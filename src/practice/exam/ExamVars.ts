@@ -84,10 +84,12 @@ reqChangePatient.subscribe(async value => {
   let currentVisitIdValue: number | null = get(currentVisitId);
   if( currentVisitIdValue !== null ){
     await suspendVisit(currentVisitIdValue).catch(ex => console.error(ex));
-    resetAll();
   }
+  resetAll();
   if( value !== null ){
     const [patient, visitIdOpt] = value;
+    currentPatient.set(patient);
+    currentVisitId.set(visitIdOpt);
     taskRunner.run(
       fetchVisits(patient.patientId, 0),
       initNav(patient.patientId)
