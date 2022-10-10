@@ -2,6 +2,8 @@
 
   import type * as m from "@/lib/model"
   import api from "@/lib/api"
+  import Confirm from "@/lib/Confirm.svelte"
+    import { loop_guard } from "svelte/internal";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -19,10 +21,15 @@
     }
   }
 
+  let showConfirmDelete = false;
+
   function onDelete(): void {
-    api.deleteText(text.textId);
+    showConfirmDelete = true;
+    // confirmDelete(() => {
+    //   api.deleteText(text.textId);
+    // })
   }
-  
+ 
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -41,8 +48,12 @@
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)">コピー</a>
     </div>
-  {/if}
+    {/if}
 </div>
+
+{#if showConfirmDelete}
+<Confirm onClose={() => showConfirmDelete = false} text="この文章を削除していいですか？" />
+{/if}
 
 <style>
   textarea {

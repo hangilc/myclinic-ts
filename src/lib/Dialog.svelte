@@ -5,18 +5,17 @@
 
   export let onClose: () => void;
   export let width: string = "260px";
+  export let noTitle = false;
 
   let content: HTMLElement;
   let zIndexScreen: number;
   let zIndexContent: number;
 
   onMount(() => {
-    console.log("Dialog mount");
     zIndexScreen = alloc();
     zIndexContent = alloc();
   })
   onDestroy(() => {
-    console.log("Dialog destroy");
     release(zIndexScreen);
     release(zIndexContent);
   })
@@ -30,9 +29,11 @@
     style:z-index={zIndexContent}
     style:width={width}
   >
+    {#if !noTitle}
     <div class="title-wrapper">
       <slot name="title" /><img src="/xicon.svg" alt="xicon" on:click={onClose}/>
     </div>
+    {/if}
     <slot />
     <slot name="commands"/>
   </div>
