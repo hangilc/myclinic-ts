@@ -4,6 +4,8 @@
   import api from "@/lib/api"
   import Confirm from "@/lib/Confirm.svelte"
   import type { Op as DrawerOp } from "@/lib/drawer/op"
+  import { drawerToSvg } from "@/lib/drawer/drawer-svg"
+  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte"
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -39,7 +41,8 @@
 
   async function onShohousen() {
     const ops: DrawerOp[] = await api.shohousenDrawer(text.textId);
-    console.log(ops);
+    const svg = drawerToSvg(ops, {});
+    document.body.appendChild(svg);
   }
  
 </script>
