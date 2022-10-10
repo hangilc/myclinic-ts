@@ -1,0 +1,57 @@
+:root {
+  font-size: 16px;
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 20px;
+}
+
+a, a:hover, a:visited {
+  text-decoration: none;
+}
+
+a {
+  color: #007bff;
+}
+
+a:hover {
+  color: red;
+}
+
+.pulldown {
+  background-color: white;
+  padding: 10px;
+
+  & a {
+    display: block;
+    color: black;
+  }
+}
+
+.select {
+  overflow-y: auto;
+  border: 1px solid gray;
+}
+
+.dialog {
+  & .title-wrapper {
+    margin-bottom: 10px;
+  }
+  & .title {
+    font-weight: bold;
+    display: inline-block;
+  }
+  & .commands {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
+
+    & button, & a {
+      margin-left: 4px;
+    }
+  }
+}
+
