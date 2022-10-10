@@ -19,8 +19,8 @@ export const textUpdated: Writable<m.Text> = writable()
 export const textDeleted: Writable<m.Text> = writable()
 
 function dispatch(e: any): void {
-  console.log("event", e);
   if( e.format === "appevent" ){
+    console.log(e);
     const data = e.data;
     const model: string = data.model;
     const kind: string = data.kind;

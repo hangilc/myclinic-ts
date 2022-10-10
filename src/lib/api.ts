@@ -119,6 +119,14 @@ export default {
 
   enterText(text: m.Text): Promise<m.Text> {
     return post("enter-text", text);
+  },
+
+  updateText(text: m.Text): Promise<boolean> {
+    return post("update-text", text);
+  },
+
+  deleteText(textId: number): Promise<boolean> {
+    return get("delete-text", { "text-id": textId });
   }
 
 }

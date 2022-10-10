@@ -1,16 +1,22 @@
 <script lang="ts">
-  import type * as m from "../../../../lib/model"
+  import type * as m from "@/lib/model"
+  import TextForm from "./TextForm.svelte"
 
   export let text: m.Text;
+  let isEditing = false;
 
   function conv(s: string): string {
     return s.replaceAll("\n", "<br />\n");
   }
 </script>
 
-<div class="top">
-  <div>{@html conv(text.content)}</div>
-</div>
+{#if isEditing}
+  <TextForm text={text} onClose={() => isEditing = false} />
+{:else}
+  <div class="top" on:click={() => isEditing = true}>
+    <div>{@html conv(text.content)}</div>
+  </div>
+{/if}
 
 <style>
   .top {

@@ -101,7 +101,6 @@ reqChangePatient.subscribe(async value => {
 export const showPatientsByDate: Writable<boolean> = writable(false);
 
 appEvent.textEntered.subscribe(text => {
-  console.log("entered", text);
   const visitsValue: m.VisitEx[] = get(visits);
   let found = false;
   visitsValue.forEach(visit => {
@@ -114,3 +113,40 @@ appEvent.textEntered.subscribe(text => {
     visits.set(visitsValue);
   }
 });
+
+appEvent.textUpdated.subscribe(text => {
+  const visitsValue: m.VisitEx[] = get(visits);
+  let found = false;
+  visitsValue.forEach(visit => {
+    if( visit.visitId === text.visitId ){
+      const index = visit.texts.findIndex(t => t.textId == text.textId);
+      if( index >= 0 ){
+        visit.texts.splice(index, 1, text);
+        found = true;
+      }
+    }
+  });
+  if( found ){
+    visits.set(visitsValue);
+  }
+});
+
+appEvent.textDeleted.subscribe(text => {
+  const visitsValue: m.VisitEx[] = get(visits);
+  let found = false;
+  visitsValue.forEach(visit => {
+    if( visit.visitId === text.visitId ){
+      const index = visit.texts.findIndex(t => t.textId == text.textId);
+      if( index >= 0 ){
+        visit.texts.splice(index, 1);
+        found = true;
+      }
+    }
+  });
+  if( found ){
+    visits.set(visitsValue);
+  }
+});
+
+
+
