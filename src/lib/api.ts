@@ -1,7 +1,9 @@
 import type * as m from "./model";
 import { dateToSql } from "./util";
 
-const base: string = getBase()
+export const base: string = getBase()
+export const wsUrl: string = 
+  base.replace("/api", "/ws/events").replace(/^http?/, "ws");
 
 function getBase(): string {
   if( !import.meta.env.SSR ){
@@ -113,6 +115,10 @@ export default {
 
   countVisitByPatient(patientId: number): Promise<number> {
     return get("count-visit-by-patient", {"patient-id": patientId});
+  },
+
+  enterText(text: m.Text): Promise<m.Text> {
+    return post("enter-text", text);
   }
 
 }

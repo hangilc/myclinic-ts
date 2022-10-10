@@ -1,11 +1,27 @@
 <script lang="ts">
-  export let onClose: () => void
+
+  import type * as m from "@/lib/model"
+  import api from "@/lib/api"
+
+  export let onClose: () => void;
+  export let text: m.Text;
+  let textarea: HTMLTextAreaElement;
+
+  function onEnter(): void {
+    const content = textarea.value;
+    const newText: m.Text = Object.assign({}, text, { content });
+    if( newText.textId === 0 ){
+      api.enterText(newText);
+      onClose();
+    }
+  }
+  
 </script>
 
 <div>
-  <textarea></textarea>
+  <textarea bind:this={textarea}>{text.content}</textarea>
   <div>
-    <button>入力</button>
+    <button on:click={onEnter}>入力</button>
     <button on:click={onClose}>キャンセル</button>
   </div>
 </div>

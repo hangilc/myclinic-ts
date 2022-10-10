@@ -103,10 +103,16 @@ export interface HokenInfo {
   kouhiList: Kouhi[]
 }
 
-export interface Text {
-  textId: number,
-  visitId: number,
-  content: string
+export class Text {
+  textId: number;
+  visitId: number;
+  content: string;
+
+  constructor(textId: number, visitId: number, content: string) {
+    this.textId = textId;
+    this.visitId = visitId;
+    this.content = content;
+  }
 }
 
 export interface Charge {

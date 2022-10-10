@@ -12,5 +12,10 @@ export default defineConfig({
         practice: resolve(__dirname, "practice/index.html")
       }
     }
+  },
+  resolve: {
+    alias: {
+      "@": resolve(__dirname, "src")
+    }
   }
 })

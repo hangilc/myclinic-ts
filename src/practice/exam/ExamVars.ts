@@ -2,6 +2,7 @@ import { writable, type Writable, get } from "svelte/store";
 import * as m from "../../lib/model";
 import api from "../../lib/api";
 import { TaskFactory as tf,  TaskRunner, type Task } from "../../lib/unit-task";
+import * as appEvent from "@/practice/app-events";
 
 export const currentPatient: Writable<m.Patient | null> = writable(null);
 export const currentVisitId: Writable<number | null> = writable(null);
@@ -98,3 +99,18 @@ reqChangePatient.subscribe(async value => {
 });
 
 export const showPatientsByDate: Writable<boolean> = writable(false);
+
+appEvent.textEntered.subscribe(text => {
+  console.log("entered", text);
+  const visitsValue: m.VisitEx[] = get(visits);
+  let found = false;
+  visitsValue.forEach(visit => {
+    if( visit.visitId === text.visitId ){
+      visit.texts.push(text);
+      found = true;
+    }
+  });
+  if( found ){
+    visits.set(visitsValue);
+  }
+});

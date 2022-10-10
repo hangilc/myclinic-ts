@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type * as m from "../../../lib/model";
+  import * as m from "../../../lib/model";
   import Title from "./Title.svelte";
   import TwoCols from "./TwoCols.svelte";
   import Text from "./text/Text.svelte";
@@ -7,6 +7,11 @@
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
+
+  function createNewText(): m.Text {
+    return new m.Text(0, visit.visitId, "");
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -18,7 +23,7 @@
         <Text text={text} />
       {/each}
       {#if showNewTextEditor}
-        <TextForm onClose={() => showNewTextEditor = false}/>
+        <TextForm text={createNewText()} onClose={() => showNewTextEditor = false}/>
       {:else}
         <div>
           <a href="javascript:void(0)" on:click={() => showNewTextEditor = true}>新規文章</a>
