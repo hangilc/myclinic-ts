@@ -21,13 +21,10 @@
     }
   }
 
-  let showConfirmDelete = false;
+  let confirmDeleteDialog: Confirm;
 
   function onDelete(): void {
-    showConfirmDelete = true;
-    // confirmDelete(() => {
-    //   api.deleteText(text.textId);
-    // })
+    confirmDeleteDialog.confirm(() => api.deleteText(text.textId));
   }
  
 </script>
@@ -51,9 +48,7 @@
     {/if}
 </div>
 
-{#if showConfirmDelete}
-<Confirm onClose={() => showConfirmDelete = false} text="この文章を削除していいですか？" />
-{/if}
+<Confirm bind:this={confirmDeleteDialog} text="この文章を削除していいですか？" />
 
 <style>
   textarea {

@@ -2,16 +2,27 @@
 
   import Dialog from "./Dialog.svelte"
 
-  export let onClose: () => void;
-  export let text: string;
   let show = false;
+  let proc: () => void;
+  export function confirm(f: () => void): void {
+    show = true;
+    proc = f;
+  }
+  export let text: string;
+
+  function onEnter(): void {
+    show = false;
+    proc();
+  }
 
 </script>
 
-<Dialog onClose={onClose} noTitle>
+{#if show}
+<Dialog onClose={() => show = false} noTitle>
   <div>{text}</div>
-  <div slot="commands">
-    <button on:click={() => {}}>実行</button>
-    <button on:click={onClose}>キャンセル</button>
+  <div slot="commands" class="commands">
+    <button on:click={onEnter}>実行</button>
+    <button on:click={() => show = false}>キャンセル</button>
   </div>
 </Dialog>
+{/if}
