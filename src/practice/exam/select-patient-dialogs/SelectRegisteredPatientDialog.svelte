@@ -6,21 +6,24 @@
   import type * as m from "../../../lib/model";
 
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
-  export let onClose: () => void;
+  let dialog: Dialog;
+  export function open(): void {
+    dialog.open();
+  }
 
   let selected: Writable<[m.Wqueue, m.Visit, m.Patient] | null> = writable(null);
 
-  function enter() {
+  function enter(close: () => void) {
     if( $selected ){
       const [wq, visit, patient] = $selected;
       onEnter(patient, visit.visitId);
-      onClose();
+      close();
     }
   }
 
 </script>
 
-<Dialog onClose={onClose}>
+<Dialog let:close={close} bind:this={dialog}>
   <span slot="title" class="title">受付患者選択</span>
   {#await api.listWqueueFull()}
     <div>Loading...</div>
@@ -36,8 +39,8 @@
   {:catch error}
     <div style="color: red">Error</div>
   {/await}
-  <div slot="commands" class="commands">
-    <button on:click={enter} disabled={$selected == null}>選択</button>
-    <button on:click={onClose}>キャンセル</button>
-  </div>
+  <svelte:fragment slot="commands">
+    <button on:click={() => enter(close)} disabled={$selected == null}>選択</button>
+    <button on:click={() => close()}>キャンセル</button>
+  </svelte:fragment>
 </Dialog>

@@ -11,6 +11,9 @@
   let selectPatientLink;
   let selectPatientVisible = false;
   let selectPatientDialog: string | null = null;
+  let registeredDialog: SelectRegisteredPatientDialog;
+  let searchDialog: SelectPatientBySearch;
+  let recentDialog: RecentVisitsDialog;
 
   function onSelectPatientClick() {
     selectPatientVisible = true;
@@ -22,10 +25,23 @@
   }
 
   function updateSelectPatientDialog(sel: string): void {
-    if( sel === "by-date" ){
-      showPatientsByDate.set(true);
-    } else {
-      selectPatientDialog = sel;
+    switch(sel){
+      case "registered": {
+        registeredDialog.open();
+        break;
+      }
+      case "search": {
+        searchDialog.open();
+        break;
+      }
+      case "recent": {
+        recentDialog.open();
+        break;
+      }
+      case "by-date": {
+        showPatientsByDate.set(true);
+        break;
+      }
     }
   }
 
@@ -49,24 +65,18 @@
         <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
       </Pulldown>
     {/if}
-    {#if selectPatientDialog === "registered"}
-      <SelectRegisteredPatientDialog
-        onEnter={startPatient}
-        onClose={() => selectPatientDialog = null}
-      />
-    {/if}
-    {#if selectPatientDialog === "search"}
-      <SelectPatientBySearch
-        onEnter={startPatient}
-        onClose={() => selectPatientDialog = null}
-      />
-    {/if}
-    {#if selectPatientDialog === "recent"}
-      <RecentVisitsDialog
-        onEnter={startPatient}
-        onClose={() => selectPatientDialog = null}
-      />
-    {/if}
+    <SelectRegisteredPatientDialog
+      bind:this={registeredDialog}
+      onEnter={startPatient}
+    />
+    <SelectPatientBySearch
+      bind:this={searchDialog}
+      onEnter={startPatient}
+    />
+    <RecentVisitsDialog
+      bind:this={recentDialog}
+      onEnter={startPatient}
+    />
     
   </svelte:fragment>
 </ServiceHeader>

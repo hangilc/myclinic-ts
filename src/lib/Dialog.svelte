@@ -3,13 +3,20 @@
   import { alloc, release } from "./zindex";
   import { onMount, onDestroy } from "svelte";
 
-  export let onClose: () => void;
+  let show = false;
+  export function open(): void {
+    show = true;
+  }
   export let width: string = "260px";
   export let noTitle = false;
 
   let content: HTMLElement;
   let zIndexScreen: number;
   let zIndexContent: number;
+
+  function close(): void {
+    show = false;
+  }
 
   onMount(() => {
     zIndexScreen = alloc();
@@ -21,6 +28,7 @@
   })
 </script>
 
+{#if show}
 <div>
   <Screen opacity="0.5" zIndex={zIndexScreen} />
   <div
@@ -31,13 +39,16 @@
   >
     {#if !noTitle}
     <div class="title-wrapper">
-      <slot name="title" /><img src="/xicon.svg" alt="xicon" on:click={onClose}/>
+      <slot name="title" /><img src="/xicon.svg" alt="xicon" on:click={() => close()}/>
     </div>
     {/if}
-    <slot />
-    <slot name="commands"/>
+    <slot close={close}/>
+    <div class="commands">
+      <slot name="commands"/>
+    </div>
   </div>
 </div>
+{/if}
 
 <style>
   .dialog {

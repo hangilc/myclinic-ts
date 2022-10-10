@@ -7,7 +7,10 @@
   import api from "../../../lib/api";
   import { dateTimeToSql } from "../../../lib/util"
 
-  export let onClose: () => void;
+  let dialog: Dialog;
+  export function open(): void {
+    dialog.open();
+  }
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
 
   let selected: Writable<m.Patient | null> = writable(null);
@@ -25,25 +28,25 @@
     console.log(patients);
   }
 
-  function onSelectButtonClick() {
+  function onSelectButtonClick(close: () => void): void {
     if( $selected ){
       onEnter($selected, null);
-      onClose();
+      close();
     }
   }
 
-  async function onRegisterButtonClick() {
+  async function onRegisterButtonClick(close: () => void) {
     if( $selected ){
       const now = dateTimeToSql(new Date());
       const visit = await api.startVisit($selected.patientId, now);
       onEnter($selected, visit.visitId);
-      onClose();
+      close();
     }
   }
 
 </script>
 
-<Dialog onClose={onClose}>
+<Dialog let:close={close} bind:this={dialog}>
   <span slot="title" class="title">患者検索</span>
   <div>
     <form on:submit={doSearch}>
@@ -58,9 +61,9 @@
     </div>
   </div>
   <div slot="commands" class="commands">
-    <button on:click={onRegisterButtonClick} disabled={$selected == null}>診察登録</button>
-    <button on:click={onSelectButtonClick} disabled={$selected == null}>選択</button>
-    <button on:click={onClose}>キャンセル</button>
+    <button on:click={() => onRegisterButtonClick(close)} disabled={$selected == null}>診察登録</button>
+    <button on:click={() => onSelectButtonClick(close)} disabled={$selected == null}>選択</button>
+    <button on:click={() => close()}>キャンセル</button>
   </div>
 </Dialog>
 

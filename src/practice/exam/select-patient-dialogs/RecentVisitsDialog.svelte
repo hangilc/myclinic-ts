@@ -7,17 +7,19 @@
   import SelectItem from "../../../lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
-  export let onClose: () => void;
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
-
+  let dialog: Dialog;
+  export function open(): void {
+    dialog.open();
+  }
   const itemsPerPage = 30;
   let page: number = 0;
   const selected: Writable<[m.Patient, m.Visit] | null> = writable(null);
 
-  function onEnterClick(){
+  function onEnterClick(close: () => void): void{
     if( $selected ){
       onEnter($selected[0], null);
-      onClose();
+      close();
     }
   }
 
@@ -34,7 +36,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog onClose={onClose} width="360px">
+<Dialog let:close={close} width="360px" bind:this={dialog}>
   <span slot="title" class="title">最近の診察</span>
   {#await api.listRecentVisitFull(page * itemsPerPage, itemsPerPage)}
     <div>Loading...</div>
@@ -57,8 +59,8 @@
     <div style:color="red">Error: {error.toString()}</div>
   {/await}
   <div slot="commands" class="commands">
-    <button on:click={onEnterClick} disabled={$selected === null}>選択</button>
-    <button on:click={onClose}>キャンセル</button>
+    <button on:click={() => onEnterClick(close)} disabled={$selected === null}>選択</button>
+    <button on:click={() => close()}>キャンセル</button>
   </div>
 </Dialog>
 
