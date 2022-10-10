@@ -19,8 +19,8 @@
   <Title {visit} />
   <TwoCols>
     <div slot="left">
-      {#each visit.texts as text (text.textId)}
-        <Text text={text} />
+      {#each visit.texts as text, i (text.textId)}
+        <Text text={text} index={i}/>
       {/each}
       {#if showNewTextEditor}
         <TextForm text={createNewText()} onClose={() => showNewTextEditor = false}/>

@@ -3,6 +3,7 @@
   import TextForm from "./TextForm.svelte"
 
   export let text: m.Text;
+  export let index: number;
   let isEditing = false;
 
   function conv(s: string): string {
@@ -11,7 +12,7 @@
 </script>
 
 {#if isEditing}
-  <TextForm text={text} onClose={() => isEditing = false} />
+  <TextForm text={text} index={index} onClose={() => isEditing = false} />
 {:else}
   <div class="top" on:click={() => isEditing = true}>
     <div>{@html conv(text.content)}</div>
