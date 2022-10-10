@@ -3,14 +3,14 @@
   import type * as m from "@/lib/model"
   import api from "@/lib/api"
   import Confirm from "@/lib/Confirm.svelte"
-  import type { Op as DrawerOp } from "@/lib/drawer/op"
-  import { drawerToSvg } from "@/lib/drawer/drawer-svg"
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte"
+  import type { Op } from "@/lib/drawer/op"
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte"
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
+  let drawerDialog: DrawerDialog;
 
   function onEnter(): void {
     const content = textarea.value;
@@ -39,10 +39,11 @@
     return text.content.startsWith("院外処方\nＲｐ）")
   }
 
+  let ops: Op[] = [];
+
   async function onShohousen() {
-    const ops: DrawerOp[] = await api.shohousenDrawer(text.textId);
-    const svg = drawerToSvg(ops, {});
-    document.body.appendChild(svg);
+    ops = await api.shohousenDrawer(text.textId);
+    drawerDialog.open();
   }
  
 </script>
@@ -70,6 +71,8 @@
     </div>
     {/if}
 </div>
+
+<DrawerDialog bind:this={drawerDialog} ops={ops}/>
 
 <Confirm bind:this={confirmDeleteDialog} text="この文章を削除していいですか？" />
 
