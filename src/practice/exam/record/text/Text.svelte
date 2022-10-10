@@ -7,7 +7,11 @@
   let isEditing = false;
 
   function conv(s: string): string {
-    return s.replaceAll("\n", "<br />\n");
+    if( s === "" ){
+      return "（空白）";
+    } else {
+      return s.replaceAll("\n", "<br />\n");
+    }
   }
 </script>
 

@@ -3,6 +3,7 @@
   import type * as m from "@/lib/model"
   import api from "@/lib/api"
   import Confirm from "@/lib/Confirm.svelte"
+  import type { Op as DrawerOp } from "@/lib/drawer/op"
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -35,6 +36,11 @@
   function isShohousen(): boolean {
     return text.content.startsWith("院外処方\nＲｐ）")
   }
+
+  async function onShohousen() {
+    const ops: DrawerOp[] = await api.shohousenDrawer(text.textId);
+    console.log(ops);
+  }
  
 </script>
 
@@ -54,7 +60,7 @@
       <a href="javascript:void(0)">引継ぎコピー</a>
       {/if}
       {#if isShohousen()}
-      <a href="javascript:void(0)">処方箋</a>
+      <a href="javascript:void(0)" on:click={onShohousen}>処方箋</a>
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)">コピー</a>

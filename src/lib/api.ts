@@ -1,5 +1,6 @@
 import type * as m from "./model";
 import { dateToSql } from "./util";
+import type { Op as DrawerOp } from "./drawer/op";
 
 export const base: string = getBase()
 export const wsUrl: string = 
@@ -127,6 +128,16 @@ export default {
 
   deleteText(textId: number): Promise<boolean> {
     return get("delete-text", { "text-id": textId });
-  }
+  },
+
+  shohousenDrawer(textId: number): Promise<DrawerOp[]> {
+    return get("shohousen-drawer", { "text-id": textId });
+  },
+
+  shohousenDrawerText(text: string): Promise<DrawerOp[]> {
+    return post("shohousen-drawer", text);
+  },
+
+
 
 }
