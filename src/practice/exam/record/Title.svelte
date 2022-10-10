@@ -18,6 +18,7 @@
     display: flex;
     align-items: center;
     justify-content:space-between;
+    margin-bottom: 6px;
   }
   .datetime {
     font-weight: bold;
