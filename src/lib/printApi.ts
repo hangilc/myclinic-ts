@@ -1,6 +1,6 @@
 import type { Op } from "./drawer/op"
 
-export const base: string = "http://localhost:4800";
+export const base: string = "http://localhost:48080";
 
 
 interface FetchOption {
@@ -15,7 +15,7 @@ function response(promise: Promise<any>, option: FetchOption): Promise<any> {
   if( option.noResult !== undefined && option.noResult ){
     return promise; // returns Promise<Response>
   } else {
-    promise.then(resp => resp.json());
+    return promise.then(resp => resp.json());
   }
 }
 

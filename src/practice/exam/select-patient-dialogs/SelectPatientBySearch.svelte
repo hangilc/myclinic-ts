@@ -8,17 +8,19 @@
   import { dateTimeToSql } from "../../../lib/util"
 
   let dialog: Dialog;
+  let input: HTMLInputElement;
   export function open(): void {
     dialog.open();
+    console.log(input);
   }
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
 
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
-  let input: HTMLInputElement;
 
   onMount(() => {
-    input.focus();
+    console.log("input", input);
+    // input.focus();
   });
 
   async function doSearch(ev: Event){
