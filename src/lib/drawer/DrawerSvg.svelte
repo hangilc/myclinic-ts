@@ -4,15 +4,18 @@
   import { onMount } from "svelte"
 
   export let ops: Op[];
-  let svg
+  export let viewBox: string;
+  export let width: string;
+  export let height: string;
+  let wrapper: HTMLElement
 
   onMount(() => {
     let option = {
-
+      viewBox, width, height
     }
-    svg.appendChild(drawerToSvg(ops, option));
+    wrapper.appendChild(drawerToSvg(ops, option));
   })
 
 </script>
 
-<svg bind:this={svg}></svg>
+<div bind:this={wrapper}></div>

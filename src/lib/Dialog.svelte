@@ -9,6 +9,7 @@
   }
   export let width: string = "260px";
   export let noTitle = false;
+  export let onClose: () => void = () => {};
 
   let content: HTMLElement;
   let zIndexScreen: number;
@@ -16,6 +17,7 @@
 
   function close(): void {
     show = false;
+    onClose();
   }
 
   onMount(() => {

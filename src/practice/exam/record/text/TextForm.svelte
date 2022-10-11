@@ -4,13 +4,13 @@
   import api from "@/lib/api"
   import Confirm from "@/lib/Confirm.svelte"
   import type { Op } from "@/lib/drawer/op"
-  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte"
+  import ShohousenDrawer from "@/ShohousenDrawerDialog.svelte"
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
-  let drawerDialog: DrawerDialog;
+  let drawerDialog: ShohousenDrawer;
 
   function onEnter(): void {
     const content = textarea.value;
@@ -72,7 +72,7 @@
     {/if}
 </div>
 
-<DrawerDialog bind:this={drawerDialog} ops={ops}/>
+<ShohousenDrawer bind:this={drawerDialog} ops={ops} onClose={onClose} />
 
 <Confirm bind:this={confirmDeleteDialog} text="この文章を削除していいですか？" />
 
