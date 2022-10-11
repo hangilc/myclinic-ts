@@ -3,29 +3,22 @@
   import type * as m from "../../../lib/model";
   import SelectItem from "../../../lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import { onMount } from "svelte";
   import api from "../../../lib/api";
   import { dateTimeToSql } from "../../../lib/util"
 
   let dialog: Dialog;
-  let input: HTMLInputElement;
   export function open(): void {
     dialog.open();
-    console.log(input);
   }
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
 
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
-
-  onMount(() => {
-    console.log("input", input);
-    // input.focus();
-  });
+  let searchText: string;
 
   async function doSearch(ev: Event){
     ev.preventDefault();
-    const t = input.value.trim()
+    const t = searchText.trim()
     patients = await api.searchPatient(t);
     console.log(patients);
   }
@@ -46,13 +39,17 @@
     }
   }
 
+  function setFocus(input){
+    input.focus();
+  }
+
 </script>
 
 <Dialog let:close={close} bind:this={dialog}>
   <span slot="title" class="title">患者検索</span>
   <div>
     <form on:submit={doSearch}>
-      <input type="text" bind:this={input}/> <button>検索</button>
+      <input type="text" bind:value={searchText} use:setFocus/> <button>検索</button>
     </form>
     <div class="select">
       {#each patients as patient}

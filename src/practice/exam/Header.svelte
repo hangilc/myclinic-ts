@@ -69,10 +69,12 @@
       bind:this={registeredDialog}
       onEnter={startPatient}
     />
+    {#if true}
     <SelectPatientBySearch
       bind:this={searchDialog}
       onEnter={startPatient}
     />
+    {/if}
     <RecentVisitsDialog
       bind:this={recentDialog}
       onEnter={startPatient}

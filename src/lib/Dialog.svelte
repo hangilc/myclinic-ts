@@ -1,10 +1,11 @@
 <script type="ts">
   import Screen from "./Screen.svelte";
   import { alloc, release } from "./zindex";
-  import { onMount, onDestroy } from "svelte";
 
   let show = false;
   export function open(): void {
+    zIndexScreen = alloc();
+    zIndexContent = alloc();
     show = true;
   }
   export let width: string = "260px";
@@ -17,17 +18,11 @@
 
   function close(): void {
     show = false;
+    release(zIndexScreen);
+    release(zIndexContent);
     onClose();
   }
 
-  onMount(() => {
-    zIndexScreen = alloc();
-    zIndexContent = alloc();
-  })
-  onDestroy(() => {
-    release(zIndexScreen);
-    release(zIndexContent);
-  })
 </script>
 
 {#if show}
