@@ -10,11 +10,13 @@
   export let svgWidth: string;
   export let svgHeight: string;
   export let title: string = "プレビュー";
+  export let kind: string;
   let dialog: Dialog;
   export function open(): void {
     dialog.open();
   }
   export let onClose: () => void = () => {};
+  let printPref: string = "";
 
   function print(): void {
     const req: PrintRequest = {
@@ -25,8 +27,8 @@
     printApi.printDrawer(req, setting);
   }
 
-  printApi.listPrintSetting().then(list => {
-    console.log(list);
+  $: printApi.getPrintPref(kind).then(pref => {
+    printPref = pref;
   })
 
 </script>
@@ -37,17 +39,19 @@
   <DrawerSvg ops={ops} viewBox={svgViewBox} width={svgWidth} height={svgHeight} />
   <div>
     <span>設定</span>
-    <select><option>手動</option></select>
-    <input type="checkbox"> 既定に
-    <a href="javascript:void(0)">管理画面表示</a>
+    <select>
+      <option value="">手動</option>
+      {#await printApi.listPrintSetting()}
+        <option></option>
+      {:then list}
+        {#each list as s}
+        <option value={s} selected={s == printPref}>{s}</option>
+        {/each}
+      {/await}  
+      </select>
+    <input type="checkbox" checked> 既定に
+    <a href="http://localhost:48080/" target="_blnak">管理画面表示</a>
   </div>
-  <!-- {#await printApi.listPrintSetting()}
-    <div></div>
-  {:then list}
-    {#each list as s}
-    <div>{s}</div>
-    {/each}
-  {/await}   -->
   <svelte:fragment slot="commands">
     <button on:click={print}>印刷</button>
     <button on:click={() => close()}>キャンセル</button>

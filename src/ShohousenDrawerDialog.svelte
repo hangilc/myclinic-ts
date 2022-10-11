@@ -12,6 +12,6 @@
 
 </script>
 
-<DrawerDialog bind:this={dialog} ops={ops} svgViewBox="0 0 148 210" 
+<DrawerDialog bind:this={dialog} ops={ops} kind="shohousen" svgViewBox="0 0 148 210" 
   svgWidth={(148*scale).toString()} svgHeight={(210*scale).toString()}
   title="処方箋印刷" onClose={onClose} />
