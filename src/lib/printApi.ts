@@ -1,3 +1,5 @@
+import type { Op } from "./drawer/op"
+
 export const base: string = "http://localhost:4800";
 
 function get(cmd: string, params: any = {}): Promise<any> {
@@ -28,6 +30,11 @@ function del(cmd: string, data: any, params: any = {}): Promise<any> {
   return fetch(arg, { method: "DELETE" }).then(resp => resp.json());
 }
 
+export interface PrintRequest {
+  setup: Op[],
+  pages: Op[][]
+}
+
 export const printApi = {
   beep(): Promise<boolean> {
     return get("beep", {});
@@ -43,6 +50,14 @@ export const printApi = {
 
   setPrintPref(kind: string, pref: string): Promise<string | null> {
     return post(`pref/${kind}`, pref);
+  },
+
+  deletePrintPref(kind: string): Promise<string | null> {
+    return del(`pref/${kind}`, {});
+  },
+
+  printDrawer(req: PrintRequest, setting: string = ""): Promise<boolean> {
+    return post(`print/${setting}`, req);
   }
 }
 
