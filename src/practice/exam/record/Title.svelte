@@ -1,7 +1,7 @@
 <script lang="ts">
   import type * as m from "../../../lib/model"
   import * as kanjidate from "kanjidate"
-  import { currentVisitId, tempVisitId } from "../ExamVars"
+  import { currentVisitId, tempVisitId, setTempVisitId, clearTempVisitId } from "../ExamVars"
   import Pulldown from "@/lib/Pulldown.svelte"
   import api from "@/lib/api"
 
@@ -18,6 +18,14 @@
     api.deleteVisit(visit.visitId);
   }
 
+  function doSetTempVisitId(): void {
+    setTempVisitId(visit.visitId, alert);
+  }
+
+  function doClearTempVisitId(): void {
+    clearTempVisitId();
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -31,8 +39,11 @@
 <Pulldown anchor={manipLink} bind:this={manipPulldown}>
   <svelte:fragment>
     <a href="javascript:void(0)" on:click={doDeleteVisit}>この診察を削除</a>
-    <a href="javascript:void(0)">暫定診察に設定</a>
-    <a href="javascript:void(0)">暫定診察の解除</a>
+    {#if visit.visitId !== $tempVisitId}
+    <a href="javascript:void(0)" on:click={doSetTempVisitId}>暫定診察に設定</a>
+    {:else}
+    <a href="javascript:void(0)" on:click={doClearTempVisitId}>暫定診察の解除</a>
+    {/if}
     <a href="javascript:void(0)">診療明細</a>
     <a href="javascript:void(0)">負担割オーバーライド</a>
     <a href="javascript:void(0)">未収リストへ</a>
