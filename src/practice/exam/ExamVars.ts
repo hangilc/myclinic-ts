@@ -200,10 +200,6 @@ appEvent.visitDeleted.subscribe(visit => {
     return;
   }
   console.log("visit deleted", visit);
-  const currentVisitIdValue = get(currentVisitId);
-  if( currentVisitIdValue === visit.visitId ){
-    currentVisitId.set(null);
-  }
   const visitsValue: m.VisitEx[] = get(visits);
   const index = visitsValue.findIndex(v => v.visitId == visit.visitId);
   if( index >= 0 ){
@@ -235,6 +231,16 @@ appEvent.visitDeleted.subscribe(visit => {
     visits.set(visitsValue);
   }
 });
+
+appEvent.wqueueDeleted.subscribe(wqueue => {
+  if( wqueue == null ){
+    return;
+  }
+  const currentVisitIdValue = get(currentVisitId);
+  if( wqueue.visitId === currentVisitIdValue ){
+    currentVisitId.set(null);
+  }
+})
 
 
 
