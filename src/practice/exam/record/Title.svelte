@@ -1,12 +1,14 @@
 <script lang="ts">
   import type * as m from "../../../lib/model";
   import * as kanjidate from "kanjidate";
+  import { currentVisitId, tempVisitId } from "../ExamVars"
 
   export let visit: m.VisitEx;
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<div class="top">
+<div class="top" class:current={visit.visitId === $currentVisitId}
+  class:temp-visit={visit.visitId === $tempVisitId}>
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span>
   <a href="javascript:void(0)">操作</a>
 </div>
@@ -20,6 +22,15 @@
     justify-content:space-between;
     margin-bottom: 6px;
   }
+
+  .top.current {
+    background-color: #ff9;
+  }
+
+  .top.temp-visit {
+    background-color: #9ff;
+  }
+
   .datetime {
     font-weight: bold;
   }

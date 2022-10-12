@@ -8,15 +8,14 @@
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
   import { reqChangePatient, showPatientsByDate } from "./ExamVars";
 
-  let selectPatientLink;
-  let selectPatientVisible = false;
-  let selectPatientDialog: string | null = null;
+  let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
   let searchDialog: SelectPatientBySearch;
   let recentDialog: RecentVisitsDialog;
+  let selectPatientPulldown: Pulldown;
 
   function onSelectPatientClick() {
-    selectPatientVisible = true;
+    selectPatientPulldown.open();
   }
 
   function startPatient(patient: m.Patient, visitId: number | null){
@@ -57,14 +56,6 @@
     >
     <a href="javascript:void(0);">登録薬剤</a>
     <a href="javascript:void(0);">全文検索</a>
-    {#if selectPatientVisible}
-      <Pulldown
-        onClose={() => {selectPatientVisible = false}}
-        anchor={selectPatientLink}
-      >
-        <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
-      </Pulldown>
-    {/if}
     <SelectRegisteredPatientDialog
       bind:this={registeredDialog}
       onEnter={startPatient}
@@ -82,6 +73,10 @@
     
   </svelte:fragment>
 </ServiceHeader>
+
+<Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink} >
+  <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
+</Pulldown>
 
 <style>
   a:nth-of-type(1) {
