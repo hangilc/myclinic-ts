@@ -118,6 +118,14 @@ export default {
     return get("count-visit-by-patient", {"patient-id": patientId});
   },
 
+  deleteVisit(visitId: number): Promise<boolean> {
+    return get("delete-visit", { "visit-id": visitId });
+  },
+
+  deleteVisitFromReception(visitId: number): Promise<boolean> {
+    return get("delete-visit-from-reception", { "visit-id": visitId });
+  },
+
   enterText(text: m.Text): Promise<m.Text> {
     return post("enter-text", text);
   },

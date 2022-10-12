@@ -14,9 +14,12 @@ export function initAppEvents(): void{
   })
 }
 
-export const textEntered: Writable<m.Text> = writable()
-export const textUpdated: Writable<m.Text> = writable()
-export const textDeleted: Writable<m.Text> = writable()
+export const textEntered: Writable<m.Text | null> = writable(null)
+export const textUpdated: Writable<m.Text | null> = writable(null)
+export const textDeleted: Writable<m.Text | null> = writable(null)
+export const visitEntered: Writable<m.Visit | null> = writable(null)
+export const visitUpdated: Writable<m.Visit | null> = writable(null)
+export const visitDeleted: Writable<m.Visit | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -41,6 +44,24 @@ function dispatch(e: any): void {
             break;
           }
         }
+        break;
+      }
+      case "visit": {
+        switch(kind) {
+          case "created": {
+            visitEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            visitUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            visitDeleted.set(payload);
+            break;
+          }
+        }
+        break;
       }
     }
   }

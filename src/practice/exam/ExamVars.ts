@@ -27,11 +27,15 @@ function fetchVisits(patientId: number, page: number): Task {
     result => visits.set(result));
 }
 
+function countVisitPages(totalVisits: number): number {
+  return Math.floor((totalVisits + recordsPerPage - 1) / recordsPerPage);
+}
+
 function initNav(patientId: number): Task {
   return tf.fetch(() => api.countVisitByPatient(patientId),
     result => {
       navPage.set(0);
-      navTotal.set(Math.floor((result + recordsPerPage - 1) / recordsPerPage));
+      navTotal.set(countVisitPages(result));
     })
 }
 
@@ -68,6 +72,13 @@ export function gotoNavLastPage() {
   const page = get(navPage)
   const total = get(navTotal);
   advanceNavPage(total - 1 - page);
+}
+
+export function gotoPage(page: number): void {
+  const curPage = get(navPage);
+  if( curPage !== page ){
+    advanceNavPage(page - curPage);
+  }
 }
 
 export function getCopyTarget(): number | null {
@@ -128,6 +139,9 @@ reqChangePatient.subscribe(async value => {
 export const showPatientsByDate: Writable<boolean> = writable(false);
 
 appEvent.textEntered.subscribe(text => {
+  if( text == null ){
+    return;
+  }
   const visitsValue: m.VisitEx[] = get(visits);
   let found = false;
   visitsValue.forEach(visit => {
@@ -142,6 +156,9 @@ appEvent.textEntered.subscribe(text => {
 });
 
 appEvent.textUpdated.subscribe(text => {
+  if( text == null ){
+    return;
+  }
   const visitsValue: m.VisitEx[] = get(visits);
   let found = false;
   visitsValue.forEach(visit => {
@@ -159,6 +176,9 @@ appEvent.textUpdated.subscribe(text => {
 });
 
 appEvent.textDeleted.subscribe(text => {
+  if( text == null ){
+    return;
+  }
   const visitsValue: m.VisitEx[] = get(visits);
   let found = false;
   visitsValue.forEach(visit => {
@@ -171,6 +191,47 @@ appEvent.textDeleted.subscribe(text => {
     }
   });
   if( found ){
+    visits.set(visitsValue);
+  }
+});
+
+appEvent.visitDeleted.subscribe(visit => {
+  if( visit == null ){
+    return;
+  }
+  console.log("visit deleted", visit);
+  const currentVisitIdValue = get(currentVisitId);
+  if( currentVisitIdValue === visit.visitId ){
+    currentVisitId.set(null);
+  }
+  const visitsValue: m.VisitEx[] = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId == visit.visitId);
+  if( index >= 0 ){
+    const patient = get(currentPatient);
+    if( patient !== null ){
+      taskRunner.run(
+        tf.fetch(
+          () => api.countVisitByPatient(patient.patientId),
+          count => {
+            const newTotal = countVisitPages(count);
+            const navTotalValue = get(navTotal);
+            if( navTotalValue !== newTotal ){
+              let navPageValue = get(navPage);
+              if( navPageValue >= newTotal ){
+                navPageValue = newTotal - 1;
+                if( navPageValue < 0 ){
+                  navPageValue = 0;
+                }
+                navPage.set(navPageValue);
+              }
+              navTotal.set(newTotal);
+              gotoPage(navPageValue);
+            }
+          }
+        )
+      )
+    }
+        visitsValue.splice(index, 1);
     visits.set(visitsValue);
   }
 });

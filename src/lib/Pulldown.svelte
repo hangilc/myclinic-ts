@@ -41,7 +41,7 @@
 {#if show}
 <div>
   <Screen opacity="0" zIndex={zIndexScreen} onclick={close}/>
-  <div use:setMenu class="menu" style:z-index={zIndexMenu}
+  <div use:setMenu class="menu pulldown" style:z-index={zIndexMenu}
     on:click={close}>
     <slot />
   </div>
