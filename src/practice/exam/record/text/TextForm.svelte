@@ -5,6 +5,8 @@
   import Confirm from "@/lib/Confirm.svelte"
   import type { Op } from "@/lib/drawer/op"
   import ShohousenDrawer from "@/ShohousenDrawerDialog.svelte"
+  import { hasHikitsugi, extractHikitsugi } from "./hikitsugi"
+  import { getCopyTarget } from "../../ExamVars"
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -30,9 +32,24 @@
     confirmDeleteDialog.confirm(() => api.deleteText(text.textId));
   }
 
-  function hasHikitsugi(): boolean {
-    return index === 0 && 
-      (text.content.startsWith("●") || text.content.startsWith("★"));
+  function containsHikitsugi(): boolean {
+    return index === 0 && hasHikitsugi(text.content);
+  }
+
+  function doHikitsugi(): void {
+    const targetVisitId = getCopyTarget();
+    if( targetVisitId !== null ){
+      const s: string = extractHikitsugi(text.content);
+      const t: m.Text = {
+        textId: 0,
+        visitId: targetVisitId,
+        content: s
+      };
+      api.enterText(t);
+      onClose();
+    } else {
+      alert("コピー先を見つけられませんでした。");
+    }
   }
 
   function isShohousen(): boolean {
@@ -60,8 +77,8 @@
     <div>
       <a href="javascript:void(0)" on:click={onEnter}>入力</a>
       <a href="javascript:void(0)" on:click={onClose}>キャンセル</a>
-      {#if hasHikitsugi()}
-      <a href="javascript:void(0)">引継ぎコピー</a>
+      {#if containsHikitsugi()}
+      <a href="javascript:void(0)" on:click={() => doHikitsugi()}>引継ぎコピー</a>
       {/if}
       {#if isShohousen()}
       <a href="javascript:void(0)" on:click={onShohousen}>処方箋</a>

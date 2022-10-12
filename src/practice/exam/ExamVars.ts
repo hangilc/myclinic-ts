@@ -6,6 +6,7 @@ import * as appEvent from "@/practice/app-events";
 
 export const currentPatient: Writable<m.Patient | null> = writable(null);
 export const currentVisitId: Writable<number | null> = writable(null);
+export const tempVisitId: Writable<number | null> = writable(null);
 export const visits: Writable<m.VisitEx[]> = writable([]);
 export const navPage: Writable<number> = writable(0);
 export const navTotal: Writable<number> = writable(0);
@@ -69,6 +70,18 @@ export function gotoNavLastPage() {
   advanceNavPage(total - 1 - page);
 }
 
+export function getCopyTarget(): number | null {
+  const visitIdValue = get(currentVisitId);
+  if( visitIdValue !== null ){
+    return visitIdValue;
+  }
+  const tempVisitIdValue = get(tempVisitId);
+  if( tempVisitIdValue !== null ){
+    return tempVisitIdValue;
+  }
+  return null;
+}
+
 async function suspendVisit(visitId: number): Promise<void> {
   await api.changeWqueueState(visitId, m.WqueueState.WaitReExam);
 }
@@ -76,8 +89,22 @@ async function suspendVisit(visitId: number): Promise<void> {
 function resetAll(): void {
   currentPatient.set(null);
   currentVisitId.set(null);
+  tempVisitId.set(null);
   resetVisits();
   resetNav();
+}
+
+export function setTempVisitId(visitId: number, errorHandler: (err: string) => void): void {
+  const currentVistiIdValue = get(currentVisitId);
+  if( currentVistiIdValue === null ){
+    tempVisitId.set(visitId);
+  } else {
+    errorHandler("現在診察中なので、暫定診察を設定できません。");
+  }
+}
+
+export function clearTempVisitId(): void {
+  tempVisitId.set(null);
 }
 
 reqChangePatient.subscribe(async value => {
