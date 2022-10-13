@@ -83,7 +83,7 @@ describe("parse-shohousen", () => {
     )
   });
 
-  it("should parse part", () => {
+  it("should parse part template", () => {
     const s = sm`
     １）カロナール錠３００ｍｇ　３錠
     　　分３　毎食後　５日分
@@ -92,7 +92,7 @@ describe("parse-shohousen", () => {
     @_comment: コメント
     @global
     `
-    expect(p.parsePart(s)).toStrictEqual({
+    expect(p.parsePartTemplate(s)).toStrictEqual({
       lines: [
         "カロナール錠３００ｍｇ　３錠",
         "分３　毎食後　５日分"

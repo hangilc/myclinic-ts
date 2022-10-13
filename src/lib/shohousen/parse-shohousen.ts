@@ -44,7 +44,7 @@ export function splitToParts(s: string): [string, string[]] {
   return cut(s, rePartStart);
 }
 
-export interface Part {
+export interface PartTemplate {
   lines: string[],
   trails: string[],
   localCommands: string[],
@@ -73,7 +73,7 @@ export function partition<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
   }, [[], []]);
 }
 
-export function parsePart(s: string): Part {
+export function parsePartTemplate(s: string): PartTemplate {
   s = s.replace(rePartStart, zenkakuSpace);
   const lines = s.split("\n");
   let [pre, post] = span(lines, a => a.startsWith(zenkakuSpace));
