@@ -10,4 +10,8 @@ describe("zenkaku", () => {
   it("should convert lower char", () => {
     expect(z.lowerMap.get('z')).toBe("ｚ");
   });
+
+  it("should convert upper char", () => {
+    expect(z.upperMap.get('Z')).toBe("Ｚ");
+  });
 });

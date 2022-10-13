@@ -21,5 +21,5 @@ function charMap(alphaStart: string, alphaLast: string, zenkakuStart: string): M
 }
 
 export const digitMap: Map<string, string> = charMap("0", "9", zenkakuZero);
-
 export const lowerMap: Map<string, string> = charMap("a", "z", zenkakuLower_a);
+export const upperMap: Map<string, string> = charMap("A", "Z", zenkakuUpper_a);
