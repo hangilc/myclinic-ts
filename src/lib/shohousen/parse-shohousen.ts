@@ -15,7 +15,8 @@ const days1 = `${digit}+日分`
 const drugPattern = `(${chunk})${space}+((?:１回)?${digitOrPeriod}+${unit}(?:${chunk})?)${space}*`
 const reDrugPattern = new RegExp(`^${drugPattern}`);
 const daysPart = `${digit}+(?:日|回)分`;
-const usagepattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)${space}*`;
+const usagePattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)${space}*`;
+const reUsagePttern = new RegExp(`^${usagePattern}`);
 
 export const exportForTesting = {
   chunk, reDrugPattern
@@ -111,9 +112,17 @@ export interface DrugPart {
   amount: string;
 }
 
-// function parseDrugPart(s: string): [DrugPart | null, string] {
-
-// }
+export function parseDrugPart(s: string): [DrugPart | null, string] {
+  let m = reDrugPattern.exec(s);
+  if( m != null ){
+    const drugPart = { name: m[1], amount: m[2] };
+    const len = m[0].length;
+    const rem = s.substring(len);
+    return [drugPart, rem];
+  } else {
+    return [null, s];
+  }
+}
 
 export interface Part {
   drugs: DrugPart[]

@@ -113,5 +113,11 @@ describe("parse-shohousen", () => {
     expect(m[1]).toBe("カロナール錠３００ｍｇ");
     expect(m[2]).toBe("１回０．５錠");
   });
+
+  it("should parse drug part", () => {
+    const [drugPart, rem] = p.parseDrugPart("カロナール錠３００ｍｇ　３錠");
+    expect(drugPart).toStrictEqual({ name: "カロナール錠３００ｍｇ", amount: "３錠" });
+    expect(rem).toBe("");
+  })
   
 });
