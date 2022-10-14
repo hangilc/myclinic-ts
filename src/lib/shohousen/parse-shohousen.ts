@@ -88,10 +88,8 @@ export function partition<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
 
 export function parsePartTemplate(s: string): PartTemplate {
   s = s.replace(rePartStart, zenkakuSpace);
+  s = s.replace(/\n$/, "");
   const lines = s.split("\n");
-  if( lines.length > 0 && lines[lines.length - 1] === "" ){
-    lines.pop();
-  }
   let [pre, post] = span(lines, a => a.startsWith(zenkakuSpace));
   pre = pre.map(a => a.replace(reLeadingSpaces, ""));
   const [commands, trails] = partition(post, a => a.startsWith(commandStart));

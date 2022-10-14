@@ -108,6 +108,10 @@ describe("parse-shohousen", () => {
     expect(m).not.toBeNull();
     expect(m[1]).toBe("カロナール錠３００ｍｇ");
     expect(m[2]).toBe("３錠");
+    m = priv.reDrugPattern.exec("カロナール錠３００ｍｇ　１回０．５錠　");
+    expect(m).not.toBeNull();
+    expect(m[1]).toBe("カロナール錠３００ｍｇ");
+    expect(m[2]).toBe("１回０．５錠");
   });
   
 });
