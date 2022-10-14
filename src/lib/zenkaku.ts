@@ -2,6 +2,7 @@ export const zenkakuSpace = "　";
 export const zenkakuZero = "０";
 export const zenkakuLower_a = "ａ"
 export const zenkakuUpper_a = "Ａ"
+export const zenkakuPeriod = "．";
 
 function range(start: number, end: number): number[] {
   return [...Array(end - start)].map((_, i) => start + i);

@@ -1,12 +1,25 @@
-import { zenkakuSpace } from "../zenkaku"
-const space = "[ 　]"
-const digit = "[0-9０-９]"
+import { zenkakuSpace, zenkakuPeriod } from "../zenkaku"
+const space = "[ 　]";
+const digit = "[0-9０-９]";
+const notSpace = "[^ 　]";
+const digitOrPeriod = `[０-９${zenkakuPeriod}]`;
 const reProlog = new RegExp(`^院外処方${space}*\nＲｐ）${space}*\n`);
 const rePartStart = new RegExp(`(?<=^|\n)${space}?${digit}+）${space}*`);
 const reLeadingSpaces = new RegExp(`^${space}+`)
 const commandStart = "@";
 const localCommandStart = "@_"
 const localCommentCommand = "@_comment:"
+const unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)";
+const chunk = `${notSpace}(?:.*${notSpace})?`;
+const days1 = `${digit}+日分`
+const drugPattern = `(${chunk})${space}+((?:１回)?${digitOrPeriod}+${unit}(?:${chunk})?)${space}*`
+const reDrugPattern = new RegExp(`^${drugPattern}`);
+const daysPart = `${digit}+(?:日|回)分`;
+const usagepattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)${space}*`;
+
+export const exportForTesting = {
+  chunk, reDrugPattern
+}
 
 export function isShohousen(s: string): boolean {
   return reProlog.test(s);
@@ -52,7 +65,7 @@ export interface PartTemplate {
 }
 
 export function span<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
-  let i;
+  let i: number;
   for(i=0;i<list.length;i++){
     const a = list[i];
     if( !pred(a) ){
@@ -76,16 +89,34 @@ export function partition<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
 export function parsePartTemplate(s: string): PartTemplate {
   s = s.replace(rePartStart, zenkakuSpace);
   const lines = s.split("\n");
+  if( lines.length > 0 && lines[lines.length - 1] === "" ){
+    lines.pop();
+  }
   let [pre, post] = span(lines, a => a.startsWith(zenkakuSpace));
   pre = pre.map(a => a.replace(reLeadingSpaces, ""));
-  const [commands, trails] = span(post, a => a.startsWith(commandStart));
+  const [commands, trails] = partition(post, a => a.startsWith(commandStart));
+  console.log("commands", commands);
+  console.log("trails", trails);
   let [localCommands, globalCommands] = 
     partition(commands, c => c.startsWith(localCommandStart));
-  localCommands = localCommands.filter(a => a.startsWith(localCommentCommand))
+  localCommands = localCommands.filter(a => !a.startsWith(localCommentCommand))
   return {
     lines: pre,
     trails,
     localCommands,
     globalCommands
   };
+}
+
+export interface DrugPart {
+  name: string;
+  amount: string;
+}
+
+// function parseDrugPart(s: string): [DrugPart | null, string] {
+
+// }
+
+export interface Part {
+  drugs: DrugPart[]
 }

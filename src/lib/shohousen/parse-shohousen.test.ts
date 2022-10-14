@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { sm } from "@/lib/sm"
 import { isShohousen, stripShohousenProlog, isPartStart, cut,
-  splitToParts
+  splitToParts, exportForTesting as priv
 } from "./parse-shohousen"
 import * as p from "./parse-shohousen"
 
@@ -101,6 +101,13 @@ describe("parse-shohousen", () => {
       localCommands: ["@_local"],
       globalCommands: ["@global"]
     })
+  });
+
+  it("should match drug part", () => {
+    let m = priv.reDrugPattern.exec("カロナール錠３００ｍｇ　３錠");
+    expect(m).not.toBeNull();
+    expect(m[1]).toBe("カロナール錠３００ｍｇ");
+    expect(m[2]).toBe("３錠");
   });
   
 });
