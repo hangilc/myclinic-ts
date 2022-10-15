@@ -1,7 +1,7 @@
 import { zenkakuSpace, zenkakuPeriod } from "../zenkaku"
 const space = "[ 　]";
 const digit = "[0-9０-９]";
-const notSpace = "[^ 　]";
+const notSpace = "[^ 　\n]";
 const digitOrPeriod = `[０-９${zenkakuPeriod}]`;
 const reProlog = new RegExp(`^院外処方${space}*\nＲｐ）${space}*\n`);
 const rePartStart = new RegExp(`(?<=^|\n)${space}?${digit}+）${space}*`);
@@ -11,12 +11,11 @@ const localCommandStart = "@_"
 const localCommentCommand = "@_comment:"
 const unit = "(?:錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本)";
 const chunk = `${notSpace}(?:.*${notSpace})?`;
-const days1 = `${digit}+日分`
-const drugPattern = `(${chunk})${space}+((?:１回)?${digitOrPeriod}+${unit}(?:${chunk})?)${space}*`
-const reDrugPattern = new RegExp(`^${drugPattern}`);
+const drugPattern = `(${chunk})${space}+((?:１回)?${digitOrPeriod}+${unit}(?:${chunk})?)`
+const reDrugPattern = new RegExp(`^${drugPattern}${space}*(?:\n|$)`);
 const daysPart = `${digit}+(?:日|回)分`;
-const usagePattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)${space}*`;
-const reUsagePattern = new RegExp(`^${usagePattern}`);
+const usagePattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)`;
+const reUsagePattern = new RegExp(`^${usagePattern}${space}*(?:\n|$)`);
 
 export const exportForTesting = {
   chunk, reDrugPattern, reUsagePattern
@@ -59,7 +58,7 @@ export function splitToParts(s: string): [string, string[]] {
 }
 
 export interface PartTemplate {
-  lines: string[],
+  lines: string,
   trails: string[],
   localCommands: string[],
   globalCommands: string[]
@@ -94,13 +93,11 @@ export function parsePartTemplate(s: string): PartTemplate {
   let [pre, post] = span(lines, a => a.startsWith(zenkakuSpace));
   pre = pre.map(a => a.replace(reLeadingSpaces, ""));
   const [commands, trails] = partition(post, a => a.startsWith(commandStart));
-  console.log("commands", commands);
-  console.log("trails", trails);
   let [localCommands, globalCommands] = 
     partition(commands, c => c.startsWith(localCommandStart));
   localCommands = localCommands.filter(a => !a.startsWith(localCommentCommand))
   return {
-    lines: pre,
+    lines: pre.join("\n"),
     trails,
     localCommands,
     globalCommands
@@ -162,9 +159,10 @@ function repeat<T>(
 export interface Part {
   drugs: DrugPart[],
   usage: UsagePart | null
+  more: string
 }
 
-export function parsePart(s: string): Part {
+export function parseDrugLines(s: string): Part {
   let drugs: DrugPart[];
   [drugs, s] = repeat(parseDrugPart, s);
   let usage: UsagePart;
@@ -172,6 +170,7 @@ export function parsePart(s: string): Part {
 
   return {
     drugs: drugs || [],
-    usage
+    usage: usage || null,
+    more: s
   };
 }

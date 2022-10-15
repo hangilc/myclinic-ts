@@ -96,7 +96,7 @@ describe("parse-shohousen", () => {
       lines: [
         "カロナール錠３００ｍｇ　３錠",
         "分３　毎食後　５日分"
-      ],
+      ].join("\n"),
       trails: ["以上、一包化"],
       localCommands: ["@_local"],
       globalCommands: ["@global"]
@@ -115,9 +115,13 @@ describe("parse-shohousen", () => {
   });
 
   it("should parse drug part", () => {
-    const [drugPart, rem] = p.parseDrugPart("カロナール錠３００ｍｇ　３錠");
+    let [drugPart, rem] = p.parseDrugPart("カロナール錠３００ｍｇ　３錠");
     expect(drugPart).toStrictEqual({ name: "カロナール錠３００ｍｇ", amount: "３錠" });
     expect(rem).toBe("");
+
+    [drugPart, rem] = p.parseDrugPart("カロナール錠３００ｍｇ　３錠\n分３　毎食後　５日分");
+    expect(drugPart).toStrictEqual({ name: "カロナール錠３００ｍｇ", amount: "３錠" });
+    expect(rem).toBe("分３　毎食後　５日分");
   });
 
   it("should parse usage pattern", () => {
@@ -127,12 +131,12 @@ describe("parse-shohousen", () => {
     expect(m[2]).toBe("７日分");
   });
 
-  it("should parse part", () => {
+  it("should parse drug lines", () => {
     let s = sm`
     カロナール錠３００ｍｇ　３錠
     分３　毎食後　５日分
     `;
-    let part = p.parsePart(s);
+    let part = p.parseDrugLines(s);
     expect(part).toStrictEqual({
       drugs: [{
         name: "カロナール錠３００ｍｇ",
@@ -141,8 +145,61 @@ describe("parse-shohousen", () => {
       usage: {
         usage: "分３　毎食後",
         days: "５日分"
-      }
+      },
+      more: ""
     })
   });
+
+  it("should parse multiple drug lines", () => {
+    let s = sm`
+    カロナール錠３００ｍｇ　３錠
+    フロモックス錠１００ｍｇ　３錠
+    分３　毎食後　５日分
+    `;
+    let part = p.parseDrugLines(s);
+    expect(part).toStrictEqual({
+      drugs: [
+        {
+          name: "カロナール錠３００ｍｇ",
+          amount: "３錠"
+        },
+        {
+          name: "フロモックス錠１００ｍｇ",
+          amount: "３錠"
+        }
+      ],
+      usage: {
+        usage: "分３　毎食後",
+        days: "５日分"
+      },
+      more: ""
+    })
+  });
+
+  it("should parse drug lines with more", () => {
+    let s = sm`
+    カロナール錠３００ｍｇ　３錠
+    フロモックス錠１００ｍｇ　３錠
+    分３　毎食後　５日分
+    （後発品に変更不可）`;
+    let part = p.parseDrugLines(s);
+    expect(part).toStrictEqual({
+      drugs: [
+        {
+          name: "カロナール錠３００ｍｇ",
+          amount: "３錠"
+        },
+        {
+          name: "フロモックス錠１００ｍｇ",
+          amount: "３錠"
+        }
+      ],
+      usage: {
+        usage: "分３　毎食後",
+        days: "５日分"
+      },
+      more: "（後発品に変更不可）"
+    })
+  })
   
 });
