@@ -62,6 +62,20 @@
     ops = await api.shohousenDrawer(text.textId);
     drawerDialog.open();
   }
+
+  async function onCopy() {
+    const targetVisitId = getCopyTarget();
+    if( targetVisitId !== null ){
+      const t: m.Text = Object.assign({}, text, {
+        textId: 0,
+        visitId: targetVisitId
+      })
+      api.enterText(t);
+      onClose();
+    } else {
+      alert("コピー先を見つけられませんでした。");
+    }
+  }
  
 </script>
 
@@ -84,7 +98,7 @@
       <a href="javascript:void(0)" on:click={onShohousen}>処方箋</a>
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
-      <a href="javascript:void(0)">コピー</a>
+      <a href="javascript:void(0)" on:click={onCopy}>コピー</a>
     </div>
     {/if}
 </div>
