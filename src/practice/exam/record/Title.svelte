@@ -4,11 +4,16 @@
   import { currentVisitId, tempVisitId, setTempVisitId, clearTempVisitId } from "../ExamVars"
   import Pulldown from "@/lib/Pulldown.svelte"
   import api from "@/lib/api"
+  import { onDestroy } from "svelte"
 
   export let visit: m.VisitEx;
 
   let manipLink: HTMLElement;
   let manipPulldown: Pulldown;
+
+  onDestroy(() => {
+    console.log("title destroyed", visit.visitId);
+  });
 
   function doManip(): void {
     manipPulldown.open();
