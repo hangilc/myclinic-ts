@@ -1,7 +1,7 @@
 import { writable, type Writable, get } from "svelte/store";
 import * as m from "../../lib/model";
 import api from "../../lib/api";
-import { TaskFactory as tf,  TaskRunner, type Task } from "../../lib/unit-task";
+import { FetchTask,  TaskRunner, type Task } from "../../lib/unit-task";
 import * as appEvent from "@/practice/app-events";
 
 export const currentPatient: Writable<m.Patient | null> = writable(null);
@@ -22,7 +22,7 @@ function resetVisits(): void {
 }
 
 function fetchVisits(patientId: number, page: number): Task {
-  return tf.fetch<m.VisitEx[]>(() => 
+  return new FetchTask<m.VisitEx[]>(() => 
     api.listVisitEx(patientId, page * recordsPerPage, recordsPerPage),
     result => visits.set(result));
 }
@@ -32,7 +32,7 @@ function countVisitPages(totalVisits: number): number {
 }
 
 function initNav(patientId: number): Task {
-  return tf.fetch(() => api.countVisitByPatient(patientId),
+  return new FetchTask<number>(() => api.countVisitByPatient(patientId),
     result => {
       navPage.set(0);
       navTotal.set(countVisitPages(result));
@@ -206,7 +206,7 @@ appEvent.visitDeleted.subscribe(visit => {
     const patient = get(currentPatient);
     if( patient !== null ){
       taskRunner.run(
-        tf.fetch(
+        new FetchTask<number>(
           () => api.countVisitByPatient(patient.patientId),
           count => {
             const newTotal = countVisitPages(count);
