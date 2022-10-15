@@ -156,13 +156,18 @@ function repeat<T>(
   return [ts, rem];
 }
 
-export interface Part {
-  drugs: DrugPart[],
-  usage: UsagePart | null
-  more: string
+export interface DrugLines {
+  drugs: DrugPart[];
+  usage: UsagePart | null;
+  more: string;
 }
 
-export function parseDrugLines(s: string): Part {
+export interface Part extends DrugLines {
+  trails: string[],
+  localCommands: string[]
+}
+
+export function parseDrugLines(s: string): DrugLines {
   let drugs: DrugPart[];
   [drugs, s] = repeat(parseDrugPart, s);
   let usage: UsagePart;
@@ -173,4 +178,26 @@ export function parseDrugLines(s: string): Part {
     usage: usage || null,
     more: s
   };
+}
+
+export function parsePart(drugLines: string, trails: string[], localCommands: string[]): Part {
+  return Object.assign(parseDrugLines(drugLines), { trails, localCommands});
+}
+
+export interface Shohousen {
+  prolog: string,
+  parts: Part[],
+  globalCommands: string[]
+}
+
+export function parseShohousen(s: string): Shohousen {
+  const [prolog, partSrc]: [string, string[]] = splitToParts(s);
+  const globalCommands: string[] = [];
+  const parts = partSrc.map(s => {
+    const tmpl: PartTemplate = parsePartTemplate(s);
+    const part = parsePart(tmpl.lines, tmpl.trails, tmpl.localCommands);
+    globalCommands.push(...tmpl.globalCommands);
+    return part;
+  });
+  return { prolog, parts, globalCommands };
 }

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { sm } from "@/lib/sm"
 import { isShohousen, stripShohousenProlog, isPartStart, cut,
-  splitToParts, exportForTesting as priv
+  splitToParts, exportForTesting as priv, parseShohousen
 } from "./parse-shohousen"
 import * as p from "./parse-shohousen"
 
@@ -200,6 +200,31 @@ describe("parse-shohousen", () => {
       },
       more: "（後発品に変更不可）"
     })
-  })
+  });
+
+  it("should parse shohousen", () => {
+    let s = sm`
+    院外処方
+    Ｒｐ）
+    １）カロナール錠３００ｍｇ　３錠
+    　　分３　毎食後　５日分
+    `;
+    let parsed: p.Shohousen = parseShohousen(s);
+    expect(parsed).toStrictEqual({
+      prolog: "院外処方\nＲｐ）\n",
+      parts: [
+        {
+          drugs: [
+            { name: "カロナール錠３００ｍｇ", amount: "３錠" }
+          ],
+          usage: { usage: "分３　毎食後", days: "５日分" },
+          more: "",
+          trails: [],
+          localCommands: []
+        }
+      ],
+      globalCommands: []
+    })
+  });
   
 });
