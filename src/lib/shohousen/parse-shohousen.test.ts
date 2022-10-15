@@ -118,6 +118,31 @@ describe("parse-shohousen", () => {
     const [drugPart, rem] = p.parseDrugPart("カロナール錠３００ｍｇ　３錠");
     expect(drugPart).toStrictEqual({ name: "カロナール錠３００ｍｇ", amount: "３錠" });
     expect(rem).toBe("");
-  })
+  });
+
+  it("should parse usage pattern", () => {
+    let m = priv.reUsagePattern.exec("分３　毎食後　７日分");
+    expect(m).not.toBeNull()
+    expect(m[1]).toBe("分３　毎食後");
+    expect(m[2]).toBe("７日分");
+  });
+
+  it("should parse part", () => {
+    let s = sm`
+    カロナール錠３００ｍｇ　３錠
+    分３　毎食後　５日分
+    `;
+    let part = p.parsePart(s);
+    expect(part).toStrictEqual({
+      drugs: [{
+        name: "カロナール錠３００ｍｇ",
+        amount: "３錠"
+      }],
+      usage: {
+        usage: "分３　毎食後",
+        days: "５日分"
+      }
+    })
+  });
   
 });

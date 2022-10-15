@@ -16,10 +16,10 @@ const drugPattern = `(${chunk})${space}+((?:１回)?${digitOrPeriod}+${unit}(?:$
 const reDrugPattern = new RegExp(`^${drugPattern}`);
 const daysPart = `${digit}+(?:日|回)分`;
 const usagePattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)${space}*`;
-const reUsagePttern = new RegExp(`^${usagePattern}`);
+const reUsagePattern = new RegExp(`^${usagePattern}`);
 
 export const exportForTesting = {
-  chunk, reDrugPattern
+  chunk, reDrugPattern, reUsagePattern
 }
 
 export function isShohousen(s: string): boolean {
@@ -115,7 +115,7 @@ export interface DrugPart {
 export function parseDrugPart(s: string): [DrugPart | null, string] {
   let m = reDrugPattern.exec(s);
   if( m != null ){
-    const drugPart = { name: m[1], amount: m[2] };
+    const drugPart: DrugPart = { name: m[1], amount: m[2] };
     const len = m[0].length;
     const rem = s.substring(len);
     return [drugPart, rem];
@@ -124,6 +124,54 @@ export function parseDrugPart(s: string): [DrugPart | null, string] {
   }
 }
 
+export interface UsagePart {
+  usage: string;
+  days: string;
+}
+
+export function parseUsagePart(s: string): [UsagePart | null, string] {
+  let m = reUsagePattern.exec(s);
+  if( m != null ){
+    const usagePart: UsagePart = { usage: m[1], days: m[2] };
+    const len = m[0].length;
+    const rem = s.substring(len);
+    return [usagePart, rem];
+  } else {
+    return [null, s];
+  }
+}
+
+function repeat<T>(
+  parser: (src: string) => [T | null, string],
+  s: string
+): [T[], string] {
+  const ts: T[] = [];
+  let rem: string = s;
+  while( true ){
+    let [t, r] = parser(rem);
+    if( t == null ){
+      break;
+    } else {
+      ts.push(t);
+      rem = r;
+    }
+  }
+  return [ts, rem];
+}
+
 export interface Part {
-  drugs: DrugPart[]
+  drugs: DrugPart[],
+  usage: UsagePart | null
+}
+
+export function parsePart(s: string): Part {
+  let drugs: DrugPart[];
+  [drugs, s] = repeat(parseDrugPart, s);
+  let usage: UsagePart;
+  [usage, s] = parseUsagePart(s);
+
+  return {
+    drugs: drugs || [],
+    usage
+  };
 }
