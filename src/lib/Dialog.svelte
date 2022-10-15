@@ -63,6 +63,20 @@
   .title-wrapper {
     display: flex;
     align-items: center;
+    font-weight: bold;
     justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .commands :global(a),
+  .commands :global(button) {
+    margin-left: 4px;
   }
 </style>

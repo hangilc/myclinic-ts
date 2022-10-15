@@ -46,23 +46,3 @@ div {
   border: 1px solid gray;
 }
 
-.dialog {
-  & .title-wrapper {
-    margin-bottom: 10px;
-  }
-  & .title {
-    font-weight: bold;
-    display: inline-block;
-  }
-  & .commands {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 10px;
-
-    & button, & a {
-      margin-left: 4px;
-    }
-  }
-}
-

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type * as m from "../../../lib/model"
+  import * as m from "../../../lib/model"
   import * as kanjidate from "kanjidate"
   import { currentVisitId, tempVisitId, setTempVisitId, clearTempVisitId } from "../ExamVars"
   import Pulldown from "@/lib/Pulldown.svelte"
@@ -37,8 +37,6 @@
   }
 
   async function doMeisai() {
-    const meisai: m.Meisai = await api.getMeisai(visit.visitId);
-    console.log(meisai.totalTen);
     meisaiDialog.open();
   }
 
@@ -66,24 +64,31 @@
   </svelte:fragment>
 </Pulldown>
 
-<Dialog bind:this={meisaiDialog} let:close={close}>
+<Dialog bind:this={meisaiDialog} let:close={close} width="">
   <span slot="title">診療明細</span>
-  {#await api.getMeisai(visit.visitId)}
-  {:then meisai}
+  {#await api.getMeisai(visit.visitId) then meisai}
     {#each meisai.items as item}
     <div>
       <div>{item.section}</div>
       {#each item.entries as entry}
-      <div>
-        <div>{entry.label}</div>
-        <div>{entry.tanka}x{entry.count}</div>
-        <div>{entry.tanka * entry.count}</div>
+      <div class="meisai-detail-item-row">
+        <div class="meisai-detail-item label">{entry.label}</div>
+        <div class="meisai-detail-item tanka-count">
+          {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
+        </div>
+        <div class="meisai-detail-item subtotal">
+          {(entry.tanka * entry.count).toLocaleString()}
+        </div>
       </div>
       {/each}
     </div>
     {/each}
-    <div>
-      総点：{meisai.totalTen}点、負担割：{meisai.futanWari}割、自己負担：{meisai.charge}円
+    {@const totalTenOf = a => (m.MeisaiObject.totalTenOf(a)).toLocaleString()}
+    <hr />
+    <div class="meisai-detail-summary">
+      <span>総点：{totalTenOf(meisai)}点</span>
+      <span>負担割：{meisai.futanWari.toLocaleString()}割</span>
+      <span>自己負担：{meisai.charge.toLocaleString()}円</span>
     </div>
   {/await}
   <svelte:fragment slot="commands">
@@ -111,5 +116,34 @@
 
   .datetime {
     font-weight: bold;
+  }
+
+  .meisai-detail-item.label {
+    max-width: 16em;
+  }
+
+  .meisai-detail-item-row {
+    margin-left: 1em;
+    display: flex;
+  }
+
+  .meisai-detail-item {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .meisai-detail-item.tanka-count {
+    width: 4em;
+    text-align: right;
+    margin-right: 4px;
+  }
+
+  .meisai-detail-item.subtotal {
+    width: 3em;
+    text-align: right;
+  }
+
+  .meisai-detail-summary span {
+    margin-right: 1em;
   }
 </style>

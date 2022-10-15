@@ -267,54 +267,43 @@ export enum MeisaiSectionEnum {
   Sonota = "その他",
 }
 
-export class MeisaiSectionItem {
+export interface MeisaiSectionItem {
   tanka: number;
   count: number;
   label: string;
+}
 
-  constructor(tanka: number, count: number, label: string) {
-    this.tanka = tanka;
-    this.count = count;
-    this.label = label;
-  }
-
-  get total(): number {
-    return this.tanka * this.count;
+export const MeisaiSectionItemObject = {
+  totalOf(item: MeisaiSectionItem): number {
+    return item.tanka * item.count;
   }
 }
 
-export class MeisaiSectionData {
+export interface MeisaiSectionData {
   section: MeisaiSectionEnum;
   entries: MeisaiSectionItem[];
+}
 
-  constructor(section: MeisaiSectionEnum, entries: MeisaiSectionItem[]) {
-    this.section = section;
-    this.entries = entries;
-  }
-
-  get subtotal(): number {
-    return this.entries.reduce((acc, ele) => {
-      return acc + ele.total;
+export const MeisaiSectionDataObject = {
+  subtotalOf(data: MeisaiSectionData): number {
+    const totalOf = MeisaiSectionItemObject.totalOf;
+    return data.entries.reduce((acc, ele) => {
+      return acc + totalOf(ele);
     }, 0);
   }
 }
 
-export class Meisai {
+export interface Meisai {
   items: MeisaiSectionData[];
   futanWari: number;
   charge: number;
+}
 
-  constructor(items: MeisaiSectionData[], funtanWari: number, charge: number) {
-    this.items = items;
-    this.futanWari = this.futanWari;
-    this.charge = charge;
-  }
-
-  get totalTen(): number {
-    console.log("totalTen");
-    return this.items.reduce((acc, ele) => {
-      console.log("ele.subtotal", ele.subtotal);
-      return acc + ele.subtotal;
+export const MeisaiObject = {
+  totalTenOf(meisai: Meisai): number {
+    const subtotal = MeisaiSectionDataObject.subtotalOf;
+    return meisai.items.reduce((acc, ele) => {
+      return acc + subtotal(ele);
     }, 0);
   }
 }
