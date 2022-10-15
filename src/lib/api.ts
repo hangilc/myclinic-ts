@@ -146,6 +146,10 @@ export default {
     return post("shohousen-drawer", text);
   },
 
+  getMeisai(visitId: number): Promise<m.Meisai> {
+    return get("get-meisai", { "visit-id": visitId });
+  }
+
 
 
 }

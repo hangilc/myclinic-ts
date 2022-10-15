@@ -255,3 +255,69 @@ export interface VisitEx {
   lastPayment?: Payment
 }
 
+export enum MeisaiSectionEnum {
+  ShoshinSaisin = "初・再診料",
+  IgakuKanri = "医学管理等",
+  Zaitaku = "在宅医療",
+  Kensa = "検査",
+  Gazou = "画像診断",
+  Touyaku = "投薬",
+  Chuusha = "注射",
+  Shochi = "処置",
+  Sonota = "その他",
+}
+
+export class MeisaiSectionItem {
+  tanka: number;
+  count: number;
+  label: string;
+
+  constructor(tanka: number, count: number, label: string) {
+    this.tanka = tanka;
+    this.count = count;
+    this.label = label;
+  }
+
+  get total(): number {
+    return this.tanka * this.count;
+  }
+}
+
+export class MeisaiSectionData {
+  section: MeisaiSectionEnum;
+  entries: MeisaiSectionItem[];
+
+  constructor(section: MeisaiSectionEnum, entries: MeisaiSectionItem[]) {
+    this.section = section;
+    this.entries = entries;
+  }
+
+  get subtotal(): number {
+    return this.entries.reduce((acc, ele) => {
+      return acc + ele.total;
+    }, 0);
+  }
+}
+
+export class Meisai {
+  items: MeisaiSectionData[];
+  futanWari: number;
+  charge: number;
+
+  constructor(items: MeisaiSectionData[], funtanWari: number, charge: number) {
+    this.items = items;
+    this.futanWari = this.futanWari;
+    this.charge = charge;
+  }
+
+  get totalTen(): number {
+    console.log("totalTen");
+    return this.items.reduce((acc, ele) => {
+      console.log("ele.subtotal", ele.subtotal);
+      return acc + ele.subtotal;
+    }, 0);
+  }
+}
+
+
+
