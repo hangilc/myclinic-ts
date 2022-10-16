@@ -87,6 +87,10 @@ export default {
     return get("start-visit", {"patient-id": patientId, "at": at});
   },
 
+  updateVisit(visit: m.Visit): Promise<boolean> {
+    return post("update-visit", visit);
+  },
+
   listRecentVisit(offset: number, count: number): Promise<Array<m.Visit>> {
     return get("list-recent-visit", { offset, count });
   },
@@ -106,7 +110,11 @@ export default {
   },
 
   batchGetVisitEx(visitIds: number[]): Promise<m.VisitEx[]> {
-      return post("batch-get-visit-ex", visitIds);
+    return post("batch-get-visit-ex", visitIds);
+  },
+
+  getVisitEx(visitId: number): Promise<m.VisitEx> {
+    return get("get-visit-ex", { "visit-id": visitId });
   },
 
   async listVisitEx(patientId: number, offset: number, count: number): Promise<m.VisitEx[]> {

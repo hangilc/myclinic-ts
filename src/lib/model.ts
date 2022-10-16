@@ -21,7 +21,25 @@ export interface Visit {
   kouhi2Id: number,
   kouhi3Id: number,
   koukikoureiId: number,
-  attributesStore: string | null
+  attributesStore?: string
+}
+
+export const VisitObject = {
+  attributesOf(visit: Visit): VisitAttributes | null {
+    return VisitAttributeObject.fromString(visit.attributesStore);
+  },
+
+  updateAttribute(visit: Visit, attr: VisitAttributes | null): Visit {
+    let newAttr: string | null;
+    if( attr == null ){
+      newAttr = null;
+    } else {
+      newAttr = JSON.stringify(attr);
+    }
+    return Object.assign({}, visit, {
+      attributesStore: newAttr
+    });
+  }
 }
 
 export const WqueueState = {
@@ -241,6 +259,27 @@ export interface ConductEx {
   kizaiList: ConductKizaiEx[]
 }
 
+export interface VisitAttributes {
+  futanWari: number | null
+}
+
+export const VisitAttributeObject = {
+  fromString(src: string | null): VisitAttributes | null {
+    if( src == null ){
+      return null;
+    } else {
+      return JSON.parse(src);
+    }
+  },
+
+  updateWith(
+      orig: VisitAttributes | null, 
+      update: VisitAttributes | null 
+  ): VisitAttributes {
+    return Object.assign({}, orig, update);
+  }
+}
+
 export interface VisitEx {
   visitId: number,
   visitedAt: string,
@@ -254,6 +293,27 @@ export interface VisitEx {
   chargeOption?: Charge,
   lastPayment?: Payment
 }
+
+export const VisitExObject = {
+  attributesOf(visit: VisitEx): VisitAttributes | null {
+    return VisitAttributeObject.fromString(visit.attributesStore);
+  },
+
+  asVisit(src: VisitEx): Visit {
+    return {
+      visitId: src.visitId,
+      patientId: src.patient.patientId,
+      visitedAt: src.visitedAt,
+      shahokokuhoId: src.hoken.shahokokuho?.shahokokuhoId || 0,
+      roujinId: src.hoken.roujin?.roujinId || 0,
+      kouhi1Id: src.hoken.kouhiList[0]?.kouhiId || 0,
+      kouhi2Id: src.hoken.kouhiList[1]?.kouhiId || 0,
+      kouhi3Id: src.hoken.kouhiList[2]?.kouhiId || 0,
+      koukikoureiId: src.hoken.koukikourei?.koukikoureiId || 0,
+      attributesStore: src.attributesStore
+    };
+  }
+};
 
 export enum MeisaiSectionEnum {
   ShoshinSaisin = "初・再診料",

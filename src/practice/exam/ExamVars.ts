@@ -195,13 +195,27 @@ appEvent.textDeleted.subscribe(text => {
   }
 });
 
+appEvent.visitUpdated.subscribe(async visit => {
+  if( visit == null ){
+    return;
+  }
+  console.log("visit updated", visit);
+  const visitsValue: m.VisitEx[] = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
+  if( index >= 0 ){
+    const newVisit: m.VisitEx = await api.getVisitEx(visit.visitId);
+    visitsValue.splice(index, 1, newVisit);
+    visits.set(visitsValue);
+  }
+});
+
 appEvent.visitDeleted.subscribe(visit => {
   if( visit == null ){
     return;
   }
   console.log("visit deleted", visit);
   const visitsValue: m.VisitEx[] = get(visits);
-  const index = visitsValue.findIndex(v => v.visitId == visit.visitId);
+  const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
   if( index >= 0 ){
     const patient = get(currentPatient);
     if( patient !== null ){

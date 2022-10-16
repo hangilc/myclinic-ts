@@ -1,13 +1,14 @@
 <script lang="ts">
   import * as m from "../../../lib/model"
+  import { VisitExObject } from "@/lib/model"
   import * as kanjidate from "kanjidate"
   import { currentVisitId, tempVisitId, setTempVisitId, clearTempVisitId } from "../ExamVars"
   import Pulldown from "@/lib/Pulldown.svelte"
   import Dialog from "@/lib/Dialog.svelte"
   import api from "@/lib/api"
-  import { onDestroy } from "svelte"
-  import type { FetchTask, TaskRunner } from "@/lib/unit-task"
-    import SelectItem from "@/lib/SelectItem.svelte";
+  import { onDestroy, tick } from "svelte"
+  import type { TaskRunner } from "@/lib/unit-task"
+  import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte"
 
   export let visit: m.VisitEx;
 
@@ -15,6 +16,7 @@
   let manipPulldown: Pulldown;
   let taskRunner: TaskRunner | null = null;
   let meisaiDialog: Dialog;
+  let futanWariDialog: FutanWariOverrideDialog;
 
   onDestroy(() => {
     taskRunner?.cancel();
@@ -40,6 +42,10 @@
     meisaiDialog.open();
   }
 
+  async function doFutanwariOverride() {
+    futanWariDialog.open();
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -59,7 +65,7 @@
     <a href="javascript:void(0)" on:click={doClearTempVisitId}>暫定診察の解除</a>
     {/if}
     <a href="javascript:void(0)" on:click={doMeisai}>診療明細</a>
-    <a href="javascript:void(0)">負担割オーバーライド</a>
+    <a href="javascript:void(0)" on:click={doFutanwariOverride}>負担割オーバーライド</a>
     <a href="javascript:void(0)">未収リストへ</a>
   </svelte:fragment>
 </Pulldown>
@@ -95,6 +101,8 @@
     <button on:click={close}>閉じる</button>
   </svelte:fragment>
 </Dialog>
+
+<FutanWariOverrideDialog bind:visit bind:this={futanWariDialog} />
 
 <style>
   .top {

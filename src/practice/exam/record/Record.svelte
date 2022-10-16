@@ -16,7 +16,7 @@
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top">
-  <Title {visit} />
+  <Title bind:visit={visit} />
   <TwoCols>
     <div slot="left">
       {#each visit.texts as text, i (text.textId)}
