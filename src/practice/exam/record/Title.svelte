@@ -1,14 +1,19 @@
 <script lang="ts">
-  import * as m from "../../../lib/model"
-  import { VisitExObject } from "@/lib/model"
-  import * as kanjidate from "kanjidate"
-  import { currentVisitId, tempVisitId, setTempVisitId, clearTempVisitId } from "../ExamVars"
-  import Pulldown from "@/lib/Pulldown.svelte"
-  import Dialog from "@/lib/Dialog.svelte"
-  import api from "@/lib/api"
-  import { onDestroy, tick } from "svelte"
-  import type { TaskRunner } from "@/lib/unit-task"
-  import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte"
+  import * as m from "../../../lib/model";
+  import * as kanjidate from "kanjidate";
+  import {
+    currentVisitId,
+    tempVisitId,
+    setTempVisitId,
+    clearTempVisitId,
+    addToMishuuList,
+  } from "../ExamVars";
+  import Pulldown from "@/lib/Pulldown.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
+  import api from "@/lib/api";
+  import { onDestroy, tick } from "svelte";
+  import type { TaskRunner } from "@/lib/unit-task";
+  import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
 
   export let visit: m.VisitEx;
 
@@ -46,12 +51,19 @@
     futanWariDialog.open();
   }
 
+  function doMishuuList(): void {
+    addToMishuuList(visit);
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<div class="top" class:current={visit.visitId === $currentVisitId}
-  class:temp-visit={visit.visitId === $tempVisitId}>
-  <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span>
+<div
+  class="top"
+  class:current={visit.visitId === $currentVisitId}
+  class:temp-visit={visit.visitId === $tempVisitId}
+>
+  <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
+  >
   <a href="javascript:void(0)" bind:this={manipLink} on:click={doManip}>操作</a>
 </div>
 
@@ -60,36 +72,41 @@
   <svelte:fragment>
     <a href="javascript:void(0)" on:click={doDeleteVisit}>この診察を削除</a>
     {#if visit.visitId !== $tempVisitId}
-    <a href="javascript:void(0)" on:click={doSetTempVisitId}>暫定診察に設定</a>
+      <a href="javascript:void(0)" on:click={doSetTempVisitId}>暫定診察に設定</a
+      >
     {:else}
-    <a href="javascript:void(0)" on:click={doClearTempVisitId}>暫定診察の解除</a>
+      <a href="javascript:void(0)" on:click={doClearTempVisitId}
+        >暫定診察の解除</a
+      >
     {/if}
     <a href="javascript:void(0)" on:click={doMeisai}>診療明細</a>
-    <a href="javascript:void(0)" on:click={doFutanwariOverride}>負担割オーバーライド</a>
-    <a href="javascript:void(0)">未収リストへ</a>
+    <a href="javascript:void(0)" on:click={doFutanwariOverride}
+      >負担割オーバーライド</a
+    >
+    <a href="javascript:void(0)" on:click={doMishuuList}>未収リストへ</a>
   </svelte:fragment>
 </Pulldown>
 
-<Dialog bind:this={meisaiDialog} let:close={close} width="">
+<Dialog bind:this={meisaiDialog} let:close width="">
   <span slot="title">診療明細</span>
   {#await api.getMeisai(visit.visitId) then meisai}
     {#each meisai.items as item}
-    <div>
-      <div>{item.section}</div>
-      {#each item.entries as entry}
-      <div class="meisai-detail-item-row">
-        <div class="meisai-detail-item label">{entry.label}</div>
-        <div class="meisai-detail-item tanka-count">
-          {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
-        </div>
-        <div class="meisai-detail-item subtotal">
-          {(entry.tanka * entry.count).toLocaleString()}
-        </div>
+      <div>
+        <div>{item.section}</div>
+        {#each item.entries as entry}
+          <div class="meisai-detail-item-row">
+            <div class="meisai-detail-item label">{entry.label}</div>
+            <div class="meisai-detail-item tanka-count">
+              {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
+            </div>
+            <div class="meisai-detail-item subtotal">
+              {(entry.tanka * entry.count).toLocaleString()}
+            </div>
+          </div>
+        {/each}
       </div>
-      {/each}
-    </div>
     {/each}
-    {@const totalTenOf = a => (m.MeisaiObject.totalTenOf(a)).toLocaleString()}
+    {@const totalTenOf = (a) => m.MeisaiObject.totalTenOf(a).toLocaleString()}
     <hr />
     <div class="meisai-detail-summary">
       <span>総点：{totalTenOf(meisai)}点</span>
@@ -110,7 +127,7 @@
     background-color: #eee;
     display: flex;
     align-items: center;
-    justify-content:space-between;
+    justify-content: space-between;
     margin-bottom: 6px;
   }
 

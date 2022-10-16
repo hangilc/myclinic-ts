@@ -10,6 +10,7 @@ export const tempVisitId: Writable<number | null> = writable(null);
 export const visits: Writable<m.VisitEx[]> = writable([]);
 export const navPage: Writable<number> = writable(0);
 export const navTotal: Writable<number> = writable(0);
+export const mishuuList: Writable<m.VisitEx[]> = writable([]);
 
 export const recordsPerPage = 10;
 
@@ -93,6 +94,19 @@ export function getCopyTarget(): number | null {
   return null;
 }
 
+export function addToMishuuList(visit: m.VisitEx): void {
+  const mishuuListValue = get(mishuuList);
+  if( mishuuListValue.findIndex(v => v.visitId === visit.visitId) < 0 ){
+    mishuuListValue.push(visit);
+    mishuuList.set(mishuuListValue);
+    console.log("mishuuList", mishuuListValue);
+  }
+}
+
+export function clearMishuuList(): void {
+  mishuuList.set([]);
+}
+
 async function suspendVisit(visitId: number): Promise<void> {
   await api.changeWqueueState(visitId, m.WqueueState.WaitReExam);
 }
@@ -103,6 +117,7 @@ function resetAll(): void {
   tempVisitId.set(null);
   resetVisits();
   resetNav();
+  clearMishuuList();
 }
 
 export function setTempVisitId(visitId: number, errorHandler: (err: string) => void): void {
@@ -199,13 +214,18 @@ appEvent.visitUpdated.subscribe(async visit => {
   if( visit == null ){
     return;
   }
-  console.log("visit updated", visit);
+  const newVisit: m.VisitEx = await api.getVisitEx(visit.visitId);
   const visitsValue: m.VisitEx[] = get(visits);
-  const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
+  let index = visitsValue.findIndex(v => v.visitId === visit.visitId);
   if( index >= 0 ){
-    const newVisit: m.VisitEx = await api.getVisitEx(visit.visitId);
     visitsValue.splice(index, 1, newVisit);
     visits.set(visitsValue);
+  }
+  const mishuuListValue: m.VisitEx[] = get(mishuuList);
+  index = mishuuListValue.findIndex(v => v.visitId == visit.visitId);
+  if( index >= 0 ){
+    mishuuListValue.splice(index, 1, newVisit);
+    mishuuList.set(mishuuListValue);
   }
 });
 
