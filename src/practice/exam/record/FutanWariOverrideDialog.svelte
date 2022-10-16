@@ -1,6 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte"
   import { tick } from "svelte"
+  import { derived } from "svelte/store"
   import {
     type Visit, VisitObject, type VisitAttributes, type VisitEx, VisitExObject
   } from "@/lib/model"
@@ -8,15 +9,17 @@
 
   export let visit: VisitEx;
   let futanWariDialog: Dialog;
+  let currentRep: string;
   let input: HTMLInputElement;
   let error: string = "";
 
+  $: currentRep = futanWariRep(visit);
 
   export function open(): void {
     futanWariDialog.open();
   }
 
-  function currentRep(): string {
+  function futanWariRep(visit: VisitEx): string {
     const futanWari = VisitExObject.attributesOf(visit)?.futanWari;
     if( futanWari == null ){
       return "（未設定）";
@@ -49,7 +52,13 @@
         return;
       }
     }
-    const newAttr = Object.assign({}, oldAttr, { futanWari: newFutanWari });
+    let newAttr: VisitAttributes | null;
+    if( newFutanWari == null ){
+      newAttr = Object.assign({}, oldAttr);
+      delete newAttr.futanWari;
+    } else {
+      newAttr = Object.assign({}, oldAttr, { futanWari: newFutanWari });
+    }
     const newVisit = VisitObject.updateAttribute(VisitExObject.asVisit(visit), newAttr);
     api.updateVisit(newVisit);
     close();
@@ -59,7 +68,7 @@
 
 <Dialog let:close={close} bind:this={futanWariDialog}>
   <span slot="title">負担割オーバーライド</span>
-  <div>現在の設定：{currentRep()}</div>
+  <div>現在の設定：{currentRep}</div>
   {#if error !== "" }
   <div class="error">{error}</div>
   {/if}
