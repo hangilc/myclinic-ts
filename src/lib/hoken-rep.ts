@@ -1,4 +1,5 @@
 import type { VisitEx } from "@/lib/model"
+import { idiv } from "@/lib/idiv"
 
 export function hokenRep(visit: VisitEx): string {
   let terms: string[] = [];
@@ -6,7 +7,7 @@ export function hokenRep(visit: VisitEx): string {
 
   if( hoken.shahokokuho != null ){
     terms.push(shahokokuhoRep(
-      hoken.shahokokuho.shahokokuhoId,
+      hoken.shahokokuho.hokenshaBangou,
       hoken.shahokokuho.koureiStore
     ));
   }
@@ -32,7 +33,7 @@ export function shahokokuhoName(hokenshaBangou: number): string {
   } else if (hokenshaBangou <= 999999) {
     return "国保";
   } else {
-    switch (hokenshaBangou / 1000000) {
+    switch (idiv(hokenshaBangou, 1000000)) {
       case 1: return "協会けんぽ";
       case 2: return "船員";
       case 3: return "日雇一般";
@@ -75,11 +76,11 @@ export function roujinRep(futanWari: number): string {
 }
 
 export function kouhiRep(futanshaBangou: number): string {
-  if ((futanshaBangou / 1000000) == 41){ return  "マル福"; }
-  else if ((futanshaBangou / 1000) == 80136) { "マル障（１割負担）"; }
-  else if ((futanshaBangou / 1000) == 80137) { "マル障（負担なし）"; }
-  else if ((futanshaBangou / 1000) == 81136) { "マル親（１割負担）"; }
-  else if ((futanshaBangou / 1000) == 81137) { "マル親（負担なし）"; }
-  else if ((futanshaBangou / 1000000) == 88) { "マル乳"; }
+  if ((idiv(futanshaBangou, 1000000)) == 41){ return  "マル福"; }
+  else if (idiv(futanshaBangou, 1000) == 80136) { return "マル障（１割負担）"; }
+  else if (idiv(futanshaBangou, 1000) == 80137) { return "マル障（負担なし）"; }
+  else if (idiv(futanshaBangou, 1000) == 81136) { return "マル親（１割負担）"; }
+  else if (idiv(futanshaBangou, 1000) == 81137) { return "マル親（負担なし）"; }
+  else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
   else { return `公費負担（${futanshaBangou}）`; }
 }
