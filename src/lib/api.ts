@@ -3,16 +3,17 @@ import { dateToSql } from "./util"
 import type { Op as DrawerOp, Op } from "./drawer/op"
 import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
 
-export const base: string = getBase()
+export const backend: string = getBackend();
+export const base: string = backend + "/api";
 export const wsUrl: string = 
   base.replace("/api", "/ws/events").replace(/^http?/, "ws");
 
-function getBase(): string {
+function getBackend(): string {
   if( !import.meta.env.SSR ){
     const l = window.location;
-    return `${l.protocol}//${l.hostname}:8080/api`;
+    return `${l.protocol}//${l.hostname}:8080`;
   } else {
-    return "http://localhost:8080/api";
+    return "http://localhost:8080";
   }
 }
 
@@ -168,13 +169,19 @@ export default {
   },
 
   stampPdf(fileName: string, stamp: string): Promise<boolean> {
-    return get("stmp-pdf", { "file-name": fileName, "stamp": stamp });
+    return get("stamp-pdf", { "file-name": fileName, "stamp": stamp });
   },
 
   concatPdfFiles(files: string[], outFile: string): Promise<boolean> {
+    return post("concat-pdf-files", files, { "out-file": outFile });
+  },
 
-  }
+  deletePortalTmpFile(fileName: string): Promise<boolean> {
+    return get("delete-portal-tmp-file", { "file-name": fileName });
+  },
 
-
+  portalTmpFileUrl(fileName: string): string {
+    return `${backend}/portal-tmp/${fileName}`;
+  },
 
 }

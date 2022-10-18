@@ -4,20 +4,41 @@
   import * as kanjidate from "kanjidate"
   import type { VisitEx } from "@/lib/model"
   import { pad } from "@/lib/pad"
-    import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
-    import api from "@/lib/api";
+  import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
+  import api from "@/lib/api";
+
+  let pdfFiles: string[] = [];
 
   function sum(list: VisitEx[]): number {
     return list.reduce((acc, ele) => acc + ele.chargeOption?.charge || 0, 0);
   }
 
+  function makeStamp(at: Date): string {
+    return `${pad(at.getFullYear(), 4)}${pad(at.getMonth()+1, 2)}${pad(at.getDate(), 2)}`;
+  }
+
   function receiptPdfFileName(visit: VisitEx): string {
-    const at = new Date(visit.visitedAt)
-    const stamp = `${pad(at.getFullYear(), 4)}${pad(at.getMonth()+1, 2)}${pad(at.getDate(), 2)}`;
+    const stamp = makeStamp(new Date(visit.visitedAt));
     return `receipt-${visit.patient.patientId}-${visit.visitId}-${stamp}.pdf`;
   }
 
+  function bundlePdfFileName(patientId: number): string {
+    const stamp = makeStamp(new Date());
+    return `receipt-bundle-${patientId}-${stamp}.pdf`;
+  }
+
   async function doReceiptPdf(visits: VisitEx[]) {
+    const patientIds: Set<number> = new Set();
+    visits.forEach(visit => patientIds.add(visit.patient.patientId));
+    let patientId: number;
+    if( patientIds.size === 0 ){
+      return;
+    } else if( patientIds.size === 1 ){
+      patientId = Array.from(patientIds)[0];
+    } else {
+      alert("Error: multiple patients.");
+      return;
+    }
     const files: string[] = [];
     const promises = visits.map(async visit => {
       const file = receiptPdfFileName(visit);
@@ -28,7 +49,22 @@
       await api.createPdfFile(ops, "A6_Landscape", file);
       await api.stampPdf(file, "receipt");
     });
-    await Promise.all(promises)
+    await Promise.all(promises);
+    const outFile = bundlePdfFileName(patientId);
+    await api.concatPdfFiles(files, outFile);
+    const url = api.portalTmpFileUrl(outFile);
+    if( window ){
+      window.open(url, "_blank");
+      pdfFiles.push(outFile);
+      console.log("pdfFiles", pdfFiles);
+    }
+  }
+
+  async function doClose() {
+    clearMishuuList();
+    const promises = pdfFiles.map(file => api.deletePortalTmpFile(file));
+    await Promise.all(promises);
+    pdfFiles = [];
   }
 </script>
 
@@ -48,7 +84,7 @@
   <div class="commands">
     <button on:click={() => doReceiptPdf($mishuuList)}>領収書PDF</button>
     <button>会計済に</button>
-    <a href="javascript:void(0)" on:click={clearMishuuList}>閉じる</a>
+    <a href="javascript:void(0)" on:click={doClose}>閉じる</a>
   </div>
 </RightBox>
 {/if}
