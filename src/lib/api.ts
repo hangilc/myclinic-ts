@@ -1,6 +1,7 @@
-import type * as m from "./model";
-import { dateToSql } from "./util";
-import type { Op as DrawerOp } from "./drawer/op";
+import type * as m from "./model"
+import { dateToSql } from "./util"
+import type { Op as DrawerOp, Op } from "./drawer/op"
+import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
 
 export const base: string = getBase()
 export const wsUrl: string = 
@@ -156,6 +157,18 @@ export default {
 
   getMeisai(visitId: number): Promise<m.Meisai> {
     return get("get-meisai", { "visit-id": visitId });
+  },
+
+  drawReceipt(data: ReceiptDrawerData): Promise<Op[]> {
+    return post("draw-receipt", data);
+  },
+
+  createPdfFile(ops: Op[], paperSize: string, fileName: string): Promise<boolean> {
+    return post("create-pdf-file", ops, { "paper-size": paperSize, "file-name": fileName });
+  },
+
+  stampPdf(fileName: string, stamp: string): Promise<boolean> {
+    return get("stmp-pdf", { "file-name": fileName, "stamp": stamp });
   }
 
 

@@ -4,6 +4,8 @@
   import * as kanjidate from "kanjidate"
   import type { VisitEx } from "@/lib/model"
   import { pad } from "@/lib/pad"
+    import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
+    import api from "@/lib/api";
 
   function sum(list: VisitEx[]): number {
     return list.reduce((acc, ele) => acc + ele.chargeOption?.charge || 0, 0);
@@ -15,11 +17,16 @@
     return `receipt-${visit.patient.patientId}-${visit.visitId}-${stamp}.pdf`;
   }
 
-  function doReceiptPdf(visits: VisitEx[]): void {
-    visits.forEach(visit => {
+  async function doReceiptPdf(visits: VisitEx[]) {
+    const promises = visits.map(async visit => {
       const file = receiptPdfFileName(visit);
-      console.log(file);
-    })
+      const meisai = await api.getMeisai(visit.visitId);
+      const data = ReceiptDrawerData.create(visit, meisai);
+      const ops = await api.drawReceipt(data);
+      await api.createPdfFile(ops, "A6_Landscape", file);
+      await api.stampPdf(file, "receipt");
+    });
+    await Promise.all(promises)
   }
 </script>
 

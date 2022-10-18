@@ -6,7 +6,7 @@ import {
   MeisaiSectionEnum,
   type VisitEx,
 } from "@/lib/model"
-import { hokenRep } from "@/lib/hoken-util"
+import { hokenRep } from "@/lib/hoken-rep"
 import * as kanjidate from "kanjidate"
 
 export class ReceiptDrawerData {
