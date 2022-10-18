@@ -2,7 +2,25 @@ import type { VisitEx } from "@/lib/model"
 
 export function hokenRep(visit: VisitEx): string {
   let terms: string[] = [];
-  return "";
+
+  for bangou <- shahokokuhoHokenshaBangou
+  yield add(shahokokuhoRep(bangou, shahokokuhoKoureiFutanWari))
+  for futan <- koukikoureiFutanWari yield add(koukikoureiRep(futan))
+  for futan <- roujinFutanWari yield add(roujinRep(futan))
+  terms ++= List(
+    kouhi1FutanshaBangou,
+    kouhi2FutanshaBangou,
+    kouhi3FutanshaBangou
+  )
+    .filter(_.isDefined)
+    .map(_.get)
+    .map(kouhiRep(_))
+  
+  if( terms.length === 0 ){
+    return "自費";
+  } else {
+    return terms.join("・");
+  }
 }
 
 export function shahokokuhoName(hokenshaBangou: number): String {
@@ -28,15 +46,28 @@ export function shahokokuhoName(hokenshaBangou: number): String {
       case 73: return "地方公務員共済退職";
       case 74: return "警察公務員共済退職";
       case 75: return "学校共済退職";
-      case _: return "不明";
+      default: return "不明";
     }
   }
 }
 
 export function koukikoureiRep(futanWari: number): string {
-  return "後期高齢" + futanWari.toString + "割";
+  return `後期高齢${futanWari}割`;
 }
 
+export function roujinRep(futanWari: number): string {
+  return `老人${futanWari}割`;
+}
+
+export function kouhiRep(futanshaBangou: number): string {
+  if ((futanshaBangou / 1000000) == 41){ return  "マル福"; }
+  else if ((futanshaBangou / 1000) == 80136) { "マル障（１割負担）"; }
+  else if ((futanshaBangou / 1000) == 80137) { "マル障（負担なし）"; }
+  else if ((futanshaBangou / 1000) == 81136) { "マル親（１割負担）"; }
+  else if ((futanshaBangou / 1000) == 81137) { "マル親（負担なし）"; }
+  else if ((futanshaBangou / 1000000) == 88) { "マル乳"; }
+  else { return `公費負担（${futanshaBangou}）`; }
+}
 
 
 /*
