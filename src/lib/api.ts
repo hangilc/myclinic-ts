@@ -169,6 +169,10 @@ export default {
 
   stampPdf(fileName: string, stamp: string): Promise<boolean> {
     return get("stmp-pdf", { "file-name": fileName, "stamp": stamp });
+  },
+
+  concatPdfFiles(files: string[], outFile: string): Promise<boolean> {
+
   }
 
 

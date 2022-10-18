@@ -18,8 +18,10 @@
   }
 
   async function doReceiptPdf(visits: VisitEx[]) {
+    const files: string[] = [];
     const promises = visits.map(async visit => {
       const file = receiptPdfFileName(visit);
+      files.push(file);
       const meisai = await api.getMeisai(visit.visitId);
       const data = ReceiptDrawerData.create(visit, meisai);
       const ops = await api.drawReceipt(data);
