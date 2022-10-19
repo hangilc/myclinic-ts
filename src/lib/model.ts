@@ -245,9 +245,9 @@ export type ConductKindTag = Record<ConductKindKey, any>;
 
 export class ConductKindType {
   constructor(
-    code: number,
-    rep: string
-  ) {}
+    public code: number,
+    public rep: string
+  ) { }
 }
 
 export const ConductKind: Record<ConductKindKey, ConductKindType> = {

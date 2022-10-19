@@ -235,8 +235,15 @@ export default {
     return get("get-shinryou-regular", {});
   },
 
-  resolveShinryouCodeByName(name: string, at: Date | string): Promise<number | null> {
+  resolveShinryoucodeByName(name: string, at: Date | string): Promise<number | null> {
     return get("resolve-shinryoucode-by-name", { 
+      "name": name, 
+      at: dateParam(at) 
+    });
+  },
+
+  resolveKizaicodeByName(name: string, at: Date | string): Promise<number | null> {
+    return get("resolve-kizaicode-by-name", { 
       "name": name, 
       at: dateParam(at) 
     });
