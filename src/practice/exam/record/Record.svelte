@@ -4,7 +4,8 @@
   import TwoCols from "./TwoCols.svelte";
   import Text from "./text/Text.svelte";
   import TextForm from "./text/TextForm.svelte";
-    import Hoken from "./hoken/Hoken.svelte";
+  import Hoken from "./hoken/Hoken.svelte";
+  import ShinryouMenu from "./shinryou/ShinryouMenu.svelte";
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
@@ -33,6 +34,7 @@
     </div>
     <div slot="right">
       <Hoken bind:visit={visit} />
+      <ShinryouMenu />
     </div>
   </TwoCols>
 </div>
