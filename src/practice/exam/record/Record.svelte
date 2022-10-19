@@ -34,7 +34,7 @@
     </div>
     <div slot="right">
       <Hoken bind:visit={visit} />
-      <ShinryouMenu />
+      <ShinryouMenu visit={visit}/>
     </div>
   </TwoCols>
 </div>

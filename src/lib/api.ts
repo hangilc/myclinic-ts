@@ -36,6 +36,14 @@ function post(cmd: string, data: any, params: any = {}): Promise<any> {
     .then(resp => resp.json());
 }
 
+function dateParam(arg: Date | string): string {
+  if( typeof arg !== "string" ){
+    return dateToSql(arg);
+  } else {
+    return arg.length > 10 ? arg.substring(0, 10) : arg;
+  }
+}
+
 
 export default {
   getPatient(patientId: number): Promise<m.Patient> {
@@ -190,38 +198,53 @@ export default {
 
   findAvailableShahokokuho(patientId: number, at: Date | string): 
     Promise<m.Shahokokuho | null > {
-    if( typeof at !== "string" ){
-      at = dateToSql(at);
-    }
-    return get("find-available-shahokokuho", { "patient-id": patientId, at })
+    return get("find-available-shahokokuho", { 
+      "patient-id": patientId, at: dateParam(at)
+    })
   },
 
   findAvailableRoujin(patientId: number, at: Date | string): 
     Promise<m.Roujin | null > {
-    if( typeof at !== "string" ){
-      at = dateToSql(at);
-    }
-    return get("find-available-roujin", { "patient-id": patientId, at })
+    return get("find-available-roujin", { 
+      "patient-id": patientId, 
+      at: dateParam(at) 
+    })
   },
 
   findAvailableKoukikourei(patientId: number, at: Date | string): 
     Promise<m.Koukikourei | null > {
-    if( typeof at !== "string" ){
-      at = dateToSql(at);
-    }
-    return get("find-available-koukikourei", { "patient-id": patientId, at })
+    return get("find-available-koukikourei", { 
+      "patient-id": patientId, 
+      at: dateParam(at) 
+    })
   },
 
   listAvailableKouhi(patientId: number, at: Date | string): 
     Promise<m.Kouhi[]> {
-    if( typeof at !== "string" ){
-      at = dateToSql(at);
-    }
-    return get("list-available-kouhi", { "patient-id": patientId, at })
+    return get("list-available-kouhi", { 
+      "patient-id": patientId, 
+      at: dateParam(at)
+    })
   },
 
   updateHokenIds(visitId: number, hokenIdSet: m.HokenIdSet): Promise<boolean> {
     return post("update-hoken-ids", hokenIdSet, { "visit-id": visitId });
+  },
+
+  getShinryouRegular(): Promise<Record<string, string[]>> {
+    return get("get-shinryou-regular", {});
+  },
+
+  resolveShinryouCodeByName(name: string, at: Date | string): Promise<number | null> {
+    return get("resolve-shinryoucode-by-name", { 
+      "name": name, 
+      at: dateParam(at) 
+    });
+  },
+
+  batchEnterShinryouConduct(req: m.CreateShinryouConductRequest):
+      Promise<[number[], number[]]> {
+    return post("batch-enter-shinryou-conduct", req);        
   },
 
 }

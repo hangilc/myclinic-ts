@@ -1,4 +1,6 @@
 import { zenkakuSpace, zenkakuPeriod } from "../zenkaku"
+import { partition } from "@/lib/partition"
+
 const space = "[ 　]";
 const digit = "[0-9０-９]";
 const notSpace = "[^ 　\n]";
@@ -75,16 +77,16 @@ export function span<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
   return [list.slice(0, i), list.slice(i)];
 }
 
-export function partition<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
-  return list.reduce(([pos, neg], ele) => {
-    if( pred(ele) ){
-      pos.push(ele);
-    } else {
-      neg.push(ele);
-    }
-    return [pos, neg];
-  }, [[], []]);
-}
+// export function partition<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
+//   return list.reduce(([pos, neg], ele) => {
+//     if( pred(ele) ){
+//       pos.push(ele);
+//     } else {
+//       neg.push(ele);
+//     }
+//     return [pos, neg];
+//   }, [[], []]);
+// }
 
 export function parsePartTemplate(s: string): PartTemplate {
   s = s.replace(rePartStart, zenkakuSpace);

@@ -202,6 +202,12 @@ export interface DrugEx {
   master: IyakuhinMaster
 }
 
+export interface Shinryou {
+  shinryouId: number,
+  visitId: number,
+  shinryoucode: number
+}
+
 export interface ShinryouEx {
   shinryouId: number,
   visitId: number,
@@ -375,6 +381,40 @@ export const MeisaiObject = {
       return acc + subtotal(ele);
     }, 0);
   }
+}
+
+export interface ConductShinryou {
+  conductShinryouId: number,
+  conductId: number,
+  shinryoucode: number
+}
+
+export interface ConductDrug {
+  conductDrugId: number,
+  conductId: number,
+  iyakuhincode: number,
+  amount: number
+}
+
+export interface ConductKizai {
+  conductKizaiId: number,
+  conductId: number,
+  kizaicode: number,
+  amount: number
+}
+
+export interface CreateConductRequest {
+  visitId: number,
+  kind: number,
+  labelOption: string | null,
+  shinryouList: ConductShinryou[],
+  drugs: ConductDrug[],
+  kizaiList: ConductKizai[]
+}
+
+export interface CreateShinryouConductRequest {
+  shinryouList: Shinryou[],
+  conducts: CreateConductRequest[]
 }
 
 
