@@ -2,7 +2,7 @@
   import { mishuuList, clearMishuuList } from "@/practice/exam/ExamVars"
   import RightBox from "../RightBox.svelte"
   import * as kanjidate from "kanjidate"
-  import type { VisitEx } from "@/lib/model"
+  import type { Payment, VisitEx } from "@/lib/model"
   import { pad } from "@/lib/pad"
   import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
   import api from "@/lib/api";
@@ -66,6 +66,20 @@
     await Promise.all(promises);
     pdfFiles = [];
   }
+
+  async function doFinished(visits: VisitEx[]) {
+    const promises = visits.map(async visit => {
+      const pay: Payment = {
+        visitId: visit.visitId,
+        amount: visit.chargeOption?.charge || 0,
+        paytime: kanjidate.format(kanjidate.fSqlDateTime, new Date())
+      };
+      await api.enterPayment(pay);
+    });
+    await Promise.all(promises);
+    await doClose();
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -83,7 +97,7 @@
   </div>
   <div class="commands">
     <button on:click={() => doReceiptPdf($mishuuList)}>領収書PDF</button>
-    <button>会計済に</button>
+    <button on:click={() => doFinished($mishuuList)}>会計済に</button>
     <a href="javascript:void(0)" on:click={doClose}>閉じる</a>
   </div>
 </RightBox>

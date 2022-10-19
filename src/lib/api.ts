@@ -148,6 +148,10 @@ export default {
     return get("delete-text", { "text-id": textId });
   },
 
+  enterPayment(payment: m.Payment): Promise<boolean> {
+    return post("enter-payment", payment);
+  },
+
   shohousenDrawer(textId: number): Promise<DrawerOp[]> {
     return get("shohousen-drawer", { "text-id": textId });
   },
