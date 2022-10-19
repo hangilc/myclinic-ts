@@ -235,6 +235,10 @@ export default {
     return get("get-shinryou-regular", {});
   },
 
+  getShinryouKensa(): Promise<Record<string, string[]>> {
+    return get("get-shinryou-kensa", {});
+  },
+
   resolveShinryoucodeByName(name: string, at: Date | string): Promise<number | null> {
     return get("resolve-shinryoucode-by-name", { 
       "name": name, 
