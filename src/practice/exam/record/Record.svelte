@@ -4,6 +4,7 @@
   import TwoCols from "./TwoCols.svelte";
   import Text from "./text/Text.svelte";
   import TextForm from "./text/TextForm.svelte";
+    import Hoken from "./hoken/Hoken.svelte";
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
@@ -29,6 +30,9 @@
           <a href="javascript:void(0)" on:click={() => showNewTextEditor = true}>新規文章</a>
         </div>
       {/if}
+    </div>
+    <div slot="right">
+      <Hoken bind:visit={visit} />
     </div>
   </TwoCols>
 </div>

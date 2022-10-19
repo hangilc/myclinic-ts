@@ -121,6 +121,15 @@ export interface HokenInfo {
   kouhiList: Kouhi[]
 }
 
+export interface HokenIdSet {
+  shahokokuhoId: number,
+  koukikoureiId: number,
+  roujinId: number,
+  kouhi1Id: number,
+  kouhi2Id: number,
+  kouhi3Id: number
+}
+
 export class Text {
   textId: number;
   visitId: number;

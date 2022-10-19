@@ -1,4 +1,4 @@
-import type { VisitEx } from "@/lib/model"
+import type { VisitEx, Shahokokuho } from "@/lib/model"
 import { idiv } from "@/lib/idiv"
 
 export function hokenRep(visit: VisitEx): string {
@@ -6,10 +6,7 @@ export function hokenRep(visit: VisitEx): string {
   const hoken = visit.hoken;
 
   if( hoken.shahokokuho != null ){
-    terms.push(shahokokuhoRep(
-      hoken.shahokokuho.hokenshaBangou,
-      hoken.shahokokuho.koureiStore
-    ));
+    terms.push(shahokokuhoRep(hoken.shahokokuho));
   }
   if( hoken.koukikourei != null ){
     terms.push(koukikoureiRep(hoken.koukikourei.futanWari));
@@ -55,7 +52,11 @@ export function shahokokuhoName(hokenshaBangou: number): string {
   }
 }
 
-export function shahokokuhoRep(
+export function shahokokuhoRep(shahokokuho: Shahokokuho): string {
+  return shahokokuhoRep2(shahokokuho.hokenshaBangou, shahokokuho.koureiStore);
+}
+
+export function shahokokuhoRep2(
   shahokokuhoHokenshaBangou: number,
   shahokokuhoKoureiFutanWari: number
 ): string {

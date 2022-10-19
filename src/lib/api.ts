@@ -188,4 +188,40 @@ export default {
     return `${backend}/portal-tmp/${fileName}`;
   },
 
+  findAvailableShahokokuho(patientId: number, at: Date | string): 
+    Promise<m.Shahokokuho | null > {
+    if( typeof at !== "string" ){
+      at = dateToSql(at);
+    }
+    return get("find-available-shahokokuho", { "patient-id": patientId, at })
+  },
+
+  findAvailableRoujin(patientId: number, at: Date | string): 
+    Promise<m.Roujin | null > {
+    if( typeof at !== "string" ){
+      at = dateToSql(at);
+    }
+    return get("find-available-roujin", { "patient-id": patientId, at })
+  },
+
+  findAvailableKoukikourei(patientId: number, at: Date | string): 
+    Promise<m.Koukikourei | null > {
+    if( typeof at !== "string" ){
+      at = dateToSql(at);
+    }
+    return get("find-available-koukikourei", { "patient-id": patientId, at })
+  },
+
+  listAvailableKouhi(patientId: number, at: Date | string): 
+    Promise<m.Kouhi[]> {
+    if( typeof at !== "string" ){
+      at = dateToSql(at);
+    }
+    return get("list-available-kouhi", { "patient-id": patientId, at })
+  },
+
+  updateHokenIds(visitId: number, hokenIdSet: m.HokenIdSet): Promise<boolean> {
+    return post("update-hoken-ids", hokenIdSet, { "visit-id": visitId });
+  },
+
 }
