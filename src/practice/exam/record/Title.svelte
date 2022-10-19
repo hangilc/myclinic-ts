@@ -54,6 +54,14 @@
   function doMishuuList(): void {
     addToMishuuList(visit);
   }
+
+  function isMishuu(visit: m.VisitEx): boolean {
+    const charge = visit.chargeOption?.charge;
+    const pay = visit.lastPayment?.amount;
+    return charge != null && charge > 0 && (
+      pay == null || (pay === 0)
+    );
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -83,7 +91,9 @@
     <a href="javascript:void(0)" on:click={doFutanwariOverride}
       >負担割オーバーライド</a
     >
+    {#if isMishuu(visit)}
     <a href="javascript:void(0)" on:click={doMishuuList}>未収リストへ</a>
+    {/if}
   </svelte:fragment>
 </Pulldown>
 

@@ -23,6 +23,9 @@ export const visitDeleted: Writable<m.Visit | null> = writable(null)
 export const wqueueEntered: Writable<m.Wqueue | null> = writable(null)
 export const wqueueUpdated: Writable<m.Wqueue | null> = writable(null)
 export const wqueueDeleted: Writable<m.Wqueue | null> = writable(null)
+export const paymentEntered: Writable<m.Payment | null> = writable(null)
+export const paymentUpdated: Writable<m.Payment | null> = writable(null)
+export const paymentDeleted: Writable<m.Payment | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -78,6 +81,23 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             wqueueDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "payment": {
+        switch(kind) {
+          case "created": {
+            paymentEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            paymentUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            paymentDeleted.set(payload);
             break;
           }
         }

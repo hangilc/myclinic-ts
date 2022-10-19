@@ -276,5 +276,19 @@ appEvent.wqueueDeleted.subscribe(wqueue => {
   }
 })
 
+appEvent.paymentEntered.subscribe(payment => {
+  if( payment == null ){
+    return;
+  }
+  console.log("payment entered", payment);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === payment.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    visit.lastPayment = payment;
+    visits.set(visitsValue);
+  }
+});
+
 
 

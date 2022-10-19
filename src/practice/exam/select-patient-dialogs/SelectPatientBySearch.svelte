@@ -7,20 +7,23 @@
   import { dateTimeToSql } from "../../../lib/util"
 
   let dialog: Dialog;
-  export function open(): void {
-    dialog.open();
-  }
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
 
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
   let searchText: string;
 
+  export function open(): void {
+    selected.set(null);
+    patients = [];
+    searchText = "";
+    dialog.open();
+  }
+
   async function doSearch(ev: Event){
     ev.preventDefault();
     const t = searchText.trim()
     patients = await api.searchPatient(t);
-    console.log(patients);
   }
 
   function onSelectButtonClick(close: () => void): void {
