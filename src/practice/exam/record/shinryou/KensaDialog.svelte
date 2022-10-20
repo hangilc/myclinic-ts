@@ -1,9 +1,9 @@
 <script lang="ts">
   import CheckLabel from "@/lib/CheckLabel.svelte";
-import Dialog from "@/lib/Dialog.svelte"
+  import Dialog from "@/lib/Dialog.svelte"
   import type { VisitEx } from "@/lib/model";
+  import { enter } from "./helper"
 
-  export let kensa: Record<string, string[]>;
   export let visit: VisitEx;
   let dialog: Dialog;
   interface Item {
@@ -12,10 +12,10 @@ import Dialog from "@/lib/Dialog.svelte"
     value: string,
     preset: boolean,
   }
-  let leftItems: Item[];
-  let rightItems: Item[];
+  let leftItems: Item[] = [];
+  let rightItems: Item[] = [];
 
-  function mkItem(name: string): Item {
+  function mkItem(name: string, preset: string[]): Item {
     const index = name.indexOf(":");
     if( index >= 0 ){
       const value = name.substring(index+1);
@@ -23,52 +23,53 @@ import Dialog from "@/lib/Dialog.svelte"
         label: name.substring(0, index),
         checked: false,
         value: value,
-        preset: kensa.preset.includes(value)
+        preset: preset.includes(value)
       };
     } else {
       return {
         label: name,
         checked: false,
         value: name,
-        preset: kensa.preset.includes(name)
+        preset: preset.includes(name)
       };
     }
   }
 
-  $: leftItems = kensa.left.map(mkItem);
-  $: rightItems = kensa.right.map(mkItem);
-
-  function allItems(): Item[] {
-    return [...leftItems, ...rightItems];
-  }
-
-  function clearChecks(): void {
-    allItems().forEach(item => item.checked = false);
-  }
-
-  export function open(): void {
-    clearChecks();
+  export function open(kensa: Record<string, string[]>): void {
+    const preset: string[] = kensa.preset;
+    leftItems = kensa.left.map(name => mkItem(name, preset));
+    rightItems = kensa.right.map(name => mkItem(name, preset));
     dialog.open();
   }
 
   function doPreset(): void {
-    allItems().filter(item => item.preset).forEach(item => {
-      console.log("preset", item.label);
-      item.checked = true
-    });
+    function preset(items: Item[]): Item[] {
+      items.forEach(item => {
+        if( item.preset ){
+          item.checked = true;
+        }
+      })
+      return items;
+    }
+    leftItems = preset(leftItems);
+    rightItems = preset(rightItems);
   }
 
   function doClear(): void {
-    clearChecks();
+    function clear(items: Item[]): Item[] {
+      items.forEach(item => item.checked = false);
+      return items;
+    }
+    leftItems = clear(leftItems);
+    rightItems = clear(rightItems);
   }
 
   async function doEnter() {
     const at = visit.visitedAt.substring(0, 10);
     const visitId = visit.visitId;
-    const names = [...leftItems, ...rightItems]
-      .filter(item => item.checked)
-      .map(item => item.value);
-    
+    const names: string[] = 
+      [...leftItems, ...rightItems].filter(item => item.checked).map(item => item.value);
+    await enter(visit, names, []);
   }
 </script>
 
@@ -80,18 +81,18 @@ import Dialog from "@/lib/Dialog.svelte"
       {#if item.label.startsWith("---")}
       <div class="leading"></div>
       {:else}
-      <div><CheckLabel data={item} bind:checked={item.checked}/></div>
+      <div><input type="checkbox" bind:checked={item.checked}/>{item.label}</div>
       {/if}
     {/each}
     </div>
     <div class="right">
     {#each rightItems as item}
-    {#if item.label.startsWith("---")}
-    <div class="leading"></div>
-    {:else}
-    <div><CheckLabel data={item} bind:checked={item.checked}/></div>
-    {/if}
-  {/each}
+      {#if item.label.startsWith("---")}
+      <div class="leading"></div>
+      {:else}
+      <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
+      {/if} 
+    {/each}
     </div>
   </div>
   <svelte:fragment slot="commands">

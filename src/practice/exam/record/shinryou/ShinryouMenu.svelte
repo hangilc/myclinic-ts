@@ -35,7 +35,7 @@
 
   async function doKensa() {
     kensa = await api.getShinryouKensa();
-    kensaDialog.open();
+    kensaDialog.open(kensa);
   }
 
 </script>
@@ -47,7 +47,7 @@
 </div>
 
 <RegularDialog bind:this={regularDialog} bind:names={regularNames} visit={visit}/>
-<KensaDialog bind:this={kensaDialog} bind:kensa={kensa} visit={visit} />
+<KensaDialog bind:this={kensaDialog} visit={visit} />
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <Pulldown anchor={auxLink} bind:this={auxPopup}>
