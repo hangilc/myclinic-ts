@@ -6,6 +6,7 @@
   import TextForm from "./text/TextForm.svelte";
   import Hoken from "./hoken/Hoken.svelte";
   import ShinryouMenu from "./shinryou/ShinryouMenu.svelte";
+    import ShinryouWrapper from "./shinryou/ShinryouWrapper.svelte";
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
@@ -35,6 +36,7 @@
     <div slot="right">
       <Hoken bind:visit={visit} />
       <ShinryouMenu visit={visit}/>
+      <ShinryouWrapper visit={visit}/>
     </div>
   </TwoCols>
 </div>
