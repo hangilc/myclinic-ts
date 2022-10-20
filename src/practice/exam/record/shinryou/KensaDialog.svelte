@@ -9,7 +9,8 @@ import Dialog from "@/lib/Dialog.svelte"
   interface Item {
     label: string,
     checked: boolean,
-    value: string
+    value: string,
+    preset: boolean,
   }
   let leftItems: Item[];
   let rightItems: Item[];
@@ -17,16 +18,19 @@ import Dialog from "@/lib/Dialog.svelte"
   function mkItem(name: string): Item {
     const index = name.indexOf(":");
     if( index >= 0 ){
+      const value = name.substring(index+1);
       return {
         label: name.substring(0, index),
         checked: false,
-        value: name.substring(index+1)
+        value: value,
+        preset: kensa.preset.includes(value)
       };
     } else {
       return {
         label: name,
         checked: false,
-        value: name
+        value: name,
+        preset: kensa.preset.includes(name)
       };
     }
   }
@@ -34,14 +38,28 @@ import Dialog from "@/lib/Dialog.svelte"
   $: leftItems = kensa.left.map(mkItem);
   $: rightItems = kensa.right.map(mkItem);
 
+  function allItems(): Item[] {
+    return [...leftItems, ...rightItems];
+  }
+
   function clearChecks(): void {
-    leftItems.forEach(item => item.checked = false);
-    rightItems.forEach(item => item.checked = false);
+    allItems().forEach(item => item.checked = false);
   }
 
   export function open(): void {
     clearChecks();
     dialog.open();
+  }
+
+  function doPreset(): void {
+    allItems().filter(item => item.preset).forEach(item => {
+      console.log("preset", item.label);
+      item.checked = true
+    });
+  }
+
+  function doClear(): void {
+    clearChecks();
   }
 
   async function doEnter() {
@@ -62,7 +80,7 @@ import Dialog from "@/lib/Dialog.svelte"
       {#if item.label.startsWith("---")}
       <div class="leading"></div>
       {:else}
-      <div><CheckLabel data={item}/></div>
+      <div><CheckLabel data={item} bind:checked={item.checked}/></div>
       {/if}
     {/each}
     </div>
@@ -71,13 +89,15 @@ import Dialog from "@/lib/Dialog.svelte"
     {#if item.label.startsWith("---")}
     <div class="leading"></div>
     {:else}
-    <div><CheckLabel data={item}/></div>
+    <div><CheckLabel data={item} bind:checked={item.checked}/></div>
     {/if}
   {/each}
     </div>
   </div>
   <svelte:fragment slot="commands">
+    <button on:click={doPreset}>セット検査</button>
     <button on:click={doEnter}>入力</button>
+    <button on:click={doClear}>クリア</button>
     <button on:click={close}>キャンセル</button>
   </svelte:fragment>
 </Dialog>

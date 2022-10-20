@@ -1,6 +1,7 @@
 <script lang="ts">
   import { genid } from "@/lib/genid"
 
+  export let checked: boolean;
   export let data: {
     label: string,
     checked: boolean,
@@ -12,5 +13,5 @@
 </script>
 
 
-<input type="checkbox" bind:checked={data.checked} id={id} bind:this={input} />
+<input type="checkbox" bind:checked={checked} id={id} bind:this={input} />
 <label for={id}>{data.label}</label>
