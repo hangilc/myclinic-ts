@@ -1,16 +1,16 @@
 <script lang="ts">
   import { genid } from "@/lib/genid"
 
-  export let label: string;
-  export let checked: (value: boolean) => void;
+  export let data: {
+    label: string,
+    checked: boolean,
+    value?: any
+  };
   const id = genid("check-label-");
   let input: HTMLInputElement;
 
-  function onChange(e: Event): void {
-    checked(input.checked);
-  }
 </script>
 
 
-<input type="checkbox" on:change={onChange} id={id} bind:this={input} />
-<label for={id}>{label}</label>
+<input type="checkbox" bind:checked={data.checked} id={id} bind:this={input} />
+<label for={id}>{data.label}</label>

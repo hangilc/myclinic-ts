@@ -13,7 +13,7 @@
   let dialog: Dialog;
 
   interface Item {
-    name: string;
+    label: string;
     checked: boolean;
   }
 
@@ -22,9 +22,9 @@
   let bottomItems: Item[] = [];
 
   $: {
-    leftItems = names.left.map((name) => ({ name, checked: false }));
-    rightItems = names.right.map((name) => ({ name: name, checked: false }));
-    bottomItems = names.bottom.map((name) => ({ name: name, checked: false }));
+    leftItems = names.left.map((name) => ({ label: name, checked: false }));
+    rightItems = names.right.map((name) => ({ label: name, checked: false }));
+    bottomItems = names.bottom.map((name) => ({ label: name, checked: false }));
   }
 
   export function open(): void {
@@ -53,7 +53,7 @@
       ...bottomItems,
     ]
       .filter((item) => item.checked)
-      .map((item) => item.name);
+      .map((item) => item.label);
     const [regularNames, conductSpecs] = partitionConv<string, string, ConductSpec>(
       selectedNames,
       (name) => !(name in conductReqMap),
@@ -74,41 +74,26 @@
   <div class="two-cols">
     <div class="left">
       {#each leftItems as item}
-        {#if item.name.startsWith("---")}
+        {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div>
-            <CheckLabel
-              label={item.name}
-              checked={(checked) => (item.checked = checked)}
-            />
-          </div>
+          <div><CheckLabel data={item} /></div>
         {/if}
       {/each}
     </div>
     <div class="right">
       {#each rightItems as item}
-        {#if item.name.startsWith("---")}
+        {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div>
-            <CheckLabel
-              label={item.name}
-              checked={(checked) => (item.checked = checked)}
-            />
-          </div>
+          <div><CheckLabel data={item} /></div>
         {/if}
       {/each}
     </div>
     <div class="bottom-wrapper">
       <div class="bottom">
         {#each bottomItems as item}
-          <div>
-            <CheckLabel
-              label={item.name}
-              checked={(checked) => (item.checked = checked)}
-            />
-          </div>
+          <div><CheckLabel data={item} /></div>
         {/each}
       </div>
     </div>
