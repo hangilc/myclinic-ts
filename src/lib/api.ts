@@ -266,4 +266,8 @@ export default {
     return get("search-shinryou-master", { text, at: dateParam(at) });
   },
 
+  deleteShinryou(shinryouId: number): Promise<boolean> {
+    return get("delete-shinryou", { "shinryou-id": shinryouId });
+  }
+
 }

@@ -32,6 +32,24 @@
     searchDialog.open();
   }
 
+  async function doDeleteDuplicate() {
+    const foundCodes: Set<number> = new Set<number>();
+    const dupShinryouIds: number[] = [];
+    visit.shinryouList.forEach(s => {
+      const code = s.shinryoucode;
+      if( foundCodes.has(code) ){
+        dupShinryouIds.push(s.shinryouId);
+      } else {
+        foundCodes.add(s.shinryoucode);
+      }
+    });
+    if( dupShinryouIds.length > 0 ){
+      await Promise.all(
+        dupShinryouIds.map(shinryouId => api.deleteShinryou(shinryouId))
+      );
+    }
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -49,7 +67,7 @@
   <div>
     <a href="javascript:void(0)" on:click={doKensa}>検査</a>
     <a href="javascript:void(0)" on:click={doSearch}>検索入力</a>
-    <a href="javascript:void(0)">重複削除</a>
+    <a href="javascript:void(0)" on:click={doDeleteDuplicate}>重複削除</a>
     <a href="javascript:void(0)">全部コピー</a>
   </div>
 </Pulldown>
