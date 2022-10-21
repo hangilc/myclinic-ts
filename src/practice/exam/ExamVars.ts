@@ -302,11 +302,27 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
     const i = shinryouList.findIndex(s => s.shinryoucode > shinryou.shinryoucode);
     const shinryouEx: m.ShinryouEx = await api.getShinryouEx(shinryou.shinryouId);
     if( i >= 0 ){
-      shinryouList.splice(i, i, shinryouEx);
+      shinryouList.splice(i, 0, shinryouEx);
     } else {
       shinryouList.push(shinryouEx);
     }
     visits.set(visitsValue);
+  }
+});
+
+appEvent.shinryouDeleted.subscribe(shinryou => {
+  if( shinryou == null ){
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === shinryou.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const i = visit.shinryouList.findIndex( s => s.shinryouId === shinryou.shinryouId);
+    if( i >= 0 ){
+      visit.shinryouList.splice(i, 1);
+      visits.set(visitsValue);
+    }
   }
 });
 

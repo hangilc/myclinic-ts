@@ -123,13 +123,27 @@ export default {
     return post("batch-get-visit-ex", visitIds);
   },
 
-  getVisitEx(visitId: number): Promise<m.VisitEx> {
-    return get("get-visit-ex", { "visit-id": visitId });
+  async getVisitEx(visitId: number): Promise<m.VisitEx> {
+    const visit = await get("get-visit-ex", { "visit-id": visitId });
+    visit.shinryouList.sort((sa, sb) => {
+      const a = sa.shinryoucode;
+      const b = sb.shinryoucode;
+      return a - b;
+    });
+    return visit;
   },
 
   async listVisitEx(patientId: number, offset: number, count: number): Promise<m.VisitEx[]> {
     const visitIds: number[] = await this.listVisitIdByPatientReverse(patientId, offset, count);
-    return this.batchGetVisitEx(visitIds);
+    const visits = await this.batchGetVisitEx(visitIds);
+    visits.forEach(visit => {
+      visit.shinryouList.sort((sa, sb) => {
+        const a = sa.shinryoucode;
+        const b = sb.shinryoucode;
+        return a - b;
+      })
+    });
+    return visits;
   },
 
   countVisitByPatient(patientId: number): Promise<number> {
