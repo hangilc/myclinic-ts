@@ -2,13 +2,14 @@ import type {
   ConductKindType, CreateConductRequest, CreateShinryouConductRequest, VisitEx
 } from "@/lib/model"
 import api from "@/lib/api"
+import { dateParam } from "@/lib/date-param"
 
 async function resolveShinryoucode(src: string | number, at: string): Promise<number> {
   if (typeof src === "number") {
     return src;
   } else {
     const code = await api.resolveShinryoucodeByName(src, at);
-    if( code == null ){
+    if (code == null) {
       throw new Error("診療行為をみつけられません：" + src);
     } else {
       return code;
@@ -21,7 +22,7 @@ async function resolveKizaicode(src: string | number, at: string): Promise<numbe
     return src;
   } else {
     const code = await api.resolveKizaicodeByName(src, at);
-    if( code == null ){
+    if (code == null) {
       throw new Error("器材をみつけられません：" + src);
     } else {
       return code;
@@ -90,11 +91,19 @@ export async function enter(
   shinryou: (string | number)[],
   conduct: ConductSpec[]
 ) {
-  const at = visit.visitedAt.substring(0, 10);
+  await enterTo(visit.visitId, visit.visitedAt.substring(0, 10), shinryou, conduct);
+}
+
+export async function enterTo(
+  visitId: number, 
+  atArg: (string | Date),
+  shinryou: (string | number)[], 
+  conduct: ConductSpec[]) {
+  const at: string = dateParam(atArg);
   const shinryouList = (await batchResolveShinryoucodes(shinryou, at))
-    .map(tmpl => Object.assign(tmpl, { shinryouId: 0, visitId: visit.visitId }));
+    .map(tmpl => Object.assign(tmpl, { shinryouId: 0, visitId }));
   const conducts = (await Promise.all(conduct.map(async src =>
-    conductReq(at, visit.visitId, src.kind, src.labelOption, src.shinryou, src.kizai))))
+    conductReq(at, visitId, src.kind, src.labelOption, src.shinryou, src.kizai))))
     .map(obj => Object.assign(obj, { conductId: 0 }))
   const req: CreateShinryouConductRequest = {
     shinryouList,

@@ -1,5 +1,6 @@
 import type * as m from "./model"
 import { dateToSql } from "./util"
+import { dateParam } from "./date-param"
 import type { Op as DrawerOp, Op } from "./drawer/op"
 import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
 
@@ -35,15 +36,6 @@ function post(cmd: string, data: any, params: any = {}): Promise<any> {
   return fetch(arg, { method: "POST", body: JSON.stringify(data) })
     .then(resp => resp.json());
 }
-
-function dateParam(arg: Date | string): string {
-  if( typeof arg !== "string" ){
-    return dateToSql(arg);
-  } else {
-    return arg.length > 10 ? arg.substring(0, 10) : arg;
-  }
-}
-
 
 export default {
   getPatient(patientId: number): Promise<m.Patient> {
@@ -121,6 +113,10 @@ export default {
 
   batchGetVisitEx(visitIds: number[]): Promise<m.VisitEx[]> {
     return post("batch-get-visit-ex", visitIds);
+  },
+
+  getVisit(visitId: number): Promise<m.Visit> {
+    return get("get-visit", { "visit-id": visitId });
   },
 
   async getVisitEx(visitId: number): Promise<m.VisitEx> {
