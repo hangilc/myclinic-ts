@@ -7,6 +7,7 @@
   import Hoken from "./hoken/Hoken.svelte";
   import ShinryouMenu from "./shinryou/ShinryouMenu.svelte";
     import ShinryouWrapper from "./shinryou/ShinryouWrapper.svelte";
+    import ConductMenu from "./conduct/ConductMenu.svelte";
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
@@ -37,6 +38,7 @@
       <Hoken bind:visit={visit} />
       <ShinryouMenu visit={visit}/>
       <ShinryouWrapper visit={visit}/>
+      <ConductMenu visit={visit}/>
     </div>
   </TwoCols>
 </div>
