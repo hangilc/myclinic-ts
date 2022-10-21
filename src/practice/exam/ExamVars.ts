@@ -290,5 +290,25 @@ appEvent.paymentEntered.subscribe(payment => {
   }
 });
 
+appEvent.shinryouEntered.subscribe(async shinryou => {
+  if( shinryou == null ){
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === shinryou.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const shinryouList = visit.shinryouList;
+    const i = shinryouList.findIndex(s => s.shinryoucode > shinryou.shinryoucode);
+    const shinryouEx: m.ShinryouEx = await api.getShinryouEx(shinryou.shinryouId);
+    if( i >= 0 ){
+      shinryouList.splice(i, i, shinryouEx);
+    } else {
+      shinryouList.push(shinryouEx);
+    }
+    visits.set(visitsValue);
+  }
+});
+
 
 

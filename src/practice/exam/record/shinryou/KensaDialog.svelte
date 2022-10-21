@@ -81,7 +81,7 @@
       {#if item.label.startsWith("---")}
       <div class="leading"></div>
       {:else}
-      <div><input type="checkbox" bind:checked={item.checked}/>{item.label}</div>
+      <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
       {/if}
     {/each}
     </div>

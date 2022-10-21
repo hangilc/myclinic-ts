@@ -8,7 +8,6 @@
   import { partitionConv } from "@/lib/partition";
   import { type ConductSpec, enter } from "./helper";
 
-  export let names: Record<string, string[]>;
   export let visit: VisitEx;
   let dialog: Dialog;
 
@@ -21,16 +20,14 @@
   let rightItems: Item[] = [];
   let bottomItems: Item[] = [];
 
-  $: {
+  function setupItems(names: Record<string, string[]>): void {
     leftItems = names.left.map((name) => ({ label: name, checked: false }));
     rightItems = names.right.map((name) => ({ label: name, checked: false }));
     bottomItems = names.bottom.map((name) => ({ label: name, checked: false }));
   }
 
-  export function open(): void {
-    leftItems.forEach((item) => (item.checked = false));
-    rightItems.forEach((item) => (item.checked = false));
-    bottomItems.forEach((item) => (item.checked = false));
+  export function open(names: Record<string, string[]>): void {
+    setupItems(names);
     dialog.open();
   }
 
@@ -77,7 +74,7 @@
         {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div><CheckLabel data={item} /></div>
+          <div><CheckLabel bind:checked={item.checked} label={item.label} /></div>
         {/if}
       {/each}
     </div>
@@ -86,14 +83,14 @@
         {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div><CheckLabel data={item} /></div>
+          <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
         {/if}
       {/each}
     </div>
     <div class="bottom-wrapper">
       <div class="bottom">
         {#each bottomItems as item}
-          <div><CheckLabel data={item} /></div>
+          <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
         {/each}
       </div>
     </div>

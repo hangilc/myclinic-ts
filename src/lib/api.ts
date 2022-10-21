@@ -258,4 +258,12 @@ export default {
     return post("batch-enter-shinryou-conduct", req);        
   },
 
+  getShinryouEx(shinryouId: number): Promise<m.ShinryouEx> {
+    return get("get-shinryou-ex", { "shinryou-id": shinryouId });
+  },
+
+  searchShinryouMaster(text: string, at: Date | string): Promise<m.ShinryouMaster[]> {
+    return get("search-shinryou-master", { text, at: dateParam(at) });
+  },
+
 }

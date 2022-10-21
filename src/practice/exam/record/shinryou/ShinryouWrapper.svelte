@@ -5,7 +5,7 @@
 </script>
 
 <div>
-  {#each visit.shinryouList as shinryou}
+  {#each visit.shinryouList as shinryou (shinryou.shinryouId)}
   <div>{shinryou.master.name}</div>
   {/each}
 </div>
