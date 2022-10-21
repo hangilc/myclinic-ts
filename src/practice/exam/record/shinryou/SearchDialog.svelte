@@ -2,9 +2,10 @@
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte"
   import type { ShinryouMaster, VisitEx } from "@/lib/model";
-    import SelectItem from "@/lib/SelectItem.svelte";
+  import SelectItem from "@/lib/SelectItem.svelte";
   import { setFocus } from "@/lib/set-focus"
-    import { writable, type Writable } from "svelte/store";
+  import { writable, type Writable } from "svelte/store";
+  import { enter } from "./helper"
 
   export let visit: VisitEx
   let dialog: Dialog;
@@ -27,7 +28,7 @@
   async function doEnter() {
     const m = $selected;
     if( m != null ){
-      console.log(m);
+      await enter(visit, [m.shinryoucode], []);
     }
   }
 </script>
