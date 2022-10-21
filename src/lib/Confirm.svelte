@@ -12,13 +12,13 @@
 
 </script>
 
-<Dialog let:close={close} noTitle bind:this={dialog}>
+<Dialog let:close={close} noTitle bind:this={dialog} width="">
   <div>{text}</div>
   <svelte:fragment slot="commands">
     <button on:click={() => {
       close();
       proc();
-    }}>実行</button>
+    }}>はい</button>
     <button on:click={() => close()}>キャンセル</button>
   </svelte:fragment>
 </Dialog>
