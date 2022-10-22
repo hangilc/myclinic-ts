@@ -38,7 +38,7 @@
     <option>四ツ切</option>
   </select>
   <svelte:fragment slot="commands">
-    <button on:click={doEnter(close)}>入力</button>
+    <button on:click={() => doEnter(close)}>入力</button>
     <button on:click={close}>キャンセル</button>
   </svelte:fragment>
 </Widget>

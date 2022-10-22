@@ -241,7 +241,9 @@ export interface ConductKizaiEx {
 export type ConductKindKey = "HikaChuusha" | "JoumyakuChuusha" |
   "OtherChuusha" | "Gazou";
 
-export type ConductKindTag = Record<ConductKindKey, any>;
+export type ConductKindTag = {
+  [key in ConductKindKey]: {}
+}
 
 export class ConductKindType {
   constructor(
