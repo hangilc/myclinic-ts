@@ -278,6 +278,6 @@ export default {
 
   deleteShinryou(shinryouId: number): Promise<boolean> {
     return get("delete-shinryou", { "shinryou-id": shinryouId });
-  }
+  },
 
 }

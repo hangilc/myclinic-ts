@@ -43,4 +43,9 @@
     display: flex;
     justify-content: flex-end;
   }
+
+  .commands :global(a),
+  .commands :global(button) {
+    margin-left: 4px;
+  }
 </style>
