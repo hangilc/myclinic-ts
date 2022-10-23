@@ -41,6 +41,9 @@ export const conductDrugDeleted: Writable<m.ConductDrug | null> = writable(null)
 export const conductKizaiEntered: Writable<m.ConductKizai | null> = writable(null)
 export const conductKizaiUpdated: Writable<m.ConductKizai | null> = writable(null)
 export const conductKizaiDeleted: Writable<m.ConductKizai | null> = writable(null)
+export const gazouLabelEntered: Writable<m.GazouLabel | null> = writable(null)
+export const gazouLabelUpdated: Writable<m.GazouLabel | null> = writable(null)
+export const gazouLabelDeleted: Writable<m.GazouLabel | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -198,6 +201,23 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             conductKizaiDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "gazouLabel": {
+        switch(kind) {
+          case "created": {
+            gazouLabelEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            gazouLabelUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            gazouLabelDeleted.set(payload);
             break;
           }
         }

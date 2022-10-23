@@ -336,4 +336,12 @@ export default {
     return get("delete-conduct-kizai", { "conduct-kizai-id": conductKizaiId });
   },
 
+  updateConduct(conduct: m.Conduct): Promise<boolean> {
+    return post("update-conduct", conduct)
+  },
+
+  setGazouLabel(gl: m.GazouLabel): Promise<boolean> {
+    return post("set-gazou-label", gl);
+  },
+
 }

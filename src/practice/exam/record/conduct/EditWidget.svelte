@@ -9,6 +9,8 @@
   import ShinryouEditItem from "./ShinryouEditItem.svelte"
   import DrugEditItem from "./DrugEditItem.svelte"
   import KizaiEditItem from "./KizaiEditItem.svelte"
+  import LabelEditItem from "./LabelEditItem.svelte"
+  import KindEditItem from "./KindEditItem.svelte"
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
@@ -48,7 +50,6 @@
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <Widget title="処置編集" let:close={close} onClose={onClose} bind:this={widget}>
-  <div>[{kindRep(conduct.kind)}]</div>
   <div class="enterCommands">
     <a href="javascript:void(0)" on:click={doAddShinryou}>診療行為追加</a>
     <a href="javascript:void(0)" on:click={doAddDrug}>薬剤追加</a>
@@ -59,6 +60,8 @@
     <AddDrug bind:this={addDrug} conductId={conduct.conductId} visit={visit} />
     <AddKizai bind:this={addKizai} conductId={conduct.conductId} visit={visit} />
   </div>
+  <KindEditItem conduct={conduct} />
+  <LabelEditItem conduct={conduct} />
   {#each conduct.shinryouList as shinryou (shinryou.conductShinryouId)}
     <ShinryouEditItem conductShinryou={shinryou} />
   {/each}

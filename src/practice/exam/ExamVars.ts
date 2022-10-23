@@ -340,6 +340,23 @@ appEvent.conductEntered.subscribe(async conduct => {
   }
 });
 
+appEvent.conductUpdated.subscribe(async conduct => {
+  if( conduct == null ){
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conduct.conductId);
+    if( ci >= 0 ){
+      const conductEx = await api.getConductEx(conduct.conductId);
+      visit.conducts[ci] = conductEx;
+      visits.set(visitsValue);
+    }
+  }
+});
+
 appEvent.conductDeleted.subscribe(conduct => {
   if( conduct == null ){
     return;
@@ -471,5 +488,56 @@ appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
     }
   }
 });
+
+appEvent.gazouLabelEntered.subscribe(async gazouLabel => {
+  if( gazouLabel == null ){
+    return;
+  }
+  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
+    if( ci >= 0 ){
+      visit.conducts.splice(ci, 1, conduct);
+      visits.set(visitsValue);
+    }
+  }
+})
+
+appEvent.gazouLabelUpdated.subscribe(async gazouLabel => {
+  if( gazouLabel == null ){
+    return;
+  }
+  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
+    if( ci >= 0 ){
+      visit.conducts.splice(ci, 1, conduct);
+      visits.set(visitsValue);
+    }
+  }
+})
+
+appEvent.gazouLabelDeleted.subscribe(async gazouLabel => {
+  if( gazouLabel == null ){
+    return;
+  }
+  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
+    if( ci >= 0 ){
+      visit.conducts.splice(ci, 1, conduct);
+      visits.set(visitsValue);
+    }
+  }
+})
 
 

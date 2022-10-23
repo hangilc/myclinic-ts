@@ -392,6 +392,11 @@ export interface Conduct {
   kindStore: number
 }
 
+export interface GazouLabel {
+  conductId: number,
+  label: string
+}
+
 export interface ConductShinryou {
   conductShinryouId: number,
   conductId: number,
