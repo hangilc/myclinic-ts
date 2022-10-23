@@ -5,8 +5,9 @@
     type ConductKindTag,
     type VisitEx,
   } from "@/lib/model"
-  import ShinryouItem from "./ShinryouItem.svelte"
+  import ShinryouItem from "./ShinryouEditItem.svelte"
   import EditWidget from "./EditWidget.svelte"
+    import { shinryouDeleted } from "@/practice/app-events";
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
@@ -30,7 +31,7 @@
     <div>[{kindRep(conduct.kind)}]</div>
     <div>{conduct.gazouLabel || ""}</div>
     {#each conduct.shinryouList as shinryou (shinryou.conductShinryouId)}
-      <ShinryouItem conductShinryou={shinryou} />
+      <div>* {shinryou.master.name}</div>
     {/each}
     {#each conduct.drugs as drug (drug.conductDrugId)}
       <div>* {drug.master.name} {drug.amount}{drug.master.unit}</div>

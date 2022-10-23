@@ -5,7 +5,8 @@
   import api from "@/lib/api";
   import AddShinryou from "./AddShinryou.svelte"
   import AddDrug from "./AddDrug.svelte"
-    import AddKizai from "./AddKizai.svelte";
+  import AddKizai from "./AddKizai.svelte";
+  import ShinryouEditItem from "./ShinryouEditItem.svelte"
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
@@ -57,7 +58,7 @@
     <AddKizai bind:this={addKizai} conductId={conduct.conductId} visit={visit} />
   </div>
   {#each conduct.shinryouList as shinryou (shinryou.conductShinryouId)}
-    <div>* {shinryou.master.name}</div>
+    <ShinryouEditItem conductShinryou={shinryou} />
   {/each}
   {#each conduct.drugs as drug (drug.conductDrugId)}
     <div>* {drug.master.name} {drug.amount}{drug.master.unit}</div>

@@ -324,4 +324,16 @@ export default {
     return get("get-conduct", { "conduct-id": conductId });
   },
 
+  deleteConductShinryou(conductShinryouId: number): Promise<boolean> {
+    return get("delete-conduct-shinryou", { "conduct-shinryou-id": conductShinryouId });
+  },
+
+  deleteConductDrug(conductDrugId: number): Promise<boolean> {
+    return get("delete-conduct-drug", { "conduct-drug-id": conductDrugId });
+  },
+
+  deleteConductKizai(conductKizaiId: number): Promise<boolean> {
+    return get("delete-conduct-kizai", { "conduct-kizai-id": conductKizaiId });
+  },
+
 }
