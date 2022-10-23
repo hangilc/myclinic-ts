@@ -411,6 +411,27 @@ appEvent.conductDrugEntered.subscribe(async conductDrug => {
   }
 });
 
+appEvent.conductDrugDeleted.subscribe(async conductDrug => {
+  if( conductDrug == null ){
+    return;
+  }
+  const conduct = await api.getConduct(conductDrug.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conductDrug.conductId);
+    if( ci >= 0 ){
+      const list = visit.conducts[ci].drugs;
+      const di = list.findIndex(d => d.conductDrugId === conductDrug.conductDrugId)
+      if( di => 0 ){
+        list.splice(di, 1);
+        visits.set(visitsValue);
+      }
+    }
+  }
+});
+
 appEvent.conductKizaiEntered.subscribe(async conductKizai => {
   if( conductKizai == null ){
     return;
@@ -426,6 +447,27 @@ appEvent.conductKizaiEntered.subscribe(async conductKizai => {
       console.log("conduct kizai entered", conductKizaiEx);
       visit.conducts[ci].kizaiList.push(conductKizaiEx);
       visits.set(visitsValue);
+    }
+  }
+});
+
+appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
+  if( conductKizai == null ){
+    return;
+  }
+  const conduct = await api.getConduct(conductKizai.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conductKizai.conductId);
+    if( ci >= 0 ){
+      const list = visit.conducts[ci].kizaiList;
+      const ki = list.findIndex(s => s.conductKizaiId === conductKizai.conductKizaiId)
+      if( ki => 0 ){
+        list.splice(ki, 1);
+        visits.set(visitsValue);
+      }
     }
   }
 });

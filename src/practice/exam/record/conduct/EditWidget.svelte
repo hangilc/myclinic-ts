@@ -7,6 +7,8 @@
   import AddDrug from "./AddDrug.svelte"
   import AddKizai from "./AddKizai.svelte";
   import ShinryouEditItem from "./ShinryouEditItem.svelte"
+  import DrugEditItem from "./DrugEditItem.svelte"
+  import KizaiEditItem from "./KizaiEditItem.svelte"
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
@@ -61,10 +63,10 @@
     <ShinryouEditItem conductShinryou={shinryou} />
   {/each}
   {#each conduct.drugs as drug (drug.conductDrugId)}
-    <div>* {drug.master.name} {drug.amount}{drug.master.unit}</div>
+    <DrugEditItem conductDrug={drug} />
   {/each}
   {#each conduct.kizaiList as kizai (kizai.conductKizaiId)}
-    <div>* {kizai.master.name} {kizai.amount}{kizai.master.unit}</div>
+    <KizaiEditItem conductKizai={kizai} />
   {/each}
   <svelte:fragment slot="commands">
     <button on:click={() => doDelete(close)}>削除</button>
