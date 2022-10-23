@@ -370,7 +370,44 @@ appEvent.conductShinryouEntered.subscribe(async conductShinryou => {
       visits.set(visitsValue);
     }
   }
+});
 
+appEvent.conductDrugEntered.subscribe(async conductDrug => {
+  if( conductDrug == null ){
+    return;
+  }
+  const conduct = await api.getConduct(conductDrug.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conductDrug.conductId);
+    if( ci >= 0 ){
+      const conductDrugEx = await api.getConductDrugEx(conductDrug.conductDrugId);
+      console.log("conduct drug entered", conductDrugEx);
+      visit.conducts[ci].drugs.push(conductDrugEx);
+      visits.set(visitsValue);
+    }
+  }
+});
+
+appEvent.conductKizaiEntered.subscribe(async conductKizai => {
+  if( conductKizai == null ){
+    return;
+  }
+  const conduct = await api.getConduct(conductKizai.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conductKizai.conductId);
+    if( ci >= 0 ){
+      const conductKizaiEx = await api.getConductKizaiEx(conductKizai.conductKizaiId);
+      console.log("conduct kizai entered", conductKizaiEx);
+      visit.conducts[ci].kizaiList.push(conductKizaiEx);
+      visits.set(visitsValue);
+    }
+  }
 });
 
 

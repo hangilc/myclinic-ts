@@ -284,6 +284,10 @@ export default {
     return get("search-iyakuhin-master", { text, at: dateParam(at) });
   },
 
+  searchKizaiMaster(text: string, at: Date | string): Promise<m.KizaiMaster[]> {
+    return get("search-kizai-master", { text, at: dateParam(at) });
+  },
+
   getConductEx(conductId: number): Promise<m.ConductEx> {
     return get("get-conduct-ex", { "conduct-id": conductId });
   },

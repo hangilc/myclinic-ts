@@ -1,44 +1,58 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { ShinryouMaster, VisitEx } from "@/lib/model";
+  import type { KizaiMaster, VisitEx } from "@/lib/model";
   import SelectItem from "@/lib/SelectItem.svelte";
+  import { showError } from "@/lib/showError-call";
   import { writable, type Writable } from "svelte/store";
 
   export let conductId: number;
   export let visit: VisitEx;
   let show = false;
   let searchTextInput: HTMLInputElement;
-  let searchResult: ShinryouMaster[] = [];
-  let selected: Writable<ShinryouMaster | null> = writable(null);
+  let searchResult: KizaiMaster[] = [];
+  let selected: Writable<KizaiMaster | null> = writable(null);
+  let amountInput: HTMLInputElement;
+
   export function open(): void {
     init();
     show = true;
   }
 
-  export function init(): void {
+  function init(): void {
     if( searchTextInput ){
       searchTextInput.value = "";
     }
     selected.set(null);
     searchResult = [];
+    if( amountInput ){
+      amountInput.value = "1";
+    }
   }
 
   async function doSearch() {
     const t = searchTextInput.value.trim();
     if( t !== "" ){
-      searchResult = await api.searchShinryouMaster(t, visit.visitedAt);
+      searchResult = await api.searchKizaiMaster(t, visit.visitedAt);
     }
   }
 
   async function doEnter() {
     const master = $selected;
     if( master != null ){
-      const cs = {
-        conductShinryouId: 0,
+      let amount: number;
+      try {
+        amount = parseFloat(amountInput.value.trim());
+      } catch (ex) {
+        showError("用量の入力が数字でありません。");
+        return;
+      }
+      const ck = {
+        conductKizaiId: 0,
         conductId: conductId,
-        shinryoucode: master.shinryoucode
+        kizaicode: master.kizaicode,
+        amount
       };
-      await api.enterConductShinryou(cs);
+      await api.enterConductKizai(ck);
     }
   }
 
@@ -49,15 +63,18 @@
 
 {#if show}
 <div class="top">
-  <div class="title">診療行為追加</div>
+  <div class="title">器材追加</div>
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:this={searchTextInput} /> 
     <button type="submit">検索</button>
   </form>
   <div class="select">
-    {#each searchResult as master (master.shinryoucode)}
+    {#each searchResult as master (master.kizaicode)}
     <SelectItem selected={selected} data={master}>{master.name}</SelectItem>
     {/each}
+  </div>
+  <div>
+    用量：<input type="text" bind:this={amountInput} value="1"/> {$selected?.unit || ""}
   </div>
   <div class="commands">
     <button on:click={doEnter} disabled={$selected == null}>入力</button>

@@ -4,12 +4,16 @@
   import { confirm } from "@/lib/confirm-call"
   import api from "@/lib/api";
   import AddShinryou from "./AddShinryou.svelte"
+  import AddDrug from "./AddDrug.svelte"
+    import AddKizai from "./AddKizai.svelte";
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
   export let onClose: () => void;
   let widget: Widget;
-  let addWorkarea: HTMLElement;
+  let addShinryou: AddShinryou;
+  let addDrug: AddDrug;
+  let addKizai: AddKizai;
 
   $: console.log("conduct changed (edit)", conduct);
 
@@ -29,24 +33,15 @@
   }
 
   function doAddShinryou(): void {
-    let form: AddShinryou;
-    form = new AddShinryou({
-      target: addWorkarea,
-      props: {
-        conductId: conduct.conductId,
-        visit: visit,
-        onClose: () => form.$destroy()
-      }
-    });
-
+    addShinryou.open();
   }
 
   function doAddDrug(): void {
-
+    addDrug.open();
   }
 
   function doAddKizai(): void {
-
+    addKizai.open();
   }
 </script>
 
@@ -58,7 +53,11 @@
     <a href="javascript:void(0)" on:click={doAddDrug}>薬剤追加</a>
     <a href="javascript:void(0)" on:click={doAddKizai}>器材追加</a>
   </div>
-  <div bind:this={addWorkarea}></div>
+  <div>
+    <AddShinryou bind:this={addShinryou} conductId={conduct.conductId} visit={visit} />
+    <AddDrug bind:this={addDrug} conductId={conduct.conductId} visit={visit} />
+    <AddKizai bind:this={addKizai} conductId={conduct.conductId} visit={visit} />
+  </div>
   {#each conduct.shinryouList as shinryou (shinryou.conductShinryouId)}
     <div>* {shinryou.master.name}</div>
   {/each}
