@@ -1,7 +1,6 @@
 <script lang="ts">
   import { navPage, navTotal, advanceNavPage, gotoNavFirstPage, gotoNavLastPage } from "./ExamVars";
 
-  $: console.log($navTotal);
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->

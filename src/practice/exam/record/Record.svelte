@@ -45,7 +45,7 @@
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
       <ConductMenu {visit} />
-      <ConductWrapper conducts={visit.conducts} />
+      <ConductWrapper conducts={visit.conducts} visit={visit}/>
     </div>
   </TwoCols>
 </div>

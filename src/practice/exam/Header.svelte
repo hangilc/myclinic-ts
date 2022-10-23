@@ -19,7 +19,6 @@
   }
 
   function startPatient(patient: m.Patient, visitId: number | null){
-    console.log("start-patient", patient, visitId);
     reqChangePatient.set([patient, visitId]);
   }
 

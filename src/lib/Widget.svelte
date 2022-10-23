@@ -2,9 +2,11 @@
   export let title: string;
 
   let show = false;
+  export let onClose: () => void = () => {};
 
   function close(): void {
     show = false;
+    onClose();
   }
 
   export function open(): void {

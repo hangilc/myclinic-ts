@@ -32,6 +32,15 @@ export const shinryouDeleted: Writable<m.Shinryou | null> = writable(null)
 export const conductEntered: Writable<m.Conduct | null> = writable(null)
 export const conductUpdated: Writable<m.Conduct | null> = writable(null)
 export const conductDeleted: Writable<m.Conduct | null> = writable(null)
+export const conductShinryouEntered: Writable<m.ConductShinryou | null> = writable(null)
+export const conductShinryouUpdated: Writable<m.ConductShinryou | null> = writable(null)
+export const conductShinryouDeleted: Writable<m.ConductShinryou | null> = writable(null)
+export const conductDrugEntered: Writable<m.ConductDrug | null> = writable(null)
+export const conductDrugUpdated: Writable<m.ConductDrug | null> = writable(null)
+export const conductDrugDeleted: Writable<m.ConductDrug | null> = writable(null)
+export const conductKizaiEntered: Writable<m.ConductKizai | null> = writable(null)
+export const conductKizaiUpdated: Writable<m.ConductKizai | null> = writable(null)
+export const conductKizaiDeleted: Writable<m.ConductKizai | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -138,6 +147,57 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             conductDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "conductShinryou": {
+        switch(kind) {
+          case "created": {
+            conductShinryouEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            conductShinryouUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            conductShinryouDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "conductDrug": {
+        switch(kind) {
+          case "created": {
+            conductDrugEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            conductDrugUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            conductDrugDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "conductKizai": {
+        switch(kind) {
+          case "created": {
+            conductKizaiEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            conductKizaiUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            conductKizaiDeleted.set(payload);
             break;
           }
         }

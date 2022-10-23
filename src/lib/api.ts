@@ -288,4 +288,36 @@ export default {
     return get("get-conduct-ex", { "conduct-id": conductId });
   },
 
+  deleteConductEx(conductId: number): Promise<boolean> {
+    return get("delete-conduct-ex", { "conduct-id": conductId });
+  },
+
+  enterConductShinryou(conductShinryou: m.ConductShinryou): Promise<m.ConductShinryou> {
+    return post("enter-conduct-shinryou", conductShinryou);
+  },
+
+  enterConductDrug(conductDrug: m.ConductDrug): Promise<m.ConductDrug> {
+    return post("enter-conduct-drug", conductDrug);
+  },
+
+  enterConductKizai(conductKizai: m.ConductKizai): Promise<m.ConductKizai> {
+    return post("enter-conduct-kizai", conductKizai);
+  },
+
+  getConductShinryouEx(conductShinryouId: number): Promise<m.ConductShinryouEx> {
+    return get("get-conduct-shinryou-ex", { "conduct-shinryou-id": conductShinryouId });
+  },
+
+  getConductDrugEx(conductDrugId: number): Promise<m.ConductDrugEx> {
+    return get("get-conduct-drug-ex", { "conduct-drug-id": conductDrugId });
+  },
+
+  getConductKizaiEx(conductKizaiId: number): Promise<m.ConductKizaiEx> {
+    return get("get-conduct-kizai-ex", { "conduct-kizai-id": conductKizaiId });
+  },
+
+  getConduct(conductId: number): Promise<m.Conduct> {
+    return get("get-conduct", { "conduct-id": conductId });
+  },
+
 }
