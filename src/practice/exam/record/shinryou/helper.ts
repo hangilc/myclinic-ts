@@ -60,6 +60,7 @@ async function conductReq(
   kind: ConductKindType,
   labelOption: string | undefined,
   shinryou: (string | number)[],
+  drug: { iyakuhincode: number, amount: number }[],
   kizai: ({ code: string | number, amount: number })[]
 ): Promise<CreateConductRequest> {
   const s = await batchResolveShinryoucodes(shinryou, at);
@@ -69,17 +70,21 @@ async function conductReq(
     kind: kind.code,
     labelOption,
     shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
-    drugs: [],
+    drugs: drug.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
     kizaiList: k.map(obj => Object.assign(obj, { conductKizaiId: 0, conductId: 0 }))
   }
 }
 
-export type ShinryouSpec = number | string;
+// export type ShinryouSpec = number | string;
 
 export type ConductSpec = {
   kind: ConductKindType,
   labelOption: string | undefined,
-  shinryou: (string | number)[],
+  shinryou: (number | string)[],
+  drug: {
+    iyakuhincode: number,
+    amount: number
+  }[],
   kizai: {
     code: string | number,
     amount: number
@@ -95,15 +100,15 @@ export async function enter(
 }
 
 export async function enterTo(
-  visitId: number, 
+  visitId: number,
   atArg: (string | Date),
-  shinryou: (string | number)[], 
+  shinryou: (string | number)[],
   conduct: ConductSpec[]) {
   const at: string = dateParam(atArg);
   const shinryouList = (await batchResolveShinryoucodes(shinryou, at))
     .map(tmpl => Object.assign(tmpl, { shinryouId: 0, visitId }));
   const conducts = (await Promise.all(conduct.map(async src =>
-    conductReq(at, visitId, src.kind, src.labelOption, src.shinryou, src.kizai))))
+    conductReq(at, visitId, src.kind, src.labelOption, src.shinryou, src.drug, src.kizai))))
     .map(obj => Object.assign(obj, { conductId: 0 }))
   const req: CreateShinryouConductRequest = {
     shinryouList,

@@ -38,6 +38,7 @@
       kind: ConductKind.Gazou,
       labelOption: "骨塩定量に使用",
       shinryou: ["骨塩定量ＭＤ法"],
+      drug: [],
       kizai: [{ code: "四ツ切", amount: 1 }],
     },
   };

@@ -248,15 +248,16 @@ export type ConductKindTag = {
 export class ConductKindType {
   constructor(
     public code: number,
-    public rep: string
+    public rep: string,
+    public key: ConductKindKey
   ) { }
 }
 
 export const ConductKind: Record<ConductKindKey, ConductKindType> = {
-  HikaChuusha: new ConductKindType(0, "皮下・筋肉注射"),
-  JoumyakuChuusha: new ConductKindType(1, "静脈注射"),
-  OtherChuusha: new ConductKindType(2, "その他の注射"),
-  Gazou: new ConductKindType(3, "画像")
+  HikaChuusha: new ConductKindType(0, "皮下・筋肉注射", "HikaChuusha"),
+  JoumyakuChuusha: new ConductKindType(1, "静脈注射", "JoumyakuChuusha"),
+  OtherChuusha: new ConductKindType(2, "その他の注射", "OtherChuusha"),
+  Gazou: new ConductKindType(3, "画像", "Gazou")
 };
 
 export const ConductKindObject = {
@@ -383,6 +384,12 @@ export const MeisaiObject = {
       return acc + subtotal(ele);
     }, 0);
   }
+}
+
+export interface Conduct {
+  conductId: number,
+  visitId: number,
+  kindStore: number
 }
 
 export interface ConductShinryou {

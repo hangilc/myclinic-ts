@@ -326,5 +326,19 @@ appEvent.shinryouDeleted.subscribe(shinryou => {
   }
 });
 
+appEvent.conductEntered.subscribe(async conduct => {
+  if( conduct == null ){
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const conductEx = await api.getConductEx(conduct.conductId);
+    visit.conducts.push(conductEx);
+    visits.set(visitsValue);
+  }
+
+})
 
 

@@ -29,6 +29,9 @@ export const paymentDeleted: Writable<m.Payment | null> = writable(null)
 export const shinryouEntered: Writable<m.Shinryou | null> = writable(null)
 export const shinryouUpdated: Writable<m.Shinryou | null> = writable(null)
 export const shinryouDeleted: Writable<m.Shinryou | null> = writable(null)
+export const conductEntered: Writable<m.Conduct | null> = writable(null)
+export const conductUpdated: Writable<m.Conduct | null> = writable(null)
+export const conductDeleted: Writable<m.Conduct | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -118,6 +121,23 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             shinryouDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "conduct": {
+        switch(kind) {
+          case "created": {
+            conductEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            conductUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            conductDeleted.set(payload);
             break;
           }
         }

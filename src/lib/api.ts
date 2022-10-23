@@ -280,4 +280,12 @@ export default {
     return get("delete-shinryou", { "shinryou-id": shinryouId });
   },
 
+  searchIyakuhinMaster(text: string, at: Date | string): Promise<m.IyakuhinMaster[]> {
+    return get("search-iyakuhin-master", { text, at: dateParam(at) });
+  },
+
+  getConductEx(conductId: number): Promise<m.ConductEx> {
+    return get("get-conduct-ex", { "conduct-id": conductId });
+  },
+
 }
