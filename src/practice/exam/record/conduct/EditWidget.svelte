@@ -15,8 +15,6 @@
   let addDrug: AddDrug;
   let addKizai: AddKizai;
 
-  $: console.log("conduct changed (edit)", conduct);
-
   export function open(): void {
     widget.open();
   }

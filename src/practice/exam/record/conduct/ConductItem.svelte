@@ -13,8 +13,6 @@
 
   let mode = "disp";
 
-  $: console.log("conduct changed (conduct-item)", conduct);
-
   function kindRep(kindTag: ConductKindTag): string {
     return ConductKindObject.fromTag(kindTag).rep;
   }
