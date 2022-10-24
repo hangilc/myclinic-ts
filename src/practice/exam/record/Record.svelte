@@ -9,6 +9,7 @@
   import ShinryouWrapper from "./shinryou/ShinryouWrapper.svelte";
   import ConductMenu from "./conduct/ConductMenu.svelte";
   import ConductWrapper from "./conduct/ConductWrapper.svelte";
+    import Payment from "./payment/Payment.svelte";
 
   export let visit: m.VisitEx;
   let showNewTextEditor = false;
@@ -46,6 +47,7 @@
       <ShinryouWrapper {visit} />
       <ConductMenu {visit} />
       <ConductWrapper conducts={visit.conducts} visit={visit}/>
+      <Payment {visit} />
     </div>
   </TwoCols>
 </div>
