@@ -1,4 +1,5 @@
 <script lang="ts">
+    import api from "@/lib/api";
   import type { VisitEx } from "@/lib/model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
@@ -16,10 +17,11 @@
     }
   }
 
-  function doDispClick(): void {
+  async function doDispClick() {
     if (visit.chargeOption != null) {
+      const meisai = await api.getMeisai(visit.visitId);
       mode = "edit";
-      edit.open();
+      edit.open(meisai);
     }
   }
 </script>
@@ -40,4 +42,6 @@
   .disp.has-charge {
     cursor: pointer;
   }
+
+  
 </style>

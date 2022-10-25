@@ -344,4 +344,8 @@ export default {
     return post("set-gazou-label", gl);
   },
 
+  finishCashier(payment: m.Payment): Promise<boolean> {
+    return post("finish-cashier",payment);
+  },
+
 }
