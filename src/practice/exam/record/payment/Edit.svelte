@@ -1,10 +1,13 @@
 <script lang="ts">
   import { MeisaiObject, type Meisai, type VisitEx, 
-    type Payment as ModelPayment } from "@/lib/model";
+    type Payment as ModelPayment, 
+    VisitExObject} from "@/lib/model";
   import RightBox from "../../RightBox.svelte";
   import { setFocus } from "@/lib/set-focus"
   import { dateTimeToSql } from "@/lib/util"
-    import api from "@/lib/api";
+  import api, { backend } from "@/lib/api";
+  import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
+  import { pad } from "@/lib/pad";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
@@ -31,6 +34,30 @@
     await api.finishCashier(pay);
     close();
   }
+
+  function makeTimestamp(d: Date): string {
+    const fmtYear = pad(d.getFullYear(), 4);
+    const fmtMonth = pad(d.getMonth() + 1, 2);
+    const fmtDay = pad(d.getDate(), 2);
+    const fmtHour = pad(d.getHours(), 2);
+    const fmtMinute = pad(d.getMinutes(), 2);
+    return `${fmtYear}${fmtMonth}${fmtDay}-${fmtHour}${fmtMinute}`;
+  }
+
+  async function doReceiptPdf() {
+    const visitProper = VisitExObject.asVisit(visit);
+    const patient = visit.patient;
+    const data = ReceiptDrawerData.create(visit, meisai);
+    const ops = await api.drawReceipt(data);
+    const timestamp = makeTimestamp(new Date());
+    const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
+    await api.createPdfFile(ops, "A6_Landscape", fileName);
+    await api.stampPdf(fileName, "receipt");
+    const url = backend + "/portal-tmp/" + fileName;
+    if( window ){
+      window.open(url, "_blank");
+    }
+  }
 </script>
 
 {#if show}
@@ -53,7 +80,7 @@
     {/if}
     <div class="commands">
       <a href="javascript:void(0)" on:click={doNoPayment}>未収に</a>
-      <a href="javascript:void(0)">領収書PDF</a>
+      <a href="javascript:void(0)" on:click={doReceiptPdf}>領収書PDF</a>
       <button>入力</button>
       <button on:click={close}>キャンセル</button>
     </div>
