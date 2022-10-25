@@ -8,6 +8,7 @@
   import api, { backend } from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
   import { pad } from "@/lib/pad";
+    import { showError } from "@/lib/showError-call";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
@@ -58,6 +59,24 @@
       window.open(url, "_blank");
     }
   }
+
+  async function doEnter() {
+    const t = chargeInput.value.trim();
+    let chargeValue: number;
+    try {
+      chargeValue = parseInt(t);
+    } catch (ex) {
+      showError("請求額の入力が整数でありません");
+      return;
+    }
+    if( chargeValue < 0 ) {
+      showError("請求額が負の値です。");
+      return;
+    }
+    const updated = api.updateChargeValue(visit.visitId, chargeValue);
+    throw new Error("Not implemented");
+    close();
+  }
 </script>
 
 {#if show}
@@ -81,7 +100,7 @@
     <div class="commands">
       <a href="javascript:void(0)" on:click={doNoPayment}>未収に</a>
       <a href="javascript:void(0)" on:click={doReceiptPdf}>領収書PDF</a>
-      <button>入力</button>
+      <button on:click={doEnter}>入力</button>
       <button on:click={close}>キャンセル</button>
     </div>
   </RightBox>

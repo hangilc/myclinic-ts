@@ -348,4 +348,11 @@ export default {
     return post("finish-cashier",payment);
   },
 
+  updateChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
+    return get("update-charge-value", {
+      "visit-id": visitId,
+      "charge-value": chargeValue
+    })
+  }
+
 }
