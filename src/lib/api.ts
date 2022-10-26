@@ -85,6 +85,14 @@ export default {
     return get("change-wqueue-state", { "visit-id": visitId, "wqueue-state": wqueueState });
   },
 
+  findWqueue(visitId: number): Promise<m.Wqueue | null> {
+    return get("find-wqueue", { "visit-id": visitId });
+  },
+
+  enterWqueue(wq: m.Wqueue): Promise<boolean> {
+    return post("enter-wqueue", wq);
+  },
+
   startVisit(patientId: number, at: string): Promise<m.Visit> {
     return get("start-visit", {"patient-id": patientId, "at": at});
   },

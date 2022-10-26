@@ -1,14 +1,16 @@
 <script lang="ts">
   import { MeisaiObject, type Meisai, type VisitEx, 
     type Payment as ModelPayment, 
-    VisitExObject} from "@/lib/model";
+    VisitExObject,
+    type Wqueue,
+    WqueueState} from "@/lib/model";
   import RightBox from "../../RightBox.svelte";
   import { setFocus } from "@/lib/set-focus"
   import { dateTimeToSql } from "@/lib/util"
   import api, { backend } from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
   import { pad } from "@/lib/pad";
-    import { showError } from "@/lib/showError-call";
+  import { showError } from "@/lib/showError-call";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
@@ -18,6 +20,7 @@
 
   export function open(m: Meisai): void {
     meisai = m;
+    TODO: set input value to calculated charge
     show = true;
   }
 
@@ -73,8 +76,17 @@
       showError("請求額が負の値です。");
       return;
     }
-    const updated = api.updateChargeValue(visit.visitId, chargeValue);
-    throw new Error("Not implemented");
+    const updated = await api.updateChargeValue(visit.visitId, chargeValue);
+    const wqueueOpt = await api.findWqueue(visit.visitId);
+    if( wqueueOpt == null ){
+      const wq: Wqueue = {
+        visitId: visit.visitId,
+        waitState: WqueueState.WaitCashier
+      };
+      await api.enterWqueue(wq);
+    } else {
+      await api.changeWqueueState(visit.visitId, WqueueState.WaitCashier);
+    }
     close();
   }
 </script>
