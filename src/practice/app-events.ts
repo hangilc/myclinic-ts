@@ -44,6 +44,9 @@ export const conductKizaiDeleted: Writable<m.ConductKizai | null> = writable(nul
 export const gazouLabelEntered: Writable<m.GazouLabel | null> = writable(null)
 export const gazouLabelUpdated: Writable<m.GazouLabel | null> = writable(null)
 export const gazouLabelDeleted: Writable<m.GazouLabel | null> = writable(null)
+export const chargeEntered: Writable<m.Charge | null> = writable(null)
+export const chargeUpdated: Writable<m.Charge | null> = writable(null)
+export const chargeDeleted: Writable<m.Charge | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -218,6 +221,23 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             gazouLabelDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "charge": {
+        switch(kind) {
+          case "created": {
+            chargeEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            chargeUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            chargeDeleted.set(payload);
             break;
           }
         }

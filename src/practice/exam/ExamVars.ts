@@ -540,4 +540,18 @@ appEvent.gazouLabelDeleted.subscribe(async gazouLabel => {
   }
 })
 
+appEvent.chargeUpdated.subscribe(charge => {
+  if( charge == null ){
+    return;
+  }
+  const visitId = charge.visitId;
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    visit.chargeOption = charge;
+    visits.set(visitsValue);
+  }
+})
+
 
