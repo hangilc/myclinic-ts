@@ -20,7 +20,6 @@
 
   export function open(m: Meisai): void {
     meisai = m;
-    TODO: set input value to calculated charge
     show = true;
   }
 
@@ -105,6 +104,7 @@
             bind:this={chargeInput}
             class="charge-input"
             use:setFocus
+            value={meisai.charge}
           />円
         </div>
       </div>
