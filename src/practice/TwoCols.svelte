@@ -3,11 +3,19 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
 
+  // test
+  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  import DateForm from "@/lib/date-form/DateForm.svelte";
+
   const service = writable("exam");
 </script>
 
 <div class="two-cols">
-  <div class="left"><SideMenu serviceStore={service}/></div>
+  <div class="left">
+    <SideMenu serviceStore={service}/>
+    <EditableDate date={new Date()} />
+    <DateForm />
+  </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
 
