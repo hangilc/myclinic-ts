@@ -1,3 +1,17 @@
+<script lang="ts">
+  import * as kanjidate from "kanjidate"
+
+  export let date: Date | null;
+  let gengouValue: string;
+  let nenValue: string;
+  let monthValue: string;
+  let dayValue: string;
+
+  function updateValues(): void {
+    
+  }
+
+</script>
 
 <div class="top">
   <select>
