@@ -7,6 +7,7 @@
   import RecordsWrapper from "./RecordsWrapper.svelte";
   import Nav from "./Nav.svelte";
   import MishuuList from "./mishuu-list/MishuuList.svelte";
+  import Disease from "./disease/Disease.svelte";
 
   export let isVisible = false;
 </script>
@@ -23,6 +24,7 @@
     {/if}
   </div>
   <div class="exam-right">
+    <Disease />
     <MishuuList />
     {#if $showPatientsByDate}
       <PatientsByDateBox />

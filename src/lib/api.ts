@@ -361,6 +361,11 @@ export default {
       "visit-id": visitId,
       "charge-value": chargeValue
     })
+  },
+
+  listCurrentDiseaseEx(patientId: number):
+    Promise<[m.Disease, m.ByoumeiMaster, [m.DiseaseAdj, m.ShuushokugoMaster][]][]> {
+    return get("list-current-disease-ex", {"patient-id": patientId});
   }
 
 }

@@ -6,7 +6,7 @@
   const service = writable("exam");
 
   // test
-  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  // import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   // import DatePicker from "@/lib/date-picker/DatePicker.svelte";
 </script>
 
@@ -14,7 +14,7 @@
   <div class="left">
     <SideMenu serviceStore={service}/>
 
-    <EditableDate date={new Date()} />
+    <!-- <EditableDate date={new Date()} /> -->
     <!-- <DatePicker date={new Date()}/> -->
   </div>
   <div class="right"><Main serviceStore={service}/></div>

@@ -431,5 +431,54 @@ export interface CreateShinryouConductRequest {
   conducts: CreateConductRequest[]
 }
 
+export interface ByoumeiMaster {
+  shoubyoumeicode: number,
+  name: string
+}
+
+export interface ShuushokugoMaster {
+  shuushokugocode: number,
+  name: string
+}
+
+export interface DiseaseEndReasonType {
+  code: string,
+  label: string
+}
+
+export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
+  NotEnded: {code: "N", label: "継続"},
+  Cured: {code: "C", label: "治癒"},
+  Stopped: {code: "S", label: "中止"},
+  Dead: {code: "D", label: "死亡"},
+}
+
+export const DiseaseEndReasonObject = {
+  fromCode(code: string): DiseaseEndReasonType {
+    for(let r of Object.values(DiseaseEndReason)) {
+      if( r.code == code ){
+        return r;
+      }
+    }
+    throw new Error("Invalid end reason code: " + code);
+  }
+}
+
+export interface Disease {
+  diseaseId: number,
+  patientId: number,
+  shoubyoumeicode: number,
+  startDate: string,
+  endDate: string,
+  endReasonStore: string
+}
+
+export interface DiseaseAdj {
+  diseaseAdjId: number,
+  diseaseId: number,
+  shuushokugocode: number
+}
+
+
 
 
