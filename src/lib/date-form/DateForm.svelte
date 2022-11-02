@@ -2,7 +2,7 @@
   import { KanjiDate, fromGengou } from "kanjidate";
 
   export let date: Date | null;
-  export let onEnter: (value: Date | null) => void = _ => {};
+  export let onEnter: (value: Date | null) => void = (_) => {};
   export let onCancel: () => void = () => {};
   let gengouValue: string;
   let nenValue: string = "";
@@ -30,8 +30,8 @@
   }
 
   function parseNenValue(): number {
-    const y = parseInt(monthValue);
-    if( isNaN(y) ){
+    const y = parseInt(nenValue);
+    if (isNaN(y)) {
       throw new Error("年の入力が数字でありません。");
     }
     return y;
@@ -39,7 +39,7 @@
 
   function parseMonthValue(): number {
     const m = parseInt(monthValue);
-    if( isNaN(m) ){
+    if (isNaN(m)) {
       throw new Error("月の入力が数字でありません。");
     }
     return m;
@@ -47,15 +47,19 @@
 
   function parseDayValue(): number {
     const d = parseInt(dayValue);
-    if( isNaN(d) ){
+    if (isNaN(d)) {
       throw new Error("日の入力が数字でありません。");
     }
     return d;
   }
 
-  export function getValue(): Date {
-    let year: number = fromGengou(gengouValue, parseNenValue());
-    return new Date(year, parseMonthValue(), parseDayValue());
+  export function getValue(): Date | null {
+    if (nenValue === "" && monthValue === "" && dayValue === "") {
+      return null;
+    } else {
+      let year: number = fromGengou(gengouValue, parseNenValue());
+      return new Date(year, parseMonthValue() - 1, parseDayValue());
+    }
   }
 
   export function setValue(d: Date): void {
@@ -70,7 +74,7 @@
     try {
       const d = getValue();
       onEnter(d);
-    } catch(ex) {
+    } catch (ex) {
       error = ex.toString();
       console.log(error);
     }
@@ -83,7 +87,7 @@
 
 <div class="top date-form">
   {#if error !== ""}
-  <div class="error">{error}</div>
+    <div class="error">{error}</div>
   {/if}
   <div class="inputs">
     <select bind:value={gengouValue}>

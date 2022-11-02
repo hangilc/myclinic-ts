@@ -21,8 +21,6 @@
     <SideMenu serviceStore={service}/>
 
     <EditableDate date={new Date()} />
-    <DateForm date={new Date()} bind:this={dateForm}/>
-    <button on:click={doTest}>Test</button>
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>

@@ -4,6 +4,7 @@
   import { afterUpdate } from "svelte";
 
   export let anchor: HTMLElement
+  export let locator: (e: HTMLElement, anchor: HTMLElement) => void = locateAtAnchor;
   let show = false;
   let menu: HTMLElement;
   let zIndexScreen: number;
@@ -22,10 +23,10 @@
   }
 
   afterUpdate(() => {
-    locateAtAnchor(menu, anchor);
+    locator(menu, anchor);
   });
 
-  function locateAtAnchor(e: HTMLElement, anchor: HTMLElement) {
+  function locateAtAnchor(e: HTMLElement, anchor: HTMLElement): void {
     if( e != null ){
       const r = anchor.getBoundingClientRect();
       e.style.left = (window.scrollX + r.left) + "px";
