@@ -3,18 +3,26 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
 
+  const service = writable("exam");
+
   // test
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import DateForm from "@/lib/date-form/DateForm.svelte";
-
-  const service = writable("exam");
+  import * as kanjidate from "kanjidate"
+  let dateForm;
+  function doTest(): void {
+    const d: Date = dateForm.getValue();
+    dateForm.setValue(kanjidate.addDays(d, 7));
+  }
 </script>
 
 <div class="two-cols">
   <div class="left">
     <SideMenu serviceStore={service}/>
+
     <EditableDate date={new Date()} />
-    <DateForm />
+    <DateForm date={new Date()} bind:this={dateForm}/>
+    <button on:click={doTest}>Test</button>
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>

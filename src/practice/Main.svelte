@@ -1,7 +1,9 @@
 <script lang="ts">
   import Exam from "./exam/Exam.svelte";
   import Cashier from "./cashier/Cashier.svelte";
-  export let serviceStore;
+  import type { Writable } from "svelte/store";
+  
+  export let serviceStore: Writable<string>;
 </script>
 
 <div>
