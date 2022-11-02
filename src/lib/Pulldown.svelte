@@ -5,6 +5,7 @@
 
   export let anchor: HTMLElement
   export let locator: (e: HTMLElement, anchor: HTMLElement) => void = locateAtAnchor;
+  export let maxHeight: string = "260px";
   let show = false;
   let menu: HTMLElement;
   let zIndexScreen: number;
@@ -43,6 +44,7 @@
 <div>
   <Screen opacity="0" zIndex={zIndexScreen} onclick={close}/>
   <div use:setMenu class="menu pulldown" style:z-index={zIndexMenu}
+    style:max-height={maxHeight}
     on:click={close}>
     <slot />
   </div>
@@ -54,5 +56,6 @@
     position: absolute;
     border: 1px solid gray;
     margin: 0;
+    overflow: auto;
   }
 </style>
