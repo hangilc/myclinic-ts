@@ -12,12 +12,8 @@
   let gengouValue: string = "令和";
   let nenValue: string = "";
   let monthValue: string = "";
-  {
-    const wareki = kanjidate.toGengou(date.getFullYear(), date.getMonth() + 1, date.getDate());
-    gengouValue = wareki.gengou;
-    nenValue = wareki.nen.toString();
-    monthValue = (date.getMonth() + 1).toString();
-  }
+  let selectedDay: number;
+  initValues(date);
   let gengouSpan: HTMLElement;
   let gengouPulldown: Pulldown;
   let gengouSelect: Writable<string | null> = writable(null);
@@ -28,7 +24,6 @@
   let monthSpan: HTMLElement;
   let monthSelect: Writable<number | null> = writable(null);
   let monthPulldown: Pulldown;
-  let selectedDay: number = date.getDate();
 
   let days: [string, string][] = [
     ["1", ""], ["2", ""]
@@ -56,6 +51,14 @@
       updateDays();
     }
   })
+
+  function initValues(date: Date): void {
+    const wareki = kanjidate.toGengou(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    gengouValue = wareki.gengou;
+    nenValue = wareki.nen.toString();
+    monthValue = (date.getMonth() + 1).toString();
+    selectedDay = date.getDate();
+  }
 
   function updateDays(): void {
     const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue));
@@ -94,11 +97,29 @@
     monthPulldown.open();
   }
 
-  function doEnter(): void {
+  function doNenLabelClick(event: MouseEvent): void {
+    const n = event.shiftKey ? -1 : 1;
+    const d = kanjidate.addYears(getCurrentDate(), n);
+    initValues(d);
+    updateDays();
+  }
+
+  function doMonthLabelClick(event: MouseEvent): void {
+    const n = event.shiftKey ? -1 : 1;
+    const d = kanjidate.addMonths(getCurrentDate(), n);
+    initValues(d);
+    updateDays();
+  }
+
+  function getCurrentDate(): Date {
     const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue));
     const month = parseInt(monthValue);
     const day = selectedDay;
-    onEnter(new Date(year, month - 1, day));
+    return new Date(year, month - 1, day);
+  }
+
+  function doEnter(): void {
+    onEnter(getCurrentDate());
   }
 
   function doCancel(): void {
@@ -110,8 +131,10 @@
 <div>
   <div class="top-row">
     <span on:click={doGengouClick} bind:this={gengouSpan} class="gengou-span">{gengouValue}</span>
-    <span on:click={doNenClick} bind:this={nenSpan} class="nen-span">{nenValue}</span>年
-    <span on:click={doMonthClick} bind:this={monthSpan} class="month-span">{monthValue}</span>月
+    <span on:click={doNenClick} bind:this={nenSpan} class="nen-span">{nenValue}</span>
+    <span on:click={doNenLabelClick} class="nen-label">年</span>
+    <span on:click={doMonthClick} bind:this={monthSpan} class="month-span">{monthValue}</span>
+    <span on:click={doMonthLabelClick} class="month-label">月</span>
     <svg xmlns="http://www.w3.org/2000/svg" on:click={doEnter} class="enter-check" width="1.2em" 
       fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -164,6 +187,10 @@
   .top-row {
     display: flex;
     align-items: center;
+  }
+
+  .nen-label, .month-label {
+    cursor: pointer;
   }
 
   .enter-check {
