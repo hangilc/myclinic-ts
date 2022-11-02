@@ -7,15 +7,6 @@
 
   // test
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import DatePicker from "@/lib/date-picker/DatePicker.svelte"
-  let datePicker: DatePicker;
-  function doOnEnter(date: Date): void {
-    console.log(date);
-  }
-
-  function doOnCancel(): void {
-    console.log("cancel");
-  }
 </script>
 
 <div class="two-cols">
@@ -23,7 +14,6 @@
     <SideMenu serviceStore={service}/>
 
     <EditableDate date={new Date()} />
-    <DatePicker date={new Date} onEnter={doOnEnter} onCancel={doOnCancel}/>
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
