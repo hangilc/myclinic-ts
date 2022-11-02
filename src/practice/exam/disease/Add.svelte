@@ -1,11 +1,24 @@
-<script>
+<script lang="ts">
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  import api from "@/lib/api"
+
+  let startDate: Date = new Date();
+  let searchText: string = "";
+  let searchResult;
+
+  async function doSearch() {
+    const t = searchText.trim();
+    if( t !== "" && startDate != null ){
+      searchResult = await api.searchByoumeiMaster(t, startDate);
+      console.log(searchResult);
+    }
+  }
 </script>
 
 <div>
   <div>名称：</div>
   <div>
-    <EditableDate date={new Date()}>
+    <EditableDate bind:date={startDate}>
       <svelte:fragment slot="icons">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -31,9 +44,9 @@
     <a href="javascript:void(0)">修飾語削除</a>
   </div>
   <div>
-    <form class="search-form">
-      <input type="text" class="search-text-input" />
-      <button>検索</button>
+    <form class="search-form" on:submit|preventDefault={doSearch}>
+      <input type="text" class="search-text-input" bind:value={searchText} />
+      <button type="submit">検索</button>
     </form>
     <a href="javascript:void(0)">例</a>
   </div>

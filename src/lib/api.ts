@@ -366,6 +366,13 @@ export default {
   listCurrentDiseaseEx(patientId: number):
     Promise<[m.Disease, m.ByoumeiMaster, [m.DiseaseAdj, m.ShuushokugoMaster][]][]> {
     return get("list-current-disease-ex", {"patient-id": patientId});
-  }
+  },
+
+  searchByoumeiMaster(text: string, at: Date | string): Promise<m.ByoumeiMaster[]> {
+    return get("search-byoumei-master", {
+      text,
+      at: dateParam(at)
+    })
+  },
 
 }
