@@ -1,15 +1,18 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate"
+    import { dataset_dev } from "svelte/internal";
     import { writable, type Writable } from "svelte/store";
   import Pulldown from "../Pulldown.svelte";
     import SelectItem from "../SelectItem.svelte";
 
-  export let date: Date | null;
+  export let date: Date;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
+  export let onEnter: (date: Date) => void = _ => {};
+  export let onCancel: () => void = () => {};
   let gengouValue: string = "令和";
   let nenValue: string = "";
   let monthValue: string = "";
-  if( date != null ){
+  {
     const wareki = kanjidate.toGengou(date.getFullYear(), date.getMonth() + 1, date.getDate());
     gengouValue = wareki.gengou;
     nenValue = wareki.nen.toString();
@@ -25,10 +28,13 @@
   let monthSpan: HTMLElement;
   let monthSelect: Writable<number | null> = writable(null);
   let monthPulldown: Pulldown;
+  let selectedDay: number = date.getDate();
 
   let days: [string, string][] = [
     ["1", ""], ["2", ""]
   ]
+
+  updateDays();
 
   gengouSelect.subscribe(g => {
     if( g != null ){
@@ -51,8 +57,6 @@
     }
   })
 
-  updateDays();
-
   function updateDays(): void {
     const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue));
     const month = parseInt(monthValue);
@@ -65,7 +69,13 @@
     }
     let lastDay = kanjidate.lastDayOfMonth(year, month);
     for(let d=1;d<=lastDay;d++){
-      ds.push([d.toString(), ""]);
+      let cls: string;
+      if( d == selectedDay ){
+        cls = "selected"
+      } else {
+        cls = "";
+      }
+      ds.push([d.toString(), cls]);
     }
     days = ds;
   }
@@ -84,14 +94,33 @@
     monthPulldown.open();
   }
 
+  function doEnter(): void {
+    const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue));
+    const month = parseInt(monthValue);
+    const day = selectedDay;
+    onEnter(new Date(year, month - 1, day));
+  }
+
+  function doCancel(): void {
+    onCancel();
+  }
+
 </script>
 
 <div>
-  <div>
+  <div class="top-row">
     <span on:click={doGengouClick} bind:this={gengouSpan} class="gengou-span">{gengouValue}</span>
     <span on:click={doNenClick} bind:this={nenSpan} class="nen-span">{nenValue}</span>年
     <span on:click={doMonthClick} bind:this={monthSpan} class="month-span">{monthValue}</span>月
-  </div>
+    <svg xmlns="http://www.w3.org/2000/svg" on:click={doEnter} class="enter-check" width="1.2em" 
+      fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" on:click={doCancel} class="cancel-mark" width="1.2em"
+      fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+      </div>
   <div class="days-panel">
     <span class="sunday">日</span>
     <span>月</span>
@@ -101,7 +130,10 @@
     <span>金</span>
     <span>土</span>
     {#each days as d}
-      <span class={d[1]}>{d[0]}</span>
+      <span class={d[1]} class:selected={parseInt(d[0]) === selectedDay}
+        on:click={() => selectedDay = parseInt(d[0])}>
+        {d[0]}
+      </span>
     {/each}
   </div>
 </div>
@@ -129,6 +161,23 @@
 
 
 <style>
+  .top-row {
+    display: flex;
+    align-items: center;
+  }
+
+  .enter-check {
+    color: green;
+    margin-left: 2.2em;
+    cursor: pointer;
+  }
+
+  .cancel-mark {
+    color: red;
+    margin-left: 4px;
+    cursor: pointer;
+  }
+
   .days-panel {
     display: grid;
     grid-template-columns: repeat(7, 1.5em);
@@ -136,6 +185,11 @@
 
   .days-panel span {
     text-align: right;
+    cursor: default;
+  }
+
+  .days-panel span.selected {
+    background-color: #ccc;
   }
 
   .sunday {
