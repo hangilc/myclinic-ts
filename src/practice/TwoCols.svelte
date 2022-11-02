@@ -7,13 +7,7 @@
 
   // test
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import DateForm from "@/lib/date-form/DateForm.svelte";
-  import * as kanjidate from "kanjidate"
-  let dateForm;
-  function doTest(): void {
-    const d: Date = dateForm.getValue();
-    dateForm.setValue(kanjidate.addDays(d, 7));
-  }
+  import DatePicker from "@/lib/date-picker/DatePicker.svelte"
 </script>
 
 <div class="two-cols">
@@ -21,6 +15,7 @@
     <SideMenu serviceStore={service}/>
 
     <EditableDate date={new Date()} />
+    <DatePicker date={new Date}/>
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
