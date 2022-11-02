@@ -143,6 +143,7 @@
     <span on:click={doMonthClick} bind:this={monthSpan} class="month-span">
       {monthValue}</span>
     <span on:click={doMonthLabelClick} class="month-label">月</span>
+    <span class="spacer"></span>
     <svg
       xmlns="http://www.w3.org/2000/svg"
       on:click={doEnter}
@@ -243,9 +244,13 @@
     margin-left: 1px;
   }
 
+  .spacer {
+    flex-grow: 1;
+  }
+
   .enter-check {
     color: green;
-    margin-left: 1.3em;
+    margin-left: 4px;
     cursor: pointer;
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { 
+  import type {
     Patient,
     Disease,
     ByoumeiMaster,
@@ -10,10 +10,15 @@
   import RightBox from "@/practice/exam/RightBox.svelte";
   import api from "@/lib/api";
   import Current from "./Current.svelte";
+  import Add from "./Add.svelte";
 
   let show = false;
   let mode = "current";
-  let currentList: [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]][] = [];
+  let currentList: [
+    Disease,
+    ByoumeiMaster,
+    [DiseaseAdj, ShuushokugoMaster][]
+  ][] = [];
   let patient: Patient | null = null;
 
   currentPatient.subscribe(async (p) => {
@@ -25,18 +30,38 @@
       currentList = [];
     }
   });
+
+  function doMode(m: string): void {
+    mode = m;
+  }
 </script>
 
 {#if show}
   <RightBox title="病名">
+    <div class="workarea">
     {#if mode === "current"}
-    <Current list={currentList} />
+      <Current list={currentList} />
+    {:else if mode === "add"}
+      <Add />
     {/if}
-    <div>
-      <a href="javascript:void(0)">現行</a>
-      <a href="javascript:void(0)">追加</a>
+    </div>
+    <div class="commands">
+      <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
+      <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
       <a href="javascript:void(0)">転機</a>
       <a href="javascript:void(0)">編集</a>
     </div>
   </RightBox>
 {/if}
+
+<style>
+  .workarea {
+    margin-top: 6px;
+  }
+  
+  .commands {
+    margin-top: 6px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+  }
+</style>
