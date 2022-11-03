@@ -5,7 +5,7 @@
   import SelectItem from "../SelectItem.svelte";
   import { pad } from "@/lib/pad";
 
-  export let date: Date;
+  export let initDate: Date | null;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let onEnter: (date: Date) => void = (_) => {};
   export let onCancel: () => void = () => {};
@@ -13,7 +13,6 @@
   let nenValue: string = "";
   let monthValue: string = "";
   let selectedDay: number;
-  initValues(date);
   let gengouSpan: HTMLElement;
   let gengouPulldown: Pulldown;
   let gengouSelect: Writable<string | null> = writable(null);
@@ -25,12 +24,12 @@
   let monthSelect: Writable<number | null> = writable(null);
   let monthPulldown: Pulldown;
 
-  let days: [string, string][] = [
-    ["1", ""],
-    ["2", ""],
-  ];
+  let days: [string, string][] = [];
 
-  updateDays();
+  $: {
+    initValues(initDate);
+    updateDays();
+  }
 
   gengouSelect.subscribe((g) => {
     if (g != null) {

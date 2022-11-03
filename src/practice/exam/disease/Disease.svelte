@@ -52,6 +52,7 @@
       currentList = await api.listCurrentDiseaseEx(p.patientId);
     } else {
       currentList = [];
+      mode = "current";
     }
   });
 

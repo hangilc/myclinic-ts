@@ -15,6 +15,10 @@ export function fullName(data: DiseaseData): string {
   return byoumeiName(data) + shuushokugoName(data);
 }
 
+export function getStartDate(data: DiseaseData): string {
+  return data[0].startDate;
+}
+
 export function startDateRep(data: DiseaseData): string {
-  return kanjidate.format(kanjidate.f3, data[0].startDate);
+  return kanjidate.format(kanjidate.f3, getStartDate(data));
 }

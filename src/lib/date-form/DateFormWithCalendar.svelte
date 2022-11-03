@@ -4,8 +4,9 @@
   import type { AppError } from "../app-error";
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
-  export let date: Date | null = new Date();
+  export let date: Date | null = null;
   export let isNullable = false;
+  export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.1em";
   let form: DateForm;
   let datePicker: DatePickerPulldown;
@@ -14,8 +15,16 @@
     return form.getValue();
   }
 
+  export function setValue(d: Date): void {
+    form.setValue(d);
+  }
+
   function doCalClick(): void {
-    datePicker.open();
+    let d = getValue();
+    if( !(d instanceof Date) ){
+      d = datePickerDefault();
+    }
+    datePicker.open(d);
   }
 </script>
 
@@ -41,7 +50,7 @@
     </svg>
   </div>
 </div>
-<DatePickerPulldown bind:date bind:this={datePicker} />
+<DatePickerPulldown bind:this={datePicker} onEnter={d => date = d}/>
 
 <style>
   .wrapper {

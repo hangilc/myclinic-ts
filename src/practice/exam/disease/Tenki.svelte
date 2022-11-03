@@ -1,12 +1,25 @@
 <script lang="ts">
-  import { type DiseaseData, fullName, startDateRep } from "./types";
+  import { type DiseaseData, fullName, startDateRep, getStartDate } from "./types";
   import { genid } from "@/lib/genid"
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
-  $: console.log(selected);
   let endDate: Date = new Date();
+  let dateForm: DateFormWithCalendar;
+
+  $: updateEndDate(selected);
+
+  function updateEndDate(list: DiseaseData[]): void {
+    let e: string | null = null;
+    list.forEach(d => {
+      const s: string = getStartDate(d);
+      if( e == null || s > e ){
+        e = s;
+      }
+    })
+    console.log(e);
+  }
 </script>
 
 <div>
@@ -18,7 +31,7 @@
   </div>
   {/each}
   <div class="date-wrapper">
-    <DateFormWithCalendar date={endDate} iconWidth="18px">
+    <DateFormWithCalendar date={endDate} iconWidth="18px" bind:this={dateForm}>
       <span slot="spacer" style:width="6px"/>
     </DateFormWithCalendar>
   </div>
