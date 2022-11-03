@@ -1,4 +1,5 @@
 import type { ByoumeiMaster, Disease, DiseaseAdj, ShuushokugoMaster } from "@/lib/model";
+import * as kanjidate from "kanjidate";
 
 export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]
 
@@ -12,4 +13,8 @@ export function shuushokugoName(data: DiseaseData): string {
 
 export function fullName(data: DiseaseData): string {
   return byoumeiName(data) + shuushokugoName(data);
+}
+
+export function startDateRep(data: DiseaseData): string {
+  return kanjidate.format(kanjidate.f3, data[0].startDate);
 }
