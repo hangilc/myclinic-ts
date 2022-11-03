@@ -17,6 +17,8 @@
   import SelectItem from "@/lib/SelectItem.svelte";
   import { genid } from "@/lib/genid";
   import { dateParam } from "@/lib/date-param";
+  import Pulldown from "@/lib/Pulldown.svelte";
+  import * as kanjidate from "kanjidate";
 
   export let patientId: number;
   export let examples: DiseaseExample[];
@@ -58,6 +60,9 @@
   let searchKind: SearchKind = "byoumei";
   let byoumeiId: string = genid();
   let shuushokugoId: string = genid();
+  let chooseStartDateIcon: SVGSVGElement;
+  let visitDates: Date[] = [];
+  let chooseStartDatePulldown: Pulldown;
 
   async function doSearch() {
     const t = searchText.trim();
@@ -113,6 +118,12 @@
       };
     });
   }
+
+  async function doChooseStartDate() {
+    const visits = await api.listVisitByPatientReverse(patientId, 0, 10);
+    visitDates = visits.map((v) => new Date(v.visitedAt.substring(0, 10)));
+    chooseStartDatePulldown.open();
+  }
 </script>
 
 <div>
@@ -124,6 +135,8 @@
       <svelte:fragment slot="icons">
         <svg
           xmlns="http://www.w3.org/2000/svg"
+          on:click={doChooseStartDate}
+          bind:this={chooseStartDateIcon}
           class="choice-icon"
           width="1.2em"
           fill="none"
@@ -178,6 +191,13 @@
     </div>
   </div>
 </div>
+<Pulldown anchor={chooseStartDateIcon} bind:this={chooseStartDatePulldown}>
+  {#each visitDates as date}
+    <SelectItem onSelect={(date) => (startDate = date)} data={date}>
+      <div>{kanjidate.format(kanjidate.f1, date)}</div>
+    </SelectItem>
+  {/each}
+</Pulldown>
 
 <style>
   .choice-icon {

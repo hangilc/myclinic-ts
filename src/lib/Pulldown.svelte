@@ -3,8 +3,8 @@
   import { alloc, release } from "./zindex";
   import { afterUpdate } from "svelte";
 
-  export let anchor: HTMLElement;
-  export let locator: (e: HTMLElement, anchor: HTMLElement) => void =
+  export let anchor: HTMLElement | SVGSVGElement;
+  export let locator: (e: HTMLElement, anchor: HTMLElement | SVGSVGElement) => void =
     locateAtAnchor;
   export let maxHeight: string = "260px";
   let show = false;
@@ -30,7 +30,7 @@
     locator(menu, anchor);
   });
 
-  function locateAtAnchor(e: HTMLElement, anchor: HTMLElement): void {
+  function locateAtAnchor(e: HTMLElement, anchor: HTMLElement | SVGSVGElement): void {
     if (e != null) {
       const r = anchor.getBoundingClientRect();
       const t = e.getBoundingClientRect();

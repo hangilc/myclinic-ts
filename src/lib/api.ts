@@ -406,4 +406,12 @@ export default {
     return get("list-disease-example", {});
   },
 
+  listVisitByPatientReverse(patientId: number, offset: number, count: number):
+    Promise<m.Visit[]> {
+    return get(
+      "list-visit-by-patient-reverse",
+      {"patient-id": patientId, "offset": offset, "count": count}
+    );
+  },
+
 }
