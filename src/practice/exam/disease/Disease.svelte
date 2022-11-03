@@ -37,6 +37,32 @@
     })
   );
 
+  unsubs.push(
+    appEvent.diseaseUpdated.subscribe(async (d) => {
+      if( d != null && d.patientId === patient?.patientId ){
+        if( d.endReasonStore === "N" ){
+          const data = await api.getDiseaseEx(d.diseaseId);
+          const list = currentList;
+          const index = list.findIndex(e => e[0].diseaseId == d.diseaseId);
+          if( index >= 0 ){
+            list.splice(index, 1, data);
+          } else {
+            list.push(data);
+            list.sort((a, b) => a[0].diseaseId - b[0].diseaseId);
+          }
+          currentList = list;
+        } else {
+          const list = currentList;
+          const index = list.findIndex(e => e[0].diseaseId == d.diseaseId);
+          if( index >= 0 ){
+            list.splice(index, 1);
+            currentList = list;
+          }
+        }
+      }
+    })
+  )
+
   onMount(async () => {
     examples = await api.listDiseaseExample();
   });

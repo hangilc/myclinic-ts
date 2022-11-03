@@ -6,6 +6,7 @@
   import * as kanjidate from "kanjidate";
   import type { DiseaseEndReasonType } from "@/lib/model";
   import { DiseaseEndReason } from "@/lib/model";
+    import api from "@/lib/api";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
@@ -58,7 +59,12 @@
   }
 
   async function doEnter() {
-    
+    const diseaseIds: number[] = selected.map(d => d[0].diseaseId);
+    const reasonCode = endReason.code;
+    const promises = diseaseIds.map(diseaseId => 
+      api.endDisease(diseaseId, endDate, reasonCode)
+    );
+    await Promise.all(promises);
   }
 </script>
 

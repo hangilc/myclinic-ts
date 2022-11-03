@@ -414,4 +414,12 @@ export default {
     );
   },
 
+  endDisease(diseaseId: number, endDate: Date | string, endReason: string): Promise<boolean> {
+    return get("end-disease", {
+      "disease-id": diseaseId,
+      "end-date": dateParam(endDate),
+      "end-reason": endReason
+    });
+  }
+
 }
