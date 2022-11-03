@@ -6,6 +6,7 @@
 
   export let date: Date | null = new Date();
   export let isNullable = false;
+  export let iconWidth: string = "1.1em";
   let form: DateForm;
   let datePicker: DatePickerPulldown;
 
@@ -19,11 +20,12 @@
 </script>
 
 <div>
-  <div>
+  <div class="wrapper">
     <DateForm {date} {isNullable} bind:this={form} />
+    <slot name="spacer" />
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width="1.1em"
+      width={iconWidth}
       class="calendar-icon"
       on:click={doCalClick}
       fill="none"
@@ -42,7 +44,13 @@
 <DatePickerPulldown bind:date bind:this={datePicker} />
 
 <style>
+  .wrapper {
+    display: flex;
+    justify-items: baseline;
+  }
   .calendar-icon {
     color: gray;
+    margin-top: -0.3em;
+    cursor: pointer;
   }
 </style>

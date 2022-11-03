@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type DiseaseData, fullName, startDateRep } from "./types";
   import { genid } from "@/lib/genid"
-    import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
@@ -17,7 +17,19 @@
     <label for={id}>{fullName(d)} ({startDateRep(d)})</label>
   </div>
   {/each}
-  <div>
-    <EditableDate bind:date={endDate} />
+  <div class="date-wrapper">
+    <DateFormWithCalendar date={endDate} iconWidth="18px">
+      <span slot="spacer" style:width="6px"/>
+    </DateFormWithCalendar>
   </div>
 </div>
+
+<style>
+  .date-wrapper {
+    font-size: 13px;
+  }
+
+  .date-wrapper :global(input) {
+    padding: 0px;
+  }
+</style>

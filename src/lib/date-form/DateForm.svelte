@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { KanjiDate, fromGengou } from "kanjidate";
+  import { KanjiDate, fromGengou, addYears, addMonths, addDays } from "kanjidate";
   import { AppError } from "@/lib/app-error";
 
   export let date: Date | null;
@@ -84,6 +84,30 @@
   export function clearValue(): void {
     date = null;
   }
+
+  function doNenClick(event: MouseEvent): void {
+    const d = getValue();
+    if( d instanceof Date ){
+      const n = event.shiftKey ? -1 : 1;
+      date = addYears(d, n);
+    }
+  }
+
+  function doMonthClick(event: MouseEvent): void {
+    const d = getValue();
+    if( d instanceof Date ){
+      const n = event.shiftKey ? -1 : 1;
+      date = addMonths(d, n);
+    }
+  }
+
+  function doDayClick(event: MouseEvent): void {
+    const d = getValue();
+    if( d instanceof Date ){
+      const n = event.shiftKey ? -1 : 1;
+      date = addDays(d, n);
+    }
+  }
 </script>
 
 <div class="top date-form">
@@ -94,15 +118,19 @@
       {/each}
     </select>
     <input type="text" class="nen" bind:value={nenValue} />
-    <span>年</span>
+    <span on:click={doNenClick} class="nen-span">年</span>
     <input type="text" class="month" bind:value={monthValue} />
-    <span>月</span>
+    <span on:click={doMonthClick} class="month-span">月</span>
     <input type="text" class="day" bind:value={dayValue} />
-    <span>日</span>
+    <span on:click={doDayClick} class="day-span">日</span>
   </div>
 </div>
 
 <style>
+  .top {
+    display: inline-block;
+  }
+
   .inputs {
     display: flex;
     align-items: center;
@@ -130,5 +158,9 @@
   .day {
     width: 1.5em;
     font-size: 1em;
+  }
+
+  .nen-span, .month-span, .day-span {
+    cursor: pointer;
   }
 </style>

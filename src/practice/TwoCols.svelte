@@ -6,9 +6,9 @@
   const service = writable("exam");
 
   // test
-  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  // import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   // import DatePicker from "@/lib/date-picker/DatePicker.svelte";
-  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  // import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import DateForm from "@/lib/date-form/DateForm.svelte";
 </script>
 
@@ -16,9 +16,9 @@
   <div class="left">
     <SideMenu serviceStore={service}/>
 
-    <EditableDate date={new Date()} />
+    <!-- <EditableDate date={new Date()} /> -->
     <!-- <DatePicker date={new Date()}/> -->
-    <DateFormWithCalendar date={new Date()}/>
+    <!-- <DateFormWithCalendar date={new Date()}/> -->
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
