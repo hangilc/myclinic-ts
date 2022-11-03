@@ -47,6 +47,12 @@ export const gazouLabelDeleted: Writable<m.GazouLabel | null> = writable(null)
 export const chargeEntered: Writable<m.Charge | null> = writable(null)
 export const chargeUpdated: Writable<m.Charge | null> = writable(null)
 export const chargeDeleted: Writable<m.Charge | null> = writable(null)
+export const diseaseEntered: Writable<m.Disease | null> = writable(null)
+export const diseaseUpdated: Writable<m.Disease | null> = writable(null)
+export const diseaseDeleted: Writable<m.Disease | null> = writable(null)
+export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null)
+export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null)
+export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null)
 
 function dispatch(e: any): void {
   if( e.format === "appevent" ){
@@ -238,6 +244,40 @@ function dispatch(e: any): void {
           }
           case "deleted": {
             chargeDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "disease": {
+        switch(kind) {
+          case "created": {
+            diseaseEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            diseaseUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            diseaseDeleted.set(payload);
+            break;
+          }
+        }
+        break;
+      }
+      case "diseaseAdj": {
+        switch(kind) {
+          case "created": {
+            diseaseAdjEntered.set(payload);
+            break;
+          }
+          case "updated": {
+            diseaseAdjUpdated.set(payload);
+            break;
+          }
+          case "deleted": {
+            diseaseAdjDeleted.set(payload);
             break;
           }
         }

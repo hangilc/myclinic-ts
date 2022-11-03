@@ -500,6 +500,26 @@ export interface DiseaseEnterData {
   adjCodes: number[]
 }
 
+export interface DiseaseExample {
+  byoumei: string | null,
+  preAdjList: string[],
+  postAdjList: string[],
+}
+
+export const DiseaseExampleObject = {
+  repr(e: DiseaseExample): string {
+    return [e.byoumei || "", ...e.preAdjList, ...e.postAdjList].join("");
+  }
+}
+
+export function isDiseaseExample(arg: any): arg is DiseaseExample {
+  return arg != null &&
+    typeof arg === "object" &&
+    (arg.byoumei == null || typeof arg.byoumei === "string") &&
+    Array.isArray(arg.preAdjList) && Array.isArray(arg.postAdjList);
+}
+
+
 
 
 

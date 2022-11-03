@@ -6,11 +6,11 @@ import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
 
 export const backend: string = getBackend();
 export const base: string = backend + "/api";
-export const wsUrl: string = 
+export const wsUrl: string =
   base.replace("/api", "/ws/events").replace(/^http?/, "ws");
 
 function getBackend(): string {
-  if( !import.meta.env.SSR ){
+  if (!import.meta.env.SSR) {
     const l = window.location;
     return `${l.protocol}//${l.hostname}:8080`;
   } else {
@@ -61,11 +61,11 @@ export default {
   },
 
   async listWqueueFull(): Promise<Array<[m.Wqueue, m.Visit, m.Patient]>> {
-    const [, wqList, vObj, pObj]: 
+    const [, wqList, vObj, pObj]:
       [number, Array<m.Wqueue>, object, object]
       = await get("list-wqueue-full", {});
     const vMap: Map<number, m.Visit> = new Map();
-    Object.entries(vObj).forEach(([k, v] : [string, any]) => {
+    Object.entries(vObj).forEach(([k, v]: [string, any]) => {
       const visit: m.Visit = v;
       vMap.set(parseInt(k), visit);
     })
@@ -94,7 +94,7 @@ export default {
   },
 
   startVisit(patientId: number, at: string): Promise<m.Visit> {
-    return get("start-visit", {"patient-id": patientId, "at": at});
+    return get("start-visit", { "patient-id": patientId, "at": at });
   },
 
   updateVisit(visit: m.Visit): Promise<boolean> {
@@ -116,7 +116,8 @@ export default {
 
   listVisitIdByPatientReverse(patientId: number, offset: number, count: number): Promise<number[]> {
     return get("list-visit-id-by-patient-reverse", {
-      "patient-id": patientId, offset, count});
+      "patient-id": patientId, offset, count
+    });
   },
 
   batchGetVisitEx(visitIds: number[]): Promise<m.VisitEx[]> {
@@ -151,7 +152,7 @@ export default {
   },
 
   countVisitByPatient(patientId: number): Promise<number> {
-    return get("count-visit-by-patient", {"patient-id": patientId});
+    return get("count-visit-by-patient", { "patient-id": patientId });
   },
 
   deleteVisit(visitId: number): Promise<boolean> {
@@ -214,33 +215,33 @@ export default {
     return `${backend}/portal-tmp/${fileName}`;
   },
 
-  findAvailableShahokokuho(patientId: number, at: Date | string): 
-    Promise<m.Shahokokuho | null > {
-    return get("find-available-shahokokuho", { 
+  findAvailableShahokokuho(patientId: number, at: Date | string):
+    Promise<m.Shahokokuho | null> {
+    return get("find-available-shahokokuho", {
       "patient-id": patientId, at: dateParam(at)
     })
   },
 
-  findAvailableRoujin(patientId: number, at: Date | string): 
-    Promise<m.Roujin | null > {
-    return get("find-available-roujin", { 
-      "patient-id": patientId, 
-      at: dateParam(at) 
+  findAvailableRoujin(patientId: number, at: Date | string):
+    Promise<m.Roujin | null> {
+    return get("find-available-roujin", {
+      "patient-id": patientId,
+      at: dateParam(at)
     })
   },
 
-  findAvailableKoukikourei(patientId: number, at: Date | string): 
-    Promise<m.Koukikourei | null > {
-    return get("find-available-koukikourei", { 
-      "patient-id": patientId, 
-      at: dateParam(at) 
+  findAvailableKoukikourei(patientId: number, at: Date | string):
+    Promise<m.Koukikourei | null> {
+    return get("find-available-koukikourei", {
+      "patient-id": patientId,
+      at: dateParam(at)
     })
   },
 
-  listAvailableKouhi(patientId: number, at: Date | string): 
+  listAvailableKouhi(patientId: number, at: Date | string):
     Promise<m.Kouhi[]> {
-    return get("list-available-kouhi", { 
-      "patient-id": patientId, 
+    return get("list-available-kouhi", {
+      "patient-id": patientId,
       at: dateParam(at)
     })
   },
@@ -258,22 +259,22 @@ export default {
   },
 
   resolveShinryoucodeByName(name: string, at: Date | string): Promise<number | null> {
-    return get("resolve-shinryoucode-by-name", { 
-      "name": name, 
-      at: dateParam(at) 
+    return get("resolve-shinryoucode-by-name", {
+      "name": name,
+      at: dateParam(at)
     });
   },
 
   resolveKizaicodeByName(name: string, at: Date | string): Promise<number | null> {
-    return get("resolve-kizaicode-by-name", { 
-      "name": name, 
-      at: dateParam(at) 
+    return get("resolve-kizaicode-by-name", {
+      "name": name,
+      at: dateParam(at)
     });
   },
 
   batchEnterShinryouConduct(req: m.CreateShinryouConductRequest):
-      Promise<[number[], number[]]> {
-    return post("batch-enter-shinryou-conduct", req);        
+    Promise<[number[], number[]]> {
+    return post("batch-enter-shinryou-conduct", req);
   },
 
   getShinryouEx(shinryouId: number): Promise<m.ShinryouEx> {
@@ -353,7 +354,7 @@ export default {
   },
 
   finishCashier(payment: m.Payment): Promise<boolean> {
-    return post("finish-cashier",payment);
+    return post("finish-cashier", payment);
   },
 
   updateChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
@@ -365,7 +366,7 @@ export default {
 
   listCurrentDiseaseEx(patientId: number):
     Promise<[m.Disease, m.ByoumeiMaster, [m.DiseaseAdj, m.ShuushokugoMaster][]][]> {
-    return get("list-current-disease-ex", {"patient-id": patientId});
+    return get("list-current-disease-ex", { "patient-id": patientId });
   },
 
   searchByoumeiMaster(text: string, at: Date | string): Promise<m.ByoumeiMaster[]> {
@@ -384,6 +385,25 @@ export default {
 
   enterDiseaseEx(data: m.DiseaseEnterData): Promise<number> {
     return post("enter-disease-ex", data);
+  },
+
+  getDiseaseEx(diseaseId: number):
+    Promise<[m.Disease, m.ByoumeiMaster, [m.DiseaseAdj, m.ShuushokugoMaster][]]> {
+    return get("get-disease-ex", { "disease-id": diseaseId });
+  },
+
+  resolveByoumeiMasterByName(name: string, at: Date | string):
+    Promise<m.ByoumeiMaster | null> {
+    return get("resolve-byoumei-master-by-name", { name, at: dateParam(at) })
+  },
+
+  resolveShuushokugoMasterByName(name: string, at: Date | string):
+    Promise<m.ShuushokugoMaster | null> {
+    return get("resolve-shuushokugo-master-by-name", { name, at: dateParam(at) })
+  },
+
+  listDiseaseExample(): Promise<m.DiseaseExample[]> {
+    return get("list-disease-example", {});
   },
 
 }
