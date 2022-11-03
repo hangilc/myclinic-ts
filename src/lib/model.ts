@@ -31,7 +31,7 @@ export const VisitObject = {
 
   updateAttribute(visit: Visit, attr: VisitAttributes | null): Visit {
     let newAttr: string | null;
-    if( attr == null ){
+    if (attr == null) {
       newAttr = null;
     } else {
       newAttr = JSON.stringify(attr);
@@ -56,7 +56,7 @@ export class WqueueStateData {
   constructor(
     code: number,
     label: string
-  ) {}
+  ) { }
 }
 
 export const WqueueStateObject: Record<WqueueStateKey, WqueueStateData> = {
@@ -261,7 +261,7 @@ export const ConductKind: Record<ConductKindKey, ConductKindType> = {
 };
 
 export const ConductKindObject = {
-  fromTag(tag: ConductKindTag ): ConductKindType {
+  fromTag(tag: ConductKindTag): ConductKindType {
     const key: ConductKindKey = Object.keys(tag)[0] as ConductKindKey;
     return ConductKind[key];
   }
@@ -283,7 +283,7 @@ export interface VisitAttributes {
 
 export const VisitAttributeObject = {
   fromString(src: string | null): VisitAttributes | null {
-    if( src == null ){
+    if (src == null) {
       return null;
     } else {
       return JSON.parse(src);
@@ -291,8 +291,8 @@ export const VisitAttributeObject = {
   },
 
   updateWith(
-      orig: VisitAttributes | null, 
-      update: VisitAttributes | null 
+    orig: VisitAttributes | null,
+    update: VisitAttributes | null
   ): VisitAttributes {
     return Object.assign({}, orig, update);
   }
@@ -436,9 +436,23 @@ export interface ByoumeiMaster {
   name: string
 }
 
+export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
+  return arg != null &&
+    typeof arg === "object" &&
+    typeof arg.shoubyoumeicode === "number" &&
+    typeof arg.name === "string";
+}
+
 export interface ShuushokugoMaster {
   shuushokugocode: number,
   name: string
+}
+
+export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
+  return arg != null &&
+    typeof arg === "object" &&
+    typeof arg.shuushokugocode === "number" &&
+    typeof arg.name === "string";
 }
 
 export interface DiseaseEndReasonType {
@@ -447,16 +461,16 @@ export interface DiseaseEndReasonType {
 }
 
 export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
-  NotEnded: {code: "N", label: "継続"},
-  Cured: {code: "C", label: "治癒"},
-  Stopped: {code: "S", label: "中止"},
-  Dead: {code: "D", label: "死亡"},
+  NotEnded: { code: "N", label: "継続" },
+  Cured: { code: "C", label: "治癒" },
+  Stopped: { code: "S", label: "中止" },
+  Dead: { code: "D", label: "死亡" },
 }
 
 export const DiseaseEndReasonObject = {
   fromCode(code: string): DiseaseEndReasonType {
-    for(let r of Object.values(DiseaseEndReason)) {
-      if( r.code == code ){
+    for (let r of Object.values(DiseaseEndReason)) {
+      if (r.code == code) {
         return r;
       }
     }
@@ -477,6 +491,13 @@ export interface DiseaseAdj {
   diseaseAdjId: number,
   diseaseId: number,
   shuushokugocode: number
+}
+
+export interface DiseaseEnterData {
+  patientId: number,
+  byoumeicode: number,
+  startDate: string,
+  adjCodes: number[]
 }
 
 

@@ -1,22 +1,82 @@
 <script lang="ts">
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import api from "@/lib/api"
+  import api from "@/lib/api";
+  import type {
+    ByoumeiMaster,
+    DiseaseEnterData,
+    ShuushokugoMaster,
+  } from "@/lib/model";
+  import {
+    isByoumeiMaster,
+    isShuushokugoMaster,
+  } from "@/lib/model";
+  import { type Writable, writable } from "svelte/store";
+  import SelectItem from "@/lib/SelectItem.svelte";
+  import { genid } from "@/lib/genid";
+  import { dateParam } from "@/lib/date-param"
 
+  export let patientId: number;
+  type SearchKind = "byoumei" | "shuushokugo";
+  interface SearchResult {
+    label: string;
+    data: ByoumeiMaster | ShuushokugoMaster;
+  }
   let startDate: Date = new Date();
+  let byoumeiMaster: ByoumeiMaster | null = null;
+  let adjList: ShuushokugoMaster[] = [];
   let searchText: string = "";
-  let searchResult;
+  let searchResult: SearchResult[] = [];
+  let searchSelect: Writable<ByoumeiMaster | ShuushokugoMaster | null> =
+    writable(null);
+  searchSelect.subscribe(r => {
+    if( isByoumeiMaster(r) ){
+      byoumeiMaster = r;
+    } else if( isShuushokugoMaster(r) ){
+      const cur = adjList;
+      cur.push(r);
+      adjList = cur;
+    }
+  })
+  let searchKind: SearchKind = "byoumei";
+  let byoumeiId: string = genid();
+  let shuushokugoId: string = genid();
 
   async function doSearch() {
     const t = searchText.trim();
-    if( t !== "" && startDate != null ){
-      searchResult = await api.searchByoumeiMaster(t, startDate);
-      console.log(searchResult);
+    if (t !== "" && startDate != null) {
+      if (searchKind === "byoumei") {
+        searchResult = (await api.searchByoumeiMaster(t, startDate)).map(
+          (m) => ({
+            label: m.name,
+            data: m,
+          })
+        );
+      } else if (searchKind === "shuushokugo") {
+        searchResult = (await api.searchShuushokugoMaster(t, startDate)).map(
+          (m) => ({
+            label: m.name,
+            data: m,
+          })
+        );
+      }
+    }
+  }
+
+  async function doEnter() {
+    if (byoumeiMaster != null && patientId != null) {
+      const data: DiseaseEnterData = {
+        patientId: patientId,
+        byoumeicode: byoumeiMaster.shoubyoumeicode,
+        startDate: dateParam(startDate),
+        adjCodes: adjList.map(m => m.shuushokugocode)
+      };
+      await api.enterDiseaseEx(data);
     }
   }
 </script>
 
 <div>
-  <div>名称：</div>
+  <div>名称：{byoumeiMaster?.name || ""}{adjList.map(m => m.name).join("")}</div>
   <div>
     <EditableDate bind:date={startDate}>
       <svelte:fragment slot="icons">
@@ -39,7 +99,7 @@
     </EditableDate>
   </div>
   <div>
-    <button>入力</button>
+    <button on:click={doEnter}>入力</button>
     <a href="javascript:void(0)">の疑い</a>
     <a href="javascript:void(0)">修飾語削除</a>
   </div>
@@ -51,12 +111,28 @@
     <a href="javascript:void(0)">例</a>
   </div>
   <div>
-    <input type="radio" checked/>病名
-    <input type="radio">修飾語
+    <input
+      type="radio"
+      bind:group={searchKind}
+      value="byoumei"
+      id={byoumeiId}
+    />
+    <label for={byoumeiId}>病名</label>
+    <input
+      type="radio"
+      bind:group={searchKind}
+      value="shuushokugo"
+      id={shuushokugoId}
+    />
+    <label for={shuushokugoId}>修飾語</label>
   </div>
   <div>
     <div class="search-result select">
-
+      {#each searchResult as r}
+        <SelectItem selected={searchSelect} data={r.data}>
+          <div>{r.label}</div>
+        </SelectItem>
+      {/each}
     </div>
   </div>
 </div>

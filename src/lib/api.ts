@@ -372,7 +372,18 @@ export default {
     return get("search-byoumei-master", {
       text,
       at: dateParam(at)
-    })
+    });
+  },
+
+  searchShuushokugoMaster(text: string, at: Date | string): Promise<m.ShuushokugoMaster[]> {
+    return get("search-shuushokugo-master", {
+      text,
+      at: dateParam(at)
+    });
+  },
+
+  enterDiseaseEx(data: m.DiseaseEnterData): Promise<number> {
+    return post("enter-disease-ex", data);
   },
 
 }

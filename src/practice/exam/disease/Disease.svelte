@@ -42,7 +42,7 @@
     {#if mode === "current"}
       <Current list={currentList} />
     {:else if mode === "add"}
-      <Add />
+      <Add patientId={patient?.patientId}/>
     {/if}
     </div>
     <div class="commands">

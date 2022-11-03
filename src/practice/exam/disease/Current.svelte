@@ -1,13 +1,8 @@
 <script lang="ts">
-  import type { 
-    Disease,
-    ByoumeiMaster,
-    DiseaseAdj,
-    ShuushokugoMaster,
-  } from "@/lib/model"
   import * as kanjidate from "kanjidate"
+  import { type DiseaseData, fullName } from "./types"
 
-  export let list: [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]][];
+  export let list: DiseaseData[];
 
   function formatStartDate(src: string): string {
     return kanjidate.format(kanjidate.f3, src);
@@ -18,7 +13,7 @@
   {#each list as d (d[0].diseaseId)}
   {@const startDate=formatStartDate(d[0].startDate)}
   <div>
-    <span>{d[1].name}</span>
+    <span>{fullName(d)}</span>
     <span class="start-date">({startDate})</span>
   </div>
   {/each}
