@@ -5,10 +5,10 @@
   import SelectItem from "../SelectItem.svelte";
   import { pad } from "@/lib/pad";
 
-  export let initDate: Date | null;
+  export let date: Date | null;
+  export let onEnter: (value: Date) => void;
+  export let onCancel: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  export let onEnter: (date: Date) => void = (_) => {};
-  export let onCancel: () => void = () => {};
   let gengouValue: string = "令和";
   let nenValue: string = "";
   let monthValue: string = "";
@@ -27,7 +27,7 @@
   let days: [string, string][] = [];
 
   $: {
-    initValues(initDate);
+    initValues(date);
     updateDays();
   }
 
@@ -52,16 +52,21 @@
     }
   });
 
-  function initValues(date: Date): void {
-    const wareki = kanjidate.toGengou(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate()
-    );
-    gengouValue = wareki.gengou;
-    nenValue = pad(wareki.nen, 2, " ");
-    monthValue = pad(date.getMonth() + 1, 2, " ");
-    selectedDay = date.getDate();
+  function initValues(date: Date | null): void {
+    if (date == null) {
+      nenValue = "";
+      monthValue = "";
+    } else {
+      const wareki = kanjidate.toGengou(
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate()
+      );
+      gengouValue = wareki.gengou;
+      nenValue = pad(wareki.nen, 2, " ");
+      monthValue = pad(date.getMonth() + 1, 2, " ");
+      selectedDay = date.getDate();
+    }
   }
 
   function updateDays(): void {
@@ -137,12 +142,14 @@
       {gengouValue}
     </span>
     <span on:click={doNenClick} bind:this={nenSpan} class="nen-span">
-      {nenValue}</span>
+      {nenValue}</span
+    >
     <span on:click={doNenLabelClick} class="nen-label">年</span>
     <span on:click={doMonthClick} bind:this={monthSpan} class="month-span">
-      {monthValue}</span>
+      {monthValue}</span
+    >
     <span on:click={doMonthLabelClick} class="month-label">月</span>
-    <span class="spacer"></span>
+    <span class="spacer" />
     <svg
       xmlns="http://www.w3.org/2000/svg"
       on:click={doEnter}
@@ -223,7 +230,8 @@
     align-items: center;
   }
 
-  .nen-span, .month-span {
+  .nen-span,
+  .month-span {
     width: 1.2em;
     text-align: right;
     user-select: none;

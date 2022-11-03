@@ -5,6 +5,7 @@
   export let date: Date | null;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let isNullable = false;
+  export let errorPrefix: string = "";
 
   let gengouValue: string;
   let nenValue: string = "";
@@ -28,10 +29,14 @@
     }
   }
 
+  function mkError(msg: string): AppError {
+    return new AppError(errorPrefix + msg);
+  }
+
   function parseNenValue(): number | AppError {
     const y = parseInt(nenValue);
     if (isNaN(y)) {
-      return new AppError("年の入力が数字でありません。");
+      return mkError("年の入力が数字でありません。");
     }
     return y;
   }
@@ -39,7 +44,7 @@
   function parseMonthValue(): number | AppError {
     const m = parseInt(monthValue);
     if (isNaN(m)) {
-      return new AppError("月の入力が数字でありません。");
+      return mkError("月の入力が数字でありません。");
     }
     return m;
   }
@@ -47,46 +52,54 @@
   function parseDayValue(): number | AppError {
     const d = parseInt(dayValue);
     if (isNaN(d)) {
-      return new AppError("日の入力が数字でありません。");
+      return mkError("日の入力が数字でありません。");
     }
     return d;
   }
 
-  export function getValue(): Date | null | AppError {
+  export function calcValue(errors: AppError[]): Date | null {
     if (nenValue === "" && monthValue === "" && dayValue === "") {
       if( isNullable ){
         return null;
       } else {
-        return new AppError("入力がありません。")
+        errors.push(mkError("入力がありません。"));
+        return null;
       }
     } else {
+      let nErr = errors.length;
       const nen = parseNenValue();
       if( nen instanceof AppError ){
-        return nen;
+        errors.push(nen);
       }
       const month = parseMonthValue();
       if( month instanceof AppError ){
-        return month;
+        errors.push(month);
       }
       const day = parseDayValue();
       if( day instanceof AppError ){
-        return day;
+        errors.push(day);
       }
-      let year: number = fromGengou(gengouValue, nen);
-      return new Date(year, month - 1, day);
+      if( errors.length > nErr ){
+        return null;
+      }
+      let year: number = fromGengou(gengouValue, nen as number);
+      return new Date(year, (month as number) - 1, day as number);
     }
   }
 
-  export function setValue(d: Date): void {
-    date = d;
-  }
-
-  export function clearValue(): void {
-    date = null;
+  export function validate(errors: AppError[]): boolean {
+    const nErr = errors.length;
+    const d = calcValue(errors);
+    if( errors.length == nErr ){
+      date = d;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   function doNenClick(event: MouseEvent): void {
-    const d = getValue();
+    const d = calcValue([]);
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
       date = addYears(d, n);
@@ -94,7 +107,7 @@
   }
 
   function doMonthClick(event: MouseEvent): void {
-    const d = getValue();
+    const d = calcValue([]);
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
       date = addMonths(d, n);
@@ -102,7 +115,7 @@
   }
 
   function doDayClick(event: MouseEvent): void {
-    const d = getValue();
+    const d = calcValue([]);
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
       date = addDays(d, n);

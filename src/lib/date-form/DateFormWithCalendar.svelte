@@ -1,36 +1,36 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
-  import DatePicker from "../date-picker/DatePicker.svelte";
   import type { AppError } from "../app-error";
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
   export let date: Date | null = null;
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();
+  export let errorPrefix: string = "";
   export let iconWidth: string = "1.1em";
   let form: DateForm;
   let datePicker: DatePickerPulldown;
 
-  export function getValue(): Date | null | AppError {
-    return form.getValue();
-  }
-
-  export function setValue(d: Date): void {
-    form.setValue(d);
+  export function validate(errors: AppError[], prefix: string): boolean {
+    return form.validate(errors);
   }
 
   function doCalClick(): void {
-    let d = getValue();
-    if( !(d instanceof Date) ){
+    let d = form.calcValue([]);
+    if( d == null ){
       d = datePickerDefault();
     }
     datePicker.open(d);
+  }
+
+  function doDatePickerEnter(value: Date): void {
+    date = value;
   }
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm {date} {isNullable} bind:this={form} />
+    <DateForm bind:date={date} {isNullable} bind:this={form} {errorPrefix} />
     <slot name="spacer" />
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,7 @@
     </svg>
   </div>
 </div>
-<DatePickerPulldown bind:this={datePicker} onEnter={d => date = d}/>
+<DatePickerPulldown bind:this={datePicker} onEnter={(d) => doDatePickerEnter(d)}/>
 
 <style>
   .wrapper {
