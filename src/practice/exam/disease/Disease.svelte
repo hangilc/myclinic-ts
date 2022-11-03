@@ -102,7 +102,7 @@
       <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
       <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
       <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
-      <a href="javascript:void(0)">編集</a>
+      <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
     </div>
   </RightBox>
 {/if}
