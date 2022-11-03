@@ -1,10 +1,10 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import DateForm from "../date-form/DateForm.svelte";
-  import Modal from "@/lib/Modal.svelte";
-  import DatePicker from "../date-picker/DatePicker.svelte";
+  import DateFormPulldown from "../date-form/DateFormPulldown.svelte";
+  import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
   export let date: Date | null;
+  export let isNullable = false;
   export let format: (date: Date | null) => string = (date: Date | null) => {
     if (date == null) {
       return "（未設定）";
@@ -14,33 +14,16 @@
   };
   let repr: string;
   let disp: HTMLElement;
-  let modalForm: Modal;
-  let form: DateForm;
-  let modalPicker: Modal;
+  let form: DateFormPulldown;
+  let datePicker: DatePickerPulldown;
   $: repr = format(date);
 
   function doClick(): void {
-    modalForm.open();
-  }
-
-  function doFormEnter(value: Date | null, close: () => void): void {
-    try {
-      date = value;
-      // updateRepr();
-    } catch (ex) {
-      console.error(ex);
-    }
-    close();
-  }
-
-  function doPickerEnter(value: Date, close: () => void): void {
-    date = value;
-    // updateRepr();
-    close();
+    form.open();
   }
 
   function doCalClick(): void {
-    modalPicker.open();
+    datePicker.open();
   }
 </script>
 
@@ -64,21 +47,13 @@
     />
   </svg>
 </div>
-<Modal bind:this={modalForm} let:close screenOpacity="0.2">
-  <DateForm
-    date={new Date()}
-    bind:this={form}
-    onEnter={(d) => doFormEnter(d, close)}
-    onCancel={close}
-  />
-</Modal>
-<Modal bind:this={modalPicker} let:close>
-  <DatePicker
-    {date}
-    onCancel={close}
-    onEnter={(d) => doPickerEnter(d, close)}
-  />
-</Modal>
+<DateFormPulldown
+  {date}
+  {isNullable}
+  onEnter={(d) => (date = d)}
+  bind:this={form}
+/>
+<DatePickerPulldown bind:date={date} bind:this={datePicker} />
 
 <style>
   .disp {
