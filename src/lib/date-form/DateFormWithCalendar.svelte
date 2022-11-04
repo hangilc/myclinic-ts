@@ -8,6 +8,7 @@
   export let datePickerDefault: () => Date = () => new Date();
   export let errorPrefix: string = "";
   export let iconWidth: string = "1.1em";
+  export let gengouList: string[] = ["昭和", "平成", "令和"];
   let form: DateForm;
   let datePicker: DatePickerPulldown;
 
@@ -30,7 +31,8 @@
 
 <div>
   <div class="wrapper">
-    <DateForm bind:date={date} {isNullable} bind:this={form} {errorPrefix} />
+    <DateForm bind:date={date} {isNullable} bind:this={form} {errorPrefix} 
+      {gengouList} />
     <slot name="spacer" />
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -171,6 +171,7 @@
   .day {
     width: 1.5em;
     font-size: 1em;
+    padding: 0 1px;
   }
 
   .nen-span, .month-span, .day-span {
