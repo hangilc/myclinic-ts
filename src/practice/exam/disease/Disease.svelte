@@ -16,6 +16,7 @@
   import { onMount, onDestroy } from "svelte";
   import * as appEvent from "@/practice/app-events";
   import Tenki from "./Tenki.svelte";
+    import Edit from "./Edit.svelte";
 
   let show = false;
   let mode = "current";
@@ -23,6 +24,7 @@
   let patient: Patient | null = null;
   const unsubs: (() => void)[] = [];
   let examples: DiseaseExample[] = [];
+  let allList: DiseaseData[] = [];
 
   unsubs.push(
     appEvent.diseaseEntered.subscribe(async (d) => {
@@ -82,7 +84,10 @@
     }
   });
 
-  function doMode(m: string): void {
+  async function doMode(m: string) {
+    if( m === "edit" && allList.length === 0 && patient != null ){
+      allList = await api.listDiseaseEx(patient.patientId);
+    }
     mode = m;
   }
 </script>
@@ -96,6 +101,8 @@
         <Add patientId={patient?.patientId} {examples} />
       {:else if mode === "tenki"}
         <Tenki current={currentList}/>
+      {:else if mode === "edit"}
+        <Edit list={allList} />
       {/if}
     </div>
     <div class="commands">

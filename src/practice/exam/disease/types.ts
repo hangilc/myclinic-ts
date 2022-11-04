@@ -1,4 +1,4 @@
-import type { ByoumeiMaster, Disease, DiseaseAdj, ShuushokugoMaster } from "@/lib/model";
+import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type ShuushokugoMaster } from "@/lib/model";
 import * as kanjidate from "kanjidate";
 
 export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]
@@ -19,6 +19,28 @@ export function getStartDate(data: DiseaseData): string {
   return data[0].startDate;
 }
 
+export function getEndDate(data: DiseaseData): string {
+  return data[0].endDate;
+}
+
+export function hasEndDate(data: DiseaseData): boolean {
+  return getEndDate(data) !== "0000-00-00";
+}
+
 export function startDateRep(data: DiseaseData): string {
   return kanjidate.format(kanjidate.f3, getStartDate(data));
+}
+
+export function endDateRep(data: DiseaseData): string {
+  const d = getEndDate(data);
+  if( d === "0000-00-00" ) {
+    return "未終了";
+  } else {
+    return kanjidate.format(kanjidate.f3, d);
+  }
+}
+
+export function getEndReason(data: DiseaseData): DiseaseEndReasonType {
+  const s = data[0].endReasonStore;
+  return DiseaseEndReasonObject.fromCode(s);
 }
