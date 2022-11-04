@@ -41,6 +41,10 @@ import SelectItem from "@/lib/SelectItem.svelte";
     }
     return `${reason.label}、${start}${end}`;
   }
+
+  function doCancel(): void {
+    selected.set(null);
+  }
 </script>
 
 <div>
@@ -63,6 +67,7 @@ import SelectItem from "@/lib/SelectItem.svelte";
         </div>
         <div>
           <button>入力</button>
+          <a href="javascript:void(0)" on:click={doCancel}>キャンセル</a>
         </div>
         <div>
           <a href="javascript:void(0)">の疑い</a>
@@ -100,8 +105,8 @@ import SelectItem from "@/lib/SelectItem.svelte";
 </div>
 
 <style>
-  .list {
-    max-height: 10em;
+  .list.select {
+    height: 10em;
     overflow-y: auto;
     font-size: 14px;
     margin-top: 10px;
