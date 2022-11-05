@@ -1,25 +1,27 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
   import Modal from "../Modal.svelte";
-  import type { AppError } from "../app-error";
 
-  export let date: Date | null = null;
   export let isNullable: boolean = false;
   export let errorPrefix: string = "";
+  export let onEnter: (value: Date | null) => void;
+  let init: Date | null = null;
   let modal: Modal;
   let dateForm: DateForm;
   let error: string = "";
 
-  export function open(): void {
+  export function open(initValue: Date | null): void {
+    init = initValue;
     modal.open();
   }
 
   function doEnter(close: () => void): void {
-    const errs: AppError[] = [];
-    if( dateForm.validate(errs) ){
-      close();
-    } else {
+    const [value, errs] = dateForm.validate();
+    if( errs.length > 0 ){
       error = errs.map(e => e.message).join("\n");
+    } else {
+      close();
+      onEnter(value);
     }
   }
 </script>
@@ -28,7 +30,7 @@
   {#if error !== ""}
   <div class="error">{error}</div>
   {/if}
-  <DateForm bind:date={date} {isNullable} bind:this={dateForm} {errorPrefix} />
+  <DateForm {init} {isNullable} bind:this={dateForm} {errorPrefix} />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={() => doEnter(close)}>入力</button>

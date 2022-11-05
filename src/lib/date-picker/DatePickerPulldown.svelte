@@ -2,12 +2,13 @@
   import Modal from "../Modal.svelte";
   import DatePicker from "./DatePicker.svelte";
 
+  let init: Date;
+
   export let onEnter: (value: Date) => void;
-  let date: Date | null;
   let modal: Modal;
 
-  export function open(init: Date): void {
-    date = init;
+  export function open(initValue: Date): void {
+    init = initValue;
     modal.open();
   }
 
@@ -18,5 +19,5 @@
 </script>
 
 <Modal bind:this={modal} let:close>
-  <DatePicker bind:date={date} onCancel={close} onEnter={(d) => doEnter(d, close)}/>
+  <DatePicker {init} onCancel={close} onEnter={(d) => doEnter(d, close)}/>
 </Modal>

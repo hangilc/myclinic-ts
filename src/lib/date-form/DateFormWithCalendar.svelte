@@ -3,7 +3,7 @@
   import type { AppError } from "../app-error";
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
-  export let date: Date | null = null;
+  export let init: Date | null = null;
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();
   export let errorPrefix: string = "";
@@ -12,26 +12,30 @@
   let form: DateForm;
   let datePicker: DatePickerPulldown;
 
-  export function validate(errors: AppError[], prefix: string): boolean {
-    return form.validate(errors);
+  export function initValues(date: Date | null): void {
+    form.initValues(date);
+  }
+
+  export function validate(): [Date | null, AppError[]] {
+    return form.validate();
   }
 
   function doCalClick(): void {
-    let d = form.calcValue([]);
-    if( d == null ){
+    let [d, errs] = form.validate();
+    if( d == null || errs.length > 0 ){
       d = datePickerDefault();
     }
     datePicker.open(d);
   }
 
   function doDatePickerEnter(value: Date): void {
-    date = value;
+    form.initValues(value);
   }
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm bind:date={date} {isNullable} bind:this={form} {errorPrefix} 
+    <DateForm {init} {isNullable} bind:this={form} {errorPrefix} 
       {gengouList} />
     <slot name="spacer" />
     <svg

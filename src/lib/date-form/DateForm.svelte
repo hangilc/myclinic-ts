@@ -2,7 +2,7 @@
   import { KanjiDate, fromGengou, addYears, addMonths, addDays } from "kanjidate";
   import { AppError } from "@/lib/app-error";
 
-  export let date: Date | null;
+  export let init: Date | null = null;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let isNullable = false;
   export let errorPrefix: string = "";
@@ -12,9 +12,9 @@
   let monthValue: string = "";
   let dayValue: string = "";
 
-  $: updateValues(date);
+  initValues(init);
 
-  function updateValues(d: Date | null): void {
+  export function initValues(d: Date | null): void {
     if (d == null) {
       nenValue = "";
       monthValue = "";
@@ -26,6 +26,35 @@
       nenValue = kdate.nen.toString();
       monthValue = kdate.month.toString();
       dayValue = kdate.day.toString();
+    }
+  }
+
+  export function validate(): [Date | null, AppError[]] {
+    if (nenValue === "" && monthValue === "" && dayValue === "") {
+      if( isNullable ){
+        return [null, []];
+      } else {
+        return [null, [mkError("入力がありません。")]];
+      }
+    } else {
+      const errors: AppError[] = [];
+      const nen = parseNenValue();
+      if( nen instanceof AppError ){
+        errors.push(nen);
+      }
+      const month = parseMonthValue();
+      if( month instanceof AppError ){
+        errors.push(month);
+      }
+      const day = parseDayValue();
+      if( day instanceof AppError ){
+        errors.push(day);
+      }
+      if( errors.length > 0 ){
+        return [null, errors];
+      }
+      let year: number = fromGengou(gengouValue, nen as number);
+      return [new Date(year, (month as number) - 1, day as number), []];
     }
   }
 
@@ -57,68 +86,27 @@
     return d;
   }
 
-  export function calcValue(errors: AppError[]): Date | null {
-    if (nenValue === "" && monthValue === "" && dayValue === "") {
-      if( isNullable ){
-        return null;
-      } else {
-        errors.push(mkError("入力がありません。"));
-        return null;
-      }
-    } else {
-      let nErr = errors.length;
-      const nen = parseNenValue();
-      if( nen instanceof AppError ){
-        errors.push(nen);
-      }
-      const month = parseMonthValue();
-      if( month instanceof AppError ){
-        errors.push(month);
-      }
-      const day = parseDayValue();
-      if( day instanceof AppError ){
-        errors.push(day);
-      }
-      if( errors.length > nErr ){
-        return null;
-      }
-      let year: number = fromGengou(gengouValue, nen as number);
-      return new Date(year, (month as number) - 1, day as number);
-    }
-  }
-
-  export function validate(errors: AppError[]): boolean {
-    const nErr = errors.length;
-    const d = calcValue(errors);
-    if( errors.length == nErr ){
-      date = d;
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   function doNenClick(event: MouseEvent): void {
-    const d = calcValue([]);
+    const [d, _] = validate();
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
-      date = addYears(d, n);
+      initValues(addYears(d, n));
     }
   }
 
   function doMonthClick(event: MouseEvent): void {
-    const d = calcValue([]);
+    const [d, _] = validate();
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
-      date = addMonths(d, n);
+      initValues(addMonths(d, n));
     }
   }
 
   function doDayClick(event: MouseEvent): void {
-    const d = calcValue([]);
+    const [d, _] = validate();
     if( d instanceof Date ){
       const n = event.shiftKey ? -1 : 1;
-      date = addDays(d, n);
+      initValues(addDays(d, n));
     }
   }
 </script>

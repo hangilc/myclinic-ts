@@ -1,4 +1,4 @@
-import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type ShuushokugoMaster } from "@/lib/model";
+import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type DiseaseExample, type ShuushokugoMaster } from "@/lib/model";
 import * as kanjidate from "kanjidate";
 
 export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]
@@ -44,3 +44,5 @@ export function getEndReason(data: DiseaseData): DiseaseEndReasonType {
   const s = data[0].endReasonStore;
   return DiseaseEndReasonObject.fromCode(s);
 }
+
+export type SearchResultType = ByoumeiMaster | ShuushokugoMaster | DiseaseExample;

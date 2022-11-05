@@ -5,7 +5,7 @@
   import SelectItem from "../SelectItem.svelte";
   import { pad } from "@/lib/pad";
 
-  export let date: Date | null;
+  export let init: Date;
   export let onEnter: (value: Date) => void;
   export let onCancel: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
@@ -23,13 +23,10 @@
   let monthSpan: HTMLElement;
   let monthSelect: Writable<number | null> = writable(null);
   let monthPulldown: Pulldown;
-
   let days: [string, string][] = [];
 
-  $: {
-    initValues(date);
-    updateDays();
-  }
+  initValues(init);
+  updateDays();
 
   gengouSelect.subscribe((g) => {
     if (g != null) {
@@ -52,21 +49,16 @@
     }
   });
 
-  function initValues(date: Date | null): void {
-    if (date == null) {
-      nenValue = "";
-      monthValue = "";
-    } else {
-      const wareki = kanjidate.toGengou(
-        date.getFullYear(),
-        date.getMonth() + 1,
-        date.getDate()
-      );
-      gengouValue = wareki.gengou;
-      nenValue = pad(wareki.nen, 2, " ");
-      monthValue = pad(date.getMonth() + 1, 2, " ");
-      selectedDay = date.getDate();
-    }
+  function initValues(date: Date): void {
+    const wareki = kanjidate.toGengou(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate()
+    );
+    gengouValue = wareki.gengou;
+    nenValue = pad(wareki.nen, 2, " ");
+    monthValue = pad(date.getMonth() + 1, 2, " ");
+    selectedDay = date.getDate();
   }
 
   function updateDays(): void {
@@ -136,7 +128,7 @@
   }
 </script>
 
-<div>
+<div class="top">
   <div class="top-row">
     <span on:click={doGengouClick} bind:this={gengouSpan} class="gengou-span">
       {gengouValue}
@@ -225,6 +217,10 @@
 </Pulldown>
 
 <style>
+  .top {
+    font-size: 1rem;
+  }
+  
   .top-row {
     display: flex;
     align-items: center;

@@ -1,10 +1,9 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
-    import { genid } from "@/lib/genid";
-    import { DiseaseEndReason, type DiseaseEndReasonType } from "@/lib/model";
-import SelectItem from "@/lib/SelectItem.svelte";
-    import { each } from "svelte/internal";
-    import { writable, type Writable } from "svelte/store";
+  import { genid } from "@/lib/genid";
+  import { DiseaseEndReason, type DiseaseEndReasonType } from "@/lib/model";
+  import SelectItem from "@/lib/SelectItem.svelte";
+  import { writable, type Writable } from "svelte/store";
   import {
     fullName,
     getEndReason,
@@ -14,23 +13,31 @@ import SelectItem from "@/lib/SelectItem.svelte";
     getEndDate,
     getStartDate,
     type DiseaseData,
+    type SearchResultType,
   } from "./types";
+  import SearchForm from "./SearchForm.svelte";
 
   export let list: DiseaseData[];
-  export let selected: Writable<DiseaseData | null> = writable(null);
-  export let startDate: Date;
-  export let endDate: Date | null;
-  export let endReason: DiseaseEndReasonType;
-  selected.subscribe(data => {
-    if( data != null ){
-      startDate = new Date(getStartDate(data));
-      endDate = hasEndDate(data) ? new Date(getEndDate(data)) : null;
-      endReason = getEndReason(data);
-    }
-  });
+  let selected: Writable<DiseaseData | null> = writable(null);
+  let name: string = "";
+
+  function startDateOf(data: DiseaseData): Date {
+    return new Date(getStartDate(data));
+  }
+  // let startDate: Date | null = selected
+  //   ? new Date(getStartDate(selected))
+  //   : null;
+  // let endDate: Date | null = selected
+  //   ? getEndDate(selected) === "0000-00-00"
+  //     ? null
+  //     : new Date(getEndDate(selected))
+  //   : null;
+  // let endReason: DiseaseEndReasonType =
+  //   selected
+  //   ? getEndReason(selected)
+  //   : DiseaseEndReason.NotEnded;
   const gengouList = ["平成", "令和"];
-  const searchKinds = ["病名", "修飾語"];
-  let searchKind = "病名";
+  // let searchSelect: Writable<SearchResultType> = writable(null);
 
   function formatAux(data: DiseaseData): string {
     const reason = getEndReason(data);
@@ -42,9 +49,9 @@ import SelectItem from "@/lib/SelectItem.svelte";
     return `${reason.label}、${start}${end}`;
   }
 
-  function doCancel(): void {
-    selected.set(null);
-  }
+  // function doCancel(): void {
+  //   selected = null;
+  // }
 </script>
 
 <div>
@@ -53,15 +60,15 @@ import SelectItem from "@/lib/SelectItem.svelte";
       <div>
         <div>名前：{fullName($selected)}</div>
         <div class="date-wrapper start-date">
-          <DateFormWithCalendar bind:date={startDate} gengouList={gengouList}/>
+          <DateFormWithCalendar init={startDateOf($selected)} {gengouList} />
         </div>
-        <div class="date-wrapper end-date">
-          <DateFormWithCalendar bind:date={endDate} gengouList={gengouList}/>
+        <!-- <div class="date-wrapper end-date">
+          <DateFormWithCalendar bind:date={endDate} {gengouList} />
         </div>
         <div class="end-reason">
           {#each Object.values(DiseaseEndReason) as reason}
-          {@const id=genid()}
-            <input type="radio" bind:group={endReason} value={reason} id={id} />
+            {@const id = genid()}
+            <input type="radio" bind:group={endReason} value={reason} {id} />
             <label for={id}>{reason.label}</label>
           {/each}
         </div>
@@ -75,19 +82,7 @@ import SelectItem from "@/lib/SelectItem.svelte";
           <a href="javascript:void(0)">終了日クリア</a>
           <a href="javascript:void(0)">削除</a>
         </div>
-        <div>
-          {#each searchKinds as kind}
-          {@const id=genid()}
-            <input type="radio" bind:group={searchKind} value={kind} id={id} />
-            <label for={id}>{kind}</label>
-          {/each}
-        </div>
-        <div>
-          <input type="text" class="search-text-input"/> <button>検索</button>
-        </div>
-        <div class="select">
-
-        </div>
+        <SearchForm selected={searchSelect} {startDate} /> -->
       </div>
     {:else}
       （病名未選択）

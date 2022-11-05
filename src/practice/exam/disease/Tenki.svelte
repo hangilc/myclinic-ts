@@ -1,12 +1,17 @@
 <script lang="ts">
-  import { type DiseaseData, fullName, startDateRep, getStartDate } from "./types";
-  import { genid } from "@/lib/genid"
+  import {
+    type DiseaseData,
+    fullName,
+    startDateRep,
+    getStartDate,
+  } from "./types";
+  import { genid } from "@/lib/genid";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { addDays } from "kanjidate";
   import * as kanjidate from "kanjidate";
   import type { DiseaseEndReasonType } from "@/lib/model";
   import { DiseaseEndReason } from "@/lib/model";
-    import api from "@/lib/api";
+  import api from "@/lib/api";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
@@ -23,16 +28,19 @@
 
   function updateEndDate(list: DiseaseData[]): void {
     let e: string | null = null;
-    list.forEach(d => {
+    list.forEach((d) => {
       const s: string = getStartDate(d);
-      if( e == null || s > e ){
+      if (e == null || s > e) {
         e = s;
       }
-    })
-    if( e == null ){
+    });
+    if (e == null) {
       endDate = new Date();
     } else {
       endDate = new Date(e);
+    }
+    if (dateForm) {
+      dateForm.initValues(endDate);
     }
   }
 
@@ -46,7 +54,10 @@
   }
 
   function doEndOfMonthClick(): void {
-    const lastDay = kanjidate.lastDayOfMonth(endDate.getFullYear(), endDate.getMonth() + 1);
+    const lastDay = kanjidate.lastDayOfMonth(
+      endDate.getFullYear(),
+      endDate.getMonth() + 1
+    );
     const d = new Date(endDate);
     d.setDate(lastDay);
     endDate = d;
@@ -59,9 +70,9 @@
   }
 
   async function doEnter() {
-    const diseaseIds: number[] = selected.map(d => d[0].diseaseId);
+    const diseaseIds: number[] = selected.map((d) => d[0].diseaseId);
     const reasonCode = endReason.code;
-    const promises = diseaseIds.map(diseaseId => 
+    const promises = diseaseIds.map((diseaseId) =>
       api.endDisease(diseaseId, endDate, reasonCode)
     );
     await Promise.all(promises);
@@ -70,15 +81,15 @@
 
 <div>
   {#each current as d}
-  {@const id=genid()}
-  <div>
-    <input type="checkbox" id={id} bind:group={selected} value={d}/> 
-    <label for={id}>{fullName(d)} ({startDateRep(d)})</label>
-  </div>
+    {@const id = genid()}
+    <div>
+      <input type="checkbox" {id} bind:group={selected} value={d} />
+      <label for={id}>{fullName(d)} ({startDateRep(d)})</label>
+    </div>
   {/each}
   <div class="date-wrapper">
-    <DateFormWithCalendar bind:date={endDate} iconWidth="18px" bind:this={dateForm}>
-      <span slot="spacer" style:width="6px"/>
+    <DateFormWithCalendar init={endDate} iconWidth="18px" bind:this={dateForm}>
+      <span slot="spacer" style:width="6px" />
     </DateFormWithCalendar>
   </div>
   <div class="date-manip">
@@ -89,9 +100,9 @@
   </div>
   <div class="tenki">
     {#each endReasons as reason}
-    {@const id=genid()}
-    <input type="radio" bind:group={endReason} value={reason} id={id} />
-    <label for={id}>{reason.label}</label>
+      {@const id = genid()}
+      <input type="radio" bind:group={endReason} value={reason} {id} />
+      <label for={id}>{reason.label}</label>
     {/each}
   </div>
   <div class="commands">

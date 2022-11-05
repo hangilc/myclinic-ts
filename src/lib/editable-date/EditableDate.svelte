@@ -12,6 +12,7 @@
       return kanjidate.format(kanjidate.f2, date);
     }
   };
+  export let datePickerDefault: () => Date = () => new Date();
   let repr: string;
   let disp: HTMLElement;
   let form: DateFormPulldown;
@@ -19,11 +20,11 @@
   $: repr = format(date);
 
   function doClick(): void {
-    form.open();
+    form.open(date);
   }
 
   function doCalClick(): void {
-    datePicker.open();
+    datePicker.open(date || datePickerDefault());
   }
 </script>
 
@@ -48,12 +49,11 @@
   </svg>
 </div>
 <DateFormPulldown
-  {date}
   {isNullable}
   onEnter={(d) => (date = d)}
   bind:this={form}
 />
-<DatePickerPulldown bind:date={date} bind:this={datePicker} />
+<DatePickerPulldown bind:this={datePicker} onEnter={d => date = d}/>
 
 <style>
   .disp {
