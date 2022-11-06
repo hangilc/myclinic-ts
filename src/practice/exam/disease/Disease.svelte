@@ -17,6 +17,7 @@
   import * as appEvent from "@/practice/app-events";
   import Tenki from "./Tenki.svelte";
     import Edit from "./Edit.svelte";
+    import { get } from "svelte/store";
 
   let show = false;
   let mode = "current";
@@ -24,7 +25,7 @@
   let patient: Patient | null = null;
   const unsubs: (() => void)[] = [];
   let examples: DiseaseExample[] = [];
-  let allList: DiseaseData[] = [];
+  let allList: DiseaseData[] = undefined;
 
   unsubs.push(
     appEvent.diseaseEntered.subscribe(async (d) => {
@@ -50,7 +51,7 @@
             list.splice(index, 1, data);
           } else {
             list.push(data);
-            list.sort((a, b) => a[0].diseaseId - b[0].diseaseId);
+            list.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
           }
           currentList = list;
         } else {
@@ -61,9 +62,25 @@
             currentList = list;
           }
         }
+        if( allList !== undefined ){
+          updateAllListWith(d.diseaseId);
+        }
       }
     })
   )
+
+  async function updateAllListWith(diseaseId: number) {
+    let d = await api.getDiseaseEx(diseaseId);
+    const cur = allList;
+    const i = cur.findIndex(e => e[0].diseaseId === diseaseId);
+    if( i >= 0 ){
+      cur.splice(i, 1, d);
+    } else {
+      cur.push(d);
+      cur.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
+    }
+    allList = cur;
+  }
 
   onMount(async () => {
     examples = await api.listDiseaseExample();
@@ -85,7 +102,7 @@
   });
 
   async function doMode(m: string) {
-    if( m === "edit" && allList.length === 0 && patient != null ){
+    if( m === "edit" && allList === undefined && patient != null ){
       allList = await api.listDiseaseEx(patient.patientId);
     }
     mode = m;
