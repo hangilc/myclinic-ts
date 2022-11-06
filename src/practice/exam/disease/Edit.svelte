@@ -71,10 +71,22 @@
 
   async function doEnter() {
     const data = copyDiseaseData($selected);
+    if( startDate == null ){
+      alert("エラー：開始日が設定されていません。");
+      return;
+    }
     data[0].startDate = dateToSql(startDate);
     data[0].endDate = endDate == null ? "0000-00-00" : dateToSql(endDate);
     data[0].endReasonStore = endReason.code;
+    if( data[0].endReasonStore === "N" ){
+      data[0].endDate = "0000-00-00";
+    }
+    if( !(data[0].endDate === "0000-00-00" || data[0].startDate <= data[0].endDate) ){
+      alert("エラー：開始日が終了日の後です。");
+      return;
+    }
     await api.updateDiseaseEx(data[0], data[2].map(e => e[0].shuushokugocode));
+    selected.set(null);
   }
 
   function doCancel(): void {
@@ -98,6 +110,7 @@
           <DateFormWithCalendar
             bind:date={endDate}
             bind:errors={endDateErrors}
+            isNullable={false}
             {gengouList}
           />
         </div>

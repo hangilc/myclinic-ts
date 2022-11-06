@@ -28,6 +28,7 @@
     data: ByoumeiMaster | ShuushokugoMaster | DiseaseExample;
   }
   let startDate: Date = new Date();
+  let startDateErrors: string[] = [];
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
   let searchText: string = "";
@@ -87,6 +88,10 @@
 
   async function doEnter() {
     if (byoumeiMaster != null && patientId != null) {
+      if( startDateErrors.length > 0 ){
+        alert("エラー：\n" + startDateErrors.join("\n"));
+        return;
+      }
       const data: DiseaseEnterData = {
         patientId: patientId,
         byoumeicode: byoumeiMaster.shoubyoumeicode,
@@ -131,7 +136,7 @@
     名称：{byoumeiMaster?.name || ""}{adjList.map((m) => m.name).join("")}
   </div>
   <div>
-    <EditableDate bind:date={startDate}>
+    <EditableDate bind:date={startDate} bind:errors={startDateErrors} isNullable={false}>
       <svelte:fragment slot="icons">
         <svg
           xmlns="http://www.w3.org/2000/svg"
