@@ -24,6 +24,7 @@
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
   import { dateToSql } from "@/lib/util"
+    import api from "@/lib/api";
 
   export let list: DiseaseData[];
   let selected: Writable<DiseaseData | null> = writable(null);
@@ -73,7 +74,7 @@
     data[0].startDate = dateToSql(startDate);
     data[0].endDate = endDate == null ? "0000-00-00" : dateToSql(endDate);
     data[0].endReasonStore = endReason.code;
-    console.log(data);
+    await api.updateDiseaseEx(data[0], data[2].map(e => e[0].shuushokugocode));
   }
 
   function doCancel(): void {
