@@ -12,10 +12,22 @@ export const wsUrl: string =
 function getBackend(): string {
   if (!import.meta.env.SSR) {
     const l = window.location;
-    return `${l.protocol}//${l.hostname}:8080`;
+    const proto = l.protocol.toLowerCase()
+    console.log(proto);
+    const port = proto === "https:" ? sslServerPort() : nonSslServerPort();
+    console.log(port);
+    return `${proto}//${l.hostname}:${port}`;
   } else {
     return "http://localhost:8080";
   }
+}
+
+function sslServerPort(): number {
+  return 8443;
+}
+
+function nonSslServerPort(): number {
+  return 8080;
 }
 
 function get(cmd: string, params: any = {}): Promise<any> {

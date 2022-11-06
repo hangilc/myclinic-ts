@@ -22,29 +22,45 @@
     release(zIndexContent);
     onClose();
   }
-
 </script>
 
 {#if show}
-<div>
-  <Screen opacity="0.5" zIndex={zIndexScreen} />
-  <div
-    bind:this={content}
-    class="dialog"
-    style:z-index={zIndexContent}
-    style:width={width}
-  >
-    {#if !noTitle}
-    <div class="title-wrapper">
-      <slot name="title" /><img src="/xicon.svg" alt="xicon" on:click={() => close()}/>
-    </div>
-    {/if}
-    <slot close={close}/>
-    <div class="commands">
-      <slot name="commands"/>
+  <div>
+    <Screen opacity="0.5" zIndex={zIndexScreen} />
+    <div
+      bind:this={content}
+      class="dialog"
+      style:z-index={zIndexContent}
+      style:width
+    >
+      {#if !noTitle}
+        <div class="title-wrapper">
+          <slot name="title" />
+          <!-- <img src="/xicon.svg" alt="xicon" on:click={() => close()}/> -->
+          <svg
+            on:click={close}
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            width="16px"
+            height="16px"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </div>
+      {/if}
+      <slot {close} />
+      <div class="commands">
+        <slot name="commands" />
+      </div>
     </div>
   </div>
-</div>
 {/if}
 
 <style>
@@ -55,7 +71,7 @@
     transform: translateX(-50%);
     background-color: white;
     padding: 0.5rem 1.5rem;
-    opacity: 1.0;
+    opacity: 1;
     overflow: auto;
     border-radius: 0.5rem;
   }
