@@ -11,32 +11,32 @@
   // import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   // import DateForm from "@/lib/date-form/DateForm.svelte";
   // import DateFormPulldown from "@/lib/date-form/DateFormPulldown.svelte";
-  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  // import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   // let pulldown: DateFormPulldown;
-  let date = new Date();
-  let errors: string[] = [];
-  function click() {
+  // let date = new Date();
+  // let errors: string[] = [];
+  // function click() {
     
-  }
-  function doGet() {
-    console.log(date, errors);
-  }
-  function onEnter(value: Date) {
-    console.log("enter", value);
-  }
+  // }
+  // function doGet() {
+  //   console.log(date, errors);
+  // }
+  // function onEnter(value: Date) {
+  //   console.log("enter", value);
+  // }
 </script>
 
 <div class="two-cols">
   <div class="left">
     <SideMenu serviceStore={service}/>
 
-    <EditableDate bind:date={date} bind:errors={errors} />
+    <!-- <EditableDate bind:date={date} bind:errors={errors} /> -->
     <!-- <DatePicker date={new Date()}/> -->
     <!-- <DateFormWithCalendar date={new Date()}/> -->
     <!-- <DateForm bind:date={obj.a} bind:errors={dateErrs}/> -->
     <!-- <DateFormWithCalendar bind:date={date} bind:errors={errors}/> -->
-    <button on:click={click}>click</button>
-    <button on:click={doGet}>get</button>
+    <!-- <button on:click={click}>click</button>
+    <button on:click={doGet}>get</button> -->
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
