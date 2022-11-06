@@ -20,13 +20,13 @@
   export let list: DiseaseData[];
   let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
-  let startDateForm: DateFormWithCalendar;
+  let startDate: Date | null = null;
+  let startDateErrors: string[] = [];
 
-  selected.subscribe(sel => {
-    if( sel != null ){
+  selected.subscribe((sel) => {
+    if (sel != null) {
       name = fullName(sel);
-      console.log(startDateOf(sel));
-      startDateForm.initValues(startDateOf(sel));
+      startDate = startDateOf(sel);
     }
   });
 
@@ -72,7 +72,11 @@
       <div>
         <div>名前：{name}</div>
         <div class="date-wrapper start-date">
-          <DateFormWithCalendar bind:this={startDateForm} {gengouList} />
+          <DateFormWithCalendar
+            bind:date={startDate}
+            bind:errors={startDateErrors}
+            {gengouList}
+          />
         </div>
         <!-- <div class="date-wrapper end-date">
           <DateFormWithCalendar bind:date={endDate} {gengouList} />
