@@ -1,9 +1,15 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { DiseaseEndReason, type DiseaseEndReasonType } from "@/lib/model";
+  import {
+    DiseaseEndReason,
+    type DiseaseEndReasonType,
+    isByoumeiMaster,
+    isShuushokugoMaster,
+    isDiseaseExample,
+  } from "@/lib/model";
   import SelectItem from "@/lib/SelectItem.svelte";
-  import { writable, type Writable } from "svelte/store";
+  import { get, writable, type Writable } from "svelte/store";
   import {
     fullName,
     getEndReason,
@@ -11,45 +17,46 @@
     hasEndDate,
     endDateRep,
     startDateOf,
-    getStartDate,
+    endDateOf,
+    copyDiseaseData,
     type DiseaseData,
     type SearchResultType,
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
+  import { dateToSql } from "@/lib/util"
 
   export let list: DiseaseData[];
   let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
   let startDate: Date | null = null;
   let startDateErrors: string[] = [];
+  let endDate: Date | null = null;
+  let endDateErrors: string[] = [];
+  let endReason: DiseaseEndReasonType = DiseaseEndReason.NotEnded;
+  let searchSelect: Writable<SearchResultType> = writable(null);
 
-  selected.subscribe((sel) => {
-    if (sel != null) {
-      name = fullName(sel);
-      startDate = startDateOf(sel);
+  searchSelect.subscribe((sel) => {
+    if (isByoumeiMaster(sel)) {
+      const data = copyDiseaseData($selected);
+      data[0].shoubyoumeicode = sel.shoubyoumeicode;
+      data[1] = sel;
+      selected.set(data);
+    } else if (isShuushokugoMaster(sel)) {
+    } else if (isDiseaseExample(sel)) {
     }
   });
 
-  // selected.subscribe(sel => {
-  //   if( sel != null ){
-  //     startDateForm.initValues(startDateOf(sel));
-  //   }
-  // })
+  selected.subscribe((sel) => {
+    if (sel != null) {
+      console.log("sel updated", sel);
+      name = fullName(sel);
+      startDate = startDateOf(sel);
+      endDate = endDateOf(sel);
+      endReason = getEndReason(sel);
+    }
+  });
 
-  // let startDate: Date | null = selected
-  //   ? new Date(getStartDate(selected))
-  //   : null;
-  // let endDate: Date | null = selected
-  //   ? getEndDate(selected) === "0000-00-00"
-  //     ? null
-  //     : new Date(getEndDate(selected))
-  //   : null;
-  // let endReason: DiseaseEndReasonType =
-  //   selected
-  //   ? getEndReason(selected)
-  //   : DiseaseEndReason.NotEnded;
   const gengouList = ["平成", "令和"];
-  // let searchSelect: Writable<SearchResultType> = writable(null);
 
   function formatAux(data: DiseaseData): string {
     const reason = getEndReason(data);
@@ -61,9 +68,17 @@
     return `${reason.label}、${start}${end}`;
   }
 
-  // function doCancel(): void {
-  //   selected = null;
-  // }
+  async function doEnter() {
+    const data = copyDiseaseData($selected);
+    data[0].startDate = dateToSql(startDate);
+    data[0].endDate = endDate == null ? "0000-00-00" : dateToSql(endDate);
+    data[0].endReasonStore = endReason.code;
+    console.log(data);
+  }
+
+  function doCancel(): void {
+    selected.set(null);
+  }
 </script>
 
 <div>
@@ -78,8 +93,12 @@
             {gengouList}
           />
         </div>
-        <!-- <div class="date-wrapper end-date">
-          <DateFormWithCalendar bind:date={endDate} {gengouList} />
+        <div class="date-wrapper end-date">
+          <DateFormWithCalendar
+            bind:date={endDate}
+            bind:errors={endDateErrors}
+            {gengouList}
+          />
         </div>
         <div class="end-reason">
           {#each Object.values(DiseaseEndReason) as reason}
@@ -89,16 +108,10 @@
           {/each}
         </div>
         <div>
-          <button>入力</button>
+          <button on:click={doEnter}>入力</button>
           <a href="javascript:void(0)" on:click={doCancel}>キャンセル</a>
         </div>
-        <div>
-          <a href="javascript:void(0)">の疑い</a>
-          <a href="javascript:void(0)">修飾語削除</a>
-          <a href="javascript:void(0)">終了日クリア</a>
-          <a href="javascript:void(0)">削除</a>
-        </div>
-        <SearchForm selected={searchSelect} {startDate} /> -->
+        <SearchForm selected={searchSelect} bind:startDate />
       </div>
     {:else}
       （病名未選択）

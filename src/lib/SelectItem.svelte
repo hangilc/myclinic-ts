@@ -10,7 +10,6 @@
   export let data: any;
 
   function onClick() {
-    console.log("select", data);
     onSelect(data);
   }
 </script>

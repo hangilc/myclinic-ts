@@ -425,6 +425,10 @@ export default {
       "end-date": dateParam(endDate),
       "end-reason": endReason
     });
+  },
+
+  updateDiseaseEx(disease: m.Disease, shuushokugocodes: number[]): Promise<boolean> {
+    return post("update-disease-ex", [disease, shuushokugocodes]);
   }
 
 }

@@ -3,6 +3,17 @@ import * as kanjidate from "kanjidate";
 
 export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]
 
+export function copyDiseaseData(data: DiseaseData): DiseaseData {
+  return [
+    {...data[0]},
+    data[1],
+    data[2].map(ele => {
+      const [adj, master] = ele;
+      return [{...adj}, master];
+    })
+  ]
+}
+
 export function byoumeiName(data: DiseaseData): string {
   return data[1].name;
 }

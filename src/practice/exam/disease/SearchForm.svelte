@@ -17,12 +17,15 @@
   }
   export let selected: Writable<SearchResultType | null>;
   export let examples: DiseaseExample[] = [];
-  export let startDate: Readable<Date>;
-  let searchSelect: Writable<SearchResult> = writable(null);
+  export let startDate: Date;
+  let searchSelect: Writable<SearchResultType> = writable(null);
   let searchText: string = "";
 
-  searchSelect.subscribe((sel) => {
-    selected.set(sel.data);
+  searchSelect.subscribe((data) => {
+    if( data != null ){
+      console.log("data", data);
+      selected.set(data);
+    }
   });
 
   type SearchKind = "byoumei" | "shuushokugo";
@@ -33,16 +36,16 @@
 
   async function doSearch() {
     const t = searchText.trim();
-    if (t !== "" && $startDate != null) {
+    if (t !== "" && startDate != null) {
       if (searchKind === "byoumei") {
-        searchResult = (await api.searchByoumeiMaster(t, $startDate)).map(
+        searchResult = (await api.searchByoumeiMaster(t, startDate)).map(
           (m) => ({
             label: m.name,
             data: m,
           })
         );
       } else if (searchKind === "shuushokugo") {
-        searchResult = (await api.searchShuushokugoMaster(t, $startDate)).map(
+        searchResult = (await api.searchShuushokugoMaster(t, startDate)).map(
           (m) => ({
             label: m.name,
             data: m,
@@ -89,3 +92,10 @@
     {/each}
   </div>
 </div>
+
+<style>
+  .search-result {
+    height: 7em;
+    overflow-y: auto;
+  }
+</style>
