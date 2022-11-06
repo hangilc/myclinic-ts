@@ -27,6 +27,10 @@
   let examples: DiseaseExample[] = [];
   let allList: DiseaseData[] = undefined;
 
+  function sortDiseaseList(dlist: DiseaseData[]): void {
+    dlist.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
+  }
+
   unsubs.push(
     appEvent.diseaseEntered.subscribe(async (d) => {
       if (d != null) {
@@ -35,6 +39,12 @@
           const curr = currentList;
           curr.push(ex);
           currentList = curr;
+          if( allList !== undefined ){
+            const cur = allList;
+            cur.push(ex);
+            sortDiseaseList(cur);
+            allList = cur;
+          }
         }
       }
     })
@@ -51,7 +61,7 @@
             list.splice(index, 1, data);
           } else {
             list.push(data);
-            list.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
+            sortDiseaseList(list);
           }
           currentList = list;
         } else {
@@ -77,7 +87,7 @@
       cur.splice(i, 1, d);
     } else {
       cur.push(d);
-      cur.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
+      sortDiseaseList(cur);
     }
     allList = cur;
   }
