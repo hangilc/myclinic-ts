@@ -7,9 +7,10 @@
     addDays,
   } from "kanjidate";
   import { AppError } from "@/lib/app-error";
+  import { string, notEmpty, toNumber, integer } from "@/lib/validator";
 
   export let date: Date | null | undefined;
-  export const errors: AppError[] = [];
+  export let errors: string[];
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let isNullable = false;
   export let errorPrefix: string = "";
@@ -22,10 +23,11 @@
   $: {
     if (date !== undefined) {
       initValues(date);
+      validate();
     }
   }
 
-  export function initValues(d: Date | null ): void {
+  export function initValues(d: Date | null): void {
     if (d == null) {
       nenValue = "";
       monthValue = "";
@@ -40,13 +42,15 @@
     }
   }
 
-  function hasError(): boolean {
-    return errors.length > 0;
+  function clearError(): void {
+    errors = [];
   }
 
-  function clearError(): void {
-    errors.splice(0, errors.length);
-  }
+  const intValidator = string.bind(notEmpty).bind(toNumber).bind(integer);
+
+  const nenSchema = intValidator;
+  const monthSchema = intValidator;
+  const daySchema = intValidator;
 
   function validate(): void {
     clearError();
@@ -55,24 +59,17 @@
         date = null;
       } else {
         date = undefined;
-        errors.push(mkError("入力がありません。"));
+        errors.push("入力がありません。");
       }
     } else {
-      const nen = parseNenValue();
-      if (nen instanceof AppError) {
-        errors.push(nen);
-      }
-      const month = parseMonthValue();
-      if (month instanceof AppError) {
-        errors.push(month);
-      }
-      const day = parseDayValue();
-      if (day instanceof AppError) {
-        errors.push(day);
-      }
-      if (errors.length === 0) {
-        let year: number = fromGengou(gengouValue, nen as number);
-        date = new Date(year, (month as number) - 1, day as number);
+      const validated = {
+        nen: nenSchema.validate(nenValue).unwrap(errors, "年："),
+        month: monthSchema.validate(monthValue).unwrap(errors, "月："),
+        day: daySchema.validate(dayValue).unwrap(errors, "日："),
+      };
+      if( errors.length === 0 ){
+        let year: number = fromGengou(gengouValue, validated.nen);
+        date = new Date(year, validated.month - 1, validated.day);
       } else {
         date = undefined;
       }

@@ -2,35 +2,43 @@
   import DateForm from "./DateForm.svelte";
   import Modal from "../Modal.svelte";
 
+  let date: Date | null = null;
+  export let errors: string[];
   export let isNullable: boolean = false;
   export let errorPrefix: string = "";
   export let onEnter: (value: Date | null) => void;
-  let init: Date | null = null;
   let modal: Modal;
   let dateForm: DateForm;
   let error: string = "";
 
   export function open(initValue: Date | null): void {
-    init = initValue;
+    date = initValue;
+    errors = [];
+    error = "";
     modal.open();
   }
 
   function doEnter(close: () => void): void {
-    const [value, errs] = dateForm.validate();
-    if( errs.length > 0 ){
-      error = errs.map(e => e.message).join("\n");
-    } else {
+    if( errors.length === 0 ){
       close();
-      onEnter(value);
+      onEnter(date);
+    } else {
+      error = errors.join("\n");
     }
   }
 </script>
 
 <Modal let:close screenOpacity="0.2" bind:this={modal}>
   {#if error !== ""}
-  <div class="error">{error}</div>
+    <div class="error">{error}</div>
   {/if}
-  <DateForm {init} {isNullable} bind:this={dateForm} {errorPrefix} />
+  <DateForm
+    bind:date
+    bind:errors
+    {isNullable}
+    bind:this={dateForm}
+    {errorPrefix}
+  />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={() => doEnter(close)}>入力</button>

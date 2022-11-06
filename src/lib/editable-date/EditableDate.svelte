@@ -4,6 +4,7 @@
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
   export let date: Date | null;
+  export let errors: string[];
   export let isNullable = false;
   export let format: (date: Date | null) => string = (date: Date | null) => {
     if (date == null) {
@@ -49,6 +50,7 @@
   </svg>
 </div>
 <DateFormPulldown
+  bind:errors={errors}
   {isNullable}
   onEnter={(d) => (date = d)}
   bind:this={form}

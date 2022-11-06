@@ -9,17 +9,20 @@
   // import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   // import DatePicker from "@/lib/date-picker/DatePicker.svelte";
   // import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
-  import DateForm from "@/lib/date-form/DateForm.svelte";
-  let obj = {
-    a: new Date()
-  }
+  // import DateForm from "@/lib/date-form/DateForm.svelte";
+  // import DateFormPulldown from "@/lib/date-form/DateFormPulldown.svelte";
+  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  // let pulldown: DateFormPulldown;
   let date = new Date();
-  let dateErrs = [];
+  let errors: string[] = [];
   function click() {
-    date = new Date("2022-12-31")
+    
   }
   function doGet() {
-    console.log(obj.a);
+    console.log(date, errors);
+  }
+  function onEnter(value: Date) {
+    console.log("enter", value);
   }
 </script>
 
@@ -27,10 +30,11 @@
   <div class="left">
     <SideMenu serviceStore={service}/>
 
-    <!-- <EditableDate date={new Date()} /> -->
+    <EditableDate bind:date={date} bind:errors={errors} />
     <!-- <DatePicker date={new Date()}/> -->
     <!-- <DateFormWithCalendar date={new Date()}/> -->
-    <DateForm bind:date={obj.a} errors={dateErrs}/>
+    <!-- <DateForm bind:date={obj.a} bind:errors={dateErrs}/> -->
+    <!-- <DateFormWithCalendar bind:date={date} bind:errors={errors}/> -->
     <button on:click={click}>click</button>
     <button on:click={doGet}>get</button>
   </div>
