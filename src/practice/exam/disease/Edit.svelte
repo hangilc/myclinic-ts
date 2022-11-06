@@ -10,7 +10,7 @@
     startDateRep,
     hasEndDate,
     endDateRep,
-    getEndDate,
+    startDateOf,
     getStartDate,
     type DiseaseData,
     type SearchResultType,
@@ -19,11 +19,23 @@
 
   export let list: DiseaseData[];
   let selected: Writable<DiseaseData | null> = writable(null);
-  let name: string = "";
+  let name: string;
+  let startDateForm: DateFormWithCalendar;
 
-  function startDateOf(data: DiseaseData): Date {
-    return new Date(getStartDate(data));
-  }
+  selected.subscribe(sel => {
+    if( sel != null ){
+      name = fullName(sel);
+      console.log(startDateOf(sel));
+      startDateForm.initValues(startDateOf(sel));
+    }
+  });
+
+  // selected.subscribe(sel => {
+  //   if( sel != null ){
+  //     startDateForm.initValues(startDateOf(sel));
+  //   }
+  // })
+
   // let startDate: Date | null = selected
   //   ? new Date(getStartDate(selected))
   //   : null;
@@ -58,9 +70,9 @@
   <div>
     {#if $selected != null}
       <div>
-        <div>名前：{fullName($selected)}</div>
+        <div>名前：{name}</div>
         <div class="date-wrapper start-date">
-          <DateFormWithCalendar init={startDateOf($selected)} {gengouList} />
+          <DateFormWithCalendar bind:this={startDateForm} {gengouList} />
         </div>
         <!-- <div class="date-wrapper end-date">
           <DateFormWithCalendar bind:date={endDate} {gengouList} />

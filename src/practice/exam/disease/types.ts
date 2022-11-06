@@ -19,8 +19,17 @@ export function getStartDate(data: DiseaseData): string {
   return data[0].startDate;
 }
 
+export function startDateOf(data: DiseaseData): Date {
+  return new Date(getStartDate(data));
+}
+
 export function getEndDate(data: DiseaseData): string {
   return data[0].endDate;
+}
+
+export function endDateOf(data: DiseaseData): Date | null {
+  const s = getEndDate(data);
+  return s === "0000-00-00" ? null : new Date(s);
 }
 
 export function hasEndDate(data: DiseaseData): boolean {

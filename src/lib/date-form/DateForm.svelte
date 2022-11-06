@@ -1,8 +1,15 @@
 <script lang="ts">
-  import { KanjiDate, fromGengou, addYears, addMonths, addDays } from "kanjidate";
+  import {
+    KanjiDate,
+    fromGengou,
+    addYears,
+    addMonths,
+    addDays,
+  } from "kanjidate";
   import { AppError } from "@/lib/app-error";
 
-  export let init: Date | null = null;
+  export let date: Date | null | undefined;
+  export const errors: AppError[] = [];
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let isNullable = false;
   export let errorPrefix: string = "";
@@ -12,9 +19,13 @@
   let monthValue: string = "";
   let dayValue: string = "";
 
-  initValues(init);
+  $: {
+    if (date !== undefined) {
+      initValues(date);
+    }
+  }
 
-  export function initValues(d: Date | null): void {
+  export function initValues(d: Date | null ): void {
     if (d == null) {
       nenValue = "";
       monthValue = "";
@@ -29,37 +40,53 @@
     }
   }
 
-  export function validate(): [Date | null, AppError[]] {
+  function hasError(): boolean {
+    return errors.length > 0;
+  }
+
+  function clearError(): void {
+    errors.splice(0, errors.length);
+  }
+
+  function validate(): void {
+    clearError();
     if (nenValue === "" && monthValue === "" && dayValue === "") {
-      if( isNullable ){
-        return [null, []];
+      if (isNullable) {
+        date = null;
       } else {
-        return [null, [mkError("入力がありません。")]];
+        date = undefined;
+        errors.push(mkError("入力がありません。"));
       }
     } else {
-      const errors: AppError[] = [];
       const nen = parseNenValue();
-      if( nen instanceof AppError ){
+      if (nen instanceof AppError) {
         errors.push(nen);
       }
       const month = parseMonthValue();
-      if( month instanceof AppError ){
+      if (month instanceof AppError) {
         errors.push(month);
       }
       const day = parseDayValue();
-      if( day instanceof AppError ){
+      if (day instanceof AppError) {
         errors.push(day);
       }
-      if( errors.length > 0 ){
-        return [null, errors];
+      if (errors.length === 0) {
+        let year: number = fromGengou(gengouValue, nen as number);
+        date = new Date(year, (month as number) - 1, day as number);
+      } else {
+        date = undefined;
       }
-      let year: number = fromGengou(gengouValue, nen as number);
-      return [new Date(year, (month as number) - 1, day as number), []];
     }
   }
 
   function mkError(msg: string): AppError {
     return new AppError(errorPrefix + msg);
+  }
+
+  const patDigits = /^\d+$/;
+
+  function isAllDigits(s: string): boolean {
+    return patDigits.test(s);
   }
 
   function parseNenValue(): number | AppError {
@@ -87,42 +114,47 @@
   }
 
   function doNenClick(event: MouseEvent): void {
-    const [d, _] = validate();
-    if( d instanceof Date ){
+    validate();
+    if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
-      initValues(addYears(d, n));
+      date = addYears(date, n);
     }
   }
 
   function doMonthClick(event: MouseEvent): void {
-    const [d, _] = validate();
-    if( d instanceof Date ){
+    validate();
+    if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
-      initValues(addMonths(d, n));
+      date = addMonths(date, n);
     }
   }
 
   function doDayClick(event: MouseEvent): void {
-    const [d, _] = validate();
-    if( d instanceof Date ){
+    validate();
+    if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
-      initValues(addDays(d, n));
+      date = addDays(date, n);
     }
   }
 </script>
 
 <div class="top date-form">
   <div class="inputs">
-    <select bind:value={gengouValue} class="gengou">
+    <select bind:value={gengouValue} class="gengou" on:change={validate}>
       {#each gengouList as g}
         <option>{g}</option>
       {/each}
     </select>
-    <input type="text" class="nen" bind:value={nenValue} />
+    <input type="text" class="nen" bind:value={nenValue} on:change={validate} />
     <span on:click={doNenClick} class="nen-span">年</span>
-    <input type="text" class="month" bind:value={monthValue} />
+    <input
+      type="text"
+      class="month"
+      bind:value={monthValue}
+      on:change={validate}
+    />
     <span on:click={doMonthClick} class="month-span">月</span>
-    <input type="text" class="day" bind:value={dayValue} />
+    <input type="text" class="day" bind:value={dayValue} on:change={validate} />
     <span on:click={doDayClick} class="day-span">日</span>
   </div>
 </div>
@@ -162,7 +194,10 @@
     padding: 0 1px;
   }
 
-  .nen-span, .month-span, .day-span {
+  .nen-span,
+  .month-span,
+  .day-span {
     cursor: pointer;
+    user-select: none;
   }
 </style>

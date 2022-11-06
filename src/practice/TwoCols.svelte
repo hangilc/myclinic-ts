@@ -10,6 +10,17 @@
   // import DatePicker from "@/lib/date-picker/DatePicker.svelte";
   // import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import DateForm from "@/lib/date-form/DateForm.svelte";
+  let obj = {
+    a: new Date()
+  }
+  let date = new Date();
+  let dateErrs = [];
+  function click() {
+    date = new Date("2022-12-31")
+  }
+  function doGet() {
+    console.log(obj.a);
+  }
 </script>
 
 <div class="two-cols">
@@ -19,6 +30,9 @@
     <!-- <EditableDate date={new Date()} /> -->
     <!-- <DatePicker date={new Date()}/> -->
     <!-- <DateFormWithCalendar date={new Date()}/> -->
+    <DateForm bind:date={obj.a} errors={dateErrs}/>
+    <button on:click={click}>click</button>
+    <button on:click={doGet}>get</button>
   </div>
   <div class="right"><Main serviceStore={service}/></div>
 </div>
