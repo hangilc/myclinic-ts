@@ -445,6 +445,14 @@ export default {
 
   listAppEventSince(fromEventId: number): Promise<m.AppEvent[]> {
     return get("list-app-event-since", { "from": fromEventId })
-  }
+  },
+
+  listTodaysHotline(): Promise<m.AppEvent[]> {
+    return get("list-todays-hotline", {});
+  },
+
+  getNextAppEventId(): Promise<number> {
+    return get("get-next-app-event-id", {});
+  },
 
 }

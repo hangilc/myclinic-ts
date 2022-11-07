@@ -525,6 +525,10 @@ export interface Hotline {
   recipient: string
 }
 
+export interface HotlineEx extends Hotline {
+  appEventId: number
+}
+
 export interface HotlineBeep {
   recipient: string
 }

@@ -2,22 +2,44 @@ import api, { wsUrl } from "../lib/api"
 import type * as m from "@/lib/model"
 import { writable, type Writable } from "svelte/store"
 
-export function initAppEvents(): void {
+let nextEventId = 0;
+let isDraining = false;
+let eventQueue: m.AppEvent[] = [];
+let heartBeatSerialId = 0;
+
+export async function initAppEvents() {
+  nextEventId = await api.getNextAppEventId();
+  connect();
+}
+
+function connect(): void {
   let ws = new WebSocket(wsUrl);
 
+  ws.addEventListener("open", event => {
+    console.log("ws open");
+  })
+
   ws.addEventListener("message", event => {
+    console.log(event.data);
     const data = event.data;
     if (typeof data === "string") {
       const json = JSON.parse(data);
       dispatch(json);
     }
   })
-}
 
-let nextEventId = 0;
-let isDraining = false;
-let eventQueue: m.AppEvent[] = [];
-let heartBeatSerialId = 0;
+  ws.addEventListener("close", event => {
+    console.log("ws close");
+    setTimeout(() => {
+      connect()
+    }, 1000);
+  })
+
+  ws.addEventListener("error", event => {
+    console.log("ws error");
+    ws.close();
+  })
+}
 
 async function drainEvents() {
   isDraining = true;
@@ -76,17 +98,15 @@ export const diseaseDeleted: Writable<m.Disease | null> = writable(null)
 export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null)
-export const hotlineEntered: Writable<m.Hotline | null> = writable(null)
-export const hotlineUpdated: Writable<m.Hotline | null> = writable(null)
-export const hotlineDeleted: Writable<m.Hotline | null> = writable(null)
+export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null)
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null);
 export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> = writable(null);
 export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
 
-function handleAppEvent(e: any): void {
+function handleAppEvent(e: m.AppEvent): void {
   if( isDraining ){
-    eventQueue.push(e as m.AppEvent);
+    eventQueue.push(e);
   } else {
     const eventId = e.appEventId;
     if( eventId === nextEventId ){
@@ -98,12 +118,12 @@ function handleAppEvent(e: any): void {
   }
 }
 
-function publishAppEvent(e: any): void {
+function publishAppEvent(e: m.AppEvent): void {
   console.log(e);
-  const data = e.data;
-  const model: string = data.model;
-  const kind: string = data.kind;
-  const payload = JSON.parse(data.data);
+  const model: string = e.model;
+  const kind: string = e.kind;
+  const payload = JSON.parse(e.data);
+  console.log("event kind", kind);
   switch (model) {
     case "text": {
       switch (kind) {
@@ -329,15 +349,9 @@ function publishAppEvent(e: any): void {
     case "hotline": {
       switch (kind) {
         case "created": {
-          hotlineEntered.set(payload);
-          break;
-        }
-        case "updated": {
-          hotlineUpdated.set(payload);
-          break;
-        }
-        case "deleted": {
-          hotlineDeleted.set(payload);
+          console.log("hotline created", payload)
+          const appEventId: number = e.appEventId;
+          hotlineEntered.set({ appEventId, ...payload });
           break;
         }
       }
@@ -347,13 +361,14 @@ function publishAppEvent(e: any): void {
 }
 
 function dispatch(e: any): void {
+  console.log("dispatch", e);
   if (e.format === "appevent") {
-    handleAppEvent(e);
+    handleAppEvent(e.data as m.AppEvent);
   } else if (e.format === "hotline-beep") {
     const hotlineBeep = JSON.parse(e.data) as m.HotlineBeep;
     hotlineBeepEntered.set(hotlineBeep);
   } else if (e.format === "event-id-notice") {
-    const eventIdNotice = JSON.parse(e.data) as m.EventIdNotice;
+    const eventIdNotice = e.data;
     eventIdNoticeEntered.set(eventIdNotice);
   } else if (e.format === "heart-beat") {
     const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
