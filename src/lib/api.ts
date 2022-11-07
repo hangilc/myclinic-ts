@@ -455,4 +455,8 @@ export default {
     return get("get-next-app-event-id", {});
   },
 
+  postHotline(hotline: m.Hotline): Promise<boolean> {
+    return post("post-hotline", hotline);
+  },
+
 }

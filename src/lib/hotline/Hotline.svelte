@@ -1,12 +1,13 @@
 <script lang="ts">
   import api from "../api";
-  import type { AppEvent, HotlineEx } from "../model";
+  import type { AppEvent, Hotline, HotlineEx } from "../model";
   import { hotlineEntered } from "@/practice/app-events";
   import { onDestroy } from "svelte";
 
   export let sendAs: string;
   export let sendTo: string;
   let relevants: string[] = [sendAs, sendTo];
+  let message: string = "";
 
   let hotlines: HotlineEx[] = [];
   let lastAppEventId = 0;
@@ -35,7 +36,7 @@
 
   unsubs.push(
     hotlineEntered.subscribe((h) => {
-      if( h == null ){
+      if (h == null) {
         return;
       }
       console.log(h.appEventId, lastAppEventId);
@@ -49,13 +50,32 @@
   );
 
   onDestroy(() => unsubs.forEach((f) => f()));
+
+  async function sendMessage(msg: string) {
+    return api.postHotline({
+      message: msg,
+      sender: sendAs,
+      recipient: sendTo
+    });
+  }
+
+  async function doSend() {
+    if (message !== "") {
+      await sendMessage(message);
+      message = "";
+    }
+  }
+
+  async function doRoger() {
+    return sendMessage("了解");
+  }
 </script>
 
 <div>
-  <textarea />
+  <textarea bind:value={message} />
   <div>
-    <button>送信</button>
-    <button>了解</button>
+    <button on:click={doSend}>送信</button>
+    <button on:click={doRoger}>了解</button>
     <button>Beep</button>
     <a href="javascript:void(0)">常用</a>
     <a href="javascript:void(0)">患者</a>
