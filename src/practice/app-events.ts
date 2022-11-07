@@ -16,17 +16,25 @@ export function initAppEvents(): void {
 
 let nextEventId = 0;
 let isDraining = false;
+let eventQueue: m.AppEvent[] = [];
+let heartBeatSerialId = 0;
 
 async function drainEvents() {
   isDraining = true;
+  console.log("start drain");
   let events = await api.listAppEventSince(nextEventId);
   events.forEach(event => {
     if( event.appEventId >= nextEventId ){
       nextEventId = event.appEventId + 1;
-      onNewAppEvent(event);
+      publishAppEvent(event);
     }
   });
   isDraining = false;
+  console.log("end drain");
+  while( eventQueue.length > 0 ){
+    const e = eventQueue.shift();
+    handleAppEvent(e);
+  }
 }
 
 export const textEntered: Writable<m.Text | null> = writable(null)
@@ -75,9 +83,22 @@ export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null)
 export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> = writable(null);
 export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
-let heartBeatSerialId = 0;
 
-function dispatchAppEvent(e: any): void {
+function handleAppEvent(e: any): void {
+  if( isDraining ){
+    eventQueue.push(e as m.AppEvent);
+  } else {
+    const eventId = e.appEventId;
+    if( eventId === nextEventId ){
+      nextEventId = eventId + 1;
+      publishAppEvent(e);
+    } else if( eventId > nextEventId ){
+      drainEvents();
+    }
+  }
+}
+
+function publishAppEvent(e: any): void {
   console.log(e);
   const data = e.data;
   const model: string = data.model;
@@ -327,7 +348,7 @@ function dispatchAppEvent(e: any): void {
 
 function dispatch(e: any): void {
   if (e.format === "appevent") {
-    dispatchAppEvent(e);
+    handleAppEvent(e);
   } else if (e.format === "hotline-beep") {
     const hotlineBeep = JSON.parse(e.data) as m.HotlineBeep;
     hotlineBeepEntered.set(hotlineBeep);
