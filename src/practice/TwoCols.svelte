@@ -2,6 +2,7 @@
   import SideMenu from "./SideMenu.svelte";
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
+    import Hotline from "@/lib/hotline/Hotline.svelte";
 
   const service = writable("exam");
 
@@ -29,6 +30,7 @@
 <div class="two-cols">
   <div class="left">
     <SideMenu serviceStore={service}/>
+    <Hotline sendAs="practice" sendTo="reception" />
 
     <!-- <EditableDate bind:date={date} bind:errors={errors} /> -->
     <!-- <DatePicker date={new Date()}/> -->

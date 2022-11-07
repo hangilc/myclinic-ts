@@ -519,6 +519,31 @@ export function isDiseaseExample(arg: any): arg is DiseaseExample {
     Array.isArray(arg.preAdjList) && Array.isArray(arg.postAdjList);
 }
 
+export interface Hotline {
+  message: string,
+  sender: string,
+  recipient: string
+}
+
+export interface HotlineBeep {
+  recipient: string
+}
+
+export interface EventIdNotice {
+  currentEventId: number
+}
+
+export interface HeartBeat {
+  heartBeatSerialId: number
+}
+
+export interface AppEvent {
+  appEventId: number,
+  createdAt: string,
+  model: string,
+  kind: string,
+  data: string
+}
 
 
 

@@ -1,17 +1,32 @@
-import { wsUrl } from "../lib/api"
+import api, { wsUrl } from "../lib/api"
 import type * as m from "@/lib/model"
 import { writable, type Writable } from "svelte/store"
 
-export function initAppEvents(): void{
+export function initAppEvents(): void {
   let ws = new WebSocket(wsUrl);
-  
+
   ws.addEventListener("message", event => {
     const data = event.data;
-    if( typeof data === "string" ){
+    if (typeof data === "string") {
       const json = JSON.parse(data);
       dispatch(json);
     }
   })
+}
+
+let nextEventId = 0;
+let isDraining = false;
+
+async function drainEvents() {
+  isDraining = true;
+  let events = await api.listAppEventSince(nextEventId);
+  events.forEach(event => {
+    if( event.appEventId >= nextEventId ){
+      nextEventId = event.appEventId + 1;
+      onNewAppEvent(event);
+    }
+  });
+  isDraining = false;
 }
 
 export const textEntered: Writable<m.Text | null> = writable(null)
@@ -53,236 +68,274 @@ export const diseaseDeleted: Writable<m.Disease | null> = writable(null)
 export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null)
+export const hotlineEntered: Writable<m.Hotline | null> = writable(null)
+export const hotlineUpdated: Writable<m.Hotline | null> = writable(null)
+export const hotlineDeleted: Writable<m.Hotline | null> = writable(null)
+export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null);
+export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> = writable(null);
+export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
+
+let heartBeatSerialId = 0;
+
+function dispatchAppEvent(e: any): void {
+  console.log(e);
+  const data = e.data;
+  const model: string = data.model;
+  const kind: string = data.kind;
+  const payload = JSON.parse(data.data);
+  switch (model) {
+    case "text": {
+      switch (kind) {
+        case "created": {
+          textEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          textUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          textDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "visit": {
+      switch (kind) {
+        case "created": {
+          visitEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          visitUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          visitDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "wqueue": {
+      switch (kind) {
+        case "created": {
+          wqueueEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          wqueueUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          wqueueDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "payment": {
+      switch (kind) {
+        case "created": {
+          paymentEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          paymentUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          paymentDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "shinryou": {
+      switch (kind) {
+        case "created": {
+          shinryouEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          shinryouUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          shinryouDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "conduct": {
+      switch (kind) {
+        case "created": {
+          conductEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          conductUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          conductDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "conductShinryou": {
+      switch (kind) {
+        case "created": {
+          conductShinryouEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          conductShinryouUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          conductShinryouDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "conductDrug": {
+      switch (kind) {
+        case "created": {
+          conductDrugEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          conductDrugUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          conductDrugDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "conductKizai": {
+      switch (kind) {
+        case "created": {
+          conductKizaiEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          conductKizaiUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          conductKizaiDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "gazouLabel": {
+      switch (kind) {
+        case "created": {
+          gazouLabelEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          gazouLabelUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          gazouLabelDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "charge": {
+      switch (kind) {
+        case "created": {
+          chargeEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          chargeUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          chargeDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "disease": {
+      switch (kind) {
+        case "created": {
+          diseaseEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          diseaseUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          diseaseDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "diseaseAdj": {
+      switch (kind) {
+        case "created": {
+          diseaseAdjEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          diseaseAdjUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          diseaseAdjDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "hotline": {
+      switch (kind) {
+        case "created": {
+          hotlineEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          hotlineUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          hotlineDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+  }
+}
 
 function dispatch(e: any): void {
-  if( e.format === "appevent" ){
-    console.log(e);
-    const data = e.data;
-    const model: string = data.model;
-    const kind: string = data.kind;
-    const payload = JSON.parse(data.data);
-    switch(model){
-      case "text": {
-        switch(kind) {
-          case "created": {
-            textEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            textUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            textDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "visit": {
-        switch(kind) {
-          case "created": {
-            visitEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            visitUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            visitDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "wqueue": {
-        switch(kind) {
-          case "created": {
-            wqueueEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            wqueueUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            wqueueDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "payment": {
-        switch(kind) {
-          case "created": {
-            paymentEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            paymentUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            paymentDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "shinryou": {
-        switch(kind) {
-          case "created": {
-            shinryouEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            shinryouUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            shinryouDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "conduct": {
-        switch(kind) {
-          case "created": {
-            conductEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            conductUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            conductDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "conductShinryou": {
-        switch(kind) {
-          case "created": {
-            conductShinryouEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            conductShinryouUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            conductShinryouDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "conductDrug": {
-        switch(kind) {
-          case "created": {
-            conductDrugEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            conductDrugUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            conductDrugDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "conductKizai": {
-        switch(kind) {
-          case "created": {
-            conductKizaiEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            conductKizaiUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            conductKizaiDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "gazouLabel": {
-        switch(kind) {
-          case "created": {
-            gazouLabelEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            gazouLabelUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            gazouLabelDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "charge": {
-        switch(kind) {
-          case "created": {
-            chargeEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            chargeUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            chargeDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "disease": {
-        switch(kind) {
-          case "created": {
-            diseaseEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            diseaseUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            diseaseDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-      case "diseaseAdj": {
-        switch(kind) {
-          case "created": {
-            diseaseAdjEntered.set(payload);
-            break;
-          }
-          case "updated": {
-            diseaseAdjUpdated.set(payload);
-            break;
-          }
-          case "deleted": {
-            diseaseAdjDeleted.set(payload);
-            break;
-          }
-        }
-        break;
-      }
-    }
+  if (e.format === "appevent") {
+    dispatchAppEvent(e);
+  } else if (e.format === "hotline-beep") {
+    const hotlineBeep = JSON.parse(e.data) as m.HotlineBeep;
+    hotlineBeepEntered.set(hotlineBeep);
+  } else if (e.format === "event-id-notice") {
+    const eventIdNotice = JSON.parse(e.data) as m.EventIdNotice;
+    eventIdNoticeEntered.set(eventIdNotice);
+  } else if (e.format === "heart-beat") {
+    const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
+    heartBeatEntered.set(heartBeat);
   }
 }

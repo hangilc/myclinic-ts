@@ -441,6 +441,10 @@ export default {
 
   updateDiseaseEx(disease: m.Disease, shuushokugocodes: number[]): Promise<boolean> {
     return post("update-disease-ex", [disease, shuushokugocodes]);
+  },
+
+  listAppEventSince(fromEventId: number): Promise<m.AppEvent[]> {
+    return get("list-app-event-since", { "from": fromEventId })
   }
 
 }

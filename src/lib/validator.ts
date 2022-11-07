@@ -1,5 +1,3 @@
-import { isInteger } from "lodash";
-
 export class ValidationError {
   isValidationError: boolean = true;
   message: string;
@@ -99,7 +97,7 @@ export const toNumber = new Validator<string, number>((src: string) => {
 })
 
 export const integer = new Validator<number, number>((src: number) => {
-  if( isInteger(src) ){
+  if( Number.isInteger(src) ){
     return ValidationResult.valid<number>(src);
   } else {
     return ValidationResult.invalid("整数でありません。");

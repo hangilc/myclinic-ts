@@ -16,6 +16,7 @@
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
   let endDate: Date = new Date();
+  let endDateErrors: string[] = [];
   let dateForm: DateFormWithCalendar;
   let endReasons: DiseaseEndReasonType[] = [
     DiseaseEndReason.Cured,
@@ -70,6 +71,10 @@
   }
 
   async function doEnter() {
+    if( endDateErrors.length > 0 ){
+      alert("終了日が設定されていません。");
+      return;
+    }
     const diseaseIds: number[] = selected.map((d) => d[0].diseaseId);
     const reasonCode = endReason.code;
     const promises = diseaseIds.map((diseaseId) =>
@@ -88,7 +93,12 @@
     </div>
   {/each}
   <div class="date-wrapper">
-    <DateFormWithCalendar init={endDate} iconWidth="18px" bind:this={dateForm}>
+    <DateFormWithCalendar
+      bind:date={endDate}
+      bind:errors={endDateErrors}
+      iconWidth="18px"
+      bind:this={dateForm}
+    >
       <span slot="spacer" style:width="6px" />
     </DateFormWithCalendar>
   </div>
