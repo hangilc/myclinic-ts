@@ -12,7 +12,7 @@ let regularsMap: Record<string, string[]> = {
   "practice": [
     "おはようございます。",
     "診察室におねがいします。",
-    "処方箋おねがいします。",
+    "処方箋{}おねがいします。",
     "検査伝票おねがいします。",
   ],
   "reception": [

@@ -82,17 +82,21 @@
 
   function insertIntoMessage(msg: string): void {
     const start = hotlineInput.selectionStart
-    val end = hotlineInput.selectionEnd
-    val left = hotlineInput.value.substring(0, start)
-    val right = hotlineInput.value.substring(end)
-    val index = s.indexOf("{}")
-    val msgLeft = if index < 0 then s else s.substring(0, index)
-    val msgRight = if index < 0 then "" else s.substring(index + 2)
+    const end = hotlineInput.selectionEnd
+    const left = hotlineInput.value.substring(0, start)
+    const right = hotlineInput.value.substring(end)
+    const index = msg.indexOf("{}")
+    const msgLeft = index < 0 ? msg : msg.substring(0, index)
+    const msgRight = index < 0 ? "" : msg.substring(index + 2)
     hotlineInput.value = left + msgLeft + msgRight + right
     hotlineInput.focus()
-    val pos = start + msgLeft.size
+    const pos = start + msgLeft.length
     hotlineInput.selectionStart = pos
     hotlineInput.selectionEnd = pos
+  }
+
+  function stripPlaceholder(msg: string): string {
+    return msg.replaceAll("{}", "");
   }
 </script>
 
@@ -114,7 +118,9 @@
 <Pulldown anchor={regularAnchor} bind:this={regularPulldown}>
   <svelte:fragment>
     {#each regulars as r}
-    <a href="javascript:void(0)" on:click={() => insertIntoMessage(r)}>{r}</a>
+    <a href="javascript:void(0)" on:click={() => insertIntoMessage(r)}>
+      {stripPlaceholder(r)}
+    </a>
     {/each}
   </svelte:fragment>
 </Pulldown>
