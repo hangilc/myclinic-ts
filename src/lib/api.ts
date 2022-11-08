@@ -72,6 +72,10 @@ export default {
     return map;
   },
 
+  listWqueue(): Promise<m.Wqueue[]> {
+    return get("list-wqueue", {});
+  },
+
   async listWqueueFull(): Promise<Array<[m.Wqueue, m.Visit, m.Patient]>> {
     const [, wqList, vObj, pObj]:
       [number, Array<m.Wqueue>, object, object]
@@ -130,6 +134,10 @@ export default {
     return get("list-visit-id-by-patient-reverse", {
       "patient-id": patientId, offset, count
     });
+  },
+
+  batchGetVisit(visitIds: number[]): Promise<Record<number, m.Visit>> {
+    return post("batch-get-visit", visitIds);
   },
 
   batchGetVisitEx(visitIds: number[]): Promise<m.VisitEx[]> {
