@@ -1,20 +1,29 @@
 <script lang="ts">
-    import api from "@/lib/api";
+  import api from "@/lib/api";
+  import { confirm } from "@/lib/confirm-call";
+  import Confirm from "@/lib/Confirm.svelte";
   import { reqChangePatient, currentPatient } from "./ExamVars";
+  import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
+
+  let searchTextDialog: SearchTextDialog;
 
   function onEndPatientClick() {
     reqChangePatient.set(null);
   }
 
-  async function doRegister() {
+  function doRegister(): void {
     const patient = $currentPatient;
-    if( patient != null ){
-      await api.startVisit(patient.patientId, new Date());
+    if (patient != null) {
+      confirm("診察を登録しますか？", () => {
+        api.startVisit(patient.patientId, new Date());
+      });
     }
   }
 
   async function doSearchText() {
-
+    if( $currentPatient ){
+      searchTextDialog.open();
+    }
   }
 </script>
 
@@ -26,6 +35,10 @@
   <a href="javascript:void(0)">画像保存</a>
   <a href="javascript:void(0)">画像一覧</a>
 </div>
+<SearchTextDialog
+  patient={$currentPatient}
+  bind:this={searchTextDialog}
+/>
 
 <style>
   .top {

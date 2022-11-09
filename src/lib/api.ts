@@ -471,7 +471,12 @@ export default {
     return get("count-search-text-for-patient", { text, "patient-id": patientId });
   },
 
-  searchTextForPatient(text: string, patientId: number, limit: number, offset: number) {
+  searchTextForPatient(
+    text: string,
+    patientId: number,
+    limit: number,
+    offset: number
+  ): Promise<[m.Text, m.Visit][]> {
     return get(
       "search-text-for-patient",
       {

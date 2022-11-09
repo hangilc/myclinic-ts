@@ -66,16 +66,16 @@ export function advanceNavPage(diff: number) {
   }
 }
 
-export function gotoNavFirstPage() {
-  const page = get(navPage);
-  advanceNavPage(-page);
-}
+// export function gotoNavFirstPage() {
+//   const page = get(navPage);
+//   advanceNavPage(-page);
+// }
 
-export function gotoNavLastPage() {
-  const page = get(navPage)
-  const total = get(navTotal);
-  advanceNavPage(total - 1 - page);
-}
+// export function gotoNavLastPage() {
+//   const page = get(navPage)
+//   const total = get(navTotal);
+//   advanceNavPage(total - 1 - page);
+// }
 
 export function gotoPage(page: number): void {
   const curPage = get(navPage);

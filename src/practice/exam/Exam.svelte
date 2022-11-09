@@ -1,11 +1,11 @@
 <script>
   import Header from "./Header.svelte";
   import PatientsByDateBox from "./patients-by-date-box/PatientsByDateBox.svelte";
-  import { currentPatient, showPatientsByDate } from "./ExamVars";
+  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage } from "./ExamVars";
   import PatientDisp from "./PatientDisp.svelte";
   import PatientManip from "./PatientManip.svelte";
   import RecordsWrapper from "./RecordsWrapper.svelte";
-  import Nav from "./Nav.svelte";
+  import Nav from "../../lib/Nav.svelte";
   import MishuuList from "./mishuu-list/MishuuList.svelte";
   import Disease from "./disease/Disease.svelte";
 
@@ -18,9 +18,9 @@
     {#if $currentPatient !== null}
       <PatientDisp patient={$currentPatient} />
       <PatientManip />
-      <Nav />
+      <Nav page={$navPage} total={$navTotal} {gotoPage} />
       <RecordsWrapper />
-      <Nav />
+      <Nav page={$navPage} total={$navTotal} {gotoPage} />
     {/if}
   </div>
   <div class="exam-right">
