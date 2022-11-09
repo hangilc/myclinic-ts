@@ -365,7 +365,7 @@ function dispatch(e: any): void {
   if (e.format === "appevent") {
     handleAppEvent(e.data as m.AppEvent);
   } else if (e.format === "hotline-beep") {
-    const hotlineBeep = JSON.parse(e.data) as m.HotlineBeep;
+    const hotlineBeep = e.data as m.HotlineBeep;
     hotlineBeepEntered.set(hotlineBeep);
   } else if (e.format === "event-id-notice") {
     const eventIdNotice = e.data;
