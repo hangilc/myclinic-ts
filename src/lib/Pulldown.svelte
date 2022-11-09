@@ -31,8 +31,9 @@
   });
 
   function locateAtAnchor(e: HTMLElement, anchor: HTMLElement | SVGSVGElement): void {
-    if (e != null) {
+    if (e != null && anchor != null) {
       const r = anchor.getBoundingClientRect();
+      console.log("anchor r", r);
       const t = e.getBoundingClientRect();
       const w = document.documentElement.clientWidth;
       if (r.left + t.width > w) {
