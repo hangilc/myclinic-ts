@@ -8,6 +8,7 @@ export const currentPatient: Writable<m.Patient | null> = writable(null);
 export const currentVisitId: Writable<number | null> = writable(null);
 export const tempVisitId: Writable<number | null> = writable(null);
 export const visits: Writable<m.VisitEx[]> = writable([]);
+let totalVisits: number = 0;
 export const navPage: Writable<number> = writable(0);
 export const navTotal: Writable<number> = writable(0);
 export const mishuuList: Writable<m.VisitEx[]> = writable([]);
@@ -37,6 +38,7 @@ function initNav(patientId: number): Task {
     result => {
       navPage.set(0);
       navTotal.set(countVisitPages(result));
+      totalVisits = result;
     })
 }
 
@@ -207,6 +209,34 @@ appEvent.textDeleted.subscribe(text => {
   });
   if( found ){
     visits.set(visitsValue);
+  }
+});
+
+appEvent.visitEntered.subscribe(async visit => {
+  if( visit == null ){
+    return;
+  }
+  const patient: m.Patient | null = get(currentPatient);
+  if( patient != null ){
+    if( patient.patientId === visit.patientId && get(navPage) === 0 ){
+      const newTotal = countVisitPages(totalVisits + 1);
+      if( newTotal !== get(navTotal) ){
+        navTotal.set(newTotal);
+      }
+      const currentVisitIdValue: number | null = get(currentVisitId);
+      const visitEx = await api.getVisitEx(visit.visitId);
+      const curVisits = get(visits);
+      if( currentVisitIdValue == null ){
+        currentVisitId.set(visit.visitId);
+      } else {
+        if( curVisits.length > 0 && curVisits[curVisits.length - 1].visitId === visit.visitId ){
+          navPage.set(1);
+        }
+      }
+      curVisits.pop();
+      curVisits.unshift(visitEx);
+      visits.set(curVisits);
+    }
   }
 });
 

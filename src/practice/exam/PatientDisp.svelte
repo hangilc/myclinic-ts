@@ -13,7 +13,7 @@ import { sexRep } from "../../lib/util";
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<div>
+<div class="patient-disp">
   <div>
     [{patient.patientId}]
     {patient.lastName} {patient.firstName}

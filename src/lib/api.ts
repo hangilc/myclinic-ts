@@ -1,6 +1,6 @@
 import type * as m from "./model"
 import { dateToSql } from "./util"
-import { dateParam } from "./date-param"
+import { dateParam, dateTimeParam } from "./date-param"
 import type { Op as DrawerOp, Op } from "./drawer/op"
 import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
 
@@ -109,8 +109,8 @@ export default {
     return post("enter-wqueue", wq);
   },
 
-  startVisit(patientId: number, at: string): Promise<m.Visit> {
-    return get("start-visit", { "patient-id": patientId, "at": at });
+  startVisit(patientId: number, at: string | Date): Promise<m.Visit> {
+    return get("start-visit", { "patient-id": patientId, "at": dateTimeParam(at) });
   },
 
   updateVisit(visit: m.Visit): Promise<boolean> {

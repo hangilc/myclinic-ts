@@ -5,7 +5,7 @@
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 {#if $navTotal > 1}
-<div>
+<div class="nav">
   <a href="javascript:void(0)" on:click={() => gotoNavFirstPage()}>最初へ</a>
   <a href="javascript:void(0)" on:click={() => advanceNavPage(-1)}>前へ</a>
   <a href="javascript:void(0)" on:click={() => advanceNavPage(+1)}>次へ</a>

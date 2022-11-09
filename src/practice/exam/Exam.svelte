@@ -43,6 +43,18 @@
     margin-right: 10px;
   }
 
+  .exam-left > :global(.patient-disp) {
+    margin-bottom: 10px;
+  }
+
+  .exam-left > :global(.patient-manip) {
+    margin: 10px 0;
+  }
+
+  .exam-left > :global(.nav) {
+    margin: 10px 0;
+  }
+
   .exam-right {
     flex: 0 0 240px;
     width: 240px;
