@@ -29,8 +29,12 @@
 
 <div class="two-cols">
   <div class="left">
-    <SideMenu serviceStore={service}/>
-    <Hotline sendAs="practice" sendTo="reception" />
+    <div class="left-box">
+      <SideMenu serviceStore={service}/>
+    </div>
+    <div class="left-box">
+      <Hotline sendAs="practice" sendTo="reception" />
+    </div>
 
     <!-- <EditableDate bind:date={date} bind:errors={errors} /> -->
     <!-- <DatePicker date={new Date()}/> -->
@@ -53,6 +57,14 @@
   .left {
     flex: 0 0 200px;
     margin: 0 6px 10px 0;
+  }
+
+  .left-box {
+    margin-bottom: 10px;
+  }
+
+  .left-box :global(.hotline a) {
+    font-size: 80%;
   }
 
   .right {

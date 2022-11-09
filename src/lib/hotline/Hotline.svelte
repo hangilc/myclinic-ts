@@ -1,11 +1,18 @@
 <script lang="ts">
   import api from "../api";
-  import type { AppEvent, Hotline, HotlineEx, Patient, Visit, Wqueue } from "../model";
+  import type {
+    AppEvent,
+    Hotline,
+    HotlineEx,
+    Patient,
+    Visit,
+    Wqueue,
+  } from "../model";
   import { hotlineBeepEntered, hotlineEntered } from "@/practice/app-events";
   import { onDestroy } from "svelte";
-  import { getRegulars } from "@/lib/hotline/hotline-config"
-    import Pulldown from "../Pulldown.svelte";
-    import { printApi } from "../printApi";
+  import { getRegulars } from "@/lib/hotline/hotline-config";
+  import Pulldown from "../Pulldown.svelte";
+  import { printApi } from "../printApi";
 
   export let sendAs: string;
   export let sendTo: string;
@@ -58,12 +65,16 @@
   );
 
   unsubs.push(
-    hotlineBeepEntered.subscribe(event => {
-      if( event.recipient == sendAs ){
+    hotlineBeepEntered.subscribe((event) => {
+      if (event == null) {
+        return;
+      }
+      console.log(event);
+      if (event.recipient == sendAs) {
         printApi.beep();
       }
     })
-  )
+  );
 
   onDestroy(() => unsubs.forEach((f) => f()));
 
@@ -71,7 +82,7 @@
     return api.postHotline({
       message: msg,
       sender: sendAs,
-      recipient: sendTo
+      recipient: sendTo,
     });
   }
 
@@ -92,18 +103,18 @@
   }
 
   function insertIntoMessage(msg: string): void {
-    const start = hotlineInput.selectionStart
-    const end = hotlineInput.selectionEnd
-    const left = hotlineInput.value.substring(0, start)
-    const right = hotlineInput.value.substring(end)
-    const index = msg.indexOf("{}")
-    const msgLeft = index < 0 ? msg : msg.substring(0, index)
-    const msgRight = index < 0 ? "" : msg.substring(index + 2)
-    hotlineInput.value = left + msgLeft + msgRight + right
-    hotlineInput.focus()
-    const pos = start + msgLeft.length
-    hotlineInput.selectionStart = pos
-    hotlineInput.selectionEnd = pos
+    const start = hotlineInput.selectionStart;
+    const end = hotlineInput.selectionEnd;
+    const left = hotlineInput.value.substring(0, start);
+    const right = hotlineInput.value.substring(end);
+    const index = msg.indexOf("{}");
+    const msgLeft = index < 0 ? msg : msg.substring(0, index);
+    const msgRight = index < 0 ? "" : msg.substring(index + 2);
+    hotlineInput.value = left + msgLeft + msgRight + right;
+    hotlineInput.focus();
+    const pos = start + msgLeft.length;
+    hotlineInput.selectionStart = pos;
+    hotlineInput.selectionEnd = pos;
   }
 
   function stripPlaceholder(msg: string): string {
@@ -112,15 +123,19 @@
 
   async function doPatients() {
     const wqueue: Wqueue[] = await api.listWqueue();
-    const visitIds: number[] = wqueue.map(wq => wq.visitId);
+    const visitIds: number[] = wqueue.map((wq) => wq.visitId);
     const visitMap: Record<number, Visit> = await api.batchGetVisit(visitIds);
-    const patientIds: number[] = Object.values(visitMap).map(v => v.patientId);
-    const patientMap: Map<number, Patient> = await api.batchGetPatient(patientIds);
+    const patientIds: number[] = Object.values(visitMap).map(
+      (v) => v.patientId
+    );
+    const patientMap: Map<number, Patient> = await api.batchGetPatient(
+      patientIds
+    );
     const patients: Patient[] = [];
-    visitIds.forEach(visitId => {
+    visitIds.forEach((visitId) => {
       const visit = visitMap[visitId];
       const patient = patientMap.get(visit.patientId);
-      if( !patients.includes(patient) ){
+      if (!patients.includes(patient)) {
         patients.push(patient);
       }
     });
@@ -133,16 +148,22 @@
   }
 </script>
 
-<div>
-  <textarea bind:this={hotlineInput}/>
-  <div>
+<div class="top hotline">
+  <textarea bind:this={hotlineInput} class="input-textarea" />
+  <div class="commands">
     <button on:click={doSend}>送信</button>
     <button on:click={doRoger}>了解</button>
     <button>Beep</button>
-    <a href="javascript:void(0)" on:click={doRegulars} bind:this={regularAnchor}>常用</a>
-    <a href="javascript:void(0)" on:click={doPatients} bind:this={patientsAnchor}>患者</a>
+    <a href="javascript:void(0)" on:click={doRegulars} bind:this={regularAnchor}
+      >常用</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doPatients}
+      bind:this={patientsAnchor}>患者</a
+    >
   </div>
-  <div>
+  <div class="messages">
     {#each hotlines as h (h.appEventId)}
       <div>{h.message}</div>
     {/each}
@@ -151,16 +172,40 @@
 <Pulldown anchor={regularAnchor} bind:this={regularPulldown}>
   <svelte:fragment>
     {#each regulars as r}
-    <a href="javascript:void(0)" on:click={() => insertIntoMessage(r)}>
-      {stripPlaceholder(r)}
-    </a>
+      <a href="javascript:void(0)" on:click={() => insertIntoMessage(r)}>
+        {stripPlaceholder(r)}
+      </a>
     {/each}
   </svelte:fragment>
 </Pulldown>
 <Pulldown anchor={patientsAnchor} bind:this={patientsPulldown}>
   <svelte:fragment>
     {#each wqPatients as p}
-    <a href="javascript:void(0)" on:click={() => insertPatient(p)}>{p.lastName} {p.firstName}</a>
+      <a href="javascript:void(0)" on:click={() => insertPatient(p)}
+        >{p.lastName} {p.firstName}</a
+      >
     {/each}
   </svelte:fragment>
 </Pulldown>
+
+<style>
+  .input-textarea {
+    resize: vertical;
+    height: 90px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  .commands {
+    margin: 0 0 6px 0;
+  }
+
+  .messages {
+    border: 1px solid gray;
+    padding: 4px;
+    height: 15em;
+    font-size: 14px;
+  }
+</style>
