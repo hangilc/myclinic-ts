@@ -435,7 +435,7 @@ export default {
     Promise<m.Visit[]> {
     return get(
       "list-visit-by-patient-reverse",
-      {"patient-id": patientId, "offset": offset, "count": count}
+      { "patient-id": patientId, "offset": offset, "count": count }
     );
   },
 
@@ -466,5 +466,21 @@ export default {
   postHotline(hotline: m.Hotline): Promise<boolean> {
     return post("post-hotline", hotline);
   },
+
+  countSearchTextForPatient(text: string, patientId: number): Promise<number> {
+    return get("count-search-text-for-patient", { text, "patient-id": patientId });
+  },
+
+  searchTextForPatient(text: string, patientId: number, limit: number, offset: number) {
+    return get(
+      "search-text-for-patient",
+      {
+        text,
+        "patient-id": patientId,
+        limit,
+        offset
+      }
+    );
+  }
 
 }
