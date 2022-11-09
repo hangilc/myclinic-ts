@@ -2,7 +2,6 @@
   import api from "../api";
   import type {
     AppEvent,
-    Hotline,
     HotlineEx,
     Patient,
     Visit,
@@ -10,7 +9,7 @@
   } from "../model";
   import { hotlineBeepEntered, hotlineEntered } from "@/practice/app-events";
   import { onDestroy } from "svelte";
-  import { getRegulars } from "@/lib/hotline/hotline-config";
+  import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
   import Pulldown from "../Pulldown.svelte";
   import { printApi } from "../printApi";
 
@@ -165,7 +164,7 @@
   </div>
   <div class="messages">
     {#each hotlines as h (h.appEventId)}
-      <div>{h.message}</div>
+      <div>{hotlineNameRep(h.sender)}> {h.message}</div>
     {/each}
   </div>
 </div>
