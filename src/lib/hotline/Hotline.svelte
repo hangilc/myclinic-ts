@@ -206,5 +206,6 @@
     padding: 4px;
     height: 15em;
     font-size: 14px;
+    overflow-y: auto;
   }
 </style>
