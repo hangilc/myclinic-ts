@@ -21,15 +21,16 @@
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;
 
-  function print(): void {
+  async function print(close: () => void) {
     const req: PrintRequest = {
       setup: [],
       pages: [ops],
     };
-    printApi.printDrawer(req, settingSelect);
+    await printApi.printDrawer(req, settingSelect);
     if( setDefaultChecked && settingSelect !== printPref ){
       printApi.setPrintPref(kind, settingSelect);
     }
+    close();
   }
 
   onMount(() =>
@@ -62,7 +63,7 @@
     <a href="http://localhost:48080/" target="_blnak">管理画面表示</a>
   </div>
   <svelte:fragment slot="commands">
-    <button on:click={print}>印刷</button>
+    <button on:click={() => print(close)}>印刷</button>
     <button on:click={() => close()}>キャンセル</button>
   </svelte:fragment>
 </Dialog>
