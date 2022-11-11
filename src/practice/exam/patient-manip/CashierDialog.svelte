@@ -4,49 +4,71 @@
     MeisaiObject,
     MeisaiSectionDataObject,
     type Meisai,
-    type MeisaiSectionData,
   } from "@/lib/model";
-    import ChargeForm from "./ChargeForm.svelte";
+  import ChargeForm from "./ChargeForm.svelte";
 
   let dialog: Dialog;
+  let meisai: Meisai | null = null;
   let meisaiItems: string[] = [];
   let summary: string = "";
   let chargeValue: number = 0;
   let chargeRep: string = "";
+  $: {
+    meisaiItems = mkMeisaiItems(meisai);
+    summary = mkSummary(meisai);
+    chargeValue = meisai == null ? 0 : meisai.charge;
+    chargeRep = mkChargeRep(chargeValue);
+  }
   let mode = "disp";
+  let formChargeValue = "";
 
-  export function open(meisai: Meisai) {
-    chargeValue = meisai.charge;
-    setupItems(meisai.items);
-    setupSummary(meisai);
-    setupChargeRep(meisai);
+  export function open(meisaiArg: Meisai) {
+    meisai = meisaiArg;
     dialog.open();
   }
 
-  function setupItems(items: MeisaiSectionData[]): void {
-    meisaiItems = items.map((item) => {
-      const label: string = item.section;
-      const subtotal: number = MeisaiSectionDataObject.subtotalOf(item);
-      return `${label}：${subtotal}点`;
-    });
+  function mkMeisaiItems(meisai: Meisai | null): string[] {
+    if (meisai == null) {
+      return [];
+    } else {
+      return meisai.items.map((item) => {
+        const label: string = item.section;
+        const subtotal: number = MeisaiSectionDataObject.subtotalOf(item);
+        return `${label}：${subtotal}点`;
+      });
+    }
   }
 
-  function setupSummary(meisai: Meisai): void {
-    const totalTen: number = MeisaiObject.totalTenOf(meisai);
-    summary = `総点：${totalTen}点、負担割：${meisai.futanWari}割`;
+  function mkSummary(meisai: Meisai | null): string {
+    if (meisai == null) {
+      return "";
+    } else {
+      const totalTen: number = MeisaiObject.totalTenOf(meisai);
+      return `総点：${totalTen}点、負担割：${meisai.futanWari}割`;
+    }
   }
 
-  function setupChargeRep(): void {
-    chargeRep = `請求額：${chargeValue}円`;
+  function mkChargeRep(chargeValue: number): string {
+    return `請求額：${chargeValue}円`;
   }
 
   function doModify(): void {
+    formChargeValue = "";
     mode = "form";
   }
 
-  function doFormEnter(): void {
-    setupChargeRep();
+  function doFormEnter(n: number): void {
+    chargeValue = n;
+    alert(n);
     mode = "disp";
+  }
+
+  function doDefault(): void {
+    if (meisai == null) {
+      chargeValue = 0;
+    } else {
+      chargeValue = meisai.charge;
+    }
   }
 </script>
 
@@ -60,9 +82,17 @@
   <div>{summary}</div>
   <div>
     {#if mode === "disp"}
-    <div>{chargeRep} <a href="javascript:void(0)" on:click={doModify}>変更</a></div>
+      <div>
+        {chargeRep}
+        <a href="javascript:void(0)" on:click={doModify}>変更</a>
+        <a href="javascript:void(0)" on:click={doDefault}>既定値</a>
+      </div>
     {:else if mode === "form"}
-    <ChargeForm bind:chargeValue onCancel={() => mode = "disp"} onEnter={doFormEnter}/>
+      <ChargeForm
+        chargeValue={formChargeValue}
+        onCancel={() => (mode = "disp")}
+        onEnter={doFormEnter}
+      />
     {/if}
   </div>
   <div class="commands">
