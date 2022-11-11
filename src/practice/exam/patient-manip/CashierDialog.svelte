@@ -1,23 +1,40 @@
 <script lang="ts">
+    import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import {
     MeisaiObject,
     MeisaiSectionDataObject,
+    WqueueStateObject,
     type Meisai,
   } from "@/lib/model";
-    import { writable, type Writable } from "svelte/store";
+    import { writable, type Readable, type Writable } from "svelte/store";
   import ChargeForm from "./ChargeForm.svelte";
 
-  export let meisai: Writable<Meisai | null>;
-  let meisaiItems: string[] = mkMeisaiItems($meisai);
-  let summary: string = mkSummary($meisai);
+  export let visitId: Readable<number | null>;
+  let meisai: Writable<Meisai | null> = writable(null);
+  let meisaiItems: string[] = [];
+  let summary: string = ""
   let chargeValue: Writable<number> = writable(0);
-  let chargeRep = mkChargeRep($chargeValue);
+  let chargeRep = "";
   let mode = "disp";
   let dialog: Dialog;
 
-  export function open() {
-    dialog.open();
+  meisai.subscribe(m => {
+    meisaiItems = mkMeisaiItems(m);
+    summary = mkSummary(m);
+    chargeValue.set(m == null ? 0 : m.charge);
+  });
+
+  chargeValue.subscribe(c => {
+    chargeRep = mkChargeRep(c);
+  })
+
+  export async function open() {
+    if( $visitId != null ){
+      const m: Meisai = await api.getMeisai($visitId);
+      meisai.set(m);
+      dialog.open();
+    }
   }
 
   function mkMeisaiItems(meisai: Meisai | null): string[] {
@@ -61,6 +78,14 @@
       chargeValue.set($meisai.charge);
     }
   }
+
+  async function doEnter(close: () => void) {
+    if( $visitId != null ){
+      await api.enterChargeValue($visitId, $chargeValue);
+      await api.changeWqueueState($visitId, WqueueStateObject.WaitCashier.code);
+      close();
+    }
+  }
 </script>
 
 <Dialog bind:this={dialog} let:close>
@@ -87,7 +112,7 @@
     {/if}
   </div>
   <div class="commands">
-    <button disabled={mode !== "disp"}>入力</button>
+    <button on:click={() => doEnter(close)} disabled={mode !== "disp"}>入力</button>
     <button on:click={close} disabled={mode !== "disp"}>キャンセル</button>
   </div>
 </Dialog>

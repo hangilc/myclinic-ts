@@ -11,13 +11,12 @@
   let cashierDialog: CashierDialog;
   let searchTextDialog: SearchTextDialog;
   let uploadImageDialog: UploadImageDialog;
-  let meisai: Writable<Meisai | null> = writable(null);
+  let cashierVisitId: Writable<number | null> = writable(null);
 
   async function doCashier() {
     const visitId = $currentVisitId;
     if (visitId != null) {
-      const m = await api.getMeisai(visitId);
-      meisai.set(m);
+      cashierVisitId.set(visitId);
       cashierDialog.open();
     }
   }
@@ -49,14 +48,14 @@
 </script>
 
 <div class="patient-manip top">
-  <button on:click={doCashier}>会計</button>
+  <button on:click={doCashier} disabled={$currentVisitId == null}>会計</button>
   <button on:click={onEndPatientClick}>患者終了</button>
   <a href="javascript:void(0)" on:click={doRegister}>診察登録</a>
   <a href="javascript:void(0)" on:click={doSearchText}>文章検索</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)">画像一覧</a>
 </div>
-<CashierDialog bind:this={cashierDialog} {meisai} />
+<CashierDialog bind:this={cashierDialog} visitId={cashierVisitId} />
 <SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} />
 <UploadImageDialog bind:this={uploadImageDialog} />
 

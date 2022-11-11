@@ -54,8 +54,8 @@ export type WqueueStateKey = keyof typeof WqueueState;
 
 export class WqueueStateData {
   constructor(
-    code: number,
-    label: string
+    public code: number,
+    public label: string
   ) { }
 }
 

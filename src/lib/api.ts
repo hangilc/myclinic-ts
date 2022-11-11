@@ -486,6 +486,13 @@ export default {
         offset
       }
     );
-  }
+  },
+
+  enterChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
+    return get(
+      "enter-charge-value",
+      { "visit-id": visitId, "charge-value": chargeValue }
+    );
+  },
 
 }
