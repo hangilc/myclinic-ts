@@ -1,10 +1,10 @@
 <script lang="ts">
-  export let chargeValue: string;
+  export let initValue: string;
   export let onEnter: (value: number) => void;
   export let onCancel: () => void;
 
   function doEnter(): void {
-    const n = parseInt(chargeValue);
+    const n = parseInt(initValue);
     if( isNaN(n) ){
       alert("入力が数字でありません。");
     } else {
@@ -18,7 +18,7 @@
 </script>
 
 <div>
-  請求金額：<input type="text" bind:value={chargeValue} />円
+  請求金額：<input type="text" bind:value={initValue} />円
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={onCancel}>キャンセル</button>

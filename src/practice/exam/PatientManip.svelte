@@ -1,6 +1,8 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
+  import type { Meisai } from "@/lib/model";
+  import { writable, type Writable } from "svelte/store";
   import { reqChangePatient, currentPatient, currentVisitId } from "./ExamVars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
@@ -9,13 +11,14 @@
   let cashierDialog: CashierDialog;
   let searchTextDialog: SearchTextDialog;
   let uploadImageDialog: UploadImageDialog;
+  let meisai: Writable<Meisai | null> = writable(null);
 
   async function doCashier() {
     const visitId = $currentVisitId;
-    if( visitId != null ){
-      const meisai = await api.getMeisai(visitId);
-      cashierDialog.open(meisai);
-
+    if (visitId != null) {
+      const m = await api.getMeisai(visitId);
+      meisai.set(m);
+      cashierDialog.open();
     }
   }
 
@@ -53,7 +56,7 @@
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)">画像一覧</a>
 </div>
-<CashierDialog bind:this={cashierDialog} />
+<CashierDialog bind:this={cashierDialog} {meisai} />
 <SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} />
 <UploadImageDialog bind:this={uploadImageDialog} />
 

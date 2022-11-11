@@ -5,25 +5,18 @@
     MeisaiSectionDataObject,
     type Meisai,
   } from "@/lib/model";
+    import { writable, type Writable } from "svelte/store";
   import ChargeForm from "./ChargeForm.svelte";
 
-  let dialog: Dialog;
-  let meisai: Meisai | null = null;
-  let meisaiItems: string[] = [];
-  let summary: string = "";
-  let chargeValue: number = 0;
-  let chargeRep: string = "";
-  $: {
-    meisaiItems = mkMeisaiItems(meisai);
-    summary = mkSummary(meisai);
-    chargeValue = meisai == null ? 0 : meisai.charge;
-    chargeRep = mkChargeRep(chargeValue);
-  }
+  export let meisai: Writable<Meisai | null>;
+  let meisaiItems: string[] = mkMeisaiItems($meisai);
+  let summary: string = mkSummary($meisai);
+  let chargeValue: Writable<number> = writable(0);
+  let chargeRep = mkChargeRep($chargeValue);
   let mode = "disp";
-  let formChargeValue = "";
+  let dialog: Dialog;
 
-  export function open(meisaiArg: Meisai) {
-    meisai = meisaiArg;
+  export function open() {
     dialog.open();
   }
 
@@ -53,21 +46,19 @@
   }
 
   function doModify(): void {
-    formChargeValue = "";
     mode = "form";
   }
 
   function doFormEnter(n: number): void {
-    chargeValue = n;
-    alert(n);
+    chargeValue.set(n);
     mode = "disp";
   }
 
   function doDefault(): void {
-    if (meisai == null) {
-      chargeValue = 0;
+    if ($meisai == null) {
+      chargeValue.set(0);
     } else {
-      chargeValue = meisai.charge;
+      chargeValue.set($meisai.charge);
     }
   }
 </script>
@@ -89,7 +80,7 @@
       </div>
     {:else if mode === "form"}
       <ChargeForm
-        chargeValue={formChargeValue}
+        initValue={$chargeValue.toString()}
         onCancel={() => (mode = "disp")}
         onEnter={doFormEnter}
       />
