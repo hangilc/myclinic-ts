@@ -15,7 +15,16 @@ export const mishuuList: Writable<m.VisitEx[]> = writable([]);
 
 export const recordsPerPage = 10;
 
-export const reqChangePatient: Writable<[m.Patient, number | null] | null> = writable(null);
+export interface StartPatientReq {
+  patient: m.Patient,
+  visitId?: number
+}
+
+export interface EndPatientReq {
+  waitState?: m.WqueueStateData
+}
+
+export const reqChangePatient: Writable<StartPatientReq | EndPatientReq | null> = writable(null);
 
 const taskRunner: TaskRunner = new TaskRunner();
 
