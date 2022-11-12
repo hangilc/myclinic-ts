@@ -41,12 +41,16 @@ async function get(cmd: string, params: any = {}): Promise<any> {
 }
 
 async function post(cmd: string, data: any, params: any = {}): Promise<any> {
+  return postRaw(cmd, JSON.stringify(data), params);
+}
+
+async function postRaw(cmd: string, data: any, params: any = {}): Promise<any> {
   let arg = `${base}/${cmd}`
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
   }
-  const resp = await fetch(arg, { method: "POST", body: JSON.stringify(data) })
+  const resp = await fetch(arg, { method: "POST", body: data })
   return await resp.json()
 }
 
@@ -492,6 +496,10 @@ export default {
       "enter-charge-value",
       { "visit-id": visitId, "charge-value": chargeValue }
     );
+  },
+
+  uploadPatientImage(patientId: number, data: FormData): Promise<boolean> {
+    return postRaw("upload-patient-image", data, { "patient-id": patientId });
   },
 
 }

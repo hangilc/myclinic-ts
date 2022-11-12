@@ -3,9 +3,12 @@
   import Pulldown from "@/lib/Pulldown.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import { pad } from "@/lib/pad";
+  import { currentPatient } from "../ExamVars";
+  import api from "@/lib/api";
 
   let dialog: Dialog;
-  let tag: string = "other";
+  const initTag = "other";
+  let tag: string = initTag;
   let exampleAnchor: HTMLElement;
   let examples: [string, string][] = [
     ["画像", "image"],
@@ -27,18 +30,41 @@
     examplePulldown.open();
   }
 
-  async function doSave() {
+  async function doSave(close: () => void) {
+    const patient = $currentPatient;
+    if (patient == null) {
+      return;
+    }
     const at = new Date();
     const formData = new FormData();
     const files = fileInput.files;
-    for (let i = 0; i < files.length; i++) {
-      const f = files[i];
-      const ext = getFileExtension(f);
+    if (files.length === 0) {
+      return;
+    } else if (files.length === 1) {
+      const f = files[0];
+      const ext = getFileExtension(f.name);
+      const fn = composeFileName(patient.patientId, tag, new Date(), 0, ext);
+      formData.append("uploadfile-1", f, fn);
+    } else {
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        const ext = getFileExtension(f.name);
+        const fn = composeFileName(
+          patient.patientId,
+          tag,
+          new Date(),
+          i + 1,
+          ext
+        );
+        formData.append(`uploadfile-${1 + 1}`, f, fn);
+      }
     }
+    await api.uploadPatientImage(patient.patientId, formData);
+    close();
   }
 
   function onClose(): void {
-    tag = "";
+    tag = initTag;
     form.reset();
   }
 
@@ -59,7 +85,9 @@
     const hour = zeroPad(at.getHours());
     const minute = zeroPad(at.getMinutes());
     const second = zeroPad(at.getSeconds());
-    const stamp = `${month}`;
+    const stamp = `${year}${month}${day}-${hour}${minute}${second}`;
+    const indexPart = index <= 0 ? "" : `-${index}`;
+    return `${patientId}-${tag}-${stamp}${indexPart}.${ext}`;
   }
 </script>
 
@@ -72,10 +100,10 @@
     >
   </div>
   <form bind:this={form}>
-    <input type="file" bind:this={fileInput} />
+    <input type="file" bind:this={fileInput} multiple />
   </form>
   <div class="commands">
-    <button on:click={doSave}>保存</button>
+    <button on:click={() => doSave(close)}>保存</button>
     <button on:click={close}>キャンセル</button>
   </div>
 </Dialog>
