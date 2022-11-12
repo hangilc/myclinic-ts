@@ -2,11 +2,9 @@
   import { genid } from "@/lib/genid";
   import {
     DiseaseExampleObject,
-    type ByoumeiMaster,
     type DiseaseExample,
-    type ShuushokugoMaster,
   } from "@/lib/model";
-  import { writable, type Readable, type Writable } from "svelte/store";
+  import { writable, type Writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
   import api from "@/lib/api";
   import type { SearchResultType } from "./types";

@@ -1,9 +1,8 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import type { Meisai } from "@/lib/model";
   import { writable, type Writable } from "svelte/store";
-  import { reqChangePatient, currentPatient, currentVisitId } from "./ExamVars";
+  import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
@@ -22,7 +21,7 @@
   }
 
   function onEndPatientClick() {
-    reqChangePatient.set(null);
+    endPatient();
   }
 
   function doRegister(): void {

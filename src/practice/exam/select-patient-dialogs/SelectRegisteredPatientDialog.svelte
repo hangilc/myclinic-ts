@@ -15,7 +15,7 @@
 
   function enter(close: () => void) {
     if( $selected ){
-      const [wq, visit, patient] = $selected;
+      const [_, visit, patient] = $selected;
       onEnter(patient, visit.visitId);
       close();
     }
@@ -31,12 +31,12 @@
     <div class="select">
       {#each dataList as data}
         <SelectItem data={data} selected={selected}>
-          {@const [wq, visit, patient] = data}
+          {@const [_wq, _visit, patient] = data}
           <span>{patient.lastName}{patient.firstName}</span>
         </SelectItem>
       {/each}
     </div>
-  {:catch error}
+  {:catch}
     <div style="color: red">Error</div>
   {/await}
   <svelte:fragment slot="commands">

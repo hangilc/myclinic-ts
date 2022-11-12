@@ -15,7 +15,7 @@ export async function initAppEvents() {
 function connect(): void {
   let ws = new WebSocket(wsUrl);
 
-  ws.addEventListener("open", event => {
+  ws.addEventListener("open", () => {
     console.log("ws open");
   })
 
@@ -28,14 +28,14 @@ function connect(): void {
     }
   })
 
-  ws.addEventListener("close", event => {
+  ws.addEventListener("close", () => {
     console.log("ws close");
     setTimeout(() => {
       connect()
     }, 1000);
   })
 
-  ws.addEventListener("error", event => {
+  ws.addEventListener("error", () => {
     console.log("ws error");
     ws.close();
   })

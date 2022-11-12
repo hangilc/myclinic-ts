@@ -20,7 +20,7 @@ class ValidationResult<T> {
     return this.error === "";
   }
 
-  unwrap(errors: string[], prefix: string = ""): T {
+  unwrap(errors: string[], prefix: () => string = () => ""): T {
     if( this.isValid ){
       return this.value;
     } else {

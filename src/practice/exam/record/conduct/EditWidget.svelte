@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ConductKindObject, type ConductEx, type ConductKindTag, type VisitEx } from "@/lib/model";
+  import type { ConductEx, VisitEx } from "@/lib/model";
   import Widget from "@/lib/Widget.svelte";
   import { confirm } from "@/lib/confirm-call"
   import api from "@/lib/api";
@@ -24,9 +24,9 @@
     widget.open();
   }
 
-  function kindRep(kindTag: ConductKindTag): string {
-    return ConductKindObject.fromTag(kindTag).rep;
-  }
+  // function kindRep(kindTag: ConductKindTag): string {
+  //   return ConductKindObject.fromTag(kindTag).rep;
+  // }
 
   function doDelete(close: () => void): void {
     confirm("この処置を削除していいですか？", async () => {

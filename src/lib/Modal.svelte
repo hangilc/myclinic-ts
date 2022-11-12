@@ -12,7 +12,6 @@
   }
   export let onClose: () => void = () => {};
 
-  let content: HTMLElement;
   let zIndexScreen: number;
   let zIndexContent: number;
 
@@ -29,7 +28,6 @@
 <div>
   <Screen opacity={screenOpacity} zIndex={zIndexScreen} />
   <div
-    bind:this={content}
     class="modal"
     style:z-index={zIndexContent}
   >

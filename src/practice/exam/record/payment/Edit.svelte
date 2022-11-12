@@ -1,7 +1,6 @@
 <script lang="ts">
   import { MeisaiObject, type Meisai, type VisitEx, 
     type Payment as ModelPayment, 
-    VisitExObject,
     type Wqueue,
     WqueueState} from "@/lib/model";
   import RightBox from "../../RightBox.svelte";
@@ -48,7 +47,6 @@
   }
 
   async function doReceiptPdf() {
-    const visitProper = VisitExObject.asVisit(visit);
     const patient = visit.patient;
     const data = ReceiptDrawerData.create(visit, meisai);
     const ops = await api.drawReceipt(data);
@@ -75,7 +73,6 @@
       showError("請求額が負の値です。");
       return;
     }
-    const updated = await api.updateChargeValue(visit.visitId, chargeValue);
     const wqueueOpt = await api.findWqueue(visit.visitId);
     if( wqueueOpt == null ){
       const wq: Wqueue = {

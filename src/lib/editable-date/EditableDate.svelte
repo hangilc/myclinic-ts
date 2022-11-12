@@ -15,7 +15,6 @@
   };
   export let datePickerDefault: () => Date = () => new Date();
   let repr: string;
-  let disp: HTMLElement;
   let form: DateFormPulldown;
   let datePicker: DatePickerPulldown;
   $: repr = format(date);
@@ -29,7 +28,7 @@
   }
 </script>
 
-<div class="disp" bind:this={disp}>
+<div class="disp">
   <span class="repr" on:click={doClick}>{repr}</span>
   <slot name="icons" />
   <svg

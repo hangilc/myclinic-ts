@@ -36,7 +36,15 @@ export class EndPatientReq {
   }
 }
 
-export const reqChangePatient: Writable<StartPatientReq | EndPatientReq | null> = writable(null);
+const reqChangePatient: Writable<StartPatientReq | EndPatientReq | null> = writable(null);
+
+export function startPatient(patient: m.Patient, visitId: number | null = null): void {
+  reqChangePatient.set(new StartPatientReq(patient, visitId));
+}
+
+export function endPatient(waitState: m.WqueueStateData | null = null): void {
+  reqChangePatient.set(new EndPatientReq(waitState));
+}
 
 const taskRunner: TaskRunner = new TaskRunner();
 
@@ -148,23 +156,29 @@ export function clearTempVisitId(): void {
 reqChangePatient.subscribe(async value => {
   if( value == null ){
     return;
-  } else if( value instanceof StartPatientReq ){
-
-  } else if( value instanceof EndPatientReq)
-  taskRunner.cancel();
-  let currentVisitIdValue: number | null = get(currentVisitId);
-  if (currentVisitIdValue !== null) {
-    await suspendVisit(currentVisitIdValue).catch(ex => console.error(ex));
-  }
-  resetAll();
-  if (value != null) {
-    const [patient, visitIdOpt] = value;
-    currentPatient.set(patient);
-    currentVisitId.set(visitIdOpt);
-    taskRunner.run(
-      fetchVisits(patient.patientId, 0),
-      initNav(patient.patientId)
-    );
+  } else {
+    const visitIdSave: number | null = get(currentVisitId);
+    taskRunner.cancel();
+    resetAll();
+    if (visitIdSave !== null) {
+      await suspendVisit(visitIdSave).catch(ex => console.error(ex));
+    }
+    if( value instanceof StartPatientReq ){
+      const patient: m.Patient = value.patient;
+      currentPatient.set(value.patient);
+      currentVisitId.set(value.visitId);
+      taskRunner.run(
+        fetchVisits(patient.patientId, 0),
+        initNav(patient.patientId)
+      );
+    } else if( value instanceof EndPatientReq){
+      if( visitIdSave != null ){
+        const ws: m.WqueueStateData | null = value.waitState;
+        if( ws != null ){
+          api.changeWqueueState(visitIdSave, ws.code);
+        }
+      }
+    }
   }
 });
 
@@ -446,7 +460,7 @@ appEvent.conductShinryouDeleted.subscribe(async conductShinryou => {
     if (ci >= 0) {
       const list = visit.conducts[ci].shinryouList;
       const si = list.findIndex(s => s.conductShinryouId === conductShinryou.conductShinryouId)
-      if (si => 0) {
+      if (si >= 0) {
         list.splice(si, 1);
         visits.set(visitsValue);
       }
@@ -486,7 +500,7 @@ appEvent.conductDrugDeleted.subscribe(async conductDrug => {
     if (ci >= 0) {
       const list = visit.conducts[ci].drugs;
       const di = list.findIndex(d => d.conductDrugId === conductDrug.conductDrugId)
-      if (di => 0) {
+      if (di >= 0) {
         list.splice(di, 1);
         visits.set(visitsValue);
       }
@@ -526,7 +540,7 @@ appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
     if (ci >= 0) {
       const list = visit.conducts[ci].kizaiList;
       const ki = list.findIndex(s => s.conductKizaiId === conductKizai.conductKizaiId)
-      if (ki => 0) {
+      if (ki >= 0) {
         list.splice(ki, 1);
         visits.set(visitsValue);
       }

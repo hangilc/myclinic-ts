@@ -65,8 +65,6 @@
   }
 
   async function doEnter() {
-    const at = visit.visitedAt.substring(0, 10);
-    const visitId = visit.visitId;
     const names: string[] = 
       [...leftItems, ...rightItems].filter(item => item.checked).map(item => item.value);
     await enter(visit, names, []);

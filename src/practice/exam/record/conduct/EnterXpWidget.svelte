@@ -17,6 +17,7 @@
       kind: ConductKind.Gazou,
       labelOption: label,
       shinryou: ["単純撮影", "単純撮影診断"],
+      drug: [],
       kizai: [{
         code: film,
         amount: 1

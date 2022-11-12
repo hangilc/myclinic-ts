@@ -1,9 +1,8 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte"
   import { tick } from "svelte"
-  import { derived } from "svelte/store"
   import {
-    type Visit, VisitObject, type VisitAttributes, type VisitEx, VisitExObject
+    VisitObject, type VisitAttributes, type VisitEx, VisitExObject
   } from "@/lib/model"
   import api from "@/lib/api"
 

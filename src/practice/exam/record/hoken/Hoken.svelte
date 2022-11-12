@@ -3,7 +3,6 @@
   import { hokenRep, shahokokuhoRep, roujinRep, koukikoureiRep, kouhiRep } from "@/lib/hoken-rep"
   import Dialog from "@/lib/Dialog.svelte"
   import api from "@/lib/api"
-    import Cashier from "@/practice/cashier/Cashier.svelte";
 
   export let visit: VisitEx;
   let dialog: Dialog;

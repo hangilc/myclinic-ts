@@ -59,7 +59,7 @@
   }
 </script>
 
-<Dialog let:close bind:this={dialog} width="26em" {onClose}>
+<Dialog bind:this={dialog} width="26em" {onClose}>
   <span slot="title">文章検索</span>
   <div class="patient">
     ({patient?.patientId}) {patient?.lastName}{patient?.firstName} 

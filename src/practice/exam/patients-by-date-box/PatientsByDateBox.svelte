@@ -20,7 +20,7 @@
     <div>Loading...</div>
   {:then dataList}
     {#each dataList as data}
-      {@const [visit, patient] = data}
+      {@const [_visit, patient] = data}
       <div>{patient.lastName}{patient.firstName}</div>
     {/each}
   {:catch err}

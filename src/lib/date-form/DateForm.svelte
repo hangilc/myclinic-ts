@@ -6,7 +6,6 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import { AppError } from "@/lib/app-error";
   import { string, notEmpty, toNumber, integer } from "@/lib/validator";
 
   export let date: Date | null | undefined;
@@ -59,13 +58,13 @@
         date = null;
       } else {
         date = undefined;
-        errors.push("入力がありません。");
+        errors.push(errorPrefix + "入力がありません。");
       }
     } else {
       const validated = {
-        nen: nenSchema.validate(nenValue).unwrap(errors, "年："),
-        month: monthSchema.validate(monthValue).unwrap(errors, "月："),
-        day: daySchema.validate(dayValue).unwrap(errors, "日："),
+        nen: nenSchema.validate(nenValue).unwrap(errors, () => errorPrefix + "年："),
+        month: monthSchema.validate(monthValue).unwrap(errors, () => errorPrefix + "月："),
+        day: daySchema.validate(dayValue).unwrap(errors, () => errorPrefix + "日："),
       };
       if( errors.length === 0 ){
         let year: number = fromGengou(gengouValue, validated.nen);
@@ -76,39 +75,39 @@
     }
   }
 
-  function mkError(msg: string): AppError {
-    return new AppError(errorPrefix + msg);
-  }
+  // function mkError(msg: string): AppError {
+  //   return new AppError(errorPrefix + msg);
+  // }
 
-  const patDigits = /^\d+$/;
+  // const patDigits = /^\d+$/;
 
-  function isAllDigits(s: string): boolean {
-    return patDigits.test(s);
-  }
+  // function isAllDigits(s: string): boolean {
+  //   return patDigits.test(s);
+  // }
 
-  function parseNenValue(): number | AppError {
-    const y = parseInt(nenValue);
-    if (isNaN(y)) {
-      return mkError("年の入力が数字でありません。");
-    }
-    return y;
-  }
+  // function parseNenValue(): number | AppError {
+  //   const y = parseInt(nenValue);
+  //   if (isNaN(y)) {
+  //     return mkError("年の入力が数字でありません。");
+  //   }
+  //   return y;
+  // }
 
-  function parseMonthValue(): number | AppError {
-    const m = parseInt(monthValue);
-    if (isNaN(m)) {
-      return mkError("月の入力が数字でありません。");
-    }
-    return m;
-  }
+  // function parseMonthValue(): number | AppError {
+  //   const m = parseInt(monthValue);
+  //   if (isNaN(m)) {
+  //     return mkError("月の入力が数字でありません。");
+  //   }
+  //   return m;
+  // }
 
-  function parseDayValue(): number | AppError {
-    const d = parseInt(dayValue);
-    if (isNaN(d)) {
-      return mkError("日の入力が数字でありません。");
-    }
-    return d;
-  }
+  // function parseDayValue(): number | AppError {
+  //   const d = parseInt(dayValue);
+  //   if (isNaN(d)) {
+  //     return mkError("日の入力が数字でありません。");
+  //   }
+  //   return d;
+  // }
 
   function doNenClick(event: MouseEvent): void {
     validate();

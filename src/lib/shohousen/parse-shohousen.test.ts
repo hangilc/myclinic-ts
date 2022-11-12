@@ -43,10 +43,6 @@ describe("parse-shohousen", () => {
     　　分３　毎食後　５日分
     `
     expect(isPartStart(s)).toBe(true);
-    const t = sm`
-    　１）カロナール錠３００ｍｇ　３錠
-    　　分３　毎食後　５日分
-    `
   });
   
   it("should detect non item start", () => {
