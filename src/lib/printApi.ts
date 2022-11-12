@@ -8,14 +8,15 @@ interface FetchOption {
   noResult?: boolean;
 }
 
-function response(promise: Promise<any>, option: FetchOption): Promise<any> {
+async function response(promise: Promise<any>, option: FetchOption): Promise<any> {
   if( option.progress ){
 
   }
   if( option.noResult !== undefined && option.noResult ){
     return promise; // returns Promise<Response>
   } else {
-    return promise.then(resp => resp.json());
+    const resp = await promise;
+    return resp.json();
   }
 }
 
@@ -37,7 +38,7 @@ function post(cmd: string, data: any, params: any = {}, option: FetchOption = {}
   return response(fetch(arg, { method: "POST", body: JSON.stringify(data) }), option);
 }
 
-function del(cmd: string, data: any, params: any = {}, option: FetchOption = {}): Promise<any> {
+function del(cmd: string, params: any = {}, option: FetchOption = {}): Promise<any> {
   let arg = `${base}/${cmd}`
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
@@ -86,22 +87,21 @@ export const printApi = {
     return get("scanner/device/", {});
   },
 
-  scan(
+  async scan(
     deviceid: string, 
     progress: (loaded: number, total: number) => void, 
     resolution: number = 100
     ): Promise<string> {
-    return get("scanner/scan", { "device-id": deviceid, "resolution": resolution}, {
+    const resp = await get("scanner/scan", { "device-id": deviceid, "resolution": resolution }, {
       progress,
       noResult: true
-    }).then((resp: Response) => {
-      return resp.headers.get("x-saved-image");
     });
+    return resp.headers.get("x-saved-image");
   },
 
-  getScannedFile(savedFile: string): Promise<ArrayBuffer> {
-    return get(`scanner/image/${savedFile}`, {}, { noResult: true })
-      .then(resp => resp.arrayBuffer());
+  async getScannedFile(savedFile: string): Promise<ArrayBuffer> {
+    const resp = await get(`scanner/image/${savedFile}`, {}, { noResult: true });
+    return resp.arrayBuffer();
   },
 
   deleteScannedFile(savedFile: string): Promise<boolean> {

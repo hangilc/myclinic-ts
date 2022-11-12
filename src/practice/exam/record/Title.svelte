@@ -11,7 +11,7 @@
   import Pulldown from "@/lib/Pulldown.svelte";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
-  import { onDestroy, tick } from "svelte";
+  import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
 
@@ -61,6 +61,10 @@
     return charge != null && charge > 0 && (
       pay == null || (pay === 0)
     );
+  }
+
+  function totalTenOf(meisai: m.Meisai): string {
+    return m.MeisaiObject.totalTenOf(meisai).toLocaleString();
   }
 </script>
 
@@ -116,7 +120,6 @@
         {/each}
       </div>
     {/each}
-    {@const totalTenOf = (a) => m.MeisaiObject.totalTenOf(a).toLocaleString()}
     <hr />
     <div class="meisai-detail-summary">
       <span>総点：{totalTenOf(meisai)}点</span>

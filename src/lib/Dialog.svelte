@@ -12,7 +12,6 @@
   export let noTitle = false;
   export let onClose: () => void = () => {};
 
-  let content: HTMLElement;
   let zIndexScreen: number;
   let zIndexContent: number;
 
@@ -28,7 +27,6 @@
   <div>
     <Screen opacity="0.5" zIndex={zIndexScreen} />
     <div
-      bind:this={content}
       class="dialog"
       style:z-index={zIndexContent}
       style:width

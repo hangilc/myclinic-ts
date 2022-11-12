@@ -42,7 +42,7 @@
     }
   }
 
-  function setFocus(input){
+  function setFocus(input: HTMLInputElement){
     input.focus();
   }
 

@@ -30,23 +30,24 @@ function nonSslServerPort(): number {
   return 8080;
 }
 
-function get(cmd: string, params: any = {}): Promise<any> {
+async function get(cmd: string, params: any = {}): Promise<any> {
   let arg = `${base}/${cmd}`
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
   }
-  return fetch(arg).then(resp => resp.json());
+  const resp = await fetch(arg)
+  return await resp.json()
 }
 
-function post(cmd: string, data: any, params: any = {}): Promise<any> {
+async function post(cmd: string, data: any, params: any = {}): Promise<any> {
   let arg = `${base}/${cmd}`
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
   }
-  return fetch(arg, { method: "POST", body: JSON.stringify(data) })
-    .then(resp => resp.json());
+  const resp = await fetch(arg, { method: "POST", body: JSON.stringify(data) })
+  return await resp.json()
 }
 
 export default {
@@ -54,12 +55,10 @@ export default {
     return get("get-patient", { "patient-id": patientId });
   },
 
-  searchPatient(text: string): Promise<Array<m.Patient>> {
-    return get("search-patient", { "text": text })
-      .then(result => {
-        const [_, list] = result;
-        return list;
-      });
+  async searchPatient(text: string): Promise<Array<m.Patient>> {
+    const result = await get("search-patient", { "text": text })
+    const [_, list] = result
+    return list
   },
 
   async batchGetPatient(patientIds: number[]): Promise<Map<number, m.Patient>> {
@@ -149,7 +148,7 @@ export default {
   },
 
   async getVisitEx(visitId: number): Promise<m.VisitEx> {
-    const visit = await get("get-visit-ex", { "visit-id": visitId });
+    const visit: m.VisitEx = await get("get-visit-ex", { "visit-id": visitId });
     visit.shinryouList.sort((sa, sb) => {
       const a = sa.shinryoucode;
       const b = sb.shinryoucode;
@@ -160,7 +159,7 @@ export default {
 
   async listVisitEx(patientId: number, offset: number, count: number): Promise<m.VisitEx[]> {
     const visitIds: number[] = await this.listVisitIdByPatientReverse(patientId, offset, count);
-    const visits = await this.batchGetVisitEx(visitIds);
+    const visits: m.VisitEx[] = await this.batchGetVisitEx(visitIds);
     visits.forEach(visit => {
       visit.shinryouList.sort((sa, sb) => {
         const a = sa.shinryoucode;
@@ -486,6 +485,13 @@ export default {
         offset
       }
     );
-  }
+  },
+
+  enterChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
+    return get(
+      "enter-charge-value",
+      { "visit-id": visitId, "charge-value": chargeValue }
+    );
+  },
 
 }

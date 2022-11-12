@@ -44,7 +44,6 @@
   };
 
   async function doEnter(close: () => void) {
-    const at: string = visit.visitedAt.substring(0, 10);
     const selectedNames: string[] = [
       ...leftItems,
       ...rightItems,

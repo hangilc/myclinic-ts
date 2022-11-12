@@ -112,5 +112,6 @@
     width: 100%;
     height: 16em;
     resize: vertical;
+    box-sizing: border-box;
   }
 </style>

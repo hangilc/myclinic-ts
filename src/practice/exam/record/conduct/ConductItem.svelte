@@ -5,9 +5,7 @@
     type ConductKindTag,
     type VisitEx,
   } from "@/lib/model"
-  import ShinryouItem from "./ShinryouEditItem.svelte"
   import EditWidget from "./EditWidget.svelte"
-    import { shinryouDeleted } from "@/practice/app-events";
 
   export let conduct: ConductEx;
   export let visit: VisitEx;

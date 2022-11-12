@@ -1,16 +1,27 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import Confirm from "@/lib/Confirm.svelte";
-  import { reqChangePatient, currentPatient } from "./ExamVars";
+  import { writable, type Writable } from "svelte/store";
+  import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
+  import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
-    import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
+  import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
 
+  let cashierDialog: CashierDialog;
   let searchTextDialog: SearchTextDialog;
   let uploadImageDialog: UploadImageDialog;
+  let cashierVisitId: Writable<number | null> = writable(null);
+
+  async function doCashier() {
+    const visitId = $currentVisitId;
+    if (visitId != null) {
+      cashierVisitId.set(visitId);
+      cashierDialog.open();
+    }
+  }
 
   function onEndPatientClick() {
-    reqChangePatient.set(null);
+    endPatient();
   }
 
   function doRegister(): void {
@@ -23,33 +34,29 @@
   }
 
   function doSearchText() {
-    if( $currentPatient ){
+    if ($currentPatient) {
       searchTextDialog.open();
     }
   }
 
   function doUploadImage() {
-    if( $currentPatient ){
+    if ($currentPatient) {
       uploadImageDialog.open();
     }
   }
 </script>
 
 <div class="patient-manip top">
-  <button>会計</button>
+  <button on:click={doCashier} disabled={$currentVisitId == null}>会計</button>
   <button on:click={onEndPatientClick}>患者終了</button>
   <a href="javascript:void(0)" on:click={doRegister}>診察登録</a>
   <a href="javascript:void(0)" on:click={doSearchText}>文章検索</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)">画像一覧</a>
 </div>
-<SearchTextDialog
-  patient={$currentPatient}
-  bind:this={searchTextDialog}
-/>
-<UploadImageDialog bind:this={uploadImageDialog}>
-
-</UploadImageDialog>
+<CashierDialog bind:this={cashierDialog} visitId={cashierVisitId} />
+<SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} />
+<UploadImageDialog bind:this={uploadImageDialog} />
 
 <style>
   .top {

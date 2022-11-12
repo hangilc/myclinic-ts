@@ -1,11 +1,12 @@
+import type { Op } from "./op";
 
-export function drawerJsonToSvg(opsJson: string, width, height, viewBox) {
-  let ops = JSON.parse(opsJson);
-  let options = { width, height, viewBox };
-  return drawerToSvg(ops, options);
-}
+// export function drawerJsonToSvg(opsJson: string, width, height, viewBox) {
+//   let ops = JSON.parse(opsJson);
+//   let options = { width, height, viewBox };
+//   return drawerToSvg(ops, options);
+// }
 
-export function drawerToSvg(ops, options) {
+export function drawerToSvg(ops: Op[], options: any) {
   options = options || {};
 
   let ns = "http://www.w3.org/2000/svg";
@@ -13,11 +14,11 @@ export function drawerToSvg(ops, options) {
   let pen_width = "1px";
   let pen_style = [];
   let pen_dict = {};
-  let font_name, font_size, font_weight, font_italic;
+  let font_name: string, font_size: number, font_weight: number, font_italic: boolean;
   let font_dict = {};
   let text_color = "rgb(0,0,0)";
-  let i, n, op;
-  let curr_x, curr_y;
+  let i: number, n: number, op: Op;
+  let curr_x: number, curr_y: number;
 
   let svg = document.createElementNS(ns, "svg");
   ['width', 'height', "viewBox"].forEach(function (key) {
@@ -26,17 +27,17 @@ export function drawerToSvg(ops, options) {
     }
   })
 
-  function draw_move_to(x, y) {
+  function draw_move_to(x: number, y: number) {
     curr_x = x;
     curr_y = y;
   }
 
-  function draw_line_to(x, y) {
+  function draw_line_to(x: number, y: number) {
     let e = document.createElementNS(ns, "line");
-    e.setAttributeNS(null, "x1", curr_x);
-    e.setAttributeNS(null, "y1", curr_y);
-    e.setAttributeNS(null, "x2", x);
-    e.setAttributeNS(null, "y2", y);
+    e.setAttributeNS(null, "x1", curr_x.toString());
+    e.setAttributeNS(null, "y1", curr_y.toString());
+    e.setAttributeNS(null, "x2", x.toString());
+    e.setAttributeNS(null, "y2", y.toString());
     //e.setAttributeNS(null, "style", "stroke:" + pen_color + ";stroke-width:" + pen_width);
     e.setAttributeNS(null, "stroke", pen_color);
     e.setAttributeNS(null, "stroke-width", pen_width);
@@ -48,34 +49,34 @@ export function drawerToSvg(ops, options) {
     return e;
   }
 
-  function create_pen(name, r, g, b, width, penstyle) {
+  function create_pen(name: string, r: number, g: number, b: number, width: number, penstyle: number[]) {
     let color = "rgb(" + r + "," + g + "," + b + ")";
-    penstyle = penstyle.join(" ");
-    pen_dict[name] = { width: width + "px", color: color, penstyle: penstyle };
+    const penstyleStr = penstyle.map(n => n.toString()).join(" ");
+    pen_dict[name] = { width: width + "px", color: color, penstyle: penstyleStr };
   }
 
-  function set_pen(name) {
+  function set_pen(name: string) {
     let pen = pen_dict[name];
     pen_color = pen.color;
     pen_width = pen.width;
     pen_style = pen.penstyle;
   }
 
-  function mmToPixel(dpi, mm) {
-    let inch = mm / 25.4;
-    return Math.floor(dpi * inch);
-  }
+  // function mmToPixel(dpi: number, mm: number) {
+  //   let inch = mm / 25.4;
+  //   return Math.floor(dpi * inch);
+  // }
 
-  function pixelToMm(dpi, px) {
-    let inch = px / dpi;
-    return inch * 25.4;
-  }
+  // function pixelToMm(dpi: number, px: number) {
+  //   let inch = px / dpi;
+  //   return inch * 25.4;
+  // }
 
-  function create_font(name, font_name, size, weight, italic) {
+  function create_font(name: string, font_name: string, size: number, weight: number, italic: boolean) {
     font_dict[name] = { font_name: font_name, font_size: size, font_weight: weight, font_italic: italic };
   }
 
-  function set_font(name) {
+  function set_font(name: string) {
     let font = font_dict[name];
     font_name = font.font_name;
     font_size = font.font_size;
@@ -83,21 +84,21 @@ export function drawerToSvg(ops, options) {
     font_italic = font.font_italic;
   }
 
-  function set_text_color(r, g, b) {
+  function set_text_color(r: number, g: number, b: number) {
     text_color = "rgb(" + r + "," + g + "," + b + ")";
   }
 
-  function encodeText(text) {
-    text = text.replace(/ /g, "&nbsp;");
-    text = text.replace(/&/g, "&amp;");
-    text = text.replace(/>/g, "&gt;");
-    text = text.replace(/</g, "&lt;");
-    text = text.replace(/"/g, "&quot;");
-    text = text.replace(/'/g, "&#039;");
-    return text;
-  }
+  // function encodeText(text: string) {
+  //   text = text.replace(/ /g, "&nbsp;");
+  //   text = text.replace(/&/g, "&amp;");
+  //   text = text.replace(/>/g, "&gt;");
+  //   text = text.replace(/</g, "&lt;");
+  //   text = text.replace(/"/g, "&quot;");
+  //   text = text.replace(/'/g, "&#039;");
+  //   return text;
+  // }
 
-  function draw_chars(chars, xs, ys) {
+  function draw_chars(chars: string, xs: number[], ys: number[]) {
     let e = document.createElementNS(ns, "text");
     let attrs = {
       fill: text_color,
@@ -127,11 +128,11 @@ export function drawerToSvg(ops, options) {
     return e;
   }
 
-  function draw_circle(cx, cy, r) {
+  function draw_circle(cx: number, cy: number, r: number) {
     let e = document.createElementNS(ns, "circle");
-    e.setAttributeNS(null, "cx", cx);
-    e.setAttributeNS(null, "cy", cy);
-    e.setAttributeNS(null, "r", r);
+    e.setAttributeNS(null, "cx", cx.toString());
+    e.setAttributeNS(null, "cy", cy.toString());
+    e.setAttributeNS(null, "r", r.toString());
     e.setAttributeNS(null, "style", "fill: none");
     e.setAttributeNS(null, "stroke", pen_color);
     e.setAttributeNS(null, "stroke-width", pen_width);

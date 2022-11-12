@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate"
   import { type DiseaseData, fullName, startDateRep } from "./types"
 
   export let list: DiseaseData[];

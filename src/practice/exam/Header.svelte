@@ -1,12 +1,11 @@
 <script type="ts">
   import ServiceHeader from "../../ServiceHeader.svelte";
-  import type * as m from "../../lib/model";
   import SelectPatientMenu from "./SelectPatientMenu.svelte";
   import Pulldown from "../../lib/Pulldown.svelte";
   import SelectRegisteredPatientDialog from "./select-patient-dialogs/SelectRegisteredPatientDialog.svelte";
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
-  import { reqChangePatient, showPatientsByDate } from "./ExamVars";
+  import { startPatient, showPatientsByDate } from "./ExamVars";
 
   let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
@@ -16,10 +15,6 @@
 
   function onSelectPatientClick() {
     selectPatientPulldown.open();
-  }
-
-  function startPatient(patient: m.Patient, visitId: number | null){
-    reqChangePatient.set([patient, visitId]);
   }
 
   function updateSelectPatientDialog(sel: string): void {

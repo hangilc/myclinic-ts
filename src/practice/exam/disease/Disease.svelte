@@ -1,12 +1,5 @@
 <script lang="ts">
-  import type {
-    Patient,
-    Disease,
-    ByoumeiMaster,
-    DiseaseAdj,
-    ShuushokugoMaster,
-    DiseaseExample,
-  } from "@/lib/model";
+  import type { Patient, DiseaseExample } from "@/lib/model";
   import { currentPatient } from "@/practice/exam/ExamVars";
   import RightBox from "@/practice/exam/RightBox.svelte";
   import api from "@/lib/api";
@@ -16,8 +9,7 @@
   import { onMount, onDestroy } from "svelte";
   import * as appEvent from "@/practice/app-events";
   import Tenki from "./Tenki.svelte";
-    import Edit from "./Edit.svelte";
-    import { get } from "svelte/store";
+  import Edit from "./Edit.svelte";
 
   let show = false;
   let mode = "current";
@@ -39,7 +31,7 @@
           const curr = currentList;
           curr.push(ex);
           currentList = curr;
-          if( allList !== undefined ){
+          if (allList !== undefined) {
             const cur = allList;
             cur.push(ex);
             sortDiseaseList(cur);
@@ -52,12 +44,12 @@
 
   unsubs.push(
     appEvent.diseaseUpdated.subscribe(async (d) => {
-      if( d != null && d.patientId === patient?.patientId ){
-        if( d.endReasonStore === "N" ){
+      if (d != null && d.patientId === patient?.patientId) {
+        if (d.endReasonStore === "N") {
           const data = await api.getDiseaseEx(d.diseaseId);
           const list = currentList;
-          const index = list.findIndex(e => e[0].diseaseId == d.diseaseId);
-          if( index >= 0 ){
+          const index = list.findIndex((e) => e[0].diseaseId == d.diseaseId);
+          if (index >= 0) {
             list.splice(index, 1, data);
           } else {
             list.push(data);
@@ -66,24 +58,24 @@
           currentList = list;
         } else {
           const list = currentList;
-          const index = list.findIndex(e => e[0].diseaseId == d.diseaseId);
-          if( index >= 0 ){
+          const index = list.findIndex((e) => e[0].diseaseId == d.diseaseId);
+          if (index >= 0) {
             list.splice(index, 1);
             currentList = list;
           }
         }
-        if( allList !== undefined ){
+        if (allList !== undefined) {
           updateAllListWith(d.diseaseId);
         }
       }
     })
-  )
+  );
 
   async function updateAllListWith(diseaseId: number) {
     let d = await api.getDiseaseEx(diseaseId);
     const cur = allList;
-    const i = cur.findIndex(e => e[0].diseaseId === diseaseId);
-    if( i >= 0 ){
+    const i = cur.findIndex((e) => e[0].diseaseId === diseaseId);
+    if (i >= 0) {
       cur.splice(i, 1, d);
     } else {
       cur.push(d);
@@ -112,7 +104,7 @@
   });
 
   async function doMode(m: string) {
-    if( m === "edit" && allList === undefined && patient != null ){
+    if (m === "edit" && allList === undefined && patient != null) {
       allList = await api.listDiseaseEx(patient.patientId);
     }
     mode = m;
@@ -127,7 +119,7 @@
       {:else if mode === "add"}
         <Add patientId={patient?.patientId} {examples} />
       {:else if mode === "tenki"}
-        <Tenki current={currentList}/>
+        <Tenki current={currentList} />
       {:else if mode === "edit"}
         <Edit list={allList} />
       {/if}

@@ -9,7 +9,7 @@
     isDiseaseExample,
   } from "@/lib/model";
   import SelectItem from "@/lib/SelectItem.svelte";
-  import { get, writable, type Writable } from "svelte/store";
+  import { writable, type Writable } from "svelte/store";
   import {
     fullName,
     getEndReason,
@@ -172,10 +172,6 @@
 
   .end-reason {
     font-size: 13px;
-  }
-
-  .search-text-input {
-    width: 10em;
   }
 
   .select {

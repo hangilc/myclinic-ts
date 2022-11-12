@@ -8,7 +8,6 @@
   export let errorPrefix: string = "";
   export let onEnter: (value: Date | null) => void;
   let modal: Modal;
-  let dateForm: DateForm;
   let error: string = "";
 
   export function open(initValue: Date | null): void {
@@ -36,7 +35,6 @@
     bind:date
     bind:errors
     {isNullable}
-    bind:this={dateForm}
     {errorPrefix}
   />
   <div class="commands">
