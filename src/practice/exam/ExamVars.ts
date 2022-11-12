@@ -15,13 +15,25 @@ export const mishuuList: Writable<m.VisitEx[]> = writable([]);
 
 export const recordsPerPage = 10;
 
-export interface StartPatientReq {
-  patient: m.Patient,
-  visitId?: number
+export class StartPatientReq {
+  patient: m.Patient;
+  visitId: number | null;
+  isStartPatientReq: boolean = true;
+
+  constructor(patient: m.Patient, visitId?: number){
+    this.patient = patient;
+    this.visitId = visitId;
+  }
+
 }
 
-export interface EndPatientReq {
-  waitState?: m.WqueueStateData
+export class EndPatientReq {
+  waitState?: m.WqueueStateData;
+  isEndPatientReq: boolean = true;
+
+  constructor(waitState?: m.WqueueStateData) {
+    this.waitState = waitState;
+  }
 }
 
 export const reqChangePatient: Writable<StartPatientReq | EndPatientReq | null> = writable(null);
@@ -134,6 +146,11 @@ export function clearTempVisitId(): void {
 }
 
 reqChangePatient.subscribe(async value => {
+  if( value == null ){
+    return;
+  } else if( value instanceof StartPatientReq ){
+
+  } else if( value instanceof EndPatientReq)
   taskRunner.cancel();
   let currentVisitIdValue: number | null = get(currentVisitId);
   if (currentVisitIdValue !== null) {
