@@ -1,6 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
+  import { WqueueStateObject } from "@/lib/model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
@@ -21,7 +22,7 @@
   }
 
   function onEndPatientClick() {
-    endPatient();
+    endPatient(WqueueStateObject.WaitReExam);
   }
 
   function doRegister(): void {

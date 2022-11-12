@@ -161,7 +161,13 @@ reqChangePatient.subscribe(async value => {
     taskRunner.cancel();
     resetAll();
     if (visitIdSave !== null) {
-      await suspendVisit(visitIdSave).catch(ex => console.error(ex));
+      if( value instanceof EndPatientReq ){
+        if( value.waitState != null ){
+          await api.changeWqueueState(visitIdSave, value.waitState.code);
+        }
+      } else {
+        await suspendVisit(visitIdSave).catch(ex => console.error(ex));
+      }
     }
     if( value instanceof StartPatientReq ){
       const patient: m.Patient = value.patient;
@@ -171,12 +177,8 @@ reqChangePatient.subscribe(async value => {
         fetchVisits(patient.patientId, 0),
         initNav(patient.patientId)
       );
-    } else if( value instanceof EndPatientReq){
-      if( visitIdSave != null ){
-        const ws: m.WqueueStateData | null = value.waitState;
-        if( ws != null ){
-          api.changeWqueueState(visitIdSave, ws.code);
-        }
+      if( value.visitId != null ){
+        api.changeWqueueState(value.visitId, m.WqueueState.InExam)
       }
     }
   }

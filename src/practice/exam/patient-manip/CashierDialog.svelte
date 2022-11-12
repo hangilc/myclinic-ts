@@ -8,6 +8,7 @@
     type Meisai,
   } from "@/lib/model";
     import { writable, type Readable, type Writable } from "svelte/store";
+    import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
   export let visitId: Readable<number | null>;
@@ -84,6 +85,7 @@
       await api.enterChargeValue($visitId, $chargeValue);
       await api.changeWqueueState($visitId, WqueueStateObject.WaitCashier.code);
       close();
+      endPatient(WqueueStateObject.WaitCashier);
     }
   }
 </script>
