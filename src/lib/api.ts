@@ -502,4 +502,13 @@ export default {
     return postRaw("upload-patient-image", data, { "patient-id": patientId });
   },
 
+  listPatientImage(patientId: number): Promise<m.FileInfo[]> {
+    return get("list-patient-image", { "patient-id": patientId });
+  },
+
+  patientImageUrl(patientId: number, filename: string): string {
+    const fn = encodeURI(filename);
+    return `${base}/patient-image?patient-id=${patientId}&file-name=${fn}`;
+  }
+
 }

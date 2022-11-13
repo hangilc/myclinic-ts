@@ -549,6 +549,12 @@ export interface AppEvent {
   data: string
 }
 
+export interface FileInfo {
+  name: string,
+  createdAt: string,
+  size: number
+}
+
 
 
 
