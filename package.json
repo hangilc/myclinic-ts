@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/frontend",
-    "packages/model"
+    "packages/model",
+    "packages/rezept"
   ],
   "dependencies": {
     "typescript": "^4.8.4"
