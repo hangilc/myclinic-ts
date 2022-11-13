@@ -509,6 +509,14 @@ export default {
   patientImageUrl(patientId: number, filename: string): string {
     const fn = encodeURI(filename);
     return `${base}/patient-image?patient-id=${patientId}&file-name=${fn}`;
-  }
+  },
+
+  searchPrescExample(text: string): Promise<[m.PrescExample, m.IyakuhinMaster][]> {
+    return get("search-presc-example-full", { text });
+  },
+
+  searchShohouSample(text: string): Promise<string[]> {
+    return get("search-shohou-sample", { text });
+  },
 
 }

@@ -6,12 +6,14 @@
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
   import { startPatient, showPatientsByDate } from "./ExamVars";
+    import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
 
   let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
   let searchDialog: SelectPatientBySearch;
   let recentDialog: RecentVisitsDialog;
   let selectPatientPulldown: Pulldown;
+  let searchShohouSampleDialog: SearchShohouSampleDialog;
 
   function onSelectPatientClick() {
     selectPatientPulldown.open();
@@ -38,6 +40,10 @@
     }
   }
 
+  function doSearchShohouSample(): void {
+    searchShohouSampleDialog.open();
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -48,7 +54,7 @@
       bind:this={selectPatientLink}
       on:click={onSelectPatientClick}>患者選択</a
     >
-    <a href="javascript:void(0);">登録薬剤</a>
+    <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);">全文検索</a>
     <SelectRegisteredPatientDialog
       bind:this={registeredDialog}
@@ -69,6 +75,7 @@
 <Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink} >
   <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
 </Pulldown>
+<SearchShohouSampleDialog bind:this={searchShohouSampleDialog} />
 
 <style>
   a:nth-of-type(1) {

@@ -190,6 +190,17 @@ export interface KizaiMaster {
   validUpto: string
 }
 
+export interface DrugCategoryType {
+  code: number,
+  name: string,
+}
+
+export const DrugCategory: Record<string, DrugCategoryType> = {
+  Naifuku: { code: 0, name: "内服" },
+  Tonpuku: { code: 1, name: "頓服" },
+  Gaiyou:  { code: 2, name: "外用" },
+}
+
 export interface DrugEx {
   drugId: number,
   visitId: number,
@@ -555,6 +566,17 @@ export interface FileInfo {
   size: number
 }
 
+
+export interface PrescExample {
+  prescExampleId: number,
+  iyakuhincode: number,
+  masterValidFrom: string,
+  amount: String,
+  usage: String,
+  days: number,
+  category: number,
+  comment: String
+}
 
 
 
