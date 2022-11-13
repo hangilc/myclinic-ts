@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductEx, VisitEx } from "@/lib/model";
+  import type { ConductEx, VisitEx } from "myclinic-model";
   import Widget from "@/lib/Widget.svelte";
   import { confirm } from "@/lib/confirm-call"
   import api from "@/lib/api";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductShinryouEx } from "@/lib/model"
+  import type { ConductShinryouEx } from "myclinic-model"
   import ShinryouEdit from "./ShinryouEdit.svelte"
 
   let mode = "disp";

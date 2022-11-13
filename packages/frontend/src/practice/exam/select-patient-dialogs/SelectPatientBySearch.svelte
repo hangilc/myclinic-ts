@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog from "../../../lib/Dialog.svelte";
-  import type * as m from "../../../lib/model";
+  import type * as m from "myclinic-model";
   import SelectItem from "../../../lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import api from "../../../lib/api";

@@ -2,7 +2,7 @@
   import { MeisaiObject, type Meisai, type VisitEx, 
     type Payment as ModelPayment, 
     type Wqueue,
-    WqueueState} from "@/lib/model";
+    WqueueState} from "myclinic-model";
   import RightBox from "../../RightBox.svelte";
   import { setFocus } from "@/lib/set-focus"
   import { dateTimeToSql } from "@/lib/util"

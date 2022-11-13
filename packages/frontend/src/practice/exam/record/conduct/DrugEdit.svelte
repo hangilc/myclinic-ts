@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductDrugEx } from "@/lib/model";
+  import type { ConductDrugEx } from "myclinic-model";
   import { confirm } from "@/lib/confirm-call"
     import api from "@/lib/api";
 

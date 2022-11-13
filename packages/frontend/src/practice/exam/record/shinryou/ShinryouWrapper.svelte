@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { VisitEx } from "@/lib/model";
+  import type { VisitEx } from "myclinic-model";
   import ShinryouItem from "./ShinryouItem.svelte"
 
   export let visit: VisitEx;

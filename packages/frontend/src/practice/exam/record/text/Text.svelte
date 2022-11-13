@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type * as m from "@/lib/model"
+  import type * as m from "myclinic-model"
   import TextForm from "./TextForm.svelte"
 
   export let text: m.Text;

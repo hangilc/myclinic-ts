@@ -7,7 +7,7 @@
     DrugCategory,
     type IyakuhinMaster,
     type PrescExample,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import { toZenkaku } from "@/lib/zenkaku";
   import { fade } from "svelte/transition";
 

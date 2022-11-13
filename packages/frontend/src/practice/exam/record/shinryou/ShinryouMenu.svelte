@@ -1,7 +1,7 @@
 <script lang="ts">
   import Pulldown from "@/lib/Pulldown.svelte"
   import api from "@/lib/api"
-  import type { VisitEx } from "@/lib/model"
+  import type { VisitEx } from "myclinic-model"
   import RegularDialog from "./RegularDialog.svelte"
   import KensaDialog from "./KensaDialog.svelte"
   import SearchDialog from "./SearchDialog.svelte"

@@ -3,7 +3,7 @@
   import { tick } from "svelte"
   import {
     VisitObject, type VisitAttributes, type VisitEx, VisitExObject
-  } from "@/lib/model"
+  } from "myclinic-model"
   import api from "@/lib/api"
 
   export let visit: VisitEx;

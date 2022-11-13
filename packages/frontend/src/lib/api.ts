@@ -1,4 +1,4 @@
-import type * as m from "./model"
+import type * as m from "myclinic-model"
 import { dateToSql } from "./util"
 import { dateParam, dateTimeParam } from "./date-param"
 import type { Op as DrawerOp, Op } from "./drawer/op"

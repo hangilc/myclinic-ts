@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as m from "../../../lib/model";
+  import * as m from "myclinic-model";
   import Title from "./Title.svelte";
   import TwoCols from "./TwoCols.svelte";
   import Text from "./text/Text.svelte";

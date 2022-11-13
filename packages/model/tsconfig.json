@@ -13,5 +13,7 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
+    "declaration": true,
+    "declarationMap": true
   }
 }

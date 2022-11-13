@@ -1,5 +1,5 @@
 import api, { wsUrl } from "../lib/api"
-import type * as m from "@/lib/model"
+import type * as m from "myclinic-model"
 import { writable, type Writable } from "svelte/store"
 
 let nextEventId = 0;

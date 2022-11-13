@@ -1,7 +1,7 @@
 <script lang="ts">
   import CheckLabel from "@/lib/CheckLabel.svelte";
   import Dialog from "@/lib/Dialog.svelte"
-  import type { VisitEx } from "@/lib/model";
+  import type { VisitEx } from "myclinic-model";
   import { enter } from "./helper"
 
   export let visit: VisitEx;

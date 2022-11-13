@@ -6,7 +6,7 @@
     MeisaiSectionDataObject,
     WqueueStateObject,
     type Meisai,
-  } from "@/lib/model";
+  } from "myclinic-model";
     import { writable, type Readable, type Writable } from "svelte/store";
     import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";

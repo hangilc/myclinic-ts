@@ -4,7 +4,7 @@
     type ConductEx,
     type ConductKindTag,
     type VisitEx,
-  } from "@/lib/model"
+  } from "myclinic-model"
   import EditWidget from "./EditWidget.svelte"
 
   export let conduct: ConductEx;

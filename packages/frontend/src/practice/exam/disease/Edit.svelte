@@ -7,7 +7,7 @@
     isByoumeiMaster,
     isShuushokugoMaster,
     isDiseaseExample,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import {

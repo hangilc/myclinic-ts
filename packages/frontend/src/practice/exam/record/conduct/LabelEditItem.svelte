@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductEx } from "@/lib/model"
+  import type { ConductEx } from "myclinic-model"
   import LabelEdit from "./LabelEdit.svelte";
 
   export let conduct: ConductEx;

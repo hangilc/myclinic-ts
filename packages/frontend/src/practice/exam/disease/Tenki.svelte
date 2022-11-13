@@ -9,8 +9,8 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { addDays } from "kanjidate";
   import * as kanjidate from "kanjidate";
-  import type { DiseaseEndReasonType } from "@/lib/model";
-  import { DiseaseEndReason } from "@/lib/model";
+  import type { DiseaseEndReasonType } from "myclinic-model";
+  import { DiseaseEndReason } from "myclinic-model";
   import api from "@/lib/api";
 
   export let current: DiseaseData[];

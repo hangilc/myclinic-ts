@@ -1,4 +1,4 @@
-import type { VisitEx } from "@/lib/model";
+import type { VisitEx } from "myclinic-model";
 
 export interface PaymentStatus {
   rep: string,

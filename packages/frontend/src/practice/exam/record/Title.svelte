@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as m from "../../../lib/model";
+  import * as m from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import {
     currentVisitId,

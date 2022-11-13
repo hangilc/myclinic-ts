@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog from "../../../lib/Dialog.svelte";
-  import type * as m from "../../../lib/model";
+  import type * as m from "myclinic-model";
   import api from "../../../lib/api";
   import { padNumber } from "../../../lib/util";
   import * as kanjidate from "kanjidate";

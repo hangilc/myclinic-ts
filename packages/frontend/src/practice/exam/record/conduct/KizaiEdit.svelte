@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductKizaiEx } from "@/lib/model";
+  import type { ConductKizaiEx } from "myclinic-model";
   import { confirm } from "@/lib/confirm-call"
     import api from "@/lib/api";
 

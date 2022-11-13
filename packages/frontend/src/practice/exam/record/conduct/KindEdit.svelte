@@ -1,6 +1,6 @@
 <script lang="ts">
     import api from "@/lib/api";
-  import { ConductKind, ConductKindObject, type ConductEx, type ConductKindType } from "@/lib/model";
+  import { ConductKind, ConductKindObject, type ConductEx, type ConductKindType } from "myclinic-model";
     import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductDrugEx } from "@/lib/model"
+  import type { ConductDrugEx } from "myclinic-model"
   import DrugEdit from "./DrugEdit.svelte"
 
   let mode = "disp";

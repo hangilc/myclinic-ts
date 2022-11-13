@@ -2,7 +2,7 @@
   import SideMenu from "./SideMenu.svelte";
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
-    import Hotline from "@/lib/hotline/Hotline.svelte";
+  import Hotline from "@/lib/hotline/Hotline.svelte";
 
   const service = writable("exam");
 
@@ -17,7 +17,7 @@
   // let date = new Date();
   // let errors: string[] = [];
   // function click() {
-    
+
   // }
   // function doGet() {
   //   console.log(date, errors);
@@ -30,7 +30,7 @@
 <div class="two-cols">
   <div class="left">
     <div class="left-box">
-      <SideMenu serviceStore={service}/>
+      <SideMenu serviceStore={service} />
     </div>
     <div class="left-box">
       <Hotline sendAs="practice" sendTo="reception" />
@@ -44,7 +44,7 @@
     <!-- <button on:click={click}>click</button>
     <button on:click={doGet}>get</button> -->
   </div>
-  <div class="right"><Main serviceStore={service}/></div>
+  <div class="right"><Main serviceStore={service} /></div>
 </div>
 
 <style>
@@ -70,5 +70,5 @@
   .right {
     flex: 1 1 auto;
     margin: 0 0 10px 6px;
-  }  
+  }
 </style>

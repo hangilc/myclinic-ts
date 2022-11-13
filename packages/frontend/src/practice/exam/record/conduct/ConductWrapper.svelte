@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductEx, VisitEx } from "@/lib/model";
+  import type { ConductEx, VisitEx } from "myclinic-model";
   import ConductItem from "./ConductItem.svelte";
 
   export let conducts: ConductEx[];

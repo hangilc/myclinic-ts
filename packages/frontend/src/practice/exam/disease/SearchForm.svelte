@@ -3,7 +3,7 @@
   import {
     DiseaseExampleObject,
     type DiseaseExample,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
   import api from "@/lib/api";

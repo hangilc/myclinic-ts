@@ -7,12 +7,12 @@
     type DiseaseEnterData,
     type DiseaseExample,
     type ShuushokugoMaster,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import {
     isByoumeiMaster,
     isShuushokugoMaster,
     DiseaseExampleObject,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import { type Writable, writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { genid } from "@/lib/genid";

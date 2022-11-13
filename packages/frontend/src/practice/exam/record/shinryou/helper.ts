@@ -1,6 +1,6 @@
 import type {
   ConductKindType, CreateConductRequest, CreateShinryouConductRequest, VisitEx
-} from "@/lib/model"
+} from "myclinic-model"
 import api from "@/lib/api"
 import { dateParam } from "@/lib/date-param"
 

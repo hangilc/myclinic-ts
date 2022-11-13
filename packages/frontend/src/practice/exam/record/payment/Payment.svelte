@@ -1,6 +1,6 @@
 <script lang="ts">
     import api from "@/lib/api";
-  import type { VisitEx } from "@/lib/model";
+  import type { VisitEx } from "myclinic-model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
 

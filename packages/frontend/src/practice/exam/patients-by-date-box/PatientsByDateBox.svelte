@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "../../../lib/api";
   import { showPatientsByDate } from "../ExamVars";
-  import type * as m from "../../../lib/model";
+  import type * as m from "myclinic-model";
   import RightBox from "../RightBox.svelte";
 
   function onCloseClick(){

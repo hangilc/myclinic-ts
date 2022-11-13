@@ -1,4 +1,4 @@
-import type { VisitEx, Shahokokuho } from "@/lib/model"
+import type { VisitEx, Shahokokuho } from "myclinic-model"
 import { idiv } from "@/lib/idiv"
 
 export function hokenRep(visit: VisitEx): string {

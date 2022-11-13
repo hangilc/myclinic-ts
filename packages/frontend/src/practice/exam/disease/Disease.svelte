@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Patient, DiseaseExample } from "@/lib/model";
+  import type { Patient, DiseaseExample } from "myclinic-model";
   import { currentPatient } from "@/practice/exam/ExamVars";
   import RightBox from "@/practice/exam/RightBox.svelte";
   import api from "@/lib/api";

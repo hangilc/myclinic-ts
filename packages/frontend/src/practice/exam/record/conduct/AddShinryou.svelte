@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { ShinryouMaster, VisitEx } from "@/lib/model";
+  import type { ShinryouMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 

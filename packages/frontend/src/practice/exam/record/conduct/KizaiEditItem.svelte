@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ConductKizaiEx } from "@/lib/model"
+  import type { ConductKizaiEx } from "myclinic-model"
   import KizaiEdit from "./KizaiEdit.svelte"
 
   let mode = "disp";

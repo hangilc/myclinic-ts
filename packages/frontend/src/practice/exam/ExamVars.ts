@@ -1,5 +1,5 @@
 import { writable, type Writable, get } from "svelte/store";
-import * as m from "../../lib/model";
+import * as m from "myclinic-model";
 import api from "../../lib/api";
 import { FetchTask, TaskRunner, type Task } from "../../lib/unit-task";
 import * as appEvent from "@/practice/app-events";

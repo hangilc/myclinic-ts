@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { VisitEx, Shahokokuho, Koukikourei, Kouhi, Roujin } from "@/lib/model"
+  import type { VisitEx, Shahokokuho, Koukikourei, Kouhi, Roujin } from "myclinic-model"
   import { hokenRep, shahokokuhoRep, roujinRep, koukikoureiRep, kouhiRep } from "@/lib/hoken-rep"
   import Dialog from "@/lib/Dialog.svelte"
   import api from "@/lib/api"

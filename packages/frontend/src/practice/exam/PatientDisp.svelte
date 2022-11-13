@@ -1,5 +1,5 @@
 <script lang="ts">
-import type * as m from "../../lib/model";
+import type * as m from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import { sexRep } from "../../lib/util";
 

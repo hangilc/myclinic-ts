@@ -5,7 +5,7 @@ import {
   MeisaiSectionDataObject,
   MeisaiSectionEnum,
   type VisitEx,
-} from "@/lib/model"
+} from "myclinic-model"
 import { hokenRep } from "@/lib/hoken-rep"
 import * as kanjidate from "kanjidate"
 

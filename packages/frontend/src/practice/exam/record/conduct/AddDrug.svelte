@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { IyakuhinMaster, VisitEx } from "@/lib/model";
+  import type { IyakuhinMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { showError } from "@/lib/showError-call";
   import { writable, type Writable } from "svelte/store";

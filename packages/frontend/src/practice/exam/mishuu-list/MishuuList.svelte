@@ -2,7 +2,7 @@
   import { mishuuList, clearMishuuList } from "@/practice/exam/ExamVars"
   import RightBox from "../RightBox.svelte"
   import * as kanjidate from "kanjidate"
-  import type { Payment, VisitEx } from "@/lib/model"
+  import type { Payment, VisitEx } from "myclinic-model"
   import { pad } from "@/lib/pad"
   import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
   import api from "@/lib/api";

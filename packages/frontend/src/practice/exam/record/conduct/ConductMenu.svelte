@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { VisitEx } from "@/lib/model"
+  import type { VisitEx } from "myclinic-model"
   import Pulldown from "@/lib/Pulldown.svelte"
   import EnterXpWidget from "./EnterXpWidget.svelte"
   import EnterInjectWidget from "./EnterInjectWidget.svelte"

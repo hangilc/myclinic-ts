@@ -4,7 +4,7 @@
   import {
     ConductKind,
     type VisitEx,
-  } from "@/lib/model";
+  } from "myclinic-model";
   import { partitionConv } from "@/lib/partition";
   import { type ConductSpec, enter } from "./helper";
 

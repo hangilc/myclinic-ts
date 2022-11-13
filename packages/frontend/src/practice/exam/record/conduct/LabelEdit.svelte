@@ -2,7 +2,7 @@
     import api from "@/lib/api";
 
 
-  import type { ConductEx } from "@/lib/model";
+  import type { ConductEx } from "myclinic-model";
 
   let show = false;
   export let conduct: ConductEx;

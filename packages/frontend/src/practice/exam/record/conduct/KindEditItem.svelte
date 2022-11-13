@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ConductKindObject, type ConductEx, type ConductKindTag } from "@/lib/model";
+  import { ConductKindObject, type ConductEx, type ConductKindTag } from "myclinic-model";
   import KindEdit from "./KindEdit.svelte"
 
   export let conduct: ConductEx;

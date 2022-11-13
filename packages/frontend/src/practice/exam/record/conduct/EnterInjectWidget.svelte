@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ConductKind, ConductKindType, type ConductKindKey, type IyakuhinMaster, type VisitEx } from "@/lib/model";
+  import { ConductKind, ConductKindType, type ConductKindKey, type IyakuhinMaster, type VisitEx } from "myclinic-model";
   import Widget from "@/lib/Widget.svelte"
   import api from "@/lib/api"
   import SelectItem from "@/lib/SelectItem.svelte"

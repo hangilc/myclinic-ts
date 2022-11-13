@@ -1,4 +1,4 @@
-import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type DiseaseExample, type ShuushokugoMaster } from "@/lib/model";
+import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type DiseaseExample, type ShuushokugoMaster } from "myclinic-model";
 import * as kanjidate from "kanjidate";
 
 export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]

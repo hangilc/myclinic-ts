@@ -3,7 +3,7 @@
   import SelectItem from "../../../lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import api from "../../../lib/api";
-  import type * as m from "../../../lib/model";
+  import type * as m from "myclinic-model";
 
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
   let dialog: Dialog;

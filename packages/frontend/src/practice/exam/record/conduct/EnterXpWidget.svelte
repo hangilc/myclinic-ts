@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ConductKind, type VisitEx } from "@/lib/model";
+  import { ConductKind, type VisitEx } from "myclinic-model";
   import Widget from "@/lib/Widget.svelte"
   import { enter } from "../shinryou//helper"
 

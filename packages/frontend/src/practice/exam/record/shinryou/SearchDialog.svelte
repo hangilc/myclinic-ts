@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte"
-  import type { ShinryouMaster, VisitEx } from "@/lib/model";
+  import type { ShinryouMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { setFocus } from "@/lib/set-focus"
   import { writable, type Writable } from "svelte/store";

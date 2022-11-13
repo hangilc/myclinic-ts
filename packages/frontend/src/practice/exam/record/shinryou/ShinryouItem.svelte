@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { ShinryouEx } from "@/lib/model";
+  import type { ShinryouEx } from "myclinic-model";
   import { confirm } from "@/lib/confirm-call"
 
   export let shinryou: ShinryouEx;

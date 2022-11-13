@@ -1,6 +1,6 @@
 <script lang="ts">
 
-  import type * as m from "@/lib/model"
+  import type * as m from "myclinic-model"
   import api from "@/lib/api"
   import Confirm from "@/lib/Confirm.svelte"
   import type { Op } from "@/lib/drawer/op"
