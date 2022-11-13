@@ -1,0 +1,19 @@
+{
+  "name": "myclinic-model",
+  "version": "1.0.0",
+  "description": "Model for myclinic",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hangilc/myclinic-ts.git"
+  },
+  "author": "Hangil Chang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hangilc/myclinic-ts/issues"
+  },
+  "homepage": "https://github.com/hangilc/myclinic-ts#readme"
+}
