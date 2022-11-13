@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import { calcPages } from "@/lib/calcPages";
+  import { calcPages } from "@/lib/calc-pages";
   import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Text, Visit } from "@/lib/model";
   import Nav from "@/lib/Nav.svelte";

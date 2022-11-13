@@ -519,4 +519,14 @@ export default {
     return get("search-shohou-sample", { text });
   },
 
+  countSearchTextGlobally(text: string): Promise<number> {
+    return get("count-search-text-globally", { text });
+  },
+
+  searchTextGlobally(
+    text: string, limit: number, offset: number
+  ): Promise<[m.Text, m.Visit, m.Patient][]> {
+    return get("search-text-globally", { text, limit, offset });
+  },
+
 }

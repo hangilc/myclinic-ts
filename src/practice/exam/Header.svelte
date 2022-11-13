@@ -7,6 +7,7 @@
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
   import { startPatient, showPatientsByDate } from "./ExamVars";
     import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
+    import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
 
   let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
@@ -14,6 +15,7 @@
   let recentDialog: RecentVisitsDialog;
   let selectPatientPulldown: Pulldown;
   let searchShohouSampleDialog: SearchShohouSampleDialog;
+  let globalSearchDialog: GlobalSearchDialog;
 
   function onSelectPatientClick() {
     selectPatientPulldown.open();
@@ -44,6 +46,9 @@
     searchShohouSampleDialog.open();
   }
 
+  function doGlobalSearch(): void {
+    globalSearchDialog.open();
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -55,7 +60,7 @@
       on:click={onSelectPatientClick}>患者選択</a
     >
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
-    <a href="javascript:void(0);">全文検索</a>
+    <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <SelectRegisteredPatientDialog
       bind:this={registeredDialog}
       onEnter={startPatient}
@@ -76,6 +81,7 @@
   <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
 </Pulldown>
 <SearchShohouSampleDialog bind:this={searchShohouSampleDialog} />
+<GlobalSearchDialog bind:this={globalSearchDialog} />
 
 <style>
   a:nth-of-type(1) {
