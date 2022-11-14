@@ -11,6 +11,13 @@
   } from "myclinic-model";
 
   let entries: [Wqueue, Visit, Patient][] = [];
+  let selected: Writable<[Wqueue, Visit, Patient] | null> =
+    writable(null);
+
+  function onClose(): void {
+    selected.set(null);
+    entries = [];
+  }
 
   export let onEnter: (patient: Patient, visitId: number | null) => void;
   let dialog: Dialog;
@@ -24,9 +31,6 @@
     dialog.open();
   }
 
-  let selected: Writable<[Wqueue, Visit, Patient] | null> =
-    writable(null);
-
   function enter(close: () => void) {
     if ($selected) {
       const [_, visit, patient] = $selected;
@@ -36,12 +40,12 @@
   }
 </script>
 
-<Dialog let:close bind:this={dialog}>
+<Dialog let:close bind:this={dialog} {onClose}>
   <span slot="title" class="title">受付患者選択</span>
 
   <div class="select">
     {#each entries as data}
-      <SelectItem {data} {selected}>
+      <SelectItem {data} {selected} autoselect>
         {@const [_wq, _visit, patient] = data}
         <span>{patient.lastName}{patient.firstName}</span>
       </SelectItem>
