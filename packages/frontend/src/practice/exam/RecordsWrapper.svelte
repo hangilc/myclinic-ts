@@ -1,10 +1,18 @@
 <script lang="ts">
+    import { tick } from "svelte";
   import { visits } from "./ExamVars";
   import Record from "./record/Record.svelte";
+
+  let topElement: HTMLElement;
+
+  async function onLast() {
+    window.scroll({ top: 0 });
+  }
 </script>
 
-<div>
-  {#each $visits as visit (visit.visitId)}
-    <Record bind:visit={visit} />
+<div bind:this={topElement}>
+  {#each $visits as visit, i (visit.visitId)}
+    <Record bind:visit={visit} isLast={i === ($visits.length - 1)} 
+      {onLast}/>
   {/each}
 </div>

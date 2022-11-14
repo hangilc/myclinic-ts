@@ -9,14 +9,23 @@
   import ShinryouWrapper from "./shinryou/ShinryouWrapper.svelte";
   import ConductMenu from "./conduct/ConductMenu.svelte";
   import ConductWrapper from "./conduct/ConductWrapper.svelte";
-    import Payment from "./payment/Payment.svelte";
+  import Payment from "./payment/Payment.svelte";
+    import { afterUpdate } from "svelte";
 
   export let visit: m.VisitEx;
+  export let isLast: boolean;
+  export let onLast: () => void;
   let showNewTextEditor = false;
 
   function createNewText(): m.Text {
     return new m.Text(0, visit.visitId, "");
   }
+
+  afterUpdate(() => {
+    if( isLast ){
+      onLast();
+    }
+  });
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -46,7 +55,7 @@
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
       <ConductMenu {visit} />
-      <ConductWrapper conducts={visit.conducts} visit={visit}/>
+      <ConductWrapper conducts={visit.conducts} {visit} />
       <Payment {visit} />
     </div>
   </TwoCols>
