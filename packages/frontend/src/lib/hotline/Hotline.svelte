@@ -153,14 +153,18 @@
     <button on:click={doSend}>送信</button>
     <button on:click={doRoger}>了解</button>
     <button>Beep</button>
-    <a href="javascript:void(0)" on:click={doRegulars} bind:this={regularAnchor}
-      >常用</a
-    >
-    <a
-      href="javascript:void(0)"
-      on:click={doPatients}
-      bind:this={patientsAnchor}>患者</a
-    >
+    <div class="link-commands">
+      <a
+        href="javascript:void(0)"
+        on:click={doRegulars}
+        bind:this={regularAnchor}>常用</a
+      >
+      <a
+        href="javascript:void(0)"
+        on:click={doPatients}
+        bind:this={patientsAnchor}>患者</a
+      >
+    </div>
   </div>
   <div class="messages">
     {#each hotlines as h (h.appEventId)}
@@ -199,6 +203,10 @@
 
   .commands {
     margin: 0 0 6px 0;
+  }
+
+  .link-commands {
+    margin-top: 2px;
   }
 
   .messages {
