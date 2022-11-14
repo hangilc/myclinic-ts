@@ -1,16 +1,11 @@
 <script type="ts">
   import type { Writable } from "svelte/store";
 
-  export let selected: Writable<any> | null = null;
-  export let onSelect: (value: any) => void = (value) => {
-    if( selected != null ){
-      selected.set(value);
-    }
-  };
+  export let selected: Writable<any>;
   export let data: any;
 
   function onClick() {
-    onSelect(data);
+    selected.set(data);
   }
 </script>
 

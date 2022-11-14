@@ -37,7 +37,7 @@
   }
 </script>
 
-<Dialog let:close bind:this={dialog} width="300">
+<Dialog bind:this={dialog} width="300">
   <span slot="title">画像一覧</span>
   <div class="select">
     {#each list as f}
@@ -46,7 +46,7 @@
   </div>
   {#if inlineImageSrc !== ""}
     <div class="image-wrapper">
-      <img src={inlineImageSrc} height="1400px" />
+      <img src={inlineImageSrc} height="1400px" alt="保存画像"/>
     </div>
   {/if}
   {#if externalImageSrc !== ""}

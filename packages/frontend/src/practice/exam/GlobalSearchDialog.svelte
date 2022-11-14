@@ -5,7 +5,6 @@
   import type { Patient, Visit, Text } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";
-    import { tick } from "svelte";
 
   let dialog: Dialog;
   let searchTextValue = "";

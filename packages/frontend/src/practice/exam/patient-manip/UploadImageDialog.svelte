@@ -35,7 +35,6 @@
     if (patient == null) {
       return;
     }
-    const at = new Date();
     const formData = new FormData();
     const files = fileInput.files;
     if (files.length === 0) {
@@ -68,7 +67,7 @@
     form.reset();
   }
 
-  function zeroPad(n): string {
+  function zeroPad(n: number): string {
     return pad(n, 2, "0");
   }
 

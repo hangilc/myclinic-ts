@@ -36,6 +36,8 @@
   let searchSelect: Writable<
     ByoumeiMaster | ShuushokugoMaster | DiseaseExample | null
   > = writable(null);
+  let startDateSelect: Writable<Date | null> = writable(null);
+
   searchSelect.subscribe(async (r) => {
     if (isByoumeiMaster(r)) {
       byoumeiMaster = r;
@@ -58,6 +60,15 @@
       });
     }
   });
+
+  startDateSelect.subscribe(d => {
+    if( d == null ){
+      startDate = new Date();
+    } else {
+      startDate = d;
+    }
+  })
+
   let searchKind: SearchKind = "byoumei";
   let byoumeiId: string = genid();
   let shuushokugoId: string = genid();
@@ -99,6 +110,8 @@
         adjCodes: adjList.map((m) => m.shuushokugocode),
       };
       await api.enterDiseaseEx(data);
+      byoumeiMaster = null;
+      adjList = [];
     }
   }
 
@@ -198,7 +211,7 @@
 </div>
 <Pulldown anchor={chooseStartDateIcon} bind:this={chooseStartDatePulldown}>
   {#each visitDates as date}
-    <SelectItem onSelect={(date) => (startDate = date)} data={date}>
+    <SelectItem selected={startDateSelect} data={date}>
       <div>{kanjidate.format(kanjidate.f1, date)}</div>
     </SelectItem>
   {/each}
