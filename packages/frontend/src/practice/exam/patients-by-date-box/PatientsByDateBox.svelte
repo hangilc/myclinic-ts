@@ -1,17 +1,27 @@
 <script lang="ts">
   import api from "../../../lib/api";
-  import { showPatientsByDate } from "../ExamVars";
+  import { showPatientsByDate, startPatient } from "../ExamVars";
   import type * as m from "myclinic-model";
   import RightBox from "../RightBox.svelte";
+    import type { Patient } from "myclinic-model";
 
-  function onCloseClick(){
+  let selectedPatientId: number | null = null;
+
+  function onCloseClick() {
     showPatientsByDate.set(false);
   }
 
   async function fetchData(date: Date): Promise<[m.Visit, m.Patient][]> {
     const visits: m.Visit[] = await api.listVisitByDate(date);
-    const map: Map<number, m.Patient> = await api.batchGetPatient(visits.map(v => v.patientId));
-    return visits.map(v => [v, map.get(v.patientId) as m.Patient]);
+    const map: Map<number, m.Patient> = await api.batchGetPatient(
+      visits.map((v) => v.patientId)
+    );
+    return visits.map((v) => [v, map.get(v.patientId) as m.Patient]);
+  }
+
+  function doSelect(patient: Patient): void {
+    startPatient(patient);
+    selectedPatientId = patient.patientId;
   }
 </script>
 
@@ -21,7 +31,13 @@
   {:then dataList}
     {#each dataList as data}
       {@const [_visit, patient] = data}
-      <div>{patient.lastName}{patient.firstName}</div>
+      <a
+        href="javascript:void(0)"
+        on:click={() => doSelect(patient)}
+        class="patient-link"
+        class:selected={selectedPatientId === patient.patientId}
+        >{patient.lastName}{patient.firstName}</a
+      >
     {/each}
   {:catch err}
     <div style:color="red">{err}</div>
@@ -32,6 +48,14 @@
 </RightBox>
 
 <style>
+  .patient-link {
+    display: block;
+  }
+
+  .patient-link.selected {
+    font-weight: bold;
+  }
+
   .commands {
     display: flex;
     justify-content: flex-end;
