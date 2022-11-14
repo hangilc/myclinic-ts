@@ -6,12 +6,17 @@
   import api from "../../../lib/api";
   import { dateTimeToSql } from "../../../lib/util"
 
-  let dialog: Dialog;
   export let onEnter: (patient: m.Patient, visitId: number | null) => void;
-
+  let dialog: Dialog;
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
   let searchText: string;
+
+  function onClose(): void {
+    selected.set(null);
+    patients = [];
+    searchText = "";
+  }
 
   export function open(): void {
     selected.set(null);
@@ -48,7 +53,7 @@
 
 </script>
 
-<Dialog let:close={close} bind:this={dialog}>
+<Dialog let:close={close} bind:this={dialog} {onClose}>
   <span slot="title" class="title">患者検索</span>
   <div>
     <form on:submit={doSearch}>
@@ -56,7 +61,7 @@
     </form>
     <div class="select">
       {#each patients as patient}
-        <SelectItem selected={selected} data={patient}>
+        <SelectItem selected={selected} data={patient} autoselect>
           {patient.lastName} {patient.firstName}
         </SelectItem>
       {/each}
