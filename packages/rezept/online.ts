@@ -49,6 +49,17 @@ function resolveShinsaKikanId(hokenshaBangou: string): number {
   }
 }
 
+function resolveRcptShubetsu(entry: RcptEntry): number {
+  const base = 1112 + entry.kouhiList.length * 10;
+  switch(entry.hokenFutan){
+    case "六才未満": return base + 2;
+    case "家族": return base + 4;
+    case "高齢９": case "高齢８": return base + 6;
+    case "高齢７": return base + 8;
+    case "本人": return base;
+    default: throw new Error("Unknown shubetsu: " + entry.hokenShubetsu);
+}
+
 function outRecClinicInfo(r: RecClinicInfo): void {
   console.log([
     "IR",
