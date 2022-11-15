@@ -3,6 +3,6 @@ import { RcptDataObject } from "./rcpt-data";
 const dataFile = process.argv[2];
 run();
 async function run() {
-    const data = RcptDataObject.readFromXmlFile(dataFile);
+    const data = await RcptDataObject.readFromXmlFile(dataFile);
     console.log(data);
 }

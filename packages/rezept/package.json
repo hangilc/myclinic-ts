@@ -6,6 +6,7 @@
   "scripts": {
     "compile": "tsc",
     "hello": "node index.js",
+    "online": "node --es-module-specifier-resolution=node online.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
