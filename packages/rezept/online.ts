@@ -1,6 +1,6 @@
 // Usage: node online.js DATA-FILE
 
-import { RcptData, RcptDataObject } from "./rcpt-data";
+import { RcptData, RcptDataObject, RcptEntry } from "./rcpt-data";
 
 const shahoId = 1;
 const kokuhoId = 2;
@@ -20,25 +20,23 @@ run();
 
 async function run() {
   const data = await RcptDataObject.readFromXmlFile(dataFile);
-  // const shubetsuSet: string[] = [];
-  // const hokenshaBangouSet: string[] = [];
-  // data.entries.forEach(e => {
-  //   if( !shubetsuSet.includes(e.hokenShubetsu) ){
-  //     shubetsuSet.push(e.hokenShubetsu);
-  //   }
-  //   if( !hokenshaBangouSet.includes(e.hokenshaBangou) ){
-  //     hokenshaBangouSet.push(e.hokenshaBangou);
-  //   }
-  // })
-  // console.log(shubetsuSet);
-  // console.log(hokenshaBangouSet);
-  outRecClinicInfo(dataToRecClinicInfo)
+  const shahoEntries: RcptEntry[] = [];
+  const kokuhoEntries: RcptEntry[] = [];
+  data.entries.forEach(e => {
+    const shinsaId = resolveShinsaKikanId(e.hokenshaBangou);
+    if( shinsaId === shahoId ){
+      shahoEntries.push(e);
+    } else {
+      kokuhoEntries.push(e);
+    }
+  });
+  outRecClinicInfo(dataToRecClinicInfo(data, shahoId));
   // console.log(JSON.stringify(data, null, 2));
 }
 
 function resolveShinsaKikanId(hokenshaBangou: string): number {
   const b = pad(hokenshaBangou, 8, "0");
-  switch(b.substring(0, 2)){
+  switch (b.substring(0, 2)) {
     case "00": case "39": case "67": {
       return kokuhoId;
     }
@@ -75,7 +73,7 @@ function dataToRecClinicInfo(data: RcptData, shinsaKikanId: number): RecClinicIn
 
 function pad(n: number | string, cols: number, c: string): string {
   let r: string;
-  if( typeof n === "number" ){
+  if (typeof n === "number") {
     r = n.toString();
   } else {
     r = n;
@@ -87,7 +85,7 @@ function pad(n: number | string, cols: number, c: string): string {
 }
 
 function gengouToYear(gengou: string, nen: number): number {
-  if( gengou === "令和" ){
+  if (gengou === "令和") {
     return nen + (2022 - 4);
   } else {
     throw new Error("Unknown gengou: " + gengou);

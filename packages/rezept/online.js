@@ -6,20 +6,30 @@ const dataFile = process.argv[2];
 run();
 async function run() {
     const data = await RcptDataObject.readFromXmlFile(dataFile);
-    const shubetsuSet = [];
-    const hokenshaBangouSet = [];
+    const shahoEntries = [];
+    const kokuhoEntries = [];
     data.entries.forEach(e => {
-        if (!shubetsuSet.includes(e.hokenShubetsu)) {
-            shubetsuSet.push(e.hokenShubetsu);
+        const shinsaId = resolveShinsaKikanId(e.hokenshaBangou);
+        if (shinsaId === shahoId) {
+            shahoEntries.push(e);
         }
-        if (!hokenshaBangouSet.includes(e.hokenshaBangou)) {
-            hokenshaBangouSet.push(e.hokenshaBangou);
+        else {
+            kokuhoEntries.push(e);
         }
     });
-    console.log(shubetsuSet);
-    console.log(hokenshaBangouSet);
-    // outRecClinicInfo(dataToRecClinicInfo)
+    outRecClinicInfo(dataToRecClinicInfo(data, shahoId));
     // console.log(JSON.stringify(data, null, 2));
+}
+function resolveShinsaKikanId(hokenshaBangou) {
+    const b = pad(hokenshaBangou, 8, "0");
+    switch (b.substring(0, 2)) {
+        case "00":
+        case "39":
+        case "67": {
+            return kokuhoId;
+        }
+        default: return shahoId;
+    }
 }
 function outRecClinicInfo(r) {
     console.log([
@@ -47,9 +57,15 @@ function dataToRecClinicInfo(data, shinsaKikanId) {
     };
 }
 function pad(n, cols, c) {
-    let r = n.toString();
+    let r;
+    if (typeof n === "number") {
+        r = n.toString();
+    }
+    else {
+        r = n;
+    }
     while (r.length < cols) {
-        r += c;
+        r = c + r;
     }
     return r;
 }
