@@ -2,6 +2,10 @@ export interface Byoumei {
     name: string;
     startDate: string;
 }
+export interface RcptKouhi {
+    futansha: number;
+    jukyuusha: number;
+}
 export interface RcptShinryou {
     shinryoucode: number;
     name: string;
@@ -25,6 +29,7 @@ export interface RcptEntry {
     hokenshaBangou: string;
     hihokenshaKigou: string;
     hihokenshaBangou: string;
+    kouhiList: RcptKouhi[];
     edaban: string;
     shouki: string;
     byoumeiList: Byoumei[];

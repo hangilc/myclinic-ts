@@ -6,6 +6,11 @@ const dataFile = process.argv[2];
 run();
 async function run() {
     const data = await RcptDataObject.readFromXmlFile(dataFile);
+    data.entries.forEach(e => {
+        if (e.kouhiList.length > 0) {
+            console.log(e.kouhiList);
+        }
+    });
     const shahoEntries = [];
     const kokuhoEntries = [];
     data.entries.forEach(e => {

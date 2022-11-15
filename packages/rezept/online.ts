@@ -20,6 +20,11 @@ run();
 
 async function run() {
   const data = await RcptDataObject.readFromXmlFile(dataFile);
+  data.entries.forEach(e => {
+    if( e.kouhiList.length > 0 ){
+      console.log(e.kouhiList);
+    }
+  })
   const shahoEntries: RcptEntry[] = [];
   const kokuhoEntries: RcptEntry[] = [];
   data.entries.forEach(e => {

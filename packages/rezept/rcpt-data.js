@@ -6,8 +6,6 @@ export const RcptDataObject = {
         const parser = new Parser({});
         const xml = await parser.parseStringPromise(data);
         const root = xml['レセプト'];
-        // console.log(root['請求'][0]);
-        // console.log(root['請求'][0]["受診"][0]["診療"]);
         return {
             gengou: root["元号"][0],
             nen: parseInt(root["年"][0]),
@@ -41,11 +39,34 @@ function xmlToEntry(xml) {
         hokenshaBangou: xml["保険者番号"][0],
         hihokenshaKigou: xml["被保険者記号"][0],
         hihokenshaBangou: xml["被保険者番号"][0],
+        kouhiList: resolveKouhiList(xml),
         edaban: resolveOptional(xml, "被保険者枝番"),
         shouki: xml["症状詳記"][0],
         byoumeiList: xml["傷病名"].map(xmlToByoumei),
         jushinList: xml["受診"].map(xmlToJushin),
     };
+}
+function resolveKouhiList(xml) {
+    const list = [];
+    if (xml["公費1負担者番号"]) {
+        list.push({
+            futansha: parseInt(xml["公費1負担者番号"][0]),
+            jukyuusha: parseInt(xml["公費1受給者番号"][0])
+        });
+    }
+    if (xml["公費2負担者番号"]) {
+        list.push({
+            futansha: parseInt(xml["公費2負担者番号"][0]),
+            jukyuusha: parseInt(xml["公費2受給者番号"][0])
+        });
+    }
+    if (xml["公費3負担者番号"]) {
+        list.push({
+            futansha: parseInt(xml["公費3負担者番号"][0]),
+            jukyuusha: parseInt(xml["公費3受給者番号"][0])
+        });
+    }
+    return list;
 }
 function resolveOptional(xml, key, defaultValue = "") {
     const val = xml[key];
