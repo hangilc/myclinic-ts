@@ -10,7 +10,8 @@
   import ConductMenu from "./conduct/ConductMenu.svelte";
   import ConductWrapper from "./conduct/ConductWrapper.svelte";
   import Payment from "./payment/Payment.svelte";
-    import { afterUpdate } from "svelte";
+  import { afterUpdate } from "svelte";
+  import { currentVisitId } from "../ExamVars";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -22,7 +23,7 @@
   }
 
   afterUpdate(() => {
-    if( isLast ){
+    if (isLast) {
       onLast();
     }
   });
@@ -31,7 +32,7 @@
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top">
   <Title bind:visit />
-  <TwoCols>
+  <TwoCols isCurrent={$currentVisitId === visit.visitId}>
     <div slot="left">
       {#each visit.texts as text, i (text.textId)}
         <Text {text} index={i} />

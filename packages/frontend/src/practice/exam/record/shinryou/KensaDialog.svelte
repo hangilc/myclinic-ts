@@ -64,10 +64,11 @@
     rightItems = clear(rightItems);
   }
 
-  async function doEnter() {
+  async function doEnter(close: () => void) {
     const names: string[] = 
       [...leftItems, ...rightItems].filter(item => item.checked).map(item => item.value);
     await enter(visit, names, []);
+    close();
   }
 </script>
 
@@ -95,7 +96,7 @@
   </div>
   <svelte:fragment slot="commands">
     <button on:click={doPreset}>セット検査</button>
-    <button on:click={doEnter}>入力</button>
+    <button on:click={() => doEnter(close)}>入力</button>
     <button on:click={doClear}>クリア</button>
     <button on:click={close}>キャンセル</button>
   </svelte:fragment>
