@@ -35,7 +35,10 @@ async function run() {
       kokuhoEntries.push(e);
     }
   });
-  outRecClinicInfo(dataToRecClinicInfo(data, shahoId));
+  data.entries.forEach(e => {
+    console.log(resolveRcptShubetsu(e));
+  })
+  // outRecClinicInfo(dataToRecClinicInfo(data, shahoId));
   // console.log(JSON.stringify(data, null, 2));
 }
 
@@ -58,6 +61,7 @@ function resolveRcptShubetsu(entry: RcptEntry): number {
     case "高齢７": return base + 8;
     case "本人": return base;
     default: throw new Error("Unknown shubetsu: " + entry.hokenShubetsu);
+  }
 }
 
 function outRecClinicInfo(r: RecClinicInfo): void {
