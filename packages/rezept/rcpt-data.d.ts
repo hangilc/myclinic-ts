@@ -1,5 +1,34 @@
+export interface Byoumei {
+    name: string;
+    startDate: string;
+}
+export interface RcptShinryou {
+    shinryoucode: number;
+    name: string;
+    tensuu: string;
+    shuukeisaki: string;
+}
+export interface Jushin {
+    visitDate: string;
+    shinryouList: RcptShinryou[];
+}
 export interface RcptEntry {
     patientId: number;
+    patientName: string;
+    sex: string;
+    birthday: string;
+    hokenShubetsu: string;
+    hokenTandoku: string;
+    hokennFutan: string;
+    kyuufuWariai: string;
+    tokkijikou: string;
+    hokenshaBangou: string;
+    hihokenshaKigou: string;
+    hihokenshaBangou: string;
+    edaban: string;
+    shouki: string;
+    byoumeiList: Byoumei[];
+    jushinList: Jushin[];
 }
 export interface RcptData {
     gengou: string;
