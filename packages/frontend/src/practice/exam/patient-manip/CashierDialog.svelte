@@ -1,37 +1,42 @@
 <script lang="ts">
-    import api from "@/lib/api";
+  import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
+  import { genid } from "@/lib/genid";
+    import { dateTimeToSql } from "@/lib/util";
   import {
     MeisaiObject,
     MeisaiSectionDataObject,
     WqueueStateObject,
     type Meisai,
+    type Payment,
   } from "myclinic-model";
-    import { writable, type Readable, type Writable } from "svelte/store";
-    import { endPatient } from "../ExamVars";
+  import { writable, type Readable, type Writable } from "svelte/store";
+  import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
   export let visitId: Readable<number | null>;
   let meisai: Writable<Meisai | null> = writable(null);
   let meisaiItems: string[] = [];
-  let summary: string = ""
+  let summary: string = "";
   let chargeValue: Writable<number> = writable(0);
   let chargeRep = "";
   let mode = "disp";
   let dialog: Dialog;
+  let isMishuu = false;
+  const mishuuId = genid();
 
-  meisai.subscribe(m => {
+  meisai.subscribe((m) => {
     meisaiItems = mkMeisaiItems(m);
     summary = mkSummary(m);
     chargeValue.set(m == null ? 0 : m.charge);
   });
 
-  chargeValue.subscribe(c => {
+  chargeValue.subscribe((c) => {
     chargeRep = mkChargeRep(c);
-  })
+  });
 
   export async function open() {
-    if( $visitId != null ){
+    if ($visitId != null) {
       const m: Meisai = await api.getMeisai($visitId);
       meisai.set(m);
       dialog.open();
@@ -81,11 +86,25 @@
   }
 
   async function doEnter(close: () => void) {
-    if( $visitId != null ){
+    if ($visitId != null) {
       await api.enterChargeValue($visitId, $chargeValue);
-      await api.changeWqueueState($visitId, WqueueStateObject.WaitCashier.code);
-      close();
-      endPatient(WqueueStateObject.WaitCashier);
+      if (isMishuu) {
+        const pay: Payment = {
+          visitId: $visitId,
+          amount: 0,
+          paytime: dateTimeToSql(new Date())
+        }
+        await api.finishCashier(pay);
+        close();
+        endPatient(null);
+      } else {
+        await api.changeWqueueState(
+          $visitId,
+          WqueueStateObject.WaitCashier.code
+        );
+        close();
+        endPatient(WqueueStateObject.WaitCashier);
+      }
     }
   }
 </script>
@@ -114,7 +133,12 @@
     {/if}
   </div>
   <div class="commands">
-    <button on:click={() => doEnter(close)} disabled={mode !== "disp"}>入力</button>
+    <input type="checkbox" bind:value={isMishuu} id={mishuuId} /><label
+      for={mishuuId}>未収扱</label
+    >
+    <button on:click={() => doEnter(close)} disabled={mode !== "disp"}
+      >入力</button
+    >
     <button on:click={close} disabled={mode !== "disp"}>キャンセル</button>
   </div>
 </Dialog>
@@ -123,10 +147,11 @@
   .commands {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
   }
 
   .commands :global(button) {
     margin-left: 4px;
-    margin-top: 10px;
   }
 </style>
