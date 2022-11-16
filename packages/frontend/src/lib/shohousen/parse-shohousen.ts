@@ -286,10 +286,14 @@ export class Shohousen {
     return this.parts.reduce((acc, ele) => acc + ele.totalDrugs, 0);
   }
 
+  get digitsWidth(): number {
+    return this.totalDrugs.toString().length;
+  }
+
   formatForSave(): string {
     const ndrugs = this.totalDrugs;
     return this.prolog + flatten(
-      this.parts.map((p, i) => p.formatForSave(i + 1, ndrugs)),
+      this.parts.map((p, i) => p.formatForSave(i + 1, this.digitsWidth)),
       this.globalCommands
     ).join("\n");
   }
