@@ -291,7 +291,6 @@ export class Shohousen {
   }
 
   formatForSave(): string {
-    const ndrugs = this.totalDrugs;
     return this.prolog + flatten(
       this.parts.map((p, i) => p.formatForSave(i + 1, this.digitsWidth)),
       this.globalCommands

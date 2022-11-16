@@ -7,7 +7,7 @@
   import SelectItem from "../../../lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
-  export let onEnter: (patient: m.Patient, visitId: number | null) => void;
+  export let onEnter: (patient: m.Patient, visitId?: number) => void;
   let dialog: Dialog;
   export function open(): void {
     dialog.open();
@@ -18,7 +18,7 @@
 
   function onEnterClick(close: () => void): void{
     if( $selected ){
-      onEnter($selected[0], null);
+      onEnter($selected[0]);
       close();
     }
   }

@@ -102,12 +102,16 @@ describe("parse-shohousen", () => {
   it("should match drug part", () => {
     let m = priv.reDrugPattern.exec("カロナール錠３００ｍｇ　３錠");
     expect(m).not.toBeNull();
-    expect(m[1]).toBe("カロナール錠３００ｍｇ");
-    expect(m[2]).toBe("３錠");
+    if( m != null ){
+      expect(m[1]).toBe("カロナール錠３００ｍｇ");
+      expect(m[2]).toBe("３錠");
+    }
     m = priv.reDrugPattern.exec("カロナール錠３００ｍｇ　１回０．５錠　");
     expect(m).not.toBeNull();
-    expect(m[1]).toBe("カロナール錠３００ｍｇ");
-    expect(m[2]).toBe("１回０．５錠");
+    if( m != null ){
+      expect(m[1]).toBe("カロナール錠３００ｍｇ");
+      expect(m[2]).toBe("１回０．５錠");
+    }
   });
 
   it("should parse drug part", () => {
@@ -123,8 +127,10 @@ describe("parse-shohousen", () => {
   it("should parse usage pattern", () => {
     let m = priv.reUsagePattern.exec("分３　毎食後　７日分");
     expect(m).not.toBeNull()
-    expect(m[1]).toBe("分３　毎食後");
-    expect(m[2]).toBe("７日分");
+    if( m != null ){
+      expect(m[1]).toBe("分３　毎食後");
+      expect(m[2]).toBe("７日分");
+    }
   });
 
   it("should parse drug lines", () => {

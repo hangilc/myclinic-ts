@@ -19,7 +19,7 @@
     entries = [];
   }
 
-  export let onEnter: (patient: Patient, visitId: number | null) => void;
+  export let onEnter: (patient: Patient, visitId: number | undefined) => void;
   let dialog: Dialog;
 
   export async function open() {

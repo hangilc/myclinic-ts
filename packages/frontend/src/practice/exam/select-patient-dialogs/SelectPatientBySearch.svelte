@@ -6,7 +6,7 @@
   import api from "../../../lib/api";
   import { dateTimeToSql } from "../../../lib/util"
 
-  export let onEnter: (patient: m.Patient, visitId: number | null) => void;
+  export let onEnter: (patient: m.Patient, visitId?: number) => void;
   let dialog: Dialog;
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
@@ -33,7 +33,7 @@
 
   function onSelectButtonClick(close: () => void): void {
     if( $selected ){
-      onEnter($selected, null);
+      onEnter($selected, undefined);
       close();
     }
   }

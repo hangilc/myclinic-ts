@@ -5,7 +5,6 @@
     ConductKind,
     type VisitEx,
   } from "myclinic-model";
-  import { partitionConv } from "@/lib/partition";
   import { type ConductSpec, enter } from "./helper";
 
   export let visit: VisitEx;

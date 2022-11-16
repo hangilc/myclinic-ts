@@ -96,7 +96,7 @@
         };
         await api.finishCashier(pay);
         close();
-        endPatient(null);
+        endPatient();
       } else {
         await api.changeWqueueState(
           $visitId,

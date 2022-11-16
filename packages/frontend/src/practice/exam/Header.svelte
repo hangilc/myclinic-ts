@@ -6,8 +6,8 @@
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
   import { startPatient, showPatientsByDate } from "./ExamVars";
-    import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
-    import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
+  import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
+  import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
 
   let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
@@ -22,7 +22,7 @@
   }
 
   function updateSelectPatientDialog(sel: string): void {
-    switch(sel){
+    switch (sel) {
       case "registered": {
         registeredDialog.open();
         break;
@@ -51,7 +51,6 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <ServiceHeader title="診察">
   <svelte:fragment>
     <a
@@ -65,20 +64,13 @@
       bind:this={registeredDialog}
       onEnter={startPatient}
     />
-    <SelectPatientBySearch
-      bind:this={searchDialog}
-      onEnter={startPatient}
-    />
-    <RecentVisitsDialog
-      bind:this={recentDialog}
-      onEnter={startPatient}
-    />
-    
+    <SelectPatientBySearch bind:this={searchDialog} onEnter={startPatient} />
+    <RecentVisitsDialog bind:this={recentDialog} onEnter={startPatient} />
   </svelte:fragment>
 </ServiceHeader>
 
-<Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink} >
-  <SelectPatientMenu onSelect={updateSelectPatientDialog}/>
+<Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink}>
+  <SelectPatientMenu onSelect={updateSelectPatientDialog} />
 </Pulldown>
 <SearchShohouSampleDialog bind:this={searchShohouSampleDialog} />
 <GlobalSearchDialog bind:this={globalSearchDialog} />
