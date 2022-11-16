@@ -1,12 +1,14 @@
 <script lang="ts">
-    import { tick } from "svelte";
-  import { visits } from "./ExamVars";
+  import { visits, scrollToVisitsTop, clearScrollToVisitsTop } from "./ExamVars";
   import Record from "./record/Record.svelte";
 
   let topElement: HTMLElement;
 
   async function onLast() {
-    window.scroll({ top: 0 });
+    if( scrollToVisitsTop ){
+      window.scroll({ top: 0 });
+      clearScrollToVisitsTop();
+    }
   }
 </script>
 

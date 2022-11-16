@@ -108,7 +108,7 @@ export function parsePartTemplate(s: string): PartTemplate {
 // }
 
 export class DrugPart {
-  constructor(public name: string, public amount: string) {}
+  constructor(public name: string, public amount: string) { }
 
   formatForSave(index: number | null, nDigits: number): string {
     const ipart = pad(
@@ -138,7 +138,7 @@ export function parseDrugPart(s: string): [DrugPart | null, string] {
 // }
 
 export class UsagePart {
-  constructor(public usage: string, public days: string) {}
+  constructor(public usage: string, public days: string) { }
 
   formatForSave(indent: string): string {
     return `${indent}${this.usage}　${this.days}`
@@ -186,7 +186,7 @@ export class DrugLines {
     public drugs: DrugPart[],
     public usage: UsagePart | null,
     public more: string
-  ) {}
+  ) { }
 }
 
 function flatten(...args: (string | string[] | null)[]): string[] {
@@ -277,7 +277,7 @@ export class Shohousen {
     public prolog: string,
     public parts: Part[],
     public globalCommands: string[]
-  ) {}
+  ) { }
 
   get totalDrugs(): number {
     return this.parts.reduce((acc, ele) => acc + ele.totalDrugs, 0);
@@ -286,7 +286,7 @@ export class Shohousen {
   formatForSave(): string {
     const ndrugs = this.totalDrugs;
     return this.prolog + flatten(
-      this.parts.map((p, i) => p.formatForSave(i+1, ndrugs)),
+      this.parts.map((p, i) => p.formatForSave(i + 1, ndrugs)),
       this.globalCommands
     ).join("\n");
   }

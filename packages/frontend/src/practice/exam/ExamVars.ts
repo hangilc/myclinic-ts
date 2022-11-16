@@ -52,10 +52,19 @@ function resetVisits(): void {
   visits.set([]);
 }
 
+export let scrollToVisitsTop = false;
+
+export function clearScrollToVisitsTop(): void {
+  scrollToVisitsTop = false;
+}
+
 function fetchVisits(patientId: number, page: number): Task {
   return new FetchTask<m.VisitEx[]>(() =>
     api.listVisitEx(patientId, page * recordsPerPage, recordsPerPage),
-    result => visits.set(result));
+    result => {
+      scrollToVisitsTop = true;
+      visits.set(result);
+    });
 }
 
 function countVisitPages(totalVisits: number): number {
