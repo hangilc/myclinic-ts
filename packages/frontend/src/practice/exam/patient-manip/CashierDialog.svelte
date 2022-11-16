@@ -2,7 +2,7 @@
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
-    import { dateTimeToSql } from "@/lib/util";
+  import { dateTimeToSql } from "@/lib/util";
   import {
     MeisaiObject,
     MeisaiSectionDataObject,
@@ -92,8 +92,8 @@
         const pay: Payment = {
           visitId: $visitId,
           amount: 0,
-          paytime: dateTimeToSql(new Date())
-        }
+          paytime: dateTimeToSql(new Date()),
+        };
         await api.finishCashier(pay);
         close();
         endPatient(null);

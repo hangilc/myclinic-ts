@@ -1,5 +1,10 @@
-export function pad(n: number, width: number, c: string = "0"): string {
-  let s = n.toString()
+export function pad(n: number | string, width: number, c: string = "0"): string {
+  let s: string;
+  if( typeof n !== "string" ){
+    s = n.toString();
+  } else {
+    s = n;
+  }
   let len = s.length;
   while( len < width ){
     s = c + s;

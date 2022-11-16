@@ -1,23 +1,26 @@
 <script lang="ts">
-
-  import type * as m from "myclinic-model"
-  import api from "@/lib/api"
-  import Confirm from "@/lib/Confirm.svelte"
-  import type { Op } from "@/lib/drawer/op"
-  import ShohousenDrawer from "@/ShohousenDrawerDialog.svelte"
-  import { hasHikitsugi, extractHikitsugi } from "./hikitsugi"
-  import { getCopyTarget } from "../../ExamVars"
+  import type * as m from "myclinic-model";
+  import api from "@/lib/api";
+  import Confirm from "@/lib/Confirm.svelte";
+  import type { Op } from "@/lib/drawer/op";
+  import ShohousenDrawer from "@/ShohousenDrawerDialog.svelte";
+  import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
+  import { getCopyTarget } from "../../ExamVars";
+  import Pulldown from "@/lib/Pulldown.svelte";
+  import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
   let drawerDialog: ShohousenDrawer;
+  let shohousenAnchor: HTMLElement;
+  let shohousenPulldown: Pulldown;
 
   function onEnter(): void {
-    const content = textarea.value;
+    const content = textarea.value.trim();
     const newText: m.Text = Object.assign({}, text, { content });
-    if( newText.textId === 0 ){
+    if (newText.textId === 0) {
       api.enterText(newText);
       onClose();
     } else {
@@ -38,12 +41,12 @@
 
   function doHikitsugi(): void {
     const targetVisitId = getCopyTarget();
-    if( targetVisitId !== null ){
+    if (targetVisitId !== null) {
       const s: string = extractHikitsugi(text.content);
       const t: m.Text = {
         textId: 0,
         visitId: targetVisitId,
-        content: s
+        content: s,
       };
       api.enterText(t);
       onClose();
@@ -53,30 +56,37 @@
   }
 
   function isShohousen(): boolean {
-    return text.content.startsWith("院外処方\nＲｐ）")
+    return text.content.startsWith("院外処方\nＲｐ）");
   }
 
   let ops: Op[] = [];
 
-  async function onShohousen() {
+  async function doPrintShohousen() {
     ops = await api.shohousenDrawer(text.textId);
     drawerDialog.open();
   }
 
+  function doFormatShohousen(): void {
+    textarea.value = parseShohousen(textarea.value.trim()).formatForSave();
+  }
+
+  function onShohousen(): void {
+    shohousenPulldown.open();
+  }
+
   async function onCopy() {
     const targetVisitId = getCopyTarget();
-    if( targetVisitId !== null ){
+    if (targetVisitId !== null) {
       const t: m.Text = Object.assign({}, text, {
         textId: 0,
-        visitId: targetVisitId
-      })
+        visitId: targetVisitId,
+      });
       api.enterText(t);
       onClose();
     } else {
       alert("コピー先を見つけられませんでした。");
     }
   }
- 
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -92,20 +102,35 @@
       <a href="javascript:void(0)" on:click={onEnter}>入力</a>
       <a href="javascript:void(0)" on:click={onClose}>キャンセル</a>
       {#if containsHikitsugi()}
-      <a href="javascript:void(0)" on:click={() => doHikitsugi()}>引継ぎコピー</a>
+        <a href="javascript:void(0)" on:click={() => doHikitsugi()}
+          >引継ぎコピー</a
+        >
       {/if}
       {#if isShohousen()}
-      <a href="javascript:void(0)" on:click={onShohousen}>処方箋</a>
+        <a
+          href="javascript:void(0)"
+          bind:this={shohousenAnchor}
+          on:click={onShohousen}>処方箋</a
+        >
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>
     </div>
-    {/if}
+  {/if}
 </div>
 
-<ShohousenDrawer bind:this={drawerDialog} ops={ops} onClose={onClose} />
+<ShohousenDrawer bind:this={drawerDialog} {ops} {onClose} />
 
-<Confirm bind:this={confirmDeleteDialog} text="この文章を削除していいですか？" />
+<Pulldown anchor={shohousenAnchor} bind:this={shohousenPulldown}>
+  <svelte:fragment>
+    <a href="javascript:void(0)" on:click={doPrintShohousen}>処方箋印刷</a>
+    <a href="javascript:void(0)" on:click={doFormatShohousen}>処方箋フォーマット</a>
+  </svelte:fragment>
+</Pulldown>
+<Confirm
+  bind:this={confirmDeleteDialog}
+  text="この文章を削除していいですか？"
+/>
 
 <style>
   textarea {
