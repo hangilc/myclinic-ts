@@ -1,6 +1,6 @@
 export const VisitObject = {
     attributesOf(visit) {
-        return VisitAttributeObject.fromString(visit.attributesStore);
+        return VisitAttributeObject.fromString(visit.attributesStore ?? null);
     },
     updateAttribute(visit, attr) {
         let newAttr;
@@ -52,6 +52,33 @@ export const DrugCategory = {
     Tonpuku: { code: 1, name: "頓服" },
     Gaiyou: { code: 2, name: "外用" },
 };
+export const ConductKindTagObject = {
+    fromKey(key) {
+        if (key === "HikaChuusha") {
+            return { [key]: {} };
+        }
+        else if (key === "JoumyakuChuusha") {
+            return { [key]: {} };
+        }
+        else if (key === "OtherChuusha") {
+            return { [key]: {} };
+        }
+        else if (key === "Gazou") {
+            return { [key]: {} };
+        }
+        else {
+            throw new Error("Cannot happen");
+        }
+    },
+    fromCode(code) {
+        for (let ctype of Object.values(ConductKind)) {
+            if (ctype.code === code) {
+                return ConductKindTagObject.fromKey(ctype.key);
+            }
+        }
+        throw new Error("Invalid conduct kind code: " + code);
+    }
+};
 export class ConductKindType {
     code;
     rep;
@@ -72,6 +99,26 @@ export const ConductKindObject = {
     fromTag(tag) {
         const key = Object.keys(tag)[0];
         return ConductKind[key];
+    },
+    fromCode(code) {
+        for (let kind of Object.values(ConductKind)) {
+            if (kind.code === code) {
+                return kind;
+            }
+        }
+        throw new Error("Invalid conduct kind code: " + code);
+    }
+};
+export const ConductExObject = {
+    fromConduct(c) {
+        return {
+            conductId: c.conductId,
+            visitId: c.visitId,
+            kind: ConductKindTagObject.fromCode(c.kindStore),
+            drugs: [],
+            shinryouList: [],
+            kizaiList: []
+        };
     }
 };
 export const VisitAttributeObject = {
@@ -89,7 +136,7 @@ export const VisitAttributeObject = {
 };
 export const VisitExObject = {
     attributesOf(visit) {
-        return VisitAttributeObject.fromString(visit.attributesStore);
+        return VisitAttributeObject.fromString(visit.attributesStore ?? null);
     },
     asVisit(src) {
         return {

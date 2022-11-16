@@ -193,7 +193,17 @@ export interface ConductKizaiEx {
 }
 export declare type ConductKindKey = "HikaChuusha" | "JoumyakuChuusha" | "OtherChuusha" | "Gazou";
 export declare type ConductKindTag = {
-    [key in ConductKindKey]: {};
+    "HikaChuusha": {};
+} | {
+    "JoumyakuChuusha": {};
+} | {
+    "OtherChuusha": {};
+} | {
+    "Gazou": {};
+};
+export declare const ConductKindTagObject: {
+    fromKey(key: ConductKindKey): ConductKindTag;
+    fromCode(code: number): ConductKindTag;
 };
 export declare class ConductKindType {
     code: number;
@@ -204,6 +214,7 @@ export declare class ConductKindType {
 export declare const ConductKind: Record<ConductKindKey, ConductKindType>;
 export declare const ConductKindObject: {
     fromTag(tag: ConductKindTag): ConductKindType;
+    fromCode(code: number): ConductKindType;
 };
 export interface ConductEx {
     conductId: number;
@@ -214,8 +225,11 @@ export interface ConductEx {
     shinryouList: ConductShinryouEx[];
     kizaiList: ConductKizaiEx[];
 }
+export declare const ConductExObject: {
+    fromConduct(c: Conduct): ConductEx;
+};
 export interface VisitAttributes {
-    futanWari: number | null;
+    futanWari?: number;
 }
 export declare const VisitAttributeObject: {
     fromString(src: string | null): VisitAttributes | null;

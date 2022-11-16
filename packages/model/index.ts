@@ -26,7 +26,7 @@ export interface Visit {
 
 export const VisitObject = {
   attributesOf(visit: Visit): VisitAttributes | null {
-    return VisitAttributeObject.fromString(visit.attributesStore);
+    return VisitAttributeObject.fromString(visit.attributesStore ?? null);
   },
 
   updateAttribute(visit: Visit, attr: VisitAttributes | null): Visit {
@@ -253,7 +253,38 @@ export type ConductKindKey = "HikaChuusha" | "JoumyakuChuusha" |
   "OtherChuusha" | "Gazou";
 
 export type ConductKindTag = {
-  [key in ConductKindKey]: {}
+  "HikaChuusha": {}
+} | {
+  "JoumyakuChuusha": {}
+} | {
+  "OtherChuusha": {}
+} | {
+  "Gazou": {}
+}
+
+export const ConductKindTagObject = {
+  fromKey(key: ConductKindKey): ConductKindTag {
+    if( key === "HikaChuusha" ){
+      return { [key]: {} };
+    } else if( key === "JoumyakuChuusha" ) {
+      return { [key]: {} };
+    } else if( key === "OtherChuusha" ) {
+      return { [key]: {} };
+    } else if( key === "Gazou" ) {
+      return { [key]: {} };
+    } else {
+      throw new Error("Cannot happen");
+    }
+  },
+
+  fromCode(code: number): ConductKindTag {
+    for(let ctype of Object.values(ConductKind) ){
+      if( ctype.code === code ){
+        return ConductKindTagObject.fromKey(ctype.key);
+      }
+    }
+    throw new Error("Invalid conduct kind code: " + code);
+  }
 }
 
 export class ConductKindType {
@@ -275,6 +306,15 @@ export const ConductKindObject = {
   fromTag(tag: ConductKindTag): ConductKindType {
     const key: ConductKindKey = Object.keys(tag)[0] as ConductKindKey;
     return ConductKind[key];
+  },
+
+  fromCode(code: number): ConductKindType {
+    for(let kind of Object.values(ConductKind)){
+      if( kind.code === code ){
+        return kind;
+      }
+    }
+    throw new Error("Invalid conduct kind code: " + code);
   }
 }
 
@@ -288,8 +328,21 @@ export interface ConductEx {
   kizaiList: ConductKizaiEx[]
 }
 
+export const ConductExObject = {
+  fromConduct(c: Conduct): ConductEx {
+    return {
+      conductId: c.conductId,
+      visitId: c.visitId,
+      kind: ConductKindTagObject.fromCode(c.kindStore),
+      drugs: [],
+      shinryouList: [],
+      kizaiList: []
+    };
+  }
+}
+
 export interface VisitAttributes {
-  futanWari: number | null
+  futanWari?: number
 }
 
 export const VisitAttributeObject = {
@@ -325,7 +378,7 @@ export interface VisitEx {
 
 export const VisitExObject = {
   attributesOf(visit: VisitEx): VisitAttributes | null {
-    return VisitAttributeObject.fromString(visit.attributesStore);
+    return VisitAttributeObject.fromString(visit.attributesStore ?? null);
   },
 
   asVisit(src: VisitEx): Visit {
