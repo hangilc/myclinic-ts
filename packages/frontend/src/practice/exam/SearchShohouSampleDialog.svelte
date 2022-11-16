@@ -86,7 +86,7 @@
   }
 </script>
 
-<Dialog bind:this={dialog} {onClose} width={null}>
+<Dialog bind:this={dialog} {onClose} width={undefined}>
   <span slot="title">処方サンプル検索</span>
   <textarea readonly bind:this={textarea} />
   <div class="commands1">

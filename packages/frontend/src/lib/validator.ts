@@ -7,34 +7,40 @@ export class ValidationError {
   }
 }
 
-class ValidationResult<T> {
-  value: T;
-  error: string;
+class Valid<T> {
+  constructor(
+    public value: T
+  ) {}
+}
 
-  constructor(value: T, error: string){
-    this.value = value;
-    this.error = error;
-  }
+class Invalid {
+  constructor(
+    public error: string
+  ) {}
+}
+
+class ValidationResult<T> {
+  constructor(public result: Valid<T> | Invalid){}
 
   get isValid(): boolean {
-    return this.error === "";
+    return this.result instanceof Valid<T>;
   }
 
-  unwrap(errors: string[], prefix: () => string = () => ""): T {
+  unwrap(errors: string[], errValue: T, prefix: () => string = () => ""): T {
     if( this.isValid ){
-      return this.value;
+      return (this.result as Valid<T>).value;
     } else {
-      errors.push(prefix + this.error);
-      return undefined;
+      errors.push(prefix + (this.result as Invalid).error);
+      return errValue;
     }
   }
 
   static valid<T>(value: T): ValidationResult<T> {
-    return new ValidationResult(value, "");
+    return new ValidationResult(new Valid(value));
   }
 
   static invalid<T>(error: string): ValidationResult<T> {
-    return new ValidationResult<T>(undefined, error);
+    return new ValidationResult<T>(new Invalid(error));
   }
 }
 
@@ -53,9 +59,9 @@ class Validator<S, T> {
     return new Validator<S, U>((src: S) => {
       const r = this.op(src);
       if( r.isValid ){
-        return other.op(r.value);
+        return other.op((r.result as Valid<T>).value);
       } else {
-        return ValidationResult.invalid<U>(r.error);
+        return ValidationResult.invalid<U>((r.result as Invalid).error);
       }
     })
   }

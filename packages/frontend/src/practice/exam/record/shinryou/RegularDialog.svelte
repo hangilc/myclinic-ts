@@ -31,16 +31,16 @@
     dialog.open();
   }
 
-  type ConductReqKey = "骨塩定量";
+  // type ConductReqKey = "骨塩定量";
 
-  const conductReqMap: Record<ConductReqKey, ConductSpec> = {
-    骨塩定量: {
+  const conductReqMap: Record<string, ConductSpec> = {
+    "骨塩定量": {
       kind: ConductKind.Gazou,
       labelOption: "骨塩定量に使用",
       shinryou: ["骨塩定量ＭＤ法"],
       drug: [],
       kizai: [{ code: "四ツ切", amount: 1 }],
-    },
+    }
   };
 
   async function doEnter(close: () => void) {
@@ -51,22 +51,25 @@
     ]
       .filter((item) => item.checked)
       .map((item) => item.label);
-    const [regularNames, conductSpecs] = partitionConv<string, string, ConductSpec>(
-      selectedNames,
-      (name) => !(name in conductReqMap),
-      name => name,
-      name => conductReqMap[name]
-    );
+    const regularNames: string[] = [];
+    const conductSpecs: ConductSpec[] = [];
+    selectedNames.forEach(name => {
+      if( name in conductReqMap ){
+        conductSpecs.push(conductReqMap[name])
+      } else {
+        regularNames.push(name);
+      }
+    })
     try {
       await enter(visit, regularNames, conductSpecs);
       close();
     } catch(ex) {
-      alert(ex.toString());
+      alert(ex);
     }
   }
 </script>
 
-<Dialog bind:this={dialog} let:close width={null}>
+<Dialog bind:this={dialog} let:close width={undefined}>
   <span slot="title">診療行為入力</span>
   <div class="two-cols">
     <div class="left">

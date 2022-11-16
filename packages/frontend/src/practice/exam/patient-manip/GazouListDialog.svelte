@@ -18,7 +18,7 @@
     if( src == null ){
       return;
     }
-    const ext = getFileExtension(src);
+    const ext = getFileExtension(src) ?? "";
     const url = api.patientImageUrl(patientId, src);
     if( externals.includes(ext) ){
       externalImageSrc = url;

@@ -68,7 +68,7 @@ async function conductReq(
   return {
     visitId: visitId,
     kind: kind.code,
-    labelOption,
+    labelOption: labelOption ?? null,
     shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
     drugs: drug.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
     kizaiList: k.map(obj => Object.assign(obj, { conductKizaiId: 0, conductId: 0 }))

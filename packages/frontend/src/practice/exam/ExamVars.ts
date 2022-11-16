@@ -17,7 +17,7 @@ export const recordsPerPage = 10;
 
 export class StartPatientReq {
   patient: m.Patient;
-  visitId: number | null;
+  visitId: number | undefined;
   isStartPatientReq: boolean = true;
 
   constructor(patient: m.Patient, visitId?: number){
@@ -38,11 +38,11 @@ export class EndPatientReq {
 
 const reqChangePatient: Writable<StartPatientReq | EndPatientReq | null> = writable(null);
 
-export function startPatient(patient: m.Patient, visitId: number | null = null): void {
+export function startPatient(patient: m.Patient, visitId?: number): void {
   reqChangePatient.set(new StartPatientReq(patient, visitId));
 }
 
-export function endPatient(waitState: m.WqueueStateData | null = null): void {
+export function endPatient(waitState?: m.WqueueStateData): void {
   reqChangePatient.set(new EndPatientReq(waitState));
 }
 
@@ -181,7 +181,7 @@ reqChangePatient.subscribe(async value => {
     if( value instanceof StartPatientReq ){
       const patient: m.Patient = value.patient;
       currentPatient.set(value.patient);
-      currentVisitId.set(value.visitId);
+      currentVisitId.set(value.visitId ?? null);
       taskRunner.run(
         fetchVisits(patient.patientId, 0),
         initNav(patient.patientId)
@@ -396,7 +396,7 @@ appEvent.shinryouDeleted.subscribe(shinryou => {
   }
 });
 
-appEvent.conductEntered.subscribe(async conduct => {
+appEvent.conductEntered.subscribe(conduct => {
   if (conduct == null) {
     return;
   }
@@ -404,13 +404,15 @@ appEvent.conductEntered.subscribe(async conduct => {
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
     const visit = visitsValue[index];
-    const conductEx = await api.getConductEx(conduct.conductId);
+    const conductEx = m.ConductExObject.fromConduct(conduct);
+    console.log("conduct entering", conductEx);
     visit.conducts.push(conductEx);
+    console.log("conduct entered", conductEx);
     visits.set(visitsValue);
   }
 });
 
-appEvent.conductUpdated.subscribe(async conduct => {
+appEvent.conductUpdated.subscribe(conduct => {
   if (conduct == null) {
     return;
   }
@@ -420,8 +422,8 @@ appEvent.conductUpdated.subscribe(async conduct => {
     const visit = visitsValue[index];
     const ci = visit.conducts.findIndex(c => c.conductId === conduct.conductId);
     if (ci >= 0) {
-      const conductEx = await api.getConductEx(conduct.conductId);
-      visit.conducts[ci] = conductEx;
+      const conductEx = m.ConductExObject.fromConduct(conduct);
+      Object.assign(visit.conducts[ci], conductEx);
       visits.set(visitsValue);
     }
   }
@@ -453,6 +455,7 @@ appEvent.conductShinryouEntered.subscribe(async conductShinryou => {
     if (ci >= 0) {
       const conductShinryouEx = await api.getConductShinryouEx(conductShinryou.conductShinryouId);
       visit.conducts[ci].shinryouList.push(conductShinryouEx);
+      console.log("conductShinryou entered", visit.conducts[ci].shinryouList);
       visits.set(visitsValue);
     }
   }
@@ -563,14 +566,15 @@ appEvent.gazouLabelEntered.subscribe(async gazouLabel => {
   if (gazouLabel == null) {
     return;
   }
-  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const conduct = await api.getConduct(gazouLabel.conductId);
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
     const visit = visitsValue[index];
     const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
     if (ci >= 0) {
-      visit.conducts.splice(ci, 1, conduct);
+      const curr: m.ConductEx = visit.conducts[ci];
+      curr.gazouLabel = gazouLabel.label;
       visits.set(visitsValue);
     }
   }
@@ -580,14 +584,15 @@ appEvent.gazouLabelUpdated.subscribe(async gazouLabel => {
   if (gazouLabel == null) {
     return;
   }
-  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const conduct = await api.getConduct(gazouLabel.conductId);
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
     const visit = visitsValue[index];
     const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
     if (ci >= 0) {
-      visit.conducts.splice(ci, 1, conduct);
+      const curr: m.ConductEx = visit.conducts[ci];
+      curr.gazouLabel = gazouLabel.label;
       visits.set(visitsValue);
     }
   }
@@ -597,14 +602,15 @@ appEvent.gazouLabelDeleted.subscribe(async gazouLabel => {
   if (gazouLabel == null) {
     return;
   }
-  const conduct = await api.getConductEx(gazouLabel.conductId);
+  const conduct = await api.getConduct(gazouLabel.conductId);
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
     const visit = visitsValue[index];
     const ci = visit.conducts.findIndex(c => c.conductId === gazouLabel.conductId);
     if (ci >= 0) {
-      visit.conducts.splice(ci, 1, conduct);
+      const curr: m.ConductEx = visit.conducts[ci];
+      delete curr.gazouLabel;
       visits.set(visitsValue);
     }
   }

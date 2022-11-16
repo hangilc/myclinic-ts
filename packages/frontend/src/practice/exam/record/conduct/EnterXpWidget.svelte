@@ -5,8 +5,15 @@
 
   export let visit: VisitEx;
   let widget: Widget;
-  let label: string;
-  let film: string;
+  const initLabel = "胸部単純Ｘ線"
+  let label: string = initLabel;
+  const initFilm = "大角";
+  let film: string = initFilm;
+
+  function onClose(): void {
+    label = initLabel;
+    film = initFilm;
+  }
 
   export function open(): void {
     widget.open();
@@ -29,13 +36,13 @@
 
 </script>
 
-<Widget title="Ｘ線検査入力" let:close={close} bind:this={widget}>
+<Widget title="Ｘ線検査入力" let:close={close} bind:this={widget} {onClose}>
   <select bind:value={label}>
-    <option selected>胸部単純Ｘ線</option>
+    <option>胸部単純Ｘ線</option>
     <option>腹部単純Ｘ線</option>
   </select>
   <select bind:value={film}>
-    <option selected>大角</option>
+    <option>大角</option>
     <option>四ツ切</option>
   </select>
   <svelte:fragment slot="commands">

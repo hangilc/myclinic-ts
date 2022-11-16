@@ -42,8 +42,8 @@
       })
       .then((pref) => {
         console.log("pref", pref);
-        printPref = pref;
-        settingSelect = pref;
+        printPref = pref ?? "手動";
+        settingSelect = pref ?? "手動";
       })
   );
 </script>

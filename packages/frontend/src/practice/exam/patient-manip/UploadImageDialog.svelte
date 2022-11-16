@@ -37,7 +37,7 @@
     }
     const formData = new FormData();
     const files = fileInput.files;
-    if (files.length === 0) {
+    if (files == null || files.length === 0) {
       return;
     } else if (files.length === 1) {
       const f = files[0];
@@ -76,7 +76,7 @@
     tag: string,
     at: Date,
     index: number,
-    ext: string
+    ext: string | undefined
   ): string {
     const year = at.getFullYear();
     const month = zeroPad(at.getMonth() + 1);
@@ -86,7 +86,8 @@
     const second = zeroPad(at.getSeconds());
     const stamp = `${year}${month}${day}-${hour}${minute}${second}`;
     const indexPart = index <= 0 ? "" : `-${index}`;
-    return `${patientId}-${tag}-${stamp}${indexPart}.${ext}`;
+    const extPart = ext === undefined ? "" : "." + ext;
+    return `${patientId}-${tag}-${stamp}${indexPart}${extPart}`;
   }
 </script>
 

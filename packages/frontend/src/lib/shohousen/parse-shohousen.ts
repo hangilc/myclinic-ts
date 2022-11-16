@@ -48,6 +48,9 @@ export function cut(s: string, re: RegExp): [string, string[]] {
   let i = 0;
   for (const m of ms) {
     const start = m.index;
+    if( start === undefined ){
+      continue;
+    }
     if (i === 0) {
       pre = s.substring(0, start);
     } else {
@@ -239,7 +242,7 @@ export class Part extends DrugLines {
     const indent = pad("", ndrugs + 1, "　");
     return flatten(
       this.drugs.map((d, i) => d.formatForSave(i == 0 ? index : null, ndrugs)),
-      this.usage?.formatForSave(indent),
+      this.usage?.formatForSave(indent) ?? null,
       this.more ? indent + this.more : null
     ).join("\n");
   }
@@ -248,12 +251,12 @@ export class Part extends DrugLines {
 export function parseDrugLines(s: string): DrugLines {
   let drugs: DrugPart[];
   [drugs, s] = repeat(parseDrugPart, s);
-  let usage: UsagePart;
+  let usage: UsagePart | null;
   [usage, s] = parseUsagePart(s);
 
   return {
     drugs: drugs || [],
-    usage: usage || null,
+    usage: usage,
     more: s,
   };
 }

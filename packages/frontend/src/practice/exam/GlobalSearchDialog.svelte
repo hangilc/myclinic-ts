@@ -51,7 +51,7 @@
   }
 </script>
 
-<Dialog bind:this={dialog} {onClose} width={null}>
+<Dialog bind:this={dialog} {onClose} width={undefined}>
   <span slot="title">全文検索</span>
   <div class="content">
     <form on:submit|preventDefault={doSearch}>

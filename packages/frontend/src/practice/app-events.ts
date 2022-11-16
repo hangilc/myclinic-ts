@@ -20,10 +20,12 @@ function connect(): void {
   })
 
   ws.addEventListener("message", event => {
-    console.log(event.data);
     const data = event.data;
     if (typeof data === "string") {
       const json = JSON.parse(data);
+      if( json.format !== "heart-beat" ){
+        console.log(json);
+      }
       dispatch(json);
     }
   })
@@ -54,7 +56,7 @@ async function drainEvents() {
   isDraining = false;
   console.log("end drain");
   while( eventQueue.length > 0 ){
-    const e = eventQueue.shift();
+    const e = eventQueue.shift() as m.AppEvent;
     handleAppEvent(e);
   }
 }
@@ -119,11 +121,10 @@ function handleAppEvent(e: m.AppEvent): void {
 }
 
 function publishAppEvent(e: m.AppEvent): void {
-  console.log(e);
   const model: string = e.model;
   const kind: string = e.kind;
   const payload = JSON.parse(e.data);
-  console.log("event kind", kind);
+  console.log(e);
   switch (model) {
     case "text": {
       switch (kind) {
@@ -361,7 +362,7 @@ function publishAppEvent(e: m.AppEvent): void {
 }
 
 function dispatch(e: any): void {
-  console.log("dispatch", e);
+  // console.log("dispatch", e);
   if (e.format === "appevent") {
     handleAppEvent(e.data as m.AppEvent);
   } else if (e.format === "hotline-beep") {

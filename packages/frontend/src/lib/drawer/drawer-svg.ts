@@ -6,26 +6,42 @@ import type { Op } from "./op";
 //   return drawerToSvg(ops, options);
 // }
 
+interface Pen {
+  width: string;
+  color: string;
+  penstyle: string;
+}
+
+interface Font {
+  font_name: string;
+  font_size: number;
+  font_weight: number;
+  font_italic: boolean;
+}
+
 export function drawerToSvg(ops: Op[], options: any) {
   options = options || {};
 
   let ns = "http://www.w3.org/2000/svg";
   let pen_color = "rgb(0,0,0)";
   let pen_width = "1px";
-  let pen_style = [];
-  let pen_dict = {};
-  let font_name: string, font_size: number, font_weight: number, font_italic: boolean;
-  let font_dict = {};
+  let pen_style = "";
+  let pen_dict: Record<string, Pen> = {};
+  let font_name: string,
+    font_size: number,
+    font_weight: number,
+    font_italic: boolean;
+  let font_dict: Record<string, Font> = {};
   let text_color = "rgb(0,0,0)";
   let i: number, n: number, op: Op;
   let curr_x: number, curr_y: number;
 
   let svg = document.createElementNS(ns, "svg");
-  ['width', 'height', "viewBox"].forEach(function (key) {
+  ["width", "height", "viewBox"].forEach(function (key) {
     if (key in options) {
-      svg.setAttributeNS(null, key, options[key])
+      svg.setAttributeNS(null, key, options[key]);
     }
-  })
+  });
 
   function draw_move_to(x: number, y: number) {
     curr_x = x;
@@ -42,17 +58,28 @@ export function drawerToSvg(ops: Op[], options: any) {
     e.setAttributeNS(null, "stroke", pen_color);
     e.setAttributeNS(null, "stroke-width", pen_width);
     if (pen_style.length > 0) {
-      e.setAttributeNS(null, "stroke-dasharray", pen_style.join(" "));
+      e.setAttributeNS(null, "stroke-dasharray", pen_style);
     }
     curr_x = x;
     curr_y = y;
     return e;
   }
 
-  function create_pen(name: string, r: number, g: number, b: number, width: number, penstyle: number[]) {
+  function create_pen(
+    name: string,
+    r: number,
+    g: number,
+    b: number,
+    width: number,
+    penstyle: number[]
+  ) {
     let color = "rgb(" + r + "," + g + "," + b + ")";
-    const penstyleStr = penstyle.map(n => n.toString()).join(" ");
-    pen_dict[name] = { width: width + "px", color: color, penstyle: penstyleStr };
+    const penstyleStr = penstyle.map((n) => n.toString()).join(" ");
+    pen_dict[name] = {
+      width: width + "px",
+      color: color,
+      penstyle: penstyleStr,
+    };
   }
 
   function set_pen(name: string) {
@@ -72,8 +99,14 @@ export function drawerToSvg(ops: Op[], options: any) {
   //   return inch * 25.4;
   // }
 
-  function create_font(name: string, font_name: string, size: number, weight: number, italic: boolean) {
-    font_dict[name] = { font_name: font_name, font_size: size, font_weight: weight, font_italic: italic };
+  function create_font(
+    name: string,
+    font_name: string,
+    font_size: number,
+    font_weight: number,
+    font_italic: boolean
+  ) {
+    font_dict[name] = { font_name, font_size, font_weight, font_italic };
   }
 
   function set_font(name: string) {
@@ -100,15 +133,15 @@ export function drawerToSvg(ops: Op[], options: any) {
 
   function draw_chars(chars: string, xs: number[], ys: number[]) {
     let e = document.createElementNS(ns, "text");
-    let attrs = {
+    let attrs: Record<string, string> = {
       fill: text_color,
       "font-family": font_name,
-      "font-size": font_size,
+      "font-size": font_size.toString(),
       "font-weight": font_weight ? "bold" : "normal",
       "font-italic": font_italic ? "italic" : "normal",
       "text-anchor": "start",
       //'dominant-baseline': "text-after-edge",
-      "dy": "1em"
+      dy: "1em",
     };
     for (let key in attrs) {
       e.setAttributeNS(null, key, attrs[key]);
@@ -124,7 +157,7 @@ export function drawerToSvg(ops: Op[], options: any) {
       e.setAttributeNS(null, "y", ys.join(","));
     }
     chars = chars.replace(/ /g, "&nbsp;");
-    e.innerHTML = chars
+    e.innerHTML = chars;
     return e;
   }
 
@@ -137,7 +170,7 @@ export function drawerToSvg(ops: Op[], options: any) {
     e.setAttributeNS(null, "stroke", pen_color);
     e.setAttributeNS(null, "stroke-width", pen_width);
     if (pen_style.length > 0) {
-      e.setAttributeNS(null, "stroke-dasharray", pen_style.join(" "));
+      e.setAttributeNS(null, "stroke-dasharray", pen_style);
     }
     return e;
   }

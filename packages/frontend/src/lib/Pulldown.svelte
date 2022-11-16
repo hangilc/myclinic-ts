@@ -9,7 +9,7 @@
   export let maxHeight: string = "260px";
   let show = false;
   let menu: HTMLElement;
-  let menuParent: HTMLElement;
+  let menuParent: HTMLElement | null;
   let zIndexScreen: number;
   let zIndexMenu: number;
 
@@ -20,7 +20,9 @@
   }
 
   function close(): void {
-    menuParent.appendChild(menu);
+    if( menuParent != null ){
+      menuParent.appendChild(menu);
+    }
     show = false;
     release(zIndexScreen);
     release(zIndexMenu);
@@ -33,7 +35,6 @@
   function locateAtAnchor(e: HTMLElement, anchor: HTMLElement | SVGSVGElement): void {
     if (e != null && anchor != null) {
       const r = anchor.getBoundingClientRect();
-      console.log("anchor r", r);
       const t = e.getBoundingClientRect();
       const w = document.documentElement.clientWidth;
       if (r.left + t.width > w) {

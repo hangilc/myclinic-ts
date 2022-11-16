@@ -12,7 +12,7 @@ export function hasHikitsugi(s: string): boolean {
 
 export function extractHikitsugi(s: string): string {
   const m = endregex.exec(s);
-  if( m.length === 0 ){
+  if( m == null || m.length === 0 ){
     return s;
   } else {
     console.dir(m);

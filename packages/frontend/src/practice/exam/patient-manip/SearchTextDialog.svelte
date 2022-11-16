@@ -6,9 +6,9 @@
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";
 
-  export let patient: Patient;
+  export let patient: Patient | null;
   let patientId: number | null;
-  $: patientId = patient?.patientId;
+  $: patientId = patient?.patientId ?? null;
   let textVisits: [Text, Visit][] = [];
   const nPerPage = 10;
   let dialog: Dialog;
@@ -22,7 +22,7 @@
   }
 
   async function load() {
-    if (text !== "") {
+    if (text !== "" && patientId != null) {
       textVisits = await api.searchTextForPatient(
         text,
         patientId,
@@ -34,7 +34,7 @@
 
   async function doSearch() {
     const t = searchText.trim();
-    if (t !== "") {
+    if (t !== "" && patientId != null) {
       const nhit = await api.countSearchTextForPatient(t, patientId);
       text = t;
       total = calcPages(nhit, nPerPage);
@@ -44,7 +44,9 @@
   }
 
   function formatContent(c: string): string {
-    return c.replaceAll("\n", "<br />").replaceAll(text, `<span class="hit">${text}</span>`);
+    return c
+      .replaceAll("\n", "<br />")
+      .replaceAll(text, `<span class="hit">${text}</span>`);
   }
 
   function gotoPage(p: number): void {
@@ -62,10 +64,10 @@
 <Dialog bind:this={dialog} width="26em" {onClose}>
   <span slot="title">文章検索</span>
   <div class="patient">
-    ({patient?.patientId}) {patient?.lastName}{patient?.firstName} 
+    ({patient?.patientId}) {patient?.lastName}{patient?.firstName}
   </div>
   <form on:submit|preventDefault={doSearch} class="form">
-    <input type="text" bind:value={searchText} autofocus/>
+    <input type="text" bind:value={searchText} autofocus />
     <button type="submit">検索</button>
   </form>
   <Nav {page} {total} {gotoPage} />
