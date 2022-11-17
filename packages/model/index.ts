@@ -227,7 +227,7 @@ export class ShinryouMaster {
     public oushinkubun: string,
     public kensagroup: string,
     public validFrom: string,
-    public validUpto: string,
+    public validUpto: string
   ) {}
 }
 
@@ -239,17 +239,12 @@ export class KizaiMaster {
     public unit: string,
     public kingakuStore: string,
     public validFrom: string,
-    public validUpto: string,
-  
+    public validUpto: string
   ) {}
 }
 
 export class DrugCategoryType {
-  constructor(
-    public code: number,
-    public name: string,
-  
-  ) {}
+  constructor(public code: number, public name: string) {}
 }
 
 export const DrugCategory: Record<string, DrugCategoryType> = {
@@ -268,8 +263,7 @@ export class DrugEx {
     public days: number,
     public categoryStore: number,
     public prescribed: boolean,
-    public master: IyakuhinMaster,
-  
+    public master: IyakuhinMaster
   ) {}
 }
 
@@ -277,8 +271,7 @@ export class Shinryou {
   constructor(
     public shinryouId: number,
     public visitId: number,
-    public shinryoucode: number,
-  
+    public shinryoucode: number
   ) {}
 }
 
@@ -287,8 +280,7 @@ export class ShinryouEx {
     public shinryouId: number,
     public visitId: number,
     public shinryoucode: number,
-    public master: ShinryouMaster,
-  
+    public master: ShinryouMaster
   ) {}
 }
 
@@ -298,158 +290,130 @@ export class ConductDrugEx {
     public conductId: number,
     public iyakuhincode: number,
     public amount: number,
-    public master: IyakuhinMaster,
-  
+    public master: IyakuhinMaster
   ) {}
 }
 
 export class ConductShinryouEx {
   constructor(
-
+    public conductShinryouId: number,
+    public conductId: number,
+    public shinryoucode: number,
+    public master: ShinryouMaster
   ) {}
-  conductShinryouId: number;
-  conductId: number;
-  shinryoucode: number;
-  master: ShinryouMaster;
 }
 
 export class ConductKizaiEx {
   constructor(
-
+    public conductKizaiId: number,
+    public conductId: number,
+    public kizaicode: number,
+    public amount: number,
+    public master: KizaiMaster
   ) {}
-  conductKizaiId: number;
-  conductId: number;
-  kizaicode: number;
-  amount: number;
-  master: KizaiMaster;
 }
-
-export type ConductKindKey =
-  | "HikaChuusha"
-  | "JoumyakuChuusha"
-  | "OtherChuusha"
-  | "Gazou";
-
-export const ConductKindKeyObject = {
-  fromString(s: string): ConductKindKey {
-    switch (s) {
-      case "HikaChuusha":
-      case "JoumyakuChuusha":
-      case "OtherChuusha":
-      case "Gazou":
-        return s;
-      default:
-        throw new Error("Invalid conduct kind key: " + s);
-    }
-  },
-};
-
-export type ConductKindTag =
-  | {
-      HikaChuusha: {};
-    }
-  | {
-      JoumyakuChuusha: {};
-    }
-  | {
-      OtherChuusha: {};
-    }
-  | {
-      Gazou: {};
-    };
-
-export const ConductKindTagObject = {
-  fromKey(key: ConductKindKey): ConductKindTag {
-    if (key === "HikaChuusha") {
-      return { [key]: {} };
-    } else if (key === "JoumyakuChuusha") {
-      return { [key]: {} };
-    } else if (key === "OtherChuusha") {
-      return { [key]: {} };
-    } else if (key === "Gazou") {
-      return { [key]: {} };
-    } else {
-      throw new Error("Cannot happen");
-    }
-  },
-
-  fromCode(code: number): ConductKindTag {
-    for (let ctype of Object.values(ConductKind)) {
-      if (ctype.code === code) {
-        return ConductKindTagObject.fromKey(ctype.key);
-      }
-    }
-    throw new Error("Invalid conduct kind code: " + code);
-  },
-};
 
 export class ConductKindType {
-  constructor(
-    public code: number,
-    public rep: string,
-    public key: ConductKindKey
-  ) {}
-}
+  constructor(public code: number, public rep: string) {}
 
-export const ConductKind: Record<ConductKindKey, ConductKindType> = {
-  HikaChuusha: new ConductKindType(0, "皮下・筋肉注射", "HikaChuusha"),
-  JoumyakuChuusha: new ConductKindType(1, "静脈注射", "JoumyakuChuusha"),
-  OtherChuusha: new ConductKindType(2, "その他の注射", "OtherChuusha"),
-  Gazou: new ConductKindType(3, "画像", "Gazou"),
-};
+  toTag(): ConductKindTag {
+    for(let k of Object.keys(ConductKind) ){
+      const ct = ConductKind[k]
+      if( ct.code === this.code ){
+        return { [k]: {} };
+      }
+    }
+    throw new Error("Cannot convert to ConductKindTag: " + this.code);
+  }
 
-export const ConductKindObject = {
-  fromTag(tag: ConductKindTag): ConductKindType {
-    const key: ConductKindKey = Object.keys(tag)[0] as ConductKindKey;
-    return ConductKind[key];
-  },
-
-  fromCode(code: number): ConductKindType {
-    for (let kind of Object.values(ConductKind)) {
-      if (kind.code === code) {
-        return kind;
+  static fromCode(code: number): ConductKindType {
+    for (let ck of Object.values(ConductKind)) {
+      if (ck.code === code) {
+        return ck;
       }
     }
     throw new Error("Invalid conduct kind code: " + code);
-  },
+  }
 
-  fromKeyString(s: string): ConductKindType {
-    const key = ConductKindKeyObject.fromString(s);
-    return ConductKind[key];
-  },
+  static fromKey(key: string): ConductKindType {
+    const ck = ConductKind[key];
+    if (ck === undefined) {
+      throw new Error("Invalid conduct kind key: " + key);
+    }
+    return ck;
+  }
+
+  static fromTag(tag: ConductKindTag): ConductKindType {
+    const key = Object.keys(tag)[0];
+    return ConductKindType.fromKey(key);
+  }
+}
+
+export const ConductKind: Record<string, ConductKindType> = {
+  HikaChuusha: new ConductKindType(0, "皮下・筋肉注射"),
+  JoumyakuChuusha: new ConductKindType(1, "静脈注射"),
+  OtherChuusha: new ConductKindType(2, "その他の注射"),
+  Gazou: new ConductKindType(3, "画像"),
+};
+
+export type ConductKindTag = {
+  [key in keyof typeof ConductKind]: {};
 };
 
 export class ConductEx {
-  constructor(
-
-  ) {}
   conductId: number;
   visitId: number;
   kind: ConductKindTag;
-  gazouLabel?: String;
+  gazouLabel: string | undefined;
   drugs: ConductDrugEx[];
   shinryouList: ConductShinryouEx[];
   kizaiList: ConductKizaiEx[];
-}
 
-export const ConductExObject = {
-  fromConduct(c: Conduct): ConductEx {
-    return {
+  constructor({
+    conductId,
+    visitId,
+    kind,
+    gazouLabel,
+    drugs = [],
+    shinryouList = [],
+    kizaiList = [],
+  }: {
+    conductId: number;
+    visitId: number;
+    kind: ConductKindTag;
+    gazouLabel?: string;
+    drugs?: ConductDrugEx[];
+    shinryouList?: ConductShinryouEx[];
+    kizaiList?: ConductKizaiEx[];
+  }) {
+    this.conductId = conductId;
+    this.visitId = visitId;
+    this.kind = kind;
+    this.gazouLabel = gazouLabel;
+    this.drugs = drugs;
+    this.shinryouList = shinryouList;
+    this.kizaiList = kizaiList;
+  }
+
+  static fromConduct(c: Conduct): ConductEx {
+    return new ConductEx({
       conductId: c.conductId,
       visitId: c.visitId,
-      kind: ConductKindTagObject.fromCode(c.kindStore),
-      drugs: [],
-      shinryouList: [],
-      kizaiList: [],
-    };
-  },
-};
+      kind: ConductKindType.fromCode(c.kindStore).toTag()
+    });
+  }
+}
 
 export class VisitAttributes {
-  constructor(
+  futanWari: number | undefined;
 
-  ) {}
-  futanWari?: number;
+  constructor({
+    futanWari = undefined
+  }: {
+    futanWari?: number
+  }) {
+    this.futanWari = futanWari;
+  }
 }
 
 export const VisitAttributeObject = {
@@ -470,9 +434,7 @@ export const VisitAttributeObject = {
 };
 
 export class VisitEx {
-  constructor(
-
-  ) {}
+  constructor() {}
   visitId: number;
   visitedAt: string;
   attributesStore?: string;
@@ -520,9 +482,7 @@ export enum MeisaiSectionEnum {
 }
 
 export class MeisaiSectionItem {
-  constructor(
-
-  ) {}
+  constructor() {}
   tanka: number;
   count: number;
   label: string;
@@ -535,9 +495,7 @@ export const MeisaiSectionItemObject = {
 };
 
 export class MeisaiSectionData {
-  constructor(
-
-  ) {}
+  constructor() {}
   section: MeisaiSectionEnum;
   entries: MeisaiSectionItem[];
 }
@@ -552,9 +510,7 @@ export const MeisaiSectionDataObject = {
 };
 
 export class Meisai {
-  constructor(
-
-  ) {}
+  constructor() {}
   items: MeisaiSectionData[];
   futanWari: number;
   charge: number;
@@ -570,35 +526,27 @@ export const MeisaiObject = {
 };
 
 export class Conduct {
-  constructor(
-
-  ) {}
+  constructor() {}
   conductId: number;
   visitId: number;
   kindStore: number;
 }
 
 export class GazouLabel {
-  constructor(
-
-  ) {}
+  constructor() {}
   conductId: number;
   label: string;
 }
 
 export class ConductShinryou {
-  constructor(
-
-  ) {}
+  constructor() {}
   conductShinryouId: number;
   conductId: number;
   shinryoucode: number;
 }
 
 export class ConductDrug {
-  constructor(
-
-  ) {}
+  constructor() {}
   conductDrugId: number;
   conductId: number;
   iyakuhincode: number;
@@ -606,9 +554,7 @@ export class ConductDrug {
 }
 
 export class ConductKizai {
-  constructor(
-
-  ) {}
+  constructor() {}
   conductKizaiId: number;
   conductId: number;
   kizaicode: number;
@@ -616,9 +562,7 @@ export class ConductKizai {
 }
 
 export class CreateConductRequest {
-  constructor(
-
-  ) {}
+  constructor() {}
   visitId: number;
   kind: number;
   labelOption: string | null;
@@ -628,17 +572,13 @@ export class CreateConductRequest {
 }
 
 export class CreateShinryouConductRequest {
-  constructor(
-
-  ) {}
+  constructor() {}
   shinryouList: Shinryou[];
   conducts: CreateConductRequest[];
 }
 
 export class ByoumeiMaster {
-  constructor(
-
-  ) {}
+  constructor() {}
   shoubyoumeicode: number;
   name: string;
 }
@@ -653,9 +593,7 @@ export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
 }
 
 export class ShuushokugoMaster {
-  constructor(
-
-  ) {}
+  constructor() {}
   shuushokugocode: number;
   name: string;
 }
@@ -678,9 +616,7 @@ export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
 }
 
 export class DiseaseEndReasonType {
-  constructor(
-
-  ) {}
+  constructor() {}
   code: string;
   label: string;
 }
@@ -704,9 +640,7 @@ export const DiseaseEndReasonObject = {
 };
 
 export class Disease {
-  constructor(
-
-  ) {}
+  constructor() {}
   diseaseId: number;
   patientId: number;
   shoubyoumeicode: number;
@@ -716,18 +650,14 @@ export class Disease {
 }
 
 export class DiseaseAdj {
-  constructor(
-
-  ) {}
+  constructor() {}
   diseaseAdjId: number;
   diseaseId: number;
   shuushokugocode: number;
 }
 
 export class DiseaseEnterData {
-  constructor(
-
-  ) {}
+  constructor() {}
   patientId: number;
   byoumeicode: number;
   startDate: string;
@@ -735,9 +665,7 @@ export class DiseaseEnterData {
 }
 
 export class DiseaseExample {
-  constructor(
-
-  ) {}
+  constructor() {}
   byoumei: string | null;
   preAdjList: string[];
   postAdjList: string[];
@@ -760,46 +688,34 @@ export function isDiseaseExample(arg: any): arg is DiseaseExample {
 }
 
 export class Hotline {
-  constructor(
-
-  ) {}
+  constructor() {}
   message: string;
   sender: string;
   recipient: string;
 }
 
 export class HotlineEx extends Hotline {
-  constructor(
-
-  ) {}
+  constructor() {}
   appEventId: number;
 }
 
 export class HotlineBeep {
-  constructor(
-
-  ) {}
+  constructor() {}
   recipient: string;
 }
 
 export class EventIdNotice {
-  constructor(
-
-  ) {}
+  constructor() {}
   currentEventId: number;
 }
 
 export class HeartBeat {
-  constructor(
-
-  ) {}
+  constructor() {}
   heartBeatSerialId: number;
 }
 
 export class AppEvent {
-  constructor(
-
-  ) {}
+  constructor() {}
   appEventId: number;
   createdAt: string;
   model: string;
@@ -808,18 +724,14 @@ export class AppEvent {
 }
 
 export class FileInfo {
-  constructor(
-
-  ) {}
+  constructor() {}
   name: string;
   createdAt: string;
   size: number;
 }
 
 export class PrescExample {
-  constructor(
-
-  ) {}
+  constructor() {}
   prescExampleId: number;
   iyakuhincode: number;
   masterValidFrom: string;
