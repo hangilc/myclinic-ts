@@ -8,7 +8,7 @@ export class Patient {
     public sex: string,
     public birthday: string,
     public address: string,
-    public phone: string,
+    public phone: string
   ) {}
 }
 
@@ -23,7 +23,7 @@ export class Visit {
     public kouhi2Id: number,
     public kouhi3Id: number,
     public koukikoureiId: number,
-    public attributesStore?: string,
+    public attributesStore?: string
   ) {}
 
   clone(): Visit {
@@ -44,18 +44,15 @@ export class Visit {
     const newVisit = this.clone();
     newVisit.attributesStore = newAttr;
     return newVisit;
-  }  
+  }
 }
 
 export class WqueueStateType {
-  constructor(
-    public code: number, 
-    public label: string
-  ) {}
+  constructor(public code: number, public label: string) {}
 
   static fromCode(code: number): WqueueStateType {
-    for( let wq of Object.values(WqueueState) ){
-      if( wq.code === code ){
+    for (let wq of Object.values(WqueueState)) {
+      if (wq.code === code) {
         return wq;
       }
     }
@@ -77,37 +74,38 @@ export interface Wqueue {
 }
 
 export class Wqueue {
-  constructor(
-    public visitId: number,
-    public waitState: number,
-  ) {}
+  constructor(public visitId: number, public waitState: number) {}
 
   get waitStateType(): WqueueStateType {
     return WqueueStateType.fromCode(this.waitState);
   }
 }
 
-export interface Shahokokuho {
-  shahokokuhoId: number;
-  patientId: number;
-  hokenshaBangou: number;
-  hihokenshaKigou: string;
-  hihokenshaBangou: string;
-  honninStore: number;
-  validFrom: string;
-  validUpto: string;
-  koureiStore: number;
-  edaban: string;
+export class Shahokokuho {
+  constructor(
+    public shahokokuhoId: number,
+    public patientId: number,
+    public hokenshaBangou: number,
+    public hihokenshaKigou: string,
+    public hihokenshaBangou: string,
+    public honninStore: number,
+    public validFrom: string,
+    public validUpto: string,
+    public koureiStore: number,
+    public edaban: string
+  ) {}
 }
 
-export interface Roujin {
-  roujinId: number;
-  patientId: number;
-  shichouson: number;
-  jukyuusha: number;
-  futanWari: number;
-  validFrom: string;
-  validUpto: string;
+export class Roujin {
+  constructor(
+    public roujinId: number,
+    public patientId: number,
+    public shichouson: number,
+    public jukyuusha: number,
+    public futanWari: number,
+    public validFrom: string,
+    public validUpto: string
+  ) {}
 }
 
 export interface Koukikourei {
@@ -120,143 +118,205 @@ export interface Koukikourei {
   validUpto: string;
 }
 
-export interface Kouhi {
-  kouhiId: number;
-  futansha: number;
-  jukyuusha: number;
-  validFrom: string;
-  validUpto: string;
-  patientId: number;
+export class Koukikourei {
+  constructor(
+    public koukikoureiId: number,
+    public patientId: number,
+    public hokenshaBangou: string,
+    public hihokenshaBangou: string,
+    public futanWari: number,
+    public validFrom: string,
+    public validUpto: string
+  ) {}
 }
 
-export interface HokenInfo {
-  shahokokuho?: Shahokokuho;
-  roujin?: Roujin;
-  koukikourei: Koukikourei;
-  kouhiList: Kouhi[];
+export class Kouhi {
+  constructor(
+    public kouhiId: number,
+    public futansha: number,
+    public jukyuusha: number,
+    public validFrom: string,
+    public validUpto: string,
+    public patientId: number
+  ) {}
 }
 
-export interface HokenIdSet {
-  shahokokuhoId: number;
-  koukikoureiId: number;
-  roujinId: number;
-  kouhi1Id: number;
-  kouhi2Id: number;
-  kouhi3Id: number;
-}
+export class HokenInfo {
+  public shahokokuho: Shahokokuho | undefined;
+  public roujin: Roujin | undefined;
+  public koukikourei: Koukikourei | undefined;
+  public kouhiList: Kouhi[];
 
-export class Text {
-  textId: number;
-  visitId: number;
-  content: string;
+  constructor({
+    shahokokuho = undefined,
+    roujin = undefined,
+    koukikourei = undefined,
+    kouhiList = [],
+  }: {
+    shahokokuho?: Shahokokuho;
+    roujin?: Roujin;
+    koukikourei?: Koukikourei;
+    kouhiList?: Kouhi[];
+  }) {
+    this.shahokokuho = shahokokuho;
+    this.roujin = roujin;
+    this.koukikourei = koukikourei;
+    this.kouhiList = kouhiList ?? [];
+  }
 
-  constructor(textId: number, visitId: number, content: string) {
-    this.textId = textId;
-    this.visitId = visitId;
-    this.content = content;
+  static createBlank(): HokenInfo {
+    return new HokenInfo({});
   }
 }
 
-export interface Charge {
-  visitId: number;
-  charge: number;
+export class HokenIdSet {
+  constructor(
+    public shahokokuhoId: number,
+    public koukikoureiId: number,
+    public roujinId: number,
+    public kouhi1Id: number,
+    public kouhi2Id: number,
+    public kouhi3Id: number
+  ) {}
 }
 
-export interface Payment {
-  visitId: number;
-  amount: number;
-  paytime: string;
+export class Text {
+  constructor(
+    public textId: number,
+    public visitId: number,
+    public content: string
+  ) {}
 }
 
-export interface IyakuhinMaster {
-  iyakuhincode: number;
-  yakkacode: string;
-  name: string;
-  yomi: string;
-  unit: string;
-  yakkaStore: string;
-  madoku: string;
-  kouhatsu: string;
-  zaikei: string;
-  validFrom: string;
-  validUpto: string;
+export class Charge {
+  constructor(public visitId: number, public charge: number) {}
 }
 
-export interface ShinryouMaster {
-  shinryoucode: number;
-  name: string;
-  tensuuStore: string;
-  tensuuShikibetsu: string;
-  shuukeisaki: string;
-  houkatsukensa: string;
-  oushinkubun: string;
-  kensagroup: string;
-  validFrom: string;
-  validUpto: string;
+export class Payment {
+  constructor(
+    public visitId: number,
+    public amount: number,
+    public paytime: string
+  ) {}
 }
 
-export interface KizaiMaster {
-  kizaicode: number;
-  name: string;
-  yomi: string;
-  unit: string;
-  kingakuStore: string;
-  validFrom: string;
-  validUpto: string;
+export class IyakuhinMaster {
+  constructor(
+    public iyakuhincode: number,
+    public yakkacode: string,
+    public name: string,
+    public yomi: string,
+    public unit: string,
+    public yakkaStore: string,
+    public madoku: string,
+    public kouhatsu: string,
+    public zaikei: string,
+    public validFrom: string,
+    public validUpto: string
+  ) {}
 }
 
-export interface DrugCategoryType {
-  code: number;
-  name: string;
+export class ShinryouMaster {
+  constructor(
+    public shinryoucode: number,
+    public name: string,
+    public tensuuStore: string,
+    public tensuuShikibetsu: string,
+    public shuukeisaki: string,
+    public houkatsukensa: string,
+    public oushinkubun: string,
+    public kensagroup: string,
+    public validFrom: string,
+    public validUpto: string,
+  ) {}
+}
+
+export class KizaiMaster {
+  constructor(
+    public kizaicode: number,
+    public name: string,
+    public yomi: string,
+    public unit: string,
+    public kingakuStore: string,
+    public validFrom: string,
+    public validUpto: string,
+  
+  ) {}
+}
+
+export class DrugCategoryType {
+  constructor(
+    public code: number,
+    public name: string,
+  
+  ) {}
 }
 
 export const DrugCategory: Record<string, DrugCategoryType> = {
-  Naifuku: { code: 0, name: "内服" },
-  Tonpuku: { code: 1, name: "頓服" },
-  Gaiyou: { code: 2, name: "外用" },
+  Naifuku: new DrugCategoryType(0, "内服"),
+  Tonpuku: new DrugCategoryType(1, "頓服"),
+  Gaiyou: new DrugCategoryType(2, "外用"),
 };
 
-export interface DrugEx {
-  drugId: number;
-  visitId: number;
-  iyakuhincode: number;
-  amount: number;
-  usage: string;
-  days: number;
-  categoryStore: number;
-  prescribed: boolean;
-  master: IyakuhinMaster;
+export class DrugEx {
+  constructor(
+    public drugId: number,
+    public visitId: number,
+    public iyakuhincode: number,
+    public amount: number,
+    public usage: string,
+    public days: number,
+    public categoryStore: number,
+    public prescribed: boolean,
+    public master: IyakuhinMaster,
+  
+  ) {}
 }
 
-export interface Shinryou {
-  shinryouId: number;
-  visitId: number;
-  shinryoucode: number;
+export class Shinryou {
+  constructor(
+    public shinryouId: number,
+    public visitId: number,
+    public shinryoucode: number,
+  
+  ) {}
 }
 
-export interface ShinryouEx {
-  shinryouId: number;
-  visitId: number;
-  shinryoucode: number;
-  master: ShinryouMaster;
+export class ShinryouEx {
+  constructor(
+    public shinryouId: number,
+    public visitId: number,
+    public shinryoucode: number,
+    public master: ShinryouMaster,
+  
+  ) {}
 }
 
-export interface ConductDrugEx {
-  conductDrugId: number;
-  conductId: number;
-  iyakuhincode: number;
-  amount: number;
-  master: IyakuhinMaster;
+export class ConductDrugEx {
+  constructor(
+    public conductDrugId: number,
+    public conductId: number,
+    public iyakuhincode: number,
+    public amount: number,
+    public master: IyakuhinMaster,
+  
+  ) {}
 }
 
-export interface ConductShinryouEx {
+export class ConductShinryouEx {
+  constructor(
+
+  ) {}
   conductShinryouId: number;
   conductId: number;
   shinryoucode: number;
   master: ShinryouMaster;
 }
 
-export interface ConductKizaiEx {
+export class ConductKizaiEx {
+  constructor(
+
+  ) {}
   conductKizaiId: number;
   conductId: number;
   kizaicode: number;
@@ -356,10 +416,13 @@ export const ConductKindObject = {
   fromKeyString(s: string): ConductKindType {
     const key = ConductKindKeyObject.fromString(s);
     return ConductKind[key];
-  }
+  },
 };
 
-export interface ConductEx {
+export class ConductEx {
+  constructor(
+
+  ) {}
   conductId: number;
   visitId: number;
   kind: ConductKindTag;
@@ -382,7 +445,10 @@ export const ConductExObject = {
   },
 };
 
-export interface VisitAttributes {
+export class VisitAttributes {
+  constructor(
+
+  ) {}
   futanWari?: number;
 }
 
@@ -403,7 +469,10 @@ export const VisitAttributeObject = {
   },
 };
 
-export interface VisitEx {
+export class VisitEx {
+  constructor(
+
+  ) {}
   visitId: number;
   visitedAt: string;
   attributesStore?: string;
@@ -450,7 +519,10 @@ export enum MeisaiSectionEnum {
   Sonota = "その他",
 }
 
-export interface MeisaiSectionItem {
+export class MeisaiSectionItem {
+  constructor(
+
+  ) {}
   tanka: number;
   count: number;
   label: string;
@@ -462,7 +534,10 @@ export const MeisaiSectionItemObject = {
   },
 };
 
-export interface MeisaiSectionData {
+export class MeisaiSectionData {
+  constructor(
+
+  ) {}
   section: MeisaiSectionEnum;
   entries: MeisaiSectionItem[];
 }
@@ -476,7 +551,10 @@ export const MeisaiSectionDataObject = {
   },
 };
 
-export interface Meisai {
+export class Meisai {
+  constructor(
+
+  ) {}
   items: MeisaiSectionData[];
   futanWari: number;
   charge: number;
@@ -491,38 +569,56 @@ export const MeisaiObject = {
   },
 };
 
-export interface Conduct {
+export class Conduct {
+  constructor(
+
+  ) {}
   conductId: number;
   visitId: number;
   kindStore: number;
 }
 
-export interface GazouLabel {
+export class GazouLabel {
+  constructor(
+
+  ) {}
   conductId: number;
   label: string;
 }
 
-export interface ConductShinryou {
+export class ConductShinryou {
+  constructor(
+
+  ) {}
   conductShinryouId: number;
   conductId: number;
   shinryoucode: number;
 }
 
-export interface ConductDrug {
+export class ConductDrug {
+  constructor(
+
+  ) {}
   conductDrugId: number;
   conductId: number;
   iyakuhincode: number;
   amount: number;
 }
 
-export interface ConductKizai {
+export class ConductKizai {
+  constructor(
+
+  ) {}
   conductKizaiId: number;
   conductId: number;
   kizaicode: number;
   amount: number;
 }
 
-export interface CreateConductRequest {
+export class CreateConductRequest {
+  constructor(
+
+  ) {}
   visitId: number;
   kind: number;
   labelOption: string | null;
@@ -531,12 +627,18 @@ export interface CreateConductRequest {
   kizaiList: ConductKizai[];
 }
 
-export interface CreateShinryouConductRequest {
+export class CreateShinryouConductRequest {
+  constructor(
+
+  ) {}
   shinryouList: Shinryou[];
   conducts: CreateConductRequest[];
 }
 
-export interface ByoumeiMaster {
+export class ByoumeiMaster {
+  constructor(
+
+  ) {}
   shoubyoumeicode: number;
   name: string;
 }
@@ -550,7 +652,10 @@ export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
   );
 }
 
-export interface ShuushokugoMaster {
+export class ShuushokugoMaster {
+  constructor(
+
+  ) {}
   shuushokugocode: number;
   name: string;
 }
@@ -560,8 +665,8 @@ export const ShuushokugoMasterObject = {
 
   isPrefix(m: ShuushokugoMaster): boolean {
     return m.shuushokugocode < ShuushokugoMasterObject.smallestPostfixCode;
-  }
-}
+  },
+};
 
 export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
   return (
@@ -572,7 +677,10 @@ export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
   );
 }
 
-export interface DiseaseEndReasonType {
+export class DiseaseEndReasonType {
+  constructor(
+
+  ) {}
   code: string;
   label: string;
 }
@@ -595,7 +703,10 @@ export const DiseaseEndReasonObject = {
   },
 };
 
-export interface Disease {
+export class Disease {
+  constructor(
+
+  ) {}
   diseaseId: number;
   patientId: number;
   shoubyoumeicode: number;
@@ -604,20 +715,29 @@ export interface Disease {
   endReasonStore: string;
 }
 
-export interface DiseaseAdj {
+export class DiseaseAdj {
+  constructor(
+
+  ) {}
   diseaseAdjId: number;
   diseaseId: number;
   shuushokugocode: number;
 }
 
-export interface DiseaseEnterData {
+export class DiseaseEnterData {
+  constructor(
+
+  ) {}
   patientId: number;
   byoumeicode: number;
   startDate: string;
   adjCodes: number[];
 }
 
-export interface DiseaseExample {
+export class DiseaseExample {
+  constructor(
+
+  ) {}
   byoumei: string | null;
   preAdjList: string[];
   postAdjList: string[];
@@ -639,29 +759,47 @@ export function isDiseaseExample(arg: any): arg is DiseaseExample {
   );
 }
 
-export interface Hotline {
+export class Hotline {
+  constructor(
+
+  ) {}
   message: string;
   sender: string;
   recipient: string;
 }
 
-export interface HotlineEx extends Hotline {
+export class HotlineEx extends Hotline {
+  constructor(
+
+  ) {}
   appEventId: number;
 }
 
-export interface HotlineBeep {
+export class HotlineBeep {
+  constructor(
+
+  ) {}
   recipient: string;
 }
 
-export interface EventIdNotice {
+export class EventIdNotice {
+  constructor(
+
+  ) {}
   currentEventId: number;
 }
 
-export interface HeartBeat {
+export class HeartBeat {
+  constructor(
+
+  ) {}
   heartBeatSerialId: number;
 }
 
-export interface AppEvent {
+export class AppEvent {
+  constructor(
+
+  ) {}
   appEventId: number;
   createdAt: string;
   model: string;
@@ -669,13 +807,19 @@ export interface AppEvent {
   data: string;
 }
 
-export interface FileInfo {
+export class FileInfo {
+  constructor(
+
+  ) {}
   name: string;
   createdAt: string;
   size: number;
 }
 
-export interface PrescExample {
+export class PrescExample {
+  constructor(
+
+  ) {}
   prescExampleId: number;
   iyakuhincode: number;
   masterValidFrom: string;
