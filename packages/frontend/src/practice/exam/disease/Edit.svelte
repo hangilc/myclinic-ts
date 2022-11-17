@@ -27,6 +27,7 @@
   import api from "@/lib/api";
 
   export let list: DiseaseData[];
+  
   let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
   let startDate: Date | null = null;
@@ -44,6 +45,7 @@
         data[1] = sel;
         selected.set(data);
       } else if (isShuushokugoMaster(sel)) {
+        $selected[2]
       } else if (isDiseaseExample(sel)) {
       }
     }

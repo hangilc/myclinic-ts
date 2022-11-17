@@ -1,5 +1,6 @@
 import {
   DiseaseEndReasonObject,
+  ShuushokugoMasterObject,
   type ByoumeiMaster,
   type Disease,
   type DiseaseAdj,
@@ -31,12 +32,22 @@ export function byoumeiName(data: DiseaseData): string {
   return data[1].name;
 }
 
-export function shuushokugoName(data: DiseaseData): string {
-  return data[2].map((a) => a[1].name).join("");
+function shuushokugoNames(data: DiseaseData): [string, string] {
+  const pres: string[] = [];
+  const posts: string[] = [];
+  data[2].forEach(([_adj, master]: [DiseaseAdj, ShuushokugoMaster]) => {
+    if( ShuushokugoMasterObject.isPrefix(master) ){
+      pres.push(master.name);
+    } else {
+      posts.push(master.name);
+    }
+  });
+  return [pres.join(""), posts.join("")];
 }
 
 export function fullName(data: DiseaseData): string {
-  return byoumeiName(data) + shuushokugoName(data);
+  const [pre, post] = shuushokugoNames(data);
+  return pre + byoumeiName(data) + post;
 }
 
 export function getStartDate(data: DiseaseData): string {
