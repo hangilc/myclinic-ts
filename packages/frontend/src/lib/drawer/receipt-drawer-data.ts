@@ -1,8 +1,6 @@
 import {
   type Patient,
   type Meisai,
-  MeisaiObject,
-  MeisaiSectionDataObject,
   MeisaiSectionEnum,
   type VisitEx,
 } from "myclinic-model"
@@ -35,9 +33,6 @@ export class ReceiptDrawerData {
   }
 
   setMeisai(meisai: Meisai): void {
-    const subtotal = MeisaiSectionDataObject.subtotalOf;
-    const totalTen = MeisaiObject.totalTenOf;
-
     this.charge = meisai.charge
     if (meisai.futanWari == 10) {
       this.futanWari = "";
@@ -46,8 +41,8 @@ export class ReceiptDrawerData {
     }
     meisai.items.forEach(sect => {
       let ten: string;
-      if (subtotal(sect) > 0) {
-        ten = subtotal(sect).toString();
+      if (sect.totalTen > 0) {
+        ten = sect.totalTen.toString();
       } else {
         ten = "";
       }
@@ -89,7 +84,7 @@ export class ReceiptDrawerData {
           break;
         }
       }
-      this.souten = totalTen(meisai).toString()
+      this.souten = meisai.totalTen.toString()
     });
   }
 

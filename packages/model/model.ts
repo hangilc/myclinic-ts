@@ -326,6 +326,15 @@ export class ConductKindType {
     throw new Error("Cannot convert to ConductKindTag: " + this.code);
   }
 
+  get key(): ConductKindKey {
+    for(let k of Object.keys(ConductKind)){
+      if( ConductKind[k].code == this.code ){
+        return k;
+      }
+    }
+    throw new Error("Cannot find ConductKindKey");
+  }
+
   static fromCode(code: number): ConductKindType {
     for (let ck of Object.values(ConductKind)) {
       if (ck.code === code) {
@@ -356,8 +365,10 @@ export const ConductKind: Record<string, ConductKindType> = {
   Gazou: new ConductKindType(3, "画像"),
 };
 
+export type ConductKindKey = keyof typeof ConductKind;
+
 export type ConductKindTag = {
-  [key in keyof typeof ConductKind]: {};
+  [key in ConductKindKey]: {};
 };
 
 export class ConductEx {

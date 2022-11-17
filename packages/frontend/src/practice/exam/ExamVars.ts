@@ -28,10 +28,10 @@ export class StartPatientReq {
 }
 
 export class EndPatientReq {
-  waitState?: m.WqueueStateData;
+  waitState?: m.WqueueStateType;
   isEndPatientReq: boolean = true;
 
-  constructor(waitState?: m.WqueueStateData) {
+  constructor(waitState?: m.WqueueStateType) {
     this.waitState = waitState;
   }
 }
@@ -42,7 +42,7 @@ export function startPatient(patient: m.Patient, visitId?: number): void {
   reqChangePatient.set(new StartPatientReq(patient, visitId));
 }
 
-export function endPatient(waitState?: m.WqueueStateData): void {
+export function endPatient(waitState?: m.WqueueStateType): void {
   reqChangePatient.set(new EndPatientReq(waitState));
 }
 
@@ -137,7 +137,7 @@ export function clearMishuuList(): void {
 }
 
 async function suspendVisit(visitId: number): Promise<void> {
-  await api.changeWqueueState(visitId, m.WqueueState.WaitReExam);
+  await api.changeWqueueState(visitId, m.WqueueState.WaitReExam.code);
 }
 
 function resetAll(): void {
@@ -187,7 +187,7 @@ reqChangePatient.subscribe(async value => {
         initNav(patient.patientId)
       );
       if( value.visitId != null ){
-        api.changeWqueueState(value.visitId, m.WqueueState.InExam)
+        api.changeWqueueState(value.visitId, m.WqueueState.InExam.code)
       }
     }
   }
@@ -404,7 +404,7 @@ appEvent.conductEntered.subscribe(conduct => {
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
     const visit = visitsValue[index];
-    const conductEx = m.ConductExObject.fromConduct(conduct);
+    const conductEx = m.ConductEx.fromConduct(conduct);
     console.log("conduct entering", conductEx);
     visit.conducts.push(conductEx);
     console.log("conduct entered", conductEx);
@@ -422,7 +422,7 @@ appEvent.conductUpdated.subscribe(conduct => {
     const visit = visitsValue[index];
     const ci = visit.conducts.findIndex(c => c.conductId === conduct.conductId);
     if (ci >= 0) {
-      const conductEx = m.ConductExObject.fromConduct(conduct);
+      const conductEx = m.ConductEx.fromConduct(conduct);
       Object.assign(visit.conducts[ci], conductEx);
       visits.set(visitsValue);
     }

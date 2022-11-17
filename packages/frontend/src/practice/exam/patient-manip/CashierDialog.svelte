@@ -4,9 +4,7 @@
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import {
-    MeisaiObject,
-    MeisaiSectionDataObject,
-    WqueueStateObject,
+  WqueueState,
     type Meisai,
     type Payment,
   } from "myclinic-model";
@@ -49,7 +47,7 @@
     } else {
       return meisai.items.map((item) => {
         const label: string = item.section;
-        const subtotal: number = MeisaiSectionDataObject.subtotalOf(item);
+        const subtotal: number = item.totalTen;
         return `${label}：${subtotal}点`;
       });
     }
@@ -59,7 +57,7 @@
     if (meisai == null) {
       return "";
     } else {
-      const totalTen: number = MeisaiObject.totalTenOf(meisai);
+      const totalTen: number = meisai.totalTen;
       return `総点：${totalTen}点、負担割：${meisai.futanWari}割`;
     }
   }
@@ -100,10 +98,10 @@
       } else {
         await api.changeWqueueState(
           $visitId,
-          WqueueStateObject.WaitCashier.code
+          WqueueState.WaitCashier.code
         );
         close();
-        endPatient(WqueueStateObject.WaitCashier);
+        endPatient(WqueueState.WaitCashier);
       }
     }
   }

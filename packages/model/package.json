@@ -2,7 +2,7 @@
   "name": "myclinic-model",
   "version": "1.0.0",
   "description": "Model for myclinic",
-  "main": "./dist/index.js",
+  "main": "./dist/model.js",
   "scripts": {
     "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"

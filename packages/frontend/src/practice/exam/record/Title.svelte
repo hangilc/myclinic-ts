@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as m from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import {
     currentVisitId,
@@ -14,8 +13,9 @@
   import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
+  import type { Meisai, VisitEx } from "myclinic-model";
 
-  export let visit: m.VisitEx;
+  export let visit: VisitEx;
 
   let manipLink: HTMLElement;
   let manipPulldown: Pulldown;
@@ -55,7 +55,7 @@
     addToMishuuList(visit);
   }
 
-  function isMishuu(visit: m.VisitEx): boolean {
+  function isMishuu(visit: VisitEx): boolean {
     const charge = visit.chargeOption?.charge;
     const pay = visit.lastPayment?.amount;
     return charge != null && charge > 0 && (
@@ -63,8 +63,8 @@
     );
   }
 
-  function totalTenOf(meisai: m.Meisai): string {
-    return m.MeisaiObject.totalTenOf(meisai).toLocaleString();
+  function totalTenOf(meisai: Meisai): string {
+    return meisai.totalTen.toLocaleString();
   }
 </script>
 

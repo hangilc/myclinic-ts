@@ -1,4 +1,4 @@
-import type {
+import {
   ConductKindType, CreateConductRequest, CreateShinryouConductRequest, VisitEx
 } from "myclinic-model"
 import api from "@/lib/api"
@@ -65,14 +65,14 @@ async function conductReq(
 ): Promise<CreateConductRequest> {
   const s = await batchResolveShinryoucodes(shinryou, at);
   const k = await batchResolveKizaicodes(kizai, at);
-  return {
+  return new CreateConductRequest({
     visitId: visitId,
     kind: kind.code,
-    labelOption: labelOption ?? null,
+    labelOption: labelOption,
     shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
     drugs: drug.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
     kizaiList: k.map(obj => Object.assign(obj, { conductKizaiId: 0, conductId: 0 }))
-  }
+  });
 }
 
 // export type ShinryouSpec = number | string;

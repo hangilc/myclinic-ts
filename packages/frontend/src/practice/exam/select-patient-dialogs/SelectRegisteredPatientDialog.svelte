@@ -5,6 +5,7 @@
   import api from "../../../lib/api";
   import {
     WqueueState,
+    WqueueStateType,
     type Patient,
     type Visit,
     type Wqueue,
@@ -25,7 +26,7 @@
   export async function open() {
     const list = await api.listWqueueFull();
     entries = list.filter((d) => {
-      const state = d[0].waitState;
+      const state = WqueueStateType.fromCode(d[0].waitState);
       return state == WqueueState.WaitExam || state == WqueueState.WaitReExam;
     });
     dialog.open();
