@@ -23,8 +23,8 @@
     type SearchResultType,
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
-  import { dateToSql } from "@/lib/util"
-    import api from "@/lib/api";
+  import { dateToSql } from "@/lib/util";
+  import api from "@/lib/api";
 
   export let list: DiseaseData[];
   let selected: Writable<DiseaseData | null> = writable(null);
@@ -34,16 +34,18 @@
   let endDate: Date | null = null;
   let endDateErrors: string[] = [];
   let endReason: DiseaseEndReasonType = DiseaseEndReason.NotEnded;
-  let searchSelect: Writable<SearchResultType> = writable(null);
+  let searchSelect: Writable<SearchResultType | null> = writable(null);
 
   searchSelect.subscribe((sel) => {
-    if (isByoumeiMaster(sel)) {
-      const data = copyDiseaseData($selected);
-      data[0].shoubyoumeicode = sel.shoubyoumeicode;
-      data[1] = sel;
-      selected.set(data);
-    } else if (isShuushokugoMaster(sel)) {
-    } else if (isDiseaseExample(sel)) {
+    if ($selected != null) {
+      if (isByoumeiMaster(sel)) {
+        const data = copyDiseaseData($selected);
+        data[0].shoubyoumeicode = sel.shoubyoumeicode;
+        data[1] = sel;
+        selected.set(data);
+      } else if (isShuushokugoMaster(sel)) {
+      } else if (isDiseaseExample(sel)) {
+      }
     }
   });
 
@@ -71,21 +73,28 @@
 
   async function doEnter() {
     const data = copyDiseaseData($selected);
-    if( startDate == null ){
+    if (startDate == null) {
       alert("エラー：開始日が設定されていません。");
       return;
     }
     data[0].startDate = dateToSql(startDate);
     data[0].endDate = endDate == null ? "0000-00-00" : dateToSql(endDate);
     data[0].endReasonStore = endReason.code;
-    if( data[0].endReasonStore === "N" ){
+    if (data[0].endReasonStore === "N") {
       data[0].endDate = "0000-00-00";
     }
-    if( !(data[0].endDate === "0000-00-00" || data[0].startDate <= data[0].endDate) ){
+    if (
+      !(
+        data[0].endDate === "0000-00-00" || data[0].startDate <= data[0].endDate
+      )
+    ) {
       alert("エラー：開始日が終了日の後です。");
       return;
     }
-    await api.updateDiseaseEx(data[0], data[2].map(e => e[0].shuushokugocode));
+    await api.updateDiseaseEx(
+      data[0],
+      data[2].map((e) => e[0].shuushokugocode)
+    );
     selected.set(null);
   }
 

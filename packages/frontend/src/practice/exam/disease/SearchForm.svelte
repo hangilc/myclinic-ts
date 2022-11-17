@@ -16,7 +16,7 @@
   export let selected: Writable<SearchResultType | null>;
   export let examples: DiseaseExample[] = [];
   export let startDate: Date;
-  let searchSelect: Writable<SearchResultType> = writable(null);
+  let searchSelect: Writable<SearchResultType | null> = writable(null);
   let searchText: string = "";
 
   searchSelect.subscribe((data) => {

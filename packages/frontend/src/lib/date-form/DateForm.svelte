@@ -62,11 +62,17 @@
       }
     } else {
       const validated = {
-        nen: nenSchema.validate(nenValue).unwrap(errors, () => errorPrefix + "年："),
-        month: monthSchema.validate(monthValue).unwrap(errors, () => errorPrefix + "月："),
-        day: daySchema.validate(dayValue).unwrap(errors, () => errorPrefix + "日："),
+        nen: nenSchema
+          .validate(nenValue)
+          .unwrap(errors, 0, () => errorPrefix + "年："),
+        month: monthSchema
+          .validate(monthValue)
+          .unwrap(errors, 0, () => errorPrefix + "月："),
+        day: daySchema
+          .validate(dayValue)
+          .unwrap(errors, 0, () => errorPrefix + "日："),
       };
-      if( errors.length === 0 ){
+      if (errors.length === 0) {
         let year: number = fromGengou(gengouValue, validated.nen);
         date = new Date(year, validated.month - 1, validated.day);
       } else {
@@ -74,40 +80,6 @@
       }
     }
   }
-
-  // function mkError(msg: string): AppError {
-  //   return new AppError(errorPrefix + msg);
-  // }
-
-  // const patDigits = /^\d+$/;
-
-  // function isAllDigits(s: string): boolean {
-  //   return patDigits.test(s);
-  // }
-
-  // function parseNenValue(): number | AppError {
-  //   const y = parseInt(nenValue);
-  //   if (isNaN(y)) {
-  //     return mkError("年の入力が数字でありません。");
-  //   }
-  //   return y;
-  // }
-
-  // function parseMonthValue(): number | AppError {
-  //   const m = parseInt(monthValue);
-  //   if (isNaN(m)) {
-  //     return mkError("月の入力が数字でありません。");
-  //   }
-  //   return m;
-  // }
-
-  // function parseDayValue(): number | AppError {
-  //   const d = parseInt(dayValue);
-  //   if (isNaN(d)) {
-  //     return mkError("日の入力が数字でありません。");
-  //   }
-  //   return d;
-  // }
 
   function doNenClick(event: MouseEvent): void {
     validate();

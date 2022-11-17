@@ -1,17 +1,30 @@
-import { DiseaseEndReasonObject, type ByoumeiMaster, type Disease, type DiseaseAdj, type DiseaseEndReasonType, type DiseaseExample, type ShuushokugoMaster } from "myclinic-model";
+import {
+  DiseaseEndReasonObject,
+  type ByoumeiMaster,
+  type Disease,
+  type DiseaseAdj,
+  type DiseaseEndReasonType,
+  type DiseaseExample,
+  type ShuushokugoMaster,
+} from "myclinic-model";
 import * as kanjidate from "kanjidate";
+import api from "@/lib/api";
 
-export type DiseaseData = [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]
+export type DiseaseData = [
+  Disease,
+  ByoumeiMaster,
+  [DiseaseAdj, ShuushokugoMaster][]
+];
 
 export function copyDiseaseData(data: DiseaseData): DiseaseData {
   return [
-    {...data[0]},
+    { ...data[0] },
     data[1],
-    data[2].map(ele => {
+    data[2].map((ele) => {
       const [adj, master] = ele;
-      return [{...adj}, master];
-    })
-  ]
+      return [{ ...adj }, master];
+    }),
+  ];
 }
 
 export function byoumeiName(data: DiseaseData): string {
@@ -19,7 +32,7 @@ export function byoumeiName(data: DiseaseData): string {
 }
 
 export function shuushokugoName(data: DiseaseData): string {
-  return data[2].map(a => a[1].name).join("");
+  return data[2].map((a) => a[1].name).join("");
 }
 
 export function fullName(data: DiseaseData): string {
@@ -53,7 +66,7 @@ export function startDateRep(data: DiseaseData): string {
 
 export function endDateRep(data: DiseaseData): string {
   const d = getEndDate(data);
-  if( d === "0000-00-00" ) {
+  if (d === "0000-00-00") {
     return "未終了";
   } else {
     return kanjidate.format(kanjidate.f3, d);
@@ -65,4 +78,36 @@ export function getEndReason(data: DiseaseData): DiseaseEndReasonType {
   return DiseaseEndReasonObject.fromCode(s);
 }
 
-export type SearchResultType = ByoumeiMaster | ShuushokugoMaster | DiseaseExample;
+export async function resolveDiseaseExample(
+  ex: DiseaseExample,
+  at: string | Date
+): Promise<[ByoumeiMaster | null, ShuushokugoMaster[], ShuushokugoMaster[]]> {
+  let b: ByoumeiMaster | null;
+  if (ex.byoumei == null) {
+    b = null;
+  } else {
+    b = await api.resolveByoumeiMasterByName(ex.byoumei, at);
+    if (b == null) {
+      throw new Error("Cannot resolve byoumei: " + ex.byoumei);
+    }
+  }
+  async function resolveAdjList(list: string[]): Promise<ShuushokugoMaster[]> {
+    return Promise.all(
+      list.map(async (name) => {
+        const adj = await api.resolveShuushokugoMasterByName(name, at);
+        if (adj == null) {
+          throw new Error("Cannot resolve adj: " + name);
+        }
+        return adj;
+      })
+    );
+  }
+  const pre: ShuushokugoMaster[] = await resolveAdjList(ex.preAdjList);
+  const post: ShuushokugoMaster[] = await resolveAdjList(ex.postAdjList);
+  return [b, pre, post];
+}
+
+export type SearchResultType =
+  | ByoumeiMaster
+  | ShuushokugoMaster
+  | DiseaseExample;

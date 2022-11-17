@@ -90,8 +90,10 @@
 
   function doNenClick(): void {
     const g = kanjidate.Gengou.fromString(gengouValue);
-    nenLast = kanjidate.nenRangeOf(g)[1];
-    nenPulldown.open();
+    if (g != null) {
+      nenLast = kanjidate.nenRangeOf(g)[1];
+      nenPulldown.open();
+    }
   }
 
   function doMonthClick(): void {
@@ -220,7 +222,7 @@
   .top {
     font-size: 1rem;
   }
-  
+
   .top-row {
     display: flex;
     align-items: center;

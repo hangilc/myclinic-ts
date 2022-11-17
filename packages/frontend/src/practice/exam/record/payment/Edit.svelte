@@ -1,11 +1,15 @@
 <script lang="ts">
-  import { MeisaiObject, type Meisai, type VisitEx, 
-    type Payment as ModelPayment, 
+  import {
+    MeisaiObject,
+    type Meisai,
+    type VisitEx,
+    type Payment as ModelPayment,
     type Wqueue,
-    WqueueState} from "myclinic-model";
+    WqueueState,
+  } from "myclinic-model";
   import RightBox from "../../RightBox.svelte";
-  import { setFocus } from "@/lib/set-focus"
-  import { dateTimeToSql } from "@/lib/util"
+  import { setFocus } from "@/lib/set-focus";
+  import { dateTimeToSql } from "@/lib/util";
   import api, { backend } from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
   import { pad } from "@/lib/pad";
@@ -22,7 +26,7 @@
     show = true;
   }
 
-  function close(){
+  function close() {
     show = false;
     onClose();
   }
@@ -31,7 +35,7 @@
     const pay: ModelPayment = {
       visitId: visit.visitId,
       amount: 0,
-      paytime: dateTimeToSql(new Date())
+      paytime: dateTimeToSql(new Date()),
     };
     await api.finishCashier(pay);
     close();
@@ -47,16 +51,18 @@
   }
 
   async function doReceiptPdf() {
-    const patient = visit.patient;
-    const data = ReceiptDrawerData.create(visit, meisai);
-    const ops = await api.drawReceipt(data);
-    const timestamp = makeTimestamp(new Date());
-    const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
-    await api.createPdfFile(ops, "A6_Landscape", fileName);
-    await api.stampPdf(fileName, "receipt");
-    const url = backend + "/portal-tmp/" + fileName;
-    if( window ){
-      window.open(url, "_blank");
+    if (meisai != null) {
+      const patient = visit.patient;
+      const data = ReceiptDrawerData.create(visit, meisai);
+      const ops = await api.drawReceipt(data);
+      const timestamp = makeTimestamp(new Date());
+      const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
+      await api.createPdfFile(ops, "A6_Landscape", fileName);
+      await api.stampPdf(fileName, "receipt");
+      const url = backend + "/portal-tmp/" + fileName;
+      if (window) {
+        window.open(url, "_blank");
+      }
     }
   }
 
@@ -69,15 +75,15 @@
       showError("請求額の入力が整数でありません");
       return;
     }
-    if( chargeValue < 0 ) {
+    if (chargeValue < 0) {
       showError("請求額が負の値です。");
       return;
     }
     const wqueueOpt = await api.findWqueue(visit.visitId);
-    if( wqueueOpt == null ){
+    if (wqueueOpt == null) {
       const wq: Wqueue = {
         visitId: visit.visitId,
-        waitState: WqueueState.WaitCashier
+        waitState: WqueueState.WaitCashier,
       };
       await api.enterWqueue(wq);
     } else {

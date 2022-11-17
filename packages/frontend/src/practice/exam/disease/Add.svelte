@@ -50,24 +50,31 @@
         const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
         if (m != null) {
           byoumeiMaster = m;
+        } else {
+          throw new Error("Cannot resolve byoumei: " + r.byoumei);
         }
       }
       [...r.preAdjList, ...r.postAdjList].forEach(async (name) => {
         const m = await api.resolveShuushokugoMasterByName(name, startDate);
-        const cur = adjList;
-        cur.push(m);
-        adjList = cur;
+        if (m != null) {
+          const cur = adjList;
+          cur.push(m);
+          adjList = cur;
+        } else {
+          throw new Error("Cannot resolve adj name: " + r.byoumei);
+
+        }
       });
     }
   });
 
-  startDateSelect.subscribe(d => {
-    if( d == null ){
+  startDateSelect.subscribe((d) => {
+    if (d == null) {
       startDate = new Date();
     } else {
       startDate = d;
     }
-  })
+  });
 
   let searchKind: SearchKind = "byoumei";
   let byoumeiId: string = genid();
@@ -99,7 +106,7 @@
 
   async function doEnter() {
     if (byoumeiMaster != null && patientId != null) {
-      if( startDateErrors.length > 0 ){
+      if (startDateErrors.length > 0) {
         alert("エラー：\n" + startDateErrors.join("\n"));
         return;
       }
@@ -149,7 +156,11 @@
     名称：{byoumeiMaster?.name || ""}{adjList.map((m) => m.name).join("")}
   </div>
   <div>
-    <EditableDate bind:date={startDate} bind:errors={startDateErrors} isNullable={false}>
+    <EditableDate
+      bind:date={startDate}
+      bind:errors={startDateErrors}
+      isNullable={false}
+    >
       <svelte:fragment slot="icons">
         <svg
           xmlns="http://www.w3.org/2000/svg"
