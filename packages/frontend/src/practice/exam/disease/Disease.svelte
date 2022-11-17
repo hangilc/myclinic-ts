@@ -17,7 +17,7 @@
   let patient: Patient | null = null;
   const unsubs: (() => void)[] = [];
   let examples: DiseaseExample[] = [];
-  let allList: DiseaseData[] = undefined;
+  let allList: DiseaseData[] = [];
 
   function sortDiseaseList(dlist: DiseaseData[]): void {
     dlist.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
@@ -117,7 +117,7 @@
       {#if mode === "current"}
         <Current list={currentList} />
       {:else if mode === "add"}
-        <Add patientId={patient?.patientId} {examples} />
+        <Add patientId={patient?.patientId ?? 0} {examples} />
       {:else if mode === "tenki"}
         <Tenki current={currentList} />
       {:else if mode === "edit"}

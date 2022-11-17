@@ -2,11 +2,11 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import {
+    ByoumeiMaster,
     DiseaseEndReason,
+    DiseaseExample,
+    ShuushokugoMaster,
     type DiseaseEndReasonType,
-    isByoumeiMaster,
-    isShuushokugoMaster,
-    isDiseaseExample,
   } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
@@ -27,10 +27,10 @@
   import api from "@/lib/api";
 
   export let list: DiseaseData[];
-  
+
   let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
-  let startDate: Date | null = null;
+  let startDate: Date = new Date();
   let startDateErrors: string[] = [];
   let endDate: Date | null = null;
   let endDateErrors: string[] = [];
@@ -39,14 +39,14 @@
 
   searchSelect.subscribe((sel) => {
     if ($selected != null) {
-      if (isByoumeiMaster(sel)) {
+      if (ByoumeiMaster.isByoumeiMaster(sel)) {
         const data = copyDiseaseData($selected);
         data[0].shoubyoumeicode = sel.shoubyoumeicode;
         data[1] = sel;
         selected.set(data);
-      } else if (isShuushokugoMaster(sel)) {
-        $selected[2]
-      } else if (isDiseaseExample(sel)) {
+      } else if (ShuushokugoMaster.isShuushokugoMaster(sel)) {
+        $selected[2];
+      } else if (DiseaseExample.isDiseaseExample(sel)) {
       }
     }
   });
@@ -74,6 +74,9 @@
   }
 
   async function doEnter() {
+    if ($selected == null) {
+      return;
+    }
     const data = copyDiseaseData($selected);
     if (startDate == null) {
       alert("エラー：開始日が設定されていません。");

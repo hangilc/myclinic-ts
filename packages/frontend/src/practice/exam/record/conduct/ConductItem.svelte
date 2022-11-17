@@ -1,11 +1,11 @@
 <script lang="ts">
   import {
-    ConductKindObject,
+    ConductKindType,
     type ConductEx,
     type ConductKindTag,
     type VisitEx,
-  } from "myclinic-model"
-  import EditWidget from "./EditWidget.svelte"
+  } from "myclinic-model";
+  import EditWidget from "./EditWidget.svelte";
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
@@ -14,14 +14,13 @@
   let mode = "disp";
 
   function kindRep(kindTag: ConductKindTag): string {
-    return ConductKindObject.fromTag(kindTag).rep;
+    return ConductKindType.fromTag(kindTag).rep;
   }
 
   function doDispClick(): void {
     mode = "edit";
     editWidget.open();
   }
-
 </script>
 
 {#if mode === "disp"}
@@ -39,7 +38,12 @@
     {/each}
   </div>
 {/if}
-<EditWidget conduct={conduct} visit={visit} onClose={() => mode = "disp"} bind:this={editWidget} />
+<EditWidget
+  {conduct}
+  {visit}
+  onClose={() => (mode = "disp")}
+  bind:this={editWidget}
+/>
 
 <style>
   .disp {

@@ -2,9 +2,8 @@
   import api from "@/lib/api";
   import {
     ConductKind,
-    ConductKindObject,
     type ConductEx,
-    type ConductKindType,
+    ConductKindType,
   } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
@@ -13,7 +12,7 @@
   export let onClose: () => void;
   let show = false;
   let selected: Writable<ConductKindType> = writable(
-    ConductKindObject.fromTag(conduct.kind)
+    ConductKindType.fromTag(conduct.kind)
   );
 
   export function open(): void {
@@ -41,7 +40,7 @@
     <div class="title">処置種類編集</div>
     <div class="select">
       {#each Object.keys(ConductKind) as kindKey}
-        {@const kind = ConductKindObject.fromKeyString(kindKey)}
+        {@const kind = ConductKindType.fromKey(kindKey)}
         <SelectItem {selected} data={kind}>
           {kind.rep}
         </SelectItem>

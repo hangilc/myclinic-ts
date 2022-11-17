@@ -1,10 +1,8 @@
 import {
-  DiseaseEndReasonObject,
-  ShuushokugoMasterObject,
+  DiseaseEndReasonType,
   type ByoumeiMaster,
   type Disease,
   type DiseaseAdj,
-  type DiseaseEndReasonType,
   type DiseaseExample,
   type ShuushokugoMaster,
 } from "myclinic-model";
@@ -36,7 +34,7 @@ function shuushokugoNames(data: DiseaseData): [string, string] {
   const pres: string[] = [];
   const posts: string[] = [];
   data[2].forEach(([_adj, master]: [DiseaseAdj, ShuushokugoMaster]) => {
-    if( ShuushokugoMasterObject.isPrefix(master) ){
+    if( master.isPrefix ){
       pres.push(master.name);
     } else {
       posts.push(master.name);
@@ -86,7 +84,7 @@ export function endDateRep(data: DiseaseData): string {
 
 export function getEndReason(data: DiseaseData): DiseaseEndReasonType {
   const s = data[0].endReasonStore;
-  return DiseaseEndReasonObject.fromCode(s);
+  return DiseaseEndReasonType.fromCode(s);
 }
 
 export async function resolveDiseaseExample(

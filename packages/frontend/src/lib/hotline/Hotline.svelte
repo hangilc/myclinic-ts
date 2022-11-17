@@ -134,7 +134,7 @@
     visitIds.forEach((visitId) => {
       const visit = visitMap[visitId];
       const patient = patientMap.get(visit.patientId);
-      if (!patients.includes(patient)) {
+      if (patient != null && !patients.includes(patient)) {
         patients.push(patient);
       }
     });

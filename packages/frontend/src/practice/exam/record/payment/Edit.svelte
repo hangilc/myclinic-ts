@@ -1,10 +1,8 @@
 <script lang="ts">
   import {
-    MeisaiObject,
-    type Meisai,
+    Meisai,
     type VisitEx,
-    type Payment as ModelPayment,
-    type Wqueue,
+    type Payment as ModelPayment, Wqueue,
     WqueueState,
   } from "myclinic-model";
   import RightBox from "../../RightBox.svelte";
@@ -81,24 +79,23 @@
     }
     const wqueueOpt = await api.findWqueue(visit.visitId);
     if (wqueueOpt == null) {
-      const wq: Wqueue = {
-        visitId: visit.visitId,
-        waitState: WqueueState.WaitCashier,
-      };
+      const wq: Wqueue = new Wqueue(
+        visit.visitId,
+        WqueueState.WaitCashier.code,
+      );
       await api.enterWqueue(wq);
     } else {
-      await api.changeWqueueState(visit.visitId, WqueueState.WaitCashier);
+      await api.changeWqueueState(visit.visitId, WqueueState.WaitCashier.code);
     }
     close();
   }
 </script>
 
 {#if show}
-  <!-- svelte-ignore a11y-invalid-attribute -->
   <RightBox title="請求額の変更">
     {#if meisai != null}
       <div>
-        <div>診療報酬総点 {MeisaiObject.totalTenOf(meisai)}点</div>
+        <div>診療報酬総点 {meisai.totalTen}点</div>
         <div>負担割 {meisai.futanWari}割</div>
         <div>現在の請求額 {visit.chargeOption?.charge || 0}円</div>
         <div>

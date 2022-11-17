@@ -68,11 +68,6 @@ export const WqueueState = {
   WaitReExam: new WqueueStateType(4, "再待"),
 } as const;
 
-export interface Wqueue {
-  visitId: number;
-  waitState: number;
-}
-
 export class Wqueue {
   constructor(public visitId: number, public waitState: number) {}
 
@@ -729,9 +724,9 @@ export class Disease {
 
 export class DiseaseAdj {
   constructor(
-    diseaseAdjId: number,
-    diseaseId: number,
-    shuushokugocode: number
+    public diseaseAdjId: number,
+    public diseaseId: number,
+    public shuushokugocode: number
   ) {}
 }
 
