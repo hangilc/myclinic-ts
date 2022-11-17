@@ -1,71 +1,90 @@
-export interface Patient {
-  patientId: number;
-  lastName: string;
-  firstName: string;
-  lastNameYomi: string;
-  firstNameYomi: string;
-  sex: string;
-  birthday: string;
-  address: string;
-  phone: string;
+export class Patient {
+  constructor(
+    public patientId: number,
+    public lastName: string,
+    public firstName: string,
+    public lastNameYomi: string,
+    public firstNameYomi: string,
+    public sex: string,
+    public birthday: string,
+    public address: string,
+    public phone: string,
+  ) {}
 }
 
-export interface Visit {
-  visitId: number;
-  patientId: number;
-  visitedAt: string;
-  shahokokuhoId: number;
-  roujinId: number;
-  kouhi1Id: number;
-  kouhi2Id: number;
-  kouhi3Id: number;
-  koukikoureiId: number;
-  attributesStore?: string;
-}
+export class Visit {
+  constructor(
+    public visitId: number,
+    public patientId: number,
+    public visitedAt: string,
+    public shahokokuhoId: number,
+    public roujinId: number,
+    public kouhi1Id: number,
+    public kouhi2Id: number,
+    public kouhi3Id: number,
+    public koukikoureiId: number,
+    public attributesStore?: string,
+  ) {}
 
-export const VisitObject = {
-  attributesOf(visit: Visit): VisitAttributes | null {
-    return VisitAttributeObject.fromString(visit.attributesStore ?? null);
-  },
+  clone(): Visit {
+    return Object.assign({}, this) as Visit;
+  }
 
-  updateAttribute(visit: Visit, attr: VisitAttributes | null): Visit {
-    let newAttr: string | null;
-    if (attr == null) {
-      newAttr = null;
+  get attributes(): VisitAttributes | null {
+    return VisitAttributeObject.fromString(this.attributesStore ?? null);
+  }
+
+  updateAttribute(attr: VisitAttributes | undefined): Visit {
+    let newAttr: string | undefined;
+    if (attr == undefined) {
+      newAttr = undefined;
     } else {
       newAttr = JSON.stringify(attr);
     }
-    return Object.assign({}, visit, {
-      attributesStore: newAttr,
-    });
-  },
-};
-
-export const WqueueState = {
-  WaitExam: 0,
-  InExam: 1,
-  WaitCashier: 2,
-  WaitDrug: 3,
-  WaitReExam: 4,
-} as const;
-
-export type WqueueStateKey = keyof typeof WqueueState;
-
-export class WqueueStateData {
-  constructor(public code: number, public label: string) {}
+    const newVisit = this.clone();
+    newVisit.attributesStore = newAttr;
+    return newVisit;
+  }  
 }
 
-export const WqueueStateObject: Record<WqueueStateKey, WqueueStateData> = {
-  WaitExam: new WqueueStateData(0, "診待"),
-  InExam: new WqueueStateData(1, "診中"),
-  WaitCashier: new WqueueStateData(2, "会待"),
-  WaitDrug: new WqueueStateData(3, "薬待"),
-  WaitReExam: new WqueueStateData(4, "再待"),
-};
+export class WqueueStateType {
+  constructor(
+    public code: number, 
+    public label: string
+  ) {}
+
+  static fromCode(code: number): WqueueStateType {
+    for( let wq of Object.values(WqueueState) ){
+      if( wq.code === code ){
+        return wq;
+      }
+    }
+    throw new Error("Invalid wqueue state code: " + code);
+  }
+}
+
+export const WqueueState = {
+  WaitExam: new WqueueStateType(0, "診待"),
+  InExam: new WqueueStateType(1, "診中"),
+  WaitCashier: new WqueueStateType(2, "会待"),
+  WaitDrug: new WqueueStateType(3, "薬待"),
+  WaitReExam: new WqueueStateType(4, "再待"),
+} as const;
 
 export interface Wqueue {
   visitId: number;
   waitState: number;
+}
+
+export class Wqueue {
+  constructor(
+    public visitId: number,
+    public waitState: number,
+  ) {}
+
+  get waitStateType(): WqueueStateType {
+    return WqueueStateType.fromCode(this.waitState);
+  }
 }
 
 export interface Shahokokuho {
