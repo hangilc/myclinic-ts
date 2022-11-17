@@ -9,7 +9,7 @@ export class Patient {
     public birthday: string,
     public address: string,
     public phone: string
-  ) {}
+  ) { }
 }
 
 export class Visit {
@@ -24,14 +24,14 @@ export class Visit {
     public kouhi3Id: number,
     public koukikoureiId: number,
     public attributesStore?: string
-  ) {}
+  ) { }
 
   clone(): Visit {
     return Object.assign({}, this) as Visit;
   }
 
   get attributes(): VisitAttributes | null {
-    return VisitAttributeObject.fromString(this.attributesStore ?? null);
+    return VisitAttributes.fromString(this.attributesStore ?? null);
   }
 
   updateAttribute(attr: VisitAttributes | undefined): Visit {
@@ -48,7 +48,7 @@ export class Visit {
 }
 
 export class WqueueStateType {
-  constructor(public code: number, public label: string) {}
+  constructor(public code: number, public label: string) { }
 
   static fromCode(code: number): WqueueStateType {
     for (let wq of Object.values(WqueueState)) {
@@ -74,7 +74,7 @@ export interface Wqueue {
 }
 
 export class Wqueue {
-  constructor(public visitId: number, public waitState: number) {}
+  constructor(public visitId: number, public waitState: number) { }
 
   get waitStateType(): WqueueStateType {
     return WqueueStateType.fromCode(this.waitState);
@@ -93,7 +93,7 @@ export class Shahokokuho {
     public validUpto: string,
     public koureiStore: number,
     public edaban: string
-  ) {}
+  ) { }
 }
 
 export class Roujin {
@@ -105,7 +105,7 @@ export class Roujin {
     public futanWari: number,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 }
 
 export interface Koukikourei {
@@ -127,7 +127,7 @@ export class Koukikourei {
     public futanWari: number,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 }
 
 export class Kouhi {
@@ -138,7 +138,7 @@ export class Kouhi {
     public validFrom: string,
     public validUpto: string,
     public patientId: number
-  ) {}
+  ) { }
 }
 
 export class HokenInfo {
@@ -177,7 +177,7 @@ export class HokenIdSet {
     public kouhi1Id: number,
     public kouhi2Id: number,
     public kouhi3Id: number
-  ) {}
+  ) { }
 }
 
 export class Text {
@@ -185,11 +185,11 @@ export class Text {
     public textId: number,
     public visitId: number,
     public content: string
-  ) {}
+  ) { }
 }
 
 export class Charge {
-  constructor(public visitId: number, public charge: number) {}
+  constructor(public visitId: number, public charge: number) { }
 }
 
 export class Payment {
@@ -197,7 +197,7 @@ export class Payment {
     public visitId: number,
     public amount: number,
     public paytime: string
-  ) {}
+  ) { }
 }
 
 export class IyakuhinMaster {
@@ -213,7 +213,7 @@ export class IyakuhinMaster {
     public zaikei: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 }
 
 export class ShinryouMaster {
@@ -228,7 +228,7 @@ export class ShinryouMaster {
     public kensagroup: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 }
 
 export class KizaiMaster {
@@ -240,11 +240,11 @@ export class KizaiMaster {
     public kingakuStore: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 }
 
 export class DrugCategoryType {
-  constructor(public code: number, public name: string) {}
+  constructor(public code: number, public name: string) { }
 }
 
 export const DrugCategory: Record<string, DrugCategoryType> = {
@@ -264,7 +264,7 @@ export class DrugEx {
     public categoryStore: number,
     public prescribed: boolean,
     public master: IyakuhinMaster
-  ) {}
+  ) { }
 }
 
 export class Shinryou {
@@ -272,7 +272,7 @@ export class Shinryou {
     public shinryouId: number,
     public visitId: number,
     public shinryoucode: number
-  ) {}
+  ) { }
 }
 
 export class ShinryouEx {
@@ -281,7 +281,7 @@ export class ShinryouEx {
     public visitId: number,
     public shinryoucode: number,
     public master: ShinryouMaster
-  ) {}
+  ) { }
 }
 
 export class ConductDrugEx {
@@ -291,7 +291,7 @@ export class ConductDrugEx {
     public iyakuhincode: number,
     public amount: number,
     public master: IyakuhinMaster
-  ) {}
+  ) { }
 }
 
 export class ConductShinryouEx {
@@ -300,7 +300,7 @@ export class ConductShinryouEx {
     public conductId: number,
     public shinryoucode: number,
     public master: ShinryouMaster
-  ) {}
+  ) { }
 }
 
 export class ConductKizaiEx {
@@ -310,11 +310,11 @@ export class ConductKizaiEx {
     public kizaicode: number,
     public amount: number,
     public master: KizaiMaster
-  ) {}
+  ) { }
 }
 
 export class ConductKindType {
-  constructor(public code: number, public rep: string) {}
+  constructor(public code: number, public rep: string) { }
 
   toTag(): ConductKindTag {
     for (let k of Object.keys(ConductKind)) {
@@ -493,28 +493,26 @@ export class VisitEx {
     this.chargeOption = chargeOption;
     this.lastPayment = lastPayment;
   }
+
+  get attributes(): VisitAttributes | null {
+    return VisitAttributes.fromString(this.attributesStore ?? null);
+  }
+
+  get asVisit(): Visit {
+    return new Visit(
+      this.visitId,
+      this.patient.patientId,
+      this.visitedAt,
+      this.hoken.shahokokuho?.shahokokuhoId ?? 0,
+      this.hoken.roujin?.roujinId ?? 0,
+      this.hoken.kouhiList.length >= 1 ? this.hoken.kouhiList[0].kouhiId ?? 0,
+      this.hoken.kouhiList.length >= 2 ? this.hoken.kouhiList[1].kouhiId ?? 0,
+      this.hoken.kouhiList.length >= 3 ? this.hoken.kouhiList[2].kouhiId ?? 0,
+      this.hoken.koukikourei?.koukikoureiId ?? 0,
+      this.attributesStore
+    );
+  }
 }
-
-export const VisitExObject = {
-  attributesOf(visit: VisitEx): VisitAttributes | null {
-    return VisitAttributeObject.fromString(visit.attributesStore ?? null);
-  },
-
-  asVisit(src: VisitEx): Visit {
-    return {
-      visitId: src.visitId,
-      patientId: src.patient.patientId,
-      visitedAt: src.visitedAt,
-      shahokokuhoId: src.hoken.shahokokuho?.shahokokuhoId || 0,
-      roujinId: src.hoken.roujin?.roujinId || 0,
-      kouhi1Id: src.hoken.kouhiList[0]?.kouhiId || 0,
-      kouhi2Id: src.hoken.kouhiList[1]?.kouhiId || 0,
-      kouhi3Id: src.hoken.kouhiList[2]?.kouhiId || 0,
-      koukikoureiId: src.hoken.koukikourei?.koukikoureiId || 0,
-      attributesStore: src.attributesStore,
-    };
-  },
-};
 
 export enum MeisaiSectionEnum {
   ShoshinSaisin = "初・再診料",
@@ -529,35 +527,33 @@ export enum MeisaiSectionEnum {
 }
 
 export class MeisaiSectionItem {
-  constructor() {}
-  tanka: number;
-  count: number;
-  label: string;
-}
+  constructor(
+    public tanka: number,
+    public count: number,
+    public label: string,
+  ) { }
 
-export const MeisaiSectionItemObject = {
-  totalOf(item: MeisaiSectionItem): number {
-    return item.tanka * item.count;
-  },
-};
+  get totalTen(): number {
+    return this.tanka * this.count;
+  }
+}
 
 export class MeisaiSectionData {
-  constructor() {}
-  section: MeisaiSectionEnum;
-  entries: MeisaiSectionItem[];
+  constructor(
+    public section: MeisaiSectionEnum,
+    public entries: MeisaiSectionItem[],
+  ) { }
+
+  get totalTen(): number {
+    return this.entries.reduce((acc, ele) => {
+      return acc + ele.totalTen;
+    }, 0);
+
+  }
 }
 
-export const MeisaiSectionDataObject = {
-  subtotalOf(data: MeisaiSectionData): number {
-    const totalOf = MeisaiSectionItemObject.totalOf;
-    return data.entries.reduce((acc, ele) => {
-      return acc + totalOf(ele);
-    }, 0);
-  },
-};
-
 export class Meisai {
-  constructor() {}
+  constructor() { }
   items: MeisaiSectionData[];
   futanWari: number;
   charge: number;
@@ -573,27 +569,27 @@ export const MeisaiObject = {
 };
 
 export class Conduct {
-  constructor() {}
+  constructor() { }
   conductId: number;
   visitId: number;
   kindStore: number;
 }
 
 export class GazouLabel {
-  constructor() {}
+  constructor() { }
   conductId: number;
   label: string;
 }
 
 export class ConductShinryou {
-  constructor() {}
+  constructor() { }
   conductShinryouId: number;
   conductId: number;
   shinryoucode: number;
 }
 
 export class ConductDrug {
-  constructor() {}
+  constructor() { }
   conductDrugId: number;
   conductId: number;
   iyakuhincode: number;
@@ -601,7 +597,7 @@ export class ConductDrug {
 }
 
 export class ConductKizai {
-  constructor() {}
+  constructor() { }
   conductKizaiId: number;
   conductId: number;
   kizaicode: number;
@@ -609,7 +605,7 @@ export class ConductKizai {
 }
 
 export class CreateConductRequest {
-  constructor() {}
+  constructor() { }
   visitId: number;
   kind: number;
   labelOption: string | null;
@@ -619,13 +615,13 @@ export class CreateConductRequest {
 }
 
 export class CreateShinryouConductRequest {
-  constructor() {}
+  constructor() { }
   shinryouList: Shinryou[];
   conducts: CreateConductRequest[];
 }
 
 export class ByoumeiMaster {
-  constructor() {}
+  constructor() { }
   shoubyoumeicode: number;
   name: string;
 }
@@ -640,7 +636,7 @@ export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
 }
 
 export class ShuushokugoMaster {
-  constructor() {}
+  constructor() { }
   shuushokugocode: number;
   name: string;
 }
@@ -663,7 +659,7 @@ export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
 }
 
 export class DiseaseEndReasonType {
-  constructor() {}
+  constructor() { }
   code: string;
   label: string;
 }
@@ -687,7 +683,7 @@ export const DiseaseEndReasonObject = {
 };
 
 export class Disease {
-  constructor() {}
+  constructor() { }
   diseaseId: number;
   patientId: number;
   shoubyoumeicode: number;
@@ -697,14 +693,14 @@ export class Disease {
 }
 
 export class DiseaseAdj {
-  constructor() {}
+  constructor() { }
   diseaseAdjId: number;
   diseaseId: number;
   shuushokugocode: number;
 }
 
 export class DiseaseEnterData {
-  constructor() {}
+  constructor() { }
   patientId: number;
   byoumeicode: number;
   startDate: string;
@@ -712,7 +708,7 @@ export class DiseaseEnterData {
 }
 
 export class DiseaseExample {
-  constructor() {}
+  constructor() { }
   byoumei: string | null;
   preAdjList: string[];
   postAdjList: string[];
@@ -735,34 +731,34 @@ export function isDiseaseExample(arg: any): arg is DiseaseExample {
 }
 
 export class Hotline {
-  constructor() {}
+  constructor() { }
   message: string;
   sender: string;
   recipient: string;
 }
 
 export class HotlineEx extends Hotline {
-  constructor() {}
+  constructor() { }
   appEventId: number;
 }
 
 export class HotlineBeep {
-  constructor() {}
+  constructor() { }
   recipient: string;
 }
 
 export class EventIdNotice {
-  constructor() {}
+  constructor() { }
   currentEventId: number;
 }
 
 export class HeartBeat {
-  constructor() {}
+  constructor() { }
   heartBeatSerialId: number;
 }
 
 export class AppEvent {
-  constructor() {}
+  constructor() { }
   appEventId: number;
   createdAt: string;
   model: string;
@@ -771,14 +767,14 @@ export class AppEvent {
 }
 
 export class FileInfo {
-  constructor() {}
+  constructor() { }
   name: string;
   createdAt: string;
   size: number;
 }
 
 export class PrescExample {
-  constructor() {}
+  constructor() { }
   prescExampleId: number;
   iyakuhincode: number;
   masterValidFrom: string;
