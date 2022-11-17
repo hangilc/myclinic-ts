@@ -2,7 +2,7 @@ import type * as m from "myclinic-model"
 import { dateToSql } from "./util"
 import { dateParam, dateTimeParam } from "./date-param"
 import type { Op as DrawerOp, Op } from "./drawer/op"
-import type { ReceiptDrawerData } from "./drawer/ReceiptDrawerData"
+import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data"
 
 export const backend: string = getBackend();
 export const base: string = backend + "/api";

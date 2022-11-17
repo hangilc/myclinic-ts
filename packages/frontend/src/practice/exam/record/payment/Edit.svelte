@@ -11,7 +11,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { dateTimeToSql } from "@/lib/util";
   import api, { backend } from "@/lib/api";
-  import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
+  import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import { pad } from "@/lib/pad";
   import { showError } from "@/lib/showError-call";
 

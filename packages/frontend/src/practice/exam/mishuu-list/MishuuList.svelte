@@ -4,7 +4,7 @@
   import * as kanjidate from "kanjidate";
   import type { Payment, VisitEx } from "myclinic-model";
   import { pad } from "@/lib/pad";
-  import { ReceiptDrawerData } from "@/lib/drawer/ReceiptDrawerData";
+  import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import api from "@/lib/api";
 
   let pdfFiles: string[] = [];

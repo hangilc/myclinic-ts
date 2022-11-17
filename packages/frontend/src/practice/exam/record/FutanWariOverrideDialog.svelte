@@ -1,10 +1,8 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte"
   import { tick } from "svelte"
-  import {
-    VisitObject, type VisitAttributes, type VisitEx, VisitExObject
-  } from "myclinic-model"
   import api from "@/lib/api"
+  import type { VisitAttributes, VisitEx } from "myclinic-model";
 
   export let visit: VisitEx;
   let futanWariDialog: Dialog;
@@ -19,7 +17,7 @@
   }
 
   function futanWariRep(visit: VisitEx): string {
-    const futanWari = VisitExObject.attributesOf(visit)?.futanWari;
+    const futanWari = visit.attributes?.futanWari;
     if( futanWari == null ){
       return "（未設定）";
     } else {
@@ -39,7 +37,7 @@
 
   function onFutanWariEnter(close: () => void): void {
     const value: string = input.value;
-    const oldAttr: VisitAttributes | null = VisitExObject.attributesOf(visit);
+    const oldAttr: VisitAttributes | null = visit.attributes;
     let newFutanWari: number | null;
     if( value === "" ){
       newFutanWari = null;
@@ -58,7 +56,7 @@
     } else {
       newAttr = Object.assign({}, oldAttr, { futanWari: newFutanWari });
     }
-    const newVisit = VisitObject.updateAttribute(VisitExObject.asVisit(visit), newAttr);
+    const newVisit = visit.asVisit.updateAttribute(newAttr);
     api.updateVisit(newVisit);
     close();
   }

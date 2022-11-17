@@ -31,7 +31,7 @@ export class Visit {
   }
 
   get attributes(): VisitAttributes | null {
-    return VisitAttributeObject.fromString(this.attributesStore ?? null);
+    return VisitAttributes.fromString(this.attributesStore ?? null);
   }
 
   updateAttribute(attr: VisitAttributes | undefined): Visit {
@@ -326,6 +326,15 @@ export class ConductKindType {
     throw new Error("Cannot convert to ConductKindTag: " + this.code);
   }
 
+  get key(): ConductKindKey {
+    for(let k of Object.keys(ConductKind)){
+      if( ConductKind[k].code == this.code ){
+        return k;
+      }
+    }
+    throw new Error("Cannot find ConductKindKey");
+  }
+
   static fromCode(code: number): ConductKindType {
     for (let ck of Object.values(ConductKind)) {
       if (ck.code === code) {
@@ -356,8 +365,10 @@ export const ConductKind: Record<string, ConductKindType> = {
   Gazou: new ConductKindType(3, "画像"),
 };
 
+export type ConductKindKey = keyof typeof ConductKind;
+
 export type ConductKindTag = {
-  [key in keyof typeof ConductKind]: {};
+  [key in ConductKindKey]: {};
 };
 
 export class ConductEx {
@@ -493,28 +504,26 @@ export class VisitEx {
     this.chargeOption = chargeOption;
     this.lastPayment = lastPayment;
   }
+
+  get attributes(): VisitAttributes | null {
+    return VisitAttributes.fromString(this.attributesStore ?? null);
+  }
+
+  get asVisit(): Visit {
+    return new Visit(
+      this.visitId,
+      this.patient.patientId,
+      this.visitedAt,
+      this.hoken.shahokokuho?.shahokokuhoId ?? 0,
+      this.hoken.roujin?.roujinId ?? 0,
+      this.hoken.kouhiList.length >= 1 ? this.hoken.kouhiList[0].kouhiId : 0,
+      this.hoken.kouhiList.length >= 2 ? this.hoken.kouhiList[1].kouhiId : 0,
+      this.hoken.kouhiList.length >= 3 ? this.hoken.kouhiList[2].kouhiId : 0,
+      this.hoken.koukikourei?.koukikoureiId ?? 0,
+      this.attributesStore
+    );
+  }
 }
-
-export const VisitExObject = {
-  attributesOf(visit: VisitEx): VisitAttributes | null {
-    return VisitAttributeObject.fromString(visit.attributesStore ?? null);
-  },
-
-  asVisit(src: VisitEx): Visit {
-    return {
-      visitId: src.visitId,
-      patientId: src.patient.patientId,
-      visitedAt: src.visitedAt,
-      shahokokuhoId: src.hoken.shahokokuho?.shahokokuhoId || 0,
-      roujinId: src.hoken.roujin?.roujinId || 0,
-      kouhi1Id: src.hoken.kouhiList[0]?.kouhiId || 0,
-      kouhi2Id: src.hoken.kouhiList[1]?.kouhiId || 0,
-      kouhi3Id: src.hoken.kouhiList[2]?.kouhiId || 0,
-      koukikoureiId: src.hoken.koukikourei?.koukikoureiId || 0,
-      attributesStore: src.attributesStore,
-    };
-  },
-};
 
 export enum MeisaiSectionEnum {
   ShoshinSaisin = "初・再診料",
@@ -529,143 +538,173 @@ export enum MeisaiSectionEnum {
 }
 
 export class MeisaiSectionItem {
-  constructor() {}
-  tanka: number;
-  count: number;
-  label: string;
-}
+  constructor(
+    public tanka: number,
+    public count: number,
+    public label: string
+  ) {}
 
-export const MeisaiSectionItemObject = {
-  totalOf(item: MeisaiSectionItem): number {
-    return item.tanka * item.count;
-  },
-};
+  get totalTen(): number {
+    return this.tanka * this.count;
+  }
+}
 
 export class MeisaiSectionData {
-  constructor() {}
-  section: MeisaiSectionEnum;
-  entries: MeisaiSectionItem[];
-}
+  constructor(
+    public section: MeisaiSectionEnum,
+    public entries: MeisaiSectionItem[]
+  ) {}
 
-export const MeisaiSectionDataObject = {
-  subtotalOf(data: MeisaiSectionData): number {
-    const totalOf = MeisaiSectionItemObject.totalOf;
-    return data.entries.reduce((acc, ele) => {
-      return acc + totalOf(ele);
+  get totalTen(): number {
+    return this.entries.reduce((acc, ele) => {
+      return acc + ele.totalTen;
     }, 0);
-  },
-};
+  }
+}
 
 export class Meisai {
-  constructor() {}
-  items: MeisaiSectionData[];
-  futanWari: number;
-  charge: number;
+  constructor(
+    public items: MeisaiSectionData[],
+    public futanWari: number,
+    public charge: number
+  ) {}
+
+  get totalTen(): number {
+    return this.items.reduce((acc, ele) => {
+      return acc + ele.totalTen;
+    }, 0);
+  }
 }
 
-export const MeisaiObject = {
-  totalTenOf(meisai: Meisai): number {
-    const subtotal = MeisaiSectionDataObject.subtotalOf;
-    return meisai.items.reduce((acc, ele) => {
-      return acc + subtotal(ele);
-    }, 0);
-  },
-};
-
 export class Conduct {
-  constructor() {}
-  conductId: number;
-  visitId: number;
-  kindStore: number;
+  constructor(
+    public conductId: number,
+    public visitId: number,
+    public kindStore: number
+  ) {}
 }
 
 export class GazouLabel {
-  constructor() {}
-  conductId: number;
-  label: string;
+  constructor(public conductId: number, public label: string) {}
 }
 
 export class ConductShinryou {
-  constructor() {}
-  conductShinryouId: number;
-  conductId: number;
-  shinryoucode: number;
+  constructor(
+    public conductShinryouId: number,
+    public conductId: number,
+    public shinryoucode: number
+  ) {}
 }
 
 export class ConductDrug {
-  constructor() {}
-  conductDrugId: number;
-  conductId: number;
-  iyakuhincode: number;
-  amount: number;
+  constructor(
+    public conductDrugId: number,
+    public conductId: number,
+    public iyakuhincode: number,
+    public amount: number
+  ) {}
 }
 
 export class ConductKizai {
-  constructor() {}
-  conductKizaiId: number;
-  conductId: number;
-  kizaicode: number;
-  amount: number;
+  constructor(
+    public conductKizaiId: number,
+    public conductId: number,
+    public kizaicode: number,
+    public amount: number
+  ) {}
 }
 
 export class CreateConductRequest {
-  constructor() {}
   visitId: number;
   kind: number;
-  labelOption: string | null;
+  labelOption: string | undefined;
   shinryouList: ConductShinryou[];
   drugs: ConductDrug[];
   kizaiList: ConductKizai[];
+
+  constructor({
+    visitId,
+    kind,
+    labelOption = undefined,
+    shinryouList = [],
+    drugs = [],
+    kizaiList = [],
+  }: {
+    visitId: number;
+    kind: number;
+    labelOption?: string;
+    shinryouList?: ConductShinryou[];
+    drugs?: ConductDrug[];
+    kizaiList?: ConductKizai[];
+  }) {
+    this.visitId = visitId;
+    this.kind = kind;
+    this.labelOption = labelOption;
+    this.shinryouList = shinryouList;
+    this.drugs = drugs;
+    this.kizaiList = kizaiList;
+  }
 }
 
 export class CreateShinryouConductRequest {
-  constructor() {}
   shinryouList: Shinryou[];
   conducts: CreateConductRequest[];
+
+  constructor({
+    shinryouList = [],
+    conducts = [],
+  }: {
+    shinryouList?: Shinryou[];
+    conducts?: CreateConductRequest[];
+  }) {
+    this.shinryouList = shinryouList;
+    this.conducts = conducts;
+  }
 }
 
 export class ByoumeiMaster {
-  constructor() {}
-  shoubyoumeicode: number;
-  name: string;
-}
+  constructor(public shoubyoumeicode: number, public name: string) {}
 
-export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
-  return (
-    arg != null &&
-    typeof arg === "object" &&
-    typeof arg.shoubyoumeicode === "number" &&
-    typeof arg.name === "string"
-  );
+  static isByoumeiMaster(arg: any): arg is ByoumeiMaster {
+    return (
+      arg != null &&
+      typeof arg === "object" &&
+      typeof arg.shoubyoumeicode === "number" &&
+      typeof arg.name === "string"
+    );
+  }
 }
 
 export class ShuushokugoMaster {
-  constructor() {}
-  shuushokugocode: number;
-  name: string;
-}
+  constructor(public shuushokugocode: number, public name: string) {}
 
-export const ShuushokugoMasterObject = {
-  smallestPostfixCode: 8000,
+  get isPrefix(): boolean {
+    return this.shuushokugocode < ShuushokugoMaster.smallestPostfixCode;
+  }
 
-  isPrefix(m: ShuushokugoMaster): boolean {
-    return m.shuushokugocode < ShuushokugoMasterObject.smallestPostfixCode;
-  },
-};
+  static smallestPostfixCode = 8000;
 
-export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
-  return (
-    arg != null &&
-    typeof arg === "object" &&
-    typeof arg.shuushokugocode === "number" &&
-    typeof arg.name === "string"
-  );
+  static isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
+    return (
+      arg != null &&
+      typeof arg === "object" &&
+      typeof arg.shuushokugocode === "number" &&
+      typeof arg.name === "string"
+    );
+  }
 }
 
 export class DiseaseEndReasonType {
-  constructor() {}
-  code: string;
-  label: string;
+  constructor(public code: string, public label: string) {}
+
+  static fromCode(code: string): DiseaseEndReasonType {
+    for (let e of Object.values(DiseaseEndReason)) {
+      if (e.code === code) {
+        return e;
+      }
+    }
+    throw new Error("Invalid disease end reason code: " + code);
+  }
 }
 
 export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
@@ -675,116 +714,118 @@ export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
   Dead: { code: "D", label: "死亡" },
 };
 
-export const DiseaseEndReasonObject = {
-  fromCode(code: string): DiseaseEndReasonType {
-    for (let r of Object.values(DiseaseEndReason)) {
-      if (r.code == code) {
-        return r;
-      }
-    }
-    throw new Error("Invalid end reason code: " + code);
-  },
-};
+export const DiseaseEndReasonKeys: string[] = Object.keys(DiseaseEndReason);
 
 export class Disease {
-  constructor() {}
-  diseaseId: number;
-  patientId: number;
-  shoubyoumeicode: number;
-  startDate: string;
-  endDate: string;
-  endReasonStore: string;
+  constructor(
+    public diseaseId: number,
+    public patientId: number,
+    public shoubyoumeicode: number,
+    public startDate: string,
+    public endDate: string,
+    public endReasonStore: string
+  ) {}
 }
 
 export class DiseaseAdj {
-  constructor() {}
-  diseaseAdjId: number;
-  diseaseId: number;
-  shuushokugocode: number;
+  constructor(
+    diseaseAdjId: number,
+    diseaseId: number,
+    shuushokugocode: number
+  ) {}
 }
 
 export class DiseaseEnterData {
-  constructor() {}
-  patientId: number;
-  byoumeicode: number;
-  startDate: string;
-  adjCodes: number[];
+  constructor(
+    public patientId: number,
+    public byoumeicode: number,
+    public startDate: string,
+    public adjCodes: number[]
+  ) {}
 }
 
 export class DiseaseExample {
-  constructor() {}
-  byoumei: string | null;
-  preAdjList: string[];
-  postAdjList: string[];
-}
+  constructor(
+    public byoumei: string | null,
+    public preAdjList: string[],
+    public postAdjList: string[]
+  ) {}
 
-export const DiseaseExampleObject = {
-  repr(e: DiseaseExample): string {
-    return [e.byoumei || "", ...e.preAdjList, ...e.postAdjList].join("");
-  },
-};
+  get repr(): string {
+    return [...this.preAdjList, this.byoumei || "", ...this.postAdjList].join(
+      ""
+    );
+  }
 
-export function isDiseaseExample(arg: any): arg is DiseaseExample {
-  return (
-    arg != null &&
-    typeof arg === "object" &&
-    (arg.byoumei == null || typeof arg.byoumei === "string") &&
-    Array.isArray(arg.preAdjList) &&
-    Array.isArray(arg.postAdjList)
-  );
+  static isDiseaseExample(arg: any): arg is DiseaseExample {
+    return (
+      arg != null &&
+      typeof arg === "object" &&
+      (arg.byoumei == null || typeof arg.byoumei === "string") &&
+      Array.isArray(arg.preAdjList) &&
+      Array.isArray(arg.postAdjList)
+    );
+  }
 }
 
 export class Hotline {
-  constructor() {}
-  message: string;
-  sender: string;
-  recipient: string;
+  constructor(
+    public message: string,
+    public sender: string,
+    public recipient: string
+  ) {}
 }
 
 export class HotlineEx extends Hotline {
-  constructor() {}
-  appEventId: number;
+  constructor(
+    public message: string,
+    public sender: string,
+    public recipient: string,
+    public appEventId: number
+  ) {
+    super(message, sender, recipient);
+  }
 }
 
 export class HotlineBeep {
-  constructor() {}
-  recipient: string;
+  constructor(public recipient: string) {}
 }
 
 export class EventIdNotice {
-  constructor() {}
-  currentEventId: number;
+  constructor(public currentEventId: number) {}
 }
 
 export class HeartBeat {
-  constructor() {}
-  heartBeatSerialId: number;
+  constructor(public heartBeatSerialId: number) {}
 }
 
 export class AppEvent {
-  constructor() {}
-  appEventId: number;
-  createdAt: string;
-  model: string;
-  kind: string;
-  data: string;
+  constructor(
+    public appEventId: number,
+    public createdAt: string,
+    public model: string,
+    public kind: string,
+    public data: string
+  ) {}
 }
 
 export class FileInfo {
-  constructor() {}
-  name: string;
-  createdAt: string;
-  size: number;
+  constructor(
+    public name: string,
+    public createdAt: string,
+    public size: number
+  ) {}
 }
 
 export class PrescExample {
-  constructor() {}
-  prescExampleId: number;
-  iyakuhincode: number;
-  masterValidFrom: string;
-  amount: String;
-  usage: String;
-  days: number;
-  category: number;
-  comment: String;
+  constructor(
+    public prescExampleId: number,
+    public iyakuhincode: number,
+    public masterValidFrom: string,
+    public amount: String,
+    public usage: String,
+    public days: number,
+    public category: number,
+    public comment: String
+  ) {}
 }

@@ -2,7 +2,7 @@
   "name": "myclinic-model",
   "version": "1.0.0",
   "description": "Model for myclinic",
-  "main": "index.js",
+  "main": "./dist/model.js",
   "scripts": {
     "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,9 +13,6 @@
   },
   "author": "Hangil Chang",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/hangilc/myclinic-ts/issues"
-  },
   "homepage": "https://github.com/hangilc/myclinic-ts#readme",
   "devDependencies": {
     "typescript": "^4.8.4"

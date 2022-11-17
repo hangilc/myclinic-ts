@@ -1,13 +1,10 @@
 <script lang="ts">
   import { genid } from "@/lib/genid";
-  import {
-    DiseaseExampleObject,
-    type DiseaseExample,
-  } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
   import api from "@/lib/api";
   import type { SearchResultType } from "./types";
+  import type { DiseaseExample } from "myclinic-model";
 
   interface SearchResult {
     label: string;
@@ -56,7 +53,7 @@
   function doExample(): void {
     searchResult = examples.map((e) => {
       return {
-        label: DiseaseExampleObject.repr(e),
+        label: e.repr,
         data: e,
       };
     });

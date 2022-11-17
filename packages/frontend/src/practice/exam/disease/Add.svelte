@@ -2,16 +2,10 @@
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import api from "@/lib/api";
   import {
-    isDiseaseExample,
-    type ByoumeiMaster,
-    type DiseaseEnterData,
-    type DiseaseExample,
-    type ShuushokugoMaster,
-  } from "myclinic-model";
-  import {
-    isByoumeiMaster,
-    isShuushokugoMaster,
-    DiseaseExampleObject,
+    ByoumeiMaster,
+    ShuushokugoMaster,
+    DiseaseEnterData,
+    DiseaseExample,
   } from "myclinic-model";
   import { type Writable, writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
@@ -39,13 +33,13 @@
   let startDateSelect: Writable<Date | null> = writable(null);
 
   searchSelect.subscribe(async (r) => {
-    if (isByoumeiMaster(r)) {
+    if (ByoumeiMaster.isByoumeiMaster(r)) {
       byoumeiMaster = r;
-    } else if (isShuushokugoMaster(r)) {
+    } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
       const cur = adjList;
       cur.push(r);
       adjList = cur;
-    } else if (isDiseaseExample(r)) {
+    } else if (DiseaseExample.isDiseaseExample(r)) {
       if (r.byoumei != null) {
         const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
         if (m != null) {
@@ -138,7 +132,7 @@
   function doExample(): void {
     searchResult = examples.map((e) => {
       return {
-        label: DiseaseExampleObject.repr(e),
+        label: e.repr,
         data: e,
       };
     });
