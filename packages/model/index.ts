@@ -1,27 +1,26 @@
-
 export interface Patient {
-  patientId: number,
-  lastName: string,
-  firstName: string,
-  lastNameYomi: string,
-  firstNameYomi: string,
-  sex: string,
-  birthday: string,
-  address: string,
-  phone: string
+  patientId: number;
+  lastName: string;
+  firstName: string;
+  lastNameYomi: string;
+  firstNameYomi: string;
+  sex: string;
+  birthday: string;
+  address: string;
+  phone: string;
 }
 
 export interface Visit {
-  visitId: number,
-  patientId: number,
-  visitedAt: string,
-  shahokokuhoId: number,
-  roujinId: number,
-  kouhi1Id: number,
-  kouhi2Id: number,
-  kouhi3Id: number,
-  koukikoureiId: number,
-  attributesStore?: string
+  visitId: number;
+  patientId: number;
+  visitedAt: string;
+  shahokokuhoId: number;
+  roujinId: number;
+  kouhi1Id: number;
+  kouhi2Id: number;
+  kouhi3Id: number;
+  koukikoureiId: number;
+  attributesStore?: string;
 }
 
 export const VisitObject = {
@@ -37,10 +36,10 @@ export const VisitObject = {
       newAttr = JSON.stringify(attr);
     }
     return Object.assign({}, visit, {
-      attributesStore: newAttr
+      attributesStore: newAttr,
     });
-  }
-}
+  },
+};
 
 export const WqueueState = {
   WaitExam: 0,
@@ -53,81 +52,78 @@ export const WqueueState = {
 export type WqueueStateKey = keyof typeof WqueueState;
 
 export class WqueueStateData {
-  constructor(
-    public code: number,
-    public label: string
-  ) { }
+  constructor(public code: number, public label: string) {}
 }
 
 export const WqueueStateObject: Record<WqueueStateKey, WqueueStateData> = {
-  "WaitExam": new WqueueStateData(0, "診待"),
-  "InExam": new WqueueStateData(1, "診中"),
-  "WaitCashier": new WqueueStateData(2, "会待"),
-  "WaitDrug": new WqueueStateData(3, "薬待"),
-  "WaitReExam": new WqueueStateData(4, "再待"),
-}
+  WaitExam: new WqueueStateData(0, "診待"),
+  InExam: new WqueueStateData(1, "診中"),
+  WaitCashier: new WqueueStateData(2, "会待"),
+  WaitDrug: new WqueueStateData(3, "薬待"),
+  WaitReExam: new WqueueStateData(4, "再待"),
+};
 
 export interface Wqueue {
-  visitId: number,
-  waitState: number
+  visitId: number;
+  waitState: number;
 }
 
 export interface Shahokokuho {
-  shahokokuhoId: number,
-  patientId: number,
-  hokenshaBangou: number,
-  hihokenshaKigou: string,
-  hihokenshaBangou: string,
-  honninStore: number,
-  validFrom: string,
-  validUpto: string,
-  koureiStore: number,
-  edaban: string
+  shahokokuhoId: number;
+  patientId: number;
+  hokenshaBangou: number;
+  hihokenshaKigou: string;
+  hihokenshaBangou: string;
+  honninStore: number;
+  validFrom: string;
+  validUpto: string;
+  koureiStore: number;
+  edaban: string;
 }
 
 export interface Roujin {
-  roujinId: number,
-  patientId: number,
-  shichouson: number,
-  jukyuusha: number,
-  futanWari: number,
-  validFrom: string,
-  validUpto: string
+  roujinId: number;
+  patientId: number;
+  shichouson: number;
+  jukyuusha: number;
+  futanWari: number;
+  validFrom: string;
+  validUpto: string;
 }
 
 export interface Koukikourei {
-  koukikoureiId: number,
-  patientId: number,
-  hokenshaBangou: string,
-  hihokenshaBangou: string,
-  futanWari: number,
-  validFrom: string,
-  validUpto: string
+  koukikoureiId: number;
+  patientId: number;
+  hokenshaBangou: string;
+  hihokenshaBangou: string;
+  futanWari: number;
+  validFrom: string;
+  validUpto: string;
 }
 
 export interface Kouhi {
-  kouhiId: number,
-  futansha: number,
-  jukyuusha: number,
-  validFrom: string,
-  validUpto: string,
-  patientId: number
+  kouhiId: number;
+  futansha: number;
+  jukyuusha: number;
+  validFrom: string;
+  validUpto: string;
+  patientId: number;
 }
 
 export interface HokenInfo {
-  shahokokuho?: Shahokokuho,
-  roujin?: Roujin,
-  koukikourei: Koukikourei,
-  kouhiList: Kouhi[]
+  shahokokuho?: Shahokokuho;
+  roujin?: Roujin;
+  koukikourei: Koukikourei;
+  kouhiList: Kouhi[];
 }
 
 export interface HokenIdSet {
-  shahokokuhoId: number,
-  koukikoureiId: number,
-  roujinId: number,
-  kouhi1Id: number,
-  kouhi2Id: number,
-  kouhi3Id: number
+  shahokokuhoId: number;
+  koukikoureiId: number;
+  roujinId: number;
+  kouhi1Id: number;
+  kouhi2Id: number;
+  kouhi3Id: number;
 }
 
 export class Text {
@@ -143,134 +139,155 @@ export class Text {
 }
 
 export interface Charge {
-  visitId: number,
-  charge: number
+  visitId: number;
+  charge: number;
 }
 
 export interface Payment {
-  visitId: number,
-  amount: number,
-  paytime: string
+  visitId: number;
+  amount: number;
+  paytime: string;
 }
 
 export interface IyakuhinMaster {
-  iyakuhincode: number,
-  yakkacode: string,
-  name: string,
-  yomi: string,
-  unit: string,
-  yakkaStore: string,
-  madoku: string,
-  kouhatsu: string,
-  zaikei: string,
-  validFrom: string,
-  validUpto: string
+  iyakuhincode: number;
+  yakkacode: string;
+  name: string;
+  yomi: string;
+  unit: string;
+  yakkaStore: string;
+  madoku: string;
+  kouhatsu: string;
+  zaikei: string;
+  validFrom: string;
+  validUpto: string;
 }
 
 export interface ShinryouMaster {
-  shinryoucode: number,
-  name: string,
-  tensuuStore: string,
-  tensuuShikibetsu: string,
-  shuukeisaki: string,
-  houkatsukensa: string,
-  oushinkubun: string,
-  kensagroup: string,
-  validFrom: string,
-  validUpto: string
+  shinryoucode: number;
+  name: string;
+  tensuuStore: string;
+  tensuuShikibetsu: string;
+  shuukeisaki: string;
+  houkatsukensa: string;
+  oushinkubun: string;
+  kensagroup: string;
+  validFrom: string;
+  validUpto: string;
 }
 
 export interface KizaiMaster {
-  kizaicode: number,
-  name: string,
-  yomi: string,
-  unit: string,
-  kingakuStore: string,
-  validFrom: string,
-  validUpto: string
+  kizaicode: number;
+  name: string;
+  yomi: string;
+  unit: string;
+  kingakuStore: string;
+  validFrom: string;
+  validUpto: string;
 }
 
 export interface DrugCategoryType {
-  code: number,
-  name: string,
+  code: number;
+  name: string;
 }
 
 export const DrugCategory: Record<string, DrugCategoryType> = {
   Naifuku: { code: 0, name: "内服" },
   Tonpuku: { code: 1, name: "頓服" },
-  Gaiyou:  { code: 2, name: "外用" },
-}
+  Gaiyou: { code: 2, name: "外用" },
+};
 
 export interface DrugEx {
-  drugId: number,
-  visitId: number,
-  iyakuhincode: number,
-  amount: number,
-  usage: string,
-  days: number,
-  categoryStore: number,
-  prescribed: boolean,
-  master: IyakuhinMaster
+  drugId: number;
+  visitId: number;
+  iyakuhincode: number;
+  amount: number;
+  usage: string;
+  days: number;
+  categoryStore: number;
+  prescribed: boolean;
+  master: IyakuhinMaster;
 }
 
 export interface Shinryou {
-  shinryouId: number,
-  visitId: number,
-  shinryoucode: number
+  shinryouId: number;
+  visitId: number;
+  shinryoucode: number;
 }
 
 export interface ShinryouEx {
-  shinryouId: number,
-  visitId: number,
-  shinryoucode: number,
-  master: ShinryouMaster
+  shinryouId: number;
+  visitId: number;
+  shinryoucode: number;
+  master: ShinryouMaster;
 }
 
 export interface ConductDrugEx {
-  conductDrugId: number,
-  conductId: number,
-  iyakuhincode: number,
-  amount: number,
-  master: IyakuhinMaster
+  conductDrugId: number;
+  conductId: number;
+  iyakuhincode: number;
+  amount: number;
+  master: IyakuhinMaster;
 }
 
 export interface ConductShinryouEx {
-  conductShinryouId: number,
-  conductId: number,
-  shinryoucode: number,
-  master: ShinryouMaster
+  conductShinryouId: number;
+  conductId: number;
+  shinryoucode: number;
+  master: ShinryouMaster;
 }
 
 export interface ConductKizaiEx {
-  conductKizaiId: number,
-  conductId: number,
-  kizaicode: number,
-  amount: number,
-  master: KizaiMaster
+  conductKizaiId: number;
+  conductId: number;
+  kizaicode: number;
+  amount: number;
+  master: KizaiMaster;
 }
 
-export type ConductKindKey = "HikaChuusha" | "JoumyakuChuusha" |
-  "OtherChuusha" | "Gazou";
+export type ConductKindKey =
+  | "HikaChuusha"
+  | "JoumyakuChuusha"
+  | "OtherChuusha"
+  | "Gazou";
 
-export type ConductKindTag = {
-  "HikaChuusha": {}
-} | {
-  "JoumyakuChuusha": {}
-} | {
-  "OtherChuusha": {}
-} | {
-  "Gazou": {}
-}
+export const ConductKindKeyObject = {
+  fromString(s: string): ConductKindKey {
+    switch (s) {
+      case "HikaChuusha":
+      case "JoumyakuChuusha":
+      case "OtherChuusha":
+      case "Gazou":
+        return s;
+      default:
+        throw new Error("Invalid conduct kind key: " + s);
+    }
+  },
+};
+
+export type ConductKindTag =
+  | {
+      HikaChuusha: {};
+    }
+  | {
+      JoumyakuChuusha: {};
+    }
+  | {
+      OtherChuusha: {};
+    }
+  | {
+      Gazou: {};
+    };
 
 export const ConductKindTagObject = {
   fromKey(key: ConductKindKey): ConductKindTag {
-    if( key === "HikaChuusha" ){
+    if (key === "HikaChuusha") {
       return { [key]: {} };
-    } else if( key === "JoumyakuChuusha" ) {
+    } else if (key === "JoumyakuChuusha") {
       return { [key]: {} };
-    } else if( key === "OtherChuusha" ) {
+    } else if (key === "OtherChuusha") {
       return { [key]: {} };
-    } else if( key === "Gazou" ) {
+    } else if (key === "Gazou") {
       return { [key]: {} };
     } else {
       throw new Error("Cannot happen");
@@ -278,28 +295,28 @@ export const ConductKindTagObject = {
   },
 
   fromCode(code: number): ConductKindTag {
-    for(let ctype of Object.values(ConductKind) ){
-      if( ctype.code === code ){
+    for (let ctype of Object.values(ConductKind)) {
+      if (ctype.code === code) {
         return ConductKindTagObject.fromKey(ctype.key);
       }
     }
     throw new Error("Invalid conduct kind code: " + code);
-  }
-}
+  },
+};
 
 export class ConductKindType {
   constructor(
     public code: number,
     public rep: string,
     public key: ConductKindKey
-  ) { }
+  ) {}
 }
 
 export const ConductKind: Record<ConductKindKey, ConductKindType> = {
   HikaChuusha: new ConductKindType(0, "皮下・筋肉注射", "HikaChuusha"),
   JoumyakuChuusha: new ConductKindType(1, "静脈注射", "JoumyakuChuusha"),
   OtherChuusha: new ConductKindType(2, "その他の注射", "OtherChuusha"),
-  Gazou: new ConductKindType(3, "画像", "Gazou")
+  Gazou: new ConductKindType(3, "画像", "Gazou"),
 };
 
 export const ConductKindObject = {
@@ -309,23 +326,28 @@ export const ConductKindObject = {
   },
 
   fromCode(code: number): ConductKindType {
-    for(let kind of Object.values(ConductKind)){
-      if( kind.code === code ){
+    for (let kind of Object.values(ConductKind)) {
+      if (kind.code === code) {
         return kind;
       }
     }
     throw new Error("Invalid conduct kind code: " + code);
+  },
+
+  fromKeyString(s: string): ConductKindType {
+    const key = ConductKindKeyObject.fromString(s);
+    return ConductKind[key];
   }
-}
+};
 
 export interface ConductEx {
-  conductId: number,
-  visitId: number,
-  kind: ConductKindTag,
-  gazouLabel?: String,
-  drugs: ConductDrugEx[],
-  shinryouList: ConductShinryouEx[],
-  kizaiList: ConductKizaiEx[]
+  conductId: number;
+  visitId: number;
+  kind: ConductKindTag;
+  gazouLabel?: String;
+  drugs: ConductDrugEx[];
+  shinryouList: ConductShinryouEx[];
+  kizaiList: ConductKizaiEx[];
 }
 
 export const ConductExObject = {
@@ -336,13 +358,13 @@ export const ConductExObject = {
       kind: ConductKindTagObject.fromCode(c.kindStore),
       drugs: [],
       shinryouList: [],
-      kizaiList: []
+      kizaiList: [],
     };
-  }
-}
+  },
+};
 
 export interface VisitAttributes {
-  futanWari?: number
+  futanWari?: number;
 }
 
 export const VisitAttributeObject = {
@@ -359,21 +381,21 @@ export const VisitAttributeObject = {
     update: VisitAttributes | null
   ): VisitAttributes {
     return Object.assign({}, orig, update);
-  }
-}
+  },
+};
 
 export interface VisitEx {
-  visitId: number,
-  visitedAt: string,
-  attributesStore?: string,
-  patient: Patient,
-  hoken: HokenInfo,
-  texts: Text[],
-  drugs: DrugEx[],
-  shinryouList: ShinryouEx[],
-  conducts: ConductEx[],
-  chargeOption?: Charge,
-  lastPayment?: Payment
+  visitId: number;
+  visitedAt: string;
+  attributesStore?: string;
+  patient: Patient;
+  hoken: HokenInfo;
+  texts: Text[];
+  drugs: DrugEx[];
+  shinryouList: ShinryouEx[];
+  conducts: ConductEx[];
+  chargeOption?: Charge;
+  lastPayment?: Payment;
 }
 
 export const VisitExObject = {
@@ -392,9 +414,9 @@ export const VisitExObject = {
       kouhi2Id: src.hoken.kouhiList[1]?.kouhiId || 0,
       kouhi3Id: src.hoken.kouhiList[2]?.kouhiId || 0,
       koukikoureiId: src.hoken.koukikourei?.koukikoureiId || 0,
-      attributesStore: src.attributesStore
+      attributesStore: src.attributesStore,
     };
-  }
+  },
 };
 
 export enum MeisaiSectionEnum {
@@ -418,8 +440,8 @@ export interface MeisaiSectionItem {
 export const MeisaiSectionItemObject = {
   totalOf(item: MeisaiSectionItem): number {
     return item.tanka * item.count;
-  }
-}
+  },
+};
 
 export interface MeisaiSectionData {
   section: MeisaiSectionEnum;
@@ -432,8 +454,8 @@ export const MeisaiSectionDataObject = {
     return data.entries.reduce((acc, ele) => {
       return acc + totalOf(ele);
     }, 0);
-  }
-}
+  },
+};
 
 export interface Meisai {
   items: MeisaiSectionData[];
@@ -447,81 +469,93 @@ export const MeisaiObject = {
     return meisai.items.reduce((acc, ele) => {
       return acc + subtotal(ele);
     }, 0);
-  }
-}
+  },
+};
 
 export interface Conduct {
-  conductId: number,
-  visitId: number,
-  kindStore: number
+  conductId: number;
+  visitId: number;
+  kindStore: number;
 }
 
 export interface GazouLabel {
-  conductId: number,
-  label: string
+  conductId: number;
+  label: string;
 }
 
 export interface ConductShinryou {
-  conductShinryouId: number,
-  conductId: number,
-  shinryoucode: number
+  conductShinryouId: number;
+  conductId: number;
+  shinryoucode: number;
 }
 
 export interface ConductDrug {
-  conductDrugId: number,
-  conductId: number,
-  iyakuhincode: number,
-  amount: number
+  conductDrugId: number;
+  conductId: number;
+  iyakuhincode: number;
+  amount: number;
 }
 
 export interface ConductKizai {
-  conductKizaiId: number,
-  conductId: number,
-  kizaicode: number,
-  amount: number
+  conductKizaiId: number;
+  conductId: number;
+  kizaicode: number;
+  amount: number;
 }
 
 export interface CreateConductRequest {
-  visitId: number,
-  kind: number,
-  labelOption: string | null,
-  shinryouList: ConductShinryou[],
-  drugs: ConductDrug[],
-  kizaiList: ConductKizai[]
+  visitId: number;
+  kind: number;
+  labelOption: string | null;
+  shinryouList: ConductShinryou[];
+  drugs: ConductDrug[];
+  kizaiList: ConductKizai[];
 }
 
 export interface CreateShinryouConductRequest {
-  shinryouList: Shinryou[],
-  conducts: CreateConductRequest[]
+  shinryouList: Shinryou[];
+  conducts: CreateConductRequest[];
 }
 
 export interface ByoumeiMaster {
-  shoubyoumeicode: number,
-  name: string
+  shoubyoumeicode: number;
+  name: string;
 }
 
 export function isByoumeiMaster(arg: any): arg is ByoumeiMaster {
-  return arg != null &&
+  return (
+    arg != null &&
     typeof arg === "object" &&
     typeof arg.shoubyoumeicode === "number" &&
-    typeof arg.name === "string";
+    typeof arg.name === "string"
+  );
 }
 
 export interface ShuushokugoMaster {
-  shuushokugocode: number,
-  name: string
+  shuushokugocode: number;
+  name: string;
+}
+
+export const ShuushokugoMasterObject = {
+  smallestPostfixCode: 8000,
+
+  isPrefix(m: ShuushokugoMaster): boolean {
+    return m.shuushokugocode < ShuushokugoMasterObject.smallestPostfixCode;
+  }
 }
 
 export function isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
-  return arg != null &&
+  return (
+    arg != null &&
     typeof arg === "object" &&
     typeof arg.shuushokugocode === "number" &&
-    typeof arg.name === "string";
+    typeof arg.name === "string"
+  );
 }
 
 export interface DiseaseEndReasonType {
-  code: string,
-  label: string
+  code: string;
+  label: string;
 }
 
 export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
@@ -529,7 +563,7 @@ export const DiseaseEndReason: Record<string, DiseaseEndReasonType> = {
   Cured: { code: "C", label: "治癒" },
   Stopped: { code: "S", label: "中止" },
   Dead: { code: "D", label: "死亡" },
-}
+};
 
 export const DiseaseEndReasonObject = {
   fromCode(code: string): DiseaseEndReasonType {
@@ -539,97 +573,96 @@ export const DiseaseEndReasonObject = {
       }
     }
     throw new Error("Invalid end reason code: " + code);
-  }
-}
+  },
+};
 
 export interface Disease {
-  diseaseId: number,
-  patientId: number,
-  shoubyoumeicode: number,
-  startDate: string,
-  endDate: string,
-  endReasonStore: string
+  diseaseId: number;
+  patientId: number;
+  shoubyoumeicode: number;
+  startDate: string;
+  endDate: string;
+  endReasonStore: string;
 }
 
 export interface DiseaseAdj {
-  diseaseAdjId: number,
-  diseaseId: number,
-  shuushokugocode: number
+  diseaseAdjId: number;
+  diseaseId: number;
+  shuushokugocode: number;
 }
 
 export interface DiseaseEnterData {
-  patientId: number,
-  byoumeicode: number,
-  startDate: string,
-  adjCodes: number[]
+  patientId: number;
+  byoumeicode: number;
+  startDate: string;
+  adjCodes: number[];
 }
 
 export interface DiseaseExample {
-  byoumei: string | null,
-  preAdjList: string[],
-  postAdjList: string[],
+  byoumei: string | null;
+  preAdjList: string[];
+  postAdjList: string[];
 }
 
 export const DiseaseExampleObject = {
   repr(e: DiseaseExample): string {
     return [e.byoumei || "", ...e.preAdjList, ...e.postAdjList].join("");
-  }
-}
+  },
+};
 
 export function isDiseaseExample(arg: any): arg is DiseaseExample {
-  return arg != null &&
+  return (
+    arg != null &&
     typeof arg === "object" &&
     (arg.byoumei == null || typeof arg.byoumei === "string") &&
-    Array.isArray(arg.preAdjList) && Array.isArray(arg.postAdjList);
+    Array.isArray(arg.preAdjList) &&
+    Array.isArray(arg.postAdjList)
+  );
 }
 
 export interface Hotline {
-  message: string,
-  sender: string,
-  recipient: string
+  message: string;
+  sender: string;
+  recipient: string;
 }
 
 export interface HotlineEx extends Hotline {
-  appEventId: number
+  appEventId: number;
 }
 
 export interface HotlineBeep {
-  recipient: string
+  recipient: string;
 }
 
 export interface EventIdNotice {
-  currentEventId: number
+  currentEventId: number;
 }
 
 export interface HeartBeat {
-  heartBeatSerialId: number
+  heartBeatSerialId: number;
 }
 
 export interface AppEvent {
-  appEventId: number,
-  createdAt: string,
-  model: string,
-  kind: string,
-  data: string
+  appEventId: number;
+  createdAt: string;
+  model: string;
+  kind: string;
+  data: string;
 }
 
 export interface FileInfo {
-  name: string,
-  createdAt: string,
-  size: number
+  name: string;
+  createdAt: string;
+  size: number;
 }
-
 
 export interface PrescExample {
-  prescExampleId: number,
-  iyakuhincode: number,
-  masterValidFrom: string,
-  amount: String,
-  usage: String,
-  days: number,
-  category: number,
-  comment: String
+  prescExampleId: number;
+  iyakuhincode: number;
+  masterValidFrom: string;
+  amount: String;
+  usage: String;
+  days: number;
+  category: number;
+  comment: String;
 }
-
-
-

@@ -11,9 +11,9 @@ export const VisitObject = {
             newAttr = JSON.stringify(attr);
         }
         return Object.assign({}, visit, {
-            attributesStore: newAttr
+            attributesStore: newAttr,
         });
-    }
+    },
 };
 export const WqueueState = {
     WaitExam: 0,
@@ -31,11 +31,11 @@ export class WqueueStateData {
     }
 }
 export const WqueueStateObject = {
-    "WaitExam": new WqueueStateData(0, "診待"),
-    "InExam": new WqueueStateData(1, "診中"),
-    "WaitCashier": new WqueueStateData(2, "会待"),
-    "WaitDrug": new WqueueStateData(3, "薬待"),
-    "WaitReExam": new WqueueStateData(4, "再待"),
+    WaitExam: new WqueueStateData(0, "診待"),
+    InExam: new WqueueStateData(1, "診中"),
+    WaitCashier: new WqueueStateData(2, "会待"),
+    WaitDrug: new WqueueStateData(3, "薬待"),
+    WaitReExam: new WqueueStateData(4, "再待"),
 };
 export class Text {
     textId;
@@ -51,6 +51,19 @@ export const DrugCategory = {
     Naifuku: { code: 0, name: "内服" },
     Tonpuku: { code: 1, name: "頓服" },
     Gaiyou: { code: 2, name: "外用" },
+};
+export const ConductKindKeyObject = {
+    fromString(s) {
+        switch (s) {
+            case "HikaChuusha":
+            case "JoumyakuChuusha":
+            case "OtherChuusha":
+            case "Gazou":
+                return s;
+            default:
+                throw new Error("Invalid conduct kind key: " + s);
+        }
+    },
 };
 export const ConductKindTagObject = {
     fromKey(key) {
@@ -77,7 +90,7 @@ export const ConductKindTagObject = {
             }
         }
         throw new Error("Invalid conduct kind code: " + code);
-    }
+    },
 };
 export class ConductKindType {
     code;
@@ -93,7 +106,7 @@ export const ConductKind = {
     HikaChuusha: new ConductKindType(0, "皮下・筋肉注射", "HikaChuusha"),
     JoumyakuChuusha: new ConductKindType(1, "静脈注射", "JoumyakuChuusha"),
     OtherChuusha: new ConductKindType(2, "その他の注射", "OtherChuusha"),
-    Gazou: new ConductKindType(3, "画像", "Gazou")
+    Gazou: new ConductKindType(3, "画像", "Gazou"),
 };
 export const ConductKindObject = {
     fromTag(tag) {
@@ -107,6 +120,10 @@ export const ConductKindObject = {
             }
         }
         throw new Error("Invalid conduct kind code: " + code);
+    },
+    fromKeyString(s) {
+        const key = ConductKindKeyObject.fromString(s);
+        return ConductKind[key];
     }
 };
 export const ConductExObject = {
@@ -117,9 +134,9 @@ export const ConductExObject = {
             kind: ConductKindTagObject.fromCode(c.kindStore),
             drugs: [],
             shinryouList: [],
-            kizaiList: []
+            kizaiList: [],
         };
-    }
+    },
 };
 export const VisitAttributeObject = {
     fromString(src) {
@@ -132,7 +149,7 @@ export const VisitAttributeObject = {
     },
     updateWith(orig, update) {
         return Object.assign({}, orig, update);
-    }
+    },
 };
 export const VisitExObject = {
     attributesOf(visit) {
@@ -149,9 +166,9 @@ export const VisitExObject = {
             kouhi2Id: src.hoken.kouhiList[1]?.kouhiId || 0,
             kouhi3Id: src.hoken.kouhiList[2]?.kouhiId || 0,
             koukikoureiId: src.hoken.koukikourei?.koukikoureiId || 0,
-            attributesStore: src.attributesStore
+            attributesStore: src.attributesStore,
         };
-    }
+    },
 };
 export var MeisaiSectionEnum;
 (function (MeisaiSectionEnum) {
@@ -168,7 +185,7 @@ export var MeisaiSectionEnum;
 export const MeisaiSectionItemObject = {
     totalOf(item) {
         return item.tanka * item.count;
-    }
+    },
 };
 export const MeisaiSectionDataObject = {
     subtotalOf(data) {
@@ -176,7 +193,7 @@ export const MeisaiSectionDataObject = {
         return data.entries.reduce((acc, ele) => {
             return acc + totalOf(ele);
         }, 0);
-    }
+    },
 };
 export const MeisaiObject = {
     totalTenOf(meisai) {
@@ -184,19 +201,19 @@ export const MeisaiObject = {
         return meisai.items.reduce((acc, ele) => {
             return acc + subtotal(ele);
         }, 0);
-    }
+    },
 };
 export function isByoumeiMaster(arg) {
-    return arg != null &&
+    return (arg != null &&
         typeof arg === "object" &&
         typeof arg.shoubyoumeicode === "number" &&
-        typeof arg.name === "string";
+        typeof arg.name === "string");
 }
 export function isShuushokugoMaster(arg) {
-    return arg != null &&
+    return (arg != null &&
         typeof arg === "object" &&
         typeof arg.shuushokugocode === "number" &&
-        typeof arg.name === "string";
+        typeof arg.name === "string");
 }
 export const DiseaseEndReason = {
     NotEnded: { code: "N", label: "継続" },
@@ -212,16 +229,17 @@ export const DiseaseEndReasonObject = {
             }
         }
         throw new Error("Invalid end reason code: " + code);
-    }
+    },
 };
 export const DiseaseExampleObject = {
     repr(e) {
         return [e.byoumei || "", ...e.preAdjList, ...e.postAdjList].join("");
-    }
+    },
 };
 export function isDiseaseExample(arg) {
-    return arg != null &&
+    return (arg != null &&
         typeof arg === "object" &&
         (arg.byoumei == null || typeof arg.byoumei === "string") &&
-        Array.isArray(arg.preAdjList) && Array.isArray(arg.postAdjList);
+        Array.isArray(arg.preAdjList) &&
+        Array.isArray(arg.postAdjList));
 }

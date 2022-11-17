@@ -192,14 +192,17 @@ export interface ConductKizaiEx {
     master: KizaiMaster;
 }
 export declare type ConductKindKey = "HikaChuusha" | "JoumyakuChuusha" | "OtherChuusha" | "Gazou";
+export declare const ConductKindKeyObject: {
+    fromString(s: string): ConductKindKey;
+};
 export declare type ConductKindTag = {
-    "HikaChuusha": {};
+    HikaChuusha: {};
 } | {
-    "JoumyakuChuusha": {};
+    JoumyakuChuusha: {};
 } | {
-    "OtherChuusha": {};
+    OtherChuusha: {};
 } | {
-    "Gazou": {};
+    Gazou: {};
 };
 export declare const ConductKindTagObject: {
     fromKey(key: ConductKindKey): ConductKindTag;
@@ -215,6 +218,7 @@ export declare const ConductKind: Record<ConductKindKey, ConductKindType>;
 export declare const ConductKindObject: {
     fromTag(tag: ConductKindTag): ConductKindType;
     fromCode(code: number): ConductKindType;
+    fromKeyString(s: string): ConductKindType;
 };
 export interface ConductEx {
     conductId: number;
