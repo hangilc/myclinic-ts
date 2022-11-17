@@ -317,9 +317,9 @@ export class ConductKindType {
   constructor(public code: number, public rep: string) {}
 
   toTag(): ConductKindTag {
-    for(let k of Object.keys(ConductKind) ){
-      const ct = ConductKind[k]
-      if( ct.code === this.code ){
+    for (let k of Object.keys(ConductKind)) {
+      const ct = ConductKind[k];
+      if (ct.code === this.code) {
         return { [k]: {} };
       }
     }
@@ -399,7 +399,7 @@ export class ConductEx {
     return new ConductEx({
       conductId: c.conductId,
       visitId: c.visitId,
-      kind: ConductKindType.fromCode(c.kindStore).toTag()
+      kind: ConductKindType.fromCode(c.kindStore).toTag(),
     });
   }
 }
@@ -407,34 +407,43 @@ export class ConductEx {
 export class VisitAttributes {
   futanWari: number | undefined;
 
-  constructor({
-    futanWari = undefined
-  }: {
-    futanWari?: number
-  }) {
+  constructor({ futanWari = undefined }: { futanWari?: number }) {
     this.futanWari = futanWari;
   }
-}
 
-export const VisitAttributeObject = {
-  fromString(src: string | null): VisitAttributes | null {
+  updateWith(other: VisitAttributes): VisitAttributes {
+    const a = Object.assign({}, this, other);
+    if (VisitAttributes.isVisitAttributes(a)) {
+      return a;
+    } else {
+      throw new Error("Cannot update with: " + other);
+    }
+  }
+
+  static isVisitAttributes(arg: any): arg is VisitAttributes {
+    return (
+      arg != null &&
+      typeof arg === "object" &&
+      (arg.futanWari === undefined ||
+        (typeof arg.futanWari === "number" && Number.isInteger(arg.futanWari)))
+    );
+  }
+
+  static fromString(src: string | null): VisitAttributes | null {
     if (src == null) {
       return null;
     } else {
-      return JSON.parse(src);
+      const json = JSON.parse(src);
+      if (this.isVisitAttributes(json)) {
+        return json;
+      } else {
+        throw new Error("Cannot convert to VisitAttributes: " + src);
+      }
     }
-  },
-
-  updateWith(
-    orig: VisitAttributes | null,
-    update: VisitAttributes | null
-  ): VisitAttributes {
-    return Object.assign({}, orig, update);
-  },
-};
+  }
+}
 
 export class VisitEx {
-  constructor() {}
   visitId: number;
   visitedAt: string;
   attributesStore?: string;
@@ -446,6 +455,44 @@ export class VisitEx {
   conducts: ConductEx[];
   chargeOption?: Charge;
   lastPayment?: Payment;
+
+  constructor({
+    visitId,
+    visitedAt,
+    attributesStore = undefined,
+    patient,
+    hoken,
+    texts,
+    drugs,
+    shinryouList,
+    conducts,
+    chargeOption = undefined,
+    lastPayment = undefined,
+  }: {
+    visitId: number;
+    visitedAt: string;
+    attributesStore?: string;
+    patient: Patient;
+    hoken: HokenInfo;
+    texts: Text[];
+    drugs: DrugEx[];
+    shinryouList: ShinryouEx[];
+    conducts: ConductEx[];
+    chargeOption?: Charge;
+    lastPayment?: Payment;
+  }) {
+    this.visitId = visitId;
+    this.visitedAt = visitedAt;
+    this.attributesStore = attributesStore;
+    this.patient = patient;
+    this.hoken = hoken;
+    this.texts = texts;
+    this.drugs = drugs;
+    this.shinryouList = shinryouList;
+    this.conducts = conducts;
+    this.chargeOption = chargeOption;
+    this.lastPayment = lastPayment;
+  }
 }
 
 export const VisitExObject = {
