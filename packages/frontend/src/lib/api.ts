@@ -96,7 +96,7 @@ export default {
     return wqList.map(wq => {
       const visit = vMap.get(wq.visitId) as m.Visit;
       const patient = pMap.get(visit.patientId) as m.Patient;
-      return [wq, visit, patient];
+      return [m.Wqueue.cast(wq), m.Visit.cast(visit), m.Patient.cast(patient)];
     });
   },
 

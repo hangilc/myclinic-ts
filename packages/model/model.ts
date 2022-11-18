@@ -10,6 +10,20 @@ export class Patient {
     public address: string,
     public phone: string
   ) {}
+
+  static cast(arg: any): Patient {
+    return new Patient(
+      arg.patientId,
+      arg.lastName,
+      arg.firstName,
+      arg.lastNameYomi,
+      arg.firstNameYomi,
+      arg.sex,
+      arg.birthday,
+      arg.address,
+      arg.phone,
+      );
+  }
 }
 
 export class Visit {
@@ -25,6 +39,14 @@ export class Visit {
     public koukikoureiId: number,
     public attributesStore?: string
   ) {}
+
+  static cast(arg: any): Visit {
+    return new Visit(
+      arg.visitId, arg.patientId, arg.visitedAt, arg.shahokokuhoId,
+      arg.roujinId, arg.kouhi1Id, arg.kouhi2Id, arg.kouhi3Id, arg.koukikoureiId,
+      arg.attributesStore
+    );
+  }
 
   clone(): Visit {
     return Object.assign({}, this) as Visit;
