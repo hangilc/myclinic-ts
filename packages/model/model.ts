@@ -506,25 +506,6 @@ export class ConductKizaiEx {
 export class ConductKindType {
   constructor(public code: number, public rep: string) {}
 
-  toTag(): ConductKindTag {
-    for (let k of Object.keys(ConductKind)) {
-      const ct = ConductKind[k];
-      if (ct.code === this.code) {
-        return { [k]: {} };
-      }
-    }
-    throw new Error("Cannot convert to ConductKindTag: " + this.code);
-  }
-
-  get key(): ConductKindKey {
-    for (let k of Object.keys(ConductKind)) {
-      if (ConductKind[k].code == this.code) {
-        return k;
-      }
-    }
-    throw new Error("Cannot find ConductKindKey");
-  }
-
   static fromCode(code: number): ConductKindType {
     for (let ck of Object.values(ConductKind)) {
       if (ck.code === code) {
@@ -542,8 +523,8 @@ export class ConductKindType {
     return ck;
   }
 
-  static fromTag(tag: ConductKindTag): ConductKindType {
-    const key = Object.keys(tag)[0];
+  static cast(arg: any): ConductKindType {
+    const key = Object.keys(arg)[0];
     return ConductKindType.fromKey(key);
   }
 }
@@ -553,18 +534,14 @@ export const ConductKind: Record<string, ConductKindType> = {
   JoumyakuChuusha: new ConductKindType(1, "静脈注射"),
   OtherChuusha: new ConductKindType(2, "その他の注射"),
   Gazou: new ConductKindType(3, "画像"),
-};
+}
 
 export type ConductKindKey = keyof typeof ConductKind;
-
-export type ConductKindTag = {
-  [key in ConductKindKey]: {};
-};
 
 export class ConductEx {
   conductId: number;
   visitId: number;
-  kind: ConductKindTag;
+  kind: ConductKindType;
   gazouLabel: string | undefined;
   drugs: ConductDrugEx[];
   shinryouList: ConductShinryouEx[];
@@ -581,7 +558,7 @@ export class ConductEx {
   }: {
     conductId: number;
     visitId: number;
-    kind: ConductKindTag;
+    kind: ConductKindType;
     gazouLabel?: string;
     drugs?: ConductDrugEx[];
     shinryouList?: ConductShinryouEx[];
@@ -598,6 +575,7 @@ export class ConductEx {
 
   static cast(arg: any): ConductEx {
     arg = Object.assign({}, arg);
+    arg.kind = ConductKindType.cast(arg.kind);
     arg.drgs = arg.drugs?.map((a: any) => ConductDrugEx.cast(a)) ?? [];
     arg.shinryouList = arg.shinryouList?.map((a: any) =>
       ConductShinryouEx.cast(a)
@@ -610,7 +588,7 @@ export class ConductEx {
     return new ConductEx({
       conductId: c.conductId,
       visitId: c.visitId,
-      kind: ConductKindType.fromCode(c.kindStore).toTag(),
+      kind: ConductKindType.fromCode(c.kindStore),
     });
   }
 }
@@ -891,7 +869,7 @@ export class ConductKizai {
       arg.conductId,
       arg.kizaicode,
       arg.amount
-      );
+    );
   }
 }
 
@@ -928,10 +906,11 @@ export class CreateConductRequest {
 
   static cast(arg: any): CreateConductRequest {
     arg = Object.assign({}, arg);
-    arg.shinryouList = arg.shinryouList?.map((a: any) => ConductShinryou.cast(a)) ?? [];
+    arg.shinryouList =
+      arg.shinryouList?.map((a: any) => ConductShinryou.cast(a)) ?? [];
     arg.drugs = arg.drugs?.map((a: any) => ConductDrug.cast(a)) ?? [];
     arg.kizaiList = arg.kizaiList?.map((a: any) => ConductKizai.cast(a)) ?? [];
-    return new CreateConductRequest(arg)
+    return new CreateConductRequest(arg);
   }
 }
 
@@ -951,24 +930,19 @@ export class CreateShinryouConductRequest {
   }
 
   static cast(arg: any): CreateShinryouConductRequest {
-    arg.shinryouList = arg.shinryouList?.map((a: any) => Shinryou.cast(a)) ?? [];
-    arg.conducts = arg.conducts?.map((a: any) => CreateConductRequest.cast(a)) ?? [];
+    arg.shinryouList =
+      arg.shinryouList?.map((a: any) => Shinryou.cast(a)) ?? [];
+    arg.conducts =
+      arg.conducts?.map((a: any) => CreateConductRequest.cast(a)) ?? [];
     return new CreateShinryouConductRequest(arg);
   }
 }
 
 export class ByoumeiMaster {
-  constructor(
-    public shoubyoumeicode: number, 
-    public name: string
-    ) {}
+  constructor(public shoubyoumeicode: number, public name: string) {}
 
   static cast(arg: any): ByoumeiMaster {
-    return new ByoumeiMaster(
-      arg.shoubyoumeicode, 
-      arg.name
-  
-    )
+    return new ByoumeiMaster(arg.shoubyoumeicode, arg.name);
   }
 
   static isByoumeiMaster(arg: any): arg is ByoumeiMaster {
@@ -982,17 +956,10 @@ export class ByoumeiMaster {
 }
 
 export class ShuushokugoMaster {
-  constructor(
-    public shuushokugocode: number, 
-    public name: string
-    ) {}
+  constructor(public shuushokugocode: number, public name: string) {}
 
   static cast(arg: any): ShuushokugoMaster {
-    return new ShuushokugoMaster(
-      arg.shuushokugocode, 
-      arg.name
-  
-    )
+    return new ShuushokugoMaster(arg.shuushokugocode, arg.name);
   }
 
   get isPrefix(): boolean {
@@ -1013,6 +980,10 @@ export class ShuushokugoMaster {
 
 export class DiseaseEndReasonType {
   constructor(public code: string, public label: string) {}
+
+  static cast(arg: any): DiseaseEndReasonType {
+    return DiseaseEndReasonType.fromCode(arg);
+  }
 
   static fromCode(code: string): DiseaseEndReasonType {
     for (let e of Object.values(DiseaseEndReason)) {
@@ -1042,6 +1013,22 @@ export class Disease {
     public endDate: string,
     public endReasonStore: string
   ) {}
+
+  static cast(arg: any): Disease {
+    return new Disease(
+      arg.diseaseId,
+      arg.patientId,
+      arg.shoubyoumeicode,
+      arg.startDate,
+      arg.endDate,
+      arg.endReasonStore
+  
+    )
+  }
+
+  get endReason(): DiseaseEndReasonType {
+    return DiseaseEndReasonType.fromCode(this.endReasonStore);
+  }
 }
 
 export class DiseaseAdj {
@@ -1050,6 +1037,15 @@ export class DiseaseAdj {
     public diseaseId: number,
     public shuushokugocode: number
   ) {}
+
+  static cast(arg: any): DiseaseAdj {
+    return new DiseaseAdj(
+      arg.diseaseAdjId,
+      arg.diseaseId,
+      arg.shuushokugocode
+  
+    )
+  }
 }
 
 export class DiseaseEnterData {
@@ -1059,6 +1055,16 @@ export class DiseaseEnterData {
     public startDate: string,
     public adjCodes: number[]
   ) {}
+
+  static cast(arg: any): DiseaseEnterData {
+    return new DiseaseEnterData(
+      arg.patientId,
+      arg.byoumeicode,
+      arg.startDate,
+      arg.adjCodes
+  
+    )
+  }
 }
 
 export class DiseaseExample {
@@ -1067,6 +1073,15 @@ export class DiseaseExample {
     public preAdjList: string[],
     public postAdjList: string[]
   ) {}
+
+  static cast(arg: any): DiseaseExample {
+    return new DiseaseExample(
+      arg.byoumei,
+      arg.preAdjList,
+      arg.postAdjList
+  
+    )
+  }
 
   get repr(): string {
     return [...this.preAdjList, this.byoumei || "", ...this.postAdjList].join(
@@ -1091,6 +1106,16 @@ export class Hotline {
     public sender: string,
     public recipient: string
   ) {}
+
+  static cast(arg: any): Hotline {
+    return new Hotline(
+      arg.message,
+      arg.sender,
+      arg.recipient
+  
+    )
+
+  }
 }
 
 export class HotlineEx extends Hotline {
@@ -1106,14 +1131,32 @@ export class HotlineEx extends Hotline {
 
 export class HotlineBeep {
   constructor(public recipient: string) {}
+  
+  static cast(arg: any): HotlineBeep {
+    return new HotlineBeep(
+      arg.recipient
+    )
+  }
 }
 
 export class EventIdNotice {
   constructor(public currentEventId: number) {}
+
+  static cast(arg: any): EventIdNotice {
+    return new EventIdNotice(
+      arg.currentEventId
+    )
+  }
 }
 
 export class HeartBeat {
   constructor(public heartBeatSerialId: number) {}
+
+  static cast(arg: any): HeartBeat {
+    return new HeartBeat(
+      arg.heartBeatSerialId
+    )
+  }
 }
 
 export class AppEvent {
@@ -1124,6 +1167,17 @@ export class AppEvent {
     public kind: string,
     public data: string
   ) {}
+
+  static cast(arg: any): AppEvent {
+    return new AppEvent(
+      arg.appEventId,
+      arg.createdAt,
+      arg.model,
+      arg.kind,
+      arg.data
+  
+    )
+  }
 }
 
 export class FileInfo {
@@ -1132,6 +1186,15 @@ export class FileInfo {
     public createdAt: string,
     public size: number
   ) {}
+
+  static cast(arg: any): FileInfo {
+    return new FileInfo(
+      arg.name,
+      arg.createdAt,
+      arg.size,
+  
+    )
+  }
 }
 
 export class PrescExample {
@@ -1139,10 +1202,24 @@ export class PrescExample {
     public prescExampleId: number,
     public iyakuhincode: number,
     public masterValidFrom: string,
-    public amount: String,
-    public usage: String,
+    public amount: string,
+    public usage: string,
     public days: number,
     public category: number,
-    public comment: String
+    public comment: string
   ) {}
+
+  static cast(arg: any): PrescExample {
+    return new PrescExample(
+      arg.prescExampleId,
+      arg.iyakuhincode,
+      arg.masterValidFrom,
+      arg.amount,
+      arg.usage,
+      arg.days,
+      arg.category,
+      arg.comment
+  
+    )
+  }
 }
