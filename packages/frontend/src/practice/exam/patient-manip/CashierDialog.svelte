@@ -46,7 +46,7 @@
       return [];
     } else {
       return meisai.items.map((item) => {
-        const label: string = item.section;
+        const label: string = item.section.label;
         const subtotal: number = item.totalTen;
         return `${label}：${subtotal}点`;
       });

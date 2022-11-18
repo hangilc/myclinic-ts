@@ -1,4 +1,4 @@
-import type * as m from "myclinic-model"
+import * as m from "myclinic-model"
 import { dateToSql } from "./util"
 import { dateParam, dateTimeParam } from "./date-param"
 import type { Op as DrawerOp, Op } from "./drawer/op"
@@ -210,8 +210,8 @@ export default {
     return post("shohousen-drawer", text);
   },
 
-  getMeisai(visitId: number): Promise<m.Meisai> {
-    return get("get-meisai", { "visit-id": visitId });
+  async getMeisai(visitId: number): Promise<m.Meisai> {
+    return m.Meisai.cast(await get("get-meisai", { "visit-id": visitId }));
   },
 
   drawReceipt(data: ReceiptDrawerData): Promise<Op[]> {

@@ -74,6 +74,12 @@ export class Wqueue {
   get waitStateType(): WqueueStateType {
     return WqueueStateType.fromCode(this.waitState);
   }
+
+  static cast(arg: any): Wqueue {
+    return new Wqueue(
+      arg.visitId, arg.waitState
+    )
+  }
 }
 
 export class Shahokokuho {
@@ -520,16 +526,31 @@ export class VisitEx {
   }
 }
 
-export enum MeisaiSectionEnum {
-  ShoshinSaisin = "初・再診料",
-  IgakuKanri = "医学管理等",
-  Zaitaku = "在宅医療",
-  Kensa = "検査",
-  Gazou = "画像診断",
-  Touyaku = "投薬",
-  Chuusha = "注射",
-  Shochi = "処置",
-  Sonota = "その他",
+export class MeisaiSectionType {
+  constructor(
+    public label: string
+  ) {}
+
+  static fromString(s: string): MeisaiSectionType {
+    for(let e of Object.values(MeisaiSectionEnum) ){
+      if( e.label === s ){
+        return e;
+      }
+    }
+    throw new Error("Cannot find meisai section enum for: " + s);
+  }
+}
+
+export const MeisaiSectionEnum: Record<string, MeisaiSectionType>  = {
+  ShoshinSaisin: new MeisaiSectionType("初・再診料"),
+  IgakuKanri: new MeisaiSectionType("医学管理等"),
+  Zaitaku: new MeisaiSectionType("在宅医療"),
+  Kensa: new MeisaiSectionType("検査"),
+  Gazou: new MeisaiSectionType("画像診断"),
+  Touyaku: new MeisaiSectionType("投薬"),
+  Chuusha: new MeisaiSectionType("注射"),
+  Shochi: new MeisaiSectionType("処置"),
+  Sonota: new MeisaiSectionType("その他"),
 }
 
 export class MeisaiSectionItem {
@@ -542,11 +563,17 @@ export class MeisaiSectionItem {
   get totalTen(): number {
     return this.tanka * this.count;
   }
+
+  static cast(arg: any): MeisaiSectionItem {
+    return new MeisaiSectionItem(
+      arg.tanka, arg.count, arg.label
+    )
+  }
 }
 
 export class MeisaiSectionData {
   constructor(
-    public section: MeisaiSectionEnum,
+    public section: MeisaiSectionType,
     public entries: MeisaiSectionItem[]
   ) {}
 
@@ -554,6 +581,13 @@ export class MeisaiSectionData {
     return this.entries.reduce((acc, ele) => {
       return acc + ele.totalTen;
     }, 0);
+  }
+
+  static cast(arg: any): MeisaiSectionData {
+    return new MeisaiSectionData(
+      MeisaiSectionType.fromString(arg.section),
+      arg.entries.map((e: any) => MeisaiSectionItem.cast(e))
+    );
   }
 }
 
@@ -568,6 +602,14 @@ export class Meisai {
     return this.items.reduce((acc, ele) => {
       return acc + ele.totalTen;
     }, 0);
+  }
+
+  static cast(arg: any): Meisai {
+    return new Meisai(
+      arg.items.map((a: any) => MeisaiSectionData.cast(a)),
+      arg.futanWari,
+      arg.charge
+    );
   }
 }
 
