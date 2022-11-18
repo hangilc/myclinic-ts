@@ -423,12 +423,7 @@ export class Shinryou {
   ) {}
 
   static cast(arg: any): Shinryou {
-    return new Shinryou(
-      arg.shinryouId,
-      arg.visitId,
-      arg.shinryoucode
-  
-    )
+    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode);
   }
 }
 
@@ -446,7 +441,7 @@ export class ShinryouEx {
       arg.visitId,
       arg.shinryoucode,
       ShinryouMaster.cast(arg.master)
-    )
+    );
   }
 }
 
@@ -466,8 +461,7 @@ export class ConductDrugEx {
       arg.iyakuhincode,
       arg.amount,
       IyakuhinMaster.cast(arg.master)
-  
-    )
+    );
   }
 }
 
@@ -478,6 +472,15 @@ export class ConductShinryouEx {
     public shinryoucode: number,
     public master: ShinryouMaster
   ) {}
+
+  static cast(arg: any): ConductShinryouEx {
+    return new ConductShinryouEx(
+      arg.conductShinryouId,
+      arg.conductId,
+      arg.shinryoucode,
+      ShinryouMaster.cast(arg.master)
+    );
+  }
 }
 
 export class ConductKizaiEx {
@@ -488,6 +491,16 @@ export class ConductKizaiEx {
     public amount: number,
     public master: KizaiMaster
   ) {}
+
+  static cast(arg: any): ConductKizaiEx {
+    return new ConductKizaiEx(
+      arg.conductKizaiId,
+      arg.conductId,
+      arg.kizaicode,
+      arg.amount,
+      KizaiMaster.cast(arg.master)
+    );
+  }
 }
 
 export class ConductKindType {
@@ -581,6 +594,16 @@ export class ConductEx {
     this.drugs = drugs;
     this.shinryouList = shinryouList;
     this.kizaiList = kizaiList;
+  }
+
+  static cast(arg: any): ConductEx {
+    arg = Object.assign({}, arg);
+    arg.drgs = arg.drugs?.map((a: any) => ConductDrugEx.cast(a)) ?? [];
+    arg.shinryouList = arg.shinryouList?.map((a: any) =>
+      ConductShinryouEx.cast(a)
+    );
+    arg.kizaiList = arg.kizaiList?.map((a: any) => ConductKizaiEx.cast(a));
+    return new ConductEx(arg);
   }
 
   static fromConduct(c: Conduct): ConductEx {
@@ -680,6 +703,21 @@ export class VisitEx {
     this.conducts = conducts;
     this.chargeOption = chargeOption;
     this.lastPayment = lastPayment;
+  }
+
+  static cast(arg: any): VisitEx {
+    arg = Object.assign({}, arg);
+    arg.patient = Patient.cast(arg.patient);
+    arg.hoken = HokenInfo.cast(arg.hoken);
+    arg.texts = arg.texts.map((a: any) => Text.cast(a));
+    arg.drugs = arg.drugs.map((a: any) => DrugEx.cast(a));
+    arg.shnryouList = arg.shnryouList.map((a: any) => ShinryouEx.cast(a));
+    arg.conducts = arg.conducts.map((a: any) => ConductEx.cast(a));
+    arg.chargeOption =
+      arg.chargeOption != undefined ? Charge.cast(arg.chargeOption) : undefined;
+    arg.lastPayment =
+      arg.lastPayment != undefined ? Payment.cast(arg.lastPayment) : undefined;
+    return new VisitEx(arg);
   }
 
   get attributes(): VisitAttributes | null {
@@ -791,10 +829,18 @@ export class Conduct {
     public visitId: number,
     public kindStore: number
   ) {}
+
+  static cast(arg: any): Conduct {
+    return new Conduct(arg.conductId, arg.visitId, arg.kindStore);
+  }
 }
 
 export class GazouLabel {
   constructor(public conductId: number, public label: string) {}
+
+  static cast(arg: any): GazouLabel {
+    return new GazouLabel(arg.conductId, arg.label);
+  }
 }
 
 export class ConductShinryou {
@@ -803,6 +849,14 @@ export class ConductShinryou {
     public conductId: number,
     public shinryoucode: number
   ) {}
+
+  static cast(arg: any): ConductShinryou {
+    return new ConductShinryou(
+      arg.conductShinryouId,
+      arg.conductId,
+      arg.shinryoucode
+    );
+  }
 }
 
 export class ConductDrug {
@@ -812,6 +866,15 @@ export class ConductDrug {
     public iyakuhincode: number,
     public amount: number
   ) {}
+
+  static cast(arg: any): ConductDrug {
+    return new ConductDrug(
+      arg.conductDrugId,
+      arg.conductId,
+      arg.iyakuhincode,
+      arg.amount
+    );
+  }
 }
 
 export class ConductKizai {
@@ -821,6 +884,15 @@ export class ConductKizai {
     public kizaicode: number,
     public amount: number
   ) {}
+
+  static cast(arg: any): ConductKizai {
+    return new ConductKizai(
+      arg.conductKizaiId,
+      arg.conductId,
+      arg.kizaicode,
+      arg.amount
+      );
+  }
 }
 
 export class CreateConductRequest {
@@ -853,6 +925,14 @@ export class CreateConductRequest {
     this.drugs = drugs;
     this.kizaiList = kizaiList;
   }
+
+  static cast(arg: any): CreateConductRequest {
+    arg = Object.assign({}, arg);
+    arg.shinryouList = arg.shinryouList?.map((a: any) => ConductShinryou.cast(a)) ?? [];
+    arg.drugs = arg.drugs?.map((a: any) => ConductDrug.cast(a)) ?? [];
+    arg.kizaiList = arg.kizaiList?.map((a: any) => ConductKizai.cast(a)) ?? [];
+    return new CreateConductRequest(arg)
+  }
 }
 
 export class CreateShinryouConductRequest {
@@ -869,10 +949,27 @@ export class CreateShinryouConductRequest {
     this.shinryouList = shinryouList;
     this.conducts = conducts;
   }
+
+  static cast(arg: any): CreateShinryouConductRequest {
+    arg.shinryouList = arg.shinryouList?.map((a: any) => Shinryou.cast(a)) ?? [];
+    arg.conducts = arg.conducts?.map((a: any) => CreateConductRequest.cast(a)) ?? [];
+    return new CreateShinryouConductRequest(arg);
+  }
 }
 
 export class ByoumeiMaster {
-  constructor(public shoubyoumeicode: number, public name: string) {}
+  constructor(
+    public shoubyoumeicode: number, 
+    public name: string
+    ) {}
+
+  static cast(arg: any): ByoumeiMaster {
+    return new ByoumeiMaster(
+      arg.shoubyoumeicode, 
+      arg.name
+  
+    )
+  }
 
   static isByoumeiMaster(arg: any): arg is ByoumeiMaster {
     return (
@@ -885,7 +982,18 @@ export class ByoumeiMaster {
 }
 
 export class ShuushokugoMaster {
-  constructor(public shuushokugocode: number, public name: string) {}
+  constructor(
+    public shuushokugocode: number, 
+    public name: string
+    ) {}
+
+  static cast(arg: any): ShuushokugoMaster {
+    return new ShuushokugoMaster(
+      arg.shuushokugocode, 
+      arg.name
+  
+    )
+  }
 
   get isPrefix(): boolean {
     return this.shuushokugocode < ShuushokugoMaster.smallestPostfixCode;
