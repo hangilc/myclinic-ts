@@ -21,8 +21,8 @@ export class Patient {
       arg.sex,
       arg.birthday,
       arg.address,
-      arg.phone,
-      );
+      arg.phone
+    );
   }
 }
 
@@ -42,8 +42,15 @@ export class Visit {
 
   static cast(arg: any): Visit {
     return new Visit(
-      arg.visitId, arg.patientId, arg.visitedAt, arg.shahokokuhoId,
-      arg.roujinId, arg.kouhi1Id, arg.kouhi2Id, arg.kouhi3Id, arg.koukikoureiId,
+      arg.visitId,
+      arg.patientId,
+      arg.visitedAt,
+      arg.shahokokuhoId,
+      arg.roujinId,
+      arg.kouhi1Id,
+      arg.kouhi2Id,
+      arg.kouhi3Id,
+      arg.koukikoureiId,
       arg.attributesStore
     );
   }
@@ -98,9 +105,7 @@ export class Wqueue {
   }
 
   static cast(arg: any): Wqueue {
-    return new Wqueue(
-      arg.visitId, arg.waitState
-    )
+    return new Wqueue(arg.visitId, arg.waitState);
   }
 }
 
@@ -129,8 +134,8 @@ export class Shahokokuho {
       arg.validFrom,
       arg.validUpto,
       arg.koureiStore,
-      arg.edaban,
-    )
+      arg.edaban
+    );
   }
 }
 
@@ -153,7 +158,7 @@ export class Roujin {
       arg.jukyuusha,
       arg.futanWari,
       arg.validFrom,
-      arg.validUpto,
+      arg.validUpto
     );
   }
 }
@@ -168,6 +173,18 @@ export class Koukikourei {
     public validFrom: string,
     public validUpto: string
   ) {}
+
+  static cast(arg: any): Koukikourei {
+    return new Koukikourei(
+      arg.koukikoureiId,
+      arg.patientId,
+      arg.hokenshaBangou,
+      arg.hihokenshaBangou,
+      arg.futanWari,
+      arg.validFrom,
+      arg.validUpto
+    );
+  }
 }
 
 export class Kouhi {
@@ -179,6 +196,17 @@ export class Kouhi {
     public validUpto: string,
     public patientId: number
   ) {}
+
+  static cast(arg: any): Kouhi {
+    return new Kouhi(
+      arg.kouhiId,
+      arg.futansha,
+      arg.jukyuusha,
+      arg.validFrom,
+      arg.validUpto,
+      arg.patientId
+    );
+  }
 }
 
 export class HokenInfo {
@@ -204,8 +232,8 @@ export class HokenInfo {
     this.kouhiList = kouhiList ?? [];
   }
 
-  static createBlank(): HokenInfo {
-    return new HokenInfo({});
+  static cast(arg: any): HokenInfo {
+    return new HokenInfo(arg);
   }
 }
 
@@ -218,6 +246,17 @@ export class HokenIdSet {
     public kouhi2Id: number,
     public kouhi3Id: number
   ) {}
+
+  static cast(arg: any): HokenIdSet {
+    return new HokenIdSet(
+      arg.shahokokuhoId,
+      arg.koukikoureiId,
+      arg.roujinId,
+      arg.kouhi1Id,
+      arg.kouhi2Id,
+      arg.kouhi3Id
+    );
+  }
 }
 
 export class Text {
@@ -226,10 +265,18 @@ export class Text {
     public visitId: number,
     public content: string
   ) {}
+
+  static cast(arg: any): Text {
+    return new Text(arg.textId, arg.visitId, arg.content);
+  }
 }
 
 export class Charge {
   constructor(public visitId: number, public charge: number) {}
+
+  static cast(arg: any): Charge {
+    return new Charge(arg.visitId, arg.charge);
+  }
 }
 
 export class Payment {
@@ -238,6 +285,10 @@ export class Payment {
     public amount: number,
     public paytime: string
   ) {}
+
+  static cast(arg: any): Payment {
+    return new Payment(arg.visitId, arg.amount, arg.paytime);
+  }
 }
 
 export class IyakuhinMaster {
@@ -254,6 +305,22 @@ export class IyakuhinMaster {
     public validFrom: string,
     public validUpto: string
   ) {}
+
+  static cast(arg: any): IyakuhinMaster {
+    return new IyakuhinMaster(
+      arg.iyakuhincode,
+      arg.yakkacode,
+      arg.name,
+      arg.yomi,
+      arg.unit,
+      arg.yakkaStore,
+      arg.madoku,
+      arg.kouhatsu,
+      arg.zaikei,
+      arg.validFrom,
+      arg.validUpto
+    );
+  }
 }
 
 export class ShinryouMaster {
@@ -269,6 +336,21 @@ export class ShinryouMaster {
     public validFrom: string,
     public validUpto: string
   ) {}
+
+  static cast(arg: any): ShinryouMaster {
+    return new ShinryouMaster(
+      arg.shinryoucode,
+      arg.name,
+      arg.tensuuStore,
+      arg.tensuuShikibetsu,
+      arg.shuukeisaki,
+      arg.houkatsukensa,
+      arg.oushinkubun,
+      arg.kensagroup,
+      arg.validFrom,
+      arg.validUpto
+    );
+  }
 }
 
 export class KizaiMaster {
@@ -281,6 +363,18 @@ export class KizaiMaster {
     public validFrom: string,
     public validUpto: string
   ) {}
+
+  static cast(arg: any): KizaiMaster {
+    return new KizaiMaster(
+      arg.kizaicode,
+      arg.name,
+      arg.yomi,
+      arg.unit,
+      arg.kingakuStore,
+      arg.validFrom,
+      arg.validUpto
+    );
+  }
 }
 
 export class DrugCategoryType {
@@ -305,6 +399,20 @@ export class DrugEx {
     public prescribed: boolean,
     public master: IyakuhinMaster
   ) {}
+
+  static cast(arg: any): DrugEx {
+    return new DrugEx(
+      arg.drugId,
+      arg.visitId,
+      arg.iyakuhincode,
+      arg.amount,
+      arg.usage,
+      arg.days,
+      arg.categoryStore,
+      arg.prescribed,
+      IyakuhinMaster.cast(arg.master)
+    );
+  }
 }
 
 export class Shinryou {
@@ -313,6 +421,15 @@ export class Shinryou {
     public visitId: number,
     public shinryoucode: number
   ) {}
+
+  static cast(arg: any): Shinryou {
+    return new Shinryou(
+      arg.shinryouId,
+      arg.visitId,
+      arg.shinryoucode
+  
+    )
+  }
 }
 
 export class ShinryouEx {
@@ -322,6 +439,15 @@ export class ShinryouEx {
     public shinryoucode: number,
     public master: ShinryouMaster
   ) {}
+
+  static cast(arg: any): ShinryouEx {
+    return new ShinryouEx(
+      arg.shinryouId,
+      arg.visitId,
+      arg.shinryoucode,
+      ShinryouMaster.cast(arg.master)
+    )
+  }
 }
 
 export class ConductDrugEx {
@@ -332,6 +458,17 @@ export class ConductDrugEx {
     public amount: number,
     public master: IyakuhinMaster
   ) {}
+
+  static cast(arg: any): ConductDrugEx {
+    return new ConductDrugEx(
+      arg.conductDrugId,
+      arg.conductId,
+      arg.iyakuhincode,
+      arg.amount,
+      IyakuhinMaster.cast(arg.master)
+  
+    )
+  }
 }
 
 export class ConductShinryouEx {
@@ -367,8 +504,8 @@ export class ConductKindType {
   }
 
   get key(): ConductKindKey {
-    for(let k of Object.keys(ConductKind)){
-      if( ConductKind[k].code == this.code ){
+    for (let k of Object.keys(ConductKind)) {
+      if (ConductKind[k].code == this.code) {
         return k;
       }
     }
@@ -566,13 +703,11 @@ export class VisitEx {
 }
 
 export class MeisaiSectionType {
-  constructor(
-    public label: string
-  ) {}
+  constructor(public label: string) {}
 
   static fromString(s: string): MeisaiSectionType {
-    for(let e of Object.values(MeisaiSectionEnum) ){
-      if( e.label === s ){
+    for (let e of Object.values(MeisaiSectionEnum)) {
+      if (e.label === s) {
         return e;
       }
     }
@@ -580,7 +715,7 @@ export class MeisaiSectionType {
   }
 }
 
-export const MeisaiSectionEnum: Record<string, MeisaiSectionType>  = {
+export const MeisaiSectionEnum: Record<string, MeisaiSectionType> = {
   ShoshinSaisin: new MeisaiSectionType("初・再診料"),
   IgakuKanri: new MeisaiSectionType("医学管理等"),
   Zaitaku: new MeisaiSectionType("在宅医療"),
@@ -590,7 +725,7 @@ export const MeisaiSectionEnum: Record<string, MeisaiSectionType>  = {
   Chuusha: new MeisaiSectionType("注射"),
   Shochi: new MeisaiSectionType("処置"),
   Sonota: new MeisaiSectionType("その他"),
-}
+};
 
 export class MeisaiSectionItem {
   constructor(
@@ -604,9 +739,7 @@ export class MeisaiSectionItem {
   }
 
   static cast(arg: any): MeisaiSectionItem {
-    return new MeisaiSectionItem(
-      arg.tanka, arg.count, arg.label
-    )
+    return new MeisaiSectionItem(arg.tanka, arg.count, arg.label);
   }
 }
 
