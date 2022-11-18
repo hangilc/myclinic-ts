@@ -117,6 +117,21 @@ export class Shahokokuho {
     public koureiStore: number,
     public edaban: string
   ) {}
+
+  static cast(arg: any): Shahokokuho {
+    return new Shahokokuho(
+      arg.shahokokuhoId,
+      arg.patientId,
+      arg.hokenshaBangou,
+      arg.hihokenshaKigou,
+      arg.hihokenshaBangou,
+      arg.honninStore,
+      arg.validFrom,
+      arg.validUpto,
+      arg.koureiStore,
+      arg.edaban,
+    )
+  }
 }
 
 export class Roujin {
@@ -129,16 +144,18 @@ export class Roujin {
     public validFrom: string,
     public validUpto: string
   ) {}
-}
 
-export interface Koukikourei {
-  koukikoureiId: number;
-  patientId: number;
-  hokenshaBangou: string;
-  hihokenshaBangou: string;
-  futanWari: number;
-  validFrom: string;
-  validUpto: string;
+  static cast(arg: any): Roujin {
+    return new Roujin(
+      arg.roujinId,
+      arg.patientId,
+      arg.shichouson,
+      arg.jukyuusha,
+      arg.futanWari,
+      arg.validFrom,
+      arg.validUpto,
+    );
+  }
 }
 
 export class Koukikourei {
