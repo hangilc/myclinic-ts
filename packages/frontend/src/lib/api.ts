@@ -163,7 +163,11 @@ function castOption<T>(cast: Caster<T>): Caster<T | null> {
 
 export default {
   getPatient(patientId: number): Promise<m.Patient> {
-    return get("get-patient", { "patient-id": patientId.toString() }, m.Patient.cast);
+    return get(
+      "get-patient",
+      { "patient-id": patientId.toString() },
+      m.Patient.cast
+    );
   },
 
   async searchPatient(text: string): Promise<Array<m.Patient>> {
@@ -237,30 +241,48 @@ export default {
   },
 
   startVisit(patientId: number, at: string | Date): Promise<m.Visit> {
-    return get("start-visit", {
-      "patient-id": patientId,
-      at: dateTimeParam(at),
-    });
+    return get(
+      "start-visit",
+      {
+        "patient-id": patientId.toString(),
+        at: dateTimeParam(at),
+      },
+      m.Visit.cast
+    );
   },
 
   updateVisit(visit: m.Visit): Promise<boolean> {
-    return post("update-visit", visit);
+    return post("update-visit", visit, {}, castBoolean);
   },
 
-  listRecentVisit(offset: number, count: number): Promise<Array<m.Visit>> {
-    return get("list-recent-visit", { offset, count });
+  listRecentVisit(offset: number, count: number): Promise<m.Visit[]> {
+    return get(
+      "list-recent-visit",
+      { offset: offset.toString(), count: count.toString() },
+      castList(m.Visit.cast)
+    );
   },
 
   listRecentVisitFull(
     offset: number,
     count: number
-  ): Promise<Array<[m.Visit, m.Patient]>> {
-    return get("list-recent-visit-full", { offset, count });
+  ): Promise<[m.Visit, m.Patient][]> {
+    return get(
+      "list-recent-visit-full",
+      {
+        offset: offset.toString(),
+        count: count.toString(),
+      },
+      castList(castPair(m.Visit.cast, m.Patient.cast))
+    );
   },
 
-  listVisitByDate(date: Date): Promise<m.Visit[]> {
-    const at = dateToSql(date);
-    return get("list-visit-by-date", { at });
+  listVisitByDate(date: string | Date): Promise<m.Visit[]> {
+    return get(
+      "list-visit-by-date",
+      { at: dateParam(date) },
+      castList(m.Visit.cast)
+    );
   },
 
   listVisitIdByPatientReverse(
@@ -269,18 +291,20 @@ export default {
     count: number
   ): Promise<number[]> {
     return get("list-visit-id-by-patient-reverse", {
-      "patient-id": patientId,
-      offset,
-      count,
-    });
+      "patient-id": patientId.toString(),
+      offset: offset.toString(),
+      count: count.toString(),
+    }, castList(castNumber));
   },
 
   batchGetVisit(visitIds: number[]): Promise<Record<number, m.Visit>> {
-    return post("batch-get-visit", visitIds);
+    return post("batch-get-visit", visitIds, {},
+    castObject(castNumber, m.Visit.cast));
   },
 
   batchGetVisitEx(visitIds: number[]): Promise<m.VisitEx[]> {
-    return post("batch-get-visit-ex", visitIds);
+    return post("batch-get-visit-ex", visitIds, {},
+    castList(m.VisitEx.cast));
   },
 
   getVisit(visitId: number): Promise<m.Visit> {
