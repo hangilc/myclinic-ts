@@ -8,12 +8,15 @@
     ShuushokugoMaster,
     type DiseaseEndReasonType,
     type DiseaseData,
-    Disease,
   } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import type {
-    SearchResultType,
+  import {
+    resolveDiseaseExample,
+    EditData,
+    type SearchResultType,
+    startDateRep,
+    endDateRep,
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
   import { dateToSql } from "@/lib/util";
@@ -21,93 +24,116 @@
 
   export let list: DiseaseData[];
 
-  let curDisease: Writable<Disease | null> = writable(null);
-  let curByoumeiMaster: Writable<ByoumeiMaster | null> = writable(null);
-  let curStartDate
+  let data: EditData | undefined = undefined;
 
-  let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
-  let startDate: Date = new Date();
+  let startDate: Date | null = null;
   let startDateErrors: string[] = [];
   let endDate: Date | null = null;
   let endDateErrors: string[] = [];
   let endReason: DiseaseEndReasonType = DiseaseEndReason.NotEnded;
   let searchSelect: Writable<SearchResultType | null> = writable(null);
+  let diseaseDataSelected: Writable<DiseaseData | null> = writable(null);
 
-  searchSelect.subscribe((sel) => {
-    if ($selected != null) {
-      const data = $selected.clone();
+  searchSelect.subscribe(async (sel) => {
+    if (data != undefined && startDate != null) {
       if (ByoumeiMaster.isByoumeiMaster(sel)) {
-        data.disease.shoubyoumeicode = sel.shoubyoumeicode;
-        data.byoumeiMaster = sel;
-        selected.set(data);
+        data.setByoumeiMaster(sel);
+        name = data.fullName;
       } else if (ShuushokugoMaster.isShuushokugoMaster(sel)) {
-        $selected[2];
+        data.addToShuushokugoList(sel);
+        name = data.fullName;
       } else if (DiseaseExample.isDiseaseExample(sel)) {
+        const [b, as] = await resolveDiseaseExample(sel, startDate);
+        if (b != null) {
+          data.setByoumeiMaster(b);
+        }
+        data.addToShuushokugoList(...as);
       }
     }
   });
 
-  selected.subscribe((sel) => {
-    if (sel != null) {
-      console.log("sel updated", sel);
-      name = fullName(sel);
-      startDate = startDateOf(sel);
-      endDate = endDateOf(sel);
-      endReason = getEndReason(sel);
+  function clearData(): void {
+    data = undefined;
+    name = "";
+    startDate = null;
+    startDateErrors = [];
+    endDate = null;
+    endDateErrors = [];
+    endReason = DiseaseEndReason.NotEnded;
+    searchSelect.set(null);
+  }
+
+  function setData(dd: DiseaseData): void {
+    data = new EditData(dd);
+    name = data.fullName;
+    startDate = data.startDate;
+    startDateErrors = [];
+    endDate = data.endDate ?? null;
+    endDateErrors = [];
+    endReason = data.endReason;
+    searchSelect.set(null);
+  }
+
+  diseaseDataSelected.subscribe((dd) => {
+    if (dd == null) {
+      clearData();
+    } else {
+      setData(dd);
     }
   });
 
   const gengouList = ["平成", "令和"];
 
   function formatAux(data: DiseaseData): string {
-    const reason = getEndReason(data);
-    const start = startDateRep(data);
+    const reason = data.endReason;
+    const start = startDateRep(data.startDate);
     let end: string = "";
-    if (hasEndDate(data)) {
-      end = ` - ${endDateRep(data)}`;
+    const endDate = data.endDate;
+    if (endDate != null) {
+      end = ` - ${endDateRep(endDate)}`;
     }
     return `${reason.label}、${start}${end}`;
   }
 
   async function doEnter() {
-    if ($selected == null) {
+    if (data == null) {
       return;
     }
-    const data = copyDiseaseData($selected);
     if (startDate == null) {
       alert("エラー：開始日が設定されていません。");
       return;
     }
-    data[0].startDate = dateToSql(startDate);
-    data[0].endDate = endDate == null ? "0000-00-00" : dateToSql(endDate);
-    data[0].endReasonStore = endReason.code;
-    if (data[0].endReasonStore === "N") {
-      data[0].endDate = "0000-00-00";
+    data.setStartDate(startDate);
+    data.setEndDate(endDate ?? undefined);
+    data.setEndReason(endReason);
+    if (data.endReason === DiseaseEndReason.NotEnded) {
+      data.setEndDate(undefined);
     }
     if (
       !(
-        data[0].endDate === "0000-00-00" || data[0].startDate <= data[0].endDate
+        data.disease.endDate === "0000-00-00" ||
+        data.disease.startDate <= data.disease.endDate
       )
     ) {
       alert("エラー：開始日が終了日の後です。");
       return;
     }
     await api.updateDiseaseEx(
-      data[0],
-      data[2].map((e) => e[0].shuushokugocode)
+      data.disease,
+      data.shuushokugocodes
     );
-    selected.set(null);
+    clearData();
   }
 
   function doCancel(): void {
-    selected.set(null);
+    clearData();
   }
 </script>
 
 <div>
   <div>
-    {#if $selected != null}
+    {#if data != undefined}
       <div>
         <div>名前：{name}</div>
         <div class="date-wrapper start-date">

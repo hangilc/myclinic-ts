@@ -3,7 +3,7 @@
   import type { AppError } from "../app-error";
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
-  export let date: Date | null;
+  export let date: Date | null | undefined;
   export let errors: string[];
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();

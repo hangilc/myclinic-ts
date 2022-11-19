@@ -1,3 +1,58 @@
+export function padNumber(n: number | string, finalSize: number, pad: string) {
+  let s: string;
+  if (typeof n === "number") {
+    s = n.toString();
+  } else {
+    s = n;
+  }
+  while (s.length < finalSize) {
+    s = pad + s;
+  }
+  return s;
+}
+
+export function dateToSqlDate(d: Date): string {
+  const year: number = d.getFullYear();
+  const month: number = d.getMonth() + 1;
+  const day: number = d.getDate();
+  return `${padNumber(year, 4, "0")}-${padNumber(month, 2, "0")}-${padNumber(
+    day,
+    2,
+    "0"
+  )}`;
+}
+
+export function optionalDateToSqlDate(d: Date | undefined): string {
+  if( d == null ){
+    return "0000-00-00";
+  } else {
+    return dateToSqlDate(d);
+  }
+}
+
+export function dateToSqlTime(d: Date): string {
+  const hours: number = d.getHours();
+  const minutes: number = d.getMinutes();
+  const seconds: number = d.getSeconds();
+  return `${padNumber(hours, 2, "0")}:${padNumber(minutes, 2, "0")}:${padNumber(
+    seconds,
+    2,
+    "0"
+  )}`;
+}
+
+export function dateToSqlDateTime(d: Date): string {
+  return `${dateToSqlDate(d)} ${dateToSqlTime(d)}`;
+}
+
+export function stringToOptionalDate(s: string): Date | undefined {
+  if( s == null || s === "0000-00-00" ) {
+    return undefined;
+  } else {
+    return new Date(s);
+  }
+}
+
 export class Patient {
   constructor(
     public patientId: number,
@@ -953,6 +1008,11 @@ export class ByoumeiMaster {
       typeof arg.name === "string"
     );
   }
+
+  fullName(adj: ShuushokugoMaster[]): string {
+    const [pres, posts] = ShuushokugoMaster.classify(adj);
+    return pres.join("") + this.name + posts.join("");
+  }
 }
 
 export class ShuushokugoMaster {
@@ -964,6 +1024,18 @@ export class ShuushokugoMaster {
 
   get isPrefix(): boolean {
     return this.shuushokugocode < ShuushokugoMaster.smallestPostfixCode;
+  }
+
+  static classify(
+    list: ShuushokugoMaster[]
+  ): [ShuushokugoMaster[], ShuushokugoMaster[]] {
+    const pres: ShuushokugoMaster[] = [];
+    const posts: ShuushokugoMaster[] = [];
+    list.forEach((m) => {
+      const list = m.isPrefix ? pres : posts;
+      list.push(m);
+    });
+    return [pres, posts];
   }
 
   static smallestPostfixCode = 8000;
@@ -1126,6 +1198,10 @@ export class DiseaseData {
     );
   }
 
+  get shuushokugoMasters(): ShuushokugoMaster[] {
+    return this.adjList.map((tpl) => tpl[1]);
+  }
+
   static castFromTuple(tuple: any[]): DiseaseData {
     return new DiseaseData(
       Disease.cast(tuple[0]),
@@ -1138,14 +1214,19 @@ export class DiseaseData {
   }
 
   get fullName(): string {
-    const pres: string[] = [];
-    const posts: string[] = [];
-    this.adjList.forEach((tuple) => {
-      const [_adj, master] = tuple;
-      const list: string[] = master.isPrefix ? pres : posts;
-      list.push(master.name);
-    });
-    return pres.join("") + this.byoumeiMaster.name + posts.join("");
+    return this.byoumeiMaster.fullName(this.shuushokugoMasters);
+  }
+
+  get startDate(): Date {
+    return this.disease.startDateAsDate;
+  }
+
+  get endDate(): Date | undefined {
+    return stringToOptionalDate(this.disease.endDate);
+  }
+
+  get endReason(): DiseaseEndReasonType {
+    return DiseaseEndReasonType.fromCode(this.disease.endReasonStore);
   }
 }
 
