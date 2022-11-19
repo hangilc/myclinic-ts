@@ -1088,6 +1088,25 @@ export class DiseaseExample {
   }
 }
 
+export class DiseaseData {
+  constructor(
+    public disease: Disease,
+    public byoumeiMaster: ByoumeiMaster,
+    public adjList: [DiseaseAdj, ShuushokugoMaster][]
+  ) {}
+
+  static castFromTuple(tuple: any[]): DiseaseData {
+    return new DiseaseData(
+      Disease.cast(tuple[0]),
+      ByoumeiMaster.cast(tuple[1]),
+      tuple[2].map((pair: any) => [
+        DiseaseAdj.cast(pair[0]),
+        ShuushokugoMaster.cast(pair[1]),
+      ])
+    );
+  }
+}
+
 export class Hotline {
   constructor(
     public message: string,
