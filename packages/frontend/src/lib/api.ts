@@ -709,8 +709,11 @@ export default {
   },
 
   deleteConductKizai(conductKizaiId: number): Promise<boolean> {
-    return get("delete-conduct-kizai", { "conduct-kizai-id": conductKizaiId.toString() },
-    castBoolean);
+    return get(
+      "delete-conduct-kizai",
+      { "conduct-kizai-id": conductKizaiId.toString() },
+      castBoolean
+    );
   },
 
   updateConduct(conduct: m.Conduct): Promise<boolean> {
@@ -726,82 +729,101 @@ export default {
   },
 
   updateChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
-    return get("update-charge-value", {
-      "visit-id": visitId.toString(),
-      "charge-value": chargeValue.toString(),
-    }, m.Charge.cast);
+    return get(
+      "update-charge-value",
+      {
+        "visit-id": visitId.toString(),
+        "charge-value": chargeValue.toString(),
+      },
+      m.Charge.cast
+    );
   },
 
-  listCurrentDiseaseEx(
-    patientId: number
-  ): Promise<
-    m.DiseaseData[]
-  > {
-    return get("list-current-disease-ex", {
-      "patient-id": patientId.toString(),
-    }, castList(m.DiseaseData.castFromTuple));
+  listCurrentDiseaseEx(patientId: number): Promise<m.DiseaseData[]> {
+    return get(
+      "list-current-disease-ex",
+      {
+        "patient-id": patientId.toString(),
+      },
+      castList(m.DiseaseData.castFromTuple)
+    );
   },
 
-  listDiseaseEx(
-    patientId: number
-  ): Promise<
-    m.DiseaseData[]
-  > {
-    return get("list-disease-ex", { "patient-id": patientId.toString() },
-    castList(m.DiseaseData.castFromTuple));
+  listDiseaseEx(patientId: number): Promise<m.DiseaseData[]> {
+    return get(
+      "list-disease-ex",
+      { "patient-id": patientId.toString() },
+      castList(m.DiseaseData.castFromTuple)
+    );
   },
 
   searchByoumeiMaster(
     text: string,
     at: Date | string
   ): Promise<m.ByoumeiMaster[]> {
-    return get("search-byoumei-master", {
-      text,
-      at: dateParam(at),
-    }, castList(m.ByoumeiMaster.cast));
+    return get(
+      "search-byoumei-master",
+      {
+        text,
+        at: dateParam(at),
+      },
+      castList(m.ByoumeiMaster.cast)
+    );
   },
 
   searchShuushokugoMaster(
     text: string,
     at: Date | string
   ): Promise<m.ShuushokugoMaster[]> {
-    return get("search-shuushokugo-master", {
-      text,
-      at: dateParam(at),
-    }, castList(m.ShuushokugoMaster.cast));
+    return get(
+      "search-shuushokugo-master",
+      {
+        text,
+        at: dateParam(at),
+      },
+      castList(m.ShuushokugoMaster.cast)
+    );
   },
 
   enterDiseaseEx(data: m.DiseaseEnterData): Promise<number> {
     return post("enter-disease-ex", data, {}, castNumber);
   },
 
-  getDiseaseEx(
-    diseaseId: number
-  ): Promise<
-    [m.Disease, m.ByoumeiMaster, [m.DiseaseAdj, m.ShuushokugoMaster][]]
-  > {
-    return get("get-disease-ex", { "disease-id": diseaseId });
+  getDiseaseEx(diseaseId: number): Promise<m.DiseaseData> {
+    return get(
+      "get-disease-ex",
+      { "disease-id": diseaseId.toString() },
+      m.DiseaseData.castFromTuple
+    );
   },
 
   resolveByoumeiMasterByName(
     name: string,
     at: Date | string
   ): Promise<m.ByoumeiMaster | null> {
-    return get("resolve-byoumei-master-by-name", { name, at: dateParam(at) });
+    return get(
+      "resolve-byoumei-master-by-name",
+      { name, at: dateParam(at) },
+      castOption(m.ByoumeiMaster.cast)
+    );
   },
 
   resolveShuushokugoMasterByName(
     name: string,
     at: Date | string
   ): Promise<m.ShuushokugoMaster | null> {
-    return get("resolve-shuushokugo-master-by-name", {
-      name,
-      at: dateParam(at),
-    });
+    return get(
+      "resolve-shuushokugo-master-by-name",
+      {
+        name,
+        at: dateParam(at),
+      },
+      castOption(m.ShuushokugoMaster.cast)
+    );
   },
 
   listDiseaseExample(): Promise<m.DiseaseExample[]> {
-    return get("list-disease-example", {});
+    return get("list-disease-example", {}, castList(m.DiseaseExample.cast));
   },
 
   listVisitByPatientReverse(
@@ -809,11 +831,15 @@ export default {
     offset: number,
     count: number
   ): Promise<m.Visit[]> {
-    return get("list-visit-by-patient-reverse", {
-      "patient-id": patientId.toString(),
-      offset: offset,
-      count: count,
-    });
+    return get(
+      "list-visit-by-patient-reverse",
+      {
+        "patient-id": patientId.toString(),
+        offset: offset.toString(),
+        count: count.toString(),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   endDisease(
@@ -821,41 +847,58 @@ export default {
     endDate: Date | string,
     endReason: string
   ): Promise<boolean> {
-    return get("end-disease", {
-      "disease-id": diseaseId,
-      "end-date": dateParam(endDate),
-      "end-reason": endReason,
-    });
+    return get(
+      "end-disease",
+      {
+        "disease-id": diseaseId.toString(),
+        "end-date": dateParam(endDate),
+        "end-reason": endReason,
+      },
+      castBoolean
+    );
   },
 
   updateDiseaseEx(
     disease: m.Disease,
     shuushokugocodes: number[]
   ): Promise<boolean> {
-    return post("update-disease-ex", [disease, shuushokugocodes]);
+    return post(
+      "update-disease-ex",
+      [disease, shuushokugocodes],
+      {},
+      castBoolean
+    );
   },
 
   listAppEventSince(fromEventId: number): Promise<m.AppEvent[]> {
-    return get("list-app-event-since", { from: fromEventId });
+    return get(
+      "list-app-event-since",
+      { from: fromEventId.toString() },
+      castList(m.AppEvent.cast)
+    );
   },
 
   listTodaysHotline(): Promise<m.AppEvent[]> {
-    return get("list-todays-hotline", {});
+    return get("list-todays-hotline", {}, castList(m.AppEvent.cast));
   },
 
   getNextAppEventId(): Promise<number> {
-    return get("get-next-app-event-id", {});
+    return get("get-next-app-event-id", {}, castNumber);
   },
 
   postHotline(hotline: m.Hotline): Promise<boolean> {
-    return post("post-hotline", hotline);
+    return post("post-hotline", hotline, {}, castBoolean);
   },
 
   countSearchTextForPatient(text: string, patientId: number): Promise<number> {
-    return get("count-search-text-for-patient", {
-      text,
-      "patient-id": patientId.toString(),
-    });
+    return get(
+      "count-search-text-for-patient",
+      {
+        text,
+        "patient-id": patientId.toString(),
+      },
+      castNumber
+    );
   },
 
   searchTextForPatient(
@@ -864,29 +907,46 @@ export default {
     limit: number,
     offset: number
   ): Promise<[m.Text, m.Visit][]> {
-    return get("search-text-for-patient", {
-      text,
-      "patient-id": patientId.toString(),
-      limit,
-      offset,
-    });
+    return get(
+      "search-text-for-patient",
+      {
+        text,
+        "patient-id": patientId.toString(),
+        limit: limit.toString(),
+        offset: offset.toString(),
+      },
+      castList(castPair(m.Text.cast, m.Visit.cast))
+    );
   },
 
   enterChargeValue(visitId: number, chargeValue: number): Promise<m.Charge> {
-    return get("enter-charge-value", {
-      "visit-id": visitId.toString(),
-      "charge-value": chargeValue,
-    });
+    return get(
+      "enter-charge-value",
+      {
+        "visit-id": visitId.toString(),
+        "charge-value": chargeValue.toString(),
+      },
+      m.Charge.cast
+    );
   },
 
   uploadPatientImage(patientId: number, data: FormData): Promise<boolean> {
-    return postRaw("upload-patient-image", data, {
-      "patient-id": patientId.toString(),
-    });
+    return postRaw(
+      "upload-patient-image",
+      data,
+      {
+        "patient-id": patientId.toString(),
+      },
+      castBoolean
+    );
   },
 
   listPatientImage(patientId: number): Promise<m.FileInfo[]> {
-    return get("list-patient-image", { "patient-id": patientId.toString() });
+    return get(
+      "list-patient-image",
+      { "patient-id": patientId.toString() },
+      castList(m.FileInfo.cast)
+    );
   },
 
   patientImageUrl(patientId: number, filename: string): string {
@@ -897,15 +957,19 @@ export default {
   searchPrescExample(
     text: string
   ): Promise<[m.PrescExample, m.IyakuhinMaster][]> {
-    return get("search-presc-example-full", { text });
+    return get(
+      "search-presc-example-full",
+      { text },
+      castList(castPair(m.PrescExample.cast, m.IyakuhinMaster.cast))
+    );
   },
 
   searchShohouSample(text: string): Promise<string[]> {
-    return get("search-shohou-sample", { text });
+    return get("search-shohou-sample", { text }, castList(castString));
   },
 
   countSearchTextGlobally(text: string): Promise<number> {
-    return get("count-search-text-globally", { text });
+    return get("count-search-text-globally", { text }, castNumber);
   },
 
   searchTextGlobally(
@@ -913,6 +977,10 @@ export default {
     limit: number,
     offset: number
   ): Promise<[m.Text, m.Visit, m.Patient][]> {
-    return get("search-text-globally", { text, limit, offset });
+    return get(
+      "search-text-globally",
+      { text, limit: limit.toString(), offset: offset.toString() },
+      castList(castTuple3(m.Text.cast, m.Visit.cast, m.Patient.cast))
+    );
   },
 };
