@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { type DiseaseData, fullName, startDateRep } from "./types"
+  import type { DiseaseData } from "myclinic-model";
 
   export let list: DiseaseData[];
 
 </script>
 
 <div>
-  {#each list as d (d[0].diseaseId)}
+  {#each list as d (d.disease.diseaseId)}
   <div>
-    <span>{fullName(d)}</span>
+    <span>{d.fullName}</span>
     <span class="start-date">({startDateRep(d)})</span>
   </div>
   {/each}

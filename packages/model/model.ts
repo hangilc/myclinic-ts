@@ -1,3 +1,17 @@
+export class MyDate {
+  constructor(
+    public value: Date
+  ) {}
+
+  static fromSqlDate(s: string): MyDate {
+    return new MyDate(new Date(s));
+  }
+
+  static fromSqlDateTime(s: string): MyDate {
+    return new MyDate(new Date(s.substring(0, 10)));
+  }
+}
+
 export class Patient {
   constructor(
     public patientId: number,
@@ -1104,6 +1118,17 @@ export class DiseaseData {
         ShuushokugoMaster.cast(pair[1]),
       ])
     );
+  }
+
+  get fullName(): string {
+    const pres: string[] = [];
+    const posts: string[] = [];
+    this.adjList.forEach(tuple => {
+      const [_adj, master] = tuple;
+      const list: string[] = master.isPrefix ? pres : posts;
+      list.push(master.name);
+    })
+    return pres.join("") + this.byoumeiMaster.name + posts.join("");
   }
 }
 
