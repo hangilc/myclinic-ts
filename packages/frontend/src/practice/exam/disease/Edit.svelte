@@ -6,7 +6,6 @@
     DiseaseEndReason,
     DiseaseExample,
     ShuushokugoMaster,
-    type DiseaseEndReasonType,
     type DiseaseData,
   } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
@@ -19,7 +18,6 @@
     endDateRep,
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
-  import { dateToSql } from "@/lib/util";
   import api from "@/lib/api";
 
   export let list: DiseaseData[];
@@ -27,52 +25,40 @@
   let data: EditData | undefined = undefined;
 
   let name: string;
-  let startDate: Date | null = null;
-  let startDateErrors: string[] = [];
-  let endDate: Date | null = null;
-  let endDateErrors: string[] = [];
-  let endReason: DiseaseEndReasonType = DiseaseEndReason.NotEnded;
   let searchSelect: Writable<SearchResultType | null> = writable(null);
   let diseaseDataSelected: Writable<DiseaseData | null> = writable(null);
 
   searchSelect.subscribe(async (sel) => {
-    if (data != undefined && startDate != null) {
+    if (data != undefined && data.startDate != null) {
       if (ByoumeiMaster.isByoumeiMaster(sel)) {
-        data.setByoumeiMaster(sel);
+        data.byoumeiMaster = sel;
         name = data.fullName;
       } else if (ShuushokugoMaster.isShuushokugoMaster(sel)) {
         data.addToShuushokugoList(sel);
         name = data.fullName;
       } else if (DiseaseExample.isDiseaseExample(sel)) {
-        const [b, as] = await resolveDiseaseExample(sel, startDate);
+        const [b, as] = await resolveDiseaseExample(sel, data.startDate);
         if (b != null) {
-          data.setByoumeiMaster(b);
+          data.byoumeiMaster = b;
         }
         data.addToShuushokugoList(...as);
       }
+      searchSelect.set(null);
     }
   });
 
   function clearData(): void {
     data = undefined;
     name = "";
-    startDate = null;
-    startDateErrors = [];
-    endDate = null;
-    endDateErrors = [];
-    endReason = DiseaseEndReason.NotEnded;
     searchSelect.set(null);
+    diseaseDataSelected.set(null);
   }
 
   function setData(dd: DiseaseData): void {
     data = new EditData(dd);
     name = data.fullName;
-    startDate = data.startDate;
-    startDateErrors = [];
-    endDate = data.endDate ?? null;
-    endDateErrors = [];
-    endReason = data.endReason;
     searchSelect.set(null);
+    diseaseDataSelected.set(null);
   }
 
   diseaseDataSelected.subscribe((dd) => {
@@ -100,27 +86,14 @@
     if (data == null) {
       return;
     }
-    if (startDate == null) {
-      alert("エラー：開始日が設定されていません。");
-      return;
-    }
-    data.setStartDate(startDate);
-    data.setEndDate(endDate ?? undefined);
-    data.setEndReason(endReason);
-    if (data.endReason === DiseaseEndReason.NotEnded) {
-      data.setEndDate(undefined);
-    }
-    if (
-      !(
-        data.disease.endDate === "0000-00-00" ||
-        data.disease.startDate <= data.disease.endDate
-      )
-    ) {
-      alert("エラー：開始日が終了日の後です。");
+    const errors: string[] = [];
+    const disease = data.unwrapDisease(errors);
+    if( errors.length > 0 ){
+      alert(errors.join("\n"));
       return;
     }
     await api.updateDiseaseEx(
-      data.disease,
+      disease,
       data.shuushokugocodes
     );
     clearData();
@@ -138,15 +111,15 @@
         <div>名前：{name}</div>
         <div class="date-wrapper start-date">
           <DateFormWithCalendar
-            bind:date={startDate}
-            bind:errors={startDateErrors}
+            bind:date={data.startDate}
+            bind:errors={data.startDateErrors}
             {gengouList}
           />
         </div>
         <div class="date-wrapper end-date">
           <DateFormWithCalendar
-            bind:date={endDate}
-            bind:errors={endDateErrors}
+            bind:date={data.endDate}
+            bind:errors={data.endDateErrors}
             isNullable={false}
             {gengouList}
           />
@@ -154,7 +127,7 @@
         <div class="end-reason">
           {#each Object.values(DiseaseEndReason) as reason}
             {@const id = genid()}
-            <input type="radio" bind:group={endReason} value={reason} {id} />
+            <input type="radio" bind:group={data.endReason} value={reason} {id} />
             <label for={id}>{reason.label}</label>
           {/each}
         </div>
@@ -162,7 +135,7 @@
           <button on:click={doEnter}>入力</button>
           <a href="javascript:void(0)" on:click={doCancel}>キャンセル</a>
         </div>
-        <SearchForm selected={searchSelect} bind:startDate />
+        <SearchForm selected={searchSelect} bind:startDate={data.startDate} />
       </div>
     {:else}
       （病名未選択）
@@ -170,9 +143,9 @@
   </div>
   <div class="list select">
     {#each list as data}
-      <SelectItem {selected} {data}>
-        <span class="disease-name" class:hasEnd={hasEndDate(data)}
-          >{fullName(data)}</span
+      <SelectItem selected={diseaseDataSelected} {data}>
+        <span class="disease-name" class:hasEnd={data.hasEndDate}
+          >{data.fullName}</span
         > <span>({formatAux(data)})</span>
       </SelectItem>
     {/each}

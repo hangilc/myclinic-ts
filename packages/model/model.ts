@@ -1225,6 +1225,10 @@ export class DiseaseData {
     return stringToOptionalDate(this.disease.endDate);
   }
 
+  get hasEndDate(): boolean {
+    return this.endDate != undefined;
+  }
+
   get endReason(): DiseaseEndReasonType {
     return DiseaseEndReasonType.fromCode(this.disease.endReasonStore);
   }

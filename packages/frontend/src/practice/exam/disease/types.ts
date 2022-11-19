@@ -1,9 +1,12 @@
 import {
-  DiseaseEndReasonType, ByoumeiMaster,
-  type Disease,
-  DiseaseData,
-  type DiseaseAdj,
-  type DiseaseExample, ShuushokugoMaster, dateToSqlDate, stringToOptionalDate, optionalDateToSqlDate,
+  type DiseaseEndReasonType,
+  type ByoumeiMaster,
+  type DiseaseData,
+  type DiseaseExample,
+  type ShuushokugoMaster,
+  dateToSqlDate,
+  optionalDateToSqlDate,
+  Disease,
 } from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import api from "@/lib/api";
@@ -98,7 +101,9 @@ export async function resolveDiseaseExample(
       })
     );
   }
-  const adj: ShuushokugoMaster[] = await resolveAdjList(ex.preAdjList.concat(ex.postAdjList));
+  const adj: ShuushokugoMaster[] = await resolveAdjList(
+    ex.preAdjList.concat(ex.postAdjList)
+  );
   return [b, adj];
 }
 
@@ -108,47 +113,32 @@ export type SearchResultType =
   | DiseaseExample;
 
 export class EditData {
-  disease: Disease;
+  diseaseId: number;
+  patientId: number;
   byoumeiMaster: ByoumeiMaster;
+  startDate: Date;
+  startDateErrors: string[] = [];
+  endDate: Date | null;
+  endDateErrors: string[] = [];
+  endReason: DiseaseEndReasonType;
   shuushokugoList: ShuushokugoMaster[];
-  
+
   constructor(src: DiseaseData) {
-    this.disease = src.disease.clone();
+    this.diseaseId = src.disease.diseaseId;
+    this.patientId = src.disease.patientId;
     this.byoumeiMaster = src.byoumeiMaster;
-    this.shuushokugoList = src.adjList.map(tuple => tuple[1]);
+    this.startDate = src.startDate;
+    this.endDate = src.endDate ?? null;
+    this.endReason = src.endReason;
+    this.shuushokugoList = src.adjList.map((tuple) => tuple[1]);
   }
 
   get fullName(): string {
     return this.byoumeiMaster.fullName(this.shuushokugoList);
   }
 
-  setByoumeiMaster(m: ByoumeiMaster): void {
-    this.disease.shoubyoumeicode = m.shoubyoumeicode;
-    this.byoumeiMaster = m;
-  }
-
-  get startDate(): Date {
-    return this.disease.startDateAsDate;
-  }
-
-  setStartDate(date: Date): void {
-    this.disease.startDate = dateToSqlDate(date);
-  }
-
-  get endDate(): Date | undefined {
-    return stringToOptionalDate(this.disease.endDate);
-  }
-
-  setEndDate(date: Date | undefined): void {
-    this.disease.endDate = optionalDateToSqlDate(date);
-  }
-
-  get endReason(): DiseaseEndReasonType {
-    return this.disease.endReason;
-  }
-
-  setEndReason(reason: DiseaseEndReasonType): void {
-    this.disease.endReasonStore = reason.code;
+  get hasEndDate(): boolean {
+    return this.endDate != undefined;
   }
 
   clearShuushokugoList(): void {
@@ -160,6 +150,37 @@ export class EditData {
   }
 
   get shuushokugocodes(): number[] {
-    return this.shuushokugoList.map(m => m.shuushokugocode);
+    return this.shuushokugoList.map((m) => m.shuushokugocode);
+  }
+
+  unwrapStartDate(errs: string[]): string {
+    if (this.startDateErrors.length === 0) {
+      return dateToSqlDate(this.startDate);
+    } else {
+      errs.push(...this.startDateErrors.map((m) => "開始日：" + m));
+      return "";
+    }
+  }
+
+  unwrapEndDate(errs: string[]): string {
+    if (this.endDateErrors.length === 0) {
+      return optionalDateToSqlDate(this.endDate ?? undefined);
+    } else {
+      errs.push(...this.endDateErrors.map((m) => "終了日：" + m));
+      return "";
+    }
+  }
+
+  unwrapDisease(errs: string[]): Disease {
+    const localErrs: string[] = [];
+    const d: Disease = new Disease(
+      this.diseaseId,
+      this.patientId,
+      this.byoumeiMaster.shoubyoumeicode,
+      this.unwrapStartDate(localErrs),
+      this.unwrapEndDate(localErrs),
+      this.endReason.code
+    );
+    return localErrs.length === 0 ? d : (undefined as any);
   }
 }
