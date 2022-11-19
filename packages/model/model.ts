@@ -534,7 +534,7 @@ export const ConductKind: Record<string, ConductKindType> = {
   JoumyakuChuusha: new ConductKindType(1, "静脈注射"),
   OtherChuusha: new ConductKindType(2, "その他の注射"),
   Gazou: new ConductKindType(3, "画像"),
-}
+};
 
 export type ConductKindKey = keyof typeof ConductKind;
 
@@ -1022,8 +1022,7 @@ export class Disease {
       arg.startDate,
       arg.endDate,
       arg.endReasonStore
-  
-    )
+    );
   }
 
   get endReason(): DiseaseEndReasonType {
@@ -1039,12 +1038,7 @@ export class DiseaseAdj {
   ) {}
 
   static cast(arg: any): DiseaseAdj {
-    return new DiseaseAdj(
-      arg.diseaseAdjId,
-      arg.diseaseId,
-      arg.shuushokugocode
-  
-    )
+    return new DiseaseAdj(arg.diseaseAdjId, arg.diseaseId, arg.shuushokugocode);
   }
 }
 
@@ -1062,8 +1056,7 @@ export class DiseaseEnterData {
       arg.byoumeicode,
       arg.startDate,
       arg.adjCodes
-  
-    )
+    );
   }
 }
 
@@ -1075,12 +1068,7 @@ export class DiseaseExample {
   ) {}
 
   static cast(arg: any): DiseaseExample {
-    return new DiseaseExample(
-      arg.byoumei,
-      arg.preAdjList,
-      arg.postAdjList
-  
-    )
+    return new DiseaseExample(arg.byoumei, arg.preAdjList, arg.postAdjList);
   }
 
   get repr(): string {
@@ -1108,13 +1096,7 @@ export class Hotline {
   ) {}
 
   static cast(arg: any): Hotline {
-    return new Hotline(
-      arg.message,
-      arg.sender,
-      arg.recipient
-  
-    )
-
+    return new Hotline(arg.message, arg.sender, arg.recipient);
   }
 }
 
@@ -1131,11 +1113,9 @@ export class HotlineEx extends Hotline {
 
 export class HotlineBeep {
   constructor(public recipient: string) {}
-  
+
   static cast(arg: any): HotlineBeep {
-    return new HotlineBeep(
-      arg.recipient
-    )
+    return new HotlineBeep(arg.recipient);
   }
 }
 
@@ -1143,9 +1123,7 @@ export class EventIdNotice {
   constructor(public currentEventId: number) {}
 
   static cast(arg: any): EventIdNotice {
-    return new EventIdNotice(
-      arg.currentEventId
-    )
+    return new EventIdNotice(arg.currentEventId);
   }
 }
 
@@ -1153,9 +1131,7 @@ export class HeartBeat {
   constructor(public heartBeatSerialId: number) {}
 
   static cast(arg: any): HeartBeat {
-    return new HeartBeat(
-      arg.heartBeatSerialId
-    )
+    return new HeartBeat(arg.heartBeatSerialId);
   }
 }
 
@@ -1175,8 +1151,7 @@ export class AppEvent {
       arg.model,
       arg.kind,
       arg.data
-  
-    )
+    );
   }
 }
 
@@ -1188,12 +1163,7 @@ export class FileInfo {
   ) {}
 
   static cast(arg: any): FileInfo {
-    return new FileInfo(
-      arg.name,
-      arg.createdAt,
-      arg.size,
-  
-    )
+    return new FileInfo(arg.name, arg.createdAt, arg.size);
   }
 }
 
@@ -1219,7 +1189,6 @@ export class PrescExample {
       arg.days,
       arg.category,
       arg.comment
-  
-    )
+    );
   }
 }
