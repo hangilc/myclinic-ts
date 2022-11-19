@@ -5,7 +5,7 @@
   import api from "@/lib/api";
   import Current from "./Current.svelte";
   import Add from "./Add.svelte";
-  import type { DiseaseData } from "./types";
+  import type { DiseaseData } from "myclinic-model";
   import { onMount, onDestroy } from "svelte";
   import * as appEvent from "@/practice/app-events";
   import Tenki from "./Tenki.svelte";
@@ -20,7 +20,7 @@
   let allList: DiseaseData[] = [];
 
   function sortDiseaseList(dlist: DiseaseData[]): void {
-    dlist.sort((a, b) => a[0].startDate.localeCompare(b[0].startDate));
+    dlist.sort((a, b) => a.disease.startDate.localeCompare(b.disease.startDate));
   }
 
   unsubs.push(
@@ -48,7 +48,7 @@
         if (d.endReasonStore === "N") {
           const data = await api.getDiseaseEx(d.diseaseId);
           const list = currentList;
-          const index = list.findIndex((e) => e[0].diseaseId == d.diseaseId);
+          const index = list.findIndex((e) => e.disease.diseaseId == d.diseaseId);
           if (index >= 0) {
             list.splice(index, 1, data);
           } else {
@@ -58,7 +58,7 @@
           currentList = list;
         } else {
           const list = currentList;
-          const index = list.findIndex((e) => e[0].diseaseId == d.diseaseId);
+          const index = list.findIndex((e) => e.disease.diseaseId == d.diseaseId);
           if (index >= 0) {
             list.splice(index, 1);
             currentList = list;
@@ -74,7 +74,7 @@
   async function updateAllListWith(diseaseId: number) {
     let d = await api.getDiseaseEx(diseaseId);
     const cur = allList;
-    const i = cur.findIndex((e) => e[0].diseaseId === diseaseId);
+    const i = cur.findIndex((e) => e.disease.diseaseId === diseaseId);
     if (i >= 0) {
       cur.splice(i, 1, d);
     } else {

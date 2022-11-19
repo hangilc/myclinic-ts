@@ -7,26 +7,23 @@
     DiseaseExample,
     ShuushokugoMaster,
     type DiseaseEndReasonType,
+    type DiseaseData,
+    Disease,
   } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import {
-    fullName,
-    getEndReason,
-    startDateRep,
-    hasEndDate,
-    endDateRep,
-    startDateOf,
-    endDateOf,
-    copyDiseaseData,
-    type DiseaseData,
-    type SearchResultType,
+  import type {
+    SearchResultType,
   } from "./types";
   import SearchForm from "./SearchForm.svelte";
   import { dateToSql } from "@/lib/util";
   import api from "@/lib/api";
 
   export let list: DiseaseData[];
+
+  let curDisease: Writable<Disease | null> = writable(null);
+  let curByoumeiMaster: Writable<ByoumeiMaster | null> = writable(null);
+  let curStartDate
 
   let selected: Writable<DiseaseData | null> = writable(null);
   let name: string;
@@ -39,10 +36,10 @@
 
   searchSelect.subscribe((sel) => {
     if ($selected != null) {
+      const data = $selected.clone();
       if (ByoumeiMaster.isByoumeiMaster(sel)) {
-        const data = copyDiseaseData($selected);
-        data[0].shoubyoumeicode = sel.shoubyoumeicode;
-        data[1] = sel;
+        data.disease.shoubyoumeicode = sel.shoubyoumeicode;
+        data.byoumeiMaster = sel;
         selected.set(data);
       } else if (ShuushokugoMaster.isShuushokugoMaster(sel)) {
         $selected[2];

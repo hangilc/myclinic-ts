@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { DiseaseData } from "myclinic-model";
+  import { startDateRep } from "./types"
 
   export let list: DiseaseData[];
 
@@ -9,7 +10,7 @@
   {#each list as d (d.disease.diseaseId)}
   <div>
     <span>{d.fullName}</span>
-    <span class="start-date">({startDateRep(d)})</span>
+    <span class="start-date">({startDateRep(d.disease.startDateAsDate)})</span>
   </div>
   {/each}
 </div>

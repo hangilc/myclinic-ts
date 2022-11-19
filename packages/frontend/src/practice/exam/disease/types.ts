@@ -8,23 +8,13 @@ import {
 } from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import api from "@/lib/api";
+import { writable, type Writable } from "svelte/store";
 
 export type DiseaseData = [
   Disease,
   ByoumeiMaster,
   [DiseaseAdj, ShuushokugoMaster][]
 ];
-
-export function copyDiseaseData(data: DiseaseData): DiseaseData {
-  return [
-    { ...data[0] },
-    data[1],
-    data[2].map((ele) => {
-      const [adj, master] = ele;
-      return [{ ...adj }, master];
-    }),
-  ];
-}
 
 export function byoumeiName(data: DiseaseData): string {
   return data[1].name;
@@ -69,8 +59,8 @@ export function hasEndDate(data: DiseaseData): boolean {
   return getEndDate(data) !== "0000-00-00";
 }
 
-export function startDateRep(data: DiseaseData): string {
-  return kanjidate.format(kanjidate.f3, getStartDate(data));
+export function startDateRep(date: Date): string {
+  return kanjidate.format(kanjidate.f3, date);
 }
 
 export function endDateRep(data: DiseaseData): string {
@@ -120,3 +110,11 @@ export type SearchResultType =
   | ByoumeiMaster
   | ShuushokugoMaster
   | DiseaseExample;
+
+export class EditData {
+  disease: Writable<Disease>
+  
+  constructor(src: DiseaseData) {
+    this.disease = writable(src.disease);
+  }
+}

@@ -1,10 +1,8 @@
 <script lang="ts">
-  import {
-    type DiseaseData,
-    fullName,
-    startDateRep,
-    getStartDate,
-  } from "./types";
+  import type {
+    DiseaseData
+  } from "myclinic-model";
+  import { startDateRep } from "./types";
   import { genid } from "@/lib/genid";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { addDays } from "kanjidate";
@@ -12,6 +10,7 @@
   import type { DiseaseEndReasonType } from "myclinic-model";
   import { DiseaseEndReason } from "myclinic-model";
   import api from "@/lib/api";
+  import Disease from "./Disease.svelte";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
@@ -30,7 +29,7 @@
   function updateEndDate(list: DiseaseData[]): void {
     let e: string | null = null;
     list.forEach((d) => {
-      const s: string = getStartDate(d);
+      const s: string = d.disease.startDate;
       if (e == null || s > e) {
         e = s;
       }
@@ -75,7 +74,7 @@
       alert("終了日が設定されていません。");
       return;
     }
-    const diseaseIds: number[] = selected.map((d) => d[0].diseaseId);
+    const diseaseIds: number[] = selected.map((d) => d.disease.diseaseId);
     const reasonCode = endReason.code;
     const promises = diseaseIds.map((diseaseId) =>
       api.endDisease(diseaseId, endDate, reasonCode)
@@ -89,7 +88,7 @@
     {@const id = genid()}
     <div>
       <input type="checkbox" {id} bind:group={selected} value={d} />
-      <label for={id}>{fullName(d)} ({startDateRep(d)})</label>
+      <label for={id}>{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label>
     </div>
   {/each}
   <div class="date-wrapper">

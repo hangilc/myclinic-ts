@@ -1,17 +1,3 @@
-export class MyDate {
-  constructor(
-    public value: Date
-  ) {}
-
-  static fromSqlDate(s: string): MyDate {
-    return new MyDate(new Date(s));
-  }
-
-  static fromSqlDateTime(s: string): MyDate {
-    return new MyDate(new Date(s.substring(0, 10)));
-  }
-}
-
 export class Patient {
   constructor(
     public patientId: number,
@@ -1028,6 +1014,17 @@ export class Disease {
     public endReasonStore: string
   ) {}
 
+  clone(): Disease {
+    return new Disease(
+      this.diseaseId,
+      this.patientId,
+      this.shoubyoumeicode,
+      this.startDate,
+      this.endDate,
+      this.endReasonStore
+    );
+  }
+
   static cast(arg: any): Disease {
     return new Disease(
       arg.diseaseId,
@@ -1037,6 +1034,10 @@ export class Disease {
       arg.endDate,
       arg.endReasonStore
     );
+  }
+
+  get startDateAsDate(): Date {
+    return new Date(this.startDate);
   }
 
   get endReason(): DiseaseEndReasonType {
@@ -1050,6 +1051,14 @@ export class DiseaseAdj {
     public diseaseId: number,
     public shuushokugocode: number
   ) {}
+
+  clone(): DiseaseAdj {
+    return new DiseaseAdj(
+      this.diseaseAdjId,
+      this.diseaseId,
+      this.shuushokugocode
+    );
+  }
 
   static cast(arg: any): DiseaseAdj {
     return new DiseaseAdj(arg.diseaseAdjId, arg.diseaseId, arg.shuushokugocode);
@@ -1109,6 +1118,14 @@ export class DiseaseData {
     public adjList: [DiseaseAdj, ShuushokugoMaster][]
   ) {}
 
+  clone(): DiseaseData {
+    return new DiseaseData(
+      this.disease.clone(),
+      this.byoumeiMaster,
+      this.adjList.map((tuple) => [tuple[0].clone(), tuple[1]])
+    );
+  }
+
   static castFromTuple(tuple: any[]): DiseaseData {
     return new DiseaseData(
       Disease.cast(tuple[0]),
@@ -1123,11 +1140,11 @@ export class DiseaseData {
   get fullName(): string {
     const pres: string[] = [];
     const posts: string[] = [];
-    this.adjList.forEach(tuple => {
+    this.adjList.forEach((tuple) => {
       const [_adj, master] = tuple;
       const list: string[] = master.isPrefix ? pres : posts;
       list.push(master.name);
-    })
+    });
     return pres.join("") + this.byoumeiMaster.name + posts.join("");
   }
 }
