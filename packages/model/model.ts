@@ -1050,6 +1050,7 @@ export class ShuushokugoMaster {
   }
 
   static smallestPostfixCode = 8000;
+  static suspMaster: ShuushokugoMaster = new ShuushokugoMaster(8002, "の疑い");
 
   static isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
     return (
@@ -1242,6 +1243,16 @@ export class DiseaseData {
 
   get endReason(): DiseaseEndReasonType {
     return DiseaseEndReasonType.fromCode(this.disease.endReasonStore);
+  }
+
+  get hasSusp(): boolean {
+    for(let adj of this.adjList){
+      const [_, m] = adj;
+      if( m.shuushokugocode === ShuushokugoMaster.suspMaster.shuushokugocode ){
+        return true;
+      }
+    }
+    return false;
   }
 }
 

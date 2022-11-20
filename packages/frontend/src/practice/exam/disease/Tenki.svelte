@@ -73,11 +73,11 @@
       alert("終了日が設定されていません。");
       return;
     }
-    const diseaseIds: number[] = selected.map((d) => d.disease.diseaseId);
     const reasonCode = endReason.code;
-    const promises = diseaseIds.map((diseaseId) =>
-      api.endDisease(diseaseId, endDate, reasonCode)
-    );
+    const promises = selected.map((data) => {
+      const reason = data.hasSusp ? DiseaseEndReason.Stopped.code : reasonCode;
+      return api.endDisease(data.disease.diseaseId, endDate, reason)
+  });
     await Promise.all(promises);
   }
 </script>

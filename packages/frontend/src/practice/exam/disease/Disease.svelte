@@ -95,6 +95,7 @@
   currentPatient.subscribe(async (p) => {
     patient = p;
     show = p != null;
+    allList = []
     if (p != null) {
       currentList = await api.listCurrentDiseaseEx(p.patientId);
     } else {
