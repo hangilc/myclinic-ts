@@ -7,7 +7,7 @@ const digit = "[0-9０-９]";
 const notSpace = "[^ 　\n]";
 const digitOrPeriod = `[０-９${zenkakuPeriod}]`;
 const reProlog = new RegExp(`^院外処方${space}*\nＲｐ）${space}*\n`);
-const rePartStart = new RegExp(`(?<=^|\n)${space}?${digit}+）${space}*`);
+const rePartStart = new RegExp(`(?<=^|\n)${space}?${digit}+[)）]${space}*`);
 const reLeadingSpaces = new RegExp(`^${space}+`);
 const commandStart = "@";
 const localCommandStart = "@_";
@@ -87,9 +87,11 @@ export function span<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
 export function parsePartTemplate(s: string): PartTemplate {
   s = s.replace(rePartStart, zenkakuSpace);
   s = s.replace(/\n$/, "");
-  const lines = s.split("\n");
+  let lines = s.split("\n");
+  lines = lines.map(line => line.replace(reLeadingSpaces, zenkakuSpace));
   let [pre, post] = span(lines, (a) => a.startsWith(zenkakuSpace));
-  pre = pre.map((a) => a.replace(reLeadingSpaces, ""));
+  pre = pre.map((a) => a.replace(reLeadingSpaces, ""))
+    .map((a) => toZenkaku(a));
   const [commands, trails] = partition(post, (a) => a.startsWith(commandStart));
   let [localCommands, globalCommands] = partition(commands, (c) =>
     c.startsWith(localCommandStart)
@@ -104,11 +106,6 @@ export function parsePartTemplate(s: string): PartTemplate {
     globalCommands,
   };
 }
-
-// export interface DrugPart {
-//   name: string;
-//   amount: string;
-// }
 
 export class DrugPart {
   constructor(public name: string, public amount: string) { }
@@ -134,11 +131,6 @@ export function parseDrugPart(s: string): [DrugPart | null, string] {
     return [null, s];
   }
 }
-
-// export interface UsagePart {
-//   usage: string;
-//   days: string;
-// }
 
 export class UsagePart {
   constructor(public usage: string, public days: string) { }
@@ -178,12 +170,6 @@ function repeat<T>(
   return [ts, rem];
 }
 
-// export interface DrugLines {
-//   drugs: DrugPart[];
-//   usage: UsagePart | null;
-//   more: string;
-// }
-
 export class DrugLines {
   constructor(
     public drugs: DrugPart[],
@@ -203,11 +189,6 @@ function flatten(...args: (string | string[] | null)[]): string[] {
   });
   return result;
 }
-
-// export interface Part extends DrugLines {
-//   trails: string[],
-//   localCommands: string[]
-// }
 
 export class Part extends DrugLines {
   constructor(
@@ -268,12 +249,6 @@ export function parsePart(
 ): Part {
   return Part.create(parseDrugLines(drugLines), trails, localCommands);
 }
-
-// export interface Shohousen {
-//   prolog: string,
-//   parts: Part[],
-//   globalCommands: string[]
-// }
 
 export class Shohousen {
   constructor(

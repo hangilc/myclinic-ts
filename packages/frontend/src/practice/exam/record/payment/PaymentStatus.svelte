@@ -3,11 +3,16 @@
   import { resolvePaymentStatus } from "./payment-status"
 
   export let visit: VisitEx;
-  let status = resolvePaymentStatus(visit);
-
+  let rep: string = "";
+  let cls: string = "";
+  $: {
+    let status = resolvePaymentStatus(visit);
+    rep = status.rep;
+    cls = status.cls ?? "";
+  }
 </script>
 
-<span class={`payment-status ${status.cls}`}>{status.rep}</span>
+<span class={`payment-status ${cls}`}>{rep}</span>
 
 <style>
   .payment-status.no-payment {

@@ -41,7 +41,6 @@
         return printApi.getPrintPref(kind);
       })
       .then((pref) => {
-        console.log("pref", pref);
         printPref = pref ?? "手動";
         settingSelect = pref ?? "手動";
       })

@@ -12,7 +12,7 @@
 
 <div>
   {#each $visits as visit, i (visit.visitId)}
-    <Record bind:visit={visit} isLast={i === ($visits.length - 1)} 
+    <Record visit={visit} isLast={i === ($visits.length - 1)} 
       {onLast}/>
   {/each}
 </div>
