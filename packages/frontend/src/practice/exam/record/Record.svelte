@@ -12,7 +12,6 @@
   import Payment from "./payment/Payment.svelte";
   import { afterUpdate } from "svelte";
   import { currentVisitId } from "../ExamVars";
-  import { DrugLines } from "@/lib/shohousen/parse-shohousen";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
 
   export let visit: m.VisitEx;

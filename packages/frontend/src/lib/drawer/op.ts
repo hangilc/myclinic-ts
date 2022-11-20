@@ -147,14 +147,6 @@ function castString(arg: any): string {
   }
 }
 
-function castBoolean(arg: any): boolean {
-  if (typeof arg === "boolean") {
-    return arg;
-  } else {
-    throw new Error("Boolean expected but got: " + arg);
-  }
-}
-
 export function castOp(arg: any): Op {
   switch (arg[0]) {
     case "move_to":

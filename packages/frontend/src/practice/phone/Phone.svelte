@@ -1,9 +1,4 @@
-<script lang="ts" context="module">
-  declare var Twilio: any;
-</script>
-
 <script lang="ts">
-  import api from "@/lib/api";
   import { connect, disconnect } from "@/lib/twilio";
 
   export let isVisible: boolean;
