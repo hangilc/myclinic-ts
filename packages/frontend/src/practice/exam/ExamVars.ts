@@ -376,6 +376,7 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
       shinryouList.splice(i, 0, shinryouEx);
     } else {
       shinryouList.push(shinryouEx);
+      shinryouList.sort((a, b) => a.shinryoucode - b.shinryoucode)
     }
     visits.set(visitsValue);
   }
