@@ -992,4 +992,8 @@ export default {
       castList(castTuple3(m.Text.cast, m.Visit.cast, m.Patient.cast))
     );
   },
+
+  getWebphoneToken(): Promise<string> {
+    return get("get-webphone-token", {}, castString);
+  }
 };
