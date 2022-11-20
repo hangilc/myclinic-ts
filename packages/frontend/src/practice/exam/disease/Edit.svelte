@@ -51,14 +51,13 @@
     data = undefined;
     name = "";
     searchSelect.set(null);
-    diseaseDataSelected.set(null);
   }
 
   function setData(dd: DiseaseData): void {
     data = new EditData(dd);
     name = data.fullName;
+    console.log("name", name);
     searchSelect.set(null);
-    diseaseDataSelected.set(null);
   }
 
   diseaseDataSelected.subscribe((dd) => {

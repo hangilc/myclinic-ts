@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {
+  import type {
     ConductKindType,
-    type ConductEx,
-    type ConductKindTag,
-    type VisitEx,
+    ConductEx,
+    VisitEx,
   } from "myclinic-model";
   import EditWidget from "./EditWidget.svelte";
 
@@ -13,8 +12,8 @@
 
   let mode = "disp";
 
-  function kindRep(kindTag: ConductKindTag): string {
-    return ConductKindType.fromTag(kindTag).rep;
+  function kindRep(kind: ConductKindType): string {
+    return kind.rep;
   }
 
   function doDispClick(): void {

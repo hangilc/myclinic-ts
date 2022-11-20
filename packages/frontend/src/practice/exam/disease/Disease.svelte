@@ -104,7 +104,7 @@
   });
 
   async function doMode(m: string) {
-    if (m === "edit" && allList === undefined && patient != null) {
+    if (m === "edit" && allList.length === 0 && patient != null) {
       allList = await api.listDiseaseEx(patient.patientId);
     }
     mode = m;

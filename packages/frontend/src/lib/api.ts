@@ -1,5 +1,4 @@
 import * as m from "myclinic-model";
-import { dateToSql } from "./util";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, castOp as castDrawerOp } from "./drawer/op";
 import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data";

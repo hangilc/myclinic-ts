@@ -744,7 +744,7 @@ export class VisitEx {
     arg.hoken = HokenInfo.cast(arg.hoken);
     arg.texts = arg.texts.map((a: any) => Text.cast(a));
     arg.drugs = arg.drugs.map((a: any) => DrugEx.cast(a));
-    arg.shnryouList = arg.shnryouList.map((a: any) => ShinryouEx.cast(a));
+    arg.shinryouList = arg.shinryouList.map((a: any) => ShinryouEx.cast(a));
     arg.conducts = arg.conducts.map((a: any) => ConductEx.cast(a));
     arg.chargeOption =
       arg.chargeOption != undefined ? Charge.cast(arg.chargeOption) : undefined;
@@ -1011,7 +1011,9 @@ export class ByoumeiMaster {
 
   fullName(adj: ShuushokugoMaster[]): string {
     const [pres, posts] = ShuushokugoMaster.classify(adj);
-    return pres.join("") + this.name + posts.join("");
+    const pre: string = pres.map(m => m.name).join("")
+    const post: string = posts.map(m => m.name).join("")
+    return pre + this.name + post;
   }
 }
 
