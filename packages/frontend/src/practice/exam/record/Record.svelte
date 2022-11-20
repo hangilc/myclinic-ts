@@ -12,6 +12,8 @@
   import Payment from "./payment/Payment.svelte";
   import { afterUpdate } from "svelte";
   import { currentVisitId } from "../ExamVars";
+  import { DrugLines } from "@/lib/shohousen/parse-shohousen";
+  import DrugWrapper from "./drug/DrugWrapper.svelte";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -54,6 +56,7 @@
       <Hoken bind:visit />
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
+      <DrugWrapper {visit} />
       <ConductMenu {visit} />
       <ConductWrapper conducts={visit.conducts} {visit} />
       <Payment {visit} />

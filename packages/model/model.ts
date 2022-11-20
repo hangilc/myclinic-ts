@@ -434,6 +434,15 @@ export class KizaiMaster {
 
 export class DrugCategoryType {
   constructor(public code: number, public name: string) {}
+
+  static fromCode(code: number): DrugCategoryType {
+    for(let v of Object.values(DrugCategory)){
+      if( v.code === code ){
+        return v;
+      }
+    }
+    throw new Error("Cannot find drug category: " + code);
+  }
 }
 
 export const DrugCategory: Record<string, DrugCategoryType> = {
@@ -454,6 +463,10 @@ export class DrugEx {
     public prescribed: boolean,
     public master: IyakuhinMaster
   ) {}
+
+  get category(): DrugCategoryType {
+    return DrugCategoryType.fromCode(this.categoryStore);
+  }
 
   static cast(arg: any): DrugEx {
     return new DrugEx(
