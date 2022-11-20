@@ -63,7 +63,7 @@
   }
 
   function doEndOfLastMonthClick(): void {
-    const d = new Date(endDate);
+    const d = new Date();
     d.setDate(0);
     endDate = d;
   }

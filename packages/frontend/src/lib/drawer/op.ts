@@ -178,7 +178,7 @@ export function castOp(arg: any): Op {
         castString(arg[2]),
         castNumber(arg[3]),
         castNumber(arg[4]),
-        castBoolean(arg[5])
+        castNumber(arg[5]) === 0 ? false : true
       );
 
     case "set_font":

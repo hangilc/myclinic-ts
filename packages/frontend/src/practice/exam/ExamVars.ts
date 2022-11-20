@@ -354,6 +354,7 @@ appEvent.paymentEntered.subscribe(payment => {
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === payment.visitId);
   if (index >= 0) {
+    console.log("visit found");
     const visit = visitsValue[index];
     visit.lastPayment = payment;
     visits.set(visitsValue);

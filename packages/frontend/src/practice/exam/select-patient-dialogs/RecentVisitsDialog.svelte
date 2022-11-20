@@ -51,7 +51,7 @@
         </SelectItem>
       {/each}
     </div>
-    <div>
+    <div class="nav">
       <a href="javascript:void(0)" on:click={onPrevClick}>前へ</a>
       <a href="javascript:void(0)" on:click={onNextClick}>次へ</a>
     </div>
@@ -67,5 +67,9 @@
 <style>
   .select {
     height: 300px;
+  }
+
+  .nav {
+    margin: 10px 0;
   }
 </style>

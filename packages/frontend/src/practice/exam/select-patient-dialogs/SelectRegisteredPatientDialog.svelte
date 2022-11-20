@@ -12,8 +12,7 @@
   } from "myclinic-model";
 
   let entries: [Wqueue, Visit, Patient][] = [];
-  let selected: Writable<[Wqueue, Visit, Patient] | null> =
-    writable(null);
+  let selected: Writable<[Wqueue, Visit, Patient] | null> = writable(null);
 
   function onClose(): void {
     selected.set(null);
@@ -27,7 +26,12 @@
     const list = await api.listWqueueFull();
     entries = list.filter((d) => {
       const state = WqueueStateType.fromCode(d[0].waitState);
-      return state == WqueueState.WaitExam || state == WqueueState.WaitReExam;
+      console.log("state", state);
+      return (
+        state == WqueueState.WaitExam ||
+        state == WqueueState.WaitReExam ||
+        state == WqueueState.InExam
+      );
     });
     dialog.open();
   }
@@ -44,6 +48,7 @@
 <Dialog let:close bind:this={dialog} {onClose}>
   <span slot="title" class="title">受付患者選択</span>
 
+  {#if entries.length > 0}
   <div class="select">
     {#each entries as data}
       <SelectItem {data} {selected} autoselect>
@@ -52,6 +57,9 @@
       </SelectItem>
     {/each}
   </div>
+  {:else}
+    <div>（受付患者なし）</div>
+  {/if}
   <svelte:fragment slot="commands">
     <button on:click={() => enter(close)} disabled={$selected == null}
       >選択</button

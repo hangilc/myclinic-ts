@@ -30,8 +30,6 @@
     dialog.open();
   }
 
-  // type ConductReqKey = "骨塩定量";
-
   const conductReqMap: Record<string, ConductSpec> = {
     "骨塩定量": {
       kind: ConductKind.Gazou,
@@ -68,7 +66,7 @@
   }
 </script>
 
-<Dialog bind:this={dialog} let:close width={undefined}>
+<Dialog bind:this={dialog} let:close width={""}>
   <span slot="title">診療行為入力</span>
   <div class="two-cols">
     <div class="left">

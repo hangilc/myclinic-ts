@@ -84,6 +84,16 @@ function castNumber(arg: any): number {
   }
 }
 
+function castNumberFromString(arg: any): number {
+  if( typeof arg === "string" ){
+    const n = parseInt(arg);
+    if( !isNaN(n) ){
+      return n;
+    }
+  }
+  throw new Error("Cannot convert to number: " + arg);
+}
+
 function castString(arg: any): string {
   if (typeof arg === "string") {
     return arg;
@@ -183,7 +193,7 @@ export default {
       "batch-get-patient",
       patientIds,
       {},
-      castObject<number, m.Patient>(castNumber, m.Patient.cast)
+      castObject<number, m.Patient>(castNumberFromString, m.Patient.cast)
     );
   },
 
@@ -205,8 +215,8 @@ export default {
       >(
         identity,
         castList(m.Wqueue.cast),
-        castObject<number, m.Visit>(castNumber, m.Visit.cast),
-        castObject<number, m.Patient>(castNumber, m.Patient.cast)
+        castObject<number, m.Visit>(castNumberFromString, m.Visit.cast),
+        castObject<number, m.Patient>(castNumberFromString, m.Patient.cast)
       )
     );
     return wqList.map((wq) => {
@@ -305,7 +315,7 @@ export default {
       "batch-get-visit",
       visitIds,
       {},
-      castObject(castNumber, m.Visit.cast)
+      castObject(castNumberFromString, m.Visit.cast)
     );
   },
 

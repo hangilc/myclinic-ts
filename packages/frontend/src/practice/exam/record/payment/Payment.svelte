@@ -1,5 +1,5 @@
 <script lang="ts">
-    import api from "@/lib/api";
+  import api from "@/lib/api";
   import type { VisitEx } from "myclinic-model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
@@ -42,6 +42,4 @@
   .disp.has-charge {
     cursor: pointer;
   }
-
-  
 </style>

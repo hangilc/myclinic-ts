@@ -29,7 +29,6 @@
   });
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top">
   <Title bind:visit />
   <TwoCols isCurrent={$currentVisitId === visit.visitId}>
