@@ -77,6 +77,7 @@
       showError("請求額が負の値です。");
       return;
     }
+    await api.updateChargeValue(visit.visitId, chargeValue);
     const wqueueOpt = await api.findWqueue(visit.visitId);
     if (wqueueOpt == null) {
       const wq: Wqueue = new Wqueue(
