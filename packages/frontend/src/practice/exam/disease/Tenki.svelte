@@ -10,7 +10,6 @@
   import type { DiseaseEndReasonType } from "myclinic-model";
   import { DiseaseEndReason } from "myclinic-model";
   import api from "@/lib/api";
-  import Disease from "./Disease.svelte";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];

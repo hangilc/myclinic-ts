@@ -10,7 +10,6 @@ import {
 } from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import api from "@/lib/api";
-import { writable, type Writable } from "svelte/store";
 
 // export type DiseaseData = [
 //   Disease,
@@ -181,6 +180,11 @@ export class EditData {
       this.unwrapEndDate(localErrs),
       this.endReason.code
     );
-    return localErrs.length === 0 ? d : (undefined as any);
+    if( localErrs.length > 0 ){
+      errs.push(...localErrs);
+      return undefined as any;
+    } else {
+      return d;
+    }
   }
 }

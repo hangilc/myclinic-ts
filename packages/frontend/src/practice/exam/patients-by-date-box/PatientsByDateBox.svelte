@@ -3,7 +3,7 @@
   import { showPatientsByDate, startPatient } from "../ExamVars";
   import type * as m from "myclinic-model";
   import RightBox from "../RightBox.svelte";
-    import type { Patient } from "myclinic-model";
+  import type { Patient } from "myclinic-model";
 
   let selectedPatientId: number | null = null;
 
@@ -13,10 +13,10 @@
 
   async function fetchData(date: Date): Promise<[m.Visit, m.Patient][]> {
     const visits: m.Visit[] = await api.listVisitByDate(date);
-    const map: Map<number, m.Patient> = await api.batchGetPatient(
+    const map: Record<number, m.Patient> = await api.batchGetPatient(
       visits.map((v) => v.patientId)
     );
-    return visits.map((v) => [v, map.get(v.patientId) as m.Patient]);
+    return visits.map((v) => [v, map[v.patientId]]);
   }
 
   function doSelect(patient: Patient): void {

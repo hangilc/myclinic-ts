@@ -12,7 +12,7 @@
   export let onClose: () => void;
   let show = false;
   let selected: Writable<ConductKindType> = writable(
-    ConductKindType.fromTag(conduct.kind)
+    conduct.kind
   );
 
   export function open(): void {

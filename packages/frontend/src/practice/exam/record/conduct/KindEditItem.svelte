@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { ConductKindType, type ConductEx, type ConductKindTag } from "myclinic-model";
+  import type { ConductKindType, ConductEx } from "myclinic-model";
   import KindEdit from "./KindEdit.svelte"
 
   export let conduct: ConductEx;
   let mode = "disp"
   let edit: KindEdit
 
-  function kindRep(kindTag: ConductKindTag): string {
-    return ConductKindType.fromTag(kindTag).rep;
+  function kindRep(kind: ConductKindType): string {
+    return kind.rep;
   }
 
   function doDispClick(): void {

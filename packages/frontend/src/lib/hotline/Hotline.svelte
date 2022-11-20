@@ -127,13 +127,13 @@
     const patientIds: number[] = Object.values(visitMap).map(
       (v) => v.patientId
     );
-    const patientMap: Map<number, Patient> = await api.batchGetPatient(
+    const patientMap: Record<number, Patient> = await api.batchGetPatient(
       patientIds
     );
     const patients: Patient[] = [];
     visitIds.forEach((visitId) => {
       const visit = visitMap[visitId];
-      const patient = patientMap.get(visit.patientId);
+      const patient = patientMap[visit.patientId];
       if (patient != null && !patients.includes(patient)) {
         patients.push(patient);
       }

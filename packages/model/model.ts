@@ -561,6 +561,15 @@ export class ConductKizaiEx {
 export class ConductKindType {
   constructor(public code: number, public rep: string) {}
 
+  get key(): string {
+    for(let k of Object.keys(ConductKind) ){
+      if( ConductKind[k].code === this.code ){
+        return k;
+      }
+    }
+    throw new Error("Cannot find Conduct kind key: " + this);
+  }
+
   static fromCode(code: number): ConductKindType {
     for (let ck of Object.values(ConductKind)) {
       if (ck.code === code) {
