@@ -1,30 +1,46 @@
-import { cut, type CutText, type CutMatch } from "@/lib/regexp-util";
+import { cut, CutText  } from "@/lib/regexp-util";
 
-const phoneNumberPattern = /(?:\+81)?[-0-9]+/g;
+const phoneNumberProbePattern = /(?:\+81)?[-0-9]+/g;
 
-function normalize(s: string): string {
-  s = s.replaceAll("-", "");
-  if( !s.startsWith("+81") ){
-    if( s.length === 8 ){
-      s = "3" + s;
+const fullLocalPattern = /^\+81[^0]\d{8}$/;
+const fullMobilePattern = /^\+81[^0]0\d{8}$/;
+const domesticPattern = /^0([^0]\d{8})$/;
+const localPattern = /^\d{8}$/;
+const localPrefix = "3";
+
+export function normalize(s: string): string | undefined {
+  s = s.trim().replaceAll("-", "");
+  if( fullLocalPattern.test(s) || fullMobilePattern.test(s) ){
+    return s;
+  }
+  let m = domesticPattern.exec(s);
+  if( m ){
+    return "+81" + m[1];
+  }
+  m = localPattern.exec(s);
+  if( m ){
+    return "+81" + localPrefix + m[1];
+  }
+  return undefined;
+}
+
+export class PhoneMatch {
+  constructor(
+    public orig: string,
+    public phoneNumber: string
+  ) {}
+}
+
+export function splitPhoneNumber(s: string): (CutText | PhoneMatch)[] {
+  function handler(m: string): CutText | PhoneMatch {
+    const n = normalize(m);
+    if( n ){
+      return new PhoneMatch(m, n);
+    } else {
+      return new CutText(m);
     }
   }
-  s = s.replace(/^0/, "");
-  if( !s.startsWith("+81") ){
-    s = "+81" + s;
-  }
-  return s;
-}
-
-export function replacePhoneNumber(s: string, f: (phoneNumber: string) => string): string {
-  return s.replaceAll(phoneNumberPattern, s => {
-    const n: string = normalize(s);
-    return f(n);
-  });
-}
-
-export function splitPhoneNumber(s: string): (CutText | CutMatch<string>)[] {
-  return cut<string>(s, phoneNumberPattern, normalize);
+  return cut<PhoneMatch>(s, phoneNumberProbePattern, handler);
 }
 
 
