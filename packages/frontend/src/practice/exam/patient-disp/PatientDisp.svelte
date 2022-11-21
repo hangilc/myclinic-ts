@@ -24,15 +24,23 @@
 
   function toggleDetail(): void {
     showDetail = !showDetail;
-    if (showDetail && phoneFrags.length === 0) {
+    if( showDetail ){
       phoneFrags = splitPhoneNumber(patient.phone);
-      console.log(phoneFrags);
     }
   }
 
   function doPhone(phoneNumberArg: string): void {
     phoneNumber = phoneNumberArg;
     showPhone = true;
+  }
+
+  function doConnect(): void {
+    connect(phoneNumber);
+  }
+
+  function doDisconnect(): void {
+    showPhone = false;
+    phoneNumber = "";
   }
 </script>
 
@@ -68,7 +76,7 @@
     </div>
   {/if}
   {#if showDetail && showPhone}
-    <div>Phone: {phoneNumber}</div>
+    <div>Phone: {phoneNumber} <button on:click={doConnect}>発信</button> <button on:click={doDisconnect}>終了</button></div>
   {/if}
 </div>
 
