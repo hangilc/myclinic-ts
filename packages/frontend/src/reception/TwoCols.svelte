@@ -4,7 +4,7 @@
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
 
-  const service = writable("exam");
+  const service = writable("main");
 
 </script>
 
@@ -14,7 +14,7 @@
       <SideMenu serviceStore={service} />
     </div>
     <div class="left-box">
-      <Hotline sendAs="practice" sendTo="reception" />
+      <Hotline sendAs="reception" sendTo="practice" />
     </div>
   </div>
   <div class="right"><Main serviceStore={service} /></div>
