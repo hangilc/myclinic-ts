@@ -4,7 +4,7 @@ const phoneNumberProbePattern = /(?:\+81)?[-0-9]+/g;
 
 const fullLocalPattern = /^\+81[^0]\d{8}$/;
 const fullMobilePattern = /^\+81[^0]0\d{8}$/;
-const domesticPattern = /^0([^0]\d{8})$/;
+const domesticPattern = /^0([^0]0?\d{8})$/;
 const localPattern = /^\d{8}$/;
 const localPrefix = "3";
 
