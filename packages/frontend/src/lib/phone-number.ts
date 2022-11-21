@@ -23,8 +23,8 @@ export function replacePhoneNumber(s: string, f: (phoneNumber: string) => string
   });
 }
 
-export function splitPhoneNumber(s: string): (CutText | CutMatch)[] {
-  return cut(s, phoneNumberPattern)
+export function splitPhoneNumber(s: string): (CutText | CutMatch<string>)[] {
+  return cut<string>(s, phoneNumberPattern, normalize);
 }
 
 
