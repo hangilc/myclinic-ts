@@ -1,18 +1,30 @@
 <script lang="ts">
 import type * as m from "myclinic-model";
 import * as kanjidate from "kanjidate";
-import { sexRep } from "../../lib/util";
+import { sexRep } from "../../../lib/util";
+  import { replacePhoneNumber } from "@/lib/phone-number";
 
   export let patient: m.Patient;
   
-  let showDetail: boolean = false;
+  let showDetail = false;
+  let showPhone = false;
+  let phoneHtml = "";
 
   function toggleDetail(): void {
     showDetail = !showDetail;
+    if( showDetail && phoneHtml === "" ){
+      const s = replacePhoneNumber(patient.phone, s => {
+        return `<a href="javascript:void(0)" on:click={doPhone}>${patient.phone}</a>`;
+      })
+      phoneHtml = s;
+    }
+  }
+
+  function doPhone(): void {
+    alert("phone");
   }
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="patient-disp">
   <div>
     [{patient.patientId}]
@@ -29,8 +41,13 @@ import { sexRep } from "../../lib/util";
         <span>住所：</span>{patient.address}
       </div>
       <div>
-        <span>電話：</span>{patient.phone}
+        <span>電話：</span><span>{@html phoneHtml}</span>
       </div>
+    </div>
+  {/if}
+  {#if showDetail && showPhone}
+    <div>
+      Phone: 
     </div>
   {/if}
 </div>
