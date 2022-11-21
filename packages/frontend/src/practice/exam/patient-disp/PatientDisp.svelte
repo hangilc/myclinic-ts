@@ -4,6 +4,8 @@
   import { sexRep } from "../../../lib/util";
   import { PhoneMatch, splitPhoneNumber } from "@/lib/phone-number";
   import { CutText } from "@/lib/regexp-util";
+  import PhoneLink from "./PhoneLink.svelte";
+  import { connect } from "@/lib/twilio"
 
   export let patient: m.Patient;
 
@@ -11,6 +13,7 @@
   let showPhone = false;
   let address = "";
   let phoneFrags: (CutText | PhoneMatch)[] = [];
+  let phoneNumber: string = "";
 
   $: {
     showDetail = false;
@@ -27,8 +30,9 @@
     }
   }
 
-  function doPhone(): void {
-    alert("phone");
+  function doPhone(phoneNumberArg: string): void {
+    phoneNumber = phoneNumberArg;
+    showPhone = true;
   }
 </script>
 
@@ -56,7 +60,7 @@
             {#if frag instanceof CutText}
               {frag.text}
             {:else}
-              {frag.orig}
+              <PhoneLink orig={frag.orig} phoneNumber={frag.phoneNumber} onClick={doPhone} />
             {/if}
           {/each}
         </span>
@@ -64,7 +68,7 @@
     </div>
   {/if}
   {#if showDetail && showPhone}
-    <div>Phone:</div>
+    <div>Phone: {phoneNumber}</div>
   {/if}
 </div>
 
