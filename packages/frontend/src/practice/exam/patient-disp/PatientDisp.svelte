@@ -2,7 +2,7 @@
 import type * as m from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import { sexRep } from "../../../lib/util";
-  import { replacePhoneNumber } from "@/lib/phone-number";
+  import { splitPhoneNumber } from "@/lib/phone-number";
 
   export let patient: m.Patient;
   
@@ -13,10 +13,8 @@ import { sexRep } from "../../../lib/util";
   function toggleDetail(): void {
     showDetail = !showDetail;
     if( showDetail && phoneHtml === "" ){
-      const s = replacePhoneNumber(patient.phone, s => {
-        return `<a href="javascript:void(0)" on:click={doPhone}>${patient.phone}</a>`;
-      })
-      phoneHtml = s;
+      const cs = splitPhoneNumber(patient.phone)
+      console.log(cs);
     }
   }
 
