@@ -6,6 +6,10 @@ export class OpMoveTo extends OpBase {
   constructor(public x: number, public y: number) {
     super("move_to");
   }
+
+  toJSON(): any {
+    return [this.opCode, this.x, this.y];
+  }
 }
 
 // export type OpMoveTo = ["move_to", number, number];
@@ -23,6 +27,10 @@ export class OpMoveTo extends OpBase {
 export class OpLineTo extends OpBase {
   constructor(public x: number, public y: number) {
     super("line_to");
+  }
+
+  toJSON(): any {
+    return [this.opCode, this.x, this.y]
   }
 }
 
@@ -55,6 +63,11 @@ export class OpCreateFont extends OpBase {
   ) {
     super("create_font");
   }
+
+  toJSON(): any {
+    return [this.opCode, this.name, this.fontName, this.size, this.weight, 
+      this.italic ? 1 : 0]
+  }
 }
 
 // export type OpSetFont = ["set_font", string];
@@ -62,6 +75,10 @@ export class OpCreateFont extends OpBase {
 export class OpSetFont extends OpBase {
   constructor(public name: string) {
     super("set_font");
+  }
+
+  toJSON(): any {
+    return [this.opCode, this.name]
   }
 }
 
@@ -71,6 +88,10 @@ export class OpSetTextColor extends OpBase {
   constructor(public r: number, public g: number, public b: number) {
     super("set_text_color");
   }
+
+  toJSON(): any {
+    return [this.opCode, this.r, this.g, this.b];
+  }
 }
 
 // export type OpDrawChars = ["draw_chars", string, number[], number[]];
@@ -78,6 +99,10 @@ export class OpSetTextColor extends OpBase {
 export class OpDrawChars extends OpBase {
   constructor(public chars: string, public xs: number[], public ys: number[]) {
     super("draw_chars");
+  }
+
+  toJSON(): any {
+    return [this.opCode, this.chars, this.xs, this.ys]
   }
 }
 
@@ -102,6 +127,10 @@ export class OpCreatePen extends OpBase {
   ) {
     super("create_pen");
   }
+
+  toJSON(): any {
+    return [this.opCode, this.name, this.r, this.g, this.b, this.width, this.penstyle]
+  }
 }
 
 // export type OpSetPen = ["set_pen", string];
@@ -110,6 +139,10 @@ export class OpSetPen extends OpBase {
   constructor(public name: string) {
     super("set_pen");
   }
+
+  toJSON(): any {
+    return [this.opCode, this.name]
+  }
 }
 
 // export type OpCircle = ["circle", number, number, number];
@@ -117,6 +150,10 @@ export class OpSetPen extends OpBase {
 export class OpCircle extends OpBase {
   constructor(public x: number, public y: number, public r: number) {
     super("circle");
+  }
+
+  toJSON(): any {
+    return [this.opCode, this.x, this.y, this.r]
   }
 }
 
