@@ -6,7 +6,12 @@ import { dateParam } from "@/lib/date-param"
 
 async function resolveShinryoucode(src: string | number, at: string): Promise<number> {
   if (typeof src === "number") {
-    return src;
+    const result: number | null = await api.resolveShinryoucode(src, at);
+    if( result == null ){
+      throw new Error("診療行為が有効でありません：" + src);
+    } else {
+      return result;
+    }
   } else {
     const code = await api.resolveShinryoucodeByName(src, at);
     if (code == null) {
@@ -54,6 +59,21 @@ async function batchResolveKizaicodes(
   )
 }
 
+async function batchResolveIyakuhincodes(
+  srcList: { iyakuhincode: number, amount: number }[],
+  at: string
+): Promise<{ iyakuhincode: number, amount: number }[]> {
+  return await Promise.all(
+    srcList.map(async src => {
+      const code = await api.resolveIyakuhincode(src.iyakuhincode, at);
+      if( code == null ){
+        throw new Error("医薬品をみつけられません：" + src)
+      }
+      return { iyakuhincode: code, amount: src.amount };
+    })
+  )
+}
+
 async function conductReq(
   at: string,
   visitId: number,
@@ -64,18 +84,17 @@ async function conductReq(
   kizai: ({ code: string | number, amount: number })[]
 ): Promise<CreateConductRequest> {
   const s = await batchResolveShinryoucodes(shinryou, at);
+  const d = await batchResolveIyakuhincodes(drug, at);
   const k = await batchResolveKizaicodes(kizai, at);
   return new CreateConductRequest({
     visitId: visitId,
     kind: kind.code,
     labelOption: labelOption,
     shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
-    drugs: drug.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
+    drugs: d.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
     kizaiList: k.map(obj => Object.assign(obj, { conductKizaiId: 0, conductId: 0 }))
   });
 }
-
-// export type ShinryouSpec = number | string;
 
 export type ConductSpec = {
   kind: ConductKindType,

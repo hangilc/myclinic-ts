@@ -57,7 +57,13 @@
     if( targetId != null ){
       const codes = visit.shinryouList.map(s => s.shinryoucode);
       const targetVisit = await api.getVisit(targetId);
-      await enterTo(targetId, targetVisit.visitedAt, codes, []);
+      try {
+        await enterTo(targetId, targetVisit.visitedAt, codes, []);
+      } catch(ex) {
+        alert(ex);
+      }
+    } else {
+      alert("コピー先をみつけられません。");
     }
   }
 

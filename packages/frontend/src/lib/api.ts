@@ -85,9 +85,9 @@ function castNumber(arg: any): number {
 }
 
 function castNumberFromString(arg: any): number {
-  if( typeof arg === "string" ){
+  if (typeof arg === "string") {
     const n = parseInt(arg);
-    if( !isNaN(n) ){
+    if (!isNaN(n)) {
       return n;
     }
   }
@@ -543,6 +543,17 @@ export default {
     );
   },
 
+  resolveShinryoucode(
+    shinryoucode: number,
+    at: Date | string
+  ): Promise<number | null> {
+    return get(
+      "resolve-shinryoucode",
+      { shinryoucode: shinryoucode.toString(), at: dateParam(at) },
+      castOption(castNumber)
+    );
+  },
+
   resolveShinryoucodeByName(
     name: string,
     at: Date | string
@@ -553,6 +564,28 @@ export default {
         name: name,
         at: dateParam(at),
       },
+      castOption(castNumber)
+    );
+  },
+
+  resolveKizaicode(
+    kizaicode: number,
+    at: Date | string
+  ): Promise<number | null> {
+    return get(
+      "resolve-kizaicode",
+      { kizaicode: kizaicode.toString(), at: dateParam(at) },
+      castOption(castNumber)
+    );
+  },
+
+  resolveIyakuhincode(
+    iyakuhincode: number,
+    at: Date | string
+  ): Promise<number | null> {
+    return get(
+      "resolve-iyakuhincode",
+      { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
       castOption(castNumber)
     );
   },
@@ -995,5 +1028,5 @@ export default {
 
   getWebphoneToken(): Promise<string> {
     return get("get-webphone-token", {}, castString);
-  }
+  },
 };

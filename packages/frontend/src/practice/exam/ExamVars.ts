@@ -370,13 +370,12 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
   if (index >= 0) {
     const visit = visitsValue[index];
     const shinryouList = visit.shinryouList;
-    const i = shinryouList.findIndex(s => s.shinryoucode > shinryou.shinryoucode);
     const shinryouEx: m.ShinryouEx = await api.getShinryouEx(shinryou.shinryouId);
+    const i = shinryouList.findIndex(s => s.shinryoucode > shinryou.shinryoucode);
     if (i >= 0) {
       shinryouList.splice(i, 0, shinryouEx);
     } else {
       shinryouList.push(shinryouEx);
-      shinryouList.sort((a, b) => a.shinryoucode - b.shinryoucode)
     }
     visits.set(visitsValue);
   }
