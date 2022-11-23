@@ -7,6 +7,7 @@
   import SearchDialog from "./SearchDialog.svelte"
   import { getCopyTarget } from "@/practice/exam/ExamVars"
   import { enterTo } from "./helper"
+  import CopySelectedDialog from "./CopySelectedDialog.svelte";
 
   export let visit: VisitEx;
   let auxLink: HTMLAnchorElement;
@@ -14,7 +15,7 @@
   let regularDialog: RegularDialog;
   let kensaDialog: KensaDialog;
   let searchDialog: SearchDialog;
-
+  let copySelectedDialog: CopySelectedDialog;
 
   function doAux(): void {
     auxPopup.open();
@@ -52,6 +53,16 @@
     }
   }
 
+  function doCopySelected(): void {
+    const targetId = getCopyTarget();
+    if( targetId == null ){
+      alert("コピー先をみつけられません。");
+    } else {
+
+      copySelectedDialog.open(targetId, visit.shinryouList);
+    }
+  }
+
   async function doCopyAll() {
     const targetId = getCopyTarget();
     if( targetId != null ){
@@ -78,13 +89,14 @@
 <RegularDialog bind:this={regularDialog} visit={visit}/>
 <KensaDialog bind:this={kensaDialog} visit={visit} />
 <SearchDialog bind:this={searchDialog} visit={visit}/>
+<CopySelectedDialog bind:this={copySelectedDialog} />
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <Pulldown anchor={auxLink} bind:this={auxPopup}>
   <div>
     <a href="javascript:void(0)" on:click={doKensa}>検査</a>
     <a href="javascript:void(0)" on:click={doSearch}>検索入力</a>
     <a href="javascript:void(0)" on:click={doDeleteDuplicate}>重複削除</a>
+    <a href="javascript:void(0)" on:click={doCopySelected}>選択コピー</a>
     <a href="javascript:void(0)" on:click={doCopyAll}>全部コピー</a>
   </div>
 </Pulldown>

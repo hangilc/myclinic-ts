@@ -604,6 +604,18 @@ export default {
     );
   },
 
+  batchEnterShinryou(
+    visitId: number,
+    shinryoucodes: number[]
+  ): Promise<number[]> {
+    return post(
+      "batch-enter-shinryou",
+      shinryoucodes,
+      { "visit-id": visitId.toString() },
+      castList(castNumber)
+    );
+  },
+
   batchEnterShinryouConduct(
     req: m.CreateShinryouConductRequest
   ): Promise<[number[], number[]]> {

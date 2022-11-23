@@ -129,6 +129,10 @@ export class Visit {
     newVisit.attributesStore = newAttr;
     return newVisit;
   }
+
+  get visitedAtAsDate(): Date {
+    return new Date(this.visitedAt);
+  }
 }
 
 export class WqueueStateType {
@@ -773,6 +777,10 @@ export class VisitEx {
     arg.lastPayment =
       arg.lastPayment != undefined ? Payment.cast(arg.lastPayment) : undefined;
     return new VisitEx(arg);
+  }
+
+  get visitedAtAsDate(): Date {
+    return new Date(this.visitedAt);
   }
 
   get attributes(): VisitAttributes | null {
