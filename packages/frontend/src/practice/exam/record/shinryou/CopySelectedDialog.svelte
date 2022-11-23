@@ -49,7 +49,7 @@
   }
 </script>
 
-<Dialog let:close bind:this={dialog}>
+<Dialog let:close bind:this={dialog} {onClose}>
   <span slot="title">診療行為選択コピー</span>
   <div>
     {#each items as item}
@@ -62,7 +62,7 @@
           bind:group={selected}
           disabled={item.shinryoucode === 0}
         />
-        <label>{item.name}</label>
+        <label for={id}>{item.name}</label>
       </div>
     {/each}
   </div>
