@@ -5,7 +5,7 @@
 
   let phoneNumberValue: string = "";
 
-  async function doCall(): Promise<void> {
+  async function doCall() {
     connect(phoneNumberValue);
   }
 

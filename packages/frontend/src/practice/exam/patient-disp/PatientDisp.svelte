@@ -5,7 +5,7 @@
   import { PhoneMatch, splitPhoneNumber } from "@/lib/phone-number";
   import { CutText } from "@/lib/regexp-util";
   import PhoneLink from "./PhoneLink.svelte";
-  import { connect } from "@/lib/twilio"
+  import { connect, disconnect } from "@/lib/twilio"
 
   export let patient: m.Patient;
 
@@ -39,6 +39,7 @@
   }
 
   function doDisconnect(): void {
+    disconnect();
     showPhone = false;
     phoneNumber = "";
   }
