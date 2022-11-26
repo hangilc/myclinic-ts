@@ -31,7 +31,7 @@
           const curr = currentList;
           curr.push(ex);
           currentList = curr;
-          if (allList !== undefined) {
+          if (allList !== undefined && allList.length > 0) {
             const cur = allList;
             cur.push(ex);
             sortDiseaseList(cur);
@@ -64,7 +64,7 @@
             currentList = list;
           }
         }
-        if (allList !== undefined) {
+        if (allList !== undefined && allList.length > 0) {
           updateAllListWith(d.diseaseId);
         }
       }

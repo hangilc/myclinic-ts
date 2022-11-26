@@ -1148,6 +1148,10 @@ export class Disease {
   get endReason(): DiseaseEndReasonType {
     return DiseaseEndReasonType.fromCode(this.endReasonStore);
   }
+
+  clearEndDate(): void {
+    this.endDate = "0000-00-00";
+  }
 }
 
 export class DiseaseAdj {

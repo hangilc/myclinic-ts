@@ -91,6 +91,9 @@
       alert(errors.join("\n"));
       return;
     }
+    if( disease.endReason == DiseaseEndReason.NotEnded ){
+      disease.clearEndDate();
+    }
     await api.updateDiseaseEx(
       disease,
       data.shuushokugocodes
