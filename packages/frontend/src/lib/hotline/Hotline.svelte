@@ -7,7 +7,7 @@
     Visit,
     Wqueue,
   } from "myclinic-model";
-  import { hotlineBeepEntered, hotlineEntered } from "@/practice/app-events";
+  import { hotlineBeepEntered, hotlineEntered } from "@/app-events";
   import { onDestroy } from "svelte";
   import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
   import Pulldown from "../Pulldown.svelte";

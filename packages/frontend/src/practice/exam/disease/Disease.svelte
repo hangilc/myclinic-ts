@@ -7,7 +7,7 @@
   import Add from "./Add.svelte";
   import type { DiseaseData } from "myclinic-model";
   import { onMount, onDestroy } from "svelte";
-  import * as appEvent from "@/practice/app-events";
+  import * as appEvent from "@/app-events";
   import Tenki from "./Tenki.svelte";
   import Edit from "./Edit.svelte";
 

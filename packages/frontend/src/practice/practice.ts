@@ -1,5 +1,5 @@
 import Practice from "./Practice.svelte"
-import { initAppEvents } from "./app-events"
+import { initAppEvents } from "@/app-events"
 
 initAppEvents();
 

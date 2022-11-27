@@ -2,7 +2,7 @@ import { writable, type Writable, get } from "svelte/store";
 import * as m from "myclinic-model";
 import api from "../../lib/api";
 import { FetchTask, TaskRunner, type Task } from "../../lib/unit-task";
-import * as appEvent from "@/practice/app-events";
+import * as appEvent from "@/app-events";
 
 export const currentPatient: Writable<m.Patient | null> = writable(null);
 export const currentVisitId: Writable<number | null> = writable(null);

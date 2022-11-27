@@ -1,4 +1,4 @@
-import api, { wsUrl } from "../lib/api"
+import api, { wsUrl } from "./lib/api"
 import type * as m from "myclinic-model"
 import { writable, type Writable } from "svelte/store"
 

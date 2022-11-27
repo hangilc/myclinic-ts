@@ -1,7 +1,7 @@
 import Reception from "./Reception.svelte"
-// import { initAppEvents } from "./app-events"
+import { initAppEvents } from "@/app-events"
 
-// initAppEvents();
+initAppEvents();
 
 const app = new Reception({
   target: document.getElementById('app') as HTMLElement
