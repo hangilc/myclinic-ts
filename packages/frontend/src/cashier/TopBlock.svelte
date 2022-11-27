@@ -8,7 +8,6 @@
 
   let searchText = "";
   let searchPatientResultDialog: SearchPatientResultDialog;
-  let patientDialog: PatientDialog;
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
@@ -19,7 +18,13 @@
   async function doPatientSelected(patient: Patient) {
     const hokenList = await listCurrentHoken(patient.patientId);
     const data = new PatientData(patient, hokenList);
-    patientDialog.open(data);
+    const dialog = new PatientDialog({
+      target: document.body,
+      props: {
+      patientData: data
+      }
+    })
+    dialog.$on("close", () => dialog.$destroy())
   }
 
 </script>
@@ -48,7 +53,6 @@
   </svg>
 </div>
 <SearchPatientResultDialog bind:this={searchPatientResultDialog} onSelect={doPatientSelected}/>
-<PatientDialog bind:this={patientDialog}/>
 
 <style>
   .top {
