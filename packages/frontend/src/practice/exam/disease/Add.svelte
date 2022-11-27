@@ -13,6 +13,7 @@
   import { dateParam } from "@/lib/date-param";
   import Pulldown from "@/lib/Pulldown.svelte";
   import * as kanjidate from "kanjidate";
+  import { onMount } from "svelte";
 
   export let patientId: number;
   export let examples: DiseaseExample[];
@@ -31,6 +32,8 @@
     ByoumeiMaster | ShuushokugoMaster | DiseaseExample | null
   > = writable(null);
   let startDateSelect: Writable<Date | null> = writable(null);
+
+  onMount(() => doExample())
 
   searchSelect.subscribe(async (r) => {
     if (ByoumeiMaster.isByoumeiMaster(r)) {
