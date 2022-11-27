@@ -11,7 +11,8 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         practice: resolve(__dirname, "practice/index.html")
       }
-    }
+    },
+    chunkSizeWarningLimit: 5000
   },
   resolve: {
     alias: {
