@@ -18,9 +18,19 @@
   const unsubs: (() => void)[] = [];
   let examples: DiseaseExample[] = [];
   let allList: DiseaseData[] = [];
+  let editInit: DiseaseData | null = null;
+  let modeKeyIndex = 0;
+  let modeKey = newModeKey();
+
+  function newModeKey(): string {
+    modeKeyIndex += 1;
+    return `modekey${modeKeyIndex}`;
+  }
 
   function sortDiseaseList(dlist: DiseaseData[]): void {
-    dlist.sort((a, b) => a.disease.startDate.localeCompare(b.disease.startDate));
+    dlist.sort((a, b) =>
+      a.disease.startDate.localeCompare(b.disease.startDate)
+    );
   }
 
   unsubs.push(
@@ -48,7 +58,9 @@
         if (d.endReasonStore === "N") {
           const data = await api.getDiseaseEx(d.diseaseId);
           const list = currentList;
-          const index = list.findIndex((e) => e.disease.diseaseId == d.diseaseId);
+          const index = list.findIndex(
+            (e) => e.disease.diseaseId == d.diseaseId
+          );
           if (index >= 0) {
             list.splice(index, 1, data);
           } else {
@@ -58,7 +70,9 @@
           currentList = list;
         } else {
           const list = currentList;
-          const index = list.findIndex((e) => e.disease.diseaseId == d.diseaseId);
+          const index = list.findIndex(
+            (e) => e.disease.diseaseId == d.diseaseId
+          );
           if (index >= 0) {
             list.splice(index, 1);
             currentList = list;
@@ -67,6 +81,21 @@
         if (allList !== undefined && allList.length > 0) {
           updateAllListWith(d.diseaseId);
         }
+      }
+    })
+  );
+
+  unsubs.push(
+    currentPatient.subscribe(async (p) => {
+      patient = p;
+      show = p != null;
+      allList = [];
+      editInit = null;
+      if (p != null) {
+        currentList = await api.listCurrentDiseaseEx(p.patientId);
+      } else {
+        currentList = [];
+        mode = "current";
       }
     })
   );
@@ -92,38 +121,42 @@
     unsubs.forEach((f) => f());
   });
 
-  currentPatient.subscribe(async (p) => {
-    patient = p;
-    show = p != null;
-    allList = []
-    if (p != null) {
-      currentList = await api.listCurrentDiseaseEx(p.patientId);
-    } else {
-      currentList = [];
-      mode = "current";
-    }
-  });
-
   async function doMode(m: string) {
-    if (m === "edit" && allList.length === 0 && patient != null) {
-      allList = await api.listDiseaseEx(patient.patientId);
+    if( mode === "edit" ){
+      editInit = null;
+    }
+    switch (m) {
+      case "edit": {
+        if (allList.length === 0 && patient) {
+          allList = await api.listDiseaseEx(patient.patientId);
+        }
+        break;
+      }
     }
     mode = m;
+    modeKey = newModeKey();
+  }
+
+  function doCurrentDiseaseClick(d: DiseaseData): void {
+    editInit = d;
+    doMode("edit");
   }
 </script>
 
 {#if show}
   <RightBox title="病名">
     <div class="workarea">
-      {#if mode === "current"}
-        <Current list={currentList} />
-      {:else if mode === "add"}
-        <Add patientId={patient?.patientId ?? 0} {examples} />
-      {:else if mode === "tenki"}
-        <Tenki current={currentList} />
-      {:else if mode === "edit"}
-        <Edit list={allList} />
-      {/if}
+      {#key modeKey}
+        {#if mode === "current"}
+          <Current list={currentList} onDiseaseClick={doCurrentDiseaseClick} />
+        {:else if mode === "add"}
+          <Add patientId={patient?.patientId ?? 0} {examples} />
+        {:else if mode === "tenki"}
+          <Tenki current={currentList} />
+        {:else if mode === "edit"}
+          <Edit list={allList} init={editInit} />
+        {/if}
+      {/key}
     </div>
     <div class="commands">
       <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>

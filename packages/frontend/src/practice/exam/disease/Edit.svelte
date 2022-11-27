@@ -21,6 +21,9 @@
   import api from "@/lib/api";
 
   export let list: DiseaseData[];
+  export let init: DiseaseData | null;
+
+  $: diseaseDataSelected.set(init);
 
   let data: EditData | undefined = undefined;
 
