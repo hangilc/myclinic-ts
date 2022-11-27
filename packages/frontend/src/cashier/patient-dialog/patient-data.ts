@@ -5,7 +5,7 @@ import type { Hoken } from "./hoken";
 export class PatientData {
   constructor(
     public patient: Patient,
-    public currentHoken: Hoken[],
+    public currentHokenList: Hoken[],
     public allHoken: Hoken[] | undefined = undefined,
     public stack: ComponentType[] = []
   ) {}

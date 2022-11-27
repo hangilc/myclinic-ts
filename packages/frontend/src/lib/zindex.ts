@@ -6,9 +6,7 @@ export function alloc() {
   }
   const z = stack[0] + 1
   stack.unshift(z);
-  if( stack.length > 100 ){
-    console.error("Too may zindex stack.");
-  }
+  console.log(stack);
   return z;
 }
 
@@ -17,4 +15,5 @@ export function release(zIndex: number) {
   if( i >= 0 ) {
     stack.splice(i, 1);
   }
+  console.log(stack);
 }

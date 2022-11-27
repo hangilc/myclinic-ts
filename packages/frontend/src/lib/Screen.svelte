@@ -1,10 +1,10 @@
 <script type="ts">
   export let opacity: string = "0";
   export let zIndex:number | undefined = undefined;
-  export let onclick: (ev: Event) => void = _ => {};
+  export let onClick: (ev: Event) => void = _ => {};
 </script>
 
-<div style={`opacity: ${opacity}; z-index: ${zIndex}`} on:click={onclick}></div>
+<div style={`opacity: ${opacity}; z-index: ${zIndex}`} on:click={onClick}></div>
 
 <style>
   div {
