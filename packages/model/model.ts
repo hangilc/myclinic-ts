@@ -79,6 +79,18 @@ export class Patient {
       arg.phone
     );
   }
+
+  fullName(sep: string = " "): string {
+    return this.lastName + sep + this.firstName;
+  }
+
+  get sexAsKanji(): string {
+    switch(this.sex){
+      case "M": return "男";
+      case "F": return "女";
+      default: return this.sex;
+    }
+  }
 }
 
 export class Visit {

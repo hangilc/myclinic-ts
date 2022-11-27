@@ -2,4 +2,6 @@
 
 </script>
 
-<div>SCAN</div>
+<div>
+  
+</div>

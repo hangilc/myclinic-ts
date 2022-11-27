@@ -188,6 +188,20 @@ export default {
     return list;
   },
 
+  async searchPatientSmart(text: string): Promise<m.Patient[]> {
+    text = text.trim();
+    if (text) {
+      if (/^\d+$/.test(text)) {
+        const patientId = parseInt(text);
+        return [await this.getPatient(patientId)];
+      } else {
+        return this.searchPatient(text);
+      }
+    } else {
+      return [];
+    }
+  },
+
   batchGetPatient(patientIds: number[]): Promise<Record<number, m.Patient>> {
     return post<Record<number, m.Patient>>(
       "batch-get-patient",
@@ -1040,5 +1054,24 @@ export default {
 
   getWebphoneToken(): Promise<string> {
     return get("get-webphone-token", {}, castString);
+  },
+
+  getPatientHoken(
+    patientId: number,
+    at: string | Date
+  ): Promise<[m.Shahokokuho[], m.Koukikourei[], m.Roujin[], m.Kouhi[]]> {
+    return get<[m.Shahokokuho[], m.Koukikourei[], m.Roujin[], m.Kouhi[]]>(
+      "get-patient-hoken",
+      { "patient-id": patientId.toString(), at: dateParam(at) },
+      (json: any) => {
+        const [_ser, _patient, shahoList, koukiList, roujinList, kouhiList] = json;
+        return [
+          castList(m.Shahokokuho.cast)(shahoList),
+          castList(m.Koukikourei.cast)(koukiList),
+          castList(m.Roujin.cast)(roujinList),
+          castList(m.Kouhi.cast)(kouhiList)
+        ]
+      }
+    );
   },
 };

@@ -9,17 +9,29 @@
 </script>
 
 <div class="top">
-  <a href="javascript:void(0);" on:click={() => start("main")}>メイン</a>
-  <a href="javascript:void(0)" on:click={() => start("scan")}>スキャン</a>
+  <a
+    href="javascript:void(0);"
+    on:click={() => start("main")}
+    class:current={$serviceStore === "main"}>メイン</a
+  >
+  <a
+    href="javascript:void(0)"
+    on:click={() => start("scan")}
+    class:current={$serviceStore === "scan"}>スキャン</a
+  >
 </div>
 
 <style>
-.top {
-  background-color: #eee;
-  padding: 6px;
-}
+  .top {
+    background-color: #eee;
+    padding: 6px;
+  }
 
-a {
-  display: block;
-}  
+  a {
+    display: block;
+  }
+
+  a.current {
+    font-weight: bold;
+  }
 </style>
