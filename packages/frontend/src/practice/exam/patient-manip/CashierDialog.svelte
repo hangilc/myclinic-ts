@@ -3,11 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
-  import {
-  WqueueState,
-    type Meisai,
-    type Payment,
-  } from "myclinic-model";
+  import { WqueueState, type Meisai, type Payment } from "myclinic-model";
   import { writable, type Readable, type Writable } from "svelte/store";
   import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
@@ -96,10 +92,7 @@
         close();
         endPatient();
       } else {
-        await api.changeWqueueState(
-          $visitId,
-          WqueueState.WaitCashier.code
-        );
+        await api.changeWqueueState($visitId, WqueueState.WaitCashier.code);
         close();
         endPatient(WqueueState.WaitCashier);
       }
@@ -120,14 +113,16 @@
       <div>
         {chargeRep}
         <a href="javascript:void(0)" on:click={doModify}>変更</a>
-        <a href="javascript:void(0)" on:click={doDefault}>既定値</a>
       </div>
     {:else if mode === "form"}
-      <ChargeForm
-        initValue={$chargeValue.toString()}
-        onCancel={() => (mode = "disp")}
-        onEnter={doFormEnter}
-      />
+      <div class="charge-form-wrapper">
+        <ChargeForm
+          initValue={$chargeValue.toString()}
+          meisaiChargeValue={$meisai?.charge}
+          onCancel={() => (mode = "disp")}
+          onEnter={doFormEnter}
+        />
+      </div>
     {/if}
   </div>
   <div class="commands">
@@ -142,6 +137,13 @@
 </Dialog>
 
 <style>
+  .charge-form-wrapper {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 6px;
+  }
+
   .commands {
     display: flex;
     justify-content: flex-end;
