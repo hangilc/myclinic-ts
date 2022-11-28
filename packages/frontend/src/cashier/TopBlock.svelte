@@ -3,7 +3,6 @@
   import type { Patient } from "myclinic-model";
   import { listCurrentHoken } from "./patient-dialog/misc";
   import { PatientData } from "./patient-dialog/patient-data";
-  import PatientDialog from "./patient-dialog/PatientDialog.svelte";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
 
   let searchText = "";
@@ -18,13 +17,7 @@
   async function doPatientSelected(patient: Patient) {
     const hokenList = await listCurrentHoken(patient.patientId);
     const data = new PatientData(patient, hokenList);
-    const dialog = new PatientDialog({
-      target: document.body,
-      props: {
-      patientData: data
-      }
-    })
-    dialog.$on("close", () => dialog.$destroy())
+    data.moveToInfo();
   }
 
 </script>
