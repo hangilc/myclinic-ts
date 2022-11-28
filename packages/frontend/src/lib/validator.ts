@@ -1,12 +1,3 @@
-export class ValidationError {
-  isValidationError: boolean = true;
-  message: string;
-
-  constructor(message: string) {
-    this.message = message;
-  }
-}
-
 class Valid<T> {
   constructor(
     public value: T
@@ -42,6 +33,10 @@ class ValidationResult<T> {
   static invalid<T>(error: string): ValidationResult<T> {
     return new ValidationResult<T>(new Invalid(error));
   }
+}
+
+interface Validator<T> {
+  validate(errs: string[]): T;
 }
 
 class Validator<S, T> {
