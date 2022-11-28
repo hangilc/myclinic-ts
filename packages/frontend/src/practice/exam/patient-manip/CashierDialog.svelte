@@ -71,13 +71,13 @@
     mode = "disp";
   }
 
-  function doDefault(): void {
-    if ($meisai == null) {
-      chargeValue.set(0);
-    } else {
-      chargeValue.set($meisai.charge);
-    }
-  }
+  // function doDefault(): void {
+  //   if ($meisai == null) {
+  //     chargeValue.set(0);
+  //   } else {
+  //     chargeValue.set($meisai.charge);
+  //   }
+  // }
 
   async function doEnter(close: () => void) {
     if ($visitId != null) {

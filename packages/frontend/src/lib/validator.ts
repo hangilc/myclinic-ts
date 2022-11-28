@@ -26,12 +26,12 @@ class ValidationResult<T> {
     return this.result instanceof Valid<T>;
   }
 
-  unwrap(errors: string[], errValue: T, prefix: () => string = () => ""): T {
+  unwrap(errors: string[], prefix: () => string = () => ""): T {
     if( this.isValid ){
       return (this.result as Valid<T>).value;
     } else {
       errors.push(prefix + (this.result as Invalid).error);
-      return errValue;
+      return undefined as any;
     }
   }
 

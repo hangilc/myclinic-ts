@@ -64,13 +64,13 @@
       const validated = {
         nen: nenSchema
           .validate(nenValue)
-          .unwrap(errors, 0, () => errorPrefix + "年："),
+          .unwrap(errors, () => errorPrefix + "年："),
         month: monthSchema
           .validate(monthValue)
-          .unwrap(errors, 0, () => errorPrefix + "月："),
+          .unwrap(errors, () => errorPrefix + "月："),
         day: daySchema
           .validate(dayValue)
-          .unwrap(errors, 0, () => errorPrefix + "日："),
+          .unwrap(errors, () => errorPrefix + "日："),
       };
       if (errors.length === 0) {
         let year: number = fromGengou(gengouValue, validated.nen);

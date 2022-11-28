@@ -60,7 +60,7 @@
 
 {#if show}
   <div>
-    <Screen opacity="0" zIndex={zIndexScreen} onclick={close} />
+    <Screen opacity="0" zIndex={zIndexScreen} on:click={close} />
     <div
       use:setMenu
       class="menu pulldown"

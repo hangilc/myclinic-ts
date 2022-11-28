@@ -1,4 +1,3 @@
-import { createTypeReferenceDirectiveResolutionCache } from "typescript";
 import api from "./api";
 
 declare var Twilio: any;
