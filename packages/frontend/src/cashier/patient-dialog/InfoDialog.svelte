@@ -7,13 +7,7 @@
   export let onClose: () => void = () => {};
 </script>
 
-<SurfaceModal
-  on:close
-  width="320px"
-  height="auto"
-  title="患者情報"
-  {onClose}
->
+<SurfaceModal on:close width="320px" height="auto" title="患者情報" {onClose}>
   {#if patientData}
     {@const p = patientData.patient}
     <div class="info">
@@ -37,11 +31,14 @@
       <button>閉じる</button>
     </div>
     <div class="menu">
-      <a href="javascript:void(0)">編集</a> | 
-      <a href="javascript:void(0)">新規社保国保</a> | 
-      <a href="javascript:void(0)">新規後期高齢</a> | 
-      <a href="javascript:void(0)">新規公費</a> | 
-      <a href="javascript:void(0)">保険履歴</a> | 
+      <a href="javascript:void(0)" on:click={() => patientData?.moveToEdit()}
+        >編集</a
+      >
+      |
+      <a href="javascript:void(0)">新規社保国保</a> |
+      <a href="javascript:void(0)">新規後期高齢</a> |
+      <a href="javascript:void(0)">新規公費</a> |
+      <a href="javascript:void(0)">保険履歴</a> |
       <a href="javascript:void(0)">保存画像</a>
     </div>
   {/if}

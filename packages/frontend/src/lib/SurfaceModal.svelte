@@ -5,7 +5,7 @@
 
   export let screenOpacity: string = "0.4";
   export let title: string = "Untitled";
-  export let width: string = "auto";
+  export let width: string = "320px";
   export let height: string = "auto";
   export let onClose: () => void = () => {};
 

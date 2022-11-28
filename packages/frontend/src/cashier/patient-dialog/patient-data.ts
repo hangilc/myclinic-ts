@@ -1,14 +1,18 @@
 import type { Patient } from "myclinic-model";
+import type { ComponentType } from "svelte";
+import EditDialog from "./EditDialog.svelte";
 import type { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
 
+type Closer = () => void;
+
 interface Opener {
-  open(): void
+  open(): Closer
 }
 
 function infoOpener(data: PatientData): Opener {
   return {
-    open(): void {
+    open(): Closer {
       const d = new InfoDialog({
         target: document.body,
         props: {
@@ -18,14 +22,32 @@ function infoOpener(data: PatientData): Opener {
       d.$on("close", () => {
         d.$destroy();
         data.onDialogClose();
-      })
-  
+      });
+      return () => d.$destroy();
+    }
+  }
+}
+
+function editOpener(data: PatientData): Opener {
+  return {
+    open(): Closer {
+      const d = new EditDialog({
+        target: document.body,
+        props: {
+          patient: data.patient
+        }
+      });
+      d.$on("close", () => {
+        d.$destroy();
+        data.onDialogClose();
+      });
+      return () => d.$destroy();
     }
   }
 }
 
 export class PatientData {
-  current: Opener | undefined = undefined;
+  current: [Opener, Closer] | undefined = undefined;
 
   constructor(
     public patient: Patient,
@@ -40,10 +62,13 @@ export class PatientData {
 
   moveTo(opener: Opener): void {
     if( this.current != undefined ){
-      this.stack.push(this.current);
+      const [opener, closer] = this.current;
+      closer();
+      console.log("CLOSER");
+      this.stack.push(opener);
     }
-    this.current = opener;
-    opener.open();
+    const closer = opener.open();
+    this.current = [opener, closer];
   }
 
   goBack(): void {
@@ -66,5 +91,9 @@ export class PatientData {
 
   moveToInfo(): void {
     this.moveTo(infoOpener(this));
+  }
+
+  moveToEdit(): void {
+    this.moveTo(editOpener(this));
   }
 }
