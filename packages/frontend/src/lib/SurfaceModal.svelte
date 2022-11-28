@@ -3,7 +3,7 @@
   import Screen from "./Screen.svelte";
   import { alloc, release } from "./zindex";
 
-  export let screenOpacity: string = "0";
+  export let screenOpacity: string = "0.4";
   export let title: string = "Untitled";
   export let width: string = "auto";
   export let height: string = "auto";
@@ -85,12 +85,14 @@
     opacity: 1;
     overflow: auto;
     border-radius: 0.5rem;
+    border: 1px solid gray;
   }
 
   .title {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 10px;
   }
 
   .title-span {

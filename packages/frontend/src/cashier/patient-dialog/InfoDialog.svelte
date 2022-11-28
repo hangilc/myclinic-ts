@@ -9,7 +9,7 @@
 
 <SurfaceModal
   on:close
-  width="360px"
+  width="320px"
   height="auto"
   title="患者情報"
   {onClose}
@@ -27,10 +27,22 @@
       <span>住所</span><span>{p.address}</span>
       <span>電話</span><span>{p.phone}</span>
     </div>
-    <div>
+    <div class="current-list">
       {#each patientData.currentHokenList as h}
         <a href="javascript:void(0)">{h.rep}</a>
       {/each}
+    </div>
+    <div class="commands">
+      <button>診察受付</button>
+      <button>閉じる</button>
+    </div>
+    <div class="menu">
+      <a href="javascript:void(0)">編集</a> | 
+      <a href="javascript:void(0)">新規社保国保</a> | 
+      <a href="javascript:void(0)">新規後期高齢</a> | 
+      <a href="javascript:void(0)">新規公費</a> | 
+      <a href="javascript:void(0)">保険履歴</a> | 
+      <a href="javascript:void(0)">保存画像</a>
     </div>
   {/if}
 </SurfaceModal>
@@ -46,5 +58,24 @@
     align-items: center;
     justify-content: right;
     margin-right: 6px;
+  }
+
+  .current-list {
+    margin: 10px 0 0 0;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
+    margin: 0;
+    margin-bottom: 10px;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
+
+  .menu a {
+    word-break: keep-all;
   }
 </style>
