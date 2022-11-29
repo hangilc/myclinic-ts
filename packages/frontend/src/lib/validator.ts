@@ -1,3 +1,5 @@
+import { dateToSql } from "./util";
+
 class Valid<T> {
   constructor(public value: T) {}
 }
@@ -73,6 +75,14 @@ export class ValidationResult<T> {
     }
   }
 
+  map<U>(f: (t: T) => U): ValidationResult<U> {
+    if( this.result instanceof Valid<T> ){
+      return new ValidationResult<U>(new Valid<U>(f(this.result.value)), this.prefixList);
+    } else {
+      return new ValidationResult<U>(this.result, this.prefixList);
+    }
+  }
+
   unwrap(
     errorsCollector: string[],
     cb: (isValid: boolean) => void = (_) => {}
@@ -93,6 +103,24 @@ export class ValidationResult<T> {
       prefixList.concat(this.prefixList)
     );
   }
+}
+
+export function and<T>(
+  top: (src: T) => Valid<T> | Invalid,
+  ...vtors: ((src: T) => Valid<T> | Invalid)[]
+): (src: T) => Valid<T> | Invalid {
+  return (src: T) => {
+    const r = top(src);
+    if (vtors.length === 0) {
+      return r;
+    } else {
+      if (r instanceof Valid<T>) {
+        return and(vtors[0], ...vtors.slice(1))(r.value);
+      } else {
+        return r;
+      }
+    }
+  };
 }
 
 export function strSrc(src: string, prefix?: string): ValidationResult<string> {
@@ -139,17 +167,20 @@ export const isInt: VFun<number> = (src: number) => {
   }
 };
 
-export const isPositive: VFun<number> = pred<number>((t: number) => t > 0, "正の数でありません。");
+export const isPositive: VFun<number> = pred<number>(
+  (t: number) => t > 0,
+  "正の数でありません。"
+);
 
 export function inRange(min: number, max: number): VFun<number> {
   return (n: number) => {
-    if( n >= min && n <= max ){
+    if (n >= min && n <= max) {
       return new Valid(n);
     } else {
       return new Invalid(`${min} と ${max} の間の範囲でありません。`);
     }
-  }
-};
+  };
+}
 
 export function pred<T>(
   test: (t: T) => boolean,
@@ -166,4 +197,29 @@ export function pred<T>(
       }
     }
   };
+}
+
+export function oneOf<T>(
+  choices: T[],
+  err?: string | ((t: T) => string)
+): (src: T) => Valid<T> | Invalid {
+  return (src: T) => {
+    if (choices.includes(src)) {
+      return new Valid<T>(src);
+    } else {
+      if (typeof err === "string") {
+        return new Invalid(err);
+      } else if (err == undefined) {
+        const msg =
+          choices.map((c) => `${c}`).join(", ") + " でありません。";
+        return new Invalid(msg);
+      } else {
+        return new Invalid(err(src));
+      }
+    }
+  };
+}
+
+export function toSqlDate(date: Date): string {
+  return dateToSql(date);
 }

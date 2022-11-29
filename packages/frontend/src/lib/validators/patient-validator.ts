@@ -1,5 +1,10 @@
 import { Patient } from "myclinic-model";
-import { notEmpty, type ValidationResult } from "../validator";
+import {
+  notEmpty,
+  oneOf,
+  toSqlDate,
+  type ValidationResult,
+} from "../validator";
 
 export class PatientInput {
   constructor(
@@ -11,16 +16,25 @@ export class PatientInput {
     public sex: ValidationResult<string>,
     public birthday: ValidationResult<Date>,
     public address: ValidationResult<string>,
-    public phone: ValidationResult<string>,
+    public phone: ValidationResult<string>
   ) {}
 }
 
-export function validatePatient(patientId: number, input: PatientInput): ValidationResult<Patient> {
+export function validatePatient(
+  patientId: number,
+  input: PatientInput
+): Patient | string[] {
   const errs: string[] = [];
   const patient: Patient = new Patient(
     patientId,
     input.lastName.and(notEmpty).unwrap(errs),
     input.firstName.and(notEmpty).unwrap(errs),
-    
-  )
+    input.lastNameYomi.and(notEmpty).unwrap(errs),
+    input.firstNameYomi.and(notEmpty).unwrap(errs),
+    input.sex.and(oneOf(["M", "F"])).unwrap(errs),
+    input.birthday.map(toSqlDate).unwrap(errs),
+    input.address.unwrap(errs),
+    input.phone.unwrap(errs)
+  );
+  return errs.length > 0 ? errs : patient;
 }

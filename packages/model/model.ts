@@ -53,6 +53,27 @@ export function stringToOptionalDate(s: string): Date | undefined {
   }
 }
 
+export class SexType {
+  constructor(
+    public code: string,
+    public rep: string
+  ) {}
+
+  static fromCode(code: string): SexType {
+    for(let s of Object.values(Sex)){
+      if( s.code === code ){
+        return s;
+      }
+    }
+    throw new Error("Cannot convert to SexType: " + code);
+  }
+}
+
+export const Sex: Record<string, SexType> = {
+  Male: new SexType("M", "男"),
+  Female: new SexType("F", "女")
+}
+
 export class Patient {
   constructor(
     public patientId: number,
@@ -84,12 +105,12 @@ export class Patient {
     return this.lastName + sep + this.firstName;
   }
 
+  get sexType(): SexType {
+    return SexType.fromCode(this.sex);
+  }
+
   get sexAsKanji(): string {
-    switch(this.sex){
-      case "M": return "男";
-      case "F": return "女";
-      default: return this.sex;
-    }
+    return this.sexType.rep;
   }
 }
 
