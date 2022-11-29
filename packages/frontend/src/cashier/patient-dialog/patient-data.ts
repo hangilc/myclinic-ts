@@ -1,5 +1,4 @@
 import type { Patient } from "myclinic-model";
-import type { ComponentType } from "svelte";
 import EditDialog from "./EditDialog.svelte";
 import type { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";

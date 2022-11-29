@@ -1,107 +1,169 @@
 class Valid<T> {
-  constructor(
-    public value: T
-  ) {}
+  constructor(public value: T) {}
 }
 
 class Invalid {
-  constructor(
-    public error: string
-  ) {}
+  constructor(public error: string) {}
 }
 
-class ValidationResult<T> {
-  constructor(public result: Valid<T> | Invalid){}
+export class ValidationResult<T> {
+  constructor(
+    public result: Valid<T> | Invalid[],
+    public prefixList: string[]
+  ) {}
 
   get isValid(): boolean {
     return this.result instanceof Valid<T>;
   }
 
-  unwrap(errors: string[], prefix: () => string = () => ""): T {
-    if( this.isValid ){
-      return (this.result as Valid<T>).value;
+  get errorStrings(): string[] {
+    if (this.result instanceof Valid) {
+      return [];
     } else {
-      errors.push(prefix + (this.result as Invalid).error);
+      return this.result.map((inv) => {
+        return [...this.prefixList, inv.error].join(":");
+      });
+    }
+  }
+
+  and1(
+    vtor: (src: T) => ValidationResult<T> | Valid<T> | Invalid
+  ): ValidationResult<T> {
+    if (this.result instanceof Valid<T>) {
+      const r = vtor(this.result.value);
+      if (r instanceof ValidationResult<T>) {
+        return r.extendPrefixList(this.prefixList);
+      } else if (r instanceof Valid<T>) {
+        return new ValidationResult<T>(r, this.prefixList);
+      } else {
+        return new ValidationResult<T>([r], this.prefixList);
+      }
+    } else {
+      return this;
+    }
+  }
+
+  and(
+    ...vtors: ((src: T) => ValidationResult<T> | Valid<T> | Invalid)[]
+  ): ValidationResult<T> {
+    if (vtors.length === 0) {
+      return this;
+    } else if (vtors.length === 1) {
+      return this.and1(vtors[0]);
+    } else {
+      const [vtor, ...rest] = vtors;
+      return this.and1(vtor).and(...rest);
+    }
+  }
+
+  to<U>(
+    vtor: (src: T) => ValidationResult<U> | Valid<U> | Invalid
+  ): ValidationResult<U> {
+    if (this.result instanceof Valid<T>) {
+      const r = vtor(this.result.value);
+      if (r instanceof ValidationResult<U>) {
+        return r.extendPrefixList(this.prefixList);
+      } else if (r instanceof Valid<U>) {
+        return new ValidationResult<U>(r, this.prefixList);
+      } else {
+        return new ValidationResult<U>([r], this.prefixList);
+      }
+    } else {
+      return new ValidationResult<U>(this.result, this.prefixList);
+    }
+  }
+
+  unwrap(
+    errorsCollector: string[],
+    cb: (isValid: boolean) => void = (_) => {}
+  ): T {
+    if (this.result instanceof Valid<T>) {
+      cb(true);
+      return this.result.value;
+    } else {
+      errorsCollector.push(...this.errorStrings);
+      cb(false);
       return undefined as any;
     }
   }
 
-  static valid<T>(value: T): ValidationResult<T> {
-    return new ValidationResult(new Valid(value));
-  }
-
-  static invalid<T>(error: string): ValidationResult<T> {
-    return new ValidationResult<T>(new Invalid(error));
-  }
-}
-
-interface Validator<T> {
-  validate(errs: string[]): T;
-}
-
-class Validator<S, T> {
-  op: (src: S) => ValidationResult<T>;
-
-  constructor(op: (src: S) => ValidationResult<T>) {
-    this.op = op;
-  }
-
-  validate(src: S): ValidationResult<T> {
-    return this.op(src);
-  }
-
-  bind<U>(other: Validator<T, U>): Validator<S, U> {
-    return new Validator<S, U>((src: S) => {
-      const r = this.op(src);
-      if( r.isValid ){
-        return other.op((r.result as Valid<T>).value);
-      } else {
-        return ValidationResult.invalid<U>((r.result as Invalid).error);
-      }
-    })
+  extendPrefixList(prefixList: string[]): ValidationResult<T> {
+    return new ValidationResult<T>(
+      this.result,
+      prefixList.concat(this.prefixList)
+    );
   }
 }
 
-export const string = new Validator<any, string>((src: any) => {
-  if( typeof src === "string" ){
-    return ValidationResult.valid<string>(src);
+export function strSrc(src: string, prefix?: string): ValidationResult<string> {
+  return new ValidationResult(
+    new Valid(src),
+    prefix == undefined ? [] : [prefix]
+  );
+}
+
+type VFun<T> = (src: T) => Valid<T> | Invalid;
+
+export const notEmpty: VFun<string> = (src: string) => {
+  if (src === "") {
+    return new Invalid("入力がありません。");
   } else {
-    return ValidationResult.invalid("文字列でありません。");
+    return new Valid(src);
   }
-})
+};
 
-export const notEmpty = new Validator<string, string>((src: string) => {
-  if( src === "" ){
-    return ValidationResult.invalid("入力がありません。");
-  } else {
-    return ValidationResult.valid(src);
-  }
-})
-
-export function regex(re: RegExp): Validator<string, string> {
-  return new Validator<string, string>((src: string) => {
-    if( re.test(src) ){
-      return ValidationResult.valid<string>(src);
+export function regex(re: RegExp): VFun<string> {
+  return (src: string) => {
+    if (re.test(src)) {
+      return new Valid(src);
     } else {
-      return ValidationResult.invalid("入力が不適切です。");
+      return new Invalid("入力が不適切です。");
     }
-  })
+  };
 }
 
-export const toNumber = new Validator<string, number>((src: string) => {
+export function toNumber(src: string): Valid<number> | Invalid {
   const n = +src;
-  if( isNaN(n) ){
-    return ValidationResult.invalid("数値でありません。");
+  if (isNaN(n)) {
+    return new Invalid("数値でありません。");
   } else {
-    return ValidationResult.valid(n);
+    return new Valid(n);
   }
-})
+}
 
-export const integer = new Validator<number, number>((src: number) => {
-  if( Number.isInteger(src) ){
-    return ValidationResult.valid<number>(src);
+export const isInt: VFun<number> = (src: number) => {
+  if (Number.isInteger(src)) {
+    return new Valid(src);
   } else {
-    return ValidationResult.invalid("整数でありません。");
+    return new Invalid("整数でありません。");
   }
-})
+};
 
+export const isPositive: VFun<number> = pred<number>((t: number) => t > 0, "正の数でありません。");
+
+export function inRange(min: number, max: number): VFun<number> {
+  return (n: number) => {
+    if( n >= min && n <= max ){
+      return new Valid(n);
+    } else {
+      return new Invalid(`${min} と ${max} の間の範囲でありません。`);
+    }
+  }
+};
+
+export function pred<T>(
+  test: (t: T) => boolean,
+  errorMessage: string | ((t: T) => string)
+): VFun<T> {
+  return (src: T) => {
+    if (test(src)) {
+      return new Valid(src);
+    } else {
+      if (typeof errorMessage === "string") {
+        return new Invalid(errorMessage);
+      } else {
+        return new Invalid(errorMessage(src));
+      }
+    }
+  };
+}

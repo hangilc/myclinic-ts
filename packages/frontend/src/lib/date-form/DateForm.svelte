@@ -6,7 +6,13 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import { string, notEmpty, toNumber, integer } from "@/lib/validator";
+  import {
+    inRange,
+    isInt,
+    isPositive,
+    strSrc,
+    toNumber,
+  } from "../validator";
 
   export let date: Date | null | undefined;
   export let errors: string[];
@@ -45,12 +51,6 @@
     errors = [];
   }
 
-  const intValidator = string.bind(notEmpty).bind(toNumber).bind(integer);
-
-  const nenSchema = intValidator;
-  const monthSchema = intValidator;
-  const daySchema = intValidator;
-
   function validate(): void {
     clearError();
     if (nenValue === "" && monthValue === "" && dayValue === "") {
@@ -62,15 +62,18 @@
       }
     } else {
       const validated = {
-        nen: nenSchema
-          .validate(nenValue)
-          .unwrap(errors, () => errorPrefix + "年："),
-        month: monthSchema
-          .validate(monthValue)
-          .unwrap(errors, () => errorPrefix + "月："),
-        day: daySchema
-          .validate(dayValue)
-          .unwrap(errors, () => errorPrefix + "日："),
+        nen: strSrc(nenValue, "年")
+          .to(toNumber)
+          .and(isInt, isPositive)
+          .unwrap(errors),
+        month: strSrc(monthValue, "月")
+          .to(toNumber)
+          .and(isInt, inRange(1, 12))
+          .unwrap(errors),
+        day: strSrc(dayValue)
+          .to(toNumber)
+          .and(isInt, inRange(1, 31))
+          .unwrap(errors),
       };
       if (errors.length === 0) {
         let year: number = fromGengou(gengouValue, validated.nen);
