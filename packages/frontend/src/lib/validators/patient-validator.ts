@@ -20,6 +20,7 @@ export function validatePatient(patientId: number, input: PatientInput): Validat
   const patient: Patient = new Patient(
     patientId,
     input.lastName.and(notEmpty).unwrap(errs),
-    input.firstName.and(notEmpty).unwrap(errs)
+    input.firstName.and(notEmpty).unwrap(errs),
+    
   )
 }
