@@ -1,10 +1,9 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import DateFormPulldown from "../date-form/DateFormPulldown.svelte";
-  import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
+  import { openDateFormPulldown } from "../date-form/date-form-pulldown-op";
+  import { openDatePickerPulldown } from "../date-picker/date-picker-op";
 
   export let date: Date | null;
-  export let errors: string[];
   export let isNullable = false;
   export let format: (date: Date | null) => string = (date: Date | null) => {
     if (date == null) {
@@ -14,22 +13,31 @@
     }
   };
   export let datePickerDefault: () => Date = () => new Date();
-  let repr: string;
-  let form: DateFormPulldown;
-  let datePicker: DatePickerPulldown;
-  $: repr = format(date);
 
-  function doClick(): void {
-    form.open(date);
+  function doClick(ev: Event): void {
+    openDateFormPulldown(
+      date,
+      ev.target as HTMLElement,
+      (d: Date | null) => {
+        date = d;
+      },
+      isNullable
+    );
   }
 
-  function doCalClick(): void {
-    datePicker.open(date || datePickerDefault());
+  function doCalClick(ev: Event): void {
+    openDatePickerPulldown(
+      date ?? datePickerDefault(),
+      ev.target as any,
+      (d: Date) => {
+        date = d;
+      }
+    );
   }
 </script>
 
 <div class="disp">
-  <span class="repr" on:click={doClick}>{repr}</span>
+  <span class="repr" on:click={doClick}>{format(date)}</span>
   <slot name="icons" />
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -48,13 +56,6 @@
     />
   </svg>
 </div>
-<DateFormPulldown
-  bind:errors={errors}
-  {isNullable}
-  onEnter={(d) => (date = d)}
-  bind:this={form}
-/>
-<DatePickerPulldown bind:this={datePicker} onEnter={d => date = d}/>
 
 <style>
   .disp {
@@ -64,14 +65,13 @@
 
   .disp .repr {
     cursor: pointer;
-    margin-right: 6px;
   }
 
   .calendar-icon {
     color: #666;
     display: inline-block;
     margin-top: -3px;
-    margin-left: 4px;
+    margin-left: 5px;
     cursor: pointer;
   }
 </style>

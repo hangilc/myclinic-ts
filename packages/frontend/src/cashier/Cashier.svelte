@@ -1,10 +1,10 @@
 <script lang="ts">
-  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
 import TopBlock from "./TopBlock.svelte";
 
 </script>
 
 <div>
   <TopBlock />
-  <DateFormWithCalendar date={null}/>
+  <EditableDate date={new Date} />
 </div>
