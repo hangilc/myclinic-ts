@@ -2,10 +2,9 @@
   import DateForm from "./DateForm.svelte";
   import Modal from "../Modal.svelte";
 
-  let date: Date | null = null;
+  let date: Date | null;
   export let errors: string[];
   export let isNullable: boolean = false;
-  export let errorPrefix: string = "";
   export let onEnter: (value: Date | null) => void;
   let modal: Modal;
   let error: string = "";
@@ -18,9 +17,15 @@
   }
 
   function doEnter(close: () => void): void {
-    if( errors.length === 0 ){
-      close();
-      onEnter(date);
+    if (errors.length === 0) {
+      if (date === null && !isNullable) {
+        errors = ["入力がありません。"];
+        error = errors[0];
+        return;
+      } else {
+        close();
+        onEnter(date);
+      }
     } else {
       error = errors.join("\n");
     }
@@ -31,12 +36,7 @@
   {#if error !== ""}
     <div class="error">{error}</div>
   {/if}
-  <DateForm
-    bind:date
-    bind:errors
-    {isNullable}
-    {errorPrefix}
-  />
+  <DateForm bind:date bind:errors />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={() => doEnter(close)}>入力</button>

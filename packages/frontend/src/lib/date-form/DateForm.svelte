@@ -6,40 +6,22 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import {
-    inRange,
-    isInt,
-    isPositive,
-    strSrc,
-    toNumber,
-  } from "../validator";
+  import { inRange, isInt, isPositive, strSrc, toNumber } from "../validator";
 
   export let date: Date | null | undefined;
-  export let errors: string[];
+  export let errors: string[] = [];
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  export let isNullable = false;
-  export let errorPrefix: string = "";
 
-  let gengouValue: string;
+  let gengouValue: string = gengouList[gengouList.length - 1];
   let nenValue: string = "";
   let monthValue: string = "";
   let dayValue: string = "";
 
-  $: {
-    if (date !== undefined) {
-      initValues(date);
-      validate();
-    }
-  }
+  initValues(date);
 
-  export function initValues(d: Date | null): void {
-    if (d == null) {
-      nenValue = "";
-      monthValue = "";
-      dayValue = "";
-    } else {
-      let kdate: KanjiDate | null;
-      kdate = new KanjiDate(d);
+  function initValues(d: Date | null | undefined): void {
+    if (d != null) {
+      const kdate = new KanjiDate(d);
       gengouValue = kdate.gengou;
       nenValue = kdate.nen.toString();
       monthValue = kdate.month.toString();
@@ -54,12 +36,7 @@
   function validate(): void {
     clearError();
     if (nenValue === "" && monthValue === "" && dayValue === "") {
-      if (isNullable) {
-        date = null;
-      } else {
-        date = undefined;
-        errors.push(errorPrefix + "入力がありません。");
-      }
+      date = null;
     } else {
       const validated = {
         nen: strSrc(nenValue, "年")
@@ -89,6 +66,7 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addYears(date, n);
+      initValues(date);
     }
   }
 
@@ -97,6 +75,7 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addMonths(date, n);
+      initValues(date);
     }
   }
 
@@ -105,6 +84,7 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addDays(date, n);
+      initValues(date);
     }
   }
 </script>
