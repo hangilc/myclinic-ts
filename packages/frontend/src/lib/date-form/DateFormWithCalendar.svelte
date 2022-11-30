@@ -4,21 +4,23 @@
   import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
 
   export let date: Date | null | undefined;
-  export let errors: string[];
+  export let errors: string[] = [];
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();
-  export let errorPrefix: string = "";
-  export let iconWidth: string = "1.1em";
+  export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   let form: DateForm;
   let datePicker: DatePickerPulldown;
 
+  $: if( date === null && !isNullable ) {
+    date = undefined;
+    errors = ["入力がありません。"]
+  }
+  $: console.log(date);
+  $: console.log(errors);
+
   export function initValues(date: Date | null): void {
     form.initValues(date);
-  }
-
-  export function validate(): [Date | null, AppError[]] {
-    return form.validate();
   }
 
   function doCalClick(): void {
@@ -39,9 +41,7 @@
     <DateForm
       bind:date
       bind:errors
-      {isNullable}
       bind:this={form}
-      {errorPrefix}
       {gengouList}
     />
     <slot name="spacer" />
@@ -75,7 +75,8 @@
   }
   .calendar-icon {
     color: gray;
-    margin-top: -0.3em;
+    margin-top: -0.2em;
+    margin-left: 0.2em;
     cursor: pointer;
   }
 </style>

@@ -6,7 +6,14 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import { inRange, isInt, isPositive, strSrc, toNumber } from "../validator";
+  import {
+    inRange,
+    isInt,
+    isPositive,
+    notEmpty,
+    strSrc,
+    toNumber,
+  } from "../validator";
 
   export let date: Date | null | undefined;
   export let errors: string[] = [];
@@ -17,7 +24,7 @@
   let monthValue: string = "";
   let dayValue: string = "";
 
-  initValues(date);
+  $: initValues(date);
 
   function initValues(d: Date | null | undefined): void {
     if (d != null) {
@@ -40,14 +47,17 @@
     } else {
       const validated = {
         nen: strSrc(nenValue, "年")
+          .and(notEmpty)
           .to(toNumber)
           .and(isInt, isPositive)
           .unwrap(errors),
         month: strSrc(monthValue, "月")
+          .and(notEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 12))
           .unwrap(errors),
-        day: strSrc(dayValue)
+        day: strSrc(dayValue, "日")
+          .and(notEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 31))
           .unwrap(errors),
@@ -66,7 +76,6 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addYears(date, n);
-      initValues(date);
     }
   }
 
@@ -75,7 +84,6 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addMonths(date, n);
-      initValues(date);
     }
   }
 
@@ -84,7 +92,6 @@
     if (date instanceof Date) {
       const n = event.shiftKey ? -1 : 1;
       date = addDays(date, n);
-      initValues(date);
     }
   }
 </script>
@@ -122,6 +129,8 @@
 
   .gengou {
     font-size: 1em;
+    padding: 1px;
+    margin-right: 2px;
   }
 
   .inputs span {

@@ -22,8 +22,9 @@ export class ValidationResult<T> {
     if (this.result instanceof Valid) {
       return [];
     } else {
+      console.log("pre", this.prefixList);
       return this.result.map((inv) => {
-        return [...this.prefixList, inv.error].join(":");
+        return [...this.prefixList, inv.error].join("：");
       });
     }
   }
@@ -152,7 +153,7 @@ export function regex(re: RegExp): VFun<string> {
 
 export function toNumber(src: string): Valid<number> | Invalid {
   const n = +src;
-  if (isNaN(n)) {
+  if (isNaN(n) || src === "") {
     return new Invalid("数値でありません。");
   } else {
     return new Valid(n);
