@@ -1,20 +1,14 @@
 <script lang="ts">
-  import DateForm from "./DateForm.svelte";
-  import Modal from "../Modal.svelte";
+  import SurfacePulldown from "../SurfacePulldown.svelte";
+import DateForm from "./DateForm.svelte";
 
-  let date: Date | null;
-  export let errors: string[];
+  export let date: Date | null;
   export let isNullable: boolean = false;
+  export let anchor: HTMLElement | SVGSVGElement;
+  export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
-  let modal: Modal;
+  let errors: string[] = [];
   let error: string = "";
-
-  export function open(initValue: Date | null): void {
-    date = initValue;
-    errors = [];
-    error = "";
-    modal.open();
-  }
 
   function doEnter(close: () => void): void {
     if (errors.length === 0) {
@@ -32,17 +26,17 @@
   }
 </script>
 
-<Modal let:close screenOpacity="0.2" bind:this={modal}>
+<SurfacePulldown let:close {destroy} {anchor} width="auto">
   {#if error !== ""}
     <div class="error">{error}</div>
   {/if}
-  <DateForm bind:date bind:errors />
+  <DateForm bind:date bind:errors/>
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={() => doEnter(close)}>入力</button>
     <button on:click={close}>キャンセル</button>
   </div>
-</Modal>
+</SurfacePulldown>
 
 <style>
   .error {

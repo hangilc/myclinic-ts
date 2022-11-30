@@ -7,12 +7,11 @@
   export let title: string = "Untitled";
   export let width: string = "320px";
   export let height: string = "auto";
+  export let destroy: () => void;
   export let onClose: () => void = () => {};
 
   let zIndexScreen = alloc();
   let zIndexContent = alloc();
-
-  const dispatch = createEventDispatcher();
 
   const screen = new Screen({
     target: document.body,
@@ -30,7 +29,7 @@
   });
 
   function close(): void {
-    dispatch("close");
+    destroy();
     onClose();
   }
 

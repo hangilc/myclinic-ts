@@ -1,19 +1,14 @@
 <script lang="ts">
-  import DateFormPulldown from "@/lib/date-form/DateFormPulldown.svelte";
+  import { openDateFormPulldown } from "@/lib/date-form/date-form-pulldown-op";
   import TopBlock from "./TopBlock.svelte";
 
-  let errors: string[] = [];
-  let pulldown: DateFormPulldown;
-  function onEnter(d: Date | null): void {
-    console.log(d);
-  }
-  function doClick(): void {
-    pulldown.open(new Date());
+  function doClick(ev: MouseEvent): void {
+    openDateFormPulldown(new Date(), ev.target as HTMLElement, (d) => console.log(d),
+      true);
   }
 </script>
 
 <div>
   <TopBlock />
-  <DateFormPulldown bind:errors={errors} onEnter={onEnter} bind:this={pulldown} isNullable/>
   <button on:click={doClick}>click</button>
 </div>
