@@ -1,10 +1,10 @@
 import { dateToSql } from "./util";
 
-class Valid<T> {
+export class Valid<T> {
   constructor(public value: T) {}
 }
 
-class Invalid {
+export class Invalid {
   constructor(public error: string) {}
 }
 
