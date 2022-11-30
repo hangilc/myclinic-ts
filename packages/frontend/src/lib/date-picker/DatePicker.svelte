@@ -50,6 +50,7 @@
   });
 
   function initValues(date: Date): void {
+    console.log("date", date);
     const wareki = kanjidate.toGengou(
       date.getFullYear(),
       date.getMonth() + 1,

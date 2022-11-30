@@ -1,8 +1,6 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
-  import type { AppError } from "../app-error";
-  import DatePickerPulldown from "../date-picker/DatePickerPulldown.svelte";
-
+  import { openDatePickerPulldown } from "@/lib/date-picker/date-picker-op";
   export let date: Date | null | undefined;
   export let errors: string[] = [];
   export let isNullable = false;
@@ -10,7 +8,6 @@
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   let form: DateForm;
-  let datePicker: DatePickerPulldown;
 
   $: if( date === null && !isNullable ) {
     date = undefined;
@@ -23,12 +20,12 @@
     form.initValues(date);
   }
 
-  function doCalClick(): void {
+  function doCalClick(ev: Event): void {
     let d = date;
     if( d == null ){
       d = datePickerDefault();
     }
-    datePicker.open(d);
+    openDatePickerPulldown(d, ev.target as HTMLElement, doDatePickerEnter);
   }
 
   function doDatePickerEnter(value: Date): void {
@@ -63,10 +60,6 @@
     </svg>
   </div>
 </div>
-<DatePickerPulldown
-  bind:this={datePicker}
-  onEnter={(d) => doDatePickerEnter(d)}
-/>
 
 <style>
   .wrapper {

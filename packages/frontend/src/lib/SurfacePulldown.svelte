@@ -5,7 +5,7 @@
   import { alloc, release } from "./zindex";
 
   export let anchor: HTMLElement | SVGSVGElement;
-  export let width: string = "320px";
+  export let width: string = "auto";
   export let height: string = "auto";
   export let destroy: () => void;
   export let onClose: () => void = () => {};
@@ -26,15 +26,13 @@
     screen.$destroy();
     release(zIndexContent);
     release(zIndexScreen);
+    onClose();
   });
 
-  function close(): void {
+  function doScreenClick(ev: Event): void {
+    ev.preventDefault();
+    ev.stopPropagation();
     destroy();
-    onClose();
-  }
-
-  function doScreenClick(): void {
-    close();
   }
 
   function content(e: HTMLElement): void {
@@ -50,7 +48,7 @@
   use:content
 >
   <div>
-    <slot {close} />
+    <slot />
   </div>
 </div>
 

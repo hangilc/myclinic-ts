@@ -10,14 +10,14 @@ import DateForm from "./DateForm.svelte";
   let errors: string[] = [];
   let error: string = "";
 
-  function doEnter(close: () => void): void {
+  function doEnter(): void {
     if (errors.length === 0) {
       if (date === null && !isNullable) {
         errors = ["入力がありません。"];
         error = errors[0];
         return;
       } else {
-        close();
+        destroy();
         onEnter(date);
       }
     } else {
@@ -26,15 +26,15 @@ import DateForm from "./DateForm.svelte";
   }
 </script>
 
-<SurfacePulldown let:close {destroy} {anchor} width="auto">
+<SurfacePulldown {destroy} {anchor} width="auto">
   {#if error !== ""}
     <div class="error">{error}</div>
   {/if}
   <DateForm bind:date bind:errors/>
   <div class="commands">
     <slot name="aux-commands" />
-    <button on:click={() => doEnter(close)}>入力</button>
-    <button on:click={close}>キャンセル</button>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doEnter}>キャンセル</button>
   </div>
 </SurfacePulldown>
 

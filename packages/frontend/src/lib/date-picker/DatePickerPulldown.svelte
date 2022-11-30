@@ -1,23 +1,18 @@
 <script lang="ts">
-  import Modal from "../Modal.svelte";
+  import SurfacePulldown from "../SurfacePulldown.svelte";
   import DatePicker from "./DatePicker.svelte";
 
-  let init: Date;
-
+  export let init: Date;
+  export let destroy: () => void;
+  export let anchor: HTMLElement | SVGSVGElement;
   export let onEnter: (value: Date) => void;
-  let modal: Modal;
 
-  export function open(initValue: Date): void {
-    init = initValue;
-    modal.open();
-  }
-
-  function doEnter(value: Date, close: () => void): void {
-    close();
+  function doEnter(value: Date): void {
+    destroy();
     onEnter(value);
   }
 </script>
 
-<Modal bind:this={modal} let:close>
-  <DatePicker {init} onCancel={close} onEnter={(d) => doEnter(d, close)}/>
-</Modal>
+<SurfacePulldown {anchor} {destroy}>
+  <DatePicker {init} onCancel={destroy} onEnter={doEnter}/>
+</SurfacePulldown>
