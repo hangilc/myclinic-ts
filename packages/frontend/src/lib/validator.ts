@@ -224,3 +224,15 @@ export function oneOf<T>(
 export function toSqlDate(date: Date): string {
   return dateToSql(date);
 }
+
+export function toOptionalSqlDate(date: Date | null): string {
+  return date === null ? "0000-00-00" : dateToSql(date);
+}
+
+export function isNotNull<T>(t: T | null): Valid<T> | Invalid {
+  if( t === null ){
+    return new Invalid("Null pointer.");
+  } else {
+    return new Valid<T>(t);
+  }
+}
