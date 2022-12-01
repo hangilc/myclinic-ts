@@ -64,6 +64,9 @@ async function drainEvents() {
 export const textEntered: Writable<m.Text | null> = writable(null)
 export const textUpdated: Writable<m.Text | null> = writable(null)
 export const textDeleted: Writable<m.Text | null> = writable(null)
+export const patientEntered: Writable<m.Patient | null> = writable(null)
+export const patientUpdated: Writable<m.Patient | null> = writable(null)
+export const patientDeleted: Writable<m.Patient | null> = writable(null)
 export const visitEntered: Writable<m.Visit | null> = writable(null)
 export const visitUpdated: Writable<m.Visit | null> = writable(null)
 export const visitDeleted: Writable<m.Visit | null> = writable(null)
@@ -138,6 +141,23 @@ function publishAppEvent(e: m.AppEvent): void {
         }
         case "deleted": {
           textDeleted.set(payload);
+          break;
+        }
+      }
+      break;
+    }
+    case "patient": {
+      switch (kind) {
+        case "created": {
+          patientEntered.set(payload);
+          break;
+        }
+        case "updated": {
+          patientUpdated.set(payload);
+          break;
+        }
+        case "deleted": {
+          patientDeleted.set(payload);
           break;
         }
       }

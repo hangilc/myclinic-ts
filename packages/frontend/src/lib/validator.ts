@@ -1,3 +1,4 @@
+import { HighlightSpanKind } from "typescript";
 import { dateToSql } from "./util";
 
 export class Valid<T> {
@@ -5,13 +6,24 @@ export class Valid<T> {
 }
 
 export class Invalid {
-  constructor(public error: string, prefixList: string[] = []) {}
+  constructor(public error: string, public prefixList: string[] = []) {}
+
+  unshiftPrefix(prefix?: string): Invalid {
+    if( prefix == undefined ){
+      return this;
+    } else {
+      return new Invalid(this.error, [prefix, ...this.prefixList]);
+    }
+  }
+
+  toString(): string {
+    return [...this.prefixList, this.error].join("：");
+  }
 }
 
 export class ValidationResult<T> {
   constructor(
     public result: Valid<T> | Invalid[],
-    public prefixList: string[]
   ) {}
 
   get isValid(): boolean {
@@ -22,10 +34,7 @@ export class ValidationResult<T> {
     if (this.result instanceof Valid) {
       return [];
     } else {
-      console.log("pre", this.prefixList);
-      return this.result.map((inv) => {
-        return [...this.prefixList, inv.error].join("：");
-      });
+      return this.result.map(e => e.toString());
     }
   }
 
@@ -35,11 +44,11 @@ export class ValidationResult<T> {
     if (this.result instanceof Valid<T>) {
       const r = vtor(this.result.value);
       if (r instanceof ValidationResult<T>) {
-        return r.extendPrefixList(this.prefixList);
+        return r;
       } else if (r instanceof Valid<T>) {
-        return new ValidationResult<T>(r, this.prefixList);
+        return new ValidationResult<T>(r);
       } else {
-        return new ValidationResult<T>([r], this.prefixList);
+        return new ValidationResult<T>([r]);
       }
     } else {
       return this;
@@ -65,44 +74,48 @@ export class ValidationResult<T> {
     if (this.result instanceof Valid<T>) {
       const r = vtor(this.result.value);
       if (r instanceof ValidationResult<U>) {
-        return r.extendPrefixList(this.prefixList);
+        return r;
       } else if (r instanceof Valid<U>) {
-        return new ValidationResult<U>(r, this.prefixList);
+        return new ValidationResult<U>(r);
       } else {
-        return new ValidationResult<U>([r], this.prefixList);
+        return new ValidationResult<U>([r]);
       }
     } else {
-      return new ValidationResult<U>(this.result, this.prefixList);
+      return new ValidationResult<U>(this.result);
+    }
+  }
+
+  fold<U>(fValid: (v: T) => U, fError: (es: Invalid[]) => U): U {
+    if( this.result instanceof Valid<T> ){
+      return fValid(this.result.value);
+    } else {
+      return fError(this.result);
     }
   }
 
   map<U>(f: (t: T) => U): ValidationResult<U> {
-    if( this.result instanceof Valid<T> ){
-      return new ValidationResult<U>(new Valid<U>(f(this.result.value)), this.prefixList);
+    if (this.result instanceof Valid<T>) {
+      return new ValidationResult<U>(
+        new Valid<U>(f(this.result.value))
+      );
     } else {
-      return new ValidationResult<U>(this.result, this.prefixList);
+      return new ValidationResult<U>(this.result);
     }
   }
 
   unwrap(
-    errorsCollector: string[],
+    errorCollector: Invalid[],
+    prefix?: string,
     cb: (isValid: boolean) => void = (_) => {}
   ): T {
     if (this.result instanceof Valid<T>) {
       cb(true);
       return this.result.value;
     } else {
-      errorsCollector.push(...this.errorStrings);
+      errorCollector.push(...this.result.map(e => e.unshiftPrefix(prefix)));
       cb(false);
       return undefined as any;
     }
-  }
-
-  extendPrefixList(prefixList: string[]): ValidationResult<T> {
-    return new ValidationResult<T>(
-      this.result,
-      prefixList.concat(this.prefixList)
-    );
   }
 }
 
@@ -124,10 +137,9 @@ export function and<T>(
   };
 }
 
-export function strSrc(src: string, prefix?: string): ValidationResult<string> {
+export function strSrc(src: string): ValidationResult<string> {
   return new ValidationResult(
     new Valid(src),
-    prefix == undefined ? [] : [prefix]
   );
 }
 
@@ -211,8 +223,7 @@ export function oneOf<T>(
       if (typeof err === "string") {
         return new Invalid(err);
       } else if (err == undefined) {
-        const msg =
-          choices.map((c) => `${c}`).join(", ") + " でありません。";
+        const msg = choices.map((c) => `${c}`).join(", ") + " でありません。";
         return new Invalid(msg);
       } else {
         return new Invalid(err(src));
@@ -230,7 +241,7 @@ export function toOptionalSqlDate(date: Date | null): string {
 }
 
 export function isNotNull<T>(t: T | null): Valid<T> | Invalid {
-  if( t === null ){
+  if (t === null) {
     return new Invalid("Null pointer.");
   } else {
     return new Valid<T>(t);

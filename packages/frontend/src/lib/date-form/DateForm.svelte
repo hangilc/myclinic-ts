@@ -47,21 +47,21 @@
       date = null;
     } else {
       const validated = {
-        nen: strSrc(nenValue, "年")
+        nen: strSrc(nenValue)
           .and(notEmpty)
           .to(toNumber)
           .and(isInt, isPositive)
-          .unwrap(errors),
-        month: strSrc(monthValue, "月")
+          .unwrap(errors, "年"),
+        month: strSrc(monthValue)
           .and(notEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 12))
-          .unwrap(errors),
-        day: strSrc(dayValue, "日")
+          .unwrap(errors, "月"),
+        day: strSrc(dayValue)
           .and(notEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 31))
-          .unwrap(errors),
+          .unwrap(errors, "日"),
       };
       if (errors.length === 0) {
         let year: number = fromGengou(gengouValue, validated.nen);

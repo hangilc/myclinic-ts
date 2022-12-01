@@ -3,82 +3,85 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { strSrc } from "@/lib/validator";
+  import { Invalid, strSrc } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validatePatient } from "@/lib/validators/patient-validator";
-  import { Patient, Sex } from "myclinic-model";
+  import { Patient, Sex, SexType } from "myclinic-model";
 
   export let patient: Patient;
   export let destroy: () => void;
   export let onClose: () => void;
+  export let errors: string[] = [];
 
-  let values = {
-    lastName: patient.lastName,
-    firstName: patient.firstName,
-    lastNameYomi: patient.lastNameYomi,
-    firstNameYomi: patient.firstNameYomi,
-    sex: patient.sex,
-    birthday: new Date(patient.birthday),
-    address: patient.address,
-    phone: patient.phone,
-  };
-  let sexValue: string = patient.sex;
-  let birthdayErrors: string[] = [];
+  let lastName: string = patient.lastName;
+  let firstName: string = patient.firstName;
+  let lastNameYomi: string = patient.lastNameYomi;
+  let firstNameYomi: string = patient.firstNameYomi;
+  let sex: string = patient.sex;
+  let birthday: Date = new Date(patient.birthday);
+  let address: string = patient.address;
+  let phone: string = patient.phone;
+  let birthdayErrors: Invalid[] = [];
 
   async function doEnter() {
-    const result = validatePatient(
-      patient.patientId,  
-    {
-      lastName: strSrc(values.lastName),
-      firstName: strSrc(values.firstName),
-      lastNameYomi: strSrc(values.lastNameYomi),
-      firstNameYomi: strSrc(values.firstNameYomi),
-      sex: strSrc(sexValue),
-      birthday: dateSrc(values.birthday, birthdayErrors),
-      address: strSrc(values.address),
-      phone: strSrc(values.phone)
+    const result = validatePatient(patient.patientId, {
+      lastName: strSrc(lastName),
+      firstName: strSrc(firstName),
+      lastNameYomi: strSrc(lastNameYomi),
+      firstNameYomi: strSrc(firstNameYomi),
+      sex: strSrc(sex),
+      birthday: dateSrc(birthday, birthdayErrors),
+      address: strSrc(address),
+      phone: strSrc(phone),
     });
-    if( result instanceof Patient ){
+    if (result instanceof Patient) {
       await api.updatePatient(result);
     } else {
-      To Be Fixed
+      errors = result;
     }
   }
 </script>
 
 <SurfaceModal title="患者情報編集" {destroy} {onClose}>
+  {#if errors.length > 0}
+    <div class="error">
+      {#each errors as e}
+        <div>{e}</div>
+      {/each}
+    </div>
+  {/if}
   <div class="panel">
     <span>患者番号</span>
     <span>{patient.patientId}</span>
     <span>氏名</span>
     <div class="input-block">
-      <input type="text" bind:value={values.lastName} class="name-input" />
-      <input type="text" bind:value={values.firstName} class="name-input" />
+      <input type="text" bind:value={lastName} class="name-input" />
+      <input type="text" bind:value={firstName} class="name-input" />
     </div>
     <span>よみ</span>
     <div class="input-block">
-      <input type="text" bind:value={values.lastNameYomi} class="name-input" />
-      <input type="text" bind:value={values.firstNameYomi} class="name-input" />
+      <input type="text" bind:value={lastNameYomi} class="name-input" />
+      <input type="text" bind:value={firstNameYomi} class="name-input" />
     </div>
     <span>生年月日</span>
     <div class="input-block">
-      <DateFormWithCalendar date={values.birthday} errors={birthdayErrors} />
+      <DateFormWithCalendar bind:date={birthday} bind:errors={birthdayErrors} />
     </div>
     <span>性別</span>
     <div class="input-block">
-      {#each Object.values(Sex) as sex}
+      {#each Object.values(Sex) as sexType}
         {@const id = genid()}
-        <input type="radio" bind:group={sexValue} value={sex.code} {id} />
-        <label for={id}>{sex.rep}</label>
+        <input type="radio" bind:group={sex} value={sexType.code} {id} />
+        <label for={id}>{sexType.rep}</label>
       {/each}
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" bind:value={values.address}/>
+      <input type="text" bind:value={address} />
     </div>
-    <span>電話</span>
+    <span>電話番号</span>
     <div class="input-block">
-      <input type="text" bind:value={values.phone}/>
+      <input type="text" bind:value={phone} />
     </div>
   </div>
   <div class="commands">
@@ -113,5 +116,14 @@
   .commands {
     display: flex;
     justify-content: right;
+    margin-top: 10px;
+  }
+
+  .commands > * + * {
+    margin-left: 4px;
+  }
+
+  .error {
+    color: red;
   }
 </style>

@@ -1,5 +1,6 @@
 import { Patient } from "myclinic-model";
 import {
+  Invalid,
   isNotNull,
   notEmpty,
   oneOf,
@@ -24,17 +25,17 @@ export function validatePatient(
   patientId: number,
   input: PatientInput
 ): Patient | string[] {
-  const errs: string[] = [];
+  const errs: Invalid[] = [];
   const patient: Patient = new Patient(
     patientId,
-    input.lastName.and(notEmpty).unwrap(errs),
-    input.firstName.and(notEmpty).unwrap(errs),
-    input.lastNameYomi.and(notEmpty).unwrap(errs),
-    input.firstNameYomi.and(notEmpty).unwrap(errs),
-    input.sex.and(oneOf(["M", "F"])).unwrap(errs),
-    input.birthday.to(isNotNull).map(toSqlDate).unwrap(errs),
-    input.address.unwrap(errs),
-    input.phone.unwrap(errs)
+    input.lastName.and(notEmpty).unwrap(errs, "姓"),
+    input.firstName.and(notEmpty).unwrap(errs, "名"),
+    input.lastNameYomi.and(notEmpty).unwrap(errs, "姓のよみ"),
+    input.firstNameYomi.and(notEmpty).unwrap(errs, "名のよみ"),
+    input.sex.and(oneOf(["M", "F"])).unwrap(errs, "性別"),
+    input.birthday.to(isNotNull).map(toSqlDate).unwrap(errs, "生年月日"),
+    input.address.unwrap(errs, "住所"),
+    input.phone.unwrap(errs, "電話番号")
   );
-  return errs.length > 0 ? errs : patient;
+  return errs.length > 0 ? errs.map(e => e.toString()) : patient;
 }

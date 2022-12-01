@@ -20,7 +20,7 @@
       >
       <span>性別</span><span>{p.sexAsKanji}性</span>
       <span>住所</span><span>{p.address}</span>
-      <span>電話</span><span>{p.phone}</span>
+      <span>電話番号</span><span>{p.phone}</span>
     </div>
     <div class="current-list">
       {#each patientData.currentHokenList as h}

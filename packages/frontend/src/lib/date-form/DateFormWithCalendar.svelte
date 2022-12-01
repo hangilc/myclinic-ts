@@ -1,8 +1,9 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
   import { openDatePickerPulldown } from "@/lib/date-picker/date-picker-op";
+  import { Invalid } from "../validator";
   export let date: Date | null | undefined;
-  export let errors: string[] = [];
+  export let errors: Invalid[] = [];
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
@@ -11,7 +12,7 @@
 
   $: if( date === null && !isNullable ) {
     date = undefined;
-    errors = ["入力がありません。"]
+    errors = [new Invalid("入力がありません。")]
   }
   $: console.log(date);
   $: console.log(errors);

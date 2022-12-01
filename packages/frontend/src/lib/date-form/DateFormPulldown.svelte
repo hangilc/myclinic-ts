@@ -1,36 +1,34 @@
 <script lang="ts">
   import SurfacePulldown from "../SurfacePulldown.svelte";
-import DateForm from "./DateForm.svelte";
+  import { Invalid } from "../validator";
+  import DateForm from "./DateForm.svelte";
 
   export let date: Date | null;
   export let isNullable: boolean = false;
   export let anchor: HTMLElement | SVGSVGElement;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
-  let errors: string[] = [];
-  let error: string = "";
+  let errors: Invalid[] = [];
+  let errorStrings: string[] = [];
 
   function doEnter(): void {
-    if (errors.length === 0) {
-      if (date === null && !isNullable) {
-        errors = ["入力がありません。"];
-        error = errors[0];
-        return;
-      } else {
-        destroy();
-        onEnter(date);
-      }
+    if( errors.length === 0 && (date === null && !isNullable)){
+      errors = [new Invalid("入力がありません。")];
+    }
+    if( errors.length === 0 ){
+      destroy();
+      onEnter(date);
     } else {
-      error = errors.join("\n");
+      errorStrings = errors.map(e => e.toString());
     }
   }
 </script>
 
 <SurfacePulldown {destroy} {anchor} width="auto">
-  {#if error !== ""}
+  {#each errorStrings as error}
     <div class="error">{error}</div>
-  {/if}
-  <DateForm bind:date bind:errors/>
+  {/each}
+  <DateForm bind:date bind:errors />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>
