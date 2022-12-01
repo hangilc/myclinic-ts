@@ -1,10 +1,13 @@
 <script lang="ts">
-  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { type Patient, Sex, SexType } from "myclinic-model";
+  import { type Patient, Sex } from "myclinic-model";
 
   export let patient: Patient;
+  export let destroy: () => void;
+  export let onClose: () => void;
+
   let values = {
     lastName: patient.lastName,
     firstName: patient.firstName,
@@ -19,7 +22,7 @@
   let birthdayErrors: string[] = [];
 </script>
 
-<SurfaceModal title="患者情報編集" let:close on:close>
+<SurfaceModal title="患者情報編集" {destroy} {onClose}>
   <div class="panel">
     <span>患者番号</span>
     <span>{patient.patientId}</span>
@@ -35,7 +38,7 @@
     </div>
     <span>生年月日</span>
     <div class="input-block">
-      <EditableDate date={values.birthday} errors={birthdayErrors} />
+      <DateFormWithCalendar date={values.birthday} errors={birthdayErrors} />
     </div>
     <span>性別</span>
     <div class="input-block">

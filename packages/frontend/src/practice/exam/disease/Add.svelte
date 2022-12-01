@@ -1,5 +1,4 @@
 <script lang="ts">
-  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import api from "@/lib/api";
   import {
     ByoumeiMaster,
@@ -14,6 +13,7 @@
   import Pulldown from "@/lib/Pulldown.svelte";
   import * as kanjidate from "kanjidate";
   import { onMount } from "svelte";
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
 
   export let patientId: number;
   export let examples: DiseaseExample[];
@@ -153,7 +153,7 @@
     名称：{byoumeiMaster?.name || ""}{adjList.map((m) => m.name).join("")}
   </div>
   <div>
-    <EditableDate
+    <DateFormWithCalendar
       bind:date={startDate}
       bind:errors={startDateErrors}
       isNullable={false}
@@ -177,7 +177,7 @@
           />
         </svg>
       </svelte:fragment>
-    </EditableDate>
+    </DateFormWithCalendar>
   </div>
   <div>
     <button on:click={doEnter}>入力</button>

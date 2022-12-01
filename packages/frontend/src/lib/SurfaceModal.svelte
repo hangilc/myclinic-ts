@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
+  import { onDestroy } from "svelte";
   import Screen from "./Screen.svelte";
   import { alloc, release } from "./zindex";
 
@@ -26,15 +26,12 @@
     screen.$destroy();
     release(zIndexContent);
     release(zIndexScreen);
+    onClose();
   });
 
-  function close(): void {
-    destroy();
-    onClose();
-  }
-
-  function doScreenClick(): void {
-    close();
+  function doScreenClick(ev: Event): void {
+    ev.stopPropagation();
+    ev.preventDefault();
   }
 </script>
 
@@ -47,7 +44,7 @@
   <div class="title">
     <span class="title-span">{title}</span>
     <svg
-      on:click={close}
+      on:click={destroy}
       class="closeIcon"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
@@ -64,7 +61,7 @@
       />
     </svg>
   </div>
-  <slot {close} />
+  <slot />
 </div>
 
 <style>

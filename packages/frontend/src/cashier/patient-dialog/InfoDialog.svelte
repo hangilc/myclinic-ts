@@ -4,10 +4,11 @@
   import type { PatientData } from "./patient-data";
 
   export let patientData: PatientData | undefined = undefined;
+  export let destroy: () => void;
   export let onClose: () => void = () => {};
 </script>
 
-<SurfaceModal on:close width="320px" height="auto" title="患者情報" {onClose}>
+<SurfaceModal {destroy} width="320px" height="auto" title="患者情報" {onClose}>
   {#if patientData}
     {@const p = patientData.patient}
     <div class="info">

@@ -12,17 +12,20 @@ interface Opener {
 function infoOpener(data: PatientData): Opener {
   return {
     open(): Closer {
-      const d = new InfoDialog({
+      const d: InfoDialog = new InfoDialog({
         target: document.body,
         props: {
-          patientData: data
+          patientData: data,
+          destroy: () => d.$destroy(),
+          onClose: () => {
+            data.onDialogClose();
+          }
         }
       });
-      d.$on("close", () => {
+      function destroy(): void {
         d.$destroy();
-        data.onDialogClose();
-      });
-      return () => d.$destroy();
+      }
+      return destroy;
     }
   }
 }
@@ -30,17 +33,21 @@ function infoOpener(data: PatientData): Opener {
 function editOpener(data: PatientData): Opener {
   return {
     open(): Closer {
-      const d = new EditDialog({
+      const d: EditDialog = new EditDialog({
         target: document.body,
         props: {
-          patient: data.patient
+          patient: data.patient,
+          destroy: destroy,
+          onClose: () => {
+            console.log("edit onClose");
+            data.onDialogClose();
+          }
         }
       });
-      d.$on("close", () => {
+      function destroy(): void {
         d.$destroy();
-        data.onDialogClose();
-      });
-      return () => d.$destroy();
+      }
+      return destroy;
     }
   }
 }
@@ -80,6 +87,7 @@ export class PatientData {
   }
 
   onDialogClose(): void {
+    console.log("dialog close");
     if( this.stack.length > 0 ){
       const o = this.stack.shift();
       o?.open();
