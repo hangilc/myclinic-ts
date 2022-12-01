@@ -3,6 +3,7 @@ import EditDialog from "./EditDialog.svelte";
 import type { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
 import { patientUpdated } from "@/app-events";
+import { writable, type Writable } from "svelte/store";
 
 type Closer = () => void;
 
@@ -16,11 +17,15 @@ function infoOpener(data: PatientData): Opener {
       const d: InfoDialog = new InfoDialog({
         target: document.body,
         props: {
-          patientData: data,
+          patient: data.patient,
+          currentHokenList: data.currentHokenList,
           destroy: () => d.$destroy(),
           onClose: () => {
             data.onDialogClose();
           },
+          ops: {
+            moveToEdit: () => data.moveToEdit()
+          }
         },
       });
       function destroy(): void {
@@ -54,18 +59,23 @@ function editOpener(data: PatientData): Opener {
 }
 
 export class PatientData {
+  patient: Writable<Patient>;
+  currentHokenList: Writable<Hoken[]>;
+  allHoken: Writable<Hoken[] | undefined>;
   current: [Opener, Closer] | undefined = undefined;
   unsubs: (() => void)[] = [];
+  stack: Opener[] = [];
 
   constructor(
-    public patient: Patient,
-    public currentHokenList: Hoken[],
-    public allHoken: Hoken[] | undefined = undefined,
-    public stack: Opener[] = []
+    patient: Patient,
+    currentHokenList: Hoken[]
   ) {
+    this.patient = writable(patient);
+    this.currentHokenList = writable(currentHokenList);
+    this.allHoken = writable(undefined);
     this.unsubs.push(patientUpdated.subscribe((patient) => {
       if( patient != null ){
-        this.patient = patient;
+        this.patient.set(patient);
       }
     }));
   }

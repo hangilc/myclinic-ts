@@ -7,24 +7,25 @@
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validatePatient } from "@/lib/validators/patient-validator";
   import { Patient, Sex, SexType } from "myclinic-model";
+  import type { Readable } from "svelte/store";
 
-  export let patient: Patient;
+  export let patient: Readable<Patient>;
   export let destroy: () => void;
   export let onClose: () => void;
   export let errors: string[] = [];
 
-  let lastName: string = patient.lastName;
-  let firstName: string = patient.firstName;
-  let lastNameYomi: string = patient.lastNameYomi;
-  let firstNameYomi: string = patient.firstNameYomi;
-  let sex: string = patient.sex;
-  let birthday: Date = new Date(patient.birthday);
-  let address: string = patient.address;
-  let phone: string = patient.phone;
+  let lastName: string = $patient.lastName;
+  let firstName: string = $patient.firstName;
+  let lastNameYomi: string = $patient.lastNameYomi;
+  let firstNameYomi: string = $patient.firstNameYomi;
+  let sex: string = $patient.sex;
+  let birthday: Date = new Date($patient.birthday);
+  let address: string = $patient.address;
+  let phone: string = $patient.phone;
   let birthdayErrors: Invalid[] = [];
 
   async function doEnter() {
-    const result = validatePatient(patient.patientId, {
+    const result = validatePatient($patient.patientId, {
       lastName: strSrc(lastName),
       firstName: strSrc(firstName),
       lastNameYomi: strSrc(lastNameYomi),
@@ -36,6 +37,7 @@
     });
     if (result instanceof Patient) {
       await api.updatePatient(result);
+      destroy();
     } else {
       errors = result;
     }
@@ -52,7 +54,7 @@
   {/if}
   <div class="panel">
     <span>患者番号</span>
-    <span>{patient.patientId}</span>
+    <span>{$patient.patientId}</span>
     <span>氏名</span>
     <div class="input-block">
       <input type="text" bind:value={lastName} class="name-input" />
