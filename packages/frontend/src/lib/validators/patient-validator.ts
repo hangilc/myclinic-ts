@@ -1,5 +1,6 @@
 import { Patient } from "myclinic-model";
 import {
+  isNotNull,
   notEmpty,
   oneOf,
   toSqlDate,
@@ -8,13 +9,12 @@ import {
 
 export class PatientInput {
   constructor(
-    public patientId: Number,
     public lastName: ValidationResult<string>,
     public firstName: ValidationResult<string>,
     public lastNameYomi: ValidationResult<string>,
     public firstNameYomi: ValidationResult<string>,
     public sex: ValidationResult<string>,
-    public birthday: ValidationResult<Date>,
+    public birthday: ValidationResult<Date | null>,
     public address: ValidationResult<string>,
     public phone: ValidationResult<string>
   ) {}
@@ -32,7 +32,7 @@ export function validatePatient(
     input.lastNameYomi.and(notEmpty).unwrap(errs),
     input.firstNameYomi.and(notEmpty).unwrap(errs),
     input.sex.and(oneOf(["M", "F"])).unwrap(errs),
-    input.birthday.map(toSqlDate).unwrap(errs),
+    input.birthday.to(isNotNull).map(toSqlDate).unwrap(errs),
     input.address.unwrap(errs),
     input.phone.unwrap(errs)
   );

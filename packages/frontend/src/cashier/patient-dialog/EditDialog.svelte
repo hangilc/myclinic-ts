@@ -1,8 +1,12 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { type Patient, Sex } from "myclinic-model";
+  import { strSrc } from "@/lib/validator";
+  import { dateSrc } from "@/lib/validators/date-validator";
+  import { validatePatient } from "@/lib/validators/patient-validator";
+  import { Patient, Sex } from "myclinic-model";
 
   export let patient: Patient;
   export let destroy: () => void;
@@ -20,6 +24,26 @@
   };
   let sexValue: string = patient.sex;
   let birthdayErrors: string[] = [];
+
+  async function doEnter() {
+    const result = validatePatient(
+      patient.patientId,  
+    {
+      lastName: strSrc(values.lastName),
+      firstName: strSrc(values.firstName),
+      lastNameYomi: strSrc(values.lastNameYomi),
+      firstNameYomi: strSrc(values.firstNameYomi),
+      sex: strSrc(sexValue),
+      birthday: dateSrc(values.birthday, birthdayErrors),
+      address: strSrc(values.address),
+      phone: strSrc(values.phone)
+    });
+    if( result instanceof Patient ){
+      await api.updatePatient(result);
+    } else {
+      To Be Fixed
+    }
+  }
 </script>
 
 <SurfaceModal title="患者情報編集" {destroy} {onClose}>
@@ -57,6 +81,10 @@
       <input type="text" bind:value={values.phone}/>
     </div>
   </div>
+  <div class="commands">
+    <button on:click={doEnter}>入力</button>
+    <button on:click={destroy}>キャンセル</button>
+  </div>
 </SurfaceModal>
 
 <style>
@@ -80,5 +108,10 @@
 
   .name-input {
     width: 80px;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
   }
 </style>

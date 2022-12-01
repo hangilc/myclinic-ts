@@ -5,7 +5,7 @@ export class Valid<T> {
 }
 
 export class Invalid {
-  constructor(public error: string) {}
+  constructor(public error: string, prefixList: string[] = []) {}
 }
 
 export class ValidationResult<T> {

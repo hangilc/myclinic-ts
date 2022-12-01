@@ -1074,4 +1074,12 @@ export default {
       }
     );
   },
+
+  updatePatient(patient: m.Patient): Promise<boolean> {
+    return post("update-patient", patient, {}, castBoolean);
+  },
+
+  enterPatient(patient: m.Patient): Promise<m.Patient> {
+    return post("enter-patient", patient, {}, m.Patient.cast);
+  }
 };

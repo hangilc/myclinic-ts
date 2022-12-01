@@ -8,6 +8,7 @@
   } from "kanjidate";
   import {
     inRange,
+    Invalid,
     isInt,
     isPositive,
     notEmpty,
@@ -16,7 +17,7 @@
   } from "../validator";
 
   export let date: Date | null | undefined;
-  export let errors: string[] = [];
+  export let errors: Invalid[] = [];
   export let gengouList: string[] = ["昭和", "平成", "令和"];
 
   let gengouValue: string = gengouList[gengouList.length - 1];
