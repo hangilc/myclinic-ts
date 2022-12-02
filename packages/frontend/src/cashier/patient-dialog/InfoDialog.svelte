@@ -68,6 +68,10 @@
     margin: 10px 0 0 0;
   }
 
+  .current-list a + a {
+    margin-left: 6px;
+  }
+
   .commands {
     display: flex;
     justify-content: right;

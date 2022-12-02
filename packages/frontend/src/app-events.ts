@@ -1,5 +1,5 @@
 import api, { wsUrl } from "./lib/api"
-import type * as m from "myclinic-model"
+import * as m from "myclinic-model"
 import { writable, type Writable } from "svelte/store"
 
 let nextEventId = 0;
@@ -140,238 +140,306 @@ function publishAppEvent(e: m.AppEvent): void {
   console.log(e);
   switch (model) {
     case "text": {
+      const model = m.Text.cast(payload);
       switch (kind) {
         case "created": {
-          textEntered.set(payload);
+          textEntered.set(model);
           break;
         }
         case "updated": {
-          textUpdated.set(payload);
+          textUpdated.set(model);
           break;
         }
         case "deleted": {
-          textDeleted.set(payload);
+          textDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "patient": {
+      const model = m.Patient.cast(payload);
       switch (kind) {
         case "created": {
-          patientEntered.set(payload);
+          patientEntered.set(model);
           break;
         }
         case "updated": {
-          patientUpdated.set(payload);
+          patientUpdated.set(model);
           break;
         }
         case "deleted": {
-          patientDeleted.set(payload);
+          patientDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "visit": {
+      const model = m.Visit.cast(payload);
       switch (kind) {
         case "created": {
-          visitEntered.set(payload);
+          visitEntered.set(model);
           break;
         }
         case "updated": {
-          visitUpdated.set(payload);
+          visitUpdated.set(model);
           break;
         }
         case "deleted": {
-          visitDeleted.set(payload);
+          visitDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "wqueue": {
+      const model = m.Wqueue.cast(payload);
       switch (kind) {
         case "created": {
-          wqueueEntered.set(payload);
+          wqueueEntered.set(model);
           break;
         }
         case "updated": {
-          wqueueUpdated.set(payload);
+          wqueueUpdated.set(model);
           break;
         }
         case "deleted": {
-          wqueueDeleted.set(payload);
+          wqueueDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "payment": {
+      const model = m.Payment.cast(payload);
       switch (kind) {
         case "created": {
-          paymentEntered.set(payload);
+          paymentEntered.set(model);
           break;
         }
         case "updated": {
-          paymentUpdated.set(payload);
+          paymentUpdated.set(model);
           break;
         }
         case "deleted": {
-          paymentDeleted.set(payload);
+          paymentDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "shinryou": {
+      const model = m.Shinryou.cast(payload);
       switch (kind) {
         case "created": {
-          shinryouEntered.set(payload);
+          shinryouEntered.set(model);
           break;
         }
         case "updated": {
-          shinryouUpdated.set(payload);
+          shinryouUpdated.set(model);
           break;
         }
         case "deleted": {
-          shinryouDeleted.set(payload);
+          shinryouDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "conduct": {
+      const model = m.Conduct.cast(payload);
       switch (kind) {
         case "created": {
-          conductEntered.set(payload);
+          conductEntered.set(model);
           break;
         }
         case "updated": {
-          conductUpdated.set(payload);
+          conductUpdated.set(model);
           break;
         }
         case "deleted": {
-          conductDeleted.set(payload);
+          conductDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "conductShinryou": {
+      const model = m.ConductShinryou.cast(payload);
       switch (kind) {
         case "created": {
-          conductShinryouEntered.set(payload);
+          conductShinryouEntered.set(model);
           break;
         }
         case "updated": {
-          conductShinryouUpdated.set(payload);
+          conductShinryouUpdated.set(model);
           break;
         }
         case "deleted": {
-          conductShinryouDeleted.set(payload);
+          conductShinryouDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "conductDrug": {
+      const model = m.ConductDrug.cast(payload);
       switch (kind) {
         case "created": {
-          conductDrugEntered.set(payload);
+          conductDrugEntered.set(model);
           break;
         }
         case "updated": {
-          conductDrugUpdated.set(payload);
+          conductDrugUpdated.set(model);
           break;
         }
         case "deleted": {
-          conductDrugDeleted.set(payload);
+          conductDrugDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "conductKizai": {
+      const model = m.ConductKizai.cast(payload);
       switch (kind) {
         case "created": {
-          conductKizaiEntered.set(payload);
+          conductKizaiEntered.set(model);
           break;
         }
         case "updated": {
-          conductKizaiUpdated.set(payload);
+          conductKizaiUpdated.set(model);
           break;
         }
         case "deleted": {
-          conductKizaiDeleted.set(payload);
+          conductKizaiDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "gazouLabel": {
+      const model = m.GazouLabel.cast(payload);
       switch (kind) {
         case "created": {
-          gazouLabelEntered.set(payload);
+          gazouLabelEntered.set(model);
           break;
         }
         case "updated": {
-          gazouLabelUpdated.set(payload);
+          gazouLabelUpdated.set(model);
           break;
         }
         case "deleted": {
-          gazouLabelDeleted.set(payload);
+          gazouLabelDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "charge": {
+      const model = m.Charge.cast(payload);
       switch (kind) {
         case "created": {
-          chargeEntered.set(payload);
+          chargeEntered.set(model);
           break;
         }
         case "updated": {
-          chargeUpdated.set(payload);
+          chargeUpdated.set(model);
           break;
         }
         case "deleted": {
-          chargeDeleted.set(payload);
+          chargeDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "disease": {
+      const model = m.Disease.cast(payload);
       switch (kind) {
         case "created": {
-          diseaseEntered.set(payload);
+          diseaseEntered.set(model);
           break;
         }
         case "updated": {
-          diseaseUpdated.set(payload);
+          diseaseUpdated.set(model);
           break;
         }
         case "deleted": {
-          diseaseDeleted.set(payload);
+          diseaseDeleted.set(model);
           break;
         }
       }
       break;
     }
     case "diseaseAdj": {
+      const model = m.DiseaseAdj.cast(payload);
       switch (kind) {
         case "created": {
-          diseaseAdjEntered.set(payload);
+          diseaseAdjEntered.set(model);
           break;
         }
         case "updated": {
-          diseaseAdjUpdated.set(payload);
+          diseaseAdjUpdated.set(model);
           break;
         }
         case "deleted": {
-          diseaseAdjDeleted.set(payload);
+          diseaseAdjDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
+    case "shahokokuho": {
+      const model = m.Shahokokuho.cast(payload);
+      switch (kind) {
+        case "created": {
+          shahokokuhoEntered.set(model);
+          break;
+        }
+        case "updated": {
+          shahokokuhoUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          shahokokuhoDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
+    case "koukikourei": {
+      const model = m.Koukikourei.cast(payload);
+      switch (kind) {
+        case "created": {
+          koukikoureiEntered.set(model);
+          break;
+        }
+        case "updated": {
+          koukikoureiUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          koukikoureiDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
+    case "kouhi": {
+      const model = m.Kouhi.cast(payload);
+      switch (kind) {
+        case "created": {
+          kouhiEntered.set(model);
+          break;
+        }
+        case "updated": {
+          kouhiUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          kouhiDeleted.set(model);
           break;
         }
       }
