@@ -1,4 +1,5 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
@@ -37,7 +38,8 @@
       edaban: strSrc(edaban),
     });
     if( result instanceof Shahokokuho ){
-      // Enter shahokokuho
+      await api.enterShahokokuho(result);
+      destroy();
     } else {
       errors = result;
     }

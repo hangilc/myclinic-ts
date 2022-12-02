@@ -1081,5 +1081,30 @@ export default {
 
   enterPatient(patient: m.Patient): Promise<m.Patient> {
     return post("enter-patient", patient, {}, m.Patient.cast);
-  }
+  },
+
+  enterShahokokuho(shahokokuho: m.Shahokokuho): Promise<m.Shahokokuho> {
+    return post("enter-shahokokuho", shahokokuho, {}, m.Shahokokuho.cast);
+  },
+  
+  enterKoukikourei(koukikourei: m.Koukikourei): Promise<m.Koukikourei> {
+    return post("enter-koukikourei", koukikourei, {}, m.Koukikourei.cast);
+  },
+  
+  enterKouhi(kouhi: m.Kouhi): Promise<m.Kouhi> {
+    return post("enter-kouhi", kouhi, {}, m.Kouhi.cast);
+  },
+  
+  updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
+    return post("update-shahokokuho", shahokokuho, {}, castNumber);
+  },
+  
+  updateKoukikourei(koukikourei: m.Koukikourei): Promise<number> {
+    return post("update-koukikourei", koukikourei, {}, castNumber);
+  },
+  
+  updateKouhi(kouhi: m.Kouhi): Promise<number> {
+    return post("update-kouhi", kouhi, {}, castNumber);
+  },
+  
 };
