@@ -26,6 +26,7 @@
   let kourei: number = 0;
 
   async function doEnter() {
+    console.log(validFrom);
     const result: Shahokokuho | string[] = validateShahokokuho(0, {
       patientId: intSrc($patient.patientId),
       hokenshaBangou: intSrc(hokenshaBangou),

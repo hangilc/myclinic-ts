@@ -1107,4 +1107,16 @@ export default {
     return post("update-kouhi", kouhi, {}, castNumber);
   },
   
+  deleteShahokokuho(shahokokuho: m.Shahokokuho): Promise<boolean> {
+    return post("delete-shahokokuho", shahokokuho, {}, castBoolean);
+  },
+  
+  deleteKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
+    return post("delete-koukikourei", koukikourei, {}, castBoolean);
+  },
+  
+  deleteKouhi(kouhi: m.Kouhi): Promise<boolean> {
+    return post("delete-kouhi", kouhi, {}, castBoolean);
+  },
+  
 };

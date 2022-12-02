@@ -103,6 +103,16 @@ export const diseaseDeleted: Writable<m.Disease | null> = writable(null)
 export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null)
 export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null)
+export const shahokokuhoEntered: Writable<m.Shahokokuho | null> = writable(null)
+export const shahokokuhoUpdated: Writable<m.Shahokokuho | null> = writable(null)
+export const shahokokuhoDeleted: Writable<m.Shahokokuho | null> = writable(null)
+export const koukikoureiEntered: Writable<m.Koukikourei | null> = writable(null)
+export const koukikoureiUpdated: Writable<m.Koukikourei | null> = writable(null)
+export const koukikoureiDeleted: Writable<m.Koukikourei | null> = writable(null)
+export const kouhiEntered: Writable<m.Kouhi | null> = writable(null)
+export const kouhiUpdated: Writable<m.Kouhi | null> = writable(null)
+export const kouhiDeleted: Writable<m.Kouhi | null> = writable(null)
+
 export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null)
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null);
 export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> = writable(null);

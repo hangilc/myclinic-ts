@@ -14,8 +14,6 @@
     date = undefined;
     errors = [new Invalid("入力がありません。")]
   }
-  $: console.log(date);
-  $: console.log(errors);
 
   export function initValues(date: Date | null): void {
     form.initValues(date);
@@ -30,6 +28,7 @@
   }
 
   function doDatePickerEnter(value: Date): void {
+    errors = [];
     date = value;
   }
 </script>

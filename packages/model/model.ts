@@ -23,7 +23,7 @@ export function dateToSqlDate(d: Date): string {
 }
 
 export function optionalDateToSqlDate(d: Date | undefined): string {
-  if( d == null ){
+  if (d == null) {
     return "0000-00-00";
   } else {
     return dateToSqlDate(d);
@@ -46,22 +46,39 @@ export function dateToSqlDateTime(d: Date): string {
 }
 
 export function stringToOptionalDate(s: string): Date | undefined {
-  if( s == null || s === "0000-00-00" ) {
+  if (s == null || s === "0000-00-00") {
     return undefined;
   } else {
     return new Date(s);
   }
 }
 
+function isValidAt(
+  validFrom: string,
+  validUpto: string,
+  at: Date | string
+): boolean {
+  let atStr: string;
+  if (at instanceof Date) {
+    atStr = dateToSqlDate(at);
+  } else {
+    if (at.length === 10) {
+      atStr = at;
+    } else {
+      atStr = at.substring(0, 10);
+    }
+  }
+  return (
+    validFrom <= atStr && (validUpto === "0000-00-00" || atStr <= validUpto)
+  );
+}
+
 export class SexType {
-  constructor(
-    public code: string,
-    public rep: string
-  ) {}
+  constructor(public code: string, public rep: string) {}
 
   static fromCode(code: string): SexType {
-    for(let s of Object.values(Sex)){
-      if( s.code === code ){
+    for (let s of Object.values(Sex)) {
+      if (s.code === code) {
         return s;
       }
     }
@@ -71,8 +88,8 @@ export class SexType {
 
 export const Sex: Record<string, SexType> = {
   Male: new SexType("M", "男"),
-  Female: new SexType("F", "女")
-}
+  Female: new SexType("F", "女"),
+};
 
 export class Patient {
   constructor(
@@ -202,14 +219,11 @@ export class Wqueue {
 }
 
 export class HonninKazokuType {
-  constructor(
-    public code: 0 | 1,
-    public rep: string
-  ) {}
+  constructor(public code: 0 | 1, public rep: string) {}
 
-  static fromCode(code: number){
-    for(let t of Object.values(HonninKazoku) ){
-      if( t.code as number === code ){
+  static fromCode(code: number) {
+    for (let t of Object.values(HonninKazoku)) {
+      if ((t.code as number) === code) {
         return t;
       }
     }
@@ -219,8 +233,8 @@ export class HonninKazokuType {
 
 export const HonninKazoku = {
   Honnin: new HonninKazokuType(1, "本人"),
-  Kazoku: new HonninKazokuType(0, "家族")
-}
+  Kazoku: new HonninKazokuType(0, "家族"),
+};
 
 export class Shahokokuho {
   constructor(
@@ -238,6 +252,10 @@ export class Shahokokuho {
 
   get honnninKazokuType(): HonninKazokuType {
     return HonninKazokuType.fromCode(this.honninStore);
+  }
+
+  isValidAt(at: Date | string): boolean {
+    return isValidAt(this.validFrom, this.validUpto, at);
   }
 
   static cast(arg: any): Shahokokuho {
@@ -498,8 +516,8 @@ export class DrugCategoryType {
   constructor(public code: number, public name: string) {}
 
   static fromCode(code: number): DrugCategoryType {
-    for(let v of Object.values(DrugCategory)){
-      if( v.code === code ){
+    for (let v of Object.values(DrugCategory)) {
+      if (v.code === code) {
         return v;
       }
     }
@@ -637,8 +655,8 @@ export class ConductKindType {
   constructor(public code: number, public rep: string) {}
 
   get key(): string {
-    for(let k of Object.keys(ConductKind) ){
-      if( ConductKind[k].code === this.code ){
+    for (let k of Object.keys(ConductKind)) {
+      if (ConductKind[k].code === this.code) {
         return k;
       }
     }
@@ -1099,8 +1117,8 @@ export class ByoumeiMaster {
 
   fullName(adj: ShuushokugoMaster[]): string {
     const [pres, posts] = ShuushokugoMaster.classify(adj);
-    const pre: string = pres.map(m => m.name).join("")
-    const post: string = posts.map(m => m.name).join("")
+    const pre: string = pres.map((m) => m.name).join("");
+    const post: string = posts.map((m) => m.name).join("");
     return pre + this.name + post;
   }
 }
@@ -1329,9 +1347,9 @@ export class DiseaseData {
   }
 
   get hasSusp(): boolean {
-    for(let adj of this.adjList){
+    for (let adj of this.adjList) {
       const [_, m] = adj;
-      if( m.shuushokugocode === ShuushokugoMaster.suspMaster.shuushokugocode ){
+      if (m.shuushokugocode === ShuushokugoMaster.suspMaster.shuushokugocode) {
         return true;
       }
     }

@@ -1,9 +1,9 @@
 import type { Patient } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
-import type { Hoken } from "./hoken";
+import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
-import { patientUpdated } from "@/app-events";
-import { writable, type Writable } from "svelte/store";
+import { patientUpdated, shahokokuhoEntered } from "@/app-events";
+import { get, writable, type Writable } from "svelte/store";
 import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 
 type Closer = () => void;
@@ -98,6 +98,28 @@ export class PatientData {
         this.patient.set(patient);
       }
     }));
+    this.unsubs.push(shahokokuhoEntered.subscribe(shahokokuho => {
+      if( shahokokuho == null ){
+        return;
+      }
+      const patient: Patient = get(this.patient);
+      if( patient.patientId === shahokokuho.patientId ){
+        const h = new Hoken(shahokokuho);
+        if( shahokokuho.isValidAt(new Date()) ){
+          const chl = get(this.currentHokenList);
+          this.currentHokenList.set([...chl, h]);
+        }
+        this.addToAllHoken(h);
+      }
+    }))
+  }
+
+  addToAllHoken(h: Hoken): void {
+    const c = get(this.allHoken);
+    if( c != undefined ){
+      c.push(h);
+      this.allHoken.set(c);
+    }
   }
 
   cleanup(): void {
