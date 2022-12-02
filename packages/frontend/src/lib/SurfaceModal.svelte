@@ -5,7 +5,7 @@
 
   export let screenOpacity: string = "0.4";
   export let title: string = "Untitled";
-  export let width: string = "320px";
+  export let width: string = "auto";
   export let height: string = "auto";
   export let destroy: () => void;
   export let onClose: () => void = () => {};
@@ -67,6 +67,17 @@
 <style>
   .top {
     position: fixed;
+    top: 20px;
+    left: 50vw;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 0.5rem 1.5rem;
+    opacity: 1;
+    overflow: auto;
+    border-radius: 0.5rem;
+  }
+  /* .top {
+    position: fixed;
     margin-top: 20px;
     margin-bottom: auto;
     margin-left: auto;
@@ -82,7 +93,7 @@
     overflow: auto;
     border-radius: 0.5rem;
     border: 1px solid gray;
-  }
+  } */
 
   .title {
     display: flex;
