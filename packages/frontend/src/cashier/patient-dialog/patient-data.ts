@@ -2,9 +2,10 @@ import type { Patient } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
-import { patientUpdated, shahokokuhoEntered } from "@/app-events";
+import { kouhiEntered, koukikoureiEntered, patientUpdated, shahokokuhoEntered } from "@/app-events";
 import { get, writable, type Writable } from "svelte/store";
 import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
+import NewKoukikoureiDialog from "./NewKoukikoureiDialog.svelte";
 
 type Closer = () => void;
 
@@ -27,6 +28,7 @@ function infoOpener(data: PatientData): Opener {
           ops: {
             moveToEdit: () => data.moveToEdit(),
             moveToNewShahokokuho: () => data.moveToNewShahokokuho(),
+            moveToNewKoukikourei: () => data.moveToNewKoukikourei(),
           }
         },
       });
@@ -78,6 +80,24 @@ function newShahokokuhoOpener(data: PatientData): Opener {
   }
 }
 
+function newKoukikoureiOpener(data: PatientData): Opener {
+  return {
+    open(): Closer {
+      const d = new NewKoukikoureiDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          destroy
+        }
+    });
+    function destroy(): void {
+      d.$destroy();
+    }
+    return destroy;
+    }
+  }
+}
+
 export class PatientData {
   patient: Writable<Patient>;
   currentHokenList: Writable<Hoken[]>;
@@ -106,6 +126,34 @@ export class PatientData {
       if( patient.patientId === shahokokuho.patientId ){
         const h = new Hoken(shahokokuho);
         if( shahokokuho.isValidAt(new Date()) ){
+          const chl = get(this.currentHokenList);
+          this.currentHokenList.set([...chl, h]);
+        }
+        this.addToAllHoken(h);
+      }
+    }))
+    this.unsubs.push(koukikoureiEntered.subscribe(koukikourei => {
+      if( koukikourei == null ){
+        return;
+      }
+      const patient: Patient = get(this.patient);
+      if( patient.patientId === koukikourei.patientId ){
+        const h = new Hoken(koukikourei);
+        if( koukikourei.isValidAt(new Date()) ){
+          const chl = get(this.currentHokenList);
+          this.currentHokenList.set([...chl, h]);
+        }
+        this.addToAllHoken(h);
+      }
+    }))
+    this.unsubs.push(kouhiEntered.subscribe(kouhi => {
+      if( kouhi == null ){
+        return;
+      }
+      const patient: Patient = get(this.patient);
+      if( patient.patientId === kouhi.patientId ){
+        const h = new Hoken(kouhi);
+        if( kouhi.isValidAt(new Date()) ){
           const chl = get(this.currentHokenList);
           this.currentHokenList.set([...chl, h]);
         }
@@ -156,5 +204,9 @@ export class PatientData {
 
   moveToNewShahokokuho(): void {
     this.moveTo(newShahokokuhoOpener(this));
+  }
+
+  moveToNewKoukikourei(): void {
+    this.moveTo(newKoukikoureiOpener(this));
   }
 }

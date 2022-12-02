@@ -9,7 +9,8 @@
   export let currentHokenList: Readable<Hoken[]>;
   export let ops: {
     moveToEdit: () => void,
-    moveToNewShahokokuho: () => void
+    moveToNewShahokokuho: () => void,
+    moveToNewKoukikourei: () => void,
   };
 
   export let destroy: () => void;
@@ -44,7 +45,8 @@
     >
     |
     <a href="javascript:void(0)" on:click={ops.moveToNewShahokokuho}>新規社保国保</a> |
-    <a href="javascript:void(0)">新規後期高齢</a> |
+    <a href="javascript:void(0)" on:click={ops.moveToNewKoukikourei}
+    >新規後期高齢</a> |
     <a href="javascript:void(0)">新規公費</a> |
     <a href="javascript:void(0)">保険履歴</a> |
     <a href="javascript:void(0)">保存画像</a>

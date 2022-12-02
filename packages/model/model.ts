@@ -285,6 +285,10 @@ export class Roujin {
     public validUpto: string
   ) {}
 
+  isValidAt(at: Date | string): boolean {
+    return isValidAt(this.validFrom, this.validUpto, at);
+  }
+
   static cast(arg: any): Roujin {
     return new Roujin(
       arg.roujinId,
@@ -309,6 +313,10 @@ export class Koukikourei {
     public validUpto: string
   ) {}
 
+  isValidAt(at: Date | string): boolean {
+    return isValidAt(this.validFrom, this.validUpto, at);
+  }
+
   static cast(arg: any): Koukikourei {
     return new Koukikourei(
       arg.koukikoureiId,
@@ -331,6 +339,10 @@ export class Kouhi {
     public validUpto: string,
     public patientId: number
   ) {}
+
+  isValidAt(at: Date | string): boolean {
+    return isValidAt(this.validFrom, this.validUpto, at);
+  }
 
   static cast(arg: any): Kouhi {
     return new Kouhi(
