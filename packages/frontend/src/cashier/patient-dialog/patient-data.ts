@@ -6,6 +6,7 @@ import { kouhiEntered, koukikoureiEntered, patientUpdated, shahokokuhoEntered } 
 import { get, writable, type Writable } from "svelte/store";
 import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 import NewKoukikoureiDialog from "./NewKoukikoureiDialog.svelte";
+import NewKouhiDialog from "./NewKouhiDialog.svelte";
 
 type Closer = () => void;
 
@@ -29,6 +30,7 @@ function infoOpener(data: PatientData): Opener {
             moveToEdit: () => data.moveToEdit(),
             moveToNewShahokokuho: () => data.moveToNewShahokokuho(),
             moveToNewKoukikourei: () => data.moveToNewKoukikourei(),
+            moveToNewKouhi: () => data.moveToNewKouhi(),
           }
         },
       });
@@ -84,6 +86,24 @@ function newKoukikoureiOpener(data: PatientData): Opener {
   return {
     open(): Closer {
       const d = new NewKoukikoureiDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          destroy
+        }
+    });
+    function destroy(): void {
+      d.$destroy();
+    }
+    return destroy;
+    }
+  }
+}
+
+function newKouhiOpener(data: PatientData): Opener {
+  return {
+    open(): Closer {
+      const d = new NewKouhiDialog({
         target: document.body,
         props: {
           patient: data.patient,
@@ -208,5 +228,9 @@ export class PatientData {
 
   moveToNewKoukikourei(): void {
     this.moveTo(newKoukikoureiOpener(this));
+  }
+
+  moveToNewKouhi(): void {
+    this.moveTo(newKouhiOpener(this));
   }
 }
