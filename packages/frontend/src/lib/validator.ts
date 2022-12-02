@@ -137,15 +137,32 @@ export function and<T>(
   };
 }
 
-export function strSrc(src: string): ValidationResult<string> {
-  return new ValidationResult(
-    new Valid(src),
+function genSrc<T>(src: T): ValidationResult<T> {
+  return new ValidationResult<T>(
+    new Valid(src)
   );
 }
 
+export function strSrc(src: string): ValidationResult<string> {
+  return genSrc<string>(src);
+}
+
+export function numberSrc(src: number | string): ValidationResult<number> {
+  if( typeof src === "number" ){
+    return genSrc<number>(src);
+  } else {
+    return strSrc(src).to(toNumber);
+  }
+}
+
+export function intSrc(src: number | string): ValidationResult<number> {
+  return numberSrc(src).and(isInt);
+}
+
+
 type VFun<T> = (src: T) => Valid<T> | Invalid;
 
-export const notEmpty: VFun<string> = (src: string) => {
+export const isNotEmpty: VFun<string> = (src: string) => {
   if (src === "") {
     return new Invalid("入力がありません。");
   } else {

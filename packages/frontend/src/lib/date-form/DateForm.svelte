@@ -11,7 +11,7 @@
     Invalid,
     isInt,
     isPositive,
-    notEmpty,
+    isNotEmpty,
     strSrc,
     toNumber,
   } from "../validator";
@@ -48,17 +48,17 @@
     } else {
       const validated = {
         nen: strSrc(nenValue)
-          .and(notEmpty)
+          .and(isNotEmpty)
           .to(toNumber)
           .and(isInt, isPositive)
           .unwrap(errors, "年"),
         month: strSrc(monthValue)
-          .and(notEmpty)
+          .and(isNotEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 12))
           .unwrap(errors, "月"),
         day: strSrc(dayValue)
-          .and(notEmpty)
+          .and(isNotEmpty)
           .to(toNumber)
           .and(isInt, inRange(1, 31))
           .unwrap(errors, "日"),

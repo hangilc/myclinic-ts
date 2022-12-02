@@ -2,7 +2,7 @@ import { Patient } from "myclinic-model";
 import {
   Invalid,
   isNotNull,
-  notEmpty,
+  isNotEmpty,
   oneOf,
   toSqlDate,
   type ValidationResult,
@@ -28,10 +28,10 @@ export function validatePatient(
   const errs: Invalid[] = [];
   const patient: Patient = new Patient(
     patientId,
-    input.lastName.and(notEmpty).unwrap(errs, "姓"),
-    input.firstName.and(notEmpty).unwrap(errs, "名"),
-    input.lastNameYomi.and(notEmpty).unwrap(errs, "姓のよみ"),
-    input.firstNameYomi.and(notEmpty).unwrap(errs, "名のよみ"),
+    input.lastName.and(isNotEmpty).unwrap(errs, "姓"),
+    input.firstName.and(isNotEmpty).unwrap(errs, "名"),
+    input.lastNameYomi.and(isNotEmpty).unwrap(errs, "姓のよみ"),
+    input.firstNameYomi.and(isNotEmpty).unwrap(errs, "名のよみ"),
     input.sex.and(oneOf(["M", "F"])).unwrap(errs, "性別"),
     input.birthday.to(isNotNull).map(toSqlDate).unwrap(errs, "生年月日"),
     input.address.unwrap(errs, "住所"),

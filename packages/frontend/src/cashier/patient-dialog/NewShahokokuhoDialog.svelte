@@ -2,15 +2,17 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Invalid } from "@/lib/validator";
+  import { intSrc, strSrc, type Invalid } from "@/lib/validator";
+  import { dateSrc } from "@/lib/validators/date-validator";
+  import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
   import { toZenkaku } from "@/lib/zenkaku";
-  import type { Patient } from "myclinic-model";
+  import { type Patient, Shahokokuho } from "myclinic-model";
   import { HonninKazoku } from "myclinic-model/model";
   import type { Readable } from "svelte/store";
 
   export let patient: Readable<Patient>;
   export let destroy: () => void;
-  export let errors: Invalid[] = [];
+  let errors: string[] = [];
   let hokenshaBangou: string = "";
   let kigou: string = "";
   let bangou: string = "";
@@ -23,7 +25,22 @@
   let kourei: number = 0;
 
   async function doEnter() {
-    
+    const result: Shahokokuho | string[] = validateShahokokuho(0, {
+      patientId: intSrc($patient.patientId),
+      hokenshaBangou: intSrc(hokenshaBangou),
+      hihokenshaKigou: strSrc(kigou),
+      hihokenshaBangou: strSrc(bangou),
+      honninStore: intSrc(honninKazoku),
+      validFrom: dateSrc(validFrom, validFromErrors),
+      validUpto: dateSrc(validUpto, validUptoErrors),
+      koureiStore: intSrc(kourei),
+      edaban: strSrc(edaban),
+    });
+    if( result instanceof Shahokokuho ){
+      // Enter shahokokuho
+    } else {
+      errors = result;
+    }
   }
 </script>
 
@@ -76,14 +93,20 @@
       <div>
         {#if true}
           {@const id = genid()}
-          <input type="radio" {id} class="radio" bind:group={kourei} value={0}/>
+          <input
+            type="radio"
+            {id}
+            class="radio"
+            bind:group={kourei}
+            value={0}
+          />
           <label for={id}>高齢でない</label>
         {/if}
       </div>
       <div>
         {#each [1, 2, 3] as w}
           {@const id = genid()}
-          <input type="radio" {id} class="radio" value={w}/>
+          <input type="radio" {id} class="radio" value={w} />
           <label for={id}>{toZenkaku(w.toString())}割</label>
         {/each}
       </div>
