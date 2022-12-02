@@ -8,7 +8,8 @@
   export let patient: Readable<Patient>;
   export let currentHokenList: Readable<Hoken[]>;
   export let ops: {
-    moveToEdit: () => void
+    moveToEdit: () => void,
+    moveToNewShahokokuho: () => void
   };
 
   export let destroy: () => void;
@@ -42,7 +43,7 @@
       >編集</a
     >
     |
-    <a href="javascript:void(0)">新規社保国保</a> |
+    <a href="javascript:void(0)" on:click={ops.moveToNewShahokokuho}>新規社保国保</a> |
     <a href="javascript:void(0)">新規後期高齢</a> |
     <a href="javascript:void(0)">新規公費</a> |
     <a href="javascript:void(0)">保険履歴</a> |

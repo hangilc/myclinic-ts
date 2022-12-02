@@ -201,6 +201,27 @@ export class Wqueue {
   }
 }
 
+export class HonninKazokuType {
+  constructor(
+    public code: 0 | 1,
+    public rep: string
+  ) {}
+
+  static fromCode(code: number){
+    for(let t of Object.values(HonninKazoku) ){
+      if( t.code as number === code ){
+        return t;
+      }
+    }
+    throw new Error("Cannot find HonninKazokuType for " + code);
+  }
+}
+
+export const HonninKazoku = {
+  Honnin: new HonninKazokuType(1, "本人"),
+  Kazoku: new HonninKazokuType(0, "家族")
+}
+
 export class Shahokokuho {
   constructor(
     public shahokokuhoId: number,
@@ -214,6 +235,10 @@ export class Shahokokuho {
     public koureiStore: number,
     public edaban: string
   ) {}
+
+  get honnninKazokuType(): HonninKazokuType {
+    return HonninKazokuType.fromCode(this.honninStore);
+  }
 
   static cast(arg: any): Shahokokuho {
     return new Shahokokuho(

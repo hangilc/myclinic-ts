@@ -4,6 +4,7 @@ import type { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
 import { patientUpdated } from "@/app-events";
 import { writable, type Writable } from "svelte/store";
+import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 
 type Closer = () => void;
 
@@ -24,7 +25,8 @@ function infoOpener(data: PatientData): Opener {
             data.onDialogClose();
           },
           ops: {
-            moveToEdit: () => data.moveToEdit()
+            moveToEdit: () => data.moveToEdit(),
+            moveToNewShahokokuho: () => data.moveToNewShahokokuho(),
           }
         },
       });
@@ -56,6 +58,24 @@ function editOpener(data: PatientData): Opener {
       return destroy;
     },
   };
+}
+
+function newShahokokuhoOpener(data: PatientData): Opener {
+  return {
+    open(): Closer {
+      const d = new NewShahokokuhoDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          destroy
+        }
+    });
+    function destroy(): void {
+      d.$destroy();
+    }
+    return destroy;
+    }
+  }
 }
 
 export class PatientData {
@@ -110,5 +130,9 @@ export class PatientData {
 
   moveToEdit(): void {
     this.moveTo(editOpener(this));
+  }
+
+  moveToNewShahokokuho(): void {
+    this.moveTo(newShahokokuhoOpener(this));
   }
 }
