@@ -32,7 +32,7 @@ function infoOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          currentHokenList: data.currentHokenList,
+          hokenCache: data.hokenCache,
           ops: {
             close: () => data.goback(),
             moveToEdit: () => data.moveTo(editOpener(data)),
@@ -68,7 +68,10 @@ function editOpener(data: PatientData): Opener {
   };
 }
 
-function newShahokokuhoOpener(data: PatientData, template?: Shahokokuho): Opener {
+function newShahokokuhoOpener(
+  data: PatientData,
+  template?: Shahokokuho
+): Opener {
   return {
     open(): Closer {
       const d = new ShahokokuhoEditDialog({
@@ -82,7 +85,7 @@ function newShahokokuhoOpener(data: PatientData, template?: Shahokokuho): Opener
           onEnter: async (s: Shahokokuho) => {
             await api.enterShahokokuho(s);
             data.goback();
-          }
+          },
         },
       });
       return d.$destroy;
@@ -90,7 +93,10 @@ function newShahokokuhoOpener(data: PatientData, template?: Shahokokuho): Opener
   };
 }
 
-function newKoukikoureiOpener(data: PatientData, koukikourei?: Koukikourei): Opener {
+function newKoukikoureiOpener(
+  data: PatientData,
+  koukikourei?: Koukikourei
+): Opener {
   return {
     open(): Closer {
       const d = new KoukikoureiEditDialog({
@@ -104,7 +110,7 @@ function newKoukikoureiOpener(data: PatientData, koukikourei?: Koukikourei): Ope
           onEnter: async (k: Koukikourei) => {
             await api.enterKoukikourei(k);
             data.goback();
-          }
+          },
         },
       });
       return d.$destroy;
@@ -129,7 +135,10 @@ function newKouhiOpener(data: PatientData): Opener {
   };
 }
 
-function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
+function editShahokokuhoOpener(
+  data: PatientData,
+  shahokokuho: Shahokokuho
+): Opener {
   return {
     open(): Closer {
       const d = new ShahokokuhoEditDialog({
@@ -143,7 +152,7 @@ function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Ope
           onEnter: async (s: Shahokokuho) => {
             await api.updateShahokokuho(s);
             data.goback();
-          }
+          },
         },
       });
       return d.$destroy;
@@ -151,7 +160,10 @@ function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Ope
   };
 }
 
-function editKoukikoureiOpener(data: PatientData, koukikourei: Koukikourei): Opener {
+function editKoukikoureiOpener(
+  data: PatientData,
+  koukikourei: Koukikourei
+): Opener {
   return {
     open(): Closer {
       koukikourei = data.resolveKoukikourei(koukikourei);
@@ -166,7 +178,7 @@ function editKoukikoureiOpener(data: PatientData, koukikourei: Koukikourei): Ope
           onEnter: async (s: Koukikourei) => {
             await api.updateKoukikourei(s);
             data.goback();
-          }
+          },
         },
       });
       return d.$destroy;
@@ -188,7 +200,8 @@ function shahokokuhoInfoOpener(
           shahokokuho,
           ops: {
             goback: () => data.goback(),
-            moveToEdit: () => data.moveTo(editShahokokuhoOpener(data, shahokokuho)),
+            moveToEdit: () =>
+              data.moveTo(editShahokokuhoOpener(data, shahokokuho)),
             renew: (s: Shahokokuho) => {
               data.goto(newShahokokuhoOpener(data, s));
             },
@@ -214,7 +227,8 @@ function koukikoureiInfoOpener(
           koukikourei,
           ops: {
             goback: () => data.goback(),
-            moveToEdit: () => data.moveTo(editKoukikoureiOpener(data, koukikourei)),
+            moveToEdit: () =>
+              data.moveTo(editKoukikoureiOpener(data, koukikourei)),
             renew: (s: Koukikourei) => {
               data.goto(newKoukikoureiOpener(data, s));
             },
@@ -228,15 +242,14 @@ function koukikoureiInfoOpener(
 
 export class PatientData {
   patient: Writable<Patient>;
-  currentHokenList: Writable<Hoken[]>;
-  allHoken: Writable<Hoken[] | undefined>;
+  hokenCache: Writable<Hoken[]>;
+  allHoken: boolean = false;
   unsubs: (() => void)[] = [];
   stack: [Opener, Closer][] = [];
 
   constructor(patient: Patient, currentHokenList: Hoken[]) {
     this.patient = writable(patient);
-    this.currentHokenList = writable(currentHokenList);
-    this.allHoken = writable(undefined);
+    this.hokenCache = writable(currentHokenList);
     this.unsubs.push(
       patientUpdated.subscribe((patient) => {
         if (patient != null) {
@@ -252,10 +265,7 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === shahokokuho.patientId) {
           const h = new Hoken(shahokokuho);
-          if (shahokokuho.isValidAt(new Date())) {
-            this.addToCurrentList(h);
-          }
-          this.addToAllHoken(h);
+          this.addToCache(h);
         }
       })
     );
@@ -267,10 +277,7 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === shahokokuho.patientId) {
           const h = new Hoken(shahokokuho);
-          if (shahokokuho.isValidAt(new Date())) {
-            this.updateCurrentList(h);
-          }
-          this.updateAllHoken(h);
+          this.updateCache(h);
         }
       })
     );
@@ -282,11 +289,7 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === koukikourei.patientId) {
           const h = new Hoken(koukikourei);
-          if (koukikourei.isValidAt(new Date())) {
-            const chl = get(this.currentHokenList);
-            this.currentHokenList.set([...chl, h]);
-          }
-          this.addToAllHoken(h);
+          this.addToCache(h);
         }
       })
     );
@@ -298,10 +301,7 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === koukikourei.patientId) {
           const h = new Hoken(koukikourei);
-          if (koukikourei.isValidAt(new Date())) {
-            this.addToCurrentList(h);
-          }
-          this.updateAllHoken(h);
+          this.updateCache(h);
         }
       })
     );
@@ -313,11 +313,7 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === kouhi.patientId) {
           const h = new Hoken(kouhi);
-          if (kouhi.isValidAt(new Date())) {
-            const chl = get(this.currentHokenList);
-            this.currentHokenList.set([...chl, h]);
-          }
-          this.addToAllHoken(h);
+          this.addToCache(h);
         }
       })
     );
@@ -329,63 +325,34 @@ export class PatientData {
         const patient: Patient = get(this.patient);
         if (patient.patientId === kouhi.patientId) {
           const h = new Hoken(kouhi);
-          if (kouhi.isValidAt(new Date())) {
-            this.addToCurrentList(h);
-          }
-          this.updateAllHoken(h);
+          this.updateCache(h);
         }
       })
     );
   }
 
-  addToCurrentList(h: Hoken): void {
-    const c = get(this.currentHokenList);
-    this.currentHokenList.set([...c, h]);
+  addToCache(h: Hoken): void {
+    const c = get(this.hokenCache);
+    this.hokenCache.set([...c, h]);
   }
 
-  updateCurrentList(h: Hoken): void {
-    const c = get(this.currentHokenList);
+  updateCache(h: Hoken): void {
+    const c = get(this.hokenCache);
     const key = h.key;
     const i = c.findIndex(e => e.key === key);
     if( i >= 0 ){
       const cc = [...c];
       cc.splice(i, 1, h);
-      this.currentHokenList.set(cc);
-    }
-  }
-
-  addToAllHoken(h: Hoken): void {
-    const c = get(this.allHoken);
-    if (c != undefined) {
-      const cc = [...c];
-      cc.push(h);
-      this.allHoken.set(cc);
-    }
-  }
-
-  updateAllHoken(h: Hoken): void {
-    const c = get(this.allHoken);
-    if (c != undefined) {
-      const key = h.key;
-      const i = c.findIndex(e => e.key === key);
-      if( i >= 0 ){
-        const cc = [...c];
-        cc.splice(i, 1, h);
-        this.allHoken.set(cc);
-      }
+      this.hokenCache.set(cc);
     }
   }
 
   resolveHoken(key: string): Hoken {
-    let h = get(this.currentHokenList).find(e => e.key === key);
-    if( h !== undefined ){
+    let h = get(this.hokenCache).find((e) => e.key === key);
+    if (h !== undefined) {
       return h;
-    }
-    h = (get(this.allHoken) ?? []).find(e => e.key === key);
-    if( h === undefined ){
-      throw new Error("Cannot find hoken: " + key);
     } else {
-      return h;
+      throw new Error("Cannot find hoken: " + key);
     }
   }
 

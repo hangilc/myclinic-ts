@@ -6,7 +6,7 @@
   import type { Hoken } from "./hoken";
 
   export let patient: Readable<Patient>;
-  export let currentHokenList: Readable<Hoken[]>;
+  export let hokenCache: Readable<Hoken[]>;
   export let ops: {
     close: () => void,
     moveToEdit: () => void,
@@ -24,6 +24,8 @@
       ops.moveToKoukikoureiInfo(h.value);
     }
   }
+
+  let today: Date = new Date();
 </script>
 
 <SurfaceModal destroy={ops.close} width="320px" height="auto" title="患者情報">
@@ -40,7 +42,7 @@
     <span>電話番号</span><span>{p.phone}</span>
   </div>
   <div class="current-list">
-    {#each $currentHokenList as h}
+    {#each $hokenCache.filter(h => h.isValidAt(today)) as h (h.key)}
       <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}>{h.rep}</a
       >
     {/each}
