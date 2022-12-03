@@ -1,3 +1,5 @@
+import { isNamedTupleMember } from "typescript";
+
 export function padNumber(n: number, finalSize: number){
   let s = n.toString();
   while( s.length < finalSize ){
@@ -22,6 +24,24 @@ export function timeToSql(d: Date): string {
 
 export function dateTimeToSql(d: Date): string {
   return `${dateToSql(d)} ${timeToSql(d)}`;
+}
+
+export function parseSqlDate(sqlDate: string): Date {
+  if( sqlDate.length > 10 ){
+    sqlDate = sqlDate.substring(0, 10);
+  }
+  return new Date(sqlDate);
+}
+
+export function parseOptionalSqlDate(sqlDate: string): Date | null {
+  if( sqlDate.length > 10 ){
+    sqlDate = sqlDate.substring(0, 10);
+  }
+  if( sqlDate === "0000-00-00" ){
+    return null;
+  } else {
+    return new Date(sqlDate);
+  }
 }
 
 export function sexRep(sex: string): string {

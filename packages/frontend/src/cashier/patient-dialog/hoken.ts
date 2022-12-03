@@ -10,6 +10,21 @@ export class Hoken {
     this.value = value;
   }
 
+  get key(): string {
+    const h = this.value
+    if( h instanceof Shahokokuho ){
+      return `shahokokuho-${h.shahokokuhoId}`;
+    } else if( h instanceof Koukikourei ){
+      return `koukikourei-${h.koukikoureiId}`;
+    } else if( h instanceof Roujin ){
+      return `roujin-${h.roujinId}`;
+    } else if( h instanceof Kouhi ){
+      return `kouhi-${h.kouhiId}`;
+    } else {
+      throw new Error("不明の保険：" + h);
+    }
+  }
+
   get rep(): string {
     const h = this.value
     if( h instanceof Shahokokuho ){
@@ -21,7 +36,7 @@ export class Hoken {
     } else if( h instanceof Kouhi ){
       return kouhiRep(h.futansha);
     } else {
-      return "不明の保険"
+      throw new Error("不明の保険：" + h);
     }
   }
 }

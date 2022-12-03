@@ -3,6 +3,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { intSrc, strSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
@@ -13,36 +14,44 @@
 
   export let patient: Readable<Patient>;
   export let ops: {
-    goback: () => void
-  }
+    goback: () => void;
+  };
+  export let shahokokuho: Shahokokuho | undefined;
+  export let onEnter: (s: Shahokokuho) => void;
+
   let errors: string[] = [];
-  let hokenshaBangou: string = "";
-  let kigou: string = "";
-  let bangou: string = "";
-  let edaban: string = "";
-  let honninKazoku: number = 0;
-  let validFrom: Date | null = null;
+  let hokenshaBangou: string = shahokokuho?.hokenshaBangou.toString() ?? "";
+  let kigou: string = shahokokuho?.hihokenshaKigou ?? "";
+  let bangou: string = shahokokuho?.hihokenshaBangou ?? "";
+  let edaban: string = shahokokuho?.edaban ?? "";
+  let honninKazoku: number = shahokokuho?.honninStore ?? 0;
+  let validFrom: Date | null =
+    shahokokuho != undefined ? parseSqlDate(shahokokuho.validFrom) : null;
   let validFromErrors: Invalid[] = [];
-  let validUpto: Date | null = null;
+  let validUpto: Date | null =
+    shahokokuho != undefined
+      ? parseOptionalSqlDate(shahokokuho.validUpto)
+      : null;
   let validUptoErrors: Invalid[] = [];
-  let kourei: number = 0;
+  let kourei: number = shahokokuho?.koureiStore ?? 0;
 
   async function doEnter() {
-    console.log(validFrom);
-    const result: Shahokokuho | string[] = validateShahokokuho(0, {
-      patientId: intSrc($patient.patientId),
-      hokenshaBangou: intSrc(hokenshaBangou),
-      hihokenshaKigou: strSrc(kigou),
-      hihokenshaBangou: strSrc(bangou),
-      honninStore: intSrc(honninKazoku),
-      validFrom: dateSrc(validFrom, validFromErrors),
-      validUpto: dateSrc(validUpto, validUptoErrors),
-      koureiStore: intSrc(kourei),
-      edaban: strSrc(edaban),
-    });
-    if( result instanceof Shahokokuho ){
-      await api.enterShahokokuho(result);
-      ops.goback();
+    const result: Shahokokuho | string[] = validateShahokokuho(
+      shahokokuho?.shahokokuhoId ?? 0,
+      {
+        patientId: intSrc($patient.patientId),
+        hokenshaBangou: intSrc(hokenshaBangou),
+        hihokenshaKigou: strSrc(kigou),
+        hihokenshaBangou: strSrc(bangou),
+        honninStore: intSrc(honninKazoku),
+        validFrom: dateSrc(validFrom, validFromErrors),
+        validUpto: dateSrc(validUpto, validUptoErrors),
+        koureiStore: intSrc(kourei),
+        edaban: strSrc(edaban),
+      }
+    );
+    if (result instanceof Shahokokuho) {
+      onEnter(result);
     } else {
       errors = result;
     }

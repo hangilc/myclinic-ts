@@ -8,7 +8,8 @@
   export let patient: Readable<Patient>;
   export let shahokokuho: Shahokokuho;
   export let ops: {
-    goback: () => void
+    goback: () => void,
+    moveToEdit: () => void,
   };
 
   function formatValidFrom(sqldate: string): string {
@@ -59,7 +60,7 @@
   </div>
   <div class="commands">
     <button>更新</button>
-    <button>編集</button>
+    <button on:click={ops.moveToEdit}>編集</button>
     <button on:click={ops.goback}>閉じる</button>
   </div>
 </SurfaceModal>

@@ -4,15 +4,19 @@ import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
 import {
   kouhiEntered,
+  kouhiUpdated,
   koukikoureiEntered,
+  koukikoureiUpdated,
   patientUpdated,
   shahokokuhoEntered,
+  shahokokuhoUpdated,
 } from "@/app-events";
 import { get, writable, type Writable } from "svelte/store";
-import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
+import ShahokokuhoEditDialog from "./ShahokokuhoEditDialog.svelte";
 import NewKoukikoureiDialog from "./NewKoukikoureiDialog.svelte";
 import NewKouhiDialog from "./NewKouhiDialog.svelte";
 import ShahokokuhoInfoDialog from "./ShahokokuhoInfoDialog.svelte";
+import api from "@/lib/api";
 
 type Closer = () => void;
 
@@ -64,13 +68,40 @@ function editOpener(data: PatientData): Opener {
 function newShahokokuhoOpener(data: PatientData): Opener {
   return {
     open(): Closer {
-      const d = new NewShahokokuhoDialog({
+      const d = new ShahokokuhoEditDialog({
         target: document.body,
         props: {
           patient: data.patient,
           ops: {
             goback: () => data.goback(),
           },
+          shahokokuho: undefined,
+          onEnter: async (s: Shahokokuho) => {
+            await api.enterShahokokuho(s);
+            data.goback();
+          }
+        },
+      });
+      return d.$destroy;
+    },
+  };
+}
+
+function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
+  return {
+    open(): Closer {
+      const d = new ShahokokuhoEditDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          ops: {
+            goback: () => data.goback(),
+          },
+          shahokokuho,
+          onEnter: async (s: Shahokokuho) => {
+            await api.updateShahokokuho(s);
+            data.goback();
+          }
         },
       });
       return d.$destroy;
@@ -125,6 +156,7 @@ function shahokokuhoInfoOpener(
           shahokokuho,
           ops: {
             goback: () => data.goback(),
+            moveToEdit: () => data.moveTo(editShahokokuhoOpener(data, shahokokuho))
           },
         },
       });
@@ -160,10 +192,24 @@ export class PatientData {
         if (patient.patientId === shahokokuho.patientId) {
           const h = new Hoken(shahokokuho);
           if (shahokokuho.isValidAt(new Date())) {
-            const chl = get(this.currentHokenList);
-            this.currentHokenList.set([...chl, h]);
+            this.addToCurrentList(h);
           }
           this.addToAllHoken(h);
+        }
+      })
+    );
+    this.unsubs.push(
+      shahokokuhoUpdated.subscribe((shahokokuho) => {
+        if (shahokokuho == null) {
+          return;
+        }
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === shahokokuho.patientId) {
+          const h = new Hoken(shahokokuho);
+          if (shahokokuho.isValidAt(new Date())) {
+            this.updateCurrentList(h);
+          }
+          this.updateAllHoken(h);
         }
       })
     );
@@ -184,6 +230,21 @@ export class PatientData {
       })
     );
     this.unsubs.push(
+      koukikoureiUpdated.subscribe((koukikourei) => {
+        if (koukikourei == null) {
+          return;
+        }
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === koukikourei.patientId) {
+          const h = new Hoken(koukikourei);
+          if (koukikourei.isValidAt(new Date())) {
+            this.addToCurrentList(h);
+          }
+          this.updateAllHoken(h);
+        }
+      })
+    );
+    this.unsubs.push(
       kouhiEntered.subscribe((kouhi) => {
         if (kouhi == null) {
           return;
@@ -199,13 +260,54 @@ export class PatientData {
         }
       })
     );
+    this.unsubs.push(
+      kouhiUpdated.subscribe((kouhi) => {
+        if (kouhi == null) {
+          return;
+        }
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === kouhi.patientId) {
+          const h = new Hoken(kouhi);
+          if (kouhi.isValidAt(new Date())) {
+            this.addToCurrentList(h);
+          }
+          this.updateAllHoken(h);
+        }
+      })
+    );
+  }
+
+  addToCurrentList(h: Hoken): void {
+    const c = get(this.currentHokenList);
+    this.currentHokenList.set([...c, h]);
+  }
+
+  updateCurrentList(h: Hoken): void {
+    const c = get(this.currentHokenList);
+    const key = h.key;
+    const i = c.findIndex(e => e.key === key);
+    if( i >= 0 ){
+      this.currentHokenList.set([...c].splice(i, 1, h))
+    }
   }
 
   addToAllHoken(h: Hoken): void {
     const c = get(this.allHoken);
     if (c != undefined) {
-      c.push(h);
-      this.allHoken.set(c);
+      const cc = [...c];
+      cc.push(h);
+      this.allHoken.set(cc);
+    }
+  }
+
+  updateAllHoken(h: Hoken): void {
+    const c = get(this.allHoken);
+    if (c != undefined) {
+      const key = h.key;
+      const i = c.findIndex(e => e.key === key);
+      if( i >= 0 ){
+        this.allHoken.set([...c].splice(i, 1, h));
+      }
     }
   }
 
