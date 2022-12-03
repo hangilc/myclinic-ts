@@ -1,4 +1,4 @@
-import type { Patient, Shahokokuho } from "myclinic-model";
+import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
@@ -65,7 +65,7 @@ function editOpener(data: PatientData): Opener {
   };
 }
 
-function newShahokokuhoOpener(data: PatientData): Opener {
+function newShahokokuhoOpener(data: PatientData, template?: Shahokokuho): Opener {
   return {
     open(): Closer {
       const d = new ShahokokuhoEditDialog({
@@ -75,31 +75,9 @@ function newShahokokuhoOpener(data: PatientData): Opener {
           ops: {
             goback: () => data.goback(),
           },
-          shahokokuho: undefined,
+          shahokokuho: template,
           onEnter: async (s: Shahokokuho) => {
             await api.enterShahokokuho(s);
-            data.goback();
-          }
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
-  return {
-    open(): Closer {
-      const d = new ShahokokuhoEditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          shahokokuho,
-          onEnter: async (s: Shahokokuho) => {
-            await api.updateShahokokuho(s);
             data.goback();
           }
         },
@@ -143,12 +121,35 @@ function newKouhiOpener(data: PatientData): Opener {
   };
 }
 
+function editShahokokuhoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
+  return {
+    open(): Closer {
+      const d = new ShahokokuhoEditDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          ops: {
+            goback: () => data.goback(),
+          },
+          shahokokuho,
+          onEnter: async (s: Shahokokuho) => {
+            await api.updateShahokokuho(s);
+            data.goback();
+          }
+        },
+      });
+      return d.$destroy;
+    },
+  };
+}
+
 function shahokokuhoInfoOpener(
   data: PatientData,
   shahokokuho: Shahokokuho
 ): Opener {
   return {
     open(): Closer {
+      shahokokuho = data.resolveShahokokuho(shahokokuho);
       const d = new ShahokokuhoInfoDialog({
         target: document.body,
         props: {
@@ -156,7 +157,10 @@ function shahokokuhoInfoOpener(
           shahokokuho,
           ops: {
             goback: () => data.goback(),
-            moveToEdit: () => data.moveTo(editShahokokuhoOpener(data, shahokokuho))
+            moveToEdit: () => data.moveTo(editShahokokuhoOpener(data, shahokokuho)),
+            renew: (s: Shahokokuho) => {
+              data.goto(newShahokokuhoOpener(data, s));
+            },
           },
         },
       });
@@ -326,6 +330,21 @@ export class PatientData {
     } else {
       return h;
     }
+  }
+
+  resolveShahokokuho(shahokokuho: Shahokokuho): Shahokokuho {
+    const h = new Hoken(shahokokuho);
+    return this.resolveHoken(h.key).value as Shahokokuho;
+  }
+
+  resolveKoukikourei(koukikourei: Koukikourei): Koukikourei {
+    const h = new Hoken(koukikourei);
+    return this.resolveHoken(h.key).value as Koukikourei;
+  }
+
+  resolveKouhi(kouhi: Kouhi): Kouhi {
+    const h = new Hoken(kouhi);
+    return this.resolveHoken(h.key).value as Kouhi;
   }
 
   cleanup(): void {

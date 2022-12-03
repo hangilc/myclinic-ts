@@ -1,6 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Patient, Shahokokuho } from "myclinic-model";
+  import { dateToSqlDate, type Patient, type Shahokokuho } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
@@ -12,30 +12,33 @@
   export let ops: {
     goback: () => void,
     moveToEdit: () => void,
+    renew: (s: Shahokokuho) => void,
   };
 
   const unsubs: (() => void)[] = [];
 
-  unsubs.push(shahokokuhoUpdated.subscribe(s => {
-    if( s == null ){
-      return;
-    }
-    if( s.shahokokuhoId === shahokokuho.shahokokuhoId ){
-      console.log("updated", s);
-      shahokokuho = s;
-    }
-  }))
+  unsubs.push(
+    shahokokuhoUpdated.subscribe((s) => {
+      if (s == null) {
+        return;
+      }
+      if (s.shahokokuhoId === shahokokuho.shahokokuhoId) {
+        console.log("updated", s);
+        shahokokuho = s;
+      }
+    })
+  );
 
   onDestroy(() => {
-    unsubs.forEach(u => u());
-  })
+    unsubs.forEach((u) => u());
+  });
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
   }
 
   function formatValidUpto(sqldate: string): string {
-    if( sqldate === "0000-00-00" ){
+    if (sqldate === "0000-00-00") {
       return "（期限なし）";
     } else {
       return kanjidate.format(kanjidate.f2, sqldate);
@@ -43,16 +46,31 @@
   }
 
   function formatKourei(kourei: number): string {
-    if( kourei === 0 ){
-      return "高齢でない"
+    if (kourei === 0) {
+      return "高齢でない";
     } else {
       return `${toZenkaku(kourei.toString())}割`;
     }
   }
 
+  function doRenew(): void {
+    if( shahokokuho.validUpto !== "0000-00-00") {
+      const d = new Date(shahokokuho.validUpto);
+      d.setDate(d.getDate() + 1);
+      const s = Object.assign({}, shahokokuho, {
+        shahokokuhoId: 0,
+        validFrom: dateToSqlDate(d),
+        validUpto: "0000-00-00"
+      }) as Shahokokuho;
+      ops.renew(s);
+    } else {
+      alert("期限終了日が設定されていないので、更新できません。");
+      return;
+    }
+  }
 </script>
 
-<SurfaceModal destroy={ops.goback} title="社保国保" >
+<SurfaceModal destroy={ops.goback} title="社保国保">
   <div class="panel">
     <span>({$patient.patientId})</span>
     <span>{$patient.fullName(" ")}</span>
@@ -77,7 +95,9 @@
     <span>{formatKourei(shahokokuho.koureiStore)}</span>
   </div>
   <div class="commands">
-    <button>更新</button>
+    {#if shahokokuho.validUpto !== "0000-00-00"}
+      <button on:click={doRenew}>更新</button>
+    {/if}
     <button on:click={ops.moveToEdit}>編集</button>
     <button on:click={ops.goback}>閉じる</button>
   </div>
