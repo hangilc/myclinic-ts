@@ -2,7 +2,12 @@ import type { Patient, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
-import { kouhiEntered, koukikoureiEntered, patientUpdated, shahokokuhoEntered } from "@/app-events";
+import {
+  kouhiEntered,
+  koukikoureiEntered,
+  patientUpdated,
+  shahokokuhoEntered,
+} from "@/app-events";
 import { get, writable, type Writable } from "svelte/store";
 import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 import NewKoukikoureiDialog from "./NewKoukikoureiDialog.svelte";
@@ -23,21 +28,18 @@ function infoOpener(data: PatientData): Opener {
         props: {
           patient: data.patient,
           currentHokenList: data.currentHokenList,
-          destroy,
           ops: {
-            moveToEdit: () => data.moveToEdit(),
-            moveToNewShahokokuho: () => data.moveToNewShahokokuho(),
-            moveToNewKoukikourei: () => data.moveToNewKoukikourei(),
-            moveToNewKouhi: () => data.moveToNewKouhi(),
-            moveToShahokokuhoInfo: (d: Shahokokuho) => data.moveToShahokokuhoInfo(d),
-          }
+            close: () => data.goback(),
+            moveToEdit: () => data.moveTo(editOpener(data)),
+            moveToNewShahokokuho: () => data.moveTo(newShahokokuhoOpener(data)),
+            moveToNewKoukikourei: () => data.moveTo(newKoukikoureiOpener(data)),
+            moveToNewKouhi: () => data.moveTo(newKouhiOpener(data)),
+            moveToShahokokuhoInfo: (d: Shahokokuho) =>
+              data.moveTo(shahokokuhoInfoOpener(data, d)),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-        data.onDialogClose();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }
@@ -68,15 +70,15 @@ function newShahokokuhoOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy
-        }
-    });
-    function destroy(): void {
-      d.$destroy();
-    }
-    return destroy;
-    }
-  }
+          destroy,
+        },
+      });
+      function destroy(): void {
+        d.$destroy();
+      }
+      return destroy;
+    },
+  };
 }
 
 function newKoukikoureiOpener(data: PatientData): Opener {
@@ -86,15 +88,15 @@ function newKoukikoureiOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy
-        }
-    });
-    function destroy(): void {
-      d.$destroy();
-    }
-    return destroy;
-    }
-  }
+          destroy,
+        },
+      });
+      function destroy(): void {
+        d.$destroy();
+      }
+      return destroy;
+    },
+  };
 }
 
 function newKouhiOpener(data: PatientData): Opener {
@@ -104,18 +106,21 @@ function newKouhiOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy
-        }
-    });
-    function destroy(): void {
-      d.$destroy();
-    }
-    return destroy;
-    }
-  }
+          destroy,
+        },
+      });
+      function destroy(): void {
+        d.$destroy();
+      }
+      return destroy;
+    },
+  };
 }
 
-function shahokokuhoInfoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
+function shahokokuhoInfoOpener(
+  data: PatientData,
+  shahokokuho: Shahokokuho
+): Opener {
   return {
     open(): Closer {
       const d = new ShahokokuhoInfoDialog({
@@ -123,84 +128,88 @@ function shahokokuhoInfoOpener(data: PatientData, shahokokuho: Shahokokuho): Ope
         props: {
           patient: data.patient,
           shahokokuho,
-          destroy
-        }
-    });
-    function destroy(): void {
-      d.$destroy();
-    }
-    return destroy;
-    }
-  }
+          destroy,
+        },
+      });
+      function destroy(): void {
+        d.$destroy();
+      }
+      return destroy;
+    },
+  };
 }
 
 export class PatientData {
   patient: Writable<Patient>;
   currentHokenList: Writable<Hoken[]>;
   allHoken: Writable<Hoken[] | undefined>;
-  current: [Opener, Closer] | undefined = undefined;
   unsubs: (() => void)[] = [];
-  stack: Opener[] = [];
+  stack: [Opener, Closer][] = [];
 
-  constructor(
-    patient: Patient,
-    currentHokenList: Hoken[]
-  ) {
+  constructor(patient: Patient, currentHokenList: Hoken[]) {
     this.patient = writable(patient);
     this.currentHokenList = writable(currentHokenList);
     this.allHoken = writable(undefined);
-    this.unsubs.push(patientUpdated.subscribe((patient) => {
-      if( patient != null ){
-        this.patient.set(patient);
-      }
-    }));
-    this.unsubs.push(shahokokuhoEntered.subscribe(shahokokuho => {
-      if( shahokokuho == null ){
-        return;
-      }
-      const patient: Patient = get(this.patient);
-      if( patient.patientId === shahokokuho.patientId ){
-        const h = new Hoken(shahokokuho);
-        if( shahokokuho.isValidAt(new Date()) ){
-          const chl = get(this.currentHokenList);
-          this.currentHokenList.set([...chl, h]);
+    this.unsubs.push(
+      patientUpdated.subscribe((patient) => {
+        if (patient != null) {
+          this.patient.set(patient);
         }
-        this.addToAllHoken(h);
-      }
-    }))
-    this.unsubs.push(koukikoureiEntered.subscribe(koukikourei => {
-      if( koukikourei == null ){
-        return;
-      }
-      const patient: Patient = get(this.patient);
-      if( patient.patientId === koukikourei.patientId ){
-        const h = new Hoken(koukikourei);
-        if( koukikourei.isValidAt(new Date()) ){
-          const chl = get(this.currentHokenList);
-          this.currentHokenList.set([...chl, h]);
+      })
+    );
+    this.unsubs.push(
+      shahokokuhoEntered.subscribe((shahokokuho) => {
+        if (shahokokuho == null) {
+          return;
         }
-        this.addToAllHoken(h);
-      }
-    }))
-    this.unsubs.push(kouhiEntered.subscribe(kouhi => {
-      if( kouhi == null ){
-        return;
-      }
-      const patient: Patient = get(this.patient);
-      if( patient.patientId === kouhi.patientId ){
-        const h = new Hoken(kouhi);
-        if( kouhi.isValidAt(new Date()) ){
-          const chl = get(this.currentHokenList);
-          this.currentHokenList.set([...chl, h]);
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === shahokokuho.patientId) {
+          const h = new Hoken(shahokokuho);
+          if (shahokokuho.isValidAt(new Date())) {
+            const chl = get(this.currentHokenList);
+            this.currentHokenList.set([...chl, h]);
+          }
+          this.addToAllHoken(h);
         }
-        this.addToAllHoken(h);
-      }
-    }))
+      })
+    );
+    this.unsubs.push(
+      koukikoureiEntered.subscribe((koukikourei) => {
+        if (koukikourei == null) {
+          return;
+        }
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === koukikourei.patientId) {
+          const h = new Hoken(koukikourei);
+          if (koukikourei.isValidAt(new Date())) {
+            const chl = get(this.currentHokenList);
+            this.currentHokenList.set([...chl, h]);
+          }
+          this.addToAllHoken(h);
+        }
+      })
+    );
+    this.unsubs.push(
+      kouhiEntered.subscribe((kouhi) => {
+        if (kouhi == null) {
+          return;
+        }
+        const patient: Patient = get(this.patient);
+        if (patient.patientId === kouhi.patientId) {
+          const h = new Hoken(kouhi);
+          if (kouhi.isValidAt(new Date())) {
+            const chl = get(this.currentHokenList);
+            this.currentHokenList.set([...chl, h]);
+          }
+          this.addToAllHoken(h);
+        }
+      })
+    );
   }
 
   addToAllHoken(h: Hoken): void {
     const c = get(this.allHoken);
-    if( c != undefined ){
+    if (c != undefined) {
       c.push(h);
       this.allHoken.set(c);
     }
@@ -212,54 +221,49 @@ export class PatientData {
   }
 
   closeCurrent(): void {
-    if( this.current !== undefined ){
-      const [_, closer] = this.current;
+    if (this.stack.length > 0) {
+      const [_, closer] = this.stack[this.stack.length - 1];
       closer();
     }
   }
 
-  moveTo(opener: Opener): void {
-    this.closeCurrent();
-    const closer = opener.open();
-    this.current = [opener, closer];
-    this.stack.push(opener);
+  pop(): void {
+    this.stack.pop();
   }
 
-  onDialogClose(): void {
-    if (this.stack.length > 0) {
-      this.stack.shift();
-      if (this.stack.length > 0) {
-        const o = this.stack.shift();
-        o?.open();
-      } else {
-        this.cleanup();
-      }
+  push(opener: Opener): void {
+    this.stack.push([opener, opener.open()]);
+  }
+
+  moveTo(opener: Opener): void {
+    this.closeCurrent();
+    this.push(opener);
+  }
+
+  goto(opener: Opener): void {
+    this.closeCurrent();
+    this.pop();
+    this.push(opener);
+  }
+
+  goback(): void {
+    this.closeCurrent();
+    this.pop();
+    const s = this.stack.pop();
+    if (s == undefined) {
+      this.cleanup();
     } else {
-      console.log("patient-data stack underflow");
+      const [opener, _] = s;
+      this.push(opener);
     }
   }
 
-  moveToInfo(): void {
+  close(): void {
+    this.closeCurrent();
+    this.cleanup();
+  }
+
+  startInfo(): void {
     this.moveTo(infoOpener(this));
-  }
-
-  moveToEdit(): void {
-    this.moveTo(editOpener(this));
-  }
-
-  moveToNewShahokokuho(): void {
-    this.moveTo(newShahokokuhoOpener(this));
-  }
-
-  moveToNewKoukikourei(): void {
-    this.moveTo(newKoukikoureiOpener(this));
-  }
-
-  moveToNewKouhi(): void {
-    this.moveTo(newKouhiOpener(this));
-  }
-
-  moveToShahokokuhoInfo(shahokokuho: Shahokokuho): void {
-    this.moveTo(shahokokuhoInfoOpener(this, shahokokuho));
   }
 }

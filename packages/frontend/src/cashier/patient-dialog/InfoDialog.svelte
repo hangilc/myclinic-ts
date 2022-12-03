@@ -8,23 +8,22 @@
   export let patient: Readable<Patient>;
   export let currentHokenList: Readable<Hoken[]>;
   export let ops: {
-    moveToEdit: () => void,
-    moveToNewShahokokuho: () => void,
-    moveToNewKoukikourei: () => void,
-    moveToNewKouhi: () => void,
-    moveToShahokokuhoInfo: (d: Shahokokuho) => void,
+    close: () => void;
+    moveToEdit: () => void;
+    moveToNewShahokokuho: () => void;
+    moveToNewKoukikourei: () => void;
+    moveToNewKouhi: () => void;
+    moveToShahokokuhoInfo: (d: Shahokokuho) => void;
   };
 
-  export let destroy: () => void;
-
   function doCurrentClick(h: Hoken): void {
-    if( h.value instanceof Shahokokuho ){
+    if (h.value instanceof Shahokokuho) {
       ops.moveToShahokokuhoInfo(h.value);
     }
   }
 </script>
 
-<SurfaceModal {destroy} width="320px" height="auto" title="患者情報">
+<SurfaceModal destroy={ops.close} width="320px" height="auto" title="患者情報">
   {@const p = $patient}
   <div class="info">
     <span>患者番号</span><span>{p.patientId}</span>
@@ -39,21 +38,25 @@
   </div>
   <div class="current-list">
     {#each $currentHokenList as h}
-      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}>{h.rep}</a>
+      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}>{h.rep}</a
+      >
     {/each}
   </div>
   <div class="commands">
     <button>診察受付</button>
-    <button on:click={destroy}>閉じる</button>
+    <button on:click={ops.close}>閉じる</button>
   </div>
   <div class="menu">
-    <a href="javascript:void(0)" on:click={() => ops.moveToEdit()}
-      >編集</a
+    <a href="javascript:void(0)" on:click={() => ops.moveToEdit()}>編集</a>
+    |
+    <a href="javascript:void(0)" on:click={ops.moveToNewShahokokuho}
+      >新規社保国保</a
     >
     |
-    <a href="javascript:void(0)" on:click={ops.moveToNewShahokokuho}>新規社保国保</a> |
     <a href="javascript:void(0)" on:click={ops.moveToNewKoukikourei}
-    >新規後期高齢</a> |
+      >新規後期高齢</a
+    >
+    |
     <a href="javascript:void(0)" on:click={ops.moveToNewKouhi}>新規公費</a> |
     <a href="javascript:void(0)">保険履歴</a> |
     <a href="javascript:void(0)">保存画像</a>

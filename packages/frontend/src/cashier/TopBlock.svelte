@@ -19,7 +19,7 @@
   async function doPatientSelected(patient: Patient) {
     const hokenList = await listCurrentHoken(patient.patientId);
     const data = new PatientData(patient, hokenList);
-    data.moveToInfo();
+    data.startInfo();
   }
 </script>
 
