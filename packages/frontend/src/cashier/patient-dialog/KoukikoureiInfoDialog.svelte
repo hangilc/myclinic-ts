@@ -1,30 +1,30 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { dateToSqlDate, type Patient, type Shahokokuho } from "myclinic-model";
+  import { dateToSqlDate, type Patient, type Koukikourei } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
   import { onDestroy } from "svelte";
-  import { shahokokuhoUpdated } from "@/app-events";
+  import { koukikoureiUpdated } from "@/app-events";
 
   export let patient: Readable<Patient>;
-  export let shahokokuho: Shahokokuho;
+  export let koukikourei: Koukikourei;
   export let ops: {
     goback: () => void,
     moveToEdit: () => void,
-    renew: (s: Shahokokuho) => void,
+    renew: (s: Koukikourei) => void,
   };
 
   const unsubs: (() => void)[] = [];
 
   unsubs.push(
-    shahokokuhoUpdated.subscribe((s) => {
+    koukikoureiUpdated.subscribe((s) => {
       if (s == null) {
         return;
       }
-      if (s.shahokokuhoId === shahokokuho.shahokokuhoId) {
+      if (s.koukikoureiId === koukikourei.koukikoureiId) {
         console.log("updated", s);
-        shahokokuho = s;
+        koukikourei = s;
       }
     })
   );
@@ -45,23 +45,15 @@
     }
   }
 
-  function formatKourei(kourei: number): string {
-    if (kourei === 0) {
-      return "高齢でない";
-    } else {
-      return `${toZenkaku(kourei.toString())}割`;
-    }
-  }
-
   function doRenew(): void {
-    if( shahokokuho.validUpto !== "0000-00-00") {
-      const d = new Date(shahokokuho.validUpto);
+    if( koukikourei.validUpto !== "0000-00-00") {
+      const d = new Date(koukikourei.validUpto);
       d.setDate(d.getDate() + 1);
-      const s = Object.assign({}, shahokokuho, {
-        shahokokuhoId: 0,
+      const s = Object.assign({}, koukikourei, {
+        koukikoureiId: 0,
         validFrom: dateToSqlDate(d),
         validUpto: "0000-00-00"
-      }) as Shahokokuho;
+      }) as Koukikourei;
       ops.renew(s);
     } else {
       alert("期限終了日が設定されていないので、更新できません。");
@@ -70,32 +62,23 @@
   }
 </script>
 
-<SurfaceModal destroy={ops.goback} title="社保国保">
+<SurfaceModal destroy={ops.goback} title="後期高齢">
   <div class="panel">
     <span>({$patient.patientId})</span>
     <span>{$patient.fullName(" ")}</span>
     <span>保険者番号</span>
-    <span>{shahokokuho.hokenshaBangou}</span>
-    <span>記号・番号</span>
-    <span>
-      {#if shahokokuho.hihokenshaKigou !== ""}
-        {shahokokuho.hihokenshaKigou}・
-      {/if}
-      {shahokokuho.hihokenshaBangou}
-    </span>
-    <span>枝番</span>
-    <span>{shahokokuho.edaban}</span>
-    <span>本人・家族</span>
-    <span>{shahokokuho.honnninKazokuType.rep}</span>
+    <span>{koukikourei.hokenshaBangou}</span>
+    <span>被保険者番号</span>
+    <span>{koukikourei.hihokenshaBangou}</span>
+    <span>負担割</span>
+    <span>{koukikourei.futanWari}割</span>
     <span>期限開始</span>
-    <span>{formatValidFrom(shahokokuho.validFrom)}</span>
+    <span>{formatValidFrom(koukikourei.validFrom)}</span>
     <span>期限終了</span>
-    <span>{formatValidUpto(shahokokuho.validUpto)}</span>
-    <span>高齢</span>
-    <span>{formatKourei(shahokokuho.koureiStore)}</span>
+    <span>{formatValidUpto(koukikourei.validUpto)}</span>
   </div>
   <div class="commands">
-    {#if shahokokuho.validUpto !== "0000-00-00"}
+    {#if koukikourei.validUpto !== "0000-00-00"}
       <button on:click={doRenew}>更新</button>
     {/if}
     <button on:click={ops.moveToEdit}>編集</button>

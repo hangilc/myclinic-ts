@@ -3,6 +3,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { intSrc, strSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateKoukikourei } from "@/lib/validators/koukikourei-validator";
@@ -14,17 +15,23 @@
   export let ops: {
     goback: () => void
   };
+  export let koukikourei: Koukikourei | undefined;
+  export let onEnter: (k: Koukikourei) => void;
+
   let errors: string[] = [];
-  let hokenshaBangou: string = "";
-  let hihokenshaBangou: string = "";
-  let futanWari: number = 1;
-  let validFrom: Date | null = null;
+  let hokenshaBangou: string = koukikourei?.hokenshaBangou ?? "";
+  let hihokenshaBangou: string = koukikourei?.hihokenshaBangou ?? "";
+  let futanWari: number = koukikourei?.futanWari ?? 1;
+  let validFrom: Date | null = 
+    koukikourei !== undefined ? parseSqlDate(koukikourei.validFrom) : null;
   let validFromErrors: Invalid[] = [];
-  let validUpto: Date | null = null;
+  let validUpto: Date | null = 
+    koukikourei !== undefined ? parseOptionalSqlDate(koukikourei.validUpto) : null;
   let validUptoErrors: Invalid[] = [];
 
   async function doEnter() {
-    const result: Koukikourei | string[] = validateKoukikourei(0, {
+    const result: Koukikourei | string[] = validateKoukikourei(
+      koukikourei?.koukikoureiId ?? 0, {
       patientId: intSrc($patient.patientId),
       hokenshaBangou: strSrc(hokenshaBangou),
       hihokenshaBangou: strSrc(hihokenshaBangou),
@@ -33,8 +40,9 @@
       validUpto: dateSrc(validUpto, validUptoErrors),
     });
     if( result instanceof Koukikourei ){
-      await api.enterKoukikourei(result);
-      ops.goback();
+      onEnter(result);
+      // await api.enterKoukikourei(result);
+      // ops.goback();
     } else {
       errors = result;
     }

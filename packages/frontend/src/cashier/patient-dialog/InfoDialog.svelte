@@ -1,24 +1,27 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import * as kanjidate from "kanjidate";
-  import { Shahokokuho, type Patient } from "myclinic-model";
+  import { Koukikourei, Shahokokuho, type Patient } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import type { Hoken } from "./hoken";
 
   export let patient: Readable<Patient>;
   export let currentHokenList: Readable<Hoken[]>;
   export let ops: {
-    close: () => void;
-    moveToEdit: () => void;
-    moveToNewShahokokuho: () => void;
-    moveToNewKoukikourei: () => void;
-    moveToNewKouhi: () => void;
-    moveToShahokokuhoInfo: (d: Shahokokuho) => void;
+    close: () => void,
+    moveToEdit: () => void,
+    moveToNewShahokokuho: () => void,
+    moveToNewKoukikourei: () => void,
+    moveToNewKouhi: () => void,
+    moveToShahokokuhoInfo: (d: Shahokokuho) => void,
+    moveToKoukikoureiInfo: (d: Koukikourei) => void,
   };
 
   function doCurrentClick(h: Hoken): void {
     if (h.value instanceof Shahokokuho) {
       ops.moveToShahokokuhoInfo(h.value);
+    } else if (h.value instanceof Koukikourei) {
+      ops.moveToKoukikoureiInfo(h.value);
     }
   }
 </script>

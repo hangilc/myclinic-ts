@@ -1099,12 +1099,12 @@ export default {
     return post("update-shahokokuho", shahokokuho, {}, castNumber);
   },
   
-  updateKoukikourei(koukikourei: m.Koukikourei): Promise<number> {
-    return post("update-koukikourei", koukikourei, {}, castNumber);
+  updateKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
+    return post("update-koukikourei", koukikourei, {}, castBoolean);
   },
   
-  updateKouhi(kouhi: m.Kouhi): Promise<number> {
-    return post("update-kouhi", kouhi, {}, castNumber);
+  updateKouhi(kouhi: m.Kouhi): Promise<boolean> {
+    return post("update-kouhi", kouhi, {}, castBoolean);
   },
   
   deleteShahokokuho(shahokokuho: m.Shahokokuho): Promise<boolean> {
