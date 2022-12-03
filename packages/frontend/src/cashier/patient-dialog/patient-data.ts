@@ -287,7 +287,9 @@ export class PatientData {
     const key = h.key;
     const i = c.findIndex(e => e.key === key);
     if( i >= 0 ){
-      this.currentHokenList.set([...c].splice(i, 1, h))
+      const cc = [...c];
+      cc.splice(i, 1, h);
+      this.currentHokenList.set(cc);
     }
   }
 
@@ -306,8 +308,23 @@ export class PatientData {
       const key = h.key;
       const i = c.findIndex(e => e.key === key);
       if( i >= 0 ){
-        this.allHoken.set([...c].splice(i, 1, h));
+        const cc = [...c];
+        cc.splice(i, 1, h);
+        this.allHoken.set(cc);
       }
+    }
+  }
+
+  resolveHoken(key: string): Hoken {
+    let h = get(this.currentHokenList).find(e => e.key === key);
+    if( h !== undefined ){
+      return h;
+    }
+    h = (get(this.allHoken) ?? []).find(e => e.key === key);
+    if( h === undefined ){
+      throw new Error("Cannot find hoken: " + key);
+    } else {
+      return h;
     }
   }
 

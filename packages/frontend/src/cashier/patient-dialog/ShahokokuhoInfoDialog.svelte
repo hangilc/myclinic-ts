@@ -4,6 +4,8 @@
   import type { Readable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
+  import { onDestroy } from "svelte";
+  import { shahokokuhoUpdated } from "@/app-events";
 
   export let patient: Readable<Patient>;
   export let shahokokuho: Shahokokuho;
@@ -11,6 +13,22 @@
     goback: () => void,
     moveToEdit: () => void,
   };
+
+  const unsubs: (() => void)[] = [];
+
+  unsubs.push(shahokokuhoUpdated.subscribe(s => {
+    if( s == null ){
+      return;
+    }
+    if( s.shahokokuhoId === shahokokuho.shahokokuhoId ){
+      console.log("updated", s);
+      shahokokuho = s;
+    }
+  }))
+
+  onDestroy(() => {
+    unsubs.forEach(u => u());
+  })
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
