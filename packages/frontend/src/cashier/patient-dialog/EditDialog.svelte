@@ -11,7 +11,6 @@
 
   export let patient: Readable<Patient>;
   export let destroy: () => void;
-  export let onClose: () => void;
   export let errors: string[] = [];
 
   let lastName: string = $patient.lastName;
@@ -44,7 +43,7 @@
   }
 </script>
 
-<SurfaceModal title="患者情報編集" {destroy} {onClose}>
+<SurfaceModal title="患者情報編集" {destroy}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}

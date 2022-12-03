@@ -1,4 +1,4 @@
-import type { Patient } from "myclinic-model";
+import type { Patient, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
 import InfoDialog from "./InfoDialog.svelte";
@@ -7,6 +7,7 @@ import { get, writable, type Writable } from "svelte/store";
 import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 import NewKoukikoureiDialog from "./NewKoukikoureiDialog.svelte";
 import NewKouhiDialog from "./NewKouhiDialog.svelte";
+import ShahokokuhoInfoDialog from "./ShahokokuhoInfoDialog.svelte";
 
 type Closer = () => void;
 
@@ -22,20 +23,19 @@ function infoOpener(data: PatientData): Opener {
         props: {
           patient: data.patient,
           currentHokenList: data.currentHokenList,
-          destroy: () => d.$destroy(),
-          onClose: () => {
-            data.onDialogClose();
-          },
+          destroy,
           ops: {
             moveToEdit: () => data.moveToEdit(),
             moveToNewShahokokuho: () => data.moveToNewShahokokuho(),
             moveToNewKoukikourei: () => data.moveToNewKoukikourei(),
             moveToNewKouhi: () => data.moveToNewKouhi(),
+            moveToShahokokuhoInfo: (d: Shahokokuho) => data.moveToShahokokuhoInfo(d),
           }
         },
       });
       function destroy(): void {
         d.$destroy();
+        data.onDialogClose();
       }
       return destroy;
     },
@@ -50,14 +50,11 @@ function editOpener(data: PatientData): Opener {
         props: {
           patient: data.patient,
           destroy: destroy,
-          onClose: () => {
-            console.log("edit onClose");
-            data.onDialogClose();
-          },
         },
       });
       function destroy(): void {
         d.$destroy();
+        data.onDialogClose();
       }
       return destroy;
     },
@@ -107,6 +104,25 @@ function newKouhiOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
+          destroy
+        }
+    });
+    function destroy(): void {
+      d.$destroy();
+    }
+    return destroy;
+    }
+  }
+}
+
+function shahokokuhoInfoOpener(data: PatientData, shahokokuho: Shahokokuho): Opener {
+  return {
+    open(): Closer {
+      const d = new ShahokokuhoInfoDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          shahokokuho,
           destroy
         }
     });
@@ -195,9 +211,18 @@ export class PatientData {
     this.unsubs.forEach((f) => f());
   }
 
+  closeCurrent(): void {
+    if( this.current !== undefined ){
+      const [_, closer] = this.current;
+      closer();
+    }
+  }
+
   moveTo(opener: Opener): void {
+    this.closeCurrent();
     const closer = opener.open();
     this.current = [opener, closer];
+    this.stack.push(opener);
   }
 
   onDialogClose(): void {
@@ -232,5 +257,9 @@ export class PatientData {
 
   moveToNewKouhi(): void {
     this.moveTo(newKouhiOpener(this));
+  }
+
+  moveToShahokokuhoInfo(shahokokuho: Shahokokuho): void {
+    this.moveTo(shahokokuhoInfoOpener(this, shahokokuho));
   }
 }

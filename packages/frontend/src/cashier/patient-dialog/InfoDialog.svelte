@@ -1,7 +1,7 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import * as kanjidate from "kanjidate";
-  import type { Patient } from "myclinic-model";
+  import { Shahokokuho, type Patient } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import type { Hoken } from "./hoken";
 
@@ -12,13 +12,19 @@
     moveToNewShahokokuho: () => void,
     moveToNewKoukikourei: () => void,
     moveToNewKouhi: () => void,
+    moveToShahokokuhoInfo: (d: Shahokokuho) => void,
   };
 
   export let destroy: () => void;
-  export let onClose: () => void = () => {};
+
+  function doCurrentClick(h: Hoken): void {
+    if( h.value instanceof Shahokokuho ){
+      ops.moveToShahokokuhoInfo(h.value);
+    }
+  }
 </script>
 
-<SurfaceModal {destroy} width="320px" height="auto" title="患者情報" {onClose}>
+<SurfaceModal {destroy} width="320px" height="auto" title="患者情報">
   {@const p = $patient}
   <div class="info">
     <span>患者番号</span><span>{p.patientId}</span>
@@ -33,7 +39,7 @@
   </div>
   <div class="current-list">
     {#each $currentHokenList as h}
-      <a href="javascript:void(0)">{h.rep}</a>
+      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}>{h.rep}</a>
     {/each}
   </div>
   <div class="commands">

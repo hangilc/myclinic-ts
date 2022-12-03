@@ -10,8 +10,10 @@
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
-    searchPatientResultDialog.open(result);
-    searchText = "";
+    if (searchPatientResultDialog) {
+      searchPatientResultDialog.open(result);
+      searchText = "";
+    }
   }
 
   async function doPatientSelected(patient: Patient) {
@@ -19,18 +21,18 @@
     const data = new PatientData(patient, hokenList);
     data.moveToInfo();
   }
-
 </script>
 
 <div class="top">
   <div class="title">受付患者</div>
   <form class="search-form" on:submit|preventDefault={doSearch}>
-    <input type="text" class="search-input" bind:value={searchText}/>
+    <input type="text" class="search-input" bind:value={searchText} />
     <button>検索</button>
   </form>
   <button>新規患者</button>
   <a href="javascript:void(0)" class="records-link">診療録</a>
-  <svg class="menu-svg"
+  <svg
+    class="menu-svg"
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
@@ -45,7 +47,10 @@
     />
   </svg>
 </div>
-<SearchPatientResultDialog bind:this={searchPatientResultDialog} onSelect={doPatientSelected}/>
+<SearchPatientResultDialog
+  bind:this={searchPatientResultDialog}
+  onSelect={doPatientSelected}
+/>
 
 <style>
   .top {
