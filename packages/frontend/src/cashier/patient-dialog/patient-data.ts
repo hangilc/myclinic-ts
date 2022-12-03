@@ -51,14 +51,12 @@ function editOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy: destroy,
+          ops: {
+            goback: () => data.goback(),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-        data.onDialogClose();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }
@@ -70,13 +68,12 @@ function newShahokokuhoOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy,
+          ops: {
+            goback: () => data.goback(),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }
@@ -88,13 +85,12 @@ function newKoukikoureiOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy,
+          ops: {
+            goback: () => data.goback(),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }
@@ -106,13 +102,12 @@ function newKouhiOpener(data: PatientData): Opener {
         target: document.body,
         props: {
           patient: data.patient,
-          destroy,
+          ops: {
+            goback: () => data.goback(),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }
@@ -128,13 +123,12 @@ function shahokokuhoInfoOpener(
         props: {
           patient: data.patient,
           shahokokuho,
-          destroy,
+          ops: {
+            goback: () => data.goback(),
+          },
         },
       });
-      function destroy(): void {
-        d.$destroy();
-      }
-      return destroy;
+      return d.$destroy;
     },
   };
 }

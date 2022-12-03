@@ -7,8 +7,9 @@
 
   export let patient: Readable<Patient>;
   export let shahokokuho: Shahokokuho;
-  export let destroy: () => void;
-  export let onClose: () => void;
+  export let ops: {
+    goback: () => void
+  };
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -32,7 +33,7 @@
 
 </script>
 
-<SurfaceModal {destroy} title="社保国保" {onClose}>
+<SurfaceModal destroy={ops.goback} title="社保国保" >
   <div class="panel">
     <span>({$patient.patientId})</span>
     <span>{$patient.fullName(" ")}</span>
@@ -59,7 +60,7 @@
   <div class="commands">
     <button>更新</button>
     <button>編集</button>
-    <button on:click={destroy}>閉じる</button>
+    <button on:click={ops.goback}>閉じる</button>
   </div>
 </SurfaceModal>
 

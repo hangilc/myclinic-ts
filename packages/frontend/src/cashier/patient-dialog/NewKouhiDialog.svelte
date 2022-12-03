@@ -9,7 +9,9 @@
   import type { Readable } from "svelte/store";
 
   export let patient: Readable<Patient>;
-  export let destroy: () => void;
+  export let ops: {
+    goback: () => void
+  };
   let errors: string[] = [];
   let futansha: string = "";
   let jukyuusha: string = "";
@@ -28,14 +30,14 @@
     });
     if( result instanceof Kouhi ){
       await api.enterKouhi(result);
-      destroy();
+      ops.goback();
     } else {
       errors = result;
     }
   }
 </script>
 
-<SurfaceModal title="新規公費" {destroy}>
+<SurfaceModal title="新規公費" destroy={ops.goback}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -71,7 +73,7 @@
   </div>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
-    <button on:click={destroy}>キャンセル</button>
+    <button on:click={ops.goback}>キャンセル</button>
   </div>
 </SurfaceModal>
 

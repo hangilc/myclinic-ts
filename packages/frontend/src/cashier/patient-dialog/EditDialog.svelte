@@ -10,7 +10,9 @@
   import type { Readable } from "svelte/store";
 
   export let patient: Readable<Patient>;
-  export let destroy: () => void;
+  export let ops: {
+    goback: () => void
+  };
   export let errors: string[] = [];
 
   let lastName: string = $patient.lastName;
@@ -36,14 +38,14 @@
     });
     if (result instanceof Patient) {
       await api.updatePatient(result);
-      destroy();
+      ops.goback();
     } else {
       errors = result;
     }
   }
 </script>
 
-<SurfaceModal title="患者情報編集" {destroy}>
+<SurfaceModal title="患者情報編集" destroy={ops.goback}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -87,7 +89,7 @@
   </div>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
-    <button on:click={destroy}>キャンセル</button>
+    <button on:click={ops.goback}>キャンセル</button>
   </div>
 </SurfaceModal>
 

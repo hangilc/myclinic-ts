@@ -12,7 +12,9 @@
   import type { Readable } from "svelte/store";
 
   export let patient: Readable<Patient>;
-  export let destroy: () => void;
+  export let ops: {
+    goback: () => void
+  }
   let errors: string[] = [];
   let hokenshaBangou: string = "";
   let kigou: string = "";
@@ -40,14 +42,14 @@
     });
     if( result instanceof Shahokokuho ){
       await api.enterShahokokuho(result);
-      destroy();
+      ops.goback();
     } else {
       errors = result;
     }
   }
 </script>
 
-<SurfaceModal {destroy} title="新規社保国保入力">
+<SurfaceModal destroy={ops.goback} title="新規社保国保入力">
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -117,7 +119,7 @@
   </div>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
-    <button on:click={destroy}>キャンセル</button>
+    <button on:click={ops.goback}>キャンセル</button>
   </div>
 </SurfaceModal>
 
