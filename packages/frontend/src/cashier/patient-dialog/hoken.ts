@@ -158,6 +158,17 @@ export class Hoken {
     )
   }
 
+  static async batchFromHoken(shahokokuhoList: Shahokokuho[], koukikoureiList: Koukikourei[], 
+    roujinList: Roujin[], kouhiList: Kouhi[]): Promise<Hoken[]> {
+      const [shahoMap, koukiMap, roujinMap, kouhiMap] = await api.batchCountHokenUsage(
+        shahokokuhoList.map(e => e.shahokokuhoId), 
+        koukikoureiList.map(e => e.koukikoureiId), 
+        roujinList.map(e => e.roujinId), 
+        kouhiList.map(e => e.kouhiId)
+      );
+      
+    }
+
   static async fromHoken(h: HokenType): Promise<Hoken> {
     const c: number = await Hoken.getUsageCount(h);
     return new Hoken(h, c);
