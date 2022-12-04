@@ -2,7 +2,8 @@
   import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { intSrc, strSrc, type Invalid } from "@/lib/validator";
+  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
+  import { intSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateKouhi } from "@/lib/validators/kouhi-validator";
   import { Kouhi, type Patient } from "myclinic-model";
@@ -12,16 +13,22 @@
   export let ops: {
     goback: () => void
   };
+  export let kouhi: Kouhi | undefined;
+  export let onEnter: (k: Kouhi) => void;
+
   let errors: string[] = [];
-  let futansha: string = "";
-  let jukyuusha: string = "";
-  let validFrom: Date | null = null;
+  let futansha: string = kouhi?.futansha.toString() ?? "";
+  let jukyuusha: string = kouhi?.jukyuusha.toString() ?? "";
+  let validFrom: Date | null = 
+    kouhi !== undefined ? parseSqlDate(kouhi.validFrom) : null;
   let validFromErrors: Invalid[] = [];
-  let validUpto: Date | null = null;
+  let validUpto: Date | null = 
+    kouhi !== undefined ? parseOptionalSqlDate(kouhi.validUpto) : null;
   let validUptoErrors: Invalid[] = [];
 
   async function doEnter() {
-    const result: Kouhi | string[] = validateKouhi(0, {
+    const result: Kouhi | string[] = validateKouhi(
+      kouhi?.kouhiId ?? 0, {
       patientId: intSrc($patient.patientId),
       futansha: intSrc(futansha),
       jukyuusha: intSrc(jukyuusha),
@@ -29,8 +36,7 @@
       validUpto: dateSrc(validUpto, validUptoErrors),
     });
     if( result instanceof Kouhi ){
-      await api.enterKouhi(result);
-      ops.goback();
+      onEnter(result);
     } else {
       errors = result;
     }

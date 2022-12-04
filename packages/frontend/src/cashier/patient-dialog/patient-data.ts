@@ -14,9 +14,10 @@ import {
 import { get, writable, type Writable } from "svelte/store";
 import ShahokokuhoEditDialog from "./ShahokokuhoEditDialog.svelte";
 import KoukikoureiEditDialog from "./KoukikoureiEditDialog.svelte";
-import NewKouhiDialog from "./NewKouhiDialog.svelte";
+import KouhiEditDialog from "./KouhiEditDialog.svelte";
 import ShahokokuhoInfoDialog from "./ShahokokuhoInfoDialog.svelte";
 import KoukikoureiInfoDialog from "./KoukikoureiInfoDialog.svelte";
+import KouhiInfoDialog from "./KouhiInfoDialog.svelte";
 import api from "@/lib/api";
 
 type Closer = () => void;
@@ -43,6 +44,8 @@ function infoOpener(data: PatientData): Opener {
               data.moveTo(shahokokuhoInfoOpener(data, d)),
             moveToKoukikoureiInfo: (d: Koukikourei) =>
               data.moveTo(koukikoureiInfoOpener(data, d)),
+            moveToKouhiInfo: (d: Kouhi) =>
+              data.moveTo(kouhiInfoOpener(data, d)),
           },
         },
       });
@@ -118,16 +121,21 @@ function newKoukikoureiOpener(
   };
 }
 
-function newKouhiOpener(data: PatientData): Opener {
+function newKouhiOpener(data: PatientData, kouhi?: Kouhi): Opener {
   return {
     open(): Closer {
-      const d = new NewKouhiDialog({
+      const d = new KouhiEditDialog({
         target: document.body,
         props: {
           patient: data.patient,
+          kouhi,
           ops: {
             goback: () => data.goback(),
           },
+          onEnter: async (k: Kouhi) => {
+            await api.enterKouhi(k);
+            data.goback();
+          }
         },
       });
       return d.$destroy;
@@ -186,6 +194,32 @@ function editKoukikoureiOpener(
   };
 }
 
+function editKouhiOpener(
+  data: PatientData,
+  kouhi: Kouhi
+): Opener {
+  return {
+    open(): Closer {
+      kouhi = data.resolveKouhi(kouhi);
+      const d = new KouhiEditDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          ops: {
+            goback: () => data.goback(),
+          },
+          kouhi,
+          onEnter: async (s: Kouhi) => {
+            await api.updateKouhi(s);
+            data.goback();
+          },
+        },
+      });
+      return d.$destroy;
+    },
+  };
+}
+
 function shahokokuhoInfoOpener(
   data: PatientData,
   shahokokuho: Shahokokuho
@@ -231,6 +265,33 @@ function koukikoureiInfoOpener(
               data.moveTo(editKoukikoureiOpener(data, koukikourei)),
             renew: (s: Koukikourei) => {
               data.goto(newKoukikoureiOpener(data, s));
+            },
+          },
+        },
+      });
+      return d.$destroy;
+    },
+  };
+}
+
+function kouhiInfoOpener(
+  data: PatientData,
+  kouhi: Kouhi
+): Opener {
+  return {
+    open(): Closer {
+      kouhi = data.resolveKouhi(kouhi);
+      const d = new KouhiInfoDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          kouhi,
+          ops: {
+            goback: () => data.goback(),
+            moveToEdit: () =>
+              data.moveTo(editKouhiOpener(data, kouhi)),
+            renew: (k: Kouhi) => {
+              data.goto(newKouhiOpener(data, k));
             },
           },
         },

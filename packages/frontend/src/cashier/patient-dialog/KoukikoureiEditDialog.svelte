@@ -41,8 +41,6 @@
     });
     if( result instanceof Koukikourei ){
       onEnter(result);
-      // await api.enterKoukikourei(result);
-      // ops.goback();
     } else {
       errors = result;
     }
