@@ -82,6 +82,7 @@ export class PatientData {
         ...kouhiList.map((h) => new Hoken(h)),
       ];
       this.hokenCache.set(hs);
+      this.allHokenLoaded = true;
     }
   }
 

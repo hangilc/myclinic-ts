@@ -10,9 +10,11 @@ export type HokenType = Shahokokuho | Koukikourei | Roujin | Kouhi;
 
 export class Hoken {
   value: HokenType;
+  usageCount: number;
 
-  constructor(value: HokenType) {
+  constructor(value: HokenType, usageCount: number) {
     this.value = value;
+    this.usageCount = usageCount;
   }
 
   fold<T>(
@@ -82,10 +84,26 @@ export class Hoken {
 
   get rep(): string {
     return this.fold(
-      h => shahokokuhoRep(h),
-      h => koukikoureiRep(h.futanWari),
-      h => roujinRep(h.futanWari),
-      h => kouhiRep(h.futansha),
+      h => Hoken.shahokokuhoRep(h),
+      h => Hoken.koukikoureiRep(h),
+      h => Hoken.roujinRep(h),
+      h => Hoken.kouhiRep(h),
     )
+  }
+
+  static shahokokuhoRep(h: Shahokokuho): string {
+    return shahokokuhoRep(h);
+  }
+
+  static koukikoureiRep(h: Koukikourei): string {
+    return koukikoureiRep(h.futanWari);
+  }
+
+  static roujinRep(h: Roujin): string {
+    return roujinRep(h.futanWari);
+  }
+
+  static kouhiRep(h: Kouhi): string {
+    return kouhiRep(h.futansha);
   }
 }

@@ -15,6 +15,7 @@ export function allHokenOpener(data: PatientData): Opener {
           allHoken: data.hokenCache,
         }
       });
+      data.fetchAllHoken();
       return d.$destroy;
     }
   }

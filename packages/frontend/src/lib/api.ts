@@ -1134,4 +1134,30 @@ export default {
   deleteKouhi(kouhi: m.Kouhi): Promise<boolean> {
     return post("delete-kouhi", kouhi, {}, castBoolean);
   },
+
+  batchCountHokenUsage(
+    shahokokuhoIds: number[],
+    koukikoureiIds: number[],
+    roujinIds: number[],
+    kouhiIds: number[]
+  ): Promise<
+    [
+      Record<number, number>,
+      Record<number, number>,
+      Record<number, number>,
+      Record<number, number>
+    ]
+  > {
+    return post(
+      "batch-count-hoken-usage",
+      [shahokokuhoIds, koukikoureiIds, roujinIds, kouhiIds],
+      {},
+      castTuple4(
+        castObject<number, number>(castNumber, castNumber),
+        castObject<number, number>(castNumber, castNumber),
+        castObject<number, number>(castNumber, castNumber),
+        castObject<number, number>(castNumber, castNumber)
+      )
+    );
+  },
 };
