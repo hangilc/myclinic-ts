@@ -16,6 +16,7 @@
     moveToShahokokuhoInfo: (d: Shahokokuho) => void,
     moveToKoukikoureiInfo: (d: Koukikourei) => void,
     moveToKouhiInfo: (d: Kouhi) => void,
+    moveToAllHoken: () => void,
   };
 
   function doCurrentClick(h: Hoken): void {
@@ -68,7 +69,7 @@
     >
     |
     <a href="javascript:void(0)" on:click={ops.moveToNewKouhi}>新規公費</a> |
-    <a href="javascript:void(0)">保険履歴</a> |
+    <a href="javascript:void(0)" on:click={ops.moveToAllHoken}>保険履歴</a> |
     <a href="javascript:void(0)">保存画像</a>
   </div>
 </SurfaceModal>

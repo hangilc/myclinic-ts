@@ -18,6 +18,7 @@
   };
   export let shahokokuho: Shahokokuho | undefined;
   export let onEnter: (s: Shahokokuho) => void;
+  export let title: string;
 
   let errors: string[] = [];
   let hokenshaBangou: string = shahokokuho?.hokenshaBangou.toString() ?? "";
@@ -58,7 +59,7 @@
   }
 </script>
 
-<SurfaceModal destroy={ops.goback} title="新規社保国保入力">
+<SurfaceModal destroy={ops.goback} {title}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}

@@ -541,6 +541,21 @@ export default {
     );
   },
 
+  listAllHoken(
+    patientId: number
+  ): Promise<[m.Shahokokuho[], m.Koukikourei[], m.Roujin[], m.Kouhi[]]> {
+    return get(
+      "list-all-hoken",
+      { "patient-id": patientId.toString() },
+      castTuple4(
+        castList(m.Shahokokuho.cast),
+        castList(m.Koukikourei.cast),
+        castList(m.Roujin.cast),
+        castList(m.Kouhi.cast)
+      )
+    );
+  },
+
   getShinryouRegular(): Promise<Record<string, string[]>> {
     return get(
       "get-shinryou-regular",
@@ -1064,13 +1079,14 @@ export default {
       "get-patient-hoken",
       { "patient-id": patientId.toString(), at: dateParam(at) },
       (json: any) => {
-        const [_ser, _patient, shahoList, koukiList, roujinList, kouhiList] = json;
+        const [_ser, _patient, shahoList, koukiList, roujinList, kouhiList] =
+          json;
         return [
           castList(m.Shahokokuho.cast)(shahoList),
           castList(m.Koukikourei.cast)(koukiList),
           castList(m.Roujin.cast)(roujinList),
-          castList(m.Kouhi.cast)(kouhiList)
-        ]
+          castList(m.Kouhi.cast)(kouhiList),
+        ];
       }
     );
   },
@@ -1086,37 +1102,36 @@ export default {
   enterShahokokuho(shahokokuho: m.Shahokokuho): Promise<m.Shahokokuho> {
     return post("enter-shahokokuho", shahokokuho, {}, m.Shahokokuho.cast);
   },
-  
+
   enterKoukikourei(koukikourei: m.Koukikourei): Promise<m.Koukikourei> {
     return post("enter-koukikourei", koukikourei, {}, m.Koukikourei.cast);
   },
-  
+
   enterKouhi(kouhi: m.Kouhi): Promise<m.Kouhi> {
     return post("enter-kouhi", kouhi, {}, m.Kouhi.cast);
   },
-  
+
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
     return post("update-shahokokuho", shahokokuho, {}, castNumber);
   },
-  
+
   updateKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
     return post("update-koukikourei", koukikourei, {}, castBoolean);
   },
-  
+
   updateKouhi(kouhi: m.Kouhi): Promise<boolean> {
     return post("update-kouhi", kouhi, {}, castBoolean);
   },
-  
+
   deleteShahokokuho(shahokokuho: m.Shahokokuho): Promise<boolean> {
     return post("delete-shahokokuho", shahokokuho, {}, castBoolean);
   },
-  
+
   deleteKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
     return post("delete-koukikourei", koukikourei, {}, castBoolean);
   },
-  
+
   deleteKouhi(kouhi: m.Kouhi): Promise<boolean> {
     return post("delete-kouhi", kouhi, {}, castBoolean);
   },
-  
 };

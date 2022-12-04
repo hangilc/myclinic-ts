@@ -35,12 +35,30 @@ export class Hoken {
     }
   }
 
+  get validFrom(): string {
+    return this.fold(
+      h => h.validFrom,
+      h => h.validFrom,
+      h => h.validFrom,
+      h => h.validFrom,
+    )
+  }
+
   isValidAt(d: Date): boolean {
     return this.fold(
       h => h.isValidAt(d),
       h => h.isValidAt(d),
       h => h.isValidAt(d),
       h => h.isValidAt(d),
+    )
+  }
+
+  get hokenType(): string {
+    return this.fold(
+      _ => "shahokokuho",
+      _ => "koukikourei",
+      _ => "roujin",
+      _ => "kouhi",
     )
   }
 

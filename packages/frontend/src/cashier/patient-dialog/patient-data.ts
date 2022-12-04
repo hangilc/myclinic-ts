@@ -19,6 +19,7 @@ import ShahokokuhoInfoDialog from "./ShahokokuhoInfoDialog.svelte";
 import KoukikoureiInfoDialog from "./KoukikoureiInfoDialog.svelte";
 import KouhiInfoDialog from "./KouhiInfoDialog.svelte";
 import api from "@/lib/api";
+import AllHokenDialog from "./AllHokenDialog.svelte";
 
 type Closer = () => void;
 
@@ -46,6 +47,7 @@ function infoOpener(data: PatientData): Opener {
               data.moveTo(koukikoureiInfoOpener(data, d)),
             moveToKouhiInfo: (d: Kouhi) =>
               data.moveTo(kouhiInfoOpener(data, d)),
+            moveToAllHoken: () => data.moveTo(allHokenOpener(data)),
           },
         },
       });
@@ -80,6 +82,7 @@ function newShahokokuhoOpener(
       const d = new ShahokokuhoEditDialog({
         target: document.body,
         props: {
+          title: "新規社保国保",
           patient: data.patient,
           ops: {
             goback: () => data.goback(),
@@ -152,6 +155,7 @@ function editShahokokuhoOpener(
       const d = new ShahokokuhoEditDialog({
         target: document.body,
         props: {
+          title: "社保国保編集",
           patient: data.patient,
           ops: {
             goback: () => data.goback(),
@@ -301,6 +305,23 @@ function kouhiInfoOpener(
   };
 }
 
+function allHokenOpener(data: PatientData): Opener {
+  return {
+    open(): Closer {
+      const d = new AllHokenDialog({
+        target: document.body,
+        props: {
+          patient: data.patient,
+          ops: {
+            goback: () => data.goback(),
+          },
+        }
+      });
+      return d.$destroy;
+    }
+  }
+}
+
 export class PatientData {
   patient: Writable<Patient>;
   hokenCache: Writable<Hoken[]>;
@@ -390,6 +411,14 @@ export class PatientData {
         }
       })
     );
+  }
+
+  async fetchAllHoken() {
+    if( !this.allHoken ){
+      const patient = get(this.patient);
+      const [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
+        await api.listAllHoken(patient.patientId);
+    }
   }
 
   addToCache(h: Hoken): void {
