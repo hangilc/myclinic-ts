@@ -2,14 +2,17 @@
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Hoken } from "./hoken";
   import type { Kouhi, Koukikourei, Patient, Roujin, Shahokokuho } from "myclinic-model";
-  import { writable, type Readable, type Writable } from "svelte/store";
+  import type { Readable } from "svelte/store";
   import { classify } from "@/lib/partition";
 
   export let patient: Readable<Patient>;
+  export let allHoken: Readable<Hoken[]>;
   export let ops: {
     goback: () => void,
   }
-  export let allHoken: Writable<Hoken[]> = writable([]);
+
+  $: console.log(allHoken);
+
   const classified: Record<string, Hoken[]> = classify($allHoken, h => h.hokenType);
   Object.values(classified).forEach((list: Hoken[]) => {
     list.sort((a: Hoken, b: Hoken) => - a.validFrom.localeCompare(b.validFrom))

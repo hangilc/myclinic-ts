@@ -44,6 +44,15 @@ export class Hoken {
     )
   }
 
+  get patientId(): number {
+    return this.fold(
+      h => h.patientId,
+      h => h.patientId,
+      h => h.patientId,
+      h => h.patientId,
+    )
+  }
+
   isValidAt(d: Date): boolean {
     return this.fold(
       h => h.isValidAt(d),

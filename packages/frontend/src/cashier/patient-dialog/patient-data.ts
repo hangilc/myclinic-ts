@@ -1,7 +1,6 @@
 import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
-import InfoDialog from "./InfoDialog.svelte";
 import {
   kouhiEntered,
   kouhiUpdated,
@@ -12,320 +11,14 @@ import {
   shahokokuhoUpdated,
 } from "@/app-events";
 import { get, writable, type Writable } from "svelte/store";
-import ShahokokuhoEditDialog from "./ShahokokuhoEditDialog.svelte";
-import KoukikoureiEditDialog from "./KoukikoureiEditDialog.svelte";
-import KouhiEditDialog from "./KouhiEditDialog.svelte";
-import ShahokokuhoInfoDialog from "./ShahokokuhoInfoDialog.svelte";
-import KoukikoureiInfoDialog from "./KoukikoureiInfoDialog.svelte";
-import KouhiInfoDialog from "./KouhiInfoDialog.svelte";
 import api from "@/lib/api";
-import AllHokenDialog from "./AllHokenDialog.svelte";
-
-type Closer = () => void;
-
-interface Opener {
-  open(): Closer;
-}
-
-function infoOpener(data: PatientData): Opener {
-  return {
-    open(): Closer {
-      const d: InfoDialog = new InfoDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          hokenCache: data.hokenCache,
-          ops: {
-            close: () => data.goback(),
-            moveToEdit: () => data.moveTo(editOpener(data)),
-            moveToNewShahokokuho: () => data.moveTo(newShahokokuhoOpener(data)),
-            moveToNewKoukikourei: () => data.moveTo(newKoukikoureiOpener(data)),
-            moveToNewKouhi: () => data.moveTo(newKouhiOpener(data)),
-            moveToShahokokuhoInfo: (d: Shahokokuho) =>
-              data.moveTo(shahokokuhoInfoOpener(data, d)),
-            moveToKoukikoureiInfo: (d: Koukikourei) =>
-              data.moveTo(koukikoureiInfoOpener(data, d)),
-            moveToKouhiInfo: (d: Kouhi) =>
-              data.moveTo(kouhiInfoOpener(data, d)),
-            moveToAllHoken: () => data.moveTo(allHokenOpener(data)),
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function editOpener(data: PatientData): Opener {
-  return {
-    open(): Closer {
-      const d: EditDialog = new EditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function newShahokokuhoOpener(
-  data: PatientData,
-  template?: Shahokokuho
-): Opener {
-  return {
-    open(): Closer {
-      const d = new ShahokokuhoEditDialog({
-        target: document.body,
-        props: {
-          title: "新規社保国保",
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          shahokokuho: template,
-          onEnter: async (s: Shahokokuho) => {
-            await api.enterShahokokuho(s);
-            data.goback();
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function newKoukikoureiOpener(
-  data: PatientData,
-  koukikourei?: Koukikourei
-): Opener {
-  return {
-    open(): Closer {
-      const d = new KoukikoureiEditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          koukikourei,
-          onEnter: async (k: Koukikourei) => {
-            await api.enterKoukikourei(k);
-            data.goback();
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function newKouhiOpener(data: PatientData, kouhi?: Kouhi): Opener {
-  return {
-    open(): Closer {
-      const d = new KouhiEditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          kouhi,
-          ops: {
-            goback: () => data.goback(),
-          },
-          onEnter: async (k: Kouhi) => {
-            await api.enterKouhi(k);
-            data.goback();
-          }
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function editShahokokuhoOpener(
-  data: PatientData,
-  shahokokuho: Shahokokuho
-): Opener {
-  return {
-    open(): Closer {
-      const d = new ShahokokuhoEditDialog({
-        target: document.body,
-        props: {
-          title: "社保国保編集",
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          shahokokuho,
-          onEnter: async (s: Shahokokuho) => {
-            await api.updateShahokokuho(s);
-            data.goback();
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function editKoukikoureiOpener(
-  data: PatientData,
-  koukikourei: Koukikourei
-): Opener {
-  return {
-    open(): Closer {
-      koukikourei = data.resolveKoukikourei(koukikourei);
-      const d = new KoukikoureiEditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          koukikourei,
-          onEnter: async (s: Koukikourei) => {
-            await api.updateKoukikourei(s);
-            data.goback();
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function editKouhiOpener(
-  data: PatientData,
-  kouhi: Kouhi
-): Opener {
-  return {
-    open(): Closer {
-      kouhi = data.resolveKouhi(kouhi);
-      const d = new KouhiEditDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-          kouhi,
-          onEnter: async (s: Kouhi) => {
-            await api.updateKouhi(s);
-            data.goback();
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function shahokokuhoInfoOpener(
-  data: PatientData,
-  shahokokuho: Shahokokuho
-): Opener {
-  return {
-    open(): Closer {
-      shahokokuho = data.resolveShahokokuho(shahokokuho);
-      const d = new ShahokokuhoInfoDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          shahokokuho,
-          ops: {
-            goback: () => data.goback(),
-            moveToEdit: () =>
-              data.moveTo(editShahokokuhoOpener(data, shahokokuho)),
-            renew: (s: Shahokokuho) => {
-              data.goto(newShahokokuhoOpener(data, s));
-            },
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function koukikoureiInfoOpener(
-  data: PatientData,
-  koukikourei: Koukikourei
-): Opener {
-  return {
-    open(): Closer {
-      koukikourei = data.resolveKoukikourei(koukikourei);
-      const d = new KoukikoureiInfoDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          koukikourei,
-          ops: {
-            goback: () => data.goback(),
-            moveToEdit: () =>
-              data.moveTo(editKoukikoureiOpener(data, koukikourei)),
-            renew: (s: Koukikourei) => {
-              data.goto(newKoukikoureiOpener(data, s));
-            },
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function kouhiInfoOpener(
-  data: PatientData,
-  kouhi: Kouhi
-): Opener {
-  return {
-    open(): Closer {
-      kouhi = data.resolveKouhi(kouhi);
-      const d = new KouhiInfoDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          kouhi,
-          ops: {
-            goback: () => data.goback(),
-            moveToEdit: () =>
-              data.moveTo(editKouhiOpener(data, kouhi)),
-            renew: (k: Kouhi) => {
-              data.goto(newKouhiOpener(data, k));
-            },
-          },
-        },
-      });
-      return d.$destroy;
-    },
-  };
-}
-
-function allHokenOpener(data: PatientData): Opener {
-  return {
-    open(): Closer {
-      const d = new AllHokenDialog({
-        target: document.body,
-        props: {
-          patient: data.patient,
-          ops: {
-            goback: () => data.goback(),
-          },
-        }
-      });
-      return d.$destroy;
-    }
-  }
-}
+import type { Opener, Closer } from "./openers/opener";
+import { infoOpener } from "./openers/info-opener";
 
 export class PatientData {
   patient: Writable<Patient>;
   hokenCache: Writable<Hoken[]>;
-  allHoken: boolean = false;
+  allHokenLoaded: boolean = false;
   unsubs: (() => void)[] = [];
   stack: [Opener, Closer][] = [];
 
@@ -339,74 +32,38 @@ export class PatientData {
         }
       })
     );
+    [shahokokuhoEntered, koukikoureiEntered, kouhiEntered].forEach((w) =>
+      this.enterSubscribe(w)
+    );
+    [shahokokuhoUpdated, koukikoureiUpdated, kouhiUpdated].forEach((w) =>
+      this.updateSubscribe(w)
+    );
+  }
+
+  enterSubscribe(w: Writable<Shahokokuho | Koukikourei | Kouhi | null>): void {
     this.unsubs.push(
-      shahokokuhoEntered.subscribe((shahokokuho) => {
-        if (shahokokuho == null) {
+      w.subscribe((v) => {
+        if (v == null) {
           return;
         }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === shahokokuho.patientId) {
-          const h = new Hoken(shahokokuho);
+        const h = new Hoken(v);
+        const patient = get(this.patient);
+        if (patient.patientId === h.patientId) {
           this.addToCache(h);
         }
       })
     );
+  }
+
+  updateSubscribe(w: Writable<Shahokokuho | Koukikourei | Kouhi | null>): void {
     this.unsubs.push(
-      shahokokuhoUpdated.subscribe((shahokokuho) => {
-        if (shahokokuho == null) {
+      w.subscribe((v) => {
+        if (v == null) {
           return;
         }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === shahokokuho.patientId) {
-          const h = new Hoken(shahokokuho);
-          this.updateCache(h);
-        }
-      })
-    );
-    this.unsubs.push(
-      koukikoureiEntered.subscribe((koukikourei) => {
-        if (koukikourei == null) {
-          return;
-        }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === koukikourei.patientId) {
-          const h = new Hoken(koukikourei);
-          this.addToCache(h);
-        }
-      })
-    );
-    this.unsubs.push(
-      koukikoureiUpdated.subscribe((koukikourei) => {
-        if (koukikourei == null) {
-          return;
-        }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === koukikourei.patientId) {
-          const h = new Hoken(koukikourei);
-          this.updateCache(h);
-        }
-      })
-    );
-    this.unsubs.push(
-      kouhiEntered.subscribe((kouhi) => {
-        if (kouhi == null) {
-          return;
-        }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === kouhi.patientId) {
-          const h = new Hoken(kouhi);
-          this.addToCache(h);
-        }
-      })
-    );
-    this.unsubs.push(
-      kouhiUpdated.subscribe((kouhi) => {
-        if (kouhi == null) {
-          return;
-        }
-        const patient: Patient = get(this.patient);
-        if (patient.patientId === kouhi.patientId) {
-          const h = new Hoken(kouhi);
+        const h = new Hoken(v);
+        const patient = get(this.patient);
+        if (patient.patientId === h.patientId) {
           this.updateCache(h);
         }
       })
@@ -414,10 +71,17 @@ export class PatientData {
   }
 
   async fetchAllHoken() {
-    if( !this.allHoken ){
+    if (!this.allHokenLoaded) {
       const patient = get(this.patient);
       const [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
         await api.listAllHoken(patient.patientId);
+      const hs = [
+        ...shahokokuhoList.map((h) => new Hoken(h)),
+        ...koukikoureiList.map((h) => new Hoken(h)),
+        ...roujinList.map((h) => new Hoken(h)),
+        ...kouhiList.map((h) => new Hoken(h)),
+      ];
+      this.hokenCache.set(hs);
     }
   }
 
@@ -429,8 +93,8 @@ export class PatientData {
   updateCache(h: Hoken): void {
     const c = get(this.hokenCache);
     const key = h.key;
-    const i = c.findIndex(e => e.key === key);
-    if( i >= 0 ){
+    const i = c.findIndex((e) => e.key === key);
+    if (i >= 0) {
       const cc = [...c];
       cc.splice(i, 1, h);
       this.hokenCache.set(cc);
