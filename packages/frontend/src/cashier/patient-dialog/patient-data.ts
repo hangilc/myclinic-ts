@@ -74,12 +74,9 @@ export class PatientData {
       const patient = get(this.patient);
       const [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
         await api.listAllHoken(patient.patientId);
-      const hs = [
-        ...shahokokuhoList.map((h) => new Hoken(h)),
-        ...koukikoureiList.map((h) => new Hoken(h)),
-        ...roujinList.map((h) => new Hoken(h)),
-        ...kouhiList.map((h) => new Hoken(h)),
-      ];
+      const hs: Hoken[] = await Hoken.batchFromHoken(
+        shahokokuhoList, koukikoureiList, roujinList, kouhiList
+      );
       this.hokenCache.set(hs);
       this.allHokenLoaded = true;
     }
@@ -112,18 +109,15 @@ export class PatientData {
   }
 
   resolveShahokokuho(shahokokuho: Shahokokuho): Shahokokuho {
-    const h = new Hoken(shahokokuho);
-    return this.resolveHoken(h.key).value as Shahokokuho;
+    return this.resolveHoken(Hoken.composeKey(shahokokuho)).value as Shahokokuho;
   }
 
   resolveKoukikourei(koukikourei: Koukikourei): Koukikourei {
-    const h = new Hoken(koukikourei);
-    return this.resolveHoken(h.key).value as Koukikourei;
+    return this.resolveHoken(Hoken.composeKey(koukikourei)).value as Koukikourei;
   }
 
   resolveKouhi(kouhi: Kouhi): Kouhi {
-    const h = new Hoken(kouhi);
-    return this.resolveHoken(h.key).value as Kouhi;
+    return this.resolveHoken(Hoken.composeKey(kouhi)).value as Kouhi;
   }
 
   cleanup(): void {

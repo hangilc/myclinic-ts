@@ -19,6 +19,7 @@
   }
 </script>
 
+{#if shahokokuho}
 <div>
   {Hoken.shahokokuhoRep(shahokokuho)}
   【保険者番号】{shahokokuho.hokenshaBangou}
@@ -30,3 +31,4 @@
   【期限終了】{formatValidUpto(shahokokuho.validUpto)}]
   【使用回数】{usageCount}回
 </div>
+{/if}

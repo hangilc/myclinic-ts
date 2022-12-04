@@ -10,6 +10,7 @@
   } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import { classify } from "@/lib/partition";
+  import ShahokokuhoBox from "./hoken-box/ShahokokuhoBox.svelte";
 
   export let patient: Readable<Patient>;
   export let allHoken: Readable<Hoken[]>;
@@ -36,8 +37,12 @@
   <div class="hoken-list">
     {#each Object.keys(classified) as hokenName}
       {#each classified[hokenName] as hoken (hoken.key)}
-        <div class={`hoken-box ${hoken.hokenType}`}>
-          <div>{hoken.rep}</div>
+        {@const hokenType=hoken.hokenType}
+        {@const usageCount=hoken.usageCount}
+        <div class={`hoken-box ${hokenType}`}>
+          {#if hokenType === "shahokokuho"}
+            <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
+          {/if}
         </div>
       {/each}
     {/each}

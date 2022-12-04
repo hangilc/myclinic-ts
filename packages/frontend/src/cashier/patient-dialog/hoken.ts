@@ -52,6 +52,14 @@ export class Hoken {
     return Hoken.patientId(this.value);
   }
 
+  get asShahokokuho(): Shahokokuho {
+    if( this.value instanceof Shahokokuho ){
+      return this.value;
+    } else {
+      throw new Error("Is not shahokokuho: " + this.value);
+    }
+  }
+
   isValidAt(d: Date): boolean {
     return this.fold(
       (h) => h.isValidAt(d),
@@ -166,7 +174,20 @@ export class Hoken {
         roujinList.map(e => e.roujinId), 
         kouhiList.map(e => e.kouhiId)
       );
-      
+      const shahokokuhoHokens: Hoken[] = shahokokuhoList.map(h => {
+        return new Hoken(h, shahoMap[h.shahokokuhoId]);
+      });
+      const koukikoureiHokens: Hoken[] = koukikoureiList.map(h => {
+        return new Hoken(h, koukiMap[h.koukikoureiId]);
+      });
+      const roujinHokens: Hoken[] = roujinList.map(h => {
+        return new Hoken(h, roujinMap[h.roujinId]);
+      });
+      const kouhiHokens: Hoken[] = kouhiList.map(h => {
+        return new Hoken(h, kouhiMap[h.kouhiId]);
+      })
+      return [...shahokokuhoHokens, ...koukikoureiHokens, 
+        ...roujinHokens, ...kouhiHokens];
     }
 
   static async fromHoken(h: HokenType): Promise<Hoken> {

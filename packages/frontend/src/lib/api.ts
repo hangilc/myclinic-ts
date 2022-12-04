@@ -84,6 +84,16 @@ function castNumber(arg: any): number {
   }
 }
 
+function castStringToInt(arg: any): number {
+  if( typeof arg === "string" ){
+    const i = parseInt(arg);
+    if( !isNaN(i) ){
+      return i;
+    }
+  }
+  throw new Error("Cannot cast to int: " + arg);
+}
+
 function castNumberFromString(arg: any): number {
   if (typeof arg === "string") {
     const n = parseInt(arg);
@@ -1153,10 +1163,10 @@ export default {
       [shahokokuhoIds, koukikoureiIds, roujinIds, kouhiIds],
       {},
       castTuple4(
-        castObject<number, number>(castNumber, castNumber),
-        castObject<number, number>(castNumber, castNumber),
-        castObject<number, number>(castNumber, castNumber),
-        castObject<number, number>(castNumber, castNumber)
+        castObject<number, number>(castStringToInt, castNumber),
+        castObject<number, number>(castStringToInt, castNumber),
+        castObject<number, number>(castStringToInt, castNumber),
+        castObject<number, number>(castStringToInt, castNumber)
       )
     );
   },
