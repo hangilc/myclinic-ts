@@ -14,6 +14,7 @@ export function newKoukikoureiOpener(
         target: document.body,
         props: {
           patient: data.patient,
+          title: "新規後期高齢",
           ops: {
             goback: () => data.goback(),
           },

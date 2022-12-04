@@ -12,6 +12,7 @@ export function newKouhiOpener(data: PatientData, kouhi?: Kouhi): Opener {
         props: {
           patient: data.patient,
           kouhi,
+          title: "新規公費",
           ops: {
             goback: () => data.goback(),
           },

@@ -15,6 +15,7 @@ export function editKouhiOpener(
         target: document.body,
         props: {
           patient: data.patient,
+          title: "公費編集",
           ops: {
             goback: () => data.goback(),
           },

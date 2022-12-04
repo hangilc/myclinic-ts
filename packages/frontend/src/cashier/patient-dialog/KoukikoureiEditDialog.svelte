@@ -12,6 +12,7 @@
   import type { Readable } from "svelte/store";
 
   export let patient: Readable<Patient>;
+  export let title: string;
   export let ops: {
     goback: () => void
   };
@@ -47,7 +48,7 @@
   }
 </script>
 
-<SurfaceModal title="新規後期高齢" destroy={ops.goback}>
+<SurfaceModal {title} destroy={ops.goback}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}

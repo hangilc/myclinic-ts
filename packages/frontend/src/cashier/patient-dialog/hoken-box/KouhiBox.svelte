@@ -2,10 +2,10 @@
   import type { Kouhi } from "myclinic-model";
   import { Hoken } from "../hoken";
   import * as kanjidate from "kanjidate";
-  import { toZenkaku } from "@/lib/zenkaku";
 
   export let kouhi: Kouhi;
   export let usageCount: number;
+  export let onEdit: (h: Kouhi) => void;
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -28,5 +28,6 @@
   【期限開始】{formatValidFrom(kouhi.validFrom)}
   【期限終了】{formatValidUpto(kouhi.validUpto)}]
   【使用回数】{usageCount}回
+  <button on:click={() => onEdit(kouhi)}>編集</button>
 </div>
 {/if}

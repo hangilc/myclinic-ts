@@ -5,6 +5,7 @@
 
   export let shahokokuho: Shahokokuho;
   export let usageCount: number;
+  export let onEdit: (h: Shahokokuho) => void;
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -30,5 +31,6 @@
   【期限開始】{formatValidFrom(shahokokuho.validFrom)}
   【期限終了】{formatValidUpto(shahokokuho.validUpto)}]
   【使用回数】{usageCount}回
+  <button on:click={() => onEdit(shahokokuho)}>編集</button>
 </div>
 {/if}

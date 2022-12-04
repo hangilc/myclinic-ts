@@ -1,7 +1,7 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Hoken } from "./hoken";
-  import type { Patient } from "myclinic-model";
+  import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import { classify } from "@/lib/partition";
   import ShahokokuhoBox from "./hoken-box/ShahokokuhoBox.svelte";
@@ -12,7 +12,10 @@
   export let patient: Readable<Patient>;
   export let allHoken: Readable<Hoken[]>;
   export let ops: {
-    goback: () => void;
+    goback: () => void,
+    moveToShahokokuhoEdit: (h: Shahokokuho) => void,
+    moveToKoukikoureiEdit: (h: Koukikourei) => void,
+    moveToKouhiEdit: (h: Kouhi) => void,
   };
 
   let classified = {} as Record<string, Hoken[]>;
@@ -38,13 +41,16 @@
         {@const usageCount = hoken.usageCount}
         <div class={`hoken-box ${hokenType}`}>
           {#if hokenType === "shahokokuho"}
-            <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
+            <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} 
+            onEdit={ops.moveToShahokokuhoEdit}/>
           {:else if hokenType === "koukikourei"}
-            <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
+            <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} 
+            onEdit={ops.moveToKoukikoureiEdit}/>
           {:else if hokenType === "roujin"}
             <RoujinBox roujin={hoken.asRoujin} {usageCount} />
           {:else if hokenType === "kouhi"}
-            <KouhiBox kouhi={hoken.asKouhi} {usageCount} />
+            <KouhiBox kouhi={hoken.asKouhi} {usageCount} 
+            onEdit={ops.moveToKouhiEdit}/>
           {/if}
         </div>
       {/each}
