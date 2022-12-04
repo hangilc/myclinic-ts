@@ -1,3 +1,4 @@
+import api from "@/lib/api";
 import {
   kouhiRep,
   koukikoureiRep,
@@ -10,11 +11,17 @@ export type HokenType = Shahokokuho | Koukikourei | Roujin | Kouhi;
 
 export class Hoken {
   value: HokenType;
+  key: string;
   usageCount: number;
 
   constructor(value: HokenType, usageCount: number) {
     this.value = value;
+    this.key = Hoken.composeKey(value);
     this.usageCount = usageCount;
+  }
+
+  updateValue(v: HokenType): Hoken {
+    return new Hoken(v, this.usageCount);
   }
 
   fold<T>(
@@ -23,72 +30,48 @@ export class Hoken {
     roujinHandler: (r: Roujin) => T,
     kouhiHandler: (k: Kouhi) => T
   ): T {
-    const h = this.value;
-    if (h instanceof Shahokokuho) {
-      return shahokokuhoHandler(h);
-    } else if (h instanceof Koukikourei) {
-      return koukikoureiHandler(h);
-    } else if (h instanceof Roujin) {
-      return roujinHandler(h);
-    } else if (h instanceof Kouhi) {
-      return kouhiHandler(h);
-    } else {
-      throw new Error("不明の保険：" + h);
-    }
+    return Hoken.fold<T>(
+      this.value,
+      shahokokuhoHandler,
+      koukikoureiHandler,
+      roujinHandler,
+      kouhiHandler
+    );
   }
 
   get validFrom(): string {
     return this.fold(
-      h => h.validFrom,
-      h => h.validFrom,
-      h => h.validFrom,
-      h => h.validFrom,
-    )
+      (h) => h.validFrom,
+      (h) => h.validFrom,
+      (h) => h.validFrom,
+      (h) => h.validFrom
+    );
   }
 
   get patientId(): number {
-    return this.fold(
-      h => h.patientId,
-      h => h.patientId,
-      h => h.patientId,
-      h => h.patientId,
-    )
+    return Hoken.patientId(this.value);
   }
 
   isValidAt(d: Date): boolean {
     return this.fold(
-      h => h.isValidAt(d),
-      h => h.isValidAt(d),
-      h => h.isValidAt(d),
-      h => h.isValidAt(d),
-    )
+      (h) => h.isValidAt(d),
+      (h) => h.isValidAt(d),
+      (h) => h.isValidAt(d),
+      (h) => h.isValidAt(d)
+    );
   }
 
   get hokenType(): string {
-    return this.fold(
-      _ => "shahokokuho",
-      _ => "koukikourei",
-      _ => "roujin",
-      _ => "kouhi",
-    )
-  }
-
-  get key(): string {
-    return this.fold(
-      h => `shahokokuho-${h.shahokokuhoId}`,
-      h => `koukikourei-${h.koukikoureiId}`,
-      h => `roujin-${h.roujinId}`,
-      h => `kouhi-${h.kouhiId}`,
-    )
+    return Hoken.hokenType(this.value);
   }
 
   get rep(): string {
     return this.fold(
-      h => Hoken.shahokokuhoRep(h),
-      h => Hoken.koukikoureiRep(h),
-      h => Hoken.roujinRep(h),
-      h => Hoken.kouhiRep(h),
-    )
+      (h) => Hoken.shahokokuhoRep(h),
+      (h) => Hoken.koukikoureiRep(h),
+      (h) => Hoken.roujinRep(h),
+      (h) => Hoken.kouhiRep(h)
+    );
   }
 
   static shahokokuhoRep(h: Shahokokuho): string {
@@ -105,5 +88,78 @@ export class Hoken {
 
   static kouhiRep(h: Kouhi): string {
     return kouhiRep(h.futansha);
+  }
+
+  static fold<T>(
+    h: HokenType,
+    shahokokuhoHandler: (s: Shahokokuho) => T,
+    koukikoureiHandler: (k: Koukikourei) => T,
+    roujinHandler: (r: Roujin) => T,
+    kouhiHandler: (k: Kouhi) => T
+  ): T {
+    if (h instanceof Shahokokuho) {
+      return shahokokuhoHandler(h);
+    } else if (h instanceof Koukikourei) {
+      return koukikoureiHandler(h);
+    } else if (h instanceof Roujin) {
+      return roujinHandler(h);
+    } else if (h instanceof Kouhi) {
+      return kouhiHandler(h);
+    } else {
+      throw new Error("不明の保険：" + h);
+    }
+  }
+
+  static composeKey(h: HokenType): string {
+    return Hoken.fold(
+      h,
+      (h) => `shahokokuho-${h.shahokokuhoId}`,
+      (h) => `koukikourei-${h.koukikoureiId}`,
+      (h) => `roujin-${h.roujinId}`,
+      (h) => `kouhi-${h.kouhiId}`
+    );
+  }
+
+  static hokenType(h: HokenType): string {
+    return Hoken.fold(
+      h,
+      (_) => "shahokokuho",
+      (_) => "koukikourei",
+      (_) => "roujin",
+      (_) => "kouhi"
+    );
+  }
+
+  static patientId(h: HokenType): number {
+    return Hoken.fold(
+      h,
+      (h) => h.patientId,
+      (h) => h.patientId,
+      (h) => h.patientId,
+      (h) => h.patientId,
+    )
+  }
+
+  static async getUsageCount(h: Shahokokuho | Koukikourei | Roujin | Kouhi): Promise<number> {
+    return await Hoken.fold<Promise<number>>(
+      h,
+      async (h) => {
+        return (await api.batchCountHokenUsage([h.shahokokuhoId], [], [], []))[0][0]
+      },
+      async (h) => {
+        return (await api.batchCountHokenUsage([], [h.koukikoureiId], [], []))[1][0]
+      },
+      async (h) => {
+        return (await api.batchCountHokenUsage([], [], [h.roujinId], []))[2][0]
+      },
+      async (h) => {
+        return (await api.batchCountHokenUsage([], [], [], [h.kouhiId]))[3][0]
+      },
+    )
+  }
+
+  static async fromHoken(h: HokenType): Promise<Hoken> {
+    const c: number = await Hoken.getUsageCount(h);
+    return new Hoken(h, c);
   }
 }

@@ -1,4 +1,4 @@
-import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+import type { Kouhi, Koukikourei, Patient, Roujin, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
 import { Hoken } from "./hoken";
 import {
@@ -42,11 +42,11 @@ export class PatientData {
 
   enterSubscribe(w: Writable<Shahokokuho | Koukikourei | Kouhi | null>): void {
     this.unsubs.push(
-      w.subscribe((v) => {
+      w.subscribe(async (v) => {
         if (v == null) {
           return;
         }
-        const h = new Hoken(v);
+        const h = await Hoken.fromHoken(v);
         const patient = get(this.patient);
         if (patient.patientId === h.patientId) {
           this.addToCache(h);
@@ -61,10 +61,9 @@ export class PatientData {
         if (v == null) {
           return;
         }
-        const h = new Hoken(v);
         const patient = get(this.patient);
-        if (patient.patientId === h.patientId) {
-          this.updateCache(h);
+        if (patient.patientId === Hoken.patientId(v)) {
+          this.updateCache(v);
         }
       })
     );
@@ -91,13 +90,14 @@ export class PatientData {
     this.hokenCache.set([...c, h]);
   }
 
-  updateCache(h: Hoken): void {
+  updateCache(v: Shahokokuho | Koukikourei | Roujin | Kouhi): void {
     const c = get(this.hokenCache);
-    const key = h.key;
+    const key = Hoken.composeKey(v);
     const i = c.findIndex((e) => e.key === key);
     if (i >= 0) {
+      const h: Hoken = c[i];
       const cc = [...c];
-      cc.splice(i, 1, h);
+      cc.splice(i, 1, h.updateValue(v));
       this.hokenCache.set(cc);
     }
   }
