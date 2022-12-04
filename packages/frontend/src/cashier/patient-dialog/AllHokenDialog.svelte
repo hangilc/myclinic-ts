@@ -1,16 +1,13 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Hoken } from "./hoken";
-  import type {
-    Kouhi,
-    Koukikourei,
-    Patient,
-    Roujin,
-    Shahokokuho,
-  } from "myclinic-model";
+  import type { Patient } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import { classify } from "@/lib/partition";
   import ShahokokuhoBox from "./hoken-box/ShahokokuhoBox.svelte";
+  import KoukikoureiBox from "./hoken-box/KoukikoureiBox.svelte";
+  import RoujinBox from "./hoken-box/RoujinBox.svelte";
+  import KouhiBox from "./hoken-box/KouhiBox.svelte";
 
   export let patient: Readable<Patient>;
   export let allHoken: Readable<Hoken[]>;
@@ -37,11 +34,17 @@
   <div class="hoken-list">
     {#each Object.keys(classified) as hokenName}
       {#each classified[hokenName] as hoken (hoken.key)}
-        {@const hokenType=hoken.hokenType}
-        {@const usageCount=hoken.usageCount}
+        {@const hokenType = hoken.hokenType}
+        {@const usageCount = hoken.usageCount}
         <div class={`hoken-box ${hokenType}`}>
           {#if hokenType === "shahokokuho"}
             <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
+          {:else if hokenType === "koukikourei"}
+            <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
+          {:else if hokenType === "roujin"}
+            <RoujinBox roujin={hoken.asRoujin} {usageCount} />
+          {:else if hokenType === "kouhi"}
+            <KouhiBox kouhi={hoken.asKouhi} {usageCount} />
           {/if}
         </div>
       {/each}
@@ -62,8 +65,9 @@
   }
 
   .hoken-list {
-    max-height: 400px;
+    max-height: 500px;
     overflow-y: auto;
+    padding: 6px 0;
   }
 
   .hoken-box.shahokokuho {
@@ -85,5 +89,6 @@
   .commands {
     display: flex;
     justify-content: right;
+    margin-top: 10px;
   }
 </style>

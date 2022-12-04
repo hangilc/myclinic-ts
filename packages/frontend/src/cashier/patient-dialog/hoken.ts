@@ -60,6 +60,30 @@ export class Hoken {
     }
   }
 
+  get asKoukikourei(): Koukikourei {
+    if( this.value instanceof Koukikourei ){
+      return this.value;
+    } else {
+      throw new Error("Is not koukikourei: " + this.value);
+    }
+  }
+
+  get asRoujin(): Roujin {
+    if( this.value instanceof Roujin ){
+      return this.value;
+    } else {
+      throw new Error("Is not roujin: " + this.value);
+    }
+  }
+
+  get asKouhi(): Kouhi {
+    if( this.value instanceof Kouhi ){
+      return this.value;
+    } else {
+      throw new Error("Is not kouhi: " + this.value);
+    }
+  }
+
   isValidAt(d: Date): boolean {
     return this.fold(
       (h) => h.isValidAt(d),
