@@ -10,7 +10,7 @@ export function editKouhiOpener(
 ): Opener {
   return {
     open(): Closer {
-      kouhi = data.resolveKouhi(kouhi);
+      const [resolved, usageCount] = data.resolveKouhi(kouhi);
       const d = new KouhiEditDialog({
         target: document.body,
         props: {
@@ -19,7 +19,8 @@ export function editKouhiOpener(
           ops: {
             goback: () => data.goback(),
           },
-          kouhi,
+          kouhi: resolved,
+          usageCount,
           onEnter: async (s: Kouhi) => {
             await api.updateKouhi(s);
             data.goback();

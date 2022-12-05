@@ -17,6 +17,7 @@
     goback: () => void
   };
   export let koukikourei: Koukikourei | undefined;
+  export let usageCount: number;
   export let onEnter: (k: Koukikourei) => void;
 
   let errors: string[] = [];

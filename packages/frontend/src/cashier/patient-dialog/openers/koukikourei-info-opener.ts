@@ -11,12 +11,13 @@ export function koukikoureiInfoOpener(
 ): Opener {
   return {
     open(): Closer {
-      koukikourei = data.resolveKoukikourei(koukikourei);
+      const [resolved, usageCount] = data.resolveKoukikourei(koukikourei);
       const d = new KoukikoureiInfoDialog({
         target: document.body,
         props: {
           patient: data.patient,
-          koukikourei,
+          koukikourei: resolved,
+          usageCount,
           ops: {
             goback: () => data.goback(),
             moveToEdit: () =>

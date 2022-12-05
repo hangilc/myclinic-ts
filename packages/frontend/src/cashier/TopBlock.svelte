@@ -6,14 +6,18 @@
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
 
   let searchText = "";
-  let searchPatientResultDialog: SearchPatientResultDialog;
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
-    if (searchPatientResultDialog) {
-      searchPatientResultDialog.open(result);
-      searchText = "";
-    }
+    const d: SearchPatientResultDialog = new SearchPatientResultDialog({
+      target: document.body,
+      props: {
+        result,
+        destroy: () => d.$destroy(),
+        onSelect: doPatientSelected,
+      },
+    });
+    searchText = "";
   }
 
   async function doPatientSelected(patient: Patient) {
@@ -47,10 +51,6 @@
     />
   </svg>
 </div>
-<SearchPatientResultDialog
-  bind:this={searchPatientResultDialog}
-  onSelect={doPatientSelected}
-/>
 
 <style>
   .top {

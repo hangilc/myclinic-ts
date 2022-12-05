@@ -10,15 +10,17 @@ export function editShahokokuhoOpener(
 ): Opener {
   return {
     open(): Closer {
+      const [resolved, usageCount] = data.resolveShahokokuho(shahokokuho);
       const d = new ShahokokuhoEditDialog({
         target: document.body,
         props: {
           title: "社保国保編集",
           patient: data.patient,
+          usageCount,
           ops: {
             goback: () => data.goback(),
           },
-          shahokokuho,
+          shahokokuho: resolved,
           onEnter: async (s: Shahokokuho) => {
             await api.updateShahokokuho(s);
             data.goback();

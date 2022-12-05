@@ -85,9 +85,9 @@ function castNumber(arg: any): number {
 }
 
 function castStringToInt(arg: any): number {
-  if( typeof arg === "string" ){
+  if (typeof arg === "string") {
     const i = parseInt(arg);
-    if( !isNaN(i) ){
+    if (!isNaN(i)) {
       return i;
     }
   }
@@ -1133,16 +1133,28 @@ export default {
     return post("update-kouhi", kouhi, {}, castBoolean);
   },
 
-  deleteShahokokuho(shahokokuho: m.Shahokokuho): Promise<boolean> {
-    return post("delete-shahokokuho", shahokokuho, {}, castBoolean);
+  deleteShahokokuho(shahokokuhoId: number): Promise<boolean> {
+    return get(
+      "delete-shahokokuho",
+      { "shahokokuho-id": shahokokuhoId.toString() },
+      castBoolean
+    );
   },
 
-  deleteKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
-    return post("delete-koukikourei", koukikourei, {}, castBoolean);
+  deleteKoukikourei(koukikoureiId: number): Promise<boolean> {
+    return get(
+      "delete-koukikourei",
+      { "koukikourei-id": koukikoureiId.toString() },
+      castBoolean
+    );
   },
 
-  deleteKouhi(kouhi: m.Kouhi): Promise<boolean> {
-    return post("delete-kouhi", kouhi, {}, castBoolean);
+  deleteKouhi(kouhiId: number): Promise<boolean> {
+    return get(
+      "delete-kouhi",
+      { "kouhi-id": kouhiId.toString() },
+      castBoolean
+    );
   },
 
   batchCountHokenUsage(

@@ -10,7 +10,7 @@ export function editKoukikoureiOpener(
 ): Opener {
   return {
     open(): Closer {
-      koukikourei = data.resolveKoukikourei(koukikourei);
+      const [resolved, usageCount] = data.resolveKoukikourei(koukikourei);
       const d = new KoukikoureiEditDialog({
         target: document.body,
         props: {
@@ -19,7 +19,8 @@ export function editKoukikoureiOpener(
           ops: {
             goback: () => data.goback(),
           },
-          koukikourei,
+          koukikourei: resolved,
+          usageCount,
           onEnter: async (s: Koukikourei) => {
             await api.updateKoukikourei(s);
             data.goback();

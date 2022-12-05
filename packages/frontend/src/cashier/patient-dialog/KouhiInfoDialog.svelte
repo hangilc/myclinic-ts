@@ -99,6 +99,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: cener;
     margin: 0;
     margin-bottom: 10px;
   }

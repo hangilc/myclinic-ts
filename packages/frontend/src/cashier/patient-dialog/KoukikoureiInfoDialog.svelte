@@ -6,9 +6,13 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { onDestroy } from "svelte";
   import { koukikoureiUpdated } from "@/app-events";
+  import { kouhiInfoOpener } from "./openers/kouhi-info-opener";
+  import { confirm } from "@/lib/confirm-call";
+  import api from "@/lib/api";
 
   export let patient: Readable<Patient>;
   export let koukikourei: Koukikourei;
+  export let usageCount: number;
   export let ops: {
     goback: () => void,
     moveToEdit: () => void,
@@ -60,6 +64,15 @@
       return;
     }
   }
+
+  async function doDelete() {
+    if( koukikourei !== undefined ){
+      confirm("この保険を削除していいですか？", async () => {
+        await api.deleteKoukikourei(koukikourei.koukikoureiId);
+        ops.goback();
+      })
+    }
+  }
 </script>
 
 <SurfaceModal destroy={ops.goback} title="後期高齢">
@@ -76,8 +89,13 @@
     <span>{formatValidFrom(koukikourei.validFrom)}</span>
     <span>期限終了</span>
     <span>{formatValidUpto(koukikourei.validUpto)}</span>
+    <span>使用回数</span>
+    <span>{usageCount}回</span>
   </div>
   <div class="commands">
+    {#if usageCount === 0}
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     {#if koukikourei.validUpto !== "0000-00-00"}
       <button on:click={doRenew}>更新</button>
     {/if}
@@ -102,6 +120,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: center;
     margin: 0;
     margin-bottom: 10px;
   }

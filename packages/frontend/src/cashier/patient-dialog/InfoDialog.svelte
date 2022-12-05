@@ -4,20 +4,28 @@
   import { Kouhi, Koukikourei, Shahokokuho, type Patient } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import type { Hoken } from "./hoken";
+  import type { PatientData } from "./patient-data";
 
-  export let patient: Readable<Patient>;
-  export let hokenCache: Readable<Hoken[]>;
-  export let ops: {
-    close: () => void,
-    moveToEdit: () => void,
-    moveToNewShahokokuho: () => void,
-    moveToNewKoukikourei: () => void,
-    moveToNewKouhi: () => void,
-    moveToShahokokuhoInfo: (d: Shahokokuho) => void,
-    moveToKoukikoureiInfo: (d: Koukikourei) => void,
-    moveToKouhiInfo: (d: Kouhi) => void,
-    moveToAllHoken: () => void,
-  };
+  export let patientData: PatientData;
+  export let currentList: Hoken[] = [];
+  export let destroy: () => void;
+  let patient: Patient | undefined = undefined;
+
+  patientData.patient.subscribe(p => patient = p);
+
+  // export let patient: Readable<Patient>;
+  // export let hokenCache: Readable<Hoken[]>;
+  // export let ops: {
+  //   close: () => void,
+  //   moveToEdit: () => void,
+  //   moveToNewShahokokuho: () => void,
+  //   moveToNewKoukikourei: () => void,
+  //   moveToNewKouhi: () => void,
+  //   moveToShahokokuhoInfo: (d: Shahokokuho) => void,
+  //   moveToKoukikoureiInfo: (d: Koukikourei) => void,
+  //   moveToKouhiInfo: (d: Kouhi) => void,
+  //   moveToAllHoken: () => void,
+  // };
 
   function doCurrentClick(h: Hoken): void {
     if (h.value instanceof Shahokokuho) {
@@ -31,11 +39,11 @@
 
   let today: Date = new Date();
 
-  console.log($hokenCache)
 </script>
 
-<SurfaceModal destroy={ops.close} width="320px" height="auto" title="患者情報">
-  {@const p = $patient}
+<SurfaceModal {destroy} width="320px" height="auto" title="患者情報">
+  {#if patient !== undefined}
+  {@const p = patient}
   <div class="info">
     <span>患者番号</span><span>{p.patientId}</span>
     <span>氏名</span><span>{p.lastName} {p.firstName}</span>
@@ -72,6 +80,7 @@
     <a href="javascript:void(0)" on:click={ops.moveToAllHoken}>保険履歴</a> |
     <a href="javascript:void(0)">保存画像</a>
   </div>
+  {/if}
 </SurfaceModal>
 
 <style>

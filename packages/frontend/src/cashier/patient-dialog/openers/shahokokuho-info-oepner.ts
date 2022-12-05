@@ -11,16 +11,16 @@ export function shahokokuhoInfoOpener(
 ): Opener {
   return {
     open(): Closer {
-      shahokokuho = data.resolveShahokokuho(shahokokuho);
+      const [v, usageCount] = data.resolveShahokokuho(shahokokuho);
       const d = new ShahokokuhoInfoDialog({
         target: document.body,
         props: {
           patient: data.patient,
           shahokokuho,
+          usageCount,
           ops: {
             goback: () => data.goback(),
-            moveToEdit: () =>
-              data.moveTo(editShahokokuhoOpener(data, shahokokuho)),
+            moveToEdit: () => data.moveTo(editShahokokuhoOpener(data, v)),
             renew: (s: Shahokokuho) => {
               data.goto(newShahokokuhoOpener(data, s));
             },
@@ -31,4 +31,3 @@ export function shahokokuhoInfoOpener(
     },
   };
 }
-

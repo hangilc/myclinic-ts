@@ -1,6 +1,6 @@
 import type { Kouhi, Koukikourei, Patient, Roujin, Shahokokuho } from "myclinic-model";
 import EditDialog from "./EditDialog.svelte";
-import { Hoken } from "./hoken";
+import { Hoken, type HokenType } from "./hoken";
 import {
   kouhiEntered,
   kouhiUpdated,
@@ -47,6 +47,7 @@ export class PatientData {
           return;
         }
         const h = await Hoken.fromHoken(v);
+        console.log("entered", h);
         const patient = get(this.patient);
         if (patient.patientId === h.patientId) {
           this.addToCache(h);
@@ -108,16 +109,19 @@ export class PatientData {
     }
   }
 
-  resolveShahokokuho(shahokokuho: Shahokokuho): Shahokokuho {
-    return this.resolveHoken(Hoken.composeKey(shahokokuho)).value as Shahokokuho;
+  resolveShahokokuho(shahokokuho: Shahokokuho): [Shahokokuho, number] {
+    const h = this.resolveHoken(Hoken.composeKey(shahokokuho));
+    return [h.value as Shahokokuho, h.usageCount];
   }
 
-  resolveKoukikourei(koukikourei: Koukikourei): Koukikourei {
-    return this.resolveHoken(Hoken.composeKey(koukikourei)).value as Koukikourei;
+  resolveKoukikourei(koukikourei: Koukikourei): [Koukikourei, number] {
+    const h = this.resolveHoken(Hoken.composeKey(koukikourei));
+    return [h.value as Koukikourei, h.usageCount];
   }
 
-  resolveKouhi(kouhi: Kouhi): Kouhi {
-    return this.resolveHoken(Hoken.composeKey(kouhi)).value as Kouhi;
+  resolveKouhi(kouhi: Kouhi): [Kouhi, number] {
+    const h = this.resolveHoken(Hoken.composeKey(kouhi));
+    return [h.value as Kouhi, h.usageCount];
   }
 
   cleanup(): void {
@@ -170,5 +174,15 @@ export class PatientData {
 
   startInfo(): void {
     this.moveTo(infoOpener(this));
+  }
+
+  resolveUsageCount(v: HokenType): number | undefined {
+    const key = Hoken.composeKey(v);
+    for(let hoken of get(this.hokenCache)){
+      if( hoken.key === key ){
+        return hoken.usageCount;
+      }
+    }
+    return undefined;
   }
 }

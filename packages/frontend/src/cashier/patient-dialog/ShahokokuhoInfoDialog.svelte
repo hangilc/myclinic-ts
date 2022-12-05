@@ -1,18 +1,25 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { dateToSqlDate, type Patient, type Shahokokuho } from "myclinic-model";
+  import {
+    dateToSqlDate,
+    type Patient,
+    type Shahokokuho,
+  } from "myclinic-model";
   import type { Readable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
   import { onDestroy } from "svelte";
   import { shahokokuhoUpdated } from "@/app-events";
+  import { confirm } from "@/lib/confirm-call";
+  import api from "@/lib/api";
 
   export let patient: Readable<Patient>;
   export let shahokokuho: Shahokokuho;
+  export let usageCount: number;
   export let ops: {
-    goback: () => void,
-    moveToEdit: () => void,
-    renew: (s: Shahokokuho) => void,
+    goback: () => void;
+    moveToEdit: () => void;
+    renew: (s: Shahokokuho) => void;
   };
 
   const unsubs: (() => void)[] = [];
@@ -54,18 +61,27 @@
   }
 
   function doRenew(): void {
-    if( shahokokuho.validUpto !== "0000-00-00") {
+    if (shahokokuho.validUpto !== "0000-00-00") {
       const d = new Date(shahokokuho.validUpto);
       d.setDate(d.getDate() + 1);
       const s = Object.assign({}, shahokokuho, {
         shahokokuhoId: 0,
         validFrom: dateToSqlDate(d),
-        validUpto: "0000-00-00"
+        validUpto: "0000-00-00",
       }) as Shahokokuho;
       ops.renew(s);
     } else {
       alert("期限終了日が設定されていないので、更新できません。");
       return;
+    }
+  }
+
+  async function doDelete() {
+    if (shahokokuho != undefined) {
+      confirm("この保険を削除していいですか？", async () => {
+        await api.deleteShahokokuho(shahokokuho.shahokokuhoId);
+        ops.goback();
+      });
     }
   }
 </script>
@@ -93,8 +109,13 @@
     <span>{formatValidUpto(shahokokuho.validUpto)}</span>
     <span>高齢</span>
     <span>{formatKourei(shahokokuho.koureiStore)}</span>
+    <span>使用回数</span>
+    <span>{usageCount}回</span>
   </div>
   <div class="commands">
+    {#if usageCount === 0}
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     {#if shahokokuho.validUpto !== "0000-00-00"}
       <button on:click={doRenew}>更新</button>
     {/if}
@@ -119,6 +140,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: center;
     margin: 0;
     margin-bottom: 10px;
   }

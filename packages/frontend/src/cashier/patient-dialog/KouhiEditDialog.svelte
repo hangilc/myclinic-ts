@@ -15,6 +15,7 @@
     goback: () => void
   };
   export let kouhi: Kouhi | undefined;
+  export let usageCount: number;
   export let onEnter: (k: Kouhi) => void;
 
   let errors: string[] = [];

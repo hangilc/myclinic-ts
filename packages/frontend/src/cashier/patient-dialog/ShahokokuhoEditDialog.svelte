@@ -17,6 +17,7 @@
     goback: () => void;
   };
   export let shahokokuho: Shahokokuho | undefined;
+  export let usageCount: number;
   export let onEnter: (s: Shahokokuho) => void;
   export let title: string;
 
