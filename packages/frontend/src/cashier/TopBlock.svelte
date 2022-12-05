@@ -1,8 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import type { Patient } from "myclinic-model";
-  import { listCurrentHoken } from "./patient-dialog/misc";
-  import { PatientData } from "./patient-dialog/patient-data";
+  import { PatientData } from "./patient-dialog2/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
 
   let searchText = "";
@@ -21,9 +20,7 @@
   }
 
   async function doPatientSelected(patient: Patient) {
-    const hokenList = await listCurrentHoken(patient.patientId);
-    const data = new PatientData(patient, hokenList);
-    data.startInfo();
+    PatientData.start(patient);
   }
 </script>
 

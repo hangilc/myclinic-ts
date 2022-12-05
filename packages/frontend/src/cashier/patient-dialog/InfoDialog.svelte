@@ -13,19 +13,18 @@
 
   patientData.patient.subscribe(p => patient = p);
 
-  // export let patient: Readable<Patient>;
-  // export let hokenCache: Readable<Hoken[]>;
-  // export let ops: {
-  //   close: () => void,
-  //   moveToEdit: () => void,
-  //   moveToNewShahokokuho: () => void,
-  //   moveToNewKoukikourei: () => void,
-  //   moveToNewKouhi: () => void,
-  //   moveToShahokokuhoInfo: (d: Shahokokuho) => void,
-  //   moveToKoukikoureiInfo: (d: Koukikourei) => void,
-  //   moveToKouhiInfo: (d: Kouhi) => void,
-  //   moveToAllHoken: () => void,
-  // };
+  export let hokenCache: Readable<Hoken[]>;
+  export let ops: {
+    close: () => void,
+    moveToEdit: () => void,
+    moveToNewShahokokuho: () => void,
+    moveToNewKoukikourei: () => void,
+    moveToNewKouhi: () => void,
+    moveToShahokokuhoInfo: (d: Shahokokuho) => void,
+    moveToKoukikoureiInfo: (d: Koukikourei) => void,
+    moveToKouhiInfo: (d: Kouhi) => void,
+    moveToAllHoken: () => void,
+  };
 
   function doCurrentClick(h: Hoken): void {
     if (h.value instanceof Shahokokuho) {
