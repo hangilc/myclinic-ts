@@ -5,6 +5,7 @@
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
+  import EditPatientDialog from "./EditPatientDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -26,7 +27,19 @@
     data.push(open);
   }
 
-  function doEdit() {}
+  function doEdit() {
+    function open(): void {
+      const d: EditPatientDialog = new EditPatientDialog({
+        target: document.body,
+        props: {
+          data,
+          destroy: () => d.$destroy()
+        }
+      })
+    }
+    destroy();
+    data.push(open);
+  }
 
   function doNewShahokokuho() {}
 
