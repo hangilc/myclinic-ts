@@ -14,6 +14,38 @@ export class Hoken {
     this.usageCount = usageCount;
   }
 
+  get asShahokokuho(): Shahokokuho {
+    if( this.value instanceof Shahokokuho ){
+      return this.value;
+    } else {
+      throw new Error("Cannot get Shahokokuho value.");
+    }
+  }
+
+  get asKoukikourei(): Koukikourei {
+    if( this.value instanceof Koukikourei ){
+      return this.value;
+    } else {
+      throw new Error("Cannot get Koukikourei value.");
+    }
+  }
+
+  get asRoujin(): Roujin {
+    if( this.value instanceof Roujin ){
+      return this.value;
+    } else {
+      throw new Error("Cannot get Roujin value.");
+    }
+  }
+
+  get asKouhi(): Kouhi {
+    if( this.value instanceof Kouhi ){
+      return this.value;
+    } else {
+      throw new Error("Cannot get Kouhi value.");
+    }
+  }
+
   isValidAt(at: Date): boolean {
     return Hoken.fold<boolean>(
       this.value,
