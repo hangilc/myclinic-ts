@@ -17,6 +17,10 @@ export class PatientData {
     this.hokenCache = new HokenCache(currentList);
   }
 
+  cleanup() {
+
+  }
+
   getPatient(): Patient {
     return get(this.patient);
   }
@@ -40,7 +44,13 @@ export class PatientData {
     const o = this.stack.shift();
     if( o !== undefined ){
       this.push(o);
+    } else {
+      this.cleanup();
     }
+  }
+
+  exit() {
+    this.cleanup();
   }
 
   static async start(patient: Patient) {

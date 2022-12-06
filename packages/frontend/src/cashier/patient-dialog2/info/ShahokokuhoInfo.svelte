@@ -3,24 +3,13 @@
   import type { Hoken } from "../hoken";
   import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
+  import { formatValidFrom, formatValidUpto } from "./misc";
 
   export let patient: Patient;
   export let hoken: Hoken;
   let shahokokuho: Shahokokuho = hoken.asShahokokuho;
   let usageCount: number = hoken.usageCount;
   
-  function formatValidFrom(sqldate: string): string {
-    return kanjidate.format(kanjidate.f2, sqldate);
-  }
-
-  function formatValidUpto(sqldate: string): string {
-    if (sqldate === "0000-00-00") {
-      return "（期限なし）";
-    } else {
-      return kanjidate.format(kanjidate.f2, sqldate);
-    }
-  }
-
   function formatKourei(kourei: number): string {
     if (kourei === 0) {
       return "高齢でない";
