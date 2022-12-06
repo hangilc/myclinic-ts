@@ -44,6 +44,11 @@
     data.goback();
   }
 
+  function exit(): void {
+    destroy();
+    data.exit();
+  }
+
   async function doEnter() {
     const result: Koukikourei | string[] = validateKoukikourei(
       koukikourei?.koukikoureiId ?? 0, {
@@ -70,7 +75,7 @@
   
 </script>
 
-<SurfaceModal destroy={close} {title}>
+<SurfaceModal destroy={exit} {title}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}

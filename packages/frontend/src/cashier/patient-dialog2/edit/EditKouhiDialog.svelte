@@ -7,7 +7,6 @@
   import { intSrc, strSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateKouhi } from "@/lib/validators/kouhi-validator";
-  import { toZenkaku } from "@/lib/zenkaku";
   import { Kouhi, type Patient } from "myclinic-model";
   import type { Hoken } from "../hoken";
   import type { PatientData } from "../patient-data";
@@ -25,15 +24,14 @@
   }
 
   let errors: string[] = [];
-  let hokenshaBangou: string = foldK(k => k.hokenshaBangou, "");
-  let hihokenshaBangou: string = foldK(k => k.hihokenshaBangou, "");
-  let futanWari: number = kouhi?.futanWari ?? 1;
+  let futansha: string = foldK(k => k.futansha.toString(), "");
+  let jukyuusha: string = foldK(k => k.jukyuusha.toString(), "");
   let validFrom: Date | null = foldK(k => parseSqlDate(k.validFrom), null);
   let validFromErrors: Invalid[] = [];
   let validUpto: Date | null = foldK(k => parseOptionalSqlDate(k.validUpto), null);
   let validUptoErrors: Invalid[] = [];
   
-  let title: string = isCreation ? "新規後期高齢" : "後期高齢編集";
+  let title: string = isCreation ? "新規公費" : "公費編集";
 
   function checkCreation(s: Kouhi | undefined): boolean {
     return fold(s, s => s.kouhiId === 0, false);
@@ -44,13 +42,17 @@
     data.goback();
   }
 
+  function exit(): void {
+    destroy();
+    data.exit();
+  }
+
   async function doEnter() {
     const result: Kouhi | string[] = validateKouhi(
       kouhi?.kouhiId ?? 0, {
       patientId: intSrc(patient.patientId),
-      hokenshaBangou: strSrc(hokenshaBangou),
-      hihokenshaBangou: strSrc(hihokenshaBangou),
-      futanWari: intSrc(futanWari),
+      futansha: intSrc(futansha),
+      jukyuusha: intSrc(jukyuusha),
       validFrom: dateSrc(validFrom, validFromErrors),
       validUpto: dateSrc(validUpto, validUptoErrors),
     });
@@ -67,10 +69,9 @@
       errors = result;
     }
   }
-  
 </script>
 
-<SurfaceModal destroy={close} {title}>
+<SurfaceModal destroy={exit} {title}>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -81,19 +82,11 @@
   <div class="panel">
     <span>({patient.patientId})</span>
     <span>{patient.fullName(" ")}</span>
-    <span>保険者番号</span>
-    <div><input type="text" class="regular" bind:value={hokenshaBangou} /></div>
-    <span>被保険者番号</span>
+    <span>負担者番号</span>
+    <div><input type="text" class="regular" bind:value={futansha} /></div>
+    <span>受給者番号</span>
     <div>
-      <input type="text" class="regular" bind:value={hihokenshaBangou} />
-    </div>
-    <span>負担割</span>
-    <div>
-      {#each [1, 2, 3] as w}
-        {@const id = genid()}
-        <input type="radio" value={w} bind:group={futanWari} />
-        <label for={id}>{toZenkaku(w.toString())}割</label>
-      {/each}
+      <input type="text" class="regular" bind:value={jukyuusha} />
     </div>
     <span>期限開始</span>
     <div>

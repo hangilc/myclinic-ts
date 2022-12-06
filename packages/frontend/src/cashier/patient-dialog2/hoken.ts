@@ -50,6 +50,16 @@ export class Hoken {
     }
   }
 
+  get hokenId(): number {
+    return Hoken.fold(
+      this.value,
+      (h) => h.shahokokuhoId,
+      (h) => h.koukikoureiId,
+      (h) => h.roujinId,
+      (h) => h.kouhiId,
+    );
+  }
+
   isValidAt(at: Date): boolean {
     return Hoken.fold<boolean>(
       this.value,
@@ -68,6 +78,22 @@ export class Hoken {
       (h) => Hoken.roujinRep(h),
       (h) => Hoken.kouhiRep(h)
     );
+  }
+
+  static shahokokuhoRep(h: Shahokokuho): string {
+    return shahokokuhoRep(h);
+  }
+
+  static koukikoureiRep(h: Koukikourei): string {
+    return koukikoureiRep(h.futanWari);
+  }
+
+  static roujinRep(h: Roujin): string {
+    return roujinRep(h.futanWari);
+  }
+
+  static kouhiRep(h: Kouhi): string {
+    return kouhiRep(h.futansha);
   }
 
   get name(): string {
@@ -110,20 +136,5 @@ export class Hoken {
     );
   }
 
-  static shahokokuhoRep(h: Shahokokuho): string {
-    return shahokokuhoRep(h);
-  }
-
-  static koukikoureiRep(h: Koukikourei): string {
-    return koukikoureiRep(h.futanWari);
-  }
-
-  static roujinRep(h: Roujin): string {
-    return roujinRep(h.futanWari);
-  }
-
-  static kouhiRep(h: Kouhi): string {
-    return kouhiRep(h.futansha);
-  }
 
 }
