@@ -1,5 +1,4 @@
 import type { Patient } from "myclinic-model";
-import { get, writable, type Writable } from "svelte/store";
 import { fetchHokenList } from "./fetch-hoken-list";
 import type { Hoken } from "./hoken";
 import { HokenCache } from "./hoken-cache";
@@ -8,13 +7,17 @@ import PatientDialog from "./PatientDialog.svelte";
 export type Opener = () => void;
 
 export class PatientData {
-  patient: Writable<Patient>;
+  patient: Patient;
   hokenCache: HokenCache;
   stack: Opener[] = [];
 
   constructor(patient: Patient, currentList: Hoken[]) {
-    this.patient = writable(patient);
+    this.patient = patient;
     this.hokenCache = new HokenCache(currentList);
+  }
+
+  getUpdate(h: Hoken): Hoken {
+    return this.hokenCache.getUpdate(h.value);
   }
 
   cleanup() {
@@ -22,12 +25,12 @@ export class PatientData {
   }
 
   getPatient(): Patient {
-    return get(this.patient);
+    return this.patient;
   }
 
   getCurrentList(): Hoken[] {
     const today = new Date();
-    return get(this.hokenCache.cache).filter(h => h.isValidAt(today));
+    return this.hokenCache.listCurrent();
   }
 
   push(opener: Opener): void {

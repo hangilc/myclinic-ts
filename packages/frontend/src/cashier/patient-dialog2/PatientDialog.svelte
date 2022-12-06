@@ -18,7 +18,7 @@
       const d: HokenInfoDialog = new HokenInfoDialog({
         target: document.body,
         props: {
-          hoken,
+          hoken: data.getUpdate(hoken),
           data,
           destroy: () => d.$destroy(),
         },

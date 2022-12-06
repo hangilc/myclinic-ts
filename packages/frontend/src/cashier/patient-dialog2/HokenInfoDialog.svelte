@@ -1,7 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Patient } from "myclinic-model";
-  import { get } from "svelte/store";
   import { Hoken } from "./hoken";
   import ShahokokuhoInfo from "./info/ShahokokuhoInfo.svelte";
   import KoukikoureiInfo from "./info/KoukikoureiInfo.svelte";
@@ -13,7 +12,7 @@
   export let data: PatientData;
   export let hoken: Hoken;
   export let destroy: () => void;
-  let patient: Patient = get(data.patient);
+  let patient: Patient = data.patient;
   let panel = Hoken.fold(
     hoken.value,
     (_) => ShahokokuhoInfo,

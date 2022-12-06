@@ -1,5 +1,4 @@
 import type { Kouhi, Koukikourei, Patient, Roujin, Shahokokuho } from "myclinic-model";
-import EditDialog from "./EditDialog.svelte";
 import { Hoken, type HokenType } from "./hoken";
 import {
   kouhiEntered,

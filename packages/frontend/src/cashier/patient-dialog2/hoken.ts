@@ -14,6 +14,10 @@ export class Hoken {
     this.usageCount = usageCount;
   }
 
+  updateValue(v: HokenType): Hoken {
+    return new Hoken(v, this.usageCount);
+  }
+
   get asShahokokuho(): Shahokokuho {
     if( this.value instanceof Shahokokuho ){
       return this.value;

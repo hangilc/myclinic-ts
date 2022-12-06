@@ -6,18 +6,19 @@
   import type { PatientData } from "./patient-data";
 
   export let data: PatientData;
-  export let hoken: Hoken;
+  export let hoken: Hoken | undefined;
   export let destroy: () => void;
 
-  let comp = Hoken.fold(
-    hoken.value,
-    (_) => EditShahokokuhoDialog,
-    (_) => EditKoukikoureiDialog,
-    (_) => undefined,
-    (_) => EditKouhiDialog,
-  )
-
+  let comp =
+    hoken === undefined
+      ? undefined
+      : Hoken.fold(
+          hoken?.value,
+          (_) => EditShahokokuhoDialog,
+          (_) => EditKoukikoureiDialog,
+          (_) => undefined,
+          (_) => EditKouhiDialog
+        );
 </script>
 
-<svelte:component this={comp} {hoken} {data} {destroy}/>
-
+<svelte:component this={comp} {hoken} {data} {destroy} />
