@@ -6,6 +6,7 @@
   import type { Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
+  import EditHokenDialog from "./EditHokenDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -42,11 +43,32 @@
     data.push(open);
   }
 
-  function doNewShahokokuho() {}
+  function doNew(slug: string): void {
+    function open(): void {
+      const d: EditHokenDialog = new EditHokenDialog({
+        target: document.body,
+        props: {
+          data,
+          hoken: slug,
+          destroy: () => d.$destroy()
+        }
+      });
+    }
+    destroy();
+    data.push(open);
+  }
 
-  function doNewKoukikourei() {}
+  function doNewShahokokuho() {
+    doNew("shahokokuho");
+  }
 
-  function doNewKouhi() {}
+  function doNewKoukikourei() {
+    doNew("koukikourei");
+  }
+
+  function doNewKouhi() {
+    doNew("kouhi");
+  }
 
   function doHokenHistory() {}
 

@@ -7,25 +7,41 @@
   import api from "@/lib/api";
   import KoukikoureiForm from "./edit/KoukikoureiForm.svelte";
   import KouhiForm from "./edit/KouhiForm.svelte";
+  import { strToHokenTypeRep } from "./str-to-hoken-type-rep";
+  import type { SvelteComponent } from "svelte";
 
   export let data: PatientData;
-  export let hoken: Hoken;
+  export let hoken: Hoken | string;
   export let destroy: () => void;
+  let hokenTmpl: Hoken | undefined = hoken instanceof Hoken ? hoken : undefined;
   let errors: string[] = [];
-  console.log("enter stack", data.stack);
+  let hokenTypeRep: string =
+    typeof hoken === "string" ? strToHokenTypeRep(hoken) : hoken.name;
 
-  let title: string = `${hoken.name}編集`;
+  function isCreation(): boolean {
+    return typeof hoken === "string" || hoken.hokenId === 0;
+  }
 
-  let comp =
-    hoken === undefined
-      ? undefined
-      : Hoken.fold(
-          hoken?.value,
-          (_) => ShahokokuhoForm,
-          (_) => KoukikoureiForm,
-          (_) => undefined,
-          (_) => KouhiForm
-        );
+  let title: string = isCreation()
+    ? `新規${hokenTypeRep}`
+    : `${hokenTypeRep}編集`;
+
+  let hokenTypeSlug: string = hoken instanceof Hoken ? hoken.slug : hoken;
+
+  function getComp(slug: string): typeof SvelteComponent | undefined {
+    switch (slug) {
+      case "shahokokuho":
+        return ShahokokuhoForm;
+      case "koukikourei":
+        return KoukikoureiForm;
+      case "kouhi":
+        return KouhiForm;
+      default:
+        return undefined;
+    }
+  }
+
+  let comp = getComp(hokenTypeSlug);
 
   function exit(): void {
     destroy();
@@ -42,11 +58,11 @@
   let validate: () => HokenType | string[];
 
   async function enterHoken(ht: HokenType) {
-    if( ht instanceof Shahokokuho ){
+    if (ht instanceof Shahokokuho) {
       await api.enterShahokokuho(ht);
-    } else if( ht instanceof Koukikourei ){
+    } else if (ht instanceof Koukikourei) {
       await api.enterKoukikourei(ht);
-    } else if( ht instanceof Kouhi ){
+    } else if (ht instanceof Kouhi) {
       await api.enterKouhi(ht);
     } else {
       throw new Error("Cannot enter hoken: " + ht);
@@ -54,11 +70,11 @@
   }
 
   async function updateHoken(ht: HokenType) {
-    if( ht instanceof Shahokokuho ){
+    if (ht instanceof Shahokokuho) {
       await api.updateShahokokuho(ht);
-    } else if( ht instanceof Koukikourei ){
+    } else if (ht instanceof Koukikourei) {
       await api.updateKoukikourei(ht);
-    } else if( ht instanceof Kouhi ){
+    } else if (ht instanceof Kouhi) {
       await api.updateKouhi(ht);
     } else {
       throw new Error("Cannot update hoken: " + ht);
@@ -67,11 +83,16 @@
 
   async function doEnter() {
     const result: HokenType | string[] = validate();
-    if( Array.isArray(result) ){
+    if (Array.isArray(result)) {
       errors = result;
     } else {
-      await updateHoken(result);
-      data.hokenCache.updateWithHokenType(result);
+      if (isCreation()) {
+        await enterHoken(result);
+        data.hokenCache.enterHokenType(result);
+      } else {
+        await updateHoken(result);
+        data.hokenCache.updateWithHokenType(result);
+      }
       close();
     }
   }
@@ -85,7 +106,12 @@
       {/each}
     </div>
   {/if}
-  <svelte:component this={comp} hoken={hoken.value} bind:validate patient={data.patient}/>
+  <svelte:component
+    this={comp}
+    hoken={hokenTmpl?.value}
+    bind:validate
+    patient={data.patient}
+  />
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={close}>キャンセル</button>

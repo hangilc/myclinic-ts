@@ -99,10 +99,20 @@ export class Hoken {
   get name(): string {
     return Hoken.fold(
       this.value,
-      (h) => "社保国保",
-      (h) => "後期高齢",
-      (h) => "老人保険",
-      (h) => "公費",
+      (_) => "社保国保",
+      (_) => "後期高齢",
+      (_) => "老人保険",
+      (_) => "公費",
+    )
+  }
+
+  get slug(): string {
+    return Hoken.fold(
+      this.value,
+      (_) => "shahokokuho",
+      (_) => "koukikourei",
+      (_) => "roujin",
+      (_) => "kouhi",
     )
   }
 
