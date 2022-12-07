@@ -1,13 +1,9 @@
-import type { Hoken } from "../hoken";
+import type { HokenType } from "../hoken";
 
-export function resolveTitle(hoken: Hoken | undefined, ifUndefined: string): string {
-  if( hoken ){
-    if( hoken.hokenId === 0 ){
-      return `新規${hoken.name}`;
-    } else {
-      return `${hoken.name}編集`;
-    }
+export function castHokenType<T>(ht: HokenType | undefined): T | undefined {
+  if( ht === undefined ){
+    return undefined;
   } else {
-    return `新規${ifUndefined}`;
+    return ht as T;
   }
 }

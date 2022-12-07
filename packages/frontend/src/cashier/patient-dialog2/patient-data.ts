@@ -44,7 +44,7 @@ export class PatientData {
 
   goback(): void {
     this.pop();
-    const o = this.stack.shift();
+    const o = this.stack.pop();
     if( o !== undefined ){
       this.push(o);
     } else {

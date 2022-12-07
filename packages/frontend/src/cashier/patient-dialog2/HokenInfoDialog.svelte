@@ -43,6 +43,7 @@
       })
     }
     destroy();
+    console.log("before edit stack", data.stack);
     data.push(open);
   }
 </script>
