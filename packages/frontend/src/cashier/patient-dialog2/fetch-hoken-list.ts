@@ -8,7 +8,7 @@ export async function fetchHokenList(patientId: number): Promise<Hoken[]> {
   return batchFromHoken(shahoList, koukikoureiList, roujinList, kouhiList);
 }
 
-async function batchFromHoken(shahokokuhoList: Shahokokuho[], koukikoureiList: Koukikourei[], 
+export async function batchFromHoken(shahokokuhoList: Shahokokuho[], koukikoureiList: Koukikourei[], 
   roujinList: Roujin[], kouhiList: Kouhi[]): Promise<Hoken[]> {
     const [shahoMap, koukiMap, roujinMap, kouhiMap] = await api.batchCountHokenUsage(
       shahokokuhoList.map(e => e.shahokokuhoId), 

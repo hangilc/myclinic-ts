@@ -29,7 +29,7 @@
       </div>
     {/each}
   </div>
-</SurfaceModal>al>
+</SurfaceModal>
 
 <style>
   .result-wrapper {

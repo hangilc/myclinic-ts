@@ -7,6 +7,7 @@
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
   import EditHokenDialog from "./EditHokenDialog.svelte";
+  import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -70,7 +71,20 @@
     doNew("kouhi");
   }
 
-  function doHokenHistory() {}
+  async function doHokenHistory() {
+    await data.fetchAllHoken();
+    function open(): void {
+      const d: HokenHistoryDialog = new HokenHistoryDialog({
+        target: document.body,
+        props: {
+          data,
+          destroy: () => d.$destroy()
+        }
+      })
+    }
+    destroy();
+    data.push(open);
+  }
 
   function doPatientImages() {}
 </script>

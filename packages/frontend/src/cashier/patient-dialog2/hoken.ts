@@ -116,6 +116,16 @@ export class Hoken {
     )
   }
 
+  get validFrom(): string {
+    return Hoken.fold(
+      this.value,
+      (h) => h.validFrom,
+      (h) => h.validFrom,
+      (h) => h.validFrom,
+      (h) => h.validFrom,
+    );
+  }
+
   static fold<T>(
     h: HokenType,
     shahokokuhoHandler: (s: Shahokokuho) => T,

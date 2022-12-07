@@ -44,4 +44,8 @@ export class HokenCache {
     const today = new Date();
     return this.#cache.filter(h => h.isValidAt(today));
   }
+
+  listAll(): Hoken[] {
+    return [...this.#cache];
+  }
 }

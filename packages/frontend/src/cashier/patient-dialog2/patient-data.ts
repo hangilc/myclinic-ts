@@ -1,5 +1,6 @@
+import api from "@/lib/api";
 import type { Patient } from "myclinic-model";
-import { fetchHokenList } from "./fetch-hoken-list";
+import { batchFromHoken, fetchHokenList } from "./fetch-hoken-list";
 import type { Hoken } from "./hoken";
 import { HokenCache } from "./hoken-cache";
 import PatientDialog from "./PatientDialog.svelte";
@@ -16,13 +17,23 @@ export class PatientData {
     this.hokenCache = new HokenCache(currentList);
   }
 
+  async fetchAllHoken() {
+    const [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
+      await api.listAllHoken(this.patient.patientId);
+    const hs: Hoken[] = await batchFromHoken(
+      shahokokuhoList,
+      koukikoureiList,
+      roujinList,
+      kouhiList
+    );
+    this.hokenCache = new HokenCache(hs);
+  }
+
   getUpdate(h: Hoken): Hoken {
     return this.hokenCache.getUpdate(h.value);
   }
 
-  cleanup() {
-
-  }
+  cleanup() {}
 
   getPatient(): Patient {
     return this.patient;
@@ -45,7 +56,7 @@ export class PatientData {
   goback(): void {
     this.pop();
     const o = this.stack.pop();
-    if( o !== undefined ){
+    if (o !== undefined) {
       this.push(o);
     } else {
       this.cleanup();
@@ -65,7 +76,7 @@ export class PatientData {
         props: {
           data,
           destroy: () => d.$destroy(),
-        }
+        },
       });
     }
     data.push(open);
