@@ -63,6 +63,12 @@ export class PatientData {
     }
   }
 
+  reopen(): void {
+    if( this.stack.length > 0 ){
+      this.stack[this.stack.length - 1]();
+    }
+  }
+
   exit() {
     this.cleanup();
   }

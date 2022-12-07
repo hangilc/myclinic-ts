@@ -9,6 +9,9 @@
   import RoujinBox from "./hoken-box/RoujinBox.svelte";
   import KouhiBox from "./hoken-box/KouhiBox.svelte";
   import EditHokenDialog from "./EditHokenDialog.svelte";
+  import { confirm } from "@/lib/confirm-call";
+  import api from "@/lib/api";
+  import { deleteHoken } from "./delete-hoken";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -52,6 +55,19 @@
     destroy();
     data.push(open);
   }
+
+  function doDelete(hoken: Hoken): void {
+    confirm("この保険を削除していいですか？", async () => {
+      const ok = await deleteHoken(hoken);
+      if( !ok ){
+        alert("保険の削除に失敗しました。");
+        return;
+      }
+      data.hokenCache.remove(hoken.value);
+      destroy();
+      data.reopen();
+    });
+  }
 </script>
 
 <SurfaceModal destroy={exit} title="保険履歴" width="400px">
@@ -73,6 +89,9 @@
               <RoujinBox roujin={hoken.asRoujin} {usageCount} />
             {:else if hokenType === "kouhi"}
               <KouhiBox kouhi={hoken.asKouhi} {usageCount} />
+            {/if}
+            {#if hoken.usageCount === 0}
+              <a href="javascript:void(0)" on:click={() => doDelete(hoken)}>削除</a>
             {/if}
             {#if hokenType !== "roujin"}
               <button on:click={() => doEdit(hoken)}>編集</button>

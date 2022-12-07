@@ -10,6 +10,7 @@
   import { strToHokenTypeRep } from "./str-to-hoken-type-rep";
   import type { SvelteComponent } from "svelte";
   import { confirm } from "@/lib/confirm-call";
+  import { deleteHoken } from "./delete-hoken";
 
   export let data: PatientData;
   export let hoken: Hoken | string;
@@ -83,17 +84,17 @@
     }
   }
 
-  async function deleteHoken(hoken: Hoken) {
-    if (hoken.value instanceof Shahokokuho) {
-      await api.deleteShahokokuho(hoken.hokenId);
-    } else if (hoken.value instanceof Koukikourei) {
-      await api.deleteKoukikourei(hoken.hokenId);
-    } else if (hoken.value instanceof Kouhi) {
-      await api.deleteKouhi(hoken.hokenId);
-    } else {
-      throw new Error("Cannot update hoken: " + hoken);
-    }
-  }
+  // async function deleteHoken(hoken: Hoken) {
+  //   if (hoken.value instanceof Shahokokuho) {
+  //     await api.deleteShahokokuho(hoken.hokenId);
+  //   } else if (hoken.value instanceof Koukikourei) {
+  //     await api.deleteKoukikourei(hoken.hokenId);
+  //   } else if (hoken.value instanceof Kouhi) {
+  //     await api.deleteKouhi(hoken.hokenId);
+  //   } else {
+  //     throw new Error("Cannot update hoken: " + hoken);
+  //   }
+  // }
 
   async function doEnter() {
     const result: HokenType | string[] = validate();
@@ -115,7 +116,11 @@
     if (hokenTmpl && hokenTmpl.hokenId !== 0) {
       const hoken = hokenTmpl;
       confirm("この保険を削除していいですか？", async () => {
-        await deleteHoken(hoken);
+        const ok = await deleteHoken(hoken);
+        if( !ok ){
+          alert("保険の削除に失敗しました。");
+          return;
+        }
         data.hokenCache.remove(hoken.value);
         destroy();
         onDelete();
