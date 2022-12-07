@@ -38,7 +38,8 @@
         props: {
           hoken,
           data,
-          destroy: () => d.$destroy()
+          destroy: () => d.$destroy(),
+          onDelete: () => data.pop()
         }
       })
     }

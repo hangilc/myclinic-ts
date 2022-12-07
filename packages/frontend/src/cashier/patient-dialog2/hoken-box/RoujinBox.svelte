@@ -20,14 +20,10 @@
   }
 </script>
 
-{#if roujin}
-<div>
-  {Hoken.roujinRep(roujin)}
-  【市町村】{roujin.shichouson}
-  【受給者】{roujin.jukyuusha}
-  【負担割】{toZenkaku(roujin.futanWari.toString())}割
-  【期限開始】{formatValidFrom(roujin.validFrom)}
-  【期限終了】{formatValidUpto(roujin.validUpto)}]
-  【使用回数】{usageCount}回
-</div>
-{/if}
+{Hoken.roujinRep(roujin)}
+【市町村】{roujin.shichouson}
+【受給者】{roujin.jukyuusha}
+【負担割】{toZenkaku(roujin.futanWari.toString())}割 【期限開始】{formatValidFrom(
+  roujin.validFrom
+)}
+【期限終了】{formatValidUpto(roujin.validUpto)}] 【使用回数】{usageCount}回

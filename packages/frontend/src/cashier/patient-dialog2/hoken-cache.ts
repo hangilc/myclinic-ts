@@ -29,6 +29,16 @@ export class HokenCache {
     this.#cache.push(h);
   }
 
+  remove(ht: HokenType): void {
+    const key = Hoken.composeKey(ht);
+    const i = this.#cache.findIndex(h => h.key === key);
+    if( i >= 0 ){
+      this.#cache.splice(i, 1);
+    } else {
+      console.error("Cannot find hoken to remove: " + ht);
+    }
+  }
+
   getUpdate(ht: HokenType): Hoken{
     const key = Hoken.composeKey(ht);
     const hs = this.#cache;

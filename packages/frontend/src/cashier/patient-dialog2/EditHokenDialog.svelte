@@ -9,10 +9,12 @@
   import KouhiForm from "./edit/KouhiForm.svelte";
   import { strToHokenTypeRep } from "./str-to-hoken-type-rep";
   import type { SvelteComponent } from "svelte";
+  import { confirm } from "@/lib/confirm-call";
 
   export let data: PatientData;
   export let hoken: Hoken | string;
   export let destroy: () => void;
+  export let onDelete: () => void = () => {};
   let hokenTmpl: Hoken | undefined = hoken instanceof Hoken ? hoken : undefined;
   let errors: string[] = [];
   let hokenTypeRep: string =
@@ -81,6 +83,18 @@
     }
   }
 
+  async function deleteHoken(hoken: Hoken) {
+    if (hoken.value instanceof Shahokokuho) {
+      await api.deleteShahokokuho(hoken.hokenId);
+    } else if (hoken.value instanceof Koukikourei) {
+      await api.deleteKoukikourei(hoken.hokenId);
+    } else if (hoken.value instanceof Kouhi) {
+      await api.deleteKouhi(hoken.hokenId);
+    } else {
+      throw new Error("Cannot update hoken: " + hoken);
+    }
+  }
+
   async function doEnter() {
     const result: HokenType | string[] = validate();
     if (Array.isArray(result)) {
@@ -94,6 +108,19 @@
         data.hokenCache.updateWithHokenType(result);
       }
       close();
+    }
+  }
+
+  function doDelete() {
+    if (hokenTmpl && hokenTmpl.hokenId !== 0) {
+      const hoken = hokenTmpl;
+      confirm("この保険を削除していいですか？", async () => {
+        await deleteHoken(hoken);
+        data.hokenCache.remove(hoken.value);
+        destroy();
+        onDelete();
+        data.goback();
+      });
     }
   }
 </script>
@@ -113,6 +140,9 @@
     patient={data.patient}
   />
   <div class="commands">
+    {#if hokenTmpl?.usageCount === 0}
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     <button on:click={doEnter}>入力</button>
     <button on:click={close}>キャンセル</button>
   </div>

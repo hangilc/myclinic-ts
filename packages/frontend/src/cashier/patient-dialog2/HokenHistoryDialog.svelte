@@ -45,9 +45,9 @@
         props: {
           data,
           hoken,
-          destroy: () => d.$destroy()
-        }
-      })
+          destroy: () => d.$destroy(),
+        },
+      });
     }
     destroy();
     data.push(open);
@@ -66,25 +66,16 @@
           {@const usageCount = hoken.usageCount}
           <div class={`hoken-box ${hokenType}`}>
             {#if hokenType === "shahokokuho"}
-              <ShahokokuhoBox
-                shahokokuho={hoken.asShahokokuho}
-                {usageCount}
-                onEdit={() => doEdit(hoken)}
-              />
+              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
             {:else if hokenType === "koukikourei"}
-              <KoukikoureiBox
-                koukikourei={hoken.asKoukikourei}
-                {usageCount}
-                onEdit={() => doEdit(hoken)}
-              />
+              <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
             {:else if hokenType === "roujin"}
               <RoujinBox roujin={hoken.asRoujin} {usageCount} />
             {:else if hokenType === "kouhi"}
-              <KouhiBox
-                kouhi={hoken.asKouhi}
-                {usageCount}
-                onEdit={() => doEdit(hoken)}
-              />
+              <KouhiBox kouhi={hoken.asKouhi} {usageCount} />
+            {/if}
+            {#if hokenType !== "roujin"}
+              <button on:click={() => doEdit(hoken)}>編集</button>
             {/if}
           </div>
         {/each}

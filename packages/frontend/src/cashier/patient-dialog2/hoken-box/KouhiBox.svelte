@@ -5,7 +5,6 @@
 
   export let kouhi: Kouhi;
   export let usageCount: number;
-  export let onEdit: (h: Kouhi) => void;
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -20,14 +19,8 @@
   }
 </script>
 
-{#if kouhi}
-<div>
-  {Hoken.kouhiRep(kouhi)}
-  【負担者】{kouhi.futansha}
-  【受給者】{kouhi.jukyuusha}
-  【期限開始】{formatValidFrom(kouhi.validFrom)}
-  【期限終了】{formatValidUpto(kouhi.validUpto)}]
-  【使用回数】{usageCount}回
-  <button on:click={() => onEdit(kouhi)}>編集</button>
-</div>
-{/if}
+{Hoken.kouhiRep(kouhi)}
+【負担者】{kouhi.futansha}
+【受給者】{kouhi.jukyuusha}
+【期限開始】{formatValidFrom(kouhi.validFrom)}
+【期限終了】{formatValidUpto(kouhi.validUpto)}] 【使用回数】{usageCount}回

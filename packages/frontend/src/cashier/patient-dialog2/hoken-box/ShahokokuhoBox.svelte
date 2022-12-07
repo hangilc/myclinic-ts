@@ -5,7 +5,6 @@
 
   export let shahokokuho: Shahokokuho;
   export let usageCount: number;
-  export let onEdit: (h: Shahokokuho) => void;
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -20,17 +19,11 @@
   }
 </script>
 
-{#if shahokokuho}
-<div>
-  {Hoken.shahokokuhoRep(shahokokuho)}
-  【保険者番号】{shahokokuho.hokenshaBangou}
-  【被保険者記号】{shahokokuho.hihokenshaKigou}
-  【被保険者番号】{shahokokuho.hihokenshaBangou}
-  【枝番】{shahokokuho.edaban}
-  【本人・家族】{shahokokuho.honnninKazokuType.rep}
-  【期限開始】{formatValidFrom(shahokokuho.validFrom)}
-  【期限終了】{formatValidUpto(shahokokuho.validUpto)}]
-  【使用回数】{usageCount}回
-  <button on:click={() => onEdit(shahokokuho)}>編集</button>
-</div>
-{/if}
+{Hoken.shahokokuhoRep(shahokokuho)}
+【保険者番号】{shahokokuho.hokenshaBangou}
+【被保険者記号】{shahokokuho.hihokenshaKigou}
+【被保険者番号】{shahokokuho.hihokenshaBangou}
+【枝番】{shahokokuho.edaban}
+【本人・家族】{shahokokuho.honnninKazokuType.rep}
+【期限開始】{formatValidFrom(shahokokuho.validFrom)}
+【期限終了】{formatValidUpto(shahokokuho.validUpto)}] 【使用回数】{usageCount}回
