@@ -23,6 +23,13 @@ export class DiseaseEnv {
     this.examples = examples;
   }
 
+  addDisease(d: DiseaseData): void {
+    this.currentList.push(d);
+    if( this.allList !== undefined ){
+      this.allList.push(d);
+    }
+  }
+
   static async create(patient: Patient): Promise<DiseaseEnv> {
     const cur = await api.listCurrentDiseaseEx(patient.patientId);
     const examples = await DiseaseEnv.examplesCache.get();

@@ -1,12 +1,15 @@
 <script lang="ts">
   import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import { dateParam } from "@/lib/date-param";
   import type { Invalid } from "@/lib/validator";
-  import { ByoumeiMaster, DiseaseExample, ShuushokugoMaster } from "myclinic-model";
+  import { ByoumeiMaster, DiseaseData, DiseaseEnterData, DiseaseExample, ShuushokugoMaster } from "myclinic-model";
   import type { DiseaseEnv } from "./disease-env";
+  import type { Mode } from "./mode";
   import DiseaseSearchForm from "./search/DiseaseSearchForm.svelte";
 
   export let env: DiseaseEnv | undefined;
+  export let doMode: (mode: Mode) => void;
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
   let startDate: Date = new Date();
@@ -17,8 +20,23 @@
 
   }
 
-  function doEnter() {
-
+  async function doEnter() {
+    if (env != undefined && byoumeiMaster != null) {
+      if (startDateErrors.length > 0) {
+        alert("エラー：\n" + startDateErrors.map(e => e.toString()).join("\n"));
+        return;
+      }
+      const data: DiseaseEnterData = {
+        patientId: env.patient.patientId,
+        byoumeicode: byoumeiMaster.shoubyoumeicode,
+        startDate: dateParam(startDate),
+        adjCodes: adjList.map((m) => m.shuushokugocode),
+      };
+      const diseaseId: number = await api.enterDiseaseEx(data);
+      const d: DiseaseData = await api.getDiseaseEx(diseaseId);
+      env.addDisease(d);
+      doMode("add");
+    }
   }
 
   function doSusp() {

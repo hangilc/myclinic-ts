@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { DiseaseData } from "myclinic-model";
   import type { DiseaseEnv } from "./disease-env";
+  import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
 
   export let env: DiseaseEnv | undefined;
+  export let doMode: (mode: Mode) => void;
   const list = env?.currentList ?? [];
 
   function onDiseaseClick(d: DiseaseData) {

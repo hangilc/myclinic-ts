@@ -4,68 +4,86 @@
   import Tenki from "./Tenki.svelte";
   import Edit from "./Edit.svelte";
   import { currentPatient } from "../ExamVars";
-  import { onDestroy, onMount } from "svelte";
+  import { onDestroy, onMount, tick } from "svelte";
   import RightBox from "../RightBox.svelte";
   import { DiseaseEnv } from "./disease-env";
+  import type { Mode } from "./mode";
 
+  let show = false;
   const unsubs: (() => void)[] = [];
-  let comp: undefined | typeof Current | typeof Add | typeof Tenki | typeof Edit  = undefined;
+  let comp:
+    | undefined
+    | typeof Current
+    | typeof Add
+    | typeof Tenki
+    | typeof Edit = undefined;
   let env: DiseaseEnv | undefined = undefined;
 
-  unsubs.push(currentPatient.subscribe(async (p) => {
-    if( p == null ){
-      env = undefined;
-      comp = undefined;
-    } else {
-      env = await DiseaseEnv.create(p);
-      comp = Current;
-    }
-  }))
+  unsubs.push(
+    currentPatient.subscribe(async (p) => {
+      if (p == null) {
+        show = false;
+        env = undefined;
+        comp = undefined;
+      } else {
+        env = await DiseaseEnv.create(p);
+        comp = Current;
+        show = true;
+      }
+    })
+  );
 
   onDestroy(() => {
-    unsubs.forEach(f => f());
-  })
+    unsubs.forEach((f) => f());
+  });
 
-  function doMode(mode: string){
-    switch(mode){
+  async function doMode(mode: Mode) {
+    console.log("enter doMode", comp);
+    let c: typeof comp;
+    switch (mode) {
       case "current": {
-        comp = Current;
+        c = Current;
         break;
       }
       case "add": {
-        comp = Add;
+        c = Add;
         break;
       }
       case "tenki": {
-        comp = Tenki;
+        c = Tenki;
         break;
       }
       case "edit": {
-        comp = Edit;
+        c = Edit;
         break;
       }
       default: {
-        comp = undefined;
+        c = undefined;
         break;
       }
     }
+    if( c === comp ){
+      comp = undefined;
+      await tick();
+      comp = c;
+    } else {
+      comp = c;
+    }
   }
-
-
 </script>
 
-{#if comp !== undefined}
-<RightBox title="病名">
-  <div class="workarea">
-    <svelte:component this={comp} {env} />
-  </div>
-  <div class="commands">
-    <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
-    <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
-    <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
-    <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
-  </div>
-</RightBox>
+{#if show}
+  <RightBox title="病名">
+    <div class="workarea">
+      <svelte:component this={comp} {env} {doMode} />
+    </div>
+    <div class="commands">
+      <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
+      <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
+      <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
+      <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
+    </div>
+  </RightBox>
 {/if}
 
 <style>

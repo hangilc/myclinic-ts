@@ -24,6 +24,8 @@
     ByoumeiMaster | ShuushokugoMaster | DiseaseExample | null
   > = writable(null);
 
+  doExample();
+
   searchSelect.subscribe((r) => {
     if (r != null) {
       onSelect(r);
