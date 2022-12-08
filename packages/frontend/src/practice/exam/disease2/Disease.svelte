@@ -4,7 +4,7 @@
   import Tenki from "./Tenki.svelte";
   import Edit from "./Edit.svelte";
   import { currentPatient } from "../ExamVars";
-  import { onDestroy } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import RightBox from "../RightBox.svelte";
   import { DiseaseEnv } from "./disease-env";
 
@@ -12,6 +12,10 @@
   let comp: undefined | typeof Current | typeof Add | typeof Tenki | typeof Edit  = undefined;
   let env: DiseaseEnv | undefined = undefined;
 
+  onMount(async () => {
+    examples = await api.listDiseaseExample();
+  });
+  
   unsubs.push(currentPatient.subscribe(async (p) => {
     if( p == null ){
       env = undefined;
