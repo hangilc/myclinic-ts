@@ -14,7 +14,6 @@
   let searchDialog: SelectPatientBySearch;
   let recentDialog: RecentVisitsDialog;
   let selectPatientPulldown: Pulldown;
-  let searchShohouSampleDialog: SearchShohouSampleDialog;
   let globalSearchDialog: GlobalSearchDialog;
 
   function onSelectPatientClick() {
@@ -43,7 +42,12 @@
   }
 
   function doSearchShohouSample(): void {
-    searchShohouSampleDialog.open();
+    const d: SearchShohouSampleDialog = new SearchShohouSampleDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    })
   }
 
   function doGlobalSearch(): void {
@@ -72,7 +76,6 @@
 <Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink}>
   <SelectPatientMenu onSelect={updateSelectPatientDialog} />
 </Pulldown>
-<SearchShohouSampleDialog bind:this={searchShohouSampleDialog} />
 <GlobalSearchDialog bind:this={globalSearchDialog} />
 
 <style>

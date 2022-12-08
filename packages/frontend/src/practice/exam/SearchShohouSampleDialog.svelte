@@ -1,6 +1,5 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/Dialog.svelte";
   import { writable, type Writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
   import {
@@ -10,18 +9,16 @@
   } from "myclinic-model";
   import { toZenkaku } from "@/lib/zenkaku";
   import { fade } from "svelte/transition";
+  import SurfaceModal from "@/lib/SurfaceModal.svelte";
 
-  let dialog: Dialog;
+  export let destroy: () => void;
+
   let drugIndex = 1;
   let searchText: string = "";
   let texts: string[] = [];
   let selected: Writable<string | null> = writable(null);
   let textarea: HTMLTextAreaElement;
   let copiedVisible = false;
-
-  export function open(): void {
-    dialog.open();
-  }
 
   function onClose(): void {
     searchText = "";
@@ -81,13 +78,13 @@
       copiedVisible = true;
       setTimeout(() => {
         copiedVisible = false;
-      }, 10);
+        destroy();
+      }, 800);
     }
   }
 </script>
 
-<Dialog bind:this={dialog} {onClose} width={undefined}>
-  <span slot="title">処方サンプル検索</span>
+<SurfaceModal {destroy} title="処方サンプル検索">
   <textarea readonly bind:this={textarea} />
   <div class="commands1">
     <button on:click={doCopy}>コピー</button>
@@ -104,7 +101,7 @@
       <SelectItem {selected} data={t}>{@html formatSearchResult(t)}</SelectItem>
     {/each}
   </div>
-</Dialog>
+</SurfaceModal>
 
 <style>
   textarea {
@@ -136,7 +133,7 @@
     padding: 4px;
   }
 
-  .select :global(.select-item:nth-child(even):not(:hover):not(.selected)) {
-    background-color: hsl(60, 100%, 85%);
+  .select :global(.select-item:nth-child(odd):not(:hover):not(.selected)) {
+    background-color: hsla(60, 100%, 85%, 0.3);
   }
 </style>
