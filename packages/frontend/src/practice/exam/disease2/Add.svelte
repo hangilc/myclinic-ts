@@ -1,7 +1,8 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import type { Invalid } from "@/lib/validator";
-  import { ShuushokugoMaster, type ByoumeiMaster } from "myclinic-model";
+  import { ByoumeiMaster, DiseaseExample, ShuushokugoMaster } from "myclinic-model";
   import type { DiseaseEnv } from "./disease-env";
   import DiseaseSearchForm from "./search/DiseaseSearchForm.svelte";
 
@@ -21,15 +22,41 @@
   }
 
   function doSusp() {
-    adjList.push(ShuushokugoMaster.suspMaster);
+    adjList = [...adjList, ShuushokugoMaster.suspMaster];
   }
 
   function doDelAdj() {
     adjList = [];
   }
 
-  function doSearch() {
+  async function onSearchSelect(r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample) {
+    if (ByoumeiMaster.isByoumeiMaster(r)) {
+      byoumeiMaster = r;
+    } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
+      const cur = adjList;
+      cur.push(r);
+      adjList = cur;
+    } else if (DiseaseExample.isDiseaseExample(r)) {
+      if (r.byoumei != null) {
+        const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
+        if (m != null) {
+          byoumeiMaster = m;
+        } else {
+          throw new Error("Cannot resolve byoumei: " + r.byoumei);
+        }
+      }
+      [...r.preAdjList, ...r.postAdjList].forEach(async (name) => {
+        const m = await api.resolveShuushokugoMasterByName(name, startDate);
+        if (m != null) {
+          const cur = adjList;
+          cur.push(m);
+          adjList = cur;
+        } else {
+          throw new Error("Cannot resolve adj name: " + r.byoumei);
 
+        }
+      });
+    }
   }
 </script>
 
@@ -69,7 +96,7 @@
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm />
+  <DiseaseSearchForm examples={env?.examples ?? []} {startDate} onSelect={onSearchSelect}/>
 </div>
 
 <style>

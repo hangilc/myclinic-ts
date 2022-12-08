@@ -1,21 +1,31 @@
 import api from "@/lib/api";
+import { CachedValue } from "@/lib/cached-value";
 import type { Patient } from "myclinic-model";
-import type { DiseaseData } from "myclinic-model/model";
+import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
 
 export class DiseaseEnv {
   patient: Patient;
   currentList: DiseaseData[];
   allList: DiseaseData[] | undefined = undefined;
+  examples: DiseaseExample[];
 
-  constructor(patient: Patient, currentList: DiseaseData[]) {
+  static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
+    api.listDiseaseExample
+  );
+
+  constructor(
+    patient: Patient,
+    currentList: DiseaseData[],
+    examples: DiseaseExample[]
+  ) {
     this.patient = patient;
-    currentList = [...currentList];
-    
-    this.currentList = currentList;
+    this.currentList = [...currentList];
+    this.examples = examples;
   }
 
   static async create(patient: Patient): Promise<DiseaseEnv> {
     const cur = await api.listCurrentDiseaseEx(patient.patientId);
-    return new DiseaseEnv(patient, cur);
+    const examples = await DiseaseEnv.examplesCache.get();
+    return new DiseaseEnv(patient, cur, examples);
   }
 }

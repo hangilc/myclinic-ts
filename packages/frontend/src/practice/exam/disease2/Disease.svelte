@@ -12,10 +12,6 @@
   let comp: undefined | typeof Current | typeof Add | typeof Tenki | typeof Edit  = undefined;
   let env: DiseaseEnv | undefined = undefined;
 
-  onMount(async () => {
-    examples = await api.listDiseaseExample();
-  });
-  
   unsubs.push(currentPatient.subscribe(async (p) => {
     if( p == null ){
       env = undefined;

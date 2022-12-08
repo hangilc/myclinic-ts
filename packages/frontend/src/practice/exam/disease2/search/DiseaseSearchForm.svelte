@@ -1,10 +1,20 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import { genid } from "@/lib/genid";
   import SelectItem from "@/lib/SelectItem.svelte";
-  import type { ByoumeiMaster, DiseaseExample, ShuushokugoMaster } from "myclinic-model";
+  import type {
+    ByoumeiMaster,
+    DiseaseExample,
+    ShuushokugoMaster,
+  } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import type { SearchResult } from "./search-result";
 
+  export let examples: DiseaseExample[];
+  export let startDate: Date;
+  export let onSelect: (
+    result: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
+  ) => void;
   let searchText: string = "";
   let searchKind: string = "byoumei";
   const byoumeiId: string = genid();
@@ -14,9 +24,42 @@
     ByoumeiMaster | ShuushokugoMaster | DiseaseExample | null
   > = writable(null);
 
-  function doSearch() {}
+  searchSelect.subscribe((r) => {
+    if (r != null) {
+      onSelect(r);
+    }
+  });
 
-  function doExample() {}
+  async function doSearch() {
+    console.log(startDate);
+    const t = searchText.trim();
+    if (t !== "" && startDate != null) {
+      if (searchKind === "byoumei") {
+        searchResult = (await api.searchByoumeiMaster(t, startDate)).map(
+          (m) => ({
+            label: m.name,
+            data: m,
+          })
+        );
+      } else if (searchKind === "shuushokugo") {
+        searchResult = (await api.searchShuushokugoMaster(t, startDate)).map(
+          (m) => ({
+            label: m.name,
+            data: m,
+          })
+        );
+      }
+    }
+  }
+
+  function doExample() {
+    searchResult = examples.map((e) => {
+      return {
+        label: e.repr,
+        data: e,
+      };
+    });
+  }
 </script>
 
 <div>
