@@ -125,7 +125,7 @@
           <DateFormWithCalendar
             bind:date={data.endDate}
             bind:errors={data.endDateErrors}
-            isNullable={false}
+            isNullable={true}
             {gengouList}
           />
         </div>

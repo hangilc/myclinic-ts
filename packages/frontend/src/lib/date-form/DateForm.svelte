@@ -27,7 +27,7 @@
 
   $: initValues(date);
 
-  function initValues(d: Date | null | undefined): void {
+  export function initValues(d: Date | null | undefined): void {
     if (d != null) {
       const kdate = new KanjiDate(d);
       gengouValue = kdate.gengou;

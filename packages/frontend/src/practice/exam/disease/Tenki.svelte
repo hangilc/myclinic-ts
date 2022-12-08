@@ -10,11 +10,12 @@
   import type { DiseaseEndReasonType } from "myclinic-model";
   import { DiseaseEndReason } from "myclinic-model";
   import api from "@/lib/api";
+  import type { Invalid } from "@/lib/validator";
 
   export let current: DiseaseData[];
   let selected: DiseaseData[] = [];
   let endDate: Date = new Date();
-  let endDateErrors: string[] = [];
+  let endDateErrors: Invalid[] = [];
   let dateForm: DateFormWithCalendar;
   let endReasons: DiseaseEndReasonType[] = [
     DiseaseEndReason.Cured,

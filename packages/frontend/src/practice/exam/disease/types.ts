@@ -10,6 +10,7 @@ import {
 } from "myclinic-model";
 import * as kanjidate from "kanjidate";
 import api from "@/lib/api";
+import type { Invalid } from "@/lib/validator";
 
 // export type DiseaseData = [
 //   Disease,
@@ -116,9 +117,9 @@ export class EditData {
   patientId: number;
   byoumeiMaster: ByoumeiMaster;
   startDate: Date;
-  startDateErrors: string[] = [];
+  startDateErrors: Invalid[] = [];
   endDate: Date | null;
-  endDateErrors: string[] = [];
+  endDateErrors: Invalid[] = [];
   endReason: DiseaseEndReasonType;
   shuushokugoList: ShuushokugoMaster[];
 
