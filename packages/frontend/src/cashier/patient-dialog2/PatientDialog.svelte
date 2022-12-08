@@ -119,8 +119,7 @@
     <a href="javascript:void(0)" on:click={doNewKoukikourei}>新規後期高齢</a>
     |
     <a href="javascript:void(0)" on:click={doNewKouhi}>新規公費</a> |
-    <a href="javascript:void(0)" on:click={doHokenHistory}>保険履歴</a> |
-    <a href="javascript:void(0)" on:click={doPatientImages}>保存画像</a>
+    <a href="javascript:void(0)" on:click={doHokenHistory}>保険履歴</a> 
   </div>
 </SurfaceModal>
 
