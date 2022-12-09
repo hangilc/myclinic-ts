@@ -1,9 +1,150 @@
 <script lang="ts">
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import { genid } from "@/lib/genid";
+  import type { Invalid } from "@/lib/validator";
+  import { addDays } from "kanjidate";
+  import * as kanjidate from "kanjidate";
+  import {
+    DiseaseEndReason,
+    type DiseaseData,
+    type DiseaseEndReasonType,
+  } from "myclinic-model";
   import type { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";
+  import { startDateRep } from "./start-date-rep";
 
   export let env: DiseaseEnv | undefined;
   export let doMode: (mode: Mode) => void;
+  let selected: DiseaseData[] = [];
+  let endDate: Date = new Date();
+  let endDateErrors: Invalid[] = [];
+  let dateForm: DateFormWithCalendar;
+  let endReasons: DiseaseEndReasonType[] = [
+    DiseaseEndReason.Cured,
+    DiseaseEndReason.Stopped,
+    DiseaseEndReason.Dead,
+  ];
+  let endReason: DiseaseEndReasonType = DiseaseEndReason.Cured;
+
+  $: updateEndDate(selected);
+
+  function updateEndDate(list: DiseaseData[]): void {
+    let e: string | null = null;
+    list.forEach((d) => {
+      const s: string = d.disease.startDate;
+      if (e == null || s > e) {
+        e = s;
+      }
+    });
+    if (e == null) {
+      endDate = new Date();
+    } else {
+      endDate = new Date(e);
+    }
+    if (dateForm) {
+      dateForm.initValues(endDate);
+    }
+  }
+
+  function doWeekClick(event: MouseEvent): void {
+    const n = event.shiftKey ? -7 : 7;
+    endDate = addDays(endDate, n);
+  }
+
+  function doTodayClick(): void {
+    endDate = new Date();
+  }
+
+  function doEndOfMonthClick(): void {
+    const lastDay = kanjidate.lastDayOfMonth(
+      endDate.getFullYear(),
+      endDate.getMonth() + 1
+    );
+    const d = new Date(endDate);
+    d.setDate(lastDay);
+    endDate = d;
+  }
+
+  function doEndOfLastMonthClick(): void {
+    const d = new Date();
+    d.setDate(0);
+    endDate = d;
+  }
+
+  async function doEnter() {
+    if (endDateErrors.length > 0) {
+      alert("終了日が設定されていません。");
+      return;
+    }
+    const reasonCode = endReason.code;
+    const promises = selected.map((data) => {
+      const reason = data.hasSusp ? DiseaseEndReason.Stopped.code : reasonCode;
+      return api.endDisease(data.disease.diseaseId, endDate, reason);
+    });
+    await Promise.all(promises);
+  }
 </script>
 
-<div>Tenki</div>
+{#if env !== undefined}
+  <div>
+    {#each env.currentList as d}
+      {@const id = genid()}
+      <div>
+        <input type="checkbox" {id} bind:group={selected} value={d} />
+        <label for={id}
+          >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
+        >
+      </div>
+    {/each}
+    <div class="date-wrapper">
+      <DateFormWithCalendar
+        bind:date={endDate}
+        bind:errors={endDateErrors}
+        iconWidth="18px"
+        bind:this={dateForm}
+      >
+        <span slot="spacer" style:width="6px" />
+      </DateFormWithCalendar>
+    </div>
+    <div class="date-manip">
+      <a href="javascript:void(0)" on:click={doWeekClick}>週</a>
+      <a href="javascript:void(0)" on:click={doTodayClick}>今日</a>
+      <a href="javascript:void(0)" on:click={doEndOfMonthClick}>月末</a>
+      <a href="javascript:void(0)" on:click={doEndOfLastMonthClick}>先月末</a>
+    </div>
+    <div class="tenki">
+      {#each endReasons as reason}
+        {@const id = genid()}
+        <input type="radio" bind:group={endReason} value={reason} {id} />
+        <label for={id}>{reason.label}</label>
+      {/each}
+    </div>
+    <div class="commands">
+      <button on:click={doEnter}>入力</button>
+    </div>
+  </div>
+{/if}
+
+<style>
+  .date-wrapper {
+    font-size: 13px;
+    margin-top: 10px;
+  }
+
+  .date-wrapper :global(input) {
+    padding: 0px 2px;
+  }
+
+  .date-manip {
+    margin-top: 6px;
+  }
+
+  .date-manip :global(a) {
+    user-select: none;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: flex-end;
+  }
+</style>
