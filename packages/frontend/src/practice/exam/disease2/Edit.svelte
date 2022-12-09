@@ -40,7 +40,25 @@
     dataSrc = sel ?? undefined;
   });
 
-  function doEnter() {}
+  function doEnter() {
+    if (data == null) {
+      return;
+    }
+    const errors: Invalid[] = [];
+    let disease = data.unwrapDisease(errors);
+    if( errors.length > 0 ){
+      alert(errors.join("\n"));
+      return;
+    }
+    if( disease.endReason == DiseaseEndReason.NotEnded ){
+      disease = disease.clearEndDate();
+    }
+    await api.updateDiseaseEx(
+      disease,
+      data.shuushokugocodes
+    );
+    clearData();
+  }
 
   function doCancel() {
     dataSrc = undefined;
