@@ -67,14 +67,14 @@
       <div>名前：{data.fullName}</div>
       <div class="date-wrapper start-date">
         <DateFormWithCalendar
-          bind:date={data.startDate}
+          bind:date={data.disease.startDateAsDate}
           bind:errors={startDateErrors}
           {gengouList}
         />
       </div>
       <div class="date-wrapper end-date">
         <DateFormWithCalendar
-          bind:date={data.endDate}
+          bind:date={data.disease.endDateAsDate}
           bind:errors={endDateErrors}
           isNullable={true}
           {gengouList}

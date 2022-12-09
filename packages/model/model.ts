@@ -1233,6 +1233,26 @@ export class Disease {
     return new Date(this.startDate);
   }
 
+  set startDateAsDate(d: Date) {
+    this.startDate = dateToSqlDate(d);
+  }
+
+  get endDateAsDate(): Date | null {
+    if( this.endDate === "0000-00-00" ){
+      return null;
+    } else {
+      return new Date(this.endDate);
+    }
+  }
+
+  set endDateAsDate(d: Date | null) {
+    if( d === null ){
+      this.endDate = "0000-00-00";
+    } else {
+      this.endDate = dateToSqlDate(d);
+    }
+  }
+
   get endReason(): DiseaseEndReasonType {
     return DiseaseEndReasonType.fromCode(this.endReasonStore);
   }
