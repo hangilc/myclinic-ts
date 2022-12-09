@@ -8,6 +8,7 @@ export class DiseaseEnv {
   currentList: DiseaseData[];
   allList: DiseaseData[] | undefined = undefined;
   examples: DiseaseExample[];
+  editTarget: DiseaseData | undefined = undefined;
 
   static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
     api.listDiseaseExample

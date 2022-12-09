@@ -91,7 +91,6 @@
     await Promise.all(promises);
     env?.removeFromCurrentList(selected.map(d => d.disease.diseaseId));
     doMode("tenki");
-
   }
 </script>
 
