@@ -1237,8 +1237,14 @@ export class Disease {
     return DiseaseEndReasonType.fromCode(this.endReasonStore);
   }
 
-  clearEndDate(): void {
-    this.endDate = "0000-00-00";
+  clearEndDate(): Disease {
+    const c = this.clone();
+    c.endDate = "0000-00-00";
+    return c;
+  }
+
+  isValidAt(at: Date | string): boolean {
+    return isValidAt(this.startDate, this.endDate, at);
   }
 }
 

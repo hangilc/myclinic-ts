@@ -31,8 +31,29 @@ export class DiseaseEnv {
     }
   }
 
+  updateDisease(d: DiseaseData): void {
+    let i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
+    if( i >= 0 ){
+      if( !d.disease.isValidAt(new Date()) ){
+        this.currentList.splice(i, 1);
+      }
+    }
+    if( this.allList !== undefined ){
+      i = this.allList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
+      if( i >= 0 ){
+        this.allList.splice(i, 1, d);
+      }
+    }
+  }
+
   removeFromCurrentList(diseaseIds: number[]): void {
     this.currentList = this.currentList.filter(d => !diseaseIds.includes(d.disease.diseaseId));
+  }
+
+  async fetchAllList() {
+    if( this.allList === undefined ){
+      this.allList = await api.listDiseaseEx(this.patient.patientId);
+    }
   }
 
   static async create(patient: Patient): Promise<DiseaseEnv> {

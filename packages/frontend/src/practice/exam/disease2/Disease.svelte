@@ -61,6 +61,9 @@
         break;
       }
     }
+    if( c === Edit && env !== undefined ){
+      await env.fetchAllList();
+    }
     if( c === comp ){
       comp = undefined;
       await tick();

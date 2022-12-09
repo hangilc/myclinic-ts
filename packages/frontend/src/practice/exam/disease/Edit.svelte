@@ -89,13 +89,13 @@
       return;
     }
     const errors: string[] = [];
-    const disease = data.unwrapDisease(errors);
+    let disease = data.unwrapDisease(errors);
     if( errors.length > 0 ){
       alert(errors.join("\n"));
       return;
     }
     if( disease.endReason == DiseaseEndReason.NotEnded ){
-      disease.clearEndDate();
+      disease = disease.clearEndDate();
     }
     await api.updateDiseaseEx(
       disease,
