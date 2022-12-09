@@ -12,6 +12,7 @@
   import type { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
+  import api from "@/lib/api";
 
   export let env: DiseaseEnv | undefined;
   export let doMode: (mode: Mode) => void;
@@ -73,15 +74,24 @@
 
   async function doEnter() {
     if (endDateErrors.length > 0) {
-      alert("終了日が設定されていません。");
+      alert(endDateErrors.map(e => e.toString()).join("\n"));
       return;
     }
     const reasonCode = endReason.code;
+    for(let d of selected){
+      if( endDate < d.startDate ){
+        alert("終了日が開始日の前のものがあります。");
+        return;
+      }
+    }
     const promises = selected.map((data) => {
       const reason = data.hasSusp ? DiseaseEndReason.Stopped.code : reasonCode;
       return api.endDisease(data.disease.diseaseId, endDate, reason);
     });
     await Promise.all(promises);
+    env?.removeFromCurrentList(selected.map(d => d.disease.diseaseId));
+    doMode("tenki");
+
   }
 </script>
 

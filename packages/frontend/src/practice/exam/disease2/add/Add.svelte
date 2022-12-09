@@ -3,10 +3,17 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
   import type { Invalid } from "@/lib/validator";
-  import { ByoumeiMaster, DiseaseData, DiseaseEnterData, DiseaseExample, ShuushokugoMaster } from "myclinic-model";
-  import type { DiseaseEnv } from "./disease-env";
-  import type { Mode } from "./mode";
-  import DiseaseSearchForm from "./search/DiseaseSearchForm.svelte";
+  import {
+    ByoumeiMaster,
+    DiseaseData,
+    DiseaseEnterData,
+    DiseaseExample,
+    ShuushokugoMaster,
+  } from "myclinic-model";
+  import type { DiseaseEnv } from "../disease-env";
+  import type { Mode } from "../mode";
+  import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
+  import DatesPulldown from "./DatesPulldown.svelte";
 
   export let env: DiseaseEnv | undefined;
   export let doMode: (mode: Mode) => void;
@@ -16,14 +23,34 @@
   let startDateErrors: Invalid[] = [];
   let chooseStartDateIcon: SVGSVGElement;
 
-  function doChooseStartDate() {
-
+  async function doChooseStartDate(evt: Event) {
+    if (env !== undefined) {
+      const visits = await api.listVisitByPatientReverse(
+        env.patient.patientId,
+        0,
+        10
+      );
+      const visitDates = visits.map(
+        (v) => new Date(v.visitedAt.substring(0, 10))
+      );
+      const d: DatesPulldown = new DatesPulldown({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          anchor: chooseStartDateIcon,
+          dates: visitDates,
+          onSelect: (d: Date) => startDate = d
+        },
+      });
+    }
   }
 
   async function doEnter() {
     if (env != undefined && byoumeiMaster != null) {
       if (startDateErrors.length > 0) {
-        alert("エラー：\n" + startDateErrors.map(e => e.toString()).join("\n"));
+        alert(
+          "エラー：\n" + startDateErrors.map((e) => e.toString()).join("\n")
+        );
         return;
       }
       const data: DiseaseEnterData = {
@@ -47,7 +74,9 @@
     adjList = [];
   }
 
-  async function onSearchSelect(r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample) {
+  async function onSearchSelect(
+    r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
+  ) {
     if (ByoumeiMaster.isByoumeiMaster(r)) {
       byoumeiMaster = r;
     } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
@@ -71,7 +100,6 @@
           adjList = cur;
         } else {
           throw new Error("Cannot resolve adj name: " + r.byoumei);
-
         }
       });
     }
@@ -82,7 +110,7 @@
   <div>
     名称：{byoumeiMaster?.name || ""}{adjList.map((m) => m.name).join("")}
   </div>
-  <div>
+  <div class="start-date-wrapper">
     <DateFormWithCalendar
       bind:date={startDate}
       bind:errors={startDateErrors}
@@ -109,17 +137,30 @@
       </svelte:fragment>
     </DateFormWithCalendar>
   </div>
-  <div>
+  <div class="command-box">
     <button on:click={doEnter}>入力</button>
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm examples={env?.examples ?? []} {startDate} onSelect={onSearchSelect}/>
+  <DiseaseSearchForm
+    examples={env?.examples ?? []}
+    {startDate}
+    onSelect={onSearchSelect}
+  />
 </div>
 
 <style>
+  .start-date-wrapper {
+    font-size: 13px;
+    margin: 4px 0;
+  }
+
   .choice-icon {
     color: gray;
     cursor: pointer;
+  }
+
+  .command-box {
+    margin: 4px 0;
   }
 </style>

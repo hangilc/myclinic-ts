@@ -30,6 +30,10 @@ export class DiseaseEnv {
     }
   }
 
+  removeFromCurrentList(diseaseIds: number[]): void {
+    this.currentList = this.currentList.filter(d => !diseaseIds.includes(d.disease.diseaseId));
+  }
+
   static async create(patient: Patient): Promise<DiseaseEnv> {
     const cur = await api.listCurrentDiseaseEx(patient.patientId);
     const examples = await DiseaseEnv.examplesCache.get();

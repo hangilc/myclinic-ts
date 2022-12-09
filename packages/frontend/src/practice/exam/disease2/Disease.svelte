@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Add from "./Add.svelte";
+  import Add from "./add/Add.svelte";
   import Current from "./Current.svelte";
   import Tenki from "./Tenki.svelte";
   import Edit from "./Edit.svelte";
@@ -38,7 +38,6 @@
   });
 
   async function doMode(mode: Mode) {
-    console.log("enter doMode", comp);
     let c: typeof comp;
     switch (mode) {
       case "current": {

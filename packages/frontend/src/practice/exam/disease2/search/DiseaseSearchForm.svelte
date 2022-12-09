@@ -64,7 +64,7 @@
   }
 </script>
 
-<div>
+<div class="command-box">
   <form class="search-form" on:submit|preventDefault={doSearch}>
     <input type="text" class="search-text-input" bind:value={searchText} />
     <button type="submit">検索</button>
@@ -93,6 +93,10 @@
 </div>
 
 <style>
+  .command-box {
+    margin: 4px 0;
+  }
+  
   .search-form {
     display: inline-block;
   }
