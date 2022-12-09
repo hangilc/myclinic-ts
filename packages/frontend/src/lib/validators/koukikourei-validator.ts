@@ -1,6 +1,6 @@
 import { Koukikourei } from "myclinic-model";
 import {
-  isNotNull,
+  notNull,
   isPositive,
   isNotEmpty,
   oneOf,
@@ -30,7 +30,7 @@ export function validateKoukikourei(
     input.hokenshaBangou.and(isNotEmpty).unwrap(errs, "保険者番号"),
     input.hihokenshaBangou.and(isNotEmpty).unwrap(errs, "被保険者番号"),
     input.futanWari.and(oneOf([1, 2, 3])).unwrap(errs, "負担割"),
-    input.validFrom.to(isNotNull).map(toSqlDate).unwrap(errs, "期限開始"),
+    input.validFrom.to(notNull).map(toSqlDate).unwrap(errs, "期限開始"),
     input.validUpto.map(toOptionalSqlDate).unwrap(errs, "期限終了")
   );
   if (errs.length > 0) {

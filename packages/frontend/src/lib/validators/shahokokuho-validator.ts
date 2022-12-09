@@ -1,5 +1,5 @@
 import { Shahokokuho } from "myclinic-model";
-import { isNotNull, isPositive, isNotEmpty, oneOf, type Invalid, type ValidationResult, inRange, toSqlDate, toOptionalSqlDate } from "../validator";
+import { notNull, isPositive, isNotEmpty, oneOf, type Invalid, type ValidationResult, inRange, toSqlDate, toOptionalSqlDate } from "../validator";
 
 export interface ShahokokuhoInput {
   patientId: ValidationResult<number>;
@@ -25,7 +25,7 @@ export function validateShahokokuho(
     input.hihokenshaKigou.unwrap(errs, "被保険者記号"),
     input.hihokenshaBangou.and(isNotEmpty).unwrap(errs, "被保険者番号"),
     input.honninStore.and(oneOf([0, 1])).unwrap(errs, "本人・家族"),
-    input.validFrom.to(isNotNull).map(toSqlDate).unwrap(errs, "期限開始"),
+    input.validFrom.to(notNull).map(toSqlDate).unwrap(errs, "期限開始"),
     input.validUpto.map(toOptionalSqlDate).unwrap(errs, "期限終了"),
     input.koureiStore.and(inRange(0, 3)).unwrap(errs, "高齢"),
     input.edaban.unwrap(errs, "枝番"),

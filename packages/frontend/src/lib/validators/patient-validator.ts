@@ -1,7 +1,7 @@
 import { Patient } from "myclinic-model";
 import {
   Invalid,
-  isNotNull,
+  notNull,
   isNotEmpty,
   oneOf,
   toSqlDate,
@@ -33,7 +33,7 @@ export function validatePatient(
     input.lastNameYomi.and(isNotEmpty).unwrap(errs, "姓のよみ"),
     input.firstNameYomi.and(isNotEmpty).unwrap(errs, "名のよみ"),
     input.sex.and(oneOf(["M", "F"])).unwrap(errs, "性別"),
-    input.birthday.to(isNotNull).map(toSqlDate).unwrap(errs, "生年月日"),
+    input.birthday.to(notNull).map(toSqlDate).unwrap(errs, "生年月日"),
     input.address.unwrap(errs, "住所"),
     input.phone.unwrap(errs, "電話番号")
   );

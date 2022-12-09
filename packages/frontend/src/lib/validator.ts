@@ -1,5 +1,6 @@
 import { HighlightSpanKind } from "typescript";
 import { dateToSql } from "./util";
+import { dateSrc } from "./validators/date-validator";
 
 export class Valid<T> {
   constructor(public value: T) {}
@@ -9,7 +10,7 @@ export class Invalid {
   constructor(public error: string, public prefixList: string[] = []) {}
 
   unshiftPrefix(prefix?: string): Invalid {
-    if( prefix == undefined ){
+    if (prefix == undefined) {
       return this;
     } else {
       return new Invalid(this.error, [prefix, ...this.prefixList]);
@@ -22,9 +23,7 @@ export class Invalid {
 }
 
 export class ValidationResult<T> {
-  constructor(
-    public result: Valid<T> | Invalid[],
-  ) {}
+  constructor(public result: Valid<T> | Invalid[]) {}
 
   get isValid(): boolean {
     return this.result instanceof Valid<T>;
@@ -34,7 +33,7 @@ export class ValidationResult<T> {
     if (this.result instanceof Valid) {
       return [];
     } else {
-      return this.result.map(e => e.toString());
+      return this.result.map((e) => e.toString());
     }
   }
 
@@ -86,7 +85,7 @@ export class ValidationResult<T> {
   }
 
   fold<U>(fValid: (v: T) => U, fError: (es: Invalid[]) => U): U {
-    if( this.result instanceof Valid<T> ){
+    if (this.result instanceof Valid<T>) {
       return fValid(this.result.value);
     } else {
       return fError(this.result);
@@ -95,9 +94,7 @@ export class ValidationResult<T> {
 
   map<U>(f: (t: T) => U): ValidationResult<U> {
     if (this.result instanceof Valid<T>) {
-      return new ValidationResult<U>(
-        new Valid<U>(f(this.result.value))
-      );
+      return new ValidationResult<U>(new Valid<U>(f(this.result.value)));
     } else {
       return new ValidationResult<U>(this.result);
     }
@@ -112,7 +109,7 @@ export class ValidationResult<T> {
       cb(true);
       return this.result.value;
     } else {
-      errorCollector.push(...this.result.map(e => e.unshiftPrefix(prefix)));
+      errorCollector.push(...this.result.map((e) => e.unshiftPrefix(prefix)));
       cb(false);
       return undefined as any;
     }
@@ -138,9 +135,7 @@ export function and<T>(
 }
 
 function genSrc<T>(src: T): ValidationResult<T> {
-  return new ValidationResult<T>(
-    new Valid(src)
-  );
+  return new ValidationResult<T>(new Valid(src));
 }
 
 export function strSrc(src: string): ValidationResult<string> {
@@ -148,7 +143,7 @@ export function strSrc(src: string): ValidationResult<string> {
 }
 
 export function numberSrc(src: number | string): ValidationResult<number> {
-  if( typeof src === "number" ){
+  if (typeof src === "number") {
     return genSrc<number>(src);
   } else {
     return strSrc(src).to(toNumber);
@@ -158,7 +153,6 @@ export function numberSrc(src: number | string): ValidationResult<number> {
 export function intSrc(src: number | string): ValidationResult<number> {
   return numberSrc(src).and(isInt);
 }
-
 
 type VFun<T> = (src: T) => Valid<T> | Invalid;
 
@@ -170,7 +164,7 @@ export const isNotEmpty: VFun<string> = (src: string) => {
   }
 };
 
-export function regex(re: RegExp): VFun<string> {
+export function matchRegex(re: RegExp): VFun<string> {
   return (src: string) => {
     if (re.test(src)) {
       return new Valid(src);
@@ -178,6 +172,16 @@ export function regex(re: RegExp): VFun<string> {
       return new Invalid("入力が不適切です。");
     }
   };
+}
+
+export function isNotEqual<T>(t: T): VFun<T> {
+  return (src: T) => {
+    if( src === t ){
+      return new Valid(src);
+    } else {
+      return new Invalid("不適切な値です：" + t);
+    }
+  }
 }
 
 export function toNumber(src: string): Valid<number> | Invalid {
@@ -201,6 +205,8 @@ export const isPositive: VFun<number> = pred<number>(
   (t: number) => t > 0,
   "正の数でありません。"
 );
+
+export const isPositiveInt: VFun<number> = and(isInt, isPositive);
 
 export function inRange(min: number, max: number): VFun<number> {
   return (n: number) => {
@@ -257,10 +263,32 @@ export function toOptionalSqlDate(date: Date | null): string {
   return date === null ? "0000-00-00" : dateToSql(date);
 }
 
-export function isNotNull<T>(t: T | null): Valid<T> | Invalid {
+export function notNull<T>(t: T | null): Valid<T> | Invalid {
   if (t === null) {
     return new Invalid("Null pointer.");
   } else {
     return new Valid<T>(t);
   }
 }
+
+export function sqlDateSrc(
+  date: Date | null,
+  errors: Invalid[]
+): ValidationResult<string> {
+  return dateSrc(date, errors).to(notNull).map(toSqlDate);
+}
+
+export const validFromSrc = sqlDateSrc;
+
+export function optionalSqlDateSrc(
+  date: Date | null,
+  errors: Invalid[]
+): ValidationResult<string> {
+  return dateSrc(date, errors).map(toOptionalSqlDate);
+}
+
+export const validUptoSrc = optionalSqlDateSrc;
+
+export const isSqlDate = and<string>(matchRegex(/\d{4}-\d{2}-\d{2}/), isNotEqual("0000-00-00"));
+
+export const isOptionalSqlDate = and<string>(matchRegex(/\d{4}-\d{2}-\d{2}/));
