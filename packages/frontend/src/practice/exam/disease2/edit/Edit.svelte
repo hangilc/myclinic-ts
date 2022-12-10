@@ -1,35 +1,28 @@
 <script lang="ts">
   import SelectItem from "@/lib/SelectItem.svelte";
-  import type { Invalid } from "@/lib/validator";
   import type { DiseaseData } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import type { DiseaseEnv } from "../disease-env";
   import { endDateRep } from "../end-date-rep";
   import type { Mode } from "../mode";
   import { startDateRep } from "../start-date-rep";
+  import {
+    composeEditFormValues,
+    type EditFormValues,
+  } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
 
-  export let env: DiseaseEnv | undefined;
+  export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
-  const gengouList = ["平成", "令和"];
-  let dataSrc: DiseaseData | undefined = env?.editTarget;
-  let data: DiseaseData | undefined;
-  let diseaseDataSelected: Writable<DiseaseData | null> = writable(null);
-  let startDateErrors: Invalid[] = [];
-  let endDateErrors: Invalid[] = [];
 
-  $: {
-    if (dataSrc === undefined) {
-      data = undefined;
-    } else {
-      data = dataSrc.clone();
-    }
-    startDateErrors = [];
-    endDateErrors = [];
-  }
+  let formValues: EditFormValues | undefined =
+    env.editTarget == undefined
+      ? undefined
+      : composeEditFormValues(env.editTarget);
+  let diseaseDataSelected: Writable<DiseaseData | null> = writable(null);
 
   diseaseDataSelected.subscribe((sel) => {
-    dataSrc = sel ?? undefined;
+    formValues = sel == undefined ? undefined : composeEditFormValues(sel);
   });
 
   function formatAux(data: DiseaseData): string {
@@ -43,78 +36,36 @@
     return `${reason.label}、${start}${end}`;
   }
 
-  function doEnter() {
-    // if (data == null) {
-    //   return;
-    // }
-    // const errors: Invalid[] = [];
-    // let disease = data.unwrapDisease(errors);
-    // if( errors.length > 0 ){
-    //   alert(errors.join("\n"));
-    //   return;
-    // }
-    // if( disease.endReason == DiseaseEndReason.NotEnded ){
-    //   disease = disease.clearEndDate();
-    // }
-    // await api.updateDiseaseEx(
-    //   disease,
-    //   data.shuushokugocodes
-    // );
-    // clearData();
-  }
-
   function doFormCancel() {
-    dataSrc = undefined;
+    formValues = undefined;
   }
-
+  function doFormEnter(d: DiseaseData) {
+    env.updateDisease(d);
+    doMode("edit");
+  }
 </script>
 
-{#if env != undefined}
-    <EditForm examples={env.examples} {data} onCancel={doFormCancel} />
-    <!-- <div>
-      <div>名前：{data.fullName}</div>
-      <div class="date-wrapper start-date">
-        <DateFormWithCalendar
-          bind:date={data.disease.startDateAsDate}
-          bind:errors={startDateErrors}
-          {gengouList}
-        />
-      </div>
-      <div class="date-wrapper end-date">
-        <DateFormWithCalendar
-          bind:date={data.disease.endDateAsDate}
-          bind:errors={endDateErrors}
-          isNullable={true}
-          {gengouList}
-        />
-      </div>
-      <div class="end-reason">
-        {#each Object.values(DiseaseEndReason) as reason}
-          {@const id = genid()}
-          <input type="radio" bind:group={data.endReason} value={reason} {id} />
-          <label for={id}>{reason.label}</label>
-        {/each}
-      </div>
-      <div>
-        <button on:click={doEnter}>入力</button>
-        <a href="javascript:void(0)" on:click={doCancel}>キャンセル</a>
-      </div>
-      <DiseaseSearchForm
-        examples={env.examples}
-        startDate={data.startDate}
-        onSelect={onSearchSelect}
-      />
-    </div> -->
-  <div class="list select">
-    {#each env?.allList ?? [] as data}
-      <SelectItem selected={diseaseDataSelected} {data}>
-        <span class="disease-name" class:hasEnd={data.hasEndDate}
-          >{data.fullName}</span
-        > <span>({formatAux(data)})</span>
-      </SelectItem>
-    {/each}
-  </div>
-{/if}
+{#key formValues}
+  {#if formValues == undefined}
+    （病名未選択）
+  {:else}
+    <EditForm
+      examples={env.examples}
+      {formValues}
+      onCancel={doFormCancel}
+      onEnter={doFormEnter}
+    />
+  {/if}
+{/key}
+<div class="list select">
+  {#each env?.allList ?? [] as data}
+    <SelectItem selected={diseaseDataSelected} {data}>
+      <span class="disease-name" class:hasEnd={data.hasEndDate}
+        >{data.fullName}</span
+      > <span>({formatAux(data)})</span>
+    </SelectItem>
+  {/each}
+</div>
 
 <style>
   .list.select {

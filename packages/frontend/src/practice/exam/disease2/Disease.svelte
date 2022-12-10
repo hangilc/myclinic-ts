@@ -9,7 +9,6 @@
   import { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";
 
-  let show = false;
   const unsubs: (() => void)[] = [];
   let comp:
     | undefined
@@ -22,13 +21,11 @@
   unsubs.push(
     currentPatient.subscribe(async (p) => {
       if (p == null) {
-        show = false;
         env = undefined;
         comp = undefined;
       } else {
         env = await DiseaseEnv.create(p);
         comp = Current;
-        show = true;
       }
     })
   );
@@ -74,7 +71,7 @@
   }
 </script>
 
-{#if show}
+{#if env != undefined}
   <RightBox title="病名">
     <div class="workarea">
       <svelte:component this={comp} {env} {doMode} />

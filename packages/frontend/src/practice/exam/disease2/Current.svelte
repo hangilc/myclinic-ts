@@ -4,9 +4,9 @@
   import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
 
-  export let env: DiseaseEnv | undefined;
+  export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
-  const list = env?.currentList ?? [];
+  const list = env.currentList;
 
   function onDiseaseClick(d: DiseaseData) {
     

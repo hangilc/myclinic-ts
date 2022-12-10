@@ -44,21 +44,24 @@ export function validateDiseaseInput(
     input.endDate.and(isOptionalSqlDate).unwrap(errs, "終了日"),
     input.endReason.and(oneOf(endReasonCodes)).unwrap(errs, "転機")
   );
-  if (
-    typeof disease.startDate === "string" &&
-    typeof disease.endDate === "string"
-  ) {
+  if (errs.length === 0) {
     if (
       disease.endDate !== "0000-00-00" &&
-      disease.startDate < disease.endDate
+      disease.startDate > disease.endDate
     ) {
       errs.push(new Invalid("開始日が終了日のあとです。"));
+    }
+    if (
+      disease.endReasonStore !== DiseaseEndReason.NotEnded.code &&
+      disease.endDate === "0000-00-00"
+    ) {
+      errs.push(new Invalid("終了日が設定されていません。"));
     }
   }
   if (errs.length > 0) {
     return errs;
   } else {
-    if( disease.endReasonStore === DiseaseEndReason.NotCured.code ){
+    if (disease.endReasonStore === DiseaseEndReason.NotEnded.code) {
       disease.endDate = "0000-00-00";
     }
     return disease;

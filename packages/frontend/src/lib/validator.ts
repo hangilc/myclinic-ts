@@ -176,7 +176,7 @@ export function matchRegex(re: RegExp): VFun<string> {
 
 export function isNotEqual<T>(t: T): VFun<T> {
   return (src: T) => {
-    if( src === t ){
+    if( src !== t ){
       return new Valid(src);
     } else {
       return new Invalid("不適切な値です：" + t);

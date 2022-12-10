@@ -8,7 +8,6 @@
     ByoumeiMaster,
     Disease,
     DiseaseEndReason,
-    DiseaseEndReasonType,
     DiseaseExample,
     diseaseFullName,
     ShuushokugoMaster,
@@ -16,129 +15,116 @@
   } from "myclinic-model";
   import { foldSearchResult } from "../fold-search-result";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
+  import type { EditFormValues } from "./edit-form-values";
 
-  export let data: DiseaseData | null;
+  export let formValues: EditFormValues;
   export let examples: DiseaseExample[];
   export let onEnter: (entered: DiseaseData) => void;
   export let onCancel: () => void;
-  let byoumeiMaster: ByoumeiMaster | null = null;
-  let shuushokugoMasters: ShuushokugoMaster[] = [];
-  let startDate: Date | null = null;
   let startDateErrors: Invalid[] = [];
-  let endDate: Date | null = null;
   let endDateErrors: Invalid[] = [];
-  let endReason: DiseaseEndReasonType = DiseaseEndReason.Cured;
+  let errors: string[] = [];
 
   let fullName: string = "";
-  $: fullName = diseaseFullName(byoumeiMaster, shuushokugoMasters);
+  $: fullName = diseaseFullName(
+    formValues.byoumeiMaster,
+    formValues.shuushokugoMasters
+  );
   const gengouList = ["平成", "令和"];
 
-  $: initFormValues(data);
-
-  function initFormValues(data: DiseaseData | null): void {
-    if (data == null) {
-      clear();
-    } else {
-      byoumeiMaster = data.byoumeiMaster;
-      shuushokugoMasters = data.shuushokugoMasters;
-      startDate = data.disease.startDateAsDate;
-      startDateErrors = [];
-      endDate = data.disease.endDateAsDate;
-      endDateErrors = [];
-      endReason = data.disease.endReason;
-    }
-  }
-
-  function clear(): void {
-    byoumeiMaster = null;
-    shuushokugoMasters = [];
-    startDate = null;
+  function clearErrors(): void {
     startDateErrors = [];
-    endDate = null;
     endDateErrors = [];
-    endReason = DiseaseEndReason.Cured;
   }
 
   async function doEnter() {
-    if (data == null) {
-      return;
-    }
+    clearErrors();
     const dr: Disease | Invalid[] = validateDisease({
-      diseaseId: data.disease.diseaseId,
-      patientId: data.disease.patientId,
-      shoubyoumeicode: byoumeiMaster?.shoubyoumeicode ?? 0,
-      startDate,
-      startDateErrors,
-      endDate,
-      endDateErrors: [],
-      endReason,
+      diseaseId: formValues.diseaseId,
+      patientId: formValues.patientId,
+      shoubyoumeicode: formValues.byoumeiMaster?.shoubyoumeicode ?? 0,
+      startDate: formValues.startDate,
+      startDateErrors: startDateErrors,
+      endDate: formValues.endDate,
+      endDateErrors: endDateErrors,
+      endReason: formValues.endReason,
     });
     if (dr instanceof Disease) {
       const ok = await api.updateDiseaseEx(
         dr,
-        shuushokugoMasters.map((m) => m.shuushokugocode)
+        formValues.shuushokugoMasters.map((m) => m.shuushokugocode)
       );
       if (!ok) {
         alert("症病名の更新に失敗しました。");
         return;
       } else {
-        const entered = await api.getDiseaseEx(data.disease.diseaseId);
+        const entered = await api.getDiseaseEx(formValues.diseaseId);
         onEnter(entered);
       }
+    } else {
+      errors = dr.map(e => e.toString());
     }
   }
 
   function doSusp() {
-    const c = shuushokugoMasters;
-    c.push(ShuushokugoMaster.suspMaster);
-    shuushokugoMasters = c;
+    const c = formValues;
+    c.shuushokugoMasters.push(ShuushokugoMaster.suspMaster);
+    formValues = c;
   }
 
   function doDelAdj() {
-    shuushokugoMasters = [];
+    const c = formValues;
+    c.shuushokugoMasters = [];
+    formValues = c;
   }
 
   function doSearchSelect(
     r: DiseaseExample | ByoumeiMaster | ShuushokugoMaster
   ) {
-    if (data != null) {
-      foldSearchResult(
-        r,
-        data.disease.startDateAsDate,
-        (m: ByoumeiMaster) => {
-          byoumeiMaster = m;
-        },
-        (a: ShuushokugoMaster) => {
-          const c = shuushokugoMasters;
-          c.push(a);
-          shuushokugoMasters = c;
-        },
-        (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
-          if (m != null) {
-            byoumeiMaster = m;
-          }
-          const c = shuushokugoMasters;
-          c.push(...as);
-          shuushokugoMasters = c;
+    foldSearchResult(
+      r,
+      formValues.startDate ?? new Date(),
+      (m: ByoumeiMaster) => {
+        const c = formValues;
+        c.byoumeiMaster = m;
+        formValues = c;
+      },
+      (a: ShuushokugoMaster) => {
+        const c = formValues;
+        c.shuushokugoMasters.push(a);
+        formValues = c;
+      },
+      (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
+        const c = formValues;
+        if (m != null) {
+          c.byoumeiMaster = m;
         }
-      );
-    }
+        c.shuushokugoMasters.push(...as);
+        formValues = c;
+      }
+    );
   }
 </script>
 
-{#if data != null}
 <div>
-  <div>名前：{data.fullName}</div>
+  {#if errors.length > 0}
+  <div class="errors">
+    {#each errors as err}
+    <div>{err}</div>
+    {/each}
+  </div>
+  {/if}
+  <div>名前：{fullName}</div>
   <div class="date-wrapper start-date">
     <DateFormWithCalendar
-      bind:date={data.disease.startDateAsDate}
+      bind:date={formValues.startDate}
       bind:errors={startDateErrors}
       {gengouList}
     />
   </div>
   <div class="date-wrapper end-date">
     <DateFormWithCalendar
-      bind:date={data.disease.endDateAsDate}
+      bind:date={formValues.endDate}
       bind:errors={endDateErrors}
       isNullable={true}
       {gengouList}
@@ -147,30 +133,28 @@
   <div class="end-reason">
     {#each Object.values(DiseaseEndReason) as reason}
       {@const id = genid()}
-      <input type="radio" bind:group={data.endReason} value={reason} {id} />
+      <input type="radio" bind:group={formValues.endReason} value={reason} {id} />
       <label for={id}>{reason.label}</label>
     {/each}
   </div>
   <div>
     <button on:click={doEnter}>入力</button>
-    <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
-  </div>
-  <div class="command-box">
-    <button on:click={doEnter}>入力</button>
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
+    <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
   </div>
   <DiseaseSearchForm
     {examples}
-    startDate={data.disease.startDateAsDate}
+    startDate={formValues.startDate ?? new Date()}
     onSelect={doSearchSelect}
   />
 </div>
-{:else}
-（病名未選択）
-{/if}
 
 <style>
+  .errors {
+    margin: 10px 0;
+    color: red;
+  }
   .date-wrapper {
     font-size: 13px;
     margin-top: 4px;

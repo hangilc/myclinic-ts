@@ -9,6 +9,7 @@ export class DiseaseEnv {
   allList: DiseaseData[] | undefined = undefined;
   examples: DiseaseExample[];
   editTarget: DiseaseData | undefined = undefined;
+  today: Date = new Date();
 
   static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
     api.listDiseaseExample
@@ -32,14 +33,22 @@ export class DiseaseEnv {
   }
 
   updateDisease(d: DiseaseData): void {
-    let i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-    if( i >= 0 ){
-      if( !d.disease.isValidAt(new Date()) ){
-        this.currentList.splice(i, 1);
+    if( d.disease.isCurrentAt(this.today)) {
+      const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
+      if( i >= 0 ){
+        this.currentList.splice(i, 1, d);
+      } else {
+        this.currentList.push(d);
+        this.currentList.sort((a, b) => a.disease.diseaseId - b.disease.diseaseId)
       }
+    } else {
+      const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
+      if( i >= 0 ){
+        this.currentList.splice(i, 1);
+      }    
     }
     if( this.allList !== undefined ){
-      i = this.allList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
+      const i = this.allList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
       if( i >= 0 ){
         this.allList.splice(i, 1, d);
       }
@@ -61,4 +70,5 @@ export class DiseaseEnv {
     const examples = await DiseaseEnv.examplesCache.get();
     return new DiseaseEnv(patient, cur, examples);
   }
+
 }

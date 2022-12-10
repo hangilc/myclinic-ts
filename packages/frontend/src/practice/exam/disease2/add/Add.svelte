@@ -16,7 +16,7 @@
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
   import DatesPulldown from "./DatesPulldown.svelte";
 
-  export let env: DiseaseEnv | undefined;
+  export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
@@ -25,29 +25,27 @@
   let chooseStartDateIcon: SVGSVGElement;
 
   async function doChooseStartDate(evt: Event) {
-    if (env !== undefined) {
-      const visits = await api.listVisitByPatientReverse(
-        env.patient.patientId,
-        0,
-        10
-      );
-      const visitDates = visits.map(
-        (v) => new Date(v.visitedAt.substring(0, 10))
-      );
-      const d: DatesPulldown = new DatesPulldown({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          anchor: chooseStartDateIcon,
-          dates: visitDates,
-          onSelect: (d: Date) => startDate = d
-        },
-      });
-    }
+    const visits = await api.listVisitByPatientReverse(
+      env.patient.patientId,
+      0,
+      10
+    );
+    const visitDates = visits.map(
+      (v) => new Date(v.visitedAt.substring(0, 10))
+    );
+    const d: DatesPulldown = new DatesPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: chooseStartDateIcon,
+        dates: visitDates,
+        onSelect: (d: Date) => (startDate = d),
+      },
+    });
   }
 
   async function doEnter() {
-    if (env != undefined && byoumeiMaster != null) {
+    if (byoumeiMaster != null) {
       if (startDateErrors.length > 0) {
         alert(
           "エラー：\n" + startDateErrors.map((e) => e.toString()).join("\n")
@@ -78,50 +76,26 @@
   async function onSearchSelect(
     r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
   ) {
-    foldSearchResult(r, startDate, 
+    foldSearchResult(
+      r,
+      startDate,
       (m: ByoumeiMaster) => {
         byoumeiMaster = m;
       },
       (a: ShuushokugoMaster) => {
         const cur = adjList;
-      cur.push(a);
-      adjList = cur;
+        cur.push(a);
+        adjList = cur;
       },
       (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
-        if( m != null ){
+        if (m != null) {
           byoumeiMaster = m;
         }
         const cur = adjList;
         cur.push(...as);
         adjList = cur;
       }
-    )
-    // if (ByoumeiMaster.isByoumeiMaster(r)) {
-    //   byoumeiMaster = r;
-    // } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
-    //   const cur = adjList;
-    //   cur.push(r);
-    //   adjList = cur;
-    // } else if (DiseaseExample.isDiseaseExample(r)) {
-    //   if (r.byoumei != null) {
-    //     const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
-    //     if (m != null) {
-    //       byoumeiMaster = m;
-    //     } else {
-    //       throw new Error("Cannot resolve byoumei: " + r.byoumei);
-    //     }
-    //   }
-    //   [...r.preAdjList, ...r.postAdjList].forEach(async (name) => {
-    //     const m = await api.resolveShuushokugoMasterByName(name, startDate);
-    //     if (m != null) {
-    //       const cur = adjList;
-    //       cur.push(m);
-    //       adjList = cur;
-    //     } else {
-    //       throw new Error("Cannot resolve adj name: " + r.byoumei);
-    //     }
-    //   });
-    // }
+    );
   }
 </script>
 
@@ -162,7 +136,7 @@
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
   <DiseaseSearchForm
-    examples={env?.examples ?? []}
+    examples={env.examples}
     {startDate}
     onSelect={onSearchSelect}
   />

@@ -1277,6 +1277,10 @@ export class Disease {
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.startDate, this.endDate, at);
   }
+
+  isCurrentAt(at: Date | string): boolean {
+    return this.isValidAt(at) && this.endReason === DiseaseEndReason.NotEnded;
+  }
 }
 
 export class DiseaseAdj {

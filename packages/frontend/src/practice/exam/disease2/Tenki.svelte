@@ -14,7 +14,7 @@
   import { startDateRep } from "./start-date-rep";
   import api from "@/lib/api";
 
-  export let env: DiseaseEnv | undefined;
+  export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
   let selected: DiseaseData[] = [];
   let endDate: Date = new Date();
@@ -74,12 +74,12 @@
 
   async function doEnter() {
     if (endDateErrors.length > 0) {
-      alert(endDateErrors.map(e => e.toString()).join("\n"));
+      alert(endDateErrors.map((e) => e.toString()).join("\n"));
       return;
     }
     const reasonCode = endReason.code;
-    for(let d of selected){
-      if( endDate < d.startDate ){
+    for (let d of selected) {
+      if (endDate < d.startDate) {
         alert("終了日が開始日の前のものがあります。");
         return;
       }
@@ -89,50 +89,48 @@
       return api.endDisease(data.disease.diseaseId, endDate, reason);
     });
     await Promise.all(promises);
-    env?.removeFromCurrentList(selected.map(d => d.disease.diseaseId));
+    env.removeFromCurrentList(selected.map((d) => d.disease.diseaseId));
     doMode("tenki");
   }
 </script>
 
-{#if env !== undefined}
-  <div>
-    {#each env.currentList as d}
-      {@const id = genid()}
-      <div>
-        <input type="checkbox" {id} bind:group={selected} value={d} />
-        <label for={id}
-          >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
-        >
-      </div>
-    {/each}
-    <div class="date-wrapper">
-      <DateFormWithCalendar
-        bind:date={endDate}
-        bind:errors={endDateErrors}
-        iconWidth="18px"
-        bind:this={dateForm}
+<div>
+  {#each env.currentList as d}
+    {@const id = genid()}
+    <div>
+      <input type="checkbox" {id} bind:group={selected} value={d} />
+      <label for={id}
+        >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
       >
-        <span slot="spacer" style:width="6px" />
-      </DateFormWithCalendar>
     </div>
-    <div class="date-manip">
-      <a href="javascript:void(0)" on:click={doWeekClick}>週</a>
-      <a href="javascript:void(0)" on:click={doTodayClick}>今日</a>
-      <a href="javascript:void(0)" on:click={doEndOfMonthClick}>月末</a>
-      <a href="javascript:void(0)" on:click={doEndOfLastMonthClick}>先月末</a>
-    </div>
-    <div class="tenki">
-      {#each endReasons as reason}
-        {@const id = genid()}
-        <input type="radio" bind:group={endReason} value={reason} {id} />
-        <label for={id}>{reason.label}</label>
-      {/each}
-    </div>
-    <div class="commands">
-      <button on:click={doEnter}>入力</button>
-    </div>
+  {/each}
+  <div class="date-wrapper">
+    <DateFormWithCalendar
+      bind:date={endDate}
+      bind:errors={endDateErrors}
+      iconWidth="18px"
+      bind:this={dateForm}
+    >
+      <span slot="spacer" style:width="6px" />
+    </DateFormWithCalendar>
   </div>
-{/if}
+  <div class="date-manip">
+    <a href="javascript:void(0)" on:click={doWeekClick}>週</a>
+    <a href="javascript:void(0)" on:click={doTodayClick}>今日</a>
+    <a href="javascript:void(0)" on:click={doEndOfMonthClick}>月末</a>
+    <a href="javascript:void(0)" on:click={doEndOfLastMonthClick}>先月末</a>
+  </div>
+  <div class="tenki">
+    {#each endReasons as reason}
+      {@const id = genid()}
+      <input type="radio" bind:group={endReason} value={reason} {id} />
+      <label for={id}>{reason.label}</label>
+    {/each}
+  </div>
+  <div class="commands">
+    <button on:click={doEnter}>入力</button>
+  </div>
+</div>
 
 <style>
   .date-wrapper {
