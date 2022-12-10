@@ -1111,6 +1111,16 @@ export class CreateShinryouConductRequest {
   }
 }
 
+export function diseaseFullName(
+  byoumeiMaster: ByoumeiMaster | null | undefined,
+  shuushokugoMasters: ShuushokugoMaster[]
+): string {
+  const [pres, posts] = ShuushokugoMaster.classify(shuushokugoMasters);
+  const pre: string = pres.map((m) => m.name).join("");
+  const post: string = posts.map((m) => m.name).join("");
+  return pre + (byoumeiMaster?.name ?? "") + post;
+}
+
 export class ByoumeiMaster {
   constructor(public shoubyoumeicode: number, public name: string) {}
 
@@ -1128,10 +1138,7 @@ export class ByoumeiMaster {
   }
 
   fullName(adj: ShuushokugoMaster[]): string {
-    const [pres, posts] = ShuushokugoMaster.classify(adj);
-    const pre: string = pres.map((m) => m.name).join("");
-    const post: string = posts.map((m) => m.name).join("");
-    return pre + this.name + post;
+    return diseaseFullName(this, adj);
   }
 }
 
@@ -1238,7 +1245,7 @@ export class Disease {
   }
 
   get endDateAsDate(): Date | null {
-    if( this.endDate === "0000-00-00" ){
+    if (this.endDate === "0000-00-00") {
       return null;
     } else {
       return new Date(this.endDate);
@@ -1246,7 +1253,7 @@ export class Disease {
   }
 
   set endDateAsDate(d: Date | null) {
-    if( d === null ){
+    if (d === null) {
       this.endDate = "0000-00-00";
     } else {
       this.endDate = dateToSqlDate(d);

@@ -70,7 +70,6 @@
 </script>
 
 {#if env != undefined}
-  {#if data != undefined}
     <EditForm examples={env.examples} {data} onCancel={doFormCancel} />
     <!-- <div>
       <div>名前：{data.fullName}</div>
@@ -106,9 +105,6 @@
         onSelect={onSearchSelect}
       />
     </div> -->
-  {:else}
-    （病名未選択）
-  {/if}
   <div class="list select">
     {#each env?.allList ?? [] as data}
       <SelectItem selected={diseaseDataSelected} {data}>

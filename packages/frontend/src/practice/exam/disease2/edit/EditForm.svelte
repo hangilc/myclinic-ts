@@ -1,74 +1,132 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import type { Invalid } from "@/lib/validator";
   import { validateDisease } from "@/lib/validators/disease-validator";
-  import { ByoumeiMaster, DiseaseEndReason, DiseaseExample, ShuushokugoMaster, type DiseaseData } from "myclinic-model";
+  import {
+    ByoumeiMaster,
+    Disease,
+    DiseaseEndReason,
+    DiseaseEndReasonType,
+    DiseaseExample,
+    diseaseFullName,
+    ShuushokugoMaster,
+    type DiseaseData,
+  } from "myclinic-model";
   import { foldSearchResult } from "../fold-search-result";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
 
-  export let data: DiseaseData;
+  export let data: DiseaseData | null;
   export let examples: DiseaseExample[];
+  export let onEnter: (entered: DiseaseData) => void;
   export let onCancel: () => void;
+  let byoumeiMaster: ByoumeiMaster | null = null;
+  let shuushokugoMasters: ShuushokugoMaster[] = [];
+  let startDate: Date | null = null;
   let startDateErrors: Invalid[] = [];
+  let endDate: Date | null = null;
   let endDateErrors: Invalid[] = [];
+  let endReason: DiseaseEndReasonType = DiseaseEndReason.Cured;
+
+  let fullName: string = "";
+  $: fullName = diseaseFullName(byoumeiMaster, shuushokugoMasters);
   const gengouList = ["平成", "令和"];
 
-  $: console.log("data", data);
+  $: initFormValues(data);
 
-  function doEnter() {
-    // const errors: Invalid[] = [];
-    // let disease = validateDisease({
-    //   diseaseId: data.disease.diseaseId,
-    //   patientId: data.disease.patientId,
-    // })
-    // if( errors.length > 0 ){
-    //   alert(errors.join("\n"));
-    //   return;
-    // }
-    // if( disease.endReason == DiseaseEndReason.NotEnded ){
-    //   disease = disease.clearEndDate();
-    // }
-    // await api.updateDiseaseEx(
-    //   disease,
-    //   data.shuushokugocodes
-    // );
-    // clearData();
+  function initFormValues(data: DiseaseData | null): void {
+    if (data == null) {
+      clear();
+    } else {
+      byoumeiMaster = data.byoumeiMaster;
+      shuushokugoMasters = data.shuushokugoMasters;
+      startDate = data.disease.startDateAsDate;
+      startDateErrors = [];
+      endDate = data.disease.endDateAsDate;
+      endDateErrors = [];
+      endReason = data.disease.endReason;
+    }
+  }
+
+  function clear(): void {
+    byoumeiMaster = null;
+    shuushokugoMasters = [];
+    startDate = null;
+    startDateErrors = [];
+    endDate = null;
+    endDateErrors = [];
+    endReason = DiseaseEndReason.Cured;
+  }
+
+  async function doEnter() {
+    if (data == null) {
+      return;
+    }
+    const dr: Disease | Invalid[] = validateDisease({
+      diseaseId: data.disease.diseaseId,
+      patientId: data.disease.patientId,
+      shoubyoumeicode: byoumeiMaster?.shoubyoumeicode ?? 0,
+      startDate,
+      startDateErrors,
+      endDate,
+      endDateErrors: [],
+      endReason,
+    });
+    if (dr instanceof Disease) {
+      const ok = await api.updateDiseaseEx(
+        dr,
+        shuushokugoMasters.map((m) => m.shuushokugocode)
+      );
+      if (!ok) {
+        alert("症病名の更新に失敗しました。");
+        return;
+      } else {
+        const entered = await api.getDiseaseEx(data.disease.diseaseId);
+        onEnter(entered);
+      }
+    }
   }
 
   function doSusp() {
-    const d = data;
-    d.adjList.push(ShuushokugoMaster.suspMaster);
-    data = d;
-    adjList = [...adjList, ShuushokugoMaster.suspMaster];
+    const c = shuushokugoMasters;
+    c.push(ShuushokugoMaster.suspMaster);
+    shuushokugoMasters = c;
   }
 
   function doDelAdj() {
-    adjList = [];
+    shuushokugoMasters = [];
   }
 
-  function doSearchSelect(r: DiseaseExample | ByoumeiMaster | ShuushokugoMaster) {
-    console.log("search select", r);
-    foldSearchResult(r, data.disease.startDateAsDate, 
-      (m: ByoumeiMaster) => {
-        const d = data;
-        d.byoumeiMaster = m;
-        data = d;
-      }, (a: ShuushokugoMaster) => {
-        const d = data;
-        d.shuushokugoMasters.push(a);
-        data = d;
-      }, (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
-        const d = data;
-        if( m != null ){
-          d.byoumeiMaster = m;
+  function doSearchSelect(
+    r: DiseaseExample | ByoumeiMaster | ShuushokugoMaster
+  ) {
+    if (data != null) {
+      foldSearchResult(
+        r,
+        data.disease.startDateAsDate,
+        (m: ByoumeiMaster) => {
+          byoumeiMaster = m;
+        },
+        (a: ShuushokugoMaster) => {
+          const c = shuushokugoMasters;
+          c.push(a);
+          shuushokugoMasters = c;
+        },
+        (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
+          if (m != null) {
+            byoumeiMaster = m;
+          }
+          const c = shuushokugoMasters;
+          c.push(...as);
+          shuushokugoMasters = c;
         }
-        d.shuushokugoMasters.push(...as);
-        data = d;
-      })
+      );
+    }
   }
 </script>
 
+{#if data != null}
 <div>
   <div>名前：{data.fullName}</div>
   <div class="date-wrapper start-date">
@@ -102,8 +160,15 @@
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm {examples} startDate={data.disease.startDateAsDate} onSelect={doSearchSelect}/>
+  <DiseaseSearchForm
+    {examples}
+    startDate={data.disease.startDateAsDate}
+    onSelect={doSearchSelect}
+  />
 </div>
+{:else}
+（病名未選択）
+{/if}
 
 <style>
   .date-wrapper {
