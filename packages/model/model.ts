@@ -1257,6 +1257,10 @@ export class Disease {
     return DiseaseEndReasonType.fromCode(this.endReasonStore);
   }
 
+  set endReason(value: DiseaseEndReasonType) {
+    this.endReasonStore = value.code;
+  }
+
   clearEndDate(): Disease {
     const c = this.clone();
     c.endDate = "0000-00-00";
@@ -1381,7 +1385,11 @@ export class DiseaseData {
   }
 
   get endReason(): DiseaseEndReasonType {
-    return DiseaseEndReasonType.fromCode(this.disease.endReasonStore);
+    return this.disease.endReason;
+  }
+
+  set endReason(value: DiseaseEndReasonType) {
+    this.disease.endReason = value;
   }
 
   get hasSusp(): boolean {

@@ -11,6 +11,7 @@
     ShuushokugoMaster,
   } from "myclinic-model";
   import type { DiseaseEnv } from "../disease-env";
+  import { foldSearchResult } from "../fold-search-result";
   import type { Mode } from "../mode";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
   import DatesPulldown from "./DatesPulldown.svelte";
@@ -77,32 +78,50 @@
   async function onSearchSelect(
     r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
   ) {
-    if (ByoumeiMaster.isByoumeiMaster(r)) {
-      byoumeiMaster = r;
-    } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
-      const cur = adjList;
-      cur.push(r);
+    foldSearchResult(r, startDate, 
+      (m: ByoumeiMaster) => {
+        byoumeiMaster = m;
+      },
+      (a: ShuushokugoMaster) => {
+        const cur = adjList;
+      cur.push(a);
       adjList = cur;
-    } else if (DiseaseExample.isDiseaseExample(r)) {
-      if (r.byoumei != null) {
-        const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
-        if (m != null) {
+      },
+      (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
+        if( m != null ){
           byoumeiMaster = m;
-        } else {
-          throw new Error("Cannot resolve byoumei: " + r.byoumei);
         }
+        const cur = adjList;
+        cur.push(...as);
+        adjList = cur;
       }
-      [...r.preAdjList, ...r.postAdjList].forEach(async (name) => {
-        const m = await api.resolveShuushokugoMasterByName(name, startDate);
-        if (m != null) {
-          const cur = adjList;
-          cur.push(m);
-          adjList = cur;
-        } else {
-          throw new Error("Cannot resolve adj name: " + r.byoumei);
-        }
-      });
-    }
+    )
+    // if (ByoumeiMaster.isByoumeiMaster(r)) {
+    //   byoumeiMaster = r;
+    // } else if (ShuushokugoMaster.isShuushokugoMaster(r)) {
+    //   const cur = adjList;
+    //   cur.push(r);
+    //   adjList = cur;
+    // } else if (DiseaseExample.isDiseaseExample(r)) {
+    //   if (r.byoumei != null) {
+    //     const m = await api.resolveByoumeiMasterByName(r.byoumei, startDate);
+    //     if (m != null) {
+    //       byoumeiMaster = m;
+    //     } else {
+    //       throw new Error("Cannot resolve byoumei: " + r.byoumei);
+    //     }
+    //   }
+    //   [...r.preAdjList, ...r.postAdjList].forEach(async (name) => {
+    //     const m = await api.resolveShuushokugoMasterByName(name, startDate);
+    //     if (m != null) {
+    //       const cur = adjList;
+    //       cur.push(m);
+    //       adjList = cur;
+    //     } else {
+    //       throw new Error("Cannot resolve adj name: " + r.byoumei);
+    //     }
+    //   });
+    // }
   }
 </script>
 

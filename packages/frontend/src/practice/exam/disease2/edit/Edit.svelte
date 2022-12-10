@@ -1,21 +1,13 @@
 <script lang="ts">
-  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
-  import { genid } from "@/lib/genid";
   import SelectItem from "@/lib/SelectItem.svelte";
   import type { Invalid } from "@/lib/validator";
-  import {
-    ByoumeiMaster,
-    DiseaseEndReason,
-    DiseaseExample,
-    ShuushokugoMaster,
-    type DiseaseData,
-  } from "myclinic-model";
+  import type { DiseaseData } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
-  import type { DiseaseEnv } from "./disease-env";
-  import { endDateRep } from "./end-date-rep";
-  import type { Mode } from "./mode";
-  import DiseaseSearchForm from "./search/DiseaseSearchForm.svelte";
-  import { startDateRep } from "./start-date-rep";
+  import type { DiseaseEnv } from "../disease-env";
+  import { endDateRep } from "../end-date-rep";
+  import type { Mode } from "../mode";
+  import { startDateRep } from "../start-date-rep";
+  import EditForm from "./EditForm.svelte";
 
   export let env: DiseaseEnv | undefined;
   export let doMode: (mode: Mode) => void;
@@ -40,33 +32,6 @@
     dataSrc = sel ?? undefined;
   });
 
-  function doEnter() {
-    if (data == null) {
-      return;
-    }
-    const errors: Invalid[] = [];
-    let disease = data.unwrapDisease(errors);
-    if( errors.length > 0 ){
-      alert(errors.join("\n"));
-      return;
-    }
-    if( disease.endReason == DiseaseEndReason.NotEnded ){
-      disease = disease.clearEndDate();
-    }
-    await api.updateDiseaseEx(
-      disease,
-      data.shuushokugocodes
-    );
-    clearData();
-  }
-
-  function doCancel() {
-    dataSrc = undefined;
-  }
-
-  function onSearchSelect(
-    sel: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
-  ) {}
   function formatAux(data: DiseaseData): string {
     const reason = data.endReason;
     const start = startDateRep(data.startDate);
@@ -77,11 +42,37 @@
     }
     return `${reason.label}、${start}${end}`;
   }
+
+  function doEnter() {
+    // if (data == null) {
+    //   return;
+    // }
+    // const errors: Invalid[] = [];
+    // let disease = data.unwrapDisease(errors);
+    // if( errors.length > 0 ){
+    //   alert(errors.join("\n"));
+    //   return;
+    // }
+    // if( disease.endReason == DiseaseEndReason.NotEnded ){
+    //   disease = disease.clearEndDate();
+    // }
+    // await api.updateDiseaseEx(
+    //   disease,
+    //   data.shuushokugocodes
+    // );
+    // clearData();
+  }
+
+  function doFormCancel() {
+    dataSrc = undefined;
+  }
+
 </script>
 
 {#if env != undefined}
   {#if data != undefined}
-    <div>
+    <EditForm examples={env.examples} {data} onCancel={doFormCancel} />
+    <!-- <div>
       <div>名前：{data.fullName}</div>
       <div class="date-wrapper start-date">
         <DateFormWithCalendar
@@ -114,7 +105,7 @@
         startDate={data.startDate}
         onSelect={onSearchSelect}
       />
-    </div>
+    </div> -->
   {:else}
     （病名未選択）
   {/if}

@@ -2,7 +2,7 @@
   import Add from "./add/Add.svelte";
   import Current from "./Current.svelte";
   import Tenki from "./Tenki.svelte";
-  import Edit from "./Edit.svelte";
+  import Edit from "./edit/Edit.svelte";
   import { currentPatient } from "../ExamVars";
   import { onDestroy, onMount, tick } from "svelte";
   import RightBox from "../RightBox.svelte";
