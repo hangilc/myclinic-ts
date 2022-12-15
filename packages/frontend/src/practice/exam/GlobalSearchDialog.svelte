@@ -1,12 +1,12 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { calcPages } from "@/lib/calc-pages";
-  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Visit, Text } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";
+  import SurfaceModal from "@/lib/SurfaceModal.svelte";
 
-  let dialog: Dialog;
+  export let destroy: () => void;
   let searchTextValue = "";
   let searchText = "";
   let result: [Text, Visit, Patient][] = [];
@@ -15,16 +15,8 @@
   const itemsPerPage = 10;
   let resultWrapper: HTMLElement;
 
-  function onClose(): void {
-    searchTextValue = "";
-    searchText = "";
-    result = [];
-    pageTotal = 0;
-    curPage = 0;
-  }
-
-  export function open(): void {
-    dialog.open();
+  function doClose(): void {
+    destroy();
   }
 
   async function doSearch() {
@@ -51,8 +43,7 @@
   }
 </script>
 
-<Dialog bind:this={dialog} {onClose} width={undefined}>
-  <span slot="title">全文検索</span>
+<SurfaceModal destroy={doClose} title="全文検索" width="400px">
   <div class="content">
     <form on:submit|preventDefault={doSearch}>
       <input type="text" bind:value={searchTextValue} class="search-text-input" autofocus/>
@@ -83,7 +74,7 @@
       <Nav bind:page={curPage} bind:total={pageTotal} gotoPage={doGotoPage} />
     {/if}
   </div>
-</Dialog>
+</SurfaceModal>
 
 <style>
   .content :global(.nav) {

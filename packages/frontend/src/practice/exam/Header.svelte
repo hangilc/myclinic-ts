@@ -51,7 +51,12 @@
   }
 
   function doGlobalSearch(): void {
-    globalSearchDialog.open();
+    const d: GlobalSearchDialog = new GlobalSearchDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    });
   }
 </script>
 
@@ -76,7 +81,6 @@
 <Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink}>
   <SelectPatientMenu onSelect={updateSelectPatientDialog} />
 </Pulldown>
-<GlobalSearchDialog bind:this={globalSearchDialog} />
 
 <style>
   a:nth-of-type(1) {
