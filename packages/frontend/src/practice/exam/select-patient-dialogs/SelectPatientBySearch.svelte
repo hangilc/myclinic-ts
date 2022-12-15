@@ -28,6 +28,7 @@
   async function doSearch(ev: Event){
     ev.preventDefault();
     const t = searchText.trim()
+    selected.set(null);
     patients = await api.searchPatient(t);
   }
 

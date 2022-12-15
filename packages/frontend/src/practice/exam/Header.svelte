@@ -14,7 +14,6 @@
   let searchDialog: SelectPatientBySearch;
   let recentDialog: RecentVisitsDialog;
   let selectPatientPulldown: Pulldown;
-  let globalSearchDialog: GlobalSearchDialog;
 
   function onSelectPatientClick() {
     selectPatientPulldown.open();
