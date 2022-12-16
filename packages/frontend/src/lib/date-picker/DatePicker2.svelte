@@ -7,6 +7,8 @@
   import DayPart from "./DayPart.svelte";
   import MonthPart from "./MonthPart.svelte";
   import DaysPanel from "./DaysPanel.svelte";
+  import { listDateItems, type DateItem } from "./date-item";
+  import { composeDate, lastDayOf, lastNenOf } from "./date-picker-misc";
 
   export let date: Date;
   export let destroy: () => void;
@@ -16,32 +18,43 @@
   let nen: number;
   let month: number;
   let day: number;
+  let items: DateItem[];
   let errors: Invalid[];
-  init(date);
+  update_with(date);
 
-  function init(d: Date): void {
+  function update_with(d: Date): void {
     errors = [];
     const wareki = kanjidate.toGengou(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate()
+      d.getFullYear(),
+      d.getMonth() + 1,
+      d.getDate()
     );
     gengou = wareki.gengou;
     nen = wareki.nen;
-    month = date.getMonth() + 1;
-    day = date.getDate();
+    month = d.getMonth() + 1;
+    day = d.getDate();
+    items = listDateItems(d);
+    date = d;
   }
 
   function onGengouChange(g: string): void {
-    gengou = g;
+    update_with(composeDate(g, nen, month, day));
   }
 
   function onNenChange(n: number): void {
-    nen = n;
+    update_with(composeDate(gengou, n, month, day));
   }
 
   function onMonthChange(m: number): void {
-    month = m;
+    update_with(composeDate(gengou, nen, m, day));
+  }
+
+  function onDayChange(d: number): void {
+    update_with(composeDate(gengou, nen, month, d));
+  }
+
+  function onDaysPanelChange(d: Date): void {
+    update_with(d);
   }
 
   function doEnter(): void {
@@ -58,7 +71,7 @@
     <GengouPart {gengou} {gengouList} onChange={onGengouChange} />
     <NenPart {nen} {gengou} onChange={onNenChange} />
     <MonthPart {month} onChange={onMonthChange} />
-    <DayPart {day} {gengou} {nen} {month} />
+    <DayPart {day} {gengou} {nen} {month} onChange={onDayChange}/>
     <span class="spacer" />
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -93,7 +106,7 @@
       />
     </svg>
   </div>
-  <DaysPanel {gengou} {nen} {month} {day}/>
+  <DaysPanel {items} onChange={onDaysPanelChange}/>
 </SurfacePulldown>
 
 <style>
@@ -117,6 +130,4 @@
     margin-left: 2px;
     cursor: pointer;
   }
-
- 
 </style>

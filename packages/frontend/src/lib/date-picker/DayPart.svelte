@@ -8,6 +8,7 @@
   export let gengou: string;
   export let nen: number;
   export let month: number;
+  export let onChange: (day: number) => void;
   let anchor: HTMLElement;
 
   function doClick(): void {
@@ -21,6 +22,7 @@
         anchor,
         dayList,
         day,
+        onChange,
       }
     })
   }
