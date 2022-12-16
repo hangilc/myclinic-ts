@@ -4,6 +4,8 @@
   import * as kanjidate from "kanjidate";
   import GengouPart from "./GengouPart.svelte";
   import NenPart from "./NenPart.svelte";
+  import DayPart from "./DayPart.svelte";
+  import MonthPart from "./MonthPart.svelte";
 
   export let date: Date;
   export let destroy: () => void;
@@ -30,11 +32,15 @@
   }
 
   function onGengouChange(g: string): void {
-    console.log("g change", g);
+    gengou = g;
   }
 
   function onNenChange(n: number): void {
-    
+    nen = n;
+  }
+
+  function onMonthChange(m: number): void {
+    month = m;
   }
 
 </script>
@@ -43,6 +49,8 @@
   <div class="top-row">
     <GengouPart {gengou} {gengouList} onChange={onGengouChange}/>
     <NenPart {nen} {gengou} onChange={onNenChange} />
+    <MonthPart {month} onChange={onMonthChange} />
+    <DayPart {day} />
   </div>
 </SurfacePulldown>
 
