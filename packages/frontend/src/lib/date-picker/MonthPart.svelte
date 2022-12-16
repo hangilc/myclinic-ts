@@ -18,6 +18,15 @@
   }
 </script>
 
-<span>
+<span class="top">
   <span on:click={onClick} bind:this={anchor}>{month}</span><span>月</span>
 </span>
+
+<style>
+  .top {
+    user-select: none;
+    cursor: pointer;
+    min-width: 2.3rem;
+    text-align: right;
+  }
+</style>

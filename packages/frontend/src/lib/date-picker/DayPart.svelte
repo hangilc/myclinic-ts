@@ -1,5 +1,4 @@
 <script lang="ts">
-
   import * as kanjidate from "kanjidate";
   import { range_from_one_upto } from "../range";
   import DayPartPulldown from "./DayPartPulldown.svelte";
@@ -23,12 +22,20 @@
         dayList,
         day,
         onChange,
-      }
-    })
+      },
+    });
   }
-
 </script>
 
 <span class="top">
   <span on:click={doClick} bind:this={anchor}>{day}</span><span>日</span>
 </span>
+
+<style>
+  .top {
+    user-select: none;
+    cursor: pointer;
+    min-width: 2.3rem;
+    text-align: right;
+  }
+</style>

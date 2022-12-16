@@ -42,7 +42,7 @@
   .top {
     user-select: none;
     cursor: pointer;
-    width: 2.2rem;
+    min-width: 2.3rem;
     text-align: right;
   }
 </style>

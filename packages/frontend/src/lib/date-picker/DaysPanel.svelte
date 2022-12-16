@@ -33,7 +33,8 @@
 
   .days-panel span {
     text-align: right;
-    cursor: default;
+    cursor: pointer;
+    user-select: none;
   }
 
   .days-panel span.selected {
