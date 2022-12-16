@@ -11,7 +11,7 @@
 
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<SurfacePulldown {destroy} {anchor} maxHeight="400px">
   {#each dayList as d}
     <SelectItem data={d} {selected}>{d}</SelectItem>
   {/each}

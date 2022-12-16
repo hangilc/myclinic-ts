@@ -46,6 +46,7 @@
   style:z-index={zIndexContent}
   style:width
   style:height
+  style:max-height={maxHeight}
   use:content
 >
   <div>
