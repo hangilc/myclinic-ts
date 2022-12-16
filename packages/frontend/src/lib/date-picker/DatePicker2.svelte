@@ -93,7 +93,7 @@
       />
     </svg>
   </div>
-  <DaysPanel />
+  <DaysPanel {gengou} {nen} {month} {day}/>
 </SurfacePulldown>
 
 <style>

@@ -14,7 +14,7 @@
   selected.subscribe(onChange);
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<SurfacePulldown {destroy} {anchor} maxHeight="400px">
   <svelte:fragment>
     {#each nenList as n}
       <SelectItem data={n} {selected} onSelected={destroy}>{n}</SelectItem>
