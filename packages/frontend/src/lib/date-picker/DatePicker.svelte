@@ -11,11 +11,11 @@
   export let onCancel: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let gengou: string = gengouList[gengouList.length - 1];
+  let gengouSpan: HTMLElement;
+  let gengouSelect: Writable<string> = writable(gengou);
   let nenValue: string = "";
   let monthValue: string = "";
   let selectedDay: number;
-  let gengouSpan: HTMLElement;
-  let gengouSelect: Writable<string> = writable(gengou);
   let nenLast: number = 1;
   let nenSpan: HTMLElement;
   let nenPulldown: Pulldown;

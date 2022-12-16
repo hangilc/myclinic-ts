@@ -6,8 +6,7 @@
   export let destroy: () => void;
   export let anchor: HTMLElement | SVGSVGElement;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  export let selected: Writable<string | null>;
-
+  export let selected: Writable<string>;
 </script>
 
 <SurfacePulldown {destroy} {anchor}>
