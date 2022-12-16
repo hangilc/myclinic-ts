@@ -50,7 +50,7 @@
     <GengouPart {gengou} {gengouList} onChange={onGengouChange}/>
     <NenPart {nen} {gengou} onChange={onNenChange} />
     <MonthPart {month} onChange={onMonthChange} />
-    <DayPart {day} />
+    <DayPart {day} {gengou} {nen} {month} />
   </div>
 </SurfacePulldown>
 

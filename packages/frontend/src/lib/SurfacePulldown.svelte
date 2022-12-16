@@ -8,6 +8,7 @@
   export let destroy: () => void;
   export let width: string = "auto";
   export let height: string = "auto";
+  export let maxHeight: string | undefined = undefined;
   export let onClose: () => void = () => {};
 
   let zIndexScreen = alloc();
