@@ -4,18 +4,18 @@
   import Pulldown from "../Pulldown.svelte";
   import SelectItem from "../SelectItem.svelte";
   import { pad } from "@/lib/pad";
+  import GengouPulldown from "./GengouPulldown.svelte";
 
   export let init: Date;
   export let onEnter: (value: Date) => void;
   export let onCancel: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  let gengouValue: string = "令和";
+  export let gengou: string = gengouList[gengouList.length - 1];
   let nenValue: string = "";
   let monthValue: string = "";
   let selectedDay: number;
   let gengouSpan: HTMLElement;
-  let gengouPulldown: Pulldown;
-  let gengouSelect: Writable<string | null> = writable(null);
+  let gengouSelect: Writable<string> = writable(gengou);
   let nenLast: number = 1;
   let nenSpan: HTMLElement;
   let nenPulldown: Pulldown;
@@ -30,7 +30,7 @@
 
   gengouSelect.subscribe((g) => {
     if (g != null) {
-      gengouValue = g;
+      gengou = g;
       updateDays();
     }
   });
@@ -50,20 +50,19 @@
   });
 
   function initValues(date: Date): void {
-    console.log("date", date);
     const wareki = kanjidate.toGengou(
       date.getFullYear(),
       date.getMonth() + 1,
       date.getDate()
     );
-    gengouValue = wareki.gengou;
+    gengou = wareki.gengou;
     nenValue = pad(wareki.nen, 2, " ");
     monthValue = pad(date.getMonth() + 1, 2, " ");
     selectedDay = date.getDate();
   }
 
   function updateDays(): void {
-    const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue.trim()));
+    const year = kanjidate.fromGengou(gengou, parseInt(nenValue.trim()));
     const month = parseInt(monthValue.trim());
     const firstDay = new Date(year, month - 1, 1);
     const firstDayOfWeek = firstDay.getDay(); // Sunday: 0
@@ -86,11 +85,19 @@
   }
 
   function doGengouClick(): void {
-    gengouPulldown.open();
+    const d: GengouPulldown = new GengouPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: gengouSpan,
+        selected: gengouSelect,
+        gengouList,
+      }
+    })
   }
 
   function doNenClick(): void {
-    const g = kanjidate.Gengou.fromString(gengouValue);
+    const g = kanjidate.Gengou.fromString(gengou);
     if (g != null) {
       nenLast = kanjidate.nenRangeOf(g)[1];
       nenPulldown.open();
@@ -116,7 +123,7 @@
   }
 
   function getCurrentDate(): Date {
-    const year = kanjidate.fromGengou(gengouValue, parseInt(nenValue.trim()));
+    const year = kanjidate.fromGengou(gengou, parseInt(nenValue.trim()));
     const month = parseInt(monthValue.trim());
     const day = selectedDay;
     return new Date(year, month - 1, day);
@@ -134,7 +141,7 @@
 <div class="top">
   <div class="top-row">
     <span on:click={doGengouClick} bind:this={gengouSpan} class="gengou-span">
-      {gengouValue}
+      {gengou}
     </span>
     <span on:click={doNenClick} bind:this={nenSpan} class="nen-span">
       {nenValue}</span
@@ -197,13 +204,6 @@
     {/each}
   </div>
 </div>
-<Pulldown anchor={gengouSpan} bind:this={gengouPulldown}>
-  <svelte:fragment>
-    {#each gengouList as gengou}
-      <SelectItem data={gengou} selected={gengouSelect}>{gengou}</SelectItem>
-    {/each}
-  </svelte:fragment>
-</Pulldown>
 <Pulldown anchor={nenSpan} bind:this={nenPulldown}>
   <svelte:fragment>
     {#each Array.from(new Array(nenLast), (_, i) => i + 1) as n}

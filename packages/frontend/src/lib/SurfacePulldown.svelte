@@ -5,9 +5,9 @@
   import { alloc, release } from "./zindex";
 
   export let anchor: HTMLElement | SVGSVGElement;
+  export let destroy: () => void;
   export let width: string = "auto";
   export let height: string = "auto";
-  export let destroy: () => void;
   export let onClose: () => void = () => {};
 
   let zIndexScreen = alloc();
