@@ -73,9 +73,9 @@
     adjList = [];
   }
 
-  async function onSearchSelect(
+  function onSearchSelect(
     r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
-  ) {
+  ): void {
     foldSearchResult(
       r,
       startDate,
@@ -87,12 +87,12 @@
         cur.push(a);
         adjList = cur;
       },
-      (m: ByoumeiMaster | null, as: ShuushokugoMaster[]) => {
+      (m: ByoumeiMaster | null, adjs: ShuushokugoMaster[]) => {
         if (m != null) {
           byoumeiMaster = m;
         }
-        const cur = adjList;
-        cur.push(...as);
+        const cur: ShuushokugoMaster[] = adjList;
+        cur.push(...adjs);
         adjList = cur;
       }
     );
