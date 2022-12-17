@@ -8,6 +8,8 @@
   import { getCopyTarget } from "../../ExamVars";
   import Pulldown from "@/lib/Pulldown.svelte";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
+  import TextCommandDialog from "./TextCommandDialog.svelte";
+  import { listTextCommands } from "./text-commands";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -87,11 +89,29 @@
       alert("コピー先を見つけられませんでした。");
     }
   }
+
+  function doKeyDown(event: KeyboardEvent): void {
+    if (event.altKey && event.key === "p") {
+      const d: TextCommandDialog = new TextCommandDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          commands: listTextCommands(),
+          onEnter: (t: string) => {
+            let ta = event.target as HTMLTextAreaElement;
+            ta.setRangeText(t, ta.selectionStart, ta.selectionEnd, "end");
+            ta.focus();
+          },
+        },
+      });
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div>
-  <textarea bind:this={textarea}>{text.content}</textarea>
+  <textarea bind:this={textarea} on:keydown={doKeyDown}>{text.content}</textarea
+  >
   {#if text.textId === 0}
     <div>
       <button on:click={onEnter}>入力</button>
@@ -124,7 +144,9 @@
 <Pulldown anchor={shohousenAnchor} bind:this={shohousenPulldown}>
   <svelte:fragment>
     <a href="javascript:void(0)" on:click={doPrintShohousen}>処方箋印刷</a>
-    <a href="javascript:void(0)" on:click={doFormatShohousen}>処方箋フォーマット</a>
+    <a href="javascript:void(0)" on:click={doFormatShohousen}
+      >処方箋フォーマット</a
+    >
   </svelte:fragment>
 </Pulldown>
 <Confirm

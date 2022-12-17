@@ -30,6 +30,9 @@
     const t = searchText.trim()
     selected.set(null);
     patients = await api.searchPatient(t);
+    if( patients.length > 0 ){
+      selected.set(patients[0]);
+    }
   }
 
   function onSelectButtonClick(close: () => void): void {
@@ -62,7 +65,7 @@
     </form>
     <div class="select">
       {#each patients as patient}
-        <SelectItem selected={selected} data={patient} autoselect>
+        <SelectItem selected={selected} data={patient}>
           {patient.lastName} {patient.firstName}
         </SelectItem>
       {/each}

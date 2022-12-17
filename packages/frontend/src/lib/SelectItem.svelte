@@ -4,12 +4,12 @@
   type T = $$Generic;
   export let selected: Writable<T | null>;
   export let data: T;
-  export let autoselect = false;
+  // export let autoselect = false;
   export let onSelected: () => void = () => {};
 
-  if( autoselect && $selected == null ){
-    selected.set(data);
-  }
+  // if( autoselect && $selected == null ){
+  //   selected.set(data);
+  // }
 
   function onClick() {
     selected.set(data);

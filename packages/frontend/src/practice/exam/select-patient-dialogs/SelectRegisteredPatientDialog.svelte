@@ -33,6 +33,9 @@
         state == WqueueState.InExam
       );
     });
+    if( entries.length > 0 ){
+      selected.set(entries[0]);
+    }
     dialog.open();
   }
 
@@ -51,7 +54,7 @@
   {#if entries.length > 0}
   <div class="select">
     {#each entries as data}
-      <SelectItem {data} {selected} autoselect>
+      <SelectItem {data} {selected}>
         {@const [_wq, _visit, patient] = data}
         <span>{patient.lastName}{patient.firstName}</span>
       </SelectItem>
