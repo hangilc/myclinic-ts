@@ -15,11 +15,8 @@
   export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
 
-  let formValues: EditFormValues | undefined =
-    env.editTarget == undefined
-      ? undefined
-      : composeEditFormValues(env.editTarget);
-  let diseaseDataSelected: Writable<DiseaseData | null> = writable(null);
+  let formValues: EditFormValues | undefined;
+  let diseaseDataSelected: Writable<DiseaseData | null> = writable(env.editTarget ?? null);
 
   diseaseDataSelected.subscribe((sel) => {
     formValues = sel == undefined ? undefined : composeEditFormValues(sel);
@@ -41,6 +38,7 @@
   }
   function doFormEnter(d: DiseaseData) {
     env.updateDisease(d);
+    env.editTarget = undefined;
     doMode("edit");
   }
 </script>

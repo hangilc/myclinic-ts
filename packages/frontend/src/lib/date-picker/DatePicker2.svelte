@@ -57,6 +57,7 @@
 
   function doEnter(): void {
     onEnter(date);
+    destroy();
   }
 
   function doCancel(): void {
