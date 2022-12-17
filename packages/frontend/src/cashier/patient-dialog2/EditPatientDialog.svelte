@@ -7,13 +7,12 @@
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validatePatient } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
-  import { get } from "svelte/store";
   import type { PatientData } from "./patient-data";
 
   export let data: PatientData;
   export let destroy: () => void;
 
-  let patient: Patient = get(data.patient);
+  let patient: Patient = data.patient;
 
   let errors: string[] = [];
   let patientId: number = patient.patientId;
@@ -45,7 +44,7 @@
     });
     if (result instanceof Patient) {
       await api.updatePatient(result);
-      data.patient.set(result);
+      data.patient = result;
       close();
     } else {
       errors = result;

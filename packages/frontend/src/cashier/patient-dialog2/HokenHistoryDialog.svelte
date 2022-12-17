@@ -10,7 +10,6 @@
   import KouhiBox from "./hoken-box/KouhiBox.svelte";
   import EditHokenDialog from "./EditHokenDialog.svelte";
   import { confirm } from "@/lib/confirm-call";
-  import api from "@/lib/api";
   import { deleteHoken } from "./delete-hoken";
 
   export let data: PatientData;

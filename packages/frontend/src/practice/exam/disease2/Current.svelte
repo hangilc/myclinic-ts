@@ -5,10 +5,11 @@
   import { startDateRep } from "./start-date-rep";
 
   export let env: DiseaseEnv;
+  // svelte-ignore unused-export-let
   export let doMode: (mode: Mode) => void;
   const list = env.currentList;
 
-  function onDiseaseClick(d: DiseaseData) {
+  function onDiseaseClick(_d: DiseaseData) {
     
   }
 </script>

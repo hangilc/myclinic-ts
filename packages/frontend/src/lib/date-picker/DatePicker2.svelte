@@ -1,6 +1,5 @@
 <script lang="ts">
   import SurfacePulldown from "../SurfacePulldown.svelte";
-  import type { Invalid } from "../validator";
   import * as kanjidate from "kanjidate";
   import GengouPart from "./GengouPart.svelte";
   import NenPart from "./NenPart.svelte";
@@ -8,22 +7,21 @@
   import MonthPart from "./MonthPart.svelte";
   import DaysPanel from "./DaysPanel.svelte";
   import { listDateItems, type DateItem } from "./date-item";
-  import { composeDate, lastDayOf, lastNenOf } from "./date-picker-misc";
+  import { composeDate } from "./date-picker-misc";
 
   export let date: Date;
   export let destroy: () => void;
   export let anchor: HTMLElement | SVGSVGElement;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
+  export let onEnter: (date: Date) => void;
   let gengou: string;
   let nen: number;
   let month: number;
   let day: number;
   let items: DateItem[];
-  let errors: Invalid[];
   update_with(date);
 
   function update_with(d: Date): void {
-    errors = [];
     const wareki = kanjidate.toGengou(
       d.getFullYear(),
       d.getMonth() + 1,
@@ -58,7 +56,7 @@
   }
 
   function doEnter(): void {
-
+    onEnter(date);
   }
 
   function doCancel(): void {

@@ -1,4 +1,3 @@
-import { HighlightSpanKind } from "typescript";
 import { dateToSql } from "./util";
 import { dateSrc } from "./validators/date-validator";
 

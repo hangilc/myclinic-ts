@@ -83,24 +83,5 @@
     color: green;
   }
 
-  .date-wrapper {
-    font-size: 13px;
-    margin-top: 4px;
-  }
-
-  .date-wrapper :global(.calendar-icon) {
-    margin-left: 6px;
-    font-size: 16px;
-    position: relative;
-    top: 1px;
-  }
-
-  .end-reason {
-    font-size: 13px;
-  }
-
-  .select {
-    height: 5em;
-    overflow-y: auto;
-  }
+  
 </style>

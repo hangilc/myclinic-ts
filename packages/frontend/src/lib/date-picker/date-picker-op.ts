@@ -1,19 +1,17 @@
-import DatePickerPulldown from "./DatePickerPulldown.svelte";
+import DatePicker2 from "./DatePicker2.svelte";
 
 export function openDatePickerPulldown(
-  init: Date,
+  date: Date,
   anchor: HTMLElement | SVGSVGElement,
   onEnter: (d: Date) => void
 ): void {
-  let m: DatePickerPulldown | undefined = undefined;
-
-  m = new DatePickerPulldown({
+  let m: DatePicker2 = new DatePicker2({
     target: document.body,
     props: {
-      init,
+      date,
       anchor,
       onEnter,
-      destroy: () => m?.$destroy()
+      destroy: () => m.$destroy()
     }
   });
 }

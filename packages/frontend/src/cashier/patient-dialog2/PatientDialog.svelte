@@ -86,7 +86,6 @@
     data.push(open);
   }
 
-  function doPatientImages() {}
 </script>
 
 <SurfaceModal {destroy} title="患者情報" width="320px">

@@ -13,11 +13,8 @@ import {
   optionalSqlDateSrc,
   sqlDateSrc,
   strSrc,
-  toSqlDate,
-  Valid,
   type ValidationResult,
 } from "../validator";
-import { dateSrc } from "./date-validator";
 
 export interface DiseaseInput {
   patientId: ValidationResult<number>;

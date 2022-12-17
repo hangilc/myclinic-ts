@@ -1,6 +1,5 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
-  import { pad } from "../pad";
   import SelectItem from "../SelectItem.svelte";
   import SurfacePulldown from "../SurfacePulldown.svelte";
 

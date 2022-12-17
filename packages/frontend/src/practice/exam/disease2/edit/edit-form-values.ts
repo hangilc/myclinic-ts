@@ -1,4 +1,3 @@
-import type { Invalid } from "@/lib/validator";
 import type {
   DiseaseData,
   ByoumeiMaster,

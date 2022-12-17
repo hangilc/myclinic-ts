@@ -24,7 +24,7 @@
   let startDateErrors: Invalid[] = [];
   let chooseStartDateIcon: SVGSVGElement;
 
-  async function doChooseStartDate(evt: Event) {
+  async function doChooseStartDate() {
     const visits = await api.listVisitByPatientReverse(
       env.patient.patientId,
       0,

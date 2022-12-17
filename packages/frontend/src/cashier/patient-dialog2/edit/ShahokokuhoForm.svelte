@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HokenType } from "@/cashier/patient-dialog/hoken";
+  import type { HokenType } from "@/cashier/patient-dialog2/hoken";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";

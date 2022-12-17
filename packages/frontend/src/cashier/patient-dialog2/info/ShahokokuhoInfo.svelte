@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Patient, Shahokokuho } from "myclinic-model";
   import type { Hoken } from "../hoken";
-  import * as kanjidate from "kanjidate";
   import { toZenkaku } from "@/lib/zenkaku";
   import { formatValidFrom, formatValidUpto } from "./misc";
 

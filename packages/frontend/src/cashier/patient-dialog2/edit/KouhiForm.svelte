@@ -1,7 +1,7 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
-  import { intSrc, strSrc, type Invalid } from "@/lib/validator";
+  import { intSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateKouhi } from "@/lib/validators/kouhi-validator";
   import type { Kouhi, Patient } from "myclinic-model";

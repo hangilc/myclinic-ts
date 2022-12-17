@@ -11,7 +11,8 @@
       props: {
         date: new Date(),
         destroy: () => d.$destroy(),
-        anchor: b
+        anchor: b,
+        onEnter: (d) => console.log(d)
       }
     });
   }

@@ -20,14 +20,14 @@
   let textarea: HTMLTextAreaElement;
   let copiedVisible = false;
 
-  function onClose(): void {
-    searchText = "";
-    drugIndex = 1;
-    searchText = "";
-    texts = [];
-    selected.set(null);
-    textarea.value = "";
-  }
+  // function onClose(): void {
+  //   searchText = "";
+  //   drugIndex = 1;
+  //   searchText = "";
+  //   texts = [];
+  //   selected.set(null);
+  //   textarea.value = "";
+  // }
 
   selected.subscribe((s) => {
     if (s == null) {

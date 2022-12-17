@@ -40,7 +40,6 @@ export class PatientData {
   }
 
   getCurrentList(): Hoken[] {
-    const today = new Date();
     return this.hokenCache.listCurrent();
   }
 
