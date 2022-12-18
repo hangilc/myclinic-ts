@@ -122,6 +122,10 @@ export class Patient {
     return this.lastName + sep + this.firstName;
   }
 
+  fullYomi(sep: string = " "): string {
+    return this.lastNameYomi + sep + this.firstNameYomi;
+  }
+
   get sexType(): SexType {
     return SexType.fromCode(this.sex);
   }

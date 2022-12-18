@@ -23,11 +23,15 @@
 
 <SurfaceModal {destroy} title="患者検索結果" width="260px">
   <div class="result-wrapper">
-    {#each patients as p (p.patientId)}
-      <div class="result-item" on:click={() => doSelect(p)}>
-        ({pad(p.patientId, 4, "0")}) {p.fullName()}
-      </div>
-    {/each}
+    {#if patients.length === 0}
+      （該当患者がありません）
+    {:else}
+      {#each patients as p (p.patientId)}
+        <div class="result-item" on:click={() => doSelect(p)}>
+          ({pad(p.patientId, 4, "0")}) {p.fullName()}
+        </div>
+      {/each}
+    {/if}
   </div>
 </SurfaceModal>
 

@@ -24,7 +24,7 @@ export class PatientInput {
 export function validatePatient(
   patientId: number,
   input: PatientInput
-): Patient | string[] {
+): Patient | Invalid[] {
   const errs: Invalid[] = [];
   const patient: Patient = new Patient(
     patientId,
@@ -37,5 +37,5 @@ export function validatePatient(
     input.address.unwrap(errs, "住所"),
     input.phone.unwrap(errs, "電話番号")
   );
-  return errs.length > 0 ? errs.map(e => e.toString()) : patient;
+  return errs.length > 0 ? errs : patient;
 }
