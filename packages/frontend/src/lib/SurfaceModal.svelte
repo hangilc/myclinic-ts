@@ -9,6 +9,7 @@
   export let height: string = "auto";
   export let destroy: () => void;
   export let onClose: () => void = () => {};
+  export let keyDown: (e: KeyboardEvent) => void = _ => {};
 
   let zIndexScreen = alloc();
   let zIndexContent = alloc();
@@ -33,13 +34,26 @@
     ev.stopPropagation();
     ev.preventDefault();
   }
+
+  function doKeyDown(event: KeyboardEvent): void {
+    if( event.key === "Escape" ){
+      destroy();
+    } else {
+      keyDown(event);
+    }
+  }
+
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div
   class="top dialog-top"
   style:z-index={zIndexContent}
   style:width
   style:height
+  on:keydown={doKeyDown}
+  tabindex="0"
+  autofocus
 >
   <div class="title">
     <span class="title-span">{title}</span>
@@ -76,24 +90,10 @@
     overflow: auto;
     border-radius: 0.5rem;
   }
-  /* .top {
-    position: fixed;
-    margin-top: 20px;
-    margin-bottom: auto;
-    margin-left: auto;
-    margin-right: auto;
-    width: 360px;
-    height: auto;
-    left: 0;
-    right: 0;
-    top: 0;
-    background-color: white;
-    padding: 0.5rem 1.5rem;
-    opacity: 1;
-    overflow: auto;
-    border-radius: 0.5rem;
-    border: 1px solid gray;
-  } */
+
+  .top:focus {
+    outline: none;
+  }
 
   .title {
     display: flex;

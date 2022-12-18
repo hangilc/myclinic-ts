@@ -4,12 +4,8 @@
   type T = $$Generic;
   export let selected: Writable<T | null>;
   export let data: T;
-  // export let autoselect = false;
   export let onSelected: () => void = () => {};
-
-  // if( autoselect && $selected == null ){
-  //   selected.set(data);
-  // }
+  export let cursor: string = "default";
 
   function onClick() {
     selected.set(data);
@@ -18,14 +14,11 @@
 </script>
 
 <div class="select-item" class:selected={$selected === data} 
-    on:click={onClick}>
+    on:click={onClick} style:cursor={cursor}>
   <slot />
 </div>
 
 <style>
-  .select-item {
-    cursor: default;
-  }
   .select-item:hover {
     background-color: #eee;
   }
