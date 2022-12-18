@@ -123,19 +123,23 @@
     display: table-cell;
     font-weight: bold;
     font-size: 0.8rem;
+    padding-bottom: 6px;
+    line-height: 1;
   }
 
   .wq-row {
     display: table-row;
   }
 
-  .wq-row:nth-of-type(2n+1) {
-    background-color: #eee;
+  .wq-row:nth-of-type(2n) {
+    /* background-color: #eee; */
+    background-color: #17a2b811;
   }
 
   .wq-row > div {
     display: table-cell;
     padding: 2px;
+    line-height: 1;
   }
 
   .wq-row .dob {

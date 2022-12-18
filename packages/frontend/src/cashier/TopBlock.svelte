@@ -9,14 +9,18 @@
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
-    const d: SearchPatientResultDialog = new SearchPatientResultDialog({
-      target: document.body,
-      props: {
-        result,
-        destroy: () => d.$destroy(),
-        onSelect: doPatientSelected,
-      },
-    });
+    if (result.length === 1) {
+      PatientData.start(result[0]);
+    } else {
+      const d: SearchPatientResultDialog = new SearchPatientResultDialog({
+        target: document.body,
+        props: {
+          result,
+          destroy: () => d.$destroy(),
+          onSelect: doPatientSelected,
+        },
+      });
+    }
     searchText = "";
   }
 
@@ -28,9 +32,9 @@
     const d: NewPatientDialog = new NewPatientDialog({
       target: document.body,
       props: {
-        destroy: () => d.$destroy()
-      }
-    })
+        destroy: () => d.$destroy(),
+      },
+    });
   }
 </script>
 

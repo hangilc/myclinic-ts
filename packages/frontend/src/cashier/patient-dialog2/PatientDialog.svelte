@@ -8,6 +8,7 @@
   import EditPatientDialog from "./EditPatientDialog.svelte";
   import EditHokenDialog from "./EditHokenDialog.svelte";
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
+  import api from "@/lib/api";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -86,9 +87,19 @@
     data.push(open);
   }
 
+  async function doRegisterVisit() {
+    await api.startVisit(p.patientId, new Date());
+    exit();
+  }
+
+  function exit(): void {
+    destroy();
+    data.cleanup();
+  }
+
 </script>
 
-<SurfaceModal {destroy} title="患者情報" width="320px">
+<SurfaceModal destroy={exit} title="患者情報" width="320px">
   <div class="info">
     <span>患者番号</span><span>{p.patientId}</span>
     <span>氏名</span><span>{p.lastName} {p.firstName}</span>
@@ -107,7 +118,7 @@
     {/each}
   </div>
   <div class="commands">
-    <button>診察受付</button>
+    <button on:click={doRegisterVisit}>診察受付</button>
     <button on:click={destroy}>閉じる</button>
   </div>
   <div class="menu">
