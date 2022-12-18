@@ -1,38 +1,38 @@
 <script lang="ts">
-  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import { strSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validatePatient } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
-  import type { PatientData } from "./patient-data";
+  import { onMount } from "svelte";
 
-  export let data: PatientData;
-  export let destroy: () => void;
-
-  let patient: Patient = data.patient;
-
+  export let patient: Patient | undefined;
   let errors: Invalid[] = [];
-  let patientId: number = patient.patientId;
-  let lastName: string = patient.lastName;
-  let firstName: string = patient.firstName;
-  let lastNameYomi: string = patient.lastNameYomi;
-  let firstNameYomi: string = patient.firstNameYomi;
-  let sex: string = patient.sex;
-  let birthday: Date = new Date(patient.birthday);
-  let address: string = patient.address;
-  let phone: string = patient.phone;
+  let patientId: number | undefined = patient?.patientId;
+  let lastName: string = patient?.lastName ?? "";
+  let firstName: string = patient?.firstName ?? "";
+  let lastNameYomi: string = patient?.lastNameYomi ?? "";
+  let firstNameYomi: string = patient?.firstNameYomi ?? "";
+  let birthday: Date | null = getBirthday(patient);
+  let sex: string = patient?.sex ?? "F";
+  let address: string = patient?.address ?? "";
+  let phone: string = patient?.phone ?? "";
   let birthdayErrors: Invalid[] = [];
+  let focusInput: HTMLInputElement;
 
-  function close(): void {
-    destroy();
-    data.goback();
+  function getBirthday(p: Patient | undefined): Date | null {
+    if (p != undefined) {
+      return new Date(p.birthday);
+    } else {
+      return null;
+    }
   }
 
-  async function doEnter() {
-    const result = validatePatient(patientId, {
+  onMount(() => focusInput.focus());
+
+  export function validate(): Patient | undefined {
+    const result = validatePatient(patientId ?? 0, {
       lastName: strSrc(lastName),
       firstName: strSrc(firstName),
       lastNameYomi: strSrc(lastNameYomi),
@@ -43,21 +43,14 @@
       phone: strSrc(phone),
     });
     if (result instanceof Patient) {
-      await api.updatePatient(result);
-      data.patient = result;
-      close();
+      return result;
     } else {
       errors = result;
     }
   }
-
-  function doCancel() {
-    close();
-  }
-
 </script>
 
-<SurfaceModal title="患者情報編集" destroy={close}>
+<div>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -66,11 +59,13 @@
     </div>
   {/if}
   <div class="panel">
-    <span>患者番号</span>
-    <span>{patientId}</span>
+    {#if patientId && patientId > 0}
+      <span>患者番号</span>
+      <span>{patientId}</span>
+    {/if}
     <span>氏名</span>
     <div class="input-block">
-      <input type="text" bind:value={lastName} class="name-input" />
+      <input type="text" bind:value={lastName} class="name-input" bind:this={focusInput}/>
       <input type="text" bind:value={firstName} class="name-input" />
     </div>
     <span>よみ</span>
@@ -99,11 +94,7 @@
       <input type="text" bind:value={phone} />
     </div>
   </div>
-  <div class="commands">
-    <button on:click={doEnter}>入力</button>
-    <button on:click={doCancel}>キャンセル</button>
-  </div>
-</SurfaceModal>
+</div>
 
 <style>
   .panel {
@@ -126,16 +117,6 @@
 
   .name-input {
     width: 80px;
-  }
-
-  .commands {
-    display: flex;
-    justify-content: right;
-    margin-top: 10px;
-  }
-
-  .commands > * + * {
-    margin-left: 4px;
   }
 
   .error {

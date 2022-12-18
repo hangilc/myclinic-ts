@@ -1,6 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import type { Patient } from "myclinic-model";
+  import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog2/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
 
@@ -22,6 +23,15 @@
   async function doPatientSelected(patient: Patient) {
     PatientData.start(patient);
   }
+
+  function doNewPatient(): void {
+    const d: NewPatientDialog = new NewPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    })
+  }
 </script>
 
 <div class="top">
@@ -30,7 +40,7 @@
     <input type="text" class="search-input" bind:value={searchText} />
     <button>検索</button>
   </form>
-  <button>新規患者</button>
+  <button on:click={doNewPatient}>新規患者</button>
   <a href="javascript:void(0)" class="records-link">診療録</a>
   <svg
     class="menu-svg"
