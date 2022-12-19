@@ -2,11 +2,26 @@
   import { calcAge } from "@/lib/calc-age";
   import type { Patient, Visit, Wqueue } from "myclinic-model";
   import * as kanjidate from "kanjidate";
+  import api from "@/lib/api";
+  import CashierDialog from "./CashierDialog.svelte";
 
   export let items: [Wqueue, Visit, Patient][];
 
   function formatDob(birthday: string): string {
     return kanjidate.format(kanjidate.f2, birthday);
+  }
+
+  async function doCashier(visit: Visit) {
+    let meisai = await api.getMeisai(visit.visitId);
+    let patient = await api.getPatient(visit.patientId);
+    let charge = await api.getCharge(visit.visitId);
+    const d: CashierDialog = new CashierDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        data: [meisai, visit, patient, charge]
+      }
+    });
   }
 </script>
 
@@ -43,7 +58,7 @@
       <div class="dob">{formatDob(patient.birthday)}</div>
       <div class="manip">
         <div class="manip-content">
-          <button>会計</button>
+          <button on:click={() => doCashier(visit)}>会計</button>
           <a href="javascript:void(0)">診療録</a>
           <svg
             width="1.2rem"

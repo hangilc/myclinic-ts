@@ -1023,6 +1023,14 @@ export default {
     );
   },
 
+  getCharge(visitId: number): Promise<m.Charge> {
+    return get(
+      "get-charge",
+      { "visit-id": visitId.toString() },
+      m.Charge.cast
+    )
+  },
+
   uploadPatientImage(patientId: number, data: FormData): Promise<boolean> {
     return postRaw(
       "upload-patient-image",
