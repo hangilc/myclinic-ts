@@ -4,8 +4,9 @@
   import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
   import CashierDialog from "./CashierDialog.svelte";
+  import type { WqueueData } from "./wq-data";
 
-  export let items: [Wqueue, Visit, Patient][];
+  export let items: WqueueData[];
 
   function formatDob(birthday: string): string {
     return kanjidate.format(kanjidate.f2, birthday);
@@ -19,8 +20,8 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        data: [meisai, visit, patient, charge]
-      }
+        data: [meisai, visit, patient, charge],
+      },
     });
   }
 </script>
@@ -44,10 +45,10 @@
     <div>生年月日</div>
     <div>操作</div>
   </div>
-  {#each items as item (item[0].visitId)}
-    {@const wq = item[0]}
-    {@const visit = item[1]}
-    {@const patient = item[2]}
+  {#each items as item (item.visitId)}
+    {@const wq = item.wq}
+    {@const visit = item.visit}
+    {@const patient = item.patient}
     <div class="wq-row">
       <div>{wq.waitStateType.label}</div>
       <div>{patient.patientId}</div>
@@ -58,7 +59,9 @@
       <div class="dob">{formatDob(patient.birthday)}</div>
       <div class="manip">
         <div class="manip-content">
-          <button on:click={() => doCashier(visit)}>会計</button>
+          {#if item.isWaitCashier}
+            <button on:click={() => doCashier(visit)}>会計</button>
+          {/if}
           <a href="javascript:void(0)">診療録</a>
           <svg
             width="1.2rem"
@@ -177,5 +180,4 @@
     /* position: relative;
     top: 3px; */
   }
-
 </style>

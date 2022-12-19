@@ -1,32 +1,71 @@
 <script lang="ts">
-  import { wqueueEntered } from "@/app-events";
+  import { wqueueDeleted, wqueueEntered, wqueueUpdated } from "@/app-events";
   import api from "@/lib/api";
   import type { Patient, Visit, Wqueue } from "myclinic-model";
+  import { onDestroy } from "svelte";
   import TopBlock from "./TopBlock.svelte";
+  import { WqueueData } from "./wq-data";
   import WqTable from "./WqTable.svelte";
 
-  export let wqItems: [Wqueue, Visit, Patient][] = [];
+  export let wqItems: WqueueData[] = [];
   let unsubs: (() => void)[] = [];
+
+  onDestroy(() => unsubs.forEach((f) => f()));
 
   refresh();
 
-  unsubs.push(wqueueEntered.subscribe(async (wq) => {
-    if( wq == null ){
-      return;
-    }
+  unsubs.push(
+    wqueueEntered.subscribe(async (wq) => {
+      if (wq == null) {
+        return;
+      }
+      let data = await getWqueueData(wq);
+      wqItems = [...wqItems, data];
+    })
+  );
+
+  unsubs.push(
+    wqueueUpdated.subscribe(async (wq) => {
+      if (wq == null) {
+        return;
+      }
+      let item = await getWqueueData(wq);
+      const tmp = wqItems;
+      let i = tmp.findIndex((d) => d.visitId == wq.visitId);
+      if (i >= 0) {
+        tmp.splice(i, 1, item);
+        wqItems = tmp;
+      }
+    })
+  );
+
+  unsubs.push(
+    wqueueDeleted.subscribe(async (wq) => {
+      if (wq == null) {
+        return;
+      }
+      let i = wqItems.findIndex((d) => d.visitId == wq.visitId);
+      if (i >= 0) {
+        const tmp = wqItems;
+        tmp.splice(i, 1);
+        wqItems = tmp;
+      }
+    })
+  );
+
+  async function getWqueueData(wq: Wqueue): Promise<WqueueData> {
     let visit = await api.getVisit(wq.visitId);
     let patient = await api.getPatient(visit.patientId);
-    let item: [Wqueue, Visit, Patient] = [wq, visit, patient];
-    wqItems = [...wqItems, item];
-  }));
+    return new WqueueData(wq, visit, patient);
+  }
 
   async function refresh() {
-    wqItems = await api.listWqueueFull();
+    wqItems = (await api.listWqueueFull()).map(r => new WqueueData(...r));
   }
 </script>
 
 <div>
   <TopBlock />
-  <WqTable items={wqItems}/>
+  <WqTable items={wqItems} />
   <button on:click={refresh}>更新</button>
 </div>
