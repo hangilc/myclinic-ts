@@ -1,10 +1,12 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type {
-    Meisai,
-    Charge,
-    Patient,
-    Visit,
+  import {
+    type Meisai,
+    type Charge,
+    type Patient, Payment,
+    type Visit,
+    dateToSqlDateTime,
   } from "myclinic-model";
 
   export let data: [Meisai, Visit, Patient, Charge];
@@ -19,8 +21,20 @@
     return data[0];
   }
 
+  function getVisit(data: [Meisai, Visit, Patient, Charge]): Visit {
+    return data[1];
+  }
+
   function getCharge(data: [Meisai, Visit, Patient, Charge]): Charge {
     return data[3];
+  }
+
+  async function doFinishCashier() {
+    let visit = getVisit(data);
+    let charge = getCharge(data);
+    let payment = new Payment(visit.visitId, charge.charge, dateToSqlDateTime(new Date()));
+    await api.finishCashier(payment);
+    destroy();
   }
 </script>
 
@@ -54,7 +68,7 @@
   </div>
   <div class="commands">
     <button>領収書印刷</button>
-    <button>会計終了</button>
+    <button on:click={doFinishCashier}>会計終了</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
 </SurfaceModal>
