@@ -16,11 +16,15 @@
     let meisai = await api.getMeisai(visit.visitId);
     let patient = await api.getPatient(visit.patientId);
     let charge = await api.getCharge(visit.visitId);
+    let visitEx = await api.getVisitEx(visit.visitId);
     const d: CashierDialog = new CashierDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        data: [meisai, visit, patient, charge],
+        patient,
+        visit: visitEx,
+        meisai,
+        charge,
       },
     });
   }

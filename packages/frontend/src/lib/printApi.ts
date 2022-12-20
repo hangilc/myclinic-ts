@@ -21,7 +21,7 @@ async function response(promise: Promise<any>, option: FetchOption): Promise<any
 }
 
 function get(cmd: string, params: any = {}, option: FetchOption = {}): Promise<any> {
-  let arg = `${base}/${cmd}`
+  let arg = `${base}/${cmd}`;
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
@@ -30,7 +30,7 @@ function get(cmd: string, params: any = {}, option: FetchOption = {}): Promise<a
 }
 
 function post(cmd: string, data: any, params: any = {}, option: FetchOption = {}): Promise<any> {
-  let arg = `${base}/${cmd}`
+  let arg = `${base}/${cmd}`;
   if (Object.keys(params).length !== 0) {
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
