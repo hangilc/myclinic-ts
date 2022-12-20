@@ -1522,3 +1522,79 @@ export class PrescExample {
     );
   }
 }
+
+export class ReceiptDrawerData {
+  constructor(
+    public patientName: string = "",
+    public charge: number = 0,
+    public visitDate: string = "",
+    public issueDate: string = "",
+    public patientId: string = "",
+    public hoken: string = "",
+    public futanWari: string = "",
+    public shoshin: string = "",
+    public kanri: string = "",
+    public zaitaku: string = "",
+    public kensa: string = "",
+    public gazou: string = "",
+    public touyaku: string = "",
+    public chuusha: string = "",
+    public shochi: string = "",
+    public sonota: string = "",
+    public souten: string = "",
+    public hokengai: string[] = ["", "", "", ""]
+  ) {}
+
+  setPatient(patient: Patient): void {
+    this.patientName = patient.fullName();
+    this.patientId = patient.patientId.toString();
+  }
+
+  setMeisai(meisai: Meisai): void {
+    this.charge = meisai.charge;
+    this.futanWari = meisai.futanWari == 10 ? "" : meisai.futanWari.toString();
+    meisai.items.forEach((sect) => {
+      const ten = sect.totalTen > 0 ? sect.totalTen.toLocaleString() : "";
+      switch (sect.section.label) {
+        case MeisaiSectionEnum.ShoshinSaisin.label: {
+          this.shoshin = ten;
+          break;
+        }
+        case MeisaiSectionEnum.IgakuKanri.label: {
+          this.kanri = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Zaitaku.label: {
+          this.zaitaku = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Kensa.label: {
+          this.kensa = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Gazou.label: {
+          this.gazou = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Touyaku.label: {
+          this.touyaku = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Chuusha.label: {
+          this.chuusha = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Shochi.label: {
+          this.shochi = ten;
+          break;
+        }
+        case MeisaiSectionEnum.Sonota.label: {
+          this.sonota = ten;
+          break;
+        }
+      }
+    });
+    this.souten = meisai.totalTen.toString();
+  }
+
+}

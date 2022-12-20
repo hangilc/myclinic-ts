@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import {
     type Meisai,
@@ -8,17 +9,19 @@
     type Visit,
     dateToSqlDateTime,
   } from "myclinic-model";
+  import type { WqueueData } from "./wq-data";
 
-  export let data: [Meisai, Visit, Patient, Charge];
+  export let data: WqueueData;
+  export let charge: Charge;
   export let destroy: () => void;
 
-  function patientLine(data: [Meisai, Visit, Patient, Charge]): string {
-    const p = data[2];
+  function patientLine(data: WqueueData): string {
+    const p = data.patient;
     return `(${p.patientId}) ${p.fullName()} ${p.fullYomi()}`;
   }
 
-  function getMeisai(data: [Meisai, Visit, Patient, Charge]): Meisai {
-    return data[0];
+  function getMeisai(data: WqueueData): Meisai {
+    return data.meisai;
   }
 
   function getVisit(data: [Meisai, Visit, Patient, Charge]): Visit {
@@ -35,6 +38,11 @@
     let payment = new Payment(visit.visitId, charge.charge, dateToSqlDateTime(new Date()));
     await api.finishCashier(payment);
     destroy();
+  }
+
+  async function doPrintReceipt() {
+    let data = new ReceiptDrawerData();
+    data.setPatient()
   }
 </script>
 
@@ -67,7 +75,7 @@
     <div class="charge">請求額：{getCharge(data).charge.toLocaleString()}円</div>
   </div>
   <div class="commands">
-    <button>領収書印刷</button>
+    <button on:click={doPrintReceipt}>領収書印刷</button>
     <button on:click={doFinishCashier}>会計終了</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
