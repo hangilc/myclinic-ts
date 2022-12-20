@@ -8,53 +8,48 @@
     type Patient, Payment,
     type Visit,
     dateToSqlDateTime,
+    VisitEx,
   } from "myclinic-model";
   import type { WqueueData } from "./wq-data";
+  import * as kanjidate from "kanjidate";
+  import { hokenRep } from "@/lib/hoken-rep";
 
-  export let data: WqueueData;
+  export let patient: Patient;
+  export let visit: VisitEx;
+  export let meisai: Meisai;
   export let charge: Charge;
   export let destroy: () => void;
 
-  function patientLine(data: WqueueData): string {
-    const p = data.patient;
+  function patientLine(p: Patient): string {
     return `(${p.patientId}) ${p.fullName()} ${p.fullYomi()}`;
   }
 
-  function getMeisai(data: WqueueData): Meisai {
-    return data.meisai;
-  }
-
-  function getVisit(data: [Meisai, Visit, Patient, Charge]): Visit {
-    return data[1];
-  }
-
-  function getCharge(data: [Meisai, Visit, Patient, Charge]): Charge {
-    return data[3];
-  }
-
   async function doFinishCashier() {
-    let visit = getVisit(data);
-    let charge = getCharge(data);
     let payment = new Payment(visit.visitId, charge.charge, dateToSqlDateTime(new Date()));
     await api.finishCashier(payment);
     destroy();
   }
 
   async function doPrintReceipt() {
-    let data = new ReceiptDrawerData();
-    data.setPatient()
+    let receipt = new ReceiptDrawerData();
+    receipt.setPatient(patient);
+    receipt.charge = charge.charge;
+    receipt.visitDate = kanjidate.format(kanjidate.f2, visit.visitedAtAsDate);
+    receipt.issueDate = kanjidate.format(kanjidate.f2, new Date());
+    receipt.hoken = hokenRep(visit);
+    receipt.futanWari = meisai.futanWari === 10 ? "" : meisai.futanWari.toString();
   }
 </script>
 
 <SurfaceModal {destroy} title="会計">
   <div class="body">
     <div class="patient">
-      {patientLine(data)})
+      {patientLine(patient)})
     </div>
     <div class="detail">
       <div class="col1" />
       <div class="col2" />
-      {#each getMeisai(data).items as item}
+      {#each meisai.items as item}
         <div class="item-row">
           <div class="item-cell1 header">{item.section.label}</div>
           <div class="item-cell2" />
@@ -71,8 +66,8 @@
     </div>
   </div>
   <div class="summary">
-    <div>総点：{getMeisai(data).totalTen.toLocaleString()}点、、負担割：{getMeisai(data).futanWari}割</div>
-    <div class="charge">請求額：{getCharge(data).charge.toLocaleString()}円</div>
+    <div>総点：{meisai.totalTen.toLocaleString()}点、、負担割：{meisai.futanWari}割</div>
+    <div class="charge">請求額：{charge.charge.toLocaleString()}円</div>
   </div>
   <div class="commands">
     <button on:click={doPrintReceipt}>領収書印刷</button>
