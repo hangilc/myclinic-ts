@@ -13,6 +13,7 @@
     }
   };
   export let datePickerDefault: () => Date = () => new Date();
+  export let onChange: (date: Date | null) => void = _ => {};
 
   function doClick(ev: Event): void {
     openDateFormPulldown(
@@ -20,6 +21,7 @@
       ev.target as HTMLElement,
       (d: Date | null) => {
         date = d;
+        onChange(d);
       },
       isNullable
     );
@@ -31,6 +33,7 @@
       ev.target as any,
       (d: Date) => {
         date = d;
+        onChange(d);
       }
     );
   }
