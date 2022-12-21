@@ -3,11 +3,13 @@
   import type { Patient } from "myclinic-model";
   import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog2/patient-data";
+  import RecordsPulldown from "./RecordsPulldown.svelte";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
   import TopBlockAuxMenuPulldown from "./TopBlockAuxMenuPulldown.svelte";
 
   let searchText = "";
   let auxMenuIcon: SVGSVGElement;
+  let recordsLink: HTMLElement;
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
@@ -48,6 +50,16 @@
       }
     })
   }
+
+  function doRecords(): void {
+    const d: RecordsPulldown = new RecordsPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: recordsLink,
+      }
+    })
+  }
 </script>
 
 <div class="top">
@@ -57,7 +69,8 @@
     <button>検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
-  <a href="javascript:void(0)" class="records-link">診療録</a>
+  <a href="javascript:void(0)" class="records-link" on:click={doRecords}
+    bind:this={recordsLink}>診療録</a>
   <svg
     class="menu-svg"
     xmlns="http://www.w3.org/2000/svg"

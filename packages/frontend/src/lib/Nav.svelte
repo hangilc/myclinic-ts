@@ -1,6 +1,4 @@
 <script lang="ts">
-  // import { navPage, navTotal, advanceNavPage, gotoNavFirstPage, gotoNavLastPage } from "./ExamVars";
-
   export let page: number;
   export let total: number;
   export let gotoPage: (page: number) => void;
