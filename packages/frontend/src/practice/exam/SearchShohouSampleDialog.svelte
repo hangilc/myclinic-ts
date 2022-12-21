@@ -10,6 +10,7 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { fade } from "svelte/transition";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import { setFocus } from "@/lib/set-focus";
 
   export let destroy: () => void;
 
@@ -19,15 +20,6 @@
   let selected: Writable<string | null> = writable(null);
   let textarea: HTMLTextAreaElement;
   let copiedVisible = false;
-
-  // function onClose(): void {
-  //   searchText = "";
-  //   drugIndex = 1;
-  //   searchText = "";
-  //   texts = [];
-  //   selected.set(null);
-  //   textarea.value = "";
-  // }
 
   selected.subscribe((s) => {
     if (s == null) {
@@ -82,6 +74,7 @@
       }, 800);
     }
   }
+
 </script>
 
 <SurfaceModal {destroy} title="処方サンプル検索">
@@ -93,7 +86,7 @@
     {/if}
   </div>
   <form on:submit|preventDefault={doSearch}>
-    <input type="text" bind:value={searchText} autofocus />
+    <input type="text" bind:value={searchText} use:setFocus />
     <button type="submit">検索</button>
   </form>
   <div class="select">

@@ -10,7 +10,6 @@
     dateToSqlDateTime,
     VisitEx,
   } from "myclinic-model";
-  import type { WqueueData } from "./wq-data";
   import * as kanjidate from "kanjidate";
   import { hokenRep } from "@/lib/hoken-rep";
   import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
@@ -60,6 +59,9 @@
   <div class="body">
     <div class="patient">
       {patientLine(patient)})
+    </div>
+    <div>
+      {kanjidate.format(kanjidate.f9, visit.visitedAt)}
     </div>
     <div class="detail">
       <div class="col1" />

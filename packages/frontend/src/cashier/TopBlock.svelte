@@ -4,8 +4,10 @@
   import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog2/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
+  import TopBlockAuxMenuPulldown from "./TopBlockAuxMenuPulldown.svelte";
 
   let searchText = "";
+  let auxMenuIcon: SVGSVGElement;
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
@@ -36,6 +38,16 @@
       },
     });
   }
+
+  function doAuxMenu(): void {
+    const d: TopBlockAuxMenuPulldown = new TopBlockAuxMenuPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: auxMenuIcon
+      }
+    })
+  }
 </script>
 
 <div class="top">
@@ -54,6 +66,8 @@
     stroke-width="1.5"
     stroke="currentColor"
     width="24px"
+    on:click={doAuxMenu}
+    bind:this={auxMenuIcon}
   >
     <path
       stroke-linecap="round"

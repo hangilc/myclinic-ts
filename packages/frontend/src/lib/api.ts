@@ -273,6 +273,10 @@ export default {
     return post("enter-wqueue", wq, {}, castBoolean);
   },
 
+  updateWqueue(wq: m.Wqueue): Promise<boolean> {
+    return post("update-wqueue", wq, {}, castBoolean);
+  },
+
   startVisit(patientId: number, at: string | Date): Promise<m.Visit> {
     return get(
       "start-visit",
@@ -1024,11 +1028,7 @@ export default {
   },
 
   getCharge(visitId: number): Promise<m.Charge> {
-    return get(
-      "get-charge",
-      { "visit-id": visitId.toString() },
-      m.Charge.cast
-    )
+    return get("get-charge", { "visit-id": visitId.toString() }, m.Charge.cast);
   },
 
   uploadPatientImage(patientId: number, data: FormData): Promise<boolean> {
@@ -1158,11 +1158,7 @@ export default {
   },
 
   deleteKouhi(kouhiId: number): Promise<boolean> {
-    return get(
-      "delete-kouhi",
-      { "kouhi-id": kouhiId.toString() },
-      castBoolean
-    );
+    return get("delete-kouhi", { "kouhi-id": kouhiId.toString() }, castBoolean);
   },
 
   batchCountHokenUsage(
@@ -1188,6 +1184,17 @@ export default {
         castObject<number, number>(castStringToInt, castNumber),
         castObject<number, number>(castStringToInt, castNumber)
       )
+    );
+  },
+
+  listMishuuForPatient(
+    patientId: number,
+    nVisits: number
+  ): Promise<[m.Visit, m.Charge][]> {
+    return get(
+      "list-mishuu-for-patient",
+      { "patient-id": patientId.toString(), "n-visits": nVisits.toString() },
+      castList(castPair(m.Visit.cast, m.Charge.cast))
     );
   },
 };
