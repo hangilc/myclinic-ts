@@ -17,11 +17,11 @@
         destroy: () => d.$destroy(),
         title: "診療録（患者検索）",
         onEnter: (p: Patient) => {
-          openRecords(p.patientId);
+          openRecords(p);
         },
         onSingleResult: (p: Patient, destroy: () => void) => {
           destroy();
-          openRecords(p.patientId);
+          openRecords(p);
         }
       }
     })
@@ -36,7 +36,7 @@
         title: "診療録（最近の診察）",
         onEnter: (item: [Visit, Patient]) => {
           destroy();
-          openRecords(item[0].patientId);
+          openRecords(item[1]);
         }
       }
     })
@@ -51,7 +51,7 @@
         title: "診療録（日付別）",
         onEnter: (visit: Visit, patient: Patient) => {
           destroy();
-          openRecords(visit.patientId);
+          openRecords(patient);
         }
       }
     })

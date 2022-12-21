@@ -1,27 +1,16 @@
 import api from "@/lib/api";
-import { calcPages } from "@/lib/calc-pages";
+import type { Patient } from "myclinic-model";
 import RecordList from "./RecordList.svelte";
 
-let itemsPerPage: number = 10;
-
-async function countRecordPages(patientId: number): Promise<number> {
-  const nvisits: number = await api.countVisitByPatient(patientId);
-  return calcPages(nvisits, itemsPerPage);
-}
-
-async function fetchRecords(patientId: number, page: number) {
-  return await api.listVisitEx(patientId, itemsPerPage * page, itemsPerPage);
-}
-
-export async function openRecords(patientId: number) {
-  const totalPages = await countRecordPages(patientId);
-  const records = await fetchRecords(patientId, 0);
+export async function openRecords(patient: Patient) {
+  let patientId = patient.patientId;
+  const totalVisits: number = await api.countVisitByPatient(patientId);
   const d: RecordList = new RecordList({
     target: document.body,
     props: {
       destroy: () => d.$destroy(),
-      totalPages,
-      records,
+      totalVisits,
+      patient,
     }
   })
 }
