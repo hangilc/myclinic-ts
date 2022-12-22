@@ -3,10 +3,23 @@
   import { formatVisitDrug } from "@/lib/format-visit-drug";
   import { formatVisitText } from "@/lib/format-visit-text";
   import { hokenRep } from "@/lib/hoken-rep";
+  import { formatPaymentStatus, resolvePaymentStatus } from "@/lib/payment-status";
   import * as kanjidate from "kanjidate";
   import type { VisitEx } from "myclinic-model";
 
   export let visit: VisitEx;
+
+  function renderPaymentStatus(visit: VisitEx): string {
+    const chargeOpt = visit.chargeOption;
+    if( chargeOpt == null ){
+      return "（未請求）";
+    } else {
+      const charge = chargeOpt.charge;
+      const lastPay = visit.lastPayment?.amount ?? 0;
+      return formatPaymentStatus(resolvePaymentStatus(charge, lastPay));
+
+    }
+  }
 </script>
 
 <div class="top">
@@ -58,6 +71,7 @@
       </div>
       <div>
         {formatPayment(visit.chargeOption)}
+        {renderPaymentStatus(visit)}
       </div>
     </div>
   </div>
