@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatVisitText } from "@/lib/format-visit-text";
   import type * as m from "myclinic-model"
   import TextForm from "./TextForm.svelte"
 
@@ -7,11 +8,7 @@
   let isEditing = false;
 
   function conv(s: string): string {
-    if( s === "" ){
-      return "（空白）";
-    } else {
-      return s.replaceAll("\n", "<br />\n");
-    }
+    return formatVisitText(s);
   }
 </script>
 

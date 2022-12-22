@@ -4,7 +4,9 @@
   import Nav from "@/lib/Nav.svelte";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Patient, VisitEx } from "myclinic-model";
+  import { tick } from "svelte";
   import { writable, type Writable } from "svelte/store";
+  import Record from "./Record.svelte";
 
   export let destroy: () => void;
   export let totalVisits: number;
@@ -13,28 +15,39 @@
   const itemsPerPage = 10;
   let page: Writable<number> = writable(0);
   let totalPages: number = calcPages(totalVisits, itemsPerPage);
+  let wrapper: HTMLElement;
 
-  page.subscribe(doGotoPage);
+  page.subscribe(async (newPage) => {
+    records = await api.listVisitEx(
+      patient.patientId,
+      itemsPerPage * newPage,
+      itemsPerPage
+    );
+    await tick();
+    wrapper.scrollTop = 0;
+  });
 
-  async function fetchRecords(patientId: number, page: number) {
-    return await api.listVisitEx(patientId, itemsPerPage * page, itemsPerPage);
-  }
-
-  async function doGotoPage(page: number) {
-    records = await fetchRecords(patient.patientId, page);
+  async function doGotoPage(nextPage: number) {
+    page.set(nextPage);
   }
 </script>
 
-<SurfaceModal {destroy} title="診療録">
+<SurfaceModal {destroy} title="診療録" width="500px">
   <Nav page={$page} total={totalPages} gotoPage={doGotoPage} />
   <div>
     ({patient.patientId}) {patient.fullName()}
   </div>
-  <div>
+  <div class="records" bind:this={wrapper}>
     {#each records as rec (rec.visitId)}
-      <div>
-        {rec.visitId}
-      </div>
+      <Record visit={rec} />
     {/each}
   </div>
 </SurfaceModal>
+
+<style>
+  .records {
+    max-height: 500px;
+    overflow-y: auto;
+    width: 100%;
+  }
+</style>

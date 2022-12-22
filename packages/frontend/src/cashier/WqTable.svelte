@@ -5,6 +5,7 @@
   import api from "@/lib/api";
   import CashierDialog from "./CashierDialog.svelte";
   import type { WqueueData } from "./wq-data";
+  import { openRecords } from "./open-records";
 
   export let items: WqueueData[];
 
@@ -27,6 +28,10 @@
         charge,
       },
     });
+  }
+
+  function doRecord(patient: Patient): void {
+    openRecords(patient);
   }
 </script>
 
@@ -66,7 +71,7 @@
           {#if item.isWaitCashier}
             <button on:click={() => doCashier(visit)}>会計</button>
           {/if}
-          <a href="javascript:void(0)">診療録</a>
+          <a href="javascript:void(0)" on:click={() => doRecord(patient)}>診療録</a>
           <svg
             width="1.2rem"
             class="menu-icon"
