@@ -6,6 +6,7 @@
   import CashierDialog from "./CashierDialog.svelte";
   import type { WqueueData } from "./wq-data";
   import { openRecords } from "./open-records";
+  import WqTableAuxMenuPulldown from "./WqTableAuxMenuPulldown.svelte";
 
   export let items: WqueueData[];
 
@@ -32,6 +33,18 @@
 
   function doRecord(patient: Patient): void {
     openRecords(patient);
+  }
+
+  function doAuxMenu(e: Event, patient: Patient, visit: Visit): void {
+    const d: WqTableAuxMenuPulldown = new WqTableAuxMenuPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: e.target as SVGSVGElement,
+        patient,
+        visit
+      }
+    })
   }
 </script>
 
@@ -80,6 +93,7 @@
             viewBox="0 0 24 24"
             stroke="currentColor"
             stroke-width="2"
+            on:click={(e) => doAuxMenu(e, patient, visit)}
           >
             <path
               stroke-linecap="round"
@@ -181,6 +195,7 @@
   .manip-content > a {
     margin-left: 3px;
     line-height: 1;
+    user-select: none;
   }
 
   .menu-icon {
