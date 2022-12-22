@@ -622,16 +622,16 @@ export default {
     );
   },
 
-  resolveIyakuhincode(
-    iyakuhincode: number,
-    at: Date | string
-  ): Promise<number | null> {
-    return get(
-      "resolve-iyakuhincode",
-      { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
-      castOption(castNumber)
-    );
-  },
+  // resolveIyakuhincode(
+  //   iyakuhincode: number,
+  //   at: Date | string
+  // ): Promise<number | null> {
+  //   return get(
+  //     "resolve-iyakuhincode",
+  //     { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
+  //     castOption(castNumber)
+  //   );
+  // },
 
   resolveKizaicodeByName(
     name: string,

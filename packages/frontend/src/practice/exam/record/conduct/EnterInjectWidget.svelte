@@ -71,7 +71,7 @@
         [
           {
             kind: kind,
-            labelOption: kind.rep,
+            labelOption: undefined,
             shinryou: shinryouMap[kind.key],
             drug: [{ iyakuhincode, amount }],
             kizai: [],

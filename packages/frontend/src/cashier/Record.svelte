@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { formatPayment } from "@/lib/format-payment";
   import { formatVisitDrug } from "@/lib/format-visit-drug";
   import { formatVisitText } from "@/lib/format-visit-text";
   import { hokenRep } from "@/lib/hoken-rep";
@@ -42,7 +43,7 @@
       {/if}
       <div>
         {#each visit.conducts as conduct (conduct.conductId)}
-          <div>{conduct.kind.rep}</div>
+          <div>[{conduct.kind.rep}]</div>
           <div>{conduct.gazouLabel ?? ""}</div>
           {#each conduct.shinryouList as shinryou (shinryou.conductShinryouId)}
             <div>* {shinryou.master.name}</div>
@@ -54,6 +55,9 @@
             <div>* {kizai.master.name} {kizai.amount}{kizai.master.unit}</div>
           {/each}
         {/each}
+      </div>
+      <div>
+        {formatPayment(visit.chargeOption)}
       </div>
     </div>
   </div>

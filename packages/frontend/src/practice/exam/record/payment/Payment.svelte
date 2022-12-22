@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import { formatPayment } from "@/lib/format-payment";
   import type { VisitEx } from "myclinic-model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
@@ -9,12 +10,7 @@
   let edit: Edit;
 
   function paymentRep(visit: VisitEx): string {
-    const charge = visit.chargeOption;
-    if (charge == null) {
-      return "（未請求）";
-    } else {
-      return `請求額：${charge.charge.toLocaleString()}円`;
-    }
+    return formatPayment(visit.chargeOption);
   }
 
   async function doDispClick() {

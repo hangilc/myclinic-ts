@@ -65,10 +65,11 @@ async function batchResolveIyakuhincodes(
 ): Promise<{ iyakuhincode: number, amount: number }[]> {
   return await Promise.all(
     srcList.map(async src => {
-      const code = await api.resolveIyakuhincode(src.iyakuhincode, at);
-      if( code == null ){
-        throw new Error("医薬品をみつけられません：" + src)
-      }
+      const code = src.iyakuhincode;
+      // const code = await api.resolveIyakuhincode(src.iyakuhincode, at);
+      // if( code == null ){
+      //   throw new Error("医薬品をみつけられません：" + src)
+      // }
       return { iyakuhincode: code, amount: src.amount };
     })
   )
