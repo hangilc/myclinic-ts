@@ -56,8 +56,19 @@
     })
   }
 
-  function doStartScan(): void {
-    console.log($kind);
+  async function doStartScan() {
+    // if( $patient == undefined ){
+    //   alert("患者が設定されていません。");
+    //   return;
+    // }
+    if( $scanner == undefined ){
+      alert("スキャナーが設定されていません。");
+      return;
+    }
+    const result = await printApi.scan($scanner.deviceId, (loaded, total) => {
+      console.log("progress", loaded, total);
+    });
+    console.log("scanned", result);
   }
 </script>
 

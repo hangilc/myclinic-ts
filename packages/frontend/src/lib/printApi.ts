@@ -2,7 +2,6 @@ import type { Op } from "./drawer/op"
 
 export const base: string = "http://localhost:48080";
 
-
 interface FetchOption {
   progress?: (loaded: number, total: number) => void;
   noResult?: boolean;
@@ -10,7 +9,19 @@ interface FetchOption {
 
 async function response(promise: Promise<any>, option: FetchOption): Promise<any> {
   if( option.progress ){
-
+    const resp = await promise;
+    const len = parseInt(resp.headers.get("Content-length"));
+    const reader = resp.body.getReader();
+    let loaded = 0;
+    while( true ){
+      const { done, value } = await reader.read();
+      loaded += value.length;
+      option.progress(loaded, len);
+      if( done ){
+        break;
+      }
+    }
+    return resp; // returns Promise<Response>
   }
   if( option.noResult !== undefined && option.noResult ){
     return promise; // returns Promise<Response>
