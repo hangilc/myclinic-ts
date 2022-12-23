@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
   import Cashier from "@/cashier/Cashier.svelte"
-  import Scan from "./scan/Scan.svelte";
+  import Scan from "@/scan/Scan.svelte";
   
   export let serviceStore: Writable<string>;
 </script>
