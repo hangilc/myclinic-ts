@@ -1,10 +1,20 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
 
+  let kind: Writable<string | undefined> = writable(undefined);
   let scanner: Writable<string | undefined> = writable(undefined);
 
+  function onKindInputChange(event: Event): void {
+    const target = event.target;
+    console.log("target, target");
+    if( target != null ){
+      const input = target as HTMLInputElement;
+      kind.set(input.value);
+    }
+  }
+
   function doStartScan(): void {
-    console.log($scanner);
+    console.log($kind);
   }
 </script>
 
@@ -18,13 +28,12 @@
   </div>
   <div class="title">文書の種類</div>
   <div class="work">
-    <input type="text" />
+    <input type="text"  on:change={onKindInputChange}/>
     <a href="javascript:void(0)">選択</a>
   </div>
   <div class="title">スキャナー</div>
   <div class="work">
-    <input type="text" on:change={((e: InputEvent) => scanner.set(e.target.value))} />
-    {scanner ?? "（未選択）"}
+    {$scanner ?? "（未選択）"}
     <a href="javascript:void(0)">選択</a>
   </div>
   <div class="commands"><button on:click={doStartScan}>スキャン開始</button></div>
