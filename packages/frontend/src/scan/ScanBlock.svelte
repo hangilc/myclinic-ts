@@ -1,16 +1,59 @@
 <script lang="ts">
+  import { printApi, type ScannerDevice } from "@/lib/printApi";
+  import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
+  import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
+  import ScanKindPulldown from "./ScanKindPulldown.svelte";
 
+  let patient: Writable<Patient | undefined> = writable(undefined);
   let kind: Writable<string | undefined> = writable(undefined);
-  let scanner: Writable<string | undefined> = writable(undefined);
+  let scanner: Writable<ScannerDevice | undefined> = writable(undefined);
+  let selectKindLink: HTMLElement;
+  let kindValue = "";
 
-  function onKindInputChange(event: Event): void {
-    const target = event.target;
-    console.log("target, target");
-    if( target != null ){
-      const input = target as HTMLInputElement;
-      kind.set(input.value);
+  probeScanner();
+
+  async function probeScanner() {
+    const result = await printApi.listScannerDevices();
+    if( result.length === 1 ){
+      scanner.set(result[0]);
     }
+  }
+
+  kind.subscribe((k) => {
+    if( k == undefined ){
+      kindValue = "";
+    } else {
+      kindValue = k;
+    }
+  })
+
+  function doSearchPatient(): void {
+    const d: SearchPatientDialog = new SearchPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "患者検索（スキャン）",
+        onEnter: (p: Patient) => {
+          patient.set(p);
+        }
+      }
+    })
+  }
+
+  function onKindInputChange(): void {
+    kind.set(kindValue);
+  }
+
+  function doSelectKind(): void {
+    const d: ScanKindPulldown = new ScanKindPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: selectKindLink,
+        onEnter: (k: string) => kind.set(k),
+      }
+    })
   }
 
   function doStartScan(): void {
@@ -22,18 +65,21 @@
   <div class="title main">書類のスキャン</div>
   <div class="title">患者選択</div>
   <div class="work">
-    <form>
-      <input type="text" /> <button>検索</button>
-    </form>
+    {#if $patient == undefined}
+      {"（未選択）"}
+    {:else}
+      ({$patient.patientId}) {$patient.fullName()}
+    {/if}
+      <button on:click={doSearchPatient}>検索</button>
   </div>
   <div class="title">文書の種類</div>
   <div class="work">
-    <input type="text"  on:change={onKindInputChange}/>
-    <a href="javascript:void(0)">選択</a>
+    <input type="text"  bind:value={kindValue} on:change={onKindInputChange}/>
+    <a href="javascript:void(0)" on:click={doSelectKind} bind:this={selectKindLink}>選択</a>
   </div>
   <div class="title">スキャナー</div>
   <div class="work">
-    {$scanner ?? "（未選択）"}
+    {$scanner?.description ?? "（未選択）"}
     <a href="javascript:void(0)">選択</a>
   </div>
   <div class="commands"><button on:click={doStartScan}>スキャン開始</button></div>

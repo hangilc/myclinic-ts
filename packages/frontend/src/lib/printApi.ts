@@ -83,7 +83,7 @@ export const printApi = {
     return post(`print/${setting}`, req);
   },
 
-  listScannerDevice(): Promise<ScannerDevice[]> {
+  listScannerDevices(): Promise<ScannerDevice[]> {
     return get("scanner/device/", {});
   },
 
@@ -106,6 +106,7 @@ export const printApi = {
 
   deleteScannedFile(savedFile: string): Promise<boolean> {
     return del(`scanner/image/${savedFile}`, {});
-  }
+  },
+
 }
 
