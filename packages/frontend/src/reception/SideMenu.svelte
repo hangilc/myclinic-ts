@@ -27,8 +27,13 @@
     padding: 6px;
   }
 
+  .top a:last-child {
+    margin-bottom: 0;
+  }
+
   a {
     display: block;
+    margin-bottom: 4px;
   }
 
   a.current {

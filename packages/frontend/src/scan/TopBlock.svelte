@@ -1,11 +1,15 @@
 <script lang="ts">
 
   export let onNewScan: () => void;
+
+  function doNewScan(): void {
+    onNewScan();
+  }
 </script>
 
 <div class="top">
   <div class="title">スキャン</div>
-  <button>新規スキャン</button>
+  <button on:click={doNewScan}>新規スキャン</button>
 </div>
 
 <style>
