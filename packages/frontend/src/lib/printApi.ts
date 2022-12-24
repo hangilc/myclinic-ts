@@ -15,11 +15,11 @@ async function response(promise: Promise<any>, option: FetchOption): Promise<any
     let loaded = 0;
     while( true ){
       const { done, value } = await reader.read();
-      loaded += value.length;
-      option.progress(loaded, len);
       if( done ){
         break;
       }
+      loaded += value.length;
+      option.progress(loaded, len);
     }
     return resp; // returns Promise<Response>
   }

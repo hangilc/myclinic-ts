@@ -1,9 +1,12 @@
 <script lang="ts">
-  export let fileName: string;
+  import type { ScannedDocData } from "./scanned-doc-data";
+
+
+  export let data: ScannedDocData;
 </script>
 
 <div>
-  <span>{fileName}</span>
+  <span>{data.uploadFileName}</span>
   <a href="javascript:void(0)">表示</a> |
   <a href="javascript:void(0)">再スキャン</a> |
   <a href="javascript:void(0)">削除</a>

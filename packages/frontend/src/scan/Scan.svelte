@@ -9,13 +9,17 @@
   function doNewScan(): void {
     scanIds = [scanSer++, ...scanIds];
   }
+
+  function removeBlock(id: number): void {
+    scanIds = scanIds.filter(e => e !== id);
+  }
 </script>
 
 <div>
   <TopBlock onNewScan={doNewScan} />
   <div>
     {#each scanIds as scanId (scanId)}
-      <ScanBlock/>
+      <ScanBlock remove={() => removeBlock(scanId)}/>
     {/each}
   </div>
 </div>

@@ -1,31 +1,19 @@
 <script lang="ts">
   import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
+  import { kindChoices } from "./kind-choices";
 
   export let destroy: () => void;
   export let anchor: HTMLElement | SVGSVGElement;
-  export let onEnter: (kind: string) => void;
-
-  let kindMap: Record<string, string> = {
-    保険証: "hokensho",
-    健診結果: "health-check",
-    検査結果: "exam-report",
-    紹介状: "refer",
-    訪問看護指示書など: "shijisho",
-    訪問看護などの報告書: "zaitaku",
-    その他: "image",
-  };
+  export let onEnter: (kindKey: string) => void;
 
   function doKey(key: string): void {
-    const kind = kindMap[key];
-    if( kind != null ){
-      destroy();
-      onEnter(kind);
-    }
+    destroy();
+    onEnter(key);
   }
 </script>
 
 <SurfacePulldown {destroy} {anchor} >
-  {#each Object.keys(kindMap) as k}
+  {#each Object.keys(kindChoices) as k}
     <a href="javascript:void(0)" on:click={() => doKey(k)}>{k}</a>
   {/each}
 </SurfacePulldown>

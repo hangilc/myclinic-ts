@@ -1197,4 +1197,17 @@ export default {
       castList(castPair(m.Visit.cast, m.Charge.cast))
     );
   },
+
+  savePatientImage(
+    patientId: number,
+    fileName: string,
+    data: ArrayBuffer
+  ): Promise<boolean> {
+    return postRaw(
+      "save-patient-image",
+      data,
+      { "patient-id": patientId.toString(), "file-name": fileName },
+      castBoolean
+    );
+  },
 };

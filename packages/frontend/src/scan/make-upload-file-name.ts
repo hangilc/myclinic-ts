@@ -1,6 +1,6 @@
 import { pad } from "@/lib/pad";
 
-export function makeImageFileName(patientId: number, kind: string, date: Date, ser: number): string {
+export function makeUploadFileName(patientId: number, kind: string, date: Date, ser: number): string {
   const m = pad(date.getMonth()+1, 2, "0");
   const d = pad(date.getDate(), 2, "0");
   const H = pad(date.getHours(), 2, "0");
