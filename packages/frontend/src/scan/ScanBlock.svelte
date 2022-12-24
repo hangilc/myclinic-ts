@@ -3,6 +3,7 @@
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
+  import { makeImageFileName } from "./make-image-file-name";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
 
   let patient: Writable<Patient | undefined> = writable(undefined);
@@ -10,6 +11,8 @@
   let scanner: Writable<ScannerDevice | undefined> = writable(undefined);
   let selectKindLink: HTMLElement;
   let kindValue = "";
+  let scanDate: Date | undefined = undefined;
+  let scanSerial = 1;
 
   probeScanner();
 
@@ -56,19 +59,29 @@
     })
   }
 
+  function getScanDate(): Date {
+    if( scanDate == undefined ){
+      scanDate = new Date();
+    }
+    return scanDate;
+  }
+
   async function doStartScan() {
-    // if( $patient == undefined ){
-    //   alert("患者が設定されていません。");
-    //   return;
-    // }
+    if( $patient == undefined ){
+      alert("患者が設定されていません。");
+      return;
+    }
     if( $scanner == undefined ){
       alert("スキャナーが設定されていません。");
       return;
     }
-    const result = await printApi.scan($scanner.deviceId, (loaded, total) => {
-      console.log("progress", loaded, total);
-    });
-    console.log("scanned", result);
+    const kindValue = $kind || "image";
+    const imageFile = makeImageFileName($patient.patientId, kindValue, getScanDate(), scanSerial++);
+    console.log(imageFile);
+    // const result = await printApi.scan($scanner.deviceId, (loaded, total) => {
+    //   console.log("progress", loaded, total);
+    // });
+    // console.log("scanned", result);
   }
 </script>
 

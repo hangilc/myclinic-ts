@@ -25,6 +25,7 @@
     if (t !== "") {
       result = await api.searchPatientSmart(t);
       if (result.length === 1) {
+        selected.set(result[0]);
         onSingleResult(result[0], destroy);
       }
     }
