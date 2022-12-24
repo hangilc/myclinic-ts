@@ -1,7 +1,14 @@
 import api from "@/lib/api";
 import { printApi } from "@/lib/printApi";
+
+export enum UploadStatus {
+  NotYet,
+  Success,
+  Failure,
+}
+
 export class ScannedDocData {
-  uploaded: boolean = false;
+  uploadStatus: UploadStatus = UploadStatus.NotYet;
   constructor(
     public patientId: number,
     public scannedImageFile: string,

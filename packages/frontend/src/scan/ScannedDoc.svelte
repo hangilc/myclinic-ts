@@ -1,11 +1,44 @@
 <script lang="ts">
-  import type { ScannedDocData } from "./scanned-doc-data";
-
+  import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
 
   export let data: ScannedDocData;
 </script>
 
-<div>
+<div class="top">
+  {#if data.uploadStatus === UploadStatus.Success}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="green"
+      stroke-width="2"
+      width="18"
+      class="icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  {/if}
+  {#if data.uploadStatus === UploadStatus.Failure}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="red"
+      stroke-width="2"
+      width="18"
+      class="icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  {/if}
   <span>{data.uploadFileName}</span>
   <a href="javascript:void(0)">表示</a> |
   <a href="javascript:void(0)">再スキャン</a> |
@@ -14,6 +47,11 @@
 
 <style>
   a:first-of-type {
-    margin-left: 10px;
+    margin-left: 6px;
+  }
+
+  .icon {
+    position: relative;
+    top: 3px;
   }
 </style>
