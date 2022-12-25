@@ -1,8 +1,11 @@
 <script lang="ts">
   import ImageDialog from "@/lib/ImageDialog.svelte";
+  import type { Readable } from "svelte/store";
   import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
 
   export let data: ScannedDocData;
+  export let canScan: Readable<boolean>;
+  export let onRescan: (date: ScannedDocData) => void;
 
   function doView(): void {
     const url = data.scannedImageUrl;
@@ -14,6 +17,10 @@
         url,
       }
     })
+  }
+
+  async function doRescan() {
+    onRescan(data);
   }
 </script>
 
@@ -54,7 +61,9 @@
   {/if}
   <span>{data.uploadFileName}</span>
   <a href="javascript:void(0)" on:click={doView}>表示</a> |
-  <a href="javascript:void(0)">再スキャン</a> |
+  {#if $canScan}
+  <a href="javascript:void(0)" on:click={doRescan}>再スキャン</a> |
+  {/if}
   <a href="javascript:void(0)">削除</a>
 </div>
 

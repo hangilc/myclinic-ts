@@ -6,17 +6,16 @@
   import { writable, type Writable } from "svelte/store";
   import { kindChoices } from "./kind-choices";
   import {
-    getScanner,
     isScannerAvailable,
-    releaseScanner,
+    scannerProbed,
     ScannerState,
     scannerUsage,
-    setScannerAvailable,
   } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { ScannedDocData, UploadStatus } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
   import ScanProgress from "./ScanProgress.svelte";
+  import { startScan } from "./start-scan";
 
   export let remove: () => void;
   let patient: Writable<Patient | undefined> = writable(undefined);
@@ -27,14 +26,14 @@
   let scannedDocs: ScannedDocData[] = [];
   let unUploadedFileExists = false;
   let scannerAvailable: Writable<boolean> = writable(false);
-  let canScan = false;
-  let isScanning = false;
-  let scanPct: number = 0;
+  let canScan: Writable<boolean> = writable(false);
+  let isScanning: Writable<boolean> = writable(false);
+  let scanPct: Writable<number> = writable(0);
 
   probeScanner();
 
   $: unUploadedFileExists = hasUnUploaded(scannedDocs);
-  $: canScan = $scannerAvailable && $patient != undefined;
+  $: canScan.set($scannerAvailable && $patient != undefined);
 
   scanner.subscribe((s) => {
     if (s == undefined) {
@@ -46,13 +45,15 @@
 
   scannerUsage.subscribe((rec) => {
     const deviceId = $scanner?.deviceId;
-    scannerAvailable.set(deviceId != undefined && rec[deviceId] === ScannerState.Available);
+    scannerAvailable.set(
+      deviceId != undefined && rec[deviceId] === ScannerState.Available
+    );
   });
 
   async function probeScanner() {
     const result = await printApi.listScannerDevices();
     for (const r of result) {
-      setScannerAvailable(r.deviceId);
+      scannerProbed(r.deviceId);
     }
     if (result.length >= 1) {
       scanner.set(result[0]);
@@ -99,6 +100,14 @@
     return scanDate;
   }
 
+  async function scan(): Promise<string | undefined> {
+    if ($scanner == undefined) {
+      alert("スキャナーが設定されていません。");
+      return;
+    }
+    return await startScan($scanner.deviceId, isScanning, scanPct);
+  }
+
   async function doStartScan() {
     if ($patient == undefined) {
       alert("患者が設定されていません。");
@@ -109,27 +118,25 @@
       return;
     }
     const kindValue = kindChoices[$kindKey] || "image";
-    let scannerDevice = $scanner.deviceId;
-    if (!getScanner(scannerDevice)) {
-      alert("スキャナーを使用できません。");
-      return;
+    const imageFile = await scan();
+    if (imageFile != undefined) {
+      const index = scannedDocs.length + 1;
+      const data = new ScannedDocData(
+        imageFile,
+        $patient.patientId,
+        kindValue,
+        getScanDate(),
+        index
+      );
+      scannedDocs = [...scannedDocs, data];
     }
-    scanPct = 0;
-    isScanning = true;
-    const imageFile = await printApi.scan(scannerDevice, (loaded, total) => {
-      scanPct = loaded / total * 100;
-    });
-    isScanning = false;
-    releaseScanner(scannerDevice);
-    const index = scannedDocs.length + 1;
-    const data = new ScannedDocData(
-      imageFile,
-      $patient.patientId,
-      kindValue,
-      getScanDate(),
-      index
-    );
-    scannedDocs = [...scannedDocs, data];
+  }
+
+  async function doRescan(data: ScannedDocData) {
+    const img = await scan();
+    if( img != undefined ){
+      data.scannedImageFile = img;
+    }
   }
 
   async function doUpload() {
@@ -176,15 +183,15 @@
     <a href="javascript:void(0)">選択</a>
   </div>
   <div class="commands">
-    <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
-    {#if isScanning}
-    <ScanProgress pct={scanPct} />
+    <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>
+    {#if $isScanning}
+      <ScanProgress pct={scanPct} />
     {/if}
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
     {#each scannedDocs as doc (doc.index)}
-      <ScannedDoc data={doc} />
+      <ScannedDoc data={doc} {canScan} onRescan={doRescan}/>
     {/each}
   </div>
   <div class="commands">

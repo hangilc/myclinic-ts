@@ -7,10 +7,12 @@ export enum ScannerState {
 
 export const scannerUsage: Writable<Record<string, ScannerState>> = writable({});
 
-export function setScannerAvailable(name: string): void {
+export function scannerProbed(name: string): void {
   const r = get(scannerUsage);
-  r[name] = ScannerState.Available;
-  scannerUsage.set(r);
+  if( !(name in r) ){
+    r[name] = ScannerState.Available;
+    scannerUsage.set(r);
+  }
 }
 
 export function getScanner(name: string): boolean {
