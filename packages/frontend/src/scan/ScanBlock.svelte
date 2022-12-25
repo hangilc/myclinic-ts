@@ -1,4 +1,5 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
@@ -134,8 +135,10 @@
 
   async function doRescan(data: ScannedDocData) {
     const img = await scan();
-    if( img != undefined ){
+    if (img != undefined) {
+      const prev = data.scannedImageFile;
       data.scannedImageFile = img;
+      printApi.deleteScannedFile(prev);
     }
   }
 
@@ -145,14 +148,25 @@
     scannedDocs = [...scannedDocs];
   }
 
+  async function deleteScannedImages() {
+    const promises = scannedDocs.map((doc) =>
+      printApi.deleteScannedFile(doc.scannedImageFile)
+    );
+    Promise.all(promises);
+  }
+
   function doClose(): void {
+    function close(): void {
+      deleteScannedImages();
+      remove();
+    }
     if (hasUnUploaded(scannedDocs)) {
       confirm(
         "アップロードされていないファイルがありますが、閉じますか？",
-        remove
+        close
       );
     } else {
-      remove();
+      close();
     }
   }
 </script>
@@ -191,7 +205,7 @@
   <div class="title">スキャン文書</div>
   <div class="work">
     {#each scannedDocs as doc (doc.index)}
-      <ScannedDoc data={doc} {canScan} onRescan={doRescan}/>
+      <ScannedDoc data={doc} {canScan} onRescan={doRescan} />
     {/each}
   </div>
   <div class="commands">
