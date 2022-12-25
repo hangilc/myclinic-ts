@@ -16,18 +16,20 @@
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { ScannedDocData, UploadStatus } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
+  import ScanProgress from "./ScanProgress.svelte";
 
   export let remove: () => void;
   let patient: Writable<Patient | undefined> = writable(undefined);
   let kindKey: Writable<string> = writable("その他");
   let scanner: Writable<ScannerDevice | undefined> = writable(undefined);
   let selectKindLink: HTMLElement;
-  let kindValue = "";
   let scanDate: Date | undefined = undefined;
   let scannedDocs: ScannedDocData[] = [];
   let unUploadedFileExists = false;
   let scannerAvailable: Writable<boolean> = writable(false);
   let canScan = false;
+  let isScanning = false;
+  let scanPct: number = 0;
 
   probeScanner();
 
@@ -65,14 +67,6 @@
     }
     return false;
   }
-
-  kindKey.subscribe((k) => {
-    if (k == undefined) {
-      kindValue = "";
-    } else {
-      kindValue = k;
-    }
-  });
 
   function doSearchPatient(): void {
     const d: SearchPatientDialog = new SearchPatientDialog({
@@ -120,9 +114,13 @@
       alert("スキャナーを使用できません。");
       return;
     }
+    scanPct = 0;
+    isScanning = true;
     const imageFile = await printApi.scan(scannerDevice, (loaded, total) => {
-      console.log("progress", loaded, total);
+      scanPct = loaded / total * 100;
     });
+    isScanning = false;
+    releaseScanner(scannerDevice);
     const index = scannedDocs.length + 1;
     const data = new ScannedDocData(
       imageFile,
@@ -132,7 +130,6 @@
       index
     );
     scannedDocs = [...scannedDocs, data];
-    releaseScanner(scannerDevice);
   }
 
   async function doUpload() {
@@ -180,6 +177,9 @@
   </div>
   <div class="commands">
     <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
+    {#if isScanning}
+    <ScanProgress pct={scanPct} />
+    {/if}
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
