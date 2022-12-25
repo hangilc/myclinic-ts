@@ -1,7 +1,20 @@
 <script lang="ts">
+  import ImageDialog from "@/lib/ImageDialog.svelte";
   import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
 
   export let data: ScannedDocData;
+
+  function doView(): void {
+    const url = data.scannedImageUrl;
+    const d: ImageDialog = new ImageDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "スキャン画像プレビュー",
+        url,
+      }
+    })
+  }
 </script>
 
 <div class="top">
@@ -40,7 +53,7 @@
     </svg>
   {/if}
   <span>{data.uploadFileName}</span>
-  <a href="javascript:void(0)">表示</a> |
+  <a href="javascript:void(0)" on:click={doView}>表示</a> |
   <a href="javascript:void(0)">再スキャン</a> |
   <a href="javascript:void(0)">削除</a>
 </div>

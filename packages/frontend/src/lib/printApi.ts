@@ -115,6 +115,10 @@ export const printApi = {
     return resp.arrayBuffer();
   },
 
+  scannedFileUrl(savedFile: string): string {
+    return encodeURI(`${base}/scanner/image/${savedFile}`);
+  },
+
   deleteScannedFile(savedFile: string): Promise<boolean> {
     return del(`scanner/image/${savedFile}`, {});
   },

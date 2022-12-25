@@ -5,7 +5,14 @@
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { kindChoices } from "./kind-choices";
-  import { makeUploadFileName } from "./make-upload-file-name";
+  import {
+    getScanner,
+    isScannerAvailable,
+    releaseScanner,
+    ScannerState,
+    scannerUsage,
+    setScannerAvailable,
+  } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { ScannedDocData, UploadStatus } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
@@ -19,14 +26,33 @@
   let scanDate: Date | undefined = undefined;
   let scannedDocs: ScannedDocData[] = [];
   let unUploadedFileExists = false;
+  let scannerAvailable: Writable<boolean> = writable(false);
+  let canScan = false;
 
   probeScanner();
 
   $: unUploadedFileExists = hasUnUploaded(scannedDocs);
+  $: canScan = $scannerAvailable && $patient != undefined;
+
+  scanner.subscribe((s) => {
+    if (s == undefined) {
+      scannerAvailable.set(false);
+    } else {
+      scannerAvailable.set(isScannerAvailable(s.deviceId));
+    }
+  });
+
+  scannerUsage.subscribe((rec) => {
+    const deviceId = $scanner?.deviceId;
+    scannerAvailable.set(deviceId != undefined && rec[deviceId] === ScannerState.Available);
+  });
 
   async function probeScanner() {
     const result = await printApi.listScannerDevices();
-    if (result.length === 1) {
+    for (const r of result) {
+      setScannerAvailable(r.deviceId);
+    }
+    if (result.length >= 1) {
       scanner.set(result[0]);
     }
   }
@@ -89,45 +115,28 @@
       return;
     }
     const kindValue = kindChoices[$kindKey] || "image";
-    const imageFile = await printApi.scan(
-      $scanner.deviceId,
-      (loaded, total) => {
-        console.log("progress", loaded, total);
-      }
-    );
-    // const imageFile = "mock.jpg";
+    let scannerDevice = $scanner.deviceId;
+    if (!getScanner(scannerDevice)) {
+      alert("スキャナーを使用できません。");
+      return;
+    }
+    const imageFile = await printApi.scan(scannerDevice, (loaded, total) => {
+      console.log("progress", loaded, total);
+    });
     const index = scannedDocs.length + 1;
-    const uploadFile = makeUploadFileName(
+    const data = new ScannedDocData(
+      imageFile,
       $patient.patientId,
       kindValue,
       getScanDate(),
       index
     );
-    const data = new ScannedDocData(
-      $patient.patientId,
-      imageFile,
-      uploadFile,
-      index
-    );
     scannedDocs = [...scannedDocs, data];
+    releaseScanner(scannerDevice);
   }
 
   async function doUpload() {
-    const promises = scannedDocs
-      .filter((doc) => doc.uploadStatus !== UploadStatus.Success)
-      .map(async (doc) => {
-        try {
-          const ok = await doc.upload();
-          if (ok) {
-            doc.uploadStatus = UploadStatus.Success;
-          } else {
-            doc.uploadStatus = UploadStatus.Failure;
-          }
-        } catch (ex) {
-          console.error(ex);
-          doc.uploadStatus = UploadStatus.Failure;
-        }
-      });
+    const promises = scannedDocs.map((doc) => doc.upload());
     await Promise.all(promises);
     scannedDocs = [...scannedDocs];
   }
@@ -170,7 +179,7 @@
     <a href="javascript:void(0)">選択</a>
   </div>
   <div class="commands">
-    <button on:click={doStartScan}>スキャン開始</button>
+    <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
