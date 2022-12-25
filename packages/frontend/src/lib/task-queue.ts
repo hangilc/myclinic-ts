@@ -1,16 +1,16 @@
 export class TaskQueue {
   queue: (() => Promise<void>)[] = [];
-  isStarted = false;
+  isRunning = false;
 
   append(task: () => Promise<void>): void {
     this.queue.push(task);
-    if( !this.isStarted ){
+    if( !this.isRunning ){
       this.start();
     }
   }
 
   async start() {
-    this.isStarted = true;
+    this.isRunning = true;
     while(true){
       const p = this.queue.shift();
       if( p == undefined ){
@@ -20,6 +20,8 @@ export class TaskQueue {
         await p();
       } catch(ex) {
         console.error(ex);
+      } finally {
+        this.isRunning = false;
       }
     }
   }
