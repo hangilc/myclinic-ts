@@ -1210,4 +1210,25 @@ export default {
       castBoolean
     );
   },
+
+  renamePatientImage(
+    patientId: number,
+    src: string,
+    dst: string
+  ): Promise<boolean> {
+    return get(
+      "rename-patient-image",
+      { "patient-id": patientId.toString(), src, dst },
+      castBoolean
+    );
+  },
+
+  deletePatientImage(patientId: number, fileName: string): Promise<boolean> {
+    return get(
+      "delete-patient-image", 
+      { "patient-id": patientId.toString(), "file-name": fileName },
+      castBoolean
+    );
+  },
+  
 };

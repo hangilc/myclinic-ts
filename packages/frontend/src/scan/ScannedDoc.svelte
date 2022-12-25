@@ -5,7 +5,8 @@
 
   export let data: ScannedDocData;
   export let canScan: Readable<boolean>;
-  export let onRescan: (date: ScannedDocData) => void;
+  export let onRescan: (data: ScannedDocData) => void;
+  export let onDelete: (data: ScannedDocData) => void;
 
   function doView(): void {
     const url = data.scannedImageUrl;
@@ -19,8 +20,12 @@
     })
   }
 
-  async function doRescan() {
+  function doRescan(): void {
     onRescan(data);
+  }
+
+  function doDelete(): void {
+    onDelete(data);
   }
 </script>
 
@@ -64,7 +69,7 @@
   {#if $canScan}
   <a href="javascript:void(0)" on:click={doRescan}>再スキャン</a> |
   {/if}
-  <a href="javascript:void(0)">削除</a>
+  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
 </div>
 
 <style>

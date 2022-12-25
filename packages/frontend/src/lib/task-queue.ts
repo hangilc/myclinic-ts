@@ -1,10 +1,10 @@
 export class TaskQueue {
-  queue: Promise<any>[] = [];
+  queue: (() => Promise<void>)[] = [];
   isStarted = false;
 
-  append(promise: Promise<any>): void {
-    this.queue.push(promise);
-    if( this.isStarted ){
+  append(task: () => Promise<void>): void {
+    this.queue.push(task);
+    if( !this.isStarted ){
       this.start();
     }
   }
@@ -17,7 +17,7 @@ export class TaskQueue {
         break;
       }
       try {
-        await p;
+        await p();
       } catch(ex) {
         console.error(ex);
       }

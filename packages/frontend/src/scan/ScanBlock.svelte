@@ -5,6 +5,7 @@
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
+  import { docsAddTask, taskDelete } from "./docs-task";
   import { kindChoices } from "./kind-choices";
   import {
     isScannerAvailable,
@@ -50,6 +51,10 @@
       deviceId != undefined && rec[deviceId] === ScannerState.Available
     );
   });
+
+  function updateDocs(newDocs: ScannedDocData[]): void {
+    scannedDocs = newDocs;
+  }
 
   async function probeScanner() {
     const result = await printApi.listScannerDevices();
@@ -142,6 +147,12 @@
     }
   }
 
+  async function doDelete(data: ScannedDocData) {
+    docsAddTask(() => {
+      return taskDelete(() => scannedDocs, data, updateDocs);
+    });
+  }
+
   async function doUpload() {
     const promises = scannedDocs.map((doc) => doc.upload());
     await Promise.all(promises);
@@ -205,7 +216,7 @@
   <div class="title">スキャン文書</div>
   <div class="work">
     {#each scannedDocs as doc (doc.index)}
-      <ScannedDoc data={doc} {canScan} onRescan={doRescan} />
+      <ScannedDoc data={doc} {canScan} onRescan={doRescan} onDelete={doDelete}/>
     {/each}
   </div>
   <div class="commands">
