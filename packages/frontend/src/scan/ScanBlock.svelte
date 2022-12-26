@@ -1,5 +1,4 @@
 <script lang="ts">
-  import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
@@ -7,6 +6,8 @@
   import { writable, type Writable } from "svelte/store";
   import { docsAddTask, taskDelete } from "./docs-task";
   import { kindChoices } from "./kind-choices";
+  import { makePatientText, makeScannerText } from "./misc";
+  import { ScanManager } from "./scan-manager";
   import {
     isScannerAvailable,
     scannerProbed,
@@ -20,40 +21,44 @@
   import { startScan } from "./start-scan";
 
   export let remove: () => void;
-  let patient: Writable<Patient | undefined> = writable(undefined);
-  let kindKey: Writable<string> = writable("その他");
-  let scanner: Writable<ScannerDevice | undefined> = writable(undefined);
+
+  let manager = new ScanManager();
+  let patientText: string = makePatientText(manager.patient);
+  let kindText: string = manager.kindKey;
+  let scannerText: string = makeScannerText(manager.scanDevice);
+  let scannerList: ScannerDevice[] = [];
+  let scannerSelect: Writable<ScannerDevice | undefined> = writable(undefined);
   let selectKindLink: HTMLElement;
   let scanDate: Date | undefined = undefined;
-  let scannedDocs: ScannedDocData[] = [];
+  let scannedDocs: Writable<ScannedDocData[]> = writable([]);
   let unUploadedFileExists = false;
   let scannerAvailable: Writable<boolean> = writable(false);
-  let canScan: Writable<boolean> = writable(false);
+  let canScan: boolean = false;
   let isScanning: Writable<boolean> = writable(false);
   let scanPct: Writable<number> = writable(0);
 
+  manager.onPatientChange = (p: Patient) => {
+    patientText = makePatientText(p);
+  };
+
+  manager.onScannableChange = (available: boolean) => {
+    canScan = available;
+  };
+
+  manager.onScannerChange = (scanner: ScannerDevice | undefined) => {
+    scannerText = makeScannerText(scanner);
+  };
+
+  manager.onKindKeyChange = (key: string) => {
+    kindText = key;
+  }
+
   probeScanner();
 
-  $: unUploadedFileExists = hasUnUploaded(scannedDocs);
-  $: canScan.set($scannerAvailable && $patient != undefined);
-
-  scanner.subscribe((s) => {
-    if (s == undefined) {
-      scannerAvailable.set(false);
-    } else {
-      scannerAvailable.set(isScannerAvailable(s.deviceId));
-    }
-  });
-
-  scannerUsage.subscribe((rec) => {
-    const deviceId = $scanner?.deviceId;
-    scannerAvailable.set(
-      deviceId != undefined && rec[deviceId] === ScannerState.Available
-    );
-  });
+  $: unUploadedFileExists = hasUnUploaded($scannedDocs);
 
   function updateDocs(newDocs: ScannedDocData[]): void {
-    scannedDocs = newDocs;
+    scannedDocs.set(newDocs);
   }
 
   async function probeScanner() {
@@ -61,8 +66,9 @@
     for (const r of result) {
       scannerProbed(r.deviceId);
     }
+    scannerList = result;
     if (result.length >= 1) {
-      scanner.set(result[0]);
+      manager.setDevice(result[0]);
     }
   }
 
@@ -82,7 +88,7 @@
         destroy: () => d.$destroy(),
         title: "患者検索（スキャン）",
         onEnter: (p: Patient) => {
-          patient.set(p);
+          manager.setPatient(p);
         },
       },
     });
@@ -94,7 +100,7 @@
       props: {
         destroy: () => d.$destroy(),
         anchor: selectKindLink,
-        onEnter: (k: string) => kindKey.set(k),
+        onEnter: (k: string) => manager.setKindKey(k),
       },
     });
   }
@@ -107,34 +113,37 @@
   }
 
   async function scan(): Promise<string | undefined> {
-    if ($scanner == undefined) {
+    const scanner = manager.scanDevice;
+    if (scanner == undefined) {
       alert("スキャナーが設定されていません。");
       return;
     }
-    return await startScan($scanner.deviceId, isScanning, scanPct);
+    return await startScan(scanner.deviceId, isScanning, scanPct);
   }
 
   async function doStartScan() {
-    if ($patient == undefined) {
+    const patient = manager.patient;
+    if (patient == undefined) {
       alert("患者が設定されていません。");
       return;
     }
-    if ($scanner == undefined) {
+    const scanner = manager.scanDevice;
+    if (scanner == undefined) {
       alert("スキャナーが設定されていません。");
       return;
     }
-    const kindValue = kindChoices[$kindKey] || "image";
+    const kindValue = manager.scanKind;
     const imageFile = await scan();
     if (imageFile != undefined) {
-      const index = scannedDocs.length + 1;
+      const index = $scannedDocs.length + 1;
       const data = new ScannedDocData(
         imageFile,
-        $patient.patientId,
+        patient.patientId,
         kindValue,
         getScanDate(),
         index
       );
-      scannedDocs = [...scannedDocs, data];
+      updateDocs([...$scannedDocs, data]);
     }
   }
 
@@ -149,18 +158,18 @@
 
   async function doDelete(data: ScannedDocData) {
     docsAddTask(() => {
-      return taskDelete(() => scannedDocs, data, updateDocs);
+      return taskDelete(() => $scannedDocs, data, updateDocs);
     });
   }
 
   async function doUpload() {
-    const promises = scannedDocs.map((doc) => doc.upload());
+    const promises = $scannedDocs.map((doc) => doc.upload());
     await Promise.all(promises);
-    scannedDocs = [...scannedDocs];
+    updateDocs([...$scannedDocs]);
   }
 
   async function deleteScannedImages() {
-    const promises = scannedDocs.map((doc) =>
+    const promises = $scannedDocs.map((doc) =>
       printApi.deleteScannedFile(doc.scannedImageFile)
     );
     Promise.all(promises);
@@ -171,7 +180,7 @@
       deleteScannedImages();
       remove();
     }
-    if (hasUnUploaded(scannedDocs)) {
+    if (hasUnUploaded($scannedDocs)) {
       confirm(
         "アップロードされていないファイルがありますが、閉じますか？",
         close
@@ -180,22 +189,22 @@
       close();
     }
   }
+
+  function doSelectScanner(): void {
+    const d: 
+  }
 </script>
 
 <div class="top">
   <div class="title main">書類のスキャン</div>
   <div class="title">患者選択</div>
   <div class="work">
-    {#if $patient == undefined}
-      {"（未選択）"}
-    {:else}
-      ({$patient.patientId}) {$patient.fullName()}
-    {/if}
+    {patientText}
     <button on:click={doSearchPatient}>検索</button>
   </div>
   <div class="title">文書の種類</div>
   <div class="work">
-    {$kindKey}
+    {kindText}
     <a
       href="javascript:void(0)"
       on:click={doSelectKind}
@@ -204,19 +213,19 @@
   </div>
   <div class="title">スキャナー</div>
   <div class="work">
-    {$scanner?.description ?? "（未選択）"}
-    <a href="javascript:void(0)">選択</a>
+    {scannerText}
+    <a href="javascript:void(0)" on:click={doSelectScanner}>選択</a>
   </div>
   <div class="commands">
-    <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>
+    <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
     {#if $isScanning}
       <ScanProgress pct={scanPct} />
     {/if}
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
-    {#each scannedDocs as doc (doc.index)}
-      <ScannedDoc data={doc} {canScan} onRescan={doRescan} onDelete={doDelete}/>
+    {#each $scannedDocs as doc (doc.index)}
+      <ScannedDoc data={doc} onRescan={doRescan} onDelete={doDelete}/>
     {/each}
   </div>
   <div class="commands">
