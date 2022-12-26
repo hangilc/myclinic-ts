@@ -2,7 +2,7 @@ import { TaskQueue } from "@/lib/task-queue";
 import type { Patient } from "myclinic-model";
 import type { ScannerDevice } from "myclinic-model/model";
 import { kindChoices } from "./kind-choices";
-import { isScannerAvailable } from "./scan-vars";
+import { isScannerAvailable, scannerUsage } from "./scan-vars";
 import { ScannedDocData } from "./scanned-doc-data";
 import { startScan } from "./start-scan";
 
@@ -23,7 +23,11 @@ export class ScanManager {
   tq: TaskQueue = new TaskQueue();
   unsubs: (() => void)[] = [];
 
-  constructor() {}
+  constructor() {
+    this.unsubs.push(scannerUsage.subscribe(_ => {
+      this.triggerScannableChange();
+    }))
+  }
 
   setPatient(patient: Patient): void {
     this.patient = patient;

@@ -25,7 +25,7 @@
   let scannerList: ScannerDevice[] = [];
   let scannedDocs: ScannedDocData[] = [];
   let canScan: boolean = false;
-  let isScanning: Writable<boolean> = writable(false);
+  let isScanning: boolean = false;
   let scanPct: number = 0;
   let canUpload: boolean = false;
 
@@ -42,9 +42,9 @@
   manager.onKindKeyChange = (key: string) => kindText = key;
 
   manager.onDocsChange = docs => scannedDocs = docs;
-  manager.onScanPctChange = pct => {
-    console.log("pct", pct);
-  }
+  manager.onScanStart = () => isScanning = true;
+  manager.onScanEnd = () => isScanning = false;
+  manager.onScanPctChange = pct => scanPct = pct;
 
   probeScanner();
 
@@ -211,9 +211,9 @@
   </div>
   <div class="commands">
     <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
-    <!-- {#if $isScanning}
+    {#if isScanning}
       <ScanProgress pct={scanPct} />
-    {/if} -->
+    {/if}
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
