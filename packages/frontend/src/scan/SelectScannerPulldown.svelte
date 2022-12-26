@@ -1,17 +1,24 @@
 <script lang="ts">
-  import SelectItem from "@/lib/SelectItem.svelte";
-import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
+  import SelectItem2 from "@/lib/SelectItem2.svelte";
+  import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import type { ScannerDevice } from "myclinic-model/model";
-  import type { Writable } from "svelte/store";
 
   export let destroy: () => void;
   export let anchor: HTMLElement | SVGSVGElement;
   export let list: ScannerDevice[];
-  export let selected: Writable<ScannerDevice | undefined>;
+  export let current: ScannerDevice | undefined;
+  export let onSelect: (d: ScannerDevice) => void;
+
+  function doSelect(d: ScannerDevice): void {
+    destroy();
+    onSelect(d);
+  }
 </script>
 
 <SurfacePulldown {destroy} {anchor}>
   {#each list as d}
-    <SelectItem data={d} {selected}>{d.description}</SelectItem>
+    <SelectItem2 data={d} isCurrent={d === current} onSelect={doSelect}
+      >{d.description}</SelectItem2
+    >
   {/each}
 </SurfacePulldown>

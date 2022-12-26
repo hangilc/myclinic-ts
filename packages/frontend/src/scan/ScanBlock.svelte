@@ -5,19 +5,16 @@
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { docsAddTask, taskDelete } from "./docs-task";
-  import { kindChoices } from "./kind-choices";
   import { makePatientText, makeScannerText } from "./misc";
   import { ScanManager } from "./scan-manager";
   import {
-    isScannerAvailable,
     scannerProbed,
-    ScannerState,
-    scannerUsage,
   } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { ScannedDocData, UploadStatus } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
   import ScanProgress from "./ScanProgress.svelte";
+  import SelectScannerPulldown from "./SelectScannerPulldown.svelte";
   import { startScan } from "./start-scan";
 
   export let remove: () => void;
@@ -27,8 +24,6 @@
   let kindText: string = manager.kindKey;
   let scannerText: string = makeScannerText(manager.scanDevice);
   let scannerList: ScannerDevice[] = [];
-  let scannerSelect: Writable<ScannerDevice | undefined> = writable(undefined);
-  let selectKindLink: HTMLElement;
   let scanDate: Date | undefined = undefined;
   let scannedDocs: Writable<ScannedDocData[]> = writable([]);
   let unUploadedFileExists = false;
@@ -94,12 +89,12 @@
     });
   }
 
-  function doSelectKind(): void {
+  function doSelectKind(event: MouseEvent): void {
     const d: ScanKindPulldown = new ScanKindPulldown({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        anchor: selectKindLink,
+        anchor: event.target as HTMLElement,
         onEnter: (k: string) => manager.setKindKey(k),
       },
     });
@@ -190,8 +185,19 @@
     }
   }
 
-  function doSelectScanner(): void {
-    const d: 
+  function doSelectScanner(event: MouseEvent): void {
+    const d: SelectScannerPulldown = new SelectScannerPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        anchor: event.target as HTMLElement,
+        list: scannerList,
+        current: manager.scanDevice,
+        onSelect: (device: ScannerDevice) => {
+          manager.setDevice(device);
+        }
+      }
+    })
   }
 </script>
 
@@ -207,8 +213,7 @@
     {kindText}
     <a
       href="javascript:void(0)"
-      on:click={doSelectKind}
-      bind:this={selectKindLink}>選択</a
+      on:click={doSelectKind}>選択</a
     >
   </div>
   <div class="title">スキャナー</div>
