@@ -13,7 +13,6 @@ let nextId: number = 1;
 export class ScannedDocData {
   id: number;
   uploadStatus: UploadStatus = UploadStatus.NotYet;
-  canScan: boolean = false;
   constructor(
     public scannedImageFile: string,
     public patientId: number,

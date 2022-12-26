@@ -24,7 +24,7 @@
   let scannerText: string = makeScannerText(manager.scanDevice);
   let scannerList: ScannerDevice[] = [];
   let scannedDocs: ScannedDocData[] = [];
-  let canScan: boolean = false;
+  let canScan: Writable<boolean> = writable(false);
   let isScanning: boolean = false;
   let scanPct: number = 0;
   let canUpload: boolean = false;
@@ -33,8 +33,7 @@
     patientText = makePatientText(p);
   };
 
-  manager.onScannableChange = (available: boolean) => canScan = available;
-
+  manager.onScannableChange = (available: boolean) => canScan.set(available);
   manager.onScannerChange = (scanner: ScannerDevice | undefined) => {
     scannerText = makeScannerText(scanner);
   };
@@ -130,18 +129,11 @@
   }
 
   async function doRescan(data: ScannedDocData) {
-    // const img = await scan();
-    // if (img != undefined) {
-    //   const prev = data.scannedImageFile;
-    //   data.scannedImageFile = img;
-    //   printApi.deleteScannedFile(prev);
-    // }
+    manager.reScan(data);
   }
 
   async function doDelete(data: ScannedDocData) {
-    // docsAddTask(() => {
-    //   return taskDelete(() => $scannedDocs, data, updateDocs);
-    // });
+    manager.deleteDoc(data);
   }
 
   async function doUpload() {
@@ -210,7 +202,7 @@
     <a href="javascript:void(0)" on:click={doSelectScanner}>選択</a>
   </div>
   <div class="commands">
-    <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
+    <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>
     {#if isScanning}
       <ScanProgress pct={scanPct} />
     {/if}
@@ -218,7 +210,7 @@
   <div class="title">スキャン文書</div>
   <div class="work">
     {#each scannedDocs as doc (doc.id)}
-      <ScannedDoc data={doc} onRescan={doRescan} onDelete={doDelete}/>
+      <ScannedDoc data={doc} {canScan} onRescan={doRescan} onDelete={doDelete}/>
     {/each}
   </div>
   <div class="commands">
