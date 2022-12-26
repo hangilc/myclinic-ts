@@ -11,11 +11,10 @@
     scannerProbed,
   } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
-  import { ScannedDocData, UploadStatus } from "./scanned-doc-data";
+  import type { ScannedDocData } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
   import ScanProgress from "./ScanProgress.svelte";
   import SelectScannerPulldown from "./SelectScannerPulldown.svelte";
-  import { startScan } from "./start-scan";
 
   export let remove: () => void;
 
@@ -24,37 +23,30 @@
   let kindText: string = manager.kindKey;
   let scannerText: string = makeScannerText(manager.scanDevice);
   let scannerList: ScannerDevice[] = [];
-  let scanDate: Date | undefined = undefined;
-  let scannedDocs: Writable<ScannedDocData[]> = writable([]);
-  let unUploadedFileExists = false;
-  let scannerAvailable: Writable<boolean> = writable(false);
+  let scannedDocs: ScannedDocData[] = [];
   let canScan: boolean = false;
   let isScanning: Writable<boolean> = writable(false);
-  let scanPct: Writable<number> = writable(0);
+  let scanPct: number = 0;
+  let canUpload: boolean = false;
 
   manager.onPatientChange = (p: Patient) => {
     patientText = makePatientText(p);
   };
 
-  manager.onScannableChange = (available: boolean) => {
-    canScan = available;
-  };
+  manager.onScannableChange = (available: boolean) => canScan = available;
 
   manager.onScannerChange = (scanner: ScannerDevice | undefined) => {
     scannerText = makeScannerText(scanner);
   };
 
-  manager.onKindKeyChange = (key: string) => {
-    kindText = key;
+  manager.onKindKeyChange = (key: string) => kindText = key;
+
+  manager.onDocsChange = docs => scannedDocs = docs;
+  manager.onScanPctChange = pct => {
+    console.log("pct", pct);
   }
 
   probeScanner();
-
-  $: unUploadedFileExists = hasUnUploaded($scannedDocs);
-
-  function updateDocs(newDocs: ScannedDocData[]): void {
-    scannedDocs.set(newDocs);
-  }
 
   async function probeScanner() {
     const result = await printApi.listScannerDevices();
@@ -67,14 +59,14 @@
     }
   }
 
-  function hasUnUploaded(docs: ScannedDocData[]): boolean {
-    for (let doc of docs) {
-      if (doc.uploadStatus !== UploadStatus.Success) {
-        return true;
-      }
-    }
-    return false;
-  }
+  // function hasUnUploaded(docs: ScannedDocData[]): boolean {
+  //   for (let doc of docs) {
+  //     if (doc.uploadStatus !== UploadStatus.Success) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // }
 
   function doSearchPatient(): void {
     const d: SearchPatientDialog = new SearchPatientDialog({
@@ -100,74 +92,69 @@
     });
   }
 
-  function getScanDate(): Date {
-    if (scanDate == undefined) {
-      scanDate = new Date();
-    }
-    return scanDate;
-  }
+  // async function scan(): Promise<string | undefined> {
+  //   const scanner = manager.scanDevice;
+  //   if (scanner == undefined) {
+  //     alert("スキャナーが設定されていません。");
+  //     return;
+  //   }
+  //   return await startScan(scanner.deviceId, isScanning, scanPct);
+  // }
 
-  async function scan(): Promise<string | undefined> {
-    const scanner = manager.scanDevice;
-    if (scanner == undefined) {
-      alert("スキャナーが設定されていません。");
-      return;
-    }
-    return await startScan(scanner.deviceId, isScanning, scanPct);
-  }
+  function doStartScan(): void {
+    manager.scan();
 
-  async function doStartScan() {
-    const patient = manager.patient;
-    if (patient == undefined) {
-      alert("患者が設定されていません。");
-      return;
-    }
-    const scanner = manager.scanDevice;
-    if (scanner == undefined) {
-      alert("スキャナーが設定されていません。");
-      return;
-    }
-    const kindValue = manager.scanKind;
-    const imageFile = await scan();
-    if (imageFile != undefined) {
-      const index = $scannedDocs.length + 1;
-      const data = new ScannedDocData(
-        imageFile,
-        patient.patientId,
-        kindValue,
-        getScanDate(),
-        index
-      );
-      updateDocs([...$scannedDocs, data]);
-    }
+    // const patient = manager.patient;
+    // if (patient == undefined) {
+    //   alert("患者が設定されていません。");
+    //   return;
+    // }
+    // const scanner = manager.scanDevice;
+    // if (scanner == undefined) {
+    //   alert("スキャナーが設定されていません。");
+    //   return;
+    // }
+    // const kindValue = manager.scanKind;
+    // const imageFile = await scan();
+    // if (imageFile != undefined) {
+    //   const index = $scannedDocs.length + 1;
+    //   const data = new ScannedDocData(
+    //     imageFile,
+    //     patient.patientId,
+    //     kindValue,
+    //     getScanDate(),
+    //     index
+    //   );
+    //   updateDocs([...$scannedDocs, data]);
+    // }
   }
 
   async function doRescan(data: ScannedDocData) {
-    const img = await scan();
-    if (img != undefined) {
-      const prev = data.scannedImageFile;
-      data.scannedImageFile = img;
-      printApi.deleteScannedFile(prev);
-    }
+    // const img = await scan();
+    // if (img != undefined) {
+    //   const prev = data.scannedImageFile;
+    //   data.scannedImageFile = img;
+    //   printApi.deleteScannedFile(prev);
+    // }
   }
 
   async function doDelete(data: ScannedDocData) {
-    docsAddTask(() => {
-      return taskDelete(() => $scannedDocs, data, updateDocs);
-    });
+    // docsAddTask(() => {
+    //   return taskDelete(() => $scannedDocs, data, updateDocs);
+    // });
   }
 
   async function doUpload() {
-    const promises = $scannedDocs.map((doc) => doc.upload());
-    await Promise.all(promises);
-    updateDocs([...$scannedDocs]);
+    // const promises = $scannedDocs.map((doc) => doc.upload());
+    // await Promise.all(promises);
+    // updateDocs([...$scannedDocs]);
   }
 
   async function deleteScannedImages() {
-    const promises = $scannedDocs.map((doc) =>
-      printApi.deleteScannedFile(doc.scannedImageFile)
-    );
-    Promise.all(promises);
+    // const promises = $scannedDocs.map((doc) =>
+    //   printApi.deleteScannedFile(doc.scannedImageFile)
+    // );
+    // Promise.all(promises);
   }
 
   function doClose(): void {
@@ -175,14 +162,15 @@
       deleteScannedImages();
       remove();
     }
-    if (hasUnUploaded($scannedDocs)) {
-      confirm(
-        "アップロードされていないファイルがありますが、閉じますか？",
-        close
-      );
-    } else {
-      close();
-    }
+    close();
+    // if (hasUnUploaded($scannedDocs)) {
+    //   confirm(
+    //     "アップロードされていないファイルがありますが、閉じますか？",
+    //     close
+    //   );
+    // } else {
+    //   close();
+    // }
   }
 
   function doSelectScanner(event: MouseEvent): void {
@@ -223,18 +211,18 @@
   </div>
   <div class="commands">
     <button on:click={doStartScan} disabled={!canScan}>スキャン開始</button>
-    {#if $isScanning}
+    <!-- {#if $isScanning}
       <ScanProgress pct={scanPct} />
-    {/if}
+    {/if} -->
   </div>
   <div class="title">スキャン文書</div>
   <div class="work">
-    {#each $scannedDocs as doc (doc.index)}
+    {#each scannedDocs as doc (doc.id)}
       <ScannedDoc data={doc} onRescan={doRescan} onDelete={doDelete}/>
     {/each}
   </div>
   <div class="commands">
-    <button on:click={doUpload} disabled={!unUploadedFileExists}
+    <button on:click={doUpload} disabled={!canUpload}
       >アップロード</button
     ><button on:click={doClose}>閉じる</button>
   </div>

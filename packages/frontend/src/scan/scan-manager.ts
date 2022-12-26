@@ -1,7 +1,10 @@
+import { TaskQueue } from "@/lib/task-queue";
 import type { Patient } from "myclinic-model";
 import type { ScannerDevice } from "myclinic-model/model";
 import { kindChoices } from "./kind-choices";
 import { isScannerAvailable } from "./scan-vars";
+import { ScannedDocData } from "./scanned-doc-data";
+import { startScan } from "./start-scan";
 
 export class ScanManager {
   patient: Patient | undefined = undefined;
@@ -11,6 +14,13 @@ export class ScanManager {
   kindKey: string = "その他";
   onKindKeyChange: (key: string) => void = (_) => {};
   onScannableChange: (canScan: boolean) => void = (_) => {};
+  onScanStart: () => void = () => {};
+  onScanEnd: () => void = () => {};
+  onScanPctChange: (pct: number) => void = (_) => {};
+  scanDateOpt: Date | undefined = undefined;
+  docs: ScannedDocData[] = [];
+  onDocsChange: (docs: ScannedDocData[]) => void = (_) => {};
+  tq: TaskQueue = new TaskQueue();
   unsubs: (() => void)[] = [];
 
   constructor() {}
@@ -46,10 +56,47 @@ export class ScanManager {
     }
   }
 
+  get scanDate(): Date {
+    if (this.scanDateOpt == undefined) {
+      this.scanDateOpt = new Date();
+    }
+    return this.scanDateOpt;
+  }
+
   triggerScannableChange(): void {
     this.onScannableChange(
       this.isScannerAvailable && this.patient != undefined
     );
+  }
+
+  async scan() {
+    const scanner = this.scanDevice;
+    if (scanner == undefined) {
+      alert("スキャナーが設定されていません。");
+      return;
+    }
+    if( this.patient == undefined ){
+      alert("患者が選択されていません。");
+      return;
+    }
+    const patientId = this.patient.patientId;
+    const kind = this.scanKind;
+    const img = await startScan(
+      scanner.deviceId,
+      () => this.onScanStart(),
+      (pct) => this.onScanPctChange(pct),
+      () => this.onScanEnd()
+    );
+    if( img == undefined ){
+      alert("スキャンに失敗しました。");
+      return;
+    }
+    this.tq.append(async () => {
+      const index = this.docs.length + 1;
+      const data = new ScannedDocData(img, patientId, kind, this.scanDate, index);
+      this.docs.push(data);
+      this.onDocsChange(this.docs);
+    });
   }
 
   dispose(): void {
