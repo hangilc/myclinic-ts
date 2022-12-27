@@ -26,9 +26,11 @@ export class ScanManager {
   unsubs: (() => void)[] = [];
 
   constructor() {
-    this.unsubs.push(scannerUsage.subscribe(_ => {
-      this.triggerScannableChange();
-    }))
+    this.unsubs.push(
+      scannerUsage.subscribe((_) => {
+        this.triggerScannableChange();
+      })
+    );
   }
 
   setPatient(patient: Patient): void {
@@ -81,7 +83,7 @@ export class ScanManager {
       alert("スキャナーが設定されていません。");
       return;
     }
-    if( this.patient == undefined ){
+    if (this.patient == undefined) {
       alert("患者が選択されていません。");
       return;
     }
@@ -93,12 +95,18 @@ export class ScanManager {
       (pct) => this.onScanPctChange(pct),
       () => this.onScanEnd()
     );
-    if( img == undefined ){
+    if (img == undefined) {
       return;
     }
     this.tq.append(async () => {
       const index = this.docs.length + 1;
-      const data = new ScannedDocData(img, patientId, kind, this.scanDate, index);
+      const data = new ScannedDocData(
+        img,
+        patientId,
+        kind,
+        this.scanDate,
+        index
+      );
       this.docs.push(data);
       this.onDocsChange(this.docs);
     });
@@ -120,15 +128,15 @@ export class ScanManager {
       (pct) => this.onScanPctChange(pct),
       () => this.onScanEnd()
     );
-    if( img == undefined ){
+    if (img == undefined) {
       return;
     }
     this.tq.append(async () => {
       const docs = this.docs;
-      const i = docs.findIndex(d => d.id === id );
-      if( i >= 0 ){
+      const i = docs.findIndex((d) => d.id === id);
+      if (i >= 0) {
         const d = docs[i];
-        if( d.uploadStatus === UploadStatus.Success ){
+        if (d.uploadStatus === UploadStatus.Success) {
           await api.deletePatientImage(patientId, prevUploadImage);
         }
         d.scannedImageFile = img;
@@ -142,25 +150,45 @@ export class ScanManager {
     const id = data.id;
     this.tq.append(async () => {
       const docs = this.docs;
-      const i = docs.findIndex(d => d.id === id);
-      if( i >= 0 ){
+      const i = docs.findIndex((d) => d.id === id);
+      if (i >= 0) {
         let d: ScannedDocData = docs[i];
-        if( d.uploadStatus === UploadStatus.Success ){
+        if (d.uploadStatus === UploadStatus.Success) {
           await api.deletePatientImage(d.patientId, d.uploadFileName);
         }
         await printApi.deleteScannedFile(d.scannedImageFile);
-        for(let j=i+1;j<docs.length;j++){
+        for (let j = i + 1; j < docs.length; j++) {
           d = docs[j];
           const src = d.uploadFileName;
           d.index = j;
-          if( d.uploadStatus === UploadStatus.Success ){
+          if (d.uploadStatus === UploadStatus.Success) {
             await api.renamePatientImage(d.patientId, src, d.uploadFileName);
           }
         }
         docs.splice(i, 1);
         this.onDocsChange(docs);
       }
-    })
+    });
+  }
+
+  async upload() {
+    this.tq.append(async () => {
+      const docs = this.docs;
+      const proms = docs
+        .filter((d) => d.uploadStatus !== UploadStatus.Success)
+        .map(async (d) => {
+          const bytes = await printApi.getScannedFile(d.scannedImageFile);
+          try{
+            await api.savePatientImage(d.patientId, d.uploadFileName, bytes);
+            d.uploadStatus = UploadStatus.Success;
+          } catch(ex) {
+            console.error(ex);
+            d.uploadStatus = UploadStatus.Failure;
+          }
+        });
+      await Promise.all(proms);
+      this.onDocsChange(docs);
+    });
   }
 
   dispose(): void {

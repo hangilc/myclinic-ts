@@ -1,17 +1,17 @@
 <script lang="ts">
   import { confirm } from "@/lib/confirm-call";
+  import Confirm from "@/lib/Confirm.svelte";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
-  import { docsAddTask, taskDelete } from "./docs-task";
   import { makePatientText, makeScannerText } from "./misc";
   import { ScanManager } from "./scan-manager";
   import {
     scannerProbed,
   } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
-  import type { ScannedDocData } from "./scanned-doc-data";
+  import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
   import ScanProgress from "./ScanProgress.svelte";
   import SelectScannerPulldown from "./SelectScannerPulldown.svelte";
@@ -40,7 +40,10 @@
 
   manager.onKindKeyChange = (key: string) => kindText = key;
 
-  manager.onDocsChange = docs => scannedDocs = docs;
+  manager.onDocsChange = docs => {
+    scannedDocs = docs;
+    canUpload = hasUnUploaded(docs);
+  }
   manager.onScanStart = () => isScanning = true;
   manager.onScanEnd = () => isScanning = false;
   manager.onScanPctChange = pct => scanPct = pct;
@@ -58,14 +61,14 @@
     }
   }
 
-  // function hasUnUploaded(docs: ScannedDocData[]): boolean {
-  //   for (let doc of docs) {
-  //     if (doc.uploadStatus !== UploadStatus.Success) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // }
+  function hasUnUploaded(docs: ScannedDocData[]): boolean {
+    for (let doc of docs) {
+      if (doc.uploadStatus !== UploadStatus.Success) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   function doSearchPatient(): void {
     const d: SearchPatientDialog = new SearchPatientDialog({
@@ -133,13 +136,11 @@
   }
 
   async function doDelete(data: ScannedDocData) {
-    manager.deleteDoc(data);
+    confirm("このスキャン文書を削除しますか？", () => manager.deleteDoc(data));
   }
 
   async function doUpload() {
-    // const promises = $scannedDocs.map((doc) => doc.upload());
-    // await Promise.all(promises);
-    // updateDocs([...$scannedDocs]);
+    manager.upload();
   }
 
   async function deleteScannedImages() {
