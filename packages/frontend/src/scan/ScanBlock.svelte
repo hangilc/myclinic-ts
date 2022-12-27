@@ -1,6 +1,5 @@
 <script lang="ts">
   import { confirm } from "@/lib/confirm-call";
-  import Confirm from "@/lib/Confirm.svelte";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
@@ -94,41 +93,8 @@
     });
   }
 
-  // async function scan(): Promise<string | undefined> {
-  //   const scanner = manager.scanDevice;
-  //   if (scanner == undefined) {
-  //     alert("スキャナーが設定されていません。");
-  //     return;
-  //   }
-  //   return await startScan(scanner.deviceId, isScanning, scanPct);
-  // }
-
   function doStartScan(): void {
     manager.scan();
-
-    // const patient = manager.patient;
-    // if (patient == undefined) {
-    //   alert("患者が設定されていません。");
-    //   return;
-    // }
-    // const scanner = manager.scanDevice;
-    // if (scanner == undefined) {
-    //   alert("スキャナーが設定されていません。");
-    //   return;
-    // }
-    // const kindValue = manager.scanKind;
-    // const imageFile = await scan();
-    // if (imageFile != undefined) {
-    //   const index = $scannedDocs.length + 1;
-    //   const data = new ScannedDocData(
-    //     imageFile,
-    //     patient.patientId,
-    //     kindValue,
-    //     getScanDate(),
-    //     index
-    //   );
-    //   updateDocs([...$scannedDocs, data]);
-    // }
   }
 
   async function doRescan(data: ScannedDocData) {
@@ -145,10 +111,6 @@
 
   function deleteScannedImages() {
     manager.deleteScannedImages();
-    // const promises = $scannedDocs.map((doc) =>
-    //   printApi.deleteScannedFile(doc.scannedImageFile)
-    // );
-    // Promise.all(promises);
   }
 
   function doClose(): void {

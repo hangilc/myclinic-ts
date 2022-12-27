@@ -33,10 +33,24 @@ export class ScanManager {
     );
   }
 
+  async changePatientTo(data: ScannedDocData, patientId: number) {
+    if (data.uploadStatus === UploadStatus.Success) {
+      await api.deletePatientImage(data.patientId, data.uploadFileName);
+    }
+    data.patientId = patientId;
+    data.uploadStatus = UploadStatus.NotYet;
+  }
+
   setPatient(patient: Patient): void {
-    this.patient = patient;
-    this.onPatientChange(patient);
-    this.triggerScannableChange();
+    this.tq.append(async () => {
+      const docs = this.docs;
+      const proms = docs.map((d) => this.changePatientTo(d, patient.patientId));
+      await Promise.all(proms);
+      this.patient = patient;
+      this.onPatientChange(patient);
+      this.triggerScannableChange();
+      this.onDocsChange(this.docs);
+    });
   }
 
   setDevice(device: ScannerDevice): void {
@@ -45,9 +59,24 @@ export class ScanManager {
     this.triggerScannableChange();
   }
 
+  async changeKindTo(data: ScannedDocData, kind: string) {
+    if (data.uploadStatus === UploadStatus.Success) {
+      await api.deletePatientImage(data.patientId, data.uploadFileName);
+    }
+    data.kind = kind;
+    data.uploadStatus = UploadStatus.NotYet;
+  }
+
   setKindKey(key: string): void {
-    this.kindKey = key;
-    this.onKindKeyChange(key);
+    const kind = kindChoices[key] || "image";
+    this.tq.append(async () => {
+      const docs = this.docs;
+      const proms = docs.map((d) => this.changeKindTo(d, kind));
+      await Promise.all(proms);
+      this.kindKey = key;
+      this.onKindKeyChange(key);
+      this.onDocsChange(this.docs);
+    });
   }
 
   get scanKind(): string {
@@ -178,10 +207,10 @@ export class ScanManager {
         .filter((d) => d.uploadStatus !== UploadStatus.Success)
         .map(async (d) => {
           const bytes = await printApi.getScannedFile(d.scannedImageFile);
-          try{
+          try {
             await api.savePatientImage(d.patientId, d.uploadFileName, bytes);
             d.uploadStatus = UploadStatus.Success;
-          } catch(ex) {
+          } catch (ex) {
             console.error(ex);
             d.uploadStatus = UploadStatus.Failure;
           }
@@ -194,13 +223,13 @@ export class ScanManager {
   async deleteScannedImages() {
     this.tq.append(async () => {
       const docs = this.docs;
-      const proms = docs.map(async d => {
+      const proms = docs.map(async (d) => {
         await printApi.deleteScannedFile(d.scannedImageFile);
       });
       await Promise.all(proms);
       this.docs = [];
       this.onDocsChange(docs);
-    })
+    });
   }
 
   dispose(): void {
