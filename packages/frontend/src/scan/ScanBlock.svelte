@@ -143,7 +143,8 @@
     manager.upload();
   }
 
-  async function deleteScannedImages() {
+  function deleteScannedImages() {
+    manager.deleteScannedImages();
     // const promises = $scannedDocs.map((doc) =>
     //   printApi.deleteScannedFile(doc.scannedImageFile)
     // );
@@ -155,15 +156,14 @@
       deleteScannedImages();
       remove();
     }
-    close();
-    // if (hasUnUploaded($scannedDocs)) {
-    //   confirm(
-    //     "アップロードされていないファイルがありますが、閉じますか？",
-    //     close
-    //   );
-    // } else {
-    //   close();
-    // }
+    if (canUpload) {
+      confirm(
+        "アップロードされていないファイルがありますが、閉じますか？",
+        close
+      );
+    } else {
+      close();
+    }
   }
 
   function doSelectScanner(event: MouseEvent): void {

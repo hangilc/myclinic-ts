@@ -191,6 +191,18 @@ export class ScanManager {
     });
   }
 
+  async deleteScannedImages() {
+    this.tq.append(async () => {
+      const docs = this.docs;
+      const proms = docs.map(async d => {
+        await printApi.deleteScannedFile(d.scannedImageFile);
+      });
+      await Promise.all(proms);
+      this.docs = [];
+      this.onDocsChange(docs);
+    })
+  }
+
   dispose(): void {
     this.unsubs.forEach((f) => f());
   }
