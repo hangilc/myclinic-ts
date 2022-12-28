@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { AppointTimeData } from "./appoint-time-data";
+  import AppointPatient from "./AppointPatient.svelte";
   import RegisterAppointDialog from "./RegisterAppointDialog.svelte";
 
   export let data: AppointTimeData;
@@ -32,6 +33,11 @@
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
   <div class="time-box" on:click={doTimeBoxClick}>{timeText}</div>
+  {#if data.appoints.length > 0}
+    {#each data.appoints as appoint (appoint.appointId)}
+      <AppointPatient data={appoint} />
+    {/each}
+  {/if}
 </div>
 
 <style>

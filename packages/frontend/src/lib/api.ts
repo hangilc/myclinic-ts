@@ -1259,4 +1259,8 @@ export default {
       castBoolean
     );
   },
+
+  registerAppoint(appoint: m.Appoint): Promise<m.Appoint> {
+    return post("register-appoint", appoint, {}, m.Appoint.cast);
+  },
 };

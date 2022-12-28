@@ -205,7 +205,14 @@ export const isPositive: VFun<number> = pred<number>(
   "正の数でありません。"
 );
 
+export const isZeroOrPositive: VFun<number> = pred<number>(
+  (t: number) => t > 0,
+  "正またはゼロの数でありません。"
+);
+
 export const isPositiveInt: VFun<number> = and(isInt, isPositive);
+
+export const isZeroOrPositiveInt: VFun<number> = and(isInt, isZeroOrPositive);
 
 export function inRange(min: number, max: number): VFun<number> {
   return (n: number) => {
