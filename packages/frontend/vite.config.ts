@@ -9,7 +9,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        practice: resolve(__dirname, "practice/index.html")
+        practice: resolve(__dirname, "practice/index.html"),
+        reception: resolve(__dirname, "reception/index.html"),
       }
     },
     chunkSizeWarningLimit: 5000

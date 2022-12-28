@@ -13,9 +13,7 @@ function getBackend(): string {
   if (!import.meta.env.SSR) {
     const l = window.location;
     const proto = l.protocol.toLowerCase();
-    console.log(proto);
     const port = proto === "https:" ? sslServerPort() : nonSslServerPort();
-    console.log(port);
     return `${proto}//${l.hostname}:${port}`;
   } else {
     return "http://localhost:8080";
@@ -125,6 +123,10 @@ function castPair<T, U>(
   castU: Caster<U>
 ): (arg: any) => [T, U] {
   return (arg: any) => [castT(arg[0]), castU(arg[1])];
+}
+
+function castCdr<T>(castT: Caster<T>): (arg: any) => T {
+  return (arg: any) => castT(arg[1]);
 }
 
 function castTuple3<A, B, C>(
@@ -1225,10 +1227,36 @@ export default {
 
   deletePatientImage(patientId: number, fileName: string): Promise<boolean> {
     return get(
-      "delete-patient-image", 
+      "delete-patient-image",
       { "patient-id": patientId.toString(), "file-name": fileName },
       castBoolean
     );
   },
-  
+
+  batchResolveClinicOperations(
+    dates: Date[]
+  ): Promise<Record<string, m.ClinicOperation>> {
+    return post(
+      "batch-resolve-clinic-operations",
+      dates.map((d) => dateParam(d)),
+      {},
+      castObject(castString, m.ClinicOperation.cast)
+    );
+  },
+
+  listAppoints(date: Date | string): Promise<[m.AppointTime, m.Appoint[]][]> {
+    return get(
+      "list-appoint-time-filled",
+      { date: dateParam(date) },
+      castCdr(castList(castPair(m.AppointTime.cast, castList(m.Appoint.cast))))
+    );
+  },
+
+  fillAppointTimes(from: Date | string, upto: Date | string): Promise<boolean> {
+    return get(
+      "fill-appoint-times",
+      { from: dateParam(from), upto: dateParam(upto) },
+      castBoolean
+    );
+  },
 };

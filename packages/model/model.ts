@@ -1538,3 +1538,59 @@ export class ScannerDevice {
     );
   }
 }
+
+export class ClinicOperation {
+  constructor(
+    public code: string,
+    public name: string | undefined
+  ) {}
+
+  static cast(arg: any): ClinicOperation {
+    return new ClinicOperation(
+      arg.type,
+      arg.name
+    );
+  }
+}
+
+export class AppointTime {
+  constructor(
+  public appointTimeId: number,
+  public date: string,
+  public fromTime: string,
+  public untilTime: string,
+  public kind: string,
+  public capacity: number
+  ) {}
+
+  static cast(arg: any): AppointTime {
+    return new AppointTime(
+      arg.appointTimeId,
+      arg.date,
+      arg.fromTime,
+      arg.untilTime,
+      arg.kind,
+      arg.capacity,
+    );
+  }
+}
+
+export class Appoint {
+  constructor(
+    public appointId: number,
+    public appointTimeId: number,
+    public patientName: string,
+    public patientId: number,
+    public memo: string
+  ) {}
+
+  static cast(arg: any): Appoint {
+    return new Appoint(
+      arg.appointId,
+      arg.appointTimeId,
+      arg.patientName,
+      arg.patientId,
+      arg.memo,
+    );
+  }
+}
