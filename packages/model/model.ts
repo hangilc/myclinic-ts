@@ -1563,6 +1563,10 @@ export class AppointTime {
   public capacity: number
   ) {}
 
+  isConsecutive(follower: AppointTime): boolean {
+    return this.date == follower.date && this.untilTime === follower.fromTime;
+  }
+
   static cast(arg: any): AppointTime {
     return new AppointTime(
       arg.appointTimeId,
@@ -1576,13 +1580,35 @@ export class AppointTime {
 }
 
 export class Appoint {
+  memoString: string;
+  tags: string[];
   constructor(
     public appointId: number,
     public appointTimeId: number,
     public patientName: string,
     public patientId: number,
     public memo: string
-  ) {}
+  ) {
+    const parsed = this.parseMemo(memo);
+    this.memoString = parsed.memoString;
+    this.tags = parsed.tags;
+  }
+
+  parseMemo(m: string): { memoString: string, tags: string[] } {
+    const tagStart = m.indexOf("{{");
+    if( tagStart >= 0 ){
+      const tagEnd = m.indexOf("}}");
+      if( tagStart < tagEnd ){
+        const tagString = m.substring(tagStart + 2, tagEnd);
+        const tags = tagString.split(/[,、]/).map(s => s.trim())
+        const left = m.substring(0, tagStart).trim();
+        const right = m.substring(tagEnd + 2).trim();
+        const memoString = left === "" ? right : `${left} ${right}`;
+        return { memoString, tags };
+      }
+    }
+    return { memoString: m, tags: [] };
+  }
 
   static cast(arg: any): Appoint {
     return new Appoint(

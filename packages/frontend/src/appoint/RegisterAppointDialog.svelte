@@ -1,11 +1,14 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { KanjiDate } from "kanjidate";
   import type { AppointTimeData } from "./appoint-time-data";
   import * as kanjidate from "kanjidate";
   import { genid } from "@/lib/genid";
   import api from "@/lib/api";
-  import { Appoint, type Patient } from "myclinic-model";
+  import {
+    Appoint,
+    AppointTime as AppointTimeModel,
+    type Patient,
+  } from "myclinic-model";
   import SelectItem2 from "@/lib/SelectItem2.svelte";
   import { validateAppoint } from "@/lib/validators/appoint-validator";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
@@ -14,13 +17,15 @@
   export let destroy: () => void;
   export let title: string;
   export let appointTimeData: AppointTimeData;
+
   const kenshinId = genid();
   const withRegularId = genid();
   let searchText: string = "";
   let patientSearchResult: Patient[] = [];
   let patient: Patient | undefined = undefined;
-  let memo: string = "";
+  let memoInput: string = "";
   let errors: Invalid[] = [];
+  let kenshinChecked: boolean = false;
 
   function appointTimeText(data: AppointTimeData): string {
     const d = kanjidate.format("{M}月{D}日（{W}）", data.appointTime.date);
@@ -43,10 +48,10 @@
     const t = searchText.trim();
     if (t !== "") {
       const result = await api.searchPatientSmart(t);
-      if( result.length === 0 ){
+      if (result.length === 0) {
         alert("該当患者がありません。");
-      } else if( result.length === 1 ){
-        doPatientSelect(result[0])
+      } else if (result.length === 1) {
+        doPatientSelect(result[0]);
       } else {
         patientSearchResult = result;
       }
@@ -60,17 +65,18 @@
   }
 
   async function doEnter() {
+    let memoValue = kenshinChecked ? "{{健診}}" : "";
     const validation = validateAppoint(0, {
       appointTimeId: intSrc(appointTimeData.appointTime.appointTimeId),
       patientName: strSrc(searchText),
       patientId: intSrc(patient?.patientId ?? 0),
-      memo: strSrc(memo),
+      memo: strSrc(memoValue + memoInput),
     });
-    if( validation instanceof Appoint ){
+    if (validation instanceof Appoint) {
       await api.registerAppoint(validation);
       destroy();
     } else {
-
+      errors = validation;
     }
   }
 
@@ -82,11 +88,11 @@
 <SurfaceModal {destroy} {title}>
   <div>{appointTimeText(appointTimeData)}</div>
   {#if errors.length > 0}
-  <div class="error">
-    {#each errors as error}
-      <div>{error.toString()}</div>
-    {/each}
-  </div>
+    <div class="error">
+      {#each errors as error}
+        <div>{error.toString()}</div>
+      {/each}
+    </div>
   {/if}
   <div class="form">
     <div class="table-row">
@@ -124,8 +130,9 @@
               <SelectItem2
                 data={p}
                 isCurrent={p.patientId === patient?.patientId ?? 0}
-                onSelect={doPatientSelect}>
-              {p.fullName()}
+                onSelect={doPatientSelect}
+              >
+                {p.fullName()}
               </SelectItem2>
             {/each}
           </div>
@@ -141,16 +148,18 @@
     <div class="table-row">
       <div>メモ</div>
       <div>
-        <input type="text" class="memo-input" bind:value={memo}/>
+        <input type="text" class="memo-input" bind:value={memoInput} />
       </div>
     </div>
     <div class="table-row">
       <div>タグ</div>
       <div>
-        <input type="checkbox" id={kenshinId} />
+        <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} />
         <label for={kenshinId}>健診</label>
-        <input type="checkbox" id={withRegularId} />
-        <label for={withRegularId}>診察も</label>
+        {#if kenshinChecked && appointTimeData.followingVacant != undefined}
+          <input type="checkbox" id={withRegularId} />
+          <label for={withRegularId}>診察も</label>
+        {/if}
       </div>
     </div>
   </div>
@@ -165,7 +174,7 @@
     color: red;
     margin: 10px;
   }
-  
+
   .form {
     display: table;
     border-spacing: 0 4px;

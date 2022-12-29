@@ -206,7 +206,7 @@ export const isPositive: VFun<number> = pred<number>(
 );
 
 export const isZeroOrPositive: VFun<number> = pred<number>(
-  (t: number) => t > 0,
+  (t: number) => t >= 0,
   "正またはゼロの数でありません。"
 );
 

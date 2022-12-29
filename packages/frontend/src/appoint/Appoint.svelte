@@ -14,6 +14,7 @@
   import { dateToSql } from "@/lib/util";
   import { AppointTimeData } from "./appoint-time-data";
   import { appointEntered, appointTimeEntered } from "@/app-events";
+  import { attr_dev } from "svelte/internal";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
@@ -30,7 +31,7 @@
     }
     for (let c of cols) {
       if (c.date === at.date) {
-        c.addAppointTimeData(new AppointTimeData(at, []));
+        c.addAppointTimeData(new AppointTimeData(at, [], undefined));
         cols = [...cols];
         return;
       }
@@ -38,13 +39,13 @@
   }
 
   function onAppointEntered(a: AppointModel | null): void {
-    if( a == null ){
+    if (a == null) {
       return;
     }
-    for(let c of cols){
-      const atd = c.findAppointTimeData(a.appointTimeId);
-      if( atd != undefined ){
-        atd.addAppoint(a);
+    for (let c of cols) {
+      const i = c.findAppointTimeDataIndex(a.appointTimeId);
+      if( i >= 0 ){
+        c.addAppoint(i, a);
         cols = [...cols];
         return;
       }
@@ -66,7 +67,16 @@
       })
       .map(async (d) => {
         const pairs = await api.listAppoints(d);
-        const appoints = pairs.map((pair) => new AppointTimeData(...pair));
+        const appoints = pairs.map((pair) => {
+          const [at, as] = pair;
+          return new AppointTimeData(at, as, undefined);
+        });
+        for (let i = appoints.length - 2; i >= 0; i--) {
+          const atd = appoints[i];
+          if (appoints[i + 1].isRegularVacant) {
+            atd.followingVacant = appoints[i + 1].appointTime;
+          }
+        }
         const sqldate = dateToSql(d);
         return new ColumnData(sqldate, map[sqldate], appoints);
       });
