@@ -9,6 +9,7 @@
   import SelectItem2 from "@/lib/SelectItem2.svelte";
   import { validateAppoint } from "@/lib/validators/appoint-validator";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
+  import { setFocus } from "@/lib/set-focus";
 
   export let destroy: () => void;
   export let title: string;
@@ -97,6 +98,7 @@
               type="text"
               class="patient-search-input"
               bind:value={searchText}
+              use:setFocus
             />
           </form>
           <svg

@@ -112,6 +112,12 @@ export const koukikoureiDeleted: Writable<m.Koukikourei | null> = writable(null)
 export const kouhiEntered: Writable<m.Kouhi | null> = writable(null)
 export const kouhiUpdated: Writable<m.Kouhi | null> = writable(null)
 export const kouhiDeleted: Writable<m.Kouhi | null> = writable(null)
+export const appointEntered: Writable<m.Appoint | null> = writable(null)
+export const appointUpdated: Writable<m.Appoint | null> = writable(null)
+export const appointDeleted: Writable<m.Appoint | null> = writable(null)
+export const appointTimeEntered: Writable<m.AppointTime | null> = writable(null)
+export const appointTimeUpdated: Writable<m.AppointTime | null> = writable(null)
+export const appointTimeDeleted: Writable<m.AppointTime | null> = writable(null)
 
 export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null)
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null);
@@ -440,6 +446,43 @@ function publishAppEvent(e: m.AppEvent): void {
         }
         case "deleted": {
           kouhiDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
+    case "appoint": {
+      const model = m.Appoint.cast(payload);
+      switch (kind) {
+        case "created": {
+          console.log("appevent appoint created", model);
+          appointEntered.set(model);
+          break;
+        }
+        case "updated": {
+          appointUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          appointDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
+    case "appoint-time": {
+      const model = m.AppointTime.cast(payload);
+      switch (kind) {
+        case "created": {
+          appointTimeEntered.set(model);
+          break;
+        }
+        case "updated": {
+          appointTimeUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          appointTimeDeleted.set(model);
           break;
         }
       }

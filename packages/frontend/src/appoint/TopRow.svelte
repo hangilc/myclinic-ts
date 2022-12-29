@@ -2,6 +2,8 @@
   import AppointMenuPulldown from "./AppointMenuPulldown.svelte";
 
   export let onCreateAppoints: () => void;
+  export let onMoveWeeks: (n: number) => void;
+  export let onThisWeek: () => void;
 
   function doMenu(event: MouseEvent): void {
     const d: AppointMenuPulldown = new AppointMenuPulldown({
@@ -16,11 +18,11 @@
 </script>
 
 <div class="top">
-  <button>前の月</button>
-  <button>前の週</button>
-  <a href="javascript:void(0)">今週</a>
-  <button>次の週</button>
-  <button>次の月</button>
+  <button on:click={() => onMoveWeeks(-4)}>前の月</button>
+  <button on:click={() => onMoveWeeks(-1)}>前の週</button>
+  <a href="javascript:void(0)" on:click={onThisWeek}>今週</a>
+  <button on:click={() => onMoveWeeks(1)}>次の週</button>
+  <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
     <a href="javascript:void(0)">予約検索</a>
     <svg
