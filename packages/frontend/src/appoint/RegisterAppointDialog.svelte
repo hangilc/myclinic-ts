@@ -13,6 +13,7 @@
   import { validateAppoint } from "@/lib/validators/appoint-validator";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
   import { setFocus } from "@/lib/set-focus";
+  import { appointEntered } from "@/app-events";
 
   export let destroy: () => void;
   export let title: string;
@@ -26,6 +27,7 @@
   let memoInput: string = "";
   let errors: Invalid[] = [];
   let kenshinChecked: boolean = false;
+  let followingChecked: boolean = false;
 
   function appointTimeText(data: AppointTimeData): string {
     const d = kanjidate.format("{M}月{D}日（{W}）", data.appointTime.date);
@@ -64,19 +66,46 @@
     patientSearchResult = [];
   }
 
-  async function doEnter() {
-    let memoValue = kenshinChecked ? "{{健診}}" : "";
+  async function enterAppoint(
+    appointTimeId: number,
+    memoPrefix: string
+  ): Promise<boolean> {
     const validation = validateAppoint(0, {
-      appointTimeId: intSrc(appointTimeData.appointTime.appointTimeId),
+      appointTimeId: intSrc(appointTimeId),
       patientName: strSrc(searchText),
       patientId: intSrc(patient?.patientId ?? 0),
-      memo: strSrc(memoValue + memoInput),
+      memo: strSrc(`${memoPrefix}${memoInput}`),
     });
     if (validation instanceof Appoint) {
       await api.registerAppoint(validation);
-      destroy();
+      return true;
     } else {
       errors = validation;
+      return false;
+    }
+  }
+
+  async function doEnter() {
+    let ok = enterAppoint(
+      appointTimeData.appointTime.appointTimeId,
+      kenshinChecked ? "{{健診}}" : ""
+    );
+    if (!ok) {
+      return;
+    }
+    if (followingChecked) {
+      const following = appointTimeData.followingVacant;
+      if (following == undefined) {
+        errors = [new Invalid("診察枠を登録できません。", [])];
+      } else {
+        ok = enterAppoint(following.appointTimeId, "");
+        if (!ok) {
+          return;
+        }
+        destroy();
+      }
+    } else {
+      destroy();
     }
   }
 
@@ -157,7 +186,7 @@
         <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} />
         <label for={kenshinId}>健診</label>
         {#if kenshinChecked && appointTimeData.followingVacant != undefined}
-          <input type="checkbox" id={withRegularId} />
+          <input type="checkbox" id={withRegularId} bind:checked={followingChecked}/>
           <label for={withRegularId}>診察も</label>
         {/if}
       </div>
