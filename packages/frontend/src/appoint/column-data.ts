@@ -14,25 +14,39 @@ export class ColumnData {
       a.appointTime.fromTime.localeCompare(b.appointTime.fromTime)
     );
     const i = this.findAppointTimeDataIndex(data.appointTime.appointTimeId);
+    this.fixFollowingVacant(i-1);
     this.fixFollowingVacant(i);
   }
 
   fixFollowingVacant(i: number): void {
-    const data = this.appointTimes[i];
-    if( i > 0 ){
-      const prev = this.appointTimes[i-1];
-      if( prev.isConsecutive(data) ){
-        prev.followingVacant = data.isRegularVacant ? data.appointTime : undefined;
-      }
-    } else {
-      if( i+1 < this.appointTimes.length ){
-        const next = this.appointTimes[i+1];
-        data.followingVacant = next.isRegularVacant ? next.appointTime : undefined;
+    if( i >= 0 && i < this.appointTimes.length ){
+      const target = this.appointTimes[i];
+      const j = i + 1;
+      if( j < this.appointTimes.length ){
+        const next = this.appointTimes[j];
+        target.followingVacant = next.isRegularVacant ? next.appointTime : undefined;
       } else {
-        data.followingVacant = undefined;
+        target.followingVacant = undefined;
       }
     }
   }
+
+  // fixFollowingVacantOrig(i: number): void {
+  //   const data = this.appointTimes[i];
+  //   if( i > 0 ){
+  //     const prev = this.appointTimes[i-1];
+  //     if( prev.isConsecutive(data) ){
+  //       prev.followingVacant = data.isRegularVacant ? data.appointTime : undefined;
+  //     }
+  //   } else {
+  //     if( i+1 < this.appointTimes.length ){
+  //       const next = this.appointTimes[i+1];
+  //       data.followingVacant = next.isRegularVacant ? next.appointTime : undefined;
+  //     } else {
+  //       data.followingVacant = undefined;
+  //     }
+  //   }
+  // }
 
   findAppointTimeDataIndex(appointTimeId: number): number {
     for(let i=0;i<this.appointTimes.length;i++){
@@ -52,6 +66,17 @@ export class ColumnData {
   addAppoint(i: number, a: Appoint): void {
     const atd = this.appointTimes[i];
     atd.addAppoint(a);
-    this.fixFollowingVacant(i);
+    this.fixFollowingVacant(i-1);
+  }
+
+  updateAppoint(i: number, a: Appoint): void {
+    const atd = this.appointTimes[i];
+    atd.updateAppoint(a);
+  }
+
+  deleteAppoint(i: number, a: Appoint): void {
+    const atd = this.appointTimes[i];
+    atd.deleteAppoint(a);
+    this.fixFollowingVacant(i-1);
   }
 }

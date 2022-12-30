@@ -1,20 +1,35 @@
 <script lang="ts">
   import type {
-    Appoint as AppointModel,
+    Appoint,
   } from "myclinic-model";
+  import type { AppointTimeData } from "./appoint-time-data";
+  import AppointDialog from "./AppointDialog.svelte";
 
-  export let data: AppointModel;
+  export let data: Appoint;
+  export let appointTimeData: AppointTimeData;
 
-  function patientText(data: AppointModel): string {
+  function patientText(data: Appoint): string {
     let a = "";
     if (data.patientId > 0) {
       a = `(${data.patientId}) `;
     }
     return `${a}${data.patientName}`;
   }
+
+  function doClick(): void {
+    const d: AppointDialog = new AppointDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "診察予約編集",
+        data: appointTimeData,
+        init: data
+      }
+    })
+  }
 </script>
 
-<div>
+<div class="top" on:click={doClick}>
   <div>
     {patientText(data)}
     {#if data.memoString !== ""}
@@ -29,3 +44,10 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .top {
+    cursor: pointer;
+    user-select: none;
+  }
+</style>

@@ -4,30 +4,78 @@
   import * as kanjidate from "kanjidate";
   import { genid } from "@/lib/genid";
   import api from "@/lib/api";
-  import {
-    Appoint,
-    AppointTime as AppointTimeModel,
-    type Patient,
-  } from "myclinic-model";
+  import { Appoint, type Patient } from "myclinic-model";
   import SelectItem2 from "@/lib/SelectItem2.svelte";
   import { validateAppoint } from "@/lib/validators/appoint-validator";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
   import { setFocus } from "@/lib/set-focus";
-  import { appointEntered } from "@/app-events";
 
   export let destroy: () => void;
   export let title: string;
-  export let appointTimeData: AppointTimeData;
+  export let data: AppointTimeData;
+  export let init: Appoint | undefined = undefined;
 
   const kenshinId = genid();
   const withRegularId = genid();
   let searchText: string = "";
   let patientSearchResult: Patient[] = [];
-  let patient: Patient | undefined = undefined;
+  let patientId = 0;
   let memoInput: string = "";
+  let tags: string[] = [];
   let errors: Invalid[] = [];
   let kenshinChecked: boolean = false;
   let followingChecked: boolean = false;
+
+  $: {
+    if (kenshinChecked) {
+      if (!tags.includes("健診")) {
+        tags.push("健診");
+      }
+    } else {
+      tags = tags.filter((t) => t !== "健診");
+    }
+  }
+
+  if (init instanceof Appoint) {
+    searchText = init.patientName;
+    patientId = init.patientId;
+    memoInput = init.memoString;
+    tags = init.tags;
+    if (init.tags.includes("健診")) {
+      kenshinChecked = true;
+    }
+  }
+
+  function isEqualTags(a: string[], b: string[]): boolean {
+    if (a.length !== b.length) {
+      return false;
+    }
+    for (let x of a) {
+      if (!b.includes(x)) {
+        return false;
+      }
+    }
+    for (let x of b) {
+      if (!a.includes(x)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function isModified(): boolean {
+    if (init == undefined) {
+      return false;
+    } else {
+      return !(
+        searchText === init.patientName &&
+        patientId === init.patientId &&
+        memoInput === init.memoString &&
+        isEqualTags(tags, init.tags) &&
+        !followingChecked
+      );
+    }
+  }
 
   function appointTimeText(data: AppointTimeData): string {
     const d = kanjidate.format("{M}月{D}日（{W}）", data.appointTime.date);
@@ -61,20 +109,20 @@
   }
 
   function doPatientSelect(p: Patient): void {
-    patient = p;
     searchText = p.fullName();
+    patientId = p.patientId;
     patientSearchResult = [];
   }
 
   async function enterAppoint(
     appointTimeId: number,
-    memoPrefix: string
+    tags: string[]
   ): Promise<boolean> {
     const validation = validateAppoint(0, {
       appointTimeId: intSrc(appointTimeId),
       patientName: strSrc(searchText),
-      patientId: intSrc(patient?.patientId ?? 0),
-      memo: strSrc(`${memoPrefix}${memoInput}`),
+      patientId: intSrc(patientId),
+      memo: strSrc(Appoint.composeMemo(memoInput, tags)),
     });
     if (validation instanceof Appoint) {
       await api.registerAppoint(validation);
@@ -85,20 +133,18 @@
     }
   }
 
-  async function doEnter() {
-    let ok = enterAppoint(
-      appointTimeData.appointTime.appointTimeId,
-      kenshinChecked ? "{{健診}}" : ""
-    );
+  async function doNewEnter() {
+    let ok: boolean = await enterAppoint(data.appointTime.appointTimeId, tags);
     if (!ok) {
       return;
     }
     if (followingChecked) {
-      const following = appointTimeData.followingVacant;
+      const following = data.followingVacant;
       if (following == undefined) {
         errors = [new Invalid("診察枠を登録できません。", [])];
       } else {
-        ok = enterAppoint(following.appointTimeId, "");
+        const newTags: string[] = tags.filter((t) => t !== "健診");
+        ok = await enterAppoint(following.appointTimeId, newTags);
         if (!ok) {
           return;
         }
@@ -109,13 +155,70 @@
     }
   }
 
+  async function doUpdate(init: Appoint) {
+    const validation = validateAppoint(init.appointId, {
+      appointTimeId: intSrc(data.appointTime.appointTimeId),
+      patientName: strSrc(searchText),
+      patientId: intSrc(patientId),
+      memo: strSrc(Appoint.composeMemo(memoInput, tags)),
+    });
+    if (validation instanceof Appoint) {
+      let ok: boolean = await api.updateAppoint(validation);
+      if (!ok) {
+        errors = [new Invalid("変更の登録に失敗しました。", [])];
+        return;
+      }
+      if (followingChecked) {
+        const following = data.followingVacant;
+        if (following == undefined) {
+          errors = [new Invalid("Internal error: null followingVacant", [])];
+          return;
+        }
+        ok = await enterAppoint(
+          following.appointTimeId,
+          tags.filter((t) => t !== "健診")
+        );
+        if (!ok) {
+          return;
+        }
+        destroy();
+      } else {
+        destroy();
+      }
+    } else {
+      errors = validation;
+      return;
+    }
+  }
+
+  function doEnter(): void {
+    if (init == undefined) {
+      doNewEnter();
+    } else {
+      doUpdate(init);
+    }
+  }
+
+  async function doDelete() {
+    if (init != undefined) {
+      if( isModified() ){
+        const ok = confirm("この予約を削除していいですか？");
+        if( !ok ){
+          return;
+        }
+      }
+      await api.cancelAppoint(init.appointId);
+      destroy();
+    }
+  }
+
   function doClose(): void {
     destroy();
   }
 </script>
 
 <SurfaceModal {destroy} {title}>
-  <div>{appointTimeText(appointTimeData)}</div>
+  <div>{appointTimeText(data)}</div>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as error}
@@ -158,7 +261,7 @@
             {#each patientSearchResult as p (p.patientId)}
               <SelectItem2
                 data={p}
-                isCurrent={p.patientId === patient?.patientId ?? 0}
+                isCurrent={p.patientId === patientId}
                 onSelect={doPatientSelect}
               >
                 {p.fullName()}
@@ -171,7 +274,7 @@
     <div class="table-row">
       <div>患者番号</div>
       <div>
-        {patient?.patientId ?? ""}
+        {patientId === 0 ? "" : patientId.toString()}
       </div>
     </div>
     <div class="table-row">
@@ -185,15 +288,26 @@
       <div>
         <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} />
         <label for={kenshinId}>健診</label>
-        {#if kenshinChecked && appointTimeData.followingVacant != undefined}
-          <input type="checkbox" id={withRegularId} bind:checked={followingChecked}/>
+        {#if kenshinChecked && data.followingVacant != undefined}
+          <input
+            type="checkbox"
+            id={withRegularId}
+            bind:checked={followingChecked}
+          />
           <label for={withRegularId}>診察も</label>
         {/if}
       </div>
     </div>
   </div>
   <div class="commands">
-    <button on:click={doEnter}>入力</button>
+    {#if init != undefined}
+      <button on:click={doDelete}>予約取消</button>
+    {/if}
+    {#if init == undefined}
+      <button on:click={doEnter}>入力</button>
+    {:else}
+      <a href="javascript:void(0)" on:click={doEnter}>変更入力</a>
+    {/if}
     <button on:click={doClose}>キャンセル</button>
   </div>
 </SurfaceModal>
@@ -256,10 +370,17 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: center;
     margin-bottom: 4px;
+    line-height: 1;
   }
 
-  .commands * + button {
+  .commands * + button,
+  .commands * + a {
     margin-left: 4px;
+  }
+
+  .commands a {
+    font-size: 0.8rem;
   }
 </style>

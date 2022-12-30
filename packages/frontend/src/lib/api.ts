@@ -1263,4 +1263,12 @@ export default {
   registerAppoint(appoint: m.Appoint): Promise<m.Appoint> {
     return post("register-appoint", appoint, {}, m.Appoint.cast);
   },
+
+  updateAppoint(appoint: m.Appoint): Promise<boolean> {
+    return post("update-appoint", appoint, {}, castBoolean);
+  },
+
+  cancelAppoint(appointId: number): Promise<boolean> {
+    return post("cancel-appoint", {}, {"appoint-id": appointId.toString()}, castBoolean);
+  }
 };

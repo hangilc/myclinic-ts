@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { AppointTimeData } from "./appoint-time-data";
   import AppointPatient from "./AppointPatient.svelte";
-  import RegisterAppointDialog from "./RegisterAppointDialog.svelte";
+  import AppointDialog from "./AppointDialog.svelte";
 
   export let data: AppointTimeData;
 
@@ -20,14 +20,16 @@
   }
 
   async function doTimeBoxClick() {
-    const d: RegisterAppointDialog = new RegisterAppointDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "診察予約入力",
-        appointTimeData: data,
-      }
-    })
+    if (data.hasVacancy) {
+      const d: AppointDialog = new AppointDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          title: "診察予約入力",
+          data: data,
+        },
+      });
+    }
   }
 </script>
 
@@ -35,7 +37,7 @@
   <div class="time-box" on:click={doTimeBoxClick}>{timeText}</div>
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
-      <AppointPatient data={appoint} />
+      <AppointPatient data={appoint} appointTimeData={data}/>
     {/each}
   {/if}
 </div>

@@ -8,13 +8,12 @@
   import api from "@/lib/api";
   import type {
     ClinicOperation,
-    AppointTime as AppointTimeModel,
-    Appoint as AppointModel,
+    AppointTime,
+    Appoint,
   } from "myclinic-model";
   import { dateToSql } from "@/lib/util";
   import { AppointTimeData } from "./appoint-time-data";
-  import { appointEntered, appointTimeEntered } from "@/app-events";
-  import { attr_dev } from "svelte/internal";
+  import { appointDeleted, appointEntered, appointTimeEntered, appointUpdated } from "@/app-events";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
@@ -24,8 +23,10 @@
 
   unsubs.push(appointTimeEntered.subscribe(onAppointTimeEntered));
   unsubs.push(appointEntered.subscribe(onAppointEntered));
+  unsubs.push(appointUpdated.subscribe(onAppointUpdated));
+  unsubs.push(appointDeleted.subscribe(onAppointDeleted));
 
-  function onAppointTimeEntered(at: AppointTimeModel | null): void {
+  function onAppointTimeEntered(at: AppointTime | null): void {
     if (at == null) {
       return;
     }
@@ -38,7 +39,7 @@
     }
   }
 
-  function onAppointEntered(a: AppointModel | null): void {
+  function onAppointEntered(a: Appoint | null): void {
     if (a == null) {
       return;
     }
@@ -46,6 +47,34 @@
       const i = c.findAppointTimeDataIndex(a.appointTimeId);
       if( i >= 0 ){
         c.addAppoint(i, a);
+        cols = [...cols];
+        return;
+      }
+    }
+  }
+
+  function onAppointUpdated(a: Appoint | null): void {
+    if (a == null) {
+      return;
+    }
+    for (let c of cols) {
+      const i = c.findAppointTimeDataIndex(a.appointTimeId);
+      if( i >= 0 ){
+        c.updateAppoint(i, a);
+        cols = [...cols];
+        return;
+      }
+    }
+  }
+
+  function onAppointDeleted(a: Appoint | null): void {
+    if( a == null ){
+      return;
+    }
+    for (let c of cols) {
+      const i = c.findAppointTimeDataIndex(a.appointTimeId);
+      if( i >= 0 ){
+        c.deleteAppoint(i, a);
         cols = [...cols];
         return;
       }

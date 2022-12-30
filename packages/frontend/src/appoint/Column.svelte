@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { ColumnData } from "./column-data";
   import * as kanjidate from "kanjidate";
-  import AppointTime from "./AppointTime.svelte";
+  import AppointTimeBlock from "./AppointTimeBlock.svelte";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -13,7 +13,7 @@
     <div class="date-label">{data.op.name ?? ""}</div>
   </div>
   {#each data.appointTimes as at (at.appointTime.fromTime)}
-    <AppointTime data={at} />
+    <AppointTimeBlock data={at} />
   {/each}
 </div>
 

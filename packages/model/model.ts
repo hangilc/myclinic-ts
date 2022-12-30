@@ -1610,6 +1610,11 @@ export class Appoint {
     return { memoString: m, tags: [] };
   }
 
+  static composeMemo(memoString: string, tags: string[]): string {
+    const pre = tags.length === 0 ? "" : `{{${tags.join("、")}}}`;
+    return `${pre}${memoString}`;
+  }
+
   static cast(arg: any): Appoint {
     return new Appoint(
       arg.appointId,
