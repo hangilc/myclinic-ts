@@ -56,7 +56,7 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          anchor: new ViewportCoord(event.clientX, event.clientY),
+          anchor: new ViewportCoord(event.clientX, event.clientY).toAbsolute(),
           onEdit: doOpenEditDialog
         },
       });

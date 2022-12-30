@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { windowResized } from "@/app-events";
   import { onDestroy } from "svelte";
+  import { AbsoluteCoord } from "./absolute-coord";
   import { locateAtAnchor, locateAtPoint } from "./locator";
   import Screen from "./Screen.svelte";
-  import { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
 
-  export let anchor: HTMLElement | SVGSVGElement | ViewportCoord;
+  export let anchor: HTMLElement | SVGSVGElement | AbsoluteCoord;
   export let destroy: () => void;
   export let maxHeight: string | undefined = undefined;
   export let onClose: () => void = () => {};
@@ -15,8 +14,6 @@
   let zIndexContent = alloc();
   const unsubs: (() => void)[] = [];
   let element: HTMLElement | undefined = undefined;
-
-  unsubs.push(windowResized.subscribe((e) => onWindowResized(e)));
 
   const screen = new Screen({
     target: document.body,
@@ -35,12 +32,6 @@
     unsubs.forEach(f => f());
   });
 
-  function onWindowResized(e: UIEvent | undefined): void {
-    if( element != undefined ){
-      content(element);
-    }
-  }
-
   function doScreenClick(ev: Event): void {
     ev.preventDefault();
     ev.stopPropagation();
@@ -48,10 +39,20 @@
   }
 
   function content(e: HTMLElement): void {
-    if( anchor instanceof ViewportCoord ){
+    if( anchor instanceof AbsoluteCoord ){
       locateAtPoint(e, anchor);
     } else  {
-      locateAtAnchor(e, anchor);
+      anchor.style.position = "relative";
+      // anchor.appendChild(e);
+      e.style.position = "absolute";
+      e.style.left = "0px";
+      e.style.top = "0px";
+      e.style.width = "auto";
+      const r = e.getBoundingClientRect();
+      e.style.width = r.width + "px";
+      e.style.height = r.height + "px";
+      e.style.textAlign = "left";
+      anchor.appendChild(e);
     }
     element = e;
   }

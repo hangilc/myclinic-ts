@@ -1,9 +1,10 @@
 <script lang="ts">
+  import type { AbsoluteCoord } from "@/lib/absolute-coord";
   import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import type { ViewportCoord } from "@/lib/viewport-coord";
 
   export let destroy: () => void;
-  export let anchor: ViewportCoord;
+  export let anchor: AbsoluteCoord;
   export let onEdit: () => void;
 
   function doEdit(): void {

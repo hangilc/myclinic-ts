@@ -1,3 +1,4 @@
+import type { AbsoluteCoord } from "./absolute-coord";
 import type { ViewportCoord } from "./viewport-coord";
 
 export function locateAtAnchor(
@@ -27,11 +28,18 @@ export function locateAtAnchor(
   }
 }
 
-export function locateAtPoint(e: HTMLElement, anchor: ViewportCoord): void {
+export function locateAtPoint(e: HTMLElement, anchor: AbsoluteCoord): void {
   console.log("locateAtPoint");
-  const {x, y} = anchor;
+  let { x, y } = anchor;
+  x -= window.scrollX;
+  y -= window.scrollY;
   const t = e.getBoundingClientRect();
   const w = document.documentElement.clientWidth;
+  {
+    e.style.left = "0px";
+    const tt = e.getBoundingClientRect();
+    e.style.width = tt.width + "px";
+  }
   if (x + t.width > w) {
     e.style.left = window.scrollX + w - t.width - 10 + "px";
   } else {
@@ -41,6 +49,6 @@ export function locateAtPoint(e: HTMLElement, anchor: ViewportCoord): void {
   if (y + t.height > h) {
     e.style.top = window.scrollY + h - t.height - 10 + "px";
   } else {
-    e.style.top = window.scrollY + y + 4 + "px";
+    e.style.top =  window.scrollY + y + 4 + "px";
   }
 }

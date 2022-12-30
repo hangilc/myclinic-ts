@@ -146,22 +146,6 @@ export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
 export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
 
-windowResized.subscribe(() => console.log("resized"));
-
-if (window) {
-  let timer: any = undefined;
-
-  window.addEventListener("resize", (e) => {
-    if( timer != undefined ){
-      return;
-    }
-    timer = setTimeout(() => {
-      windowResized.set(e);
-      timer = undefined;
-    }, 500);
-  });
-}
-
 function handleAppEvent(e: m.AppEvent): void {
   if (isDraining) {
     eventQueue.push(e);

@@ -5,13 +5,15 @@
   export let onMoveWeeks: (n: number) => void;
   export let onThisWeek: () => void;
 
+  let svgWrapper: HTMLElement;
+
   function doMenu(event: MouseEvent): void {
     const d: AppointMenuPulldown = new AppointMenuPulldown({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        anchor: event.target as SVGSVGElement,
-        onCreateAppoints
+        anchor: svgWrapper,
+        onCreateAppoints,
       },
     });
   }
@@ -25,22 +27,24 @@
   <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
     <a href="javascript:void(0)">予約検索</a>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      stroke-width="2"
-      width="18"
-      class="menu-icon"
-      on:click={doMenu}
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M4 6h16M4 12h16M4 18h16"
-      />
-    </svg>
+    <div class="svg-wrapper" bind:this={svgWrapper}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+        width="18"
+        class="menu-icon"
+        on:click={doMenu}
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M4 6h16M4 12h16M4 18h16"
+        />
+      </svg>
+    </div>
   </div>
 </div>
 
@@ -70,5 +74,11 @@
 
   a {
     margin: 0 6px;
+  }
+
+  .svg-wrapper {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
   }
 </style>
