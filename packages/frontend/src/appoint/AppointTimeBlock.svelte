@@ -2,8 +2,12 @@
   import type { AppointTimeData } from "./appoint-time-data";
   import AppointPatient from "./AppointPatient.svelte";
   import AppointDialog from "./AppointDialog.svelte";
+  import { isAdmin } from "./appoint-vars";
+  import AppointTimeDialog from "./AppointTimeDialog.svelte";
+  import AppointTimePulldown from "./AppointTimePulldown.svelte";
 
   export let data: AppointTimeData;
+  export let siblings: AppointTimeData[];
 
   let timeText = `${fromTimeText(data)} - ${untilTimeText(data)}`;
 
@@ -19,7 +23,7 @@
     return data.appoints.length === 0 ? "vacant" : "";
   }
 
-  async function doTimeBoxClick() {
+  function doTimeBoxClick() {
     if (data.hasVacancy) {
       const d: AppointDialog = new AppointDialog({
         target: document.body,
@@ -31,13 +35,45 @@
       });
     }
   }
+
+  function doOpenEditDialog(): void {
+    const d: AppointTimeDialog = new AppointTimeDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "予約枠編集",
+        data: data.appointTime,
+        siblings,
+      },
+    });
+  }
+
+  function doContextMenu(event: MouseEvent): void {
+    if( isAdmin ){
+      event.preventDefault();
+      const d: AppointTimePulldown = new AppointTimePulldown({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          anchor: [event.x, event.y],
+          onEdit: doOpenEditDialog
+        },
+      });
+    }
+  }
 </script>
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
-  <div class="time-box" on:click={doTimeBoxClick}>{timeText}</div>
+  <div
+    class="time-box"
+    on:click={doTimeBoxClick}
+    on:contextmenu={doContextMenu}
+  >
+    {timeText}
+  </div>
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
-      <AppointPatient data={appoint} appointTimeData={data}/>
+      <AppointPatient data={appoint} appointTimeData={data} />
     {/each}
   {/if}
 </div>

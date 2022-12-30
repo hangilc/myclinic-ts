@@ -145,7 +145,7 @@ export function numberSrc(src: number | string): ValidationResult<number> {
   if (typeof src === "number") {
     return genSrc<number>(src);
   } else {
-    return strSrc(src).to(toNumber);
+    return strSrc(src).and(isNotEmpty).to(toNumber);
   }
 }
 
@@ -298,3 +298,6 @@ export const validUptoSrc = optionalSqlDateSrc;
 export const isSqlDate = and<string>(matchRegex(/\d{4}-\d{2}-\d{2}/), isNotEqual("0000-00-00"));
 
 export const isOptionalSqlDate = and<string>(matchRegex(/\d{4}-\d{2}-\d{2}/));
+
+export const isSqlTime = and<string>(matchRegex(/\d{2}:\d{2}:\d{2}/));
+

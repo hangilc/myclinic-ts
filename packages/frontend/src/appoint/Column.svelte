@@ -13,7 +13,7 @@
     <div class="date-label">{data.op.name ?? ""}</div>
   </div>
   {#each data.appointTimes as at (at.appointTime.fromTime)}
-    <AppointTimeBlock data={at} />
+    <AppointTimeBlock data={at} siblings={data.appointTimes}/>
   {/each}
 </div>
 

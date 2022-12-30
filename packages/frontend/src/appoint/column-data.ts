@@ -31,23 +31,6 @@ export class ColumnData {
     }
   }
 
-  // fixFollowingVacantOrig(i: number): void {
-  //   const data = this.appointTimes[i];
-  //   if( i > 0 ){
-  //     const prev = this.appointTimes[i-1];
-  //     if( prev.isConsecutive(data) ){
-  //       prev.followingVacant = data.isRegularVacant ? data.appointTime : undefined;
-  //     }
-  //   } else {
-  //     if( i+1 < this.appointTimes.length ){
-  //       const next = this.appointTimes[i+1];
-  //       data.followingVacant = next.isRegularVacant ? next.appointTime : undefined;
-  //     } else {
-  //       data.followingVacant = undefined;
-  //     }
-  //   }
-  // }
-
   findAppointTimeDataIndex(appointTimeId: number): number {
     for(let i=0;i<this.appointTimes.length;i++){
       const d = this.appointTimes[i];

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { locateAtAnchor } from "./locator";
+  import { locateAtAnchor, locateAtPoint } from "./locator";
   import Screen from "./Screen.svelte";
   import { alloc, release } from "./zindex";
 
@@ -38,13 +38,16 @@
 
   function content(e: HTMLElement): void {
     locateAtAnchor(e, anchor);
+    // if (anchor instanceof HTMLElement || anchor instanceof SVGSVGElement) {
+    // } else {
+    //   locateAtPoint(e, anchor);
+    // }
   }
 </script>
 
 <div
-  class="top dialog-top"
+  class="top"
   style:z-index={zIndexContent}
-  style:width
   style:height
   style:max-height={maxHeight}
   use:content
@@ -56,13 +59,14 @@
 
 <style>
   .top {
-    position: fixed;
-    display: inline-block;
+    position: absolute;
+    display: block;
     width: auto;
     background-color: white;
     padding: 10px;
     opacity: 1;
     overflow: auto;
     border: 1px solid gray;
+    box-sizing: border-box;
   }
 </style>
