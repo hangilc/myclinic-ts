@@ -5,6 +5,7 @@
   import { isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
   import AppointTimePulldown from "./AppointTimePulldown.svelte";
+  import { ViewportCoord } from "@/lib/viewport-coord";
 
   export let data: AppointTimeData;
   export let siblings: AppointTimeData[];
@@ -55,7 +56,7 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          anchor: [event.x, event.y],
+          anchor: new ViewportCoord(event.clientX, event.clientY),
           onEdit: doOpenEditDialog
         },
       });

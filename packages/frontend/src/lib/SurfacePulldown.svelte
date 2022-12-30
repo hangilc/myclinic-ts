@@ -2,11 +2,11 @@
   import { onDestroy } from "svelte";
   import { locateAtAnchor, locateAtPoint } from "./locator";
   import Screen from "./Screen.svelte";
+  import type { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
 
-  export let anchor: HTMLElement | SVGSVGElement;
+  export let anchor: HTMLElement | SVGSVGElement | ViewportCoord;
   export let destroy: () => void;
-  export let width: string = "auto";
   export let height: string = "auto";
   export let maxHeight: string | undefined = undefined;
   export let onClose: () => void = () => {};
@@ -37,11 +37,10 @@
   }
 
   function content(e: HTMLElement): void {
-    locateAtAnchor(e, anchor);
-    // if (anchor instanceof HTMLElement || anchor instanceof SVGSVGElement) {
-    // } else {
-    //   locateAtPoint(e, anchor);
-    // }
+    if (anchor instanceof HTMLElement || anchor instanceof SVGSVGElement) {
+    } else {
+      locateAtPoint(e, anchor);
+    }
   }
 </script>
 

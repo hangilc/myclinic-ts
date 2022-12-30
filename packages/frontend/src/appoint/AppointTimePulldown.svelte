@@ -1,8 +1,9 @@
 <script lang="ts">
   import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
+  import type { ViewportCoord } from "@/lib/viewport-coord";
 
   export let destroy: () => void;
-  export let anchor: [number, number];
+  export let anchor: ViewportCoord;
   export let onEdit: () => void;
 
   function doEdit(): void {
