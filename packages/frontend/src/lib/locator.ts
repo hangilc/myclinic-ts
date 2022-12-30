@@ -17,7 +17,6 @@ export function locateAtAnchor(
       e.style.left = window.scrollX + w - t.width - 10 + "px";
     } else {
       e.style.left = window.scrollX + r.left + "px";
-      console.log(e.getBoundingClientRect());
     }
     const h = document.documentElement.clientHeight;
     if (r.top + t.height > h) {
@@ -29,6 +28,7 @@ export function locateAtAnchor(
 }
 
 export function locateAtPoint(e: HTMLElement, anchor: ViewportCoord): void {
+  console.log("locateAtPoint");
   const {x, y} = anchor;
   const t = e.getBoundingClientRect();
   const w = document.documentElement.clientWidth;

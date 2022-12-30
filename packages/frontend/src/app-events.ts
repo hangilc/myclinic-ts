@@ -1,6 +1,6 @@
-import api, { wsUrl } from "./lib/api"
-import * as m from "myclinic-model"
-import { writable, type Writable } from "svelte/store"
+import api, { wsUrl } from "./lib/api";
+import * as m from "myclinic-model";
+import { writable, type Writable } from "svelte/store";
 
 let nextEventId = 0;
 let isDraining = false;
@@ -17,123 +17,160 @@ function connect(): void {
 
   ws.addEventListener("open", () => {
     console.log("ws open");
-  })
+  });
 
-  ws.addEventListener("message", event => {
+  ws.addEventListener("message", (event) => {
     const data = event.data;
     if (typeof data === "string") {
       const json = JSON.parse(data);
-      if( json.format !== "heart-beat" ){
+      if (json.format !== "heart-beat") {
         console.log(json);
       }
       dispatch(json);
     }
-  })
+  });
 
   ws.addEventListener("close", () => {
     console.log("ws close");
     setTimeout(() => {
-      connect()
+      connect();
     }, 1000);
-  })
+  });
 
   ws.addEventListener("error", () => {
     console.log("ws error");
     ws.close();
-  })
+  });
 }
 
 async function drainEvents() {
   isDraining = true;
   console.log("start drain");
   let events = await api.listAppEventSince(nextEventId);
-  events.forEach(event => {
-    if( event.appEventId >= nextEventId ){
+  events.forEach((event) => {
+    if (event.appEventId >= nextEventId) {
       nextEventId = event.appEventId + 1;
       publishAppEvent(event);
     }
   });
   isDraining = false;
   console.log("end drain");
-  while( eventQueue.length > 0 ){
+  while (eventQueue.length > 0) {
     const e = eventQueue.shift() as m.AppEvent;
     handleAppEvent(e);
   }
 }
 
-export const textEntered: Writable<m.Text | null> = writable(null)
-export const textUpdated: Writable<m.Text | null> = writable(null)
-export const textDeleted: Writable<m.Text | null> = writable(null)
-export const patientEntered: Writable<m.Patient | null> = writable(null)
-export const patientUpdated: Writable<m.Patient | null> = writable(null)
-export const patientDeleted: Writable<m.Patient | null> = writable(null)
-export const visitEntered: Writable<m.Visit | null> = writable(null)
-export const visitUpdated: Writable<m.Visit | null> = writable(null)
-export const visitDeleted: Writable<m.Visit | null> = writable(null)
-export const wqueueEntered: Writable<m.Wqueue | null> = writable(null)
-export const wqueueUpdated: Writable<m.Wqueue | null> = writable(null)
-export const wqueueDeleted: Writable<m.Wqueue | null> = writable(null)
-export const paymentEntered: Writable<m.Payment | null> = writable(null)
-export const paymentUpdated: Writable<m.Payment | null> = writable(null)
-export const paymentDeleted: Writable<m.Payment | null> = writable(null)
-export const shinryouEntered: Writable<m.Shinryou | null> = writable(null)
-export const shinryouUpdated: Writable<m.Shinryou | null> = writable(null)
-export const shinryouDeleted: Writable<m.Shinryou | null> = writable(null)
-export const conductEntered: Writable<m.Conduct | null> = writable(null)
-export const conductUpdated: Writable<m.Conduct | null> = writable(null)
-export const conductDeleted: Writable<m.Conduct | null> = writable(null)
-export const conductShinryouEntered: Writable<m.ConductShinryou | null> = writable(null)
-export const conductShinryouUpdated: Writable<m.ConductShinryou | null> = writable(null)
-export const conductShinryouDeleted: Writable<m.ConductShinryou | null> = writable(null)
-export const conductDrugEntered: Writable<m.ConductDrug | null> = writable(null)
-export const conductDrugUpdated: Writable<m.ConductDrug | null> = writable(null)
-export const conductDrugDeleted: Writable<m.ConductDrug | null> = writable(null)
-export const conductKizaiEntered: Writable<m.ConductKizai | null> = writable(null)
-export const conductKizaiUpdated: Writable<m.ConductKizai | null> = writable(null)
-export const conductKizaiDeleted: Writable<m.ConductKizai | null> = writable(null)
-export const gazouLabelEntered: Writable<m.GazouLabel | null> = writable(null)
-export const gazouLabelUpdated: Writable<m.GazouLabel | null> = writable(null)
-export const gazouLabelDeleted: Writable<m.GazouLabel | null> = writable(null)
-export const chargeEntered: Writable<m.Charge | null> = writable(null)
-export const chargeUpdated: Writable<m.Charge | null> = writable(null)
-export const chargeDeleted: Writable<m.Charge | null> = writable(null)
-export const diseaseEntered: Writable<m.Disease | null> = writable(null)
-export const diseaseUpdated: Writable<m.Disease | null> = writable(null)
-export const diseaseDeleted: Writable<m.Disease | null> = writable(null)
-export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null)
-export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null)
-export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null)
-export const shahokokuhoEntered: Writable<m.Shahokokuho | null> = writable(null)
-export const shahokokuhoUpdated: Writable<m.Shahokokuho | null> = writable(null)
-export const shahokokuhoDeleted: Writable<m.Shahokokuho | null> = writable(null)
-export const koukikoureiEntered: Writable<m.Koukikourei | null> = writable(null)
-export const koukikoureiUpdated: Writable<m.Koukikourei | null> = writable(null)
-export const koukikoureiDeleted: Writable<m.Koukikourei | null> = writable(null)
-export const kouhiEntered: Writable<m.Kouhi | null> = writable(null)
-export const kouhiUpdated: Writable<m.Kouhi | null> = writable(null)
-export const kouhiDeleted: Writable<m.Kouhi | null> = writable(null)
-export const appointEntered: Writable<m.Appoint | null> = writable(null)
-export const appointUpdated: Writable<m.Appoint | null> = writable(null)
-export const appointDeleted: Writable<m.Appoint | null> = writable(null)
-export const appointTimeEntered: Writable<m.AppointTime | null> = writable(null)
-export const appointTimeUpdated: Writable<m.AppointTime | null> = writable(null)
-export const appointTimeDeleted: Writable<m.AppointTime | null> = writable(null)
+export const textEntered: Writable<m.Text | null> = writable(null);
+export const textUpdated: Writable<m.Text | null> = writable(null);
+export const textDeleted: Writable<m.Text | null> = writable(null);
+export const patientEntered: Writable<m.Patient | null> = writable(null);
+export const patientUpdated: Writable<m.Patient | null> = writable(null);
+export const patientDeleted: Writable<m.Patient | null> = writable(null);
+export const visitEntered: Writable<m.Visit | null> = writable(null);
+export const visitUpdated: Writable<m.Visit | null> = writable(null);
+export const visitDeleted: Writable<m.Visit | null> = writable(null);
+export const wqueueEntered: Writable<m.Wqueue | null> = writable(null);
+export const wqueueUpdated: Writable<m.Wqueue | null> = writable(null);
+export const wqueueDeleted: Writable<m.Wqueue | null> = writable(null);
+export const paymentEntered: Writable<m.Payment | null> = writable(null);
+export const paymentUpdated: Writable<m.Payment | null> = writable(null);
+export const paymentDeleted: Writable<m.Payment | null> = writable(null);
+export const shinryouEntered: Writable<m.Shinryou | null> = writable(null);
+export const shinryouUpdated: Writable<m.Shinryou | null> = writable(null);
+export const shinryouDeleted: Writable<m.Shinryou | null> = writable(null);
+export const conductEntered: Writable<m.Conduct | null> = writable(null);
+export const conductUpdated: Writable<m.Conduct | null> = writable(null);
+export const conductDeleted: Writable<m.Conduct | null> = writable(null);
+export const conductShinryouEntered: Writable<m.ConductShinryou | null> =
+  writable(null);
+export const conductShinryouUpdated: Writable<m.ConductShinryou | null> =
+  writable(null);
+export const conductShinryouDeleted: Writable<m.ConductShinryou | null> =
+  writable(null);
+export const conductDrugEntered: Writable<m.ConductDrug | null> =
+  writable(null);
+export const conductDrugUpdated: Writable<m.ConductDrug | null> =
+  writable(null);
+export const conductDrugDeleted: Writable<m.ConductDrug | null> =
+  writable(null);
+export const conductKizaiEntered: Writable<m.ConductKizai | null> =
+  writable(null);
+export const conductKizaiUpdated: Writable<m.ConductKizai | null> =
+  writable(null);
+export const conductKizaiDeleted: Writable<m.ConductKizai | null> =
+  writable(null);
+export const gazouLabelEntered: Writable<m.GazouLabel | null> = writable(null);
+export const gazouLabelUpdated: Writable<m.GazouLabel | null> = writable(null);
+export const gazouLabelDeleted: Writable<m.GazouLabel | null> = writable(null);
+export const chargeEntered: Writable<m.Charge | null> = writable(null);
+export const chargeUpdated: Writable<m.Charge | null> = writable(null);
+export const chargeDeleted: Writable<m.Charge | null> = writable(null);
+export const diseaseEntered: Writable<m.Disease | null> = writable(null);
+export const diseaseUpdated: Writable<m.Disease | null> = writable(null);
+export const diseaseDeleted: Writable<m.Disease | null> = writable(null);
+export const diseaseAdjEntered: Writable<m.DiseaseAdj | null> = writable(null);
+export const diseaseAdjUpdated: Writable<m.DiseaseAdj | null> = writable(null);
+export const diseaseAdjDeleted: Writable<m.DiseaseAdj | null> = writable(null);
+export const shahokokuhoEntered: Writable<m.Shahokokuho | null> =
+  writable(null);
+export const shahokokuhoUpdated: Writable<m.Shahokokuho | null> =
+  writable(null);
+export const shahokokuhoDeleted: Writable<m.Shahokokuho | null> =
+  writable(null);
+export const koukikoureiEntered: Writable<m.Koukikourei | null> =
+  writable(null);
+export const koukikoureiUpdated: Writable<m.Koukikourei | null> =
+  writable(null);
+export const koukikoureiDeleted: Writable<m.Koukikourei | null> =
+  writable(null);
+export const kouhiEntered: Writable<m.Kouhi | null> = writable(null);
+export const kouhiUpdated: Writable<m.Kouhi | null> = writable(null);
+export const kouhiDeleted: Writable<m.Kouhi | null> = writable(null);
+export const appointEntered: Writable<m.Appoint | null> = writable(null);
+export const appointUpdated: Writable<m.Appoint | null> = writable(null);
+export const appointDeleted: Writable<m.Appoint | null> = writable(null);
+export const appointTimeEntered: Writable<m.AppointTime | null> =
+  writable(null);
+export const appointTimeUpdated: Writable<m.AppointTime | null> =
+  writable(null);
+export const appointTimeDeleted: Writable<m.AppointTime | null> =
+  writable(null);
 
-export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null)
-export const hotlineBeepEntered: Writable<m.HotlineBeep | null> = writable(null);
-export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> = writable(null);
+export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null);
+export const hotlineBeepEntered: Writable<m.HotlineBeep | null> =
+  writable(null);
+export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> =
+  writable(null);
 export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
+export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
+
+windowResized.subscribe(() => console.log("resized"));
+
+if (window) {
+  let timer: any = undefined;
+
+  window.addEventListener("resize", (e) => {
+    if( timer != undefined ){
+      return;
+    }
+    timer = setTimeout(() => {
+      windowResized.set(e);
+      timer = undefined;
+    }, 500);
+  });
+}
 
 function handleAppEvent(e: m.AppEvent): void {
-  if( isDraining ){
+  if (isDraining) {
     eventQueue.push(e);
   } else {
     const eventId = e.appEventId;
-    if( eventId === nextEventId ){
+    if (eventId === nextEventId) {
       nextEventId = eventId + 1;
       publishAppEvent(e);
-    } else if( eventId > nextEventId ){
+    } else if (eventId > nextEventId) {
       drainEvents();
     }
   }
@@ -491,7 +528,7 @@ function publishAppEvent(e: m.AppEvent): void {
     case "hotline": {
       switch (kind) {
         case "created": {
-          console.log("hotline created", payload)
+          console.log("hotline created", payload);
           const appEventId: number = e.appEventId;
           hotlineEntered.set({ appEventId, ...payload });
           break;
