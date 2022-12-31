@@ -15,7 +15,7 @@
 
   function getContextMenuItems(): [string, () => void][] {
     return [
-      ["編集", () => {}],
+      ["編集", doOpenEditDialog],
       ["結合", () => {}],
       ["分割", () => {}],
       ["延長", () => {}],

@@ -1,15 +1,14 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import PulldownMenu from "@/lib/PulldownMenu.svelte";
   import type { Patient } from "myclinic-model";
   import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog2/patient-data";
-  import RecordsPulldown from "./RecordsPulldown.svelte";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
-  import TopBlockAuxMenuPulldown from "./TopBlockAuxMenuPulldown.svelte";
+  import { recordsMenuItems } from "./records-pulldown";
+  import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
 
   let searchText = "";
-  let auxMenuIcon: SVGSVGElement;
-  let recordsLink: HTMLElement;
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
@@ -41,25 +40,6 @@
     });
   }
 
-  function doAuxMenu(): void {
-    const d: TopBlockAuxMenuPulldown = new TopBlockAuxMenuPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor: auxMenuIcon
-      }
-    })
-  }
-
-  function doRecords(): void {
-    const d: RecordsPulldown = new RecordsPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor: recordsLink,
-      }
-    })
-  }
 </script>
 
 <div class="top">
@@ -69,25 +49,30 @@
     <button>検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
-  <a href="javascript:void(0)" class="records-link" on:click={doRecords}
-    bind:this={recordsLink}>診療録</a>
-  <svg
-    class="menu-svg"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke-width="1.5"
-    stroke="currentColor"
-    width="24px"
-    on:click={doAuxMenu}
-    bind:this={auxMenuIcon}
-  >
-    <path
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-    />
-  </svg>
+  <PulldownMenu items={recordsMenuItems} let:trigger>
+    <a href="javascript:void(0)" class="records-link" on:click={trigger}
+      >診療録</a
+    >
+  </PulldownMenu>
+  <PulldownMenu let:trigger let:destroy>
+    <svg
+      class="menu-svg"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      width="24px"
+      on:click={trigger}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+      />
+    </svg>
+    <TopBlockAuxMenu slot="menu" {destroy}/>
+  </PulldownMenu>
 </div>
 
 <style>

@@ -23,7 +23,7 @@
 
   function doClick(act: () => void): void {
     destroy();
-    //act();
+    act();
   }
 
   function trigger(event: MouseEvent): void {
@@ -68,6 +68,7 @@
   <div class="wrapper" bind:this={wrapper}>
     {#if show}
       <div class="menu" bind:this={menu} use:open>
+        <slot name="menu" />
         {#each items() as item}
           {@const [text, action] = item}
           <a href="javascript:void(0)" on:click={() => doClick(action)}>{text}</a
@@ -77,7 +78,7 @@
     {/if}
   </div>
 </div>
-<slot {trigger} {triggerClick} />
+<slot {trigger} {triggerClick} {destroy}/>
 
 <style>
   .top {
