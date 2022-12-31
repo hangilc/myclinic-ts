@@ -1,6 +1,5 @@
 <script lang="ts">
   import PulldownMenu from "@/lib/PulldownMenu.svelte";
-  import Add from "@/practice/exam/disease2/add/Add.svelte";
   import { isAdmin } from "./appoint-vars";
   import AppointMenuPulldown from "./AppointMenuPulldown.svelte";
 
@@ -16,19 +15,7 @@
   ]
 
   if( isAdmin ){
-    menuItems.unshift(["予約枠わりあて", () => {}])
-  }
-
-  function doMenu(event: MouseEvent): void {
-    const d: AppointMenuPulldown = new AppointMenuPulldown({
-      target: svgWrapper,
-      props: {
-        destroy: () => d.$destroy(),
-        wrapper: svgWrapper,
-        anchor: menuIcon,
-        onCreateAppoints,
-      },
-    });
+    menuItems.unshift(["予約枠わりあて", onCreateAppoints])
   }
 </script>
 
@@ -77,6 +64,8 @@
   .menu-icon {
     color: gray;
     cursor: pointer;
+    position: relative;
+    top: -2px;
   }
 
   button {

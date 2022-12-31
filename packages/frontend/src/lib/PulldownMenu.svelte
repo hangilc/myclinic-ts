@@ -1,33 +1,50 @@
 <script lang="ts">
-  import { locatePulldown } from "./locator";
+  import { locateContextMenu, locatePulldown } from "./locator";
   import Screen from "./Screen.svelte";
+  import { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
 
   let wrapper: HTMLElement;
   let menu: HTMLElement;
-  let anchor: HTMLElement | SVGSVGElement;
+  let anchor: HTMLElement | SVGSVGElement | ViewportCoord;
 
   export let items: [string, () => void][] = [];
   let show = false;
+  let destroy: () => void = () => {};
 
-  function doClick(act: () => void): void {}
+  function locate(): void {
+    if( anchor instanceof ViewportCoord ){
+      locateContextMenu(wrapper, anchor, menu);
+    } else {
+      locatePulldown(wrapper, anchor, menu);
+    }
+  }
+
+  function doClick(act: () => void): void {
+    destroy();
+    act();
+  }
 
   function trigger(event: MouseEvent): void {
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
-    console.log(anchor);
+    show = true;
+  }
+
+  function triggerClick(event: MouseEvent): void {
+    anchor = ViewportCoord.fromEvent(event);
     show = true;
   }
 
   function open(e: HTMLElement | SVGSVGElement): void {
     const zIndexScreen = alloc();
     const zIndexMenu = alloc();
-    function destroy(): void {
+    destroy = () => {
       show = false;
       screen.$destroy();
       e.style.zIndex = "";
       release(zIndexMenu);
       release(zIndexScreen);
-    }
+    };
     const screen = new Screen({
       target: document.body,
       props: {
@@ -41,7 +58,7 @@
     const r = e.getBoundingClientRect();
     e.style.width = r.width + "px";
     parent?.appendChild(e);
-    locatePulldown(wrapper, anchor, menu);
+    locate();
   }
 </script>
 
@@ -58,7 +75,7 @@
     {/if}
   </div>
 </div>
-<slot {trigger}/>
+<slot {trigger} {triggerClick} />
 
 <style>
   .top {
