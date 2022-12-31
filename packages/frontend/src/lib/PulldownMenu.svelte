@@ -23,6 +23,7 @@
 
   function doClick(act: () => void): void {
     destroy();
+    console.log("pull down menu item click");
     act();
   }
 
@@ -37,9 +38,11 @@
     show = true;
   }
 
-  function open(e: HTMLElement | SVGSVGElement): void {
+  function open(e: HTMLElement): void {
     const zIndexScreen = alloc();
     const zIndexMenu = alloc();
+    const parent = e.parentElement;
+    console.log("parent", parent);
     destroy = () => {
       show = false;
       screen.$destroy();
@@ -51,23 +54,31 @@
       target: document.body,
       props: {
         zIndex: zIndexScreen,
-        onClick: () => destroy(),
+        onClick: () => {
+          console.log("screen click");
+          destroy()
+        },
+        opacity: "0.3",
       },
     });
-    const parent = e.parentElement;
-    e.style.zIndex = zIndexMenu.toString();
     document.body.appendChild(e);
     const r = e.getBoundingClientRect();
     e.style.width = r.width + "px";
+    e.style.zIndex = zIndexMenu.toString();
     parent?.appendChild(e);
+    menu = e;
     locate();
+  }
+
+  function doMenuClick(e: MouseEvent) {
+    console.log("menu click");
   }
 </script>
 
 <div class="top">
   <div class="wrapper" bind:this={wrapper}>
     {#if show}
-      <div class="menu" bind:this={menu} use:open>
+      <div class="menu" on:click={doMenuClick} use:open>
         <slot name="menu" />
         {#each items() as item}
           {@const [text, action] = item}
@@ -104,6 +115,7 @@
     border: 1px solid gray;
     position: absolute;
     box-sizing: border-box;
+    isolation: isolate;
   }
 
   .menu a {

@@ -56,7 +56,7 @@
 </script>
 
 <SurfaceModal {destroy} {title}>
-  <div>
+  <div class="date">
     <EditableDate date={$date} onChange={doChange}/>
   </div>
   <div>
@@ -82,6 +82,10 @@
 </SurfaceModal>
 
 <style>
+  .date {
+    display: flex;
+  }
+
   .result {
     height: 10rem;
     width: 18rem;

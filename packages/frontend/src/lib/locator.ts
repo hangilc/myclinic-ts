@@ -1,4 +1,3 @@
-import type { AbsoluteCoord } from "./absolute-coord";
 import type { ViewportCoord } from "./viewport-coord";
 
 export function locatePulldown(

@@ -1,7 +1,9 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
   import { openDateFormPulldown } from "../date-form/date-form-pulldown-op";
+  import DateFormPulldown from "../date-form/DateFormPulldown.svelte";
   import { openDatePickerPulldown } from "../date-picker/date-picker-op";
+  import PulldownMenu from "../PulldownMenu.svelte";
 
   export let date: Date | null;
   export let isNullable = false;
@@ -40,7 +42,15 @@
 </script>
 
 <div class="disp">
-  <span class="repr" on:click={doClick}>{format(date)}</span>
+  <PulldownMenu let:destroy let:trigger>
+    <span class="repr" on:click={trigger}>{format(date)}</span>
+    <!-- <DateFormPulldown slot="menu" {destroy} {date} onEnter={onChange}/> -->
+    <div slot="menu">
+      <div on:click={() => console.log("click")}>
+        Inner Menu Area
+      </div>
+    </div>
+  </PulldownMenu>
   <slot name="icons" />
   <svg
     xmlns="http://www.w3.org/2000/svg"

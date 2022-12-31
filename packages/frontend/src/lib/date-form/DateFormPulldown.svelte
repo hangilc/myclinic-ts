@@ -5,7 +5,6 @@
 
   export let date: Date | null;
   export let isNullable: boolean = false;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
   let errors: Invalid[] = [];
@@ -24,7 +23,7 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor} width="auto">
+<div>
   {#each errorStrings as error}
     <div class="error">{error}</div>
   {/each}
@@ -34,7 +33,7 @@
     <button on:click={doEnter}>入力</button>
     <button on:click={doEnter}>キャンセル</button>
   </div>
-</SurfacePulldown>
+</div>
 
 <style>
   .error {
