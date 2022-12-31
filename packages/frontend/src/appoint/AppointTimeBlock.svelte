@@ -9,6 +9,7 @@
 
   export let data: AppointTimeData;
   export let siblings: AppointTimeData[];
+  let contextMenuWrapper: HTMLElement;
 
   let timeText = `${fromTimeText(data)} - ${untilTimeText(data)}`;
 
@@ -56,7 +57,8 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          anchor: new ViewportCoord(event.clientX, event.clientY).toAbsolute(),
+          wrapper: contextMenuWrapper,
+          anchor: new ViewportCoord(event.clientX, event.clientY),
           onEdit: doOpenEditDialog
         },
       });
@@ -65,6 +67,7 @@
 </script>
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
+  <div class="context-menu-wrapper" bind:this={contextMenuWrapper}></div>
   <div
     class="time-box"
     on:click={doTimeBoxClick}
@@ -134,5 +137,12 @@
 
   .time-box {
     user-select: none;
+  }
+
+  .context-menu-wrapper {
+    width: 0;
+    height: 0;
+    position: relative;
+    font-weight: normal;
   }
 </style>

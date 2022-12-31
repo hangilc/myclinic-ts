@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { AbsoluteCoord } from "@/lib/absolute-coord";
   import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import type { ViewportCoord } from "@/lib/viewport-coord";
 
   export let destroy: () => void;
-  export let anchor: AbsoluteCoord;
+  export let wrapper: HTMLElement;
+  export let anchor: ViewportCoord;
   export let onEdit: () => void;
 
   function doEdit(): void {
@@ -13,7 +13,7 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<SurfacePulldown {destroy} {anchor} {wrapper}>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
   <a href="javascript:void(0)">結合</a>
   <a href="javascript:void(0)">分割</a>

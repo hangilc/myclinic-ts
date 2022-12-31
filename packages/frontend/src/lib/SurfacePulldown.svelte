@@ -1,12 +1,13 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { AbsoluteCoord } from "./absolute-coord";
-  import { locateAtAnchor, locateAtPoint, locatePulldown } from "./locator";
+  import { locatePulldown, locateContextMenu } from "./locator";
   import Screen from "./Screen.svelte";
+  import { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
 
   export let wrapper: HTMLElement;
-  export let anchor: HTMLElement | SVGSVGElement;
+  export let anchor: HTMLElement | SVGSVGElement | ViewportCoord;
   export let destroy: () => void;
   export let maxHeight: string | undefined = undefined;
   export let onClose: () => void = () => {};
@@ -37,25 +38,25 @@
   }
 
   function content(e: HTMLElement): void {
-    if( anchor instanceof AbsoluteCoord ){
-      // locateAtPoint(e, anchor);
-    } else  {
-      const wrapperStyle = window.getComputedStyle(wrapper);
-      if( wrapperStyle.position !== "relative" ){
-        console.error("pulldown wrapper should be position: relative");
-        return;
-      }
-      document.body.appendChild(e);
-      e.style.position = "absolute";
-      e.style.left = "0px";
-      e.style.top = "0px";
-      e.style.width = "auto";
-      const r = e.getBoundingClientRect();
-      e.style.width = r.width + "px";
-      e.style.height = r.height + "px";
-      e.style.left = "";
-      e.style.top = "";
-      wrapper.appendChild(e);
+    const wrapperStyle = window.getComputedStyle(wrapper);
+    if (wrapperStyle.position !== "relative") {
+      console.error("pulldown wrapper should be position: relative");
+      return;
+    }
+    document.body.appendChild(e);
+    e.style.position = "absolute";
+    e.style.left = "0px";
+    e.style.top = "0px";
+    e.style.width = "auto";
+    const r = e.getBoundingClientRect();
+    e.style.width = r.width + "px";
+    e.style.height = r.height + "px";
+    e.style.left = "";
+    e.style.top = "";
+    wrapper.appendChild(e);
+    if( anchor instanceof ViewportCoord ){
+      locateContextMenu(wrapper, anchor, e);
+    } else {
       locatePulldown(wrapper, anchor, e);
     }
   }

@@ -1,4 +1,5 @@
 import type { AbsoluteCoord } from "./absolute-coord";
+import type { ViewportCoord } from "./viewport-coord";
 
 export function locatePulldown(
   wrapper: HTMLElement,
@@ -26,6 +27,35 @@ export function locatePulldown(
     setTop(-eleRect.height - 4);
   } else {
     setTop(anchorRect.height + 4);
+  }
+}
+
+export function locateContextMenu(
+  wrapper: HTMLElement,
+  anchor: ViewportCoord,
+  ele: HTMLElement
+): void {
+  const {x, y} = anchor;
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const eleRect = ele.getBoundingClientRect();
+  const win = document.documentElement;
+  const dx = x - wrapperRect.left;
+  const dy = y - wrapperRect.top;
+  function setLeft(left: number): void {
+    ele.style.left = left + dx + "px";
+  }
+  function setTop(top: number): void {
+    ele.style.top = top + dy + "px";
+  }
+  if (x + eleRect.width > win.clientWidth - 4) {
+    setLeft(x - eleRect.width);
+  } else {
+    setLeft(0);
+  }
+  if( y + eleRect.height > win.clientHeight - 4 ){
+    setTop(-eleRect.height - 4);
+  } else {
+    setTop(4);
   }
 }
 
