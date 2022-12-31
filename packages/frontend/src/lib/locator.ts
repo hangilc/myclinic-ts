@@ -1,5 +1,33 @@
 import type { AbsoluteCoord } from "./absolute-coord";
-import type { ViewportCoord } from "./viewport-coord";
+
+export function locatePulldown(
+  wrapper: HTMLElement,
+  anchor: HTMLElement | SVGSVGElement,
+  ele: HTMLElement
+): void {
+  const wrapperRect = wrapper.getBoundingClientRect();
+  const anchorRect = anchor.getBoundingClientRect();
+  const eleRect = ele.getBoundingClientRect();
+  const win = document.documentElement;
+  const dx = anchorRect.left - wrapperRect.left;
+  const dy = anchorRect.top - wrapperRect.top;
+  function setLeft(left: number): void {
+    ele.style.left = left + dx + "px";
+  }
+  function setTop(top: number): void {
+    ele.style.top = top + dy + "px";
+  }
+  if (anchorRect.left + eleRect.width > win.clientWidth - 4) {
+    setLeft(anchorRect.width - eleRect.width);
+  } else {
+    setLeft(0);
+  }
+  if( anchorRect.bottom + eleRect.height > win.clientHeight - 4 ){
+    setTop(-eleRect.height - 4);
+  } else {
+    setTop(anchorRect.height + 4);
+  }
+}
 
 export function locateAtAnchor(
   e: HTMLElement,
@@ -49,6 +77,6 @@ export function locateAtPoint(e: HTMLElement, anchor: AbsoluteCoord): void {
   if (y + t.height > h) {
     e.style.top = window.scrollY + h - t.height - 10 + "px";
   } else {
-    e.style.top =  window.scrollY + y + 4 + "px";
+    e.style.top = window.scrollY + y + 4 + "px";
   }
 }

@@ -3,6 +3,7 @@
   import { isAdmin } from "./appoint-vars";
 
   export let destroy: () => void;
+  export let wrapper: HTMLElement;
   export let anchor: HTMLElement | SVGSVGElement;
   export let onCreateAppoints: () => void;
 
@@ -12,7 +13,7 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<SurfacePulldown {destroy} {wrapper} {anchor}>
   {#if isAdmin}
     <a href="javascript:void(0)" on:click={doCreateAppoints}>予約枠わりあて</a>
   {/if}

@@ -1,19 +1,18 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import { AbsoluteCoord } from "./absolute-coord";
-  import { locateAtAnchor, locateAtPoint } from "./locator";
+  import { locateAtAnchor, locateAtPoint, locatePulldown } from "./locator";
   import Screen from "./Screen.svelte";
   import { alloc, release } from "./zindex";
 
-  export let anchor: HTMLElement | SVGSVGElement | AbsoluteCoord;
+  export let wrapper: HTMLElement;
+  export let anchor: HTMLElement | SVGSVGElement;
   export let destroy: () => void;
   export let maxHeight: string | undefined = undefined;
   export let onClose: () => void = () => {};
 
   let zIndexScreen = alloc();
   let zIndexContent = alloc();
-  const unsubs: (() => void)[] = [];
-  let element: HTMLElement | undefined = undefined;
 
   const screen = new Screen({
     target: document.body,
@@ -29,7 +28,6 @@
     release(zIndexContent);
     release(zIndexScreen);
     onClose();
-    unsubs.forEach(f => f());
   });
 
   function doScreenClick(ev: Event): void {
@@ -40,10 +38,14 @@
 
   function content(e: HTMLElement): void {
     if( anchor instanceof AbsoluteCoord ){
-      locateAtPoint(e, anchor);
+      // locateAtPoint(e, anchor);
     } else  {
-      anchor.style.position = "relative";
-      // anchor.appendChild(e);
+      const wrapperStyle = window.getComputedStyle(wrapper);
+      if( wrapperStyle.position !== "relative" ){
+        console.error("pulldown wrapper should be position: relative");
+        return;
+      }
+      document.body.appendChild(e);
       e.style.position = "absolute";
       e.style.left = "0px";
       e.style.top = "0px";
@@ -51,10 +53,11 @@
       const r = e.getBoundingClientRect();
       e.style.width = r.width + "px";
       e.style.height = r.height + "px";
-      e.style.textAlign = "left";
-      anchor.appendChild(e);
+      e.style.left = "";
+      e.style.top = "";
+      wrapper.appendChild(e);
+      locatePulldown(wrapper, anchor, e);
     }
-    element = e;
   }
 </script>
 
