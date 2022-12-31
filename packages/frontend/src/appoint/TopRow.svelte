@@ -1,7 +1,6 @@
 <script lang="ts">
   import PulldownMenu from "@/lib/PulldownMenu.svelte";
   import { isAdmin } from "./appoint-vars";
-  import AppointMenuPulldown from "./AppointMenuPulldown.svelte";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;
@@ -27,7 +26,7 @@
   <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
     <a href="javascript:void(0)">予約検索</a>
-    <PulldownMenu items={menuItems} let:trigger>
+    <PulldownMenu items={() => menuItems} let:trigger>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

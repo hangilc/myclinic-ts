@@ -4,14 +4,24 @@
   import AppointDialog from "./AppointDialog.svelte";
   import { isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
-  import AppointTimePulldown from "./AppointTimePulldown.svelte";
   import { ViewportCoord } from "@/lib/viewport-coord";
+  import PulldownMenu from "@/lib/PulldownMenu.svelte";
 
   export let data: AppointTimeData;
   export let siblings: AppointTimeData[];
   let contextMenuWrapper: HTMLElement;
 
   let timeText = `${fromTimeText(data)} - ${untilTimeText(data)}`;
+
+  function getContextMenuItems(): [string, () => void][] {
+    return [
+      ["編集", () => {}],
+      ["結合", () => {}],
+      ["分割", () => {}],
+      ["延長", () => {}],
+      ["削除", () => {}],
+    ];
+  }
 
   function fromTimeText(data: AppointTimeData): string {
     return data.appointTime.fromTime.substring(0, 5);
@@ -50,31 +60,24 @@
     });
   }
 
-  function doContextMenu(event: MouseEvent): void {
-    if( isAdmin ){
+  function doContextMenu(event: MouseEvent, trigger: (e: MouseEvent) => void): void {
+    if (isAdmin) {
       event.preventDefault();
-      const d: AppointTimePulldown = new AppointTimePulldown({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          wrapper: contextMenuWrapper,
-          anchor: new ViewportCoord(event.clientX, event.clientY),
-          onEdit: doOpenEditDialog
-        },
-      });
+      trigger(event);
     }
   }
 </script>
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
-  <div class="context-menu-wrapper" bind:this={contextMenuWrapper}></div>
-  <div
-    class="time-box"
-    on:click={doTimeBoxClick}
-    on:contextmenu={doContextMenu}
-  >
-    {timeText}
-  </div>
+  <PulldownMenu items={getContextMenuItems} let:triggerClick>
+    <div
+      class="time-box"
+      on:click={doTimeBoxClick}
+      on:contextmenu={e => doContextMenu(e, triggerClick)}
+    >
+      {timeText}
+    </div>
+  </PulldownMenu>
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
       <AppointPatient data={appoint} appointTimeData={data} />

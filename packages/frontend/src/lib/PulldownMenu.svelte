@@ -4,16 +4,17 @@
   import { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
 
+  export let items: () => [string, () => void][] = () => [];
+
   let wrapper: HTMLElement;
   let menu: HTMLElement;
   let anchor: HTMLElement | SVGSVGElement | ViewportCoord;
 
-  export let items: [string, () => void][] = [];
   let show = false;
   let destroy: () => void = () => {};
 
   function locate(): void {
-    if( anchor instanceof ViewportCoord ){
+    if (anchor instanceof ViewportCoord) {
       locateContextMenu(wrapper, anchor, menu);
     } else {
       locatePulldown(wrapper, anchor, menu);
@@ -22,7 +23,7 @@
 
   function doClick(act: () => void): void {
     destroy();
-    act();
+    //act();
   }
 
   function trigger(event: MouseEvent): void {
@@ -31,6 +32,7 @@
   }
 
   function triggerClick(event: MouseEvent): void {
+    event.preventDefault();
     anchor = ViewportCoord.fromEvent(event);
     show = true;
   }
@@ -66,9 +68,9 @@
   <div class="wrapper" bind:this={wrapper}>
     {#if show}
       <div class="menu" bind:this={menu} use:open>
-        {#each items as item}
+        {#each items() as item}
           {@const [text, action] = item}
-          <a href="javascript:void(0" on:click={() => doClick(action)}>{text}</a
+          <a href="javascript:void(0)" on:click={() => doClick(action)}>{text}</a
           >
         {/each}
       </div>
@@ -79,11 +81,13 @@
 
 <style>
   .top {
-    display: inline-block;
+    display: block;
     font-weight: normal;
     text-align: left;
     line-height: 1;
     position: relative;
+    width: 0;
+    height: 0;
   }
 
   .wrapper {
