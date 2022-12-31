@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { AbsoluteCoord } from "./absolute-coord";
   import { locatePulldown, locateContextMenu } from "./locator";
   import Screen from "./Screen.svelte";
   import { ViewportCoord } from "./viewport-coord";
