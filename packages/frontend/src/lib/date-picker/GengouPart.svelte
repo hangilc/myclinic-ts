@@ -1,5 +1,6 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
+  import PulldownMenu from "../PulldownMenu.svelte";
   import GengouPulldown from "./GengouPulldown.svelte";
 
 
@@ -11,21 +12,13 @@
   let selected: Writable<string> = writable(gengou);
   selected.subscribe(onChange);
 
-  function doClick(): void {
-    const d: GengouPulldown = new GengouPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor,
-        gengouList,
-        selected,
-      }
-    });
-  }
 </script>
 
-<span on:click={doClick} class="top" bind:this={anchor}>
-  {gengou}
+<span class="top" bind:this={anchor}>
+  <PulldownMenu let:destroy let:trigger>
+    <span on:click={trigger}>{gengou}</span>
+    <GengouPulldown slot="menu" {destroy} {selected}/>
+  </PulldownMenu>
 </span>
 
 <style>
