@@ -119,6 +119,10 @@
     box-sizing: border-box;
   }
 
+  .menu:focus {
+    outline: none;
+  }
+
   .menu a {
     display: block;
     margin-bottom: 4px;

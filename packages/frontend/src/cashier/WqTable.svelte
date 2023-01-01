@@ -1,12 +1,13 @@
 <script lang="ts">
   import { calcAge } from "@/lib/calc-age";
-  import type { Patient, Visit, Wqueue } from "myclinic-model";
+  import type { Patient, Visit } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
   import CashierDialog from "./CashierDialog.svelte";
   import type { WqueueData } from "./wq-data";
   import { openRecords } from "./open-records";
-  import WqTableAuxMenuPulldown from "./WqTableAuxMenuPulldown.svelte";
+  import WqTableAuxMenu from "./WqTableAuxMenu.svelte";
+  import PulldownMenu from "@/lib/PulldownMenu.svelte";
 
   export let items: WqueueData[];
 
@@ -35,17 +36,6 @@
     openRecords(patient);
   }
 
-  function doAuxMenu(e: Event, patient: Patient, visit: Visit): void {
-    const d: WqTableAuxMenuPulldown = new WqTableAuxMenuPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor: e.target as SVGSVGElement,
-        patient,
-        visit
-      }
-    })
-  }
 </script>
 
 <div class="top">
@@ -84,23 +74,28 @@
           {#if item.isWaitCashier}
             <button on:click={() => doCashier(visit)}>会計</button>
           {/if}
-          <a href="javascript:void(0)" on:click={() => doRecord(patient)}>診療録</a>
-          <svg
-            width="1.2rem"
-            class="menu-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="2"
-            on:click={(e) => doAuxMenu(e, patient, visit)}
+          <a href="javascript:void(0)" on:click={() => doRecord(patient)}
+            >診療録</a
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4 6h16M4 12h8m-8 6h16"
-            />
-          </svg>
+          <PulldownMenu let:destroy let:triggerClick>
+            <svg
+              width="1.2rem"
+              class="menu-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+              on:click={triggerClick}
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 12h8m-8 6h16"
+              />
+            </svg>
+            <WqTableAuxMenu slot="menu" {destroy} {visit} {patient}/>
+          </PulldownMenu>
         </div>
       </div>
     </div>

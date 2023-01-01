@@ -1,12 +1,10 @@
 <script lang="ts">
-  import api from "@/lib/api";
+import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import type { Patient, Visit } from "myclinic-model";
   import { PatientData } from "./patient-dialog2/patient-data";
 
   export let destroy: () => void;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let patient: Patient;
   export let visit: Visit;
 
@@ -29,13 +27,12 @@
       alert("削除できませんでした。");
     }
   }
-
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<div>
   <a href="javascript:void(0)" on:click={doPatient}>患者</a>
   <a href="javascript:void(0)" on:click={doDeleteVisit}>削除</a>
-</SurfacePulldown>
+</div>
 
 <style>
   a {
