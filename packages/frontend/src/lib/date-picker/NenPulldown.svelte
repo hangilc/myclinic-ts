@@ -1,10 +1,8 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
   import SelectItem from "../SelectItem.svelte";
-  import SurfacePulldown from "../SurfacePulldown.svelte";
 
   export let destroy: () => void;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let nenList: number[];
   export let nen: number;
   export let onChange: (nen: number) => void;
@@ -13,10 +11,16 @@
   selected.subscribe(onChange);
 </script>
 
-<SurfacePulldown {destroy} {anchor} maxHeight="400px">
-  <svelte:fragment>
-    {#each nenList as n}
-      <SelectItem data={n} {selected} onSelected={destroy}>{n}</SelectItem>
-    {/each}
-  </svelte:fragment>
-</SurfacePulldown>
+<div class="top">
+  {#each nenList as n}
+    <SelectItem data={n} {selected} onSelected={destroy}>{n}</SelectItem>
+  {/each}
+</div>
+
+<style>
+  .top {
+    max-height: 400px;
+    padding-right: 10px;
+    overflow-y: auto;
+  }
+</style>

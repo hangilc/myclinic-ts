@@ -2,6 +2,7 @@
   import { writable, type Writable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import NenPulldown from "./NenPulldown.svelte";
+  import PulldownMenu from "../PulldownMenu.svelte";
 
   export let nen: number;
   export let gengou: string;
@@ -11,21 +12,13 @@
   let selected: Writable<number> = writable(nen);
   selected.subscribe(onChange);
 
-  function doClick(): void {
+  function calcNenList(): number[] {
     let g = kanjidate.Gengou.fromString(gengou);
     if (g != null) {
       let nenLast = kanjidate.nenRangeOf(g)[1];
-      let nenList: number[] = range(nenLast);
-      const d: NenPulldown = new NenPulldown({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          anchor,
-          onChange,
-          nenList,
-          nen,
-        }
-      })
+      return range(nenLast);
+    } else {
+      return [];
     }
   }
 
@@ -35,7 +28,10 @@
 </script>
 
 <span class="top" bind:this={anchor}>
-  <span on:click={doClick}>{nen}</span><span>年</span>
+  <PulldownMenu let:destroy let:trigger>
+    <span on:click={trigger}>{nen}</span><span>年</span>
+    <NenPulldown slot="menu" {destroy} {nen} nenList={calcNenList()} {onChange}/>
+  </PulldownMenu>
 </span>
 
 <style>
