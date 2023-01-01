@@ -1,5 +1,4 @@
 <script lang="ts">
-  import SurfacePulldown from "../SurfacePulldown.svelte";
   import * as kanjidate from "kanjidate";
   import GengouPart from "./GengouPart.svelte";
   import NenPart from "./NenPart.svelte";
@@ -11,7 +10,6 @@
 
   export let date: Date;
   export let destroy: () => void;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let onEnter: (date: Date) => void;
   let gengou: string;
@@ -65,7 +63,7 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<div>
   <div class="top-row">
     <GengouPart {gengou} {gengouList} onChange={onGengouChange} />
     <NenPart {nen} {gengou} onChange={onNenChange} />
@@ -106,7 +104,7 @@
     </svg>
   </div>
   <DaysPanel {items} onChange={onDaysPanelChange}/>
-</SurfacePulldown>
+</div>
 
 <style>
   .top-row {
