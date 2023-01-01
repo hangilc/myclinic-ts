@@ -8,9 +8,13 @@
     ev.stopPropagation();
     onClick(ev);
   }
+
+  function doKeydown(ev: KeyboardEvent): void {
+    console.log("screen key down");
+  }
 </script>
 
-<div style={`opacity: ${opacity}; z-index: ${zIndex}`} on:click={doClick}></div>
+<div style={`opacity: ${opacity}; z-index: ${zIndex}`} on:click={doClick} on:keydown={doKeydown}></div>
 
 <style>
   div {

@@ -10,6 +10,7 @@
   export let destroy: () => void;
   export let onClose: () => void = () => {};
   export let keyDown: (e: KeyboardEvent) => void = _ => {};
+  export let allowEscapeClose: boolean = false;
 
   let zIndexScreen = alloc();
   let zIndexContent = alloc();
@@ -36,7 +37,7 @@
   }
 
   function doKeyDown(event: KeyboardEvent): void {
-    if( event.key === "Escape" ){
+    if( event.key === "Escape" && allowEscapeClose ){
       destroy();
     } else {
       keyDown(event);
@@ -44,7 +45,6 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div
   class="top dialog-top"
   style:z-index={zIndexContent}
@@ -86,7 +86,7 @@
     background-color: white;
     padding: 0.5rem 1.5rem;
     opacity: 1;
-    overflow: auto;
+    /* overflow: auto; */
     border-radius: 0.5rem;
   }
 

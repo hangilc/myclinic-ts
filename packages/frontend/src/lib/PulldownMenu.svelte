@@ -51,14 +51,13 @@
       release(zIndexScreen);
     };
     const screen = new Screen({
-      target: document.body,
+      target: wrapper,
       props: {
         zIndex: zIndexScreen,
         onClick: () => {
-          console.log("screen click");
           destroy()
         },
-        opacity: "0.3",
+        opacity: "0",
       },
     });
     document.body.appendChild(e);
@@ -67,18 +66,21 @@
     e.style.zIndex = zIndexMenu.toString();
     parent?.appendChild(e);
     menu = e;
+    menu.focus();
     locate();
   }
 
-  function doMenuClick(e: MouseEvent) {
-    console.log("menu click");
+  function doMenuKey(event: KeyboardEvent): void {
+    if( event.key === "Escape" ) {
+      destroy();
+    }
   }
 </script>
 
 <div class="top">
   <div class="wrapper" bind:this={wrapper}>
     {#if show}
-      <div class="menu" on:click={doMenuClick} use:open>
+      <div class="menu" use:open on:keydown={doMenuKey} tabindex="0">
         <slot name="menu" />
         {#each items() as item}
           {@const [text, action] = item}
@@ -115,7 +117,6 @@
     border: 1px solid gray;
     position: absolute;
     box-sizing: border-box;
-    isolation: isolate;
   }
 
   .menu a {

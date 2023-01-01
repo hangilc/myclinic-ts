@@ -44,12 +44,7 @@
 <div class="disp">
   <PulldownMenu let:destroy let:trigger>
     <span class="repr" on:click={trigger}>{format(date)}</span>
-    <!-- <DateFormPulldown slot="menu" {destroy} {date} onEnter={onChange}/> -->
-    <div slot="menu">
-      <div on:click={() => console.log("click")}>
-        Inner Menu Area
-      </div>
-    </div>
+    <DateFormPulldown slot="menu" {destroy} {date} onEnter={onChange}/>
   </PulldownMenu>
   <slot name="icons" />
   <svg
