@@ -38,6 +38,7 @@
 
   function doKeyDown(event: KeyboardEvent): void {
     if( event.key === "Escape" && allowEscapeClose ){
+      event.stopPropagation();
       destroy();
     } else {
       keyDown(event);
@@ -86,7 +87,7 @@
     background-color: white;
     padding: 0.5rem 1.5rem;
     opacity: 1;
-    /* overflow: auto; */
+    overflow: auto;
     border-radius: 0.5rem;
   }
 

@@ -38,28 +38,60 @@
     show = true;
   }
 
+  function findScreen(e: HTMLElement): HTMLElement | undefined {
+    const es = document.body.querySelectorAll(".screen-layer");
+    let scr: HTMLElement | undefined = undefined;
+    let zIndex = 0;
+    es.forEach((s) => {
+      if (s instanceof HTMLElement) {
+        const z = parseInt(s.style.zIndex);
+        if (!isNaN(z) && parseInt(s.style.zIndex) > zIndex) {
+          scr = s;
+          zIndex = z;
+        }
+      }
+    });
+    return scr;
+  }
+
   function open(e: HTMLElement): void {
     const zIndexScreen = alloc();
     const zIndexMenu = alloc();
+    const screens: { $destroy: () => void }[] = [];
     const parent = e.parentElement;
-    console.log("parent", parent);
     destroy = () => {
       show = false;
-      screen.$destroy();
+      screens.forEach((s) => s.$destroy());
       e.style.zIndex = "";
       release(zIndexMenu);
       release(zIndexScreen);
     };
+    const nextScreen = findScreen(wrapper);
+    if (nextScreen != undefined) {
+      const s2 = new Screen({
+        target: nextScreen,
+        props: {
+          zIndex: zIndexMenu,
+          onClick: () => {
+            destroy();
+          },
+          opacity: "0",
+          postConstruct: (e) => (e.style.backgroundColor = "orange"),
+        },
+      });
+      screens.push(s2);
+    }
     const screen = new Screen({
       target: wrapper,
       props: {
         zIndex: zIndexScreen,
         onClick: () => {
-          destroy()
+          destroy();
         },
         opacity: "0",
       },
     });
+    screens.push(screen);
     document.body.appendChild(e);
     const r = e.getBoundingClientRect();
     e.style.width = r.width + "px";
@@ -71,7 +103,8 @@
   }
 
   function doMenuKey(event: KeyboardEvent): void {
-    if( event.key === "Escape" ) {
+    if (event.key === "Escape") {
+      event.stopPropagation();
       destroy();
     }
   }
@@ -84,14 +117,15 @@
         <slot name="menu" />
         {#each items() as item}
           {@const [text, action] = item}
-          <a href="javascript:void(0)" on:click={() => doClick(action)}>{text}</a
+          <a href="javascript:void(0)" on:click={() => doClick(action)}
+            >{text}</a
           >
         {/each}
       </div>
     {/if}
   </div>
 </div>
-<slot {trigger} {triggerClick} {destroy}/>
+<slot {trigger} {triggerClick} {destroy} />
 
 <style>
   .top {

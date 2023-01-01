@@ -1,7 +1,8 @@
 <script type="ts">
   export let opacity: string = "0";
-  export let zIndex:number | undefined = undefined;
-  export let onClick: (ev: Event) => void = _ => {};
+  export let zIndex: number | undefined = undefined;
+  export let onClick: (ev: Event) => void = (_) => {};
+  export let postConstruct: (screen: HTMLElement) => void = _ => {};
 
   function doClick(ev: Event): void {
     ev.preventDefault();
@@ -14,7 +15,12 @@
   }
 </script>
 
-<div style={`opacity: ${opacity}; z-index: ${zIndex}`} on:click={doClick} on:keydown={doKeydown}></div>
+<div class="screen-layer"
+  style={`opacity: ${opacity}; z-index: ${zIndex}`}
+  on:click={doClick}
+  on:keydown={doKeydown}
+  use:postConstruct
+/>
 
 <style>
   div {
