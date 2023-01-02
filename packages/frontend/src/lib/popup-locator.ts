@@ -22,20 +22,21 @@ export function locatePulldown(
   } else {
     setLeft(0);
   }
-  if( anchorRect.bottom + eleRect.height > win.clientHeight - 4 ){
+  if (anchorRect.bottom + eleRect.height > win.clientHeight - 4) {
     setTop(-eleRect.height - 4);
   } else {
     setTop(anchorRect.height + 4);
   }
   const finalRect = ele.getBoundingClientRect();
-  return [
-    finalRect.x - anchorRect.x,
-    finalRect.y - anchorRect.y
-  ]
+  return [finalRect.x - anchorRect.x, finalRect.y - anchorRect.y];
 }
 
-export function syncLocation(anchor: HTMLElement | SVGSVGElement, menu: HTMLElement,
-  dx: number, dy: number): void {
+export function syncLocation(
+  anchor: HTMLElement | SVGSVGElement,
+  menu: HTMLElement,
+  dx: number,
+  dy: number
+): void {
   const anchorRect = anchor.getBoundingClientRect();
   menu.style.left = window.scrollX + anchorRect.x + dx + "px";
   menu.style.top = window.scrollY + anchorRect.y + dy + "px";
@@ -44,16 +45,18 @@ export function syncLocation(anchor: HTMLElement | SVGSVGElement, menu: HTMLElem
 export function locateContextMenu(
   anchor: HTMLElement | SVGSVGElement,
   ele: HTMLElement,
-  clickLocation: ViewportCoord,
+  clickLocation: ViewportCoord
 ): [number, number] {
-  const {x, y} = clickLocation;
+  const { x, y } = clickLocation;
   const anchorRect = anchor.getBoundingClientRect();
+  const [dx, dy] = [x - anchorRect.x, y - anchorRect.y];
   const eleRect = ele.getBoundingClientRect();
   const win = document.documentElement;
   function setLeft(left: number): void {
     ele.style.left = window.scrollX + x + left + "px";
   }
   function setTop(top: number): void {
+    console.log("setTop", window.scrollX, window.scrollY, y, top)
     ele.style.top = window.scrollY + y + top + "px";
   }
   if (x + eleRect.width > win.clientWidth - 4) {
@@ -61,15 +64,14 @@ export function locateContextMenu(
   } else {
     setLeft(4);
   }
-  if( y + eleRect.height > win.clientHeight - 4 ){
+  if (y + eleRect.height > win.clientHeight - 4) {
     setTop(-eleRect.height - 4);
   } else {
     setTop(4);
   }
-  return [
-    x - anchorRect.x,
-    y - anchorRect.y
-  ]
+  console.log("x, y", x, y);
+  console.log(ele.style.left, ele.style.top);
+  return [dx, dy];
 }
 
 // export function locateAtAnchor(

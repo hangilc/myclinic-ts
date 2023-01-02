@@ -31,7 +31,6 @@ export class PopupContext {
     document.body.appendChild(menu);
     const r = menu.getBoundingClientRect();
     menu.style.width = r.width + "px";
-    menu.focus();
     let [dx, dy]: [number, number] = [0, 0];
     if( clickLocation ){
       [dx, dy] = locateContextMenu(anchor, menu, clickLocation);
@@ -48,6 +47,7 @@ export class PopupContext {
       }
     };
     window.addEventListener("resize", this.resizeHandler);
+    menu.focus();
   }
 
   destroy(): void {
