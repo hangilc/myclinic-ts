@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import PulldownMenu from "../PulldownMenu.svelte";
+  import Popup from "../Popup.svelte";
   import { range_from_one_upto } from "../range";
   import DayPartPulldown from "./DayPartPulldown.svelte";
 
@@ -17,28 +17,13 @@
     return range_from_one_upto(lastDay);
   }
 
-  // function doClick(): void {
-  //   let year = kanjidate.fromGengou(gengou, nen);
-  //   let lastDay: number = kanjidate.lastDayOfMonth(year, month);
-  //   let dayList: number[] = range_from_one_upto(lastDay);
-  //   const d: DayPartPulldown = new DayPartPulldown({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       anchor,
-  //       dayList,
-  //       day,
-  //       onChange,
-  //     },
-  //   });
-  // }
 </script>
 
 <span class="top">
-  <PulldownMenu let:destroy let:triggerClick>
+  <Popup let:destroy let:triggerClick>
     <span on:click={triggerClick} bind:this={anchor}>{day}</span><span>日</span>
     <DayPartPulldown slot="menu" {destroy} dayList={calcDayList()} {day} {onChange}/>
-  </PulldownMenu>
+  </Popup>
 </span>
 
 <style>

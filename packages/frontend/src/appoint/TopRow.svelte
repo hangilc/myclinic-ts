@@ -1,21 +1,17 @@
 <script lang="ts">
-  import PulldownMenu from "@/lib/PulldownMenu.svelte";
+  import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
+  import Bars3 from "@/icons/Bars3.svelte";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;
   export let onThisWeek: () => void;
 
-  let svgWrapper: HTMLElement;
-  let menuIcon: SVGSVGElement;
-
-  let menuItems: [string, () => void][] = [
-    ["変更履歴", () => {}],
-  ]
-
-  if( isAdmin ){
-    menuItems.unshift(["予約枠わりあて", onCreateAppoints])
+  function doAlloc(destroy: () => void){
+    destroy();
+    onCreateAppoints();
   }
+
 </script>
 
 <div class="top">
@@ -26,24 +22,15 @@
   <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
     <a href="javascript:void(0)">予約検索</a>
-    <PulldownMenu items={() => menuItems} let:trigger>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="2"
-        width="18"
-        class="menu-icon"
-        on:click={trigger}
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M4 6h16M4 12h16M4 18h16"
-        />
-      </svg>
-    </PulldownMenu>
+    <Popup let:trigger let:destroy>
+      <Bars3 onClick={trigger} style="cursor: pointer;" dy="-2px" width="18"/>
+      <div slot="menu" class="context-menu">
+        {#if isAdmin}
+          <a href="javascript:void(0)" on:click={() => doAlloc(destroy)}>予約枠わりあて</a>
+        {/if}
+        <a href="javascript:void(0)">変更履歴</a>
+      </div>
+    </Popup>
   </div>
 </div>
 
@@ -73,5 +60,14 @@
 
   a {
     margin: 0 6px;
+  }
+
+  .context-menu a {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .context-menu a:last-of-type {
+    margin-bottom: 0;
   }
 </style>

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
-  import PulldownMenu from "../PulldownMenu.svelte";
+  import Popup from "../Popup.svelte";
   import GengouPulldown from "./GengouPulldown.svelte";
 
 
@@ -15,10 +15,10 @@
 </script>
 
 <span class="top" bind:this={anchor}>
-  <PulldownMenu let:destroy let:trigger>
+  <Popup let:destroy let:trigger>
     <span on:click={trigger}>{gengou}</span>
-    <GengouPulldown slot="menu" {destroy} {selected}/>
-  </PulldownMenu>
+    <GengouPulldown slot="menu" {destroy} {selected} {gengouList}/>
+  </Popup>
 </span>
 
 <style>

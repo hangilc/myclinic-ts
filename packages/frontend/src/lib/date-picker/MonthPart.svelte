@@ -1,5 +1,5 @@
 <script lang="ts">
-  import PulldownMenu from "../PulldownMenu.svelte";
+  import Popup from "../Popup.svelte";
 import MonthPulldown from "./MonthPulldown.svelte";
 
   export let month: number;
@@ -9,10 +9,10 @@ import MonthPulldown from "./MonthPulldown.svelte";
 </script>
 
 <span class="top">
-  <PulldownMenu let:destroy let:trigger>
+  <Popup let:destroy let:trigger>
     <span on:click={trigger}>{month}</span><span>月</span>
     <MonthPulldown slot="menu" {onChange} {month} {destroy}/>
-  </PulldownMenu>
+  </Popup>
 </span>
 
 <style>

@@ -2,7 +2,7 @@
   import { writable, type Writable } from "svelte/store";
   import * as kanjidate from "kanjidate";
   import NenPulldown from "./NenPulldown.svelte";
-  import PulldownMenu from "../PulldownMenu.svelte";
+  import Popup from "../Popup.svelte";
 
   export let nen: number;
   export let gengou: string;
@@ -28,10 +28,10 @@
 </script>
 
 <span class="top" bind:this={anchor}>
-  <PulldownMenu let:destroy let:trigger>
+  <Popup let:destroy let:trigger>
     <span on:click={trigger}>{nen}</span><span>年</span>
     <NenPulldown slot="menu" {destroy} {nen} nenList={calcNenList()} {onChange}/>
-  </PulldownMenu>
+  </Popup>
 </span>
 
 <style>

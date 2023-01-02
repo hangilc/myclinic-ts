@@ -17,7 +17,7 @@ import api from "@/lib/api";
     confirm("この診察を削除しますか？", async () => {
       destroy();
       await deleteVisit(visit.visitId);
-    })
+    }, () => destroy());
   }
 
   async function deleteVisit(visitId: number) {

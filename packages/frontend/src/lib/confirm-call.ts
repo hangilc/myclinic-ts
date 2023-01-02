@@ -1,11 +1,15 @@
-import Confirm from "./Confirm.svelte"
+import Confirm from "./Confirm.svelte";
 
-export function confirm(message: string, proc: () => void): void {
+export function confirm(
+  message: string,
+  yes: () => void,
+  no: () => void = () => {}
+): void {
   const conf = new Confirm({
     target: document.body,
     props: {
-      text: message
-    }
+      text: message,
+    },
   });
-  conf.confirm(proc);
+  conf.confirm(yes, no);
 }

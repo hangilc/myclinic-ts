@@ -7,7 +7,7 @@
   import type { WqueueData } from "./wq-data";
   import { openRecords } from "./open-records";
   import WqTableAuxMenu from "./WqTableAuxMenu.svelte";
-  import PulldownMenu from "@/lib/PulldownMenu.svelte";
+  import Popup from "@/lib/Popup.svelte";
 
   export let items: WqueueData[];
 
@@ -77,7 +77,7 @@
           <a href="javascript:void(0)" on:click={() => doRecord(patient)}
             >診療録</a
           >
-          <PulldownMenu let:destroy let:triggerClick>
+          <Popup let:destroy let:triggerClick>
             <svg
               width="1.2rem"
               class="menu-icon"
@@ -95,7 +95,7 @@
               />
             </svg>
             <WqTableAuxMenu slot="menu" {destroy} {visit} {patient}/>
-          </PulldownMenu>
+          </Popup>
         </div>
       </div>
     </div>

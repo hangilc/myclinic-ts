@@ -28,6 +28,9 @@ export class PopupContext {
       },
     });
     menu.style.zIndex = this.zIndexMenu.toString();
+    menu.style.left = "0";
+    menu.style.top = "0";
+    menu.style.width = "auto";
     document.body.appendChild(menu);
     const r = menu.getBoundingClientRect();
     menu.style.width = r.width + "px";
