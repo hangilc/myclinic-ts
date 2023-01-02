@@ -87,8 +87,8 @@
     background-color: white;
     padding: 0.5rem 1.5rem;
     opacity: 1;
-    overflow: visible;
-    /* overflow: auto; */
+    /* overflow: visible; */
+    overflow: auto;
     border-radius: 0.5rem;
   }
 

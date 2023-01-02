@@ -1,3 +1,4 @@
+<script lang="ts">
 import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
 import RecentVisitsDialog from "@/lib/RecentVisitsDialog.svelte";
 import type { Patient, Visit } from "myclinic-model";
@@ -54,3 +55,21 @@ function doByDate(): void {
     },
   });
 }
+</script>
+
+<div class="top">
+  <a href="javascript:void(0)">患者検索</a>
+  <a href="javascript:void(0)">最近の診察</a>
+  <a href="javascript:void(0)">日付別</a>
+</div>
+
+<style>
+  a {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  a:last-of-type {
+    margin-bottom: 0;
+  }
+</style>

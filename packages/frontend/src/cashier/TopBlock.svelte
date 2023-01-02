@@ -1,12 +1,13 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import PulldownMenu from "@/lib/PulldownMenu.svelte";
+  import Popup from "@/lib/Popup.svelte";
   import type { Patient } from "myclinic-model";
   import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog2/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
-  import { recordsMenuItems } from "./records-pulldown";
+  import RecordsPulldown from "./RecordsPulldown.svelte";
   import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
+  import Bars3 from "@/icons/Bars3.svelte";
 
   let searchText = "";
 
@@ -49,30 +50,16 @@
     <button>検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
-  <PulldownMenu items={recordsMenuItems} let:trigger>
+  <Popup let:trigger>
     <a href="javascript:void(0)" class="records-link" on:click={trigger}
       >診療録</a
     >
-  </PulldownMenu>
-  <PulldownMenu let:trigger let:destroy>
-    <svg
-      class="menu-svg"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke-width="1.5"
-      stroke="currentColor"
-      width="24px"
-      on:click={trigger}
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-      />
-    </svg>
+    <RecordsPulldown slot="menu" />
+  </Popup>
+  <Popup let:trigger let:destroy>
+    <Bars3 onClick={trigger} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"/>
     <TopBlockAuxMenu slot="menu" {destroy}/>
-  </PulldownMenu>
+  </Popup>
 </div>
 
 <style>
