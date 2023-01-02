@@ -42,28 +42,34 @@ export function syncLocation(anchor: HTMLElement | SVGSVGElement, menu: HTMLElem
 }
 
 export function locateContextMenu(
-  anchor: ViewportCoord,
-  ele: HTMLElement
-): void {
-  const {x, y} = anchor;
+  anchor: HTMLElement | SVGSVGElement,
+  ele: HTMLElement,
+  clickLocation: ViewportCoord,
+): [number, number] {
+  const {x, y} = clickLocation;
+  const anchorRect = anchor.getBoundingClientRect();
   const eleRect = ele.getBoundingClientRect();
   const win = document.documentElement;
   function setLeft(left: number): void {
-    ele.style.left = left + "px";
+    ele.style.left = window.scrollX + x + left + "px";
   }
   function setTop(top: number): void {
-    ele.style.top = top + "px";
+    ele.style.top = window.scrollY + y + top + "px";
   }
   if (x + eleRect.width > win.clientWidth - 4) {
     setLeft(x - eleRect.width);
   } else {
-    setLeft(0);
+    setLeft(4);
   }
   if( y + eleRect.height > win.clientHeight - 4 ){
     setTop(-eleRect.height - 4);
   } else {
     setTop(4);
   }
+  return [
+    x - anchorRect.x,
+    y - anchorRect.y
+  ]
 }
 
 // export function locateAtAnchor(

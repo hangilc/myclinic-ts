@@ -3,7 +3,6 @@
   import { kindChoices } from "./kind-choices";
 
   export let destroy: () => void;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let onEnter: (kindKey: string) => void;
 
   function doKey(key: string): void {
@@ -12,11 +11,11 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor} >
+<div>
   {#each Object.keys(kindChoices) as k}
     <a href="javascript:void(0)" on:click={() => doKey(k)}>{k}</a>
   {/each}
-</SurfacePulldown>
+</div>
 
 <style>
   a {

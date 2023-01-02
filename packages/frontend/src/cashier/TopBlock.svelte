@@ -50,11 +50,11 @@
     <button>検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
-  <Popup let:trigger>
+  <Popup let:trigger let:destroy>
     <a href="javascript:void(0)" class="records-link" on:click={trigger}
       >診療録</a
     >
-    <RecordsPulldown slot="menu" />
+    <RecordsPulldown slot="menu" {destroy}/>
   </Popup>
   <Popup let:trigger let:destroy>
     <Bars3 onClick={trigger} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"/>

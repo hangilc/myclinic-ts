@@ -1,6 +1,6 @@
 import { alloc, release } from "./zindex";
 import Screen from "@/lib/Screen.svelte";
-import { locatePulldown, syncLocation } from "./popup-locator";
+import { locatePulldown, syncLocation, locateContextMenu } from "./popup-locator";
 import type { ViewportCoord } from "./viewport-coord";
 
 export class PopupContext {
@@ -24,7 +24,7 @@ export class PopupContext {
       props: {
         zIndex: this.zIndexScreen,
         onClick: onDestroy,
-        opacity: "0.4",
+        opacity: "0",
       },
     });
     menu.style.zIndex = this.zIndexMenu.toString();
@@ -32,7 +32,12 @@ export class PopupContext {
     const r = menu.getBoundingClientRect();
     menu.style.width = r.width + "px";
     menu.focus();
-    const [dx, dy] = locatePulldown(anchor, menu);
+    let [dx, dy]: [number, number] = [0, 0];
+    if( clickLocation ){
+      [dx, dy] = locateContextMenu(anchor, menu, clickLocation);
+    } else {
+      [dx, dy] = locatePulldown(anchor, menu);
+    }
     let syncTimer: any = undefined;
     this.resizeHandler = (_evt) => {
       if (!syncTimer) {

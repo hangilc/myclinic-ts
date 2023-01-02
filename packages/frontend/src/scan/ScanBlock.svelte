@@ -1,14 +1,13 @@
 <script lang="ts">
   import { confirm } from "@/lib/confirm-call";
+  import Popup from "@/lib/Popup.svelte";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { makePatientText, makeScannerText } from "./misc";
   import { ScanManager } from "./scan-manager";
-  import {
-    scannerProbed,
-  } from "./scan-vars";
+  import { scannerProbed } from "./scan-vars";
   import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
@@ -37,15 +36,15 @@
     scannerText = makeScannerText(scanner);
   };
 
-  manager.onKindKeyChange = (key: string) => kindText = key;
+  manager.onKindKeyChange = (key: string) => (kindText = key);
 
-  manager.onDocsChange = docs => {
+  manager.onDocsChange = (docs) => {
     scannedDocs = docs;
     canUpload = hasUnUploaded(docs);
-  }
-  manager.onScanStart = () => isScanning = true;
-  manager.onScanEnd = () => isScanning = false;
-  manager.onScanPctChange = pct => scanPct = pct;
+  };
+  manager.onScanStart = () => (isScanning = true);
+  manager.onScanEnd = () => (isScanning = false);
+  manager.onScanPctChange = (pct) => (scanPct = pct);
 
   probeScanner();
 
@@ -82,16 +81,16 @@
     });
   }
 
-  function doSelectKind(event: MouseEvent): void {
-    const d: ScanKindPulldown = new ScanKindPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor: event.target as HTMLElement,
-        onEnter: (k: string) => manager.setKindKey(k),
-      },
-    });
-  }
+  // function doSelectKind(event: MouseEvent): void {
+  //   const d: ScanKindPulldown = new ScanKindPulldown({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       anchor: event.target as HTMLElement,
+  //       onEnter: (k: string) => manager.setKindKey(k),
+  //     },
+  //   });
+  // }
 
   function doStartScan(): void {
     manager.scan();
@@ -128,20 +127,20 @@
     }
   }
 
-  function doSelectScanner(event: MouseEvent): void {
-    const d: SelectScannerPulldown = new SelectScannerPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        anchor: event.target as HTMLElement,
-        list: scannerList,
-        current: manager.scanDevice,
-        onSelect: (device: ScannerDevice) => {
-          manager.setDevice(device);
-        }
-      }
-    })
-  }
+  // function doSelectScanner(event: MouseEvent): void {
+  //   const d: SelectScannerPulldown = new SelectScannerPulldown({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       anchor: event.target as HTMLElement,
+  //       list: scannerList,
+  //       current: manager.scanDevice,
+  //       onSelect: (device: ScannerDevice) => {
+  //         manager.setDevice(device);
+  //       },
+  //     },
+  //   });
+  // }
 </script>
 
 <div class="top">
@@ -154,15 +153,19 @@
   <div class="title">文書の種類</div>
   <div class="work">
     {kindText}
-    <a
-      href="javascript:void(0)"
-      on:click={doSelectKind}>選択</a
-    >
+    <Popup let:destroy let:trigger>
+      <a href="javascript:void(0)" on:click={trigger}>選択</a>
+      <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/>
+    </Popup>
   </div>
   <div class="title">スキャナー</div>
   <div class="work">
     {scannerText}
-    <a href="javascript:void(0)" on:click={doSelectScanner}>選択</a>
+    <Popup let:destroy let:trigger>
+      <a href="javascript:void(0)" on:click={trigger}>選択</a>
+      <SelectScannerPulldown slot="menu" {destroy} list={scannerList}
+        current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/>
+    </Popup>
   </div>
   <div class="commands">
     <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>
@@ -173,12 +176,16 @@
   <div class="title">スキャン文書</div>
   <div class="work">
     {#each scannedDocs as doc (doc.id)}
-      <ScannedDoc data={doc} {canScan} onRescan={doRescan} onDelete={doDelete}/>
+      <ScannedDoc
+        data={doc}
+        {canScan}
+        onRescan={doRescan}
+        onDelete={doDelete}
+      />
     {/each}
   </div>
   <div class="commands">
-    <button on:click={doUpload} disabled={!canUpload}
-      >アップロード</button
+    <button on:click={doUpload} disabled={!canUpload}>アップロード</button
     ><button on:click={doClose}>閉じる</button>
   </div>
 </div>

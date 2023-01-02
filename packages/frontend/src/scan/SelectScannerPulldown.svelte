@@ -1,10 +1,8 @@
 <script lang="ts">
   import SelectItem2 from "@/lib/SelectItem2.svelte";
-  import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import type { ScannerDevice } from "myclinic-model/model";
 
   export let destroy: () => void;
-  export let anchor: HTMLElement | SVGSVGElement;
   export let list: ScannerDevice[];
   export let current: ScannerDevice | undefined;
   export let onSelect: (d: ScannerDevice) => void;
@@ -15,10 +13,10 @@
   }
 </script>
 
-<SurfacePulldown {destroy} {anchor}>
+<div>
   {#each list as d}
     <SelectItem2 data={d} isCurrent={d === current} onSelect={doSelect}
       >{d.description}</SelectItem2
     >
   {/each}
-</SurfacePulldown>
+</div>

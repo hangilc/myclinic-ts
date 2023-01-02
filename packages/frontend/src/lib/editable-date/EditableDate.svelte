@@ -2,7 +2,7 @@
   import * as kanjidate from "kanjidate";
   import DateFormPulldown from "../date-form/DateFormPulldown.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
-  import PulldownMenu from "../Popup.svelte";
+  import Popup from "../Popup.svelte";
   import CalendarIcon from "../../icons/CalendarIcon.svelte";
 
   export let date: Date | null;
@@ -19,20 +19,20 @@
 </script>
 
 <div class="disp">
-  <PulldownMenu let:destroy let:trigger>
+  <Popup let:destroy let:trigger>
     <span class="repr" on:click={trigger}>{format(date)}</span>
     <DateFormPulldown slot="menu" {destroy} {date} onEnter={onChange} />
-  </PulldownMenu>
+  </Popup>
   <slot name="icons" />
-  <PulldownMenu let:destroy let:triggerClick>
-    <CalendarIcon dy="-4px" dx="4px"/>
+  <Popup let:destroy let:triggerClick>
+    <CalendarIcon dy="-4px" dx="4px" onClick={triggerClick}/>
     <DatePicker
       slot="menu"
       date={date || datePickerDefault()}
       {destroy}
       onEnter={onChange}
     />
-  </PulldownMenu>
+  </Popup>
 </div>
 
 <style>

@@ -1,8 +1,9 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
   import { Invalid } from "../validator";
-  import PulldownMenu from "../PulldownMenu.svelte";
+  import Popup from "../Popup.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
+  import CalendarIcon from "@/icons/CalendarIcon.svelte";
 
   export let date: Date | null | undefined;
   export let errors: Invalid[] = [];
@@ -32,8 +33,9 @@
     <DateForm bind:date bind:errors bind:this={form} {gengouList} />
     <slot name="spacer" />
     <slot name="icons" />
-    <PulldownMenu let:destroy let:trigger>
-      <svg
+    <Popup let:destroy let:trigger>
+      <CalendarIcon width={iconWidth} dy="-0.2rem" dx="0.2rem" style="cursor: pointer;"/>
+      <!-- <svg
         xmlns="http://www.w3.org/2000/svg"
         width={iconWidth}
         class="calendar-icon"
@@ -48,14 +50,14 @@
           stroke-linejoin="round"
           d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
         />
-      </svg>
+      </svg> -->
       <DatePicker
         slot="menu"
         {destroy}
         date={date ?? datePickerDefault()}
         onEnter={doDatePickerEnter}
       />
-    </PulldownMenu>
+    </Popup>
   </div>
 </div>
 
