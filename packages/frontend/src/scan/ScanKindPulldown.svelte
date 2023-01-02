@@ -1,5 +1,4 @@
 <script lang="ts">
-  import SurfacePulldown from "@/lib/SurfacePulldown.svelte";
   import { kindChoices } from "./kind-choices";
 
   export let destroy: () => void;
