@@ -4,24 +4,13 @@
   import AppointDialog from "./AppointDialog.svelte";
   import { isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
-  import { ViewportCoord } from "@/lib/viewport-coord";
-  import PulldownMenu from "@/lib/PulldownMenu.svelte";
+  import Popup from "@/lib/Popup.svelte";
 
   export let data: AppointTimeData;
   export let siblings: AppointTimeData[];
   let contextMenuWrapper: HTMLElement;
 
   let timeText = `${fromTimeText(data)} - ${untilTimeText(data)}`;
-
-  function getContextMenuItems(): [string, () => void][] {
-    return [
-      ["編集", doOpenEditDialog],
-      ["結合", () => {}],
-      ["分割", () => {}],
-      ["延長", () => {}],
-      ["削除", () => {}],
-    ];
-  }
 
   function fromTimeText(data: AppointTimeData): string {
     return data.appointTime.fromTime.substring(0, 5);
@@ -49,35 +38,49 @@
   }
 
   function doOpenEditDialog(): void {
-    const d: AppointTimeDialog = new AppointTimeDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "予約枠編集",
-        data: data.appointTime,
-        siblings,
-      },
-    });
+    if (isAdmin) {
+      const d: AppointTimeDialog = new AppointTimeDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          title: "予約枠編集",
+          data: data.appointTime,
+          siblings,
+        },
+      });
+    }
   }
 
-  function doContextMenu(event: MouseEvent, trigger: (e: MouseEvent) => void): void {
+  function doContextMenu(
+    event: MouseEvent,
+    trigger: (e: MouseEvent) => void
+  ): void {
     if (isAdmin) {
       event.preventDefault();
+      console.log(event.clientY);
       trigger(event);
     }
   }
 </script>
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
-  <PulldownMenu items={getContextMenuItems} let:triggerClick>
+  <Popup let:triggerClick let:destroy>
     <div
       class="time-box"
       on:click={doTimeBoxClick}
-      on:contextmenu={e => doContextMenu(e, triggerClick)}
+      on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
     >
       {timeText}
     </div>
-  </PulldownMenu>
+    <div slot="menu" class="context-menu">
+      {#if isAdmin}
+        <a href="javascript:void(0)">編集</a>
+        <a href="javascript:void(0)">結合</a>
+        <a href="javascript:void(0)">分割</a>
+        <a href="javascript:void(0)">削除</a>
+      {/if}
+    </div>
+  </Popup>
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
       <AppointPatient data={appoint} appointTimeData={data} />
@@ -142,10 +145,12 @@
     user-select: none;
   }
 
-  .context-menu-wrapper {
-    width: 0;
-    height: 0;
-    position: relative;
-    font-weight: normal;
+  .context-menu a {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .context-menu a:last-of-type {
+    margin-bottom: 0;
   }
 </style>
