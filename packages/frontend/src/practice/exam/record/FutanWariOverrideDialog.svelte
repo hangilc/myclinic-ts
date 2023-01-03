@@ -1,9 +1,10 @@
 <script lang="ts">
-  import Dialog from "@/lib/DialogOld.svelte"
+  import Dialog from "@/lib/Dialog.svelte"
   import { tick } from "svelte"
   import api from "@/lib/api"
   import type { VisitAttributes, VisitEx } from "myclinic-model";
 
+  export let destroy: () => void;
   export let visit: VisitEx;
   let futanWariDialog: Dialog;
   let currentRep: string;
@@ -35,7 +36,7 @@
     });
   }
 
-  function onFutanWariEnter(close: () => void): void {
+  function onFutanWariEnter(): void {
     const value: string = input.value;
     const oldAttr: VisitAttributes | null = visit.attributes;
     let newFutanWari: number | null;
@@ -58,13 +59,16 @@
     }
     const newVisit = visit.asVisit.updateAttribute(newAttr);
     api.updateVisit(newVisit);
-    close();
+    doClose();
+  }
+
+  function doClose(): void {
+    destroy();
   }
 
 </script>
 
-<Dialog let:close={close} bind:this={futanWariDialog}>
-  <span slot="title">負担割オーバーライド</span>
+<Dialog {destroy} title="負担割オーバーライド">
   <div>現在の設定：{currentRep}</div>
   {#if error !== "" }
   <div class="error">{error}</div>
@@ -72,10 +76,10 @@
   <div class="futanwari-form">
     <input type="text" use:setFutanWariInput use:setFocus/><span>割</span>
   </div>
-  <svelte:fragment slot="commands">
-    <button on:click={() => onFutanWariEnter(close)}>入力</button>
-    <button on:click={close}>キャンセル</button>
-  </svelte:fragment>
+  <div class="commands">
+    <button on:click={onFutanWariEnter}>入力</button>
+    <button on:click={doClose}>キャンセル</button>
+  </div>
 </Dialog>
 
 <style>
@@ -94,6 +98,15 @@
 
   .futanwari-form :global(span) {
     display: inline-block;
+    margin-left: 4px;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
+  }
+
+  .commands * + * {
     margin-left: 4px;
   }
 </style>

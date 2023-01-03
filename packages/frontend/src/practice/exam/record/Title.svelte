@@ -8,7 +8,7 @@
     addToMishuuList,
   } from "../ExamVars";
   import Pulldown from "@/lib/Pulldown.svelte";
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
   import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";
@@ -20,8 +20,7 @@
   let manipLink: HTMLElement;
   let manipPulldown: Pulldown;
   let taskRunner: TaskRunner | null = null;
-  let meisaiDialog: Dialog;
-  let futanWariDialog: FutanWariOverrideDialog;
+  let showMeisai = false;
 
   onDestroy(() => {
     taskRunner?.cancel();
@@ -44,11 +43,17 @@
   }
 
   async function doMeisai() {
-    meisaiDialog.open();
+    showMeisai = true;
   }
 
-  async function doFutanwariOverride() {
-    futanWariDialog.open();
+  function doFutanwariOverride() {
+    const d: FutanWariOverrideDialog = new FutanWariOverrideDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        visit,
+      },
+    });
   }
 
   function doMishuuList(): void {
@@ -58,9 +63,7 @@
   function isMishuu(visit: VisitEx): boolean {
     const charge = visit.chargeOption?.charge;
     const pay = visit.lastPayment?.amount;
-    return charge != null && charge > 0 && (
-      pay == null || (pay === 0)
-    );
+    return charge != null && charge > 0 && (pay == null || pay === 0);
   }
 
   function totalTenOf(meisai: Meisai): string {
@@ -68,7 +71,6 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <div
   class="top"
   class:current={visit.visitId === $currentVisitId}
@@ -79,7 +81,6 @@
   <a href="javascript:void(0)" bind:this={manipLink} on:click={doManip}>操作</a>
 </div>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <Pulldown anchor={manipLink} bind:this={manipPulldown}>
   <svelte:fragment>
     <a href="javascript:void(0)" on:click={doDeleteVisit}>この診察を削除</a>
@@ -96,43 +97,44 @@
       >負担割オーバーライド</a
     >
     {#if isMishuu(visit)}
-    <a href="javascript:void(0)" on:click={doMishuuList}>未収リストへ</a>
+      <a href="javascript:void(0)" on:click={doMishuuList}>未収リストへ</a>
     {/if}
   </svelte:fragment>
 </Pulldown>
 
-<Dialog bind:this={meisaiDialog} let:close width="">
-  <span slot="title">診療明細</span>
-  {#await api.getMeisai(visit.visitId) then meisai}
-    {#each meisai.items as item}
-      <div>
-        <div>{item.section}</div>
-        {#each item.entries as entry}
-          <div class="meisai-detail-item-row">
-            <div class="meisai-detail-item label">{entry.label}</div>
-            <div class="meisai-detail-item tanka-count">
-              {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
-            </div>
-            <div class="meisai-detail-item subtotal">
-              {(entry.tanka * entry.count).toLocaleString()}
-            </div>
+{#if showMeisai}
+  <Dialog destroy={() => (showMeisai = false)} title="診療明細">
+    <div class="meisai-top">
+      {#await api.getMeisai(visit.visitId) then meisai}
+        {#each meisai.items as item}
+          <div>
+            <div>{item.section.label}</div>
+            {#each item.entries as entry}
+              <div class="meisai-detail-item-row">
+                <div class="meisai-detail-item label">{entry.label}</div>
+                <div class="meisai-detail-item tanka-count">
+                  {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
+                </div>
+                <div class="meisai-detail-item subtotal">
+                  {(entry.tanka * entry.count).toLocaleString()}
+                </div>
+              </div>
+            {/each}
           </div>
         {/each}
+        <hr />
+        <div class="meisai-detail-summary">
+          <span>総点：{totalTenOf(meisai)}点</span>
+          <span>負担割：{meisai.futanWari.toLocaleString()}割</span>
+          <span>自己負担：{meisai.charge.toLocaleString()}円</span>
+        </div>
+      {/await}
+      <div class="commands">
+        <button on:click={() => (showMeisai = false)}>閉じる</button>
       </div>
-    {/each}
-    <hr />
-    <div class="meisai-detail-summary">
-      <span>総点：{totalTenOf(meisai)}点</span>
-      <span>負担割：{meisai.futanWari.toLocaleString()}割</span>
-      <span>自己負担：{meisai.charge.toLocaleString()}円</span>
     </div>
-  {/await}
-  <svelte:fragment slot="commands">
-    <button on:click={close}>閉じる</button>
-  </svelte:fragment>
-</Dialog>
-
-<FutanWariOverrideDialog bind:visit bind:this={futanWariDialog} />
+  </Dialog>
+{/if}
 
 <style>
   .top {
@@ -184,4 +186,17 @@
   .meisai-detail-summary span {
     margin-right: 1em;
   }
+
+  .meisai-top {
+    margin: 10px;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
 </style>
