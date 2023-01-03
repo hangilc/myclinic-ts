@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import CheckLabel from "@/lib/CheckLabel.svelte";
   import {
     ConductKind,

@@ -8,7 +8,7 @@
     addToMishuuList,
   } from "../ExamVars";
   import Pulldown from "@/lib/Pulldown.svelte";
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import api from "@/lib/api";
   import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";

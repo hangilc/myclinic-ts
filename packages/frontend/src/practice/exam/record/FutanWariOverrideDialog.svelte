@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "@/lib/Dialog.svelte"
+  import Dialog from "@/lib/DialogOld.svelte"
   import { tick } from "svelte"
   import api from "@/lib/api"
   import type { VisitAttributes, VisitEx } from "myclinic-model";

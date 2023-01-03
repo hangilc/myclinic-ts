@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "../Dialog.svelte";
+  import Dialog from "../DialogOld.svelte";
   import DrawerSvg from "./DrawerSvg.svelte";
   import type { Op } from "./op";
   import { printApi, type PrintRequest } from "@/lib/printApi";

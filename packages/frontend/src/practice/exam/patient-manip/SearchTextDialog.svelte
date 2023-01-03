@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { calcPages } from "@/lib/calc-pages";
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import type { Patient, Text, Visit } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";

@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import { genid } from "@/lib/genid";
   import type { ShinryouEx, Visit } from "myclinic-model";
   import { Item } from "./copy-selected-types";

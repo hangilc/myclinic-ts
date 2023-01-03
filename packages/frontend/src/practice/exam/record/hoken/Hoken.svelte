@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { VisitEx, Shahokokuho, Koukikourei, Kouhi, Roujin } from "myclinic-model"
   import { hokenRep, shahokokuhoRep, roujinRep, koukikoureiRep, kouhiRep } from "@/lib/hoken-rep"
-  import Dialog from "@/lib/Dialog.svelte"
+  import Dialog from "@/lib/DialogOld.svelte"
   import api from "@/lib/api"
 
   export let visit: VisitEx;

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "../../../lib/Dialog.svelte";
+  import Dialog from "../../../lib/DialogOld.svelte";
   import type * as m from "myclinic-model";
   import api from "../../../lib/api";
   import { padNumber } from "../../../lib/util";

@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/Dialog.svelte"
+  import Dialog from "@/lib/DialogOld.svelte"
   import type { ShinryouMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { setFocus } from "@/lib/set-focus"

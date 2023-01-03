@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";

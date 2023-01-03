@@ -2,6 +2,7 @@
 
   import Dialog from "./Dialog.svelte"
 
+  export let destroy: () => void;
   let dialog: Dialog;
   let proc: () => void;
   let no: () => void;
@@ -24,10 +25,27 @@
   }
 </script>
 
-<Dialog let:close={close} noTitle bind:this={dialog} width="">
-  <div>{text}</div>
-  <svelte:fragment slot="commands">
-    <button on:click={() => doYes(close)}>はい</button>
-    <button on:click={() => doNo(close)}>キャンセル</button>
-  </svelte:fragment>
+<Dialog {destroy} title="確認">
+  <div class="content">{text}</div>
+  <div class="commands">
+    <button on:click={() => doYes(destroy)}>はい</button>
+    <button on:click={() => doNo(destroy)}>キャンセル</button>
+  </div>
 </Dialog>
+
+<style>
+  .content {
+    margin: 10px 0;
+    min-width: 100px;
+    max-width: 400px;
+    overflow: auto;
+  }
+
+  .commands {
+    text-align: right;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
+</style>

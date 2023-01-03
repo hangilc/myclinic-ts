@@ -3,9 +3,18 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
+  import Confirm from "@/lib/Confirm.svelte";
 
   const service = writable("main");
 
+  function doDialog(): void {
+    const d: Confirm = new Confirm({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    })
+  }
 </script>
 
 <div class="two-cols">
@@ -16,6 +25,7 @@
     <div class="left-box">
       <Hotline sendAs="reception" sendTo="practice" />
     </div>
+    <button on:click={doDialog}>Dialog</button>
   </div>
   <div class="right"><Main serviceStore={service} /></div>
 </div>

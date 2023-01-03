@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog from "@/lib/DialogOld.svelte";
   import Pulldown from "@/lib/Pulldown.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import { pad } from "@/lib/pad";

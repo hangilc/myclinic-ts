@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Dialog from "./Dialog.svelte"
+  import Dialog from "./DialogOld.svelte"
 
   export let message: string;
   export let onClose: () => void = () => {};
