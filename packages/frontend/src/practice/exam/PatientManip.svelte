@@ -56,7 +56,12 @@
 
   function doUploadImage() {
     if ($currentPatient) {
-      uploadImageDialog.open();
+      const d: UploadImageDialog = new UploadImageDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy()
+        }
+      })
     }
   }
 
@@ -82,7 +87,7 @@
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
 </div>
 <!-- <SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} /> -->
-<UploadImageDialog bind:this={uploadImageDialog} />
+<!-- <UploadImageDialog bind:this={uploadImageDialog} /> -->
 
 <style>
   .top {

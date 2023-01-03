@@ -1,12 +1,12 @@
 <script lang="ts">
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import Pulldown from "@/lib/Pulldown.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import { pad } from "@/lib/pad";
   import { currentPatient } from "../ExamVars";
   import api from "@/lib/api";
 
-  let dialog: Dialog;
+  export let destroy: () => void;
   const initTag = "other";
   let tag: string = initTag;
   let exampleAnchor: HTMLElement;
@@ -22,15 +22,11 @@
   let fileInput: HTMLInputElement;
   let form: HTMLFormElement;
 
-  export function open(): void {
-    dialog.open();
-  }
-
   function doExample(): void {
     examplePulldown.open();
   }
 
-  async function doSave(close: () => void) {
+  async function doSave() {
     const patient = $currentPatient;
     if (patient == null) {
       return;
@@ -59,12 +55,7 @@
       }
     }
     await api.uploadPatientImage(patient.patientId, formData);
-    close();
-  }
-
-  function onClose(): void {
-    tag = initTag;
-    form.reset();
+    destroy();
   }
 
   function zeroPad(n: number): string {
@@ -89,10 +80,14 @@
     const extPart = ext === undefined ? "" : "." + ext;
     return `${patientId}-${tag}-${stamp}${indexPart}${extPart}`;
   }
+
+  function doClose(): void {
+    console.log("close");
+    destroy();
+  }
 </script>
 
-<Dialog let:close bind:this={dialog} {onClose}>
-  <span slot="title">画像保存</span>
+<Dialog {destroy} title="画像保存">
   <div class="tag-wrapper">
     Tag: <input type="text" bind:value={tag} />
     <a href="javascript:void(0)" bind:this={exampleAnchor} on:click={doExample}
@@ -103,8 +98,8 @@
     <input type="file" bind:this={fileInput} multiple />
   </form>
   <div class="commands">
-    <button on:click={() => doSave(close)}>保存</button>
-    <button on:click={close}>キャンセル</button>
+    <button on:click={doSave}>保存</button>
+    <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
 <Pulldown anchor={exampleAnchor} bind:this={examplePulldown}>
