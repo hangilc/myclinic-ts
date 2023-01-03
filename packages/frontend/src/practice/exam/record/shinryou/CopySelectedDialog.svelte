@@ -1,24 +1,19 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
   import type { ShinryouEx, Visit } from "myclinic-model";
   import { Item } from "./copy-selected-types";
 
-  let dialog: Dialog;
+  export let destroy: () => void;
+  export let targetVisitId: number ;
+  export let shinryouList: ShinryouEx[];
   let items: Item[] = [];
   let selected: number[] = [];
-  let targetVisitId: number | undefined = undefined;
 
-  function onClose(): void {
-    selected = [];
-  }
+  init();
 
-  export async function open(
-    targetVisitIdArg: number,
-    shinryouList: ShinryouEx[]
-  ) {
-    targetVisitId = targetVisitIdArg;
+  async function init() {
     const target: Visit = await api.getVisit(targetVisitId);
     const at: Date = target.visitedAtAsDate;
     items = await Promise.all(
@@ -28,7 +23,6 @@
         return new Item(r, s.master.name);
       })
     );
-    dialog.open();
   }
 
   function doSelectAll(): void {
@@ -39,19 +33,18 @@
     selected = [];
   }
 
-  async function doEnter(close: () => void) {
+  async function doEnter() {
     if( targetVisitId != undefined ){
       console.log(selected);
       const shinryoucodes: number[] = selected.filter(n => n > 0);
       await api.batchEnterShinryou(targetVisitId, shinryoucodes);
-      close();
+      destroy();
     }
   }
 </script>
 
-<Dialog let:close bind:this={dialog} {onClose}>
-  <span slot="title">診療行為選択コピー</span>
-  <div>
+<Dialog {destroy} title="診療行為選択コピー">
+  <div class="top">
     {#each items as item}
       {@const id = genid()}
       <div>
@@ -71,12 +64,15 @@
     {#if selected.length > 0}
     <a href="javascript:void(0)" on:click={doUnselectAll}>全解除</a>
     {/if}
-    <button on:click={() => doEnter(close)}>入力</button>
-    <button on:click={close}>キャンセル</button>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>
 
 <style>
+  .top {
+    width: 16rem;
+  }
   .commands {
     display: flex;
     justify-content: flex-end;

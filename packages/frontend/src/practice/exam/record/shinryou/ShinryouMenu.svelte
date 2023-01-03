@@ -64,8 +64,14 @@
     if( targetId == null ){
       alert("コピー先をみつけられません。");
     } else {
-
-      copySelectedDialog.open(targetId, visit.shinryouList);
+      const d: CopySelectedDialog = new CopySelectedDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          targetVisitId: targetId,
+          shinryouList: visit.shinryouList
+        },
+      });
     }
   }
 
@@ -94,7 +100,6 @@
 <RegularDialog bind:this={regularDialog} visit={visit}/>
 <KensaDialog bind:this={kensaDialog} visit={visit} />
 <SearchDialog bind:this={searchDialog} visit={visit}/>
-<CopySelectedDialog bind:this={copySelectedDialog} />
 <DeleteSelectedDialog bind:this={deleteSelectedDialog} />
 
 <Pulldown anchor={auxLink} bind:this={auxPopup}>
