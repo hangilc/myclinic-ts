@@ -12,7 +12,6 @@
   let selectPatientLink: HTMLAnchorElement;
   let registeredDialog: SelectRegisteredPatientDialog;
   let searchDialog: SelectPatientBySearch;
-  let recentDialog: RecentVisitsDialog;
   let selectPatientPulldown: Pulldown;
 
   function onSelectPatientClick() {
@@ -26,11 +25,23 @@
         break;
       }
       case "search": {
-        searchDialog.open();
+        const d: SelectPatientBySearch = new SelectPatientBySearch({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            onEnter: startPatient,
+          },
+        });
         break;
       }
       case "recent": {
-        recentDialog.open();
+        const d: RecentVisitsDialog = new RecentVisitsDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            onEnter: startPatient,
+          },
+        });
         break;
       }
       case "by-date": {
@@ -72,8 +83,6 @@
       bind:this={registeredDialog}
       onEnter={startPatient}
     />
-    <SelectPatientBySearch bind:this={searchDialog} onEnter={startPatient} />
-    <RecentVisitsDialog bind:this={recentDialog} onEnter={startPatient} />
   </svelte:fragment>
 </ServiceHeader>
 

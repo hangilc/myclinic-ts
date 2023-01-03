@@ -46,7 +46,13 @@
   }
 
   function doSearch(): void {
-    searchDialog.open();
+    const d: SearchDialog = new SearchDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        visit,
+      },
+    });
   }
 
   function doDeleteSelected(): void {
@@ -115,8 +121,6 @@
   <a href="javascript:void(0)"  on:click={doRegular}>[診療行為]</a>
   <a href="javascript:void(0)" bind:this={auxLink} on:click={doAux}>その他</a>
 </div>
-
-<SearchDialog bind:this={searchDialog} visit={visit}/>
 
 <Pulldown anchor={auxLink} bind:this={auxPopup}>
   <div>

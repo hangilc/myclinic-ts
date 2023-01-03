@@ -1,13 +1,13 @@
 <script lang="ts">
-  import Dialog from "../../../lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type * as m from "myclinic-model";
-  import SelectItem from "../../../lib/SelectItem.svelte";
+  import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import api from "../../../lib/api";
-  import { dateTimeToSql } from "../../../lib/util"
+  import api from "@/lib/api";
+  import { dateTimeToSql } from "@/lib/util"
 
+  export let destroy: () => void;
   export let onEnter: (patient: m.Patient, visitId?: number) => void;
-  let dialog: Dialog;
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
   let searchText: string;
@@ -16,13 +16,6 @@
     selected.set(null);
     patients = [];
     searchText = "";
-  }
-
-  export function open(): void {
-    selected.set(null);
-    patients = [];
-    searchText = "";
-    dialog.open();
   }
 
   async function doSearch(ev: Event){
@@ -35,19 +28,19 @@
     }
   }
 
-  function onSelectButtonClick(close: () => void): void {
+  function onSelectButtonClick(): void {
     if( $selected ){
       onEnter($selected, undefined);
-      close();
+      destroy();
     }
   }
 
-  async function onRegisterButtonClick(close: () => void) {
+  async function onRegisterButtonClick() {
     if( $selected ){
       const now = dateTimeToSql(new Date());
       const visit = await api.startVisit($selected.patientId, now);
       onEnter($selected, visit.visitId);
-      close();
+      destroy();
     }
   }
 
@@ -57,8 +50,7 @@
 
 </script>
 
-<Dialog let:close={close} bind:this={dialog} {onClose}>
-  <span slot="title" class="title">患者検索</span>
+<Dialog {destroy} title="患者検索">
   <div>
     <form on:submit={doSearch}>
       <input type="text" bind:value={searchText} use:setFocus/> <button>検索</button>
@@ -71,10 +63,10 @@
       {/each}
     </div>
   </div>
-  <div slot="commands" class="commands">
-    <button on:click={() => onRegisterButtonClick(close)} disabled={$selected == null}>診察登録</button>
-    <button on:click={() => onSelectButtonClick(close)} disabled={$selected == null}>選択</button>
-    <button on:click={() => close()}>キャンセル</button>
+  <div class="commands">
+    <button on:click={onRegisterButtonClick} disabled={$selected == null}>診察登録</button>
+    <button on:click={onSelectButtonClick} disabled={$selected == null}>選択</button>
+    <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>
 
@@ -86,5 +78,18 @@
   .select {
     height: 100px;
   }
+
+    .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    line-height: 1;
+    }
+  
+    .commands * + * {
+    margin-left: 4px;
+    }
 </style>
 

@@ -1,25 +1,23 @@
 <script lang="ts">
-  import Dialog from "../../../lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type * as m from "myclinic-model";
-  import api from "../../../lib/api";
-  import { padNumber } from "../../../lib/util";
+  import api from "@/lib/api";
+  import { padNumber } from "@/lib/util";
   import * as kanjidate from "kanjidate";
-  import SelectItem from "../../../lib/SelectItem.svelte";
+  import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
+  export let destroy: () => void;
   export let onEnter: (patient: m.Patient, visitId?: number) => void;
-  let dialog: Dialog;
-  export function open(): void {
-    dialog.open();
-  }
+
   const itemsPerPage = 30;
   let page: number = 0;
   const selected: Writable<[m.Patient, m.Visit] | null> = writable(null);
 
-  function onEnterClick(close: () => void): void{
+  function onEnterClick(): void{
     if( $selected ){
       onEnter($selected[0]);
-      close();
+      destroy();
     }
   }
 
@@ -36,8 +34,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog let:close={close} width="360px" bind:this={dialog}>
-  <span slot="title" class="title">最近の診察</span>
+<Dialog {destroy} title="最近の診察">
   {#await api.listRecentVisitFull(page * itemsPerPage, itemsPerPage)}
     <div>Loading...</div>
   {:then visits}
@@ -58,18 +55,32 @@
   {:catch error}
     <div style:color="red">Error: {error.toString()}</div>
   {/await}
-  <div slot="commands" class="commands">
-    <button on:click={() => onEnterClick(close)} disabled={$selected === null}>選択</button>
-    <button on:click={() => close()}>キャンセル</button>
+  <div class="commands">
+    <button on:click={onEnterClick} disabled={$selected === null}>選択</button>
+    <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>
 
 <style>
   .select {
+    width: 360px;
     height: 300px;
   }
 
   .nav {
     margin: 10px 0;
   }
+
+    .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    line-height: 1;
+    }
+  
+    .commands * + * {
+    margin-left: 4px;
+    }
 </style>
