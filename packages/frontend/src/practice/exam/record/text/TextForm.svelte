@@ -10,6 +10,7 @@
   import { listTextCommands } from "./text-commands";
   import { confirm } from "@/lib/confirm-call";
   import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
+  import Popup from "@/lib/Popup.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -31,7 +32,9 @@
   }
 
   function onDelete(): void {
-    confirm("この文章を削除していいですか？", () => api.deleteText(text.textId));
+    confirm("この文章を削除していいですか？", () =>
+      api.deleteText(text.textId)
+    );
   }
 
   function containsHikitsugi(): boolean {
@@ -66,16 +69,14 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        ops
-      }
-    })
+        ops,
+      },
+    });
+    onClose();
   }
 
   function doFormatShohousen(): void {
     textarea.value = parseShohousen(textarea.value.trim()).formatForSave();
-  }
-
-  function onShohousen(): void {
   }
 
   async function onCopy() {
@@ -128,19 +129,35 @@
         >
       {/if}
       {#if isShohousen()}
-        <a
-          href="javascript:void(0)"
-          bind:this={shohousenAnchor}
-          on:click={onShohousen}>処方箋</a
-        >
+        <Popup let:trigger let:destroy>
+          <a
+            href="javascript:void(0)"
+            bind:this={shohousenAnchor}
+            on:click={trigger}>処方箋</a
+          >
+          <div slot="menu" class="shohousen-menu">
+            <a
+              href="javascript:void(0)"
+              on:click={() => {
+                destroy();
+                doPrintShohousen();
+              }}>処方箋印刷</a
+            >
+            <a
+              href="javascript:void(0)"
+              on:click={() => {
+                destroy();
+                doFormatShohousen();
+              }}>処方箋フォーマット</a
+            >
+          </div>
+        </Popup>
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>
     </div>
   {/if}
 </div>
-
-<!-- <ShohousenDrawer bind:this={drawerDialog} {ops} {onClose} /> -->
 
 <Pulldown anchor={shohousenAnchor} bind:this={shohousenPulldown}>
   <svelte:fragment>
@@ -157,5 +174,14 @@
     height: 16em;
     resize: vertical;
     box-sizing: border-box;
+  }
+
+  .shohousen-menu a {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .shohousen-menu a:last-of-type {
+    margin-bottom: 0;
   }
 </style>

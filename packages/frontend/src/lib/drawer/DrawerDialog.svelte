@@ -24,11 +24,11 @@
       setup: [],
       pages: [ops],
     };
-    await printApi.printDrawer(req, settingSelect);
+    await printApi.printDrawer(req, settingSelect === "手動" ? "" : settingSelect);
     if( setDefaultChecked && settingSelect !== printPref ){
       printApi.setPrintPref(kind, settingSelect);
     }
-    close();
+    doClose();
   }
 
   onMount(() =>
@@ -43,6 +43,11 @@
         settingSelect = pref ?? "手動";
       })
   );
+
+  function doClose(): void {
+    destroy();
+    onClose();
+  }
 </script>
 
 <Dialog {destroy} {onClose} {title}>
@@ -59,7 +64,7 @@
   </div>
   <div class="commands">
     <button on:click={() => print(close)}>印刷</button>
-    <button on:click={() => close()}>キャンセル</button>
+    <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
 
