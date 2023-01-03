@@ -1,8 +1,8 @@
 <script type="ts">
-  import Dialog from "../../../lib/DialogOld.svelte";
-  import SelectItem from "../../../lib/SelectItem.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
+  import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import api from "../../../lib/api";
+  import api from "@/lib/api";
   import {
     WqueueState,
     WqueueStateType,
@@ -11,18 +11,16 @@
     type Wqueue,
   } from "myclinic-model";
 
+  export let destroy: () => void;
   let entries: [Wqueue, Visit, Patient][] = [];
   let selected: Writable<[Wqueue, Visit, Patient] | null> = writable(null);
 
-  function onClose(): void {
-    selected.set(null);
-    entries = [];
-  }
+  init();
 
   export let onEnter: (patient: Patient, visitId: number | undefined) => void;
   let dialog: Dialog;
 
-  export async function open() {
+  async function init() {
     const list = await api.listWqueueFull();
     entries = list.filter((d) => {
       const state = WqueueStateType.fromCode(d[0].waitState);
@@ -33,40 +31,54 @@
         state == WqueueState.InExam
       );
     });
-    if( entries.length > 0 ){
+    if (entries.length > 0) {
       selected.set(entries[0]);
     }
-    dialog.open();
   }
 
-  function enter(close: () => void) {
+  function enter() {
     if ($selected) {
       const [_, visit, patient] = $selected;
       onEnter(patient, visit.visitId);
-      close();
+      destroy();
     }
   }
 </script>
 
-<Dialog let:close bind:this={dialog} {onClose}>
-  <span slot="title" class="title">受付患者選択</span>
-
+<Dialog {destroy} title="受付患者選択">
   {#if entries.length > 0}
-  <div class="select">
-    {#each entries as data}
-      <SelectItem {data} {selected}>
-        {@const [_wq, _visit, patient] = data}
-        <span>{patient.lastName}{patient.firstName}</span>
-      </SelectItem>
-    {/each}
-  </div>
+    <div class="select">
+      {#each entries as data}
+        <SelectItem {data} {selected}>
+          {@const [_wq, _visit, patient] = data}
+          <span>{patient.lastName}{patient.firstName}</span>
+        </SelectItem>
+      {/each}
+    </div>
   {:else}
     <div>（受付患者なし）</div>
   {/if}
-  <svelte:fragment slot="commands">
-    <button on:click={() => enter(close)} disabled={$selected == null}
-      >選択</button
-    >
-    <button on:click={() => close()}>キャンセル</button>
-  </svelte:fragment>
+  <div class="commands">
+    <button on:click={enter} disabled={$selected == null}>選択</button>
+    <button on:click={destroy}>キャンセル</button>
+  </div>
 </Dialog>
+
+<style>
+  .select {
+    width: 16rem;
+  }
+  
+  .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
+</style>

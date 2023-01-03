@@ -10,8 +10,6 @@
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
 
   let selectPatientLink: HTMLAnchorElement;
-  let registeredDialog: SelectRegisteredPatientDialog;
-  let searchDialog: SelectPatientBySearch;
   let selectPatientPulldown: Pulldown;
 
   function onSelectPatientClick() {
@@ -21,7 +19,13 @@
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
       case "registered": {
-        registeredDialog.open();
+        const d: SelectRegisteredPatientDialog = new SelectRegisteredPatientDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            onEnter: startPatient,
+          },
+        });
         break;
       }
       case "search": {
@@ -79,10 +83,6 @@
     >
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
-    <SelectRegisteredPatientDialog
-      bind:this={registeredDialog}
-      onEnter={startPatient}
-    />
   </svelte:fragment>
 </ServiceHeader>
 
