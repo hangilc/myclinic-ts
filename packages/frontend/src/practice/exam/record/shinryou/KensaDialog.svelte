@@ -1,11 +1,12 @@
 <script lang="ts">
   import CheckLabel from "@/lib/CheckLabel.svelte";
-  import Dialog from "@/lib/DialogOld.svelte"
+  import Dialog from "@/lib/Dialog.svelte"
   import type { VisitEx } from "myclinic-model";
   import { enter } from "./helper"
 
+  export let destroy: () => void;
   export let visit: VisitEx;
-  let dialog: Dialog;
+  export let kensa: Record<string, string[]>;
   interface Item {
     label: string,
     checked: boolean,
@@ -14,6 +15,8 @@
   }
   let leftItems: Item[] = [];
   let rightItems: Item[] = [];
+
+  init();
 
   function mkItem(name: string, preset: string[]): Item {
     const index = name.indexOf(":");
@@ -35,11 +38,10 @@
     }
   }
 
-  export function open(kensa: Record<string, string[]>): void {
+  function init(): void {
     const preset: string[] = kensa.preset;
     leftItems = kensa.left.map(name => mkItem(name, preset));
     rightItems = kensa.right.map(name => mkItem(name, preset));
-    dialog.open();
   }
 
   function doPreset(): void {
@@ -64,16 +66,15 @@
     rightItems = clear(rightItems);
   }
 
-  async function doEnter(close: () => void) {
+  async function doEnter() {
     const names: string[] = 
       [...leftItems, ...rightItems].filter(item => item.checked).map(item => item.value);
     await enter(visit, names, []);
-    close();
+    destroy();
   }
 </script>
 
-<Dialog let:close={close} bind:this={dialog} width="360px">
-  <span slot="title">検査入力</span>
+<Dialog {destroy} title="検査入力">
   <div class="two-cols">
     <div class="left">
     {#each leftItems as item}
@@ -94,12 +95,12 @@
     {/each}
     </div>
   </div>
-  <svelte:fragment slot="commands">
+  <div class="commands">
     <button on:click={doPreset}>セット検査</button>
-    <button on:click={() => doEnter(close)}>入力</button>
+    <button on:click={doEnter}>入力</button>
     <button on:click={doClear}>クリア</button>
     <button on:click={close}>キャンセル</button>
-  </svelte:fragment>
+  </div>
 </Dialog>
 
 <style>
@@ -114,4 +115,16 @@
   .leading {
     height: 1em;
   }
+
+    .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 4px;
+    line-height: 1;
+    }
+  
+    .commands * + * {
+    margin-left: 4px;
+    }
 </style>

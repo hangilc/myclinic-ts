@@ -1,23 +1,22 @@
 <script lang="ts">
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import CheckLabel from "@/lib/CheckLabel.svelte";
-  import {
-    ConductKind,
-    type VisitEx,
-  } from "myclinic-model";
+  import { ConductKind, type VisitEx } from "myclinic-model";
   import { type ConductSpec, enter } from "./helper";
 
+  export let destroy: () => void;
   export let visit: VisitEx;
-  let dialog: Dialog;
+  export let names: Record<string, string[]>;
+  let leftItems: Item[] = [];
+  let rightItems: Item[] = [];
+  let bottomItems: Item[] = [];
+
+  init();
 
   interface Item {
     label: string;
     checked: boolean;
   }
-
-  let leftItems: Item[] = [];
-  let rightItems: Item[] = [];
-  let bottomItems: Item[] = [];
 
   function setupItems(names: Record<string, string[]>): void {
     leftItems = names.left.map((name) => ({ label: name, checked: false }));
@@ -25,22 +24,21 @@
     bottomItems = names.bottom.map((name) => ({ label: name, checked: false }));
   }
 
-  export function open(names: Record<string, string[]>): void {
+  function init(): void {
     setupItems(names);
-    dialog.open();
   }
 
   const conductReqMap: Record<string, ConductSpec> = {
-    "骨塩定量": {
+    骨塩定量: {
       kind: ConductKind.Gazou,
       labelOption: "骨塩定量に使用",
       shinryou: ["骨塩定量ＭＤ法"],
       drug: [],
       kizai: [{ code: "四ツ切", amount: 1 }],
-    }
+    },
   };
 
-  async function doEnter(close: () => void) {
+  async function doEnter() {
     const selectedNames: string[] = [
       ...leftItems,
       ...rightItems,
@@ -50,31 +48,32 @@
       .map((item) => item.label);
     const regularNames: string[] = [];
     const conductSpecs: ConductSpec[] = [];
-    selectedNames.forEach(name => {
-      if( name in conductReqMap ){
-        conductSpecs.push(conductReqMap[name])
+    selectedNames.forEach((name) => {
+      if (name in conductReqMap) {
+        conductSpecs.push(conductReqMap[name]);
       } else {
         regularNames.push(name);
       }
-    })
+    });
     try {
       await enter(visit, regularNames, conductSpecs);
-      close();
-    } catch(ex) {
+      destroy();
+    } catch (ex) {
       alert(ex);
     }
   }
 </script>
 
-<Dialog bind:this={dialog} let:close width={""}>
-  <span slot="title">診療行為入力</span>
+<Dialog {destroy} title="診療行為入力">
   <div class="two-cols">
     <div class="left">
       {#each leftItems as item}
         {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div><CheckLabel bind:checked={item.checked} label={item.label} /></div>
+          <div>
+            <CheckLabel bind:checked={item.checked} label={item.label} />
+          </div>
         {/if}
       {/each}
     </div>
@@ -83,22 +82,26 @@
         {#if item.label.startsWith("---")}
           <div class="leading" />
         {:else}
-          <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
+          <div>
+            <CheckLabel bind:checked={item.checked} label={item.label} />
+          </div>
         {/if}
       {/each}
     </div>
     <div class="bottom-wrapper">
       <div class="bottom">
         {#each bottomItems as item}
-          <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
+          <div>
+            <CheckLabel bind:checked={item.checked} label={item.label} />
+          </div>
         {/each}
       </div>
     </div>
   </div>
-  <svelte:fragment slot="commands">
-    <button on:click={() => doEnter(close)}>入力</button>
-    <button on:click={close}>キャンセル</button>
-  </svelte:fragment>
+  <div class="commands">
+    <button on:click={doEnter}>入力</button>
+    <button on:click={destroy}>キャンセル</button>
+  </div>
 </Dialog>
 
 <style>
@@ -124,5 +127,17 @@
     grid-column-end: 3;
     display: flex;
     justify-content: center;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
   }
 </style>

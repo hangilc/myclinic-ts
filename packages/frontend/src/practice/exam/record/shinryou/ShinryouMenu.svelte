@@ -16,8 +16,6 @@
   let regularDialog: RegularDialog;
   let kensaDialog: KensaDialog;
   let searchDialog: SearchDialog;
-  let copySelectedDialog: CopySelectedDialog;
-  let deleteSelectedDialog: DeleteSelectedDialog;
 
   function doAux(): void {
     auxPopup.open();
@@ -25,12 +23,26 @@
   
   async function doRegular() {
     const names = await api.getShinryouRegular();
-    regularDialog.open(names);
+    const d: RegularDialog = new RegularDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        names,
+        visit,
+      },
+    });
   }
 
   async function doKensa() {
     const kensa = await api.getShinryouKensa();
-    kensaDialog.open(kensa);
+    const d: KensaDialog = new KensaDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        kensa,
+        visit
+      },
+    });
   }
 
   function doSearch(): void {
@@ -38,7 +50,14 @@
   }
 
   function doDeleteSelected(): void {
-    deleteSelectedDialog.open(visit.visitId, visit.shinryouList);
+    const d: DeleteSelectedDialog = new DeleteSelectedDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        visitId: visit.visitId,
+        shinryouList: visit.shinryouList
+      },
+    });
   }
 
   async function doDeleteDuplicate() {
@@ -97,10 +116,7 @@
   <a href="javascript:void(0)" bind:this={auxLink} on:click={doAux}>その他</a>
 </div>
 
-<RegularDialog bind:this={regularDialog} visit={visit}/>
-<KensaDialog bind:this={kensaDialog} visit={visit} />
 <SearchDialog bind:this={searchDialog} visit={visit}/>
-<DeleteSelectedDialog bind:this={deleteSelectedDialog} />
 
 <Pulldown anchor={auxLink} bind:this={auxPopup}>
   <div>

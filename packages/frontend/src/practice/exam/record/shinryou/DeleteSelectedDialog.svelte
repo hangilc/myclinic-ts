@@ -1,20 +1,13 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
   import type { ShinryouEx } from "myclinic-model/model";
 
-  let dialog: Dialog;
-  let visitId: number | undefined = undefined;
-  let shinryouList: ShinryouEx[] = [];
+  export let destroy: () => void;
+  export let visitId: number;
+  export let shinryouList: ShinryouEx[];
   let selected: number[] = []; // shinryouIds
-
-  export async function open(visitIdArg: number, shinryouListArg: ShinryouEx[]) {
-    visitId = visitIdArg;
-    shinryouList = shinryouListArg;
-    selected = [];
-    dialog.open();
-  }
 
   function doSelectAll(): void {
     selected = shinryouList.map(s => s.shinryouId);
@@ -24,18 +17,17 @@
     selected = [];
   }
 
-  async function doEnter(close: () => void) {
+  async function doEnter() {
     if( visitId != undefined ){
       await Promise.all(selected.map(shinryouId => api.deleteShinryou(shinryouId)))
-      close();
+      destroy();
     }
   }
 
 </script>
 
-<Dialog let:close bind:this={dialog}>
-  <span slot="title">診療行為選択削除</span>
-  <div>
+<Dialog {destroy} title="診療行為選択削除">
+  <div class="top">
     {#each shinryouList as shinryou}
     {@const id=genid()}
     <div>
@@ -49,7 +41,25 @@
     {#if selected.length > 0}
     <a href="javascript:void(0)" on:click={doUnselectAll}>全解除</a>
     {/if}
-    <button on:click={() => doEnter(close)}>入力</button>
-    <button on:click={close}>キャンセル</button>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>
+
+<style>
+  .top {
+    width: 16rem;
+  }
+
+    .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 4px;
+    line-height: 1;
+    }
+  
+    .commands * + * {
+    margin-left: 4px;
+    }
+</style>
