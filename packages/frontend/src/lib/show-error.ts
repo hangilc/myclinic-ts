@@ -5,9 +5,8 @@ export function showError(message: string): void {
   comp = new ShowError({
     target: document.body,
     props: {
+      destroy: () => comp.$destroy(),
       message,
-      onClose: () => comp.$destroy()
     }
   });
-  comp.open();
 }

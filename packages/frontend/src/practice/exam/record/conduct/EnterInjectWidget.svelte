@@ -10,7 +10,7 @@
   import api from "@/lib/api";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { type Writable, writable } from "svelte/store";
-  import { showError } from "@/lib/showError-call";
+  import { showError } from "@/lib/show-error";
   import { enter } from "../shinryou/helper";
 
   export let visit: VisitEx;

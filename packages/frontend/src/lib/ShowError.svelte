@@ -1,26 +1,27 @@
 <script lang="ts">
-  import Dialog from "./DialogOld.svelte"
+  import Dialog from "./Dialog.svelte"
 
+  export let destroy: () => void;
   export let message: string;
   export let onClose: () => void = () => {};
 
-  let dialog: Dialog;
-
-  export function open(): void {
-    dialog.open();
-  }
 </script>
 
-<Dialog let:close={close} onClose={onClose} bind:this={dialog}>
-  <span class="title" slot="title">エラー</span>
-  <div>{message}</div>
-  <svelte:fragment slot="commands">
-    <button on:click={close}>閉じる</button>
-  </svelte:fragment>
+<Dialog {destroy} onClose={onClose} title="エラー">
+  <div class="message">{message}</div>
+  <div class="commands">
+    <button on:click={destroy}>閉じる</button>
+  </div>
 </Dialog>
 
 <style>
-  .title {
+  .message {
     color: red;
+    max-width: 300px;
+    margin: 10px 0;
+  }
+
+  .commands {
+    text-align: right;
   }
 </style>

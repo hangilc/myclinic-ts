@@ -3,25 +3,19 @@
   import Dialog from "./Dialog.svelte"
 
   export let destroy: () => void;
-  let dialog: Dialog;
-  let proc: () => void;
-  let no: () => void;
+  export let yesProc: () => void;
+  export let noProc: () => void;
 
-  export function confirm(f: () => void, g: () => void = () => {}): void {
-    proc = f;
-    no = g;
-    dialog.open();
-  }
   export let text: string;
 
   function doYes(close: () => void): void {
     close();
-    proc();
+    yesProc();
   }
 
   function doNo(close: () => void): void {
     close();
-    no();
+    noProc();
   }
 </script>
 

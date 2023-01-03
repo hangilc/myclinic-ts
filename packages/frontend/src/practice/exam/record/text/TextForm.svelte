@@ -1,21 +1,20 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
   import api from "@/lib/api";
-  import Confirm from "@/lib/Confirm.svelte";
   import type { Op } from "@/lib/drawer/op";
-  import ShohousenDrawer from "@/ShohousenDrawerDialog.svelte";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
   import { getCopyTarget } from "../../ExamVars";
   import Pulldown from "@/lib/Pulldown.svelte";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
+  import { confirm } from "@/lib/confirm-call";
+  import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
-  let drawerDialog: ShohousenDrawer;
   let shohousenAnchor: HTMLElement;
   let shohousenPulldown: Pulldown;
 
@@ -31,10 +30,8 @@
     }
   }
 
-  let confirmDeleteDialog: Confirm;
-
   function onDelete(): void {
-    confirmDeleteDialog.confirm(() => api.deleteText(text.textId));
+    confirm("この文章を削除していいですか？", () => api.deleteText(text.textId));
   }
 
   function containsHikitsugi(): boolean {
@@ -65,7 +62,13 @@
 
   async function doPrintShohousen() {
     ops = await api.shohousenDrawer(text.textId);
-    drawerDialog.open();
+    const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        ops
+      }
+    })
   }
 
   function doFormatShohousen(): void {
@@ -73,7 +76,6 @@
   }
 
   function onShohousen(): void {
-    shohousenPulldown.open();
   }
 
   async function onCopy() {
@@ -108,7 +110,6 @@
   }
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <textarea bind:this={textarea} on:keydown={doKeyDown}>{text.content}</textarea
   >
@@ -139,7 +140,7 @@
   {/if}
 </div>
 
-<ShohousenDrawer bind:this={drawerDialog} {ops} {onClose} />
+<!-- <ShohousenDrawer bind:this={drawerDialog} {ops} {onClose} /> -->
 
 <Pulldown anchor={shohousenAnchor} bind:this={shohousenPulldown}>
   <svelte:fragment>
@@ -149,10 +150,6 @@
     >
   </svelte:fragment>
 </Pulldown>
-<Confirm
-  bind:this={confirmDeleteDialog}
-  text="この文章を削除していいですか？"
-/>
 
 <style>
   textarea {

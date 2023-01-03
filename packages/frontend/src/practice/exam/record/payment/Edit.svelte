@@ -11,7 +11,7 @@
   import api, { backend } from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import { pad } from "@/lib/pad";
-  import { showError } from "@/lib/showError-call";
+  import { showError } from "@/lib/show-error";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;

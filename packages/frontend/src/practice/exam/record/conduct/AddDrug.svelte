@@ -2,7 +2,7 @@
   import api from "@/lib/api";
   import type { IyakuhinMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
-  import { showError } from "@/lib/showError-call";
+  import { showError } from "@/lib/show-error";
   import { writable, type Writable } from "svelte/store";
 
   export let conductId: number;

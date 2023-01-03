@@ -2,14 +2,16 @@ import Confirm from "./Confirm.svelte";
 
 export function confirm(
   message: string,
-  yes: () => void,
-  no: () => void = () => {}
+  yesProc: () => void,
+  noProc: () => void = () => {}
 ): void {
-  const conf = new Confirm({
+  const conf: Confirm = new Confirm({
     target: document.body,
     props: {
       text: message,
+      destroy: () => conf.$destroy(),
+      yesProc,
+      noProc,
     },
   });
-  conf.confirm(yes, no);
 }

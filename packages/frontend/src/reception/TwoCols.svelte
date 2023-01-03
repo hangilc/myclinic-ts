@@ -3,17 +3,12 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
-  import Confirm from "@/lib/Confirm.svelte";
+  import { showError } from "@/lib/show-error";
 
   const service = writable("main");
 
   function doDialog(): void {
-    const d: Confirm = new Confirm({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy()
-      }
-    })
+    showError("メッセージ");
   }
 </script>
 

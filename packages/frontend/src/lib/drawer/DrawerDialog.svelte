@@ -1,21 +1,19 @@
 <script lang="ts">
-  import Dialog from "../DialogOld.svelte";
+  import Dialog from "../Dialog.svelte";
   import DrawerSvg from "./DrawerSvg.svelte";
   import type { Op } from "./op";
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
 
+  export let destroy: () => void;
   export let ops: Op[];
   export let svgViewBox: string;
   export let svgWidth: string;
   export let svgHeight: string;
   export let title: string = "プレビュー";
   export let kind: string;
-  let dialog: Dialog;
-  export function open(): void {
-    dialog.open();
-  }
   export let onClose: () => void = () => {};
+
   let printPref: string = "手動";
   let settingSelect: string = "手動";
   let settingList: string[] = ["手動"];
@@ -47,9 +45,7 @@
   );
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog let:close bind:this={dialog} width="" {onClose}>
-  <span slot="title">{title}</span>
+<Dialog {destroy} {onClose} {title}>
   <DrawerSvg {ops} viewBox={svgViewBox} width={svgWidth} height={svgHeight} />
   <div>
     <span>設定</span>
@@ -61,8 +57,19 @@
     <input type="checkbox" bind:checked={setDefaultChecked} /> 既定に
     <a href="http://localhost:48080/" target="_blnak">管理画面表示</a>
   </div>
-  <svelte:fragment slot="commands">
+  <div class="commands">
     <button on:click={() => print(close)}>印刷</button>
     <button on:click={() => close()}>キャンセル</button>
-  </svelte:fragment>
+  </div>
 </Dialog>
+
+<style>
+  .commands {
+    display: flex;
+    justify-content: right;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
+</style>

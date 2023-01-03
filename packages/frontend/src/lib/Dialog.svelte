@@ -6,6 +6,8 @@
 
   export let destroy: () => void;
   export let title: string;
+  export let onClose: () => void = () => {};
+
   let dialog: HTMLElement;
 
   let zIndexScreen = alloc();
@@ -14,7 +16,7 @@
     target: document.body,
     props: {
       zIndex: zIndexScreen,
-      opacity: "0.3"
+      opacity: "0.4"
     }
   });
 
@@ -26,6 +28,7 @@
       release(zIndexScreen);
     }
     screen.$destroy();
+    onClose();
   });
 
   onMount(() => {
@@ -45,12 +48,12 @@
 
 <div class="dialog" bind:this={dialog} >
   <div class="title">{title}</div>
-  <slot {destroy}/>
+  <slot />
 </div>
 
 <style>
   .dialog {
-    position: absolute;
+    position: fixed;
     margin: 0;
     top: 10px;
     padding: 10px;
