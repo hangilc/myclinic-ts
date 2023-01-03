@@ -66,7 +66,7 @@
     position: fixed;
     top: 20px;
     left: 50vw;
-    transform: translateX(-50%);
+    /* transform: translateX(-35%); */
     background-color: white;
     padding: 0.5rem 1.5rem;
     opacity: 1;

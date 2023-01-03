@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SearchPatientResultDialog from "@/cashier/SearchPatientResultDialog.svelte";
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import { WqueueState } from "myclinic-model";
@@ -9,7 +10,6 @@
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
 
-  let cashierDialog: CashierDialog;
   let searchTextDialog: SearchTextDialog;
   let uploadImageDialog: UploadImageDialog;
   let cashierVisitId: Writable<number | null> = writable(null);
@@ -19,7 +19,13 @@
     const visitId = $currentVisitId;
     if (visitId != null) {
       cashierVisitId.set(visitId);
-      cashierDialog.open();
+      const d: CashierDialog = new CashierDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          visitId: cashierVisitId,
+        }
+      })
     }
   }
 
@@ -38,7 +44,13 @@
 
   function doSearchText() {
     if ($currentPatient) {
-      searchTextDialog.open();
+      const d: SearchTextDialog = new SearchTextDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          patient: $currentPatient
+        }
+      });
     }
   }
 
@@ -50,7 +62,13 @@
 
   function doGazouList() {
     if( $currentPatient ){
-      gazouListDialog.open($currentPatient.patientId);
+      const d: GazouListDialog = new GazouListDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          patientId: $currentPatient.patientId
+        }
+      })
     }
   }
 </script>
@@ -63,10 +81,8 @@
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
 </div>
-<CashierDialog bind:this={cashierDialog} visitId={cashierVisitId} />
-<SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} />
+<!-- <SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} /> -->
 <UploadImageDialog bind:this={uploadImageDialog} />
-<GazouListDialog bind:this={gazouListDialog} />
 
 <style>
   .top {

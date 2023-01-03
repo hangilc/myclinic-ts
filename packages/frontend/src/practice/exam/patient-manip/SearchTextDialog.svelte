@@ -1,11 +1,12 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { calcPages } from "@/lib/calc-pages";
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Text, Visit } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";
 
+  export let destroy: () => void;
   export let patient: Patient | null;
   let patientId: number | null;
   $: patientId = patient?.patientId ?? null;
@@ -16,10 +17,6 @@
   let page = 0;
   let total = 0;
   let text: string = "";
-
-  export function open() {
-    dialog.open();
-  }
 
   async function load() {
     if (text !== "" && patientId != null) {
@@ -54,38 +51,43 @@
     load();
   }
 
-  function onClose(): void {
-    searchText = "";
-    text = "";
-    textVisits = [];
+  function doClose(): void {
+    destroy();
   }
 </script>
 
-<Dialog bind:this={dialog} width="26em" {onClose}>
-  <span slot="title">文章検索</span>
-  <div class="patient">
-    ({patient?.patientId}) {patient?.lastName}{patient?.firstName}
-  </div>
-  <form on:submit|preventDefault={doSearch} class="form">
-    <input type="text" bind:value={searchText} autofocus />
-    <button type="submit">検索</button>
-  </form>
-  <Nav {page} {total} {gotoPage} />
-  <div class="result">
-    {#each textVisits as tv (tv[0].textId)}
-      <div class="result-item">
-        <div class="visited-at">
-          {kanjidate.format(kanjidate.f9, tv[1].visitedAt)}
+<Dialog {destroy} title="文章検索">
+  <div class="top">
+    <div class="patient">
+      ({patient?.patientId}) {patient?.lastName}{patient?.firstName}
+    </div>
+    <form on:submit|preventDefault={doSearch} class="form">
+      <input type="text" bind:value={searchText} autofocus />
+      <button type="submit">検索</button>
+    </form>
+    <Nav {page} {total} {gotoPage} />
+    <div class="result">
+      {#each textVisits as tv (tv[0].textId)}
+        <div class="result-item">
+          <div class="visited-at">
+            {kanjidate.format(kanjidate.f9, tv[1].visitedAt)}
+          </div>
+          <div>
+            {@html formatContent(tv[0].content)}
+          </div>
         </div>
-        <div>
-          {@html formatContent(tv[0].content)}
-        </div>
-      </div>
-    {/each}
+      {/each}
+    </div>
+    <div class="commands">
+      <button on:click={doClose}>閉じる</button>
+    </div>
   </div>
 </Dialog>
 
 <style>
+  .top {
+    width: 26em;
+  }
   .patient {
     margin-bottom: 10px;
   }
@@ -117,5 +119,10 @@
   .result-item :global(span.hit) {
     color: red;
     font-weight: bold;
+  }
+
+  .commands {
+    margin-top: 10px;
+    text-align: right;
   }
 </style>

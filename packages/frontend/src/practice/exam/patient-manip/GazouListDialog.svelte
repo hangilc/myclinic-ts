@@ -1,18 +1,18 @@
 <script lang="ts">
   import api from "@/lib/api";
 
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
     import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
-  let dialog: Dialog;
+  export let destroy: () => void;
+  export let patientId: number;
   let list: string[] = [];
   let imgSrc: Writable<string | null> = writable(null);
   let inlineImageSrc: string = "";
   let externalImageSrc: string = "";
   let externals: string[] = ["pdf"];
-  let patientId: number = 0;
 
   imgSrc.subscribe(src => {
     if( src == null ){
@@ -27,18 +27,21 @@
       externalImageSrc = "";
       inlineImageSrc = url;
     }
-  })
+  });
 
-  export async function open(patientIdArg: number) {
-    patientId = patientIdArg;
+  init();
+
+  async function init() {
     const files = await api.listPatientImage(patientId);
     list = files.map((f) => f.name);
-    dialog.open();
+  }
+
+  function doClose(): void {
+    destroy();
   }
 </script>
 
-<Dialog bind:this={dialog} width="300">
-  <span slot="title">画像一覧</span>
+<Dialog {destroy} title="画像一覧">
   <div class="select">
     {#each list as f}
       <SelectItem selected={imgSrc} data={f}>{f}</SelectItem>
@@ -46,13 +49,15 @@
   </div>
   {#if inlineImageSrc !== ""}
     <div class="image-wrapper">
-      <img src={inlineImageSrc} height="1400px" alt="保存画像"/>
+      <img src={inlineImageSrc} width="800px" alt="保存画像"/>
     </div>
   {/if}
   {#if externalImageSrc !== ""}
-    <!-- svelte-ignore security-anchor-rel-noreferrer -->
-    <a href={externalImageSrc} target="_blank">別のタブで開く</a>
+    <a href={externalImageSrc} target="_blank" rel="noreferrer">別のタブで開く</a>
   {/if}
+  <div class="commands">
+    <button on:click={doClose}>閉じる</button>
+  </div>
 </Dialog>
 
 <style>
@@ -63,7 +68,13 @@
   }
 
   .image-wrapper {
-    height: 500px;
+    /* width: 600px; */
+    max-height: 500px;
     overflow: auto;
+  }
+
+  .commands {
+    margin-top: 10px;
+    text-align: right;
   }
 </style>

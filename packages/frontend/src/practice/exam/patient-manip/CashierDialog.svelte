@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Dialog from "@/lib/DialogOld.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";
@@ -8,6 +8,7 @@
   import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
+  export let destroy: () => void;
   export let visitId: Readable<number | null>;
   let meisai: Writable<Meisai | null> = writable(null);
   let meisaiItems: string[] = [];
@@ -29,13 +30,13 @@
     chargeRep = mkChargeRep(c);
   });
 
-  export async function open() {
-    if ($visitId != null) {
-      const m: Meisai = await api.getMeisai($visitId);
-      meisai.set(m);
-      dialog.open();
-    }
-  }
+  // export async function open() {
+  //   if ($visitId != null) {
+  //     const m: Meisai = await api.getMeisai($visitId);
+  //     meisai.set(m);
+  //     dialog.open();
+  //   }
+  // }
 
   function mkMeisaiItems(meisai: Meisai | null): string[] {
     if (meisai == null) {
@@ -71,14 +72,6 @@
     mode = "disp";
   }
 
-  // function doDefault(): void {
-  //   if ($meisai == null) {
-  //     chargeValue.set(0);
-  //   } else {
-  //     chargeValue.set($meisai.charge);
-  //   }
-  // }
-
   async function doEnter(close: () => void) {
     if ($visitId != null) {
       await api.enterChargeValue($visitId, $chargeValue);
@@ -98,10 +91,13 @@
       }
     }
   }
+
+  function close(): void {
+    destroy();
+  }
 </script>
 
-<Dialog bind:this={dialog} let:close>
-  <span slot="title">会計</span>
+<Dialog {destroy} title="会計">
   <div>
     {#each meisaiItems as item}
       <div>{item}</div>
