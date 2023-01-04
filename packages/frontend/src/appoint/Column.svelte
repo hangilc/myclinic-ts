@@ -6,11 +6,21 @@
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
+
+  function kenshinRep(data: ColumnData): string {
+    const n = data.countKenshin();
+    if( n > 0 ){
+      return `健${n}`;
+    } else {
+      return "";
+    }
+  }
 </script>
 
 <div class="top">
   <div class={`date ${data.op.code}`}>
     {kanjidate.format(dateFormat, data.date)}
+    <span class="kenshin-rep">{kenshinRep(data)}</span>
     {#each data.collectAvail() as avail}
       <span
         ><FilledCircle
@@ -48,5 +58,9 @@
   .date.national-holiday .date-label,
   .date.ad-hoc-holiday .date-label {
     color: red;
+  }
+
+  .kenshin-rep {
+    font-weight: normal;
   }
 </style>

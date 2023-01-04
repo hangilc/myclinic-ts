@@ -76,6 +76,18 @@ export class ColumnData {
     });
     return acc.result;
   }
+
+  countKenshin(): number {
+    let count = 0;
+    this.appointTimes.forEach(at => {
+      at.appoints.forEach(a => {
+        if( a.tags.includes("健診") ){
+          count += 1;
+        }
+      })
+    });
+    return count;
+  }
 }
 
 class AvailCounter {
