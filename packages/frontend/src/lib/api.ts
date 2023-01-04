@@ -1270,5 +1270,9 @@ export default {
 
   cancelAppoint(appointId: number): Promise<boolean> {
     return post("cancel-appoint", {}, {"appoint-id": appointId.toString()}, castBoolean);
+  },
+
+  updateAppointTime(appointTime: m.AppointTime): Promise<boolean> {
+    return post("update-appoint-time", appointTime, {}, castBoolean);
   }
 };

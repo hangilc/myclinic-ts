@@ -5,6 +5,7 @@
   import { isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
+  import { resolveAppointKind } from "./appoint-kind";
 
   export let data: AppointTimeData;
   export let siblings: AppointTimeData[];
@@ -37,7 +38,8 @@
     }
   }
 
-  function doOpenEditDialog(): void {
+  function doOpenEditDialog(destroy: () => void): void {
+    destroy();
     if (isAdmin) {
       const d: AppointTimeDialog = new AppointTimeDialog({
         target: document.body,
@@ -61,6 +63,20 @@
       trigger(event);
     }
   }
+
+  function capacityRep(data: AppointTimeData): string {
+    if( data.appointTime.kind === "regular" && data.appointTime.capacity === 1 ){
+      return "";
+    } else {
+      const c = data.appointTime.capacity;
+      return `(${c})`;
+    }
+  }
+
+  function appointKindRep(data: AppointTimeData): string {
+    const rep = resolveAppointKind(data.appointTime.kind)?.label
+    return rep ? `[${rep}]` : "";
+  }
 </script>
 
 <div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
@@ -70,11 +86,12 @@
       on:click={doTimeBoxClick}
       on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
     >
-      {timeText}
+      <div>{timeText} {capacityRep(data)}</div>
+      <div>{appointKindRep(data)}</div>
     </div>
     <div slot="menu" class="context-menu">
       {#if isAdmin}
-        <a href="javascript:void(0)">編集</a>
+        <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}>編集</a>
         <a href="javascript:void(0)">結合</a>
         <a href="javascript:void(0)">分割</a>
         <a href="javascript:void(0)">削除</a>

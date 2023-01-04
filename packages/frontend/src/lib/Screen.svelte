@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   export let opacity: string = "0";
   export let zIndex: number | undefined = undefined;
   export let onClick: (ev: Event) => void = (_) => {};

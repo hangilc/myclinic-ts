@@ -1567,9 +1567,17 @@ export class AppointTime {
     return this.date == follower.date && this.untilTime === follower.fromTime;
   }
 
+  isBefore(other: AppointTime): boolean {
+    return this.untilTime <= other.fromTime;
+  }
+
+  isAfter(other: AppointTime): boolean {
+    return other.isBefore(this);
+  }
+
   overlapsWith(other: AppointTime): boolean {
     return this.date === other.date &&
-      !(other.untilTime <= this.fromTime || this.untilTime >= other.fromTime);
+      !(this.isBefore(other) || this.isAfter(other));
   }
 
   static cast(arg: any): AppointTime {
