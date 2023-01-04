@@ -1,4 +1,5 @@
 import type { Appoint, ClinicOperation } from "myclinic-model";
+import { AppointKind, resolveAppointKind } from "./appoint-kind";
 import type { AppointTimeData } from "./appoint-time-data";
 
 export class ColumnData {
@@ -14,17 +15,19 @@ export class ColumnData {
       a.appointTime.fromTime.localeCompare(b.appointTime.fromTime)
     );
     const i = this.findAppointTimeDataIndex(data.appointTime.appointTimeId);
-    this.fixFollowingVacant(i-1);
+    this.fixFollowingVacant(i - 1);
     this.fixFollowingVacant(i);
   }
 
   fixFollowingVacant(i: number): void {
-    if( i >= 0 && i < this.appointTimes.length ){
+    if (i >= 0 && i < this.appointTimes.length) {
       const target = this.appointTimes[i];
       const j = i + 1;
-      if( j < this.appointTimes.length ){
+      if (j < this.appointTimes.length) {
         const next = this.appointTimes[j];
-        target.followingVacant = next.isRegularVacant ? next.appointTime : undefined;
+        target.followingVacant = next.isRegularVacant
+          ? next.appointTime
+          : undefined;
       } else {
         target.followingVacant = undefined;
       }
@@ -32,9 +35,9 @@ export class ColumnData {
   }
 
   findAppointTimeDataIndex(appointTimeId: number): number {
-    for(let i=0;i<this.appointTimes.length;i++){
+    for (let i = 0; i < this.appointTimes.length; i++) {
       const d = this.appointTimes[i];
-      if( d.appointTime.appointTimeId === appointTimeId ){
+      if (d.appointTime.appointTimeId === appointTimeId) {
         return i;
       }
     }
@@ -49,7 +52,7 @@ export class ColumnData {
   addAppoint(i: number, a: Appoint): void {
     const atd = this.appointTimes[i];
     atd.addAppoint(a);
-    this.fixFollowingVacant(i-1);
+    this.fixFollowingVacant(i - 1);
   }
 
   updateAppoint(i: number, a: Appoint): void {
@@ -60,6 +63,33 @@ export class ColumnData {
   deleteAppoint(i: number, a: Appoint): void {
     const atd = this.appointTimes[i];
     atd.deleteAppoint(a);
-    this.fixFollowingVacant(i-1);
+    this.fixFollowingVacant(i - 1);
+  }
+
+  collectAvail(): AppointKind[] {
+    const acc = new AvailCounter();
+    this.appointTimes.forEach((d) => {
+      const at = d.appointTime;
+      if (at.capacity > d.appoints.length) {
+        acc.addCode(at.kind);
+      }
+    });
+    return acc.result;
+  }
+}
+
+class AvailCounter {
+  map: Record<string, boolean> = {};
+
+  addCode(code: string): void {
+    this.map[code] = true;
+  }
+
+  get result(): AppointKind[] {
+    const list: AppointKind[] = Object.keys(this.map)
+      .map((c) => resolveAppointKind(c))
+      .filter((k): k is AppointKind => k instanceof AppointKind);
+    list.sort((a, b) => a.ord - b.ord);
+    return list;
   }
 }

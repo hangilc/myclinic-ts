@@ -2,6 +2,7 @@
   import type { ColumnData } from "./column-data";
   import * as kanjidate from "kanjidate";
   import AppointTimeBlock from "./AppointTimeBlock.svelte";
+  import FilledCircle from "@/icons/FilledCircle.svelte";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -10,10 +11,18 @@
 <div class="top">
   <div class={`date ${data.op.code}`}>
     {kanjidate.format(dateFormat, data.date)}
+    {#each data.collectAvail() as avail}
+      <span
+        ><FilledCircle
+          width="20px"
+          style={`fill:${avail.iconColor}; stroke:none; margin-bottom: -4px;`}
+        /></span
+      >
+    {/each}
     <div class="date-label">{data.op.name ?? ""}</div>
   </div>
   {#each data.appointTimes as at (at.appointTime.fromTime)}
-    <AppointTimeBlock data={at} siblings={data.appointTimes}/>
+    <AppointTimeBlock data={at} siblings={data.appointTimes} />
   {/each}
 </div>
 
@@ -40,6 +49,4 @@
   .date.ad-hoc-holiday .date-label {
     color: red;
   }
-
-
 </style>
