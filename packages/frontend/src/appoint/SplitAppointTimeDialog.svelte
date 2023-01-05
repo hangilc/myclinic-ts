@@ -13,28 +13,35 @@
   }
 
   async function doEnter() {
-    const at = splitValue;
-    console.log(appointTime.fromTime, at, appointTime.untilTime);
-    if (appointTime.fromTime <= at && at <= appointTime.untilTime) {
-      const first = Object.assign({}, appointTime, { untilTime: at });
-      const second = new AppointTime(
-        0,
-        appointTime.date,
-        at,
-        appointTime.untilTime,
-        "regular",
-        1
-      );
-      await api.updateAppointTime(first);
-      await api.addAppointTime(second);
-      destroy();
+    let at = splitValue;
+    if (/^\d{2}:\d{2}$/.test(at)) {
+      at += ":00";
+      if (appointTime.fromTime <= at && at <= appointTime.untilTime) {
+        const first = Object.assign({}, appointTime, { untilTime: at });
+        const second = new AppointTime(
+          0,
+          appointTime.date,
+          at,
+          appointTime.untilTime,
+          "regular",
+          1
+        );
+        await api.updateAppointTime(first);
+        await api.addAppointTime(second);
+        destroy();
+      }
     }
   }
 </script>
 
 <Dialog {destroy} title="予約枠の分割">
   <div>{formatDate(appointTime.date)}</div>
-  <div>{appointTime.fromTime} - {appointTime.untilTime}</div>
+  <div>
+    {appointTime.fromTime.substring(0, 5)} - {appointTime.untilTime.substring(
+      0,
+      5
+    )}
+  </div>
   <div>
     分割時刻：<input type="text" placeholder="HH:MM" bind:value={splitValue} />
   </div>
