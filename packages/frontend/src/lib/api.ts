@@ -1289,4 +1289,8 @@ export default {
       castBoolean
     );
   },
+
+  addAppointTime(appointTime: m.AppointTime): Promise<boolean> {
+    return post("add-appoint-time", appointTime, {}, castBoolean);
+  }
 };

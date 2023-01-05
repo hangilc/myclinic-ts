@@ -10,6 +10,7 @@
   import type { AppointTime } from "myclinic-model";
   import BindAppointTimesDialog from "./BindAppointTimesDialog.svelte";
   import api from "@/lib/api";
+  import SplitAppointTimeDialog from "./SplitAppointTimeDialog.svelte";
 
   export let data: AppointTimeData;
   export let column: ColumnData;
@@ -80,6 +81,17 @@
     }
   }
 
+  function doOpenSplitDialog(destroy: () => void): void {
+    destroy();
+    const d: SplitAppointTimeDialog = new SplitAppointTimeDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        appointTime: data.appointTime
+      }
+    })
+  }
+
   function doContextMenu(
     event: MouseEvent,
     trigger: (e: MouseEvent) => void
@@ -120,7 +132,7 @@
       {#if isAdmin}
         <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}>編集</a>
         <a href="javascript:void(0)" on:click={() => doOpenBindDialog(destroy)}>結合</a>
-        <a href="javascript:void(0)">分割</a>
+        <a href="javascript:void(0)" on:click={() => doOpenSplitDialog(destroy)}>分割</a>
         <a href="javascript:void(0)">削除</a>
       {/if}
     </div>
