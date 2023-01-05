@@ -1269,10 +1269,24 @@ export default {
   },
 
   cancelAppoint(appointId: number): Promise<boolean> {
-    return post("cancel-appoint", {}, {"appoint-id": appointId.toString()}, castBoolean);
+    return post(
+      "cancel-appoint",
+      {},
+      { "appoint-id": appointId.toString() },
+      castBoolean
+    );
   },
 
   updateAppointTime(appointTime: m.AppointTime): Promise<boolean> {
     return post("update-appoint-time", appointTime, {}, castBoolean);
-  }
+  },
+
+  deleteAppointTime(appointTimeId: number): Promise<boolean> {
+    return post(
+      "delete-appoint-time",
+      {},
+      { "appoint-time-id": appointTimeId.toString() },
+      castBoolean
+    );
+  },
 };

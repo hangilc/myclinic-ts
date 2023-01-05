@@ -6,14 +6,17 @@
   import { ColumnData } from "./column-data";
   import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
-  import type {
-    ClinicOperation,
-    AppointTime,
-    Appoint,
-  } from "myclinic-model";
+  import type { ClinicOperation, AppointTime, Appoint } from "myclinic-model";
   import { dateToSql } from "@/lib/util";
   import { AppointTimeData } from "./appoint-time-data";
-  import { appointDeleted, appointEntered, appointTimeEntered, appointUpdated } from "@/app-events";
+  import {
+    appointDeleted,
+    appointEntered,
+    appointTimeDeleted,
+    appointTimeEntered,
+    appointTimeUpdated,
+    appointUpdated,
+  } from "@/app-events";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
@@ -22,6 +25,8 @@
   initColumns(startDate);
 
   unsubs.push(appointTimeEntered.subscribe(onAppointTimeEntered));
+  unsubs.push(appointTimeUpdated.subscribe(onAppointTimeUpdated));
+  unsubs.push(appointTimeDeleted.subscribe(onAppointTimeDeleted));
   unsubs.push(appointEntered.subscribe(onAppointEntered));
   unsubs.push(appointUpdated.subscribe(onAppointUpdated));
   unsubs.push(appointDeleted.subscribe(onAppointDeleted));
@@ -39,13 +44,43 @@
     }
   }
 
+  function onAppointTimeUpdated(at: AppointTime | null): void {
+    if (at == null) {
+      return;
+    }
+    for (let c of cols) {
+      if (c.date === at.date) {
+        if (c.updateAppointTime(at)) {
+          console.log("at", at);
+          console.log("c", c);
+          cols = [...cols];
+          return;
+        }
+      }
+    }
+  }
+
+  function onAppointTimeDeleted(at: AppointTime | null): void {
+    if (at == null) {
+      return;
+    }
+    for (let c of cols) {
+      if (c.date === at.date) {
+        if (c.deleteAppointTime(at)) {
+          cols = [...cols];
+          return;
+        }
+      }
+    }
+  }
+
   function onAppointEntered(a: Appoint | null): void {
     if (a == null) {
       return;
     }
     for (let c of cols) {
       const i = c.findAppointTimeDataIndex(a.appointTimeId);
-      if( i >= 0 ){
+      if (i >= 0) {
         c.addAppoint(i, a);
         cols = [...cols];
         return;
@@ -59,7 +94,7 @@
     }
     for (let c of cols) {
       const i = c.findAppointTimeDataIndex(a.appointTimeId);
-      if( i >= 0 ){
+      if (i >= 0) {
         c.updateAppoint(i, a);
         cols = [...cols];
         return;
@@ -68,12 +103,12 @@
   }
 
   function onAppointDeleted(a: Appoint | null): void {
-    if( a == null ){
+    if (a == null) {
       return;
     }
     for (let c of cols) {
       const i = c.findAppointTimeDataIndex(a.appointTimeId);
-      if( i >= 0 ){
+      if (i >= 0) {
         c.deleteAppoint(i, a);
         cols = [...cols];
         return;

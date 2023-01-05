@@ -1,4 +1,4 @@
-import type { Appoint, ClinicOperation } from "myclinic-model";
+import type { Appoint, AppointTime, ClinicOperation } from "myclinic-model";
 import { AppointKind, resolveAppointKind } from "./appoint-kind";
 import type { AppointTimeData } from "./appoint-time-data";
 
@@ -17,6 +17,26 @@ export class ColumnData {
     const i = this.findAppointTimeDataIndex(data.appointTime.appointTimeId);
     this.fixFollowingVacant(i - 1);
     this.fixFollowingVacant(i);
+  }
+
+  updateAppointTime(a: AppointTime): boolean {
+    const i = this.appointTimes.findIndex(d => d.appointTime.appointTimeId === a.appointTimeId);
+    if( i >= 0 ){
+      const d = this.appointTimes[i];
+      d.appointTime = a;
+      console.log("updated", d);
+      return true;
+    }
+    return false;
+  }
+
+  deleteAppointTime(a: AppointTime): boolean {
+    const i = this.appointTimes.findIndex(d => d.appointTime.appointTimeId === a.appointTimeId);
+    if( i >= 0 ){
+      this.appointTimes.splice(i, 1);
+      return true;
+    }
+    return false;
   }
 
   fixFollowingVacant(i: number): void {
@@ -79,14 +99,30 @@ export class ColumnData {
 
   countKenshin(): number {
     let count = 0;
-    this.appointTimes.forEach(at => {
-      at.appoints.forEach(a => {
-        if( a.tags.includes("健診") ){
+    this.appointTimes.forEach((at) => {
+      at.appoints.forEach((a) => {
+        if (a.tags.includes("健診")) {
           count += 1;
         }
-      })
+      });
     });
     return count;
+  }
+
+  planBind(at: AppointTime): AppointTime | undefined {
+    const i = this.appointTimes.findIndex(
+      (a) => a.appointTime.appointTimeId === at.appointTimeId
+    );
+    if (i >= 0) {
+      const j = i + 1;
+      if (j <= this.appointTimes.length) {
+        const n = this.appointTimes[j];
+        if (n.appoints.length === 0) {
+          return n.appointTime;
+        }
+      }
+    }
+    return undefined;
   }
 }
 

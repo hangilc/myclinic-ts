@@ -6,12 +6,17 @@
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
   import { resolveAppointKind } from "./appoint-kind";
+  import type { ColumnData } from "./column-data";
+  import type { AppointTime } from "myclinic-model";
+  import BindAppointTimesDialog from "./BindAppointTimesDialog.svelte";
+  import api from "@/lib/api";
 
   export let data: AppointTimeData;
-  export let siblings: AppointTimeData[];
-  let contextMenuWrapper: HTMLElement;
-
-  let timeText = `${fromTimeText(data)} - ${untilTimeText(data)}`;
+  export let column: ColumnData;
+  
+  function timeText(data: AppointTimeData): string {
+    return `${fromTimeText(data)} - ${untilTimeText(data)}`;
+  }
 
   function fromTimeText(data: AppointTimeData): string {
     return data.appointTime.fromTime.substring(0, 5);
@@ -47,9 +52,31 @@
           destroy: () => d.$destroy(),
           title: "予約枠編集",
           data: data.appointTime,
-          siblings,
+          siblings: column.appointTimes,
         },
       });
+    }
+  }
+
+  function doOpenBindDialog(destroy: () => void): void {
+    destroy();
+    const n = column.planBind(data.appointTime);
+    if( n != undefined ){
+      const b = Object.assign({}, data.appointTime, {
+        untilTime: n.untilTime
+      }) as AppointTime;
+      const d: BindAppointTimesDialog = new BindAppointTimesDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          appointTime: b,
+          onOk: async () => {
+            await api.deleteAppointTime(n.appointTimeId);
+            await api.updateAppointTime(b);
+            d.$destroy();
+          }
+        }
+      })
     }
   }
 
@@ -86,13 +113,13 @@
       on:click={doTimeBoxClick}
       on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
     >
-      <div>{timeText} {capacityRep(data)}</div>
+      <div>{timeText(data)} {capacityRep(data)}</div>
       <div>{appointKindRep(data)}</div>
     </div>
     <div slot="menu" class="context-menu">
       {#if isAdmin}
         <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}>編集</a>
-        <a href="javascript:void(0)">結合</a>
+        <a href="javascript:void(0)" on:click={() => doOpenBindDialog(destroy)}>結合</a>
         <a href="javascript:void(0)">分割</a>
         <a href="javascript:void(0)">削除</a>
       {/if}
