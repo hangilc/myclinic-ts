@@ -3,34 +3,51 @@
   import * as kanjidate from "kanjidate";
   import AppointTimeBlock from "./AppointTimeBlock.svelte";
   import FilledCircle from "@/icons/FilledCircle.svelte";
+  import Popup from "@/lib/Popup.svelte";
+  import { isAdmin } from "./appoint-vars";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
 
   function kenshinRep(data: ColumnData): string {
     const n = data.countKenshin();
-    if( n > 0 ){
+    if (n > 0) {
       return `健${n}`;
     } else {
       return "";
     }
   }
+
+  function doContextMenu(
+    event: MouseEvent,
+    trigger: (e: MouseEvent) => void
+  ): void {
+    if (isAdmin) {
+      event.preventDefault();
+      alert("ctx");
+    }
+  }
 </script>
 
 <div class="top">
-  <div class={`date ${data.op.code}`}>
-    {kanjidate.format(dateFormat, data.date)}
-    <span class="kenshin-rep">{kenshinRep(data)}</span>
-    {#each data.collectAvail() as avail}
-      <span
-        ><FilledCircle
-          width="20px"
-          style={`fill:${avail.iconColor}; stroke:none; margin-bottom: -4px;`}
-        /></span
-      >
-    {/each}
-    <div class="date-label">{data.op.name ?? ""}</div>
-  </div>
+  <Popup let:destroy let:triggerClick>
+    <div
+      class={`date ${data.op.code}`}
+      on:contextmenu={(e) => doContextMenu(e, triggerClick)}
+    >
+      {kanjidate.format(dateFormat, data.date)}
+      <span class="kenshin-rep">{kenshinRep(data)}</span>
+      {#each data.collectAvail() as avail}
+        <span
+          ><FilledCircle
+            width="20px"
+            style={`fill:${avail.iconColor}; stroke:none; margin-bottom: -4px;`}
+          /></span
+        >
+      {/each}
+      <div class="date-label">{data.op.name ?? ""}</div>
+    </div>
+  </Popup>
   {#each data.appointTimes as at (at.appointTime.fromTime)}
     <AppointTimeBlock data={at} column={data} />
   {/each}
