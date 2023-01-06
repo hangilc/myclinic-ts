@@ -5,6 +5,7 @@
   import FilledCircle from "@/icons/FilledCircle.svelte";
   import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
+  import ColumnContextMenu from "./ColumnContextMenu.svelte";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -24,12 +25,12 @@
   ): void {
     if (isAdmin) {
       event.preventDefault();
-      alert("ctx");
+      trigger(event);
     }
   }
 </script>
 
-<div class="top">
+<div class={`top ${isAdmin ? "admin" : ""}`}>
   <Popup let:destroy let:triggerClick>
     <div
       class={`date ${data.op.code}`}
@@ -47,6 +48,12 @@
       {/each}
       <div class="date-label">{data.op.name ?? ""}</div>
     </div>
+    <ColumnContextMenu
+      slot="menu"
+      {destroy}
+      date={data.date}
+      siblings={data.appointTimes}
+    />
   </Popup>
   {#each data.appointTimes as at (at.appointTime.fromTime)}
     <AppointTimeBlock data={at} column={data} />

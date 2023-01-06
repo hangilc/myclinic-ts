@@ -9,7 +9,7 @@
 
   export let destroy: () => void;
   export let title: string;
-  export let data: AppointTime | undefined;
+  export let data: AppointTime;
   export let siblings: AppointTimeData[];
 
   let fromTime: string = "";
