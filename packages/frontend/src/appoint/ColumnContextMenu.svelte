@@ -1,4 +1,5 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import { AppointTime } from "myclinic-model";
   import type { AppointTimeData } from "./appoint-time-data";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
@@ -18,6 +19,9 @@
         title: "新規予約枠",
         data: tmpl,
         siblings,
+        onEnter: async (a: AppointTime) => {
+          await api.addAppointTime(a);
+        }
       }
     })
   }

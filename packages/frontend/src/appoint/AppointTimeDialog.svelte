@@ -11,6 +11,7 @@
   export let title: string;
   export let data: AppointTime;
   export let siblings: AppointTimeData[];
+  export let onEnter: (a: AppointTime) => void;
 
   let fromTime: string = "";
   let untilTime: string = "";
@@ -58,34 +59,40 @@
     return true;
   }
 
+  function checkConsitencyForEnter(at: AppointTime): boolean {
+    for(let x of siblings) {
+      if( x.appointTime.overlapsWith(at) ){
+        return false;
+      }
+    }
+    return true;
+  }
+
   function addError(msg: string): void {
     errors = [...errors, new Invalid(msg, [])];
   }
 
-  async function update(at: AppointTime) {
-    const result = validateAppointTime(at.appointTimeId, {
-      date: strSrc(at.date),
+  function doEnter() {
+    const result = validateAppointTime(data.appointTimeId, {
+      date: strSrc(data.date),
       fromTime: strSrc(fromTime + ":00"),
       untilTime: strSrc(untilTime + ":00"),
       kind: strSrc(kind),
       capacity: intSrc(capacity),
     });
     if (result instanceof AppointTime) {
-      const ok: boolean = checkConsistentyForUpdate(result);
-      if (!ok) {
-        return;
+      let ok = false;
+      if( result.appointTimeId === 0 ){
+        ok = checkConsitencyForEnter(result);
+      } else {
+        ok = checkConsistentyForUpdate(result);
       }
-      await api.updateAppointTime(result);
-      destroy();
+      if( ok ){
+          destroy();
+          onEnter(result);
+        }
     } else {
       errors = result;
-    }
-  }
-
-  function doEnter() {
-    if (data == undefined) {
-    } else {
-      update(data);
     }
   }
 </script>

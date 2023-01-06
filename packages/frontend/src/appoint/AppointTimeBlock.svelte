@@ -55,6 +55,9 @@
           title: "予約枠編集",
           data: data.appointTime,
           siblings: column.appointTimes,
+          onEnter: async (a: AppointTime) => {
+            await api.updateAppointTime(a);
+          }
         },
       });
     }
