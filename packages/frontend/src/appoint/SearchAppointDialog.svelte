@@ -5,6 +5,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
   import type { Appoint, AppointTime, Patient } from "myclinic-model";
+  import { formatDate } from "./helper";
 
   export let destroy: () => void;
   let result: [Appoint, AppointTime][] = [];
@@ -43,7 +44,14 @@
     {#each result as r (r[0].appointId)}
       {@const appoint=r[0]}
       {@const appointTime=r[1]}
-      <div>{appoint.appointId}</div>
+      <div class="item">
+        {appoint.patientName}
+        {#if appoint.patientId > 0}
+        ({appoint.patientId})
+        {/if}
+        {formatDate(appointTime.date)}
+        {appointTime.fromTime} - {appointTime.untilTime}
+      </div>
     {/each}
   </div>
   <div class="commands">
@@ -61,6 +69,19 @@
     margin-top: 10px;
     overflow-y: auto;
   }
+
+  .item {
+    margin: 10px 4px;
+  }
+
+  .item:first-of-type {
+    margin-top: 0;
+  }
+
+  .item:last-of-type {
+    margin-bottom: 0;
+  }
+
 
   .commands {
     display: flex;
