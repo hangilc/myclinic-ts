@@ -11,10 +11,11 @@
   import BindAppointTimesDialog from "./BindAppointTimesDialog.svelte";
   import api from "@/lib/api";
   import SplitAppointTimeDialog from "./SplitAppointTimeDialog.svelte";
+  import { confirm } from "@/lib/confirm-call";
 
   export let data: AppointTimeData;
   export let column: ColumnData;
-  
+
   function timeText(data: AppointTimeData): string {
     return `${fromTimeText(data)} - ${untilTimeText(data)}`;
   }
@@ -62,9 +63,9 @@
   function doOpenBindDialog(destroy: () => void): void {
     destroy();
     const n = column.planBind(data.appointTime);
-    if( n != undefined ){
+    if (n != undefined) {
       const b = Object.assign({}, data.appointTime, {
-        untilTime: n.untilTime
+        untilTime: n.untilTime,
       }) as AppointTime;
       const d: BindAppointTimesDialog = new BindAppointTimesDialog({
         target: document.body,
@@ -75,9 +76,9 @@
             await api.deleteAppointTime(n.appointTimeId);
             await api.updateAppointTime(b);
             d.$destroy();
-          }
-        }
-      })
+          },
+        },
+      });
     }
   }
 
@@ -87,9 +88,21 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        appointTime: data.appointTime
-      }
-    })
+        appointTime: data.appointTime,
+      },
+    });
+  }
+
+  function doDelete(destroy: () => void): void {
+    destroy();
+    if (data.appoints.length > 0) {
+      alert("予約がはいっているので、この予約枠を削除できません。");
+      return;
+    } else {
+      confirm("この予約枠を削除しますか？", async () => {
+        await api.deleteAppointTime(data.appointTime.appointTimeId);
+      });
+    }
   }
 
   function doContextMenu(
@@ -104,7 +117,10 @@
   }
 
   function capacityRep(data: AppointTimeData): string {
-    if( data.appointTime.kind === "regular" && data.appointTime.capacity === 1 ){
+    if (
+      data.appointTime.kind === "regular" &&
+      data.appointTime.capacity === 1
+    ) {
       return "";
     } else {
       const c = data.appointTime.capacity;
@@ -113,7 +129,7 @@
   }
 
   function appointKindRep(data: AppointTimeData): string {
-    const rep = resolveAppointKind(data.appointTime.kind)?.label
+    const rep = resolveAppointKind(data.appointTime.kind)?.label;
     return rep ? `[${rep}]` : "";
   }
 </script>
@@ -130,10 +146,16 @@
     </div>
     <div slot="menu" class="context-menu">
       {#if isAdmin}
-        <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}>編集</a>
-        <a href="javascript:void(0)" on:click={() => doOpenBindDialog(destroy)}>結合</a>
-        <a href="javascript:void(0)" on:click={() => doOpenSplitDialog(destroy)}>分割</a>
-        <a href="javascript:void(0)">削除</a>
+        <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}
+          >編集</a
+        >
+        <a href="javascript:void(0)" on:click={() => doOpenBindDialog(destroy)}
+          >結合</a
+        >
+        <a href="javascript:void(0)" on:click={() => doOpenSplitDialog(destroy)}
+          >分割</a
+        >
+        <a href="javascript:void(0)" on:click={() => doDelete(destroy)}>削除</a>
       {/if}
     </div>
   </Popup>
