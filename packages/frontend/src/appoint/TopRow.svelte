@@ -2,6 +2,7 @@
   import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
   import Bars3 from "@/icons/Bars3.svelte";
+  import SearchAppointDialog from "./SearchAppointDialog.svelte";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;
@@ -10,6 +11,15 @@
   function doAlloc(destroy: () => void){
     destroy();
     onCreateAppoints();
+  }
+
+  function doSearch(): void {
+    const d: SearchAppointDialog = new SearchAppointDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    })
   }
 
 </script>
@@ -21,7 +31,7 @@
   <button on:click={() => onMoveWeeks(1)}>次の週</button>
   <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
-    <a href="javascript:void(0)">予約検索</a>
+    <a href="javascript:void(0)" on:click={doSearch}>予約検索</a>
     <Popup let:trigger let:destroy>
       <Bars3 onClick={trigger} style="cursor: pointer;" dy="-2px" width="18"/>
       <div slot="menu" class="context-menu">

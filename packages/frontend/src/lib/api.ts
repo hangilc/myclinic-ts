@@ -1292,5 +1292,36 @@ export default {
 
   addAppointTime(appointTime: m.AppointTime): Promise<boolean> {
     return post("add-appoint-time", appointTime, {}, castBoolean);
-  }
+  },
+
+  searchAppointByPatientId(
+    patientId: number
+  ): Promise<[m.Appoint, m.AppointTime][]> {
+    return get(
+      "search-appoint-by-patient-id",
+      { "patient-id": patientId.toString() },
+      castList(castPair(m.Appoint.cast, m.AppointTime.cast))
+    );
+  },
+
+  searchAppointByPatientName(
+    text: string
+  ): Promise<[m.Appoint, m.AppointTime][]> {
+    return get(
+      "search-appoint-by-patient-name",
+      { text },
+      castList(castPair(m.Appoint.cast, m.AppointTime.cast))
+    );
+  },
+
+  searchAppointByPatientName2(
+    text1: string,
+    text2: string,
+  ): Promise<[m.Appoint, m.AppointTime][]> {
+    return get(
+      "search-appoint-by-patient-name2",
+      { text1, text2 },
+      castList(castPair(m.Appoint.cast, m.AppointTime.cast))
+    );
+  },
 };
