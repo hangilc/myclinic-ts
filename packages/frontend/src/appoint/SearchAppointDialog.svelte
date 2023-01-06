@@ -3,6 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { pad } from "@/lib/pad";
   import { setFocus } from "@/lib/set-focus";
+  import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
   import type { Appoint, AppointTime, Patient } from "myclinic-model";
 
   export let destroy: () => void;
@@ -16,11 +17,13 @@
         const patientId = parseInt(t);
         result = await api.searchAppointByPatientId(patientId);
       } else {
-        const m = / 　/.exec(t);
+        const m = /[ 　]/.exec(t);
+        console.log(m);
         if( m ){
           const i = m.index
           const t1 = t.substring(0, i);
-          const t2 = t.substring(i+1).trim();
+          let t2 = t.substring(i+1).trim();
+          t2 = fromZenkakuWith(spaceMap, t2).trim();
           console.log("t1 - t2", t1, "-", t2);
           result = await api.searchAppointByPatientName2(t1, t2);
         } else {
