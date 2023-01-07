@@ -11,6 +11,7 @@ export default defineConfig({
         main: resolve(__dirname, "index.html"),
         practice: resolve(__dirname, "practice/index.html"),
         reception: resolve(__dirname, "reception/index.html"),
+        appoint: resolve(__dirname, "appoint/index.html"),
       }
     },
     chunkSizeWarningLimit: 5000
