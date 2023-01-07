@@ -36,7 +36,7 @@
           【{kindRep(e.kind)}】
           {formatDate(at.date)}
           {at.fromTime} - {at.untilTime}
-          {a.patientName}
+          <span class="patient-name">{a.patientName}</span>
           {#if a.patientId > 0}
           ({a.patientId})
           {/if}
@@ -61,6 +61,7 @@
     max-width: 24rem;
     overflow-y: auto;
     resize: vertical;
+    margin: 10px 0;
   }
 
   .item {
@@ -73,6 +74,11 @@
 
   .item:last-of-type {
     margin-bottom: 0;
+  }
+
+  .patient-name {
+    font-weight: bold;
+    color: blue;
   }
 
   .commands {
