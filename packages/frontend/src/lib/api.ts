@@ -1277,6 +1277,11 @@ export default {
     );
   },
 
+  getAppointTime(appointTimeId: number): Promise<m.AppointTime> {
+    return get("get-appoint-time", { "appoint-time-id": appointTimeId.toString()},
+    m.AppointTime.cast);
+  },
+
   updateAppointTime(appointTime: m.AppointTime): Promise<boolean> {
     return post("update-appoint-time", appointTime, {}, castBoolean);
   },
@@ -1316,12 +1321,23 @@ export default {
 
   searchAppointByPatientName2(
     text1: string,
-    text2: string,
+    text2: string
   ): Promise<[m.Appoint, m.AppointTime][]> {
     return get(
       "search-appoint-by-patient-name2",
       { text1, text2 },
       castList(castPair(m.Appoint.cast, m.AppointTime.cast))
+    );
+  },
+
+  listAppointEvents(limit: number, offset: number): Promise<m.AppEvent[]> {
+    return get(
+      "list-appoint-events",
+      {
+        limit: limit.toString(),
+        offset: offset.toString(),
+      },
+      castList(m.AppEvent.cast)
     );
   },
 };
