@@ -63,6 +63,18 @@
     resize: vertical;
   }
 
+  .item {
+    margin: 10px 0;
+  }
+
+  .item:first-of-type {
+    margin-top: 0;
+  }
+
+  .item:last-of-type {
+    margin-bottom: 0;
+  }
+
   .commands {
     display: flex;
     justify-content: right;
