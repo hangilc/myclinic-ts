@@ -2,6 +2,7 @@
   import api from "@/lib/api";
   import { AppointTime } from "myclinic-model";
   import type { AppointTimeData } from "./appoint-time-data";
+  import { appointTimeTemplate } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
 
 
@@ -11,7 +12,8 @@
 
   async function doAddAppointTime() {
     destroy();
-    const tmpl = new AppointTime(0, date, "", "", "regular", 1);
+    const tmpl = new AppointTime(0, date, "", "", 
+      appointTimeTemplate.kind, appointTimeTemplate.capacity);
     const d: AppointTimeDialog = new AppointTimeDialog({
       target: document.body,
       props: {
@@ -21,6 +23,10 @@
         siblings,
         onEnter: async (a: AppointTime) => {
           await api.addAppointTime(a);
+          Object.assign(appointTimeTemplate, {
+            kind: a.kind,
+            capacity: a.capacity,
+          })
         }
       }
     })
@@ -32,7 +38,7 @@
 </div>
 
 <style>
-    .top a {
+  .top a {
     display: block;
     margin-bottom: 4px;
   }

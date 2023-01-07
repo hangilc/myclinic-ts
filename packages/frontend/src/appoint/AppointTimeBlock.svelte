@@ -2,7 +2,7 @@
   import type { AppointTimeData } from "./appoint-time-data";
   import AppointPatient from "./AppointPatient.svelte";
   import AppointDialog from "./AppointDialog.svelte";
-  import { isAdmin } from "./appoint-vars";
+  import { appointTimeTemplate, isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
   import { resolveAppointKind } from "./appoint-kind";
@@ -48,16 +48,25 @@
   function doOpenEditDialog(destroy: () => void): void {
     destroy();
     if (isAdmin) {
+      const tmpl: AppointTime = Object.assign(
+        {},
+        data.appointTime,
+        appointTimeTemplate
+      );
       const d: AppointTimeDialog = new AppointTimeDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           title: "予約枠編集",
-          data: data.appointTime,
+          data: tmpl,
           siblings: column.appointTimes,
           onEnter: async (a: AppointTime) => {
             await api.updateAppointTime(a);
-          }
+            Object.assign(appointTimeTemplate, {
+              kind: a.kind,
+              capacity: a.capacity
+            });
+          },
         },
       });
     }
