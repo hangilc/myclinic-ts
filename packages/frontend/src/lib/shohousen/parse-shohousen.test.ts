@@ -10,6 +10,7 @@ import {
   parseShohousen,
   DrugPart,
   Part,
+  setDebug,
 } from "./parse-shohousen";
 import * as p from "./parse-shohousen";
 
@@ -217,5 +218,26 @@ describe("parse-shohousen", () => {
         []
       )
     );
+  });
+
+  it("should parse ロキソニンテープ", () => {
+    let s = sm`
+    院外処方
+    Ｒｐ）
+    １）レンドルミンＤ錠０．２５ｍｇ　　　　　１錠
+    　　分１　就寝前　　　　　　　　　　　　　３０日分
+    ２）ロキソニンテープ１００ｍｇ（１０ｃｍｘ１５ｃｍ） 
+    　　６３枚
+    　　１日１回、１回１枚、膝に貼付
+    `;
+    let parsed: p.Shohousen = parseShohousen(s);
+    expect(parsed.formatForSave()).toBe(
+`院外処方
+Ｒｐ）
+１）レンドルミンＤ錠０．２５ｍｇ　１錠
+　　分１　就寝前　３０日分
+２）ロキソニンテープ１００ｍｇ（１０ｃｍｘ１５ｃｍ）　　
+　　６３枚
+　　１日１回、１回１枚、膝に貼付`);
   });
 });

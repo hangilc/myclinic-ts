@@ -11,6 +11,7 @@
   import { confirm } from "@/lib/confirm-call";
   import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
+  import { setFocus } from "@/lib/set-focus";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -112,7 +113,8 @@
 </script>
 
 <div>
-  <textarea bind:this={textarea} on:keydown={doKeyDown}>{text.content}</textarea
+  <textarea bind:this={textarea} on:keydown={doKeyDown} use:setFocus
+    >{text.content}</textarea
   >
   {#if text.textId === 0}
     <div>

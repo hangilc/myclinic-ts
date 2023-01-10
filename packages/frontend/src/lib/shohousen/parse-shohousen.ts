@@ -1,6 +1,7 @@
 import { zenkakuSpace, zenkakuPeriod, toZenkaku } from "../zenkaku";
 import { partition } from "@/lib/partition";
 import { pad } from "../pad";
+import { splitOneLine } from "../split-one-line";
 
 const space = "[ 　]";
 const digit = "[0-9０-９]";
@@ -20,6 +21,11 @@ const reDrugPattern = new RegExp(`^${drugPattern}${space}*(?:\n|$)`);
 const daysPart = `${digit}+(?:日|回)分`;
 const usagePattern = `(${chunk})${space}+(${daysPart}(?:${chunk})?)`;
 const reUsagePattern = new RegExp(`^${usagePattern}${space}*(?:\n|$)`);
+let debug: boolean = false;
+
+export function setDebug(value: boolean): void {
+  debug = value;
+}
 
 export const exportForTesting = {
   chunk,
@@ -85,6 +91,10 @@ export function span<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
 }
 
 export function parsePartTemplate(s: string): PartTemplate {
+  if( debug ){
+    console.log("[enter parsePartTemplate]");
+    console.log("s --- ", s);
+  }
   s = s.replace(rePartStart, zenkakuSpace);
   s = s.replace(/\n$/, "");
   let lines = s.split("\n");
@@ -99,12 +109,17 @@ export function parsePartTemplate(s: string): PartTemplate {
   localCommands = localCommands.filter(
     (a) => !a.startsWith(localCommentCommand)
   );
-  return {
+  const retValue = {
     lines: pre.join("\n"),
     trails,
     localCommands,
     globalCommands,
   };
+  if( debug ){
+    console.log("[returning from parsePartTemplate]");
+    console.log("return --- ", retValue);
+  }
+  return retValue;
 }
 
 export class DrugPart {
@@ -121,14 +136,29 @@ export class DrugPart {
 }
 
 export function parseDrugPart(s: string): [DrugPart | null, string] {
+  if( debug ){
+    console.log("[enter parseDrugPart]");
+    console.log("s --- ", s);
+  }
   let m = reDrugPattern.exec(s);
+  if( debug ){
+    console.log("m --- ", m);
+  }
   if (m != null) {
     const drugPart = new DrugPart(m[1], m[2]);
     const len = m[0].length;
     const rem = s.substring(len);
-    return [drugPart, rem];
+    const retValue: [DrugPart, string] = [drugPart, rem];
+    if( debug ){
+      console.log("retValue --- ", retValue);
+    }
+    return retValue;
   } else {
-    return [null, s];
+    const retValue: [null, string] = [null, s];
+    if( debug ){
+      console.log("retValue --- ", retValue);
+    }
+    return retValue;
   }
 }
 
@@ -165,6 +195,9 @@ function repeat<T>(
     } else {
       ts.push(t);
       rem = r;
+      if( rem === "" ){
+        break;
+      }
     }
   }
   return [ts, rem];
@@ -224,14 +257,25 @@ export class Part extends DrugLines {
     return flatten(
       this.drugs.map((d, i) => d.formatForSave(i == 0 ? index : null, ndrugs)),
       this.usage?.formatForSave(indent) ?? null,
-      this.more ? indent + this.more : null
+      // this.more ? indent + this.more : null
+      this.more ? this.more.split("\n").map(s => indent + s) : null
     ).join("\n");
   }
 }
 
 export function parseDrugLines(s: string): DrugLines {
   let drugs: DrugPart[];
-  [drugs, s] = repeat(parseDrugPart, s);
+  let firstDrug: DrugPart | null;
+  [firstDrug, s] = parseDrugPart(s);
+  if( firstDrug == null ){
+    const [line, rest] = splitOneLine(s);
+    drugs = [new DrugPart(line, "")];
+    s = rest;
+  } else {
+    let ds: DrugPart[];
+    [ds, s] = repeat(parseDrugPart, s);
+    drugs = [firstDrug, ...ds];
+  }
   let usage: UsagePart | null;
   [usage, s] = parseUsagePart(s);
 
@@ -247,7 +291,19 @@ export function parsePart(
   trails: string[],
   localCommands: string[]
 ): Part {
-  return Part.create(parseDrugLines(drugLines), trails, localCommands);
+  if( debug ){
+    console.log("[enter parsePart]");
+    console.log("drugLines", drugLines);
+    console.log("trails", trails);
+    console.log("localCommands", localCommands);
+  }
+
+  const retValue = Part.create(parseDrugLines(drugLines), trails, localCommands);
+  if( debug ){
+    console.log("[return from parsePart]");
+    console.log("retValue --- ", retValue);
+  }
+  return retValue;
 }
 
 export class Shohousen {
@@ -275,6 +331,11 @@ export class Shohousen {
 
 export function parseShohousen(s: string): Shohousen {
   const [prolog, partSrc]: [string, string[]] = splitToParts(s);
+  if( debug ){
+    console.log("[splitToParts]");
+    console.log("prolog --- ", prolog);
+    console.log("partSrc --- ", partSrc);
+  }
   const globalCommands: string[] = [];
   const parts = partSrc.map((s) => {
     const tmpl: PartTemplate = parsePartTemplate(s);
