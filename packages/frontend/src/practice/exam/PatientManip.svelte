@@ -19,11 +19,13 @@
     const visitId = $currentVisitId;
     if (visitId != null) {
       cashierVisitId.set(visitId);
+      const meisai = await api.getMeisai(visitId);
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
+          meisai
         }
       })
     }

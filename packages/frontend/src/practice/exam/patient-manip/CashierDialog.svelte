@@ -10,26 +10,27 @@
 
   export let destroy: () => void;
   export let visitId: Readable<number | null>;
-  let meisai: Writable<Meisai | null> = writable(null);
-  let meisaiItems: string[] = [];
-  let summary: string = "";
-  let chargeValue: Writable<number> = writable(0);
-  let chargeRep = "";
+  export let meisai: Meisai;
+  let meisaiItems: string[] = mkMeisaiItems(meisai);
+  let summary: string = mkSummary(meisai);
+  let chargeValue: Writable<number> = writable(meisai.charge);
+  let chargeRep: string = mkChargeRep($chargeValue);
   let mode = "disp";
   let dialog: Dialog;
   let isMishuu = false;
   const mishuuId = genid();
 
-  meisai.subscribe((m) => {
-    meisaiItems = mkMeisaiItems(m);
-    summary = mkSummary(m);
-    chargeValue.set(m == null ? 0 : m.charge);
-  });
+  // meisai.subscribe((m) => {
+  //   meisaiItems = mkMeisaiItems(m);
+  //   summary = mkSummary(m);
+  //   chargeValue.set(m == null ? 0 : m.charge);
+  // });
 
-  chargeValue.subscribe((c) => {
-    chargeRep = mkChargeRep(c);
-  });
+  // chargeValue.subscribe((c) => {
+  //   chargeRep = mkChargeRep(c);
+  // });
 
+  
   // export async function open() {
   //   if ($visitId != null) {
   //     const m: Meisai = await api.getMeisai($visitId);
@@ -114,7 +115,7 @@
       <div class="charge-form-wrapper">
         <ChargeForm
           initValue={$chargeValue.toString()}
-          meisaiChargeValue={$meisai?.charge}
+          meisaiChargeValue={meisai.charge}
           onCancel={() => (mode = "disp")}
           onEnter={doFormEnter}
         />
