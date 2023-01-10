@@ -4,7 +4,7 @@
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";
-  import { writable, type Readable, type Writable } from "svelte/store";
+  import type { Readable } from "svelte/store";
   import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
@@ -13,10 +13,8 @@
   export let meisai: Meisai;
   let meisaiItems: string[] = mkMeisaiItems(meisai);
   let summary: string = mkSummary(meisai);
-  let chargeValue: Writable<number> = writable(meisai.charge);
-  let chargeRep: string = mkChargeRep($chargeValue);
+  let chargeValue:string = meisai.charge.toString();
   let mode = "disp";
-  let dialog: Dialog;
   let isMishuu = false;
   const mishuuId = genid();
 
@@ -60,22 +58,23 @@
     }
   }
 
-  function mkChargeRep(chargeValue: number): string {
-    return `請求額：${chargeValue}円`;
-  }
-
   function doModify(): void {
     mode = "form";
   }
 
   function doFormEnter(n: number): void {
-    chargeValue.set(n);
+    chargeValue = n.toString();
     mode = "disp";
   }
 
   async function doEnter(close: () => void) {
     if ($visitId != null) {
-      await api.enterChargeValue($visitId, $chargeValue);
+      const charge: number = parseInt(chargeValue);
+      if( isNaN(charge) ){
+        alert("請求金額が数字でありません。");
+        return;
+      }
+      await api.enterChargeValue($visitId, charge);
       if (isMishuu) {
         const pay: Payment = {
           visitId: $visitId,
@@ -108,13 +107,13 @@
   <div>
     {#if mode === "disp"}
       <div>
-        {chargeRep}
+        請求額：{chargeValue}円
         <a href="javascript:void(0)" on:click={doModify}>変更</a>
       </div>
     {:else if mode === "form"}
       <div class="charge-form-wrapper">
         <ChargeForm
-          initValue={$chargeValue.toString()}
+          initValue={chargeValue}
           meisaiChargeValue={meisai.charge}
           onCancel={() => (mode = "disp")}
           onEnter={doFormEnter}

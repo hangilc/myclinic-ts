@@ -10,10 +10,7 @@
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
 
-  let searchTextDialog: SearchTextDialog;
-  let uploadImageDialog: UploadImageDialog;
   let cashierVisitId: Writable<number | null> = writable(null);
-  let gazouListDialog: GazouListDialog;
 
   async function doCashier() {
     const visitId = $currentVisitId;
@@ -88,8 +85,6 @@
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
 </div>
-<!-- <SearchTextDialog patient={$currentPatient} bind:this={searchTextDialog} /> -->
-<!-- <UploadImageDialog bind:this={uploadImageDialog} /> -->
 
 <style>
   .top {
