@@ -8,6 +8,7 @@
     DiseaseData,
     DiseaseEnterData,
     DiseaseExample,
+    diseaseFullName,
     ShuushokugoMaster,
   } from "myclinic-model";
   import type { DiseaseEnv } from "../disease-env";
@@ -37,7 +38,6 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        anchor: chooseStartDateIcon,
         dates: visitDates,
         onSelect: (d: Date) => (startDate = d),
       },
@@ -101,7 +101,7 @@
 
 <div>
   <div>
-    名称：{byoumeiMaster?.name || ""}{adjList.map((m) => m.name).join("")}
+    名称：{diseaseFullName(byoumeiMaster, adjList)}
   </div>
   <div class="start-date-wrapper">
     <DateFormWithCalendar

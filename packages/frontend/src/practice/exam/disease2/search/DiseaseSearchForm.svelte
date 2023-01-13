@@ -33,7 +33,6 @@
   });
 
   async function doSearch() {
-    console.log(startDate);
     const t = searchText.trim();
     if (t !== "" && startDate != null) {
       if (searchKind === "byoumei") {
