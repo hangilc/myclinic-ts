@@ -6,21 +6,24 @@
   let anchor: HTMLElement | SVGSVGElement | undefined = undefined;
   let clickLocation: ViewportCoord | undefined = undefined;
   let context: PopupContext | undefined = undefined;
+  export let triggerHook: () => Promise<void> = async () => {};
 
   function destroy(): void {
     context?.destroy();
     show = false;
   }
 
-  function trigger(event: MouseEvent): void {
+  async function trigger(event: MouseEvent) {
     event.preventDefault();
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    await triggerHook();
     show = true;
   }
 
-  function triggerClick(event: MouseEvent): void {
+  async function triggerClick(event: MouseEvent) {
     event.preventDefault();
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    await triggerHook();
     clickLocation = ViewportCoord.fromEvent(event);
     show = true;
   }

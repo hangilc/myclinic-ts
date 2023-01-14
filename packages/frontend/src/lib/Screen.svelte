@@ -5,6 +5,7 @@
   export let postConstruct: (screen: HTMLElement) => void = _ => {};
 
   function doClick(ev: Event): void {
+    console.log("screen click");
     ev.preventDefault();
     ev.stopPropagation();
     onClick(ev);

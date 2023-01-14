@@ -2,6 +2,7 @@
   import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
+  import Popup from "@/lib/Popup.svelte";
   import type { Invalid } from "@/lib/validator";
   import {
     ByoumeiMaster,
@@ -15,7 +16,8 @@
   import { foldSearchResult } from "../fold-search-result";
   import type { Mode } from "../mode";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
-  import DatesPulldown from "./DatesPulldown.svelte";
+  import DatesPopup from "./DatesPopup.svelte";
+  import DatesPulldown from "./DatesPopup.svelte";
 
   export let env: DiseaseEnv;
   export let doMode: (mode: Mode) => void;
@@ -25,23 +27,8 @@
   let startDateErrors: Invalid[] = [];
   let chooseStartDateIcon: SVGSVGElement;
 
-  async function doChooseStartDate() {
-    const visits = await api.listVisitByPatientReverse(
-      env.patient.patientId,
-      0,
-      10
-    );
-    const visitDates = visits.map(
-      (v) => new Date(v.visitedAt.substring(0, 10))
-    );
-    const d: DatesPulldown = new DatesPulldown({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        dates: visitDates,
-        onSelect: (d: Date) => (startDate = d),
-      },
-    });
+  function doChooseStartDate(date: Date): void {
+    startDate = date;
   }
 
   async function doEnter() {
@@ -109,25 +96,7 @@
       bind:errors={startDateErrors}
       isNullable={false}
     >
-      <svelte:fragment slot="icons">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          on:click={doChooseStartDate}
-          bind:this={chooseStartDateIcon}
-          class="choice-icon"
-          width="1.2em"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-          />
-        </svg>
-      </svelte:fragment>
+    <DatesPopup slot="icons" onSelect={doChooseStartDate} patientId={env.patient.patientId}/>
     </DateFormWithCalendar>
   </div>
   <div class="command-box">
@@ -146,11 +115,6 @@
   .start-date-wrapper {
     font-size: 13px;
     margin: 4px 0;
-  }
-
-  .choice-icon {
-    color: gray;
-    cursor: pointer;
   }
 
   .command-box {
