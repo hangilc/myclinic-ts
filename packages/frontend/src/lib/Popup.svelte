@@ -9,27 +9,31 @@
   export let triggerHook: () => Promise<void> = async () => {};
 
   function destroy(): void {
+    console.log("Popup destroy");
     context?.destroy();
     show = false;
   }
 
   async function trigger(event: MouseEvent) {
+    console.log("popup trigger", event.currentTarget);
     event.preventDefault();
-    await triggerHook();
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    await triggerHook();
+    console.log("anchor", anchor);
     show = true;
   }
 
   async function triggerClick(event: MouseEvent) {
     event.preventDefault();
-    await triggerHook();
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    await triggerHook();
     clickLocation = ViewportCoord.fromEvent(event);
     show = true;
   }
 
   function open(
     e: HTMLElement): void {
+    console.log("popup open", anchor);
     if( anchor != undefined ){
       context = new PopupContext(anchor, e, clickLocation, destroy);
     }

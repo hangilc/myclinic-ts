@@ -8,7 +8,8 @@
   export let onSelect: (d: Date) => void;
   let dates: Date[] = [];
 
-  async function triggerHook() {
+  async function triggerHook(): Promise<void> {
+    console.log("DatesPopup triggerHook");
     if (patientId > 0) {
       const visits = await api.listVisitByPatientReverse(patientId, 0, 10);
       dates = visits.map(

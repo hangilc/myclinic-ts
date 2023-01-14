@@ -19,12 +19,16 @@ export class PopupContext {
     this.zIndexScreen = alloc();
     this.zIndexMenu = alloc();
     this.menuWrapper = menu.parentElement;
+    console.log("creating new screen");
     this.screen = new Screen({
       target: document.body,
       props: {
         zIndex: this.zIndexScreen,
-        onClick: onDestroy,
-        opacity: "0",
+        onClick: () => {
+          console.log("screen destroy");
+          onDestroy();
+        },
+        opacity: "0.3",
       },
     });
     menu.style.zIndex = this.zIndexMenu.toString();
