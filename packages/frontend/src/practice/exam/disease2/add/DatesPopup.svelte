@@ -9,12 +9,9 @@
   let dates: Date[] = [];
 
   async function triggerHook(): Promise<void> {
-    console.log("DatesPopup triggerHook");
     if (patientId > 0) {
       const visits = await api.listVisitByPatientReverse(patientId, 0, 10);
-      dates = visits.map(
-        (v) => new Date(v.visitedAt.substring(0, 10))
-      );
+      dates = visits.map((v) => new Date(v.visitedAt.substring(0, 10)));
     }
   }
 
@@ -49,3 +46,10 @@
     {/each}
   </div>
 </Popup>
+
+<style>
+  .choice-icon {
+    color: gray;
+    cursor: pointer;
+  }
+</style>

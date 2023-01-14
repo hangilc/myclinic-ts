@@ -28,7 +28,7 @@ export class PopupContext {
           console.log("screen destroy");
           onDestroy();
         },
-        opacity: "0.3",
+        opacity: "0",
       },
     });
     menu.style.zIndex = this.zIndexMenu.toString();

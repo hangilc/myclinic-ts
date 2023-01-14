@@ -29,22 +29,6 @@
 
   function doChooseStartDate(date: Date): void {
     startDate = date;
-    // const visits = await api.listVisitByPatientReverse(
-    //   env.patient.patientId,
-    //   0,
-    //   10
-    // );
-    // const visitDates = visits.map(
-    //   (v) => new Date(v.visitedAt.substring(0, 10))
-    // );
-    // const d: DatesPulldown = new DatesPulldown({
-    //   target: document.body,
-    //   props: {
-    //     anchor: chooseStartDateIcon,
-    //     dates: visitDates,
-    //     onSelect: (d: Date) => (startDate = d),
-    //   },
-    // });
   }
 
   async function doEnter() {
@@ -131,11 +115,6 @@
   .start-date-wrapper {
     font-size: 13px;
     margin: 4px 0;
-  }
-
-  .choice-icon {
-    color: gray;
-    cursor: pointer;
   }
 
   .command-box {
