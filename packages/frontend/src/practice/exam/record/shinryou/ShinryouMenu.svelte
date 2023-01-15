@@ -1,26 +1,21 @@
 <script lang="ts">
-  import Pulldown from "@/lib/Pulldown.svelte"
-  import api from "@/lib/api"
-  import type { VisitEx } from "myclinic-model"
-  import RegularDialog from "./RegularDialog.svelte"
-  import KensaDialog from "./KensaDialog.svelte"
-  import SearchDialog from "./SearchDialog.svelte"
-  import { getCopyTarget } from "@/practice/exam/ExamVars"
-  import { enterTo } from "./helper"
+  import api from "@/lib/api";
+  import type { VisitEx } from "myclinic-model";
+  import RegularDialog from "./RegularDialog.svelte";
+  import KensaDialog from "./KensaDialog.svelte";
+  import SearchDialog from "./SearchDialog.svelte";
+  import { getCopyTarget } from "@/practice/exam/ExamVars";
+  import { enterTo } from "./helper";
   import CopySelectedDialog from "./CopySelectedDialog.svelte";
   import DeleteSelectedDialog from "./DeleteSelectedDialog.svelte";
+  import Popup from "@/lib/Popup.svelte";
 
   export let visit: VisitEx;
   let auxLink: HTMLAnchorElement;
-  let auxPopup: Pulldown;
   let regularDialog: RegularDialog;
   let kensaDialog: KensaDialog;
   let searchDialog: SearchDialog;
 
-  function doAux(): void {
-    auxPopup.open();
-  }
-  
   async function doRegular() {
     const names = await api.getShinryouRegular();
     const d: RegularDialog = new RegularDialog({
@@ -40,7 +35,7 @@
       props: {
         destroy: () => d.$destroy(),
         kensa,
-        visit
+        visit,
       },
     });
   }
@@ -61,7 +56,7 @@
       props: {
         destroy: () => d.$destroy(),
         visitId: visit.visitId,
-        shinryouList: visit.shinryouList
+        shinryouList: visit.shinryouList,
       },
     });
   }
@@ -69,24 +64,24 @@
   async function doDeleteDuplicate() {
     const foundCodes: Set<number> = new Set<number>();
     const dupShinryouIds: number[] = [];
-    visit.shinryouList.forEach(s => {
+    visit.shinryouList.forEach((s) => {
       const code = s.shinryoucode;
-      if( foundCodes.has(code) ){
+      if (foundCodes.has(code)) {
         dupShinryouIds.push(s.shinryouId);
       } else {
         foundCodes.add(s.shinryoucode);
       }
     });
-    if( dupShinryouIds.length > 0 ){
+    if (dupShinryouIds.length > 0) {
       await Promise.all(
-        dupShinryouIds.map(shinryouId => api.deleteShinryou(shinryouId))
+        dupShinryouIds.map((shinryouId) => api.deleteShinryou(shinryouId))
       );
     }
   }
 
   function doCopySelected(): void {
     const targetId = getCopyTarget();
-    if( targetId == null ){
+    if (targetId == null) {
       alert("コピー先をみつけられません。");
     } else {
       const d: CopySelectedDialog = new CopySelectedDialog({
@@ -94,7 +89,7 @@
         props: {
           destroy: () => d.$destroy(),
           targetVisitId: targetId,
-          shinryouList: visit.shinryouList
+          shinryouList: visit.shinryouList,
         },
       });
     }
@@ -102,27 +97,46 @@
 
   async function doCopyAll() {
     const targetId = getCopyTarget();
-    if( targetId != null ){
-      const codes = visit.shinryouList.map(s => s.shinryoucode);
+    if (targetId != null) {
+      const codes = visit.shinryouList.map((s) => s.shinryoucode);
       const targetVisit = await api.getVisit(targetId);
       try {
         await enterTo(targetId, targetVisit.visitedAt, codes, []);
-      } catch(ex) {
+      } catch (ex) {
         alert(ex);
       }
     } else {
       alert("コピー先をみつけられません。");
     }
   }
-
 </script>
 
 <div>
-  <a href="javascript:void(0)"  on:click={doRegular}>[診療行為]</a>
-  <a href="javascript:void(0)" bind:this={auxLink} on:click={doAux}>その他</a>
+  <a href="javascript:void(0)" on:click={doRegular}>[診療行為]</a>
+  <Popup let:destroyAnd let:trigger>
+    <a href="javascript:void(0)" bind:this={auxLink} on:click={trigger}
+      >その他</a
+    >
+    <div slot="menu" class="popup-menu">
+      <a href="javascript:void(0)" on:click={destroyAnd(doKensa)}>検査</a>
+      <a href="javascript:void(0)" on:click={destroyAnd(doSearch)}>検索入力</a>
+      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteSelected)}
+        >選択削除</a
+      >
+      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteDuplicate)}
+        >重複削除</a
+      >
+      <a href="javascript:void(0)" on:click={destroyAnd(doCopySelected)}
+        >選択コピー</a
+      >
+      <a href="javascript:void(0)" on:click={destroyAnd(doCopyAll)}
+        >全部コピー</a
+      >
+    </div>
+  </Popup>
 </div>
 
-<Pulldown anchor={auxLink} bind:this={auxPopup}>
+<!-- <Pulldown anchor={auxLink} bind:this={auxPopup}>
   <div>
     <a href="javascript:void(0)" on:click={doKensa}>検査</a>
     <a href="javascript:void(0)" on:click={doSearch}>検索入力</a>
@@ -131,4 +145,16 @@
     <a href="javascript:void(0)" on:click={doCopySelected}>選択コピー</a>
     <a href="javascript:void(0)" on:click={doCopyAll}>全部コピー</a>
   </div>
-</Pulldown>
+</Pulldown> -->
+
+<style>
+  .popup-menu a {
+    display: block;
+    margin-bottom: 4px;
+    color: black;
+  }
+
+  .popup-menu a:last-of-type {
+    margin-bottom: 0;
+  }
+</style>

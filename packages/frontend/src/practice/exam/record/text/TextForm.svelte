@@ -4,7 +4,6 @@
   import type { Op } from "@/lib/drawer/op";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
   import { getCopyTarget } from "../../ExamVars";
-  import Pulldown from "@/lib/Pulldown.svelte";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
@@ -17,8 +16,6 @@
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
-  let shohousenAnchor: HTMLElement;
-  let shohousenPulldown: Pulldown;
 
   function onEnter(): void {
     const content = textarea.value.trim();
@@ -134,7 +131,6 @@
         <Popup let:trigger let:destroy>
           <a
             href="javascript:void(0)"
-            bind:this={shohousenAnchor}
             on:click={trigger}>処方箋</a
           >
           <div slot="menu" class="shohousen-menu">
@@ -161,15 +157,6 @@
   {/if}
 </div>
 
-<Pulldown anchor={shohousenAnchor} bind:this={shohousenPulldown}>
-  <svelte:fragment>
-    <a href="javascript:void(0)" on:click={doPrintShohousen}>処方箋印刷</a>
-    <a href="javascript:void(0)" on:click={doFormatShohousen}
-      >処方箋フォーマット</a
-    >
-  </svelte:fragment>
-</Pulldown>
-
 <style>
   textarea {
     width: 100%;
@@ -181,6 +168,7 @@
   .shohousen-menu a {
     display: block;
     margin-bottom: 4px;
+    color: black;
   }
 
   .shohousen-menu a:last-of-type {
