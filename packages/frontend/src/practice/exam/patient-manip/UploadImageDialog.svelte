@@ -1,10 +1,10 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
-  import Pulldown from "@/lib/Pulldown.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import { pad } from "@/lib/pad";
   import { currentPatient } from "../ExamVars";
   import api from "@/lib/api";
+  import Popup from "@/lib/Popup.svelte";
 
   export let destroy: () => void;
   const initTag = "other";
@@ -18,13 +18,8 @@
     ["同意書", "douisho"],
     ["その他", "other"],
   ];
-  let examplePulldown: Pulldown;
   let fileInput: HTMLInputElement;
   let form: HTMLFormElement;
-
-  function doExample(): void {
-    examplePulldown.open();
-  }
 
   async function doSave() {
     const patient = $currentPatient;
@@ -90,9 +85,22 @@
 <Dialog {destroy} title="画像保存">
   <div class="tag-wrapper">
     Tag: <input type="text" bind:value={tag} />
-    <a href="javascript:void(0)" bind:this={exampleAnchor} on:click={doExample}
-      >例</a
-    >
+    <Popup let:destroy let:trigger>
+      <a href="javascript:void(0)" bind:this={exampleAnchor} on:click={trigger}
+        >例</a
+      >
+      <div class="popup-menu" slot="menu">
+        {#each examples as e}
+          <a
+            href="javascript:void(0)"
+            on:click={() => {
+              destroy();
+              tag = e[1];
+            }}>{e[0]}</a
+          >
+        {/each}
+      </div>
+    </Popup>
   </div>
   <form bind:this={form}>
     <input type="file" bind:this={fileInput} multiple />
@@ -102,15 +110,20 @@
     <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
-<Pulldown anchor={exampleAnchor} bind:this={examplePulldown}>
-  {#each examples as e}
-    <a href="javascript:void(0)" on:click={() => (tag = e[1])}>{e[0]}</a>
-  {/each}
-</Pulldown>
 
 <style>
   .tag-wrapper {
     margin: 10px 0;
+  }
+
+  .popup-menu a {
+    display: block;
+    margin-bottom: 4px;
+    color: black;
+  }
+
+  .popup-menu a:last-of-type {
+    margin-bottom: 0;
   }
 
   .commands {

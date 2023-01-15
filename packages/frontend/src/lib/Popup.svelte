@@ -13,6 +13,13 @@
     show = false;
   }
 
+  function destroyAnd(f: () => void): () => void {
+    return () => {
+      destroy();
+      f();
+    }
+  }
+
   async function trigger(event: MouseEvent) {
     event.preventDefault();
     anchor = event.currentTarget as HTMLElement | SVGSVGElement;
@@ -43,7 +50,7 @@
   }
 </script>
 
-<slot {trigger} {triggerClick} {destroy} />
+<slot {trigger} {triggerClick} {destroy} {destroyAnd}/>
 {#if show}
   <div class="menu" use:open on:keydown={doMenuKey} tabindex="0">
     <slot name="menu" />

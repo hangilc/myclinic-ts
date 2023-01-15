@@ -7,28 +7,23 @@
     clearTempVisitId,
     addToMishuuList,
   } from "../ExamVars";
-  import Pulldown from "@/lib/Pulldown.svelte";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
   import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
   import type { Meisai, VisitEx } from "myclinic-model";
+  import Popup from "@/lib/Popup.svelte";
 
   export let visit: VisitEx;
 
   let manipLink: HTMLElement;
-  let manipPulldown: Pulldown;
   let taskRunner: TaskRunner | null = null;
   let showMeisai = false;
 
   onDestroy(() => {
     taskRunner?.cancel();
   });
-
-  function doManip(): void {
-    manipPulldown.open();
-  }
 
   function doDeleteVisit(): void {
     api.deleteVisit(visit.visitId);
@@ -69,6 +64,7 @@
   function totalTenOf(meisai: Meisai): string {
     return meisai.totalTen.toLocaleString();
   }
+
 </script>
 
 <div
@@ -78,29 +74,35 @@
 >
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
-  <a href="javascript:void(0)" bind:this={manipLink} on:click={doManip}>操作</a>
-</div>
-
-<Pulldown anchor={manipLink} bind:this={manipPulldown}>
-  <svelte:fragment>
-    <a href="javascript:void(0)" on:click={doDeleteVisit}>この診察を削除</a>
-    {#if visit.visitId !== $tempVisitId}
-      <a href="javascript:void(0)" on:click={doSetTempVisitId}>暫定診察に設定</a
-      >
-    {:else}
-      <a href="javascript:void(0)" on:click={doClearTempVisitId}
-        >暫定診察の解除</a
-      >
-    {/if}
-    <a href="javascript:void(0)" on:click={doMeisai}>診療明細</a>
-    <a href="javascript:void(0)" on:click={doFutanwariOverride}
-      >負担割オーバーライド</a
+  <Popup let:destroyAnd let:trigger>
+    <a href="javascript:void(0)" bind:this={manipLink} on:click={trigger}
+      >操作</a
     >
-    {#if isMishuu(visit)}
-      <a href="javascript:void(0)" on:click={doMishuuList}>未収リストへ</a>
-    {/if}
-  </svelte:fragment>
-</Pulldown>
+    <div slot="menu" class="popup-menu">
+      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteVisit)}
+        >この診察を削除</a
+      >
+      {#if visit.visitId !== $tempVisitId}
+        <a
+          href="javascript:void(0)"
+          on:click={destroyAnd(doSetTempVisitId)}>暫定診察に設定</a
+        >
+      {:else}
+        <a
+          href="javascript:void(0)"
+          on:click={destroyAnd(doClearTempVisitId)}>暫定診察の解除</a
+        >
+      {/if}
+      <a href="javascript:void(0)" on:click={destroyAnd(doMeisai)}>診療明細</a>
+      <a href="javascript:void(0)" on:click={destroyAnd(doFutanwariOverride)}
+        >負担割オーバーライド</a
+      >
+      {#if isMishuu(visit)}
+        <a href="javascript:void(0)" on:click={destroyAnd(doMishuuList)}>未収リストへ</a>
+      {/if}
+    </div>
+  </Popup>
+</div>
 
 {#if showMeisai}
   <Dialog destroy={() => (showMeisai = false)} title="診療明細">
@@ -199,4 +201,13 @@
     line-height: 1;
   }
 
+  .popup-menu a {
+    display: block;
+    margin-bottom: 4px;
+    color: black;
+  }
+
+  .popup-menu a:last-of-type {
+    margin-bottom: 0;
+  }
 </style>

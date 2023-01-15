@@ -10,18 +10,16 @@
   import { hotlineBeepEntered, hotlineEntered } from "@/app-events";
   import { onDestroy } from "svelte";
   import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
-  import Pulldown from "../Pulldown.svelte";
   import { printApi } from "../printApi";
+  import Popup from "../Popup.svelte";
 
   export let sendAs: string;
   export let sendTo: string;
   let relevants: string[] = [sendAs, sendTo];
   let regulars: string[] = getRegulars(sendAs);
   let regularAnchor: HTMLElement;
-  let regularPulldown: Pulldown;
   let hotlineInput: HTMLTextAreaElement;
   let patientsAnchor: HTMLElement;
-  let patientsPulldown: Pulldown;
   let wqPatients: Patient[] = [];
 
   let hotlines: HotlineEx[] = [];
@@ -97,10 +95,6 @@
     return sendMessage("了解");
   }
 
-  function doRegulars(): void {
-    regularPulldown.open();
-  }
-
   function insertIntoMessage(msg: string): void {
     const start = hotlineInput.selectionStart;
     const end = hotlineInput.selectionEnd;
@@ -120,7 +114,7 @@
     return msg.replaceAll("{}", "");
   }
 
-  async function doPatients() {
+  async function setupPatients() {
     const wqueue: Wqueue[] = await api.listWqueue();
     const visitIds: number[] = wqueue.map((wq) => wq.visitId);
     const visitMap: Record<number, Visit> = await api.batchGetVisit(visitIds);
@@ -139,7 +133,6 @@
       }
     });
     wqPatients = patients;
-    patientsPulldown.open();
   }
 
   function insertPatient(patient: Patient): void {
@@ -154,16 +147,44 @@
     <button on:click={doRoger}>了解</button>
     <button>Beep</button>
     <div class="link-commands">
-      <a
-        href="javascript:void(0)"
-        on:click={doRegulars}
-        bind:this={regularAnchor}>常用</a
-      >
-      <a
-        href="javascript:void(0)"
-        on:click={doPatients}
-        bind:this={patientsAnchor}>患者</a
-      >
+      <Popup let:destroy let:trigger>
+        <a
+          href="javascript:void(0)"
+          on:click={trigger}
+          bind:this={regularAnchor}>常用</a
+        >
+        <div slot="menu" class="popup-menu">
+          {#each regulars as r}
+            <a
+              href="javascript:void(0)"
+              on:click={() => {
+                destroy();
+                insertIntoMessage(r);
+              }}
+            >
+              {stripPlaceholder(r)}
+            </a>
+          {/each}
+        </div>
+      </Popup>
+      <Popup let:destroy let:trigger triggerHook={setupPatients}>
+        <a
+          href="javascript:void(0)"
+          on:click={trigger}
+          bind:this={patientsAnchor}>患者</a
+        >
+        <div slot="menu" class="popup-menu">
+          {#each wqPatients as p}
+            <a
+              href="javascript:void(0)"
+              on:click={() => {
+                destroy();
+                insertPatient(p);
+              }}>{p.lastName} {p.firstName}</a
+            >
+          {/each}
+        </div>
+      </Popup>
     </div>
   </div>
   <div class="messages">
@@ -172,24 +193,6 @@
     {/each}
   </div>
 </div>
-<Pulldown anchor={regularAnchor} bind:this={regularPulldown}>
-  <svelte:fragment>
-    {#each regulars as r}
-      <a href="javascript:void(0)" on:click={() => insertIntoMessage(r)}>
-        {stripPlaceholder(r)}
-      </a>
-    {/each}
-  </svelte:fragment>
-</Pulldown>
-<Pulldown anchor={patientsAnchor} bind:this={patientsPulldown}>
-  <svelte:fragment>
-    {#each wqPatients as p}
-      <a href="javascript:void(0)" on:click={() => insertPatient(p)}
-        >{p.lastName} {p.firstName}</a
-      >
-    {/each}
-  </svelte:fragment>
-</Pulldown>
 
 <style>
   .input-textarea {
@@ -215,5 +218,15 @@
     height: 15em;
     font-size: 14px;
     overflow-y: auto;
+  }
+
+  .popup-menu a {
+    display: block;
+    margin-bottom: 4px;
+    color: black;
+  }
+
+  .popup-menu a:last-of-type {
+    margin-bottom: 0;
   }
 </style>
