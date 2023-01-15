@@ -27,3 +27,41 @@ export function cut<T>(
   result.push(new CutText(s.substring(i, s.length)));
   return result;
 }
+
+export function cutMulti(
+  s: string,
+  handlers: { re: RegExp; kind: string }[]
+): { kind: string; text: string }[] {
+  const re = new RegExp(
+    handlers
+      .map((h) => `(?<cut_multi_${h.kind}>` + h.re.source + ")")
+      .join("|"),
+    "g"
+  );
+  const result: { kind: string; text: string }[] = [];
+  const matches = s.matchAll(re);
+  let start = 0;
+  if (matches != null) {
+    for (let m of matches) {
+      const gs = m.groups || {};
+      for (let g in gs) {
+        const t = gs[g];
+        if (typeof t === "string" && g.startsWith("cut_multi_")) {
+          const index = m.index;
+          if (index != undefined) {
+            if (index > start) {
+              result.push({ kind: "", text: s.substring(start, index)})
+            }
+            const kind = g.substring(10);
+            result.push({ kind, text: t});
+            start = index + t.length;
+          }
+        }
+      }
+    }
+  }
+  if( start < s.length ){
+    result.push({ kind: "", text: s.substring(start)})
+  }
+  return result;
+}
