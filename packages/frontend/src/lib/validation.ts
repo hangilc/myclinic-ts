@@ -1,3 +1,5 @@
+import { dateToSql } from "./util";
+
 type VErrorUnit = string | VError;
 
 export class VError {
@@ -64,12 +66,12 @@ export class Validator<S, T> {
   map<U>(f: (t: T) => U): Validator<S, U> {
     return new Validator<S, U>((s: S) => {
       const r = this.f(s);
-      if( r.ok ){
+      if (r.ok) {
         return valid(f(r.validated));
       } else {
         return r;
       }
-    })
+    });
   }
 
   unwrap(src: S, prefix: string, ve: VError): T {
@@ -93,13 +95,14 @@ export function invalid(message: string): { ok: false; error: VErrorUnit } {
 
 function check<S>(
   test: (s: S) => boolean,
-  message: string
+  message: string | (() => string)
 ): Validator<S, S> {
   return new Validator<S, S>((s) => {
     if (test(s)) {
       return valid(s);
     } else {
-      return invalid(message);
+      const m = typeof message === "string" ? message : message();
+      return invalid(m);
     }
   });
 }
@@ -114,33 +117,72 @@ export function isNotNull<T>(): Validator<T | null | undefined, T> {
   });
 }
 
-export const isNotEmpty = check<string>(
-  (s) => s !== "",
-  "空白文字です"
-);
+export const isNotEmpty = check<string>((s) => s !== "", "空白文字です");
 
 export function matchRegExp(re: RegExp): Validator<string, string> {
-  return check<string>(
-    (s) => re.test(s),
-    "入力が不適切です"
-  );
+  return check<string>((s) => re.test(s), "入力が不適切です");
 }
 
-export const toInt = new Validator<string | number, number>( s => {
+export const toInt = new Validator<string | number, number>((s) => {
   const n = Number(s);
-  if( Number.isInteger(n) ){
+  if (Number.isInteger(n)) {
     return valid(n);
   } else {
     return invalid("整数でありません");
   }
-})
-  
+});
 
-export const toFloat = new Validator<string | number, number>( s => {
+export const isInt = check<number>(
+  (s) => Number.isInteger(s),
+  "整数でありません"
+);
+
+export const toFloat = new Validator<string | number, number>((s) => {
   const n = Number(s);
-  if( !Number.isNaN(n) ){
+  if (!Number.isNaN(n)) {
     return valid(n);
   } else {
     return invalid("数値でありません");
   }
-})
+});
+
+export const isPositive = check<number>((s) => s > 0, "正の数でありません");
+
+export const isZeroOrPositive = check<number>(
+  (t: number) => t >= 0,
+  "正またはゼロの数でありません。"
+);
+
+export const isPositiveInt = isInt.and(isPositive);
+
+export const isZeroOrPositiveInt = isInt.and(isZeroOrPositive);
+
+export function isInRange(min: number, max: number): Validator<number, number> {
+  return check<number>(
+    (s) => min <= s && s <= max,
+    () => `${min} と ${max} の間の範囲でありません。`
+  );
+}
+
+export function isOneOf<T>(alts: T[]): Validator<T, T> {
+  return new Validator<T, T>((s: T) => {
+    if (alts.includes(s)) {
+      return valid(s);
+    } else {
+      return invalid(alts.map((c) => `${c}`).join(", ") + " でありません。");
+    }
+  });
+}
+
+export const toSqlDate: Validator<Date, string> = new Validator<Date, string>(
+  (s) => {
+    return valid(dateToSql(s));
+  }
+);
+
+export const toOptionalSqlDate: Validator<Date | null, string> = new Validator<
+  Date | null,
+  string
+>((s: Date | null) => {
+  return valid(s === null ? "0000-00-00" : dateToSql(s));
+});
