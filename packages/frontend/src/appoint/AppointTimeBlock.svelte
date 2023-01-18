@@ -29,7 +29,7 @@
   }
 
   function vacant(data: AppointTimeData): string {
-    return data.appoints.length === 0 ? "vacant" : "";
+    return data.appoints.length < data.appointTime.capacity ? "vacant" : "";
   }
 
   function doTimeBoxClick() {
