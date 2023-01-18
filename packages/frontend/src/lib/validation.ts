@@ -1,6 +1,6 @@
 import { dateToSql } from "./util";
 
-interface VErrorMark {
+export interface VErrorMark {
   label: string;
 }
 

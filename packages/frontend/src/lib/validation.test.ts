@@ -1,9 +1,11 @@
 import { it, expect } from "vitest";
-import { isNotEmpty, isNotNull, matchRegExp, toFloat, toInt, VError } from "./validation";
+import { MessageValidatorBuilder, VError, type VErrorMark } from "./validation";
+
+const b = new MessageValidatorBuilder();
 
 it("should validate non-null", () => {
-  let ve = new VError();
-  let r = isNotNull<string>().unwrap("12", "digits", ve);
+  let ve = new VError<VErrorMark>();
+  let r = b.isNotNull<string>().unwrap("12", "digits", ve);
   expect(ve.isEmpty).toBe(true);
   expect(r).toBe("12");
   ve = new VError();
