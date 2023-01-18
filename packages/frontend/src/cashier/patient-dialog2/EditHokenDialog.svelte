@@ -21,11 +21,19 @@
   let hokenTypeRep: string =
     typeof hoken === "string" ? strToHokenTypeRep(hoken) : hoken.name;
 
-  function isCreation(): boolean {
-    return typeof hoken === "string" || hoken.hokenId === 0;
+  function hokenId(hoken: Hoken | string): number {
+    if( typeof hoken === "string" ){
+      return 0;
+    } else {
+      return hoken.hokenId;
+    }
   }
 
-  let title: string = isCreation()
+  function isCreation(hoken: Hoken | string): boolean {
+    return hokenId(hoken) === 0;
+  }
+
+  let title: string = isCreation(hoken)
     ? `新規${hokenTypeRep}`
     : `${hokenTypeRep}編集`;
 
@@ -52,9 +60,7 @@
   }
 
   function close(): void {
-    console.log("closing edit hoken", data.stack);
     destroy();
-    console.log("closing edit hoken (before goback)", data.stack);
     data.goback();
   }
 
@@ -84,24 +90,12 @@
     }
   }
 
-  // async function deleteHoken(hoken: Hoken) {
-  //   if (hoken.value instanceof Shahokokuho) {
-  //     await api.deleteShahokokuho(hoken.hokenId);
-  //   } else if (hoken.value instanceof Koukikourei) {
-  //     await api.deleteKoukikourei(hoken.hokenId);
-  //   } else if (hoken.value instanceof Kouhi) {
-  //     await api.deleteKouhi(hoken.hokenId);
-  //   } else {
-  //     throw new Error("Cannot update hoken: " + hoken);
-  //   }
-  // }
-
   async function doEnter() {
     const result: HokenType | string[] = validate();
     if (Array.isArray(result)) {
       errors = result;
     } else {
-      if (isCreation()) {
+      if (isCreation(hoken)) {
         await enterHoken(result);
         data.hokenCache.enterHokenType(result);
       } else {
@@ -113,6 +107,7 @@
   }
 
   function doDelete() {
+    console.log("doDelete", hokenTmpl);
     if (hokenTmpl && hokenTmpl.hokenId !== 0) {
       const hoken = hokenTmpl;
       confirm("この保険を削除していいですか？", async () => {

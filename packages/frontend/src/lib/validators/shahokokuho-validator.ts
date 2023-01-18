@@ -1,7 +1,7 @@
 import { Shahokokuho } from "myclinic-model";
 import { notNull, isPositive, isNotEmpty, oneOf, type Invalid, type ValidationResult, inRange, toSqlDate, toOptionalSqlDate } from "../validator";
 
-export interface ShahokokuhoInput {
+interface ShahokokuhoInput {
   patientId: ValidationResult<number>;
   hokenshaBangou: ValidationResult<number>;
   hihokenshaKigou: ValidationResult<string>;

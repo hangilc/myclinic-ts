@@ -12,7 +12,7 @@
   function renderPaymentStatus(visit: VisitEx): string {
     const chargeOpt = visit.chargeOption;
     if( chargeOpt == null ){
-      return "（未請求）";
+      return "";
     } else {
       const charge = chargeOpt.charge;
       const lastPay = visit.lastPayment?.amount ?? 0;

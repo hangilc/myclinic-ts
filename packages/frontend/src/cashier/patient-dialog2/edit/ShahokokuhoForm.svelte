@@ -2,51 +2,31 @@
   import type { HokenType } from "@/cashier/patient-dialog2/hoken";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { intSrc, strSrc, type Invalid } from "@/lib/validator";
   import { dateSrc } from "@/lib/validators/date-validator";
   import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
   import { toZenkaku } from "@/lib/zenkaku";
-  import { HonninKazoku, Shahokokuho, type Patient } from "myclinic-model";
-  import fold from "./fold";
-  import { castHokenType } from "./misc";
+  import { HonninKazoku, type Patient } from "myclinic-model";
+  import type { ShahokokuhoInput } from "../shahokokuho-input";
 
-  export let hoken: HokenType | undefined;
+  export let input: ShahokokuhoInput;
   export let patient: Patient;
-  let shahokokuho: Shahokokuho | undefined = castHokenType<Shahokokuho>(hoken);
 
-  function foldS<T>(someF: (some: Shahokokuho) => T, noneF: T): T {
-    return fold(shahokokuho, someF, noneF);
-  }
-  let hokenshaBangou: string = foldS((h) => h.hokenshaBangou.toString(), "");
-  let kigou: string = foldS((h) => h.hihokenshaKigou, "");
-  let bangou: string = foldS((h) => h.hihokenshaBangou, "");
-  let edaban: string = foldS((h) => h.edaban, "");
-  let honninKazoku: number = foldS((h) => h.honninStore, 0);
-  let validFrom: Date | null = foldS((h) => parseSqlDate(h.validFrom), null);
   let validFromErrors: Invalid[] = [];
-  let validUpto: Date | null = foldS(
-    (h) => parseOptionalSqlDate(h.validUpto),
-    null
-  );
   let validUptoErrors: Invalid[] = [];
-  let kourei: number = foldS((h) => h.koureiStore, 0);
 
   export function validate(): HokenType | string[] {
-    return validateShahokokuho(
-      foldS((h) => h.shahokokuhoId, 0),
-      {
-        patientId: intSrc(patient.patientId),
-        hokenshaBangou: intSrc(hokenshaBangou),
-        hihokenshaKigou: strSrc(kigou),
-        hihokenshaBangou: strSrc(bangou),
-        honninStore: intSrc(honninKazoku),
-        validFrom: dateSrc(validFrom, validFromErrors),
-        validUpto: dateSrc(validUpto, validUptoErrors),
-        koureiStore: intSrc(kourei),
-        edaban: strSrc(edaban),
-      }
-    );
+    return validateShahokokuho(shahokokuhoId, {
+      patientId: intSrc(patient.patientId),
+      hokenshaBangou: intSrc(input.hokenshaBangou),
+      hihokenshaKigou: strSrc(input.kigou),
+      hihokenshaBangou: strSrc(input.bangou),
+      honninStore: intSrc(input.honninKazoku),
+      validFrom: dateSrc(input.validFrom, validFromErrors),
+      validUpto: dateSrc(input.validUpto, validUptoErrors),
+      koureiStore: intSrc(input.kourei),
+      edaban: strSrc(input.edaban),
+    });
   }
 </script>
 
@@ -54,26 +34,28 @@
   <span>({patient.patientId})</span>
   <span>{patient.fullName(" ")}</span>
   <span>保険者番号</span>
-  <div><input type="text" class="regular" bind:value={hokenshaBangou} /></div>
+  <div>
+    <input type="text" class="regular" bind:value={input.hokenshaBangou} />
+  </div>
   <span>記号・番号</span>
   <div>
-    <input type="text" class="regular" bind:value={kigou} /> ・
-    <input type="text" class="regular" bind:value={bangou} />
+    <input type="text" class="regular" bind:value={input.kigou} /> ・
+    <input type="text" class="regular" bind:value={input.bangou} />
   </div>
   <span>枝番</span>
-  <div><input type="text" class="edaban" bind:value={edaban} /></div>
+  <div><input type="text" class="edaban" bind:value={input.edaban} /></div>
   <span>本人・家族</span>
   <div>
     {#each Object.values(HonninKazoku) as h}
       {@const id = genid()}
-      <input type="radio" {id} bind:group={honninKazoku} value={h.code} />
+      <input type="radio" {id} bind:group={input.honninKazoku} value={h.code} />
       <label for={id}>{h.rep}</label>
     {/each}
   </div>
   <span>期限開始</span>
   <div>
     <DateFormWithCalendar
-      bind:date={validFrom}
+      bind:date={input.validFrom}
       bind:errors={validFromErrors}
       isNullable={false}
     />
@@ -81,7 +63,7 @@
   <span>期限終了</span>
   <div>
     <DateFormWithCalendar
-      bind:date={validUpto}
+      bind:date={input.validUpto}
       bind:errors={validUptoErrors}
       isNullable={true}
     />
@@ -91,14 +73,26 @@
     <div>
       {#if true}
         {@const id = genid()}
-        <input type="radio" {id} class="radio" bind:group={kourei} value={0} />
+        <input
+          type="radio"
+          {id}
+          class="radio"
+          bind:group={input.kourei}
+          value={0}
+        />
         <label for={id}>高齢でない</label>
       {/if}
     </div>
     <div>
       {#each [1, 2, 3] as w}
         {@const id = genid()}
-        <input type="radio" {id} class="radio" bind:group={kourei} value={w} />
+        <input
+          type="radio"
+          {id}
+          class="radio"
+          bind:group={input.kourei}
+          value={w}
+        />
         <label for={id}>{toZenkaku(w.toString())}割</label>
       {/each}
     </div>

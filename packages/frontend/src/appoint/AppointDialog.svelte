@@ -9,6 +9,7 @@
   import { validateAppoint } from "@/lib/validators/appoint-validator";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
   import { setFocus } from "@/lib/set-focus";
+  import { confirm } from "@/lib/confirm-call";
 
   export let destroy: () => void;
   export let title: string;
@@ -201,14 +202,11 @@
 
   async function doDelete() {
     if (init != undefined) {
-      if( isModified() ){
-        const ok = confirm("この予約を削除していいですか？");
-        if( !ok ){
-          return;
-        }
-      }
-      await api.cancelAppoint(init.appointId);
-      destroy();
+      const appointId = init.appointId;
+      confirm("この予約を削除していいですか？", async () => {
+        await api.cancelAppoint(appointId);
+        destroy();
+      });
     }
   }
 
@@ -306,7 +304,7 @@
     {#if init == undefined}
       <button on:click={doEnter}>入力</button>
     {:else}
-      <a href="javascript:void(0)" on:click={doEnter}>変更入力</a>
+      <button on:click={doEnter}>変更入力</button>
     {/if}
     <button on:click={doClose}>キャンセル</button>
   </div>
