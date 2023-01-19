@@ -48,6 +48,32 @@ export class VError<M> {
   // }
 }
 
+export function hasError<M>(e: any | VError<M>): boolean {
+  if( e instanceof VError<M> ){
+    return e.units.length > 0;
+  }
+  return false;
+}
+
+export function getError<M, T>(e: T | VError<M>): VError<M> | undefined {
+  if( e instanceof VError<M> ){
+    return e;
+  } else {
+    return undefined;
+  }
+}
+
+export function errorMessages(e: undefined | VError<string>): string[] {
+  if( e instanceof VError<string> ){
+    return e.units.map(u => {
+      const ms = u.marks;
+      return [...ms, u.error].join(" : ");
+    });
+  } else {
+    return [];
+  }
+}
+
 type OkResult<T> = { ok: true; validated: T };
 
 type ErrorResult<M> = { ok: false; error: VError<M> };
@@ -123,15 +149,21 @@ function convert<M, S, T>(f: (s: S) => ValidationResult<M, T>) {
   return new Validator<M, S, T>(f);
 }
 
-export function isNotNull<M, T>(): Validator<M, T, T> {
-  return ensure((s) => s != null, "Null value");
+export function isNotNull<M, T>(): Validator<M, T | null, T> {
+  return new Validator<M, T | null, T>(s => {
+    if( s != null ){
+      return valid(s);
+    } else {
+      return invalid("Null value");
+    }
+  })
 }
 
-function isNotEmpty<M>(): Validator<M, string, string> {
+export function isNotEmpty<M>(): Validator<M, string, string> {
   return ensure((s) => s !== "", "空白文字です");
 }
 
-function matchRegExp<M>(re: RegExp): Validator<M, string, string> {
+export function matchRegExp<M>(re: RegExp): Validator<M, string, string> {
   return ensure<M, string>((s) => re.test(s), "入力が不適切です");
 }
 

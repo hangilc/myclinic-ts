@@ -1,42 +1,37 @@
 import { it, expect } from "vitest";
-import { isNotNull, validate, VError } from "./validation";
+import {
+  isNotNull,
+  validate,
+  VError,
+  hasError,
+  errorMessages,
+  getError,
+  isNotEmpty,
+} from "./validation";
 
 it("should validate non-null", () => {
-  const r1 = validate(
-    "12", 
-    isNotNull(),
-    "digits"
-  );
+  const r1 = validate("12", isNotNull(), "digits");
   expect(r1 instanceof VError<string>).toBe(false);
   expect(r1).toBe("12");
 
-  const r2 = validate(
+  const r2 = validate<string, string | null, string>(
     null,
     isNotNull(),
     "digits"
   );
-  expect(r2 instanceof VError<string>).toBe(true);
-
-  
-  // strSrc("12").and(isNotNull()).unwrap("digits", ve);
-  // expect(ve.isEmpty).toBe(true);
-  // expect(r).toBe("12");
-  // ve = new VError();
-  // r = isNotNull<string>().unwrap(null, "digits", ve);
-  // expect(ve.isEmpty).toBe(false);
-  // expect(ve.messages).deep.equal(["digits : Null value"]);
+  expect(hasError(r2)).toBe(true);
+  expect(errorMessages(getError(r2))).deep.equal(["digits : Null value"]);
 });
 
-// it("should validate non-empty string", () => {
-//   let ve = new VError();
-//   let r = isNotEmpty.unwrap("hello", "greeting", ve);
-//   expect(ve.isEmpty).toBe(true);
-//   expect(r).toBe("hello");
-//   ve = new VError();
-//   r = isNotEmpty.unwrap("", "greeting", ve);
-//   expect(ve.isEmpty).toBe(false);
-//   expect(ve.messages).deep.equal(["greeting : 空白文字です"]);
-// });
+it("should validate non-empty string", () => {
+  const r1 = validate("hello", isNotEmpty(), "greeting");
+  expect(hasError(r1)).toBe(false);
+  expect(r1).toBe("hello");
+  
+  const r2 = validate<string, string, string>("", isNotEmpty(), "greeting");
+  expect(hasError(r2)).toBe(true);
+  expect(errorMessages(getError(r2))).deep.equal(["greeting : 空白文字です"]);
+});
 
 // it("should validate with RegExp", () => {
 //   let ve = new VError();
@@ -89,4 +84,3 @@ it("should validate non-null", () => {
 //   expect(ve.isEmpty).toBe(false);
 //   expect(ve.messages).deep.equal(["id : 空白文字です"]);
 // });
-
