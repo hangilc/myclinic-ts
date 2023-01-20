@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { isNotEmpty, isNotNull, toInt, valid, validated2 } from "./validation";
+import { isNotEmpty, isNotNull, matchRegExp, toFloat, toInt, valid, validated2 } from "./validation";
 
 it("should validate non-null", () => {
   const r1 = valid("12").validate(isNotNull).mark("digits");
@@ -21,35 +21,38 @@ it("should validate non-empty string", () => {
   expect(r2.errorMessage).toBe("greeting : 空白文字です");
 });
 
-// it("should validate with RegExp", () => {
-//   const v = matchRegExp<string>(/^hello+$/)
-//   const r1 = validate("hello", v, "greeting");
-//   expect(hasError(r1)).toBe(false);
-//   expect(r1).toBe("hello");
-//   const r2 = validate(" hello", v, "greeting");
-//   expect(hasError(r2)).toBe(true);
-//   expect(errorMessages(getError(r2))).deep.equal(["greeting : 入力が不適切です"]);
-// });
+it("should validate with RegExp", () => {
+  const v = matchRegExp(/^hello+$/)
+  const r1 = valid("hello").validate(v).mark("greeting");
+  expect(r1.isValid).toBe(true);
+  expect(r1.value).toBe("hello");
 
-// it("should validate toInt", () => {
-//   const validator = toInt<string>();
-//   const r1 = validate("123", validator, "int");
-//   expect(hasError(r1)).toBe(false);
-//   expect(r1).toBe(123);
-//   const r2 = validate("abc", validator, "int");
-//   expect(hasError(r2)).toBe(true);
-//   expect(errorMessages(getError(r2))).deep.equal(["int : 整数でありません"]);
-// });
+  const r2 = valid(" hello").validate(v).mark("greeting");
+  expect(r2.isValid).toBe(false);
+  expect(r2.errorMessage).toBe("greeting : 入力が不適切です");
+});
 
-// it("should validate toFloat", () => {
-//   const validator = toFloat<string>();
-//   const r1 = validate("123.45", validator, "float");
-//   expect(hasError(r1)).toBe(false);
-//   expect(r1).toBe(123.45);
-//   const r2 = validate("abc", validator, "float");
-//   expect(hasError(r2)).toBe(true);
-//   expect(errorMessages(getError(r2))).deep.equal(["float : 数値でありません"]);
-// });
+it("should validate toInt", () => {
+  const validator = toInt;
+  const r1 = valid("123").validate(validator).mark("int");
+  expect(r1.isValid).toBe(true);
+  expect(r1.value).toBe(123);
+
+  const r2 = valid("abc").validate(validator).mark("int");
+  expect(r2.isValid).toBe(false);
+  expect(r2.errorMessage).toBe("int : 整数でありません");
+});
+
+it("should validate toFloat", () => {
+  const validator = toFloat;
+  const r1 = valid("123.45").validate(validator).mark("float");
+  expect(r1.isValid).toBe(true);
+  expect(r1.value).toBe(123.45);
+
+  const r2 = valid("abc").validate(validator).mark("float");
+  expect(r2.isValid).toBe(false);
+  expect(r2.errorMessage).toBe("float : 数値でありません");
+});
 
 it("should validate simple object", () => {
   const idVal = valid("12")

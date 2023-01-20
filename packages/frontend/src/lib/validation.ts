@@ -109,6 +109,25 @@ export function toInt(s: string | number): VResult<number> {
   }
 }
 
+export function toFloat(s: string | number): VResult<number> {
+  const num = Number(s);
+  if (!Number.isNaN(num)) {
+    return valid(num);
+  } else {
+    return invalid<number>("数値でありません");
+  }
+}
+
+export function matchRegExp(re: RegExp): Validator<string, string> {
+  return (s) => {
+    if( re.test(s) ) {
+      return valid(s);
+    } else {
+      return invalid<string>("入力が不適切です")
+    }
+  }
+}
+
 export class Validated<T> {
   _value: T | undefined;
   errors: VError[];
