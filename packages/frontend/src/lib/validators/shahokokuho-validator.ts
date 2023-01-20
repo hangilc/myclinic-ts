@@ -1,37 +1,70 @@
 import { Shahokokuho } from "myclinic-model";
-import { notNull, isPositive, isNotEmpty, oneOf, type Invalid, type ValidationResult, inRange, toSqlDate, toOptionalSqlDate } from "../validator";
+import {
+  isNotNull,
+  isOneOf,
+  isPositive,
+  toSqlDate,
+  toOptionalSqlDate,
+  type VResult,
+  isInInclusiveRange,
+  validated9,
+  valid,
+} from "../validation";
 
-interface ShahokokuhoInput {
-  hokenshaBangou: ValidationResult<number>;
-  hihokenshaKigou: ValidationResult<string>;
-  hihokenshaBangou: ValidationResult<string>;
-  honninStore: ValidationResult<number>;
-  validFrom: ValidationResult<Date | null>;
-  validUpto: ValidationResult<Date | null>;
-  koureiStore: ValidationResult<number>;
-  edaban: ValidationResult<string>;
+export interface ShahokokuhoInput {
+  patientId: number;
+  hokenshaBangou: number;
+  hihokenshaKigou: string;
+  hihokenshaBangou: string;
+  honninStore: number;
+  validFrom: Date | null;
+  validUpto: Date | null;
+  koureiStore: number;
+  edaban: string;
 }
 
 export function validateShahokokuho(
   shahokokuhoId: number,
   input: ShahokokuhoInput
 ): Shahokokuho | string[] {
-  const errs: Invalid[] = [];
-  const shahokokuho = new Shahokokuho(
-    shahokokuhoId,
-    input.patientId.and(isPositive).unwrap(errs, "patient-id"),
-    input.hokenshaBangou.and(isPositive).unwrap(errs, "保険者番号"),
-    input.hihokenshaKigou.unwrap(errs, "被保険者記号"),
-    input.hihokenshaBangou.and(isNotEmpty).unwrap(errs, "被保険者番号"),
-    input.honninStore.and(oneOf([0, 1])).unwrap(errs, "本人・家族"),
-    input.validFrom.to(notNull).map(toSqlDate).unwrap(errs, "期限開始"),
-    input.validUpto.map(toOptionalSqlDate).unwrap(errs, "期限終了"),
-    input.koureiStore.and(inRange(0, 3)).unwrap(errs, "高齢"),
-    input.edaban.unwrap(errs, "枝番"),
+  const patientIdVal = valid(input.patientId)
+    .validate(isPositive)
+    .mark("patient-id");
+  const hokenshaBangouVal = valid(input.hokenshaBangou)
+    .validate(isPositive)
+    .mark("保険者番号");
+  const hihokenshaKigouVal = valid(input.hihokenshaKigou).mark("被保険者記号");
+  const hihokenshaBangouVal = valid(input.hihokenshaBangou).mark(
+    "被保険者番号"
   );
-  if( errs.length > 0 ){
-    return errs.map(e => e.toString());
+  const honninVal = valid(input.honninStore)
+    .validate(isOneOf(0, 1))
+    .mark("本人・家族");
+  const validFromVal = valid(input.validFrom)
+    .validate(isNotNull)
+    .validate(toSqlDate)
+    .mark("期限開始");
+  const validUptoVal = valid(input.validUpto)
+    .validate(toOptionalSqlDate)
+    .mark("期限終了");
+  const koureiVal = valid(input.koureiStore)
+    .validate(isInInclusiveRange(0, 3))
+    .mark("高齢");
+  const edabanVal = valid(input.edaban).mark("枝番");
+  const vs = validated9(
+    patientIdVal,
+    hokenshaBangouVal,
+    hihokenshaKigouVal,
+    hihokenshaBangouVal,
+    honninVal,
+    validFromVal,
+    validUptoVal,
+    koureiVal,
+    edabanVal
+  );
+  if (vs.isValid) {
+    return new Shahokokuho(shahokokuhoId, ...vs.value);
   } else {
-    return shahokokuho;
+    return vs.errorMessages;
   }
 }

@@ -1,33 +1,13 @@
 <script lang="ts">
-  import type { HokenType } from "@/cashier/patient-dialog2/hoken";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { intSrc, strSrc, type Invalid } from "@/lib/validator";
-  import { dateSrc } from "@/lib/validators/date-validator";
-  import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import { HonninKazoku, type Patient } from "myclinic-model";
-  import type { ShahokokuhoInput } from "../shahokokuho-input";
+  import type { ShahokokuhoInput } from "@/lib/validators/shahokokuho-validator";
 
   export let input: ShahokokuhoInput;
   export let patient: Patient;
 
-  let validFromErrors: Invalid[] = [];
-  let validUptoErrors: Invalid[] = [];
-
-  export function validate(): HokenType | string[] {
-    return validateShahokokuho(shahokokuhoId, {
-      patientId: intSrc(patient.patientId),
-      hokenshaBangou: intSrc(input.hokenshaBangou),
-      hihokenshaKigou: strSrc(input.kigou),
-      hihokenshaBangou: strSrc(input.bangou),
-      honninStore: intSrc(input.honninKazoku),
-      validFrom: dateSrc(input.validFrom, validFromErrors),
-      validUpto: dateSrc(input.validUpto, validUptoErrors),
-      koureiStore: intSrc(input.kourei),
-      edaban: strSrc(input.edaban),
-    });
-  }
 </script>
 
 <div class="panel">
@@ -48,7 +28,7 @@
   <div>
     {#each Object.values(HonninKazoku) as h}
       {@const id = genid()}
-      <input type="radio" {id} bind:group={input.honninKazoku} value={h.code} />
+      <input type="radio" {id} bind:group={input.honninStore} value={h.code} />
       <label for={id}>{h.rep}</label>
     {/each}
   </div>
