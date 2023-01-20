@@ -73,3 +73,7 @@ export function isNotEmpty(s: string): VResult<string> {
     return invalid("空白文字です");
   }
 }
+
+export class Validated<T> {
+
+}
