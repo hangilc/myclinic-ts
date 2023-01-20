@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { isNotEmpty, isNotNull, valid } from "./validation";
+import { isNotEmpty, isNotNull, toInt, valid, validated2 } from "./validation";
 
 it("should validate non-null", () => {
   const r1 = valid("12").validate(isNotNull).mark("digits");
@@ -51,26 +51,55 @@ it("should validate non-empty string", () => {
 //   expect(errorMessages(getError(r2))).deep.equal(["float : 数値でありません"]);
 // });
 
-// it("should validate simple object", () => {
-//   const idVal = valid("12")
-//     .flatMap(isNotEmpty)
-//     .flatMap(toInt)
-//     .mark("id");
-//   const nameVal = valid("jane")
-//     .flatMap(isNotEmpty)
-//     .mark("name");
+it("should validate simple object", () => {
+  const idVal = valid("12")
+    .validate(isNotEmpty)
+    .validate(toInt)
+    .mark("id");
+  const nameVal = valid("Jane")
+    .validate(isNotEmpty)
+    .mark("name");
   
-//   const vs = validated2<string, _, _>(idVal, nameVal);
-//   const user = { 
-//     id: isNotEmpty.and(toInt).unwrap("12", "id", ve),
-//     name: isNotEmpty.unwrap("Jane", "name", ve)
-//   };
-//   expect(ve.isEmpty).toBe(true);
-//   expect(user).deep.equal({ id: 12, name: "Jane"});
-//   const user2 = {
-//     id: isNotEmpty.and(toInt).unwrap("", "id", ve),
-//     name: isNotEmpty.unwrap("Jane", "name", ve)
-//   };
-//   expect(ve.isEmpty).toBe(false);
-//   expect(ve.messages).deep.equal(["id : 空白文字です"]);
-// });
+  const vs = validated2(idVal, nameVal);
+  expect(vs.isValid).toBe(true);
+  if( vs.isValid ){
+    const [id, name] = vs.value;
+    const user = { id, name };
+    expect(user).deep.equal({ id: 12, name: "Jane"});
+  }
+});
+
+it("should detect single object error", () => {
+  const idVal = valid("")
+    .validate(isNotEmpty)
+    .validate(toInt)
+    .mark("id");
+  const nameVal = valid("Jane")
+    .validate(isNotEmpty)
+    .mark("name");
+  
+  const vs = validated2(idVal, nameVal);
+  expect(vs.isValid).toBe(false);
+  if( !vs.isValid ){
+    expect(vs.errorMessages).deep.equal(["id : 空白文字です"]);
+  }
+});
+
+it("should detect two object errors", () => {
+  const idVal = valid("abc")
+    .validate(isNotEmpty)
+    .validate(toInt)
+    .mark("id");
+  const nameVal = valid("")
+    .validate(isNotEmpty)
+    .mark("name");
+  
+  const vs = validated2(idVal, nameVal);
+  expect(vs.isValid).toBe(false);
+  if( !vs.isValid ){
+    expect(vs.errorMessages).deep.equal([
+      "id : 整数でありません",
+      "name : 空白文字です"
+    ]);
+  }
+});
