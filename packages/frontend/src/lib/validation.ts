@@ -74,6 +74,3 @@ export function isNotEmpty(s: string): VResult<string> {
   }
 }
 
-export class Validated<T> {
-
-}
