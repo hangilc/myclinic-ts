@@ -6,18 +6,10 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import {
-    inRange,
-    Invalid,
-    isInt,
-    isPositive,
-    isNotEmpty,
-    strSrc,
-    toNumber,
-  } from "../validator";
+  import type { VError } from "../validation";
 
   export let date: Date | null | undefined;
-  export let errors: Invalid[] = [];
+  export let errors: VError[] = [];
   export let gengouList: string[] = ["昭和", "平成", "令和"];
 
   let gengouValue: string = gengouList[gengouList.length - 1];

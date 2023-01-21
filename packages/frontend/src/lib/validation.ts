@@ -1,16 +1,22 @@
 import { dateToSql } from "./util";
 import { numberSrc } from "./validator";
 
-interface VError {
+export interface VError {
   message: string;
   marks: any[];
 }
 
-function error(message: string): VError {
+export function error(message: string, marks: any[] = []): VError {
   return {
     message,
-    marks: [],
+    marks,
   };
+}
+
+export function addMark(err: VError, mark: any): VError {
+  return Object.assign({}, err, {
+    marks: [mark, ...err.marks]
+  });
 }
 
 function errorMessageOf(err: VError): string {

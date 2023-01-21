@@ -1,12 +1,12 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
-  import { Invalid } from "../validator";
+  import { type VError, error } from "../validation";
   import Popup from "../Popup.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
   import CalendarIcon from "@/icons/CalendarIcon.svelte";
 
   export let date: Date | null | undefined;
-  export let errors: Invalid[] = [];
+  export let errors: VError[] = [];
   export let isNullable = false;
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
@@ -15,7 +15,7 @@
 
   $: if (date === null && !isNullable) {
     date = undefined;
-    errors = [new Invalid("入力がありません。")];
+    errors = [error("入力がありません。")];
   }
 
   export function initValues(date: Date | null): void {
@@ -50,11 +50,5 @@
   .wrapper {
     display: flex;
     justify-items: baseline;
-  }
-  .calendar-icon {
-    color: gray;
-    margin-top: -0.2em;
-    margin-left: 0.2em;
-    cursor: pointer;
   }
 </style>
