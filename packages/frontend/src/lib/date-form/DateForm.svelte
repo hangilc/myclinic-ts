@@ -6,7 +6,8 @@
     addMonths,
     addDays,
   } from "kanjidate";
-  import type { VError } from "../validation";
+  import { source, toInt, toPositiveInt, type VError } from "../validation";
+  import { validateWareki } from "../validators/wareki-validator";
 
   export let date: Date | null | undefined;
   export let errors: VError[] = [];
@@ -17,6 +18,7 @@
   let monthValue: string = "";
   let dayValue: string = "";
 
+  $: console.log("date change", date);
   $: initValues(date);
 
   export function initValues(d: Date | null | undefined): void {
@@ -34,32 +36,22 @@
   }
 
   function validate(): void {
-    clearError();
+    // clearError();
     if (nenValue === "" && monthValue === "" && dayValue === "") {
       date = null;
     } else {
-      const validated = {
-        nen: strSrc(nenValue)
-          .and(isNotEmpty)
-          .to(toNumber)
-          .and(isInt, isPositive)
-          .unwrap(errors, "年"),
-        month: strSrc(monthValue)
-          .and(isNotEmpty)
-          .to(toNumber)
-          .and(isInt, inRange(1, 12))
-          .unwrap(errors, "月"),
-        day: strSrc(dayValue)
-          .and(isNotEmpty)
-          .to(toNumber)
-          .and(isInt, inRange(1, 31))
-          .unwrap(errors, "日"),
-      };
-      if (errors.length === 0) {
-        let year: number = fromGengou(gengouValue, validated.nen);
-        date = new Date(year, validated.month - 1, validated.day);
+      const vs = validateWareki({
+        gengou: source(gengouValue),
+        nen: source(nenValue).validate(toInt),
+        month: source(monthValue).validate(toInt),
+        day: source(dayValue).validate(toInt)
+      })
+      if( vs.isValid ){
+        console.log("valid")
+        date = vs.value;
       } else {
-        date = undefined;
+        console.log("invalid")
+        errors = vs.errors;
       }
     }
   }

@@ -24,8 +24,8 @@ export function addMark(err: VError, mark: any): VError {
   });
 }
 
-function errorMessageOf(err: VError): string {
-  return [...err.marks, err.message].join(" : ");
+export function errorMessageOf(err: VError): string {
+  return [...err.marks, err.message].filter((m) => m !== "").join(" : ");
 }
 
 export function errorMessagesOf(errs: VError[]): string[] {

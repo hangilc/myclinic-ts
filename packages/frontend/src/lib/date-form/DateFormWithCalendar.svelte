@@ -13,9 +13,17 @@
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   let form: DateForm;
 
-  $: if (date === null && !isNullable) {
-    date = undefined;
-    errors = [error("入力がありません。")];
+  $: console.log("date modified in parent", date);
+  $: checkNullDate(date, isNullable);
+
+  function checkNullDate(
+    date: Date | null | undefined,
+    isNullable: boolean
+  ): void {
+    if (date === null && !isNullable) {
+      date = undefined;
+      errors = [error("入力がありません。", [], [""])];
+    }
   }
 
   export function initValues(date: Date | null): void {
@@ -34,8 +42,13 @@
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>
-      <CalendarIcon width={iconWidth} dy="-0.2rem" dx="0.2rem" style="cursor: pointer;"
-        onClick={trigger}/>
+      <CalendarIcon
+        width={iconWidth}
+        dy="-0.2rem"
+        dx="0.2rem"
+        style="cursor: pointer;"
+        onClick={trigger}
+      />
       <DatePicker
         slot="menu"
         {destroy}

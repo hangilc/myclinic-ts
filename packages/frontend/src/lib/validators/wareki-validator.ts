@@ -3,14 +3,9 @@ import {
   ensure,
   isInInclusiveRange,
   isInt,
-  isNotEmpty,
-  isNotNull,
   isPositive,
-  toInt,
-  valid,
   validated2,
   validated3,
-  type VError,
   type VResult,
 } from "../validation";
 import * as kanjidate from "kanjidate";
@@ -40,28 +35,23 @@ const gengouToYear = convert<[string, number], number>(
   }
 );
 
-export function validateWareki(input: WarekiInput): Date | VError[] {
+export function validateWareki(input: WarekiInput): VResult<Date> {
   const gengou = input.gengou
     .validate(isValidGengouKanji)
-    .mark("gengou");
+    .mark("元号");
   const nen = input.nen
     .validate(isInt)
     .validate(isPositive)
-    .mark("nen");
-  const year = validated2(gengou, nen).validate(gengouToYear).mark("year");
+    .mark("年");
+  const year = validated2(gengou, nen).validate(gengouToYear).mark("");
   const month = input.month
     .validate(isInt)
     .validate(isInInclusiveRange(1, 12))
-    .mark("month");
+    .mark("月");
   const day = input.day
     .validate(isInt)
     .validate(isInInclusiveRange(1, 31))
-    .mark("month");
-  const vs = validated3(year, month, day);
-  if (vs.isValid) {
-    const [y, m, d] = vs.value;
-    return new Date(y, m - 1, d);
-  } else {
-    return vs.errors;
-  }
+    .mark("日");
+  return validated3(year, month, day)
+    .map(([y, m, d]) => new Date(y, m-1, d));
 }
