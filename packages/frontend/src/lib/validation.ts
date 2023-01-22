@@ -134,6 +134,10 @@ export class VResult<T> {
   }
 }
 
+export function validResult<T>(value: T): VResult<T> {
+  return valid(value, []);
+}
+
 function castErrorResult<T>(r: VResult<any>): VResult<T> {
   return new VResult<T>(undefined, r.sources, r.errors);
 }

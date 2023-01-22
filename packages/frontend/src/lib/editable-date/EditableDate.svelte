@@ -14,14 +14,16 @@
     }
   };
   export let datePickerDefault: () => Date = () => new Date();
-  export let onChange: (date: Date | null) => void = (_) => {};
 
+  function doChange(d: Date | null): void {
+    date = d;
+  }
 </script>
 
 <div class="disp">
   <Popup let:destroy let:trigger>
     <span class="repr" on:click={trigger}>{format(date)}</span>
-    <DateFormPulldown slot="menu" {destroy} {date} onEnter={onChange} />
+    <DateFormPulldown slot="menu" {destroy} {date} onEnter={doChange} />
   </Popup>
   <slot name="icons" />
   <Popup let:destroy let:triggerClick>
@@ -30,7 +32,7 @@
       slot="menu"
       date={date || datePickerDefault()}
       {destroy}
-      onEnter={onChange}
+      onEnter={doChange}
     />
   </Popup>
 </div>

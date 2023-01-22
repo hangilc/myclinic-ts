@@ -1,20 +1,29 @@
 <script lang="ts">
-  import { error, errorMessagesOf, type VError } from "../validation";
+  import { errorMessagesOf, VResult } from "../validation";
   import DateForm from "./DateForm.svelte";
 
   export let date: Date | null;
   export let isNullable: boolean = false;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
-  let errors: VError[] = [];
+  let errors: string[] = [];
 
   function doEnter(): void {
-    if( errors.length === 0 && (date === null && !isNullable)){
-      errors = [error("入力がありません。", [], [""])];
-    }
     if( errors.length === 0 ){
       destroy();
       onEnter(date);
+    }
+  }
+
+  function doFormChange(result: VResult<Date | null>): void {
+    if( result.isValid ){
+      if( result.value === null && !isNullable ){
+        errors = ["入力がありません"];
+      } else {
+        date = result.value;
+      }
+    } else {
+      errors = errorMessagesOf(result.errors);
     }
   }
 </script>
@@ -22,12 +31,12 @@
 <div>
   {#if errors.length > 0}
   <div class="error">
-    {#each errorMessagesOf(errors) as e}
+    {#each errors as e}
       <div>{e}</div>
     {/each}
   </div>
   {/if}
-  <DateForm bind:date bind:errors />
+  <DateForm {date} onChange={doFormChange}  />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>
