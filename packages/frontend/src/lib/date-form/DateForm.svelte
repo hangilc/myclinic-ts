@@ -15,10 +15,14 @@
     return new DateFormValues(date, gengouList[0]);
   }
 
+  export function resetDate(d: Date | null): void {
+    date = d;
+    values = formValues(d);
+    doInputChange();
+  }
+
   export function clear(): void {
-    date = null;
-    values = formValues(null);
-    onChange(validResult(null));
+    resetDate(null);
   }
 
   export function validate(): VResult<Date | null> {
@@ -46,6 +50,7 @@
     const vs = validate();
     if (vs.isValid && vs.value !== null) {
       date = f(vs.value);
+      values = formValues(date);
       onChange(validate());
     }
   }

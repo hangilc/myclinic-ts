@@ -3,7 +3,6 @@
   import DateForm from "./DateForm.svelte";
 
   export let date: Date | null;
-  export let isNullable: boolean = false;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
   let errors: string[] = [];
@@ -16,13 +15,7 @@
   }
 
   function doFormChange(result: VResult<Date | null>): void {
-    if( result.isValid ){
-      if( result.value === null && !isNullable ){
-        errors = ["入力がありません"];
-      } else {
-        date = result.value;
-      }
-    } else {
+    if( result.isError ){
       errors = errorMessagesOf(result.errors);
     }
   }
@@ -36,7 +29,7 @@
     {/each}
   </div>
   {/if}
-  <DateForm {date} onChange={doFormChange}  />
+  <DateForm bind:date onChange={doFormChange}  />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>

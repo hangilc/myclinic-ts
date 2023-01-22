@@ -6,6 +6,7 @@
   import { currentPatient } from "./exam/ExamVars";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import DateForm from "@/lib/date-form/DateForm.svelte";
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -25,6 +26,7 @@
     }
   }
   let date: Date | null = new Date();
+  let validateDateForm: () => VResult<Date | null>;
 
 </script>
 
@@ -33,5 +35,5 @@
   <Cashier isVisible={$serviceStore === "cashier"} />
   <Phone isVisible={$serviceStore === "phone"} />
 
-  <DateForm date={null} onChange={doChange} />
+  <DateFormWithCalendar date={date} onChange={doChange} bind:validate={validateDateForm}/>
 </div>

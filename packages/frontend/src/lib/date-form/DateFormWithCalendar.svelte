@@ -16,35 +16,44 @@
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  let errors: string[] = [];
+  let setFormDate: (d: Date | null) => void;
+  // let errors: string[] = [];
 
   onChange(validResult(date));
 
   function doDatePickerEnter(d: Date): void {
-    errors = [];
-    date = d;
-    onChange(validResult(d));
+    // errors = [];
+    // date = d;
+    setFormDate(d);
+    // onChange(validResult(d));
   }
 
   function doFormChange(result: VResult<Date | null>): void {
-    if (result.isValid) {
-      if (result.value === null && !isNullable) {
-        errors = ["入力がありません"];
-        onChange(invalid<Date | null>("入力がありません", []));
-      } else {
-        date = result.value;
-        onChange(result);
-      }
-    } else {
-      errors = errorMessagesOf(result.errors);
-      onChange(result);
-    }
+    onChange(result);
+  //   if (result.isValid) {
+  //     if (result.value === null && !isNullable) {
+  //       errors = ["入力がありません"];
+  //       onChange(invalid<Date | null>("入力がありません", []));
+  //     } else {
+  //       date = result.value;
+  //       onChange(result);
+  //     }
+  //   } else {
+  //     errors = errorMessagesOf(result.errors);
+  //     onChange(result);
+  //   }
   }
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm {date} onChange={doFormChange} {gengouList} bind:validate/>
+    <DateForm
+      bind:date
+      onChange={doFormChange}
+      {gengouList}
+      bind:validate
+      bind:resetDate={setFormDate}
+    />
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>
