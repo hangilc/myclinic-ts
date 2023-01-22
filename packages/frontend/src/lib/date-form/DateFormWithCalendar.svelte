@@ -12,7 +12,7 @@
 
   export let date: Date | null;
   export let onChange: (result: VResult<Date | null>) => void;
-  export let isNullable = false;
+  export let validate: () => VResult<Date | null>;
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
@@ -32,6 +32,7 @@
         errors = ["入力がありません"];
         onChange(invalid<Date | null>("入力がありません", []));
       } else {
+        date = result.value;
         onChange(result);
       }
     } else {
@@ -43,7 +44,7 @@
 
 <div>
   <div class="wrapper">
-    <DateForm {date} onChange={doFormChange} {gengouList} />
+    <DateForm {date} onChange={doFormChange} {gengouList} bind:validate/>
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>

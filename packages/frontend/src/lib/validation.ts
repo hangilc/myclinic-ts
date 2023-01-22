@@ -157,21 +157,22 @@ export function invalid<T>(message: string, sources: any[]): VResult<T> {
 type Validator<S, T> = (s: S, sources: any[]) => VResult<T>;
 
 export function isNotNull<T>(
-  s: T | null | undefined,
-  sources: any[]
-): VResult<T> {
-  if (s != null) {
-    return valid(s, sources);
-  } else {
-    return invalid<T>("Null value", sources);
-  }
+  msg: string = "Null value"
+): Validator<T | null | undefined, T> {
+  return (s: T | null | undefined, sources: any[]) => {
+    if (s != null) {
+      return valid(s, sources);
+    } else {
+      return invalid<T>(msg, sources);
+    }
+  };
 }
 
 export function isNotEmpty(
   s: string | null | undefined,
   sources: any[]
 ): VResult<string> {
-  return isNotNull<string>(s, sources).ensure((s) => s !== "", "空白文字です");
+  return isNotNull<string>()(s, sources).ensure((s) => s !== "", "空白文字です");
 }
 
 export function toNumber(
@@ -179,7 +180,7 @@ export function toNumber(
   sources: any[]
 ): VResult<number> {
   if (typeof s !== "number") {
-    return isNotNull<string>(s, sources)
+    return isNotNull<string>()(s, sources)
       .validate(isNotEmpty)
       .convertTo<number>((s, resolve, reject) => {
         const num = Number(s);
@@ -200,6 +201,11 @@ export const isInt = ensure<number>(
 );
 
 export const isPositive = ensure<number>((n) => n > 0, "正の数値でありません");
+
+export const isZeroOrPositive = ensure<number>(
+  (n) => n >= 0,
+  "ゼロまたは正の数値でありません"
+);
 
 export function toInt(
   s: string | undefined | null | number,

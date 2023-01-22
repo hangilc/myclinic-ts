@@ -9,6 +9,7 @@
   import EditHokenDialog from "./EditHokenDialog.svelte";
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
   import api from "@/lib/api";
+  import NewShahokokuhoDialog from "./NewShahokokuhoDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -61,7 +62,17 @@
   }
 
   function doNewShahokokuho() {
-    doNew("shahokokuho");
+    function open(): void {
+      const d: NewShahokokuhoDialog = new NewShahokokuhoDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          patient: p,
+        },
+      });
+    }
+    destroy();
+    data.push(open);
   }
 
   function doNewKoukikourei() {

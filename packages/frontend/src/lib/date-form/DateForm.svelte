@@ -1,99 +1,95 @@
 <script lang="ts">
-  import {
-    KanjiDate,
-    addYears,
-    addMonths,
-    addDays,
-  } from "kanjidate";
-  import {
-    isNotNull,
-    source,
-    toInt,
-    valid,
-    VResult,
-  } from "../validation";
+  import { addYears, addMonths, addDays } from "kanjidate";
+  import { source, toInt, validResult, VResult } from "../validation";
   import { validateWareki } from "../validators/wareki-validator";
+  import { DateFormValues } from "./date-form-values";
+  import * as kanjidate from "kanjidate";
 
   export let date: Date | null;
   export let onChange: (result: VResult<Date | null>) => void;
-  export let gengouList: string[] = ["昭和", "平成", "令和"];
-  let errors: string[] = [];
+  export let gengouList: string[] = kanjidate.GengouList.map(g => g.kanji);
 
-  let gengouValue: string = gengouList[gengouList.length - 1];
-  let nenValue: string = "";
-  let monthValue: string = "";
-  let dayValue: string = "";
+  let values: DateFormValues = formValues(date);
 
-  $: initValues(date);
-
-  export function initValues(d: Date | null): void {
-    if (d != null) {
-      const kdate = new KanjiDate(d);
-      gengouValue = kdate.gengou;
-      nenValue = kdate.nen.toString();
-      monthValue = kdate.month.toString();
-      dayValue = kdate.day.toString();
-    } else {
-      nenValue = "";
-      monthValue = "";
-      dayValue = "";
-    }
+  function formValues(date: Date | null): DateFormValues {
+    return new DateFormValues(date, gengouList[0]);
   }
 
-  function validate(): VResult<Date | null> {
-    if (nenValue === "" && monthValue === "" && dayValue === "") {
-      return valid<Date | null>(null, []);
+  export function clear(): void {
+    date = null;
+    values = formValues(null);
+    onChange(validResult(null));
+  }
+
+  export function validate(): VResult<Date | null> {
+    if (values.nen === "" && values.month === "" && values.day === "") {
+      return validResult(null);
     } else {
       return validateWareki({
-        gengou: source(gengouValue),
-        nen: source(nenValue).validate(toInt),
-        month: source(monthValue).validate(toInt),
-        day: source(dayValue).validate(toInt),
+        gengou: source(values.gengou),
+        nen: source(values.nen).validate(toInt),
+        month: source(values.month).validate(toInt),
+        day: source(values.day).validate(toInt),
       });
     }
   }
 
   function doInputChange(): void {
-    onChange(validate());
+    const vs = validate();
+    if (vs.isValid) {
+      date = vs.value;
+    }
+    onChange(vs);
   }
 
-  function handleChangeRequest(f: (d: Date) => Date): void {
+  function doModify(f: (d: Date) => Date): void {
     const vs = validate();
     if (vs.isValid && vs.value !== null) {
-      onChange(vs.validate(isNotNull).map(f));
+      date = f(vs.value);
+      onChange(validate());
     }
   }
 
   function doNenClick(event: MouseEvent): void {
-    handleChangeRequest((d) => addYears(d, event.shiftKey ? -1 : 1));
+    doModify((d) => addYears(d, event.shiftKey ? -1 : 1));
   }
 
   function doMonthClick(event: MouseEvent): void {
-    handleChangeRequest((d) => addMonths(d, event.shiftKey ? -1 : 1));
+    doModify((d) => addMonths(d, event.shiftKey ? -1 : 1));
   }
 
   function doDayClick(event: MouseEvent): void {
-    handleChangeRequest((d) => addDays(d, event.shiftKey ? -1 : 1));
+    doModify((d) => addDays(d, event.shiftKey ? -1 : 1));
   }
 </script>
 
 <div class="top date-form">
   <div class="inputs">
-    <select bind:value={gengouValue} class="gengou" on:change={doInputChange}>
+    <select bind:value={values.gengou} class="gengou" on:change={doInputChange}>
       {#each gengouList as g}
         <option>{g}</option>
       {/each}
     </select>
-    <input type="text" class="nen" bind:value={nenValue} on:change={doInputChange} />
+    <input
+      type="text"
+      class="nen"
+      bind:value={values.nen}
+      on:change={doInputChange}
+    />
     <span on:click={doNenClick} class="nen-span">年</span>
     <input
       type="text"
       class="month"
-      bind:value={monthValue}
+      bind:value={values.month}
       on:change={doInputChange}
     />
     <span on:click={doMonthClick} class="month-span">月</span>
-    <input type="text" class="day" bind:value={dayValue} on:change={doInputChange} />
+    <input
+      type="text"
+      class="day"
+      bind:value={values.day}
+      on:change={doInputChange}
+    />
     <span on:click={doDayClick} class="day-span">日</span>
   </div>
 </div>

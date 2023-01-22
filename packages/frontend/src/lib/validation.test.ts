@@ -2,11 +2,11 @@ import { it, expect } from "vitest";
 import { isNotEmpty, isNotNull, matchRegExp, source, toFloat, toInt, valid, validated2 } from "./validation";
 
 it("should validate non-null", () => {
-  const r1 = source("12").validate(isNotNull).mark("digits");
+  const r1 = source("12").validate(isNotNull()).mark("digits");
   expect(r1.isValid).toBe(true);
   expect(r1.value).toBe("12");
 
-  const r2 = source<string | null>(null).validate(isNotNull).mark("digits");
+  const r2 = source<string | null>(null).validate(isNotNull()).mark("digits");
   expect(r2.isValid).toBe(false);
   expect(r2.errorMessages).deep.equal(["digits : Null value"]);
 });
