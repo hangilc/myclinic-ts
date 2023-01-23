@@ -8,11 +8,14 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings 'a11y-invalid-attribute:ignore,a11y-click-events-have-key-events:ignore,a11y-autofocus:ignore'",
-    "test": "vitest run"
+    "test": "vitest run",
+    "story:dev": "histoire dev"
   },
   "devDependencies": {
+    "@histoire/plugin-svelte": "^0.12.4",
     "@sveltejs/vite-plugin-svelte": "^1.0.2",
     "@tsconfig/svelte": "^3.0.0",
+    "histoire": "^0.12.4",
     "kanjidate": "^1.3.1",
     "myclinic-model": "^1.0.0",
     "sass": "^1.55.0",

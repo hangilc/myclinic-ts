@@ -51,7 +51,7 @@
     if (vs.isValid && vs.value !== null) {
       date = f(vs.value);
       values = formValues(date);
-      onChange(validate());
+      onChange(validResult(date));
     }
   }
 

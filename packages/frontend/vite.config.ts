@@ -21,5 +21,10 @@ export default defineConfig({
       "@": resolve(__dirname, "src")
     }
   },
-  base: "/vite/"
+  base: "/vite/",
+  server: {
+    fs: {
+      allow: ["../../node_modules/@histoire"],
+    }
+  }
 })
