@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { Hst } from "@histoire/plugin-svelte";
   import { errorMessagesOf, type VResult } from "../validation";
-  import DateForm from "./DateForm.svelte";
+  import DateFormWithCalendar from "./DateFormWithCalendar.svelte";
   import * as kanjidate from "kanjidate";
 
   export let Hst: Hst;
   let date: Date = new Date();
-  let validate: () => VResult<Date | null>;
   let logs: string[] = [];
+  let validate: () => VResult<Date | null>;
   let setDate: (d: Date | null) => void;
 
   function log(arg: any): void {
@@ -39,7 +39,8 @@
 </script>
 
 <Hst.Story>
-  <DateForm bind:date bind:validate onChange={doChange} bind:setDate={setDate}/>
+  <DateFormWithCalendar bind:date={date} onChange={doChange} bind:validate
+    bind:setDate/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
@@ -50,7 +51,6 @@
     {#each logs as log}
       <pre>{log}</pre>
     {/each}
-  </div>
 </Hst.Story>
 
 <style>
@@ -64,3 +64,4 @@
     min-height: 10px;
   }
 </style>
+

@@ -16,7 +16,7 @@
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  let setFormDate: (d: Date | null) => void;
+  export let setDate: (d: Date | null) => void;
   // let errors: string[] = [];
 
   onChange(validResult(date));
@@ -24,7 +24,7 @@
   function doDatePickerEnter(d: Date): void {
     // errors = [];
     // date = d;
-    setFormDate(d);
+    setDate(d);
     // onChange(validResult(d));
   }
 
@@ -52,7 +52,7 @@
       onChange={doFormChange}
       {gengouList}
       bind:validate
-      bind:resetDate={setFormDate}
+      bind:setDate
     />
     <slot name="spacer" />
     <slot name="icons" />

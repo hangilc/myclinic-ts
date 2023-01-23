@@ -15,14 +15,14 @@
     return new DateFormValues(date, gengouList[0]);
   }
 
-  export function resetDate(d: Date | null): void {
+  export function setDate(d: Date | null): void {
     date = d;
     values = formValues(d);
     doInputChange();
   }
 
   export function clear(): void {
-    resetDate(null);
+    setDate(null);
   }
 
   export function validate(): VResult<Date | null> {
