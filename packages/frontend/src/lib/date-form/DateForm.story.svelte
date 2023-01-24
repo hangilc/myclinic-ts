@@ -5,7 +5,7 @@
   import * as kanjidate from "kanjidate";
 
   export let Hst: Hst;
-  let date: Date = new Date();
+  let date: Date | null | undefined = new Date();
   let validate: () => VResult<Date | null>;
   let logs: string[] = [];
   let setDate: (d: Date | null) => void;
@@ -20,7 +20,6 @@
       if( r.value == null ){
         log(r.value);
       } else {
-
         log(kanjidate.format(kanjidate.f5, r.value));
       }
     } else {
@@ -29,21 +28,30 @@
   }
 
   function doSet(): void {
-    const d = new Date(2022, 3, 12);
-    setDate(d);
+    setDate(new Date(2022, 3, 12));
   }
 
   function doNull(): void {
     setDate(null);
   }
+
+  function dateRep(d: Date | null | undefined): string {
+    if( d === undefined ){
+      return "（エラー）";
+    } else if( d === null ){
+      return "（未設定）"
+    } else {
+      return kanjidate.format(kanjidate.f5, d);
+    }
+  }
 </script>
 
 <Hst.Story>
-  <DateForm bind:date bind:validate onChange={doChange} bind:setDate={setDate}/>
+  <DateForm bind:date bind:validate onChange={doChange} bind:setDate/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
-    { date == null ? "(null)" : kanjidate.format(kanjidate.f5, date)}
+    { dateRep(date) }
     <button on:click={() => logs = []}>clear logs</button>
   </div>
   <div class="logs">

@@ -5,24 +5,19 @@
   import { DateFormValues } from "./date-form-values";
   import * as kanjidate from "kanjidate";
 
-  export let date: Date | null;
+  export let date: Date | null | undefined;
   export let onChange: (result: VResult<Date | null>) => void;
-  export let gengouList: string[] = kanjidate.GengouList.map(g => g.kanji);
+  export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
 
-  let values: DateFormValues = formValues(date);
-
-  function formValues(date: Date | null): DateFormValues {
-    return new DateFormValues(date, gengouList[0]);
-  }
+  let values: DateFormValues = formValues(date ?? null);
 
   export function setDate(d: Date | null): void {
-    date = d;
     values = formValues(d);
     doInputChange();
   }
 
-  export function clear(): void {
-    setDate(null);
+  function formValues(date: Date | null): DateFormValues {
+    return new DateFormValues(date, gengouList[0]);
   }
 
   export function validate(): VResult<Date | null> {
@@ -40,18 +35,14 @@
 
   function doInputChange(): void {
     const vs = validate();
-    if (vs.isValid) {
-      date = vs.value;
-    }
+    date = vs.isValid ? vs.value : undefined;
     onChange(vs);
   }
 
   function doModify(f: (d: Date) => Date): void {
     const vs = validate();
     if (vs.isValid && vs.value !== null) {
-      date = f(vs.value);
-      values = formValues(date);
-      onChange(validResult(date));
+      setDate(f(vs.value));
     }
   }
 
