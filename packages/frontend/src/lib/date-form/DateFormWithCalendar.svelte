@@ -1,58 +1,32 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
-  import {
-    VResult,
-    errorMessagesOf,
-    validResult,
-    invalid,
-  } from "../validation";
   import Popup from "../Popup.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
   import CalendarIcon from "@/icons/CalendarIcon.svelte";
+  import type { VResult } from "../validation";
 
-  export let date: Date | null;
+  export let date: Date | null | undefined;
   export let onChange: (result: VResult<Date | null>) => void;
   export let validate: () => VResult<Date | null>;
+  export let setDate: (d: Date | null) => void;
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
-  export let setDate: (d: Date | null) => void;
-  // let errors: string[] = [];
-
-  onChange(validResult(date));
 
   function doDatePickerEnter(d: Date): void {
-    // errors = [];
-    // date = d;
     setDate(d);
-    // onChange(validResult(d));
   }
 
-  function doFormChange(result: VResult<Date | null>): void {
-    onChange(result);
-  //   if (result.isValid) {
-  //     if (result.value === null && !isNullable) {
-  //       errors = ["入力がありません"];
-  //       onChange(invalid<Date | null>("入力がありません", []));
-  //     } else {
-  //       date = result.value;
-  //       onChange(result);
-  //     }
-  //   } else {
-  //     errors = errorMessagesOf(result.errors);
-  //     onChange(result);
-  //   }
-  }
 </script>
 
 <div>
   <div class="wrapper">
     <DateForm
       bind:date
-      onChange={doFormChange}
-      {gengouList}
+      bind:onChange
       bind:validate
       bind:setDate
+      {gengouList}
     />
     <slot name="spacer" />
     <slot name="icons" />
