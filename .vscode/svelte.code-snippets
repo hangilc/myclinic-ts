@@ -108,5 +108,26 @@
       ""
     ],
     "description": "create SVG component"
+  },
+
+  "Histoire story": {
+    "prefix": "story",
+    "scope": "svelte, typescript",
+    "body": [
+      "<script lang=\"ts\">",
+      "  import type { Hst } from \"@histoire/plugin-svelte\";",
+      "  import { logEvent } from \"histoire/client\";", 
+      "",
+      "  export let Hst: Hst;",
+      "</script>",
+      "",
+      "<Hst.Story>",
+      "</Hst.Story>",
+      "",
+      "<style>",
+      "</style>",
+      ""
+    ],
+    "description": "histoire story"
   }
 }

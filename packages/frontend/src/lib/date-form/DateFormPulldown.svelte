@@ -6,6 +6,7 @@
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
   let errors: string[] = [];
+  let setDate: (d: Date | null) => void;
 
   function doEnter(): void {
     if( errors.length === 0 ){
@@ -15,9 +16,7 @@
   }
 
   function doFormChange(result: VResult<Date | null>): void {
-    if( result.isError ){
-      errors = errorMessagesOf(result.errors);
-    }
+    errors = errorMessagesOf(result.errors);
   }
 </script>
 
@@ -29,7 +28,7 @@
     {/each}
   </div>
   {/if}
-  <DateForm bind:date onChange={doFormChange}  />
+  <DateForm bind:date onChange={doFormChange} bind:setDate />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>

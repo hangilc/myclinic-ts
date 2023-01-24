@@ -12,8 +12,9 @@
   let values: DateFormValues = formValues(date ?? null);
 
   export function setDate(d: Date | null): void {
+    date = d;
     values = formValues(d);
-    doInputChange();
+    onChange(validResult(d));
   }
 
   function formValues(date: Date | null): DateFormValues {
@@ -35,8 +36,12 @@
 
   function doInputChange(): void {
     const vs = validate();
-    date = vs.isValid ? vs.value : undefined;
-    onChange(vs);
+    if( vs.isValid ){
+      setDate(vs.value);
+    } else {
+      date = undefined;
+      onChange(vs);
+    }
   }
 
   function doModify(f: (d: Date) => Date): void {
