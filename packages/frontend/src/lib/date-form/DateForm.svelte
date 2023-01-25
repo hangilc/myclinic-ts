@@ -6,28 +6,40 @@
   import * as kanjidate from "kanjidate";
   import { createEventDispatcher, onMount } from "svelte";
 
-  export let date: Date | null;
+  export let date: Date | null | undefined;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
   export function validate(): VResult<Date | null> {
     return validateValues(values);
   }
   let dispatch =
     createEventDispatcher<{
-      "date-form-value": VResult<Date | null>;
+      "value-change": VResult<Date | null>;
     }>();
-  
-  $: values = formValues(date);
-  $: dispatchValues(values);
 
-  onMount(() => dispatchValues(values));
+  let values: DateFormValues;
+  $: onExternalData(date);
 
-  function dispatchValues(values: DateFormValues): void {
-    dispatch("date-form-value", validateValues(values));
+  onMount(() => {
+    if (date !== undefined) {
+      values = values;
+      dispatch("value-change", validResult(date));
+    }
+  });
+
+  function onExternalData(date: Date | null | undefined): void {
+    if (date !== undefined) {
+      const newValues = formValues(date);
+      if (JSON.stringify(values) !== JSON.stringify(newValues)) {
+        values = newValues;
+        dispatch("value-change", validResult(date));
+      }
+    }
   }
 
   function modifyDateFromIntern(f: (d: Date) => Date): void {
     if (date !== undefined && date !== null) {
-      date = (f(date));
+      console.log("modify");
+      date = f(date);
     }
   }
 
@@ -36,7 +48,8 @@
     if (vs.isValid) {
       date = vs.value;
     } else {
-      dispatch("date-form-value", vs);
+      date = undefined;
+      dispatch("value-change", vs);
     }
   }
 
@@ -58,6 +71,7 @@
   }
 
   function doInputChange(): void {
+    console.log("doInputChange");
     handleUserInput();
   }
 

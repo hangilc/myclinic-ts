@@ -7,19 +7,33 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { HonninKazoku, Shahokokuho, type Patient } from "myclinic-model";
   import { createEventDispatcher, onMount } from "svelte";
-  import type { ShahokokuhoFormValues } from "./shahokokuho-form-values";
+  import { ShahokokuhoFormValues } from "./shahokokuho-form-values";
 
   export let patient: Patient;
-  export let values: ShahokokuhoFormValues;
-  let resultValidFrom: VResult<Date | null> = validResult(values.validFrom);
-  let resultValidUpto: VResult<Date | null> = validResult(values.validUpto);
-  let gengouList = gengouListUpto("平成");
+  export let data: Shahokokuho | null | undefined;
   let dispatch = createEventDispatcher<{
-    "value-changed": VResult<Shahokokuho>
+    "value-change": VResult<Shahokokuho>
     }>();
+  let values: ShahokokuhoFormValues;
+  $: onExternalData(data);
+  onMount(() => onExternalData(data));
+  let gengouList = gengouListUpto("平成");
+  let validFromResult: VResult<Date | null>;
+  let validUptoResult: VResult<Date | null>;
 
-  console.log("valid-from", values.validFrom);
-  
+  function onExternalData(data: Shahokokuho | null | undefined){
+    if( data !== undefined ){
+      if( data === null ){
+        values = ShahokokuhoFormValues.blank();
+      } else {
+        values = ShahokokuhoFormValues.from(data);
+        dispatch("value-change", validResult(data));
+      }
+      validFromResult = validResult(values.validFrom);
+      validUptoResult = validResult(values.validUpto);
+    }
+  }
+
   export function validate(): VResult<Shahokokuho> {
     const input = {
       shahokokuhoId: validResult(values.shahokokuhoId),
@@ -28,8 +42,8 @@
       hihokenshaKigou: validResult(values.hihokenshaKigou),
       hihokenshaBangou: validResult(values.hihokenshaBangou),
       honninStore: validResult(values.honninStore),
-      validFrom: resultValidFrom,
-      validUpto: resultValidUpto,
+      validFrom: validFromResult,
+      validUpto: validUptoResult,
       koureiStore: validResult(values.koureiStore),
       edaban: validResult(values.edaban),
     }
@@ -37,18 +51,15 @@
   }
 
   function doUserInput(): void {
-    dispatch("value-changed", validate());
+    const vs = validate();
+    if( vs.isValid ){
+      onExternalData(vs.value);
+    } else {
+      onExternalData(undefined);
+      dispatch("value-change", vs);
+    }
   }
 
-  function onValidFromChanged(evt: CustomEvent<VResult<Date | null>>): void {
-    resultValidFrom = evt.detail;
-    doUserInput();
-  }
-
-  function onValidUptoChanged(evt: CustomEvent<VResult<Date | null>>): void {
-    resultValidUpto = evt.detail;
-    doUserInput();
-  }
 </script>
 
 <div>

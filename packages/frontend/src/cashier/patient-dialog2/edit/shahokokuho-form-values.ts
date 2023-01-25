@@ -1,3 +1,4 @@
+import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
 import type { Shahokokuho } from "myclinic-model";
 
 export class ShahokokuhoFormValues {
@@ -48,6 +49,21 @@ export class ShahokokuhoFormValues {
       validFrom: null,
       validUpto: null,
       koureiStore: 0,
+    });
+  }
+
+  static from(data: Shahokokuho): ShahokokuhoFormValues {
+    return new ShahokokuhoFormValues({
+      shahokokuhoId: data.shahokokuhoId,
+      patientId: data.patientId,
+      hokenshaBangou: data.hokenshaBangou.toString(),
+      hihokenshaKigou: data.hihokenshaKigou,
+      hihokenshaBangou: data.hihokenshaBangou,
+      edaban: data.edaban,
+      honninStore: data.honninStore,
+      validFrom: parseSqlDate(data.validFrom),
+      validUpto: parseOptionalSqlDate(data.validUpto),
+      koureiStore: data.koureiStore,
     });
   }
 }

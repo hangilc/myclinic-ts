@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Hst } from "@histoire/plugin-svelte";
+  import { logEvent } from "histoire/client";
   import { errorMessagesOf, type VResult } from "../validation";
   import DateForm from "./DateForm.svelte";
   import { format, f5 } from "kanjidate";
@@ -17,16 +18,17 @@
   function logResult(r: VResult<Date | null>): void {
     if( r.isValid ){
       if( r.value == null ){
-        log(r.value);
+        logEvent("data", { data: r.value });
       } else {
-        log(format(f5, r.value));
+        logEvent("data", { data: format(f5, r.value) });
       }
     } else {
-      log(errorMessagesOf(r.errors));
+      logEvent("error", errorMessagesOf(r.errors));
     }
   }
 
   function doChange(evt: CustomEvent<VResult<Date | null>>): void {
+    console.log("doChange");
     const r = evt.detail;
     logResult(r);
   }
@@ -51,7 +53,7 @@
 </script>
 
 <Hst.Story>
-  <DateForm bind:date on:date-form-value={doChange}/>
+  <DateForm bind:date on:value-change={doChange}/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
