@@ -7,7 +7,6 @@
   export let Hst: Hst;
   let date: Date = new Date();
   let logs: string[] = [];
-  let validate: () => VResult<Date | null>;
   let setDate: (d: Date | null) => void;
 
   function log(arg: any): void {
@@ -15,7 +14,8 @@
     logs = [t, ...logs];
   }
 
-  function doChange(r: VResult<Date | null>): void {
+  function doChange(evt: CustomEvent<VResult<Date | null>>): void {
+    const r = evt.detail;
     if( r.isValid ){
       if( r.value == null ){
         log(r.value);
@@ -39,7 +39,7 @@
 </script>
 
 <Hst.Story>
-  <DateFormWithCalendar bind:date={date} onChange={doChange} bind:validate
+  <DateFormWithCalendar bind:date={date} on:value-changed={doChange}
     bind:setDate/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>

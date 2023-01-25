@@ -4,13 +4,22 @@
   import { validateWareki } from "../validators/wareki-validator";
   import { DateFormValues } from "./date-form-values";
   import * as kanjidate from "kanjidate";
+  import { createEventDispatcher } from "svelte";
 
   export let date: Date | null | undefined;
   export const setDate: (d: Date | null) => void = setDateFromExtern;
-  export let onChange: (result: VResult<Date | null>) => void;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
+  
+  let dispatch =
+    createEventDispatcher<{
+      "value-changed": VResult<Date | null>;
+    }>();
 
   let values: DateFormValues = formValues(date ?? null);
+
+  function onChange(result: VResult<Date | null>) {
+    dispatch("value-changed", result);
+  }
 
   function setDateFromExtern(d: Date | null): void {
     date = d;
@@ -19,7 +28,7 @@
   }
 
   function modifyDateFromIntern(f: (d: Date) => Date): void {
-    if( date !== undefined && date !== null ){
+    if (date !== undefined && date !== null) {
       setDateFromExtern(f(date));
     }
   }
@@ -27,7 +36,7 @@
   function handleUserInput(): void {
     const vs = validate();
     console.log("validate", vs);
-    if( vs.isValid ){
+    if (vs.isValid) {
       date = vs.value;
       values = formValues(date);
       console.log("values", values);
@@ -42,7 +51,7 @@
     return new DateFormValues(date, gengouList[0]);
   }
 
-  export function validate(): VResult<Date | null> {
+  function validate(): VResult<Date | null> {
     if (values.nen === "" && values.month === "" && values.day === "") {
       return validResult(null);
     } else {

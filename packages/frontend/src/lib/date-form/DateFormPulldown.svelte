@@ -15,7 +15,8 @@
     }
   }
 
-  function doFormChange(result: VResult<Date | null>): void {
+  function doFormChange(evt: CustomEvent<VResult<Date | null>>): void {
+    const result = evt.detail;
     errors = errorMessagesOf(result.errors);
   }
 </script>
@@ -28,7 +29,7 @@
     {/each}
   </div>
   {/if}
-  <DateForm bind:date onChange={doFormChange} bind:setDate />
+  <DateForm bind:date on:value-changed={doFormChange} bind:setDate />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>

@@ -6,28 +6,21 @@
   import type { VResult } from "../validation";
 
   export let date: Date | null | undefined;
-  export let onChange: (result: VResult<Date | null>) => void;
-  export let validate: () => VResult<Date | null>;
-  export let setDate: (d: Date | null) => void;
   export let datePickerDefault: () => Date = () => new Date();
+  export function setDate(d: Date | null): void { setFormDate(d) }; 
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = ["昭和", "平成", "令和"];
+
+  let setFormDate: (d: Date | null) => void;
 
   function doDatePickerEnter(d: Date): void {
     setDate(d);
   }
-
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm
-      bind:date
-      bind:onChange
-      bind:validate
-      bind:setDate
-      {gengouList}
-    />
+    <DateForm bind:date on:value-changed bind:setDate={setFormDate} {gengouList} />
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>

@@ -6,7 +6,6 @@
 
   export let Hst: Hst;
   let date: Date | null | undefined = new Date();
-  let validate: () => VResult<Date | null>;
   let logs: string[] = [];
   let setDate: (d: Date | null) => void;
 
@@ -15,7 +14,7 @@
     logs = [t, ...logs];
   }
 
-  function doChange(r: VResult<Date | null>): void {
+  function logResult(r: VResult<Date | null>): void {
     if( r.isValid ){
       if( r.value == null ){
         log(r.value);
@@ -25,6 +24,11 @@
     } else {
       log(errorMessagesOf(r.errors));
     }
+  }
+
+  function doChange(evt: CustomEvent<VResult<Date | null>>): void {
+    const r = evt.detail;
+    logResult(r);
   }
 
   function doSet(): void {
@@ -47,7 +51,7 @@
 </script>
 
 <Hst.Story>
-  <DateForm bind:date bind:validate onChange={doChange} bind:setDate/>
+  <DateForm bind:date on:value-changed={doChange} bind:setDate/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
