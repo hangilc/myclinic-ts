@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings 'a11y-invalid-attribute:ignore,a11y-click-events-have-key-events:ignore,a11y-autofocus:ignore'",
     "test": "vitest run",
-    "story:dev": "histoire dev"
+    "story:dev": "histoire dev",
+    "story:build": "histoire build",
+    "story:preview": "histoire preview"
   },
   "devDependencies": {
     "@histoire/plugin-svelte": "^0.12.4",

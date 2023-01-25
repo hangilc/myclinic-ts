@@ -2,7 +2,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { errorMessagesOf, type VResult } from "../validation";
   import DateForm from "./DateForm.svelte";
-  import * as kanjidate from "kanjidate";
+  import { format, f5 } from "kanjidate";
 
   export let Hst: Hst;
   let date: Date | null | undefined = new Date();
@@ -20,7 +20,7 @@
       if( r.value == null ){
         log(r.value);
       } else {
-        log(kanjidate.format(kanjidate.f5, r.value));
+        log(format(f5, r.value));
       }
     } else {
       log(errorMessagesOf(r.errors));
@@ -41,7 +41,7 @@
     } else if( d === null ){
       return "（未設定）"
     } else {
-      return kanjidate.format(kanjidate.f5, d);
+      return format(f5, d);
     }
   }
 </script>

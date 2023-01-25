@@ -1,14 +1,13 @@
 <script lang="ts">
+  import { DateFormValues } from "@/lib/date-form/date-form-values";
+  import { validResult, VResult } from "@/lib/validation";
   import { addYears, addMonths, addDays } from "kanjidate";
-  import { source, toInt, validResult, VResult } from "../validation";
-  import { validateWareki } from "../validators/wareki-validator";
-  import { DateFormValues } from "./date-form-values";
-  import * as kanjidate from "kanjidate";
 
   export let date: Date | null | undefined;
   export const setDate: (d: Date | null) => void = setDateFromExtern;
   export let onChange: (result: VResult<Date | null>) => void;
-  export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
+
+  const gengouList = ["令和", "平成", "昭和"];
 
   let values: DateFormValues = formValues(date ?? null);
 
@@ -24,40 +23,11 @@
     }
   }
 
-  function handleUserInput(): void {
-    const vs = validate();
-    console.log("validate", vs);
-    if( vs.isValid ){
-      date = vs.value;
-      values = formValues(date);
-      console.log("values", values);
-      onChange(validResult(date));
-    } else {
-      date = undefined;
-      onChange(vs);
-    }
-  }
-
   function formValues(date: Date | null): DateFormValues {
     return new DateFormValues(date, gengouList[0]);
   }
 
-  export function validate(): VResult<Date | null> {
-    if (values.nen === "" && values.month === "" && values.day === "") {
-      return validResult(null);
-    } else {
-      return validateWareki({
-        gengou: source(values.gengou),
-        nen: source(values.nen).validate(toInt),
-        month: source(values.month).validate(toInt),
-        day: source(values.day).validate(toInt),
-      });
-    }
-  }
-
-  function doInputChange(): void {
-    handleUserInput();
-  }
+  function doInputChange(): void {}
 
   function doModify(f: (d: Date) => Date): void {
     modifyDateFromIntern(f);
