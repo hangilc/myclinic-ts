@@ -3,13 +3,13 @@
   import Popup from "../Popup.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
   import CalendarIcon from "@/icons/CalendarIcon.svelte";
-  import type { VResult } from "../validation";
+  import { GengouList } from "kanjidate";
 
   export let date: Date | null | undefined;
   export let datePickerDefault: () => Date = () => new Date();
   export function setDate(d: Date | null): void { setFormDate(d) }; 
   export let iconWidth: string = "1.3em";
-  export let gengouList: string[] = ["昭和", "平成", "令和"];
+  export let gengouList: string[] = GengouList.map(g => g.kanji);
 
   let setFormDate: (d: Date | null) => void;
 

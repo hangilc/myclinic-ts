@@ -1,6 +1,8 @@
 import type { Shahokokuho } from "myclinic-model";
 
 export class ShahokokuhoFormValues {
+  shahokokuhoId: number;
+  patientId: number;
   hokenshaBangou: string;
   hihokenshaKigou: string;
   hihokenshaBangou: string;
@@ -11,6 +13,8 @@ export class ShahokokuhoFormValues {
   koureiStore: number;
 
   constructor(init: {
+    shahokokuhoId: number;
+    patientId: number;
     hokenshaBangou: string;
     hihokenshaKigou: string;
     hihokenshaBangou: string;
@@ -20,6 +24,8 @@ export class ShahokokuhoFormValues {
     validUpto: Date | null;
     koureiStore: number;
   }) {
+    this.shahokokuhoId = init.shahokokuhoId;
+    this.patientId = init.patientId;
     this.hokenshaBangou = init.hokenshaBangou;
     this.hihokenshaKigou = init.hihokenshaKigou;
     this.hihokenshaBangou = init.hihokenshaBangou;
@@ -32,6 +38,8 @@ export class ShahokokuhoFormValues {
 
   static blank(): ShahokokuhoFormValues {
     return new ShahokokuhoFormValues({
+      shahokokuhoId: 0,
+      patientId: 1,
       hokenshaBangou: "",
       hihokenshaKigou: "",
       hihokenshaBangou: "",

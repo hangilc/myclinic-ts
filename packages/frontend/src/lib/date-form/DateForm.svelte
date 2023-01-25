@@ -4,7 +4,7 @@
   import { validateWareki } from "../validators/wareki-validator";
   import { DateFormValues } from "./date-form-values";
   import * as kanjidate from "kanjidate";
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
 
   export let date: Date | null | undefined;
   export const setDate: (d: Date | null) => void = setDateFromExtern;
@@ -18,6 +18,7 @@
   let values: DateFormValues = formValues(date ?? null);
 
   function onChange(result: VResult<Date | null>) {
+    console.log("onChange");
     dispatch("value-changed", result);
   }
 
@@ -35,11 +36,9 @@
 
   function handleUserInput(): void {
     const vs = validate();
-    console.log("validate", vs);
     if (vs.isValid) {
       date = vs.value;
       values = formValues(date);
-      console.log("values", values);
       onChange(validResult(date));
     } else {
       date = undefined;
