@@ -27,7 +27,12 @@
   </Popup>
   <slot name="icons" />
   <Popup let:destroy let:triggerClick>
-    <CalendarIcon dy="-4px" dx="4px" onClick={triggerClick}/>
+    <CalendarIcon
+      dy="0px"
+      dx="4px"
+      onClick={triggerClick}
+      style="cursor: pointer;"
+    />
     <DatePicker
       slot="menu"
       date={date || datePickerDefault()}
