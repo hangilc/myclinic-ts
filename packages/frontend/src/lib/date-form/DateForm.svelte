@@ -8,7 +8,9 @@
 
   export let date: Date | null | undefined;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
+  let values: DateFormValues;
   export function validate(): VResult<Date | null> {
+    console.log("validate", values);
     return validateValues(values);
   }
   let dispatch =
@@ -16,23 +18,13 @@
       "value-change": VResult<Date | null>;
     }>();
 
-  let values: DateFormValues;
   $: onExternalData(date);
 
-  onMount(() => {
-    if (date !== undefined) {
-      values = values;
-      dispatch("value-change", validResult(date));
-    }
-  });
+  onMount(() => onExternalData(date));
 
   function onExternalData(date: Date | null | undefined): void {
     if (date !== undefined) {
-      const newValues = formValues(date);
-      if (JSON.stringify(values) !== JSON.stringify(newValues)) {
-        values = newValues;
-        dispatch("value-change", validResult(date));
-      }
+        values = formValues(date);
     }
   }
 
@@ -40,17 +32,20 @@
     if (date !== undefined && date !== null) {
       console.log("modify");
       date = f(date);
+      dispatch("value-change", validResult(date));
     }
   }
 
   function handleUserInput(): void {
+    console.log("handleUserInput", values);
     const vs = validate();
     if (vs.isValid) {
       date = vs.value;
     } else {
       date = undefined;
-      dispatch("value-change", vs);
     }
+    console.log("handleUserInput", vs);
+    dispatch("value-change", vs);
   }
 
   function formValues(date: Date | null): DateFormValues {
@@ -71,7 +66,6 @@
   }
 
   function doInputChange(): void {
-    console.log("doInputChange");
     handleUserInput();
   }
 
@@ -116,7 +110,7 @@
     <input
       type="text"
       class="day"
-      value={values.day}
+      bind:value={values.day}
       on:change={doInputChange}
     />
     <span on:click={doDayClick} class="day-span">日</span>

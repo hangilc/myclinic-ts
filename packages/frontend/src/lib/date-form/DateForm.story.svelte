@@ -23,12 +23,12 @@
         logEvent("data", { data: format(f5, r.value) });
       }
     } else {
+      console.log("error", errorMessagesOf(r.errors));
       logEvent("error", errorMessagesOf(r.errors));
     }
   }
 
   function doChange(evt: CustomEvent<VResult<Date | null>>): void {
-    console.log("doChange");
     const r = evt.detail;
     logResult(r);
   }
