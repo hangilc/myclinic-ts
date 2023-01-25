@@ -10,7 +10,6 @@
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
   let values: DateFormValues;
   export function validate(): VResult<Date | null> {
-    console.log("validate", values);
     return validateValues(values);
   }
   let dispatch =
@@ -30,21 +29,18 @@
 
   function modifyDateFromIntern(f: (d: Date) => Date): void {
     if (date !== undefined && date !== null) {
-      console.log("modify");
       date = f(date);
       dispatch("value-change", validResult(date));
     }
   }
 
   function handleUserInput(): void {
-    console.log("handleUserInput", values);
     const vs = validate();
     if (vs.isValid) {
       date = vs.value;
     } else {
       date = undefined;
     }
-    console.log("handleUserInput", vs);
     dispatch("value-change", vs);
   }
 

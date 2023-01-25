@@ -23,7 +23,6 @@
         logEvent("data", { data: format(f5, r.value) });
       }
     } else {
-      console.log("error", errorMessagesOf(r.errors));
       logEvent("error", errorMessagesOf(r.errors));
     }
   }
