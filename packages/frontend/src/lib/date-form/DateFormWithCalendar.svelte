@@ -7,20 +7,17 @@
 
   export let date: Date | null | undefined;
   export let datePickerDefault: () => Date = () => new Date();
-  export function setDate(d: Date | null): void { setFormDate(d) }; 
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = GengouList.map(g => g.kanji);
 
-  let setFormDate: (d: Date | null) => void;
-
   function doDatePickerEnter(d: Date): void {
-    setDate(d);
+    date = d;
   }
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm bind:date on:value-changed bind:setDate={setFormDate} {gengouList} />
+    <DateForm bind:date on:value-change {gengouList} />
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>

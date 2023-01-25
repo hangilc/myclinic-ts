@@ -5,9 +5,9 @@
   import { format, f5  } from "kanjidate";
 
   export let Hst: Hst;
-  let date: Date = new Date();
+  let date: Date | null = new Date();
   let logs: string[] = [];
-  let setDate: (d: Date | null) => void;
+  let setDate: (d: Date | null) => void = d => date = d;
 
   function log(arg: any): void {
     const t = JSON.stringify(arg, undefined, 2);
@@ -39,8 +39,7 @@
 </script>
 
 <Hst.Story>
-  <DateFormWithCalendar bind:date={date} on:value-changed={doChange}
-    bind:setDate/>
+  <DateFormWithCalendar bind:date={date} on:value-change={doChange}/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
