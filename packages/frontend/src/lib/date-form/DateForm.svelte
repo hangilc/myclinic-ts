@@ -6,31 +6,28 @@
   import * as kanjidate from "kanjidate";
   import { createEventDispatcher, onMount } from "svelte";
 
-  export let date: Date | null | undefined;
-  export const setDate: (d: Date | null) => void = setDateFromExtern;
+  export let date: Date | null;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
-  
+  export function validate(): VResult<Date | null> {
+    return validateValues(values);
+  }
   let dispatch =
     createEventDispatcher<{
-      "value-changed": VResult<Date | null>;
+      "date-form-value": VResult<Date | null>;
     }>();
+  
+  $: values = formValues(date);
+  $: dispatchValues(values);
 
-  let values: DateFormValues = formValues(date ?? null);
+  onMount(() => dispatchValues(values));
 
-  function onChange(result: VResult<Date | null>) {
-    console.log("onChange");
-    dispatch("value-changed", result);
-  }
-
-  function setDateFromExtern(d: Date | null): void {
-    date = d;
-    values = formValues(d);
-    onChange(validResult(d));
+  function dispatchValues(values: DateFormValues): void {
+    dispatch("date-form-value", validateValues(values));
   }
 
   function modifyDateFromIntern(f: (d: Date) => Date): void {
     if (date !== undefined && date !== null) {
-      setDateFromExtern(f(date));
+      date = (f(date));
     }
   }
 
@@ -38,11 +35,8 @@
     const vs = validate();
     if (vs.isValid) {
       date = vs.value;
-      values = formValues(date);
-      onChange(validResult(date));
     } else {
-      date = undefined;
-      onChange(vs);
+      dispatch("date-form-value", vs);
     }
   }
 
@@ -50,7 +44,7 @@
     return new DateFormValues(date, gengouList[0]);
   }
 
-  function validate(): VResult<Date | null> {
+  function validateValues(values: DateFormValues): VResult<Date | null> {
     if (values.nen === "" && values.month === "" && values.day === "") {
       return validResult(null);
     } else {
@@ -108,7 +102,7 @@
     <input
       type="text"
       class="day"
-      bind:value={values.day}
+      value={values.day}
       on:change={doInputChange}
     />
     <span on:click={doDayClick} class="day-span">日</span>
