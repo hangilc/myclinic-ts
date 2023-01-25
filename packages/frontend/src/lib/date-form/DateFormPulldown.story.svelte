@@ -2,7 +2,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import DateFormPulldown from "./DateFormPulldown.svelte";
-  import * as kanjidate from "kanjidate";
+  import { format, f5 } from "kanjidate";
 
   export let Hst: Hst;
 
@@ -13,7 +13,7 @@
   }
 
   function doEnter(d: Date | null): void {
-    const rep = d === null ? "null" : kanjidate.format(kanjidate.f5, d);
+    const rep = d === null ? "null" : format(f5, d);
     logEvent("enter", { d: rep });
   }
 </script>

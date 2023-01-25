@@ -1,7 +1,7 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { AppointTimeData } from "./appoint-time-data";
-  import * as kanjidate from "kanjidate";
+  import { format } from "kanjidate";
   import { genid } from "@/lib/genid";
   import api from "@/lib/api";
   import { Appoint, type Patient } from "myclinic-model";
@@ -79,7 +79,7 @@
   }
 
   function appointTimeText(data: AppointTimeData): string {
-    const d = kanjidate.format("{M}月{D}日（{W}）", data.appointTime.date);
+    const d = format("{M}月{D}日（{W}）", data.appointTime.date);
     const fp = parseTime(data.appointTime.fromTime);
     const f = `${fp.hour}時${fp.minute}分`;
     const up = parseTime(data.appointTime.untilTime);

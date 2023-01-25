@@ -2,7 +2,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { errorMessagesOf, type VResult } from "../validation";
   import DateFormWithCalendar from "./DateFormWithCalendar.svelte";
-  import * as kanjidate from "kanjidate";
+  import { format, f5  } from "kanjidate";
 
   export let Hst: Hst;
   let date: Date = new Date();
@@ -21,7 +21,7 @@
         log(r.value);
       } else {
 
-        log(kanjidate.format(kanjidate.f5, r.value));
+        log(format(f5, r.value));
       }
     } else {
       log(errorMessagesOf(r.errors));
@@ -44,7 +44,7 @@
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">
-    { date == null ? "(null)" : kanjidate.format(kanjidate.f5, date)}
+    { date == null ? "(null)" : format(f5, date)}
     <button on:click={() => logs = []}>clear logs</button>
   </div>
   <div class="logs">
