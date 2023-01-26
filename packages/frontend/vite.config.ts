@@ -24,8 +24,13 @@ export default defineConfig({
   base: "/vite/",
   server: {
     fs: {
-      allow: ["../../node_modules/@histoire", "../../node_modules/histoire",
-      "../../node_modules/svelte-hmr"],
+      allow: [
+        "../../node_modules/@histoire", 
+        "../../node_modules/histoire",
+        "../../node_modules/svelte-hmr",
+        ".", 
+        "../model",
+      ],
     }
   }
 })

@@ -24,7 +24,7 @@
   function onExternalData(data: Shahokokuho | null | undefined){
     if( data !== undefined ){
       if( data === null ){
-        values = ShahokokuhoFormValues.blank();
+        values = ShahokokuhoFormValues.blank(patient.patientId);
       } else {
         values = ShahokokuhoFormValues.from(data);
         dispatch("value-change", validResult(data));

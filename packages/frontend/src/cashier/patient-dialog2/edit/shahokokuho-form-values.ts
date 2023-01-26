@@ -37,10 +37,10 @@ export class ShahokokuhoFormValues {
     this.koureiStore = init.koureiStore;
   }
 
-  static blank(): ShahokokuhoFormValues {
+  static blank(patientId: number): ShahokokuhoFormValues {
     return new ShahokokuhoFormValues({
       shahokokuhoId: 0,
-      patientId: 1,
+      patientId: patientId,
       hokenshaBangou: "",
       hihokenshaKigou: "",
       hihokenshaBangou: "",

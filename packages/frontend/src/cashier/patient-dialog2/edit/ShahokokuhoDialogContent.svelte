@@ -9,8 +9,10 @@
   export let onClose: () => void;
   let validate: () => VResult<Shahokokuho>;
   let errors: string[] = [];
+  let enterClicked = false;
 
   async function doEnter() {
+    enterClicked = true;
     const vs = validate();
     if( vs.isValid ){
       errors = [];
@@ -28,6 +30,13 @@
   function doClose() {
     onClose();
   }
+
+  function onValueChange(evt: CustomEvent<VResult<Shahokokuho>>): void {
+    if( enterClicked ){
+      const r = evt.detail;
+      errors = errorMessagesOf(r.errors);
+    }
+  }
 </script>
 
 <div>
@@ -38,7 +47,7 @@
       {/each}
     </div>
   {/if}
-  <ShahokokuhoForm {patient} bind:data={data} bind:validate/>
+  <ShahokokuhoForm {patient} bind:data={data} bind:validate on:value-change={onValueChange}/>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
