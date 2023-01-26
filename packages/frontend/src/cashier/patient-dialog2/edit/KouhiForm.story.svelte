@@ -1,0 +1,59 @@
+<script lang="ts">
+  import { errorMessagesOf, type VResult } from "@/lib/validation";
+  import type { Hst } from "@histoire/plugin-svelte";
+  import { logEvent } from "histoire/client";
+  import { Patient, Kouhi } from "myclinic-model";
+  import { KouhiFormValues } from "./kouhi-form-values";
+  import KouhiForm from "./KouhiForm.svelte";
+
+  export let Hst: Hst;
+  let patient: Patient = new Patient(
+    123,
+    "診療",
+    "太郎",
+    "",
+    "",
+    "M",
+    "2000-01-01",
+    "",
+    ""
+  );
+  let data: Kouhi | null = null;
+  let values = KouhiFormValues.blank(patient.patientId);
+  let validate: () => VResult<Kouhi>
+
+  function logResult(r: VResult<Kouhi>): void {
+    if( r.isValid ){
+      logEvent("data", { data: r.value });
+    } else {
+      const messages = errorMessagesOf(r.errors);
+      logEvent("error", { messages });
+    }
+  }
+
+  function doValueChange(evt: CustomEvent<VResult<Kouhi>>): void {
+    console.log("change", evt.detail);
+  }
+
+  function doSet(): void {
+    data = new Kouhi(
+      1, 1234, 23, "2023-01-26", "0000-00-00", 12
+    )
+  }
+
+  function doValidate(): void {
+    logResult(validate());
+  }
+
+</script>
+
+<Hst.Story>
+  <div style:width="460px">
+    <KouhiForm {patient} bind:data={data} on:value-change={doValueChange} bind:validate/>
+  </div>
+  <div>
+    <button on:click={doSet}>Set</button>
+    <button on:click={doValidate}>Validate</button>
+  </div>
+</Hst.Story>
+

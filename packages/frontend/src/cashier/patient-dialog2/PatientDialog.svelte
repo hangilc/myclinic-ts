@@ -1,6 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+  import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import type { PatientData } from "../patient-dialog2/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -11,6 +11,7 @@
   import api from "@/lib/api";
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
+  import KouhiDialog from "./edit/KouhiDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -47,20 +48,20 @@
     data.push(open);
   }
 
-  function doNew(slug: string): void {
-    function open(): void {
-      const d: EditHokenDialog = new EditHokenDialog({
-        target: document.body,
-        props: {
-          data,
-          hoken: slug,
-          destroy: () => d.$destroy()
-        }
-      });
-    }
-    destroy();
-    data.push(open);
-  }
+  // function doNew(slug: string): void {
+  //   function open(): void {
+  //     const d: EditHokenDialog = new EditHokenDialog({
+  //       target: document.body,
+  //       props: {
+  //         data,
+  //         hoken: slug,
+  //         destroy: () => d.$destroy()
+  //       }
+  //     });
+  //   }
+  //   destroy();
+  //   data.push(open);
+  // }
 
   function doNewShahokokuho() {
     function open(): void {
@@ -107,7 +108,25 @@
   }
 
   function doNewKouhi() {
-    doNew("kouhi");
+    function open(): void {
+      const d: KouhiDialog = new KouhiDialog({
+        target: document.body,
+        props: {
+          destroy: () => {
+            d.$destroy();
+            data.goback();
+          },
+          patient: p,
+          init: null,
+          title: "新規後期高齢保険",
+          onEntered: (entered: Kouhi) => {
+            data.hokenCache.enterHokenType(entered);
+          }
+        },
+      });
+    }
+    destroy();
+    data.push(open);
   }
 
   async function doHokenHistory() {
