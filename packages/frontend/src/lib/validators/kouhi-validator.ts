@@ -1,37 +1,50 @@
 import { Kouhi } from "myclinic-model";
 import {
-  notNull,
+  isNotNull,
   isPositive,
-  type Invalid,
-  type ValidationResult,
-  toSqlDate,
+  isZeroOrPositive,
   toOptionalSqlDate,
-} from "../validator";
+  toSqlDate,
+  validated6,
+} from "../validation";
+import type { VResult } from "../validation";
 
 export interface KouhiInput {
-  patientId: ValidationResult<number>;
-  futansha: ValidationResult<number>;
-  jukyuusha: ValidationResult<number>;
-  validFrom: ValidationResult<Date | null>;
-  validUpto: ValidationResult<Date | null>;
+  kouhiId: VResult<number>;
+  futansha: VResult<number>;
+  jukyuusha: VResult<number>;
+  validFrom: VResult<Date | null>;
+  validUpto: VResult<Date | null>;
+  patientId: VResult<number>;
 }
 
 export function validateKouhi(
-  kouhiId: number,
   input: KouhiInput
-): Kouhi | string[] {
-  const errs: Invalid[] = [];
-  const kouhi = new Kouhi(
-    kouhiId,
-    input.futansha.and(isPositive).unwrap(errs, "負担者番号"),
-    input.jukyuusha.and(isPositive).unwrap(errs, "受給者番号"),
-    input.validFrom.to(notNull).map(toSqlDate).unwrap(errs, "期限開始"),
-    input.validUpto.map(toOptionalSqlDate).unwrap(errs, "期限終了"),
-    input.patientId.and(isPositive).unwrap(errs, "patient-id"),
-  );
-  if (errs.length > 0) {
-    return errs.map((e) => e.toString());
-  } else {
-    return kouhi;
-  }
+): VResult<Kouhi> {
+  const kouhiIdVal = input.kouhiId
+    .validate(isZeroOrPositive)
+    .mark("kouhi-id");
+    const futanshaVal = input.futansha
+    .validate(isPositive)
+    .mark("負担者番号");
+    const jukyuushaVal = input.jukyuusha
+    .validate(isPositive)
+    .mark("受給者番号");
+    const validFromVal = input.validFrom
+    .validate(isNotNull("入力されていません"))
+    .validate(toSqlDate)
+    .mark("期限開始");
+    const validUptoVal = input.validUpto
+    .validate(toOptionalSqlDate)
+    .mark("期限終了");
+    const patientIdVal = input.patientId.validate(isPositive).mark("patient-id");
+  return validated6(
+    kouhiIdVal,
+    futanshaVal,
+    jukyuushaVal,
+    validFromVal,
+    validUptoVal,
+    patientIdVal,
+  ).map((args) => new Kouhi(...args));
 }
+
