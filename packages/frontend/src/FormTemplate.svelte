@@ -48,7 +48,6 @@
   function onInternalModify(f: (data: DATA_TYPE) => DATA_TYPE): void {
     if( data !== undefined ){
       data = f(data);
-      dispatch("value-change", validResult(data));
     }
   }
 

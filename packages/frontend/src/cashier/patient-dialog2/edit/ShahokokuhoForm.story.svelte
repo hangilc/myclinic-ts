@@ -18,7 +18,7 @@
     "",
     ""
   );
-  let values = ShahokokuhoFormValues.blank();
+  let values = ShahokokuhoFormValues.blank(patient.patientId);
   let validate: () => VResult<Shahokokuho>
 
   function logResult(r: VResult<Shahokokuho>): void {
