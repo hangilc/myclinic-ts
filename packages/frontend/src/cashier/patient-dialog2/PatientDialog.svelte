@@ -1,6 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Patient, Shahokokuho } from "myclinic-model";
+  import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import type { PatientData } from "../patient-dialog2/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -10,6 +10,7 @@
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
   import api from "@/lib/api";
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
+  import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -84,7 +85,25 @@
   }
 
   function doNewKoukikourei() {
-    doNew("koukikourei");
+    function open(): void {
+      const d: KoukikoureiDialog = new KoukikoureiDialog({
+        target: document.body,
+        props: {
+          destroy: () => {
+            d.$destroy();
+            data.goback();
+          },
+          patient: p,
+          init: null,
+          title: "新規後期高齢保険",
+          onEntered: (entered: Koukikourei) => {
+            data.hokenCache.enterHokenType(entered);
+          }
+        },
+      });
+    }
+    destroy();
+    data.push(open);
   }
 
   function doNewKouhi() {

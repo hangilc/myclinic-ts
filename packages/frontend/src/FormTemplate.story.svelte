@@ -9,17 +9,17 @@
 
   let data: DATA_TYPE = { num: 0 };
 
-  function log(t: string): void {
-    
+  function log(what: string, t: string): void {
+    logs.unshift(`${what}: ${t}`);
   }
 
   function onValueChange(evt: CustomEvent<VResult<DATA_TYPE>>): void {
     const r = evt.detail;
     if( r.isValid ){
       const d: DATA_TYPE = r.value;
-      console.log("data", d);
+      log("data", JSON.stringify(d));
     } else {
-      console.log("error", errorMessagesOf(r.errors) );
+      log("error", JSON.stringify(errorMessagesOf(r.errors)) );
     }
   }
 </script>
