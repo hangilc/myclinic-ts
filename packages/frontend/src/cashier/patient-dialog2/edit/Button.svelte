@@ -2,36 +2,40 @@
   import { invalid, valid, validResult, type VResult } from "@/lib/validation";
   import { createEventDispatcher, onMount } from "svelte";
 
-  type DATA_TYPE = number;
-  type VALUES_TYPE = string;
+  type DATA_TYPE = { num: number };
+  type VALUES_TYPE = { num: string };
 
   export let data: DATA_TYPE | undefined;
   $: onExternalData(data);
+  onMount(() => onExternalData(data));
   let values: VALUES_TYPE;
   const dispatch = createEventDispatcher<{"value-change": VResult<DATA_TYPE>}>();
-  onMount(() => onExternalData(data));
 
-  function onExternalData(data: number | undefined): void {
+  function onExternalData(data: DATA_TYPE | undefined): void {
     if( data !== undefined ){
       values = formValues(data);
       dispatch("value-change", validResult(data));
     }
   }
 
-  function formValues(data: DATA_TYPE): string {
-    return data.toString();
+  function formValues(data: DATA_TYPE): VALUES_TYPE {
+    return { num: data.num.toString() };
   }
 
-  function validate(): VResult<DATA_TYPE> {
-    const d = parseInt(values);
-    if( isNaN(d) ){
-      return invalid("Invalid number", []);
+  function validateValues(values: VALUES_TYPE): VResult<DATA_TYPE> {
+    const n = parseInt(values.num);
+    if( isNaN(n) ){
+      return invalid("Not a number", []);
     } else {
-      return validResult(d);
+      return validResult({ num: n });
     }
   }
 
-  function doChange(): void {
+  export function validate(): VResult<DATA_TYPE> {
+    return validateValues(values);
+  }
+
+  function onUserInput(): void {
     const vs = validate();
     if( vs.isValid ){
       data = vs.value;
@@ -41,13 +45,17 @@
     }
   }
 
-  function doInc(): void {
-    const vs = validate();
-    if( vs.isValid && data !== undefined ){
-      data = data + 1;
+  function onInternalModify(f: (data: DATA_TYPE) => DATA_TYPE): void {
+    if( data !== undefined ){
+      data = f(data);
+      dispatch("value-change", validResult(data));
     }
+  }
+
+  function doInc(): void {
+    onInternalModify(d => Object.assign({}, d, { num: d.num + 1}));
   }
 </script>
 
-<input type="text" bind:value={values} on:change={doChange} />
+<input type="text" bind:value={values.num} on:change={onUserInput} />
 <button on:click={doInc}>Inc</button>
