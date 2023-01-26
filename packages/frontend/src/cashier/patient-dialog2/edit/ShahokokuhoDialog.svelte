@@ -8,12 +8,14 @@
   export let title: string;
   export let init: Shahokokuho | null;
   export let patient: Patient;
+  export let onEntered: (entered: Shahokokuho) => void = _ => {};
 
   async function doEnter(shahokokuho: Shahokokuho): Promise<string[]> {
     try {
       if (init === null) {
         shahokokuho.shahokokuhoId = 0;
-        await api.enterShahokokuho(shahokokuho);
+        const entered = await api.enterShahokokuho(shahokokuho);
+        onEntered(entered);
       } else {
         if( shahokokuho.shahokokuhoId <= 0 ){
           return ["Invalid shahokokuhoId"];

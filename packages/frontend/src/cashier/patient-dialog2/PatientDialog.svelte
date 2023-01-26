@@ -1,6 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Patient } from "myclinic-model";
+  import type { Patient, Shahokokuho } from "myclinic-model";
   import type { PatientData } from "../patient-dialog2/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -72,7 +72,10 @@
           },
           patient: p,
           init: null,
-          title: "新規社保国保"
+          title: "新規社保国保",
+          onEntered: (entered: Shahokokuho) => {
+            data.hokenCache.enterHokenType(entered);
+          }
         },
       });
     }
