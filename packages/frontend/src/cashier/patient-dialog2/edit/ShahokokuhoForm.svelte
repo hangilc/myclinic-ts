@@ -60,6 +60,16 @@
     }
   }
 
+  function onValidFromChange(evt: CustomEvent<VResult<Date | null>>): void {
+    validFromResult = evt.detail;
+    doUserInput();
+  }
+
+  function onValidUptoChange(evt: CustomEvent<VResult<Date | null>>): void {
+    validUptoResult = evt.detail;
+    doUserInput();
+  }
+
 </script>
 
 <div>
@@ -109,7 +119,7 @@
   <div>
     <DateFormWithCalendar
       date={values.validFrom}
-      on:value-changed={onValidFromChanged}
+      on:value-change={onValidFromChange}
       {gengouList}
     />
   </div>
@@ -117,7 +127,7 @@
   <div>
     <DateFormWithCalendar
       date={values.validUpto}
-      on:value-changed={onValidUptoChanged}
+      on:value-change={onValidUptoChange}
       {gengouList}
     />
   </div>

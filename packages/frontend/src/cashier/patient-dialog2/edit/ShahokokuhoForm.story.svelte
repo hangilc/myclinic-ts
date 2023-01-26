@@ -30,7 +30,7 @@
     }
   }
 
-  function doValueChanged(evt: CustomEvent<VResult<Shahokokuho>>): void {
+  function doValueChange(evt: CustomEvent<VResult<Shahokokuho>>): void {
     logResult(evt.detail);
   }
 
@@ -57,7 +57,7 @@
 
 <Hst.Story>
   <div style:width="460px">
-    <ShahokokuhoForm {patient} {values} on:value-changed={doValueChanged} bind:validate/>
+    <ShahokokuhoForm {patient} data={null} on:value-change={doValueChange} bind:validate/>
   </div>
   <div>
     <button on:click={doSet}>Set</button>
