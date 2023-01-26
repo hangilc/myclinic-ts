@@ -1,78 +1,111 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import { gengouListUpto } from "@/lib/gengou-list-upto";
   import { genid } from "@/lib/genid";
-  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
-  import { intSrc, strSrc, type Invalid } from "@/lib/validator";
-  import { dateSrc } from "@/lib/validators/date-validator";
+  import { validResult, type VResult } from "@/lib/validation";
   import { validateKoukikourei } from "@/lib/validators/koukikourei-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import type { Koukikourei, Patient } from "myclinic-model";
-  import type { HokenType } from "../hoken";
-  import fold from "./fold";
-  import { castHokenType } from "./misc";
+  import { createEventDispatcher, onMount } from "svelte";
+  import { KoukikoureiFormValues } from "./koukikourei-form-values";
 
-  export let hoken: HokenType | undefined;
   export let patient: Patient;
-  let koukikourei: Koukikourei | undefined = castHokenType<Koukikourei>(hoken);
+  export let data: Koukikourei | null | undefined;
+  let dispatch = createEventDispatcher<{
+    "value-change": VResult<Koukikourei>
+    }>();
+  let values: KoukikoureiFormValues;
+  $: onExternalData(data);
+  onMount(() => onExternalData(data));
+  let gengouList = gengouListUpto("平成");
+  let validFromResult: VResult<Date | null>;
+  let validUptoResult: VResult<Date | null>;
 
-  function foldK<T>(someF: (some: Koukikourei) => T, noneF: T): T {
-    return fold(koukikourei, someF, noneF);
+  function onExternalData(data: Koukikourei | null | undefined){
+    if( data !== undefined ){
+      if( data === null ){
+        values = KoukikoureiFormValues.blank(patient.patientId);
+      } else {
+        values = KoukikoureiFormValues.from(data);
+        console.log("values", values);
+        dispatch("value-change", validResult(data));
+      }
+      validFromResult = validResult(values.validFrom);
+      validUptoResult = validResult(values.validUpto);
+    }
   }
 
-  let hokenshaBangou: string = foldK((k) => k.hokenshaBangou, "");
-  let hihokenshaBangou: string = foldK((k) => k.hihokenshaBangou, "");
-  let futanWari: number = koukikourei?.futanWari ?? 1;
-  let validFrom: Date | null = foldK((k) => parseSqlDate(k.validFrom), null);
-  let validFromErrors: Invalid[] = [];
-  let validUpto: Date | null = foldK(
-    (k) => parseOptionalSqlDate(k.validUpto),
-    null
-  );
-  let validUptoErrors: Invalid[] = [];
-
-  export function validate(): HokenType | string[] {
-    return validateKoukikourei(koukikourei?.koukikoureiId ?? 0, {
-      patientId: intSrc(patient.patientId),
-      hokenshaBangou: strSrc(hokenshaBangou),
-      hihokenshaBangou: strSrc(hihokenshaBangou),
-      futanWari: intSrc(futanWari),
-      validFrom: dateSrc(validFrom, validFromErrors),
-      validUpto: dateSrc(validUpto, validUptoErrors),
-    });
+  export function validate(): VResult<Koukikourei> {
+    const input = {
+      koukikoureiId: validResult(values.koukikoureiId),
+      patientId: validResult(values.patientId),
+      hokenshaBangou: validResult(values.hokenshaBangou),
+      hihokenshaBangou: validResult(values.hihokenshaBangou),
+      futanWari: validResult(values.futanWari),
+      validFrom: validFromResult,
+      validUpto: validUptoResult,
+    }
+    return validateKoukikourei(input);
   }
+
+  function doUserInput(): void {
+    const vs = validate();
+    if( vs.isValid ){
+      onExternalData(vs.value);
+    } else {
+      onExternalData(undefined);
+      dispatch("value-change", vs);
+    }
+  }
+
+  function onValidFromChange(evt: CustomEvent<VResult<Date | null>>): void {
+    validFromResult = evt.detail;
+    doUserInput();
+  }
+
+  function onValidUptoChange(evt: CustomEvent<VResult<Date | null>>): void {
+    validUptoResult = evt.detail;
+    doUserInput();
+  }
+
 </script>
 
-<div class="panel">
+<div>
   <span>({patient.patientId})</span>
   <span>{patient.fullName(" ")}</span>
+</div>
+<div class="panel">
   <span>保険者番号</span>
-  <div><input type="text" class="regular" bind:value={hokenshaBangou} /></div>
+  <div>
+    <input type="text" class="regular" bind:value={values.hokenshaBangou} 
+      on:change={doUserInput}/>
+  </div>
   <span>被保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={hihokenshaBangou} />
+    <input type="text" class="regular" bind:value={values.hihokenshaBangou} on:change={doUserInput}/>
   </div>
   <span>負担割</span>
   <div>
     {#each [1, 2, 3] as w}
       {@const id = genid()}
-      <input type="radio" value={w} bind:group={futanWari} />
+      <input type="radio" value={w} bind:group={values.futanWari} on:change={doUserInput}/>
       <label for={id}>{toZenkaku(w.toString())}割</label>
     {/each}
   </div>
   <span>期限開始</span>
   <div>
     <DateFormWithCalendar
-      bind:date={validFrom}
-      bind:errors={validFromErrors}
-      isNullable={false}
+      date={values.validFrom}
+      on:value-change={onValidFromChange}
+      {gengouList}
     />
   </div>
   <span>期限終了</span>
   <div>
     <DateFormWithCalendar
-      bind:date={validUpto}
-      bind:errors={validUptoErrors}
-      isNullable={true}
+      date={values.validUpto}
+      on:value-change={onValidUptoChange}
+      {gengouList}
     />
   </div>
 </div>
@@ -81,25 +114,19 @@
   .panel {
     display: grid;
     grid-template-columns: auto 1fr;
-  }
-
-  .panel > * {
-    margin: 3px 0;
-  }
-
-  .panel > div {
-    display: flex;
-    align-items: center;
+    row-gap: 6px;
+    column-gap: 6px;
   }
 
   .panel > :nth-child(odd) {
-    margin-right: 6px;
-    display: flex;
-    justify-content: right;
-    align-items: center;
+    text-align: right;
   }
 
-  .panel input.regular {
+  input[type="text"].regular {
     width: 6rem;
+  }
+
+  input.edaban {
+    width: 2rem;
   }
 </style>

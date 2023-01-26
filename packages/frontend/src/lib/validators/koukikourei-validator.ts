@@ -1,41 +1,60 @@
 import { Koukikourei } from "myclinic-model";
 import {
-  notNull,
-  isPositive,
+  isInInclusiveRange,
   isNotEmpty,
-  oneOf,
-  type Invalid,
-  type ValidationResult,
-  toSqlDate,
+  isNotNull,
+  isPositive,
+  isZeroOrPositive,
+  toInt,
   toOptionalSqlDate,
-} from "../validator";
+  toSqlDate,
+  validated7,
+} from "../validation";
+import type { VResult } from "../validation";
 
 export interface KoukikoureiInput {
-  patientId: ValidationResult<number>;
-  hokenshaBangou: ValidationResult<string>;
-  hihokenshaBangou: ValidationResult<string>;
-  futanWari: ValidationResult<number>;
-  validFrom: ValidationResult<Date | null>;
-  validUpto: ValidationResult<Date | null>;
+  koukikoureiId: VResult<number>;
+  patientId: VResult<number>;
+  hokenshaBangou: VResult<string>;
+  hihokenshaBangou: VResult<string>;
+  futanWari: VResult<number>;
+  validFrom: VResult<Date | null>;
+  validUpto: VResult<Date | null>;
 }
 
 export function validateKoukikourei(
-  koukikoureiId: number,
   input: KoukikoureiInput
-): Koukikourei | string[] {
-  const errs: Invalid[] = [];
-  const koukikourei = new Koukikourei(
-    koukikoureiId,
-    input.patientId.and(isPositive).unwrap(errs, "patient-id"),
-    input.hokenshaBangou.and(isNotEmpty).unwrap(errs, "保険者番号"),
-    input.hihokenshaBangou.and(isNotEmpty).unwrap(errs, "被保険者番号"),
-    input.futanWari.and(oneOf([1, 2, 3])).unwrap(errs, "負担割"),
-    input.validFrom.to(notNull).map(toSqlDate).unwrap(errs, "期限開始"),
-    input.validUpto.map(toOptionalSqlDate).unwrap(errs, "期限終了")
-  );
-  if (errs.length > 0) {
-    return errs.map((e) => e.toString());
-  } else {
-    return koukikourei;
-  }
+): VResult<Koukikourei> {
+  const koukikoureiIdVal = input.koukikoureiId
+    .validate(isZeroOrPositive)
+    .mark("koukikourei-id");
+  const patientIdVal = input.patientId.validate(isPositive).mark("patient-id");
+  const hokenshaBangouVal = input.hokenshaBangou
+    .validate(toInt)
+    .validate(isPositive)
+    .map((n) => n.toString())
+    .mark("保険者番号");
+  const hihokenshaBangouVal = input.hihokenshaBangou
+    .validate(isNotEmpty)
+    .map((n) => n.toString())
+    .mark("被保険者番号");
+  const futanWariVal = input.futanWari
+    .validate(isInInclusiveRange(1, 3))
+    .mark("負担割");
+  const validFromVal = input.validFrom
+    .validate(isNotNull("入力されていません"))
+    .validate(toSqlDate)
+    .mark("期限開始");
+  const validUptoVal = input.validUpto
+    .validate(toOptionalSqlDate)
+    .mark("期限終了");
+  return validated7(
+    koukikoureiIdVal,
+    patientIdVal,
+    hokenshaBangouVal,
+    hihokenshaBangouVal,
+    futanWariVal,
+    validFromVal,
+    validUptoVal
+  ).map((args) => new Koukikourei(...args));
 }
