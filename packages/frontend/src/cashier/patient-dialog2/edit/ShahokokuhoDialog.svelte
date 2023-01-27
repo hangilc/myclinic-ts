@@ -9,6 +9,7 @@
   export let init: Shahokokuho | null;
   export let patient: Patient;
   export let onEntered: (entered: Shahokokuho) => void = _ => {};
+  export let onUpdated: (updated: Shahokokuho) => void = _ => {};
 
   async function doEnter(shahokokuho: Shahokokuho): Promise<string[]> {
     try {
@@ -21,6 +22,7 @@
           return ["Invalid shahokokuhoId"];
         } else {
           await api.updateShahokokuho(shahokokuho);
+          onUpdated(shahokokuho);
         }
       }
       return [];
