@@ -11,6 +11,7 @@
   import EditHokenDialog from "./EditHokenDialog.svelte";
   import { confirm } from "@/lib/confirm-call";
   import { deleteHoken } from "./delete-hoken";
+  import { editHoken } from "./edit-hoken";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -41,19 +42,23 @@
   }
 
   function doEdit(hoken: Hoken): void {
-    function open(): void {
-      const d: EditHokenDialog = new EditHokenDialog({
-        target: document.body,
-        props: {
-          data,
-          hoken,
-          destroy: () => d.$destroy(),
-        },
-      });
-    }
-    destroy();
-    data.push(open);
+    editHoken(data, patient, destroy, hoken);
   }
+
+  // function doEdit(hoken: Hoken): void {
+  //   function open(): void {
+  //     const d: EditHokenDialog = new EditHokenDialog({
+  //       target: document.body,
+  //       props: {
+  //         data,
+  //         hoken,
+  //         destroy: () => d.$destroy(),
+  //       },
+  //     });
+  //   }
+  //   destroy();
+  //   data.push(open);
+  // }
 
   function doDelete(hoken: Hoken): void {
     confirm("この保険を削除していいですか？", async () => {

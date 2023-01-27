@@ -18,6 +18,7 @@
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
   import api from "@/lib/api";
+  import { editHoken } from "./edit-hoken";
 
   export let data: PatientData;
   export let hoken: Hoken;
@@ -42,71 +43,75 @@
   }
 
   function doEdit(): void {
-    if (hoken.value instanceof Shahokokuho) {
-      const shahokokuho = hoken.value;
-      function open(): void {
-        const d: ShahokokuhoDialog = new ShahokokuhoDialog({
-          target: document.body,
-          props: {
-            init: shahokokuho,
-            destroy: () => {
-              d.$destroy();
-              data.goback();
-            },
-            title: "社保国保編集",
-            patient,
-            onUpdated: (updated: Shahokokuho) => {
-              data.hokenCache.updateWithHokenType(updated);
-            },
-          },
-        });
-      }
-      destroy();
-      data.push(open);
-    } else if (hoken.value instanceof Koukikourei) {
-      const koukikourei = hoken.value;
-      function open(): void {
-        const d: KoukikoureiDialog = new KoukikoureiDialog({
-          target: document.body,
-          props: {
-            init: koukikourei,
-            destroy: () => {
-              d.$destroy();
-              data.goback();
-            },
-            title: "後期高齢保険編集",
-            patient,
-            onUpdated: (updated: Koukikourei) => {
-              data.hokenCache.updateWithHokenType(updated);
-            },
-          },
-        });
-      }
-      destroy();
-      data.push(open);
-    } else if (hoken.value instanceof Kouhi) {
-      const kouhi = hoken.value;
-      function open(): void {
-        const d: KouhiDialog = new KouhiDialog({
-          target: document.body,
-          props: {
-            init: kouhi,
-            destroy: () => {
-              d.$destroy();
-              data.goback();
-            },
-            title: "後期高齢保険編集",
-            patient,
-            onUpdated: (updated: Kouhi) => {
-              data.hokenCache.updateWithHokenType(updated);
-            },
-          },
-        });
-      }
-      destroy();
-      data.push(open);
-    }
+    editHoken(data, patient, destroy, hoken);
   }
+
+  // function doEdit(): void {
+  //   if (hoken.value instanceof Shahokokuho) {
+  //     const shahokokuho = hoken.value;
+  //     function open(): void {
+  //       const d: ShahokokuhoDialog = new ShahokokuhoDialog({
+  //         target: document.body,
+  //         props: {
+  //           init: shahokokuho,
+  //           destroy: () => {
+  //             d.$destroy();
+  //             data.goback();
+  //           },
+  //           title: "社保国保編集",
+  //           patient,
+  //           onUpdated: (updated: Shahokokuho) => {
+  //             data.hokenCache.updateWithHokenType(updated);
+  //           },
+  //         },
+  //       });
+  //     }
+  //     destroy();
+  //     data.push(open);
+  //   } else if (hoken.value instanceof Koukikourei) {
+  //     const koukikourei = hoken.value;
+  //     function open(): void {
+  //       const d: KoukikoureiDialog = new KoukikoureiDialog({
+  //         target: document.body,
+  //         props: {
+  //           init: koukikourei,
+  //           destroy: () => {
+  //             d.$destroy();
+  //             data.goback();
+  //           },
+  //           title: "後期高齢保険編集",
+  //           patient,
+  //           onUpdated: (updated: Koukikourei) => {
+  //             data.hokenCache.updateWithHokenType(updated);
+  //           },
+  //         },
+  //       });
+  //     }
+  //     destroy();
+  //     data.push(open);
+  //   } else if (hoken.value instanceof Kouhi) {
+  //     const kouhi = hoken.value;
+  //     function open(): void {
+  //       const d: KouhiDialog = new KouhiDialog({
+  //         target: document.body,
+  //         props: {
+  //           init: kouhi,
+  //           destroy: () => {
+  //             d.$destroy();
+  //             data.goback();
+  //           },
+  //           title: "後期高齢保険編集",
+  //           patient,
+  //           onUpdated: (updated: Kouhi) => {
+  //             data.hokenCache.updateWithHokenType(updated);
+  //           },
+  //         },
+  //       });
+  //     }
+  //     destroy();
+  //     data.push(open);
+  //   }
+  // }
 
   async function doDelete() {
     if (hoken.usageCount > 0) {
