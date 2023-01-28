@@ -1,5 +1,8 @@
 <div>
   受付
+  {#if import.meta.env.MODE === "test-client"}
+  <span data-cy="test-flag">(Test-Client)</span>
+  {/if}
 </div>
 
 <style>

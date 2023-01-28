@@ -56,7 +56,7 @@
   autofocus
 >
   <div class="title">
-    <span class="title-span">{title}</span>
+    <span class="title-span" data-cy="dialog-title">{title}</span>
     <svg
       on:click={destroy}
       class="closeIcon"

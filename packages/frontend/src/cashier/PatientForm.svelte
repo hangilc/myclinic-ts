@@ -65,13 +65,13 @@
     {/if}
     <span>氏名</span>
     <div class="input-block">
-      <input type="text" bind:value={lastName} class="name-input" bind:this={focusInput}/>
-      <input type="text" bind:value={firstName} class="name-input" />
+      <input type="text" bind:value={lastName} class="name-input" data-cy="last-name-input" bind:this={focusInput}/>
+      <input type="text" bind:value={firstName} class="name-input" data-cy="first-name-input" />
     </div>
     <span>よみ</span>
     <div class="input-block">
-      <input type="text" bind:value={lastNameYomi} class="name-input" />
-      <input type="text" bind:value={firstNameYomi} class="name-input" />
+      <input type="text" bind:value={lastNameYomi} class="name-input" data-cy="last-name-yomi-input"/>
+      <input type="text" bind:value={firstNameYomi} class="name-input" data-cy="first-name-yomi-input"/>
     </div>
     <span>生年月日</span>
     <div class="input-block">
