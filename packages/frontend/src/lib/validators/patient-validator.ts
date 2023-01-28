@@ -1,41 +1,54 @@
 import { Patient } from "myclinic-model";
 import {
-  Invalid,
-  notNull,
   isNotEmpty,
-  oneOf,
+  isNotNull,
+  isOneOf,
+  isZeroOrPositive,
   toSqlDate,
-  type ValidationResult,
-} from "../validator";
+  type VResult,
+  validated9,
+} from "../validation";
 
 export class PatientInput {
   constructor(
-    public lastName: ValidationResult<string>,
-    public firstName: ValidationResult<string>,
-    public lastNameYomi: ValidationResult<string>,
-    public firstNameYomi: ValidationResult<string>,
-    public sex: ValidationResult<string>,
-    public birthday: ValidationResult<Date | null>,
-    public address: ValidationResult<string>,
-    public phone: ValidationResult<string>
+    public patientId: VResult<number>,
+    public lastName: VResult<string>,
+    public firstName: VResult<string>,
+    public lastNameYomi: VResult<string>,
+    public firstNameYomi: VResult<string>,
+    public sex: VResult<string>,
+    public birthday: VResult<Date | null>,
+    public address: VResult<string>,
+    public phone: VResult<string>
   ) {}
 }
 
-export function validatePatient(
-  patientId: number,
-  input: PatientInput
-): Patient | Invalid[] {
-  const errs: Invalid[] = [];
-  const patient: Patient = new Patient(
+export function validatePatient(input: PatientInput): VResult<Patient> {
+  const patientId = input.patientId
+    .validate(isZeroOrPositive)
+    .mark("patient-id");
+  const lastName = input.lastName.validate(isNotEmpty).mark("姓");
+  const firstName = input.firstName.validate(isNotEmpty).mark("名");
+  const lastNameYomi = input.lastNameYomi.validate(isNotEmpty).mark("姓のよみ");
+  const firstNameYomi = input.firstNameYomi
+    .validate(isNotEmpty)
+    .mark("名のよみ");
+  const sex = input.sex.validate(isOneOf("M", "F")).mark("性別");
+  const birthday = input.birthday
+    .validate(isNotNull("入力されていません"))
+    .validate(toSqlDate)
+    .mark("生年月日");
+  const address = input.address.mark("住所");
+  const phone = input.phone.mark("電話番号");
+  return validated9(
     patientId,
-    input.lastName.and(isNotEmpty).unwrap(errs, "姓"),
-    input.firstName.and(isNotEmpty).unwrap(errs, "名"),
-    input.lastNameYomi.and(isNotEmpty).unwrap(errs, "姓のよみ"),
-    input.firstNameYomi.and(isNotEmpty).unwrap(errs, "名のよみ"),
-    input.sex.and(oneOf(["M", "F"])).unwrap(errs, "性別"),
-    input.birthday.to(notNull).map(toSqlDate).unwrap(errs, "生年月日"),
-    input.address.unwrap(errs, "住所"),
-    input.phone.unwrap(errs, "電話番号")
-  );
-  return errs.length > 0 ? errs : patient;
+    lastName,
+    firstName,
+    lastNameYomi,
+    firstNameYomi,
+    sex,
+    birthday,
+    address,
+    phone
+  ).map((args) => new Patient(...args));
 }

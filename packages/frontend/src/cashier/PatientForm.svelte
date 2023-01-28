@@ -1,97 +1,131 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { strSrc, type Invalid } from "@/lib/validator";
-  import { dateSrc } from "@/lib/validators/date-validator";
-  import { validatePatient } from "@/lib/validators/patient-validator";
+  import { setFocus } from "@/lib/set-focus";
+  import { validResult, VResult } from "@/lib/validation";
+  import {
+    PatientInput,
+    validatePatient,
+  } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
-  import { onMount } from "svelte";
+  import { createEventDispatcher, onMount } from "svelte";
+  import {
+    type PatientFormValues,
+    blankPatientFormValues,
+    patientFormValues,
+  } from "./patient-form-values";
 
   export let patient: Patient | undefined;
-  let errors: Invalid[] = [];
-  let patientId: number | undefined = patient?.patientId;
-  let lastName: string = patient?.lastName ?? "";
-  let firstName: string = patient?.firstName ?? "";
-  let lastNameYomi: string = patient?.lastNameYomi ?? "";
-  let firstNameYomi: string = patient?.firstNameYomi ?? "";
-  let birthday: Date | null = getBirthday(patient);
-  let sex: string = patient?.sex ?? "F";
-  let address: string = patient?.address ?? "";
-  let phone: string = patient?.phone ?? "";
-  let birthdayErrors: Invalid[] = [];
-  let focusInput: HTMLInputElement;
+  let values: PatientFormValues;
+  $: values = formValues(patient);
+  onMount(() => (values = formValues(patient)));
+  const dispatch = createEventDispatcher<{
+    "value-change": VResult<Patient>;
+  }>();
 
-  function getBirthday(p: Patient | undefined): Date | null {
-    if (p != undefined) {
-      return new Date(p.birthday);
+  function formValues(patient: Patient | undefined): PatientFormValues {
+    if (patient) {
+      return patientFormValues(patient);
     } else {
-      return null;
+      return blankPatientFormValues();
     }
   }
 
-  onMount(() => focusInput.focus());
+  export function validate(): VResult<Patient> {
+    const input: PatientInput = {
+      patientId: validResult(values.patientId),
+      lastName: validResult(values.lastName),
+      firstName: validResult(values.firstName),
+      lastNameYomi: validResult(values.lastNameYomi),
+      firstNameYomi: validResult(values.firstNameYomi),
+      sex: validResult(values.sex),
+      birthday: validResult(values.birthday),
+      address: validResult(values.address),
+      phone: validResult(values.phone),
+    };
+    return validatePatient(input);
+  }
 
-  export function validate(): Patient | undefined {
-    const result = validatePatient(patientId ?? 0, {
-      lastName: strSrc(lastName),
-      firstName: strSrc(firstName),
-      lastNameYomi: strSrc(lastNameYomi),
-      firstNameYomi: strSrc(firstNameYomi),
-      sex: strSrc(sex),
-      birthday: dateSrc(birthday, birthdayErrors),
-      address: strSrc(address),
-      phone: strSrc(phone),
-    });
-    if (result instanceof Patient) {
-      return result;
-    } else {
-      errors = result;
-    }
+  function onUserInput(): void {
+    // console.log("values", values);
+    // const vs = validate();
+    // console.log("vs", vs);
+    // if (vs.isValid) {
+    //   patient = vs.value;
+    // }
+    // dispatch("value-change", vs);
   }
 </script>
 
 <div>
-  {#if errors.length > 0}
-    <div class="error">
-      {#each errors as e}
-        <div>{e}</div>
-      {/each}
-    </div>
-  {/if}
   <div class="panel">
-    {#if patientId && patientId > 0}
+    {#if patient && patient.patientId > 0}
       <span>患者番号</span>
-      <span>{patientId}</span>
+      <span>{patient.patientId}</span>
     {/if}
     <span>氏名</span>
     <div class="input-block">
-      <input type="text" bind:value={lastName} class="name-input" data-cy="last-name-input" bind:this={focusInput}/>
-      <input type="text" bind:value={firstName} class="name-input" data-cy="first-name-input" />
+      <input
+        type="text"
+        bind:value={values.lastName}
+        on:change={onUserInput}
+        class="name-input"
+        data-cy="last-name-input"
+        use:setFocus
+      />
+      <input
+        type="text"
+        bind:value={values.firstName}
+        on:change={onUserInput}
+        class="name-input"
+        data-cy="first-name-input"
+      />
     </div>
     <span>よみ</span>
     <div class="input-block">
-      <input type="text" bind:value={lastNameYomi} class="name-input" data-cy="last-name-yomi-input"/>
-      <input type="text" bind:value={firstNameYomi} class="name-input" data-cy="first-name-yomi-input"/>
+      <input
+        type="text"
+        bind:value={values.lastNameYomi}
+        on:change={onUserInput}
+        class="name-input"
+        data-cy="last-name-yomi-input"
+      />
+      <input
+        type="text"
+        bind:value={values.firstNameYomi}
+        on:change={onUserInput}
+        class="name-input"
+        data-cy="first-name-yomi-input"
+      />
     </div>
     <span>生年月日</span>
     <div class="input-block">
-      <DateFormWithCalendar bind:date={birthday} bind:errors={birthdayErrors} />
+      <DateFormWithCalendar
+        bind:date={values.birthday}
+        on:value-change={onUserInput}
+      />
     </div>
     <span>性別</span>
     <div class="input-block">
       {#each Object.values(Sex) as sexType}
         {@const id = genid()}
-        <input type="radio" bind:group={sex} value={sexType.code} {id} />
+        <input
+          type="radio"
+          bind:group={values.sex}
+          value={sexType.code}
+          {id}
+          on:change={onUserInput}
+        />
         <label for={id}>{sexType.rep}</label>
       {/each}
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" bind:value={address} />
+      <input type="text" bind:value={values.address} on:change={onUserInput} />
     </div>
     <span>電話番号</span>
     <div class="input-block">
-      <input type="text" bind:value={phone} />
+      <input type="text" bind:value={values.phone} on:change={onUserInput} />
     </div>
   </div>
 </div>
@@ -117,9 +151,5 @@
 
   .name-input {
     width: 80px;
-  }
-
-  .error {
-    color: red;
   }
 </style>
