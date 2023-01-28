@@ -12,9 +12,20 @@ export const wsUrl: string = base
 function getBackend(): string {
   if (!import.meta.env.SSR) {
     const l = window.location;
-    const proto = l.protocol.toLowerCase();
-    const port = proto === "https:" ? sslServerPort() : nonSslServerPort();
-    return `${proto}//${l.hostname}:${port}`;
+    let proto = l.protocol.toLowerCase();
+    let host = l.hostname;
+    let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
+    let path = "";
+    if( import.meta.env.VITE_BACKEND_PROTO ) {
+      proto = import.meta.env.VITE_BACKEND_PROTO;
+    }
+    if( import.meta.env.VITE_BACKEND_HOST ) {
+      host = import.meta.env.VITE_BACKEND_HOST;
+    }
+    if( import.meta.env.VITE_BACKEND_PORT ) {
+      port = import.meta.env.VITE_BACKEND_PORT;
+    }
+    return `${proto}//${host}:${port}`;
   } else {
     return "http://localhost:8080";
   }
