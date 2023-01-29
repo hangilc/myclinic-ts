@@ -17,11 +17,15 @@
     "",
     ""
   );
-  let data: Koukikourei | null = null;
-
-  function onValueChange(evt: CustomEvent<VResult<Koukikourei>>) {
-    
-  }
+  const dataSet: Koukikourei = new Koukikourei(
+    1,
+    12,
+    "1234",
+    "23",
+    1,
+    "2023-01-26",
+    "0000-00-00"
+  );
 
   function doClose(): void {
     logEvent("close", {});
@@ -35,9 +39,18 @@
 </script>
 
 <Hst.Story>
-  <div style:width="330px">
-    <KoukikoureiDialogContent {data} {patient} on:value-change={onValueChange}
-      onEnter={doEnter}
-      onClose={doClose}/>
-  </div>
+  <Hst.Variant title="new">
+    <div style:width="360px">
+      <KoukikoureiDialogContent init={null} {patient}
+        onEnter={doEnter}
+        onClose={doClose}/>
+    </div>
+  </Hst.Variant>
+  <Hst.Variant title="update">
+    <div style:width="360px">
+      <KoukikoureiDialogContent init={dataSet} {patient}
+        onEnter={doEnter}
+        onClose={doClose}/>
+    </div>
+  </Hst.Variant>
 </Hst.Story>

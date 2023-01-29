@@ -4,7 +4,7 @@
   import KoukikoureiForm from "./KoukikoureiForm.svelte";
 
   export let patient: Patient;
-  export let data: Koukikourei | null = null;
+  export let init: Koukikourei | null;
   export let onEnter: (data: Koukikourei) => Promise<string[]>;
   export let onClose: () => void;
   let validate: () => VResult<Koukikourei>;
@@ -31,9 +31,9 @@
     onClose();
   }
 
-  function onValueChange(evt: CustomEvent<VResult<Koukikourei>>): void {
+  function onValueChange(): void {
     if( enterClicked ){
-      const r = evt.detail;
+      const r = validate();
       errors = errorMessagesOf(r.errors);
     }
   }
@@ -47,7 +47,7 @@
       {/each}
     </div>
   {/if}
-  <KoukikoureiForm {patient} bind:data={data} bind:validate on:value-change={onValueChange}/>
+  <KoukikoureiForm {patient} {init} bind:validate on:value-change={onValueChange}/>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
