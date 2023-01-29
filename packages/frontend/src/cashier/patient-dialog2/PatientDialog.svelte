@@ -48,21 +48,6 @@
     data.push(open);
   }
 
-  // function doNew(slug: string): void {
-  //   function open(): void {
-  //     const d: EditHokenDialog = new EditHokenDialog({
-  //       target: document.body,
-  //       props: {
-  //         data,
-  //         hoken: slug,
-  //         destroy: () => d.$destroy()
-  //       }
-  //     });
-  //   }
-  //   destroy();
-  //   data.push(open);
-  // }
-
   function doNewShahokokuho() {
     function open(): void {
       const d: ShahokokuhoDialog = new ShahokokuhoDialog({
@@ -118,7 +103,7 @@
           },
           patient: p,
           init: null,
-          title: "新規後期高齢保険",
+          title: "新規公費",
           onEntered: (entered: Kouhi) => {
             data.hokenCache.enterHokenType(entered);
           }
