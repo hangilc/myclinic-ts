@@ -23,9 +23,9 @@
     }
   }
 
-  function doChange(evt: CustomEvent<VResult<Patient>>): void {
+  function doChange(): void {
     if (true) {
-      const vs = evt.detail;
+      const vs = validate();
       if (vs.isValid) {
         errors = [];
       } else {

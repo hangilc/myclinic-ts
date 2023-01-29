@@ -8,7 +8,7 @@
     validatePatient,
   } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher, onMount, tick } from "svelte";
   import {
     type PatientFormValues,
     blankPatientFormValues,
@@ -20,7 +20,7 @@
   $: values = formValues(patient);
   onMount(() => (values = formValues(patient)));
   const dispatch = createEventDispatcher<{
-    "value-change": VResult<Patient>;
+    "value-change": void;
   }>();
 
   function formValues(patient: Patient | undefined): PatientFormValues {
@@ -31,6 +31,8 @@
     }
   }
 
+  let validateBirthday: () => VResult<Date | null>;
+
   export function validate(): VResult<Patient> {
     const input: PatientInput = {
       patientId: validResult(values.patientId),
@@ -39,21 +41,15 @@
       lastNameYomi: validResult(values.lastNameYomi),
       firstNameYomi: validResult(values.firstNameYomi),
       sex: validResult(values.sex),
-      birthday: validResult(values.birthday),
+      birthday: validateBirthday(),
       address: validResult(values.address),
       phone: validResult(values.phone),
     };
     return validatePatient(input);
   }
 
-  function onUserInput(): void {
-    // console.log("values", values);
-    // const vs = validate();
-    // console.log("vs", vs);
-    // if (vs.isValid) {
-    //   patient = vs.value;
-    // }
-    // dispatch("value-change", vs);
+  async function onUserInput() {
+    dispatch("value-change");
   }
 </script>
 
@@ -101,8 +97,9 @@
     <span>生年月日</span>
     <div class="input-block">
       <DateFormWithCalendar
-        bind:date={values.birthday}
+        date={values.birthday.value}
         on:value-change={onUserInput}
+        bind:validate={validateBirthday}
       />
     </div>
     <span>性別</span>

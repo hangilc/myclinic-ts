@@ -6,59 +6,64 @@
   import * as kanjidate from "kanjidate";
   import { createEventDispatcher, onMount } from "svelte";
 
-  export let date: Date | null | undefined;
+  export let init: Date | null;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
-  let values: DateFormValues;
-  export function validate(): VResult<Date | null> {
-    return validateValues(values);
+  export function setValue(value: Date | null): void {
+    updateValues(value);
   }
-  let dispatch =
-    createEventDispatcher<{
-      "value-change": VResult<Date | null>;
-    }>();
+  let dispatch = createEventDispatcher<{ "value-change": void }>();
+  let gengou: string;
+  let nen: string;
+  let month: string;
+  let day: string;
 
-  $: onExternalData(date);
+  updateValues(init);
 
-  onMount(() => onExternalData(date));
+  function updateValues(date: Date | null): void {
+    if (date === null) {
+      gengou = gengouList.length > 0 ? gengouList[0] : "";
+      nen = "";
+      month = "";
+      day = "";
+    } else {
+      const k = new kanjidate.KanjiDate(date);
+      gengou = k.gengou;
+      nen = k.nen.toString();
+      month = (date.getMonth() + 1).toString();
+      day = date.getDate().toString();
+    }
+  }
 
-  function onExternalData(date: Date | null | undefined): void {
-    if (date !== undefined) {
-        values = formValues(date);
+  export function validate(): VResult<Date | null> {
+    if (nen === "" && month === "" && day === "") {
+      return validResult(null);
+    } else {
+      return validateWareki({
+        gengou: source(gengou),
+        nen: source(nen).validate(toInt),
+        month: source(month).validate(toInt),
+        day: source(day).validate(toInt),
+      });
     }
   }
 
   function modifyDateFromIntern(f: (d: Date) => Date): void {
-    if (date !== undefined && date !== null) {
-      date = f(date);
-      dispatch("value-change", validResult(date));
+    const vs = validate();
+    if (vs.isValid) {
+      if (vs.value !== null) {
+        const value = f(vs.value);
+        updateValues(value);
+        dispatch("value-change");
+      }
     }
   }
 
   function handleUserInput(): void {
     const vs = validate();
     if (vs.isValid) {
-      date = vs.value;
-    } else {
-      date = undefined;
+      updateValues(vs.value);
     }
-    dispatch("value-change", vs);
-  }
-
-  function formValues(date: Date | null): DateFormValues {
-    return new DateFormValues(date, gengouList[0]);
-  }
-
-  function validateValues(values: DateFormValues): VResult<Date | null> {
-    if (values.nen === "" && values.month === "" && values.day === "") {
-      return validResult(null);
-    } else {
-      return validateWareki({
-        gengou: source(values.gengou),
-        nen: source(values.nen).validate(toInt),
-        month: source(values.month).validate(toInt),
-        day: source(values.day).validate(toInt),
-      });
-    }
+    dispatch("value-change");
   }
 
   function doInputChange(): void {
@@ -84,7 +89,7 @@
 
 <div class="top date-form">
   <div class="inputs">
-    <select bind:value={values.gengou} class="gengou" on:change={doInputChange}>
+    <select bind:value={gengou} class="gengou" on:change={doInputChange}>
       {#each gengouList as g}
         <option>{g}</option>
       {/each}
@@ -92,21 +97,21 @@
     <input
       type="text"
       class="nen"
-      bind:value={values.nen}
+      bind:value={nen}
       on:change={doInputChange}
     />
     <span on:click={doNenClick} class="nen-span">年</span>
     <input
       type="text"
       class="month"
-      bind:value={values.month}
+      bind:value={month}
       on:change={doInputChange}
     />
     <span on:click={doMonthClick} class="month-span">月</span>
     <input
       type="text"
       class="day"
-      bind:value={values.day}
+      bind:value={day}
       on:change={doInputChange}
     />
     <span on:click={doDayClick} class="day-span">日</span>

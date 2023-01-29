@@ -19,6 +19,6 @@
 </script>
 
 <Hst.Story>
-  <DateFormPulldown bind:date {destroy} onEnter={doEnter}/>
+  <DateFormPulldown init={date} {destroy} onEnter={doEnter}/>
 </Hst.Story>
 

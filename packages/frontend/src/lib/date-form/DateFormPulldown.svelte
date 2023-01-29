@@ -2,21 +2,30 @@
   import { errorMessagesOf, VResult } from "../validation";
   import DateForm from "./DateForm.svelte";
 
-  export let date: Date | null;
+  export let init: Date | null;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
+  let validate: () => VResult<Date | null>;
   let errors: string[] = [];
 
   function doEnter(): void {
-    if( errors.length === 0 ){
+    const vs = validate();
+    if( vs.isValid ){
       destroy();
-      onEnter(date);
+      onEnter(vs.value);
+      errors = [];
+    } else {
+      errors = errorMessagesOf(vs.errors);
     }
   }
 
-  function doFormChange(evt: CustomEvent<VResult<Date | null>>): void {
-    const result = evt.detail;
-    errors = errorMessagesOf(result.errors);
+  function doFormChange(): void {
+    const vs = validate();
+    if( vs.isValid ){
+      errors = [];
+    } else {
+      errors = errorMessagesOf(vs.errors);
+    }
   }
 </script>
 
@@ -28,7 +37,7 @@
     {/each}
   </div>
   {/if}
-  <DateForm bind:date on:value-change={doFormChange}/>
+  <DateForm {init} on:value-change={doFormChange} bind:validate/>
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>

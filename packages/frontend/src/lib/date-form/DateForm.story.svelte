@@ -1,35 +1,22 @@
 <script lang="ts">
   import type { Hst } from "@histoire/plugin-svelte";
-  import { logEvent } from "histoire/client";
-  import { errorMessagesOf, type VResult } from "../validation";
   import DateForm from "./DateForm.svelte";
   import { format, f5 } from "kanjidate";
+  import type { VResult } from "../validation";
 
   export let Hst: Hst;
   let date: Date | null = new Date();
   let logs: string[] = [];
-  let setDate: (d: Date | null) => void = d => date = d;
+  let setDate: (d: Date | null) => void;
+  let validate: () => VResult<Date | null>;
 
-  function log(arg: any): void {
+  function log(what: string, arg: any): void {
     const t = JSON.stringify(arg, undefined, 2);
-    logs = [t, ...logs];
+    logs = [`${what}: ${t}`, ...logs];
   }
 
-  function logResult(r: VResult<Date | null>): void {
-    if( r.isValid ){
-      if( r.value == null ){
-        logEvent("data", { data: r.value });
-      } else {
-        logEvent("data", { data: format(f5, r.value) });
-      }
-    } else {
-      logEvent("error", errorMessagesOf(r.errors));
-    }
-  }
-
-  function doChange(evt: CustomEvent<VResult<Date | null>>): void {
-    const r = evt.detail;
-    logResult(r);
+  function doChange(): void {
+    log("change", validate());
   }
 
   function doSet(): void {
@@ -52,7 +39,7 @@
 </script>
 
 <Hst.Story>
-  <DateForm bind:date on:value-change={doChange}/>
+  <DateForm init={date} on:value-change={doChange} bind:validate bind:setValue={setDate}/>
   <button on:click={doSet}>Set</button>
   <button on:click={doNull}>Null</button>
   <div class="date-box">

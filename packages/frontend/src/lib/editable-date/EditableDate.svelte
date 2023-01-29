@@ -23,7 +23,7 @@
 <div class="disp">
   <Popup let:destroy let:trigger>
     <span class="repr" on:click={trigger}>{format(date)}</span>
-    <DateFormPulldown slot="menu" {destroy} {date} onEnter={doChange} />
+    <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} />
   </Popup>
   <slot name="icons" />
   <Popup let:destroy let:triggerClick>
@@ -49,14 +49,6 @@
   }
 
   .disp .repr {
-    cursor: pointer;
-  }
-
-  .calendar-icon {
-    color: #999;
-    display: inline-block;
-    margin-top: -3px;
-    margin-left: 5px;
     cursor: pointer;
   }
 </style>

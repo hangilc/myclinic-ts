@@ -5,25 +5,38 @@
   import CalendarIcon from "@/icons/CalendarIcon.svelte";
   import { GengouList } from "kanjidate";
   import { createEventDispatcher } from "svelte";
-  import { validResult, type VResult } from "../validation";
-
-  export let date: Date | null | undefined;
+  import type { VResult } from "../validation";
+  
+  export let init: Date | null;
   export let datePickerDefault: () => Date = () => new Date();
   export let iconWidth: string = "1.3em";
   export let gengouList: string[] = GengouList.map(g => g.kanji);
-  let dispatch = createEventDispatcher<{
-    "value-change": VResult<Date | null>
-  }>();
+  export function validate(): VResult<Date | null> { return validateForm(); }
+  export function setValue(value: Date | null) {
+    setFormValue(value);
+    dispatch("value-change");
+  }
+  let dispatch = createEventDispatcher<{ "value-change": void }>();
+  let validateForm: () => VResult<Date | null>;
+  let setFormValue: (value: Date | null) => void;
 
-  function doDatePickerEnter(d: Date): void {
-    date = d;
-    dispatch("value-change", validResult(date));
+  function resolvePickerDefault(): Date {
+    const vs = validate();
+    if( vs.isValid ){
+      if( vs.value === null ){
+        return datePickerDefault();
+      } else {
+        return vs.value;
+      }
+    } else {
+      return datePickerDefault();
+    }
   }
 </script>
 
 <div>
   <div class="wrapper">
-    <DateForm bind:date on:value-change {gengouList} />
+    <DateForm {init} on:value-change {gengouList} bind:validate={validateForm} bind:setValue={setFormValue}/>
     <slot name="spacer" />
     <slot name="icons" />
     <Popup let:destroy let:trigger>
@@ -37,8 +50,8 @@
       <DatePicker
         slot="menu"
         {destroy}
-        date={date ?? datePickerDefault()}
-        onEnter={doDatePickerEnter}
+        date={resolvePickerDefault()}
+        onEnter={setValue}
       />
     </Popup>
   </div>
