@@ -2,7 +2,6 @@
   import { addYears, addMonths, addDays } from "kanjidate";
   import { source, toInt, validResult, VResult } from "../validation";
   import { validateWareki } from "../validators/wareki-validator";
-  import { DateFormValues } from "./date-form-values";
   import * as kanjidate from "kanjidate";
   import { createEventDispatcher, onMount } from "svelte";
 

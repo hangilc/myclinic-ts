@@ -2,6 +2,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import { setFocus } from "@/lib/set-focus";
+  import { parseSqlDate } from "@/lib/util";
   import { validResult, VResult } from "@/lib/validation";
   import {
     PatientInput,
@@ -15,35 +16,54 @@
     patientFormValues,
   } from "./patient-form-values";
 
-  export let patient: Patient | undefined;
-  let values: PatientFormValues;
-  $: values = formValues(patient);
-  onMount(() => (values = formValues(patient)));
-  const dispatch = createEventDispatcher<{
-    "value-change": void;
-  }>();
+  export let init: Patient | undefined;
+  let lastName: string;
+  let firstName: string;
+  let lastNameYomi: string;
+  let firstNameYomi: string;
+  let birthday: Date | null;
+  let sex: string;
+  let address: string;
+  let phone: string;
 
-  function formValues(patient: Patient | undefined): PatientFormValues {
-    if (patient) {
-      return patientFormValues(patient);
+  updateValues(init);
+
+  function updateValues(patient: Patient | undefined) {
+    if( patient === undefined ){
+      lastName = "";
+      firstName = "";
+      lastNameYomi = "";
+      firstNameYomi = "";
+      birthday = null;
+      sex = "F";
+      address = "";
+      phone = "";
     } else {
-      return blankPatientFormValues();
+      lastName = patient.lastName;
+      firstName = patient.firstName;
+      lastNameYomi = patient.lastNameYomi;
+      firstNameYomi = patient.firstNameYomi;
+      birthday = parseSqlDate(patient.birthday);
+      sex = patient.sex;
+      address = patient.address;
+      phone = patient.phone;
     }
   }
+  const dispatch = createEventDispatcher<{ "value-change": void; }>();
 
   let validateBirthday: () => VResult<Date | null>;
 
   export function validate(): VResult<Patient> {
     const input: PatientInput = {
-      patientId: validResult(values.patientId),
-      lastName: validResult(values.lastName),
-      firstName: validResult(values.firstName),
-      lastNameYomi: validResult(values.lastNameYomi),
-      firstNameYomi: validResult(values.firstNameYomi),
-      sex: validResult(values.sex),
+      patientId: validResult(init?.patientId ?? 0),
+      lastName: validResult(lastName),
+      firstName: validResult(firstName),
+      lastNameYomi: validResult(lastNameYomi),
+      firstNameYomi: validResult(firstNameYomi),
+      sex: validResult(sex),
       birthday: validateBirthday(),
-      address: validResult(values.address),
-      phone: validResult(values.phone),
+      address: validResult(address),
+      phone: validResult(phone),
     };
     return validatePatient(input);
   }
@@ -55,15 +75,15 @@
 
 <div>
   <div class="panel">
-    {#if patient && patient.patientId > 0}
+    {#if init && init.patientId > 0}
       <span>患者番号</span>
-      <span>{patient.patientId}</span>
+      <span>{init.patientId}</span>
     {/if}
     <span>氏名</span>
     <div class="input-block">
       <input
         type="text"
-        bind:value={values.lastName}
+        bind:value={lastName}
         on:change={onUserInput}
         class="name-input"
         data-cy="last-name-input"
@@ -71,7 +91,7 @@
       />
       <input
         type="text"
-        bind:value={values.firstName}
+        bind:value={firstName}
         on:change={onUserInput}
         class="name-input"
         data-cy="first-name-input"
@@ -81,14 +101,14 @@
     <div class="input-block">
       <input
         type="text"
-        bind:value={values.lastNameYomi}
+        bind:value={lastNameYomi}
         on:change={onUserInput}
         class="name-input"
         data-cy="last-name-yomi-input"
       />
       <input
         type="text"
-        bind:value={values.firstNameYomi}
+        bind:value={firstNameYomi}
         on:change={onUserInput}
         class="name-input"
         data-cy="first-name-yomi-input"
@@ -97,7 +117,7 @@
     <span>生年月日</span>
     <div class="input-block">
       <DateFormWithCalendar
-        date={values.birthday.value}
+        init={birthday}
         on:value-change={onUserInput}
         bind:validate={validateBirthday}
       />
@@ -108,7 +128,7 @@
         {@const id = genid()}
         <input
           type="radio"
-          bind:group={values.sex}
+          bind:group={sex}
           value={sexType.code}
           {id}
           on:change={onUserInput}
@@ -118,11 +138,11 @@
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" bind:value={values.address} on:change={onUserInput} />
+      <input type="text" bind:value={address} on:change={onUserInput} />
     </div>
     <span>電話番号</span>
     <div class="input-block">
-      <input type="text" bind:value={values.phone} on:change={onUserInput} />
+      <input type="text" bind:value={phone} on:change={onUserInput} />
     </div>
   </div>
 </div>

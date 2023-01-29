@@ -43,7 +43,7 @@
       {/each}
     </div>
   {/if}
-  <PatientForm patient={undefined} on:value-change={doChange} bind:validate />
+  <PatientForm init={undefined} on:value-change={doChange} bind:validate />
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={destroy}>キャンセル</button>
