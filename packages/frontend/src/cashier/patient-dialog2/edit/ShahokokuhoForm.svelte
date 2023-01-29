@@ -2,72 +2,74 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
   import { genid } from "@/lib/genid";
+  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { toInt, validResult, type VResult } from "@/lib/validation";
   import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import { HonninKazoku, Shahokokuho, type Patient } from "myclinic-model";
   import { createEventDispatcher, onMount } from "svelte";
-  import { ShahokokuhoFormValues } from "./shahokokuho-form-values";
 
   export let patient: Patient;
-  export let data: Shahokokuho | null | undefined;
-  let dispatch = createEventDispatcher<{
-    "value-change": VResult<Shahokokuho>
-    }>();
-  let values: ShahokokuhoFormValues;
-  $: onExternalData(data);
-  onMount(() => onExternalData(data));
-  let gengouList = gengouListUpto("平成");
-  let validFromResult: VResult<Date | null>;
-  let validUptoResult: VResult<Date | null>;
+  export let init: Shahokokuho | null;
+  let dispatch = createEventDispatcher<{ "value-change": void }>();
+  let hokenshaBangou: string;
+  let hihokenshaKigou: string;
+  let hihokenshaBangou: string;
+  let honninStore: number;
+  let validFrom: Date | null;
+  let validUpto: Date | null;
+  let koureiStore: number;
+  let edaban: string;
+  let validateValidFrom: () => VResult<Date | null>;
+  let validateValidUpto: () => VResult<Date | null>;
+  export function setData(data: Shahokokuho | null): void {
+    updateValues(data);
+  }
 
-  function onExternalData(data: Shahokokuho | null | undefined){
-    if( data !== undefined ){
-      if( data === null ){
-        values = ShahokokuhoFormValues.blank(patient.patientId);
-      } else {
-        values = ShahokokuhoFormValues.from(data);
-        dispatch("value-change", validResult(data));
-      }
-      validFromResult = validResult(values.validFrom);
-      validUptoResult = validResult(values.validUpto);
+  updateValues(init);
+
+  function updateValues(init: Shahokokuho | null): void {
+    if( init === null ){
+      hokenshaBangou = "";
+      hihokenshaKigou = "";
+      hihokenshaBangou = "";
+      honninStore = 0;
+      validFrom = null;
+      validUpto = null;
+      koureiStore = 0;
+      edaban = "";
+    } else {
+      hokenshaBangou = init.hokenshaBangou.toString();
+      hihokenshaKigou = init.hihokenshaKigou;
+      hihokenshaBangou = init.hihokenshaBangou;
+      honninStore = init.honninStore;
+      validFrom = parseSqlDate(init.validFrom);
+      validUpto = parseOptionalSqlDate(init.validUpto);
+      koureiStore = init.koureiStore;
+      edaban = init.edaban;
     }
   }
 
+  let gengouList = gengouListUpto("平成");
+
   export function validate(): VResult<Shahokokuho> {
     const input = {
-      shahokokuhoId: validResult(values.shahokokuhoId),
-      patientId: validResult(values.patientId),
-      hokenshaBangou: validResult(values.hokenshaBangou).validate(toInt),
-      hihokenshaKigou: validResult(values.hihokenshaKigou),
-      hihokenshaBangou: validResult(values.hihokenshaBangou),
-      honninStore: validResult(values.honninStore),
-      validFrom: validFromResult,
-      validUpto: validUptoResult,
-      koureiStore: validResult(values.koureiStore),
-      edaban: validResult(values.edaban),
+      shahokokuhoId: validResult(init?.shahokokuhoId ?? 0),
+      patientId: validResult(patient.patientId),
+      hokenshaBangou: validResult(hokenshaBangou).validate(toInt),
+      hihokenshaKigou: validResult(hihokenshaKigou),
+      hihokenshaBangou: validResult(hihokenshaBangou),
+      honninStore: validResult(honninStore),
+      validFrom: validateValidFrom(),
+      validUpto: validateValidUpto(),
+      koureiStore: validResult(koureiStore),
+      edaban: validResult(edaban),
     }
     return validateShahokokuho(input);
   }
 
   function doUserInput(): void {
-    const vs = validate();
-    if( vs.isValid ){
-      onExternalData(vs.value);
-    } else {
-      onExternalData(undefined);
-      dispatch("value-change", vs);
-    }
-  }
-
-  function onValidFromChange(evt: CustomEvent<VResult<Date | null>>): void {
-    validFromResult = evt.detail;
-    doUserInput();
-  }
-
-  function onValidUptoChange(evt: CustomEvent<VResult<Date | null>>): void {
-    validUptoResult = evt.detail;
-    doUserInput();
+    dispatch("value-change");
   }
 
 </script>
@@ -82,7 +84,7 @@
     <input
       type="text"
       class="regular"
-      bind:value={values.hokenshaBangou}
+      bind:value={hokenshaBangou}
       on:change={doUserInput}
     />
   </div>
@@ -91,26 +93,26 @@
     <input
       type="text"
       class="regular"
-      bind:value={values.hihokenshaKigou}
+      bind:value={hihokenshaKigou}
       on:change={doUserInput}
     />
     ・
     <input
       type="text"
       class="regular"
-      bind:value={values.hihokenshaBangou}
+      bind:value={hihokenshaBangou}
       on:change={doUserInput}
     />
   </div>
   <span>枝番</span>
   <div>
-    <input type="text" class="edaban" bind:value={values.edaban} on:change={doUserInput}/>
+    <input type="text" class="edaban" bind:value={edaban} on:change={doUserInput}/>
   </div>
   <span>本人・家族</span>
   <div>
     {#each Object.values(HonninKazoku) as h}
       {@const id = genid()}
-      <input type="radio" {id} bind:group={values.honninStore} value={h.code} 
+      <input type="radio" {id} bind:group={honninStore} value={h.code} 
         on:change={doUserInput}/>
       <label for={id}>{h.rep}</label>
     {/each}
@@ -118,17 +120,19 @@
   <span>期限開始</span>
   <div>
     <DateFormWithCalendar
-      date={values.validFrom}
-      on:value-change={onValidFromChange}
+      init={validFrom}
+      on:value-change={doUserInput}
       {gengouList}
+      bind:validate={validateValidFrom}
     />
   </div>
   <span>期限終了</span>
   <div>
     <DateFormWithCalendar
-      date={values.validUpto}
-      on:value-change={onValidUptoChange}
+      init={validUpto}
+      on:value-change={doUserInput}
       {gengouList}
+      bind:validate={validateValidUpto}
     />
   </div>
   <span>高齢</span>
@@ -140,7 +144,7 @@
           type="radio"
           {id}
           class="radio"
-          bind:group={values.koureiStore}
+          bind:group={koureiStore}
           value={0}
           on:change={doUserInput}
         />
@@ -154,7 +158,7 @@
           type="radio"
           {id}
           class="radio"
-          bind:group={values.koureiStore}
+          bind:group={koureiStore}
           value={w}
           on:change={doUserInput}
         />

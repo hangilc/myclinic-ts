@@ -2,8 +2,7 @@
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
-  import { Patient, Shahokokuho } from "myclinic-model";
-  import { ShahokokuhoFormValues } from "./shahokokuho-form-values";
+  import { dateToSqlDate, Patient, Shahokokuho } from "myclinic-model";
   import ShahokokuhoForm from "./ShahokokuhoForm.svelte";
 
   export let Hst: Hst;
@@ -18,8 +17,8 @@
     "",
     ""
   );
-  let values = ShahokokuhoFormValues.blank(patient.patientId);
   let validate: () => VResult<Shahokokuho>
+  let setData: (data: Shahokokuho | null) => void;
 
   function logResult(r: VResult<Shahokokuho>): void {
     if( r.isValid ){
@@ -30,23 +29,24 @@
     }
   }
 
-  function doValueChange(evt: CustomEvent<VResult<Shahokokuho>>): void {
-    logResult(evt.detail);
+  function doValueChange(): void {
+    logResult(validate());
   }
 
   function doSet(): void {
-    values = new ShahokokuhoFormValues({
-      shahokokuhoId: 1,
-      patientId: 12,
-      hokenshaBangou: "1234",
-      hihokenshaKigou: "a",
-      hihokenshaBangou: "23",
-      edaban: "01",
-      honninStore: 0,
-      validFrom: new Date(),
-      validUpto: null,
-      koureiStore: 0
-    })
+    const data = new Shahokokuho(
+      1,
+      12,
+      1234,
+      "a",
+      "23",
+      0,
+      dateToSqlDate(new Date()),
+      "0000-00-00",
+      0,
+      "01",
+    );
+    setData(data);
   }
 
   function doValidate(): void {
@@ -57,7 +57,7 @@
 
 <Hst.Story>
   <div style:width="460px">
-    <ShahokokuhoForm {patient} data={null} on:value-change={doValueChange} bind:validate/>
+    <ShahokokuhoForm {patient} init={null} on:value-change={doValueChange} bind:validate bind:setData/>
   </div>
   <div>
     <button on:click={doSet}>Set</button>
