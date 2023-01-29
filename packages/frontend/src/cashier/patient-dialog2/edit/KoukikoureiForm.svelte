@@ -2,70 +2,58 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
   import { genid } from "@/lib/genid";
-  import { validResult, type VResult } from "@/lib/validation";
+  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
+  import { validResult, VResult } from "@/lib/validation";
   import { validateKoukikourei } from "@/lib/validators/koukikourei-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import type { Koukikourei, Patient } from "myclinic-model";
   import { createEventDispatcher, onMount } from "svelte";
-  import { KoukikoureiFormValues } from "./koukikourei-form-values";
 
   export let patient: Patient;
-  export let data: Koukikourei | null | undefined;
-  let dispatch = createEventDispatcher<{
-    "value-change": VResult<Koukikourei>
-    }>();
-  let values: KoukikoureiFormValues;
-  $: onExternalData(data);
-  onMount(() => onExternalData(data));
+  export let init: Koukikourei | null;
+  let dispatch = createEventDispatcher<{ "value-change": void }>();
+  let hokenshaBangou: string;
+  let hihokenshaBangou: string;
+  let futanWari: number;
+  let validFrom: Date | null;
+  let validUpto: Date | null;
   let gengouList = gengouListUpto("平成");
-  let validFromResult: VResult<Date | null>;
-  let validUptoResult: VResult<Date | null>;
+  let validateValidFrom: () => VResult<Date | null>
+  let validateValidUpto: () => VResult<Date | null>
 
-  function onExternalData(data: Koukikourei | null | undefined){
-    if( data !== undefined ){
-      if( data === null ){
-        values = KoukikoureiFormValues.blank(patient.patientId);
-      } else {
-        values = KoukikoureiFormValues.from(data);
-        console.log("values", values);
-        dispatch("value-change", validResult(data));
-      }
-      validFromResult = validResult(values.validFrom);
-      validUptoResult = validResult(values.validUpto);
+  updateValues(init);
+
+  function updateValues(data: Koukikourei | null): void {
+    if( data === null ){
+      hokenshaBangou = "";
+      hihokenshaBangou = "";
+      futanWari = 1;
+      validFrom = null;
+      validUpto = null;
+    } else {
+      hokenshaBangou = data.hokenshaBangou;
+      hihokenshaBangou = data.hihokenshaBangou;
+      futanWari = data.futanWari;
+      validFrom = parseSqlDate(data.validFrom);
+      validUpto = parseOptionalSqlDate(data.validUpto);
     }
   }
 
   export function validate(): VResult<Koukikourei> {
     const input = {
-      koukikoureiId: validResult(values.koukikoureiId),
-      patientId: validResult(values.patientId),
-      hokenshaBangou: validResult(values.hokenshaBangou),
-      hihokenshaBangou: validResult(values.hihokenshaBangou),
-      futanWari: validResult(values.futanWari),
-      validFrom: validFromResult,
-      validUpto: validUptoResult,
+      koukikoureiId: validResult(init?.koukikoureiId ?? 0),
+      patientId: validResult(patient.patientId),
+      hokenshaBangou: validResult(hokenshaBangou),
+      hihokenshaBangou: validResult(hihokenshaBangou),
+      futanWari: validResult(futanWari),
+      validFrom: validateValidFrom(),
+      validUpto: validateValidUpto(),
     }
     return validateKoukikourei(input);
   }
 
   function doUserInput(): void {
-    const vs = validate();
-    if( vs.isValid ){
-      onExternalData(vs.value);
-    } else {
-      onExternalData(undefined);
-      dispatch("value-change", vs);
-    }
-  }
-
-  function onValidFromChange(evt: CustomEvent<VResult<Date | null>>): void {
-    validFromResult = evt.detail;
-    doUserInput();
-  }
-
-  function onValidUptoChange(evt: CustomEvent<VResult<Date | null>>): void {
-    validUptoResult = evt.detail;
-    doUserInput();
+    dispatch("value-change");
   }
 
 </script>
@@ -77,35 +65,37 @@
 <div class="panel">
   <span>保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={values.hokenshaBangou} 
+    <input type="text" class="regular" bind:value={hokenshaBangou} 
       on:change={doUserInput}/>
   </div>
   <span>被保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={values.hihokenshaBangou} on:change={doUserInput}/>
+    <input type="text" class="regular" bind:value={hihokenshaBangou} on:change={doUserInput}/>
   </div>
   <span>負担割</span>
   <div>
     {#each [1, 2, 3] as w}
       {@const id = genid()}
-      <input type="radio" value={w} bind:group={values.futanWari} on:change={doUserInput}/>
+      <input type="radio" value={w} bind:group={futanWari} on:change={doUserInput}/>
       <label for={id}>{toZenkaku(w.toString())}割</label>
     {/each}
   </div>
   <span>期限開始</span>
   <div>
     <DateFormWithCalendar
-      date={values.validFrom}
-      on:value-change={onValidFromChange}
+      init={validFrom}
+      on:value-change={doUserInput}
       {gengouList}
+      bind:validate={validateValidFrom}
     />
   </div>
   <span>期限終了</span>
   <div>
     <DateFormWithCalendar
-      date={values.validUpto}
-      on:value-change={onValidUptoChange}
+      init={validUpto}
+      on:value-change={doUserInput}
       {gengouList}
+      bind:validate={validateValidUpto}
     />
   </div>
 </div>

@@ -3,7 +3,6 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { Patient, Koukikourei } from "myclinic-model";
-  import { KoukikoureiFormValues } from "./koukikourei-form-values";
   import KoukikoureiForm from "./KoukikoureiForm.svelte";
 
   export let Hst: Hst;
@@ -18,12 +17,19 @@
     "",
     ""
   );
-  let data: Koukikourei | null = null;
-  let values = KoukikoureiFormValues.blank(patient.patientId);
-  let validate: () => VResult<Koukikourei>
+  let validate: () => VResult<Koukikourei>;
+  const dataSet: Koukikourei = new Koukikourei(
+    1,
+    12,
+    "1234",
+    "23",
+    1,
+    "2023-01-26",
+    "0000-00-00"
+  );
 
   function logResult(r: VResult<Koukikourei>): void {
-    if( r.isValid ){
+    if (r.isValid) {
       logEvent("data", { data: r.value });
     } else {
       const messages = errorMessagesOf(r.errors);
@@ -31,29 +37,41 @@
     }
   }
 
-  function doValueChange(evt: CustomEvent<VResult<Koukikourei>>): void {
-    console.log("change", evt.detail);
-  }
-
-  function doSet(): void {
-    data = new Koukikourei(
-      1, 12, "1234", "23", 1, "2023-01-26", "0000-00-00"
-    )
+  function doValueChange(): void {
+    logResult(validate());
   }
 
   function doValidate(): void {
     logResult(validate());
   }
-
 </script>
 
 <Hst.Story>
-  <div style:width="460px">
-    <KoukikoureiForm {patient} bind:data={data} on:value-change={doValueChange} bind:validate/>
-  </div>
-  <div>
-    <button on:click={doSet}>Set</button>
-    <button on:click={doValidate}>Validate</button>
-  </div>
-</Hst.Story>
+  <Hst.Variant title="new">
+    <div style:width="460px">
+      <KoukikoureiForm
+        {patient}
+        init={null}
+        on:value-change={doValueChange}
+        bind:validate
+      />
+    </div>
+    <div>
+      <button on:click={doValidate}>Validate</button>
+    </div>
+  </Hst.Variant>
 
+  <Hst.Variant title="update">
+    <div style:width="460px">
+      <KoukikoureiForm
+        {patient}
+        init={dataSet}
+        on:value-change={doValueChange}
+        bind:validate
+      />
+    </div>
+    <div>
+      <button on:click={doValidate}>Validate</button>
+    </div>
+  </Hst.Variant>
+</Hst.Story>
