@@ -15,9 +15,8 @@
     enterClicked = true;
     const vs = validate();
     if (vs.isValid) {
-      console.log(vs.value);
-      // await api.enterShahokokuho(vs.value);
-      // destroy();
+      await api.enterShahokokuho(vs.value);
+      destroy();
     } else {
       errors = errorMessagesOf(vs.errors);
     }
@@ -29,7 +28,6 @@
 
   function revalidate(): void {
     if (enterClicked) {
-      console.log("revalidate");
       errors = errorMessagesOf(validate().errors);
     }
   }
@@ -44,10 +42,10 @@
     </div>
   {/if}
   <ShahokokuhoForm
-    init={undefined}
+    init={null}
     {patient}
     bind:validate
-    onChange={revalidate}
+    on:value-change={revalidate}
   />
   <div class="commands">
     <button on:click={doEnter}>入力</button>

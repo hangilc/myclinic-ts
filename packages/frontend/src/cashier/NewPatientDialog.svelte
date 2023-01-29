@@ -24,7 +24,7 @@
   }
 
   function doChange(): void {
-    if (true) {
+    if (isEnterClicked) {
       const vs = validate();
       if (vs.isValid) {
         errors = [];

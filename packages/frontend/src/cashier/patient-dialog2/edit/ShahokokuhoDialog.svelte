@@ -34,7 +34,7 @@
 
 <Dialog {destroy} {title}>
   <ShahokokuhoDialogContent
-    data={init}
+    {init}
     {patient}
     onClose={destroy}
     onEnter={doEnter}

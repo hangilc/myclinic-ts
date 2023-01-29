@@ -138,11 +138,11 @@
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" bind:value={address} on:change={onUserInput} />
+      <input type="text" class="address" bind:value={address} on:change={onUserInput} />
     </div>
     <span>電話番号</span>
     <div class="input-block">
-      <input type="text" bind:value={phone} on:change={onUserInput} />
+      <input type="text" class="phone" bind:value={phone} on:change={onUserInput} />
     </div>
   </div>
 </div>
@@ -168,5 +168,13 @@
 
   .name-input {
     width: 80px;
+  }
+
+  input.address {
+    width: 16rem;
+  }
+
+  input.phone {
+    width: 16rem;
   }
 </style>

@@ -4,7 +4,7 @@
   import ShahokokuhoForm from "./ShahokokuhoForm.svelte";
 
   export let patient: Patient;
-  export let data: Shahokokuho | null = null;
+  export let init: Shahokokuho | null;
   export let onEnter: (data: Shahokokuho) => Promise<string[]>;
   export let onClose: () => void;
   let validate: () => VResult<Shahokokuho>;
@@ -31,9 +31,9 @@
     onClose();
   }
 
-  function onValueChange(evt: CustomEvent<VResult<Shahokokuho>>): void {
+  function onValueChange(): void {
     if( enterClicked ){
-      const r = evt.detail;
+      const r = validate();
       errors = errorMessagesOf(r.errors);
     }
   }
@@ -47,7 +47,7 @@
       {/each}
     </div>
   {/if}
-  <ShahokokuhoForm {patient} bind:data={data} bind:validate on:value-change={onValueChange}/>
+  <ShahokokuhoForm {patient} {init} bind:validate on:value-change={onValueChange}/>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>

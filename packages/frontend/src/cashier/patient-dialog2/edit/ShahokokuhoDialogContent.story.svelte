@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { VResult } from "@/lib/validation";
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { Patient, Shahokokuho } from "myclinic-model";
@@ -17,11 +16,7 @@
     "",
     ""
   );
-  let data: Shahokokuho | null = null;
-
-  function onValueChange(evt: CustomEvent<VResult<Shahokokuho>>) {
-    
-  }
+  let init: Shahokokuho | null = null;
 
   function doClose(): void {
     logEvent("close", {});
@@ -36,7 +31,7 @@
 
 <Hst.Story>
   <div style:width="330px">
-    <ShahokokuhoDialogContent {data} {patient} on:value-change={onValueChange}
+    <ShahokokuhoDialogContent {init} {patient}
       onEnter={doEnter}
       onClose={doClose}/>
   </div>
