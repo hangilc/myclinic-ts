@@ -11,7 +11,7 @@
     updateValues(value);
   }
   let dispatch = createEventDispatcher<{ "value-change": void }>();
-  let gengou: string;
+  let gengou: string = gengouList.length > 0 ? gengouList[0] : "";;
   let nen: string;
   let month: string;
   let day: string;
@@ -19,8 +19,8 @@
   updateValues(init);
 
   function updateValues(date: Date | null): void {
+    console.log("DateForm/updateValues", date);
     if (date === null) {
-      gengou = gengouList.length > 0 ? gengouList[0] : "";
       nen = "";
       month = "";
       day = "";
@@ -34,6 +34,7 @@
   }
 
   export function validate(): VResult<Date | null> {
+    console.log("DateForm/validate", gengou);
     if (nen === "" && month === "" && day === "") {
       return validResult(null);
     } else {
@@ -58,6 +59,7 @@
   }
 
   function handleUserInput(): void {
+    console.log("DateForm/handleUserInput", gengou);
     const vs = validate();
     if (vs.isValid) {
       updateValues(vs.value);
@@ -88,9 +90,9 @@
 
 <div class="top date-form">
   <div class="inputs">
-    <select bind:value={gengou} class="gengou" on:change={doInputChange}>
+    <select bind:value={gengou} class="gengou" on:change={doInputChange} data-cy="gengou-select">
       {#each gengouList as g}
-        <option>{g}</option>
+        <option data-cy="gengou-option">{g}</option>
       {/each}
     </select>
     <input
@@ -98,6 +100,7 @@
       class="nen"
       bind:value={nen}
       on:change={doInputChange}
+      data-cy="nen-input"
     />
     <span on:click={doNenClick} class="nen-span">年</span>
     <input
@@ -105,15 +108,17 @@
       class="month"
       bind:value={month}
       on:change={doInputChange}
+      data-cy="month-input"
     />
-    <span on:click={doMonthClick} class="month-span">月</span>
+    <span on:click={doMonthClick} class="month-span" >月</span>
     <input
       type="text"
       class="day"
       bind:value={day}
       on:change={doInputChange}
+      data-cy="day-input"
     />
-    <span on:click={doDayClick} class="day-span">日</span>
+    <span on:click={doDayClick} class="day-span" >日</span>
   </div>
 </div>
 

@@ -53,6 +53,7 @@
   let gengouList = gengouListUpto("平成");
 
   export function validate(): VResult<Shahokokuho> {
+    console.log("ShahokokuhoForm/validate");
     const input = {
       shahokokuhoId: validResult(init?.shahokokuhoId ?? 0),
       patientId: validResult(patient.patientId),

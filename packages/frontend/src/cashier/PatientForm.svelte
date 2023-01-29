@@ -10,11 +10,6 @@
   } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
   import { createEventDispatcher, onMount, tick } from "svelte";
-  import {
-    type PatientFormValues,
-    blankPatientFormValues,
-    patientFormValues,
-  } from "./patient-form-values";
 
   export let init: Patient | undefined;
   let lastName: string;
@@ -115,7 +110,7 @@
       />
     </div>
     <span>生年月日</span>
-    <div class="input-block">
+    <div class="input-block birthday-input">
       <DateFormWithCalendar
         init={birthday}
         on:value-change={onUserInput}
@@ -132,17 +127,18 @@
           value={sexType.code}
           {id}
           on:change={onUserInput}
+          data-cy="sex-input"
         />
         <label for={id}>{sexType.rep}</label>
       {/each}
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" class="address" bind:value={address} on:change={onUserInput} />
+      <input type="text" class="address" bind:value={address} on:change={onUserInput} data-cy="address"/>
     </div>
     <span>電話番号</span>
     <div class="input-block">
-      <input type="text" class="phone" bind:value={phone} on:change={onUserInput} />
+      <input type="text" class="phone" bind:value={phone} on:change={onUserInput} data-cy="phone"/>
     </div>
   </div>
 </div>
