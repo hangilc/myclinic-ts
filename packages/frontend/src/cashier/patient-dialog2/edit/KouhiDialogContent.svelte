@@ -4,7 +4,7 @@
   import KouhiForm from "./KouhiForm.svelte";
 
   export let patient: Patient;
-  export let data: Kouhi | null = null;
+  export let init: Kouhi | null;
   export let onEnter: (data: Kouhi) => Promise<string[]>;
   export let onClose: () => void;
   let validate: () => VResult<Kouhi>;
@@ -31,9 +31,9 @@
     onClose();
   }
 
-  function onValueChange(evt: CustomEvent<VResult<Kouhi>>): void {
+  function onValueChange(): void {
     if( enterClicked ){
-      const r = evt.detail;
+      const r = validate();
       errors = errorMessagesOf(r.errors);
     }
   }
@@ -47,7 +47,7 @@
       {/each}
     </div>
   {/if}
-  <KouhiForm {patient} bind:data={data} bind:validate on:value-change={onValueChange}/>
+  <KouhiForm {patient} {init} bind:validate on:value-change={onValueChange}/>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>

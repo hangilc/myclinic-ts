@@ -3,7 +3,6 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { Patient, Kouhi } from "myclinic-model";
-  import { KouhiFormValues } from "./kouhi-form-values";
   import KouhiForm from "./KouhiForm.svelte";
 
   export let Hst: Hst;
@@ -18,12 +17,11 @@
     "",
     ""
   );
-  let data: Kouhi | null = null;
-  let values = KouhiFormValues.blank(patient.patientId);
-  let validate: () => VResult<Kouhi>
+  let dataSet: Kouhi = new Kouhi(1, 1234, 23, "2023-01-26", "0000-00-00", 12);
+  let validate: () => VResult<Kouhi>;
 
   function logResult(r: VResult<Kouhi>): void {
-    if( r.isValid ){
+    if (r.isValid) {
       logEvent("data", { data: r.value });
     } else {
       const messages = errorMessagesOf(r.errors);
@@ -31,29 +29,40 @@
     }
   }
 
-  function doValueChange(evt: CustomEvent<VResult<Kouhi>>): void {
-    console.log("change", evt.detail);
-  }
-
-  function doSet(): void {
-    data = new Kouhi(
-      1, 1234, 23, "2023-01-26", "0000-00-00", 12
-    )
+  function doValueChange(): void {
+    console.log("change", validate());
   }
 
   function doValidate(): void {
     logResult(validate());
   }
-
 </script>
 
 <Hst.Story>
-  <div style:width="460px">
-    <KouhiForm {patient} bind:data={data} on:value-change={doValueChange} bind:validate/>
-  </div>
-  <div>
-    <button on:click={doSet}>Set</button>
-    <button on:click={doValidate}>Validate</button>
-  </div>
+  <Hst.Variant title="new">
+    <div style:width="460px">
+      <KouhiForm
+        {patient}
+        init={null}
+        on:value-change={doValueChange}
+        bind:validate
+      />
+    </div>
+    <div>
+      <button on:click={doValidate}>Validate</button>
+    </div>
+  </Hst.Variant>
+  <Hst.Variant title="update">
+    <div style:width="460px">
+      <KouhiForm
+        {patient}
+        init={dataSet}
+        on:value-change={doValueChange}
+        bind:validate
+      />
+    </div>
+    <div>
+      <button on:click={doValidate}>Validate</button>
+    </div>
+  </Hst.Variant>
 </Hst.Story>
-
