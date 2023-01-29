@@ -4,8 +4,7 @@
   "workspaces": [
     "packages/frontend",
     "packages/model",
-    "packages/rezept",
-    "packages/cypress-test"
+    "packages/rezept"
   ],
   "dependencies": {
     "typescript": "^4.8.4"
