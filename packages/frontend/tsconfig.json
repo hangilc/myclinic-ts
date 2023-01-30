@@ -17,7 +17,8 @@
     "checkJs": true,
     "isolatedModules": true,
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@cypress/*": ["cypress/*"]
     },
     "strict": true
   },

@@ -1,0 +1,11 @@
+{
+  "patientId": 0,
+  "lastName": "診療",
+  "firstName": "太郎",
+  "lastNameYomi": "しんりょう",
+  "firstNameYomi": "たろう",
+  "sex": "M",
+  "birthday": "1982-06-23",
+  "address": "東京",
+  "phone": "03-1234-5678"
+}
