@@ -1,11 +1,14 @@
 import user from "../../fixtures/patient-a.json"
 import { toWareki } from "../../../src/lib/to-wareki";
 import { parseSqlDate } from "../../../src/lib/util";
+import { format, f1 } from "kanjidate";
 
 describe('template spec', () => {
   it('enters a new patient', () => {
     const bday = parseSqlDate(user.birthday);
     const [gengou, nen] = toWareki(user.birthday);
+    const s: string = format(f1, new Date());
+    console.log(s);
     cy.visit('http://localhost:5173/vite/reception/');
     cy.get("[data-cy=test-flag]").contains("(Test-Client)");
     cy.get("button").contains("新規患者").click();
