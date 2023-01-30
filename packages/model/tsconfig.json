@@ -16,6 +16,7 @@
     "declaration": true,
     "declarationMap": true,
     "strict": true,
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "moduleResolution": "node"
   }
 }
