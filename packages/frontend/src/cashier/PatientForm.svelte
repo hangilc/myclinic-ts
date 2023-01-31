@@ -24,7 +24,7 @@
   updateValues(init);
 
   function updateValues(patient: Patient | undefined) {
-    if( patient === undefined ){
+    if (patient === undefined) {
       lastName = "";
       firstName = "";
       lastNameYomi = "";
@@ -44,7 +44,7 @@
       phone = patient.phone;
     }
   }
-  const dispatch = createEventDispatcher<{ "value-change": void; }>();
+  const dispatch = createEventDispatcher<{ "value-change": void }>();
 
   let validateBirthday: () => VResult<Date | null>;
 
@@ -72,7 +72,7 @@
   <div class="panel">
     {#if init && init.patientId > 0}
       <span>患者番号</span>
-      <span>{init.patientId}</span>
+      <span data-cy="patient-id">{init.patientId}</span>
     {/if}
     <span>氏名</span>
     <div class="input-block">
@@ -110,7 +110,7 @@
       />
     </div>
     <span>生年月日</span>
-    <div class="input-block birthday-input">
+    <div class="input-block birthday-input" data-cy="birthday-input-wrapper">
       <DateFormWithCalendar
         init={birthday}
         on:value-change={onUserInput}
@@ -134,11 +134,23 @@
     </div>
     <span>住所</span>
     <div class="input-block">
-      <input type="text" class="address" bind:value={address} on:change={onUserInput} data-cy="address"/>
+      <input
+        type="text"
+        class="address"
+        bind:value={address}
+        on:change={onUserInput}
+        data-cy="address-input"
+      />
     </div>
     <span>電話番号</span>
     <div class="input-block">
-      <input type="text" class="phone" bind:value={phone} on:change={onUserInput} data-cy="phone"/>
+      <input
+        type="text"
+        class="phone"
+        bind:value={phone}
+        on:change={onUserInput}
+        data-cy="phone-input"
+      />
     </div>
   </div>
 </div>

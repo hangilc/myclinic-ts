@@ -1,7 +1,8 @@
 import user from "@cypress/fixtures/patient-a.json";
 import { Patient } from "myclinic-model";
-import * as kanjidate from "kanjidate";
+import { KanjiDate, addDays } from "kanjidate";
 import { dateToSql, parseSqlDate } from "@/lib/util";
+import { assertPatientDisp, assertPatientForm, fillPatientForm } from "./misc";
 
 function modifyStr(s: string): string {
   return s + "変";
@@ -9,7 +10,7 @@ function modifyStr(s: string): string {
 
 function modifyDate(s: string): string {
   const d: Date = parseSqlDate(s);
-  return dateToSql(kanjidate.addDays(d, -7));
+  return dateToSql(addDays(d, -7));
 }
 
 function modify(p: Patient): Patient {
@@ -44,8 +45,13 @@ describe("Edit Patient", () => {
     cy.get("[data-cy=edit-patient-link]").click();
 
     cy.get("[data-cy=dialog-title]").contains("患者情報編集");
-    
+    assertPatientForm(patient);
+    const modified = modify(patient);
+    fillPatientForm(modified);
+    cy.get("button").contains("入力").click();
+    cy.get("[data-cy=dialog-title]").contains("患者情報");
+    assertPatientDisp(modified);
   });
 });
 
-export {};
+export { };
