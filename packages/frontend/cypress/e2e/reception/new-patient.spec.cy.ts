@@ -37,5 +37,3 @@ describe('template spec', () => {
     cy.get("[data-cy=phone]").contains(user.phone);
   })
 })
-
-export { };
