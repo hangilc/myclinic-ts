@@ -2,8 +2,8 @@
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
-  import { Patient, Kouhi } from "myclinic-model";
-  import KouhiForm from "./KouhiForm.svelte";
+  import { Patient, Koukikourei } from "myclinic-model";
+  import KoukikoureiForm from "@/cashier/patient-dialog2/edit/KoukikoureiForm.svelte";
 
   export let Hst: Hst;
   let patient: Patient = new Patient(
@@ -17,10 +17,18 @@
     "",
     ""
   );
-  let dataSet: Kouhi = new Kouhi(1, 1234, 23, "2023-01-26", "0000-00-00", 12);
-  let validate: () => VResult<Kouhi>;
+  let validate: () => VResult<Koukikourei>;
+  const dataSet: Koukikourei = new Koukikourei(
+    1,
+    12,
+    "1234",
+    "23",
+    1,
+    "2023-01-26",
+    "0000-00-00"
+  );
 
-  function logResult(r: VResult<Kouhi>): void {
+  function logResult(r: VResult<Koukikourei>): void {
     if (r.isValid) {
       logEvent("data", { data: r.value });
     } else {
@@ -30,7 +38,7 @@
   }
 
   function doValueChange(): void {
-    console.log("change", validate());
+    logResult(validate());
   }
 
   function doValidate(): void {
@@ -41,7 +49,7 @@
 <Hst.Story>
   <Hst.Variant title="new">
     <div style:width="460px">
-      <KouhiForm
+      <KoukikoureiForm
         {patient}
         init={null}
         on:value-change={doValueChange}
@@ -52,9 +60,10 @@
       <button on:click={doValidate}>Validate</button>
     </div>
   </Hst.Variant>
+
   <Hst.Variant title="update">
     <div style:width="460px">
-      <KouhiForm
+      <KoukikoureiForm
         {patient}
         init={dataSet}
         on:value-change={doValueChange}

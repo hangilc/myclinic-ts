@@ -3,7 +3,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { Patient, Koukikourei } from "myclinic-model";
-  import KoukikoureiDialogContent from "./KoukikoureiDialogContent.svelte";
+  import KoukikoureiDialogContent from "@/cashier/patient-dialog2/edit/KoukikoureiDialogContent.svelte";
 
   export let Hst: Hst;
   let patient: Patient = new Patient(

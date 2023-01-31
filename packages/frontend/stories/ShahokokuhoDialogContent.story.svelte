@@ -2,7 +2,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { Patient, Shahokokuho } from "myclinic-model";
-  import ShahokokuhoDialogContent from "./ShahokokuhoDialogContent.svelte";
+  import ShahokokuhoDialogContent from "@/cashier/patient-dialog2/edit/ShahokokuhoDialogContent.svelte";
 
   export let Hst: Hst;
   let patient: Patient = new Patient(

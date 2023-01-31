@@ -3,7 +3,7 @@
   import type { Hst } from "@histoire/plugin-svelte";
   import { logEvent } from "histoire/client";
   import { dateToSqlDate, Patient, Shahokokuho } from "myclinic-model";
-  import ShahokokuhoForm from "./ShahokokuhoForm.svelte";
+  import ShahokokuhoForm from "@/cashier/patient-dialog2/edit/ShahokokuhoForm.svelte";
 
   export let Hst: Hst;
   let patient: Patient = new Patient(
