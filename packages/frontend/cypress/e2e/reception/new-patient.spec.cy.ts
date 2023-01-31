@@ -1,25 +1,16 @@
 import user from "../../fixtures/patient-a.json"
 import { toKanjiDate } from "@/lib/to-kanjidate";
 import { format, f2 } from "kanjidate";
+import { fillPatientForm } from "./misc";
+import { Patient } from "myclinic-model";
 
-describe('template spec', () => {
+describe('New Patient', () => {
   it('enters a new patient', () => {
     const bd = toKanjiDate(user.birthday);
     cy.visit('http://localhost:5173/vite/reception/');
     cy.get("[data-cy=test-flag]").contains("(Test-Client)");
     cy.get("button").contains("新規患者").click();
-    cy.get("[data-cy=dialog-title").contains("新規患者入力");
-    cy.get("[data-cy=last-name-input").type(user.lastName);
-    cy.get("[data-cy=first-name-input").type(user.firstName);
-    cy.get("[data-cy=last-name-yomi-input").type(user.lastNameYomi);
-    cy.get("[data-cy=first-name-yomi-input").type(user.firstNameYomi);
-    cy.get(".birthday-input [data-cy=gengou-select]").select(bd.gengou);
-    cy.get(".birthday-input [data-cy=nen-input]").type(bd.nen.toString());
-    cy.get(".birthday-input [data-cy=month-input]").type(bd.month.toString());
-    cy.get(".birthday-input [data-cy=day-input]").type(bd.day.toString());
-    cy.get(`[data-cy=sex-input][value=${user.sex}]`).click();
-    cy.get("[data-cy=address]").type(user.address);
-    cy.get("[data-cy=phone]").type(user.phone);
+    fillPatientForm(Patient.cast(user));
     cy.get("button").contains("入力").click();
 
     cy.get("[data-cy=dialog-title]").contains("患者情報");

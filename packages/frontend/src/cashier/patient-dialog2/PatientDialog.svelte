@@ -11,7 +11,6 @@
   import type { Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
-  import EditHokenDialog from "./EditHokenDialog.svelte";
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
   import api from "@/lib/api";
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
@@ -44,8 +43,12 @@
       const d: EditPatientDialog = new EditPatientDialog({
         target: document.body,
         props: {
-          data,
+          patient: data.patient,
           destroy: () => d.$destroy(),
+          onUpdate: (updated: Patient) => {
+            data.patient = updated;
+            data.goback();
+          }
         },
       });
     }
@@ -176,14 +179,14 @@
     <button on:click={destroy}>閉じる</button>
   </div>
   <div class="menu">
-    <a href="javascript:void(0)" on:click={doEdit}>編集</a>
+    <a href="javascript:void(0)" on:click={doEdit} data-cy="edit-patient-link">編集</a>
     |
-    <a href="javascript:void(0)" on:click={doNewShahokokuho}>新規社保国保</a>
+    <a href="javascript:void(0)" on:click={doNewShahokokuho} data-cy="new-shahokokuho-link">新規社保国保</a>
     |
-    <a href="javascript:void(0)" on:click={doNewKoukikourei}>新規後期高齢</a>
+    <a href="javascript:void(0)" on:click={doNewKoukikourei} data-cy="new-koukikourei-link">新規後期高齢</a>
     |
-    <a href="javascript:void(0)" on:click={doNewKouhi}>新規公費</a> |
-    <a href="javascript:void(0)" on:click={doHokenHistory}>保険履歴</a>
+    <a href="javascript:void(0)" on:click={doNewKouhi} data-cy="new-kouhi-link">新規公費</a> |
+    <a href="javascript:void(0)" on:click={doHokenHistory} data-cy="hoken-history-link">保険履歴</a>
   </div>
 </SurfaceModal>
 

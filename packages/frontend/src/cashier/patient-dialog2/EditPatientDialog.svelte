@@ -1,44 +1,66 @@
 <script lang="ts">
   import api from "@/lib/api";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import { Patient, Sex } from "myclinic-model";
+  import { errorMessagesOf, type VResult } from "@/lib/validation";
+  import type { Patient } from "myclinic-model";
+  import { PatientData } from "../patient-dialog2/patient-data";
   import PatientForm from "../PatientForm.svelte";
-  import type { PatientData } from "./patient-data";
 
-  export let data: PatientData;
   export let destroy: () => void;
-
-  let patient: Patient = data.patient;
-  let form: PatientForm;
-
-  function close(): void {
-    destroy();
-    data.goback();
-  }
+  export let onUpdate: (updated: Patient) => void;
+  export let patient: Patient;
+  let errors: string[] = [];
+  let isEnterClicked = false;
+  let validate: () => VResult<Patient>;
 
   async function doEnter() {
-    const result = form.validate();
-    if (result instanceof Patient) {
-      await api.updatePatient(result);
-      data.patient = result;
-      close();
+    isEnterClicked = true;
+    const vs = validate();
+    if (vs.isValid) {
+      let ok = await api.updatePatient(vs.value);
+      if( !ok ){
+        errors = ["患者情報の変更に失敗しました。"];
+      } else {
+        destroy();
+        onUpdate(vs.value);
+      }
+    } else {
+      errors = errorMessagesOf(vs.errors);
     }
   }
 
-  function doCancel() {
-    close();
+  function doChange(): void {
+    if (isEnterClicked) {
+      const vs = validate();
+      if (vs.isValid) {
+        errors = [];
+      } else {
+        errors = errorMessagesOf(vs.errors);
+      }
+    }
   }
 </script>
 
-<SurfaceModal title="患者情報編集" destroy={close}>
-  <PatientForm {patient} bind:this={form}/>
+<SurfaceModal {destroy} title="患者情報編集">
+  {#if errors.length > 0}
+    <div class="error">
+      {#each errors as e}
+        <div>{e}</div>
+      {/each}
+    </div>
+  {/if}
+  <PatientForm init={patient} on:value-change={doChange} bind:validate />
   <div class="commands">
     <button on:click={doEnter}>入力</button>
-    <button on:click={doCancel}>キャンセル</button>
+    <button on:click={destroy}>キャンセル</button>
   </div>
 </SurfaceModal>
 
 <style>
+  .error {
+    color: red;
+  }
+
   .commands {
     display: flex;
     justify-content: right;

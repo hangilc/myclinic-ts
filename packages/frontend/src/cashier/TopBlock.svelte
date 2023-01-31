@@ -46,8 +46,8 @@
 <div class="top">
   <div class="title">受付患者</div>
   <form class="search-form" on:submit|preventDefault={doSearch}>
-    <input type="text" class="search-input" bind:value={searchText} />
-    <button>検索</button>
+    <input type="text" class="search-input" bind:value={searchText} data-cy="search-text-input"/>
+    <button data-cy="search-button">検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
   <Popup let:trigger let:destroy>
