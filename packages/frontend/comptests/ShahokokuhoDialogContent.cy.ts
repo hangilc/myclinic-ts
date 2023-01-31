@@ -1,6 +1,5 @@
 import { Patient, Shahokokuho } from "myclinic-model";
-import ShahokokuhoDialogContent from "./ShahokokuhoDialogContent.svelte";
-// import Button from "@/cashier/patient-dialog2/edit/Button.svelte";
+import ShahokokuhoDialogContent from "@/cashier/patient-dialog2/edit/ShahokokuhoDialogContent.svelte";
 
 let patient: Patient = new Patient(
   123,

@@ -17,11 +17,26 @@
     "checkJs": true,
     "isolatedModules": true,
     "paths": {
-      "@/*": ["src/*"],
-      "@cypress/*": ["cypress/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@cypress/*": [
+        "cypress/*"
+      ]
     },
     "strict": true
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.js", "src/**/*.svelte", "cypress/**/*.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "cypress/**/*.ts",
+    "comptests/**/*.cy.ts"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
 }
