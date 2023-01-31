@@ -1,6 +1,11 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+  import type {
+    Kouhi,
+    Koukikourei,
+    Patient,
+    Shahokokuho,
+  } from "myclinic-model";
   import type { PatientData } from "../patient-dialog2/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -40,9 +45,9 @@
         target: document.body,
         props: {
           data,
-          destroy: () => d.$destroy()
-        }
-      })
+          destroy: () => d.$destroy(),
+        },
+      });
     }
     destroy();
     data.push(open);
@@ -62,7 +67,7 @@
           title: "新規社保国保",
           onEntered: (entered: Shahokokuho) => {
             data.hokenCache.enterHokenType(entered);
-          }
+          },
         },
       });
     }
@@ -84,7 +89,7 @@
           title: "新規後期高齢保険",
           onEntered: (entered: Koukikourei) => {
             data.hokenCache.enterHokenType(entered);
-          }
+          },
         },
       });
     }
@@ -106,7 +111,7 @@
           title: "新規公費",
           onEntered: (entered: Kouhi) => {
             data.hokenCache.enterHokenType(entered);
-          }
+          },
         },
       });
     }
@@ -121,9 +126,9 @@
         target: document.body,
         props: {
           data,
-          destroy: () => d.$destroy()
-        }
-      })
+          destroy: () => d.$destroy(),
+        },
+      });
     }
     destroy();
     data.push(open);
@@ -138,20 +143,27 @@
     destroy();
     data.cleanup();
   }
-
 </script>
 
 <SurfaceModal destroy={exit} title="患者情報" width="320px">
   <div class="info">
-    <span>患者番号</span><span>{p.patientId}</span>
-    <span>氏名</span><span>{p.lastName} {p.firstName}</span>
-    <span>よみ</span><span>{p.lastNameYomi} {p.firstNameYomi}</span>
-    <span>生年月日</span><span
+    <span>患者番号</span><span data-cy="patient-id">{p.patientId}</span>
+    <span>氏名</span>
+    <div class="composite-value">
+      <span data-cy="last-name">{p.lastName}</span>
+      <span data-cy="first-name">{p.firstName}</span>
+    </div>
+    <span>よみ</span>
+    <div class="composite-value">
+      <span data-cy="last-name-yomi">{p.lastNameYomi}</span>
+      <span data-cy="first-name-yomi">{p.firstNameYomi}</span>
+    </div>
+    <span>生年月日</span><span data-cy="birthday"
       >{kanjidate.format(kanjidate.f2, p.birthday)}</span
     >
-    <span>性別</span><span>{p.sexAsKanji}性</span>
-    <span>住所</span><span>{p.address}</span>
-    <span>電話番号</span><span>{p.phone}</span>
+    <span>性別</span><span data-cy="sex">{p.sexAsKanji}性</span>
+    <span>住所</span><span data-cy="address">{p.address}</span>
+    <span>電話番号</span><span data-cy="phone">{p.phone}</span>
   </div>
   <div class="current-list">
     {#each currentList as h (h.key)}
@@ -171,7 +183,7 @@
     <a href="javascript:void(0)" on:click={doNewKoukikourei}>新規後期高齢</a>
     |
     <a href="javascript:void(0)" on:click={doNewKouhi}>新規公費</a> |
-    <a href="javascript:void(0)" on:click={doHokenHistory}>保険履歴</a> 
+    <a href="javascript:void(0)" on:click={doHokenHistory}>保険履歴</a>
   </div>
 </SurfaceModal>
 
@@ -181,11 +193,15 @@
     grid-template-columns: auto 1fr;
   }
 
-  .info *:nth-child(odd) {
+  .info > *:nth-child(odd) {
     display: flex;
     align-items: center;
     justify-content: right;
     margin-right: 6px;
+  }
+
+  .composite-value {
+    display: inline-block;
   }
 
   .current-list {
