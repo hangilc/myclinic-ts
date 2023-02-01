@@ -1,0 +1,12 @@
+{
+    "shahokokuhoId": 0,
+    "patientId": 1,
+    "hokenshaBangou": 1234,
+    "hihokenshaKigou": "a2222",
+    "hihokenshaBangou": "34",
+    "honninStore": 0,
+    "validFrom": "2022-07-01",
+    "validUpto": "2024-06-30",
+    "koureiStore": 0,
+    "edaban": "01"
+}

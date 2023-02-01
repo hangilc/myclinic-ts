@@ -1,7 +1,11 @@
 version: '3'
 services:
   mysql:
-    image: "hangilc/myclinic-mysql-demo:1.0.0"
+    image: "myclinic-test-db"
+    build: "./db"
+    # image: "hangilc/myclinic-mysql-demo:1.0.0"
+    ports:
+      - "33060:3306"
   files:
     image: "hangilc/myclinic-files-demo:1.0.0"
   server:

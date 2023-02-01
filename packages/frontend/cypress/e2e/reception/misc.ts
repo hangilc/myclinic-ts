@@ -17,6 +17,20 @@ export function fillPatientForm(patient: Patient) {
   cy.get("[data-cy=phone-input]").clear().type(patient.phone);
 }
 
+export function fillDateForm(date: Date | string | null) {
+  if( date === null || date === "" ){
+    cy.get("[data-cy=nen-input]").clear();
+    cy.get("[data-cy=month-input]").clear();
+    cy.get("[data-cy=day-input]").clear();
+  } else {
+    const d = toKanjiDate(date);
+    cy.get("[data-cy=gengou-select]").select(d.gengou);
+    cy.get("[data-cy=nen-input]").clear().type(d.nen.toString());
+    cy.get("[data-cy=month-input]").clear().type(d.month.toString());
+    cy.get("[data-cy=day-input]").clear().type(d.day.toString());
+  }
+}
+
 export function assertPatientDisp(patient: Patient) {
   if( patient.patientId === 0 ){
     cy.get("[data-cy=patient-id]").should(($e) => {

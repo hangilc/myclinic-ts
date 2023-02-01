@@ -6,6 +6,10 @@
     "packages/model",
     "packages/rezept"
   ],
+  "scripts": {
+    "test-server:start": "cd docker/test-server && docker compose up -d",
+    "test-server:stop": "cd docker/test-server && docker compose down"
+  },
   "dependencies": {
     "typescript": "^4.8.4"
   }

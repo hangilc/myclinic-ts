@@ -48,7 +48,7 @@
           onUpdate: (updated: Patient) => {
             data.patient = updated;
             data.goback();
-          }
+          },
         },
       });
     }
@@ -168,9 +168,10 @@
     <span>住所</span><span data-cy="address">{p.address}</span>
     <span>電話番号</span><span data-cy="phone">{p.phone}</span>
   </div>
-  <div class="current-list">
+  <div class="current-list" data-cy="current-list">
     {#each currentList as h (h.key)}
-      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}>{h.rep}</a
+      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}
+        data-cy="current-hoken" data-hoken-key={h.key}>{h.rep}</a
       >
     {/each}
   </div>
@@ -179,14 +180,31 @@
     <button on:click={destroy}>閉じる</button>
   </div>
   <div class="menu">
-    <a href="javascript:void(0)" on:click={doEdit} data-cy="edit-patient-link">編集</a>
+    <a href="javascript:void(0)" on:click={doEdit} data-cy="edit-patient-link"
+      >編集</a
+    >
     |
-    <a href="javascript:void(0)" on:click={doNewShahokokuho} data-cy="new-shahokokuho-link">新規社保国保</a>
+    <a
+      href="javascript:void(0)"
+      on:click={doNewShahokokuho}
+      data-cy="new-shahokokuho-link">新規社保国保</a
+    >
     |
-    <a href="javascript:void(0)" on:click={doNewKoukikourei} data-cy="new-koukikourei-link">新規後期高齢</a>
+    <a
+      href="javascript:void(0)"
+      on:click={doNewKoukikourei}
+      data-cy="new-koukikourei-link">新規後期高齢</a
+    >
     |
-    <a href="javascript:void(0)" on:click={doNewKouhi} data-cy="new-kouhi-link">新規公費</a> |
-    <a href="javascript:void(0)" on:click={doHokenHistory} data-cy="hoken-history-link">保険履歴</a>
+    <a href="javascript:void(0)" on:click={doNewKouhi} data-cy="new-kouhi-link"
+      >新規公費</a
+    >
+    |
+    <a
+      href="javascript:void(0)"
+      on:click={doHokenHistory}
+      data-cy="hoken-history-link">保険履歴</a
+    >
   </div>
 </SurfaceModal>
 

@@ -19,7 +19,6 @@
   updateValues(init);
 
   function updateValues(date: Date | null): void {
-    console.log("DateForm/updateValues", date);
     if (date === null) {
       nen = "";
       month = "";
@@ -34,7 +33,6 @@
   }
 
   export function validate(): VResult<Date | null> {
-    console.log("DateForm/validate", gengou);
     if (nen === "" && month === "" && day === "") {
       return validResult(null);
     } else {
@@ -59,7 +57,6 @@
   }
 
   function handleUserInput(): void {
-    console.log("DateForm/handleUserInput", gengou);
     const vs = validate();
     if (vs.isValid) {
       updateValues(vs.value);

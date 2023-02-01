@@ -7,7 +7,7 @@ import { Patient } from "myclinic-model";
 describe('New Patient', () => {
   it('enters a new patient', () => {
     const bd = toKanjiDate(user.birthday);
-    cy.visit('http://localhost:5173/vite/reception/');
+    cy.visit('/reception/');
     cy.get("[data-cy=test-flag]").contains("(Test-Client)");
     cy.get("button").contains("新規患者").click();
     fillPatientForm(Patient.cast(user));

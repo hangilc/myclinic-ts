@@ -8,7 +8,12 @@ export default defineConfig({
     },
   },
 
+  env: {
+    "API": "http://localhost:38080/api"
+  },
+
   e2e: {
+    baseUrl: "http://localhost:5173/vite",
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },

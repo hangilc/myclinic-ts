@@ -29,7 +29,7 @@
   updateValues(init);
 
   function updateValues(init: Shahokokuho | null): void {
-    if( init === null ){
+    if (init === null) {
       hokenshaBangou = "";
       hihokenshaKigou = "";
       hihokenshaBangou = "";
@@ -65,19 +65,18 @@
       validUpto: validateValidUpto(),
       koureiStore: validResult(koureiStore),
       edaban: validResult(edaban),
-    }
+    };
     return validateShahokokuho(input);
   }
 
   function doUserInput(): void {
     dispatch("value-change");
   }
-
 </script>
 
 <div>
-  <span>({patient.patientId})</span>
-  <span>{patient.fullName(" ")}</span>
+  <span data-cy="patient-id">({patient.patientId})</span>
+  <span data-cy="patient-name">{patient.fullName(" ")}</span>
 </div>
 <div class="panel">
   <span>保険者番号</span>
@@ -87,6 +86,7 @@
       class="regular"
       bind:value={hokenshaBangou}
       on:change={doUserInput}
+      data-cy="hokensha-bangou-input"
     />
   </div>
   <span>記号・番号</span>
@@ -96,6 +96,7 @@
       class="regular"
       bind:value={hihokenshaKigou}
       on:change={doUserInput}
+      data-cy="hihokensha-kigou-input"
     />
     ・
     <input
@@ -103,23 +104,36 @@
       class="regular"
       bind:value={hihokenshaBangou}
       on:change={doUserInput}
+      data-cy="hihokensha-bangou-input"
     />
   </div>
   <span>枝番</span>
   <div>
-    <input type="text" class="edaban" bind:value={edaban} on:change={doUserInput}/>
+    <input
+      type="text"
+      class="edaban"
+      bind:value={edaban}
+      on:change={doUserInput}
+      data-cy="edaban-input"
+    />
   </div>
   <span>本人・家族</span>
   <div>
     {#each Object.values(HonninKazoku) as h}
       {@const id = genid()}
-      <input type="radio" {id} bind:group={honninStore} value={h.code} 
-        on:change={doUserInput}/>
+      <input
+        type="radio"
+        {id}
+        bind:group={honninStore}
+        value={h.code}
+        on:change={doUserInput}
+        data-cy="honnin-input"
+      />
       <label for={id}>{h.rep}</label>
     {/each}
   </div>
   <span>期限開始</span>
-  <div>
+  <div data-cy="valid-from-input">
     <DateFormWithCalendar
       init={validFrom}
       on:value-change={doUserInput}
@@ -128,7 +142,7 @@
     />
   </div>
   <span>期限終了</span>
-  <div>
+  <div data-cy="valid-upto-input">
     <DateFormWithCalendar
       init={validUpto}
       on:value-change={doUserInput}
@@ -148,6 +162,7 @@
           bind:group={koureiStore}
           value={0}
           on:change={doUserInput}
+          data-cy="kourei-input"
         />
         <label for={id}>高齢でない</label>
       {/if}
@@ -162,6 +177,7 @@
           bind:group={koureiStore}
           value={w}
           on:change={doUserInput}
+          data-cy="kourei-input"
         />
         <label for={id}>{toZenkaku(w.toString())}割</label>
       {/each}
