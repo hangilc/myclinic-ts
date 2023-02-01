@@ -18,7 +18,7 @@ export function fillPatientForm(patient: Patient) {
 }
 
 export function fillDateForm(date: Date | string | null) {
-  if( date === null || date === "" ){
+  if( date === null || date === "0000-00-00" ){
     cy.get("[data-cy=nen-input]").clear();
     cy.get("[data-cy=month-input]").clear();
     cy.get("[data-cy=day-input]").clear();

@@ -89,8 +89,9 @@
           },
           patient: p,
           init: null,
-          title: "新規後期高齢保険",
+          title: "新規後期高齢",
           onEntered: (entered: Koukikourei) => {
+            console.log("entered", entered);
             data.hokenCache.enterHokenType(entered);
           },
         },

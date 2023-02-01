@@ -59,29 +59,31 @@
 </script>
 
 <div>
-  <span>({patient.patientId})</span>
-  <span>{patient.fullName(" ")}</span>
+  <span data-cy="patient-id">({patient.patientId})</span>
+  <span data-cy="patient-name">{patient.fullName(" ")}</span>
 </div>
 <div class="panel">
   <span>保険者番号</span>
   <div>
     <input type="text" class="regular" bind:value={hokenshaBangou} 
-      on:change={doUserInput}/>
+      on:change={doUserInput} data-cy="hokensha-bangou-input"/>
   </div>
   <span>被保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={hihokenshaBangou} on:change={doUserInput}/>
+    <input type="text" class="regular" bind:value={hihokenshaBangou} on:change={doUserInput}
+    data-cy="hihokensha-bangou-input"/>
   </div>
   <span>負担割</span>
   <div>
     {#each [1, 2, 3] as w}
       {@const id = genid()}
-      <input type="radio" value={w} bind:group={futanWari} on:change={doUserInput}/>
+      <input type="radio" value={w} bind:group={futanWari} on:change={doUserInput}
+      data-cy="futan-wari-input"/>
       <label for={id}>{toZenkaku(w.toString())}割</label>
     {/each}
   </div>
   <span>期限開始</span>
-  <div>
+  <div  data-cy="valid-from-input">
     <DateFormWithCalendar
       init={validFrom}
       on:value-change={doUserInput}
@@ -90,7 +92,7 @@
     />
   </div>
   <span>期限終了</span>
-  <div>
+  <div data-cy="valid-upto-input">
     <DateFormWithCalendar
       init={validUpto}
       on:value-change={doUserInput}
