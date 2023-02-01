@@ -52,21 +52,22 @@
 </script>
 
 <div>
-  <span>({patient.patientId})</span>
-  <span>{patient.fullName(" ")}</span>
+  <span data-cy="patient-id">({patient.patientId})</span>
+  <span data-cy="patient-name">{patient.fullName(" ")}</span>
 </div>
 <div class="panel">
   <span>負担者番号</span>
   <div>
     <input type="text" class="regular" bind:value={futansha} 
-      on:change={doUserInput}/>
+      on:change={doUserInput} data-cy="futansha-input"/>
   </div>
   <span>受給者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={jukyuusha} on:change={doUserInput}/>
+    <input type="text" class="regular" bind:value={jukyuusha} on:change={doUserInput}
+    data-cy="jukyuusha-input"/>
   </div>
   <span>期限開始</span>
-  <div>
+  <div data-cy="valid-from-input">
     <DateFormWithCalendar
       init={validFrom}
       on:value-change={doUserInput}
@@ -75,7 +76,7 @@
     />
   </div>
   <span>期限終了</span>
-  <div>
+  <div data-cy="valid-upto-input">
     <DateFormWithCalendar
       init={validUpto}
       on:value-change={doUserInput}
