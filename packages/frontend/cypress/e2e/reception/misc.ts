@@ -32,6 +32,20 @@ export function fillDateForm(date: Date | string | null) {
   }
 }
 
+export function assertDateForm(date: Date | string | null) {
+  if( date === null || date === "0000-00-00" ){
+    cy.get("[data-cy=nen-input]").should("have.value", "");
+    cy.get("[data-cy=month-input]").should("have.value", "");
+    cy.get("[data-cy=day-input]").should("have.value", "");
+  } else {
+    const d = toKanjiDate(date);
+    cy.get("[data-cy=gengou-select]").should("have.value", d.gengou)
+    cy.get("[data-cy=nen-input]").should("have.value", d.nen.toString());
+    cy.get("[data-cy=month-input]").should("have.value", d.month.toString());
+    cy.get("[data-cy=day-input]").should("have.value", d.day.toString());
+  }
+}
+
 export function assertPatientDisp(patient: Patient) {
   if (patient.patientId === 0) {
     cy.get("[data-cy=patient-id]").should(($e) => {
@@ -67,6 +81,30 @@ export function assertPatientForm(patient: Patient) {
   cy.get(`[data-cy=sex-input][value=${patient.sex}]:checked`);
   cy.get("[data-cy=address-input]").should("have.value", patient.address);
   cy.get("[data-cy=phone-input]").should("have.value", patient.phone);
+}
+
+export function assertShahokokuhoForm(patient: Patient, h: Shahokokuho) {
+  cy.get("[data-cy=patient-id]").contains(patient.patientId.toString());
+  cy.get("[data-cy=patient-name]").contains(patient.fullName(" "));
+  cy.get("[data-cy=hokensha-bangou-input]").should("have.value", h.hokenshaBangou.toString());
+  cy.get("[data-cy=hihokensha-kigou-input]").should("have.value", h.hihokenshaKigou);
+  cy.get("[data-cy=hihokensha-bangou-input]").should("have.value", h.hihokenshaBangou);
+  cy.get("[data-cy=edaban-input]").should("have.value", h.edaban);
+  cy.get("[data-cy=honnin-input]:checked").should("have.value", h.honninStore.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => assertDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => assertDateForm(h.validUpto));
+  cy.get("[data-cy=kourei-input]:checked").should("have.value", h.koureiStore.toString());
+}
+
+export function fillShahokokuhoForm(h: Shahokokuho) {
+  cy.get("[data-cy=hokensha-bangou-input]").clear().type(h.hokenshaBangou.toString());
+  cy.get("[data-cy=hihokensha-kigou-input]").clear().type(h.hihokenshaKigou);
+  cy.get("[data-cy=hihokensha-bangou-input]").clear().type(h.hihokenshaBangou);
+  cy.get("[data-cy=edaban-input]").clear().type(h.edaban);
+  cy.get("[data-cy=honnin-input]").check(h.honninStore.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => fillDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(h.validUpto));
+  cy.get("[data-cy=kourei-input]").check(h.koureiStore.toString());
 }
 
 export function newPatient() {
