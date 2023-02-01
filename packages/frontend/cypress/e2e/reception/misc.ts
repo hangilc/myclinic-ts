@@ -87,9 +87,17 @@ export function newShahokokuho(patientId: number) {
 export function openPatientDialog(patientId: number) {
   cy.get("form [data-cy=search-text-input]").type(patientId.toString());
   cy.get("form [data-cy=search-button]").click();
-  cy.get("[data-cy=dialog-title]").contains("患者情報");
+  dialogOpen("患者情報");
 }
 
-export function closePatientDialog() {
-  cy.get("[data-cy=dialog-title]").contains("患者情報").should("not.exist");
+export function patientDialogClose() {
+  dialogClose("患者情報");
+}
+
+export function dialogOpen(title: string) {
+  cy.get("[data-cy=dialog-title]").contains(title);
+}
+
+export function dialogClose(title: string) {
+  cy.get("[data-cy=dialog-title]").contains(title).should("not.exist");
 }

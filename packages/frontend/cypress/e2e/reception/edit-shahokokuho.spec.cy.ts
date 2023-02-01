@@ -1,6 +1,5 @@
-import user from "@cypress/fixtures/patient-a.json";
 import type { Patient, Shahokokuho } from "myclinic-model";
-import { closePatientDialog, newPatient, newShahokokuho, openPatientDialog } from "./misc";
+import { dialogClose, dialogOpen, newPatient, newShahokokuho, openPatientDialog, patientDialogClose } from "./misc";
 
 describe("Edit Shahokokuho", () => {
   let patient: Patient;
@@ -21,9 +20,9 @@ describe("Edit Shahokokuho", () => {
     cy.visit("/reception/");
     openPatientDialog(patient.patientId);
     cy.get("[data-cy=current-hoken]").click();
-    closePatientDialog();
-    cy.get("[data-cy=dialog-title]").contains("社保国保情報");
+    patientDialogClose();
+    dialogOpen("社保国保情報");
     cy.get("button").contains("編集").click();
-    cy.get("[data-cy=dialog-title]").contains("社保国保情報").should("not.exist");
+    dialogClose("社保国保情報");
   })
 })
