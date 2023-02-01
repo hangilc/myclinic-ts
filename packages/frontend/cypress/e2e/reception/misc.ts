@@ -1,6 +1,7 @@
 import { toKanjiDate } from "@/lib/to-kanjidate";
-import type { Patient } from "myclinic-model";
+import { Patient, Shahokokuho } from "myclinic-model";
 import { format, f2, KanjiDate } from "kanjidate";
+import patientTmpl from "@cypress/fixtures/patient-a.json";
 
 export function fillPatientForm(patient: Patient) {
   const bd = toKanjiDate(patient.birthday);
@@ -18,7 +19,7 @@ export function fillPatientForm(patient: Patient) {
 }
 
 export function fillDateForm(date: Date | string | null) {
-  if( date === null || date === "0000-00-00" ){
+  if (date === null || date === "0000-00-00") {
     cy.get("[data-cy=nen-input]").clear();
     cy.get("[data-cy=month-input]").clear();
     cy.get("[data-cy=day-input]").clear();
@@ -32,7 +33,7 @@ export function fillDateForm(date: Date | string | null) {
 }
 
 export function assertPatientDisp(patient: Patient) {
-  if( patient.patientId === 0 ){
+  if (patient.patientId === 0) {
     cy.get("[data-cy=patient-id]").should(($e) => {
       const t = $e.text();
       expect(t).match(/^[1-9][0-9]*$/);
@@ -66,4 +67,29 @@ export function assertPatientForm(patient: Patient) {
   cy.get(`[data-cy=sex-input][value=${patient.sex}]:checked`);
   cy.get("[data-cy=address-input]").should("have.value", patient.address);
   cy.get("[data-cy=phone-input]").should("have.value", patient.phone);
+}
+
+export function newPatient() {
+  const user = patientTmpl;
+  return cy.request("POST", Cypress.env("API") + "/enter-patient", user)
+    .then((response) => Patient.cast(response.body))
+}
+
+export function newShahokokuho(patientId: number) {
+  return cy.fixture("new-shahokokuho-template.json")
+    .then((tmpl) => {
+      tmpl.patientId = patientId;
+      return cy.request("POST", Cypress.env("API") + "/enter-shahokokuho", tmpl)
+        .then((response) => Shahokokuho.cast(response.body))
+    })
+}
+
+export function openPatientDialog(patientId: number) {
+  cy.get("form [data-cy=search-text-input]").type(patientId.toString());
+  cy.get("form [data-cy=search-button]").click();
+  cy.get("[data-cy=dialog-title]").contains("患者情報");
+}
+
+export function closePatientDialog() {
+  cy.get("[data-cy=dialog-title]").contains("患者情報").should("not.exist");
 }
