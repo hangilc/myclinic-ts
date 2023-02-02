@@ -45,21 +45,6 @@
     editHoken(data, patient, destroy, hoken);
   }
 
-  // function doEdit(hoken: Hoken): void {
-  //   function open(): void {
-  //     const d: EditHokenDialog = new EditHokenDialog({
-  //       target: document.body,
-  //       props: {
-  //         data,
-  //         hoken,
-  //         destroy: () => d.$destroy(),
-  //       },
-  //     });
-  //   }
-  //   destroy();
-  //   data.push(open);
-  // }
-
   function doDelete(hoken: Hoken): void {
     confirm("この保険を削除していいですか？", async () => {
       const ok = await deleteHoken(hoken);
@@ -84,7 +69,8 @@
         {#each classified[hokenName] as hoken (hoken.key)}
           {@const hokenType = hoken.slug}
           {@const usageCount = hoken.usageCount}
-          <div class={`hoken-box ${hokenType}`}>
+          <div class={`hoken-box ${hokenType}`} data-cy="hoken-box" 
+            data-key={hoken.key}>
             {#if hokenType === "shahokokuho"}
               <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
             {:else if hokenType === "koukikourei"}

@@ -19,11 +19,12 @@
   }
 </script>
 
-{Hoken.shahokokuhoRep(shahokokuho)}
-【保険者番号】{shahokokuho.hokenshaBangou}
-【被保険者記号】{shahokokuho.hihokenshaKigou}
-【被保険者番号】{shahokokuho.hihokenshaBangou}
-【枝番】{shahokokuho.edaban}
-【本人・家族】{shahokokuho.honnninKazokuType.rep}
-【期限開始】{formatValidFrom(shahokokuho.validFrom)}
-【期限終了】{formatValidUpto(shahokokuho.validUpto)}] 【使用回数】{usageCount}回
+<sapn data-cy="rep">{Hoken.shahokokuhoRep(shahokokuho)}</sapn>
+【保険者番号】<span data-cy="hokensha-bangou">{shahokokuho.hokenshaBangou}</span>
+【被保険者記号】<span data-cy="hihokensha-kigou">{shahokokuho.hihokenshaKigou}</span>
+【被保険者番号】<span data-cy="hihokensha-bangou">{shahokokuho.hihokenshaBangou}</span>
+【枝番】<span data-cy="edaban">{shahokokuho.edaban}</span>
+【本人・家族】<span data-cy="honnin">{shahokokuho.honnninKazokuType.rep}</span>
+【期限開始】<span data-cy="valid-from">{formatValidFrom(shahokokuho.validFrom)}</span>
+【期限終了】<span data-cy="valid-upto">{formatValidUpto(shahokokuho.validUpto)}</span>
+【使用回数】<span data-cy="usage-count">{usageCount}</span>回
