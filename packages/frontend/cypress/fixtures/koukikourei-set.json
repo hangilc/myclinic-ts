@@ -1,0 +1,21 @@
+{
+  "enter": {
+    "koukikoureiId": 0,
+    "patientId": 0,
+    "hokenshaBangou": "12345678",
+    "hihokenshaBangou": "87654321",
+    "futanWari": 1,
+    "validFrom": "2022-07-01",
+    "validUpto": "0000-00-00"
+  },
+
+  "update": {
+    "koukikoureiId": 0,
+    "patientId": 0,
+    "hokenshaBangou": "11111111",
+    "hihokenshaBangou": "22222222",
+    "futanWari": 3,
+    "validFrom": "2021-07-01",
+    "validUpto": "2025-06-30"
+  }
+}

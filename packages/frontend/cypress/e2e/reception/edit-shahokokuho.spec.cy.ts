@@ -54,6 +54,9 @@ describe("Edit Shahokokuho", () => {
         const r = Shahokokuho.cast(response);
         expect(r).deep.equal(m);
       });
+    cy.on("window:confirm", (msg) => {
+      expect(msg).equal("この保険を削除していいですか？");
+    });
     cy.get("a").contains("削除").click();
     dialogClose("社保国保情報");
     dialogOpen("患者情報");

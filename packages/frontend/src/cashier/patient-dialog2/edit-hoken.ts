@@ -43,7 +43,7 @@ export function editHoken(
             d.$destroy();
             data.goback();
           },
-          title: "後期高齢保険編集",
+          title: "後期高齢編集",
           patient,
           onUpdated: (updated: Koukikourei) => {
             data.hokenCache.updateWithHokenType(updated);
@@ -64,7 +64,7 @@ export function editHoken(
             d.$destroy();
             data.goback();
           },
-          title: "後期高齢保険編集",
+          title: "後期高齢編集",
           patient,
           onUpdated: (updated: Kouhi) => {
             data.hokenCache.updateWithHokenType(updated);

@@ -14,7 +14,7 @@
     "story:build": "histoire build",
     "story:preview": "histoire preview",
     "cy:open": "cypress open",
-    "cy:run": "cypress:run"
+    "cy:run": "cypress run"
   },
   "devDependencies": {
     "@histoire/plugin-svelte": "^0.12.4",

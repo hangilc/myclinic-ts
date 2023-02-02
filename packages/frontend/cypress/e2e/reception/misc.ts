@@ -1,5 +1,5 @@
 import { toKanjiDate } from "@/lib/to-kanjidate";
-import { Patient, Shahokokuho } from "myclinic-model";
+import { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { format, f2, KanjiDate } from "kanjidate";
 import patientTmpl from "@cypress/fixtures/patient-a.json";
 
@@ -33,7 +33,7 @@ export function fillDateForm(date: Date | string | null) {
 }
 
 export function assertDateForm(date: Date | string | null) {
-  if( date === null || date === "0000-00-00" ){
+  if (date === null || date === "0000-00-00") {
     cy.get("[data-cy=nen-input]").should("have.value", "");
     cy.get("[data-cy=month-input]").should("have.value", "");
     cy.get("[data-cy=day-input]").should("have.value", "");
@@ -107,6 +107,24 @@ export function fillShahokokuhoForm(h: Shahokokuho) {
   cy.get("[data-cy=kourei-input]").check(h.koureiStore.toString());
 }
 
+export function assertKoukikoureiForm(patient: Patient, h: Koukikourei) {
+  cy.get("[data-cy=patient-id]").contains(patient.patientId.toString());
+  cy.get("[data-cy=patient-name]").contains(patient.fullName(" "));
+  cy.get("[data-cy=hokensha-bangou-input]").should("have.value", h.hokenshaBangou);
+  cy.get("[data-cy=hihokensha-bangou-input]").should("have.value", h.hihokenshaBangou);
+  cy.get("[data-cy=futan-wari-input]:checked").should("have.value", h.futanWari.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => assertDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => assertDateForm(h.validUpto));
+}
+
+export function fillKoukikoureiForm(h: Koukikourei) {
+  cy.get("[data-cy=hokensha-bangou-input]").clear().type(h.hokenshaBangou);
+  cy.get("[data-cy=hihokensha-bangou-input]").clear().type(h.hihokenshaBangou);
+  cy.get("[data-cy=futan-wari-input]").check(h.futanWari.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => fillDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(h.validUpto));
+}
+
 export function newPatient() {
   const user = patientTmpl;
   return cy.request("POST", Cypress.env("API") + "/enter-patient", user)
@@ -119,6 +137,30 @@ export function newShahokokuho(patientId: number) {
       tmpl.patientId = patientId;
       return cy.request("POST", Cypress.env("API") + "/enter-shahokokuho", tmpl)
         .then((response) => Shahokokuho.cast(response.body))
+    })
+}
+
+export function newKoukikourei(patientId: number, data?: any) {
+  if (data) {
+    data.patientId = patientId;
+    return cy.request("POST", Cypress.env("API") + "/enter-koukikourei", data)
+      .then((response) => Koukikourei.cast(response.body))
+  } else {
+    return cy.fixture("new-koukikourei-template.json")
+      .then((tmpl) => {
+        tmpl.patientId = patientId;
+        return cy.request("POST", Cypress.env("API") + "/enter-koukikourei", tmpl)
+          .then((response) => Koukikourei.cast(response.body))
+      })
+  }
+}
+
+export function newKouhi(patientId: number) {
+  return cy.fixture("new-kouhi-template.json")
+    .then((tmpl) => {
+      tmpl.patientId = patientId;
+      return cy.request("POST", Cypress.env("API") + "/enter-kouhi", tmpl)
+        .then((response) => Kouhi.cast(response.body))
     })
 }
 
