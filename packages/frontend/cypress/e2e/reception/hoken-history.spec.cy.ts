@@ -1,5 +1,6 @@
 import type { Shahokokuho, Patient, Koukikourei, Kouhi } from "myclinic-model"
-import { newPatient, newShahokokuho, newKoukikourei, newKouhi, openPatientDialog, patientDialogClose, dialogOpen, dialogClose, assertShahokokuhoForm } from "./misc"
+import { newPatient, newShahokokuho, newKoukikourei, newKouhi, openPatientDialog, patientDialogClose, dialogOpen, dialogClose, assertShahokokuhoForm, assertKoukikoureiForm } from "./misc"
+import { findAvailableKoukikourei, findAvailableShahokokuho } from "./req";
 
 describe("Hoken History", () => {
   let patient: Patient;
@@ -20,10 +21,10 @@ describe("Hoken History", () => {
     }).then(h => {
       kouhi = h;
     })
+    cy.visit("/reception/");
   })
 
-  it("should open hoken history dialog", () => {
-    cy.visit("/reception/");
+  it("should open hoken history dialog with shahokokuho", () => {
     openPatientDialog(patient.patientId);
     cy.get("[data-cy=hoken-history-link]").click();
     patientDialogClose();
@@ -36,6 +37,48 @@ describe("Hoken History", () => {
     assertShahokokuhoForm(patient, shahokokuho);
     cy.get("button").contains("キャンセル").click();
     dialogClose("社保国保編集");
+    dialogOpen("保険履歴");
+    cy.get(`[data-cy=hoken-box][data-key=shahokokuho-${shahokokuho.shahokokuhoId}]`).within(() => {
+      cy.get("a").contains("削除").click();
+    })
+    dialogOpen("確認");
+    cy.get("button").contains("はい").click();
+    dialogClose("確認");
+    findAvailableShahokokuho(patient.patientId).should("be.null");
+    cy.get(`[data-cy=hoken-box][data-key=shahokokuho-${shahokokuho.shahokokuhoId}]`).should("not.exist");
+    cy.get("button").contains("閉じる").click();
     dialogClose("保険履歴");
+    dialogOpen("患者情報");
+    cy.get("button").contains("閉じる").click();
+    dialogClose("患者情報");
   })
+
+  // it("should open hoken history dialog with koukikourei", () => {
+  //   openPatientDialog(patient.patientId);
+  //   cy.get("[data-cy=hoken-history-link]").click();
+  //   patientDialogClose();
+  //   dialogOpen("保険履歴");
+  //   cy.get(`[data-cy=hoken-box][data-key=koukikourei-${koukikourei.koukikoureiId}]`).within(() => {
+  //     cy.get("button").contains("編集").click();
+  //   })
+  //   dialogClose("保険履歴");
+  //   dialogOpen("後期高齢編集");
+  //   assertKoukikoureiForm(patient, koukikourei);
+  //   cy.get("button").contains("キャンセル").click();
+  //   dialogClose("後期高齢編集");
+  //   dialogOpen("保険履歴");
+  //   cy.get(`[data-cy=hoken-box][data-key=koukikourei-${koukikourei.koukikoureiId}]`).within(() => {
+  //     cy.get("a").contains("削除").click();
+  //   })
+  //   dialogOpen("確認");
+  //   cy.get("button").contains("はい").click();
+  //   dialogClose("確認");
+  //   findAvailableKoukikourei(patient.patientId).should("be.null");
+  //   cy.get(`[data-cy=hoken-box][data-key=koukikourei-${koukikourei.koukikoureiId}]`).should("not.exist");
+  //   cy.get("button").contains("閉じる").click();
+  //   dialogClose("保険履歴");
+  //   dialogOpen("患者情報");
+  //   cy.get("button").contains("閉じる").click();
+  //   dialogClose("患者情報");
+  // })
 })

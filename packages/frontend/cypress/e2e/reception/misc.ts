@@ -201,5 +201,5 @@ export function dialogOpen(title: string) {
 }
 
 export function dialogClose(title: string) {
-  cy.get("[data-cy=dialog-title]").contains(title).should("not.exist");
+  cy.get("[data-cy=dialog-title]").should("not.have.text", title);
 }
