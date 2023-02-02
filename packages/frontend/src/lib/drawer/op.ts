@@ -12,18 +12,6 @@ export class OpMoveTo extends OpBase {
   }
 }
 
-// export type OpMoveTo = ["move_to", number, number];
-
-// export function opMoveTo(x: number, y: number): OpMoveTo {
-//   return ["move_to", x, y];
-// }
-
-// export type OpLineTo = ["line_to", number, number];
-
-// export function opLineTo(x: number, y: number): OpLineTo {
-//   return ["line_to", x, y];
-// }
-
 export class OpLineTo extends OpBase {
   constructor(public x: number, public y: number) {
     super("line_to");
@@ -33,25 +21,6 @@ export class OpLineTo extends OpBase {
     return [this.opCode, this.x, this.y]
   }
 }
-
-// export type OpCreateFont = [
-//   "create_font",
-//   string,
-//   string,
-//   number,
-//   number,
-//   boolean
-// ];
-
-// export function opCreateFont(
-//   name: string,
-//   fontName: string,
-//   size: number,
-//   weight: number,
-//   italic: boolean
-// ): OpCreateFont {
-//   return ["create_font", name, fontName, size, weight, italic];
-// }
 
 export class OpCreateFont extends OpBase {
   constructor(
@@ -70,8 +39,6 @@ export class OpCreateFont extends OpBase {
   }
 }
 
-// export type OpSetFont = ["set_font", string];
-
 export class OpSetFont extends OpBase {
   constructor(public name: string) {
     super("set_font");
@@ -81,8 +48,6 @@ export class OpSetFont extends OpBase {
     return [this.opCode, this.name]
   }
 }
-
-// export type OpSetTextColor = ["set_text_color", number, number, number];
 
 export class OpSetTextColor extends OpBase {
   constructor(public r: number, public g: number, public b: number) {
@@ -94,8 +59,6 @@ export class OpSetTextColor extends OpBase {
   }
 }
 
-// export type OpDrawChars = ["draw_chars", string, number[], number[]];
-
 export class OpDrawChars extends OpBase {
   constructor(public chars: string, public xs: number[], public ys: number[]) {
     super("draw_chars");
@@ -105,16 +68,6 @@ export class OpDrawChars extends OpBase {
     return [this.opCode, this.chars, this.xs, this.ys]
   }
 }
-
-// export type OpCreatePen = [
-//   "create_pen",
-//   string,
-//   number,
-//   number,
-//   number,
-//   number,
-//   number[]
-// ];
 
 export class OpCreatePen extends OpBase {
   constructor(
@@ -133,8 +86,6 @@ export class OpCreatePen extends OpBase {
   }
 }
 
-// export type OpSetPen = ["set_pen", string];
-
 export class OpSetPen extends OpBase {
   constructor(public name: string) {
     super("set_pen");
@@ -144,8 +95,6 @@ export class OpSetPen extends OpBase {
     return [this.opCode, this.name]
   }
 }
-
-// export type OpCircle = ["circle", number, number, number];
 
 export class OpCircle extends OpBase {
   constructor(public x: number, public y: number, public r: number) {
