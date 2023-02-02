@@ -125,6 +125,22 @@ export function fillKoukikoureiForm(h: Koukikourei) {
   cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(h.validUpto));
 }
 
+export function assertKouhiForm(patient: Patient, h: Kouhi) {
+  cy.get("[data-cy=patient-id]").contains(patient.patientId.toString());
+  cy.get("[data-cy=patient-name]").contains(patient.fullName(" "));
+  cy.get("[data-cy=futansha-input]").should("have.value", h.futansha.toString());
+  cy.get("[data-cy=jukyuusha-input]").should("have.value", h.jukyuusha.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => assertDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => assertDateForm(h.validUpto));
+}
+
+export function fillKouhiForm(h: Kouhi) {
+  cy.get("[data-cy=futansha-input]").clear().type(h.futansha.toString());
+  cy.get("[data-cy=jukyuusha-input]").clear().type(h.jukyuusha.toString());
+  cy.get("[data-cy=valid-from-input]").within(() => fillDateForm(h.validFrom));
+  cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(h.validUpto));
+}
+
 export function newPatient() {
   const user = patientTmpl;
   return cy.request("POST", Cypress.env("API") + "/enter-patient", user)
@@ -155,13 +171,19 @@ export function newKoukikourei(patientId: number, data?: any) {
   }
 }
 
-export function newKouhi(patientId: number) {
-  return cy.fixture("new-kouhi-template.json")
+export function newKouhi(patientId: number, data?: any) {
+  if( data ){
+    data.patientId = patientId;
+    return cy.request("POST", Cypress.env("API") + "/enter-kouhi", data)
+    .then((response) => Kouhi.cast(response.body))
+  } else {
+    return cy.fixture("new-kouhi-template.json")
     .then((tmpl) => {
       tmpl.patientId = patientId;
       return cy.request("POST", Cypress.env("API") + "/enter-kouhi", tmpl)
         .then((response) => Kouhi.cast(response.body))
     })
+  }
 }
 
 export function openPatientDialog(patientId: number) {

@@ -1,0 +1,18 @@
+{
+  "enter": {
+    "kouhiId": 0,
+    "patientId": 0,
+    "futansha": 12345678,
+    "jukyuusha": 87654321,
+    "validFrom": "2022-07-01",
+    "validUpto": "0000-00-00"
+  },
+  "update": {
+    "kouhiId": 0,
+    "patientId": 0,
+    "futansha": 11111111,
+    "jukyuusha": 22222222,
+    "validFrom": "2022-06-01",
+    "validUpto": "2030-05-31"
+  }
+}

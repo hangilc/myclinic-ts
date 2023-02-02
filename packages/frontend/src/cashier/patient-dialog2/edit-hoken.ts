@@ -64,7 +64,7 @@ export function editHoken(
             d.$destroy();
             data.goback();
           },
-          title: "後期高齢編集",
+          title: "公費編集",
           patient,
           onUpdated: (updated: Kouhi) => {
             data.hokenCache.updateWithHokenType(updated);
