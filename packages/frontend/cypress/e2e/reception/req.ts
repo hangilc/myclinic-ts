@@ -12,3 +12,9 @@ export function findAvailableKoukikourei(patientId: number, atOpt?: Date) {
     .its("body")
 }
 
+export function listAvailableKouhi(patientId: number, atOpt?: Date) {
+  const at = atOpt || dateToSql(new Date());
+  return cy.request(Cypress.env("API") + `/list-available-kouhi?patient-id=${patientId}&at=${at}`)
+    .its("body")
+}
+

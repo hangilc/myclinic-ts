@@ -201,5 +201,16 @@ export function dialogOpen(title: string) {
 }
 
 export function dialogClose(title: string) {
-  cy.get("[data-cy=dialog-title]").should("not.have.text", title);
+  function findTitle($e: JQuery<HTMLBodyElement>): boolean {
+    for(let i=0;i<$e.length;i++){
+      if( $e[i].innerText === title ){
+        return true;
+      }
+    }
+    return false;
+  }
+  cy.get("body").should(($body) => {
+    const found = findTitle($body.find("[data-cy=dialog-title]"));
+    expect(found).not.to.be.true;
+  })
 }
