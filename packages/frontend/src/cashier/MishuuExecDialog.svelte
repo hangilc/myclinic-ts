@@ -49,7 +49,8 @@
       {@const charge=item[1]}
       {@const id=genid()}
       <div>
-        <input type="checkbox" id={id} bind:group={selected} value={visit.visitId}/>
+        <input type="checkbox" id={id} bind:group={selected} value={visit.visitId}
+          data-visit-id={visit.visitId}/>
         {kanjidate.format(kanjidate.f2, visit.visitedAt)}
         {charge.toLocaleString()}円
       </div>

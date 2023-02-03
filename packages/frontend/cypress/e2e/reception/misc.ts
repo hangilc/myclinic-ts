@@ -215,7 +215,7 @@ export function dialogClose(title: string) {
   })
 }
 
-export function withinDialog(title: string) {
+export function openedDialog(title: string) {
   return cy.get("[data-cy=dialog]").within((d) => {
     dialogOpen(title);
     return d;

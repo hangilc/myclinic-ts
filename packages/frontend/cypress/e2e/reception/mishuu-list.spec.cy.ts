@@ -1,6 +1,6 @@
 import { type Visit, type Patient, type Meisai, WqueueState } from "myclinic-model";
-import { dialogClose, dialogOpen, newPatient, withDialog, withinDialog } from "./misc";
-import { batchEnterShinryou, changeWqueueState, enterChargeValue, finishCashier, getMeisai, startVisit } from "./req";
+import { dialogClose, newPatient, openedDialog } from "./misc";
+import { batchEnterShinryou, changeWqueueState, enterChargeValue, finishCashier, getMeisai, listWqueue, startVisit } from "./req";
 import shinryouMap from "@cypress/fixtures/shinryou-names.json";
 
 describe("Mishuu List", () => {
@@ -25,17 +25,21 @@ describe("Mishuu List", () => {
     cy.visit("/reception/");
     cy.get("[data-cy=bars3-menu]").click();
     cy.get("a").contains("未収処理").click();
-    withinDialog("未収処理").within(() => {
+    openedDialog("未収処理（検索）").within(() => {
       cy.get("input").type(patient.patientId.toString());
       cy.get("button").contains("検索").click();
+      cy.get("[data-patient-id]").contains(patient.patientId.toString()).click();
     });
-    // dialogOpen("未収処理").within(() => {
-    //   cy.get("input").type(patient.patientId.toString());
-    //   cy.get("button").contains("検索").click();
-
-    // })
-
+    dialogClose("未収処理（検索）");
+    openedDialog("未収処理").within(() => {
+      cy.get(`input[data-visit-id=${visit.visitId}]`).check();
+      cy.get("button").contains("会計に加える").click();
+    })
     dialogClose("未収処理");
+    listWqueue().then(list => {
+      const idx = list.findIndex(wq => wq.visitId === visit.visitId);
+      expect(idx).to.satisfy((n: number) => n >= 0);
+    })
   })
 })
 

@@ -38,7 +38,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="未収処理">
+<SurfaceModal {destroy} title="未収処理（検索）">
   <div>患者検索</div>
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:value={searchText} use:setFocus data-cy="mishuu-search-input"/>
@@ -47,7 +47,7 @@
   <div class="result">
     {#each searchResult as patient (patient.patientId)}
       <SelectItem {selected} data={patient}>
-        ({pad(patient.patientId, 4, "0")}) {patient.fullName()}
+        <span data-patient-id={patient.patientId}>({pad(patient.patientId, 4, "0")}) {patient.fullName()}</span>
       </SelectItem>
     {/each}
   </div>
