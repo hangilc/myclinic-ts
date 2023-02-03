@@ -5,6 +5,7 @@
   export let dx: string | undefined = undefined;
   export let dy: string | undefined = undefined;
   export let onClick: (event: MouseEvent) => void = _ => {};
+  export let dataCy: string = "";
 
   if (dy != undefined) {
     style += `margin-top: ${dy};`;
@@ -23,6 +24,7 @@
   stroke={color}
   {style}
   on:click={onClick}
+  data-cy={dataCy}
 >
   <path
     stroke-linecap="round"

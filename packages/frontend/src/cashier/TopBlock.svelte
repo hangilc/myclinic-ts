@@ -57,7 +57,8 @@
     <RecordsPulldown slot="menu" {destroy}/>
   </Popup>
   <Popup let:trigger let:destroy>
-    <Bars3 onClick={trigger} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"/>
+    <Bars3 onClick={trigger} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"
+      dataCy="bars3-menu"/>
     <TopBlockAuxMenu slot="menu" {destroy}/>
   </Popup>
 </div>

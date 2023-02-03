@@ -41,7 +41,7 @@
 <SurfaceModal {destroy} title="未収処理">
   <div>患者検索</div>
   <form on:submit|preventDefault={doSearch}>
-    <input type="text" bind:value={searchText} use:setFocus/>
+    <input type="text" bind:value={searchText} use:setFocus data-cy="mishuu-search-input"/>
     <button type="submit">検索</button>
   </form>
   <div class="result">

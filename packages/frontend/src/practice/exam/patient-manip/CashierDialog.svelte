@@ -18,25 +18,6 @@
   let isMishuu = false;
   const mishuuId = genid();
 
-  // meisai.subscribe((m) => {
-  //   meisaiItems = mkMeisaiItems(m);
-  //   summary = mkSummary(m);
-  //   chargeValue.set(m == null ? 0 : m.charge);
-  // });
-
-  // chargeValue.subscribe((c) => {
-  //   chargeRep = mkChargeRep(c);
-  // });
-
-  
-  // export async function open() {
-  //   if ($visitId != null) {
-  //     const m: Meisai = await api.getMeisai($visitId);
-  //     meisai.set(m);
-  //     dialog.open();
-  //   }
-  // }
-
   function mkMeisaiItems(meisai: Meisai | null): string[] {
     if (meisai == null) {
       return [];

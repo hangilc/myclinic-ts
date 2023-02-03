@@ -54,6 +54,7 @@
   on:keydown={doKeyDown}
   tabindex="0"
   autofocus
+  data-cy="dialog"
 >
   <div class="title">
     <span class="title-span" data-cy="dialog-title">{title}</span>

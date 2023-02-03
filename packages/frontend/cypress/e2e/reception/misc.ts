@@ -214,3 +214,10 @@ export function dialogClose(title: string) {
     expect(found).not.to.be.true;
   })
 }
+
+export function withinDialog(title: string) {
+  return cy.get("[data-cy=dialog]").within((d) => {
+    dialogOpen(title);
+    return d;
+  })
+}
