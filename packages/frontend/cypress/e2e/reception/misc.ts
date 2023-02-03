@@ -141,8 +141,8 @@ export function fillKouhiForm(h: Kouhi) {
   cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(h.validUpto));
 }
 
-export function newPatient() {
-  const user = patientTmpl;
+export function newPatient(user?: any) {
+  user = user || patientTmpl;
   return cy.request("POST", Cypress.env("API") + "/enter-patient", user)
     .then((response) => Patient.cast(response.body))
 }
