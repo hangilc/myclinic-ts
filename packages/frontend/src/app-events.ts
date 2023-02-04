@@ -6,9 +6,18 @@ let nextEventId = 0;
 let isDraining = false;
 let eventQueue: m.AppEvent[] = [];
 let heartBeatSerialId = 0;
+let debug = true;
+
+function log(...msgs: any[]): void {
+  if( debug ){
+    console.log(...msgs);
+  }
+}
 
 export async function initAppEvents() {
+  log("initializing AppEvents");
   nextEventId = await api.getNextAppEventId();
+  log("got nextEventId", nextEventId);
   connect();
 }
 
@@ -16,11 +25,12 @@ function connect(): void {
   let ws = new WebSocket(wsUrl);
 
   ws.addEventListener("open", () => {
-    console.log("ws open");
+    log("ws open");
   });
 
   ws.addEventListener("message", (event) => {
     const data = event.data;
+    log("got ws message", data);
     if (typeof data === "string") {
       const json = JSON.parse(data);
       if (json.format !== "heart-beat") {
@@ -44,6 +54,9 @@ function connect(): void {
 }
 
 async function drainEvents() {
+  if( isDraining ){
+    return;
+  }
   isDraining = true;
   console.log("start drain");
   let events = await api.listAppEventSince(nextEventId);
@@ -532,6 +545,11 @@ function dispatch(e: any): void {
     hotlineBeepEntered.set(hotlineBeep);
   } else if (e.format === "event-id-notice") {
     const eventIdNotice = e.data;
+    const eventId = eventIdNotice.currentEventId
+    log("event-id-notice currentEventId", eventId);
+    if( eventId >= nextEventId ){
+      drainEvents();
+    }
     eventIdNoticeEntered.set(eventIdNotice);
   } else if (e.format === "heart-beat") {
     const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };

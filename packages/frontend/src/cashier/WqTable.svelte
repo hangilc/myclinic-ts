@@ -61,7 +61,7 @@
     {@const wq = item.wq}
     {@const visit = item.visit}
     {@const patient = item.patient}
-    <div class="wq-row">
+    <div class="wq-row" data-cy="wq-row" data-patient-id={patient.patientId} data-visit-id={visit.visitId}>
       <div>{wq.waitStateType.label}</div>
       <div>{patient.patientId}</div>
       <div>{patient.fullName(" ")}</div>

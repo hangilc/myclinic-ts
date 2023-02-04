@@ -68,6 +68,7 @@
       stroke="currentColor"
       width="16px"
       height="16px"
+      data-cy="cross-icon"
     >
       <path
         stroke-linecap="round"
