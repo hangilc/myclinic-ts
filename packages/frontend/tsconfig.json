@@ -31,8 +31,7 @@
     "src/**/*.ts",
     "src/**/*.js",
     "src/**/*.svelte",
-    "cypress/**/*.ts",
-    "comptests/**/*.cy.ts"
+    "cypress/**/*.ts"
   ],
   "references": [
     {

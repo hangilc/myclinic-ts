@@ -13,13 +13,15 @@
   import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
   import api from "@/lib/api";
+  import { errorMessagesOf, type VResult } from "@/lib/validation";
 
-  export let env: DiseaseEnv;
+  export let diseases: DiseaseData[];
   export let doMode: (mode: Mode) => void;
   let selected: DiseaseData[] = [];
   let endDate: Date = new Date();
-  let endDateErrors: Invalid[] = [];
-  let dateForm: DateFormWithCalendar;
+  let validateEndDate: () => VResult<Date | null>;
+  let setEndDate: (d: Date | null) => void;
+  let endDateErrors: string[] = [];
   let endReasons: DiseaseEndReasonType[] = [
     DiseaseEndReason.Cured,
     DiseaseEndReason.Stopped,
@@ -27,33 +29,50 @@
   ];
   let endReason: DiseaseEndReasonType = DiseaseEndReason.Cured;
 
-  $: updateEndDate(selected);
-
-  function updateEndDate(list: DiseaseData[]): void {
+  function endDateForInput(startDates: string[]): Date {
     let e: string | null = null;
-    list.forEach((d) => {
-      const s: string = d.disease.startDate;
+    startDates.forEach((s) => {
       if (e == null || s > e) {
         e = s;
       }
     });
     if (e == null) {
-      endDate = new Date();
+      return new Date();
     } else {
-      endDate = new Date(e);
+      return new Date(e);
     }
-    if (dateForm) {
-      dateForm.initValues(endDate);
+  }
+
+  function getEndDate(): Date | undefined {
+    const vs = validateEndDate();
+    if (vs.isValid) {
+      const d = vs.value;
+      if (d === null) {
+        endDateErrors = ["null end date"];
+        return undefined;
+      } else {
+        return d;
+      }
+    } else {
+      endDateErrors = errorMessagesOf(vs.errors);
+      return undefined;
+    }
+  }
+
+  function modifyEndDate(f: (d: Date) => Date): void {
+    const d = getEndDate();
+    if (d) {
+      setEndDate(f(d));
     }
   }
 
   function doWeekClick(event: MouseEvent): void {
     const n = event.shiftKey ? -7 : 7;
-    endDate = addDays(endDate, n);
+    modifyEndDate((d) => addDays(d, n));
   }
 
   function doTodayClick(): void {
-    endDate = new Date();
+    setEndDate(new Date());
   }
 
   function doEndOfMonthClick(): void {
@@ -63,13 +82,17 @@
     );
     const d = new Date(endDate);
     d.setDate(lastDay);
-    endDate = d;
+    setEndDate(d);
   }
 
   function doEndOfLastMonthClick(): void {
     const d = new Date();
     d.setDate(0);
-    endDate = d;
+    setEndDate(d);
+  }
+
+  function onSelectChange(): void {
+    console.log("select change", selected);
   }
 
   async function doEnter() {
@@ -95,21 +118,28 @@
 </script>
 
 <div>
-  {#each env.currentList as d}
+  {#each diseases as d}
     {@const id = genid()}
     <div>
-      <input type="checkbox" {id} bind:group={selected} value={d} />
+      <input type="checkbox" {id} bind:group={selected} value={d} on:change={onSelectChange}/>
       <label for={id}
         >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
       >
     </div>
   {/each}
-  <div class="date-wrapper">
+  {#if endDateErrors.length > 0}
+    <div class="error">
+      {#each endDateErrors as e}
+        {e}
+      {/each}
+    </div>
+  {/if}
+  <div class="date-wrapper" data-cy="end-date-input">
     <DateFormWithCalendar
-      bind:date={endDate}
-      bind:errors={endDateErrors}
+      init={new Date()}
       iconWidth="18px"
-      bind:this={dateForm}
+      bind:validate={validateEndDate}
+      bind:setValue={setEndDate}
     >
       <span slot="spacer" style:width="6px" />
     </DateFormWithCalendar>
@@ -133,6 +163,11 @@
 </div>
 
 <style>
+  .error {
+    margin: 10px 0;
+    color: red;
+  }
+
   .date-wrapper {
     font-size: 13px;
     margin-top: 10px;
