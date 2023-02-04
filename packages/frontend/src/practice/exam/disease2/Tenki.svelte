@@ -92,6 +92,7 @@
   }
 
   function onSelectChange(): void {
+    setEndDate(endDateForInput(selected.map(d => d.startDate)))
     console.log("select change", selected);
   }
 
