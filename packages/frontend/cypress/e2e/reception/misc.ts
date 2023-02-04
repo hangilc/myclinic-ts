@@ -172,17 +172,17 @@ export function newKoukikourei(patientId: number, data?: any) {
 }
 
 export function newKouhi(patientId: number, data?: any) {
-  if( data ){
+  if (data) {
     data.patientId = patientId;
     return cy.request("POST", Cypress.env("API") + "/enter-kouhi", data)
-    .then((response) => Kouhi.cast(response.body))
+      .then((response) => Kouhi.cast(response.body))
   } else {
     return cy.fixture("new-kouhi-template.json")
-    .then((tmpl) => {
-      tmpl.patientId = patientId;
-      return cy.request("POST", Cypress.env("API") + "/enter-kouhi", tmpl)
-        .then((response) => Kouhi.cast(response.body))
-    })
+      .then((tmpl) => {
+        tmpl.patientId = patientId;
+        return cy.request("POST", Cypress.env("API") + "/enter-kouhi", tmpl)
+          .then((response) => Kouhi.cast(response.body))
+      })
   }
 }
 
@@ -200,19 +200,28 @@ export function dialogOpen(title: string) {
   return cy.get("[data-cy=dialog-title]").contains(title);
 }
 
+export function doesNotExist(selector: string, pred: (e: JQuery<HTMLElement>) => boolean = _ => true) {
+  cy.get("body").should(($body) => {
+    let found = false;
+    $body.find(selector).each((i, e) => {
+      if (pred(Cypress.$(e))) {
+        found = true;
+      }
+    })
+    expect(found).to.be.false
+  })
+}
+
 export function dialogClose(title: string) {
-  function findTitle($e: JQuery<HTMLBodyElement>): boolean {
-    for(let i=0;i<$e.length;i++){
-      if( $e[i].innerText === title ){
+  function findTitle($e: JQuery<HTMLElement>): boolean {
+    for (let i = 0; i < $e.length; i++) {
+      if ($e[i].innerText === title) {
         return true;
       }
     }
     return false;
   }
-  cy.get("body").should(($body) => {
-    const found = findTitle($body.find("[data-cy=dialog-title]"));
-    expect(found).not.to.be.true;
-  })
+  doesNotExist("[data-cy=dialog]", findTitle);
 }
 
 export function openedDialog(title: string) {

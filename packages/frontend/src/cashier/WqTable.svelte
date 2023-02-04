@@ -87,6 +87,7 @@
               stroke="currentColor"
               stroke-width="2"
               on:click={triggerClick}
+              data-cy="aux-menu-icon"
             >
               <path
                 stroke-linecap="round"

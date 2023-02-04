@@ -29,7 +29,7 @@ import api from "@/lib/api";
   }
 </script>
 
-<div>
+<div data-cy="wq-row-aux-menu">
   <a href="javascript:void(0)" on:click={doPatient}>患者</a>
   <a href="javascript:void(0)" on:click={doDeleteVisit}>削除</a>
 </div>
