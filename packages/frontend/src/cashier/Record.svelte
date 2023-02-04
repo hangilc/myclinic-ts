@@ -6,8 +6,10 @@
   import { formatPaymentStatus, resolvePaymentStatus } from "@/lib/payment-status";
   import * as kanjidate from "kanjidate";
   import type { VisitEx } from "myclinic-model";
+  import { onMount } from "svelte";
 
   export let visit: VisitEx;
+  export let onMountCallback: () => void = () => {};
 
   function renderPaymentStatus(visit: VisitEx): string {
     const chargeOpt = visit.chargeOption;
@@ -20,6 +22,8 @@
 
     }
   }
+
+  onMount(onMountCallback);
 </script>
 
 <div class="top">

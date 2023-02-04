@@ -17,12 +17,13 @@ describe("Wqueue", () => {
       .then(() => {
         cy.get(`[data-cy=wq-row][data-visit-id=${visit.visitId}]`).within(() => {
           cy.get("a").contains("診療録").click();
-          openedDialog("診療録").within(() => {
-            cy.get("[data-cy=cross-icon]").click();
-            dialogClose("診療録");
-          });
         })
+        cy.scrollTo(0, 0);
+        openedDialog("診療録").within(() => {
+          cy.get("[data-cy=cross-icon]").should("be.visible");
+          cy.get("[data-cy=cross-icon]").click()
+        });
+        dialogClose("診療録");
       })
-
   })
 })

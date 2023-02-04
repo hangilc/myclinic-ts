@@ -6,7 +6,7 @@ let nextEventId = 0;
 let isDraining = false;
 let eventQueue: m.AppEvent[] = [];
 let heartBeatSerialId = 0;
-let debug = true;
+let debug = false;
 
 function log(...msgs: any[]): void {
   if( debug ){

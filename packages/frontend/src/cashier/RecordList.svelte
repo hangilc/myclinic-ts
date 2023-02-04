@@ -11,7 +11,7 @@
   export let destroy: () => void;
   export let totalVisits: number;
   export let patient: Patient;
-  export let records: VisitEx[] = [];
+  let records: VisitEx[] = [];
   const itemsPerPage = 10;
   let page: Writable<number> = writable(0);
   let totalPages: number = calcPages(totalVisits, itemsPerPage);
@@ -23,13 +23,19 @@
       itemsPerPage * newPage,
       itemsPerPage
     );
-    await tick();
-    wrapper.scrollTop = 0;
   });
 
   async function doGotoPage(nextPage: number) {
     page.set(nextPage);
   }
+
+  function onRecordMount(index: number, total: number): void {
+    console.log("mount", index, total, wrapper);
+    if( index == total -1 ){
+      wrapper.scrollTo(0, 0);
+    }
+  }
+
 </script>
 
 <SurfaceModal {destroy} title="診療録" width="500px">
@@ -38,8 +44,8 @@
     ({patient.patientId}) {patient.fullName()}
   </div>
   <div class="records" bind:this={wrapper}>
-    {#each records as rec (rec.visitId)}
-      <Record visit={rec} />
+    {#each records as rec, index (rec.visitId)}
+      <Record visit={rec} onMountCallback={() => onRecordMount(index, records.length)}/>
     {/each}
   </div>
 </SurfaceModal>

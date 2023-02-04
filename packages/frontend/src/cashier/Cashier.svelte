@@ -16,14 +16,11 @@
 
   unsubs.push(
     wqueueEntered.subscribe(async (wq) => {
-      console.log("wqueue-entered event", wq)
       if (wq == null) {
         return;
       }
       let data = await getWqueueData(wq);
-      console.log("wqueue-entered", data);
       wqItems = [...wqItems, data];
-      console.log("wqItems updated", wqItems);
     })
   );
 
@@ -63,7 +60,6 @@
   }
 
   async function refresh() {
-    console.log("wq-table refresh");
     wqItems = (await api.listWqueueFull()).map(r => new WqueueData(...r));
   }
 </script>

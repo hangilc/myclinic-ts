@@ -58,7 +58,7 @@
 >
   <div class="title">
     <span class="title-span" data-cy="dialog-title">{title}</span>
-    <svg
+      <svg
       on:click={destroy}
       class="closeIcon"
       xmlns="http://www.w3.org/2000/svg"

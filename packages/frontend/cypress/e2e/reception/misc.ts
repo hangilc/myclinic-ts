@@ -197,7 +197,7 @@ export function patientDialogClose() {
 }
 
 export function dialogOpen(title: string) {
-  cy.get("[data-cy=dialog-title]").contains(title);
+  return cy.get("[data-cy=dialog-title]").contains(title);
 }
 
 export function dialogClose(title: string) {
