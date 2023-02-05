@@ -8,15 +8,18 @@
   import RightBox from "../RightBox.svelte";
   import { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";
+  import api from "@/lib/api";
+  import { dateToSql, parseSqlDate } from "@/lib/util";
 
   const unsubs: (() => void)[] = [];
-  let comp:
-    | undefined
-    | typeof Current
-    | typeof Add
-    | typeof Tenki
-    | typeof Edit = undefined;
+  let comp: undefined | typeof Current | typeof Add | typeof Edit = undefined;
   let env: DiseaseEnv | undefined = undefined;
+  let workarea: HTMLElement;
+  let clear: () => void = () => {};
+
+  function setWorkarea(e: HTMLElement): void {
+    workarea = e;
+  }
 
   unsubs.push(
     currentPatient.subscribe(async (p) => {
@@ -35,6 +38,7 @@
   });
 
   async function doMode(mode: Mode) {
+    clear();
     let c: typeof comp;
     switch (mode) {
       case "current": {
@@ -46,7 +50,29 @@
         break;
       }
       case "tenki": {
-        c = Tenki;
+        if( env == null ){
+          return;
+        }
+        const envValue = env;
+        const b = new Tenki({
+          target: workarea,
+          props: {
+            diseases: envValue.currentList,
+            onEnter: async (result: [number, string, string][]) => {
+              const promises = result.map((r) => {
+                const [diseaseId, date, reason] = r;
+                return api.endDisease(diseaseId, parseSqlDate(date), reason);
+              });
+              await Promise.all(promises);
+              envValue.removeFromCurrentList(
+                result.map((d) => d[0])
+              );
+              doMode("tenki");
+            },
+          },
+        });
+        clear = () => b.$destroy();
+        c = undefined;
         break;
       }
       case "edit": {
@@ -58,10 +84,10 @@
         break;
       }
     }
-    if( c === Edit && env !== undefined ){
+    if (c === Edit && env !== undefined) {
       await env.fetchAllList();
     }
-    if( c === comp ){
+    if (c === comp) {
       comp = undefined;
       await tick();
       comp = c;
@@ -73,7 +99,7 @@
 
 {#if env != undefined}
   <RightBox title="病名">
-    <div class="workarea">
+    <div class="workarea" use:setWorkarea>
       <svelte:component this={comp} {env} {doMode} />
     </div>
     <div class="commands">

@@ -1,7 +1,6 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import type { Invalid } from "@/lib/validator";
   import { addDays } from "kanjidate";
   import * as kanjidate from "kanjidate";
   import {
@@ -9,16 +8,13 @@
     type DiseaseData,
     type DiseaseEndReasonType,
   } from "myclinic-model";
-  import type { DiseaseEnv } from "./disease-env";
-  import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
-  import api from "@/lib/api";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
+  import { dateToSql } from "@/lib/util";
 
   export let diseases: DiseaseData[];
-  export let doMode: (mode: Mode) => void;
+  export let onEnter: (result: [number, string, string][]) => void;
   let selected: DiseaseData[] = [];
-  let endDate: Date = new Date();
   let validateEndDate: () => VResult<Date | null>;
   let setEndDate: (d: Date | null) => void;
   let endDateErrors: string[] = [];
@@ -59,11 +55,15 @@
     }
   }
 
-  function modifyEndDate(f: (d: Date) => Date): void {
+  function withEndDate(f: (d: Date) => void): void {
     const d = getEndDate();
     if (d) {
-      setEndDate(f(d));
+      f(d);
     }
+  }
+
+  function modifyEndDate(f: (d: Date) => Date): void {
+    withEndDate((d) => setEndDate(f(d)));
   }
 
   function doWeekClick(event: MouseEvent): void {
@@ -76,13 +76,15 @@
   }
 
   function doEndOfMonthClick(): void {
-    const lastDay = kanjidate.lastDayOfMonth(
-      endDate.getFullYear(),
-      endDate.getMonth() + 1
-    );
-    const d = new Date(endDate);
-    d.setDate(lastDay);
-    setEndDate(d);
+    withEndDate((endDate) => {
+      const lastDay = kanjidate.lastDayOfMonth(
+        endDate.getFullYear(),
+        endDate.getMonth() + 1
+      );
+      const d = new Date(endDate);
+      d.setDate(lastDay);
+      setEndDate(d);
+    });
   }
 
   function doEndOfLastMonthClick(): void {
@@ -92,8 +94,7 @@
   }
 
   function onSelectChange(): void {
-    setEndDate(endDateForInput(selected.map(d => d.startDate)))
-    console.log("select change", selected);
+    setEndDate(endDateForInput(selected.map((d) => d.disease.startDate)));
   }
 
   async function doEnter() {
@@ -102,19 +103,21 @@
       return;
     }
     const reasonCode = endReason.code;
-    for (let d of selected) {
-      if (endDate < d.startDate) {
-        alert("終了日が開始日の前のものがあります。");
-        return;
+    withEndDate((endDate) => {
+      for (let d of selected) {
+        if (dateToSql(endDate) < dateToSql(d.startDate)) {
+          alert("終了日が開始日の前のものがあります。");
+          return;
+        }
       }
-    }
-    const promises = selected.map((data) => {
-      const reason = data.hasSusp ? DiseaseEndReason.Stopped.code : reasonCode;
-      return api.endDisease(data.disease.diseaseId, endDate, reason);
+      const result: [number, string, string][] = selected.map((data) => {
+        const reason = data.hasSusp
+          ? DiseaseEndReason.Stopped.code
+          : reasonCode;
+        return [data.disease.diseaseId, dateToSql(endDate), reason];
+      });
+      onEnter(result);
     });
-    await Promise.all(promises);
-    env.removeFromCurrentList(selected.map((d) => d.disease.diseaseId));
-    doMode("tenki");
   }
 </script>
 
@@ -122,8 +125,14 @@
   {#each diseases as d}
     {@const id = genid()}
     <div>
-      <input type="checkbox" {id} bind:group={selected} value={d} on:change={onSelectChange}
-        data-disease-id={d.disease.diseaseId}/>
+      <input
+        type="checkbox"
+        {id}
+        bind:group={selected}
+        value={d}
+        on:change={onSelectChange}
+        data-disease-id={d.disease.diseaseId}
+      />
       <label for={id}
         >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
       >
@@ -160,7 +169,7 @@
     {/each}
   </div>
   <div class="commands">
-    <button on:click={doEnter}>入力</button>
+    <button on:click={doEnter} disabled={selected.length === 0}>入力</button>
   </div>
 </div>
 

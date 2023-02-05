@@ -2,6 +2,8 @@ import { toKanjiDate } from "@/lib/to-kanjidate";
 import { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { format, f2, KanjiDate } from "kanjidate";
 import patientTmpl from "@cypress/fixtures/patient-a.json";
+import { fillDateForm } from "@cypress/lib/form";
+
 
 export function fillPatientForm(patient: Patient) {
   const bd = toKanjiDate(patient.birthday);
@@ -16,20 +18,6 @@ export function fillPatientForm(patient: Patient) {
   cy.get(`[data-cy=sex-input][value=${patient.sex}]`).click();
   cy.get("[data-cy=address-input]").clear().type(patient.address);
   cy.get("[data-cy=phone-input]").clear().type(patient.phone);
-}
-
-export function fillDateForm(date: Date | string | null) {
-  if (date === null || date === "0000-00-00") {
-    cy.get("[data-cy=nen-input]").clear();
-    cy.get("[data-cy=month-input]").clear();
-    cy.get("[data-cy=day-input]").clear();
-  } else {
-    const d = toKanjiDate(date);
-    cy.get("[data-cy=gengou-select]").select(d.gengou);
-    cy.get("[data-cy=nen-input]").clear().type(d.nen.toString());
-    cy.get("[data-cy=month-input]").clear().type(d.month.toString());
-    cy.get("[data-cy=day-input]").clear().type(d.day.toString());
-  }
 }
 
 export function assertDateForm(date: Date | string | null) {
