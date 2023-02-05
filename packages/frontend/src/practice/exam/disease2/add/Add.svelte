@@ -3,7 +3,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
   import Popup from "@/lib/Popup.svelte";
-  import type { VResult } from "@/lib/validation";
+  import { errorMessagesOf, type VResult } from "@/lib/validation";
   import type { Invalid } from "@/lib/validator";
   import {
     ByoumeiMaster,
@@ -13,46 +13,55 @@
     diseaseFullName,
     ShuushokugoMaster,
   } from "myclinic-model";
-  import type { DiseaseEnv } from "../disease-env";
   import { foldSearchResult } from "../fold-search-result";
-  import type { Mode } from "../mode";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
   import DatesPopup from "./DatesPopup.svelte";
   import DatesPulldown from "./DatesPopup.svelte";
 
   export let patientId: number;
   export let examples: DiseaseExample[] = [];
-  let validateStartDate: () => VResult<Date | null>
-  // export let env: DiseaseEnv;
-  // export let doMode: (mode: Mode) => void;
+  export let onEnter: (data: DiseaseEnterData) => void;
+  let validateStartDate: () => VResult<Date | null>;
+  let startDate: Date | undefined = new Date();
+  let setStartDate: (d: Date | null) => void;
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
-  let startDate: Date = new Date();
-  let startDateErrors: Invalid[] = [];
+  let startDateErrors: string[] = [];
   let chooseStartDateIcon: SVGSVGElement;
 
+  function onStartDateChange(evt: CustomEvent<VResult<Date | null>>): void {
+    const r = evt.detail;
+    if( r.isValid ){
+      if( r.value != null ){
+        startDate = r.value;
+      } else {
+        startDate = undefined;
+        startDateErrors = ["null start date"];
+      }
+    } else {
+      startDate = undefined;
+      startDateErrors = errorMessagesOf(r.errors);
+    }
+  }
+
   function doChooseStartDate(date: Date): void {
+    setStartDate(date);
     startDate = date;
   }
 
   async function doEnter() {
-    if (byoumeiMaster != null) {
-      if (startDateErrors.length > 0) {
-        alert(
-          "エラー：\n" + startDateErrors.map((e) => e.toString()).join("\n")
-        );
-        return;
-      }
+    if (byoumeiMaster != null && startDate) {
       const data: DiseaseEnterData = {
-        patientId: env.patient.patientId,
+        patientId: patientId,
         byoumeicode: byoumeiMaster.shoubyoumeicode,
         startDate: dateParam(startDate),
         adjCodes: adjList.map((m) => m.shuushokugocode),
       };
-      const diseaseId: number = await api.enterDiseaseEx(data);
-      const d: DiseaseData = await api.getDiseaseEx(diseaseId);
-      env.addDisease(d);
-      doMode("add");
+      onEnter(data);
+      // const diseaseId: number = await api.enterDiseaseEx(data);
+      // const d: DiseaseData = await api.getDiseaseEx(diseaseId);
+      // env.addDisease(d);
+      // doMode("add");
     }
   }
 
@@ -67,6 +76,9 @@
   function onSearchSelect(
     r: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
   ): void {
+    if (!startDate) {
+      return;
+    }
     foldSearchResult(
       r,
       startDate,
@@ -92,14 +104,25 @@
 
 <div>
   <div>
-    名称：{diseaseFullName(byoumeiMaster, adjList)}
+    名称：<span data-cy="disease-name"
+      >{diseaseFullName(byoumeiMaster, adjList)}</span
+    >
   </div>
+  {#if startDateErrors.length > 0}
+    <div class="error">
+      {#each startDateErrors as e}
+        <div>{e}</div>
+      {/each}
+    </div>
+  {/if}
   <div class="start-date-wrapper">
     <DateFormWithCalendar
-      init={new Date()}
+      init={startDate ?? new Date()}
       bind:validate={validateStartDate}
+      bind:setValue={setStartDate}
+      on:value-change={onStartDateChange}
     >
-    <DatesPopup slot="icons" onSelect={doChooseStartDate} patientId={patientId}/>
+      <DatesPopup slot="icons" onSelect={doChooseStartDate} {patientId} />
     </DateFormWithCalendar>
   </div>
   <div class="command-box">
@@ -107,14 +130,15 @@
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm
-    examples={examples}
-    {startDate}
-    onSelect={onSearchSelect}
-  />
+  <DiseaseSearchForm {examples} {startDate} onSelect={onSearchSelect} />
 </div>
 
 <style>
+  .error {
+    margin: 10px 0;
+    color: red;
+  }
+
   .start-date-wrapper {
     font-size: 13px;
     margin: 4px 0;

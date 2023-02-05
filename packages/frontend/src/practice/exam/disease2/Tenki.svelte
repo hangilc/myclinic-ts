@@ -40,6 +40,7 @@
   }
 
   function getEndDate(): Date | undefined {
+    endDateErrors = [];
     const vs = validateEndDate();
     if (vs.isValid) {
       const d = vs.value;

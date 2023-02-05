@@ -11,7 +11,7 @@
   import type { SearchResult } from "./search-result";
 
   export let examples: DiseaseExample[];
-  export let startDate: Date;
+  export let startDate: Date | undefined;
   export let onSelect: (
     result: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
   ) => void;
@@ -34,7 +34,7 @@
 
   async function doSearch() {
     const t = searchText.trim();
-    if (t !== "" && startDate != null) {
+    if (t !== "" && startDate) {
       if (searchKind === "byoumei") {
         searchResult = (await api.searchByoumeiMaster(t, startDate)).map(
           (m) => ({
@@ -66,7 +66,7 @@
 <div class="command-box">
   <form class="search-form" on:submit|preventDefault={doSearch}>
     <input type="text" class="search-text-input" bind:value={searchText} data-cy="disease-search-input"/>
-    <button type="submit">検索</button>
+    <button type="submit" disabled={startDate == undefined}>検索</button>
   </form>
   <a href="javascript:void(0)" on:click={doExample}>例</a>
 </div>
