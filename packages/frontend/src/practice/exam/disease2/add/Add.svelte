@@ -20,7 +20,7 @@
 
   export let patientId: number;
   export let examples: DiseaseExample[] = [];
-  export let onEnter: (data: DiseaseEnterData) => void;
+  export let onEnter: (data: DiseaseEnterData) => void = _ => {};
   let validateStartDate: () => VResult<Date | null>;
   let startDate: Date | undefined = new Date();
   let setStartDate: (d: Date | null) => void;
@@ -29,8 +29,9 @@
   let startDateErrors: string[] = [];
   let chooseStartDateIcon: SVGSVGElement;
 
-  function onStartDateChange(evt: CustomEvent<VResult<Date | null>>): void {
-    const r = evt.detail;
+  function onStartDateChange(): void {
+    startDateErrors = [];
+    const r = validateStartDate();
     if( r.isValid ){
       if( r.value != null ){
         startDate = r.value;
