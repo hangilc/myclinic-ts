@@ -65,7 +65,7 @@
 
 <div class="command-box">
   <form class="search-form" on:submit|preventDefault={doSearch}>
-    <input type="text" class="search-text-input" bind:value={searchText} />
+    <input type="text" class="search-text-input" bind:value={searchText} data-cy="disease-search-input"/>
     <button type="submit">検索</button>
   </form>
   <a href="javascript:void(0)" on:click={doExample}>例</a>
@@ -82,10 +82,10 @@
   <label for={shuushokugoId}>修飾語</label>
 </div>
 <div>
-  <div class="search-result select">
+  <div class="search-result select" data-cy="search-result">
     {#each searchResult as r}
       <SelectItem selected={searchSelect} data={r.data}>
-        <div>{r.label}</div>
+        <div data-cy="search-result-item">{r.label}</div>
       </SelectItem>
     {/each}
   </div>

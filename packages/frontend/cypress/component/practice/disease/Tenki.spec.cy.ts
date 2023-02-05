@@ -86,7 +86,7 @@ describe("Tenki (disease)", () => {
     cy.get("button").contains("入力").should("not.be.disabled");
   });
 
-  it.only("should enter", () => {
+  it("should enter", () => {
     const endDate = addDays(parseSqlDate(disease1.disease.startDate), 30);
     cy.mount(Tenki, {
       props: {

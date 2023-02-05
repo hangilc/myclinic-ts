@@ -3,6 +3,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
   import Popup from "@/lib/Popup.svelte";
+  import type { VResult } from "@/lib/validation";
   import type { Invalid } from "@/lib/validator";
   import {
     ByoumeiMaster,
@@ -19,8 +20,11 @@
   import DatesPopup from "./DatesPopup.svelte";
   import DatesPulldown from "./DatesPopup.svelte";
 
-  export let env: DiseaseEnv;
-  export let doMode: (mode: Mode) => void;
+  export let patientId: number;
+  export let examples: DiseaseExample[] = [];
+  let validateStartDate: () => VResult<Date | null>
+  // export let env: DiseaseEnv;
+  // export let doMode: (mode: Mode) => void;
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
   let startDate: Date = new Date();
@@ -92,20 +96,19 @@
   </div>
   <div class="start-date-wrapper">
     <DateFormWithCalendar
-      bind:date={startDate}
-      bind:errors={startDateErrors}
-      isNullable={false}
+      init={new Date()}
+      bind:validate={validateStartDate}
     >
-    <DatesPopup slot="icons" onSelect={doChooseStartDate} patientId={env.patient.patientId}/>
+    <DatesPopup slot="icons" onSelect={doChooseStartDate} patientId={patientId}/>
     </DateFormWithCalendar>
   </div>
   <div class="command-box">
-    <button on:click={doEnter}>入力</button>
+    <button on:click={doEnter} disabled={byoumeiMaster === null}>入力</button>
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
   <DiseaseSearchForm
-    examples={env.examples}
+    examples={examples}
     {startDate}
     onSelect={onSearchSelect}
   />
