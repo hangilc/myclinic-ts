@@ -122,7 +122,8 @@
   {#each diseases as d}
     {@const id = genid()}
     <div>
-      <input type="checkbox" {id} bind:group={selected} value={d} on:change={onSelectChange}/>
+      <input type="checkbox" {id} bind:group={selected} value={d} on:change={onSelectChange}
+        data-disease-id={d.disease.diseaseId}/>
       <label for={id}
         >{d.fullName} ({startDateRep(d.disease.startDateAsDate)})</label
       >

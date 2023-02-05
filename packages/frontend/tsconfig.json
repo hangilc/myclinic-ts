@@ -16,14 +16,6 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@cypress/*": [
-        "cypress/*"
-      ]
-    },
     "strict": true
   },
   "include": [
