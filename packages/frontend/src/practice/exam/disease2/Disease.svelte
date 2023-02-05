@@ -9,10 +9,11 @@
   import { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";
   import api from "@/lib/api";
-  import { dateToSql, parseSqlDate } from "@/lib/util";
+  import { parseSqlDate } from "@/lib/util";
+  import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
 
   const unsubs: (() => void)[] = [];
-  let comp: undefined | typeof Current | typeof Add | typeof Edit = undefined;
+  let comp: undefined | typeof Current | typeof Edit = undefined;
   let env: DiseaseEnv | undefined = undefined;
   let workarea: HTMLElement;
   let clear: () => void = () => {};
@@ -46,11 +47,29 @@
         break;
       }
       case "add": {
-        c = Add;
+        if (env == null) {
+          return;
+        }
+        const envValue = env;
+        const b = new Add({
+          target: workarea,
+          props: {
+            patientId: envValue.patient.patientId,
+            examples: envValue.examples,
+            onEnter: async (data: DiseaseEnterData) => {
+              const diseaseId: number = await api.enterDiseaseEx(data);
+              const d: DiseaseData = await api.getDiseaseEx(diseaseId);
+              envValue.addDisease(d);
+              doMode("add");
+            },
+          },
+        });
+        clear = () => b.$destroy();
+        c = undefined;
         break;
       }
       case "tenki": {
-        if( env == null ){
+        if (env == null) {
           return;
         }
         const envValue = env;
@@ -64,9 +83,7 @@
                 return api.endDisease(diseaseId, parseSqlDate(date), reason);
               });
               await Promise.all(promises);
-              envValue.removeFromCurrentList(
-                result.map((d) => d[0])
-              );
+              envValue.removeFromCurrentList(result.map((d) => d[0]));
               doMode("tenki");
             },
           },
