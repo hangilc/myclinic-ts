@@ -13,7 +13,7 @@
   import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
 
   const unsubs: (() => void)[] = [];
-  let comp: undefined | typeof Current | typeof Edit = undefined;
+  let comp: undefined | typeof Current = undefined;
   let env: DiseaseEnv | undefined = undefined;
   let workarea: HTMLElement;
   let clear: () => void = () => {};
@@ -93,16 +93,29 @@
         break;
       }
       case "edit": {
-        c = Edit;
+        if (env == null) {
+          return;
+        }
+        const envValue = env;
+        await envValue.fetchAllList();
+        const b = new Edit({
+          target: workarea,
+          props: {
+            diseases: env.allList ?? [],
+            onDelete: (diseaseId: number) => {
+              envValue.remove(diseaseId);
+              doMode("current")
+            }
+          }
+        })
+        clear = () => b.$destroy();
+        c = undefined;
         break;
       }
       default: {
         c = undefined;
         break;
       }
-    }
-    if (c === Edit && env !== undefined) {
-      await env.fetchAllList();
     }
     if (c === comp) {
       comp = undefined;

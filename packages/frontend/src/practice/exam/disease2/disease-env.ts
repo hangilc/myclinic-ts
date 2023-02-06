@@ -55,6 +55,17 @@ export class DiseaseEnv {
     }
   }
 
+  remove(diseaseId: number): void {
+    this.removeFromAllList(diseaseId);
+    this.removeFromCurrentList([diseaseId]);
+  }
+
+  removeFromAllList(diseaseId: number): void {
+    if( this.allList !== undefined ){
+      this.allList = this.allList.filter(d => d.disease.diseaseId !== diseaseId);
+    }
+  }
+
   removeFromCurrentList(diseaseIds: number[]): void {
     this.currentList = this.currentList.filter(d => !diseaseIds.includes(d.disease.diseaseId));
   }
