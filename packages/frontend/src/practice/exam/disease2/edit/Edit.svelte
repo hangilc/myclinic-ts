@@ -2,9 +2,7 @@
   import SelectItem from "@/lib/SelectItem.svelte";
   import type { DiseaseData, DiseaseExample } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
-  import type { DiseaseEnv } from "../disease-env";
   import { endDateRep } from "../end-date-rep";
-  import type { Mode } from "../mode";
   import { startDateRep } from "../start-date-rep";
   import {
     composeEditFormValues,
@@ -16,6 +14,7 @@
   export let examples: DiseaseExample[] = [];
   export let editTarget: DiseaseData | null = null;
   export let onDelete: (diseaseId: number) => void = _ => {};
+  export let onUpdate: (updated: DiseaseData) => void = _ => {};
 
   let formValues: EditFormValues | undefined;
   let diseaseDataSelected: Writable<DiseaseData | null> = writable(editTarget);
@@ -38,11 +37,6 @@
   function doFormCancel() {
     formValues = undefined;
   }
-  function doFormEnter(d: DiseaseData) {
-    env.updateDisease(d);
-    env.editTarget = undefined;
-    doMode("edit");
-  }
 </script>
 
 {#key formValues}
@@ -53,7 +47,7 @@
       {examples}
       {formValues}
       onCancel={doFormCancel}
-      onEnter={doFormEnter}
+      onEnter={onUpdate}
       {onDelete}
     />
   {/if}

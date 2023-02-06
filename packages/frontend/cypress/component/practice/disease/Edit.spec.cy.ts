@@ -94,10 +94,12 @@ describe("Edit Disease", () => {
   })
 
   it.only("should edit byoumeimaster of disease", () => {
+    const origMaster = new ByoumeiMaster(1, "急性咽頭炎");
+    const updatedMaster = new ByoumeiMaster(2, "急性気管支炎")
     const diseases = [
       new DiseaseData(
         new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
-        new ByoumeiMaster(1, "急性咽頭炎"),
+        origMaster,
         [
           [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
         ]
@@ -112,13 +114,30 @@ describe("Edit Disease", () => {
       }
     });
     cy.get("[data-cy=disease-name][data-disease-id=1]").click();
-    cy.get("[data-cy=disease-search-input]").type("急性気管支炎");
+    cy.get("[data-cy=disease-search-input]").type(updatedMaster.name);
     cy.intercept(base + "/search-byoumei-master*", (req) => {
-      const master = new ByoumeiMaster(2, "急性気管支炎");
-      req.reply([master]);
+      req.reply([updatedMaster]);
     });
     cy.get("button").contains("検索").click();
-    cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains("急性気管支炎").click();
-    cy.get("[data-cy=disease-name]").contains("急性気管支炎の疑い");
+    cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains(updatedMaster.name).click();
+    cy.get("[data-cy=disease-name]").contains(updatedMaster.name + "の疑い");
+    let updated = false;
+    cy.intercept("POST", base + "/update-disease-ex", (req) => {
+      const [disease, adjCodes] = JSON.parse(req.body);
+      console.log("disease", disease);
+      console.log("adjCodes", adjCodes);
+      expect(disease).deep.equal({
+        diseaseId: 1,
+        patientId: 1,
+        shoubyoumeicode: updatedMaster.shoubyoumeicode,
+        startDate: "2022-02-01",
+        endDate: "0000-00-00",
+        endReasonStore: "N"
+      });
+      expect(adjCodes).deep.equal([8002]);
+      updated = true;
+      req.reply("true");
+    })
+    cy.get("button").contains("入力").click();
   })
 });

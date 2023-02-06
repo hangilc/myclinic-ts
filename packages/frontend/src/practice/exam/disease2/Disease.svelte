@@ -102,12 +102,19 @@
           target: workarea,
           props: {
             diseases: env.allList ?? [],
+            editTarget: envValue.editTarget,
             onDelete: (diseaseId: number) => {
               envValue.remove(diseaseId);
-              doMode("current")
-            }
-          }
-        })
+              envValue.editTarget = undefined;
+              doMode("edit");
+            },
+            onUpdate: (entered: DiseaseData) => {
+              envValue.updateDisease(entered);
+              envValue.editTarget = undefined;
+              doMode("edit");
+            },
+          },
+        });
         clear = () => b.$destroy();
         c = undefined;
         break;

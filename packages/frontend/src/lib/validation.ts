@@ -159,11 +159,12 @@ type Validator<S, T> = (s: S, sources: any[]) => VResult<T>;
 export function isNotNull<T>(
   msg: string = "Null value"
 ): Validator<T | null | undefined, T> {
+  const m: string = msg || "Null value";
   return (s: T | null | undefined, sources: any[]) => {
     if (s != null) {
       return valid(s, sources);
     } else {
-      return invalid<T>(msg, sources);
+      return invalid<T>(m, sources);
     }
   };
 }
