@@ -65,19 +65,31 @@
 
 <div class="command-box">
   <form class="search-form" on:submit|preventDefault={doSearch}>
-    <input type="text" class="search-text-input" bind:value={searchText} data-cy="disease-search-input"/>
+    <input
+      type="text"
+      class="search-text-input"
+      bind:value={searchText}
+      data-cy="disease-search-input"
+    />
     <button type="submit" disabled={startDate == undefined}>検索</button>
   </form>
   <a href="javascript:void(0)" on:click={doExample}>例</a>
 </div>
 <div>
-  <input type="radio" bind:group={searchKind} value="byoumei" id={byoumeiId} />
+  <input
+    type="radio"
+    bind:group={searchKind}
+    value="byoumei"
+    id={byoumeiId}
+    data-cy="search-byoumei-checkbox"
+  />
   <label for={byoumeiId}>病名</label>
   <input
     type="radio"
     bind:group={searchKind}
     value="shuushokugo"
     id={shuushokugoId}
+    data-cy="search-shuushokugo-checkbox"
   />
   <label for={shuushokugoId}>修飾語</label>
 </div>
@@ -95,7 +107,7 @@
   .command-box {
     margin: 4px 0;
   }
-  
+
   .search-form {
     display: inline-block;
   }

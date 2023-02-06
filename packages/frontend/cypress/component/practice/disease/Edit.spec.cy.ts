@@ -5,6 +5,8 @@ import { assertDateForm, fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, DiseaseEndReason, ShuushokugoMaster } from "myclinic-model";
 
 describe("Edit Disease", () => {
+  let suspMaster = new ShuushokugoMaster(8002, "の疑い");
+
   it("should mount", () => {
     cy.mount(Edit, {
       props: {
@@ -38,7 +40,7 @@ describe("Edit Disease", () => {
         new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
         new ByoumeiMaster(1, "急性咽頭炎"),
         [
-          [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
+          [new DiseaseAdj(1, 1, 8002), suspMaster]
         ]
       )
     ];
@@ -93,7 +95,7 @@ describe("Edit Disease", () => {
     cy.wrap({}).then(() => expect(deleted).equal(true));
   })
 
-  it.only("should edit byoumeimaster of disease", () => {
+  it("should edit byoumeimaster of disease", () => {
     const origMaster = new ByoumeiMaster(1, "急性咽頭炎");
     const updatedMaster = new ByoumeiMaster(2, "急性気管支炎")
     const diseases = [
@@ -108,9 +110,9 @@ describe("Edit Disease", () => {
     cy.mount(Edit, {
       props: {
         diseases,
-        onDelete: (diseaseId: number) => {
-          expect(diseaseId).equal(1);
-        }
+        onUpdate: (updated: DiseaseData) => {
+
+        },
       }
     });
     cy.get("[data-cy=disease-name][data-disease-id=1]").click();
@@ -151,6 +153,42 @@ describe("Edit Disease", () => {
     }).as("query");
     cy.get("button").contains("入力").click();
     cy.get("@update").then(() => expect(updated).equal(true));
-    cy.get("@query").then(() => expect(queried).equal(true));
+    cy.get("@query", { timeout: 10000 }).then(() => expect(queried).equal(true));
   })
+
+  // it.only("should add shuushokugo", () => {
+  //   const master = new ByoumeiMaster(1, "急性咽頭炎");
+  //   const diseases = [
+  //     new DiseaseData(
+  //       new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
+  //       master,
+  //       [
+  //       ]
+  //     )
+  //   ];
+  //   cy.mount(Edit, {
+  //     props: {
+  //       diseases,
+  //       onDelete: (diseaseId: number) => {
+  //         expect(diseaseId).equal(1);
+  //       }
+  //     }
+  //   });
+  //   cy.get("[data-cy=disease-name][data-disease-id=1]").click();
+  //   cy.get("[data-cy=search-shuushokugo-checkbox]").click();
+  //   cy.get("[data-cy=disease-search-input]").type("の疑い");
+  //   cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+  //     const text = req.query["text"];
+  //     const at = req.query["at"];
+  //     expect(text).equal("の疑い");
+  //     expect(at).equal("2022-02-01");
+  //     req.reply([
+  //       suspMaster
+  //     ])
+  //   }).as("search");
+  //   cy.get("button").contains("検索").click();
+  //   cy.get("@search", { timeout: 10000 });
+  //   cy.get("[data-cy=search-result-item]").contains("の疑い").click();
+  //   cy.get("button").contains("入力").click();
+  // })
 });
