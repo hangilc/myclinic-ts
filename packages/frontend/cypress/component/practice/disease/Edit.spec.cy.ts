@@ -124,8 +124,6 @@ describe("Edit Disease", () => {
     let updated = false;
     cy.intercept("POST", base + "/update-disease-ex", (req) => {
       const [disease, adjCodes] = JSON.parse(req.body);
-      console.log("disease", disease);
-      console.log("adjCodes", adjCodes);
       expect(disease).deep.equal({
         diseaseId: 1,
         patientId: 1,
@@ -137,7 +135,22 @@ describe("Edit Disease", () => {
       expect(adjCodes).deep.equal([8002]);
       updated = true;
       req.reply("true");
-    })
+    }).as("update")
+    let queried = false;
+    cy.intercept(base + "/get-disease-ex?*", (req) => {
+      const diseaseId = req.query["disease-id"]
+      expect(diseaseId).equal("1");
+      queried = true;
+      req.reply([
+        new Disease(1, 1, 2, "2022-02-01", "0000-00-00", "N"),
+        updatedMaster,
+        [
+          [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
+        ]
+      ]);
+    }).as("query");
     cy.get("button").contains("入力").click();
+    cy.get("@update").then(() => expect(updated).equal(true));
+    cy.get("@query").then(() => expect(queried).equal(true));
   })
 });
