@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import { confirm } from "@/lib/confirm-call";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import type { Invalid } from "@/lib/validator";
@@ -20,6 +21,7 @@
   export let formValues: EditFormValues;
   export let examples: DiseaseExample[];
   export let onEnter: (entered: DiseaseData) => void;
+  export let onDelete: (diseaseId: number) => void;
   export let onCancel: () => void;
   let startDateErrors: Invalid[] = [];
   let endDateErrors: Invalid[] = [];
@@ -104,9 +106,13 @@
       }
     );
   }
+
+  function doDelete() {
+    confirm("この病名を削除していいですか？", () => onDelete(formValues.diseaseId));
+  }
 </script>
 
-<div>
+<div data-cy="disease-edit-form">
   {#if errors.length > 0}
   <div class="errors">
     {#each errors as err}
@@ -114,26 +120,24 @@
     {/each}
   </div>
   {/if}
-  <div>名前：{fullName}</div>
-  <div class="date-wrapper start-date">
+  <div>名前：<span data-cy="disease-name">{fullName}</span></div>
+  <div class="date-wrapper start-date" data-cy="start-date-input">
     <DateFormWithCalendar
-      bind:date={formValues.startDate}
-      bind:errors={startDateErrors}
+      init={formValues.startDate}
       {gengouList}
     />
   </div>
-  <div class="date-wrapper end-date">
+  <div class="date-wrapper end-date" data-cy="end-date-input">
     <DateFormWithCalendar
-      bind:date={formValues.endDate}
-      bind:errors={endDateErrors}
-      isNullable={true}
+      init={formValues.endDate}
       {gengouList}
     />
   </div>
   <div class="end-reason">
     {#each Object.values(DiseaseEndReason) as reason}
       {@const id = genid()}
-      <input type="radio" bind:group={formValues.endReason} value={reason} {id} />
+      <input type="radio" bind:group={formValues.endReason} value={reason} {id} data-cy="end-reason-input"
+        data-reason-code={reason.code}/>
       <label for={id}>{reason.label}</label>
     {/each}
   </div>
@@ -141,6 +145,7 @@
     <button on:click={doEnter}>入力</button>
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
+    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
   </div>
   <DiseaseSearchForm

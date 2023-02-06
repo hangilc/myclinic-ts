@@ -1,6 +1,6 @@
 <script lang="ts">
   import SelectItem from "@/lib/SelectItem.svelte";
-  import type { DiseaseData } from "myclinic-model";
+  import type { DiseaseData, DiseaseExample } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import type { DiseaseEnv } from "../disease-env";
   import { endDateRep } from "../end-date-rep";
@@ -12,11 +12,15 @@
   } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
 
-  export let env: DiseaseEnv;
-  export let doMode: (mode: Mode) => void;
+  // export let env: DiseaseEnv;
+  // export let doMode: (mode: Mode) => void;
+
+  export let diseases: DiseaseData[];
+  export let examples: DiseaseExample[] = [];
+  export let editTarget: DiseaseData | null = null;
 
   let formValues: EditFormValues | undefined;
-  let diseaseDataSelected: Writable<DiseaseData | null> = writable(env.editTarget ?? null);
+  let diseaseDataSelected: Writable<DiseaseData | null> = writable(editTarget);
 
   diseaseDataSelected.subscribe((sel) => {
     formValues = sel == undefined ? undefined : composeEditFormValues(sel);
@@ -48,7 +52,7 @@
     （病名未選択）
   {:else}
     <EditForm
-      examples={env.examples}
+      {examples}
       {formValues}
       onCancel={doFormCancel}
       onEnter={doFormEnter}
@@ -56,11 +60,17 @@
   {/if}
 {/key}
 <div class="list select">
-  {#each env?.allList ?? [] as data}
+  {#each diseases as data}
     <SelectItem selected={diseaseDataSelected} {data}>
-      <span class="disease-name" class:hasEnd={data.hasEndDate}
-        >{data.fullName}</span
-      > <span>({formatAux(data)})</span>
+      <span
+        class="disease-name"
+        class:hasEnd={data.hasEndDate}
+        data-cy="disease-name"
+        data-disease-id={data.disease.diseaseId}>{data.fullName}</span
+      >
+      <span data-cy="disease-aux" data-disease-id={data.disease.diseaseId}
+        >({formatAux(data)})</span
+      >
     </SelectItem>
   {/each}
 </div>
@@ -80,6 +90,4 @@
   .disease-name.hasEnd {
     color: green;
   }
-
-  
 </style>

@@ -89,7 +89,7 @@ describe("Disease Add", () => {
     cy.get("[data-cy=disease-name]").contains("急性咽頭炎の疑い");
   });
 
-  it.only("should enter disease", () => {
+  it("should enter disease", () => {
     let startDate = new Date("2023-02-01");
     cy.mount(Add, {
       props: {

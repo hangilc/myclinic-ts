@@ -14,7 +14,8 @@
 </script>
 
 <div class="select-item" class:selected={$selected === data} 
-    on:click={onClick} style:cursor={cursor}>
+    on:click={onClick} style:cursor={cursor}
+    >
   <slot />
 </div>
 
