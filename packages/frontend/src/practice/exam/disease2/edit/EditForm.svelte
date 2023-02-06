@@ -108,7 +108,10 @@
   }
 
   function doDelete() {
-    confirm("この病名を削除していいですか？", () => onDelete(formValues.diseaseId));
+    confirm("この病名を削除していいですか？", async () => {
+      await api.deleteDiseaseEx(formValues.diseaseId);
+      onDelete(formValues.diseaseId);
+    });
   }
 </script>
 
@@ -143,10 +146,10 @@
   </div>
   <div>
     <button on:click={doEnter}>入力</button>
-    <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
-    <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
-    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
-    <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
+    <a href="javascript:void(0)" on:click={doSusp} data-cy="susp-link">の疑い</a>
+    <a href="javascript:void(0)" on:click={doDelAdj} data-cy="delete-adj-link">修飾語削除</a>
+    <a href="javascript:void(0)" on:click={doDelete} data-cy="delete-link">削除</a>
+    <a href="javascript:void(0)" on:click={onCancel} data-cy="cancel-link">キャンセル</a>
   </div>
   <DiseaseSearchForm
     {examples}

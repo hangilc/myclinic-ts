@@ -20,7 +20,7 @@
 </script>
 
 <Dialog {destroy} title="確認">
-  <div class="content">{text}</div>
+  <div class="content" data-cy="text">{text}</div>
   <div class="commands">
     <button on:click={() => doYes(destroy)}>はい</button>
     <button on:click={() => doNo(destroy)}>キャンセル</button>

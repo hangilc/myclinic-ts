@@ -791,6 +791,10 @@ export default {
     return post("enter-disease-ex", data, {}, castNumber);
   },
 
+  deleteDiseaseEx(diseaseId: number): Promise<boolean> {
+    return get("delete-disease-ex", { "disease-id": diseaseId.toString() }, castBoolean);
+  },
+
   getDiseaseEx(diseaseId: number): Promise<m.DiseaseData> {
     return get(
       "get-disease-ex",

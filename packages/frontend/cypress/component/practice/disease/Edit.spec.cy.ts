@@ -1,4 +1,6 @@
+import { base } from "@/lib/api";
 import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
+import { dialogClose, openedDialog } from "@cypress/e2e/reception/misc";
 import { assertDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, DiseaseEndReason, ShuushokugoMaster } from "myclinic-model";
 
@@ -55,7 +57,39 @@ describe("Edit Disease", () => {
     });
   })
 
-  it.only("should delete disease", () => {
-
+  it("should delete disease", () => {
+    const diseases = [
+      new DiseaseData(
+        new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
+        new ByoumeiMaster(1, "急性咽頭炎"),
+        [
+          [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
+        ]
+      )
+    ];
+    let deleted = false;
+    cy.mount(Edit, {
+      props: {
+        diseases,
+        onDelete: (diseaseId: number) => {
+          expect(diseaseId).equal(1);
+        }
+      }
+    });
+    cy.get("[data-cy=disease-name][data-disease-id=1]").click();
+    console.log("base", base);
+    cy.intercept(base + "/delete-disease-ex?*", (req) => {
+      console.log("INTERCEPT");
+      expect(req.query["disease-id"]).equal("1");
+      deleted = true;
+      req.reply("true");
+    })
+    cy.get("[data-cy=delete-link]").click();
+    openedDialog("確認").within(() => {
+      cy.get("[data-cy=text]").contains("この病名を削除していいですか？");
+      cy.get("button").contains("はい").click();
+    })
+    dialogClose("確認");
+    cy.wrap({}).then(() => expect(deleted).equal(true));
   })
 });

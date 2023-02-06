@@ -12,12 +12,10 @@
   } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
 
-  // export let env: DiseaseEnv;
-  // export let doMode: (mode: Mode) => void;
-
   export let diseases: DiseaseData[];
   export let examples: DiseaseExample[] = [];
   export let editTarget: DiseaseData | null = null;
+  export let onDelete: (diseaseId: number) => void = _ => {};
 
   let formValues: EditFormValues | undefined;
   let diseaseDataSelected: Writable<DiseaseData | null> = writable(editTarget);
@@ -56,6 +54,7 @@
       {formValues}
       onCancel={doFormCancel}
       onEnter={doFormEnter}
+      {onDelete}
     />
   {/if}
 {/key}
