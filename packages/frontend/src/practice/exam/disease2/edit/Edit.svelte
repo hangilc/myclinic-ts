@@ -41,7 +41,7 @@
 
 {#key formValues}
   {#if formValues == undefined}
-    （病名未選択）
+    <span data-cy="no-disease-selected">（病名未選択）</span>
   {:else}
     <EditForm
       {examples}

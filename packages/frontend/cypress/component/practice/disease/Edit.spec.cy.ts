@@ -1,6 +1,6 @@
 import { base } from "@/lib/api";
 import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
-import { dialogClose, openedDialog } from "@cypress/e2e/reception/misc";
+import { assertPatientForm, dialogClose, openedDialog } from "@cypress/e2e/reception/misc";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, DiseaseEndReason, ShuushokugoMaster } from "myclinic-model";
 
@@ -481,7 +481,7 @@ describe("Edit Disease", () => {
     assertDiseaseName(master.name)
   })
 
-  it.only("should cancel", () => {
+  it("should cancel", () => {
     const master = new ByoumeiMaster(1, "急性咽頭炎");
     const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "C");
     const adj = new DiseaseAdj(1, 1, 8002);
@@ -494,7 +494,7 @@ describe("Edit Disease", () => {
     });
     clickDisease(1);
     clickCancelLink();
-    assertDiseaseName("（病名未選択）")
+    asssertNoDiseaseSelected();
   })
 });
 
@@ -549,7 +549,11 @@ function clickSearchResult(text: string) {
 }
 
 function assertDiseaseName(name: string) {
-  cy.get("[data-cy=disease-name]").invoke("text").should("eq", name);
+  cy.get("[data-cy=disease-edit-form] [data-cy=disease-name]").should("have.text", name);
+}
+
+function asssertNoDiseaseSelected() {
+  cy.get("[data-cy=no-disease-selected]");
 }
 
 function clickEnter() {
