@@ -98,22 +98,22 @@ describe("Edit Disease", () => {
   it("should edit byoumeimaster of disease", () => {
     const origMaster = new ByoumeiMaster(1, "急性咽頭炎");
     const updatedMaster = new ByoumeiMaster(2, "急性気管支炎")
+    const origDisease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    const updatedDisease = new Disease(1, 1, 2, "2022-02-01", "0000-00-00", "N");
+    const adj = new DiseaseAdj(1, 1, 8002);
+    const adjMaster = new ShuushokugoMaster(8002, "の疑い");
     const diseases = [
-      new DiseaseData(
-        new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
-        origMaster,
-        [
-          [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
-        ]
-      )
+      new DiseaseData(origDisease, origMaster, [[adj, adjMaster]])
     ];
-    cy.mount(Edit, {
-      props: {
-        diseases,
-        onUpdate: (updated: DiseaseData) => {
-
-        },
-      }
+    const entered = new Cypress.Promise((resolve, reject) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          },
+        }
+      });
     });
     cy.get("[data-cy=disease-name][data-disease-id=1]").click();
     cy.get("[data-cy=disease-search-input]").type(updatedMaster.name);
@@ -123,72 +123,131 @@ describe("Edit Disease", () => {
     cy.get("button").contains("検索").click();
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains(updatedMaster.name).click();
     cy.get("[data-cy=disease-name]").contains(updatedMaster.name + "の疑い");
-    let updated = false;
     cy.intercept("POST", base + "/update-disease-ex", (req) => {
       const [disease, adjCodes] = JSON.parse(req.body);
-      expect(disease).deep.equal({
-        diseaseId: 1,
-        patientId: 1,
-        shoubyoumeicode: updatedMaster.shoubyoumeicode,
-        startDate: "2022-02-01",
-        endDate: "0000-00-00",
-        endReasonStore: "N"
-      });
-      expect(adjCodes).deep.equal([8002]);
-      updated = true;
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([adjMaster.shuushokugocode]);
       req.reply("true");
     }).as("update")
-    let queried = false;
     cy.intercept(base + "/get-disease-ex?*", (req) => {
       const diseaseId = req.query["disease-id"]
       expect(diseaseId).equal("1");
-      queried = true;
       req.reply([
-        new Disease(1, 1, 2, "2022-02-01", "0000-00-00", "N"),
+        updatedDisease,
         updatedMaster,
         [
-          [new DiseaseAdj(1, 1, 8002), new ShuushokugoMaster(8002, "の疑い")]
+          [adj, adjMaster]
         ]
       ]);
     }).as("query");
     cy.get("button").contains("入力").click();
-    cy.get("@update").then(() => expect(updated).equal(true));
-    cy.get("@query", { timeout: 10000 }).then(() => expect(queried).equal(true));
+    cy.get("@update");
+    cy.get("@query", { timeout: 10000 });
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(updatedMaster);
+      expect(entered.adjList).deep.equal([[adj, adjMaster]]);
+    });
   })
 
-  // it.only("should add shuushokugo", () => {
-  //   const master = new ByoumeiMaster(1, "急性咽頭炎");
-  //   const diseases = [
-  //     new DiseaseData(
-  //       new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N"),
-  //       master,
-  //       [
-  //       ]
-  //     )
-  //   ];
-  //   cy.mount(Edit, {
-  //     props: {
-  //       diseases,
-  //       onDelete: (diseaseId: number) => {
-  //         expect(diseaseId).equal(1);
-  //       }
-  //     }
-  //   });
-  //   cy.get("[data-cy=disease-name][data-disease-id=1]").click();
-  //   cy.get("[data-cy=search-shuushokugo-checkbox]").click();
-  //   cy.get("[data-cy=disease-search-input]").type("の疑い");
-  //   cy.intercept(base + "/search-shuushokugo-master*", (req) => {
-  //     const text = req.query["text"];
-  //     const at = req.query["at"];
-  //     expect(text).equal("の疑い");
-  //     expect(at).equal("2022-02-01");
-  //     req.reply([
-  //       suspMaster
-  //     ])
-  //   }).as("search");
-  //   cy.get("button").contains("検索").click();
-  //   cy.get("@search", { timeout: 10000 });
-  //   cy.get("[data-cy=search-result-item]").contains("の疑い").click();
-  //   cy.get("button").contains("入力").click();
-  // })
+  it.only("should add shuushokugo", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    const updatedAdj = new DiseaseAdj(1, 1, 8002);
+    const updatedAdjMaster = new ShuushokugoMaster(8002, "の疑い");
+    const diseases = [new DiseaseData(disease, master, [])];
+    cy.mount(Edit, {
+      props: {
+        diseases,
+        onUpdate: (updated: DiseaseData) => {
+        }
+      }
+    });
+    clickDisease(1);
+    clickShuushokugoSearchMode();
+    enterSearchText(updatedAdjMaster.name);
+    interceptShuushokugoSearch(
+      (text, at) => {
+        expect(text).equal(updatedAdjMaster.name);
+        expect(at).equal("2022-02-01");
+      },
+      [updatedAdjMaster]
+    ).as("search");
+    clickSearch();
+    cy.wait("@search");
+    clickSearchResult(updatedAdjMaster.name);
+    assertDiseaseName(master.name + updatedAdjMaster.name);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(disease);
+      expect(adjCodes).deep.equal([updatedAdjMaster.shuushokugocode]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        disease,
+        master,
+        [[updatedAdj, updatedAdjMaster]]
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+  })
 });
+
+function interceptShuushokugoSearch(
+  callback: (text: string, at: string) => void,
+  result: ShuushokugoMaster[]
+) {
+  return cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+    const query = req.query;
+    callback(query["text"] as string, query["at"] as string);
+    req.reply(result);
+  })
+}
+
+function interceptUpdateDisease(
+  callback: (disease: Disease, adjCodes: number[]) => void
+) {
+  return cy.intercept("POST", base + "/update-disease-ex", (req) => {
+    const [disease, adjCodes] = JSON.parse(req.body);
+    callback(disease, adjCodes);
+    req.reply("true");
+  });
+}
+
+function interceptGetDiseaseEx(callback: (diseaseId: number) => void, 
+  result: [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]) {
+  return cy.intercept(base + "/get-disease-ex?*", (req) => {
+    const diseaseId = req.query["disease-id"]
+    callback(+diseaseId);
+    req.reply(result);
+  })  
+}
+
+function clickDisease(diseaseId: number) {
+  return cy.get("[data-cy=disease-name][data-disease-id=1]").click();
+}
+
+function clickShuushokugoSearchMode() {
+  return cy.get("[data-cy=search-shuushokugo-checkbox]").click();
+}
+
+function enterSearchText(text: string) {
+  return cy.get("[data-cy=disease-search-input]").clear().type(text);
+}
+
+function clickSearch() {
+  return cy.get("button").contains("検索").click();
+}
+
+function clickSearchResult(text: string) {
+  return cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains(text).click();
+}
+
+function assertDiseaseName(name: string) {
+  return cy.get("[data-cy=disease-name]").contains(name);
+}
+
+function clickEnter() {
+  return cy.get("button").contains("入力").click();
+}
