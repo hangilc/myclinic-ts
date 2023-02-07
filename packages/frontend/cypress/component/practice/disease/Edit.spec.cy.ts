@@ -150,7 +150,7 @@ describe("Edit Disease", () => {
     });
   })
 
-  it.only("should add shuushokugo", () => {
+  it("should add shuushokugo", () => {
     const master = new ByoumeiMaster(1, "急性咽頭炎");
     const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
     const updatedAdj = new DiseaseAdj(1, 1, 8002);
@@ -191,6 +191,23 @@ describe("Edit Disease", () => {
     ).as("get")
     clickEnter();
     cy.wait(["@update", "@get"]);
+  })
+
+  it.only("should change start date", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    const diseases = [new DiseaseData(disease, master, [])];
+    const updatedDate = "2022-01-27";
+    cy.mount(Edit, {
+      props: {
+        diseases,
+        onUpdate: (updated: DiseaseData) => {
+        }
+      }
+    });
+    clickDisease(1);
+    fillStartDate(updatedDate);
+
   })
 });
 
@@ -250,4 +267,8 @@ function assertDiseaseName(name: string) {
 
 function clickEnter() {
   return cy.get("button").contains("入力").click();
+}
+
+function fillStartDate(date: string | Date) {
+  cy.get("[data-cy=start-date-input]").within(() => fillDateForm(date))
 }
