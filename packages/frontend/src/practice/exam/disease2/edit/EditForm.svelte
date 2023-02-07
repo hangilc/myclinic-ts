@@ -24,8 +24,8 @@
   export let onEnter: (entered: DiseaseData) => void;
   export let onDelete: (diseaseId: number) => void;
   export let onCancel: () => void;
-  let startDateErrors: Invalid[] = [];
-  let endDateErrors: Invalid[] = [];
+  let validateStartDate: () => VResult<Date | null>;
+  let validateEndDate: () => VResult<Date | null>;
   let errors: string[] = [];
 
   let fullName: string = "";
@@ -36,8 +36,7 @@
   const gengouList = ["平成", "令和"];
 
   function clearErrors(): void {
-    startDateErrors = [];
-    endDateErrors = [];
+    errors = [];
   }
 
   async function doEnter() {
@@ -50,8 +49,8 @@
       )
         .validate(isNotNull())
         .map((m) => m.shoubyoumeicode),
-      startDate: validResult(formValues.startDate),
-      endDate: validResult(formValues.endDate),
+      startDate: validateStartDate(),
+      endDate: validateEndDate(),
       endReason: validResult(formValues.endReason).map((r) => r.code),
     });
     if (r.isValid) {
@@ -127,10 +126,10 @@
   {/if}
   <div>名前：<span data-cy="disease-name">{fullName}</span></div>
   <div class="date-wrapper start-date" data-cy="start-date-input">
-    <DateFormWithCalendar init={formValues.startDate} {gengouList} />
+    <DateFormWithCalendar init={formValues.startDate} {gengouList} bind:validate={validateStartDate}/>
   </div>
   <div class="date-wrapper end-date" data-cy="end-date-input">
-    <DateFormWithCalendar init={formValues.endDate} {gengouList} />
+    <DateFormWithCalendar init={formValues.endDate} {gengouList} bind:validate={validateEndDate}/>
   </div>
   <div class="end-reason">
     {#each Object.values(DiseaseEndReason) as reason}

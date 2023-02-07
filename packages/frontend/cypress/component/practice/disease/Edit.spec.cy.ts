@@ -196,8 +196,11 @@ describe("Edit Disease", () => {
   it.only("should change start date", () => {
     const master = new ByoumeiMaster(1, "急性咽頭炎");
     const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
-    const diseases = [new DiseaseData(disease, master, [])];
     const updatedDate = "2022-01-27";
+    const updatedDisease = Object.assign({}, disease, {
+      startDate: updatedDate
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
     cy.mount(Edit, {
       props: {
         diseases,
@@ -207,7 +210,21 @@ describe("Edit Disease", () => {
     });
     clickDisease(1);
     fillStartDate(updatedDate);
-
+    interceptUpdateDisease((disease, adjCodes) => {
+      console.log(disease);
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
   })
 });
 
