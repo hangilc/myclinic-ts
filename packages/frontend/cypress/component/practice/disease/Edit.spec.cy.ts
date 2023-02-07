@@ -156,13 +156,16 @@ describe("Edit Disease", () => {
     const updatedAdj = new DiseaseAdj(1, 1, 8002);
     const updatedAdjMaster = new ShuushokugoMaster(8002, "の疑い");
     const diseases = [new DiseaseData(disease, master, [])];
-    cy.mount(Edit, {
-      props: {
-        diseases,
-        onUpdate: (updated: DiseaseData) => {
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
         }
-      }
-    });
+      });
+    })
     clickDisease(1);
     clickShuushokugoSearchMode();
     enterSearchText(updatedAdjMaster.name);
@@ -191,9 +194,14 @@ describe("Edit Disease", () => {
     ).as("get")
     clickEnter();
     cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(disease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([[updatedAdj, updatedAdjMaster]]);
+    });
   })
 
-  it.only("should change start date", () => {
+  it("should change start date", () => {
     const master = new ByoumeiMaster(1, "急性咽頭炎");
     const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
     const updatedDate = "2022-01-27";
@@ -201,17 +209,19 @@ describe("Edit Disease", () => {
       startDate: updatedDate
     })
     const diseases = [new DiseaseData(disease, master, [])];
-    cy.mount(Edit, {
-      props: {
-        diseases,
-        onUpdate: (updated: DiseaseData) => {
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
         }
-      }
-    });
+      });
+    })
     clickDisease(1);
     fillStartDate(updatedDate);
     interceptUpdateDisease((disease, adjCodes) => {
-      console.log(disease);
       expect(disease).deep.equal(updatedDisease);
       expect(adjCodes).deep.equal([]);
     }).as("update");
@@ -225,6 +235,266 @@ describe("Edit Disease", () => {
     ).as("get")
     clickEnter();
     cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should change end date", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    const updatedDate = "2022-02-08";
+    const updatedDisease = Object.assign({}, disease, {
+      endDate: updatedDate
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
+        }
+      });
+    })
+    clickDisease(1);
+    fillEndDate(updatedDate);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should change end reason to cured", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    let updatedEndReason = "C";
+    const updatedDisease = Object.assign({}, disease, {
+      endReasonStore: updatedEndReason
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
+        }
+      });
+    });
+    clickDisease(1);
+    clickEndReason(updatedEndReason);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should change end reason to stopped", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    let updatedEndReason = "S";
+    const updatedDisease = Object.assign({}, disease, {
+      endReasonStore: updatedEndReason
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
+        }
+      });
+    });
+    clickDisease(1);
+    clickEndReason(updatedEndReason);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should change end reason to dead", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "N");
+    let updatedEndReason = "D";
+    const updatedDisease = Object.assign({}, disease, {
+      endReasonStore: updatedEndReason
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
+        }
+      });
+    });
+    clickDisease(1);
+    clickEndReason(updatedEndReason);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should change end reason to not ended", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "C");
+    let updatedEndReason = "N";
+    const updatedDisease = Object.assign({}, disease, {
+      endReasonStore: updatedEndReason
+    })
+    const diseases = [new DiseaseData(disease, master, [])];
+    const entered = new Cypress.Promise((resolve) => {
+      cy.mount(Edit, {
+        props: {
+          diseases,
+          onUpdate: (updated: DiseaseData) => {
+            resolve(updated);
+          }
+        }
+      });
+    });
+    clickDisease(1);
+    clickEndReason(updatedEndReason);
+    interceptUpdateDisease((disease, adjCodes) => {
+      expect(disease).deep.equal(updatedDisease);
+      expect(adjCodes).deep.equal([]);
+    }).as("update");
+    interceptGetDiseaseEx(
+      diseaseId => { expect(diseaseId).equal(disease.diseaseId) },
+      [
+        updatedDisease,
+        master,
+        []
+      ]
+    ).as("get")
+    clickEnter();
+    cy.wait(["@update", "@get"]);
+    cy.wrap(entered).then((entered: any) => {
+      expect(entered.disease).deep.equal(updatedDisease);
+      expect(entered.byoumeiMaster).deep.equal(master);
+      expect(entered.adjList).deep.equal([]);
+    })
+  })
+
+  it("should add susp", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "C");
+    const diseases = [new DiseaseData(disease, master, [])];
+    cy.mount(Edit, {
+      props: {
+        diseases,
+        onUpdate: (updated: DiseaseData) => {
+        }
+      }
+    });
+    clickDisease(1);
+    clickAddSuspLink();
+    assertDiseaseName(master.name + "の疑い")
+  })
+
+  it("should remove adj", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "C");
+    const adj = new DiseaseAdj(1, 1, 8002);
+    const adjMaster = new ShuushokugoMaster(8002, "の疑い");
+    const diseases = [new DiseaseData(disease, master, [[adj, adjMaster]])];
+    cy.mount(Edit, {
+      props: {
+        diseases,
+        onUpdate: (updated: DiseaseData) => {
+        }
+      }
+    });
+    clickDisease(1);
+    clickDeleteAdjLink();
+    assertDiseaseName(master.name)
+  })
+
+  it.only("should cancel", () => {
+    const master = new ByoumeiMaster(1, "急性咽頭炎");
+    const disease = new Disease(1, 1, 1, "2022-02-01", "0000-00-00", "C");
+    const adj = new DiseaseAdj(1, 1, 8002);
+    const adjMaster = new ShuushokugoMaster(8002, "の疑い");
+    const diseases = [new DiseaseData(disease, master, [[adj, adjMaster]])];
+    cy.mount(Edit, {
+      props: {
+        diseases,
+      }
+    });
+    clickDisease(1);
+    clickCancelLink();
+    assertDiseaseName("（病名未選択）")
   })
 });
 
@@ -249,13 +519,13 @@ function interceptUpdateDisease(
   });
 }
 
-function interceptGetDiseaseEx(callback: (diseaseId: number) => void, 
+function interceptGetDiseaseEx(callback: (diseaseId: number) => void,
   result: [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]) {
   return cy.intercept(base + "/get-disease-ex?*", (req) => {
     const diseaseId = req.query["disease-id"]
     callback(+diseaseId);
     req.reply(result);
-  })  
+  })
 }
 
 function clickDisease(diseaseId: number) {
@@ -279,7 +549,7 @@ function clickSearchResult(text: string) {
 }
 
 function assertDiseaseName(name: string) {
-  return cy.get("[data-cy=disease-name]").contains(name);
+  cy.get("[data-cy=disease-name]").invoke("text").should("eq", name);
 }
 
 function clickEnter() {
@@ -289,3 +559,24 @@ function clickEnter() {
 function fillStartDate(date: string | Date) {
   cy.get("[data-cy=start-date-input]").within(() => fillDateForm(date))
 }
+
+function fillEndDate(date: string | Date) {
+  cy.get("[data-cy=end-date-input]").within(() => fillDateForm(date))
+}
+
+function clickEndReason(reason: string) {
+  cy.get(`[data-cy=end-reason-input][data-reason-code=${reason}]`).click();
+}
+
+function clickAddSuspLink() {
+  cy.get("[data-cy=susp-link]").click();
+}
+
+function clickDeleteAdjLink() {
+  cy.get("[data-cy=delete-adj-link]").click();
+}
+
+function clickCancelLink() {
+  cy.get("[data-cy=cancel-link]").click();
+}
+
