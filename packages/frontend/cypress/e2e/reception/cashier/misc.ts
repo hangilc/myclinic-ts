@@ -185,7 +185,16 @@ export function patientDialogClose() {
 }
 
 export function dialogOpen(title: string) {
-  return cy.get("[data-cy=dialog-title]").contains(title);
+  return cy.get("[data-cy=dialog]").should(($d) => {
+    let found: HTMLElement | null = null;
+    $d.find("[data-cy=dialog-title]").each((_, e) => {
+      if( e.innerText === title ) {
+        found = e;
+      }
+    })
+    expect(found).not.null
+    return $d;
+  })
 }
 
 export function doesNotExist(selector: string, pred: (e: JQuery<HTMLElement>) => boolean = _ => true) {
@@ -214,7 +223,7 @@ export function dialogClose(title: string) {
 
 export function openedDialog(title: string) {
   return cy.get("[data-cy=dialog]").within((d) => {
-    dialogOpen(title);
+    cy.get("[data-cy=dialog-title]").should("have.text", title);
     return d;
   })
 }

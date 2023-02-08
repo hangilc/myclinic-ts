@@ -1,5 +1,5 @@
 import type { Patient, Visit } from "myclinic-model";
-import { dialogClose, dialogOpen, doesNotExist, newPatient, openedDialog } from "./misc";
+import { dialogClose, doesNotExist, newPatient, dialogOpen } from "./misc";
 import { listWqueue, startVisit } from "./req";
 
 describe("Wqueue", () => {
@@ -19,7 +19,7 @@ describe("Wqueue", () => {
           cy.get("a").contains("診療録").click();
         })
         cy.scrollTo(0, 0);
-        openedDialog("診療録").within(() => {
+        dialogOpen("診療録").within(() => {
           cy.get("[data-cy=cross-icon]").should("be.visible");
           cy.get("[data-cy=cross-icon]").click()
         });
@@ -31,7 +31,7 @@ describe("Wqueue", () => {
         cy.get("[data-cy=wq-row-aux-menu]").within(() => {
           cy.get("a").contains("患者").click();
         })
-        openedDialog("患者情報").within(() => {
+        dialogOpen("患者情報").within(() => {
           cy.get("[data-cy=patient-id]").contains(patient.patientId.toString());
           cy.get("button").contains("閉じる").click();
         });
@@ -43,7 +43,7 @@ describe("Wqueue", () => {
         cy.get("[data-cy=wq-row-aux-menu]").within(() => {
           cy.get("a").contains("削除").click();
         })
-        openedDialog("確認").within(() => {
+        dialogOpen("確認").within(() => {
           cy.get("button").contains("はい").click();
         })
         dialogClose("確認");

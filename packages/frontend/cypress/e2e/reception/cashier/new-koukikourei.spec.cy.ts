@@ -1,6 +1,6 @@
 import { Patient, Koukikourei } from "myclinic-model";
 import tmpl from "@cypress/fixtures/new-koukikourei-template.json";
-import { fillDateForm } from "./misc";
+import { fillDateForm } from "@cypress/lib/form";
 
 describe("new-koukikourei (reception)", () => {
   let patient: Patient;

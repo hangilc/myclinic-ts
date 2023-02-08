@@ -1,6 +1,6 @@
 import { castList } from "@/lib/cast";
 import { castOp } from "@/lib/drawer/op";
-import { openedDialog } from "./misc";
+import { dialogOpen } from "./misc";
 
 describe("Blank Receipt", () => {
   it("should open blank receipt dialog", () => {
@@ -17,7 +17,7 @@ describe("Blank Receipt", () => {
       req.reply("true");
     });
     cy.get("a").contains("手書き領収書印刷").click();
-    openedDialog("領収書印刷").within(() => {
+    dialogOpen("領収書印刷").within(() => {
       cy.get("button").contains("印刷").click();
     })
   })

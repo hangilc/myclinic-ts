@@ -1,6 +1,6 @@
 import { Patient, Kouhi } from "myclinic-model";
 import tmpl from "@cypress/fixtures/new-kouhi-template.json";
-import { fillDateForm } from "./misc";
+import { fillDateForm } from "@cypress/lib/form";
 
 describe("new-kouhi (reception)", () => {
   let patient: Patient;

@@ -1,6 +1,5 @@
-import user from "../../fixtures/patient-a.json"
+import user from "@cypress/fixtures/patient-a.json"
 import { toKanjiDate } from "@/lib/to-kanjidate";
-import { format, f2 } from "kanjidate";
 import { assertPatientDisp, fillPatientForm } from "./misc";
 import { Patient } from "myclinic-model";
 

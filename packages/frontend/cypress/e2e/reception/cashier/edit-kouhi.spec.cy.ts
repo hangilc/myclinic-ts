@@ -44,9 +44,8 @@ describe("Edit Kouhi", () => {
       expect(msg).equal("この保険を削除していいですか？");
     });
     cy.get("a").contains("削除").click();
-    // dialogClose("公費情報");
-    cy.get("[data-cy=dialog-title]").should("have.text", "患者情報");
-    // dialogOpen("患者情報");
-    // cy.get("[data-cy=current-hoken]").should("not.exist");
+    dialogClose("公費情報");
+    dialogOpen("患者情報");
+    cy.get("[data-cy=current-hoken]").should("not.exist");
   })
 })

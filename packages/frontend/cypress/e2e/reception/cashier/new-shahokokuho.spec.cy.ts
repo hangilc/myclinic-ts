@@ -1,6 +1,6 @@
 import { Patient, Shahokokuho } from "myclinic-model";
 import tmpl from "@cypress/fixtures/new-shahokokuho-template.json";
-import { fillDateForm } from "./misc";
+import { fillDateForm } from "@cypress/lib/form";
 
 describe("new-shahokokuho (reception)", () => {
   let patient: Patient;

@@ -34,8 +34,6 @@
   onMount(() => {
     dialog.style.zIndex = zIndexDialog.toString();
     const v = document.documentElement;
-    // const d = dialog.getBoundingClientRect();
-    // dialog.style.left = window.scrollX + v.clientWidth / 2 - d.width / 2 + "px";
   });
 
   function doMenuKey(event: KeyboardEvent): void {
