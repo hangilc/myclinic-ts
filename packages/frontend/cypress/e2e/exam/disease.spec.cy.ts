@@ -33,7 +33,7 @@ describe("Disease", () => {
     })
   });
 
-  it.only("should add disease", () => {
+  it("should add disease", () => {
     newPatient().as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       openPatient(patient.patientId);
@@ -52,6 +52,38 @@ describe("Disease", () => {
       });
     })
   });
+
+  it.only("should change tenki", () => {
+    newPatient().as("patient");
+    cy.get<Patient>("@patient").then((patient) => {
+      return reqEnterDisease(new DiseaseEnterData(
+        patient.patientId,
+        byoumeiNames.急性咽頭炎,
+        "2023-02-08",
+        []
+      ))
+    }).as("diseaseId");
+    cy.get<Patient>("@patient").then((patient) => {
+      cy.get<number>("@diseaseId").then((diseaseId) => {
+        openPatient(patient.patientId);
+        cy.get("[data-cy=disease-box]").within(() => {
+          cy.get("[data-cy=tenki-link]").click();
+        });
+        cy.get("[data-cy=disease-tenki]").within(() => {
+          cy.get(`input[data-disease-id=${diseaseId}]`).click();
+          cy.get("[data-cy=week-link]").click();
+          cy.get("button").contains("入力").click();
+        });
+        cy.get("[data-cy=edit-link]").click();
+        cy.get("[data-cy=disease-edit]").within(() => {
+          cy.get(`[data-cy=disease-list] [data-cy=disease-name][data-disease-id=${diseaseId}]`)
+            .should("have.text", "急性咽頭炎");
+          cy.get(`[data-cy=disease-list] [data-cy=disease-aux][data-disease-id=${diseaseId}]`)
+            .should("have.text", "(治癒、R5.2.8 - R5.2.15)");
+        })
+    })
+    })
+  })
 })
 
 function openPatient(patientId: number) {

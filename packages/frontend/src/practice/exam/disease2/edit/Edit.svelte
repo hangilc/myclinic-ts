@@ -53,7 +53,7 @@
       />
     {/if}
   {/key}
-  <div class="list select">
+  <div class="list select" data-cy="disease-list">
     {#each diseases as data}
       <SelectItem selected={diseaseDataSelected} {data}>
         <span

@@ -122,7 +122,7 @@
   }
 </script>
 
-<div>
+<div data-cy="disease-tenki">
   {#each diseases as d}
     {@const id = genid()}
     <div>
@@ -157,10 +157,10 @@
     </DateFormWithCalendar>
   </div>
   <div class="date-manip">
-    <a href="javascript:void(0)" on:click={doWeekClick}>週</a>
-    <a href="javascript:void(0)" on:click={doTodayClick}>今日</a>
-    <a href="javascript:void(0)" on:click={doEndOfMonthClick}>月末</a>
-    <a href="javascript:void(0)" on:click={doEndOfLastMonthClick}>先月末</a>
+    <a href="javascript:void(0)" on:click={doWeekClick} data-cy="week-link">週</a>
+    <a href="javascript:void(0)" on:click={doTodayClick} data-cy="today-link">今日</a>
+    <a href="javascript:void(0)" on:click={doEndOfMonthClick} data-cy="end-of-month-link">月末</a>
+    <a href="javascript:void(0)" on:click={doEndOfLastMonthClick} data-cy="end-of-last-month-link">先月末</a>
   </div>
   <div class="tenki">
     {#each endReasons as reason}
