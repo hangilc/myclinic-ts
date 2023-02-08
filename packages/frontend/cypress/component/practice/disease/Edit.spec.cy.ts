@@ -1,6 +1,6 @@
 import { base } from "@/lib/api";
 import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
-import { assertPatientForm, dialogClose, openedDialog } from "@cypress/e2e/reception/misc";
+import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, DiseaseEndReason, ShuushokugoMaster } from "myclinic-model";
 
@@ -87,7 +87,7 @@ describe("Edit Disease", () => {
       req.reply("true");
     })
     cy.get("[data-cy=delete-link]").click();
-    openedDialog("確認").within(() => {
+    dialogOpen("確認").within(() => {
       cy.get("[data-cy=text]").contains("この病名を削除していいですか？");
       cy.get("button").contains("はい").click();
     })

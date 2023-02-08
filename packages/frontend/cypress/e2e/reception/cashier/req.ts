@@ -54,13 +54,13 @@ export function batchEnterShinryou(visitId: number, shinryoucodes: number[]) {
     shinryoucodes).its("body").then(body => castList(castNumber)(body));
 }
 
-export function getMeisai(visitId: number) {
+export function getMeisai(visitId: number): Cypress.Chainable<Meisai> {
   return cy.request(Cypress.env("API") + `/get-meisai?visit-id=${visitId}`)
     .its("body")
     .then(body => Meisai.cast(body))
 }
 
-export function enterChargeValue(visitId: number, chargeValue: number) {
+export function enterChargeValue(visitId: number, chargeValue: number): Cypress.Chainable<Charge> {
   return cy.request(Cypress.env("API") + 
     `/enter-charge-value?visit-id=${visitId}&charge-value=${chargeValue}`)
     .its("body")

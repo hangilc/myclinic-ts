@@ -3,6 +3,9 @@ import { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { format, f2, KanjiDate } from "kanjidate";
 import patientTmpl from "@cypress/fixtures/patient-a.json";
 import { fillDateForm } from "@cypress/lib/form";
+import { dialogOpen, dialogClose } from "@cypress/lib/dialog";
+
+export { dialogOpen, dialogClose };
 
 
 export function fillPatientForm(patient: Patient) {
@@ -184,46 +187,3 @@ export function patientDialogClose() {
   dialogClose("患者情報");
 }
 
-export function dialogOpen(title: string) {
-  return cy.get("[data-cy=dialog]").should(($d) => {
-    let found: HTMLElement | null = null;
-    $d.find("[data-cy=dialog-title]").each((_, e) => {
-      if( e.innerText === title ) {
-        found = e;
-      }
-    })
-    expect(found).not.null
-    return $d;
-  })
-}
-
-export function doesNotExist(selector: string, pred: (e: JQuery<HTMLElement>) => boolean = _ => true) {
-  cy.get("body").should(($body) => {
-    let found = false;
-    $body.find(selector).each((i, e) => {
-      if (pred(Cypress.$(e))) {
-        found = true;
-      }
-    })
-    expect(found).to.be.false
-  })
-}
-
-export function dialogClose(title: string) {
-  function findTitle($e: JQuery<HTMLElement>): boolean {
-    for (let i = 0; i < $e.length; i++) {
-      if ($e[i].innerText === title) {
-        return true;
-      }
-    }
-    return false;
-  }
-  doesNotExist("[data-cy=dialog]", findTitle);
-}
-
-export function openedDialog(title: string) {
-  return cy.get("[data-cy=dialog]").within((d) => {
-    cy.get("[data-cy=dialog-title]").should("have.text", title);
-    return d;
-  })
-}
