@@ -2,6 +2,7 @@ import { clickSelectPatientLink, selectPatientMenu } from "@cypress/e2e/exam/exa
 import { DiseaseEnterData, type Patient } from "myclinic-model";
 import { dialogClose, newPatient, openedDialog, reqEnterDisease, SearchPatientDialog } from "../e2e-helper";
 import byoumeiNames from "@cypress/fixtures/byoumei-names.json";
+import { fillDateForm } from "@cypress/lib/form";
 
 describe("Disease", () => {
   beforeEach(() => {
@@ -53,7 +54,7 @@ describe("Disease", () => {
     })
   });
 
-  it.only("should change tenki", () => {
+  it("should change tenki", () => {
     newPatient().as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       return reqEnterDisease(new DiseaseEnterData(
@@ -81,9 +82,41 @@ describe("Disease", () => {
           cy.get(`[data-cy=disease-list] [data-cy=disease-aux][data-disease-id=${diseaseId}]`)
             .should("have.text", "(治癒、R5.2.8 - R5.2.15)");
         })
+      })
     })
+  });
+
+  it("should edit", () => {
+    newPatient().as("patient");
+    cy.get<Patient>("@patient").then((patient) => {
+      return reqEnterDisease(new DiseaseEnterData(
+        patient.patientId,
+        byoumeiNames.急性咽頭炎,
+        "2023-02-08",
+        []
+      ))
+    }).as("diseaseId");
+    cy.get<Patient>("@patient").then((patient) => {
+      cy.get<number>("@diseaseId").then((diseaseId) => {
+        openPatient(patient.patientId);
+        cy.get("[data-cy=disease-box]").within(() => {
+          cy.get("[data-cy=edit-link]").click();
+          cy.get("[data-cy=disease-edit]").within(() => {
+            cy.get(`[data-cy=disease-list] [data-cy=disease-name][data-disease-id=${diseaseId}]`).click();
+            cy.get("[data-cy=disease-edit-form] [data-cy=disease-name]").contains("急性咽頭炎");
+            cy.get("[data-cy=end-date-input]").within(() => fillDateForm("2023-02-15"));
+            cy.get(`[data-cy=end-reason-input][data-reason-code=C]`).click();
+            cy.get("button").contains("入力").click();
+          });
+          cy.get("[data-cy=disease-edit] [data-cy=no-disease-selected]");
+          cy.get("[data-cy=disease-edit]").within(() => {
+            cy.get("[data-cy=disease-list] [data-cy=disease-name]").contains("急性咽頭炎");
+            cy.get("[data-cy=disease-list] [data-cy=disease-aux]").contains("(治癒、R5.2.8 - R5.2.15)");
+          });
+        });
+      })
     })
-  })
+  });
 })
 
 function openPatient(patientId: number) {
@@ -97,3 +130,4 @@ function openPatient(patientId: number) {
   });
   dialogClose("患者検索");
 }
+
