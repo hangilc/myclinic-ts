@@ -1,4 +1,4 @@
-import { WqueueState, type Charge, type Meisai, type Patient, type Visit } from "myclinic-model";
+import { WqueueState, type Meisai, type Patient, type Visit } from "myclinic-model";
 import { dialogClose, newPatient, dialogOpen } from "./misc";
 import { listWqueue, startVisit, batchEnterShinryou, getMeisai, enterChargeValue, finishCashier, changeWqueueState } from "./req";
 import { doesNotExist } from "@cypress/lib/dialog";
@@ -87,8 +87,10 @@ describe("Wqueue", () => {
     dialogOpen("会計").within(() => {
       cy.get("button").contains("領収書印刷").click();
     })
-    dialogOpen("領収書印刷");
-    cy.get("button").contains("印刷").click();
+    dialogOpen("領収書印刷").within(($d) => {
+      console.log("d", $d);
+      cy.get("button").contains("印刷").click();
+    })
   });
 })
 

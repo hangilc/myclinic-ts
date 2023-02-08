@@ -44,7 +44,7 @@
   }
 </script>
 
-<div class="dialog" bind:this={dialog} data-cy="dialog">
+<div class="dialog" bind:this={dialog} data-cy="dialog" data-title={title}>
   <div class="title" data-cy="dialog-title">{title}</div>
   <slot />
 </div>

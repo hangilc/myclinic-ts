@@ -55,6 +55,7 @@
   tabindex="0"
   autofocus
   data-cy="dialog"
+  data-title={title}
 >
   <div class="title">
     <span class="title-span" data-cy="dialog-title">{title}</span>
