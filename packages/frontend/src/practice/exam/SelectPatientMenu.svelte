@@ -3,7 +3,7 @@
   export let destroy: () => void;
 </script>
 
-<div class="top">
+<div class="top" data-cy="select-patient-menu">
   <a
     href="javascript:void(0)"
     on:click={() => {

@@ -89,9 +89,6 @@
   </svelte:fragment>
 </ServiceHeader>
 
-<!-- <Pulldown bind:this={selectPatientPulldown} anchor={selectPatientLink}>
-  <SelectPatientMenu onSelect={updateSelectPatientDialog} />
-</Pulldown> -->
 <style>
   a:nth-of-type(1) {
     margin-left: 100px;

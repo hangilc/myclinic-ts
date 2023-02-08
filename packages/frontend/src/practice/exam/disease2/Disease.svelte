@@ -13,23 +13,18 @@
   import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
 
   const unsubs: (() => void)[] = [];
-  let comp: undefined | typeof Current = undefined;
   let env: DiseaseEnv | undefined = undefined;
   let workarea: HTMLElement;
   let clear: () => void = () => {};
 
-  function setWorkarea(e: HTMLElement): void {
-    workarea = e;
-  }
-
   unsubs.push(
     currentPatient.subscribe(async (p) => {
       if (p == null) {
-        env = undefined;
-        comp = undefined;
+        clear();
+        clear = () => {};
       } else {
         env = await DiseaseEnv.create(p);
-        comp = Current;
+        doMode("current");
       }
     })
   );
@@ -39,18 +34,27 @@
   });
 
   async function doMode(mode: Mode) {
+    if (env == null) {
+      return;
+    }
+    const envValue = env;
     clear();
-    let c: typeof comp;
     switch (mode) {
       case "current": {
-        c = Current;
+        const b = new Current({
+          target: workarea,
+          props: {
+            list: env.currentList,
+            onSelect: (d: DiseaseData) => {
+              envValue.editTarget = d;
+              doMode("edit");
+            },
+          },
+        });
+        clear = () => b.$destroy();
         break;
       }
       case "add": {
-        if (env == null) {
-          return;
-        }
-        const envValue = env;
         const b = new Add({
           target: workarea,
           props: {
@@ -65,14 +69,9 @@
           },
         });
         clear = () => b.$destroy();
-        c = undefined;
         break;
       }
       case "tenki": {
-        if (env == null) {
-          return;
-        }
-        const envValue = env;
         const b = new Tenki({
           target: workarea,
           props: {
@@ -89,14 +88,9 @@
           },
         });
         clear = () => b.$destroy();
-        c = undefined;
         break;
       }
       case "edit": {
-        if (env == null) {
-          return;
-        }
-        const envValue = env;
         await envValue.fetchAllList();
         const b = new Edit({
           target: workarea,
@@ -116,37 +110,24 @@
           },
         });
         clear = () => b.$destroy();
-        c = undefined;
         break;
       }
       default: {
-        c = undefined;
         break;
       }
-    }
-    if (c === comp) {
-      comp = undefined;
-      await tick();
-      comp = c;
-    } else {
-      comp = c;
     }
   }
 </script>
 
-{#if env != undefined}
-  <RightBox title="病名">
-    <div class="workarea" use:setWorkarea>
-      <svelte:component this={comp} {env} {doMode} />
-    </div>
-    <div class="commands">
-      <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
-      <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
-      <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
-      <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
-    </div>
-  </RightBox>
-{/if}
+<RightBox title="病名" display={!!env}>
+  <div class="workarea" bind:this={workarea} />
+  <div class="commands">
+    <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
+    <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
+    <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
+    <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
+  </div>
+</RightBox>
 
 <style>
   .workarea {

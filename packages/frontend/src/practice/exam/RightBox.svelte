@@ -1,8 +1,9 @@
 <script lang="ts">
   export let title: string = "";
+  export let display: boolean = true;
 </script>
 
-<div class="top">
+<div class="top" style:display={display ? "block" : "none"}>
   <div class="title">{title}</div>
   <slot />
 </div>
