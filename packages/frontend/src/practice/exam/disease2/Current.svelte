@@ -1,24 +1,26 @@
 <script lang="ts">
   import type { DiseaseData } from "myclinic-model";
-  import type { DiseaseEnv } from "./disease-env";
-  import type { Mode } from "./mode";
   import { startDateRep } from "./start-date-rep";
 
-  export let env: DiseaseEnv;
-  export let doMode: (mode: Mode) => void;
-  const list = env.currentList;
+  export let list: DiseaseData[];
+  export let onSelect: (d: DiseaseData) => void = (_) => {};
 
   function onDiseaseClick(d: DiseaseData) {
-    env.editTarget = d;
-    doMode("edit");
+    onSelect(d);
   }
 </script>
 
 <div>
   {#each list as d (d.disease.diseaseId)}
-    <div on:click={() => onDiseaseClick(d)} class="diseaseWrapper">
-      <span>{d.fullName}</span>
-      <span class="start-date">({startDateRep(d.disease.startDateAsDate)})</span
+    <div
+      on:click={() => onDiseaseClick(d)}
+      class="diseaseWrapper"
+      data-cy="disease-item"
+      data-disease-id={d.disease.diseaseId}
+    >
+      <span data-cy="disease-name">{d.fullName}</span>
+      <span class="start-date" data-cy="disease-aux"
+        >({startDateRep(d.disease.startDateAsDate)})</span
       >
     </div>
   {/each}
