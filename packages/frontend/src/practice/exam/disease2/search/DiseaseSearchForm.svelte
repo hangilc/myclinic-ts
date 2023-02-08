@@ -2,7 +2,7 @@
   import api from "@/lib/api";
   import { genid } from "@/lib/genid";
   import SelectItem from "@/lib/SelectItem.svelte";
-  import type {
+  import {
     ByoumeiMaster,
     DiseaseExample,
     ShuushokugoMaster,
@@ -61,6 +61,19 @@
       };
     });
   }
+
+  function resultKind(result: SearchResult): string {
+    const data = result.data;
+    if( data instanceof ByoumeiMaster ){
+      return "byoumei";
+    } else if( data instanceof ShuushokugoMaster ){
+      return "shuushokugo";
+    } else if( data instanceof DiseaseExample ){
+      return "example";
+    } else {
+      return "unknown";
+    }
+  }
 </script>
 
 <div class="command-box">
@@ -96,8 +109,8 @@
 <div>
   <div class="search-result select" data-cy="search-result">
     {#each searchResult as r}
-      <SelectItem selected={searchSelect} data={r.data}>
-        <div data-cy="search-result-item">{r.label}</div>
+      <SelectItem selected={searchSelect} data={r.data} dataCy="search-result-item">
+        <div data-result-kind={resultKind(r)}>{r.label}</div>
       </SelectItem>
     {/each}
   </div>

@@ -59,10 +59,6 @@
         adjCodes: adjList.map((m) => m.shuushokugocode),
       };
       onEnter(data);
-      // const diseaseId: number = await api.enterDiseaseEx(data);
-      // const d: DiseaseData = await api.getDiseaseEx(diseaseId);
-      // env.addDisease(d);
-      // doMode("add");
     }
   }
 
@@ -103,7 +99,7 @@
   }
 </script>
 
-<div>
+<div data-cy="disease-add">
   <div>
     名称：<span data-cy="disease-name"
       >{diseaseFullName(byoumeiMaster, adjList)}</span

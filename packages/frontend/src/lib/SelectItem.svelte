@@ -6,6 +6,7 @@
   export let data: T;
   export let onSelected: () => void = () => {};
   export let cursor: string = "default";
+  export let dataCy: string = "";
 
   function onClick() {
     selected.set(data);
@@ -15,6 +16,7 @@
 
 <div class="select-item" class:selected={$selected === data} 
     on:click={onClick} style:cursor={cursor}
+    data-cy={dataCy}
     >
   <slot />
 </div>

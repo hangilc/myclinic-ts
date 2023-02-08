@@ -119,13 +119,13 @@
   }
 </script>
 
-<RightBox title="病名" display={!!env}>
+<RightBox title="病名" display={!!env} dataCy="disease-box">
   <div class="workarea" bind:this={workarea} />
   <div class="commands">
-    <a href="javascript:void(0)" on:click={() => doMode("current")}>現行</a>
-    <a href="javascript:void(0)" on:click={() => doMode("add")}>追加</a>
-    <a href="javascript:void(0)" on:click={() => doMode("tenki")}>転機</a>
-    <a href="javascript:void(0)" on:click={() => doMode("edit")}>編集</a>
+    <a href="javascript:void(0)" on:click={() => doMode("current")} data-cy="current-link">現行</a>
+    <a href="javascript:void(0)" on:click={() => doMode("add")} data-cy="add-link">追加</a>
+    <a href="javascript:void(0)" on:click={() => doMode("tenki")} data-cy="tenki-link">転機</a>
+    <a href="javascript:void(0)" on:click={() => doMode("edit")} data-cy="edit-link">編集</a>
   </div>
 </RightBox>
 

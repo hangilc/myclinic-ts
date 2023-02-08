@@ -32,6 +32,26 @@ describe("Disease", () => {
       })
     })
   });
+
+  it.only("should add disease", () => {
+    newPatient().as("patient");
+    cy.get<Patient>("@patient").then((patient) => {
+      openPatient(patient.patientId);
+      cy.get("[data-cy=disease-box]").within(() => {
+        cy.get("[data-cy=add-link]").click();
+        cy.get("[data-cy=disease-add]").within(() => {
+          cy.get("[data-cy=search-result] [data-cy=search-result-item] [data-result-kind=example]")
+            .contains("アレルギー性鼻炎").click();
+          cy.get("button").contains("入力").click();
+        });
+        cy.get("[data-cy=disease-add] [data-cy=disease-name]").should("have.text", "");
+        cy.get("[data-cy=current-link]").click();
+        cy.get("[data-cy=disease-current]").within(() => {
+          cy.get("[data-cy=disease-name]").contains("アレルギー性鼻炎");
+        });
+      });
+    })
+  });
 })
 
 function openPatient(patientId: number) {
