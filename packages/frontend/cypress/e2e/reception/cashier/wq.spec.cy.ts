@@ -88,9 +88,12 @@ describe("Wqueue", () => {
       cy.get("button").contains("領収書印刷").click();
     })
     dialogOpen("領収書印刷").within(($d) => {
-      console.log("d", $d);
       cy.get("button").contains("印刷").click();
     })
+    dialogOpen("会計").within(() => {
+      cy.get("button").contains("会計終了").click();
+    });
+    dialogClose("会計終了");
   });
 })
 
