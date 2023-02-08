@@ -8,15 +8,11 @@ describe("Disease", () => {
     cy.visit("/practice/");
   });
 
-  it("should mount", () => {
-    
-  });
-
   it("should open disease", () => {
     openPatient(1);
   });
 
-  it.only("should show current diseases", () => {
+  it("should show current diseases", () => {
     newPatient().as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       return reqEnterDisease(new DiseaseEnterData(
@@ -27,7 +23,13 @@ describe("Disease", () => {
       ))
     }).as("diseaseId");
     cy.get<Patient>("@patient").then((patient) => {
-      openPatient(patient.patientId);
+      cy.get<number>("@diseaseId").then((diseaseId) => {
+        openPatient(patient.patientId);
+        cy.get("[data-cy=disease-current]");
+        cy.get(`[data-cy=disease-item][data-disease-id=${diseaseId}]`).click();
+        cy.get("[data-cy=disease-edit]");
+        cy.get("[data-cy=disease-edit-form] [data-cy=disease-name]").should("have.text", "急性咽頭炎");
+      })
     })
   });
 })

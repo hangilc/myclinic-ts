@@ -10,7 +10,7 @@
   }
 </script>
 
-<div>
+<div data-cy="disease-current">
   {#each list as d (d.disease.diseaseId)}
     <div
       on:click={() => onDiseaseClick(d)}

@@ -13,8 +13,8 @@
   export let diseases: DiseaseData[];
   export let examples: DiseaseExample[] = [];
   export let editTarget: DiseaseData | null = null;
-  export let onDelete: (diseaseId: number) => void = _ => {};
-  export let onUpdate: (updated: DiseaseData) => void = _ => {};
+  export let onDelete: (diseaseId: number) => void = (_) => {};
+  export let onUpdate: (updated: DiseaseData) => void = (_) => {};
 
   let formValues: EditFormValues | undefined;
   let diseaseDataSelected: Writable<DiseaseData | null> = writable(editTarget);
@@ -39,33 +39,35 @@
   }
 </script>
 
-{#key formValues}
-  {#if formValues == undefined}
-    <span data-cy="no-disease-selected">（病名未選択）</span>
-  {:else}
-    <EditForm
-      {examples}
-      {formValues}
-      onCancel={doFormCancel}
-      onEnter={onUpdate}
-      {onDelete}
-    />
-  {/if}
-{/key}
-<div class="list select">
-  {#each diseases as data}
-    <SelectItem selected={diseaseDataSelected} {data}>
-      <span
-        class="disease-name"
-        class:hasEnd={data.hasEndDate}
-        data-cy="disease-name"
-        data-disease-id={data.disease.diseaseId}>{data.fullName}</span
-      >
-      <span data-cy="disease-aux" data-disease-id={data.disease.diseaseId}
-        >({formatAux(data)})</span
-      >
-    </SelectItem>
-  {/each}
+<div data-cy="disease-edit">
+  {#key formValues}
+    {#if formValues == undefined}
+      <span data-cy="no-disease-selected">（病名未選択）</span>
+    {:else}
+      <EditForm
+        {examples}
+        {formValues}
+        onCancel={doFormCancel}
+        onEnter={onUpdate}
+        {onDelete}
+      />
+    {/if}
+  {/key}
+  <div class="list select">
+    {#each diseases as data}
+      <SelectItem selected={diseaseDataSelected} {data}>
+        <span
+          class="disease-name"
+          class:hasEnd={data.hasEndDate}
+          data-cy="disease-name"
+          data-disease-id={data.disease.diseaseId}>{data.fullName}</span
+        >
+        <span data-cy="disease-aux" data-disease-id={data.disease.diseaseId}
+          >({formatAux(data)})</span
+        >
+      </SelectItem>
+    {/each}
+  </div>
 </div>
 
 <style>
