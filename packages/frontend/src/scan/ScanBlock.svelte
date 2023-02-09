@@ -81,17 +81,6 @@
     });
   }
 
-  // function doSelectKind(event: MouseEvent): void {
-  //   const d: ScanKindPulldown = new ScanKindPulldown({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       anchor: event.target as HTMLElement,
-  //       onEnter: (k: string) => manager.setKindKey(k),
-  //     },
-  //   });
-  // }
-
   function doStartScan(): void {
     manager.scan();
   }

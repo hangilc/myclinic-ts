@@ -8,7 +8,7 @@
   }
 </script>
 
-<div class="top">
+<div class="top" data-cy="side-menu">
   <a
     href="javascript:void(0);"
     on:click={() => start("main")}
