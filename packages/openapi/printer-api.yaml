@@ -1,0 +1,32 @@
+openapi: '3.0.0'
+info:
+  title: MyClinic Printer API
+  version: '1.0'
+servers:
+paths:
+  /scanner/device/:
+    get:
+      description: 接続されているスキャナーのリストを返す
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    deviceId:
+                      type: string
+                      example: "{8CEE1FC6-810F-34A7-BEC7-08002BE2092F}\\0000"
+                      description: Device ID
+                    name:
+                      type: string
+                      example: "EPSON EP-807A Series"
+                      description: スキャナーの名前
+                    description:
+                      type: string
+                      example: "EPSON EP-807A Series"
+                      description: スキャナーの説明
+
