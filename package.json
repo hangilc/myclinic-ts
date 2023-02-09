@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/frontend",
     "packages/model",
-    "packages/rezept"
+    "packages/rezept",
+    "packages/openapi"
   ],
   "scripts": {
     "test-server:start": "cd docker/test-server && docker compose up -d",

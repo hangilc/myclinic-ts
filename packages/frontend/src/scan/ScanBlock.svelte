@@ -115,28 +115,13 @@
       close();
     }
   }
-
-  // function doSelectScanner(event: MouseEvent): void {
-  //   const d: SelectScannerPulldown = new SelectScannerPulldown({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       anchor: event.target as HTMLElement,
-  //       list: scannerList,
-  //       current: manager.scanDevice,
-  //       onSelect: (device: ScannerDevice) => {
-  //         manager.setDevice(device);
-  //       },
-  //     },
-  //   });
-  // }
 </script>
 
-<div class="top">
+<div class="top" data-cy="scan-block">
   <div class="title main">書類のスキャン</div>
   <div class="title">患者選択</div>
-  <div class="work">
-    {patientText}
+  <div class="work" data-cy="patient-workarea">
+    <span data-cy="patient-text">{patientText}</span>
     <button on:click={doSearchPatient}>検索</button>
   </div>
   <div class="title">文書の種類</div>
@@ -149,7 +134,7 @@
   </div>
   <div class="title">スキャナー</div>
   <div class="work">
-    {scannerText}
+    <span data-cy="scanner-text">{scannerText}</span>
     <Popup let:destroy let:trigger>
       <a href="javascript:void(0)" on:click={trigger}>選択</a>
       <SelectScannerPulldown slot="menu" {destroy} list={scannerList}

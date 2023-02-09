@@ -41,13 +41,15 @@
 
 <SurfaceModal {destroy} {title}>
   <form on:submit|preventDefault={doSearch}>
-    <input type="text" bind:value={searchText} use:setFocus />
+    <input type="text" bind:value={searchText} use:setFocus data-cy="search-text-input"/>
     <button type="submit">検索</button>
   </form>
   <div class="result">
     {#each result as p (p.patientId)}
       <SelectItem {selected} data={p}>
-        [{pad(p.patientId, 4, "0")}] {p.fullName()} ({p.fullYomi()})
+        <span data-cy="search-result-item" data-patient-id={p.patientId}>
+          [{pad(p.patientId, 4, "0")}] {p.fullName()} ({p.fullYomi()})
+        </span>
       </SelectItem>
     {/each}
   </div>
