@@ -1,6 +1,6 @@
-import { WqueueState, type Meisai, type Patient, type Visit } from "myclinic-model";
+import { Visit, Wqueue, WqueueState, type Meisai, type Patient } from "myclinic-model";
 import { dialogClose, newPatient, dialogOpen } from "./misc";
-import { listWqueue, startVisit, batchEnterShinryou, getMeisai, enterChargeValue, finishCashier, changeWqueueState } from "./req";
+import { listWqueue, startVisit, batchEnterShinryou, getMeisai, enterChargeValue, changeWqueueState } from "./req";
 import { doesNotExist } from "@cypress/lib/dialog";
 import shinryouNames from "@cypress/fixtures/shinryou-names.json";
 import { castList } from "@/lib/cast";
@@ -58,7 +58,7 @@ describe("Wqueue", () => {
       })
   });
 
-  it.only("should finish cashier", () => {
+  it("should finish cashier", () => {
     startVisit(patient.patientId, new Date()).as("visit");
     cy.get<Visit>("@visit").then(visit => {
       return batchEnterShinryou(visit.visitId, [shinryouNames.初診, shinryouNames.処方せん料])
@@ -95,6 +95,20 @@ describe("Wqueue", () => {
     });
     dialogClose("会計終了");
   });
+
+  it.only("should refresh", () => {
+    cy.visit("/reception/");
+    cy.intercept(Cypress.env("API") + "/list-wqueue-full", [
+      0, [
+        new Wqueue(1, WqueueState.WaitExam.code)
+      ], 
+      {1: new Visit(1, patient.patientId, "2023-02-09 08:57:12", 0, 0, 0, 0, 0, 0)}, 
+      {[patient.patientId]: patient}
+    ]).as("listWqueue");
+    cy.get("button").contains("更新").click();
+    cy.get("@listWqueue");
+    cy.get("[data-cy=wq-row][data-visit-id=1]").should("exist");
+  })
 })
 
 function clickCashierButton(visitId: number) {
