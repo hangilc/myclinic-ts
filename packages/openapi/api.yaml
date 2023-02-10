@@ -1,0 +1,62 @@
+openapi: '3.1.0'
+info:
+  title: MyClinic API
+  version: '1.0'
+paths:
+  /api/get-patient:
+    get:
+      description: 患者番号をもとに患者情報を返す
+      parameters:
+        - in: path
+          description: 患者番号
+          name: patient-id
+          schema:
+            type: integer
+          required: true
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+components:
+  schemas:
+    Patient:
+      description: 患者情報
+      type: object
+      properties:
+        patientId:
+          description: 患者番号
+          type: integer
+          example: 1234
+        lastName:
+          type: string
+          example: 診療
+        firstName:
+          type: string
+          example: 太郎
+        lastNameYomi:
+          type: string
+          example: しんりょう
+        firstNameYomi:
+          type: string
+          example: たろう
+        sex:
+          type: string
+          enum: [M, F]
+          example: M
+        birthday:
+          type: string
+          format: date
+        address:
+          type: string
+          example: 東京都
+        phone:
+          type: string
+          example: 03-1234-5678
+
+
+                  
+
+

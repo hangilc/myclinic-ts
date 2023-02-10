@@ -4,7 +4,8 @@
   "description": "OpenAPI specs for myclinic",
   "main": "index.js",
   "scripts": {
-    "preview-printer-api": "npx @redocly/cli preview-docs --port 9000 printer-api.yaml"
+    "preview-api": "npx @redocly/cli preview-docs --port 9000 api.yaml",
+    "preview-printer-api": "npx @redocly/cli preview-docs --port 9001 printer-api.yaml"
   },
   "author": "Hangil Chang",
   "license": "MIT",
