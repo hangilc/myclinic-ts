@@ -13,9 +13,10 @@
   }
 </script>
 
-<div>
+<div data-cy="select-scanner-pulldown">
   {#each list as d}
     <SelectItem2 data={d} isCurrent={d === current} onSelect={doSelect}
+      dataCy="scanner-item" dataId={encodeURIComponent(d.deviceId)}
       >{d.description}</SelectItem2
     >
   {/each}

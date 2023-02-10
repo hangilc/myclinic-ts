@@ -38,7 +38,7 @@ describe("Scan", () => {
     })
   })
 
-  it.only("should select patient", () => {
+  it("should select patient", () => {
     cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
       scannerDevices);
     cy.get("button").contains("新規スキャン").click();
@@ -48,18 +48,49 @@ describe("Scan", () => {
       });
     })
     dialogOpen("患者検索（スキャン）").within(() => {
-        const drv = SearchPatientDialogDriver;
-        drv.typeInput("1");
-        drv.search();
-        drv.getSearchResultByPatientId(1).click();
-        drv.select();
+      const drv = SearchPatientDialogDriver;
+      drv.typeInput("1");
+      drv.search();
+      drv.getSearchResultByPatientId(1).click();
+      drv.select();
     });
     dialogClose("患者検索（スキャン）");
     cy.get("[data-cy=scan-block]").within(() => {
-      cy.get("[data-cy=patient-text]").should("have.text", 
-      `(${patient.patientId}) ${patient.lastName} ${patient.firstName}`)
+      cy.get("[data-cy=patient-text]").should("have.text",
+        `(${patient.patientId}) ${patient.lastName} ${patient.firstName}`)
     })
   })
+
+  it("should select document type", () => {
+    cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
+      scannerDevices);
+    cy.get("button").contains("新規スキャン").click();
+    cy.get("[data-cy=scan-block]").first().within(() => {
+      cy.get("[data-cy=document-kind-workarea]").within(() => {
+        cy.get("a").contains("選択").click();
+      });
+    });
+    cy.get("[data-cy=scan-kind-pulldown]").within(() => {
+      cy.get("a").contains(/^保険証$/).click();
+    })
+    cy.get("[data-cy=document-kind-workarea] [data-cy=document-kind-text]")
+      .should("have.text", "保険証");
+  })
+
+  it.only("should select scanner", () => {
+    cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
+      scannerDevices);
+    cy.get("button").contains("新規スキャン").click();
+    cy.get("[data-cy=scan-block]").first().within(() => {
+      cy.get("[data-cy=scanner-selection-workarea]").within(() => {
+        cy.get("a").contains("選択").click();
+      })
+    });
+    cy.get("[data-cy=select-scanner-pulldown]").within(() => {
+      cy.get(`[data-cy=scanner-item][data-id='${encodeURIComponent(scannerDevices[0].deviceId)}']`)
+        .click();
+    })
+  });
 });
 
 export { }

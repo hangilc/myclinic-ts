@@ -125,15 +125,15 @@
     <button on:click={doSearchPatient}>検索</button>
   </div>
   <div class="title">文書の種類</div>
-  <div class="work">
-    {kindText}
+  <div class="work" data-cy="document-kind-workarea">
+    <span data-cy="document-kind-text">{kindText}</span>
     <Popup let:destroy let:trigger>
       <a href="javascript:void(0)" on:click={trigger}>選択</a>
       <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/>
     </Popup>
   </div>
   <div class="title">スキャナー</div>
-  <div class="work">
+  <div class="work" data-cy="scanner-selection-workarea">
     <span data-cy="scanner-text">{scannerText}</span>
     <Popup let:destroy let:trigger>
       <a href="javascript:void(0)" on:click={trigger}>選択</a>
@@ -141,14 +141,14 @@
         current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/>
     </Popup>
   </div>
-  <div class="commands">
+  <div class="commands" data-cy="scan-commands">
     <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>
     {#if isScanning}
       <ScanProgress pct={scanPct} />
     {/if}
   </div>
   <div class="title">スキャン文書</div>
-  <div class="work">
+  <div class="work" data-cy="scanned-documents">
     {#each scannedDocs as doc (doc.id)}
       <ScannedDoc
         data={doc}
@@ -158,7 +158,7 @@
       />
     {/each}
   </div>
-  <div class="commands">
+  <div class="commands" data-cy="block-commands">
     <button on:click={doUpload} disabled={!canUpload}>アップロード</button
     ><button on:click={doClose}>閉じる</button>
   </div>

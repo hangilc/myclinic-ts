@@ -10,7 +10,7 @@
   }
 </script>
 
-<div>
+<div data-cy="scan-kind-pulldown">
   {#each Object.keys(kindChoices) as k}
     <a href="javascript:void(0)" on:click={() => doKey(k)}>{k}</a>
   {/each}
