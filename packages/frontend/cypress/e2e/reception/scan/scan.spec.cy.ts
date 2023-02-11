@@ -77,7 +77,7 @@ describe("Scan", () => {
       .should("have.text", "保険証");
   })
 
-  it.only("should select scanner", () => {
+  it("should select scanner", () => {
     cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
       scannerDevices);
     cy.get("button").contains("新規スキャン").click();
@@ -91,6 +91,72 @@ describe("Scan", () => {
         .click();
     })
   });
+
+  it.only("should scan", () => {
+    cy.intercept(Cypress.env("PRINTER-API") + "/scanner/scan?*", (req) => {
+      const deviceId = req.query["device-id"];
+      const resolution = req.query["resolution"];
+      expect(deviceId).equal(scannerDevices[0].deviceId);
+      expect(resolution).equal("100");
+      req.headers["Content-Type"] = "text/plain";
+      req.headers["Content-Length"] = "10";
+      req.reply({
+        headers: {
+          "Content-Type": "text/plain",
+          "Content-Length": "10",
+          "x-saved-image": "scanned-image-17338846808322831557.jpg"
+        },
+        body: "**********"
+      });
+    }).as("scan");
+    newScanBlock();
+    selectPatient(patient);
+    scan();
+    cy.wait("@scan").then(req => {
+      const savedImage: string = req.response?.headers["x-saved-image"] as string;
+      console.log("saved-image", savedImage);
+    });
+    cy.get("[data-cy=scan-block]").first().within(() => {
+      cy.get("[data-cy=scanned-documents]").within(() => {
+        
+      })
+    })
+  })
 });
 
-export { }
+function newScanBlock() {
+  cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
+    scannerDevices);
+  cy.get("button").contains("新規スキャン").click();
+  cy.get("[data-cy=scan-block]");
+}
+
+function selectPatient(patient: Patient) {
+  cy.get("[data-cy=scan-block]").first().within(() => {
+    cy.get("[data-cy=patient-workarea]").within(() => {
+      cy.get("button").contains("検索").click();
+    });
+  })
+  dialogOpen("患者検索（スキャン）").within(() => {
+    const drv = SearchPatientDialogDriver;
+    drv.typeInput("1");
+    drv.search();
+    drv.getSearchResultByPatientId(patient.patientId).click();
+    drv.select();
+  });
+  dialogClose("患者検索（スキャン）");
+  cy.get("[data-cy=scan-block]").first().within(() => {
+    cy.get("[data-cy=patient-text]").should("have.text",
+      `(${patient.patientId}) ${patient.lastName} ${patient.firstName}`)
+  })
+  dialogClose("患者検索（スキャン）");
+}
+
+function scan() {
+  cy.get("[data-cy=scan-block]").first().within(() => {
+    cy.get("[data-cy=scan-commands]").within(() => {
+      cy.get("button").contains("スキャン開始").click();
+    });
+  })
+
+}

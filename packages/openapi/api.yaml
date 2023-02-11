@@ -7,7 +7,7 @@ paths:
     get:
       description: 患者番号をもとに患者情報を返す
       parameters:
-        - in: path
+        - in: query
           description: 患者番号
           name: patient-id
           schema:

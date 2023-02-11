@@ -26,9 +26,6 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
     fs: {
       allow: [
         "../../node_modules", 
-        // "../../node_modules/@histoire", 
-        // "../../node_modules/histoire",
-        // "../../node_modules/svelte-hmr",
         ".", 
         "../model",
       ],

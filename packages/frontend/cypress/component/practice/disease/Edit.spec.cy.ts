@@ -1,4 +1,3 @@
-import { base } from "@/lib/api";
 import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
@@ -79,8 +78,7 @@ describe("Edit Disease", () => {
       }
     });
     cy.get("[data-cy=disease-name][data-disease-id=1]").click();
-    console.log("base", base);
-    cy.intercept(base + "/delete-disease-ex?*", (req) => {
+    cy.intercept(Cypress.env("API") + "/delete-disease-ex?*", (req) => {
       console.log("INTERCEPT");
       expect(req.query["disease-id"]).equal("1");
       deleted = true;
@@ -117,19 +115,19 @@ describe("Edit Disease", () => {
     });
     cy.get("[data-cy=disease-name][data-disease-id=1]").click();
     cy.get("[data-cy=disease-search-input]").type(updatedMaster.name);
-    cy.intercept(base + "/search-byoumei-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       req.reply([updatedMaster]);
     });
     cy.get("button").contains("検索").click();
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains(updatedMaster.name).click();
     cy.get("[data-cy=disease-name]").contains(updatedMaster.name + "の疑い");
-    cy.intercept("POST", base + "/update-disease-ex", (req) => {
+    cy.intercept("POST", Cypress.env("API") + "/update-disease-ex", (req) => {
       const [disease, adjCodes] = JSON.parse(req.body);
       expect(disease).deep.equal(updatedDisease);
       expect(adjCodes).deep.equal([adjMaster.shuushokugocode]);
       req.reply("true");
     }).as("update")
-    cy.intercept(base + "/get-disease-ex?*", (req) => {
+    cy.intercept(Cypress.env("API") + "/get-disease-ex?*", (req) => {
       const diseaseId = req.query["disease-id"]
       expect(diseaseId).equal("1");
       req.reply([
@@ -502,7 +500,7 @@ function interceptShuushokugoSearch(
   callback: (text: string, at: string) => void,
   result: ShuushokugoMaster[]
 ) {
-  return cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+  return cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
     const query = req.query;
     callback(query["text"] as string, query["at"] as string);
     req.reply(result);
@@ -512,7 +510,7 @@ function interceptShuushokugoSearch(
 function interceptUpdateDisease(
   callback: (disease: Disease, adjCodes: number[]) => void
 ) {
-  return cy.intercept("POST", base + "/update-disease-ex", (req) => {
+  return cy.intercept("POST", Cypress.env("API") + "/update-disease-ex", (req) => {
     const [disease, adjCodes] = JSON.parse(req.body);
     callback(disease, adjCodes);
     req.reply("true");
@@ -521,7 +519,7 @@ function interceptUpdateDisease(
 
 function interceptGetDiseaseEx(callback: (diseaseId: number) => void,
   result: [Disease, ByoumeiMaster, [DiseaseAdj, ShuushokugoMaster][]]) {
-  return cy.intercept(base + "/get-disease-ex?*", (req) => {
+  return cy.intercept(Cypress.env("API") + "/get-disease-ex?*", (req) => {
     const diseaseId = req.query["disease-id"]
     callback(+diseaseId);
     req.reply(result);

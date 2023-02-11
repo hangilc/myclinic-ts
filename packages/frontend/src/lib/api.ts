@@ -4,11 +4,19 @@ import { type Op as DrawerOp, castOp as castDrawerOp } from "./drawer/op";
 import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 
-export const backend: string = getBackend();
-export const base: string = backend + "/api";
-export const wsUrl: string = base
+const backend: string = getBackend();
+const base: string = backend + "/api";
+const wsUrl: string = base
   .replace("/api", "/ws/events")
   .replace(/^http?/, "ws");
+
+export function getWsUrl(): string {
+  return wsUrl;
+}
+
+export function getBase(): string {
+  return base;
+}
 
 function getBackend(): string {
   if (!import.meta.env.SSR) {
@@ -16,7 +24,6 @@ function getBackend(): string {
     let proto = l.protocol.toLowerCase();
     let host = l.hostname;
     let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
-    let path = "";
     if( import.meta.env.VITE_BACKEND_PROTO ) {
       proto = import.meta.env.VITE_BACKEND_PROTO;
     }

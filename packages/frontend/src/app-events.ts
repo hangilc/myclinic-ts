@@ -1,4 +1,4 @@
-import api, { wsUrl } from "./lib/api";
+import api, { getWsUrl } from "./lib/api";
 import * as m from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 
@@ -22,7 +22,7 @@ export async function initAppEvents() {
 }
 
 function connect(): void {
-  let ws = new WebSocket(wsUrl);
+  let ws = new WebSocket(getWsUrl());
 
   ws.addEventListener("open", () => {
     log("ws open");

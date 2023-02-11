@@ -18,6 +18,7 @@ export async function startScan(
       pct((loaded / total) * 100);
     });
   } catch (ex) {
+    console.error("scan-error", ex);
     return undefined;
   } finally {
     releaseScanner(device);

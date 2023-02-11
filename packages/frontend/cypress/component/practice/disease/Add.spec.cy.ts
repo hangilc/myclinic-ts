@@ -1,4 +1,3 @@
-import { base } from "@/lib/api";
 import Add from "@/practice/exam/disease2/add/Add.svelte";
 import { fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, DiseaseEnterData, ShuushokugoMaster } from "myclinic-model";
@@ -19,7 +18,7 @@ describe("Disease Add", () => {
       }
     })
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
-    cy.intercept(base + "/search-byoumei-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       const text = req.query["text"];
       const at = req.query["at"];
       expect(text).equal("急性咽頭炎");
@@ -38,7 +37,7 @@ describe("Disease Add", () => {
     })
     cy.get("input[type=radio][value=shuushokugo]").click();
     cy.get("[data-cy=disease-search-input]").type("急性");
-    cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
       const text = req.query["text"];
       const at = req.query["at"];
       expect(text).equal("急性");
@@ -56,7 +55,7 @@ describe("Disease Add", () => {
       }
     })
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
-    cy.intercept(base + "/search-byoumei-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       const master = new ByoumeiMaster(1, "急性咽頭炎");
       req.reply([master]);
     });
@@ -72,7 +71,7 @@ describe("Disease Add", () => {
       }
     })
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
-    cy.intercept(base + "/search-byoumei-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       const master = new ByoumeiMaster(1, "急性咽頭炎");
       req.reply([master]);
     });
@@ -80,7 +79,7 @@ describe("Disease Add", () => {
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains("急性咽頭炎").click();
     cy.get("input[type=radio][value=shuushokugo]").click();
     cy.get("[data-cy=disease-search-input]").type("の疑い");
-    cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
       const master = new ShuushokugoMaster(8002, "の疑い")
       req.reply([master]);
     });
@@ -108,7 +107,7 @@ describe("Disease Add", () => {
       fillDateForm(startDate);
     });
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
-    cy.intercept(base + "/search-byoumei-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       const master = new ByoumeiMaster(1, "急性咽頭炎");
       req.reply([master]);
     });
@@ -116,7 +115,7 @@ describe("Disease Add", () => {
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains("急性咽頭炎").click();
     cy.get("input[type=radio][value=shuushokugo]").click();
     cy.get("[data-cy=disease-search-input]").type("の疑い");
-    cy.intercept(base + "/search-shuushokugo-master*", (req) => {
+    cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
       const master = new ShuushokugoMaster(8002, "の疑い")
       req.reply([master]);
     });

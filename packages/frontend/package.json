@@ -13,8 +13,8 @@
     "story:dev": "histoire dev",
     "story:build": "histoire build",
     "story:preview": "histoire preview",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:open": "VITE_BACKEND_PORT=38080 cypress open",
+    "cy:run": "VITE_BACKEND_PORT=38080 cypress run"
   },
   "devDependencies": {
     "@histoire/plugin-svelte": "^0.12.4",

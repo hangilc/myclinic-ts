@@ -8,7 +8,7 @@
   import RightBox from "../../RightBox.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { dateTimeToSql } from "@/lib/util";
-  import api, { backend } from "@/lib/api";
+  import api from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import { pad } from "@/lib/pad";
   import { showError } from "@/lib/show-error";
@@ -57,7 +57,8 @@
       const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
       await api.createPdfFile(ops, "A6_Landscape", fileName);
       await api.stampPdf(fileName, "receipt");
-      const url = backend + "/portal-tmp/" + fileName;
+      // const url = backend + "/portal-tmp/" + fileName;
+      const url = api.portalTmpFileUrl(fileName);
       if (window) {
         window.open(url, "_blank");
       }

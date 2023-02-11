@@ -28,4 +28,59 @@ paths:
                       type: string
                       example: "EPSON EP-807A Series"
                       description: スキャナーの説明
+  /scanner/scan:
+    get:
+      description: スキャンの実行
+      parameters:
+        - in: query
+          name: device-id
+          type: string
+          required: true
+          description: 使用するスキャナーの device ID
+          example: "{8CEE1FC6-810F-34A7-BEC7-08002BE2092F}\\0000"
+        - in: query
+          name: resolution
+          type: integer
+          required: true
+          description: スキャンの解像度 (pixels per inch)
+          example: 100
+      responses:
+        '200':
+          description: Success
+          headers:
+            x-saved-image:
+              schema:
+                type: string
+              description: ローカルに保存されたスキャン画像のファイル名
+              example: scanned-image-17338846808322831557.jpg
+          content:
+            plain/text:
+              example: "**********"
+              schema:
+                type: string
+                description: >
+                  スキャンの進行状況を報告する。10% ごとに「*」文字がひとつ送信される。スキャン終了時には最終的に 
+                  "**********" が送信されたことになる。
+  /scanner/image/{image-name}:
+    get:
+      description: スキャン画像の取得
+      parameters:
+        - in: path
+          name: image-name
+          type: string
+          required: true
+          description: 取得するスキャン画像の名前
+          example: scanned-image-17338846808322831557.jpg
+      responses: 
+        '200': 
+          description: Success
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+                description: 画像データ
+
+
+
 

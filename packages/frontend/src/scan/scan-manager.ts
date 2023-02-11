@@ -121,7 +121,9 @@ export class ScanManager {
     const img = await startScan(
       scanner.deviceId,
       () => this.onScanStart(),
-      (pct) => this.onScanPctChange(pct),
+      (pct) => {
+        this.onScanPctChange(pct);
+      },
       () => this.onScanEnd()
     );
     if (img == undefined) {

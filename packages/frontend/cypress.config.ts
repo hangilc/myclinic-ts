@@ -6,11 +6,9 @@ export default defineConfig({
       framework: "svelte",
       bundler: "vite",
     },
-  },
-
-  env: {
-    "API": "http://localhost:38080/api",
-    "PRINTER-API": "http://localhost:48080",
+    env: {
+      "PRINTER-API": "http://localhost:48080",
+    }
   },
 
   e2e: {
@@ -18,5 +16,8 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
+    env: {
+      "PRINTER-API": "http://localhost:48080",
+    }
   },
 });
