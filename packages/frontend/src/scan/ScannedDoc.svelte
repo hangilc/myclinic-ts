@@ -39,6 +39,7 @@
       stroke-width="2"
       width="18"
       class="icon"
+      data-cy="ok-icon"
     >
       <path
         stroke-linecap="round"
@@ -56,6 +57,7 @@
       stroke-width="2"
       width="18"
       class="icon"
+      data-cy="failure-icon"
     >
       <path
         stroke-linecap="round"

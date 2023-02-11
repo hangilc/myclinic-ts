@@ -20,6 +20,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Patient'
+  /api/upload-patient-image:
+    post:
+      description: 患者画像をアップロードする
+      parameters: 
+        - in: query
+          name: patient-id
+          schema:
+            type: integer
+          required: true
+          description: 患者番号
+          example: 1234
+        - in: query
+          name: file-name
+          schema:
+            type: string
+          required: true
+          description: アップロード後のファイル名
+          example: 1234-hokensho-20230211220932-01.jpg
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              description: 画像データ
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: 成功（true）、失敗（false）
+  /api/patient-image:
+    get:
+      description: 患者画像をダウンロードする
+      parameters:
+        - in: query
+          name: patient-id
+          schema:
+            type: integer
+          required: true
+          description: 患者番号
+          example: 1234
+        - in: query
+          name: file-name
+          schema:
+            type: string
+          required: true
+          description: アップロード後のファイル名
+          example: 1234-hokensho-20230211220932-01.jpg
+      responses:
+        '200':
+          description: Success
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+                description: 画像データ
 components:
   schemas:
     Patient:

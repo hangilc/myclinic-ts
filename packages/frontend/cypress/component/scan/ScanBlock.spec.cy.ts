@@ -1,14 +1,11 @@
+import { getBase } from "@/lib/api";
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import scannerDevices from "@cypress/fixtures/scanner-devices.json";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { SearchPatientDialogDriver } from "@cypress/lib/drivers";
-import patient1 from "@cypress/fixtures/patient-1.json";
-import { getBase } from "@/lib/api";
-import { interceptPatient1 } from "@cypress/lib/intercept";
 
 describe("Scan Block", () => {
   it("should show scanned document", () => {
-    interceptPatient1();
     cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
       scannerDevices).as("deviceList");
     cy.intercept(Cypress.env("PRINTER-API") + "/scanner/scan?*", (req) => {
@@ -29,7 +26,7 @@ describe("Scan Block", () => {
     }).as("scan");
     cy.mount(ScanBlock, {
       props: {
-        remove: () => {}
+        remove: () => { }
       }
     });
     selectPatient(1);
@@ -41,11 +38,10 @@ describe("Scan Block", () => {
   });
 
   it("should display scanned image", () => {
-    interceptPatient1();
     interceptDevices();
     interceptScan().as("scan");
-    interceptScannerImage().as("image");
-    cy.mount(ScanBlock, { props: { remove: () => {} } });
+    interceptScannerImage("scanned-image.jpg").as("image");
+    cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(1);
     scan();
     cy.wait("@scan");
@@ -61,7 +57,53 @@ describe("Scan Block", () => {
         })
     })
   })
+
+  it.only("should upload scanned image", () => {
+    const patientId = 1;
+    interceptDevices();
+    interceptScan().as("scan");
+    interceptScannerImage("scanned-image.jpg").as("image");
+    cy.fixture("scanned-image.jpg", null).as("imageData");
+    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    selectPatient(patientId);
+    cy.wait(2000);
+    scan();
+    cy.wait("@scan");
+    cy.get("button").contains("アップロード").click();
+    cy.wait("@image");
+    let imageData: Uint8Array;
+    cy.get<Uint8Array>("@imageData").then(d => imageData = d);
+    cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]").within(() => {
+      cy.get("svg[data-cy=ok-icon]").should("be.visible");
+      cy.get("[data-cy=upload-file-name]").invoke("text").then((fileName) => {
+        cy.request<ArrayBuffer>({
+          url: (getBase() + `/patient-image?patient-id=${patientId}&file-name=${fileName}`),
+          encoding: null
+        }).its("body")
+          .then(async(body) => {
+            const bodyArray = new Uint8Array(body);
+            expect(equalUint8Array(bodyArray, imageData)).to.be.true;
+          })
+      })
+    });
+
+  })
 });
+
+function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
+  if( a === b ){
+    return true;
+  }
+  if( a.length !== b.length ){
+    return false;
+  }
+  for(let i=0;i<a.length;i++){
+    if( a[i] !== b[i] ){
+      return false;
+    }
+  }
+  return true;
+}
 
 function selectPatient(patientId: number) {
   cy.get("[data-cy=patient-workarea]").within(() => {
@@ -89,7 +131,7 @@ function scan() {
 
 function interceptDevices() {
   cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
-  scannerDevices).as("deviceList");
+    scannerDevices).as("deviceList");
 }
 
 function interceptScan() {
@@ -111,13 +153,13 @@ function interceptScan() {
   });
 }
 
-function interceptScannerImage() {
+function interceptScannerImage(fixture: string) {
   return cy.intercept(Cypress.env("PRINTER-API") + "/scanner/image/*", (req) => {
     req.reply({
       headers: {
         "Content-Type": "image/jpeg"
       },
-      fixture: "scanned-image.jpg"
+      fixture,
     })
   });
 }

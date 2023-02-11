@@ -80,14 +80,15 @@ async function postRaw<T>(
   cmd: string,
   data: any,
   params: ParamsInit,
-  cast: Caster<T>
+  cast: Caster<T>,
+  init: object = {}
 ): Promise<T> {
   let arg = `${base}/${cmd}`;
   if (typeof params === "object" && Object.keys(params).length !== 0) {
     const q = new URLSearchParams(params).toString();
     arg += `?${q}`;
   }
-  const resp = await fetch(arg, { method: "POST", body: data });
+  const resp = await fetch(arg, { method: "POST", body: data, ...init });
   return cast(await resp.json());
 }
 
@@ -1123,7 +1124,12 @@ export default {
       "save-patient-image",
       data,
       { "patient-id": patientId.toString(), "file-name": fileName },
-      castBoolean
+      castBoolean,
+      {
+        headers: {
+          "Content-Type": "application/octet-stream"
+        }
+      }
     );
   },
 
