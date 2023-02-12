@@ -4,65 +4,69 @@ import scannerDevices from "@cypress/fixtures/scanner-devices.json";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
 
-describe("Scan Block", () => {
-  it("should show scanned document", () => {
-    cy.intercept(Cypress.env("PRINTER-API") + "/scanner/device/",
-      scannerDevices).as("deviceList");
-    cy.intercept(Cypress.env("PRINTER-API") + "/scanner/scan?*", (req) => {
-      const deviceId = req.query["device-id"];
-      const resolution = req.query["resolution"];
-      expect(deviceId).equal(scannerDevices[0].deviceId);
-      expect(resolution).equal("100");
-      req.headers["Content-Type"] = "text/plain";
-      req.headers["Content-Length"] = "10";
-      req.reply({
-        headers: {
-          "Content-Type": "text/plain",
-          "Content-Length": "10",
-          "x-saved-image": "scanned-image-17338846808322831557.jpg"
-        },
-        body: "**********"
-      });
-    }).as("scan");
-    cy.mount(ScanBlock, {
-      props: {
-        remove: () => { }
-      }
-    });
-    selectPatient(1);
-    scan();
-    cy.wait("@scan");
-    cy.get("[data-cy=scanned-documents]").within(() => {
-      cy.get(`[data-cy=upload-file-name]`).contains(/^1-.+-01.jpg$/);
-    })
-  });
+const ScannedDocDriver = {
+  hasSavedFileName(index: number, savedFileName: string) {
+    cy.get("[data-cy=upload-file-name]")
+      .should("have.attr", "data-scanned-file-name", savedFileName);
+  },
 
-  it("should display scanned image", () => {
+  clickDisplay() {
+    cy.get("a").contains("表示").click();
+  }
+}
+
+describe("Scan Block", () => {
+  it("should scan", () => {
     interceptDevices();
     interceptScan().as("scan");
-    interceptScannerImage("scanned-image.jpg").as("image");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(1);
     scan();
-    cy.wait("@scan");
-    cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]").within(() => {
-      cy.get("a").contains("表示").click();
+    let savedFile: string;
+    cy.wait("@scan").then(req => {
+      savedFile = req.response!.headers["x-saved-image"] as string;
     });
-    cy.wait("@image");
+    // cy.wrap({}).then(() => interceptScannerImage(savedFile, scannedImage).as("scannerImage"));
+    // clickDisplay();
+    getScannedDocument(1).within(() => {
+      ScannedDocDriver.hasSavedFileName(1, savedFile);
+    })
+  });
+
+  it.only("should display scanned image", () => {
+    interceptDevices();
+    interceptScan().as("scan");
+    let scannedImage: Uint8Array;
+    fixtureImage("scanned-image.jpg").then(img => scannedImage = img);
+    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    selectPatient(1);
+    scan();
+    let savedFile: string;
+    cy.wait("@scan").then(req => {
+      savedFile = req.response!.headers["x-saved-image"] as string;
+    });
+    cy.wrap({}).then(() => {
+      interceptScannerImage(savedFile, scannedImage).as("getScannedImage");
+    })
+    getScannedDocument(1).within(() => {
+      ScannedDocDriver.clickDisplay();
+    });
     dialogOpen("スキャン画像プレビュー").within(() => {
       cy.get<HTMLImageElement>("[src]")
         .should("be.visible")
         .and(($img) => {
           expect($img[0].naturalWidth).to.be.greaterThan(0);
         })
-    })
+      cy.get("[data-cy=cross-icon]").click();
+    });
+    dialogClose("スキャン画像プレビュー");
   })
 
   it("should upload scanned image", () => {
     const patientId = 1;
     interceptDevices();
     interceptScan().as("scan");
-    interceptScannerImage("scanned-image.jpg").as("image");
+    // interceptScannerImage("scanned-image.jpg").as("image");
     cy.fixture("scanned-image.jpg", null).as("imageData");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(patientId);
@@ -91,7 +95,7 @@ describe("Scan Block", () => {
     const patientId = 1;
     interceptDevices();
     interceptScan().as("scan");
-    interceptScannerImage("scanned-image.jpg").as("image");
+    // interceptScannerImage("scanned-image.jpg").as("image");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(patientId);
     scan();
@@ -109,7 +113,7 @@ describe("Scan Block", () => {
       .should("not.exist");
   });
 
-  it.only("should rescan image", () => {
+  it("should rescan image", () => {
     const patientId = 1;
     interceptDevices();
     interceptScan().as("scan");
@@ -127,6 +131,26 @@ describe("Scan Block", () => {
     cy.wait("@scan");
     cy.wait("@delete");
   });
+
+  it("should display uploaded image", () => {
+    const patientId = 1;
+    interceptDevices();
+    interceptScan().as("scan");
+    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    selectPatient(patientId);
+    scan();
+    let savedFile: string;
+    cy.wait("@scan").then(req => {
+      savedFile = req.response!.headers["x-saved-image"] as string;
+    })
+    let uploadFileName: string;
+    getUploadFileNameElement().invoke("text")
+      .then(name => uploadFileName = name).as("uploadFileName");
+    cy.wrap({}).then(() => {
+      cy.log(savedFile);
+      cy.log(uploadFileName);
+    });
+  })
 
 });
 
@@ -194,13 +218,15 @@ function interceptScan() {
   });
 }
 
-function interceptScannerImage(fixture: string) {
-  return cy.intercept("GET", Cypress.env("PRINTER-API") + "/scanner/image/*", (req) => {
+function interceptScannerImage(fileName: string, image: Uint8Array) {
+  const url = Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`
+  return cy.intercept("GET", url, (req) => {
     req.reply({
       headers: {
-        "Content-Type": "image/jpeg"
+        "Content-Type": "image/jpeg",
+        "Content-Length": image.length.toString()
       },
-      fixture,
+      body: image.buffer
     })
   });
 }
@@ -213,7 +239,28 @@ function interceptDeleteScannedImage(fileName: string) {
     })
 }
 
+
+function scannedDocumentSelector(index: number = 1): string {
+  return "[data-cy=scanned-documents]" + " " +
+    `[data-cy=scanned-document-item][data-index=${index}]`;
+}
+
 function getScannedDocument(index: number = 1) {
-  return cy.get(
-    `[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=${index}]`)
+  const seltor = scannedDocumentSelector(index);
+  return cy.get(seltor)
+}
+
+function getUploadFileNameElement(index: number = 1) {
+  const selector = scannedDocumentSelector(index) + " [data-cy=upload-file-name]";
+  return cy.get(selector);
+}
+
+function clickDisplay(index: number = 1) {
+  getScannedDocument(index).within(() => {
+    cy.get("a").contains("表示").click();
+  })
+}
+
+function fixtureImage(fixture: string) {
+  return cy.fixture<Uint8Array>(fixture, null)
 }
