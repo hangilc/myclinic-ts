@@ -20,7 +20,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Patient'
-  /api/upload-patient-image:
+  /api/save-patient-image:
     post:
       description: 患者画像をアップロードする
       parameters: 

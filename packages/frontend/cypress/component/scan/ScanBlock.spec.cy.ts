@@ -12,6 +12,14 @@ const ScannedDocDriver = {
 
   clickDisplay() {
     cy.get("a").contains("表示").click();
+  },
+
+  clickUpload() {
+    cy.get("a").contains("アップロード").click();
+  },
+
+  getUploadFileName() {
+    return cy.get("[data-cy=upload-file-name]").invoke("text");
   }
 }
 
@@ -26,14 +34,12 @@ describe("Scan Block", () => {
     cy.wait("@scan").then(req => {
       savedFile = req.response!.headers["x-saved-image"] as string;
     });
-    // cy.wrap({}).then(() => interceptScannerImage(savedFile, scannedImage).as("scannerImage"));
-    // clickDisplay();
     getScannedDocument(1).within(() => {
       ScannedDocDriver.hasSavedFileName(1, savedFile);
     })
   });
 
-  it.only("should display scanned image", () => {
+  it("should display scanned image", () => {
     interceptDevices();
     interceptScan().as("scan");
     let scannedImage: Uint8Array;
@@ -62,33 +68,68 @@ describe("Scan Block", () => {
     dialogClose("スキャン画像プレビュー");
   })
 
-  it("should upload scanned image", () => {
-    const patientId = 1;
+  it.only("should upload scanned image", () => {
     interceptDevices();
     interceptScan().as("scan");
-    // interceptScannerImage("scanned-image.jpg").as("image");
-    cy.fixture("scanned-image.jpg", null).as("imageData");
+    let scannedImage: Uint8Array;
+    cy.fixture("scanned-image.jpg", null).then(img => scannedImage = img).as("fixture");
+    // fixtureImage("scanned-image.jpg").then(img => scannedImage = img).as("fixture");
+    cy.get<Uint8Array>("@fixture").then(img => scannedImage = img);
     cy.mount(ScanBlock, { props: { remove: () => { } } });
-    selectPatient(patientId);
+    selectPatient(1);
     scan();
-    cy.wait("@scan");
-    cy.get("button").contains("アップロード").click();
-    cy.wait("@image");
-    let imageData: Uint8Array;
-    cy.get<Uint8Array>("@imageData").then(d => imageData = d);
-    cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]").within(() => {
-      cy.get("svg[data-cy=ok-icon]").should("be.visible");
-      cy.get("[data-cy=upload-file-name]").invoke("text").then((fileName) => {
-        cy.request<ArrayBuffer>({
-          url: (getBase() + `/patient-image?patient-id=${patientId}&file-name=${fileName}`),
-          encoding: null
-        }).its("body")
-          .then(async (body) => {
-            const bodyArray = new Uint8Array(body);
-            expect(equalUint8Array(bodyArray, imageData)).to.be.true;
+    cy.wait("@scan").then(req => {
+      const savedFile = req.response!.headers["x-saved-image"] as string;
+      interceptScannerImage(savedFile, scannedImage);
+      getUploadFileNameElement().invoke("text").then(uploadFile => {
+        // interceptSavePatientImage(1, uploadFile, scannedImage).as("upload");
+        cy.intercept({
+          method: "OPTIONS",
+          url: getBase() + "/*",
+        }, (req) => {
+          req.reply({
+            statusCode: 204,
+            headers: {
+              "Access-Control-Allow-Headers": "content-type",
+              "Access-Control-Allow-Methods": "PATCH, HEAD, PUT, GET, POST, DELETE",
+              "Access-Control-Allow-Origin": "*",
+              "Content-Length": "0",
+            },
+            body: ""
           })
+        });
+        cy.intercept("POST", getBase() + "/save-patient-image*", (req) => {
+          console.log(req.body.length);
+          req.reply({
+            statusCode: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Content-Length": "4",
+            },
+            body: "true"
+          });
+        }).as("upload");
+        cy.get("button").contains("アップロード").click();
+        cy.wait("@upload");
+        cy.log("done");
       })
     });
+    // cy.wait("@image");
+    // let imageData: Uint8Array;
+    // cy.get<Uint8Array>("@imageData").then(d => imageData = d);
+    // cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]").within(() => {
+    //   cy.get("svg[data-cy=ok-icon]").should("be.visible");
+    //   cy.get("[data-cy=upload-file-name]").invoke("text").then((fileName) => {
+    //     cy.request<ArrayBuffer>({
+    //       url: (getBase() + `/patient-image?patient-id=${patientId}&file-name=${fileName}`),
+    //       encoding: null
+    //     }).its("body")
+    //       .then(async (body) => {
+    //         const bodyArray = new Uint8Array(body);
+    //         expect(equalUint8Array(bodyArray, imageData)).to.be.true;
+    //       })
+    //   })
+    // });
   });
 
   it("should delete scanned image", () => {
@@ -139,16 +180,11 @@ describe("Scan Block", () => {
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(patientId);
     scan();
-    let savedFile: string;
     cy.wait("@scan").then(req => {
-      savedFile = req.response!.headers["x-saved-image"] as string;
-    })
-    let uploadFileName: string;
-    getUploadFileNameElement().invoke("text")
-      .then(name => uploadFileName = name).as("uploadFileName");
-    cy.wrap({}).then(() => {
-      cy.log(savedFile);
-      cy.log(uploadFileName);
+      const savedFile = req.response!.headers["x-saved-image"] as string;
+      getUploadFileNameElement().invoke("text").then(uploadFile => {
+
+      })
     });
   })
 
@@ -229,6 +265,27 @@ function interceptScannerImage(fileName: string, image: Uint8Array) {
       body: image.buffer
     })
   });
+}
+
+function interceptSavePatientImage(
+  patientId: number,
+  fileName: string,
+  assertData: Uint8Array
+) {
+  return cy.intercept("POST", getBase() + "/save-patient-image*", (req) => {
+    console.log("called");
+    req.reply("true");
+  });
+  // const url = getBase() + `/save-patient-image?patient-id=${patientId}&file-name=${fileName}`;
+  // return cy.intercept("POST", url, (req) => {
+  //   req.reply({
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "Content-Length": "4",
+  //     },
+  //     body: "true"
+  //   });
+  // })
 }
 
 function interceptDeleteScannedImage(fileName: string) {

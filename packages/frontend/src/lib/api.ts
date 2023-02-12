@@ -88,7 +88,7 @@ async function postRaw<T>(
     const q = new URLSearchParams(params).toString();
     arg += `?${q}`;
   }
-  const resp = await fetch(arg, { method: "POST", body: data, ...init });
+  const resp = await fetch(arg, Object.assign({ method: "POST", body: data}, init ));
   return cast(await resp.json());
 }
 
@@ -1127,7 +1127,8 @@ export default {
       castBoolean,
       {
         headers: {
-          "Content-Type": "application/octet-stream"
+          "Content-Type": "application/octet-stream",
+          "Content-Length": data.byteLength.toString(),
         }
       }
     );
