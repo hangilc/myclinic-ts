@@ -87,7 +87,7 @@ describe("Scan Block", () => {
     });
   });
 
-  it.only("should delete scanned image", () => {
+  it("should delete scanned image", () => {
     const patientId = 1;
     interceptDevices();
     interceptScan().as("scan");
@@ -107,7 +107,27 @@ describe("Scan Block", () => {
     cy.wait("@delete");
     cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]")
       .should("not.exist");
-  })
+  });
+
+  it.only("should rescan image", () => {
+    const patientId = 1;
+    interceptDevices();
+    interceptScan().as("scan");
+    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    selectPatient(patientId);
+    scan();
+    let savedFile: string;
+    cy.wait("@scan").then(req => {
+      savedFile = req.response!.headers["x-saved-image"] as string;
+    })
+    getScannedDocument().within(() => {
+      interceptDeleteScannedImage(savedFile).as("delete");
+      cy.get("a").contains("再スキャン").click();
+    });
+    cy.wait("@scan");
+    cy.wait("@delete");
+  });
+
 });
 
 function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
@@ -187,8 +207,13 @@ function interceptScannerImage(fixture: string) {
 
 function interceptDeleteScannedImage(fileName: string) {
   console.log("fileName", fileName);
-  return cy.intercept("DELETE", 
+  return cy.intercept("DELETE",
     Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`, (req) => {
-    req.reply("true")
-  })
+      req.reply("true")
+    })
+}
+
+function getScannedDocument(index: number = 1) {
+  return cy.get(
+    `[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=${index}]`)
 }

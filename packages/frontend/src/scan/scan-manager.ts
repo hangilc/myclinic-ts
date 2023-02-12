@@ -170,6 +170,7 @@ export class ScanManager {
         if (d.uploadStatus === UploadStatus.Success) {
           await api.deletePatientImage(patientId, prevUploadImage);
         }
+        await printApi.deleteScannedFile(d.scannedImageFile);
         d.scannedImageFile = img;
         d.uploadStatus = UploadStatus.NotYet;
         this.onDocsChange(docs);
