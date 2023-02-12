@@ -80,6 +80,24 @@ paths:
                 type: string
                 format: binary
                 description: 画像データ
+    delete:
+      description: スキャン画像の削除
+      parameters:
+        - in: path
+          name: image-name
+          type: string
+          required: true
+          description: 削除するスキャン画像の名前
+          example: scanned-image-17338846808322831557.jpg
+      responses: 
+        '200':
+          descriptioni: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: 成功（true）、失敗（false）
+
 
 
 

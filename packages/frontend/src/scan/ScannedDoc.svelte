@@ -66,7 +66,9 @@
       />
     </svg>
   {/if}
-  <span data-cy="upload-file-name">{data.uploadFileName}</span>
+  <span data-cy="upload-file-name"
+    data-scanned-file-name={data.scannedImageFile}
+  >{data.uploadFileName}</span>
   <a href="javascript:void(0)" on:click={doView}>表示</a> |
   {#if $canScan}
   <a href="javascript:void(0)" on:click={doRescan}>再スキャン</a> |

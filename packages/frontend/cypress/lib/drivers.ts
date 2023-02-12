@@ -1,3 +1,5 @@
+import { dialogClose, dialogOpen } from "./dialog";
+
 export const SearchPatientDialogDriver = {
   typeInput(text: string) {
     cy.get("[data-cy=search-text-input]").clear().type(text);
@@ -13,5 +15,14 @@ export const SearchPatientDialogDriver = {
 
   select() {
     cy.get("button").contains("選択").click();
+  }
+}
+
+export const ConfirmDriver = {
+  yes() {
+    dialogOpen("確認").within(() => {
+      cy.get("button").contains("はい").click();
+    });
+    dialogClose("確認");
   }
 }
