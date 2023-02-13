@@ -1,5 +1,9 @@
+export function dialogSelector(title: string): string {
+  return `[data-cy=dialog][data-title='${title}']`;
+}
+
 export function dialogOpen(title: string) {
-  return cy.get(`[data-cy=dialog][data-title='${title}']`).should("exist");
+  return cy.get(dialogSelector(title)).should("exist");
 }
 
 export function doesNotExist(selector: string, pred: (e: JQuery<HTMLElement>) => boolean = _ => true) {
