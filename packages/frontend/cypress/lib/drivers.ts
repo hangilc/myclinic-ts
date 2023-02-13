@@ -19,8 +19,11 @@ export const SearchPatientDialogDriver = {
 }
 
 export const ConfirmDriver = {
-  yes() {
+  yes(msg?: string) {
     dialogOpen("確認").within(() => {
+      if( msg ){
+        cy.get("[data-cy=text]").should("have.text", msg!);
+      }
       cy.get("button").contains("はい").click();
     });
     dialogClose("確認");

@@ -35,6 +35,10 @@ const ScannedDocDriver = {
     cy.get(this.itemSelector(index) + " a").contains("表示").click();
   },
 
+  clickRescan(index: number) {
+    cy.get(this.itemSelector(index) + " a").contains("再スキャン").click();
+  },
+
   clickUpload(index: number) {
     cy.get(this.itemSelector(index) + " a").contains("アップロード").click();
   },
@@ -145,7 +149,7 @@ describe("Scan Block", () => {
     });
   });
 
-  it.only("should delete scanned image", () => {
+  it("should delete scanned image", () => {
     interceptScan().as("scan");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(1);
@@ -157,29 +161,26 @@ describe("Scan Block", () => {
       interceptDeleteScannedImage(savedFile).as("delete");
       ScannedDocDriver.clickDelete(1);
     })
-    ConfirmDriver.yes();
+    ConfirmDriver.yes("このスキャン文書を削除しますか？");
     cy.wait("@delete");
     cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]")
       .should("not.exist");
   });
 
-  it("should rescan image", () => {
-    const patientId = 1;
-    interceptDevices();
+  it.only("should rescan image", () => {
     interceptScan().as("scan");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
-    selectPatient(patientId);
+    selectPatient(1);
     scan();
-    let savedFile: string;
     cy.wait("@scan").then(req => {
-      savedFile = req.response!.headers["x-saved-image"] as string;
-    })
-    getScannedDocument().within(() => {
+      return req.response!.headers["x-saved-image"] as string;
+    }).as("savedFile");
+    cy.get<string>("@savedFile").then(savedFile => {
       interceptDeleteScannedImage(savedFile).as("delete");
-      cy.get("a").contains("再スキャン").click();
-    });
-    cy.wait("@scan");
-    cy.wait("@delete");
+      ScannedDocDriver.clickRescan(1);
+      cy.wait("@scan");
+      cy.wait("@delete");
+      })
   });
 
   it("should display uploaded image", () => {
