@@ -167,7 +167,7 @@ describe("Scan Block", () => {
       .should("not.exist");
   });
 
-  it.only("should rescan image", () => {
+  it("should rescan image", () => {
     interceptScan().as("scan");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
     selectPatient(1);
@@ -178,24 +178,34 @@ describe("Scan Block", () => {
     cy.get<string>("@savedFile").then(savedFile => {
       interceptDeleteScannedImage(savedFile).as("delete");
       ScannedDocDriver.clickRescan(1);
-      cy.wait("@scan");
+      cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
+        .as("savedFile2");
       cy.wait("@delete");
+      cy.get<string>("@savedFile2").then(savedFile => {
+        ScannedDocDriver.hasSavedFileName(1, savedFile);
       })
+    })
   });
 
-  it("should display uploaded image", () => {
-    const patientId = 1;
-    interceptDevices();
+  it.only("should display uploaded image", () => {
     interceptScan().as("scan");
+    cy.fixture("scanned-image.jpg", null).as("imageData");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
-    selectPatient(patientId);
+    selectPatient(1);
     scan();
-    cy.wait("@scan").then(req => {
-      const savedFile = req.response!.headers["x-saved-image"] as string;
-      getUploadFileNameElement().invoke("text").then(uploadFile => {
-
-      })
-    });
+    cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
+      .as("savedFile");
+    cy.get<string>("@savedFile").then(savedFile => {
+      cy.get<Uint8Array>("@imageData").then(imageData => {
+        interceptScannerImage(savedFile, imageData);
+      });
+      ScannedDocDriver.getUploadFileNameElement(1).invoke("text").then(uploadFile => {
+        ScannedDocDriver.clickDisplay(1);
+      });
+      PreviewDriver.dialogOpen();
+      PreviewDriver.hasImage();
+      PreviewDriver.dialogClose();
+    })
   })
 
 });
