@@ -38,10 +38,18 @@ const ScannedDocDriver = {
   clickUpload(index: number) {
     cy.get(this.itemSelector(index) + " a").contains("アップロード").click();
   },
+
+  clickDelete(index: number) {
+    cy.get(this.itemSelector(index) + " a").contains("削除").click();
+  }
 }
 
 const PreviewDriver = {
   title: "スキャン画像プレビュー",
+
+  dialogSelector() {
+    return dialogSelector(this.title);
+  },
 
   dialogOpen() {
     dialogOpen(this.title);
@@ -52,12 +60,17 @@ const PreviewDriver = {
   },
 
   hasImage() {
-    cy.get<HTMLImageElement>(dialogSelector("スキャン画像プレビュー") + " img[src]")
+    cy.get<HTMLImageElement>(this.dialogSelector() + " img[src]")
       .should("exist")
       .and("be.visible")
       .and(($img) => {
         expect($img[0].naturalWidth).to.be.greaterThan(0);
       })
+  },
+
+  clickCross() {
+    const sel = this.dialogSelector() + " [data-cy=cross-icon]"
+    cy.get(sel).click();
   }
 }
 
@@ -79,7 +92,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should display scanned image", () => {
+  it("should display scanned image", () => {
     interceptScan().as("scan");
     fixtureImage("scanned-image.jpg").as("imageData");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
@@ -96,16 +109,8 @@ describe("Scan Block", () => {
           ScannedDocDriver.clickDisplay(1);
           PreviewDriver.dialogOpen();
           PreviewDriver.hasImage();
+          PreviewDriver.clickCross();
           PreviewDriver.dialogClose();
-          // dialogOpen("スキャン画像プレビュー").within(() => {
-          //   cy.get<HTMLImageElement>("[src]")
-          //     .should("be.visible")
-          //     .and(($img) => {
-          //       expect($img[0].naturalWidth).to.be.greaterThan(0);
-          //     })
-          //   cy.get("[data-cy=cross-icon]").click();
-          // });
-          // dialogClose("スキャン画像プレビュー");
         })
       })
     })
@@ -140,23 +145,18 @@ describe("Scan Block", () => {
     });
   });
 
-  it("should delete scanned image", () => {
-    const patientId = 1;
-    interceptDevices();
+  it.only("should delete scanned image", () => {
     interceptScan().as("scan");
-    // interceptScannerImage("scanned-image.jpg").as("image");
     cy.mount(ScanBlock, { props: { remove: () => { } } });
-    cy.wait("@deviceList");
-    selectPatient(patientId);
+    selectPatient(1);
     scan();
     cy.wait("@scan").then((req) => {
-      console.log(req);
-      const savedFile = req.response!.headers["x-saved-image"] as string;
+      return req.response!.headers["x-saved-image"] as string;
+    }).as("savedFile");
+    cy.get<string>("@savedFile").then(savedFile => {
       interceptDeleteScannedImage(savedFile).as("delete");
-    });
-    cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]").within(() => {
-      cy.get("a").contains("削除").click();
-    });
+      ScannedDocDriver.clickDelete(1);
+    })
     ConfirmDriver.yes();
     cy.wait("@delete");
     cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]")
@@ -278,11 +278,8 @@ function interceptSavePatientImage(
 
 function interceptDeleteScannedImage(fileName: string) {
   return cy.intercept("DELETE",
-    Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`, (req) => {
-      req.reply("true")
-    })
+    Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`, "true");
 }
-
 
 function scannedDocumentSelector(index: number = 1): string {
   return "[data-cy=scanned-documents]" + " " +
