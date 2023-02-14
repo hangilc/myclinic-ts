@@ -2,7 +2,7 @@ import { getBase } from "@/lib/api";
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
-import { accessUploadFileName, clickUpload, confirmSavedFileName, interceptDevices, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForScan } from "./scan-helper";
+import { accessUploadFileName, clickUpload, confirmSavedFileName, equalUint8Array, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
 
 function join(...items: string[]): string {
   return items.join(" ");
@@ -22,7 +22,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should display scanned image", () => {
+  it("should display scanned image", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -42,30 +42,21 @@ describe("Scan Block", () => {
     })
   });
 
-  it("should upload scanned image", () => {
+  it.only("should upload scanned image", () => {
     interceptDevices();
-    interceptScan().as("scan");
-    cy.fixture("scanned-image.jpg", null).as("imageData");
-    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    mount();
     selectPatient(1);
+    interceptScan().as("scan");
     scan();
-    cy.wait("@scan").then(req => {
-      const savedFile = req.response!.headers["x-saved-image"] as string;
-      return savedFile;
-    }).as("savedFile");
-    getUploadFileNameElement().invoke("text").as("uploadFile")
-    cy.get<string>("@savedFile").then(savedFile => {
-      cy.get<Uint8Array>("@imageData").then(imageData => {
-        cy.get<string>("@uploadFile").then(uploadFile => {
-          cy.log(imageData.length.toString());
-          interceptScannerImage(savedFile, imageData);
-          interceptSavePatientImage(1, uploadFile).as("saveImage");
-          cy.get("button").contains("アップロード").click();
-          cy.wait("@saveImage").then(req => {
-            const a = new Uint8Array(req.request.body);
-            const b = imageData;
-            expect(equalUint8Array(a, b)).to.be.true;
-          });
+    waitForScan("@scan", savedFile => {
+      accessUploadFileName(1, uploadFile => {
+        loadImageData("scanned-image.jpg", imageData => {
+          interceptScannerImage(savedFile, imageData).as("saveImage");
+          interceptSavePatientImage(1, uploadFile).as("upload");
+          clickUpload();
+          waitForSavePatientImage("@upload", uploadData => {
+            expect(equalUint8Array(uploadData, imageData)).to.be.true;
+          })
         })
       })
     });
@@ -132,29 +123,6 @@ describe("Scan Block", () => {
 
 });
 
-function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
-  if (a === b) {
-    return true;
-  }
-  if (a.length !== b.length) {
-    return false;
-  }
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-
-function interceptSavePatientImage(
-  patientId: number,
-  fileName: string,
-) {
-  const url = getBase() + `/save-patient-image?patient-id=${patientId}&file-name=${fileName}`;
-  return cy.intercept("POST", url)
-}
 
 function interceptDeleteScannedImage(fileName: string) {
   return cy.intercept("DELETE",

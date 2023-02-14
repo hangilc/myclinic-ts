@@ -2,6 +2,7 @@ import scannerDevices from "@cypress/fixtures/scanner-devices.json";
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { SearchPatientDialogDriver } from "@cypress/lib/drivers";
+import { getBase } from "@/lib/api";
 
 export function mount() {
   cy.mount(ScanBlock, { props: { remove: () => { } } });
@@ -65,13 +66,26 @@ export function interceptScannerImage(fileName: string, image: Uint8Array) {
   return cy.intercept("GET", url, { body: image.buffer });
 }
 
+export function interceptSavePatientImage(
+  patientId: number,
+  fileName: string,
+) {
+  const url = getBase() + `/save-patient-image?patient-id=${patientId}&file-name=${fileName}`;
+  return cy.intercept("POST", url)
+}
+
+export function waitForSavePatientImage(alias: string, cb: (uploadingData: Uint8Array) => void): void {
+  cy.wait(alias).then(req => {
+    cb(new Uint8Array(req.request.body));
+  });
+}
 
 function scannedDocWrapperSelector() {
   return "[data-cy=scanned-documents]";
 }
 
 function scannedDocSelector(index: number): string {
-  return scannedDocWrapperSelector() + 
+  return scannedDocWrapperSelector() +
     " [data-cy=scanned-document-item]" + `[data-index=${index}]`;
 }
 
@@ -96,7 +110,7 @@ export function clickDisplay(index: number): void {
   cy.get(scannedDocSelector(index) + " a").contains("表示").click();
 }
 
-export function clickUpload(index: number): void {
+export function clickUpload(): void {
   cy.get("button").contains("アップロード").click();
 }
 
@@ -132,6 +146,21 @@ export const PreviewDriver = {
     const sel = this.dialogSelector() + " [data-cy=cross-icon]"
     cy.get(sel).click();
   }
+}
+
+export function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
+  if (a === b) {
+    return true;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
+  return true;
 }
 
 
