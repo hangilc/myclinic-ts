@@ -1,6 +1,6 @@
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { ConfirmDriver } from "@cypress/lib/drivers";
-import { accessUploadFileName, clickDelete, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
+import { accessUploadFileName, clickDelete, clickDisplay, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
 
 describe("Scan Block", () => {
 
@@ -70,7 +70,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should rescan image", () => {
+  it("should rescan image", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -88,26 +88,4 @@ describe("Scan Block", () => {
   });
 
 });
-
-
-function scannedDocumentSelector(index: number = 1): string {
-  return "[data-cy=scanned-documents]" + " " +
-    `[data-cy=scanned-document-item][data-index=${index}]`;
-}
-
-function getScannedDocument(index: number = 1) {
-  const seltor = scannedDocumentSelector(index);
-  return cy.get(seltor)
-}
-
-function getUploadFileNameElement(index: number = 1) {
-  const selector = scannedDocumentSelector(index) + " [data-cy=upload-file-name]";
-  return cy.get(selector);
-}
-
-function clickDisplay(index: number = 1) {
-  getScannedDocument(index).within(() => {
-    cy.get("a").contains("表示").click();
-  })
-}
 
