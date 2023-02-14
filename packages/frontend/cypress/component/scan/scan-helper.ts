@@ -66,6 +66,11 @@ export function interceptScannerImage(fileName: string, image: Uint8Array) {
   return cy.intercept("GET", url, { body: image.buffer });
 }
 
+export function interceptDeleteScannedImage(fileName: string) {
+  return cy.intercept("DELETE",
+    Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`, "true");
+}
+
 export function interceptSavePatientImage(
   patientId: number,
   fileName: string,
@@ -89,6 +94,10 @@ function scannedDocSelector(index: number): string {
     " [data-cy=scanned-document-item]" + `[data-index=${index}]`;
 }
 
+export function getScannedDocElement(index: number) {
+  return cy.get(scannedDocSelector(index));
+}
+
 function scannedDocUploadFileNameSelector(index: number): string {
   return scannedDocSelector(index) + " [data-cy=upload-file-name]";
 }
@@ -108,6 +117,14 @@ export function uploadSuccessElement(index: number) {
 
 export function clickDisplay(index: number): void {
   cy.get(scannedDocSelector(index) + " a").contains("表示").click();
+}
+
+export function clickRescan(index: number): void {
+  cy.get(scannedDocSelector(index) + " a").contains("再スキャン").click();
+}
+
+export function clickDelete(index: number): void {
+  cy.get(scannedDocSelector(index) + " a").contains("削除").click();
 }
 
 export function clickUpload(): void {

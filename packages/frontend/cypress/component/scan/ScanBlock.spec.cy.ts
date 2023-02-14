@@ -1,13 +1,6 @@
-import { getBase } from "@/lib/api";
 import ScanBlock from "@/scan/ScanBlock.svelte";
-import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
-import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
-import { accessUploadFileName, clickUpload, confirmSavedFileName, equalUint8Array, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
-
-function join(...items: string[]): string {
-  return items.join(" ");
-}
-
+import { ConfirmDriver } from "@cypress/lib/drivers";
+import { accessUploadFileName, clickDelete, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
 
 describe("Scan Block", () => {
 
@@ -42,7 +35,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should upload scanned image", () => {
+  it("should upload scanned image", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -63,41 +56,55 @@ describe("Scan Block", () => {
   });
 
   it("should delete scanned image", () => {
-    interceptScan().as("scan");
-    cy.mount(ScanBlock, { props: { remove: () => { } } });
+    interceptDevices();
+    mount();
     selectPatient(1);
+    interceptScan().as("scan");
     scan();
-    cy.wait("@scan").then((req) => {
-      return req.response!.headers["x-saved-image"] as string;
-    }).as("savedFile");
-    cy.get<string>("@savedFile").then(savedFile => {
+    waitForScan("@scan", savedFile => {
       interceptDeleteScannedImage(savedFile).as("delete");
-      ScannedDocDriver.clickDelete(1);
+      clickDelete(1);
+      ConfirmDriver.yes("このスキャン文書を削除しますか？");
+      cy.wait("@delete");
+      getScannedDocElement(1).should("not.exist");
     })
-    ConfirmDriver.yes("このスキャン文書を削除しますか？");
-    cy.wait("@delete");
-    cy.get("[data-cy=scanned-documents] [data-cy=scanned-document-item][data-index=1]")
-      .should("not.exist");
   });
 
-  it("should rescan image", () => {
-    interceptScan().as("scan");
-    cy.mount(ScanBlock, { props: { remove: () => { } } });
+  it.only("should rescan image", () => {
+    interceptDevices();
+    mount();
     selectPatient(1);
+    interceptScan().as("scan");
     scan();
-    cy.wait("@scan").then(req => {
-      return req.response!.headers["x-saved-image"] as string;
-    }).as("savedFile");
-    cy.get<string>("@savedFile").then(savedFile => {
+    waitForScan("@scan", savedFile => {
+      confirmSavedFileName(1, savedFile);
       interceptDeleteScannedImage(savedFile).as("delete");
-      ScannedDocDriver.clickRescan(1);
-      cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
-        .as("savedFile2");
+      clickRescan(1);
+      waitForScan("@scan", savedFile2 => {
+        confirmSavedFileName(1, savedFile2);
+      });
       cy.wait("@delete");
-      cy.get<string>("@savedFile2").then(savedFile => {
-        ScannedDocDriver.hasSavedFileName(1, savedFile);
-      })
     })
+
+
+
+    // interceptScan().as("scan");
+    // cy.mount(ScanBlock, { props: { remove: () => { } } });
+    // selectPatient(1);
+    // scan();
+    // cy.wait("@scan").then(req => {
+    //   return req.response!.headers["x-saved-image"] as string;
+    // }).as("savedFile");
+    // cy.get<string>("@savedFile").then(savedFile => {
+    //   interceptDeleteScannedImage(savedFile).as("delete");
+    //   ScannedDocDriver.clickRescan(1);
+    //   cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
+    //     .as("savedFile2");
+    //   cy.wait("@delete");
+    //   cy.get<string>("@savedFile2").then(savedFile => {
+    //     ScannedDocDriver.hasSavedFileName(1, savedFile);
+    //   })
+    // })
   });
 
   it("should display uploaded image", () => {
@@ -123,11 +130,6 @@ describe("Scan Block", () => {
 
 });
 
-
-function interceptDeleteScannedImage(fileName: string) {
-  return cy.intercept("DELETE",
-    Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`, "true");
-}
 
 function scannedDocumentSelector(index: number = 1): string {
   return "[data-cy=scanned-documents]" + " " +
