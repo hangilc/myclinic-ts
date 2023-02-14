@@ -87,7 +87,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should delete scanned and uploaded images", () => {
+  it("should delete scanned and uploaded images", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -111,6 +111,14 @@ describe("Scan Block", () => {
       })
     });
   });
+
+  it.only("should delete first of two uploads", () => {
+    interceptDevices();
+    mount();
+    selectPatient(1);
+    interceptScan().as("scan");
+
+  })
 
 });
 
