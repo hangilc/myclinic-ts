@@ -85,48 +85,7 @@ describe("Scan Block", () => {
       });
       cy.wait("@delete");
     })
-
-
-
-    // interceptScan().as("scan");
-    // cy.mount(ScanBlock, { props: { remove: () => { } } });
-    // selectPatient(1);
-    // scan();
-    // cy.wait("@scan").then(req => {
-    //   return req.response!.headers["x-saved-image"] as string;
-    // }).as("savedFile");
-    // cy.get<string>("@savedFile").then(savedFile => {
-    //   interceptDeleteScannedImage(savedFile).as("delete");
-    //   ScannedDocDriver.clickRescan(1);
-    //   cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
-    //     .as("savedFile2");
-    //   cy.wait("@delete");
-    //   cy.get<string>("@savedFile2").then(savedFile => {
-    //     ScannedDocDriver.hasSavedFileName(1, savedFile);
-    //   })
-    // })
   });
-
-  it("should display uploaded image", () => {
-    interceptScan().as("scan");
-    cy.fixture("scanned-image.jpg", null).as("imageData");
-    cy.mount(ScanBlock, { props: { remove: () => { } } });
-    selectPatient(1);
-    scan();
-    cy.wait("@scan").then(req => req.response!.headers["x-saved-image"] as string)
-      .as("savedFile");
-    cy.get<string>("@savedFile").then(savedFile => {
-      cy.get<Uint8Array>("@imageData").then(imageData => {
-        interceptScannerImage(savedFile, imageData);
-      });
-      ScannedDocDriver.getUploadFileNameElement(1).invoke("text").then(uploadFile => {
-        ScannedDocDriver.clickDisplay(1);
-      });
-      PreviewDriver.dialogOpen();
-      PreviewDriver.hasImage();
-      PreviewDriver.dialogClose();
-    })
-  })
 
 });
 
