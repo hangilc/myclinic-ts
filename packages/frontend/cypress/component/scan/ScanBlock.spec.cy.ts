@@ -2,85 +2,16 @@ import { getBase } from "@/lib/api";
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
-import { confirmSavedFileName, interceptDevices, interceptScan, mount, scan, selectPatient, waitForScan } from "./scan-helper";
+import { accessUploadFileName, clickUpload, confirmSavedFileName, interceptDevices, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForScan } from "./scan-helper";
 
 function join(...items: string[]): string {
   return items.join(" ");
 }
 
-const ScannedDocDriver = {
-  wrapper: "[data-cy=scanned-documents]",
-
-  itemPart(index: number) {
-    return "[data-cy=scanned-document-item]" + `[data-index=${index}]`;
-  },
-
-  fileNamePart: "[data-cy=upload-file-name]",
-
-  itemSelector(index: number): string {
-    return join(this.wrapper, this.itemPart(index));
-  },
-
-  getUploadFileNameElement(index: number) {
-    const sel = join(this.itemSelector(index), this.fileNamePart);
-    return cy.get(sel);
-  },
-
-  hasSavedFileName(index: number, savedFileName: string) {
-    this.getUploadFileNameElement(index)
-      .should("have.attr", "data-scanned-file-name", savedFileName);
-  },
-
-  clickDisplay(index: number) {
-    cy.get(this.itemSelector(index) + " a").contains("表示").click();
-  },
-
-  clickRescan(index: number) {
-    cy.get(this.itemSelector(index) + " a").contains("再スキャン").click();
-  },
-
-  clickUpload(index: number) {
-    cy.get(this.itemSelector(index) + " a").contains("アップロード").click();
-  },
-
-  clickDelete(index: number) {
-    cy.get(this.itemSelector(index) + " a").contains("削除").click();
-  }
-}
-
-const PreviewDriver = {
-  title: "スキャン画像プレビュー",
-
-  dialogSelector() {
-    return dialogSelector(this.title);
-  },
-
-  dialogOpen() {
-    dialogOpen(this.title);
-  },
-
-  dialogClose() {
-    dialogClose(this.title);
-  },
-
-  hasImage() {
-    cy.get<HTMLImageElement>(this.dialogSelector() + " img[src]")
-      .should("exist")
-      .and("be.visible")
-      .and(($img) => {
-        expect($img[0].naturalWidth).to.be.greaterThan(0);
-      })
-  },
-
-  clickCross() {
-    const sel = this.dialogSelector() + " [data-cy=cross-icon]"
-    cy.get(sel).click();
-  }
-}
 
 describe("Scan Block", () => {
 
-  it.only("should scan", () => {
+  it("should scan", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -91,29 +22,25 @@ describe("Scan Block", () => {
     })
   });
 
-  it("should display scanned image", () => {
-    interceptScan().as("scan");
-    fixtureImage("scanned-image.jpg").as("imageData");
-    cy.mount(ScanBlock, { props: { remove: () => { } } });
+  it.only("should display scanned image", () => {
+    interceptDevices();
+    mount();
     selectPatient(1);
+    interceptScan().as("scan");
     scan();
-    cy.wait("@scan").then(req => {
-      return req.response!.headers["x-saved-image"] as string;
-    }).as("savedFile");
-    ScannedDocDriver.getUploadFileNameElement(1).invoke("text").as("uploadFile");
-    cy.get<string>("@savedFile").then(savedFile => {
-      cy.get<Uint8Array>("@imageData").then(imageData => {
-        cy.get<string>("@uploadFile").then(uploadFile => {
+    waitForScan("@scan", savedFile => {
+      accessUploadFileName(1, uploadFile => {
+        loadImageData("scanned-image.jpg", imageData => {
           interceptScannerImage(savedFile, imageData);
-          ScannedDocDriver.clickDisplay(1);
+          clickDisplay(1);
           PreviewDriver.dialogOpen();
           PreviewDriver.hasImage();
           PreviewDriver.clickCross();
           PreviewDriver.dialogClose();
         })
-      })
+      });
     })
-  })
+  });
 
   it("should upload scanned image", () => {
     interceptDevices();
@@ -221,11 +148,6 @@ function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 
-function interceptScannerImage(fileName: string, image: Uint8Array) {
-  const url = Cypress.env("PRINTER-API") + `/scanner/image/${fileName}`;
-  return cy.intercept("GET", url, { body: image.buffer });
-}
-
 function interceptSavePatientImage(
   patientId: number,
   fileName: string,
@@ -260,6 +182,3 @@ function clickDisplay(index: number = 1) {
   })
 }
 
-function fixtureImage(fixture: string) {
-  return cy.fixture<Uint8Array>(fixture, null)
-}
