@@ -85,6 +85,14 @@ export function waitForSavePatientImage(alias: string, cb: (uploadingData: Uint8
   });
 }
 
+export function interceptDeletePatientImage(
+  patientId: number,
+  fileName: string,
+) {
+  const url = getBase() + `/delete-patient-image?patient-id=${patientId}&file-name=${fileName}`;
+  return cy.intercept("GET", url)
+}
+
 function scannedDocWrapperSelector() {
   return "[data-cy=scanned-documents]";
 }

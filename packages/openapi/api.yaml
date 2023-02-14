@@ -80,6 +80,33 @@ paths:
                 type: string
                 format: binary
                 description: 画像データ
+  /api/delete-patient-image:
+    get:
+      description: 患者画像を削除する
+      parameters:
+        - in: query
+          name: patient-id
+          schema:
+            type: integer
+          required: true
+          description: 患者番号
+          example: 1234
+        - in: query
+          name: file-name
+          schema:
+            type: string
+          required: true
+          description: アップロード後のファイル名
+          example: 1234-hokensho-20230211220932-01.jpg
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: 成功（true）、失敗（false）
+
 components:
   schemas:
     Patient:

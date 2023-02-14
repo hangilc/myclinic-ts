@@ -1,6 +1,6 @@
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { ConfirmDriver } from "@cypress/lib/drivers";
-import { accessUploadFileName, clickDelete, clickDisplay, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
+import { accessUploadFileName, clickDelete, clickDisplay, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeletePatientImage, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
 
 describe("Scan Block", () => {
 
@@ -85,6 +85,31 @@ describe("Scan Block", () => {
       });
       cy.wait("@delete");
     })
+  });
+
+  it.only("should delete scanned and uploaded images", () => {
+    interceptDevices();
+    mount();
+    selectPatient(1);
+    interceptScan().as("scan");
+    scan();
+    waitForScan("@scan", savedFile => {
+      accessUploadFileName(1, uploadFile => {
+        loadImageData("scanned-image.jpg", imageData => {
+          interceptScannerImage(savedFile, imageData).as("saveImage");
+          interceptSavePatientImage(1, uploadFile).as("upload");
+          clickUpload();
+          cy.wait("@upload");
+          uploadSuccessElement(1).should("exist");
+          interceptDeleteScannedImage(savedFile).as("deleteScanned");
+          interceptDeletePatientImage(1, uploadFile).as("deleteUpload");
+          clickDelete(1);
+          ConfirmDriver.yes("このスキャン文書を削除しますか？");
+          cy.wait(["@deleteScanned", "@deleteUpload"]);
+          getScannedDocElement(1).should("not.exist");
+        })
+      })
+    });
   });
 
 });
