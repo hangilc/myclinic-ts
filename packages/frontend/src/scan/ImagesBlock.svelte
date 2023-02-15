@@ -18,7 +18,7 @@
         title: "患者選択（保存画像）",
         onEnter: async (p) => {
           patientId = p.patientId;
-          patientText = `${p.patientId} ${p.fullName()}`;
+          patientText = `(${p.patientId}) ${p.fullName()}`;
           const infoList = await api.listPatientImage(patientId);
           infoList.forEach((i) => {
             const stamp = extractPatientImageDate(i.name);
@@ -59,14 +59,15 @@
 <div class="top">
   <div class="title main">保存画像</div>
   <div class="title">患者選択</div>
-  <div class="work">
-    {patientText}
+  <div class="work" data-cy="patient-workarea">
+    <span data-cy="patient-text">{patientText}</span>
     <a href="javascript:void(0)" on:click={doSelectPatient}>選択</a>
   </div>
   <div class="title">画像リスト</div>
-  <div class="work search-result">
+  <div class="work search-result" data-cy="search-result">
     {#each images as img}
-      <a href="javascript:void(0)" on:click={() => doShowImage(img)}>{img}</a>
+      <a href="javascript:void(0)" on:click={() => doShowImage(img)}
+        data-cy="search-result-item" data-img={img}>{img}</a>
     {/each}
   </div>
   <div class="commands">
