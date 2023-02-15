@@ -96,7 +96,7 @@ describe("Wqueue", () => {
     dialogClose("会計終了");
   });
 
-  it.only("should refresh", () => {
+  it("should refresh", () => {
     cy.visit("/reception/");
     cy.intercept(Cypress.env("API") + "/list-wqueue-full", [
       0, [

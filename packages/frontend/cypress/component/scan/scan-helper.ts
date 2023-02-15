@@ -4,8 +4,8 @@ import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
 import { getBase } from "@/lib/api";
 
-export function mount() {
-  cy.mount(ScanBlock, { props: { remove: () => { } } });
+export function mount(remove: () => void = () => {}) {
+  cy.mount(ScanBlock, { props: { remove } });
 }
 
 export function selectPatient(patientId: number) {

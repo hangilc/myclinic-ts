@@ -1,3 +1,4 @@
+import { getBase } from "@/lib/api";
 import Add from "@/practice/exam/disease2/add/Add.svelte";
 import { fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, DiseaseEnterData, ShuushokugoMaster } from "myclinic-model";
@@ -78,7 +79,7 @@ describe("Disease Add", () => {
     cy.get("button").contains("検索").click();
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains("急性咽頭炎").click();
     cy.get("input[type=radio][value=shuushokugo]").click();
-    cy.get("[data-cy=disease-search-input]").type("の疑い");
+    cy.get("[data-cy=disease-search-input]").clear().type("の疑い");
     cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
       const master = new ShuushokugoMaster(8002, "の疑い")
       req.reply([master]);
@@ -94,6 +95,7 @@ describe("Disease Add", () => {
       props: {
         patientId: 1,
         onEnter: (data: DiseaseEnterData) => {
+          console.log(data);
           expect(data).deep.equal({
             patientId: 1,
             byoumeicode: 1,
@@ -107,15 +109,16 @@ describe("Disease Add", () => {
       fillDateForm(startDate);
     });
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
-    cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
+    cy.intercept(getBase() + "/search-byoumei-master*", (req) => {
       const master = new ByoumeiMaster(1, "急性咽頭炎");
       req.reply([master]);
-    });
+    }).as("searchByoumei");
     cy.get("button").contains("検索").click();
+    cy.wait("@searchByoumei");
     cy.get("[data-cy=search-result] [data-cy=search-result-item]").contains("急性咽頭炎").click();
     cy.get("input[type=radio][value=shuushokugo]").click();
-    cy.get("[data-cy=disease-search-input]").type("の疑い");
-    cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
+    cy.get("[data-cy=disease-search-input]").clear().type("の疑い");
+    cy.intercept(getBase() + "/search-shuushokugo-master*", (req) => {
       const master = new ShuushokugoMaster(8002, "の疑い")
       req.reply([master]);
     });

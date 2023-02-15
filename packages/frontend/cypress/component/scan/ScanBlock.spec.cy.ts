@@ -181,6 +181,28 @@ describe("Scan Block", () => {
       confirmSavedFileName(1, rescan.savedFile);
       uploadSuccessElement(1).should("not.exist");
     });
+  });
+
+  it.only("should remove", () => {
+    const obj = {
+      remove: () => {}
+    }
+    cy.spy(obj, "remove");
+    interceptDevices();
+    mount(() => obj.remove());
+    selectPatient(1);
+    interceptScan().as("scan");
+    let scan: ScanInfo;
+    cy.wrap(doScan(1, "@scan", "scanned-image.jpg")).then(info => scan = info as ScanInfo);
+    cy.then(() => {
+      interceptDeleteScannedImage(scan.savedFile).as("deleteSavedFile");
+    });
+    cy.get("button").contains("閉じる").click();
+    ConfirmDriver.yes("アップロードされていないファイルがありますが、閉じますか？");
+    cy.wait("@deleteSavedFile");
+    cy.then(() => {
+      expect(obj.remove).to.be.called
+    })
   })
 
 });

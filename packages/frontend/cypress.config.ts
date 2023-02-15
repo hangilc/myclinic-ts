@@ -18,6 +18,7 @@ export default defineConfig({
       // implement node event listeners here
     },
     env: {
+      "API": "http://localhost:38080/api",
       "PRINTER-API": "http://localhost:48080",
     }
   },

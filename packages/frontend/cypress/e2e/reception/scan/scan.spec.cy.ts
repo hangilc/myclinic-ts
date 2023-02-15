@@ -92,7 +92,7 @@ describe("Scan", () => {
     })
   });
 
-  it.only("should scan", () => {
+  it("should scan", () => {
     cy.intercept(Cypress.env("PRINTER-API") + "/scanner/scan?*", (req) => {
       const deviceId = req.query["device-id"];
       const resolution = req.query["resolution"];
