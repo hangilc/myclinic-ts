@@ -111,7 +111,7 @@ describe("Scan Block", () => {
     });
   });
 
-  it.only("should delete first of two uploads", () => {
+  it("should delete first of two uploads", () => {
     interceptDevices();
     mount();
     selectPatient(1);
@@ -132,6 +132,30 @@ describe("Scan Block", () => {
     uploadSuccessElement(1).should("be.visible");
     cy.then(() => {
       confirmUploaded(1, scan1!.uploadFile, scan2!.imageData);
+    })
+  });
+
+  it("should delete second of two uploads", () => {
+    interceptDevices();
+    mount();
+    selectPatient(1);
+    let scan1: ScanInfo;
+    let scan2: ScanInfo;
+    cy.wrap(doScan(1, "scanned-image.jpg")).then(scan => scan1 = scan as ScanInfo);
+    cy.wrap(doScan(2, "scanned-image-2.jpg")).then(scan => scan2 = scan as ScanInfo);
+    cy.then(() => {
+      confirmSavedFileName(1, scan1!.savedFile);
+      confirmSavedFileName(2, scan2!.savedFile);
+    })
+    cy.wrap(doDelete(2));
+    cy.then(() => {
+      confirmSavedFileName(1, scan1!.savedFile);
+      confirmUploadFileName(1, scan1!.uploadFile);
+    })
+    clickUpload();
+    uploadSuccessElement(1).should("be.visible");
+    cy.then(() => {
+      confirmUploaded(1, scan1!.uploadFile, scan1!.imageData);
     })
   });
 
