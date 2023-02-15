@@ -235,6 +235,7 @@
               class="patient-search-input"
               bind:value={searchText}
               use:setFocus
+              data-cy="search-patient-input"
             />
           </form>
           <svg
@@ -246,6 +247,7 @@
             width="20"
             class="search-icon"
             on:click={doPatientSearch}
+            data-cy="search-icon"
           >
             <path
               stroke-linecap="round"

@@ -146,7 +146,10 @@
   }
 </script>
 
-<div class={`top ${data.appointTime.kind} ${vacant(data)}`}>
+<div class={`top ${data.appointTime.kind} ${vacant(data)}`}
+  data-cy="appoint-time-block"
+  data-is-vacant={vacant(data) ? "" : undefined}
+  >
   <Popup let:triggerClick let:destroy>
     <div
       class="time-box"

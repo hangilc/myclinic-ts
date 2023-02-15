@@ -68,10 +68,12 @@
   <div class="menu">
     <a href="javascript:void(0)" on:click={doSearch}>予約検索</a>
     <Popup let:trigger let:destroy>
-      <Bars3 onClick={trigger} style="cursor: pointer;" dy="-2px" width="18" />
+      <Bars3 onClick={trigger} style="cursor: pointer;" dy="-2px" width="18" 
+        dataCy="bars3-menu"/>
       <div slot="menu" class="context-menu">
         {#if isAdmin}
           <a href="javascript:void(0)" on:click={() => doAlloc(destroy)}
+            data-cy="alloc-appoints-link"
             >予約枠わりあて</a
           >
         {/if}

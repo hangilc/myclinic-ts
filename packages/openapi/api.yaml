@@ -106,6 +106,35 @@ paths:
               schema:
                 type: boolean
                 description: 成功（true）、失敗（false）
+  /api/fill-appoint-times:
+    get:
+      description: 新規に予約枠を作成する
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date
+          required: true
+          description: この日から
+          example: "2023-02-12"
+        - in: query
+          name: upto
+          schema:
+            type: string
+            format: date
+          required: true
+          description: この日まで
+          example: "2023-02-18"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: 成功（true）、失敗（false）
+        
 
 components:
   schemas:

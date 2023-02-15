@@ -20,7 +20,7 @@
     "@histoire/plugin-svelte": "^0.12.4",
     "@sveltejs/vite-plugin-svelte": "^1.0.2",
     "@tsconfig/svelte": "^3.0.0",
-    "cypress": "^11.0.0",
+    "cypress": "^12.0.0",
     "histoire": "^0.12.4",
     "kanjidate": "^1.4.2",
     "myclinic-model": "^1.0.0",
