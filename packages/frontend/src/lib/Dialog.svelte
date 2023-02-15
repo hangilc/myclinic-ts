@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { ViewportCoord } from "./viewport-coord";
   import { alloc, release } from "./zindex";
   import Screen from "./Screen.svelte";
   import { onDestroy, onMount } from "svelte";

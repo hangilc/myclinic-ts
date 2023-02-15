@@ -2,6 +2,7 @@ import { dateToSql } from "@/lib/util";
 import { dialogOpen } from "@cypress/lib/dialog";
 import { rangeOfWeek } from "./appoint-helper";
 import { addDays } from "kanjidate";
+import { ConfirmDriver } from "@cypress/lib/drivers";
 
 describe("Appoint", () => {
   before(() => {
@@ -15,7 +16,7 @@ describe("Appoint", () => {
     cy.visit("/appoint/");
   });
 
-  it("should batch adde appoint times", () => {
+  it("should batch add appoint times", () => {
     cy.visit("/appoint/?admin=true");
     cy.get("[data-cy=bars3-menu]").click();
     cy.get("[data-cy=alloc-appoints-link]").click();
@@ -34,7 +35,29 @@ describe("Appoint", () => {
     cy.get("@slot").within(() => {
       cy.get("[data-cy=appoint-patient][data-patient-id=1]").should("exist");
     })
+  });
 
+  it.only("should cancel appointment", () => {
+    cy.visit("/appoint/");
+    cy.get("[data-cy=appoint-time-block][data-is-vacant").first().as("slot", { type: "static" });
+    cy.get("@slot").click();
+    dialogOpen("診察予約入力").within(() => {
+      cy.get("[data-cy=search-patient-input]").type("1");
+      cy.get("[data-cy=search-icon]").click();
+      cy.get("button").contains("入力").click();
+    })
+    cy.get("@slot").within(() => {
+      cy.get("[data-cy=appoint-patient][data-patient-id=1]").click();
+    });
+    dialogOpen("診察予約編集").within(() => {
+      cy.get("[data-cy=patient-id-disp]").should("have.text", "1");
+      cy.get("button").contains("予約取消").click();
+    });
+    ConfirmDriver.yes("この予約を削除していいですか？");
+    cy.get("@slot").within(() => {
+      cy.get("[data-cy=appoint-patient][data-patient-id=1]").should("not.exist");
+    });
+    cy.get("@slot").should("have.attr", "data-is-vacant");
   });
 
   it("should move to next week", () => {

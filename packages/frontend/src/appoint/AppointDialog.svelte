@@ -274,7 +274,7 @@
     <div class="table-row">
       <div>患者番号</div>
       <div>
-        {patientId === 0 ? "" : patientId.toString()}
+        <span data-cy="patient-id-disp">{patientId === 0 ? "" : patientId.toString()}</span>
       </div>
     </div>
     <div class="table-row">
