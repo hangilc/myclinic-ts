@@ -183,7 +183,7 @@ describe("Scan Block", () => {
     });
   });
 
-  it.only("should remove", () => {
+  it("should remove", () => {
     const obj = {
       remove: () => {}
     }
