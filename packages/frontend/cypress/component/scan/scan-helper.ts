@@ -115,6 +115,11 @@ export function confirmSavedFileName(index: number, savedFileName: string): void
     .should("have.attr", "data-scanned-file-name", savedFileName);
 }
 
+function getSavedFileName(index: number): Cypress.Chainable<string> {
+  return cy.get(scannedDocUploadFileNameSelector(index))
+    .invoke("attr", "data-scanned-file-name");
+}
+
 export function accessUploadFileName(index: number, cb: (uploadFile: string) => void): void {
   cy.get(scannedDocUploadFileNameSelector(index)).invoke("text").then(cb)
 }
@@ -193,7 +198,7 @@ export function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
 }
 
 export function confirmUploaded(patientId: number, uploadFile: string, imageData: Uint8Array) {
-  const url =  getBase() + `/patient-image?patient-id=${patientId}&file-name=${uploadFile}`;
+  const url = getBase() + `/patient-image?patient-id=${patientId}&file-name=${uploadFile}`;
   cy.request<ArrayBuffer>({ method: "GET", url, encoding: null }).then(response => {
     const body = new Uint8Array(response.body);
     expect(equalUint8Array(body, imageData)).to.be.true
@@ -206,15 +211,10 @@ export interface ScanInfo {
   imageData: Uint8Array,
 }
 
-let scanSerial: number = 1;
-
-export function doScan(index: number, imageFixture: string) {
+export function doScan(index: number, scanAlias: string, imageFixture: string) {
   return new Cypress.Promise<ScanInfo>((resolve) => {
-    const serial = scanSerial++;
-    const scanAlias = `scan${serial}`;
-    interceptScan().as(scanAlias);
     scan();
-    waitForScan("@" + scanAlias, savedFile => {
+    waitForScan(scanAlias, savedFile => {
       accessUploadFileName(index, uploadFile => {
         loadImageData(imageFixture, imageData => {
           interceptScannerImage(savedFile, imageData);
@@ -225,12 +225,47 @@ export function doScan(index: number, imageFixture: string) {
   })
 }
 
+export interface RescanInfo {
+  savedFile: string,
+  imageData: Uint8Array,
+}
+
+export function doRescan(patientId: number, index: number, scanAlias: string, imageFixture: string) {
+  return new Cypress.Promise<RescanInfo>((resolve) => {
+    getSavedFileName(index).then(savedFile => {
+      const delAlias = `deleteScannedImage-${savedFile}`;
+      interceptDeleteScannedImage(savedFile).as(delAlias);
+      let delUploadAlias: string | undefined = undefined;
+      uploadSuccessElement(index).then($el => {
+        if ($el.is(":visible")) {
+          console.log("visible");
+          accessUploadFileName(index, uploadFile => {
+            delUploadAlias = `deleteUploadImage-${uploadFile}`;
+            interceptDeletePatientImage(patientId, uploadFile).as(delUploadAlias);
+          });
+        }
+      });
+      clickRescan(index);
+      waitForScan(scanAlias, savedFile => {
+        loadImageData(imageFixture, imageData => {
+          interceptScannerImage(savedFile, imageData);
+          resolve({ savedFile, imageData });
+        })
+      })
+      cy.wait("@" + delAlias);
+      if( delUploadAlias ){
+        cy.wait("@" + delUploadAlias);
+      }
+    })
+  });
+}
+
 export function doDelete(index: number) {
   return new Cypress.Promise<boolean>((resolve) => {
-    const alias = `deleteScanned${scanSerial++}`;
     cy.get(scannedDocUploadFileNameSelector(index))
       .invoke("attr", "data-scanned-file-name")
       .then(savedFile => {
+        const alias = `deleteScannedImage-${savedFile}`
         interceptDeleteScannedImage(savedFile!).as(alias);
         clickDelete(index);
         ConfirmDriver.yes();
