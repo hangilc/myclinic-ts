@@ -1,6 +1,5 @@
-import ScanBlock from "@/scan/ScanBlock.svelte";
 import { ConfirmDriver } from "@cypress/lib/drivers";
-import { accessUploadFileName, clickDelete, clickDisplay, clickRescan, clickUpload, confirmSavedFileName, equalUint8Array, getScannedDocElement, interceptDeletePatientImage, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan } from "./scan-helper";
+import { accessUploadFileName, clickDelete, clickDisplay, clickRescan, clickUpload, confirmSavedFileName, confirmUploaded, confirmUploadFileName, doDelete, doScan, equalUint8Array, getScannedDocElement, interceptDeletePatientImage, interceptDeleteScannedImage, interceptDevices, interceptSavePatientImage, interceptScan, interceptScannerImage, loadImageData, mount, PreviewDriver, scan, selectPatient, uploadSuccessElement, waitForSavePatientImage, waitForScan, type ScanInfo } from "./scan-helper";
 
 describe("Scan Block", () => {
 
@@ -116,9 +115,25 @@ describe("Scan Block", () => {
     interceptDevices();
     mount();
     selectPatient(1);
-    interceptScan().as("scan");
-
-  })
+    let scan1: ScanInfo;
+    let scan2: ScanInfo;
+    cy.wrap(doScan(1, "scanned-image.jpg")).then(scan => scan1 = scan as ScanInfo);
+    cy.wrap(doScan(2, "scanned-image-2.jpg")).then(scan => scan2 = scan as ScanInfo);
+    cy.then(() => {
+      confirmSavedFileName(1, scan1!.savedFile);
+      confirmSavedFileName(2, scan2!.savedFile);
+    })
+    cy.wrap(doDelete(1));
+    cy.then(() => {
+      confirmSavedFileName(1, scan2!.savedFile);
+      confirmUploadFileName(1, scan1!.uploadFile);
+    })
+    clickUpload();
+    uploadSuccessElement(1).should("be.visible");
+    cy.then(() => {
+      confirmUploaded(1, scan1!.uploadFile, scan2!.imageData);
+    })
+  });
 
 });
 

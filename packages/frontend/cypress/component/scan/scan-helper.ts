@@ -1,7 +1,7 @@
 import scannerDevices from "@cypress/fixtures/scanner-devices.json";
 import ScanBlock from "@/scan/ScanBlock.svelte";
 import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
-import { SearchPatientDialogDriver } from "@cypress/lib/drivers";
+import { ConfirmDriver, SearchPatientDialogDriver } from "@cypress/lib/drivers";
 import { getBase } from "@/lib/api";
 
 export function mount() {
@@ -119,6 +119,10 @@ export function accessUploadFileName(index: number, cb: (uploadFile: string) => 
   cy.get(scannedDocUploadFileNameSelector(index)).invoke("text").then(cb)
 }
 
+export function confirmUploadFileName(index: number, uploadFileName: string): void {
+  cy.get(scannedDocUploadFileNameSelector(index)).should("have.text", uploadFileName);
+}
+
 export function uploadSuccessElement(index: number) {
   return cy.get(scannedDocSelector(index) + " [data-cy=ok-icon]");
 }
@@ -188,4 +192,50 @@ export function equalUint8Array(a: Uint8Array, b: Uint8Array): boolean {
   return true;
 }
 
+export function confirmUploaded(patientId: number, uploadFile: string, imageData: Uint8Array) {
+  const url =  getBase() + `/patient-image?patient-id=${patientId}&file-name=${uploadFile}`;
+  cy.request<ArrayBuffer>({ method: "GET", url, encoding: null }).then(response => {
+    const body = new Uint8Array(response.body);
+    expect(equalUint8Array(body, imageData)).to.be.true
+  })
+}
 
+export interface ScanInfo {
+  savedFile: string,
+  uploadFile: string,
+  imageData: Uint8Array,
+}
+
+let scanSerial: number = 1;
+
+export function doScan(index: number, imageFixture: string) {
+  return new Cypress.Promise<ScanInfo>((resolve) => {
+    const serial = scanSerial++;
+    const scanAlias = `scan${serial}`;
+    interceptScan().as(scanAlias);
+    scan();
+    waitForScan("@" + scanAlias, savedFile => {
+      accessUploadFileName(index, uploadFile => {
+        loadImageData(imageFixture, imageData => {
+          interceptScannerImage(savedFile, imageData);
+          resolve({ savedFile, uploadFile, imageData });
+        })
+      })
+    })
+  })
+}
+
+export function doDelete(index: number) {
+  return new Cypress.Promise<boolean>((resolve) => {
+    const alias = `deleteScanned${scanSerial++}`;
+    cy.get(scannedDocUploadFileNameSelector(index))
+      .invoke("attr", "data-scanned-file-name")
+      .then(savedFile => {
+        interceptDeleteScannedImage(savedFile!).as(alias);
+        clickDelete(index);
+        ConfirmDriver.yes();
+        cy.wait("@" + alias);
+        resolve(true);
+      })
+  })
+}
