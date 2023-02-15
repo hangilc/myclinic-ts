@@ -6,6 +6,7 @@
   import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
   import ColumnContextMenu from "./ColumnContextMenu.svelte";
+  import { dateToSql } from "@/lib/util";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -35,6 +36,8 @@
     <div
       class={`date ${data.op.code}`}
       on:contextmenu={(e) => doContextMenu(e, triggerClick)}
+      data-cy="appoint-column"
+      data-date={data.date}
     >
       {kanjidate.format(dateFormat, data.date)}
       <span class="kenshin-rep">{kenshinRep(data)}</span>

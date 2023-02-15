@@ -1,6 +1,7 @@
 import { dateToSql } from "@/lib/util";
 import { dialogOpen } from "@cypress/lib/dialog";
 import { rangeOfWeek } from "./appoint-helper";
+import { addDays } from "kanjidate";
 
 describe("Appoint", () => {
   before(() => {
@@ -21,7 +22,7 @@ describe("Appoint", () => {
     cy.get("[data-cy=appoint-time-block]").should("exist");
   });
 
-  it.only("should make appointment", () => {
+  it("should make appointment", () => {
     cy.visit("/appoint/");
     cy.get("[data-cy=appoint-time-block][data-is-vacant").first().as("slot", { type: "static" });
     cy.get("@slot").click();
@@ -35,4 +36,36 @@ describe("Appoint", () => {
     })
 
   });
+
+  it("should move to next week", () => {
+    cy.visit("/appoint/");
+    const [start, last] = rangeOfWeek(new Date());
+    cy.get("button").contains("次の週").click();
+    const d = addDays(start, 8);
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+  })
+
+  it("should move to next month", () => {
+    cy.visit("/appoint/");
+    const [start, last] = rangeOfWeek(new Date());
+    cy.get("button").contains("次の月").click();
+    const d = addDays(start, 29);
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+  })
+
+  it("should move to prev week", () => {
+    cy.visit("/appoint/");
+    const [start, last] = rangeOfWeek(new Date());
+    cy.get("button").contains("前の週").click();
+    const d = addDays(start, -7+1);
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+  })
+
+  it("should move to prev month", () => {
+    cy.visit("/appoint/");
+    const [start, last] = rangeOfWeek(new Date());
+    cy.get("button").contains("前の月").click();
+    const d = addDays(start, -28+1);
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+  })
 })
