@@ -29,7 +29,8 @@
   }
 </script>
 
-<div class="top" on:click={doClick}>
+<div class="top" on:click={doClick} data-cy="appoint-patient"
+  data-patient-id={data.patientId}>
   <div>
     {patientText(data)}
     {#if data.memoString !== ""}

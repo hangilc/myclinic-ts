@@ -30,6 +30,9 @@ describe("Appoint", () => {
       cy.get("[data-cy=search-icon]").click();
       cy.get("button").contains("入力").click();
     })
+    cy.get("@slot").within(() => {
+      cy.get("[data-cy=appoint-patient][data-patient-id=1]").should("exist");
+    })
 
   });
 })

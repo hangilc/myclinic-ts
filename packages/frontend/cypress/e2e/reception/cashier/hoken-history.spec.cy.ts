@@ -21,10 +21,10 @@ describe("Hoken History", () => {
     }).then(h => {
       kouhi = h;
     })
-    cy.visit("/reception/");
   })
 
   it("should open hoken history dialog with shahokokuho", () => {
+    cy.visit("/reception/");
     openPatientDialog(patient.patientId);
     cy.get("[data-cy=hoken-history-link]").click();
     patientDialogClose();
@@ -54,6 +54,7 @@ describe("Hoken History", () => {
   })
 
   it("should open hoken history dialog with koukikourei", () => {
+    cy.visit("/reception/");
     openPatientDialog(patient.patientId);
     cy.get("[data-cy=hoken-history-link]").click();
     patientDialogClose();
@@ -83,6 +84,7 @@ describe("Hoken History", () => {
   })
 
   it("should open hoken history dialog with kouhi", () => {
+    cy.visit("/reception/");
     openPatientDialog(patient.patientId);
     cy.get("[data-cy=hoken-history-link]").click();
     patientDialogClose();
