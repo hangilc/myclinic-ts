@@ -166,7 +166,7 @@ describe("Scan Block", () => {
     })
   });
 
-  it.only("should rescan uploaded image", () => {
+  it("should rescan uploaded image", () => {
     interceptDevices();
     mount();
     selectPatient(1);
