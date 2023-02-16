@@ -134,7 +134,25 @@ paths:
               schema:
                 type: boolean
                 description: 成功（true）、失敗（false）
-        
+  /api/get-appoint-time:
+    get:
+      description: 予約枠を返す
+      parameters:
+        - in: query
+          name: appoint-time-id
+          schema:
+            type: integer
+          required: true
+          description: 予約枠ＩＤ
+          example: 1234
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointTime'
+              
 
 components:
   schemas:
@@ -171,6 +189,36 @@ components:
         phone:
           type: string
           example: 03-1234-5678
+    AppointTime:
+      description: 診察予約枠
+      properties:
+        appointTimeId:
+          type: integer
+          example: 1234
+          description: 予約枠ＩＤ
+        date:
+          type: string
+          format: date
+          example: 2023-02-13
+          description: 予約日
+        fromTime:
+          type: string
+          format: time
+          example: 10:00:00
+          description: 予約開始時間
+        untilTime:
+          type: string
+          format: time
+          example: 10:20:00
+          description: 予約終了時間
+        kind:
+          type: string
+          example: regular
+          description: 予約の種類
+        capacity:
+          type: integer
+          example: 1
+          description: 予約可能人数
 
 
                   

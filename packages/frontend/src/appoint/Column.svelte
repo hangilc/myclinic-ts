@@ -6,7 +6,6 @@
   import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
   import ColumnContextMenu from "./ColumnContextMenu.svelte";
-  import { dateToSql } from "@/lib/util";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";

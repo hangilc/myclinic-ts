@@ -1539,6 +1539,14 @@ export class ScannerDevice {
   }
 }
 
+export const ClinicOperationCode = {
+  InOperation: "in-operation",
+  RegularHoliday: "regular-holiday",
+  AdHocHoliday: "ad-hoc-holiday",
+  AdHocWorkday: "ad-hoc-workday",
+  NationalHoliday: "national-holiday"
+}
+
 export class ClinicOperation {
   constructor(
     public code: string,
