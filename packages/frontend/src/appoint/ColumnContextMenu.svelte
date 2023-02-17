@@ -7,34 +7,39 @@
 
 
   export let destroy: () => void;
-  export let date: string;
-  export let siblings: AppointTimeData[];
+  export let onFillAppointTimes: (close: () => void) => void;
+  // export let date: string;
+  // export let siblings: AppointTimeData[];
 
-  async function doAddAppointTime() {
-    destroy();
-    const tmpl = new AppointTime(0, date, "", "", 
-      appointTimeTemplate.kind, appointTimeTemplate.capacity);
-    const d: AppointTimeDialog = new AppointTimeDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "新規予約枠",
-        data: tmpl,
-        siblings,
-        onEnter: async (a: AppointTime) => {
-          await api.addAppointTime(a);
-          Object.assign(appointTimeTemplate, {
-            kind: a.kind,
-            capacity: a.capacity,
-          })
-        }
-      }
-    })
+  // async function doAddAppointTime() {
+  //   destroy();
+  //   const tmpl = new AppointTime(0, date, "", "", 
+  //     appointTimeTemplate.kind, appointTimeTemplate.capacity);
+  //   const d: AppointTimeDialog = new AppointTimeDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       title: "新規予約枠",
+  //       data: tmpl,
+  //       siblings,
+  //       onEnter: async (a: AppointTime) => {
+  //         await api.addAppointTime(a);
+  //         Object.assign(appointTimeTemplate, {
+  //           kind: a.kind,
+  //           capacity: a.capacity,
+  //         })
+  //       }
+  //     }
+  //   })
+  // }
+
+  function doFillAppointTimes(): void {
+    onFillAppointTimes(destroy);
   }
 </script>
 
 <div class="top">
-  <a href="javascript:;" on:click={doAddAppointTime}>予約枠追加</a>
+  <a href="javascript:;" on:click={doFillAppointTimes}>予約枠追加</a>
 </div>
 
 <style>
