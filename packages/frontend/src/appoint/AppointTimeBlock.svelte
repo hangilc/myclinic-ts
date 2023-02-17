@@ -156,8 +156,11 @@
       on:click={doTimeBoxClick}
       on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
     >
-      <div>{timeText(data)} {capacityRep(data)}</div>
-      <div>{appointKindRep(data)}</div>
+      <div>
+        <span data-cy="time-disp">{timeText(data)}</span> <span
+          data-cy="capacity-disp"
+        >{capacityRep(data)}</span></div>
+      <div data-cy="kind-disp">{appointKindRep(data)}</div>
     </div>
     <div slot="menu" class="context-menu">
       {#if isAdmin}

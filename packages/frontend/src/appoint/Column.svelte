@@ -30,18 +30,20 @@
   }
 </script>
 
-<div class={`top ${isAdmin ? "admin" : ""}`}>
+<div class={`top ${isAdmin ? "admin" : ""}`} 
+  data-cy="appoint-column" data-date={data.date}>
   <Popup let:destroy let:triggerClick>
     <div
       class={`date ${data.op.code}`}
       on:contextmenu={(e) => doContextMenu(e, triggerClick)}
-      data-cy="appoint-column"
-      data-date={data.date}
+      data-cy="date-block"
     >
-      {kanjidate.format(dateFormat, data.date)}
-      <span class="kenshin-rep">{kenshinRep(data)}</span>
+      <span data-cy="date-disp">{kanjidate.format(dateFormat, data.date)}</span>
+      <span class="kenshin-rep" data-cy="kenshin-rep">{kenshinRep(data)}</span>
       {#each data.collectAvail() as avail}
         <span
+          data-cy="appoint-avail"
+          data-kind={avail.code}
           ><FilledCircle
             width="20px"
             style={`fill:${avail.iconColor}; stroke:none; margin-bottom: -4px;`}

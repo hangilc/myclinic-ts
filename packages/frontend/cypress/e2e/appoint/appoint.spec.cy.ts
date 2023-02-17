@@ -37,7 +37,7 @@ describe("Appoint", () => {
     })
   });
 
-  it.only("should cancel appointment", () => {
+  it("should cancel appointment", () => {
     cy.visit("/appoint/");
     cy.get("[data-cy=appoint-time-block][data-is-vacant").first().as("slot", { type: "static" });
     cy.get("@slot").click();

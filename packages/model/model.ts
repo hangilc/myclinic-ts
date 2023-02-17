@@ -1559,6 +1559,10 @@ export class ClinicOperation {
       arg.name
     );
   }
+
+  static InOperation: ClinicOperation = new ClinicOperation(
+    ClinicOperationCode.InOperation, ""
+  )
 }
 
 export class AppointTime {
