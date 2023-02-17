@@ -2,6 +2,7 @@ import { AppointTimeData } from "@/appoint/appoint-time-data";
 import { ColumnData } from "@/appoint/column-data";
 import Column from "@/appoint/Column.svelte";
 import { AppointTime, ClinicOperation } from "myclinic-model";
+import { fromToTime, untilToTime } from "./column-helper";
 
 describe("Column (appoint)", () => {
   it("should mount", () => {
@@ -18,6 +19,8 @@ describe("Column (appoint)", () => {
 
   it.only("should have appoints", () => {
     const date = "2023-02-13";
+    const from = "10:00";
+    const until = "10:20";
     cy.mount(Column, { props: {
       data: new ColumnData(
         date,
@@ -25,7 +28,7 @@ describe("Column (appoint)", () => {
         [
           new AppointTimeData(
             new AppointTime(
-              1, date, "10:00:00", "10:20:00", "regular", 1
+              1, date, fromToTime(from), untilToTime(until), "regular", 1
             ),
             [],
             undefined
@@ -47,7 +50,7 @@ describe("Column (appoint)", () => {
         .should("have.class", "regular")
         .should("have.class", "vacant")
         .within(() => {
-          cy.get("[data-cy=time-disp]").should("have.text", "10:00 - 10:20");
+          cy.get("[data-cy=time-disp]").should("have.text", `${from} - ${until}`);
           cy.get("[data-cy=capacity-disp]").should("have.text", "");
           cy.get("[data-cy=kind-disp]").should("have.text", "");
           cy.get("[data-cy=appoint-patient]").should("not.exist");
