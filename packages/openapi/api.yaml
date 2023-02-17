@@ -219,6 +219,33 @@ components:
           type: integer
           example: 1
           description: 予約可能人数
+    Appoint:
+      description: 診察予約
+      properties:
+        appointId:
+          type: integer
+          example: 3234
+          description: 診察予約ＩＤ
+        appointTimeId:
+          type: integer
+          example: 1234
+          description: 予約枠ＩＤ
+        patientName:
+          type: string
+          example: 診療太郎
+          description: 患者名
+        patientId:
+          type: integer
+          example: 12
+          description: 患者番号
+        memo:
+          type: string
+          example: 血圧の相談 {{健診}}
+          description: メモ
+          summary: <
+            形式は Memo1 {{Tag[, ...]}} Memo2
+            Memo1 と Memo2 は自由な形式のメモ。Tag は ',' （あるいは '、'）で区切られたタグ名
+            タグ名は Memo1 及び Memo2 とは別に予約枠で表示される。
 
 
                   

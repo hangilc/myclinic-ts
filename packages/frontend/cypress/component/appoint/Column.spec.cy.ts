@@ -1,10 +1,15 @@
 import { AppointTimeData } from "@/appoint/appoint-time-data";
 import { ColumnData } from "@/appoint/column-data";
 import Column from "@/appoint/Column.svelte";
+import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { AppointTime, ClinicOperation } from "myclinic-model";
-import { fromToTime, untilToTime } from "./column-helper";
+import { AppointDialogDriver, fromToTime, untilToTime } from "./column-helper";
 
 describe("Column (appoint)", () => {
+  beforeEach(() => {
+    cy.viewport(600, 600);
+  });
+
   it("should mount", () => {
     cy.mount(Column, {
       props: {
@@ -17,7 +22,7 @@ describe("Column (appoint)", () => {
     })
   });
 
-  it.only("should have appoints", () => {
+  it("should have appoints", () => {
     const date = "2023-02-13";
     const from = "10:00";
     const until = "10:20";
@@ -57,5 +62,60 @@ describe("Column (appoint)", () => {
         })
     });
     
-  })
+  });
+
+  it("add should cancel appoint input", () => {
+    const date = "2023-02-13";
+    const from = "10:00";
+    const until = "10:20";
+    cy.mount(Column, { props: {
+      data: new ColumnData(
+        date,
+        ClinicOperation.InOperation,
+        [
+          new AppointTimeData(
+            new AppointTime(
+              1, date, fromToTime(from), untilToTime(until), "regular", 1
+            ),
+            [],
+            undefined
+          )
+        ]
+      )
+    }});
+    cy.get(`[data-cy=appoint-column][data-date='${date}']` +
+      " [data-cy=appoint-time-block]").click();
+    dialogOpen("診察予約入力").within(() => {
+      cy.get("button").contains("キャンセル").click();
+    })
+    dialogClose("診察予約入力");
+  });
+
+  it.only("add should make appoint", () => {
+    const date = "2023-02-13";
+    const from = "10:00";
+    const until = "10:20";
+    cy.mount(Column, { props: {
+      data: new ColumnData(
+        date,
+        ClinicOperation.InOperation,
+        [
+          new AppointTimeData(
+            new AppointTime(
+              1, date, fromToTime(from), untilToTime(until), "regular", 1
+            ),
+            [],
+            undefined
+          )
+        ]
+      )
+    }});
+    cy.get(`[data-cy=appoint-column][data-date='${date}']` +
+      " [data-cy=appoint-time-block]").click();
+    dialogOpen("診察予約入力").within(() => {
+      AppointDialogDriver.setPatientInput("1");
+      AppointDialogDriver.enter();
+    })
+    dialogClose("診察予約入力");
+  });
 })
