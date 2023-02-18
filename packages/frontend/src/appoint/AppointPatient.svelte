@@ -32,7 +32,10 @@
 <div class="top" on:click={doClick} data-cy="appoint-patient"
   data-patient-id={data.patientId}>
   <div>
-    {patientText(data)}
+    {#if data.patientId > 0}
+      <span data-cy="patient-id-part">({data.patientId})</span>
+    {/if}
+    <span data-cy="patient-name-part">{data.patientName}</span>
     {#if data.memoString !== ""}
       （{data.memoString}）
     {/if}
