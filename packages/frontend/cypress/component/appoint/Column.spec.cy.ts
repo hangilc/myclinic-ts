@@ -95,7 +95,7 @@ describe("Column (appoint)", () => {
     dialogClose("診察予約入力");
   });
 
-  it.only("add should make appoint", () => {
+  it("add should make appoint", () => {
     const date = "2023-02-13";
     const from = "10:00";
     const until = "10:20";

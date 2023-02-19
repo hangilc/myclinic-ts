@@ -8,14 +8,6 @@
   export let data: Appoint;
   export let appointTimeData: AppointTimeData;
 
-  function patientText(data: Appoint): string {
-    let a = "";
-    if (data.patientId > 0) {
-      a = `(${data.patientId}) `;
-    }
-    return `${a}${data.patientName}`;
-  }
-
   function doClick(): void {
     const d: AppointDialog = new AppointDialog({
       target: document.body,
@@ -33,17 +25,17 @@
   data-patient-id={data.patientId}>
   <div>
     {#if data.patientId > 0}
-      <span data-cy="patient-id-part">({data.patientId})</span>
+      (<span data-cy="patient-id-part">{data.patientId}</span>)
     {/if}
     <span data-cy="patient-name-part">{data.patientName}</span>
     {#if data.memoString !== ""}
-      （{data.memoString}）
+      （<span data-cy="memo-part">{data.memoString}</span>）
     {/if}
   </div>
   {#if data.tags.length > 0}
     <div>
       {#each data.tags as tag}
-        <span>{tag}</span>
+        <span data-cy="tag-part">{tag}</span>
       {/each}
     </div>
   {/if}

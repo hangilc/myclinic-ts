@@ -216,7 +216,7 @@
 </script>
 
 <SurfaceModal {destroy} {title}>
-  <div>{appointTimeText(data)}</div>
+  <div data-cy="appoint-time-text">{appointTimeText(data)}</div>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as error}
@@ -280,13 +280,13 @@
     <div class="table-row">
       <div>メモ</div>
       <div>
-        <input type="text" class="memo-input" bind:value={memoInput} />
+        <input type="text" class="memo-input" bind:value={memoInput} data-cy="memo-input"/>
       </div>
     </div>
     <div class="table-row">
       <div>タグ</div>
       <div>
-        <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} />
+        <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} data-cy="kenshin-tag"/>
         <label for={kenshinId}>健診</label>
         {#if kenshinChecked && data.followingVacant != undefined}
           <input
