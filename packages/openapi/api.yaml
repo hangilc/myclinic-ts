@@ -152,7 +152,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AppointTime'
-              
+  /api/register-appoint:
+    post:
+      description: 診察予約を登録する
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appoint'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appoint'
 
 components:
   schemas:
