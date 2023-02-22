@@ -229,5 +229,79 @@ describe("AppointDialog", () => {
     driver.shouldNotHaveWithVisit();
     driver.checkKenshin();
     driver.shouldHaveUncheckedWithVisit();
-  })
+  });
+
+  it("should enter with visit", () => {
+    const appointTimeId = 10;
+    const follow = new AppointTime(appointTimeId + 1, "2023-02-13", 
+    "10:20:00", "10:40:00", "regular", 1);
+    const data = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [], follow
+    )
+    const props = {
+      destroy: () => {},
+      data,
+      init: undefined
+    };
+    cy.spy(props, "destroy").as("destroy");
+    let nextAppointId = 200;
+    cy.intercept("POST", getBase() + "/register-appoint", (req) => {
+      const body = JSON.parse(req.body);
+      body.appointId = nextAppointId++;
+      req.reply(body);
+    }).as("register");
+    cy.mount(AppointDialog, { props });
+    driver.setPatientInput("看護 花子");
+    driver.checkKenshin();
+    driver.shouldHaveUncheckedWithVisit();
+    driver.checkWithVisit();
+    driver.enter();
+    cy.wait("@register").then(intercept => {
+      const a = JSON.parse(intercept.request.body);
+      expect(a.appointTimeId).to.be.equal(appointTimeId);
+    })
+    cy.wait("@register").then(intercept => {
+      const a = JSON.parse(intercept.request.body);
+      expect(a.appointTimeId).to.be.equal(appointTimeId + 1);
+    })
+    cy.get("@destroy").should("be.called");
+  });
+
+  it.only("should update with visit", () => {
+    const appointTimeId = 10;
+    const appointId = 300;
+    const appoint = new Appoint(appointId, appointTimeId, "診療 太郎", 1, "{{健診}}");
+    const follow = new AppointTime(appointTimeId + 1, "2023-02-13", 
+    "10:20:00", "10:40:00", "regular", 1);
+    const data = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], follow
+    )
+    const props = {
+      destroy: () => {},
+      data,
+      init: appoint
+    };
+    cy.spy(props, "destroy").as("destroy");
+    let nextAppointId = 200;
+    cy.intercept("POST", getBase() + "/update-appoint", (req) => {
+      req.reply("true");
+    }).as("update");
+    cy.intercept("POST", getBase() + "/register-appoint", (req) => {
+      const body = JSON.parse(req.body);
+      body.appointId = nextAppointId++;
+      req.reply(body);
+    }).as("register");
+    cy.mount(AppointDialog, { props });
+    driver.setPatientInput("看護 花子");
+    driver.checkWithVisit();
+    driver.modify();
+    cy.wait("@update");
+    cy.wait("@register").then(intercept => {
+      const a = JSON.parse(intercept.request.body);
+      expect(a.appointTimeId).to.be.equal(appointTimeId + 1);
+    })
+    cy.get("@destroy").should("be.called");
+  });
 });
