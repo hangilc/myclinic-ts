@@ -218,7 +218,7 @@
 <SurfaceModal {destroy} {title}>
   <div data-cy="appoint-time-text">{appointTimeText(data)}</div>
   {#if errors.length > 0}
-    <div class="error">
+    <div class="error" data-cy="error">
       {#each errors as error}
         <div>{error.toString()}</div>
       {/each}

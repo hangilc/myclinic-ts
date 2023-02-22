@@ -9,6 +9,10 @@ export function untilToTime(until: string): string {
 }
 
 export const AppointDialogDriver = {
+  shouldHaveTitle(title: string): void {
+    cy.get(`[data-cy=dialog][data-title='${title}']`).should("exist");
+  },
+
   shouldHaveAppointTimeText(text: string): void {
     cy.get("[data-cy=appoint-time-text]").should("have.text", text);
   },
@@ -29,12 +33,24 @@ export const AppointDialogDriver = {
     cy.get("[data-cy=patient-id-disp]").should("have.text", patientId.toString());
   },
 
+  shouldDisplayBlankPatientId(): void {
+    cy.get("[data-cy=patient-id-disp]").should("have.text", "");
+  },
+
   shouldHaveMemoInputValue(value: string): void {
     cy.get("[data-cy=memo-input]").should("have.value", value);
   },
 
   shouldHaveUncheckedKenshinTag(): void {
     cy.get("input[type=checkbox][data-cy=kenshin-tag]").should("not.be.checked");
+  },
+
+  shouldErrorBeVisible(): void {
+    cy.get("[data-cy=error]").should("be.visible");
+  },
+
+  shouldContainErrorMessage(msg: string): void {
+    cy.get("[data-cy=error]").contains(msg);
   },
 
   enter(): void {
