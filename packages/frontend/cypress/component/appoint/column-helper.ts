@@ -65,6 +65,18 @@ export const AppointDialogDriver = {
     cy.get("input[type=checkbox][data-cy=kenshin-tag]").should("be.checked");
   },
 
+  shouldNotHaveWithVisit(): void {
+    cy.get("input[type=checkbox][data-cy=with-visit]").should("not.exist");
+  },
+
+  shouldHaveCheckedWithVisit(): void {
+    cy.get("input[type=checkbox][data-cy=with-visit]").should("be.checked");
+  },
+
+  shouldHaveUncheckedWithVisit(): void {
+    cy.get("input[type=checkbox][data-cy=with-visit]").should("not.be.checked");
+  },
+
   shouldErrorBeVisible(): void {
     cy.get("[data-cy=error]").should("be.visible");
   },

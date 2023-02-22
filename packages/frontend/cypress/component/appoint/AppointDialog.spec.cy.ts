@@ -172,7 +172,7 @@ describe("AppointDialog", () => {
     driver.shouldHaveCheckedKenshinTag();
   });
 
-  it.only("should update appoint", () => {
+  it("should update appoint", () => {
     const appointTimeId = 10;
     const appointId = 200;
     const patientId = 1;
@@ -208,5 +208,26 @@ describe("AppointDialog", () => {
     cy.get("@destroy").should("be.called");
   });
 
-
+  it("should show shinsatsu checkbox if appropriate", () => {
+    const appointTimeId = 10;
+    const appointId = 200;
+    const patientId = 1;
+    const memo = ""
+    const appoint = new Appoint(appointId, appointTimeId, "診療 太郎", patientId, memo);
+    const follow = new AppointTime(appointTimeId + 1, "2023-02-13", 
+    "10:20:00", "10:40:00", "regular", 1);
+    const data = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], follow
+    )
+    const props = {
+      destroy: () => {},
+      data,
+      init: appoint
+    }
+    cy.mount(AppointDialog, { props });
+    driver.shouldNotHaveWithVisit();
+    driver.checkKenshin();
+    driver.shouldHaveUncheckedWithVisit();
+  })
 });

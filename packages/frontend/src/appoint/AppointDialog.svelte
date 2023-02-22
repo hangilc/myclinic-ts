@@ -293,6 +293,7 @@
             type="checkbox"
             id={withRegularId}
             bind:checked={followingChecked}
+            data-cy="with-visit"
           />
           <label for={withRegularId}>診察も</label>
         {/if}
