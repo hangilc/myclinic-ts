@@ -1,5 +1,6 @@
 import { AppointTimeData } from "@/appoint/appoint-time-data";
 import AppointPatient from "@/appoint/AppointPatient.svelte";
+import type { MountReturn } from "cypress/svelte";
 import { Appoint, AppointTime } from "myclinic-model";
 import { appointDialogClose, withAppointDialog, withAppointPatient } from "./column-helper";
 
@@ -116,5 +117,42 @@ describe("AppointPatient", () => {
       driver.cancel();
     });
     appointDialogClose();
+  });
+
+  it("should update after edit", () => {
+    const appointId = 1;
+    const appointTimeId = 10;
+    const patientId = 1;
+    const patientName = "診療 太郎"
+    const appoint = new Appoint(appointId, appointTimeId, patientName, patientId, "");
+    const appointTimeData = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], undefined
+    )
+    cy.mount(AppointPatient, { props: {
+      data: appoint,
+      appointTimeData
+    }}).as("mount");
+    cy.get(`[data-cy=appoint-patient][data-patient-id=${patientId}]`).click();
+    withAppointDialog(driver => {
+      driver.setPatientInput("2");
+      driver.clickSearchIcon();
+      driver.shouldDisplayPatientId(2);
+      driver.modify();
+    });
+    appointDialogClose();
+    const newAppoint = new Appoint(2, appointTimeId, "看護 花子", 2, "");
+    cy.get<MountReturn<AppointPatient>>("@mount").then(mount => {
+      const c = mount.component;
+      c.$set({
+        data: newAppoint
+      })
+    });
+    withAppointPatient(2, driver => {
+      driver.shouldDisplayPatientId(2);
+      driver.shouldDisplayPatientName("看護 花子");
+      driver.shouldDisplayMemo("");
+      driver.shouldHaveTagCount(0);
+    })
   });
 });

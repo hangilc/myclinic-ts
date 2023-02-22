@@ -17,6 +17,10 @@ export const AppointDialogDriver = {
     cy.get("[data-cy=search-patient-input]").clear().type(s);
   },
 
+  clickSearchIcon(): void {
+    cy.get("[data-cy=search-icon]").click();
+  },
+
   shouldHavePatientInputValue(value: string): void {
     cy.get("[data-cy=search-patient-input]").should("have.value", value);
   },
@@ -35,6 +39,14 @@ export const AppointDialogDriver = {
 
   enter(): void {
     cy.get("button").contains("入力").click();
+  },
+
+  modify(): void {
+    cy.get("button").contains("変更入力").click();
+  },
+
+  cancelAppoint(): void {
+    cy.get("button").contains("予約取消").click();
   },
 
   cancel(): void {
