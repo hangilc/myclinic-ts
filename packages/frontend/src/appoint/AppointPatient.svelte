@@ -13,7 +13,6 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        title: "診察予約編集",
         data: appointTimeData,
         init: data
       }

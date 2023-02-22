@@ -93,6 +93,30 @@ describe("AppointPatient", () => {
     });
   });
 
+  it("should display both memo and tag", () => {
+    const appointId = 1;
+    const appointTimeId = 10;
+    const patientId = 1;
+    const patientName = "診療 太郎"
+    const memo = "{{健診}}相談"
+    const appoint = new Appoint(appointId, appointTimeId, patientName, patientId, memo);
+    const appointTimeData = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], undefined
+    )
+    cy.mount(AppointPatient, { props: {
+      data: appoint,
+      appointTimeData
+    }});
+    withAppointPatient(patientId, driver => {
+      driver.shouldDisplayPatientId(patientId);
+      driver.shouldDisplayPatientName(patientName);
+      driver.shouldDisplayMemo("相談");
+      driver.shouldHaveTagCount(1);
+      driver.shouldDisplayTag("健診");
+    });
+  });
+
   it("should invoke edit dialog", () => {
     const appointId = 1;
     const appointTimeId = 10;
@@ -114,6 +138,33 @@ describe("AppointPatient", () => {
       driver.shouldDisplayPatientId(patientId);
       driver.shouldHaveMemoInputValue("");
       driver.shouldHaveUncheckedKenshinTag();
+      driver.cancel();
+    });
+    appointDialogClose();
+  });
+
+  it("should invoke edit dialog with memo and tag", () => {
+    const appointId = 1;
+    const appointTimeId = 10;
+    const patientId = 1;
+    const patientName = "診療 太郎"
+    const appoint = new Appoint(appointId, appointTimeId, patientName, patientId, 
+      "{{健診}}相談");
+    const appointTimeData = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], undefined
+    )
+    cy.mount(AppointPatient, { props: {
+      data: appoint,
+      appointTimeData
+    }});
+    cy.get(`[data-cy=appoint-patient][data-patient-id=${patientId}]`).click();
+    withAppointDialog(driver => {
+      driver.shouldHaveAppointTimeText("2月13日（月）10時0分 - 10時20分");
+      driver.shouldHavePatientInputValue(patientName);
+      driver.shouldDisplayPatientId(patientId);
+      driver.shouldHaveMemoInputValue("相談");
+      driver.shouldHaveCheckedKenshinTag();
       driver.cancel();
     });
     appointDialogClose();

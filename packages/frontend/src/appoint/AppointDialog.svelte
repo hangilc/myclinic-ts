@@ -12,12 +12,12 @@
   import { confirm } from "@/lib/confirm-call";
 
   export let destroy: () => void;
-  export let title: string;
   export let data: AppointTimeData;
   export let init: Appoint | undefined = undefined;
 
   const kenshinId = genid();
   const withRegularId = genid();
+  let title: string = init ? "診察予約編集" : "診察予約入力";
   let searchText: string = "";
   let patientSearchResult: Patient[] = [];
   let patientId = 0;

@@ -40,7 +40,6 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          title: "診察予約入力",
           data: data,
         },
       });

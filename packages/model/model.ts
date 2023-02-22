@@ -1649,4 +1649,14 @@ export class Appoint {
       arg.memo,
     );
   }
+
+  toJSON() {
+    return ({
+      appointId: this.appointId,
+      appointTimeId: this.appointTimeId,
+      patientName: this.patientName,
+      patientId: this.patientId,
+      memo: this.memo,
+    });
+  };
 }

@@ -37,12 +37,32 @@ export const AppointDialogDriver = {
     cy.get("[data-cy=patient-id-disp]").should("have.text", "");
   },
 
+  setMemoInput(value: string): void {
+    if( value === "" ){
+      cy.get("[data-cy=memo-input]").clear();
+    } else {
+      cy.get("[data-cy=memo-input]").clear().type(value);
+    }
+  },
+
   shouldHaveMemoInputValue(value: string): void {
     cy.get("[data-cy=memo-input]").should("have.value", value);
   },
 
+  checkKenshin(): void {
+    cy.get("input[type=checkbox][data-cy=kenshin-tag]").check();
+  },
+
+  uncheckKenshin(): void {
+    cy.get("input[type=checkbox][data-cy=kenshin-tag]").uncheck();
+  },
+
   shouldHaveUncheckedKenshinTag(): void {
     cy.get("input[type=checkbox][data-cy=kenshin-tag]").should("not.be.checked");
+  },
+
+  shouldHaveCheckedKenshinTag(): void {
+    cy.get("input[type=checkbox][data-cy=kenshin-tag]").should("be.checked");
   },
 
   shouldErrorBeVisible(): void {
