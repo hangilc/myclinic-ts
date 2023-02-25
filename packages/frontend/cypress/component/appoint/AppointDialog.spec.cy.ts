@@ -2,6 +2,7 @@ import { AppointTimeData } from "@/appoint/appoint-time-data";
 import AppointDialog from "@/appoint/AppointDialog.svelte";
 import { getBase } from "@/lib/api";
 import { dialogOpen } from "@cypress/lib/dialog";
+import { ConfirmDriver } from "@cypress/lib/drivers";
 import { Appoint, AppointTime } from "myclinic-model";
 import { createTypeReferenceDirectiveResolutionCache } from "typescript";
 import { AppointDialogDriver as driver } from "./column-helper";
@@ -268,7 +269,7 @@ describe("AppointDialog", () => {
     cy.get("@destroy").should("be.called");
   });
 
-  it.only("should update with visit", () => {
+  it("should update with visit", () => {
     const appointTimeId = 10;
     const appointId = 300;
     const appoint = new Appoint(appointId, appointTimeId, "診療 太郎", 1, "{{健診}}");
@@ -302,6 +303,27 @@ describe("AppointDialog", () => {
       const a = JSON.parse(intercept.request.body);
       expect(a.appointTimeId).to.be.equal(appointTimeId + 1);
     })
+    cy.get("@destroy").should("be.called");
+  });
+
+  it.only("should delete appoint", () => {
+    const appointTimeId = 10;
+    const appointId = 200;
+    const patientId = 1;
+    const memo = ""
+    const appoint = new Appoint(appointId, appointTimeId, "診療 太郎", patientId, memo);
+    const data = new AppointTimeData(
+      new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
+      [appoint], undefined
+    );
+    const props = { destroy: () => {}, data, init: appoint };
+    cy.spy(props, "destroy").as("destroy").as("destroy");
+    cy.mount(AppointDialog, { props });
+    cy.intercept("POST", getBase() + `/cancel-appoint?appoint-id=${appointId}`, "true").as("cancel");
+    driver.shouldHaveTitle("診察予約編集");
+    driver.cancelAppoint();
+    ConfirmDriver.yes("この予約を削除していいですか？");
+    cy.wait("@cancel");
     cy.get("@destroy").should("be.called");
   });
 });
