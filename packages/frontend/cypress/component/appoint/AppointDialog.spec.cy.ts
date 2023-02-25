@@ -306,7 +306,7 @@ describe("AppointDialog", () => {
     cy.get("@destroy").should("be.called");
   });
 
-  it.only("should delete appoint", () => {
+  it("should delete appoint", () => {
     const appointTimeId = 10;
     const appointId = 200;
     const patientId = 1;
