@@ -1,0 +1,9 @@
+[]
+* removed histoire story books (using cypress testing instead)
+
+[1.0.1] Sun Feb 26 23:02:27 2023 +0900
+* added Cypress tests
+
+[1.0.0] Wed Jan 11 19:56:39 2023 +0900
+* initial release
+
