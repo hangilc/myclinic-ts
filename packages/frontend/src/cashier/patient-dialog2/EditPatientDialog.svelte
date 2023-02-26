@@ -7,6 +7,7 @@
   import PatientForm from "../PatientForm.svelte";
 
   export let destroy: () => void;
+  export let onCancel: () => void;
   export let onUpdate: (updated: Patient) => void;
   export let patient: Patient;
   let errors: string[] = [];
@@ -27,6 +28,11 @@
     } else {
       errors = errorMessagesOf(vs.errors);
     }
+  }
+
+  function doCancel() {
+    destroy();
+    onCancel();
   }
 
   function doChange(): void {
@@ -52,7 +58,7 @@
   <PatientForm init={patient} on:value-change={doChange} bind:validate />
   <div class="commands">
     <button on:click={doEnter}>入力</button>
-    <button on:click={destroy}>キャンセル</button>
+    <button on:click={doCancel}>キャンセル</button>
   </div>
 </SurfaceModal>
 

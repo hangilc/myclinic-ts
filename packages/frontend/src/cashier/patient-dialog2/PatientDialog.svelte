@@ -16,6 +16,7 @@
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
+  import { dateTimeParam } from "@/lib/date-param";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -45,6 +46,9 @@
         props: {
           patient: data.patient,
           destroy: () => d.$destroy(),
+          onCancel: () => {
+            data.goback();
+          },
           onUpdate: (updated: Patient) => {
             data.patient = updated;
             data.goback();

@@ -2,7 +2,8 @@ import user from "@cypress/fixtures/patient-a.json";
 import { Patient } from "myclinic-model";
 import { addDays } from "kanjidate";
 import { dateToSql, parseSqlDate } from "@/lib/util";
-import { assertPatientDisp, assertPatientForm, fillPatientForm } from "./misc";
+import { assertPatientDisp, assertPatientForm, dialogClose, fillPatientForm } from "./misc";
+import { dialogOpen } from "@cypress/lib/dialog";
 
 function modifyStr(s: string): string {
   return s + "変";
@@ -51,5 +52,19 @@ describe("Edit Patient", () => {
     cy.get("button").contains("入力").click();
     cy.get("[data-cy=dialog-title]").contains("患者情報");
     assertPatientDisp(modified);
+  });
+
+  it.only("should return to patient dialog after Edit/cancel", () => {
+    cy.visit("/reception/");
+    cy.get("form [data-cy=search-text-input]").type("1");
+    cy.get("form [data-cy=search-button]").click();
+    dialogOpen("患者情報").within(() => {
+      cy.get("a").contains("編集").click();
+    });
+    dialogOpen("患者情報編集").within(() => {
+      cy.get("button").contains("キャンセル").click();
+    });
+    dialogClose("患者情報編集");
+    dialogOpen("患者情報");
   });
 });
