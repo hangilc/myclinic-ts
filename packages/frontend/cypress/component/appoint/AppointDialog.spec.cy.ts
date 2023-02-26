@@ -116,7 +116,7 @@ describe("AppointDialog", () => {
     driver.shouldDisplayPatientId(1);
   });
 
-  it("enters new appoint", () => {
+  it("should enter new appoint", () => {
     const appointTimeId = 10;
     const data = new AppointTimeData(
       new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
@@ -131,6 +131,7 @@ describe("AppointDialog", () => {
     });
     cy.intercept("POST", getBase() + "/register-appoint", (req) => {
       const appoint = JSON.parse(req.body);
+      console.log(JSON.stringify(appoint, undefined, 2))
       expect(appoint).deep.equal({
         appointId: 0, 
         appointTimeId, 

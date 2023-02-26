@@ -54,7 +54,7 @@ describe("Edit Patient", () => {
     assertPatientDisp(modified);
   });
 
-  it.only("should return to patient dialog after Edit/cancel", () => {
+  it("should return to patient dialog after Edit/cancel", () => {
     cy.visit("/reception/");
     cy.get("form [data-cy=search-text-input]").type("1");
     cy.get("form [data-cy=search-button]").click();
