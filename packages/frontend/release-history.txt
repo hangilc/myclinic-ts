@@ -1,7 +1,7 @@
 []
 * removed histoire story books (using cypress testing instead)
 
-[1.0.2]
+[1.0.2] Mon Feb 27 11:01:21 2023 +0900
 * set height restriction to CashierDialog detail
 
 [1.0.1] Sun Feb 26 23:02:27 2023 +0900
