@@ -2,7 +2,7 @@
 * removed histoire story books (using cypress testing instead)
 
 [1.0.2] Mon Feb 27 11:01:21 2023 +0900
-* set height restriction to CashierDialog detail
+* set height restriction to CashierDialog detail -- 会計ダイアログで、明細が多い場合に、ダイアログの高さが高くなり、小さい画面では、領収書印刷ボタンが見えなくなるということがあったので、明細のリストに高さの制限をもうけた。
 
 [1.0.1] Sun Feb 26 23:02:27 2023 +0900
 * added Cypress tests
