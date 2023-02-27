@@ -108,6 +108,7 @@
     display: block;
     max-height: 200px;
     overflow-y: auto;
+    padding: 10px;
   }
 
   .detail {
