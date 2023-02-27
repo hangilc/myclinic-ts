@@ -63,23 +63,25 @@
     <div>
       {kanjidate.format(kanjidate.f9, visit.visitedAt)}
     </div>
-    <div class="detail">
-      <div class="col1" />
-      <div class="col2" />
-      {#each meisai.items as item}
-        <div class="item-row">
-          <div class="item-cell1 header">{item.section.label}</div>
-          <div class="item-cell2" />
-        </div>
-        {#each item.entries as entry}
+    <div class="detail-wrapper">
+      <div class="detail">
+        <div class="col1" />
+        <div class="col2" />
+        {#each meisai.items as item}
           <div class="item-row">
-            <div class="item-cell1">{entry.label}</div>
-            <div class="item-cell2">
-              {entry.tanka.toLocaleString()}x{entry.count}={entry.totalTen.toLocaleString()}
-            </div>
+            <div class="item-cell1 header">{item.section.label}</div>
+            <div class="item-cell2" />
           </div>
+          {#each item.entries as entry}
+            <div class="item-row">
+              <div class="item-cell1">{entry.label}</div>
+              <div class="item-cell2">
+                {entry.tanka.toLocaleString()}x{entry.count}={entry.totalTen.toLocaleString()}
+              </div>
+            </div>
+          {/each}
         {/each}
-      {/each}
+      </div>
     </div>
   </div>
   <div class="summary">
@@ -100,6 +102,12 @@
 
   .patient {
     font-weight: bold;
+  }
+
+  .detail-wrapper {
+    display: block;
+    max-height: 200px;
+    overflow-y: auto;
   }
 
   .detail {
