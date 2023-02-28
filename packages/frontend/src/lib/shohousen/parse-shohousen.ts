@@ -318,7 +318,7 @@ export class Shohousen {
   }
 
   get digitsWidth(): number {
-    return this.totalDrugs.toString().length;
+    return this.parts.length.toString().length;
   }
 
   formatForSave(): string {
