@@ -3,8 +3,19 @@ const app = express();
 const fs = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
+const { onshiLogin } = require("./onshi-login");
+const { onshiSearch } = require("./onshi-search");
 
 let faceDir = resolveFaceDir();
+let certDir = resolveCertDir();
+let certFile;
+let keyFile;
+let jsonFile;
+if( certDir ){
+  certFile = fs.readFileSync(path.resolve(certDir, "cert.pem")).toString();
+  keyFile = fs.readFileSync(path.resolve(certDir, "key.pem")).toString();
+  jsonFile = fs.readFileSync(path.resolve(certDir, "body.json")).toString();
+}
 let port = 9090;
 
 app.get("/face", (req, res) => {
@@ -28,6 +39,19 @@ app.get("/face/:file", (req, res, next) => {
       res.send(buffer);
     }
   })
+});
+
+app.post("/onshi/kakunin", async (req, res, next) => {
+  if( !certDir ){
+    throw new Error("Cannot find certification directory");
+  }
+  const token = await onshiLogin(
+    certFile, keyFile, jsonFile
+  );
+  const idToken = token.result.idToken;
+  const query = req.body;
+  const result = await onshiSearch(idToken, query, true);
+  console.log(result);
 });
 
 const ws = new WebSocketServer({ port: 9091 });
@@ -74,5 +98,10 @@ function resolveFaceDir() {
   if( !d ){
     throw new Error("Cannot find env var: ONSHI_FACE_DIR");
   }
+  return d;
+}
+
+function resolveCertDir() {
+  const d = process.env["ONSHI_CERT_DIR"];
   return d;
 }
