@@ -904,6 +904,10 @@ export default {
     return post("post-hotline", hotline, {}, castBoolean);
   },
 
+  hotlineBeep(recipient: string): Promise<boolean> {
+    return get("hotline-beep", { recipient }, castBoolean);
+  },
+
   countSearchTextForPatient(text: string, patientId: number): Promise<number> {
     return get(
       "count-search-text-for-patient",

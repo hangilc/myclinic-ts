@@ -57,6 +57,7 @@
         const cur = hotlines;
         cur.unshift(h);
         hotlines = cur;
+        printApi.beep();
       }
     })
   );
@@ -138,6 +139,10 @@
   function insertPatient(patient: Patient): void {
     insertIntoMessage(`${patient.lastName}${patient.firstName}様、`);
   }
+
+  function doBeep(): void {
+    api.hotlineBeep(sendTo);
+  }
 </script>
 
 <div class="top hotline">
@@ -145,7 +150,7 @@
   <div class="commands">
     <button on:click={doSend}>送信</button>
     <button on:click={doRoger}>了解</button>
-    <button>Beep</button>
+    <button on:click={doBeep}>Beep</button>
     <div class="link-commands">
       <Popup let:destroy let:trigger>
         <a
