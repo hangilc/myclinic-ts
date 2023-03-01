@@ -15,8 +15,8 @@
     target: document.body,
     props: {
       zIndex: zIndexScreen,
-      opacity: "0.4"
-    }
+      opacity: "0.4",
+    },
   });
 
   onDestroy(() => {
@@ -44,7 +44,27 @@
 </script>
 
 <div class="dialog" bind:this={dialog} data-cy="dialog" data-title={title}>
-  <div class="title" data-cy="dialog-title">{title}</div>
+  <div class="title" data-cy="dialog-title">
+    <span>{title}</span>
+    <svg
+      on:click={destroy}
+      class="closeIcon"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      width="16px"
+      height="16px"
+      data-cy="cross-icon"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  </div>
   <slot />
 </div>
 
@@ -68,6 +88,17 @@
   }
 
   .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .title span {
     font-weight: bold;
+  }
+
+  .closeIcon {
+    cursor: pointer;
   }
 </style>

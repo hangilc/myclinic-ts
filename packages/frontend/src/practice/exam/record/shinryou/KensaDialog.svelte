@@ -72,6 +72,10 @@
     await enter(visit, names, []);
     destroy();
   }
+
+  function doClose(): void {
+    destroy();
+  }
 </script>
 
 <Dialog {destroy} title="検査入力">
@@ -99,7 +103,7 @@
     <button on:click={doPreset}>セット検査</button>
     <button on:click={doEnter}>入力</button>
     <button on:click={doClear}>クリア</button>
-    <button on:click={close}>キャンセル</button>
+    <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
 
