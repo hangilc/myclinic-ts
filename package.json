@@ -5,7 +5,8 @@
     "packages/frontend",
     "packages/model",
     "packages/rezept",
-    "packages/openapi"
+    "packages/openapi",
+    "packages/cert"
   ],
   "scripts": {
     "test-server:start": "cd docker/test-server && docker compose up -d",

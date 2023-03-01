@@ -1,0 +1,13 @@
+{
+  "name": "cert",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "create-server-cert": "/bin/bash ./scripts/create-server-cert.sh",
+    "clean": "rm -f ${PWD}/work/*",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Hangil Chang",
+  "license": "MIT"
+}
