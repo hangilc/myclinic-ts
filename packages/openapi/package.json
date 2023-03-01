@@ -9,8 +9,5 @@
   },
   "author": "Hangil Chang",
   "license": "MIT",
-  "homepage": "https://github.com/hangilc/myclinic-ts#readme",
-  "devDependencies": {
-    "redoc-cli": "^0.13.20"
-  }
+  "homepage": "https://github.com/hangilc/myclinic-ts#readme"
 }
