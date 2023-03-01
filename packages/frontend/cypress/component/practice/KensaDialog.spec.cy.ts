@@ -30,5 +30,28 @@ describe("KensaDialog", () => {
         cy.get("@destroy").should("be.called");
       })
     });
+  });
+
+  it("should have working close icon", () => {
+    startVisit(1, new Date()).as("visit");
+    cy.get<Visit>("@visit").then(visit => {
+      getVisitEx(visit.visitId).as("visitEx");
+    });
+    getShinryhouKensa().as("kensa");
+    cy.get<VisitEx>("@visitEx").then(visitEx => {
+      cy.get<Record<string, string[]>>("@kensa").then(kensa => {
+        const props = {
+          destroy: () => {},
+          visit: visitEx,
+          kensa
+        };
+        cy.spy(props, "destroy").as("destroy");
+        cy.mount(KensaDialog, { props });
+        dialogOpen("検査入力").within(() => {
+          cy.get("[data-cy=cross-icon]").click();
+        });
+        cy.get("@destroy").should("be.called");
+      })
+    });
   })
 })
