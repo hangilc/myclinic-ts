@@ -1,4 +1,5 @@
-[]
+[1.0.3]
+* fixed no beep in Hotline (5037ff62d4ddc0aab8c9d76f4ff0e542e361146b)
 * fixed counting drugs parts in parse shohousen (commit: 2b837b)
 * removed histoire story books (using cypress testing instead)
 
