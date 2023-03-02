@@ -31,4 +31,6 @@ function onshiLogin(certFile, keyFile, jsonFile) {
   });
 }
 
-exports.onshiLogin = onshiLogin;
+module.exports = {
+  onshiLogin
+};

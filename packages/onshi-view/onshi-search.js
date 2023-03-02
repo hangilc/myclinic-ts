@@ -11,13 +11,13 @@ const { toDateArg } = require("./util");
 // }
 
 async function onshiSearch(idToken, query, debug = false) {
-  confirmationDate = confirmationDate ?? toDateArg(new Date());
+  const confirmationDate = query.confirmationDate ?? toDateArg(new Date());
   const url = "https://hweb-mnc.oqs.onshikaku.org";
   const path = "/oqs-api-pro/MSA01030/ILI01030SV01/search";
   const body = {
     "XmlMsg": {
       "MessageHeader": {
-        "QualificationConfirmationDate": query.confirmationDate,
+        "QualificationConfirmationDate": confirmationDate,
         "MedicalInstitutionCode": process.env["ONSHI_INSTITUTE_CODE"]
       },
       "MessageBody": {
@@ -64,6 +64,6 @@ async function onshiSearch(idToken, query, debug = false) {
   })
 }
 
-exports = {
+module.exports = {
   onshiSearch
 }

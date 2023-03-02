@@ -1,5 +1,6 @@
 const express = require("express");
-const app = express();
+const bodyParser = require("body-parser");
+
 const fs = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
@@ -17,6 +18,12 @@ if( certDir ){
   jsonFile = fs.readFileSync(path.resolve(certDir, "body.json")).toString();
 }
 let port = 9090;
+
+const app = express();
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
+app.use(bodyParser.json());
 
 app.get("/face", (req, res) => {
   fs.readdir(faceDir, (err, files) => {
@@ -50,8 +57,10 @@ app.post("/onshi/kakunin", async (req, res, next) => {
   );
   const idToken = token.result.idToken;
   const query = req.body;
+  console.log("query", typeof query, query, query.confirmationDate)
   const result = await onshiSearch(idToken, query, true);
-  console.log(result);
+  res.set({ "Content-Type": "application/json" })
+  res.send(result);
 });
 
 const ws = new WebSocketServer({ port: 9091 });
@@ -87,7 +96,7 @@ fs.watch(faceDir, (eventType, fileName) => {
       peer.send(JSON.stringify(data));
     })
   }
-})
+});
 
 app.listen(port, () => {
   console.log(`onshi-view listening to port ${port}`)

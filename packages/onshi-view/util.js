@@ -13,6 +13,6 @@ function toDateArg(date) {
   return `${y}${m}${d}`;
 }
 
-exports = {
+module.exports = {
   pad, toDateArg
 };
