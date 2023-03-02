@@ -6,7 +6,8 @@
     "packages/model",
     "packages/rezept",
     "packages/openapi",
-    "packages/cert"
+    "packages/cert",
+    "packages/node-server"
   ],
   "scripts": {
     "test-server:start": "cd docker/test-server && docker compose up -d",
