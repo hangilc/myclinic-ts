@@ -57,7 +57,9 @@
         const cur = hotlines;
         cur.unshift(h);
         hotlines = cur;
-        printApi.beep();
+        if( h.recipient === sendAs ){
+          printApi.beep();
+        }
       }
     })
   );
