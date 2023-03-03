@@ -7,8 +7,9 @@
     "packages/rezept",
     "packages/openapi",
     "packages/cert",
+    "packages/onshi-query",
     "packages/onshi-view",
-    "packages/node-server"
+    "packages/onshi-lib"
   ],
   "scripts": {
     "test-server:start": "cd docker/test-server && docker compose up -d",

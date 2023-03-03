@@ -1,0 +1,16 @@
+{
+  "name": "onshi-lib",
+  "version": "1.0.0",
+  "description": "Library for Javascript",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Hangil Chang",
+  "license": "MIT",
+  "dependencies": {
+    "jest": "^29.4.3"
+  },
+  "devDependencies": {
+    "jsdoc": "^4.0.2"
+  }
+}
