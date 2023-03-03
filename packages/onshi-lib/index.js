@@ -1,4 +1,7 @@
 const { onshiLogin } = require("./onshi-login");
+const { onshiSearch } = require("./onshi-search");
+const fs = require("fs");
+const path = require("path");
 
 /**
  * Directory から cert file, key file, setting file を読み込んで object として返す
@@ -26,5 +29,5 @@ function readCerts() {
 }
 
 module.exports = {
-  onshiLogin, readCerts, readCertsFromDir
+  onshiLogin, readCerts, readCertsFromDir, onshiSearch
 }
