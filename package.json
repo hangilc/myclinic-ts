@@ -2,14 +2,7 @@
   "name": "myclinic-ts",
   "private": true,
   "workspaces": [
-    "packages/frontend",
-    "packages/model",
-    "packages/rezept",
-    "packages/openapi",
-    "packages/cert",
-    "packages/onshi-query",
-    "packages/onshi-view",
-    "packages/onshi-lib"
+    "packages/*"
   ],
   "scripts": {
     "test-server:start": "cd docker/test-server && docker compose up -d",

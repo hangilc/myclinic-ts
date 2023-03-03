@@ -4,7 +4,7 @@
 
 const mysql = require("mysql2/promise");
 const { readCerts, onshiLogin, onshiSearch } = require("onshi-lib");
-const { pad } = require("myclinic-jslib");
+const { pad, dateToSqlDate } = require("myclinic-jslib");
 
 const patientId = parseInt(process.argv[2]);
 const confirmDate = process.argv[3];
@@ -33,8 +33,7 @@ async function main() {
     host: process.env["MYCLINIC_DB_HOST"],
     user: process.env["MYCLINIC_DB_USER"],
     password: process.env["MYCLINIC_DB_PASS"],
-    database: "myclinic",
-    timezone: "JST"
+    database: "myclinic"
   });
   const [rs] = await conn.query("select * from patient where patient_id = ?", [patientId]);
   const patient = rs[0];
@@ -52,11 +51,11 @@ async function main() {
     const result = await onshiLogin(certs.certFile, certs.keyFile, certs.jsonFile);
     const idToken = result.result.idToken;
     const r = await onshiSearch(idToken, {
-      hokensha: pad(shaho.hokenshaBangou, 8, " "),
-      hihokensha: shaho.hihokenshaBangou,
-      kigou: shaho.hihokenshaKigou,
-      birthdate: patient.birthday.replaceAll("-", ""),
-      confirmationDate: confirmation.replaceAll("-", "")
+      hokensha: pad(shaho.hokensha_bangou, 8, " "),
+      hihokensha: shaho.hihokensha_bangou,
+      kigou: shaho.hihokensha_kigou,
+      birthdate: dateToSqlDate(patient.birth_day).replaceAll("-", ""),
+      confirmationDate: confirmDate.replaceAll("-", "")
     });
     console.log(r);
   }
