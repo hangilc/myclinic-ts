@@ -57,7 +57,7 @@ async function main() {
       birthdate: dateToSqlDate(patient.birth_day).replaceAll("-", ""),
       confirmationDate: confirmDate.replaceAll("-", "")
     });
-    console.log(r);
+    console.log(JSON.stringify(r, undefined, 2));
   }
   await conn.end();
 }
