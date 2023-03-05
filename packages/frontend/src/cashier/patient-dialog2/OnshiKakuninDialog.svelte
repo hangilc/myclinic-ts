@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
-  import { stringToOptionalDate } from "myclinic-model";
+  import { pad } from "@/lib/pad";
 
   export let destroy: () => void;
   export let hokensha: string;
@@ -12,6 +12,34 @@
   export let secret: string;
   export let onConfirm: (kakunin: string) => void;
   let querying: boolean = true;
+  let queryResult: any = undefined;
+
+  startQuery();
+
+  async function startQuery() {
+    const q = {
+      hokensha: pad(hokensha, 8, "0"),
+      hihokensha: hihokenshaBangou,
+      kigou: hihokenshaKigou,
+      birthdate,
+      confirmationDate: confirmDate,
+    }
+    const r = await fetch(server + "/onshi/kakunin", {
+      method: "POST",
+      mode: "no-cors",
+      headers: {
+        "X-ONSHI-VIEW-SECRET": secret,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(q),
+    });
+    querying = false;
+    queryResult = r.json();
+  }
+
+  function formatQueryResult(r: string): string {
+    return r.replaceAll("\n", "<br/>\n");
+  }
 
 </script>
 
@@ -28,6 +56,9 @@
   {#if querying}
   <div class="query-state">確認中...</div>
   {/if}
+  {#if queryResult}
+  <div class="query-result">{formatQueryResult(queryResult)}</div>
+  {/if}
 </Dialog>
 
 <style>
@@ -43,5 +74,13 @@
   .query-state {
     margin: 10px 0;
     padding: 10px;
+  }
+
+  .query-result {
+    margin: 10px 0;
+    padding: 10px;
+    max-height: 100px;
+    max-width: 200px;
+    overflow: auto;
   }
 </style>

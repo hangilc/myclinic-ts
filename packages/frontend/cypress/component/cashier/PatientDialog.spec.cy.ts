@@ -36,7 +36,7 @@ describe("PatientDialog", () => {
     cy.mount(PatientDialog, { props });
   });
 
-  it("should invoke kakunin with shahokokuho", () => {
+  it.skip("should invoke kakunin with shahokokuho", () => {
     const patient = Patient.cast(patientJson);
     const shaho = new Shahokokuho(1, patient.patientId, 123456, "23-1", "87654321",
       1, "2022-11-01", "0000-00-00", 0, "01");

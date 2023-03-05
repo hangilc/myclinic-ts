@@ -1,7 +1,7 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import {
-  dateToSqlDate,
+    dateToSqlDate,
     type Kouhi,
     type Koukikourei,
     type Patient,
@@ -143,7 +143,7 @@
     data.push(open);
   }
 
-  async function doRegisterVisit() {
+  async function doRegisterVisitNext() {
     const current = data.getCurrentList()[0];
     if (current) {
       const server = await api.dictGet("onshi-server");
@@ -160,15 +160,18 @@
           confirmDate: dateToSqlDate(at).replaceAll("-", ""),
           server,
           secret,
-          onConfirm: (kakunin) => {
-
-          }
-        }
+          onConfirm: (kakunin) => {},
+        },
       });
     } else {
       await api.startVisit(p.patientId, new Date());
       exit();
     }
+  }
+
+  async function doRegisterVisit() {
+    await api.startVisit(p.patientId, new Date());
+    exit();
   }
 
   function exit(): void {
