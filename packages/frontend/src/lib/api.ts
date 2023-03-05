@@ -1265,4 +1265,21 @@ export default {
       castList(m.AppEvent.cast)
     );
   },
+
+  getOnshi(visitId: number): Promise<m.Onshi> {
+    return get("get-onshi", { "visit-id": visitId.toString() }, m.Onshi.cast);
+  },
+
+  enterOnshi(onshi: m.Onshi): Promise<boolean> {
+    return post("enter-onshi", onshi, {}, castBoolean);
+  },
+
+  updateOnshi(onshi: m.Onshi): Promise<boolean> {
+    return post("update-onshi", onshi, {}, castBoolean);
+  },
+
+  deleteOnshi(visitId: number): Promise<boolean> {
+    return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
+  },
+
 };

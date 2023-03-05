@@ -1660,3 +1660,22 @@ export class Appoint {
     });
   };
 }
+
+export class Onshi {
+  visitId: number;
+  kakunin: string;
+
+  constructor(
+    visitId: number, kakunin: string
+  ) {
+    this.visitId = visitId;
+    this.kakunin = kakunin;
+  }
+
+  static cast(arg: any): Onshi {
+    return new Onshi(
+      arg.visitId,
+      arg.kakunin
+    );
+  }
+}
