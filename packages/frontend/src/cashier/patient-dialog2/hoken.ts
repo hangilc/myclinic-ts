@@ -126,6 +126,36 @@ export class Hoken {
     );
   }
 
+  get hokenshaBangou(): string {
+    return Hoken.fold(
+      this.value,
+      (h) => h.hokenshaBangou.toString(),
+      (h) => h.hokenshaBangou,
+      (h) => "",
+      (h) => ""
+    )
+  }
+
+  get hihokenshaBangou(): string {
+    return Hoken.fold(
+      this.value,
+      (h) => h.hihokenshaBangou,
+      (h) => h.hihokenshaBangou,
+      (h) => "",
+      (h) => ""
+    )
+  }
+
+  get hihokenshaKigou(): string | undefined {
+    return Hoken.fold(
+      this.value,
+      (h) => h.hihokenshaKigou === "" ? undefined : h.hihokenshaKigou,
+      (h) => undefined,
+      (h) => undefined,
+      (h) => undefined
+    )
+  }
+
   static fold<T>(
     h: HokenType,
     shahokokuhoHandler: (s: Shahokokuho) => T,
