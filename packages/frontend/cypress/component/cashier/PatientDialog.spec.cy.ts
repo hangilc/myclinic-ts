@@ -3,6 +3,7 @@ import { PatientData } from "@/cashier/patient-dialog2/patient-data";
 import PatientDialog from "@/cashier/patient-dialog2/PatientDialog.svelte";
 import { getBase } from "@/lib/api";
 import patientJson from "@cypress/fixtures/patient-1.json";
+import { dialogOpen } from "@cypress/lib/dialog";
 import { dateToSqlDateTime, Patient, Shahokokuho, Visit } from "myclinic-model";
 
 describe("PatientDialog", () => {
@@ -60,6 +61,7 @@ describe("PatientDialog", () => {
     ).as("startVisit");
     cy.mount(PatientDialog, { props });
     cy.get("button").contains("診察受付").click();
+    dialogOpen("オンライン資格確認");
     cy.get("@startVisit").should("not.exist");
   });
 });

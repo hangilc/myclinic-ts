@@ -17,6 +17,7 @@
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
   import { dateTimeParam } from "@/lib/date-param";
+  import OnshiKakuninDialog from "./OnshiKakuninDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -143,8 +144,21 @@
   }
 
   async function doRegisterVisit() {
-    await api.startVisit(p.patientId, new Date());
-    exit();
+    const current = data.getCurrentList()[0];
+    if (current) {
+      const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          onConfirm: (kakunin) => {
+
+          }
+        }
+      });
+    } else {
+      await api.startVisit(p.patientId, new Date());
+      exit();
+    }
   }
 
   function exit(): void {
@@ -175,8 +189,11 @@
   </div>
   <div class="current-list" data-cy="current-list">
     {#each currentList as h (h.key)}
-      <a href="javascript:void(0)" on:click={() => doCurrentClick(h)}
-        data-cy="current-hoken" data-hoken-key={h.key}>{h.rep}</a
+      <a
+        href="javascript:void(0)"
+        on:click={() => doCurrentClick(h)}
+        data-cy="current-hoken"
+        data-hoken-key={h.key}>{h.rep}</a
       >
     {/each}
   </div>
