@@ -1282,4 +1282,12 @@ export default {
     return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
   },
 
+  dictGet(key: string): Promise<string> {
+    return get("dict-get", { key }, castString);
+  },
+
+  dictSet(key: string, value: string): Promise<boolean> {
+    return get("dict-set", { key, value }, castBoolean);
+  },
+
 };
