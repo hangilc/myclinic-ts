@@ -153,7 +153,7 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          hokensha: pad(h.hokenshaBangou, 8, " "),
+          hokensha: pad(h.hokenshaBangou, 8, "0"),
           hihokenshaBangou: h.hihokenshaBangou,
           hihokenshaKigou: h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
           birthdate: patient.birthday.replaceAll("-", ""),

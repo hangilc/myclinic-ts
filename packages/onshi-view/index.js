@@ -57,9 +57,10 @@ app.post("/onshi/kakunin", async (req, res, next) => {
   const idToken = token.result.idToken;
   const query = req.body;
   console.log("query", typeof query, query, query.confirmationDate)
-  const result = await onshiSearch(idToken, query, true);
-  res.set({ "Content-Type": "application/xml" })
-  res.send(result);
+  res.send("");
+  // const result = await onshiSearch(idToken, query, true);
+  // res.set({ "Content-Type": "application/xml" })
+  // res.send(result);
 });
 
 const ws = new WebSocketServer({ port: 9091 });
