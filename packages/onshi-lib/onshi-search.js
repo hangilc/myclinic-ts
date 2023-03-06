@@ -54,9 +54,8 @@ async function onshiSearch(idToken, query, debug = false) {
       res.on("end", () => {
         if( debug ){
           console.log(msg);
-          console.log(JSON.stringify(JSON.parse(msg), null, 2));
         }
-        resolve(JSON.parse(msg));
+        resolve(msg);
       })
     })
     req.write(json);
