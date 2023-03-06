@@ -4,8 +4,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
-const { onshiLogin } = require("./onshi-login");
-const { onshiSearch } = require("./onshi-search");
+const { onshiLogin, onshiSearch } = require("onshi-lib");
 
 let faceDir = resolveFaceDir();
 let certDir = resolveCertDir();
