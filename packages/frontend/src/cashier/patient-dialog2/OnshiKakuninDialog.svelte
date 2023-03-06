@@ -12,7 +12,7 @@
   export let secret: string;
   export let onConfirm: (kakunin: string) => void;
   let querying: boolean = true;
-  let queryResult: any = undefined;
+  let queryResult: string | undefined = undefined;
 
   startQuery();
 
@@ -34,11 +34,15 @@
       body: JSON.stringify(q),
     });
     querying = false;
-    queryResult = r.json();
+    queryResult = await r.text();
   }
 
-  function formatQueryResult(r: string): string {
-    return r.replaceAll("\n", "<br/>\n");
+  function formatQueryResult(result: string | undefined): string {
+    if( result !== undefined ){
+      return result;
+    } else {
+      return "";
+    }
   }
 
 </script>
