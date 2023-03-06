@@ -36,32 +36,32 @@ describe("PatientDialog", () => {
     cy.mount(PatientDialog, { props });
   });
 
-  it.skip("should invoke kakunin with shahokokuho", () => {
-    const patient = Patient.cast(patientJson);
-    const shaho = new Shahokokuho(1, patient.patientId, 123456, "23-1", "87654321",
-      1, "2022-11-01", "0000-00-00", 0, "01");
-    const hoken = new Hoken(shaho, 0);
-    const data: PatientData = new PatientData(
-      patient,
-      [hoken]
-    );
-    const props = {
-      destroy: () => { },
-      data
-    };
-    const at = dateToSqlDateTime(new Date());
-    cy.intercept("GET",
-      getBase() + "/start-visit?*",
-      (req) => {
-        const patientId = req.query["patient-id"] as number;
-        const at = req.query["at"] as string;
-        const visit = new Visit(1, patientId, at, shaho.shahokokuhoId, 0, 0, 0, 0, 0, undefined);
-        req.reply(visit);
-      }
-    ).as("startVisit");
-    cy.mount(PatientDialog, { props });
-    cy.get("button").contains("診察受付").click();
-    dialogOpen("オンライン資格確認");
-    cy.get("@startVisit").should("not.exist");
-  });
+  // it("should invoke kakunin with shahokokuho", () => {
+  //   const patient = Patient.cast(patientJson);
+  //   const shaho = new Shahokokuho(1, patient.patientId, 123456, "23-1", "87654321",
+  //     1, "2022-11-01", "0000-00-00", 0, "01");
+  //   const hoken = new Hoken(shaho, 0);
+  //   const data: PatientData = new PatientData(
+  //     patient,
+  //     [hoken]
+  //   );
+  //   const props = {
+  //     destroy: () => { },
+  //     data
+  //   };
+  //   const at = dateToSqlDateTime(new Date());
+  //   cy.intercept("GET",
+  //     getBase() + "/start-visit?*",
+  //     (req) => {
+  //       const patientId = req.query["patient-id"] as number;
+  //       const at = req.query["at"] as string;
+  //       const visit = new Visit(1, patientId, at, shaho.shahokokuhoId, 0, 0, 0, 0, 0, undefined);
+  //       req.reply(visit);
+  //     }
+  //   ).as("startVisit");
+  //   cy.mount(PatientDialog, { props });
+  //   cy.get("button").contains("診察受付").click();
+  //   dialogOpen("オンライン資格確認");
+  //   cy.get("@startVisit").should("not.exist");
+  // });
 });

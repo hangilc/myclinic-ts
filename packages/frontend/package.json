@@ -10,11 +10,9 @@
     "test-client": "vite --mode test-client",
     "check": "svelte-check --tsconfig ./tsconfig.json --compiler-warnings 'a11y-invalid-attribute:ignore,a11y-click-events-have-key-events:ignore,a11y-autofocus:ignore'",
     "test": "vitest run",
-    "story:dev": "histoire dev",
-    "story:build": "histoire build",
-    "story:preview": "histoire preview",
     "cy:open": "VITE_BACKEND_PORT=38080 cypress open",
-    "cy:run": "VITE_BACKEND_PORT=38080 cypress run"
+    "cy:run": "VITE_BACKEND_PORT=38080 cypress run",
+    "cy:local-open": "VITE_BACKEND_PORT=8080 cypress open"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",

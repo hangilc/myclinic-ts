@@ -5,6 +5,7 @@
     Koukikourei,
     Kouhi,
     Roujin,
+    Patient,
   } from "myclinic-model";
   import {
     hokenRep,
@@ -15,6 +16,8 @@
   } from "@/lib/hoken-rep";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
+  import OnshiKakuninDialog from "@/cashier/patient-dialog2/OnshiKakuninDialog.svelte";
+  import { pad } from "@/lib/pad";
 
   export let visit: VisitEx;
   let shahoOpt: [Shahokokuho, boolean] | null = null;
@@ -139,6 +142,29 @@
     await api.updateHokenIds(visit.visitId, idSet);
     closeHokenDialog();
   }
+
+  async function confirmShahokokuho(arg: [Shahokokuho, boolean] | null) {
+    if( arg != null ){
+      const h = arg[0];
+      const server = await api.dictGet("onshi-server");
+      const secret = await api.dictGet("onshi-secret");
+      const patient: Patient = visit.patient;
+      const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          hokensha: pad(h.hokenshaBangou, 8, " "),
+          hihokenshaBangou: h.hihokenshaBangou,
+          hihokenshaKigou: h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
+          birthdate: patient.birthday.replaceAll("-", ""),
+          confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
+          server,
+          secret,
+          onConfirm: (data) => {}
+        }
+      })
+    }
+  }
 </script>
 
 <div class="disp" on:click={onDispClick}>{hokenRep(visit)}</div>
@@ -150,6 +176,7 @@
         <div>
           <input type="checkbox" bind:checked={shahoOpt[1]} />
           {shahokokuhoRep(shahoOpt[0])}
+          <a href="javascript:void(0)" on:click={() => confirmShahokokuho(shahoOpt)}>資格確認</a>
         </div>
       {/if}
       {#if roujinOpt != null}

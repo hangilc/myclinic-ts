@@ -1,4 +1,5 @@
 const  https = require("https");
+const { dateToSqlDate } = require("myclinic-jslib");
 
 /**
  * オンライン資格確認を実行する
@@ -12,7 +13,7 @@ const  https = require("https");
  * @returns { Object } オンライン資格確認情報 (JSON)
  */
 async function onshiSearch(idToken, query, debug = false) {
-  const confirmationDate = query.confirmationDate ?? toDateArg(new Date());
+  const confirmationDate = query.confirmationDate ?? dateToSqlDate(new Date()).replaceAll("-", "");
   const url = "https://hweb-mnc.oqs.onshikaku.org";
   const path = "/oqs-api-pro/MSA01030/ILI01030SV01/search";
   const body = {
