@@ -42,10 +42,12 @@ async function onshiSearch(idToken, query, debug = false) {
       headers: {
         "Content-Type": "application/json;charset=UTF-8",
         "Authorization": idToken,
-        "Content-Length": json.length.toString()
+        "Content-Length": json.length.toString(),
+        "Accept": "application/json"
       },
       rejectUnauthorized: false,
     }, (res) => {
+      console.log("headers", res.headers);
       let msg = "";
       res.setEncoding("utf-8");
       res.on("data", str => {

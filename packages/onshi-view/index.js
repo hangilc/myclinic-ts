@@ -61,7 +61,7 @@ app.post("/onshi/kakunin", async (req, res, next) => {
   );
   const idToken = token.result.idToken;
   const result = await onshiSearch(idToken, query, true);
-  res.set({ "Content-Type": "application/xml" })
+  res.set({ "Content-Type": "application/json" })
   res.send(result);
 });
 
