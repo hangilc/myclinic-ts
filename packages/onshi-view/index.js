@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const fs = require("fs");
 const path = require("path");
@@ -19,9 +20,11 @@ if( certDir ){
 let port = 9090;
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.urlencoded({
   extended: true
 }))
+// app.use(bodyParser.json());
 app.use(bodyParser.json());
 
 app.get("/face", (req, res) => {
@@ -48,6 +51,8 @@ app.get("/face/:file", (req, res, next) => {
 });
 
 app.post("/onshi/kakunin", async (req, res, next) => {
+  const query = req.body;
+  console.log("query", typeof query, query, query.confirmationDate)
   if( !certDir ){
     throw new Error("Cannot find certification directory");
   }
@@ -55,12 +60,9 @@ app.post("/onshi/kakunin", async (req, res, next) => {
     certFile, keyFile, jsonFile
   );
   const idToken = token.result.idToken;
-  const query = req.body;
-  console.log("query", typeof query, query, query.confirmationDate)
-  res.send("");
-  // const result = await onshiSearch(idToken, query, true);
-  // res.set({ "Content-Type": "application/xml" })
-  // res.send(result);
+  const result = await onshiSearch(idToken, query, true);
+  res.set({ "Content-Type": "application/xml" })
+  res.send(result);
 });
 
 const ws = new WebSocketServer({ port: 9091 });

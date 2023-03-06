@@ -10,6 +10,7 @@
   "license": "MIT",
   "homepage": "https://github.com/hangilc/myclinic-ts#readme",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
     "myclinic-jslib": "^1.0.0",
     "onshi-lib": "^1.0.0",
