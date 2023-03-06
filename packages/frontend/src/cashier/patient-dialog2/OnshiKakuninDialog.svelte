@@ -10,7 +10,7 @@
   export let confirmDate: string;
   export let server: string;
   export let secret: string;
-  export let onConfirm: (kakunin: string) => void;
+  export let onDone: (result: string) => void;
   let querying: boolean = true;
   let queryResult: string | undefined = undefined;
 
@@ -26,9 +26,9 @@
     }
     const r = await fetch(server + "/onshi/kakunin", {
       method: "POST",
-      mode: "no-cors",
+      // mode: "no-cors",
       headers: {
-        "X-ONSHI-VIEW-SECRET": secret,
+        // "X-ONSHI-VIEW-SECRET": secret,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(q),

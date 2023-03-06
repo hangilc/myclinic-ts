@@ -160,7 +160,7 @@
           confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
           server,
           secret,
-          onConfirm: (data) => {}
+          onDone: (data) => {}
         }
       })
     }
