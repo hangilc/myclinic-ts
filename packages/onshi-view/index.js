@@ -2,11 +2,35 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const https = require("https");
+const util = require("util");
+const dotenv = require("dotenv");
 
 const fs = require("fs");
 const path = require("path");
 const { WebSocketServer } = require("ws");
 const { onshiLogin, onshiSearch } = require("onshi-lib");
+
+const parsed = util.parseArgs({
+  options: {
+    env: {
+      type: "string",
+      short: "e"
+    }
+  }
+});
+
+let config = {};
+
+if( parsed.values.env ) {
+  const envFile = fs.readFileSync(parsed.values.env);
+  config = dotenv.parse(envFile);
+}
+
+const SECRET = resolveVar("ONSHI_VIEW_SECRET");
+if( !SECRET ){
+  console.log("ERROR: no secret");
+  process.exit(1);
+}
 
 let faceDir = resolveFaceDir();
 let certDir = resolveCertDir();
@@ -26,6 +50,16 @@ app.use(bodyParser.urlencoded({
   extended: true
 }))
 app.use(bodyParser.json());
+app.use(checkSecret);
+
+function checkSecret(req, res, next) {
+  const scrt = req.get("X-ONSHI-VIEW-SECRET");
+  if( scrt && scrt === SECRET ) {
+    next();
+  } else {
+    throw new Error("No secret");
+  }
+}
 
 app.get("/face", (req, res) => {
   fs.readdir(faceDir, (err, files) => {
@@ -101,8 +135,8 @@ fs.watch(faceDir, (eventType, fileName) => {
 });
 
 const server = https.createServer({
-  cert: fs.readFileSync(process.env["ONSHI_VIEW_TLS_CERT"]),
-  key: fs.readFileSync(process.env["ONSHI_VIEW_TLS_KEY"]),
+  cert: fs.readFileSync(resolveVar("ONSHI_VIEW_TLS_CERT")),
+  key: fs.readFileSync(resolveVar("ONSHI_VIEW_TLS_KEY")),
 }, app)
 
 server.listen(port, () => {
@@ -110,7 +144,7 @@ server.listen(port, () => {
 })
 
 function resolveFaceDir() {
-  const d = process.env["ONSHI_FACE_DIR"];
+  const d = resolveVar("ONSHI_FACE_DIR");
   if( !d ){
     throw new Error("Cannot find env var: ONSHI_FACE_DIR");
   }
@@ -120,4 +154,12 @@ function resolveFaceDir() {
 function resolveCertDir() {
   const d = process.env["ONSHI_CERT_DIR"];
   return d;
+}
+
+function resolveVar(key) {
+  if( key in config ){
+    return config[key];
+  } else {
+    return process.env[key];
+  }
 }
