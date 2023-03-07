@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const https = require("https");
 
 const fs = require("fs");
 const path = require("path");
@@ -17,14 +18,13 @@ if( certDir ){
   keyFile = fs.readFileSync(path.resolve(certDir, "key.pem")).toString();
   jsonFile = fs.readFileSync(path.resolve(certDir, "body.json")).toString();
 }
-let port = 9090;
+let port = 443;
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.urlencoded({
   extended: true
 }))
-// app.use(bodyParser.json());
 app.use(bodyParser.json());
 
 app.get("/face", (req, res) => {
@@ -100,7 +100,12 @@ fs.watch(faceDir, (eventType, fileName) => {
   }
 });
 
-app.listen(port, () => {
+const server = https.createServer({
+  cert: fs.readFileSync(process.env["ONSHI_VIEW_TLS_CERT"]),
+  key: fs.readFileSync(process.env["ONSHI_VIEW_TLS_KEY"]),
+}, app)
+
+server.listen(port, () => {
   console.log(`onshi-view listening to port ${port}`)
 })
 
