@@ -34,12 +34,36 @@ describe("CashierDialog", () => {
           const charge = new Charge(visit.visitId, meisai.charge);
           const props = {
             patient, visit, meisai, charge,
-            destroy: () => {}
+            destroy: () => { }
           };
           cy.mount(CashierDialog, { props });
           cy.get(".detail-wrapper").invoke("outerHeight").should("be.lt", 300);
         })
       })
     })
+  });
+
+  it("should show changed charge", () => {
+    const at = new Date();
+    newPatient().as("patient");
+    cy.get<Patient>("@patient").then(patient => {
+      startVisit(patient.patientId, at).as("visit");
+    });
+    cy.get<Visit>("@visit").then(visit => {
+      getVisitEx(visit.visitId).as("visitEx");
+      getMeisai(visit.visitId).as("meisai")
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      cy.get<VisitEx>("@visitEx").then(visit => {
+        cy.get<Meisai>("@meisai").then(meisai => {
+          const charge = new Charge(visit.visitId, 1000);
+          const props = {
+            patient, visit, meisai, charge,
+            destroy: () => { }
+          };
+          cy.mount(CashierDialog, { props });
+        })
+      })
+    });
   });
 })
