@@ -1,4 +1,4 @@
-const { onshiValidity } = require("./properties");
+const { onshiValidity, onshiName, onshiNameYomi } = require("./properties");
 
 const json = JSON.parse(`
 {
@@ -57,4 +57,12 @@ const json = JSON.parse(`
 
 test("It should return validity", () => {
   expect(onshiValidity(json)).toBe("1");
+});
+
+test("It should return patient name", () => {
+  expect(onshiName(json)).toBe("診療　太郎");
+});
+
+test("It should return patient name yomi", () => {
+  expect(onshiNameYomi(json)).toBe("ｼﾝﾘｮｳ ﾀﾛｳ");
 });

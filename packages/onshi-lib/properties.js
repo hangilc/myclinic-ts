@@ -31,7 +31,7 @@ function onshiValidity(onshi) {
  * @returns { JSON } 有効な結果
  */
 function onshiValidResult(onshi) {
-  onshiBody(onshi).ResultList[0].ResultOfQualificationConfirmation;
+  return onshiBody(onshi).ResultList[0].ResultOfQualificationConfirmation;
 }
 
 /**
@@ -70,6 +70,24 @@ function onshiHihokenhsaEdaban(onshi) {
   return onshiValidResult(onshi).InsuredBranchNumber ?? "";
 }
 
+/**
+ * オンライン資格確認結果の有効な場合の患者氏名を返す
+ * @param { JSON } onshi - オンライン資格確認結果 (onshiSearch の出力)
+ * @returns { string } 患者氏名
+ */
+function onshiName(onshi) {
+  return onshiValidResult(onshi).Name;
+}
+
+/**
+ * オンライン資格確認結果の有効な場合の患者氏名のよみがなを返す
+ * @param { JSON } onshi - オンライン資格確認結果 (onshiSearch の出力)
+ * @returns { string } 患者氏名のよみがな
+ */
+function onshiNameYomi(onshi) {
+  return onshiValidResult(onshi).NameKana;
+}
+
 module.exports = {
   onshiHeader, 
   onshiBody,
@@ -79,4 +97,7 @@ module.exports = {
   onshiHihokenhsaKigou,
   onshiHihokenhsaBangou,
   onshiHihokenhsaEdaban,
+  onshiName,
+  onshiNameYomi,
+
 }
