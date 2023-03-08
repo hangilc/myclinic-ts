@@ -19,6 +19,7 @@
   export let meisai: Meisai;
   export let charge: Charge;
   export let destroy: () => void;
+  export let receiptHook: (data: ReceiptDrawerData) => void = _ => {};
 
   function patientLine(p: Patient): string {
     return `(${p.patientId}) ${p.fullName()} ${p.fullYomi()}`;
@@ -33,12 +34,13 @@
   async function doPrintReceipt() {
     let receipt = new ReceiptDrawerData();
     receipt.setPatient(patient);
-    receipt.charge = charge.charge;
     receipt.visitDate = kanjidate.format(kanjidate.f2, visit.visitedAtAsDate);
     receipt.issueDate = kanjidate.format(kanjidate.f2, new Date());
     receipt.hoken = hokenRep(visit);
     receipt.futanWari = meisai.futanWari === 10 ? "" : meisai.futanWari.toString();
     receipt.setMeisai(meisai);
+    receipt.charge = charge.charge;
+    receiptHook(receipt);
     let ops = await api.drawReceipt(receipt);
     const dlog: DrawerDialog2 = new DrawerDialog2({
       target: document.body,

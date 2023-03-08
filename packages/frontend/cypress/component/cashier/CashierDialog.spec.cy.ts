@@ -6,6 +6,7 @@ import shinryouNames from "@cypress/fixtures/shinryou-set1.json";
 import { batchResolveShinryoucodeByName } from "@cypress/lib/masters";
 import { batchEnterShinryou } from "@cypress/lib/shinryou";
 import { getMeisai } from "@cypress/lib/meisai";
+import type { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
 
 describe("CashierDialog", () => {
   it("should have proper height of cashier detail", () => {
@@ -53,15 +54,26 @@ describe("CashierDialog", () => {
       getVisitEx(visit.visitId).as("visitEx");
       getMeisai(visit.visitId).as("meisai")
     });
+    const f = {
+      receiptHook: (data: ReceiptDrawerData) => {
+        expect(data.charge).to.be.eq(1000);
+      }
+    };
+    cy.spy(f, "receiptHook").as("receiptHook");
+    cy.intercept("GET", "http://localhost:48080/setting/", "[]");
+    cy.intercept("GET", "http://localhost:48080/pref/receipt", "null");
     cy.get<Patient>("@patient").then(patient => {
       cy.get<VisitEx>("@visitEx").then(visit => {
         cy.get<Meisai>("@meisai").then(meisai => {
           const charge = new Charge(visit.visitId, 1000);
           const props = {
             patient, visit, meisai, charge,
-            destroy: () => { }
+            destroy: () => { },
+            receiptHook: (d: ReceiptDrawerData) => f.receiptHook(d)
           };
           cy.mount(CashierDialog, { props });
+          cy.get("button").contains("領収書印刷").click();
+          cy.get("@receiptHook").should("be.called");
         })
       })
     });
