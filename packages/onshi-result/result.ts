@@ -1,4 +1,4 @@
-import { XmlMsg } from "XmlMsg";
+import { XmlMsg } from "./XmlMsg";
 
 export class OnshiResult {
   XmlMsg: XmlMsg 

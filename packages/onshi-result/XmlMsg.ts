@@ -1,6 +1,9 @@
+import { MessageBody } from "./MessageBody";
+import { MessageHeader } from "./MessageHeader";
+
 export class XmlMsg {
   MessageHeader: MessageHeader;
-  MessageBody: MessageBoxy;
+  MessageBody: MessageBody;
 
   constructor(MessageHeader: MessageHeader, MessageBody: MessageBody) {
     this.MessageHeader = MessageHeader;
