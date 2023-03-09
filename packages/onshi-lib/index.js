@@ -1,5 +1,6 @@
 const { onshiLogin } = require("./onshi-login");
 const { onshiSearch } = require("./onshi-search");
+const props = require("./properties");
 const fs = require("fs");
 const path = require("path");
 
@@ -29,5 +30,6 @@ function readCerts() {
 }
 
 module.exports = {
-  onshiLogin, readCerts, readCertsFromDir, onshiSearch
+  onshiLogin, readCerts, readCertsFromDir, onshiSearch,
+  ...props,
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import { pad } from "@/lib/pad";
+  import * as onshiLib from "onshi-lib";
+  // const { onshiIsValid } = require("onshi-lib");
 
   export let destroy: () => void;
   export let hokensha: string;
@@ -10,11 +12,12 @@
   export let confirmDate: string;
   export let server: string;
   export let secret: string;
-  export let onDone: (result: string) => void;
+  export let onDone: (result: object | undefined) => void;
   let querying: boolean = true;
-  let queryResult: string | undefined = undefined;
+  let queryResult: object | undefined = undefined;
 
   startQuery();
+  console.log("onshiLib", onshiLib);
 
   async function startQuery() {
     const q = {
@@ -33,20 +36,18 @@
       body: JSON.stringify(q),
     });
     querying = false;
-    queryResult = await r.text();
+    queryResult = await r.json();
+    console.log(JSON.stringify(queryResult, undefined, 2));
   }
 
-  function formatQueryResult(result: string | undefined): string {
-    if( result !== undefined ){
-      return result;
-    } else {
-      return "";
-    }
+  function doClose(): void {
+    destroy();
+    onDone(queryResult)
   }
 
 </script>
 
-<Dialog title="オンライン資格確認" {destroy}>
+<Dialog title="オンライン資格確認" destroy={doClose}>
   <div class="query">
     <span>保険者番号</span><span>{hokensha}</span>
     {#if hihokenshaKigou }
@@ -60,8 +61,15 @@
   <div class="query-state">確認中...</div>
   {/if}
   {#if queryResult}
-  <div class="query-result">{formatQueryResult(queryResult)}</div>
+    {#if onshiLib.onshiIsValid(queryResult) }
+      <div>オンラインで資格確認ができました。</div>
+    {:else}
+      <div>資格確認失敗。</div>
+    {/if}
   {/if}
+  <div class="commands">
+    <button on:click={doClose}>閉じる</button>
+  </div>
 </Dialog>
 
 <style>
@@ -79,11 +87,8 @@
     padding: 10px;
   }
 
-  .query-result {
-    margin: 10px 0;
-    padding: 10px;
-    max-height: 100px;
-    max-width: 200px;
-    overflow: auto;
+  .commands {
+    margin-top: 10px;
+    text-align: right;
   }
 </style>

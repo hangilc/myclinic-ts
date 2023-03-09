@@ -2,6 +2,7 @@
   "name": "onshi-lib",
   "version": "1.0.0",
   "description": "Library for Javascript",
+  "main": "index.js",
   "scripts": {
     "test": "jest"
   },

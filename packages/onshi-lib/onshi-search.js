@@ -12,7 +12,7 @@ const { dateToSqlDate } = require("myclinic-jslib");
  * @param { string } query.confirmationDate - 確認日 (YYYYMMDD)
  * @returns { Object } オンライン資格確認情報 (JSON)
  */
-async function onshiSearch(idToken, query, debug = false) {
+async function onshiSearch(idToken, query, kikancode, debug = false) {
   const confirmationDate = query.confirmationDate ?? dateToSqlDate(new Date()).replaceAll("-", "");
   const url = "https://hweb-mnc.oqs.onshikaku.org";
   const path = "/oqs-api-pro/MSA01030/ILI01030SV01/search";
@@ -20,7 +20,7 @@ async function onshiSearch(idToken, query, debug = false) {
     "XmlMsg": {
       "MessageHeader": {
         "QualificationConfirmationDate": confirmationDate,
-        "MedicalInstitutionCode": process.env["ONSHI_INSTITUTE_CODE"]
+        "MedicalInstitutionCode": kikancode
       },
       "MessageBody": {
         "QualificationConfirmSearchInfo": {

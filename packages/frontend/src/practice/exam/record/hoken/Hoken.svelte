@@ -143,26 +143,52 @@
     closeHokenDialog();
   }
 
+  async function confirmByOnshi(
+    hokensha: string | number,
+    hihokensha: string,
+    kigou: string | undefined,
+    onDone: (data: object | undefined) => void,
+  ) {
+    const server = await api.dictGet("onshi-server");
+    const secret = await api.dictGet("onshi-secret");
+    const patient: Patient = visit.patient;
+    const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        hokensha: pad(hokensha, 8, "0"),
+        hihokenshaBangou: hihokensha,
+        hihokenshaKigou: kigou || "",
+        birthdate: patient.birthday.replaceAll("-", ""),
+        confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
+        server,
+        secret,
+        onDone,
+      },
+    });
+  }
+
   async function confirmShahokokuho(arg: [Shahokokuho, boolean] | null) {
-    if( arg != null ){
+    if (arg != null) {
       const h = arg[0];
-      const server = await api.dictGet("onshi-server");
-      const secret = await api.dictGet("onshi-secret");
-      const patient: Patient = visit.patient;
-      const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          hokensha: pad(h.hokenshaBangou, 8, "0"),
-          hihokenshaBangou: h.hihokenshaBangou,
-          hihokenshaKigou: h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
-          birthdate: patient.birthday.replaceAll("-", ""),
-          confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
-          server,
-          secret,
-          onDone: (data) => {}
-        }
-      })
+      confirmByOnshi(
+        h.hokenshaBangou,
+        h.hihokenshaBangou,
+        h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
+        _ => {}
+      )
+    }
+  }
+
+  async function confirmKoukikourei(arg: [Koukikourei, boolean] | null) {
+    if (arg != null) {
+      const h = arg[0];
+      confirmByOnshi(
+        h.hokenshaBangou,
+        h.hihokenshaBangou,
+        undefined,
+        _ => {}
+      )
     }
   }
 </script>
@@ -176,7 +202,10 @@
         <div>
           <input type="checkbox" bind:checked={shahoOpt[1]} />
           {shahokokuhoRep(shahoOpt[0])}
-          <a href="javascript:void(0)" on:click={() => confirmShahokokuho(shahoOpt)}>資格確認</a>
+          <a
+            href="javascript:void(0)"
+            on:click={() => confirmShahokokuho(shahoOpt)}>資格確認</a
+          >
         </div>
       {/if}
       {#if roujinOpt != null}
@@ -189,6 +218,10 @@
         <div>
           <input type="checkbox" bind:checked={koukiOpt[1]} />
           {koukikoureiRep(koukiOpt[0].futanWari)}
+          <a
+            href="javascript:void(0)"
+            on:click={() => confirmKoukikourei(koukiOpt)}>資格確認</a
+          >
         </div>
       {/if}
       {#each kouhiList as kouhi}

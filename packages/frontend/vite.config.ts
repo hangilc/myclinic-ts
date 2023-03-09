@@ -28,8 +28,12 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
         "../../node_modules", 
         ".", 
         "../model",
+        // "../onshi-lib",
       ],
     }
+  },
+  optimizeDeps: {
+    include: ["onshi-lib"]
   }
 
 }))

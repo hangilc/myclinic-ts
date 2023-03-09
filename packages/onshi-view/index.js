@@ -42,6 +42,7 @@ if( certDir ){
   keyFile = fs.readFileSync(path.resolve(certDir, "key.pem")).toString();
   jsonFile = fs.readFileSync(path.resolve(certDir, "body.json")).toString();
 }
+const kikancode = resolveVar("ONSHI_INSTITUTE_CODE");
 let port = 443;
 
 const app = express();

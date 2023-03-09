@@ -26,6 +26,15 @@ function onshiValidity(onshi) {
 }
 
 /**
+ * オンライン資格確認結果の資格有効性
+ * @param { JSON } onshi - オンライン資格確認結果 (onshiSearch の出力)
+ * @returns { boolean } 資格有効性 （有効ならば true）
+ */
+function onshiIsValid(onshi) {
+  return onshiValidity(onshi) === "1";
+}
+
+/**
  * オンライン資格確認結果の有効な場合の内容を返す
  * @param { JSON } onshi - オンライン資格確認結果 (onshiSearch の出力)
  * @returns { JSON } 有効な結果
@@ -89,6 +98,7 @@ function onshiNameYomi(onshi) {
 }
 
 module.exports = {
+  onshiIsValid,
   onshiHeader, 
   onshiBody,
   onshiValidity,
