@@ -10,9 +10,13 @@ export class XmlMsg {
     this.MessageBody = MessageBody;
   }
   static cast(arg: any): XmlMsg {
-    return new XmlMsg(
-      MessageHeader.cast(arg.MessageHeader),
-      MessageBody.cast(arg.MessageBody)
-    );
+    if (typeof arg === "object") {
+      return new XmlMsg(
+        MessageHeader.cast(arg.MessageHeader),
+        MessageBody.cast(arg.MessageBody)
+      );
+    } else {
+      throw new Error("Object expected: " + arg);
+    }
   }
 }
