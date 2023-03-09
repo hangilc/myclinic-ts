@@ -26,9 +26,8 @@
     }
     const r = await fetch(server + "/onshi/kakunin", {
       method: "POST",
-      // mode: "no-cors",
       headers: {
-        // "X-ONSHI-VIEW-SECRET": secret,
+        "X-ONSHI-VIEW-SECRET": secret,
         "Content-Type": "application/json",
       },
       body: JSON.stringify(q),
