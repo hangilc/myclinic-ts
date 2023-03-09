@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "create-server-cert": "/bin/bash ./scripts/create-server-cert.sh",
+    "p12-to-pem": "/bin/bash ./scripts/p12-to-pem.sh",
     "clean": "rm -f ${PWD}/work/*",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

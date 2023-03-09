@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # create-server-cert.sh -- creates TLS cert for server IP ADDRESS
 # Usage: /bin/bash create-server-cert.sh SERVER-IP-ADDR
 # required env vars
