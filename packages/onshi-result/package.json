@@ -1,0 +1,11 @@
+{
+  "name": "onshi-result",
+  "version": "1.0.0",
+  "description": "Online Shikaku Kakunin Result",
+  "scripts": {
+    "compile": "tsc",
+    "test": "jest"
+  },
+  "author": "Hangil Chang",
+  "license": "MIT"
+}

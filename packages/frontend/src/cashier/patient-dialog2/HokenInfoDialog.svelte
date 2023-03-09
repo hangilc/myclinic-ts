@@ -15,6 +15,9 @@
   import type { PatientData } from "./patient-data";
   import api from "@/lib/api";
   import { editHoken } from "./edit-hoken";
+  import { dateToSql } from "@/lib/util";
+  import { pad } from "@/lib/pad";
+  import { onshiConfirm } from "@/lib/onshi-confirm";
 
   export let data: PatientData;
   export let hoken: Hoken;
@@ -66,11 +69,26 @@
       }
     }
   }
+
+  async function doOnshiConfirmShahokokuho() {
+    const shahokokuho = hoken.asShahokokuho;
+    const r = await onshiConfirm(
+      shahokokuho.hokenshaBangou.toString(),
+      shahokokuho.hihokenshaBangou,
+      shahokokuho.hihokenshaKigou,
+      data.patient.birthday.replaceAll("-", ""),
+      dateToSql(new Date()).replaceAll("-", "")
+    )
+    console.log(r);
+  }
 </script>
 
 <SurfaceModal destroy={exit} title={`${hoken.name}情報`}>
   <svelte:component this={panel} {patient} {hoken} />
   <div class="commands">
+    {#if hoken.isShahokokuho}
+      <button on:click={doOnshiConfirmShahokokuho}>資格確認</button>
+    {/if}
     {#if hoken.usageCount === 0}
       <a href="javascript:;" on:click={doDelete}>削除</a>
     {/if}

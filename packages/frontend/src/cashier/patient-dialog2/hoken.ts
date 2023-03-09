@@ -18,6 +18,22 @@ export class Hoken {
     return new Hoken(v, this.usageCount);
   }
 
+  get isShahokokuho(): boolean {
+    return this.value instanceof Shahokokuho;
+  }
+
+  get isKoukikourei(): boolean {
+    return this.value instanceof Koukikourei;
+  }
+
+  get isRoujin(): boolean {
+    return this.value instanceof Roujin;
+  }
+
+  get isKouhi(): boolean {
+    return this.value instanceof Kouhi;
+  }
+
   get asShahokokuho(): Shahokokuho {
     if( this.value instanceof Shahokokuho ){
       return this.value;
