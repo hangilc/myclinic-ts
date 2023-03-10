@@ -1,16 +1,42 @@
-export type ReferenceClassificationLabel = "マイナンバーカード" | "被保険者証情報";
+type valueof<T> = T[keyof T];
 
-export const ReferenceClassification: Record<"1" | "2", ReferenceClassificationLabel> = {
+export const ReferenceClassification = {
   "1": "マイナンバーカード",
   "2": "被保険者証情報"
-};
+} as const;
 
-export type SegmentOfResultLabel = 
-  "正常終了" | "処理中" | "異常終了";
+export type ReferenceClassificationLabel = valueof<typeof ReferenceClassification>;
+export type ReferenceClassificationCode = keyof typeof ReferenceClassification;
 
-export const SegmentOfResult: Record<"1" | "2" | "9",  SegmentOfResultLabel> = {
+export function isReferenceClassificationCode(k: string): k is ReferenceClassificationCode {
+  return Object.keys(ReferenceClassification).includes(k);
+}
+
+export const SegmentOfResult = {
   "1": "正常終了",
   "2": "処理中",
   "9": "異常終了"
+} as const;
+
+export type SegmentOfResultLabel = valueof<typeof SegmentOfResult>;
+export type SegmentOfResultCode = keyof typeof SegmentOfResult;
+
+export function isSegmentOfResultCode(k: string): k is SegmentOfResultCode {
+  return Object.keys(SegmentOfResult).includes(k);
 }
+
+export const CharacterCodeIdentifier = {
+  "0": "UTF-8",
+  "1": "Shift_JIS"
+} as const;
+
+export type CharacterCodeIdentifierLabel = valueof<typeof CharacterCodeIdentifier>;
+export type CharacterCodeIdentifierCode = keyof typeof CharacterCodeIdentifier;
+
+export function isCharacterCodeIdentifierCode(k: string): k is CharacterCodeIdentifierCode {
+  return Object.keys(CharacterCodeIdentifier).includes(k);
+}
+
+
+
 

@@ -21,6 +21,7 @@ test("basic info", () => {
   console.log("medicalInstitutionCode", r.messageHeader.medicalInstitutionCode);
   console.log("referenceClassification", r.messageHeader.referenceClassification);
   console.log("segmentOfResult", r.messageHeader.segmentOfResult);
+  console.log("characterCodeIdentifier", r.messageHeader.characterCodeIdentifier);
   expect(r).toHaveProperty("XmlMsg");
 });
 

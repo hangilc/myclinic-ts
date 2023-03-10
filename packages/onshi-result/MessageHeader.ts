@@ -1,6 +1,6 @@
 import { toSqlDate, toSqlDateTime } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
-import { ReferenceClassificationLabel, ReferenceClassification, SegmentOfResultLabel, SegmentOfResult } from "./codes";
+import { ReferenceClassificationLabel, ReferenceClassification, SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
 
 interface MessageHeaderInterface {
   ProcessExecutionTime: string;
@@ -60,7 +60,7 @@ export class MessageHeader {
   // 患者の提示した券情報の区分
   get referenceClassification(): ReferenceClassificationLabel {
     const k: string = this.ReferenceClassification;
-    if( k === "1" || k === "2" ){
+    if( isReferenceClassificationCode(k) ){
       return ReferenceClassification[k];
     } else {
       throw new Error("Invalid ReferenceClassification value: " + k);
@@ -70,10 +70,30 @@ export class MessageHeader {
   // 処理結果区分
   get segmentOfResult(): SegmentOfResultLabel {
     const k = this.SegmentOfResult;
-    if( k === "1" || k === "2" || k === "9") {
+    if( isSegmentOfResultCode(k) ){
       return SegmentOfResult[k];
     } else {
       throw new Error("Invalid SegmentOfResult value: " + k);
+    }
+  }
+
+  // 処理結果区分が正常終了以外を示す場合、エラー内容に準ずるコードを設定する。
+  get errorCode(): string | undefined {
+    return this.ErrorCode;
+  }
+
+  // 処理結果区分が正常終了以外を示す場合、エラー内容を設定する。 
+  get errorMessage(): string | undefined {
+    return this.ErrorMessage;
+  }
+
+  // 結果ファイル出力用の文字コードを指定する識別コード
+  get characterCodeIdentifier(): CharacterCodeIdentifierLabel {
+    const k: string = this.CharacterCodeIdentifier;
+    if( isCharacterCodeIdentifierCode(k) ){
+      return CharacterCodeIdentifier[k];
+    } else {
+      throw new Error("Invalid CharacterCodeIdentifier: " + k);
     }
   }
 
