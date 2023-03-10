@@ -37,6 +37,20 @@ export function isCharacterCodeIdentifierCode(k: string): k is CharacterCodeIden
   return Object.keys(CharacterCodeIdentifier).includes(k);
 }
 
+export const LimitApplicationCertificateRelatedConsFlg = {
+  "0": "未同意",
+  "1": "同意"
+} as const;
+
+export type LimitApplicationCertificateRelatedConsFlgLabel = valueof<typeof LimitApplicationCertificateRelatedConsFlg>;
+export type LimitApplicationCertificateRelatedConsFlgCode = keyof typeof LimitApplicationCertificateRelatedConsFlg;
+
+export function isLimitApplicationCertificateRelatedConsFlgCode(k: string): k is LimitApplicationCertificateRelatedConsFlgCode {
+  return Object.keys(LimitApplicationCertificateRelatedConsFlg).includes(k);
+}
+
+
+
 
 
 

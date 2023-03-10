@@ -32,6 +32,10 @@ export class MessageBody implements MessageBodyInterface {
     this.SpecificDiseasesCertificateList = arg.SpecificDiseasesCertificateList;
   }
 
+  get qualificationConfirmSearchInfo(): QualificationConfirmSearchInfo | undefined {
+    return this.QualificationConfirmSearchInfo;
+  }
+
   static cast(arg: any): MessageBody {
     if (typeof arg === "object") {
       return new MessageBody({
