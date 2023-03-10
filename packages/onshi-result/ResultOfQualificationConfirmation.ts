@@ -1,3 +1,4 @@
+import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
 import { castOptStringProp, castStringProp } from "./cast";
 
 interface ResultOfQualificationConfirmationInterface {
@@ -24,6 +25,7 @@ interface ResultOfQualificationConfirmationInterface {
   InsuredPartialContributionRatio: string | undefined;
   PreschoolClassification: string | undefined;
   ReasonOfLoss: string | undefined;
+  ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
 }
 
 export class ResultOfQualificationConfirmation implements ResultOfQualificationConfirmationInterface {
@@ -50,6 +52,7 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
   InsuredPartialContributionRatio: string | undefined; // 後期高齢者の一部負担割合
   PreschoolClassification: string | undefined; 
   ReasonOfLoss: string | undefined; 
+  ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
     this.InsuredCardClassification = arg.InsuredCardClassification;
@@ -75,6 +78,7 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
     this.InsuredPartialContributionRatio = arg.InsuredPartialContributionRatio;
     this.PreschoolClassification = arg.PreschoolClassification;
     this.ReasonOfLoss = arg.ReasonOfLoss;
+    this.ElderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo;
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
@@ -102,6 +106,15 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
       InsuredPartialContributionRatio: castOptStringProp(arg, "InsuredPartialContributionRatio"),
       PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
       ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
+      ElderlyRecipientCertificateInfo: castElderlyRecipientCertificateInfo(arg.ElderlyRecipientCertificateInfo),
     });
+  }
+}
+
+function castElderlyRecipientCertificateInfo(arg: any): ElderlyRecipientCertificateInfo | undefined {
+  if( arg == undefined ){
+    return undefined;
+  } else {
+    return ElderlyRecipientCertificateInfo.cast(arg);
   }
 }
