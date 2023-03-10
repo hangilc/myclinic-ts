@@ -1,4 +1,5 @@
 import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
+import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
 
 interface ResultOfQualificationConfirmationInterface {
@@ -26,6 +27,9 @@ interface ResultOfQualificationConfirmationInterface {
   PreschoolClassification: string | undefined;
   ReasonOfLoss: string | undefined;
   ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
+  LimitApplicationCertificateRelatedConsFlg: string | undefined;
+  LimitApplicationCertificateRelatedConsTime: string | undefined;
+  LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
 }
 
 export class ResultOfQualificationConfirmation implements ResultOfQualificationConfirmationInterface {
@@ -50,9 +54,12 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
   InsuredCardValidDate: string | undefined;
   InsuredCardExpirationDate: string | undefined;
   InsuredPartialContributionRatio: string | undefined; // 後期高齢者の一部負担割合
-  PreschoolClassification: string | undefined; 
-  ReasonOfLoss: string | undefined; 
+  PreschoolClassification: string | undefined;
+  ReasonOfLoss: string | undefined;
   ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
+  LimitApplicationCertificateRelatedConsFlg: string | undefined;
+  LimitApplicationCertificateRelatedConsTime: string | undefined;
+  LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
     this.InsuredCardClassification = arg.InsuredCardClassification;
@@ -79,6 +86,9 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
     this.PreschoolClassification = arg.PreschoolClassification;
     this.ReasonOfLoss = arg.ReasonOfLoss;
     this.ElderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo;
+    this.LimitApplicationCertificateRelatedConsFlg = arg.LimitApplicationCertificateRelatedConsFlg;
+    this.LimitApplicationCertificateRelatedConsTime = arg.LimitApplicationCertificateRelatedConsTime;
+    this.LimitApplicationCertificateRelatedInfo = arg.LimitApplicationCertificateRelatedInfo;
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
@@ -107,14 +117,26 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
       PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
       ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
       ElderlyRecipientCertificateInfo: castElderlyRecipientCertificateInfo(arg.ElderlyRecipientCertificateInfo),
+      LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
+      LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
+      LimitApplicationCertificateRelatedInfo: castLimitApplicationCertificateRelatedInfo(arg.LimitApplicationCertificateRelatedInfo),
     });
   }
 }
 
 function castElderlyRecipientCertificateInfo(arg: any): ElderlyRecipientCertificateInfo | undefined {
-  if( arg == undefined ){
+  if (arg == undefined) {
     return undefined;
   } else {
     return ElderlyRecipientCertificateInfo.cast(arg);
+  }
+}
+
+function castLimitApplicationCertificateRelatedInfo(arg: any):
+  LimitApplicationCertificateRelatedInfo | undefined {
+  if (arg == undefined) {
+    return undefined;
+  } else {
+    return LimitApplicationCertificateRelatedInfo.cast(arg);
   }
 }
