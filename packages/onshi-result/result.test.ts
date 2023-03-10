@@ -16,6 +16,11 @@ const koukikourei = JSON.parse(
 test("basic info", () => {
   const r = OnshiResult.cast(koukikourei);
   console.log(JSON.stringify(r, undefined, 2));
+  console.log("processExecutionTime", r.messageHeader.processExecutionTime);
+  console.log("qualificationConfirmationDate", r.messageHeader.qualificationConfirmationDate);
+  console.log("medicalInstitutionCode", r.messageHeader.medicalInstitutionCode);
+  console.log("referenceClassification", r.messageHeader.referenceClassification);
+  console.log("segmentOfResult", r.messageHeader.segmentOfResult);
   expect(r).toHaveProperty("XmlMsg");
 });
 

@@ -9,6 +9,15 @@ export class XmlMsg {
     this.MessageHeader = MessageHeader;
     this.MessageBody = MessageBody;
   }
+
+  get messageHeader(): MessageHeader {
+    return this.MessageHeader;
+  }
+
+  get messageBody(): MessageBody {
+    return this.MessageBody;
+  }
+
   static cast(arg: any): XmlMsg {
     if (typeof arg === "object") {
       return new XmlMsg(
