@@ -1,6 +1,7 @@
 import { castOptStringProp, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
+import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
 interface MessageBodyInterface {
   ProcessingResultStatus: string;
@@ -9,6 +10,7 @@ interface MessageBodyInterface {
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
   QualificationValidity: string | undefined;
+  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
 }
 
 export class MessageBody implements MessageBodyInterface {
@@ -18,6 +20,7 @@ export class MessageBody implements MessageBodyInterface {
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
   QualificationValidity: string | undefined;
+  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
 
   constructor(arg: MessageBodyInterface) {
     this.ProcessingResultStatus = arg.ProcessingResultStatus;
@@ -26,6 +29,7 @@ export class MessageBody implements MessageBodyInterface {
     this.ProcessingResultCode = arg.ProcessingResultCode;
     this.ProcessingResultMessage = arg.ProcessingResultMessage;
     this.QualificationValidity = arg.QualificationValidity;
+    this.SpecificDiseasesCertificateList = arg.SpecificDiseasesCertificateList;
   }
 
   static cast(arg: any): MessageBody {
@@ -33,11 +37,12 @@ export class MessageBody implements MessageBodyInterface {
       return new MessageBody({
         ProcessingResultStatus: castStringProp(arg, "ProcessingResultStatus"),
         ResultList: castResultList(arg.ResultList),
-        QualificationConfirmSearchInfo: 
+        QualificationConfirmSearchInfo:
           castQualificationConfirmSearchInfo(arg.QualificationConfirmSearchInfo),
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
         QualificationValidity: castOptStringProp(arg, "QualificationValidity"),
+        SpecificDiseasesCertificateList: castSpecificDiseasesCertificateInfo(arg.SpecificDiseasesCertificateList),
       });
     } else {
       throw new Error("Object expected: " + arg);
@@ -56,9 +61,18 @@ function castResultList(arg: any): ResultOfQualificationConfirmation[] {
 }
 
 function castQualificationConfirmSearchInfo(arg: any): QualificationConfirmSearchInfo | undefined {
-  if( arg == undefined ){
+  if (arg == undefined) {
     return undefined;
   } else {
     return QualificationConfirmSearchInfo.cast(arg);
+  }
+}
+function castSpecificDiseasesCertificateInfo(arg: any): SpecificDiseasesCertificateInfo[] {
+  if (arg == undefined) {
+    return [];
+  } else if (Array.isArray(arg)) {
+    return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
+  } else {
+    throw new Error("Cannot convert to SpecificDiseasesCertificateList: " + arg);
   }
 }

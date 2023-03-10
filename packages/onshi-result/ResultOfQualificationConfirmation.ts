@@ -30,6 +30,8 @@ interface ResultOfQualificationConfirmationInterface {
   LimitApplicationCertificateRelatedConsFlg: string | undefined;
   LimitApplicationCertificateRelatedConsTime: string | undefined;
   LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
+  SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
+  SpecificDiseasesCertificateRelatedConsTime: string | undefined;
 }
 
 export class ResultOfQualificationConfirmation implements ResultOfQualificationConfirmationInterface {
@@ -60,6 +62,8 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
   LimitApplicationCertificateRelatedConsFlg: string | undefined;
   LimitApplicationCertificateRelatedConsTime: string | undefined;
   LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
+  SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
+  SpecificDiseasesCertificateRelatedConsTime: string | undefined;
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
     this.InsuredCardClassification = arg.InsuredCardClassification;
@@ -89,6 +93,8 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
     this.LimitApplicationCertificateRelatedConsFlg = arg.LimitApplicationCertificateRelatedConsFlg;
     this.LimitApplicationCertificateRelatedConsTime = arg.LimitApplicationCertificateRelatedConsTime;
     this.LimitApplicationCertificateRelatedInfo = arg.LimitApplicationCertificateRelatedInfo;
+    this.SpecificDiseasesCertificateRelatedConsFlg = arg.SpecificDiseasesCertificateRelatedConsFlg;
+    this.SpecificDiseasesCertificateRelatedConsTime = arg.SpecificDiseasesCertificateRelatedConsTime;
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
@@ -120,6 +126,8 @@ export class ResultOfQualificationConfirmation implements ResultOfQualificationC
       LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
       LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
       LimitApplicationCertificateRelatedInfo: castLimitApplicationCertificateRelatedInfo(arg.LimitApplicationCertificateRelatedInfo),
+      SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
+      SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
     });
   }
 }
