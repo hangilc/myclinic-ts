@@ -37,6 +37,8 @@ test("basic info", () => {
     r.messageBody.qualificationConfirmation?.insurerName);
   console.log("kourei futan wari", 
     r.messageBody.qualificationConfirmation?.kourei?.futanWari);
+  console.log("gendogaku", 
+    r.messageBody.qualificationConfirmation?.gendogaku?.kind);
   expect(r).toHaveProperty("XmlMsg");
 });
 

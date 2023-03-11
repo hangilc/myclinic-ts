@@ -1,8 +1,8 @@
 import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
-import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel } from "./codes";
-import { toOptInt, toOptSqlDate, toSqlDate } from "./util";
+import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isLimitApplicationCertificateRelatedConsFlgCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel } from "./codes";
+import { toOptInt, toOptSqlDate, toOptSqlDateTime, toSqlDate } from "./util";
 
 interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
@@ -46,7 +46,7 @@ export class ResultOfQualificationConfirmation {
   // 被保険者証の種類
   get insuredCardClassification(): InsuredCardClassificationLabel {
     const k: string = this.orig.InsuredCardClassification;
-    if( isInsuredCardClassificationCode(k) ){
+    if (isInsuredCardClassificationCode(k)) {
       return InsuredCardClassification[k];
     } else {
       throw new Error("Invalid InsuredCardClassification: " + k);
@@ -76,9 +76,9 @@ export class ResultOfQualificationConfirmation {
   // 本人・家族の別
   get personalFamilyClassification(): PersonalFamilyClassificationLabel | undefined {
     const k: string | undefined = this.orig.PersonalFamilyClassification;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isPersonalFamilyClassificationCode(k) ){
+    } else if (isPersonalFamilyClassificationCode(k)) {
       return PersonalFamilyClassification[k];
     } else {
       throw new Error("Invalid PersonalFamilyClassification: " + k);
@@ -114,7 +114,7 @@ export class ResultOfQualificationConfirmation {
   // 券面表面の性別
   get sex1(): SexLabel {
     const k: string = this.orig.Sex1;
-    if( isSexCode(k) ){
+    if (isSexCode(k)) {
       return Sex[k];
     } else {
       throw new Error("Invalid Sex1: " + k);
@@ -131,9 +131,9 @@ export class ResultOfQualificationConfirmation {
   // 41号）に基づく取り扱いを実施している場合に設定する。
   get sex2(): SexLabel | undefined {
     const k: string | undefined = this.orig.Sex2;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isSexCode(k) ){
+    } else if (isSexCode(k)) {
       return Sex[k];
     } else {
       throw new Error("Invalid Sex2: " + k);
@@ -179,7 +179,7 @@ export class ResultOfQualificationConfirmation {
   // 後期高齢者負担割（例：２）
   get koukikoureiFutanWari(): number | undefined {
     const r = this.insuredPartialContributionRatio;
-    if( r == undefined ){
+    if (r == undefined) {
       return undefined;
     } else {
       return r / 10;
@@ -189,9 +189,9 @@ export class ResultOfQualificationConfirmation {
   // 未就学区分
   get preschoolClassification(): PreschoolClassificationLabel | undefined {
     const k: string | undefined = this.orig.PreschoolClassification;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isPreschoolClassificationCode(k) ){
+    } else if (isPreschoolClassificationCode(k)) {
       return PreschoolClassification[k];
     } else {
       throw new Error("Invalid PreschoolClassification: " + k);
@@ -201,9 +201,9 @@ export class ResultOfQualificationConfirmation {
   // 資格喪失事由
   get reasonOfLoss(): ReasonOfLossLabel | undefined {
     const k: string | undefined = this.orig.ReasonOfLoss;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isReasonOfLossCode(k) ){
+    } else if (isReasonOfLossCode(k)) {
       return ReasonOfLoss[k];
     } else {
       throw new Error("Invalid ReasonOfLoss: " + k);
@@ -222,6 +222,33 @@ export class ResultOfQualificationConfirmation {
 
   get kourei(): ElderlyRecipientCertificateInfo | undefined {
     return this.elderlyRecipientCertificateInfo;
+  }
+
+  // 限度額適用認定証の情報について、患者の提供同意を示す区分
+  get limitApplicationCertificateRelatedConsFlg():
+    LimitApplicationCertificateRelatedConsFlgLabel | undefined {
+    const k: string | undefined = this.orig.LimitApplicationCertificateRelatedConsFlg;
+    if (k == undefined) {
+      return undefined;
+    } else if (isLimitApplicationCertificateRelatedConsFlgCode(k)) {
+      return LimitApplicationCertificateRelatedConsFlg[k];
+    } else {
+      throw new Error("Invalid LimitApplicationCertificateRelatedConsFlg: " + k);
+    }
+  }
+
+  // 限度額適用認定証の情報について、患者の提供同意が得られた日時 (YYYY-MM-DD HH:mm:ss)
+  get limitApplicationCertificateRelatedConsTime(): string | undefined {
+    return toOptSqlDateTime(this.orig.LimitApplicationCertificateRelatedConsTime)
+  }
+
+  // 限度額適用認定証関連情報
+  get limitApplicationCertificateRelatedInfo(): LimitApplicationCertificateRelatedInfo | undefined {
+    return this.orig.LimitApplicationCertificateRelatedInfo;
+  }
+
+  get gendogaku(): LimitApplicationCertificateRelatedInfo | undefined {
+    return this.limitApplicationCertificateRelatedInfo;
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {

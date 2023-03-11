@@ -140,6 +140,44 @@ export function isReasonOfLossCode(k: string): k is ReasonOfLossCode {
   return Object.keys(ReasonOfLoss).includes(k);
 }
 
+export const LimitApplicationCertificateClassification = {
+  "01": "限度額適用区分認定証",
+  "02": "限度額適用・標準負担額減額認定証",
+  "03": "標準負担額減額認定証",
+} as const;
+
+export type LimitApplicationCertificateClassificationLabel = valueof<typeof LimitApplicationCertificateClassification>;
+export type LimitApplicationCertificateClassificationCode = keyof typeof LimitApplicationCertificateClassification;
+
+export function isLimitApplicationCertificateClassificationCode(k: string): k is LimitApplicationCertificateClassificationCode {
+  return Object.keys(LimitApplicationCertificateClassification).includes(k);
+}
+
+export const LimitApplicationCertificateClassificationFlag = {
+  "A01": "ア", // 年収約1,160万円以上
+  "A02": "イ",
+  "A03": "ウ",
+  "A04": "エ",
+  "A05": "オ", // 住民税非課税者
+  "A06": "オ（境）",
+  "B01": "現役並みⅢ",
+  "B02": "現役並みⅡ",
+  "B03": "現役並みⅠ",
+  "B04": "一般",
+  "B05": "低所得Ⅱ",
+  "B06": "低所得Ⅰ",
+  "B07": "低所得Ⅰ（老福）",
+  "B08": "低所得Ⅰ（境）",
+  "B09": "一般Ⅱ",
+  "B10": "一般Ⅰ",
+} as const;
+
+export type LimitApplicationCertificateClassificationFlagLabel = valueof<typeof LimitApplicationCertificateClassificationFlag>;
+export type LimitApplicationCertificateClassificationFlagCode = keyof typeof LimitApplicationCertificateClassificationFlag;
+
+export function isLimitApplicationCertificateClassificationFlagCode(k: string): k is LimitApplicationCertificateClassificationFlagCode {
+  return Object.keys(LimitApplicationCertificateClassificationFlag).includes(k);
+}
 
 
 
