@@ -15,51 +15,35 @@ interface MessageHeaderInterface {
 }
 
 export class MessageHeader {
-  ProcessExecutionTime: string;
-  QualificationConfirmationDate: string;
-  MedicalInstitutionCode: string;
-  ArbitraryFileIdentifier: string | undefined;
-  ReferenceClassification: string;
-  SegmentOfResult: string;
-  ErrorCode: string | undefined;
-  ErrorMessage: string | undefined;
-  CharacterCodeIdentifier: string;
+  orig: MessageHeaderInterface
 
   constructor(arg: MessageHeaderInterface) {
-    this.ProcessExecutionTime = arg.ProcessExecutionTime;
-    this.QualificationConfirmationDate = arg.QualificationConfirmationDate;
-    this.MedicalInstitutionCode = arg.MedicalInstitutionCode;
-    this.ArbitraryFileIdentifier = arg.ArbitraryFileIdentifier;
-    this.ReferenceClassification = arg.ReferenceClassification;
-    this.SegmentOfResult = arg.SegmentOfResult;
-    this.ErrorCode = arg.ErrorCode;
-    this.ErrorMessage = arg.ErrorMessage;
-    this.CharacterCodeIdentifier = arg.CharacterCodeIdentifier;
+    this.orig = arg;
   }
 
   // オンライン資格確認システムにて処理が実行された日時 (YYYY-MM-DD HH:mm:ss)
   get processExecutionTime(): string {
-    return toSqlDateTime(this.ProcessExecutionTime);
+    return toSqlDateTime(this.orig.ProcessExecutionTime);
   }
 
   // 保険資格を確認する日付
   get qualificationConfirmationDate(): string {
-    return toSqlDate(this.QualificationConfirmationDate);
+    return toSqlDate(this.orig.QualificationConfirmationDate);
   }
 
   // 保険医療機関について定められた10桁のコード
   get medicalInstitutionCode(): string {
-    return this.MedicalInstitutionCode;
+    return this.orig.MedicalInstitutionCode;
   }
 
   // 医療機関ごとに使用できる項目（使用は任意）
   get arbitraryFileIdentifier(): string {
-    return this.ArbitraryFileIdentifier ?? "";
+    return this.orig.ArbitraryFileIdentifier ?? "";
   }
 
   // 患者の提示した券情報の区分
   get referenceClassification(): ReferenceClassificationLabel {
-    const k: string = this.ReferenceClassification;
+    const k: string = this.orig.ReferenceClassification;
     if( isReferenceClassificationCode(k) ){
       return ReferenceClassification[k];
     } else {
@@ -69,7 +53,7 @@ export class MessageHeader {
 
   // 処理結果区分
   get segmentOfResult(): SegmentOfResultLabel {
-    const k = this.SegmentOfResult;
+    const k = this.orig.SegmentOfResult;
     if( isSegmentOfResultCode(k) ){
       return SegmentOfResult[k];
     } else {
@@ -79,17 +63,17 @@ export class MessageHeader {
 
   // 処理結果区分が正常終了以外を示す場合、エラー内容に準ずるコードを設定する。
   get errorCode(): string | undefined {
-    return this.ErrorCode;
+    return this.orig.ErrorCode;
   }
 
   // 処理結果区分が正常終了以外を示す場合、エラー内容を設定する。 
   get errorMessage(): string | undefined {
-    return this.ErrorMessage;
+    return this.orig.ErrorMessage;
   }
 
   // 結果ファイル出力用の文字コードを指定する識別コード
   get characterCodeIdentifier(): CharacterCodeIdentifierLabel {
-    const k: string = this.CharacterCodeIdentifier;
+    const k: string = this.orig.CharacterCodeIdentifier;
     if( isCharacterCodeIdentifierCode(k) ){
       return CharacterCodeIdentifier[k];
     } else {

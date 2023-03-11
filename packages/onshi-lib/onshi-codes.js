@@ -24,7 +24,7 @@ module.exports.SegmentOfResult = {
 // 処理結果状況
 module.exports.ProcessingResultStatus = {
   "1": "正常終了",
-  "2": ""
+  "2": "エラー"
 }
 
 // OQSCD005

@@ -49,6 +49,59 @@ export function isLimitApplicationCertificateRelatedConsFlgCode(k: string): k is
   return Object.keys(LimitApplicationCertificateRelatedConsFlg).includes(k);
 }
 
+export const PrescriptionIssueSelect = {
+  "1": "電子処方箋",
+  "2": "紙の処方箋",
+} as const;
+
+export type PrescriptionIssueSelectLabel = valueof<typeof PrescriptionIssueSelect>;
+export type PrescriptionIssueSelectCode = keyof typeof PrescriptionIssueSelect;
+
+export function isPrescriptionIssueSelectCode(k: string): k is PrescriptionIssueSelectCode {
+  return Object.keys(PrescriptionIssueSelect).includes(k);
+}
+
+export const ProcessingResultStatus = {
+  "1": "正常終了",
+  "2": "エラー"
+} as const;
+
+export type ProcessingResultStatusLabel = valueof<typeof ProcessingResultStatus>;
+export type ProcessingResultStatusCode = keyof typeof ProcessingResultStatus;
+
+export function isProcessingResultStatusCode(k: string): k is ProcessingResultStatusCode {
+  return Object.keys(ProcessingResultStatus).includes(k);
+}
+
+export const InsuredCardClassification = {
+  "01": "被保険者証（一般）",
+  "02": "被保険者証（退職）",
+  "03": "短期被保険者証（一般）",
+  "04": "短期被保険者証（退職）",
+  "05": "被保険者資格証明書",
+  "06": "特例退職被保険者証",
+  "07": "自衛官診療証"
+} as const;
+
+export type InsuredCardClassificationLabel = valueof<typeof InsuredCardClassification>;
+export type InsuredCardClassificationCode = keyof typeof InsuredCardClassification;
+
+export function isInsuredCardClassificationCode(k: string): k is InsuredCardClassificationCode {
+  return Object.keys(InsuredCardClassification).includes(k);
+}
+
+export const PersonalFamilyClassification = {
+  "1": "本人",
+  "2": "家族"
+} as const;
+
+export type PersonalFamilyClassificationLabel = valueof<typeof PersonalFamilyClassification>;
+export type PersonalFamilyClassificationCode = keyof typeof PersonalFamilyClassification;
+
+export function isPersonalFamilyClassificationCode(k: string): k is PersonalFamilyClassificationCode {
+  return Object.keys(PersonalFamilyClassification).includes(k);
+}
+
 
 
 

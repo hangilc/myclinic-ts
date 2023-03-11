@@ -2,20 +2,12 @@ import { MessageBody } from "./MessageBody";
 import { MessageHeader } from "./MessageHeader";
 
 export class XmlMsg {
-  MessageHeader: MessageHeader;
-  MessageBody: MessageBody;
+  messageHeader: MessageHeader;
+  messageBody: MessageBody;
 
-  constructor(MessageHeader: MessageHeader, MessageBody: MessageBody) {
-    this.MessageHeader = MessageHeader;
-    this.MessageBody = MessageBody;
-  }
-
-  get messageHeader(): MessageHeader {
-    return this.MessageHeader;
-  }
-
-  get messageBody(): MessageBody {
-    return this.MessageBody;
+  constructor(messageHeader: MessageHeader, messageBody: MessageBody) {
+    this.messageHeader = messageHeader;
+    this.messageBody = messageBody;
   }
 
   static cast(arg: any): XmlMsg {

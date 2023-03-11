@@ -22,6 +22,13 @@ test("basic info", () => {
   console.log("referenceClassification", r.messageHeader.referenceClassification);
   console.log("segmentOfResult", r.messageHeader.segmentOfResult);
   console.log("characterCodeIdentifier", r.messageHeader.characterCodeIdentifier);
+  console.log("processingResultStatus", r.messageBody.processingResultStatus);
+  console.log("insuredCardClassification", 
+    r.messageBody.qualificationConfirmation?.insuredCardClassification);
+  console.log("insurerNumber", 
+    r.messageBody.qualificationConfirmation?.insurerNumber);
+  console.log("personalFamilyClassification", 
+    r.messageBody.qualificationConfirmation?.personalFamilyClassification);
   expect(r).toHaveProperty("XmlMsg");
 });
 

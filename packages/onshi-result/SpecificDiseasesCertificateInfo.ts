@@ -8,19 +8,11 @@ interface SpecificDiseasesCertificateInfoInterface {
   SpecificDiseasesSelfPay: string | undefined;
 }
 
-export class SpecificDiseasesCertificateInfo implements SpecificDiseasesCertificateInfoInterface {
-  SpecificDiseasesDiseaseCategory: string | undefined;
-  SpecificDiseasesCertificateDate: string | undefined;
-  SpecificDiseasesValidStartDate: string | undefined;
-  SpecificDiseasesValidEndDate: string | undefined;
-  SpecificDiseasesSelfPay: string | undefined;
+export class SpecificDiseasesCertificateInfo {
+  orig: SpecificDiseasesCertificateInfoInterface;
 
-  constructor(arg: SpecificDiseasesCertificateInfoInterface){
-    this.SpecificDiseasesDiseaseCategory = arg.SpecificDiseasesDiseaseCategory;
-    this.SpecificDiseasesCertificateDate = arg.SpecificDiseasesCertificateDate;
-    this.SpecificDiseasesValidStartDate = arg.SpecificDiseasesValidStartDate;
-    this.SpecificDiseasesValidEndDate = arg.SpecificDiseasesValidEndDate;
-    this.SpecificDiseasesSelfPay = arg.SpecificDiseasesSelfPay;
+  constructor(arg: SpecificDiseasesCertificateInfoInterface) {
+    this.orig = arg;
   }
 
   static cast(arg: any): SpecificDiseasesCertificateInfo {

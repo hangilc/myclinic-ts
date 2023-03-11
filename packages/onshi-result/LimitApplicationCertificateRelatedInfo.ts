@@ -9,22 +9,11 @@ interface LimitApplicationCertificateRelatedInfoInterface {
   LimitApplicationCertificateLongTermDate: string | undefined;
 }
 
-export class LimitApplicationCertificateRelatedInfo
-  implements LimitApplicationCertificateRelatedInfoInterface {
-  LimitApplicationCertificateClassification: string | undefined;
-  LimitApplicationCertificateClassificationFla: string | undefined;
-  LimitApplicationCertificateDate: string | undefined;
-  LimitApplicationCertificateValidStartDate: string | undefined;
-  LimitApplicationCertificateValidEndDate: string | undefined;
-  LimitApplicationCertificateLongTermDate: string | undefined;
+export class LimitApplicationCertificateRelatedInfo {
+  orig: LimitApplicationCertificateRelatedInfoInterface;
 
   constructor(arg: LimitApplicationCertificateRelatedInfoInterface) {
-    this.LimitApplicationCertificateClassification = arg.LimitApplicationCertificateClassification;
-    this.LimitApplicationCertificateClassificationFla = arg.LimitApplicationCertificateClassificationFla;
-    this.LimitApplicationCertificateDate = arg.LimitApplicationCertificateDate;
-    this.LimitApplicationCertificateValidStartDate = arg.LimitApplicationCertificateValidStartDate;
-    this.LimitApplicationCertificateValidEndDate = arg.LimitApplicationCertificateValidEndDate;
-    this.LimitApplicationCertificateLongTermDate = arg.LimitApplicationCertificateLongTermDate;
+    this.orig = arg;
   }
 
   static cast(arg: any): LimitApplicationCertificateRelatedInfo {

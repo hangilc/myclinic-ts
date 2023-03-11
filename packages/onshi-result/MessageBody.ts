@@ -2,38 +2,69 @@ import { castOptStringProp, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
+import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, PrescriptionIssueSelect, PrescriptionIssueSelectLabel, ProcessingResultStatus, ProcessingResultStatusLabel } from "./codes";
 
 interface MessageBodyInterface {
   ProcessingResultStatus: string;
   ResultList: ResultOfQualificationConfirmation[];
   QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
+  PrescriptionIssueSelect: string | undefined;
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
   QualificationValidity: string | undefined;
   SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
 }
 
-export class MessageBody implements MessageBodyInterface {
-  ProcessingResultStatus: string;
-  ResultList: ResultOfQualificationConfirmation[];
-  QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
-  ProcessingResultCode: string | undefined;
-  ProcessingResultMessage: string | undefined;
-  QualificationValidity: string | undefined;
-  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
+export class MessageBody {
+  orig: MessageBodyInterface;
 
   constructor(arg: MessageBodyInterface) {
-    this.ProcessingResultStatus = arg.ProcessingResultStatus;
-    this.ResultList = arg.ResultList;
-    this.QualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo;
-    this.ProcessingResultCode = arg.ProcessingResultCode;
-    this.ProcessingResultMessage = arg.ProcessingResultMessage;
-    this.QualificationValidity = arg.QualificationValidity;
-    this.SpecificDiseasesCertificateList = arg.SpecificDiseasesCertificateList;
+    this.orig = arg;
   }
 
+  // 資格確認照会用情報
   get qualificationConfirmSearchInfo(): QualificationConfirmSearchInfo | undefined {
-    return this.QualificationConfirmSearchInfo;
+    return this.orig.QualificationConfirmSearchInfo;
+  }
+
+  // 患者が選択した処方箋の発行形態
+  get prescriptionIssueSelect(): PrescriptionIssueSelectLabel | undefined {
+    const k: string | undefined = this.orig.PrescriptionIssueSelect;
+    if( k == undefined ){
+      return undefined;
+    } else if( isPrescriptionIssueSelectCode(k) ){
+      return PrescriptionIssueSelect[k];
+    } else {
+      throw new Error("Invalid PrescriptionIssueSelect: " + k);
+    }
+  }
+
+  // 個人単位でオンライン資格確認システムの処理結果を表す区分
+  get processingResultStatus(): ProcessingResultStatusLabel {
+    const k: string = this.orig.ProcessingResultStatus;
+    if( isProcessingResultStatusCode(k) ){
+      return ProcessingResultStatus[k];
+    } else {
+      throw new Error("Invalid ProcessingResultStatus: " + k);
+    }
+  }
+
+  // 資格確認結果のリスト
+  get resultList(): ResultOfQualificationConfirmation[] {
+    return this.orig.ResultList;
+  }
+
+  // 最初の資格確認結果（もしあれば）
+  get qualificationConfirmation(): ResultOfQualificationConfirmation | undefined {
+    return this.resultList[0];
+  }
+
+  // 処理結果状況がエラーを示す場合、エラー内容に準ずるコードを返却する。
+  // 正常処理を示すコードが設定された場合は、処理状況に付帯情報が存
+  // 在する時のみコードを返却する。（例：マイナンバーカードの失効期限3か
+  // 月前）
+  get processingResultCode(): string | undefined {
+    return this.orig.ProcessingResultCode;
   }
 
   static cast(arg: any): MessageBody {
@@ -43,6 +74,7 @@ export class MessageBody implements MessageBodyInterface {
         ResultList: castResultList(arg.ResultList),
         QualificationConfirmSearchInfo:
           castQualificationConfirmSearchInfo(arg.QualificationConfirmSearchInfo),
+        PrescriptionIssueSelect: castOptStringProp(arg, "PrescriptionIssueSelect"),
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
         QualificationValidity: castOptStringProp(arg, "QualificationValidity"),
