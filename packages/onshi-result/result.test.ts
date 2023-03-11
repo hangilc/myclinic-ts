@@ -29,6 +29,10 @@ test("basic info", () => {
     r.messageBody.qualificationConfirmation?.insurerNumber);
   console.log("personalFamilyClassification", 
     r.messageBody.qualificationConfirmation?.personalFamilyClassification);
+  console.log("birthdate", 
+    r.messageBody.qualificationConfirmation?.birthdate);
+  console.log("koukikoureiFutanWari", 
+    r.messageBody.qualificationConfirmation?.koukikoureiFutanWari);
   expect(r).toHaveProperty("XmlMsg");
 });
 

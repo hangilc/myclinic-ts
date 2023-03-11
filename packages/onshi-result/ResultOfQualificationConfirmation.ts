@@ -1,7 +1,8 @@
 import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
-import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isPersonalFamilyClassificationCode, PersonalFamilyClassification, PersonalFamilyClassificationLabel } from "./codes";
+import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel } from "./codes";
+import { toOptInt, toOptSqlDate, toSqlDate } from "./util";
 
 interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
@@ -82,6 +83,136 @@ export class ResultOfQualificationConfirmation {
     } else {
       throw new Error("Invalid PersonalFamilyClassification: " + k);
     }
+  }
+
+  // 被保険者の氏名（世帯主氏名）
+  get InsuredName(): string | undefined {
+    return this.orig.InsuredName;
+  }
+
+  // 対象者本人から保険者等へ届出された券面記載の氏名
+  get name(): string {
+    return this.orig.Name;
+  }
+
+  // 対象者本人から、通称等の理由で券面記載氏名とは別の氏名が届出されて
+  // いる場合に設定される
+  get nameOfOther(): string | undefined {
+    return this.orig.NameOfOther;
+  }
+
+  // 対象者本人から保険者等へ届出された券面記載の氏名（半角カナ）
+  get nameKana(): string | undefined {
+    return this.orig.NameKana;
+  }
+
+  // 氏名（その他）の読み仮名（半角カナ）
+  get nameOfOtherKana(): string | undefined {
+    return this.orig.NameOfOtherKana;
+  }
+
+  // 券面表面の性別
+  get sex1(): SexLabel {
+    const k: string = this.orig.Sex1;
+    if( isSexCode(k) ){
+      return Sex[k];
+    } else {
+      throw new Error("Invalid Sex1: " + k);
+    }
+  }
+
+  get sex(): SexLabel {
+    return this.sex1;
+  }
+
+  // 性別
+  // 「平成24年9月21日事務連絡　被保険者証の性別表記について」または「生
+  // 活保護法による医療券等の記載要領について」（平成11年8月27日社援保第
+  // 41号）に基づく取り扱いを実施している場合に設定する。
+  get sex2(): SexLabel | undefined {
+    const k: string | undefined = this.orig.Sex2;
+    if( k == undefined ){
+      return undefined;
+    } else if( isSexCode(k) ){
+      return Sex[k];
+    } else {
+      throw new Error("Invalid Sex2: " + k);
+    }
+  }
+
+  // 券面の生年月日
+  get birthdate(): string {
+    return toSqlDate(this.orig.Birthdate);
+  }
+
+  // 保険者等に届出されている住所
+  get address(): string | undefined {
+    return this.orig.Address;
+  }
+
+  // 対象者本人の郵便番号
+  get postNumber(): string | undefined {
+    return this.orig.PostNumber;
+  }
+
+  // 被保険者証が交付された日 (YYYY-MM-DD)
+  get insuredCertificateIssuanceDate(): string | undefined {
+    return toOptSqlDate(this.orig.InsuredCertificateIssuanceDate);
+  }
+
+  // 被保険者証が有効である最初の日 (YYYY-MM-DD)
+  get insuredCardValidDate(): string | undefined {
+    return toOptSqlDate(this.orig.InsuredCardValidDate);
+  }
+
+  // 被保険者証が有効である最後の日 (YYYY-MM-DD)
+  get insuredCardExpirationDate(): string | undefined {
+    return toOptSqlDate(this.orig.InsuredCardExpirationDate);
+  }
+
+  // 後期高齢者の一部負担割合（％）
+  // （例）1割負担の時は、"010"と設定する。
+  get insuredPartialContributionRatio(): number | undefined {
+    return toOptInt(this.orig.InsuredPartialContributionRatio);
+  }
+
+  // 後期高齢者負担割（例：２）
+  get koukikoureiFutanWari(): number | undefined {
+    const r = this.insuredPartialContributionRatio;
+    if( r == undefined ){
+      return undefined;
+    } else {
+      return r / 10;
+    }
+  }
+
+  // 未就学区分
+  get preschoolClassification(): PreschoolClassificationLabel | undefined {
+    const k: string | undefined = this.orig.PreschoolClassification;
+    if( k == undefined ){
+      return undefined;
+    } else if( isPreschoolClassificationCode(k) ){
+      return PreschoolClassification[k];
+    } else {
+      throw new Error("Invalid PreschoolClassification: " + k);
+    }
+  }
+
+  // 資格喪失事由
+  get reasonOfLoss(): ReasonOfLossLabel | undefined {
+    const k: string | undefined = this.orig.ReasonOfLoss;
+    if( k == undefined ){
+      return undefined;
+    } else if( isReasonOfLossCode(k) ){
+      return ReasonOfLoss[k];
+    } else {
+      throw new Error("Invalid ReasonOfLoss: " + k);
+    }
+  }
+
+  // 券面の保険者名称
+  get insurerName(): string {
+    return this.orig.InsurerName;
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {

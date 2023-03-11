@@ -102,6 +102,45 @@ export function isPersonalFamilyClassificationCode(k: string): k is PersonalFami
   return Object.keys(PersonalFamilyClassification).includes(k);
 }
 
+export const Sex = {
+  "1": "男",
+  "2": "女",
+  "3": "未設定"
+} as const;
+
+export type SexLabel = valueof<typeof Sex>;
+export type SexCode = keyof typeof Sex;
+
+export function isSexCode(k: string): k is SexCode {
+  return Object.keys(Sex).includes(k);
+}
+
+export const PreschoolClassification = {
+  "1": "未就学該当"
+} as const;
+
+export type PreschoolClassificationLabel = valueof<typeof PreschoolClassification>;
+export type PreschoolClassificationCode = keyof typeof PreschoolClassification;
+
+export function isPreschoolClassificationCode(k: string): k is PreschoolClassificationCode {
+  return Object.keys(PreschoolClassification).includes(k);
+}
+
+export const ReasonOfLoss = {
+  "01": "死亡",
+  "02": "生活保護受給開始",
+  "03": "医療保険等の資格取得",
+  "99": "その他",
+} as const;
+
+export type ReasonOfLossLabel = valueof<typeof ReasonOfLoss>;
+export type ReasonOfLossCode = keyof typeof ReasonOfLoss;
+
+export function isReasonOfLossCode(k: string): k is ReasonOfLossCode {
+  return Object.keys(ReasonOfLoss).includes(k);
+}
+
+
 
 
 

@@ -30,3 +30,19 @@ export function toSqlDate(s: string): string {
   return `${YYYY}-${MM}-${DD}`;
 }
 
+export function toOptSqlDate(s: string | undefined) : string | undefined {
+  if( s == undefined ){
+    return undefined;
+  } else {
+    return toSqlDate(s);
+  }
+}
+
+export function toOptInt(s: string | undefined): number | undefined {
+  if( s == undefined ){
+    return undefined;
+  } else {
+    return parseInt(s);
+  }
+}
+
