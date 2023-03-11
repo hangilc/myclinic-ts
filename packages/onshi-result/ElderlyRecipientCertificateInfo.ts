@@ -1,3 +1,4 @@
+import { toOptInt, toOptSqlDate } from "./util";
 import { castOptStringProp } from "./cast";
 
 interface ElderlyRecipientCertificateInfoInterface {
@@ -7,17 +8,41 @@ interface ElderlyRecipientCertificateInfoInterface {
   ElderlyRecipientContributionRatio: string | undefined;
 }
 
-export class ElderlyRecipientCertificateInfo implements ElderlyRecipientCertificateInfoInterface {
-  ElderlyRecipientCertificateDate: string | undefined;
-  ElderlyRecipientValidStartDate: string | undefined;
-  ElderlyRecipientValidEndDate: string | undefined;
-  ElderlyRecipientContributionRatio: string | undefined;
+export class ElderlyRecipientCertificateInfo {
+  orig: ElderlyRecipientCertificateInfoInterface;
 
   constructor(arg: ElderlyRecipientCertificateInfoInterface) {
-    this.ElderlyRecipientCertificateDate = arg.ElderlyRecipientCertificateDate;
-    this.ElderlyRecipientValidStartDate = arg.ElderlyRecipientValidStartDate;
-    this.ElderlyRecipientValidEndDate = arg.ElderlyRecipientValidEndDate;
-    this.ElderlyRecipientContributionRatio = arg.ElderlyRecipientContributionRatio;
+    this.orig = arg;
+  }
+
+  // 高齢受給者証が交付された日 (YYYY-MM-DD)
+  get elderlyRecipientCertificateDate(): string | undefined {
+    return toOptSqlDate(this.orig.ElderlyRecipientCertificateDate);
+  }
+
+  // 高齢受給者証が有効である最初の日
+  get elderlyRecipientValidStartDate(): string | undefined {
+    return toOptSqlDate(this.orig.ElderlyRecipientValidStartDate);
+  }
+
+  // 高齢受給者証が有効である最後の日
+  get elderlyRecipientValidEndDate(): string | undefined {
+    return toOptSqlDate(this.orig.ElderlyRecipientValidEndDate);
+  }
+
+  // 高齢受給者証に記載されている一部負担金の割合（％）
+  get elderlyRecipientContributionRatio(): number | undefined {
+    return toOptInt(this.orig.ElderlyRecipientContributionRatio);
+  }
+
+  // 負担割（例： 3)
+  get futanWari(): number | undefined {
+    const r = this.elderlyRecipientContributionRatio;
+    if( r == undefined ){
+      return undefined;
+    } else {
+      return r / 10;
+    }
   }
 
   static cast(arg: any): ElderlyRecipientCertificateInfo {

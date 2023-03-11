@@ -215,6 +215,15 @@ export class ResultOfQualificationConfirmation {
     return this.orig.InsurerName;
   }
 
+  // 高齢受給者証情報
+  get elderlyRecipientCertificateInfo(): ElderlyRecipientCertificateInfo | undefined {
+    return this.orig.ElderlyRecipientCertificateInfo;
+  }
+
+  get kourei(): ElderlyRecipientCertificateInfo | undefined {
+    return this.elderlyRecipientCertificateInfo;
+  }
+
   static cast(arg: any): ResultOfQualificationConfirmation {
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),

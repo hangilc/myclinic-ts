@@ -14,7 +14,7 @@ const koukikourei = JSON.parse(
 );
 
 test("basic info", () => {
-  const r = OnshiResult.cast(koukikourei);
+  const r = OnshiResult.cast(kourei);
   console.log(JSON.stringify(r, undefined, 2));
   console.log("processExecutionTime", r.messageHeader.processExecutionTime);
   console.log("qualificationConfirmationDate", r.messageHeader.qualificationConfirmationDate);
@@ -33,6 +33,10 @@ test("basic info", () => {
     r.messageBody.qualificationConfirmation?.birthdate);
   console.log("koukikoureiFutanWari", 
     r.messageBody.qualificationConfirmation?.koukikoureiFutanWari);
+  console.log("insurerName", 
+    r.messageBody.qualificationConfirmation?.insurerName);
+  console.log("kourei futan wari", 
+    r.messageBody.qualificationConfirmation?.kourei?.futanWari);
   expect(r).toHaveProperty("XmlMsg");
 });
 
