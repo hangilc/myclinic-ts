@@ -1,8 +1,9 @@
 import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
-import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isLimitApplicationCertificateRelatedConsFlgCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel } from "./codes";
+import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isLimitApplicationCertificateRelatedConsFlgCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, isSpecificDiseasesCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel, SpecificDiseasesCertificateRelatedConsFlg, SpecificDiseasesCertificateRelatedConsFlgLabel } from "./codes";
 import { toOptInt, toOptSqlDate, toOptSqlDateTime, toSqlDate } from "./util";
+import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
 interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
@@ -34,6 +35,7 @@ interface ResultOfQualificationConfirmationInterface {
   LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
   SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
   SpecificDiseasesCertificateRelatedConsTime: string | undefined;
+  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[];
 }
 
 export class ResultOfQualificationConfirmation {
@@ -251,6 +253,28 @@ export class ResultOfQualificationConfirmation {
     return this.limitApplicationCertificateRelatedInfo;
   }
 
+  // 特定疾病療養受療証の情報について、患者の提供同意を示す区分
+  get specificDiseasesCertificateRelatedConsFlg(): SpecificDiseasesCertificateRelatedConsFlgLabel | undefined {
+    const k: string | undefined = this.orig.SpecificDiseasesCertificateRelatedConsFlg;
+    if (k == undefined) {
+      return undefined;
+    } else if (isSpecificDiseasesCertificateRelatedConsFlgCode(k)) {
+      return SpecificDiseasesCertificateRelatedConsFlg[k];
+    } else {
+      throw new Error("Invalid SpecificDiseasesCertificateRelatedConsFlg: " + k);
+    }
+  }
+
+  // 特定疾病療養受療証の情報について、患者の提供同意が得られた日時 (YYYY-MM-DD HH:mm:ss)
+  get specificDiseasesCertificateRelatedConsTime(): string | undefined {
+    return toOptSqlDateTime(this.orig.SpecificDiseasesCertificateRelatedConsTime);
+  }
+
+  // 特定疾病療養受療証情報リスト
+  get specificDiseasesCertificateList(): SpecificDiseasesCertificateInfo[] {
+    return this.orig.SpecificDiseasesCertificateList;
+  }
+
   static cast(arg: any): ResultOfQualificationConfirmation {
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
@@ -282,6 +306,7 @@ export class ResultOfQualificationConfirmation {
       LimitApplicationCertificateRelatedInfo: castLimitApplicationCertificateRelatedInfo(arg.LimitApplicationCertificateRelatedInfo),
       SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
       SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
+      SpecificDiseasesCertificateList: castSpecificDiseasesCertificateList(arg.SpecificDiseasesCertificateList),
     });
   }
 }
@@ -300,5 +325,15 @@ function castLimitApplicationCertificateRelatedInfo(arg: any):
     return undefined;
   } else {
     return LimitApplicationCertificateRelatedInfo.cast(arg);
+  }
+}
+
+function castSpecificDiseasesCertificateList(arg: any): SpecificDiseasesCertificateInfo[] {
+  if( arg == undefined ){
+    return [];
+  } else if( Array.isArray(arg) ){
+    return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
+  } else {
+    throw new Error("Invalid SpecificDiseasesCertificateList: " + arg);
   }
 }

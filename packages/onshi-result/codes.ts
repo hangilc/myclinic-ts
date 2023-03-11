@@ -179,7 +179,33 @@ export function isLimitApplicationCertificateClassificationFlagCode(k: string): 
   return Object.keys(LimitApplicationCertificateClassificationFlag).includes(k);
 }
 
+export const SpecificDiseasesCertificateRelatedConsFlg = {
+  "0": "同意なし",
+  "1": "同意あり",
+  "2": "同意有効期限切れ",
+} as const;
 
+export type SpecificDiseasesCertificateRelatedConsFlgLabel = valueof<typeof SpecificDiseasesCertificateRelatedConsFlg>;
+export type SpecificDiseasesCertificateRelatedConsFlgCode = keyof typeof SpecificDiseasesCertificateRelatedConsFlg;
+
+export function isSpecificDiseasesCertificateRelatedConsFlgCode(k: string): k is SpecificDiseasesCertificateRelatedConsFlgCode {
+  return Object.keys(SpecificDiseasesCertificateRelatedConsFlg).includes(k);
+}
+
+// 特定疾病療養受療証認定疾病区分
+// OQSCD013
+export const SpecificDiseasesDiseaseCategory = {
+  "1": "人工透析を必要とする慢性腎不全",
+  "2": "先天性血液凝固因子障害（第VIII因子、第IX因子）",
+  "3": "血液凝固因子製剤の投与に起因するHIV感染症",
+} as const;
+
+export type SpecificDiseasesDiseaseCategoryLabel = valueof<typeof SpecificDiseasesDiseaseCategory>;
+export type SpecificDiseasesDiseaseCategoryCode = keyof typeof SpecificDiseasesDiseaseCategory;
+
+export function isSpecificDiseasesDiseaseCategoryCode(k: string): k is SpecificDiseasesDiseaseCategoryCode {
+  return Object.keys(SpecificDiseasesDiseaseCategory).includes(k);
+}
 
 
 
