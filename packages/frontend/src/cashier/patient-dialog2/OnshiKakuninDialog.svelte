@@ -4,6 +4,7 @@
   import { convertHankakuKatakanaToZenkakuHiraKana } from "@/lib/zenkaku";
   import { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
+  import { LimitApplicationCertificateRelatedInfo } from "onshi-result/dist/LimitApplicationCertificateRelatedInfo";
 
   export let destroy: () => void;
   export let hokensha: string;
@@ -144,6 +145,13 @@
                   <span>{kourei.futanWari}割</span>
                 </div>
               {/if}
+            {/if}
+            {#if r.limitApplicationCertificateRelatedInfo}
+                {@const data = r.limitApplicationCertificateRelatedInfo}
+                <div>
+                  <span>限度額適用</span>
+                  <span>{data.kind ?? ""}</span>
+                </div>
             {/if}
           </div>
         {/each}
