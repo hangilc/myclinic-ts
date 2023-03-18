@@ -9,6 +9,7 @@
   export let hokensha: string;
   export let hihokenshaBangou: string;
   export let hihokenshaKigou: string | undefined = undefined;
+  export let edaban: string | undefined = undefined;
   export let birthdate: string;
   export let confirmDate: string;
   export let server: string;
@@ -24,6 +25,7 @@
       hokensha: pad(hokensha, 8, "0"),
       hihokensha: hihokenshaBangou,
       kigou: hihokenshaKigou,
+      edaban,
       birthdate,
       confirmationDate: confirmDate,
     };

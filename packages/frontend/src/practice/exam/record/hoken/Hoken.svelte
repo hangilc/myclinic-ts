@@ -147,6 +147,7 @@
     hokensha: string | number,
     hihokensha: string,
     kigou: string | undefined,
+    edaban: string | undefined,
     onDone: (data: object | undefined) => void,
   ) {
     const server = await api.dictGet("onshi-server");
@@ -159,6 +160,7 @@
         hokensha: pad(hokensha, 8, "0"),
         hihokenshaBangou: hihokensha,
         hihokenshaKigou: kigou || "",
+        edaban,
         birthdate: patient.birthday.replaceAll("-", ""),
         confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
         server,
@@ -175,6 +177,7 @@
         h.hokenshaBangou,
         h.hihokenshaBangou,
         h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
+        h.edaban,
         _ => {}
       )
     }
@@ -186,6 +189,7 @@
       confirmByOnshi(
         h.hokenshaBangou,
         h.hihokenshaBangou,
+        undefined,
         undefined,
         _ => {}
       )
