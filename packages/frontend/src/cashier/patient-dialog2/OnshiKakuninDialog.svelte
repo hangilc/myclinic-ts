@@ -1,8 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import { pad } from "@/lib/pad";
-  import * as onshiLib from "onshi-lib";
-  // const { onshiIsValid } = require("onshi-lib");
+  import { OnshiResult } from "onshi-result";
 
   export let destroy: () => void;
   export let hokensha: string;
@@ -14,10 +13,9 @@
   export let secret: string;
   export let onDone: (result: object | undefined) => void;
   let querying: boolean = true;
-  let queryResult: object | undefined = undefined;
+  let queryResult: OnshiResult | undefined = undefined;
 
   startQuery();
-  console.log("onshiLib", onshiLib);
 
   async function startQuery() {
     const q = {
@@ -36,8 +34,9 @@
       body: JSON.stringify(q),
     });
     querying = false;
-    queryResult = await r.json();
-    console.log(JSON.stringify(queryResult, undefined, 2));
+    const resultJson = await r.json();
+    console.log(JSON.stringify(resultJson, undefined, 2));
+    queryResult = OnshiResult.cast(resultJson);
   }
 
   function doClose(): void {
@@ -60,11 +59,17 @@
   {#if querying}
   <div class="query-state">確認中...</div>
   {/if}
-  {#if queryResult}
-    {#if onshiLib.onshiIsValid(queryResult) }
-      <div>オンラインで資格確認ができました。</div>
+  {#if queryResult != undefined}
+    {#if queryResult.isValid }
+      <div>資格確認成功</div>
+      <div>
+        <div>
+          <span>氏名</span>
+          <span>{queryResult.name}</span>
+        </div>
+      </div>
     {:else}
-      <div>資格確認失敗。</div>
+      <div>資格確認失敗</div>
     {/if}
   {/if}
   <div class="commands">

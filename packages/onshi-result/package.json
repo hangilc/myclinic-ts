@@ -2,6 +2,7 @@
   "name": "onshi-result",
   "version": "1.0.0",
   "description": "Online Shikaku Kakunin Result",
+  "main": "dist/result.js",
   "scripts": {
     "compile": "tsc",
     "test": "jest"

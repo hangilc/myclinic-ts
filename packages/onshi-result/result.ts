@@ -21,6 +21,20 @@ export class OnshiResult {
     return this.xmlMsg.messageBody;
   }
 
+  // 資格が確認できたかどうか
+  get isValid(): boolean {
+    if( this.messageBody.processingResultStatus === "正常終了" ) {
+      const validity = this.messageBody.qualificationValidity;
+      return validity !== undefined  && validity === "有効";
+    }
+    return false;
+  }
+
+  // 患者氏名
+  get name(): string {
+    return this.messageBody.name;
+  }
+
   static cast(arg: any): OnshiResult {
     return new OnshiResult(
       XmlMsg.cast(arg.XmlMsg)

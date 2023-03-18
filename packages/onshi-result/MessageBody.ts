@@ -2,7 +2,7 @@ import { castOptStringProp, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
-import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, PrescriptionIssueSelect, PrescriptionIssueSelectLabel, ProcessingResultStatus, ProcessingResultStatusLabel } from "./codes";
+import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, PrescriptionIssueSelectLabel, ProcessingResultStatus, ProcessingResultStatusLabel, QualificationValidity, QualificationValidityLabel } from "./codes";
 
 interface MessageBodyInterface {
   ProcessingResultStatus: string;
@@ -22,20 +22,14 @@ export class MessageBody {
     this.orig = arg;
   }
 
-  // 資格確認照会用情報
-  get qualificationConfirmSearchInfo(): QualificationConfirmSearchInfo | undefined {
-    return this.orig.QualificationConfirmSearchInfo;
-  }
-
-  // 患者が選択した処方箋の発行形態
-  get prescriptionIssueSelect(): PrescriptionIssueSelectLabel | undefined {
-    const k: string | undefined = this.orig.PrescriptionIssueSelect;
+  get qualificationValidity(): QualificationValidityLabel | undefined {
+    const k: string | undefined = this.orig.QualificationValidity;
     if( k == undefined ){
       return undefined;
-    } else if( isPrescriptionIssueSelectCode(k) ){
-      return PrescriptionIssueSelect[k];
+    } else if( isQualificationValidityCode(k) ){
+      return QualificationValidity[k];
     } else {
-      throw new Error("Invalid PrescriptionIssueSelect: " + k);
+      throw new Error("Invalid QualificationValidity: " + k);
     }
   }
 
@@ -54,6 +48,23 @@ export class MessageBody {
     return this.orig.ResultList;
   }
 
+  // 資格確認照会用情報
+  get qualificationConfirmSearchInfo(): QualificationConfirmSearchInfo | undefined {
+    return this.orig.QualificationConfirmSearchInfo;
+  }
+
+  // 患者が選択した処方箋の発行形態
+  get prescriptionIssueSelect(): PrescriptionIssueSelectLabel | undefined {
+    const k: string | undefined = this.orig.PrescriptionIssueSelect;
+    if( k == undefined ){
+      return undefined;
+    } else if( isPrescriptionIssueSelectCode(k) ){
+      return PrescriptionIssueSelect[k];
+    } else {
+      throw new Error("Invalid PrescriptionIssueSelect: " + k);
+    }
+  }
+
   // 最初の資格確認結果（もしあれば）
   get qualificationConfirmation(): ResultOfQualificationConfirmation | undefined {
     return this.resultList[0];
@@ -65,6 +76,16 @@ export class MessageBody {
   // 月前）
   get processingResultCode(): string | undefined {
     return this.orig.ProcessingResultCode;
+  }
+
+  // 患者氏名
+  get name(): string {
+    const resultOpt = this.resultList[0];
+    if( resultOpt != undefined ){
+      return resultOpt.name;
+    } else {
+      return "";
+    }
   }
 
   static cast(arg: any): MessageBody {

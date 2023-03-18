@@ -207,6 +207,24 @@ export function isSpecificDiseasesDiseaseCategoryCode(k: string): k is SpecificD
   return Object.keys(SpecificDiseasesDiseaseCategory).includes(k);
 }
 
+// 資格有効性
+// OQSCD006
+export const QualificationValidity = {
+  "1": "有効",
+  "2": "無効",
+  "3": "無効（新しい資格あり）",
+  "4": "該当資格なし",
+  "5": "複数該当"
+} as const;
+
+export type QualificationValidityLabel = valueof<typeof QualificationValidity>;
+export type QualificationValidityCode = keyof typeof QualificationValidity;
+
+export function isQualificationValidityCode(k: string): k is QualificationValidityCode {
+  return Object.keys(QualificationValidity).includes(k);
+}
+
+
 
 
 
