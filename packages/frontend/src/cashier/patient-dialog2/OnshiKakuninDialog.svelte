@@ -71,10 +71,9 @@
   {/if}
   {#if queryResult != undefined}
     {#if queryResult.isValid && queryResult.resultList.length > 0}
-      <div>資格確認成功（{queryResult.resultList.length}）</div>
       <div>
         {#each queryResult.resultList as r}
-          <div>
+          <div class="query-result">
             <div>
               <span>氏名</span>
               <span>{r.name.replace("　", " ")}</span>
@@ -176,5 +175,11 @@
   .commands {
     margin-top: 10px;
     text-align: right;
+  }
+
+  .query-result {
+    border: 1px solid green;
+    padding: 10px;
+    margin: 10px 0;
   }
 </style>
