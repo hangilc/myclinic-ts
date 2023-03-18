@@ -16,7 +16,7 @@
   } from "@/lib/hoken-rep";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
-  import OnshiKakuninDialog from "@/cashier/patient-dialog2/OnshiKakuninDialog.svelte";
+  import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
   import { pad } from "@/lib/pad";
 
   export let visit: VisitEx;
@@ -150,8 +150,8 @@
     edaban: string | undefined,
     onDone: (data: object | undefined) => void,
   ) {
-    const server = await api.dictGet("onshi-server");
-    const secret = await api.dictGet("onshi-secret");
+    // const server = await api.dictGet("onshi-server");
+    // const secret = await api.dictGet("onshi-secret");
     const patient: Patient = visit.patient;
     const d: OnshiKakuninDialog = new OnshiKakuninDialog({
       target: document.body,
@@ -163,8 +163,6 @@
         edaban,
         birthdate: patient.birthday.replaceAll("-", ""),
         confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
-        server,
-        secret,
         onDone,
       },
     });

@@ -78,6 +78,11 @@ export class MessageBody {
     return this.orig.ProcessingResultCode;
   }
 
+  // 処理結果メッセージ
+  get processingResultMessage(): string | undefined {
+    return this.orig.ProcessingResultMessage;
+  }
+
   // 患者氏名
   get name(): string {
     const resultOpt = this.resultList[0];

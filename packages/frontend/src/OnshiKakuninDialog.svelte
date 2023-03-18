@@ -2,9 +2,9 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { pad } from "@/lib/pad";
   import { convertHankakuKatakanaToZenkakuHiraKana } from "@/lib/zenkaku";
-  import { OnshiResult } from "onshi-result";
+  import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
-  import { LimitApplicationCertificateRelatedInfo } from "onshi-result/dist/LimitApplicationCertificateRelatedInfo";
+  import { onshiConfirm } from "./lib/onshi-confirm";
 
   export let destroy: () => void;
   export let hokensha: string;
@@ -13,35 +13,28 @@
   export let edaban: string | undefined = undefined;
   export let birthdate: string;
   export let confirmDate: string;
-  export let server: string;
-  export let secret: string;
   export let onDone: (result: object | undefined) => void;
   let querying: boolean = true;
   let queryResult: OnshiResult | undefined = undefined;
+  let error: string = "";
 
   startQuery();
 
   async function startQuery() {
-    const q = {
-      hokensha: pad(hokensha, 8, "0"),
-      hihokensha: hihokenshaBangou,
-      kigou: hihokenshaKigou,
-      edaban,
-      birthdate,
-      confirmationDate: confirmDate,
-    };
-    const r = await fetch(server + "/onshi/kakunin", {
-      method: "POST",
-      headers: {
-        "X-ONSHI-VIEW-SECRET": secret,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(q),
-    });
-    querying = false;
-    const resultJson = await r.json();
-    console.log(JSON.stringify(resultJson, undefined, 2));
-    queryResult = OnshiResult.cast(resultJson);
+    try {
+      queryResult = await onshiConfirm(
+        pad(hokensha, 8, "0"),
+        hihokenshaBangou,
+        hihokenshaKigou,
+        edaban,
+        birthdate,
+        confirmDate
+      );
+      querying = false;
+    } catch (ex) {
+      querying = false;
+      error = "資格確認サーバーにアクセスできませんでした。";
+    }
   }
 
   function doClose(): void {
@@ -57,7 +50,7 @@
   }
 </script>
 
-<Dialog title="オンライン資格確認" destroy={doClose}>
+<Dialog title="オンライン資格確認" destroy={doClose} styleWidth="300px">
   <div class="query">
     <span>保険者番号</span><span>{hokensha}</span>
     {#if hihokenshaKigou}
@@ -67,12 +60,17 @@
     <span>生年月日</span><span>{birthdate}</span>
     <span>確認日</span><span>{confirmDate}</span>
   </div>
+  {#if error !== ""}
+    <div class="error">
+      <div>{error}</div>
+    </div>
+  {/if}
   {#if querying}
     <div class="query-state">確認中...</div>
   {/if}
   {#if queryResult != undefined}
     {#if queryResult.isValid && queryResult.resultList.length > 0}
-      <div>
+      <div class="result-wrapper">
         {#each queryResult.resultList as r}
           <div class="query-result">
             <div>
@@ -147,17 +145,21 @@
               {/if}
             {/if}
             {#if r.limitApplicationCertificateRelatedInfo}
-                {@const data = r.limitApplicationCertificateRelatedInfo}
-                <div>
-                  <span>限度額適用</span>
-                  <span>{data.kind ?? ""}</span>
-                </div>
+              {@const data = r.limitApplicationCertificateRelatedInfo}
+              <div>
+                <span>限度額適用</span>
+                <span>{data.kind ?? ""}</span>
+              </div>
             {/if}
           </div>
         {/each}
       </div>
     {:else}
-      <div>資格確認失敗</div>
+      <div class="error-result">
+        <div>資格確認失敗</div>
+        <div>{queryResult.messageBody.qualificationValidity}</div>
+        <div>{queryResult.messageBody.processingResultMessage ?? ""}</div>
+      </div>
     {/if}
   {/if}
   <div class="commands">
@@ -189,5 +191,23 @@
     border: 1px solid green;
     padding: 10px;
     margin: 10px 0;
+  }
+
+  .error-result {
+    border: 1px solid pink;
+    padding: 10px;
+    margin: 10px 0;
+  }
+
+  .error {
+    border: 1px solid red;
+    padding: 10px;
+    color: red;
+    margin: 10px 0;
+  }
+
+  .result-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
   }
 </style>

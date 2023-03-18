@@ -6,6 +6,7 @@
   export let destroy: () => void;
   export let title: string;
   export let onClose: () => void = () => {};
+  export let styleWidth: string = "";
 
   let dialog: HTMLElement;
 
@@ -43,7 +44,8 @@
   }
 </script>
 
-<div class="dialog" bind:this={dialog} data-cy="dialog" data-title={title}>
+<div class="dialog" bind:this={dialog} data-cy="dialog" data-title={title}
+  style:width={styleWidth}>
   <div class="title" data-cy="dialog-title">
     <span>{title}</span>
     <svg
