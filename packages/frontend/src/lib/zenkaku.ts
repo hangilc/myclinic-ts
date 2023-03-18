@@ -115,3 +115,104 @@ export function fromZenkakuWith(
 ): string {
   return convertWith(reverseMap(alphaToZenkakuMap), src);
 }
+
+const kanaHankakuZenkakuMap: Record<string, string> = {
+  "ｱ": "ア",
+  "ｲ": "イ",
+  "ｳ": "ウ",
+  "ｴ": "エ",
+  "ｵ": "オ",
+  "ｶ": "カ",
+  "ｷ": "キ",
+  "ｸ": "ク",
+  "ｹ": "ケ",
+  "ｺ": "コ",
+  "ｻ": "サ",
+  "ｼ": "シ",
+  "ｽ": "ス",
+  "ｾ": "セ",
+  "ｿ": "ソ",
+  "ﾀ": "タ",
+  "ﾁ": "チ",
+  "ﾂ": "ツ",
+  "ﾃ": "テ",
+  "ﾄ": "ト",
+  "ﾅ": "ナ",
+  "ﾆ": "ニ",
+  "ﾇ": "ヌ",
+  "ﾈ": "ネ",
+  "ﾉ": "ノ",
+  "ﾊ": "ハ",
+  "ﾋ": "ヒ",
+  "ﾌ": "フ",
+  "ﾍ": "ヘ",
+  "ﾎ": "ホ",
+  "ﾏ": "マ",
+  "ﾐ": "ミ",
+  "ﾑ": "ム",
+  "ﾒ": "メ",
+  "ﾓ": "モ",
+  "ﾔ": "ヤ",
+  "ﾕ": "ユ",
+  "ﾖ": "ヨ",
+  "ﾗ": "ラ",
+  "ﾘ": "リ",
+  "ﾙ": "ル",
+  "ﾚ": "レ",
+  "ﾛ": "ロ",
+  "ﾜ": "ワ",
+  "ｦ": "ヲ",
+  "ﾝ": "ン",
+  "ｶﾞ": "ガ",
+  "ｷﾞ": "ギ",
+  "ｸﾞ": "グ",
+  "ｹﾞ": "ゲ",
+  "ｺﾞ": "ゴ",
+  "ｻﾞ": "ザ",
+  "ｼﾞ": "ジ",
+  "ｽﾞ": "ズ",
+  "ｾﾞ": "ゼ",
+  "ｿﾞ": "ゾ",
+  "ﾀﾞ": "ダ",
+  "ﾁﾞ": "ヂ",
+  "ﾂﾞ": "ヅ",
+  "ﾃﾞ": "デ",
+  "ﾄﾞ": "ド",
+  "ﾊﾞ": "バ",
+  "ﾋﾞ": "ビ",
+  "ﾌﾞ": "ブ",
+  "ﾍﾞ": "ベ",
+  "ﾎﾞ": "ボ",
+  "ﾊﾟ": "パ",
+  "ﾋﾟ": "ピ",
+  "ﾌﾟ": "プ",
+  "ﾍﾟ": "ペ",
+  "ﾎﾟ": "ポ",
+}
+
+const zenkakuKatakanaList = Object.values(kanaHankakuZenkakuMap);
+
+export function hankakuKatakanaToZenkakuKatakana(h: string): string {
+  const z = kanaHankakuZenkakuMap[h];
+  if( z != undefined ) {
+    return z;
+  } else {
+    return h;
+  }
+}
+
+export function zenkakuKatakanaToZenkakuHiragana(k: string): string {
+  if( zenkakuKatakanaList.includes(k) ) {
+    return String.fromCodePoint(k.codePointAt(0)! - 96);
+  } else {
+    return k;
+  }
+}
+
+export function hankakuKatakanaToZenkakuHiragana(k: string): string {
+  return zenkakuKatakanaToZenkakuHiragana(hankakuKatakanaToZenkakuKatakana(k));
+}
+
+export function convertHankakuKatakanaToZenkakuHiraKana(s: string): string {
+  return s.split("").map(hankakuKatakanaToZenkakuHiragana).join("");
+}

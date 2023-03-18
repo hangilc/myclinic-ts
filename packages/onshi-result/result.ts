@@ -1,6 +1,7 @@
 import { MessageHeader } from "./MessageHeader";
 import { MessageBody } from "./MessageBody";
 import { XmlMsg } from "./XmlMsg";
+import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 
 export class OnshiResult {
   XmlMsg: XmlMsg 
@@ -30,9 +31,8 @@ export class OnshiResult {
     return false;
   }
 
-  // 患者氏名
-  get name(): string {
-    return this.messageBody.name;
+  get resultList(): ResultOfQualificationConfirmation[] {
+    return this.messageBody.resultList;
   }
 
   static cast(arg: any): OnshiResult {

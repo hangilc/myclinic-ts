@@ -88,6 +88,16 @@ export class MessageBody {
     }
   }
 
+  // 患者氏名よみ
+  get nameKana(): string | undefined {
+    const resultOpt = this.resultList[0];
+    if( resultOpt != undefined ){
+      return resultOpt.nameKana;
+    } else {
+      return "";
+    }
+  }
+
   static cast(arg: any): MessageBody {
     if (typeof arg === "object") {
       return new MessageBody({

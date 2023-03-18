@@ -30,4 +30,11 @@ describe("zenkaku", () => {
     expect(z.toZenkaku("abc")).toBe("ａｂｃ");
     expect(z.toZenkaku("me@example.com", ['@'])).toBe("ｍｅ@ｅｘａｍｐｌｅ．ｃｏｍ");
   });
+
+  it("should convert hankaku kana to zenkaku kana", () => {
+    expect(z.hankakuKatakanaToZenkakuKatakana("ｱ")).toBe("ア");
+    expect(z.hankakuKatakanaToZenkakuKatakana("は")).toBe("は");
+    expect(z.zenkakuKatakanaToZenkakuHiragana("ア")).toBe("あ");
+    expect(z.convertHankakuKatakanaToZenkakuHiraKana("ｱｲｳｴｵ")).toBe("あいうえお");
+  });
 });

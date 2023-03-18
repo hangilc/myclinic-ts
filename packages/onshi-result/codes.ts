@@ -73,6 +73,7 @@ export function isProcessingResultStatusCode(k: string): k is ProcessingResultSt
   return Object.keys(ProcessingResultStatus).includes(k);
 }
 
+// 被保険者証の種類
 export const InsuredCardClassification = {
   "01": "被保険者証（一般）",
   "02": "被保険者証（退職）",
