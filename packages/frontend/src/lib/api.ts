@@ -24,13 +24,13 @@ function getBackend(): string {
     let proto = l.protocol.toLowerCase();
     let host = l.hostname;
     let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
-    if( import.meta.env.VITE_BACKEND_PROTO ) {
+    if (import.meta.env.VITE_BACKEND_PROTO) {
       proto = import.meta.env.VITE_BACKEND_PROTO;
     }
-    if( import.meta.env.VITE_BACKEND_HOST ) {
+    if (import.meta.env.VITE_BACKEND_HOST) {
       host = import.meta.env.VITE_BACKEND_HOST;
     }
-    if( import.meta.env.VITE_BACKEND_PORT ) {
+    if (import.meta.env.VITE_BACKEND_PORT) {
       port = import.meta.env.VITE_BACKEND_PORT;
     }
     return `${proto}//${host}:${port}`;
@@ -88,7 +88,7 @@ async function postRaw<T>(
     const q = new URLSearchParams(params).toString();
     arg += `?${q}`;
   }
-  const resp = await fetch(arg, Object.assign({ method: "POST", body: data}, init ));
+  const resp = await fetch(arg, Object.assign({ method: "POST", body: data }, init));
   return cast(await resp.json());
 }
 
@@ -199,6 +199,18 @@ export default {
       },
       m.Visit.cast
     );
+  },
+
+  startVisitWithHoken(patientId: number, at: string | Date, hoken: m.HokenIdSet): Promise<m.Visit> {
+    return post(
+      "start-visit-with-hoken",
+      hoken,
+      {
+        "patient-id": patientId.toString(),
+        at: dateTimeParam(at),
+      },
+      m.Visit.cast
+    )
   },
 
   updateVisit(visit: m.Visit): Promise<boolean> {
@@ -1203,8 +1215,8 @@ export default {
   },
 
   getAppointTime(appointTimeId: number): Promise<m.AppointTime> {
-    return get("get-appoint-time", { "appoint-time-id": appointTimeId.toString()},
-    m.AppointTime.cast);
+    return get("get-appoint-time", { "appoint-time-id": appointTimeId.toString() },
+      m.AppointTime.cast);
   },
 
   updateAppointTime(appointTime: m.AppointTime): Promise<boolean> {

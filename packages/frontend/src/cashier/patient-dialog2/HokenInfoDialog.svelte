@@ -96,7 +96,7 @@
   <svelte:component this={panel} {patient} {hoken} />
   <div class="commands">
     {#if hoken.isShahokokuho || hoken.isKoukikourei}
-      <button on:click={() => doOnshiConfirm(hoken)}>資格確認</button>
+      <a href="javascript:;" on:click={() => doOnshiConfirm(hoken)}>資格確認</a>
     {/if}
     {#if hoken.usageCount === 0}
       <a href="javascript:;" on:click={doDelete}>削除</a>
@@ -118,5 +118,9 @@
 
   .commands > * + * {
     margin-left: 4px;
+  }
+
+  .commands > a + button {
+    margin-left: 10px;
   }
 </style>

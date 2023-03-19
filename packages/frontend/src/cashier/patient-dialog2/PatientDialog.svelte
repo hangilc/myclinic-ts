@@ -12,6 +12,7 @@
   import KouhiDialog from "./edit/KouhiDialog.svelte";
   import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
   import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+  import StartVisitDialog from "./StartVisitDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -137,35 +138,18 @@
     data.push(open);
   }
 
-  // async function doRegisterVisitNext() {
-  //   const current = data.getCurrentList()[0];
-  //   if (current) {
-  //     const server = await api.dictGet("onshi-server");
-  //     const secret = await api.dictGet("onshi-secret");
-  //     const at: Date = new Date();
-  //     const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-  //       target: document.body,
-  //       props: {
-  //         destroy: () => d.$destroy(),
-  //         hokensha: current.hokenshaBangou,
-  //         hihokenshaBangou: current.hihokenshaBangou,
-  //         hihokenshaKigou: current.hihokenshaKigou,
-  //         birthdate: p.birthday.replaceAll("-", ""),
-  //         confirmDate: dateToSqlDate(at).replaceAll("-", ""),
-  //         server,
-  //         secret,
-  //         onConfirm: (kakunin) => {},
-  //       },
-  //     });
-  //   } else {
-  //     await api.startVisit(p.patientId, new Date());
-  //     exit();
-  //   }
-  // }
-
   async function doRegisterVisit() {
-    await api.startVisit(p.patientId, new Date());
-    exit();
+    const d: StartVisitDialog = new StartVisitDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patient: p,
+        onCancel: () => {},
+        onEnter: (visit) => exit()
+      }
+    });
+    // await api.startVisit(p.patientId, new Date());
+    // exit();
   }
 
   function exit(): void {
@@ -206,7 +190,7 @@
   </div>
   <div class="commands">
     <button on:click={doRegisterVisit}>診察受付</button>
-    <button on:click={destroy}>閉じる</button>
+    <button on:click={exit}>閉じる</button>
   </div>
   <div class="menu">
     <a href="javascript:void(0)" on:click={doEdit} data-cy="edit-patient-link"
