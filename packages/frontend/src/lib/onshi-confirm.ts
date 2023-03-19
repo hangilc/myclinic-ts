@@ -1,5 +1,4 @@
 import api from "./api";
-import { pad } from "./pad";
 import { OnshiResult } from "onshi-result";
 
 export interface OnshiKakuninQuery {

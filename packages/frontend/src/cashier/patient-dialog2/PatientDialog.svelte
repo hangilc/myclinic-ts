@@ -1,12 +1,5 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import {
-    dateToSqlDate,
-    type Kouhi,
-    type Koukikourei,
-    type Patient,
-    type Shahokokuho,
-  } from "myclinic-model";
   import type { PatientData } from "../patient-dialog2/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -17,7 +10,8 @@
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
-  import OnshiKakuninDialog from "./OnshiKakuninDialog.svelte";
+  import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
+  import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -143,31 +137,31 @@
     data.push(open);
   }
 
-  async function doRegisterVisitNext() {
-    const current = data.getCurrentList()[0];
-    if (current) {
-      const server = await api.dictGet("onshi-server");
-      const secret = await api.dictGet("onshi-secret");
-      const at: Date = new Date();
-      const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          hokensha: current.hokenshaBangou,
-          hihokenshaBangou: current.hihokenshaBangou,
-          hihokenshaKigou: current.hihokenshaKigou,
-          birthdate: p.birthday.replaceAll("-", ""),
-          confirmDate: dateToSqlDate(at).replaceAll("-", ""),
-          server,
-          secret,
-          onConfirm: (kakunin) => {},
-        },
-      });
-    } else {
-      await api.startVisit(p.patientId, new Date());
-      exit();
-    }
-  }
+  // async function doRegisterVisitNext() {
+  //   const current = data.getCurrentList()[0];
+  //   if (current) {
+  //     const server = await api.dictGet("onshi-server");
+  //     const secret = await api.dictGet("onshi-secret");
+  //     const at: Date = new Date();
+  //     const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+  //       target: document.body,
+  //       props: {
+  //         destroy: () => d.$destroy(),
+  //         hokensha: current.hokenshaBangou,
+  //         hihokenshaBangou: current.hihokenshaBangou,
+  //         hihokenshaKigou: current.hihokenshaKigou,
+  //         birthdate: p.birthday.replaceAll("-", ""),
+  //         confirmDate: dateToSqlDate(at).replaceAll("-", ""),
+  //         server,
+  //         secret,
+  //         onConfirm: (kakunin) => {},
+  //       },
+  //     });
+  //   } else {
+  //     await api.startVisit(p.patientId, new Date());
+  //     exit();
+  //   }
+  // }
 
   async function doRegisterVisit() {
     await api.startVisit(p.patientId, new Date());
