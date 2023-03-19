@@ -11,6 +11,8 @@
   } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
+  import { OnshiResult } from "onshi-result";
+  import { writable, type Writable } from "svelte/store";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -21,8 +23,10 @@
   export let shahokokuhoOpt: Shahokokuho | undefined = undefined;
   export let koukikoureiOpt: Koukikourei | undefined = undefined;
   export let kouhiList: Kouhi[] = [];
-  export let shahokokuhoChecked: boolean = false;
-  export let koukikoureiChecked: boolean = false;
+  export let shahokokuhoChecked: boolean = true;
+  export let koukikoureiChecked: boolean = true;
+  export let onshiStatus: undefined | "no-need" | "querying" | OnshiResult =
+    undefined;
 
   queryHoken();
 
@@ -33,21 +37,23 @@
       koukikoureiOpt =
         (await api.findAvailableKoukikourei(patient.patientId, at)) ??
         undefined;
-      koukikoureiChecked = true;
-    } else {
-      shahokokuhoChecked = true;
     }
     kouhiList = await api.listAvailableKouhi(patient.patientId, at);
     queryingHoken = false;
   }
 
+  function onHokenCheck() {
+    if( !shahokokuhoChecked && !koukikoureiChecked) {
+      onshiStatus = "no-need";
+    } else 
+    
+  }
+
   async function doEnter() {
     let shahokokuhoId: number = 0;
     let koukikoureiId: number = 0;
-    if( shahokokuhoOpt != undefined && shahokokuhoChecked ){
-
-    } else if( koukikoureiOpt != undefined && koukikoureiChecked ){
-
+    if (shahokokuhoOpt != undefined && shahokokuhoChecked) {
+    } else if (koukikoureiOpt != undefined && koukikoureiChecked) {
     }
     const hokenIdSet = new HokenIdSet(0, 0, 0, 0, 0, 0);
     const visit = await api.startVisitWithHoken(
@@ -62,6 +68,12 @@
   function doCancel() {
     destroy();
     onCancel();
+  }
+
+  async function doOnshiKakunin() {
+    if (shahokokuhoChecked && shahokokuhoOpt != undefined) {
+    } else if (koukikoureiChecked && koukikoureiOpt != undefined) {
+    }
   }
 
   function formatBirthday(birthday: string): string {
@@ -83,7 +95,8 @@
         {#if shahokokuhoOpt != undefined}
           <div>
             <label>
-              <input type="checkbox" bind:checked={shahokokuhoChecked} />
+              <input type="checkbox" bind:checked={shahokokuhoChecked} 
+                on:change={onHokenCheck}/>
               {shahokokuhoRep(shahokokuhoOpt)}
             </label>
           </div>
@@ -111,8 +124,10 @@
     <div class="querying-hoken-notice">保険問い合わせ中</div>
   {/if}
   <div class="commands">
-    {#if !queryingHoken}
+    {#if onshiStatus === "no-need" || onshiStatus instanceof OnshiResult}
       <button on:click={doEnter}>入力</button>
+    {:else}
+      <button on:click={doOnshiKakunin}>資格確認</button>
     {/if}
     <button on:click={doCancel}>キャンセル</button>
   </div>
