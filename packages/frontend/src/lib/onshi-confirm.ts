@@ -2,25 +2,21 @@ import api from "./api";
 import { pad } from "./pad";
 import { OnshiResult } from "onshi-result";
 
-export async function onshiConfirm(
+export interface OnshiKakuninQuery {
   hokensha: string,
   hihokensha: string,
+  birthdate: string,
+  confirmationDate: string,
   kigou: string | undefined,
   edaban: string | undefined,
-  birthdate: string,
-  confirmDate: string,
+};
+
+export async function onshiConfirm(
+  query: OnshiKakuninQuery,
   timeout: number = 10, // seconds
 ): Promise<OnshiResult> {
   const server = await api.dictGet("onshi-server");
   const secret = await api.dictGet("onshi-secret");
-  const q = {
-    hokensha: pad(hokensha, 8, "0"),
-    hihokensha,
-    kigou,
-    edaban,
-    birthdate,
-    confirmationDate: confirmDate,
-  }
   const controller = new AbortController();
   const timerId = setTimeout(() => {
     console.log("timeout");
@@ -32,7 +28,7 @@ export async function onshiConfirm(
       "X-ONSHI-VIEW-SECRET": secret,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(q),
+    body: JSON.stringify(query),
     signal: controller.signal
   });
   clearTimeout(timerId);

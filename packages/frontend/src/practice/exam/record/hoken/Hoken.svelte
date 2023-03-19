@@ -18,6 +18,8 @@
   import api from "@/lib/api";
   import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
   import { pad } from "@/lib/pad";
+  import type { OnshiResult } from "onshi-result";
+  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
 
   export let visit: VisitEx;
   let shahoOpt: [Shahokokuho, boolean] | null = null;
@@ -143,56 +145,28 @@
     closeHokenDialog();
   }
 
-  async function confirmByOnshi(
-    hokensha: string | number,
-    hihokensha: string,
-    kigou: string | undefined,
-    edaban: string | undefined,
-    onDone: (data: object | undefined) => void,
-  ) {
-    // const server = await api.dictGet("onshi-server");
-    // const secret = await api.dictGet("onshi-secret");
-    const patient: Patient = visit.patient;
+  async function onshiConfirm(hoken: Shahokokuho | Koukikourei) {
+    const query = await onshi_query_from_hoken(
+      hoken,
+      visit.patient.birthday.replaceAll("-", ""),
+      visit.visitedAt.substring(0, 10).replaceAll("-", "")
+    );
     const d: OnshiKakuninDialog = new OnshiKakuninDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        hokensha: pad(hokensha, 8, "0"),
-        hihokenshaBangou: hihokensha,
-        hihokenshaKigou: kigou || "",
-        edaban,
-        birthdate: patient.birthday.replaceAll("-", ""),
-        confirmDate: visit.visitedAt.substring(0, 10).replaceAll("-", ""),
-        onDone,
+        query,
+        onDone: (result: OnshiResult | undefined) =>
+          onOnshiConfirmDone(result, hoken),
       },
     });
   }
 
-  async function confirmShahokokuho(arg: [Shahokokuho, boolean] | null) {
-    if (arg != null) {
-      const h = arg[0];
-      confirmByOnshi(
-        h.hokenshaBangou,
-        h.hihokenshaBangou,
-        h.hihokenshaKigou == "" ? undefined : h.hihokenshaKigou,
-        h.edaban,
-        _ => {}
-      )
-    }
-  }
+  function onOnshiConfirmDone(
+    result: OnshiResult | undefined,
+    hoken: Shahokokuho | Koukikourei
+  ) {}
 
-  async function confirmKoukikourei(arg: [Koukikourei, boolean] | null) {
-    if (arg != null) {
-      const h = arg[0];
-      confirmByOnshi(
-        h.hokenshaBangou,
-        h.hihokenshaBangou,
-        undefined,
-        undefined,
-        _ => {}
-      )
-    }
-  }
 </script>
 
 <div class="disp" on:click={onDispClick}>{hokenRep(visit)}</div>
@@ -201,12 +175,13 @@
   <Dialog destroy={closeHokenDialog} title="保険選択">
     <div>
       {#if shahoOpt != null}
+      {@const shaho = shahoOpt[0]}
         <div>
           <input type="checkbox" bind:checked={shahoOpt[1]} />
-          {shahokokuhoRep(shahoOpt[0])}
+          {shahokokuhoRep(shaho)}
           <a
             href="javascript:void(0)"
-            on:click={() => confirmShahokokuho(shahoOpt)}>資格確認</a
+            on:click={() => onshiConfirm(shaho)}>資格確認</a
           >
         </div>
       {/if}
@@ -217,12 +192,13 @@
         </div>
       {/if}
       {#if koukiOpt != null}
+      {@const koukikourei = koukiOpt[0]}
         <div>
           <input type="checkbox" bind:checked={koukiOpt[1]} />
           {koukikoureiRep(koukiOpt[0].futanWari)}
           <a
             href="javascript:void(0)"
-            on:click={() => confirmKoukikourei(koukiOpt)}>資格確認</a
+            on:click={() => onshiConfirm(koukikourei)}>資格確認</a
           >
         </div>
       {/if}

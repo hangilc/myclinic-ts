@@ -4,16 +4,11 @@
   import { convertHankakuKatakanaToZenkakuHiraKana } from "@/lib/zenkaku";
   import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
-  import { onshiConfirm } from "./lib/onshi-confirm";
+  import { onshiConfirm, type OnshiKakuninQuery } from "./lib/onshi-confirm";
 
   export let destroy: () => void;
-  export let hokensha: string;
-  export let hihokenshaBangou: string;
-  export let hihokenshaKigou: string | undefined = undefined;
-  export let edaban: string | undefined = undefined;
-  export let birthdate: string;
-  export let confirmDate: string;
-  export let onDone: (result: object | undefined) => void;
+  export let query: OnshiKakuninQuery;
+  export let onDone: (result: OnshiResult | undefined) => void;
   let querying: boolean = true;
   let queryResult: OnshiResult | undefined = undefined;
   let error: string = "";
@@ -22,14 +17,7 @@
 
   async function startQuery() {
     try {
-      queryResult = await onshiConfirm(
-        pad(hokensha, 8, "0"),
-        hihokenshaBangou,
-        hihokenshaKigou,
-        edaban,
-        birthdate,
-        confirmDate
-      );
+      queryResult = await onshiConfirm(query);
       querying = false;
     } catch (ex) {
       querying = false;
@@ -52,13 +40,13 @@
 
 <Dialog title="オンライン資格確認" destroy={doClose} styleWidth="300px">
   <div class="query">
-    <span>保険者番号</span><span>{hokensha}</span>
-    {#if hihokenshaKigou}
-      <span>被保険者記号</span><span>{hihokenshaKigou}</span>
+    <span>保険者番号</span><span>{query.hokensha}</span>
+    {#if query.kigou}
+      <span>被保険者記号</span><span>{query.kigou}</span>
     {/if}
-    <span>被保険者番号</span><span>{hihokenshaBangou}</span>
-    <span>生年月日</span><span>{birthdate}</span>
-    <span>確認日</span><span>{confirmDate}</span>
+    <span>被保険者番号</span><span>{query.hihokensha}</span>
+    <span>生年月日</span><span>{query.birthdate}</span>
+    <span>確認日</span><span>{query.confirmationDate}</span>
   </div>
   {#if error !== ""}
     <div class="error">
@@ -170,7 +158,7 @@
 <style>
   .query {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto 1fr;
   }
 
   .query span:nth-of-type(even) {
