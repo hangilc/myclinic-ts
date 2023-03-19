@@ -4,10 +4,12 @@ import { XmlMsg } from "./XmlMsg";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 
 export class OnshiResult {
-  XmlMsg: XmlMsg 
+  XmlMsg: XmlMsg ;
+  origJson: object;
 
-  constructor(XmlMsg: XmlMsg) {
+  constructor(XmlMsg: XmlMsg, origJson: object) {
     this.XmlMsg = XmlMsg;
+    this.origJson = origJson;
   }
 
   get xmlMsg(): XmlMsg {
@@ -37,7 +39,8 @@ export class OnshiResult {
 
   static cast(arg: any): OnshiResult {
     return new OnshiResult(
-      XmlMsg.cast(arg.XmlMsg)
+      XmlMsg.cast(arg.XmlMsg),
+      arg
     )
   }
 }

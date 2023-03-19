@@ -21,6 +21,8 @@
   export let shahokokuhoOpt: Shahokokuho | undefined = undefined;
   export let koukikoureiOpt: Koukikourei | undefined = undefined;
   export let kouhiList: Kouhi[] = [];
+  export let shahokokuhoChecked: boolean = false;
+  export let koukikoureiChecked: boolean = false;
 
   queryHoken();
 
@@ -31,12 +33,22 @@
       koukikoureiOpt =
         (await api.findAvailableKoukikourei(patient.patientId, at)) ??
         undefined;
+      koukikoureiChecked = true;
+    } else {
+      shahokokuhoChecked = true;
     }
     kouhiList = await api.listAvailableKouhi(patient.patientId, at);
     queryingHoken = false;
   }
 
   async function doEnter() {
+    let shahokokuhoId: number = 0;
+    let koukikoureiId: number = 0;
+    if( shahokokuhoOpt != undefined && shahokokuhoChecked ){
+
+    } else if( koukikoureiOpt != undefined && koukikoureiChecked ){
+
+    }
     const hokenIdSet = new HokenIdSet(0, 0, 0, 0, 0, 0);
     const visit = await api.startVisitWithHoken(
       patient.patientId,
@@ -71,7 +83,7 @@
         {#if shahokokuhoOpt != undefined}
           <div>
             <label>
-              <input type="checkbox" checked />
+              <input type="checkbox" bind:checked={shahokokuhoChecked} />
               {shahokokuhoRep(shahokokuhoOpt)}
             </label>
           </div>
@@ -79,7 +91,7 @@
         {#if koukikoureiOpt != undefined}
           <div>
             <label>
-              <input type="checkbox" checked />
+              <input type="checkbox" bind:checked={koukikoureiChecked} />
               {koukikoureiRep(koukikoureiOpt.futanWari)}
             </label>
           </div>
