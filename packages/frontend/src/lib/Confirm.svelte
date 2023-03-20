@@ -33,6 +33,10 @@
     min-width: 100px;
     max-width: 400px;
     overflow: auto;
+    height: auto;
+    width: auto;
+    min-height: 30px;
+    max-height: 300px;
   }
 
   .commands {

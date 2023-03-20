@@ -16,6 +16,7 @@
   import { dateToSql } from "@/lib/util";
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
+  import { confirm } from "@/lib/confirm-call";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -59,7 +60,7 @@
     }
   }
 
-  async function doEnter() {
+  async function doEnter(need_onshi_confirm: boolean) {
     const hokenIdSet = new HokenIdSet(
       shahokokuhoOpt && shahokokuhoChecked ? shahokokuhoOpt.shahokokuhoId : 0,
       koukikoureiOpt && koukikoureiChecked ? koukikoureiOpt.koukikoureiId : 0,
@@ -78,45 +79,40 @@
       if (shahokokuhoOnshi) {
         onshiResult = shahokokuhoOnshi;
       } else {
-        error = "社保国保の資格確認ができていません。";
-        return;
+        if (need_onshi_confirm) {
+          error = "社保国保の資格確認ができていません。";
+          return;
+        }
       }
     }
     if (hokenIdSet.koukikoureiId > 0) {
       if (koukikoureiOnshi) {
         onshiResult = koukikoureiOnshi;
       } else {
-        error = "後期高齢の資格確認ができていません。";
-        return;
+        if (need_onshi_confirm) {
+          error = "後期高齢の資格確認ができていません。";
+          return;
+        }
       }
     }
-    if (onshiResult == undefined) {
-      error = "資格確認ができていません。";
+    let visit: Visit | undefined = undefined;
+    try {
+      visit = await api.startVisitWithHoken(patient.patientId, at, hokenIdSet);
+    } catch (e) {
+      error = "診察の登録に失敗しました。";
       return;
-    } else {
-      let visit: Visit | undefined = undefined;
+    }
+    if (onshiResult) {
       try {
-        visit = await api.startVisitWithHoken(
-          patient.patientId,
-          at,
-          hokenIdSet
+        await api.enterOnshi(
+          new Onshi(visit.visitId, JSON.stringify(onshiResult.origJson))
         );
       } catch (e) {
-        error = "診察の登録に失敗しました。";
-        return;
-      }
-      if (visit) {
-        if (onshiResult) {
-          try {
-            await api.enterOnshi(new Onshi(visit.visitId, JSON.stringify(onshiResult.origJson)));
-          } catch (e) {
-            error = "資格確認情報の登録に失敗しました。";
-          }
-        }
-        destroy();
-        onEnter(visit);
+        error = "資格確認情報の登録に失敗しました。";
       }
     }
+    destroy();
+    onEnter(visit);
   }
 
   function doCancel() {
@@ -177,6 +173,10 @@
     }
   }
 
+  function doEnterWithoutOnshiKakunin() {
+    confirm("資格確認なしで入力していいですか？", () => doEnter(false));
+  }
+
   function formatBirthday(birthday: string): string {
     const d = new Date(birthday);
     const age = kanjidate.calcAge(d);
@@ -231,10 +231,11 @@
     <div class="error">{error}</div>
   {/if}
   <div class="commands">
+    <a href="javascript:;" class="skip-onshi-confirm-link" on:click={doEnterWithoutOnshiKakunin}>資格確認なしで入力</a>
     {#if needOnshiConfirm}
       <button on:click={doOnshiKakunin}>資格確認</button>
     {:else}
-      <button on:click={doEnter}>入力</button>
+      <button on:click={() => doEnter(true)}>入力</button>
     {/if}
     <button on:click={doCancel}>キャンセル</button>
   </div>
@@ -262,6 +263,7 @@
     display: flex;
     justify-content: right;
     margin-top: 10px;
+    align-items: center;
   }
 
   .commands * + button {
@@ -284,5 +286,10 @@
   .onshi-confirmed-notice {
     color: green;
     font-weight: bold;
+  }
+
+  .skip-onshi-confirm-link {
+    font-size: 12px;
+    margin-right: 6px;
   }
 </style>
