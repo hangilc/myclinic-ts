@@ -15,6 +15,7 @@
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import { dateToSql } from "@/lib/util";
   import { onshiConfirm } from "@/lib/onshi-confirm";
+  import { Onshi } from "myclinic-model/model";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -60,40 +61,62 @@
 
   async function doEnter() {
     const hokenIdSet = new HokenIdSet(
-      (shahokokuhoOpt && shahokokuhoChecked) ? shahokokuhoOpt.shahokokuhoId : 0, 
-      (koukikoureiOpt && koukikoureiChecked)? koukikoureiOpt.koukikoureiId : 0, 
-      0, 
-      kouhiList.length > 0 ? kouhiList[0].kouhiId : 0, 
-      kouhiList.length > 1 ? kouhiList[1].kouhiId : 0, 
-      kouhiList.length > 2 ? kouhiList[2].kouhiId : 0);
-    if( hokenIdSet.shahokokuhoId > 0 && hokenIdSet.koukikoureiId > 0 ){
-      error = "複数の保険（社保国保と後期高齢）が設定されていますので、入力できません。";
+      shahokokuhoOpt && shahokokuhoChecked ? shahokokuhoOpt.shahokokuhoId : 0,
+      koukikoureiOpt && koukikoureiChecked ? koukikoureiOpt.koukikoureiId : 0,
+      0,
+      kouhiList.length > 0 ? kouhiList[0].kouhiId : 0,
+      kouhiList.length > 1 ? kouhiList[1].kouhiId : 0,
+      kouhiList.length > 2 ? kouhiList[2].kouhiId : 0
+    );
+    if (hokenIdSet.shahokokuhoId > 0 && hokenIdSet.koukikoureiId > 0) {
+      error =
+        "複数の保険（社保国保と後期高齢）が設定されていますので、入力できません。";
       return;
     }
     let onshiResult: OnshiResult | undefined = undefined;
-    if( hokenIdSet.shahokokuhoId > 0 ){
-      if( shahokokuhoOnshi ){
+    if (hokenIdSet.shahokokuhoId > 0) {
+      if (shahokokuhoOnshi) {
         onshiResult = shahokokuhoOnshi;
       } else {
         error = "社保国保の資格確認ができていません。";
         return;
       }
     }
-    if( hokenIdSet.koukikoureiId > 0 ){
-      if( koukikoureiOnshi ){
+    if (hokenIdSet.koukikoureiId > 0) {
+      if (koukikoureiOnshi) {
         onshiResult = koukikoureiOnshi;
       } else {
         error = "後期高齢の資格確認ができていません。";
         return;
       }
     }
-    const visit = await api.startVisitWithHoken(
-      patient.patientId,
-      at,
-      hokenIdSet
-    );
-    destroy();
-    onEnter(visit);
+    if (onshiResult == undefined) {
+      error = "資格確認ができていません。";
+      return;
+    } else {
+      let visit: Visit | undefined = undefined;
+      try {
+        visit = await api.startVisitWithHoken(
+          patient.patientId,
+          at,
+          hokenIdSet
+        );
+      } catch (e) {
+        error = "診察の登録に失敗しました。";
+        return;
+      }
+      if (visit) {
+        if (onshiResult) {
+          try {
+            await api.enterOnshi(new Onshi(visit.visitId, JSON.stringify(onshiResult.origJson)));
+          } catch (e) {
+            error = "資格確認情報の登録に失敗しました。";
+          }
+        }
+        destroy();
+        onEnter(visit);
+      }
+    }
   }
 
   function doCancel() {
