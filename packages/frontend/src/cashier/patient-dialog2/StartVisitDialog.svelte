@@ -11,51 +11,82 @@
   } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
-  import { OnshiResult } from "onshi-result";
-  import { writable, type Writable } from "svelte/store";
+  import type { OnshiResult } from "onshi-result";
+  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  import { dateToSql } from "@/lib/util";
+  import { onshiConfirm } from "@/lib/onshi-confirm";
 
   export let destroy: () => void;
   export let patient: Patient;
   export let onEnter: (visit: Visit) => void;
   export let onCancel: () => void;
-  export let queryingHoken: boolean = true;
   export let at = new Date();
-  export let shahokokuhoOpt: Shahokokuho | undefined = undefined;
-  export let koukikoureiOpt: Koukikourei | undefined = undefined;
-  export let kouhiList: Kouhi[] = [];
   export let shahokokuhoChecked: boolean = true;
+  export let shahokokuhoOpt: Shahokokuho | undefined = undefined;
+  export let shahokokuhoOnshi: OnshiResult | undefined = undefined;
   export let koukikoureiChecked: boolean = true;
-  export let onshiStatus: undefined | "no-need" | "querying" | OnshiResult =
-    undefined;
+  export let koukikoureiOpt: Koukikourei | undefined = undefined;
+  export let koukikoureiOnshi: OnshiResult | undefined = undefined;
+  export let kouhiList: Kouhi[] = [];
+  export let inProgressNotice: string = "";
+  export let error: string = "";
 
   queryHoken();
 
+  $: needShahokokuhoOnshiConfirm =
+    shahokokuhoOpt != undefined &&
+    shahokokuhoChecked &&
+    shahokokuhoOnshi == undefined;
+  $: needKoukikoureiOnshiConfirm =
+    koukikoureiOpt != undefined &&
+    koukikoureiChecked &&
+    koukikoureiOnshi == undefined;
+  $: needOnshiConfirm =
+    (needShahokokuhoOnshiConfirm && !needKoukikoureiOnshiConfirm) ||
+    (!needShahokokuhoOnshiConfirm && needKoukikoureiOnshiConfirm);
+
   async function queryHoken() {
+    inProgressNotice = "保険情報取得中";
     shahokokuhoOpt =
       (await api.findAvailableShahokokuho(patient.patientId, at)) ?? undefined;
-    if (shahokokuhoOpt == undefined) {
-      koukikoureiOpt =
-        (await api.findAvailableKoukikourei(patient.patientId, at)) ??
-        undefined;
-    }
+    koukikoureiOpt =
+      (await api.findAvailableKoukikourei(patient.patientId, at)) ?? undefined;
     kouhiList = await api.listAvailableKouhi(patient.patientId, at);
-    queryingHoken = false;
-  }
-
-  function onHokenCheck() {
-    if( !shahokokuhoChecked && !koukikoureiChecked) {
-      onshiStatus = "no-need";
-    } else 
-    
+    inProgressNotice = "";
+    if (shahokokuhoOpt != undefined && koukikoureiOpt != undefined) {
+      error = "適用可能な保険が複数あります。修正してください。";
+    }
   }
 
   async function doEnter() {
-    let shahokokuhoId: number = 0;
-    let koukikoureiId: number = 0;
-    if (shahokokuhoOpt != undefined && shahokokuhoChecked) {
-    } else if (koukikoureiOpt != undefined && koukikoureiChecked) {
+    const hokenIdSet = new HokenIdSet(
+      (shahokokuhoOpt && shahokokuhoChecked) ? shahokokuhoOpt.shahokokuhoId : 0, 
+      (koukikoureiOpt && koukikoureiChecked)? koukikoureiOpt.koukikoureiId : 0, 
+      0, 
+      kouhiList.length > 0 ? kouhiList[0].kouhiId : 0, 
+      kouhiList.length > 1 ? kouhiList[1].kouhiId : 0, 
+      kouhiList.length > 2 ? kouhiList[2].kouhiId : 0);
+    if( hokenIdSet.shahokokuhoId > 0 && hokenIdSet.koukikoureiId > 0 ){
+      error = "複数の保険（社保国保と後期高齢）が設定されていますので、入力できません。";
+      return;
     }
-    const hokenIdSet = new HokenIdSet(0, 0, 0, 0, 0, 0);
+    let onshiResult: OnshiResult | undefined = undefined;
+    if( hokenIdSet.shahokokuhoId > 0 ){
+      if( shahokokuhoOnshi ){
+        onshiResult = shahokokuhoOnshi;
+      } else {
+        error = "社保国保の資格確認ができていません。";
+        return;
+      }
+    }
+    if( hokenIdSet.koukikoureiId > 0 ){
+      if( koukikoureiOnshi ){
+        onshiResult = koukikoureiOnshi;
+      } else {
+        error = "後期高齢の資格確認ができていません。";
+        return;
+      }
+    }
     const visit = await api.startVisitWithHoken(
       patient.patientId,
       at,
@@ -71,8 +102,55 @@
   }
 
   async function doOnshiKakunin() {
-    if (shahokokuhoChecked && shahokokuhoOpt != undefined) {
-    } else if (koukikoureiChecked && koukikoureiOpt != undefined) {
+    if (shahokokuhoOpt != undefined && koukikoureiOpt != undefined) {
+      error =
+        "適用できる社保国保と後期高齢が同時に存在します。修正してください。";
+    } else {
+      if (shahokokuhoOpt != undefined) {
+        try {
+          inProgressNotice = "オンライン資格確認中";
+          const q = await onshi_query_from_hoken(
+            shahokokuhoOpt,
+            patient.birthday,
+            dateToSql(at)
+          );
+          const result = await onshiConfirm(q);
+          if (result.isValid && result.resultList.length === 1) {
+            shahokokuhoOnshi = result;
+          } else {
+            error =
+              "資格確認できませんでした。" +
+              result.messageBody.qualificationValidity +
+              (result.messageBody.processingResultMessage ?? "");
+          }
+        } catch (ex) {
+          error = "資格確認サーバーに接続できませんでした。";
+        } finally {
+          inProgressNotice = "";
+        }
+      } else if (koukikoureiOpt != undefined) {
+        try {
+          inProgressNotice = "オンライン資格確認中";
+          const q = await onshi_query_from_hoken(
+            koukikoureiOpt,
+            patient.birthday,
+            dateToSql(at)
+          );
+          const result = await onshiConfirm(q);
+          if (result.isValid && result.resultList.length === 1) {
+            koukikoureiOnshi = result;
+          } else {
+            error =
+              "資格確認できませんでした。" +
+              result.messageBody.qualificationValidity +
+              (result.messageBody.processingResultMessage ?? "");
+          }
+        } catch (ex) {
+          error = "資格確認サーバーに接続できませんでした。";
+        } finally {
+          inProgressNotice = "";
+        }
+      }
     }
   }
 
@@ -91,43 +169,49 @@
     <span>性別</span><span>{patient.sexAsKanji}性</span>
     <span>保険</span>
     <div class="hoken-area">
-      {#if !queryingHoken}
-        {#if shahokokuhoOpt != undefined}
-          <div>
-            <label>
-              <input type="checkbox" bind:checked={shahokokuhoChecked} 
-                on:change={onHokenCheck}/>
-              {shahokokuhoRep(shahokokuhoOpt)}
-            </label>
-          </div>
-        {/if}
-        {#if koukikoureiOpt != undefined}
-          <div>
-            <label>
-              <input type="checkbox" bind:checked={koukikoureiChecked} />
-              {koukikoureiRep(koukikoureiOpt.futanWari)}
-            </label>
-          </div>
-        {/if}
-        {#each kouhiList as kouhi (kouhi.kouhiId)}
-          <div>
-            <label>
-              <input type="checkbox" checked />
-              {kouhiRep(kouhi.futansha)}
-            </label>
-          </div>
-        {/each}
+      {#if shahokokuhoOpt != undefined}
+        <div>
+          <label>
+            <input type="checkbox" bind:checked={shahokokuhoChecked} />
+            {shahokokuhoRep(shahokokuhoOpt)}
+          </label>
+          {#if shahokokuhoOnshi}
+            <span class="onshi-confirmed-notice">資格確認済</span>
+          {/if}
+        </div>
       {/if}
+      {#if koukikoureiOpt != undefined}
+        <div>
+          <label>
+            <input type="checkbox" bind:checked={koukikoureiChecked} />
+            {koukikoureiRep(koukikoureiOpt.futanWari)}
+          </label>
+          {#if koukikoureiOnshi}
+            <span class="onshi-confirmed-notice">資格確認済</span>
+          {/if}
+        </div>
+      {/if}
+      {#each kouhiList as kouhi (kouhi.kouhiId)}
+        <div>
+          <label>
+            <input type="checkbox" checked />
+            {kouhiRep(kouhi.futansha)}
+          </label>
+        </div>
+      {/each}
     </div>
   </div>
-  {#if queryingHoken}
-    <div class="querying-hoken-notice">保険問い合わせ中</div>
+  {#if inProgressNotice}
+    <div class="in-progress-notice">{inProgressNotice}</div>
+  {/if}
+  {#if error}
+    <div class="error">{error}</div>
   {/if}
   <div class="commands">
-    {#if onshiStatus === "no-need" || onshiStatus instanceof OnshiResult}
-      <button on:click={doEnter}>入力</button>
-    {:else}
+    {#if needOnshiConfirm}
       <button on:click={doOnshiKakunin}>資格確認</button>
+    {:else}
+      <button on:click={doEnter}>入力</button>
     {/if}
     <button on:click={doCancel}>キャンセル</button>
   </div>
@@ -161,9 +245,21 @@
     margin-left: 4px;
   }
 
-  .querying-hoken-notice {
+  .in-progress-notice {
     color: green;
     text-align: center;
     margin: 10px 0;
+  }
+
+  .error {
+    color: red;
+    border: 1px solid red;
+    margin: 10px 0;
+    padding: 10px;
+  }
+
+  .onshi-confirmed-notice {
+    color: green;
+    font-weight: bold;
   }
 </style>
