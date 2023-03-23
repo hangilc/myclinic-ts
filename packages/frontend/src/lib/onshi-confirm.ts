@@ -8,6 +8,7 @@ export interface OnshiKakuninQuery {
   confirmationDate: string,
   kigou: string | undefined,
   edaban: string | undefined,
+  limitAppConsFlag: string,
 };
 
 export async function onshiConfirm(

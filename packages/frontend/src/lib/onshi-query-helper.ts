@@ -5,12 +5,14 @@ import { pad } from "./pad";
 export function onshi_query_from_hoken(
   hoken: Shahokokuho | Koukikourei,
   birthdate: string,
-  confirmationDate: string): OnshiKakuninQuery {
+  confirmationDate: string,
+  limitAppConsFlag?: string): OnshiKakuninQuery {
   const base = {
     birthdate: birthdate.replaceAll("-", ""),
     confirmationDate: confirmationDate.replaceAll("-", ""),
     kigou: undefined,
-    edaban: undefined
+    edaban: undefined,
+    limitAppConsFlag: limitAppConsFlag ?? "1",
   };
   if (hoken instanceof Shahokokuho) {
     return Object.assign(base, {

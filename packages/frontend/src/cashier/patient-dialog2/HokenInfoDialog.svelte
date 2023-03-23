@@ -16,8 +16,6 @@
   import api from "@/lib/api";
   import { editHoken } from "./edit-hoken";
   import { dateToSql } from "@/lib/util";
-  import { pad } from "@/lib/pad";
-  import { onshiConfirm } from "@/lib/onshi-confirm";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
 
