@@ -10,7 +10,7 @@
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
-  import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
+  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import StartVisitDialog from "./StartVisitDialog.svelte";
 

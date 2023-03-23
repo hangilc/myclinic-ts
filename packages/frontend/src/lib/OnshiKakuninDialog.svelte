@@ -4,7 +4,7 @@
   import { convertHankakuKatakanaToZenkakuHiraKana } from "@/lib/zenkaku";
   import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
-  import { onshiConfirm, type OnshiKakuninQuery } from "./lib/onshi-confirm";
+  import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
 
   export let destroy: () => void;
   export let query: OnshiKakuninQuery;

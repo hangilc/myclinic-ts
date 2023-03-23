@@ -8,6 +8,7 @@
   import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
+  import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
 
   let selectPatientLink: HTMLAnchorElement;
 
@@ -68,6 +69,15 @@
       },
     });
   }
+
+  function doOnshiConfirmForm() {
+    const d: OnshiKakuninFormDialog = new OnshiKakuninFormDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy()
+      }
+    });
+  }
 </script>
 
 <ServiceHeader title="診察">
@@ -86,6 +96,7 @@
     </Popup>
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
+    <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
   </svelte:fragment>
 </ServiceHeader>
 

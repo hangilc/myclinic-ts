@@ -16,7 +16,7 @@
   } from "@/lib/hoken-rep";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
-  import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
+  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import { pad } from "@/lib/pad";
   import type { OnshiResult } from "onshi-result";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";

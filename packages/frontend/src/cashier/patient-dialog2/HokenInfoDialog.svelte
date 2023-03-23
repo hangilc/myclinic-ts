@@ -19,7 +19,7 @@
   import { pad } from "@/lib/pad";
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
-  import OnshiKakuninDialog from "@/OnshiKakuninDialog.svelte";
+  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
 
   export let data: PatientData;
   export let hoken: Hoken;
