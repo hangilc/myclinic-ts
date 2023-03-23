@@ -142,6 +142,16 @@ export class Hoken {
     );
   }
 
+  get validUpto(): string {
+    return Hoken.fold(
+      this.value,
+      (h) => h.validUpto,
+      (h) => h.validUpto,
+      (h) => h.validUpto,
+      (h) => h.validUpto,
+    );
+  }
+
   get hokenshaBangou(): string {
     return Hoken.fold(
       this.value,

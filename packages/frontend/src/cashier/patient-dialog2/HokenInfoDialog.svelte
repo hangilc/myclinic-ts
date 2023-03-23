@@ -75,11 +75,18 @@
   async function doOnshiConfirm(hoken: Hoken) {
     const value = hoken.value;
     if (value instanceof Shahokokuho || value instanceof Koukikourei) {
+      let confirmDate: string;
+      if( hoken.validUpto === "0000-00-00" ){
+        confirmDate = dateToSql(new Date());
+      } else {
+        confirmDate = hoken.validUpto;
+      }
       const query = onshi_query_from_hoken(
         value,
         patient.birthday,
-        hoken.validFrom
+        confirmDate,
       );
+      console.log("query", query);
       const d: OnshiKakuninDialog = new OnshiKakuninDialog({
         target: document.body,
         props: {
