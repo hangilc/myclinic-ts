@@ -122,4 +122,10 @@
     max-height: 300px;
     overflow-y: auto;
   }
+
+  .ok-result {
+    margin-bottom: 10px;
+    border: 1px solid green;
+    padding: 4px;
+  }
 </style>

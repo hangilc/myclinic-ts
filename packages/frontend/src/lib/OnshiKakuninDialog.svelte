@@ -5,6 +5,7 @@
   import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
   import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
+  import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
 
   export let destroy: () => void;
   export let query: OnshiKakuninQuery;
@@ -61,7 +62,8 @@
       <div class="result-wrapper">
         {#each queryResult.resultList as r}
           <div class="query-result">
-            <div>
+            <OnshiKakuninFormItem result={r} />
+            <!-- <div>
               <span>氏名</span>
               <span>{r.name.replace("　", " ")}</span>
             </div>
@@ -138,7 +140,7 @@
                 <span>限度額適用</span>
                 <span>{data.kind ?? ""}</span>
               </div>
-            {/if}
+            {/if} -->
           </div>
         {/each}
       </div>
@@ -197,5 +199,6 @@
   .result-wrapper {
     max-height: 300px;
     overflow-y: auto;
+    padding: 6px;
   }
 </style>
