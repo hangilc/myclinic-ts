@@ -23,6 +23,11 @@ export function toSqlDateTime(s: string): string {
   return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss}`;
 }
 
+// YYYY-MM-DD hh:mm:ss => YYYYMMDDhhmmss
+export function fromSqlDateTime(s: string): string {
+  return s.replaceAll("-", "");
+}
+
 export function toOptSqlDateTime(s: string | undefined) : string | undefined {
   if( s == undefined ){
     return undefined;
@@ -36,6 +41,10 @@ export function toSqlDate(s: string): string {
   const MM = pad(s.substring(4, 6), 2, "0");
   const DD = pad(s.substring(6, 8), 2, "0");
   return `${YYYY}-${MM}-${DD}`;
+}
+
+export function fromSqlDate(s: string): string {
+  return s.replaceAll("-", "");
 }
 
 export function toOptSqlDate(s: string | undefined) : string | undefined {
