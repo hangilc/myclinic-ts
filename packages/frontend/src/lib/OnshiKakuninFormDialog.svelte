@@ -17,6 +17,7 @@
   let result: OnshiResult | undefined = undefined;
 
   async function doConfirm() {
+    result = undefined;
     const q: OnshiKakuninQuery = {
       hokensha,
       hihokensha,
@@ -30,7 +31,7 @@
   }
 </script>
 
-<Dialog {destroy} title="オンライン資格確認フォーム">
+<Dialog {destroy} title="オンライン資格確認フォーム" styleWidth="320px">
   <form class="form">
     <span class="required">保険者番号</span>
     <input type="text" bind:value={hokensha} />
@@ -74,6 +75,12 @@
             <OnshiKakuninFormItem result={item} />
           {/each}
         </div>
+      {:else}
+        <div class="error-result">
+          <div>資格確認失敗</div>
+          <div>{result.messageBody.qualificationValidity ?? ""}</div>
+          <div>{result.messageBody.processingResultMessage ?? ""}</div>
+        </div>
       {/if}
     </div>
   {/if}
@@ -112,5 +119,7 @@
   .result {
     margin-top: 10px;
     padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
   }
 </style>
