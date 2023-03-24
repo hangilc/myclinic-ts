@@ -31,7 +31,7 @@
   }
 </script>
 
-<Dialog {destroy} title="オンライン資格確認フォーム" styleWidth="320px">
+<Dialog {destroy} title="オンライン資格確認フォーム" styleWidth="400px">
   <form class="form">
     <span class="required">保険者番号</span>
     <input type="text" bind:value={hokensha} />
