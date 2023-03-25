@@ -1,4 +1,4 @@
-import { toSqlDate, toSqlDateTime } from "./util";
+import { onshiDateToSqlDate, onshiDateTimeToSqlDateTime } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { ReferenceClassificationLabel, ReferenceClassification, SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
 
@@ -23,12 +23,12 @@ export class MessageHeader {
 
   // オンライン資格確認システムにて処理が実行された日時 (YYYY-MM-DD HH:mm:ss)
   get processExecutionTime(): string {
-    return toSqlDateTime(this.orig.ProcessExecutionTime);
+    return onshiDateTimeToSqlDateTime(this.orig.ProcessExecutionTime);
   }
 
   // 保険資格を確認する日付
   get qualificationConfirmationDate(): string {
-    return toSqlDate(this.orig.QualificationConfirmationDate);
+    return onshiDateToSqlDate(this.orig.QualificationConfirmationDate);
   }
 
   // 保険医療機関について定められた10桁のコード

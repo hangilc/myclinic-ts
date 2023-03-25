@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type {
-    VisitEx,
-    Shahokokuho,
-    Koukikourei,
-    Kouhi,
-    Roujin,
-    Patient,
+  import {
+    type VisitEx,
+    type Shahokokuho,
+    type Koukikourei,
+    type Kouhi,
+    type Roujin,
+    type Patient,
+    dateToSqlDate,
   } from "myclinic-model";
   import {
     hokenRep,
@@ -19,6 +20,7 @@
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import type { OnshiResult } from "onshi-result";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  import HokenChoiceDialog from "./HokenChoiceDialog.svelte";
 
   export let visit: VisitEx;
   export let onshiConfirmed: boolean | undefined = undefined;
@@ -35,11 +37,25 @@
   async function onDispClick() {
     const patientId = visit.patient.patientId;
     const at = new Date(visit.visitedAt);
-    shahoOpt = await resolveShahokokuho(patientId, at);
-    roujinOpt = await resolveRoujin(patientId, at);
-    koukiOpt = await resolveKoukikourei(patientId, at);
-    kouhiList = await resolveKouhiList(patientId, at);
-    showHokenChoice = true;
+    const shahoOpt = await resolveShahokokuho(patientId, at);
+    const roujinOpt = await resolveRoujin(patientId, at);
+    const koukiOpt = await resolveKoukikourei(patientId, at);
+    const kouhiList = await resolveKouhiList(patientId, at);
+    const d: HokenChoiceDialog = new HokenChoiceDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        shahoOpt,
+        roujinOpt,
+        koukiOpt,
+        kouhiList,
+        onshiConfirmed,
+        birthdate: visit.patient.birthday,
+        visitDate: dateToSqlDate(visit.visitedAtAsDate),
+        visitId: visit.visitId,
+      }
+    })
+    // showHokenChoice = true;
   }
 
   async function resolveShahokokuho(
@@ -145,22 +161,22 @@
     closeHokenDialog();
   }
 
-  async function onshiConfirm(hoken: Shahokokuho | Koukikourei) {
-    const query = await onshi_query_from_hoken(
-      hoken,
-      visit.patient.birthday.replaceAll("-", ""),
-      visit.visitedAt.substring(0, 10).replaceAll("-", "")
-    );
-    const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        query,
-        onDone: (result: OnshiResult | undefined) =>
-          onOnshiConfirmDone(result, hoken),
-      },
-    });
-  }
+  // async function onshiConfirm(hoken: Shahokokuho | Koukikourei) {
+  //   const query = await onshi_query_from_hoken(
+  //     hoken,
+  //     visit.patient.birthday.replaceAll("-", ""),
+  //     visit.visitedAt.substring(0, 10).replaceAll("-", "")
+  //   );
+  //   const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       query,
+  //       onDone: (result: OnshiResult | undefined) =>
+  //         onOnshiConfirmDone(result, hoken),
+  //     },
+  //   });
+  // }
 
   function onOnshiConfirmDone(
     result: OnshiResult | undefined,
@@ -209,7 +225,7 @@
   {hokenRep(visit)}
 </div>
 
-{#if showHokenChoice}
+<!-- {#if showHokenChoice}
   <Dialog destroy={closeHokenDialog} title="保険選択">
     <div>
       {#if shahoOpt != null}
@@ -252,7 +268,7 @@
       <button on:click={closeHokenDialog}>キャンセル</button>
     </div>
   </Dialog>
-{/if}
+{/if} -->
 
 <style>
   .disp {

@@ -1,4 +1,4 @@
-import { toSqlDate } from "./util";
+import { onshiDateToSqlDate } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { isLimitApplicationCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel } from "./codes";
 
@@ -41,7 +41,7 @@ export class QualificationConfirmSearchInfo {
 
   // 券面の生年月日 (YYYY-MM-DD)
   get birthdate(): string {
-    return toSqlDate(this.orig.Birthdate);
+    return onshiDateToSqlDate(this.orig.Birthdate);
   }
 
   // 限度額適用認定証の情報について、患者の提供同意を示す区分

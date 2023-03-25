@@ -1,4 +1,4 @@
-import { toOptInt, toOptSqlDate } from "./util";
+import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
 import { castOptStringProp } from "./cast";
 
 interface ElderlyRecipientCertificateInfoInterface {
@@ -17,17 +17,17 @@ export class ElderlyRecipientCertificateInfo {
 
   // 高齢受給者証が交付された日 (YYYY-MM-DD)
   get elderlyRecipientCertificateDate(): string | undefined {
-    return toOptSqlDate(this.orig.ElderlyRecipientCertificateDate);
+    return onshiDateOptToSqlDateOpt(this.orig.ElderlyRecipientCertificateDate);
   }
 
   // 高齢受給者証が有効である最初の日
   get elderlyRecipientValidStartDate(): string | undefined {
-    return toOptSqlDate(this.orig.ElderlyRecipientValidStartDate);
+    return onshiDateOptToSqlDateOpt(this.orig.ElderlyRecipientValidStartDate);
   }
 
   // 高齢受給者証が有効である最後の日
   get elderlyRecipientValidEndDate(): string | undefined {
-    return toOptSqlDate(this.orig.ElderlyRecipientValidEndDate);
+    return onshiDateOptToSqlDateOpt(this.orig.ElderlyRecipientValidEndDate);
   }
 
   // 高齢受給者証に記載されている一部負担金の割合（％）

@@ -2,7 +2,7 @@ import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateIn
 import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
 import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isLimitApplicationCertificateRelatedConsFlgCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, isSpecificDiseasesCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel, SpecificDiseasesCertificateRelatedConsFlg, SpecificDiseasesCertificateRelatedConsFlgLabel } from "./codes";
-import { toOptInt, toOptSqlDate, toOptSqlDateTime, toSqlDate } from "./util";
+import { toOptInt, onshiDateOptToSqlDateOpt, onshiDateTimeOptToSqlDateTimeOpt, onshiDateToSqlDate } from "./util";
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
 export interface ResultOfQualificationConfirmationInterface {
@@ -144,7 +144,7 @@ export class ResultOfQualificationConfirmation {
 
   // 券面の生年月日
   get birthdate(): string {
-    return toSqlDate(this.orig.Birthdate);
+    return onshiDateToSqlDate(this.orig.Birthdate);
   }
 
   // 保険者等に届出されている住所
@@ -159,17 +159,17 @@ export class ResultOfQualificationConfirmation {
 
   // 被保険者証が交付された日 (YYYY-MM-DD)
   get insuredCertificateIssuanceDate(): string | undefined {
-    return toOptSqlDate(this.orig.InsuredCertificateIssuanceDate);
+    return onshiDateOptToSqlDateOpt(this.orig.InsuredCertificateIssuanceDate);
   }
 
   // 被保険者証が有効である最初の日 (YYYY-MM-DD)
   get insuredCardValidDate(): string | undefined {
-    return toOptSqlDate(this.orig.InsuredCardValidDate);
+    return onshiDateOptToSqlDateOpt(this.orig.InsuredCardValidDate);
   }
 
   // 被保険者証が有効である最後の日 (YYYY-MM-DD)
   get insuredCardExpirationDate(): string | undefined {
-    return toOptSqlDate(this.orig.InsuredCardExpirationDate);
+    return onshiDateOptToSqlDateOpt(this.orig.InsuredCardExpirationDate);
   }
 
   // 後期高齢者の一部負担割合（％）
@@ -241,7 +241,7 @@ export class ResultOfQualificationConfirmation {
 
   // 限度額適用認定証の情報について、患者の提供同意が得られた日時 (YYYY-MM-DD HH:mm:ss)
   get limitApplicationCertificateRelatedConsTime(): string | undefined {
-    return toOptSqlDateTime(this.orig.LimitApplicationCertificateRelatedConsTime)
+    return onshiDateTimeOptToSqlDateTimeOpt(this.orig.LimitApplicationCertificateRelatedConsTime)
   }
 
   // 限度額適用認定証関連情報
@@ -267,7 +267,7 @@ export class ResultOfQualificationConfirmation {
 
   // 特定疾病療養受療証の情報について、患者の提供同意が得られた日時 (YYYY-MM-DD HH:mm:ss)
   get specificDiseasesCertificateRelatedConsTime(): string | undefined {
-    return toOptSqlDateTime(this.orig.SpecificDiseasesCertificateRelatedConsTime);
+    return onshiDateTimeOptToSqlDateTimeOpt(this.orig.SpecificDiseasesCertificateRelatedConsTime);
   }
 
   // 特定疾病療養受療証情報リスト

@@ -90,7 +90,6 @@
         props: {
           destroy: () => d.$destroy(),
           query,
-          onDone: _ => {}
         }
       });
     }

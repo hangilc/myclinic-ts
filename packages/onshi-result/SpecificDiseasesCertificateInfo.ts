@@ -1,6 +1,6 @@
 import { isSpecificDiseasesDiseaseCategoryCode, SpecificDiseasesDiseaseCategory, SpecificDiseasesDiseaseCategoryLabel } from "./codes";
 import { castOptStringProp } from "./cast";
-import { toOptInt, toOptSqlDate } from "./util";
+import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
 
 interface SpecificDiseasesCertificateInfoInterface {
   SpecificDiseasesDiseaseCategory: string | undefined;
@@ -31,18 +31,18 @@ export class SpecificDiseasesCertificateInfo {
 
   // 特定疾病療養受療証が交付された日 (YYYY-MM-DD)
   get specificDiseasesCertificateDate(): string | undefined {
-    return toOptSqlDate(this.orig.SpecificDiseasesCertificateDate);
+    return onshiDateOptToSqlDateOpt(this.orig.SpecificDiseasesCertificateDate);
   }
 
   // 特定疾病療養受療証が有効である最初の日
   get specificDiseasesValidStartDate(): string | undefined {
-    return toOptSqlDate(this.orig.SpecificDiseasesValidStartDate);
+    return onshiDateOptToSqlDateOpt(this.orig.SpecificDiseasesValidStartDate);
   }
 
   // 自己負担限度額変更、治癒により証を回収した場合に回収の理由が発生し
   // た日付
   get specificDiseasesValidEndDate(): string | undefined {
-    return toOptSqlDate(this.orig.SpecificDiseasesValidEndDate);
+    return onshiDateOptToSqlDateOpt(this.orig.SpecificDiseasesValidEndDate);
   }
 
   // 1ヶ月あたりの自己負担限度額

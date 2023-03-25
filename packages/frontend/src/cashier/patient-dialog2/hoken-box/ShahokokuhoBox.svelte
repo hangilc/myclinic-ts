@@ -28,7 +28,6 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        onDone: (r) => {},
         query,
       }
     });

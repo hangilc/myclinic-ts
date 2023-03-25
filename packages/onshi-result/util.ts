@@ -13,7 +13,7 @@ export function pad(n: number | string, width: number, c: string = "0"): string 
   return s;
 }
 
-export function toSqlDateTime(s: string): string {
+export function onshiDateTimeToSqlDateTime(s: string): string {
   const YYYY = s.substring(0, 4);
   const MM = pad(s.substring(4, 6), 2, "0");
   const DD = pad(s.substring(6, 8), 2, "0");
@@ -28,15 +28,15 @@ export function fromSqlDateTime(s: string): string {
   return s.replaceAll("-", "");
 }
 
-export function toOptSqlDateTime(s: string | undefined) : string | undefined {
+export function onshiDateTimeOptToSqlDateTimeOpt(s: string | undefined) : string | undefined {
   if( s == undefined ){
     return undefined;
   } else {
-    return toSqlDateTime(s);
+    return onshiDateTimeToSqlDateTime(s);
   }
 }
 
-export function toSqlDate(s: string): string {
+export function onshiDateToSqlDate(s: string): string {
   const YYYY = s.substring(0, 4);
   const MM = pad(s.substring(4, 6), 2, "0");
   const DD = pad(s.substring(6, 8), 2, "0");
@@ -47,11 +47,11 @@ export function fromSqlDate(s: string): string {
   return s.replaceAll("-", "");
 }
 
-export function toOptSqlDate(s: string | undefined) : string | undefined {
+export function onshiDateOptToSqlDateOpt(s: string | undefined) : string | undefined {
   if( s == undefined ){
     return undefined;
   } else {
-    return toSqlDate(s);
+    return onshiDateToSqlDate(s);
   }
 }
 

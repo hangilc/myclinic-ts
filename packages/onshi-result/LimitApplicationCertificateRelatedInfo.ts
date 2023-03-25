@@ -1,6 +1,6 @@
 import { isLimitApplicationCertificateClassificationCode, isLimitApplicationCertificateClassificationFlagCode, LimitApplicationCertificateClassification, LimitApplicationCertificateClassificationFlag, LimitApplicationCertificateClassificationFlagLabel, LimitApplicationCertificateClassificationLabel } from "./codes";
 import { castOptStringProp } from "./cast";
-import { toOptSqlDate } from "./util";
+import { onshiDateOptToSqlDateOpt } from "./util";
 
 interface LimitApplicationCertificateRelatedInfoInterface {
   LimitApplicationCertificateClassification: string | undefined;
@@ -49,23 +49,23 @@ export class LimitApplicationCertificateRelatedInfo {
 
   // 限度額適用認定証が交付された日
   get limitApplicationCertificateDate(): string | undefined {
-    return toOptSqlDate(this.orig.LimitApplicationCertificateDate);
+    return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateDate);
   }
 
   // 限度額適用認定証が有効である最初の日
   get limitApplicationCertificateValidStartDate(): string | undefined {
-    return toOptSqlDate(this.orig.LimitApplicationCertificateValidStartDate);
+    return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateValidStartDate);
   }
 
   // 限度額適用認定証が有効である最後の日
   get limitApplicationCertificateValidEndDate(): string | undefined {
-    return toOptSqlDate(this.orig.LimitApplicationCertificateValidEndDate);
+    return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateValidEndDate);
   }
 
   // 過去12か月で区分Ⅱの交付を受けていた期間の入院日数が90日を超えた場
   // 合に、申請日の翌月1日が設定される。
   get limitApplicationCertificateLongTermDate(): string | undefined {
-    return toOptSqlDate(this.orig.LimitApplicationCertificateLongTermDate);
+    return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateLongTermDate);
   } 
 
   static cast(arg: any): LimitApplicationCertificateRelatedInfo {
