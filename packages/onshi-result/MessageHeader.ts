@@ -2,7 +2,7 @@ import { toSqlDate, toSqlDateTime } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { ReferenceClassificationLabel, ReferenceClassification, SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
 
-interface MessageHeaderInterface {
+export interface MessageHeaderInterface {
   ProcessExecutionTime: string;
   QualificationConfirmationDate: string;
   MedicalInstitutionCode: string;
@@ -44,7 +44,7 @@ export class MessageHeader {
   // 患者の提示した券情報の区分
   get referenceClassification(): ReferenceClassificationLabel {
     const k: string = this.orig.ReferenceClassification;
-    if( isReferenceClassificationCode(k) ){
+    if (isReferenceClassificationCode(k)) {
       return ReferenceClassification[k];
     } else {
       throw new Error("Invalid ReferenceClassification value: " + k);
@@ -54,7 +54,7 @@ export class MessageHeader {
   // 処理結果区分
   get segmentOfResult(): SegmentOfResultLabel {
     const k = this.orig.SegmentOfResult;
-    if( isSegmentOfResultCode(k) ){
+    if (isSegmentOfResultCode(k)) {
       return SegmentOfResult[k];
     } else {
       throw new Error("Invalid SegmentOfResult value: " + k);
@@ -74,11 +74,15 @@ export class MessageHeader {
   // 結果ファイル出力用の文字コードを指定する識別コード
   get characterCodeIdentifier(): CharacterCodeIdentifierLabel {
     const k: string = this.orig.CharacterCodeIdentifier;
-    if( isCharacterCodeIdentifierCode(k) ){
+    if (isCharacterCodeIdentifierCode(k)) {
       return CharacterCodeIdentifier[k];
     } else {
       throw new Error("Invalid CharacterCodeIdentifier: " + k);
     }
+  }
+
+  toJsonObject(): object {
+    return this.orig;
   }
 
   static cast(arg: any): MessageHeader {

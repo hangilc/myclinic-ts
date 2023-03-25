@@ -4,7 +4,7 @@ import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, PrescriptionIssueSelectLabel, ProcessingResultStatus, ProcessingResultStatusLabel, QualificationValidity, QualificationValidityLabel } from "./codes";
 
-interface MessageBodyInterface {
+export interface MessageBodyInterface {
   ProcessingResultStatus: string;
   ResultList: ResultOfQualificationConfirmation[];
   QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
@@ -101,6 +101,10 @@ export class MessageBody {
     } else {
       return "";
     }
+  }
+
+  toJsonObject(): object {
+    return this.orig;
   }
 
   static cast(arg: any): MessageBody {

@@ -10,6 +10,13 @@ export class XmlMsg {
     this.messageBody = messageBody;
   }
 
+  toJsonObject(): object {
+    return {
+      MessageHeader: this.messageHeader.toJsonObject(),
+      MessageBody: this.messageBody.toJsonObject(),
+    }
+  }
+
   static cast(arg: any): XmlMsg {
     if (typeof arg === "object") {
       return new XmlMsg(

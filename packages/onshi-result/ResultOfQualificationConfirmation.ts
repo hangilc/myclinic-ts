@@ -5,7 +5,7 @@ import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCar
 import { toOptInt, toOptSqlDate, toOptSqlDateTime, toSqlDate } from "./util";
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
-interface ResultOfQualificationConfirmationInterface {
+export interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
   Name: string;
   Sex1: string;

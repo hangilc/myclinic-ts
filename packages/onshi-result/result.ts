@@ -37,6 +37,12 @@ export class OnshiResult {
     return this.messageBody.resultList;
   }
 
+  toJsonObject(): object {
+    return {
+      XmlMsg: this.xmlMsg.toJsonObject(),
+    }
+  }
+
   static cast(arg: any): OnshiResult {
     return new OnshiResult(
       XmlMsg.cast(arg.XmlMsg),
