@@ -13,11 +13,21 @@
   import { afterUpdate } from "svelte";
   import { currentVisitId } from "../ExamVars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
+  import api from "@/lib/api";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
   export let onLast: () => void;
   let showNewTextEditor = false;
+  let onshiConfirmed: boolean | undefined = undefined;
+
+  probeOnshi();
+
+  async function probeOnshi() {
+    const onshi: m.Onshi | undefined = await api.findOnshi(visit.visitId);
+    onshiConfirmed = !!onshi;
+    console.log("onshiConfirmed", onshiConfirmed);
+  }
 
   function createNewText(): m.Text {
     return new m.Text(0, visit.visitId, "");
@@ -52,7 +62,7 @@
       {/if}
     </div>
     <div slot="right">
-      <Hoken bind:visit />
+      <Hoken bind:visit {onshiConfirmed}/>
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
       <DrugWrapper {visit} />

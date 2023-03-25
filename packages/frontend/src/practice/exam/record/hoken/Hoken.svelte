@@ -17,11 +17,11 @@
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
-  import { pad } from "@/lib/pad";
   import type { OnshiResult } from "onshi-result";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
 
   export let visit: VisitEx;
+  export let onshiConfirmed: boolean | undefined = undefined;
   let shahoOpt: [Shahokokuho, boolean] | null = null;
   let roujinOpt: [Roujin, boolean] | null = null;
   let koukiOpt: [Koukikourei, boolean] | null = null;
@@ -166,22 +166,59 @@
     result: OnshiResult | undefined,
     hoken: Shahokokuho | Koukikourei
   ) {}
-
 </script>
 
-<div class="disp" on:click={onDispClick}>{hokenRep(visit)}</div>
+<div class="disp" on:click={onDispClick}>
+  {#if (visit.hoken.shahokokuho || visit.hoken.koukikourei) && onshiConfirmed !== undefined}
+    {#if onshiConfirmed}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="green"
+        class="w-6 h-6"
+        width="18"
+        style="position:relative;top:3px;right:-3px"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    {:else}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="red"
+        class="w-6 h-6"
+        width="18"
+        style="position:relative;top:3px;right:-3px"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    {/if}
+  {/if}
+  {hokenRep(visit)}
+</div>
 
 {#if showHokenChoice}
   <Dialog destroy={closeHokenDialog} title="保険選択">
     <div>
       {#if shahoOpt != null}
-      {@const shaho = shahoOpt[0]}
+        {@const shaho = shahoOpt[0]}
         <div>
           <input type="checkbox" bind:checked={shahoOpt[1]} />
           {shahokokuhoRep(shaho)}
-          <a
-            href="javascript:void(0)"
-            on:click={() => onshiConfirm(shaho)}>資格確認</a
+          <a href="javascript:void(0)" on:click={() => onshiConfirm(shaho)}
+            >資格確認</a
           >
         </div>
       {/if}
@@ -192,7 +229,7 @@
         </div>
       {/if}
       {#if koukiOpt != null}
-      {@const koukikourei = koukiOpt[0]}
+        {@const koukikourei = koukiOpt[0]}
         <div>
           <input type="checkbox" bind:checked={koukiOpt[1]} />
           {koukikoureiRep(koukiOpt[0].futanWari)}

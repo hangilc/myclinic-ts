@@ -1,10 +1,13 @@
 <script lang="ts">
-  import type { Shahokokuho } from "myclinic-model";
+  import { dateToSqlDate, type Shahokokuho } from "myclinic-model";
   import { Hoken } from "../hoken";
   import * as kanjidate from "kanjidate";
+  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
 
   export let shahokokuho: Shahokokuho;
   export let usageCount: number;
+  export let birthdate: string;
 
   function formatValidFrom(sqldate: string): string {
     return kanjidate.format(kanjidate.f2, sqldate);
@@ -17,6 +20,19 @@
       return kanjidate.format(kanjidate.f2, sqldate);
     }
   }
+
+  function doOnshiConfirm() {
+    const confirmDate = shahokokuho.validUpto = "0000-00-00" ? dateToSqlDate(new Date()): shahokokuho.validUpto;
+    const query = onshi_query_from_hoken(shahokokuho, birthdate, confirmDate);
+    const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        onDone: (r) => {},
+        query,
+      }
+    });
+  }
 </script>
 
 <sapn data-cy="rep">{Hoken.shahokokuhoRep(shahokokuho)}</sapn>
@@ -28,3 +44,4 @@
 【期限開始】<span data-cy="valid-from">{formatValidFrom(shahokokuho.validFrom)}</span>
 【期限終了】<span data-cy="valid-upto">{formatValidUpto(shahokokuho.validUpto)}</span>
 【使用回数】<span data-cy="usage-count">{usageCount}</span>回
+<a href="javascript:;" on:click={doOnshiConfirm}>資格確認</a>

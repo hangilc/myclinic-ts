@@ -1282,6 +1282,11 @@ export default {
     return get("get-onshi", { "visit-id": visitId.toString() }, m.Onshi.cast);
   },
 
+  findOnshi(visitId: number): Promise<m.Onshi | undefined> {
+    return get("find-onshi", { "visit-id": visitId.toString() }, castOption(m.Onshi.cast))
+      .then(o => o || undefined);
+  },
+
   enterOnshi(onshi: m.Onshi): Promise<boolean> {
     return post("enter-onshi", onshi, {}, castBoolean);
   },
@@ -1292,6 +1297,10 @@ export default {
 
   deleteOnshi(visitId: number): Promise<boolean> {
     return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
+  },
+
+  batchProbeOnshi(visitIds: number[]): Promise<number[]> {
+    return post("batch-probe-onshi", visitIds, {}, castList(castNumber));
   },
 
   dictGet(key: string): Promise<string> {

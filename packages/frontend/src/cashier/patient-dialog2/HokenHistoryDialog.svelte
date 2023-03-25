@@ -8,7 +8,6 @@
   import KoukikoureiBox from "./hoken-box/KoukikoureiBox.svelte";
   import RoujinBox from "./hoken-box/RoujinBox.svelte";
   import KouhiBox from "./hoken-box/KouhiBox.svelte";
-  import EditHokenDialog from "./EditHokenDialog.svelte";
   import { confirm } from "@/lib/confirm-call";
   import { deleteHoken } from "./delete-hoken";
   import { editHoken } from "./edit-hoken";
@@ -72,7 +71,7 @@
           <div class={`hoken-box ${hokenType}`} data-cy="hoken-box" 
             data-key={hoken.key}>
             {#if hokenType === "shahokokuho"}
-              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
+              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} birthdate={patient.birthday}/>
             {:else if hokenType === "koukikourei"}
               <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
             {:else if hokenType === "roujin"}
