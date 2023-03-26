@@ -6,7 +6,6 @@
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";
-  import api from "@/lib/api";
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
@@ -147,8 +146,6 @@
         onEnter: (visit) => exit()
       }
     });
-    // await api.startVisit(p.patientId, new Date());
-    // exit();
   }
 
   function exit(): void {

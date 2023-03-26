@@ -17,6 +17,7 @@
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
   import { confirm } from "@/lib/confirm-call";
+  import { checkKoukikoureiOnshiCompat, checkShahokokuhoOnshiCompat } from "@/lib/check-hoken-onshi-compat";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -135,6 +136,12 @@
           );
           const result = await onshiConfirm(q);
           if (result.isValid && result.resultList.length === 1) {
+            const r = result.resultList[0];
+            const err = checkShahokokuhoOnshiCompat(shahokokuhoOpt, r);
+            if( err ){
+              alert(err);
+              return;
+            }
             shahokokuhoOnshi = result;
           } else {
             error =
@@ -157,6 +164,8 @@
           );
           const result = await onshiConfirm(q);
           if (result.isValid && result.resultList.length === 1) {
+            const r = result.resultList[0];
+            const err = checkKoukikoureiOnshiCompat(koukikoureiOpt, r);
             koukikoureiOnshi = result;
           } else {
             error =
@@ -231,7 +240,11 @@
     <div class="error">{error}</div>
   {/if}
   <div class="commands">
-    <a href="javascript:;" class="skip-onshi-confirm-link" on:click={doEnterWithoutOnshiKakunin}>資格確認なしで入力</a>
+    <a
+      href="javascript:;"
+      class="skip-onshi-confirm-link"
+      on:click={doEnterWithoutOnshiKakunin}>資格確認なしで入力</a
+    >
     {#if needOnshiConfirm}
       <button on:click={doOnshiKakunin}>資格確認</button>
     {:else}
