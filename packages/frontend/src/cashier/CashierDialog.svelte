@@ -5,7 +5,8 @@
   import {
     type Meisai,
     type Charge,
-    type Patient, Payment,
+    type Patient,
+    Payment,
     type Visit,
     dateToSqlDateTime,
     VisitEx,
@@ -19,14 +20,18 @@
   export let meisai: Meisai;
   export let charge: Charge;
   export let destroy: () => void;
-  export let receiptHook: (data: ReceiptDrawerData) => void = _ => {};
+  export let receiptHook: (data: ReceiptDrawerData) => void = (_) => {};
 
   function patientLine(p: Patient): string {
     return `(${p.patientId}) ${p.fullName()} ${p.fullYomi()}`;
   }
 
   async function doFinishCashier() {
-    let payment = new Payment(visit.visitId, charge.charge, dateToSqlDateTime(new Date()));
+    let payment = new Payment(
+      visit.visitId,
+      charge.charge,
+      dateToSqlDateTime(new Date())
+    );
     await api.finishCashier(payment);
     destroy();
   }
@@ -37,7 +42,8 @@
     receipt.visitDate = kanjidate.format(kanjidate.f2, visit.visitedAtAsDate);
     receipt.issueDate = kanjidate.format(kanjidate.f2, new Date());
     receipt.hoken = hokenRep(visit);
-    receipt.futanWari = meisai.futanWari === 10 ? "" : meisai.futanWari.toString();
+    receipt.futanWari =
+      meisai.futanWari === 10 ? "" : meisai.futanWari.toString();
     receipt.setMeisai(meisai);
     receipt.charge = charge.charge;
     receiptHook(receipt);
@@ -52,7 +58,7 @@
         previewScale: 3,
         kind: "receipt",
         ops,
-      }
+      },
     });
   }
 </script>
@@ -66,28 +72,34 @@
       {kanjidate.format(kanjidate.f9, visit.visitedAt)}
     </div>
     <div class="detail-wrapper">
-      <div class="detail">
-        <div class="col1" />
-        <div class="col2" />
-        {#each meisai.items as item}
-          <div class="item-row">
-            <div class="item-cell1 header">{item.section.label}</div>
-            <div class="item-cell2" />
-          </div>
-          {#each item.entries as entry}
+      {#if meisai.items.length > 0}
+        <div class="detail">
+          <div class="col1" />
+          <div class="col2" />
+          {#each meisai.items as item}
             <div class="item-row">
-              <div class="item-cell1">{entry.label}</div>
-              <div class="item-cell2">
-                {entry.tanka.toLocaleString()}x{entry.count}={entry.totalTen.toLocaleString()}
-              </div>
+              <div class="item-cell1 header">{item.section.label}</div>
+              <div class="item-cell2" />
             </div>
+            {#each item.entries as entry}
+              <div class="item-row">
+                <div class="item-cell1">{entry.label}</div>
+                <div class="item-cell2">
+                  {entry.tanka.toLocaleString()}x{entry.count}={entry.totalTen.toLocaleString()}
+                </div>
+              </div>
+            {/each}
           {/each}
-        {/each}
-      </div>
+        </div>
+      {:else}
+        明細なし
+      {/if}
     </div>
   </div>
   <div class="summary">
-    <div>総点：{meisai.totalTen.toLocaleString()}点、、負担割：{meisai.futanWari}割</div>
+    <div>
+      総点：{meisai.totalTen.toLocaleString()}点、、負担割：{meisai.futanWari}割
+    </div>
     <div class="charge">請求額：{charge.charge.toLocaleString()}円</div>
   </div>
   <div class="commands">
@@ -111,14 +123,17 @@
     max-height: 200px;
     overflow-y: auto;
     padding: 10px;
+    border: 1px solid gray;
+    margin: 10px 0;
+    padding: 4px 10px;
   }
 
   .detail {
     display: table;
-    border-top: 1px solid black;
-    border-bottom: 1px solid black;
-    margin: 10px 0;
-    padding: 10px 0;
+    /* border-top: 1px solid black;
+    border-bottom: 1px solid black; */
+    /* margin: 10px 0; */
+    /* padding: 10px 0; */
   }
 
   .detail .col1 {

@@ -89,7 +89,7 @@
       <div>
         <input type="checkbox" bind:checked={koukiOpt[1]} />
         {koukikoureiRep(koukiOpt[0].futanWari)}
-        {#if !onshiConfirmed}
+        {#if koukiOpt[1] && !onshiConfirmed}
           <a
             href="javascript:void(0)"
             on:click={() => doOnshiConfirm(koukikourei)}>資格確認</a
