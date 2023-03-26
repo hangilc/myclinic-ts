@@ -9,7 +9,7 @@ let heartBeatSerialId = 0;
 let debug = false;
 
 function log(...msgs: any[]): void {
-  if( debug ){
+  if (debug) {
     console.log(...msgs);
   }
 }
@@ -54,7 +54,7 @@ function connect(): void {
 }
 
 async function drainEvents() {
-  if( isDraining ){
+  if (isDraining) {
     return;
   }
   isDraining = true;
@@ -149,6 +149,9 @@ export const appointTimeUpdated: Writable<m.AppointTime | null> =
   writable(null);
 export const appointTimeDeleted: Writable<m.AppointTime | null> =
   writable(null);
+export const onshiEntered: Writable<m.Onshi | null> = writable(null);
+export const onshiUpdated: Writable<m.Onshi | null> = writable(null);
+export const onshiDeleted: Writable<m.Onshi | null> = writable(null);
 
 export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null);
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> =
@@ -522,6 +525,25 @@ function publishAppEvent(e: m.AppEvent): void {
       }
       break;
     }
+    case "onshi": {
+      const model = m.Onshi.cast(payload);
+      switch (kind) {
+        case "created": {
+          console.log("appevent onshi created", model);
+          onshiEntered.set(model);
+          break;
+        }
+        case "updated": {
+          onshiUpdated.set(model);
+          break;
+        }
+        case "deleted": {
+          onshiDeleted.set(model);
+          break;
+        }
+      }
+      break;
+    }
     case "hotline": {
       switch (kind) {
         case "created": {
@@ -547,7 +569,7 @@ function dispatch(e: any): void {
     const eventIdNotice = e.data;
     const eventId = eventIdNotice.currentEventId
     log("event-id-notice currentEventId", eventId);
-    if( eventId >= nextEventId ){
+    if (eventId >= nextEventId) {
       drainEvents();
     }
     eventIdNoticeEntered.set(eventIdNotice);

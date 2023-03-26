@@ -17,10 +17,12 @@
     appointTimeUpdated,
     appointUpdated,
   } from "@/app-events";
+  import { onDestroy } from "svelte";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
   let unsubs: (() => void)[] = [];
+  onDestroy(() => unsubs.forEach(f => f()));
 
   initColumns(startDate);
 

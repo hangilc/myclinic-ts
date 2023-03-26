@@ -8,8 +8,7 @@
     shahokokuhoRep,
   } from "@/lib/hoken-rep";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
-  import { Onshi, type Kouhi, type Koukikourei, type Roujin, type Shahokokuho } from "myclinic-model";
-  import type { OnshiResult } from "onshi-result";
+  import { HokenIdSet, type Kouhi, type Koukikourei, type Roujin, type Shahokokuho } from "myclinic-model";
   import HokenKakuninDialog from "./HokenKakuninDialog.svelte";
 
   export let destroy: () => void;
@@ -26,7 +25,28 @@
     destroy();
   }
 
-  function doEnter() {}
+  async function doEnter() {
+    const shahokokuhoId = shahoOpt && shahoOpt[1] ? shahoOpt[0].shahokokuhoId : 0;
+    const roujinId = roujinOpt && roujinOpt[1] ? roujinOpt[0].roujinId : 0;
+    const koukikoureiId = koukiOpt && koukiOpt[1] ? koukiOpt[0].koukikoureiId : 0;
+    const kouhiIds = kouhiList.filter(kouhi => kouhi[1]).map(kouhi => kouhi[0].kouhiId);
+    const kouhi1Id = kouhiIds.length > 0 ? kouhiIds[0] : 0;
+    const kouhi2Id = kouhiIds.length > 1 ? kouhiIds[1] : 0;
+    const kouhi3Id = kouhiIds.length > 2 ? kouhiIds[2] : 0;
+    const hokenCount = (shahokokuhoId > 0 ? 1 : 0) + (roujinId > 0 ? 1 : 0) +
+    (koukikoureiId > 0 ? 1 : 0);
+    if( hokenCount > 1 ){
+      alert("Multiple primary hoken selected.");
+      return;
+    } else if( hokenCount === 0 ){
+      await api.clearOnshi(visitId);
+      onshiConfirmed = false;
+    }
+    await api.updateHokenIds(visitId, new HokenIdSet(
+      shahokokuhoId, koukikoureiId, roujinId, kouhi1Id, kouhi2Id, kouhi3Id
+    ));
+    doClose();
+  }
 
   async function doOnshiConfirm(hoken: Shahokokuho | Koukikourei) {
     const query = onshi_query_from_hoken(hoken, birthdate, visitDate);
@@ -35,12 +55,12 @@
       props: {
         destroy: () => d.$destroy(),
         query,
-        onRegister: async (r: OnshiResult) => {
-          await api.enterOnshi(new Onshi(visitId, JSON.stringify(r.origJson)));
+        visitId,
+        onRegister: (r) => {
           onshiConfirmed = true;
-        }
-      }
-    })
+        },
+      },
+    });
   }
 </script>
 
@@ -51,7 +71,7 @@
       <div>
         <input type="checkbox" bind:checked={shahoOpt[1]} />
         {shahokokuhoRep(shaho)}
-        {#if !onshiConfirmed}
+        {#if shahoOpt[1] && !onshiConfirmed}
           <a href="javascript:void(0)" on:click={() => doOnshiConfirm(shaho)}
             >資格確認</a
           >

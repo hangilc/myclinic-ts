@@ -104,7 +104,7 @@
     }
     if (onshiResult) {
       try {
-        await api.enterOnshi(
+        await api.setOnshi(
           new Onshi(visit.visitId, JSON.stringify(onshiResult.origJson))
         );
       } catch (e) {

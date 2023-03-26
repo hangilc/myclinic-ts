@@ -5,22 +5,13 @@
     type Koukikourei,
     type Kouhi,
     type Roujin,
-    type Patient,
     dateToSqlDate,
   } from "myclinic-model";
-  import {
-    hokenRep,
-    shahokokuhoRep,
-    roujinRep,
-    koukikoureiRep,
-    kouhiRep,
-  } from "@/lib/hoken-rep";
-  import Dialog from "@/lib/Dialog.svelte";
+  import { hokenRep } from "@/lib/hoken-rep";
   import api from "@/lib/api";
-  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import type { OnshiResult } from "onshi-result";
-  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import HokenChoiceDialog from "./HokenChoiceDialog.svelte";
+  import { onshiDeleted, onshiEntered } from "@/app-events";
 
   export let visit: VisitEx;
   export let onshiConfirmed: boolean | undefined = undefined;
@@ -29,6 +20,28 @@
   let koukiOpt: [Koukikourei, boolean] | null = null;
   let kouhiList: [Kouhi, boolean][] = [];
   let showHokenChoice = false;
+
+  const unsubs: (() => void)[] = [];
+
+  unsubs.push(
+    onshiEntered.subscribe((o) => {
+      if (!o) {
+        return;
+      }
+      if( o.visitId === visit.visitId ){
+        onshiConfirmed = true;
+      }
+    })
+  );
+
+  unsubs.push(onshiDeleted.subscribe((o) => {
+    if( !o ){
+      return;
+    }
+    if( o.visitId === visit.visitId ){
+      onshiConfirmed = false;
+    }
+  }));
 
   function closeHokenDialog(): void {
     showHokenChoice = false;
@@ -53,8 +66,8 @@
         birthdate: visit.patient.birthday,
         visitDate: dateToSqlDate(visit.visitedAtAsDate),
         visitId: visit.visitId,
-      }
-    })
+      },
+    });
     // showHokenChoice = true;
   }
 
@@ -161,23 +174,6 @@
     closeHokenDialog();
   }
 
-  // async function onshiConfirm(hoken: Shahokokuho | Koukikourei) {
-  //   const query = await onshi_query_from_hoken(
-  //     hoken,
-  //     visit.patient.birthday.replaceAll("-", ""),
-  //     visit.visitedAt.substring(0, 10).replaceAll("-", "")
-  //   );
-  //   const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       query,
-  //       onDone: (result: OnshiResult | undefined) =>
-  //         onOnshiConfirmDone(result, hoken),
-  //     },
-  //   });
-  // }
-
   function onOnshiConfirmDone(
     result: OnshiResult | undefined,
     hoken: Shahokokuho | Koukikourei
@@ -224,51 +220,6 @@
   {/if}
   {hokenRep(visit)}
 </div>
-
-<!-- {#if showHokenChoice}
-  <Dialog destroy={closeHokenDialog} title="保険選択">
-    <div>
-      {#if shahoOpt != null}
-        {@const shaho = shahoOpt[0]}
-        <div>
-          <input type="checkbox" bind:checked={shahoOpt[1]} />
-          {shahokokuhoRep(shaho)}
-          <a href="javascript:void(0)" on:click={() => onshiConfirm(shaho)}
-            >資格確認</a
-          >
-        </div>
-      {/if}
-      {#if roujinOpt != null}
-        <div>
-          <input type="checkbox" bind:checked={roujinOpt[1]} />
-          {roujinRep(roujinOpt[0].futanWari)}
-        </div>
-      {/if}
-      {#if koukiOpt != null}
-        {@const koukikourei = koukiOpt[0]}
-        <div>
-          <input type="checkbox" bind:checked={koukiOpt[1]} />
-          {koukikoureiRep(koukiOpt[0].futanWari)}
-          <a
-            href="javascript:void(0)"
-            on:click={() => onshiConfirm(koukikourei)}>資格確認</a
-          >
-        </div>
-      {/if}
-      {#each kouhiList as kouhi}
-        <div>
-          <input type="checkbox" bind:checked={kouhi[1]} />{kouhiRep(
-            kouhi[0].futansha
-          )}
-        </div>
-      {/each}
-    </div>
-    <div class="commands">
-      <button on:click={doEnter}>入力</button>
-      <button on:click={closeHokenDialog}>キャンセル</button>
-    </div>
-  </Dialog>
-{/if} -->
 
 <style>
   .disp {

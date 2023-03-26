@@ -1,14 +1,18 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import type { OnshiKakuninQuery } from "@/lib/onshi-confirm";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import { Onshi } from "myclinic-model";
   import type { OnshiResult } from "onshi-result";
 
   export let destroy: () => void;
   export let query: OnshiKakuninQuery;
+  export let visitId: number;
   export let onRegister: (result: OnshiResult) => void;
   let result: OnshiResult | undefined = undefined;
 
-  function doRegister(r: OnshiResult) {
+  async function doRegister(r: OnshiResult) {
+    await api.setOnshi(new Onshi(visitId, JSON.stringify(r.origJson)));
     destroy();
     onRegister(r);
   }
@@ -16,9 +20,10 @@
 
 <OnshiKakuninDialog {destroy} {query} bind:queryResult={result}>
   <div slot="commands" class="commands">
-    {#if result && result.isValid}
-      {#if result && result.isValid}
-        <button on:click={() => doRegister(result)}>登録</button>
+    {#if result}
+      {@const r = result}
+      {#if r.isValid}
+        <button on:click={() => doRegister(r)}>登録</button>
       {/if}
     {/if}
     <button on:click={destroy}>閉じる</button>

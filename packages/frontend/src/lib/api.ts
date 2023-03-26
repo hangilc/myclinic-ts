@@ -1282,22 +1282,30 @@ export default {
     return get("get-onshi", { "visit-id": visitId.toString() }, m.Onshi.cast);
   },
 
-  findOnshi(visitId: number): Promise<m.Onshi | undefined> {
-    return get("find-onshi", { "visit-id": visitId.toString() }, castOption(m.Onshi.cast))
-      .then(o => o || undefined);
+  async findOnshi(visitId: number): Promise<m.Onshi | undefined> {
+    const o = await get("find-onshi", { "visit-id": visitId.toString() }, castOption(m.Onshi.cast))
+    return o || undefined;
   },
 
-  enterOnshi(onshi: m.Onshi): Promise<boolean> {
-    return post("enter-onshi", onshi, {}, castBoolean);
+  setOnshi(onshi: m.Onshi): Promise<boolean> {
+    return post("set-onshi", onshi, {}, castBoolean);
   },
 
-  updateOnshi(onshi: m.Onshi): Promise<boolean> {
-    return post("update-onshi", onshi, {}, castBoolean);
+  clearOnshi(visitId: number): Promise<boolean> {
+    return get("clear-onshi", { "visit-id": visitId.toString() }, castBoolean);
   },
 
-  deleteOnshi(visitId: number): Promise<boolean> {
-    return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
-  },
+  // enterOnshi(onshi: m.Onshi): Promise<boolean> {
+  //   return post("enter-onshi", onshi, {}, castBoolean);
+  // },
+
+  // updateOnshi(onshi: m.Onshi): Promise<boolean> {
+  //   return post("update-onshi", onshi, {}, castBoolean);
+  // },
+
+  // deleteOnshi(visitId: number): Promise<boolean> {
+  //   return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
+  // },
 
   batchProbeOnshi(visitIds: number[]): Promise<number[]> {
     return post("batch-probe-onshi", visitIds, {}, castList(castNumber));
