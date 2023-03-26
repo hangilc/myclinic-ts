@@ -166,6 +166,10 @@
           if (result.isValid && result.resultList.length === 1) {
             const r = result.resultList[0];
             const err = checkKoukikoureiOnshiCompat(koukikoureiOpt, r);
+            if( err ){
+              alert(err);
+              return;
+            }
             koukikoureiOnshi = result;
           } else {
             error =

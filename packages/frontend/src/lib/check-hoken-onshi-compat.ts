@@ -29,8 +29,8 @@ export function checkShahokokuhoOnshiCompat(shahokokuho: Shahokokuho, r: ResultO
 }
 
 export function checkKoukikoureiOnshiCompat(koukikourei: Koukikourei, r: ResultOfQualificationConfirmation): string | undefined {
-  if( r.insuredPartialContributionRatio !== undefined ){
-    if( koukikourei.futanWari !== r.insuredPartialContributionRatio ){
+  if( r.koukikoureiFutanWari !== undefined ){
+    if( koukikourei.futanWari !== r.koukikoureiFutanWari ){
       return "後期高齢保険の負担割データが一致しません。保険内容を確認してください。";
     }
   }
