@@ -1,0 +1,7 @@
+* How to start cypress test
+    (> npm run test-server:build)
+    > npm run test-server:start
+    > npm run test-client -w packages/frontend
+    > npm run cy:run -w packages/frontend
+    > npm run cy:run -w packages/frontend -- --component
+    
