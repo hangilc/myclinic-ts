@@ -208,8 +208,9 @@
       {#if shahokokuhoOpt != undefined}
         <div>
           <label>
-            <input type="checkbox" bind:checked={shahokokuhoChecked} />
-            {shahokokuhoRep(shahokokuhoOpt)}
+            <input type="checkbox" bind:checked={shahokokuhoChecked} data-cy="hoken-input"
+              data-shahokokuho-id={shahokokuhoOpt.shahokokuhoId}/>
+            <span data-cy="hoken-label">{shahokokuhoRep(shahokokuhoOpt)}</span>
           </label>
           {#if shahokokuhoOnshi}
             <span class="onshi-confirmed-notice">資格確認済</span>
@@ -219,8 +220,9 @@
       {#if koukikoureiOpt != undefined}
         <div>
           <label>
-            <input type="checkbox" bind:checked={koukikoureiChecked} />
-            {koukikoureiRep(koukikoureiOpt.futanWari)}
+            <input type="checkbox" bind:checked={koukikoureiChecked} data-cy="hoken-input"
+              data-koukikourei-id={koukikoureiOpt.koukikoureiId}/>
+            <span data-cy="hoken-label">{koukikoureiRep(koukikoureiOpt.futanWari)}</span>
           </label>
           {#if koukikoureiOnshi}
             <span class="onshi-confirmed-notice">資格確認済</span>
@@ -230,8 +232,8 @@
       {#each kouhiList as kouhi (kouhi.kouhiId)}
         <div>
           <label>
-            <input type="checkbox" checked />
-            {kouhiRep(kouhi.futansha)}
+            <input type="checkbox" checked data-cy="kouhi-input" data-kouhi-id={kouhi.kouhiId}/>
+            <span data-cy="kouhi-label">{kouhiRep(kouhi.futansha)}</span>
           </label>
         </div>
       {/each}
