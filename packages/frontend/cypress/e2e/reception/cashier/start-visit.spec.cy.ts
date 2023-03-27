@@ -1,4 +1,4 @@
-import { Shahokokuho, type Patient } from "myclinic-model";
+import { Shahokokuho, Visit, type Patient } from "myclinic-model";
 import { newPatient, openPatientDialog, patientDialogClose } from "./misc";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { listWqueueFull } from "./req";
@@ -43,6 +43,22 @@ describe("Start Visit", () => {
         cy.get("button").contains("はい").click();
       })
       dialogClose("確認");
-  });
+      dialogClose("診察受付");
+      dialogClose("患者情報");
+      listWqueueFull().then((list) => {
+        const wqs = list.filter(wq => wq.patient.patientId === patient.patientId);
+        expect(wqs.length).to.satisfy((i: number) => i > 0);
+        const wq = wqs[wqs.length - 1];
+        cy.request("GET", Cypress.env("API") + "/get-visit?visit-id=" + wq.visitId)
+          .then((response) => Visit.cast(response.body)).as("visit")
+      });
+      cy.get<Visit>("@visit").then((visit) => {
+        cy.get<Shahokokuho>("@hoken").then((shahokokuho) => {
+          console.log(visit);
+          console.log(shahokokuho);
+          expect(visit.shahokokuhoId).to.be.equal(shahokokuho.shahokokuhoId);
+        });
+      });
+    });
   });
 })
