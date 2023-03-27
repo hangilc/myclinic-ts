@@ -135,6 +135,8 @@
             dateToSql(at)
           );
           const result = await onshiConfirm(q);
+          console.log("result", result);
+          console.log("isValid", result.isValid);
           if (result.isValid && result.resultList.length === 1) {
             const r = result.resultList[0];
             const err = checkShahokokuhoOnshiCompat(shahokokuhoOpt, r);
@@ -150,7 +152,7 @@
               (result.messageBody.processingResultMessage ?? "");
           }
         } catch (ex) {
-          error = "資格確認サーバーに接続できませんでした。";
+          error = "資格確認サーバーに接続できませんでした。" + ex;
         } finally {
           inProgressNotice = "";
         }

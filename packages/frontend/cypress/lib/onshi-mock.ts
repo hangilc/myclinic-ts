@@ -69,7 +69,7 @@ function resultBase(): ResultOfQualificationConfirmationInterface {
   }
 }
 
-export function mockSuccessResult(q: OnshiKakuninQuery): OnshiResult {
+export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
   const messageHeader = new MessageHeader(Object.assign(messageHeaderBase(), {
     QualificationConfirmationDate: fromSqlDate(q.confirmationDate)
   }));
