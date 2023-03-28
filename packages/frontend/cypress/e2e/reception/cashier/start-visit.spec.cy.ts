@@ -79,8 +79,18 @@ describe("Start Visit", () => {
         const onshiResult = mockOnshiSuccessResult(query);
         cy.intercept("POST", "http://localhost/onshi/kakunin", onshiResult.origJson);
         cy.get("button").contains("資格確認").click();
+        cy.get("[data-cy=onshi-confirmed]");
+        cy.get("button").contains("入力").click();
+      });
+    });
+    dialogClose("診察受付");
+    dialogClose("患者情報");
+    cy.get<Shahokokuho>("@hoken").then((shahokokuho) => {
+      listWqueueFull().then((list) => {
+        const wqs = list.filter(wq => wq.patient.patientId === patient.patientId &&
+          wq.visit.shahokokuhoId === shahokokuho.shahokokuhoId);
+        expect(wqs.length).to.satisfy((i: number) => i > 0);
       });
     });
   });
-
-})
+});

@@ -215,7 +215,7 @@
             <span data-cy="hoken-label">{shahokokuhoRep(shahokokuhoOpt)}</span>
           </label>
           {#if shahokokuhoOnshi}
-            <span class="onshi-confirmed-notice">資格確認済</span>
+            <span class="onshi-confirmed-notice" data-cy="onshi-confirmed">資格確認済</span>
           {/if}
         </div>
       {/if}
@@ -227,7 +227,7 @@
             <span data-cy="hoken-label">{koukikoureiRep(koukikoureiOpt.futanWari)}</span>
           </label>
           {#if koukikoureiOnshi}
-            <span class="onshi-confirmed-notice">資格確認済</span>
+            <span class="onshi-confirmed-notice" data-cy="onshi-confirmed">資格確認済</span>
           {/if}
         </div>
       {/if}
