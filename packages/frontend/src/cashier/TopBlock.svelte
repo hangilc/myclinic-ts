@@ -3,7 +3,7 @@
   import Popup from "@/lib/Popup.svelte";
   import type { Patient } from "myclinic-model";
   import NewPatientDialog from "./NewPatientDialog.svelte";
-  import { PatientData } from "./patient-dialog2/patient-data";
+  import { PatientData } from "./patient-dialog/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
   import RecordsPulldown from "./RecordsPulldown.svelte";
   import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";

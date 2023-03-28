@@ -3,7 +3,7 @@
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import type { Patient } from "myclinic-model";
-  import { PatientData } from "./patient-dialog2/patient-data";
+  import { PatientData } from "./patient-dialog/patient-data";
   import PatientForm from "./PatientForm.svelte";
 
   export let destroy: () => void;

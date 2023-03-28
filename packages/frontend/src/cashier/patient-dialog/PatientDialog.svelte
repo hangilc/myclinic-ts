@@ -1,6 +1,6 @@
 <script lang="ts">
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
-  import type { PatientData } from "../patient-dialog2/patient-data";
+  import type { PatientData } from "../patient-dialog/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";

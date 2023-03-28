@@ -1,6 +1,6 @@
-import { Hoken } from "@/cashier/patient-dialog2/hoken";
-import { PatientData } from "@/cashier/patient-dialog2/patient-data";
-import PatientDialog from "@/cashier/patient-dialog2/PatientDialog.svelte";
+import { Hoken } from "@/cashier/patient-dialog/hoken";
+import { PatientData } from "@/cashier/patient-dialog/patient-data";
+import PatientDialog from "@/cashier/patient-dialog/PatientDialog.svelte";
 import { getBase } from "@/lib/api";
 import patientJson from "@cypress/fixtures/patient-1.json";
 import { dialogOpen } from "@cypress/lib/dialog";

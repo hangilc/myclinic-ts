@@ -2,7 +2,7 @@
 import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import type { Patient, Visit } from "myclinic-model";
-  import { PatientData } from "./patient-dialog2/patient-data";
+  import { PatientData } from "./patient-dialog/patient-data";
 
   export let destroy: () => void;
   export let patient: Patient;

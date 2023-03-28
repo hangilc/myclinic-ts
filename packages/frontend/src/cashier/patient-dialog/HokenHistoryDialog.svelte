@@ -2,7 +2,7 @@
   import { classify } from "@/lib/partition";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Patient } from "myclinic-model";
-  import type { PatientData } from "../patient-dialog2/patient-data";
+  import type { PatientData } from "../patient-dialog/patient-data";
   import type { Hoken } from "./hoken";
   import ShahokokuhoBox from "./hoken-box/ShahokokuhoBox.svelte";
   import KoukikoureiBox from "./hoken-box/KoukikoureiBox.svelte";

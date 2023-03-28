@@ -12,6 +12,7 @@
   import api from "@/lib/api";
   import SplitAppointTimeDialog from "./SplitAppointTimeDialog.svelte";
   import { confirm } from "@/lib/confirm-call";
+  import OnshiConfirmForDate from "./OnshiConfirmForDate.svelte";
 
   export let data: AppointTimeData;
   export let column: ColumnData;
@@ -118,6 +119,19 @@
     }
   }
 
+  function doOnshiKakunin(destroy: () => void): void {
+    const date = column.date;
+    destroy();
+    const d: OnshiConfirmForDate =new OnshiConfirmForDate({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        date,
+        siblings: [data]
+      }
+    });
+  }
+
   function doContextMenu(
     event: MouseEvent,
     trigger: (e: MouseEvent) => void
@@ -175,6 +189,7 @@
           >分割</a
         >
         <a href="javascript:void(0)" on:click={() => doDelete(destroy)}>削除</a>
+        <a href="javascript:void(0)" on:click={() => doOnshiKakunin(destroy)}>資格確認</a>
       {/if}
     </div>
   </Popup>
