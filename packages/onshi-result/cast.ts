@@ -7,7 +7,7 @@ export function castStringProp(obj: any, name: string): string {
       throw new Error("Cannot find string property: " + name);
     }
   } else {
-    throw new Error("Object expected: " + obj);
+    throw new Error(`Object expected (${name}): ` + obj);
   }
 }
 
@@ -22,7 +22,7 @@ export function castOptStringProp(obj: any, name: string): string | undefined {
       throw new Error("Cannot find string property: " + name);
     }
   } else {
-    throw new Error("Object expected: " + obj);
+    throw new Error(`Object expected (${name}): ` + obj);
   }
 }
 

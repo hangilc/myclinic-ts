@@ -59,6 +59,10 @@ export class QualificationConfirmSearchInfo {
     return this.orig.ArbitraryIdentifier;
   }
 
+  toJsonObject(): object {
+    return this.orig;
+  }
+
   static cast(arg: any): QualificationConfirmSearchInfo {
     if (typeof arg === "object") {
       return new QualificationConfirmSearchInfo({

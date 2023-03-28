@@ -45,6 +45,10 @@ export class ElderlyRecipientCertificateInfo {
     }
   }
 
+  toJsonObject(): object {
+    return this.orig;
+  }
+
   static cast(arg: any): ElderlyRecipientCertificateInfo {
     if( typeof arg === "object" ){
       return new ElderlyRecipientCertificateInfo({

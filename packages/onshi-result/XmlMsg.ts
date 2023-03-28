@@ -24,7 +24,7 @@ export class XmlMsg {
         MessageBody.cast(arg.MessageBody)
       );
     } else {
-      throw new Error("Object expected: " + arg);
+      throw new Error("Object expected (XmlMsg): " + arg);
     }
   }
 }

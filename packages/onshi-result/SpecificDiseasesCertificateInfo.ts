@@ -50,6 +50,10 @@ export class SpecificDiseasesCertificateInfo {
     return toOptInt(this.orig.SpecificDiseasesSelfPay);
   }
 
+  toJsonObject(): object {
+    return this.orig;
+  }
+
   static cast(arg: any): SpecificDiseasesCertificateInfo {
     return new SpecificDiseasesCertificateInfo({
       SpecificDiseasesDiseaseCategory: castOptStringProp(arg, "SpecificDiseasesDiseaseCategory"),

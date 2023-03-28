@@ -12,7 +12,7 @@ export interface MessageBodyInterface {
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
   QualificationValidity: string | undefined;
-  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
+  // SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
 }
 
 export class MessageBody {
@@ -104,7 +104,11 @@ export class MessageBody {
   }
 
   toJsonObject(): object {
-    return this.orig;
+    return Object.assign({}, this.orig, {
+      ResultList: this.orig.ResultList.map(r => r.toJsonObject()),
+      QualificationConfirmSearchInfo: this.orig.QualificationConfirmSearchInfo ?
+        this.orig.QualificationConfirmSearchInfo.toJsonObject() : undefined,
+    });
   }
 
   static cast(arg: any): MessageBody {
@@ -118,15 +122,16 @@ export class MessageBody {
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
         QualificationValidity: castOptStringProp(arg, "QualificationValidity"),
-        SpecificDiseasesCertificateList: castSpecificDiseasesCertificateInfo(arg.SpecificDiseasesCertificateList),
+        // SpecificDiseasesCertificateList: castSpecificDiseasesCertificateInfo(arg.SpecificDiseasesCertificateList),
       });
     } else {
-      throw new Error("Object expected: " + arg);
+      throw new Error("Object expected (MessageBody): " + arg);
     }
   }
 }
 
 function castResultList(arg: any): ResultOfQualificationConfirmation[] {
+  console.log("castResultList", arg);
   if (arg == undefined) {
     return [];
   } else if (Array.isArray(arg)) {

@@ -30,7 +30,6 @@ function messageBodyBase(): MessageBodyInterface {
     ProcessingResultCode: undefined,
     ProcessingResultMessage: undefined,
     QualificationValidity: "1", // 有効
-    SpecificDiseasesCertificateList: [], //SpecificDiseasesCertificateInfo[]
   };
 }
 

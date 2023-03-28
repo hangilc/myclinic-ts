@@ -275,7 +275,21 @@ export class ResultOfQualificationConfirmation {
     return this.orig.SpecificDiseasesCertificateList;
   }
 
+  toJsonObject(): object {
+    const roqc: object = Object.assign({}, this.orig, {
+      ElderlyRecipientCertificateInfo: this.orig.ElderlyRecipientCertificateInfo ?
+        this.orig.ElderlyRecipientCertificateInfo.toJsonObject() : undefined,
+      LimitApplicationCertificateRelatedInfo: this.orig.LimitApplicationCertificateRelatedInfo ?
+        this.orig.LimitApplicationCertificateRelatedInfo.toJsonObject() : undefined,
+      SpecificDiseasesCertificateList: this.orig.SpecificDiseasesCertificateList.map(s => s.toJsonObject()),
+    });
+    return {
+      ResultOfQualificationConfirmation: roqc,
+    }
+  }
+
   static cast(arg: any): ResultOfQualificationConfirmation {
+    console.log("cast Result", arg);
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
       Name: castStringProp(arg, "Name"),
@@ -329,9 +343,9 @@ function castLimitApplicationCertificateRelatedInfo(arg: any):
 }
 
 function castSpecificDiseasesCertificateList(arg: any): SpecificDiseasesCertificateInfo[] {
-  if( arg == undefined ){
+  if (arg == undefined) {
     return [];
-  } else if( Array.isArray(arg) ){
+  } else if (Array.isArray(arg)) {
     return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
   } else {
     throw new Error("Invalid SpecificDiseasesCertificateList: " + arg);

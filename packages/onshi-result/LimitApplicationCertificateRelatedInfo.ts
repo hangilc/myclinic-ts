@@ -68,6 +68,10 @@ export class LimitApplicationCertificateRelatedInfo {
     return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateLongTermDate);
   } 
 
+  toJsonObject(): object {
+    return this.orig;
+  }
+
   static cast(arg: any): LimitApplicationCertificateRelatedInfo {
     return new LimitApplicationCertificateRelatedInfo({
       LimitApplicationCertificateClassification: castOptStringProp(arg, "LimitApplicationCertificateClassification"),
