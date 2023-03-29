@@ -13,8 +13,7 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
 
   trigger.addEventListener("mouseup", (event) => {
     isDragging = false;
-    trigger.releasePointerCapture(pointerId);
-    pointerId = 0;
+    release();
     if( isInvisible(e) ){
       e.style.left = "10px";
       e.style.top = "10px";
@@ -29,8 +28,17 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
       const rect = e.getBoundingClientRect();
       e.style.left = rect.x + deltaX + "px";
       e.style.top = rect.y + deltaY + "px";
+    } else {
+      if( pointerId !== 0 ){
+        release();
+      }
     }
-  })
+  });
+
+  function release() {
+    trigger.releasePointerCapture(pointerId);
+    pointerId = 0;
+  }
 }
 
 function isInvisible(e: HTMLElement): boolean {
