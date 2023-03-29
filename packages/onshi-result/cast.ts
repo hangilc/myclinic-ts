@@ -1,6 +1,9 @@
 export function castStringProp(obj: any, name: string): string {
   if( typeof obj === "object" ){
-    const value = obj[name];
+    let value = obj[name];
+    if( typeof value === "number" ){
+      value = value.toString();
+    }
     if( typeof value === "string" ){
       return value;
     } else {
@@ -13,7 +16,10 @@ export function castStringProp(obj: any, name: string): string {
 
 export function castOptStringProp(obj: any, name: string): string | undefined {
   if( typeof obj === "object" ){
-    const value = obj[name];
+    let value = obj[name];
+    if( typeof value === "number" ){
+      value = value.toString();
+    }
     if( typeof value === "string" ){
       return value;
     } else if( value == undefined ){

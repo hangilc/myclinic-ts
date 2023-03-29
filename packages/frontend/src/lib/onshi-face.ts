@@ -1,6 +1,9 @@
 import api from "./api";
+import { XMLParser } from "fast-xml-parser";
+import { OnshiResult } from "onshi-result";
+import { XmlMsg } from "onshi-result/XmlMsg";
 
-export async function onshiFace(faceFile: string, timeout: number = 10): Promise<string> {
+export async function onshiFace(faceFile: string, timeout: number = 10): Promise<OnshiResult> {
   const server = await api.dictGet("onshi-server");
   const secret = await api.dictGet("onshi-secret");
   const controller = new AbortController();
@@ -17,5 +20,17 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
     signal: controller.signal
   });
   clearTimeout(timerId);
-  return await response.text();
+  return convertXml(await response.text());
 };
+
+function convertXml(xml: string): OnshiResult {
+  const parser = new XMLParser();
+  const json = parser.parse(xml);
+  if( !Array.isArray(json.XmlMsg.MessageBody.ResultList) ){
+    json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
+  }
+  console.log(json);
+  const xmlMsg = XmlMsg.cast(json.XmlMsg);
+  return new OnshiResult(xmlMsg, json);
+}
+

@@ -11,14 +11,7 @@ export async function faceStart() {
 
   ws.addEventListener("message", async (event) => {
     const file = event.data;
-    const text = await onshiFace(file);
-    // const json = parseString(text, (err, json) => {
-    //   if( err ){
-    //     console.log(err);
-    //   } else {
-    //     console.log(json);
-    //   }
-    // });
+    const result = await onshiFace(file);
   });
 
   ws.addEventListener("error", (event) => {
@@ -29,3 +22,4 @@ export async function faceStart() {
     console.log("onshi websocket closed");
   })
 }
+
