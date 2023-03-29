@@ -22,9 +22,16 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
     if( trigger.hasPointerCapture(pointerId) ){
       let deltaX = event.movementX;
       let deltaY = event.movementY;
-      const rect = e.getBoundingClientRect();
-      e.style.left = rect.x + deltaX + "px";
-      e.style.top = rect.y + deltaY + "px";
+      const rect = trigger.getBoundingClientRect();
+      const left = rect.x + deltaX;
+      const top = rect.y + deltaY;
+      const dw = document.documentElement.clientWidth;
+      const dh = document.documentElement.clientHeight;
+      if( left >= 0 && left + rect.width <= dw && top >= 0 && top + rect.height <= dh ){
+        const r = e.getBoundingClientRect();
+        e.style.left = r.x + deltaX + "px";
+        e.style.top = r.y + deltaY + "px";
+      }
     } else {
       release();
     }
