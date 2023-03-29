@@ -31,9 +31,6 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
         "../onshi-result",
       ],
     }
-  },
-  optimizeDeps: {
-    include: ["onshi-lib"]
   }
 
 }))
