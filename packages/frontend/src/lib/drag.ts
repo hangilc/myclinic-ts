@@ -1,18 +1,15 @@
 export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
-  let isDragging: boolean = false;
   let pointerId = 0;
 
   trigger.style.cursor = "grab";
 
   trigger.addEventListener("pointerdown", (event) => {
-    isDragging = true;
     pointerId = event.pointerId;
     trigger.setPointerCapture(pointerId);
     console.log("pointerdown");
   });
 
   trigger.addEventListener("mouseup", (event) => {
-    isDragging = false;
     release();
     if( isInvisible(e) ){
       e.style.left = "10px";
@@ -22,16 +19,14 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
   })
 
   trigger.addEventListener("pointermove", (event) => {
-    if( isDragging ){
+    if( trigger.hasPointerCapture(pointerId) ){
       let deltaX = event.movementX;
       let deltaY = event.movementY;
       const rect = e.getBoundingClientRect();
       e.style.left = rect.x + deltaX + "px";
       e.style.top = rect.y + deltaY + "px";
     } else {
-      if( pointerId !== 0 ){
-        release();
-      }
+      release();
     }
   });
 
