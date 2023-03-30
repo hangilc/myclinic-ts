@@ -33,7 +33,7 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
         e.style.top = r.y + deltaY + "px";
       }
     } else {
-      release();
+      pointerId = 0;
     }
   });
 

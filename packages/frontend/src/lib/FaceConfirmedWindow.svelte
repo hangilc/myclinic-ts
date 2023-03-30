@@ -4,11 +4,17 @@
   import * as kanjidate from "kanjidate";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import api from "./api";
+  import type { Patient, Shahokokuho } from "myclinic-model";
+  import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
 
   export let destroy: () => void;
   export let result: OnshiResult;
-  const style = "width:300px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;"
-  let yomi: string = result.messageBody.nameKana ? toZenkaku(result.messageBody.nameKana) : "";
+  const style =
+    "width:360px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;";
+  let yomi: string = result.messageBody.nameKana
+    ? toZenkaku(result.messageBody.nameKana)
+    : "";
+  let resolvedPatient: Patient | undefined = undefined;
 
   resolvePatient();
 
@@ -20,21 +26,85 @@
     return kanjidate.format(kanjidate.f2, s);
   }
 
+  function shahokokuhoConsistent(
+    shahokokuho: Shahokokuho,
+    r: ResultOfQualificationConfirmation
+  ): boolean {
+    const hokenshaBangou = parseInt(r.insurerNumber || "0");
+    const hihokenshaKigou = r.insuredCardSymbol ?? "";
+    const hihokenshaBangou = r.insuredIdentificationNumber || "";
+    const edaban = r.insuredBranchNumber || "";
+    return shahokokuho.hokenshaBangou === hokenshaBangou &&
+      shahokokuho.hihokenshaKigou === hihokenshaKigou &&
+      shahokokuho.hihokenshaBangou === hihokenshaBangou &&
+      (shahokokuho.edaban === edaban || shahokokuho.edaban === "0" + edaban);
+  }
+
   async function resolvePatient() {
-    let result = await api.searchPatientSmart(yomi);
-    console.log("result", yomi, result);
+    const name = result.messageBody.name;
+    if (result.resultList.length === 1) {
+      const r = result.resultList[0];
+      let patients: Patient[] = await api.searchPatient(name);
+      if (patients.length === 1) {
+        const patient = patients[0];
+        if (
+          name === `${patient.lastName}　${patient.firstName}` &&
+          patient.birthday === r.birthdate
+        ) {
+          // single patient resolved
+          const now = new Date();
+          const shahoOpt =
+            (await api.findAvailableShahokokuho(patient.patientId, now)) ??
+            undefined;
+          const koukiOpt =
+            (await api.findAvailableKoukikourei(patient.patientId, now)) ??
+            undefined;
+          if (shahoOpt && !koukiOpt) {
+            console.log(shahoOpt);
+            console.log(r);
+            if( shahokokuhoConsistent(shahoOpt, r) ){
+              alert("OK");
+            }
+          } else if (koukiOpt && !shahoOpt) {
+          } else {
+          }
+        }
+      } else {
+        const yomi = result.messageBody.nameKana;
+      }
+    }
   }
 </script>
 
 <Floating title="顔認証完了" {destroy} {style}>
   <div class="content">
-    <div class="info">
+    <div class="patient-info">
       <span>名前</span>
       <span>{result.messageBody.name ?? ""}</span>
       <span>よみ</span>
       <span>{yomi}</span>
       <span>生年月日</span>
       <span>{formatDate(result.messageBody.resultList[0].birthdate)}</span>
+    </div>
+    <div class="result-list">
+      {#each result.messageBody.resultList as r}
+        <div class="result-list-item">
+          <span>保険者</span>
+          <span>{r.insurerName}</span>
+          <span>保険者番号</span>
+          <span>{r.insurerNumber}</span>
+          {#if r.insuredCardSymbol}
+            <span>被保険者記号</span>
+            <span>{r.insuredCardSymbol}</span>
+          {/if}
+          <span>被保険者番号</span>
+          <span>{r.insuredIdentificationNumber}</span>
+          {#if r.insuredBranchNumber}
+            <span>枝番</span>
+            <span>{r.insuredBranchNumber}</span>
+          {/if}
+        </div>
+      {/each}
     </div>
   </div>
 </Floating>
@@ -48,13 +118,26 @@
     overflow-y: auto;
   }
 
-  .info {
+  .patient-info {
     display: grid;
     grid-template-columns: auto 1fr;
     margin: 10px 0;
   }
 
-  .info > *:nth-child(odd) {
+  .patient-info > *:nth-child(odd) {
+    margin-right: 10px;
+  }
+
+  .result-list-item {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    margin: 10px 0;
+    border: 1px solid gray;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .result-list-item > *:nth-child(odd) {
     margin-right: 10px;
   }
 </style>

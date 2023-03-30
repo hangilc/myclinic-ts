@@ -34,3 +34,28 @@ export function parseFaceXml(xml: string): OnshiResult {
   return new OnshiResult(xmlMsg, json);
 }
 
+export interface OnshiFaceConfirmed {
+  name: string;
+  fileName: string;
+  createdAt: string;
+}
+
+export async function onshiFaceList(timeout: number = 10): Promise<OnshiFaceConfirmed[]> {
+  const server = await api.dictGet("onshi-server");
+  const secret = await api.dictGet("onshi-secret");
+  const controller = new AbortController();
+  const timerId = setTimeout(() => {
+    console.log("timeout");
+    controller.abort();
+  }, timeout * 1000);
+  const response = await fetch(server + "/face", {
+    method: "GET",
+    headers: {
+      "X-ONSHI-VIEW-SECRET": secret,
+    },
+    signal: controller.signal
+  });
+  clearTimeout(timerId);
+  return await response.json();
+}
+

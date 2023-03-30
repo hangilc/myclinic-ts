@@ -8,8 +8,8 @@
   import RecordsPulldown from "./RecordsPulldown.svelte";
   import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
   import Bars3 from "@/icons/Bars3.svelte";
-  import { parseFaceXml } from "@/lib/onshi-face";
-  import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
+  import { onshiFaceList, parseFaceXml } from "@/lib/onshi-face";
+  import FaceListDialog from "./FaceListDialog.svelte";
 
   let searchText = "";
 
@@ -43,14 +43,13 @@
     });
   }
 
-  async function doTestFaceConfirm() {
-    const xml = await api.dictGet("mock-face-confirm-xml");
-    const result = parseFaceXml(xml);
-    const d: FaceConfirmedWindow = new FaceConfirmedWindow({
+  async function doListFaceConfirm() {
+    const list = await onshiFaceList();
+    const d: FaceListDialog = new FaceListDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        result,
+        list,
       }
     })
   }
@@ -64,6 +63,7 @@
     <button data-cy="search-button">検索</button>
   </form>
   <button on:click={doNewPatient}>新規患者</button>
+  <button on:click={doListFaceConfirm}>顔認証一覧</button>
   <Popup let:trigger let:destroy>
     <a href="javascript:void(0)" class="records-link" on:click={trigger}
       >診療録</a
@@ -75,13 +75,16 @@
       dataCy="bars3-menu"/>
     <TopBlockAuxMenu slot="menu" {destroy}/>
   </Popup>
-  <button on:click={doTestFaceConfirm}>顔認証テスト</button>
 </div>
 
 <style>
   .top {
     display: flex;
     align-items: center;
+  }
+
+  .top > button {
+    margin-right: 4px;
   }
 
   .title {
@@ -101,10 +104,10 @@
     margin-left: 6px;
   }
 
-  .menu-svg {
+  /* .menu-svg {
     stroke: gray;
     cursor: pointer;
     margin-top: -4px;
     margin-left: 6px;
-  }
+  } */
 </style>
