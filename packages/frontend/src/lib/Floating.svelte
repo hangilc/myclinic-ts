@@ -5,6 +5,7 @@
 
   export let title: string;
   export let destroy: () => void;
+  export let style: string = "";
   let zIndex: number = alloc();
   let floating: HTMLElement;
   let titleElement: HTMLElement;
@@ -24,7 +25,7 @@
   }
 </script>
 
-<div class="floating" bind:this={floating}>
+<div class="floating" bind:this={floating} {style}>
   <div class="title-wrapper">
     <div class="title" bind:this={titleElement}>{title}</div>
     <svg
@@ -63,6 +64,7 @@
   .title {
     display: inline-block;
     flex-grow: 1;
+    font-weight: bold;
   }
 
   .title-wrapper svg {

@@ -8,6 +8,8 @@
   import RecordsPulldown from "./RecordsPulldown.svelte";
   import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
   import Bars3 from "@/icons/Bars3.svelte";
+  import { parseFaceXml } from "@/lib/onshi-face";
+  import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 
   let searchText = "";
 
@@ -41,6 +43,18 @@
     });
   }
 
+  async function doTestFaceConfirm() {
+    const xml = await api.dictGet("mock-face-confirm-xml");
+    const result = parseFaceXml(xml);
+    const d: FaceConfirmedWindow = new FaceConfirmedWindow({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        result,
+      }
+    })
+  }
+
 </script>
 
 <div class="top">
@@ -61,6 +75,7 @@
       dataCy="bars3-menu"/>
     <TopBlockAuxMenu slot="menu" {destroy}/>
   </Popup>
+  <button on:click={doTestFaceConfirm}>顔認証テスト</button>
 </div>
 
 <style>

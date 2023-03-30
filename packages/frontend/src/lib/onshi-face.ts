@@ -20,10 +20,10 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
     signal: controller.signal
   });
   clearTimeout(timerId);
-  return convertXml(await response.text());
+  return parseFaceXml(await response.text());
 };
 
-function convertXml(xml: string): OnshiResult {
+export function parseFaceXml(xml: string): OnshiResult {
   const parser = new XMLParser();
   const json = parser.parse(xml);
   if( !Array.isArray(json.XmlMsg.MessageBody.ResultList) ){
