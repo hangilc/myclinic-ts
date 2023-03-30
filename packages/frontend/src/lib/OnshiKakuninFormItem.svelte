@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ResultOfQualificationConfirmation } from "onshi-result/dist/ResultOfQualificationConfirmation";
-  import { convertHankakuKatakanaToZenkakuHiraKana } from "./zenkaku";
+  import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import * as kanjidate from "kanjidate";
 
   export let result: ResultOfQualificationConfirmation;
@@ -18,7 +18,7 @@
   <span>氏名</span>
   <span>{result.name.replace("　", " ")}</span>
   <span>よみ</span>
-  <span>{convertHankakuKatakanaToZenkakuHiraKana(result.nameKana ?? "")}</span>
+  <span>{convertHankakuKatakanaToZenkakuHiragana(result.nameKana ?? "")}</span>
   <span>保険者証種類</span>
   <span>{result.insuredCardClassification}</span>
   <span>保険者番号</span>

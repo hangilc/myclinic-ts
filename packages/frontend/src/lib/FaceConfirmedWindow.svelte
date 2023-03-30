@@ -2,13 +2,27 @@
   import Floating from "@/lib/Floating.svelte";
   import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
+  import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
+  import api from "./api";
 
   export let destroy: () => void;
   export let result: OnshiResult;
   const style = "width:300px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;"
+  let yomi: string = result.messageBody.nameKana ? toZenkaku(result.messageBody.nameKana) : "";
+
+  resolvePatient();
+
+  function toZenkaku(s: string): string {
+    return convertHankakuKatakanaToZenkakuHiragana(s);
+  }
 
   function formatDate(s: string): string {
     return kanjidate.format(kanjidate.f2, s);
+  }
+
+  async function resolvePatient() {
+    let result = await api.searchPatientSmart(yomi);
+    console.log("result", yomi, result);
   }
 </script>
 
@@ -18,7 +32,7 @@
       <span>名前</span>
       <span>{result.messageBody.name ?? ""}</span>
       <span>よみ</span>
-      <span>{result.messageBody.nameKana ?? ""}</span>
+      <span>{yomi}</span>
       <span>生年月日</span>
       <span>{formatDate(result.messageBody.resultList[0].birthdate)}</span>
     </div>
