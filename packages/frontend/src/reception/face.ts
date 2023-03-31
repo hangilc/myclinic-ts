@@ -3,7 +3,7 @@ import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 import { onshiFace } from "@/lib/onshi-face";
 
 export async function faceStart() {
-  const server = (await api.dictGet("onshi-server")).replace("https", "wss");
+  const server = (await api.dictGet("onshi-server")).replace(/^http/, "ws");
   const secret = await api.dictGet("onshi-secret");
   const ws = new WebSocket(`${server}/ws?secret=${secret}`);
   ws.addEventListener("open", (_event) => {
