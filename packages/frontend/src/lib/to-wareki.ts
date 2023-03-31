@@ -1,4 +1,4 @@
-import { dateToSql, parseSqlDate } from "./util";
+import { parseSqlDate } from "./util";
 import { KanjiDate } from "kanjidate";
 
 export function toWareki(date: Date | string): [string, number] {

@@ -9,7 +9,7 @@
   export let nen: number;
   export let month: number;
   export let onChange: (day: number) => void;
-  let anchor: HTMLElement;
+  // let anchor: HTMLElement;
 
   function calcDayList(): number[] {
     let year = kanjidate.fromGengou(gengou, nen);
@@ -21,7 +21,7 @@
 
 <span class="top">
   <Popup let:destroy let:triggerClick>
-    <span on:click={triggerClick} bind:this={anchor}>{day}</span><span>日</span>
+    <span on:click={triggerClick}>{day}</span><span>日</span>
     <DayPartPulldown slot="menu" {destroy} dayList={calcDayList()} {day} {onChange}/>
   </Popup>
 </span>

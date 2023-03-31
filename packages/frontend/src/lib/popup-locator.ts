@@ -9,8 +9,8 @@ export function locatePulldown(
   const anchorRect = anchor.getBoundingClientRect();
   const eleRect = ele.getBoundingClientRect();
   const win = document.documentElement;
-  let dx: number = 0;
-  let dy: number = 0;
+  // let dx: number = 0;
+  // let dy: number = 0;
   function setLeft(left: number): void {
     ele.style.left = window.scrollX + anchorRect.left + left + "px";
   }

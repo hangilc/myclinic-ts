@@ -1,10 +1,10 @@
 import { Hoken } from "@/cashier/patient-dialog/hoken";
 import { PatientData } from "@/cashier/patient-dialog/patient-data";
 import PatientDialog from "@/cashier/patient-dialog/PatientDialog.svelte";
-import { getBase } from "@/lib/api";
+// import { getBase } from "@/lib/api";
 import patientJson from "@cypress/fixtures/patient-1.json";
-import { dialogOpen } from "@cypress/lib/dialog";
-import { dateToSqlDateTime, Patient, Shahokokuho, Visit } from "myclinic-model";
+// import { dialogOpen } from "@cypress/lib/dialog";
+import { Patient, Shahokokuho } from "myclinic-model";
 
 describe("PatientDialog", () => {
   it("should mount", () => {

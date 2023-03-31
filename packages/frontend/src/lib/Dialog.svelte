@@ -33,15 +33,15 @@
 
   onMount(() => {
     dialog.style.zIndex = zIndexDialog.toString();
-    const v = document.documentElement;
+    // const v = document.documentElement;
   });
 
-  function doMenuKey(event: KeyboardEvent): void {
-    if (event.key === "Escape") {
-      event.stopPropagation();
-      destroy();
-    }
-  }
+  // function doMenuKey(event: KeyboardEvent): void {
+  //   if (event.key === "Escape") {
+  //     event.stopPropagation();
+  //     destroy();
+  //   }
+  // }
 </script>
 
 <div class="dialog" bind:this={dialog} data-cy="dialog" data-title={title}

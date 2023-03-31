@@ -4,7 +4,7 @@ import MonthPulldown from "./MonthPulldown.svelte";
 
   export let month: number;
   export let onChange: (month: number) => void;
-  let anchor: HTMLElement;
+  // let anchor: HTMLElement;
 
 </script>
 

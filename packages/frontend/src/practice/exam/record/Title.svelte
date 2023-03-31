@@ -17,7 +17,7 @@
 
   export let visit: VisitEx;
 
-  let manipLink: HTMLElement;
+  // let manipLink: HTMLElement;
   let taskRunner: TaskRunner | null = null;
   let showMeisai = false;
 
@@ -75,7 +75,7 @@
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
   <Popup let:destroyAnd let:trigger>
-    <a href="javascript:void(0)" bind:this={manipLink} on:click={trigger}
+    <a href="javascript:void(0)" on:click={trigger}
       >操作</a
     >
     <div slot="menu" class="popup-menu">

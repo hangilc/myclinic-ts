@@ -3,8 +3,8 @@ import { dialogClose, newPatient, dialogOpen } from "./misc";
 import { listWqueue, startVisit, batchEnterShinryou, getMeisai, enterChargeValue, changeWqueueState } from "./req";
 import { doesNotExist } from "@cypress/lib/dialog";
 import shinryouNames from "@cypress/fixtures/shinryou-names.json";
-import { castList } from "@/lib/cast";
-import { castOp } from "@/lib/drawer/op";
+// import { castList } from "@/lib/cast";
+// import { castOp } from "@/lib/drawer/op";
 
 describe("Wqueue", () => {
   let patient: Patient;
@@ -79,15 +79,15 @@ describe("Wqueue", () => {
     cy.intercept("http://localhost:48080/setting", []);
     cy.intercept("http://localhost:48080/pref/receipt", "null");
     cy.intercept("http://localhost:48080/print/", (req) => {
-      const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
-      const setup = castList(castOp)(body.setup);
-      const pages = castList(castList(castOp))(body.pages);
+      // const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+      // const setup = castList(castOp)(body.setup);
+      // const pages = castList(castList(castOp))(body.pages);
       req.reply("true");
     });
     dialogOpen("会計").within(() => {
       cy.get("button").contains("領収書印刷").click();
     })
-    dialogOpen("領収書印刷").within(($d) => {
+    dialogOpen("領収書印刷").within(() => {
       cy.get("button").contains("印刷").click();
     })
     dialogOpen("会計").within(() => {

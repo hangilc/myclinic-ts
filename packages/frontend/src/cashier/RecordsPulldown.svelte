@@ -46,7 +46,7 @@ function doByDate(): void {
     props: {
       destroy: () => d.$destroy(),
       title: "診療録（日付別）",
-      onEnter: (visit: Visit, patient: Patient) => {
+      onEnter: (_visit: Visit, patient: Patient) => {
         openRecords(patient);
       },
     },

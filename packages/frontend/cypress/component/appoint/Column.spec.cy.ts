@@ -134,7 +134,7 @@ describe("Column (appoint)", () => {
       ));
       mount.component.$set({ data });
     });
-    withAppointPatient(patientId, driver => {
+    withAppointPatient(patientId, _driver => {
 
     })
   });

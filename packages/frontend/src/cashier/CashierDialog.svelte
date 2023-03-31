@@ -7,7 +7,7 @@
     type Charge,
     type Patient,
     Payment,
-    type Visit,
+    // type Visit,
     dateToSqlDateTime,
     VisitEx,
   } from "myclinic-model";

@@ -4,7 +4,7 @@
   import * as kanjidate from "kanjidate";
   import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
   import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
-  import { fromSqlDate, onshiDateToSqlDate } from "onshi-result/util";
+  import { onshiDateToSqlDate } from "onshi-result/util";
 
   export let destroy: () => void;
   export let query: OnshiKakuninQuery;

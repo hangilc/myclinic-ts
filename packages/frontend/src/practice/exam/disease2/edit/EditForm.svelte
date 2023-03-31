@@ -4,7 +4,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
   import { errorMessagesOf, isNotNull, validResult, type VResult } from "@/lib/validation";
-  import type { Invalid } from "@/lib/validator";
+  // import type { Invalid } from "@/lib/validator";
   import { validateDisease } from "@/lib/validators/disease-validator";
   import {
     ByoumeiMaster,

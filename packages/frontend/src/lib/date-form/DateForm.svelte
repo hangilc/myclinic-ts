@@ -3,7 +3,7 @@
   import { source, toInt, validResult, VResult } from "../validation";
   import { validateWareki } from "../validators/wareki-validator";
   import * as kanjidate from "kanjidate";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let init: Date | null;
   export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);

@@ -1,5 +1,5 @@
 import { it, expect } from "vitest";
-import { isNotEmpty, isNotNull, matchRegExp, source, toFloat, toInt, valid, validated2 } from "./validation";
+import { isNotEmpty, isNotNull, matchRegExp, source, toFloat, toInt, validated2 } from "./validation";
 
 it("should validate non-null", () => {
   const r1 = source("12").validate(isNotNull()).mark("digits");

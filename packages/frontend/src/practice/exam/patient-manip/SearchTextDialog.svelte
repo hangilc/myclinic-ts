@@ -12,7 +12,7 @@
   $: patientId = patient?.patientId ?? null;
   let textVisits: [Text, Visit][] = [];
   const nPerPage = 10;
-  let dialog: Dialog;
+  // let dialog: Dialog;
   let searchText: string = "";
   let page = 0;
   let total = 0;

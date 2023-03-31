@@ -9,7 +9,7 @@ export function dragStart(trigger: HTMLElement, e: HTMLElement): void {
     console.log("pointerdown");
   });
 
-  trigger.addEventListener("mouseup", (event) => {
+  trigger.addEventListener("mouseup", (_event) => {
     release();
     if( isInvisible(e) ){
       e.style.left = "10px";

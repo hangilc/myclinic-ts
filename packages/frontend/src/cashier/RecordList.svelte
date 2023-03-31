@@ -4,7 +4,7 @@
   import Nav from "@/lib/Nav.svelte";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { Patient, VisitEx } from "myclinic-model";
-  import { tick } from "svelte";
+  // import { tick } from "svelte";
   import { writable, type Writable } from "svelte/store";
   import Record from "./Record.svelte";
 

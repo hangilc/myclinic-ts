@@ -5,7 +5,7 @@
   import { toInt, validResult, type VResult } from "@/lib/validation";
   import { validateKouhi } from "@/lib/validators/kouhi-validator";
   import type { Kouhi, Patient } from "myclinic-model";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let patient: Patient;
   export let init: Kouhi | null;

@@ -17,9 +17,9 @@
   export let sendTo: string;
   let relevants: string[] = [sendAs, sendTo];
   let regulars: string[] = getRegulars(sendAs);
-  let regularAnchor: HTMLElement;
+  // let regularAnchor: HTMLElement;
   let hotlineInput: HTMLTextAreaElement;
-  let patientsAnchor: HTMLElement;
+  // let patientsAnchor: HTMLElement;
   let wqPatients: Patient[] = [];
 
   let hotlines: HotlineEx[] = [];
@@ -158,7 +158,7 @@
         <a
           href="javascript:void(0)"
           on:click={trigger}
-          bind:this={regularAnchor}>常用</a
+          >常用</a
         >
         <div slot="menu" class="popup-menu">
           {#each regulars as r}
@@ -178,7 +178,7 @@
         <a
           href="javascript:void(0)"
           on:click={trigger}
-          bind:this={patientsAnchor}>患者</a
+          >患者</a
         >
         <div slot="menu" class="popup-menu">
           {#each wqPatients as p}

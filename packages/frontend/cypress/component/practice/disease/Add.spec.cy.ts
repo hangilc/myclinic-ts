@@ -21,7 +21,7 @@ describe("Disease Add", () => {
     cy.get("[data-cy=disease-search-input]").type("急性咽頭炎");
     cy.intercept(Cypress.env("API") + "/search-byoumei-master*", (req) => {
       const text = req.query["text"];
-      const at = req.query["at"];
+      // const at = req.query["at"];
       expect(text).equal("急性咽頭炎");
       const master = new ByoumeiMaster(1, "急性咽頭炎");
       req.reply([master]);
@@ -40,7 +40,7 @@ describe("Disease Add", () => {
     cy.get("[data-cy=disease-search-input]").type("急性");
     cy.intercept(Cypress.env("API") + "/search-shuushokugo-master*", (req) => {
       const text = req.query["text"];
-      const at = req.query["at"];
+      // const at = req.query["at"];
       expect(text).equal("急性");
       const master = new ShuushokugoMaster(1, "急性");
       req.reply([master]);

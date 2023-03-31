@@ -7,7 +7,7 @@
   import { validateKoukikourei } from "@/lib/validators/koukikourei-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import type { Koukikourei, Patient } from "myclinic-model";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let patient: Patient;
   export let init: Koukikourei | null;
@@ -118,7 +118,7 @@
     width: 6rem;
   }
 
-  input.edaban {
+  /* input.edaban {
     width: 2rem;
-  }
+  } */
 </style>

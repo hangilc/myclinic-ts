@@ -5,7 +5,7 @@
   import Popup from "@/lib/Popup.svelte";
 
   export let visit: VisitEx;
-  let anchor: HTMLElement;
+  // let anchor: HTMLElement;
   let enterXpWidget: EnterXpWidget;
   let enterInjectWidget: EnterInjectWidget;
 
@@ -19,7 +19,7 @@
 </script>
 
 <Popup let:destroyAnd let:trigger>
-  <a href="javascript:void(0)" bind:this={anchor} on:click={trigger}>処置</a>
+  <a href="javascript:void(0)" on:click={trigger}>処置</a>
   <div slot="menu" class="popup-menu">
     <a href="javascript:void(0)" on:click={destroyAnd(doXp)}>Ｘ線検査追加</a>
     <a href="javascript:void(0)" on:click={destroyAnd(doInject)}>注射追加</a>

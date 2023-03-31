@@ -1,4 +1,4 @@
-import { describe, it, expect, createExpect } from "vitest";
+import { describe, it, expect } from "vitest";
 import { sm } from "@/lib/sm";
 import {
   isShohousen,
@@ -10,7 +10,7 @@ import {
   parseShohousen,
   DrugPart,
   Part,
-  setDebug,
+  // setDebug,
 } from "./parse-shohousen";
 import * as p from "./parse-shohousen";
 

@@ -1,8 +1,8 @@
 import { castOptStringProp, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
-import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
-import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, PrescriptionIssueSelectLabel, ProcessingResultStatus, ProcessingResultStatusLabel, QualificationValidity, QualificationValidityLabel } from "./codes";
+// import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
+import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;
@@ -148,12 +148,12 @@ function castQualificationConfirmSearchInfo(arg: any): QualificationConfirmSearc
     return QualificationConfirmSearchInfo.cast(arg);
   }
 }
-function castSpecificDiseasesCertificateInfo(arg: any): SpecificDiseasesCertificateInfo[] {
-  if (arg == undefined) {
-    return [];
-  } else if (Array.isArray(arg)) {
-    return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
-  } else {
-    throw new Error("Cannot convert to SpecificDiseasesCertificateList: " + arg);
-  }
-}
+// function castSpecificDiseasesCertificateInfo(arg: any): SpecificDiseasesCertificateInfo[] {
+//   if (arg == undefined) {
+//     return [];
+//   } else if (Array.isArray(arg)) {
+//     return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
+//   } else {
+//     throw new Error("Cannot convert to SpecificDiseasesCertificateList: " + arg);
+//   }
+// }

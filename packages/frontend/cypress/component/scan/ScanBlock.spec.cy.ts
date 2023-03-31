@@ -26,7 +26,7 @@ describe("Scan Block", () => {
     interceptScan().as("scan");
     scan();
     waitForScan("@scan", savedFile => {
-      accessUploadFileName(1, uploadFile => {
+      accessUploadFileName(1, _uploadFile => {
         loadImageData("scanned-image.jpg", imageData => {
           interceptScannerImage(savedFile, imageData);
           clickDisplay(1);

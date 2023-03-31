@@ -2,7 +2,7 @@ import { getBase } from "@/lib/api";
 import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
-import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, DiseaseEndReason, ShuushokugoMaster } from "myclinic-model";
+import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, ShuushokugoMaster } from "myclinic-model";
 
 describe("Edit Disease", () => {
   let suspMaster = new ShuushokugoMaster(8002, "の疑い");
@@ -104,7 +104,7 @@ describe("Edit Disease", () => {
     const diseases = [
       new DiseaseData(origDisease, origMaster, [[adj, adjMaster]])
     ];
-    const entered = new Cypress.Promise((resolve, reject) => {
+    const entered = new Cypress.Promise((resolve, _reject) => {
       cy.mount(Edit, {
         props: {
           diseases,
@@ -453,7 +453,7 @@ describe("Edit Disease", () => {
     cy.mount(Edit, {
       props: {
         diseases,
-        onUpdate: (updated: DiseaseData) => {
+        onUpdate: (_updated: DiseaseData) => {
         }
       }
     });
@@ -471,7 +471,7 @@ describe("Edit Disease", () => {
     cy.mount(Edit, {
       props: {
         diseases,
-        onUpdate: (updated: DiseaseData) => {
+        onUpdate: (_updated: DiseaseData) => {
         }
       }
     });
@@ -527,7 +527,7 @@ function interceptGetDiseaseEx(callback: (diseaseId: number) => void,
   })
 }
 
-function clickDisease(diseaseId: number) {
+function clickDisease(_diseaseId: number) {
   return cy.get("[data-cy=disease-name][data-disease-id=1]").click();
 }
 

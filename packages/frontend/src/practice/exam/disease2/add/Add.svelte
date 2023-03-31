@@ -1,13 +1,13 @@
 <script lang="ts">
-  import api from "@/lib/api";
+  // import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
-  import Popup from "@/lib/Popup.svelte";
+  // import Popup from "@/lib/Popup.svelte";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
-  import type { Invalid } from "@/lib/validator";
+  // import type { Invalid } from "@/lib/validator";
   import {
     ByoumeiMaster,
-    DiseaseData,
+    // DiseaseData,
     DiseaseEnterData,
     DiseaseExample,
     diseaseFullName,
@@ -16,7 +16,7 @@
   import { foldSearchResult } from "../fold-search-result";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
   import DatesPopup from "./DatesPopup.svelte";
-  import DatesPulldown from "./DatesPopup.svelte";
+  // import DatesPulldown from "./DatesPopup.svelte";
 
   export let patientId: number;
   export let examples: DiseaseExample[] = [];
@@ -27,7 +27,7 @@
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
   let startDateErrors: string[] = [];
-  let chooseStartDateIcon: SVGSVGElement;
+  // let chooseStartDateIcon: SVGSVGElement;
 
   function onStartDateChange(): void {
     startDateErrors = [];

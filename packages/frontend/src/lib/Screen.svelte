@@ -11,7 +11,7 @@
     onClick(ev);
   }
 
-  function doKeydown(ev: KeyboardEvent): void {
+  function doKeydown(_ev: KeyboardEvent): void {
     console.log("screen key down");
   }
 </script>

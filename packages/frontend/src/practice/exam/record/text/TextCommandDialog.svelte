@@ -63,7 +63,7 @@
 </SurfaceModal>
 
 <style>
-  .item {
+  /* .item {
     cursor: pointer;
-  }
+  } */
 </style>

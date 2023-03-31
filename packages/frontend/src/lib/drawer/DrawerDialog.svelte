@@ -19,7 +19,7 @@
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;
 
-  async function print(close: () => void) {
+  async function print(_close: () => void) {
     const req: PrintRequest = {
       setup: [],
       pages: [ops],

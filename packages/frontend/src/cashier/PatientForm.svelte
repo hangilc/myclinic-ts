@@ -9,7 +9,7 @@
     validatePatient,
   } from "@/lib/validators/patient-validator";
   import { Patient, Sex } from "myclinic-model";
-  import { createEventDispatcher, onMount, tick } from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let init: Patient | undefined;
   let lastName: string;

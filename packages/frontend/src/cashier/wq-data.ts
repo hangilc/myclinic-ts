@@ -1,4 +1,4 @@
-import { WqueueState, type Charge, type Patient, type Visit, type Wqueue } from "myclinic-model";
+import { WqueueState, type Patient, type Visit, type Wqueue } from "myclinic-model";
 
 export class WqueueData {
   constructor(

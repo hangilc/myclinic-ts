@@ -143,7 +143,7 @@
         destroy: () => d.$destroy(),
         patient: p,
         onCancel: () => {},
-        onEnter: (visit) => exit()
+        onEnter: (_visit) => exit()
       }
     });
   }

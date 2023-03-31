@@ -5,6 +5,5 @@ export default {
   // for more information about preprocessors
   preprocess: sveltePreprocess(),
   onwarn: (warning, handler) => {
-    
   }
 }

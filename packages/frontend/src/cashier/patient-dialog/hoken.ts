@@ -157,8 +157,8 @@ export class Hoken {
       this.value,
       (h) => h.hokenshaBangou.toString(),
       (h) => h.hokenshaBangou,
-      (h) => "",
-      (h) => ""
+      (_h) => "",
+      (_h) => ""
     )
   }
 
@@ -167,8 +167,8 @@ export class Hoken {
       this.value,
       (h) => h.hihokenshaBangou,
       (h) => h.hihokenshaBangou,
-      (h) => "",
-      (h) => ""
+      (_h) => "",
+      (_h) => ""
     )
   }
 
@@ -176,9 +176,9 @@ export class Hoken {
     return Hoken.fold(
       this.value,
       (h) => h.hihokenshaKigou === "" ? undefined : h.hihokenshaKigou,
-      (h) => undefined,
-      (h) => undefined,
-      (h) => undefined
+      (_h) => undefined,
+      (_h) => undefined,
+      (_h) => undefined
     )
   }
 

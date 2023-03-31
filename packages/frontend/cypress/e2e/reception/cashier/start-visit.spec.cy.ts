@@ -1,5 +1,5 @@
 import { dateToSqlDate, Shahokokuho, Visit, type Patient } from "myclinic-model";
-import { newPatient, openPatientDialog, patientDialogClose } from "./misc";
+import { newPatient, openPatientDialog } from "./misc";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { listWqueueFull } from "./req";
 import { mockShahokokuho } from "@cypress/lib/shahokokuho-mock";

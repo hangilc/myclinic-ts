@@ -11,10 +11,10 @@
   import Popup from "@/lib/Popup.svelte";
 
   export let visit: VisitEx;
-  let auxLink: HTMLAnchorElement;
-  let regularDialog: RegularDialog;
-  let kensaDialog: KensaDialog;
-  let searchDialog: SearchDialog;
+  // let auxLink: HTMLAnchorElement;
+  // let regularDialog: RegularDialog;
+  // let kensaDialog: KensaDialog;
+  // let searchDialog: SearchDialog;
 
   async function doRegular() {
     const names = await api.getShinryouRegular();
@@ -114,7 +114,7 @@
 <div>
   <a href="javascript:void(0)" on:click={doRegular}>[診療行為]</a>
   <Popup let:destroyAnd let:trigger>
-    <a href="javascript:void(0)" bind:this={auxLink} on:click={trigger}
+    <a href="javascript:void(0)" on:click={trigger}
       >その他</a
     >
     <div slot="menu" class="popup-menu">

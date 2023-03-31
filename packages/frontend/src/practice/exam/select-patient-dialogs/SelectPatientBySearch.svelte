@@ -12,11 +12,11 @@
   let patients: Array<m.Patient> = [];
   let searchText: string;
 
-  function onClose(): void {
-    selected.set(null);
-    patients = [];
-    searchText = "";
-  }
+  // function onClose(): void {
+  //   selected.set(null);
+  //   patients = [];
+  //   searchText = "";
+  // }
 
   async function doSearch(ev: Event) {
     ev.preventDefault();

@@ -1,4 +1,4 @@
-import { getBase } from "@/lib/api";
+// import { getBase } from "@/lib/api";
 import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { SearchPatientDialogDriver } from "@cypress/lib/drivers";
 

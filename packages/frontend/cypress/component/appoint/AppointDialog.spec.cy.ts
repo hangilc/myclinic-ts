@@ -1,10 +1,10 @@
 import { AppointTimeData } from "@/appoint/appoint-time-data";
 import AppointDialog from "@/appoint/AppointDialog.svelte";
 import { getBase } from "@/lib/api";
-import { dialogOpen } from "@cypress/lib/dialog";
+// import { dialogOpen } from "@cypress/lib/dialog";
 import { ConfirmDriver } from "@cypress/lib/drivers";
 import { Appoint, AppointTime } from "myclinic-model";
-import { createTypeReferenceDirectiveResolutionCache } from "typescript";
+// import { createTypeReferenceDirectiveResolutionCache } from "typescript";
 import { AppointDialogDriver as driver } from "./column-helper";
 
 describe("AppointDialog", () => {

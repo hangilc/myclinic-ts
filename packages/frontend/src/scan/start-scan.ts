@@ -1,5 +1,5 @@
 import { printApi } from "@/lib/printApi";
-import { getScanner, releaseScanner, scannerUsage } from "./scan-vars";
+import { getScanner, releaseScanner } from "./scan-vars";
 
 export async function startScan(
   device: string,

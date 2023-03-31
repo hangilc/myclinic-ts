@@ -173,7 +173,7 @@ const kanaHankakuZenkakuMap: Record<string, string> = {
   "ﾎﾟ": "ポ",
 }
 
-const zenkakuKatakanaList = Object.values(kanaHankakuZenkakuMap);
+// const zenkakuKatakanaList = Object.values(kanaHankakuZenkakuMap);
 
 const katakanaHiraganaZenkakuMap: Record<string, string> = {
   "ア": "あ",

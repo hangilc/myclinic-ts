@@ -7,7 +7,7 @@
   import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import { HonninKazoku, Shahokokuho, type Patient } from "myclinic-model";
-  import { createEventDispatcher, onMount } from "svelte";
+  import { createEventDispatcher } from "svelte";
 
   export let patient: Patient;
   export let init: Shahokokuho | null;

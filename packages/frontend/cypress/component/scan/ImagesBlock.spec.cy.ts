@@ -7,7 +7,7 @@ describe("Images Block (scan)", () => {
     const uploadFile = `1-image-${Date.now()}-01.jpg`;
     cy.fixture("scanned-image.jpg", null).then(imageData => {
       console.log(imageData.buffer);
-      const url = getBase() + `/save-patient-image?patient-id=1&file-name=${uploadFile}`;
+      // const url = getBase() + `/save-patient-image?patient-id=1&file-name=${uploadFile}`;
       cy.request({
         method: "POST",
         url: getBase() + `/save-patient-image?patient-id=1&file-name=${uploadFile}`,

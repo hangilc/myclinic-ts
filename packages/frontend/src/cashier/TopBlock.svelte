@@ -8,7 +8,7 @@
   import RecordsPulldown from "./RecordsPulldown.svelte";
   import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
   import Bars3 from "@/icons/Bars3.svelte";
-  import { onshiFaceList, parseFaceXml } from "@/lib/onshi-face";
+  import { onshiFaceList } from "@/lib/onshi-face";
   import FaceListDialog from "./FaceListDialog.svelte";
 
   let searchText = "";

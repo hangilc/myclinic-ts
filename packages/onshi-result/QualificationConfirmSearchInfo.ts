@@ -1,6 +1,6 @@
 import { onshiDateToSqlDate } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
-import { isLimitApplicationCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel } from "./codes";
+import { isLimitApplicationCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, type LimitApplicationCertificateRelatedConsFlgLabel } from "./codes";
 
 interface QualificationConfirmSearchInfoInterface {
   InsurerNumber: string;

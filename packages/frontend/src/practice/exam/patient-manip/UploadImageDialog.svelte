@@ -9,7 +9,7 @@
   export let destroy: () => void;
   const initTag = "other";
   let tag: string = initTag;
-  let exampleAnchor: HTMLElement;
+  // let exampleAnchor: HTMLElement;
   let examples: [string, string][] = [
     ["画像", "image"],
     ["保険証", "hokensho"],
@@ -19,7 +19,7 @@
     ["その他", "other"],
   ];
   let fileInput: HTMLInputElement;
-  let form: HTMLFormElement;
+  // let form: HTMLFormElement;
 
   async function doSave() {
     const patient = $currentPatient;
@@ -86,7 +86,7 @@
   <div class="tag-wrapper">
     Tag: <input type="text" bind:value={tag} />
     <Popup let:destroy let:trigger>
-      <a href="javascript:void(0)" bind:this={exampleAnchor} on:click={trigger}
+      <a href="javascript:void(0)" on:click={trigger}
         >例</a
       >
       <div class="popup-menu" slot="menu">
@@ -102,7 +102,7 @@
       </div>
     </Popup>
   </div>
-  <form bind:this={form}>
+  <form>
     <input type="file" bind:this={fileInput} multiple />
   </form>
   <div class="commands">

@@ -6,7 +6,7 @@
 
   export let gengou: string;
   export let gengouList: string[];
-  let anchor: HTMLElement;
+  // let anchor: HTMLElement;
   export let onChange: (gengou: string) => void;
 
   let selected: Writable<string> = writable(gengou);
@@ -14,7 +14,7 @@
 
 </script>
 
-<span class="top" bind:this={anchor}>
+<span class="top">
   <Popup let:destroy let:trigger>
     <span on:click={trigger}>{gengou}</span>
     <GengouPulldown slot="menu" {destroy} {selected} {gengouList}/>

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import api from "@/lib/api";
+  // import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
   import { onshiFace, type OnshiFaceConfirmed } from "@/lib/onshi-face";
   import * as kanjidate from "kanjidate";
-  import type { Patient } from "myclinic-model";
+  // import type { Patient } from "myclinic-model";
 
   export let destroy: () => void;
   export let list: OnshiFaceConfirmed[];

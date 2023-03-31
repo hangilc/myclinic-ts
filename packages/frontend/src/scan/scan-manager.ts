@@ -152,7 +152,7 @@ export class ScanManager {
     }
     const patientId = data.patientId;
     const prevUploadImage = data.uploadFileName;
-    const kind = this.scanKind;
+    // const kind = this.scanKind;
     const img = await startScan(
       scanner.deviceId,
       () => this.onScanStart(),

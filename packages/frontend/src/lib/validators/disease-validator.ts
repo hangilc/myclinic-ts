@@ -1,7 +1,7 @@
 import {
   Disease,
   DiseaseEndReason,
-  type DiseaseEndReasonType,
+  // type DiseaseEndReasonType,
 } from "myclinic-model";
 import { isNotNull, isOneOf, isPositive, isZeroOrPositive, toOptionalSqlDate, toSqlDate, validated6, type VResult } from "../validation";
 

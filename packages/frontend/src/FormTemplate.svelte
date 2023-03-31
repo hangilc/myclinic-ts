@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invalid, valid, validResult, type VResult } from "@/lib/validation";
+  import { invalid, validResult, type VResult } from "@/lib/validation";
   import { createEventDispatcher, onMount } from "svelte";
 
   type DATA_TYPE = { num: number };

@@ -9,5 +9,5 @@
 </script>
 
 <SurfaceModal {destroy} {title}>
-  <img src={url} {width}/>
+  <img src={url} {width} alt={title}/>
 </SurfaceModal>

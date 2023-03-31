@@ -56,7 +56,7 @@
         destroy: () => d.$destroy(),
         query,
         visitId,
-        onRegister: (r) => {
+        onRegister: (_r) => {
           onshiConfirmed = true;
         },
       },

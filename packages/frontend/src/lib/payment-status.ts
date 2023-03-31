@@ -1,4 +1,4 @@
-import type { Charge } from "myclinic-model";
+// import type { Charge } from "myclinic-model";
 
 export enum PaymentStatus {
   Done,

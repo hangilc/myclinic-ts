@@ -98,12 +98,12 @@
     line-height: 1;
   }
 
-  .menu-icon {
+  /* .menu-icon {
     color: gray;
     cursor: pointer;
     position: relative;
     top: -2px;
-  }
+  } */
 
   button {
     margin-left: 0;

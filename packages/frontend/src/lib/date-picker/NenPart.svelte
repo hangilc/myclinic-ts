@@ -6,7 +6,7 @@
 
   export let nen: number;
   export let gengou: string;
-  let anchor: HTMLElement;
+  // let anchor: HTMLElement;
   export let onChange: (nen: number) => void;
 
   let selected: Writable<number> = writable(nen);
@@ -27,7 +27,7 @@
   }
 </script>
 
-<span class="top" bind:this={anchor}>
+<span class="top">
   <Popup let:destroy let:trigger>
     <span on:click={trigger}>{nen}</span><span>年</span>
     <NenPulldown slot="menu" {destroy} {nen} nenList={calcNenList()} {onChange}/>

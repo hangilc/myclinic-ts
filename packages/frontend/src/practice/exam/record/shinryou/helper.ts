@@ -61,7 +61,7 @@ async function batchResolveKizaicodes(
 
 async function batchResolveIyakuhincodes(
   srcList: { iyakuhincode: number, amount: number }[],
-  at: string
+  _at: string
 ): Promise<{ iyakuhincode: number, amount: number }[]> {
   return await Promise.all(
     srcList.map(async src => {

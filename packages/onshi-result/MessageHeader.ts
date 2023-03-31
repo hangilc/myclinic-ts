@@ -1,6 +1,6 @@
 import { onshiDateToSqlDate, onshiDateTimeToSqlDateTime } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
-import { ReferenceClassificationLabel, ReferenceClassification, SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
+import { type ReferenceClassificationLabel, ReferenceClassification, type SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, type CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
 
 export interface MessageHeaderInterface {
   ProcessExecutionTime: string;

@@ -9,7 +9,7 @@
 
   export let destroy: () => void;
   export let visit: VisitEx;
-  let dialog: Dialog;
+  // let dialog: Dialog;
   let searchTextInput: HTMLInputElement;
   let result: ShinryouMaster[] = [];
   let selected: Writable<ShinryouMaster | null> = writable(null);

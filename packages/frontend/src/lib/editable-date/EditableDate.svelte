@@ -14,9 +14,11 @@
     }
   };
   export let datePickerDefault: () => Date = () => new Date();
+  export let onChange: () => void = () => {};
 
   function doChange(d: Date | null): void {
     date = d;
+    onChange();
   }
 </script>
 

@@ -1,10 +1,10 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { pad } from "@/lib/pad";
+  // import { pad } from "@/lib/pad";
   import { setFocus } from "@/lib/set-focus";
   import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
-  import type { Appoint, AppointTime, Patient } from "myclinic-model";
+  import type { Appoint, AppointTime } from "myclinic-model";
   import { formatDate } from "./helper";
 
   export let destroy: () => void;

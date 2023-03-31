@@ -9,17 +9,17 @@
   } from "myclinic-model";
   import { hokenRep } from "@/lib/hoken-rep";
   import api from "@/lib/api";
-  import type { OnshiResult } from "onshi-result";
+  // import type { OnshiResult } from "onshi-result";
   import HokenChoiceDialog from "./HokenChoiceDialog.svelte";
   import { onshiDeleted, onshiEntered } from "@/app-events";
 
   export let visit: VisitEx;
   export let onshiConfirmed: boolean | undefined = undefined;
-  let shahoOpt: [Shahokokuho, boolean] | null = null;
-  let roujinOpt: [Roujin, boolean] | null = null;
-  let koukiOpt: [Koukikourei, boolean] | null = null;
-  let kouhiList: [Kouhi, boolean][] = [];
-  let showHokenChoice = false;
+  // let shahoOpt: [Shahokokuho, boolean] | null = null;
+  // let roujinOpt: [Roujin, boolean] | null = null;
+  // let koukiOpt: [Koukikourei, boolean] | null = null;
+  // let kouhiList: [Kouhi, boolean][] = [];
+  // let showHokenChoice = false;
 
   const unsubs: (() => void)[] = [];
 
@@ -43,9 +43,9 @@
     }
   }));
 
-  function closeHokenDialog(): void {
-    showHokenChoice = false;
-  }
+  // function closeHokenDialog(): void {
+  //   showHokenChoice = false;
+  // }
 
   async function onDispClick() {
     const patientId = visit.patient.patientId;
@@ -130,54 +130,54 @@
     ]);
   }
 
-  function selectedShahokokuhoId(): number {
-    if (shahoOpt == null) {
-      return 0;
-    } else {
-      return shahoOpt[1] ? shahoOpt[0].shahokokuhoId : 0;
-    }
-  }
+  // function selectedShahokokuhoId(): number {
+  //   if (shahoOpt == null) {
+  //     return 0;
+  //   } else {
+  //     return shahoOpt[1] ? shahoOpt[0].shahokokuhoId : 0;
+  //   }
+  // }
 
-  function selectedRoujinId(): number {
-    if (roujinOpt == null) {
-      return 0;
-    } else {
-      return roujinOpt[1] ? roujinOpt[0].roujinId : 0;
-    }
-  }
+  // function selectedRoujinId(): number {
+  //   if (roujinOpt == null) {
+  //     return 0;
+  //   } else {
+  //     return roujinOpt[1] ? roujinOpt[0].roujinId : 0;
+  //   }
+  // }
 
-  function selectedKoukikoureiId(): number {
-    if (koukiOpt == null) {
-      return 0;
-    } else {
-      return koukiOpt[1] ? koukiOpt[0].koukikoureiId : 0;
-    }
-  }
+  // function selectedKoukikoureiId(): number {
+  //   if (koukiOpt == null) {
+  //     return 0;
+  //   } else {
+  //     return koukiOpt[1] ? koukiOpt[0].koukikoureiId : 0;
+  //   }
+  // }
 
-  function selectedKouhiList(): number[] {
-    const selected = kouhiList.map((a) => (a[1] ? a[0].kouhiId : 0));
-    selected.push(...[0, 0, 0]);
-    return selected;
-  }
+  // function selectedKouhiList(): number[] {
+  //   const selected = kouhiList.map((a) => (a[1] ? a[0].kouhiId : 0));
+  //   selected.push(...[0, 0, 0]);
+  //   return selected;
+  // }
 
-  async function doEnter() {
-    const selectedKouhi = selectedKouhiList();
-    const idSet = {
-      shahokokuhoId: selectedShahokokuhoId(),
-      koukikoureiId: selectedKoukikoureiId(),
-      roujinId: selectedRoujinId(),
-      kouhi1Id: selectedKouhi[0],
-      kouhi2Id: selectedKouhi[1],
-      kouhi3Id: selectedKouhi[2],
-    };
-    await api.updateHokenIds(visit.visitId, idSet);
-    closeHokenDialog();
-  }
+  // async function doEnter() {
+  //   const selectedKouhi = selectedKouhiList();
+  //   const idSet = {
+  //     shahokokuhoId: selectedShahokokuhoId(),
+  //     koukikoureiId: selectedKoukikoureiId(),
+  //     roujinId: selectedRoujinId(),
+  //     kouhi1Id: selectedKouhi[0],
+  //     kouhi2Id: selectedKouhi[1],
+  //     kouhi3Id: selectedKouhi[2],
+  //   };
+  //   await api.updateHokenIds(visit.visitId, idSet);
+  //   closeHokenDialog();
+  // }
 
-  function onOnshiConfirmDone(
-    result: OnshiResult | undefined,
-    hoken: Shahokokuho | Koukikourei
-  ) {}
+  // function onOnshiConfirmDone(
+  //   _result: OnshiResult | undefined,
+  //   _hoken: Shahokokuho | Koukikourei
+  // ) {}
 </script>
 
 <div class="disp" on:click={onDispClick}>
@@ -226,7 +226,7 @@
     cursor: pointer;
   }
 
-  .commands {
+  /* .commands {
     display: flex;
     justify-content: right;
     align-items: center;
@@ -236,5 +236,5 @@
 
   .commands * + * {
     margin-left: 4px;
-  }
+  } */
 </style>

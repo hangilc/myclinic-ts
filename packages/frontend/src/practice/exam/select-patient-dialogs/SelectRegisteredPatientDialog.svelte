@@ -18,7 +18,7 @@
   init();
 
   export let onEnter: (patient: Patient, visitId: number | undefined) => void;
-  let dialog: Dialog;
+  // let dialog: Dialog;
 
   async function init() {
     const list = await api.listWqueueFull();

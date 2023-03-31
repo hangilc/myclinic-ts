@@ -10,7 +10,7 @@
   import Popup from "@/lib/Popup.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
 
-  let selectPatientLink: HTMLAnchorElement;
+  // let selectPatientLink: HTMLAnchorElement;
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -85,7 +85,6 @@
     <Popup let:destroy let:trigger>
       <a
         href="javascript:void(0);"
-        bind:this={selectPatientLink}
         on:click={trigger}>患者選択</a
       >
       <SelectPatientMenu

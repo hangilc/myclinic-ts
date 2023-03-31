@@ -20,7 +20,7 @@ import api from "@/lib/api";
     }, () => destroy());
   }
 
-  async function deleteVisit(visitId: number) {
+  async function deleteVisit(_visitId: number) {
     try {
       await api.deleteVisitFromReception(visit.visitId);
     } catch(e) {

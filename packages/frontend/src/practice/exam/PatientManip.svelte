@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SearchPatientResultDialog from "@/cashier/SearchPatientResultDialog.svelte";
+  // import SearchPatientResultDialog from "@/cashier/SearchPatientResultDialog.svelte";
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import { WqueueState } from "myclinic-model";

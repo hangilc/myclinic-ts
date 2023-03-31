@@ -17,7 +17,7 @@
     return () => {
       destroy();
       f();
-    }
+    };
   }
 
   async function trigger(event: MouseEvent) {
@@ -35,9 +35,8 @@
     show = true;
   }
 
-  function open(
-    e: HTMLElement): void {
-    if( anchor != undefined ){
+  function open(e: HTMLElement): void {
+    if (anchor != undefined) {
       context = new PopupContext(anchor, e, clickLocation, destroy);
     }
   }
@@ -50,8 +49,9 @@
   }
 </script>
 
-<slot {trigger} {triggerClick} {destroy} {destroyAnd}/>
+<slot {trigger} {triggerClick} {destroy} {destroyAnd} />
 {#if show}
+  <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
   <div class="menu" use:open on:keydown={doMenuKey} tabindex="0">
     <slot name="menu" />
   </div>

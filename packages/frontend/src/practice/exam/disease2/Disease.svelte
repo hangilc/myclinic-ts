@@ -4,7 +4,7 @@
   import Tenki from "./Tenki.svelte";
   import Edit from "./edit/Edit.svelte";
   import { currentPatient } from "../ExamVars";
-  import { onDestroy, tick } from "svelte";
+  import { onDestroy } from "svelte";
   import RightBox from "../RightBox.svelte";
   import { DiseaseEnv } from "./disease-env";
   import type { Mode } from "./mode";

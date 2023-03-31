@@ -14,11 +14,13 @@
   export let enterButton: string = "選択";
   let result: [Visit, Patient][] = [];
   let selected: Writable<[Visit, Patient] | undefined> = writable(undefined);
-  let date: Writable<Date> = writable(new Date());
+  // let date: Writable<Date> = writable(new Date());
+  let date: Date = new Date();
 
-  date.subscribe(init);
+  // date.subscribe(init);
+  init();
 
-  async function init(date: Date) {
+  async function init() {
     let visits = await api.listVisitByDate(date);
     let map = await api.batchGetPatient(visits.map(v => v.patientId));
     result = visits.map(visit => {
@@ -34,31 +36,41 @@
     }
   }
 
-  function doChange(dateArg: Date | null): void {
-    console.log("doChange", dateArg);
-    if( dateArg != null ){
-      date.set(dateArg);
-    }
-  }
+  // function doChange(dateArg: Date | null): void {
+  //   console.log("doChange", dateArg);
+  //   if( dateArg != null ){
+  //     date = dateArg;
+  //     init();
+  //     // date.set(dateArg);
+  //   }
+  // }
 
   function doToday(): void {
-    date.set(new Date());
+    date = new Date();
+    init();
+    // date.set(new Date());
   }
 
   function doPrev(): void {
-    let newDate = kanjidate.addDays($date, -1);
-    date.set(newDate);
+    const newDate = kanjidate.addDays(date, -1);
+    date = newDate;
+    init();
+    // let newDate = kanjidate.addDays($date, -1);
+    // date.set(newDate);
   }
 
   function doNext(): void {
-    let newDate = kanjidate.addDays($date, 1);
-    date.set(newDate);
+    let newDate = kanjidate.addDays(date, 1);
+    date = newDate;
+    init();
+    // let newDate = kanjidate.addDays($date, 1);
+    // date.set(newDate);
   }
 </script>
 
 <SurfaceModal {destroy} {title}>
   <div class="date">
-    <EditableDate date={$date} onChange={() => doChange($date)}/>
+    <EditableDate bind:date={date} onChange={init}/>
   </div>
   <div>
     <a href="javascript:void(0)" on:click={doToday}>今日</a> |
@@ -67,7 +79,7 @@
   </div>
   <div class="result">
     {#each result as item (item[0].visitId)}
-      {@const visit = item[0]}
+      <!-- {@const visit = item[0]} -->
       {@const patient = item[1]}
       <SelectItem {selected} data={item}>
         ({pad(patient.patientId, 4, "0")}) {patient.fullName()}

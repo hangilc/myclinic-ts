@@ -129,7 +129,7 @@
       if (shahokokuhoOpt != undefined) {
         try {
           inProgressNotice = "オンライン資格確認中";
-          const q = await onshi_query_from_hoken(
+          const q = onshi_query_from_hoken(
             shahokokuhoOpt,
             patient.birthday,
             dateToSql(at)
@@ -159,7 +159,7 @@
       } else if (koukikoureiOpt != undefined) {
         try {
           inProgressNotice = "オンライン資格確認中";
-          const q = await onshi_query_from_hoken(
+          const q = onshi_query_from_hoken(
             koukikoureiOpt,
             patient.birthday,
             dateToSql(at)

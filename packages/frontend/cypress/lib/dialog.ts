@@ -9,7 +9,7 @@ export function dialogOpen(title: string) {
 export function doesNotExist(selector: string, pred: (e: JQuery<HTMLElement>) => boolean = _ => true) {
   cy.get("body").should(($body) => {
     let found = false;
-    $body.find(selector).each((i, e) => {
+    $body.find(selector).each((_i, e) => {
       if (pred(Cypress.$(e))) {
         found = true;
       }

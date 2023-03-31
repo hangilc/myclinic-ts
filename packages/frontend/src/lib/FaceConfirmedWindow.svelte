@@ -13,7 +13,7 @@
     type Kouhi,
     type Patient,
   } from "myclinic-model";
-  import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+  // import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import { AllResolved } from "./face-confirm-window";
   import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "./hoken-onshi-consistent";
 
