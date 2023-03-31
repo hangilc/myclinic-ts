@@ -1,7 +1,8 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import { checkKoukikoureiOnshiCompat, checkShahokokuhoOnshiCompat } from "@/lib/check-hoken-onshi-compat";
+  // import { checkKoukikoureiOnshiCompat, checkShahokokuhoOnshiCompat } from "@/lib/check-hoken-onshi-compat";
   import Dialog from "@/lib/Dialog.svelte";
+  import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import type { AppointTimeData } from "./appoint-time-data";
@@ -40,7 +41,7 @@
             const r = await onshiConfirm(q);
             if (r.isValid && r.resultList.length === 1) {
               const o = r.resultList[0];
-              const err = checkShahokokuhoOnshiCompat(shahoOpt, o);
+              const err = shahokokuhoOnshiConsistent(shahoOpt, o);
               if (err) {
                 c.message += "、" + err;
               } else {
@@ -55,7 +56,7 @@
             const r = await onshiConfirm(q);
             if (r.isValid && r.resultList.length === 1) {
               const o = r.resultList[0];
-              const err = checkKoukikoureiOnshiCompat(koukiOpt, o);
+              const err = koukikoureiOnshiConsistent(koukiOpt, o);
               if (err) {
                 c.message += "、" + err;
               } else {

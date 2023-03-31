@@ -47,36 +47,36 @@
     }
   }
 
-  function isEqualTags(a: string[], b: string[]): boolean {
-    if (a.length !== b.length) {
-      return false;
-    }
-    for (let x of a) {
-      if (!b.includes(x)) {
-        return false;
-      }
-    }
-    for (let x of b) {
-      if (!a.includes(x)) {
-        return false;
-      }
-    }
-    return true;
-  }
+  // function isEqualTags(a: string[], b: string[]): boolean {
+  //   if (a.length !== b.length) {
+  //     return false;
+  //   }
+  //   for (let x of a) {
+  //     if (!b.includes(x)) {
+  //       return false;
+  //     }
+  //   }
+  //   for (let x of b) {
+  //     if (!a.includes(x)) {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 
-  function isModified(): boolean {
-    if (init == undefined) {
-      return false;
-    } else {
-      return !(
-        searchText === init.patientName &&
-        patientId === init.patientId &&
-        memoInput === init.memoString &&
-        isEqualTags(tags, init.tags) &&
-        !followingChecked
-      );
-    }
-  }
+  // function isModified(): boolean {
+  //   if (init == undefined) {
+  //     return false;
+  //   } else {
+  //     return !(
+  //       searchText === init.patientName &&
+  //       patientId === init.patientId &&
+  //       memoInput === init.memoString &&
+  //       isEqualTags(tags, init.tags) &&
+  //       !followingChecked
+  //     );
+  //   }
+  // }
 
   function appointTimeText(data: AppointTimeData): string {
     const d = format("{M}月{D}日（{W}）", data.appointTime.date);
@@ -274,19 +274,31 @@
     <div class="table-row">
       <div>患者番号</div>
       <div>
-        <span data-cy="patient-id-disp">{patientId === 0 ? "" : patientId.toString()}</span>
+        <span data-cy="patient-id-disp"
+          >{patientId === 0 ? "" : patientId.toString()}</span
+        >
       </div>
     </div>
     <div class="table-row">
       <div>メモ</div>
       <div>
-        <input type="text" class="memo-input" bind:value={memoInput} data-cy="memo-input"/>
+        <input
+          type="text"
+          class="memo-input"
+          bind:value={memoInput}
+          data-cy="memo-input"
+        />
       </div>
     </div>
     <div class="table-row">
       <div>タグ</div>
       <div>
-        <input type="checkbox" id={kenshinId} bind:checked={kenshinChecked} data-cy="kenshin-tag"/>
+        <input
+          type="checkbox"
+          id={kenshinId}
+          bind:checked={kenshinChecked}
+          data-cy="kenshin-tag"
+        />
         <label for={kenshinId}>健診</label>
         {#if kenshinChecked && data.followingVacant != undefined}
           <input
@@ -376,12 +388,7 @@
     line-height: 1;
   }
 
-  .commands * + button,
-  .commands * + a {
+  .commands * + button {
     margin-left: 4px;
-  }
-
-  .commands a {
-    font-size: 0.8rem;
   }
 </style>

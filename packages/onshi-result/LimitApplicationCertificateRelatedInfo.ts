@@ -1,4 +1,11 @@
-import { isLimitApplicationCertificateClassificationCode, isLimitApplicationCertificateClassificationFlagCode, LimitApplicationCertificateClassification, LimitApplicationCertificateClassificationFlag, LimitApplicationCertificateClassificationFlagLabel, LimitApplicationCertificateClassificationLabel } from "./codes";
+import {
+  isLimitApplicationCertificateClassificationCode,
+  isLimitApplicationCertificateClassificationFlagCode, 
+  LimitApplicationCertificateClassification, 
+  LimitApplicationCertificateClassificationFlag, 
+  type LimitApplicationCertificateClassificationFlagLabel, 
+  type LimitApplicationCertificateClassificationLabel
+} from "./codes";
 import { castOptStringProp } from "./cast";
 import { onshiDateOptToSqlDateOpt } from "./util";
 
@@ -66,7 +73,7 @@ export class LimitApplicationCertificateRelatedInfo {
   // 合に、申請日の翌月1日が設定される。
   get limitApplicationCertificateLongTermDate(): string | undefined {
     return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateLongTermDate);
-  } 
+  }
 
   toJsonObject(): object {
     return this.orig;

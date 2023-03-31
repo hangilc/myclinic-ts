@@ -1,5 +1,4 @@
 <script lang="ts">
-  import api from "@/lib/api";
   import { setFocus } from "@/lib/set-focus";
   import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";

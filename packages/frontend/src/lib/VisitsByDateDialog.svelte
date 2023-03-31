@@ -35,6 +35,7 @@
   }
 
   function doChange(dateArg: Date | null): void {
+    console.log("doChange", dateArg);
     if( dateArg != null ){
       date.set(dateArg);
     }
@@ -57,7 +58,7 @@
 
 <SurfaceModal {destroy} {title}>
   <div class="date">
-    <EditableDate date={$date} onChange={doChange}/>
+    <EditableDate date={$date} onChange={() => doChange($date)}/>
   </div>
   <div>
     <a href="javascript:void(0)" on:click={doToday}>今日</a> |

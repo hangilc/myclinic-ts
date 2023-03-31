@@ -17,7 +17,7 @@
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
   import { confirm } from "@/lib/confirm-call";
-  import { checkKoukikoureiOnshiCompat, checkShahokokuhoOnshiCompat } from "@/lib/check-hoken-onshi-compat";
+  import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -139,7 +139,7 @@
           console.log("isValid", result.isValid);
           if (result.isValid && result.resultList.length === 1) {
             const r = result.resultList[0];
-            const err = checkShahokokuhoOnshiCompat(shahokokuhoOpt, r);
+            const err = shahokokuhoOnshiConsistent(shahokokuhoOpt, r);
             if( err ){
               alert(err);
               return;
@@ -167,7 +167,8 @@
           const result = await onshiConfirm(q);
           if (result.isValid && result.resultList.length === 1) {
             const r = result.resultList[0];
-            const err = checkKoukikoureiOnshiCompat(koukikoureiOpt, r);
+            // const err = checkKoukikoureiOnshiCompat(koukikoureiOpt, r);
+            const err = koukikoureiOnshiConsistent(koukikoureiOpt, r);
             if( err ){
               alert(err);
               return;

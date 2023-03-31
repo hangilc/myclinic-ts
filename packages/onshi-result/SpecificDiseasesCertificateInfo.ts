@@ -1,4 +1,8 @@
-import { isSpecificDiseasesDiseaseCategoryCode, SpecificDiseasesDiseaseCategory, SpecificDiseasesDiseaseCategoryLabel } from "./codes";
+import { 
+  isSpecificDiseasesDiseaseCategoryCode, 
+  SpecificDiseasesDiseaseCategory, 
+  type SpecificDiseasesDiseaseCategoryLabel 
+} from "./codes";
 import { castOptStringProp } from "./cast";
 import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
 

@@ -1,7 +1,29 @@
 import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
-import { InsuredCardClassification, InsuredCardClassificationLabel, isInsuredCardClassificationCode, isLimitApplicationCertificateRelatedConsFlgCode, isPersonalFamilyClassificationCode, isPreschoolClassificationCode, isReasonOfLossCode, isSexCode, isSpecificDiseasesCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassification, PersonalFamilyClassificationLabel, PreschoolClassification, PreschoolClassificationLabel, ReasonOfLoss, ReasonOfLossLabel, Sex, SexLabel, SpecificDiseasesCertificateRelatedConsFlg, SpecificDiseasesCertificateRelatedConsFlgLabel } from "./codes";
+import { 
+  InsuredCardClassification, 
+  type InsuredCardClassificationLabel, 
+  isInsuredCardClassificationCode, 
+  isLimitApplicationCertificateRelatedConsFlgCode, 
+  isPersonalFamilyClassificationCode, 
+  isPreschoolClassificationCode, 
+  isReasonOfLossCode, 
+  isSexCode, 
+  isSpecificDiseasesCertificateRelatedConsFlgCode, 
+  LimitApplicationCertificateRelatedConsFlg, 
+  type LimitApplicationCertificateRelatedConsFlgLabel, 
+  PersonalFamilyClassification, 
+  type PersonalFamilyClassificationLabel, 
+  PreschoolClassification, 
+  type PreschoolClassificationLabel, 
+  ReasonOfLoss, 
+  type ReasonOfLossLabel, 
+  Sex, 
+  type SexLabel, 
+  SpecificDiseasesCertificateRelatedConsFlg, 
+  type SpecificDiseasesCertificateRelatedConsFlgLabel 
+} from "./codes";
 import { toOptInt, onshiDateOptToSqlDateOpt, onshiDateTimeOptToSqlDateTimeOpt, onshiDateToSqlDate } from "./util";
 import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 

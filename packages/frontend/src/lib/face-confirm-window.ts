@@ -7,5 +7,6 @@ export class AllResolved {
     public hoken: Shahokokuho | Koukikourei,
     public kouhiList: Kouhi[],
     public onshiResult: OnshiResult,
+    public at: string, // date time
   ) { }
 }
