@@ -52,53 +52,85 @@
     );
   }
 
+  async function searchPatient(
+    name: string,
+    yomi: string,
+    birthdate: string
+  ): Promise<Patient[]> {
+    let patients: Patient[] = (await api.searchPatient(name)).filter(p => name === `${p.lastName}　${p.firstName}`);
+    if (yomi !== "") {
+      let yomiPatients = await api.searchPatient(yomi);
+      yomiPatients
+        .filter(p => yomi === `${p.lastNameYomi} ${p.firstNameYomi}`)
+        .filter((p) => {
+          return patients.findIndex((a) => a.patientId === p.patientId) < 0;
+        })
+        .forEach((p) => patients.push(p));
+    }
+    return patients.filter((p) => p.birthday === birthdate);
+  }
+
   async function resolvePatient() {
     const name = result.messageBody.name;
+    const yomi = convertHankakuKatakanaToZenkakuHiragana(
+      result.messageBody.nameKana ?? ""
+    );
     if (result.resultList.length === 1) {
       const r = result.resultList[0];
-      let patients: Patient[] = await api.searchPatient(name);
-      if (patients.length === 1) {
-        const patient = patients[0];
-        if (
-          name === `${patient.lastName}　${patient.firstName}` &&
-          patient.birthday === r.birthdate
-        ) {
-          // single patient resolved
-          const now = new Date();
-          const shahoOpt =
-            (await api.findAvailableShahokokuho(patient.patientId, now)) ??
-            undefined;
-          const koukiOpt =
-            (await api.findAvailableKoukikourei(patient.patientId, now)) ??
-            undefined;
-          const kouhiList: Kouhi[] = await api.listAvailableKouhi(
-            patient.patientId,
-            now
-          );
-          if (shahoOpt && !koukiOpt) {
-            if (shahokokuhoConsistent(shahoOpt, r) && kouhiList.length === 0) {
-              resolvedState = new AllResolved(patient, shahoOpt, [], result);
-            }
-          } else if (koukiOpt && !shahoOpt) {
-          } else if( !shahoOpt && !koukiOpt ){
-            message = "現在有効な登録保険情報が存在しません。";
-          } else {
-            message = "現在有効な登録保険情報が複数存在します。";
-          }
-        } else {
-          message = "検索された登録患者情報とオンライン確認された患者情報とが一致しません。";
-        }
-      } else if (patients.length === 0) {
-        message = "該当する登録患者情報がありません。";
-        const yomi = result.messageBody.nameKana;
-      } else {
-        message = "該当する登録患者情報が複数あります。";
-      }
+      const birthdate = r.birthdate;
+      const patients = await searchPatient(name, yomi, birthdate);
+      console.log(patients);
     } else if (result.resultList.length === 0) {
       message = "確認された保険情報がありません。";
     } else {
       message = "確認された保険情報が複数あります。";
     }
+    // const name = result.messageBody.name;
+    // if (result.resultList.length === 1) {
+    //   const r = result.resultList[0];
+    //   let patients: Patient[] = await api.searchPatient(name);
+    //   if (patients.length === 1) {
+    //     const patient = patients[0];
+    //     if (
+    //       name === `${patient.lastName}　${patient.firstName}` &&
+    //       patient.birthday === r.birthdate
+    //     ) {
+    //       // single patient resolved
+    //       const now = new Date();
+    //       const shahoOpt =
+    //         (await api.findAvailableShahokokuho(patient.patientId, now)) ??
+    //         undefined;
+    //       const koukiOpt =
+    //         (await api.findAvailableKoukikourei(patient.patientId, now)) ??
+    //         undefined;
+    //       const kouhiList: Kouhi[] = await api.listAvailableKouhi(
+    //         patient.patientId,
+    //         now
+    //       );
+    //       if (shahoOpt && !koukiOpt) {
+    //         if (shahokokuhoConsistent(shahoOpt, r) && kouhiList.length === 0) {
+    //           resolvedState = new AllResolved(patient, shahoOpt, [], result);
+    //         }
+    //       } else if (koukiOpt && !shahoOpt) {
+    //       } else if( !shahoOpt && !koukiOpt ){
+    //         message = "現在有効な登録保険情報が存在しません。";
+    //       } else {
+    //         message = "現在有効な登録保険情報が複数存在します。";
+    //       }
+    //     } else {
+    //       message = "検索された登録患者情報とオンライン確認された患者情報とが一致しません。";
+    //     }
+    //   } else if (patients.length === 0) {
+    //     message = "該当する登録患者情報がありません。";
+    //     const yomi = result.messageBody.nameKana;
+    //   } else {
+    //     message = "該当する登録患者情報が複数あります。";
+    //   }
+    // } else if (result.resultList.length === 0) {
+    //   message = "確認された保険情報がありません。";
+    // } else {
+    //   message = "確認された保険情報が複数あります。";
+    // }
   }
 
   async function doRegister(resolved: AllResolved) {
