@@ -5,7 +5,6 @@
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import api from "./api";
   import {
-    dateToSqlDate,
     dateToSqlDateTime,
     HokenIdSet,
     Koukikourei,

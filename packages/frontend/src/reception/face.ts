@@ -1,4 +1,5 @@
 import api from "@/lib/api"
+import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 import { onshiFace } from "@/lib/onshi-face";
 
 export async function faceStart() {
@@ -12,6 +13,13 @@ export async function faceStart() {
   ws.addEventListener("message", async (event) => {
     const file = event.data;
     const result = await onshiFace(file);
+    const d: FaceConfirmedWindow = new FaceConfirmedWindow({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        result,
+      }
+    })
   });
 
   ws.addEventListener("error", (event) => {
