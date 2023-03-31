@@ -4,8 +4,18 @@
   import * as kanjidate from "kanjidate";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import api from "./api";
-  import type { Patient, Shahokokuho } from "myclinic-model";
+  import {
+    dateToSqlDate,
+    dateToSqlDateTime,
+    HokenIdSet,
+    Koukikourei,
+    Onshi,
+    Shahokokuho,
+    type Kouhi,
+    type Patient,
+  } from "myclinic-model";
   import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+  import { AllResolved } from "./face-confirm-window";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -14,7 +24,8 @@
   let yomi: string = result.messageBody.nameKana
     ? toZenkaku(result.messageBody.nameKana)
     : "";
-  let resolvedPatient: Patient | undefined = undefined;
+  let resolvedState: undefined | AllResolved = undefined;
+  let message: string = "";
 
   resolvePatient();
 
@@ -34,10 +45,12 @@
     const hihokenshaKigou = r.insuredCardSymbol ?? "";
     const hihokenshaBangou = r.insuredIdentificationNumber || "";
     const edaban = r.insuredBranchNumber || "";
-    return shahokokuho.hokenshaBangou === hokenshaBangou &&
+    return (
+      shahokokuho.hokenshaBangou === hokenshaBangou &&
       shahokokuho.hihokenshaKigou === hihokenshaKigou &&
       shahokokuho.hihokenshaBangou === hihokenshaBangou &&
-      (shahokokuho.edaban === edaban || shahokokuho.edaban === "0" + edaban);
+      (shahokokuho.edaban === edaban || shahokokuho.edaban === "0" + edaban)
+    );
   }
 
   async function resolvePatient() {
@@ -59,20 +72,68 @@
           const koukiOpt =
             (await api.findAvailableKoukikourei(patient.patientId, now)) ??
             undefined;
+          const kouhiList: Kouhi[] = await api.listAvailableKouhi(
+            patient.patientId,
+            now
+          );
           if (shahoOpt && !koukiOpt) {
-            console.log(shahoOpt);
-            console.log(r);
-            if( shahokokuhoConsistent(shahoOpt, r) ){
-              alert("OK");
+            if (shahokokuhoConsistent(shahoOpt, r) && kouhiList.length === 0) {
+              resolvedState = new AllResolved(patient, shahoOpt, [], result);
             }
           } else if (koukiOpt && !shahoOpt) {
+          } else if( !shahoOpt && !koukiOpt ){
+            message = "現在有効な登録保険情報が存在しません。";
           } else {
+            message = "現在有効な登録保険情報が複数存在します。";
           }
+        } else {
+          message = "検索された登録患者情報とオンライン確認された患者情報とが一致しません。";
         }
-      } else {
+      } else if (patients.length === 0) {
+        message = "該当する登録患者情報がありません。";
         const yomi = result.messageBody.nameKana;
+      } else {
+        message = "該当する登録患者情報が複数あります。";
       }
+    } else if (result.resultList.length === 0) {
+      message = "確認された保険情報がありません。";
+    } else {
+      message = "確認された保険情報が複数あります。";
     }
+  }
+
+  async function doRegister(resolved: AllResolved) {
+    const at = dateToSqlDateTime(new Date());
+    const shahokokuhoId =
+      resolved.hoken instanceof Shahokokuho ? resolved.hoken.shahokokuhoId : 0;
+    const koukikoureiId =
+      resolved.hoken instanceof Koukikourei ? resolved.hoken.koukikoureiId : 0;
+    const kouhi1Id =
+      resolved.kouhiList.length > 0 ? resolved.kouhiList[0].kouhiId : 0;
+    const kouhi2Id =
+      resolved.kouhiList.length > 1 ? resolved.kouhiList[1].kouhiId : 0;
+    const kouhi3Id =
+      resolved.kouhiList.length > 2 ? resolved.kouhiList[2].kouhiId : 0;
+    const hokenIdSet = new HokenIdSet(
+      shahokokuhoId,
+      koukikoureiId,
+      0,
+      kouhi1Id,
+      kouhi2Id,
+      kouhi3Id
+    );
+    const visit = await api.startVisitWithHoken(
+      resolved.patient.patientId,
+      at,
+      hokenIdSet
+    );
+    await api.setOnshi(
+      new Onshi(visit.visitId, JSON.stringify(resolved.onshiResult.origJson))
+    );
+  }
+
+  function doClose(): void {
+    destroy();
   }
 </script>
 
@@ -105,6 +166,22 @@
           {/if}
         </div>
       {/each}
+    </div>
+    {#if message}
+      <div class="message">{message}</div>
+    {/if}
+    <div class="commands">
+      {#if resolvedState instanceof AllResolved}
+        {@const resolved = resolvedState}
+        <button
+          on:click={async () => {
+            await doRegister(resolved);
+            doClose();
+          }}>診察登録</button
+        >
+      {:else}
+        <button on:click={doClose}>閉じる</button>
+      {/if}
     </div>
   </div>
 </Floating>
@@ -139,5 +216,10 @@
 
   .result-list-item > *:nth-child(odd) {
     margin-right: 10px;
+  }
+
+  .message {
+    padding: 10px;
+    margin: 10px 0;
   }
 </style>
