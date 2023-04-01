@@ -26,7 +26,7 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
 export function parseFaceXml(xml: string): OnshiResult {
   const parser = new XMLParser();
   const json = parser.parse(xml);
-  if( !Array.isArray(json.XmlMsg.MessageBody.ResultList) ){
+  if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {
     json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
   }
   console.log(json);
@@ -57,5 +57,25 @@ export async function onshiFaceList(timeout: number = 10): Promise<OnshiFaceConf
   });
   clearTimeout(timerId);
   return await response.json();
+}
+
+export async function onshiFaceArchive(face: String, timeout: number = 10): Promise<boolean> {
+  const server = await api.dictGet("onshi-server");
+  const secret = await api.dictGet("onshi-secret");
+  const controller = new AbortController();
+  const timerId = setTimeout(() => {
+    console.log("timeout");
+    controller.abort();
+  }, timeout * 1000);
+  const response = await fetch(server + "/face/move-to-archive/" + face, {
+    method: "GET",
+    headers: {
+      "X-ONSHI-VIEW-SECRET": secret,
+    },
+    signal: controller.signal
+  });
+  clearTimeout(timerId);
+  const json = await response.json();
+  return json === true;
 }
 

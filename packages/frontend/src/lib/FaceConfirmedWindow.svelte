@@ -19,6 +19,8 @@
 
   export let destroy: () => void;
   export let result: OnshiResult;
+  export let onRegister: () => void = () => {};
+
   const style =
     "width:360px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;";
   let yomi: string = result.messageBody.nameKana
@@ -151,6 +153,7 @@
     await api.setOnshi(
       new Onshi(visit.visitId, JSON.stringify(resolved.onshiResult.origJson))
     );
+    onRegister();
   }
 
   function doClose(): void {

@@ -2,7 +2,7 @@
   // import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
-  import { onshiFace, type OnshiFaceConfirmed } from "@/lib/onshi-face";
+  import { onshiFace, onshiFaceArchive, type OnshiFaceConfirmed } from "@/lib/onshi-face";
   import * as kanjidate from "kanjidate";
   // import type { Patient } from "myclinic-model";
 
@@ -20,6 +20,9 @@
       props: {
         destroy: () => d.$destroy(),
         result,
+        onRegister: async () => {
+          await onshiFaceArchive(c.fileName);
+        }
       }
     })
   }
