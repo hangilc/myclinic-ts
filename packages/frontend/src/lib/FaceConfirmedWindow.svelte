@@ -14,8 +14,13 @@
     type Patient,
   } from "myclinic-model";
   // import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
-  import { AllResolved } from "./face-confirm-window";
-  import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "./hoken-onshi-consistent";
+  import { AllResolved, MultiplePatients } from "./face-confirm-window";
+  import {
+    koukikoureiOnshiConsistent,
+    shahokokuhoOnshiConsistent,
+  } from "./hoken-onshi-consistent";
+  import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+  import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -26,7 +31,7 @@
   let yomi: string = result.messageBody.nameKana
     ? toZenkaku(result.messageBody.nameKana)
     : "";
-  let resolvedState: undefined | AllResolved = undefined;
+  let resolvedState: undefined | AllResolved | MultiplePatients = undefined;
   let message: string = "";
 
   resolvePatient();
@@ -59,6 +64,52 @@
     return patients.filter((p) => p.birthday === birthdate);
   }
 
+  async function advance(
+    patient: Patient,
+    r: ResultOfQualificationConfirmation
+  ) {
+    const now = dateToSqlDateTime(new Date());
+    const shahoOpt =
+      (await api.findAvailableShahokokuho(patient.patientId, now)) ?? undefined;
+    const koukiOpt =
+      (await api.findAvailableKoukikourei(patient.patientId, now)) ?? undefined;
+    const kouhiList: Kouhi[] = await api.listAvailableKouhi(
+      patient.patientId,
+      now
+    );
+    if (shahoOpt && !koukiOpt) {
+      const err = shahokokuhoOnshiConsistent(shahoOpt, r);
+      if (!err) {
+        resolvedState = new AllResolved(
+          patient,
+          shahoOpt,
+          kouhiList,
+          result,
+          now
+        );
+      } else {
+        message = err;
+      }
+    } else if (koukiOpt && !shahoOpt) {
+      const err = koukikoureiOnshiConsistent(koukiOpt, r);
+      if (!err) {
+        resolvedState = new AllResolved(
+          patient,
+          koukiOpt,
+          kouhiList,
+          result,
+          now
+        );
+      } else {
+        message = "保険情報が資格確認情報と一致しません。";
+      }
+    } else if (!shahoOpt && !koukiOpt) {
+      message = "現在有効な登録保険情報が存在しません。";
+    } else {
+      message = "現在有効な登録保険情報が複数存在します。";
+    }
+  }
+
   async function resolvePatient() {
     const name = result.messageBody.name;
     const yomi = convertHankakuKatakanaToZenkakuHiragana(
@@ -69,54 +120,12 @@
       const birthdate = r.birthdate;
       const patients = await searchPatient(name, yomi, birthdate);
       if (patients.length === 1) {
-        const patient = patients[0];
-        const now = dateToSqlDateTime(new Date());
-        const shahoOpt =
-          (await api.findAvailableShahokokuho(patient.patientId, now)) ??
-          undefined;
-        const koukiOpt =
-          (await api.findAvailableKoukikourei(patient.patientId, now)) ??
-          undefined;
-        const kouhiList: Kouhi[] = await api.listAvailableKouhi(
-          patient.patientId,
-          now
-        );
-        if (shahoOpt && !koukiOpt) {
-          const err = shahokokuhoOnshiConsistent(shahoOpt, r);
-          if (!err) {
-            resolvedState = new AllResolved(
-              patient,
-              shahoOpt,
-              kouhiList,
-              result,
-              now
-            );
-          } else {
-            // message = "保険情報が資格確認情報と一致しません。";
-            message = err;
-          }
-        } else if (koukiOpt && !shahoOpt) {
-          const err = koukikoureiOnshiConsistent(koukiOpt, r);
-          if (!err) {
-            resolvedState = new AllResolved(
-              patient,
-              koukiOpt,
-              kouhiList,
-              result,
-              now
-            );
-          } else {
-            message = "保険情報が資格確認情報と一致しません。";
-          }
-        } else if (!shahoOpt && !koukiOpt) {
-          message = "現在有効な登録保険情報が存在しません。";
-        } else {
-          message = "現在有効な登録保険情報が複数存在します。";
-        }
+        advance(patients[0], r);
       } else if (patients.length === 0) {
         message = "該当する登録患者情報がありません。";
       } else {
         message = "該当する登録患者情報が複数あります。";
+        resolvedState = new MultiplePatients(patients, r);
       }
     } else if (result.resultList.length === 0) {
       message = "確認された保険情報がありません。";
@@ -154,6 +163,21 @@
       new Onshi(visit.visitId, JSON.stringify(resolved.onshiResult.origJson))
     );
     onRegister();
+  }
+
+  function doChoosePatient(patients: Patient[], r: ResultOfQualificationConfirmation) {
+    const d: ChoosePatientDialog = new ChoosePatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patients,
+        onSelect: (selected: Patient | undefined) => {
+          if( selected !== undefined ){
+            advance(selected, r);
+          }
+        }
+      }
+    })
   }
 
   function doClose(): void {
@@ -202,6 +226,12 @@
             await doRegister(resolved);
             doClose();
           }}>診察登録</button
+        >
+      {:else if resolvedState instanceof MultiplePatients}
+        {@const resolved = resolvedState}
+        <button
+          on:click={() => doChoosePatient(resolved.patients, resolved.result)}
+          >患者選択</button
         >
       {:else}
         <button on:click={doClose}>閉じる</button>
