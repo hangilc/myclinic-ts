@@ -13,7 +13,6 @@
     type Kouhi,
     type Patient,
   } from "myclinic-model";
-  // import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import { AllResolved, MultiplePatients } from "./face-confirm-window";
   import {
     koukikoureiOnshiConsistent,
@@ -119,7 +118,9 @@
       const r = result.resultList[0];
       const birthdate = r.birthdate;
       const patients = await searchPatient(name, yomi, birthdate);
+      console.log("patients", patients);
       if (patients.length === 1) {
+        message = "";
         advance(patients[0], r);
       } else if (patients.length === 0) {
         message = "該当する登録患者情報がありません。";
@@ -173,6 +174,7 @@
         patients,
         onSelect: (selected: Patient | undefined) => {
           if( selected !== undefined ){
+            message = "";
             advance(selected, r);
           }
         }

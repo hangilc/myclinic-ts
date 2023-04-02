@@ -22,6 +22,7 @@
         result,
         onRegister: async () => {
           await onshiFaceArchive(c.fileName);
+          destroy();
         }
       }
     })
