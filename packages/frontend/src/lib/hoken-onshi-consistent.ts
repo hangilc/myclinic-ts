@@ -83,7 +83,8 @@ export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultOfQu
   const validFrom: string = dateToSqlDate(validFromDate);
   const validUpto: string = r.insuredCardExpirationDate ?? "0000-00-00";
   if (isKoukikourei(hokenshaNumber)) {
-    const futanWari: number | undefined = r.elderlyRecipientCertificateInfo?.futanWari;
+    console.log(r);
+    const futanWari: number | undefined = r.koukikoureiFutanWari;
     if (futanWari === undefined) {
       return "後期高齢保険の負担割合が取得できません。"
     }

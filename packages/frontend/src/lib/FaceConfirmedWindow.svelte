@@ -19,13 +19,14 @@
     MultiplePatients,
   } from "./face-confirm-window";
   import {
-  create_hoken_from_onshi_kakunin,
+    create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
   import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
-  import { koukikoureiRep, shahokokuhoRep } from "./hoken-rep";
+  import { koukikoureiRep, shahokokuhoName, shahokokuhoRep } from "./hoken-rep";
+  import { confirm } from "./confirm-call";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -198,19 +199,40 @@
   }
 
   async function doHokenUpdate(resolved: InconsistentHoken) {
+    message = "";
     const today: Date = new Date();
-    const yesterday: Date = kanjidate.addDays(today, -1);
     let alertMessage: string = "";
-    if( resolved.shahokokuhoOpt !== undefined ){
+    if (resolved.shahokokuhoOpt !== undefined) {
       const rep = shahokokuhoRep(resolved.shahokokuhoOpt);
       alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
     }
-    if( resolved.koukikoureiOpt !== undefined ){
+    if (resolved.koukikoureiOpt !== undefined) {
       const rep = koukikoureiRep(resolved.koukikoureiOpt.futanWari);
       alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
     }
-    const hoken = create_hoken_from_onshi_kakunin(resolved.patient.patientId, resolved.result, today);
-    console.log(hoken);
+    const hoken = create_hoken_from_onshi_kakunin(
+      resolved.patient.patientId,
+      resolved.result,
+      today
+    );
+    if (typeof hoken === "string") {
+      alert(hoken);
+    } else if (hoken instanceof Shahokokuho) {
+      const rep = shahokokuhoName(hoken.hokenshaBangou);
+      alertMessage += `${rep}を登録します。`;
+      console.log(hoken);
+      confirm(alertMessage, async () => {
+        await api.newShahokokuho(hoken);
+        resolvePatient();
+      });
+    } else {
+      const rep = koukikoureiRep(hoken.futanWari);
+      alertMessage += `${rep}を登録します。`;
+      confirm(alertMessage, async () => {
+        await api.newKoukikourei(hoken);
+        resolvePatient();
+      });
+    }
   }
 
   function doClose(): void {

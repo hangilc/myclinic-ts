@@ -1295,18 +1295,6 @@ export default {
     return get("clear-onshi", { "visit-id": visitId.toString() }, castBoolean);
   },
 
-  // enterOnshi(onshi: m.Onshi): Promise<boolean> {
-  //   return post("enter-onshi", onshi, {}, castBoolean);
-  // },
-
-  // updateOnshi(onshi: m.Onshi): Promise<boolean> {
-  //   return post("update-onshi", onshi, {}, castBoolean);
-  // },
-
-  // deleteOnshi(visitId: number): Promise<boolean> {
-  //   return get("delete-onshi", { "visit-id": visitId.toString() }, castBoolean);
-  // },
-
   batchProbeOnshi(visitIds: number[]): Promise<number[]> {
     return post("batch-probe-onshi", visitIds, {}, castList(castNumber));
   },
@@ -1317,6 +1305,14 @@ export default {
 
   dictSet(key: string, value: string): Promise<boolean> {
     return get("dict-set", { key, value }, castBoolean);
+  },
+
+  newShahokokuho(shahokokuho: m.Shahokokuho): Promise<m.Shahokokuho> {
+    return post("new-shahokokuho", shahokokuho, {}, m.Shahokokuho.cast)
+  },
+
+  newKoukikourei(koukikourei: m.Koukikourei): Promise<m.Koukikourei> {
+    return post("new-koukikourei", koukikourei, {}, m.Koukikourei.cast)
   },
 
 };
