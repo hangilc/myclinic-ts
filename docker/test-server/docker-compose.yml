@@ -7,7 +7,7 @@ services:
     ports:
       - "33060:3306"
   files:
-    image: "hangilc/myclinic-files-demo:1.0.1"
+    image: "hangilc/myclinic-files-demo:1.0.2"
   server:
     image: "hangilc/myclinic-scala:1.0.2"
     ports:
