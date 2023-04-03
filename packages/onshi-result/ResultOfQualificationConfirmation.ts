@@ -109,6 +109,19 @@ export class ResultOfQualificationConfirmation {
     }
   }
 
+  get honninStore(): number | undefined {
+    const honnin = this.personalFamilyClassification;
+    if( honnin === undefined ){
+      return undefined;
+    } else {
+      if( honnin === "本人" ) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+  }
+
   // 被保険者の氏名（世帯主氏名）
   get InsuredName(): string | undefined {
     return this.orig.InsuredName;

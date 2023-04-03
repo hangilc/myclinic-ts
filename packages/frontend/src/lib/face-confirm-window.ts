@@ -18,3 +18,12 @@ export class MultiplePatients {
     public result: ResultOfQualificationConfirmation,
   ) {}
 }
+
+export class InconsistentHoken {
+  constructor(
+    public patient: Patient,
+    public shahokokuhoOpt: Shahokokuho | undefined,
+    public koukikoureiOpt: Koukikourei | undefined,
+    public result: ResultOfQualificationConfirmation,
+  ) {}
+}

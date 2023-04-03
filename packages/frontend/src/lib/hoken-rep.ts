@@ -85,3 +85,7 @@ export function kouhiRep(futanshaBangou: number): string {
   else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
   else { return `公費負担（${futanshaBangou}）`; }
 }
+
+export function isKoukikourei(hokenshaBangou: number): boolean {
+  return Math.floor(hokenshaBangou / 1000000) === 39;
+}

@@ -13,13 +13,19 @@
     type Kouhi,
     type Patient,
   } from "myclinic-model";
-  import { AllResolved, MultiplePatients } from "./face-confirm-window";
   import {
+    AllResolved,
+    InconsistentHoken,
+    MultiplePatients,
+  } from "./face-confirm-window";
+  import {
+  create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
   import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
+  import { koukikoureiRep, shahokokuhoRep } from "./hoken-rep";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -30,7 +36,11 @@
   let yomi: string = result.messageBody.nameKana
     ? toZenkaku(result.messageBody.nameKana)
     : "";
-  let resolvedState: undefined | AllResolved | MultiplePatients = undefined;
+  let resolvedState:
+    | undefined
+    | AllResolved
+    | MultiplePatients
+    | InconsistentHoken = undefined;
   let message: string = "";
 
   resolvePatient();
@@ -77,8 +87,6 @@
       now
     );
     if (shahoOpt && !koukiOpt) {
-      console.log("shaho", shahoOpt);
-      console.log("r", r);
       const err = shahokokuhoOnshiConsistent(shahoOpt, r);
       if (!err) {
         resolvedState = new AllResolved(
@@ -90,6 +98,7 @@
         );
       } else {
         message = err;
+        resolvedState = new InconsistentHoken(patient, shahoOpt, koukiOpt, r);
       }
     } else if (koukiOpt && !shahoOpt) {
       const err = koukikoureiOnshiConsistent(koukiOpt, r);
@@ -102,7 +111,8 @@
           now
         );
       } else {
-        message = "保険情報が資格確認情報と一致しません。";
+        message = err;
+        resolvedState = new InconsistentHoken(patient, shahoOpt, koukiOpt, r);
       }
     } else if (!shahoOpt && !koukiOpt) {
       message = "現在有効な登録保険情報が存在しません。";
@@ -168,20 +178,39 @@
     onRegister();
   }
 
-  function doChoosePatient(patients: Patient[], r: ResultOfQualificationConfirmation) {
+  function doChoosePatient(
+    patients: Patient[],
+    r: ResultOfQualificationConfirmation
+  ) {
     const d: ChoosePatientDialog = new ChoosePatientDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         patients,
         onSelect: (selected: Patient | undefined) => {
-          if( selected !== undefined ){
+          if (selected !== undefined) {
             message = "";
             advance(selected, r);
           }
-        }
-      }
-    })
+        },
+      },
+    });
+  }
+
+  async function doHokenUpdate(resolved: InconsistentHoken) {
+    const today: Date = new Date();
+    const yesterday: Date = kanjidate.addDays(today, -1);
+    let alertMessage: string = "";
+    if( resolved.shahokokuhoOpt !== undefined ){
+      const rep = shahokokuhoRep(resolved.shahokokuhoOpt);
+      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
+    }
+    if( resolved.koukikoureiOpt !== undefined ){
+      const rep = koukikoureiRep(resolved.koukikoureiOpt.futanWari);
+      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
+    }
+    const hoken = create_hoken_from_onshi_kakunin(resolved.patient.patientId, resolved.result, today);
+    console.log(hoken);
   }
 
   function doClose(): void {
@@ -237,6 +266,9 @@
           on:click={() => doChoosePatient(resolved.patients, resolved.result)}
           >患者選択</button
         >
+      {:else if resolvedState instanceof InconsistentHoken}
+        {@const resolved = resolvedState}
+        <button on:click={() => doHokenUpdate(resolved)}>保険証更新</button>
       {:else}
         <button on:click={doClose}>閉じる</button>
       {/if}
@@ -248,7 +280,7 @@
   .content {
     background-color: white;
     opacity: 1;
-    max-height: 300px;
+    max-height: 400px;
     height: auto;
     overflow-y: auto;
   }
