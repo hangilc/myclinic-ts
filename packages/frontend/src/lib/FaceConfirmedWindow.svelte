@@ -77,6 +77,8 @@
       now
     );
     if (shahoOpt && !koukiOpt) {
+      console.log("shaho", shahoOpt);
+      console.log("r", r);
       const err = shahokokuhoOnshiConsistent(shahoOpt, r);
       if (!err) {
         resolvedState = new AllResolved(

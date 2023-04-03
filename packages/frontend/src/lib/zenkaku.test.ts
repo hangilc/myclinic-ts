@@ -40,4 +40,8 @@ describe("zenkaku", () => {
     expect(z.hankakuKatakanaToZenkakuHiragana("ｼﾞ")).toBe("じ");
     expect(z.convertHankakuKatakanaToZenkakuHiragana("ﾌｼﾞﾜﾗ")).toBe("ふじわら");
   });
+
+  it("should convert zenkaku to hankaku", () => {
+    expect(z.toHankaku("Ａ－１０４")).toBe("A-104");
+  })
 });

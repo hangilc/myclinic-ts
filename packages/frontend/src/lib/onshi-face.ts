@@ -24,6 +24,7 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
 };
 
 export function parseFaceXml(xml: string): OnshiResult {
+  console.log("xml", xml);
   const parser = new XMLParser();
   const json = parser.parse(xml);
   if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {

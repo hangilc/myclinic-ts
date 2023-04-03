@@ -99,6 +99,14 @@ export function fromZenkakuWith(
   return convertWith(reverseMap(alphaToZenkakuMap), src);
 }
 
+const reverseZenkakuMap = Object.assign(reverseMap(zenkakuMap), {
+  "－": "-",
+});
+
+export function toHankaku(src: string): string {
+  return convertWith(reverseZenkakuMap, src.normalize("NFKC"));
+}
+
 const kanaHankakuZenkakuMap: Record<string, string> = {
   "ｱ": "ア",
   "ｲ": "イ",
