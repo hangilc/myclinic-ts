@@ -1,5 +1,6 @@
 import api from "./api";
 import { OnshiResult } from "onshi-result";
+import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result/codes";
 
 export interface OnshiKakuninQuery {
   hokensha: string,
@@ -8,7 +9,7 @@ export interface OnshiKakuninQuery {
   confirmationDate: string,
   kigou: string | undefined,
   edaban: string | undefined,
-  limitAppConsFlag: string,
+  limitAppConsFlag: LimitApplicationCertificateRelatedConsFlgCode,
 };
 
 export async function onshiConfirm(

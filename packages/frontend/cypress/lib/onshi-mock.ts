@@ -1,94 +1,91 @@
 import type { OnshiKakuninQuery } from "@/lib/onshi-confirm";
 import { OnshiResult } from "onshi-result";
-import { MessageBody, type MessageBodyInterface } from "onshi-result/MessageBody";
-import { MessageHeader, type MessageHeaderInterface } from "onshi-result/MessageHeader";
+import type { MessageBodyInterface } from "onshi-result/MessageBody";
+import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime } from "myclinic-model";
-import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, preschoolClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type PersonalFamilyClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode } from "onshi-result/codes";
-import type { QualificationConfirmSearchInfo, QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
+import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
+import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
+import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
+import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
+import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
+import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
 
-function messageHeaderBase(): MessageHeaderInterface {
-  return {
-    ProcessExecutionTime: fromSqlDateTime(dateToSqlDateTime(new Date())),
-    QualificationConfirmationDate: fromSqlDate(dateToSqlDate(new Date())),
-    MedicalInstitutionCode: "1312345678",
-    ReferenceClassification: "2", // 保険者証
-    CharacterCodeIdentifier: "0", // UTF-8
-    SegmentOfResult: "1", // 正常終了
-    ArbitraryFileIdentifier: undefined,
-    ErrorCode: undefined,
-    ErrorMessage: undefined,
-  };
-}
+// function messageHeaderBase(): MessageHeaderInterface {
+//   return {
+//     ProcessExecutionTime: fromSqlDateTime(dateToSqlDateTime(new Date())),
+//     QualificationConfirmationDate: fromSqlDate(dateToSqlDate(new Date())),
+//     MedicalInstitutionCode: "1312345678",
+//     ReferenceClassification: "2", // 保険者証
+//     CharacterCodeIdentifier: "0", // UTF-8
+//     SegmentOfResult: "1", // 正常終了
+//     ArbitraryFileIdentifier: undefined,
+//     ErrorCode: undefined,
+//     ErrorMessage: undefined,
+//   };
+// }
 
-function messageBodyBase(): MessageBodyInterface {
-  return {
-    ProcessingResultStatus: "1", // 正常終了
-    ResultList: [], //ResultOfQualificationConfirmation[];
-    QualificationConfirmSearchInfo: undefined,
-    PrescriptionIssueSelect: undefined,
-    ProcessingResultCode: undefined,
-    ProcessingResultMessage: undefined,
-    QualificationValidity: "1", // 有効
-  };
-}
+// function messageBodyBase(): MessageBodyInterface {
+//   return {
+//     ProcessingResultStatus: "1", // 正常終了
+//     ResultList: [], //ResultOfQualificationConfirmation[];
+//     QualificationConfirmSearchInfo: undefined,
+//     PrescriptionIssueSelect: undefined,
+//     ProcessingResultCode: undefined,
+//     ProcessingResultMessage: undefined,
+//     QualificationValidity: "1", // 有効
+//   };
+// }
 
-function resultBase(): ResultOfQualificationConfirmationInterface {
-  return {
-    InsuredCardClassification: "01", // 被保険者証（一般） 
-    Name: "診療 太郎",
-    Sex1: "1", // 男,
-    Birthdate: "20000101",
-    InsurerName: "保険組合",
-    InsurerNumber: undefined,
-    InsuredCardSymbol: undefined,
-    InsuredIdentificationNumber: undefined,
-    InsuredBranchNumber: undefined,
-    PersonalFamilyClassification: undefined,
-    InsuredName: undefined,
-    NameOfOther: undefined,
-    NameKana: undefined,
-    NameOfOtherKana: undefined,
-    Sex2: undefined,
-    Address: undefined,
-    PostNumber: undefined,
-    InsuredCertificateIssuanceDate: undefined,
-    InsuredCardValidDate: undefined,
-    InsuredCardExpirationDate: undefined,
-    InsuredPartialContributionRatio: undefined,
-    PreschoolClassification: undefined,
-    ReasonOfLoss: undefined,
-    ElderlyRecipientCertificateInfo: undefined,
-    LimitApplicationCertificateRelatedConsFlg: undefined,
-    LimitApplicationCertificateRelatedConsTime: undefined,
-    LimitApplicationCertificateRelatedInfo: undefined,
-    SpecificDiseasesCertificateRelatedConsFlg: undefined,
-    SpecificDiseasesCertificateRelatedConsTime: undefined,
-    SpecificDiseasesCertificateList: [],
-  }
-}
+// function resultBase(): ResultOfQualificationConfirmationInterface {
+//   return {
+//     InsuredCardClassification: "01", // 被保険者証（一般） 
+//     Name: "診療 太郎",
+//     Sex1: "1", // 男,
+//     Birthdate: "20000101",
+//     InsurerName: "保険組合",
+//     InsurerNumber: undefined,
+//     InsuredCardSymbol: undefined,
+//     InsuredIdentificationNumber: undefined,
+//     InsuredBranchNumber: undefined,
+//     PersonalFamilyClassification: undefined,
+//     InsuredName: undefined,
+//     NameOfOther: undefined,
+//     NameKana: undefined,
+//     NameOfOtherKana: undefined,
+//     Sex2: undefined,
+//     Address: undefined,
+//     PostNumber: undefined,
+//     InsuredCertificateIssuanceDate: undefined,
+//     InsuredCardValidDate: undefined,
+//     InsuredCardExpirationDate: undefined,
+//     InsuredPartialContributionRatio: undefined,
+//     PreschoolClassification: undefined,
+//     ReasonOfLoss: undefined,
+//     ElderlyRecipientCertificateInfo: undefined,
+//     LimitApplicationCertificateRelatedConsFlg: undefined,
+//     LimitApplicationCertificateRelatedConsTime: undefined,
+//     LimitApplicationCertificateRelatedInfo: undefined,
+//     SpecificDiseasesCertificateRelatedConsFlg: undefined,
+//     SpecificDiseasesCertificateRelatedConsTime: undefined,
+//     SpecificDiseasesCertificateList: [],
+//   }
+// }
 
 export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
-  const messageHeader = new MessageHeader(Object.assign(messageHeaderBase(), {
-    QualificationConfirmationDate: fromSqlDate(q.confirmationDate)
-  }));
-  const messageBody = new MessageBody(Object.assign(messageBodyBase(), {
+  return createOnshiResult({
+    QualificationConfirmationDate: q.confirmationDate,
+  }, {
     ResultList: [
-      new ResultOfQualificationConfirmation(Object.assign(resultBase(), {
+      createResultOfQualificationConfirmationInterface({
         InsurerNumber: q.hokensha,
         InsuredCardSymbol: q.kigou,
         InsuredIdentificationNumber: q.hihokensha,
         InsuredBranchNumber: q.edaban,
         LimitApplicationCertificateRelatedConsFlg: q.limitAppConsFlag,
-      }))
+      })
     ]
-  }));
-  const xmlMsg = new XmlMsg(messageHeader, messageBody);
-  const origJson: object = {
-    XmlMsg: xmlMsg.toJsonObject()
-  }
-  return new OnshiResult(xmlMsg, origJson);
+  });
 }
 
 export interface MessageHeaderCreationSpec {
@@ -149,7 +146,7 @@ function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyI
   };
 }
 
-function  resolveDate(src: string | Date | undefined, defaultValue: () => Date): string {
+function resolveDate(src: string | Date | undefined, defaultValue: () => Date): string {
   if (src === undefined) {
     src = defaultValue();
   }
@@ -157,7 +154,34 @@ function  resolveDate(src: string | Date | undefined, defaultValue: () => Date):
     src = dateToSqlDate(src);
   }
   return fromSqlDate(src);
+}
 
+function resolveOptDate(src: string | Date | undefined): string | undefined {
+  if (src === undefined) {
+    return undefined;
+  }
+  if (src instanceof Date) {
+    src = dateToSqlDate(src);
+  }
+  return fromSqlDate(src);
+}
+
+function resolveOptDateTime(src: string | Date | undefined): string | undefined {
+  if (src === undefined) {
+    return undefined;
+  }
+  if (src instanceof Date) {
+    src = dateToSqlDateTime(src);
+  }
+  return fromSqlDateTime(src);
+}
+
+function toOptContributionRatio(src: 10 | 20 | 30 | undefined): string | undefined {
+  if (src === undefined) {
+    return undefined;
+  } else {
+    return `0${src}`;
+  }
 }
 
 export interface ResultOfQualificationConfirmationCreationSpec {
@@ -177,15 +201,29 @@ export interface ResultOfQualificationConfirmationCreationSpec {
   NameOfOtherKana?: string;
   Sex2?: SexCode;
   Address?: string;
+  PostNumber?: string;
+  InsuredCertificateIssuanceDate?: string | Date;
+  InsuredCardValidDate?: string | Date;
+  InsuredCardExpirationDate?: string | Date;
+  InsuredPartialContributionRatio?: 10 | 20 | 30 | undefined;
+  PreschoolClassification?: PreschoolClassificationCode;
+  ReasonOfLoss?: ReasonOfLossCode;
+  ElderlyRecipientCertificateInfo?: ElderlyRecipientCertificateInfoInterface;
+  LimitApplicationCertificateRelatedConsFlg?: LimitApplicationCertificateRelatedConsFlgCode;
+  LimitApplicationCertificateRelatedConsTime?: string | Date;
+  LimitApplicationCertificateRelatedInfo?: LimitApplicationCertificateRelatedInfoInterface;
+  SpecificDiseasesCertificateRelatedConsFlg?: SpecificDiseasesCertificateRelatedConsFlgCode;
+  SpecificDiseasesCertificateRelatedConsTime?: string | Date;
+  SpecificDiseasesCertificateList?: SpecificDiseasesCertificateInfoInterface[],
 }
 
-function createResultOfQualificationConfirmationInterface(spec: ResultOfQualificationConfirmationCreationSpec)
+export function createResultOfQualificationConfirmationInterface(spec: ResultOfQualificationConfirmationCreationSpec)
   : ResultOfQualificationConfirmationInterface {
-    return {
+  return {
     InsuredCardClassification: spec.InsuredCardClassification ?? insuredCardClassificationFromLabel("被保険者証（一般）"),
     Name: spec.Name ?? "診療　太郎",
     Sex1: spec.Sex1 ?? sexFromLabel("男"),
-    Birthdate: resolveDate(spec.Birthdate, () => new Date(1970, 7-1, 12)),
+    Birthdate: resolveDate(spec.Birthdate, () => new Date(1970, 7 - 1, 12)),
     InsurerName: spec.InsurerName ?? "杉並区",
     InsurerNumber: spec.InsurerNumber ?? "01123456",
     InsuredCardSymbol: spec.InsuredCardSymbol,
@@ -198,20 +236,20 @@ function createResultOfQualificationConfirmationInterface(spec: ResultOfQualific
     NameOfOtherKana: spec.NameOfOtherKana,
     Sex2: spec.Sex2,
     Address: spec.Address,
-    PostNumber: string | undefined;
-    InsuredCertificateIssuanceDate: string | undefined;
-    InsuredCardValidDate: string | undefined;
-    InsuredCardExpirationDate: string | undefined;
-    InsuredPartialContributionRatio: string | undefined;
-    PreschoolClassification: string | undefined;
-    ReasonOfLoss: string | undefined;
-    ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfoInterface | undefined;
-    LimitApplicationCertificateRelatedConsFlg: string | undefined;
-    LimitApplicationCertificateRelatedConsTime: string | undefined;
-    LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfoInterface | undefined;
-    SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
-    SpecificDiseasesCertificateRelatedConsTime: string | undefined;
-    SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfoInterface[];
+    PostNumber: spec.PostNumber,
+    InsuredCertificateIssuanceDate: resolveOptDate(spec.InsuredCertificateIssuanceDate),
+    InsuredCardValidDate: resolveOptDate(spec.InsuredCardValidDate),
+    InsuredCardExpirationDate: resolveOptDate(spec.InsuredCardExpirationDate),
+    InsuredPartialContributionRatio: toOptContributionRatio(spec.InsuredPartialContributionRatio),
+    PreschoolClassification: spec.PreschoolClassification,
+    ReasonOfLoss: spec.ReasonOfLoss,
+    ElderlyRecipientCertificateInfo: spec.ElderlyRecipientCertificateInfo,
+    LimitApplicationCertificateRelatedConsFlg: spec.LimitApplicationCertificateRelatedConsFlg,
+    LimitApplicationCertificateRelatedConsTime: resolveOptDateTime(spec.LimitApplicationCertificateRelatedConsTime),
+    LimitApplicationCertificateRelatedInfo: spec.LimitApplicationCertificateRelatedInfo,
+    SpecificDiseasesCertificateRelatedConsFlg: spec.SpecificDiseasesCertificateRelatedConsFlg,
+    SpecificDiseasesCertificateRelatedConsTime: resolveOptDateTime(spec.SpecificDiseasesCertificateRelatedConsTime),
+    SpecificDiseasesCertificateList: spec.SpecificDiseasesCertificateList ?? [],
   }
 }
 
