@@ -12,6 +12,17 @@ export function isReferenceClassificationCode(k: string): k is ReferenceClassifi
   return Object.keys(ReferenceClassification).includes(k);
 }
 
+export function referenceClassificationFromLabel(label: ReferenceClassificationLabel): ReferenceClassificationCode {
+  let key: ReferenceClassificationCode;
+  for (key in ReferenceClassification) {
+    const value = ReferenceClassification[key];
+    if( value === label ){
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (referenceClassificationFromLabel).");
+}
+
 export const SegmentOfResult = {
   "1": "正常終了",
   "2": "処理中",
@@ -23,6 +34,17 @@ export type SegmentOfResultCode = keyof typeof SegmentOfResult;
 
 export function isSegmentOfResultCode(k: string): k is SegmentOfResultCode {
   return Object.keys(SegmentOfResult).includes(k);
+}
+
+export function segmentOfResultFromLabel(label: SegmentOfResultLabel): SegmentOfResultCode {
+  let key: SegmentOfResultCode;
+  for (key in SegmentOfResult) {
+    const value = SegmentOfResult[key];
+    if( value === label ){
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (SegmentOfResultCode).");
 }
 
 export const CharacterCodeIdentifier = {
@@ -41,6 +63,17 @@ export const LimitApplicationCertificateRelatedConsFlg = {
   "0": "未同意",
   "1": "同意"
 } as const;
+
+export function characterCodeIdentifierFromLabel(label: CharacterCodeIdentifierLabel): CharacterCodeIdentifierCode {
+  let key: CharacterCodeIdentifierCode;
+  for (key in CharacterCodeIdentifier) {
+    const value = CharacterCodeIdentifier[key];
+    if( value === label ){
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (CharacterCodeIdentifierCode).");
+}
 
 export type LimitApplicationCertificateRelatedConsFlgLabel = valueof<typeof LimitApplicationCertificateRelatedConsFlg>;
 export type LimitApplicationCertificateRelatedConsFlgCode = keyof typeof LimitApplicationCertificateRelatedConsFlg;
