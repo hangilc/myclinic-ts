@@ -1,7 +1,6 @@
 import { castOptStringProp, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
-// import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
 
 export interface MessageBodyInterface {
@@ -12,7 +11,6 @@ export interface MessageBodyInterface {
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
   QualificationValidity: string | undefined;
-  // SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[]
 }
 
 export class MessageBody {
@@ -122,7 +120,6 @@ export class MessageBody {
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
         QualificationValidity: castOptStringProp(arg, "QualificationValidity"),
-        // SpecificDiseasesCertificateList: castSpecificDiseasesCertificateInfo(arg.SpecificDiseasesCertificateList),
       });
     } else {
       throw new Error("Object expected (MessageBody): " + arg);

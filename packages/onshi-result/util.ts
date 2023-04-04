@@ -25,7 +25,7 @@ export function onshiDateTimeToSqlDateTime(s: string): string {
 
 // YYYY-MM-DD hh:mm:ss => YYYYMMDDhhmmss
 export function fromSqlDateTime(s: string): string {
-  return s.replaceAll("-", "");
+  return s.replaceAll("-", "").replace(" ", "");
 }
 
 export function onshiDateTimeOptToSqlDateTimeOpt(s: string | undefined) : string | undefined {

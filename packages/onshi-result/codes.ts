@@ -16,7 +16,7 @@ export function referenceClassificationFromLabel(label: ReferenceClassificationL
   let key: ReferenceClassificationCode;
   for (key in ReferenceClassification) {
     const value = ReferenceClassification[key];
-    if( value === label ){
+    if (value === label) {
       return key;
     }
   }
@@ -40,11 +40,11 @@ export function segmentOfResultFromLabel(label: SegmentOfResultLabel): SegmentOf
   let key: SegmentOfResultCode;
   for (key in SegmentOfResult) {
     const value = SegmentOfResult[key];
-    if( value === label ){
+    if (value === label) {
       return key;
     }
   }
-  throw new Error("Cannot happen (SegmentOfResultCode).");
+  throw new Error("Cannot happen (SegmentOfResultFromLabel).");
 }
 
 export const CharacterCodeIdentifier = {
@@ -59,27 +59,38 @@ export function isCharacterCodeIdentifierCode(k: string): k is CharacterCodeIden
   return Object.keys(CharacterCodeIdentifier).includes(k);
 }
 
-export const LimitApplicationCertificateRelatedConsFlg = {
-  "0": "未同意",
-  "1": "同意"
-} as const;
-
 export function characterCodeIdentifierFromLabel(label: CharacterCodeIdentifierLabel): CharacterCodeIdentifierCode {
   let key: CharacterCodeIdentifierCode;
   for (key in CharacterCodeIdentifier) {
     const value = CharacterCodeIdentifier[key];
-    if( value === label ){
+    if (value === label) {
       return key;
     }
   }
-  throw new Error("Cannot happen (CharacterCodeIdentifierCode).");
+  throw new Error("Cannot happen (CharacterCodeIdentifierFromLabel).");
 }
+
+export const LimitApplicationCertificateRelatedConsFlg = {
+  "0": "未同意",
+  "1": "同意"
+} as const;
 
 export type LimitApplicationCertificateRelatedConsFlgLabel = valueof<typeof LimitApplicationCertificateRelatedConsFlg>;
 export type LimitApplicationCertificateRelatedConsFlgCode = keyof typeof LimitApplicationCertificateRelatedConsFlg;
 
 export function isLimitApplicationCertificateRelatedConsFlgCode(k: string): k is LimitApplicationCertificateRelatedConsFlgCode {
   return Object.keys(LimitApplicationCertificateRelatedConsFlg).includes(k);
+}
+
+export function limitApplicationCertificateRelatedConsFlgFromLabel(label: LimitApplicationCertificateRelatedConsFlgLabel): LimitApplicationCertificateRelatedConsFlgCode {
+  let key: LimitApplicationCertificateRelatedConsFlgCode;
+  for (key in LimitApplicationCertificateRelatedConsFlg) {
+    const value = LimitApplicationCertificateRelatedConsFlg[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (LimitApplicationCertificateRelatedConsFlgFromLabel).");
 }
 
 export const PrescriptionIssueSelect = {
@@ -94,6 +105,17 @@ export function isPrescriptionIssueSelectCode(k: string): k is PrescriptionIssue
   return Object.keys(PrescriptionIssueSelect).includes(k);
 }
 
+export function prescriptionIssueSelectFromLabel(label: PrescriptionIssueSelectLabel): PrescriptionIssueSelectCode {
+  let key: PrescriptionIssueSelectCode;
+  for (key in PrescriptionIssueSelect) {
+    const value = PrescriptionIssueSelect[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (PrescriptionIssueSelectFromLabel).");
+}
+
 export const ProcessingResultStatus = {
   "1": "正常終了",
   "2": "エラー"
@@ -104,6 +126,17 @@ export type ProcessingResultStatusCode = keyof typeof ProcessingResultStatus;
 
 export function isProcessingResultStatusCode(k: string): k is ProcessingResultStatusCode {
   return Object.keys(ProcessingResultStatus).includes(k);
+}
+
+export function processingResultStatusFromLabel(label: ProcessingResultStatusLabel): ProcessingResultStatusCode {
+  let key: ProcessingResultStatusCode;
+  for (key in ProcessingResultStatus) {
+    const value = ProcessingResultStatus[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (ProcessingResultStatusFromLabel).");
 }
 
 // 被保険者証の種類
@@ -124,6 +157,17 @@ export function isInsuredCardClassificationCode(k: string): k is InsuredCardClas
   return Object.keys(InsuredCardClassification).includes(k);
 }
 
+export function insuredCardClassificationFromLabel(label: InsuredCardClassificationLabel): InsuredCardClassificationCode {
+  let key: InsuredCardClassificationCode;
+  for (key in InsuredCardClassification) {
+    const value = InsuredCardClassification[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (InsuredCardClassificationFromLabel).");
+}
+
 export const PersonalFamilyClassification = {
   "1": "本人",
   "2": "家族"
@@ -134,6 +178,17 @@ export type PersonalFamilyClassificationCode = keyof typeof PersonalFamilyClassi
 
 export function isPersonalFamilyClassificationCode(k: string): k is PersonalFamilyClassificationCode {
   return Object.keys(PersonalFamilyClassification).includes(k);
+}
+
+export function personalFamilyClassificationFromLabel(label: PersonalFamilyClassificationLabel): PersonalFamilyClassificationCode {
+  let key: PersonalFamilyClassificationCode;
+  for (key in PersonalFamilyClassification) {
+    const value = PersonalFamilyClassification[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (PersonalFamilyClassificationFromLabel).");
 }
 
 export const Sex = {
@@ -149,6 +204,17 @@ export function isSexCode(k: string): k is SexCode {
   return Object.keys(Sex).includes(k);
 }
 
+export function sexFromLabel(label: SexLabel): SexCode {
+  let key: SexCode;
+  for (key in Sex) {
+    const value = Sex[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (SexFromLabel).");
+}
+
 export const PreschoolClassification = {
   "1": "未就学該当"
 } as const;
@@ -158,6 +224,17 @@ export type PreschoolClassificationCode = keyof typeof PreschoolClassification;
 
 export function isPreschoolClassificationCode(k: string): k is PreschoolClassificationCode {
   return Object.keys(PreschoolClassification).includes(k);
+}
+
+export function preschoolClassificationFromLabel(label: PreschoolClassificationLabel): PreschoolClassificationCode {
+  let key: PreschoolClassificationCode;
+  for (key in PreschoolClassification) {
+    const value = PreschoolClassification[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (PreschoolClassificationFromLabel).");
 }
 
 export const ReasonOfLoss = {
@@ -174,6 +251,17 @@ export function isReasonOfLossCode(k: string): k is ReasonOfLossCode {
   return Object.keys(ReasonOfLoss).includes(k);
 }
 
+export function reasonOfLossFromLabel(label: ReasonOfLossLabel): ReasonOfLossCode {
+  let key: ReasonOfLossCode;
+  for (key in ReasonOfLoss) {
+    const value = ReasonOfLoss[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (ReasonOfLossFromLabel).");
+}
+
 export const LimitApplicationCertificateClassification = {
   "01": "限度額適用区分認定証",
   "02": "限度額適用・標準負担額減額認定証",
@@ -185,6 +273,17 @@ export type LimitApplicationCertificateClassificationCode = keyof typeof LimitAp
 
 export function isLimitApplicationCertificateClassificationCode(k: string): k is LimitApplicationCertificateClassificationCode {
   return Object.keys(LimitApplicationCertificateClassification).includes(k);
+}
+
+export function limitApplicationCertificateClassificationFromLabel(label: LimitApplicationCertificateClassificationLabel): LimitApplicationCertificateClassificationCode {
+  let key: LimitApplicationCertificateClassificationCode;
+  for (key in LimitApplicationCertificateClassification) {
+    const value = LimitApplicationCertificateClassification[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (LimitApplicationCertificateClassificationFromLabel).");
 }
 
 export const LimitApplicationCertificateClassificationFlag = {
@@ -213,6 +312,17 @@ export function isLimitApplicationCertificateClassificationFlagCode(k: string): 
   return Object.keys(LimitApplicationCertificateClassificationFlag).includes(k);
 }
 
+export function limitApplicationCertificateClassificationFlagFromLabel(label: LimitApplicationCertificateClassificationFlagLabel): LimitApplicationCertificateClassificationFlagCode {
+  let key: LimitApplicationCertificateClassificationFlagCode;
+  for (key in LimitApplicationCertificateClassificationFlag) {
+    const value = LimitApplicationCertificateClassificationFlag[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (LimitApplicationCertificateClassificationFlagFromLabel).");
+}
+
 export const SpecificDiseasesCertificateRelatedConsFlg = {
   "0": "同意なし",
   "1": "同意あり",
@@ -224,6 +334,17 @@ export type SpecificDiseasesCertificateRelatedConsFlgCode = keyof typeof Specifi
 
 export function isSpecificDiseasesCertificateRelatedConsFlgCode(k: string): k is SpecificDiseasesCertificateRelatedConsFlgCode {
   return Object.keys(SpecificDiseasesCertificateRelatedConsFlg).includes(k);
+}
+
+export function specificDiseasesCertificateRelatedConsFlgFromLabel(label: SpecificDiseasesCertificateRelatedConsFlgLabel): SpecificDiseasesCertificateRelatedConsFlgCode {
+  let key: SpecificDiseasesCertificateRelatedConsFlgCode;
+  for (key in SpecificDiseasesCertificateRelatedConsFlg) {
+    const value = SpecificDiseasesCertificateRelatedConsFlg[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (SpecificDiseasesCertificateRelatedConsFlgFromLabel).");
 }
 
 // 特定疾病療養受療証認定疾病区分
@@ -239,6 +360,17 @@ export type SpecificDiseasesDiseaseCategoryCode = keyof typeof SpecificDiseasesD
 
 export function isSpecificDiseasesDiseaseCategoryCode(k: string): k is SpecificDiseasesDiseaseCategoryCode {
   return Object.keys(SpecificDiseasesDiseaseCategory).includes(k);
+}
+
+export function specificDiseasesDiseaseCategoryFromLabel(label: SpecificDiseasesDiseaseCategoryLabel): SpecificDiseasesDiseaseCategoryCode {
+  let key: SpecificDiseasesDiseaseCategoryCode;
+  for (key in SpecificDiseasesDiseaseCategory) {
+    const value = SpecificDiseasesDiseaseCategory[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (SpecificDiseasesDiseaseCategoryFromLabel).");
 }
 
 // 資格有効性
@@ -257,6 +389,19 @@ export type QualificationValidityCode = keyof typeof QualificationValidity;
 export function isQualificationValidityCode(k: string): k is QualificationValidityCode {
   return Object.keys(QualificationValidity).includes(k);
 }
+
+export function qualificationValidityFromLabel(label: QualificationValidityLabel): QualificationValidityCode {
+  let key: QualificationValidityCode;
+  for (key in QualificationValidity) {
+    const value = QualificationValidity[key];
+    if (value === label) {
+      return key;
+    }
+  }
+  throw new Error("Cannot happen (QualificationValidityFromLabel).");
+}
+
+
 
 
 

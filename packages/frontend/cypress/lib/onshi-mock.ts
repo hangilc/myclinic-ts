@@ -7,6 +7,7 @@ import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime } from "myclinic-model";
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
 import { characterCodeIdentifierFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, type CharacterCodeIdentifierCode, type CharacterCodeIdentifierLabel, type ReferenceClassificationCode, type ReferenceClassificationLabel, type SegmentOfResultCode, type SegmentOfResultLabel } from "onshi-result/codes";
+import type { QualificationConfirmSearchInfo } from "onshi-result/QualificationConfirmSearchInfo";
 
 function messageHeaderBase(): MessageHeaderInterface {
   return {
@@ -91,45 +92,53 @@ export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
   return new OnshiResult(xmlMsg, origJson);
 }
 
-export interface RequiredMessageHeaderInterface {
-  ProcessExecutionTime: string;
-  QualificationConfirmationDate: string;
-  MedicalInstitutionCode: string;
-  ReferenceClassification: string;
-  SegmentOfResult: string;
-  CharacterCodeIdentifier: string;
+export interface MessageHeaderCreationSpec {
+  ProcessExecutionTime?: string | Date;
+  QualificationConfirmationDate?: string | Date;
+  MedicalInstitutionCode?: string;
+  ArbitraryFileIdentifier?: string;
+  ReferenceClassification?: ReferenceClassificationCode;
+  SegmentOfResult?: SegmentOfResultCode;
+  ErrorCode?: string;
+  ErrorMessage?: string;
+  CharacterCodeIdentifier?: CharacterCodeIdentifierCode;
 }
 
-export function createMessageHeaderInterface(
-  processExecutionTime?: Date,
-  qualificationConfirmationDate?: Date,
-  medicalInstitutionCode?: string,
-  referenceClassificationCode?: ReferenceClassificationCode,
-  segmentOfResultCode?: SegmentOfResultCode,
-  characterCodeIdentifierCode?: CharacterCodeIdentifierCode,
-) {
-  processExecutionTime = processExecutionTime ?? new Date();
-  qualificationConfirmationDate = qualificationConfirmationDate ?? new Date();
-  medicalInstitutionCode = medicalInstitutionCode ?? "1312345678";
-  let referenceClassification: string = referenceClassificationCode
-    ?? referenceClassificationFromLabel("マイナンバーカード");
-  let segmentOfResult: string = segmentOfResultCode 
-    ?? segmentOfResultFromLabel("正常終了");
-  let characterCodeIdentifier: string = characterCodeIdentifierCode
-    ?? characterCodeIdentifierFromLabel("UTF-8");
+export function createMessageHeaderInterface(spec: MessageHeaderCreationSpec): MessageHeaderinterface {
+  function resolveDateTime(src: string | Date | undefined): string {
+    if( src === undefined ){
+      src = new Date();
+    }
+    if( src instanceof Date ){
+      src = dateToSqlDateTime(src);
+    }
+    return fromSqlDateTime(src);
+  }
+
   return {
-    ProcessExecutionTime: processExecutionTime,
-    QualificationConfirmationDate: qualificationConfirmationDate,
-    MedicalInstitutionCode: medicalInstitutionCode,
-    ArbitraryFileIdentifier: undefined,
-    ReferenceClassification: referenceClassification,
-    SegmentOfResult: segmentOfResult,
-    ErrorCode: undefined,
-    ErrorMessage: undefined,
-    CharacterCodeIdentifier: characterCodeIdentifier,
+    ProcessExecutionTime: resolveDateTime(spec.ProcessExecutionTime),
+    QualificationConfirmationDate: resolveDateTime(spec.QualificationConfirmationDate),
+    MedicalInstitutionCode: spec.MedicalInstitutionCode ?? "1312345678",
+    ArbitraryFileIdentifier: spec.ArbitraryFileIdentifier,
+    ReferenceClassification: spec.ReferenceClassification ?? referenceClassificationFromLabel("マイナンバーカード"),
+    SegmentOfResult: spec.SegmentOfResult ?? segmentOfResultFromLabel("正常終了"),
+    ErrorCode: spec.ErrorCode,
+    ErrorMessage: spec.ErrorMessage,
+    CharacterCodeIdentifier: spec.CharacterCodeIdentifier ?? characterCodeIdentifierFromLabel("UTF-8"),
   }
 }
 
-export function createOnshiResult(): OnshiResult {
-  const h = createMessageHeaderInterface(medicalInstitutionCode = "1234567890");
+export interface MessageBodyCreationSpec {
+  ProcessingResultStatus: string;
+  ResultList: ResultOfQualificationConfirmation[];
+  QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
+  PrescriptionIssueSelect: string | undefined;
+  ProcessingResultCode: string | undefined;
+  ProcessingResultMessage: string | undefined;
+  QualificationValidity: string | undefined;
+}
+
+export function createOnshiResult(headerSpec: MessageHeaderCreationSpec): OnshiResult {
+  const headerObj: MessageHeaderInterface = createMessageHeaderInterface(headerSpec);
+  const h: MessageHeader = MessageHeader.cast(headerObj);
 }
