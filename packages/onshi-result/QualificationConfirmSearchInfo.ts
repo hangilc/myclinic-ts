@@ -2,7 +2,7 @@ import { onshiDateToSqlDate } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { isLimitApplicationCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, type LimitApplicationCertificateRelatedConsFlgLabel } from "./codes";
 
-interface QualificationConfirmSearchInfoInterface {
+export interface QualificationConfirmSearchInfoInterface {
   InsurerNumber: string;
   InsuredIdentificationNumber: string;
   Birthdate: string;
@@ -59,7 +59,7 @@ export class QualificationConfirmSearchInfo {
     return this.orig.ArbitraryIdentifier;
   }
 
-  toJsonObject(): object {
+  toJSON(): object {
     return this.orig;
   }
 

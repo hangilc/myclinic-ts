@@ -6,7 +6,7 @@ import {
 import { castOptStringProp } from "./cast";
 import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
 
-interface SpecificDiseasesCertificateInfoInterface {
+export interface SpecificDiseasesCertificateInfoInterface {
   SpecificDiseasesDiseaseCategory: string | undefined;
   SpecificDiseasesCertificateDate: string | undefined;
   SpecificDiseasesValidStartDate: string | undefined;
@@ -54,7 +54,7 @@ export class SpecificDiseasesCertificateInfo {
     return toOptInt(this.orig.SpecificDiseasesSelfPay);
   }
 
-  toJsonObject(): object {
+  toJSON(): object {
     return this.orig;
   }
 

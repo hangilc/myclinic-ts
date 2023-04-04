@@ -1,7 +1,9 @@
-import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
+// import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 
-describe("FaceConfirmedWindow", () => {
-  it("should mount", () => {
+// describe("FaceConfirmedWindow", () => {
+//   it("should mount", () => {
     
-  })
-});
+//   })
+// });
+
+export {};

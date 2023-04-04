@@ -1,27 +1,25 @@
-import { MessageHeader } from "./MessageHeader";
-import { MessageBody } from "./MessageBody";
-import { XmlMsg } from "./XmlMsg";
+import { MessageHeader, MessageHeaderInterface } from "./MessageHeader";
+import { MessageBody, MessageBodyInterface } from "./MessageBody";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
 
+export interface XmlMsgInterface {
+  MessageHeader: MessageHeaderInterface;
+  MessageBody: MessageBodyInterface;
+}
+
+export interface OnshiResultInterface {
+  XmlMsg: XmlMsgInterface;
+}
+
 export class OnshiResult {
-  XmlMsg: XmlMsg ;
-  origJson: object;
+  orig: object;
+  messageHeader: MessageHeader;
+  messageBody: MessageBody;
 
-  constructor(XmlMsg: XmlMsg, origJson: object) {
-    this.XmlMsg = XmlMsg;
-    this.origJson = origJson;
-  }
-
-  get xmlMsg(): XmlMsg {
-    return this.XmlMsg;
-  }
-
-  get messageHeader(): MessageHeader {
-    return this.xmlMsg.messageHeader;
-  }
-
-  get messageBody(): MessageBody {
-    return this.xmlMsg.messageBody;
+  constructor(orig: OnshiResultInterface) {
+    this.orig = orig;
+    this.messageHeader = MessageHeader.cast(orig.XmlMsg.MessageHeader);
+    this.messageBody = MessageBody.cast(orig.XmlMsg.MessageBody);
   }
 
   // 資格が確認できたかどうか
@@ -37,16 +35,23 @@ export class OnshiResult {
     return this.messageBody.resultList;
   }
 
-  toJsonObject(): object {
-    return {
-      XmlMsg: this.xmlMsg.toJsonObject(),
-    }
+  toJSON(): object {
+    return this.orig;
   }
 
   static cast(arg: any): OnshiResult {
-    return new OnshiResult(
-      XmlMsg.cast(arg.XmlMsg),
-      arg
-    )
+    if( typeof arg === "object" ){
+      if( typeof arg.XmlMsg === "object" ){
+        return new OnshiResult(arg);
+      } else {
+        throw new Error("object expected (XmlMsg)");
+      }
+    } else {
+      throw new Error("object expected (OnshiResult.cast)");
+    }
+  }
+
+  static create(header: MessageHeaderInterface, body: MessageBodyInterface): OnshiResult {
+    return OnshiResult.cast({ XmlMsg: { MessageHeader: header, MessageBody: body }});
   }
 }

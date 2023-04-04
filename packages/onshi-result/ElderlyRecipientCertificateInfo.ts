@@ -1,7 +1,7 @@
 import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
 import { castOptStringProp } from "./cast";
 
-interface ElderlyRecipientCertificateInfoInterface {
+export interface ElderlyRecipientCertificateInfoInterface {
   ElderlyRecipientCertificateDate: string | undefined;
   ElderlyRecipientValidStartDate: string | undefined;
   ElderlyRecipientValidEndDate: string | undefined;
@@ -45,7 +45,7 @@ export class ElderlyRecipientCertificateInfo {
     }
   }
 
-  toJsonObject(): object {
+  toJSON(): object {
     return this.orig;
   }
 

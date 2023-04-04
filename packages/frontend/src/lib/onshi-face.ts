@@ -1,7 +1,6 @@
 import api from "./api";
 import { XMLParser } from "fast-xml-parser";
 import { OnshiResult } from "onshi-result";
-import { XmlMsg } from "onshi-result/XmlMsg";
 
 export async function onshiFace(faceFile: string, timeout: number = 10): Promise<OnshiResult> {
   const server = await api.dictGet("onshi-server");
@@ -24,15 +23,12 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
 };
 
 export function parseFaceXml(xml: string): OnshiResult {
-  console.log("xml", xml);
   const parser = new XMLParser();
   const json = parser.parse(xml);
   if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {
     json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
   }
-  console.log(json);
-  const xmlMsg = XmlMsg.cast(json.XmlMsg);
-  return new OnshiResult(xmlMsg, json);
+  return OnshiResult.cast(json);
 }
 
 export interface OnshiFaceConfirmed {

@@ -1,5 +1,5 @@
-import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
-import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
+import { ElderlyRecipientCertificateInfo, type ElderlyRecipientCertificateInfoInterface } from "./ElderlyRecipientCertificateInfo";
+import { LimitApplicationCertificateRelatedInfo, type LimitApplicationCertificateRelatedInfoInterface } from "./LimitApplicationCertificateRelatedInfo";
 import { castOptStringProp, castStringProp } from "./cast";
 import { 
   InsuredCardClassification, 
@@ -25,7 +25,7 @@ import {
   type SpecificDiseasesCertificateRelatedConsFlgLabel 
 } from "./codes";
 import { toOptInt, onshiDateOptToSqlDateOpt, onshiDateTimeOptToSqlDateTimeOpt, onshiDateToSqlDate } from "./util";
-import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
+import { SpecificDiseasesCertificateInfo, type SpecificDiseasesCertificateInfoInterface } from "./SpecificDiseasesCertificateInfo";
 
 export interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
@@ -51,22 +51,35 @@ export interface ResultOfQualificationConfirmationInterface {
   InsuredPartialContributionRatio: string | undefined;
   PreschoolClassification: string | undefined;
   ReasonOfLoss: string | undefined;
-  ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
+  ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfoInterface | undefined;
   LimitApplicationCertificateRelatedConsFlg: string | undefined;
   LimitApplicationCertificateRelatedConsTime: string | undefined;
-  LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
+  LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfoInterface | undefined;
   SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
   SpecificDiseasesCertificateRelatedConsTime: string | undefined;
-  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfo[];
+  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfoInterface[];
 }
 
 export class ResultOfQualificationConfirmation {
   orig: ResultOfQualificationConfirmationInterface;
+  // 高齢受給者証情報
+  elderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfo | undefined;
+  // 限度額適用認定証関連情報
+  limitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfo | undefined;
+  // 特定疾病療養受療証情報リスト
+  specificDiseasesCertificateList: SpecificDiseasesCertificateInfo[];
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
     this.orig = arg;
+    this.elderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo
+      ? ElderlyRecipientCertificateInfo.cast(arg.ElderlyRecipientCertificateInfo)
+      : undefined;
+    this.limitApplicationCertificateRelatedInfo = arg.LimitApplicationCertificateRelatedInfo
+      ? LimitApplicationCertificateRelatedInfo.cast(arg.LimitApplicationCertificateRelatedInfo)
+      : undefined;
+    this.specificDiseasesCertificateList = arg.SpecificDiseasesCertificateList.map(SpecificDiseasesCertificateInfo.cast);
   }
-
+  
   // 被保険者証の種類
   get insuredCardClassification(): InsuredCardClassificationLabel {
     const k: string = this.orig.InsuredCardClassification;
@@ -252,11 +265,6 @@ export class ResultOfQualificationConfirmation {
     return this.orig.InsurerName;
   }
 
-  // 高齢受給者証情報
-  get elderlyRecipientCertificateInfo(): ElderlyRecipientCertificateInfo | undefined {
-    return this.orig.ElderlyRecipientCertificateInfo;
-  }
-
   get kourei(): ElderlyRecipientCertificateInfo | undefined {
     return this.elderlyRecipientCertificateInfo;
   }
@@ -277,11 +285,6 @@ export class ResultOfQualificationConfirmation {
   // 限度額適用認定証の情報について、患者の提供同意が得られた日時 (YYYY-MM-DD HH:mm:ss)
   get limitApplicationCertificateRelatedConsTime(): string | undefined {
     return onshiDateTimeOptToSqlDateTimeOpt(this.orig.LimitApplicationCertificateRelatedConsTime)
-  }
-
-  // 限度額適用認定証関連情報
-  get limitApplicationCertificateRelatedInfo(): LimitApplicationCertificateRelatedInfo | undefined {
-    return this.orig.LimitApplicationCertificateRelatedInfo;
   }
 
   get gendogaku(): LimitApplicationCertificateRelatedInfo | undefined {
@@ -305,21 +308,9 @@ export class ResultOfQualificationConfirmation {
     return onshiDateTimeOptToSqlDateTimeOpt(this.orig.SpecificDiseasesCertificateRelatedConsTime);
   }
 
-  // 特定疾病療養受療証情報リスト
-  get specificDiseasesCertificateList(): SpecificDiseasesCertificateInfo[] {
-    return this.orig.SpecificDiseasesCertificateList;
-  }
-
-  toJsonObject(): object {
-    const roqc: object = Object.assign({}, this.orig, {
-      ElderlyRecipientCertificateInfo: this.orig.ElderlyRecipientCertificateInfo ?
-        this.orig.ElderlyRecipientCertificateInfo.toJsonObject() : undefined,
-      LimitApplicationCertificateRelatedInfo: this.orig.LimitApplicationCertificateRelatedInfo ?
-        this.orig.LimitApplicationCertificateRelatedInfo.toJsonObject() : undefined,
-      SpecificDiseasesCertificateList: this.orig.SpecificDiseasesCertificateList.map(s => s.toJsonObject()),
-    });
+  toJSON(): object {
     return {
-      ResultOfQualificationConfirmation: roqc,
+      ResultOfQualificationConfirmation: this.orig,
     }
   }
 
@@ -349,40 +340,13 @@ export class ResultOfQualificationConfirmation {
       InsuredPartialContributionRatio: castOptStringProp(arg, "InsuredPartialContributionRatio"),
       PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
       ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
-      ElderlyRecipientCertificateInfo: castElderlyRecipientCertificateInfo(arg.ElderlyRecipientCertificateInfo),
+      ElderlyRecipientCertificateInfo: arg.ElderlyRecipientCertificateInfo,
       LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
       LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
-      LimitApplicationCertificateRelatedInfo: castLimitApplicationCertificateRelatedInfo(arg.LimitApplicationCertificateRelatedInfo),
+      LimitApplicationCertificateRelatedInfo: arg.LimitApplicationCertificateRelatedInfo,
       SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
       SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
-      SpecificDiseasesCertificateList: castSpecificDiseasesCertificateList(arg.SpecificDiseasesCertificateList),
+      SpecificDiseasesCertificateList: arg.SpecificDiseasesCertificateList,
     });
-  }
-}
-
-function castElderlyRecipientCertificateInfo(arg: any): ElderlyRecipientCertificateInfo | undefined {
-  if (arg == undefined) {
-    return undefined;
-  } else {
-    return ElderlyRecipientCertificateInfo.cast(arg);
-  }
-}
-
-function castLimitApplicationCertificateRelatedInfo(arg: any):
-  LimitApplicationCertificateRelatedInfo | undefined {
-  if (arg == undefined) {
-    return undefined;
-  } else {
-    return LimitApplicationCertificateRelatedInfo.cast(arg);
-  }
-}
-
-function castSpecificDiseasesCertificateList(arg: any): SpecificDiseasesCertificateInfo[] {
-  if (arg == undefined) {
-    return [];
-  } else if (Array.isArray(arg)) {
-    return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
-  } else {
-    throw new Error("Invalid SpecificDiseasesCertificateList: " + arg);
   }
 }

@@ -12,7 +12,7 @@
   let result: OnshiResult | undefined = undefined;
 
   async function doRegister(r: OnshiResult) {
-    await api.setOnshi(new Onshi(visitId, JSON.stringify(r.origJson)));
+    await api.setOnshi(new Onshi(visitId, JSON.stringify(r.toJSON())));
     destroy();
     onRegister(r);
   }

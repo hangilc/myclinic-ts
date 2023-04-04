@@ -174,7 +174,7 @@
       hokenIdSet
     );
     await api.setOnshi(
-      new Onshi(visit.visitId, JSON.stringify(resolved.onshiResult.origJson))
+      new Onshi(visit.visitId, JSON.stringify(resolved.onshiResult.toJSON()))
     );
     onRegister();
   }

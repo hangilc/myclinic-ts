@@ -1,12 +1,12 @@
 import { castOptStringProp, castStringProp } from "./cast";
-import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
-import { QualificationConfirmSearchInfo } from "./QualificationConfirmSearchInfo";
+import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
+import { QualificationConfirmSearchInfo, type QualificationConfirmSearchInfoInterface } from "./QualificationConfirmSearchInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;
-  ResultList: ResultOfQualificationConfirmation[];
-  QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
+  ResultList: ResultOfQualificationConfirmationInterface[];
+  QualificationConfirmSearchInfo: QualificationConfirmSearchInfoInterface | undefined;
   PrescriptionIssueSelect: string | undefined;
   ProcessingResultCode: string | undefined;
   ProcessingResultMessage: string | undefined;
@@ -15,9 +15,17 @@ export interface MessageBodyInterface {
 
 export class MessageBody {
   orig: MessageBodyInterface;
+  // 資格確認結果のリスト
+  resultList: ResultOfQualificationConfirmation[];
+  // 資格確認照会用情報
+  qualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
 
   constructor(arg: MessageBodyInterface) {
     this.orig = arg;
+    this.resultList = arg.ResultList.map(ResultOfQualificationConfirmation.cast);
+    this.qualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo 
+      ? QualificationConfirmSearchInfo.cast(arg.QualificationConfirmSearchInfo)
+      : undefined;
   }
 
   get qualificationValidity(): QualificationValidityLabel | undefined {
@@ -39,16 +47,6 @@ export class MessageBody {
     } else {
       throw new Error("Invalid ProcessingResultStatus: " + k);
     }
-  }
-
-  // 資格確認結果のリスト
-  get resultList(): ResultOfQualificationConfirmation[] {
-    return this.orig.ResultList;
-  }
-
-  // 資格確認照会用情報
-  get qualificationConfirmSearchInfo(): QualificationConfirmSearchInfo | undefined {
-    return this.orig.QualificationConfirmSearchInfo;
   }
 
   // 患者が選択した処方箋の発行形態
@@ -101,21 +99,16 @@ export class MessageBody {
     }
   }
 
-  toJsonObject(): object {
-    return Object.assign({}, this.orig, {
-      ResultList: this.orig.ResultList.map(r => r.toJsonObject()),
-      QualificationConfirmSearchInfo: this.orig.QualificationConfirmSearchInfo ?
-        this.orig.QualificationConfirmSearchInfo.toJsonObject() : undefined,
-    });
+  toJSON(): object {
+    return this.orig;
   }
 
   static cast(arg: any): MessageBody {
     if (typeof arg === "object") {
       return new MessageBody({
         ProcessingResultStatus: castStringProp(arg, "ProcessingResultStatus"),
-        ResultList: castResultList(arg.ResultList),
-        QualificationConfirmSearchInfo:
-          castQualificationConfirmSearchInfo(arg.QualificationConfirmSearchInfo),
+        ResultList: arg.ResultList,
+        QualificationConfirmSearchInfo:arg.QualificationConfirmSearchInfo,
         PrescriptionIssueSelect: castOptStringProp(arg, "PrescriptionIssueSelect"),
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
@@ -127,30 +120,3 @@ export class MessageBody {
   }
 }
 
-function castResultList(arg: any): ResultOfQualificationConfirmation[] {
-  console.log("castResultList", arg);
-  if (arg == undefined) {
-    return [];
-  } else if (Array.isArray(arg)) {
-    return arg.map(e => ResultOfQualificationConfirmation.cast(e.ResultOfQualificationConfirmation));
-  } else {
-    throw new Error("Array or undefined expected: " + arg);
-  }
-}
-
-function castQualificationConfirmSearchInfo(arg: any): QualificationConfirmSearchInfo | undefined {
-  if (arg == undefined) {
-    return undefined;
-  } else {
-    return QualificationConfirmSearchInfo.cast(arg);
-  }
-}
-// function castSpecificDiseasesCertificateInfo(arg: any): SpecificDiseasesCertificateInfo[] {
-//   if (arg == undefined) {
-//     return [];
-//   } else if (Array.isArray(arg)) {
-//     return arg.map(e => SpecificDiseasesCertificateInfo.cast(e));
-//   } else {
-//     throw new Error("Cannot convert to SpecificDiseasesCertificateList: " + arg);
-//   }
-// }

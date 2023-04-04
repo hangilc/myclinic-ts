@@ -81,13 +81,11 @@ export class MessageHeader {
     }
   }
 
-  toJsonObject(): object {
+  toJSON(): object {
     return this.orig;
   }
 
   static cast(arg: any): MessageHeader {
-    console.log("MessageHeader arg", arg);
-    console.log("MessageHeader arg ProcessExecutionTime", arg.ProcessExecutionTime);
     return new MessageHeader({
       ProcessExecutionTime: castStringProp(arg, "ProcessExecutionTime"),
       QualificationConfirmationDate: castStringProp(arg, "QualificationConfirmationDate"),

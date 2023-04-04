@@ -106,7 +106,7 @@
     if (onshiResult) {
       try {
         await api.setOnshi(
-          new Onshi(visit.visitId, JSON.stringify(onshiResult.origJson))
+          new Onshi(visit.visitId, JSON.stringify(onshiResult.toJSON()))
         );
       } catch (e) {
         error = "資格確認情報の登録に失敗しました。";

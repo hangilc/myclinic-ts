@@ -9,7 +9,7 @@ import {
 import { castOptStringProp } from "./cast";
 import { onshiDateOptToSqlDateOpt } from "./util";
 
-interface LimitApplicationCertificateRelatedInfoInterface {
+export interface LimitApplicationCertificateRelatedInfoInterface {
   LimitApplicationCertificateClassification: string | undefined;
   LimitApplicationCertificateClassificationFlag: string | undefined;
   LimitApplicationCertificateDate: string | undefined;
@@ -75,7 +75,7 @@ export class LimitApplicationCertificateRelatedInfo {
     return onshiDateOptToSqlDateOpt(this.orig.LimitApplicationCertificateLongTermDate);
   }
 
-  toJsonObject(): object {
+  toJSON(): object {
     return this.orig;
   }
 

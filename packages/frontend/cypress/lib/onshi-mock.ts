@@ -2,12 +2,11 @@ import type { OnshiKakuninQuery } from "@/lib/onshi-confirm";
 import { OnshiResult } from "onshi-result";
 import { MessageBody, type MessageBodyInterface } from "onshi-result/MessageBody";
 import { MessageHeader, type MessageHeaderInterface } from "onshi-result/MessageHeader";
-import { XmlMsg } from "onshi-result/XmlMsg";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime } from "myclinic-model";
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, type CharacterCodeIdentifierCode, type CharacterCodeIdentifierLabel, type ReferenceClassificationCode, type ReferenceClassificationLabel, type SegmentOfResultCode, type SegmentOfResultLabel } from "onshi-result/codes";
-import type { QualificationConfirmSearchInfo } from "onshi-result/QualificationConfirmSearchInfo";
+import { characterCodeIdentifierFromLabel, preschoolClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, type CharacterCodeIdentifierCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReferenceClassificationCode, type SegmentOfResultCode } from "onshi-result/codes";
+import type { QualificationConfirmSearchInfo, QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 
 function messageHeaderBase(): MessageHeaderInterface {
   return {
@@ -104,12 +103,12 @@ export interface MessageHeaderCreationSpec {
   CharacterCodeIdentifier?: CharacterCodeIdentifierCode;
 }
 
-export function createMessageHeaderInterface(spec: MessageHeaderCreationSpec): MessageHeaderinterface {
+export function createMessageHeaderInterface(spec: MessageHeaderCreationSpec): MessageHeaderInterface {
   function resolveDateTime(src: string | Date | undefined): string {
-    if( src === undefined ){
+    if (src === undefined) {
       src = new Date();
     }
-    if( src instanceof Date ){
+    if (src instanceof Date) {
       src = dateToSqlDateTime(src);
     }
     return fromSqlDateTime(src);
@@ -129,16 +128,69 @@ export function createMessageHeaderInterface(spec: MessageHeaderCreationSpec): M
 }
 
 export interface MessageBodyCreationSpec {
-  ProcessingResultStatus: string;
-  ResultList: ResultOfQualificationConfirmation[];
-  QualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
-  PrescriptionIssueSelect: string | undefined;
-  ProcessingResultCode: string | undefined;
-  ProcessingResultMessage: string | undefined;
-  QualificationValidity: string | undefined;
+  ProcessingResultStatus?: ProcessingResultStatusCode;
+  ResultList?: ResultOfQualificationConfirmationInterface[];
+  QualificationConfirmSearchInfo?: QualificationConfirmSearchInfoInterface;
+  PrescriptionIssueSelect?: PrescriptionIssueSelectCode;
+  ProcessingResultCode?: string;
+  ProcessingResultMessage?: string;
+  QualificationValidity?: QualificationValidityCode;
 }
 
-export function createOnshiResult(headerSpec: MessageHeaderCreationSpec): OnshiResult {
-  const headerObj: MessageHeaderInterface = createMessageHeaderInterface(headerSpec);
-  const h: MessageHeader = MessageHeader.cast(headerObj);
+function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyInterface {
+  return {
+    ProcessingResultStatus: spec.ProcessingResultStatus ?? processingResultStatusFromLabel("正常終了"),
+    ResultList: spec.ResultList ?? [],
+    QualificationConfirmSearchInfo: spec.QualificationConfirmSearchInfo,
+    PrescriptionIssueSelect: spec.PrescriptionIssueSelect ?? prescriptionIssueSelectFromLabel("紙の処方箋"),
+    ProcessingResultCode: spec.ProcessingResultCode,
+    ProcessingResultMessage: spec.ProcessingResultMessage,
+    QualificationValidity: spec.QualificationValidity ?? qualificationValidityFromLabel("有効"),
+  };
+}
+
+export interface ResultOfQualificationConfirmationCreationSpec {
+
+}
+
+function createResultOfQualificationConfirmationInterface(spec: ResultOfQualificationConfirmationCreationSpec)
+  : ResultOfQualificationConfirmationInterface {
+  return {
+    InsuredCardClassification: string;
+    Name: string;
+    Sex1: string;
+    Birthdate: string;
+    InsurerName: string;
+    InsurerNumber: string | undefined;
+    InsuredCardSymbol: string | undefined;
+    InsuredIdentificationNumber: string | undefined;
+    InsuredBranchNumber: string | undefined;
+    PersonalFamilyClassification: string | undefined;
+    InsuredName: string | undefined;
+    NameOfOther: string | undefined;
+    NameKana: string | undefined;
+    NameOfOtherKana: string | undefined;
+    Sex2: string | undefined;
+    Address: string | undefined;
+    PostNumber: string | undefined;
+    InsuredCertificateIssuanceDate: string | undefined;
+    InsuredCardValidDate: string | undefined;
+    InsuredCardExpirationDate: string | undefined;
+    InsuredPartialContributionRatio: string | undefined;
+    PreschoolClassification: string | undefined;
+    ReasonOfLoss: string | undefined;
+    ElderlyRecipientCertificateInfo: ElderlyRecipientCertificateInfoInterface | undefined;
+    LimitApplicationCertificateRelatedConsFlg: string | undefined;
+    LimitApplicationCertificateRelatedConsTime: string | undefined;
+    LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfoInterface | undefined;
+    SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
+    SpecificDiseasesCertificateRelatedConsTime: string | undefined;
+    SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfoInterface[];
+  }
+}
+
+export function createOnshiResult(headerSpec: MessageHeaderCreationSpec, bodySpec: MessageBodyCreationSpec): OnshiResult {
+  const header: MessageHeaderInterface = createMessageHeaderInterface(headerSpec);
+  const body: MessageBodyInterface = createMessageBodyInterface(bodySpec);
+  return OnshiResult.create(header, body);
 }
