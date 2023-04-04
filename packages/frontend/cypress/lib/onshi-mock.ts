@@ -5,7 +5,7 @@ import { MessageHeader, type MessageHeaderInterface } from "onshi-result/Message
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime } from "myclinic-model";
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, preschoolClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, type CharacterCodeIdentifierCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReferenceClassificationCode, type SegmentOfResultCode } from "onshi-result/codes";
+import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, preschoolClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type PersonalFamilyClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfo, QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 
 function messageHeaderBase(): MessageHeaderInterface {
@@ -149,29 +149,55 @@ function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyI
   };
 }
 
-export interface ResultOfQualificationConfirmationCreationSpec {
+function  resolveDate(src: string | Date | undefined, defaultValue: () => Date): string {
+  if (src === undefined) {
+    src = defaultValue();
+  }
+  if (src instanceof Date) {
+    src = dateToSqlDate(src);
+  }
+  return fromSqlDate(src);
 
+}
+
+export interface ResultOfQualificationConfirmationCreationSpec {
+  InsuredCardClassification?: InsuredCardClassificationCode;
+  Name?: string;
+  Sex1?: SexCode;
+  Birthdate?: string | Date;
+  InsurerName?: string;
+  InsurerNumber?: string;
+  InsuredCardSymbol?: string;
+  InsuredIdentificationNumber?: string;
+  InsuredBranchNumber?: string;
+  PersonalFamilyClassification?: PersonalFamilyClassificationCode;
+  InsuredName?: string; // 世帯主名
+  NameOfOther?: string;
+  NameKana?: string;
+  NameOfOtherKana?: string;
+  Sex2?: SexCode;
+  Address?: string;
 }
 
 function createResultOfQualificationConfirmationInterface(spec: ResultOfQualificationConfirmationCreationSpec)
   : ResultOfQualificationConfirmationInterface {
-  return {
-    InsuredCardClassification: string;
-    Name: string;
-    Sex1: string;
-    Birthdate: string;
-    InsurerName: string;
-    InsurerNumber: string | undefined;
-    InsuredCardSymbol: string | undefined;
-    InsuredIdentificationNumber: string | undefined;
-    InsuredBranchNumber: string | undefined;
-    PersonalFamilyClassification: string | undefined;
-    InsuredName: string | undefined;
-    NameOfOther: string | undefined;
-    NameKana: string | undefined;
-    NameOfOtherKana: string | undefined;
-    Sex2: string | undefined;
-    Address: string | undefined;
+    return {
+    InsuredCardClassification: spec.InsuredCardClassification ?? insuredCardClassificationFromLabel("被保険者証（一般）"),
+    Name: spec.Name ?? "診療　太郎",
+    Sex1: spec.Sex1 ?? sexFromLabel("男"),
+    Birthdate: resolveDate(spec.Birthdate, () => new Date(1970, 7-1, 12)),
+    InsurerName: spec.InsurerName ?? "杉並区",
+    InsurerNumber: spec.InsurerNumber ?? "01123456",
+    InsuredCardSymbol: spec.InsuredCardSymbol,
+    InsuredIdentificationNumber: spec.InsuredIdentificationNumber,
+    InsuredBranchNumber: spec.InsuredBranchNumber,
+    PersonalFamilyClassification: spec.PersonalFamilyClassification,
+    InsuredName: spec.InsuredName,
+    NameOfOther: spec.NameOfOther,
+    NameKana: spec.NameKana,
+    NameOfOtherKana: spec.NameOfOtherKana,
+    Sex2: spec.Sex2,
+    Address: spec.Address,
     PostNumber: string | undefined;
     InsuredCertificateIssuanceDate: string | undefined;
     InsuredCardValidDate: string | undefined;
