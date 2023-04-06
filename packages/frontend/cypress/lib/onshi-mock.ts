@@ -3,74 +3,13 @@ import { OnshiResult } from "onshi-result";
 import type { MessageBodyInterface } from "onshi-result/MessageBody";
 import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
-import { dateToSqlDate, dateToSqlDateTime } from "myclinic-model";
+import { dateToSqlDate, dateToSqlDateTime, Patient } from "myclinic-model";
 import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
 import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
-
-// function messageHeaderBase(): MessageHeaderInterface {
-//   return {
-//     ProcessExecutionTime: fromSqlDateTime(dateToSqlDateTime(new Date())),
-//     QualificationConfirmationDate: fromSqlDate(dateToSqlDate(new Date())),
-//     MedicalInstitutionCode: "1312345678",
-//     ReferenceClassification: "2", // 保険者証
-//     CharacterCodeIdentifier: "0", // UTF-8
-//     SegmentOfResult: "1", // 正常終了
-//     ArbitraryFileIdentifier: undefined,
-//     ErrorCode: undefined,
-//     ErrorMessage: undefined,
-//   };
-// }
-
-// function messageBodyBase(): MessageBodyInterface {
-//   return {
-//     ProcessingResultStatus: "1", // 正常終了
-//     ResultList: [], //ResultOfQualificationConfirmation[];
-//     QualificationConfirmSearchInfo: undefined,
-//     PrescriptionIssueSelect: undefined,
-//     ProcessingResultCode: undefined,
-//     ProcessingResultMessage: undefined,
-//     QualificationValidity: "1", // 有効
-//   };
-// }
-
-// function resultBase(): ResultOfQualificationConfirmationInterface {
-//   return {
-//     InsuredCardClassification: "01", // 被保険者証（一般） 
-//     Name: "診療 太郎",
-//     Sex1: "1", // 男,
-//     Birthdate: "20000101",
-//     InsurerName: "保険組合",
-//     InsurerNumber: undefined,
-//     InsuredCardSymbol: undefined,
-//     InsuredIdentificationNumber: undefined,
-//     InsuredBranchNumber: undefined,
-//     PersonalFamilyClassification: undefined,
-//     InsuredName: undefined,
-//     NameOfOther: undefined,
-//     NameKana: undefined,
-//     NameOfOtherKana: undefined,
-//     Sex2: undefined,
-//     Address: undefined,
-//     PostNumber: undefined,
-//     InsuredCertificateIssuanceDate: undefined,
-//     InsuredCardValidDate: undefined,
-//     InsuredCardExpirationDate: undefined,
-//     InsuredPartialContributionRatio: undefined,
-//     PreschoolClassification: undefined,
-//     ReasonOfLoss: undefined,
-//     ElderlyRecipientCertificateInfo: undefined,
-//     LimitApplicationCertificateRelatedConsFlg: undefined,
-//     LimitApplicationCertificateRelatedConsTime: undefined,
-//     LimitApplicationCertificateRelatedInfo: undefined,
-//     SpecificDiseasesCertificateRelatedConsFlg: undefined,
-//     SpecificDiseasesCertificateRelatedConsTime: undefined,
-//     SpecificDiseasesCertificateList: [],
-//   }
-// }
 
 export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
   return createOnshiResult({
@@ -137,7 +76,7 @@ export interface MessageBodyCreationSpec {
 function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyInterface {
   return {
     ProcessingResultStatus: spec.ProcessingResultStatus ?? processingResultStatusFromLabel("正常終了"),
-    ResultList: spec.ResultList ? spec.ResultList.map(createResultOfQualificationConfirmationInterface) : [],
+    ResultList: (spec.ResultList || [{}]).map(createResultOfQualificationConfirmationInterface),
     QualificationConfirmSearchInfo: spec.QualificationConfirmSearchInfo,
     PrescriptionIssueSelect: spec.PrescriptionIssueSelect ?? prescriptionIssueSelectFromLabel("紙の処方箋"),
     ProcessingResultCode: spec.ProcessingResultCode,
@@ -253,8 +192,28 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
   }
 }
 
-export function createOnshiResult(headerSpec: MessageHeaderCreationSpec, bodySpec: MessageBodyCreationSpec): OnshiResult {
-  const header: MessageHeaderInterface = createMessageHeaderInterface(headerSpec);
-  const body: MessageBodyInterface = createMessageBodyInterface(bodySpec);
+type OnshiCreationPair = [MessageHeaderCreationSpec, MessageBodyCreationSpec];
+
+export type OnshiCreationModifier = (specs: OnshiCreationPair) => OnshiCreationPair;
+
+function bodyModifier(m: (spec: MessageBodyCreationSpec) => MessageBodyCreationSpec): OnshiCreationModifier {
+  return (pair: OnshiCreationPair) => [ pair[0], m(pair[1]) ];
+}
+
+const onshiCreationModifier = {
+  patient: (p: Patient) => bodyModifier(body => Object.assign({}, body, {
+    Name: `${p.lastName}　${p.firstName}`,
+    NameKana: `${p.lastNameYomi} ${p.firstNameYomi}`,
+    Birthdate: p.birthday,
+    Sex1: p.sex === "M" ? sexFromLabel("男") : sexFromLabel("女"),
+  })),
+};
+
+export function createOnshiResult(...modifiers: OnshiCreationModifier[]): OnshiResult {
+  let pair:  [MessageHeaderCreationSpec, MessageBodyCreationSpec] = [{}, {}];
+  modifiers.forEach(m => pair = m(pair));
+
+  const header = createMessageHeaderInterface(pair[0]);
+  const body = createMessageBodyInterface(pair[1]);
   return OnshiResult.create(header, body);
 }
