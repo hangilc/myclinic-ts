@@ -315,7 +315,6 @@ export class ResultOfQualificationConfirmation {
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
-    console.log("cast Result", arg);
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
       Name: castStringProp(arg, "Name"),

@@ -1,5 +1,6 @@
 import { AppointTimeData } from "@/appoint/appoint-time-data";
 import AppointPatient from "@/appoint/AppointPatient.svelte";
+import { apiBase } from "@cypress/lib/base";
 import type { MountReturn } from "cypress/svelte";
 import { Appoint, AppointTime } from "myclinic-model";
 import { appointDialogClose, withAppointDialog, withAppointPatient } from "./column-helper";
@@ -184,6 +185,7 @@ describe("AppointPatient", () => {
       data: appoint,
       appointTimeData
     }}).as("mount");
+    cy.intercept("POST", apiBase() + "/update-appoint", "true").as("update");
     cy.get(`[data-cy=appoint-patient][data-patient-id=${patientId}]`).click();
     withAppointDialog(driver => {
       driver.setPatientInput("2");

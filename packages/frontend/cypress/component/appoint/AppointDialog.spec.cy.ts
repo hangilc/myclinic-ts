@@ -131,7 +131,6 @@ describe("AppointDialog", () => {
     });
     cy.intercept("POST", getBase() + "/register-appoint", (req) => {
       const appoint = JSON.parse(req.body);
-      console.log(JSON.stringify(appoint, undefined, 2))
       expect(appoint).deep.equal({
         appointId: 0, 
         appointTimeId, 

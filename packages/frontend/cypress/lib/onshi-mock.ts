@@ -77,13 +77,13 @@ export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
     QualificationConfirmationDate: q.confirmationDate,
   }, {
     ResultList: [
-      createResultOfQualificationConfirmationInterface({
+      {
         InsurerNumber: q.hokensha,
         InsuredCardSymbol: q.kigou,
         InsuredIdentificationNumber: q.hihokensha,
         InsuredBranchNumber: q.edaban,
         LimitApplicationCertificateRelatedConsFlg: q.limitAppConsFlag,
-      })
+      }
     ]
   });
 }
@@ -126,7 +126,7 @@ export function createMessageHeaderInterface(spec: MessageHeaderCreationSpec): M
 
 export interface MessageBodyCreationSpec {
   ProcessingResultStatus?: ProcessingResultStatusCode;
-  ResultList?: ResultOfQualificationConfirmationInterface[];
+  ResultList?: ResultOfQualificationConfirmationCreationSpec[];
   QualificationConfirmSearchInfo?: QualificationConfirmSearchInfoInterface;
   PrescriptionIssueSelect?: PrescriptionIssueSelectCode;
   ProcessingResultCode?: string;
@@ -137,7 +137,7 @@ export interface MessageBodyCreationSpec {
 function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyInterface {
   return {
     ProcessingResultStatus: spec.ProcessingResultStatus ?? processingResultStatusFromLabel("正常終了"),
-    ResultList: spec.ResultList ?? [],
+    ResultList: spec.ResultList ? spec.ResultList.map(createResultOfQualificationConfirmationInterface) : [],
     QualificationConfirmSearchInfo: spec.QualificationConfirmSearchInfo,
     PrescriptionIssueSelect: spec.PrescriptionIssueSelect ?? prescriptionIssueSelectFromLabel("紙の処方箋"),
     ProcessingResultCode: spec.ProcessingResultCode,
