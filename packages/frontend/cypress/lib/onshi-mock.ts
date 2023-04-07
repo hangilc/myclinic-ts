@@ -76,7 +76,9 @@ function resolveDate(src: string | Date | undefined, defaultValue: () => Date): 
   if (src instanceof Date) {
     src = dateToSqlDate(src);
   }
-  return fromSqlDate(src);
+  const r = fromSqlDate(src);
+  // console.log("resolveDate", src, r);
+  return r;
 }
 
 function resolveOptDate(src: string | Date | undefined): string | undefined {

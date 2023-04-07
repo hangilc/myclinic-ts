@@ -26,12 +26,6 @@ function charMap(
     r[key] = val;
   });
   return r;
-  // return new Map(
-  //   range(0, charCodeOf(alphaLast) - alphaCode + 1).map((i) => [
-  //     String.fromCharCode(alphaCode + i),
-  //     String.fromCharCode(zenkakuCode + i),
-  //   ])
-  // );
 }
 
 export const digitMap: Record<string, string> = charMap("0", "9", zenkakuZero);
@@ -190,6 +184,10 @@ const kanaHankakuZenkakuMap: Record<string, string> = {
   "ﾌﾟ": "プ",
   "ﾍﾟ": "ペ",
   "ﾎﾟ": "ポ",
+  "ｯ": "ッ",
+  "ｬ": "ャ",
+  "ｭ": "ュ",
+  "ｮ": "ョ",
 }
 
 const zenkakuKatakanaToHankakuKatakanaMap: Record<string, string> = reverseMap(kanaHankakuZenkakuMap);
@@ -266,7 +264,13 @@ const katakanaHiraganaZenkakuMap: Record<string, string> = {
   "プ": "ぷ",
   "ペ": "ぺ",
   "ポ": "ぽ",
+  "ッ": "っ",
+  "ャ": "ゃ",
+  "ュ": "ゅ",
+  "ョ": "ょ",
 }
+
+export const hiraganaKatakanaZenkakuMap = reverseMap(katakanaHiraganaZenkakuMap);
 
 export function hankakuKatakanaToZenkakuKatakana(h: string): string {
   const z = kanaHankakuZenkakuMap[h];
@@ -291,6 +295,17 @@ export function hankakuKatakanaToZenkakuHiragana(k: string): string {
   return zenkakuKatakanaToZenkakuHiragana(a);
 }
 
+export function zenkakuHiraganaToHankakuKatakana(c: string): string {
+  const p = hiraganaKatakanaZenkakuMap[c] ?? c;
+  const q = zenkakuKatakanaToHankakuKatakanaMap[p] ?? p;
+  const r = reverseZenkakuMap[q] ?? q;
+  return r;
+}
+
 export function convertHankakuKatakanaToZenkakuHiragana(s: string): string {
   return s.normalize("NFKC").split("").map(hankakuKatakanaToZenkakuHiragana).join("");
+}
+
+export function convertZenkakuHiraganaToHankakuKatakana(s: string): string {
+  return s.normalize("NFKC").split("").map(zenkakuHiraganaToHankakuKatakana).join("");
 }

@@ -1,6 +1,7 @@
 import {
   convert,
   ensure,
+  isInInclusiveRange,
   // isInInclusiveRange,
   isInt,
   isPositive,
@@ -46,11 +47,11 @@ export function validateWareki(input: WarekiInput): VResult<Date> {
   const year = validated2(gengou, nen).validate(gengouToYear).mark("");
   const month = input.month
     .validate(isInt)
-    // .validate(isInInclusiveRange(1, 12))
+    .validate(isInInclusiveRange(1, 12))
     .mark("月");
   const day = input.day
     .validate(isInt)
-    // .validate(isInInclusiveRange(1, 31))
+    .validate(isInInclusiveRange(1, 31))
     .mark("日");
   return validated3(year, month, day)
     .map(([y, m, d]) => new Date(y, m-1, d));

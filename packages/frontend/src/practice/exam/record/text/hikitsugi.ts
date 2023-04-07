@@ -15,7 +15,6 @@ export function extractHikitsugi(s: string): string {
   if( m == null || m.length === 0 ){
     return s;
   } else {
-    console.dir(m);
     return s.substring(0, m.index);
   }
 }
