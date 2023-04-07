@@ -21,15 +21,15 @@ export interface PatientCreationSpec {
 }
 
 function toSqlDate(arg: string | Date): string {
-  if( typeof arg === "string" ){
+  if (typeof arg === "string") {
     return arg;
   } else {
     return dateToSqlDate(arg);
   }
 }
 
-export function createPatient(spec: PatientCreationSpec = {}): Cypress.Chainable<Patient> {
-  const patient = {
+export function createPatient(spec: PatientCreationSpec = {}): Patient {
+  return Patient.cast({
     patientId: spec.patientId ?? 0,
     lastName: spec.lastName ?? "診療",
     firstName: spec.firstName ?? "太郎",
@@ -39,7 +39,10 @@ export function createPatient(spec: PatientCreationSpec = {}): Cypress.Chainable
     birthday: toSqlDate(spec.birthday ?? "2000-03-04"),
     address: spec.address ?? "",
     phone: spec.phone ?? "",
-  }
+  });
+}
+
+export function enterPatient(patient: Patient): Cypress.Chainable<Patient> {
   return cy.request("POST", apiBase() + "/enter-patient", patient)
     .then((response) => Patient.cast(response.body));
 }

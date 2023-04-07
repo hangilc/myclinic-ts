@@ -13,7 +13,7 @@ export interface MockShahokokuhoSpec {
   edaban?: string;
 }
 
-export function mockShahokokuho(spec?: MockShahokokuhoSpec): Shahokokuho {
+export function createShahokokuho(spec?: MockShahokokuhoSpec): Shahokokuho {
   const s: MockShahokokuhoSpec = spec || {};
   return new Shahokokuho(
     s.shahokokuhoId ?? 0,
@@ -28,3 +28,8 @@ export function mockShahokokuho(spec?: MockShahokokuhoSpec): Shahokokuho {
     s.edaban ?? "",
   )
 }
+
+export function mockShahokokuho(spec?: MockShahokokuhoSpec): Shahokokuho {
+  return createShahokokuho(spec);
+}
+

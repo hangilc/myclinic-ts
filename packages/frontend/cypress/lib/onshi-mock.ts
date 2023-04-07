@@ -3,29 +3,13 @@ import { OnshiResult } from "onshi-result";
 import type { MessageBodyInterface } from "onshi-result/MessageBody";
 import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
-import { dateToSqlDate, dateToSqlDateTime, Patient } from "myclinic-model";
+import { dateToSqlDate, dateToSqlDateTime, Patient, Shahokokuho } from "myclinic-model";
 import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
+import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
-
-export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
-  return createOnshiResult({
-    QualificationConfirmationDate: q.confirmationDate,
-  }, {
-    ResultList: [
-      {
-        InsurerNumber: q.hokensha,
-        InsuredCardSymbol: q.kigou,
-        InsuredIdentificationNumber: q.hihokensha,
-        InsuredBranchNumber: q.edaban,
-        LimitApplicationCertificateRelatedConsFlg: q.limitAppConsFlag,
-      }
-    ]
-  });
-}
 
 export interface MessageHeaderCreationSpec {
   ProcessExecutionTime?: string | Date;
@@ -102,6 +86,9 @@ function resolveOptDate(src: string | Date | undefined): string | undefined {
   if (src instanceof Date) {
     src = dateToSqlDate(src);
   }
+  if( src === "0000-00-00" ) {
+    return undefined;
+  }
   return fromSqlDate(src);
 }
 
@@ -120,6 +107,23 @@ function toOptContributionRatio(src: 10 | 20 | 30 | undefined): string | undefin
     return undefined;
   } else {
     return `0${src}`;
+  }
+}
+
+export interface ElderlyRecipientCertificateInfoCreationSpec {
+  ElderlyRecipientCertificateDate?: string;
+  ElderlyRecipientValidStartDate?: string;
+  ElderlyRecipientValidEndDate?: string;
+  ElderlyRecipientContributionRatio?: 10 | 20 | 30 | undefined;
+}
+
+export function createElderlyRecipientCertificateInfoInterface(spec: ElderlyRecipientCertificateInfoCreationSpec)
+  : ElderlyRecipientCertificateInfoInterface {
+  return {
+    ElderlyRecipientCertificateDate: spec.ElderlyRecipientCertificateDate,
+    ElderlyRecipientValidStartDate: spec.ElderlyRecipientCertificateDate,
+    ElderlyRecipientValidEndDate: spec.ElderlyRecipientValidEndDate,
+    ElderlyRecipientContributionRatio: toOptContributionRatio(spec.ElderlyRecipientContributionRatio)
   }
 }
 
@@ -147,7 +151,7 @@ export interface ResultOfQualificationConfirmationCreationSpec {
   InsuredPartialContributionRatio?: 10 | 20 | 30 | undefined;
   PreschoolClassification?: PreschoolClassificationCode;
   ReasonOfLoss?: ReasonOfLossCode;
-  ElderlyRecipientCertificateInfo?: ElderlyRecipientCertificateInfoInterface;
+  ElderlyRecipientCertificateInfo?: ElderlyRecipientCertificateInfoCreationSpec;
   LimitApplicationCertificateRelatedConsFlg?: LimitApplicationCertificateRelatedConsFlgCode;
   LimitApplicationCertificateRelatedConsTime?: string | Date;
   LimitApplicationCertificateRelatedInfo?: LimitApplicationCertificateRelatedInfoInterface;
@@ -182,7 +186,9 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
     InsuredPartialContributionRatio: toOptContributionRatio(spec.InsuredPartialContributionRatio),
     PreschoolClassification: spec.PreschoolClassification,
     ReasonOfLoss: spec.ReasonOfLoss,
-    ElderlyRecipientCertificateInfo: spec.ElderlyRecipientCertificateInfo,
+    ElderlyRecipientCertificateInfo: spec.ElderlyRecipientCertificateInfo
+      ? createElderlyRecipientCertificateInfoInterface(spec.ElderlyRecipientCertificateInfo)
+      : undefined,
     LimitApplicationCertificateRelatedConsFlg: spec.LimitApplicationCertificateRelatedConsFlg,
     LimitApplicationCertificateRelatedConsTime: resolveOptDateTime(spec.LimitApplicationCertificateRelatedConsTime),
     LimitApplicationCertificateRelatedInfo: spec.LimitApplicationCertificateRelatedInfo,
@@ -192,28 +198,66 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
   }
 }
 
-type OnshiCreationPair = [MessageHeaderCreationSpec, MessageBodyCreationSpec];
-
-export type OnshiCreationModifier = (specs: OnshiCreationPair) => OnshiCreationPair;
-
-function bodyModifier(m: (spec: MessageBodyCreationSpec) => MessageBodyCreationSpec): OnshiCreationModifier {
-  return (pair: OnshiCreationPair) => [ pair[0], m(pair[1]) ];
-}
+type OnshiHeaderModifier = (header: MessageHeaderCreationSpec) => MessageHeaderCreationSpec | void;
+type OnshiBodyModifier = (body: MessageBodyCreationSpec) => MessageBodyCreationSpec | void;
+type OnshiResultModifier = (result: ResultOfQualificationConfirmationCreationSpec) => ResultOfQualificationConfirmationCreationSpec | void;
 
 const onshiCreationModifier = {
-  patient: (p: Patient) => bodyModifier(body => Object.assign({}, body, {
+  patient: (p: Patient) => (body: MessageBodyCreationSpec) => Object.assign(body, {
     Name: `${p.lastName}　${p.firstName}`,
     NameKana: `${p.lastNameYomi} ${p.firstNameYomi}`,
     Birthdate: p.birthday,
     Sex1: p.sex === "M" ? sexFromLabel("男") : sexFromLabel("女"),
+  }),
+  result: (m: OnshiResultModifier) => (body: MessageBodyCreationSpec) => {
+    let r: ResultOfQualificationConfirmationCreationSpec;
+    if (!body.ResultList) {
+      r = {};
+    } else if (body.ResultList.length === 1) {
+      r = body.ResultList[0];
+    } else {
+      throw new Error("multiple result list");
+    }
+    r = m(r) ?? r;
+    body.ResultList = [r];
+  },
+  shahokokuho: (shahokokuho: Shahokokuho) => onshiCreationModifier.result(r => Object.assign(r, {
+    InsurerNumber: shahokokuho.hokenshaBangou.toString(),
+    InsuredCardSymbol: shahokokuho.hihokenshaKigou,
+    InsuredIdentificationNumber: shahokokuho.hihokenshaBangou,
+    InsuredBranchNumber: shahokokuho.edaban,
+    PersonalFamilyClassification: shahokokuho.honninStore === 0
+      ? personalFamilyClassificationFromLabel("家族")
+      : personalFamilyClassificationFromLabel("本人"),
+    InsuredCertificateIssuanceDate: shahokokuho.validFrom,
+    InsuredCardValidDate: shahokokuho.validFrom,
+    InsuredCardExpirationDate: shahokokuho.validUpto,
+    kourei,
   })),
 };
 
-export function createOnshiResult(...modifiers: OnshiCreationModifier[]): OnshiResult {
-  let pair:  [MessageHeaderCreationSpec, MessageBodyCreationSpec] = [{}, {}];
-  modifiers.forEach(m => pair = m(pair));
+export function createOnshiResult(headerModifier?: OnshiHeaderModifier, ...bodyModifiers: OnshiBodyModifier[]): OnshiResult {
+  let headerSpec: MessageHeaderCreationSpec = {};
+  let bodySpec: MessageBodyCreationSpec = {};
+  headerSpec = (headerModifier ? headerModifier(headerSpec) : headerSpec) ?? headerSpec;
+  bodyModifiers.forEach(m => bodySpec = m(bodySpec) ?? bodySpec);
 
-  const header = createMessageHeaderInterface(pair[0]);
-  const body = createMessageBodyInterface(pair[1]);
+  const header = createMessageHeaderInterface(headerSpec);
+  const body = createMessageBodyInterface(bodySpec);
   return OnshiResult.create(header, body);
 }
+
+export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
+  return createOnshiResult((h: MessageHeaderCreationSpec) => {
+    h.QualificationConfirmationDate = q.confirmationDate;
+  },
+    onshiCreationModifier.result(r => Object.assign(r, {
+      InsurerNumber: q.hokensha,
+      InsuredCardSymbol: q.kigou,
+      InsuredIdentificationNumber: q.hihokensha,
+      InsuredBranchNumber: q.edaban,
+      LimitApplicationCertificateRelatedConsFlg: q.limitAppConsFlag,
+    }))
+  );
+}
+
