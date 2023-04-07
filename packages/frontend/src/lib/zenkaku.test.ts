@@ -4,26 +4,26 @@ import * as z from "./zenkaku"
 
 describe("zenkaku", () => {
   it("should convert digit", () => {
-    expect(z.digitMap.get('2')).toBe("２");
+    expect(z.digitMap['2']).toBe("２");
   });
 
   it("should convert lower char", () => {
-    expect(z.lowerMap.get('z')).toBe("ｚ");
+    expect(z.lowerMap['z']).toBe("ｚ");
   });
 
   it("should convert upper char", () => {
-    expect(z.upperMap.get('Z')).toBe("Ｚ");
+    expect(z.upperMap['Z']).toBe("Ｚ");
   });
 
   it("should convert custom char", () => {
-    expect(z.customMap.get(',')).toBe("、");
+    expect(z.customMap[',']).toBe("、");
   });
 
   it("should convert char", () => {
-    expect(z.zenkakuMap.get('2')).toBe("２");
-    expect(z.zenkakuMap.get('z')).toBe("ｚ");
-    expect(z.zenkakuMap.get('Z')).toBe("Ｚ");
-    expect(z.zenkakuMap.get(',')).toBe("、");
+    expect(z.zenkakuMap['2']).toBe("２");
+    expect(z.zenkakuMap['z']).toBe("ｚ");
+    expect(z.zenkakuMap['Z']).toBe("Ｚ");
+    expect(z.zenkakuMap[',']).toBe("、");
   });
 
   it("shold string to zenkaku", () => {

@@ -52,36 +52,39 @@ export const customMap: Record<string, string> = {
 
 export const spaceMap: Record<string, string> = { " ": "　" };
 
-export const zenkakuMap: Record<string, string> = {
-  ...Object.entries(digitMap),
-  ...lowerMap.entries(),
-  ...upperMap.entries(),
-  ...customMap.entries(),
+function extendRecords(...rs: Record<string, string>[]): Record<string, string> {
+  const r: Record<string, string> = {};
+  for(let a of rs){
+    Object.assign(r, a);
+  }
+  return r;
 }
+
+export const zenkakuMap: Record<string, string> = extendRecords(digitMap, lowerMap, upperMap, customMap);
 
 export function toZenkaku(src: string, except: string[] = []): string {
   return toZenkakuWith(zenkakuMap, src, except);
 }
 
 export function toZenkakuWith(
-  map: Map<string, string>,
+  map: Record<string, string>,
   src: string,
   except: string[] = []): string {
   return src.split("").map(c => {
     if (except.indexOf(c) >= 0) {
       return c;
     } else {
-      const z = map.get(c);
+      const z = map[c];
       return z || c;
     }
   }).join("");
 }
 
-function convertWith(map: Map<string, string>, src: string): string {
+function convertWith(map: Record<string, string>, src: string): string {
   return src
     .split("")
     .map((s) => {
-      const d = map.get(s);
+      const d = map[s];
       if (d === undefined) {
         return s;
       } else {
@@ -91,16 +94,17 @@ function convertWith(map: Map<string, string>, src: string): string {
     .join("");
 }
 
-function reverseMap(map: Map<string, string>): Map<string, string> {
-  const r = new Map<string, string>();
-  for (let e of map.entries()) {
-    r.set(e[1], e[0]);
+function reverseMap(map: Record<string, string>): Record<string, string> {
+  const r: Record<string, string> = {};
+  for(let k in map){
+    const v = map[k];
+    r[v] = k;
   }
   return r;
 }
 
 export function fromZenkakuWith(
-  alphaToZenkakuMap: Map<string, string>,
+  alphaToZenkakuMap: Record<string, string>,
   src: string
 ): string {
   return convertWith(reverseMap(alphaToZenkakuMap), src);
