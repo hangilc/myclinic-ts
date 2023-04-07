@@ -5,7 +5,8 @@ import path from "node:path"
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src")
+      "@": path.resolve(__dirname, "./src"),
+      "@cypress": path.resolve(__dirname, "./cypress"),
     }
   },
   test: {

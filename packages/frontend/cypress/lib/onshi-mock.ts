@@ -5,7 +5,7 @@ import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime, Patient, Shahokokuho } from "myclinic-model";
 import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
+import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateClassificationCode, type LimitApplicationCertificateClassificationFlagCode, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
@@ -86,7 +86,7 @@ function resolveOptDate(src: string | Date | undefined): string | undefined {
   if (src instanceof Date) {
     src = dateToSqlDate(src);
   }
-  if( src === "0000-00-00" ) {
+  if (src === "0000-00-00") {
     return undefined;
   }
   return fromSqlDate(src);
@@ -202,24 +202,48 @@ type OnshiHeaderModifier = (header: MessageHeaderCreationSpec) => MessageHeaderC
 type OnshiBodyModifier = (body: MessageBodyCreationSpec) => MessageBodyCreationSpec | void;
 type OnshiResultModifier = (result: ResultOfQualificationConfirmationCreationSpec) => ResultOfQualificationConfirmationCreationSpec | void;
 
-const onshiCreationModifier = {
-  patient: (p: Patient) => (body: MessageBodyCreationSpec) => Object.assign(body, {
+function convertShahokokuhoKourei(koureiStore: number): 10 | 20 | 30 | undefined {
+  if (koureiStore === 0) {
+    return undefined;
+  } else if (koureiStore === 1) {
+    return 10;
+  } else if (koureiStore === 2) {
+    return 20;
+  } else if (koureiStore === 3) {
+    return 30;
+  } else {
+    throw new Error("Cannot convert koureiStore: " + koureiStore);
+  }
+}
+
+function ensureSingleResult(body: MessageBodyCreationSpec): ResultOfQualificationConfirmationCreationSpec {
+  let r: ResultOfQualificationConfirmationCreationSpec;
+  if (!body.ResultList) {
+    r = {};
+    body.ResultList = [r];
+  } else if (body.ResultList.length === 1) {
+    r = body.ResultList[0];
+  } else {
+    throw new Error("multiple result list");
+  }
+  return r;
+}
+
+export const onshiCreationModifier = {
+  patient: (p: Patient) => onshiCreationModifier.result(r => Object.assign(r, {
     Name: `${p.lastName}　${p.firstName}`,
     NameKana: `${p.lastNameYomi} ${p.firstNameYomi}`,
     Birthdate: p.birthday,
     Sex1: p.sex === "M" ? sexFromLabel("男") : sexFromLabel("女"),
-  }),
+  })),
   result: (m: OnshiResultModifier) => (body: MessageBodyCreationSpec) => {
-    let r: ResultOfQualificationConfirmationCreationSpec;
-    if (!body.ResultList) {
-      r = {};
-    } else if (body.ResultList.length === 1) {
-      r = body.ResultList[0];
+    let r: ResultOfQualificationConfirmationCreationSpec = ensureSingleResult(body);
+    if( body.ResultList && body.ResultList.length === 1 ){
+      body.ResultList[0] = m(r) ?? r;
     } else {
-      throw new Error("multiple result list");
+      throw new Error("Cannot happen (modifier: result");
     }
-    r = m(r) ?? r;
-    body.ResultList = [r];
+    return body;
   },
   shahokokuho: (shahokokuho: Shahokokuho) => onshiCreationModifier.result(r => Object.assign(r, {
     InsurerNumber: shahokokuho.hokenshaBangou.toString(),
@@ -232,14 +256,14 @@ const onshiCreationModifier = {
     InsuredCertificateIssuanceDate: shahokokuho.validFrom,
     InsuredCardValidDate: shahokokuho.validFrom,
     InsuredCardExpirationDate: shahokokuho.validUpto,
-    kourei,
+    ElderlyRecipientCertificateInfo: convertShahokokuhoKourei(shahokokuho.koureiStore),
   })),
 };
 
-export function createOnshiResult(headerModifier?: OnshiHeaderModifier, ...bodyModifiers: OnshiBodyModifier[]): OnshiResult {
+export function createOnshiResultWithHeader(headerModifier: OnshiHeaderModifier, ...bodyModifiers: OnshiBodyModifier[]): OnshiResult {
   let headerSpec: MessageHeaderCreationSpec = {};
   let bodySpec: MessageBodyCreationSpec = {};
-  headerSpec = (headerModifier ? headerModifier(headerSpec) : headerSpec) ?? headerSpec;
+  headerSpec = headerModifier(headerSpec) ?? headerSpec;
   bodyModifiers.forEach(m => bodySpec = m(bodySpec) ?? bodySpec);
 
   const header = createMessageHeaderInterface(headerSpec);
@@ -247,8 +271,12 @@ export function createOnshiResult(headerModifier?: OnshiHeaderModifier, ...bodyM
   return OnshiResult.create(header, body);
 }
 
+export function createOnshiResult(...bodyModifiers: OnshiBodyModifier[]): OnshiResult {
+  return createOnshiResultWithHeader(h => h, ...bodyModifiers);
+}
+
 export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
-  return createOnshiResult((h: MessageHeaderCreationSpec) => {
+  return createOnshiResultWithHeader((h: MessageHeaderCreationSpec) => {
     h.QualificationConfirmationDate = q.confirmationDate;
   },
     onshiCreationModifier.result(r => Object.assign(r, {

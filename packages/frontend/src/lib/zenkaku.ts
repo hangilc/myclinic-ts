@@ -16,41 +16,48 @@ function charMap(
   alphaStart: string,
   alphaLast: string,
   zenkakuStart: string
-): Map<string, string> {
+): Record<string, string> {
   const alphaCode = charCodeOf(alphaStart);
   const zenkakuCode = charCodeOf(zenkakuStart);
-  return new Map(
-    range(0, charCodeOf(alphaLast) - alphaCode + 1).map((i) => [
-      String.fromCharCode(alphaCode + i),
-      String.fromCharCode(zenkakuCode + i),
-    ])
-  );
+  const r: Record<string, string> = {};
+  range(0, charCodeOf(alphaLast) - alphaCode + 1).forEach((i) => {
+    const key = String.fromCharCode(alphaCode + i);
+    const val = String.fromCharCode(zenkakuCode + i);
+    r[key] = val;
+  });
+  return r;
+  // return new Map(
+  //   range(0, charCodeOf(alphaLast) - alphaCode + 1).map((i) => [
+  //     String.fromCharCode(alphaCode + i),
+  //     String.fromCharCode(zenkakuCode + i),
+  //   ])
+  // );
 }
 
-export const digitMap: Map<string, string> = charMap("0", "9", zenkakuZero);
-export const lowerMap: Map<string, string> = charMap("a", "z", zenkakuLower_a);
-export const upperMap: Map<string, string> = charMap("A", "Z", zenkakuUpper_a);
-export const customMap: Map<string, string> = new Map([
-  [".", "．"],
-  [" ", "　"],
-  ["-", "ー"],
-  ["(", "（"],
-  [")", "）"],
-  [",", "、"],
-  ["%", "％"],
-  ["@", "＠"],
-  [":", "："],
-  [";", "；"],
-]);
+export const digitMap: Record<string, string> = charMap("0", "9", zenkakuZero);
+export const lowerMap: Record<string, string> = charMap("a", "z", zenkakuLower_a);
+export const upperMap: Record<string, string> = charMap("A", "Z", zenkakuUpper_a);
+export const customMap: Record<string, string> = {
+  ".": "．",
+  " ": "　",
+  "-": "ー",
+  "(": "（",
+  ")": "）",
+  ",": "、",
+  "%": "％",
+  "@": "＠",
+  ":": "：",
+  ";": "；",
+};
 
-export const spaceMap: Map<string, string> = new Map([[" ", "　"]]);
+export const spaceMap: Record<string, string> = { " ": "　" };
 
-export const zenkakuMap: Map<string, string> = new Map([
-  ...digitMap.entries(),
+export const zenkakuMap: Record<string, string> = {
+  ...Object.entries(digitMap),
   ...lowerMap.entries(),
   ...upperMap.entries(),
   ...customMap.entries(),
-]);
+}
 
 export function toZenkaku(src: string, except: string[] = []): string {
   return toZenkakuWith(zenkakuMap, src, except);
@@ -181,7 +188,7 @@ const kanaHankakuZenkakuMap: Record<string, string> = {
   "ﾎﾟ": "ポ",
 }
 
-// const zenkakuKatakanaList = Object.values(kanaHankakuZenkakuMap);
+const zenkakuKatakanaToHankakuKatakanaMap: Record<string, string> = reverseMap(kanaHankakuZenkakuMap);
 
 const katakanaHiraganaZenkakuMap: Record<string, string> = {
   "ア": "あ",
@@ -268,7 +275,7 @@ export function hankakuKatakanaToZenkakuKatakana(h: string): string {
 
 export function zenkakuKatakanaToZenkakuHiragana(k: string): string {
   const h = katakanaHiraganaZenkakuMap[k];
-  if( h != undefined ){
+  if (h != undefined) {
     return h;
   } else {
     return k;
