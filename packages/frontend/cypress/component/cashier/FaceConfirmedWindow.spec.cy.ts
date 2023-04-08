@@ -5,7 +5,7 @@ import { createShahokokuho } from "@cypress/lib/shahokokuho-mock";
 import type { OnshiResult } from "onshi-result";
 import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
 import { apiBase } from "@cypress/lib/base";
-import type { Patient, Shahokokuho } from "myclinic-model";
+import { Visit, type Patient, type Shahokokuho } from "myclinic-model";
 import { enterShahokokuho } from "@cypress/lib/shahokokuho";
 import { confirmCancel, confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
 
@@ -45,7 +45,17 @@ describe("FaceConfirmedWindow", () => {
           apiBase() + `/list-visit-id-by-patient-reverse?patient-id=${patient.patientId}&offset=0&count=1`,
         ).its("body").then((body: number[]) => {
           expect(body.length).equal(1);
-        })
+          return body[0]
+        }).as("visitId");
+        cy.get<number>("@visitId").then((visitId: number) => {
+          cy.request(
+            apiBase() + `/get-visit?visit-id=${visitId}`
+          ).its("body").then((body) => Visit.cast(body))
+          .as("visit");
+        });
+        cy.get<Visit>("@visit").then((visit: Visit) => {
+
+        });
       })
     });
   })
