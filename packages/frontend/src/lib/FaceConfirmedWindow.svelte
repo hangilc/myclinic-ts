@@ -17,6 +17,7 @@
     AllResolved,
     InconsistentHoken,
     MultiplePatients,
+    NewHoken,
   } from "./face-confirm-window";
   import {
     create_hoken_from_onshi_kakunin,
@@ -41,7 +42,8 @@
     | undefined
     | AllResolved
     | MultiplePatients
-    | InconsistentHoken = undefined;
+    | InconsistentHoken
+    | NewHoken = undefined;
   let message: string = "";
 
   resolvePatient();
@@ -116,7 +118,8 @@
         resolvedState = new InconsistentHoken(patient, shahoOpt, koukiOpt, r);
       }
     } else if (!shahoOpt && !koukiOpt) {
-      message = "現在有効な登録保険情報が存在しません。";
+      message = "新しい保険証";
+      resolvedState = new NewHoken(patient, r);
     } else {
       message = "現在有効な登録保険情報が複数存在します。";
     }
@@ -131,7 +134,6 @@
       const r = result.resultList[0];
       const birthdate = r.birthdate;
       const patients = await searchPatient(name, yomi, birthdate);
-      console.log("patients", patients);
       if (patients.length === 1) {
         message = "";
         advance(patients[0], r);
@@ -198,21 +200,16 @@
     });
   }
 
-  async function doHokenUpdate(resolved: InconsistentHoken) {
-    message = "";
-    const today: Date = new Date();
-    let alertMessage: string = "";
-    if (resolved.shahokokuhoOpt !== undefined) {
-      const rep = shahokokuhoRep(resolved.shahokokuhoOpt);
-      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
-    }
-    if (resolved.koukikoureiOpt !== undefined) {
-      const rep = koukikoureiRep(resolved.koukikoureiOpt.futanWari);
-      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
-    }
+  async function registerOnshiResultAsHoken(
+    patient: Patient,
+    result: ResultOfQualificationConfirmation,
+    preAlertMessage: string = "",
+  ) {
+    const today = new Date();
+    let alertMessage: string = preAlertMessage;
     const hoken = create_hoken_from_onshi_kakunin(
-      resolved.patient.patientId,
-      resolved.result,
+      patient.patientId,
+      result,
       today
     );
     if (typeof hoken === "string") {
@@ -233,6 +230,48 @@
         resolvePatient();
       });
     }
+  }
+
+  async function doHokenUpdate(resolved: InconsistentHoken) {
+    message = "";
+    // const today: Date = new Date();
+    let alertMessage: string = "";
+    if (resolved.shahokokuhoOpt !== undefined) {
+      const rep = shahokokuhoRep(resolved.shahokokuhoOpt);
+      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
+    }
+    if (resolved.koukikoureiOpt !== undefined) {
+      const rep = koukikoureiRep(resolved.koukikoureiOpt.futanWari);
+      alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
+    }
+    registerOnshiResultAsHoken(resolved.patient, resolved.result, alertMessage);
+    // const hoken = create_hoken_from_onshi_kakunin(
+    //   resolved.patient.patientId,
+    //   resolved.result,
+    //   today
+    // );
+    // if (typeof hoken === "string") {
+    //   alert(hoken);
+    // } else if (hoken instanceof Shahokokuho) {
+    //   const rep = shahokokuhoName(hoken.hokenshaBangou);
+    //   alertMessage += `${rep}を登録します。`;
+    //   console.log(hoken);
+    //   confirm(alertMessage, async () => {
+    //     await api.newShahokokuho(hoken);
+    //     resolvePatient();
+    //   });
+    // } else {
+    //   const rep = koukikoureiRep(hoken.futanWari);
+    //   alertMessage += `${rep}を登録します。`;
+    //   confirm(alertMessage, async () => {
+    //     await api.newKoukikourei(hoken);
+    //     resolvePatient();
+    //   });
+    // }
+  }
+
+  async function doNewHoken(resolved: NewHoken) {
+    registerOnshiResultAsHoken(resolved.patient, resolved.result);
   }
 
   function doClose(): void {
@@ -271,7 +310,7 @@
       {/each}
     </div>
     {#if message}
-      <div class="message">{message}</div>
+      <div class="message" data-cy="message">{message}</div>
     {/if}
     <div class="commands">
       {#if resolvedState instanceof AllResolved}
@@ -291,6 +330,9 @@
       {:else if resolvedState instanceof InconsistentHoken}
         {@const resolved = resolvedState}
         <button on:click={() => doHokenUpdate(resolved)}>保険証更新</button>
+      {:else if resolvedState instanceof NewHoken}
+        {@const resolved = resolvedState}
+        <button on:click={() => doNewHoken(resolved)}>新規保険証登録</button>
       {:else}
         <button on:click={doClose}>閉じる</button>
       {/if}

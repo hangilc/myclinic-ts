@@ -27,3 +27,10 @@ export class InconsistentHoken {
     public result: ResultOfQualificationConfirmation,
   ) {}
 }
+
+export class NewHoken {
+  constructor(
+    public patient: Patient,
+    public result: ResultOfQualificationConfirmation,
+  ) {}
+}
