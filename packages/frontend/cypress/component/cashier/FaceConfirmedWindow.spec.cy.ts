@@ -38,10 +38,15 @@ describe("FaceConfirmedWindow", () => {
         });
         cy.get("[data-cy=message]").contains("新しい保険証");
         cy.get("button").contains("新規保険証登録").click();
+        confirmYesContainingMessage("登録します");
+        cy.get("[data-cy=message]").should("not.exist");
+        cy.get("button").contains("診察登録").click();
+        cy.request(
+          apiBase() + `/list-visit-id-by-patient-reverse?patient-id=${patient.patientId}&offset=0&count=1`,
+        ).its("body").then((body: number[]) => {
+          expect(body.length).equal(1);
+        })
       })
     });
-    confirmYesContainingMessage("登録します");
-    cy.get("[data-cy=message]").should("not.exist");
-    cy.get("button").contains("診察登録").click();
   })
 });
