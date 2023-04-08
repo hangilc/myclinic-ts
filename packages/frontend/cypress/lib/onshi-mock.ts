@@ -3,7 +3,7 @@ import { OnshiResult } from "onshi-result";
 import type { MessageBodyInterface } from "onshi-result/MessageBody";
 import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
-import { dateToSqlDate, dateToSqlDateTime, Patient, Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, dateToSqlDateTime, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
 import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateClassificationCode, type LimitApplicationCertificateClassificationFlagCode, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
@@ -218,6 +218,18 @@ function convertShahokokuhoKourei(koureiStore: number): 10 | 20 | 30 | undefined
   }
 }
 
+function convertKoukikoureiFutanwari(futanWari: number): 10 | 20 | 30 {
+  if( futanWari === 1 ){
+    return 10;
+  } else if( futanWari === 2 ){
+    return 20;
+  } else if( futanWari === 3 ){
+    return 30;
+  } else {
+    throw new Error("Cannot convert futanWari: " + futanWari);
+  }
+}
+
 function ensureSingleResult(body: MessageBodyCreationSpec): ResultOfQualificationConfirmationCreationSpec {
   let r: ResultOfQualificationConfirmationCreationSpec;
   if (!body.ResultList) {
@@ -259,6 +271,14 @@ export const onshiCreationModifier = {
     InsuredCardValidDate: shahokokuho.validFrom,
     InsuredCardExpirationDate: shahokokuho.validUpto,
     ElderlyRecipientCertificateInfo: convertShahokokuhoKourei(shahokokuho.koureiStore),
+  })),
+  koukikourei: (koukikourei: Koukikourei) => onshiCreationModifier.result(r => Object.assign(r, {
+    InsurerNumber: koukikourei.hokenshaBangou,
+    InsuredIdentificationNumber: koukikourei.hihokenshaBangou,
+    InsuredCertificateIssuanceDate: koukikourei.validFrom,
+    InsuredPartialContributionRatio: convertKoukikoureiFutanwari(koukikourei.futanWari),
+    InsuredCardValidDate: koukikourei.validFrom,
+    InsuredCardExpirationDate: koukikourei.validUpto,
   })),
 };
 

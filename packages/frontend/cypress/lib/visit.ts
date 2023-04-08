@@ -13,3 +13,10 @@ export function getVisitEx(visitId: number): Cypress.Chainable<VisitEx> {
     .its("body")
     .then(body => VisitEx.cast(body));
 }
+
+export function listRecentVisitIdsByPatient(patientId: number, count: number):
+  Cypress.Chainable<number[]> {
+  return cy.request(
+    apiBase() + `/list-visit-id-by-patient-reverse?patient-id=${patientId}&offset=0&count=${count}`
+  ).its("body");
+}
