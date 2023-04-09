@@ -57,7 +57,7 @@ export interface ResultOfQualificationConfirmationInterface {
   LimitApplicationCertificateRelatedInfo: LimitApplicationCertificateRelatedInfoInterface | undefined;
   SpecificDiseasesCertificateRelatedConsFlg: string | undefined;
   SpecificDiseasesCertificateRelatedConsTime: string | undefined;
-  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfoInterface[];
+  SpecificDiseasesCertificateList: SpecificDiseasesCertificateInfoInterface[] | undefined;
 }
 
 export class ResultOfQualificationConfirmation {
@@ -70,6 +70,7 @@ export class ResultOfQualificationConfirmation {
   specificDiseasesCertificateList: SpecificDiseasesCertificateInfo[];
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
+    console.log("new Result...", arg);
     this.orig = arg;
     this.elderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo
       ? ElderlyRecipientCertificateInfo.cast(arg.ElderlyRecipientCertificateInfo)
@@ -77,7 +78,9 @@ export class ResultOfQualificationConfirmation {
     this.limitApplicationCertificateRelatedInfo = arg.LimitApplicationCertificateRelatedInfo
       ? LimitApplicationCertificateRelatedInfo.cast(arg.LimitApplicationCertificateRelatedInfo)
       : undefined;
-    this.specificDiseasesCertificateList = arg.SpecificDiseasesCertificateList.map(SpecificDiseasesCertificateInfo.cast);
+    this.specificDiseasesCertificateList = arg.SpecificDiseasesCertificateList
+      ? arg.SpecificDiseasesCertificateList.map(SpecificDiseasesCertificateInfo.cast)
+      : [];
   }
   
   // 被保険者証の種類
@@ -315,6 +318,9 @@ export class ResultOfQualificationConfirmation {
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
+    console.log("cast ResultOfQualificationConfirmation", arg);
+    arg = arg.ResultOfQualificationConfirmation;
+    console.log("cast ResultOfQualificationConfirmation (after)", arg);
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
       Name: castStringProp(arg, "Name"),

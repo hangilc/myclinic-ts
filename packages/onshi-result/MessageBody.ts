@@ -22,17 +22,20 @@ export class MessageBody {
 
   constructor(arg: MessageBodyInterface) {
     this.orig = arg;
+    console.log("before resultList");
     this.resultList = arg.ResultList.map(ResultOfQualificationConfirmation.cast);
-    this.qualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo 
+    console.log("resultList", this.resultList);
+    this.qualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo
       ? QualificationConfirmSearchInfo.cast(arg.QualificationConfirmSearchInfo)
       : undefined;
+    console.log("qualificationConfirmSearchInfo", this.qualificationConfirmSearchInfo);
   }
 
   get qualificationValidity(): QualificationValidityLabel | undefined {
     const k: string | undefined = this.orig.QualificationValidity;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isQualificationValidityCode(k) ){
+    } else if (isQualificationValidityCode(k)) {
       return QualificationValidity[k];
     } else {
       throw new Error("Invalid QualificationValidity: " + k);
@@ -42,7 +45,7 @@ export class MessageBody {
   // 個人単位でオンライン資格確認システムの処理結果を表す区分
   get processingResultStatus(): ProcessingResultStatusLabel {
     const k: string = this.orig.ProcessingResultStatus;
-    if( isProcessingResultStatusCode(k) ){
+    if (isProcessingResultStatusCode(k)) {
       return ProcessingResultStatus[k];
     } else {
       throw new Error("Invalid ProcessingResultStatus: " + k);
@@ -52,9 +55,9 @@ export class MessageBody {
   // 患者が選択した処方箋の発行形態
   get prescriptionIssueSelect(): PrescriptionIssueSelectLabel | undefined {
     const k: string | undefined = this.orig.PrescriptionIssueSelect;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isPrescriptionIssueSelectCode(k) ){
+    } else if (isPrescriptionIssueSelectCode(k)) {
       return PrescriptionIssueSelect[k];
     } else {
       throw new Error("Invalid PrescriptionIssueSelect: " + k);
@@ -82,7 +85,7 @@ export class MessageBody {
   // 患者氏名
   get name(): string {
     const resultOpt = this.resultList[0];
-    if( resultOpt != undefined ){
+    if (resultOpt != undefined) {
       return resultOpt.name;
     } else {
       return "";
@@ -92,7 +95,7 @@ export class MessageBody {
   // 患者氏名よみ
   get nameKana(): string | undefined {
     const resultOpt = this.resultList[0];
-    if( resultOpt != undefined ){
+    if (resultOpt != undefined) {
       return resultOpt.nameKana;
     } else {
       return "";
@@ -108,7 +111,7 @@ export class MessageBody {
       return new MessageBody({
         ProcessingResultStatus: castStringProp(arg, "ProcessingResultStatus"),
         ResultList: arg.ResultList,
-        QualificationConfirmSearchInfo:arg.QualificationConfirmSearchInfo,
+        QualificationConfirmSearchInfo: arg.QualificationConfirmSearchInfo,
         PrescriptionIssueSelect: castOptStringProp(arg, "PrescriptionIssueSelect"),
         ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
         ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),

@@ -19,7 +19,9 @@ export class OnshiResult {
   constructor(orig: OnshiResultInterface) {
     this.orig = orig;
     this.messageHeader = MessageHeader.cast(orig.XmlMsg.MessageHeader);
+    console.log("header", this.messageHeader);
     this.messageBody = MessageBody.cast(orig.XmlMsg.MessageBody);
+    console.log("body", this.messageBody);
   }
 
   // 資格が確認できたかどうか
