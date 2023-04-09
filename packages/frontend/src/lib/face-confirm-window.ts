@@ -34,3 +34,9 @@ export class NewHoken {
     public result: ResultOfQualificationConfirmation,
   ) {}
 }
+
+export class NoPatient {
+  constructor(
+    public result: ResultOfQualificationConfirmation
+  ) {}
+}

@@ -13,6 +13,7 @@ import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/li
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
 import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
 import * as kanjidate from "kanjidate";
+import { getPatient } from "@cypress/e2e/req";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -273,6 +274,57 @@ describe("FaceConfirmedWindow", () => {
         })
       });
     });
+  }); //
+
+  it("should register new patient", () => {
+    const patientTmpl = createPatient();
+    const shahokokuhoTmpl = createShahokokuho();
+    const result = createOnshiResult(m.patient(patientTmpl), m.shahokokuho(shahokokuhoTmpl));
+    const props = {
+      destroy: () => { },
+      result,
+      onRegister: () => { }
+    };
+    cy.stub(props, "onRegister").as("onRegister");
+    cy.intercept(
+      "GET",
+      apiBase() + "/search-patient?text=*",
+      [10, []]);
+    cy.mount(FaceConfirmedWindow, { props });
+    cy.get("button").contains("新規患者登録").click();
+    const phone = "03-1234-5678";
+    cy.window().then(win => {
+      cy.stub(win, "prompt").returns(phone);
+    });
+    cy.intercept("POST", apiBase() + "/enter-patient").as("enterPatient");
+    confirmYes();
+    cy.get("@onRegister").should("be.called");
+    cy.wait("@enterPatient").then(intercept => {
+      const patient = Patient.cast(intercept.response?.body);
+      const tmpl = Object.assign({}, patientTmpl, {
+        patientId: patient.patientId,
+        phone
+      });
+      expect(patient).deep.equal(tmpl);
+      cy.wrap(patient).as("patient");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      getMostRecentVisit(patient.patientId).as("visit");
+    });
+    cy.get<Visit>("@visit").then(visit => {
+      const shahokokuhoId = visit.shahokokuhoId;
+      expect(shahokokuhoId).to.be.gt(0);
+      getShahokokuho(shahokokuhoId).as("shahokokuho");
+    });
+    cy.get<Shahokokuho>("@shahokokuho").then(shahokokuho => {
+      cy.get<Patient>("@patient").then(patient => {
+        const tmpl = Object.assign({}, shahokokuhoTmpl, {
+          shahokokuhoId: shahokokuho.shahokokuhoId,
+          patientId: patient.patientId,
+        });
+        expect(shahokokuho).deep.equal(tmpl);
+      })
+    })
   }); //
 });
 

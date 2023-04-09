@@ -7,17 +7,19 @@
   import {
     dateToSqlDateTime,
     HokenIdSet,
+    HokenInfo,
     Koukikourei,
     Onshi,
+    Patient,
     Shahokokuho,
     type Kouhi,
-    type Patient,
   } from "myclinic-model";
   import {
     AllResolved,
     InconsistentHoken,
     MultiplePatients,
     NewHoken,
+    NoPatient,
   } from "./face-confirm-window";
   import {
     create_hoken_from_onshi_kakunin,
@@ -26,7 +28,12 @@
   } from "./hoken-onshi-consistent";
   import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
-  import { koukikoureiRep, shahokokuhoName, shahokokuhoRep } from "./hoken-rep";
+  import {
+    isKoukikourei,
+    koukikoureiRep,
+    shahokokuhoName,
+    shahokokuhoRep,
+  } from "./hoken-rep";
   import { confirm } from "./confirm-call";
 
   export let destroy: () => void;
@@ -43,7 +50,8 @@
     | AllResolved
     | MultiplePatients
     | InconsistentHoken
-    | NewHoken = undefined;
+    | NewHoken
+    | NoPatient = undefined;
   let message: string = "";
 
   resolvePatient();
@@ -139,14 +147,17 @@
         advance(patients[0], r);
       } else if (patients.length === 0) {
         message = "該当する登録患者情報がありません。";
+        resolvedState = new NoPatient(result.resultList[0]);
       } else {
         message = "該当する登録患者情報が複数あります。";
         resolvedState = new MultiplePatients(patients, r);
       }
     } else if (result.resultList.length === 0) {
       message = "確認された保険情報がありません。";
+      resolvedState = undefined;
     } else {
       message = "確認された保険情報が複数あります。";
+      resolvedState = undefined;
     }
   }
 
@@ -203,7 +214,7 @@
   async function registerOnshiResultAsHoken(
     patient: Patient,
     result: ResultOfQualificationConfirmation,
-    preAlertMessage: string = "",
+    preAlertMessage: string = ""
   ) {
     const today = new Date();
     let alertMessage: string = preAlertMessage;
@@ -232,7 +243,7 @@
     }
   }
 
-  async function doHokenUpdate(resolved: InconsistentHoken) {
+  function doHokenUpdate(resolved: InconsistentHoken) {
     message = "";
     // const today: Date = new Date();
     let alertMessage: string = "";
@@ -245,33 +256,98 @@
       alertMessage += `現在有効な「${rep}」の有効期限を終了します。`;
     }
     registerOnshiResultAsHoken(resolved.patient, resolved.result, alertMessage);
-    // const hoken = create_hoken_from_onshi_kakunin(
-    //   resolved.patient.patientId,
-    //   resolved.result,
-    //   today
-    // );
-    // if (typeof hoken === "string") {
-    //   alert(hoken);
-    // } else if (hoken instanceof Shahokokuho) {
-    //   const rep = shahokokuhoName(hoken.hokenshaBangou);
-    //   alertMessage += `${rep}を登録します。`;
-    //   console.log(hoken);
-    //   confirm(alertMessage, async () => {
-    //     await api.newShahokokuho(hoken);
-    //     resolvePatient();
-    //   });
-    // } else {
-    //   const rep = koukikoureiRep(hoken.futanWari);
-    //   alertMessage += `${rep}を登録します。`;
-    //   confirm(alertMessage, async () => {
-    //     await api.newKoukikourei(hoken);
-    //     resolvePatient();
-    //   });
-    // }
   }
 
-  async function doNewHoken(resolved: NewHoken) {
+  function doNewHoken(resolved: NewHoken) {
     registerOnshiResultAsHoken(resolved.patient, resolved.result);
+  }
+
+  function composePatientFromResult(
+    r: ResultOfQualificationConfirmation
+  ): Patient | string | undefined {
+    const name: string = r.name;
+    const [lastName, firstName] = name.split("　");
+    if (!(lastName && firstName)) {
+      return "氏名がありません。";
+    }
+    const yomi: string | undefined = r.nameKana;
+    if (!yomi) {
+      return "氏名のよみがありません。";
+    }
+    const [lastNameYomi, firstNameYomi] = yomi.split(" ");
+    if (!(lastNameYomi && firstNameYomi)) {
+      return "氏名のよみがありません。";
+    }
+    if (r.sex1 == undefined) {
+      return "性別がわかりません。";
+    }
+    const sex: string = r.sex1 === "男" ? "M" : "F";
+    const birthday = r.birthdate;
+    const addr = r.address ?? "";
+    const phone = prompt("電話番号");
+    if (phone === null) {
+      return undefined;
+    }
+    return new Patient(
+      0,
+      lastName,
+      firstName,
+      lastNameYomi,
+      firstNameYomi,
+      sex,
+      birthday,
+      addr,
+      phone
+    );
+  }
+
+  function doNoPatient(resolved: NoPatient) {
+    confirm("患者の新規登録をして診察を受付ますか？", async () => {
+      const patient: Patient | string | undefined = composePatientFromResult(
+        resolved.result
+      );
+      if (patient === undefined) {
+        return;
+      } else if (typeof patient === "string") {
+        message = patient;
+        resolvedState = undefined;
+      } else {
+        const patientEntered: Patient = await api.enterPatient(patient);
+        const patientId = patientEntered.patientId;
+        const validDate: string | undefined =
+          resolved.result.insuredCardValidDate;
+        const validFrom = validDate ? new Date(validDate) : new Date();
+        const hoken = create_hoken_from_onshi_kakunin(
+          patientId,
+          resolved.result,
+          validFrom
+        );
+        if (typeof hoken === "string") {
+          message = hoken;
+          resolvedState = undefined;
+        } else {
+          if (hoken instanceof Shahokokuho) {
+            const shahokokuho = await api.enterShahokokuho(hoken);
+            await api.startVisitWithHoken(
+              patientId,
+              new Date(),
+              new HokenIdSet(shahokokuho.shahokokuhoId, 0, 0, 0, 0, 0)
+            );
+          } else {
+            const koukikourei = await api.enterKoukikourei(hoken);
+            await api.startVisitWithHoken(
+              patientId,
+              new Date(),
+              new HokenIdSet(0, koukikourei.koukikoureiId, 0, 0, 0, 0)
+            );
+          }
+          message = "新規患者登録と診察受付を行いました。";
+          resolvedState = undefined;
+          doClose();
+          onRegister();
+        }
+      }
+    });
   }
 
   function doClose(): void {
@@ -333,6 +409,9 @@
       {:else if resolvedState instanceof NewHoken}
         {@const resolved = resolvedState}
         <button on:click={() => doNewHoken(resolved)}>新規保険証登録</button>
+      {:else if resolvedState instanceof NoPatient}
+        {@const resolved = resolvedState}
+        <button on:click={() => doNoPatient(resolved)}>新規患者登録</button>
       {:else}
         <button on:click={doClose}>閉じる</button>
       {/if}
