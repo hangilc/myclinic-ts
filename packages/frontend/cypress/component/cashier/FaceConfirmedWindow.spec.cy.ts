@@ -5,13 +5,14 @@ import { createShahokokuho } from "@cypress/lib/shahokokuho-mock";
 import type { OnshiResult } from "onshi-result";
 import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
 import { apiBase } from "@cypress/lib/base";
-import { Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
+import { dateToSqlDate, Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
 import { enterShahokokuho, getShahokokuho } from "@cypress/lib/shahokokuho";
 import { confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
 import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
 import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+import * as kanjidate from "kanjidate";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -206,11 +207,18 @@ describe("FaceConfirmedWindow", () => {
         getShahokokuho(shahokokuhoId).as("newShahokokuho");
       });
       cy.get<Shahokokuho>("@newShahokokuho").then(registered => {
-        console.log("registered", registered);
         expect(isConsistent(registered, result)).to.be.true;
-      })
+      });
+      cy.get<Shahokokuho>("@oldShahokokuho").then(oldShahokokuho => {
+        getShahokokuho(oldShahokokuho.shahokokuhoId).as("updatedOldShahokokuho");
+      });
+      cy.get<Shahokokuho>("@updatedOldShahokokuho").then(oldShahokokuho => {
+        cy.get<Shahokokuho>("@newShahokokuho").then(newShahokokuho => {
+          const prev = kanjidate.addDays(new Date(newShahokokuho.validFrom), -1);
+          expect(oldShahokokuho.validUpto).to.be.equal(dateToSqlDate(prev));
+        })
+      });
     });
-
   }); //
 
   it("should renew koukikourei", () => {
@@ -255,8 +263,16 @@ describe("FaceConfirmedWindow", () => {
         console.log("registered", registered);
         expect(isConsistent(registered, result)).to.be.true;
       })
+      cy.get<Koukikourei>("@oldKoukikourei").then(oldKoukikourei => {
+        getKoukikourei(oldKoukikourei.koukikoureiId).as("updatedOldKoukikourei");
+      });
+      cy.get<Koukikourei>("@updatedOldKoukikourei").then(oldKoukikourei => {
+        cy.get<Koukikourei>("@newKoukikourei").then(newKoukikourei => {
+          const prev = kanjidate.addDays(new Date(newKoukikourei.validFrom), -1);
+          expect(oldKoukikourei.validUpto).to.be.equal(dateToSqlDate(prev));
+        })
+      });
     });
-
   }); //
 });
 
