@@ -7,10 +7,11 @@ import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
 import { apiBase } from "@cypress/lib/base";
 import { Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
 import { enterShahokokuho, getShahokokuho } from "@cypress/lib/shahokokuho";
-import { confirmYesContainingMessage } from "@cypress/lib/confirm";
+import { confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
 import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
+import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -46,23 +47,15 @@ describe("FaceConfirmedWindow", () => {
       cy.stub(props, "onRegister").as("onRegister");
       cy.get("button").contains("診察登録").click();
       cy.get("@onRegister").should("be.called");
-      listRecentVisitIdsByPatient(patient.patientId, 1).then(visitIds => {
-        expect(visitIds.length).equal(1);
-        return visitIds[0];
-      }).as("visitId");
-      cy.get<number>("@visitId").then((visitId: number) => {
-        cy.request(
-          apiBase() + `/get-visit?visit-id=${visitId}`
-        ).its("body").then((body) => Visit.cast(body))
-          .as("visit");
-      });
+      getMostRecentVisit(patient.patientId).as("visit");
       cy.get<Visit>("@visit").then((visit: Visit) => {
         const shahokokuhoId = visit.shahokokuhoId;
         expect(shahokokuhoId).to.be.gt(0);
         getShahokokuho(shahokokuhoId).as("shahokokuho");
       });
       cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
-        expect(shahokokuhoOnshiConsistent(shahokokuho, result.messageBody.resultList[0]))
+        console.log("result", result);
+        expect(isConsistent(shahokokuho, result)).to.be.true;
       });
     });
   });
@@ -90,23 +83,14 @@ describe("FaceConfirmedWindow", () => {
       cy.stub(props, "onRegister").as("onRegister");
       cy.get("button").contains("診察登録").click();
       cy.get("@onRegister").should("be.called");
-      listRecentVisitIdsByPatient(patient.patientId, 1).then(visitIds => {
-        expect(visitIds.length).equal(1);
-        return visitIds[0];
-      }).as("visitId");
-      cy.get<number>("@visitId").then((visitId: number) => {
-        cy.request(
-          apiBase() + `/get-visit?visit-id=${visitId}`
-        ).its("body").then((body) => Visit.cast(body))
-          .as("visit");
-      });
+      getMostRecentVisit(patient.patientId).as("visit");
       cy.get<Visit>("@visit").then((visit: Visit) => {
         const koukikoureiId = visit.koukikoureiId;
         expect(koukikoureiId).to.be.gt(0);
         getKoukikourei(koukikoureiId).as("koukikourei");
       });
       cy.get<Koukikourei>("@koukikourei").then((koukikourei) => {
-        expect(koukikoureiOnshiConsistent(koukikourei, result.messageBody.resultList[0]))
+        expect(isConsistent(koukikourei, result)).to.be.true;
       });
     });
   });
@@ -134,23 +118,14 @@ describe("FaceConfirmedWindow", () => {
         cy.get("[data-cy=message]").should("not.exist");
         cy.get("button").contains("診察登録").click();
         cy.get("@onRegister").should("be.called");
-        listRecentVisitIdsByPatient(patient.patientId, 1).then(visitIds => {
-          expect(visitIds.length).equal(1);
-          return visitIds[0];
-        }).as("visitId");
-        cy.get<number>("@visitId").then((visitId: number) => {
-          cy.request(
-            apiBase() + `/get-visit?visit-id=${visitId}`
-          ).its("body").then((body) => Visit.cast(body))
-            .as("visit");
-        });
+        getMostRecentVisit(patient.patientId).as("visit");
         cy.get<Visit>("@visit").then((visit: Visit) => {
           const shahokokuhoId = visit.shahokokuhoId;
           expect(shahokokuhoId).to.be.gt(0);
           getShahokokuho(shahokokuhoId).as("shahokokuho");
         });
         cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
-          expect(shahokokuhoOnshiConsistent(shahokokuho, result.messageBody.resultList[0]))
+          expect(isConsistent(shahokokuho, result)).to.be.true;
         });
       });
     });
@@ -179,26 +154,128 @@ describe("FaceConfirmedWindow", () => {
         cy.get("[data-cy=message]").should("not.exist");
         cy.get("button").contains("診察登録").click();
         cy.get("@onRegister").should("be.called");
-        listRecentVisitIdsByPatient(patient.patientId, 1).then(visitIds => {
-          expect(visitIds.length).equal(1);
-          return visitIds[0];
-        }).as("visitId");
-        cy.get<number>("@visitId").then((visitId: number) => {
-          cy.request(
-            apiBase() + `/get-visit?visit-id=${visitId}`
-          ).its("body").then((body) => Visit.cast(body))
-            .as("visit");
-        });
+        getMostRecentVisit(patient.patientId).as("visit");
         cy.get<Visit>("@visit").then((visit: Visit) => {
           const koukikoureiId = visit.koukikoureiId;
           expect(koukikoureiId).to.be.gt(0);
           getKoukikourei(koukikoureiId).as("koukikourei");
         });
         cy.get<Koukikourei>("@koukikourei").then((koukikourei) => {
-          expect(koukikoureiOnshiConsistent(koukikourei, result.messageBody.resultList[0]))
+          expect(isConsistent(koukikourei, result)).to.be.true;
         });
       });
     });
   });
+
+  it("should renew shahokokuho", () => {
+    enterPatient(createPatient()).as("patient");
+    const oldHokenshaBangou = 123456;
+    const newHokenshaBangou = 1234567;
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      const oldShahokokuho = createShahokokuho({
+        patientId: patient.patientId,
+        hokenshaBangou: oldHokenshaBangou
+      });
+      enterShahokokuho(oldShahokokuho).as("oldShahokokuho");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      const newShahokokuho = createShahokokuho({
+        patientId: patient.patientId,
+        hokenshaBangou: newHokenshaBangou
+      });
+      const result = createOnshiResult(m.patient(patient), m.shahokokuho(newShahokokuho));
+      cy.intercept(
+        "GET",
+        apiBase() + "/search-patient?text=*",
+        [10, [patient]]);
+      const props = {
+        destroy: () => { },
+        result,
+        onRegister: () => { }
+      };
+      cy.mount(FaceConfirmedWindow, { props });
+      cy.get("[data-cy=message]").contains("保険者番号が一致しません。");
+      cy.get("button").contains("保険証更新").click();
+      confirmYes();
+      cy.stub(props, "onRegister").as("onRegister");
+      cy.get("button").contains("診察登録").click();
+      cy.get("@onRegister").should("be.called");
+      getMostRecentVisit(patient.patientId).then(visit => {
+        const shahokokuhoId = visit.shahokokuhoId;
+        expect(shahokokuhoId).to.be.gt(0);
+        getShahokokuho(shahokokuhoId).as("newShahokokuho");
+      });
+      cy.get<Shahokokuho>("@newShahokokuho").then(registered => {
+        console.log("registered", registered);
+        expect(isConsistent(registered, result)).to.be.true;
+      })
+    });
+
+  }); //
+
+  it("should renew koukikourei", () => {
+    enterPatient(createPatient()).as("patient");
+    const oldHihokenshaBangou = "12345678";
+    const newHihokenshaBangou = "23456789";
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      const oldKoukikourei = createKoukikourei({
+        patientId: patient.patientId,
+        hihokenshaBangou: oldHihokenshaBangou,
+      });
+      enterKoukikourei(oldKoukikourei).as("oldKoukikourei");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      const newKoukikourei = createKoukikourei({
+        patientId: patient.patientId,
+        hihokenshaBangou: newHihokenshaBangou,
+      });
+      const result = createOnshiResult(m.patient(patient), m.koukikourei(newKoukikourei));
+      cy.intercept(
+        "GET",
+        apiBase() + "/search-patient?text=*",
+        [10, [patient]]);
+      const props = {
+        destroy: () => { },
+        result,
+        onRegister: () => { }
+      };
+      cy.mount(FaceConfirmedWindow, { props });
+      cy.get("[data-cy=message]").contains("保険者番号が一致しません。");
+      cy.get("button").contains("保険証更新").click();
+      confirmYes();
+      cy.stub(props, "onRegister").as("onRegister");
+      cy.get("button").contains("診察登録").click();
+      cy.get("@onRegister").should("be.called");
+      getMostRecentVisit(patient.patientId).then(visit => {
+        const koukikoureiId = visit.koukikoureiId;
+        expect(koukikoureiId).to.be.gt(0);
+        getKoukikourei(koukikoureiId).as("newKoukikourei");
+      });
+      cy.get<Koukikourei>("@newKoukikourei").then(registered => {
+        console.log("registered", registered);
+        expect(isConsistent(registered, result)).to.be.true;
+      })
+    });
+
+  }); //
 });
+
+function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {
+  return listRecentVisitIdsByPatient(patientId, 1).then(visitIds => {
+    expect(visitIds.length).equal(1);
+    const visitId = visitIds[0];
+    return cy.request(
+      apiBase() + `/get-visit?visit-id=${visitId}`
+    ).its("body").then((body) => Visit.cast(body));
+  });
+}
+
+function isConsistent(hoken: Shahokokuho | Koukikourei, result: OnshiResult): boolean {
+  const r: ResultOfQualificationConfirmation = result.messageBody.resultList[0];
+  if (hoken instanceof Shahokokuho) {
+    return shahokokuhoOnshiConsistent(hoken, r) === undefined;
+  } else {
+    return koukikoureiOnshiConsistent(hoken, r) === undefined;
+  }
+}
 
