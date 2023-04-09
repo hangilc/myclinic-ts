@@ -9,7 +9,7 @@ import { Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
 import { enterShahokokuho, getShahokokuho } from "@cypress/lib/shahokokuho";
 import { confirmYesContainingMessage } from "@cypress/lib/confirm";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
-import { createKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
+import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
 
 describe("FaceConfirmedWindow", () => {
@@ -151,6 +151,51 @@ describe("FaceConfirmedWindow", () => {
         });
         cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
           expect(shahokokuhoOnshiConsistent(shahokokuho, result.messageBody.resultList[0]))
+        });
+      });
+    });
+  });
+
+  it("should register patient with valid koukikourei", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      const koukikourei = createKoukikourei({ patientId: patient.patientId });
+      enterKoukikourei(koukikourei).as("koukikourei");
+    });
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      cy.get<Koukikourei>("@koukikourei").then((koukikourei: Koukikourei) => {
+        const result = createOnshiResult(m.patient(patient), m.koukikourei(koukikourei))
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.stub(props, "onRegister").as("onRegister");
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.get("[data-cy=message]").should("not.exist");
+        cy.get("button").contains("診察登録").click();
+        cy.get("@onRegister").should("be.called");
+        listRecentVisitIdsByPatient(patient.patientId, 1).then(visitIds => {
+          expect(visitIds.length).equal(1);
+          return visitIds[0];
+        }).as("visitId");
+        cy.get<number>("@visitId").then((visitId: number) => {
+          cy.request(
+            apiBase() + `/get-visit?visit-id=${visitId}`
+          ).its("body").then((body) => Visit.cast(body))
+            .as("visit");
+        });
+        cy.get<Visit>("@visit").then((visit: Visit) => {
+          const koukikoureiId = visit.koukikoureiId;
+          expect(koukikoureiId).to.be.gt(0);
+          getKoukikourei(koukikoureiId).as("koukikourei");
+        });
+        cy.get<Koukikourei>("@koukikourei").then((koukikourei) => {
+          expect(koukikoureiOnshiConsistent(koukikourei, result.messageBody.resultList[0]))
         });
       });
     });

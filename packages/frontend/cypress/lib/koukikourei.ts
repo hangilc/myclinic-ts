@@ -15,8 +15,8 @@ export function createKoukikourei(spec: KoukikoureiCreationSpec = {}): Koukikour
   return Koukikourei.cast({
     koukikoureiId: spec.koukikoureiId ?? 0,
     patientId: spec.patientId ?? 1,
-    hokenshaBangou: spec.hokenshaBangou ?? 39345678,
-    hihokenshaBangou: spec.hihokenshaBangou ?? 87654321,
+    hokenshaBangou: spec.hokenshaBangou ?? "39345678",
+    hihokenshaBangou: spec.hihokenshaBangou ?? "87654321",
     futanWari: spec.futanWari ?? 1,
     validFrom: spec.validFrom ?? dateToSqlDate(new Date()),
     validUpto: spec.validUpto ?? "0000-00-00",
@@ -27,3 +27,9 @@ export function getKoukikourei(koukikoureiId: number): Cypress.Chainable<Koukiko
   return cy.request("GET", apiBase() + "/get-koukikourei?koukikourei-id=" + koukikoureiId)
     .its("body").then(body => Koukikourei.cast(body));
 }
+
+export function enterKoukikourei(koukikourei: Koukikourei): Cypress.Chainable<Koukikourei> {
+  return cy.request("POST", apiBase() + "/enter-koukikourei", koukikourei)
+    .then((response) => Koukikourei.cast(response.body));
+}
+
