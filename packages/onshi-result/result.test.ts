@@ -17,17 +17,20 @@ test("load shaho", () => {
   const r = OnshiResult.cast(shaho);
   expect(r).toHaveProperty("messageHeader");
   expect(r).toHaveProperty("messageBody");
+  expect(r.toJSON()).toStrictEqual(shaho);
 });
 
 test("load kourei", () => {
   const r = OnshiResult.cast(kourei);
   expect(r).toHaveProperty("messageHeader");
   expect(r).toHaveProperty("messageBody");
+  expect(r.toJSON()).toStrictEqual(kourei);
 });
 
 test("load koukikourei", () => {
   const r = OnshiResult.cast(koukikourei);
   expect(r).toHaveProperty("messageHeader");
   expect(r).toHaveProperty("messageBody");
+  expect(r.toJSON()).toStrictEqual(koukikourei);
 });
 
