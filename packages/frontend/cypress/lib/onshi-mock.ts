@@ -196,7 +196,7 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
     LimitApplicationCertificateRelatedInfo: spec.LimitApplicationCertificateRelatedInfo,
     SpecificDiseasesCertificateRelatedConsFlg: spec.SpecificDiseasesCertificateRelatedConsFlg,
     SpecificDiseasesCertificateRelatedConsTime: resolveOptDateTime(spec.SpecificDiseasesCertificateRelatedConsTime),
-    SpecificDiseasesCertificateList: spec.SpecificDiseasesCertificateList ?? [],
+    SpecificDiseasesCertificateList: spec.SpecificDiseasesCertificateList,
   }
 }
 
