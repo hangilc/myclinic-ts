@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { ResultOfQualificationConfirmation } from "onshi-result/dist/ResultOfQualificationConfirmation";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import * as kanjidate from "kanjidate";
+  import type { ResultItem } from "onshi-result/ResultItem";
 
-  export let result: ResultOfQualificationConfirmation;
+  export let result: ResultItem;
 
   function onshiDateRep(onshiDate: string): string {
     return kanjidate.format(kanjidate.f2, onshiDate);
@@ -41,9 +41,9 @@
     <span>本人・家族</span>
     <span>{result.personalFamilyClassification}</span>
   {/if}
-  {#if result.InsuredName}
+  {#if result.insuredName}
     <span>世帯主</span>
-    <span>{result.InsuredName}</span>
+    <span>{result.insuredName}</span>
   {/if}
   {#if result.nameOfOther}
     <span>別名</span>

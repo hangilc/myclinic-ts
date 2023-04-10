@@ -1,8 +1,8 @@
-import { InsuredCardClassificationLabel, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassificationLabel, PreschoolClassificationLabel, ReasonOfLossLabel, SexLabel, SpecificDiseasesCertificateRelatedConsFlgLabel } from "codes";
-import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
-import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
-import { ResultOfQualificationConfirmation, ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
-import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
+import type { InsuredCardClassificationLabel, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassificationLabel, PreschoolClassificationLabel, ReasonOfLossLabel, SexLabel, SpecificDiseasesCertificateRelatedConsFlgLabel } from "./codes";
+import type { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
+import type { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
+import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
+import type { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
 export interface ResultItemInterface {
   ResultOfQualificationConfirmation: ResultOfQualificationConfirmationInterface;
@@ -104,6 +104,14 @@ export class ResultItem {
 
   get insuredCertificateIssuanceDate(): string | undefined {
     return this.resultOfQualificationConfirmation.insuredCertificateIssuanceDate;
+  }
+
+  get insuredCardValidDate(): string | undefined {
+    return this.resultOfQualificationConfirmation.insuredCardValidDate;
+  }
+
+  get insuredCardExpirationDate(): string | undefined {
+    return this.resultOfQualificationConfirmation.insuredCardExpirationDate;
   }
 
   get insuredPartialContributionRatio(): number | undefined {

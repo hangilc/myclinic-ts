@@ -11,9 +11,8 @@ import { confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
 import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
-import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
 import * as kanjidate from "kanjidate";
-import { getPatient } from "@cypress/e2e/req";
+import type { ResultItem } from "onshi-result/ResultItem";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -339,7 +338,7 @@ function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {
 }
 
 function isConsistent(hoken: Shahokokuho | Koukikourei, result: OnshiResult): boolean {
-  const r: ResultOfQualificationConfirmation = result.messageBody.resultList[0];
+  const r: ResultItem = result.messageBody.resultList[0];
   if (hoken instanceof Shahokokuho) {
     return shahokokuhoOnshiConsistent(hoken, r) === undefined;
   } else {

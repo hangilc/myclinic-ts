@@ -7,7 +7,6 @@
   import {
     dateToSqlDateTime,
     HokenIdSet,
-    HokenInfo,
     Koukikourei,
     Onshi,
     Patient,
@@ -26,15 +25,14 @@
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
-  import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import {
-    isKoukikourei,
     koukikoureiRep,
     shahokokuhoName,
     shahokokuhoRep,
   } from "./hoken-rep";
   import { confirm } from "./confirm-call";
+  import type { ResultItem } from "onshi-result/ResultItem";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -86,7 +84,7 @@
 
   async function advance(
     patient: Patient,
-    r: ResultOfQualificationConfirmation
+    r: ResultItem
   ) {
     const now = dateToSqlDateTime(new Date());
     const shahoOpt =
@@ -147,7 +145,7 @@
         advance(patients[0], r);
       } else if (patients.length === 0) {
         message = "該当する登録患者情報がありません。";
-        resolvedState = new NoPatient(result.resultList[0]);
+        resolvedState = new NoPatient(r);
       } else {
         message = "該当する登録患者情報が複数あります。";
         resolvedState = new MultiplePatients(patients, r);
@@ -194,7 +192,7 @@
 
   function doChoosePatient(
     patients: Patient[],
-    r: ResultOfQualificationConfirmation
+    r: ResultItem
   ) {
     const d: ChoosePatientDialog = new ChoosePatientDialog({
       target: document.body,
@@ -213,7 +211,7 @@
 
   async function registerOnshiResultAsHoken(
     patient: Patient,
-    result: ResultOfQualificationConfirmation,
+    result: ResultItem,
     preAlertMessage: string = ""
   ) {
     const today = new Date();
@@ -263,7 +261,7 @@
   }
 
   function composePatientFromResult(
-    r: ResultOfQualificationConfirmation
+    r: ResultItem
   ): Patient | string | undefined {
     const name: string = r.name;
     const [lastName, firstName] = name.split("　");

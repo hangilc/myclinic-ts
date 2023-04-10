@@ -5,6 +5,7 @@
   import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
   import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
   import { dateToSql } from "./util";
+  import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result/codes";
 
   export let destroy: () => void;
   let hokensha: string = "";
@@ -12,7 +13,7 @@
   let hihokensha: string = "";
   let edaban: string = "";
   let birthdate: Date = new Date(2000, 0, 1);
-  let limitConfirm: string = "1";
+  let limitConfirm: LimitApplicationCertificateRelatedConsFlgCode = "1";
   let confirmDate: Date = new Date();
   let result: OnshiResult | undefined = undefined;
 

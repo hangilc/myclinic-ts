@@ -1,8 +1,7 @@
 import { castOptConvert, castOptStringProp, castOptTest, castStringProp } from "./cast";
-import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo, type QualificationConfirmSearchInfoInterface } from "./QualificationConfirmSearchInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
-import { ResultItem, ResultItemInterface } from "./ResultItem";
+import { ResultItem, type ResultItemInterface } from "./ResultItem";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;

@@ -1,6 +1,6 @@
 import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
-import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+import type { ResultItem } from "onshi-result/ResultItem";
 
 export class AllResolved {
   constructor(
@@ -15,7 +15,7 @@ export class AllResolved {
 export class MultiplePatients {
   constructor(
     public patients: Patient[],
-    public result: ResultOfQualificationConfirmation,
+    public result: ResultItem,
   ) {}
 }
 
@@ -24,19 +24,19 @@ export class InconsistentHoken {
     public patient: Patient,
     public shahokokuhoOpt: Shahokokuho | undefined,
     public koukikoureiOpt: Koukikourei | undefined,
-    public result: ResultOfQualificationConfirmation,
+    public result: ResultItem,
   ) {}
 }
 
 export class NewHoken {
   constructor(
     public patient: Patient,
-    public result: ResultOfQualificationConfirmation,
+    public result: ResultItem,
   ) {}
 }
 
 export class NoPatient {
   constructor(
-    public result: ResultOfQualificationConfirmation
+    public result: ResultItem
   ) {}
 }

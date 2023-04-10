@@ -5,12 +5,12 @@ import type { MessageHeaderInterface } from "onshi-result/MessageHeader";
 import { fromSqlDateTime, fromSqlDate } from "onshi-result/util";
 import { dateToSqlDate, dateToSqlDateTime, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import type { ResultOfQualificationConfirmationInterface } from "onshi-result/ResultOfQualificationConfirmation";
-import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type InsuredCardClassificationLabel, type LimitApplicationCertificateClassificationCode, type LimitApplicationCertificateClassificationFlagCode, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
+import { characterCodeIdentifierFromLabel, insuredCardClassificationFromLabel, personalFamilyClassificationFromLabel, prescriptionIssueSelectFromLabel, processingResultStatusFromLabel, qualificationValidityFromLabel, referenceClassificationFromLabel, segmentOfResultFromLabel, sexFromLabel, type CharacterCodeIdentifierCode, type InsuredCardClassificationCode, type LimitApplicationCertificateRelatedConsFlgCode, type PersonalFamilyClassificationCode, type PreschoolClassificationCode, type PrescriptionIssueSelectCode, type ProcessingResultStatusCode, type QualificationValidityCode, type ReasonOfLossCode, type ReferenceClassificationCode, type SegmentOfResultCode, type SexCode, type SpecificDiseasesCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { QualificationConfirmSearchInfoInterface } from "onshi-result/QualificationConfirmSearchInfo";
 import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
-import type { ResultItem, ResultItemInterface } from "onshi-result/ResultItem";
+import type { ResultItemInterface } from "onshi-result/ResultItem";
 
 export interface MessageHeaderCreationSpec {
   ProcessExecutionTime?: string | Date;

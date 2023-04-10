@@ -1,4 +1,5 @@
 import { Koukikourei, Shahokokuho } from "myclinic-model";
+import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result/codes";
 import type { OnshiKakuninQuery } from "./onshi-confirm";
 import { pad } from "./pad";
 
@@ -6,7 +7,7 @@ export function onshi_query_from_hoken(
   hoken: Shahokokuho | Koukikourei,
   birthdate: string,
   confirmationDate: string,
-  limitAppConsFlag?: string): OnshiKakuninQuery {
+  limitAppConsFlag?: LimitApplicationCertificateRelatedConsFlgCode): OnshiKakuninQuery {
   const base = {
     birthdate: birthdate.replaceAll("-", ""),
     confirmationDate: confirmationDate.replaceAll("-", ""),

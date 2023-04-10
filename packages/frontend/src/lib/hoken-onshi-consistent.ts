@@ -1,11 +1,11 @@
 import { dateToSqlDate, Koukikourei, Shahokokuho, } from "myclinic-model";
-import type { ResultOfQualificationConfirmation } from "onshi-result/ResultOfQualificationConfirmation";
+import type { ResultItem } from "onshi-result/ResultItem";
 import { isKoukikourei } from "./hoken-rep";
 import { toHankaku } from "./zenkaku";
 
 export function shahokokuhoOnshiConsistent(
   shahokokuho: Shahokokuho,
-  r: ResultOfQualificationConfirmation
+  r: ResultItem
 ): string | undefined {
   const hokenshaBangou = parseInt(r.insurerNumber || "0");
   if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
@@ -44,7 +44,7 @@ export function shahokokuhoOnshiConsistent(
 
 export function koukikoureiOnshiConsistent(
   koukikourei: Koukikourei,
-  r: ResultOfQualificationConfirmation
+  r: ResultItem
 ): string | undefined {
   const hokenshaBangou = r.insurerNumber ?? "";
   if (stripLeadingZero(koukikourei.hokenshaBangou) !== stripLeadingZero(hokenshaBangou)) {
@@ -65,7 +65,7 @@ function stripLeadingZero(s: string): string {
   return s.replace(/^[0０]+/, "");
 }
 
-export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultOfQualificationConfirmation,
+export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem,
   validFromDate: Date):
   Shahokokuho | Koukikourei | string {
   const hokenshaBangou: string = r.insurerNumber ?? "";
