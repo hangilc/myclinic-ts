@@ -12,10 +12,21 @@ describe("onshi-mock", () => {
   it("should set patient", () => {
     const patientTmpl = createPatient();
     const result = createOnshiResult(m.patient(patientTmpl));
-    expect(result.messageBody.resultList[0].orig.Name).toBe( `${patientTmpl.lastName}　${patientTmpl.firstName}`);
-    expect(result.messageBody.resultList[0].orig.NameKana).toBe(`${patientTmpl.lastNameYomi} ${patientTmpl.firstNameYomi}`);
-    expect(result.messageBody.resultList[0].orig.Birthdate).toBe(patientTmpl.birthday.replaceAll("-", ""));
-    expect(result.messageBody.resultList[0].orig.Sex1).toBe(sexFromLabel("男"));
+    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Name).toBe(`${patientTmpl.lastName}　${patientTmpl.firstName}`);
+    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.NameKana).toBe(`${patientTmpl.lastNameYomi} ${patientTmpl.firstNameYomi}`);
+    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Birthdate)
+      .toBe(replaceAll(patientTmpl.birthday, "-", ""));
+    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Sex1).toBe(sexFromLabel("男"));
   })
 
 });
+
+function replaceAll(s: string, src: string, dst: string): string {
+  return s.split("").map(c => {
+    if( c === src ){
+      return dst;
+    } else {
+      return c;
+    }
+  }).join("");
+}

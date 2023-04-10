@@ -10,6 +10,7 @@ import type { QualificationConfirmSearchInfoInterface } from "onshi-result/Quali
 import type { ElderlyRecipientCertificateInfoInterface } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-result/LimitApplicationCertificateRelatedInfo";
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
+import type { ResultItem, ResultItemInterface } from "onshi-result/ResultItem";
 
 export interface MessageHeaderCreationSpec {
   ProcessExecutionTime?: string | Date;
@@ -60,7 +61,7 @@ export interface MessageBodyCreationSpec {
 function createMessageBodyInterface(spec: MessageBodyCreationSpec): MessageBodyInterface {
   return {
     ProcessingResultStatus: spec.ProcessingResultStatus ?? processingResultStatusFromLabel("正常終了"),
-    ResultList: (spec.ResultList || [{}]).map(createResultOfQualificationConfirmationInterface),
+    ResultList: (spec.ResultList || [{}]).map(createResultItem),
     QualificationConfirmSearchInfo: spec.QualificationConfirmSearchInfo,
     PrescriptionIssueSelect: spec.PrescriptionIssueSelect ?? prescriptionIssueSelectFromLabel("紙の処方箋"),
     ProcessingResultCode: spec.ProcessingResultCode,
@@ -198,6 +199,12 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
     SpecificDiseasesCertificateRelatedConsTime: resolveOptDateTime(spec.SpecificDiseasesCertificateRelatedConsTime),
     SpecificDiseasesCertificateList: spec.SpecificDiseasesCertificateList,
   }
+}
+
+function createResultItem(spec: ResultOfQualificationConfirmationCreationSpec): ResultItemInterface {
+  return {
+    ResultOfQualificationConfirmation: createResultOfQualificationConfirmationInterface(spec)
+  };
 }
 
 type OnshiHeaderModifier = (header: MessageHeaderCreationSpec) => MessageHeaderCreationSpec | void;

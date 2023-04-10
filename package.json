@@ -8,7 +8,8 @@
     "test-server:start": "cd docker/test-server && docker compose up -d",
     "test-server:stop": "cd docker/test-server && docker compose down",
     "test-server:build": "cd docker/test-server && docker compose build",
-    "tag-date": "git tag --format='%(refname) %(creatordate)'"
+    "tag-date": "git tag --format='%(refname) %(creatordate)'",
+    "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result"
   },
   "dependencies": {
     "typescript": "^4.8.4"
