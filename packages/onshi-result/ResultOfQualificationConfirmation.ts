@@ -70,7 +70,6 @@ export class ResultOfQualificationConfirmation {
   specificDiseasesCertificateList: SpecificDiseasesCertificateInfo[];
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
-    console.log("new Result...", arg);
     this.orig = arg;
     this.elderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo
       ? ElderlyRecipientCertificateInfo.cast(arg.ElderlyRecipientCertificateInfo)
@@ -318,9 +317,7 @@ export class ResultOfQualificationConfirmation {
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
-    console.log("cast ResultOfQualificationConfirmation", arg);
     arg = arg.ResultOfQualificationConfirmation;
-    console.log("cast ResultOfQualificationConfirmation (after)", arg);
     return new ResultOfQualificationConfirmation({
       InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
       Name: castStringProp(arg, "Name"),

@@ -22,13 +22,10 @@ export class MessageBody {
 
   constructor(arg: MessageBodyInterface) {
     this.orig = arg;
-    console.log("before resultList");
     this.resultList = arg.ResultList.map(ResultOfQualificationConfirmation.cast);
-    console.log("resultList", this.resultList);
     this.qualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo
       ? QualificationConfirmSearchInfo.cast(arg.QualificationConfirmSearchInfo)
       : undefined;
-    console.log("qualificationConfirmSearchInfo", this.qualificationConfirmSearchInfo);
   }
 
   get qualificationValidity(): QualificationValidityLabel | undefined {
