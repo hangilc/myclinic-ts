@@ -93,7 +93,7 @@ export class LimitApplicationCertificateRelatedInfo {
   }
 
   static cast(arg: any): LimitApplicationCertificateRelatedInfo {
-    if (this.isLimitApplicationCertificateRelatedInfoInterface(arg)) {
+    if (LimitApplicationCertificateRelatedInfo.isLimitApplicationCertificateRelatedInfoInterface(arg)) {
       return new LimitApplicationCertificateRelatedInfo(arg);
     } else {
       throw new Error("Cannot create LimitApplicationCertificateRelatedInfo");

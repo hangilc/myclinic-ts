@@ -87,7 +87,7 @@ export class MessageHeader {
 
   static isMessageHeaderInterface(arg: any): arg is MessageHeader {
     if (typeof arg === "object") {
-      return castStringProp(arg, "ProcessExecutionTime") &&
+      const ok = castStringProp(arg, "ProcessExecutionTime") &&
         castStringProp(arg, "QualificationConfirmationDate") &&
         castStringProp(arg, "MedicalInstitutionCode") &&
         castOptStringProp(arg, "ArbitraryFileIdentifier") &&
@@ -96,8 +96,14 @@ export class MessageHeader {
         castOptStringProp(arg, "ErrorCode") &&
         castOptStringProp(arg, "ErrorMessage") &&
         castStringProp(arg, "CharacterCodeIdentifier");
+      if( !ok ){
+        console.error("isMessageHeaderInterface failed");
+        console.log("arg", arg);
+      }
+      return ok;
     } else {
       return false;
     }
   }
+
 }

@@ -1,5 +1,5 @@
-import { MessageBody, MessageBodyInterface } from "MessageBody";
-import { MessageHeader, MessageHeaderInterface } from "MessageHeader";
+import { MessageBody, MessageBodyInterface } from "./MessageBody";
+import { MessageHeader, MessageHeaderInterface } from "./MessageHeader";
 
 export interface XmlMsgInterface {
   MessageHeader: MessageHeaderInterface;
@@ -26,6 +26,7 @@ export class XmlMsg {
       return MessageHeader.isMessageHeaderInterface(arg.MessageHeader) && 
         MessageBody.isMessageBodyInterface(arg.MessageBody);
     } else {
+      console.error("is not object (isXmlMsgInterface)");
       return false;
     }
   }

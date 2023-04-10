@@ -350,12 +350,13 @@ export class ResultOfQualificationConfirmation {
           arg.SpecificDiseasesCertificateList.every(SpecificDiseasesCertificateInfo.isSpecificDiseasesCertificateInfoInterface)
         ));
     } else {
+      console.error("is not object (isResultOfQualificationConfirmationInterface)");
       return false;
     }
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
-    if (this.isResultOfQualificationConfirmationInterface(arg)) {
+    if (ResultOfQualificationConfirmation.isResultOfQualificationConfirmationInterface(arg)) {
       return new ResultOfQualificationConfirmation(arg);
     } else {
       throw new Error("Cannot create ResultOfQualificationConfirmation");

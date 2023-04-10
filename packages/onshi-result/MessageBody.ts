@@ -2,7 +2,7 @@ import { castOptConvert, castOptStringProp, castOptTest, castStringProp } from "
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo, type QualificationConfirmSearchInfoInterface } from "./QualificationConfirmSearchInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
-import { ResultItem, ResultItemInterface } from "ResultItem";
+import { ResultItem, ResultItemInterface } from "./ResultItem";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;
@@ -107,9 +107,9 @@ export class MessageBody {
 
   static isMessageBodyInterface(arg: any): arg is MessageBody {
     if (typeof arg === "object") {
-      return castStringProp(arg, "ProcessingResultStatus") &&
+      const ok = castStringProp(arg, "ProcessingResultStatus") &&
         Array.isArray(arg.ResultList) && arg.ResultList.every(
-          ResultOfQualificationConfirmation.isResultOfQualificationConfirmationInterface
+          ResultItem.isResultItemInterface
         ) && castOptTest(
           arg.QualificationConfirmSearchInfo,
           QualificationConfirmSearchInfo.isQualificationConfirmSearchInfoInterface
@@ -118,8 +118,13 @@ export class MessageBody {
         castOptStringProp(arg, "ProcessingResultCode") &&
         castOptStringProp(arg, "ProcessingResultMessage") &&
         castOptStringProp(arg, "QualificationValidity");
-
+      if( !ok ){
+        console.error("isMessageBodyInterface failed");
+        console.log("arg", arg);
+      }
+      return ok;
     } else {
+      console.error("is not object (isMessageBodyInterface)");
       return false;
     }
   }

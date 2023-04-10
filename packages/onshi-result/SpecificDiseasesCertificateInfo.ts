@@ -66,12 +66,13 @@ export class SpecificDiseasesCertificateInfo {
         castOptStringProp(arg, "SpecificDiseasesValidEndDate") &&
         castOptStringProp(arg, "SpecificDiseasesSelfPay");
     } else {
+      console.error("is not object (isSpecificDiseasesCertificateInfoInterface)");
       return false;
     }
   }
 
   static cast(arg: any): SpecificDiseasesCertificateInfo {
-    if (this.isSpecificDiseasesCertificateInfoInterface(arg)) {
+    if (SpecificDiseasesCertificateInfo.isSpecificDiseasesCertificateInfoInterface(arg)) {
       return new SpecificDiseasesCertificateInfo(arg);
     } else {
       throw new Error("isSpecificDiseasesCertificate");

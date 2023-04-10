@@ -1,8 +1,7 @@
 import { MessageHeader, MessageHeaderInterface } from "./MessageHeader";
 import { MessageBody, MessageBodyInterface } from "./MessageBody";
-import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
-import { XmlMsg, XmlMsgInterface } from "XmlMsg";
-import { ResultItem } from "ResultItem";
+import { XmlMsg, XmlMsgInterface } from "./XmlMsg";
+import { ResultItem } from "./ResultItem";
 
 
 export interface OnshiResultInterface {
@@ -47,12 +46,13 @@ export class OnshiResult {
     if( typeof arg === "object" ){
       return XmlMsg.isXmlMsgInterface(arg.XmlMsg);
     } else {
+      console.error("is not object (isOnshiResultInterface)")
       return false;
     }
   }
 
   static cast(arg: any): OnshiResult {
-    if( this.isOnshiResultInterface(arg) ){
+    if( OnshiResult.isOnshiResultInterface(arg) ){
       return new OnshiResult(arg);
     } else {
       throw new Error("Cannot create OnshiResult");

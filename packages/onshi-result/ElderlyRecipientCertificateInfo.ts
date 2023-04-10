@@ -61,7 +61,7 @@ export class ElderlyRecipientCertificateInfo {
   }
 
   static cast(arg: any): ElderlyRecipientCertificateInfo {
-    if( this.isElderlyRecipientCertificateInfoInterface(arg) ){
+    if( ElderlyRecipientCertificateInfo.isElderlyRecipientCertificateInfoInterface(arg) ){
       return new ElderlyRecipientCertificateInfo(arg);
     } else {
       throw new Error("Cannot create ElderlyRecipientCertificateInfo");

@@ -73,6 +73,7 @@ export class QualificationConfirmSearchInfo {
         castOptStringProp(arg, "InsuredBranchNumber") &&
         castOptStringProp(arg, "ArbitraryIdentifier");
     } else {
+      console.error("is not object (isQualificationConfirmSearchInfoInterface)");
       return false;
     }
   }

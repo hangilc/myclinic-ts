@@ -1,8 +1,8 @@
 import { InsuredCardClassificationLabel, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassificationLabel, PreschoolClassificationLabel, ReasonOfLossLabel, SexLabel, SpecificDiseasesCertificateRelatedConsFlgLabel } from "codes";
-import { ElderlyRecipientCertificateInfo } from "ElderlyRecipientCertificateInfo";
-import { LimitApplicationCertificateRelatedInfo } from "LimitApplicationCertificateRelatedInfo";
-import { ResultOfQualificationConfirmation, ResultOfQualificationConfirmationInterface } from "ResultOfQualificationConfirmation";
-import { SpecificDiseasesCertificateInfo } from "SpecificDiseasesCertificateInfo";
+import { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertificateInfo";
+import { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
+import { ResultOfQualificationConfirmation, ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
+import { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
 
 export interface ResultItemInterface {
   ResultOfQualificationConfirmation: ResultOfQualificationConfirmationInterface;
@@ -160,12 +160,13 @@ export class ResultItem {
         arg.ResultOfQualificationConfirmation
       )
     } else {
+      console.error("is not object (isResultItemInterface)");
       return false;
     }
   }
 
   static cast(arg: any): ResultItem {
-    if (this.isResultItemInterface(arg)) {
+    if (ResultItem.isResultItemInterface(arg)) {
       return new ResultItem(arg);
     } else {
       throw new Error("Cannot create ResultItem");
