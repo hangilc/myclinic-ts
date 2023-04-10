@@ -135,7 +135,7 @@ export class ResultOfQualificationConfirmation {
   }
 
   // 被保険者の氏名（世帯主氏名）
-  get InsuredName(): string | undefined {
+  get insuredName(): string | undefined {
     return this.orig.InsuredName;
   }
 
