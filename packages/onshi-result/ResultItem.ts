@@ -1,4 +1,4 @@
-import { InsuredCardClassificationLabel, PersonalFamilyClassificationLabel, SexLabel } from "codes";
+import { InsuredCardClassificationLabel, LimitApplicationCertificateRelatedConsFlgLabel, PersonalFamilyClassificationLabel, PreschoolClassificationLabel, ReasonOfLossLabel, SexLabel, SpecificDiseasesCertificateRelatedConsFlgLabel } from "codes";
 import { ElderlyRecipientCertificateInfo } from "ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo } from "LimitApplicationCertificateRelatedInfo";
 import { ResultOfQualificationConfirmation, ResultOfQualificationConfirmationInterface } from "ResultOfQualificationConfirmation";
@@ -100,6 +100,54 @@ export class ResultItem {
 
   get postNumber(): string | undefined {
     return this.resultOfQualificationConfirmation.postNumber;
+  }
+
+  get insuredCertificateIssuanceDate(): string | undefined {
+    return this.resultOfQualificationConfirmation.insuredCertificateIssuanceDate;
+  }
+
+  get insuredPartialContributionRatio(): number | undefined {
+    return this.resultOfQualificationConfirmation.insuredPartialContributionRatio;
+  }
+
+  get koukikoureiFutanWari(): number | undefined {
+    return this.resultOfQualificationConfirmation.koukikoureiFutanWari;
+  }
+
+  get preschoolClassification(): PreschoolClassificationLabel | undefined {
+    return this.resultOfQualificationConfirmation.preschoolClassification;
+  }
+
+  get reasonOfLoss(): ReasonOfLossLabel | undefined {
+    return this.resultOfQualificationConfirmation.reasonOfLoss
+  }
+
+  get insurerName(): string {
+    return this.resultOfQualificationConfirmation.insurerName;
+  }
+
+  get kourei(): ElderlyRecipientCertificateInfo | undefined {
+    return this.resultOfQualificationConfirmation.kourei;
+  }
+
+  get limitApplicationCertificateRelatedConsFlg(): LimitApplicationCertificateRelatedConsFlgLabel | undefined {
+    return this.resultOfQualificationConfirmation.limitApplicationCertificateRelatedConsFlg;
+  }
+
+  get limitApplicationCertificateRelatedConsTime(): string | undefined {
+    return this.resultOfQualificationConfirmation.limitApplicationCertificateRelatedConsTime;
+  }
+
+  get gendogaku(): LimitApplicationCertificateRelatedInfo | undefined {
+    return this.resultOfQualificationConfirmation.gendogaku;
+  }
+
+  get specificDiseasesCertificateRelatedConsFlg(): SpecificDiseasesCertificateRelatedConsFlgLabel | undefined {
+    return this.resultOfQualificationConfirmation.specificDiseasesCertificateRelatedConsFlg;
+  }
+
+  get specificDiseasesCertificateRelatedConsTime(): string | undefined {
+    return this.resultOfQualificationConfirmation.specificDiseasesCertificateRelatedConsTime;
   }
 
   toJSON(): object {

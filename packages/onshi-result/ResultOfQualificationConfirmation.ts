@@ -352,38 +352,6 @@ export class ResultOfQualificationConfirmation {
     } else {
       return false;
     }
-    // return new ResultOfQualificationConfirmation({
-    //   InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
-    //   Name: castStringProp(arg, "Name"),
-    //   Sex1: castStringProp(arg, "Sex1"),
-    //   Birthdate: castStringProp(arg, "Birthdate"),
-    //   InsurerName: castStringProp(arg, "InsurerName"),
-    //   InsurerNumber: castOptStringProp(arg, "InsurerNumber"),
-    //   InsuredCardSymbol: castOptStringProp(arg, "InsuredCardSymbol"),
-    //   InsuredIdentificationNumber: castOptStringProp(arg, "InsuredIdentificationNumber"),
-    //   InsuredBranchNumber: castOptStringProp(arg, "InsuredBranchNumber"),
-    //   PersonalFamilyClassification: castOptStringProp(arg, "PersonalFamilyClassification"),
-    //   InsuredName: castOptStringProp(arg, "InsuredName"),
-    //   NameOfOther: castOptStringProp(arg, "NameOfOther"),
-    //   NameKana: castOptStringProp(arg, "NameKana"),
-    //   NameOfOtherKana: castOptStringProp(arg, "NameOfOtherKana"),
-    //   Sex2: castOptStringProp(arg, "Sex2"),
-    //   Address: castOptStringProp(arg, "Address"),
-    //   PostNumber: castOptStringProp(arg, "PostNumber"),
-    //   InsuredCertificateIssuanceDate: castOptStringProp(arg, "InsuredCertificateIssuanceDate"),
-    //   InsuredCardValidDate: castOptStringProp(arg, "InsuredCardValidDate"),
-    //   InsuredCardExpirationDate: castOptStringProp(arg, "InsuredCardExpirationDate"),
-    //   InsuredPartialContributionRatio: castOptStringProp(arg, "InsuredPartialContributionRatio"),
-    //   PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
-    //   ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
-    //   ElderlyRecipientCertificateInfo: arg.ElderlyRecipientCertificateInfo,
-    //   LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
-    //   LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
-    //   LimitApplicationCertificateRelatedInfo: arg.LimitApplicationCertificateRelatedInfo,
-    //   SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
-    //   SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
-    //   SpecificDiseasesCertificateList: arg.SpecificDiseasesCertificateList,
-    // });
   }
 
   static cast(arg: any): ResultOfQualificationConfirmation {
