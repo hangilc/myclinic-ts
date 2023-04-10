@@ -1,28 +1,28 @@
 import { ElderlyRecipientCertificateInfo, type ElderlyRecipientCertificateInfoInterface } from "./ElderlyRecipientCertificateInfo";
 import { LimitApplicationCertificateRelatedInfo, type LimitApplicationCertificateRelatedInfoInterface } from "./LimitApplicationCertificateRelatedInfo";
-import { castOptStringProp, castStringProp } from "./cast";
-import { 
-  InsuredCardClassification, 
-  type InsuredCardClassificationLabel, 
-  isInsuredCardClassificationCode, 
-  isLimitApplicationCertificateRelatedConsFlgCode, 
-  isPersonalFamilyClassificationCode, 
-  isPreschoolClassificationCode, 
-  isReasonOfLossCode, 
-  isSexCode, 
-  isSpecificDiseasesCertificateRelatedConsFlgCode, 
-  LimitApplicationCertificateRelatedConsFlg, 
-  type LimitApplicationCertificateRelatedConsFlgLabel, 
-  PersonalFamilyClassification, 
-  type PersonalFamilyClassificationLabel, 
-  PreschoolClassification, 
-  type PreschoolClassificationLabel, 
-  ReasonOfLoss, 
-  type ReasonOfLossLabel, 
-  Sex, 
-  type SexLabel, 
-  SpecificDiseasesCertificateRelatedConsFlg, 
-  type SpecificDiseasesCertificateRelatedConsFlgLabel 
+import { castOptConvert, castOptStringProp, castOptTest, castStringProp } from "./cast";
+import {
+  InsuredCardClassification,
+  type InsuredCardClassificationLabel,
+  isInsuredCardClassificationCode,
+  isLimitApplicationCertificateRelatedConsFlgCode,
+  isPersonalFamilyClassificationCode,
+  isPreschoolClassificationCode,
+  isReasonOfLossCode,
+  isSexCode,
+  isSpecificDiseasesCertificateRelatedConsFlgCode,
+  LimitApplicationCertificateRelatedConsFlg,
+  type LimitApplicationCertificateRelatedConsFlgLabel,
+  PersonalFamilyClassification,
+  type PersonalFamilyClassificationLabel,
+  PreschoolClassification,
+  type PreschoolClassificationLabel,
+  ReasonOfLoss,
+  type ReasonOfLossLabel,
+  Sex,
+  type SexLabel,
+  SpecificDiseasesCertificateRelatedConsFlg,
+  type SpecificDiseasesCertificateRelatedConsFlgLabel
 } from "./codes";
 import { toOptInt, onshiDateOptToSqlDateOpt, onshiDateTimeOptToSqlDateTimeOpt, onshiDateToSqlDate } from "./util";
 import { SpecificDiseasesCertificateInfo, type SpecificDiseasesCertificateInfoInterface } from "./SpecificDiseasesCertificateInfo";
@@ -71,17 +71,14 @@ export class ResultOfQualificationConfirmation {
 
   constructor(arg: ResultOfQualificationConfirmationInterface) {
     this.orig = arg;
-    this.elderlyRecipientCertificateInfo = arg.ElderlyRecipientCertificateInfo
-      ? ElderlyRecipientCertificateInfo.cast(arg.ElderlyRecipientCertificateInfo)
-      : undefined;
-    this.limitApplicationCertificateRelatedInfo = arg.LimitApplicationCertificateRelatedInfo
-      ? LimitApplicationCertificateRelatedInfo.cast(arg.LimitApplicationCertificateRelatedInfo)
-      : undefined;
-    this.specificDiseasesCertificateList = arg.SpecificDiseasesCertificateList
-      ? arg.SpecificDiseasesCertificateList.map(SpecificDiseasesCertificateInfo.cast)
-      : [];
+    this.elderlyRecipientCertificateInfo = castOptConvert(arg.ElderlyRecipientCertificateInfo,
+      ElderlyRecipientCertificateInfo.cast);
+    this.limitApplicationCertificateRelatedInfo = castOptConvert(arg.LimitApplicationCertificateRelatedInfo,
+      LimitApplicationCertificateRelatedInfo.cast);
+    this.specificDiseasesCertificateList =
+      (arg.SpecificDiseasesCertificateList ?? []).map(SpecificDiseasesCertificateInfo.cast);
   }
-  
+
   // 被保険者証の種類
   get insuredCardClassification(): InsuredCardClassificationLabel {
     const k: string = this.orig.InsuredCardClassification;
@@ -126,10 +123,10 @@ export class ResultOfQualificationConfirmation {
 
   get honninStore(): number | undefined {
     const honnin = this.personalFamilyClassification;
-    if( honnin === undefined ){
+    if (honnin === undefined) {
       return undefined;
     } else {
-      if( honnin === "本人" ) {
+      if (honnin === "本人") {
         return 1;
       } else {
         return 0;
@@ -316,39 +313,84 @@ export class ResultOfQualificationConfirmation {
     }
   }
 
+  static isResultOfQualificationConfirmationInterface(arg: any): arg is ResultOfQualificationConfirmationInterface {
+    if (typeof arg === "object") {
+      return castStringProp(arg, "InsuredCardClassification") &&
+        castStringProp(arg, "Name") &&
+        castStringProp(arg, "Sex1") &&
+        castStringProp(arg, "Birthdate") &&
+        castStringProp(arg, "InsurerName") &&
+        castOptStringProp(arg, "InsurerNumber") &&
+        castOptStringProp(arg, "InsuredCardSymbol") &&
+        castOptStringProp(arg, "InsuredIdentificationNumber") &&
+        castOptStringProp(arg, "InsuredBranchNumber") &&
+        castOptStringProp(arg, "PersonalFamilyClassification") &&
+        castOptStringProp(arg, "InsuredName") &&
+        castOptStringProp(arg, "NameOfOther") &&
+        castOptStringProp(arg, "NameKana") &&
+        castOptStringProp(arg, "NameOfOtherKana") &&
+        castOptStringProp(arg, "Sex2") &&
+        castOptStringProp(arg, "Address") &&
+        castOptStringProp(arg, "PostNumber") &&
+        castOptStringProp(arg, "InsuredCertificateIssuanceDate") &&
+        castOptStringProp(arg, "InsuredCardValidDate") &&
+        castOptStringProp(arg, "InsuredCardExpirationDate") &&
+        castOptStringProp(arg, "InsuredPartialContributionRatio") &&
+        castOptStringProp(arg, "PreschoolClassification") &&
+        castOptStringProp(arg, "ReasonOfLoss") &&
+        castOptTest(arg.ElderlyRecipientCertificateInfo,
+          ElderlyRecipientCertificateInfo.isElderlyRecipientCertificateInfoInterface) &&
+        castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg") &&
+        castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime") &&
+        castOptTest(arg.LimitApplicationCertificateRelatedInfo, LimitApplicationCertificateRelatedInfo.isLimitApplicationCertificateRelatedInfoInterface) &&
+        castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg") &&
+        castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime") &&
+        (arg.SpecificDiseasesCertificateList === undefined || (
+          Array.isArray(arg.SpecificDiseasesCertificateList) &&
+          arg.SpecificDiseasesCertificateList.every(SpecificDiseasesCertificateInfo.isSpecificDiseasesCertificateInfoInterface)
+        ));
+    } else {
+      return false;
+    }
+    // return new ResultOfQualificationConfirmation({
+    //   InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
+    //   Name: castStringProp(arg, "Name"),
+    //   Sex1: castStringProp(arg, "Sex1"),
+    //   Birthdate: castStringProp(arg, "Birthdate"),
+    //   InsurerName: castStringProp(arg, "InsurerName"),
+    //   InsurerNumber: castOptStringProp(arg, "InsurerNumber"),
+    //   InsuredCardSymbol: castOptStringProp(arg, "InsuredCardSymbol"),
+    //   InsuredIdentificationNumber: castOptStringProp(arg, "InsuredIdentificationNumber"),
+    //   InsuredBranchNumber: castOptStringProp(arg, "InsuredBranchNumber"),
+    //   PersonalFamilyClassification: castOptStringProp(arg, "PersonalFamilyClassification"),
+    //   InsuredName: castOptStringProp(arg, "InsuredName"),
+    //   NameOfOther: castOptStringProp(arg, "NameOfOther"),
+    //   NameKana: castOptStringProp(arg, "NameKana"),
+    //   NameOfOtherKana: castOptStringProp(arg, "NameOfOtherKana"),
+    //   Sex2: castOptStringProp(arg, "Sex2"),
+    //   Address: castOptStringProp(arg, "Address"),
+    //   PostNumber: castOptStringProp(arg, "PostNumber"),
+    //   InsuredCertificateIssuanceDate: castOptStringProp(arg, "InsuredCertificateIssuanceDate"),
+    //   InsuredCardValidDate: castOptStringProp(arg, "InsuredCardValidDate"),
+    //   InsuredCardExpirationDate: castOptStringProp(arg, "InsuredCardExpirationDate"),
+    //   InsuredPartialContributionRatio: castOptStringProp(arg, "InsuredPartialContributionRatio"),
+    //   PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
+    //   ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
+    //   ElderlyRecipientCertificateInfo: arg.ElderlyRecipientCertificateInfo,
+    //   LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
+    //   LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
+    //   LimitApplicationCertificateRelatedInfo: arg.LimitApplicationCertificateRelatedInfo,
+    //   SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
+    //   SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
+    //   SpecificDiseasesCertificateList: arg.SpecificDiseasesCertificateList,
+    // });
+  }
+
   static cast(arg: any): ResultOfQualificationConfirmation {
-    arg = arg.ResultOfQualificationConfirmation;
-    return new ResultOfQualificationConfirmation({
-      InsuredCardClassification: castStringProp(arg, "InsuredCardClassification"),
-      Name: castStringProp(arg, "Name"),
-      Sex1: castStringProp(arg, "Sex1"),
-      Birthdate: castStringProp(arg, "Birthdate"),
-      InsurerName: castStringProp(arg, "InsurerName"),
-      InsurerNumber: castOptStringProp(arg, "InsurerNumber"),
-      InsuredCardSymbol: castOptStringProp(arg, "InsuredCardSymbol"),
-      InsuredIdentificationNumber: castOptStringProp(arg, "InsuredIdentificationNumber"),
-      InsuredBranchNumber: castOptStringProp(arg, "InsuredBranchNumber"),
-      PersonalFamilyClassification: castOptStringProp(arg, "PersonalFamilyClassification"),
-      InsuredName: castOptStringProp(arg, "InsuredName"),
-      NameOfOther: castOptStringProp(arg, "NameOfOther"),
-      NameKana: castOptStringProp(arg, "NameKana"),
-      NameOfOtherKana: castOptStringProp(arg, "NameOfOtherKana"),
-      Sex2: castOptStringProp(arg, "Sex2"),
-      Address: castOptStringProp(arg, "Address"),
-      PostNumber: castOptStringProp(arg, "PostNumber"),
-      InsuredCertificateIssuanceDate: castOptStringProp(arg, "InsuredCertificateIssuanceDate"),
-      InsuredCardValidDate: castOptStringProp(arg, "InsuredCardValidDate"),
-      InsuredCardExpirationDate: castOptStringProp(arg, "InsuredCardExpirationDate"),
-      InsuredPartialContributionRatio: castOptStringProp(arg, "InsuredPartialContributionRatio"),
-      PreschoolClassification: castOptStringProp(arg, "PreschoolClassification"),
-      ReasonOfLoss: castOptStringProp(arg, "ReasonOfLoss"),
-      ElderlyRecipientCertificateInfo: arg.ElderlyRecipientCertificateInfo,
-      LimitApplicationCertificateRelatedConsFlg: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
-      LimitApplicationCertificateRelatedConsTime: castOptStringProp(arg, "LimitApplicationCertificateRelatedConsTime"),
-      LimitApplicationCertificateRelatedInfo: arg.LimitApplicationCertificateRelatedInfo,
-      SpecificDiseasesCertificateRelatedConsFlg: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsFlg"),
-      SpecificDiseasesCertificateRelatedConsTime: castOptStringProp(arg, "SpecificDiseasesCertificateRelatedConsTime"),
-      SpecificDiseasesCertificateList: arg.SpecificDiseasesCertificateList,
-    });
+    if (this.isResultOfQualificationConfirmationInterface(arg)) {
+      return new ResultOfQualificationConfirmation(arg);
+    } else {
+      throw new Error("Cannot create ResultOfQualificationConfirmation");
+    }
   }
 }

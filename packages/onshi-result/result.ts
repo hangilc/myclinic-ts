@@ -1,25 +1,29 @@
 import { MessageHeader, MessageHeaderInterface } from "./MessageHeader";
 import { MessageBody, MessageBodyInterface } from "./MessageBody";
 import { ResultOfQualificationConfirmation } from "./ResultOfQualificationConfirmation";
+import { XmlMsg, XmlMsgInterface } from "XmlMsg";
+import { ResultItem } from "ResultItem";
 
-export interface XmlMsgInterface {
-  MessageHeader: MessageHeaderInterface;
-  MessageBody: MessageBodyInterface;
-}
 
 export interface OnshiResultInterface {
   XmlMsg: XmlMsgInterface;
 }
 
 export class OnshiResult {
-  orig: object;
-  messageHeader: MessageHeader;
-  messageBody: MessageBody;
+  orig: OnshiResultInterface;
+  xmlMsg: XmlMsg;
 
   constructor(orig: OnshiResultInterface) {
     this.orig = orig;
-    this.messageHeader = MessageHeader.cast(orig.XmlMsg.MessageHeader);
-    this.messageBody = MessageBody.cast(orig.XmlMsg.MessageBody);
+    this.xmlMsg = new XmlMsg(orig.XmlMsg);
+  }
+
+  get messageHeader(): MessageHeader {
+    return this.xmlMsg.messageHeader;
+  }
+
+  get messageBody(): MessageBody {
+    return this.xmlMsg.messageBody;
   }
 
   // 資格が確認できたかどうか
@@ -31,7 +35,7 @@ export class OnshiResult {
     return false;
   }
 
-  get resultList(): ResultOfQualificationConfirmation[] {
+  get resultList(): ResultItem[] {
     return this.messageBody.resultList;
   }
 
@@ -39,19 +43,23 @@ export class OnshiResult {
     return this.orig;
   }
 
-  static cast(arg: any): OnshiResult {
+  static isOnshiResultInterface(arg: any): arg is OnshiResultInterface {
     if( typeof arg === "object" ){
-      if( typeof arg.XmlMsg === "object" ){
-        return new OnshiResult(arg);
-      } else {
-        throw new Error("object expected (XmlMsg)");
-      }
+      return XmlMsg.isXmlMsgInterface(arg.XmlMsg);
     } else {
-      throw new Error("object expected (OnshiResult.cast)");
+      return false;
+    }
+  }
+
+  static cast(arg: any): OnshiResult {
+    if( this.isOnshiResultInterface(arg) ){
+      return new OnshiResult(arg);
+    } else {
+      throw new Error("Cannot create OnshiResult");
     }
   }
 
   static create(header: MessageHeaderInterface, body: MessageBodyInterface): OnshiResult {
-    return OnshiResult.cast({ XmlMsg: { MessageHeader: header, MessageBody: body }});
+    return new OnshiResult({ XmlMsg: { MessageHeader: header, MessageBody: body }});
   }
 }

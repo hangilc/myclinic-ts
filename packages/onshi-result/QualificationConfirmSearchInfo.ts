@@ -63,19 +63,25 @@ export class QualificationConfirmSearchInfo {
     return this.orig;
   }
 
-  static cast(arg: any): QualificationConfirmSearchInfo {
+  static isQualificationConfirmSearchInfoInterface(arg: any): arg is QualificationConfirmSearchInfoInterface {
     if (typeof arg === "object") {
-      return new QualificationConfirmSearchInfo({
-        InsurerNumber: castStringProp(arg, "InsurerNumber"),
-        InsuredIdentificationNumber: castStringProp(arg, "InsuredIdentificationNumber"),
-        Birthdate: castStringProp(arg, "Birthdate"),
-        LimitApplicationCertificateRelatedConsFlg: castStringProp(arg, "LimitApplicationCertificateRelatedConsFlg"),
-        InsuredCardSymbol: castOptStringProp(arg, "InsuredCardSymbol"),
-        InsuredBranchNumber: castOptStringProp(arg, "InsuredBranchNumber"),
-        ArbitraryIdentifier: castOptStringProp(arg, "ArbitraryIdentifier"),
-      });
+      return castStringProp(arg, "InsurerNumber") &&
+        castStringProp(arg, "InsuredIdentificationNumber") &&
+        castStringProp(arg, "Birthdate") &&
+        castStringProp(arg, "LimitApplicationCertificateRelatedConsFlg") &&
+        castOptStringProp(arg, "InsuredCardSymbol") &&
+        castOptStringProp(arg, "InsuredBranchNumber") &&
+        castOptStringProp(arg, "ArbitraryIdentifier");
     } else {
-      throw new Error("Cannot convert to " + QualificationConfirmSearchInfo);
+      return false;
+    }
+  }
+
+  static cast(arg: any): QualificationConfirmSearchInfo {
+    if (QualificationConfirmSearchInfo.isQualificationConfirmSearchInfoInterface(arg)) {
+      return new QualificationConfirmSearchInfo(arg);
+    } else {
+      throw new Error("Cannot construct QualificationConfirmSearchInfo");
     }
   }
 }

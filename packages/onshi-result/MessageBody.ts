@@ -1,11 +1,12 @@
-import { castOptStringProp, castStringProp } from "./cast";
+import { castOptConvert, castOptStringProp, castOptTest, castStringProp } from "./cast";
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
 import { QualificationConfirmSearchInfo, type QualificationConfirmSearchInfoInterface } from "./QualificationConfirmSearchInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
+import { ResultItem, ResultItemInterface } from "ResultItem";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;
-  ResultList: ResultOfQualificationConfirmationInterface[];
+  ResultList: ResultItemInterface[];
   QualificationConfirmSearchInfo: QualificationConfirmSearchInfoInterface | undefined;
   PrescriptionIssueSelect: string | undefined;
   ProcessingResultCode: string | undefined;
@@ -16,16 +17,17 @@ export interface MessageBodyInterface {
 export class MessageBody {
   orig: MessageBodyInterface;
   // 資格確認結果のリスト
-  resultList: ResultOfQualificationConfirmation[];
+  resultList: ResultItem[];
   // 資格確認照会用情報
   qualificationConfirmSearchInfo: QualificationConfirmSearchInfo | undefined;
 
   constructor(arg: MessageBodyInterface) {
     this.orig = arg;
-    this.resultList = arg.ResultList.map(ResultOfQualificationConfirmation.cast);
-    this.qualificationConfirmSearchInfo = arg.QualificationConfirmSearchInfo
-      ? QualificationConfirmSearchInfo.cast(arg.QualificationConfirmSearchInfo)
-      : undefined;
+    this.resultList = arg.ResultList.map(ResultItem.cast);
+    this.qualificationConfirmSearchInfo = castOptConvert(
+      arg.QualificationConfirmSearchInfo,
+      QualificationConfirmSearchInfo.cast
+    );
   }
 
   get qualificationValidity(): QualificationValidityLabel | undefined {
@@ -62,7 +64,7 @@ export class MessageBody {
   }
 
   // 最初の資格確認結果（もしあれば）
-  get qualificationConfirmation(): ResultOfQualificationConfirmation | undefined {
+  get qualificationConfirmation(): ResultItem | undefined {
     return this.resultList[0];
   }
 
@@ -103,19 +105,22 @@ export class MessageBody {
     return this.orig;
   }
 
-  static cast(arg: any): MessageBody {
+  static isMessageBodyInterface(arg: any): arg is MessageBody {
     if (typeof arg === "object") {
-      return new MessageBody({
-        ProcessingResultStatus: castStringProp(arg, "ProcessingResultStatus"),
-        ResultList: arg.ResultList,
-        QualificationConfirmSearchInfo: arg.QualificationConfirmSearchInfo,
-        PrescriptionIssueSelect: castOptStringProp(arg, "PrescriptionIssueSelect"),
-        ProcessingResultCode: castOptStringProp(arg, "ProcessingResultCode"),
-        ProcessingResultMessage: castOptStringProp(arg, "ProcessingResultMessage"),
-        QualificationValidity: castOptStringProp(arg, "QualificationValidity"),
-      });
+      return castStringProp(arg, "ProcessingResultStatus") &&
+        Array.isArray(arg.ResultList) && arg.ResultList.every(
+          ResultOfQualificationConfirmation.isResultOfQualificationConfirmationInterface
+        ) && castOptTest(
+          arg.QualificationConfirmSearchInfo,
+          QualificationConfirmSearchInfo.isQualificationConfirmSearchInfoInterface
+        ) &&
+        castOptStringProp(arg, "PrescriptionIssueSelect") &&
+        castOptStringProp(arg, "ProcessingResultCode") &&
+        castOptStringProp(arg, "ProcessingResultMessage") &&
+        castOptStringProp(arg, "QualificationValidity");
+
     } else {
-      throw new Error("Object expected (MessageBody): " + arg);
+      return false;
     }
   }
 }

@@ -85,17 +85,19 @@ export class MessageHeader {
     return this.orig;
   }
 
-  static cast(arg: any): MessageHeader {
-    return new MessageHeader({
-      ProcessExecutionTime: castStringProp(arg, "ProcessExecutionTime"),
-      QualificationConfirmationDate: castStringProp(arg, "QualificationConfirmationDate"),
-      MedicalInstitutionCode: castStringProp(arg, "MedicalInstitutionCode"),
-      ArbitraryFileIdentifier: castOptStringProp(arg, "ArbitraryFileIdentifier"),
-      ReferenceClassification: castStringProp(arg, "ReferenceClassification"),
-      SegmentOfResult: castStringProp(arg, "SegmentOfResult"),
-      ErrorCode: castOptStringProp(arg, "ErrorCode"),
-      ErrorMessage: castOptStringProp(arg, "ErrorMessage"),
-      CharacterCodeIdentifier: castStringProp(arg, "CharacterCodeIdentifier"),
-    })
+  static isMessageHeaderInterface(arg: any): arg is MessageHeader {
+    if (typeof arg === "object") {
+      return castStringProp(arg, "ProcessExecutionTime") &&
+        castStringProp(arg, "QualificationConfirmationDate") &&
+        castStringProp(arg, "MedicalInstitutionCode") &&
+        castOptStringProp(arg, "ArbitraryFileIdentifier") &&
+        castStringProp(arg, "ReferenceClassification") &&
+        castStringProp(arg, "SegmentOfResult") &&
+        castOptStringProp(arg, "ErrorCode") &&
+        castOptStringProp(arg, "ErrorMessage") &&
+        castStringProp(arg, "CharacterCodeIdentifier");
+    } else {
+      return false;
+    }
   }
 }

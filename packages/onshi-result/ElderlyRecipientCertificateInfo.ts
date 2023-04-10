@@ -49,16 +49,22 @@ export class ElderlyRecipientCertificateInfo {
     return this.orig;
   }
 
-  static cast(arg: any): ElderlyRecipientCertificateInfo {
+  static isElderlyRecipientCertificateInfoInterface(arg: any): arg is ElderlyRecipientCertificateInfoInterface {
     if( typeof arg === "object" ){
-      return new ElderlyRecipientCertificateInfo({
-        ElderlyRecipientCertificateDate: castOptStringProp(arg, "ElderlyRecipientCertificateDate"),
-        ElderlyRecipientValidStartDate: castOptStringProp(arg, "ElderlyRecipientValidStartDate"),
-        ElderlyRecipientValidEndDate: castOptStringProp(arg, "ElderlyRecipientValidEndDate"),
-        ElderlyRecipientContributionRatio: castOptStringProp(arg, "ElderlyRecipientContributionRatio"),
-      });
+      return castOptStringProp(arg, "ElderlyRecipientCertificateDate") &&
+        castOptStringProp(arg, "ElderlyRecipientValidStartDate") &&
+        castOptStringProp(arg, "ElderlyRecipientValidEndDate") &&
+        castOptStringProp(arg, "ElderlyRecipientContributionRatio");
     } else {
-      throw new Error("Cannot convert to ElderlyRecipientCertificateInfo: " + arg);
+      return false;
+    }
+  }
+
+  static cast(arg: any): ElderlyRecipientCertificateInfo {
+    if( this.isElderlyRecipientCertificateInfoInterface(arg) ){
+      return new ElderlyRecipientCertificateInfo(arg);
+    } else {
+      throw new Error("Cannot create ElderlyRecipientCertificateInfo");
     }
   }
 }

@@ -1,7 +1,7 @@
-import { 
-  isSpecificDiseasesDiseaseCategoryCode, 
-  SpecificDiseasesDiseaseCategory, 
-  type SpecificDiseasesDiseaseCategoryLabel 
+import {
+  isSpecificDiseasesDiseaseCategoryCode,
+  SpecificDiseasesDiseaseCategory,
+  type SpecificDiseasesDiseaseCategoryLabel
 } from "./codes";
 import { castOptStringProp } from "./cast";
 import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
@@ -24,9 +24,9 @@ export class SpecificDiseasesCertificateInfo {
   // 証が発行される際に認定された疾病に係る分類
   get specificDiseasesDiseaseCategory(): SpecificDiseasesDiseaseCategoryLabel | undefined {
     const k: string | undefined = this.orig.SpecificDiseasesDiseaseCategory;
-    if( k == undefined ){
+    if (k == undefined) {
       return undefined;
-    } else if( isSpecificDiseasesDiseaseCategoryCode(k) ){
+    } else if (isSpecificDiseasesDiseaseCategoryCode(k)) {
       return SpecificDiseasesDiseaseCategory[k];
     } else {
       throw new Error("Invalid SpecificDiseasesDiseaseCategory: " + k);
@@ -58,13 +58,23 @@ export class SpecificDiseasesCertificateInfo {
     return this.orig;
   }
 
+  static isSpecificDiseasesCertificateInfoInterface(arg: any): arg is SpecificDiseasesCertificateInfoInterface {
+    if (typeof arg === "object") {
+      return castOptStringProp(arg, "SpecificDiseasesDiseaseCategory") &&
+        castOptStringProp(arg, "SpecificDiseasesCertificateDate") &&
+        castOptStringProp(arg, "SpecificDiseasesValidStartDate") &&
+        castOptStringProp(arg, "SpecificDiseasesValidEndDate") &&
+        castOptStringProp(arg, "SpecificDiseasesSelfPay");
+    } else {
+      return false;
+    }
+  }
+
   static cast(arg: any): SpecificDiseasesCertificateInfo {
-    return new SpecificDiseasesCertificateInfo({
-      SpecificDiseasesDiseaseCategory: castOptStringProp(arg, "SpecificDiseasesDiseaseCategory"),
-      SpecificDiseasesCertificateDate: castOptStringProp(arg, "SpecificDiseasesCertificateDate"),
-      SpecificDiseasesValidStartDate: castOptStringProp(arg, "SpecificDiseasesValidStartDate"),
-      SpecificDiseasesValidEndDate: castOptStringProp(arg, "SpecificDiseasesValidEndDate"),
-      SpecificDiseasesSelfPay: castOptStringProp(arg, "SpecificDiseasesSelfPay"),
-    })
+    if (this.isSpecificDiseasesCertificateInfoInterface(arg)) {
+      return new SpecificDiseasesCertificateInfo(arg);
+    } else {
+      throw new Error("isSpecificDiseasesCertificate");
+    }
   }
 }

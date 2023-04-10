@@ -1,9 +1,9 @@
 import {
   isLimitApplicationCertificateClassificationCode,
-  isLimitApplicationCertificateClassificationFlagCode, 
-  LimitApplicationCertificateClassification, 
-  LimitApplicationCertificateClassificationFlag, 
-  type LimitApplicationCertificateClassificationFlagLabel, 
+  isLimitApplicationCertificateClassificationFlagCode,
+  LimitApplicationCertificateClassification,
+  LimitApplicationCertificateClassificationFlag,
+  type LimitApplicationCertificateClassificationFlagLabel,
   type LimitApplicationCertificateClassificationLabel
 } from "./codes";
 import { castOptStringProp } from "./cast";
@@ -79,15 +79,25 @@ export class LimitApplicationCertificateRelatedInfo {
     return this.orig;
   }
 
+  static isLimitApplicationCertificateRelatedInfoInterface(arg: any): arg is LimitApplicationCertificateRelatedInfoInterface {
+    if (typeof arg === "object") {
+      return castOptStringProp(arg, "LimitApplicationCertificateClassification") &&
+        castOptStringProp(arg, "LimitApplicationCertificateClassificationFlag") &&
+        castOptStringProp(arg, "LimitApplicationCertificateDate") &&
+        castOptStringProp(arg, "LimitApplicationCertificateValidStartDate") &&
+        castOptStringProp(arg, "LimitApplicationCertificateValidEndDate") &&
+        castOptStringProp(arg, "LimitApplicationCertificateLongTermDate");
+    } else {
+      return false;
+    }
+  }
+
   static cast(arg: any): LimitApplicationCertificateRelatedInfo {
-    return new LimitApplicationCertificateRelatedInfo({
-      LimitApplicationCertificateClassification: castOptStringProp(arg, "LimitApplicationCertificateClassification"),
-      LimitApplicationCertificateClassificationFlag: castOptStringProp(arg, "LimitApplicationCertificateClassificationFlag"),
-      LimitApplicationCertificateDate: castOptStringProp(arg, "LimitApplicationCertificateDate"),
-      LimitApplicationCertificateValidStartDate: castOptStringProp(arg, "LimitApplicationCertificateValidStartDate"),
-      LimitApplicationCertificateValidEndDate: castOptStringProp(arg, "LimitApplicationCertificateValidEndDate"),
-      LimitApplicationCertificateLongTermDate: castOptStringProp(arg, "LimitApplicationCertificateLongTermDate"),
-    });
+    if (this.isLimitApplicationCertificateRelatedInfoInterface(arg)) {
+      return new LimitApplicationCertificateRelatedInfo(arg);
+    } else {
+      throw new Error("Cannot create LimitApplicationCertificateRelatedInfo");
+    }
   }
 }
 
