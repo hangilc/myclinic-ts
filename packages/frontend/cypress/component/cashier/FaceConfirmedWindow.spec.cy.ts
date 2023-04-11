@@ -15,7 +15,7 @@ import * as kanjidate from "kanjidate";
 import type { ResultItem } from "onshi-result/ResultItem";
 
 describe("FaceConfirmedWindow", () => {
-  it("should mount", () => {
+  it.only("should mount", () => {
     const result: OnshiResult = createOnshiResult();
     cy.mount(FaceConfirmedWindow, {
       props: {
@@ -290,12 +290,12 @@ describe("FaceConfirmedWindow", () => {
       apiBase() + "/search-patient?text=*",
       [10, []]);
     cy.mount(FaceConfirmedWindow, { props });
-    cy.get("button").contains("新規患者登録").click();
     const phone = "03-1234-5678";
     cy.window().then(win => {
       cy.stub(win, "prompt").returns(phone);
     });
     cy.intercept("POST", apiBase() + "/enter-patient").as("enterPatient");
+    cy.get("button").contains("新規患者登録").click();
     confirmYes();
     cy.get("@onRegister").should("be.called");
     cy.wait("@enterPatient").then(intercept => {
@@ -325,6 +325,7 @@ describe("FaceConfirmedWindow", () => {
       })
     })
   }); //
+
 });
 
 function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {

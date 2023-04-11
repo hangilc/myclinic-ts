@@ -1,4 +1,51 @@
 <script lang="ts">
+  import type { OnshiResult } from "onshi-result";
+  import {
+    Initializing,
+    OnshiPatient,
+  } from "./face-confirm-window";
+  import Floating from "./Floating.svelte";
+
+  export let destroy: () => void;
+  export let result: OnshiResult;
+  export let onRegister: () => void = () => {};
+
+  let onshiPatient: OnshiPatient | undefined =
+    result.resultList.length === 1
+      ? new OnshiPatient(result.resultList[0])
+      : undefined;
+  let resolvedState: Initializing = new Initializing();
+  const style =
+    "width:360px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;";
+
+  function doClose() {
+    destroy();
+  }
+</script>
+
+<Floating title="顔認証完了" {destroy} {style}>
+  <div class="onshi-content">
+    <div class="onshi-content-title">資格確認内容</div>
+    {#if onshiPatient}
+      <div>
+        {onshiPatient.lastName} {onshiPatient.firstName} 
+        ({onshiPatient.lastNameYomi} {onshiPatient.firstNameYomi})
+      </div>
+    {/}
+  </div>
+  <div data-cy="message" class="message">
+    {#if resolvedState instanceof Initializing}
+      初期化中
+    {/if}
+  </div>
+  <div class="commands">
+    {#if resolvedState instanceof Initializing}
+      <button on:click={doClose}>閉じる</button>
+    {/if}
+  </div>
+</Floating>
+
+<!-- <script lang="ts">
   import Floating from "@/lib/Floating.svelte";
   import type { OnshiResult } from "onshi-result";
   import * as kanjidate from "kanjidate";
@@ -26,11 +73,7 @@
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
-  import {
-    koukikoureiRep,
-    shahokokuhoName,
-    shahokokuhoRep,
-  } from "./hoken-rep";
+  import { koukikoureiRep, shahokokuhoName, shahokokuhoRep } from "./hoken-rep";
   import { confirm } from "./confirm-call";
   import type { ResultItem } from "onshi-result/ResultItem";
 
@@ -82,10 +125,7 @@
     return patients.filter((p) => p.birthday === birthdate);
   }
 
-  async function advance(
-    patient: Patient,
-    r: ResultItem
-  ) {
+  async function advance(patient: Patient, r: ResultItem) {
     const now = dateToSqlDateTime(new Date());
     const shahoOpt =
       (await api.findAvailableShahokokuho(patient.patientId, now)) ?? undefined;
@@ -190,10 +230,7 @@
     onRegister();
   }
 
-  function doChoosePatient(
-    patients: Patient[],
-    r: ResultItem
-  ) {
+  function doChoosePatient(patients: Patient[], r: ResultItem) {
     const d: ChoosePatientDialog = new ChoosePatientDialog({
       target: document.body,
       props: {
@@ -282,7 +319,7 @@
     const sex: string = r.sex1 === "男" ? "M" : "F";
     const birthday = r.birthdate;
     const addr = r.address ?? "";
-    const phone = prompt("電話番号");
+    const phone = prompt("患者の電話番号");
     if (phone === null) {
       return undefined;
     }
@@ -299,53 +336,53 @@
     );
   }
 
-  function doNoPatient(resolved: NoPatient) {
-    confirm("患者の新規登録をして診察を受付ますか？", async () => {
-      const patient: Patient | string | undefined = composePatientFromResult(
-        resolved.result
-      );
-      if (patient === undefined) {
-        return;
-      } else if (typeof patient === "string") {
-        message = patient;
-        resolvedState = undefined;
-      } else {
-        const patientEntered: Patient = await api.enterPatient(patient);
-        const patientId = patientEntered.patientId;
-        const validDate: string | undefined =
-          resolved.result.insuredCardValidDate;
-        const validFrom = validDate ? new Date(validDate) : new Date();
-        const hoken = create_hoken_from_onshi_kakunin(
-          patientId,
-          resolved.result,
-          validFrom
-        );
-        if (typeof hoken === "string") {
-          message = hoken;
-          resolvedState = undefined;
-        } else {
-          if (hoken instanceof Shahokokuho) {
-            const shahokokuho = await api.enterShahokokuho(hoken);
-            await api.startVisitWithHoken(
-              patientId,
-              new Date(),
-              new HokenIdSet(shahokokuho.shahokokuhoId, 0, 0, 0, 0, 0)
-            );
-          } else {
-            const koukikourei = await api.enterKoukikourei(hoken);
-            await api.startVisitWithHoken(
-              patientId,
-              new Date(),
-              new HokenIdSet(0, koukikourei.koukikoureiId, 0, 0, 0, 0)
-            );
-          }
-          message = "新規患者登録と診察受付を行いました。";
-          resolvedState = undefined;
-          doClose();
-          onRegister();
-        }
-      }
-    });
+  async function doRegisterPatient(resolved: NoPatient) {
+    const patient: Patient | string | undefined = composePatientFromResult(
+      resolved.result
+    );
+    if (patient === undefined) {
+      // cancel selected
+      // nop
+    } else if (typeof patient === "string") {
+      message = patient;
+      resolvedState = undefined;
+    } else {
+      const patientEntered: Patient = await api.enterPatient(patient);
+      advance(patientEntered, resolved.result);
+      // const patientId = patientEntered.patientId;
+      // const validDate: string | undefined =
+      //   resolved.result.insuredCardValidDate;
+      // const validFrom = validDate ? new Date(validDate) : new Date();
+      // const hoken = create_hoken_from_onshi_kakunin(
+      //   patientId,
+      //   resolved.result,
+      //   validFrom
+      // );
+      // if (typeof hoken === "string") {
+      //   message = hoken;
+      //   resolvedState = undefined;
+      // } else {
+      //   if (hoken instanceof Shahokokuho) {
+      //     const shahokokuho = await api.enterShahokokuho(hoken);
+      //     await api.startVisitWithHoken(
+      //       patientId,
+      //       new Date(),
+      //       new HokenIdSet(shahokokuho.shahokokuhoId, 0, 0, 0, 0, 0)
+      //     );
+      //   } else {
+      //     const koukikourei = await api.enterKoukikourei(hoken);
+      //     await api.startVisitWithHoken(
+      //       patientId,
+      //       new Date(),
+      //       new HokenIdSet(0, koukikourei.koukikoureiId, 0, 0, 0, 0)
+      //     );
+      //   }
+      //   message = "新規患者登録と診察受付を行いました。";
+      //   resolvedState = undefined;
+      //   doClose();
+      //   onRegister();
+      // }
+    }
   }
 
   function doClose(): void {
@@ -409,15 +446,32 @@
         <button on:click={() => doNewHoken(resolved)}>新規保険証登録</button>
       {:else if resolvedState instanceof NoPatient}
         {@const resolved = resolvedState}
-        <button on:click={() => doNoPatient(resolved)}>新規患者登録</button>
+        <button on:click={() => doRegisterPatient(resolved)}
+          >新規患者登録</button
+        >
       {:else}
         <button on:click={doClose}>閉じる</button>
       {/if}
     </div>
   </div>
-</Floating>
+</Floating> -->
 
 <style>
+  .onshi-content {
+    margin: 1.5em 0 10px 0;
+    border: 1px solid gray;
+    padding: 10px;
+  }
+
+  .onshi-content-title {
+    background-color: white;
+    border: 1px solid gray;
+    padding: 4px;
+    position: relative;
+    top: -1.5em;
+    display: inline-block;
+  }
+
   .content {
     background-color: white;
     opacity: 1;
