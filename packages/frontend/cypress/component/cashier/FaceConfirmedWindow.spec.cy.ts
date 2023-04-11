@@ -15,14 +15,22 @@ import * as kanjidate from "kanjidate";
 import type { ResultItem } from "onshi-result/ResultItem";
 
 describe("FaceConfirmedWindow", () => {
-  it.only("should mount", () => {
+  it("should mount", () => {
     const result: OnshiResult = createOnshiResult();
+    cy.intercept(
+      "GET",
+      apiBase() + "/search-patient?text=*",
+      [10, []]);
     cy.mount(FaceConfirmedWindow, {
       props: {
         destroy: () => { },
         result
       }
     });
+  });
+
+  it.only("should choose from multiple patients", () => {
+
   });
 
   it("should enter new shahokokuho when none available", () => {

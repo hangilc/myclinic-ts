@@ -2,6 +2,7 @@ import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
+import api from "./api";
 
 export class OnshiPatient {
   lastName: string;
@@ -13,6 +14,7 @@ export class OnshiPatient {
   address: string;
 
   constructor(r: ResultItem) {
+    console.log(r);
     const [lastName, firstName] = r.name.split("　");
     const [lastNameYomi, firstNameYomi] = r.nameKana ? r.nameKana.split(" ") : ["", ""];
     const sex = r.sex === "男" ? "M" : "F";
@@ -38,8 +40,45 @@ export class OnshiPatient {
   }
 }
 
+export async function searchPatient(
+  name: string,
+  yomi: string | undefined,
+  birthdate: string
+): Promise<Patient[]> {
+  let patients: Patient[] = (await api.searchPatient(name)).filter(
+    (p) => name === `${p.lastName}　${p.firstName}`
+  );
+  if (yomi) {
+    let yomiPatients = await api.searchPatient(yomi);
+    yomiPatients
+      .filter((p) => yomi === `${p.lastNameYomi} ${p.firstNameYomi}`)
+      .filter((p) => {
+        return patients.findIndex((a) => a.patientId === p.patientId) < 0;
+      })
+      .forEach((p) => patients.push(p));
+  }
+  return patients.filter((p) => p.birthday === birthdate);
+}
+
+export class NoResultItem {}
+
+export class MultipleResultItems {}
+
 export class Initializing {
 
+}
+
+export class NoPatient {
+  constructor(
+    public result: ResultItem
+  ) {}
+}
+
+export class MultiplePatients {
+  constructor(
+    public patients: Patient[],
+    public result: ResultItem,
+  ) {}
 }
 
 export class AllResolved {
@@ -50,13 +89,6 @@ export class AllResolved {
     public onshiResult: OnshiResult,
     public at: string, // date time
   ) { }
-}
-
-export class MultiplePatients {
-  constructor(
-    public patients: Patient[],
-    public result: ResultItem,
-  ) {}
 }
 
 export class InconsistentHoken {
@@ -75,8 +107,3 @@ export class NewHoken {
   ) {}
 }
 
-export class NoPatient {
-  constructor(
-    public result: ResultItem
-  ) {}
-}

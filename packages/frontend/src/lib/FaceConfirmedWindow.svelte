@@ -2,21 +2,60 @@
   import type { OnshiResult } from "onshi-result";
   import {
     Initializing,
+    MultiplePatients,
+    MultipleResultItems,
+    NoPatient,
+    NoResultItem,
     OnshiPatient,
+    searchPatient,
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
+  import type { ResultItem } from "onshi-result/ResultItem";
 
   export let destroy: () => void;
   export let result: OnshiResult;
   export let onRegister: () => void = () => {};
 
-  let onshiPatient: OnshiPatient | undefined =
-    result.resultList.length === 1
-      ? new OnshiPatient(result.resultList[0])
-      : undefined;
-  let resolvedState: Initializing = new Initializing();
+  let resultItem: ResultItem | undefined =
+    result.resultList.length === 1 ? result.resultList[0] : undefined;
+  let onshiPatient: OnshiPatient | undefined = resultItem
+    ? new OnshiPatient(resultItem)
+    : undefined;
+  let resolvedState:
+    | NoResultItem
+    | MultipleResultItems
+    | Initializing
+    | NoPatient
+    | MultiplePatients
+    | undefined = undefined;
   const style =
     "width:360px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;";
+
+  init();
+
+  async function init() {
+    if (resultItem) {
+      resolvedState = new Initializing();
+      const patients = await searchPatient(
+        resultItem.name,
+        resultItem.nameKana,
+        resultItem.birthdate
+      );
+      if (patients.length === 0) {
+        resolvedState = new NoPatient(resultItem);
+      } else if( patients.length === 1 ){
+
+      } else {
+        resolvedState = new MultiplePatients(patients, resultItem);
+      }
+    } else {
+      if (result.resultList.length === 0) {
+        resolvedState = new NoResultItem();
+      } else if (result.resultList.length > 1) {
+        resolvedState = new MultipleResultItems();
+      }
+    }
+  }
 
   function doClose() {
     destroy();
@@ -28,19 +67,32 @@
     <div class="onshi-content-title">資格確認内容</div>
     {#if onshiPatient}
       <div>
-        {onshiPatient.lastName} {onshiPatient.firstName} 
-        ({onshiPatient.lastNameYomi} {onshiPatient.firstNameYomi})
+        {onshiPatient.fullName()}
+        ({onshiPatient.fullYomi()})
+        {onshiPatient.birthdayRep()}生
       </div>
-    {/}
+    {/if}
   </div>
   <div data-cy="message" class="message">
-    {#if resolvedState instanceof Initializing}
+    {#if resolvedState instanceof NoResultItem}
+      資格確認結果なし
+    {:else if resolvedState instanceof MultipleResultItems}
+      複数の資格確認結果
+    {:else if resolvedState instanceof Initializing}
       初期化中
+    {:else if resolvedState instanceof NoPatient}
+      該当患者なし
+    {:else if resolvedState instanceof MultiplePatients}
+      複数の該当患者
     {/if}
   </div>
   <div class="commands">
-    {#if resolvedState instanceof Initializing}
+    {#if resolvedState instanceof NoResultItem || resolvedState instanceof MultipleResultItems || resolvedState instanceof Initializing}
       <button on:click={doClose}>閉じる</button>
+    {:else if resolvedState instanceof NoPatient}
+      <button>新規患者登録</button>
+    {:else if resolvedState instanceof MultiplePatients}
+      <button>患者選択</button>
     {/if}
   </div>
 </Floating>
@@ -460,15 +512,17 @@
   .onshi-content {
     margin: 1.5em 0 10px 0;
     border: 1px solid gray;
-    padding: 10px;
+    position: relative;
+    padding: 1.5em 10px 10px 10px;
   }
 
   .onshi-content-title {
     background-color: white;
     border: 1px solid gray;
     padding: 4px;
-    position: relative;
-    top: -1.5em;
+    position: absolute;
+    top: -1em;
+    left: 10px;
     display: inline-block;
   }
 
