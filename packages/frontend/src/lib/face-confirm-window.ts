@@ -1,8 +1,9 @@
-import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+import { Patient, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
 import api from "./api";
+import { birthdayRep } from "./util";
 
 export class OnshiPatient {
   lastName: string;
@@ -14,7 +15,6 @@ export class OnshiPatient {
   address: string;
 
   constructor(r: ResultItem) {
-    console.log(r);
     const [lastName, firstName] = r.name.split("　");
     const [lastNameYomi, firstNameYomi] = r.nameKana ? r.nameKana.split(" ") : ["", ""];
     const sex = r.sex === "男" ? "M" : "F";
@@ -36,7 +36,21 @@ export class OnshiPatient {
   }
 
   birthdayRep(): string {
-    return kanjidate.format(kanjidate.f2, this.birthday);
+    return birthdayRep(this.birthday);
+  }
+
+  toPatient(): Patient {
+    return new Patient(
+      0,
+      this.lastName,
+      this.firstName,
+      this.lastNameYomi,
+      this.firstNameYomi,
+      this.sex,
+      this.birthday,
+      this.address,
+      ""
+    )
   }
 }
 
@@ -70,7 +84,7 @@ export class Initializing {
 
 export class NoPatient {
   constructor(
-    public result: ResultItem
+    public result: ResultItem,
   ) {}
 }
 
@@ -87,23 +101,16 @@ export class AllResolved {
     public hoken: Shahokokuho | Koukikourei,
     public kouhiList: Kouhi[],
     public onshiResult: OnshiResult,
-    public at: string, // date time
   ) { }
-}
-
-export class InconsistentHoken {
-  constructor(
-    public patient: Patient,
-    public shahokokuhoOpt: Shahokokuho | undefined,
-    public koukikoureiOpt: Koukikourei | undefined,
-    public result: ResultItem,
-  ) {}
 }
 
 export class NewHoken {
   constructor(
     public patient: Patient,
-    public result: ResultItem,
+    public resultItem: ResultItem,
+    public shahokokuhoOpt: Shahokokuho | undefined,
+    public koukikoureiOpt: Koukikourei | undefined,
+    public kouhiList: Kouhi[]
   ) {}
 }
 

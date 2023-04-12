@@ -29,9 +29,22 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it.only("should choose from multiple patients", () => {
-
-  });
+  it.only("should enter new patient", () => {
+    const patientTmpl = createPatient();
+    const result = createOnshiResult(m.patient(patientTmpl), m.shahokokuho(createShahokokuho()));
+    cy.intercept(
+      "GET",
+      apiBase() + "/search-patient?text=*",
+      [10, []]);
+      cy.mount(FaceConfirmedWindow, {
+        props: {
+          destroy: () => { },
+          result
+        }
+      });
+      cy.get("[data-cy=message]").contains("該当患者なし");
+      cy.get("button").contains("新規患者登録").click();
+    });
 
   it("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");

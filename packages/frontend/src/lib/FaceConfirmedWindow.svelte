@@ -1,9 +1,11 @@
 <script lang="ts">
   import type { OnshiResult } from "onshi-result";
   import {
+    AllResolved,
     Initializing,
     MultiplePatients,
     MultipleResultItems,
+    NewHoken,
     NoPatient,
     NoResultItem,
     OnshiPatient,
@@ -11,6 +13,11 @@
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
   import type { ResultItem } from "onshi-result/ResultItem";
+  import { hokenshaBangouRep } from "./hoken-rep";
+  import RegisterOnshiPatientDialog from "./RegisterOnshiPatientDialog.svelte";
+  import { dateToSqlDate, Kouhi, type Patient } from "myclinic-model";
+  import api from "./api";
+  import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "./hoken-onshi-consistent";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -18,9 +25,6 @@
 
   let resultItem: ResultItem | undefined =
     result.resultList.length === 1 ? result.resultList[0] : undefined;
-  let onshiPatient: OnshiPatient | undefined = resultItem
-    ? new OnshiPatient(resultItem)
-    : undefined;
   let resolvedState:
     | NoResultItem
     | MultipleResultItems
@@ -43,8 +47,7 @@
       );
       if (patients.length === 0) {
         resolvedState = new NoPatient(resultItem);
-      } else if( patients.length === 1 ){
-
+      } else if (patients.length === 1) {
       } else {
         resolvedState = new MultiplePatients(patients, resultItem);
       }
@@ -57,6 +60,57 @@
     }
   }
 
+  async function advanceWithPatient(patient: Patient, r: ResultItem) {
+    const at = dateToSqlDate(new Date());
+    const shahoOpt =
+      (await api.findAvailableShahokokuho(patient.patientId, at)) ?? undefined;
+    const koukiOpt =
+      (await api.findAvailableKoukikourei(patient.patientId, at)) ?? undefined;
+    const kouhiList: Kouhi[] = await api.listAvailableKouhi(
+      patient.patientId,
+      at
+    );
+    if (shahoOpt && !koukiOpt) {
+      const err = shahokokuhoOnshiConsistent(shahoOpt, r);
+      if (!err) {
+        resolvedState = new AllResolved(patient, shahoOpt, kouhiList, result);
+      } else {
+        resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
+      }
+    } else if (koukiOpt && !shahoOpt) {
+      const err = koukikoureiOnshiConsistent(koukiOpt, r);
+      if (!err) {
+        resolvedState = new AllResolved(
+          patient,
+          koukiOpt,
+          kouhiList,
+          result
+        );
+      } else {
+        resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList)
+      }
+    } else if (!shahoOpt && !koukiOpt) {
+      resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList)
+    } else {
+      message = "現在有効な登録保険情報が複数存在します。";
+    }
+  }
+
+  function doRegisterPatient(r: ResultItem) {
+    const onshiPatient = new OnshiPatient(r);
+    const patientTmpl = onshiPatient.toPatient();
+    const d: RegisterOnshiPatientDialog = new RegisterOnshiPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patient: patientTmpl,
+        onEnter: (entered) => {
+          advanceWithPatient(entered, r);
+        },
+      },
+    });
+  }
+
   function doClose() {
     destroy();
   }
@@ -65,12 +119,16 @@
 <Floating title="顔認証完了" {destroy} {style}>
   <div class="onshi-content">
     <div class="onshi-content-title">資格確認内容</div>
-    {#if onshiPatient}
+    {#if resultItem}
+      {@const onshiPatient = new OnshiPatient(resultItem)}
       <div>
         {onshiPatient.fullName()}
         ({onshiPatient.fullYomi()})
         {onshiPatient.birthdayRep()}生
       </div>
+      {#if resultItem.insurerNumber}
+        <div>{hokenshaBangouRep(resultItem.insurerNumber)}</div>
+      {/if}
     {/if}
   </div>
   <div data-cy="message" class="message">
@@ -90,7 +148,10 @@
     {#if resolvedState instanceof NoResultItem || resolvedState instanceof MultipleResultItems || resolvedState instanceof Initializing}
       <button on:click={doClose}>閉じる</button>
     {:else if resolvedState instanceof NoPatient}
-      <button>新規患者登録</button>
+      {@const resolved = resolvedState}
+      <button on:click={() => doRegisterPatient(resolved.result)}
+        >新規患者登録</button
+      >
     {:else if resolvedState instanceof MultiplePatients}
       <button>患者選択</button>
     {/if}

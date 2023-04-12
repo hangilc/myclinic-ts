@@ -1,3 +1,5 @@
+import * as kanjidate from "kanjidate";
+
 export function padNumber(n: number, finalSize: number){
   let s = n.toString();
   while( s.length < finalSize ){
@@ -48,5 +50,10 @@ export function sexRep(sex: string): string {
     case "F": return "女";
     default: return "??";
   }
+}
+
+export function birthdayRep(birthday: string): string {
+  console.log("birthday", birthday);
+  return kanjidate.format(kanjidate.f2, birthday);
 }
 
