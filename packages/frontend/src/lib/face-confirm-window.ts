@@ -1,4 +1,4 @@
-import { Patient, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, Patient, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
@@ -74,21 +74,45 @@ export async function searchPatient(
   return patients.filter((p) => p.birthday === birthdate);
 }
 
-export class NoResultItem {}
+export function yesterdayAsSqlDate(): string {
+  const today = new Date();
+  const yesterday = kanjidate.addDays(today, -1);
+  return dateToSqlDate(yesterday);
+}
 
-export class MultipleResultItems {}
+export async function invalidateShahokokuho(shahokokuho: Shahokokuho, validUpto: string) {
+  const s = Object.assign({}, shahokokuho, { validUpto: validUpto });
+  await api.updateShahokokuho(s);
+}
+
+export async function invalidateKoukikourei(koukikourei: Koukikourei, validUpto: string) {
+  const s = Object.assign({}, koukikourei, { validUpto: validUpto });
+  await api.updateKoukikourei(s);
+}
+
+export class NoResultItem {
+  readonly classKind = "NoResultItem";
+}
+
+export class MultipleResultItems {
+  readonly classKind = "MultipleResultItems";
+
+}
 
 export class Initializing {
+  readonly classKind = "Initializing";
 
 }
 
 export class NoPatient {
+  readonly classKind = "NoPatient";
   constructor(
     public result: ResultItem,
   ) {}
 }
 
 export class MultiplePatients {
+  readonly classKind = "MultiplePatients";
   constructor(
     public patients: Patient[],
     public result: ResultItem,
@@ -96,15 +120,16 @@ export class MultiplePatients {
 }
 
 export class AllResolved {
+  readonly classKind = "AllResolved";
   constructor(
     public patient: Patient,
     public hoken: Shahokokuho | Koukikourei,
     public kouhiList: Kouhi[],
-    public onshiResult: OnshiResult,
   ) { }
 }
 
 export class NewHoken {
+  readonly classKind = "NewHoken";
   constructor(
     public patient: Patient,
     public resultItem: ResultItem,

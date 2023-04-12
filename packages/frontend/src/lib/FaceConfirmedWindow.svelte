@@ -9,15 +9,27 @@
     NoPatient,
     NoResultItem,
     OnshiPatient,
+    invalidateKoukikourei,
+    invalidateShahokokuho,
     searchPatient,
+    yesterdayAsSqlDate,
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
   import type { ResultItem } from "onshi-result/ResultItem";
   import { hokenshaBangouRep } from "./hoken-rep";
   import RegisterOnshiPatientDialog from "./RegisterOnshiPatientDialog.svelte";
-  import { dateToSqlDate, Kouhi, type Patient } from "myclinic-model";
+  import {
+    dateToSqlDate,
+    Kouhi,
+    Shahokokuho,
+    type Patient,
+    Koukikourei,
+  } from "myclinic-model";
   import api from "./api";
-  import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "./hoken-onshi-consistent";
+  import {
+    koukikoureiOnshiConsistent,
+    shahokokuhoOnshiConsistent,
+  } from "./hoken-onshi-consistent";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -31,6 +43,8 @@
     | Initializing
     | NoPatient
     | MultiplePatients
+    | AllResolved
+    | NewHoken
     | undefined = undefined;
   const style =
     "width:360px;padding:6px;border:1px solid blue;opacity:1;background-color:white;left:100px;top:100px;";
@@ -72,27 +86,20 @@
     );
     if (shahoOpt && !koukiOpt) {
       const err = shahokokuhoOnshiConsistent(shahoOpt, r);
-      if (!err) {
-        resolvedState = new AllResolved(patient, shahoOpt, kouhiList, result);
-      } else {
-        resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
+      if (err) {
+        const validUpto = yesterdayAsSqlDate();
+        await invalidateShahokokuho(shahoOpt, validUpto);
       }
+      resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
     } else if (koukiOpt && !shahoOpt) {
       const err = koukikoureiOnshiConsistent(koukiOpt, r);
-      if (!err) {
-        resolvedState = new AllResolved(
-          patient,
-          koukiOpt,
-          kouhiList,
-          result
-        );
-      } else {
-        resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList)
+      if (err) {
+        const validUpto = yesterdayAsSqlDate();
+        await invalidateKoukikourei(koukiOpt, validUpto);
       }
-    } else if (!shahoOpt && !koukiOpt) {
-      resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList)
+      resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
     } else {
-      message = "現在有効な登録保険情報が複数存在します。";
+      resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
     }
   }
 
@@ -114,6 +121,22 @@
   function doClose() {
     destroy();
   }
+
+  function currentRep(
+    shahoOpt: Shahokokuho | undefined,
+    koukiOpt: Koukikourei | undefined
+  ): string {
+    return [
+      shahoOpt ? hokenshaBangouRep(shahoOpt.hokenshaBangou) : "",
+      koukiOpt ? hokenshaBangouRep(koukiOpt.hokenshaBangou) : "",
+    ]
+      .filter((s) => s !== "")
+      .join("、");
+  }
+
+  async function doRegisterNewHoken(newHoken: NewHoken) {}
+
+  async function doRegisterVisit(resolved: AllResolved) {}
 </script>
 
 <Floating title="顔認証完了" {destroy} {style}>
@@ -142,6 +165,17 @@
       該当患者なし
     {:else if resolvedState instanceof MultiplePatients}
       複数の該当患者
+    {:else if resolvedState instanceof NewHoken}
+      {@const resolved = resolvedState}
+      <div>新規保険</div>
+      {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
+        <div>
+          （現在有効な{currentRep(
+            resolved.shahokokuhoOpt,
+            resolved.koukikoureiOpt
+          )}は有効期限を設定して無効化されます。）
+        </div>
+      {/if}
     {/if}
   </div>
   <div class="commands">
@@ -154,6 +188,14 @@
       >
     {:else if resolvedState instanceof MultiplePatients}
       <button>患者選択</button>
+    {:else if resolvedState instanceof NewHoken}
+      {@const resolved = resolvedState}
+      <button on:click={() => doRegisterNewHoken(resolved)}
+        >新規保険証登録</button
+      >
+    {:else if resolvedState instanceof AllResolved}
+      {@const resolved = resolvedState}
+      <button on:click={() => doRegisterVisit(resolved)}>診察登録</button>
     {/if}
   </div>
 </Floating>
