@@ -27,6 +27,7 @@
   } from "myclinic-model";
   import api from "./api";
   import {
+  create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
@@ -150,7 +151,31 @@
     });
   }
 
-  async function doRegisterNewHoken(newHoken: NewHoken) {}
+  async function doRegisterNewHoken(newHoken: NewHoken) {
+    const patient: Patient = newHoken.patient;
+    const result: ResultItem = newHoken.resultItem;
+    const today = new Date();
+    const hoken = create_hoken_from_onshi_kakunin(patient.patientId, result);
+    if (typeof hoken === "string") {
+      alert(hoken);
+    } else if (hoken instanceof Shahokokuho) {
+      
+      const rep = shahokokuhoName(hoken.hokenshaBangou);
+      alertMessage += `${rep}を登録します。`;
+      console.log(hoken);
+      confirm(alertMessage, async () => {
+        await api.newShahokokuho(hoken);
+        resolvePatient();
+      });
+    } else {
+      const rep = koukikoureiRep(hoken.futanWari);
+      alertMessage += `${rep}を登録します。`;
+      confirm(alertMessage, async () => {
+        await api.newKoukikourei(hoken);
+        resolvePatient();
+      });
+    }
+  }
 
   async function doRegisterVisit(resolved: AllResolved) {}
 </script>

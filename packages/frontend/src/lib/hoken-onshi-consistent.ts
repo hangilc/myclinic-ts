@@ -65,9 +65,14 @@ function stripLeadingZero(s: string): string {
   return s.replace(/^[0０]+/, "");
 }
 
-export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem,
-  validFromDate: Date):
+export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem):
   Shahokokuho | Koukikourei | string {
+  const validFromOpt: string | undefined = r.insuredCardValidDate;
+  if( validFromOpt === undefined ){
+    return "保険証の有効期限開始日がありません。";
+  }
+  const validFrom = validFromOpt;
+  const validUpto: string = r.insuredCardExpirationDate ??"0000-00-00";
   const hokenshaBangou: string = r.insurerNumber ?? "";
   if (hokenshaBangou === "") {
     return "保険者番号が取得できません。";
@@ -80,8 +85,6 @@ export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem
   if (hihokenshaBangou === "") {
     return "被保険者番号が取得できません。";
   }
-  const validFrom: string = dateToSqlDate(validFromDate);
-  const validUpto: string = r.insuredCardExpirationDate ?? "0000-00-00";
   if (isKoukikourei(hokenshaNumber)) {
     console.log(r);
     const futanWari: number | undefined = r.koukikoureiFutanWari;
@@ -104,7 +107,6 @@ export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem
         return "高齢受給者証の負担割合が取得できません。";
       }
       koureiStore = kourei.futanWari;
-
     }
     const edaban: string = r.insuredBranchNumber ?? "";
     return new Shahokokuho(0, patientId, hokenshaNumber, kigou, hihokenshaBangou, honninStore, 

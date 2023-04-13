@@ -71,7 +71,7 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it.only("should select from multiple patients", () => {
+  it("should select from multiple patients", () => {
     const patientTmpl = createPatient();
     enterPatient(patientTmpl).as("patient1");
     enterPatient(patientTmpl).as("patient2");
@@ -98,12 +98,11 @@ describe("FaceConfirmedWindow", () => {
         });
         dialogClose("資格確認患者選択");
         cy.get("[data-cy=resolved-patient-id]").contains(patient1.patientId.toString());
-
-      })
+      });
     });
   }); //
 
-  it("should enter new shahokokuho when none available", () => {
+  it.only("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       const shahokokuho = createShahokokuho({ patientId: patient.patientId });
