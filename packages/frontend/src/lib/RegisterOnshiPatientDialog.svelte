@@ -33,7 +33,7 @@
     <span>生年月日</span><span>{birthdayRep(patient.birthday)}</span>
     <span>性別</span><span>{sexRep(patient.sex)}性</span>
     <span>住所</span><span>{patient.address}</span>
-    <span>電話番号</span><input type="text" bind:value={phone}/>
+    <span>電話番号</span><input type="text" bind:value={phone} data-cy="phone-input"/>
   </div>
   <div class="commands">
     <button on:click={doEnter}>入力</button>

@@ -53,7 +53,17 @@ export function sexRep(sex: string): string {
 }
 
 export function birthdayRep(birthday: string): string {
-  console.log("birthday", birthday);
   return kanjidate.format(kanjidate.f2, birthday);
 }
+
+export function replaceAll(s: string, src: string, dst: string): string {
+  return s.split("").map(c => {
+    if( c === src ){
+      return dst;
+    } else {
+      return c;
+    }
+  }).join("");
+}
+
 

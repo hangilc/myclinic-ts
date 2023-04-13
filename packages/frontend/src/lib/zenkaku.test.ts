@@ -37,6 +37,7 @@ describe("zenkaku", () => {
     expect(z.zenkakuKatakanaToZenkakuHiragana("ア")).toBe("あ");
     expect(z.convertHankakuKatakanaToZenkakuHiragana("ｱｲｳｴｵ")).toBe("あいうえお");
     expect(z.hankakuKatakanaToZenkakuKatakana("ｼﾞ")).toBe("ジ");
+    expect(z.hankakuKatakanaToZenkakuKatakana("ｼ\uFF9E")).toBe("ジ");
     expect(z.hankakuKatakanaToZenkakuHiragana("ｼﾞ")).toBe("じ");
     expect(z.convertHankakuKatakanaToZenkakuHiragana("ﾌｼﾞﾜﾗ")).toBe("ふじわら");
   });

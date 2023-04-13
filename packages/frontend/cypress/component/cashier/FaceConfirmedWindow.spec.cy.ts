@@ -13,6 +13,7 @@ import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/li
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
 import type { ResultItem } from "onshi-result/ResultItem";
+import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -30,21 +31,40 @@ describe("FaceConfirmedWindow", () => {
   });
 
   it.only("should enter new patient", () => {
-    const patientTmpl = createPatient();
+    const patientTmpl = createPatient({
+      lastName: "診療",
+      firstName: "大地",
+      lastNameYomi: "しんりょう",
+      firstNameYomi: "だいち",
+      sex: "M",
+      birthday: "1960-06-12",
+    });
     const result = createOnshiResult(m.patient(patientTmpl), m.shahokokuho(createShahokokuho()));
+    console.log(result);
     cy.intercept(
       "GET",
       apiBase() + "/search-patient?text=*",
       [10, []]);
-      cy.mount(FaceConfirmedWindow, {
-        props: {
-          destroy: () => { },
-          result
-        }
-      });
-      cy.get("[data-cy=message]").contains("該当患者なし");
-      cy.get("button").contains("新規患者登録").click();
+    cy.mount(FaceConfirmedWindow, {
+      props: {
+        destroy: () => { },
+        result
+      }
     });
+    cy.get("[data-cy=message]").contains("該当患者なし");
+    cy.get("button").contains("新規患者登録").click();
+    cy.intercept("POST", apiBase() + "/enter-patient").as("enterPatient");
+    dialogOpen("新規患者登録").within(() => {
+      cy.get("input[data-cy=phone-input]").type("03-1234-5678");
+      cy.get("button").contains("入力").click();
+    });
+    dialogClose("新規患者登録");
+    cy.wait("@enterPatient").then(resp => {
+      const entered = Patient.cast(resp.response?.body);
+      patientTmpl.patientId = entered.patientId;
+      expect(entered).deep.equal(patientTmpl);
+    });
+  });
 
   it("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");

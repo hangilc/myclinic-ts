@@ -1,3 +1,4 @@
+import { replaceAll } from "@/lib/util";
 import { sexFromLabel } from "onshi-result/codes";
 import { describe, it, expect } from "vitest"
 import { createOnshiResult, onshiCreationModifier as m } from "./onshi-mock";
@@ -21,12 +22,3 @@ describe("onshi-mock", () => {
 
 });
 
-function replaceAll(s: string, src: string, dst: string): string {
-  return s.split("").map(c => {
-    if( c === src ){
-      return dst;
-    } else {
-      return c;
-    }
-  }).join("");
-}

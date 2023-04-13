@@ -12,6 +12,7 @@ import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-resu
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
 import type { ResultItemInterface } from "onshi-result/ResultItem";
 import { convertZenkakuHiraganaToHankakuKatakana } from "@/lib/zenkaku";
+import { replaceAll } from "@/lib/util";
 
 export interface MessageHeaderCreationSpec {
   ProcessExecutionTime?: string | Date;
@@ -179,7 +180,7 @@ export function createResultOfQualificationConfirmationInterface(spec: ResultOfQ
     PersonalFamilyClassification: spec.PersonalFamilyClassification,
     InsuredName: spec.InsuredName,
     NameOfOther: spec.NameOfOther,
-    NameKana: spec.NameKana ?? "ｼﾝﾘｮｳ ﾀﾛｳ",
+    NameKana: spec.NameKana ? convertZenkakuHiraganaToHankakuKatakana(spec.NameKana) : "ｼﾝﾘｮｳ ﾀﾛｳ",
     NameOfOtherKana: spec.NameOfOtherKana,
     Sex2: spec.Sex2,
     Address: spec.Address,
@@ -254,7 +255,7 @@ function ensureSingleResult(body: MessageBodyCreationSpec): ResultOfQualificatio
 export const onshiCreationModifier = {
   patient: (p: Patient) => onshiCreationModifier.result(r => Object.assign(r, {
     Name: `${p.lastName}　${p.firstName}`,
-    NameKana: convertZenkakuHiraganaToHankakuKatakana(`${p.lastNameYomi} ${p.firstNameYomi}`),
+    NameKana: `${p.lastNameYomi} ${p.firstNameYomi}`,
     Birthdate: p.birthday,
     Sex1: p.sex === "M" ? sexFromLabel("男") : sexFromLabel("女"),
   })),
@@ -296,7 +297,6 @@ export function createOnshiResultWithHeader(headerModifier: OnshiHeaderModifier,
   headerSpec = headerModifier(headerSpec) ?? headerSpec;
   bodyModifiers.forEach(m => { bodySpec = m(bodySpec) ?? bodySpec; });
 
-  console.log("bodySpec", bodySpec);
   const header = createMessageHeaderInterface(headerSpec);
   const body = createMessageBodyInterface(bodySpec);
   return OnshiResult.create(header, body);

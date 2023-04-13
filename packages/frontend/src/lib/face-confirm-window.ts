@@ -4,6 +4,7 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
 import api from "./api";
 import { birthdayRep } from "./util";
+import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 
 export class OnshiPatient {
   lastName: string;
@@ -44,8 +45,8 @@ export class OnshiPatient {
       0,
       this.lastName,
       this.firstName,
-      this.lastNameYomi,
-      this.firstNameYomi,
+      convertHankakuKatakanaToZenkakuHiragana(this.lastNameYomi),
+      convertHankakuKatakanaToZenkakuHiragana(this.firstNameYomi),
       this.sex,
       this.birthday,
       this.address,
