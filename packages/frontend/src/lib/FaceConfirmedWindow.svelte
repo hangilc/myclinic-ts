@@ -27,7 +27,7 @@
   } from "myclinic-model";
   import api from "./api";
   import {
-  create_hoken_from_onshi_kakunin,
+    create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
@@ -107,6 +107,21 @@
     }
   }
 
+  async function advanceWithHoken(
+    patient: Patient,
+    hoken: Shahokokuho | Koukikourei,
+    shahoOpt: Shahokokuho | undefined,
+    koukiOpt: Koukikourei | undefined,
+    kouhiList: Kouhi[],
+    r: ResultItem
+  ) {
+    if( !shahoOpt && !koukiOpt ){
+      resolvedState = new AllResolved(patient, hoken, kouhiList);
+    } else {
+      throw new Error("Not implemented yet");
+    }
+  }
+
   function doRegisterPatient(r: ResultItem) {
     const onshiPatient = new OnshiPatient(r);
     const patientTmpl = onshiPatient.toPatient();
@@ -161,16 +176,24 @@
     if (typeof hoken === "string") {
       alert(hoken);
     } else if (hoken instanceof Shahokokuho) {
-      const d: RegisterOnshiShahokokuhoDialog = new RegisterOnshiShahokokuhoDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          shahokokuho: hoken,
-          onEnter: (entered: Shahokokuho) => {
-
-          }
-        }
-      })
+      const d: RegisterOnshiShahokokuhoDialog =
+        new RegisterOnshiShahokokuhoDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            shahokokuho: hoken,
+            onEnter: (entered: Shahokokuho) => {
+              advanceWithHoken(
+                newHoken.patient,
+                entered,
+                newHoken.shahokokuhoOpt,
+                newHoken.koukikoureiOpt,
+                newHoken.kouhiList,
+                newHoken.resultItem
+              );
+            },
+          },
+        });
     } else {
       // const rep = koukikoureiRep(hoken.futanWari);
       // alertMessage += `${rep}を登録します。`;
@@ -182,6 +205,16 @@
   }
 
   async function doRegisterVisit(resolved: AllResolved) {}
+
+  function hokenRep(hoken: Shahokokuho | Koukikourei): string {
+    let hokenshaBangou: string | number;
+    if( hoken instanceof Shahokokuho ){
+      hokenshaBangou = hoken.hokenshaBangou;
+    } else {
+      hokenshaBangou = hoken.hokenshaBangou;
+    }
+    return hokenshaBangouRep(hokenshaBangou);
+  }
 </script>
 
 <Floating title="顔認証完了" {destroy} {style}>
@@ -213,7 +246,9 @@
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}
       <div>
-        <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span> {resolved.patient.fullName()}
+        <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span
+        >
+        {resolved.patient.fullName()}
       </div>
       <div>新規保険</div>
       {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
@@ -224,6 +259,16 @@
           )}は有効期限を設定して無効化されます。）
         </div>
       {/if}
+    {:else if resolvedState instanceof AllResolved}
+    {@const resolved = resolvedState}
+        <div>
+          <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span
+            >
+            {resolved.patient.fullName()}
+        </div>
+        <div>
+          {hokenRep(resolved.hoken)}
+        </div>
     {/if}
   </div>
   <div class="commands">
@@ -235,7 +280,7 @@
         >新規患者登録</button
       >
     {:else if resolvedState instanceof MultiplePatients}
-        {@const resolved = resolvedState}
+      {@const resolved = resolvedState}
       <button on:click={() => doMultiplePatients(resolved)}>患者選択</button>
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}

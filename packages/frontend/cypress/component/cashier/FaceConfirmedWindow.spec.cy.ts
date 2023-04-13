@@ -127,7 +127,8 @@ describe("FaceConfirmedWindow", () => {
       cy.wait("@enterShahokokuho").then(resp => {
         const entered = Shahokokuho.cast(resp.response?.body);
         expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
-      })
+      });
+      cy.get("button").contains("診察登録").should("exist");
       // confirmYesContainingMessage("登録します");
       // cy.get("[data-cy=message]").should("not.exist");
       // cy.stub(props, "onRegister").as("onRegister");
