@@ -32,6 +32,7 @@
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
+  import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -64,6 +65,7 @@
       if (patients.length === 0) {
         resolvedState = new NoPatient(resultItem);
       } else if (patients.length === 1) {
+        advanceWithPatient(patients[0], resultItem);
       } else {
         resolvedState = new MultiplePatients(patients, resultItem);
       }
@@ -159,21 +161,23 @@
     if (typeof hoken === "string") {
       alert(hoken);
     } else if (hoken instanceof Shahokokuho) {
-      
-      const rep = shahokokuhoName(hoken.hokenshaBangou);
-      alertMessage += `${rep}を登録します。`;
-      console.log(hoken);
-      confirm(alertMessage, async () => {
-        await api.newShahokokuho(hoken);
-        resolvePatient();
-      });
+      const d: RegisterOnshiShahokokuhoDialog = new RegisterOnshiShahokokuhoDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          shahokokuho: hoken,
+          onEnter: (entered: Shahokokuho) => {
+
+          }
+        }
+      })
     } else {
-      const rep = koukikoureiRep(hoken.futanWari);
-      alertMessage += `${rep}を登録します。`;
-      confirm(alertMessage, async () => {
-        await api.newKoukikourei(hoken);
-        resolvePatient();
-      });
+      // const rep = koukikoureiRep(hoken.futanWari);
+      // alertMessage += `${rep}を登録します。`;
+      // confirm(alertMessage, async () => {
+      //   await api.newKoukikourei(hoken);
+      //   resolvePatient();
+      // });
     }
   }
 

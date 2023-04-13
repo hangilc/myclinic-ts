@@ -105,8 +105,8 @@ describe("FaceConfirmedWindow", () => {
   it.only("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
-      const shahokokuho = createShahokokuho({ patientId: patient.patientId });
-      const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuho));
+      const shahokokuhoTmpl = createShahokokuho({ patientId: patient.patientId });
+      const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuhoTmpl));
       expect(result.messageBody.resultList.length).equal(1);
       cy.intercept(
         "GET",
@@ -118,25 +118,33 @@ describe("FaceConfirmedWindow", () => {
         onRegister: () => { }
       };
       cy.mount(FaceConfirmedWindow, { props });
-      cy.get("[data-cy=message]").contains("新しい保険証");
+      cy.get("[data-cy=message]").contains("新規保険");
+      cy.intercept("POST", apiBase() + "/enter-shahokokuho").as("enterShahokokuho");
       cy.get("button").contains("新規保険証登録").click();
-      confirmYesContainingMessage("登録します");
-      cy.get("[data-cy=message]").should("not.exist");
-      cy.stub(props, "onRegister").as("onRegister");
-      cy.get("button").contains("診察登録").click();
-      cy.get("@onRegister").should("be.called");
-      getMostRecentVisit(patient.patientId).as("visit");
-      cy.get<Visit>("@visit").then((visit: Visit) => {
-        const shahokokuhoId = visit.shahokokuhoId;
-        expect(shahokokuhoId).to.be.gt(0);
-        getShahokokuho(shahokokuhoId).as("shahokokuho");
+      dialogOpen("新規社保国保登録").within(() => {
+        cy.get("button").contains("入力").click();
       });
-      cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
-        console.log("result", result);
-        expect(isConsistent(shahokokuho, result)).to.be.true;
-      });
+      cy.wait("@enterShahokokuho").then(resp => {
+        const entered = Shahokokuho.cast(resp.response?.body);
+        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
+      })
+      // confirmYesContainingMessage("登録します");
+      // cy.get("[data-cy=message]").should("not.exist");
+      // cy.stub(props, "onRegister").as("onRegister");
+      // cy.get("button").contains("診察登録").click();
+      // cy.get("@onRegister").should("be.called");
+      // getMostRecentVisit(patient.patientId).as("visit");
+      // cy.get<Visit>("@visit").then((visit: Visit) => {
+      //   const shahokokuhoId = visit.shahokokuhoId;
+      //   expect(shahokokuhoId).to.be.gt(0);
+      //   getShahokokuho(shahokokuhoId).as("shahokokuho");
+      // });
+      // cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
+      //   console.log("result", result);
+      //   expect(isConsistent(shahokokuho, result)).to.be.true;
+      // });
     });
-  });
+  }); //
 
   it("should enter kourei jukyuu", () => {
 
