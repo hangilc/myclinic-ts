@@ -30,6 +30,7 @@
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./hoken-onshi-consistent";
+  import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -134,6 +135,21 @@
       .join("、");
   }
 
+  async function doMultiplePatients(resolved: MultiplePatients) {
+    const d: ChoosePatientDialog = new ChoosePatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patients: resolved.patients,
+        onSelect: (selected: Patient | undefined) => {
+          if (selected !== undefined) {
+            advanceWithPatient(selected, resolved.result);
+          }
+        },
+      },
+    });
+  }
+
   async function doRegisterNewHoken(newHoken: NewHoken) {}
 
   async function doRegisterVisit(resolved: AllResolved) {}
@@ -167,6 +183,9 @@
       複数の該当患者
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}
+      <div>
+        <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span> {resolved.patient.fullName()}
+      </div>
       <div>新規保険</div>
       {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
         <div>
@@ -187,7 +206,8 @@
         >新規患者登録</button
       >
     {:else if resolvedState instanceof MultiplePatients}
-      <button>患者選択</button>
+        {@const resolved = resolvedState}
+      <button on:click={() => doMultiplePatients(resolved)}>患者選択</button>
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}
       <button on:click={() => doRegisterNewHoken(resolved)}

@@ -60,10 +60,10 @@
     </div>
     {#each dataList as data (data.patient.patientId)}
       <div class="data-list">
-        <div class="data">
+        <div class="data" data-patient-id={data.patient.patientId}>
           <div class="disp">
             <span>患者番号</span>
-            <span>{data.patient.patientId}</span>
+            <span data-cy="patient-id">{data.patient.patientId}</span>
             <span>受診回数</span>
             <span>{data.visitCount}</span>
             {#if data.lastVisit !== undefined}

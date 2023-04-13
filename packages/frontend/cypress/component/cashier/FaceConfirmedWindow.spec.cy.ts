@@ -30,7 +30,7 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it.only("should enter new patient", () => {
+  it("should enter new patient", () => {
     const patientTmpl = createPatient({
       lastName: "診療",
       firstName: "大地",
@@ -64,9 +64,44 @@ describe("FaceConfirmedWindow", () => {
       patientTmpl.patientId = entered.patientId;
       patientTmpl.phone = entered.phone;
       expect(entered).deep.equal(patientTmpl);
+      cy.wrap(entered.patientId).as("enteredPatientId");
     });
-    cy.get("[data-cy=message]").contains("新規保険");
+    cy.get<number>("@enteredPatientId").then(enteredPatientId => {
+      cy.get("[data-cy=resolved-patient-id]").contains(enteredPatientId.toString());
+    });
   });
+
+  it.only("should select from multiple patients", () => {
+    const patientTmpl = createPatient();
+    enterPatient(patientTmpl).as("patient1");
+    enterPatient(patientTmpl).as("patient2");
+    const result = createOnshiResult(m.patient(patientTmpl), m.shahokokuho(createShahokokuho()));
+    cy.get<Patient>("@patient1").then(patient1 => {
+      cy.get<Patient>("@patient2").then(patient2 => {
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient1, patient2]]);
+        cy.mount(FaceConfirmedWindow, {
+          props: {
+            destroy: () => { },
+            result
+          }
+        });
+        cy.get("[data-cy=message]").contains("複数の該当患者");
+        cy.get("button").contains("患者選択").click();
+        dialogOpen("資格確認患者選択").within(() => {
+          cy.get(`[data-patient-id=${patient2.patientId}]`);
+          cy.get(`[data-patient-id=${patient1.patientId}]`).within(() => {
+            cy.get("button").contains("選択").click();
+          });
+        });
+        dialogClose("資格確認患者選択");
+        cy.get("[data-cy=resolved-patient-id]").contains(patient1.patientId.toString());
+
+      })
+    });
+  }); //
 
   it("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");
