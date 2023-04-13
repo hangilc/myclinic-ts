@@ -62,8 +62,10 @@ describe("FaceConfirmedWindow", () => {
     cy.wait("@enterPatient").then(resp => {
       const entered = Patient.cast(resp.response?.body);
       patientTmpl.patientId = entered.patientId;
+      patientTmpl.phone = entered.phone;
       expect(entered).deep.equal(patientTmpl);
     });
+    cy.get("[data-cy=message]").contains("新規保険");
   });
 
   it("should enter new shahokokuho when none available", () => {
