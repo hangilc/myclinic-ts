@@ -1,4 +1,5 @@
 import * as kanjidate from "kanjidate";
+import { Kouhi, Koukikourei, Roujin, Shahokokuho } from "myclinic-model";
 
 export function padNumber(n: number, finalSize: number){
   let s = n.toString();
@@ -66,4 +67,17 @@ export function replaceAll(s: string, src: string, dst: string): string {
   }).join("");
 }
 
+export function validFromOf(hoken: Shahokokuho | Koukikourei | Roujin | Kouhi): string {
+  if( hoken instanceof Shahokokuho ){
+    return hoken.validFrom;
+  } else if( hoken instanceof Koukikourei ){
+    return hoken.validFrom;
+  } else if( hoken instanceof Roujin ){
+    return hoken.validFrom;
+  } else if( hoken instanceof Kouhi ){
+    return hoken.validFrom;
+  } else {
+    throw new Error("Cannot happen");
+  }
+}
 

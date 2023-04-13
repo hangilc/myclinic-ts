@@ -1062,6 +1062,18 @@ export default {
     return post("enter-kouhi", kouhi, {}, m.Kouhi.cast);
   },
 
+  getShahokokuho(shahokokuhoId: number): Promise<m.Shahokokuho> {
+    return get("get-shahokokuho", { "shahokoku-id": shahokokuhoId.toString() }, m.Shahokokuho.cast);
+  },
+
+  getKoukikourei(koukikoureiId: number): Promise<m.Koukikourei> {
+    return get("get-koukikourei", { "shahokoku-id": koukikoureiId.toString() }, m.Koukikourei.cast);
+  },
+
+  getKouhi(kouhiId: number): Promise<m.Kouhi> {
+    return get("get-kouhi", { "shahokoku-id": kouhiId.toString() }, m.Kouhi.cast);
+  },
+
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
     return post("update-shahokokuho", shahokokuho, {}, castNumber);
   },
@@ -1313,6 +1325,27 @@ export default {
 
   newKoukikourei(koukikourei: m.Koukikourei): Promise<m.Koukikourei> {
     return post("new-koukikourei", koukikourei, {}, m.Koukikourei.cast)
+  },
+
+  shahokokuhoUsageSince(shahokokuhoId: number, since: Date | string): Promise<m.Visit[]> {
+    return get("shahokokuho-usage-since", {
+      "shahokokuho-id": shahokokuhoId.toString(),
+      date: dateParam(since),
+    }, castList(m.Visit.cast));
+  },
+
+  koukikoureiUsageSince(koukikoureiId: number, since: Date | string): Promise<m.Visit[]> {
+    return get("koukikourei-usage-since", {
+      "koukikourei-id": koukikoureiId.toString(),
+      date: dateParam(since),
+    }, castList(m.Visit.cast));
+  },
+
+  kouhiUsageSince(kouhiId: number, since: Date | string): Promise<m.Visit[]> {
+    return get("kouhi-usage-since", {
+      "kouhi-id": kouhiId.toString(),
+      date: dateParam(since),
+    }, castList(m.Visit.cast));
   },
 
 };

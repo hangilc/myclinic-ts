@@ -9,6 +9,8 @@
     NoPatient,
     NoResultItem,
     OnshiPatient,
+    fixKoukikoureiValidUpto,
+    fixShahokokuhoValidUpto,
     invalidateKoukikourei,
     invalidateShahokokuho,
     searchPatient,
@@ -33,6 +35,7 @@
   } from "./hoken-onshi-consistent";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
+  import { validFromOf } from "./util";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -113,13 +116,25 @@
     shahoOpt: Shahokokuho | undefined,
     koukiOpt: Koukikourei | undefined,
     kouhiList: Kouhi[],
-    r: ResultItem
   ) {
-    if( !shahoOpt && !koukiOpt ){
-      resolvedState = new AllResolved(patient, hoken, kouhiList);
-    } else {
-      throw new Error("Not implemented yet");
+    const validFrom = validFromOf(hoken);
+    let errMsg: string = "";
+    if( shahoOpt ){
+      const err = await fixShahokokuhoValidUpto(shahoOpt, validFrom);
+      if( err ){
+        errMsg += "現在有効な社保国保が、" + err;
+      }
     }
+    if( koukiOpt ){
+      const err = await fixKoukikoureiValidUpto(koukiOpt, validFrom);
+      if( err ){
+        errMsg += "現在有効な後期高齢保険が、" + err;
+      }
+    }
+    if( errMsg ){
+      alert(errMsg);
+    }
+    resolvedState = new AllResolved(patient, hoken, kouhiList);
   }
 
   function doRegisterPatient(r: ResultItem) {
@@ -189,7 +204,6 @@
                 newHoken.shahokokuhoOpt,
                 newHoken.koukikoureiOpt,
                 newHoken.kouhiList,
-                newHoken.resultItem
               );
             },
           },
