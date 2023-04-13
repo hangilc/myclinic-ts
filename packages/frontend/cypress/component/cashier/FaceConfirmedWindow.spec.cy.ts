@@ -138,6 +138,10 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
+  it("should enter kourei jukyuu", () => {
+
+  });
+
   it("should enter new koukikourei when none available", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
