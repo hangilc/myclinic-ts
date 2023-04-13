@@ -213,26 +213,34 @@ type OnshiHeaderModifier = (header: MessageHeaderCreationSpec) => MessageHeaderC
 type OnshiBodyModifier = (body: MessageBodyCreationSpec) => MessageBodyCreationSpec | void;
 type OnshiResultModifier = (result: ResultOfQualificationConfirmationCreationSpec) => ResultOfQualificationConfirmationCreationSpec | void;
 
-function convertShahokokuhoKourei(koureiStore: number): 10 | 20 | 30 | undefined {
+function convertShahokokuhoKourei(koureiStore: number, aux?: KoureiAux): ElderlyRecipientCertificateInfoCreationSpec | undefined {
   if (koureiStore === 0) {
     return undefined;
-  } else if (koureiStore === 1) {
-    return 10;
-  } else if (koureiStore === 2) {
-    return 20;
-  } else if (koureiStore === 3) {
-    return 30;
   } else {
-    throw new Error("Cannot convert koureiStore: " + koureiStore);
+    let ratio: 10 | 20 | 30 | undefined = undefined;
+    if (koureiStore === 1) {
+      ratio = 10;
+    } else if (koureiStore === 2) {
+      ratio = 20;
+    } else if (koureiStore === 3) {
+      ratio = 30;
+    } else {
+      throw new Error("Cannot convert koureiStore: " + koureiStore);
+    } return {
+      ElderlyRecipientCertificateDate: aux?.ElderlyRecipientCertificateDate,
+      ElderlyRecipientValidStartDate: aux?.ElderlyRecipientValidStartDate,
+      ElderlyRecipientValidEndDate: aux?.ElderlyRecipientValidEndDate,
+      ElderlyRecipientContributionRatio: ratio,
+    };
   }
 }
 
 function convertKoukikoureiFutanwari(futanWari: number): 10 | 20 | 30 {
-  if( futanWari === 1 ){
+  if (futanWari === 1) {
     return 10;
-  } else if( futanWari === 2 ){
+  } else if (futanWari === 2) {
     return 20;
-  } else if( futanWari === 3 ){
+  } else if (futanWari === 3) {
     return 30;
   } else {
     throw new Error("Cannot convert futanWari: " + futanWari);
@@ -252,6 +260,12 @@ function ensureSingleResult(body: MessageBodyCreationSpec): ResultOfQualificatio
   return r;
 }
 
+export interface KoureiAux {
+  ElderlyRecipientCertificateDate?: string;
+  ElderlyRecipientValidStartDate?: string;
+  ElderlyRecipientValidEndDate?: string;
+}
+
 export const onshiCreationModifier = {
   patient: (p: Patient) => onshiCreationModifier.result(r => Object.assign(r, {
     Name: `${p.lastName}　${p.firstName}`,
@@ -261,14 +275,14 @@ export const onshiCreationModifier = {
   })),
   result: (m: OnshiResultModifier) => (body: MessageBodyCreationSpec) => {
     let r: ResultOfQualificationConfirmationCreationSpec = ensureSingleResult(body);
-    if( body.ResultList && body.ResultList.length === 1 ){
+    if (body.ResultList && body.ResultList.length === 1) {
       body.ResultList[0] = m(r) ?? r;
     } else {
       throw new Error("Cannot happen (modifier: result");
     }
     return body;
   },
-  shahokokuho: (shahokokuho: Shahokokuho) => onshiCreationModifier.result(r => Object.assign(r, {
+  shahokokuho: (shahokokuho: Shahokokuho, aux?: KoureiAux) => onshiCreationModifier.result(r => Object.assign(r, {
     InsurerNumber: shahokokuho.hokenshaBangou.toString(),
     InsuredCardSymbol: shahokokuho.hihokenshaKigou,
     InsuredIdentificationNumber: shahokokuho.hihokenshaBangou,
@@ -279,7 +293,7 @@ export const onshiCreationModifier = {
     InsuredCertificateIssuanceDate: shahokokuho.validFrom,
     InsuredCardValidDate: shahokokuho.validFrom,
     InsuredCardExpirationDate: shahokokuho.validUpto,
-    ElderlyRecipientCertificateInfo: convertShahokokuhoKourei(shahokokuho.koureiStore),
+    ElderlyRecipientCertificateInfo: convertShahokokuhoKourei(shahokokuho.koureiStore, aux),
   })),
   koukikourei: (koukikourei: Koukikourei) => onshiCreationModifier.result(r => Object.assign(r, {
     InsurerNumber: koukikourei.hokenshaBangou,

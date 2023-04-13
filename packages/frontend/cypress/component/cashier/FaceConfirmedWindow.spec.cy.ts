@@ -102,7 +102,7 @@ describe("FaceConfirmedWindow", () => {
     });
   }); //
 
-  it.only("should enter new shahokokuho when none available", () => {
+  it("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       const shahokokuhoTmpl = createShahokokuho({ patientId: patient.patientId });
@@ -129,26 +129,37 @@ describe("FaceConfirmedWindow", () => {
         expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
       });
       cy.get("button").contains("診察登録").should("exist");
-      // confirmYesContainingMessage("登録します");
-      // cy.get("[data-cy=message]").should("not.exist");
-      // cy.stub(props, "onRegister").as("onRegister");
-      // cy.get("button").contains("診察登録").click();
-      // cy.get("@onRegister").should("be.called");
-      // getMostRecentVisit(patient.patientId).as("visit");
-      // cy.get<Visit>("@visit").then((visit: Visit) => {
-      //   const shahokokuhoId = visit.shahokokuhoId;
-      //   expect(shahokokuhoId).to.be.gt(0);
-      //   getShahokokuho(shahokokuhoId).as("shahokokuho");
-      // });
-      // cy.get<Shahokokuho>("@shahokokuho").then((shahokokuho) => {
-      //   console.log("result", result);
-      //   expect(isConsistent(shahokokuho, result)).to.be.true;
-      // });
     });
   }); //
 
-  it("should enter kourei jukyuu", () => {
-
+  it.only("should enter kourei jukyuu", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient) => {
+      const shahokokuhoTmpl = createShahokokuho({ patientId: patient.patientId, koureiStore: 2 });
+      const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuhoTmpl));
+      expect(result.messageBody.resultList.length).equal(1);
+      cy.intercept(
+        "GET",
+        apiBase() + "/search-patient?text=*",
+        [10, [patient]]);
+      const props = {
+        destroy: () => { },
+        result,
+        onRegister: () => { }
+      };
+      cy.mount(FaceConfirmedWindow, { props });
+      cy.get("[data-cy=message]").contains("新規保険");
+      cy.intercept("POST", apiBase() + "/enter-shahokokuho").as("enterShahokokuho");
+      cy.get("button").contains("新規保険証登録").click();
+      dialogOpen("新規社保国保登録").within(() => {
+        cy.get("button").contains("入力").click();
+      });
+      cy.wait("@enterShahokokuho").then(resp => {
+        const entered = Shahokokuho.cast(resp.response?.body);
+        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
+      });
+      cy.get("button").contains("診察登録").should("exist");
+    });
   });
 
   it("should enter new koukikourei when none available", () => {
