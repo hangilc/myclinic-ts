@@ -1,8 +1,9 @@
-import { dateToSqlDateTime, Visit, VisitEx } from "myclinic-model";
+import { dateTimeParam } from "@/lib/date-param";
+import { Visit, VisitEx } from "myclinic-model";
 import { apiBase } from "./base";
 
-export function startVisit(patientId: number, atDateTime: Date): Cypress.Chainable<Visit> {
-  const at = dateToSqlDateTime(atDateTime);
+export function startVisit(patientId: number, atDateTime: Date | string): Cypress.Chainable<Visit> {
+  const at = dateTimeParam(atDateTime);
   return cy.request(apiBase() + `/start-visit?patient-id=${patientId}&at=${at}`)
     .its("body")
     .then(body => Visit.cast(body))

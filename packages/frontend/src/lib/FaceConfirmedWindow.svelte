@@ -92,23 +92,20 @@
       patient.patientId,
       at
     );
-    if (shahoOpt && !koukiOpt) {
+    if (shahoOpt) {
       const err = shahokokuhoOnshiConsistent(shahoOpt, r);
-      if (err) {
-        const validUpto = yesterdayAsSqlDate();
-        await invalidateShahokokuho(shahoOpt, validUpto);
+      if (!err) {
+        resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
+        return;
       }
-      resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
-    } else if (koukiOpt && !shahoOpt) {
+    } else if (koukiOpt) {
       const err = koukikoureiOnshiConsistent(koukiOpt, r);
-      if (err) {
-        const validUpto = yesterdayAsSqlDate();
-        await invalidateKoukikourei(koukiOpt, validUpto);
+      if (!err) {
+        resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
+        return;
       }
-      resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
-    } else {
-      resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
     }
+    resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
   }
 
   async function advanceWithHoken(
@@ -116,23 +113,23 @@
     hoken: Shahokokuho | Koukikourei,
     shahoOpt: Shahokokuho | undefined,
     koukiOpt: Koukikourei | undefined,
-    kouhiList: Kouhi[],
+    kouhiList: Kouhi[]
   ) {
     const validFrom = validFromOf(hoken);
     let errMsg: string = "";
-    if( shahoOpt ){
+    if (shahoOpt) {
       const err = await fixShahokokuhoValidUpto(shahoOpt, validFrom);
-      if( err ){
+      if (err) {
         errMsg += "現在有効な社保国保が、" + err;
       }
     }
-    if( koukiOpt ){
+    if (koukiOpt) {
       const err = await fixKoukikoureiValidUpto(koukiOpt, validFrom);
-      if( err ){
+      if (err) {
         errMsg += "現在有効な後期高齢保険が、" + err;
       }
     }
-    if( errMsg ){
+    if (errMsg) {
       alert(errMsg);
     }
     resolvedState = new AllResolved(patient, hoken, kouhiList);
@@ -204,7 +201,7 @@
                 entered,
                 newHoken.shahokokuhoOpt,
                 newHoken.koukikoureiOpt,
-                newHoken.kouhiList,
+                newHoken.kouhiList
               );
             },
           },
@@ -222,7 +219,7 @@
                 entered,
                 newHoken.shahokokuhoOpt,
                 newHoken.koukikoureiOpt,
-                newHoken.kouhiList,
+                newHoken.kouhiList
               );
             },
           },
@@ -234,7 +231,7 @@
 
   function hokenRep(hoken: Shahokokuho | Koukikourei): string {
     let hokenshaBangou: string | number;
-    if( hoken instanceof Shahokokuho ){
+    if (hoken instanceof Shahokokuho) {
       hokenshaBangou = hoken.hokenshaBangou;
     } else {
       hokenshaBangou = hoken.hokenshaBangou;
@@ -282,22 +279,22 @@
           （現在有効な{currentRep(
             resolved.shahokokuhoOpt,
             resolved.koukikoureiOpt
-          )}は有効期限を設定して無効化されます。）
+          )}は、可能であれば有効期限終了を設定します。）
         </div>
       {/if}
     {:else if resolvedState instanceof AllResolved}
-    {@const resolved = resolvedState}
-        <div>
-          <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span
-            >
-            {resolved.patient.fullName()}
-        </div>
-        <div>
-          {hokenRep(resolved.hoken)}
-          {#if resolved.hoken instanceof Shahokokuho && resolved.hoken.koureiStore > 0}
+      {@const resolved = resolvedState}
+      <div>
+        <span data-cy="resolved-patient-id">({resolved.patient.patientId})</span
+        >
+        {resolved.patient.fullName()}
+      </div>
+      <div>
+        {hokenRep(resolved.hoken)}
+        {#if resolved.hoken instanceof Shahokokuho && resolved.hoken.koureiStore > 0}
           ・高齢{resolved.hoken.koureiStore}割
-          {/if}
-        </div>
+        {/if}
+      </div>
     {/if}
   </div>
   <div class="commands">

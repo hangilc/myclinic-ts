@@ -10,7 +10,7 @@ import { enterShahokokuho, getShahokokuho } from "@cypress/lib/shahokokuho";
 import { confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
 import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
-import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
+import { listRecentVisitIdsByPatient, startVisit } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
@@ -236,7 +236,7 @@ describe("FaceConfirmedWindow", () => {
     })
   })
 
-  it.only("should fix valid upto of current koukikourei in regular case", () => {
+  it("should fix valid upto of current koukikourei in regular case", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient: Patient) => {
       enterKoukikourei(createKoukikourei({
@@ -277,7 +277,48 @@ describe("FaceConfirmedWindow", () => {
         })
       });
     })
-  })
+  });
+
+  it.only("should handle current shahokokuho in conflict case", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then(patient => {
+      enterShahokokuho(createShahokokuho({
+        patientId: patient.patientId,
+        hokenshaBangou: 6123456,
+        hihokenshaBangou: "1234",
+        validFrom: "2022-03-01",
+        validUpto: "0000-00-00",
+      })).as("curShahokokuho");
+    });
+    cy.get<Shahokokuho>("@curShahokokuho").then(curShahokokuho => {
+      startVisit(curShahokokuho.patientId, "2023-04-01 09:20:00");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      const newShahokokuho = createShahokokuho({
+        patientId: patient.patientId,
+        hokenshaBangou: 6123456,
+        hihokenshaBangou: "2211",
+        validFrom: "2023-02-01",
+        validUpto: "0000-00-00",
+      });
+      const result = createOnshiResult(m.patient(patient), m.shahokokuho(newShahokokuho));
+      cy.intercept(
+        "GET",
+        apiBase() + "/search-patient?text=*",
+        [10, [patient]]);
+      const props = {
+        destroy: () => { },
+        result,
+        onRegister: () => { }
+      };
+      cy.mount(FaceConfirmedWindow, { props });
+      cy.get("[data-cy=message]").contains("可能であれば有効期限終了を設定します。");
+      cy.get("button").contains("新規保険証登録").click();
+      dialogOpen("新規社保国保登録").within(() => cy.get("button").contains("入力").click());
+      dialogClose("新規社保国保登録");
+      
+  });
+  });
 
   it("should register patient with valid shahokokuho", () => {
     enterPatient(createPatient()).as("patient");
