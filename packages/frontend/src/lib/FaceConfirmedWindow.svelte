@@ -35,6 +35,7 @@
   } from "./hoken-onshi-consistent";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
+  import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
   import { validFromOf } from "./util";
 
   export let destroy: () => void;
@@ -209,12 +210,23 @@
           },
         });
     } else {
-      // const rep = koukikoureiRep(hoken.futanWari);
-      // alertMessage += `${rep}を登録します。`;
-      // confirm(alertMessage, async () => {
-      //   await api.newKoukikourei(hoken);
-      //   resolvePatient();
-      // });
+      const d: RegisterOnshiKoukikoureiDialog =
+        new RegisterOnshiKoukikoureiDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            koukikourei: hoken,
+            onEnter: (entered: Koukikourei) => {
+              advanceWithHoken(
+                newHoken.patient,
+                entered,
+                newHoken.shahokokuhoOpt,
+                newHoken.koukikoureiOpt,
+                newHoken.kouhiList,
+              );
+            },
+          },
+        });
     }
   }
 

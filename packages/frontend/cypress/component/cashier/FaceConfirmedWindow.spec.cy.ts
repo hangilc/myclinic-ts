@@ -126,13 +126,13 @@ describe("FaceConfirmedWindow", () => {
       });
       cy.wait("@enterShahokokuho").then(resp => {
         const entered = Shahokokuho.cast(resp.response?.body);
-        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
+        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId }));
       });
       cy.get("button").contains("診察登録").should("exist");
     });
   }); //
 
-  it.only("should enter kourei jukyuu", () => {
+  it("should enter kourei jukyuu", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
       const shahokokuhoTmpl = createShahokokuho({ patientId: patient.patientId, koureiStore: 2 });
@@ -156,7 +156,7 @@ describe("FaceConfirmedWindow", () => {
       });
       cy.wait("@enterShahokokuho").then(resp => {
         const entered = Shahokokuho.cast(resp.response?.body);
-        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId}));
+        expect(entered).deep.equal(Object.assign({}, shahokokuhoTmpl, { shahokokuhoId: entered.shahokokuhoId }));
       });
       cy.get("button").contains("診察登録").should("exist");
     });
@@ -165,8 +165,8 @@ describe("FaceConfirmedWindow", () => {
   it("should enter new koukikourei when none available", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient) => {
-      const koukikourei = createKoukikourei({ patientId: patient.patientId });
-      const result = createOnshiResult(m.patient(patient), m.koukikourei(koukikourei));
+      const koukikoureiTmpl = createKoukikourei({ patientId: patient.patientId });
+      const result = createOnshiResult(m.patient(patient), m.koukikourei(koukikoureiTmpl));
       expect(result.messageBody.resultList.length).equal(1);
       cy.intercept(
         "GET",
@@ -178,24 +178,106 @@ describe("FaceConfirmedWindow", () => {
         onRegister: () => { }
       };
       cy.mount(FaceConfirmedWindow, { props });
-      cy.get("[data-cy=message]").contains("新しい保険証");
+      cy.intercept("POST", apiBase() + "/enter-koukikourei").as("enterKoukikourei");
+      cy.get("[data-cy=message]").contains("新規保険");
       cy.get("button").contains("新規保険証登録").click();
-      confirmYesContainingMessage("登録します");
-      cy.get("[data-cy=message]").should("not.exist");
-      cy.stub(props, "onRegister").as("onRegister");
-      cy.get("button").contains("診察登録").click();
-      cy.get("@onRegister").should("be.called");
-      getMostRecentVisit(patient.patientId).as("visit");
-      cy.get<Visit>("@visit").then((visit: Visit) => {
-        const koukikoureiId = visit.koukikoureiId;
-        expect(koukikoureiId).to.be.gt(0);
-        getKoukikourei(koukikoureiId).as("koukikourei");
+      dialogOpen("新規後期高齢保険登録").within(() => {
+        cy.get("button").contains("入力").click();
       });
-      cy.get<Koukikourei>("@koukikourei").then((koukikourei) => {
-        expect(isConsistent(koukikourei, result)).to.be.true;
+      dialogClose("新規後期高齢保険登録");
+      cy.wait("@enterKoukikourei").then(resp => {
+        const entered = Koukikourei.cast(resp.response?.body);
+        expect(entered).deep.equal(Object.assign({}, koukikoureiTmpl, { koukikoureiId: entered.koukikoureiId }));
       });
+      cy.get("button").contains("診察登録").should("exist");
     });
   });
+
+  it("should fix valid upto of current shahokokuho in regular case", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      enterShahokokuho(createShahokokuho({
+        patientId: patient.patientId,
+        hokenshaBangou: 32123434,
+        validFrom: "2022-06-01",
+        validUpto: "0000-00-00",
+      })).as("curHoken");
+      cy.get<Shahokokuho>("@curHoken").then((curHoken: Shahokokuho) => {
+        const newHokenTmpl = createShahokokuho({
+          patientId: patient.patientId,
+          hokenshaBangou: 32132424,
+          validFrom: "2023-04-14",
+          validUpto: "0000-00-00",
+        });
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(newHokenTmpl));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        cy.intercept("GET", apiBase() + "/find-available-shahokokuho?*").as("findShahokokuho");
+        cy.intercept("POST", apiBase() + "/update-shahokokuho").as("updateShahokokuho");
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.wait("@findShahokokuho").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal(curHoken);
+        });
+        cy.wait("@updateShahokokuho").then(resp => {
+          const body = JSON.parse(resp.request.body);
+          expect(body).deep.equal(Object.assign({}, curHoken, {
+            validUpto: "2023-04-13",
+          }))
+        })
+      });
+    })
+  })
+
+  it.only("should fix valid upto of current koukikourei in regular case", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      enterKoukikourei(createKoukikourei({
+        patientId: patient.patientId,
+        hokenshaBangou: "39123434",
+        validFrom: "2022-10-01",
+        validUpto: "2100-09-30",
+      })).as("curHoken");
+      cy.get<Shahokokuho>("@curHoken").then((curHoken: Shahokokuho) => {
+        const newHokenTmpl = createKoukikourei({
+          patientId: patient.patientId,
+          hokenshaBangou: "39132424",
+          validFrom: "2023-04-14",
+          validUpto: "0000-00-00",
+        });
+        const result = createOnshiResult(m.patient(patient), m.koukikourei(newHokenTmpl));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        cy.intercept("GET", apiBase() + "/find-available-koukikourei?*").as("findKoukikourei");
+        cy.intercept("POST", apiBase() + "/update-koukikourei").as("updateKoukikourei");
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.wait("@findKoukikourei").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal(curHoken);
+        });
+        cy.wait("@updateKoukikourei").then(resp => {
+          const body = JSON.parse(resp.request.body);
+          expect(body).deep.equal(Object.assign({}, curHoken, {
+            validUpto: "2023-04-13",
+          }))
+        })
+      });
+    })
+  })
 
   it("should register patient with valid shahokokuho", () => {
     enterPatient(createPatient()).as("patient");
