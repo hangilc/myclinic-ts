@@ -185,7 +185,6 @@
     const patient: Patient = newHoken.patient;
     const result: ResultItem = newHoken.resultItem;
     const hoken = create_hoken_from_onshi_kakunin(patient.patientId, result);
-    console.log("hoken", hoken);
     if (typeof hoken === "string") {
       alert(hoken);
     } else if (hoken instanceof Shahokokuho) {

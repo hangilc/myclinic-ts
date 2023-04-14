@@ -231,7 +231,8 @@ describe("FaceConfirmedWindow", () => {
           expect(body).deep.equal(Object.assign({}, curHoken, {
             validUpto: "2023-04-13",
           }))
-        })
+        });
+        cy.get("button").contains("診察登録").should("exist");
       });
     })
   })
@@ -274,7 +275,8 @@ describe("FaceConfirmedWindow", () => {
           expect(body).deep.equal(Object.assign({}, curHoken, {
             validUpto: "2023-04-13",
           }))
-        })
+        });
+        cy.get("button").contains("診察登録").should("exist");
       });
     })
   });
@@ -291,7 +293,9 @@ describe("FaceConfirmedWindow", () => {
       })).as("curShahokokuho");
     });
     cy.get<Shahokokuho>("@curShahokokuho").then(curShahokokuho => {
-      startVisit(curShahokokuho.patientId, "2023-04-01 09:20:00");
+      startVisit(curShahokokuho.patientId, "2023-04-01 09:20:00").then(visit => {
+        expect(visit.shahokokuhoId).to.be.equal(curShahokokuho.shahokokuhoId);
+      }).as("visit")
     });
     cy.get<Patient>("@patient").then(patient => {
       const newShahokokuho = createShahokokuho({
@@ -314,10 +318,23 @@ describe("FaceConfirmedWindow", () => {
       cy.mount(FaceConfirmedWindow, { props });
       cy.get("[data-cy=message]").contains("可能であれば有効期限終了を設定します。");
       cy.get("button").contains("新規保険証登録").click();
+      cy.intercept("GET", apiBase() + "/shahokokuho-usage-since*").as("usageSince");
+      cy.on("window:alert", (t) => {
+        expect(t).contains("失効している保険証");
+        expect(t).contains("管理者に連絡してください");
+      });
+      cy.intercept("POST", apiBase() + "/update-shahokokuho", cy.spy().as("updateShahokokuho"));
       dialogOpen("新規社保国保登録").within(() => cy.get("button").contains("入力").click());
       dialogClose("新規社保国保登録");
-      
-  });
+      cy.get<Visit>("@visit").then(visit => {
+        cy.wait("@usageSince").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal([visit]);
+        });
+      });
+      cy.get("@updateShahokokuho").should("not.be.called");
+      cy.get("button").contains("診察登録").should("exist");
+    });
   });
 
   it("should register patient with valid shahokokuho", () => {
