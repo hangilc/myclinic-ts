@@ -96,11 +96,12 @@ export async function fixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherSta
   const shahokokuhoId = shahokokuho.shahokokuhoId;
   const visits = await api.shahokokuhoUsageSince(shahokokuhoId, otherStartDate);
   if (visits.length > 0) {
-    return visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
-      "に使用されているので、期限終了日を調整できません。";
+    return "失効している保険証の使用が" +
+      visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
+      "に確認されました。その旨を管理者に連絡してください。";
   } else {
     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-    if( shahokokuho.validUpto === "0000-00-00" || shahokokuho.validUpto > at){
+    if (shahokokuho.validUpto === "0000-00-00" || shahokokuho.validUpto > at) {
       await invalidateShahokokuho(shahokokuho, at);
     }
     return undefined;
@@ -109,14 +110,15 @@ export async function fixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherSta
 
 export async function fixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
   : Promise<string | undefined> {
-    const koukikoureiId = koukikourei.koukikoureiId;
-    const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
+  const koukikoureiId = koukikourei.koukikoureiId;
+  const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
   if (visits.length > 0) {
-    return visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
-      "に使用されているので、期限終了日を調整できません。";
+    return "失効している保険証の使用が" +
+      visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
+      "に確認されました。その旨を管理者に連絡してください。";
   } else {
     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-    if( koukikourei.validUpto === "0000-00-00" || koukikourei.validUpto > at){
+    if (koukikourei.validUpto === "0000-00-00" || koukikourei.validUpto > at) {
       await invalidateKoukikourei(koukikourei, at);
     }
     return undefined;
