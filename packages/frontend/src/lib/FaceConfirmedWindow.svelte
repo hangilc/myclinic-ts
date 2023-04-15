@@ -18,7 +18,7 @@
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
   import type { ResultItem } from "onshi-result/ResultItem";
-  import { hokenshaBangouRep } from "./hoken-rep";
+  import { hokenshaBangouRep, kouhiRep } from "./hoken-rep";
   import RegisterOnshiPatientDialog from "./RegisterOnshiPatientDialog.svelte";
   import {
     dateToSqlDate,
@@ -235,10 +235,14 @@
         title: "公費登録",
         destroy: () => d.$destroy(),
         init: null,
-        onEntered: (entered: Kouhi) => {
-
-        }
-      }
+        onEntered: async (entered: Kouhi) => {
+          const kouhiList = await api.listAvailableKouhi(
+            resolved.patient.patientId,
+            new Date()
+          );
+          resolvedState = resolved.copy((c) => (c.kouhiList = kouhiList));
+        },
+      },
     });
   }
 
@@ -310,6 +314,9 @@
           ・高齢{resolved.hoken.koureiStore}割
         {/if}
       </div>
+      {#each resolved.kouhiList as kouhi (kouhi.kouhiId)}
+        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha)}</div>
+      {/each}
     {/if}
   </div>
   <div class="commands">
@@ -330,7 +337,8 @@
       >
     {:else if resolvedState instanceof AllResolved}
       {@const resolved = resolvedState}
-      <a href="javascript:;" on:click={() => doEnterKouhi(resolved)}>公費入力</a>
+      <a href="javascript:;" on:click={() => doEnterKouhi(resolved)}>公費入力</a
+      >
       <button on:click={() => doRegisterVisit(resolved)}>診察登録</button>
     {/if}
   </div>

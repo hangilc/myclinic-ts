@@ -419,35 +419,43 @@ describe("FaceConfirmedWindow", () => {
         };
         cy.mount(FaceConfirmedWindow, { props });
         cy.get("a").contains("公費入力").click();
-        dialogOpen("公費入力").within(() => {
+        cy.intercept("POST", apiBase() + "/enter-kouhi").as("enterKouhi");
+        dialogOpen("公費登録").within(() => {
           const drv = new KouhiDialogDriver();
           drv.setFutansha("13123456");
           drv.setJukyuusha("12345678");
           drv.setValidFrom("2023-04-01");
           drv.setValidUpto("2024-03-31");
+          drv.enter();
         });
+        dialogClose("公費登録");
+        cy.wait("@enterKouhi").then(resp => {
+          const body = resp.response?.body;
+          const kouhiId = body.kouhiId;
+          cy.get(`[data-kouhi-id=${kouhiId}]`).should("exist");
+        })
       })
     })
   }); //
 
 });
 
-function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {
-  return listRecentVisitIdsByPatient(patientId, 1).then(visitIds => {
-    expect(visitIds.length).equal(1);
-    const visitId = visitIds[0];
-    return cy.request(
-      apiBase() + `/get-visit?visit-id=${visitId}`
-    ).its("body").then((body) => Visit.cast(body));
-  });
-}
+// function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {
+//   return listRecentVisitIdsByPatient(patientId, 1).then(visitIds => {
+//     expect(visitIds.length).equal(1);
+//     const visitId = visitIds[0];
+//     return cy.request(
+//       apiBase() + `/get-visit?visit-id=${visitId}`
+//     ).its("body").then((body) => Visit.cast(body));
+//   });
+// }
 
-function isConsistent(hoken: Shahokokuho | Koukikourei, result: OnshiResult): boolean {
-  const r: ResultItem = result.messageBody.resultList[0];
-  if (hoken instanceof Shahokokuho) {
-    return shahokokuhoOnshiConsistent(hoken, r) === undefined;
-  } else {
-    return koukikoureiOnshiConsistent(hoken, r) === undefined;
-  }
-}
+// function isConsistent(hoken: Shahokokuho | Koukikourei, result: OnshiResult): boolean {
+//   const r: ResultItem = result.messageBody.resultList[0];
+//   if (hoken instanceof Shahokokuho) {
+//     return shahokokuhoOnshiConsistent(hoken, r) === undefined;
+//   } else {
+//     return koukikoureiOnshiConsistent(hoken, r) === undefined;
+//   }
+// }
 

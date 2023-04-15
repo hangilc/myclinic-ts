@@ -18,6 +18,10 @@ export class KouhiDialogDriver {
   }
 
   setValidUpto(validUpto: string | Date | null) {
-    cy.get("[data-cy=valid-upto-input").within(() => fillDateForm(validUpto));
+    cy.get("[data-cy=valid-upto-input]").within(() => fillDateForm(validUpto));
+  }
+
+  enter() {
+    cy.get("button").contains("入力").click();
   }
 }

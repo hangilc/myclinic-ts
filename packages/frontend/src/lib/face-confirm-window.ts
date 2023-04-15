@@ -161,6 +161,12 @@ export class AllResolved {
     public hoken: Shahokokuho | Koukikourei,
     public kouhiList: Kouhi[],
   ) { }
+
+  copy(modify: (c: AllResolved) => void): AllResolved {
+    const c = new AllResolved(this.patient, this.hoken, this.kouhiList);
+    modify(c);
+    return c;
+  }
 }
 
 export class NewHoken {
