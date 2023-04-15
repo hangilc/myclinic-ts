@@ -1,8 +1,13 @@
 export function castStringProp(obj: any, name: string): boolean {
   if( typeof obj === "object" ){
     let value = obj[name];
-    return typeof value === "string";
+    const ok = typeof value === "string";
+    if( !ok ){
+      console.error("castStrngProp failed with name: " + name);
+    }
+    return ok;
   } else {
+    console.error("castStringOpt failed with no object arg: " + obj);
     return false;
   }
 }
@@ -10,7 +15,11 @@ export function castStringProp(obj: any, name: string): boolean {
 export function castOptStringProp(obj: any, name: string): boolean {
   if( typeof obj === "object" ){
     let value = obj[name];
-    return typeof value === "string" || value === undefined;
+    const ok = typeof value === "string" || value === undefined;
+    if( !ok ){
+      console.error("castOptStringProp failed with name: " + name);
+    }
+    return ok;
   } else {
     throw new Error(`Object expected (${name}): ` + obj);
   }

@@ -1,4 +1,5 @@
 import { replaceAll } from "@/lib/util";
+import { convertZenkakuHiraganaToHankakuKatakana } from "@/lib/zenkaku";
 import { sexFromLabel } from "onshi-result/codes";
 import { describe, it, expect } from "vitest"
 import { createOnshiResult, onshiCreationModifier as m } from "./onshi-mock";
@@ -14,7 +15,8 @@ describe("onshi-mock", () => {
     const patientTmpl = createPatient();
     const result = createOnshiResult(m.patient(patientTmpl));
     expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Name).toBe(`${patientTmpl.lastName}　${patientTmpl.firstName}`);
-    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.NameKana).toBe(`${patientTmpl.lastNameYomi} ${patientTmpl.firstNameYomi}`);
+    expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.NameKana).toBe(
+      convertZenkakuHiraganaToHankakuKatakana(`${patientTmpl.lastNameYomi} ${patientTmpl.firstNameYomi}`));
     expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Birthdate)
       .toBe(replaceAll(patientTmpl.birthday, "-", ""));
     expect(result.messageBody.resultList[0].orig.ResultOfQualificationConfirmation.Sex1).toBe(sexFromLabel("男"));

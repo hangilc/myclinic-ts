@@ -23,11 +23,18 @@ export async function onshiFace(faceFile: string, timeout: number = 10): Promise
 };
 
 export function parseFaceXml(xml: string): OnshiResult {
-  const parser = new XMLParser();
+  const parser = new XMLParser({
+    numberParseOptions: {
+      leadingZeros: true,
+      hex: false,
+      skipLike: /\d+/,
+    }
+  });
   const json = parser.parse(xml);
   if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {
     json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
   }
+  console.log("json", json);
   return OnshiResult.cast(json);
 }
 

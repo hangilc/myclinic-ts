@@ -102,6 +102,7 @@ export class MessageHeader {
       }
       return ok;
     } else {
+      console.error("isMessageHeaderInterface called with non-object arg: " + arg);
       return false;
     }
   }

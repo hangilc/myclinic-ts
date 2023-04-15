@@ -5,16 +5,14 @@ import { createShahokokuho } from "@cypress/lib/shahokokuho-mock";
 import type { OnshiResult } from "onshi-result";
 import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
 import { apiBase } from "@cypress/lib/base";
-import { dateToSqlDate, Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
-import { enterShahokokuho, getShahokokuho } from "@cypress/lib/shahokokuho";
-import { confirmYes, confirmYesContainingMessage } from "@cypress/lib/confirm";
-import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/hoken-onshi-consistent";
-import { createKoukikourei, enterKoukikourei, getKoukikourei } from "@cypress/lib/koukikourei";
-import { listRecentVisitIdsByPatient, startVisit } from "@cypress/lib/visit";
+import { dateToSqlDate, Kouhi, Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
+import { enterShahokokuho } from "@cypress/lib/shahokokuho";
+import { createKoukikourei, enterKoukikourei } from "@cypress/lib/koukikourei";
+import { getVisit, startVisit } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
-import type { ResultItem } from "onshi-result/ResultItem";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { KouhiDialogDriver } from "@cypress/lib/kouhi-dialog";
+import { createKouhi, enterKouhi } from "@cypress/lib/kouhi";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -400,7 +398,7 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it.only("should enter kouhi", () => {
+  it("should enter kouhi", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
       enterShahokokuho(createShahokokuho({ patientId: patient.patientId })).as("shahokokuho");
@@ -438,24 +436,88 @@ describe("FaceConfirmedWindow", () => {
     })
   }); //
 
+  it("should start visit", () => {
+    const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then(patient => {
+      enterShahokokuho(createShahokokuho({ 
+        patientId: patient.patientId,
+        validFrom: prevDate,
+        validUpto: "0000-00-00",
+      })).as("shahokokuho");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      cy.get<Shahokokuho>("@shahokokuho").then(shahokokuho => {
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuho));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: (entered: Visit) => {
+            cy.wrap({}).then(() => {
+
+              getVisit(entered.visitId).then(visit => {
+                expect(visit.patientId).to.be.equal(patient.patientId);
+                expect(visit.shahokokuhoId).to.be.equal(shahokokuho.shahokokuhoId);
+              });
+            })
+          }
+        };
+        cy.stub(props, "onRegister").as("onRegister");
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.get("button").contains("診察登録").click();
+        cy.get("@onRegister").should("be.called");
+      })
+    })
+  }); //
+
+  it("should start visit with kouhi", () => {
+    const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then(patient => {
+      enterShahokokuho(createShahokokuho({ 
+        patientId: patient.patientId,
+        validFrom: prevDate,
+        validUpto: "0000-00-00",
+      })).as("shahokokuho");
+      enterKouhi(createKouhi({ 
+        patientId: patient.patientId,
+        validFrom: prevDate,
+        validUpto: "0000-00-00",
+      })).as("kouhi");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      cy.get<Shahokokuho>("@shahokokuho").then(shahokokuho => {
+        cy.get<Kouhi>("@kouhi").then(kouhi => {
+          const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuho));
+          cy.intercept(
+            "GET",
+            apiBase() + "/search-patient?text=*",
+            [10, [patient]]);
+          const props = {
+            destroy: () => { },
+            result,
+            onRegister: (entered: Visit) => {
+              cy.wrap({}).then(() => {
+                getVisit(entered.visitId).then(visit => {
+                  expect(visit.patientId).to.be.equal(patient.patientId);
+                  expect(visit.shahokokuhoId).to.be.equal(shahokokuho.shahokokuhoId);
+                  expect(visit.kouhi1Id).to.be.equal(kouhi.kouhiId);
+                });
+              })
+            }
+          };
+          cy.stub(props, "onRegister").as("onRegister");
+          cy.mount(FaceConfirmedWindow, { props });
+          cy.get("button").contains("診察登録").click();
+          cy.get("@onRegister").should("be.called");
+        })
+      })
+    })
+  }); //
+
 });
-
-// function getMostRecentVisit(patientId: number): Cypress.Chainable<Visit> {
-//   return listRecentVisitIdsByPatient(patientId, 1).then(visitIds => {
-//     expect(visitIds.length).equal(1);
-//     const visitId = visitIds[0];
-//     return cy.request(
-//       apiBase() + `/get-visit?visit-id=${visitId}`
-//     ).its("body").then((body) => Visit.cast(body));
-//   });
-// }
-
-// function isConsistent(hoken: Shahokokuho | Koukikourei, result: OnshiResult): boolean {
-//   const r: ResultItem = result.messageBody.resultList[0];
-//   if (hoken instanceof Shahokokuho) {
-//     return shahokokuhoOnshiConsistent(hoken, r) === undefined;
-//   } else {
-//     return koukikoureiOnshiConsistent(hoken, r) === undefined;
-//   }
-// }
 

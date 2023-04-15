@@ -1,5 +1,4 @@
 import { dateToSqlDate, Patient, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
-import type { OnshiResult } from "onshi-result";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
 import api from "./api";

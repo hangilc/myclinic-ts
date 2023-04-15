@@ -11,10 +11,7 @@
     OnshiPatient,
     fixKoukikoureiValidUpto,
     fixShahokokuhoValidUpto,
-    invalidateKoukikourei,
-    invalidateShahokokuho,
     searchPatient,
-    yesterdayAsSqlDate,
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
   import type { ResultItem } from "onshi-result/ResultItem";
@@ -26,6 +23,8 @@
     Shahokokuho,
     type Patient,
     Koukikourei,
+    HokenIdSet,
+    Visit,
   } from "myclinic-model";
   import api from "./api";
   import {
@@ -41,7 +40,7 @@
 
   export let destroy: () => void;
   export let result: OnshiResult;
-  export let onRegister: () => void = () => {};
+  export let onRegister: (visit: Visit) => void = () => {};
 
   let resultItem: ResultItem | undefined =
     result.resultList.length === 1 ? result.resultList[0] : undefined;
@@ -235,7 +234,7 @@
         title: "公費登録",
         destroy: () => d.$destroy(),
         init: null,
-        onEntered: async (entered: Kouhi) => {
+        onEntered: async (_entered: Kouhi) => {
           const kouhiList = await api.listAvailableKouhi(
             resolved.patient.patientId,
             new Date()
@@ -246,7 +245,18 @@
     });
   }
 
-  async function doRegisterVisit(resolved: AllResolved) {}
+  async function doRegisterVisit(resolved: AllResolved) {
+    const at = new Date();
+    const shahokokuhoId = resolved.hoken instanceof Shahokokuho ? resolved.hoken.shahokokuhoId : 0;
+    const koukikoureiId = resolved.hoken instanceof Koukikourei ? resolved.hoken.koukikoureiId : 0;
+    const kouhi1Id = resolved.kouhiList.length > 0 ? resolved.kouhiList[0].kouhiId : 0;
+    const kouhi2Id = resolved.kouhiList.length > 1 ? resolved.kouhiList[1].kouhiId : 0;
+    const kouhi3Id = resolved.kouhiList.length > 2 ? resolved.kouhiList[2].kouhiId : 0;
+    const hoken = new HokenIdSet(shahokokuhoId, koukikoureiId, 0, kouhi1Id, kouhi2Id, kouhi3Id);
+    const visit = await api.startVisitWithHoken(resolved.patient.patientId, at, hoken);
+    doClose();
+    onRegister(visit);
+  }
 
   function hokenRep(hoken: Shahokokuho | Koukikourei): string {
     let hokenshaBangou: string | number;
@@ -377,5 +387,6 @@
   .commands a {
     text-decoration: none;
     margin-right: 4px;
+    font-size: 0.8rem;
   }
 </style>

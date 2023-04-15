@@ -21,3 +21,9 @@ export function listRecentVisitIdsByPatient(patientId: number, count: number):
     apiBase() + `/list-visit-id-by-patient-reverse?patient-id=${patientId}&offset=0&count=${count}`
   ).its("body");
 }
+
+export function getVisit(visitId: number): Cypress.Chainable<Visit> {
+  return cy.request(apiBase() + `/get-visit?visit-id=${visitId}`)
+    .its("body")
+    .then(body => Visit.cast(body));
+}

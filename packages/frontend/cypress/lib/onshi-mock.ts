@@ -12,7 +12,6 @@ import type { LimitApplicationCertificateRelatedInfoInterface } from "onshi-resu
 import type { SpecificDiseasesCertificateInfoInterface } from "onshi-result/SpecificDiseasesCertificateInfo";
 import type { ResultItemInterface } from "onshi-result/ResultItem";
 import { convertZenkakuHiraganaToHankakuKatakana } from "@/lib/zenkaku";
-import { replaceAll } from "@/lib/util";
 
 export interface MessageHeaderCreationSpec {
   ProcessExecutionTime?: string | Date;
