@@ -25,6 +25,7 @@
     Koukikourei,
     HokenIdSet,
     Visit,
+    Onshi,
   } from "myclinic-model";
   import api from "./api";
   import {
@@ -254,6 +255,8 @@
     const kouhi3Id = resolved.kouhiList.length > 2 ? resolved.kouhiList[2].kouhiId : 0;
     const hoken = new HokenIdSet(shahokokuhoId, koukikoureiId, 0, kouhi1Id, kouhi2Id, kouhi3Id);
     const visit = await api.startVisitWithHoken(resolved.patient.patientId, at, hoken);
+    const onshi = new Onshi(visit.visitId, JSON.stringify(result.toJSON()));
+    await api.setOnshi(onshi);
     doClose();
     onRegister(visit);
   }
