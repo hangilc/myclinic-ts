@@ -14,6 +14,7 @@ import { listRecentVisitIdsByPatient, startVisit } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
+import { KouhiDialogDriver } from "@cypress/lib/kouhi-dialog";
 
 describe("FaceConfirmedWindow", () => {
   it("should mount", () => {
@@ -399,6 +400,35 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
+  it.only("should enter kouhi", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then(patient => {
+      enterShahokokuho(createShahokokuho({ patientId: patient.patientId })).as("shahokokuho");
+    });
+    cy.get<Patient>("@patient").then(patient => {
+      cy.get<Shahokokuho>("@shahokokuho").then(shahokokuho => {
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuho));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.get("a").contains("公費入力").click();
+        dialogOpen("公費入力").within(() => {
+          const drv = new KouhiDialogDriver();
+          drv.setFutansha("13123456");
+          drv.setJukyuusha("12345678");
+          drv.setValidFrom("2023-04-01");
+          drv.setValidUpto("2024-03-31");
+        });
+      })
+    })
+  }); //
 
 });
 

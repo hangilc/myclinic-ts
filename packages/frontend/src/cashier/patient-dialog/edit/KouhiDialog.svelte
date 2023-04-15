@@ -10,6 +10,7 @@
   export let patient: Patient;
   export let onEntered: (entered: Kouhi) => void = _ => {};
   export let onUpdated: (entered: Kouhi) => void = _ => {};
+  export let styleWidth = "360px";
 
   async function doEnter(kouhi: Kouhi): Promise<string[]> {
     try {
@@ -32,7 +33,7 @@
   }
 </script>
 
-<Dialog {destroy} {title}>
+<Dialog {destroy} {title} styleWidth={styleWidth}>
   <KouhiDialogContent
     {init}
     {patient}
