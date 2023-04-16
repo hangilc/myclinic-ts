@@ -34,7 +34,6 @@ export function parseFaceXml(xml: string): OnshiResult {
   if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {
     json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
   }
-  console.log("json", json);
   return OnshiResult.cast(json);
 }
 

@@ -491,7 +491,7 @@ describe("FaceConfirmedWindow", () => {
     });
     cy.get<Patient>("@patient").then(patient => {
       cy.get<Shahokokuho>("@shahokokuho").then(shahokokuho => {
-        cy.get<Kouhi>("@kouhi").then(kouhi => {
+        cy.get<Kouhi>("@kouhi").then(_kouhi => {
           const result = createOnshiResult(m.patient(patient), m.shahokokuho(shahokokuho));
           cy.intercept(
             "GET",
@@ -500,7 +500,7 @@ describe("FaceConfirmedWindow", () => {
           const props = {
             destroy: () => { },
             result,
-            onRegister: (entered: Visit) => {}
+            onRegister: (_entered: Visit) => {}
           };
           cy.spy(props, "onRegister").as("onRegister");
           cy.mount(FaceConfirmedWindow, { props });
