@@ -108,14 +108,59 @@ export function roujinRep(futanWari: number): string {
 }
 
 export function kouhiRep(futanshaBangou: number): string {
-  if ((idiv(futanshaBangou, 1000000)) == 41){ return  "マル福"; }
-  else if (idiv(futanshaBangou, 1000) == 80136) { return "マル障（１割負担）"; }
-  else if (idiv(futanshaBangou, 1000) == 80137) { return "マル障（負担なし）"; }
-  else if (idiv(futanshaBangou, 1000) == 81136) { return "マル親（１割負担）"; }
-  else if (idiv(futanshaBangou, 1000) == 81137) { return "マル親（負担なし）"; }
-  else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
-  else { return `公費負担（${futanshaBangou}）`; }
+  const s = futanshaBangou.toString();
+  if( s.length === 8 ){
+    if( s === "52138013" ){
+      return "難病";
+    } else if( s === "52137015" ){
+      return "小児慢性";
+    } else if( s === "38136016") {
+      return "肝炎";
+    } else if( s === "38136024" ){
+      return "肝疾患";
+    } else if( s === "51136018" ){
+      return "難病";
+    } else if( s === "51137016" ){
+      return "特殊医療";
+    } else if( s === "82138009" ){
+      return "透析";
+    } else if( s === "82134008" ){
+      return "被爆者又は小児精神病";
+    } else if( s === "82137001" ){
+      return "大気汚染";
+    } else if( s === "82137555" ){
+      return "大気汚染";
+    } else if( s === "87136008" ){
+      return "妊娠高血圧";
+    }
+    switch(s.substring(0, 2)){
+      case "54": return "難病";
+      case "83": return "難病";
+      case "80": return "心身障害";
+      case "81": return "ひとり親";
+      case "89": return "高校生";
+    }
+    switch(s.substring(0, 5)){
+      case "88132": 
+      case "88138": return "乳幼児";
+      case "88134":
+      case "88135":
+      case "88137":
+        return "義務教育";
+    }
+  }
+  return `公費負担（${futanshaBangou}）`;
 }
+
+// export function kouhiRep(futanshaBangou: number): string {
+//   if ((idiv(futanshaBangou, 1000000)) == 41){ return  "マル福"; }
+//   else if (idiv(futanshaBangou, 1000) == 80136) { return "マル障（１割負担）"; }
+//   else if (idiv(futanshaBangou, 1000) == 80137) { return "マル障（負担なし）"; }
+//   else if (idiv(futanshaBangou, 1000) == 81136) { return "マル親（１割負担）"; }
+//   else if (idiv(futanshaBangou, 1000) == 81137) { return "マル親（負担なし）"; }
+//   else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
+//   else { return `公費負担（${futanshaBangou}）`; }
+// }
 
 export function isKoukikourei(hokenshaBangou: number): boolean {
   return Math.floor(hokenshaBangou / 1000000) === 39;
