@@ -8,13 +8,22 @@
   export let onSelected: () => void = () => {};
   export let cursor: string = "default";
   export let dataCy: string = "";
+  export let autoIntoView: boolean = false;
   let element: HTMLElement;
 
-  selected.subscribe(sel => {
-    if( sel && eqData(sel, data) && element ) {
-      element.scrollIntoView(false);
-    }
-  });
+  if (autoIntoView) {
+    selected.subscribe((sel) => {
+      if (sel && eqData(sel, data) && element && element.parentElement) {
+        const c = element.parentElement.getBoundingClientRect();
+        const r = element.getBoundingClientRect();
+        if( r.top < c.top ){
+          element.scrollIntoView(true);
+        } else if( r.bottom > c.bottom ){
+          element.scrollIntoView(false);
+        }
+      }
+    });
+  }
 
   function onClick() {
     selected.set(data);
@@ -22,11 +31,14 @@
   }
 </script>
 
-<div class="select-item" class:selected={$selected === data} 
-    on:click={onClick} style:cursor={cursor}
-    data-cy={dataCy}
-    bind:this={element}
-    >
+<div
+  class="select-item"
+  class:selected={$selected === data}
+  on:click={onClick}
+  style:cursor
+  data-cy={dataCy}
+  bind:this={element}
+>
   <slot />
 </div>
 

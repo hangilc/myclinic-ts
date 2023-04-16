@@ -76,7 +76,7 @@
 </script>
 
 <Dialog {destroy} title="患者検索">
-  <div>
+  <div class="top">
     <form on:submit={doSearch}>
       <input
         type="text"
@@ -88,7 +88,8 @@
     </form>
     <div class="select">
       {#each patients as patient}
-        <SelectItem {selected} data={patient} eqData={(a, b) => a.patientId === b.patientId}>
+        <SelectItem {selected} data={patient} eqData={(a, b) => a.patientId === b.patientId}
+          autoIntoView={true}>
           <span data-cy="patient-item" data-patient-id={patient.patientId}>
             ({pad(patient.patientId, 4, "0")})
             {patient.lastName}
@@ -110,6 +111,10 @@
 </Dialog>
 
 <style>
+  .top button:focus {
+    outline: solid;
+  }
+
   form {
     margin-bottom: 6px;
   }
