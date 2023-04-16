@@ -1348,4 +1348,11 @@ export default {
     }, castList(m.Visit.cast));
   },
 
+  listConductForVisit(visitId: number): Promise<m.Conduct[]> {
+    return get("list-conduct-for-visit", {
+      "visit-id": visitId.toString()
+    },
+    castList(m.Conduct.cast));
+  },
+
 };
