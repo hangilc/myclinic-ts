@@ -4,7 +4,8 @@
   import EnterInjectWidget from "./EnterInjectWidget.svelte";
   import Popup from "@/lib/Popup.svelte";
   import { getCopyTarget } from "../../ExamVars";
-  import { enter } from "../shinryou/helper";
+  import { enter, enterTo } from "../shinryou/helper";
+  import api from "@/lib/api";
 
   export let visit: VisitEx;
   let enterXpWidget: EnterXpWidget;
@@ -21,8 +22,10 @@
   async function doCopyAll() {
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
-      await enter(
-        visit,
+      const target = await api.getVisit(targetVisitId);
+      await enterTo(
+        target.visitId,
+        target.visitedAt.substring(0, 10),
         [],
         visit.conducts.map((c) => {
           return {
