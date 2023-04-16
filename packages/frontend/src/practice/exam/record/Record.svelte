@@ -26,7 +26,6 @@
   async function probeOnshi() {
     const onshi: m.Onshi | undefined = await api.findOnshi(visit.visitId);
     onshiConfirmed = !!onshi;
-    console.log("onshiConfirmed", onshiConfirmed);
   }
 
   function createNewText(): m.Text {
