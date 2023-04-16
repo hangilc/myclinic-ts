@@ -12,7 +12,8 @@
     "test": "vitest run",
     "cy:open": "VITE_BACKEND_PORT=38080 cypress open",
     "cy:run": "VITE_BACKEND_PORT=38080 cypress run",
-    "cy:local-open": "VITE_BACKEND_PORT=8080 cypress open"
+    "cy:local-open": "VITE_BACKEND_PORT=8080 cypress open",
+    "cy:local-run": "VITE_BACKEND_PORT=8080 cypress run"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",

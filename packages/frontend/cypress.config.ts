@@ -9,7 +9,8 @@ export default defineConfig({
     },
     env: {
       "PRINTER-API": "http://localhost:48080",
-    }
+    },
+    video: false,
   },
 
   e2e: {
@@ -20,6 +21,7 @@ export default defineConfig({
     env: {
       "API": "http://localhost:38080/api",
       "PRINTER-API": "http://localhost:48080",
-    }
+    },
+    video: false,
   },
 });
