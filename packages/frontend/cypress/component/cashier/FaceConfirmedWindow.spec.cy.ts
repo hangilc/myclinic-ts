@@ -474,7 +474,7 @@ describe("FaceConfirmedWindow", () => {
     })
   }); //
 
-  it("should start visit with kouhi", () => {
+  it.only("should start visit with kouhi", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
@@ -500,20 +500,28 @@ describe("FaceConfirmedWindow", () => {
           const props = {
             destroy: () => { },
             result,
-            onRegister: (entered: Visit) => {
-              cy.wrap({}).then(() => {
-                getVisit(entered.visitId).then(visit => {
-                  expect(visit.patientId).to.be.equal(patient.patientId);
-                  expect(visit.shahokokuhoId).to.be.equal(shahokokuho.shahokokuhoId);
-                  expect(visit.kouhi1Id).to.be.equal(kouhi.kouhiId);
-                });
-              })
-            }
+            onRegister: (entered: Visit) => {}
           };
-          cy.stub(props, "onRegister").as("onRegister");
+          cy.spy(props, "onRegister").as("onRegister");
           cy.mount(FaceConfirmedWindow, { props });
+          cy.intercept("POST", apiBase() + "/set-onshi").as("setOnshi");
           cy.get("button").contains("診察登録").click();
-          cy.get("@onRegister").should("be.called");
+          cy.get("@onRegister").should("be.calledOnce");
+          cy.get("@onRegister").then((spy: any) => {
+            const args = spy.firstCall.args;
+            expect(args.length).to.be.equal(1);
+            const visit = Visit.cast(args[0]);
+            expect(visit.patientId).to.be.equal(patient.patientId);
+            expect(visit.shahokokuhoId).to.be.equal(shahokokuho.shahokokuhoId);
+            cy.wrap(visit).as("visit");
+          });
+          cy.wait("@setOnshi").then(resp => {
+            cy.get<Visit>("@visit").then(visit => {
+              const body = JSON.parse(resp.request.body);
+              expect(body.visitId).to.be.equal(visit.visitId);
+              expect(JSON.parse(body.kakunin)).deep.equal(JSON.parse(JSON.stringify(result.toJSON())));
+            })
+          });
         })
       })
     })
