@@ -11,6 +11,8 @@
   import KouhiDialog from "./edit/KouhiDialog.svelte";
   import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import StartVisitDialog from "./StartVisitDialog.svelte";
+  import api from "@/lib/api";
+  import ImageViewerDialog from "./ImageViewerDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -148,6 +150,18 @@
     });
   }
 
+  async function doImage() {
+    const files = await api.listPatientImage(p.patientId);
+    const d: ImageViewerDialog = new ImageViewerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patient: p,
+        files,
+      }
+    });
+  }
+
   function exit(): void {
     destroy();
     data.cleanup();
@@ -214,6 +228,10 @@
       on:click={doHokenHistory}
       data-cy="hoken-history-link">保険履歴</a
     >
+    |
+    <a href="javascript:void(0)"
+      on:click={doImage}
+      data-cy="image-view">保存画像</a>
   </div>
 </SurfaceModal>
 
