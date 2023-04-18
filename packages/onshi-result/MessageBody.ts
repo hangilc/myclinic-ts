@@ -120,6 +120,10 @@ export class MessageBody {
       if( !ok ){
         console.error("isMessageBodyInterface failed");
         console.log("arg", arg);
+        console.log("isArray", arg.ResultList, " - ", Array.isArray(arg.ResultList));
+        console.log("every", arg.ResultList.every(
+          ResultItem.isResultItemInterface
+        ));
       }
       return ok;
     } else {

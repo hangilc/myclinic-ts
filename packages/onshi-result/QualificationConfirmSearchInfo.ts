@@ -65,13 +65,17 @@ export class QualificationConfirmSearchInfo {
 
   static isQualificationConfirmSearchInfoInterface(arg: any): arg is QualificationConfirmSearchInfoInterface {
     if (typeof arg === "object") {
-      return castStringProp(arg, "InsurerNumber") &&
+      const ok = castStringProp(arg, "InsurerNumber") &&
         castStringProp(arg, "InsuredIdentificationNumber") &&
         castStringProp(arg, "Birthdate") &&
         castStringProp(arg, "LimitApplicationCertificateRelatedConsFlg") &&
         castOptStringProp(arg, "InsuredCardSymbol") &&
         castOptStringProp(arg, "InsuredBranchNumber") &&
         castOptStringProp(arg, "ArbitraryIdentifier");
+      if( !ok ){
+        console.error("isQualificationConfirmSearchInfoInterface failed", arg);
+      }
+      return ok;
     } else {
       console.error("is not object (isQualificationConfirmSearchInfoInterface)");
       return false;

@@ -1,6 +1,7 @@
 import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
-import type { Meisai } from "myclinic-model";
-import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
+import type { Meisai, Onshi } from "myclinic-model";
+import { OnshiResult } from "onshi-result";
+import type { LimitApplicationCertificateClassificationFlagLabel, LimitApplicationCertificateClassificationLabel } from "onshi-result/codes";
 import api from "./api";
 
 export async function gendogaku(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouhi: () => Promise<number>): Promise<number | undefined> {
@@ -24,14 +25,73 @@ export async function gendogaku(kubun: LimitApplicationCertificateClassification
   }
 }
 
-export async function calcMonthlyTotalTen(patientId: number, year: number, month: number) {
+export async function calcMonthlyIryouhi(patientId: number, year: number, month: number): Promise<number> {
   const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
   const ms: Meisai[] = await Promise.all(visitIds.map(async visitId => await api.getMeisai(visitId)));
   let totalTen: number = 0;
   ms.forEach(m => totalTen += m.totalTen);
-  return totalTen;
+  return totalTen * 0;
 }
 
-// export async function calcGendogaku(patientId: number, year: number, month: number): number {
+function stringValues(obj: any): any {
+  if( typeof obj === "number" ){
+    return obj.toString();
+  } else if( typeof obj === "object" ){
+    if( Array.isArray(obj) ){
+      const a: any[] = [];
+      for(let e of obj){
+        a.push(stringValues(e));
+      }
+      return a;
+    } else {
+      const o: any = {};
+      for(let key in obj){
+        o[key] = stringValues(obj[key]);
+      }
+      return o;
+    }
+  } else {
+    return obj;
+  }
+}
 
-// }
+export async function calcGendogaku(patientId: number, year: number, month: number): Promise<number | undefined> {
+  const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+  visitIds.sort();
+  const results: OnshiResult[] = [];
+  (await Promise.all(visitIds.map(async (visitId) => await api.findOnshi(visitId))))
+    .forEach(o => {
+      if (o !== undefined) {
+        const json = JSON.parse(o.kakunin);
+        console.log("json", json);
+        try {
+          const result = OnshiResult.cast(json);
+          results.push(result);
+        } catch(ex) {
+          console.log("retry");
+          const j = stringValues(json);
+          console.log("j", j);
+          const result = OnshiResult.cast(j);
+          results.push(j);
+        }
+      }
+    });
+  console.log("resutls", results);
+  const limitList: LimitApplicationCertificateClassificationFlagLabel[] = [];
+  results.forEach(o => {
+    const limit = o.messageBody.resultList[0].limitApplicationCertificateRelatedInfo;
+    if (limit) {
+      const label: LimitApplicationCertificateClassificationFlagLabel | undefined =
+        limit.limitApplicationCertificateClassificationFlag;
+      if (label) {
+        limitList.push(label);
+      }
+    }
+  })
+  if( limitList.length === 0 ){
+    return undefined;
+  } else {
+    const kubun: LimitApplicationCertificateClassificationFlagLabel = limitList[limitList.length - 1];
+    return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
+  }
+}

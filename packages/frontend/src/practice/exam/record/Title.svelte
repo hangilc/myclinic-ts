@@ -14,10 +14,11 @@
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
   import type { Meisai, VisitEx } from "myclinic-model";
   import Popup from "@/lib/Popup.svelte";
+  import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
+  import { calcGendogaku } from "@/lib/gendogaku";
 
   export let visit: VisitEx;
 
-  // let manipLink: HTMLElement;
   let taskRunner: TaskRunner | null = null;
   let showMeisai = false;
 
@@ -65,6 +66,18 @@
     return meisai.totalTen.toLocaleString();
   }
 
+  async function doGendogaku() {
+    const year = yearOfSqlDate(visit.visitedAt);
+    const month = monthOfSqlDate(visit.visitedAt);
+    console.log("doGendogaku", year, month);
+    const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
+    if( !gendogaku ){
+      alert("限度額を確定できません。")
+    } else {
+      alert(`限度額： ${gendogaku.toLocaleString()}円`);
+    }
+  }
+
 </script>
 
 <div
@@ -100,6 +113,7 @@
       {#if isMishuu(visit)}
         <a href="javascript:void(0)" on:click={destroyAnd(doMishuuList)}>未収リストへ</a>
       {/if}
+      <a href="javascript:void(0)" on:click={doGendogaku}>限度額</a>
     </div>
   </Popup>
 </div>

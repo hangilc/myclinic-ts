@@ -81,3 +81,21 @@ export function validFromOf(hoken: Shahokokuho | Koukikourei | Roujin | Kouhi): 
   }
 }
 
+export function yearOfSqlDate(s: string): number {
+  const re = /^(\d{4})/;
+  const m = s.match(re);
+  if( !m ){
+    throw new Error("Invalid sqldate: " + s);
+  }
+  return parseInt(m[1]);
+}
+
+export function monthOfSqlDate(s: string): number {
+  const re = /^\d{4}-(\d{2})/;
+  const m = s.match(re);
+  if( !m ){
+    throw new Error("Invalid sqldate: " + s);
+  }
+  return parseInt(m[1]);
+}
+

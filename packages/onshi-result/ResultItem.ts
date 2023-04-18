@@ -164,9 +164,13 @@ export class ResultItem {
 
   static isResultItemInterface(arg: any): arg is ResultItemInterface {
     if (typeof arg === "object") {
-      return ResultOfQualificationConfirmation.isResultOfQualificationConfirmationInterface(
+      const ok =  ResultOfQualificationConfirmation.isResultOfQualificationConfirmationInterface(
         arg.ResultOfQualificationConfirmation
       )
+      if( !ok ){
+        console.error("isResultOfQualificationConfirmationInterface failed", arg);
+      }
+      return ok;
     } else {
       console.error("is not object (isResultItemInterface)");
       return false;
