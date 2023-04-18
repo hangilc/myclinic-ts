@@ -7,11 +7,21 @@ describe("onshi-face", () => {
     const result = parseFaceXml(xml);
     expect(result instanceof OnshiResult).to.be.true;
   });
+
+  it("should parse name yomi", () => {
+    const xml = getXml({ NameKana: "ｽｽﾞｷ ｴﾐｺ"});
+    const result = parseFaceXml(xml);
+    expect(result.messageBody.nameKana).to.be.equal("ｽｽﾞｷ ｴﾐｺ")
+  })
 });
 
 export { };
 
-function getXml(): string {
+interface XmlSpec {
+  NameKana?: string;
+}
+
+function getXml(spec: XmlSpec = {}): string {
   return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <XmlMsg>
     <MessageHeader>
@@ -36,7 +46,7 @@ function getXml(): string {
                 <Name>診療　太郎</Name>
                 <InsurerNumber>  123456</InsurerNumber>
                 <InsuredCardSymbol>12-34</InsuredCardSymbol>
-                <NameKana>ｼﾝﾘｮｳ ﾀﾛｳ</NameKana>
+                <NameKana>${spec.NameKana ?? "ｼﾝﾘｮｳ ﾀﾛｳ"}</NameKana>
                 <InsuredCardValidDate>20191001</InsuredCardValidDate>
                 <LimitApplicationCertificateRelatedConsFlg>0</LimitApplicationCertificateRelatedConsFlg>
                 <InsuredCardClassification>01</InsuredCardClassification>

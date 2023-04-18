@@ -38,6 +38,8 @@
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
   import { validFromOf } from "./util";
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
+  import { convert } from "./validation";
+  import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -64,7 +66,7 @@
       resolvedState = new Initializing();
       const patients = await searchPatient(
         resultItem.name,
-        resultItem.nameKana,
+        resultItem.nameKana ? convertHankakuKatakanaToZenkakuHiragana(resultItem.nameKana) : undefined,
         resultItem.birthdate
       );
       if (patients.length === 0) {

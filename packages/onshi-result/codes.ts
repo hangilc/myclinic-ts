@@ -286,13 +286,14 @@ export function limitApplicationCertificateClassificationFromLabel(label: LimitA
   throw new Error("Cannot happen (LimitApplicationCertificateClassificationFromLabel).");
 }
 
+// OQSCD012
 export const LimitApplicationCertificateClassificationFlag = {
   "A01": "ア", // 年収約1,160万円以上
   "A02": "イ",
   "A03": "ウ",
   "A04": "エ",
   "A05": "オ", // 住民税非課税者
-  "A06": "オ（境）",
+  "A06": "オ（境）", // 境界層該当
   "B01": "現役並みⅢ",
   "B02": "現役並みⅡ",
   "B03": "現役並みⅠ",
@@ -300,7 +301,7 @@ export const LimitApplicationCertificateClassificationFlag = {
   "B05": "低所得Ⅱ",
   "B06": "低所得Ⅰ",
   "B07": "低所得Ⅰ（老福）",
-  "B08": "低所得Ⅰ（境）",
+  "B08": "低所得Ⅰ（境）", // 境界層該当
   "B09": "一般Ⅱ",
   "B10": "一般Ⅰ",
 } as const;

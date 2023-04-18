@@ -1355,4 +1355,12 @@ export default {
     castList(m.Conduct.cast));
   },
 
+  listVisitIdByPatientAndMonth(patientId: number, year: number, month: number): Promise<number[]> {
+    return get("list-visit-id-by-patient-and-month", {
+      "patient-id": patientId.toString(),
+      year: year.toString(),
+      month: month.toString(),
+    }, castList(castNumber));
+  },
+
 };

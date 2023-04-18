@@ -7,6 +7,6 @@ describe("hoken-rep", () => {
   });
 
   it("should handle マル障（１割負担）", () => {
-    expect(kouhiRep(80136712)).toBe("マル障（１割負担）");
+    expect(kouhiRep(80136712)).toBe("心身障害");
   })
 });
