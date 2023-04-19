@@ -30,30 +30,30 @@ export async function calcMonthlyIryouhi(patientId: number, year: number, month:
   const ms: Meisai[] = await Promise.all(visitIds.map(async visitId => await api.getMeisai(visitId)));
   let totalTen: number = 0;
   ms.forEach(m => totalTen += m.totalTen);
-  return totalTen * 0;
+  return totalTen * 10;
 }
 
-function stringValues(obj: any): any {
-  if( typeof obj === "number" ){
-    return obj.toString();
-  } else if( typeof obj === "object" ){
-    if( Array.isArray(obj) ){
-      const a: any[] = [];
-      for(let e of obj){
-        a.push(stringValues(e));
-      }
-      return a;
-    } else {
-      const o: any = {};
-      for(let key in obj){
-        o[key] = stringValues(obj[key]);
-      }
-      return o;
-    }
-  } else {
-    return obj;
-  }
-}
+// function stringValues(obj: any): any {
+//   if( typeof obj === "number" ){
+//     return obj.toString();
+//   } else if( typeof obj === "object" ){
+//     if( Array.isArray(obj) ){
+//       const a: any[] = [];
+//       for(let e of obj){
+//         a.push(stringValues(e));
+//       }
+//       return a;
+//     } else {
+//       const o: any = {};
+//       for(let key in obj){
+//         o[key] = stringValues(obj[key]);
+//       }
+//       return o;
+//     }
+//   } else {
+//     return obj;
+//   }
+// }
 
 export async function calcGendogaku(patientId: number, year: number, month: number): Promise<number | undefined> {
   const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
@@ -63,20 +63,10 @@ export async function calcGendogaku(patientId: number, year: number, month: numb
     .forEach(o => {
       if (o !== undefined) {
         const json = JSON.parse(o.kakunin);
-        console.log("json", json);
-        try {
-          const result = OnshiResult.cast(json);
-          results.push(result);
-        } catch(ex) {
-          console.log("retry");
-          const j = stringValues(json);
-          console.log("j", j);
-          const result = OnshiResult.cast(j);
-          results.push(j);
-        }
+        const result = OnshiResult.cast(json);
+        results.push(result);
       }
     });
-  console.log("resutls", results);
   const limitList: LimitApplicationCertificateClassificationFlagLabel[] = [];
   results.forEach(o => {
     const limit = o.messageBody.resultList[0].limitApplicationCertificateRelatedInfo;
@@ -88,10 +78,12 @@ export async function calcGendogaku(patientId: number, year: number, month: numb
       }
     }
   })
-  if( limitList.length === 0 ){
+  if (limitList.length === 0) {
+    console.log("results", results);
     return undefined;
   } else {
     const kubun: LimitApplicationCertificateClassificationFlagLabel = limitList[limitList.length - 1];
+    // console.log(kubun);
     return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
   }
 }

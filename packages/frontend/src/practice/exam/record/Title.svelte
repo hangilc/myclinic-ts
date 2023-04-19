@@ -69,7 +69,6 @@
   async function doGendogaku() {
     const year = yearOfSqlDate(visit.visitedAt);
     const month = monthOfSqlDate(visit.visitedAt);
-    console.log("doGendogaku", year, month);
     const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
     if( !gendogaku ){
       alert("限度額を確定できません。")
@@ -113,7 +112,7 @@
       {#if isMishuu(visit)}
         <a href="javascript:void(0)" on:click={destroyAnd(doMishuuList)}>未収リストへ</a>
       {/if}
-      <a href="javascript:void(0)" on:click={doGendogaku}>限度額</a>
+      <a href="javascript:void(0)" on:click={destroyAnd(doGendogaku)}>限度額</a>
     </div>
   </Popup>
 </div>
