@@ -3,6 +3,7 @@ import type { ElderlyRecipientCertificateInfo } from "./ElderlyRecipientCertific
 import type { LimitApplicationCertificateRelatedInfo } from "./LimitApplicationCertificateRelatedInfo";
 import { ResultOfQualificationConfirmation, type ResultOfQualificationConfirmationInterface } from "./ResultOfQualificationConfirmation";
 import type { SpecificDiseasesCertificateInfo } from "./SpecificDiseasesCertificateInfo";
+import { quiet } from "./config";
 
 export interface ResultItemInterface {
   ResultOfQualificationConfirmation: ResultOfQualificationConfirmationInterface;
@@ -168,11 +169,15 @@ export class ResultItem {
         arg.ResultOfQualificationConfirmation
       )
       if( !ok ){
-        console.error("isResultOfQualificationConfirmationInterface failed", arg);
+        if( !quiet ){
+          console.error("isResultOfQualificationConfirmationInterface failed", arg);
+        }
       }
       return ok;
     } else {
-      console.error("is not object (isResultItemInterface)");
+      if( !quiet ){
+        console.error("is not object (isResultItemInterface)");
+      }
       return false;
     }
   }

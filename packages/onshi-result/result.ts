@@ -2,7 +2,8 @@ import { MessageHeader, MessageHeaderInterface } from "./MessageHeader";
 import { MessageBody, MessageBodyInterface } from "./MessageBody";
 import { XmlMsg, XmlMsgInterface } from "./XmlMsg";
 import { ResultItem } from "./ResultItem";
-
+import { quiet } from "./config";
+export { setQuiet } from "./config";
 
 export interface OnshiResultInterface {
   XmlMsg: XmlMsgInterface;
@@ -46,7 +47,9 @@ export class OnshiResult {
     if( typeof arg === "object" ){
       return XmlMsg.isXmlMsgInterface(arg.XmlMsg);
     } else {
-      console.error("is not object (isOnshiResultInterface)")
+      if( !quiet ){
+        console.error("is not object (isOnshiResultInterface)")
+      }
       return false;
     }
   }

@@ -26,6 +26,7 @@ import {
 } from "./codes";
 import { toOptInt, onshiDateOptToSqlDateOpt, onshiDateTimeOptToSqlDateTimeOpt, onshiDateToSqlDate } from "./util";
 import { SpecificDiseasesCertificateInfo, type SpecificDiseasesCertificateInfoInterface } from "./SpecificDiseasesCertificateInfo";
+import { quiet } from "./config";
 
 export interface ResultOfQualificationConfirmationInterface {
   InsuredCardClassification: string;
@@ -350,7 +351,9 @@ export class ResultOfQualificationConfirmation {
           arg.SpecificDiseasesCertificateList.every(SpecificDiseasesCertificateInfo.isSpecificDiseasesCertificateInfoInterface)
         ));
     } else {
-      console.error("is not object (isResultOfQualificationConfirmationInterface)");
+      if( !quiet ){
+        console.error("is not object (isResultOfQualificationConfirmationInterface)");
+      }
       return false;
     }
   }

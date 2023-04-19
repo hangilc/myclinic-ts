@@ -1,13 +1,19 @@
+import { quiet } from "./config";
+
 export function castStringProp(obj: any, name: string): boolean {
   if( typeof obj === "object" ){
     let value = obj[name];
     const ok = typeof value === "string";
     if( !ok ){
-      console.error("castStrngProp failed with name: " + name);
+      if( !quiet ){
+        console.error("castStrngProp failed with name: " + name);
+      }
     }
     return ok;
   } else {
-    console.error("castStringOpt failed with no object arg: " + obj);
+    if( !quiet ){
+      console.error("castStringOpt failed with no object arg: " + obj);
+    }
     return false;
   }
 }
@@ -17,7 +23,9 @@ export function castOptStringProp(obj: any, name: string): boolean {
     let value = obj[name];
     const ok = typeof value === "string" || value === undefined;
     if( !ok ){
-      console.error("castOptStringProp failed with name: " + name);
+      if( !quiet ){
+        console.error("castOptStringProp failed with name: " + name);
+      }
     }
     return ok;
   } else {
@@ -41,37 +49,4 @@ export function castOptConvert<T, U>(arg: T | undefined, cvt: (t: T) => U): U | 
   }
 }
 
-// export function castStringProp(obj: any, name: string): string {
-//   if( typeof obj === "object" ){
-//     let value = obj[name];
-//     if( typeof value === "number" ){
-//       value = value.toString();
-//     }
-//     if( typeof value === "string" ){
-//       return value;
-//     } else {
-//       throw new Error("Cannot find string property: " + name);
-//     }
-//   } else {
-//     throw new Error(`Object expected (${name}): ` + obj);
-//   }
-// }
-
-// export function castOptStringProp(obj: any, name: string): string | undefined {
-//   if( typeof obj === "object" ){
-//     let value = obj[name];
-//     if( typeof value === "number" ){
-//       value = value.toString();
-//     }
-//     if( typeof value === "string" ){
-//       return value;
-//     } else if( value == undefined ){
-//       return undefined;
-//     } else {
-//       throw new Error("Cannot find string property: " + name);
-//     }
-//   } else {
-//     throw new Error(`Object expected (${name}): ` + obj);
-//   }
-// }
 

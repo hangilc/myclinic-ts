@@ -2,6 +2,7 @@ import { castOptConvert, castOptStringProp, castOptTest, castStringProp } from "
 import { QualificationConfirmSearchInfo, type QualificationConfirmSearchInfoInterface } from "./QualificationConfirmSearchInfo";
 import { isPrescriptionIssueSelectCode, isProcessingResultStatusCode, isQualificationValidityCode, PrescriptionIssueSelect, type PrescriptionIssueSelectLabel, ProcessingResultStatus, type ProcessingResultStatusLabel, QualificationValidity, type QualificationValidityLabel } from "./codes";
 import { ResultItem, type ResultItemInterface } from "./ResultItem";
+import { quiet } from "./config";
 
 export interface MessageBodyInterface {
   ProcessingResultStatus: string;
@@ -127,7 +128,9 @@ export class MessageBody {
       }
       return ok;
     } else {
-      console.error("is not object (isMessageBodyInterface)");
+      if( !quiet ){
+        console.error("is not object (isMessageBodyInterface)");
+      }
       return false;
     }
   }

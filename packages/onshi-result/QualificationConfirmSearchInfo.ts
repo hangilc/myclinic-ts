@@ -1,6 +1,7 @@
 import { onshiDateToSqlDate } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { isLimitApplicationCertificateRelatedConsFlgCode, LimitApplicationCertificateRelatedConsFlg, type LimitApplicationCertificateRelatedConsFlgLabel } from "./codes";
+import { quiet } from "./config";
 
 export interface QualificationConfirmSearchInfoInterface {
   InsurerNumber: string;
@@ -77,7 +78,9 @@ export class QualificationConfirmSearchInfo {
       }
       return ok;
     } else {
-      console.error("is not object (isQualificationConfirmSearchInfoInterface)");
+      if( !quiet ){
+        console.error("is not object (isQualificationConfirmSearchInfoInterface)");
+      }
       return false;
     }
   }

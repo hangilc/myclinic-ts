@@ -1,6 +1,7 @@
 import { onshiDateToSqlDate, onshiDateTimeToSqlDateTime } from "./util";
 import { castOptStringProp, castStringProp } from "./cast";
 import { type ReferenceClassificationLabel, ReferenceClassification, type SegmentOfResultLabel, SegmentOfResult, isReferenceClassificationCode, isSegmentOfResultCode, type CharacterCodeIdentifierLabel, isCharacterCodeIdentifierCode, CharacterCodeIdentifier } from "./codes";
+import { quiet } from "./config";
 
 export interface MessageHeaderInterface {
   ProcessExecutionTime: string;
@@ -97,12 +98,16 @@ export class MessageHeader {
         castOptStringProp(arg, "ErrorMessage") &&
         castStringProp(arg, "CharacterCodeIdentifier");
       if( !ok ){
-        console.error("isMessageHeaderInterface failed");
-        console.log("arg", arg);
+        if( !quiet ){
+          console.error("isMessageHeaderInterface failed");
+          console.log("arg", arg);
+        }
       }
       return ok;
     } else {
-      console.error("isMessageHeaderInterface called with non-object arg: " + arg);
+      if( !quiet ){
+        console.error("isMessageHeaderInterface called with non-object arg: " + arg);
+      }
       return false;
     }
   }

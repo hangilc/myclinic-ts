@@ -13,6 +13,9 @@ export default defineConfig({
     include: ["**/cypress/**/*.test.ts", "**/src/**/*.test.ts"],
     exclude: ["**/node_modules/**", "**/dist/**", "**/.{idea,git,cache,output,temp}/**",
       "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress}.config.*"],
-    globals: true
-  }
+    globals: true,
+    deps: {
+      inline: true
+    }
+  },
 })

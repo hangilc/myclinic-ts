@@ -5,6 +5,7 @@ import {
 } from "./codes";
 import { castOptStringProp } from "./cast";
 import { toOptInt, onshiDateOptToSqlDateOpt } from "./util";
+import { quiet } from "./config";
 
 export interface SpecificDiseasesCertificateInfoInterface {
   SpecificDiseasesDiseaseCategory: string | undefined;
@@ -66,7 +67,9 @@ export class SpecificDiseasesCertificateInfo {
         castOptStringProp(arg, "SpecificDiseasesValidEndDate") &&
         castOptStringProp(arg, "SpecificDiseasesSelfPay");
     } else {
-      console.error("is not object (isSpecificDiseasesCertificateInfoInterface)");
+      if( !quiet ){
+        console.error("is not object (isSpecificDiseasesCertificateInfoInterface)");
+      }
       return false;
     }
   }
