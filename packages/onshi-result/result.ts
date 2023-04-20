@@ -35,6 +35,26 @@ export class OnshiResult {
     return false;
   }
 
+  probeKoukikourei(): number | undefined {
+    if( this.resultList.length === 1 ){
+      const ri = this.resultList[0];
+      return ri.koukikoureiFutanWari;
+    } else {
+      return undefined;
+    }
+  }
+
+  probeKoureiJukyuu(): number | undefined {
+    if( this.resultList.length === 1 ){
+      const ri = this.resultList[0];
+      const kourei = ri.kourei;
+      if( kourei ){
+        return kourei.futanWari;
+      }
+    }
+    return undefined;
+  }
+
   get resultList(): ResultItem[] {
     return this.messageBody.resultList;
   }

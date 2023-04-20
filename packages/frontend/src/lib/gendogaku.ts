@@ -1,27 +1,35 @@
-import { listRecentVisitIdsByPatient } from "@cypress/lib/visit";
 import type { Meisai, Onshi } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
-import type { LimitApplicationCertificateClassificationFlagLabel, LimitApplicationCertificateClassificationLabel } from "onshi-result/codes";
+import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
 
 export async function gendogaku(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouhi: () => Promise<number>): Promise<number | undefined> {
   switch (kubun) {
     case "ア":
-    case "現役並みⅢ": return 252600 + (await iryouhi() - 842000) * 0.01;
+    case "現役並みⅢ": return calc(252600, await iryouhi(), 842000, 0.01);
     case "イ":
-    case "現役並みⅡ": return 167400 + (await iryouhi() - 558000) * 0.01;
+    case "現役並みⅡ": return calc(167400, await iryouhi(), 558000, 0.01);
     case "ウ":
-    case "現役並みⅠ": return 80100 + (await iryouhi() - 267000) * 0.01;
+    case "現役並みⅠ": return calc(80100, await iryouhi(), 267000, 0.01);
     case "エ": return 57600;
     case "オ":
     case "オ（境）": return 35400;
-    case "一般Ⅱ": return Math.min(18000, 6000 + (await iryouhi() - 30000) * 0.10);
-    case "一般Ⅰ": return 18000;
+    case "一般Ⅱ": return Math.min(18000, calc(6000, await iryouhi(), 30000, 0.10));
+    case "一般Ⅰ": 
+    case "一般": return 18000;
     case "低所得Ⅱ":
     case "低所得Ⅰ":
     case "低所得Ⅰ（老福）":
     case "低所得Ⅰ（境）": return 8000;
     default: return undefined;
+  }
+}
+
+function calc(threshold: number, iryouhi: number, offset: number, ratio: number): number {
+  if( iryouhi > offset ){
+    return threshold + (iryouhi - offset) * ratio;
+  } else {
+    return threshold;
   }
 }
 
@@ -32,28 +40,6 @@ export async function calcMonthlyIryouhi(patientId: number, year: number, month:
   ms.forEach(m => totalTen += m.totalTen);
   return totalTen * 10;
 }
-
-// function stringValues(obj: any): any {
-//   if( typeof obj === "number" ){
-//     return obj.toString();
-//   } else if( typeof obj === "object" ){
-//     if( Array.isArray(obj) ){
-//       const a: any[] = [];
-//       for(let e of obj){
-//         a.push(stringValues(e));
-//       }
-//       return a;
-//     } else {
-//       const o: any = {};
-//       for(let key in obj){
-//         o[key] = stringValues(obj[key]);
-//       }
-//       return o;
-//     }
-//   } else {
-//     return obj;
-//   }
-// }
 
 export async function calcGendogaku(patientId: number, year: number, month: number): Promise<number | undefined> {
   const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
@@ -77,13 +63,35 @@ export async function calcGendogaku(patientId: number, year: number, month: numb
         limitList.push(label);
       }
     }
-  })
+  });
+  let kubun: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
   if (limitList.length === 0) {
-    console.log("results", results);
-    return undefined;
+    if( results.length > 0 ){
+      const r = results[results.length - 1];
+      switch(r.probeKoukikourei()){
+        case 3: kubun = "現役並みⅢ"; break;
+        case 2: kubun = "一般Ⅱ"; break;
+        case 1: kubun = "一般Ⅰ"; break;
+        case undefined: break;
+        default: throw new Error("Invalid koukikourei result: " + r.probeKoukikourei());
+      }
+      if( kubun === undefined ){
+        switch(r.probeKoureiJukyuu()){
+          case 3: kubun = "現役並みⅢ"; break;
+          case 2: 
+          case 1: kubun = "一般"; break;
+          case undefined: break;
+          default: throw new Error("Invalid kourei jukyuu result: " + r.probeKoureiJukyuu());
+        }
+      }
+    }
   } else {
-    const kubun: LimitApplicationCertificateClassificationFlagLabel = limitList[limitList.length - 1];
-    // console.log(kubun);
+    kubun = limitList[limitList.length - 1];
+  }
+  // console.log("kubun", kubun);
+  if( kubun ){
     return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
+  } else {
+    return undefined;
   }
 }
