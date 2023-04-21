@@ -14,10 +14,18 @@ function snakeToCamel(snake: string): string {
   return tail.join("");
 }
 
-export function coerceRow(row: any): any {
-  const obj: any = {};
+export function coerceRow(row: any, override: Record<string, string> = {}): any {
+  const obj = {};
   for(let k in row){
-    obj[snakeToCamel(k)] = row[k];
+    if( k in override ){
+      obj[override[k]] = row[k];
+    } else {
+      obj[snakeToCamel(k)] = row[k];
+    }
   }
   return obj;
+}
+
+export function coerceShahokokuho(row: any): any {
+  return coerceRow(row, { kourei: "koureiStore", honnin: "honninStore" });
 }

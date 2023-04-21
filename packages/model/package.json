@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Model for myclinic",
   "main": "./dist/model.js",
+  "type": "module",
   "scripts": {
     "compile": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"

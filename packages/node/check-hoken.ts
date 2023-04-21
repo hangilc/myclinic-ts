@@ -1,6 +1,6 @@
-const db = require("./db");
 import * as mysql from "mysql";
-import * as m from "myclinic-model";
+import { Koukikourei, Shahokokuho } from "myclinic-model";
+import { coerceRow, coerceShahokokuho } from "./db.mjs";
 
 const pool = mysql.createPool({
   connectionLimit: 10,
@@ -11,25 +11,39 @@ const pool = mysql.createPool({
   dateStrings: true,
 });
 
-start();
+const shahokokuhoList = await listShahokokuho();
+const koukikoureiList = await listKoukikourei();
+pool.end();
 
-async function start() {
-  const shahokokuhoList = await listShahokokuho();
-  console.log(shahokokuhoList[0]);
-  process.exit(0);
-}
-
-async function listShahokokuho(): Promise<any[]> {
+async function listShahokokuho(): Promise<Shahokokuho[]> {
   return new Promise(async (resolve, reject) => {
     pool.query("select * from hoken_shahokokuho order by shahokokuho_id", (err, rows) => {
       if( err ){
         reject(err);
       }
-      const result: m.Shahokokuho[] = [];
+      const result = [];
       for(let r of rows){
-        result.push(m.Shahokokuho.cast(db.coerceRow(r)));
+        result.push(Shahokokuho.cast(coerceShahokokuho(r)));
       }
       resolve(result);
     })
   })
 }
+
+async function listKoukikourei(): Promise<Koukikourei[]> {
+  return new Promise(async (resolve, reject) => {
+    pool.query("select * from hoken_koukikourei order by koukikourei_id", (err, rows) => {
+      if( err ){
+        reject(err);
+      }
+      const result = [];
+      for(let r of rows){
+        result.push(Koukikourei.cast(coerceRow(r)));
+      }
+      resolve(result);
+    })
+  })
+}
+
+
+
