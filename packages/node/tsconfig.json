@@ -15,11 +15,13 @@
       // "isolatedModules": true,
       "declaration": true,
       "declarationMap": true,
+      "outDir": "./dist",
       "moduleResolution": "Node"
     },
     "ts-node": {
         "esm": true,
-        "experimentalSpecifierResolution": "node"
+        "experimentalSpecifierResolution": "node",
+        "module": "esnext"
     }
   }
   

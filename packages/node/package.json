@@ -16,10 +16,11 @@
         "url": "https://github.com/hangilc/myclinic-ts/issues"
     },
     "homepage": "https://github.com/hangilc/myclinic-ts#readme",
-    "type": "module",
+    "type": "commonjs",
     "dependencies": {
         "@types/mysql": "^2.15.21",
         "@types/yargs": "^17.0.24",
+        "myclinic-model": "^1.0.0",
         "mysql": "^2.18.1",
         "onshi-result": "^1.0.0",
         "yargs": "^17.7.1"

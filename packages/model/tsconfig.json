@@ -17,6 +17,7 @@
     "declarationMap": true,
     "strict": true,
     "outDir": "./dist",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }
