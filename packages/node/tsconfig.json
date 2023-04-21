@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-      "target": "esnext",
+      "target": "es2021",
+      "module": "es2022",
       "useDefineForClassFields": true,
-      "module": "esnext",
       "baseUrl": ".",
       /**
        * Typecheck JS in `.svelte` and `.js` files by default.
