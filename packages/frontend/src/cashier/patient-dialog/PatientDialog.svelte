@@ -9,10 +9,16 @@
   import ShahokokuhoDialog from "./edit/ShahokokuhoDialog.svelte";
   import KoukikoureiDialog from "./edit/KoukikoureiDialog.svelte";
   import KouhiDialog from "./edit/KouhiDialog.svelte";
-  import type { Kouhi, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+  import {
+    Shahokokuho,
+    type Kouhi,
+    Koukikourei,
+    type Patient,
+  } from "myclinic-model";
   import StartVisitDialog from "./StartVisitDialog.svelte";
   import api from "@/lib/api";
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
+  import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -145,8 +151,8 @@
         destroy: () => d.$destroy(),
         patient: p,
         onCancel: () => {},
-        onEnter: (_visit) => exit()
-      }
+        onEnter: (_visit) => exit(),
+      },
     });
   }
 
@@ -158,7 +164,7 @@
         destroy: () => d.$destroy(),
         patient: p,
         files,
-      }
+      },
     });
   }
 
@@ -167,14 +173,40 @@
     data.cleanup();
   }
 
-  function hasOverlappingHoken(list: Hoken[]): boolean {
+  function listCurrentShahokokuho(): (Shahokokuho | Koukikourei)[] {
+    const list: (Shahokokuho | Koukikourei)[] = [];
+    currentList.forEach((c) => {
+      const h = c.value;
+      if (h instanceof Shahokokuho || h instanceof Koukikourei) {
+        list.push(h);
+      }
+    });
+    return list;
+  }
+
+  function countNonKouhiHoken(list: Hoken[]): number {
     let count: number = 0;
-    list.forEach(h => {
-      if( h.isShahokokuho || h.isKoukikourei ){
+    list.forEach((h) => {
+      if (h.isShahokokuho || h.isKoukikourei) {
         count += 1;
       }
-    })
-    return count > 1;
+    });
+    return count;
+  }
+
+  function doDoubleEdit(): void {
+    const ch = listCurrentShahokokuho();
+    if (ch.length === 2) {
+      const d: DoubleEditHokenDialog = new DoubleEditHokenDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          hoken1: ch[0],
+          hoken2: ch[1],
+          patient: data.patient,
+        },
+      });
+    }
   }
 </script>
 
@@ -207,9 +239,12 @@
         data-hoken-key={h.key}>{h.rep}</a
       >
     {/each}
-    {#if hasOverlappingHoken(currentList) }
+    {#if countNonKouhiHoken(currentList) > 1}
       <div class="overlap-notice">
         有効な保険証が重複しています。修正してください。
+        {#if countNonKouhiHoken(currentList) === 2}
+          <a href="javascript:;" on:click={doDoubleEdit}>修正編集</a>
+        {/if}
       </div>
     {/if}
   </div>
@@ -244,9 +279,9 @@
       data-cy="hoken-history-link">保険履歴</a
     >
     |
-    <a href="javascript:void(0)"
-      on:click={doImage}
-      data-cy="image-view">保存画像</a>
+    <a href="javascript:void(0)" on:click={doImage} data-cy="image-view"
+      >保存画像</a
+    >
   </div>
 </SurfaceModal>
 
