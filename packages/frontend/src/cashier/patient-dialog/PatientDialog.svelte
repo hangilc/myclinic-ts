@@ -166,6 +166,16 @@
     destroy();
     data.cleanup();
   }
+
+  function hasOverlappingHoken(list: Hoken[]): boolean {
+    let count: number = 0;
+    list.forEach(h => {
+      if( h.isShahokokuho || h.isKoukikourei ){
+        count += 1;
+      }
+    })
+    return count > 1;
+  }
 </script>
 
 <SurfaceModal destroy={exit} title="患者情報" width="320px">
@@ -197,6 +207,11 @@
         data-hoken-key={h.key}>{h.rep}</a
       >
     {/each}
+    {#if hasOverlappingHoken(currentList) }
+      <div class="overlap-notice">
+        有効な保険証が重複しています。修正してください。
+      </div>
+    {/if}
   </div>
   <div class="commands">
     <button on:click={doRegisterVisit}>診察受付</button>
@@ -273,5 +288,9 @@
 
   .menu a {
     word-break: keep-all;
+  }
+
+  .overlap-notice {
+    color: red;
   }
 </style>
