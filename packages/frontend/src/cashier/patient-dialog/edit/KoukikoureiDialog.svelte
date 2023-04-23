@@ -3,22 +3,38 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Koukikourei } from "myclinic-model";
   import KoukikoureiDialogContent from "./KoukikoureiDialogContent.svelte";
+  import { OverlapExists, Used, checkHokenInterval } from "@/lib/hoken-check";
 
   export let destroy: () => void;
   export let title: string;
   export let init: Koukikourei | null;
   export let patient: Patient;
-  export let onEntered: (entered: Koukikourei) => void = _ => {};
-  export let onUpdated: (entered: Koukikourei) => void = _ => {};
+  export let onEntered: (entered: Koukikourei) => void = (_) => {};
+  export let onUpdated: (entered: Koukikourei) => void = (_) => {};
 
   async function doEnter(koukikourei: Koukikourei): Promise<string[]> {
+    if (init === null) {
+      koukikourei.koukikoureiId = 0;
+    }
     try {
+      const errs = await checkHokenInterval(koukikourei);
+      if (errs.length > 0) {
+        return errs.map((e) => {
+          if (e instanceof OverlapExists) {
+            return "有効期間が重なる保険が存在するようになるので、変更できません。";
+          } else if (e instanceof Used) {
+            return "使用されている診察があるので、変更できません。";
+          } else {
+            return "Shahokokuho error";
+          }
+        });
+      }
       if (init === null) {
         koukikourei.koukikoureiId = 0;
         const entered = await api.enterKoukikourei(koukikourei);
         onEntered(entered);
       } else {
-        if( koukikourei.koukikoureiId <= 0 ){
+        if (koukikourei.koukikoureiId <= 0) {
           return ["Invalid koukikoureiId"];
         } else {
           await api.updateKoukikourei(koukikourei);

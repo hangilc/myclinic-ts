@@ -26,11 +26,10 @@ export function dateIntervalsOverlap(
   const e1 = cvtToOptDate(validUpto1);
   const s2 = cvtToDate(validFrom2);
   const e2 = cvtToOptDate(validUpto2);
-  if (e2 !== undefined && e2 < s1) {
-    return true;
-  } else if (e1 !== undefined && e1 < s2) {
+  if( (e2 !== undefined && e2 < s1) || (e1 !== undefined && e1 < s2) ) {
+    return false;
+  } else {
     return true;
   }
-  return false;
 }
 

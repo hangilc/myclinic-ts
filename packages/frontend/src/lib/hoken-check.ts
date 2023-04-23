@@ -40,6 +40,7 @@ async function checkShahokokuhoInterval(shahokokuho: Shahokokuho): Promise<Error
   }
   list.forEach(h => {
     if( dateIntervalsOverlap(shahokokuho.validFrom, shahokokuho.validUpto, h.validFrom, h.validUpto) ){
+      console.log("overlap", shahokokuho, h);
       errs.push(new OverlapExists(h));
     }
   });
