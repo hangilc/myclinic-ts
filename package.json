@@ -11,7 +11,7 @@
     "tag-date": "git tag --format='%(refname) %(creatordate)'",
     "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result"
   },
-  "dependencies": {
+  "devDependencies": {
     "typescript": "^4.8.4"
   }
 }
