@@ -133,19 +133,21 @@
         <div class="error">{form1Error}</div>
       {/if}
       {#if hoken1 instanceof Shahokokuho}
+        <div>【社保国保】</div>
         <ShahokokuhoForm
           {patient}
           init={hoken1}
           bind:validate={validateShahokokuho1}
         />
       {:else}
+        <div>【後期高齢】</div>
         <KoukikoureiForm
           {patient}
           init={hoken1}
           bind:validate={validateKoukikourei1}
         />
       {/if}
-      <div>
+      <div class="hoken-aux">
         使用回数：{hoken1Usage.length}回
         {#if hoken1Usage.length > 0}
           最終試用日：{lastVisitDate(hoken1Usage)}
@@ -159,19 +161,21 @@
         <div class="error">{form2Error}</div>
       {/if}
       {#if hoken2 instanceof Shahokokuho}
+        <div>【社保国保】</div>
         <ShahokokuhoForm
           {patient}
           init={hoken2}
           bind:validate={validateShahokokuho2}
         />
       {:else}
+        <div>【後期高齢】</div>
         <KoukikoureiForm
           {patient}
           init={hoken2}
           bind:validate={validateKoukikourei2}
         />
       {/if}
-      <div>
+      <div class="hoken-aux">
         使用回数：{hoken2Usage.length}回
         {#if hoken2Usage.length > 0}
           最終試用日：{lastVisitDate(hoken2Usage)}
@@ -204,6 +208,11 @@
     padding-left: 10px;
   }
 
+  .forms-wrapper {
+    display: flex;
+    align-items: top;
+  }
+
   .commands {
     display: flex;
     justify-content: right;
@@ -221,5 +230,9 @@
   .error {
     color: red;
     margin: 10px 0;
+  }
+
+  .hoken-aux {
+    margin-top: 6px;
   }
 </style>
