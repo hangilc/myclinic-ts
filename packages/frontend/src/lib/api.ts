@@ -1334,10 +1334,22 @@ export default {
     }, castList(m.Visit.cast));
   },
 
+  shahokokuhoUsage(shahokokuhoId: number): Promise<m.Visit[]> {
+    return get("shahokokuho-usage", {
+      "shahokokuho-id": shahokokuhoId.toString(),
+    }, castList(m.Visit.cast));
+  },
+
   koukikoureiUsageSince(koukikoureiId: number, since: Date | string): Promise<m.Visit[]> {
     return get("koukikourei-usage-since", {
       "koukikourei-id": koukikoureiId.toString(),
       date: dateParam(since),
+    }, castList(m.Visit.cast));
+  },
+
+  koukikoureiUsage(koukikoureiId: number): Promise<m.Visit[]> {
+    return get("koukikourei-usage", {
+      "koukikourei-id": koukikoureiId.toString(),
     }, castList(m.Visit.cast));
   },
 
@@ -1348,11 +1360,17 @@ export default {
     }, castList(m.Visit.cast));
   },
 
+  kouhiUsage(kouhiId: number): Promise<m.Visit[]> {
+    return get("kouhi-usage", {
+      "kouhi-id": kouhiId.toString(),
+    }, castList(m.Visit.cast));
+  },
+
   listConductForVisit(visitId: number): Promise<m.Conduct[]> {
     return get("list-conduct-for-visit", {
       "visit-id": visitId.toString()
     },
-    castList(m.Conduct.cast));
+      castList(m.Conduct.cast));
   },
 
   listVisitIdByPatientAndMonth(patientId: number, year: number, month: number): Promise<number[]> {
@@ -1362,5 +1380,12 @@ export default {
       month: month.toString(),
     }, castList(castNumber));
   },
+
+  batchEnterOrUpdateHoken(shahokokuhoList: m.Shahokokuho[], koukikoureiList: m.Koukikourei[]):
+    Promise<[m.Shahokokuho[], m.Koukikourei[]]> {
+      return post("batch-enter-or-update-hoken", {
+        shahokokuhoList, koukikoureiList
+      }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
+  }
 
 };

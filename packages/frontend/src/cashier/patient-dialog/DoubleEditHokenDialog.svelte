@@ -1,90 +1,139 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
-  import { Shahokokuho, type Koukikourei, Patient } from "myclinic-model";
+  import {
+    Shahokokuho, Koukikourei,
+    Patient,
+    Visit,
+  } from "myclinic-model";
   import ShahokokuhoForm from "./edit/ShahokokuhoForm.svelte";
   import api from "@/lib/api";
   import * as kanjidate from "kanjidate";
+  import KoukikoureiForm from "./edit/KoukikoureiForm.svelte";
+  import type { VResult } from "@/lib/validation";
 
   export let destroy: () => void;
   export let hoken1: Shahokokuho | Koukikourei;
   export let hoken2: Shahokokuho | Koukikourei;
   export let patient: Patient;
-  let hoken1Usage: number = 0;
-  let hoken2Usage: number = 0;
-  let hoken1LastDate: string | undefined = undefined;
-  let hoken2LastDate: string | undefined = undefined;
+  let initDone: boolean = false;
+  let hoken1Usage: Visit[] = [];
+  let hoken2Usage: Visit[] = [];
+  let validateShahokokuho1: (() => VResult<Shahokokuho>) | undefined = undefined;
+  let validateShahokokuho2: (() => VResult<Shahokokuho>) | undefined = undefined;
+  let validateKoukikourei1: (() => VResult<Koukikourei>) | undefined = undefined;
+  let validateKoukikourei2: (() => VResult<Koukikourei>) | undefined = undefined;
+  let form1Error: string = ""
+  let form2Error: string = ""
 
   init();
 
   async function init() {
-    [hoken1Usage, hoken2Usage] = await countUsage();
+    hoken1Usage = await fetchUsage(hoken1);
+    hoken2Usage = await fetchUsage(hoken2);
+    initDone = true;
   }
 
-  async function countUsage(): Promise<[number, number]> {
-    const shahokokuhoIds: number[] = [];
-    const koukikoureiIds: number[] = [];
-    if( hoken1 instanceof Shahokokuho ){
-      shahokokuhoIds.push(hoken1.shahokokuhoId);
+  async function fetchUsage(h: Shahokokuho | Koukikourei): Promise<Visit[]> {
+    if (h instanceof Shahokokuho) {
+      return await api.shahokokuhoUsage(h.shahokokuhoId);
     } else {
-      koukikoureiIds.push(hoken1.koukikoureiId);
+      return await api.koukikoureiUsage(h.koukikoureiId);
     }
-    if( hoken2 instanceof Shahokokuho ){
-      shahokokuhoIds.push(hoken2.shahokokuhoId);
-    } else {
-      koukikoureiIds.push(hoken2.koukikoureiId);
-    }
-    const [shahokokuhoUsages, koukikoureiUsages, _r, _k] = await api.batchCountHokenUsage(
-      shahokokuhoIds, koukikoureiIds, [], []
-    );
-    const pair: [number, number] = [0, 0];
-    if( hoken1 instanceof Shahokokuho ){
-      pair[0] = shahokokuhoUsages[hoken1.shahokokuhoId];
-    } else {
-      pair[0] = koukikoureiUsages[hoken1.koukikoureiId];
-    }
-    if( hoken2 instanceof Shahokokuho ){
-      pair[1] = shahokokuhoUsages[hoken2.shahokokuhoId];
-    } else {
-      pair[1] = koukikoureiUsages[hoken2.koukikoureiId];
-    }
-    return pair;
   }
 
   function formatDate(d: string): string {
     return kanjidate.format(kanjidate.f2, d);
   }
 
+  function lastVisitDate(visits: Visit[]): string {
+    if (visits.length > 0) {
+      return formatDate(visits[visits.length - 1].visitedAt.substring(0, 10));
+    } else {
+      return "";
+    }
+  }
+
   function doClose(): void {
     destroy();
+  }
+
+  async function doEnter() {
+    const shahokokuhoList: Shahokokuho[] = []
+    const koukikoureiList: Koukikourei[] = []
+    if( hoken1 instanceof Shahokokuho && validateShahokokuho1 ){
+      const r = validateShahokokuho1();
+      if( r.isError ){
+        form1Error = r.errorMessages.join("");
+      } else {
+        shahokokuhoList.push(r.value)
+      }
+    } else if( hoken1 instanceof Koukikourei && validateKoukikourei1 ) {
+      const r = validateKoukikourei1();
+      if( r.isError ){
+        form1Error = r.errorMessages.join("");
+      } else {
+        koukikoureiList.push(r.value)
+      }
+    }
+    if( hoken2 instanceof Shahokokuho && validateShahokokuho2 ){
+      const r = validateShahokokuho2();
+      if( r.isError ){
+        form2Error = r.errorMessages.join("");
+      } else {
+        shahokokuhoList.push(r.value)
+      }
+    } else if( hoken2 instanceof Koukikourei && validateKoukikourei2 ) {
+      const r = validateKoukikourei2();
+      if( r.isError ){
+        form2Error = r.errorMessages.join("");
+      } else {
+        koukikoureiList.push(r.value)
+      }
+    }
+    if( shahokokuhoList.length + koukikoureiList.length === 2 ){
+      await api.batchEnterOrUpdateHoken(shahokokuhoList, koukikoureiList);
+    }
   }
 </script>
 
 <Dialog title="保険修正編集" destroy={doClose}>
-  <div class="form form1">
-    {#if hoken1 instanceof Shahokokuho}
-      <ShahokokuhoForm {patient} init={hoken1} >
-
-      </ShahokokuhoForm>
-    {/if}
-    <div>
-      使用回数：{hoken1Usage}回
-      {#if hoken1LastDate}
-        最終試用日：{formatDate(hoken1LastDate)}
+  <div class="forms-wrapper">
+    <div class="form form1">
+      {#if form1Error !== ""}
+        <div class="error">{form1Error}</div>
       {/if}
+      {#if hoken1 instanceof Shahokokuho}
+        <ShahokokuhoForm {patient} init={hoken1} bind:validate={validateShahokokuho1}/>
+      {:else}
+        <KoukikoureiForm {patient} init={hoken1} bind:validate={validateKoukikourei1}/>
+      {/if}
+      <div>
+        使用回数：{hoken1Usage.length}回
+        {#if hoken1Usage.length > 0}
+          最終試用日：{lastVisitDate(hoken1Usage)}
+        {/if}
+      </div>
+    </div>
+    <div class="form form2">
+      {#if form2Error !== ""}
+        <div class="error">{form2Error}</div>
+      {/if}
+      {#if hoken2 instanceof Shahokokuho}
+        <ShahokokuhoForm {patient} init={hoken2} bind:validate={validateShahokokuho2}/>
+      {:else}
+        <KoukikoureiForm {patient} init={hoken2} bind:validate={validateKoukikourei2}/>
+      {/if}
+      <div>
+        使用回数：{hoken2Usage.length}回
+        {#if hoken2Usage.length > 0}
+          最終試用日：{lastVisitDate(hoken2Usage)}
+        {/if}
+      </div>
     </div>
   </div>
-  <div class="form form2">
-    {#if hoken2 instanceof Shahokokuho}
-      <ShahokokuhoForm {patient} init={hoken2} >
-
-      </ShahokokuhoForm>
-    {/if}
-    <div>
-      使用回数：{hoken2Usage}回
-      {#if hoken2LastDate}
-        最終試用日：{formatDate(hoken2LastDate)}
-      {/if}
-    </div>
+  <div class="commands">
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
 
@@ -100,5 +149,19 @@
 
   .form2 {
     padding-left: 10px;
+  }
+
+  .commands {
+    display: flex;
+    justify-content: right;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
+
+  .error {
+    color: red;
+    margin: 10px 0;
   }
 </style>
