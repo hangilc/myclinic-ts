@@ -17,18 +17,6 @@
       shahokokuho.shahokokuhoId = 0;
     }
     try {
-      const errs = await checkHokenInterval(shahokokuho);
-      if (errs.length > 0) {
-        return errs.map((e) => {
-          if (e instanceof OverlapExists) {
-            return "有効期間が重なる保険が存在するようになるので、変更できません。";
-          } else if( e instanceof Used ) {
-            return "使用されている診察があるので、変更できません。";
-          } else {
-            return "Shahokokuho error";
-          }
-        });
-      }
       if (init === null) {
         const entered = await api.enterShahokokuho(shahokokuho);
         onEntered(entered);
@@ -36,6 +24,25 @@
         if (shahokokuho.shahokokuhoId <= 0) {
           return ["Invalid shahokokuhoId"];
         } else {
+          let errs = await checkHokenInterval(shahokokuho);
+          errs = errs.filter((e) => {
+            if (e instanceof Used) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+          if (errs.length > 0) {
+            return errs.map((e) => {
+              if (e instanceof OverlapExists) {
+                return "有効期間が重なる保険が存在するようになるので、変更できません。";
+              } else if (e instanceof Used) {
+                return "使用されている診察があるので、変更できません。";
+              } else {
+                return "Shahokokuho error";
+              }
+            });
+          }
           await api.updateShahokokuho(shahokokuho);
           onUpdated(shahokokuho);
         }

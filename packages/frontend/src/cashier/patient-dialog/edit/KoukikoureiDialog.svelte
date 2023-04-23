@@ -17,26 +17,32 @@
       koukikourei.koukikoureiId = 0;
     }
     try {
-      const errs = await checkHokenInterval(koukikourei);
-      if (errs.length > 0) {
-        return errs.map((e) => {
-          if (e instanceof OverlapExists) {
-            return "有効期間が重なる保険が存在するようになるので、変更できません。";
-          } else if (e instanceof Used) {
-            return "使用されている診察があるので、変更できません。";
-          } else {
-            return "Shahokokuho error";
-          }
-        });
-      }
       if (init === null) {
-        koukikourei.koukikoureiId = 0;
         const entered = await api.enterKoukikourei(koukikourei);
         onEntered(entered);
       } else {
         if (koukikourei.koukikoureiId <= 0) {
           return ["Invalid koukikoureiId"];
         } else {
+          let errs = await checkHokenInterval(koukikourei);
+          errs = errs.filter((e) => {
+            if (e instanceof Used) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+         if (errs.length > 0) {
+            return errs.map((e) => {
+              if (e instanceof OverlapExists) {
+                return "有効期間が重なる保険が存在するようになるので、変更できません。";
+              } else if (e instanceof Used) {
+                return "使用されている診察があるので、変更できません。";
+              } else {
+                return "Shahokokuho error";
+              }
+            });
+          }
           await api.updateKoukikourei(koukikourei);
           onUpdated(koukikourei);
         }
