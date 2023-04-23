@@ -9,18 +9,20 @@ export class Hoken1<T extends HokenType> extends Hoken {
 export class HokenCache {
   #cache: Hoken[];
 
-  constructor(list: Hoken[]){
+  constructor(list: Hoken[]) {
     this.#cache = [...list];
   }
 
-  updateWithHokenType(ht: HokenType): void {
+  updateWithHokenType(ht: HokenType): boolean {
     const key = Hoken.composeKey(ht);
     const hs = this.#cache;
     const i = hs.findIndex(h => h.key === key);
-    if( i >= 0 ){
+    if (i >= 0) {
       const h = hs[i];
-
       hs.splice(i, 1, h.updateValue(ht));
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -29,21 +31,27 @@ export class HokenCache {
     this.#cache.push(h);
   }
 
+  enterOrUpdateHokenType(ht: HokenType): void {
+    if( !this.updateWithHokenType(ht) ){
+      this.enterHokenType(ht);
+    }
+  }
+
   remove(ht: HokenType): void {
     const key = Hoken.composeKey(ht);
     const i = this.#cache.findIndex(h => h.key === key);
-    if( i >= 0 ){
+    if (i >= 0) {
       this.#cache.splice(i, 1);
     } else {
       console.error("Cannot find hoken to remove: " + ht);
     }
   }
 
-  getUpdate(ht: HokenType): Hoken{
+  getUpdate(ht: HokenType): Hoken {
     const key = Hoken.composeKey(ht);
     const hs = this.#cache;
     const i = hs.findIndex(h => h.key === key);
-    if( i >= 0 ){
+    if (i >= 0) {
       return hs[i];
     } else {
       throw new Error("Cannot find in cache: " + ht);

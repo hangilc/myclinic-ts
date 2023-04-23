@@ -19,6 +19,7 @@
   import api from "@/lib/api";
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
   import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
+  import { destroy_block } from "svelte/internal";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -196,16 +197,35 @@
 
   function doDoubleEdit(): void {
     const ch = listCurrentShahokokuho();
+    ch.sort((a, b) => a.validFrom.localeCompare(b.validFrom));
     if (ch.length === 2) {
-      const d: DoubleEditHokenDialog = new DoubleEditHokenDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          hoken1: ch[0],
-          hoken2: ch[1],
-          patient: data.patient,
-        },
-      });
+      function open(): void {
+        const d: DoubleEditHokenDialog = new DoubleEditHokenDialog({
+          target: document.body,
+          props: {
+            destroy: () => {
+              d.$destroy();
+              data.goback();
+            },
+            hoken1: ch[0],
+            hoken2: ch[1],
+            patient: data.patient,
+            onHandle: (s: Shahokokuho[], k: Koukikourei[]) => {
+              s.forEach(h => data.hokenCache.enterOrUpdateHokenType(h));
+              k.forEach(h => data.hokenCache.enterOrUpdateHokenType(h));
+              d.$destroy();
+              data.goback();
+            },
+            onDelete: (h: Shahokokuho | Koukikourei) => {
+              data.hokenCache.remove(h);
+              d.$destroy();
+              data.goback();
+            },
+          },
+        });
+      }
+      destroy();
+      data.push(open);
     }
   }
 </script>
