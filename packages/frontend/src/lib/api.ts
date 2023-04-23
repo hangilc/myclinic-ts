@@ -1386,6 +1386,60 @@ export default {
       return post("batch-enter-or-update-hoken", {
         shahokokuhoList, koukikoureiList
       }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
-  }
+  },
+
+  countShahokokuhoUsage(shahokokuhoId: number): Promise<number> {
+    return get("count-shahokokuho-usage", { "shahokokuho-id": shahokokuhoId.toString() }, castNumber);
+  },
+
+  countShahokokuhoUsageBefore(shahokokuhoId: number, date: string | Date): Promise<number> {
+    return get("count-shahokokuho-usage-before", {
+      "shahokokuho-id": shahokokuhoId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
+
+  countShahokokuhoUsageAfter(shahokokuhoId: number, date: string | Date): Promise<number> {
+    return get("count-shahokokuho-usage-after", {
+      "shahokokuho-id": shahokokuhoId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
+
+  countKoukikoureiUsage(koukikoureiId: number): Promise<number> {
+    return get("count-koukikourei-usage", { "koukikourei-id": koukikoureiId.toString() }, castNumber);
+  },
+
+  countKoukikoureiUsageBefore(koukikoureiId: number, date: string | Date): Promise<number> {
+    return get("count-koukikourei-usage-before", {
+      "koukikourei-id": koukikoureiId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
+
+  countKoukikoureiUsageAfter(koukikoureiId: number, date: string | Date): Promise<number> {
+    return get("count-koukikourei-usage-after", {
+      "koukikourei-id": koukikoureiId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
+
+  countKouhiUsage(kouhiId: number): Promise<number> {
+    return get("count-kouhi-usage", { "kouhi-id": kouhiId.toString() }, castNumber);
+  },
+
+  countKouhiUsageBefore(kouhiId: number, date: string | Date): Promise<number> {
+    return get("count-kouhi-usage-before", {
+      "kouhi-id": kouhiId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
+
+  countKouhiUsageAfter(kouhiId: number, date: string | Date): Promise<number> {
+    return get("count-kouhi-usage-after", {
+      "kouhi-id": kouhiId.toString(),
+      date: dateParam(date)
+    }, castNumber);
+  },
 
 };
