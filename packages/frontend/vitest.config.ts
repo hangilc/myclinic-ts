@@ -15,7 +15,10 @@ export default defineConfig({
       "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress}.config.*"],
     globals: true,
     deps: {
-      inline: true
+      // inline: true
+      inline:
+        // TODO: Replace with true once https://github.com/vitest-dev/vitest/issues/2806 is fixed.
+        [/^(?!.*vitest).*$/],
     }
   },
 })
