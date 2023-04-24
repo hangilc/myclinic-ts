@@ -3,9 +3,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: ["**/*.test.ts"],
-  globals: {
-    "ts-jest": {
-      useESM: true
-    }
-  }
+  transform: {
+    '^.+\\.{ts|tsx}?$': ["ts-jest" ]
+  },
 };
