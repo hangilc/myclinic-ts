@@ -110,7 +110,7 @@
     </div>
     <div class="img">
       {#if imageUrl}
-        <img src={imageUrl} width={imageWidth} />
+        <img src={imageUrl} width={imageWidth} alt="保存された患者画像"/>
       {/if}
       {#if extImageUrl}
         <a href={extImageUrl} target="_blank">別ウィンドウで開く</a>
