@@ -1,6 +1,7 @@
 import api from "./api";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result/codes";
+import { pad } from "./pad";
 
 export interface OnshiKakuninQuery {
   hokensha: string,
@@ -16,6 +17,9 @@ export async function onshiConfirm(
   query: OnshiKakuninQuery,
   timeout: number = 10, // seconds
 ): Promise<OnshiResult> {
+  query = Object.assign({}, query, {
+    hokensha: pad(query.hokensha, 8, "0")
+  });
   const server = await api.dictGet("onshi-server");
   const secret = await api.dictGet("onshi-secret");
   const controller = new AbortController();
