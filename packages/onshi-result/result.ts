@@ -28,15 +28,31 @@ export class OnshiResult {
 
   // 資格が確認できたかどうか
   get isValid(): boolean {
-    if( this.messageBody.processingResultStatus === "正常終了" ) {
+    if (this.messageBody.processingResultStatus === "正常終了") {
       const validity = this.messageBody.qualificationValidity;
-      return validity !== undefined  && validity === "有効";
+      return validity !== undefined && validity === "有効";
     }
     return false;
   }
 
+  getErrorMessage(): string {
+    try {
+      if( this.messageHeader.segmentOfResult !== "正常終了" ) {
+        return "資格確認問い合わせエラー：" + this.messageHeader.segmentOfResult;
+      }
+      if (this.messageBody.processingResultCode !== "正常終了") {
+        return "資格確認問い合わせエラー";
+      }
+
+      return "";
+
+    } catch (ex: any) {
+      return ex.toString();
+    }
+  }
+
   probeKoukikourei(): number | undefined {
-    if( this.resultList.length === 1 ){
+    if (this.resultList.length === 1) {
       const ri = this.resultList[0];
       return ri.koukikoureiFutanWari;
     } else {
@@ -45,10 +61,10 @@ export class OnshiResult {
   }
 
   probeKoureiJukyuu(): number | undefined {
-    if( this.resultList.length === 1 ){
+    if (this.resultList.length === 1) {
       const ri = this.resultList[0];
       const kourei = ri.kourei;
-      if( kourei ){
+      if (kourei) {
         return kourei.futanWari;
       }
     }
@@ -64,10 +80,10 @@ export class OnshiResult {
   }
 
   static isOnshiResultInterface(arg: any): arg is OnshiResultInterface {
-    if( typeof arg === "object" ){
+    if (typeof arg === "object") {
       return XmlMsg.isXmlMsgInterface(arg.XmlMsg);
     } else {
-      if( !quiet ){
+      if (!quiet) {
         console.error("is not object (isOnshiResultInterface)")
       }
       return false;
@@ -75,7 +91,7 @@ export class OnshiResult {
   }
 
   static cast(arg: any): OnshiResult {
-    if( OnshiResult.isOnshiResultInterface(arg) ){
+    if (OnshiResult.isOnshiResultInterface(arg)) {
       return new OnshiResult(arg);
     } else {
       throw new Error("Cannot create OnshiResult");
@@ -83,6 +99,6 @@ export class OnshiResult {
   }
 
   static create(header: MessageHeaderInterface, body: MessageBodyInterface): OnshiResult {
-    return new OnshiResult({ XmlMsg: { MessageHeader: header, MessageBody: body }});
+    return new OnshiResult({ XmlMsg: { MessageHeader: header, MessageBody: body } });
   }
 }
