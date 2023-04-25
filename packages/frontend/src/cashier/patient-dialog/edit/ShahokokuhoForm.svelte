@@ -2,6 +2,7 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
   import { genid } from "@/lib/genid";
+  import { hokenshaBangouRep } from "@/lib/hoken-rep";
   import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { toInt, validResult, type VResult } from "@/lib/validation";
   import { validateShahokokuho } from "@/lib/validators/shahokokuho-validator";
@@ -22,6 +23,7 @@
   let edaban: string;
   let validateValidFrom: () => VResult<Date | null>;
   let validateValidUpto: () => VResult<Date | null>;
+  let honninStoreDiabled = false;
   export function setData(data: Shahokokuho | null): void {
     updateValues(data);
   }
@@ -42,7 +44,11 @@
       hokenshaBangou = init.hokenshaBangou.toString();
       hihokenshaKigou = init.hihokenshaKigou;
       hihokenshaBangou = init.hihokenshaBangou;
-      honninStore = init.honninStore;
+      if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
+        honninStore = 1;
+      } else {
+        honninStore = init.honninStore;
+      }
       validFrom = parseSqlDate(init.validFrom);
       validUpto = parseOptionalSqlDate(init.validUpto);
       koureiStore = init.koureiStore;
@@ -71,6 +77,16 @@
   function doUserInput(): void {
     dispatch("value-change");
   }
+
+  function doHokenshaBangouChange(): void {
+    dispatch("value-change");
+    if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
+      honninStore = 1;
+      honninStoreDiabled = true;
+    } else {
+      honninStoreDiabled = false;
+    }
+  }
 </script>
 
 <div>
@@ -84,7 +100,7 @@
       type="text"
       class="regular"
       bind:value={hokenshaBangou}
-      on:change={doUserInput}
+      on:change={doHokenshaBangouChange}
       data-cy="hokensha-bangou-input"
     />
   </div>
@@ -127,6 +143,7 @@
         value={h.code}
         on:change={doUserInput}
         data-cy="honnin-input"
+        disabled={honninStoreDiabled}
       />
       <label for={id}>{h.rep}</label>
     {/each}

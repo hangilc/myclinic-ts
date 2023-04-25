@@ -80,7 +80,6 @@ export function hokenshaBangouRep(hokenshaBangou: number | string): string {
       default: return "不明";
     }
   }
-
 }
 
 export function shahokokuhoRep(shahokokuho: Shahokokuho): string {
