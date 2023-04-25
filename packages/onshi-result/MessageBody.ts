@@ -23,7 +23,7 @@ export class MessageBody {
 
   constructor(arg: MessageBodyInterface) {
     this.orig = arg;
-    this.resultList = arg.ResultList.map(ResultItem.cast);
+    this.resultList = arg.ResultList?.map(ResultItem.cast) ?? [];
     this.qualificationConfirmSearchInfo = castOptConvert(
       arg.QualificationConfirmSearchInfo,
       QualificationConfirmSearchInfo.cast
@@ -108,9 +108,10 @@ export class MessageBody {
   static isMessageBodyInterface(arg: any): arg is MessageBody {
     if (typeof arg === "object") {
       const ok = castStringProp(arg, "ProcessingResultStatus") &&
-        Array.isArray(arg.ResultList) && arg.ResultList.every(
+        (Array.isArray(arg.ResultList) && arg.ResultList.every(
           ResultItem.isResultItemInterface
-        ) && castOptTest(
+        ) || !arg.ResultList)
+        && castOptTest(
           arg.QualificationConfirmSearchInfo,
           QualificationConfirmSearchInfo.isQualificationConfirmSearchInfoInterface
         ) &&

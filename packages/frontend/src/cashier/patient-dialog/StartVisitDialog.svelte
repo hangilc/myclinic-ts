@@ -147,9 +147,9 @@
             shahokokuhoOnshi = result;
           } else {
             error =
-              "資格確認できませんでした。" +
-              result.messageBody.qualificationValidity +
-              (result.messageBody.processingResultMessage ?? "");
+              "資格確認できませんでした。" + result.getErrorMessage();
+              // result.messageBody.qualificationValidity +
+              // (result.messageBody.processingResultMessage ?? "");
           }
         } catch (ex) {
           error = "資格確認サーバーに接続できませんでした。" + ex;
@@ -176,9 +176,9 @@
             koukikoureiOnshi = result;
           } else {
             error =
-              "資格確認できませんでした。" +
-              result.messageBody.qualificationValidity +
-              (result.messageBody.processingResultMessage ?? "");
+              "資格確認できませんでした。" + result.getErrorMessage();
+              // result.messageBody.qualificationValidity +
+              // (result.messageBody.processingResultMessage ?? "");
           }
         } catch (ex) {
           error = "資格確認サーバーに接続できませんでした。";

@@ -28,24 +28,32 @@ export class OnshiResult {
 
   // 資格が確認できたかどうか
   get isValid(): boolean {
-    if (this.messageBody.processingResultStatus === "正常終了") {
-      const validity = this.messageBody.qualificationValidity;
-      return validity !== undefined && validity === "有効";
-    }
-    return false;
+    return this.messageHeader.segmentOfResult === "正常終了" &&
+      this.messageBody.processingResultStatus === "正常終了" &&
+      this.messageBody.qualificationValidity === "有効" &&
+      this.messageBody.resultList.length === 1;
+    // if (this.messageBody.processingResultStatus === "正常終了") {
+    //   const validity = this.messageBody.qualificationValidity;
+    //   return validity !== undefined && validity === "有効";
+    // }
+    // return false;
   }
 
   getErrorMessage(): string {
     try {
-      if( this.messageHeader.segmentOfResult !== "正常終了" ) {
-        return "資格確認問い合わせエラー：" + this.messageHeader.segmentOfResult;
+      const list: string[] = [];
+      if( this.messageHeader.segmentOfResult !== "正常終了" ){
+        list.push(this.messageHeader.segmentOfResult)
       }
-      if (this.messageBody.processingResultCode !== "正常終了") {
-        return "資格確認問い合わせエラー";
+      if( this.messageHeader.errorMessage ){
+        list.push(this.messageHeader.errorMessage);
       }
-
-      return "";
-
+      if( this.messageBody.qualificationValidity !== "有効" ){
+        if( this.messageBody.qualificationValidity ){
+          list.push(this.messageBody.qualificationValidity);
+        }
+      }
+      return list.join("");
     } catch (ex: any) {
       return ex.toString();
     }

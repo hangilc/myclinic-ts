@@ -66,7 +66,9 @@
       resolvedState = new Initializing();
       const patients = await searchPatient(
         resultItem.name,
-        resultItem.nameKana ? convertHankakuKatakanaToZenkakuHiragana(resultItem.nameKana) : undefined,
+        resultItem.nameKana
+          ? convertHankakuKatakanaToZenkakuHiragana(resultItem.nameKana)
+          : undefined,
         resultItem.birthdate
       );
       if (patients.length === 0) {
@@ -250,13 +252,29 @@
 
   async function doRegisterVisit(resolved: AllResolved) {
     const at = new Date();
-    const shahokokuhoId = resolved.hoken instanceof Shahokokuho ? resolved.hoken.shahokokuhoId : 0;
-    const koukikoureiId = resolved.hoken instanceof Koukikourei ? resolved.hoken.koukikoureiId : 0;
-    const kouhi1Id = resolved.kouhiList.length > 0 ? resolved.kouhiList[0].kouhiId : 0;
-    const kouhi2Id = resolved.kouhiList.length > 1 ? resolved.kouhiList[1].kouhiId : 0;
-    const kouhi3Id = resolved.kouhiList.length > 2 ? resolved.kouhiList[2].kouhiId : 0;
-    const hoken = new HokenIdSet(shahokokuhoId, koukikoureiId, 0, kouhi1Id, kouhi2Id, kouhi3Id);
-    const visit = await api.startVisitWithHoken(resolved.patient.patientId, at, hoken);
+    const shahokokuhoId =
+      resolved.hoken instanceof Shahokokuho ? resolved.hoken.shahokokuhoId : 0;
+    const koukikoureiId =
+      resolved.hoken instanceof Koukikourei ? resolved.hoken.koukikoureiId : 0;
+    const kouhi1Id =
+      resolved.kouhiList.length > 0 ? resolved.kouhiList[0].kouhiId : 0;
+    const kouhi2Id =
+      resolved.kouhiList.length > 1 ? resolved.kouhiList[1].kouhiId : 0;
+    const kouhi3Id =
+      resolved.kouhiList.length > 2 ? resolved.kouhiList[2].kouhiId : 0;
+    const hoken = new HokenIdSet(
+      shahokokuhoId,
+      koukikoureiId,
+      0,
+      kouhi1Id,
+      kouhi2Id,
+      kouhi3Id
+    );
+    const visit = await api.startVisitWithHoken(
+      resolved.patient.patientId,
+      at,
+      hoken
+    );
     const onshi = new Onshi(visit.visitId, JSON.stringify(result.toJSON()));
     await api.setOnshi(onshi);
     doClose();

@@ -79,8 +79,7 @@
       {:else}
         <div class="error-result">
           <div>資格確認失敗</div>
-          <div>{result.messageBody.qualificationValidity ?? ""}</div>
-          <div>{result.messageBody.processingResultMessage ?? ""}</div>
+          <div>{result.getErrorMessage()}</div>
         </div>
       {/if}
     </div>
