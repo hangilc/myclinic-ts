@@ -26,11 +26,11 @@
       if (i >= 0) {
         const ext = name.substring(i + 1, name.length);
         if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
-          imageUrl = await api.patientImageUrl(patient.patientId, name);
+          imageUrl = api.patientImageUrl(patient.patientId, name);
           return;
         }
       }
-      extImageUrl = await api.patientImageUrl(patient.patientId, name);
+      extImageUrl = api.patientImageUrl(patient.patientId, name);
     }
   });
 

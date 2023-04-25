@@ -19,7 +19,7 @@
   import api from "@/lib/api";
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
   import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
-  import { destroy_block } from "svelte/internal";
+  // import { destroy_block } from "svelte/internal";
 
   export let data: PatientData;
   export let destroy: () => void;

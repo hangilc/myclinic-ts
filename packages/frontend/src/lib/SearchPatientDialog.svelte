@@ -38,7 +38,7 @@
     }
   }
 
-  function doKeyDown(e: KeyboardEvent) {
+  function doKeyDown(_e: KeyboardEvent) {
   }
 </script>
 

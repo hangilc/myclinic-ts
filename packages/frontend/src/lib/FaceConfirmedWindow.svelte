@@ -38,7 +38,7 @@
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
   import { validFromOf } from "./util";
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
-  import { convert } from "./validation";
+  // import { convert } from "./validation";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 
   export let destroy: () => void;

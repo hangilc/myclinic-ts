@@ -18,7 +18,7 @@
     koukikoureiList: Koukikourei[]
   ) => void;
   export let onDelete: (deleted: Shahokokuho | Koukikourei) => void;
-  let initDone: boolean = false;
+  // let initDone: boolean = false;
   let hoken1Usage: Visit[] = [];
   let hoken2Usage: Visit[] = [];
   let validateShahokokuho1: (() => VResult<Shahokokuho>) | undefined =
@@ -37,7 +37,7 @@
   async function init() {
     hoken1Usage = await fetchUsage(hoken1);
     hoken2Usage = await fetchUsage(hoken2);
-    initDone = true;
+    // initDone = true;
   }
 
   async function fetchUsage(h: Shahokokuho | Koukikourei): Promise<Visit[]> {

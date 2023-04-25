@@ -1,4 +1,4 @@
-import type { Meisai, Onshi } from "myclinic-model";
+import type { Meisai } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";

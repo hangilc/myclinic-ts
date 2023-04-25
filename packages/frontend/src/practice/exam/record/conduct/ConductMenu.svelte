@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { Conduct, VisitEx } from "myclinic-model";
+  import type { VisitEx } from "myclinic-model";
   import EnterXpWidget from "./EnterXpWidget.svelte";
   import EnterInjectWidget from "./EnterInjectWidget.svelte";
   import Popup from "@/lib/Popup.svelte";
   import { getCopyTarget } from "../../ExamVars";
-  import { enter, enterTo } from "../shinryou/helper";
+  import { enterTo } from "../shinryou/helper";
   import api from "@/lib/api";
 
   export let visit: VisitEx;
