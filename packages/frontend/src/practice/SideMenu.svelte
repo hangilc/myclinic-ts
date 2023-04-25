@@ -28,6 +28,7 @@
   <a href="javascript:void(0)">紹介状</a>
   <a href="javascript:void(0)">診断書</a>
   <a href="javascript:void(0)" on:click={(_) => start("phone")}>電話</a>
+  <a href="javascript:void(0)" on:click={(_) => start("jihi-kenshin")}>自費健診</a>
 </div>
 
 <style>

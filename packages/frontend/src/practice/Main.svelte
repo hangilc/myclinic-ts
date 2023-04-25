@@ -4,6 +4,7 @@
   import type { Writable } from "svelte/store";
   import Phone from "./phone/Phone.svelte";
   import { currentPatient } from "./exam/ExamVars";
+  import JihiKenshin from "./jihi-kenshin/JihiKenshin.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -20,4 +21,5 @@
   <Exam isVisible={$serviceStore === "exam"} />
   <Cashier isVisible={$serviceStore === "cashier"} />
   <Phone isVisible={$serviceStore === "phone"} />
+  <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
 </div>
