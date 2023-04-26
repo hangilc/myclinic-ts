@@ -46,6 +46,10 @@ export class Box {
     return bs;
   }
 
+  splitToRows(...ws: number[]): Box[] {
+
+  }
+
   splitToColsAt(...xs: number[]): Box[] {
     const bs: Box[] = [];
     let left: number = this.left;
@@ -55,6 +59,14 @@ export class Box {
       left = right;
     })
     bs.push(new Box(left, this.top, this.right, this.bottom));
+    return bs;
+  }
+
+  splitToCols(...ws: number[]): Box[] {
+    const bs: Box[] = [];
+    ws.forEach(w => {
+
+    });
     return bs;
   }
 

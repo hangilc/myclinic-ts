@@ -7,6 +7,12 @@
   import type { Op } from "@/lib/drawer/op";
 
   export let isVisible: boolean;
+  const firstColWidth = 22;
+  const secondColWidth = 54;
+
+  function compileShimei(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToColsAt(firstColWidth, )
+  }
 
   function compileOps(): Op[] {
     const comp = new DrawerCompiler();
@@ -15,6 +21,7 @@
     comp.box(frame);
     const rows = frame.splitToRowsAt(...Array(9).fill(9), 9*9);
     rows.forEach(r => comp.box(r));
+    compileShimei(comp, rows[0]);
     return comp.compile();
   }
 
