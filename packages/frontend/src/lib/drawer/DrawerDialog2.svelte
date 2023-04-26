@@ -6,12 +6,12 @@
   import type { Op } from "./op";
 
   export let destroy: () => void;
-  export let title: string;
-  export let width: number;
-  export let height: number;
+  export let title: string = "Untitled";
+  export let width: number = 210;
+  export let height: number = 297;
   export let previewScale: number = 1;
   export let kind: string = "";
-  export let ops: Op[];
+  export let ops: Op[] = [];
   let settingSelect: string = "手動";
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;

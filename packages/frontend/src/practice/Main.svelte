@@ -15,6 +15,7 @@
       document.title = `(${p.patientId}) ${p.fullName("")}`;
     }
   });
+
 </script>
 
 <div>
