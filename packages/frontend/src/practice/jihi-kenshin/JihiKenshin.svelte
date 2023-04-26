@@ -2,6 +2,7 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import { Box } from "@/lib/drawer-compiler/box";
   import { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
+  import { HorizAlign } from "@/lib/drawer-compiler/enums";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
   import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
   import type { Op } from "@/lib/drawer/op";
@@ -11,15 +12,20 @@
   const secondColWidth = 54;
 
   function compileShimei(c: DrawerCompiler, row: Box): void {
-    const cols = row.splitToColsAt(firstColWidth, )
+    const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 48);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "氏名", { interCharsSpace: 4 })
+    c.text(cols[2].inset(1), "生年月日", { halign: HorizAlign.Justify })
   }
 
   function compileOps(): Op[] {
     const comp = new DrawerCompiler();
     const paper: Box = Box.fromPaperSize(A4);
-    const frame = paper.insert(16, 42, 26, 42);
+    comp.createFont("regular", "serif", 4);
+    comp.setFont("regular");
+    const frame = paper.inset(16, 42, 26, 42);
     comp.box(frame);
-    const rows = frame.splitToRowsAt(...Array(9).fill(9), 9*9);
+    const rows = frame.splitToRows(...Array(9).fill(9), 9*9);
     rows.forEach(r => comp.box(r));
     compileShimei(comp, rows[0]);
     return comp.compile();

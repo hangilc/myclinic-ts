@@ -1,4 +1,5 @@
 import type { insert } from "svelte/internal";
+import { HorizDirection } from "./enums";
 
 export class Box {
   left: number;
@@ -21,14 +22,14 @@ export class Box {
     return this.bottom - this.top;
   }
 
-  insert(left: number, top: number | undefined, right: number | undefined, bottom: number | undefined): Box {
-    if( top === undefined ){
+  inset(left: number, top?: number, right?: number, bottom?: number): Box {
+    if (top === undefined) {
       top = left;
     }
-    if( right === undefined ){
+    if (right === undefined) {
       right = left;
     }
-    if( bottom === undefined ){
+    if (bottom === undefined) {
       bottom = top;
     }
     return new Box(this.left + left, this.top + top, this.right - right, this.bottom - bottom);
@@ -36,52 +37,72 @@ export class Box {
 
   splitToRowsAt(...ys: number[]): Box[] {
     const bs: Box[] = [];
-    let top: number = this.top;
+    const box = (top: number, bottom: number) =>
+      bs.push(new Box(this.left, top, this.right, bottom));
+    let top = this.top;
     ys.forEach(y => {
-      const bot = top + y;
-      bs.push(new Box(this.left, top, this.right, bot));
-      top = bot;
-    })
-    bs.push(new Box(this.left, top, this.right, this.bottom ))
+      const bottom = this.top + y;
+      box(top, bottom);
+      top = bottom;
+    });
+    box(top, this.bottom);
     return bs;
   }
 
-  splitToRows(...ws: number[]): Box[] {
-
+  splitToRows(...hs: number[]): Box[] {
+    const bs: Box[] = [];
+    const box = (top: number, bottom: number) =>
+      bs.push(new Box(this.left, top, this.right, bottom));
+    let top = this.top;
+    hs.forEach(h => {
+      const bottom = top + h;
+      box(top, bottom);
+      top = bottom;
+    });
+    box(top, this.bottom);
+    return bs;
   }
 
   splitToColsAt(...xs: number[]): Box[] {
     const bs: Box[] = [];
-    let left: number = this.left;
-    xs.forEach(y => {
-      const right = left + y;
+    const box = (left: number, right: number) =>
       bs.push(new Box(left, this.top, right, this.bottom));
+    let left = this.left;
+    xs.forEach(x => {
+      const right = this.left + x;
+      box(left, right);
       left = right;
-    })
-    bs.push(new Box(left, this.top, this.right, this.bottom));
+    });
+    box(left, this.right);
     return bs;
   }
 
   splitToCols(...ws: number[]): Box[] {
     const bs: Box[] = [];
+    const box = (left: number, right: number) =>
+      bs.push(new Box(left, this.top, right, this.bottom));
+    let left = this.left;
     ws.forEach(w => {
-
+      const right = left + w;
+      box(left, right);
+      left = right;
     });
+    box(left, this.right);
     return bs;
   }
 
-  shrinkWidth(w: number, dir: HorizShrinkDirection = HorizShrinkDirection.Left): Box {
-    switch(dir) {
-      case HorizShrinkDirection.Left: {
+  shrinkWidth(w: number, dir: HorizDirection = HorizDirection.Left): Box {
+    switch (dir) {
+      case HorizDirection.Left: {
         return new Box(this.left, this.top, this.left + w, this.bottom);
       }
-      case HorizShrinkDirection.Center: {
-        const left = (this.left + this.right) / 2 - w/2;
+      case HorizDirection.Center: {
+        const left = (this.left + this.right) / 2 - w / 2;
         const right = left + w;
         return new Box(left, this.top, right, this.bottom);
       }
-      case HorizShrinkDirection.Right: {
-        return new Box(this.right - w, this.top, this.right, this.bottom); 
+      case HorizDirection.Right: {
+        return new Box(this.right - w, this.top, this.right, this.bottom);
       }
     }
   }
@@ -97,4 +118,4 @@ export class Box {
   }
 }
 
-enum HorizShrinkDirection { Left, Center, Right }
+
