@@ -1,5 +1,5 @@
 import { OpCreateFont, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, type Op } from "../drawer/op";
-import type { Box } from "./box";
+import { Box } from "./box";
 import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign } from "./enums";
 import { CharVariant, MarkVariant, type TextVariant } from "./text-variant";
@@ -120,7 +120,7 @@ export class DrawerCompiler {
     this.ops.push(new OpDrawChars(chars, xs, ys));
   }
 
-  text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): void {
+  text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): Box {
     if( typeof ts === "string" ){
       ts = [ts];
     }
@@ -178,6 +178,7 @@ export class DrawerCompiler {
       x += v.getWidth(fontSize) + ics;
     });
     this.ops.push(new OpDrawChars(chars, xs, ys));
+    return new Box(x0, y0, x0 + totalWidth, y0 + fontSize);
   }
 
   vertText(b: Box, t: string, opt: VertTextOpt = {}): void {

@@ -98,10 +98,9 @@
       halign: HorizAlign.Left,
       valign: VertAlign.Top
     });
-    const bottom = row.setHeight(6, VertDirection.Bottom).shift(0, -1);
-    c.text(bottom.inset(1, 0, 0, 0), ["撮影日"], {
-      halign: HorizAlign.Left
-    });
+    const bottom = row.setHeight(6, VertDirection.Bottom).shift(0, -1).inset(1, 0, 0, 0);
+    const b = c.text(bottom, "診察日", { halign: HorizAlign.Left});
+    c.addMark("Ｘ線撮影日", bottom.setLeft(b.right).inset(4, 0, 0, 0));
   }
 
   function compileKensa(c: DrawerCompiler, box: Box): void {

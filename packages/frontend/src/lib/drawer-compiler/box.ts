@@ -34,6 +34,10 @@ export class Box {
     return new Box(this.left + dx, this.top + dy, this.right + dx, this.bottom + dy);
   }
 
+  setLeft(left: number): Box {
+    return new Box(left, this.top, this.right, this.bottom);
+  }
+
   setWidth(width: number, dir: HorizDirection = HorizDirection.Left): Box {
     switch (dir) {
       case HorizDirection.Left: {
