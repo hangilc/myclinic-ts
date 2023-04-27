@@ -113,6 +113,7 @@
     c.frame(box);
     const cols = box.splitToCols(7);
     c.frame(cols[0]);
+    c.vertText(cols[0], "検尿", { interCharsSpace: 4});
     const rows = cols[1].splitToEvenRows(3);
     rows.forEach(r => c.frame(r));
   }

@@ -138,10 +138,30 @@ export class DrawerCompiler {
     console.log("ys", ys);
     this.ops.push(new OpDrawChars(chars, xs, ys));
   }
+
+  vertText(b: Box, t: string, opt: VertTextOpt = {}): void {
+    if( t === "" ){
+      return;
+    }
+    const fontSize = this.curFontSize;
+    const x = b.left + (b.width - fontSize) / 2.0;
+    let totalHeight = t.length * fontSize;
+    const ics = opt.interCharsSpace ?? 0;
+    totalHeight += ics * (t.length - 1);
+    let y = b.top + (b.height - totalHeight) / 2.0;
+    for(let c of t){
+      this.ops.push(new OpDrawChars(c, [x], [y]));
+      y += fontSize + ics;
+    }
+  }
 }
 
 export interface TextOpt {
   halign?: HorizAlign;
   valign?: VertAlign;
+  interCharsSpace?: number;
+}
+
+export interface VertTextOpt {
   interCharsSpace?: number;
 }
