@@ -22,6 +22,20 @@ export class Box {
     return this.bottom - this.top;
   }
 
+  setWidth(width: number, dir: HorizDirection = HorizDirection.Left): Box {
+    switch (dir) {
+      case HorizDirection.Left: {
+        return new Box(this.left, this.top, this.left + width, this.bottom);
+      }
+      case HorizDirection.Center: {
+        return new Box(this.left + width / 2, this.top, this.right - width / 2, this.bottom);
+      }
+      case HorizDirection.Right: {
+        return new Box(this.right - width, this.top, this.right, this.bottom);
+      }
+    }
+  }
+
   inset(left: number, top?: number, right?: number, bottom?: number): Box {
     if (top === undefined) {
       top = left;

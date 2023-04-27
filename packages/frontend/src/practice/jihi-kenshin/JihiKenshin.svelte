@@ -2,7 +2,7 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import { Box } from "@/lib/drawer-compiler/box";
   import { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
-  import { HorizAlign } from "@/lib/drawer-compiler/enums";
+  import { HorizAlign, HorizDirection } from "@/lib/drawer-compiler/enums";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
   import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
   import type { Op } from "@/lib/drawer/op";
@@ -22,6 +22,62 @@
     c.addMark("性別", cols[5]);
   }
 
+  function compileJuusho(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "住所", { interCharsSpace: 4 });
+    c.addMark("住所", cols[1]);
+  }
+
+  function compileShincho(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "身長", { interCharsSpace: 4 });
+    c.addMark("身長", cols[1]);
+  }
+
+  function compileTaijuu(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "体重", { interCharsSpace: 4 });
+    c.addMark("体重", cols[1]);
+  }
+
+  function compileShinsatsu(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "診察", { interCharsSpace: 4 });
+    c.addMark("診察", cols[1]);
+  }
+
+  function compileShiryoku(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "視力", { interCharsSpace: 4 });
+    c.addMark("視力", cols[1]);
+  }
+
+  function compileChouryoku(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "聴力", { interCharsSpace: 4 });
+    c.addMark("聴力", cols[1]);
+  }
+
+  function compileKetsuatsu(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "血圧", { interCharsSpace: 4 });
+    c.addMark("血圧", cols[1]);
+  }
+
+  function compileShindenzu(c: DrawerCompiler, row: Box): void {
+    const cols = row.splitToCols(firstColWidth);
+    cols.forEach(col => c.box(col));
+    c.text(cols[0], "心電図");
+    c.addMark("心電図", cols[1]);
+  }
+
   function compileOps(): Op[] {
     const comp = new DrawerCompiler();
     const paper: Box = Box.fromPaperSize(A4);
@@ -30,8 +86,15 @@
     const frame = paper.inset(16, 42, 26, 42);
     comp.box(frame);
     const rows = frame.splitToRows(...Array(9).fill(9), 9*9);
-    rows.forEach(r => comp.box(r));
     compileShimei(comp, rows[0]);
+    compileJuusho(comp, rows[1]);
+    compileShincho(comp, rows[2].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileTaijuu(comp, rows[3].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileShinsatsu(comp, rows[4].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileShiryoku(comp, rows[5].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileChouryoku(comp, rows[6].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileKetsuatsu(comp, rows[7].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileShindenzu(comp, rows[8].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
     return comp.compile();
   }
 
