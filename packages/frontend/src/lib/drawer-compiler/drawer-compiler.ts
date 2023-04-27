@@ -2,6 +2,7 @@ import { OpCreateFont, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, type Op } fro
 import type { Box } from "./box";
 import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign } from "./enums";
+import { CharVariant, type TextVariant } from "./text-variant";
 
 export class DrawerCompiler {
   ops: Op[] = [];
@@ -59,49 +60,61 @@ export class DrawerCompiler {
     this.rect(b.left, b.top, b.right, b.bottom);
   }
 
+  drawTextVariant(x0: number, y0: number, fontSize: number, variant: TextVariant,
+    strList: string[], xs: number[], ys: number[]): void {
+      strList.push(variant.getChars());
+      const [vxs, vys] = variant.getLocations(x0, y0, fontSize, this);
+      xs.push(...vxs);
+      ys.push(...vys);
+  }
+
   text(b: Box, t: string, opt: TextOpt = {}): void {
-    const chars: string[] = [];
-    const xs: number[] = [];
-    let left: number = 0;
-    const fontSize = this.curFontSize;
-    const elements: string[] = Array.from(t);
-    const ws: number[] = elements.map(c => charWidth(c, fontSize));
+    const variants: TextVariant[] = Array.from(t).map(chr => new CharVariant(chr));
+    const fontSize: number = this.curFontSize;
+    let totalWidth: number = variants.map(v => v.getWidth(fontSize)).reduce((a, b) => a + b, 0);
     let ics: number = 0;
-    if (opt.halign === HorizAlign.Justify && ws.length > 1) {
-      ics = (b.width - ws.reduce((a, b) => a + b, 0)) / (ws.length - 1);
-    } else if (opt.interCharsSpace !== undefined) {
+    if( opt.halign === HorizAlign.Justify && variants.length >= 2 ){
+      ics = (b.width -totalWidth) / (variants.length - 1);
+    } else if( opt.interCharsSpace !== undefined ){
       ics = opt.interCharsSpace;
     }
-    elements.forEach((e, i) => {
-      chars.push(e);
-      if( i > 0 ){
-        left += ics;
-      }
-      xs.push(left);
-      left += ws[i];
-    });
-    console.log("xs", xs);
-    let y: number;
-    switch (opt.valign ?? VertAlign.Center) {
-      case VertAlign.Center: y = b.top + (b.height - fontSize) / 2; break;
-      case VertAlign.Bottom: y = b.bottom - fontSize; break;
-      default: y = b.top; break;
+    if( ics > 0 ){
+      totalWidth += ics * (variants.length - 1);
     }
-    let dx = b.left;
-    switch (opt.halign ?? HorizAlign.Center) {
+    let y0: number = b.top;
+    switch(opt.valign ?? VertAlign.Center) {
+      case VertAlign.Center: {
+        y0 = b.top + (b.height - fontSize) / 2.0;
+        break;
+      }
+      case VertAlign.Bottom: {
+        y0 = b.bottom - fontSize;
+        break;
+      }
+    }
+    let x0: number = b.left;
+    switch(opt.halign ?? HorizAlign.Center) {
       case HorizAlign.Center: {
-        dx += (b.width - left) / 2.0;
+        x0 = b.left + (b.width - totalWidth) / 2.0;
         break;
       }
       case HorizAlign.Right: {
-        dx += (b.width - left);
+        x0 = b.right - totalWidth;
         break;
       }
     }
-    for(let i=0;i<xs.length;i++){
-      xs[i] += dx;
-    }
-    this.ops.push(new OpDrawChars(chars.join(""), xs, [y]));
+    let x = x0;
+    const chars: string = variants.map(v => v.getChars()).join("");
+    const xs: number[] = [];
+    const ys: number[] = [];
+    variants.forEach(v => {
+      const [vxs, vys] = v.getLocations(x, y0, fontSize, this);
+      xs.push(...vxs);
+      ys.push(...vys);
+      x += v.getWidth(fontSize) + ics;
+    });
+    console.log("ys", ys);
+    this.ops.push(new OpDrawChars(chars, xs, ys));
   }
 }
 

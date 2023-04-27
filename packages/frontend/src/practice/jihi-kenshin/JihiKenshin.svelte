@@ -14,7 +14,7 @@
   function compileShimei(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 48);
     cols.forEach(col => c.box(col));
-    c.text(cols[0], "氏名", { interCharsSpace: 4 })
+    c.text(cols[0], "氏名", { interCharsSpace: 4 });
     c.text(cols[2].inset(1), "生年月日", { halign: HorizAlign.Justify })
   }
 

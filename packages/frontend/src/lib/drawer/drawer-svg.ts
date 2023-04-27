@@ -141,7 +141,8 @@ export function drawerToSvg(ops: Op[], options: any) {
       "font-italic": font_italic ? "italic" : "normal",
       "text-anchor": "start",
       //'dominant-baseline': "text-after-edge",
-      dy: "1em",
+      // dy: "1em",
+      dy: ys.length ? Array(ys.length).fill("1em").join(" ") : "1em"
     };
     for (let key in attrs) {
       e.setAttributeNS(null, key, attrs[key]);
@@ -149,12 +150,12 @@ export function drawerToSvg(ops: Op[], options: any) {
     if (typeof xs === "number" || xs instanceof Number) {
       e.setAttributeNS(null, "x", xs.toString());
     } else {
-      e.setAttributeNS(null, "x", xs.join(","));
+      e.setAttributeNS(null, "x", xs.join(" "));
     }
     if (typeof ys === "number" || ys instanceof Number) {
       e.setAttributeNS(null, "y", ys.toString());
     } else {
-      e.setAttributeNS(null, "y", ys.join(","));
+      e.setAttributeNS(null, "y", ys.join(" "));
     }
     chars = chars.replace(/ /g, "&nbsp;");
     e.innerHTML = chars;
