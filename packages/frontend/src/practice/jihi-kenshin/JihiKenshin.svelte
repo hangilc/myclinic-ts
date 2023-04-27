@@ -13,7 +13,7 @@
 
   function compileShimei(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 42, 17);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "氏名", { interCharsSpace: 4 });
     c.addMark("氏名", cols[1]);
     c.text(cols[2], "生年月日", { halign: HorizAlign.Justify });
@@ -24,58 +24,101 @@
 
   function compileJuusho(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "住所", { interCharsSpace: 4 });
     c.addMark("住所", cols[1]);
   }
 
   function compileShincho(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "身長", { interCharsSpace: 4 });
     c.addMark("身長", cols[1]);
   }
 
   function compileTaijuu(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "体重", { interCharsSpace: 4 });
     c.addMark("体重", cols[1]);
   }
 
   function compileShinsatsu(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "診察", { interCharsSpace: 4 });
     c.addMark("診察", cols[1]);
   }
 
   function compileShiryoku(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "視力", { interCharsSpace: 4 });
     c.addMark("視力", cols[1]);
   }
 
   function compileChouryoku(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "聴力", { interCharsSpace: 4 });
     c.addMark("聴力", cols[1]);
   }
 
   function compileKetsuatsu(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "血圧", { interCharsSpace: 4 });
     c.addMark("血圧", cols[1]);
   }
 
   function compileShindenzu(c: DrawerCompiler, row: Box): void {
     const cols = row.splitToCols(firstColWidth);
-    cols.forEach(col => c.box(col));
+    cols.forEach((col) => c.frame(col));
     c.text(cols[0], "心電図");
     c.addMark("心電図", cols[1]);
+  }
+
+  function compileKioureki(c: DrawerCompiler, row: Box): void {
+    c.frame(row);
+  }
+
+  function compileXp(c: DrawerCompiler, row: Box): void {
+    c.frame(row);
+  }
+
+  function compileKensa(c: DrawerCompiler, box: Box): void {
+    const cols = box.splitToCols(firstColWidth, 90);
+    c.frame(cols[0]);
+    c.text(cols[0], "血液検査");
+    const rows = cols[1].splitToEvenRows(9);
+    rows.forEach((r, i) => {
+      const cs = r.splitToCols(37);
+      cs.forEach((col) => c.frame(col));
+      c.addMark(`血液検査名${i + 1}`, cs[0]);
+      c.addMark(`血液検査結果${i + 1}`, cs[1]);
+    });
+    compileKennyou(
+      c,
+      Box.combineRows(
+        rows
+          .slice(0, 3)
+          .map((r) =>
+            r.flipRight().setWidth(cols[2].width, HorizDirection.Left)
+          )
+      )
+    );
+  }
+
+  function compileKennyou(c: DrawerCompiler, box: Box): void {
+    c.frame(box);
+    const cols = box.splitToCols(7);
+    c.frame(cols[0]);
+    const rows = cols[1].splitToEvenRows(3);
+    rows.forEach(r => c.frame(r));
+  }
+
+  function compileBottom(c: DrawerCompiler, row: Box): void {
+    c.frame(row);
   }
 
   function compileOps(): Op[] {
@@ -84,17 +127,56 @@
     comp.createFont("regular", "serif", 4);
     comp.setFont("regular");
     const frame = paper.inset(16, 42, 26, 42);
-    comp.box(frame);
-    const rows = frame.splitToRows(...Array(9).fill(9), 9*9);
+    comp.frame(frame);
+    const rows = frame.splitToRows(...Array(9).fill(9), 9 * 9);
     compileShimei(comp, rows[0]);
     compileJuusho(comp, rows[1]);
-    compileShincho(comp, rows[2].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileTaijuu(comp, rows[3].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileShinsatsu(comp, rows[4].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileShiryoku(comp, rows[5].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileChouryoku(comp, rows[6].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileKetsuatsu(comp, rows[7].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
-    compileShindenzu(comp, rows[8].setWidth(firstColWidth + secondColWidth, HorizDirection.Left));
+    compileShincho(
+      comp,
+      rows[2].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileTaijuu(
+      comp,
+      rows[3].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileShinsatsu(
+      comp,
+      rows[4].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileShiryoku(
+      comp,
+      rows[5].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileChouryoku(
+      comp,
+      rows[6].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileKetsuatsu(
+      comp,
+      rows[7].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileShindenzu(
+      comp,
+      rows[8].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+    );
+    compileKioureki(
+      comp,
+      Box.combineRows(
+        rows
+          .slice(2, 4)
+          .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
+      )
+    );
+    compileXp(
+      comp,
+      Box.combineRows(
+        rows
+          .slice(4, 9)
+          .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
+      )
+    );
+    compileKensa(comp, rows[9]);
+    compileBottom(comp, rows[10]);
     return comp.compile();
   }
 
@@ -108,8 +190,8 @@
         width: A4[0],
         height: A4[1],
         previewScale: 2,
-      }
-    })
+      },
+    });
   }
 </script>
 
@@ -118,7 +200,6 @@
   <div>
     <button on:click={doDisplay}>表示</button>
   </div>
-  
 </div>
 
 <style>

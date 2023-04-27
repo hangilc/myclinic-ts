@@ -57,7 +57,7 @@ export class DrawerCompiler {
     this.lineTo(x1, y1);
   }
 
-  box(b: Box): void {
+  frame(b: Box): void {
     this.rect(b.left, b.top, b.right, b.bottom);
   }
 

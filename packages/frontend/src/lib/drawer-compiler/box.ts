@@ -77,6 +77,21 @@ export class Box {
     return bs;
   }
 
+  splitToEvenRows(n: number): Box[] {
+    const h = this.height / n;
+    const boxes: Box[] = [];
+    for (let i = 0; i < n; i++) {
+      const b = new Box(
+        this.left,
+        this.top + h * i,
+        this.right,
+        i === (n - 1) ? this.bottom : this.top + h * (i + 1)
+      );
+      boxes.push(b);
+    }
+    return boxes;
+  }
+
   splitToColsAt(...xs: number[]): Box[] {
     const bs: Box[] = [];
     const box = (left: number, right: number) =>
@@ -119,6 +134,10 @@ export class Box {
         return new Box(this.right - w, this.top, this.right, this.bottom);
       }
     }
+  }
+
+  flipRight(): Box {
+    return new Box(this.right, this.top, this.right + this.width, this.bottom);
   }
 
   static fromPaperSize(size: [number, number]): Box {
