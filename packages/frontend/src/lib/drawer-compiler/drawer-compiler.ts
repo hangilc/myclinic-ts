@@ -2,7 +2,7 @@ import { OpCreateFont, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, type Op } fro
 import type { Box } from "./box";
 import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign } from "./enums";
-import { CharVariant, type TextVariant } from "./text-variant";
+import { CharVariant, MarkVariant, type TextVariant } from "./text-variant";
 
 export class DrawerCompiler {
   ops: Op[] = [];
@@ -60,16 +60,24 @@ export class DrawerCompiler {
     this.rect(b.left, b.top, b.right, b.bottom);
   }
 
-  drawTextVariant(x0: number, y0: number, fontSize: number, variant: TextVariant,
-    strList: string[], xs: number[], ys: number[]): void {
-      strList.push(variant.getChars());
-      const [vxs, vys] = variant.getLocations(x0, y0, fontSize, this);
-      xs.push(...vxs);
-      ys.push(...vys);
+  marker(str: string, labelName: string): MarkVariant {
+    return new MarkVariant(str, labelName);
   }
 
-  text(b: Box, t: string, opt: TextOpt = {}): void {
-    const variants: TextVariant[] = Array.from(t).map(chr => new CharVariant(chr));
+  text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): void {
+    if( typeof ts === "string" ){
+      ts = [ts];
+    }
+    const variants: TextVariant[] = [];
+    ts.forEach(t => {
+      if( typeof t === "string" ){
+        for(let c of t){
+          variants.push(new CharVariant(c));
+        }
+      } else {
+        variants.push(t);
+      }
+    });
     const fontSize: number = this.curFontSize;
     let totalWidth: number = variants.map(v => v.getWidth(fontSize)).reduce((a, b) => a + b, 0);
     let ics: number = 0;

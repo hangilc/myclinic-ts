@@ -9,6 +9,12 @@ export function charWidth(codePoint: number | string, fontSize: number): number 
   }
 }
 
+export function textWidth(t: string, fontSize: number): number {
+  return Array.from(t).map(c => charWidth(c.codePointAt(0)!, fontSize)).reduce(
+    (a, b) => a + b, 0
+  );
+}
+
 function isHankaku(code: number): boolean {
   return (code >= 0xff61 && code <= 0xff64) ||
     (code >= 0xff65 && code <= 0xff9f) ||
