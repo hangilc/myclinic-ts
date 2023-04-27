@@ -1,5 +1,5 @@
 import type { insert } from "svelte/internal";
-import { HorizDirection } from "./enums";
+import { HorizDirection, VertDirection } from "./enums";
 
 export class Box {
   left: number;
@@ -22,16 +22,42 @@ export class Box {
     return this.bottom - this.top;
   }
 
+  get cx(): number {
+    return (this.left + this.right) / 2.0;
+  }
+
+  get cy(): number {
+    return (this.top + this.bottom) / 2.0;
+  }
+
+  shift(dx: number, dy: number): Box {
+    return new Box(this.left + dx, this.top + dy, this.right + dx, this.bottom + dy);
+  }
+
   setWidth(width: number, dir: HorizDirection = HorizDirection.Left): Box {
     switch (dir) {
       case HorizDirection.Left: {
         return new Box(this.left, this.top, this.left + width, this.bottom);
       }
       case HorizDirection.Center: {
-        return new Box(this.left + width / 2, this.top, this.right - width / 2, this.bottom);
+        return new Box(this.cx - width / 2, this.top, this.cx + width / 2, this.bottom);
       }
       case HorizDirection.Right: {
         return new Box(this.right - width, this.top, this.right, this.bottom);
+      }
+    }
+  }
+
+  setHeight(height: number, dir: VertDirection = VertDirection.Top): Box {
+    switch(dir) {
+      case VertDirection.Top: {
+        return new Box(this.left, this.top, this.right, this.top + height);
+      }
+      case VertDirection.Center: {
+        return new Box(this.left, this.cy - height / 2.0, this.right, this.cy + height / 2.0);
+      }
+      case VertDirection.Bottom: {
+        return new Box(this.left, this.bottom - height, this.right, this.bottom);
       }
     }
   }

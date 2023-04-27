@@ -2,8 +2,14 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import { Box } from "@/lib/drawer-compiler/box";
   import { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
-  import { HorizAlign, HorizDirection } from "@/lib/drawer-compiler/enums";
+  import {
+    HorizAlign,
+    HorizDirection,
+    VertAlign,
+    VertDirection,
+  } from "@/lib/drawer-compiler/enums";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
+  import { FontWeightBold } from "@/lib/drawer-compiler/weight-consts";
   import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
   import type { Op } from "@/lib/drawer/op";
 
@@ -80,10 +86,22 @@
 
   function compileKioureki(c: DrawerCompiler, row: Box): void {
     c.frame(row);
+    c.text(row.inset(1), "既往歴", {
+      halign: HorizAlign.Left,
+      valign: VertAlign.Top
+    });
   }
 
   function compileXp(c: DrawerCompiler, row: Box): void {
     c.frame(row);
+    c.text(row.inset(1), "胸部Ｘ線（大角）", {
+      halign: HorizAlign.Left,
+      valign: VertAlign.Top
+    });
+    const bottom = row.setHeight(6, VertDirection.Bottom).shift(0, -1);
+    c.text(bottom.inset(1, 0, 0, 0), ["撮影日"], {
+      halign: HorizAlign.Left
+    });
   }
 
   function compileKensa(c: DrawerCompiler, box: Box): void {
@@ -113,9 +131,9 @@
     c.frame(box);
     const cols = box.splitToCols(7);
     c.frame(cols[0]);
-    c.vertText(cols[0], "検尿", { interCharsSpace: 4});
+    c.vertText(cols[0], "検尿", { interCharsSpace: 4 });
     const rows = cols[1].splitToEvenRows(3);
-    rows.forEach(r => c.frame(r));
+    rows.forEach((r) => c.frame(r));
   }
 
   function compileBottom(c: DrawerCompiler, row: Box): void {
@@ -125,9 +143,16 @@
   function compileOps(): Op[] {
     const comp = new DrawerCompiler();
     const paper: Box = Box.fromPaperSize(A4);
+    comp.createFont("title", "sans-serif", 7, FontWeightBold);
     comp.createFont("regular", "serif", 4);
-    comp.setFont("regular");
     const frame = paper.inset(16, 42, 26, 42);
+    comp.setFont("title");
+    comp.textAt(frame.cx, frame.top - 7, "健康診断書", {
+      halign: HorizAlign.Center,
+      valign: VertAlign.Bottom,
+      interCharsSpace: 1,
+    });
+    comp.setFont("regular");
     comp.frame(frame);
     const rows = frame.splitToRows(...Array(9).fill(9), 9 * 9);
     compileShimei(comp, rows[0]);

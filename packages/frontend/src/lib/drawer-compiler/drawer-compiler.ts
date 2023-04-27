@@ -78,6 +78,48 @@ export class DrawerCompiler {
     return new MarkVariant(str, labelName);
   }
 
+  textAt(x: number, y: number, t: string, opt: TextOpt = {}): void {
+    const variants: TextVariant[] = Array.from(t).map(c => new CharVariant(c));
+    const fontSize: number = this.curFontSize;
+    let totalWidth: number = variants.map(v => v.getWidth(fontSize)).reduce((a, b) => a + b, 0);
+    let ics: number = opt.interCharsSpace ?? 0;
+    if( ics > 0 ){
+      totalWidth += ics * (variants.length - 1);
+    }
+    let y0: number = y;
+    switch(opt.valign ?? VertAlign.Top) {
+      case VertAlign.Center: {
+        y0 = y - fontSize / 2.0;
+        break;
+      }
+      case VertAlign.Bottom: {
+        y0 = y - fontSize;
+        break;
+      }
+    }
+    let x0: number = x;
+    switch(opt.halign ?? HorizAlign.Left) {
+      case HorizAlign.Center: {
+        x0 = x - totalWidth / 2.0;
+        break;
+      }
+      case HorizAlign.Right: {
+        x0 = x - totalWidth;
+        break;
+      }
+    }
+    const chars: string = variants.map(v => v.getChars()).join("");
+    const xs: number[] = [];
+    const ys: number[] = [];
+    variants.forEach(v => {
+      const [vxs, vys] = v.getLocations(x0, y0, fontSize, this);
+      xs.push(...vxs);
+      ys.push(...vys);
+      x0 += v.getWidth(fontSize) + ics;
+    });
+    this.ops.push(new OpDrawChars(chars, xs, ys));
+  }
+
   text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): void {
     if( typeof ts === "string" ){
       ts = [ts];
@@ -135,7 +177,6 @@ export class DrawerCompiler {
       ys.push(...vys);
       x += v.getWidth(fontSize) + ics;
     });
-    console.log("ys", ys);
     this.ops.push(new OpDrawChars(chars, xs, ys));
   }
 
