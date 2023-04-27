@@ -12,10 +12,14 @@
   const secondColWidth = 54;
 
   function compileShimei(c: DrawerCompiler, row: Box): void {
-    const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 48);
+    const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 42, 17);
     cols.forEach(col => c.box(col));
     c.text(cols[0], "氏名", { interCharsSpace: 4 });
-    c.text(cols[2].inset(1), "生年月日", { halign: HorizAlign.Justify })
+    c.addMark("氏名", cols[1]);
+    c.text(cols[2], "生年月日", { halign: HorizAlign.Justify });
+    c.addMark("生年月日", cols[3]);
+    c.text(cols[4], "性別");
+    c.addMark("性別", cols[5]);
   }
 
   function compileOps(): Op[] {

@@ -8,6 +8,7 @@ export class DrawerCompiler {
   ops: Op[] = [];
   fontSizeMap: Record<string, number> = { "": 4 };
   curFont: string = "";
+  marks: Record<string, Box> = {};
 
   compile(): Op[] {
     return this.ops;
@@ -58,6 +59,19 @@ export class DrawerCompiler {
 
   box(b: Box): void {
     this.rect(b.left, b.top, b.right, b.bottom);
+  }
+
+  addMark(labelName: string, box: Box): void {
+    this.marks[labelName] = box;
+  }
+
+  getMark(labelName: string): Box {
+    const b = this.marks[labelName];
+    if( !b ){
+      throw new Error("Cannto find mark: " + labelName);
+    } else {
+      return b;
+    }
   }
 
   marker(str: string, labelName: string): MarkVariant {
