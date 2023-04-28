@@ -200,6 +200,20 @@ export class DrawerCompiler {
       y += fontSize + ics;
     }
   }
+
+  textLines(b: Box, ts: string[], opt: TextLinesOpt = {}): Box {
+    if( ts.length === 0 ){
+      return b.setBottom(b.top);
+    }
+    const leading = opt.leading ?? 0;
+    let rb = b;
+    const fontSize = this.curFontSize;
+    ts.forEach(t => {
+      this.text(rb, t);
+      rb = rb.shiftTopValue(fontSize + leading);
+    })
+    return rb.setTop(b.top).shiftBottomValue(-leading);
+  }
 }
 
 export interface TextOpt {
@@ -210,4 +224,8 @@ export interface TextOpt {
 
 export interface VertTextOpt {
   interCharsSpace?: number;
+}
+
+export interface TextLinesOpt {
+  leading?: number;
 }

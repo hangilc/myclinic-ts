@@ -157,10 +157,28 @@
 
   function compileBottom(c: DrawerCompiler, box: Box): void {
     c.frame(box);
-    c.text(box.inset(4, 4), "診断の結果上記の通り相違ないことを照明する。", {
+    c.text(box.inset(4, 4), "診断の結果上記の通り相違ないことを証明する。", {
       halign: HorizAlign.Left,
       valign: VertAlign.Top
     });
+    const issueDate: Box = box.shift(16, 12)
+      .setWidth(46, HorizDirection.Left)
+      .setHeight(6, VertDirection.Top);
+    c.addMark("発行日", issueDate);
+    const addr1: Box = box.shift(72, 12)
+      .setWidth(72, HorizDirection.Left)
+      .setHeight(6, VertDirection.Top);
+    const addr2: Box = addr1.flipBottom().shift(0, 1);
+    c.addMark("住所1", addr1);
+    c.addMark("住所2", addr2);
+    const clinicName: Box = addr2.flipBottom().shift(0, 2)
+      .setHeight(7.5, VertDirection.Top);
+    c.addMark("クリニック名", clinicName);
+    const doctorName: Box = clinicName.flipBottom()
+      .shift(0, 3)
+      .setLeft(36)
+      .setHeight(6, VertDirection.Top);
+    c.text(doctorName, ["診断医師氏名", c.space(43, { mark: "医師名"}), "印"]);
   }
 
   function compileOps(): Op[] {
@@ -168,6 +186,8 @@
     const paper: Box = Box.fromPaperSize(A4);
     comp.createFont("title", "sans-serif", 7, FontWeightBold);
     comp.createFont("regular", "serif", 4);
+    comp.createFont("large", "serif", 5.5);
+    comp.createFont("entry", "sans-serif", 4);
     const frame = paper.inset(16, 42, 26, 42);
     comp.setFont("title");
     comp.textAt(frame.cx, frame.top - 7, "健康診断書", {

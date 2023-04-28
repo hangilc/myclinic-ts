@@ -34,8 +34,36 @@ export class Box {
     return new Box(this.left + dx, this.top + dy, this.right + dx, this.bottom + dy);
   }
 
+  shiftLeftValue(dx: number): Box {
+    return new Box(this.left + dx, this.top, this.right, this.bottom);
+  }
+
+  shiftTopValue(dy: number): Box {
+    return new Box(this.left, this.top + dy, this.right, this.bottom);
+  }
+
+  shiftRightValue(dx: number): Box {
+    return new Box(this.left, this.top, this.right + dx, this.bottom);
+  }
+
+  shiftBottomValue(dy: number): Box {
+    return new Box(this.left, this.top, this.right, this.bottom + dy);
+  }
+
   setLeft(left: number): Box {
     return new Box(left, this.top, this.right, this.bottom);
+  }
+
+  setTop(top: number): Box {
+    return new Box(this.left, top, this.right, this.bottom);
+  }
+
+  setRight(right: number): Box {
+    return new Box(this.left, this.top, right, this.bottom);
+  }
+
+  setBottom(bottom: number): Box {
+    return new Box(this.left, this.top, this.right, bottom);
   }
 
   setWidth(width: number, dir: HorizDirection = HorizDirection.Left): Box {
@@ -168,6 +196,10 @@ export class Box {
 
   flipRight(): Box {
     return new Box(this.right, this.top, this.right + this.width, this.bottom);
+  }
+
+  flipBottom(): Box {
+    return new Box(this.left, this.bottom, this.right, this.bottom + this.height);
   }
 
   static fromPaperSize(size: [number, number]): Box {
