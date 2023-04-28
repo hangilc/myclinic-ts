@@ -124,6 +124,16 @@
           )
       )
     );
+    compileTokkijikou(
+      c,
+      Box.combineRows(
+        rows
+          .slice(3)
+          .map((r) =>
+            r.flipRight().setWidth(cols[2].width, HorizDirection.Left)
+          )
+      )
+    );
   }
 
   function compileKennyou(c: DrawerCompiler, box: Box): void {
@@ -133,10 +143,24 @@
     c.vertText(cols[0], "検尿", { interCharsSpace: 4 });
     const rows = cols[1].splitToEvenRows(3);
     rows.forEach((r) => c.frame(r));
+    c.text(rows[0], ["蛋白（", c.space(8, { mark: "尿蛋白"}), "）"]);
+    c.text(rows[1], ["潜血（", c.space(8, { mark: "尿潜血"}), "）"]);
+    c.text(rows[2], ["糖　（", c.space(8, { mark: "尿糖　"}), "）"]);
   }
 
-  function compileBottom(c: DrawerCompiler, row: Box): void {
-    c.frame(row);
+  function compileTokkijikou(c: DrawerCompiler, box: Box): void {
+    c.text(box.inset(1, 1, 0, 0), "その他特記事項", {
+      halign: HorizAlign.Left,
+      valign: VertAlign.Top
+    });
+  }
+
+  function compileBottom(c: DrawerCompiler, box: Box): void {
+    c.frame(box);
+    c.text(box.inset(4, 4), "診断の結果上記の通り相違ないことを照明する。", {
+      halign: HorizAlign.Left,
+      valign: VertAlign.Top
+    });
   }
 
   function compileOps(): Op[] {

@@ -2,7 +2,7 @@ import { OpCreateFont, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, type Op } fro
 import { Box } from "./box";
 import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign } from "./enums";
-import { CharVariant, MarkVariant, type TextVariant } from "./text-variant";
+import { CharVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant } from "./text-variant";
 
 export class DrawerCompiler {
   ops: Op[] = [];
@@ -76,6 +76,10 @@ export class DrawerCompiler {
 
   marker(str: string, labelName: string): MarkVariant {
     return new MarkVariant(str, labelName);
+  }
+
+  space(spaceWidth: number, opt?: SpaceVariantOpt) {
+    return new SpaceVariant(spaceWidth, opt);
   }
 
   textAt(x: number, y: number, t: string, opt: TextOpt = {}): void {
