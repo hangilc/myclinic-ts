@@ -237,71 +237,15 @@
     <div class="col2">
       <h3>検査結果</h3>
       <divc class="input-panel">
-        {#each Array(9).keys() as i (i)}
+        {#each [...Array(9).keys()] as i (i)}
+          <span>血液検査{i + 1}</span>
+          <div class="inline-block">
+            <span>名前</span>
+            <input type="text" bind:value={kensaLabels[i]} style:margin="0 0 2px 0"/>
+            <span>結果</span>
+            <input type="text" bind:value={kensaValues[i]} />
+          </div>
         {/each}
-        <span>血液検査1</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" bind:value={kensaLabels[0]}/>
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査2</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text"  bind:value={kensaLabels[1]}/>
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査3</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text"  bind:value={kensaLabels[2]}/>
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査4</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text"  bind:value={kensaLabels[3]}/>
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査5</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" />
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査6</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" />
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査7</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" />
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査8</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" />
-          <span>結果</span>
-          <input type="text" />
-        </div>
-        <span>血液検査9</span>
-        <div class="inline-block">
-          <span>名前</span>
-          <input type="text" />
-          <span>結果</span>
-          <input type="text" />
-        </div>
       </divc>
     </div>
   </div>
