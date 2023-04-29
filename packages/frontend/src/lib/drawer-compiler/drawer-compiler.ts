@@ -162,7 +162,7 @@ export class DrawerCompiler {
       totalWidth += ics * (variants.length - 1);
     }
     let y0: number = b.top;
-    switch (opt.valign ?? VertAlign.Center) {
+    switch (opt.valign ?? VertAlign.Top) {
       case VertAlign.Center: {
         y0 = b.top + (b.height - fontSize) / 2.0;
         break;
@@ -173,7 +173,7 @@ export class DrawerCompiler {
       }
     }
     let x0: number = b.left;
-    switch (opt.halign ?? HorizAlign.Center) {
+    switch (opt.halign ?? HorizAlign.Left) {
       case HorizAlign.Center: {
         x0 = b.left + (b.width - totalWidth) / 2.0;
         break;
