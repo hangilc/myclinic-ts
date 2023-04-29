@@ -102,7 +102,7 @@ function compileXp(c: DrawerCompiler, row: Box): void {
   });
   c.addMark("Ｘ線", row.shiftTopValue(6).shiftBottomValue(-6));
   const bottom = row.setHeight(6, VertDirection.Bottom).inset(1, 0, 0, 0);
-  const b = c.text(bottom, "撮影日", { halign: HorizAlign.Left });
+  const b = c.text(bottom, "撮影日", { halign: HorizAlign.Left, valign: VertAlign.Center });
   c.addMark("Ｘ線撮影日", bottom.setLeft(b.right).inset(4, 0, 0, 0));
 }
 

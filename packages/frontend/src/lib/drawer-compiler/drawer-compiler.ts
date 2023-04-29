@@ -1,7 +1,8 @@
 import { OpCreateFont, OpCreatePen, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, OpSetPen, OpSetTextColor, type Op } from "../drawer/op";
 import { Box } from "./box";
+import { breakLine } from "./break-line";
 import { charWidth } from "./char-width";
-import { HorizAlign, VertAlign } from "./enums";
+import { HorizAlign, VertAlign, VertDirection } from "./enums";
 import { CharVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant } from "./text-variant";
 
 export class DrawerCompiler {
@@ -235,6 +236,19 @@ export class DrawerCompiler {
   textAndAdvance(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): Box {
     const tb = this.text(b, ts, opt);
     return b.setLeft(tb.right);
+  }
+
+  paragraph(b: Box, s: string): Box {
+    let y = b.top;
+    let x = b.left;
+    const fontSize = this.curFontSize;
+    const lines = breakLine(s, fontSize, b.width);
+    let lb = b.setHeight(fontSize, VertDirection.Top);
+    for(let line of lines) {
+      this.text(lb, line, { halign: HorizAlign.Left, valign: VertAlign.Top });
+      lb = lb.flipBottom();
+    }
+    return b.setBottom(lb.bottom);
   }
 
   labelMarks(): void {

@@ -27,6 +27,9 @@
   let hearingRight4000Loss: string = "なし";
   let bloodPressure: string = "";
   let shindenzu: string = "";
+  let kioureki: string = "";
+  let xp: string = "";
+  let xpConductedDate: Date | null = null;
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -94,6 +97,11 @@
     }
     set(comp, "血圧", bloodPressure);
     set(comp, "心電図", shindenzu);
+    comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);
+    comp.paragraph(comp.getMark("Ｘ線").inset(1, 0, 2, 0), xp);
+    if( xpConductedDate ){
+      set(comp, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
+    }
     comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
@@ -198,6 +206,12 @@
     <input type="text" bind:value={bloodPressure} />
     <span>心電図</span>
     <input type="text" bind:value={shindenzu} />
+    <span>既往歴</span>
+    <input type="text" bind:value={kioureki} />
+    <span>Ｘ線</span>
+    <input type="text" bind:value={xp} />
+    <span>Ｘ線撮影日</span>
+    <EditableDate bind:date={xpConductedDate} />
   </div>
   <div class="commands">
     <button on:click={doDisplay}>表示</button>
