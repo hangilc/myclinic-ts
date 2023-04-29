@@ -196,6 +196,16 @@ export class Box {
     return boxes;
   }
 
+  withCols(at: number[], ...handlers: ((r: Box, i: number) => void)[]): void {
+    this.splitToCols(...at).forEach((r, i) => {
+      if( i < handlers.length ){
+        handlers[i](r, i);
+      } else if( handlers.length > 0 ){
+        handlers[handlers.length - 1](r, i);
+      }
+    });
+  }
+
   shrinkWidth(w: number, dir: HorizDirection = HorizDirection.Left): Box {
     switch (dir) {
       case HorizDirection.Left: {

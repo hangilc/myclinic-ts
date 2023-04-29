@@ -30,7 +30,17 @@
   let kioureki: string = "";
   let xp: string = "";
   let xpConductedDate: Date | null = null;
-  let kensaLabels: string[] = Array(9).fill("");
+  let kensaLabels: string[] = [
+    "赤血球数",
+    "血色素量",
+    "ヘモグロビン",
+    "GOT",
+    "GPT",
+    "γGTP",
+    "尿酸",
+    "血糖値",
+    "HbA1c",
+  ];
   let kensaValues: string[] = Array(9).fill("");
 
   function hasNoVisualAcuityInput(): boolean {
@@ -116,6 +126,25 @@
     if (xpConductedDate) {
       set(comp, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
     }
+    [...Array(9).keys()].forEach((i) => {
+      set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
+      const [value, unit] = kensaValues[i].split(/\s+/);
+      comp.getMark(`血液検査結果${i + 1}`).withCols(
+        [28],
+        (b) => {
+          comp.text(b, value, {
+            halign: HorizAlign.Right,
+            valign: VertAlign.Center,
+          });
+        },
+        (b) => {
+          comp.text(b.shrinkToRight(1), unit ?? "", {
+            halign: HorizAlign.Left,
+            valign: VertAlign.Center,
+          });
+        }
+      );
+    });
     comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
@@ -241,7 +270,11 @@
           <span>血液検査{i + 1}</span>
           <div class="inline-block">
             <span>名前</span>
-            <input type="text" bind:value={kensaLabels[i]} style:margin="0 0 2px 0"/>
+            <input
+              type="text"
+              bind:value={kensaLabels[i]}
+              style:margin="0 0 2px 0"
+            />
             <span>結果</span>
             <input type="text" bind:value={kensaValues[i]} />
           </div>
