@@ -20,11 +20,13 @@
   let visualAcuityLeftCorrected: string = "";
   let visualAcuityRight: string = "";
   let visualAcuityRightCorrected: string = "";
-  let hearingExamConducted: string = "実施";
+  let hearingExamConducted: string = "未実施";
   let hearingLeft1000Loss: string = "なし";
   let hearingLeft4000Loss: string = "なし";
   let hearingRight1000Loss: string = "なし";
   let hearingRight4000Loss: string = "なし";
+  let bloodPressure: string = "";
+  let shindenzu: string = "";
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -90,6 +92,8 @@
       const b = comp.getMark("聴力");
       comp.line(...b.leftBottom(), ...b.rightTop());
     }
+    set(comp, "血圧", bloodPressure);
+    set(comp, "心電図", shindenzu);
     comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
@@ -117,6 +121,11 @@
     <EditableDate bind:date={birthdate} />
     <span>住所</span>
     <input type="text" bind:value={address} />
+    <span>性別</span>
+    <form>
+      <input type="radio" bind:group={sex} value="男性" /> 男
+      <input type="radio" bind:group={sex} value="女性" /> 女
+    </form>
   </div>
   <h3>身体所見等</h3>
   <div class="input-panel">
@@ -185,6 +194,10 @@
         >
       {/if}
     </div>
+    <span>血圧</span>
+    <input type="text" bind:value={bloodPressure} />
+    <span>心電図</span>
+    <input type="text" bind:value={shindenzu} />
   </div>
   <div class="commands">
     <button on:click={doDisplay}>表示</button>

@@ -1,4 +1,3 @@
-import type { insert } from "svelte/internal";
 import { HorizDirection, VertDirection } from "./enums";
 
 export class Box {
