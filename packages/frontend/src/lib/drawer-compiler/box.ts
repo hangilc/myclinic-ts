@@ -178,6 +178,21 @@ export class Box {
     return bs;
   }
 
+  splitToEvenCols(n: number): Box[] {
+    const w = this.width / n;
+    const boxes: Box[] = [];
+    for (let i = 0; i < n; i++) {
+      const b = new Box(
+        this.left + w * i,
+        this.top,
+        this.left + w * (i + 1),
+        this.bottom
+      );
+      boxes.push(b);
+    }
+    return boxes;
+  }
+
   shrinkWidth(w: number, dir: HorizDirection = HorizDirection.Left): Box {
     switch (dir) {
       case HorizDirection.Left: {
@@ -194,12 +209,24 @@ export class Box {
     }
   }
 
+  shrinkToRight(dx: number): Box {
+    return this.shiftLeftValue(dx);
+  }
+
   flipRight(): Box {
     return new Box(this.right, this.top, this.right + this.width, this.bottom);
   }
 
   flipBottom(): Box {
     return new Box(this.left, this.bottom, this.right, this.bottom + this.height);
+  }
+
+  leftBottom(): [number, number] {
+    return [this.left, this.bottom];
+  }
+
+  rightTop(): [number, number] {
+    return [this.right, this.top];
   }
 
   static fromPaperSize(size: [number, number]): Box {

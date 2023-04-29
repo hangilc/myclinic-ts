@@ -40,6 +40,9 @@ export class DrawerCompiler {
   setFont(name: string): void {
     if (this.curFont !== name) {
       this.ops.push(new OpSetFont(name));
+      if( !(name in this.fontSizeMap) ){
+        throw new Error("Cannot find font: " + name);
+      }
       this.curFont = name;
     }
   }
