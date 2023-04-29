@@ -4,7 +4,7 @@ import { charWidth, textWidth } from "./char-width";
 import type { DrawerCompiler } from "./drawer-compiler";
 
 export interface TextVariant {
-  getWidth(fontSize: number): number;
+  getWidth(fontSize: number, c: DrawerCompiler): number;
   getChars(): string;
   getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]];
 }
@@ -24,7 +24,7 @@ export class CharVariant implements TextVariant {
     return this.chr;
   }
 
-  getLocations(x0: number, y0: number, _fontSize: number, _c: DrawerCompiler): [number[], number[]] {
+  getLocations(x0: number, y0: number): [number[], number[]] {
     return [[x0], [y0]];
   }
 }
@@ -74,7 +74,7 @@ export class SpaceVariant implements TextVariant {
     this.opt = opt;
   }
 
-  getWidth(fontSize: number): number {
+  getWidth(): number {
     return this.spaceWidth;
   }
 
@@ -90,6 +90,29 @@ export class SpaceVariant implements TextVariant {
       c.addMark(mark, b);
     }
     return [[], []];
+  }
+}
+
+export class SuperVariant implements TextVariant {
+  text: string;
+  font: string;
+
+  constructor(text: string, font: string) {
+    this.text = text;
+    this.font = font;
+  }
+
+  getWidth(_fontSize: number, c: DrawerCompiler): number {
+    const size = c.fontSizeMap[this.font];
+    return textWidth(this.text, size);
+  }
+
+  getChars(): string {
+    return this.text;
+  }
+
+  getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]] {
+    
   }
 }
 
