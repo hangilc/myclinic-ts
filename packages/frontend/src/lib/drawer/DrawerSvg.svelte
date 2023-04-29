@@ -1,21 +1,40 @@
 <script lang="ts">
-  import type { Op } from "@/lib/drawer/op"
-  import { drawerToSvg } from "./drawer-svg"
-  import { onMount } from "svelte"
+  import type { Op } from "@/lib/drawer/op";
+  import { drawerToSvg } from "./drawer-svg";
+  import { onMount } from "svelte";
 
   export let ops: Op[];
   export let viewBox: string;
   export let width: string;
   export let height: string;
-  let wrapper: HTMLElement
+  export let displayWidth: string | undefined = undefined;
+  export let displayHeight: string | undefined = undefined;
+  let wrapper: HTMLElement;
+
+  export function resize(newWidth: string, newHeight: string): void {
+    wrapper.innerHTML = "";
+    width = newWidth;
+    height = newHeight;
+    refresh();
+  }
+
+  function refresh(): void {
+    let option = {
+      viewBox,
+      width,
+      height,
+    };
+    wrapper.appendChild(drawerToSvg(ops, option));
+  }
 
   onMount(() => {
-    let option = {
-      viewBox, width, height
-    }
-    wrapper.appendChild(drawerToSvg(ops, option));
-  })
-
+    refresh();
+  });
 </script>
 
-<div bind:this={wrapper}></div>
+<div
+  bind:this={wrapper}
+  style:width={displayWidth}
+  style:height={displayHeight}
+  style:overflow="auto"
+/>

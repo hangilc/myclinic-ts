@@ -246,6 +246,7 @@
     );
     compileKensa(comp, rows[9]);
     compileBottom(comp, rows[10]);
+    comp.labelMarks();
     return comp.compile();
   }
 
@@ -259,6 +260,8 @@
         width: A4[0],
         height: A4[1],
         previewScale: 2,
+        displayWidth: A4[0] * 2 + 20,
+        displayHeight: A4[1] * 2 + 20,
       },
     });
   }

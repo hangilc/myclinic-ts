@@ -12,16 +12,19 @@
   export let previewScale: number = 1;
   export let kind: string = "";
   export let ops: Op[] = [];
+  export let displayWidth: number | undefined;
+  export let displayHeight: number | undefined;
   let settingSelect: string = "手動";
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;
   let storedSettingPref: string = "";
+  let drawerSvg: DrawerSvg;
 
   onMount(async () => {
     const list = await printApi.listPrintSetting();
     settingList = [...settingList, ...list];
     const pref = await printApi.getPrintPref(kind);
-    if( pref != null ){
+    if (pref != null) {
       settingSelect = pref;
       storedSettingPref = pref;
     }
@@ -36,7 +39,10 @@
       setup: [],
       pages: [ops],
     };
-    await printApi.printDrawer(req, settingSelect === "手動" ? undefined : settingSelect);
+    await printApi.printDrawer(
+      req,
+      settingSelect === "手動" ? undefined : settingSelect
+    );
     if (setDefaultChecked && settingSelect !== storedSettingPref) {
       printApi.setPrintPref(kind, settingSelect);
     }
@@ -46,6 +52,22 @@
   function doClose(): void {
     destroy();
   }
+
+  function doEnlarge(): void {
+    previewScale *= 1.4142;
+    drawerSvg.resize(
+      (width * previewScale).toString(),
+      (height * previewScale).toString()
+    );
+  }
+
+  function doShrink(): void {
+    previewScale /= 1.4142;
+    drawerSvg.resize(
+      (width * previewScale).toString(),
+      (height * previewScale).toString()
+    );
+  }
 </script>
 
 <SurfaceModal {destroy} {title}>
@@ -54,6 +76,9 @@
     viewBox={svgViewBox(width, height)}
     width={(width * previewScale).toString()}
     height={(height * previewScale).toString()}
+    displayWidth={displayWidth?.toString() + "px"}
+    displayHeight={displayHeight?.toString() + "px"}
+    bind:this={drawerSvg}
   />
   <div>
     <span>設定</span>
@@ -66,6 +91,37 @@
     <a href="http://localhost:48080/" target="_blnak">管理画面表示</a>
   </div>
   <div class="commands">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      width="22"
+      on:click={doEnlarge}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      width="22"
+      on:click={doShrink}
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+    <span class="spacer" />
     <button on:click={doPrint}>印刷</button>
     <button on:click={doClose}>キャンセル</button>
   </div>
@@ -80,5 +136,17 @@
 
   .commands * + * {
     margin-left: 4px;
+  }
+
+  .commands button {
+    user-select: none;
+  }
+
+  .commands .spacer {
+    flex-grow: 1;
+  }
+
+  * {
+    user-select: none;
   }
 </style>
