@@ -107,6 +107,10 @@ export class Box {
     return new Box(this.left + left, this.top + top, this.right - right, this.bottom - bottom);
   }
 
+  insetLeft(dx: number): Box {
+    return new Box(this.left + dx, this.top, this.right, this.bottom);
+  }
+
   splitToRowsAt(...ys: number[]): Box[] {
     const bs: Box[] = [];
     const box = (top: number, bottom: number) =>

@@ -7,17 +7,16 @@ import {
   VertDirection,
 } from "@/lib/drawer-compiler/enums";
 import { FontWeightBold } from "@/lib/drawer-compiler/weight-consts";
-import type { Op } from "@/lib/drawer/op";
 import { A4 } from "@/lib/drawer-compiler/paper-size";
 
 
 const firstColWidth = 22;
-const secondColWidth = 54;
+const secondColWidth = 60;
 
 const Centered = { halign: HorizAlign.Center, valign: VertAlign.Center }
 
 function compileShimei(c: DrawerCompiler, row: Box): void {
-  const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 42, 17);
+  const cols = row.splitToCols(firstColWidth, secondColWidth, 17, 38, 17);
   cols.forEach((col) => c.frame(col));
   c.text(cols[0], "氏名", { interCharsSpace: 4, ...Centered });
   c.addMark("氏名", cols[1]);
@@ -193,6 +192,7 @@ export function createJihiKenshinCompiler(): DrawerCompiler {
   comp.createFont("regular", "serif", 4);
   comp.createFont("large", "serif", 5.5);
   comp.createFont("entry", "sans-serif", 4);
+  comp.createFont("small-entry", "sans-serif", 3);
   comp.createPen("regular", 0, 0, 0, 0.1);
   comp.setPen("regular");
   const frame = paper.inset(16, 42, 26, 42);

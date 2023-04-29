@@ -20,6 +20,11 @@
   let visualAcuityLeftCorrected: string = "";
   let visualAcuityRight: string = "";
   let visualAcuityRightCorrected: string = "";
+  let hearingExamConducted: string = "実施";
+  let hearingLeft1000Loss: string = "なし";
+  let hearingLeft4000Loss: string = "なし";
+  let hearingRight1000Loss: string = "なし";
+  let hearingRight4000Loss: string = "なし";
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -55,23 +60,35 @@
       const b = comp.getMark("視力");
       comp.line(...b.leftBottom(), ...b.rightTop());
     } else {
-      const lts = [
-        "左",
-        comp.space(1),
-        visualAcuityLeft || comp.space(8)
-      ];
-      if( visualAcuityLeftCorrected ){
+      const lts = ["左", comp.space(1), visualAcuityLeft || comp.space(8)];
+      if (visualAcuityLeftCorrected) {
         lts.push(comp.space(1), "(", visualAcuityLeftCorrected, ")");
       }
       set(comp, "視力左", lts);
-      const rts = ["右",
-        comp.space(1),
-        visualAcuityRight || comp.space(8)
-      ];
-      if( visualAcuityRightCorrected ){
+      const rts = ["右", comp.space(1), visualAcuityRight || comp.space(8)];
+      if (visualAcuityRightCorrected) {
         rts.push(comp.space(1), "(", visualAcuityRightCorrected, ")");
       }
       set(comp, "視力右", rts);
+    }
+    if( hearingExamConducted === "実施" ){
+      const b = comp.getMark("聴力");
+      let [left, right] = b.splitToEvenCols(2);
+      left = comp.textAndAdvance(left.insetLeft(1), "左", { valign: VertAlign.Center });
+      let [top, bottom] = left.insetLeft(0.5).splitToEvenRows(2);
+      let saveFont = comp.setFont("small-entry");
+      comp.text(top, "4000Hz 所見" + hearingLeft4000Loss, { valign: VertAlign.Center });
+      comp.text(bottom, "1000Hz 所見" + hearingLeft1000Loss, { valign: VertAlign.Center });
+      comp.setFont(saveFont);
+      right = comp.textAndAdvance(right.insetLeft(1), "右", { valign: VertAlign.Center });
+      [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
+      saveFont = comp.setFont("small-entry");
+      comp.text(top, "4000Hz 所見" + hearingRight4000Loss, { valign: VertAlign.Center });
+      comp.text(bottom, "1000Hz 所見" + hearingRight1000Loss, { valign: VertAlign.Center });
+      comp.setFont(saveFont);
+    } else {
+      const b = comp.getMark("聴力");
+      comp.line(...b.leftBottom(), ...b.rightTop());
     }
     comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
@@ -135,6 +152,38 @@
           bind:value={visualAcuityRightCorrected}
         /> )
       </div>
+    </div>
+    <span>聴力</span>
+    <div class="inline-block">
+      <form>
+        <input
+          type="radio"
+          name="hearing-conducted"
+          bind:group={hearingExamConducted}
+          value="実施"
+        />
+        実施
+        <input
+          type="radio"
+          name="hearing-conducted"
+          bind:group={hearingExamConducted}
+          value="未実施"
+        /> 未実施
+      </form>
+      {#if hearingExamConducted === "実施"}
+        左 4000Hz 所見<select bind:value={hearingLeft4000Loss}
+          ><option>なし</option><option>あり</option></select
+        ><br /> 1000Hz 所見
+        <select bind:value={hearingLeft1000Loss}
+          ><option>なし</option><option>あり</option></select
+        ><br />右 4000Hz 所見
+        <select bind:value={hearingRight4000Loss}
+          ><option>なし</option><option>あり</option></select
+        ><br /> 1000Hz 所見
+        <select bind:value={hearingRight1000Loss}
+          ><option>なし</option><option>あり</option></select
+        >
+      {/if}
     </div>
   </div>
   <div class="commands">

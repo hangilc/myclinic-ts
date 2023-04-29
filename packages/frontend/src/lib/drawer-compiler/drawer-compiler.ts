@@ -37,7 +37,8 @@ export class DrawerCompiler {
     this.fontSizeMap[name] = size;
   }
 
-  setFont(name: string): void {
+  setFont(name: string): string {
+    const save = this.curFont;
     if (this.curFont !== name) {
       this.ops.push(new OpSetFont(name));
       if( !(name in this.fontSizeMap) ){
@@ -45,6 +46,7 @@ export class DrawerCompiler {
       }
       this.curFont = name;
     }
+    return save;
   }
 
   setTextcolor(r: number, g: number, b: number): void {
@@ -228,6 +230,11 @@ export class DrawerCompiler {
       rb = rb.shiftTopValue(fontSize + leading);
     })
     return rb.setTop(b.top).shiftBottomValue(-leading);
+  }
+
+  textAndAdvance(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): Box {
+    const tb = this.text(b, ts, opt);
+    return b.setLeft(tb.right);
   }
 
   labelMarks(): void {
