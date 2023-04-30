@@ -10,6 +10,8 @@
   import type { TextVariant } from "@/lib/drawer-compiler/text-variant";
   import type { Box } from "@/lib/drawer-compiler/box";
   import api from "@/lib/api";
+  import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
+  import ChoosePatientDialog from "@/lib/ChoosePatientDialog.svelte";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -63,6 +65,22 @@
     address2 = `TEL ${ci.tel} FAX ${ci.fax}`;
     clinicName = ci.name;
     doctorName = ci.doctorName;
+  }
+
+  async function selectPatient() {
+    const d: SelectPatientBySearch = new SelectPatientBySearch({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        showRegisterButton: false,
+        onEnter: (patient) => {
+          name = patient.fullName();
+          birthdate = new Date(patient.birthday);
+          address = patient.address;
+          sex = patient.sexAsKanji + "性";
+        }
+      }
+    });
   }
 
   function hasNoVisualAcuityInput(): boolean {
@@ -257,7 +275,10 @@
   <ServiceHeader title="自費健診" />
   <div class="two-cols">
     <div class="col-1">
-      <h3>患者情報</h3>
+      <div>
+        <h3 class="inline-block">患者情報</h3>
+        <a href="javascript:void(0)" class="small-link" on:click={selectPatient}>取り込み</a>
+      </div>
       <div class="input-panel">
         <span>氏名</span>
         <input type="text" bind:value={name} />
@@ -353,7 +374,10 @@
         <span>Ｘ線撮影日</span>
         <EditableDate bind:date={xpConductedDate} />
       </div>
-      <h3>その他</h3>
+      <div>
+        <h3 class="inline-block">その他</h3>
+        <a href="javascript:void(0)" class="small-link" on:click={applyClinicInfo}>取り込み</a>
+      </div>
       <div class="input-panel">
         <span>発行日</span>
         <EditableDate bind:date={issueDate} />
@@ -367,7 +391,7 @@
         <input type="text" bind:value={doctorName}/>
       </div>
       <div>
-        <input type="checkbox" bind:value={showMarker} /> マーカー表示
+        <input type="checkbox" bind:value={showMarker}/> マーカー表示
       </div>
     </div>
     <div class="col2">
@@ -456,5 +480,18 @@
     resize: vertical;
     width: 100%;
     height: 140px;
+  }
+
+  h3.inline-block {
+    margin-right: 10px;
+  }
+
+  a.small-link {
+    font-size: 80%;
+    padding: 2px;
+    border: 1px solid var(--primary-color);
+    border-radius: 2px;
+    position: relative;
+    top: -2px;
   }
 </style>

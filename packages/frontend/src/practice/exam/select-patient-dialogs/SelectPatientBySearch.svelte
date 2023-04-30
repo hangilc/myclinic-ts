@@ -10,6 +10,7 @@
 
   export let destroy: () => void;
   export let onEnter: (patient: m.Patient, visitId?: number) => void;
+  export let showRegisterButton = true;
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
   let searchText: string;
@@ -99,9 +100,10 @@
     </div>
   </div>
   <div class="commands">
+    {#if showRegisterButton}
     <button on:click={onRegisterButtonClick} disabled={$selected == null}
-      >診察登録</button
-    >
+      >診察登録</button>
+    {/if}
     <button on:click={onSelectButtonClick} disabled={$selected == null} bind:this={selectButton}
       on:keydown={doKeydown}
       >選択</button
