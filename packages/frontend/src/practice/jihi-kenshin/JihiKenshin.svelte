@@ -9,6 +9,7 @@
   import type { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
   import type { TextVariant } from "@/lib/drawer-compiler/text-variant";
   import type { Box } from "@/lib/drawer-compiler/box";
+  import api from "@/lib/api";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -53,6 +54,16 @@
   let clinicName = "";
   let doctorName = "";
   let showMarker: boolean = false;
+
+  applyClinicInfo();
+
+  async function applyClinicInfo() {
+    const ci = await api.getClinicInfo();
+    address1 = `${ci.postalCode} ${ci.address}`;
+    address2 = `TEL ${ci.tel} FAX ${ci.fax}`;
+    clinicName = ci.name;
+    doctorName = ci.doctorName;
+  }
 
   function hasNoVisualAcuityInput(): boolean {
     return (

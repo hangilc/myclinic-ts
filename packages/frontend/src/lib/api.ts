@@ -1442,4 +1442,8 @@ export default {
     }, castNumber);
   },
 
+  getClinicInfo(): Promise<m.ClinicInfo> {
+    return get("get-clinic-info", {}, m.ClinicInfo.cast);
+  }
+
 };

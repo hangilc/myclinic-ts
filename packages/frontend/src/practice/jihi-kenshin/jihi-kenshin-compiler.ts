@@ -172,10 +172,10 @@ function compileBottom(c: DrawerCompiler, box: Box): void {
   const addr1: Box = box.shift(72, 12)
     .setWidth(72, HorizDirection.Left)
     .setHeight(6, VertDirection.Top);
-  const addr2: Box = addr1.flipBottom().shift(0, 1);
+  const addr2: Box = addr1.flipBottom().shift(0, 0);
   c.addMark("住所1", addr1);
   c.addMark("住所2", addr2);
-  const clinicName: Box = addr2.flipBottom().shift(0, 2)
+  const clinicName: Box = addr2.flipBottom().shift(0, 0)
     .setHeight(7.5, VertDirection.Top);
   c.addMark("クリニック名", clinicName);
   const doctorName: Box = clinicName.flipBottom()

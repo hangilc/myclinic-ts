@@ -74,7 +74,7 @@ function isValidAt(
 }
 
 export class SexType {
-  constructor(public code: string, public rep: string) {}
+  constructor(public code: string, public rep: string) { }
 
   static fromCode(code: string): SexType {
     for (let s of Object.values(Sex)) {
@@ -102,7 +102,7 @@ export class Patient {
     public birthday: string,
     public address: string,
     public phone: string
-  ) {}
+  ) { }
 
   static cast(arg: any): Patient {
     return new Patient(
@@ -147,7 +147,7 @@ export class Visit {
     public kouhi3Id: number,
     public koukikoureiId: number,
     public attributesStore?: string
-  ) {}
+  ) { }
 
   static cast(arg: any): Visit {
     return new Visit(
@@ -190,7 +190,7 @@ export class Visit {
 }
 
 export class WqueueStateType {
-  constructor(public code: number, public label: string) {}
+  constructor(public code: number, public label: string) { }
 
   static fromCode(code: number): WqueueStateType {
     for (let wq of Object.values(WqueueState)) {
@@ -211,7 +211,7 @@ export const WqueueState = {
 } as const;
 
 export class Wqueue {
-  constructor(public visitId: number, public waitState: number) {}
+  constructor(public visitId: number, public waitState: number) { }
 
   get waitStateType(): WqueueStateType {
     return WqueueStateType.fromCode(this.waitState);
@@ -223,7 +223,7 @@ export class Wqueue {
 }
 
 export class HonninKazokuType {
-  constructor(public code: 0 | 1, public rep: string) {}
+  constructor(public code: 0 | 1, public rep: string) { }
 
   static fromCode(code: number) {
     for (let t of Object.values(HonninKazoku)) {
@@ -252,7 +252,7 @@ export class Shahokokuho {
     public validUpto: string,
     public koureiStore: number,
     public edaban: string
-  ) {}
+  ) { }
 
   get honnninKazokuType(): HonninKazokuType {
     return HonninKazokuType.fromCode(this.honninStore);
@@ -287,7 +287,7 @@ export class Roujin {
     public futanWari: number,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
@@ -315,7 +315,7 @@ export class Koukikourei {
     public futanWari: number,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
@@ -342,7 +342,7 @@ export class Kouhi {
     public validFrom: string,
     public validUpto: string,
     public patientId: number
-  ) {}
+  ) { }
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
@@ -396,7 +396,7 @@ export class HokenIdSet {
     public kouhi1Id: number,
     public kouhi2Id: number,
     public kouhi3Id: number
-  ) {}
+  ) { }
 
   static cast(arg: any): HokenIdSet {
     return new HokenIdSet(
@@ -415,7 +415,7 @@ export class Text {
     public textId: number,
     public visitId: number,
     public content: string
-  ) {}
+  ) { }
 
   static cast(arg: any): Text {
     return new Text(arg.textId, arg.visitId, arg.content);
@@ -423,7 +423,7 @@ export class Text {
 }
 
 export class Charge {
-  constructor(public visitId: number, public charge: number) {}
+  constructor(public visitId: number, public charge: number) { }
 
   static cast(arg: any): Charge {
     return new Charge(arg.visitId, arg.charge);
@@ -435,7 +435,7 @@ export class Payment {
     public visitId: number,
     public amount: number,
     public paytime: string
-  ) {}
+  ) { }
 
   static cast(arg: any): Payment {
     return new Payment(arg.visitId, arg.amount, arg.paytime);
@@ -455,7 +455,7 @@ export class IyakuhinMaster {
     public zaikei: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 
   static cast(arg: any): IyakuhinMaster {
     return new IyakuhinMaster(
@@ -486,7 +486,7 @@ export class ShinryouMaster {
     public kensagroup: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 
   static cast(arg: any): ShinryouMaster {
     return new ShinryouMaster(
@@ -513,7 +513,7 @@ export class KizaiMaster {
     public kingakuStore: string,
     public validFrom: string,
     public validUpto: string
-  ) {}
+  ) { }
 
   static cast(arg: any): KizaiMaster {
     return new KizaiMaster(
@@ -529,7 +529,7 @@ export class KizaiMaster {
 }
 
 export class DrugCategoryType {
-  constructor(public code: number, public name: string) {}
+  constructor(public code: number, public name: string) { }
 
   static fromCode(code: number): DrugCategoryType {
     for (let v of Object.values(DrugCategory)) {
@@ -558,7 +558,7 @@ export class DrugEx {
     public categoryStore: number,
     public prescribed: boolean,
     public master: IyakuhinMaster
-  ) {}
+  ) { }
 
   get category(): DrugCategoryType {
     return DrugCategoryType.fromCode(this.categoryStore);
@@ -584,7 +584,7 @@ export class Shinryou {
     public shinryouId: number,
     public visitId: number,
     public shinryoucode: number
-  ) {}
+  ) { }
 
   static cast(arg: any): Shinryou {
     return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode);
@@ -597,7 +597,7 @@ export class ShinryouEx {
     public visitId: number,
     public shinryoucode: number,
     public master: ShinryouMaster
-  ) {}
+  ) { }
 
   static cast(arg: any): ShinryouEx {
     return new ShinryouEx(
@@ -616,7 +616,7 @@ export class ConductDrugEx {
     public iyakuhincode: number,
     public amount: number,
     public master: IyakuhinMaster
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductDrugEx {
     return new ConductDrugEx(
@@ -635,7 +635,7 @@ export class ConductShinryouEx {
     public conductId: number,
     public shinryoucode: number,
     public master: ShinryouMaster
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductShinryouEx {
     return new ConductShinryouEx(
@@ -654,7 +654,7 @@ export class ConductKizaiEx {
     public kizaicode: number,
     public amount: number,
     public master: KizaiMaster
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductKizaiEx {
     return new ConductKizaiEx(
@@ -668,7 +668,7 @@ export class ConductKizaiEx {
 }
 
 export class ConductKindType {
-  constructor(public code: number, public rep: string) {}
+  constructor(public code: number, public rep: string) { }
 
   get key(): string {
     for (let k of Object.keys(ConductKind)) {
@@ -896,7 +896,7 @@ export class VisitEx {
 }
 
 export class MeisaiSectionType {
-  constructor(public label: string) {}
+  constructor(public label: string) { }
 
   static fromString(s: string): MeisaiSectionType {
     for (let e of Object.values(MeisaiSectionEnum)) {
@@ -925,7 +925,7 @@ export class MeisaiSectionItem {
     public tanka: number,
     public count: number,
     public label: string
-  ) {}
+  ) { }
 
   get totalTen(): number {
     return this.tanka * this.count;
@@ -940,7 +940,7 @@ export class MeisaiSectionData {
   constructor(
     public section: MeisaiSectionType,
     public entries: MeisaiSectionItem[]
-  ) {}
+  ) { }
 
   get totalTen(): number {
     return this.entries.reduce((acc, ele) => {
@@ -961,7 +961,7 @@ export class Meisai {
     public items: MeisaiSectionData[],
     public futanWari: number,
     public charge: number
-  ) {}
+  ) { }
 
   get totalTen(): number {
     return this.items.reduce((acc, ele) => {
@@ -983,7 +983,7 @@ export class Conduct {
     public conductId: number,
     public visitId: number,
     public kindStore: number
-  ) {}
+  ) { }
 
   static cast(arg: any): Conduct {
     return new Conduct(arg.conductId, arg.visitId, arg.kindStore);
@@ -991,7 +991,7 @@ export class Conduct {
 }
 
 export class GazouLabel {
-  constructor(public conductId: number, public label: string) {}
+  constructor(public conductId: number, public label: string) { }
 
   static cast(arg: any): GazouLabel {
     return new GazouLabel(arg.conductId, arg.label);
@@ -1003,7 +1003,7 @@ export class ConductShinryou {
     public conductShinryouId: number,
     public conductId: number,
     public shinryoucode: number
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductShinryou {
     return new ConductShinryou(
@@ -1020,7 +1020,7 @@ export class ConductDrug {
     public conductId: number,
     public iyakuhincode: number,
     public amount: number
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductDrug {
     return new ConductDrug(
@@ -1038,7 +1038,7 @@ export class ConductKizai {
     public conductId: number,
     public kizaicode: number,
     public amount: number
-  ) {}
+  ) { }
 
   static cast(arg: any): ConductKizai {
     return new ConductKizai(
@@ -1126,7 +1126,7 @@ export function diseaseFullName(
 }
 
 export class ByoumeiMaster {
-  constructor(public shoubyoumeicode: number, public name: string) {}
+  constructor(public shoubyoumeicode: number, public name: string) { }
 
   static cast(arg: any): ByoumeiMaster {
     return new ByoumeiMaster(arg.shoubyoumeicode, arg.name);
@@ -1147,7 +1147,7 @@ export class ByoumeiMaster {
 }
 
 export class ShuushokugoMaster {
-  constructor(public shuushokugocode: number, public name: string) {}
+  constructor(public shuushokugocode: number, public name: string) { }
 
   static cast(arg: any): ShuushokugoMaster {
     return new ShuushokugoMaster(arg.shuushokugocode, arg.name);
@@ -1183,7 +1183,7 @@ export class ShuushokugoMaster {
 }
 
 export class DiseaseEndReasonType {
-  constructor(public code: string, public label: string) {}
+  constructor(public code: string, public label: string) { }
 
   static cast(arg: any): DiseaseEndReasonType {
     return DiseaseEndReasonType.fromCode(arg);
@@ -1216,7 +1216,7 @@ export class Disease {
     public startDate: string,
     public endDate: string,
     public endReasonStore: string
-  ) {}
+  ) { }
 
   clone(): Disease {
     return new Disease(
@@ -1292,7 +1292,7 @@ export class DiseaseAdj {
     public diseaseAdjId: number,
     public diseaseId: number,
     public shuushokugocode: number
-  ) {}
+  ) { }
 
   clone(): DiseaseAdj {
     return new DiseaseAdj(
@@ -1313,7 +1313,7 @@ export class DiseaseEnterData {
     public byoumeicode: number,
     public startDate: string,
     public adjCodes: number[]
-  ) {}
+  ) { }
 
   static cast(arg: any): DiseaseEnterData {
     return new DiseaseEnterData(
@@ -1330,7 +1330,7 @@ export class DiseaseExample {
     public byoumei: string | null,
     public preAdjList: string[],
     public postAdjList: string[]
-  ) {}
+  ) { }
 
   static cast(arg: any): DiseaseExample {
     return new DiseaseExample(arg.byoumei, arg.preAdjList, arg.postAdjList);
@@ -1358,7 +1358,7 @@ export class DiseaseData {
     public disease: Disease,
     public byoumeiMaster: ByoumeiMaster,
     public adjList: [DiseaseAdj, ShuushokugoMaster][]
-  ) {}
+  ) { }
 
   clone(): DiseaseData {
     return new DiseaseData(
@@ -1423,7 +1423,7 @@ export class Hotline {
     public message: string,
     public sender: string,
     public recipient: string
-  ) {}
+  ) { }
 
   static cast(arg: any): Hotline {
     return new Hotline(arg.message, arg.sender, arg.recipient);
@@ -1442,7 +1442,7 @@ export class HotlineEx extends Hotline {
 }
 
 export class HotlineBeep {
-  constructor(public recipient: string) {}
+  constructor(public recipient: string) { }
 
   static cast(arg: any): HotlineBeep {
     return new HotlineBeep(arg.recipient);
@@ -1450,7 +1450,7 @@ export class HotlineBeep {
 }
 
 export class EventIdNotice {
-  constructor(public currentEventId: number) {}
+  constructor(public currentEventId: number) { }
 
   static cast(arg: any): EventIdNotice {
     return new EventIdNotice(arg.currentEventId);
@@ -1458,7 +1458,7 @@ export class EventIdNotice {
 }
 
 export class HeartBeat {
-  constructor(public heartBeatSerialId: number) {}
+  constructor(public heartBeatSerialId: number) { }
 
   static cast(arg: any): HeartBeat {
     return new HeartBeat(arg.heartBeatSerialId);
@@ -1472,7 +1472,7 @@ export class AppEvent {
     public model: string,
     public kind: string,
     public data: string
-  ) {}
+  ) { }
 
   static cast(arg: any): AppEvent {
     return new AppEvent(
@@ -1490,7 +1490,7 @@ export class FileInfo {
     public name: string,
     public createdAt: string,
     public size: number
-  ) {}
+  ) { }
 
   static cast(arg: any): FileInfo {
     return new FileInfo(arg.name, arg.createdAt, arg.size);
@@ -1507,7 +1507,7 @@ export class PrescExample {
     public days: number,
     public category: number,
     public comment: string
-  ) {}
+  ) { }
 
   static cast(arg: any): PrescExample {
     return new PrescExample(
@@ -1528,7 +1528,7 @@ export class ScannerDevice {
     public deviceId: string,
     public name: string,
     public description: string,
-  ) {}
+  ) { }
 
   static cast(arg: any): ScannerDevice {
     return new ScannerDevice(
@@ -1551,7 +1551,7 @@ export class ClinicOperation {
   constructor(
     public code: string,
     public name: string | undefined
-  ) {}
+  ) { }
 
   static cast(arg: any): ClinicOperation {
     return new ClinicOperation(
@@ -1567,13 +1567,13 @@ export class ClinicOperation {
 
 export class AppointTime {
   constructor(
-  public appointTimeId: number,
-  public date: string,
-  public fromTime: string,
-  public untilTime: string,
-  public kind: string,
-  public capacity: number
-  ) {}
+    public appointTimeId: number,
+    public date: string,
+    public fromTime: string,
+    public untilTime: string,
+    public kind: string,
+    public capacity: number
+  ) { }
 
   isConsecutive(follower: AppointTime): boolean {
     return this.date == follower.date && this.untilTime === follower.fromTime;
@@ -1621,9 +1621,9 @@ export class Appoint {
 
   parseMemo(m: string): { memoString: string, tags: string[] } {
     const tagStart = m.indexOf("{{");
-    if( tagStart >= 0 ){
+    if (tagStart >= 0) {
       const tagEnd = m.indexOf("}}");
-      if( tagStart < tagEnd ){
+      if (tagStart < tagEnd) {
         const tagString = m.substring(tagStart + 2, tagEnd);
         const tags = tagString.split(/[,、]/).map(s => s.trim())
         const left = m.substring(0, tagStart).trim();
@@ -1677,5 +1677,35 @@ export class Onshi {
       arg.visitId,
       arg.kakunin
     );
+  }
+}
+
+export class ClinicInfo {
+  constructor(
+    public name: string,
+    public postalCode: string,
+    public address: string,
+    public tel: string,
+    public fax: string,
+    public todoufukencode: string,
+    public tensuuhyoucode: string,
+    public kikancode: string,
+    public homepage: string,
+    public doctorName: string,
+  ) {}
+
+  static cast(arg: any): ClinicInfo {
+    return new ClinicInfo(
+      arg.name,
+      arg.postalCode,
+      arg.address,
+      arg.tel,
+      arg.fax,
+      arg.todoufukencode,
+      arg.tensuuhyoucode,
+      arg.kikancode,
+      arg.homepage,
+      arg.doctorName,
+    )
   }
 }
