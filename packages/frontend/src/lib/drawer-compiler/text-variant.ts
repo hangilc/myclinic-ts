@@ -1,32 +1,50 @@
-import type { construct_svelte_component } from "svelte/internal";
+import { OpDrawChars } from "../drawer/op";
 import { Box } from "./box";
 import { charWidth, textWidth } from "./char-width";
 import type { DrawerCompiler } from "./drawer-compiler";
 
 export interface TextVariant {
-  getWidth(fontSize: number, c: DrawerCompiler): number;
-  getChars(): string;
-  getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]];
+  getWidth(c: DrawerCompiler): number;
+  render(x0: number, y0: number, c: DrawerCompiler): void;
 }
 
-export class CharVariant implements TextVariant {
-  chr: string;
+export class StrVariant implements TextVariant {
+  str: string;
+  opt: StrVariantOpt;
 
-  constructor(chr: string) {
-    this.chr = chr;
+  constructor(str: string, opt: StrVariantOpt = {}) {
+    this.str = str;
+    this.opt = opt;
   }
 
-  getWidth(fontSize: number): number {
-    return charWidth(this.chr, fontSize);
+  getWidth(c: DrawerCompiler): number {
+    let fontSize: number;
+    if (this.opt.font) {
+      fontSize = c.fontSizeMap[this.opt.font];
+    } else {
+      fontSize = c.curFontSize;
+    }
+    return charWidth(this.str, fontSize) + (this.opt.padLeft ?? 0) + (this.opt.padRight ?? 0);
   }
 
-  getChars(): string {
-    return this.chr;
+  render(x0: number, y0: number, c: DrawerCompiler): void {
+    let prevFont: string | undefined = undefined;
+    if( this.opt.font ){
+      prevFont = c.curFont;
+      c.setFont(this.opt.font);
+    }
+    c.ops.push(new OpDrawChars(this.str, [x0 + (this.opt.padLeft ?? 0)], [y0 + (this.opt.dy ?? 0)]));
+    if( prevFont ){
+      c.setFont(prevFont);
+    }
   }
+}
 
-  getLocations(x0: number, y0: number): [number[], number[]] {
-    return [[x0], [y0]];
-  }
+export interface StrVariantOpt {
+  font?: string;
+  dy?: number;
+  padLeft?: number;
+  padRight?: number;
 }
 
 export class MarkVariant implements TextVariant {
@@ -38,25 +56,22 @@ export class MarkVariant implements TextVariant {
     this.labelName = labelName;
   }
 
-  getWidth(fontSize: number): number {
-    return  textWidth(this.str, fontSize);
+  getWidth(c: DrawerCompiler): number {
+    return textWidth(this.str, c.curFontSize);
   }
 
-  getChars(): string {
-    return this.str;
-  }
-
-  getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]] {
-    const b = new Box(x0, y0, x0 + this.getWidth(fontSize), y0 + fontSize);
+  render(x0: number, y0: number, c: DrawerCompiler): void {
+    const fontSize = c.curFontSize;
     const xs: number[] = [];
     const ys: number[] = [];
     let x = x0;
-    for(let c of this.str) {
+    for (let c of this.str) {
       xs.push(x);
       ys.push(y0);
       x += charWidth(c, fontSize);
     }
-    return [xs, ys];
+    const b = new Box(x0, y0, x0 + this.getWidth(c), y0 + fontSize);
+    c.addMark(this.labelName, b);
   }
 }
 
@@ -78,41 +93,13 @@ export class SpaceVariant implements TextVariant {
     return this.spaceWidth;
   }
 
-  getChars(): string {
-    return "";
-  }
-
-  getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]] {
-    if( this.opt.mark ) {
+  render(x0: number, y0: number, c: DrawerCompiler): void {
+    if (this.opt.mark) {
       const mark: string = this.opt.mark;
-      const height = this.opt.height ?? fontSize;
+      const height = this.opt.height ?? c.curFontSize;
       const b = new Box(x0, y0, x0 + this.spaceWidth, y0 + height);
       c.addMark(mark, b);
     }
-    return [[], []];
-  }
-}
-
-export class SuperVariant implements TextVariant {
-  text: string;
-  font: string;
-
-  constructor(text: string, font: string) {
-    this.text = text;
-    this.font = font;
-  }
-
-  getWidth(_fontSize: number, c: DrawerCompiler): number {
-    const size = c.fontSizeMap[this.font];
-    return textWidth(this.text, size);
-  }
-
-  getChars(): string {
-    return this.text;
-  }
-
-  getLocations(x0: number, y0: number, fontSize: number, c: DrawerCompiler): [number[], number[]] {
-    
   }
 }
 

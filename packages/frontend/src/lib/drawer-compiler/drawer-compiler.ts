@@ -3,7 +3,7 @@ import { Box } from "./box";
 import { breakLine } from "./break-line";
 import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign, VertDirection } from "./enums";
-import { CharVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant } from "./text-variant";
+import { StrVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant, type StrVariantOpt } from "./text-variant";
 
 export class DrawerCompiler {
   ops: Op[] = [];
@@ -100,10 +100,14 @@ export class DrawerCompiler {
     return new SpaceVariant(spaceWidth, opt);
   }
 
+  str(str: string, opt: StrVariantOpt) {
+    return new StrVariant(str, opt);
+  }
+
   textAt(x: number, y: number, t: string, opt: TextOpt = {}): void {
-    const variants: TextVariant[] = Array.from(t).map(c => new CharVariant(c));
+    const variants: TextVariant[] = Array.from(t).map(c => new StrVariant(c));
     const fontSize: number = this.curFontSize;
-    let totalWidth: number = variants.map(v => v.getWidth(fontSize)).reduce((a, b) => a + b, 0);
+    let totalWidth: number = variants.map(v => v.getWidth(this)).reduce((a, b) => a + b, 0);
     let ics: number = opt.interCharsSpace ?? 0;
     if (ics > 0) {
       totalWidth += ics * (variants.length - 1);
@@ -130,16 +134,10 @@ export class DrawerCompiler {
         break;
       }
     }
-    const chars: string = variants.map(v => v.getChars()).join("");
-    const xs: number[] = [];
-    const ys: number[] = [];
     variants.forEach(v => {
-      const [vxs, vys] = v.getLocations(x0, y0, fontSize, this);
-      xs.push(...vxs);
-      ys.push(...vys);
-      x0 += v.getWidth(fontSize) + ics;
+      v.render(x0, y0, this);
+      x0 += v.getWidth(this) + ics;
     });
-    this.ops.push(new OpDrawChars(chars, xs, ys));
   }
 
   text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): Box {
@@ -150,14 +148,14 @@ export class DrawerCompiler {
     ts.forEach(t => {
       if (typeof t === "string") {
         for (let c of t) {
-          variants.push(new CharVariant(c));
+          variants.push(new StrVariant(c));
         }
       } else {
         variants.push(t);
       }
     });
     const fontSize: number = this.curFontSize;
-    let totalWidth: number = variants.map(v => v.getWidth(fontSize)).reduce((a, b) => a + b, 0);
+    let totalWidth: number = variants.map(v => v.getWidth(this)).reduce((a, b) => a + b, 0);
     let ics: number = 0;
     if (opt.halign === HorizAlign.Justify && variants.length >= 2) {
       ics = (b.width - totalWidth) / (variants.length - 1);
@@ -190,16 +188,10 @@ export class DrawerCompiler {
       }
     }
     let x = x0;
-    const chars: string = variants.map(v => v.getChars()).join("");
-    const xs: number[] = [];
-    const ys: number[] = [];
     variants.forEach(v => {
-      const [vxs, vys] = v.getLocations(x, y0, fontSize, this);
-      xs.push(...vxs);
-      ys.push(...vys);
-      x += v.getWidth(fontSize) + ics;
+      v.render(x, y0, this);
+      x += v.getWidth(this) + ics;
     });
-    this.ops.push(new OpDrawChars(chars, xs, ys));
     return new Box(x0, y0, x0 + totalWidth, y0 + fontSize);
   }
 

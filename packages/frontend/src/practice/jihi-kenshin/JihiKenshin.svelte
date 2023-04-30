@@ -128,7 +128,10 @@
     }
     [...Array(9).keys()].forEach((i) => {
       set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
-      const [value, unit] = kensaValues[i].split(/\s+/);
+      let [value, unit] : (string | (string | TextVariant)[])[]= kensaValues[i].split(/\s+/);
+      if (unit === "ten_million_per_micro_liter") {
+        unit = ["x10", comp.str("6", { font: "small-entry", dy: -1.2, padRight: 1.0 }), "/μl"];
+      }
       comp.getMark(`血液検査結果${i + 1}`).withCols(
         [28],
         (b) => {
