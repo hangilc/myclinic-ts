@@ -11,7 +11,7 @@
   import type { Box } from "@/lib/drawer-compiler/box";
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
-  import ChoosePatientDialog from "@/lib/ChoosePatientDialog.svelte";
+  import TextInputDialog from "./TextInputDialog.svelte";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -81,6 +81,48 @@
         }
       }
     });
+  }
+
+  async function applyData() {
+    const d: TextInputDialog = new TextInputDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        onEnter: (t) => {
+          handleData(t);
+        }
+      }
+    })
+  }
+
+  function handleData(t: string): void {
+    for(let line of t.split(/\r?\n/)) {
+      let m = /^HT\s+([\d.]+)/.exec(line);
+      if( m ){
+        height = m[1];
+        continue;
+      }
+      m = /^BW\s+([\d.]+)/.exec(line);
+      if( m ){
+        weight = m[1];
+        continue;
+      }
+      m = /^BP\s+([\d/]+)/.exec(line);
+      if( m ){
+        bloodPressure = `${m[1]} mmHg`;
+        continue;
+      }
+      m = /^(?:心電図|EKG|ＥＫＧ)[:：\s]+(.+)/.exec(line);
+      if( m ){
+        shindenzu = m[1];
+        continue;
+      }
+      m = /^(?:胸部Ｘ線|Ｘ線|Xp|Ｘｐ)[:：\s]+(.+)/.exec(line);
+      if( m ){
+        xp = m[1];
+        continue;
+      }
+    }
   }
 
   function hasNoVisualAcuityInput(): boolean {
@@ -292,7 +334,10 @@
           <input type="radio" bind:group={sex} value="女性" /> 女
         </form>
       </div>
-      <h3>身体所見等</h3>
+      <div>
+        <h3 class="inline-block">身体所見等</h3>
+        <a href="javascript:void(0)" class="small-link" on:click={applyData}>取り込み</a>
+      </div>
       <div class="input-panel">
         <span>身長</span>
         <div class="inline-block">
@@ -395,7 +440,10 @@
       </div>
     </div>
     <div class="col2">
-      <h3>検査結果</h3>
+      <div>
+        <h3 class="inline-block">検査結果</h3>
+        <a href="javascript:void(0)" class="small-link" on:click={applyData}>取り込み</a>
+      </div>
       <divc class="input-panel">
         {#each [...Array(9).keys()] as i (i)}
           <span>血液検査{i + 1}</span>
