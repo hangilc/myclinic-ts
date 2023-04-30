@@ -107,7 +107,7 @@ function compileXp(c: DrawerCompiler, row: Box): void {
 }
 
 function compileKensa(c: DrawerCompiler, box: Box): void {
-  const cols = box.splitToCols(firstColWidth, 90);
+  const cols = box.splitToCols(firstColWidth, 84);
   c.frame(cols[0]);
   c.text(cols[0], "血液検査", Centered);
   const rows = cols[1].splitToEvenRows(9);

@@ -46,6 +46,7 @@
   let urineProtein: string = "";
   let urineBlood: string = "";
   let urineGlucose: string = "";
+  let tokkijikou: string = "";
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -107,6 +108,11 @@
       }
     }
     comp.setFont(prevFont);
+  }
+
+  function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
+    const r: Box = box.inset(1, 1, 2, 1);
+    c.text(r, value);
   }
 
   function doDisplay() {
@@ -204,8 +210,9 @@
     renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
     renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);
     renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
+    renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
     comp.setFont(prevFont);
-    // comp.labelMarks();
+    comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
       props: {
@@ -369,6 +376,8 @@
           <option>+++</option>
           <option>++++</option>
         </select>
+        <span>特記事項</span>
+        <textarea bind:value={tokkijikou}/>
       </divc>
     </div>
   </div>
@@ -401,5 +410,11 @@
     display: flex;
     justify-content: left;
     margin: 10px;
+  }
+
+  textarea {
+    resize: vertical;
+    width: 100%;
+    height: 140px;
   }
 </style>
