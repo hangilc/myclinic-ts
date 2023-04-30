@@ -86,7 +86,7 @@ export class DrawerCompiler {
   getMark(labelName: string): Box {
     const b = this.marks[labelName];
     if (!b) {
-      throw new Error("Cannto find mark: " + labelName);
+      throw new Error("Cannot find mark: " + labelName);
     } else {
       return b;
     }
@@ -176,6 +176,7 @@ export class DrawerCompiler {
         break;
       }
     }
+    y0 += opt.dy ?? 0;
     let x0: number = b.left;
     switch (opt.halign ?? HorizAlign.Left) {
       case HorizAlign.Center: {
@@ -261,6 +262,7 @@ export interface TextOpt {
   halign?: HorizAlign;
   valign?: VertAlign;
   interCharsSpace?: number;
+  dy?: number;
 }
 
 export interface VertTextOpt {

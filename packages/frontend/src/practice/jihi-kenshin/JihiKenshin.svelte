@@ -8,6 +8,7 @@
   import * as kanjidate from "kanjidate";
   import type { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
   import type { TextVariant } from "@/lib/drawer-compiler/text-variant";
+  import type { Box } from "@/lib/drawer-compiler/box";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -42,6 +43,9 @@
     "HbA1c",
   ];
   let kensaValues: string[] = Array(9).fill("");
+  let urineProtein: string = "";
+  let urineBlood: string = "";
+  let urineGlucose: string = "";
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -60,6 +64,49 @@
     c.text(c.getMark(name).shrinkToRight(2), value, {
       valign: VertAlign.Center,
     });
+  }
+
+  function renderUrineExam(comp: DrawerCompiler, box: Box, value: string): void {
+    const prevFont = comp.curFont;
+    const align = {
+      halign: HorizAlign.Center,
+      valign: VertAlign.Center
+    }
+    function opt(aux: object): object {
+      return Object.assign({}, align, aux);
+    }
+    switch(value) {
+      case "": break;
+      case "-": {
+        comp.text(box.shift(1, 0), "\u2013", opt({ dy: -0.5 }));  // en-dash
+        break;
+      }
+      case "+/-": {
+        comp.text(box, "\u00b1", opt({ dy: -0.5 }));
+        break;
+      }
+      case "+": {
+        comp.text(box, "\uff0b", opt({ dy: -0.2 }));
+        break;
+      }
+      case "++": {
+        comp.text(box, "2\uff0b", opt({ dy: -0.2 }));
+        break;
+      }
+      case "+++": {
+        comp.text(box, "3\uff0b", opt({ dy: -0.2 }));
+        break;
+      }
+      case "++++": {
+        comp.text(box, "4\uff0b", opt({ dy: -0.2 }));
+        break;
+      }
+      default: {
+        comp.text(box, value, align);
+        break;
+      }
+    }
+    comp.setFont(prevFont);
   }
 
   function doDisplay() {
@@ -128,9 +175,14 @@
     }
     [...Array(9).keys()].forEach((i) => {
       set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
-      let [value, unit] : (string | (string | TextVariant)[])[]= kensaValues[i].split(/\s+/);
-      if (unit === "ten_million_per_micro_liter") {
-        unit = ["x10", comp.str("6", { font: "small-entry", dy: -1.2, padRight: 1.0 }), "/μl"];
+      let [value, unit]: (string | (string | TextVariant)[])[] =
+        kensaValues[i].split(/\s+/);
+      if (unit === "ten_million_per_ul") {
+        unit = [
+          "x10",
+          comp.str("6", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
+          "/μl",
+        ];
       }
       comp.getMark(`血液検査結果${i + 1}`).withCols(
         [28],
@@ -148,7 +200,12 @@
         }
       );
     });
-    comp.labelMarks();
+    let prevFont = comp.curFont;
+    renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
+    renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);
+    renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
+    comp.setFont(prevFont);
+    // comp.labelMarks();
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
       props: {
@@ -282,6 +339,36 @@
             <input type="text" bind:value={kensaValues[i]} />
           </div>
         {/each}
+        <span>尿蛋白</span>
+        <select bind:value={urineProtein}>
+          <option></option>
+          <option>-</option>
+          <option>+/-</option>
+          <option>+</option>
+          <option>++</option>
+          <option>+++</option>
+          <option>++++</option>
+        </select>
+        <span>尿潜血</span>
+        <select bind:value={urineBlood}>
+          <option></option>
+          <option>-</option>
+          <option>+/-</option>
+          <option>+</option>
+          <option>++</option>
+          <option>+++</option>
+          <option>++++</option>
+        </select>
+        <span>尿糖</span>
+        <select bind:value={urineGlucose}>
+          <option></option>
+          <option>-</option>
+          <option>+/-</option>
+          <option>+</option>
+          <option>++</option>
+          <option>+++</option>
+          <option>++++</option>
+        </select>
       </divc>
     </div>
   </div>

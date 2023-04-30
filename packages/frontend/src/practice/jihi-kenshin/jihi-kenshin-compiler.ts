@@ -146,9 +146,9 @@ function compileKennyou(c: DrawerCompiler, box: Box): void {
   c.vertText(cols[0], "検尿", { interCharsSpace: 4 });
   const rows = cols[1].splitToEvenRows(3);
   rows.forEach((r) => c.frame(r));
-  c.text(rows[0], ["蛋白（", c.space(8, { mark: "尿蛋白" }), "）"], Centered);
-  c.text(rows[1], ["潜血（", c.space(8, { mark: "尿潜血" }), "）"], Centered);
-  c.text(rows[2], ["糖　（", c.space(8, { mark: "尿糖　" }), "）"], Centered);
+  c.text(rows[0], ["蛋白（", c.space(11, { mark: "尿蛋白" }), "）"], Centered);
+  c.text(rows[1], ["潜血（", c.space(11, { mark: "尿潜血" }), "）"], Centered);
+  c.text(rows[2], ["糖　（", c.space(11, { mark: "尿糖" }), "）"], Centered);
 }
 
 function compileTokkijikou(c: DrawerCompiler, box: Box): void {
@@ -193,6 +193,7 @@ export function createJihiKenshinCompiler(): DrawerCompiler {
   comp.createFont("large", "serif", 5.5);
   comp.createFont("entry", "sans-serif", 4);
   comp.createFont("small-entry", "sans-serif", 3);
+  comp.createFont("large-entry", "sans-serif", 5.5);
   comp.createPen("regular", 0, 0, 0, 0.1);
   comp.setPen("regular");
   const frame = paper.inset(16, 42, 26, 42);
