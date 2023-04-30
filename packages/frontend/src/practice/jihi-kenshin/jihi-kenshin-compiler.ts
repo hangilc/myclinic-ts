@@ -112,7 +112,7 @@ function compileKensa(c: DrawerCompiler, box: Box): void {
   c.text(cols[0], "血液検査", Centered);
   const rows = cols[1].splitToEvenRows(9);
   rows.forEach((r, i) => {
-    const cs = r.splitToCols(37);
+    const cs = r.splitToCols(32);
     cs.forEach((col) => c.frame(col));
     c.addMark(`血液検査名${i + 1}`, cs[0]);
     c.addMark(`血液検査結果${i + 1}`, cs[1]);
@@ -193,12 +193,12 @@ function compileBottom(c: DrawerCompiler, box: Box): void {
 export function createJihiKenshinCompiler(): DrawerCompiler {
   const comp = new DrawerCompiler();
   const paper: Box = Box.fromPaperSize(A4);
-  comp.createFont("title", "sans-serif", 7, FontWeightBold);
-  comp.createFont("regular", "serif", 4);
-  comp.createFont("large", "serif", 5.5);
-  comp.createFont("entry", "sans-serif", 4);
-  comp.createFont("small-entry", "sans-serif", 3);
-  comp.createFont("large-entry", "sans-serif", 5.5);
+  comp.createFont("title", "MS Gothic", 7, FontWeightBold);
+  comp.createFont("regular", "MS Mincho", 4);
+  comp.createFont("large", "MS Mincho", 5.5);
+  comp.createFont("entry", "MS Gothic", 4);
+  comp.createFont("small-entry", "MS Gothic", 3);
+  comp.createFont("large-entry", "MS Gothic", 5.5);
   comp.createPen("regular", 0, 0, 0, 0.1);
   comp.setPen("regular");
   const frame = paper.inset(16, 42, 26, 42);

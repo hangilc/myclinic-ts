@@ -37,11 +37,11 @@
   let kensaLabels: string[] = [
     "赤血球数",
     "血色素量",
-    "ヘモグロビン",
+    "ヘマトクリット",
     "GOT",
     "GPT",
     "γGTP",
-    "尿酸",
+    "クレアチニン",
     "血糖値",
     "HbA1c",
   ];
@@ -78,8 +78,8 @@
           birthdate = new Date(patient.birthday);
           address = patient.address;
           sex = patient.sexAsKanji + "性";
-        }
-      }
+        },
+      },
     });
   }
 
@@ -90,38 +90,115 @@
         destroy: () => d.$destroy(),
         onEnter: (t) => {
           handleData(t);
-        }
-      }
-    })
+        },
+      },
+    });
   }
 
   function handleData(t: string): void {
-    for(let line of t.split(/\r?\n/)) {
+    const collect: string[] = [];
+    for (let line of t.split(/\r?\n/)) {
       let m = /^HT\s+([\d.]+)/.exec(line);
-      if( m ){
+      if (m) {
         height = m[1];
         continue;
       }
       m = /^BW\s+([\d.]+)/.exec(line);
-      if( m ){
+      if (m) {
         weight = m[1];
         continue;
       }
       m = /^BP\s+([\d/]+)/.exec(line);
-      if( m ){
+      if (m) {
         bloodPressure = `${m[1]} mmHg`;
         continue;
       }
       m = /^(?:心電図|EKG|ＥＫＧ)[:：\s]+(.+)/.exec(line);
-      if( m ){
+      if (m) {
         shindenzu = m[1];
         continue;
       }
       m = /^(?:胸部Ｘ線|Ｘ線|Xp|Ｘｐ)[:：\s]+(.+)/.exec(line);
-      if( m ){
+      if (m) {
         xp = m[1];
         continue;
       }
+      m = /^白血球数\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("白血球数", m[1], "/μL", collect);
+      }
+      m = /^赤血球数\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("赤血球数", m[1], "ten_thousand_per_ul", collect);
+      }
+      m = /^ﾍﾓｸﾞﾛﾋﾞﾝ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("血色素量", m[1], "g/dL", collect);
+      }
+      m = /^ﾍﾏﾄｸﾘｯﾄ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("ヘマトクリット", m[1], "%", collect);
+      }
+      m = /^AST\(GOT\)\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("GOT", m[1], "U/L", collect);
+      }
+      m = /^ALT\(GPT\)\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("GPT", m[1], "U/L", collect);
+      }
+      m = /^γ-GT\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("γGTP", m[1], "U/L", collect);
+      }
+      m = /^ｸﾚｱﾁﾆﾝ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("クレアチニン", m[1], "mg/dL", collect);
+      }
+      m = /^ｸﾞﾙｺｰｽ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("血糖値", m[1], "mg/dL", collect);
+      }
+      m = /^HbA1c\/NGSP\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("HbA1c", m[1], "%", collect);
+      }
+      m = /^尿酸\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("尿酸", m[1], "mg/dL", collect);
+      }
+      m = /^LDLｺﾚｽﾃﾛｰﾙ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("LDLコレステロール", m[1], "mg/dL", collect);
+      }
+      m = /^HDLｺﾚｽﾃﾛｰﾙ\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("HDLコレステロール", m[1], "mg/dL", collect);
+      }
+      m = /^TG\(中性脂肪\)\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("中性脂肪", m[1], "mg/dL", collect);
+      }
+    }
+    console.log("collect", collect);
+    if( tokkijikou && !tokkijikou.endsWith("\n") ){
+      tokkijikou += "\n";
+    }
+    tokkijikou = collect.join("\n");
+  }
+
+  function setLaboExam(
+    name: string,
+    value: string,
+    unit: string,
+    collect: string[]
+  ) {
+    const i = kensaLabels.findIndex((e) => e === name);
+    const s = `${value} ${unit}`;
+    if (i >= 0) {
+      kensaValues[i] = s;
+    } else {
+      collect.push(name + " " + s);
     }
   }
 
@@ -144,19 +221,24 @@
     });
   }
 
-  function renderUrineExam(comp: DrawerCompiler, box: Box, value: string): void {
+  function renderUrineExam(
+    comp: DrawerCompiler,
+    box: Box,
+    value: string
+  ): void {
     const prevFont = comp.curFont;
     const align = {
       halign: HorizAlign.Center,
-      valign: VertAlign.Center
-    }
+      valign: VertAlign.Center,
+    };
     function opt(aux: object): object {
       return Object.assign({}, align, aux);
     }
-    switch(value) {
-      case "": break;
+    switch (value) {
+      case "":
+        break;
       case "-": {
-        comp.text(box.shift(1, 0), "\u2013", opt({ dy: -0.5 }));  // en-dash
+        comp.text(box.shift(1, 0), "\u2013", opt({ dy: -0.5 })); // en-dash
         break;
       }
       case "+/-": {
@@ -260,15 +342,15 @@
       set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
       let [value, unit]: (string | (string | TextVariant)[])[] =
         kensaValues[i].split(/\s+/);
-      if (unit === "ten_million_per_ul") {
+      if (unit === "ten_thousand_per_ul") {
         unit = [
           "x10",
-          comp.str("6", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
-          "/μl",
+          comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
+          "/μL",
         ];
       }
       comp.getMark(`血液検査結果${i + 1}`).withCols(
-        [28],
+        [18],
         (b) => {
           comp.text(b, value, {
             halign: HorizAlign.Right,
@@ -294,7 +376,7 @@
     set(comp, "住所2", address2);
     set(comp, "クリニック名", clinicName);
     comp.withFont("large-entry", () => set(comp, "医師名", doctorName));
-    if( showMarker ){
+    if (showMarker) {
       comp.labelMarks();
     }
     const d: DrawerDialog2 = new DrawerDialog2({
@@ -319,7 +401,9 @@
     <div class="col-1">
       <div>
         <h3 class="inline-block">患者情報</h3>
-        <a href="javascript:void(0)" class="small-link" on:click={selectPatient}>取り込み</a>
+        <a href="javascript:void(0)" class="small-link" on:click={selectPatient}
+          >取り込み</a
+        >
       </div>
       <div class="input-panel">
         <span>氏名</span>
@@ -336,7 +420,9 @@
       </div>
       <div>
         <h3 class="inline-block">身体所見等</h3>
-        <a href="javascript:void(0)" class="small-link" on:click={applyData}>取り込み</a>
+        <a href="javascript:void(0)" class="small-link" on:click={applyData}
+          >取り込み</a
+        >
       </div>
       <div class="input-panel">
         <span>身長</span>
@@ -421,28 +507,34 @@
       </div>
       <div>
         <h3 class="inline-block">その他</h3>
-        <a href="javascript:void(0)" class="small-link" on:click={applyClinicInfo}>取り込み</a>
+        <a
+          href="javascript:void(0)"
+          class="small-link"
+          on:click={applyClinicInfo}>取り込み</a
+        >
       </div>
       <div class="input-panel">
         <span>発行日</span>
         <EditableDate bind:date={issueDate} />
         <span>住所1</span>
-        <input type="text" bind:value={address1}/>
+        <input type="text" bind:value={address1} />
         <span>住所2</span>
-        <input type="text" bind:value={address2}/>
+        <input type="text" bind:value={address2} />
         <span>クリニック名</span>
-        <input type="text" bind:value={clinicName}/>
+        <input type="text" bind:value={clinicName} />
         <span>医師名</span>
-        <input type="text" bind:value={doctorName}/>
+        <input type="text" bind:value={doctorName} />
       </div>
       <div>
-        <input type="checkbox" bind:value={showMarker}/> マーカー表示
+        <input type="checkbox" bind:value={showMarker} /> マーカー表示
       </div>
     </div>
     <div class="col2">
       <div>
         <h3 class="inline-block">検査結果</h3>
-        <a href="javascript:void(0)" class="small-link" on:click={applyData}>取り込み</a>
+        <a href="javascript:void(0)" class="small-link" on:click={applyData}
+          >取り込み</a
+        >
       </div>
       <divc class="input-panel">
         {#each [...Array(9).keys()] as i (i)}
@@ -460,7 +552,7 @@
         {/each}
         <span>尿蛋白</span>
         <select bind:value={urineProtein}>
-          <option></option>
+          <option />
           <option>-</option>
           <option>+/-</option>
           <option>+</option>
@@ -470,7 +562,7 @@
         </select>
         <span>尿潜血</span>
         <select bind:value={urineBlood}>
-          <option></option>
+          <option />
           <option>-</option>
           <option>+/-</option>
           <option>+</option>
@@ -480,7 +572,7 @@
         </select>
         <span>尿糖</span>
         <select bind:value={urineGlucose}>
-          <option></option>
+          <option />
           <option>-</option>
           <option>+/-</option>
           <option>+</option>
@@ -489,7 +581,7 @@
           <option>++++</option>
         </select>
         <span>特記事項</span>
-        <textarea bind:value={tokkijikou}/>
+        <textarea bind:value={tokkijikou} />
       </divc>
     </div>
   </div>
