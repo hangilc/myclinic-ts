@@ -2,6 +2,9 @@ export function charWidth(codePoint: number | string, fontSize: number): number 
   if( typeof codePoint === "string" ){
     codePoint = codePoint.codePointAt(0)!;
   }
+  if( [10, 13, 9].includes(codePoint) ){
+    return 0;
+  }
   if( codePoint <= 255 || isHankaku(codePoint) ) {
     return fontSize / 2;
   } else {

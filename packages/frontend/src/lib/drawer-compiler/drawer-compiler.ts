@@ -1,7 +1,6 @@
 import { OpCreateFont, OpCreatePen, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, OpSetPen, OpSetTextColor, type Op } from "../drawer/op";
 import { Box } from "./box";
 import { breakLine } from "./break-line";
-import { charWidth } from "./char-width";
 import { HorizAlign, VertAlign, VertDirection } from "./enums";
 import { StrVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant, type StrVariantOpt } from "./text-variant";
 
@@ -90,6 +89,13 @@ export class DrawerCompiler {
     } else {
       return b;
     }
+  }
+
+  withFont(font: string, f: () => void): void {
+    const prevFont = this.curFont;
+    this.setFont(font);
+    f();
+    this.setFont(prevFont);
   }
 
   marker(str: string, labelName: string): MarkVariant {
@@ -235,7 +241,7 @@ export class DrawerCompiler {
     let y = b.top;
     let x = b.left;
     const fontSize = this.curFontSize;
-    const lines = breakLine(s, fontSize, b.width);
+    const lines = s.split(/\r?\n/).flatMap(line => breakLine(line, fontSize, b.width));
     let lb = b.setHeight(fontSize, VertDirection.Top);
     for(let line of lines) {
       this.text(lb, line, { halign: HorizAlign.Left, valign: VertAlign.Top });

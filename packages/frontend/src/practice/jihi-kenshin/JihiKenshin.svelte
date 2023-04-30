@@ -47,6 +47,12 @@
   let urineBlood: string = "";
   let urineGlucose: string = "";
   let tokkijikou: string = "";
+  let issueDate: Date = new Date();
+  let address1 = "";
+  let address2 = "";
+  let clinicName = "";
+  let doctorName = "";
+  let showMarker: boolean = false;
 
   function hasNoVisualAcuityInput(): boolean {
     return (
@@ -112,7 +118,7 @@
 
   function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
     const r: Box = box.inset(1, 1, 2, 1);
-    c.text(r, value);
+    c.paragraph(r, value);
   }
 
   function doDisplay() {
@@ -212,7 +218,14 @@
     renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
     renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
     comp.setFont(prevFont);
-    comp.labelMarks();
+    set(comp, "発行日", kanjidate.format(kanjidate.f2, issueDate));
+    set(comp, "住所1", address1);
+    set(comp, "住所2", address2);
+    set(comp, "クリニック名", clinicName);
+    comp.withFont("large-entry", () => set(comp, "医師名", doctorName));
+    if( showMarker ){
+      comp.labelMarks();
+    }
     const d: DrawerDialog2 = new DrawerDialog2({
       target: document.body,
       props: {
@@ -328,6 +341,22 @@
         <input type="text" bind:value={xp} />
         <span>Ｘ線撮影日</span>
         <EditableDate bind:date={xpConductedDate} />
+      </div>
+      <h3>その他</h3>
+      <div class="input-panel">
+        <span>発行日</span>
+        <EditableDate bind:date={issueDate} />
+        <span>住所1</span>
+        <input type="text" bind:value={address1}/>
+        <span>住所2</span>
+        <input type="text" bind:value={address2}/>
+        <span>クリニック名</span>
+        <input type="text" bind:value={clinicName}/>
+        <span>医師名</span>
+        <input type="text" bind:value={doctorName}/>
+      </div>
+      <div>
+        <input type="checkbox" bind:value={showMarker} /> マーカー表示
       </div>
     </div>
     <div class="col2">

@@ -182,7 +182,12 @@ function compileBottom(c: DrawerCompiler, box: Box): void {
     .shift(0, 3)
     .setLeft(36)
     .setHeight(6, VertDirection.Top);
-  c.text(doctorName, ["診断医師氏名", c.space(43, { mark: "医師名", height: doctorName.height }), "印"]);
+  c.text(doctorName, ["診断医師氏名", c.space(43,
+    {
+      mark: "医師名", modify: b => b.setTop(doctorName.top).setBottom(doctorName.bottom)
+    }), "印"], {
+    valign: VertAlign.Center
+  });
 }
 
 export function createJihiKenshinCompiler(): DrawerCompiler {

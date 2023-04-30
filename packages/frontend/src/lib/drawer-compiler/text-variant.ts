@@ -77,7 +77,7 @@ export class MarkVariant implements TextVariant {
 
 export interface SpaceVariantOpt {
   mark?: string;
-  height?: number;
+  modify?: (b: Box) => Box;
 }
 
 export class SpaceVariant implements TextVariant {
@@ -96,8 +96,10 @@ export class SpaceVariant implements TextVariant {
   render(x0: number, y0: number, c: DrawerCompiler): void {
     if (this.opt.mark) {
       const mark: string = this.opt.mark;
-      const height = this.opt.height ?? c.curFontSize;
-      const b = new Box(x0, y0, x0 + this.spaceWidth, y0 + height);
+      let b = new Box(x0, y0, x0 + this.spaceWidth, y0 + c.curFontSize);
+      if( this.opt.modify ){
+        b = this.opt.modify(b);
+      }
       c.addMark(mark, b);
     }
   }
