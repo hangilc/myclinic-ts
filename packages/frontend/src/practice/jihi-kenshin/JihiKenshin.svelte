@@ -12,6 +12,7 @@
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
   import TextInputDialog from "./TextInputDialog.svelte";
+  import { encodeUrineResult, normalizeUrineResult } from "./urine-exam";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -179,6 +180,18 @@
       if (m) {
         setLaboExam("中性脂肪", m[1], "mg/dL", collect);
       }
+      m = /^尿蛋白定性 \（(.+)\）/.exec(line);
+      if (m) {
+        urineProtein = encodeUrineResult(m[1]);
+      }
+      m = /^尿潜血反応 \（(.+)\）/.exec(line);
+      if (m) {
+        urineBlood = encodeUrineResult(m[1]);
+      }
+      m = /^尿糖定性 \（(.+)\）/.exec(line);
+      if (m) {
+        urineGlucose = encodeUrineResult(m[1]);
+      }
     }
     console.log("collect", collect);
     if( tokkijikou && !tokkijikou.endsWith("\n") ){
@@ -234,31 +247,32 @@
     function opt(aux: object): object {
       return Object.assign({}, align, aux);
     }
+    console.log("urine value", value, value === "-");
     switch (value) {
       case "":
         break;
       case "-": {
-        comp.text(box.shift(1, 0), "\u2013", opt({ dy: -0.5 })); // en-dash
+        comp.text(box.shift(1, 0), "－", opt({ dy: -0.5 })); // en-dash
         break;
       }
       case "+/-": {
-        comp.text(box, "\u00b1", opt({ dy: -0.5 }));
+        comp.text(box, "±", opt({ dy: -0.5 }));
         break;
       }
       case "+": {
-        comp.text(box, "\uff0b", opt({ dy: -0.2 }));
+        comp.text(box, "\＋", opt({ dy: -0.2 }));
         break;
       }
-      case "++": {
-        comp.text(box, "2\uff0b", opt({ dy: -0.2 }));
+      case "2+": {
+        comp.text(box, "2\＋", opt({ dy: -0.2 }));
         break;
       }
-      case "+++": {
-        comp.text(box, "3\uff0b", opt({ dy: -0.2 }));
+      case "3+": {
+        comp.text(box, "3\＋", opt({ dy: -0.2 }));
         break;
       }
-      case "++++": {
-        comp.text(box, "4\uff0b", opt({ dy: -0.2 }));
+      case "4+": {
+        comp.text(box, "4\＋", opt({ dy: -0.2 }));
         break;
       }
       default: {
@@ -552,8 +566,8 @@
         {/each}
         <span>尿蛋白</span>
         <select bind:value={urineProtein}>
-          <option />
-          <option>-</option>
+          <option value="" />
+          <option value="-">-</option>
           <option>+/-</option>
           <option>+</option>
           <option>++</option>
