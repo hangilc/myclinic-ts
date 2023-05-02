@@ -4,6 +4,8 @@ import { breakLine } from "./break-line";
 import { HorizAlign, VertAlign, VertDirection } from "./enums";
 import { StrVariant, MarkVariant, SpaceVariant, type SpaceVariantOpt, type TextVariant, type StrVariantOpt } from "./text-variant";
 
+export type Line = string | ((string | TextVariant)[])
+
 export class DrawerCompiler {
   ops: Op[] = [];
   fontSizeMap: Record<string, number> = { "": 4 };
@@ -146,7 +148,7 @@ export class DrawerCompiler {
     });
   }
 
-  text(b: Box, ts: string | (string | TextVariant)[], opt: TextOpt = {}): Box {
+  text(b: Box, ts: Line, opt: TextOpt = {}): Box {
     if (typeof ts === "string") {
       ts = [ts];
     }
@@ -218,15 +220,17 @@ export class DrawerCompiler {
     }
   }
 
-  textLines(b: Box, ts: (string | (string | TextVariant)[])[], opt: TextLinesOpt = {}): Box {
-    if (ts.length === 0) {
+  textLines(b: Box, lines: Line[], opt: TextLinesOpt = {}): Box {
+    if (lines.length === 0) {
       return b.setBottom(b.top);
     }
     const leading = opt.leading ?? 0;
     let rb = b;
     const fontSize = this.curFontSize;
-    ts.forEach(t => {
-      this.text(rb, t);
+    lines.forEach(line => {
+      this.text(rb, line, {
+        halign: HorizAlign.Left, valign: VertAlign.Top
+      });
       rb = rb.shiftTopValue(fontSize + leading);
     })
     return rb.setTop(b.top).shiftBottomValue(-leading);

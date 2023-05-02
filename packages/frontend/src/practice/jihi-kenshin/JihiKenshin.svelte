@@ -12,7 +12,8 @@
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
   import TextInputDialog from "./TextInputDialog.svelte";
-  import { encodeUrineResult, normalizeUrineResult } from "./urine-exam";
+  import { encodeUrineResult } from "./urine-exam";
+  import { convLine } from "./conv-line";
 
   export let isVisible: boolean;
   let name: string = "田中　元";
@@ -21,6 +22,7 @@
   let address: string = "東京０３";
   let height: string = "";
   let weight: string = "";
+  let physicalExam: string = "異常なし";
   let visualAcuityLeft: string = "";
   let visualAcuityLeftCorrected: string = "";
   let visualAcuityRight: string = "";
@@ -211,7 +213,7 @@
     if( tokkijikou && !tokkijikou.endsWith("\n") ){
       tokkijikou += "\n";
     }
-    tokkijikou = collect.join("\n");
+    tokkijikou += collect.join("\n");
   }
 
   function setLaboExam(
@@ -261,7 +263,6 @@
     function opt(aux: object): object {
       return Object.assign({}, align, aux);
     }
-    console.log("urine value", value, value === "-");
     switch (value) {
       case "":
         break;
@@ -299,7 +300,8 @@
 
   function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
     const r: Box = box.inset(1, 1, 2, 1);
-    c.paragraph(r, value);
+    const lines = value.split(/\r?\n/);
+    c.textLines(r, lines.map(line => convLine(line, c)), { leading: 1 });
   }
 
   function doDisplay() {
@@ -313,6 +315,7 @@
     set(comp, "住所", address);
     set(comp, "身長", [height || comp.space(18), " cm"]);
     set(comp, "体重", [weight || comp.space(18), " kg"]);
+    set(comp, "診察", physicalExam);
     if (hasNoVisualAcuityInput()) {
       const b = comp.getMark("視力");
       comp.line(...b.leftBottom(), ...b.rightTop());
@@ -421,6 +424,7 @@
       },
     });
   }
+
 </script>
 
 <div style:display={isVisible ? "block" : "none"}>
@@ -460,6 +464,10 @@
         <span>体重</span>
         <div class="inline-block">
           <input type="text" style:width="5em" bind:value={weight} /> kg
+        </div>
+        <span>診察</span>
+        <div class="inline-block">
+          <input type="text" style:width="5em" bind:value={physicalExam} />
         </div>
         <span>視力</span>
         <div class="inline-block">
