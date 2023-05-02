@@ -114,6 +114,16 @@
         bloodPressure = `${m[1]} mmHg`;
         continue;
       }
+      m = /^BMI\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("BMI", m[1], "", collect);
+        continue;
+      }
+      m = /^[Ww]aist\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("腹囲", m[1], "cm", collect);
+        continue;
+      }
       m = /^(?:心電図|EKG|ＥＫＧ)[:：\s]+(.+)/.exec(line);
       if (m) {
         shindenzu = m[1];
@@ -139,6 +149,10 @@
       m = /^ﾍﾏﾄｸﾘｯﾄ\s+([\d.]+)/.exec(line);
       if (m) {
         setLaboExam("ヘマトクリット", m[1], "%", collect);
+      }
+      m = /^血小板数\s+([\d.]+)/.exec(line);
+      if (m) {
+        setLaboExam("血小板数", m[1], "ten_thousand_per_ul", collect);
       }
       m = /^AST\(GOT\)\s+([\d.]+)/.exec(line);
       if (m) {

@@ -218,7 +218,7 @@ export class DrawerCompiler {
     }
   }
 
-  textLines(b: Box, ts: string[], opt: TextLinesOpt = {}): Box {
+  textLines(b: Box, ts: (string | (string | TextVariant)[])[], opt: TextLinesOpt = {}): Box {
     if (ts.length === 0) {
       return b.setBottom(b.top);
     }
