@@ -20,23 +20,23 @@ async function start() {
   const shahokokuhoList = await listShahokokuho(at);
   const koukikoureiList = await listKoukikourei(at);
   const map: Record<number, (Shahokokuho | Koukikourei)[]> = {};
-  for(let h of shahokokuhoList){
-    if( !(h.patientId in map) ){
+  for (let h of shahokokuhoList) {
+    if (!(h.patientId in map)) {
       map[h.patientId] = [h];
     } else {
       map[h.patientId].push(h);
     }
   }
-   for(let h of koukikoureiList){
-    if( !(h.patientId in map) ){
+  for (let h of koukikoureiList) {
+    if (!(h.patientId in map)) {
       map[h.patientId] = [h];
     } else {
       map[h.patientId].push(h);
     }
   }
-  for(let patientId in map){
+  for (let patientId in map) {
     const list = map[patientId];
-    if( list.length > 1 ){
+    if (list.length > 1) {
       console.log(patientId, list);
     }
   }
@@ -46,13 +46,13 @@ async function start() {
 async function listShahokokuho(at: string): Promise<Shahokokuho[]> {
   return new Promise(async (resolve, reject) => {
     pool.query("select * from hoken_shahokokuho order by shahokokuho_id", (err, rows) => {
-      if( err ){
+      if (err) {
         reject(err);
       }
       const result = [];
-      for(let r of rows){
+      for (let r of rows) {
         const h = Shahokokuho.cast(coerceShahokokuho(r));
-        if( h.isValidAt(at) ){
+        if (h.isValidAt(at)) {
           result.push(h);
         }
       }
@@ -64,13 +64,13 @@ async function listShahokokuho(at: string): Promise<Shahokokuho[]> {
 async function listKoukikourei(at: string): Promise<Koukikourei[]> {
   return new Promise(async (resolve, reject) => {
     pool.query("select * from hoken_koukikourei order by koukikourei_id", (err, rows) => {
-      if( err ){
+      if (err) {
         reject(err);
       }
       const result = [];
-      for(let r of rows){
+      for (let r of rows) {
         const h = Koukikourei.cast(coerceRow(r));
-        if( h.isValidAt(at) ){
+        if (h.isValidAt(at)) {
           result.push(h);
         }
       }
