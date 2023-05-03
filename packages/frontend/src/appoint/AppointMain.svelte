@@ -108,10 +108,13 @@
     if (a == null) {
       return;
     }
+    console.log("onAppointDeleted", a);
     for (let c of cols) {
       const i = c.findAppointTimeDataIndex(a.appointTimeId);
+      console.log("index", i);
       if (i >= 0) {
         c.deleteAppoint(i, a);
+        console.log("deleted", c);
         cols = [...cols];
         return;
       }

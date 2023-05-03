@@ -47,37 +47,6 @@
     }
   }
 
-  // function isEqualTags(a: string[], b: string[]): boolean {
-  //   if (a.length !== b.length) {
-  //     return false;
-  //   }
-  //   for (let x of a) {
-  //     if (!b.includes(x)) {
-  //       return false;
-  //     }
-  //   }
-  //   for (let x of b) {
-  //     if (!a.includes(x)) {
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // }
-
-  // function isModified(): boolean {
-  //   if (init == undefined) {
-  //     return false;
-  //   } else {
-  //     return !(
-  //       searchText === init.patientName &&
-  //       patientId === init.patientId &&
-  //       memoInput === init.memoString &&
-  //       isEqualTags(tags, init.tags) &&
-  //       !followingChecked
-  //     );
-  //   }
-  // }
-
   function appointTimeText(data: AppointTimeData): string {
     const d = format("{M}月{D}日（{W}）", data.appointTime.date);
     const fp = parseTime(data.appointTime.fromTime);

@@ -21,11 +21,15 @@ export class AppointTimeData {
   }
 
   deleteAppoint(a: Appoint): void {
-    const i = this.appoints.findIndex(a => a.appointId == a.appointId);
+    console.log("before delete", JSON.stringify(this.appoints));
+    console.log("deleting appoint", JSON.stringify(a));
+    const i = this.appoints.findIndex(e => e.appointId === a.appointId);
     if( i < 0 ){
       console.error("Cannot find appoint to delete.", a);
     } else {
+      console.log("i", i);
       this.appoints.splice(i, 1);
+      console.log("after delete", JSON.stringify(this.appoints));
     }
   }
 

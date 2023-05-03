@@ -17,8 +17,6 @@
   export let data: AppointTimeData;
   export let column: ColumnData;
 
-  $: console.log(data);
-
   function timeText(data: AppointTimeData): string {
     return `${fromTimeText(data)} - ${untilTimeText(data)}`;
   }
