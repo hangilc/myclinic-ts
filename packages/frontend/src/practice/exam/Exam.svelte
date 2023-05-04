@@ -1,13 +1,14 @@
 <script>
   import Header from "./Header.svelte";
   import PatientsByDateBox from "./patients-by-date-box/PatientsByDateBox.svelte";
-  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage } from "./ExamVars";
+  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage, showAppoints } from "./ExamVars";
   import PatientDisp from "./patient-disp/PatientDisp.svelte";
   import PatientManip from "./PatientManip.svelte";
   import RecordsWrapper from "./RecordsWrapper.svelte";
   import Nav from "../../lib/Nav.svelte";
   import MishuuList from "./mishuu-list/MishuuList.svelte";
   import Disease from "./disease2/Disease.svelte";
+  import Appointments from "./appointsments/Appointments.svelte";
 
   export let isVisible = false;
 </script>
@@ -26,6 +27,9 @@
   <div class="exam-right">
     <Disease />
     <MishuuList />
+    {#if $showAppoints}
+      <Appointments />
+    {/if}
     {#if $showPatientsByDate}
       <PatientsByDateBox />
     {/if}

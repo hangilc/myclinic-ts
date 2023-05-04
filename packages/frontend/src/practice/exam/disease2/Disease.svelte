@@ -22,6 +22,7 @@
       if (p == null) {
         clear();
         clear = () => {};
+        env = undefined;
       } else {
         env = await DiseaseEnv.create(p);
         doMode("current");

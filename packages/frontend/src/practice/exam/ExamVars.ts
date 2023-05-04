@@ -194,6 +194,7 @@ reqChangePatient.subscribe(async value => {
 });
 
 export const showPatientsByDate: Writable<boolean> = writable(false);
+export const showAppoints: Writable<boolean> = writable(false);
 
 appEvent.textEntered.subscribe(text => {
   if (text == null) {

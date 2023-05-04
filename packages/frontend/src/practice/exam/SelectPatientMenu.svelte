@@ -29,6 +29,13 @@
     href="javascript:void(0)"
     on:click={() => {
       destroy();
+      onSelect("appoint");
+    }}>予約患者</a
+  >
+  <a
+    href="javascript:void(0)"
+    on:click={() => {
+      destroy();
       onSelect("by-date");
     }}>日付別</a
   >

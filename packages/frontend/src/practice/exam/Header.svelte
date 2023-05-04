@@ -4,13 +4,12 @@
   import SelectRegisteredPatientDialog from "./select-patient-dialogs/SelectRegisteredPatientDialog.svelte";
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
-  import { startPatient, showPatientsByDate } from "./ExamVars";
+  import { startPatient, showPatientsByDate, showAppoints } from "./ExamVars";
   import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
 
-  // let selectPatientLink: HTMLAnchorElement;
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -43,6 +42,10 @@
             onEnter: startPatient,
           },
         });
+        break;
+      }
+      case "appoint": {
+        showAppoints.set(true);
         break;
       }
       case "by-date": {
