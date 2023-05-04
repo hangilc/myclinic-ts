@@ -18,6 +18,7 @@
   import { dateToSql } from "@/lib/util";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import { countInvalidUsage } from "@/lib/hoken-check";
 
   export let data: PatientData;
   export let hoken: Hoken;
@@ -30,6 +31,15 @@
     (_) => RoujinInfo,
     (_) => KouhiInfo
   );
+  let invalidUsage: number = 0;
+
+  checkInvalidUsage();
+
+  async function checkInvalidUsage() {
+    if( hoken ){
+      invalidUsage = await countInvalidUsage(hoken.value);
+    }
+  }
 
   function close(): void {
     destroy();
@@ -97,6 +107,9 @@
 </script>
 
 <SurfaceModal destroy={exit} title={`${hoken.name}情報`}>
+  {#if invalidUsage > 0}
+  <div class="warning">有効期間外に使用されています。</div>
+  {/if}
   <svelte:component this={panel} {patient} {hoken} />
   <div class="commands">
     {#if hoken.isShahokokuho || hoken.isKoukikourei}
@@ -113,6 +126,11 @@
 </SurfaceModal>
 
 <style>
+  .warning {
+    margin: 10px 0;
+    color: red;
+  }
+
   .commands {
     margin-top: 10px;
     display: flex;

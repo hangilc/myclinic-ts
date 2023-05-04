@@ -12,8 +12,8 @@
   export let previewScale: number = 1;
   export let kind: string = "";
   export let ops: Op[] = [];
-  export let displayWidth: number | undefined;
-  export let displayHeight: number | undefined;
+  export let displayWidth: number | undefined = undefined;
+  export let displayHeight: number | undefined = undefined;
   let settingSelect: string = "手動";
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;
@@ -148,5 +148,11 @@
 
   * {
     user-select: none;
+  }
+
+  select {
+    border: 1px solid gray;
+    border-radius: 2px;
+    padding: 3px;
   }
 </style>

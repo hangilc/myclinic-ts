@@ -1,6 +1,37 @@
-import { Koukikourei, Shahokokuho } from "myclinic-model";
+import { Kouhi, Koukikourei, Roujin, Shahokokuho } from "myclinic-model";
 import api from "./api";
 import { dateIntervalsOverlap } from "./interval-overlap";
+
+export async function countInvalidUsage(h: Shahokokuho | Koukikourei | Kouhi | Roujin): Promise<number> {
+  let cBefore: number;
+  let cAfter: number;
+  if( h instanceof Shahokokuho ){
+    cBefore = await api.countShahokokuhoUsageBefore(h.shahokokuhoId, h.validFrom);
+    if( h.validUpto !== "0000-00-00" ){
+      cAfter = await api.countShahokokuhoUsageAfter(h.shahokokuhoId, h.validUpto);
+    } else {
+      cAfter = 0;
+    }
+  } else if( h instanceof Koukikourei) {
+    cBefore = await api.countKoukikoureiUsageBefore(h.koukikoureiId, h.validFrom);
+    if( h.validUpto !== "0000-00-00" ){
+      cAfter = await api.countKoukikoureiUsageAfter(h.koukikoureiId, h.validUpto);
+    } else {
+      cAfter = 0;
+    }
+  } else if( h instanceof Kouhi ){
+    cBefore = await api.countKouhiUsageBefore(h.kouhiId, h.validFrom);
+    if( h.validUpto !== "0000-00-00" ){
+      cAfter = await api.countKouhiUsageAfter(h.kouhiId, h.validUpto);
+    } else {
+      cAfter = 0;
+    }
+  } else {
+    cBefore = 0;
+    cAfter = 0;
+  }
+  return cBefore + cAfter;
+}
 
 export class OverlapExists {
   readonly isOverlapExistsClass: boolean = true;
