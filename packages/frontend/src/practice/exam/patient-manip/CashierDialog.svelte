@@ -11,6 +11,9 @@
   export let destroy: () => void;
   export let visitId: Readable<number | null>;
   export let meisai: Meisai;
+  export let gendogaku: number | undefined;
+  export let monthlyFutan: number | undefined = undefined;
+
   let meisaiItems: string[] = mkMeisaiItems(meisai);
   let summary: string = mkSummary(meisai);
   let chargeValue:string = meisai.charge.toString();
@@ -101,6 +104,10 @@
         />
       </div>
     {/if}
+  </div>
+  <div>
+    限度額：{gendogaku !== undefined ? `${gendogaku.toLocaleString()}円` : "（未提出）"}
+    負担額：{monthlyFutan !== undefined ? `${monthlyFutan.toLocaleString()}円` : "（未計算）"}
   </div>
   <div class="commands">
     <input type="checkbox" bind:value={isMishuu} id={mishuuId} /><label

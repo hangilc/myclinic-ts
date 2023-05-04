@@ -4,6 +4,8 @@
   import type { VisitEx } from "myclinic-model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
+  import * as kanjidate from "kanjidate";
+  import { calcGendogaku, calcMonthlyFutan } from "@/lib/gendogaku";
 
   export let visit: VisitEx;
   let mode = "disp";
@@ -16,8 +18,14 @@
   async function doDispClick() {
     if (visit.chargeOption != null) {
       const meisai = await api.getMeisai(visit.visitId);
+      const patientId = visit.patient.patientId;
+      const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
+      const year = kd.year;
+      const month = kd.month;
+      const gendogaku = await calcGendogaku(patientId, year, month);
+      const monthlyFutan = await calcMonthlyFutan(patientId, year, month);
       mode = "edit";
-      edit.open(meisai);
+      edit.open(meisai, gendogaku, monthlyFutan);
     }
   }
 </script>

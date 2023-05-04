@@ -1,5 +1,4 @@
 <script lang="ts">
-  // import SearchPatientResultDialog from "@/cashier/SearchPatientResultDialog.svelte";
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import { WqueueState } from "myclinic-model";
@@ -9,22 +8,36 @@
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
+  import { calcGendogaku, calcMonthlyFutan } from "@/lib/gendogaku";
+  import * as kanjidate from "kanjidate";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
   async function doCashier() {
+    const patient = $currentPatient;
     const visitId = $currentVisitId;
-    if (visitId != null) {
+    if (visitId && visitId > 0 && patient) {
       cashierVisitId.set(visitId);
       const meisai = await api.getMeisai(visitId);
+      const visit = await api.getVisit(visitId);
+      const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
+      const year = kd.year;
+      const month = kd.month;
+      const gendogaku: number | undefined = await calcGendogaku(patient.patientId, year, month);
+      let monthlyFutan: number | undefined = undefined;
+      if( gendogaku != undefined) {
+        monthlyFutan = await calcMonthlyFutan(patient.patientId, year, month);
+      }
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
-          meisai
-        }
-      })
+          meisai,
+          gendogaku,
+          monthlyFutan,
+        },
+      });
     }
   }
 
@@ -47,8 +60,8 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          patient: $currentPatient
-        }
+          patient: $currentPatient,
+        },
       });
     }
   }
@@ -58,21 +71,21 @@
       const d: UploadImageDialog = new UploadImageDialog({
         target: document.body,
         props: {
-          destroy: () => d.$destroy()
-        }
-      })
+          destroy: () => d.$destroy(),
+        },
+      });
     }
   }
 
   function doGazouList() {
-    if( $currentPatient ){
+    if ($currentPatient) {
       const d: GazouListDialog = new GazouListDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          patientId: $currentPatient.patientId
-        }
-      })
+          patientId: $currentPatient.patientId,
+        },
+      });
     }
   }
 </script>

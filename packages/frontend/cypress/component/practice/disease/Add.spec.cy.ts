@@ -1,5 +1,5 @@
 import { getBase } from "@/lib/api";
-import Add from "@/practice/exam/disease2/add/Add.svelte";
+import Add from "@/practice/exam/disease/add/Add.svelte";
 import { fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, DiseaseEnterData, ShuushokugoMaster } from "myclinic-model";
 

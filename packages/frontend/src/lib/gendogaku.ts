@@ -1,4 +1,4 @@
-import type { Meisai } from "myclinic-model";
+import type { Charge, Meisai, Patient, Payment } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
@@ -15,7 +15,7 @@ export async function gendogaku(kubun: LimitApplicationCertificateClassification
     case "オ":
     case "オ（境）": return 35400;
     case "一般Ⅱ": return Math.min(18000, calc(6000, await iryouhi(), 30000, 0.10));
-    case "一般Ⅰ": 
+    case "一般Ⅰ":
     case "一般": return 18000;
     case "低所得Ⅱ":
     case "低所得Ⅰ":
@@ -26,7 +26,7 @@ export async function gendogaku(kubun: LimitApplicationCertificateClassification
 }
 
 function calc(threshold: number, iryouhi: number, offset: number, ratio: number): number {
-  if( iryouhi > offset ){
+  if (iryouhi > offset) {
     return threshold + (iryouhi - offset) * ratio;
   } else {
     return threshold;
@@ -66,19 +66,19 @@ export async function calcGendogaku(patientId: number, year: number, month: numb
   });
   let kubun: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
   if (limitList.length === 0) {
-    if( results.length > 0 ){
+    if (results.length > 0) {
       const r = results[results.length - 1];
-      switch(r.probeKoukikourei()){
+      switch (r.probeKoukikourei()) {
         case 3: kubun = "現役並みⅢ"; break;
         case 2: kubun = "一般Ⅱ"; break;
         case 1: kubun = "一般Ⅰ"; break;
         case undefined: break;
         default: throw new Error("Invalid koukikourei result: " + r.probeKoukikourei());
       }
-      if( kubun === undefined ){
-        switch(r.probeKoureiJukyuu()){
+      if (kubun === undefined) {
+        switch (r.probeKoureiJukyuu()) {
           case 3: kubun = "現役並みⅢ"; break;
-          case 2: 
+          case 2:
           case 1: kubun = "一般"; break;
           case undefined: break;
           default: throw new Error("Invalid kourei jukyuu result: " + r.probeKoureiJukyuu());
@@ -88,10 +88,26 @@ export async function calcGendogaku(patientId: number, year: number, month: numb
   } else {
     kubun = limitList[limitList.length - 1];
   }
-  // console.log("kubun", kubun);
-  if( kubun ){
+  if (kubun) {
     return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
   } else {
     return undefined;
   }
+}
+
+export async function calcMonthlyFutan(patientId: number, year: number, month: number): Promise<number> {
+  const visitIds = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+  const visitMap = await api.batchGetVisit(visitIds);
+  const visits = visitIds.map(visitId => visitMap[visitId]);
+  const chargePayments: [number, Charge | null, Payment | null][] =
+    await api.batchGetChargePayment(visits.filter(visit => visit.shahokokuhoId > 0 || visit.koukikoureiId > 0)
+      .map(visit => visit.visitId));
+  return chargePayments.reduce((acc, ele) => {
+    const [_visitId, _chargeOpt, payment] = ele;
+    if( payment ){
+      return acc + payment.amount;
+    } else {
+      return acc;
+    }
+  }, 0);
 }

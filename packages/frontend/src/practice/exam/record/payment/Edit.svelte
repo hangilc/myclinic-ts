@@ -2,7 +2,8 @@
   import {
     Meisai,
     type VisitEx,
-    type Payment as ModelPayment, Wqueue,
+    type Payment as ModelPayment,
+    Wqueue,
     WqueueState,
   } from "myclinic-model";
   import RightBox from "../../RightBox.svelte";
@@ -16,11 +17,19 @@
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
   export let onClose: () => void;
+  export let gendogaku: number | undefined = undefined;
+  export let monthlyFutan: number | undefined = undefined;
   let show = false;
   let chargeInput: HTMLInputElement;
 
-  export function open(m: Meisai): void {
+  export function open(
+    m: Meisai,
+    argGendogaku: number | undefined,
+    argMonthlyFutan: number | undefined
+  ): void {
     meisai = m;
+    gendogaku = argGendogaku;
+    monthlyFutan = argMonthlyFutan;
     show = true;
   }
 
@@ -57,7 +66,6 @@
       const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
       await api.createPdfFile(ops, "A6_Landscape", fileName);
       await api.stampPdf(fileName, "receipt");
-      // const url = backend + "/portal-tmp/" + fileName;
       const url = api.portalTmpFileUrl(fileName);
       if (window) {
         window.open(url, "_blank");
@@ -83,7 +91,7 @@
     if (wqueueOpt == null) {
       const wq: Wqueue = new Wqueue(
         visit.visitId,
-        WqueueState.WaitCashier.code,
+        WqueueState.WaitCashier.code
       );
       await api.enterWqueue(wq);
     } else {
@@ -100,6 +108,14 @@
         <div>診療報酬総点 {meisai.totalTen}点</div>
         <div>負担割 {meisai.futanWari}割</div>
         <div>現在の請求額 {visit.chargeOption?.charge || 0}円</div>
+        <div>
+          限度額：{gendogaku !== undefined
+            ? `${gendogaku.toLocaleString()}円`
+            : "（未提出）"}
+          負担額：{monthlyFutan !== undefined
+            ? `${monthlyFutan.toLocaleString()}円`
+            : "（未計算）"}
+        </div>
         <div>
           変更後請求額 <input
             type="text"

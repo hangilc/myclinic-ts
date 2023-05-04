@@ -7,7 +7,7 @@
   import RecordsWrapper from "./RecordsWrapper.svelte";
   import Nav from "../../lib/Nav.svelte";
   import MishuuList from "./mishuu-list/MishuuList.svelte";
-  import Disease from "./disease2/Disease.svelte";
+  import Disease from "./disease/Disease.svelte";
   import Appointments from "./appointsments/Appointments.svelte";
 
   export let isVisible = false;

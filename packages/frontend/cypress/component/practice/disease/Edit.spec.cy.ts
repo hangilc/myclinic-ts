@@ -1,5 +1,5 @@
 import { getBase } from "@/lib/api";
-import Edit from "@/practice/exam/disease2/edit/Edit.svelte";
+import Edit from "@/practice/exam/disease/edit/Edit.svelte";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, ShuushokugoMaster } from "myclinic-model";

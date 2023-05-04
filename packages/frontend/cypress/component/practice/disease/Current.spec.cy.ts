@@ -1,4 +1,4 @@
-import Current from "@/practice/exam/disease2/Current.svelte";
+import Current from "@/practice/exam/disease/Current.svelte";
 import { ByoumeiMaster, Disease, DiseaseAdj, DiseaseData, ShuushokugoMaster } from "myclinic-model";
 
 describe("Current Disease", () => {

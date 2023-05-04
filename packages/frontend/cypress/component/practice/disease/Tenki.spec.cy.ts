@@ -1,5 +1,5 @@
 import { dateToSql, parseSqlDate } from "@/lib/util";
-import Tenki from "@/practice/exam/disease2/Tenki.svelte";
+import Tenki from "@/practice/exam/disease/Tenki.svelte";
 import { assertDateForm, fillDateForm } from "@cypress/lib/form";
 import { addDays, lastDayOfMonth } from "kanjidate";
 import { ByoumeiMaster, Disease, DiseaseData, DiseaseEndReason } from "myclinic-model";

@@ -1383,9 +1383,9 @@ export default {
 
   batchEnterOrUpdateHoken(shahokokuhoList: m.Shahokokuho[], koukikoureiList: m.Koukikourei[]):
     Promise<[m.Shahokokuho[], m.Koukikourei[]]> {
-      return post("batch-enter-or-update-hoken", {
-        shahokokuhoList, koukikoureiList
-      }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
+    return post("batch-enter-or-update-hoken", {
+      shahokokuhoList, koukikoureiList
+    }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
   },
 
   countShahokokuhoUsage(shahokokuhoId: number): Promise<number> {
@@ -1444,6 +1444,11 @@ export default {
 
   getClinicInfo(): Promise<m.ClinicInfo> {
     return get("get-clinic-info", {}, m.ClinicInfo.cast);
-  }
+  },
+
+  batchGetChargePayment(visitIds: number[]): Promise<[number, m.Charge | null, m.Payment | null][]> {
+    return post("batch-get-charge-payment", visitIds, {},
+      castList(castTuple3(castNumber, castOption(m.Charge.cast), castOption(m.Payment.cast))));
+  },
 
 };
