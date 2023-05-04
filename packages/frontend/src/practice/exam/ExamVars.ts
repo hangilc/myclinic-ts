@@ -20,7 +20,7 @@ export class StartPatientReq {
   visitId: number | undefined;
   isStartPatientReq: boolean = true;
 
-  constructor(patient: m.Patient, visitId?: number){
+  constructor(patient: m.Patient, visitId?: number) {
     this.patient = patient;
     this.visitId = visitId;
   }
@@ -163,22 +163,22 @@ export function clearTempVisitId(): void {
 }
 
 reqChangePatient.subscribe(async value => {
-  if( value == null ){
+  if (value == null) {
     return;
   } else {
     const visitIdSave: number | null = get(currentVisitId);
     taskRunner.cancel();
     resetAll();
     if (visitIdSave !== null) {
-      if( value instanceof EndPatientReq ){
-        if( value.waitState != null ){
+      if (value instanceof EndPatientReq) {
+        if (value.waitState != null) {
           await api.changeWqueueState(visitIdSave, value.waitState.code);
         }
       } else {
         await suspendVisit(visitIdSave).catch(ex => console.error(ex));
       }
     }
-    if( value instanceof StartPatientReq ){
+    if (value instanceof StartPatientReq) {
       const patient: m.Patient = value.patient;
       currentPatient.set(value.patient);
       currentVisitId.set(value.visitId ?? null);
@@ -186,7 +186,7 @@ reqChangePatient.subscribe(async value => {
         fetchVisits(patient.patientId, 0),
         initNav(patient.patientId)
       );
-      if( value.visitId != null ){
+      if (value.visitId != null) {
         api.changeWqueueState(value.visitId, m.WqueueState.InExam.code)
       }
     }
@@ -259,23 +259,28 @@ appEvent.visitEntered.subscribe(async visit => {
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null) {
     if (patient.patientId === visit.patientId && get(navPage) === 0) {
-      const newTotal = countVisitPages(totalVisits + 1);
-      if (newTotal !== get(navTotal)) {
-        navTotal.set(newTotal);
+      const newTotalPages = countVisitPages(totalVisits + 1);
+      if (newTotalPages !== get(navTotal)) {
+        navTotal.set(newTotalPages);
       }
-      const currentVisitIdValue: number | null = get(currentVisitId);
       const visitEx = await api.getVisitEx(visit.visitId);
       const curVisits = get(visits);
+      let currentVisitIdValue: number | null = get(currentVisitId);
       if (currentVisitIdValue == null) {
         currentVisitId.set(visit.visitId);
-      } else {
-        if (curVisits.length > 0 && curVisits[curVisits.length - 1].visitId === visit.visitId) {
-          navPage.set(1);
-        }
+        currentVisitIdValue = visit.visitId;
       }
-      curVisits.pop();
       curVisits.unshift(visitEx);
-      visits.set(curVisits);
+      if (curVisits.length > recordsPerPage) {
+        if( curVisits[curVisits.length - 1].visitId === currentVisitIdValue ){
+          gotoPage(1);
+        } else {
+          curVisits.splice(recordsPerPage);
+          visits.set(curVisits);
+        }
+      } else {
+        visits.set(curVisits);
+      }
     }
   }
 });
