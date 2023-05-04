@@ -85,7 +85,7 @@ function resetNav(): void {
   navTotal.set(0);
 }
 
-export function advanceNavPage(diff: number) {
+export function advanceNavPage(diff: number, force: boolean = false) {
   const page = get(navPage)
   const total = get(navTotal);
   let newPage = page + diff;
@@ -95,7 +95,7 @@ export function advanceNavPage(diff: number) {
   if (newPage < 0) {
     newPage = 0;
   }
-  if (newPage !== page) {
+  if (force || newPage !== page) {
     const patient = get(currentPatient);
     if (patient !== null) {
       navPage.set(newPage);
@@ -104,10 +104,10 @@ export function advanceNavPage(diff: number) {
   }
 }
 
-export function gotoPage(page: number): void {
+export function gotoPage(page: number, force: boolean = false): void {
   const curPage = get(navPage);
-  if (curPage !== page) {
-    advanceNavPage(page - curPage);
+  if (force || curPage !== page) {
+    advanceNavPage(page - curPage, force);
   }
 }
 
@@ -258,29 +258,30 @@ appEvent.visitEntered.subscribe(async visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null) {
-    if (patient.patientId === visit.patientId && get(navPage) === 0) {
+    if (patient.patientId === visit.patientId ) {
       const newTotalPages = countVisitPages(totalVisits + 1);
-      if (newTotalPages !== get(navTotal)) {
-        navTotal.set(newTotalPages);
-      }
-      const visitEx = await api.getVisitEx(visit.visitId);
-      const curVisits = get(visits);
-      let currentVisitIdValue: number | null = get(currentVisitId);
-      if (currentVisitIdValue == null) {
-        currentVisitId.set(visit.visitId);
-        currentVisitIdValue = visit.visitId;
-      }
-      curVisits.unshift(visitEx);
-      if (curVisits.length > recordsPerPage) {
-        if( curVisits[curVisits.length - 1].visitId === currentVisitIdValue ){
-          gotoPage(1);
-        } else {
-          curVisits.splice(recordsPerPage);
-          visits.set(curVisits);
-        }
+      navTotal.set(newTotalPages);
+      let focusedVisitIdValue: number | undefined = undefined;
+      const currentVisitIdValue = get(currentVisitId);
+      if( currentVisitIdValue ){
+        focusedVisitIdValue = currentVisitIdValue;
       } else {
-        visits.set(curVisits);
+        const tempVisitIdValue = get(tempVisitId);
+        if( tempVisitIdValue ){
+          focusedVisitIdValue = tempVisitIdValue;
+        }
       }
+      if( !focusedVisitIdValue ) {
+        currentVisitId.set(visit.visitId);
+        focusedVisitIdValue = visit.visitId;
+      }
+      let curPage = get(navPage);
+      const curVisits = get(visits);
+      const index = curVisits.findIndex(v => v.visitId === focusedVisitIdValue);
+      if( index >= 0 && index === curVisits.length - 1) {
+        curPage += 1;
+      }
+      gotoPage(curPage, true);
     }
   }
 });
@@ -308,37 +309,61 @@ appEvent.visitDeleted.subscribe(visit => {
   if (visit == null) {
     return;
   }
-  console.log("visit deleted", visit);
-  const visitsValue: m.VisitEx[] = get(visits);
-  const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
-  if (index >= 0) {
-    const patient = get(currentPatient);
-    if (patient !== null) {
-      taskRunner.run(
-        new FetchTask<number>(
-          () => api.countVisitByPatient(patient.patientId),
-          count => {
-            const newTotal = countVisitPages(count);
-            const navTotalValue = get(navTotal);
-            if (navTotalValue !== newTotal) {
-              let navPageValue = get(navPage);
-              if (navPageValue >= newTotal) {
-                navPageValue = newTotal - 1;
-                if (navPageValue < 0) {
-                  navPageValue = 0;
-                }
-                navPage.set(navPageValue);
-              }
-              navTotal.set(newTotal);
-              gotoPage(navPageValue);
-            }
-          }
-        )
-      )
+  const patient: m.Patient | null = get(currentPatient);
+  if (patient != null && visit.patientId === patient.patientId) {
+    let focusedVisitId: number | undefined = undefined;
+    const currentVisitIdValue: number | null = get(currentVisitId);
+    if (currentVisitIdValue) {
+      if (currentVisitIdValue === visit.visitId) {
+        currentVisitId.set(null);
+      } else {
+        focusedVisitId = currentVisitIdValue;
+      }
+    } else {
+      const tempVisitIdValue = get(tempVisitId);
+      if (tempVisitIdValue) {
+        if (tempVisitIdValue === visit.visitId) {
+          tempVisitId.set(null);
+        } else {
+          focusedVisitId = tempVisitIdValue;
+        }
+      }
     }
-    visitsValue.splice(index, 1);
-    visits.set(visitsValue);
+    const newTotalPages = countVisitPages(totalVisits - 1);
+    navTotal.set(newTotalPages);
+    const curPage = get(navPage);
+    gotoPage(curPage, true);
   }
+  // const visitsValue: m.VisitEx[] = get(visits);
+  // const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
+  // if (index >= 0) {
+  //   const patient = get(currentPatient);
+  //   if (patient !== null) {
+  //     taskRunner.run(
+  //       new FetchTask<number>(
+  //         () => api.countVisitByPatient(patient.patientId),
+  //         count => {
+  //           const newTotal = countVisitPages(count);
+  //           const navTotalValue = get(navTotal);
+  //           if (navTotalValue !== newTotal) {
+  //             let navPageValue = get(navPage);
+  //             if (navPageValue >= newTotal) {
+  //               navPageValue = newTotal - 1;
+  //               if (navPageValue < 0) {
+  //                 navPageValue = 0;
+  //               }
+  //               navPage.set(navPageValue);
+  //             }
+  //             navTotal.set(newTotal);
+  //             gotoPage(navPageValue);
+  //           }
+  //         }
+  //       )
+  //     )
+  //   }
+  //   visitsValue.splice(index, 1);
+  //   visits.set(visitsValue);
+  // }
 });
 
 appEvent.wqueueDeleted.subscribe(wqueue => {
