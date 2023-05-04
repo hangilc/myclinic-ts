@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { PatientData } from "../patient-dialog/patient-data";
   import * as kanjidate from "kanjidate";
   import type { Hoken } from "./hoken";
@@ -230,7 +230,7 @@
   }
 </script>
 
-<SurfaceModal destroy={exit} title="患者情報" width="320px">
+<Dialog destroy={exit} title="患者情報" styleWidth="320px">
   <div class="info">
     <span>患者番号</span><span data-cy="patient-id">{p.patientId}</span>
     <span>氏名</span>
@@ -303,7 +303,7 @@
       >保存画像</a
     >
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .info {

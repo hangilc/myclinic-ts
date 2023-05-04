@@ -4,7 +4,7 @@
   import type { Patient, Visit, Text } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
   import * as kanjidate from "kanjidate";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
 
   export let destroy: () => void;
   let searchTextValue = "";
@@ -43,7 +43,7 @@
   }
 </script>
 
-<SurfaceModal destroy={doClose} title="全文検索" width="400px">
+<Dialog destroy={doClose} title="全文検索" styleWidth="400px">
   <div class="content">
     <form on:submit|preventDefault={doSearch}>
       <input type="text" bind:value={searchTextValue} class="search-text-input" autofocus/>
@@ -74,7 +74,7 @@
       <Nav bind:page={curPage} bind:total={pageTotal} gotoPage={doGotoPage} />
     {/if}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .content :global(.nav) {

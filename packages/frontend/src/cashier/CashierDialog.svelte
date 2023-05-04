@@ -1,13 +1,12 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import {
     type Meisai,
     type Charge,
     type Patient,
     Payment,
-    // type Visit,
     dateToSqlDateTime,
     VisitEx,
   } from "myclinic-model";
@@ -63,7 +62,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="会計">
+<Dialog {destroy} title="会計">
   <div class="body">
     <div class="patient">
       {patientLine(patient)})
@@ -107,7 +106,7 @@
     <button on:click={doFinishCashier}>会計終了</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .body {

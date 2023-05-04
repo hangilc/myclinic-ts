@@ -1,10 +1,10 @@
 <script lang="ts">
   import { setFocus } from "@/lib/set-focus";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
   import { validateAppointTime } from "@/lib/validators/appoint-time-validator";
   import { AppointTime } from "myclinic-model";
   import type { AppointTimeData } from "./appoint-time-data";
+  import Dialog from "@/lib/Dialog.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -96,7 +96,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   {#if errors.length > 0}
     <div class="error">
       【エラー】
@@ -140,7 +140,7 @@
     <button on:click={doEnter}>入力</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .error {

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
   import type { AppointTimeData } from "./appoint-time-data";
   import { format } from "kanjidate";
   import { genid } from "@/lib/genid";
@@ -10,6 +9,7 @@
   import { intSrc, Invalid, strSrc } from "@/lib/validator";
   import { setFocus } from "@/lib/set-focus";
   import { confirm } from "@/lib/confirm-call";
+  import Dialog from "@/lib/Dialog.svelte";
 
   export let destroy: () => void;
   export let data: AppointTimeData;
@@ -184,7 +184,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <div data-cy="appoint-time-text">{appointTimeText(data)}</div>
   {#if errors.length > 0}
     <div class="error" data-cy="error">
@@ -292,7 +292,7 @@
     {/if}
     <button on:click={doClose}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .error {

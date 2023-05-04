@@ -5,7 +5,7 @@
   import EditableDate from "./editable-date/EditableDate.svelte";
   import { pad } from "./pad";
   import SelectItem from "./SelectItem.svelte";
-  import SurfaceModal from "./SurfaceModal.svelte";
+  import Dialog from "./Dialog.svelte";
   import * as kanjidate from "kanjidate";
 
   export let destroy: () => void;
@@ -14,10 +14,8 @@
   export let enterButton: string = "選択";
   let result: [Visit, Patient][] = [];
   let selected: Writable<[Visit, Patient] | undefined> = writable(undefined);
-  // let date: Writable<Date> = writable(new Date());
   let date: Date = new Date();
 
-  // date.subscribe(init);
   init();
 
   async function init() {
@@ -35,15 +33,6 @@
       onEnter(visit, patient);
     }
   }
-
-  // function doChange(dateArg: Date | null): void {
-  //   console.log("doChange", dateArg);
-  //   if( dateArg != null ){
-  //     date = dateArg;
-  //     init();
-  //     // date.set(dateArg);
-  //   }
-  // }
 
   function doToday(): void {
     date = new Date();
@@ -63,12 +52,10 @@
     let newDate = kanjidate.addDays(date, 1);
     date = newDate;
     init();
-    // let newDate = kanjidate.addDays($date, 1);
-    // date.set(newDate);
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <div class="date">
     <EditableDate bind:date={date} onChange={init}/>
   </div>
@@ -92,7 +79,7 @@
     >
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .date {

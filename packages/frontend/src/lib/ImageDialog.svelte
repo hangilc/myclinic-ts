@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SurfaceModal from "./SurfaceModal.svelte";
+  import Dialog from "./Dialog.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -8,6 +8,6 @@
 
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <img src={url} {width} alt={title}/>
-</SurfaceModal>
+</Dialog>

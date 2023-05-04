@@ -1,6 +1,6 @@
 <script lang="ts">
   import { classify } from "@/lib/partition";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient } from "myclinic-model";
   import type { PatientData } from "../patient-dialog/patient-data";
   import type { Hoken } from "./hoken";
@@ -58,7 +58,7 @@
   }
 </script>
 
-<SurfaceModal destroy={exit} title="保険履歴" width="400px">
+<Dialog destroy={exit} title="保険履歴" styleWidth="400px">
   <div>
     ({patient.patientId}) {patient.fullName(" ")}
   </div>
@@ -93,7 +93,7 @@
   <div class="commands">
     <button on:click={close}>閉じる</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .hoken-list-wrapper {

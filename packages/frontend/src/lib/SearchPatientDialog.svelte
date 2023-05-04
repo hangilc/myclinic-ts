@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Patient } from "myclinic-model";
   import { setFocus } from "./set-focus";
-  import SurfaceModal from "./SurfaceModal.svelte";
+  import Dialog from "./Dialog.svelte";
   import SelectItem from "./SelectItem.svelte";
   import { pad } from "./pad";
   import { writable, type Writable } from "svelte/store";
@@ -42,7 +42,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:value={searchText} use:setFocus data-cy="search-text-input"/>
     <button type="submit">検索</button>
@@ -62,7 +62,7 @@
     >
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   form {

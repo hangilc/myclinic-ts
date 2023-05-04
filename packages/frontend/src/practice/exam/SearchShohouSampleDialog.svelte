@@ -9,7 +9,7 @@
   } from "myclinic-model";
   import { toZenkaku } from "@/lib/zenkaku";
   import { fade } from "svelte/transition";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { setFocus } from "@/lib/set-focus";
 
   export let destroy: () => void;
@@ -77,7 +77,7 @@
 
 </script>
 
-<SurfaceModal {destroy} title="処方サンプル検索">
+<Dialog {destroy} title="処方サンプル検索">
   <textarea readonly bind:this={textarea} />
   <div class="commands1">
     <button on:click={doCopy}>コピー</button>
@@ -94,7 +94,7 @@
       <SelectItem {selected} data={t}>{@html formatSearchResult(t)}</SelectItem>
     {/each}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   textarea {

@@ -2,7 +2,7 @@
   import api from "@/lib/api";
   import { pad } from "@/lib/pad";
   import { setFocus } from "@/lib/set-focus";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import SelectItem from "@/lib/SelectItem.svelte";
@@ -38,7 +38,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="未収処理（検索）">
+<Dialog {destroy} title="未収処理（検索）">
   <div>患者検索</div>
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:value={searchText} use:setFocus data-cy="mishuu-search-input"/>
@@ -51,7 +51,7 @@
       </SelectItem>
     {/each}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   form {

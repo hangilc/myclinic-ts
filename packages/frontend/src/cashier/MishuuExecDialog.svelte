@@ -1,6 +1,6 @@
 <script lang="ts">
   import { genid } from "@/lib/genid";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { Wqueue, WqueueState, type Patient, type Visit } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import MishuuDialog from "./MishuuDialog.svelte";
@@ -39,7 +39,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="未収処理">
+<Dialog {destroy} title="未収処理">
   <div>
     ({patient.patientId}) {patient.fullName()}
   </div>
@@ -60,7 +60,7 @@
     <button on:click={doEnter} disabled={selected.length === 0}>会計に加える</button>
     <button on:click={doBack}>検索に戻る</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .list {

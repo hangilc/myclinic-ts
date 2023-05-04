@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { printApi, type PrintRequest } from "../printApi";
-  import SurfaceModal from "../SurfaceModal.svelte";
+  import Dialog from "../Dialog.svelte";
   import DrawerSvg from "./DrawerSvg.svelte";
   import type { Op } from "./op";
 
@@ -70,7 +70,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <DrawerSvg
     {ops}
     viewBox={svgViewBox(width, height)}
@@ -125,7 +125,7 @@
     <button on:click={doPrint}>印刷</button>
     <button on:click={doClose}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .commands {

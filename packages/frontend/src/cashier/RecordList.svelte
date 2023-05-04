@@ -2,9 +2,8 @@
   import api from "@/lib/api";
   import { calcPages } from "@/lib/calc-pages";
   import Nav from "@/lib/Nav.svelte";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, VisitEx } from "myclinic-model";
-  // import { tick } from "svelte";
   import { writable, type Writable } from "svelte/store";
   import Record from "./Record.svelte";
 
@@ -38,7 +37,7 @@
 
 </script>
 
-<SurfaceModal {destroy} title="診療録" width="500px">
+<Dialog {destroy} title="診療録" styleWidth="500px">
   <Nav page={$page} total={totalPages} gotoPage={doGotoPage} />
   <div>
     ({patient.patientId}) {patient.fullName()}
@@ -48,7 +47,7 @@
       <Record visit={rec} onMountCallback={() => onRecordMount(index, records.length)}/>
     {/each}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .records {

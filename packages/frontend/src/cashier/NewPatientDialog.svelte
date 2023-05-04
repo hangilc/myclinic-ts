@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import type { Patient } from "myclinic-model";
   import { PatientData } from "./patient-dialog/patient-data";
@@ -35,7 +35,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="新規患者入力">
+<Dialog {destroy} title="新規患者入力">
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -48,7 +48,7 @@
     <button on:click={doEnter}>入力</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .error {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { range } from "@/lib/range";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import { get, writable, type Writable } from "svelte/store";
   import type { TextCommand } from "./text-commands";
   import SelectItem from "@/lib/SelectItem.svelte";
@@ -52,7 +52,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="文章入力コマンド" keyDown={doKeyDown}>
+<Dialog {destroy} title="文章入力コマンド" keyDown={doKeyDown} enableAutoFocus={true}>
   <div>
     {#each range(commands.length) as i}
       {@const c = commands[i]}
@@ -60,10 +60,7 @@
       >
     {/each}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
-  /* .item {
-    cursor: pointer;
-  } */
 </style>

@@ -7,6 +7,10 @@
   export let title: string;
   export let onClose: () => void = () => {};
   export let styleWidth: string = "";
+  export let screenOpacity: string = "0.4";
+  export let keyDown: (e: KeyboardEvent) => void = (_) => {};
+  export let allowEscapeClose: boolean = false;
+  export let enableAutoFocus = false;
 
   let dialog: HTMLElement;
 
@@ -17,11 +21,17 @@
     target: document.body,
     props: {
       zIndex: zIndexScreen,
-      opacity: "0.4",
+      opacity: screenOpacity,
+      onClick: doScreenClick,
     },
   });
 
   let fixed = true;
+
+  function doScreenClick(ev: Event): void {
+    ev.stopPropagation();
+    ev.preventDefault();
+  }
 
   onDestroy(() => {
     if (zIndexDialog != undefined) {
@@ -38,6 +48,15 @@
     dialog.style.zIndex = zIndexDialog.toString();
   });
 
+  function doKeyDown(event: KeyboardEvent): void {
+    if (event.key === "Escape" && allowEscapeClose) {
+      event.stopPropagation();
+      destroy();
+    } else {
+      keyDown(event);
+    }
+  }
+
   function doUnfix() {
     dialog.style.position = "absolute";
     fixed = false;
@@ -49,12 +68,16 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div
   class="dialog"
   bind:this={dialog}
   data-cy="dialog"
   data-title={title}
   style:width={styleWidth}
+  on:keydown={doKeyDown}
+  tabindex="0"
+  autofocus={enableAutoFocus}
 >
   <div class="title" data-cy="dialog-title">
     <span>{title}</span>
@@ -70,7 +93,7 @@
         height="16px"
         data-cy="arrow-turn-down"
         on:click={doUnfix}
-        >
+      >
         <title>下の部分までスクロールできるようにします</title>
         <path
           stroke-linecap="round"

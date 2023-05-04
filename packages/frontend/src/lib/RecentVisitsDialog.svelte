@@ -3,7 +3,7 @@
   import { writable, type Writable } from "svelte/store";
   import { pad } from "./pad";
   import SelectItem from "./SelectItem.svelte";
-  import SurfaceModal from "./SurfaceModal.svelte";
+  import Dialog from "./Dialog.svelte";
   import * as kanjidate from "kanjidate";
   import api from "./api";
 
@@ -44,7 +44,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} {title}>
+<Dialog {destroy} {title}>
   <div class="nav">
     <a href="javascript:void(0)" on:click={gotoFirst}>最初へ</a> |
     <a href="javascript:void(0)" on:click={gotoPrev}>前へ</a> |
@@ -66,7 +66,7 @@
     >
     <button on:click={destroy}>キャンセル</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .result {

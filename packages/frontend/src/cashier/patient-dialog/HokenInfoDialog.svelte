@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import {
     Kouhi,
     Koukikourei,
@@ -106,7 +106,7 @@
   }
 </script>
 
-<SurfaceModal destroy={exit} title={`${hoken.name}情報`}>
+<Dialog destroy={exit} title={`${hoken.name}情報`}>
   {#if invalidUsage > 0}
   <div class="warning">有効期間外に使用されています。</div>
   {/if}
@@ -123,7 +123,7 @@
     {/if}
     <button on:click={close}>閉じる</button>
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .warning {

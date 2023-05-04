@@ -1,6 +1,6 @@
 <script lang="ts">
   import { pad } from "@/lib/pad";
-  import SurfaceModal from "@/lib/SurfaceModal.svelte";
+  import Dialog from "@/lib/Dialog.svelte";
   import type { Patient } from "myclinic-model";
 
   export let result: Patient[];
@@ -21,7 +21,7 @@
   }
 </script>
 
-<SurfaceModal {destroy} title="患者検索結果" width="260px">
+<Dialog {destroy} title="患者検索結果" styleWidth="260px">
   <div class="result-wrapper">
     {#if patients.length === 0}
       （該当患者がありません）
@@ -33,7 +33,7 @@
       {/each}
     {/if}
   </div>
-</SurfaceModal>
+</Dialog>
 
 <style>
   .result-wrapper {
