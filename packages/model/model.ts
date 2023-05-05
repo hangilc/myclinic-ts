@@ -187,6 +187,10 @@ export class Visit {
   get visitedAtAsDate(): Date {
     return new Date(this.visitedAt);
   }
+
+  hasKouhiId(kouhiId: number): boolean {
+    return this.kouhi1Id === kouhiId || this.kouhi2Id === kouhiId || this.kouhi3Id === kouhiId;
+  }
 }
 
 export class WqueueStateType {

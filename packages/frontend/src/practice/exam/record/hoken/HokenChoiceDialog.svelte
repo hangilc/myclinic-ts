@@ -13,7 +13,8 @@
     type Kouhi,
     type Koukikourei,
     Shahokokuho,
-    type Onshi,
+    Onshi,
+    HokenIdSet,
   } from "myclinic-model";
   import HokenKakuninDialog from "./HokenKakuninDialog.svelte";
   import { HokenItem, KouhiItem } from "./hoken-item";
@@ -49,33 +50,67 @@
       return item;
     }
   );
-  let kouhiItems: KouhiItem[] = kouhiList.map((h) => new KouhiItem(h));
+  let kouhiItems: KouhiItem[] = kouhiList.map((h) => {
+    return new KouhiItem(h, visit.hasKouhiId(h.kouhiId));
+  });
+
+  function countSelectedHoken(hokenItems: HokenItem[]): number {
+    return hokenItems.filter((item) => item.checked).length;
+  }
 
   function doClose() {
     destroy();
   }
 
+  function createHokenIdSet(): HokenIdSet {
+    let shahokokuhoId = 0;
+    let koukikoureiId = 0;
+    hokenItems.forEach((item) => {
+      if (item.checked) {
+        const hoken = item.hoken;
+        if (hoken instanceof Shahokokuho) {
+          shahokokuhoId = hoken.shahokokuhoId;
+        } else {
+          koukikoureiId = hoken.koukikoureiId;
+        }
+      }
+    });
+    const selectedKouhiList: Kouhi[] = kouhiItems
+      .filter((item) => item.checked)
+      .map((item) => item.kouhi);
+    return new HokenIdSet(
+      shahokokuhoId,
+      koukikoureiId,
+      0,
+      selectedKouhiList.length > 0 ? selectedKouhiList[0].kouhiId : 0,
+      selectedKouhiList.length > 1 ? selectedKouhiList[1].kouhiId : 0,
+      selectedKouhiList.length > 2 ? selectedKouhiList[2].kouhiId : 0
+    );
+  }
+
   async function doEnter() {
-    //   const shahokokuhoId = shahoOpt && shahoOpt[1] ? shahoOpt[0].shahokokuhoId : 0;
-    //   const roujinId = roujinOpt && roujinOpt[1] ? roujinOpt[0].roujinId : 0;
-    //   const koukikoureiId = koukiOpt && koukiOpt[1] ? koukiOpt[0].koukikoureiId : 0;
-    //   const kouhiIds = kouhiList.filter(kouhi => kouhi[1]).map(kouhi => kouhi[0].kouhiId);
-    //   const kouhi1Id = kouhiIds.length > 0 ? kouhiIds[0] : 0;
-    //   const kouhi2Id = kouhiIds.length > 1 ? kouhiIds[1] : 0;
-    //   const kouhi3Id = kouhiIds.length > 2 ? kouhiIds[2] : 0;
-    //   const hokenCount = (shahokokuhoId > 0 ? 1 : 0) + (roujinId > 0 ? 1 : 0) +
-    //   (koukikoureiId > 0 ? 1 : 0);
-    //   if( hokenCount > 1 ){
-    //     alert("Multiple primary hoken selected.");
-    //     return;
-    //   } else if( hokenCount === 0 ){
-    //     await api.clearOnshi(visitId);
-    //     onshiConfirmed = false;
-    //   }
-    //   await api.updateHokenIds(visitId, new HokenIdSet(
-    //     shahokokuhoId, koukikoureiId, roujinId, kouhi1Id, kouhi2Id, kouhi3Id
-    //   ));
-    //   doClose();
+    if (
+      hokenItems.filter((item) => item.savedConfirm && !item.checked).length > 0
+    ) {
+      await api.clearOnshi(visit.visitId);
+    }
+    const selectedHokenList = hokenItems.filter((item) => item.checked);
+    if (selectedHokenList.length > 1) {
+      return;
+    }
+    const hokenIdSet = createHokenIdSet();
+    await api.updateHokenIds(visit.visitId, hokenIdSet);
+    await Promise.all(
+      hokenItems
+        .filter((item) => item.checked && item.confirm && !item.savedConfirm)
+        .map(
+          async (item) =>
+            await api.setOnshi(
+              new Onshi(visit.visitId, JSON.stringify(item.confirm!.toJSON()))
+            )
+        )
+    );
+    doClose();
   }
 
   async function doOnshiConfirm(item: HokenItem) {
@@ -85,7 +120,6 @@
       props: {
         destroy: () => d.$destroy(),
         query,
-        visitId: visit.visitId,
         onRegister: (r) => {
           item.confirm = r;
           hokenItems = [...hokenItems];
@@ -95,7 +129,7 @@
   }
 
   function doShowConfirmed(result: OnshiResult | undefined): void {
-    if( !result ){
+    if (!result) {
       return;
     }
     const d: OnshiDisp = new OnshiDisp({
@@ -103,8 +137,8 @@
       props: {
         destroy: () => d.$destroy(),
         result,
-      }
-    })
+      },
+    });
   }
 </script>
 
@@ -121,9 +155,11 @@
             on:click={() => doOnshiConfirm(hokenItem)}>資格確認</a
           >
         {:else}
-          <a href="javascript:void(0)" class="has-been-confirmed-link"
-            on:click={() => doShowConfirmed(hokenItem.confirm)}
-          >確認済</a>
+          <a
+            href="javascript:void(0)"
+            class="has-been-confirmed-link"
+            on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
+          >
         {/if}
       </div>
     {/each}
@@ -137,7 +173,9 @@
     {/each}
   </div>
   <div class="commands">
-    <button on:click={doEnter}>入力</button>
+    {#if countSelectedHoken(hokenItems) <= 1}
+      <button on:click={doEnter}>入力</button>
+    {/if}
     <button on:click={doClose}>キャンセル</button>
   </div>
 </Dialog>
@@ -158,6 +196,7 @@
   a.has-been-confirmed-link {
     font-size: 80%;
     color: orange;
+    vertical-align: middle;
   }
 
   .commands {

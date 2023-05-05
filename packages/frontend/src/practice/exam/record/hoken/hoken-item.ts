@@ -31,10 +31,11 @@ export class HokenItem {
 
 export class KouhiItem {
   kouhi: Kouhi;
-  checked: boolean = false;
+  checked: boolean;
 
-  constructor(kouhi: Kouhi) {
+  constructor(kouhi: Kouhi, checked: boolean = false) {
     this.kouhi = kouhi;
+    this.checked = checked;
   }
 
   rep(): string {
