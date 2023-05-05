@@ -430,6 +430,20 @@ export default {
     );
   },
 
+  listAvailableShahokokuho(
+    patientId: number,
+    at: Date | string
+  ): Promise<m.Shahokokuho[]> {
+    return get(
+      "list-available-shahokokuho",
+      {
+        "patient-id": patientId.toString(),
+        at: dateParam(at),
+      },
+      castList(m.Shahokokuho.cast)
+    );
+  },
+
   findAvailableRoujin(
     patientId: number,
     at: Date | string
@@ -441,6 +455,20 @@ export default {
         at: dateParam(at),
       },
       castOption(m.Roujin.cast)
+    );
+  },
+
+  listAvailableKoukikourei(
+    patientId: number,
+    at: Date | string
+  ): Promise<m.Koukikourei[]> {
+    return get(
+      "list-available-koukikourei",
+      {
+        "patient-id": patientId.toString(),
+        at: dateParam(at),
+      },
+      castList(m.Koukikourei.cast)
     );
   },
 
