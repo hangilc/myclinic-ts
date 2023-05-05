@@ -9,17 +9,12 @@
   } from "myclinic-model";
   import { hokenRep } from "@/lib/hoken-rep";
   import api from "@/lib/api";
-  // import type { OnshiResult } from "onshi-result";
   import HokenChoiceDialog from "./HokenChoiceDialog.svelte";
   import { onshiDeleted, onshiEntered } from "@/app-events";
+  import { OnshiResult } from "onshi-result";
 
   export let visit: VisitEx;
   export let onshiConfirmed: boolean | undefined = undefined;
-  // let shahoOpt: [Shahokokuho, boolean] | null = null;
-  // let roujinOpt: [Roujin, boolean] | null = null;
-  // let koukiOpt: [Koukikourei, boolean] | null = null;
-  // let kouhiList: [Kouhi, boolean][] = [];
-  // let showHokenChoice = false;
 
   const unsubs: (() => void)[] = [];
 
@@ -43,141 +38,86 @@
     }
   }));
 
-  // function closeHokenDialog(): void {
-  //   showHokenChoice = false;
-  // }
-
   async function onDispClick() {
     const patientId = visit.patient.patientId;
     const at = new Date(visit.visitedAt);
-    const shahoOpt = await resolveShahokokuho(patientId, at);
-    const roujinOpt = await resolveRoujin(patientId, at);
-    const koukiOpt = await resolveKoukikourei(patientId, at);
-    const kouhiList = await resolveKouhiList(patientId, at);
+    const shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
+    const koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
+    const kouhiList = await api.listAvailableKouhi(patientId, at);
+    const onshi = await api.findOnshi(visit.visitId);
     const d: HokenChoiceDialog = new HokenChoiceDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        shahoOpt,
-        roujinOpt,
-        koukiOpt,
+        visit: visit.asVisit,
+        shahokokuhoList,
+        koukikoureiList,
         kouhiList,
-        onshiConfirmed,
+        onshiResult: onshi ? OnshiResult.cast(JSON.parse(onshi.kakunin)) : undefined,
         birthdate: visit.patient.birthday,
         visitDate: dateToSqlDate(visit.visitedAtAsDate),
-        visitId: visit.visitId,
       },
     });
-    // showHokenChoice = true;
   }
 
-  async function resolveShahokokuho(
-    patientId: number,
-    at: Date
-  ): Promise<[Shahokokuho, boolean] | null> {
-    const shaho = await api.findAvailableShahokokuho(patientId, at);
-    if (shaho == null) {
-      return null;
-    } else {
-      console.log(visit.hoken);
-      console.log([
-        shaho,
-        visit.hoken.shahokokuho?.shahokokuhoId === shaho.shahokokuhoId,
-      ]);
-      return [
-        shaho,
-        visit.hoken.shahokokuho?.shahokokuhoId === shaho.shahokokuhoId,
-      ];
-    }
-  }
-
-  async function resolveRoujin(
-    patientId: number,
-    at: Date
-  ): Promise<[Roujin, boolean] | null> {
-    const hoken = await api.findAvailableRoujin(patientId, at);
-    if (hoken == null) {
-      return null;
-    } else {
-      return [hoken, visit.hoken.roujin?.roujinId === hoken.roujinId];
-    }
-  }
-
-  async function resolveKoukikourei(
-    patientId: number,
-    at: Date
-  ): Promise<[Koukikourei, boolean] | null> {
-    const hoken = await api.findAvailableKoukikourei(patientId, at);
-    if (hoken == null) {
-      return null;
-    } else {
-      return [
-        hoken,
-        visit.hoken.koukikourei?.koukikoureiId === hoken.koukikoureiId,
-      ];
-    }
-  }
-
-  async function resolveKouhiList(
-    patientId: number,
-    at: Date
-  ): Promise<[Kouhi, boolean][]> {
-    const kouhiList = await api.listAvailableKouhi(patientId, at);
-    return kouhiList.map((k) => [
-      k,
-      visit.hoken.kouhiList.findIndex((kouhi) => kouhi.kouhiId === k.kouhiId) >=
-        0,
-    ]);
-  }
-
-  // function selectedShahokokuhoId(): number {
-  //   if (shahoOpt == null) {
-  //     return 0;
-  //   } else {
-  //     return shahoOpt[1] ? shahoOpt[0].shahokokuhoId : 0;
-  //   }
+  // async function resolveShahokokuho(
+    // patientId: number,
+    // at: Date
+  // ): Promise<[Shahokokuho, boolean] | null> {
+    // const shaho = await api.findAvailableShahokokuho(patientId, at);
+    // if (shaho == null) {
+      // return null;
+    // } else {
+      // console.log(visit.hoken);
+      // console.log([
+        // shaho,
+        // visit.hoken.shahokokuho?.shahokokuhoId === shaho.shahokokuhoId,
+      // ]);
+      // return [
+        // shaho,
+        // visit.hoken.shahokokuho?.shahokokuhoId === shaho.shahokokuhoId,
+      // ];
+    // }
   // }
-
-  // function selectedRoujinId(): number {
-  //   if (roujinOpt == null) {
-  //     return 0;
-  //   } else {
-  //     return roujinOpt[1] ? roujinOpt[0].roujinId : 0;
-  //   }
+// 
+  // async function resolveRoujin(
+    // patientId: number,
+    // at: Date
+  // ): Promise<[Roujin, boolean] | null> {
+    // const hoken = await api.findAvailableRoujin(patientId, at);
+    // if (hoken == null) {
+      // return null;
+    // } else {
+      // return [hoken, visit.hoken.roujin?.roujinId === hoken.roujinId];
+    // }
   // }
-
-  // function selectedKoukikoureiId(): number {
-  //   if (koukiOpt == null) {
-  //     return 0;
-  //   } else {
-  //     return koukiOpt[1] ? koukiOpt[0].koukikoureiId : 0;
-  //   }
+// 
+  // async function resolveKoukikourei(
+    // patientId: number,
+    // at: Date
+  // ): Promise<[Koukikourei, boolean] | null> {
+    // const hoken = await api.findAvailableKoukikourei(patientId, at);
+    // if (hoken == null) {
+      // return null;
+    // } else {
+      // return [
+        // hoken,
+        // visit.hoken.koukikourei?.koukikoureiId === hoken.koukikoureiId,
+      // ];
+    // }
   // }
-
-  // function selectedKouhiList(): number[] {
-  //   const selected = kouhiList.map((a) => (a[1] ? a[0].kouhiId : 0));
-  //   selected.push(...[0, 0, 0]);
-  //   return selected;
+// 
+  // async function resolveKouhiList(
+    // patientId: number,
+    // at: Date
+  // ): Promise<[Kouhi, boolean][]> {
+    // const kouhiList = await api.listAvailableKouhi(patientId, at);
+    // return kouhiList.map((k) => [
+      // k,
+      // visit.hoken.kouhiList.findIndex((kouhi) => kouhi.kouhiId === k.kouhiId) >=
+        // 0,
+    // ]);
   // }
-
-  // async function doEnter() {
-  //   const selectedKouhi = selectedKouhiList();
-  //   const idSet = {
-  //     shahokokuhoId: selectedShahokokuhoId(),
-  //     koukikoureiId: selectedKoukikoureiId(),
-  //     roujinId: selectedRoujinId(),
-  //     kouhi1Id: selectedKouhi[0],
-  //     kouhi2Id: selectedKouhi[1],
-  //     kouhi3Id: selectedKouhi[2],
-  //   };
-  //   await api.updateHokenIds(visit.visitId, idSet);
-  //   closeHokenDialog();
-  // }
-
-  // function onOnshiConfirmDone(
-  //   _result: OnshiResult | undefined,
-  //   _hoken: Shahokokuho | Koukikourei
-  // ) {}
 </script>
 
 <div class="disp" on:click={onDispClick}>
@@ -225,16 +165,4 @@
   .disp {
     cursor: pointer;
   }
-
-  /* .commands {
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    margin-bottom: 4px;
-    line-height: 1;
-  }
-
-  .commands * + * {
-    margin-left: 4px;
-  } */
 </style>
