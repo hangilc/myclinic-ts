@@ -47,5 +47,8 @@
   },
   "yaml.schemas": {
     "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json": "file:///home/hangil/myclinic-ts/packages/openapi/api.yaml"
+  },
+  "[sql]": {
+    "editor.defaultFormatter": "adpyke.vscode-sql-formatter"
   }
 }
