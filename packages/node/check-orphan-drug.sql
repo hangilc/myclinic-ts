@@ -23,15 +23,20 @@ select
     d.iyakuhincode
 from
     visit_conduct_drug as d
-    inner join visit_conduct as c on d.visit_conduct_id = c.id
-    inner join visit as v on c.visit_id = v.visit_id
-    left outer join iyakuhin_master_arch as m on d.iyakuhincode = m.iyakuhincode
 where
-    m.valid_from <= date(v.v_datetime)
-    and (
-        m.valid_upto = '0000-00-00'
-        or date(v.v_datetime) <= m.valid_upto
+    not exists(
+        select
+            *
+        from
+            visit_conduct as c
+            inner join visit as v on c.visit_id = v.visit_id
+            inner join iyakuhin_master_arch as m
+        where
+            d.visit_conduct_id = c.id
+            and m.iyakuhincode = d.iyakuhincode
+            and m.valid_from <= date(v.v_datetime)
+            and (
+                m.valid_upto = '0000-00-00'
+                or date(v.v_datetime) <= m.valid_upto
+            )
     )
-    and m.iyakuhincode is null
-group by
-    d.iyakuhincode;
