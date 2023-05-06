@@ -8,7 +8,7 @@ import AdmZip from "adm-zip";
 import path from "node:path";
 import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
-// const mysql = require("mysql");
+import mysql from "mysql";
 
 class Row {
   constructor(csvRow) {
@@ -32,6 +32,18 @@ const HenkouKubunHaishi = 9;
 
 const zipFile = process.argv[2];
 const startDate = process.argv[3];
+if( process.argv.length !== 4 ){
+  console.log("usage: Usage: node install-iyakuhin-master.js Y.ZIP start-date");
+  process.exit(1);
+}
+if( !zipFile ){
+  console.log("Empty file name");
+  process.exit(1);
+}
+if( !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ){
+  console.log("Invalid start date, it should be in xxxx-xx-xx format.");
+  process.exit(1);
+}
 
 const connConfig = {
   host: process.env["MYCLINIC_DB_HOST"] || "127.0.0.1",
@@ -46,9 +58,17 @@ extractMasterContent(zipFile, (err, content) => {
     console.error(err);
     process.exit(1);
   } else if (content) {
+    const conn = mysql.createConnection(connConfig);
+    conn.connect();
+    conn.beginTransaction();
     parse(content)
       .map((row) => rowToEntry(new Row(row)))
-      .forEach(console.log);
+      .map(e => entryToMaster(e, startDate))
+      .forEach(m => {
+        enterIyakuhinMaster(conn, m);
+      });
+    conn.commit();
+    conn.end();
   }
 });
 
@@ -129,7 +149,12 @@ function rowToEntry(row) {
 //   conn.end();
 // }
 
-function entryToMaster(entry, validFrom, validUpto) {
+/**
+ * @param {object} entry
+ * @param {string} validFrom - 開始日
+ * @param {string} validUpto - 終了日
+ */
+function entryToMaster(entry, validFrom, validUpto = "0000-00-00") {
   return {
     iyakuhincode: entry.iyakuhincode,
     yakkacode: entry.yakkacode,
@@ -149,6 +174,6 @@ function dateToSqldate(date) {
   return date.toISOString().substring(0, 10);
 }
 
-function enterIyakuhinhMaster(conn, master) {
+function enterIyakuhinMaster(conn, master) {
   conn.query("insert into iyakuhin_master_arch set ?", master);
 }
