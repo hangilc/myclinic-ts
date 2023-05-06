@@ -2,7 +2,6 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { AppointTimeData } from "./appoint-time-data";
   import type { Appoint } from "myclinic-model";
-  import type { Writable } from "svelte/store";
   import OnshiConfirmItem from "./OnshiConfirmItem.svelte";
 
   export let destroy: () => void;
