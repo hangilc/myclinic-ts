@@ -65,12 +65,6 @@ export async function onshiLogin(timeout: number = 10): Promise<LoginResponse> {
   const result = await response.json();
   console.log("login result:", JSON.stringify(result, undefined, 2));
   return LoginResponse.cast(result);
-  try {
-    return result;
-  } catch (ex) {
-    console.log(ex);
-    throw ex;
-  }
 }
 
 export interface OnshiKakuninQuery {
@@ -81,6 +75,7 @@ export interface OnshiKakuninQuery {
   kigou: string | undefined,
   edaban: string | undefined,
   limitAppConsFlag: LimitApplicationCertificateRelatedConsFlgCode,
+  idToken?: string,
 };
 
 export async function onshiConfirm(

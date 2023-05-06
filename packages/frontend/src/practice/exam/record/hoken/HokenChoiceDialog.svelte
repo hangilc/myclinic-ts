@@ -24,6 +24,7 @@
   } from "@/cashier/patient-dialog/start-visit-dialog";
   import type { OnshiResult } from "onshi-result";
   import OnshiDisp from "./OnshiDispDialog.svelte";
+  import { onshiConfirm, onshiLogin } from "@/lib/onshi-confirm";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -114,6 +115,14 @@
   }
 
   async function doOnshiConfirm(item: HokenItem) {
+    const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
+    const login = await onshiLogin();
+    query.idToken = login.result.idToken;
+    const onshiResult = await onshiConfirm(query);
+    console.log(onshiResult);
+  }
+
+  async function doOnshiConfirmOrig(item: HokenItem) {
     const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
     const d: HokenKakuninDialog = new HokenKakuninDialog({
       target: document.body,
