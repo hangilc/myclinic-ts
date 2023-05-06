@@ -20,6 +20,9 @@
     "dependencies": {
         "@types/mysql": "^2.15.21",
         "@types/yargs": "^17.0.24",
+        "adm-zip": "^0.5.10",
+        "csv-parse": "^5.3.10",
+        "iconv-lite": "^0.6.3",
         "myclinic-model": "^1.0.0",
         "mysql": "^2.18.1",
         "onshi-result": "^1.0.0",
