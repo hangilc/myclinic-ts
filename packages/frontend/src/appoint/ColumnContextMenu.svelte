@@ -5,6 +5,7 @@
   import { appointTimeTemplate } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
   import OnshiConfirmForDate from "./OnshiConfirmForDate.svelte";
+  import { onshiLogin } from "@/lib/onshi-confirm";
 
   export let destroy: () => void;
   export let date: string;

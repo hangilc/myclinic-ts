@@ -17,7 +17,7 @@ function init(): ConfirmStatus {
   return {
     isDone: false,
     error: "",
-    message: "確認中",
+    message: "準備中",
   };
 }
 
@@ -72,9 +72,11 @@ function noHoken(): ConfirmStatus {
 export type PatientRep = string;
 export type AppointId = number;
 
-export function startConfirm(appoint: Appoint, date: string)
-  : Writable<ConfirmStatus> {
-  const status = writable(init());
+export function createConfirm(): Writable<ConfirmStatus> {
+  return writable(init());
+}
+
+export function startConfirm(appoint: Appoint, date: string, idToken: string, status: Writable<ConfirmStatus>): void {
   async function start() {
     const patientId = appoint.patientId;
     try {
@@ -87,9 +89,9 @@ export function startConfirm(appoint: Appoint, date: string)
           status.set(duplicateHoken());
         }
         if (shahoOpt) {
-          status.set(await confirmShahokokuho(shahoOpt, patient, date));
+          status.set(await confirmShahokokuho(shahoOpt, patient, date, idToken));
         } else if (koukiOpt) {
-          status.set(await confirmKoukikourei(koukiOpt, patient, date));
+          status.set(await confirmKoukikourei(koukiOpt, patient, date, idToken));
         } else {
           status.set(noHoken());
         }
@@ -101,7 +103,6 @@ export function startConfirm(appoint: Appoint, date: string)
     }
   }
   start();
-  return status;
 }
 
 export function getPatientRep(appoint: Appoint): string {
@@ -112,8 +113,9 @@ export function getPatientRep(appoint: Appoint): string {
   return rep + appoint.patientName;
 }
 
-async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, date: string): Promise<ConfirmStatus> {
+async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
   const q = onshi_query_from_hoken(shahokokuho, patient.birthday, date);
+  q.idToken = idToken;
   const r = await onshiConfirm(q);
   if (r.isValid && r.resultList.length === 1) {
     const o = r.resultList[0];
@@ -128,8 +130,9 @@ async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, da
   }
 }
 
-async function confirmKoukikourei(koukikourei: Koukikourei, patient: Patient, date: string): Promise<ConfirmStatus> {
+async function confirmKoukikourei(koukikourei: Koukikourei, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
   const q = onshi_query_from_hoken(koukikourei, patient.birthday, date);
+  q.idToken = idToken;
   const r = await onshiConfirm(q);
   if (r.isValid && r.resultList.length === 1) {
     const o = r.resultList[0];

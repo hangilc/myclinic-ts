@@ -1,16 +1,24 @@
 <script lang="ts">
   import type { Appoint } from "myclinic-model";
-  import { getPatientRep, type ConfirmStatus, startConfirm, type ConfirmError } from "./onshi-confirm-for-date";
+  import { getPatientRep, type ConfirmStatus, startConfirm, type ConfirmError, createConfirm } from "./onshi-confirm-for-date";
   import type { Writable } from "svelte/store";
 
   export let appoint: Appoint;
   export let date: string;
+  export let idToken: Writable<string | undefined>;
   export let onDone: () => void;
   const patientRep: string = getPatientRep(appoint);
-  const status: Writable<ConfirmStatus> = startConfirm(appoint, date);
+  const status: Writable<ConfirmStatus> = createConfirm();
+
   status.subscribe(s => {
     if( s.isDone ){
       onDone();
+    }
+  });
+
+  idToken.subscribe(tok => {
+    if( tok ){
+      startConfirm(appoint, date, tok, status);
     }
   });
 
