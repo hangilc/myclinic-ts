@@ -26,6 +26,7 @@
         "myclinic-model": "^1.0.0",
         "mysql": "^2.18.1",
         "onshi-result": "^1.0.0",
+        "prompt-sync": "^4.2.0",
         "yargs": "^17.7.1"
     },
     "devDependencies": {
