@@ -69,7 +69,7 @@ conn.beginTransaction();
 
 // count current orphans
 let origOrphans = await countCurrentOrphans(conn);
-if( origOrphans > 0 ){
+if (origOrphans > 0) {
   askContinue(`Current number of orphan drugs is ${origOrphans}`);
 }
 
@@ -84,18 +84,18 @@ const prevDate = calcPrevDate(startDate);
 askContinue(`Updates valid_upto of current effective to ${prevDate}`);
 await invalidateCurrent(conn, prevDate);
 let updatedOrphans = await countCurrentOrphans(conn);
-if( updatedOrphans > 0 ){
+if (updatedOrphans > 0) {
   askContinue(`Updated number of orphans is ${updatedOrphans}`);
 }
 
 // filter masters which has yakka length <= 10
-masters = masters.filter(m => m.yakka.length <= 10);
+masters = masters.filter((m) => m.yakka.length <= 10);
 
 // enter new masters
 await Promise.all(masters.map(async (m) => await enterIyakuhinMaster(conn, m)));
 
 // confirm commit
-askContinue("Commit changes?")
+askContinue("Commit changes?");
 conn.commit();
 
 // close conn
@@ -190,7 +190,7 @@ function parseCSVcontent(content, startDate) {
 function askContinue(msg) {
   let ans = prompt(msg + " Continue? (y/n): ");
   if (ans === "n") {
-    if( conn ){
+    if (conn) {
       conn.rollback();
     }
     process.exit(1);
@@ -243,39 +243,75 @@ function invalidateCurrent(conn, validUpto) {
  */
 async function countCurrentOrphans(conn) {
   const n = await countCurrentOrphanVisitDrugs(conn);
-  return n; 
+  const m = await countCurrentOrphanVisitConductDrugs(conn);
+  return n + m;
 }
 
 function countCurrentOrphanVisitDrugs(conn) {
   const sql = `
-  select
-    count(*) as c
-  from
-    visit_drug as d
-  where
-    not exists(
-        select
-            *
-        from
-            visit as v
-            inner join iyakuhin_master_arch as m
-        where
-            d.visit_id = v.visit_id
-            and d.d_iyakuhincode = m.iyakuhincode
-            and m.valid_from <= date(v.v_datetime)
-            and (
-                m.valid_upto = '0000-00-00'
-                or date(v.v_datetime) <= m.valid_upto
-            )
+    select
+      count(*) as c
+    from
+      visit_drug as d
+    where
+      not exists(
+          select
+              *
+          from
+              visit as v
+              inner join iyakuhin_master_arch as m
+          where
+              d.visit_id = v.visit_id
+              and d.d_iyakuhincode = m.iyakuhincode
+              and m.valid_from <= date(v.v_datetime)
+              and (
+                  m.valid_upto = '0000-00-00'
+                  or date(v.v_datetime) <= m.valid_upto
+              )
   )`;
   return new Promise((resolve, reject) => {
     conn.query(sql, (err, rows) => {
-      if( err ){
-        reject(err)
+      if (err) {
+        reject(err);
       } else {
         resolve(rows[0].c);
       }
-    })
+    });
+  });
+}
+
+function countCurrentOrphanVisitConductDrugs(conn) {
+  const sql = `
+    select
+      count(d.iyakuhincode) as c
+    from
+      visit_conduct_drug as d
+    where
+      not exists(
+          select
+              *
+          from
+              visit_conduct as c
+              inner join visit as v on c.visit_id = v.visit_id
+              inner join iyakuhin_master_arch as m
+          where
+              d.visit_conduct_id = c.id
+              and m.iyakuhincode = d.iyakuhincode
+              and m.valid_from <= date(v.v_datetime)
+              and (
+                  m.valid_upto = '0000-00-00'
+                  or date(v.v_datetime) <= m.valid_upto
+              )
+      )  
+  `;
+  return new Promise((resolve, reject) => {
+    conn.query(sql, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows[0].c);
+      }
+    });
   });
 }
 
@@ -298,7 +334,6 @@ function calcPrevDate(date) {
   return dateToSqldate(prev);
 }
 
-
 /**
  * @description enters iyakuhin master
  * @param conn - mysql connection
@@ -307,14 +342,16 @@ function calcPrevDate(date) {
  */
 async function enterIyakuhinMaster(conn, master) {
   return new Promise((resolve, reject) => {
-    conn.query("insert into iyakuhin_master_arch set ?", [master], (err, rows) => {
-      if( err ){
-        reject(err);
-      } else {
-        resolve();
+    conn.query(
+      "insert into iyakuhin_master_arch set ?",
+      [master],
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       }
-    });
-
-  })
+    );
+  });
 }
-
