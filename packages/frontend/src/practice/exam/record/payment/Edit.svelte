@@ -13,6 +13,7 @@
   import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
   import { pad } from "@/lib/pad";
   import { showError } from "@/lib/show-error";
+  import { confirm } from "@/lib/confirm-call";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
@@ -38,14 +39,29 @@
     onClose();
   }
 
-  async function doNoPayment() {
-    const pay: ModelPayment = {
-      visitId: visit.visitId,
-      amount: 0,
-      paytime: dateTimeToSql(new Date()),
-    };
-    await api.finishCashier(pay);
-    close();
+  function doPaymentFinished() {
+    confirm("領収済にしていいですか？", async () => {
+      const currentCharge = visit.chargeOption?.charge || 0;
+      const pay: ModelPayment = {
+        visitId: visit.visitId,
+        amount: currentCharge,
+        paytime: dateTimeToSql(new Date()),
+      };
+      await api.finishCashier(pay);
+      close();
+    });
+  }
+
+  function doNoPayment() {
+    confirm("未収にしていいですか？", async () => {
+      const pay: ModelPayment = {
+        visitId: visit.visitId,
+        amount: 0,
+        paytime: dateTimeToSql(new Date()),
+      };
+      await api.finishCashier(pay);
+      close();
+    });
   }
 
   function makeTimestamp(d: Date): string {
@@ -128,6 +144,7 @@
       </div>
     {/if}
     <div class="commands">
+      <a href="javascript:void(0)" on:click={doPaymentFinished}>領収済に</a>
       <a href="javascript:void(0)" on:click={doNoPayment}>未収に</a>
       <a href="javascript:void(0)" on:click={doReceiptPdf}>領収書PDF</a>
       <button on:click={doEnter}>入力</button>
