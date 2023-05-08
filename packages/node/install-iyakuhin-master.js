@@ -12,6 +12,7 @@ import { count } from "node:console";
 let prompt = promptSync.default({ sigint: true });
 
 /**
+ * @class Row
  * @description convenience class to wrap CSV row
  */
 class Row {
@@ -87,9 +88,15 @@ if( updatedOrphans > 0 ){
   askContinue(`Updated number of orphans is ${updatedOrphans}`);
 }
 
-// test case
-console.log("going to rollback");
-conn.rollback();
+// filter masters which has yakka length <= 10
+masters = masters.filter(m => m.yakka.length <= 10);
+
+// enter new masters
+await Promise.all(masters.map(async (m) => await enterIyakuhinMaster(conn, m)));
+
+// confirm commit
+askContinue("Commit changes?")
+conn.commit();
 
 // close conn
 conn.end();
@@ -290,3 +297,24 @@ function calcPrevDate(date) {
   const prev = kanjidate.addDays(new Date(date), -1);
   return dateToSqldate(prev);
 }
+
+
+/**
+ * @description enters iyakuhin master
+ * @param conn - mysql connection
+ * @param {object} master - iyakuhin master
+ * @returns {Promise<void>}
+ */
+async function enterIyakuhinMaster(conn, master) {
+  return new Promise((resolve, reject) => {
+    conn.query("insert into iyakuhin_master_arch set ?", [master], (err, rows) => {
+      if( err ){
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+
+  })
+}
+
