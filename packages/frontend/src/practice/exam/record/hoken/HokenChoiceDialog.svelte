@@ -114,15 +114,15 @@
     doClose();
   }
 
-  async function doOnshiConfirm(item: HokenItem) {
-    const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
-    const login = await onshiLogin();
-    query.idToken = login.result.idToken;
-    const onshiResult = await onshiConfirm(query);
-    console.log(onshiResult);
-  }
+  // async function doOnshiConfirm(item: HokenItem) {
+  //   const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
+  //   const login = await onshiLogin();
+  //   query.idToken = login.result.idToken;
+  //   const onshiResult = await onshiConfirm(query);
+  //   console.log(onshiResult);
+  // }
 
-  async function doOnshiConfirmOrig(item: HokenItem) {
+  async function doOnshiConfirm(item: HokenItem) {
     const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
     const d: HokenKakuninDialog = new HokenKakuninDialog({
       target: document.body,

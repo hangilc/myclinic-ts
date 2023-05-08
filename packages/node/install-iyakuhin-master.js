@@ -4,8 +4,10 @@ import path from "node:path";
 import AdmZip from "adm-zip";
 import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
+import mysql from "mysql";
+
 import * as promptSync from "prompt-sync";
-let prompt = promptSync.default({sigint: true});
+let prompt = promptSync.default({ sigint: true });
 
 /**
  * @description convenience class to wrap CSV row
@@ -24,26 +26,44 @@ class Row {
   }
 }
 
+/**
+ * @description config for mysql connection
+ */
+const connConfig = {
+  host: process.env["MYCLINIC_DB_HOST"] || "127.0.0.1",
+  user: process.env["MYCLINIC_DB_USER"],
+  password: process.env["MYCLINIC_DB_PASS"],
+  database: "myclinic",
+  charset: "utf8",
+};
+
 // parse command args
-if( process.argv.length !== 4 ){
+if (process.argv.length !== 4) {
   console.log("usage: Usage: node install-iyakuhin-master.js Y.ZIP start-date");
   process.exit(1);
 }
 const zipFile = process.argv[2];
 const startDate = process.argv[3];
-if( !zipFile ){
+if (!zipFile) {
   console.log("Empty file name");
   process.exit(1);
 }
-if( !/^\d{4}-\d{2}-\d{2}$/.test(startDate) ){
+if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
   console.log("Invalid start date, it should be in xxxx-xx-xx format.");
   process.exit(1);
 }
 
 // read csv data
 let csvContent = await extractMasterContent(zipFile);
-let masters = parseCSVcontent(csvContent);
+let masters = parseCSVcontent(csvContent, startDate);
 askContinue(`There area ${masters.length} masters in ${zipFile}.`);
+
+// connect to DB
+const conn = mysql.createConnection(connConfig);
+conn.connect();
+conn.beginTransaction();
+
+// count current effectives
 
 
 /**
@@ -65,7 +85,7 @@ async function extractMasterContent(fileName) {
       content = iconv.decode(entry.getData(), "SHIFT_JIS");
     }
   });
-  if( err ){
+  if (err) {
     return Promise.reject(err);
   } else {
     return Promise.resolve(content);
@@ -119,12 +139,13 @@ function entryToMaster(entry, validFrom, validUpto = "0000-00-00") {
 /**
  * @description parses CSV content to rows
  * @param {string} content - CSV content
+ * @param {string} startDate -- value for validFrom in Master
  * @returns {object[]} -- array of IyakuhinMaster
  */
-function parseCSVcontent(content) {
+function parseCSVcontent(content, startDate) {
   return parse(content)
-  .map((row) => rowToEntry(new Row(row)))
-  .map(e => entryToMaster(e, startDate));
+    .map((row) => rowToEntry(new Row(row)))
+    .map((e) => entryToMaster(e, startDate));
 }
 
 /**
@@ -133,7 +154,19 @@ function parseCSVcontent(content) {
  */
 function askContinue(msg) {
   let ans = prompt(msg + " Continue? (y/n): ");
-  if( ans === "n" ){
+  if (ans === "n") {
     process.exit(1);
   }
+}
+
+/**
+ * @description counts number of current effective masters (i.e., validUpto === '0000-00-00')
+ * @param conn - mysql connection
+ * @returns {Promise<number>}
+ */
+function countCurrentEffectiveMasters(conn) {
+  const sql = "select count(*) from iyakuhin_master_arch where valid_upto = '0000-00-00'";
+  conn.query(sql, (err, rows) => {
+    
+  })
 }
