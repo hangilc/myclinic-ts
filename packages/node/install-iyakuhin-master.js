@@ -5,8 +5,10 @@ import AdmZip from "adm-zip";
 import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
 import mysql from "mysql";
+import * as kanjidate from "kanjidate";
 
 import * as promptSync from "prompt-sync";
+import { count } from "node:console";
 let prompt = promptSync.default({ sigint: true });
 
 /**
@@ -52,6 +54,7 @@ if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate)) {
   console.log("Invalid start date, it should be in xxxx-xx-xx format.");
   process.exit(1);
 }
+let conn = undefined;
 
 // read csv data
 let csvContent = await extractMasterContent(zipFile);
@@ -59,12 +62,37 @@ let masters = parseCSVcontent(csvContent, startDate);
 askContinue(`There area ${masters.length} masters in ${zipFile}.`);
 
 // connect to DB
-const conn = mysql.createConnection(connConfig);
+conn = mysql.createConnection(connConfig);
 conn.connect();
 conn.beginTransaction();
 
-// count current effectives
+// count current orphans
+let origOrphans = await countCurrentOrphans(conn);
+if( origOrphans > 0 ){
+  askContinue(`Current number of orphan drugs is ${origOrphans}`);
+}
 
+// count current effectives
+const numCurrentEffectiveMasters = await countCurrentEffectiveMasters(conn);
+askContinue(
+  `Number of currently effective masters are ${numCurrentEffectiveMasters}.`
+);
+
+// updat validUpto of current effectives
+const prevDate = calcPrevDate(startDate);
+askContinue(`Updates valid_upto of current effective to ${prevDate}`);
+await invalidateCurrent(conn, prevDate);
+let updatedOrphans = await countCurrentOrphans(conn);
+if( updatedOrphans > 0 ){
+  askContinue(`Updated number of orphans is ${updatedOrphans}`);
+}
+
+// test case
+console.log("going to rollback");
+conn.rollback();
+
+// close conn
+conn.end();
 
 /**
  * @description reads CSV data
@@ -155,6 +183,9 @@ function parseCSVcontent(content, startDate) {
 function askContinue(msg) {
   let ans = prompt(msg + " Continue? (y/n): ");
   if (ans === "n") {
+    if( conn ){
+      conn.rollback();
+    }
     process.exit(1);
   }
 }
@@ -165,8 +196,97 @@ function askContinue(msg) {
  * @returns {Promise<number>}
  */
 function countCurrentEffectiveMasters(conn) {
-  const sql = "select count(*) from iyakuhin_master_arch where valid_upto = '0000-00-00'";
-  conn.query(sql, (err, rows) => {
-    
-  })
+  const sql =
+    "select count(*) as c from iyakuhin_master_arch where valid_upto = '0000-00-00'";
+  return new Promise((resolve, reject) => {
+    conn.query(sql, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        const n = rows[0].c;
+        resolve(n);
+      }
+    });
+  });
+}
+
+/**
+ * @description invalidates currently effective masters (i.e., sets validUpto)
+ * @param conn - mysql connection
+ * @param {string} validUpto
+ */
+function invalidateCurrent(conn, validUpto) {
+  const sql =
+    "update iyakuhin_master_arch set valid_upto = ? where valid_upto = '0000-00-00'";
+  return new Promise((resolve, reject) => {
+    conn.query(sql, [validUpto], (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+/**
+ * @description counts number of current orphan drugs in visit_drug and visit_conduct_drug
+ * @param conn
+ * @return {Promise<number>}
+ */
+async function countCurrentOrphans(conn) {
+  const n = await countCurrentOrphanVisitDrugs(conn);
+  return n; 
+}
+
+function countCurrentOrphanVisitDrugs(conn) {
+  const sql = `
+  select
+    count(*) as c
+  from
+    visit_drug as d
+  where
+    not exists(
+        select
+            *
+        from
+            visit as v
+            inner join iyakuhin_master_arch as m
+        where
+            d.visit_id = v.visit_id
+            and d.d_iyakuhincode = m.iyakuhincode
+            and m.valid_from <= date(v.v_datetime)
+            and (
+                m.valid_upto = '0000-00-00'
+                or date(v.v_datetime) <= m.valid_upto
+            )
+  )`;
+  return new Promise((resolve, reject) => {
+    conn.query(sql, (err, rows) => {
+      if( err ){
+        reject(err)
+      } else {
+        resolve(rows[0].c);
+      }
+    })
+  });
+}
+
+/**
+ * @description converts Date to "YYYY-MM-DD" format
+ * @param {Date} date
+ * @returns {string}
+ */
+function dateToSqldate(date) {
+  return date.toISOString().substring(0, 10);
+}
+
+/**
+ * @description calculated previous day
+ * @param {string} date
+ * @returns {string} - previous day in "YYYY-MM-DD" format
+ */
+function calcPrevDate(date) {
+  const prev = kanjidate.addDays(new Date(date), -1);
+  return dateToSqldate(prev);
 }
