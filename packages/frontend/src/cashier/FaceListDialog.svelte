@@ -3,6 +3,7 @@
   import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
   import { onshiFace, onshiFaceArchive, type OnshiFaceConfirmed } from "@/lib/onshi-face";
   import * as kanjidate from "kanjidate";
+  import { hotlineTrigger } from "@/reception/reception-vars";
 
   export let destroy: () => void;
   export let list: OnshiFaceConfirmed[];
@@ -21,7 +22,8 @@
         onRegister: async () => {
           await onshiFaceArchive(c.fileName);
           destroy();
-        }
+        },
+        hotlineTrigger,
       }
     })
   }

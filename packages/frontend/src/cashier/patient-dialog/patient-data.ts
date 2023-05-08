@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { EventEmitter } from "@/lib/event-emitter";
 import type { Patient } from "myclinic-model";
 import { batchFromHoken, fetchHokenList } from "./fetch-hoken-list";
 import type { Hoken } from "./hoken";
@@ -11,6 +12,7 @@ export class PatientData {
   patient: Patient;
   hokenCache: HokenCache;
   stack: Opener[] = [];
+  hotlineTrigger: EventEmitter<string> | undefined = undefined;
 
   constructor(patient: Patient, currentList: Hoken[]) {
     this.patient = patient;
@@ -72,9 +74,14 @@ export class PatientData {
     this.cleanup();
   }
 
-  static async start(patient: Patient) {
+  sendHotlineMessage(msg: string): void {
+    this.hotlineTrigger?.emit(msg);
+  }
+
+  static async start(patient: Patient, config: StartConfig = {}) {
     const hokenList: Hoken[] = await fetchHokenList(patient.patientId);
     const data = new PatientData(patient, hokenList);
+    data.hotlineTrigger = config.hotlineTrigger;
     function open(): void {
       const d: PatientDialog = new PatientDialog({
         target: document.body,
@@ -86,4 +93,8 @@ export class PatientData {
     }
     data.push(open);
   }
+}
+
+export interface StartConfig {
+  hotlineTrigger?: EventEmitter<string>;
 }

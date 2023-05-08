@@ -1,6 +1,7 @@
 import api from "@/lib/api"
 import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 import { onshiFace } from "@/lib/onshi-face";
+import { hotlineTrigger } from "./reception-vars";
 
 export async function faceStart() {
   const server = (await api.dictGet("onshi-server")).replace(/^http/, "ws");
@@ -18,6 +19,7 @@ export async function faceStart() {
       props: {
         destroy: () => d.$destroy(),
         result,
+        hotlineTrigger,
       }
     })
   });

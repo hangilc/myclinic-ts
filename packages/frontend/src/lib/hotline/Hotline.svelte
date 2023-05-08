@@ -12,20 +12,23 @@
   import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
   import { printApi } from "../printApi";
   import Popup from "../Popup.svelte";
+  import type { EventEmitter } from "../event-emitter";
 
   export let sendAs: string;
   export let sendTo: string;
+  export let messageTrigger: EventEmitter<string> | undefined = undefined;
   let relevants: string[] = [sendAs, sendTo];
   let regulars: string[] = getRegulars(sendAs);
-  // let regularAnchor: HTMLElement;
   let hotlineInput: HTMLTextAreaElement;
-  // let patientsAnchor: HTMLElement;
   let wqPatients: Patient[] = [];
 
   let hotlines: HotlineEx[] = [];
   let lastAppEventId = 0;
   const unsubs: (() => void)[] = [];
   init();
+  if( messageTrigger ){
+    messageTrigger.subscribe(msg => sendMessage(msg));
+  }
 
   async function init() {
     const hs: AppEvent[] = await api.listTodaysHotline();

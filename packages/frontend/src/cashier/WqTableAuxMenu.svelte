@@ -3,14 +3,16 @@ import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
   import type { Patient, Visit } from "myclinic-model";
   import { PatientData } from "./patient-dialog/patient-data";
+  import type { EventEmitter } from "@/lib/event-emitter";
 
   export let destroy: () => void;
   export let patient: Patient;
   export let visit: Visit;
+  export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
 
   function doPatient() {
     destroy();
-    PatientData.start(patient);
+    PatientData.start(patient, { hotlineTrigger });
   }
 
   async function doDeleteVisit() {

@@ -19,6 +19,7 @@
   import api from "@/lib/api";
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
   import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
+  import type { EventEmitter } from "@/lib/event-emitter";
 
   export let data: PatientData;
   export let destroy: () => void;

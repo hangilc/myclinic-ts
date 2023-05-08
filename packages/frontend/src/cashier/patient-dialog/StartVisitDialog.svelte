@@ -18,6 +18,7 @@
   import { confirm } from "@/lib/confirm-call";
   import type { Hoken, HokenType } from "./hoken";
   import { KoukikoureiItem, ShahokokuhoItem } from "./start-visit-dialog";
+  import { hotlineTrigger } from "@/reception/reception-vars";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -150,6 +151,7 @@
     let visit: Visit | undefined = undefined;
     try {
       visit = await api.startVisitWithHoken(patient.patientId, at, hokenIdSet);
+      hotlineTrigger?.emit(`[Bot] ${patient.fullName("")}様の診察を受け付けました。`);
     } catch (e) {
       error = "診察の登録に失敗しました。";
       return;

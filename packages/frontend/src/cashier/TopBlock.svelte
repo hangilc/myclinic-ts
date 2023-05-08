@@ -10,13 +10,15 @@
   import Bars3 from "@/icons/Bars3.svelte";
   import { onshiFaceList } from "@/lib/onshi-face";
   import FaceListDialog from "./FaceListDialog.svelte";
+  import type { EventEmitter } from "@/lib/event-emitter";
 
+  export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   let searchText = "";
 
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
     if (result.length === 1) {
-      PatientData.start(result[0]);
+      PatientData.start(result[0], { hotlineTrigger });
     } else {
       const d: SearchPatientResultDialog = new SearchPatientResultDialog({
         target: document.body,
@@ -31,7 +33,7 @@
   }
 
   async function doPatientSelected(patient: Patient) {
-    PatientData.start(patient);
+    PatientData.start(patient, { hotlineTrigger });
   }
 
   function doNewPatient(): void {
@@ -39,6 +41,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
+        hotlineTrigger,
       },
     });
   }

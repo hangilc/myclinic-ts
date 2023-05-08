@@ -6,8 +6,10 @@
   import TopBlock from "./TopBlock.svelte";
   import { WqueueData } from "./wq-data";
   import WqTable from "./WqTable.svelte";
+  import type { EventEmitter } from "@/lib/event-emitter";
 
   export let wqItems: WqueueData[] = [];
+  export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   let unsubs: (() => void)[] = [];
 
   onDestroy(() => unsubs.forEach((f) => f()));
@@ -65,7 +67,7 @@
 </script>
 
 <div>
-  <TopBlock />
+  <TopBlock {hotlineTrigger}/>
   <WqTable items={wqItems} />
   <button on:click={refresh}>更新</button>
 </div>

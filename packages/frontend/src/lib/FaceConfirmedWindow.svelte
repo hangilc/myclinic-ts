@@ -38,12 +38,13 @@
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
   import { validFromOf } from "./util";
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
-  // import { convert } from "./validation";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
+  import type { EventEmitter } from "./event-emitter";
 
   export let destroy: () => void;
   export let result: OnshiResult;
   export let onRegister: (visit: Visit) => void = () => {};
+  export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
 
   let resultItem: ResultItem | undefined =
     result.resultList.length === 1 ? result.resultList[0] : undefined;
@@ -275,6 +276,7 @@
       at,
       hoken
     );
+    hotlineTrigger?.emit(`[Bot] ${resolved.patient.fullName("")}様の診察をマイナンバーカードで受け付けました。`)
     const onshi = new Onshi(visit.visitId, JSON.stringify(result.toJSON()));
     await api.setOnshi(onshi);
     doClose();

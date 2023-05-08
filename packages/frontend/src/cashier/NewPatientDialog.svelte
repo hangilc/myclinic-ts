@@ -5,8 +5,10 @@
   import type { Patient } from "myclinic-model";
   import { PatientData } from "./patient-dialog/patient-data";
   import PatientForm from "./PatientForm.svelte";
+  import type { EventEmitter } from "@/lib/event-emitter";
 
   export let destroy: () => void;
+  export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   let errors: string[] = [];
   let isEnterClicked = false;
   let validate: () => VResult<Patient>;
@@ -17,7 +19,7 @@
     if (vs.isValid) {
       let entered = await api.enterPatient(vs.value);
       destroy();
-      PatientData.start(entered);
+      PatientData.start(entered, { hotlineTrigger });
     } else {
       errors = errorMessagesOf(vs.errors);
     }
