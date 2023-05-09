@@ -2,7 +2,7 @@ import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, castOp as castDrawerOp } from "./drawer/op";
 import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data";
-import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castOptionUndefined, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 
 const backend: string = getBackend();
 const base: string = backend + "/api";
@@ -1478,5 +1478,12 @@ export default {
     return post("batch-get-charge-payment", visitIds, {},
       castList(castTuple3(castNumber, castOption(m.Charge.cast), castOption(m.Payment.cast))));
   },
+
+  // (placeholder) not implemented yet in server
+  // findLastPayment(visitId: number): Promise<m.Payment | undefined> {
+  //   return get("find-last-payment", { "visit-id": visitId.toString() },
+  //     castOptionUndefined(m.Payment.cast)
+  //   )
+  // },
 
 };

@@ -108,3 +108,13 @@ export function castOption<T>(cast: Caster<T>): Caster<T | null> {
   };
 }
 
+export function castOptionUndefined<T>(cast: Caster<T>): Caster<T | undefined> {
+  return (arg: any) => {
+    if( arg == null ){
+      return undefined;
+    } else {
+      return cast(arg);
+    }
+  }
+}
+

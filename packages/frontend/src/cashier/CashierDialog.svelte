@@ -100,6 +100,13 @@
       総点：{meisai.totalTen.toLocaleString()}点、、負担割：{meisai.futanWari}割
     </div>
     <div class="charge">請求額：{charge.charge.toLocaleString()}円</div>
+    {#if visit.lastPayment}
+      {@const amount = visit.lastPayment?.amount ?? 0}
+      <div class="last-payment">
+        前回受領額：{amount.toLocaleString()}円
+        今回差額：{(charge.charge - amount).toLocaleString()}円
+      </div>
+    {/if}
   </div>
   <div class="commands">
     <button on:click={doPrintReceipt}>領収書印刷</button>
@@ -176,5 +183,10 @@
 
   .commands * + * {
     margin-left: 4px;
+  }
+
+  .last-payment {
+    font-weight: bold;
+    color: green;
   }
 </style>
