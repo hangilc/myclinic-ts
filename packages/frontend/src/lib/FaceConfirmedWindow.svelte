@@ -40,6 +40,7 @@
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import type { EventEmitter } from "./event-emitter";
+  import { onshiFaceArchive } from "./onshi-face";
 
   export let destroy: () => void;
   export let result: OnshiResult;

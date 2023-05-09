@@ -1,6 +1,6 @@
 import api from "@/lib/api"
 import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
-import { onshiFace } from "@/lib/onshi-face";
+import { onshiFace, onshiFaceArchive } from "@/lib/onshi-face";
 import { hotlineTrigger } from "./reception-vars";
 
 export async function faceStart() {
@@ -20,6 +20,9 @@ export async function faceStart() {
         destroy: () => d.$destroy(),
         result,
         hotlineTrigger,
+        onRegister: async () => {
+          await onshiFaceArchive(file);
+        }
       }
     })
   });
