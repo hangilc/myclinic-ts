@@ -9,10 +9,10 @@
   export let onClose: () => void;
   let validate: () => VResult<Koukikourei>;
   let errors: string[] = [];
-  let enterClicked = false;
+  // let enterClicked = false;
 
   async function doEnter() {
-    enterClicked = true;
+    // enterClicked = true;
     const vs = validate();
     if( vs.isValid ){
       errors = [];
@@ -31,12 +31,12 @@
     onClose();
   }
 
-  function onValueChange(): void {
-    if( enterClicked ){
-      const r = validate();
-      errors = errorMessagesOf(r.errors);
-    }
-  }
+  // function onValueChange(): void {
+  //   if( enterClicked ){
+  //     const r = validate();
+  //     errors = errorMessagesOf(r.errors);
+  //   }
+  // }
 </script>
 
 <div>
@@ -47,7 +47,7 @@
       {/each}
     </div>
   {/if}
-  <KoukikoureiForm {patient} {init} bind:validate on:value-change={onValueChange}/>
+  <KoukikoureiForm {patient} {init} bind:validate/>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
