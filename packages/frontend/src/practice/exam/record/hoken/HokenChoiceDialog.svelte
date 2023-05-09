@@ -1,12 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import {
-    kouhiRep,
-    koukikoureiRep,
-    roujinRep,
-    shahokokuhoRep,
-  } from "@/lib/hoken-rep";
   import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import {
     type Visit,
@@ -18,13 +12,8 @@
   } from "myclinic-model";
   import HokenKakuninDialog from "./HokenKakuninDialog.svelte";
   import { HokenItem, KouhiItem } from "./hoken-item";
-  import type {
-    KoukikoureiItem,
-    ShahokokuhoItem,
-  } from "@/cashier/patient-dialog/start-visit-dialog";
   import type { OnshiResult } from "onshi-result";
   import OnshiDisp from "./OnshiDispDialog.svelte";
-  import { onshiConfirm, onshiLogin } from "@/lib/onshi-confirm";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -113,14 +102,6 @@
     );
     doClose();
   }
-
-  // async function doOnshiConfirm(item: HokenItem) {
-  //   const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
-  //   const login = await onshiLogin();
-  //   query.idToken = login.result.idToken;
-  //   const onshiResult = await onshiConfirm(query);
-  //   console.log(onshiResult);
-  // }
 
   async function doOnshiConfirm(item: HokenItem) {
     const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
