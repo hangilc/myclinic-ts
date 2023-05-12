@@ -81,7 +81,15 @@ export namespace OnshiHokenInconsistency {
           return "本人";
         }
       }
-      super("本人・家族", cvt(hokenHonninKazoku), cvt(onshiHonninKazoku));
+      super("本人・家族が一致しません", cvt(hokenHonninKazoku), cvt(onshiHonninKazoku));
+    }
+  }
+
+  export class InconsistentKoureiFutanWari extends Inconsistency {
+    readonly isInconsistentKoureiFutanWari = true;
+
+    constructor(hokenFutanWari: number, onshiFutanWari: number) {
+      super("後期高齢負担割が一致しません", `${hokenFutanWari}割`, `${onshiFutanWari}割`)
     }
   }
 
@@ -94,6 +102,7 @@ export type OnshiHokenConsistencyError =
   | OnshiHokenInconsistency.InconsistentEdaban
   | OnshiHokenInconsistency.InconsistentKoureiJukyuu
   | OnshiHokenInconsistency.InconsistentHonninKazoku
+  | OnshiHokenInconsistency.InconsistentKoureiFutanWari
   ;
 
 export function checkOnshiShahokokuhoConsistency(
@@ -102,34 +111,45 @@ export function checkOnshiShahokokuhoConsistency(
 ): OnshiHokenConsistencyError[] {
   const errors: OnshiHokenConsistencyError[] = [];
   const hokenshaBangou = parseInt(r.insurerNumber || "0");
-  if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
-    errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
-      shahokokuho.hokenshaBangou.toString(), hokenshaBangou.toString()
-    ));
+  {
+
+    if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
+      errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
+        shahokokuho.hokenshaBangou.toString(), hokenshaBangou.toString()
+      ));
+    }
   }
-  const hihokenshaKigou = r.insuredCardSymbol ?? "";
-  if (toHankaku(shahokokuho.hihokenshaKigou) !== toHankaku(hihokenshaKigou)) {
-    errors.push(new OnshiHokenInconsistency.InconsistentHihokenshaKigou(
-      shahokokuho.hihokenshaKigou, hihokenshaKigou
-    ));
+  {
+    const hihokenshaKigou = r.insuredCardSymbol ?? "";
+    if (toHankaku(shahokokuho.hihokenshaKigou) !== toHankaku(hihokenshaKigou)) {
+      errors.push(new OnshiHokenInconsistency.InconsistentHihokenshaKigou(
+        shahokokuho.hihokenshaKigou, hihokenshaKigou
+      ));
+    }
   }
-  const hihokenshaBangou = r.insuredIdentificationNumber || "";
-  if (toHankaku(stripLeadingZero(shahokokuho.hihokenshaBangou)) !== toHankaku(stripLeadingZero(hihokenshaBangou))) {
-    errors.push(new OnshiHokenInconsistency.InconsistentHihokenshaBangou(
-      shahokokuho.hihokenshaBangou, hihokenshaBangou
-    ));
+  {
+    const hihokenshaBangou = r.insuredIdentificationNumber || "";
+    if (toHankaku(stripLeadingZero(shahokokuho.hihokenshaBangou)) !== toHankaku(stripLeadingZero(hihokenshaBangou))) {
+      errors.push(new OnshiHokenInconsistency.InconsistentHihokenshaBangou(
+        shahokokuho.hihokenshaBangou, hihokenshaBangou
+      ));
+    }
   }
-  const edaban = r.insuredBranchNumber || "";
-  if (shahokokuho.edaban !== "" && toHankaku(stripLeadingZero(shahokokuho.edaban)) !== toHankaku(stripLeadingZero(edaban))) {
-    errors.push(new OnshiHokenInconsistency.InconsistentEdaban(
-      shahokokuho.edaban, edaban
-    ));
+  {
+    const edaban = r.insuredBranchNumber || "";
+    if (shahokokuho.edaban !== "" && toHankaku(stripLeadingZero(shahokokuho.edaban)) !== toHankaku(stripLeadingZero(edaban))) {
+      errors.push(new OnshiHokenInconsistency.InconsistentEdaban(
+        shahokokuho.edaban, edaban
+      ));
+    }
   }
-  const kourei: number = r.kourei != undefined ? r.kourei.futanWari ?? 0 : 0;
-  if (shahokokuho.koureiStore !== kourei) {
-    errors.push(new OnshiHokenInconsistency.InconsistentKoureiJukyuu(
-      shahokokuho.koureiStore, kourei
-    ));
+  {
+    const kourei: number = r.kourei != undefined ? r.kourei.futanWari ?? 0 : 0;
+    if (shahokokuho.koureiStore !== kourei) {
+      errors.push(new OnshiHokenInconsistency.InconsistentKoureiJukyuu(
+        shahokokuho.koureiStore, kourei
+      ));
+    }
   }
   if (r.personalFamilyClassification != undefined) {
     const honnin = r.personalFamilyClassification;
@@ -153,19 +173,29 @@ export function checkOnshiKoukikoureiConsistency(
   koukikourei: Koukikourei,
 ): OnshiHokenConsistencyError[] {
   const errors: OnshiHokenConsistencyError[] = [];
-  const hokenshaBangou = r.insurerNumber ?? "";
-  if (stripLeadingZero(koukikourei.hokenshaBangou) !== stripLeadingZero(hokenshaBangou)) {
-    errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
-      koukikourei.hokenshaBangou, hokenshaBangou
-    ))
+  {
+    const hokenshaBangou = r.insurerNumber ?? "";
+    if (stripLeadingZero(koukikourei.hokenshaBangou) !== stripLeadingZero(hokenshaBangou)) {
+      errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
+        koukikourei.hokenshaBangou, hokenshaBangou
+      ))
+    }
   }
-  const hihokenshaBangou = r.insuredIdentificationNumber ?? "";
-  if (stripLeadingZero(koukikourei.hihokenshaBangou) !== stripLeadingZero(hihokenshaBangou)) {
-    return `被保険者番号が一致しません。${koukikourei.hihokenshaBangou} - ${hihokenshaBangou}`;
+  {
+    const hihokenshaBangou = r.insuredIdentificationNumber ?? "";
+    if (stripLeadingZero(koukikourei.hihokenshaBangou) !== stripLeadingZero(hihokenshaBangou)) {
+      errors.push(new OnshiHokenInconsistency.InconsistentHihokenshaBangou(
+        koukikourei.hihokenshaBangou, hihokenshaBangou
+      ))
+    }
   }
-  const futanWari = r.koukikoureiFutanWari ?? 0;
-  if (futanWari > 0 && koukikourei.futanWari !== futanWari) {
-    return `負担割が一致しません。${koukikourei.futanWari} - ${futanWari}`;
+  {
+    const futanWari = r.koukikoureiFutanWari ?? 0;
+    if (futanWari > 0 && koukikourei.futanWari !== futanWari) {
+      errors.push(new OnshiHokenInconsistency.InconsistentKoureiFutanWari(
+        koukikourei.futanWari, futanWari
+      ))
+    }
   }
   return errors;
 }
