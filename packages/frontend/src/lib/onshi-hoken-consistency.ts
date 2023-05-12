@@ -4,32 +4,59 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import { isKoukikourei } from "./hoken-rep";
 import { toHankaku } from "./zenkaku";
 
-export namespace OnshiShahokokuhoInconsistency {
-  export class InconsistentHokenshaBangou {
+export namespace OnshiHokenInconsistency {
+  export class Inconsistency {
+    messageLead: string;
+    hokenValue: string;
+    onshiValue: string;
+
+    constructor(messageLead: string, hokenValue: string, onshiValue: string) {
+      this.messageLead = messageLead.replace(/。$/, "");
+      this.hokenValue = hokenValue;
+      this.onshiValue = onshiValue;
+    }
+
+    toString(): string {
+      return `${this.messageLead}。保険：${this.hokenValue}、資格確認：${this.onshiValue}`;
+    }
+  }
+  export class InconsistentHokenshaBangou extends Inconsistency {
     readonly isInconsistentHokenshaBangou = true;
 
     constructor(
-      public shahokokuhoValue: number,
-      public onshiValue: number,
-    ) {}
-
-    toString(): string {
-      return `保険者番号が一致しません。${shahokokuho.hokenshaBangou} - ${hokenshaBangou}`;
+      hokenValue: number,
+      onshiValue: number,
+    ) {
+      super("保険者番号が一致しません", hokenValue.toString(), onshiValue.toString());
     }
   }
+
+  export class InconsistentHihokenshaKigou {
+    readonly isInconsistentHihokenshaKigou = true;
+
+    constructor {
+      public hokenValue: string,
+      public onshiValue: string,
+
+
+    }
+  }
+
 }
 
-export type OnshiShahokokuhoConsistencyError = "string";
+export type OnshiHokenConsistencyError = 
+  OnshiHokenInconsistency.InconsistentHokenshaBangou;
 
-
-
-export function checkOnshiShahokokuhoConsistency: OnshiShahokokuhoConsistencyErro | undefined (
-  result: OnshiResult,
+export function checkOnshiShahokokuhoConsistency: OnshiHokenConsistencyError[] (
+  ri: ResultItem,
   shahokokuho: Shahokokuho,
 ) {
+  const errors: OnshiHokenConsistencyError[] = [];
   const hokenshaBangou = parseInt(r.insurerNumber || "0");
   if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
-    return `保険者番号が一致しません。${shahokokuho.hokenshaBangou} - ${hokenshaBangou}`;
+    errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
+      shahokokuho.hokenshaBangou, hokenshaBangou
+    ))
   }
   const hihokenshaKigou = r.insuredCardSymbol ?? "";
   if (toHankaku(shahokokuho.hihokenshaKigou) !== toHankaku(hihokenshaKigou)) {
@@ -59,7 +86,7 @@ export function checkOnshiShahokokuhoConsistency: OnshiShahokokuhoConsistencyErr
       }
     }
   }
-  return undefined;
+  return errors;
 }
 
 export function shahokokuhoOnshiConsistent(
