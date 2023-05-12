@@ -24,8 +24,8 @@ export namespace OnshiHokenInconsistency {
     readonly isInconsistentHokenshaBangou = true;
 
     constructor(
-      hokenValue: number,
-      onshiValue: number,
+      hokenValue: string,
+      onshiValue: string,
     ) {
       super("保険者番号が一致しません", hokenValue.toString(), onshiValue.toString());
     }
@@ -96,15 +96,15 @@ export type OnshiHokenConsistencyError =
   | OnshiHokenInconsistency.InconsistentHonninKazoku
   ;
 
-export function checkOnshiShahokokuhoConsistency: OnshiHokenConsistencyError[] (
+export function checkOnshiShahokokuhoConsistency(
   r: ResultItem,
   shahokokuho: Shahokokuho,
-) {
+): OnshiHokenConsistencyError[] {
   const errors: OnshiHokenConsistencyError[] = [];
   const hokenshaBangou = parseInt(r.insurerNumber || "0");
   if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
     errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
-      shahokokuho.hokenshaBangou, hokenshaBangou
+      shahokokuho.hokenshaBangou.toString(), hokenshaBangou.toString()
     ));
   }
   const hihokenshaKigou = r.insuredCardSymbol ?? "";
@@ -144,6 +144,28 @@ export function checkOnshiShahokokuhoConsistency: OnshiHokenConsistencyError[] (
         shahokokuho.honninStore, 0
       ));
     }
+  }
+  return errors;
+}
+
+export function checkOnshiKoukikoureiConsistency(
+  r: ResultItem,
+  koukikourei: Koukikourei,
+): OnshiHokenConsistencyError[] {
+  const errors: OnshiHokenConsistencyError[] = [];
+  const hokenshaBangou = r.insurerNumber ?? "";
+  if (stripLeadingZero(koukikourei.hokenshaBangou) !== stripLeadingZero(hokenshaBangou)) {
+    errors.push(new OnshiHokenInconsistency.InconsistentHokenshaBangou(
+      koukikourei.hokenshaBangou, hokenshaBangou
+    ))
+  }
+  const hihokenshaBangou = r.insuredIdentificationNumber ?? "";
+  if (stripLeadingZero(koukikourei.hihokenshaBangou) !== stripLeadingZero(hihokenshaBangou)) {
+    return `被保険者番号が一致しません。${koukikourei.hihokenshaBangou} - ${hihokenshaBangou}`;
+  }
+  const futanWari = r.koukikoureiFutanWari ?? 0;
+  if (futanWari > 0 && koukikourei.futanWari !== futanWari) {
+    return `負担割が一致しません。${koukikourei.futanWari} - ${futanWari}`;
   }
   return errors;
 }
