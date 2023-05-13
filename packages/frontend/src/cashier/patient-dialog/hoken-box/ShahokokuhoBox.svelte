@@ -3,7 +3,7 @@
   import { Hoken } from "../hoken";
   import * as kanjidate from "kanjidate";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
-  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  // import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
 
   export let shahokokuho: Shahokokuho;
   export let usageCount: number;
@@ -23,12 +23,13 @@
 
   function doOnshiConfirm() {
     const confirmDate = shahokokuho.validUpto = "0000-00-00" ? dateToSqlDate(new Date()): shahokokuho.validUpto;
-    const query = onshi_query_from_hoken(shahokokuho, birthdate, confirmDate);
+    // const query = onshi_query_from_hoken(shahokokuho, birthdate, confirmDate);
     const d: OnshiKakuninDialog = new OnshiKakuninDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        query,
+        hoken: shahokokuho,
+        confirmDate,
       }
     });
   }

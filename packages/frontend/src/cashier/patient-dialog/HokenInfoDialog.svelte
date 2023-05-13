@@ -16,7 +16,6 @@
   import api from "@/lib/api";
   import { editHoken } from "./edit-hoken";
   import { dateToSql } from "@/lib/util";
-  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import { countInvalidUsage } from "@/lib/hoken-check";
 
@@ -89,17 +88,12 @@
       } else {
         confirmDate = hoken.validUpto;
       }
-      const query = onshi_query_from_hoken(
-        value,
-        patient.birthday,
-        confirmDate,
-      );
-      console.log("query", query);
       const d: OnshiKakuninDialog = new OnshiKakuninDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          query,
+          hoken: value,
+          confirmDate,
         }
       });
     }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  import { onshiConfirmHoken, onshi_query_from_hoken } from "@/lib/onshi-query-helper";
   import {
     type Visit,
     type Kouhi,
@@ -10,10 +10,9 @@
     Onshi,
     HokenIdSet,
   } from "myclinic-model";
-  import HokenKakuninDialog from "./HokenKakuninDialog.svelte";
   import { HokenItem, KouhiItem } from "./hoken-item";
   import type { OnshiResult } from "onshi-result";
-  import OnshiDisp from "./OnshiDispDialog.svelte";
+  import OnshiDispDialog from "./OnshiDispDialog.svelte";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -21,7 +20,7 @@
   export let koukikoureiList: Koukikourei[];
   export let kouhiList: Kouhi[];
   export let onshiResult: OnshiResult | undefined;
-  export let birthdate: string;
+  // export let birthdate: string;
   export let visitDate: string;
   let hokenItems: HokenItem[] = [...shahokokuhoList, ...koukikoureiList].map(
     (h) => {
@@ -43,6 +42,7 @@
   let kouhiItems: KouhiItem[] = kouhiList.map((h) => {
     return new KouhiItem(h, visit.hasKouhiId(h.kouhiId));
   });
+  let errors: string[] = [];
 
   function countSelectedHoken(hokenItems: HokenItem[]): number {
     return hokenItems.filter((item) => item.checked).length;
@@ -104,25 +104,20 @@
   }
 
   async function doOnshiConfirm(item: HokenItem) {
-    const query = onshi_query_from_hoken(item.hoken, birthdate, visitDate);
-    const d: HokenKakuninDialog = new HokenKakuninDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        query,
-        onRegister: (r) => {
-          item.confirm = r;
-          hokenItems = [...hokenItems];
-        },
-      },
-    });
+    const [result, errs] = await onshiConfirmHoken(item.hoken, visitDate);
+    if( errs.length> 0 ){
+      errors = errs.map(e => e.toString());
+    } else {
+      item.confirm = result;
+      hokenItems = [...hokenItems];
+    }
   }
 
   function doShowConfirmed(result: OnshiResult | undefined): void {
     if (!result) {
       return;
     }
-    const d: OnshiDisp = new OnshiDisp({
+    const d: OnshiDispDialog = new OnshiDispDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
@@ -132,7 +127,14 @@
   }
 </script>
 
-<Dialog title="保険選択" destroy={doClose}>
+<Dialog title="保険選択" destroy={doClose} styleWidth="260px">
+  {#if errors.length > 0}
+    <div class="error">
+      {#each errors as error}
+        <div>{error}</div>
+      {/each}
+    </div>
+  {/if}
   <div>
     {#each hokenItems as hokenItem (hokenItem.id)}
       <div class="item">
@@ -197,5 +199,10 @@
 
   .commands button + button {
     margin-left: 4px;
+  }
+
+  .error {
+    margin-bottom: 10px;
+    color: red;
   }
 </style>

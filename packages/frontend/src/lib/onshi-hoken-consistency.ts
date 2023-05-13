@@ -173,9 +173,11 @@ export function checkOnshiShahokokuhoConsistency(
         ));
       }
     } else {
-      errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
-        shahokokuho.honninStore, 0
-      ));
+      if (shahokokuho.honninStore !== 0) {
+        errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
+          shahokokuho.honninStore, 0
+        ));
+      }
     }
   }
   return errors;
@@ -241,15 +243,23 @@ export function shahokokuhoOnshiConsistent(
     const honnin = r.personalFamilyClassification;
     if (honnin === "本人") {
       if (shahokokuho.honninStore === 0) {
-        return `本人・家族が一致しません。${shahokokuho.honninStore} - ${honnin}`;
+        return `本人・家族が一致しません。${honninRep(shahokokuho.honninStore)} - ${honnin}`;
       }
     } else {
       if (shahokokuho.honninStore !== 0) {
-        return `本人・家族が一致しません。${shahokokuho.honninStore} - ${honnin}`;
+        return `本人・家族が一致しません。${honninRep(shahokokuho.honninStore)} - ${honnin}`;
       }
     }
   }
   return undefined;
+}
+
+function honninRep(honninStore: number): string {
+  if (honninStore === 0) {
+    return "家族";
+  } else {
+    return "本人";
+  }
 }
 
 export function koukikoureiOnshiConsistent(

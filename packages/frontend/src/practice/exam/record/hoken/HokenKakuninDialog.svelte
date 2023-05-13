@@ -2,13 +2,15 @@
   import api from "@/lib/api";
   import type { OnshiKakuninQuery } from "@/lib/onshi-confirm";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
-  import { Onshi } from "myclinic-model";
+  import type { Koukikourei, Shahokokuho } from "myclinic-model";
   import type { OnshiResult } from "onshi-result";
 
   export let destroy: () => void;
-  export let query: OnshiKakuninQuery;
+  export let hoken: Shahokokuho | Koukikourei;
   export let onRegister: (result: OnshiResult) => void;
   let result: OnshiResult | undefined = undefined;
+
+  
 
   async function doRegister(r: OnshiResult) {
     destroy();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import OnshiKakuninFormItem from "@/lib/OnshiKakuninFormItem.svelte";
-import Dialog from "@/lib/Dialog.svelte";
-import type { OnshiResult } from "onshi-result";
+  import Dialog from "@/lib/Dialog.svelte";
+  import type { OnshiResult } from "onshi-result";
 
   export let destroy: () => void;
   export let result: OnshiResult;

@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/onshi-hoken-consistency";
 import { onshiConfirm } from "@/lib/onshi-confirm";
-import { onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+import { onshiConfirmHoken, onshi_query_from_hoken } from "@/lib/onshi-query-helper";
 import type { Appoint, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 
@@ -37,7 +37,7 @@ function noPatientId(): ConfirmStatus {
   };
 }
 
-function inConsistent(msg: string): ConfirmStatus {
+function inconsistent(msg: string): ConfirmStatus {
   return {
     isDone: true,
     error: "情報不一致",
@@ -89,9 +89,9 @@ export function startConfirm(appoint: Appoint, date: string, idToken: string, st
           status.set(duplicateHoken());
         }
         if (shahoOpt) {
-          status.set(await confirmShahokokuho(shahoOpt, patient, date, idToken));
+          status.set(await confirmHoken(shahoOpt, date, idToken));
         } else if (koukiOpt) {
-          status.set(await confirmKoukikourei(koukiOpt, patient, date, idToken));
+          status.set(await confirmHoken(koukiOpt, date, idToken));
         } else {
           status.set(noHoken());
         }
@@ -113,36 +113,45 @@ export function getPatientRep(appoint: Appoint): string {
   return rep + appoint.patientName;
 }
 
-async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
-  const q = onshi_query_from_hoken(shahokokuho, patient.birthday, date);
-  q.idToken = idToken;
-  const r = await onshiConfirm(q);
-  if (r.isValid && r.resultList.length === 1) {
-    const o = r.resultList[0];
-    const err = shahokokuhoOnshiConsistent(shahokokuho, o);
-    if (err) {
-      return inConsistent(err);
-    } else {
-      return confirmed();
-    }
+async function confirmHoken(hoken: Shahokokuho | Koukikourei, date: string, idToken: string): Promise<ConfirmStatus> {
+  const [_r, e] = await onshiConfirmHoken(hoken, date, { idToken });
+  if( e.length > 0 ){
+    return inconsistent(e.join(""));
   } else {
-    return confirmError(r.getErrorMessage());
+    return confirmed();
   }
 }
 
-async function confirmKoukikourei(koukikourei: Koukikourei, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
-  const q = onshi_query_from_hoken(koukikourei, patient.birthday, date);
-  q.idToken = idToken;
-  const r = await onshiConfirm(q);
-  if (r.isValid && r.resultList.length === 1) {
-    const o = r.resultList[0];
-    const err = koukikoureiOnshiConsistent(koukikourei, o);
-    if (err) {
-      return inConsistent(err);
-    } else {
-      return confirmed();
-    }
-  } else {
-    return confirmError(r.getErrorMessage());
-  }
-}
+// async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
+//   const q = onshi_query_from_hoken(shahokokuho, patient.birthday, date);
+//   q.idToken = idToken;
+//   const r = await onshiConfirm(q);
+//   if (r.isValid && r.resultList.length === 1) {
+//     const o = r.resultList[0];
+//     const err = shahokokuhoOnshiConsistent(shahokokuho, o);
+//     if (err) {
+//       return inconsistent(err);
+//     } else {
+//       return confirmed();
+//     }
+//   } else {
+//     return confirmError(r.getErrorMessage());
+//   }
+// }
+
+// async function confirmKoukikourei(koukikourei: Koukikourei, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
+//   const q = onshi_query_from_hoken(koukikourei, patient.birthday, date);
+//   q.idToken = idToken;
+//   const r = await onshiConfirm(q);
+//   if (r.isValid && r.resultList.length === 1) {
+//     const o = r.resultList[0];
+//     const err = koukikoureiOnshiConsistent(koukikourei, o);
+//     if (err) {
+//       return inconsistent(err);
+//     } else {
+//       return confirmed();
+//     }
+//   } else {
+//     return confirmError(r.getErrorMessage());
+//   }
+// }
