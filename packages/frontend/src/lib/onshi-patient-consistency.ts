@@ -26,6 +26,7 @@ export function checkOnshiPatientConsistency(ri: ResultItem, patient: Patient): 
   if( ri.nameKana ){
     cmp("よみ", ri.nameKana, patient.fullYomi(" "), errors);
   }
+  cmp("生年月日", ri.birthdate, patient.birthday, errors);
   return errors;
 }
 
