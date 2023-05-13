@@ -22,23 +22,31 @@ export class OnshiPatientInconsistency {
 
 export function checkOnshiPatientConsistency(ri: ResultItem, patient: Patient): OnshiPatientInconsistency[] {
   const errors: OnshiPatientInconsistency[] = [];
-  cmp("名前", ri.name, patient.fullName("　"), errors, equalWithMasked);
-  if( ri.nameKana ){
+  cmp("名前", ri.name, patient.fullName("　"), errors, { eqv: equalExceptMasked });
+  if (ri.nameKana) {
     cmp("よみ", ri.nameKana, patient.fullYomi(" "), errors);
   }
   cmp("生年月日", ri.birthdate, patient.birthday, errors);
   return errors;
 }
 
-function cmp(kind: OnshiPatientInconsistencyKind, onshiValue: string, patientValue: string,
-  errs: OnshiPatientInconsistency[],
-  eqv: (a: string, b: string) => boolean = (a, b) => a === b): void {
-    if( !eqv(onshiValue, patientValue) ){
-      errs.push(new OnshiPatientInconsistency(kind, onshiValue, patientValue));
-    }
+export interface CmpOpts {
+  eqv?: (a: string, b: string) => boolean;
+  rep?: (a: string) => string;
 }
 
-function equalWithMasked(a: string, b: string): boolean {
+function cmp(kind: OnshiPatientInconsistencyKind, onshiValue: string, patientValue: string,
+  errs: OnshiPatientInconsistency[],
+  {
+    eqv = (a: string, b: string) => a === b,
+    rep = (a: string) => a,
+  }: CmpOpts = {}): void {
+  if (!eqv(onshiValue, patientValue)) {
+    errs.push(new OnshiPatientInconsistency(kind, rep(onshiValue), rep(patientValue)));
+  }
+}
+
+function equalExceptMasked(a: string, b: string): boolean {
   function eq(ca: string, cb: string): boolean {
     return ca === cb || ca === "●" || cb === "●";
   }
