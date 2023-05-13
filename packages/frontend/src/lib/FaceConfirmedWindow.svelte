@@ -32,7 +32,7 @@
     create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
-  } from "./onshi-hoken-consistent";
+  } from "./onshi-hoken-consistency";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
@@ -40,7 +40,6 @@
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import type { EventEmitter } from "./event-emitter";
-  import { onshiFaceArchive } from "./onshi-face";
 
   export let destroy: () => void;
   export let result: OnshiResult;

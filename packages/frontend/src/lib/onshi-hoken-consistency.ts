@@ -95,6 +95,18 @@ export namespace OnshiHokenInconsistency {
 
 }
 
+export class OnshiError {
+  msg: string;
+
+  constructor(msg: string) {
+    this.msg = msg;
+  }
+
+  toString(): string {
+    return this.msg;
+  }
+}
+
 export type OnshiHokenConsistencyError =
   OnshiHokenInconsistency.InconsistentHokenshaBangou
   | OnshiHokenInconsistency.InconsistentHihokenshaKigou
@@ -103,6 +115,7 @@ export type OnshiHokenConsistencyError =
   | OnshiHokenInconsistency.InconsistentKoureiJukyuu
   | OnshiHokenInconsistency.InconsistentHonninKazoku
   | OnshiHokenInconsistency.InconsistentKoureiFutanWari
+  | OnshiError
   ;
 
 export function checkOnshiShahokokuhoConsistency(
