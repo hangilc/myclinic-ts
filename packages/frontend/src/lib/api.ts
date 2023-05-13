@@ -2,7 +2,7 @@ import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, castOp as castDrawerOp } from "./drawer/op";
 import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data";
-import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castOptionUndefined, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 
 const backend: string = getBackend();
 const base: string = backend + "/api";

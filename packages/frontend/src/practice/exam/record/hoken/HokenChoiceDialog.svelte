@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { onshiConfirmHoken, onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import {
     type Visit,
     type Kouhi,

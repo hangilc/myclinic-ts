@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { koukikoureiOnshiConsistent, shahokokuhoOnshiConsistent } from "@/lib/onshi-hoken-consistency";
 import { onshiConfirm } from "@/lib/onshi-confirm";
-import { onshiConfirmHoken, onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
 import type { Appoint, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 

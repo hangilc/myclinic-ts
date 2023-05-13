@@ -6,34 +6,8 @@ import api from "./api";
 import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
 import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, OnshiError, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
 import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
+import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
 import { pad } from "./pad";
-
-export function onshi_query_from_hoken(
-  hoken: Shahokokuho | Koukikourei,
-  birthdate: string,
-  confirmationDate: string,
-  limitAppConsFlag?: LimitApplicationCertificateRelatedConsFlgCode): OnshiKakuninQuery {
-  const base = {
-    birthdate: birthdate.replaceAll("-", ""),
-    confirmationDate: confirmationDate.replaceAll("-", ""),
-    kigou: undefined,
-    edaban: undefined,
-    limitAppConsFlag: limitAppConsFlag ?? "1",
-  };
-  if (hoken instanceof Shahokokuho) {
-    return Object.assign(base, {
-      hokensha: pad(hoken.hokenshaBangou, 8, "0"),
-      hihokensha: hoken.hihokenshaBangou.toString(),
-      kigou: hoken.hihokenshaKigou || undefined,
-      edaban: hoken.edaban || undefined,
-    });
-  } else {
-    return Object.assign(base, {
-      hokensha: pad(hoken.hokenshaBangou, 8, "0"),
-      hihokensha: hoken.hihokenshaBangou,
-    });
-  }
-}
 
 export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
   {

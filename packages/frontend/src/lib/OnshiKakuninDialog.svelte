@@ -94,11 +94,11 @@
     margin-left: 10px;
   }
 
-  .query-state {
+  /* .query-state {
     margin: 10px 0;
     padding: 10px;
   }
-
+ */
   .commands {
     margin-top: 10px;
     text-align: right;
@@ -110,12 +110,12 @@
     margin: 10px 0;
   }
 
-  .error-result {
+  /* .error-result {
     border: 1px solid pink;
     padding: 10px;
     margin: 10px 0;
     color: red;
-  }
+  } */
 
   .error {
     border: 1px solid red;

@@ -11,7 +11,7 @@
   } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
-  import { onshiConfirmHoken, onshi_query_from_hoken } from "@/lib/onshi-query-helper";
+  import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import { dateToSql } from "@/lib/util";
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
