@@ -71,7 +71,7 @@
           <div class={`hoken-box ${hokenType}`} data-cy="hoken-box" 
             data-key={hoken.key}>
             {#if hokenType === "shahokokuho"}
-              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} birthdate={patient.birthday}/>
+              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount}/>
             {:else if hokenType === "koukikourei"}
               <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
             {:else if hokenType === "roujin"}

@@ -319,10 +319,11 @@ export function createOnshiResult(...bodyModifiers: OnshiBodyModifier[]): OnshiR
   return createOnshiResultWithHeader(h => h, ...bodyModifiers);
 }
 
-export function mockOnshiSuccessResult(q: OnshiKakuninQuery): OnshiResult {
+export function mockOnshiSuccessResult(q: OnshiKakuninQuery, ...bodyModifiers: OnshiBodyModifier[]): OnshiResult {
   return createOnshiResultWithHeader((h: MessageHeaderCreationSpec) => {
     h.QualificationConfirmationDate = q.confirmationDate;
   },
+    ...bodyModifiers,
     onshiCreationModifier.result(r => Object.assign(r, {
       InsurerNumber: q.hokensha,
       InsuredCardSymbol: q.kigou,
