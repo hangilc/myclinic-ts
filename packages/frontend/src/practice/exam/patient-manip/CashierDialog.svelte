@@ -4,7 +4,7 @@
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";
-  import type { Readable } from "svelte/store";
+  import { writable, type Readable, type Writable } from "svelte/store";
   import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
@@ -12,14 +12,24 @@
   export let visitId: Readable<number | null>;
   export let meisai: Meisai;
   export let gendogaku: number | undefined;
-  export let monthlyFutan: number | undefined = undefined;
+  export let payments: Payment[] | undefined = undefined;
 
   let meisaiItems: string[] = mkMeisaiItems(meisai);
   let summary: string = mkSummary(meisai);
-  let chargeValue:string = meisai.charge.toString();
+  let chargeValue: string = meisai.charge.toString();
   let mode = "disp";
   let isMishuu = false;
   const mishuuId = genid();
+  const monthlyFutan: Writable<number | undefined> = writable(undefined);
+
+  updateMonthlyFutan();
+
+  function updateMonthlyFutan(): void {
+    if (payments !== undefined) {
+      let futan = 0;
+      payments.forEach((payment) => {});
+    }
+  }
 
   function mkMeisaiItems(meisai: Meisai | null): string[] {
     if (meisai == null) {
@@ -54,7 +64,7 @@
   async function doEnter(close: () => void) {
     if ($visitId != null) {
       const charge: number = parseInt(chargeValue);
-      if( isNaN(charge) ){
+      if (isNaN(charge)) {
         alert("請求金額が数字でありません。");
         return;
       }
@@ -106,8 +116,12 @@
     {/if}
   </div>
   <div>
-    限度額：{gendogaku !== undefined ? `${gendogaku.toLocaleString()}円` : "（未提出）"}
-    負担額：{monthlyFutan !== undefined ? `${monthlyFutan.toLocaleString()}円` : "（未計算）"}
+    限度額：{gendogaku !== undefined
+      ? `${gendogaku.toLocaleString()}円`
+      : "（未提出）"}
+    負担額：{$monthlyFutan !== undefined
+      ? `${$monthlyFutan.toLocaleString()}円`
+      : "（未計算）"}
   </div>
   <div class="commands">
     <input type="checkbox" bind:value={isMishuu} id={mishuuId} /><label

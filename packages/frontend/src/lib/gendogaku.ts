@@ -104,10 +104,27 @@ export async function calcMonthlyFutan(patientId: number, year: number, month: n
       .map(visit => visit.visitId));
   return chargePayments.reduce((acc, ele) => {
     const [_visitId, _chargeOpt, payment] = ele;
-    if( payment ){
+    if (payment) {
       return acc + payment.amount;
     } else {
       return acc;
     }
   }, 0);
+}
+
+export async function listMonthlyPayment(patientId: number, year: number, month: number): Promise<Payment[]> {
+  const visitIds = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+  const visitMap = await api.batchGetVisit(visitIds);
+  const visits = visitIds
+    .map(visitId => visitMap[visitId])
+    .filter(visit => visit.shahokokuhoId > 0 || visit.koukikoureiId > 0);
+  const result: Payment[] = [];
+  (await api.batchGetChargePayment(visits.map(visit => visit.visitId)))
+    .forEach(values => {
+      const payment = values[2];
+      if (payment != null) {
+        result.push(payment);
+      }
+    });
+  return result;
 }
