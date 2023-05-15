@@ -25,15 +25,15 @@ export class OnshiPatientInconsistency {
 export function checkOnshiPatientConsistency(ri: ResultItem, patient: Patient): OnshiPatientInconsistency[] {
   const errors: OnshiPatientInconsistency[] = [];
   cmp("名前", ri.name, patient.fullName("　"), errors, { eqv: equalName });
-  if (ri.nameKana) {
-    cmp(
-      "よみ",
-      convertHankakuKatakanaToZenkakuHiragana(ri.nameKana),
-      patient.fullYomi(" "), 
-      errors,
-      { eqv: equalYomi }
-    );
-  }
+  // if (ri.nameKana) {
+  //   cmp(
+  //     "よみ",
+  //     convertHankakuKatakanaToZenkakuHiragana(ri.nameKana),
+  //     patient.fullYomi(" "), 
+  //     errors,
+  //     { eqv: equalYomi }
+  //   );
+  // }
   cmp("生年月日", ri.birthdate, patient.birthday, errors, { rep: s => kanjidate.format(kanjidate.f2, s) });
   cmp("性別", ri.sex, patient.sexAsKanji, errors);
   return errors;
@@ -82,6 +82,7 @@ const variantMap: Record<string, string> = {
   "補": "輔",
   "巖": "巌",
   "禮": "礼",
+  "惠": "恵",
   "ゃ": "や",
   "ゅ": "ゆ",
   "ょ": "よ",
@@ -103,6 +104,7 @@ const kanaVariantMap: Record<string, string> = {
   "ゃ": "や",
   "ゅ": "ゆ",
   "ょ": "よ",
+  "ェ": "ぇ",
 }
 
 function equalYomi(a: string, b: string): boolean {
