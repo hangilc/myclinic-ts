@@ -4,7 +4,7 @@
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";
-  import { writable, type Readable, type Writable } from "svelte/store";
+  import type { Readable } from "svelte/store";
   import { endPatient } from "../ExamVars";
   import ChargeForm from "./ChargeForm.svelte";
 
@@ -20,14 +20,25 @@
   let mode = "disp";
   let isMishuu = false;
   const mishuuId = genid();
-  const monthlyFutan: Writable<number | undefined> = writable(undefined);
+  let monthlyFutan: number | undefined = undefined;
 
   updateMonthlyFutan();
 
   function updateMonthlyFutan(): void {
-    if (payments !== undefined) {
+    if ($visitId != null) {
       let futan = 0;
-      payments.forEach((payment) => {});
+      (payments ?? []).forEach((payment) => {
+        if (payment.visitId === $visitId) {
+          // nop
+        } else {
+          futan += payment.amount;
+        }
+      });
+      const value = parseInt(chargeValue || "0");
+      if (value > 0) {
+        futan += value;
+      }
+      monthlyFutan = futan;
     }
   }
 
@@ -58,6 +69,7 @@
 
   function doFormEnter(n: number): void {
     chargeValue = n.toString();
+    updateMonthlyFutan();
     mode = "disp";
   }
 
@@ -119,8 +131,8 @@
     限度額：{gendogaku !== undefined
       ? `${gendogaku.toLocaleString()}円`
       : "（未提出）"}
-    負担額：{$monthlyFutan !== undefined
-      ? `${$monthlyFutan.toLocaleString()}円`
+    負担額：{monthlyFutan !== undefined
+      ? `${monthlyFutan.toLocaleString()}円`
       : "（未計算）"}
   </div>
   <div class="commands">
