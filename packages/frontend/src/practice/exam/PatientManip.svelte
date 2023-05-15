@@ -1,14 +1,14 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import { WqueueState } from "myclinic-model";
+  import { Payment, WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
-  import { calcGendogaku, calcMonthlyFutan } from "@/lib/gendogaku";
+  import { calcGendogaku, calcMonthlyFutan, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
 
   let cashierVisitId: Writable<number | null> = writable(null);
@@ -24,10 +24,14 @@
       const year = kd.year;
       const month = kd.month;
       const gendogaku: number | undefined = await calcGendogaku(patient.patientId, year, month);
-      let monthlyFutan: number | undefined = undefined;
-      if( gendogaku != undefined) {
-        monthlyFutan = await calcMonthlyFutan(patient.patientId, year, month);
+      let payments: Payment[] | undefined = undefined;
+      if( gendogaku != undefined ){
+        payments = await listMonthlyPayment(patient.patientId, year, month);
       }
+      // let monthlyFutan: number | undefined = undefined;
+      // if( gendogaku != undefined) {
+      //   monthlyFutan = await calcMonthlyFutan(patient.patientId, year, month);
+      // }
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
@@ -35,7 +39,7 @@
           visitId: cashierVisitId,
           meisai,
           gendogaku,
-          monthlyFutan,
+          payments,
         },
       });
     }

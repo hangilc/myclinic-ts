@@ -47,6 +47,7 @@
   .commands {
     display: flex;
     justify-content: flex-end;
+    align-items: center;
     margin-top: 6px;
   }
 
