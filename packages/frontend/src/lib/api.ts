@@ -1486,4 +1486,8 @@ export default {
   //   )
   // },
 
+  listVisitByMonth(year: number, month: number): Promise<m.Visit[]> {
+    return get("list-visit-by-month", { year: year.toString(), month: month.toString() }, castList(m.Visit.cast));
+  }
+
 };
