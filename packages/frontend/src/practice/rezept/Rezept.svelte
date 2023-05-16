@@ -2,11 +2,13 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import type { ClinicInfo } from "myclinic-model";
+  import { createShaho } from "./create";
 
   export let isVisible: boolean;
   let year: number;
   let month: number;
   let clinicInfo: ClinicInfo | undefined = undefined;
+  let preShow: string | undefined = undefined;
 
   initDate();
   initClinicInfo();
@@ -29,9 +31,8 @@
   }
 
   async function doStart() {
-    
-    const visits = await api.listVisitByMonth(year, month);
-    console.log(visits);
+    const content = await createShaho(year, month);
+    preShow = content;
   }
 
 </script>
@@ -44,6 +45,9 @@
       <button on:click={doStart}>開始</button>
     </div>
   </ServiceHeader>
+  {#if preShow !== undefined}
+  <pre class="show">{preShow}</pre>
+  {/if}
 </div>
 
 <style>
