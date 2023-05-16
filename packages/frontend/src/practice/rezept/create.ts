@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import type { ClinicInfo } from "myclinic-model";
-import { 診査支払い機関コード } from "./codes";
+import { KouhiOrderMap, 診査支払い機関コード } from "./codes";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { extract都道府県コードfromAddress } from "./util";
 
@@ -11,6 +11,7 @@ export async function createShaho(year: number, month: number): Promise<string> 
 async function create(year: number, month: number, 診査機関: number): Promise<string> {
   const rows: string[] = [];
   rows.push(await 医療機関情報レコード(year, month, 診査機関));
+  const visits = await api.listVisitByMonth(year, month);
   return rows.join("\r\n") + "\r\n\x1A";
 }
 
@@ -25,5 +26,4 @@ async function 医療機関情報レコード(year: number, month: number, 診�
     month,
     電話番号: clinicInfo.tel,
   });
-
 }

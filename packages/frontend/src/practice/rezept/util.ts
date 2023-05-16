@@ -1,3 +1,4 @@
+import type { Kouhi } from "myclinic-model";
 import { 都道府県コード } from "./codes";
 
 export function formatYearMonth(year: number, month: number): string {
@@ -19,4 +20,11 @@ export function extract都道府県コードfromAddress(addr: string): string {
     throw new Error("Cannot find 都道府県コード：" + ken);
   }
   return code;
+}
+
+export function orderKouhi(kouhiList: Kouhi[]): void {
+  function houbetsu(futansha: number): number {
+    return Math.floor(futansha / 1000000);
+  }
+  const items: [Kouhi, number] = 
 }

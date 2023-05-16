@@ -52,3 +52,20 @@ export const 都道府県コード: Record<string, string> = {
   "鹿児島": "46",  
   "沖縄": "47",  
 }
+
+export const KouhiOrder: number[] = [
+  13, 14, 18, 29, 30, 10, 11, 20, 21, 15, 
+  16, 24, 22, 28, 17, 79, 19, 23, 52, 54,
+  51, 38, 53, 66, 62, 25, 12
+];
+
+export const KouhiOrderMap: Record<number, number> = calcKouhiOrderMap();
+
+function calcKouhiOrderMap(): Record<number, number> {
+  const map: Record<number, number> = {};
+  KouhiOrder.forEach((k, i) => {
+    map[k] = i+1;
+  });
+  return map;
+}
+
