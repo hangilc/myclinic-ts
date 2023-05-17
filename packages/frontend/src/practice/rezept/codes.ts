@@ -69,3 +69,15 @@ function calcKouhiOrderMap(): Record<number, number> {
   return map;
 }
 
+export const RezeptShubetuCodeOffset: Record<string, number> = {
+  "本人": 2,
+  "未就学者": 4,
+  "家族": 6,
+  "高齢需給一般": 8,
+  "高齢需給７割": 0,
+}
+
+export const RezeptShubetsuCodeBase: Record<string, number> = {
+  "保険単独": 1110,
+}
+
