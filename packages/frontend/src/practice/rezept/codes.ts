@@ -69,15 +69,15 @@ function calcKouhiOrderMap(): Record<number, number> {
   return map;
 }
 
-export const RezeptShubetuCodeOffset: Record<string, number> = {
+export const RezeptShubetuCodeOffset = {
   "本人": 2,
   "未就学者": 4,
   "家族": 6,
-  "高齢需給一般": 8,
-  "高齢需給７割": 0,
-}
+  "高齢受給一般": 8,
+  "高齢受給７割": 0,
+} as const;
 
-export const RezeptShubetsuCodeBase: Record<string, number> = {
+export const RezeptShubetsuCodeBase = {
   "社保国保単独": 1110,
   "社保国保・１公費併用": 1120,
   "社保国保・２公費併用": 1130,
@@ -92,5 +92,10 @@ export const RezeptShubetsuCodeBase: Record<string, number> = {
   "後期高齢・２公費併用": 1330,
   "後期高齢・３公費併用": 1340,
   "後期高齢・４公費併用": 1350,
-}
+} as const;
+
+export const 男女区分コード = {
+  "男": 1,
+  "女": 2,
+} as const;
 

@@ -1,5 +1,5 @@
-import type { Kouhi } from "myclinic-model";
-import { KouhiOrderMap, 都道府県コード } from "./codes";
+import type { HokenInfo, Kouhi, Koukikourei, Shahokokuho } from "myclinic-model";
+import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, 都道府県コード } from "./codes";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -44,6 +44,10 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
   kouhiList.sort((a, b) => calcOrder(a.futansha) - calcOrder(b.futansha));
 }
 
+export function is国保(hokenshaBangou: number): boolean {
+  return hokenshaBangou < 1000000;
+}
+
 export function isマル都(負担者番号: number): boolean {
   return [
     51136018, // 難病医療（特定疾患）
@@ -61,4 +65,39 @@ export function isマル都(負担者番号: number): boolean {
     93137008, // 結核一般医療
     83133007, // 精神通院医療
   ].includes(負担者番号);
+}
+
+function shahokokuhoRezeptShubetsOffset(shahokokuho: Shahokokuho): number {
+  if( shahokokuho.koureiStore === 3 ){
+    return RezeptShubetuCodeOffset.高齢受給７割;
+  } else if( shahokokuho.koureiStore > 0 ){
+    return RezeptShubetuCodeOffset.高齢受給一般;
+  }
+  if( shahokokuho.honninStore === 0 ){
+    return RezeptShubetuCodeOffset.家族;
+  } else {
+    return RezeptShubetuCodeOffset.本人;
+  }
+}
+
+function koukikoureiRezeptShubetsuOffset(koukikourei: Koukikourei): number {
+  if( koukikourei.futanWari === 3 ){
+    return RezeptShubetuCodeOffset.高齢受給７割;
+  } else {
+    return RezeptShubetuCodeOffset.高齢受給一般;
+  }
+}
+
+export function resolve保険種別(hoken: HokenInfo): number {
+  if( hoken.shahokokuho ){
+    let base = RezeptShubetsuCodeBase.社保国保単独 + hoken.kouhiList.length * 10;
+    let offset = shahokokuhoRezeptShubetsOffset(hoken.shahokokuho);
+    return base + offset;
+  } else if( hoken.koukikourei ){
+    let base = RezeptShubetsuCodeBase.後期高齢単独 + hoken.kouhiList.length * 10;
+    let offset = koukikoureiRezeptShubetsuOffset(hoken.koukikourei);
+    return base + offset;
+  } else {
+    return RezeptShubetsuCodeBase.公費単独 + hoken.kouhiList.length * 10;
+  }
 }
