@@ -1488,6 +1488,10 @@ export default {
 
   listVisitByMonth(year: number, month: number): Promise<m.Visit[]> {
     return get("list-visit-by-month", { year: year.toString(), month: month.toString() }, castList(m.Visit.cast));
-  }
+  },
 
+  getHokenInfoForVisit(visitId: number): Promise<m.HokenInfo> {
+    return get("get-hoken-info-for-visit", { "visit-id": visitId.toString() }, m.HokenInfo.cast);
+  },
+  
 };
