@@ -2,6 +2,7 @@ import type { HokenInfo, Kouhi, Koukikourei, Shahokokuho } from "myclinic-model"
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 都道府県コード, type レセプト特記事項コードCode } from "./codes";
+import type { VisitItem } from "./visit-item";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -119,50 +120,70 @@ export function findOnshiResultGendogaku(result: OnshiResult | undefined)
   return undefined;
 }
 
-export function resolveGendogakuTokkiJikou(hoken: HokenInfo, result: OnshiResult | undefined): レセプト特記事項コードCode | undefined {
-  if (result) {
-    const gendo = findOnshiResultGendogaku(result);
-    if (gendo) {
-      switch (gendo) {
-        case "ア":
-        case "現役並みⅢ":
-          return レセプト特記事項コード["区ア"];
-        case "イ":
-        case "現役並みⅡ":
-          return レセプト特記事項コード["区イ"];
-        case "ウ":
-        case "現役並みⅠ":
-          return レセプト特記事項コード["区ウ"];
-        case "エ": 
-        case "一般":
-          return レセプト特記事項コード["区エ"];
-        case "オ": 
-        case "低所得Ⅱ":
-        case "低所得Ⅰ":
-          return レセプト特記事項コード["区オ"];
-        case "低所得Ⅰ（老福）": {
-          console.log("add '老福' to tekiyou", JSON.stringify(hoken));
-          return レセプト特記事項コード["区オ"];
-        }
-        case "低所得Ⅰ（境）": {
-          console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
-          return レセプト特記事項コード["区オ"];
-        }
-        case "オ（境）": {
-          console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
-          return レセプト特記事項コード["区オ"];
-        }
-        case "一般Ⅱ": return レセプト特記事項コード["区カ"];
-        case "一般Ⅰ": return レセプト特記事項コード["区キ"];
-        default: {
-          console.log("Unknown 限度額区分", gendo);
-          return undefined;
-        }
+export function resolveGendogakuTokkiJikou(hoken: HokenInfo, gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
+  if (gendo) {
+    switch (gendo) {
+      case "ア":
+      case "現役並みⅢ":
+        return レセプト特記事項コード["区ア"];
+      case "イ":
+      case "現役並みⅡ":
+        return レセプト特記事項コード["区イ"];
+      case "ウ":
+      case "現役並みⅠ":
+        return レセプト特記事項コード["区ウ"];
+      case "エ":
+      case "一般":
+        return レセプト特記事項コード["区エ"];
+      case "オ":
+      case "低所得Ⅱ":
+      case "低所得Ⅰ":
+        return レセプト特記事項コード["区オ"];
+      case "低所得Ⅰ（老福）": {
+        console.log("add '老福' to tekiyou", JSON.stringify(hoken));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "低所得Ⅰ（境）": {
+        console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "オ（境）": {
+        console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "一般Ⅱ": return レセプト特記事項コード["区カ"];
+      case "一般Ⅰ": return レセプト特記事項コード["区キ"];
+      default: {
+        console.log("Unknown 限度額区分", gendo);
+        return undefined;
       }
     }
   }
-  if( hoken.shahokokuho ){
-    
+  if (hoken.koukikourei) {
+    switch (hoken.koukikourei.futanWari) {
+      case 3: return レセプト特記事項コード["区ア"];
+      case 2: return レセプト特記事項コード["区カ"];
+      case 1: return レセプト特記事項コード["区キ"];
+    }
+  } else if (hoken.shahokokuho) {
+    switch (hoken.shahokokuho.koureiStore) {
+      case 3: return レセプト特記事項コード["区ア"];
+      case 2:
+      case 1:
+        return レセプト特記事項コード["区エ"];
+      default: break;
+    }
   }
   return undefined;
+}
+
+export function resolveGendo(items: VisitItem[]): LimitApplicationCertificateClassificationFlagLabel | undefined {
+  let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
+  items.forEach(item => {
+    const g = item.onshiResult?.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
+    if( g ){
+      gendo = g;
+    }
+  });
+  return gendo;
 }

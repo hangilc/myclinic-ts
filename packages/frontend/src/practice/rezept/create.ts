@@ -1,18 +1,14 @@
 import api from "@/lib/api";
-import type { ClinicInfo, HokenInfo, Visit } from "myclinic-model";
+import type { ClinicInfo, HokenInfo, Patient, Visit } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード } from "./codes";
+import { createレセプト共通レコード } from "./records/common-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
-import { extract都道府県コードfromAddress, findOnshiResultGendogaku, sortKouhiList } from "./util";
+import { extract都道府県コードfromAddress, findOnshiResultGendogaku, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
+import type { VisitItem } from "./visit-item";
 
 export async function createShaho(year: number, month: number): Promise<string> {
   return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金);
-}
-
-interface VisitItem {
-  visit: Visit;
-  hoken: HokenInfo;
-  onshiResult?: OnshiResult;
 }
 
 async function create(year: number, month: number, 診査機関: number): Promise<string> {
@@ -32,16 +28,14 @@ async function create(year: number, month: number, 診査機関: number): Promis
     if( onshi ){
       onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
     }
+    const patient: Patient = await api.getPatient(visit.patientId);
     return [mkRecordKey(visit.patientId, hoken), {
       visit,
       hoken,
+      patient,
       onshiResult,
     }];
   }));
-  visitItems.forEach(e => {
-    const [_key, vi] = e;
-    console.log(vi.visit.patientId, findOnshiResultGendogaku(vi.onshiResult));
-  });
   const classified: Record<string, VisitItem[]> = {};
   visitItems.forEach(item => {
     const [key, vitem] = item;
@@ -51,6 +45,21 @@ async function create(year: number, month: number, 診査機関: number): Promis
       classified[key].push(vitem);
     }
   });
+  let serial = 1;
+  for(let key in classified){
+    const items = classified[key];
+    const gendo = resolveGendo(items);
+    const tokkijikouGendo = resolveGendogakuTokkiJikou(items[0].hoken, gendo);
+    const comm = createレセプト共通レコード({
+      rezeptSerialNumber: serial++,
+      hoken: items[0].hoken,
+      year,
+      month,
+      patient: items[0].patient,
+      tokkkijikouGendogaku: tokkijikouGendo,
+    })
+    rows.push(comm);
+  }
   return rows.join("\r\n") + "\r\n\x1A";
 }
 

@@ -1,8 +1,8 @@
 import type { HokenInfo, Patient } from "myclinic-model";
-import { 男女区分コード } from "../codes";
+import { 男女区分コード, type レセプト特記事項コードCode } from "../codes";
 import { formatYearMonth, is国保, resolve保険種別 } from "../util";
 
-function mkレセプト胸痛レコード({
+function mkレセプト共通レコード({
   レセプト番号,
   レセプト種別,
   診療年月,
@@ -37,20 +37,22 @@ function mkレセプト胸痛レコード({
   ].join(",");
 }
 
-export function createレセプト胸痛レコード({
+export function createレセプト共通レコード({
   rezeptSerialNumber,
   hoken,
   year,
   month,
   patient,
+  tokkkijikouGendogaku,
 }: {
   rezeptSerialNumber: number;
   hoken: HokenInfo;
   year: number;
   month: number;
   patient: Patient;
+  tokkkijikouGendogaku: string | undefined,
 }): string {
-  return mkレセプト胸痛レコード({
+  return mkレセプト共通レコード({
     レセプト番号: rezeptSerialNumber,
     レセプト種別: resolve保険種別(hoken),
     診療年月: formatYearMonth(year, month),
@@ -58,5 +60,6 @@ export function createレセプト胸痛レコード({
     男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
     生年月日: patient.birthday.replaceAll("-", ""),
     給付割合: (hoken.shahokokuho && is国保(hoken.shahokokuho.hokenshaBangou)) ? "70" : "",
+    レセプト特記事項: (tokkkijikouGendogaku === undefined ? [] : [tokkkijikouGendogaku]).join(""),
   })
 }
