@@ -6,6 +6,7 @@ import { createレセプト共通レコード } from "./records/common-record";
 import { create保険者レコード } from "./records/hokensha-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
+import { create資格確認レコード } from "./records/shikaku-kakunin-record";
 import { extract都道府県コードfromAddress, findOnshiResultGendogaku, hokenshaBangouOfHoken, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
@@ -77,6 +78,14 @@ async function create(year: number, month: number, 診査機関: number): Promis
         kouhi, items,
       }))
     })
+    {
+      const edaban = resolveEdaban(items);
+      if( edaban ){
+        rows.push(create資格確認レコード({
+          edaban,
+        }))
+      }
+    }
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }
@@ -114,4 +123,28 @@ function collectKouhi(items: VisitItem[]): Kouhi[] {
   });
   sortKouhiList(list);
   return list;
+}
+
+function resolveEdaban(items: VisitItem[]): string | undefined {
+  let onshiEdaban: string | undefined = undefined;
+  let hokenshoEdaban: string | undefined = undefined;
+  items.forEach(item => {
+    if( item.onshiResult ){
+      const result = item.onshiResult;
+      if( result.resultList.length === 1 ){
+        const ri = result.resultList[0];
+        if( ri.insuredBranchNumber ){
+          onshiEdaban = ri.insuredBranchNumber;
+          return;
+        }
+      }
+    }
+    if( item.hoken.shahokokuho ){
+      const shahokokuho = item.hoken.shahokokuho;
+      if( shahokokuho.edaban !== "" ){
+        hokenshoEdaban = shahokokuho.edaban;
+      }
+    }
+  })
+  return onshiEdaban || hokenshoEdaban;
 }

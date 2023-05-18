@@ -149,3 +149,44 @@ export function isレセプト特記事項コードName(k: string): k is レセ�
   return Object.keys(レセプト特記事項コード).includes(k);
 }
 
+export const 負担者種別コード = {
+  "保険": 1,
+  "第１公費負担医療": 2,
+  "第２公費負担医療": 3,
+  "第３公費負担医療": 4,
+  "第４公費負担医療": 5,
+};
+
+export type 負担者種別コードName = keyof typeof 負担者種別コード;
+export type 負担者種別コードCode = valueof<typeof 負担者種別コード>;
+
+export function is負担者種別コードName(k: string): k is 負担者種別コードName {
+  return Object.keys(負担者種別コード).includes(k);
+}
+
+export const 確認区分コード = {
+  "保険医療機関・薬局窓口等": "01",
+  "審査支払機関に請求後（変更なし）": "02",
+  "審査支払機関に請求後（確認不能）": "03",
+  "審査支払機関に請求後（振替）": "04",
+  "審査支払機関に請求後（分割）": "05",
+  "審査支払機関に請求後（資格喪失・レセプト記載の保険者への請求）": "06",
+  "審査支払機関に請求後（資格喪失・証回収後）": "07",
+  "審査支払機関に請求後（資格喪失・死亡）": "08",
+  "審査支払機関に請求後（枝番特定）": "09",
+  "保険者等に請求後（振替）": "11",
+  "保険者等に請求後（分割）": "12",
+  "保険者等に請求後（変更不能）": "13",
+  "保険者等に請求後（枝番特定）": "14",
+}
+
+export type 確認区分コードName = keyof typeof 確認区分コード;
+export type 確認区分コードCode = valueof<typeof 確認区分コード>;
+
+export function is確認区分コードName(k: string): k is 確認区分コードName {
+  return Object.keys(確認区分コード).includes(k);
+}
+
+
+
+
