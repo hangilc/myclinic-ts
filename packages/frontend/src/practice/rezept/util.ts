@@ -187,3 +187,15 @@ export function resolveGendo(items: VisitItem[]): LimitApplicationCertificateCla
   });
   return gendo;
 }
+
+export function hokenshaBangouOfHoken(hoken: HokenInfo): number {
+  if( hoken.shahokokuho ){
+    return hoken.shahokokuho.hokenshaBangou;
+  } else if( hoken.koukikourei ){
+    const n = parseInt(hoken.koukikourei.hokenshaBangou);
+    if( n > 0 ){
+      return n;
+    }
+  }
+  throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(hoken));
+}

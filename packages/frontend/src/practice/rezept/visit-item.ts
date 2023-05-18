@@ -1,4 +1,4 @@
-import type { HokenInfo, Patient, Visit } from "myclinic-model";
+import type { HokenInfo, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 
 export interface VisitItem {
@@ -6,5 +6,7 @@ export interface VisitItem {
   hoken: HokenInfo;
   patient: Patient;
   onshiResult?: OnshiResult;
+  meisai: Meisai;
+  visitEx: VisitEx;
 }
 
