@@ -1,9 +1,11 @@
 import type { HokenInfo, Kouhi, Koukikourei, Shahokokuho } from "myclinic-model";
-import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, 都道府県コード } from "./codes";
+import type { OnshiResult } from "onshi-result";
+import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
+import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 都道府県コード, type レセプト特記事項コードCode } from "./codes";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
-  if( m.length === 1 ){
+  if (m.length === 1) {
     m = "0" + m;
   }
   return `${year}${m}`;
@@ -11,12 +13,12 @@ export function formatYearMonth(year: number, month: number): string {
 
 export function extract都道府県コードfromAddress(addr: string): string {
   const m = /(...?)[都道府県]/.exec(addr);
-  if( !m ){
+  if (!m) {
     throw new Error("Cannot find 都道府県：" + addr);
   }
   const ken = m[1];
   const code = 都道府県コード[ken];
-  if( !code ){
+  if (!code) {
     throw new Error("Cannot find 都道府県コード：" + ken);
   }
   return code;
@@ -30,8 +32,8 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
   function calcOrder(futansha: number): number {
     const hb = houbetsu(futansha);
     let order = KouhiOrderMap[hb];
-    if( order === undefined ){
-      if( isマル都(futansha) ){
+    if (order === undefined) {
+      if (isマル都(futansha)) {
         order = 100
       } else {
         order = futansha;
@@ -68,12 +70,12 @@ export function isマル都(負担者番号: number): boolean {
 }
 
 function shahokokuhoRezeptShubetsOffset(shahokokuho: Shahokokuho): number {
-  if( shahokokuho.koureiStore === 3 ){
+  if (shahokokuho.koureiStore === 3) {
     return RezeptShubetuCodeOffset.高齢受給７割;
-  } else if( shahokokuho.koureiStore > 0 ){
+  } else if (shahokokuho.koureiStore > 0) {
     return RezeptShubetuCodeOffset.高齢受給一般;
   }
-  if( shahokokuho.honninStore === 0 ){
+  if (shahokokuho.honninStore === 0) {
     return RezeptShubetuCodeOffset.家族;
   } else {
     return RezeptShubetuCodeOffset.本人;
@@ -81,7 +83,7 @@ function shahokokuhoRezeptShubetsOffset(shahokokuho: Shahokokuho): number {
 }
 
 function koukikoureiRezeptShubetsuOffset(koukikourei: Koukikourei): number {
-  if( koukikourei.futanWari === 3 ){
+  if (koukikourei.futanWari === 3) {
     return RezeptShubetuCodeOffset.高齢受給７割;
   } else {
     return RezeptShubetuCodeOffset.高齢受給一般;
@@ -89,15 +91,78 @@ function koukikoureiRezeptShubetsuOffset(koukikourei: Koukikourei): number {
 }
 
 export function resolve保険種別(hoken: HokenInfo): number {
-  if( hoken.shahokokuho ){
+  if (hoken.shahokokuho) {
     let base = RezeptShubetsuCodeBase.社保国保単独 + hoken.kouhiList.length * 10;
     let offset = shahokokuhoRezeptShubetsOffset(hoken.shahokokuho);
     return base + offset;
-  } else if( hoken.koukikourei ){
+  } else if (hoken.koukikourei) {
     let base = RezeptShubetsuCodeBase.後期高齢単独 + hoken.kouhiList.length * 10;
     let offset = koukikoureiRezeptShubetsuOffset(hoken.koukikourei);
     return base + offset;
   } else {
     return RezeptShubetsuCodeBase.公費単独 + hoken.kouhiList.length * 10;
   }
+}
+
+export function findOnshiResultGendogaku(result: OnshiResult | undefined)
+  : LimitApplicationCertificateClassificationFlagLabel | undefined {
+  if (result === undefined) {
+    return undefined;
+  }
+  if (result.isValid && result.resultList.length === 1) {
+    const ri = result.resultList[0];
+    const limit = ri.limitApplicationCertificateRelatedInfo;
+    if (limit) {
+      return limit.limitApplicationCertificateClassificationFlag;
+    }
+  }
+  return undefined;
+}
+
+export function resolveGendogakuTokkiJikou(hoken: HokenInfo, result: OnshiResult | undefined): レセプト特記事項コードCode | undefined {
+  if (result) {
+    const gendo = findOnshiResultGendogaku(result);
+    if (gendo) {
+      switch (gendo) {
+        case "ア":
+        case "現役並みⅢ":
+          return レセプト特記事項コード["区ア"];
+        case "イ":
+        case "現役並みⅡ":
+          return レセプト特記事項コード["区イ"];
+        case "ウ":
+        case "現役並みⅠ":
+          return レセプト特記事項コード["区ウ"];
+        case "エ": 
+        case "一般":
+          return レセプト特記事項コード["区エ"];
+        case "オ": 
+        case "低所得Ⅱ":
+        case "低所得Ⅰ":
+          return レセプト特記事項コード["区オ"];
+        case "低所得Ⅰ（老福）": {
+          console.log("add '老福' to tekiyou", JSON.stringify(hoken));
+          return レセプト特記事項コード["区オ"];
+        }
+        case "低所得Ⅰ（境）": {
+          console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
+          return レセプト特記事項コード["区オ"];
+        }
+        case "オ（境）": {
+          console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
+          return レセプト特記事項コード["区オ"];
+        }
+        case "一般Ⅱ": return レセプト特記事項コード["区カ"];
+        case "一般Ⅰ": return レセプト特記事項コード["区キ"];
+        default: {
+          console.log("Unknown 限度額区分", gendo);
+          return undefined;
+        }
+      }
+    }
+  }
+  if( hoken.shahokokuho ){
+    
+  }
+  return undefined;
 }

@@ -1,16 +1,18 @@
 import api from "@/lib/api";
 import type { ClinicInfo, HokenInfo, Visit } from "myclinic-model";
+import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード } from "./codes";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
-import { extract都道府県コードfromAddress, sortKouhiList } from "./util";
+import { extract都道府県コードfromAddress, findOnshiResultGendogaku, sortKouhiList } from "./util";
 
 export async function createShaho(year: number, month: number): Promise<string> {
   return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金);
 }
 
 interface VisitItem {
-  visit: Visit,
-  hoken: HokenInfo,
+  visit: Visit;
+  hoken: HokenInfo;
+  onshiResult?: OnshiResult;
 }
 
 async function create(year: number, month: number, 診査機関: number): Promise<string> {
@@ -25,11 +27,21 @@ async function create(year: number, month: number, 診査機関: number): Promis
   const visitItems: [string, VisitItem][] = await Promise.all(visits.map(async visit => {
     const hoken = await api.getHokenInfoForVisit(visit.visitId);
     sortKouhiList(hoken.kouhiList);
+    let onshiResult: OnshiResult | undefined;
+    const onshi = await api.findOnshi(visit.visitId);
+    if( onshi ){
+      onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+    }
     return [mkRecordKey(visit.patientId, hoken), {
       visit,
       hoken,
+      onshiResult,
     }];
   }));
+  visitItems.forEach(e => {
+    const [_key, vi] = e;
+    console.log(vi.visit.patientId, findOnshiResultGendogaku(vi.onshiResult));
+  });
   const classified: Record<string, VisitItem[]> = {};
   visitItems.forEach(item => {
     const [key, vitem] = item;
@@ -39,9 +51,6 @@ async function create(year: number, month: number, 診査機関: number): Promis
       classified[key].push(vitem);
     }
   });
-  for(let key in classified){
-    console.log(key, classified[key]);
-  }
   return rows.join("\r\n") + "\r\n\x1A";
 }
 
