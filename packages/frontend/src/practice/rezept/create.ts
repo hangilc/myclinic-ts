@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { ClinicInfo, HokenInfo, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
+import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード } from "./codes";
 import { createレセプト共通レコード } from "./records/common-record";
@@ -54,11 +54,13 @@ async function create(year: number, month: number, 診査機関: number): Promis
   for (let key in classified) {
     const items = classified[key];
     const hoken = items[0].hoken;
+    const kouhiList: Kouhi[] = collectKouhi(items);
     const gendo = resolveGendo(items);
     const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
     rows.push(createレセプト共通レコード({
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
+      kouhiList,
       year,
       month,
       patient: items[0].patient,
@@ -90,7 +92,20 @@ function mkRecordKey(patientId: number, hoken: HokenInfo): string {
   const hokenPart: string = [
     hoken.shahokokuho ? hoken.shahokokuho.hokenshaBangou : 0,
     hoken.koukikourei ? parseInt(hoken.koukikourei.hokenshaBangou) : 0,
-    ...hoken.kouhiList.map(kouhi => kouhi.futansha)
   ].join("|");
   return `<${patientId}>${hokenPart}`;
+}
+
+function collectKouhi(items: VisitItem[]): Kouhi[] {
+  const list: Kouhi[] = [];
+  items.forEach(item => {
+    item.hoken.kouhiList.forEach(kouhi => {
+      const index = list.findIndex(e => e.kouhiId === kouhi.kouhiId);
+      if( index < 0 ){
+        list.push(kouhi);
+      }
+    });
+  });
+  sortKouhiList(list);
+  return list;
 }

@@ -91,17 +91,18 @@ function koukikoureiRezeptShubetsuOffset(koukikourei: Koukikourei): number {
   }
 }
 
-export function resolve保険種別(hoken: HokenInfo): number {
-  if (hoken.shahokokuho) {
-    let base = RezeptShubetsuCodeBase.社保国保単独 + hoken.kouhiList.length * 10;
-    let offset = shahokokuhoRezeptShubetsOffset(hoken.shahokokuho);
+export function resolve保険種別(shahokokuho: Shahokokuho | undefined,
+  koukikourei: Koukikourei | undefined, kouhiList: Kouhi[]): number {
+  if (shahokokuho) {
+    let base = RezeptShubetsuCodeBase.社保国保単独 + kouhiList.length * 10;
+    let offset = shahokokuhoRezeptShubetsOffset(shahokokuho);
     return base + offset;
-  } else if (hoken.koukikourei) {
-    let base = RezeptShubetsuCodeBase.後期高齢単独 + hoken.kouhiList.length * 10;
-    let offset = koukikoureiRezeptShubetsuOffset(hoken.koukikourei);
+  } else if (koukikourei) {
+    let base = RezeptShubetsuCodeBase.後期高齢単独 + kouhiList.length * 10;
+    let offset = koukikoureiRezeptShubetsuOffset(koukikourei);
     return base + offset;
   } else {
-    return RezeptShubetsuCodeBase.公費単独 + hoken.kouhiList.length * 10;
+    return RezeptShubetsuCodeBase.公費単独 + kouhiList.length * 10;
   }
 }
 
@@ -181,7 +182,7 @@ export function resolveGendo(items: VisitItem[]): LimitApplicationCertificateCla
   let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
   items.forEach(item => {
     const g = item.onshiResult?.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
-    if( g ){
+    if (g) {
       gendo = g;
     }
   });
@@ -189,11 +190,11 @@ export function resolveGendo(items: VisitItem[]): LimitApplicationCertificateCla
 }
 
 export function hokenshaBangouOfHoken(hoken: HokenInfo): number {
-  if( hoken.shahokokuho ){
+  if (hoken.shahokokuho) {
     return hoken.shahokokuho.hokenshaBangou;
-  } else if( hoken.koukikourei ){
+  } else if (hoken.koukikourei) {
     const n = parseInt(hoken.koukikourei.hokenshaBangou);
-    if( n > 0 ){
+    if (n > 0) {
       return n;
     }
   }

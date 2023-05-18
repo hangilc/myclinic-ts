@@ -1,4 +1,4 @@
-import type { HokenInfo, Patient } from "myclinic-model";
+import type { HokenInfo, Kouhi, Patient } from "myclinic-model";
 import { 男女区分コード, type レセプト特記事項コードCode } from "../codes";
 import { formatYearMonth, is国保, resolve保険種別 } from "../util";
 
@@ -72,6 +72,7 @@ function mkレセプト共通レコード({
 export function createレセプト共通レコード({
   rezeptSerialNumber,
   hoken,
+  kouhiList,
   year,
   month,
   patient,
@@ -79,6 +80,7 @@ export function createレセプト共通レコード({
 }: {
   rezeptSerialNumber: number;
   hoken: HokenInfo;
+  kouhiList: Kouhi[];
   year: number;
   month: number;
   patient: Patient;
@@ -86,7 +88,7 @@ export function createレセプト共通レコード({
 }): string {
   return mkレセプト共通レコード({
     レセプト番号: rezeptSerialNumber,
-    レセプト種別: resolve保険種別(hoken),
+    レセプト種別: resolve保険種別(hoken.shahokokuho, hoken.koukikourei, kouhiList),
     診療年月: formatYearMonth(year, month),
     氏名: patient.fullName("　"),
     男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
