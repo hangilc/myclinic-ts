@@ -4,6 +4,7 @@ import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード } from "./codes";
 import { createレセプト共通レコード } from "./records/common-record";
 import { create保険者レコード } from "./records/hokensha-record";
+import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { extract都道府県コードfromAddress, findOnshiResultGendogaku, hokenshaBangouOfHoken, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
@@ -71,6 +72,11 @@ async function create(year: number, month: number, 診査機関: number): Promis
         items,
       }));
     }
+    kouhiList.forEach(kouhi => {
+      rows.push(create公費レコード({
+        kouhi, items,
+      }))
+    })
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }
