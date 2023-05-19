@@ -1494,4 +1494,12 @@ export default {
     return get("get-hoken-info-for-visit", { "visit-id": visitId.toString() }, m.HokenInfo.cast);
   },
   
+  listDiseaseActiveAt(patientId: number, from: Date | string, upto: Date | string): Promise<m.Disease[]> {
+    return get("list-disease-active-at", {
+      "patient-id": patientId.toString(),
+      "from": dateParam(from),
+      "upto": dateParam(upto)
+    }, castList(m.Disease.cast));
+  }
+
 };
