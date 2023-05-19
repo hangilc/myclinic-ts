@@ -155,7 +155,7 @@ export const 負担者種別コード = {
   "第２公費負担医療": 3,
   "第３公費負担医療": 4,
   "第４公費負担医療": 5,
-};
+} as const;
 
 export type 負担者種別コードName = keyof typeof 負担者種別コード;
 export type 負担者種別コードCode = valueof<typeof 負担者種別コード>;
@@ -178,13 +178,27 @@ export const 確認区分コード = {
   "保険者等に請求後（分割）": "12",
   "保険者等に請求後（変更不能）": "13",
   "保険者等に請求後（枝番特定）": "14",
-}
+} as const;
 
 export type 確認区分コードName = keyof typeof 確認区分コード;
 export type 確認区分コードCode = valueof<typeof 確認区分コード>;
 
 export function is確認区分コードName(k: string): k is 確認区分コードName {
   return Object.keys(確認区分コード).includes(k);
+}
+
+export const 転帰区分コード = {
+  "治ゆ、死亡、中止以外": 1,
+  "治ゆ": 2,
+  "死亡": 3,
+  "中 止（転医）": 4,
+} as const;
+
+export type 転帰区分コードName = keyof typeof 転帰区分コード;
+export type 転帰区分コードCode = valueof<typeof 転帰区分コード>;
+
+export function is転帰区分コードName(k: string): k is 転帰区分コードName {
+  return Object.keys(転帰区分コード).includes(k);
 }
 
 

@@ -7,7 +7,8 @@ import { create保険者レコード } from "./records/hokensha-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
-import { extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
+import { create症病名レコード } from "./records/shoubyoumei-record";
+import { composeDiseaseItem, extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
 export async function createShaho(year: number, month: number): Promise<string> {
@@ -91,6 +92,11 @@ async function create(year: number, month: number, 診査機関: number): Promis
     }
     {
       const ds = await api.listDiseaseActiveAt(patient.patientId, firstDay, lastDay);
+      const items = await Promise.all(ds.map(async (d, idx) => 
+        await composeDiseaseItem(d.diseaseId, idx === 0)));
+      items.forEach(item => {
+        rows.push(create症病名レコード({ item }));
+      })
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";
