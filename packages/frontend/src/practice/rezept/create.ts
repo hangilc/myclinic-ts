@@ -7,7 +7,7 @@ import { create保険者レコード } from "./records/hokensha-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
-import { extract都道府県コードfromAddress, findOnshiResultGendogaku, hokenshaBangouOfHoken, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
+import { extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
 export async function createShaho(year: number, month: number): Promise<string> {
@@ -53,19 +53,22 @@ async function create(year: number, month: number, 診査機関: number): Promis
     }
   });
   let serial = 1;
+  const firstDay = firstDayOfMonth(year, month);
+  const lastDay = lastDayOfMonth(year, month);
   for (let key in classified) {
     const items = classified[key];
     const hoken = items[0].hoken;
     const kouhiList: Kouhi[] = collectKouhi(items);
     const gendo = resolveGendo(items);
     const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
+    const patient: Patient = items[0].patient;
     rows.push(createレセプト共通レコード({
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
       kouhiList,
       year,
       month,
-      patient: items[0].patient,
+      patient,
       tokkkijikouGendogaku: tokkijikouGendo,
     }));
     if (hoken.shahokokuho || hoken.koukikourei) {
@@ -85,6 +88,9 @@ async function create(year: number, month: number, 診査機関: number): Promis
           edaban,
         }))
       }
+    }
+    {
+      const ds = await api.listDiseaseActiveAt(patient.patientId, firstDay, lastDay);
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";

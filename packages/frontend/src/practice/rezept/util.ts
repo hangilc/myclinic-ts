@@ -1,8 +1,10 @@
-import type { HokenInfo, Kouhi, Koukikourei, Shahokokuho } from "myclinic-model";
+import api from "@/lib/api";
+import { dateToSqlDate, type Disease, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 都道府県コード, type レセプト特記事項コードCode } from "./codes";
-import type { VisitItem } from "./visit-item";
+import type { DiseaseItem, VisitItem } from "./visit-item";
+import * as kanjidate from "kanjidate";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -199,4 +201,26 @@ export function hokenshaBangouOfHoken(hoken: HokenInfo): number {
     }
   }
   throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(hoken));
+}
+
+export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean): Promise<DiseaseItem> {
+  const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
+  return {
+    disease: dex.disease,
+    shuushokugoCodes: dex.adjList.map(e => {
+      const [adj, master]  = e;
+      return adj.shuushokugocode;
+    }),
+    isPrimary,
+  }
+}
+
+export function firstDayOfMonth(year: number, month: number): string {
+  const d = new Date(year, month - 1, 1);
+  return dateToSqlDate(d);
+}
+
+export function lastDayOfMonth(year: number, month: number): string {
+  const d = new Date(year, month, 1);
+  return dateToSqlDate(kanjidate.addDays(d, -1));
 }
