@@ -58,5 +58,6 @@ export function create診療行為レコード({
     診療行為コード: item.shinryoucode,
     点数: item.tensuu,
     回数: item.count,
+    算定日情報: item.santeibiInfo,
   });
 }

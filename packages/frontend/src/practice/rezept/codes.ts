@@ -227,6 +227,8 @@ export const 診療識別コード = {
   "その他": "80",
 } as const;
 
+export const 診療識別コードvalues: string[] = Object.values(診療識別コード);
+
 export type 診療識別コードName = keyof typeof 診療識別コード;
 export type 診療識別コードCode = valueof<typeof 診療識別コード>;
 

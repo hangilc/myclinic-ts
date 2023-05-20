@@ -7,7 +7,9 @@ import { create保険者レコード } from "./records/hokensha-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
+import { create診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
+import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
 import { composeDiseaseItem, extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
@@ -84,7 +86,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
     })
     {
       const edaban = resolveEdaban(items);
-      if( edaban ){
+      if (edaban) {
         rows.push(create資格確認レコード({
           edaban,
         }))
@@ -92,11 +94,15 @@ async function create(year: number, month: number, 診査機関: number): Promis
     }
     {
       const ds = await api.listDiseaseActiveAt(patient.patientId, firstDay, lastDay);
-      const items = await Promise.all(ds.map(async (d, idx) => 
+      const items = await Promise.all(ds.map(async (d, idx) =>
         await composeDiseaseItem(d.diseaseId, idx === 0)));
       items.forEach(item => {
         rows.push(create症病名レコード({ item }));
       })
+    }
+    {
+      const shinryouItems = composeShinryoukouiItems(items);
+      shinryouItems.forEach(shinryouItem => rows.push(create診療行為レコード({ item: shinryouItem })));
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";
@@ -128,7 +134,7 @@ function collectKouhi(items: VisitItem[]): Kouhi[] {
   items.forEach(item => {
     item.hoken.kouhiList.forEach(kouhi => {
       const index = list.findIndex(e => e.kouhiId === kouhi.kouhiId);
-      if( index < 0 ){
+      if (index < 0) {
         list.push(kouhi);
       }
     });
@@ -141,19 +147,19 @@ function resolveEdaban(items: VisitItem[]): string | undefined {
   let onshiEdaban: string | undefined = undefined;
   let hokenshoEdaban: string | undefined = undefined;
   items.forEach(item => {
-    if( item.onshiResult ){
+    if (item.onshiResult) {
       const result = item.onshiResult;
-      if( result.resultList.length === 1 ){
+      if (result.resultList.length === 1) {
         const ri = result.resultList[0];
-        if( ri.insuredBranchNumber ){
+        if (ri.insuredBranchNumber) {
           onshiEdaban = ri.insuredBranchNumber;
           return;
         }
       }
     }
-    if( item.hoken.shahokokuho ){
+    if (item.hoken.shahokokuho) {
       const shahokokuho = item.hoken.shahokokuho;
-      if( shahokokuho.edaban !== "" ){
+      if (shahokokuho.edaban !== "") {
         hokenshoEdaban = shahokokuho.edaban;
       }
     }
