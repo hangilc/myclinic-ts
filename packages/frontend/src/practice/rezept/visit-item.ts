@@ -1,11 +1,7 @@
 import type { Disease, HokenInfo, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
-
-export interface DiseaseItem {
-  disease: Disease;
-  shuushokugoCodes: number[];
-  isPrimary: boolean;
-}
+import type { 負担区分コードCode } from "./codes";
+import type { SanteibiCount, SanteibiDate } from "./util";
 
 export interface VisitItem {
   visit: Visit;
@@ -14,5 +10,20 @@ export interface VisitItem {
   onshiResult?: OnshiResult;
   meisai: Meisai;
   visitEx: VisitEx;
+}
+
+export interface DiseaseItem {
+  disease: Disease;
+  shuushokugoCodes: number[];
+  isPrimary: boolean;
+}
+
+export interface ShinryoukouiItem {
+  shinryouShubetsu: string;
+  futanKubun: 負担区分コードCode;
+  shinryoucode: number;
+  tensuu?: number;
+  count: number;
+  santeibiInfo: Record<SanteibiDate, SanteibiCount>;
 }
 

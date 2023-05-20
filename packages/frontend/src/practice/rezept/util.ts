@@ -224,3 +224,17 @@ export function lastDayOfMonth(year: number, month: number): string {
   const d = new Date(year, month, 1);
   return dateToSqlDate(kanjidate.addDays(d, -1));
 }
+
+export type SanteibiDate = number;
+export type SanteibiCount = number;
+export function formatSanteibi(info: Record<SanteibiDate, SanteibiCount>): string[] {
+  const ds: string[] = [];
+  for(let d=1;d<=31;d++){
+    if( d in info ){
+      ds.push(info[d].toString());
+    } else {
+      ds.push("");
+    }
+  }
+  return ds;
+}
