@@ -16,10 +16,10 @@
   import { convLine } from "./conv-line";
 
   export let isVisible: boolean;
-  let name: string = "田中　元";
-  let birthdate: Date | null = new Date(1945, 3, 6);
+  let name: string = "";
+  let birthdate: Date | null = null;
   let sex: string = "男性";
-  let address: string = "東京０３";
+  let address: string = "";
   let height: string = "";
   let weight: string = "";
   let physicalExam: string = "異常なし";
@@ -209,8 +209,8 @@
         urineGlucose = encodeUrineResult(m[1]);
       }
     }
-    console.log("collect", collect);
-    if( tokkijikou && !tokkijikou.endsWith("\n") ){
+    // console.log("collect", collect);
+    if (tokkijikou && !tokkijikou.endsWith("\n")) {
       tokkijikou += "\n";
     }
     tokkijikou += collect.join("\n");
@@ -275,19 +275,19 @@
         break;
       }
       case "+": {
-        comp.text(box, "\＋", opt({ dy: -0.2 }));
+        comp.text(box, "＋", opt({ dy: -0.2 }));
         break;
       }
       case "2+": {
-        comp.text(box, "2\＋", opt({ dy: -0.2 }));
+        comp.text(box, "2＋", opt({ dy: -0.2 }));
         break;
       }
       case "3+": {
-        comp.text(box, "3\＋", opt({ dy: -0.2 }));
+        comp.text(box, "3＋", opt({ dy: -0.2 }));
         break;
       }
       case "4+": {
-        comp.text(box, "4\＋", opt({ dy: -0.2 }));
+        comp.text(box, "4＋", opt({ dy: -0.2 }));
         break;
       }
       default: {
@@ -301,7 +301,11 @@
   function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
     const r: Box = box.inset(1, 1, 2, 1);
     const lines = value.split(/\r?\n/);
-    c.textLines(r, lines.map(line => convLine(line, c)), { leading: 1 });
+    c.textLines(
+      r,
+      lines.map((line) => convLine(line, c)),
+      { leading: 1 }
+    );
   }
 
   function doDisplay() {
@@ -380,21 +384,26 @@
           "/μL",
         ];
       }
-      comp.getMark(`血液検査結果${i + 1}`).withCols(
-        [18],
-        (b) => {
-          comp.text(b, value, {
-            halign: HorizAlign.Right,
-            valign: VertAlign.Center,
-          });
-        },
-        (b) => {
-          comp.text(b.shrinkToRight(1), unit ?? "", {
-            halign: HorizAlign.Left,
-            valign: VertAlign.Center,
-          });
-        }
-      );
+      if (value) {
+        comp.getMark(`血液検査結果${i + 1}`).withCols(
+          [18],
+          (b) => {
+            comp.text(b, value, {
+              halign: HorizAlign.Right,
+              valign: VertAlign.Center,
+            });
+          },
+          (b) => {
+            comp.text(b.shrinkToRight(1), unit ?? "", {
+              halign: HorizAlign.Left,
+              valign: VertAlign.Center,
+            });
+          }
+        );
+      } else {
+        const b = comp.getMark(`血液検査結果${i + 1}`);
+        comp.line(...b.leftBottom(), ...b.rightTop());
+      }
     });
     let prevFont = comp.curFont;
     renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
@@ -424,7 +433,6 @@
       },
     });
   }
-
 </script>
 
 <div style:display={isVisible ? "block" : "none"}>
