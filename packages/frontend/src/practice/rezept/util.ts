@@ -238,3 +238,7 @@ export function formatSanteibi(info: Record<SanteibiDate, SanteibiCount>): strin
   }
   return ds;
 }
+
+export function kizaiKingakuToTen(kingaku: number): number {
+  return Math.floor(Math.round(kingaku / 10.0));
+}
