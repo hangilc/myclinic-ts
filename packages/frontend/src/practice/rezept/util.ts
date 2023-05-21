@@ -208,7 +208,7 @@ export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean):
   return {
     disease: dex.disease,
     shuushokugoCodes: dex.adjList.map(e => {
-      const [adj, master]  = e;
+      const [adj, master] = e;
       return adj.shuushokugocode;
     }),
     isPrimary,
@@ -229,8 +229,8 @@ export type SanteibiDate = number;
 export type SanteibiCount = number;
 export function formatSanteibi(info: Record<SanteibiDate, SanteibiCount>): string[] {
   const ds: string[] = [];
-  for(let d=1;d<=31;d++){
-    if( d in info ){
+  for (let d = 1; d <= 31; d++) {
+    if (d in info) {
       ds.push(info[d].toString());
     } else {
       ds.push("");
@@ -242,6 +242,16 @@ export function formatSanteibi(info: Record<SanteibiDate, SanteibiCount>): strin
 export function kizaiKingakuToTen(kingaku: number): number {
   return Math.floor(Math.round(kingaku / 10.0));
 }
+
+export function shochiYakuzaiKingakuToTen(kingaku: number): number {
+  if (kingaku <= 15) {
+    return 0
+  } else {
+    return Math.ceil((kingaku - 15) / 10) + 1
+  }
+}
+
+
 
 export function hasHoken(visitItem: VisitItem): boolean {
   return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;

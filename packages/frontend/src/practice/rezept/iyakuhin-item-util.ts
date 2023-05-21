@@ -1,12 +1,12 @@
-import type { KizaiMaster } from "myclinic-model";
+import type { IyakuhinMaster } from "myclinic-model";
 import { 診療識別コード, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken, kizaiKingakuToTen } from "./util";
-import type { TokuteikizaiItem, VisitItem } from "./visit-item";
+import { calcFutanKubun, hasHoken, kizaiKingakuToTen, shochiYakuzaiKingakuToTen } from "./util";
+import type { IyakuhinItem, VisitItem } from "./visit-item";
 
 interface ItemUnit {
   isEqual(arg: any): boolean;
-  toItems(santeibi: Santeibi): TokuteikizaiItem[];
+  toItems(santeibi: Santeibi): IyakuhinItem[];
 }
 
 class Combined {
@@ -24,8 +24,8 @@ class Combined {
     this.units.push([unit, santei]);
   }
 
-  toItems(): TokuteikizaiItem[] {
-    const items: TokuteikizaiItem[] = [];
+  toItems(): IyakuhinItem[] {
+    const items: IyakuhinItem[] = [];
     this.units.forEach(([unit, santeibi]) => {
       items.push(...unit.toItems(santeibi));
     })
@@ -37,10 +37,10 @@ class SingleUnit implements ItemUnit {
   readonly isSingleItem = true;
   shinryouShubetsu: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
-  master: KizaiMaster;
+  master: IyakuhinMaster;
   amount: number;
 
-  constructor(shinryouShubetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: KizaiMaster, amount: number) {
+  constructor(shinryouShubetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: IyakuhinMaster, amount: number) {
     this.shinryouShubetsu = shinryouShubetsu;
     this.futanKubun = futanKubun;
     this.master = master;
@@ -51,7 +51,7 @@ class SingleUnit implements ItemUnit {
     if (arg instanceof SingleUnit) {
       return arg.shinryouShubetsu === this.shinryouShubetsu &&
         arg.futanKubun === this.futanKubun &&
-        arg.master.kizaicode === this.master.kizaicode &&
+        arg.master.iyakuhincode === this.master.iyakuhincode &&
         arg.amount === this.amount;
     } else {
       return false;
@@ -59,14 +59,16 @@ class SingleUnit implements ItemUnit {
   }
 
   calcTensuu(): number {
-    return kizaiKingakuToTen(parseFloat(this.master.kingakuStore) * this.amount);
+    console.log("yakka", this.master.yakkaStore, "amount", this.amount, 
+      shochiYakuzaiKingakuToTen(parseFloat(this.master.yakkaStore) * this.amount));
+    return shochiYakuzaiKingakuToTen(parseFloat(this.master.yakkaStore) * this.amount);
   }
 
-  toItems(santeibi: Santeibi): TokuteikizaiItem[] {
+  toItems(santeibi: Santeibi): IyakuhinItem[] {
     return [{
       shinryouShubetsu: this.shinryouShubetsu,
       futanKubun: this.futanKubun,
-      kizaicode: this.master.kizaicode,
+      iyakuhincode: this.master.iyakuhincode,
       amount: this.amount,
       tensuu: this.calcTensuu(),
       count: santeibi.getSum(),
@@ -79,16 +81,16 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   const units: ItemUnit[] = [];
   const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId), kouhiIdList);
   visitItem.visitEx.conducts.forEach(conduct => {
-    conduct.kizaiList.forEach(kizai => {
+    conduct.drugs.forEach(drug => {
       units.push(new SingleUnit(
-        診療識別コード.処置, futanKubun, kizai.master, kizai.amount
+        診療識別コード.処置, futanKubun, drug.master, drug.amount
       ));
     });
   })
   return units;
 }
 
-export function composeTokuteikizaiItems(visitItems: VisitItem[], kouhiIdList: number[]): TokuteikizaiItem[] {
+export function composeIyakuhinItems(visitItems: VisitItem[], kouhiIdList: number[]): IyakuhinItem[] {
   const combined = new Combined();
   visitItems.forEach(visitItem => {
     const units = visitUnits(visitItem, kouhiIdList);

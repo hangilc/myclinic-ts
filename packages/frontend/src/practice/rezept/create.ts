@@ -2,17 +2,19 @@ import api from "@/lib/api";
 import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード } from "./codes";
+import { composeIyakuhinItems } from "./iyakuhin-item-util";
 import { createレセプト共通レコード } from "./records/common-record";
 import { create保険者レコード } from "./records/hokensha-record";
+import { create医薬品レコード } from "./records/iyakuhin-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
 import { create診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
-import { create特定器材コード } from "./records/tokuteikizai-record";
+import { create特定器材レコード } from "./records/tokuteikizai-record";
 import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
 import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
-import { composeDiseaseItem, extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
+import { composeDiseaseItem, extract都道府県コードfromAddress, firstDayOfMonth, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
 export async function createShaho(year: number, month: number): Promise<string> {
@@ -107,8 +109,12 @@ async function create(year: number, month: number, 診査機関: number): Promis
       shinryouItems.forEach(shinryouItem => rows.push(create診療行為レコード({ item: shinryouItem })));
     }
     {
+      const iyakuhinItems = composeIyakuhinItems(items, kouhiList.map(k => k.kouhiId));
+      iyakuhinItems.forEach(iyakuhinItem => rows.push(create医薬品レコード({ item: iyakuhinItem })));
+    }
+    {
       const kizaiItems = composeTokuteikizaiItems(items, kouhiList.map(k => k.kouhiId));
-      kizaiItems.forEach(kizaiItem => rows.push(create特定器材コード({ item: kizaiItem})));
+      kizaiItems.forEach(kizaiItem => rows.push(create特定器材レコード({ item: kizaiItem })));
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";

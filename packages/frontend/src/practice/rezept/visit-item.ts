@@ -27,6 +27,16 @@ export interface ShinryoukouiItem {
   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
 }
 
+export interface IyakuhinItem {
+  shinryouShubetsu: string;
+  futanKubun: 負担区分コードCode;
+  iyakuhincode: number;
+  amount: number;
+  tensuu?: number;
+  count: number;
+  santeibiInfo: Record<SanteibiDate, SanteibiCount>;
+}
+
 export interface TokuteikizaiItem {
   shinryouShubetsu: string;
   futanKubun: 負担区分コードCode;
@@ -35,5 +45,4 @@ export interface TokuteikizaiItem {
   tensuu?: number;
   count: number;
   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
-
 }

@@ -1,11 +1,11 @@
 import type { 負担区分コードCode } from "../codes";
 import { formatSanteibi } from "../util";
-import type { TokuteikizaiItem } from "../visit-item";
+import type { IyakuhinItem, TokuteikizaiItem } from "../visit-item";
 
-function mk特定器材レコード({
+function mk医薬品レコード({
   診療識別,
   負担区分,
-  特定器材コード,
+  医薬品コード,
   使用量,
   点数,
   回数,
@@ -19,7 +19,7 @@ function mk特定器材レコード({
 }: {
   診療識別: string;
   負担区分: 負担区分コードCode;
-  特定器材コード: number;
+  医薬品コード: number;
   使用量: number;
   点数?: number;
   回数: number;
@@ -32,36 +32,32 @@ function mk特定器材レコード({
   算定日情報: Record<number, number>;
 }): string {
   return [
-    "TO", // 1 レコード識別情報
+    "IY", // 1 レコード識別情報
     診療識別, // 2
     負担区分, // 3
-    特定器材コード.toString(), // 4
+    医薬品コード.toString(), // 4
     使用量, // 5
     点数?.toString() ?? "", // 6
     回数.toString(), // 7
-    "", // 8 単位
-    "", // 9 単価
-    "", // 10 予備
-    "", // 11 商品名及び規格又はサイズ
-    コメントコード１?.toString() ?? "", // 12
-    コメント文字１ ?? "", // 13
-    コメントコード２?.toString() ?? "", // 14
-    コメント文字２ ?? "", // 15
-    コメントコード３?.toString() ?? "", // 16
-    コメント文字３ ?? "", // 17
-    ...formatSanteibi(算定日情報), // 18 - 48
+    コメントコード１?.toString() ?? "", // 8
+    コメント文字１ ?? "", // 9
+    コメントコード２?.toString() ?? "", // 10
+    コメント文字２ ?? "", // 11
+    コメントコード３?.toString() ?? "", // 12
+    コメント文字３ ?? "", // 13
+    ...formatSanteibi(算定日情報), // 14 - 44
   ].join(",");
 }
 
-export function create特定器材レコード({
+export function create医薬品レコード({
   item,
 }: {
-  item: TokuteikizaiItem;
+  item: IyakuhinItem;
 }): string {
-  return mk特定器材レコード({
+  return mk医薬品レコード({
     診療識別: item.shinryouShubetsu,
     負担区分: item.futanKubun,
-    特定器材コード: item.kizaicode,
+    医薬品コード: item.iyakuhincode,
     使用量: item.amount,
     点数: item.tensuu,
     回数: item.count,
