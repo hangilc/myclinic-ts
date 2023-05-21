@@ -10,6 +10,10 @@ export class Santeibi {
     }
   }
 
+  getSum(): number {
+    return Object.values(this.map).reduce((acc, ele) => acc + ele, 0);
+  }
+
   getSanteibiMap(): Record<number, number> {
     return this.map;
   }
