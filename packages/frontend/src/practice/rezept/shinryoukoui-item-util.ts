@@ -1,8 +1,10 @@
 import type { Kouhi, Visit } from "myclinic-model";
 import { is負担区分コードName, 診療識別コードvalues, 負担区分コード, type 負担区分コードCode } from "./codes";
+import { DateSet } from "./date-set";
+import { Santeibi } from "./santeibi";
 import type { ShinryoukouiItem, VisitItem } from "./visit-item";
 
-export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiList: Kouhi[]): ShinryoukouiItem[] {
+export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: number[]): ShinryoukouiItem[] {
   const result: ShinryoukouiItem[] = [];
   visitItems.forEach(visitItem => {
     const date = visitItem.visit.visitedAt.substring(0, 10);
@@ -12,10 +14,23 @@ export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiList: Kou
       if (!診療識別コードvalues.includes(shinryouShubetsu.toString())) {
         console.log("Unknown 診療識別コード", shinryouShubetsu);
       }
-      const futanKubun = calcFutanKubun()
+      const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId), kouhiIdList);
+      const santeibi = new Santeibi();
+      santeibi.add(date);
+      result.push({
+        shinryouShubetsu: shinryouShubetsu.toString(),
+        futanKubun,
+        shinryoucode: shinryou.shinryoucode,
+        count:1,
+        santeibiInfo: santeibi.getSanteibiMap(),
+      })
     })
   })
   return result;
+}
+
+function hasHoken(visitItem: VisitItem): boolean {
+  return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;
 }
 
 function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhiIds: number[]): 負担区分コードCode {

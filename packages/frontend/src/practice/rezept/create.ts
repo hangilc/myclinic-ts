@@ -101,7 +101,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
       })
     }
     {
-      const shinryouItems = composeShinryoukouiItems(items);
+      const shinryouItems = composeShinryoukouiItems(items, kouhiList.map(k => k.kouhiId));
       shinryouItems.forEach(shinryouItem => rows.push(create診療行為レコード({ item: shinryouItem })));
     }
   }
