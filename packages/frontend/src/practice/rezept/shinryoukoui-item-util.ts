@@ -1,4 +1,4 @@
-import type { Kouhi, ShinryouMaster, Visit } from "myclinic-model";
+import type { ShinryouMaster } from "myclinic-model";
 import { is負担区分コードName, 診療識別コードvalues, 負担区分コード, type 負担区分コードCode } from "./codes";
 import { Santeibi } from "./santeibi";
 import type { ShinryoukouiItem, VisitItem } from "./visit-item";
@@ -22,7 +22,7 @@ class ItemListFactory {
     this.singles.get(shinryoucode)![1].add(sqldate);
   }
 
-  toItems(): ShinryoukouiItem[] {
+  getItems(): ShinryoukouiItem[] {
     const items: ShinryoukouiItem[] = [];
     for (let shinryoucode of this.singles.keys()) {
       const [shinryouShubetsu, santeibi] = this.singles.get(shinryoucode)!;
@@ -50,6 +50,14 @@ class FactorySet {
       return factory;
     }
   }
+
+  getItems(): ShinryoukouiItem[] {
+    const items: ShinryoukouiItem[] = [];
+    for(const factory of this.map.values()){
+      items.push(...factory.getItems());
+    }
+    return items;
+  }
 }
 
 export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: number[]): ShinryoukouiItem[] {
@@ -58,35 +66,15 @@ export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: n
     const date = visitItem.visit.visitedAt.substring(0, 10);
     const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId), kouhiIdList);
     const factory = factorySet.getFactoryFor(futanKubun);
-  })
-  const result: ShinryoukouiItem[] = [];
-  for(let factory of factoryMap.values()){
-    result.push(...factory.toItems());
-  }
-  return result;
-}
-
-function toTemplates(visitItems: VisitItem[], kouhiIdList: number[]): ItemTemplate[] {
-  visitItems.forEach(visitItem => {
-    const date = visitItem.visit.visitedAt.substring(0, 10);
-    const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId), kouhiIdList);
     visitItem.visitEx.shinryouList.forEach(shinryou => {
-      const master = shinryou.master;
-      const shinryouShubetsu = Math.floor(parseInt(master.shuukeisaki) / 10);
+      const shinryouShubetsu = Math.floor(parseInt(shinryou.master.shuukeisaki) / 10);
       if (!診療識別コードvalues.includes(shinryouShubetsu.toString())) {
         console.log("Unknown 診療識別コード", shinryouShubetsu);
       }
-      const santeibi = new Santeibi();
-      santeibi.add(date);
-      result.push({
-        shinryouShubetsu: shinryouShubetsu.toString(),
-        futanKubun,
-        shinryoucode: shinryou.shinryoucode,
-        count: santeibi.getSum(),
-        santeibiInfo: santeibi.getSanteibiMap(),
-      })
+      factory.addSingle(shinryou.shinryoucode, shinryou.master, date);
     })
   })
+  return factorySet.getItems();
 }
 
 function hasHoken(visitItem: VisitItem): boolean {
