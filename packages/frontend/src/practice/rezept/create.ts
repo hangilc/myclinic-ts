@@ -9,7 +9,9 @@ import { create医療機関情報レコード } from "./records/medical-institut
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
 import { create診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
+import { create特定器材コード } from "./records/tokuteikizai-record";
 import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
+import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
 import { composeDiseaseItem, extract都道府県コードfromAddress, findOnshiResultGendogaku, firstDayOfMonth, hokenshaBangouOfHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList } from "./util";
 import type { VisitItem } from "./visit-item";
 
@@ -103,6 +105,10 @@ async function create(year: number, month: number, 診査機関: number): Promis
     {
       const shinryouItems = composeShinryoukouiItems(items, kouhiList.map(k => k.kouhiId));
       shinryouItems.forEach(shinryouItem => rows.push(create診療行為レコード({ item: shinryouItem })));
+    }
+    {
+      const kizaiItems = composeTokuteikizaiItems(items, kouhiList.map(k => k.kouhiId));
+      kizaiItems.forEach(kizaiItem => rows.push(create特定器材コード({ item: kizaiItem})));
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";

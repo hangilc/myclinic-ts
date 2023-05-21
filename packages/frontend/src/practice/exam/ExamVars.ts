@@ -487,7 +487,6 @@ appEvent.conductShinryouEntered.subscribe(async conductShinryou => {
     if (ci >= 0) {
       const conductShinryouEx = await api.getConductShinryouEx(conductShinryou.conductShinryouId);
       visit.conducts[ci].shinryouList.push(conductShinryouEx);
-      console.log("conductShinryou entered", visit.conducts[ci].shinryouList);
       visits.set(visitsValue);
     }
   }

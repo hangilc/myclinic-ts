@@ -1,11 +1,11 @@
 import type { ShinryouMaster } from "myclinic-model";
-import type ShinryouItem from "../exam/record/shinryou/ShinryouItem.svelte";
 import {
   is診療識別コードCode, is負担区分コードName, 診療識別コードvalues, 負担区分コード, type 診療識別コードCode, type 負担区分コードCode,
   診療識別コード
 } from "./codes";
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuGroup, type HoukatsuStep } from "./houkatsu";
 import { Santeibi } from "./santeibi";
+import { calcFutanKubun, hasHoken } from "./util";
 import type { ShinryoukouiItem, VisitItem } from "./visit-item";
 
 interface ItemUnit {
@@ -183,26 +183,5 @@ export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: n
     })
   })
   return combined.toItems();
-}
-
-function hasHoken(visitItem: VisitItem): boolean {
-  return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;
-}
-
-function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhiIds: number[]): 負担区分コードCode {
-  const kouhiParts: number[] = [];
-  visitKouhiIds.forEach(visitKouhiId => {
-    const index = kouhiIds.findIndex(e => e === visitKouhiId);
-    if (index < 0) {
-      throw new Error("Cannot resolve 負担区分: " + visitKouhiId);
-    }
-    kouhiParts.push(index + 1);
-  })
-  const key = (hasHoken ? "H" : "") + kouhiParts.join("");
-  if (is負担区分コードName(key)) {
-    return 負担区分コード[key];
-  } else {
-    throw new Error("Invalid 負担区分コードNam: " + key);
-  }
 }
 

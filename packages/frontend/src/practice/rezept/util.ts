@@ -2,7 +2,7 @@ import api from "@/lib/api";
 import { dateToSqlDate, type Disease, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
-import { KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 都道府県コード, type レセプト特記事項コードCode } from "./codes";
+import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 負担区分コードCode } from "./codes";
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 
@@ -242,3 +242,25 @@ export function formatSanteibi(info: Record<SanteibiDate, SanteibiCount>): strin
 export function kizaiKingakuToTen(kingaku: number): number {
   return Math.floor(Math.round(kingaku / 10.0));
 }
+
+export function hasHoken(visitItem: VisitItem): boolean {
+  return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;
+}
+
+export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhiIds: number[]): 負担区分コードCode {
+  const kouhiParts: number[] = [];
+  visitKouhiIds.forEach(visitKouhiId => {
+    const index = kouhiIds.findIndex(e => e === visitKouhiId);
+    if (index < 0) {
+      throw new Error("Cannot resolve 負担区分: " + visitKouhiId);
+    }
+    kouhiParts.push(index + 1);
+  })
+  const key = (hasHoken ? "H" : "") + kouhiParts.join("");
+  if (is負担区分コードName(key)) {
+    return 負担区分コード[key];
+  } else {
+    throw new Error("Invalid 負担区分コードNam: " + key);
+  }
+}
+
