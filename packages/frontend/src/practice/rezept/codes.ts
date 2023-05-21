@@ -236,6 +236,15 @@ export function is診療識別コードName(k: string): k is 診療識別コー�
   return Object.keys(診療識別コード).includes(k);
 }
 
+export function is診療識別コードCode(arg: string): arg is 診療識別コードCode {
+  for(const v of Object.values(診療識別コード)) {
+    if( v === arg ){
+      return true;
+    }
+  }
+  return false;
+}
+
 export const 負担区分コード = {
   "H": "1",
   "1": "5",
