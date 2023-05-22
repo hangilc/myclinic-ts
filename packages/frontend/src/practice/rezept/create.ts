@@ -12,6 +12,7 @@ import { create医療機関情報レコード } from "./records/medical-institut
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
 import { create診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
+import { create症状詳記レコード } from "./records/shoujoushouki-record";
 import { create特定器材レコード } from "./records/tokuteikizai-record";
 import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
 import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
@@ -55,6 +56,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
       meisai,
       visitEx,
       comments: [],
+      shoukiList: [],
     }];
   }));
   const classified: Record<string, VisitItem[]> = {};
@@ -135,6 +137,14 @@ async function create(year: number, month: number, 診査機関: number): Promis
         }))
       })
     });
+    items.forEach(visitItem => {
+      visitItem.shoukiList.forEach(shouki => {
+        rows.push(create症状詳記レコード({
+          shoujoushoukiKubun: shouki.kubun,
+          text: shouki.text,
+        }))
+      })
+    })
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }

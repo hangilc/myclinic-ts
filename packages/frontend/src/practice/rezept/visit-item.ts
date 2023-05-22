@@ -1,11 +1,16 @@
 import type { Disease, HokenInfo, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
-import type { 負担区分コードCode } from "./codes";
+import type { 症状詳記区分コードCode, 負担区分コードCode } from "./codes";
 import type { SanteibiCount, SanteibiDate } from "./util";
 
 export interface CommentItem {
   shikibetsucode?: string;
   commentcode: number;
+  text: string;
+}
+
+export interface ShoujouhoukiItem {
+  kubun: 症状詳記区分コードCode;
   text: string;
 }
 
@@ -17,6 +22,7 @@ export interface VisitItem {
   meisai: Meisai;
   visitEx: VisitEx;
   comments: CommentItem[];
+  shoukiList: ShoujouhoukiItem[];
 }
 
 export interface DiseaseItem {
