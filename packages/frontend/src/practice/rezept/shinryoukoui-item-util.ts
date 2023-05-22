@@ -15,19 +15,19 @@ interface ItemUnit {
 
 class SingleUnit implements ItemUnit {
   readonly isSingleItem = true;
-  shinryouShubetsu: 診療識別コードCode;
+  shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   master: ShinryouMaster;
 
-  constructor(shinryouShubetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: ShinryouMaster) {
-    this.shinryouShubetsu = shinryouShubetsu;
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, master: ShinryouMaster) {
+    this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
     this.master = master;
   }
 
   isEqual(arg: any): boolean {
     if (arg instanceof SingleUnit) {
-      return arg.shinryouShubetsu === this.shinryouShubetsu &&
+      return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
         arg.master.shinryoucode === this.master.shinryoucode;
     } else {
@@ -37,7 +37,7 @@ class SingleUnit implements ItemUnit {
 
   toItems(santeibi: Santeibi): ShinryoukouiItem[] {
     return [{
-      shinryouShubetsu: this.shinryouShubetsu,
+      shikibetsucode: this.shikibetsucode,
       futanKubun: this.futanKubun,
       shinryoucode: this.master.shinryoucode,
       tensuu: parseInt(this.master.tensuuStore),
@@ -49,13 +49,13 @@ class SingleUnit implements ItemUnit {
 
 class HoukatsuUnit implements ItemUnit {
   readonly isHoukatsuUnit = true;
-  shinryouShubetsu: 診療識別コードCode;
+  shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   houkatsuStep: HoukatsuStep;
   masters: ShinryouMaster[];
 
-  constructor(shinryouShubetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep, master: ShinryouMaster) {
-    this.shinryouShubetsu = shinryouShubetsu;
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep, master: ShinryouMaster) {
+    this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
     this.houkatsuStep = houkatsuStep;
     this.masters = [master];
@@ -74,7 +74,7 @@ class HoukatsuUnit implements ItemUnit {
         ten = this.masters.reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
       }
       const items = this.masters.map((master, index) => ({
-        shinryouShubetsu: this.shinryouShubetsu,
+        shikibetsucode: this.shikibetsucode,
         futanKubun: this.futanKubun,
         shinryoucode: master.shinryoucode,
         tensuu: index === this.masters.length - 1 ? ten : undefined,
@@ -92,7 +92,7 @@ class HoukatsuUnit implements ItemUnit {
 
   isEqual(arg: any): boolean {
     if (arg instanceof HoukatsuUnit) {
-      return arg.shinryouShubetsu === this.shinryouShubetsu &&
+      return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
         arg.isEqualMasters(this.masters);
     } else {

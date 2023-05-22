@@ -55,7 +55,7 @@ export function create医薬品レコード({
   item: IyakuhinItem;
 }): string {
   return mk医薬品レコード({
-    診療識別: item.shinryouShubetsu,
+    診療識別: item.shikibetsucode,
     負担区分: item.futanKubun,
     医薬品コード: item.iyakuhincode,
     使用量: item.amount,

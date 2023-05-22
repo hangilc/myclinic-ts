@@ -59,7 +59,7 @@ export function create特定器材レコード({
   item: TokuteikizaiItem;
 }): string {
   return mk特定器材レコード({
-    診療識別: item.shinryouShubetsu,
+    診療識別: item.shikibetsucode,
     負担区分: item.futanKubun,
     特定器材コード: item.kizaicode,
     使用量: item.amount,

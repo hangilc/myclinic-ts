@@ -225,6 +225,7 @@ export const 診療識別コード = {
   "検査・病理": "60",
   "画像診断": "70",
   "その他": "80",
+  "全体に係る識別コード９９": "99",
 } as const;
 
 export const 診療識別コードvalues: string[] = Object.values(診療識別コード);

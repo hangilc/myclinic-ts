@@ -3,6 +3,12 @@ import type { OnshiResult } from "onshi-result";
 import type { 負担区分コードCode } from "./codes";
 import type { SanteibiCount, SanteibiDate } from "./util";
 
+export interface CommentItem {
+  shikibetsucode?: string;
+  commentcode: number;
+  text: string;
+}
+
 export interface VisitItem {
   visit: Visit;
   hoken: HokenInfo;
@@ -10,6 +16,7 @@ export interface VisitItem {
   onshiResult?: OnshiResult;
   meisai: Meisai;
   visitEx: VisitEx;
+  comments: CommentItem[];
 }
 
 export interface DiseaseItem {
@@ -19,7 +26,7 @@ export interface DiseaseItem {
 }
 
 export interface ShinryoukouiItem {
-  shinryouShubetsu: string;
+  shikibetsucode: string;
   futanKubun: 負担区分コードCode;
   shinryoucode: number;
   tensuu?: number;
@@ -28,7 +35,7 @@ export interface ShinryoukouiItem {
 }
 
 export interface IyakuhinItem {
-  shinryouShubetsu: string;
+  shikibetsucode: string;
   futanKubun: 負担区分コードCode;
   iyakuhincode: number;
   amount: number;
@@ -38,7 +45,7 @@ export interface IyakuhinItem {
 }
 
 export interface TokuteikizaiItem {
-  shinryouShubetsu: string;
+  shikibetsucode: string;
   futanKubun: 負担区分コードCode;
   kizaicode: number;
   amount: number;

@@ -35,13 +35,13 @@ class Combined {
 
 class SingleUnit implements ItemUnit {
   readonly isSingleItem = true;
-  shinryouShubetsu: 診療識別コードCode;
+  shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   master: KizaiMaster;
   amount: number;
 
-  constructor(shinryouShubetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: KizaiMaster, amount: number) {
-    this.shinryouShubetsu = shinryouShubetsu;
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, master: KizaiMaster, amount: number) {
+    this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
     this.master = master;
     this.amount = amount;
@@ -49,7 +49,7 @@ class SingleUnit implements ItemUnit {
 
   isEqual(arg: any): boolean {
     if (arg instanceof SingleUnit) {
-      return arg.shinryouShubetsu === this.shinryouShubetsu &&
+      return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
         arg.master.kizaicode === this.master.kizaicode &&
         arg.amount === this.amount;
@@ -64,7 +64,7 @@ class SingleUnit implements ItemUnit {
 
   toItems(santeibi: Santeibi): TokuteikizaiItem[] {
     return [{
-      shinryouShubetsu: this.shinryouShubetsu,
+      shikibetsucode: this.shikibetsucode,
       futanKubun: this.futanKubun,
       kizaicode: this.master.kizaicode,
       amount: this.amount,
