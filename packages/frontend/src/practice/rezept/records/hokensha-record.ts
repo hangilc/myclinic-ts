@@ -38,9 +38,11 @@ function mk保険者レコード({
 }
 
 export function create保険者レコード({
-  items
+  items,
+  futanKingaku,
 }: {
   items: VisitItem[];
+  futanKingaku?: number;
 }): string {
   const hoken = items[0].hoken;
   return mk保険者レコード({
@@ -49,6 +51,7 @@ export function create保険者レコード({
     被保険者証番号: bangou(hoken),
     診療実日数: jitsuNissu(items),
     合計点数: souten(items),
+    医療保険負担金額: futanKingaku,
   });
 }
 

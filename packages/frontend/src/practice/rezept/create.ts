@@ -9,6 +9,7 @@ import { create保険者レコード } from "./records/hokensha-record";
 import { create医薬品レコード } from "./records/iyakuhin-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
+import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
 import { create診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
@@ -18,6 +19,7 @@ import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
 import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
 import {
   calcFutanKubun,
+  calcRezeptCount,
   composeDiseaseItem,
   extract都道府県コードfromAddress,
   firstDayOfMonth, hasHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList
@@ -145,6 +147,9 @@ async function create(year: number, month: number, 診査機関: number): Promis
         }))
       })
     })
+    rows.push(create診療報酬請求書レコード({
+      rezeptCount: calcRezeptCount(items),
+    }))
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }
