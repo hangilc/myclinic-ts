@@ -9,13 +9,12 @@ import { create保険者レコード } from "./records/hokensha-record";
 import { create医薬品レコード } from "./records/iyakuhin-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
-import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { create資格確認レコード } from "./records/shikaku-kakunin-record";
-import { create診療行為レコード } from "./records/shinryoukoui-record";
+import { mk診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
 import { create症状詳記レコード } from "./records/shoujoushouki-record";
 import { create特定器材レコード } from "./records/tokuteikizai-record";
-import { composeShinryoukouiItems } from "./shinryoukoui-item-util";
+import { cvtVisitItemsToDataList } from "./shinryoukoui-item-util";
 import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
 import {
   calcFutanKubun,
@@ -80,6 +79,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
     const gendo = resolveGendo(items);
     const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
     const patient: Patient = items[0].patient;
+    let souten = 0;
     rows.push(createレセプト共通レコード({
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
@@ -115,9 +115,12 @@ async function create(year: number, month: number, 診査機関: number): Promis
         rows.push(create症病名レコード({ item }));
       })
     }
+    const kouhiIdList = kouhiList.map(k => k.kouhiId);
     {
-      const shinryouItems = composeShinryoukouiItems(items, kouhiList.map(k => k.kouhiId));
-      shinryouItems.forEach(shinryouItem => rows.push(create診療行為レコード({ item: shinryouItem })));
+      const dataList = cvtVisitItemsToDataList(items, kouhiIdList);
+      dataList.forEach(data => {
+        rows.push(mk診療行為レコード(data));
+      })
     }
     {
       const iyakuhinItems = composeIyakuhinItems(items, kouhiList.map(k => k.kouhiId));
@@ -147,9 +150,9 @@ async function create(year: number, month: number, 診査機関: number): Promis
         }))
       })
     })
-    rows.push(create診療報酬請求書レコード({
-      rezeptCount: calcRezeptCount(items),
-    }))
+    // rows.push(create診療報酬請求書レコード({
+    //   rezeptCount: calcRezeptCount(items),
+    // }))
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }

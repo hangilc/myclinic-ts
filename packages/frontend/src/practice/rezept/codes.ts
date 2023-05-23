@@ -283,6 +283,13 @@ export const 負担区分コード = {
 export type 負担区分コードName = keyof typeof 負担区分コード;
 export type 負担区分コードCode = valueof<typeof 負担区分コード>;
 
+export const 負担区分コードRev: Map<負担区分コードCode, 負担区分コードName> = new Map();
+for(const k  in 負担区分コード) {
+  const n = k as 負担区分コードName
+  const v = 負担区分コード[n];
+  負担区分コードRev.set(v, n);
+}
+
 export function is負担区分コードName(k: string): k is 負担区分コードName {
   return Object.keys(負担区分コード).includes(k);
 }

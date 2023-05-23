@@ -4,13 +4,15 @@ import {
   診療識別コード
 } from "./codes";
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuGroup, type HoukatsuStep } from "./houkatsu";
+import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import { Santeibi } from "./santeibi";
 import { calcFutanKubun, hasHoken } from "./util";
-import type { ShinryoukouiItem, VisitItem } from "./visit-item";
+import type { VisitItem } from "./visit-item";
 
 interface ItemUnit {
   isEqual(arg: any): boolean;
-  toItems(santeibi: Santeibi): ShinryoukouiItem[];
+  // toItems(santeibi: Santeibi): ShinryoukouiItem[];
+  toDataList(santeibi: Santeibi): 診療行為レコードData[];
 }
 
 class SingleUnit implements ItemUnit {
@@ -35,14 +37,31 @@ class SingleUnit implements ItemUnit {
     }
   }
 
-  toItems(santeibi: Santeibi): ShinryoukouiItem[] {
+  // toItems(santeibi: Santeibi): ShinryoukouiItem[] {
+  //   return [{
+  //     shikibetsucode: this.shikibetsucode,
+  //     futanKubun: this.futanKubun,
+  //     shinryoucode: this.master.shinryoucode,
+  //     tensuu: parseInt(this.master.tensuuStore),
+  //     count: santeibi.getSum(),
+  //     santeibiInfo: santeibi.getSanteibiMap()
+  //   }];
+  // }
+
+  toDataList(santeibi: Santeibi): 診療行為レコードData[] {
     return [{
-      shikibetsucode: this.shikibetsucode,
-      futanKubun: this.futanKubun,
-      shinryoucode: this.master.shinryoucode,
-      tensuu: parseInt(this.master.tensuuStore),
-      count: santeibi.getSum(),
-      santeibiInfo: santeibi.getSanteibiMap()
+      診療識別: this.shikibetsucode,
+      負担区分: this.futanKubun,
+      診療行為コード: this.master.shinryoucode,
+      点数: parseInt(this.master.tensuuStore),
+      回数: santeibi.getSum(),
+      コメントコード１: undefined,
+      コメント文字１: undefined,
+      コメントコード２: undefined,
+      コメント文字２: undefined,
+      コメントコード３: undefined,
+      コメント文字３: undefined,
+      算定日情報: santeibi.getSanteibiMap(),
     }];
   }
 }
@@ -61,7 +80,31 @@ class HoukatsuUnit implements ItemUnit {
     this.masters = [master];
   }
 
-  toItems(santeibi: Santeibi): ShinryoukouiItem[] {
+  // toItems(santeibi: Santeibi): ShinryoukouiItem[] {
+  //   if (this.masters.length === 0) {
+  //     return [];
+  //   } else {
+  //     const g = this.masters[0].houkatsukensa
+  //     if (!isHoukatsuGroup(g)) {
+  //       throw new Error("Invalid houkatsu group: " + g);
+  //     }
+  //     let ten = houkatsuTenOf(g, this.masters.length, this.houkatsuStep);
+  //     if (ten === undefined) {
+  //       ten = this.masters.reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
+  //     }
+  //     const items = this.masters.map((master, index) => ({
+  //       shikibetsucode: index === 0 ? this.shikibetsucode : "",
+  //       futanKubun: this.futanKubun,
+  //       shinryoucode: master.shinryoucode,
+  //       tensuu: index === this.masters.length - 1 ? ten : undefined,
+  //       count: santeibi.getSum(),
+  //       santeibiInfo: santeibi.getSanteibiMap()
+  //     }))
+  //     return items;
+  //   }
+  // }
+
+  toDataList(santeibi: Santeibi): 診療行為レコードData[] {
     if (this.masters.length === 0) {
       return [];
     } else {
@@ -73,15 +116,20 @@ class HoukatsuUnit implements ItemUnit {
       if (ten === undefined) {
         ten = this.masters.reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
       }
-      const items = this.masters.map((master, index) => ({
-        shikibetsucode: this.shikibetsucode,
-        futanKubun: this.futanKubun,
-        shinryoucode: master.shinryoucode,
-        tensuu: index === this.masters.length - 1 ? ten : undefined,
-        count: santeibi.getSum(),
-        santeibiInfo: santeibi.getSanteibiMap()
+      return this.masters.map((master, index) => ({
+        診療識別: index === 0 ? this.shikibetsucode : "",
+        負担区分: this.futanKubun,
+        診療行為コード: master.shinryoucode,
+        点数: index === this.masters.length - 1 ? ten : undefined,
+        回数: santeibi.getSum(),
+        コメントコード１: undefined,
+        コメント文字１: undefined,
+        コメントコード２: undefined,
+        コメント文字２: undefined,
+        コメントコード３: undefined,
+        コメント文字３: undefined,
+        算定日情報: santeibi.getSanteibiMap(),
       }))
-      return items;
     }
   }
 
@@ -129,12 +177,12 @@ class Combined {
     this.units.push([unit, santei]);
   }
 
-  toItems(): ShinryoukouiItem[] {
-    const items: ShinryoukouiItem[] = [];
+  toDataList(): 診療行為レコードData[] {
+    const list: 診療行為レコードData[] = [];
     this.units.forEach(([unit, santeibi]) => {
-      items.push(...unit.toItems(santeibi));
+      list.push(...unit.toDataList(santeibi));
     })
-    return items;
+    return list;
   }
 }
 
@@ -148,8 +196,8 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
       throw new Error("Unknown 診療識別コード: " + shinryouShubetsu);
     }
     const g = shinryou.master.houkatsukensa;
-    if( isHoukatsuGroup(g) ){
-      if( houkatsuMap.has(g) ){
+    if (isHoukatsuGroup(g)) {
+      if (houkatsuMap.has(g)) {
         houkatsuMap.get(g)!.addMaster(shinryou.master);
       } else {
         const date = visitItem.visit.visitedAt.substring(0, 10);
@@ -160,7 +208,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
       units.push(new SingleUnit(shinryouShubetsu, futanKubun, shinryou.master));
     }
   });
-  for(const unit of houkatsuMap.values()){
+  for (const unit of houkatsuMap.values()) {
     units.push(unit);
   }
   visitItem.visitEx.conducts.forEach(conduct => {
@@ -173,7 +221,19 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   return units;
 }
 
-export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: number[]): ShinryoukouiItem[] {
+// export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: number[]): ShinryoukouiItem[] {
+//   const combined = new Combined();
+//   visitItems.forEach(visitItem => {
+//     const units = visitUnits(visitItem, kouhiIdList);
+//     const date = visitItem.visit.visitedAt.substring(0, 10);
+//     units.forEach(unit => {
+//       combined.combine(unit, date);
+//     })
+//   })
+//   return combined.toItems();
+// }
+
+export function cvtVisitItemsToDataList(visitItems: VisitItem[], kouhiIdList: number[]): 診療行為レコードData[] {
   const combined = new Combined();
   visitItems.forEach(visitItem => {
     const units = visitUnits(visitItem, kouhiIdList);
@@ -182,6 +242,6 @@ export function composeShinryoukouiItems(visitItems: VisitItem[], kouhiIdList: n
       combined.combine(unit, date);
     })
   })
-  return combined.toItems();
+  return combined.toDataList();
 }
 

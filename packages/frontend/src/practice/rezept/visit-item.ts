@@ -31,14 +31,14 @@ export interface DiseaseItem {
   isPrimary: boolean;
 }
 
-export interface ShinryoukouiItem {
-  shikibetsucode: string;
-  futanKubun: 負担区分コードCode;
-  shinryoucode: number;
-  tensuu?: number;
-  count: number;
-  santeibiInfo: Record<SanteibiDate, SanteibiCount>;
-}
+// export interface ShinryoukouiItem {
+//   shikibetsucode: string;
+//   futanKubun: 負担区分コードCode;
+//   shinryoucode: number;
+//   tensuu?: number;
+//   count: number;
+//   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
+// }
 
 export interface IyakuhinItem {
   shikibetsucode: string;
