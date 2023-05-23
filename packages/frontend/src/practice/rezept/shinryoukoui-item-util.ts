@@ -233,7 +233,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
 //   return combined.toItems();
 // }
 
-export function cvtVisitItemsToDataList(visitItems: VisitItem[], kouhiIdList: number[]): 診療行為レコードData[] {
+export function cvtVisitItemsToShinryouDataList(visitItems: VisitItem[], kouhiIdList: number[]): 診療行為レコードData[] {
   const combined = new Combined();
   visitItems.forEach(visitItem => {
     const units = visitUnits(visitItem, kouhiIdList);

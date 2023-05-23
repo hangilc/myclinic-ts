@@ -1,12 +1,13 @@
 import type { IyakuhinMaster } from "myclinic-model";
 import { 診療識別コード, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
+import type { 医薬品レコードData } from "./records/iyakuhin-record";
 import { Santeibi } from "./santeibi";
 import { calcFutanKubun, hasHoken, kizaiKingakuToTen, shochiYakuzaiKingakuToTen } from "./util";
 import type { IyakuhinItem, VisitItem } from "./visit-item";
 
 interface ItemUnit {
   isEqual(arg: any): boolean;
-  toItems(santeibi: Santeibi): IyakuhinItem[];
+  toDataList(santeibi: Santeibi): 医薬品レコードData[];
 }
 
 class Combined {
@@ -24,12 +25,13 @@ class Combined {
     this.units.push([unit, santei]);
   }
 
-  toItems(): IyakuhinItem[] {
-    const items: IyakuhinItem[] = [];
+  toDataList(): 医薬品レコードData[] {
+    const list: 医薬品レコードData[] = [];
     this.units.forEach(([unit, santeibi]) => {
-      items.push(...unit.toItems(santeibi));
+      list.push(...unit.toDataList(santeibi));
     })
-    return items;
+    return list;
+
   }
 }
 
@@ -64,15 +66,33 @@ class SingleUnit implements ItemUnit {
     return shochiYakuzaiKingakuToTen(parseFloat(this.master.yakkaStore) * this.amount);
   }
 
-  toItems(santeibi: Santeibi): IyakuhinItem[] {
+  // toItems(santeibi: Santeibi): IyakuhinItem[] {
+  //   return [{
+  //     shikibetsucode: this.shikibetsucode,
+  //     futanKubun: this.futanKubun,
+  //     iyakuhincode: this.master.iyakuhincode,
+  //     amount: this.amount,
+  //     tensuu: this.calcTensuu(),
+  //     count: santeibi.getSum(),
+  //     santeibiInfo: santeibi.getSanteibiMap()
+  //   }];
+  // }
+
+  toDataList(santeibi: Santeibi): 医薬品レコードData[] {
     return [{
-      shikibetsucode: this.shikibetsucode,
-      futanKubun: this.futanKubun,
-      iyakuhincode: this.master.iyakuhincode,
-      amount: this.amount,
-      tensuu: this.calcTensuu(),
-      count: santeibi.getSum(),
-      santeibiInfo: santeibi.getSanteibiMap()
+      診療識別: this.shikibetsucode,
+      負担区分: this.futanKubun,
+      医薬品コード: this.master.iyakuhincode,
+      使用量: this.amount,
+      点数: this.calcTensuu(),
+      回数: santeibi.getSum(),
+      コメントコード１: undefined,
+      コメント文字１: undefined,
+      コメントコード２: undefined,
+      コメント文字２: undefined,
+      コメントコード３: undefined,
+      コメント文字３: undefined,
+      算定日情報: santeibi.getSanteibiMap(),
     }];
   }
 }
@@ -90,7 +110,19 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   return units;
 }
 
-export function composeIyakuhinItems(visitItems: VisitItem[], kouhiIdList: number[]): IyakuhinItem[] {
+// export function composeIyakuhinItems(visitItems: VisitItem[], kouhiIdList: number[]): IyakuhinItem[] {
+//   const combined = new Combined();
+//   visitItems.forEach(visitItem => {
+//     const units = visitUnits(visitItem, kouhiIdList);
+//     const date = visitItem.visit.visitedAt.substring(0, 10);
+//     units.forEach(unit => {
+//       combined.combine(unit, date);
+//     })
+//   })
+//   return combined.toItems();
+// }
+
+export function cvtVisitItemsToIyakuhinDataList(visitItems: VisitItem[], kouhiIdList: number[]): 医薬品レコードData[] {
   const combined = new Combined();
   visitItems.forEach(visitItem => {
     const units = visitUnits(visitItem, kouhiIdList);
@@ -99,5 +131,5 @@ export function composeIyakuhinItems(visitItems: VisitItem[], kouhiIdList: numbe
       combined.combine(unit, date);
     })
   })
-  return combined.toItems();
+  return combined.toDataList();
 }
