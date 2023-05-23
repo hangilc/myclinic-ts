@@ -95,12 +95,12 @@ async function create(year: number, month: number, 診査機関: number): Promis
     shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
     if (hoken.shahokokuho || hoken.koukikourei) {
       rows.push(create保険者レコード({
-        items,
+        items, souten: tenCol.hokenTen, futanKingaku: undefined,
       }));
     }
-    kouhiList.forEach(kouhi => {
+    kouhiList.forEach((kouhi, index) => {
       rows.push(create公費レコード({
-        kouhi, items,
+        kouhi, items, souten: tenCol.kouhiTen[index]
       }))
     })
     {

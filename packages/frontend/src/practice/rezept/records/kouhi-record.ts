@@ -36,15 +36,20 @@ function mk公費レコード({
 export function create公費レコード({
   kouhi,
   items,
+  futanKingaku,
+  souten,
 }: {
-  kouhi: Kouhi,
-  items: VisitItem[],
+  kouhi: Kouhi;
+  items: VisitItem[];
+  futanKingaku?: number;
+  souten: number;
 }): string {
   return mk公費レコード({
     負担者番号: kouhi.futansha,
     受給者番号: kouhi.jukyuusha,
     診療実日数: jitsuNissuu(kouhi.kouhiId, items),
-    合計点数: totalTen(kouhi.kouhiId, items),
+    合計点数: souten,
+    負担金額: futanKingaku,
   })
 }
 
@@ -63,13 +68,13 @@ function jitsuNissuu(kouhiId: number, items: VisitItem[]): number {
   return ds.length;
 }
 
-function totalTen(kouhiId: number, items: VisitItem[]): number {
-  let t = 0;
-  items.forEach(item => {
-    const kouhiList = item.hoken.kouhiList;
-    if( kouhiListIncludes(kouhiList, kouhiId) ){
-      t += item.meisai.totalTen;
-    }
-  })
-  return t;
-}
+// function totalTen(kouhiId: number, items: VisitItem[]): number {
+//   let t = 0;
+//   items.forEach(item => {
+//     const kouhiList = item.hoken.kouhiList;
+//     if( kouhiListIncludes(kouhiList, kouhiId) ){
+//       t += item.meisai.totalTen;
+//     }
+//   })
+//   return t;
+// }

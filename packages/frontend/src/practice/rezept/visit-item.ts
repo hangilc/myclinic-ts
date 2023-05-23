@@ -19,7 +19,7 @@ export interface VisitItem {
   hoken: HokenInfo;
   patient: Patient;
   onshiResult?: OnshiResult;
-  meisai: Meisai;
+  // meisai: Meisai;
   visitEx: VisitEx;
   comments: CommentItem[];
   shoukiList: ShoujouhoukiItem[];
