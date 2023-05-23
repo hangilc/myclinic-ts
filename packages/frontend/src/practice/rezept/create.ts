@@ -15,6 +15,7 @@ import { create症病名レコード } from "./records/shoubyoumei-record";
 import { create症状詳記レコード } from "./records/shoujoushouki-record";
 import { create特定器材レコード } from "./records/tokuteikizai-record";
 import { cvtVisitItemsToDataList } from "./shinryoukoui-item-util";
+import { TensuuCollector } from "./tensuu-collector";
 import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
 import {
   calcFutanKubun,
@@ -76,10 +77,11 @@ async function create(year: number, month: number, 診査機関: number): Promis
     const items = classified[key];
     const hoken = items[0].hoken;
     const kouhiList: Kouhi[] = collectKouhi(items);
+    const kouhiIdList = kouhiList.map(k => k.kouhiId);
     const gendo = resolveGendo(items);
     const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
     const patient: Patient = items[0].patient;
-    let souten = 0;
+    let tenCol = new TensuuCollector(kouhiList.length);
     rows.push(createレセプト共通レコード({
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
@@ -89,6 +91,8 @@ async function create(year: number, month: number, 診査機関: number): Promis
       patient,
       tokkkijikouGendogaku: tokkijikouGendo,
     }));
+    const shinryouDataList = cvtVisitItemsToDataList(items, kouhiIdList);
+    shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
     if (hoken.shahokokuho || hoken.koukikourei) {
       rows.push(create保険者レコード({
         items,
@@ -115,13 +119,9 @@ async function create(year: number, month: number, 診査機関: number): Promis
         rows.push(create症病名レコード({ item }));
       })
     }
-    const kouhiIdList = kouhiList.map(k => k.kouhiId);
-    {
-      const dataList = cvtVisitItemsToDataList(items, kouhiIdList);
-      dataList.forEach(data => {
-        rows.push(mk診療行為レコード(data));
-      })
-    }
+    shinryouDataList.forEach(data => {
+      rows.push(mk診療行為レコード(data));
+    });
     {
       const iyakuhinItems = composeIyakuhinItems(items, kouhiList.map(k => k.kouhiId));
       iyakuhinItems.forEach(iyakuhinItem => rows.push(create医薬品レコード({ item: iyakuhinItem })));
