@@ -1,15 +1,17 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import { Payment, WqueueState } from "myclinic-model";
+  import { Payment, Visit, WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
-  import { calcGendogaku, calcMonthlyFutan, listMonthlyPayment } from "@/lib/gendogaku";
+  import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
+  import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
+  import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -19,19 +21,22 @@
     if (visitId && visitId > 0 && patient) {
       cashierVisitId.set(visitId);
       const meisai = await api.getMeisai(visitId);
+      console.log("meisai charge", meisai.charge);
       const visit = await api.getVisit(visitId);
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;
       const month = kd.month;
-      const gendogaku: number | undefined = await calcGendogaku(patient.patientId, year, month);
+      const gendogaku: number | undefined = await calcGendogaku(
+        patient.patientId,
+        year,
+        month
+      );
       let payments: Payment[] | undefined = undefined;
-      if( gendogaku != undefined ){
+      if (gendogaku != undefined) {
         payments = await listMonthlyPayment(patient.patientId, year, month);
       }
-      // let monthlyFutan: number | undefined = undefined;
-      // if( gendogaku != undefined) {
-      //   monthlyFutan = await calcMonthlyFutan(patient.patientId, year, month);
-      // }
+      const kouhiCalcs = await resolveKouhiCalcs(visit);
+      meisai.charge = calcMadoguchiFutan(meisai.totalTen, meisai.futanWari, kouhiCalcs);
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
@@ -43,6 +48,15 @@
         },
       });
     }
+  }
+
+  async function resolveKouhiCalcs(visit: Visit): Promise<KouhiCalc[]> {
+    const kouhiList = await Promise.all(
+      [visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id]
+        .filter((id) => id > 0)
+        .map(async (kouhiId) => await api.getKouhi(kouhiId))
+    );
+    return kouhiList.map(kouhi => resolveKouhiCalc(kouhi) ?? (rc => rc));
   }
 
   function onEndPatientClick() {

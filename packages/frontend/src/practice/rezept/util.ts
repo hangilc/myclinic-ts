@@ -251,8 +251,6 @@ export function shochiYakuzaiKingakuToTen(kingaku: number): number {
   }
 }
 
-
-
 export function hasHoken(visitItem: VisitItem): boolean {
   return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;
 }
