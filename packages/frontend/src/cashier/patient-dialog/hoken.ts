@@ -109,7 +109,7 @@ export class Hoken {
   }
 
   static kouhiRep(h: Kouhi): string {
-    return kouhiRep(h.futansha);
+    return kouhiRep(h.futansha, h.memoAsJson);
   }
 
   get name(): string {

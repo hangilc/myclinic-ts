@@ -1,29 +1,50 @@
-import { 負担区分コードRev, type 負担区分コードCode } from "./codes";
+import type { 負担区分コードCode } from "./codes";
 
 export class TensuuCollector {
-  hokenTen: number = 0;
-  kouhiTen: number[];
-  souten: number = 0;
+  totalTen: Map<負担区分コードCode, number> = new Map();
 
-  constructor(nhoken: number) {
-    this.kouhiTen = [];
-    for(let i=0;i<nhoken;i++){
-      this.kouhiTen.push(0);
+  add(futanKubun: 負担区分コードCode, ten: number): void {
+    if (this.totalTen.has(futanKubun)) {
+      this.totalTen.set(futanKubun, this.totalTen.get(futanKubun)! + ten);
+    } else {
+      this.totalTen.set(futanKubun, ten);
     }
   }
 
-  add(futanKubun: 負担区分コードCode, ten: number): void {
-    const key = 負担区分コードRev.get(futanKubun)!;
-    key.split("").forEach(c => {
-      if( c === "H" ){
-        this.hokenTen += ten;
-      } else {
-        const i = parseInt(c) - 1;
-        this.kouhiTen[i] += ten;
-      }
-      if( c === "H" || c === "1" ){
-        this.souten += ten;
+  getHokenTotal(): number {
+    return this.reduce(key => key.includes("H"));
+  }
+
+  getKouhiTotals(): number[] {
+    let totals = [0, 0, 0, 0];
+    this.traverse((key, ten) => {
+      for (let i = 1; i <= 4; i++) {
+        if (key.includes(i.toString())) {
+          totals[i - 1] += ten;
+        }
       }
     })
+    return totals;
+  }
+
+  getRezeptSouten(): number {
+    return this.reduce(key => key.includes("H") || key.includes("1"));
+  }
+
+  traverse(handler: (key: string, ten: number) => void): void {
+    for (let key of this.totalTen.keys()) {
+      const ten = this.totalTen.get(key)!;
+      handler(key, ten);
+    }
+  }
+
+  reduce(filter: (key: string) => boolean): number {
+    let acc = 0;
+    this.traverse((key, ten) => {
+      if (filter(key)) {
+        acc += ten;
+      }
+    })
+    return acc;
   }
 }

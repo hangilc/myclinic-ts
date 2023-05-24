@@ -15,7 +15,8 @@ export function hokenRep(visit: VisitEx): string {
     terms.push(roujinRep(hoken.roujin.futanWari));
   }
   for( let kouhi of hoken.kouhiList ){
-    terms.push(kouhiRep(kouhi.futansha));
+    console.log("kouhi", kouhi);
+    terms.push(kouhiRep(kouhi.futansha, kouhi.memoAsJson));
   }
   if( terms.length === 0 ){
     return "自費";
@@ -106,7 +107,10 @@ export function roujinRep(futanWari: number): string {
   return `老人${futanWari}割`;
 }
 
-export function kouhiRep(futanshaBangou: number): string {
+export function kouhiRep(futanshaBangou: number, memo?: any): string {
+  if( memo && memo.name ){
+    return memo.name;
+  }
   const s = futanshaBangou.toString();
   if( s.length === 8 ){
     if( s === "52138013" ){
@@ -150,16 +154,6 @@ export function kouhiRep(futanshaBangou: number): string {
   }
   return `公費負担（${futanshaBangou}）`;
 }
-
-// export function kouhiRep(futanshaBangou: number): string {
-//   if ((idiv(futanshaBangou, 1000000)) == 41){ return  "マル福"; }
-//   else if (idiv(futanshaBangou, 1000) == 80136) { return "マル障（１割負担）"; }
-//   else if (idiv(futanshaBangou, 1000) == 80137) { return "マル障（負担なし）"; }
-//   else if (idiv(futanshaBangou, 1000) == 81136) { return "マル親（１割負担）"; }
-//   else if (idiv(futanshaBangou, 1000) == 81137) { return "マル親（負担なし）"; }
-//   else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
-//   else { return `公費負担（${futanshaBangou}）`; }
-// }
 
 export function isKoukikourei(hokenshaBangou: number): boolean {
   return Math.floor(hokenshaBangou / 1000000) === 39;

@@ -54,7 +54,6 @@
         koukikoureiList,
         kouhiList,
         onshiResult: onshi ? OnshiResult.cast(JSON.parse(onshi.kakunin)) : undefined,
-        // birthdate: visit.patient.birthday,
         visitDate: dateToSqlDate(visit.visitedAtAsDate),
       },
     });

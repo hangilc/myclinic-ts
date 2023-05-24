@@ -339,6 +339,8 @@ export class Koukikourei {
 }
 
 export class Kouhi {
+  memoAsJson: any;
+
   constructor(
     public kouhiId: number,
     public futansha: number,
@@ -347,7 +349,9 @@ export class Kouhi {
     public validUpto: string,
     public patientId: number,
     public memo?: string,
-  ) { }
+  ) { 
+    this.memoAsJson = memo ? JSON.parse(memo) : {};
+  }
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
@@ -390,7 +394,12 @@ export class HokenInfo {
   }
 
   static cast(arg: any): HokenInfo {
-    return new HokenInfo(arg);
+    return new HokenInfo({
+      shahokokuho: arg.shahokokuho ? Shahokokuho.cast(arg.shahokokuho) : undefined,
+      roujin: arg.roujin ? Roujin.cast(arg.roujin) : undefined,
+      koukikourei: arg.koukikourei ? Koukikourei.cast(arg.koukikourei) : undefined,
+      kouhiList: arg.kouhiList ? arg.kouhiList.map((arg: any) => Kouhi.cast(arg)) : [],
+    });
   }
 }
 

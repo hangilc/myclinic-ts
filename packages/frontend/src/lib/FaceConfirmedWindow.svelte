@@ -350,7 +350,7 @@
         {/if}
       </div>
       {#each resolved.kouhiList as kouhi (kouhi.kouhiId)}
-        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha)}</div>
+        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha, kouhi.memoAsJson)}</div>
       {/each}
     {/if}
   </div>

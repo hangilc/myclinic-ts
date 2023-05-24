@@ -3,6 +3,7 @@
   import api from "@/lib/api";
   import type { ClinicInfo } from "myclinic-model";
   import { createShaho } from "./create";
+  import { listKouhi } from "./list-kouhi";
 
   export let isVisible: boolean;
   let year: number;
@@ -35,6 +36,14 @@
     preShow = content;
   }
 
+  async function doListKouhi() {
+    const result = await listKouhi(year, month);
+    const s = result.map(r => {
+      return `${r.patient.fullName()} (${r.patient.patientId}): ${r.kouhiList.join("、")}\n`
+    }).join("");
+    alert(s);
+  }
+
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
@@ -43,6 +52,7 @@
       <input type="text" bind:value={year} />年
       <input type="text" bind:value={month }/>月
       <button on:click={doStart}>開始</button>
+      <a href="javascript:void(0)" on:click={doListKouhi}>公費リスト</a>
     </div>
   </ServiceHeader>
   {#if preShow !== undefined}

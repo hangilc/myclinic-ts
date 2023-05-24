@@ -1095,11 +1095,11 @@ export default {
   },
 
   getKoukikourei(koukikoureiId: number): Promise<m.Koukikourei> {
-    return get("get-koukikourei", { "shahokoku-id": koukikoureiId.toString() }, m.Koukikourei.cast);
+    return get("get-koukikourei", { "koukikourei-id": koukikoureiId.toString() }, m.Koukikourei.cast);
   },
 
   getKouhi(kouhiId: number): Promise<m.Kouhi> {
-    return get("get-kouhi", { "shahokoku-id": kouhiId.toString() }, m.Kouhi.cast);
+    return get("get-kouhi", { "kouhi-id": kouhiId.toString() }, m.Kouhi.cast);
   },
 
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {

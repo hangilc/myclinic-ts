@@ -39,6 +39,6 @@ export class KouhiItem {
   }
 
   rep(): string {
-    return kouhiRep(this.kouhi.futansha);
+    return kouhiRep(this.kouhi.futansha, this.kouhi.memoAsJson);
   }
 }

@@ -74,6 +74,8 @@ async function create(year: number, month: number, 診査機関: number): Promis
   let serial = 1;
   const firstDay = firstDayOfMonth(year, month);
   const lastDay = lastDayOfMonth(year, month);
+  let rezeptCount = 0;
+  let rezeptSouten = 0;
   for (let key in classified) {
     const items = classified[key];
     const hoken = items[0].hoken;
@@ -82,7 +84,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
     const gendo = resolveGendo(items);
     const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
     const patient: Patient = items[0].patient;
-    let tenCol = new TensuuCollector(kouhiList.length);
+    let tenCol = new TensuuCollector();
     rows.push(createレセプト共通レコード({
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
@@ -100,14 +102,17 @@ async function create(year: number, month: number, 診査機関: number): Promis
     kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
     if (hoken.shahokokuho || hoken.koukikourei) {
       rows.push(create保険者レコード({
-        items, souten: tenCol.hokenTen, futanKingaku: undefined,
+        items, souten: tenCol.getHokenTotal(), futanKingaku: undefined,
       }));
     }
-    kouhiList.forEach((kouhi, index) => {
-      rows.push(create公費レコード({
-        kouhi, items, souten: resolveKouhiSouten(tenCol.kouhiTen[index])
-      }))
-    })
+    {
+      const kouhiTotals: number[] = tenCol.getKouhiTotals();
+      kouhiList.forEach((kouhi, index) => {
+        rows.push(create公費レコード({
+          kouhi, items, souten: kouhiTotals[index]
+        }))
+      })
+    }
     {
       const edaban = resolveEdaban(items);
       if (edaban) {
@@ -147,12 +152,14 @@ async function create(year: number, month: number, 診査機関: number): Promis
         }))
       })
     })
-    rows.push(create診療報酬請求書レコード({
-      rezeptCount: calcRezeptCount(items),
-      totalTen: tenCol.souten,
-    }))
+    rezeptCount += calcRezeptCount(items);
+    rezeptSouten += tenCol.getRezeptSouten();
   }
-  return rows.join("\r\n") + "\r\n\x1A";
+  rows.push(create診療報酬請求書レコード({
+    rezeptCount: rezeptCount,
+    totalTen: rezeptSouten,
+  }))
+return rows.join("\r\n") + "\r\n\x1A";
 }
 
 async function 医療機関情報レコード(year: number, month: number, 診査機関: number): Promise<string> {

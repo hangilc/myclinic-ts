@@ -276,7 +276,7 @@
         </div>
       {/each}
       {#each kouhiList as kouhi (kouhi.kouhiId)}
-        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha)}</div>
+        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha, kouhi.memoAsJson)}</div>
         <!-- <div>
           <label>
             <input type="checkbox" checked data-cy="kouhi-input" data-kouhi-id={kouhi.kouhiId}/>
