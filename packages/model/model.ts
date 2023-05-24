@@ -345,7 +345,8 @@ export class Kouhi {
     public jukyuusha: number,
     public validFrom: string,
     public validUpto: string,
-    public patientId: number
+    public patientId: number,
+    public memo?: string,
   ) { }
 
   isValidAt(at: Date | string): boolean {
@@ -359,7 +360,8 @@ export class Kouhi {
       arg.jukyuusha,
       arg.validFrom,
       arg.validUpto,
-      arg.patientId
+      arg.patientId,
+      arg.memo,
     );
   }
 }

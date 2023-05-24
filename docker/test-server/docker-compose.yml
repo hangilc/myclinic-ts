@@ -3,7 +3,6 @@ services:
   mysql:
     image: "myclinic-test-db"
     build: "./db"
-    # image: "hangilc/myclinic-mysql-demo:1.0.0"
     ports:
       - "33060:3306"
   files:
