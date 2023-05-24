@@ -1,12 +1,12 @@
 import api from "@/lib/api";
-import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
+import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, VisitEx } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード, 診療識別コード } from "./codes";
-import { composeIyakuhinItems, cvtVisitItemsToIyakuhinDataList } from "./iyakuhin-item-util";
+import { cvtVisitItemsToIyakuhinDataList } from "./iyakuhin-item-util";
 import { createコメントレコード } from "./records/comment-record";
 import { createレセプト共通レコード } from "./records/common-record";
 import { create保険者レコード } from "./records/hokensha-record";
-import { create医薬品レコード, mk医薬品レコード } from "./records/iyakuhin-record";
+import { mk医薬品レコード } from "./records/iyakuhin-record";
 import { create公費レコード } from "./records/kouhi-record";
 import { create医療機関情報レコード } from "./records/medical-institute-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
@@ -14,10 +14,10 @@ import { create資格確認レコード } from "./records/shikaku-kakunin-record
 import { mk診療行為レコード } from "./records/shinryoukoui-record";
 import { create症病名レコード } from "./records/shoubyoumei-record";
 import { create症状詳記レコード } from "./records/shoujoushouki-record";
-import { create特定器材レコード } from "./records/tokuteikizai-record";
-import { cvtVisitItemsToDataList, cvtVisitItemsToShinryouDataList } from "./shinryoukoui-item-util";
+import { mk特定器材レコード } from "./records/tokuteikizai-record";
+import { cvtVisitItemsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
-import { composeTokuteikizaiItems } from "./tokuteikizai-item-util";
+import { cvtVisitItemsToKizaiDataList } from "./tokuteikizai-item-util";
 import {
   calcFutanKubun,
   calcRezeptCount,
@@ -96,6 +96,8 @@ async function create(year: number, month: number, 診査機関: number): Promis
     shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
     const iyakuhinDataList = cvtVisitItemsToIyakuhinDataList(items, kouhiIdList);
     iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
+    const kizaiDataList = cvtVisitItemsToKizaiDataList(items, kouhiIdList);
+    kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
     if (hoken.shahokokuho || hoken.koukikourei) {
       rows.push(create保険者レコード({
         items, souten: tenCol.hokenTen, futanKingaku: undefined,
@@ -124,10 +126,7 @@ async function create(year: number, month: number, 診査機関: number): Promis
     }
     shinryouDataList.forEach(data => rows.push(mk診療行為レコード(data)));
     iyakuhinDataList.forEach(data => rows.push(mk医薬品レコード(data)));
-    {
-      const kizaiItems = composeTokuteikizaiItems(items, kouhiList.map(k => k.kouhiId));
-      kizaiItems.forEach(kizaiItem => rows.push(create特定器材レコード({ item: kizaiItem })));
-    }
+    kizaiDataList.forEach(data => rows.push(mk特定器材レコード(data)));
     items.forEach(visitItem => {
       const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId),
         kouhiList.map(k => k.kouhiId));

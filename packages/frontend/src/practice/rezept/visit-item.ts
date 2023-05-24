@@ -40,22 +40,22 @@ export interface DiseaseItem {
 //   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
 // }
 
-export interface IyakuhinItem {
-  shikibetsucode: string;
-  futanKubun: 負担区分コードCode;
-  iyakuhincode: number;
-  amount: number;
-  tensuu?: number;
-  count: number;
-  santeibiInfo: Record<SanteibiDate, SanteibiCount>;
-}
+// export interface IyakuhinItem {
+//   shikibetsucode: string;
+//   futanKubun: 負担区分コードCode;
+//   iyakuhincode: number;
+//   amount: number;
+//   tensuu?: number;
+//   count: number;
+//   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
+// }
 
-export interface TokuteikizaiItem {
-  shikibetsucode: string;
-  futanKubun: 負担区分コードCode;
-  kizaicode: number;
-  amount: number;
-  tensuu?: number;
-  count: number;
-  santeibiInfo: Record<SanteibiDate, SanteibiCount>;
-}
+// export interface TokuteikizaiItem {
+//   shikibetsucode: string;
+//   futanKubun: 負担区分コードCode;
+//   kizaicode: number;
+//   amount: number;
+//   tensuu?: number;
+//   count: number;
+//   santeibiInfo: Record<SanteibiDate, SanteibiCount>;
+// }
