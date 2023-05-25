@@ -1,4 +1,4 @@
-import type { 負担区分コードCode } from "./codes";
+import { 負担区分コードRev, type 負担区分コードCode } from "./codes";
 
 export class TensuuCollector {
   totalTen: Map<負担区分コードCode, number> = new Map();
@@ -12,6 +12,7 @@ export class TensuuCollector {
   }
 
   getHokenTotal(): number {
+    console.log("hokenTotal", this.totalTen);
     return this.reduce(key => key.includes("H"));
   }
 
@@ -34,7 +35,8 @@ export class TensuuCollector {
   traverse(handler: (key: string, ten: number) => void): void {
     for (let key of this.totalTen.keys()) {
       const ten = this.totalTen.get(key)!;
-      handler(key, ten);
+      const name: string = 負担区分コードRev.get(key)!;
+      handler(name, ten);
     }
   }
 

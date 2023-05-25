@@ -1,6 +1,6 @@
 import { pad } from "@/lib/pad";
 import type { HokenInfo } from "myclinic-model";
-import { hokenshaBangouOfHoken } from "../util";
+import { adjustOptString, hokenshaBangouOfHoken } from "../util";
 import type { VisitItem } from "../visit-item";
 
 function mk保険者レコード({
@@ -49,7 +49,7 @@ export function create保険者レコード({
   const hoken = items[0].hoken;
   return mk保険者レコード({
     保険者番号: formatHokenshaBangou(hokenshaBangouOfHoken(hoken)),
-    被保険者証記号: kigou(hoken),
+    被保険者証記号: adjustOptString(kigou(hoken)),
     被保険者証番号: bangou(hoken),
     診療実日数: jitsuNissu(items),
     合計点数: souten,
@@ -92,6 +92,3 @@ function jitsuNissu(items: VisitItem[]): number {
   return days.length;
 }
 
-// function souten(items: VisitItem[]): number {
-//   return items.reduce((acc, ele) => acc + ele.meisai.totalTen, 0);
-// }

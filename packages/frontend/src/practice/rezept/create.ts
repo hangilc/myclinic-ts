@@ -21,6 +21,7 @@ import { cvtVisitItemsToKizaiDataList } from "./tokuteikizai-item-util";
 import {
   calcFutanKubun,
   calcRezeptCount,
+  calcSeikyuuMonth,
   composeDiseaseItem,
   extract都道府県コードfromAddress,
   firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList
@@ -110,7 +111,8 @@ export async function createKokuho(year: number, month: number): Promise<string>
 
 async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
   const rows: string[] = [];
-  rows.push(await 医療機関情報レコード(year, month, 診査機関));
+  const [seikyuuYear, seikyuuMonth] = calcSeikyuuMonth(year, month);
+  rows.push(await 医療機関情報レコード(seikyuuYear, seikyuuMonth, 診査機関));
   const classified: Record<string, VisitItem[]> = {};
   visitItems.forEach(item => {
     const [key, vitem] = item;
@@ -138,8 +140,8 @@ async function create(year: number, month: number, 診査機関: number, visitIt
       rezeptSerialNumber: serial++,
       hoken: items[0].hoken,
       kouhiList,
-      year,
-      month,
+      year: year,
+      month: month,
       patient,
       tokkkijikouGendogaku: tokkijikouGendo,
     }));

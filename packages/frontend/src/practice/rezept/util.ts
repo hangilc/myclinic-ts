@@ -5,6 +5,7 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 負担区分コードCode } from "./codes";
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
+import { toZenkaku } from "@/lib/zenkaku";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -280,3 +281,33 @@ export function calcRezeptCount(items: VisitItem[]): number {
   return items.reduce((acc, ele) => acc + count(ele), 0);
 }
 
+export function calcSeikyuuMonth(year: number, month: number): [number, number] {
+  let d = new Date(year, month - 1, 1);
+  d = kanjidate.addMonths(d, 1);
+  return [d.getFullYear(), d.getMonth() + 1];
+}
+
+function isAllAscii(s: string): boolean {
+  for(let c of s){
+    if( c.charCodeAt(0) >= 256 ){
+      return false;
+    }
+  }
+  return true;
+}
+
+export function adjustString(s: string): string {
+  if( isAllAscii(s) ){
+    return s;
+  } else {
+    return toZenkaku(s);
+  }
+}
+
+export function adjustOptString(s: string | undefined): string | undefined {
+  if( s === undefined ){
+    return undefined;
+  } else {
+    return adjustString(s);
+  }
+}
