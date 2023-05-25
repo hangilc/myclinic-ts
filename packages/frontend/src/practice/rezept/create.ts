@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, VisitEx } from "myclinic-model";
+import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード, 診療識別コード } from "./codes";
 import { cvtVisitItemsToIyakuhinDataList } from "./iyakuhin-item-util";
@@ -23,45 +23,94 @@ import {
   calcRezeptCount,
   composeDiseaseItem,
   extract都道府県コードfromAddress,
-  firstDayOfMonth, hasHoken, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList
+  firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList
 } from "./util";
 import type { VisitItem } from "./visit-item";
 
-export async function createShaho(year: number, month: number): Promise<string> {
-  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金);
+export type RezeptRecordKey = string;
+let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+
+async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
+  if (visitItemsCache === undefined) {
+    const visits = (await api.listVisitByMonth(year, month)).filter(visit => {
+      if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
+        throw new Error("重複保険：" + visit.visitId);
+      }
+      return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
+    });
+    visitItemsCache = await Promise.all(visits.map(async visit => {
+      const hoken = await api.getHokenInfoForVisit(visit.visitId);
+      sortKouhiList(hoken.kouhiList);
+      let onshiResult: OnshiResult | undefined;
+      const onshi = await api.findOnshi(visit.visitId);
+      if (onshi) {
+        onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+      }
+      const patient: Patient = await api.getPatient(visit.patientId);
+      const meisai: Meisai = await api.getMeisai(visit.visitId);
+      const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
+      return [mkRecordKey(visit.patientId, hoken), {
+        visit,
+        hoken,
+        patient,
+        onshiResult,
+        meisai,
+        visitEx,
+        comments: [],
+        shoukiList: [],
+      }];
+    }));
+    return visitItemsCache;
+  } else {
+    return visitItemsCache;
+  }
 }
 
-async function create(year: number, month: number, 診査機関: number): Promise<string> {
+async function getSeikyuuVisitItems(year: number, month: number):
+  Promise<[[RezeptRecordKey, VisitItem][], [RezeptRecordKey, VisitItem][]]> {
+  if (shiharaiKikinItemsCache !== undefined && kokuhoRengouItemsCache !== undefined) {
+    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
+  } else {
+    shiharaiKikinItemsCache = [];
+    kokuhoRengouItemsCache = [];
+    const visitItems = await getVisitItems(year, month);
+    visitItems.forEach(entry => {
+      const [key, item] = entry;
+      const hoken = item.hoken;
+      if (hoken.shahokokuho) {
+        if (is国保(hoken.shahokokuho.hokenshaBangou)) {
+          kokuhoRengouItemsCache!.push(entry);
+        } else {
+          shiharaiKikinItemsCache!.push(entry);
+        }
+      } else if (hoken.koukikourei) {
+        kokuhoRengouItemsCache!.push(entry);
+      } else { // 公費のみ
+        if (hoken.kouhiList.length === 0) {
+          throw new Error("No hoken and no kouhi: " + JSON.stringify(item.visit));
+        }
+        shiharaiKikinItemsCache!.push(entry);
+      }
+    });
+    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
+  }
+}
+
+export async function createShaho(year: number, month: number): Promise<string> {
+  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
+}
+
+export async function createKokuho(year: number, month: number): Promise<string> {
+  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
+}
+
+async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
   const rows: string[] = [];
   rows.push(await 医療機関情報レコード(year, month, 診査機関));
-  const visits = (await api.listVisitByMonth(year, month)).filter(visit => {
-    if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
-      throw new Error("重複保険：" + visit.visitId);
-    }
-    return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
-  });
-  const visitItems: [string, VisitItem][] = await Promise.all(visits.map(async visit => {
-    const hoken = await api.getHokenInfoForVisit(visit.visitId);
-    sortKouhiList(hoken.kouhiList);
-    let onshiResult: OnshiResult | undefined;
-    const onshi = await api.findOnshi(visit.visitId);
-    if (onshi) {
-      onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
-    }
-    const patient: Patient = await api.getPatient(visit.patientId);
-    const meisai: Meisai = await api.getMeisai(visit.visitId);
-    const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
-    return [mkRecordKey(visit.patientId, hoken), {
-      visit,
-      hoken,
-      patient,
-      onshiResult,
-      meisai,
-      visitEx,
-      comments: [],
-      shoukiList: [],
-    }];
-  }));
   const classified: Record<string, VisitItem[]> = {};
   visitItems.forEach(item => {
     const [key, vitem] = item;
@@ -159,11 +208,12 @@ async function create(year: number, month: number, 診査機関: number): Promis
     rezeptCount: rezeptCount,
     totalTen: rezeptSouten,
   }))
-return rows.join("\r\n") + "\r\n\x1A";
+  return rows.join("\r\n") + "\r\n\x1A";
 }
 
 async function 医療機関情報レコード(year: number, month: number, 診査機関: number): Promise<string> {
   const clinicInfo: ClinicInfo = await api.getClinicInfo();
+  console.log(clinicInfo, 診査機関);
   return create医療機関情報レコード({
     診査支払い機関: 診査機関,
     都道府県: extract都道府県コードfromAddress(clinicInfo.address),

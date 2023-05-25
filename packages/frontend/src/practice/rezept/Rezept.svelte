@@ -2,7 +2,7 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import type { ClinicInfo } from "myclinic-model";
-  import { createShaho } from "./create";
+  import { createKokuho, createShaho } from "./create";
   import { listKouhi } from "./list-kouhi";
 
   export let isVisible: boolean;
@@ -10,6 +10,7 @@
   let month: number;
   let clinicInfo: ClinicInfo | undefined = undefined;
   let preShow: string | undefined = undefined;
+  let shiharaiSelect: "shaho"| "kokuho" = "shaho";
 
   initDate();
   initClinicInfo();
@@ -31,9 +32,27 @@
     console.log(clinicInfo);
   }
 
+  async function createContent(): Promise<string> {
+    return await (shiharaiSelect === "shaho" ? createShaho(year, month) : createKokuho(year, month));
+  }
+
   async function doStart() {
-    const content = await createShaho(year, month);
+    const content: string = await createContent();
     preShow = content;
+  }
+
+  async function doDownload() {
+    const content: string = await createContent();
+    const bytes: Uint8Array = new TextEncoder().encode(content);
+    const blob = new Blob([bytes]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.download = "RECEIPTC.UKE";
+    a.href = url;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   async function doListKouhi() {
@@ -51,7 +70,10 @@
     <div class="start-block">
       <input type="text" bind:value={year} />年
       <input type="text" bind:value={month }/>月
+      <input type="radio" bind:group={shiharaiSelect} value="shaho" />社保
+      <input type="radio" bind:group={shiharaiSelect} value="kokuho" />国保
       <button on:click={doStart}>開始</button>
+      <button on:click={doDownload}>ダウンロード</button>
       <a href="javascript:void(0)" on:click={doListKouhi}>公費リスト</a>
     </div>
   </ServiceHeader>
@@ -68,4 +90,9 @@
   .start-block input {
     width: 4em;
   }
+
+  input[type=radio] {
+    width: auto;
+  }
+
 </style>
