@@ -146,11 +146,11 @@ async function create(year: number, month: number, 診査機関: number, visitIt
       tokkkijikouGendogaku: tokkijikouGendo,
     }));
     const shinryouDataList = cvtVisitItemsToShinryouDataList(items, kouhiIdList);
-    shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
+    shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
     const iyakuhinDataList = cvtVisitItemsToIyakuhinDataList(items, kouhiIdList);
-    iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
+    iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
     const kizaiDataList = cvtVisitItemsToKizaiDataList(items, kouhiIdList);
-    kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数!));
+    kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
     if (hoken.shahokokuho || hoken.koukikourei) {
       rows.push(create保険者レコード({
         items, souten: tenCol.getHokenTotal(), futanKingaku: undefined,
