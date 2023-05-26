@@ -1,5 +1,5 @@
 import type { HokenInfo, Kouhi, Patient } from "myclinic-model";
-import { 男女区分コード, type レセプト特記事項コードCode } from "../codes";
+import { 男女区分コード } from "../codes";
 import { formatYearMonth, is国保, resolve保険種別 } from "../util";
 
 function mkレセプト共通レコード({

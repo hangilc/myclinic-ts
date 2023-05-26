@@ -1,3 +1,4 @@
+import { pad } from "@/lib/pad";
 import type { DiseaseEndReasonType } from "myclinic-model";
 import { 転帰区分コード, type 転帰区分コードCode } from "../codes";
 import type { DiseaseItem } from "../visit-item";
@@ -17,7 +18,7 @@ function mk症病名レコード({
 }): string {
   return [
     "SY", // 1 レコード識別情報
-    傷病名コード.toString(), // 2
+    pad(傷病名コード.toString(), 7, "0"), // 2
     診療開始日, // 3
     転帰区分.toString(), // 4
     修飾語コード, // 5
