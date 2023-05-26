@@ -575,17 +575,6 @@ export default {
     );
   },
 
-  // resolveIyakuhincode(
-  //   iyakuhincode: number,
-  //   at: Date | string
-  // ): Promise<number | null> {
-  //   return get(
-  //     "resolve-iyakuhincode",
-  //     { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
-  //     castOption(castNumber)
-  //   );
-  // },
-
   resolveKizaicodeByName(
     name: string,
     at: Date | string
@@ -640,6 +629,15 @@ export default {
       { text, at: dateParam(at) },
       castList(m.ShinryouMaster.cast)
     );
+  },
+
+  updateShinryou(shinryou: m.Shinryou): Promise<m.Shinryou> {
+    return post(
+      "update-shinryou",
+      shinryou,
+      { },
+      m.Shinryou.cast
+    )
   },
 
   deleteShinryou(shinryouId: number): Promise<boolean> {
