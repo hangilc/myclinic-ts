@@ -598,11 +598,12 @@ export class Shinryou {
   constructor(
     public shinryouId: number,
     public visitId: number,
-    public shinryoucode: number
+    public shinryoucode: number,
+    public memo?: string,
   ) { }
 
   static cast(arg: any): Shinryou {
-    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode);
+    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode, arg.memo);
   }
 }
 
@@ -611,6 +612,7 @@ export class ShinryouEx {
     public shinryouId: number,
     public visitId: number,
     public shinryoucode: number,
+    public memo: string | undefined,
     public master: ShinryouMaster
   ) { }
 
@@ -619,6 +621,7 @@ export class ShinryouEx {
       arg.shinryouId,
       arg.visitId,
       arg.shinryoucode,
+      arg.memo,
       ShinryouMaster.cast(arg.master)
     );
   }
