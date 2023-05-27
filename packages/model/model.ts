@@ -616,12 +616,21 @@ export class ShinryouEx {
     public master: ShinryouMaster
   ) { }
 
+  asShinryou(): Shinryou {
+    return new Shinryou(
+      this.shinryouId,
+      this.visitId,
+      this.shinryoucode,
+      this.memo
+    );
+  }
+
   static cast(arg: any): ShinryouEx {
     return new ShinryouEx(
       arg.shinryouId,
       arg.visitId,
       arg.shinryoucode,
-      arg.memo,
+      arg.memo ?? undefined,
       ShinryouMaster.cast(arg.master)
     );
   }

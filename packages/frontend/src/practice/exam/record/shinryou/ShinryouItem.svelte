@@ -2,14 +2,35 @@
   import api from "@/lib/api";
   import type { ShinryouEx } from "myclinic-model";
   import { confirm } from "@/lib/confirm-call"
+  import ShinryouMemoDialog from "./ShinryouMemoDialog.svelte";
 
   export let shinryou: ShinryouEx;
   let mode = "disp";
+  console.log("initial shinryou", shinryou);
 
   async function doDelete() {
     confirm("この診療行為を削除していいですか？", 
       async () => await api.deleteShinryou(shinryou.shinryouId)
     )
+  }
+
+  async function updateMemo(memo: string | undefined) {
+    console.log("newMemo", memo);
+    console.log(shinryou);
+    await api.updateShinryou(Object.assign(shinryou.asShinryou(), { memo, }))
+  }
+
+  function doMemo(): void {
+    const d: ShinryouMemoDialog = new ShinryouMemoDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        memo: shinryou.memo,
+        onEnter: (newMemo: string | undefined) => {
+          updateMemo(newMemo);
+        }
+      }
+    })
   }
 </script>
 
@@ -20,6 +41,7 @@
   <div>{shinryou.master.name}</div>
   <div class="commands">
     <button on:click={doDelete}>削除</button>
+    <a href="javascript:void(0)" on:click={doMemo}>メモ</a>
     <button on:click={() => mode = "disp"}>キャンセル</button>
   </div>
 </div>

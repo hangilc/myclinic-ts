@@ -335,36 +335,6 @@ appEvent.visitDeleted.subscribe(visit => {
     const curPage = get(navPage);
     gotoPage(curPage, true);
   }
-  // const visitsValue: m.VisitEx[] = get(visits);
-  // const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
-  // if (index >= 0) {
-  //   const patient = get(currentPatient);
-  //   if (patient !== null) {
-  //     taskRunner.run(
-  //       new FetchTask<number>(
-  //         () => api.countVisitByPatient(patient.patientId),
-  //         count => {
-  //           const newTotal = countVisitPages(count);
-  //           const navTotalValue = get(navTotal);
-  //           if (navTotalValue !== newTotal) {
-  //             let navPageValue = get(navPage);
-  //             if (navPageValue >= newTotal) {
-  //               navPageValue = newTotal - 1;
-  //               if (navPageValue < 0) {
-  //                 navPageValue = 0;
-  //               }
-  //               navPage.set(navPageValue);
-  //             }
-  //             navTotal.set(newTotal);
-  //             gotoPage(navPageValue);
-  //           }
-  //         }
-  //       )
-  //     )
-  //   }
-  //   visitsValue.splice(index, 1);
-  //   visits.set(visitsValue);
-  // }
 });
 
 appEvent.wqueueDeleted.subscribe(wqueue => {
@@ -411,6 +381,24 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
     visits.set(visitsValue);
   }
 });
+
+appEvent.shinryouUpdated.subscribe(async shinryou => {
+  if( shinryou == null ){
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === shinryou.visitId);
+  if( index >= 0 ){
+    const visit = visitsValue[index];
+    const shinryouList = visit.shinryouList;
+    const i = shinryouList.findIndex(s => s.shinryouId === shinryou.shinryouId);
+    if( i >= 0 ){
+      const ex = await api.getShinryouEx(shinryou.shinryouId);
+      shinryouList.splice(i, 1, ex);
+    }
+    visits.set(visitsValue);
+  }
+})
 
 appEvent.shinryouDeleted.subscribe(shinryou => {
   if (shinryou == null) {
