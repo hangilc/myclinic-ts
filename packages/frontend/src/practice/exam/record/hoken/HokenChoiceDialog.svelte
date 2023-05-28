@@ -13,6 +13,7 @@
   import { HokenItem, KouhiItem } from "./hoken-item";
   import type { OnshiResult } from "onshi-result";
   import OnshiDispDialog from "./OnshiDispDialog.svelte";
+  import HokenMemoEditorDialog from "./HokenMemoEditorDialog.svelte";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -20,7 +21,6 @@
   export let koukikoureiList: Koukikourei[];
   export let kouhiList: Kouhi[];
   export let onshiResult: OnshiResult | undefined;
-  // export let birthdate: string;
   export let visitDate: string;
   let hokenItems: HokenItem[] = [...shahokokuhoList, ...koukikoureiList].map(
     (h) => {
@@ -125,6 +125,20 @@
       },
     });
   }
+
+  function doMemo(kouhi: Kouhi): void {
+    const d: HokenMemoEditorDialog = new HokenMemoEditorDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        memo: kouhi.memo,
+        onEnter: (newMemo: string | undefined) => {
+          const newKouhi = Object.assign({}, kouhi, { memo: newMemo });
+          api.updateKouhi(newKouhi);
+        },
+      }
+    })
+  }
 </script>
 
 <Dialog title="保険選択" destroy={doClose} styleWidth="260px">
@@ -161,6 +175,7 @@
           type="checkbox"
           bind:checked={kouhiItem.checked}
         />{kouhiItem.rep()}
+        <a href="javascript:void(0)" class="memo-link" on:click={() => doMemo(kouhiItem.kouhi)}>メモ</a>
       </div>
     {/each}
   </div>
@@ -189,6 +204,15 @@
     font-size: 80%;
     color: orange;
     vertical-align: middle;
+  }
+
+  a.memo-link {
+    border: 1px solid orange;
+    vertical-align: middle;
+    padding: 2px;
+    font-size: 80%;
+    border-radius: 3px;
+    color: orange;
   }
 
   .commands {

@@ -30,6 +30,37 @@
     "description": "new Svelte component"
   },
 
+  "New Dialog": {
+    "scope": "svelte, typescript",
+    "prefix": "dialog",
+    "body": [
+      "<script lang=\"ts\">",
+      "  import Dialog from \"@/lib/Dialog.svelte\";",
+      "",
+      "  export let destroy: () => void;",
+      "",
+      "  function doClose(): void {",
+      "    destroy();",
+      "  }",
+      "</script>",
+      "",
+      "<Dialog title=\"Untitled\" destroy={doClose}>",
+      "  <div class=\"commands\">",
+      "",
+      "  </div>",
+      "</Dialog>",
+      "",
+      "<style>",
+      "  .commands {",
+      "    display: flex;",
+      "    justify-content: right;",
+      "  }",
+      "</style>",
+      ""
+    ],
+    "description": "new Svelte Dialog"
+  },
+
   "New Pulldown": {
     "scope": "svelte, typescript",
     "prefix": "pulldown",

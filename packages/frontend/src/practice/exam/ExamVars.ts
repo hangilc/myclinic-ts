@@ -259,27 +259,27 @@ appEvent.visitEntered.subscribe(async visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null) {
-    if (patient.patientId === visit.patientId ) {
+    if (patient.patientId === visit.patientId) {
       const newTotalPages = countVisitPages(totalVisits + 1);
       navTotal.set(newTotalPages);
       let focusedVisitIdValue: number | undefined = undefined;
       const currentVisitIdValue = get(currentVisitId);
-      if( currentVisitIdValue ){
+      if (currentVisitIdValue) {
         focusedVisitIdValue = currentVisitIdValue;
       } else {
         const tempVisitIdValue = get(tempVisitId);
-        if( tempVisitIdValue ){
+        if (tempVisitIdValue) {
           focusedVisitIdValue = tempVisitIdValue;
         }
       }
-      if( !focusedVisitIdValue ) {
+      if (!focusedVisitIdValue) {
         currentVisitId.set(visit.visitId);
         focusedVisitIdValue = visit.visitId;
       }
       let curPage = get(navPage);
       const curVisits = get(visits);
       const index = curVisits.findIndex(v => v.visitId === focusedVisitIdValue);
-      if( index >= 0 && index === curVisits.length - 1) {
+      if (index >= 0 && index === curVisits.length - 1) {
         curPage += 1;
       }
       gotoPage(curPage, true);
@@ -383,16 +383,16 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
 });
 
 appEvent.shinryouUpdated.subscribe(async shinryou => {
-  if( shinryou == null ){
+  if (shinryou == null) {
     return;
   }
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === shinryou.visitId);
-  if( index >= 0 ){
+  if (index >= 0) {
     const visit = visitsValue[index];
     const shinryouList = visit.shinryouList;
     const i = shinryouList.findIndex(s => s.shinryouId === shinryou.shinryouId);
-    if( i >= 0 ){
+    if (i >= 0) {
       const ex = await api.getShinryouEx(shinryou.shinryouId);
       shinryouList.splice(i, 1, ex);
     }
@@ -647,6 +647,22 @@ appEvent.chargeUpdated.subscribe(charge => {
     visit.chargeOption = charge;
     visits.set(visitsValue);
   }
+})
+
+appEvent.kouhiUpdated.subscribe(kouhi => {
+  if (kouhi == null) {
+    return;
+  }
+  console.log("updateKouhi", kouhi);
+  const visitsValue = get(visits);
+  visitsValue.forEach(visit => {
+    const kouhiList = visit.hoken.kouhiList;
+    const i = kouhiList.findIndex(k => k.kouhiId === kouhi.kouhiId);
+    if (i >= 0) {
+      kouhiList.splice(i, 1, kouhi);
+    }
+  });
+  visits.set(visitsValue);
 })
 
 

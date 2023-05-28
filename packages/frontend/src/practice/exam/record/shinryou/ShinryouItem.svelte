@@ -6,7 +6,6 @@
 
   export let shinryou: ShinryouEx;
   let mode = "disp";
-  console.log("initial shinryou", shinryou);
 
   async function doDelete() {
     confirm("この診療行為を削除していいですか？", 
@@ -15,8 +14,6 @@
   }
 
   async function updateMemo(memo: string | undefined) {
-    console.log("newMemo", memo);
-    console.log(shinryou);
     await api.updateShinryou(Object.assign(shinryou.asShinryou(), { memo, }))
   }
 

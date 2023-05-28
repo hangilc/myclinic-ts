@@ -15,7 +15,6 @@ export function hokenRep(visit: VisitEx): string {
     terms.push(roujinRep(hoken.roujin.futanWari));
   }
   for( let kouhi of hoken.kouhiList ){
-    console.log("kouhi", kouhi);
     terms.push(kouhiRep(kouhi.futansha, kouhi.memoAsJson));
   }
   if( terms.length === 0 ){

@@ -348,7 +348,7 @@ export class Kouhi {
     public validFrom: string,
     public validUpto: string,
     public patientId: number,
-    public memo?: string,
+    public memo: string | undefined,
   ) { 
     this.memoAsJson = memo ? JSON.parse(memo) : {};
   }
