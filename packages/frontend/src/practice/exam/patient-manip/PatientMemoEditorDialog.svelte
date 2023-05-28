@@ -17,6 +17,10 @@
 </script>
 
 <Dialog title="患者メモ編集" destroy={doClose}>
+  <div class="info">
+    <div>"onshi-name": "オンライン資格氏名"</div>
+    <div>"rezept-name": "レセプト氏名"</div>
+  </div>
   <div class="main">
     <textarea bind:value={memoValue} />
   </div>

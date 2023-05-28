@@ -22,18 +22,22 @@ export class OnshiPatientInconsistency {
   }
 }
 
+function patientNameEqv(patient: Patient): (onshiValue: string, patientValue: string) => boolean {
+  return (onshiValue, patientValue) => {
+    if( onshiValue === patientValue ){
+      return true;
+    }
+    const onshiName = patient.memoAsJson["onshi-name"];
+    if( onshiName && onshiValue === onshiName ){
+      return true;
+    }
+    return false;
+  }
+}
+
 export function checkOnshiPatientConsistency(ri: ResultItem, patient: Patient): OnshiPatientInconsistency[] {
   const errors: OnshiPatientInconsistency[] = [];
-  cmp("名前", ri.name, patient.fullName("　"), errors, { eqv: equalName });
-  // if (ri.nameKana) {
-  //   cmp(
-  //     "よみ",
-  //     convertHankakuKatakanaToZenkakuHiragana(ri.nameKana),
-  //     patient.fullYomi(" "), 
-  //     errors,
-  //     { eqv: equalYomi }
-  //   );
-  // }
+  cmp("名前", ri.name, patient.fullName("　"), errors, { eqv: patientNameEqv(patient) });
   cmp("生年月日", ri.birthdate, patient.birthday, errors, { rep: s => kanjidate.format(kanjidate.f2, s) });
   cmp("性別", ri.sex, patient.sexAsKanji, errors);
   return errors;
@@ -100,21 +104,21 @@ function equalName(a: string, b: string): boolean {
   return equalWithCharCmp(a, b, eq);
 }
 
-const kanaVariantMap: Record<string, string> = {
-  "ゃ": "や",
-  "ゅ": "ゆ",
-  "ょ": "よ",
-  "ェ": "ぇ",
-}
+// const kanaVariantMap: Record<string, string> = {
+//   "ゃ": "や",
+//   "ゅ": "ゆ",
+//   "ょ": "よ",
+//   "ェ": "ぇ",
+// }
 
-function equalYomi(a: string, b: string): boolean {
-  function norm(c: string): string {
-    return kanaVariantMap[c] ?? c;
-  }
+// function equalYomi(a: string, b: string): boolean {
+//   function norm(c: string): string {
+//     return kanaVariantMap[c] ?? c;
+//   }
 
-  function eq(ca: string, cb: string): boolean {
-    return ca === cb || (norm(ca) === norm(cb));
-  }
+//   function eq(ca: string, cb: string): boolean {
+//     return ca === cb || (norm(ca) === norm(cb));
+//   }
 
-  return equalWithCharCmp(a, b, eq);
-}
+//   return equalWithCharCmp(a, b, eq);
+// }

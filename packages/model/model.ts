@@ -105,6 +105,15 @@ export class Patient {
     public memo: string | undefined,
   ) { }
 
+  get memoAsJson(): any {
+    try {
+      return this.memo ? JSON.parse(this.memo) : {};
+    } catch(_ex){
+      console.error("Invalid JSON: ", this.memo);
+      return {};
+    }
+  }
+
   static cast(arg: any): Patient {
     return new Patient(
       arg.patientId,
@@ -341,8 +350,6 @@ export class Koukikourei {
 }
 
 export class Kouhi {
-  memoAsJson: any;
-
   constructor(
     public kouhiId: number,
     public futansha: number,
@@ -351,8 +358,15 @@ export class Kouhi {
     public validUpto: string,
     public patientId: number,
     public memo: string | undefined,
-  ) { 
-    this.memoAsJson = memo ? JSON.parse(memo) : {};
+  ) { }
+
+  get memoAsJson(): any {
+    try {
+      return this.memo ? JSON.parse(this.memo) : {};
+    } catch(_ex){
+      console.error("Invalid JSON: ", this.memo);
+      return {};
+    }
   }
 
   isValidAt(at: Date | string): boolean {
