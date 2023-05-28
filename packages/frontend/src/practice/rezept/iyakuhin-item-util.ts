@@ -3,7 +3,7 @@ import { 診療識別コード, type 診療識別コードCode, type 負担区�
 import type { 医薬品レコードData } from "./records/iyakuhin-record";
 import { Santeibi } from "./santeibi";
 import { calcFutanKubun, hasHoken, kizaiKingakuToTen, shochiYakuzaiKingakuToTen } from "./util";
-import type { IyakuhinItem, VisitItem } from "./visit-item";
+import type { VisitItem } from "./visit-item";
 
 interface ItemUnit {
   isEqual(arg: any): boolean;

@@ -101,7 +101,8 @@ export class Patient {
     public sex: string,
     public birthday: string,
     public address: string,
-    public phone: string
+    public phone: string,
+    public memo: string | undefined,
   ) { }
 
   static cast(arg: any): Patient {
@@ -114,7 +115,8 @@ export class Patient {
       arg.sex,
       arg.birthday,
       arg.address,
-      arg.phone
+      arg.phone,
+      arg.memo,
     );
   }
 

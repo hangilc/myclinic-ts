@@ -59,6 +59,7 @@
       birthday: validateBirthday(),
       address: validResult(address),
       phone: validResult(phone),
+      memo: init ? init.memo : undefined,
     };
     return validatePatient(input);
   }

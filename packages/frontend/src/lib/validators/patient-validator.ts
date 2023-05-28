@@ -6,7 +6,8 @@ import {
   isZeroOrPositive,
   toSqlDate,
   type VResult,
-  validated9,
+  validated10,
+  validResult,
 } from "../validation";
 
 export class PatientInput {
@@ -19,7 +20,8 @@ export class PatientInput {
     public sex: VResult<string>,
     public birthday: VResult<Date | null>,
     public address: VResult<string>,
-    public phone: VResult<string>
+    public phone: VResult<string>,
+    public memo: string | undefined,
   ) {}
 }
 
@@ -40,7 +42,7 @@ export function validatePatient(input: PatientInput): VResult<Patient> {
     .mark("生年月日");
   const address = input.address.mark("住所");
   const phone = input.phone.mark("電話番号");
-  return validated9(
+  return validated10(
     patientId,
     lastName,
     firstName,
@@ -49,6 +51,7 @@ export function validatePatient(input: PatientInput): VResult<Patient> {
     sex,
     birthday,
     address,
-    phone
+    phone,
+    validResult<string | undefined>(input.memo),
   ).map((args) => new Patient(...args));
 }

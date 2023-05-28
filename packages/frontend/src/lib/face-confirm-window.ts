@@ -49,7 +49,8 @@ export class OnshiPatient {
       this.sex,
       this.birthday,
       this.address,
-      ""
+      "",
+      undefined
     )
   }
 }

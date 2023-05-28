@@ -10,7 +10,8 @@ let patient: Patient = new Patient(
   "M",
   "2000-01-01",
   "",
-  ""
+  "",
+  undefined,
 );
 
 function doClose(): void {
