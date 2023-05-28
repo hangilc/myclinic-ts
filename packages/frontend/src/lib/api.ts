@@ -1498,6 +1498,10 @@ export default {
       "from": dateParam(from),
       "upto": dateParam(upto)
     }, castList(m.Disease.cast));
+  },
+
+  listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
+    return get("list-patient-by-onshi-name", { text: onshiName}, castList(m.Patient.cast));
   }
 
 };
