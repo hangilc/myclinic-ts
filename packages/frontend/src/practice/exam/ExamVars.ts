@@ -312,7 +312,7 @@ appEvent.visitDeleted.subscribe(visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null && visit.patientId === patient.patientId) {
-    let focusedVisitId: number | undefined = undefined;
+    let focusedVisitId: number | undefined;
     const currentVisitIdValue: number | null = get(currentVisitId);
     if (currentVisitIdValue) {
       if (currentVisitIdValue === visit.visitId) {
@@ -653,7 +653,6 @@ appEvent.kouhiUpdated.subscribe(kouhi => {
   if (kouhi == null) {
     return;
   }
-  console.log("updateKouhi", kouhi);
   const visitsValue = get(visits);
   visitsValue.forEach(visit => {
     const kouhiList = visit.hoken.kouhiList;
@@ -663,6 +662,16 @@ appEvent.kouhiUpdated.subscribe(kouhi => {
     }
   });
   visits.set(visitsValue);
+})
+
+appEvent.patientUpdated.subscribe(patient => {
+  if( patient == null ){
+    return;
+  }
+  const current = get(currentPatient);
+  if( current && current.patientId === patient.patientId ){
+    currentPatient.set(patient);
+  }
 })
 
 

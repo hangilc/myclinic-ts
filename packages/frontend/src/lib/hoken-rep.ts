@@ -106,6 +106,13 @@ export function roujinRep(futanWari: number): string {
   return `老人${futanWari}割`;
 }
 
+const toukyouKouhiHoubetsu: Record<string, string> = {
+  "82137001": "大気汚染関連疾病（負担なし）",
+  "82137555": "大気汚染関連疾病（負担なし）",
+  "82137670": "大気汚染関連疾病（負担あり）",
+  "82137530": "大気汚染関連疾病（負担あり）",
+}
+
 export function kouhiRep(futanshaBangou: number, memo?: any): string {
   if( memo && memo.name ){
     return memo.name;
@@ -134,6 +141,12 @@ export function kouhiRep(futanshaBangou: number, memo?: any): string {
       return "大気汚染";
     } else if( s === "87136008" ){
       return "妊娠高血圧";
+    }
+    {
+      const rep = toukyouKouhiHoubetsu[s];
+      if( rep ){
+        return rep;
+      }
     }
     switch(s.substring(0, 2)){
       case "54": return "難病";

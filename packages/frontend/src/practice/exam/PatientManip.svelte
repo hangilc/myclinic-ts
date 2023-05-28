@@ -12,6 +12,7 @@
   import * as kanjidate from "kanjidate";
   import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
   import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
+  import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -106,6 +107,23 @@
       });
     }
   }
+
+  function doMemo() {
+    if( $currentPatient ){
+      const patient = $currentPatient;
+      const d: PatientMemoEditorDialog = new PatientMemoEditorDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          memo: patient.memo,
+          onEnter: (newMemo: string | undefined) => {
+            const newPatient = Object.assign({}, patient, { memo: newMemo });
+            api.updatePatient(newPatient);
+          }
+        },
+      });
+    }
+  }
 </script>
 
 <div class="patient-manip top">
@@ -113,6 +131,7 @@
   <button on:click={onEndPatientClick}>患者終了</button>
   <a href="javascript:void(0)" on:click={doRegister}>診察登録</a>
   <a href="javascript:void(0)" on:click={doSearchText}>文章検索</a>
+  <a href="javascript:void(0)" on:click={doMemo}>メモ編集</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
 </div>
