@@ -9,49 +9,59 @@ import { Santeibi } from "./santeibi";
 import { calcFutanKubun, hasHoken, isEqualList } from "./util";
 import type { VisitItem } from "./visit-item";
 
-interface ItemUnit {
-  isEqual(arg: any): boolean;
-  toDataList(santeibi: Santeibi): 診療行為レコードData[];
-  shikibetsucode: 診療識別コードCode;
+class RezeptShinryou {
+  master: ShinryouMaster;
+  comments: ShinryouMemoComment[];
+
+  constructor(master: ShinryouMaster, comments: ShinryouMemoComment[]) {
+    this.master = master;
+    this.comments = comments;
+  }
 }
 
 function isSameComments(a: ShinryouMemoComment[], b: ShinryouMemoComment[]): boolean {
   return isEqualList(a, b, ShinryouMemoComment.isEqualComments);
 }
 
-function isSameShinryou(a: ShinryouEx, b: ShinryouEx): boolean {
+function isSameRezeptShinryou(a: RezeptShinryou, b: RezeptShinryou): boolean {
   return a.master.shinryoucode === b.master.shinryoucode &&
-    isSameComments(a.asShinryou().comments, b.asShinryou().comments);
+    isSameComments(a.comments, b.comments);
 }
 
-function isSameShinryouList(as: ShinryouEx[], bs: ShinryouEx[]): boolean {
-  return isEqualList(as, bs, isSameShinryou);
+function isSameRezeptShinryouList(as: RezeptShinryou[], bs: RezeptShinryou[]): boolean {
+  return isEqualList(as, bs, isSameRezeptShinryou);
+}
+
+interface ItemUnit {
+  isEqual(arg: any): boolean;
+  toDataList(santeibi: Santeibi): 診療行為レコードData[];
+  shikibetsucode: 診療識別コードCode;
 }
 
 class SingleUnit implements ItemUnit {
   readonly isSingleItem = true;
   shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
-  shinryou: ShinryouEx;
+  shinryou: RezeptShinryou;
 
   constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, shinryou: ShinryouEx) {
     this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
-    this.shinryou = shinryou;
+    this.shinryou = new RezeptShinryou(shinryou.master, shinryou.asShinryou().comments);
   }
 
   isEqual(arg: any): boolean {
     if (arg instanceof SingleUnit) {
       return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
-        isSameShinryou(arg.shinryou, this.shinryou);
+        isSameRezeptShinryou(arg.shinryou, this.shinryou);
     } else {
       return false;
     }
   }
 
   toDataList(santeibi: Santeibi): 診療行為レコードData[] {
-    const comments = this.shinryou.asShinryou().comments;
+    const comments = this.shinryou.comments;
     return [{
       診療識別: this.shikibetsucode,
       負担区分: this.futanKubun,
@@ -74,14 +84,14 @@ class HoukatsuUnit implements ItemUnit {
   shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   houkatsuStep: HoukatsuStep;
-  shinryouList: ShinryouEx[];
+  shinryouList: RezeptShinryou[];
 
   constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep,
     shinryou: ShinryouEx) {
     this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
     this.houkatsuStep = houkatsuStep;
-    this.shinryouList = [shinryou];
+    this.shinryouList = [new RezeptShinryou(shinryou.master, shinryou.asShinryou().comments)];
   }
 
   toDataList(santeibi: Santeibi): 診療行為レコードData[] {
@@ -100,7 +110,7 @@ class HoukatsuUnit implements ItemUnit {
       return this.shinryouList.map((shinryou, index) => {
         const master = shinryou.master;
         const len = this.shinryouList.length;
-        const comments = shinryou.asShinryou().comments;
+        const comments = shinryou.comments;
         return {
           診療識別: index === 0 ? this.shikibetsucode : "",
           負担区分: this.futanKubun,
@@ -121,7 +131,7 @@ class HoukatsuUnit implements ItemUnit {
   }
 
   addShinryou(shinryou: ShinryouEx): void {
-    this.shinryouList.push(shinryou);
+    this.shinryouList.push(new RezeptShinryou(shinryou.master, shinryou.asShinryou().comments));
     this.shinryouList.sort((a, b) => a.master.shinryoucode - b.master.shinryoucode);
   }
 
@@ -129,7 +139,7 @@ class HoukatsuUnit implements ItemUnit {
     if (arg instanceof HoukatsuUnit) {
       return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
-        isSameShinryouList(arg.shinryouList, this.shinryouList);
+        isSameRezeptShinryouList(arg.shinryouList, this.shinryouList);
     } else {
       return false;
     }
@@ -190,7 +200,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   visitItem.visitEx.conducts.forEach(conduct => {
     conduct.shinryouList.forEach(shinryou => {
       units.push(new SingleUnit(
-        診療識別コード.処置, futanKubun, shinryou
+        診療識別コード.処置, futanKubun, shinryou.master, []
       ));
     });
   })
