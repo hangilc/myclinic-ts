@@ -90,10 +90,14 @@ export function createレセプト共通レコード({
     レセプト番号: rezeptSerialNumber,
     レセプト種別: resolve保険種別(hoken.shahokokuho, hoken.koukikourei, kouhiList),
     診療年月: formatYearMonth(year, month),
-    氏名: patient.fullName("　"),
+    氏名: patientName(patient),
     男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
     生年月日: patient.birthday.replaceAll("-", ""),
     給付割合: (hoken.shahokokuho && is国保(hoken.shahokokuho.hokenshaBangou)) ? "70" : "",
     レセプト特記事項: (tokkkijikouGendogaku === undefined ? [] : [tokkkijikouGendogaku]).join(""),
   })
+}
+
+function patientName(patient: Patient): string {
+  return patient.rezeptName || patient.fullName("　");
 }

@@ -116,6 +116,30 @@ export class Patient {
     }
   }
 
+  get rezeptName(): string | undefined {
+    const name = this.memoAsJson["rezept-name"];
+    if( typeof name === "string" ){
+      return name;
+    } else {
+      if( name ){
+        console.error("Invalid rezept-name", name);
+      }
+      return undefined;
+    }
+  }
+
+  get onshiName(): string | undefined {
+    const name = this.memoAsJson["onshi-name"];
+    if( typeof name === "string" ){
+      return name;
+    } else {
+      if( name ){
+        console.error("Invalid onshi-name", name);
+      }
+      return undefined;
+    }
+  }
+
   static cast(arg: any): Patient {
     return new Patient(
       arg.patientId,
