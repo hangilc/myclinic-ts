@@ -1,3 +1,5 @@
+import { castList, castNumber, castString } from "cast";
+
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
   if (typeof n === "number") {
@@ -108,7 +110,7 @@ export class Patient {
   get memoAsJson(): any {
     try {
       return this.memo ? JSON.parse(this.memo) : {};
-    } catch(_ex){
+    } catch (_ex) {
       console.error("Invalid JSON: ", this.memo);
       return {};
     }
@@ -363,7 +365,7 @@ export class Kouhi {
   get memoAsJson(): any {
     try {
       return this.memo ? JSON.parse(this.memo) : {};
-    } catch(_ex){
+    } catch (_ex) {
       console.error("Invalid JSON: ", this.memo);
       return {};
     }
@@ -610,6 +612,54 @@ export class DrugEx {
   }
 }
 
+export class ShinryouMemoComment {
+  code: number;
+  text: string;
+
+  constructor(code: number, text: string) {
+    this.code = code;
+    this.text = text;
+  }
+
+  static cast(arg: any): ShinryouMemoComment {
+    return new ShinryouMemoComment(
+      castNumber(arg.code),
+      castString(arg.text),
+    )
+  }
+}
+
+export class ShinryouMemo {
+  json: any;
+
+  constructor(src: string | undefined) {
+    if (!src) {
+      this.json = {};
+    } else {
+      try {
+        this.json = JSON.parse(src);
+      } catch (ex) {
+        console.error("Invalid json: ", src);
+        this.json = {};
+      }
+    }
+  }
+
+  get comments(): ShinryouMemoComment[] {
+    const comms = this.json["comments"];
+    if (!comms) {
+      return [];
+    } else {
+      try {
+        return castList(ShinryouMemoComment.cast)(comms);
+      } catch (ex) {
+        console.error("Invalid comments: ", comms);
+        return [];
+      }
+    }
+  }
+}
+
 export class Shinryou {
   constructor(
     public shinryouId: number,
@@ -617,6 +667,10 @@ export class Shinryou {
     public shinryoucode: number,
     public memo?: string,
   ) { }
+
+  parseMemo(): ShinryouMemo {
+    return new ShinryouMemo(this.memo);
+  }
 
   static cast(arg: any): Shinryou {
     return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode, arg.memo);
@@ -1735,7 +1789,7 @@ export class ClinicInfo {
     public kikancode: string,
     public homepage: string,
     public doctorName: string,
-  ) {}
+  ) { }
 
   static cast(arg: any): ClinicInfo {
     return new ClinicInfo(

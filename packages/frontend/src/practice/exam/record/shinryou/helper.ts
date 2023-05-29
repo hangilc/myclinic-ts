@@ -1,5 +1,5 @@
 import {
-  ConductKindType, CreateConductRequest, CreateShinryouConductRequest, VisitEx
+  ConductKindType, CreateConductRequest, CreateShinryouConductRequest, Shinryou, VisitEx
 } from "myclinic-model"
 import api from "@/lib/api"
 import { dateParam } from "@/lib/date-param"
@@ -66,10 +66,6 @@ async function batchResolveIyakuhincodes(
   return await Promise.all(
     srcList.map(async src => {
       const code = src.iyakuhincode;
-      // const code = await api.resolveIyakuhincode(src.iyakuhincode, at);
-      // if( code == null ){
-      //   throw new Error("医薬品をみつけられません：" + src)
-      // }
       return { iyakuhincode: code, amount: src.amount };
     })
   )
@@ -126,7 +122,8 @@ export async function enterTo(
   conduct: ConductSpec[]) {
   const at: string = dateParam(atArg);
   const shinryouList = (await batchResolveShinryoucodes(shinryou, at))
-    .map(tmpl => Object.assign(tmpl, { shinryouId: 0, visitId }));
+    .map(tmpl => Object.assign(tmpl, { shinryouId: 0, visitId }))
+    .map(arg => Shinryou.cast(arg));
   const conducts = (await Promise.all(conduct.map(async src =>
     conductReq(at, visitId, src.kind, src.labelOption, src.shinryou, src.drug, src.kizai))))
     .map(obj => Object.assign(obj, { conductId: 0 }))
