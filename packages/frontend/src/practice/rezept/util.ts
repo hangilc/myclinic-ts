@@ -311,3 +311,16 @@ export function adjustOptString(s: string | undefined): string | undefined {
     return adjustString(s);
   }
 }
+
+export function isEqualList<T>(a: T[], b: T[], eq: (a: T, b: T) => boolean): boolean {
+  if( a.length === b.length ){
+    for(let i=0;i<a.length;i++){
+      if( !eq(a[i], b[i]) ){
+        return false;
+      }
+    }
+    return true;
+  } else {
+    return false;
+  }
+}

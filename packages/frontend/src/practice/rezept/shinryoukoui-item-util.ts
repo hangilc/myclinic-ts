@@ -1,4 +1,4 @@
-import type { ShinryouMaster } from "myclinic-model";
+import { ShinryouMemoComment, type ShinryouEx, type ShinryouMaster } from "myclinic-model";
 import {
   is診療識別コードCode, type 診療識別コードCode, type 負担区分コードCode,
   診療識別コード
@@ -6,7 +6,7 @@ import {
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuGroup, type HoukatsuStep } from "./houkatsu";
 import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken } from "./util";
+import { calcFutanKubun, hasHoken, isEqualList } from "./util";
 import type { VisitItem } from "./visit-item";
 
 interface ItemUnit {
@@ -15,41 +15,55 @@ interface ItemUnit {
   shikibetsucode: 診療識別コードCode;
 }
 
+function isSameComments(a: ShinryouMemoComment[], b: ShinryouMemoComment[]): boolean {
+  return isEqualList(a, b, ShinryouMemoComment.isEqualComments);
+}
+
+function isSameShinryou(a: ShinryouEx, b: ShinryouEx): boolean {
+  return a.master.shinryoucode === b.master.shinryoucode &&
+    isSameComments(a.asShinryou().comments, b.asShinryou().comments);
+}
+
+function isSameShinryouList(as: ShinryouEx[], bs: ShinryouEx[]): boolean {
+  return isEqualList(as, bs, isSameShinryou);
+}
+
 class SingleUnit implements ItemUnit {
   readonly isSingleItem = true;
   shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
-  master: ShinryouMaster;
+  shinryou: ShinryouEx;
 
-  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, master: ShinryouMaster) {
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, shinryou: ShinryouEx) {
     this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
-    this.master = master;
+    this.shinryou = shinryou;
   }
 
   isEqual(arg: any): boolean {
     if (arg instanceof SingleUnit) {
       return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
-        arg.master.shinryoucode === this.master.shinryoucode;
+        isSameShinryou(arg.shinryou, this.shinryou);
     } else {
       return false;
     }
   }
 
   toDataList(santeibi: Santeibi): 診療行為レコードData[] {
+    const comments = this.shinryou.asShinryou().comments;
     return [{
       診療識別: this.shikibetsucode,
       負担区分: this.futanKubun,
-      診療行為コード: this.master.shinryoucode,
-      点数: parseInt(this.master.tensuuStore),
+      診療行為コード: this.shinryou.master.shinryoucode,
+      点数: parseInt(this.shinryou.master.tensuuStore),
       回数: santeibi.getSum(),
-      コメントコード１: undefined,
-      コメント文字１: undefined,
-      コメントコード２: undefined,
-      コメント文字２: undefined,
-      コメントコード３: undefined,
-      コメント文字３: undefined,
+      コメントコード１: comments[0]?.code,
+      コメント文字１: comments[0]?.text,
+      コメントコード２: comments[1]?.code,
+      コメント文字２: comments[1]?.text,
+      コメントコード３: comments[2]?.code,
+      コメント文字３: comments[2]?.text,
       算定日情報: santeibi.getSanteibiMap(),
     }];
   }
@@ -60,71 +74,67 @@ class HoukatsuUnit implements ItemUnit {
   shikibetsucode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   houkatsuStep: HoukatsuStep;
-  masters: ShinryouMaster[];
+  shinryouList: ShinryouEx[];
 
-  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep, master: ShinryouMaster) {
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep,
+    shinryou: ShinryouEx) {
     this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
     this.houkatsuStep = houkatsuStep;
-    this.masters = [master];
+    this.shinryouList = [shinryou];
   }
 
   toDataList(santeibi: Santeibi): 診療行為レコードData[] {
-    if (this.masters.length === 0) {
+    if (this.shinryouList.length === 0) {
       return [];
     } else {
-      const g = this.masters[0].houkatsukensa
+      const g = this.shinryouList[0].master.houkatsukensa
       if (!isHoukatsuGroup(g)) {
         throw new Error("Invalid houkatsu group: " + g);
       }
-      let ten = houkatsuTenOf(g, this.masters.length, this.houkatsuStep);
+      let ten = houkatsuTenOf(g, this.shinryouList.length, this.houkatsuStep);
       if (ten === undefined) {
-        ten = this.masters.reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
+        ten = this.shinryouList.map(s => s.master)
+          .reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
       }
-      return this.masters.map((master, index) => ({
-        診療識別: index === 0 ? this.shikibetsucode : "",
-        負担区分: this.futanKubun,
-        診療行為コード: master.shinryoucode,
-        点数: index === this.masters.length - 1 ? ten : undefined,
-        回数: santeibi.getSum(),
-        コメントコード１: undefined,
-        コメント文字１: undefined,
-        コメントコード２: undefined,
-        コメント文字２: undefined,
-        コメントコード３: undefined,
-        コメント文字３: undefined,
-        算定日情報: santeibi.getSanteibiMap(),
-      }))
+      return this.shinryouList.map((shinryou, index) => {
+        const master = shinryou.master;
+        const len = this.shinryouList.length;
+        const comments = shinryou.asShinryou().comments;
+        return {
+          診療識別: index === 0 ? this.shikibetsucode : "",
+          負担区分: this.futanKubun,
+          診療行為コード: master.shinryoucode,
+          点数: (index === len - 1) ? ten : undefined,
+          回数: santeibi.getSum(),
+          コメントコード１: comments[0]?.code,
+          コメント文字１: comments[0]?.text,
+          コメントコード２: comments[1]?.code,
+          コメント文字２: comments[1]?.text,
+          コメントコード３: comments[2]?.code,
+          コメント文字３: comments[2]?.text,
+          算定日情報: santeibi.getSanteibiMap(),
+
+        }
+      });
     }
   }
 
-  addMaster(master: ShinryouMaster): void {
-    this.masters.push(master);
-    this.masters.sort((a, b) => a.shinryoucode - b.shinryoucode);
+  addShinryou(shinryou: ShinryouEx): void {
+    this.shinryouList.push(shinryou);
+    this.shinryouList.sort((a, b) => a.master.shinryoucode - b.master.shinryoucode);
   }
 
   isEqual(arg: any): boolean {
     if (arg instanceof HoukatsuUnit) {
       return arg.shikibetsucode === this.shikibetsucode &&
         arg.futanKubun === this.futanKubun &&
-        arg.isEqualMasters(this.masters);
+        isSameShinryouList(arg.shinryouList, this.shinryouList);
     } else {
       return false;
     }
   }
 
-  isEqualMasters(masters: ShinryouMaster[]): boolean {
-    if (this.masters.length === masters.length) {
-      for (let i = 0; i < masters.length; i++) {
-        if (this.masters[i].shinryoucode !== masters[i].shinryoucode) {
-          return false;
-        }
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
 }
 
 class Combined {
@@ -164,14 +174,14 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
     const g = shinryou.master.houkatsukensa;
     if (isHoukatsuGroup(g)) {
       if (houkatsuMap.has(g)) {
-        houkatsuMap.get(g)!.addMaster(shinryou.master);
+        houkatsuMap.get(g)!.addShinryou(shinryou);
       } else {
         const date = visitItem.visit.visitedAt.substring(0, 10);
         const step = getHoukatsuStep(date);
-        houkatsuMap.set(g, new HoukatsuUnit(shinryouShubetsu, futanKubun, step, shinryou.master))
+        houkatsuMap.set(g, new HoukatsuUnit(shinryouShubetsu, futanKubun, step, shinryou))
       }
     } else {
-      units.push(new SingleUnit(shinryouShubetsu, futanKubun, shinryou.master));
+      units.push(new SingleUnit(shinryouShubetsu, futanKubun, shinryou));
     }
   });
   for (const unit of houkatsuMap.values()) {
@@ -180,7 +190,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   visitItem.visitEx.conducts.forEach(conduct => {
     conduct.shinryouList.forEach(shinryou => {
       units.push(new SingleUnit(
-        診療識別コード.処置, futanKubun, shinryou.master
+        診療識別コード.処置, futanKubun, shinryou
       ));
     });
   })

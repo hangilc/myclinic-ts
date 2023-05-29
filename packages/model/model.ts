@@ -1,4 +1,4 @@
-import { castList, castNumber, castString } from "cast";
+import { castList, castNumber, castString } from "./cast";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
@@ -627,6 +627,10 @@ export class ShinryouMemoComment {
       castString(arg.text),
     )
   }
+
+  static isEqualComments(a: ShinryouMemoComment, b: ShinryouMemoComment): boolean {
+    return a.code === b.code && a.text === b.text;
+  }
 }
 
 export class ShinryouMemo {
@@ -670,6 +674,10 @@ export class Shinryou {
 
   parseMemo(): ShinryouMemo {
     return new ShinryouMemo(this.memo);
+  }
+
+  get comments(): ShinryouMemoComment[] {
+    return this.parseMemo().comments;
   }
 
   static cast(arg: any): Shinryou {
