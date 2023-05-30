@@ -15,7 +15,7 @@ export function hokenRep(visit: VisitEx): string {
     terms.push(roujinRep(hoken.roujin.futanWari));
   }
   for( let kouhi of hoken.kouhiList ){
-    terms.push(kouhiRep(kouhi.futansha));
+    terms.push(kouhiRep(kouhi.futansha, kouhi.memoAsJson));
   }
   if( terms.length === 0 ){
     return "自費";
@@ -106,7 +106,17 @@ export function roujinRep(futanWari: number): string {
   return `老人${futanWari}割`;
 }
 
-export function kouhiRep(futanshaBangou: number): string {
+const toukyouKouhiHoubetsu: Record<string, string> = {
+  "82137001": "大気汚染関連疾病（負担なし）",
+  "82137555": "大気汚染関連疾病（負担なし）",
+  "82137670": "大気汚染関連疾病（負担あり）",
+  "82137530": "大気汚染関連疾病（負担あり）",
+}
+
+export function kouhiRep(futanshaBangou: number, memo?: any): string {
+  if( memo && memo.name ){
+    return memo.name;
+  }
   const s = futanshaBangou.toString();
   if( s.length === 8 ){
     if( s === "52138013" ){
@@ -132,6 +142,12 @@ export function kouhiRep(futanshaBangou: number): string {
     } else if( s === "87136008" ){
       return "妊娠高血圧";
     }
+    {
+      const rep = toukyouKouhiHoubetsu[s];
+      if( rep ){
+        return rep;
+      }
+    }
     switch(s.substring(0, 2)){
       case "54": return "難病";
       case "83": return "難病";
@@ -150,16 +166,6 @@ export function kouhiRep(futanshaBangou: number): string {
   }
   return `公費負担（${futanshaBangou}）`;
 }
-
-// export function kouhiRep(futanshaBangou: number): string {
-//   if ((idiv(futanshaBangou, 1000000)) == 41){ return  "マル福"; }
-//   else if (idiv(futanshaBangou, 1000) == 80136) { return "マル障（１割負担）"; }
-//   else if (idiv(futanshaBangou, 1000) == 80137) { return "マル障（負担なし）"; }
-//   else if (idiv(futanshaBangou, 1000) == 81136) { return "マル親（１割負担）"; }
-//   else if (idiv(futanshaBangou, 1000) == 81137) { return "マル親（負担なし）"; }
-//   else if (idiv(futanshaBangou, 1000000) == 88) { return "マル乳"; }
-//   else { return `公費負担（${futanshaBangou}）`; }
-// }
 
 export function isKoukikourei(hokenshaBangou: number): boolean {
   return Math.floor(hokenshaBangou / 1000000) === 39;

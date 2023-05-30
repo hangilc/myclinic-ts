@@ -1,3 +1,5 @@
+import { castList, castNumber, castString } from "./cast";
+
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
   if (typeof n === "number") {
@@ -101,8 +103,42 @@ export class Patient {
     public sex: string,
     public birthday: string,
     public address: string,
-    public phone: string
+    public phone: string,
+    public memo: string | undefined,
   ) { }
+
+  get memoAsJson(): any {
+    try {
+      return this.memo ? JSON.parse(this.memo) : {};
+    } catch (_ex) {
+      console.error("Invalid JSON: ", this.memo);
+      return {};
+    }
+  }
+
+  get rezeptName(): string | undefined {
+    const name = this.memoAsJson["rezept-name"];
+    if( typeof name === "string" ){
+      return name;
+    } else {
+      if( name ){
+        console.error("Invalid rezept-name", name);
+      }
+      return undefined;
+    }
+  }
+
+  get onshiName(): string | undefined {
+    const name = this.memoAsJson["onshi-name"];
+    if( typeof name === "string" ){
+      return name;
+    } else {
+      if( name ){
+        console.error("Invalid onshi-name", name);
+      }
+      return undefined;
+    }
+  }
 
   static cast(arg: any): Patient {
     return new Patient(
@@ -114,7 +150,8 @@ export class Patient {
       arg.sex,
       arg.birthday,
       arg.address,
-      arg.phone
+      arg.phone,
+      arg.memo,
     );
   }
 
@@ -345,8 +382,18 @@ export class Kouhi {
     public jukyuusha: number,
     public validFrom: string,
     public validUpto: string,
-    public patientId: number
+    public patientId: number,
+    public memo: string | undefined,
   ) { }
+
+  get memoAsJson(): any {
+    try {
+      return this.memo ? JSON.parse(this.memo) : {};
+    } catch (_ex) {
+      console.error("Invalid JSON: ", this.memo);
+      return {};
+    }
+  }
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
@@ -359,7 +406,8 @@ export class Kouhi {
       arg.jukyuusha,
       arg.validFrom,
       arg.validUpto,
-      arg.patientId
+      arg.patientId,
+      arg.memo,
     );
   }
 }
@@ -388,7 +436,12 @@ export class HokenInfo {
   }
 
   static cast(arg: any): HokenInfo {
-    return new HokenInfo(arg);
+    return new HokenInfo({
+      shahokokuho: arg.shahokokuho ? Shahokokuho.cast(arg.shahokokuho) : undefined,
+      roujin: arg.roujin ? Roujin.cast(arg.roujin) : undefined,
+      koukikourei: arg.koukikourei ? Koukikourei.cast(arg.koukikourei) : undefined,
+      kouhiList: arg.kouhiList ? arg.kouhiList.map((arg: any) => Kouhi.cast(arg)) : [],
+    });
   }
 }
 
@@ -583,15 +636,76 @@ export class DrugEx {
   }
 }
 
+export class ShinryouMemoComment {
+  code: number;
+  text: string;
+
+  constructor(code: number, text: string) {
+    this.code = code;
+    this.text = text;
+  }
+
+  static cast(arg: any): ShinryouMemoComment {
+    return new ShinryouMemoComment(
+      castNumber(arg.code),
+      castString(arg.text),
+    )
+  }
+
+  static isEqualComments(a: ShinryouMemoComment, b: ShinryouMemoComment): boolean {
+    return a.code === b.code && a.text === b.text;
+  }
+}
+
+export class ShinryouMemo {
+  json: any;
+
+  constructor(src: string | undefined) {
+    if (!src) {
+      this.json = {};
+    } else {
+      try {
+        this.json = JSON.parse(src);
+      } catch (ex) {
+        console.error("Invalid json: ", src);
+        this.json = {};
+      }
+    }
+  }
+
+  get comments(): ShinryouMemoComment[] {
+    const comms = this.json["comments"];
+    if (!comms) {
+      return [];
+    } else {
+      try {
+        return castList(ShinryouMemoComment.cast)(comms);
+      } catch (ex) {
+        console.error("Invalid comments: ", comms);
+        return [];
+      }
+    }
+  }
+}
+
 export class Shinryou {
   constructor(
     public shinryouId: number,
     public visitId: number,
-    public shinryoucode: number
+    public shinryoucode: number,
+    public memo?: string,
   ) { }
 
+  parseMemo(): ShinryouMemo {
+    return new ShinryouMemo(this.memo);
+  }
+
+  get comments(): ShinryouMemoComment[] {
+    return this.parseMemo().comments;
+  }
+
   static cast(arg: any): Shinryou {
-    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode);
+    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode, arg.memo);
   }
 }
 
@@ -600,14 +714,25 @@ export class ShinryouEx {
     public shinryouId: number,
     public visitId: number,
     public shinryoucode: number,
+    public memo: string | undefined,
     public master: ShinryouMaster
   ) { }
+
+  asShinryou(): Shinryou {
+    return new Shinryou(
+      this.shinryouId,
+      this.visitId,
+      this.shinryoucode,
+      this.memo
+    );
+  }
 
   static cast(arg: any): ShinryouEx {
     return new ShinryouEx(
       arg.shinryouId,
       arg.visitId,
       arg.shinryoucode,
+      arg.memo ?? undefined,
       ShinryouMaster.cast(arg.master)
     );
   }
@@ -1696,7 +1821,7 @@ export class ClinicInfo {
     public kikancode: string,
     public homepage: string,
     public doctorName: string,
-  ) {}
+  ) { }
 
   static cast(arg: any): ClinicInfo {
     return new ClinicInfo(

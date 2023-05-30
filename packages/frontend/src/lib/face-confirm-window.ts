@@ -49,7 +49,8 @@ export class OnshiPatient {
       this.sex,
       this.birthday,
       this.address,
-      ""
+      "",
+      undefined
     )
   }
 }
@@ -62,15 +63,19 @@ export async function searchPatient(
   let patients: Patient[] = (await api.searchPatient(name)).filter(
     (p) => name === `${p.lastName}　${p.firstName}`
   );
+  function add(p: Patient): void {
+    const i = patients.findIndex(patient => patient.patientId === p.patientId);
+    if( i < 0 ){
+      patients.push(p);
+    }
+  }
   if (yomi) {
     let yomiPatients = await api.searchPatient(yomi);
     yomiPatients
       .filter((p) => yomi === `${p.lastNameYomi} ${p.firstNameYomi}`)
-      .filter((p) => {
-        return patients.findIndex((a) => a.patientId === p.patientId) < 0;
-      })
-      .forEach((p) => patients.push(p));
+      .forEach(add);
   }
+  (await api.listPatientByOnshiName(name)).forEach(add);
   return patients.filter((p) => p.birthday === birthdate);
 }
 

@@ -24,7 +24,8 @@ function modify(p: Patient): Patient {
     p.sex === "M" ? "F" : "M",
     modifyDate(p.birthday),
     modifyStr(p.address),
-    p.phone + " 携帯"
+    p.phone + " 携帯",
+    undefined,
   )
 }
 

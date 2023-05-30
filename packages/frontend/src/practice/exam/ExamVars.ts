@@ -259,27 +259,27 @@ appEvent.visitEntered.subscribe(async visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null) {
-    if (patient.patientId === visit.patientId ) {
+    if (patient.patientId === visit.patientId) {
       const newTotalPages = countVisitPages(totalVisits + 1);
       navTotal.set(newTotalPages);
       let focusedVisitIdValue: number | undefined = undefined;
       const currentVisitIdValue = get(currentVisitId);
-      if( currentVisitIdValue ){
+      if (currentVisitIdValue) {
         focusedVisitIdValue = currentVisitIdValue;
       } else {
         const tempVisitIdValue = get(tempVisitId);
-        if( tempVisitIdValue ){
+        if (tempVisitIdValue) {
           focusedVisitIdValue = tempVisitIdValue;
         }
       }
-      if( !focusedVisitIdValue ) {
+      if (!focusedVisitIdValue) {
         currentVisitId.set(visit.visitId);
         focusedVisitIdValue = visit.visitId;
       }
       let curPage = get(navPage);
       const curVisits = get(visits);
       const index = curVisits.findIndex(v => v.visitId === focusedVisitIdValue);
-      if( index >= 0 && index === curVisits.length - 1) {
+      if (index >= 0 && index === curVisits.length - 1) {
         curPage += 1;
       }
       gotoPage(curPage, true);
@@ -312,7 +312,7 @@ appEvent.visitDeleted.subscribe(visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null && visit.patientId === patient.patientId) {
-    let focusedVisitId: number | undefined = undefined;
+    let focusedVisitId: number | undefined;
     const currentVisitIdValue: number | null = get(currentVisitId);
     if (currentVisitIdValue) {
       if (currentVisitIdValue === visit.visitId) {
@@ -335,36 +335,6 @@ appEvent.visitDeleted.subscribe(visit => {
     const curPage = get(navPage);
     gotoPage(curPage, true);
   }
-  // const visitsValue: m.VisitEx[] = get(visits);
-  // const index = visitsValue.findIndex(v => v.visitId === visit.visitId);
-  // if (index >= 0) {
-  //   const patient = get(currentPatient);
-  //   if (patient !== null) {
-  //     taskRunner.run(
-  //       new FetchTask<number>(
-  //         () => api.countVisitByPatient(patient.patientId),
-  //         count => {
-  //           const newTotal = countVisitPages(count);
-  //           const navTotalValue = get(navTotal);
-  //           if (navTotalValue !== newTotal) {
-  //             let navPageValue = get(navPage);
-  //             if (navPageValue >= newTotal) {
-  //               navPageValue = newTotal - 1;
-  //               if (navPageValue < 0) {
-  //                 navPageValue = 0;
-  //               }
-  //               navPage.set(navPageValue);
-  //             }
-  //             navTotal.set(newTotal);
-  //             gotoPage(navPageValue);
-  //           }
-  //         }
-  //       )
-  //     )
-  //   }
-  //   visitsValue.splice(index, 1);
-  //   visits.set(visitsValue);
-  // }
 });
 
 appEvent.wqueueDeleted.subscribe(wqueue => {
@@ -411,6 +381,24 @@ appEvent.shinryouEntered.subscribe(async shinryou => {
     visits.set(visitsValue);
   }
 });
+
+appEvent.shinryouUpdated.subscribe(async shinryou => {
+  if (shinryou == null) {
+    return;
+  }
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === shinryou.visitId);
+  if (index >= 0) {
+    const visit = visitsValue[index];
+    const shinryouList = visit.shinryouList;
+    const i = shinryouList.findIndex(s => s.shinryouId === shinryou.shinryouId);
+    if (i >= 0) {
+      const ex = await api.getShinryouEx(shinryou.shinryouId);
+      shinryouList.splice(i, 1, ex);
+    }
+    visits.set(visitsValue);
+  }
+})
 
 appEvent.shinryouDeleted.subscribe(shinryou => {
   if (shinryou == null) {
@@ -487,7 +475,6 @@ appEvent.conductShinryouEntered.subscribe(async conductShinryou => {
     if (ci >= 0) {
       const conductShinryouEx = await api.getConductShinryouEx(conductShinryou.conductShinryouId);
       visit.conducts[ci].shinryouList.push(conductShinryouEx);
-      console.log("conductShinryou entered", visit.conducts[ci].shinryouList);
       visits.set(visitsValue);
     }
   }
@@ -659,6 +646,31 @@ appEvent.chargeUpdated.subscribe(charge => {
     const visit = visitsValue[index];
     visit.chargeOption = charge;
     visits.set(visitsValue);
+  }
+})
+
+appEvent.kouhiUpdated.subscribe(kouhi => {
+  if (kouhi == null) {
+    return;
+  }
+  const visitsValue = get(visits);
+  visitsValue.forEach(visit => {
+    const kouhiList = visit.hoken.kouhiList;
+    const i = kouhiList.findIndex(k => k.kouhiId === kouhi.kouhiId);
+    if (i >= 0) {
+      kouhiList.splice(i, 1, kouhi);
+    }
+  });
+  visits.set(visitsValue);
+})
+
+appEvent.patientUpdated.subscribe(patient => {
+  if( patient == null ){
+    return;
+  }
+  const current = get(currentPatient);
+  if( current && current.patientId === patient.patientId ){
+    currentPatient.set(patient);
   }
 })
 

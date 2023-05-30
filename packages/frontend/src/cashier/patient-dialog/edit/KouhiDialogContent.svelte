@@ -9,10 +9,8 @@
   export let onClose: () => void;
   let validate: () => VResult<Kouhi>;
   let errors: string[] = [];
-  // let enterClicked = false;
 
   async function doEnter() {
-    // enterClicked = true;
     const vs = validate();
     if( vs.isValid ){
       errors = [];
@@ -31,12 +29,6 @@
     onClose();
   }
 
-  // function onValueChange(): void {
-  //   if( enterClicked ){
-  //     const r = validate();
-  //     errors = errorMessagesOf(r.errors);
-  //   }
-  // }
 </script>
 
 <div>

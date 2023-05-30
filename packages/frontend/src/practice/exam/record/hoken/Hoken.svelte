@@ -1,10 +1,6 @@
 <script lang="ts">
   import {
     type VisitEx,
-    type Shahokokuho,
-    type Koukikourei,
-    type Kouhi,
-    type Roujin,
     dateToSqlDate,
   } from "myclinic-model";
   import { hokenRep } from "@/lib/hoken-rep";
@@ -54,7 +50,6 @@
         koukikoureiList,
         kouhiList,
         onshiResult: onshi ? OnshiResult.cast(JSON.parse(onshi.kakunin)) : undefined,
-        // birthdate: visit.patient.birthday,
         visitDate: dateToSqlDate(visit.visitedAtAsDate),
       },
     });

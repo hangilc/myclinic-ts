@@ -575,17 +575,6 @@ export default {
     );
   },
 
-  // resolveIyakuhincode(
-  //   iyakuhincode: number,
-  //   at: Date | string
-  // ): Promise<number | null> {
-  //   return get(
-  //     "resolve-iyakuhincode",
-  //     { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
-  //     castOption(castNumber)
-  //   );
-  // },
-
   resolveKizaicodeByName(
     name: string,
     at: Date | string
@@ -640,6 +629,15 @@ export default {
       { text, at: dateParam(at) },
       castList(m.ShinryouMaster.cast)
     );
+  },
+
+  updateShinryou(shinryou: m.Shinryou): Promise<m.Shinryou> {
+    return post(
+      "update-shinryou",
+      shinryou,
+      { },
+      m.Shinryou.cast
+    )
   },
 
   deleteShinryou(shinryouId: number): Promise<boolean> {
@@ -1095,11 +1093,11 @@ export default {
   },
 
   getKoukikourei(koukikoureiId: number): Promise<m.Koukikourei> {
-    return get("get-koukikourei", { "shahokoku-id": koukikoureiId.toString() }, m.Koukikourei.cast);
+    return get("get-koukikourei", { "koukikourei-id": koukikoureiId.toString() }, m.Koukikourei.cast);
   },
 
   getKouhi(kouhiId: number): Promise<m.Kouhi> {
-    return get("get-kouhi", { "shahokoku-id": kouhiId.toString() }, m.Kouhi.cast);
+    return get("get-kouhi", { "kouhi-id": kouhiId.toString() }, m.Kouhi.cast);
   },
 
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
@@ -1485,5 +1483,25 @@ export default {
   //     castOptionUndefined(m.Payment.cast)
   //   )
   // },
+
+  listVisitByMonth(year: number, month: number): Promise<m.Visit[]> {
+    return get("list-visit-by-month", { year: year.toString(), month: month.toString() }, castList(m.Visit.cast));
+  },
+
+  getHokenInfoForVisit(visitId: number): Promise<m.HokenInfo> {
+    return get("get-hoken-info-for-visit", { "visit-id": visitId.toString() }, m.HokenInfo.cast);
+  },
+  
+  listDiseaseActiveAt(patientId: number, from: Date | string, upto: Date | string): Promise<m.Disease[]> {
+    return get("list-disease-active-at", {
+      "patient-id": patientId.toString(),
+      "from": dateParam(from),
+      "upto": dateParam(upto)
+    }, castList(m.Disease.cast));
+  },
+
+  listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
+    return get("list-patient-by-onshi-name", { text: onshiName}, castList(m.Patient.cast));
+  }
 
 };

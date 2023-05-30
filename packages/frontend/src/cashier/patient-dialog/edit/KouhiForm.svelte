@@ -42,6 +42,7 @@
       jukyuusha: validResult(jukyuusha).validate(toInt),
       validFrom: validateValidFrom(),
       validUpto: validateValidUpto(),
+      memo: init ? init.memo : undefined,
     }
     return validateKouhi(input);
   }
