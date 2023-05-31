@@ -13,6 +13,7 @@
   import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
   import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
+  import { calcMeisai } from "@/lib/meisai";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -20,6 +21,8 @@
     const patient = $currentPatient;
     const visitId = $currentVisitId;
     if (visitId && visitId > 0 && patient) {
+      console.log("meisai", await calcMeisai(visitId));
+
       cashierVisitId.set(visitId);
       const meisai = await api.getMeisai(visitId);
       console.log("meisai charge", meisai.charge);

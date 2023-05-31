@@ -33,6 +33,41 @@ let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
 let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
 let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
 
+export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, VisitItem]> {
+  const hoken = await api.getHokenInfoForVisit(visit.visitId);
+  sortKouhiList(hoken.kouhiList);
+  let onshiResult: OnshiResult | undefined;
+  const onshi = await api.findOnshi(visit.visitId);
+  if (onshi) {
+    onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+  }
+  const patient: Patient = await api.getPatient(visit.patientId);
+  const meisai: Meisai = await api.getMeisai(visit.visitId);
+  const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
+  return [mkRecordKey(visit.patientId, hoken), {
+    visit,
+    hoken,
+    patient,
+    onshiResult,
+    visitEx,
+    comments: [],
+    shoukiList: [],
+  }];
+}
+
+export function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Record<RezeptRecordKey, VisitItem[]> {
+  const classified: Record<string, VisitItem[]> = {};
+  items.forEach(item => {
+    const [key, vitem] = item;
+    if (!(key in classified)) {
+      classified[key] = [vitem];
+    } else {
+      classified[key].push(vitem);
+    }
+  });
+  return classified;
+}
+
 async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
   if (visitItemsCache === undefined) {
     const visits = (await api.listVisitByMonth(year, month)).filter(visit => {
@@ -41,28 +76,7 @@ async function getVisitItems(year: number, month: number): Promise<[RezeptRecord
       }
       return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
     });
-    visitItemsCache = await Promise.all(visits.map(async visit => {
-      const hoken = await api.getHokenInfoForVisit(visit.visitId);
-      sortKouhiList(hoken.kouhiList);
-      let onshiResult: OnshiResult | undefined;
-      const onshi = await api.findOnshi(visit.visitId);
-      if (onshi) {
-        onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
-      }
-      const patient: Patient = await api.getPatient(visit.patientId);
-      const meisai: Meisai = await api.getMeisai(visit.visitId);
-      const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
-      return [mkRecordKey(visit.patientId, hoken), {
-        visit,
-        hoken,
-        patient,
-        onshiResult,
-        meisai,
-        visitEx,
-        comments: [],
-        shoukiList: [],
-      }];
-    }));
+    visitItemsCache = await Promise.all(visits.map(async visit => await mkVisitItem(visit)));
     return visitItemsCache;
   } else {
     return visitItemsCache;
@@ -113,15 +127,7 @@ async function create(year: number, month: number, 診査機関: number, visitIt
   const rows: string[] = [];
   const [seikyuuYear, seikyuuMonth] = calcSeikyuuMonth(year, month);
   rows.push(await 医療機関情報レコード(seikyuuYear, seikyuuMonth, 診査機関));
-  const classified: Record<string, VisitItem[]> = {};
-  visitItems.forEach(item => {
-    const [key, vitem] = item;
-    if (!(key in classified)) {
-      classified[key] = [vitem];
-    } else {
-      classified[key].push(vitem);
-    }
-  });
+  const classified: Record<string, VisitItem[]> = classifyVisitItems(visitItems);
   let serial = 1;
   const firstDay = firstDayOfMonth(year, month);
   const lastDay = lastDayOfMonth(year, month);

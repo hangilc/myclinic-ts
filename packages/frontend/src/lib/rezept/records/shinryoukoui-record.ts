@@ -48,17 +48,3 @@ export function mk診療行為レコード({
   ].join(",");
 }
 
-// export function create診療行為レコード({
-//   item,
-// }: {
-//   item: ShinryoukouiItem,
-// }): string {
-//   return mk診療行為レコード({
-//     診療識別: item.shikibetsucode,
-//     負担区分: item.futanKubun,
-//     診療行為コード: item.shinryoucode,
-//     点数: item.tensuu,
-//     回数: item.count,
-//     算定日情報: item.santeibiInfo,
-//   });
-// }
