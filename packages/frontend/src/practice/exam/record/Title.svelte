@@ -16,6 +16,7 @@
   import Popup from "@/lib/Popup.svelte";
   import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
   import { calcGendogaku } from "@/lib/gendogaku";
+  import { calcMeisai } from "@/lib/meisai";
 
   export let visit: VisitEx;
 
@@ -39,6 +40,7 @@
   }
 
   async function doMeisai() {
+    const meisai = await calcMeisai(visit.visitId);
     showMeisai = true;
   }
 

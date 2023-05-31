@@ -1,9 +1,7 @@
 import type { HokenInfo, Visit } from "myclinic-model";
 import api from "./api";
-import { classifyVisitItems, mkVisitItem } from "./rezept/create";
-import { cvtVisitItemsToIyakuhinDataList } from "./rezept/iyakuhin-item-util";
-import { cvtVisitItemsToShinryouDataList, mkShinryouUnits, processShinryouOfVisit } from "./rezept/shinryoukoui-item-util";
-import { cvtVisitItemsToKizaiDataList } from "./rezept/tokuteikizai-item-util";
+import { mkVisitItem } from "./rezept/create";
+import { processShinryouOfVisit } from "./rezept/shinryoukoui-item-util";
 import type { VisitItem } from "./rezept/visit-item";
 
 export const MeisaiSection = {
@@ -89,20 +87,22 @@ export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit = await api.getVisit(visitId);
   const [_key, item] = await mkVisitItem(visit);
   const meisai = new Meisai(calcHokenFutanWari(item.hoken));
+  let souten = 0;
   processShinryouOfVisit(item, (shikibetsu, futanKubun, sqldate, item) => {
-
-  })
+    souten += item.ten;
+  });
+  console.log("souten", souten);
   return meisai;
 }
 
-async function calcSimple(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-  const hoken = items[0].hoken;
-  if( hoken.shahokokuho || hoken.koukikourei ){
-    return calcSimpleHoken(items, kouhiIdList);
-  } else {
-    return calcSimpleKouhiOnly(items, kouhiIdList);
-  }
-}
+// async function calcSimple(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
+//   const hoken = items[0].hoken;
+//   if( hoken.shahokokuho || hoken.koukikourei ){
+//     return calcSimpleHoken(items, kouhiIdList);
+//   } else {
+//     return calcSimpleKouhiOnly(items, kouhiIdList);
+//   }
+// }
 
 const ShikibetuSectionMap: Record<string, MeisaiSectionKey> = {
   "全体に係る識別コード": "その他",
@@ -131,25 +131,25 @@ const ShikibetuSectionMap: Record<string, MeisaiSectionKey> = {
   "全体に係る識別コード９９": "その他",
 }
 
-async function calcSimpleHoken(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-  const hoken = items[0].hoken;
-  let futanWari = 3;
-  if( hoken.shahokokuho ){
-    const kourei = hoken.shahokokuho.koureiStore;
-    if( kourei > 0 ){
-      futanWari = kourei;
-    }
-  } else if( hoken.koukikourei ){
-    futanWari = hoken.koukikourei.futanWari;
-  }
-  const meisai = new Meisai([], futanWari, 0);
-  mkShinryouUnits(items, kouhiIdList);
-  cvtVisitItemsToShinryouDataList(items, kouhiIdList).forEach(data => {
-    const sectKey: MeisaiSectionKey = ShikibetuSectionMap[data.診療識別] ?? "その他";
-  });
-  return meisai;
-}
+// async function calcSimpleHoken(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
+//   const hoken = items[0].hoken;
+//   let futanWari = 3;
+//   if( hoken.shahokokuho ){
+//     const kourei = hoken.shahokokuho.koureiStore;
+//     if( kourei > 0 ){
+//       futanWari = kourei;
+//     }
+//   } else if( hoken.koukikourei ){
+//     futanWari = hoken.koukikourei.futanWari;
+//   }
+//   const meisai = new Meisai([], futanWari, 0);
+//   mkShinryouUnits(items, kouhiIdList);
+//   cvtVisitItemsToShinryouDataList(items, kouhiIdList).forEach(data => {
+//     const sectKey: MeisaiSectionKey = ShikibetuSectionMap[data.診療識別] ?? "その他";
+//   });
+//   return meisai;
+// }
 
-async function calcSimpleKouhiOnly(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-  throw new Error("Not omplemented");
-}
+// async function calcSimpleKouhiOnly(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
+//   throw new Error("Not omplemented");
+// }
