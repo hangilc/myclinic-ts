@@ -5,7 +5,7 @@
   import Phone from "./phone/Phone.svelte";
   import { currentPatient } from "./exam/ExamVars";
   import JihiKenshin from "./jihi-kenshin/JihiKenshin.svelte";
-  import Rezept from "./rezept/Rezept.svelte";
+  import Rezept from "./Rezept.svelte";
 
   export let serviceStore: Writable<string>;
 

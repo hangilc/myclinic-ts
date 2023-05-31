@@ -2,8 +2,8 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import type { ClinicInfo } from "myclinic-model";
-  import { createKokuho, createShaho } from "./create";
-  import { listKouhi } from "./list-kouhi";
+  import { createKokuho, createShaho } from "../lib/rezept/create";
+  import { listKouhi } from "../lib/rezept/list-kouhi";
 
   export let isVisible: boolean;
   let year: number;

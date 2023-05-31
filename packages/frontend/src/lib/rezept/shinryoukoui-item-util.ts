@@ -1,4 +1,4 @@
-import { ShinryouMemoComment, type ShinryouEx, type ShinryouMaster } from "myclinic-model";
+import { ConductShinryouEx, ShinryouMemoComment, type ShinryouEx, type ShinryouMaster } from "myclinic-model";
 import {
   is診療識別コードCode, type 診療識別コードCode, type 負担区分コードCode,
   診療識別コード
@@ -16,6 +16,14 @@ class RezeptShinryou {
   constructor(master: ShinryouMaster, comments: ShinryouMemoComment[]) {
     this.master = master;
     this.comments = comments;
+  }
+
+  static fromShinryou(shinryou: ShinryouEx): RezeptShinryou {
+    return new RezeptShinryou(shinryou.master, shinryou.asShinryou().comments);
+  }
+
+  static fromConductShinryou(shinryou: ConductShinryouEx): RezeptShinryou {
+    return new RezeptShinryou(shinryou.master, []);
   }
 }
 
@@ -44,10 +52,10 @@ class SingleUnit implements ItemUnit {
   futanKubun: 負担区分コードCode;
   shinryou: RezeptShinryou;
 
-  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, shinryou: ShinryouEx) {
+  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, shinryou: RezeptShinryou) {
     this.shikibetsucode = shikibetsucode;
     this.futanKubun = futanKubun;
-    this.shinryou = new RezeptShinryou(shinryou.master, shinryou.asShinryou().comments);
+    this.shinryou = shinryou;
   }
 
   isEqual(arg: any): boolean {
@@ -191,7 +199,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
         houkatsuMap.set(g, new HoukatsuUnit(shinryouShubetsu, futanKubun, step, shinryou))
       }
     } else {
-      units.push(new SingleUnit(shinryouShubetsu, futanKubun, shinryou));
+      units.push(new SingleUnit(shinryouShubetsu, futanKubun, RezeptShinryou.fromShinryou(shinryou)));
     }
   });
   for (const unit of houkatsuMap.values()) {
@@ -200,7 +208,7 @@ function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
   visitItem.visitEx.conducts.forEach(conduct => {
     conduct.shinryouList.forEach(shinryou => {
       units.push(new SingleUnit(
-        診療識別コード.処置, futanKubun, shinryou.master, []
+        診療識別コード.処置, futanKubun, RezeptShinryou.fromConductShinryou(shinryou)
       ));
     });
   })
