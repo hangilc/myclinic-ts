@@ -6,6 +6,7 @@ import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, Rez
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
+import type { K } from "vitest/dist/types-e3c9754d";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -288,8 +289,8 @@ export function calcSeikyuuMonth(year: number, month: number): [number, number] 
 }
 
 function isAllAscii(s: string): boolean {
-  for(let c of s){
-    if( c.charCodeAt(0) >= 256 ){
+  for (let c of s) {
+    if (c.charCodeAt(0) >= 256) {
       return false;
     }
   }
@@ -297,7 +298,7 @@ function isAllAscii(s: string): boolean {
 }
 
 export function adjustString(s: string): string {
-  if( isAllAscii(s) ){
+  if (isAllAscii(s)) {
     return s;
   } else {
     return toZenkaku(s);
@@ -305,7 +306,7 @@ export function adjustString(s: string): string {
 }
 
 export function adjustOptString(s: string | undefined): string | undefined {
-  if( s === undefined ){
+  if (s === undefined) {
     return undefined;
   } else {
     return adjustString(s);
@@ -313,9 +314,9 @@ export function adjustOptString(s: string | undefined): string | undefined {
 }
 
 export function isEqualList<T>(a: T[], b: T[], eq: (a: T, b: T) => boolean): boolean {
-  if( a.length === b.length ){
-    for(let i=0;i<a.length;i++){
-      if( !eq(a[i], b[i]) ){
+  if (a.length === b.length) {
+    for (let i = 0; i < a.length; i++) {
+      if (!eq(a[i], b[i])) {
         return false;
       }
     }
@@ -323,4 +324,37 @@ export function isEqualList<T>(a: T[], b: T[], eq: (a: T, b: T) => boolean): boo
   } else {
     return false;
   }
+}
+
+export function classify<K, V>(items: [K, V][]): Map<K, V[]> {
+  const map: Map<K, V[]> = new Map();
+  items.forEach(([k, v]) => {
+    if (map.has(k)) {
+      map.get(k)!.push(v);
+    } else {
+      map.set(k, [v]);
+    }
+  })
+  return map;
+}
+
+export function withClassified<K, V>(items: [K, V][], handler: (k: K, vs: V[]) => void): void {
+  const classified = classify(items);
+  for(let k of classified.keys()){
+    const vs = Array.from(classified.get(k)!);
+    handler(k, vs);
+  }
+}
+
+export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T): [T[], U[]] {
+  const ts: T[] = [];
+  const us: U[] = [];
+  items.forEach(item => {
+    if( pred(item) ){
+      ts.push(item);
+    } else {
+      us.push(item);
+    }
+  })
+  return [ts, us];
 }

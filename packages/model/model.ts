@@ -228,6 +228,10 @@ export class Visit {
   hasKouhiId(kouhiId: number): boolean {
     return this.kouhi1Id === kouhiId || this.kouhi2Id === kouhiId || this.kouhi3Id === kouhiId;
   }
+
+  get kouhiIdList(): number[] {
+    return [this.kouhi1Id, this.kouhi2Id, this.kouhi3Id].filter(id => id > 0);
+  }
 }
 
 export class WqueueStateType {

@@ -1,7 +1,7 @@
 import api from "./api";
 import { classifyVisitItems, mkVisitItem } from "./rezept/create";
 import { cvtVisitItemsToIyakuhinDataList } from "./rezept/iyakuhin-item-util";
-import { cvtVisitItemsToShinryouDataList } from "./rezept/shinryoukoui-item-util";
+import { cvtVisitItemsToShinryouDataList, mkShinryouUnits } from "./rezept/shinryoukoui-item-util";
 import { cvtVisitItemsToKizaiDataList } from "./rezept/tokuteikizai-item-util";
 import type { VisitItem } from "./rezept/visit-item";
 
@@ -70,20 +70,9 @@ export class Meisai {
 
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit = await api.getVisit(visitId);
-  const items = await mkVisitItem(visit);
+  const [_key, item] = await mkVisitItem(visit);
   const kouhiIdList = [visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id].filter(id => id > 0);
-  const classified = Object.values(classifyVisitItems([items]));
-  if( classified.length === 0 ){
-    return new Meisai([], undefined, 0);
-  } else if( classified.length === 1 ){
-    const visitItems = classified[0];
-    if( visitItems.length === 0 ){
-      return new Meisai([], undefined, 0);
-    }
-    return await calcSimple(visitItems, kouhiIdList);
-  } else {
-    throw new Error("Not implemented");
-  }
+  
 }
 
 async function calcSimple(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
@@ -134,6 +123,7 @@ async function calcSimpleHoken(items: VisitItem[], kouhiIdList: number[]): Promi
     futanWari = hoken.koukikourei.futanWari;
   }
   const meisai = new Meisai([], futanWari, 0);
+  mkShinryouUnits(items, kouhiIdList);
   cvtVisitItemsToShinryouDataList(items, kouhiIdList).forEach(data => {
     const sectKey: MeisaiSectionKey = ShikibetuSectionMap[data.診療識別] ?? "その他";
   });

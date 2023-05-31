@@ -24,9 +24,20 @@ import {
   calcSeikyuuMonth,
   composeDiseaseItem,
   extract都道府県コードfromAddress,
-  firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList
+  firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList,
+  classify
 } from "./util";
 import type { VisitItem } from "./visit-item";
+
+export async function createShaho(year: number, month: number): Promise<string> {
+  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
+}
+
+export async function createKokuho(year: number, month: number): Promise<string> {
+  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
+}
 
 export type RezeptRecordKey = string;
 let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
@@ -55,17 +66,8 @@ export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, Visit
   }];
 }
 
-export function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Record<RezeptRecordKey, VisitItem[]> {
-  const classified: Record<string, VisitItem[]> = {};
-  items.forEach(item => {
-    const [key, vitem] = item;
-    if (!(key in classified)) {
-      classified[key] = [vitem];
-    } else {
-      classified[key].push(vitem);
-    }
-  });
-  return classified;
+function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Map<RezeptRecordKey, VisitItem[]> {
+  return classify(items, item => item);
 }
 
 async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
@@ -113,28 +115,18 @@ async function getSeikyuuVisitItems(year: number, month: number):
   }
 }
 
-export async function createShaho(year: number, month: number): Promise<string> {
-  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
-}
-
-export async function createKokuho(year: number, month: number): Promise<string> {
-  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
-}
-
 async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
   const rows: string[] = [];
   const [seikyuuYear, seikyuuMonth] = calcSeikyuuMonth(year, month);
   rows.push(await 医療機関情報レコード(seikyuuYear, seikyuuMonth, 診査機関));
-  const classified: Record<string, VisitItem[]> = classifyVisitItems(visitItems);
+  const classified: Map<string, VisitItem[]> = classifyVisitItems(visitItems);
   let serial = 1;
   const firstDay = firstDayOfMonth(year, month);
   const lastDay = lastDayOfMonth(year, month);
   let rezeptCount = 0;
   let rezeptSouten = 0;
-  for (let key in classified) {
-    const items = classified[key];
+  for (let key of classified.keys()) {
+    const items = classified.get(key)!;
     const hoken = items[0].hoken;
     const kouhiList: Kouhi[] = collectKouhi(items);
     const kouhiIdList = kouhiList.map(k => k.kouhiId);

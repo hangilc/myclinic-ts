@@ -246,6 +246,11 @@ export function is診療識別コードCode(arg: string): arg is 診療識別コ
   return false;
 }
 
+export function sort診療識別コードCodeList(list: 診療識別コードCode[]): 診療識別コードCode[] {
+  list.sort((a, b) => a.localeCompare(b));
+  return list;
+}
+
 export const 負担区分コード = {
   "H": "1",
   "1": "5",
