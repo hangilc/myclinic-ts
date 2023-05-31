@@ -233,6 +233,15 @@ export const 診療識別コードvalues: string[] = Object.values(診療識別�
 export type 診療識別コードName = keyof typeof 診療識別コード;
 export type 診療識別コードCode = valueof<typeof 診療識別コード>;
 
+export const rev診療識別コード: Record<string, 診療識別コードName> = {};
+{
+  for(let k of Object.keys(診療識別コード)){
+    const key = k as 診療識別コードName;
+    const v = 診療識別コード[key];
+    rev診療識別コード[v] = key;
+  }
+}
+
 export function is診療識別コードName(k: string): k is 診療識別コードName {
   return Object.keys(診療識別コード).includes(k);
 }

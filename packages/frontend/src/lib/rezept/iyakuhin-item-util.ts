@@ -1,8 +1,8 @@
 import type { ConductDrugEx, IyakuhinMaster, Visit } from "myclinic-model";
-import { 診療識別コード, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
+import type { 診療識別コードCode, 負担区分コードCode } from "./codes";
 import type { 医薬品レコードData } from "./records/iyakuhin-record";
 import type { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken, shochiYakuzaiKingakuToTen, withClassified } from "./util";
+import { calcFutanKubun, hasHoken, shikibetsuOfConduct, shochiYakuzaiKingakuToTen, withClassified } from "./util";
 import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
 
 class SingleUnit implements TekiyouItem<医薬品レコードData> {
@@ -30,6 +30,10 @@ class SingleUnit implements TekiyouItem<医薬品レコードData> {
     return shochiYakuzaiKingakuToTen(parseFloat(this.master.yakkaStore) * this.amount);
   }
 
+  get label(): string {
+    return `${this.master.name} ${this.amount}${this.master.unit}`;
+  }
+
   toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 医薬品レコードData[] {
     return [{
       診療識別: shikibetsu,
@@ -49,7 +53,7 @@ class SingleUnit implements TekiyouItem<医薬品レコードData> {
   }
 }
 
-function resolveConductDrugKouhi(shinryou: ConductDrugEx, visit: Visit): number[] {
+function resolveConductDrugKouhi(drug: ConductDrugEx, visit: Visit): number[] {
   return visit.kouhiIdList;
 }
 
@@ -60,7 +64,11 @@ export function processIyakuhinOfVisit(visitItem: VisitItem,
   const visitEx = visitItem.visitEx;
   const sqldate = visitItem.visit.visitedAt.substring(0, 10);
   const conductDrugs: [診療識別コードCode, ConductDrugEx][] =
-    visitEx.conducts.flatMap(c => c.drugs).map(cs => [診療識別コード.処置, cs]);
+    visitEx.conducts
+      .flatMap(c => {
+        const shikibetsu = shikibetsuOfConduct(c.kind.code);
+        return c.drugs.map((cs) : [診療識別コードCode, ConductDrugEx] => [shikibetsu, cs]);
+      });
   const list = conductDrugs;
   function resolveFutanKubun(d: ConductDrugEx): 負担区分コードCode {
     return calcFutanKubun(

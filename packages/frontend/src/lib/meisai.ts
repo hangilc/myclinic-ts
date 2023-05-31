@@ -1,8 +1,11 @@
 import type { HokenInfo, Visit } from "myclinic-model";
 import api from "./api";
+import { rev診療識別コード, type 診療識別コードCode } from "./rezept/codes";
 import { mkVisitItem } from "./rezept/create";
 import { processIyakuhinOfVisit } from "./rezept/iyakuhin-item-util";
 import { processShinryouOfVisit } from "./rezept/shinryoukoui-item-util";
+import { processKizaiOfVisit } from "./rezept/tokuteikizai-item-util";
+import { classify } from "./rezept/util";
 import type { VisitItem } from "./rezept/visit-item";
 
 export const MeisaiSection = {
@@ -51,7 +54,7 @@ export class MeisaiSectionData {
 }
 
 export class Meisai {
-  items: MeisaiSectionData[] = [];
+  store: [MeisaiSectionKey, MeisaiSectionItem][] = [];
   futanWari: number | undefined;
   charge: number = 0;
 
@@ -59,8 +62,20 @@ export class Meisai {
     this.futanWari = futanWari;
   }
 
-  addData(data: MeisaiSectionData): void {
-    this.items.push(data);
+  addData(section: MeisaiSectionKey, item: MeisaiSectionItem): void {
+    this.store.push([section, item]);
+  }
+
+  get items(): MeisaiSectionData[] {
+    const result: MeisaiSectionData[] = [];
+    const classified = classify(this.store);
+    for(let key of MeisaiSectionKeys){
+      const entries = classified.get(key);
+      if( entries ){
+        result.push(new MeisaiSectionData(key, entries));
+      }
+    }
+    return result;
   }
 
   get totalTen(): number {
@@ -83,31 +98,6 @@ function calcHokenFutanWari(hoken: HokenInfo): number | undefined {
   }
   return undefined;
 }
-
-export async function calcMeisai(visitId: number): Promise<Meisai> {
-  const visit = await api.getVisit(visitId);
-  const [_key, item] = await mkVisitItem(visit);
-  const meisai = new Meisai(calcHokenFutanWari(item.hoken));
-  let souten = 0;
-  const kouhiIdList = visit.kouhiIdList;
-  processShinryouOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
-    souten += item.ten;
-  });
-  processIyakuhinOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
-    souten += item.ten;
-  })
-  console.log("souten", souten);
-  return meisai;
-}
-
-// async function calcSimple(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-//   const hoken = items[0].hoken;
-//   if( hoken.shahokokuho || hoken.koukikourei ){
-//     return calcSimpleHoken(items, kouhiIdList);
-//   } else {
-//     return calcSimpleKouhiOnly(items, kouhiIdList);
-//   }
-// }
 
 const ShikibetuSectionMap: Record<string, MeisaiSectionKey> = {
   "全体に係る識別コード": "その他",
@@ -136,25 +126,36 @@ const ShikibetuSectionMap: Record<string, MeisaiSectionKey> = {
   "全体に係る識別コード９９": "その他",
 }
 
-// async function calcSimpleHoken(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-//   const hoken = items[0].hoken;
-//   let futanWari = 3;
-//   if( hoken.shahokokuho ){
-//     const kourei = hoken.shahokokuho.koureiStore;
-//     if( kourei > 0 ){
-//       futanWari = kourei;
-//     }
-//   } else if( hoken.koukikourei ){
-//     futanWari = hoken.koukikourei.futanWari;
-//   }
-//   const meisai = new Meisai([], futanWari, 0);
-//   mkShinryouUnits(items, kouhiIdList);
-//   cvtVisitItemsToShinryouDataList(items, kouhiIdList).forEach(data => {
-//     const sectKey: MeisaiSectionKey = ShikibetuSectionMap[data.診療識別] ?? "その他";
-//   });
-//   return meisai;
-// }
+function revShikibetsu(shikibetsu: 診療識別コードCode): MeisaiSectionKey {
+  return ShikibetuSectionMap[rev診療識別コード[shikibetsu] ?? "その他"];
+}
 
-// async function calcSimpleKouhiOnly(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
-//   throw new Error("Not omplemented");
-// }
+export async function calcMeisai(visitId: number): Promise<Meisai> {
+  const visit = await api.getVisit(visitId);
+  const [_key, item] = await mkVisitItem(visit);
+  const meisai = new Meisai(calcHokenFutanWari(item.hoken));
+  let souten = 0;
+  const kouhiIdList = visit.kouhiIdList;
+  processShinryouOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
+    const ten = item.ten;
+    souten += ten;
+    const sectItem = new MeisaiSectionItem(ten, 1, item.label);
+    meisai.addData(revShikibetsu(shikibetsu), sectItem);
+  });
+  processIyakuhinOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
+    const ten = item.ten;
+    souten += ten;
+    const sectItem = new MeisaiSectionItem(ten, 1, item.label);
+    meisai.addData(revShikibetsu(shikibetsu), sectItem);
+  });
+  processKizaiOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
+    const ten = item.ten;
+    souten += ten;
+    const sectItem = new MeisaiSectionItem(ten, 1, item.label);
+    meisai.addData(revShikibetsu(shikibetsu), sectItem);
+  });
+  console.log("souten", souten);
+  console.log("meisai", meisai.items);
+  return meisai;
+}
+

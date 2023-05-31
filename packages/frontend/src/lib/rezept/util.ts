@@ -1,8 +1,8 @@
 import api from "@/lib/api";
-import { dateToSqlDate, type Disease, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { Conduct, dateToSqlDate, type Disease, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
-import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 負担区分コードCode } from "./codes";
+import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
@@ -357,4 +357,11 @@ export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T
     }
   })
   return [ts, us];
+}
+
+export function shikibetsuOfConduct(conductKind: number): 診療識別コードCode {
+  switch(conductKind) {
+    case 3: return 診療識別コード.画像診断;
+    default: return 診療識別コード.処置;
+  }
 }

@@ -1,76 +1,46 @@
-import type { KizaiMaster } from "myclinic-model";
-import { 診療識別コード, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
+import type { ConductKizaiEx, KizaiMaster, Visit } from "myclinic-model";
+import type { 診療識別コードCode, 負担区分コードCode } from "./codes";
 import type { 特定器材レコードData } from "./records/tokuteikizai-record";
-import { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken, kizaiKingakuToTen } from "./util";
-import type { VisitItem } from "./visit-item";
+import type { Santeibi } from "./santeibi";
+import { calcFutanKubun, hasHoken, kizaiKingakuToTen, shikibetsuOfConduct, withClassified } from "./util";
+import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
 
-interface ItemUnit {
-  isEqual(arg: any): boolean;
-  // toItems(santeibi: Santeibi): TokuteikizaiItem[];
-  toDataList(santeibi: Santeibi): 特定器材レコードData[];
-}
+type R = 特定器材レコードData;
 
-class Combined {
-  units: [ItemUnit, Santeibi][] = [];
-
-  combine(unit: ItemUnit, sqldate: string): void {
-    for (const [u, santei] of this.units) {
-      if (u.isEqual(unit)) {
-        santei.add(sqldate);
-        return;
-      }
-    }
-    const santei = new Santeibi();
-    santei.add(sqldate);
-    this.units.push([unit, santei]);
-  }
-
-  toDataList(): 特定器材レコードData[] {
-    const list: 特定器材レコードData[] = [];
-    this.units.forEach(([unit, santeibi]) => {
-      list.push(...unit.toDataList(santeibi));
-    })
-    return list;
-  }
-}
-
-class SingleUnit implements ItemUnit {
+class SingleUnit implements TekiyouItem<R> {
   readonly isSingleItem = true;
-  shikibetsucode: 診療識別コードCode;
-  futanKubun: 負担区分コードCode;
   master: KizaiMaster;
   amount: number;
 
-  constructor(shikibetsucode: 診療識別コードCode, futanKubun: 負担区分コードCode, master: KizaiMaster, amount: number) {
-    this.shikibetsucode = shikibetsucode;
-    this.futanKubun = futanKubun;
+  constructor( master: KizaiMaster, amount: number) {
     this.master = master;
     this.amount = amount;
   }
 
-  isEqual(arg: any): boolean {
+  isSame(arg: any): boolean {
     if (arg instanceof SingleUnit) {
-      return arg.shikibetsucode === this.shikibetsucode &&
-        arg.futanKubun === this.futanKubun &&
-        arg.master.kizaicode === this.master.kizaicode &&
+      return arg.master.kizaicode === this.master.kizaicode &&
         arg.amount === this.amount;
     } else {
       return false;
     }
   }
 
-  calcTensuu(): number {
+  get ten(): number {
     return kizaiKingakuToTen(parseFloat(this.master.kingakuStore) * this.amount);
   }
 
-  toDataList(santeibi: Santeibi): 特定器材レコードData[] {
+  get label(): string {
+    return `${this.master.name} ${this.amount}${this.master.unit}`;
+  }
+
+  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): R[] {
     return [{
-      診療識別: this.shikibetsucode,
-      負担区分: this.futanKubun,
+      診療識別: shikibetsu,
+      負担区分: futanKubun,
       特定器材コード: this.master.kizaicode,
       使用量: this.amount,
-      点数: this.calcTensuu(),
+      点数: this.ten,
       回数: santeibi.getSum(),
       コメントコード１: undefined,
       コメント文字１: undefined,
@@ -81,53 +51,49 @@ class SingleUnit implements ItemUnit {
       算定日情報: santeibi.getSanteibiMap(),
     }];
   }
-
-  // toItems(santeibi: Santeibi): TokuteikizaiItem[] {
-  //   return [{
-  //     shikibetsucode: this.shikibetsucode,
-  //     futanKubun: this.futanKubun,
-  //     kizaicode: this.master.kizaicode,
-  //     amount: this.amount,
-  //     tensuu: this.calcTensuu(),
-  //     count: santeibi.getSum(),
-  //     santeibiInfo: santeibi.getSanteibiMap()
-  //   }];
-  // }
 }
 
-function visitUnits(visitItem: VisitItem, kouhiIdList: number[]): ItemUnit[] {
-  const units: ItemUnit[] = [];
-  const futanKubun = calcFutanKubun(hasHoken(visitItem), visitItem.hoken.kouhiList.map(k => k.kouhiId), kouhiIdList);
-  visitItem.visitEx.conducts.forEach(conduct => {
-    conduct.kizaiList.forEach(kizai => {
-      units.push(new SingleUnit(
-        診療識別コード.処置, futanKubun, kizai.master, kizai.amount
-      ));
-    });
-  })
-  return units;
+function resolveConductKizaiKouhi(kizai: ConductKizaiEx, visit: Visit): number[] {
+  return visit.kouhiIdList;
 }
 
-export function cvtVisitItemsToKizaiDataList(visitItems: VisitItem[], kouhiIdList: number[]): 特定器材レコードData[] {
-  const combined = new Combined();
-  visitItems.forEach(visitItem => {
-    const units = visitUnits(visitItem, kouhiIdList);
-    const date = visitItem.visit.visitedAt.substring(0, 10);
-    units.forEach(unit => {
-      combined.combine(unit, date);
+export function processKizaiOfVisit(visitItem: VisitItem,
+  kouhiIdList: number[],
+  handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
+    item: SingleUnit) => void): void {
+  const visitEx = visitItem.visitEx;
+  const sqldate = visitItem.visit.visitedAt.substring(0, 10);
+  const conductKizaiList: [診療識別コードCode, ConductKizaiEx][] =
+    visitEx.conducts
+      .flatMap(c => {
+        const shikibetsu = shikibetsuOfConduct(c.kind.code);
+        return c.kizaiList.map((cs) : [診療識別コードCode, ConductKizaiEx] => [shikibetsu, cs]);
+      });
+ const list = conductKizaiList;
+  function resolveFutanKubun(k: ConductKizaiEx): 負担区分コードCode {
+    return calcFutanKubun(
+      hasHoken(visitItem),
+      resolveConductKizaiKouhi(k, visitItem.visit),
+      kouhiIdList);
+  }
+  withClassified(list, (shikibetsu, ks) => {
+    withClassified(ks.map(k => [resolveFutanKubun(k), k]), (futanKubun, ds) => {
+      ds.forEach(d => {
+        const unit = new SingleUnit(d.master, d.amount);
+        handler(shikibetsu, futanKubun, sqldate, unit);
+      });
     })
   })
-  return combined.toDataList();
 }
 
-// export function composeTokuteikizaiItems(visitItems: VisitItem[], kouhiIdList: number[]): TokuteikizaiItem[] {
-//   const combined = new Combined();
-//   visitItems.forEach(visitItem => {
-//     const units = visitUnits(visitItem, kouhiIdList);
-//     const date = visitItem.visit.visitedAt.substring(0, 10);
-//     units.forEach(unit => {
-//       combined.combine(unit, date);
-//     })
-//   })
-//   return combined.toItems();
-// }
+export function cvtVisitItemsToKizaiDataList(visitItems: VisitItem[], kouhiIdList: number[]): R[] {
+  const comb = new Combiner<R>();
+  visitItems.forEach(visitItem => {
+    processKizaiOfVisit(visitItem, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
+      comb.combine(shikibetsu, futanKubun, sqldate, s);
+    });
+  });
+  return comb.toDataList();
+}
+
+

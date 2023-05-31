@@ -6,7 +6,7 @@ import {
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuStep } from "./houkatsu";
 import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import type { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken, isEqualList, withClassified, partition } from "./util";
+import { calcFutanKubun, hasHoken, isEqualList, withClassified, partition, shikibetsuOfConduct } from "./util";
 import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
 
 function isSameComments(a: ShinryouMemoComment[], b: ShinryouMemoComment[]): boolean {
@@ -34,6 +34,10 @@ export class SimpleShinryou implements TekiyouItem<診療行為レコードData>
 
   get ten(): number {
     return parseInt(this.master.tensuuStore);
+  }
+
+  get label(): string {
+    return this.master.name;
   }
 
   toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 診療行為レコードData[] {
@@ -89,6 +93,10 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
         .reduce((acc, ele) => acc + parseInt(ele.tensuuStore), 0);
     }
     return ten;
+  }
+
+  get label(): string {
+    return this.shinryouList.map(s => s.master.name).join("、");
   }
 
   toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 診療行為レコードData[] {
@@ -170,7 +178,11 @@ export function processShinryouOfVisit(visitItem: VisitItem, kouhiIdList: number
     shinryou
   ]);
   const conductShinryouList: [診療識別コードCode, ConductShinryouEx][] =
-    visitEx.conducts.flatMap(c => c.shinryouList).map(cs => [診療識別コード.処置, cs]);
+    visitEx.conducts
+      .flatMap(c => {
+        const shikibetsu = shikibetsuOfConduct(c.kind.code);
+        return c.shinryouList.map((cs) : [診療識別コードCode, ConductShinryouEx] => [shikibetsu, cs]);
+      });
   const list: [診療識別コードCode, ShinryouEx | ConductShinryouEx][] = [...shinryouList, ...conductShinryouList];
   function resolveFutanKubun(s: ShinryouEx | ConductShinryouEx): 負担区分コードCode {
     if (s instanceof ShinryouEx) {
