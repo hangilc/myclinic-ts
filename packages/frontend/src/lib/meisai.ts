@@ -1,7 +1,8 @@
+import type { HokenInfo, Visit } from "myclinic-model";
 import api from "./api";
 import { classifyVisitItems, mkVisitItem } from "./rezept/create";
 import { cvtVisitItemsToIyakuhinDataList } from "./rezept/iyakuhin-item-util";
-import { cvtVisitItemsToShinryouDataList, mkShinryouUnits } from "./rezept/shinryoukoui-item-util";
+import { cvtVisitItemsToShinryouDataList, mkShinryouUnits, processShinryouOfVisit } from "./rezept/shinryoukoui-item-util";
 import { cvtVisitItemsToKizaiDataList } from "./rezept/tokuteikizai-item-util";
 import type { VisitItem } from "./rezept/visit-item";
 
@@ -51,11 +52,13 @@ export class MeisaiSectionData {
 }
 
 export class Meisai {
-  constructor(
-    public items: MeisaiSectionData[],
-    public futanWari: number | undefined,
-    public charge: number
-  ) { }
+  items: MeisaiSectionData[] = [];
+  futanWari: number | undefined;
+  charge: number = 0;
+
+  constructor(futanWari: number | undefined) {
+    this.futanWari = futanWari;
+  }
 
   addData(data: MeisaiSectionData): void {
     this.items.push(data);
@@ -68,11 +71,28 @@ export class Meisai {
   }
 }
 
+function calcHokenFutanWari(hoken: HokenInfo): number | undefined {
+  if( hoken.shahokokuho ){
+    const kourei = hoken.shahokokuho.koureiStore;
+    if( kourei > 0 ){
+      return kourei;
+    } else {
+      return 3;
+    }
+  } else if( hoken.koukikourei ){
+    return hoken.koukikourei.futanWari;
+  }
+  return undefined;
+}
+
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit = await api.getVisit(visitId);
   const [_key, item] = await mkVisitItem(visit);
-  const kouhiIdList = [visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id].filter(id => id > 0);
-  
+  const meisai = new Meisai(calcHokenFutanWari(item.hoken));
+  processShinryouOfVisit(item, (shikibetsu, futanKubun, sqldate, item) => {
+
+  })
+  return meisai;
 }
 
 async function calcSimple(items: VisitItem[], kouhiIdList: number[]): Promise<Meisai> {
