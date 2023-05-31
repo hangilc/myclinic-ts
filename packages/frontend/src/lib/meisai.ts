@@ -1,6 +1,7 @@
 import type { HokenInfo, Visit } from "myclinic-model";
 import api from "./api";
 import { mkVisitItem } from "./rezept/create";
+import { processIyakuhinOfVisit } from "./rezept/iyakuhin-item-util";
 import { processShinryouOfVisit } from "./rezept/shinryoukoui-item-util";
 import type { VisitItem } from "./rezept/visit-item";
 
@@ -70,14 +71,14 @@ export class Meisai {
 }
 
 function calcHokenFutanWari(hoken: HokenInfo): number | undefined {
-  if( hoken.shahokokuho ){
+  if (hoken.shahokokuho) {
     const kourei = hoken.shahokokuho.koureiStore;
-    if( kourei > 0 ){
+    if (kourei > 0) {
       return kourei;
     } else {
       return 3;
     }
-  } else if( hoken.koukikourei ){
+  } else if (hoken.koukikourei) {
     return hoken.koukikourei.futanWari;
   }
   return undefined;
@@ -88,9 +89,13 @@ export async function calcMeisai(visitId: number): Promise<Meisai> {
   const [_key, item] = await mkVisitItem(visit);
   const meisai = new Meisai(calcHokenFutanWari(item.hoken));
   let souten = 0;
-  processShinryouOfVisit(item, (shikibetsu, futanKubun, sqldate, item) => {
+  const kouhiIdList = visit.kouhiIdList;
+  processShinryouOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
     souten += item.ten;
   });
+  processIyakuhinOfVisit(item, kouhiIdList, (shikibetsu, futanKubun, sqldate, item) => {
+    souten += item.ten;
+  })
   console.log("souten", souten);
   return meisai;
 }

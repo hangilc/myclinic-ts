@@ -160,7 +160,7 @@ function isShinryouEx(arg: any): arg is ShinryouEx {
   return arg instanceof ShinryouEx;
 }
 
-export function processShinryouOfVisit(visitItem: VisitItem,
+export function processShinryouOfVisit(visitItem: VisitItem, kouhiIdList: number[],
   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
     item: SimpleShinryou | HoukatsuKensaShinryou) => void): void {
   const visitEx = visitItem.visitEx;
@@ -172,7 +172,6 @@ export function processShinryouOfVisit(visitItem: VisitItem,
   const conductShinryouList: [診療識別コードCode, ConductShinryouEx][] =
     visitEx.conducts.flatMap(c => c.shinryouList).map(cs => [診療識別コード.処置, cs]);
   const list: [診療識別コードCode, ShinryouEx | ConductShinryouEx][] = [...shinryouList, ...conductShinryouList];
-  const kouhiIdList = visitItem.visit.kouhiIdList;
   function resolveFutanKubun(s: ShinryouEx | ConductShinryouEx): 負担区分コードCode {
     if (s instanceof ShinryouEx) {
       return calcFutanKubun(
@@ -212,84 +211,10 @@ export function processShinryouOfVisit(visitItem: VisitItem,
   })
 }
 
-// class CombineUnit {
-//   item: SimpleShinryou | HoukatsuKensaShinryou;
-//   santei: Santeibi;
-
-//   constructor(item: SimpleShinryou | HoukatsuKensaShinryou, sqldate: string) {
-//     this.item = item;
-//     this.santei = new Santeibi();
-//     this.santei.add(sqldate);
-//   }
-
-//   tryAdd(arg: SimpleShinryou | HoukatsuKensaShinryou, sqldate: string): boolean {
-//     if (this.item.isSame(arg)) {
-//       this.santei.add(sqldate);
-//       return true;
-//     } else {
-//       return false;
-//     }
-//   }
-
-//   toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode,): 診療行為レコードData[] {
-//     return this.item.toRecords(shikibetsu, futanKubun, this.santei);
-//   }
-// }
-
-// class Combiner {
-//   map: Map<診療識別コードCode, Map<負担区分コードCode, CombineUnit[]>> = new Map();
-
-//   getShikibetsu(shikibetsu: 診療識別コードCode): Map<負担区分コードCode, CombineUnit[]> {
-//     const bmap = this.map.get(shikibetsu);
-//     if (bmap) {
-//       return bmap;
-//     } else {
-//       const newBmap = new Map<負担区分コードCode, CombineUnit[]>();
-//       this.map.set(shikibetsu, newBmap);
-//       return newBmap;
-//     }
-//   }
-
-//   combine(
-//     shikibetsu: 診療識別コードCode,
-//     futanKubun: 負担区分コードCode,
-//     sqldate: string,
-//     item: SimpleShinryou | HoukatsuKensaShinryou): void {
-//     const bmap = this.getShikibetsu(shikibetsu);
-//     const cs = bmap.get(futanKubun);
-//     if (cs) {
-//       for (let c of cs) {
-//         if (c.tryAdd(item, sqldate)) {
-//           return;
-//         }
-//       }
-//       cs.push(new CombineUnit(item, sqldate));
-//     } else {
-//       bmap.set(futanKubun, [new CombineUnit(item, sqldate)]);
-//     }
-//   }
-
-//   toDataList(): 診療行為レコードData[] {
-//     const result: 診療行為レコードData[] = [];
-//     const keys = Array.from(this.map.keys());
-//     sort診療識別コードCodeList(keys);
-//     for (let shikibetsu of keys) {
-//       const bmap = this.map.get(shikibetsu)!;
-//       for (let futanKubun of bmap.keys()) {
-//         const cs = bmap.get(futanKubun)!;
-//         cs.forEach(u => {
-//           result.push(...u.toRecords(shikibetsu, futanKubun));
-//         })
-//       }
-//     }
-//     return result;
-//   }
-// }
-
 export function cvtVisitItemsToShinryouDataList(visitItems: VisitItem[], kouhiIdList: number[]): 診療行為レコードData[] {
   const comb = new Combiner<診療行為レコードData>();
   visitItems.forEach(visitItem => {
-    processShinryouOfVisit(visitItem, (shikibetsu, futanKubun, sqldate, s) => {
+    processShinryouOfVisit(visitItem, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
       comb.combine(shikibetsu, futanKubun, sqldate, s);
     });
   });
