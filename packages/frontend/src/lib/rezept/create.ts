@@ -34,55 +34,6 @@ import {
 } from "./util";
 import type { VisitItem } from "./visit-item";
 
-class RezeptRecord {
-  patientId: number;
-  hoken: Shahokokuho | Koukikourei | undefined;
-  hokenshaBangou: number;
-  kouhiList: Kouhi[];
-  visits: Visit[];
-
-  constructor(
-    patientId: number,
-    hoken: Shahokokuho | Koukikourei | undefined,
-    hokenshaBangou: number,
-    kouhiList: Kouhi[],
-    visits: Visit[]) {
-    this.patientId = patientId;
-    this.hoken = hoken;
-    this.hokenshaBangou = hokenshaBangou;
-    this.kouhiList = kouhiList;
-    this.visits = visits;
-  }
-}
-
-async function classifyToRecord(year: number, month: number, handler: (rec: RezeptRecord) => void) {
-  let visits = await api.listVisitByMonth(year, month);
-  visits = visits.filter(visit => {
-    if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
-      throw new Error("重複保険：" + visit.visitId);
-    }
-    if (visit.shahokokuhoId > 0 || visit.koukikoureiId > 0) {
-      return true;
-    } else {
-      return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
-    }
-  });
-  withClassifiedBy(visits, visit => visit.patientId, async (patientId, visits) => {
-    const visitItems: [string, Visit][] = await Promise.all(visits.map(async visit => {
-      const shahokokuho = visit.shahokokuhoId > 0 ? await api.getShahokokuho(visit.shahokokuhoId) : undefined;
-      const koukikourei = visit.koukikoureiId > 0 ? await api.getKoukikourei(visit.koukikoureiId) : undefined;
-      const shubetsu = resolve保険種別(shahokokuho, koukikourei, []);
-      const hokenshaBangou1 = shahokokuho ? shahokokuho.hokenshaBangou : 0;
-      const hokenshaBangou2 = koukikourei ? parseInt(koukikourei.hokenshaBangou) : 0;
-      const encode = `${shubetsu}|${hokenshaBangou1}|${hokenshaBangou2}`;
-      return [encode, visit];
-    }));
-    withClassified(visitItems, (encode, visits) => {
-
-    });
-  });
-}
-
 async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
   const rows: string[] = [];
   const [seikyuuYear, seikyuuMonth] = calcSeikyuuMonth(year, month);
