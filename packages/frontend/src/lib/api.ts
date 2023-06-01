@@ -1089,7 +1089,7 @@ export default {
   },
 
   getShahokokuho(shahokokuhoId: number): Promise<m.Shahokokuho> {
-    return get("get-shahokokuho", { "shahokoku-id": shahokokuhoId.toString() }, m.Shahokokuho.cast);
+    return get("get-shahokokuho", { "shahokokuho-id": shahokokuhoId.toString() }, m.Shahokokuho.cast);
   },
 
   getKoukikourei(koukikoureiId: number): Promise<m.Koukikourei> {

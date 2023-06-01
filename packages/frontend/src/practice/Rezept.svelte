@@ -1,9 +1,10 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
-  import type { ClinicInfo } from "myclinic-model";
-  import { createKokuho, createShaho } from "../lib/rezept/create";
+  import type { ClinicInfo, Visit } from "myclinic-model";
+  // import { createKokuho, createShaho } from "../lib/rezept/create";
   import { listKouhi } from "./list-kouhi";
+  import { classifyByHokenOnlyShubetsu, classifyByPatient, classifyBySeikyuuSaki, listVisitForRezept } from "@/lib/rezept/prepare";
 
   export let isVisible: boolean;
   let year: number;
@@ -33,10 +34,24 @@
   }
 
   async function createContent(): Promise<string> {
-    return await (shiharaiSelect === "shaho" ? createShaho(year, month) : createKokuho(year, month));
+    return "";
+    // return await (shiharaiSelect === "shaho" ? createShaho(year, month) : createKokuho(year, month));
   }
 
   async function doStart() {
+    const visits = await listVisitForRezept(year, month);
+    const patientVisitsMap = classifyByPatient(visits);
+    const shahoList: Visit[][] = [];
+    const kokuhoList: Visit[][] = [];
+    for(let patientId of patientVisitsMap.keys()){
+      const vs = patientVisitsMap.get(patientId)!;
+      const seikyuu = await classifyBySeikyuuSaki(vs);
+      Array.from((await classifyByHokenOnlyShubetsu(seikyuu.社保基金)).values()).forEach(vs => shahoList.push(vs));
+      Array.from((await classifyByHokenOnlyShubetsu(seikyuu.国保連合)).values()).forEach(vs => kokuhoList.push(vs));
+    }
+  }
+
+  async function doStartOrig() {
     const content: string = await createContent();
     preShow = content;
   }

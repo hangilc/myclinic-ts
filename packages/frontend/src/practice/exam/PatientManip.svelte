@@ -10,48 +10,48 @@
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
   import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
-  import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
+  // import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
   import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
-  import { calcMeisai } from "@/lib/meisai";
+  // import { calcMeisai } from "@/lib/meisai";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
   async function doCashier() {
-    const patient = $currentPatient;
-    const visitId = $currentVisitId;
-    if (visitId && visitId > 0 && patient) {
-      console.log("meisai", await calcMeisai(visitId));
+    // const patient = $currentPatient;
+    // const visitId = $currentVisitId;
+    // if (visitId && visitId > 0 && patient) {
+    //   console.log("meisai", await calcMeisai(visitId));
 
-      cashierVisitId.set(visitId);
-      const meisai = await api.getMeisai(visitId);
-      console.log("meisai charge", meisai.charge);
-      const visit = await api.getVisit(visitId);
-      const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
-      const year = kd.year;
-      const month = kd.month;
-      const gendogaku: number | undefined = await calcGendogaku(
-        patient.patientId,
-        year,
-        month
-      );
-      let payments: Payment[] | undefined = undefined;
-      if (gendogaku != undefined) {
-        payments = await listMonthlyPayment(patient.patientId, year, month);
-      }
-      const kouhiCalcs = await resolveKouhiCalcs(visit);
-      meisai.charge = calcMadoguchiFutan(meisai.totalTen, meisai.futanWari, kouhiCalcs);
-      const d: CashierDialog = new CashierDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          visitId: cashierVisitId,
-          meisai,
-          gendogaku,
-          payments,
-        },
-      });
-    }
+    //   cashierVisitId.set(visitId);
+    //   const meisai = await api.getMeisai(visitId);
+    //   console.log("meisai charge", meisai.charge);
+    //   const visit = await api.getVisit(visitId);
+    //   const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
+    //   const year = kd.year;
+    //   const month = kd.month;
+    //   const gendogaku: number | undefined = await calcGendogaku(
+    //     patient.patientId,
+    //     year,
+    //     month
+    //   );
+    //   let payments: Payment[] | undefined = undefined;
+    //   if (gendogaku != undefined) {
+    //     payments = await listMonthlyPayment(patient.patientId, year, month);
+    //   }
+    //   const kouhiCalcs = await resolveKouhiCalcs(visit);
+    //   meisai.charge = calcMadoguchiFutan(meisai.totalTen, meisai.futanWari, kouhiCalcs);
+    //   const d: CashierDialog = new CashierDialog({
+    //     target: document.body,
+    //     props: {
+    //       destroy: () => d.$destroy(),
+    //       visitId: cashierVisitId,
+    //       meisai,
+    //       gendogaku,
+    //       payments,
+    //     },
+    //   });
+    // }
   }
 
   async function resolveKouhiCalcs(visit: Visit): Promise<KouhiCalc[]> {

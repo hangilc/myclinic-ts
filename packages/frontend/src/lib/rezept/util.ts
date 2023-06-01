@@ -6,6 +6,7 @@ import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, Rez
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
+import type { K } from "vitest/dist/types-e3c9754d";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -90,6 +91,37 @@ export function decodeHokensha(encoded: string): {
 
 export function is国保(hokenshaBangou: number): boolean {
   return hokenshaBangou < 1000000;
+}
+
+// Kouhi memo 公費単独請求先
+// { "kouhi-tandoku-seikyuu-saki": "shaho" } -- 社保基金
+// { "kouhi-tandoku-seikyuu-saki": "kokuho" } -- 国保連合
+
+export async function isForKokuhoRengou(visit: Visit): Promise<boolean> {
+  if( visit.shahokokuhoId > 0 ){
+    const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
+    return is国保(shahokokuho.hokenshaBangou);
+  } else if( visit.koukikoureiId > 0 ){
+    return true;
+  } else {
+    const kouhiList: Kouhi[] = await Promise.all(visit.kouhiIdList.map(api.getKouhi));
+    sortKouhiList(kouhiList);
+    if( kouhiList.length === 0 ){
+      throw new Error("No hoken and no kouhi: " + JSON.stringify(visit));
+    }
+    const memo = kouhiList[0].memoAsJson;
+    const seikyuu = memo["kouhi-tandoku-seikyuu-saki"];
+    if( !seikyuu ) {
+      throw new Error("Cannot resolve kouhi-tandoku-seikyuu-saki: " + JSON.stringify(kouhiList[0]));
+    }
+    if( seikyuu === "shaho" ){
+      return false;
+    } else if( seikyuu === "kokuho" ){
+      return true;
+    } else {
+      throw new Error("Unknown seikyuu saki (should be 'shaho' or 'kokuho'): " + seikyuu);
+    }
+  }
 }
 
 export function isマル都(負担者番号: number): boolean {
@@ -379,6 +411,10 @@ export function classify<K, V>(items: [K, V][]): Map<K, V[]> {
   return map;
 }
 
+export function classifyBy<K, V>(items: V[], getKey: (item: V) => K): Map<K, V[]> {
+  return classify(items.map(item => [getKey(item), item]));
+}
+
 export function withClassified<K, V>(items: [K, V][], handler: (k: K, vs: V[]) => void): void {
   const classified = classify(items);
   for (let k of classified.keys()) {
@@ -389,6 +425,16 @@ export function withClassified<K, V>(items: [K, V][], handler: (k: K, vs: V[]) =
 
 export function withClassifiedBy<K, V>(items: V[], getKey: (item: V) => K, handler: (k: K, vs: V[]) => void): void {
   withClassified(items.map(item => [getKey(item), item]), handler);
+}
+
+export function setOf<T>(items: T[]): T[] {
+  const as: T[] = [];
+  items.forEach(item => {
+    if( !as.includes(item) ){
+      as.push(item);
+    }
+  });
+  return as;
 }
 
 export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T): [T[], U[]] {
