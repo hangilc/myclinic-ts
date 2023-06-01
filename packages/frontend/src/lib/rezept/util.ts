@@ -1,12 +1,11 @@
 import api from "@/lib/api";
-import { Conduct, dateToSqlDate, type Disease, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
-import type { K } from "vitest/dist/types-e3c9754d";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -47,8 +46,14 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
     return order;
 
   }
-
   kouhiList.sort((a, b) => calcOrder(a.futansha) - calcOrder(b.futansha));
+}
+
+export function getSortedKouhiListOfVisits(visits: Visit[]): Kouhi[] {
+  const kouhiIdList: number[] = [];
+  visits.forEach(visit => {
+
+  })
 }
 
 export function is国保(hokenshaBangou: number): boolean {
@@ -340,17 +345,21 @@ export function classify<K, V>(items: [K, V][]): Map<K, V[]> {
 
 export function withClassified<K, V>(items: [K, V][], handler: (k: K, vs: V[]) => void): void {
   const classified = classify(items);
-  for(let k of classified.keys()){
+  for (let k of classified.keys()) {
     const vs = Array.from(classified.get(k)!);
     handler(k, vs);
   }
+}
+
+export function withClassifiedBy<K, V>(items: V[], getKey: (item: V) => K, handler: (k: K, vs: V[]) => void): void {
+  withClassified(items.map(item => [getKey(item), item]), handler);
 }
 
 export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T): [T[], U[]] {
   const ts: T[] = [];
   const us: U[] = [];
   items.forEach(item => {
-    if( pred(item) ){
+    if (pred(item)) {
       ts.push(item);
     } else {
       us.push(item);
@@ -360,7 +369,7 @@ export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T
 }
 
 export function shikibetsuOfConduct(conductKind: number): 診療識別コードCode {
-  switch(conductKind) {
+  switch (conductKind) {
     case 3: return 診療識別コード.画像診断;
     default: return 診療識別コード.処置;
   }

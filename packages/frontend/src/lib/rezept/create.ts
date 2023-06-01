@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { ClinicInfo, HokenInfo, Kouhi, Meisai, Patient, Visit, VisitEx } from "myclinic-model";
+import type { ClinicInfo, HokenInfo, Kouhi, Koukikourei, Meisai, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import { 診査支払い機関コード, 診療識別コード } from "./codes";
 import { cvtVisitItemsToIyakuhinDataList } from "./iyakuhin-item-util";
@@ -25,49 +25,62 @@ import {
   composeDiseaseItem,
   extract都道府県コードfromAddress,
   firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList,
-  classify
+  classify,
+  withClassified,
+  withClassifiedBy
 } from "./util";
 import type { VisitItem } from "./visit-item";
 
-export async function createShaho(year: number, month: number): Promise<string> {
-  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
-}
+class RezeptRecord {
+  patientId: number;
+  hoken: Shahokokuho | Koukikourei | undefined;
+  kouhiList: Kouhi[];
+  visits: Visit[];
 
-export async function createKokuho(year: number, month: number): Promise<string> {
-  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
-}
-
-export type RezeptRecordKey = string;
-let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-
-export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, VisitItem]> {
-  const hoken = await api.getHokenInfoForVisit(visit.visitId);
-  sortKouhiList(hoken.kouhiList);
-  let onshiResult: OnshiResult | undefined;
-  const onshi = await api.findOnshi(visit.visitId);
-  if (onshi) {
-    onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+  constructor(
+    patientId: number,
+    hoken: Shahokokuho | Koukikourei | undefined,
+    kouhiList: Kouhi[],
+    visits: Visit[]) {
+    this.patientId = patientId;
+    this.hoken = hoken;
+    this.kouhiList = kouhiList;
+    this.visits = visits;
   }
-  const patient: Patient = await api.getPatient(visit.patientId);
-  const meisai: Meisai = await api.getMeisai(visit.visitId);
-  const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
-  return [mkRecordKey(visit.patientId, hoken), {
-    visit,
-    hoken,
-    patient,
-    onshiResult,
-    visitEx,
-    comments: [],
-    shoukiList: [],
-  }];
 }
 
-function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Map<RezeptRecordKey, VisitItem[]> {
-  return classify(items, item => item);
+async function walkRezeptRecord(year: number, month: number, handler: (rec: RezeptRecord) => void) {
+  let visits = await api.listVisitByMonth(year, month);
+  visits = visits.filter(visit => {
+    if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
+      throw new Error("重複保険：" + visit.visitId);
+    }
+    if (visit.shahokokuhoId > 0 || visit.koukikoureiId > 0) {
+      return true;
+    } else {
+      return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
+    }
+  });
+  const visitsWithHoken = await Promise.all(visits.map(async visit => {
+    let hoken: Shahokokuho | Koukikourei | undefined;
+    let hokenshaBangou: number;
+    if (visit.shahokokuhoId > 0) {
+      hoken = await api.getShahokokuho(visit.shahokokuhoId);
+      hokenshaBangou = hoken.hokenshaBangou;
+    } else if (visit.koukikoureiId > 0) {
+      hoken = await api.getKoukikourei(visit.koukikoureiId);
+      hokenshaBangou = parseInt(hoken.hokenshaBangou);
+    } else {
+      hoken = undefined;
+      hokenshaBangou = 0;
+    }
+    return { visit, hoken, hokenshaBangou };
+  }));
+  withClassifiedBy(visitsWithHoken, vh => vh.visit.patientId, (patientId, vs) => {
+    withClassifiedBy(vs, vs => vs.hokenshaBangou, (hokenshaBangou, vs) => {
+
+    });
+  });
 }
 
 async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
@@ -113,6 +126,47 @@ async function getSeikyuuVisitItems(year: number, month: number):
     });
     return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
   }
+}
+
+export async function createShaho(year: number, month: number): Promise<string> {
+  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
+}
+
+export async function createKokuho(year: number, month: number): Promise<string> {
+  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
+}
+
+export type RezeptRecordKey = string;
+let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+
+export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, VisitItem]> {
+  const hoken = await api.getHokenInfoForVisit(visit.visitId);
+  // sortKouhiList(hoken.kouhiList);
+  let onshiResult: OnshiResult | undefined;
+  const onshi = await api.findOnshi(visit.visitId);
+  if (onshi) {
+    onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+  }
+  const patient: Patient = await api.getPatient(visit.patientId);
+  // const meisai: Meisai = await api.getMeisai(visit.visitId);
+  const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
+  return [mkRecordKey(visit.patientId, hoken), {
+    visit,
+    hoken,
+    patient,
+    onshiResult,
+    visitEx,
+    comments: [],
+    shoukiList: [],
+  }];
+}
+
+function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Map<RezeptRecordKey, VisitItem[]> {
+  return classify(items, item => item);
 }
 
 async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
