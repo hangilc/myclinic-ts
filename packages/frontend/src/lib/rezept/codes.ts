@@ -1,7 +1,10 @@
 export const 診査支払い機関コード = {
   "社会保険診療報酬支払基金": 1,
   "国民健康保険団体連合会": 2,
-};
+} as const;
+
+export type 診査支払い機関コードName = keyof typeof 診査支払い機関コード;
+export type 診査支払い機関コードCode = valueof<typeof 診査支払い機関コード>;
 
 export const 都道府県コード: Record<string, string> = {
   "北海道": "01",  

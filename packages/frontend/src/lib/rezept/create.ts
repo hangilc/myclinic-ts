@@ -27,29 +27,35 @@ import {
   firstDayOfMonth, hasHoken, is国保, lastDayOfMonth, resolveGendo, resolveGendogakuTokkiJikou, sortKouhiList,
   classify,
   withClassified,
-  withClassifiedBy
+  withClassifiedBy,
+  getSortedKouhiListOfVisits,
+  hokenshaBangouOfVisit,
+  resolve保険種別
 } from "./util";
 import type { VisitItem } from "./visit-item";
 
 class RezeptRecord {
   patientId: number;
   hoken: Shahokokuho | Koukikourei | undefined;
+  hokenshaBangou: number;
   kouhiList: Kouhi[];
   visits: Visit[];
 
   constructor(
     patientId: number,
     hoken: Shahokokuho | Koukikourei | undefined,
+    hokenshaBangou: number,
     kouhiList: Kouhi[],
     visits: Visit[]) {
     this.patientId = patientId;
     this.hoken = hoken;
+    this.hokenshaBangou = hokenshaBangou;
     this.kouhiList = kouhiList;
     this.visits = visits;
   }
 }
 
-async function walkRezeptRecord(year: number, month: number, handler: (rec: RezeptRecord) => void) {
+async function classifyToRecord(year: number, month: number, handler: (rec: RezeptRecord) => void) {
   let visits = await api.listVisitByMonth(year, month);
   visits = visits.filter(visit => {
     if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
@@ -61,112 +67,20 @@ async function walkRezeptRecord(year: number, month: number, handler: (rec: Reze
       return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
     }
   });
-  const visitsWithHoken = await Promise.all(visits.map(async visit => {
-    let hoken: Shahokokuho | Koukikourei | undefined;
-    let hokenshaBangou: number;
-    if (visit.shahokokuhoId > 0) {
-      hoken = await api.getShahokokuho(visit.shahokokuhoId);
-      hokenshaBangou = hoken.hokenshaBangou;
-    } else if (visit.koukikoureiId > 0) {
-      hoken = await api.getKoukikourei(visit.koukikoureiId);
-      hokenshaBangou = parseInt(hoken.hokenshaBangou);
-    } else {
-      hoken = undefined;
-      hokenshaBangou = 0;
-    }
-    return { visit, hoken, hokenshaBangou };
-  }));
-  withClassifiedBy(visitsWithHoken, vh => vh.visit.patientId, (patientId, vs) => {
-    withClassifiedBy(vs, vs => vs.hokenshaBangou, (hokenshaBangou, vs) => {
+  withClassifiedBy(visits, visit => visit.patientId, async (patientId, visits) => {
+    const visitItems: [string, Visit][] = await Promise.all(visits.map(async visit => {
+      const shahokokuho = visit.shahokokuhoId > 0 ? await api.getShahokokuho(visit.shahokokuhoId) : undefined;
+      const koukikourei = visit.koukikoureiId > 0 ? await api.getKoukikourei(visit.koukikoureiId) : undefined;
+      const shubetsu = resolve保険種別(shahokokuho, koukikourei, []);
+      const hokenshaBangou1 = shahokokuho ? shahokokuho.hokenshaBangou : 0;
+      const hokenshaBangou2 = koukikourei ? parseInt(koukikourei.hokenshaBangou) : 0;
+      const encode = `${shubetsu}|${hokenshaBangou1}|${hokenshaBangou2}`;
+      return [encode, visit];
+    }));
+    withClassified(visitItems, (encode, visits) => {
 
     });
   });
-}
-
-async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
-  if (visitItemsCache === undefined) {
-    const visits = (await api.listVisitByMonth(year, month)).filter(visit => {
-      if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
-        throw new Error("重複保険：" + visit.visitId);
-      }
-      return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
-    });
-    visitItemsCache = await Promise.all(visits.map(async visit => await mkVisitItem(visit)));
-    return visitItemsCache;
-  } else {
-    return visitItemsCache;
-  }
-}
-
-async function getSeikyuuVisitItems(year: number, month: number):
-  Promise<[[RezeptRecordKey, VisitItem][], [RezeptRecordKey, VisitItem][]]> {
-  if (shiharaiKikinItemsCache !== undefined && kokuhoRengouItemsCache !== undefined) {
-    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
-  } else {
-    shiharaiKikinItemsCache = [];
-    kokuhoRengouItemsCache = [];
-    const visitItems = await getVisitItems(year, month);
-    visitItems.forEach(entry => {
-      const [key, item] = entry;
-      const hoken = item.hoken;
-      if (hoken.shahokokuho) {
-        if (is国保(hoken.shahokokuho.hokenshaBangou)) {
-          kokuhoRengouItemsCache!.push(entry);
-        } else {
-          shiharaiKikinItemsCache!.push(entry);
-        }
-      } else if (hoken.koukikourei) {
-        kokuhoRengouItemsCache!.push(entry);
-      } else { // 公費のみ
-        if (hoken.kouhiList.length === 0) {
-          throw new Error("No hoken and no kouhi: " + JSON.stringify(item.visit));
-        }
-        shiharaiKikinItemsCache!.push(entry);
-      }
-    });
-    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
-  }
-}
-
-export async function createShaho(year: number, month: number): Promise<string> {
-  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
-}
-
-export async function createKokuho(year: number, month: number): Promise<string> {
-  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
-  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
-}
-
-export type RezeptRecordKey = string;
-let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
-
-export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, VisitItem]> {
-  const hoken = await api.getHokenInfoForVisit(visit.visitId);
-  // sortKouhiList(hoken.kouhiList);
-  let onshiResult: OnshiResult | undefined;
-  const onshi = await api.findOnshi(visit.visitId);
-  if (onshi) {
-    onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
-  }
-  const patient: Patient = await api.getPatient(visit.patientId);
-  // const meisai: Meisai = await api.getMeisai(visit.visitId);
-  const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
-  return [mkRecordKey(visit.patientId, hoken), {
-    visit,
-    hoken,
-    patient,
-    onshiResult,
-    visitEx,
-    comments: [],
-    shoukiList: [],
-  }];
-}
-
-function classifyVisitItems(items: [RezeptRecordKey, VisitItem][]): Map<RezeptRecordKey, VisitItem[]> {
-  return classify(items, item => item);
 }
 
 async function create(year: number, month: number, 診査機関: number, visitItems: [RezeptRecordKey, VisitItem][]): Promise<string> {
@@ -263,6 +177,88 @@ async function create(year: number, month: number, 診査機関: number, visitIt
     totalTen: rezeptSouten,
   }))
   return rows.join("\r\n") + "\r\n\x1A";
+}
+
+async function getVisitItems(year: number, month: number): Promise<[RezeptRecordKey, VisitItem][]> {
+  if (visitItemsCache === undefined) {
+    const visits = (await api.listVisitByMonth(year, month)).filter(visit => {
+      if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
+        throw new Error("重複保険：" + visit.visitId);
+      }
+      return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
+    });
+    visitItemsCache = await Promise.all(visits.map(async visit => await mkVisitItem(visit)));
+    return visitItemsCache;
+  } else {
+    return visitItemsCache;
+  }
+}
+
+async function getSeikyuuVisitItems(year: number, month: number):
+  Promise<[[RezeptRecordKey, VisitItem][], [RezeptRecordKey, VisitItem][]]> {
+  if (shiharaiKikinItemsCache !== undefined && kokuhoRengouItemsCache !== undefined) {
+    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
+  } else {
+    shiharaiKikinItemsCache = [];
+    kokuhoRengouItemsCache = [];
+    const visitItems = await getVisitItems(year, month);
+    visitItems.forEach(entry => {
+      const [key, item] = entry;
+      const hoken = item.hoken;
+      if (hoken.shahokokuho) {
+        if (is国保(hoken.shahokokuho.hokenshaBangou)) {
+          kokuhoRengouItemsCache!.push(entry);
+        } else {
+          shiharaiKikinItemsCache!.push(entry);
+        }
+      } else if (hoken.koukikourei) {
+        kokuhoRengouItemsCache!.push(entry);
+      } else { // 公費のみ
+        if (hoken.kouhiList.length === 0) {
+          throw new Error("No hoken and no kouhi: " + JSON.stringify(item.visit));
+        }
+        shiharaiKikinItemsCache!.push(entry);
+      }
+    });
+    return [shiharaiKikinItemsCache, kokuhoRengouItemsCache];
+  }
+}
+
+export async function createShaho(year: number, month: number): Promise<string> {
+  const [shiharaiKikin, _kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.社会保険診療報酬支払基金, shiharaiKikin);
+}
+
+export async function createKokuho(year: number, month: number): Promise<string> {
+  const [_shiharaiKikin, kokuhoRengou] = await getSeikyuuVisitItems(year, month);
+  return create(year, month, 診査支払い機関コード.国民健康保険団体連合会, kokuhoRengou);
+}
+
+export type RezeptRecordKey = string;
+let visitItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let shiharaiKikinItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+let kokuhoRengouItemsCache: [RezeptRecordKey, VisitItem][] | undefined = undefined;
+
+export async function mkVisitItem(visit: Visit): Promise<[RezeptRecordKey, VisitItem]> {
+  const hoken = await api.getHokenInfoForVisit(visit.visitId);
+  // sortKouhiList(hoken.kouhiList);
+  let onshiResult: OnshiResult | undefined;
+  const onshi = await api.findOnshi(visit.visitId);
+  if (onshi) {
+    onshiResult = OnshiResult.cast(JSON.parse(onshi.kakunin));
+  }
+  const patient: Patient = await api.getPatient(visit.patientId);
+  // const meisai: Meisai = await api.getMeisai(visit.visitId);
+  const visitEx: VisitEx = await api.getVisitEx(visit.visitId);
+  return [mkRecordKey(visit.patientId, hoken), {
+    visit,
+    hoken,
+    patient,
+    onshiResult,
+    visitEx,
+    comments: [],
+    shoukiList: [],
+  }];
 }
 
 async function 医療機関情報レコード(year: number, month: number, 診査機関: number): Promise<string> {

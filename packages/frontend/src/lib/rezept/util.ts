@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { dateToSqlDate, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, Patient, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
@@ -49,11 +49,43 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
   kouhiList.sort((a, b) => calcOrder(a.futansha) - calcOrder(b.futansha));
 }
 
-export function getSortedKouhiListOfVisits(visits: Visit[]): Kouhi[] {
+export async function getSortedKouhiListOfVisits(visits: Visit[]): Promise<Kouhi[]> {
   const kouhiIdList: number[] = [];
+  function addKouhiId(kouhiId: number): void {
+    if (!kouhiIdList.includes(kouhiId)) {
+      kouhiIdList.push(kouhiId);
+    }
+  }
   visits.forEach(visit => {
+    visit.kouhiIdList.forEach(addKouhiId);
+  });
+  const kouhiList: Kouhi[] = await Promise.all(kouhiIdList.map(api.getKouhi));
+  sortKouhiList(kouhiList);
+  return kouhiList;
+}
 
-  })
+export function encodeHokensha(
+  hokenShubetsu: number,
+  hokenshaBangou: string,
+  hihokenshaKigou: string,
+  hihokenshaBangou: string,
+  edaban: string
+): string {
+  return [hokenShubetsu.toString(), hokenshaBangou, hihokenshaKigou, hihokenshaBangou, edaban].join("|");
+}
+
+export function decodeHokensha(encoded: string): {
+  hokenShubetsu: number;
+  hokenshaBangou: string;
+  hihokenshaKigou: string;
+  hihokenshaBangou: string;
+  edaban: string;
+} {
+  const [hokenShubetsu, hokenshaBangou, hihokenshaKigou, hihokenshaBangou, edaban] = encoded.split("|");
+  return {
+    hokenShubetsu: parseInt(hokenShubetsu),
+    hokenshaBangou, hihokenshaKigou, hihokenshaBangou, edaban
+  };
 }
 
 export function is国保(hokenshaBangou: number): boolean {
@@ -113,6 +145,10 @@ export function resolve保険種別(shahokokuho: Shahokokuho | undefined,
   } else {
     return RezeptShubetsuCodeBase.公費単独 + kouhiList.length * 10;
   }
+}
+
+export function resolvePatientName(patient: Patient): string {
+  return patient.rezeptName || patient.fullName("　");
 }
 
 export function findOnshiResultGendogaku(result: OnshiResult | undefined)
