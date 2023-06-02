@@ -39,14 +39,8 @@
   }
 
   async function doStart() {
-    const rows: string[] = [];
     const ctx = await RezeptContext.load(year, month);
-    rows.push(ctx.create医療機関情報レコード(診査支払い機関コード.社保基金));
-    const visitsMap = await ctx.loadVisits();
-    for(let visits of visitsMap.shaho){
-      console.log(visits[0].patientId);
-    }
-    preShow = rows.join("\r\n");
+    preShow = await ctx.createForShaho();
   }
 
   async function doStartOrig() {

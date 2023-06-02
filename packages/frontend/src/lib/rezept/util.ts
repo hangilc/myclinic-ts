@@ -204,6 +204,16 @@ export async function resolve保険種別OfVisits(visits: Visit[]): Promise<numb
   return resolve保険種別(shahokokuho, koukikourei, kouhiList);
 }
 
+export async function commonRecord給付割合(visit: Visit): Promise<string> {
+  if( visit.shahokokuhoId > 0 ){
+    const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
+    if( is国保(shahokokuho.hokenshaBangou) ){
+      return "70";
+    }
+  }
+  return "";
+}
+
 export function resolvePatientName(patient: Patient): string {
   return patient.rezeptName || patient.fullName("　");
 }
@@ -280,14 +290,19 @@ export function resolveGendogakuTokkiJikou(hoken: HokenInfo, gendo: LimitApplica
   return undefined;
 }
 
-export function resolveGendo(items: VisitItem[]): LimitApplicationCertificateClassificationFlagLabel | undefined {
+export async function resolveGendo(visits: Visit[]): 
+  Promise<LimitApplicationCertificateClassificationFlagLabel | undefined> {
   let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
-  items.forEach(item => {
-    const g = item.onshiResult?.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
-    if (g) {
-      gendo = g;
+  for(let visit of visits){
+    const onshi = await api.findOnshi(visit.visitId);
+    if( onshi ){
+      const result = JSON.parse(onshi.kakunin);
+      const g = result.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
+      if (g) {
+        gendo = g;
+      }
     }
-  });
+  }
   return gendo;
 }
 

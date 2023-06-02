@@ -1,3 +1,5 @@
+export {};
+
 // import api from "@/lib/api";
 // import type { ClinicInfo, HokenInfo, Kouhi, Koukikourei, Meisai, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 // import { OnshiResult } from "onshi-result";

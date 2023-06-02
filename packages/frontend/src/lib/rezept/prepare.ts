@@ -1,15 +1,15 @@
 import type { ClinicInfo, Visit } from "myclinic-model";
 import api from "../api";
-import { 男女区分コード, type 診査支払い機関コードCode } from "./codes";
+import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, withClassified, withClassifiedBy, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, resolve保険種別OfVisits, formatYearMonth, resolvePatientName } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, withClassified, withClassifiedBy, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, resolve保険種別OfVisits, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo } from "./util";
 
 export class RezeptContext {
   year: number;
   month: number;
   clinicInfo: ClinicInfo;
 
-  constructor(year: number, month: number, clinicInfo: ClinicInfo) {
+  private constructor(year: number, month: number, clinicInfo: ClinicInfo) {
     this.year = year;
     this.month = month;
     this.clinicInfo = clinicInfo;
@@ -18,6 +18,14 @@ export class RezeptContext {
   static async load(year: number, month: number): Promise<RezeptContext> {
     const clinicInfo = await api.getClinicInfo();
     return new RezeptContext(year, month, clinicInfo);
+  }
+
+  async createForShaho(): Promise<string> {
+    let serial = 1;
+    const visits = (await this.loadVisits()).shaho;
+    const rows: string[] = [];
+    rows.push(this.create医療機関情報レコード(診査支払い機関コード.社保基金));
+    return rows.join("\r\n");
   }
 
   create医療機関情報レコード(seikyuu: 診査支払い機関コードCode): string {
@@ -34,8 +42,10 @@ export class RezeptContext {
     });
   }
 
-  async createレセプト共通レコード(serial: number, visits: Visit[]): Promise<string> {
+  async createレセプト共通レコード(serial: number, isShaho: boolean, visits: Visit[]): Promise<string> {
     const patient = await api.getPatient(visits[0].patientId);
+    const gendo = resolveGendo(visits);
+    const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
     return mkレセプト共通レコード({
       レセプト番号: serial,
       レセプト種別: await resolve保険種別OfVisits(visits),
@@ -43,12 +53,12 @@ export class RezeptContext {
       氏名: resolvePatientName(patient),
       男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
       生年月日:  patient.birthday.replaceAll("-", ""),
-      給付割合: (hoken.shahokokuho && is国保(hoken.shahokokuho.hokenshaBangou)) ? "70" : "",
+      給付割合: await commonRecord給付割合(visits[0]),
       レセプト特記事項,
-      カルテ番号等,
-      検索番号,
-      請求情報,
-    }  
+      カルテ番号等: patient.patientId.toString(),
+      検索番号: "",
+      請求情報: "",
+    });
   }
 
   async loadVisits(): Promise<{
