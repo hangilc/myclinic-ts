@@ -442,8 +442,8 @@ export function shochiYakuzaiKingakuToTen(kingaku: number): number {
   }
 }
 
-export function hasHoken(visitItem: VisitItem): boolean {
-  return visitItem.hoken.shahokokuho !== undefined || visitItem.hoken.koukikourei !== undefined;
+export function visitHasHoken(visit: Visit): boolean {
+  return visit.shahokokuhoId > 0 || visit.koukikoureiId > 0;
 }
 
 export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhiIds: number[]): 負担区分コードCode {
