@@ -382,16 +382,16 @@ export async function koukikoureiOfVisit(visit: Visit): Promise<Koukikourei | un
   }
 }
 
-export function hokenshaBangouOfHoken(hoken: HokenInfo): number {
-  if (hoken.shahokokuho) {
-    return hoken.shahokokuho.hokenshaBangou;
-  } else if (hoken.koukikourei) {
-    const n = parseInt(hoken.koukikourei.hokenshaBangou);
+export function hokenshaBangouOfHoken(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): number {
+  if (shahokokuho) {
+    return shahokokuho.hokenshaBangou;
+  } else if (koukikourei) {
+    const n = parseInt(koukikourei.hokenshaBangou);
     if (n > 0) {
       return n;
     }
   }
-  throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(hoken));
+  throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(shahokokuho) + JSON.stringify(koukikourei));
 }
 
 export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean): Promise<DiseaseItem> {

@@ -2,8 +2,9 @@ import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit } from "myclini
 import api from "../api";
 import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
 import { mkレセプト共通レコード } from "./records/common-record";
+import { formatHokenshaBangou, hokenRecordJitsuNissu, hokenshaRecordBangou, hokenshaRecordKigou, mk保険者レコード } from "./records/hokensha-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -72,6 +73,23 @@ export class RezeptContext {
       カルテ番号等: patient.patientId.toString(),
       検索番号: "",
       請求情報: "",
+    });
+  }
+
+  create保険者レコード(
+    shahokokuho: Shahokokuho | undefined,
+    koukikourei: Koukikourei | undefined,
+    visits: Visit[],
+    合計点数: number,
+    医療保険負担金額: number | undefined,
+  ): string {
+    return mk保険者レコード({
+      保険者番号: formatHokenshaBangou(hokenshaBangouOfHoken(shahokokuho, koukikourei)),
+      被保険者証記号: adjustOptString(hokenshaRecordKigou(shahokokuho)),
+      被保険者証番号: hokenshaRecordBangou(shahokokuho, koukikourei),
+      診療実日数: hokenRecordJitsuNissu(visits),
+      合計点数,
+      医療保険負担金額
     });
   }
 

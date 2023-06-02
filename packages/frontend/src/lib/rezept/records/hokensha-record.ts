@@ -1,5 +1,5 @@
 import { pad } from "@/lib/pad";
-import type { HokenInfo } from "myclinic-model";
+import type { HokenInfo, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
 import { adjustOptString, hokenshaBangouOfHoken } from "../util";
 import type { VisitItem } from "../visit-item";
 
@@ -39,27 +39,27 @@ export function mk保険者レコード({
   ].join(",");
 }
 
-function create保険者レコード({
-  items,
-  souten,
-  futanKingaku,
-}: {
-  items: VisitItem[];
-  souten: number;
-  futanKingaku?: number;
-}): string {
-  const hoken = items[0].hoken;
-  return mk保険者レコード({
-    保険者番号: formatHokenshaBangou(hokenshaBangouOfHoken(hoken)),
-    被保険者証記号: adjustOptString(kigou(hoken)),
-    被保険者証番号: bangou(hoken),
-    診療実日数: jitsuNissu(items),
-    合計点数: souten,
-    医療保険負担金額: futanKingaku,
-  });
-}
+// function create保険者レコード({
+//   items,
+//   souten,
+//   futanKingaku,
+// }: {
+//   items: VisitItem[];
+//   souten: number;
+//   futanKingaku?: number;
+// }): string {
+//   const hoken = items[0].hoken;
+//   return mk保険者レコード({
+//     保険者番号: formatHokenshaBangou(hokenshaBangouOfHoken(hoken)),
+//     被保険者証記号: adjustOptString(kigou(hoken)),
+//     被保険者証番号: bangou(hoken),
+//     診療実日数: jitsuNissu(items),
+//     合計点数: souten,
+//     医療保険負担金額: futanKingaku,
+//   });
+// }
 
-function formatHokenshaBangou(hokenshaBangou: number): string {
+export function formatHokenshaBangou(hokenshaBangou: number): string {
   if (hokenshaBangou < 1000000) {
     return pad(hokenshaBangou, 8, " ");
   } else {
@@ -67,24 +67,23 @@ function formatHokenshaBangou(hokenshaBangou: number): string {
   }
 }
 
-function kigou(hoken: HokenInfo): string | undefined {
-  return hoken.shahokokuho?.hihokenshaKigou;
+export function hokenshaRecordKigou(shahokokuho: Shahokokuho | undefined): string | undefined {
+  return shahokokuho?.hihokenshaKigou;
 }
 
-function bangou(hoken: HokenInfo): string | undefined {
-  if (hoken.shahokokuho) {
-    return hoken.shahokokuho.hihokenshaBangou;
-  } else if (hoken.koukikourei) {
-    return hoken.koukikourei.hihokenshaBangou;
+export function hokenshaRecordBangou(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): string | undefined {
+  if (shahokokuho) {
+    return shahokokuho.hihokenshaBangou;
+  } else if (koukikourei) {
+    return koukikourei.hihokenshaBangou;
   } else {
     return undefined;
   }
 }
 
-function jitsuNissu(items: VisitItem[]): number {
+export function hokenRecordJitsuNissu(visits: Visit[]): number {
   const days: string[] = [];
-  items
-    .map(item => item.visit)
+  visits
     .map(visit => visit.visitedAt.substring(0, 10))
     .forEach(d => {
       if (!days.includes(d)) {
