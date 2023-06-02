@@ -1,9 +1,9 @@
-import type { ClinicInfo, Visit } from "myclinic-model";
+import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
 import api from "../api";
 import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, withClassified, withClassifiedBy, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, resolve保険種別OfVisits, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -27,7 +27,11 @@ export class RezeptContext {
     const rows: string[] = [];
     rows.push(this.create医療機関情報レコード(診査支払い機関コード.社保基金));
     for(let visits of visitsList) {
-      rows.push(await this.createレセプト共通レコード(serial++, visits));
+      const shahokokuho = await shahokokuhoOfVisit(visits[0]);
+      const koukikourei = await koukikoureiOfVisit(visits[0]);
+      const kouhiList = await getSortedKouhiListOfVisits(visits);
+      rows.push(await this.createレセプト共通レコード(
+        serial++, shahokokuho, koukikourei, kouhiList, visits));
     }
     return rows.join("\r\n");
   }
@@ -46,15 +50,19 @@ export class RezeptContext {
     });
   }
 
-  async createレセプト共通レコード(serial: number, visits: Visit[]): Promise<string> {
+  async createレセプト共通レコード(
+    serial: number, 
+    shahokokuho: Shahokokuho | undefined,
+    koukikourei: Koukikourei | undefined,
+    kouhiList: Kouhi[], 
+    visits: Visit[]
+  ): Promise<string> {
     const patient = await api.getPatient(visits[0].patientId);
     const gendo = await resolveGendo(visits);
-    const shahokokuho = await shahokokuhoOfVisit(visits[0]);
-    const koukikourei = await koukikoureiOfVisit(visits[0]);
-    const tokkijikouGendo = await resolveGendogakuTokkiJikou(shahokokuho, koukikourei, gendo);
+    const tokkijikouGendo = resolveGendogakuTokkiJikou(shahokokuho, koukikourei, gendo);
     return mkレセプト共通レコード({
       レセプト番号: serial,
-      レセプト種別: await resolve保険種別OfVisits(visits),
+      レセプト種別: resolve保険種別(shahokokuho, koukikourei, kouhiList),
       診療年月: formatYearMonth(this.year, this.month),
       氏名: resolvePatientName(patient),
       男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,

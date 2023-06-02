@@ -179,30 +179,30 @@ export function resolve保険種別(shahokokuho: Shahokokuho | undefined,
   }
 }
 
-export async function resolve保険種別OfVisits(visits: Visit[]): Promise<number> {
-  let shahokokuho: Shahokokuho | undefined = undefined;
-  let koukikourei: Koukikourei | undefined = undefined;
-  let kouhiIdList: number[] = [];
-  for(let visit of visits){
-    if( visit.shahokokuhoId > 0 && !shahokokuho ){
-      shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
-    }
-    if( visit.koukikoureiId > 0 && !koukikourei ){
-      koukikourei = await api.getKoukikourei(visit.koukikoureiId);
-    }
-    for(let kouhiId of visit.kouhiIdList){
-      if( !kouhiIdList.includes(kouhiId) ){
-        kouhiIdList.push(kouhiId);
-      }
-    }
-  }
-  const kouhiList: Kouhi[] = [];
-  for(let kouhiId of kouhiIdList){
-    kouhiList.push(await api.getKouhi(kouhiId));
-  }
-  sortKouhiList(kouhiList);
-  return resolve保険種別(shahokokuho, koukikourei, kouhiList);
-}
+// export async function resolve保険種別OfVisits(visits: Visit[]): Promise<number> {
+//   let shahokokuho: Shahokokuho | undefined = undefined;
+//   let koukikourei: Koukikourei | undefined = undefined;
+//   let kouhiIdList: number[] = [];
+//   for(let visit of visits){
+//     if( visit.shahokokuhoId > 0 && !shahokokuho ){
+//       shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
+//     }
+//     if( visit.koukikoureiId > 0 && !koukikourei ){
+//       koukikourei = await api.getKoukikourei(visit.koukikoureiId);
+//     }
+//     for(let kouhiId of visit.kouhiIdList){
+//       if( !kouhiIdList.includes(kouhiId) ){
+//         kouhiIdList.push(kouhiId);
+//       }
+//     }
+//   }
+//   const kouhiList: Kouhi[] = [];
+//   for(let kouhiId of kouhiIdList){
+//     kouhiList.push(await api.getKouhi(kouhiId));
+//   }
+//   sortKouhiList(kouhiList);
+//   return resolve保険種別(shahokokuho, koukikourei, kouhiList);
+// }
 
 export async function commonRecord給付割合(visit: Visit): Promise<string> {
   if( visit.shahokokuhoId > 0 ){
