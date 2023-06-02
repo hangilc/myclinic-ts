@@ -277,10 +277,10 @@ export function processShinryouOfVisitEx(visitEx: VisitEx, kouhiIdList: number[]
 //   })
 // }
 
-export function cvtVisitItemsToShinryouDataList(visitItems: VisitItem[], kouhiIdList: number[]): 診療行為レコードData[] {
+export function cvtVisitsToShinryouDataList(visits: VisitEx[], kouhiIdList: number[]): 診療行為レコードData[] {
   const comb = new Combiner<診療行為レコードData>();
-  visitItems.forEach(visitItem => {
-    processShinryouOfVisitItem(visitItem, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
+  visits.forEach(visit => {
+    processShinryouOfVisitEx(visit, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
       comb.combine(shikibetsu, futanKubun, sqldate, s);
     });
   });

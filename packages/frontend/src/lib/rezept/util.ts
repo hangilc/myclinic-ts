@@ -463,13 +463,13 @@ export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhi
   }
 }
 
-export function calcRezeptCount(items: VisitItem[]): number {
-  function count(item: VisitItem): number {
-    return (hasHoken(item) ? 1 : 0) +
-      item.hoken.kouhiList.length;
-  }
-  return items.reduce((acc, ele) => acc + count(ele), 0);
-}
+// export function calcRezeptCount(items: VisitItem[]): number {
+//   function count(item: VisitItem): number {
+//     return (hasHoken(item) ? 1 : 0) +
+//       item.hoken.kouhiList.length;
+//   }
+//   return items.reduce((acc, ele) => acc + count(ele), 0);
+// }
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);

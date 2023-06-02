@@ -1,9 +1,10 @@
-import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
+import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "../api";
 import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { formatHokenshaBangou, hokenRecordJitsuNissu, hokenshaRecordBangou, hokenshaRecordKigou, mk保険者レコード } from "./records/hokensha-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
+import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString } from "./util";
 
 export class RezeptContext {
@@ -31,6 +32,9 @@ export class RezeptContext {
       const shahokokuho = await shahokokuhoOfVisit(visits[0]);
       const koukikourei = await koukikoureiOfVisit(visits[0]);
       const kouhiList = await getSortedKouhiListOfVisits(visits);
+      const visitExList: VisitEx[] = await Promise.all(visits.map(visit => api.getVisitEx(visit.visitId)));
+      const kouhiIdList = kouhiList.map(kouhi => kouhi.kouhiId);
+      const shinryouDataList = cvtVisitsToShinryouDataList(visitExList, kouhiIdList);
       rows.push(await this.createレセプト共通レコード(
         serial++, shahokokuho, koukikourei, kouhiList, visits));
     }
