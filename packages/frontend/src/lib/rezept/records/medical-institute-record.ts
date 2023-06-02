@@ -1,6 +1,6 @@
 import { formatYearMonth } from "../util";
 
-export function create医療機関情報レコード({
+export function mk医療機関情報レコード({
   診査支払い機関,
   都道府県,
   医療機関コード,
