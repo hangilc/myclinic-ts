@@ -463,13 +463,13 @@ export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhi
   }
 }
 
-function calcRezeptCountOrig(items: VisitItem[]): number {
-  function count(item: VisitItem): number {
-    return (hasHoken(item) ? 1 : 0) +
-      item.hoken.kouhiList.length;
-  }
-  return items.reduce((acc, ele) => acc + count(ele), 0);
-}
+// function calcRezeptCountOrig(items: VisitItem[]): number {
+//   function count(item: VisitItem): number {
+//     return (hasHoken(item) ? 1 : 0) +
+//       item.hoken.kouhiList.length;
+//   }
+//   return items.reduce((acc, ele) => acc + count(ele), 0);
+// }
 
 export function calcRezeptCount(visits: Visit[]): number {
   function count(visit: Visit): number {

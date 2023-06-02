@@ -37,7 +37,7 @@ export class RezeptContext {
     rows.push(this.create医療機関情報レコード(診査支払い機関コード.社保基金));
     let rezeptCount = 0;
     let rezeptSouten = 0;
-    for(let visits of visitsList) {
+    for (let visits of visitsList) {
       const shahokokuho = await shahokokuhoOfVisit(visits[0]);
       const koukikourei = await koukikoureiOfVisit(visits[0]);
       const kouhiList = await getSortedKouhiListOfVisits(visits);
@@ -52,6 +52,9 @@ export class RezeptContext {
       kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
       rows.push(await this.createレセプト共通レコード(
         serial++, shahokokuho, koukikourei, kouhiList, visits));
+      if (shahokokuho || koukikourei) {
+        rows.push(this.create保険者レコード(shahokokuho, koukikourei, visits, tenCol.getHokenTotal(), undefined));
+      }
       rows.push(...shinryouDataList.map(mk診療行為レコード));
       rows.push(...iyakuhinDataList.map(mk医薬品レコード));
       rows.push(...kizaiDataList.map(mk特定器材レコード));
@@ -80,10 +83,10 @@ export class RezeptContext {
   }
 
   async createレセプト共通レコード(
-    serial: number, 
+    serial: number,
     shahokokuho: Shahokokuho | undefined,
     koukikourei: Koukikourei | undefined,
-    kouhiList: Kouhi[], 
+    kouhiList: Kouhi[],
     visits: Visit[]
   ): Promise<string> {
     const patient = await api.getPatient(visits[0].patientId);
@@ -95,7 +98,7 @@ export class RezeptContext {
       診療年月: formatYearMonth(this.year, this.month),
       氏名: resolvePatientName(patient),
       男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
-      生年月日:  patient.birthday.replaceAll("-", ""),
+      生年月日: patient.birthday.replaceAll("-", ""),
       給付割合: await commonRecord給付割合(visits[0]),
       レセプト特記事項: tokkijikouGendo ?? "",
       カルテ番号等: patient.patientId.toString(),
