@@ -1,8 +1,9 @@
 import type { ClinicInfo, Visit } from "myclinic-model";
 import api from "../api";
 import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
+import { mkレセプト共通レコード } from "./records/common-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, withClassified, withClassifiedBy, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, resolve保険種別OfVisits, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, withClassified, withClassifiedBy, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, resolve保険種別OfVisits, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -22,9 +23,12 @@ export class RezeptContext {
 
   async createForShaho(): Promise<string> {
     let serial = 1;
-    const visits = (await this.loadVisits()).shaho;
+    const visitsList = (await this.loadVisits()).shaho;
     const rows: string[] = [];
     rows.push(this.create医療機関情報レコード(診査支払い機関コード.社保基金));
+    for(let visits of visitsList) {
+      rows.push(await this.createレセプト共通レコード(serial++, visits));
+    }
     return rows.join("\r\n");
   }
 
@@ -42,10 +46,12 @@ export class RezeptContext {
     });
   }
 
-  async createレセプト共通レコード(serial: number, isShaho: boolean, visits: Visit[]): Promise<string> {
+  async createレセプト共通レコード(serial: number, visits: Visit[]): Promise<string> {
     const patient = await api.getPatient(visits[0].patientId);
-    const gendo = resolveGendo(visits);
-    const tokkijikouGendo = resolveGendogakuTokkiJikou(hoken, gendo);
+    const gendo = await resolveGendo(visits);
+    const shahokokuho = await shahokokuhoOfVisit(visits[0]);
+    const koukikourei = await koukikoureiOfVisit(visits[0]);
+    const tokkijikouGendo = await resolveGendogakuTokkiJikou(shahokokuho, koukikourei, gendo);
     return mkレセプト共通レコード({
       レセプト番号: serial,
       レセプト種別: await resolve保険種別OfVisits(visits),
@@ -54,7 +60,7 @@ export class RezeptContext {
       男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
       生年月日:  patient.birthday.replaceAll("-", ""),
       給付割合: await commonRecord給付割合(visits[0]),
-      レセプト特記事項,
+      レセプト特記事項: tokkijikouGendo ?? "",
       カルテ番号等: patient.patientId.toString(),
       検索番号: "",
       請求情報: "",
@@ -137,7 +143,3 @@ async function classifyByHokenOnlyShubetsu(visits: Visit[]): Promise<Map<string,
   }));
   return classify(items);
 }
-function mkレセプト共通レコード(arg0: { レセプト番号: any; レセプト種別: any; 診療年月: any; 氏名: any; 男女区分: any; 生年月日: any; 給付割合: any; レセプト特記事項: any; カルテ番号等: any; 検索番号: any; 請求情報: any; }): string | PromiseLike<string> {
-  throw new Error("Function not implemented.");
-}
-

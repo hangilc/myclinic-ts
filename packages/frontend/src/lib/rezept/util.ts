@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { dateToSqlDate, Patient, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
-import type { OnshiResult } from "onshi-result";
+import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import type { DiseaseItem, VisitItem } from "./visit-item";
@@ -233,7 +233,67 @@ export function findOnshiResultGendogaku(result: OnshiResult | undefined)
   return undefined;
 }
 
-export function resolveGendogakuTokkiJikou(hoken: HokenInfo, gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
+export function resolveGendogakuTokkiJikou(
+  shahokokuho: Shahokokuho | undefined, 
+  koukikourei: Koukikourei | undefined,
+  gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
+  if (gendo) {
+    switch (gendo) {
+      case "ア":
+      case "現役並みⅢ":
+        return レセプト特記事項コード["区ア"];
+      case "イ":
+      case "現役並みⅡ":
+        return レセプト特記事項コード["区イ"];
+      case "ウ":
+      case "現役並みⅠ":
+        return レセプト特記事項コード["区ウ"];
+      case "エ":
+      case "一般":
+        return レセプト特記事項コード["区エ"];
+      case "オ":
+      case "低所得Ⅱ":
+      case "低所得Ⅰ":
+        return レセプト特記事項コード["区オ"];
+      case "低所得Ⅰ（老福）": {
+        console.log("add '老福' to tekiyou", JSON.stringify(gendo));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "低所得Ⅰ（境）": {
+        console.log("add '境界層該当' to tekiyou", JSON.stringify(gendo));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "オ（境）": {
+        console.log("add '境界層該当' to tekiyou", JSON.stringify(gendo));
+        return レセプト特記事項コード["区オ"];
+      }
+      case "一般Ⅱ": return レセプト特記事項コード["区カ"];
+      case "一般Ⅰ": return レセプト特記事項コード["区キ"];
+      default: {
+        console.log("Unknown 限度額区分", gendo);
+        return undefined;
+      }
+    }
+  }
+  if (koukikourei) {
+    switch (koukikourei.futanWari) {
+      case 3: return レセプト特記事項コード["区ア"];
+      case 2: return レセプト特記事項コード["区カ"];
+      case 1: return レセプト特記事項コード["区キ"];
+    }
+  } else if (shahokokuho) {
+    switch (shahokokuho.koureiStore) {
+      case 3: return レセプト特記事項コード["区ア"];
+      case 2:
+      case 1:
+        return レセプト特記事項コード["区エ"];
+      default: break;
+    }
+  }
+  return undefined;
+}
+
+function resolveGendogakuTokkiJikouOrig(hoken: HokenInfo, gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
   if (gendo) {
     switch (gendo) {
       case "ア":
@@ -296,7 +356,7 @@ export async function resolveGendo(visits: Visit[]):
   for(let visit of visits){
     const onshi = await api.findOnshi(visit.visitId);
     if( onshi ){
-      const result = JSON.parse(onshi.kakunin);
+      const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
       const g = result.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
       if (g) {
         gendo = g;
@@ -304,6 +364,22 @@ export async function resolveGendo(visits: Visit[]):
     }
   }
   return gendo;
+}
+
+export async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | undefined> {
+  if( visit.shahokokuhoId > 0 ){
+    return await api.getShahokokuho(visit.shahokokuhoId);
+  } else {
+    return undefined;
+  }
+}
+
+export async function koukikoureiOfVisit(visit: Visit): Promise<Koukikourei | undefined> {
+  if( visit.koukikoureiId > 0 ){
+    return await api.getKoukikourei(visit.koukikoureiId);
+  } else {
+    return undefined;
+  }
 }
 
 export function hokenshaBangouOfHoken(hoken: HokenInfo): number {

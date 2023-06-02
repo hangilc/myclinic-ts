@@ -16,7 +16,7 @@ export interface レセプト共通レコードData {
   請求情報?: string,
 };
 
-function mkレセプト共通レコード({
+export function mkレセプト共通レコード({
   レセプト番号,
   レセプト種別,
   診療年月,
