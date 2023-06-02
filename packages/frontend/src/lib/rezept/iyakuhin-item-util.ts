@@ -1,8 +1,8 @@
-import type { ConductDrugEx, IyakuhinMaster, Visit } from "myclinic-model";
+import type { ConductDrugEx, IyakuhinMaster, Visit, VisitEx } from "myclinic-model";
 import type { 診療識別コードCode, 負担区分コードCode } from "./codes";
 import type { 医薬品レコードData } from "./records/iyakuhin-record";
 import type { Santeibi } from "./santeibi";
-import { calcFutanKubun, hasHoken, shikibetsuOfConduct, shochiYakuzaiKingakuToTen, withClassified } from "./util";
+import { calcFutanKubun, shikibetsuOfConduct, shochiYakuzaiKingakuToTen, visitHasHoken, withClassified } from "./util";
 import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
 
 class SingleUnit implements TekiyouItem<医薬品レコードData> {
@@ -57,12 +57,11 @@ function resolveConductDrugKouhi(drug: ConductDrugEx, visit: Visit): number[] {
   return visit.kouhiIdList;
 }
 
-export function processIyakuhinOfVisit(visitItem: VisitItem,
-  kouhiIdList: number[],
+export function processIyakuhinOfVisitEx(visitEx: VisitEx, kouhiIdList: number[],
   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
     item: SingleUnit) => void): void {
-  const visitEx = visitItem.visitEx;
-  const sqldate = visitItem.visit.visitedAt.substring(0, 10);
+  const visit: Visit = visitEx.asVisit;
+  const sqldate = visit.visitedAt.substring(0, 10);
   const conductDrugs: [診療識別コードCode, ConductDrugEx][] =
     visitEx.conducts
       .flatMap(c => {
@@ -72,8 +71,8 @@ export function processIyakuhinOfVisit(visitItem: VisitItem,
   const list = conductDrugs;
   function resolveFutanKubun(d: ConductDrugEx): 負担区分コードCode {
     return calcFutanKubun(
-      hasHoken(visitItem),
-      resolveConductDrugKouhi(d, visitItem.visit),
+      visitHasHoken(visit),
+      resolveConductDrugKouhi(d, visit),
       kouhiIdList);
   }
   withClassified(list, (shikibetsu, ss) => {
@@ -86,10 +85,39 @@ export function processIyakuhinOfVisit(visitItem: VisitItem,
   })
 }
 
-export function cvtVisitItemsToIyakuhinDataList(visitItems: VisitItem[], kouhiIdList: number[]): 医薬品レコードData[] {
+// export function processIyakuhinOfVisit(visitItem: VisitItem,
+//   kouhiIdList: number[],
+//   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
+//     item: SingleUnit) => void): void {
+//   const visitEx = visitItem.visitEx;
+//   const sqldate = visitItem.visit.visitedAt.substring(0, 10);
+//   const conductDrugs: [診療識別コードCode, ConductDrugEx][] =
+//     visitEx.conducts
+//       .flatMap(c => {
+//         const shikibetsu = shikibetsuOfConduct(c.kind.code);
+//         return c.drugs.map((cs) : [診療識別コードCode, ConductDrugEx] => [shikibetsu, cs]);
+//       });
+//   const list = conductDrugs;
+//   function resolveFutanKubun(d: ConductDrugEx): 負担区分コードCode {
+//     return calcFutanKubun(
+//       hasHoken(visitItem),
+//       resolveConductDrugKouhi(d, visitItem.visit),
+//       kouhiIdList);
+//   }
+//   withClassified(list, (shikibetsu, ss) => {
+//     withClassified(ss.map(s => [resolveFutanKubun(s), s]), (futanKubun, ds) => {
+//       ds.forEach(d => {
+//         const unit = new SingleUnit(d.master, d.amount);
+//         handler(shikibetsu, futanKubun, sqldate, unit);
+//       });
+//     })
+//   })
+// }
+
+export function cvtVisitsToIyakuhinDataList(visitExList: VisitEx[], kouhiIdList: number[]): 医薬品レコードData[] {
   const comb = new Combiner<医薬品レコードData>();
-  visitItems.forEach(visitItem => {
-    processIyakuhinOfVisit(visitItem, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
+  visitExList.forEach(visitEx => {
+    processIyakuhinOfVisitEx(visitEx, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
       comb.combine(shikibetsu, futanKubun, sqldate, s);
     });
   });
