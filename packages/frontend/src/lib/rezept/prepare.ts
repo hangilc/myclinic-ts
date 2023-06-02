@@ -5,6 +5,7 @@ import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { formatHokenshaBangou, hokenRecordJitsuNissu, hokenshaRecordBangou, hokenshaRecordKigou, mk保険者レコード } from "./records/hokensha-record";
 import { mk医薬品レコード } from "./records/iyakuhin-record";
+import { kouhiRecordJitsuNissuu, mk公費レコード } from "./records/kouhi-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { mk診療行為レコード } from "./records/shinryoukoui-record";
@@ -54,6 +55,12 @@ export class RezeptContext {
         serial++, shahokokuho, koukikourei, kouhiList, visits));
       if (shahokokuho || koukikourei) {
         rows.push(this.create保険者レコード(shahokokuho, koukikourei, visits, tenCol.getHokenTotal(), undefined));
+      }
+      {
+        const kouhiTotals: number[] = tenCol.getKouhiTotals();
+        kouhiList.forEach((kouhi, index) => {
+          rows.push(this.create公費レコード(kouhi, visits, kouhiTotals[index], undefined));
+        })
       }
       rows.push(...shinryouDataList.map(mk診療行為レコード));
       rows.push(...iyakuhinDataList.map(mk医薬品レコード));
@@ -122,6 +129,21 @@ export class RezeptContext {
       合計点数,
       医療保険負担金額
     });
+  }
+
+  create公費レコード(
+    kouhi: Kouhi,
+    visits: Visit[],
+    souten: number,
+    futanKingaku: number | undefined,
+  ): string {
+    return mk公費レコード({
+      負担者番号: kouhi.futansha,
+      受給者番号: kouhi.jukyuusha,
+      診療実日数: kouhiRecordJitsuNissuu(kouhi.kouhiId, visits),
+      合計点数: souten,
+      負担金額: futanKingaku,
+    })
   }
 
   async loadVisits(): Promise<{

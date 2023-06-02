@@ -12,7 +12,6 @@ export class TensuuCollector {
   }
 
   getHokenTotal(): number {
-    console.log("hokenTotal", this.totalTen);
     return this.reduce(key => key.includes("H"));
   }
 
