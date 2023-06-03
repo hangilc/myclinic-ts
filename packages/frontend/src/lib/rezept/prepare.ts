@@ -10,21 +10,26 @@ import { mk医療機関情報レコード } from "./records/medical-institute-re
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
 import { mk診療行為レコード } from "./records/shinryoukoui-record";
+import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
 import { mk特定器材レコード } from "./records/tokuteikizai-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban, firstDayOfMonth, lastDayOfMonth, adjCodesOfDisease } from "./util";
 
 export class RezeptContext {
   year: number;
   month: number;
   clinicInfo: ClinicInfo;
+  firstDay: string;
+  lastDay: string;
 
   private constructor(year: number, month: number, clinicInfo: ClinicInfo) {
     this.year = year;
     this.month = month;
     this.clinicInfo = clinicInfo;
+    this.firstDay = firstDayOfMonth(year, month);
+    this.lastDay = lastDayOfMonth(year, month);
   }
 
   static async load(year: number, month: number): Promise<RezeptContext> {
@@ -68,6 +73,20 @@ export class RezeptContext {
         console.log("edaban", edaban);
         if (edaban) {
           rows.push(this.create資格確認レコード(edaban));
+        }
+      }
+      {
+        const ds = await api.listDiseaseActiveAt(visits[0].patientId, this.firstDay, this.lastDay);
+        for (let i = 0; i < ds.length; i++) {
+          const disease = ds[i];
+          const adjCodes = await adjCodesOfDisease(disease.diseaseId);
+          rows.push(mk症病名レコード({
+            傷病名コード: disease.shoubyoumeicode,
+            診療開始日: disease.startDate.replaceAll("-", ""),
+            転帰区分: endReasonToKubun(disease.endReasonStore),
+            修飾語コード: (adjCodes.length > 5 ? adjCodes.slice(0, 5) : adjCodes).join(""),
+            主傷病: i === 0,
+          }));
         }
       }
       rows.push(...shinryouDataList.map(mk診療行為レコード));
@@ -155,7 +174,7 @@ export class RezeptContext {
   }
 
   create資格確認レコード(edaban: string | undefined): string {
-    return mk資格確認レコード({ 
+    return mk資格確認レコード({
       確認区分コード: undefined,
       枝番: edaban,
     })

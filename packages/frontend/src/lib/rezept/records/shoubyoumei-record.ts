@@ -3,7 +3,7 @@ import type { DiseaseEndReasonType } from "myclinic-model";
 import { 転帰区分コード, type 転帰区分コードCode } from "../codes";
 import type { DiseaseItem } from "../visit-item";
 
-function mk症病名レコード({
+export function mk症病名レコード({
   傷病名コード,
   診療開始日,
   転帰区分,
@@ -28,22 +28,22 @@ function mk症病名レコード({
   ].join(",");
 }
 
-export function create症病名レコード({
-  item
-}: {
-  item: DiseaseItem;
-}): string {
-  return mk症病名レコード({
-    傷病名コード: item.disease.shoubyoumeicode,
-    診療開始日: item.disease.startDate.replaceAll("-", ""),
-    転帰区分: cvtEndReasonToKubun(item.disease.endReasonStore),
-    修飾語コード: (item.shuushokugoCodes.length > 5 ? 
-      item.shuushokugoCodes.slice(0, 5) : item.shuushokugoCodes).join(""),
-    主傷病: item.isPrimary,
-  });
-}
+// export function create症病名レコード({
+//   item
+// }: {
+//   item: DiseaseItem;
+// }): string {
+//   return mk症病名レコード({
+//     傷病名コード: item.disease.shoubyoumeicode,
+//     診療開始日: item.disease.startDate.replaceAll("-", ""),
+//     転帰区分: cvtEndReasonToKubun(item.disease.endReasonStore),
+//     修飾語コード: (item.shuushokugoCodes.length > 5 ? 
+//       item.shuushokugoCodes.slice(0, 5) : item.shuushokugoCodes).join(""),
+//     主傷病: item.isPrimary,
+//   });
+// }
 
-function cvtEndReasonToKubun(endReason: string): 転帰区分コードCode {
+export function endReasonToKubun(endReason: string): 転帰区分コードCode {
   switch(endReason){
     case "C": return 転帰区分コード.治ゆ;
     case "S": return 転帰区分コード["中 止（転医）"];

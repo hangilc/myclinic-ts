@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { dateToSqlDate, Patient, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, Disease, Patient, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
@@ -413,16 +413,24 @@ export function hokenshaBangouOfHoken(shahokokuho: Shahokokuho | undefined, kouk
   throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(shahokokuho) + JSON.stringify(koukikourei));
 }
 
-export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean): Promise<DiseaseItem> {
+// export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean): Promise<DiseaseItem> {
+//   const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
+//   return {
+//     disease: dex.disease,
+//     shuushokugoCodes: dex.adjList.map(e => {
+//       const [adj, master] = e;
+//       return adj.shuushokugocode;
+//     }),
+//     isPrimary,
+//   }
+// }
+
+export async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
   const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
-  return {
-    disease: dex.disease,
-    shuushokugoCodes: dex.adjList.map(e => {
-      const [adj, master] = e;
-      return adj.shuushokugocode;
-    }),
-    isPrimary,
-  }
+  return dex.adjList.map(e => {
+    const [adj, master] = e;
+    return adj.shuushokugocode;
+  });
 }
 
 export function firstDayOfMonth(year: number, month: number): string {
