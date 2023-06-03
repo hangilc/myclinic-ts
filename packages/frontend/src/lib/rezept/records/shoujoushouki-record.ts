@@ -1,6 +1,6 @@
 import type { 症状詳記区分コードCode } from "../codes";
 
-function mk症状詳記レコード({
+export function mk症状詳記レコード({
   症状詳記区分,
   症状詳記データ,
 }: {
@@ -14,15 +14,15 @@ function mk症状詳記レコード({
   ].join(",");
 }
 
-export function create症状詳記レコード({
-  shoujoushoukiKubun,
-  text,
-}: {
-  shoujoushoukiKubun: 症状詳記区分コードCode;
-  text: string;
-}): string {
-  return mk症状詳記レコード({
-    症状詳記区分: shoujoushoukiKubun,
-    症状詳記データ: text,
-  });
-}
+// export function create症状詳記レコード({
+//   shoujoushoukiKubun,
+//   text,
+// }: {
+//   shoujoushoukiKubun: 症状詳記区分コードCode;
+//   text: string;
+// }): string {
+//   return mk症状詳記レコード({
+//     症状詳記区分: shoujoushoukiKubun,
+//     症状詳記データ: text,
+//   });
+// }

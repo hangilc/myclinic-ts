@@ -1,12 +1,12 @@
-import type { 負担区分コードCode } from "../codes";
+import type { 診療識別コードCode, 負担区分コードCode } from "../codes";
 
-function mkコメントレコード({
+export function mkコメントレコード({
   診療識別,
   負担区分,
   コメントコード,
   文字データ,
 }: {
-  診療識別: string;
+  診療識別: 診療識別コードCode;
   負担区分: 負担区分コードCode;
   コメントコード: number;
   文字データ: string;
@@ -20,21 +20,21 @@ function mkコメントレコード({
   ].join(",");
 }
 
-export function createコメントレコード({
-  shikibetsucode,
-  futanKubun,
-  commentcode,
-  text,
-}: {
-  shikibetsucode: string;
-  futanKubun: 負担区分コードCode;
-  commentcode: number;
-  text: string;
-}): string {
-  return mkコメントレコード({
-    診療識別: shikibetsucode,
-    負担区分: futanKubun,
-    コメントコード: commentcode,
-    文字データ: text,
-  });
-}
+// export function createコメントレコード({
+//   shikibetsucode,
+//   futanKubun,
+//   commentcode,
+//   text,
+// }: {
+//   shikibetsucode: string;
+//   futanKubun: 負担区分コードCode;
+//   commentcode: number;
+//   text: string;
+// }): string {
+//   return mkコメントレコード({
+//     診療識別: shikibetsucode,
+//     負担区分: futanKubun,
+//     コメントコード: commentcode,
+//     文字データ: text,
+//   });
+// }

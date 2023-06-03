@@ -172,6 +172,47 @@ export class Patient {
   }
 }
 
+export class RezeptComment {
+  code: number;
+  text: string;
+  shikibetsucode?: string; // 診療識別コードCode ("01", "11", ...)
+
+  constructor(code: number, text: string, shikibetsucode?: string) {
+    this.code = code;
+    this.text = text;
+    this.shikibetsucode = shikibetsucode;
+  }
+
+  static cast(arg: any): RezeptComment {
+    return new RezeptComment(
+      castNumber(arg.code),
+      castString(arg.text),
+      castString(arg.shikibetsucode),
+    )
+  }
+
+  static isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
+    return a.code === b.code && a.text === b.text;
+  }
+}
+
+export class RezeptShoujouShouki {
+  kubun: string;
+  text: string;
+
+  constructor(kubun: string, text: string){
+    this.kubun = kubun;
+    this.text = text;
+  }
+
+  static cast(arg: any): RezeptShoujouShouki {
+    return new RezeptShoujouShouki(
+      castString(arg.kubun),
+      castString(arg.text),
+    )
+  }
+}
+
 export class Visit {
   constructor(
     public visitId: number,
@@ -203,6 +244,32 @@ export class Visit {
 
   clone(): Visit {
     return Object.assign({}, this) as Visit;
+  }
+
+  memoAsJson(): any {
+    if( this.attributesStore ){
+      return JSON.parse(this.attributesStore);
+    } else {
+      return {};
+    }
+  }
+
+  get comments(): RezeptComment[] {
+    const comm = this.memoAsJson()["comments"];
+    if( comm ){
+      return comm.map(RezeptComment.cast);
+    } else {
+      return [];
+    }
+  }
+
+  get shoujouShoukiList() : RezeptShoujouShouki[] {
+    const list = this.memoAsJson()["shoujou-shouki-list"];
+    if( list ){
+      return list.map(RezeptShoujouShouki.cast);
+    } else {
+      return [];
+    }
   }
 
   get attributes(): VisitAttributes | null {
@@ -640,27 +707,6 @@ export class DrugEx {
   }
 }
 
-export class ShinryouMemoComment {
-  code: number;
-  text: string;
-
-  constructor(code: number, text: string) {
-    this.code = code;
-    this.text = text;
-  }
-
-  static cast(arg: any): ShinryouMemoComment {
-    return new ShinryouMemoComment(
-      castNumber(arg.code),
-      castString(arg.text),
-    )
-  }
-
-  static isEqualComments(a: ShinryouMemoComment, b: ShinryouMemoComment): boolean {
-    return a.code === b.code && a.text === b.text;
-  }
-}
-
 export class ShinryouMemo {
   json: any;
 
@@ -677,13 +723,13 @@ export class ShinryouMemo {
     }
   }
 
-  get comments(): ShinryouMemoComment[] {
+  get comments(): RezeptComment[] {
     const comms = this.json["comments"];
     if (!comms) {
       return [];
     } else {
       try {
-        return castList(ShinryouMemoComment.cast)(comms);
+        return castList(RezeptComment.cast)(comms);
       } catch (ex) {
         console.error("Invalid comments: ", comms);
         return [];
@@ -704,7 +750,7 @@ export class Shinryou {
     return new ShinryouMemo(this.memo);
   }
 
-  get comments(): ShinryouMemoComment[] {
+  get comments(): RezeptComment[] {
     return this.parseMemo().comments;
   }
 

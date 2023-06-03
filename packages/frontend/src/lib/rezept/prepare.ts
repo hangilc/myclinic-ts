@@ -1,7 +1,8 @@
 import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "../api";
-import { 男女区分コード, 診査支払い機関コード, type 診査支払い機関コードCode } from "./codes";
+import { castTo症状詳記区分コードCode, castTo診療識別コードCode, is診療識別コードCode, 男女区分コード, 診査支払い機関コード, 診療識別コード, type 診査支払い機関コードCode } from "./codes";
 import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
+import { mkコメントレコード } from "./records/comment-record";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { formatHokenshaBangou, hokenRecordJitsuNissu, hokenshaRecordBangou, hokenshaRecordKigou, mk保険者レコード } from "./records/hokensha-record";
 import { mk医薬品レコード } from "./records/iyakuhin-record";
@@ -11,11 +12,12 @@ import { create診療報酬請求書レコード } from "./records/seikyuu-recor
 import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
 import { mk診療行為レコード } from "./records/shinryoukoui-record";
 import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
+import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mk特定器材レコード } from "./records/tokuteikizai-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban, firstDayOfMonth, lastDayOfMonth, adjCodesOfDisease } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban, firstDayOfMonth, lastDayOfMonth, adjCodesOfDisease, visitHasHoken, calcFutanKubun } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -89,9 +91,33 @@ export class RezeptContext {
           }));
         }
       }
+      {
+        visits.forEach(visit => {
+          visit.shoujouShoukiList.forEach(shouki => {
+            rows.push(mk症状詳記レコード({
+              症状詳記区分: castTo症状詳記区分コードCode(shouki.kubun),
+              症状詳記データ: shouki.text,
+            }))
+          })
+        })
+
+      }
       rows.push(...shinryouDataList.map(mk診療行為レコード));
       rows.push(...iyakuhinDataList.map(mk医薬品レコード));
       rows.push(...kizaiDataList.map(mk特定器材レコード));
+      for (let visit of visits) {
+        const futanKubun = calcFutanKubun(visitHasHoken(visit), visit.kouhiIdList, kouhiIdList);
+        visit.comments.forEach(comm => {
+          const shikibetsucode = castTo診療識別コードCode(comm.shikibetsucode ?? 診療識別コード.全体に係る識別コード);
+          rows.push(mkコメントレコード({
+
+            診療識別: shikibetsucode,
+            負担区分: futanKubun,
+            コメントコード: comm.code,
+            文字データ: comm.text,
+          }))
+        })
+      }
       rezeptCount += calcRezeptCount(visits);
       rezeptSouten += tenCol.getRezeptSouten();
     }
@@ -99,7 +125,7 @@ export class RezeptContext {
       rezeptCount: rezeptCount,
       totalTen: rezeptSouten,
     }))
-    return rows.join("\r\n");
+    return rows.join("\r\n") + "\r\n\x1A";
   }
 
   create医療機関情報レコード(seikyuu: 診査支払い機関コードCode): string {

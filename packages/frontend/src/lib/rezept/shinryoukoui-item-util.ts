@@ -1,4 +1,4 @@
-import { ConductShinryouEx, ShinryouEx, ShinryouMemoComment, Visit, VisitEx, type ShinryouMaster } from "myclinic-model";
+import { ConductShinryouEx, RezeptComment, ShinryouEx, Visit, VisitEx, type ShinryouMaster } from "myclinic-model";
 import {
   is診療識別コードCode, type 診療識別コードCode, type 負担区分コードCode,
 } from "./codes";
@@ -8,16 +8,16 @@ import type { Santeibi } from "./santeibi";
 import { calcFutanKubun, isEqualList, withClassified, partition, shikibetsuOfConduct, visitHasHoken } from "./util";
 import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
 
-function isSameComments(a: ShinryouMemoComment[], b: ShinryouMemoComment[]): boolean {
-  return isEqualList(a, b, ShinryouMemoComment.isEqualComments);
+function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
+  return isEqualList(a, b, RezeptComment.isEqualComments);
 }
 
 export class SimpleShinryou implements TekiyouItem<診療行為レコードData> {
   readonly isSimpleShinryou = true;
   master: ShinryouMaster;
-  comments: ShinryouMemoComment[];
+  comments: RezeptComment[];
 
-  constructor(master: ShinryouMaster, comments: ShinryouMemoComment[]) {
+  constructor(master: ShinryouMaster, comments: RezeptComment[]) {
     this.master = master;
     this.comments = comments;
   }
@@ -109,7 +109,7 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
       return this.shinryouList.map((shinryou, index) => {
         const master = shinryou.master;
         const len = this.shinryouList.length;
-        const comments: ShinryouMemoComment[] = shinryou.asShinryou().comments;
+        const comments: RezeptComment[] = shinryou.asShinryou().comments;
         const data = {
           診療識別: index === 0 ? shikibetsu : "",
           負担区分: futanKubun,
@@ -146,11 +146,11 @@ function resolveConductShinryouKouhi(shinryou: ConductShinryouEx, visit: Visit):
   return visit.kouhiIdList;
 }
 
-function commentsOfShinryou(shinryou: ShinryouEx): ShinryouMemoComment[] {
+function commentsOfShinryou(shinryou: ShinryouEx): RezeptComment[] {
   return shinryou.asShinryou().comments;
 }
 
-function commentsOfConductShinryou(shinryou: ConductShinryouEx): ShinryouMemoComment[] {
+function commentsOfConductShinryou(shinryou: ConductShinryouEx): RezeptComment[] {
   return [];
 }
 

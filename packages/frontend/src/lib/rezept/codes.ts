@@ -258,6 +258,14 @@ export function is診療識別コードCode(arg: string): arg is 診療識別コ
   return false;
 }
 
+export function castTo診療識別コードCode(arg: string): 診療識別コードCode {
+  if( is診療識別コードCode(arg) ){
+    return arg;
+  } else {
+    throw new Error("Invalid 診療識別コード: " + arg);
+  }
+}
+
 export function sort診療識別コードCodeList(list: 診療識別コードCode[]): 診療識別コードCode[] {
   list.sort((a, b) => a.localeCompare(b));
   return list;
@@ -339,6 +347,14 @@ export function is症状詳記区分コードCode(arg: string): arg is 症状詳
     }
   }
   return false;
+}
+
+export function castTo症状詳記区分コードCode(arg: string): 症状詳記区分コードCode {
+  if( is症状詳記区分コードCode(arg) ){
+    return arg;
+  } else {
+    throw new Error("Invalid 症状詳記区分コードCode: " + arg);
+  }
 }
 
 
