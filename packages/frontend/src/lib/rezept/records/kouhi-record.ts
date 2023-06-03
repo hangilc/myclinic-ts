@@ -55,9 +55,9 @@ export function mk公費レコード({
 //   })
 // }
 
-function kouhiListIncludes(list: Kouhi[], kouhiId: number): boolean {
-  return list.findIndex(k => k.kouhiId === kouhiId) >= 0;
-}
+// function kouhiListIncludes(list: Kouhi[], kouhiId: number): boolean {
+//   return list.findIndex(k => k.kouhiId === kouhiId) >= 0;
+// }
 
 export function kouhiRecordJitsuNissuu(kouhiId: number, visits: Visit[]): number {
   let ds = new DateSet();

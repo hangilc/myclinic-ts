@@ -8,12 +8,13 @@ import { mk医薬品レコード } from "./records/iyakuhin-record";
 import { kouhiRecordJitsuNissuu, mk公費レコード } from "./records/kouhi-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
+import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
 import { mk診療行為レコード } from "./records/shinryoukoui-record";
 import { mk特定器材レコード } from "./records/tokuteikizai-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -61,6 +62,13 @@ export class RezeptContext {
         kouhiList.forEach((kouhi, index) => {
           rows.push(this.create公費レコード(kouhi, visits, kouhiTotals[index], undefined));
         })
+      }
+      {
+        const edaban = await resolveEdaban(visits);
+        console.log("edaban", edaban);
+        if (edaban) {
+          rows.push(this.create資格確認レコード(edaban));
+        }
       }
       rows.push(...shinryouDataList.map(mk診療行為レコード));
       rows.push(...iyakuhinDataList.map(mk医薬品レコード));
@@ -143,6 +151,13 @@ export class RezeptContext {
       診療実日数: kouhiRecordJitsuNissuu(kouhi.kouhiId, visits),
       合計点数: souten,
       負担金額: futanKingaku,
+    })
+  }
+
+  create資格確認レコード(edaban: string | undefined): string {
+    return mk資格確認レコード({ 
+      確認区分コード: undefined,
+      枝番: edaban,
     })
   }
 

@@ -7,6 +7,7 @@ import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { K } from "vitest/dist/types-e3c9754d";
+import type { ResultItem } from "onshi-result/ResultItem";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -98,25 +99,25 @@ export function is国保(hokenshaBangou: number): boolean {
 // { "kouhi-tandoku-seikyuu-saki": "kokuho" } -- 国保連合
 
 export async function isForKokuhoRengou(visit: Visit): Promise<boolean> {
-  if( visit.shahokokuhoId > 0 ){
+  if (visit.shahokokuhoId > 0) {
     const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
     return is国保(shahokokuho.hokenshaBangou);
-  } else if( visit.koukikoureiId > 0 ){
+  } else if (visit.koukikoureiId > 0) {
     return true;
   } else {
     const kouhiList: Kouhi[] = await Promise.all(visit.kouhiIdList.map(api.getKouhi));
     sortKouhiList(kouhiList);
-    if( kouhiList.length === 0 ){
+    if (kouhiList.length === 0) {
       throw new Error("No hoken and no kouhi: " + JSON.stringify(visit));
     }
     const memo = kouhiList[0].memoAsJson;
     const seikyuu = memo["kouhi-tandoku-seikyuu-saki"];
-    if( !seikyuu ) {
+    if (!seikyuu) {
       throw new Error("Cannot resolve kouhi-tandoku-seikyuu-saki: " + JSON.stringify(kouhiList[0]));
     }
-    if( seikyuu === "shaho" ){
+    if (seikyuu === "shaho") {
       return false;
-    } else if( seikyuu === "kokuho" ){
+    } else if (seikyuu === "kokuho") {
       return true;
     } else {
       throw new Error("Unknown seikyuu saki (should be 'shaho' or 'kokuho'): " + seikyuu);
@@ -205,9 +206,9 @@ export function resolve保険種別(shahokokuho: Shahokokuho | undefined,
 // }
 
 export async function commonRecord給付割合(visit: Visit): Promise<string> {
-  if( visit.shahokokuhoId > 0 ){
+  if (visit.shahokokuhoId > 0) {
     const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
-    if( is国保(shahokokuho.hokenshaBangou) ){
+    if (is国保(shahokokuho.hokenshaBangou)) {
       return "70";
     }
   }
@@ -234,7 +235,7 @@ export function findOnshiResultGendogaku(result: OnshiResult | undefined)
 }
 
 export function resolveGendogakuTokkiJikou(
-  shahokokuho: Shahokokuho | undefined, 
+  shahokokuho: Shahokokuho | undefined,
   koukikourei: Koukikourei | undefined,
   gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
   if (gendo) {
@@ -350,24 +351,42 @@ function resolveGendogakuTokkiJikouOrig(hoken: HokenInfo, gendo: LimitApplicatio
   return undefined;
 }
 
-export async function resolveGendo(visits: Visit[]): 
+export async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {
+  const onshi = await api.findOnshi(visitId);
+  if (onshi) {
+    const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
+    if (result.isValid) {
+      return result.resultList[0];
+    }
+  }
+  return undefined;
+}
+
+export async function resolveGendo(visits: Visit[]):
   Promise<LimitApplicationCertificateClassificationFlagLabel | undefined> {
   let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
-  for(let visit of visits){
-    const onshi = await api.findOnshi(visit.visitId);
-    if( onshi ){
-      const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
-      const g = result.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
+  for (let visit of visits) {
+    const resultItem = await resolveOnshi(visit.visitId);
+    if (resultItem) {
+      const g = resultItem.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
       if (g) {
         gendo = g;
       }
     }
+    // const onshi = await api.findOnshi(visit.visitId);
+    // if (onshi) {
+    //   const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
+    //   const g = result.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
+    //   if (g) {
+    //     gendo = g;
+    //   }
+    // }
   }
   return gendo;
 }
 
 export async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | undefined> {
-  if( visit.shahokokuhoId > 0 ){
+  if (visit.shahokokuhoId > 0) {
     return await api.getShahokokuho(visit.shahokokuhoId);
   } else {
     return undefined;
@@ -375,7 +394,7 @@ export async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | un
 }
 
 export async function koukikoureiOfVisit(visit: Visit): Promise<Koukikourei | undefined> {
-  if( visit.koukikoureiId > 0 ){
+  if (visit.koukikoureiId > 0) {
     return await api.getKoukikourei(visit.koukikoureiId);
   } else {
     return undefined;
@@ -494,6 +513,29 @@ function isAllAscii(s: string): boolean {
   return true;
 }
 
+export async function resolveEdaban(visits: Visit[]): Promise<string | undefined> {
+  let onshiEdaban: string | undefined = undefined;
+  let hokenshoEdaban: string | undefined = undefined;
+  for (let visit of visits) {
+    const ri = await resolveOnshi(visit.visitId);
+    console.log("ri", ri);
+    if (ri) {
+      if (ri.insuredBranchNumber) {
+        onshiEdaban = ri.insuredBranchNumber;
+        return;
+      }
+    } else {
+      const shahokokuho = await shahokokuhoOfVisit(visit);
+      if (shahokokuho) {
+        if (shahokokuho.edaban !== "") {
+          hokenshoEdaban = shahokokuho.edaban;
+        }
+      }
+    }
+  }
+  return onshiEdaban || hokenshoEdaban;
+}
+
 export function adjustString(s: string): string {
   if (isAllAscii(s)) {
     return s;
@@ -554,7 +596,7 @@ export function withClassifiedBy<K, V>(items: V[], getKey: (item: V) => K, handl
 export function setOf<T>(items: T[]): T[] {
   const as: T[] = [];
   items.forEach(item => {
-    if( !as.includes(item) ){
+    if (!as.includes(item)) {
       as.push(item);
     }
   });

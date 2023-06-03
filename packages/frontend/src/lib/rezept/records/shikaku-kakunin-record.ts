@@ -1,4 +1,4 @@
-function mk資格確認レコード({
+export function mk資格確認レコード({
   確認区分コード,
   枝番,
 }: {
@@ -18,12 +18,12 @@ function mk資格確認レコード({
   ].join(",");
 }
 
-export function create資格確認レコード({
-  edaban,
-}: {
-  edaban?: string;
-}): string {
-  return mk資格確認レコード({
-    枝番: edaban
-  });
-}
+// export function create資格確認レコード({
+//   edaban,
+// }: {
+//   edaban?: string;
+// }): string {
+//   return mk資格確認レコード({
+//     枝番: edaban
+//   });
+// }
