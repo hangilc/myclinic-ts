@@ -1,7 +1,5 @@
 import { pad } from "@/lib/pad";
-import type { HokenInfo, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
-import { adjustOptString, hokenshaBangouOfHoken } from "../util";
-import type { VisitItem } from "../visit-item";
+import type { Koukikourei, Shahokokuho, Visit } from "myclinic-model";
 
 export interface 保険者レコードData {
   保険者番号: string;

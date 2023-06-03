@@ -4,7 +4,6 @@ export interface StepEntry {
 }
 
 const G = ["01", "02", "03", "05", "06", "07", "08", "09", "10", "11"] as const;
-// export type HoukatsuGroup = "01" | "02" | "03" | "05" | "06" | "07" | "08" | "09" | "10" | "11";
 export type HoukatsuGroup = typeof G[number];
 
 export function isHoukatsuGroup(g: string): g is HoukatsuGroup {

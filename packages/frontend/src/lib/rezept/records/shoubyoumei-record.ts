@@ -1,7 +1,5 @@
 import { pad } from "@/lib/pad";
-import type { DiseaseEndReasonType } from "myclinic-model";
 import { 転帰区分コード, type 転帰区分コードCode } from "../codes";
-import type { DiseaseItem } from "../visit-item";
 
 export function mk症病名レコード({
   傷病名コード,

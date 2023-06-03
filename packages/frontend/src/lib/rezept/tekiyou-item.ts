@@ -3,32 +3,32 @@ import type { OnshiResult } from "onshi-result";
 import { sort診療識別コードCodeList, type 症状詳記区分コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import { Santeibi } from "./santeibi";
 
-export interface CommentItem {
-  shikibetsucode?: string;
-  commentcode: number;
-  text: string;
-}
+// export interface CommentItem {
+//   shikibetsucode?: string;
+//   commentcode: number;
+//   text: string;
+// }
 
-export interface ShoujouhoukiItem {
-  kubun: 症状詳記区分コードCode;
-  text: string;
-}
+// export interface ShoujouhoukiItem {
+//   kubun: 症状詳記区分コードCode;
+//   text: string;
+// }
 
-export interface VisitItem {
-  visit: Visit;
-  hoken: HokenInfo;
-  patient: Patient;
-  onshiResult?: OnshiResult;
-  visitEx: VisitEx;
-  comments: CommentItem[];
-  shoukiList: ShoujouhoukiItem[];
-}
+// export interface VisitItem {
+//   visit: Visit;
+//   hoken: HokenInfo;
+//   patient: Patient;
+//   onshiResult?: OnshiResult;
+//   visitEx: VisitEx;
+//   comments: CommentItem[];
+//   shoukiList: ShoujouhoukiItem[];
+// }
 
-export interface DiseaseItem {
-  disease: Disease;
-  shuushokugoCodes: number[];
-  isPrimary: boolean;
-}
+// export interface DiseaseItem {
+//   disease: Disease;
+//   shuushokugoCodes: number[];
+//   isPrimary: boolean;
+// }
 
 export interface TekiyouItem<R> {
   isSame(other: any): boolean;

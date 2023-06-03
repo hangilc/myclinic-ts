@@ -34,13 +34,12 @@
   }
 
   async function createContent(): Promise<string> {
-    return "";
-    // return await (shiharaiSelect === "shaho" ? createShaho(year, month) : createKokuho(year, month));
+    const ctx = await RezeptContext.load(year, month);
+    return await ctx.createFor(shiharaiSelect);
   }
 
   async function doStart() {
-    const ctx = await RezeptContext.load(year, month);
-    preShow = await ctx.createForShaho();
+    preShow = await createContent();
   }
 
   async function doStartOrig() {

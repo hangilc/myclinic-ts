@@ -3,10 +3,8 @@ import { dateToSqlDate, Disease, Patient, Visit, type DiseaseData, type HokenInf
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
-import type { DiseaseItem, VisitItem } from "./visit-item";
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
-import type { K } from "vitest/dist/types-e3c9754d";
 import type { ResultItem } from "onshi-result/ResultItem";
 
 export function formatYearMonth(year: number, month: number): string {
@@ -180,31 +178,6 @@ export function resolve保険種別(shahokokuho: Shahokokuho | undefined,
   }
 }
 
-// export async function resolve保険種別OfVisits(visits: Visit[]): Promise<number> {
-//   let shahokokuho: Shahokokuho | undefined = undefined;
-//   let koukikourei: Koukikourei | undefined = undefined;
-//   let kouhiIdList: number[] = [];
-//   for(let visit of visits){
-//     if( visit.shahokokuhoId > 0 && !shahokokuho ){
-//       shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
-//     }
-//     if( visit.koukikoureiId > 0 && !koukikourei ){
-//       koukikourei = await api.getKoukikourei(visit.koukikoureiId);
-//     }
-//     for(let kouhiId of visit.kouhiIdList){
-//       if( !kouhiIdList.includes(kouhiId) ){
-//         kouhiIdList.push(kouhiId);
-//       }
-//     }
-//   }
-//   const kouhiList: Kouhi[] = [];
-//   for(let kouhiId of kouhiIdList){
-//     kouhiList.push(await api.getKouhi(kouhiId));
-//   }
-//   sortKouhiList(kouhiList);
-//   return resolve保険種別(shahokokuho, koukikourei, kouhiList);
-// }
-
 export async function commonRecord給付割合(visit: Visit): Promise<string> {
   if (visit.shahokokuhoId > 0) {
     const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
@@ -294,63 +267,6 @@ export function resolveGendogakuTokkiJikou(
   return undefined;
 }
 
-function resolveGendogakuTokkiJikouOrig(hoken: HokenInfo, gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
-  if (gendo) {
-    switch (gendo) {
-      case "ア":
-      case "現役並みⅢ":
-        return レセプト特記事項コード["区ア"];
-      case "イ":
-      case "現役並みⅡ":
-        return レセプト特記事項コード["区イ"];
-      case "ウ":
-      case "現役並みⅠ":
-        return レセプト特記事項コード["区ウ"];
-      case "エ":
-      case "一般":
-        return レセプト特記事項コード["区エ"];
-      case "オ":
-      case "低所得Ⅱ":
-      case "低所得Ⅰ":
-        return レセプト特記事項コード["区オ"];
-      case "低所得Ⅰ（老福）": {
-        console.log("add '老福' to tekiyou", JSON.stringify(hoken));
-        return レセプト特記事項コード["区オ"];
-      }
-      case "低所得Ⅰ（境）": {
-        console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
-        return レセプト特記事項コード["区オ"];
-      }
-      case "オ（境）": {
-        console.log("add '境界層該当' to tekiyou", JSON.stringify(hoken));
-        return レセプト特記事項コード["区オ"];
-      }
-      case "一般Ⅱ": return レセプト特記事項コード["区カ"];
-      case "一般Ⅰ": return レセプト特記事項コード["区キ"];
-      default: {
-        console.log("Unknown 限度額区分", gendo);
-        return undefined;
-      }
-    }
-  }
-  if (hoken.koukikourei) {
-    switch (hoken.koukikourei.futanWari) {
-      case 3: return レセプト特記事項コード["区ア"];
-      case 2: return レセプト特記事項コード["区カ"];
-      case 1: return レセプト特記事項コード["区キ"];
-    }
-  } else if (hoken.shahokokuho) {
-    switch (hoken.shahokokuho.koureiStore) {
-      case 3: return レセプト特記事項コード["区ア"];
-      case 2:
-      case 1:
-        return レセプト特記事項コード["区エ"];
-      default: break;
-    }
-  }
-  return undefined;
-}
-
 export async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {
   const onshi = await api.findOnshi(visitId);
   if (onshi) {
@@ -373,14 +289,6 @@ export async function resolveGendo(visits: Visit[]):
         gendo = g;
       }
     }
-    // const onshi = await api.findOnshi(visit.visitId);
-    // if (onshi) {
-    //   const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
-    //   const g = result.resultList[0]?.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
-    //   if (g) {
-    //     gendo = g;
-    //   }
-    // }
   }
   return gendo;
 }
@@ -412,18 +320,6 @@ export function hokenshaBangouOfHoken(shahokokuho: Shahokokuho | undefined, kouk
   }
   throw new Error("Cannot resolve hokenshaBangou: " + JSON.stringify(shahokokuho) + JSON.stringify(koukikourei));
 }
-
-// export async function composeDiseaseItem(diseaseId: number, isPrimary: boolean): Promise<DiseaseItem> {
-//   const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
-//   return {
-//     disease: dex.disease,
-//     shuushokugoCodes: dex.adjList.map(e => {
-//       const [adj, master] = e;
-//       return adj.shuushokugocode;
-//     }),
-//     isPrimary,
-//   }
-// }
 
 export async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
   const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
@@ -490,21 +386,13 @@ export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhi
   }
 }
 
-// function calcRezeptCountOrig(items: VisitItem[]): number {
-//   function count(item: VisitItem): number {
-//     return (hasHoken(item) ? 1 : 0) +
-//       item.hoken.kouhiList.length;
+// export function calcRezeptCount(visits: Visit[]): number {
+//   function count(visit: Visit): number {
+//     return (visitHasHoken(visit) ? 1 : 0) +
+//       visit.kouhiIdList.length;
 //   }
-//   return items.reduce((acc, ele) => acc + count(ele), 0);
+//   return visits.reduce((acc, ele) => acc + count(ele), 0);
 // }
-
-export function calcRezeptCount(visits: Visit[]): number {
-  function count(visit: Visit): number {
-    return (visitHasHoken(visit) ? 1 : 0) +
-      visit.kouhiIdList.length;
-  }
-  return visits.reduce((acc, ele) => acc + count(ele), 0);
-}
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);

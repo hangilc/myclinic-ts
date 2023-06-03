@@ -1,6 +1,6 @@
 import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "../api";
-import { castTo症状詳記区分コードCode, castTo診療識別コードCode, is診療識別コードCode, 男女区分コード, 診査支払い機関コード, 診療識別コード, type 診査支払い機関コードCode } from "./codes";
+import { castTo症状詳記区分コードCode, castTo診療識別コードCode, 男女区分コード, 診査支払い機関コード, 診療識別コード, type 診査支払い機関コードCode } from "./codes";
 import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
 import { mkコメントレコード } from "./records/comment-record";
 import { mkレセプト共通レコード } from "./records/common-record";
@@ -17,7 +17,7 @@ import { mk特定器材レコード } from "./records/tokuteikizai-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
-import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, calcRezeptCount, resolveEdaban, firstDayOfMonth, lastDayOfMonth, adjCodesOfDisease, visitHasHoken, calcFutanKubun } from "./util";
+import { classifyBy, isForKokuhoRengou, resolve保険種別, classify, setOf, calcSeikyuuMonth, extract都道府県コードfromAddress, formatYearMonth, resolvePatientName, commonRecord給付割合, resolveGendo, resolveGendogakuTokkiJikou, shahokokuhoOfVisit, koukikoureiOfVisit, getSortedKouhiListOfVisits, hokenshaBangouOfHoken, adjustOptString, resolveEdaban, firstDayOfMonth, lastDayOfMonth, adjCodesOfDisease, visitHasHoken, calcFutanKubun } from "./util";
 
 export class RezeptContext {
   year: number;
@@ -81,7 +81,6 @@ export class RezeptContext {
       }
       {
         const edaban = await resolveEdaban(visits);
-        console.log("edaban", edaban);
         if (edaban) {
           rows.push(this.create資格確認レコード(edaban));
         }
@@ -127,7 +126,10 @@ export class RezeptContext {
           }))
         })
       }
-      rezeptCount += calcRezeptCount(visits);
+      if( kouhiList.length > 0 ){
+        console.log(visits[0].patientId, kouhiList.length);
+      }
+      rezeptCount += ((shahokokuho || koukikourei) ? 1 : 0) + kouhiList.length;
       rezeptSouten += tenCol.getRezeptSouten();
     }
     rows.push(create診療報酬請求書レコード({

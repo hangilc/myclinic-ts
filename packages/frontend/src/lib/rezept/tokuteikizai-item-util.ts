@@ -3,7 +3,7 @@ import type { 診療識別コードCode, 負担区分コードCode } from "./cod
 import type { 特定器材レコードData } from "./records/tokuteikizai-record";
 import type { Santeibi } from "./santeibi";
 import { calcFutanKubun, kizaiKingakuToTen, shikibetsuOfConduct, visitHasHoken, withClassified } from "./util";
-import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
+import { Combiner, type TekiyouItem } from "./tekiyou-item";
 
 type R = 特定器材レコードData;
 

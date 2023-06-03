@@ -6,7 +6,7 @@ import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuStep } fr
 import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import type { Santeibi } from "./santeibi";
 import { calcFutanKubun, isEqualList, withClassified, partition, shikibetsuOfConduct, visitHasHoken } from "./util";
-import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
+import { Combiner, type TekiyouItem } from "./tekiyou-item";
 
 function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   return isEqualList(a, b, RezeptComment.isEqualComments);

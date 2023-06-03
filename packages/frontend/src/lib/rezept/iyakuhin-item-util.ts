@@ -3,7 +3,7 @@ import type { 診療識別コードCode, 負担区分コードCode } from "./cod
 import type { 医薬品レコードData } from "./records/iyakuhin-record";
 import type { Santeibi } from "./santeibi";
 import { calcFutanKubun, shikibetsuOfConduct, shochiYakuzaiKingakuToTen, visitHasHoken, withClassified } from "./util";
-import { Combiner, type TekiyouItem, type VisitItem } from "./visit-item";
+import { Combiner, type TekiyouItem } from "./tekiyou-item";
 
 class SingleUnit implements TekiyouItem<医薬品レコードData> {
   readonly isSingleItem = true;

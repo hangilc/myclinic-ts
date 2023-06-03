@@ -1,6 +1,5 @@
-import type { Kouhi, Visit } from "myclinic-model";
+import type {  Visit } from "myclinic-model";
 import { DateSet } from "../date-set";
-import type { VisitItem } from "../visit-item";
 
 export interface 公費レコードData {
   負担者番号: number;
