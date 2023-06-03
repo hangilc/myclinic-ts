@@ -40,10 +40,19 @@ export class RezeptContext {
   }
 
   async createForShaho(): Promise<string> {
+    return this.createFor("shaho");
+  }
+
+  async createForKokuho(): Promise<string> {
+    return this.createFor("kokuho");
+  }
+
+  async createFor(seikyuusaki: "shaho" | "kokuho"): Promise<string> {
     let serial = 1;
-    const visitsList = (await this.loadVisits()).shaho;
+    const visitsList = (await this.loadVisits())[seikyuusaki];
     const rows: string[] = [];
-    rows.push(this.create医療機関情報レコード(診査支払い機関コード.社保基金));
+    rows.push(this.create医療機関情報レコード(
+      seikyuusaki === "shaho" ? 診査支払い機関コード.社保基金 : 診査支払い機関コード.国健連合));
     let rezeptCount = 0;
     let rezeptSouten = 0;
     for (let visits of visitsList) {
