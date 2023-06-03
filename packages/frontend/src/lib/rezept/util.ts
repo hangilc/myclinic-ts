@@ -518,11 +518,9 @@ export async function resolveEdaban(visits: Visit[]): Promise<string | undefined
   let hokenshoEdaban: string | undefined = undefined;
   for (let visit of visits) {
     const ri = await resolveOnshi(visit.visitId);
-    console.log("ri", ri);
     if (ri) {
-      if (ri.insuredBranchNumber) {
+      if (ri.insuredBranchNumber !== undefined) {
         onshiEdaban = ri.insuredBranchNumber;
-        return;
       }
     } else {
       const shahokokuho = await shahokokuhoOfVisit(visit);
