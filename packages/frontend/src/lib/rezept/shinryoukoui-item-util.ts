@@ -222,61 +222,6 @@ export function processShinryouOfVisitEx(visitEx: VisitEx, kouhiIdList: number[]
   })
 }
 
-// export function processShinryouOfVisitItem(visitItem: VisitItem, kouhiIdList: number[],
-//   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
-//     item: SimpleShinryou | HoukatsuKensaShinryou) => void): void {
-//   const visitEx = visitItem.visitEx;
-//   const sqldate = visitItem.visit.visitedAt.substring(0, 10);
-//   const shinryouList: [診療識別コードCode, ShinryouEx][] = visitEx.shinryouList.map(shinryou => [
-//     resolveShinryouShikibetsu(shinryou.master),
-//     shinryou
-//   ]);
-//   const conductShinryouList: [診療識別コードCode, ConductShinryouEx][] =
-//     visitEx.conducts
-//       .flatMap(c => {
-//         const shikibetsu = shikibetsuOfConduct(c.kind.code);
-//         return c.shinryouList.map((cs) : [診療識別コードCode, ConductShinryouEx] => [shikibetsu, cs]);
-//       });
-//   const list: [診療識別コードCode, ShinryouEx | ConductShinryouEx][] = [...shinryouList, ...conductShinryouList];
-//   function resolveFutanKubun(s: ShinryouEx | ConductShinryouEx): 負担区分コードCode {
-//     if (s instanceof ShinryouEx) {
-//       return calcFutanKubun(
-//         hasHoken(visitItem),
-//         resolveShinryouKouhi(s, visitItem.visit),
-//         kouhiIdList);
-//     } else {
-//       return calcFutanKubun(
-//         hasHoken(visitItem),
-//         resolveConductShinryouKouhi(s, visitItem.visit),
-//         kouhiIdList);
-//     }
-//   }
-//   withClassified(list, (shikibetsu, ss) => {
-//     withClassified(ss.map(s => [resolveFutanKubun(s), s]), (futanKubun, ss) => {
-//       const [shinryouList, conductShinryouList] = partition<ShinryouEx, ConductShinryouEx>(ss, isShinryouEx);
-//       withClassified(shinryouList.map(houkatsuClassifier), (g, ss) => {
-//         if (g === undefined) {
-//           ss.forEach(s => {
-//             handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-//               s.master, commentsOfShinryou(s)
-//             ));
-//           })
-//         } else {
-//           const step = getHoukatsuStep(sqldate);
-//           handler(shikibetsu, futanKubun, sqldate, new HoukatsuKensaShinryou(
-//             getHoukatsuStep(sqldate), ss
-//           ));
-//         }
-//       });
-//       conductShinryouList.forEach(s => {
-//         handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-//           s.master, commentsOfConductShinryou(s)
-//         ));
-//       })
-//     })
-//   })
-// }
-
 export function cvtVisitsToShinryouDataList(visits: VisitEx[], kouhiIdList: number[]): 診療行為レコードData[] {
   const comb = new Combiner<診療行為レコードData>();
   visits.forEach(visit => {
