@@ -126,9 +126,6 @@ export class RezeptContext {
           }))
         })
       }
-      if( kouhiList.length > 0 ){
-        console.log(visits[0].patientId, kouhiList.length);
-      }
       rezeptCount += ((shahokokuho || koukikourei) ? 1 : 0) + kouhiList.length;
       rezeptSouten += tenCol.getRezeptSouten();
     }

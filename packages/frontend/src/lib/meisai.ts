@@ -1,10 +1,11 @@
-import type { HokenInfo, VisitEx } from "myclinic-model";
+import type { VisitEx } from "myclinic-model";
 import api from "./api";
+import { RezeptCharge, roundKingaku, type RezeptChargeHistory, HokenCover, calcMadoguchiFutan } from "./rezept-calc/rezept-charge";
 import { rev診療識別コード, type 診療識別コードCode } from "./rezept/codes";
 import { processIyakuhinOfVisitEx } from "./rezept/iyakuhin-item-util";
 import { processShinryouOfVisitEx } from "./rezept/shinryoukoui-item-util";
 import { processKizaiOfVisitEx } from "./rezept/tokuteikizai-item-util";
-import { classify } from "./rezept/util";
+import { classify, sortKouhiList } from "./rezept/util";
 
 export const MeisaiSection = {
   "初・再診料": 1,
@@ -53,12 +54,8 @@ export class MeisaiSectionData {
 
 export class Meisai {
   store: [MeisaiSectionKey, MeisaiSectionItem][] = [];
-  futanWari: number | undefined;
+  futanWari: number | undefined = undefined;
   charge: number = 0;
-
-  constructor(futanWari: number | undefined) {
-    this.futanWari = futanWari;
-  }
 
   addData(section: MeisaiSectionKey, item: MeisaiSectionItem): void {
     this.store.push([section, item]);
@@ -67,9 +64,9 @@ export class Meisai {
   get items(): MeisaiSectionData[] {
     const result: MeisaiSectionData[] = [];
     const classified = classify(this.store);
-    for(let key of MeisaiSectionKeys){
+    for (let key of MeisaiSectionKeys) {
       const entries = classified.get(key);
-      if( entries ){
+      if (entries) {
         result.push(new MeisaiSectionData(key, entries));
       }
     }
@@ -81,20 +78,6 @@ export class Meisai {
       return acc + ele.totalTen;
     }, 0);
   }
-}
-
-function calcHokenFutanWari(hoken: HokenInfo): number | undefined {
-  if (hoken.shahokokuho) {
-    const kourei = hoken.shahokokuho.koureiStore;
-    if (kourei > 0) {
-      return kourei;
-    } else {
-      return 3;
-    }
-  } else if (hoken.koukikourei) {
-    return hoken.koukikourei.futanWari;
-  }
-  return undefined;
 }
 
 const ShikibetuSectionMap: Record<string, MeisaiSectionKey> = {
@@ -128,30 +111,46 @@ function revShikibetsu(shikibetsu: 診療識別コードCode): MeisaiSectionKey 
   return ShikibetuSectionMap[rev診療識別コード[shikibetsu] ?? "その他"];
 }
 
+function resolveFutanWari(history: RezeptChargeHistory[]): number | undefined {
+  let futanWari: number | undefined = undefined;
+  history.forEach(h => {
+    if( h instanceof HokenCover ){
+      futanWari = h.futanWari;
+    }
+  });
+  return futanWari;
+}
+
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit: VisitEx = await api.getVisitEx(visitId);
-  const meisai = new Meisai(calcHokenFutanWari(visit.hoken));
-  let souten = 0;
+  const meisai = new Meisai();
   const kouhiIdList = visit.asVisit.kouhiIdList;
   processShinryouOfVisitEx(visit, kouhiIdList, (shikibetsu, _futanKubun, _sqldate, item) => {
     const ten = item.ten;
-    souten += ten;
     const sectItem = new MeisaiSectionItem(ten, 1, item.label);
     meisai.addData(revShikibetsu(shikibetsu), sectItem);
   });
   processIyakuhinOfVisitEx(visit, kouhiIdList, (shikibetsu, _futanKubun, _sqldate, item) => {
     const ten = item.ten;
-    souten += ten;
     const sectItem = new MeisaiSectionItem(ten, 1, item.label);
     meisai.addData(revShikibetsu(shikibetsu), sectItem);
   });
   processKizaiOfVisitEx(visit, kouhiIdList, (shikibetsu, _futanKubun, _sqldate, item) => {
     const ten = item.ten;
-    souten += ten;
     const sectItem = new MeisaiSectionItem(ten, 1, item.label);
     meisai.addData(revShikibetsu(shikibetsu), sectItem);
   });
-  console.log("souten", souten);
+  const kouhiList = visit.hoken.kouhiList;
+  sortKouhiList(kouhiList);
+  const rc: RezeptCharge = calcMadoguchiFutan(
+    meisai.totalTen,
+    visit.hoken.shahokokuho || visit.hoken.koukikourei,
+    kouhiList);
+  meisai.futanWari = resolveFutanWari(rc.history);
+  meisai.charge = rc.charge;
+  console.log("souten", meisai.totalTen);
+  console.log("charge", meisai.charge);
+  console.log("futanWari", meisai.futanWari);
   console.log("meisai", meisai.items);
   return meisai;
 }

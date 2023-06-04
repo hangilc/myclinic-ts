@@ -1,67 +1,83 @@
-export class HokenCharge {
-  totalTen: number;
-  futanWari: number;  // uncovered futan-wari (usually 3)
-  futan: number;
-  isKourei2WariHairyoSochi: boolean;
+import { Shahokokuho, type Kouhi, type Koukikourei } from "myclinic-model";
 
-  constructor({
-    totalTen, futanWari, gendogaku, isKourei2WariHairyoSochi
-  }: {
-    totalTen: number;
-    futanWari: number;
-    gendogaku?: number;
-    isKourei2WariHairyoSochi?: boolean;
-  }) {
-    this.totalTen = totalTen;
-    this.futanWari = futanWari;
-    this.futan = totalTen * futanWari;
-    if (gendogaku !== undefined && gendogaku < this.futan) {
-      this.futan = gendogaku;
-    }
-    this.isKourei2WariHairyoSochi = isKourei2WariHairyoSochi ?? false;
-  }
+export class InitialCharge {
+  readonly isInitialCharge = true;
+  value: number;
 
-  get isGendogakuApplied(): boolean {
-    return this.totalTen * this.futanWari > this.futan;
+  constructor(value: number) {
+    this.value = value;
   }
 }
+
+export class HokenCover {
+  readonly isHokenCover = true;
+  futanWari: number;
+
+  constructor(futanWari: number) {
+    this.futanWari = futanWari;
+  }
+}
+
+export type RezeptChargeHistory = InitialCharge | HokenCover | "madoguchi-rounding" ;
 
 export class RezeptCharge {
-  constructor(
-    public hokenCharge: HokenCharge | undefined,
-    public futan: number,
-  ) { }
+  charge: number;
+  history: RezeptChargeHistory[] = [];
 
-  modifyFutan(newFutan: number): RezeptCharge {
-    return new RezeptCharge(this.hokenCharge, newFutan);
+  constructor(charge: number, history: RezeptChargeHistory[]) {
+    this.charge = charge;
+    this.history = history;
   }
 
-  static fromHokenCharge(hokenCharge: HokenCharge): RezeptCharge {
-    return new RezeptCharge(hokenCharge, hokenCharge.futan);
+  processed(newCharge: number, h: RezeptChargeHistory): RezeptCharge {
+    return new RezeptCharge(newCharge, this.extendedHistory(h));
   }
-}
 
-export type KouhiCalc = (charge: RezeptCharge) => RezeptCharge;
+  static create(initialCharge: number): RezeptCharge {
+    return new RezeptCharge(initialCharge, [new InitialCharge(initialCharge)]);
+  }
 
-export function calcMadoguchiFutan(totalTen: number, futanWari: number, kouhiCalcs: KouhiCalc[], opts: {
-
-} = {}): number {
-  const init = new HokenCharge({
-    totalTen, futanWari
-  });
-  let rc = RezeptCharge.fromHokenCharge(init);
-  kouhiCalcs.forEach(kcalc => {
-    rc = kcalc(rc);
-  });
-  const futan = rc.futan;
-  if( init.isKourei2WariHairyoSochi && init.isGendogakuApplied ){
-    return futan;
-  } else {
-    return roundKingaku(futan);
+  extendedHistory(h: RezeptChargeHistory): RezeptChargeHistory[] {
+    return [...this.history, h];
   }
 }
 
-function roundKingaku(kingaku: number): number {
+function applyHoken(rc: RezeptCharge, futanWari: number): RezeptCharge {
+  const newCharge = rc.charge * futanWari / 10.0;
+  const newHistory = rc.extendedHistory(new HokenCover(futanWari));
+  return new RezeptCharge(newCharge, newHistory);
+}
+
+export function roundKingaku(kingaku: number): number {
   return Math.round(kingaku / 10.0) * 10;
+}
+
+function applyRound(rc: RezeptCharge): RezeptCharge {
+  return rc.processed(roundKingaku(rc.charge), "madoguchi-rounding");
+}
+
+function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
+  if( hoken instanceof Shahokokuho ){
+    if( hoken.koureiStore > 0 ){
+      return hoken.koureiStore;
+    } else {
+      return 3;
+    }
+  } else {
+    return hoken.futanWari;
+  }
+}
+
+export function calcMadoguchiFutan(
+  totalTen: number,
+  hoken: Shahokokuho | Koukikourei | undefined,
+  kouhiList: Kouhi[]
+): RezeptCharge {
+  let rc = RezeptCharge.create(totalTen * 10);
+  if( hoken ){
+    rc = applyHoken(rc, futanWariOfHoken(hoken));
+  }
+  rc = applyRound(rc);
+  return rc;
 }
 
