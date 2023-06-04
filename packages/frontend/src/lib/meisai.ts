@@ -113,6 +113,38 @@ function revShikibetsu(shikibetsu: 診療識別コードCode): MeisaiSectionKey 
   return ShikibetuSectionMap[rev診療識別コード[shikibetsu] ?? "その他"];
 }
 
+function mergeKouhiList(kouhiList: Kouhi[]): Kouhi[] {
+  const result: Kouhi[] = [];
+  kouhiList.forEach(kouhi => {
+    if (!result.find(e => e.kouhiId === kouhi.kouhiId)) {
+      result.push(kouhi);
+    }
+  })
+  sortKouhiList(result);
+  return result;
+}
+
+function getMergedKouhiList(visits: VisitEx[]): Kouhi[] {
+  return mergeKouhiList(visits.flatMap(v => v.hoken.kouhiList));
+}
+
+class FutanMap {
+  map: Map<負担区分コードCode, number> = new Map();
+
+  add(futanCode: 負担区分コードCode, futan: number): void {
+    this.map.set(futanCode, (this.map.get(futanCode) ?? 0) + futan);
+  }
+}
+
+export function calcFutan(visit: VisitEx, prev: VisitEx[]): Map<負担区分コードCode, number> {
+  prev.sort((a, b) => a.visitedAt.localeCompare(b.visitedAt));
+  const kouhiList = getMergedKouhiList([visit, ...prev]);
+  const kouhiIdList = kouhiList.map(kouhi => kouhi.kouhiId);
+  const futanMap = new FutanMap();
+
+}
+
+
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit: VisitEx = await api.getVisitEx(visitId);
   const meisai = new Meisai();

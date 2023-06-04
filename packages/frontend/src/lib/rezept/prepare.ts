@@ -1,19 +1,19 @@
 import type { ClinicInfo, Kouhi, Koukikourei, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "../api";
-import { castTo症状詳記区分コードCode, castTo診療識別コードCode, 男女区分コード, 診査支払い機関コード, 診療識別コード, type 診査支払い機関コードCode } from "./codes";
+import { castTo症状詳記区分コードCode, castTo診療識別コードCode, 男女区分コード, 診査支払い機関コード, 診療識別コード, type 診査支払い機関コードCode, type 負担区分コードCode } from "./codes";
 import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
 import { mkコメントレコード } from "./records/comment-record";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { formatHokenshaBangou, hokenRecordJitsuNissu, hokenshaRecordBangou, hokenshaRecordKigou, mk保険者レコード } from "./records/hokensha-record";
-import { mk医薬品レコード } from "./records/iyakuhin-record";
+import { mk医薬品レコード, type 医薬品レコードData } from "./records/iyakuhin-record";
 import { kouhiRecordJitsuNissuu, mk公費レコード } from "./records/kouhi-record";
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
-import { mk診療行為レコード } from "./records/shinryoukoui-record";
+import { mk診療行為レコード, type 診療行為レコードData } from "./records/shinryoukoui-record";
 import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
 import { mk症状詳記レコード } from "./records/shoujoushouki-record";
-import { mk特定器材レコード } from "./records/tokuteikizai-record";
+import { mk特定器材レコード, type 特定器材レコードData } from "./records/tokuteikizai-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
@@ -61,10 +61,12 @@ export class RezeptContext {
       const kouhiList = await getSortedKouhiListOfVisits(visits);
       const visitExList: VisitEx[] = await Promise.all(visits.map(visit => api.getVisitEx(visit.visitId)));
       const kouhiIdList = kouhiList.map(kouhi => kouhi.kouhiId);
-      const shinryouDataList = cvtVisitsToShinryouDataList(visitExList, kouhiIdList);
-      const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
-      const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
       const tenCol = new TensuuCollector();
+      const {shinryouDataList, iyakuhinDataList, kizaiDataList} =
+        RezeptContext.calcVisits(visitExList, kouhiIdList, tenCol);
+      // const shinryouDataList = cvtVisitsToShinryouDataList(visitExList, kouhiIdList);
+      // const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
+      // const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
       shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
       iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
       kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
@@ -134,6 +136,28 @@ export class RezeptContext {
       totalTen: rezeptSouten,
     }))
     return rows.join("\r\n") + "\r\n\x1A";
+  }
+
+  static calcVisits(visitExList: VisitEx[], kouhiIdList: number[], collector: TensuuCollector): {
+    shinryouDataList: 診療行為レコードData[];
+    iyakuhinDataList: 医薬品レコードData[];
+    kizaiDataList: 特定器材レコードData[];
+  } {
+    const shinryouDataList = cvtVisitsToShinryouDataList(visitExList, kouhiIdList);
+    const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
+    const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
+    shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+    iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+    kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+    return {
+      shinryouDataList, iyakuhinDataList, kizaiDataList,
+    }
+  }
+
+  static calcVisit(visitEx: VisitEx, kouhiIdList: number[]): Map<負担区分コードCode, number> {
+    const col = new TensuuCollector();
+    RezeptContext.calcVisits([visitEx], kouhiIdList, col);
+    return col.totalTen;
   }
 
   create医療機関情報レコード(seikyuu: 診査支払い機関コードCode): string {
