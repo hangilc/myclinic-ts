@@ -13,76 +13,87 @@ export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
 }
 
 export interface HokenCover {
-  charge: number;
+  totalTen: number;
   futanWari: number;
-  gendogakuReached?: number;
+  charge: number;
+  gendogakuReached: boolean;
 }
 
-export function applyHoken(
-  charge: number,
+export function calcHokenCover(
+  totalTen: number,
   hoken: Shahokokuho | Koukikourei,
-  accFutan: number,
   gendogaku: number | undefined
 ): HokenCover {
   const futanWari = futanWariOfHoken(hoken);
-  let remCharge = charge * futanWari / 10;
-  let gendogakuReached: number | undefined = undefined;
+  let charge = totalTen * futanWari;
+  let gendogakuReached = false;
   if (gendogaku !== undefined) {
-    if (remCharge + accFutan > gendogaku) {
-      remCharge = gendogaku - accFutan;
-      if (remCharge < 0) {
-        remCharge = 0;
-      }
-      gendogakuReached = gendogaku;
+    if (charge > gendogaku) {
+      charge = gendogaku;
     }
+    gendogakuReached = true;
   }
   return {
-    charge: remCharge,
+    totalTen,
     futanWari,
+    charge,
     gendogakuReached,
   }
 }
 
+
 export interface KouhiCover {
+  totalTen: number;
   charge: number;
-  futanWari?: number;
-  gendogakuReached?: number;
+  gendogakuReached?: true;
   unsupported?: boolean;
   warningMessage?: string;
 }
 
-export function applyKouhi(charge: number, kouhi: Kouhi, accMadoguchiFutan: number, accKouhiCover: number): KouhiCover {
+function gendogakuCover(totalTen: number, charge: number, gendogaku: number): KouhiCover {
+  let gendogakuReached: true | undefined = undefined;
+  if (charge > gendogaku) {
+    charge = gendogaku;
+    gendogakuReached = true;
+  }
+  return {
+    totalTen,
+    charge,
+    gendogakuReached,
+  }
+}
+
+export function calcKouhiCover(
+  totalTen: number,
+  charge: number,
+  kouhi: Kouhi
+): KouhiCover {
   const futansha = kouhi.futansha;
   switch (futansha) {
     case 82134008: { // 被爆者の子に対する医療
       return {
+        totalTen,
         charge: 0,
-        futanWari: 0,
       }
     }
     case 82137670:
     case 82137530: { // 大気汚染関連疾病（負担あり）
-      const gendogaku = 6000;
-      let gendogakuReached: number | undefined = undefined;
-      if (charge + accMadoguchiFutan > gendogaku) {
-        charge = gendogaku - accMadoguchiFutan;
-        if (charge < 0) {
-          charge = 0;
-        }
-        gendogakuReached = gendogaku;
-      }
-      return {
-        charge: charge,
-        gendogakuReached,
-      }
+      return gendogakuCover(totalTen, charge, 6000);
     }
-    default: {
-      return {
-        charge: 0,
-        unsupported: true,
-        warningMessage: `法別番号：${futansha}`,
-      }
+    default: break;
+  }
+  const pre5 = Math.floor(futansha / 1000);
+  switch (pre5) {
+    case 89131:
+    case 89134: { // マル青（負担あり）
+      return gendogakuCover(totalTen, charge, 200);
     }
+  }
+  return {
+    totalTen,
+    charge: 0,
+    unsupported: true,
+    warningMessage: `未対応の法別番号 (${kouhi.futansha})`,
   }
 }
 

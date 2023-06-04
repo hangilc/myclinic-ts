@@ -1,8 +1,8 @@
-import type { VisitEx } from "myclinic-model";
+import type { Kouhi, VisitEx } from "myclinic-model";
 import api from "./api";
 import { applyKouhi } from "./rezept-calc/kouhi-calcs";
 import { applyHoken, applyRounding } from "./rezept-calc/rezept-charge";
-import { rev診療識別コード, type 診療識別コードCode } from "./rezept/codes";
+import { rev診療識別コード, type 診療識別コードCode, type 負担区分コードCode } from "./rezept/codes";
 import { processIyakuhinOfVisitEx } from "./rezept/iyakuhin-item-util";
 import { processShinryouOfVisitEx } from "./rezept/shinryoukoui-item-util";
 import { processKizaiOfVisitEx } from "./rezept/tokuteikizai-item-util";
@@ -143,7 +143,6 @@ export function calcFutan(visit: VisitEx, prev: VisitEx[]): Map<負担区分コ�
   const futanMap = new FutanMap();
 
 }
-
 
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit: VisitEx = await api.getVisitEx(visitId);
