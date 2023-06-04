@@ -5,19 +5,19 @@ export function hokenRep(visit: VisitEx): string {
   let terms: string[] = [];
   const hoken = visit.hoken;
 
-  if( hoken.shahokokuho != null ){
+  if (hoken.shahokokuho != null) {
     terms.push(shahokokuhoRep(hoken.shahokokuho));
   }
-  if( hoken.koukikourei != null ){
+  if (hoken.koukikourei != null) {
     terms.push(koukikoureiRep(hoken.koukikourei.futanWari));
   }
-  if( hoken.roujin != null ){
+  if (hoken.roujin != null) {
     terms.push(roujinRep(hoken.roujin.futanWari));
   }
-  for( let kouhi of hoken.kouhiList ){
+  for (let kouhi of hoken.kouhiList) {
     terms.push(kouhiRep(kouhi.futansha, kouhi.memoAsJson));
   }
-  if( terms.length === 0 ){
+  if (terms.length === 0) {
     return "自費";
   } else {
     return terms.join("・");
@@ -53,7 +53,7 @@ export function shahokokuhoName(hokenshaBangou: number): string {
 }
 
 export function hokenshaBangouRep(hokenshaBangou: number | string): string {
-  const n = typeof hokenshaBangou === "string" ? parseInt(hokenshaBangou): hokenshaBangou;
+  const n = typeof hokenshaBangou === "string" ? parseInt(hokenshaBangou) : hokenshaBangou;
   if (n <= 9999) {
     return "政管健保";
   } else if (n <= 999999) {
@@ -91,7 +91,7 @@ export function shahokokuhoRep2(
   shahokokuhoKoureiFutanWari: number
 ): string {
   const name: string = shahokokuhoName(shahokokuhoHokenshaBangou)
-  if( shahokokuhoKoureiFutanWari === 0 ){
+  if (shahokokuhoKoureiFutanWari === 0) {
     return name;
   } else {
     return `高齢${shahokokuhoKoureiFutanWari}割`;
@@ -114,49 +114,57 @@ const toukyouKouhiHoubetsu: Record<string, string> = {
 }
 
 export function kouhiRep(futanshaBangou: number, memo?: any): string {
-  if( memo && memo.name ){
+  if (memo && memo.name) {
     return memo.name;
   }
   const s = futanshaBangou.toString();
-  if( s.length === 8 ){
-    if( s === "52138013" ){
+  if (s.length === 8) {
+    const fuken = s.substring(2, 4);
+    if (fuken === "13") {
+      const pre2 = s.substring(0, 2);
+      switch (pre2) {
+        case "82": return "マル都";
+        default: break;
+      }
+    }
+    if (s === "52138013") {
       return "難病";
-    } else if( s === "52137015" ){
+    } else if (s === "52137015") {
       return "小児慢性";
-    } else if( s === "38136016") {
+    } else if (s === "38136016") {
       return "肝炎";
-    } else if( s === "38136024" ){
+    } else if (s === "38136024") {
       return "肝疾患";
-    } else if( s === "51136018" ){
+    } else if (s === "51136018") {
       return "難病";
-    } else if( s === "51137016" ){
+    } else if (s === "51137016") {
       return "特殊医療";
-    } else if( s === "82138009" ){
+    } else if (s === "82138009") {
       return "透析";
-    } else if( s === "82134008" ){
+    } else if (s === "82134008") {
       return "被爆者又は小児精神病";
-    } else if( s === "82137001" ){
+    } else if (s === "82137001") {
       return "大気汚染";
-    } else if( s === "82137555" ){
+    } else if (s === "82137555") {
       return "大気汚染";
-    } else if( s === "87136008" ){
+    } else if (s === "87136008") {
       return "妊娠高血圧";
     }
     {
       const rep = toukyouKouhiHoubetsu[s];
-      if( rep ){
+      if (rep) {
         return rep;
       }
     }
-    switch(s.substring(0, 2)){
+    switch (s.substring(0, 2)) {
       case "54": return "難病";
       case "83": return "難病";
       case "80": return "心身障害";
       case "81": return "ひとり親";
       case "89": return "高校生";
     }
-    switch(s.substring(0, 5)){
-      case "88132": 
+    switch (s.substring(0, 5)) {
+      case "88132":
       case "88138": return "乳幼児";
       case "88134":
       case "88135":

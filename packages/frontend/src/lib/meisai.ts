@@ -1,6 +1,7 @@
 import type { VisitEx } from "myclinic-model";
 import api from "./api";
-import { RezeptCharge, roundKingaku, type RezeptChargeHistory, HokenCover, calcMadoguchiFutan } from "./rezept-calc/rezept-charge";
+import { applyKouhi } from "./rezept-calc/kouhi-calcs";
+import { applyHoken, applyRounding } from "./rezept-calc/rezept-charge";
 import { rev診療識別コード, type 診療識別コードCode } from "./rezept/codes";
 import { processIyakuhinOfVisitEx } from "./rezept/iyakuhin-item-util";
 import { processShinryouOfVisitEx } from "./rezept/shinryoukoui-item-util";
@@ -56,6 +57,7 @@ export class Meisai {
   store: [MeisaiSectionKey, MeisaiSectionItem][] = [];
   futanWari: number | undefined = undefined;
   charge: number = 0;
+  warning: string | undefined = undefined;
 
   addData(section: MeisaiSectionKey, item: MeisaiSectionItem): void {
     this.store.push([section, item]);
@@ -111,16 +113,6 @@ function revShikibetsu(shikibetsu: 診療識別コードCode): MeisaiSectionKey 
   return ShikibetuSectionMap[rev診療識別コード[shikibetsu] ?? "その他"];
 }
 
-function resolveFutanWari(history: RezeptChargeHistory[]): number | undefined {
-  let futanWari: number | undefined = undefined;
-  history.forEach(h => {
-    if( h instanceof HokenCover ){
-      futanWari = h.futanWari;
-    }
-  });
-  return futanWari;
-}
-
 export async function calcMeisai(visitId: number): Promise<Meisai> {
   const visit: VisitEx = await api.getVisitEx(visitId);
   const meisai = new Meisai();
@@ -140,14 +132,27 @@ export async function calcMeisai(visitId: number): Promise<Meisai> {
     const sectItem = new MeisaiSectionItem(ten, 1, item.label);
     meisai.addData(revShikibetsu(shikibetsu), sectItem);
   });
+  const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
   const kouhiList = visit.hoken.kouhiList;
   sortKouhiList(kouhiList);
-  const rc: RezeptCharge = calcMadoguchiFutan(
-    meisai.totalTen,
-    visit.hoken.shahokokuho || visit.hoken.koukikourei,
-    kouhiList);
-  meisai.futanWari = resolveFutanWari(rc.history);
-  meisai.charge = rc.charge;
+  let charge = meisai.totalTen * 10;
+  if( hoken ) {
+    const result = applyHoken(hoken, charge);
+    meisai.futanWari = result.futanWari;
+    charge = result.charge;
+  }
+  for(let kouhi of kouhiList){
+    const result = applyKouhi(charge, kouhi);
+    charge = result.charge;
+    if( result.charge !== undefined ){
+      meisai.charge = result.charge;
+    }
+    if( result.unsupported ){
+      meisai.warning = "[Unsupported] " + result.warningMessage ?? "";
+      break;
+    }
+  }
+  meisai.charge = applyRounding(charge);
   console.log("souten", meisai.totalTen);
   console.log("charge", meisai.charge);
   console.log("futanWari", meisai.futanWari);

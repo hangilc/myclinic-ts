@@ -11,7 +11,7 @@
   import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
   // import { calcMadoguchiFutan, type KouhiCalc } from "@/lib/rezept-calc/rezept-charge";
-  import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
+  // import { resolveKouhiCalc } from "@/lib/rezept-calc/resolve-kouhi-calc";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   // import { calcMeisai } from "@/lib/meisai";
 
@@ -54,14 +54,14 @@
     // }
   }
 
-  async function resolveKouhiCalcs(visit: Visit): Promise<KouhiCalc[]> {
-    const kouhiList = await Promise.all(
-      [visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id]
-        .filter((id) => id > 0)
-        .map(async (kouhiId) => await api.getKouhi(kouhiId))
-    );
-    return kouhiList.map(kouhi => resolveKouhiCalc(kouhi) ?? (rc => rc));
-  }
+  // async function resolveKouhiCalcs(visit: Visit): Promise<KouhiCalc[]> {
+  //   const kouhiList = await Promise.all(
+  //     [visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id]
+  //       .filter((id) => id > 0)
+  //       .map(async (kouhiId) => await api.getKouhi(kouhiId))
+  //   );
+  //   return kouhiList.map(kouhi => resolveKouhiCalc(kouhi) ?? (rc => rc));
+  // }
 
   function onEndPatientClick() {
     endPatient(WqueueState.WaitReExam);
