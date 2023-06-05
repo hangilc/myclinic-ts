@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { dateToSqlDate, Disease, Patient, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, Disease, Patient, Shahokokuho, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
@@ -514,5 +514,17 @@ export function shikibetsuOfConduct(conductKind: number): 診療識別コードC
   switch (conductKind) {
     case 3: return 診療識別コード.画像診断;
     default: return 診療識別コード.処置;
+  }
+}
+
+export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
+  if (hoken instanceof Shahokokuho) {
+    if (hoken.koureiStore > 0) {
+      return hoken.koureiStore;
+    } else {
+      return 3;
+    }
+  } else {
+    return hoken.futanWari;
   }
 }

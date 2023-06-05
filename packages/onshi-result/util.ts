@@ -1,12 +1,12 @@
 export function pad(n: number | string, width: number, c: string = "0"): string {
   let s: string;
-  if( typeof n !== "string" ){
+  if (typeof n !== "string") {
     s = n.toString();
   } else {
     s = n;
   }
   let len = s.length;
-  while( len < width ){
+  while (len < width) {
     s = c + s;
     len += 1;
   }
@@ -28,8 +28,8 @@ export function fromSqlDateTime(s: string): string {
   return s.replaceAll("-", "").replace(" ", "").replaceAll(":", "");
 }
 
-export function onshiDateTimeOptToSqlDateTimeOpt(s: string | undefined) : string | undefined {
-  if( s == undefined ){
+export function onshiDateTimeOptToSqlDateTimeOpt(s: string | undefined): string | undefined {
+  if (s == undefined) {
     return undefined;
   } else {
     return onshiDateTimeToSqlDateTime(s);
@@ -47,8 +47,8 @@ export function fromSqlDate(s: string): string {
   return s.replaceAll("-", "");
 }
 
-export function onshiDateOptToSqlDateOpt(s: string | undefined) : string | undefined {
-  if( s == undefined ){
+export function onshiDateOptToSqlDateOpt(s: string | undefined): string | undefined {
+  if (s == undefined) {
     return undefined;
   } else {
     return onshiDateToSqlDate(s);
@@ -56,7 +56,7 @@ export function onshiDateOptToSqlDateOpt(s: string | undefined) : string | undef
 }
 
 export function toOptInt(s: string | undefined): number | undefined {
-  if( s == undefined ){
+  if (s == undefined) {
     return undefined;
   } else {
     return parseInt(s);

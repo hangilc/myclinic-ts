@@ -1,7 +1,29 @@
-import type { Charge, Meisai, Patient, Payment } from "myclinic-model";
+import type { Charge, Meisai, Payment } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
+
+export function gendogakuOfKubun(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouKingaku: number): number   {
+  switch (kubun) {
+    case "ア":
+    case "現役並みⅢ": return calc(252600, iryouKingaku, 842000, 0.01);
+    case "イ":
+    case "現役並みⅡ": return calc(167400, iryouKingaku, 558000, 0.01);
+    case "ウ":
+    case "現役並みⅠ": return calc(80100, iryouKingaku, 267000, 0.01);
+    case "エ": return 57600;
+    case "オ":
+    case "オ（境）": return 35400;
+    case "一般Ⅱ": return Math.min(18000, calc(6000, iryouKingaku, 30000, 0.10)); // 配慮措置（令和７年９月30日まで）
+    case "一般Ⅰ":
+    case "一般": return 18000;
+    case "低所得Ⅱ":
+    case "低所得Ⅰ":
+    case "低所得Ⅰ（老福）":
+    case "低所得Ⅰ（境）": return 8000;
+    default: throw new Error("Cannot handle kubun: " + kubun);
+  }
+}
 
 export async function gendogaku(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouhi: () => Promise<number>): Promise<number | undefined> {
   switch (kubun) {

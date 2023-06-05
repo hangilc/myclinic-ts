@@ -1,6 +1,6 @@
 import { Shahokokuho, VisitEx, type Kouhi, type Koukikourei } from "myclinic-model";
 
-export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
+function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
   if (hoken instanceof Shahokokuho) {
     if (hoken.koureiStore > 0) {
       return hoken.koureiStore;
