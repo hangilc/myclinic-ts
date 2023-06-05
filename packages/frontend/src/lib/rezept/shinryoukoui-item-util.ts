@@ -147,7 +147,11 @@ function resolveConductShinryouKouhi(shinryou: ConductShinryouEx, visit: Visit):
 }
 
 function commentsOfShinryou(shinryou: ShinryouEx): RezeptComment[] {
-  return shinryou.asShinryou().comments;
+  const comms = shinryou.asShinryou().comments;
+  if( comms.length > 0 ){
+    console.log("comms", comms);
+  }
+  return comms;
 }
 
 function commentsOfConductShinryou(shinryou: ConductShinryouEx): RezeptComment[] {

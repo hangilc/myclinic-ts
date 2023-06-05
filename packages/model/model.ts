@@ -1,4 +1,4 @@
-import { castList, castNumber, castString } from "./cast";
+import { castList, castNumber, castOption, castOptionUndefined, castString } from "./cast";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
@@ -185,10 +185,10 @@ export class RezeptComment {
 
   static cast(arg: any): RezeptComment {
     return new RezeptComment(
-      castNumber(arg.code),
+      castNumber(parseInt(arg.code)),
       castString(arg.text),
-      castString(arg.shikibetsucode),
-    )
+      castOptionUndefined<string>(castString)(arg.shikibetsucode),
+    );
   }
 
   static isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
@@ -257,6 +257,7 @@ export class Visit {
   get comments(): RezeptComment[] {
     const comm = this.memoAsJson()["comments"];
     if( comm ){
+      console.log("comments json", comm);
       return comm.map(RezeptComment.cast);
     } else {
       return [];
@@ -729,6 +730,7 @@ export class ShinryouMemo {
       return [];
     } else {
       try {
+        console.log("comms", comms);
         return castList(RezeptComment.cast)(comms);
       } catch (ex) {
         console.error("Invalid comments: ", comms);

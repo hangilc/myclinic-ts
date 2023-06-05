@@ -67,9 +67,9 @@ export class RezeptContext {
       // const shinryouDataList = cvtVisitsToShinryouDataList(visitExList, kouhiIdList);
       // const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
       // const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
-      shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
-      iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
-      kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
+      // shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
+      // iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
+      // kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => tenCol.add(dl.負担区分, dl.点数! * dl.回数));
       rows.push(await this.createレセプト共通レコード(
         serial++, shahokokuho, koukikourei, kouhiList, visits));
       if (shahokokuho || koukikourei) {
