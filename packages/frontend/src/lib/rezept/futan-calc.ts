@@ -28,7 +28,7 @@ interface KouhiProcessorArg {
 type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
 
 class KouhiData {
-  houbetsu: number; 
+  houbetsu: number;
   processor: KouhiProcessor;
   isNoFutan: boolean = false;
 
@@ -44,18 +44,22 @@ class KouhiData {
 }
 
 function noFutanKouhiData(houbetsu: number): KouhiData {
-  const d = new KouhiData(houbetsu, process);
+  const process: (arg: KouhiProcessorArg) => KouhiCover = ({ kakari }: KouhiProcessorArg) => ({ kakari, patientCharge: 0 });
+  const data = new KouhiData(houbetsu, process);
+  data.isNoFutan = true;
+  return data;
 }
-const NoFutanKouhi: KouhiData = new KouhiData(({ kakari }: KouhiProcessorArg) => ({ kakari, patientCharge: 0 }))
-  .modify(d => d.isNoFutan = true)
+const HibakushaNoKo: KouhiData = noFutanKouhiData(82);
 
-const HibakushaNoKo: KouhiData = NoFutanKouhi;
-
-function applyGendogaku(charge: number, prevCharge: number, gendogaku: number): [number, true | undefined] {
-  if (charge + prevCharge > gendogaku) {
-    return [gendogaku - prevCharge, true]
-  } else {
+function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, true | undefined] {
+  if (gendogaku === undefined) {
     return [charge, undefined];
+  } else {
+    if (charge + prevCharge > gendogaku) {
+      return [gendogaku - prevCharge, true]
+    } else {
+      return [charge, undefined];
+    }
   }
 }
 
@@ -68,22 +72,27 @@ function taikiosenProcessor(gendogaku: number): KouhiData {
       gendogakuReached,
     }
   };
-  return new KouhiData(processor);
+  return new KouhiData(82, processor);
 }
 
-const MaruAoFutanNashi: KouhiData = NoFutanKouhi;
+const MaruAoNoFutan: KouhiData = noFutanKouhiData(89)
 
 function processHoken(
   totalTen: number,
   futanWari: number,
   gendogaku: number | undefined,
-  accPatientCharge: number
+  prevPatientCharge: number
 ): HokenCover {
-  let patientCharge: number = totalTen * futanWari;
+  const [patientCharge, gendogakuReached] = applyGendogaku(
+    totalTen * futanWari,
+    prevPatientCharge,
+    gendogaku
+  );
   return {
     kakari: totalTen * 10,
     patientCharge,
     futanWari,
+    gendogakuReached,
   }
 }
 
@@ -91,24 +100,38 @@ export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 export type TotalCover = Map<負担区分コードCode, [HokenCover | undefined, KouhiCover[]]>;
 
 function prevPatientChargeOf(code: "H" | "0" | "1" | "2" | "3" | "4", totalCover: TotalCover): number {
-  for(let futanCode of totalCover.keys()){
-    if( futanCode.includes(code) ){
+  let result = 0;
+  for (let futanCode of totalCover.keys()) {
+    if (futanCode.includes(code)) {
       const [hokenCover, kouhiCovers] = totalCover.get(futanCode)!;
-      return (hokenCover?.patientCharge ?? 0) +
+      result += (hokenCover?.patientCharge ?? 0) +
         kouhiCovers.reduce((acc, ele) => acc + (ele?.patientCharge ?? 0), 0);
     }
   }
+  return result;
 }
 
 export function calcFutanOne(
   futanWari: number | undefined,
   shotokuKubun: ShotokuKubun | undefined,
-  kouhiList: KouhiProcessor[],
+  kouhiList: KouhiData[],
   totalTens: Map<負担区分コードCode, number>,
   prevCover: TotalCover | undefined,
 ): TotalCover {
+  const totalCover: TotalCover = new Map();
   const futanKubuns: 負担区分コードCode[] = sortFutanKubun(Array.from(totalTens.keys()));
-  throw new Error("Not implemented");
+  for (let futanKubun of futanKubuns) {
+    let hokenCover: HokenCover | undefined = undefined;
+    const kouhiCovers: KouhiCover[] = [];
+    const totalTen = totalTens.get(futanKubun)!;
+    if (futanKubun.includes("H")) {
+      if (futanWari !== undefined) {
+        throw new Error("Cannot find futanwari");
+      }
+      hokenCover = processHoken()
+    }
+  }
+  return totalCover;
 }
 
 export function calcFutan(

@@ -3,7 +3,10 @@ import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
 
-export function gendogakuOfKubun(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouKingaku: number): number   {
+export function gendogakuOfKubun(
+  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
+  iryouKingaku: number
+): number {
   switch (kubun) {
     case "ア":
     case "現役並みⅢ": return calc(252600, iryouKingaku, 842000, 0.01);
@@ -21,6 +24,7 @@ export function gendogakuOfKubun(kubun: LimitApplicationCertificateClassificatio
     case "低所得Ⅰ":
     case "低所得Ⅰ（老福）":
     case "低所得Ⅰ（境）": return 8000;
+    case "ext国公費": return kuniKouhiHeiyouGendogaku(iryouKingaku);
     default: throw new Error("Cannot handle kubun: " + kubun);
   }
 }
@@ -31,7 +35,7 @@ export const KuniKouhiHoubetsu = [
 
 export function isKuniKouhi(houbetsu: number): boolean {
   // exclude 51, 52, 54
-  if( [51, 52, 54].includes(houbetsu) ){
+  if ([51, 52, 54].includes(houbetsu)) {
     return false;
   } else {
     return KuniKouhiHoubetsu.includes(houbetsu);
@@ -40,8 +44,8 @@ export function isKuniKouhi(houbetsu: number): boolean {
 
 export function isKuniKouhiOfHeiyou(houbetsuList: number[]): boolean {
   // 公費併用の場合は、一つでも国公費ならば、国公費で限度額計算
-  for(let h of houbetsuList){
-    if( isKuniKouhi(h) ){
+  for (let h of houbetsuList) {
+    if (isKuniKouhi(h)) {
       return true;
     }
   }
