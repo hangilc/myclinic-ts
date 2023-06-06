@@ -124,11 +124,12 @@ export function calcFutanOne(
     let hokenCover: HokenCover | undefined = undefined;
     const kouhiCovers: KouhiCover[] = [];
     const totalTen = totalTens.get(futanKubun)!;
+    const ks = kouhiListOfKubun(futanKubun, kouhiList);
     if (futanKubun.includes("H")) {
       if (futanWari !== undefined) {
         throw new Error("Cannot find futanwari");
       }
-      hokenCover = processHoken(totalTen, futanWari, )
+      hokenCover = processHoken(totalTen, futanWari,)
     }
   }
   return totalCover;
@@ -155,13 +156,13 @@ function sortFutanKubun(kubuns: 負担区分コードCode[]): 負担区分コー
   return kubuns;
 }
 
-function kubunToKouhiList(kubun: 負担区分コードCode, kouhiList: KouhiProcessor[]):
-  KouhiProcessor[] {
-  const ks: KouhiProcessor[] = [];
+function kouhiListOfKubun(kubun: 負担区分コードCode, allKouhiList: KouhiData[]):
+  KouhiData[] {
+  const ks: KouhiData[] = [];
   kubun.split("").forEach((k) => {
     if (k !== "H") {
       const i = parseInt(k);
-      ks.push(kouhiList[i - 1]);
+      ks.push(allKouhiList[i - 1]);
     }
   });
   return ks;
