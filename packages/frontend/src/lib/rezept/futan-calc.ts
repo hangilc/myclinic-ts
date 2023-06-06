@@ -128,7 +128,7 @@ export function calcFutanOne(
       if (futanWari !== undefined) {
         throw new Error("Cannot find futanwari");
       }
-      hokenCover = processHoken()
+      hokenCover = processHoken(totalTen, futanWari, )
     }
   }
   return totalCover;
