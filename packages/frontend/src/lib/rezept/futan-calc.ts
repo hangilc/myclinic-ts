@@ -11,29 +11,55 @@ interface Cover {
 
 interface HokenCover extends Cover {
   futanWari: number;
-  gendogakuReaches?: true;
+  gendogakuReached?: true;
 }
 
 interface KouhiCover extends Cover {
-
+  gendogakuReached?: true;
 }
 
 interface KouhiProcessorArg {
   kakari: number;
   totalTen: number;
   hokenFutanWari: number | undefined;
+  prevPatientCharge: number;
 }
 
 type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
 
-function hibakushaNoKo({ kakari }: KouhiProcessorArg): KouhiCover {
-  return { kakari, patientCharge: 0 };
+class KouhiData {
+  processor: KouhiProcessor;
+  isNoFutan: boolean = false;
+
+  constructor(processor: KouhiProcessor) {
+    this.processor = processor;
+  }
+
+  modify(modifier: (self: KouhiData) => void): KouhiData {
+    modifier(this);
+    return this;
+  }
 }
 
-function taikiosenProcessor(gendogaku: number): KouhiProcessor {
-  return (arg: KouhiArg) => {
+const HibakushaNoKo: KouhiData =
+  new KouhiData(({ kakari }: KouhiProcessorArg) => ({ kakari, patientCharge: 0 })).modify(d => d.isNoFutan = true);
 
-  }
+
+function applyGendogaku(charge: number, gendogaku: number): [number, true | undefined] {
+  
+}
+
+function taikiosenProcessor(gendogaku: number): KouhiData {
+  const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
+    let patientCharge = kakari;
+    let gendogakuReached: true | undefined = undefined;
+    return {
+      kakari,
+      patientCharge,
+      gendogakuReached,
+    }
+  };
+  return new KouhiData(processor);
 }
 
 class Slot {
@@ -91,11 +117,11 @@ export function calcFutan(
   kouhiList: KouhiProcessor[],
   totalTensList: Map<負担区分コードCode, number>[], // in chronological order (new one is before old one)
 ): TotalCover {
-  if( totalTensList.length === 0 ){
+  if (totalTensList.length === 0) {
     throw new Error("Empty total tens list");
   }
   let totalCover: TotalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[0], undefined);
-  for(let i = 1; i < totalTensList.length; i++){
+  for (let i = 1; i < totalTensList.length; i++) {
     totalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[i], totalCover)
   }
   return totalCover;
