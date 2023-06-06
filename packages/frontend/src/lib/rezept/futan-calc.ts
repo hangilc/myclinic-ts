@@ -28,10 +28,12 @@ interface KouhiProcessorArg {
 type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
 
 class KouhiData {
+  houbetsu: number; 
   processor: KouhiProcessor;
   isNoFutan: boolean = false;
 
-  constructor(processor: KouhiProcessor) {
+  constructor(houbetsu: number, processor: KouhiProcessor) {
+    this.houbetsu = houbetsu;
     this.processor = processor;
   }
 
@@ -41,6 +43,9 @@ class KouhiData {
   }
 }
 
+function noFutanKouhiData(houbetsu: number): KouhiData {
+  const d = new KouhiData(houbetsu, process);
+}
 const NoFutanKouhi: KouhiData = new KouhiData(({ kakari }: KouhiProcessorArg) => ({ kakari, patientCharge: 0 }))
   .modify(d => d.isNoFutan = true)
 

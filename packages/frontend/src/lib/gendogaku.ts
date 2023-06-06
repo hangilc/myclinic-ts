@@ -38,6 +38,16 @@ export function isKuniKouhi(houbetsu: number): boolean {
   }
 }
 
+export function isKuniKouhiOfHeiyou(houbetsuList: number[]): boolean {
+  // 公費併用の場合は、一つでも国公費ならば、国公費で限度額計算
+  for(let h of houbetsuList){
+    if( isKuniKouhi(h) ){
+      return true;
+    }
+  }
+  return false;
+}
+
 export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
   return calc(80100, iryouKingaku, 267000, 0.01);
 }
