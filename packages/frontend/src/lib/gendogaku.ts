@@ -25,6 +25,23 @@ export function gendogakuOfKubun(kubun: LimitApplicationCertificateClassificatio
   }
 }
 
+export const KuniKouhiHoubetsu = [
+  13, 14, 18, 19, 28, 29, 10, 11, 20, 16, 15, 21, 22, 17, 52, 23, 54, 51, 53, 79, 12
+]
+
+export function isKuniKouhi(houbetsu: number): boolean {
+  // exclude 51, 52, 54
+  if( [51, 52, 54].includes(houbetsu) ){
+    return false;
+  } else {
+    return KuniKouhiHoubetsu.includes(houbetsu);
+  }
+}
+
+export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
+  return calc(80100, iryouKingaku, 267000, 0.01);
+}
+
 export async function gendogaku(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouhi: () => Promise<number>): Promise<number | undefined> {
   switch (kubun) {
     case "ア":
