@@ -2,7 +2,9 @@ import type { Kouhi, Koukikourei, Shahokokuho } from "myclinic-model";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { 負担区分コードRev, type 負担区分コードCode } from "./codes";
 import { futanWariOfHoken } from "./util";
-import { gendogakuOfKubun } from "@/lib/gendogaku";
+import { gendogakuOfKubun, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
+import { optionFold } from "../option";
+import { filter } from "cypress/types/bluebird";
 
 interface Cover {
   kakari: number;
@@ -16,6 +18,56 @@ interface HokenCover extends Cover {
 
 interface KouhiCover extends Cover {
   gendogakuReached?: true;
+}
+
+function coverOptFold<T>(coverOpt: Cover | undefined, f: (c: Cover) => T, defaultValue: T): T {
+  if (coverOpt === undefined) {
+    return defaultValue;
+  } else {
+    return f(coverOpt);
+  }
+}
+
+type KouhiSelector = "1" | "2" | "3" | "4";
+type HokenSelector = "H" | KouhiSelector;
+
+function toKouhiSelector(index: number): KouhiSelector {
+  switch (index) {
+    case 0: return "1";
+    case 1: return "2";
+    case 2: return "3";
+    case 3: return "4";
+    default: throw new Error("Invalid kouhi index: should be one of 0, 1, 2, or 3.");
+  }
+}
+
+function kouhiSelectorToIndex(kouhiSelector: KouhiSelector): number {
+  return parseInt(kouhiSelector) - 1;
+}
+
+class Slot {
+  hokenCover: HokenCover | undefined = undefined;
+  kouhiCovers: KouhiCover[] = [];
+
+  coverOf(sel: HokenSelector): Cover | undefined {
+    if (sel === "H") {
+      return this.hokenCover;
+    } else {
+      return this.kouhiCovers[kouhiSelectorToIndex(sel)];
+    }
+  }
+
+  patientChargeOf(sel: HokenSelector): number {
+    return coverOptFold(this.coverOf(sel), c => c.patientCharge, 0);
+  }
+
+  kakariOf(sel: HokenSelector): number {
+    return coverOptFold(this.coverOf(sel), c => c.kakari, 0);
+  }
+
+  get patientCharge(): number {
+    return this.patientChargeOf("H") + this.kouhiCovers.reduce((acc, ele) => acc + ele.patientCharge, 0);
+  }
 }
 
 interface KouhiProcessorArg {
@@ -97,18 +149,23 @@ function processHoken(
 }
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
-export type TotalCover = Map<負担区分コードCode, [HokenCover | undefined, KouhiCover[]]>;
+export type TotalCover = Map<負担区分コードCode, Slot>;
 
-function prevPatientChargeOf(code: "H" | "0" | "1" | "2" | "3" | "4", totalCover: TotalCover): number {
-  let result = 0;
-  for (let futanCode of totalCover.keys()) {
-    if (futanCode.includes(code)) {
-      const [hokenCover, kouhiCovers] = totalCover.get(futanCode)!;
-      result += (hokenCover?.patientCharge ?? 0) +
-        kouhiCovers.reduce((acc, ele) => acc + (ele?.patientCharge ?? 0), 0);
-    }
+function reduceTotalCover(code: HokenSelector, f: (cover: Cover) => number, totalCover: TotalCover | undefined): number {
+  if (totalCover === undefined) {
+    return 0;
   }
-  return result;
+  return Array.from(totalCover.entries())
+    .reduce((acc, [_, slot]) => acc + optionFold(slot.coverOf(code), f, 0), 0);
+
+}
+
+function patientChargeOfTotalCover(code: HokenSelector, totalCover: TotalCover | undefined): number {
+  return reduceTotalCover(code, c => c.patientCharge, totalCover);
+}
+
+function kakariOfTotalCover(code: HokenSelector, totalCover: TotalCover | undefined): number {
+  return reduceTotalCover(code, c => c.kakari, totalCover);
 }
 
 export function calcFutanOne(
@@ -129,6 +186,13 @@ export function calcFutanOne(
       if (futanWari !== undefined) {
         throw new Error("Cannot find futanwari");
       }
+      let shotokuKubunExt: ShotokuKubun | "ext国公費" | undefined = shotokuKubun;
+      if (isKuniKouhiOfHeiyou(kouhiList.map(k => k.houbetsu))) {
+        shotokuKubunExt = "ext国公費";
+      }
+      const iryouKingaku = totalTen * 10 + prevCover?.
+      const gendogaku = gendogakuOfKubun(shotokuKubunExt,)
+      const prevPatientCharge = prevPatientChargeOf("H", prevCover);
       hokenCover = processHoken(totalTen, futanWari,)
     }
   }

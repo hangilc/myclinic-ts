@@ -3,6 +3,17 @@ import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
 
+export function gendogakuOfKubunOpt(
+  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
+  iryouKingaku: number
+): number | undefined {
+  if( kubun === undefined ){
+    return undefined;
+  } else {
+    gendogakuOfKubun(kubun, iryouKingaku);
+  }
+}
+
 export function gendogakuOfKubun(
   kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
   iryouKingaku: number
@@ -56,7 +67,10 @@ export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
   return calc(80100, iryouKingaku, 267000, 0.01);
 }
 
-export async function gendogaku(kubun: LimitApplicationCertificateClassificationFlagLabel, iryouhi: () => Promise<number>): Promise<number | undefined> {
+export async function gendogaku(
+  kubun: LimitApplicationCertificateClassificationFlagLabel, 
+  iryouhi: () => Promise<number>
+): Promise<number | undefined> {
   switch (kubun) {
     case "ア":
     case "現役並みⅢ": return calc(252600, await iryouhi(), 842000, 0.01);
