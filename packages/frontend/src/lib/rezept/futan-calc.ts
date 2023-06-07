@@ -88,7 +88,7 @@ function kouhiSelectorToIndex(kouhiSelector: KouhiSelector): number {
   return parseInt(kouhiSelector) - 1;
 }
 
-class Slot {
+export class Slot {
   hokenCover: HokenCover | undefined;
   kouhiCovers: (KouhiCover | undefined)[] = [];
 
