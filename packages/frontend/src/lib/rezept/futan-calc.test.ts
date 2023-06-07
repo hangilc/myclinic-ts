@@ -35,12 +35,60 @@ function dumpJson(arg: any): void {
 }
 
 describe("futan-calc", () => {
-  it("should calc simple", () => {
+  it("should handle single visit hoken only", () => {
     const covers = calcFutan(3, undefined, [], [mkTotalTensMap(["H", 300])]);
     expect(covers.patientCharge).equal(900);
     expect(summarize(covers)).deep.equal([["H", {
       hokenCover: { kakari: 3000, patientCharge: 900, futanWari: 3},
       kouhiCovers: [],
     }]])
+  });
+
+  it("should handle two visits hoken only", () => {
+    const covers = calcFutan(3, undefined, [], [
+      mkTotalTensMap(["H", 300]),
+      mkTotalTensMap(["H", 900]),
+    ]);
+    expect(covers.patientCharge).equal(3600);
+    expect(summarize(covers)).deep.equal([["H", {
+      hokenCover: { kakari: 12000, patientCharge: 3600, futanWari: 3},
+      kouhiCovers: [],
+    }]])
+  });
+
+  it("should handle gendogaku of ウ under 70", () => {
+    const covers = calcFutan(3, "ウ", [], [
+      mkTotalTensMap(["H", 100000])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 1000000, patientCharge: 87430, futanWari: 3, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
+
+  it("should handle gendogaku of ウ under 70 (case 2)", () => {
+    const covers = calcFutan(3, "ウ", [], [
+      mkTotalTensMap(["H", 80000])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 800000, patientCharge: 85430, futanWari: 3, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
+
+  it("should handle gendogaku of 現役並みⅢ", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [], [
+      mkTotalTensMap(["H", 100000])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 1000000, patientCharge: 254180, futanWari: 3, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
   })
 });

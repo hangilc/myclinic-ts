@@ -324,13 +324,14 @@ export function calcFutanOne(
     const slot = Slot.NullSlot(kouhiList.length);
     for (let sel of splitFutanKubun(futanKubun)) {
       if (sel === "H") {
-        const gendogaku = gendogakuOfKubunOpt(
-          resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun),
-          (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0)
-        );
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
         }
+        const resolvedShotukuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        const gendogaku = gendogakuOfKubunOpt(
+          resolvedShotukuKubun,
+          (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0)
+        );
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
       } else {
         const index = kouhiSelectorToIndex(sel);

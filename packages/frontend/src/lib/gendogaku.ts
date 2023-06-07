@@ -10,7 +10,7 @@ export function gendogakuOfKubunOpt(
   if( kubun === undefined ){
     return undefined;
   } else {
-    gendogakuOfKubun(kubun, iryouKingaku);
+    return gendogakuOfKubun(kubun, iryouKingaku);
   }
 }
 
@@ -93,10 +93,10 @@ export async function gendogaku(
 }
 
 function calc(threshold: number, iryouhi: number, offset: number, ratio: number): number {
-  if (iryouhi > offset) {
-    return threshold + (iryouhi - offset) * ratio;
-  } else {
+  if( iryouhi <= offset ){
     return threshold;
+  } else {
+    return threshold + (iryouhi - offset) * ratio;
   }
 }
 
