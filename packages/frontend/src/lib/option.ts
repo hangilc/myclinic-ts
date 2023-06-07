@@ -18,3 +18,14 @@ export function optionForEach<T>(opt: Option<T>, f: (arg: T) => void): void {
   }
 }
 
+export function mergeOptions<T>(a: Option<T>, b: Option<T>, merge: (a: T, b: T) => T): Option<T> {
+  if( a === undefined ){
+    return b;
+  } else {
+    if( b === undefined ){
+      return a;
+    } else {
+      return merge(a, b);
+    }
+  }
+}

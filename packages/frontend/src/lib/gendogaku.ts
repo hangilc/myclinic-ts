@@ -4,7 +4,7 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import api from "./api";
 
 export function gendogakuOfKubunOpt(
-  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
+  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
   iryouKingaku: number
 ): number | undefined {
   if( kubun === undefined ){

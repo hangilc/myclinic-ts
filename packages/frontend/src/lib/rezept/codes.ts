@@ -319,6 +319,29 @@ export function is負担区分コードName(k: string): k is 負担区分コー�
   return Object.keys(負担区分コード).includes(k);
 }
 
+export function is負担区分コードCode(k: string): k is 負担区分コードCode {
+  for(let code of Object.values(負担区分コード)) {
+    if( code === k ){
+      return true;
+    }
+  }
+  return false;
+}
+
+export function 負担区分コードNameOf(code: 負担区分コードCode): 負担区分コードName {
+  return 負担区分コードRev.get(code)!;
+}
+
+export function compare負担区分コードName(a: 負担区分コードName, b: 負担区分コードName): number {
+  if( a.startsWith("H") && !b.startsWith("H") ){
+    return 1;
+  }
+  if( !a.startsWith("H") && b.startsWith("H") ){
+    return -1;
+  }
+  return a.localeCompare(b);
+}
+
 export const 症状詳記区分コード = {
   "患者の主たる疾患（合併症を含む。）の診断根拠となった臨床症状": "01",
   "患者の主たる疾患（合併症を含む。）の診断根拠となった臨床症状の診察・検査所見": "02",
