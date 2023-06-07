@@ -1,5 +1,5 @@
 import { compare負担区分コードName, 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, Slot, TotalCover } from "./futan-calc";
+import { calcFutan, HibakushaNoKo, Slot, TotalCover } from "./futan-calc";
 
 function mkTotalTensMap(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -36,12 +36,15 @@ function dumpJson(arg: any): void {
 
 describe("futan-calc", () => {
   it("should handle single visit hoken only", () => {
-    const covers = calcFutan(3, undefined, [], [mkTotalTensMap(["H", 300])]);
-    expect(covers.patientCharge).equal(900);
+    const totalTen = 300;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [], [mkTotalTensMap(["H", totalTen])]);
+    expect(covers.patientCharge).equal(totalTen * futanWari);
     expect(summarize(covers)).deep.equal([["H", {
-      hokenCover: { kakari: 3000, patientCharge: 900, futanWari: 3},
+      hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
       kouhiCovers: [],
-    }]])
+    }]]);
+    expect(covers.patientCharge).equal(totalTen * futanWari);
   });
 
   it("should handle two visits hoken only", () => {
@@ -53,7 +56,8 @@ describe("futan-calc", () => {
     expect(summarize(covers)).deep.equal([["H", {
       hokenCover: { kakari: 12000, patientCharge: 3600, futanWari: 3},
       kouhiCovers: [],
-    }]])
+    }]]);
+    expect(covers.patientCharge).equal(3600);
   });
 
   it("should handle gendogaku of ウ under 70", () => {
@@ -65,7 +69,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 1000000, patientCharge: 87430, futanWari: 3, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(87430);
   });
 
   it("should handle gendogaku of ウ under 70 (case 2)", () => {
@@ -77,7 +82,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 800000, patientCharge: 85430, futanWari: 3, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(85430);
   });
 
   it("should handle gendogaku of ウ under 70 (case 3)", () => {
@@ -89,7 +95,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 266000, patientCharge: 79800, futanWari: 3},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(79800);
   });
 
   it("should handle gendogaku of 現役並みⅢ", () => {
@@ -101,7 +108,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 1000000, patientCharge: 254180, futanWari: 3, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(254180);
   });
 
   it("should handle gendogaku of 配慮措置", () => {
@@ -113,7 +121,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 80000, patientCharge: 11000, futanWari: 2, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(11000);
   });
 
   it("should handle gendogaku of 配慮措置 (case 2)", () => {
@@ -125,7 +134,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 130000, patientCharge: 16000, futanWari: 2, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(16000);
   });
 
   it("should handle gendogaku of 配慮措置 at birthday month", () => {
@@ -137,7 +147,8 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 100000, patientCharge: 9000, futanWari: 2, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(9000);
   });
 
   it("should handle gendogaku of 配慮措置 at birthday month (case 2)", () => {
@@ -149,6 +160,24 @@ describe("futan-calc", () => {
         hokenCover: { kakari: 40000, patientCharge: 7000, futanWari: 2, gendogakuReached: true},
         kouhiCovers: [],
       }]
-    ])
+    ]);
+    expect(covers.patientCharge).equal(7000);
+  });
+
+  it("should handle 公費 被爆者の子", () => {
+    const totalTen = 400;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [HibakushaNoKo], [
+      mkTotalTensMap(["H1", totalTen])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", { 
+        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
+        kouhiCovers: [
+          { kakari: 1200, patientCharge: 0, }
+        ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(0);
   });
 });

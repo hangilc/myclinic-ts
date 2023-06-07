@@ -2,7 +2,6 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 import { gendogakuOfHeiryoSochiBirthdayMonth, gendogakuOfKubunOpt, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
-import { OpSetFont } from "../drawer/op";
 
 interface Cover {
   kakari: number;
@@ -115,8 +114,20 @@ export class Slot {
   }
 
   get patientCharge(): number {
-    return (this.hokenCover?.patientCharge ?? 0) +
-      this.kouhiCovers.reduce((acc, ele) => acc + (ele?.patientCharge ?? 0), 0);
+    const ks: KouhiCover[] = [];
+    this.kouhiCovers.forEach(k => {
+      if( k !== undefined ){
+        ks.push(k);
+      }
+    })
+    if( ks.length === 0){
+      if( this.hokenCover === undefined ){
+        throw new Error("No hoken, no kouhi");
+      }
+      return this.hokenCover.patientCharge;
+    } else {
+      return ks[ks.length - 1].patientCharge;
+    }
   }
 
   merge(other: Slot): Slot {
@@ -165,7 +176,8 @@ function noFutanKouhiData(houbetsu: number): KouhiData {
   data.isNoFutan = true;
   return data;
 }
-const HibakushaNoKo: KouhiData = noFutanKouhiData(82);
+
+export const HibakushaNoKo: KouhiData = noFutanKouhiData(82);
 
 function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, true | undefined] {
   if (gendogaku === undefined) {
@@ -327,7 +339,9 @@ export function calcFutanOne(
   opt: CalcFutanOpt = {},
 ): TotalCover {
   const cur = mapTotalTens(totalTens, (futanKubun, totalTen, curTotalCover) => {
+    let kakari: number = totalTen * 10;
     const slot = Slot.NullSlot(kouhiList.length);
+    curTotalCover.setSlot(futanKubun, slot);
     for (let sel of splitFutanKubun(futanKubun)) {
       if (sel === "H") {
         if (futanWari === undefined) {
@@ -355,8 +369,20 @@ export function calcFutanOne(
           );
         }
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
+        kakari = slot.hokenCover.patientCharge;
       } else {
         const index = kouhiSelectorToIndex(sel);
+        const kouhiData = kouhiList[index];
+        console.log("kouhi index", index);
+        console.log("kouhi data", kouhiData);
+        const kouhiCover = kouhiData.processor({
+          kakari,
+          totalTen,
+          hokenFutanWari: futanWari,
+          prevPatientCharge: curTotalCover.patientChargeOf(sel) + prevCover.patientChargeOf(sel)
+        });
+        slot.kouhiCovers[index] = kouhiCover;
+        kakari = kouhiCover.patientCharge;
       }
     }
     return slot;
