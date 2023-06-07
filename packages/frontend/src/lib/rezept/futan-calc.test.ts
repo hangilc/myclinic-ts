@@ -80,6 +80,18 @@ describe("futan-calc", () => {
     ])
   });
 
+  it("should handle gendogaku of ウ under 70 (case 3)", () => {
+    const covers = calcFutan(3, "ウ", [], [
+      mkTotalTensMap(["H", 26600])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 266000, patientCharge: 79800, futanWari: 3},
+        kouhiCovers: [],
+      }]
+    ])
+  });
+
   it("should handle gendogaku of 現役並みⅢ", () => {
     const covers = calcFutan(3, "現役並みⅢ", [], [
       mkTotalTensMap(["H", 100000])
@@ -90,5 +102,17 @@ describe("futan-calc", () => {
         kouhiCovers: [],
       }]
     ])
-  })
+  });
+
+  it("should handle gendogaku of 配慮措置", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTotalTensMap(["H", 8000])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 80000, patientCharge: 11000, futanWari: 2, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
 });
