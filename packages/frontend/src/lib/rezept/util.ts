@@ -6,6 +6,7 @@ import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, Rez
 import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { ResultItem } from "onshi-result/ResultItem";
+import { calcAge } from "../calc-age";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -526,5 +527,24 @@ export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
     }
   } else {
     return hoken.futanWari;
+  }
+}
+
+export function isBirthdayMonth75(birthday: string, year: number, month: number): boolean {
+  const bd = new Date(birthday);
+  if( (bd.getMonth() + 1) === month ){
+    const endOfMonth = new Date(year, month - 1, kanjidate.lastDayOfMonth(year, month));
+    const age = calcAge(bd, endOfMonth);
+    if( age === 75 ){
+      if( bd.getDate() === 1 ){
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
   }
 }

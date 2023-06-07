@@ -115,4 +115,40 @@ describe("futan-calc", () => {
       }]
     ])
   });
+
+  it("should handle gendogaku of 配慮措置 (case 2)", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTotalTensMap(["H", 13000])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 130000, patientCharge: 16000, futanWari: 2, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
+
+  it("should handle gendogaku of 配慮措置 at birthday month", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTotalTensMap(["H", 10000])
+    ], { isBirthdayMonth75: true });
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 100000, patientCharge: 9000, futanWari: 2, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
+
+  it("should handle gendogaku of 配慮措置 at birthday month (case 2)", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTotalTensMap(["H", 4000])
+    ], { isBirthdayMonth75: true });
+    expect(summarize(covers)).deep.equal([
+      ["H", { 
+        hokenCover: { kakari: 40000, patientCharge: 7000, futanWari: 2, gendogakuReached: true},
+        kouhiCovers: [],
+      }]
+    ])
+  });
 });

@@ -1,7 +1,8 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { gendogakuOfKubunOpt, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
+import { gendogakuOfHeiryoSochiBirthdayMonth, gendogakuOfKubunOpt, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
+import { OpSetFont } from "../drawer/op";
 
 interface Cover {
   kakari: number;
@@ -114,7 +115,7 @@ export class Slot {
   }
 
   get patientCharge(): number {
-    return (this.hokenCover?.patientCharge ?? 0) + 
+    return (this.hokenCover?.patientCharge ?? 0) +
       this.kouhiCovers.reduce((acc, ele) => acc + (ele?.patientCharge ?? 0), 0);
   }
 
@@ -313,12 +314,17 @@ function resolveShotokuKubun(futanKubun: 負担区分コードCode, kouhiList: K
   }
 }
 
+export interface CalcFutanOpt {
+  isBirthdayMonth75?: true;
+}
+
 export function calcFutanOne(
   futanWari: number | undefined,
   shotokuKubun: ShotokuKubun | undefined,
   kouhiList: KouhiData[],
   totalTens: Map<負担区分コードCode, number>,
   prevCover: TotalCover,
+  opt: CalcFutanOpt = {},
 ): TotalCover {
   const cur = mapTotalTens(totalTens, (futanKubun, totalTen, curTotalCover) => {
     const slot = Slot.NullSlot(kouhiList.length);
@@ -328,10 +334,26 @@ export function calcFutanOne(
           throw new Error("Cannot find futanWari");
         }
         const resolvedShotukuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
-        const gendogaku = gendogakuOfKubunOpt(
-          resolvedShotukuKubun,
-          (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0)
-        );
+        const iryouKingaku = (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0);
+        let gendogaku: number | undefined = undefined;
+        if (opt.isBirthdayMonth75) {
+          if (resolvedShotukuKubun === "一般Ⅱ") {
+            gendogaku = gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku);
+          } else {
+            gendogaku = gendogakuOfKubunOpt(
+              resolvedShotukuKubun,
+              iryouKingaku
+            );
+            if( gendogaku !== undefined ){
+              gendogaku /= 2.0;
+            }
+          }
+        } else {
+          gendogaku = gendogakuOfKubunOpt(
+            resolvedShotukuKubun,
+            iryouKingaku
+          );
+        }
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
       } else {
         const index = kouhiSelectorToIndex(sel);
@@ -347,13 +369,15 @@ export function calcFutan(
   shotokuKubun: ShotokuKubun | undefined,
   kouhiList: KouhiData[],
   totalTensList: Map<負担区分コードCode, number>[], // in chronological order (new one is before old one)
+  opt: CalcFutanOpt = {},
 ): TotalCover {
   if (totalTensList.length === 0) {
     throw new Error("Empty total tens list");
   }
-  let totalCover: TotalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[0], TotalCover.NullTotalCover());
+  let totalCover: TotalCover =
+    calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[0], TotalCover.NullTotalCover(), opt);
   for (let i = 1; i < totalTensList.length; i++) {
-    totalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[i], totalCover)
+    totalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[i], totalCover, opt)
   }
   return totalCover;
 }

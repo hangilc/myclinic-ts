@@ -7,7 +7,7 @@ export function gendogakuOfKubunOpt(
   kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
   iryouKingaku: number
 ): number | undefined {
-  if( kubun === undefined ){
+  if (kubun === undefined) {
     return undefined;
   } else {
     return gendogakuOfKubun(kubun, iryouKingaku);
@@ -40,6 +40,10 @@ export function gendogakuOfKubun(
   }
 }
 
+export function gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku: number): number {
+  return Math.min(9000, calc(6000, iryouKingaku, 30000, 0.10)); // 配慮措置（令和７年９月30日まで）
+}
+
 export const KuniKouhiHoubetsu = [
   13, 14, 18, 19, 28, 29, 10, 11, 20, 16, 15, 21, 22, 17, 52, 23, 54, 51, 53, 79, 12
 ]
@@ -67,8 +71,8 @@ export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
   return calc(80100, iryouKingaku, 267000, 0.01);
 }
 
-export async function gendogaku(
-  kubun: LimitApplicationCertificateClassificationFlagLabel, 
+async function gendogaku(
+  kubun: LimitApplicationCertificateClassificationFlagLabel,
   iryouhi: () => Promise<number>
 ): Promise<number | undefined> {
   switch (kubun) {
@@ -93,7 +97,7 @@ export async function gendogaku(
 }
 
 function calc(threshold: number, iryouhi: number, offset: number, ratio: number): number {
-  if( iryouhi <= offset ){
+  if (iryouhi <= offset) {
     return threshold;
   } else {
     return threshold + (iryouhi - offset) * ratio;
