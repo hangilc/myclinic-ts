@@ -116,12 +116,12 @@ export class Slot {
   get patientCharge(): number {
     const ks: KouhiCover[] = [];
     this.kouhiCovers.forEach(k => {
-      if( k !== undefined ){
+      if (k !== undefined) {
         ks.push(k);
       }
     })
-    if( ks.length === 0){
-      if( this.hokenCover === undefined ){
+    if (ks.length === 0) {
+      if (this.hokenCover === undefined) {
         throw new Error("No hoken, no kouhi");
       }
       return this.hokenCover.patientCharge;
@@ -150,6 +150,8 @@ interface KouhiProcessorArg {
   totalTen: number;
   hokenFutanWari: number | undefined;
   prevPatientCharge: number;
+  gendogakuApplied: number | undefined;
+  isLastAppliction: boolean;  // is the last application of this kouhi in slot processing
 }
 
 type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
@@ -203,7 +205,32 @@ export function MaruToTaikiosen(gendogaku: number): KouhiData {
   return new KouhiData(82, processor);
 }
 
-export const MaruAoNoFutan: KouhiData = noFutanKouhiData(89)
+export const MaruAoNoFutan: KouhiData = noFutanKouhiData(89);
+
+export const MarutoNanbyou: KouhiData = new KouhiData(82,
+  ({
+    kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied
+  }: KouhiProcessorArg) => {
+    let patientCharge = kakari;
+    let gendogakuReached: true | undefined = undefined;
+    if (gendogakuApplied !== undefined) {
+      patientCharge = gendogakuApplied - prevPatientCharge;
+      if (patientCharge < 0) {
+        throw new Error("Cannot happen in MarutoNanbyou");
+      }
+      gendogakuReached = true;
+    } else {
+      if (hokenFutanWari === 3) {
+        patientCharge -= totalTen;
+      }
+    }
+    return {
+      kakari,
+      patientCharge,
+      gendogakuReached,
+    }
+  }
+);
 
 function processHoken(
   totalTen: number,
@@ -328,6 +355,10 @@ function resolveShotokuKubun(futanKubun: 負担区分コードCode, kouhiList: K
 
 export interface CalcFutanOpt {
   isBirthdayMonth75?: true;
+  gendogaku?: {
+    kingaku: number;
+    kouhiBangou: number; // 1-based
+  }
 }
 
 export function calcFutanOne(
@@ -342,7 +373,8 @@ export function calcFutanOne(
     let kakari: number = totalTen * 10;
     const slot = Slot.NullSlot(kouhiList.length);
     curTotalCover.setSlot(futanKubun, slot);
-    for (let sel of splitFutanKubun(futanKubun)) {
+    const selectors = splitFutanKubun(futanKubun);
+    for (let sel of selectors) {
       if (sel === "H") {
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
@@ -358,7 +390,7 @@ export function calcFutanOne(
               resolvedShotukuKubun,
               iryouKingaku
             );
-            if( gendogaku !== undefined ){
+            if (gendogaku !== undefined) {
               gendogaku /= 2.0;
             }
           }
@@ -377,7 +409,9 @@ export function calcFutanOne(
           kakari,
           totalTen,
           hokenFutanWari: futanWari,
-          prevPatientCharge: curTotalCover.patientChargeOf(sel) + prevCover.patientChargeOf(sel)
+          prevPatientCharge: curTotalCover.patientChargeOf(sel) + prevCover.patientChargeOf(sel),
+          gendogakuApplied: findGendo(opt, sel),
+          isLastAppliction: selectors[selectors.length - 1] === sel,
         });
         slot.kouhiCovers[index] = kouhiCover;
         kakari = kouhiCover.patientCharge;
@@ -404,6 +438,14 @@ export function calcFutan(
     totalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, totalTensList[i], totalCover, opt)
   }
   return totalCover;
+}
+
+function findGendo(opt: CalcFutanOpt, sel: KouhiSelector): number | undefined { // for Nanbyou
+  const kouhiBangou = parseInt(sel);
+  if( opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou ){
+    return opt.gendogaku.kingaku;
+  }
+  return undefined;
 }
 
 function sortFutanKubun(kubuns: 負担区分コードCode[]): 負担区分コードCode[] {

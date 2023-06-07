@@ -1,5 +1,5 @@
 import { compare負担区分コードName, 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MaruToTaikiosen, Slot, TotalCover } from "./futan-calc";
+import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MarutoNanbyou, MaruToTaikiosen, Slot, TotalCover } from "./futan-calc";
 
 function mkTotalTensMap(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -245,6 +245,40 @@ describe("futan-calc", () => {
         kouhiCovers: [
           { kakari: totalTensSum * futanWari, patientCharge: 6000, gendogakuReached: true }
         ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(6000);
+  });
+
+  it("should handle 公費 マル都 難病", () => {
+    const totalTen = 800;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MarutoNanbyou], [
+      mkTotalTensMap(["H1", totalTen]),
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", {
+        hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
+        kouhiCovers: [
+          { kakari: totalTen * futanWari, patientCharge: totalTen * 2 }
+        ]
+      }]
+    ]);
+    expect(covers.patientCharge).equal(totalTen * 2);
+  });
+
+  it("should handle 公費 マル都 難病 (gendo applied)", () => {
+    const totalTen = 4000;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MarutoNanbyou], [
+      mkTotalTensMap(["H1", totalTen]),
+    ], { gendogaku: { kingaku: 6000, kouhiBangou: 1}});
+    expect(summarize(covers)).deep.equal([
+      ["H1", {
+        hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
+        kouhiCovers: [
+          { kakari: totalTen * futanWari, patientCharge: 6000, gendogakuReached: true }
+        ]
       }]
     ]);
     expect(covers.patientCharge).equal(6000);
