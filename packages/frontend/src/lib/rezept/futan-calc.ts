@@ -191,18 +191,6 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
   }
 }
 
-// function taikiosenProcessor(gendogaku: number): KouhiData {
-//   const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
-//     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
-//     return {
-//       kakari,
-//       patientCharge,
-//       gendogakuReached,
-//     }
-//   };
-//   return new KouhiData(82, processor);
-// }
-
 export function MaruToTaikiosen(gendogaku: number): KouhiData {
   const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
@@ -385,8 +373,6 @@ export function calcFutanOne(
       } else {
         const index = kouhiSelectorToIndex(sel);
         const kouhiData = kouhiList[index];
-        console.log("kouhi index", index);
-        console.log("kouhi data", kouhiData);
         const kouhiCover = kouhiData.processor({
           kakari,
           totalTen,

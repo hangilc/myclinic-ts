@@ -231,4 +231,22 @@ describe("futan-calc", () => {
     ]);
     expect(covers.patientCharge).equal(6000);
   });
+
+  it("should handle 公費 大気汚染 限度額到達 multiple visits", () => {
+    const totalTens = [1000, 3000, 2000];
+    const totalTensSum = totalTens.reduce((a, b) => a + b, 0);
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
+      ...totalTens.map(totalTen => mkTotalTensMap(["H1", totalTen]))
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", { 
+        hokenCover: { kakari: totalTensSum * 10, patientCharge: totalTensSum * futanWari, futanWari},
+        kouhiCovers: [
+          { kakari: totalTensSum * futanWari, patientCharge: 6000, gendogakuReached: true }
+        ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(6000);
+  });
 });
