@@ -191,7 +191,19 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
   }
 }
 
-function taikiosenProcessor(gendogaku: number): KouhiData {
+// function taikiosenProcessor(gendogaku: number): KouhiData {
+//   const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
+//     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+//     return {
+//       kakari,
+//       patientCharge,
+//       gendogakuReached,
+//     }
+//   };
+//   return new KouhiData(82, processor);
+// }
+
+export function MaruToTaikiosen(gendogaku: number): KouhiData {
   const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
     return {
@@ -203,7 +215,7 @@ function taikiosenProcessor(gendogaku: number): KouhiData {
   return new KouhiData(82, processor);
 }
 
-const MaruAoNoFutan: KouhiData = noFutanKouhiData(89)
+export const MaruAoNoFutan: KouhiData = noFutanKouhiData(89)
 
 function processHoken(
   totalTen: number,

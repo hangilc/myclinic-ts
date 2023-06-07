@@ -1,5 +1,5 @@
 import { compare負担区分コードName, 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, HibakushaNoKo, Slot, TotalCover } from "./futan-calc";
+import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MaruToTaikiosen, Slot, TotalCover } from "./futan-calc";
 
 function mkTotalTensMap(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -179,5 +179,56 @@ describe("futan-calc", () => {
       }]
     ]);
     expect(covers.patientCharge).equal(0);
+  });
+
+  it("should handle 公費 マル青負担なし", () => {
+    const totalTen = 400;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MaruAoNoFutan], [
+      mkTotalTensMap(["H1", totalTen])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", { 
+        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
+        kouhiCovers: [
+          { kakari: 1200, patientCharge: 0, }
+        ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(0);
+  });
+
+  it("should handle 公費 大気汚染", () => {
+    const totalTen = 400;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
+      mkTotalTensMap(["H1", totalTen])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", { 
+        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
+        kouhiCovers: [
+          { kakari: 1200, patientCharge: 1200, }
+        ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(1200);
+  });
+
+  it("should handle 公費 大気汚染 限度額到達", () => {
+    const totalTen = 4000;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
+      mkTotalTensMap(["H1", totalTen])
+    ]);
+    expect(summarize(covers)).deep.equal([
+      ["H1", { 
+        hokenCover: { kakari: totalTen * 10, patientCharge: 12000, futanWari},
+        kouhiCovers: [
+          { kakari: 12000, patientCharge: 6000, gendogakuReached: true }
+        ],
+      }]
+    ]);
+    expect(covers.patientCharge).equal(6000);
   });
 });
