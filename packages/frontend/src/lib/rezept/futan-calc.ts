@@ -245,7 +245,7 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
       gendogakuReached,
     }
   },
-  d => d.hasGendogaku
+  d => d.hasGendogaku = true
 );
 
 function processHoken(
@@ -416,11 +416,13 @@ export function calcFutanOne(
 ): TotalCover {
   if (opt.debug) {
     console.log(`enter calcFutanOne, futanWari: ${futanWari}`);
+    console.log("kouhiList", kouhiList);
   }
   const cur = mapTotalTens(totalTens, (futanKubun, totalTen, curTotalCover) => {
     if (opt.debug) {
       console.log("futanKubun", 負担区分コードRev.get(futanKubun));
     }
+    const curKouhiList: KouhiData[] = kouhiListOfKubun(futanKubun, kouhiList);
     let kakari: number = totalTen * 10;
     const slot = Slot.NullSlot(kouhiList.length);
     curTotalCover.setSlot(futanKubun, slot);
@@ -430,7 +432,10 @@ export function calcFutanOne(
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
         }
-        const resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        if( resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover) ){
+          resolvedShotokuKubun = undefined;
+        }
         if (opt.debug) {
           console.log(`所得区分: ${resolvedShotokuKubun}`)
         }
@@ -541,4 +546,19 @@ function kouhiListOfKubun(kubun: 負担区分コードCode, allKouhiList: KouhiD
     }
   });
   return ks;
+}
+
+function hairyosochiNotApplicable(opt: CalcFutanOpt, kouhiList: KouhiData[], prevCover: TotalCover): boolean {
+  if( opt.marucho ){
+    return true;
+  }
+  for(let kouhi of kouhiList ){
+    if( kouhi.hasGendogaku ) {
+      return true;
+    }
+  }
+  if( prevCover.accHokenCover?.maruchoGendogakuReached ) {
+    return true;
+  }
+  return false;
 }

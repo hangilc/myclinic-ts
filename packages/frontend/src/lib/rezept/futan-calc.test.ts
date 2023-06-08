@@ -35,6 +35,12 @@ function dumpJson(arg: any): void {
 }
 
 describe("futan-calc", () => {
+  it("should sort futan kubun", () => {
+    let futanKubuns: 負担区分コードCode[] = ["1", "2"];
+    futanKubuns = sortFutanKubun(futanKubuns);
+    expect(futanKubuns).deep.equal(["2", "1"]);
+  })
+
   it("should handle single visit hoken only", () => {
     const totalTen = 300;
     const futanWari = 3;
@@ -334,12 +340,12 @@ describe("futan-calc", () => {
     expect(covers.patientCharge).equal(7000);
   });
 
-  it.only("should handle 難病 (case 2)", () => {
+  it("should handle 難病 (case 2)", () => {
     const totalTen = 9000;
     const futanWari = 2;
     const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
       mkTotalTensMap(["H1", 4000], ["H", 5000])
-    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }, debug: true});
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
     expect(summarize(covers)).deep.equal([
       ["H", {
         hokenCover: { kakari: 50000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
@@ -353,9 +359,4 @@ describe("futan-calc", () => {
     expect(covers.patientCharge).equal(13000);
   });
 
-  it("should sort futan kubun", () => {
-    let futanKubuns: 負担区分コードCode[] = ["1", "2"];
-    futanKubuns = sortFutanKubun(futanKubuns);
-    expect(futanKubuns).deep.equal(["2", "1"]);
-  })
 });
