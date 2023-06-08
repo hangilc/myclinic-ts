@@ -18,6 +18,7 @@ function mergeCovers(a: Cover, b: Cover): Cover {
 interface HokenCover extends Cover {
   futanWari: number;
   gendogakuReached?: true;
+  maruchoGendogakuReached?: 10000 | 20000 | undefined;
 }
 
 function mergeHokenCovers(a: HokenCover, b: HokenCover): HokenCover {
@@ -29,6 +30,16 @@ function mergeHokenCovers(a: HokenCover, b: HokenCover): HokenCover {
     ...cover,
     futanWari: a.futanWari,
     gendogakuReached: mergeOptions(a.gendogakuReached, b.gendogakuReached, (a, b) => a || b),
+    maruchoGendogakuReached: mergeOptions(
+      a.maruchoGendogakuReached,
+      b.maruchoGendogakuReached,
+      (a, b) => {
+        if (a !== b) {
+          throw new Error("Inconsistent マル長限度額");
+        }
+        return a;
+      }
+    )
   }
 }
 
@@ -36,7 +47,7 @@ interface KouhiCover extends Cover {
   gendogakuReached?: true;
 }
 
-function mergeKouhiCover(a: KouhiCover, b: KouhiCover): KouhiCover {
+function mergeKouhiCovers(a: KouhiCover, b: KouhiCover): KouhiCover {
   const cover = mergeCovers(a, b);
   return {
     ...cover,
@@ -136,7 +147,7 @@ export class Slot {
     }
     return new Slot(
       mergeOptions(this.hokenCover, other.hokenCover, mergeHokenCovers),
-      this.kouhiCovers.map((kc, index) => mergeOptions(kc, other.kouhiCovers[index], mergeKouhiCover)),
+      this.kouhiCovers.map((kc, index) => mergeOptions(kc, other.kouhiCovers[index], mergeKouhiCovers)),
     );
   }
 
@@ -151,7 +162,6 @@ interface KouhiProcessorArg {
   hokenFutanWari: number | undefined;
   prevPatientCharge: number;
   gendogakuApplied: number | undefined;
-  isLastAppliction: boolean;  // is the last application of this kouhi in slot processing
 }
 
 type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
@@ -181,6 +191,18 @@ function noFutanKouhiData(houbetsu: number): KouhiData {
 
 export const HibakushaNoKo: KouhiData = noFutanKouhiData(82);
 
+function fixedGendogakuKouhi(houbetsu: number, gendogaku: number): KouhiData {
+  const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
+    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+    return {
+      kakari,
+      patientCharge,
+      gendogakuReached,
+    }
+  };
+  return new KouhiData(houbetsu, processor);
+}
+
 function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, true | undefined] {
   if (gendogaku === undefined) {
     return [charge, undefined];
@@ -193,20 +215,15 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
   }
 }
 
+// マル都（大気汚染）
 export function MaruToTaikiosen(gendogaku: number): KouhiData {
-  const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
-    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
-    return {
-      kakari,
-      patientCharge,
-      gendogakuReached,
-    }
-  };
-  return new KouhiData(82, processor);
+  return fixedGendogakuKouhi(82, gendogaku);
 }
 
+// マル青
 export const MaruAoNoFutan: KouhiData = noFutanKouhiData(89);
 
+// マル都（難病）
 export const MarutoNanbyou: KouhiData = new KouhiData(82,
   ({
     kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied
@@ -268,9 +285,35 @@ export class TotalCover implements TotalCoverInterface {
     this.map.set(futanCode, slot);
   }
 
-  reduceByCode(code: HokenSelector, f: (cover: Cover) => number): number {
+  get accHokenCover(): HokenCover | undefined {
     return Array.from(this.map.entries())
-      .reduce((acc, [_, slot]) => acc + optionFold(slot.coverOf(code), f, 0), 0);
+      .reduce((acc: HokenCover | undefined, [_, slot]) => {
+        return mergeOptions(acc, slot.hokenCover, mergeHokenCovers);
+      }, undefined);
+  }
+
+  accKouhiCover(sel: KouhiSelector, kouhiList: KouhiData[]): KouhiCover | undefined {
+    const index = kouhiSelectorToIndex(sel);
+    return Array.from(this.map.entries())
+      .reduce((acc: KouhiCover | undefined, [_, slot]) => {
+        return mergeOptions(acc, slot.kouhiCovers[index], mergeKouhiCovers);
+      }, undefined);
+  }
+
+  reduceByCodeGeneric<T>(code: HokenSelector, f: (acc: T, cover: Cover) => T, init: T): T {
+    return Array.from(this.map.entries())
+      .reduce((acc, [_, slot]) => {
+        const cover = slot.coverOf(code);
+        if (cover) {
+          return f(acc, cover);
+        } else {
+          return acc;
+        }
+      }, init);
+  }
+
+  reduceByCode(code: HokenSelector, f: (cover: Cover) => number): number {
+    return this.reduceByCodeGeneric<number>(code, ((acc, ele) => acc + f(ele)), 0);
   }
 
   patientChargeOf(code: HokenSelector): number {
@@ -358,7 +401,8 @@ export interface CalcFutanOpt {
   gendogaku?: {
     kingaku: number;
     kouhiBangou: number; // 1-based
-  }
+  },
+  marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
 }
 
 export function calcFutanOne(
@@ -402,6 +446,21 @@ export function calcFutanOne(
         }
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
         kakari = slot.hokenCover.patientCharge;
+      } else if (opt.marucho) {
+        const maruchoGendo = opt.marucho;
+        const hokenCover = slot.hokenCover;
+        if (hokenCover === undefined) {
+          throw new Error("マル長を適用する保険がない");
+        }
+        const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
+        if (accHokenCover.maruchoGendogakuReached) {
+          hokenCover.patientCharge = 0;
+        } else {
+          const
+          if (accHokenCover.patientCharge > maruchoGendo) {
+            hokenCover.patientCharge = maruchoGendo - 
+          }
+        }
       } else {
         const index = kouhiSelectorToIndex(sel);
         const kouhiData = kouhiList[index];
@@ -411,7 +470,6 @@ export function calcFutanOne(
           hokenFutanWari: futanWari,
           prevPatientCharge: curTotalCover.patientChargeOf(sel) + prevCover.patientChargeOf(sel),
           gendogakuApplied: findGendo(opt, sel),
-          isLastAppliction: selectors[selectors.length - 1] === sel,
         });
         slot.kouhiCovers[index] = kouhiCover;
         kakari = kouhiCover.patientCharge;
@@ -442,7 +500,7 @@ export function calcFutan(
 
 function findGendo(opt: CalcFutanOpt, sel: KouhiSelector): number | undefined { // for Nanbyou
   const kouhiBangou = parseInt(sel);
-  if( opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou ){
+  if (opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou) {
     return opt.gendogaku.kingaku;
   }
   return undefined;

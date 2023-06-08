@@ -387,14 +387,6 @@ export function calcFutanKubun(hasHoken: boolean, visitKouhiIds: number[], kouhi
   }
 }
 
-// export function calcRezeptCount(visits: Visit[]): number {
-//   function count(visit: Visit): number {
-//     return (visitHasHoken(visit) ? 1 : 0) +
-//       visit.kouhiIdList.length;
-//   }
-//   return visits.reduce((acc, ele) => acc + count(ele), 0);
-// }
-
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);
   d = kanjidate.addMonths(d, 1);
