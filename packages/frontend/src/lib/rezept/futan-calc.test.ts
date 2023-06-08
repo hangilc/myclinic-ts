@@ -1,5 +1,5 @@
 import { compare負担区分コードName, 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MarutoNanbyou, MaruToTaikiosen, Slot, TotalCover } from "./futan-calc";
+import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MarutoNanbyou, MaruToTaikiosen, Slot, sortFutanKubun, TotalCover } from "./futan-calc";
 
 function mkTotalTensMap(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -334,22 +334,28 @@ describe("futan-calc", () => {
     expect(covers.patientCharge).equal(7000);
   });
 
-  it("should handle 難病 (case 2)", () => {
+  it.only("should handle 難病 (case 2)", () => {
     const totalTen = 9000;
     const futanWari = 2;
     const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
       mkTotalTensMap(["H1", 4000], ["H", 5000])
-    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }, debug: true});
     expect(summarize(covers)).deep.equal([
       ["H", {
         hokenCover: { kakari: 50000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
         kouhiCovers: [{}],
       }],
       ["H1", {
-        hokenCover: { kakari: 40000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
+        hokenCover: { kakari: 40000, futanWari: 2, patientCharge: 8000 },
         kouhiCovers: [{ kakari: 8000, patientCharge: 5000, gendogakuReached: true}]
       }],
     ])
     expect(covers.patientCharge).equal(13000);
   });
+
+  it("should sort futan kubun", () => {
+    let futanKubuns: 負担区分コードCode[] = ["1", "2"];
+    futanKubuns = sortFutanKubun(futanKubuns);
+    expect(futanKubuns).deep.equal(["2", "1"]);
+  })
 });

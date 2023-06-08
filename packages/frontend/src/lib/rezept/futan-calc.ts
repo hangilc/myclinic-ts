@@ -2,6 +2,7 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 import { gendogakuOfHeiryoSochiBirthdayMonth, gendogakuOfKubunOpt, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
+import { resolve } from "path";
 
 interface Cover {
   kakari: number;
@@ -170,37 +171,20 @@ class KouhiData {
   houbetsu: number;
   processor: KouhiProcessor;
   isNoFutan: boolean = false;
+  hasGendogaku: boolean = false;
 
-  constructor(houbetsu: number, processor: KouhiProcessor) {
+  constructor(houbetsu: number, processor: KouhiProcessor, modifier: (d: KouhiData) => void = _ => { }) {
     this.houbetsu = houbetsu;
     this.processor = processor;
-  }
-
-  modify(modifier: (self: KouhiData) => void): KouhiData {
     modifier(this);
-    return this;
   }
 }
 
-function noFutanKouhiData(houbetsu: number): KouhiData {
-  const process: (arg: KouhiProcessorArg) => KouhiCover = ({ kakari }: KouhiProcessorArg) => ({ kakari, patientCharge: 0 });
-  const data = new KouhiData(houbetsu, process);
-  data.isNoFutan = true;
-  return data;
-}
-
-export const HibakushaNoKo: KouhiData = noFutanKouhiData(82);
-
-function fixedGendogakuKouhi(houbetsu: number, gendogaku: number): KouhiData {
-  const processor = ({ kakari, prevPatientCharge }: KouhiProcessorArg) => {
-    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
-    return {
-      kakari,
-      patientCharge,
-      gendogakuReached,
-    }
-  };
-  return new KouhiData(houbetsu, processor);
+function noFutanKouhiProcessor({ kakari }: KouhiProcessorArg): KouhiCover {
+  return {
+    kakari,
+    patientCharge: 0,
+  }
 }
 
 function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, true | undefined] {
@@ -215,13 +199,27 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
   }
 }
 
+function mkGendogakuLimitProcessor(gendogaku: number): KouhiProcessor {
+  return ({ kakari, prevPatientCharge }: KouhiProcessorArg): KouhiCover => {
+    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+    return {
+      kakari,
+      patientCharge,
+      gendogakuReached,
+    }
+  }
+}
+
+export const HibakushaNoKo: KouhiData = new KouhiData(82, noFutanKouhiProcessor, d => d.isNoFutan = true);
+
+
 // マル都（大気汚染）
-export function MaruToTaikiosen(gendogaku: number): KouhiData {
-  return fixedGendogakuKouhi(82, gendogaku);
+export function MaruToTaikiosen(gendogaku: number): KouhiData {;
+  return new KouhiData(82, mkGendogakuLimitProcessor(gendogaku), d => d.hasGendogaku = true)
 }
 
 // マル青
-export const MaruAoNoFutan: KouhiData = noFutanKouhiData(89);
+export const MaruAoNoFutan: KouhiData = new KouhiData(89, noFutanKouhiProcessor, d => d.isNoFutan = true);
 
 // マル都（難病）
 export const MarutoNanbyou: KouhiData = new KouhiData(82,
@@ -246,7 +244,8 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
       patientCharge,
       gendogakuReached,
     }
-  }
+  },
+  d => d.hasGendogaku
 );
 
 function processHoken(
@@ -352,6 +351,7 @@ function mapTotalTens(
 ): TotalCover {
   const totalCover = new TotalCover();
   const futanKubuns: 負担区分コードCode[] = sortFutanKubun(Array.from(totalTens.keys()));
+  console.log(futanKubuns);
   for (let futanKubun of futanKubuns) {
     const slot = f(futanKubun, totalTens.get(futanKubun)!, totalCover);
     totalCover.setSlot(futanKubun, slot);
@@ -403,6 +403,7 @@ export interface CalcFutanOpt {
     kouhiBangou: number; // 1-based
   },
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
+  debug?: boolean;
 }
 
 export function calcFutanOne(
@@ -413,8 +414,13 @@ export function calcFutanOne(
   prevCover: TotalCover,
   opt: CalcFutanOpt = {},
 ): TotalCover {
+  if (opt.debug) {
+    console.log(`enter calcFutanOne, futanWari: ${futanWari}`);
+  }
   const cur = mapTotalTens(totalTens, (futanKubun, totalTen, curTotalCover) => {
-    // console.log("futanKubun", 負担区分コードRev.get(futanKubun));
+    if (opt.debug) {
+      console.log("futanKubun", 負担区分コードRev.get(futanKubun));
+    }
     let kakari: number = totalTen * 10;
     const slot = Slot.NullSlot(kouhiList.length);
     curTotalCover.setSlot(futanKubun, slot);
@@ -424,15 +430,18 @@ export function calcFutanOne(
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
         }
-        const resolvedShotukuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        const resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        if (opt.debug) {
+          console.log(`所得区分: ${resolvedShotokuKubun}`)
+        }
         const iryouKingaku = (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0);
         let gendogaku: number | undefined = undefined;
         if (opt.isBirthdayMonth75) {
-          if (resolvedShotukuKubun === "一般Ⅱ") {
+          if (resolvedShotokuKubun === "一般Ⅱ") {
             gendogaku = gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku);
           } else {
             gendogaku = gendogakuOfKubunOpt(
-              resolvedShotukuKubun,
+              resolvedShotokuKubun,
               iryouKingaku
             );
             if (gendogaku !== undefined) {
@@ -441,9 +450,12 @@ export function calcFutanOne(
           }
         } else {
           gendogaku = gendogakuOfKubunOpt(
-            resolvedShotukuKubun,
+            resolvedShotokuKubun,
             iryouKingaku
           );
+        }
+        if (opt.debug) {
+          console.log(`限度額: ${gendogaku}`);
         }
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
         kakari = slot.hokenCover.patientCharge;
@@ -508,8 +520,14 @@ function findGendo(opt: CalcFutanOpt, sel: KouhiSelector): number | undefined { 
   return undefined;
 }
 
-function sortFutanKubun(kubuns: 負担区分コードCode[]): 負担区分コードCode[] {
-  kubuns.sort(kubun => -負担区分コードRev.get(kubun)!.length);
+export function sortFutanKubun(kubuns: 負担区分コードCode[]): 負担区分コードCode[] {
+  console.log("before", kubuns);
+  kubuns.sort((a, b) => {
+    const na = 負担区分コードRev.get(a)!;
+    const nb = 負担区分コードRev.get(b)!;
+    return -(na.length - nb.length);
+  });
+  console.log("after", kubuns);
   return kubuns;
 }
 
