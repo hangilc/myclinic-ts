@@ -414,6 +414,7 @@ export function calcFutanOne(
   opt: CalcFutanOpt = {},
 ): TotalCover {
   const cur = mapTotalTens(totalTens, (futanKubun, totalTen, curTotalCover) => {
+    // console.log("futanKubun", 負担区分コードRev.get(futanKubun));
     let kakari: number = totalTen * 10;
     const slot = Slot.NullSlot(kouhiList.length);
     curTotalCover.setSlot(futanKubun, slot);
@@ -446,19 +447,20 @@ export function calcFutanOne(
         }
         slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
         kakari = slot.hokenCover.patientCharge;
-      } else if (opt.marucho) {
-        const maruchoGendo = opt.marucho;
-        const hokenCover = slot.hokenCover;
-        if (hokenCover === undefined) {
-          throw new Error("マル長を適用する保険がない");
-        }
-        const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
-        if (accHokenCover.maruchoGendogakuReached) {
-          hokenCover.patientCharge = 0;
-        } else {
-          const
-          if (accHokenCover.patientCharge > maruchoGendo) {
-            hokenCover.patientCharge = maruchoGendo - 
+        if (opt.marucho) {
+          const maruchoGendo = opt.marucho;
+          const hokenCover = slot.hokenCover;
+          if (hokenCover === undefined) {
+            throw new Error("マル長を適用する保険がない");
+          }
+          const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
+          if (accHokenCover.maruchoGendogakuReached) {
+            hokenCover.patientCharge = 0;
+          } else {
+            if (accHokenCover.patientCharge > maruchoGendo) {
+              hokenCover.patientCharge = maruchoGendo - prevCover.patientChargeOf("H");
+              hokenCover.maruchoGendogakuReached = maruchoGendo;
+            }
           }
         }
       } else {

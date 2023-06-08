@@ -283,4 +283,73 @@ describe("futan-calc", () => {
     ]);
     expect(covers.patientCharge).equal(6000);
   });
+
+  it("should handle マル長", () => {
+    const totalTen = 28000;
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [], [
+      mkTotalTensMap(["H", totalTen]),
+    ], { marucho: 10000 });
+    expect(summarize(covers)).deep.equal([
+      ["H", {
+        hokenCover: { kakari: totalTen * 10, patientCharge: 10000, futanWari, maruchoGendogakuReached: 10000},
+        kouhiCovers: []
+      }]
+    ]);
+    expect(covers.patientCharge).equal(10000);
+  });
+
+  it("should handle マル長 (case 2: multiple visits)", () => {
+    const totalTens = [28000, 1000];
+    const totalTen = totalTens.reduce((a, b) => a + b);
+    const futanWari = 3;
+    const covers = calcFutan(futanWari, undefined, [], [
+      ...totalTens.map(totalTen => mkTotalTensMap(["H", totalTen]))
+    ], { marucho: 10000 });
+    expect(summarize(covers)).deep.equal([
+      ["H", {
+        hokenCover: { kakari: totalTen * 10, patientCharge: 10000, futanWari, maruchoGendogakuReached: 10000},
+        kouhiCovers: []
+      }]
+    ]);
+    expect(covers.patientCharge).equal(10000);
+  });
+
+  it("should handle 難病", () => {
+    const totalTen = 4000;
+    const futanWari = 2;
+    const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
+      mkTotalTensMap(["H", 1000], ["H1", 3000])
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
+    expect(summarize(covers)).deep.equal([
+      ["H", {
+        hokenCover: { kakari: 10000, futanWari: 2, patientCharge: 2000 },
+        kouhiCovers: [{}],
+      }],
+      ["H1", {
+        hokenCover: { kakari: 30000, futanWari: 2, patientCharge: 6000 },
+        kouhiCovers: [{ kakari: 6000, patientCharge: 5000, gendogakuReached: true}]
+      }],
+    ])
+    expect(covers.patientCharge).equal(7000);
+  });
+
+  it("should handle 難病 (case 2)", () => {
+    const totalTen = 9000;
+    const futanWari = 2;
+    const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
+      mkTotalTensMap(["H1", 4000], ["H", 5000])
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
+    expect(summarize(covers)).deep.equal([
+      ["H", {
+        hokenCover: { kakari: 50000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
+        kouhiCovers: [{}],
+      }],
+      ["H1", {
+        hokenCover: { kakari: 40000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
+        kouhiCovers: [{ kakari: 8000, patientCharge: 5000, gendogakuReached: true}]
+      }],
+    ])
+    expect(covers.patientCharge).equal(13000);
+  });
 });
