@@ -230,35 +230,31 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
 //   }
 // }
 
-interface CalcHokenCoverContext {
-  kakari: number;
-  gendogakuAlreadyReached: boolean;
-  gendogaku: number | undefined;
-  prevPatientCharge: number;
+export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
+
+interface ProcessHokenContext {
+  totalTen: number;
+  futanWari: number;
+  gendogakuReached: number;
+  shotokuKubun: ShotokuKubun | undefined;
 }
 
-function calcHokenCover({ kakari, gendogakuAlreadyReached, gendogaku, prevPatientCharge }: CalcHokenCoverContext): Cover {
-  if( gendogakuAlreadyReached ){
-    return {
-      kakari,
-      patientCharge: 0,
-      gendogakuReached: false,
-    }
+
+function processHoken({
+  totalTen, futanWari, gendogakuReached, shotokuKubun,
+}: ProcessHokenContext}): Cover {
+  const kakari = totalTen * 10;
+  if( gendogakuReached ){
+    return { kakari, patientCharge: 0, gendogakuReached: false };
   } else {
-    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
-    return { kakari, patientCharge, gendogakuReached };
+    if( shotokuKubun === undefined ){
+      return { kakari, patientCharge: totalTen * futanWari, gendogakuReached: false };
+    } else {
+      
+    }
   }
 }
 
-interface ProcessHokenContext {
-  
-}
-
-function processHoken(ctx: ProcessHokenContext): Cover {
-
-}
-
-export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 export interface TotalCoverInterface {
   patientChargeOf(code: HokenSelector): number;
   kakariOf(code: HokenSelector): number;
