@@ -232,41 +232,62 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
+export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
+
 interface ProcessHokenWithFixedShotokuKubunContext {
   totalTen: number;
   futanWari: number;
   gendogakuReached: boolean;
-  shotokuKubun: ShotokuKubun | undefined | "ext国公費";
+  shotokuKubun: ShotokuKubun | undefined;
   iryouKingaku: number;
   prevPatientCharge: number;
+  hasKuniKouhi: boolean;
   isTasuuGaitou: boolean;
+  shotokuKubunGroup?: ShotokuKubunGroup;
 }
 
+function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): ShotokuKubun {
+  switch (shotokuKubunGroup) {
+    case "若年": return "ウ";
+    case "高齢受給": return "一般";
+    case "後期高齢": return "一般Ⅰ";
+  }
+}
 
 function processHokenWithFixedShotokuKubun({
-  totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge, isTasuuGaitou
+  totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge,
+  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
-  function gendo(): number {
-    if( isTasuuGaitou ){
-      return gendogakuTasuuGaitouOfKubun(shotokuKubun);
+  function gendo(): number | undefined {
+    if (hasKuniKouhi) {
+      let sk: ShotokuKubun;
+      if (shotokuKubun) {
+        sk = shotokuKubun;
+      } else {
+        if (!shotokuKubunGroup) {
+          throw new Error("Cannot resolve shotoku kubun group");
+        }
+        sk = defaultKuniKouhiShotokuKubun(shotokuKubunGroup);
+      }
+      return kuniKouhiHeiyouGendogaku(sk, iryouKingaku);
+    } else if (shotokuKubun === undefined) {
+      return undefined;
     } else {
-      return gendogakuOfKubun(shotokuKubun, iryouKingaku);
+      if (isTasuuGaitou) {
+        return gendogakuTasuuGaitouOfKubun(shotokuKubun);
+      } else {
+        return shotokuKubun ? gendogakuOfKubun(shotokuKubun, iryouKingaku) : undefined;
+      }
     }
   }
-  if( gendogakuReached ){
+  if (gendogakuReached) {
     return { kakari, patientCharge: 0, gendogakuReached: false };
   } else {
-    if( shotokuKubun === undefined ){
+    if (shotokuKubun === undefined) {
       return { kakari, patientCharge: totalTen * futanWari, gendogakuReached: false };
     } else {
-      let gendogaku: number;
-      if( shotokuKubun === "ext国公費" ){
-        gendogaku = kuniKouhiHeiyouGendogaku(iryouKingaku);
-      } else {
-        gendogaku = gendogakuOfKubun(shotokuKubun, iryouKingaku);
-      }
-      const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+      const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendo());
       return { kakari, patientCharge, gendogakuReached };
     }
   }
@@ -277,12 +298,14 @@ interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
 }
 
 function mkProcessHokenContext(
-  totalTen: number, 
-  futanWari: number, 
+  totalTen: number,
+  futanWari: number,
   accHokenCover: Cover,
   shotokuKubun: ShotokuKubun | undefined,
   iryouKingaku: number,
   curKouhiList: KouhiData[],
+  isTasuuGaitou: boolean,
+  shotokuKubunGroup?: ShotokuKubunGroup,
 ): ProcessHokenContext {
   return {
     totalTen,
@@ -292,17 +315,19 @@ function mkProcessHokenContext(
     iryouKingaku,
     prevPatientCharge: accHokenCover.patientCharge,
     hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi(k.houbetsu)) >= 0,
+    isTasuuGaitou,
+    shotokuKubunGroup,
   }
 }
 
 function processHoken(arg: ProcessHokenContext): Cover {
   const { shotokuKubun, hasKuniKouhi } = arg;
-  if( shotokuKubun === undefined ){
+  if (shotokuKubun === undefined) {
     return processHokenWithFixedShotokuKubun(arg);
-  } else if( shotokuKubun === "一般Ⅱ" ) { // 配慮措置
+  } else if (shotokuKubun === "一般Ⅱ") { // 配慮措置
     throw new Error("Not implemented");
   } else {
-    if( hasKuniKouhi ){
+    if (hasKuniKouhi) {
       return processHokenWithFixedShotokuKubun(Object.assign({}, arg, { shotokuKubun: "ext国公費" }));
     } else {
       return processHokenWithFixedShotokuKubun(arg);
@@ -459,6 +484,7 @@ export interface CalcFutanOptions {
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
   debug?: boolean;
   gendogakuTasuuGaitou?: true;
+  shotokuKubunGroup?: ShotokuKubunGroup;
 }
 
 export function calcFutanOne(
@@ -490,7 +516,8 @@ export function calcFutanOne(
         const accHokenCover = mergeOptions(curTotalCover.accHokenCover, prevCover.accHokenCover, mergeCovers) ||
           { kakari: 0, patientCharge: 0, gendogakuReached: false };
         slot.hokenCover = processHoken(mkProcessHokenContext(
-          totalTen, futanWari, accHokenCover, shotokuKubun, totalTenOfSelector("H", totalTens) * 10, curKouhiList
+          totalTen, futanWari, accHokenCover, shotokuKubun, totalTenOfSelector("H", totalTens) * 10, curKouhiList,
+          opt.gendogakuTasuuGaitou ?? false, opt.shotokuKubunGroup,
         ));
         // let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
         // if (resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover)) {

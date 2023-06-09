@@ -30,7 +30,7 @@ export function gendogakuOfKubun(
 }
 
 export function gendogakuTasuuGaitouOfKubun(
-  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
+  kubun: LimitApplicationCertificateClassificationFlagLabel,
 ): number {
   switch (kubun) {
     case "ア":
@@ -55,8 +55,30 @@ export function gendogakuTasuuGaitouOfKubun(
   }
 }
 
-export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
-  return calc(80100, iryouKingaku, 267000, 0.01);
+export function kuniKouhiHeiyouGendogaku(
+  shotokuKubun: LimitApplicationCertificateClassificationFlagLabel,
+  iryouKingaku: number
+): number {
+  switch (shotokuKubun) {
+    case "ア":
+    case "イ":
+    case "ウ":
+    case "エ":
+    case "オ":
+      return calc(80100, iryouKingaku, 267000, 0.01);
+    case "現役並みⅢ":
+    case "現役並みⅡ":
+    case "現役並みⅠ":
+    case "一般":
+    case "一般Ⅱ":
+    case "一般Ⅰ":
+      return 12000;
+    case "低所得Ⅱ":
+    case "低所得Ⅰ":
+      return 8000;
+    default: throw new Error("Cannot hanlde: " + shotokuKubun);
+  }
+
 }
 
 export function gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku: number): number {
