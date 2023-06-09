@@ -1,6 +1,6 @@
 import { optionMap } from "../option";
 import { 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, TotalCover } from "./futan-calc";
+import { calcFutan, MarutoNanbyou, TotalCover } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -33,7 +33,6 @@ describe("高額療養費", () => {
     expect(rep(covers)).deep.equal([
       ["H", { kakari: 873000, charge: 252910 }]
     ])
-    assert(true);
   });
 
   it("should handle 多数該当", () => {
@@ -43,6 +42,19 @@ describe("高額療養費", () => {
     expect(rep(covers)).deep.equal([
       ["H", { kakari: 346000, charge: 93000 }]
     ])
-    assert(true);
+  });
+
+  it("should handle 難病、多数該当", () => {
+    const covers = calcFutan(3, "ア", [MarutoNanbyou], [
+      mkTens(
+        ["H1", 13500],
+        ["H", 47000],
+      )
+    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, gendogakuTasuuGaitou: true });
+    console.log(rep(covers));
+    expect(rep(covers)).deep.equal([
+      ["H1", { kakari: 135000, charge: 10000 }],
+      ["H", { kakari: 470000, charge: 140000}]
+    ])
   });
 });

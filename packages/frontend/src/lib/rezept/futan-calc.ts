@@ -418,7 +418,6 @@ function mapTotalTens(
 ): TotalCover {
   const totalCover = new TotalCover();
   const futanKubuns: 負担区分コードCode[] = sortFutanKubun(Array.from(totalTens.keys()));
-  console.log(futanKubuns);
   for (let futanKubun of futanKubuns) {
     const slot = f(futanKubun, totalTens.get(futanKubun)!, totalCover);
     totalCover.setSlot(futanKubun, slot);
