@@ -1,6 +1,6 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { gendogakuOfHairyoSochiBirthdayMonth, gendogakuOfKubunOpt, gendogakuTasuuGaitouOfKubun, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
+import { gendogakuOfHairyoSochiBirthdayMonth, gendogakuOfKubun, gendogakuOfKubunOpt, gendogakuTasuuGaitouOfKubun, isKuniKouhiOfHeiyou, kuniKouhiHeiyouGendogaku } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
 
 interface Cover {
@@ -232,17 +232,19 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
-interface ProcessHokenContext {
+interface ProcessHokenWithFixedShotokuKubunContext {
   totalTen: number;
   futanWari: number;
-  gendogakuReached: number;
-  shotokuKubun: ShotokuKubun | undefined;
+  gendogakuReached: boolean;
+  shotokuKubun: ShotokuKubun | undefined | "ext国公費";
+  iryouKingaku: number;
+  prevPatientCharge: number;
 }
 
 
-function processHoken({
-  totalTen, futanWari, gendogakuReached, shotokuKubun,
-}: ProcessHokenContext}): Cover {
+function processHokenWithFixedShotokuKubun({
+  totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge,
+}: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
   if( gendogakuReached ){
     return { kakari, patientCharge: 0, gendogakuReached: false };
@@ -250,7 +252,33 @@ function processHoken({
     if( shotokuKubun === undefined ){
       return { kakari, patientCharge: totalTen * futanWari, gendogakuReached: false };
     } else {
-      
+      let gendogaku: number;
+      if( shotokuKubun === "ext国公費" ){
+        gendogaku = kuniKouhiHeiyouGendogaku(iryouKingaku);
+      } else {
+        gendogaku = gendogakuOfKubun(shotokuKubun, iryouKingaku);
+      }
+      const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+      return { kakari, patientCharge, gendogakuReached };
+    }
+  }
+}
+
+interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
+  hasKuniKouhi: boolean;
+}
+
+function processHoken(arg: ProcessHokenContext): Cover {
+  const { shotokuKubun, hasKuniKouhi } = arg;
+  if( shotokuKubun === undefined ){
+    return processHokenWithFixedShotokuKubun(arg);
+  } else if( shotokuKubun === "一般Ⅱ" ) { // 配慮措置
+    throw new Error("Not implemented");
+  } else {
+    if( hasKuniKouhi ){
+      return processHokenWithFixedShotokuKubun(Object.assign({}, arg, { shotokuKubun: "ext国公費" }));
+    } else {
+      return processHokenWithFixedShotokuKubun(arg);
     }
   }
 }
