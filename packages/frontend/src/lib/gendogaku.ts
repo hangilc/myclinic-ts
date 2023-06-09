@@ -40,6 +40,32 @@ export function gendogakuOfKubun(
   }
 }
 
+export function gendogakuTasuuGaitouOfKubun(
+  kubun: LimitApplicationCertificateClassificationFlagLabel
+): number {
+  switch (kubun) {
+    case "ア":
+    case "現役並みⅢ":
+      return 140100;
+    case "イ":
+    case "現役並みⅡ":
+      return 93000;
+    case "ウ":
+    case "現役並みⅠ":
+      return 44400;
+    case "エ": return 44400;
+    case "オ": return 24600;
+    case "一般":
+    case "一般Ⅱ":
+    case "一般Ⅰ":
+      return 18000;
+    case "低所得Ⅱ":
+    case "低所得Ⅰ":
+      return 8000;
+    default: throw new Error("Cannot handle: " + kubun);
+  }
+}
+
 export function gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku: number): number {
   return Math.min(9000, calc(6000, iryouKingaku, 30000, 0.10)); // 配慮措置（令和７年９月30日まで）
 }

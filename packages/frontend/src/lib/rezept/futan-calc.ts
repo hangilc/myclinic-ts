@@ -526,13 +526,11 @@ function findGendo(opt: CalcFutanOpt, sel: KouhiSelector): number | undefined { 
 }
 
 export function sortFutanKubun(kubuns: 負担区分コードCode[]): 負担区分コードCode[] {
-  console.log("before", kubuns);
   kubuns.sort((a, b) => {
     const na = 負担区分コードRev.get(a)!;
     const nb = 負担区分コードRev.get(b)!;
     return -(na.length - nb.length);
   });
-  console.log("after", kubuns);
   return kubuns;
 }
 
