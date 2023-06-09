@@ -88,18 +88,15 @@ export class Slot {
 
   get patientCharge(): number {
     const ks: Cover[] = [];
-    this.kouhiCovers.forEach(k => {
-      if (k !== undefined) {
-        ks.push(k);
+    this.kouhiCovers.forEach(c => {
+      if( c !== undefined ){
+        ks.push(c);
       }
-    })
-    if (ks.length === 0) {
-      if (this.hokenCover === undefined) {
-        throw new Error("No hoken, no kouhi");
-      }
-      return this.hokenCover.patientCharge;
+    });
+    if( ks.length === 0 ){
+      return this.hokenCover?.patientCharge ?? 0;
     } else {
-      return ks[ks.length - 1].patientCharge;
+      return ks[ks.length-1].patientCharge;
     }
   }
 
@@ -248,6 +245,8 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   hasKuniKouhi: boolean;
   isTasuuGaitou: boolean;
   shotokuKubunGroup?: ShotokuKubunGroup;
+  isBirthdayMonth75?: boolean;
+  debug?: boolean;
 }
 
 function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): ShotokuKubun {
@@ -260,7 +259,7 @@ function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): Sho
 
 function processHokenWithFixedShotokuKubun({
   totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge,
-  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup
+  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, debug
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
   function gendo(): number | undefined {
@@ -291,7 +290,11 @@ function processHokenWithFixedShotokuKubun({
     if (shotokuKubun === undefined) {
       return { kakari, patientCharge: totalTen * futanWari, gendogakuReached: false };
     } else {
-      const [patientCharge, gendogakuReached] = applyGendogaku(totalTen * futanWari, prevPatientCharge, gendo());
+      let g = gendo();
+      if( isBirthdayMonth75 && g !== undefined ){
+        g /= 2;
+      }
+      const [patientCharge, gendogakuReached] = applyGendogaku(totalTen * futanWari, prevPatientCharge, g);
       return { kakari, patientCharge, gendogakuReached };
     }
   }
@@ -310,6 +313,8 @@ function mkProcessHokenContext(
   curKouhiList: KouhiData[],
   isTasuuGaitou: boolean,
   shotokuKubunGroup?: ShotokuKubunGroup,
+  isBirthdayMonth75?: boolean,
+  debug?: boolean,
 ): ProcessHokenContext {
   return {
     totalTen,
@@ -321,11 +326,17 @@ function mkProcessHokenContext(
     hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi(k.houbetsu)) >= 0,
     isTasuuGaitou,
     shotokuKubunGroup,
+    isBirthdayMonth75,
+    debug,
   }
 }
 
 function processHoken(arg: ProcessHokenContext): Cover {
-  const { shotokuKubun, hasKuniKouhi } = arg;
+  const { shotokuKubun, hasKuniKouhi, debug } = arg;
+  if( debug ){
+    console.log("    enter processHoken");
+    console.log(`    arg: ${JSON.stringify(arg)}`);
+  }
   if (shotokuKubun === undefined) {
     return processHokenWithFixedShotokuKubun(arg);
   } else if (shotokuKubun === "一般Ⅱ") { // 配慮措置
@@ -524,7 +535,7 @@ export function calcFutanOne(
           { kakari: 0, patientCharge: 0, gendogakuReached: false };
         const hokenCover = processHoken(mkProcessHokenContext(
           totalTen, futanWari, accHokenCover, shotokuKubun, totalTenOfSelector("H", totalTens) * 10, curKouhiList,
-          opt.gendogakuTasuuGaitou ?? false, opt.shotokuKubunGroup,
+          opt.gendogakuTasuuGaitou ?? false, opt.shotokuKubunGroup, opt.isBirthdayMonth75, opt.debug,
         ));
         if( opt.debug ){
           console.log(`    hokenCover: ${JSON.stringify(hokenCover)}`)
