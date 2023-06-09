@@ -1,6 +1,6 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { gendogakuOfHairyoSochiBirthdayMonth, gendogakuOfKubun, gendogakuOfKubunOpt, gendogakuTasuuGaitouOfKubun, isKuniKouhiOfHeiyou, kuniKouhiHeiyouGendogaku } from "@/lib/gendogaku";
+import { gendogakuOfKubun, gendogakuTasuuGaitouOfKubun, isKuniKouhi, isKuniKouhiOfHeiyou, kuniKouhiHeiyouGendogaku } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
 
 interface Cover {
@@ -268,6 +268,25 @@ interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
   hasKuniKouhi: boolean;
 }
 
+function mkProcessHokenContext(
+  totalTen: number, 
+  futanWari: number, 
+  accHokenCover: Cover,
+  shotokuKubun: ShotokuKubun | undefined,
+  iryouKingaku: number,
+  curKouhiList: KouhiData[],
+): ProcessHokenContext {
+  return {
+    totalTen,
+    futanWari,
+    gendogakuReached: accHokenCover.gendogakuReached,
+    shotokuKubun,
+    iryouKingaku,
+    prevPatientCharge: accHokenCover.patientCharge,
+    hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi(k.houbetsu)) >= 0,
+  }
+}
+
 function processHoken(arg: ProcessHokenContext): Cover {
   const { shotokuKubun, hasKuniKouhi } = arg;
   if( shotokuKubun === undefined ){
@@ -299,18 +318,18 @@ export class TotalCover implements TotalCoverInterface {
     this.map.set(futanCode, slot);
   }
 
-  get accHokenCover(): HokenCover | undefined {
+  get accHokenCover(): Cover | undefined {
     return Array.from(this.map.entries())
-      .reduce((acc: HokenCover | undefined, [_, slot]) => {
-        return mergeOptions(acc, slot.hokenCover, mergeHokenCovers);
+      .reduce((acc: Cover | undefined, [_, slot]) => {
+        return mergeOptions(acc, slot.hokenCover, mergeCovers);
       }, undefined);
   }
 
-  accKouhiCover(sel: KouhiSelector, kouhiList: KouhiData[]): KouhiCover | undefined {
+  accKouhiCover(sel: KouhiSelector, kouhiList: KouhiData[]): Cover | undefined {
     const index = kouhiSelectorToIndex(sel);
     return Array.from(this.map.entries())
-      .reduce((acc: KouhiCover | undefined, [_, slot]) => {
-        return mergeOptions(acc, slot.kouhiCovers[index], mergeKouhiCovers);
+      .reduce((acc: Cover | undefined, [_, slot]) => {
+        return mergeOptions(acc, slot.kouhiCovers[index], mergeCovers);
       }, undefined);
   }
 
@@ -374,7 +393,7 @@ function mapTotalTens(
   return totalCover;
 }
 
-function totalTenOf(selector: HokenSelector, totalTens: Map<負担区分コードCode, number>): number {
+function totalTenOfSelector(selector: HokenSelector, totalTens: Map<負担区分コードCode, number>): number {
   return Array.from(totalTens.entries()).reduce((acc: number, ele) => {
     const [futanKubun, totalTen] = ele;
     const futanName = 負担区分コードNameOf(futanKubun);
@@ -411,19 +430,19 @@ function resolveShotokuKubun(futanKubun: 負担区分コードCode, kouhiList: K
   }
 }
 
-function calcGendogaku(shotokuKubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
-  iryouKingaku: number, isTasuuGaitou: boolean)
-  : number | undefined {
-  if (shotokuKubun === undefined) {
-    return undefined;
-  } else if (isTasuuGaitou) {
-    return gendogakuTasuuGaitouOfKubun(shotokuKubun);
-  } else {
-    return gendogakuOfKubunOpt(shotokuKubun, iryouKingaku);
-  }
-}
+// function calcGendogaku(shotokuKubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
+//   iryouKingaku: number, isTasuuGaitou: boolean)
+//   : number | undefined {
+//   if (shotokuKubun === undefined) {
+//     return undefined;
+//   } else if (isTasuuGaitou) {
+//     return gendogakuTasuuGaitouOfKubun(shotokuKubun);
+//   } else {
+//     return gendogakuOfKubunOpt(shotokuKubun, iryouKingaku);
+//   }
+// }
 
-export interface CalcFutanOpt {
+export interface CalcFutanOptions {
   isBirthdayMonth75?: true;
   gendogaku?: {
     kingaku: number;
@@ -440,7 +459,7 @@ export function calcFutanOne(
   kouhiList: KouhiData[],
   totalTens: Map<負担区分コードCode, number>,
   prevCover: TotalCover,
-  opt: CalcFutanOpt = {},
+  opt: CalcFutanOptions = {},
 ): TotalCover {
   if (opt.debug) {
     console.log(`enter calcFutanOne, futanWari: ${futanWari}`);
@@ -460,58 +479,63 @@ export function calcFutanOne(
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
         }
-        let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
-        if (resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover)) {
-          resolvedShotokuKubun = undefined;
-        }
-        if (opt.debug) {
-          console.log(`所得区分: ${resolvedShotokuKubun}`)
-        }
-        const iryouKingaku = (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0);
-        let gendogaku: number | undefined = undefined;
-        if (opt.isBirthdayMonth75) {
-          if (resolvedShotokuKubun === "一般Ⅱ") {
-            gendogaku = gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku);
-          } else {
-            gendogaku = gendogakuOfKubunOpt(
-              resolvedShotokuKubun,
-              iryouKingaku
-            );
-            if (gendogaku !== undefined) {
-              gendogaku /= 2.0;
-            }
-          }
-        } else {
-          if (opt.gendogakuTasuuGaitou) {
-            gendogaku = gendogakuTasuuGaitouOfKubun(resolvedShotokuKubun);
-          } else {
-            gendogaku = gendogakuOfKubunOpt(
-              resolvedShotokuKubun,
-              iryouKingaku
-            );
-          }
-        }
-        if (opt.debug) {
-          console.log(`限度額: ${gendogaku}`);
-        }
-        slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
-        kakari = slot.hokenCover.patientCharge;
-        if (opt.marucho) {
-          const maruchoGendo = opt.marucho;
-          const hokenCover = slot.hokenCover;
-          if (hokenCover === undefined) {
-            throw new Error("マル長を適用する保険がない");
-          }
-          const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
-          if (accHokenCover.maruchoGendogakuReached) {
-            hokenCover.patientCharge = 0;
-          } else {
-            if (accHokenCover.patientCharge > maruchoGendo) {
-              hokenCover.patientCharge = maruchoGendo - prevCover.patientChargeOf("H");
-              hokenCover.maruchoGendogakuReached = maruchoGendo;
-            }
-          }
-        }
+        const accHokenCover = mergeOptions(curTotalCover.accHokenCover, prevCover.accHokenCover, mergeCovers) ||
+          { kakari: 0, patientCharge: 0, gendogakuReached: false };
+        slot.hokenCover = processHoken(mkProcessHokenContext(
+          totalTen, futanWari, accHokenCover, shotokuKubun, totalTenOfSelector("H", totalTens) * 10, curKouhiList
+        ));
+        // let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
+        // if (resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover)) {
+        //   resolvedShotokuKubun = undefined;
+        // }
+        // if (opt.debug) {
+        //   console.log(`所得区分: ${resolvedShotokuKubun}`)
+        // }
+        // const iryouKingaku = (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0);
+        // let gendogaku: number | undefined = undefined;
+        // if (opt.isBirthdayMonth75) {
+        //   if (resolvedShotokuKubun === "一般Ⅱ") {
+        //     gendogaku = gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku);
+        //   } else {
+        //     gendogaku = gendogakuOfKubunOpt(
+        //       resolvedShotokuKubun,
+        //       iryouKingaku
+        //     );
+        //     if (gendogaku !== undefined) {
+        //       gendogaku /= 2.0;
+        //     }
+        //   }
+        // } else {
+        //   if (opt.gendogakuTasuuGaitou) {
+        //     gendogaku = gendogakuTasuuGaitouOfKubun(resolvedShotokuKubun);
+        //   } else {
+        //     gendogaku = gendogakuOfKubunOpt(
+        //       resolvedShotokuKubun,
+        //       iryouKingaku
+        //     );
+        //   }
+        // }
+        // if (opt.debug) {
+        //   console.log(`限度額: ${gendogaku}`);
+        // }
+        // slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
+        // kakari = slot.hokenCover.patientCharge;
+        // if (opt.marucho) {
+        //   const maruchoGendo = opt.marucho;
+        //   const hokenCover = slot.hokenCover;
+        //   if (hokenCover === undefined) {
+        //     throw new Error("マル長を適用する保険がない");
+        //   }
+        //   const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
+        //   if (accHokenCover.maruchoGendogakuReached) {
+        //     hokenCover.patientCharge = 0;
+        //   } else {
+        //     if (accHokenCover.patientCharge > maruchoGendo) {
+        //       hokenCover.patientCharge = maruchoGendo - prevCover.patientChargeOf("H");
+        //       hokenCover.maruchoGendogakuReached = maruchoGendo;
+        //     }
+        //   }
+        // }
       } else {
         const index = kouhiSelectorToIndex(sel);
         const kouhiData = kouhiList[index];
@@ -536,7 +560,7 @@ export function calcFutan(
   shotokuKubun: ShotokuKubun | undefined,
   kouhiList: KouhiData[],
   totalTensList: Map<負担区分コードCode, number>[], // in chronological order (new one is before old one)
-  opt: CalcFutanOpt = {},
+  opt: CalcFutanOptions = {},
 ): TotalCover {
   if (totalTensList.length === 0) {
     throw new Error("Empty total tens list");
@@ -549,7 +573,7 @@ export function calcFutan(
   return totalCover;
 }
 
-function findGendo(opt: CalcFutanOpt, sel: KouhiSelector): number | undefined { // for Nanbyou
+function findGendo(opt: CalcFutanOptions, sel: KouhiSelector): number | undefined { // for Nanbyou
   const kouhiBangou = parseInt(sel);
   if (opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou) {
     return opt.gendogaku.kingaku;
@@ -578,17 +602,6 @@ function kouhiListOfKubun(kubun: 負担区分コードCode, allKouhiList: KouhiD
   return ks;
 }
 
-function hairyosochiNotApplicable(opt: CalcFutanOpt, kouhiList: KouhiData[], prevCover: TotalCover): boolean {
-  if (opt.marucho) {
-    return true;
-  }
-  for (let kouhi of kouhiList) {
-    if (kouhi.hasGendogaku) {
-      return true;
-    }
-  }
-  if (prevCover.accHokenCover?.maruchoGendogakuReached) {
-    return true;
-  }
-  return false;
+function hairyosochiNotApplicable(hasMarucho: boolean, kouhiList: KouhiData[]): boolean {
+  return hasMarucho || kouhiList.length > 0;
 }
