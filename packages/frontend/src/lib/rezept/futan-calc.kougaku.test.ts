@@ -50,7 +50,7 @@ describe("高額療養費", () => {
         ["H1", 13500],
         ["H", 47000],
       )
-    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, gendogakuTasuuGaitou: true });
+    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, gendogakuTasuuGaitou: true, debug: true });
     console.log(rep(covers));
     expect(rep(covers)).deep.equal([
       ["H1", { kakari: 135000, charge: 10000 }],
