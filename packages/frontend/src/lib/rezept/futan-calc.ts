@@ -1,58 +1,19 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { gendogakuOfHeiryoSochiBirthdayMonth, gendogakuOfKubunOpt, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
+import { gendogakuOfHairyoSochiBirthdayMonth, gendogakuOfKubunOpt, gendogakuTasuuGaitouOfKubun, isKuniKouhiOfHeiyou } from "@/lib/gendogaku";
 import { mergeOptions, optionFold } from "../option";
-import { resolve } from "path";
 
 interface Cover {
   kakari: number;
   patientCharge: number;
+  gendogakuReached: boolean;
 }
 
 function mergeCovers(a: Cover, b: Cover): Cover {
   return {
     kakari: a.kakari + b.kakari,
     patientCharge: a.patientCharge + b.patientCharge,
-  }
-}
-
-interface HokenCover extends Cover {
-  futanWari: number;
-  gendogakuReached?: true;
-  maruchoGendogakuReached?: 10000 | 20000 | undefined;
-}
-
-function mergeHokenCovers(a: HokenCover, b: HokenCover): HokenCover {
-  if (a.futanWari !== b.futanWari) {
-    throw new Error("Inconsistent futan wari");
-  }
-  const cover = mergeCovers(a, b);
-  return {
-    ...cover,
-    futanWari: a.futanWari,
-    gendogakuReached: mergeOptions(a.gendogakuReached, b.gendogakuReached, (a, b) => a || b),
-    maruchoGendogakuReached: mergeOptions(
-      a.maruchoGendogakuReached,
-      b.maruchoGendogakuReached,
-      (a, b) => {
-        if (a !== b) {
-          throw new Error("Inconsistent マル長限度額");
-        }
-        return a;
-      }
-    )
-  }
-}
-
-interface KouhiCover extends Cover {
-  gendogakuReached?: true;
-}
-
-function mergeKouhiCovers(a: KouhiCover, b: KouhiCover): KouhiCover {
-  const cover = mergeCovers(a, b);
-  return {
-    ...cover,
-    gendogakuReached: mergeOptions(a.gendogakuReached, b.gendogakuReached, (a, b) => a || b),
+    gendogakuReached: a.gendogakuReached || b.gendogakuReached,
   }
 }
 
@@ -101,10 +62,10 @@ function kouhiSelectorToIndex(kouhiSelector: KouhiSelector): number {
 }
 
 export class Slot {
-  hokenCover: HokenCover | undefined;
-  kouhiCovers: (KouhiCover | undefined)[] = [];
+  hokenCover: Cover | undefined;
+  kouhiCovers: (Cover | undefined)[] = [];
 
-  constructor(hokenCover: HokenCover | undefined, kouhiCovers: (KouhiCover | undefined)[]) {
+  constructor(hokenCover: Cover | undefined, kouhiCovers: (Cover | undefined)[]) {
     this.hokenCover = hokenCover;
     this.kouhiCovers = kouhiCovers;
   }
@@ -126,7 +87,7 @@ export class Slot {
   }
 
   get patientCharge(): number {
-    const ks: KouhiCover[] = [];
+    const ks: Cover[] = [];
     this.kouhiCovers.forEach(k => {
       if (k !== undefined) {
         ks.push(k);
@@ -147,13 +108,13 @@ export class Slot {
       throw new Error("Inconsitent kouhi covers length");
     }
     return new Slot(
-      mergeOptions(this.hokenCover, other.hokenCover, mergeHokenCovers),
-      this.kouhiCovers.map((kc, index) => mergeOptions(kc, other.kouhiCovers[index], mergeKouhiCovers)),
+      mergeOptions(this.hokenCover, other.hokenCover, mergeCovers),
+      this.kouhiCovers.map((kc, index) => mergeOptions(kc, other.kouhiCovers[index], mergeCovers)),
     );
   }
 
   static NullSlot(kouhiListLength: number): Slot {
-    return new Slot(undefined, Array<KouhiCover | undefined>(kouhiListLength).fill(undefined));
+    return new Slot(undefined, Array<Cover | undefined>(kouhiListLength).fill(undefined));
   }
 }
 
@@ -165,7 +126,7 @@ interface KouhiProcessorArg {
   gendogakuApplied: number | undefined;
 }
 
-type KouhiProcessor = (arg: KouhiProcessorArg) => KouhiCover;
+type KouhiProcessor = (arg: KouhiProcessorArg) => Cover;
 
 class KouhiData {
   houbetsu: number;
@@ -180,27 +141,28 @@ class KouhiData {
   }
 }
 
-function noFutanKouhiProcessor({ kakari }: KouhiProcessorArg): KouhiCover {
+function noFutanKouhiProcessor({ kakari }: KouhiProcessorArg): Cover {
   return {
     kakari,
     patientCharge: 0,
+    gendogakuReached: false,
   }
 }
 
-function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, true | undefined] {
+function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): [number, boolean] {
   if (gendogaku === undefined) {
-    return [charge, undefined];
+    return [charge, false];
   } else {
     if (charge + prevCharge > gendogaku) {
       return [gendogaku - prevCharge, true]
     } else {
-      return [charge, undefined];
+      return [charge, false];
     }
   }
 }
 
 function mkGendogakuLimitProcessor(gendogaku: number): KouhiProcessor {
-  return ({ kakari, prevPatientCharge }: KouhiProcessorArg): KouhiCover => {
+  return ({ kakari, prevPatientCharge }: KouhiProcessorArg): Cover => {
     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
     return {
       kakari,
@@ -214,7 +176,8 @@ export const HibakushaNoKo: KouhiData = new KouhiData(82, noFutanKouhiProcessor,
 
 
 // マル都（大気汚染）
-export function MaruToTaikiosen(gendogaku: number): KouhiData {;
+export function MaruToTaikiosen(gendogaku: number): KouhiData {
+  ;
   return new KouhiData(82, mkGendogakuLimitProcessor(gendogaku), d => d.hasGendogaku = true)
 }
 
@@ -227,7 +190,7 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
     kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied
   }: KouhiProcessorArg) => {
     let patientCharge = kakari;
-    let gendogakuReached: true | undefined = undefined;
+    let gendogakuReached: boolean = false;
     if (gendogakuApplied !== undefined) {
       patientCharge = gendogakuApplied - prevPatientCharge;
       if (patientCharge < 0) {
@@ -248,23 +211,51 @@ export const MarutoNanbyou: KouhiData = new KouhiData(82,
   d => d.hasGendogaku = true
 );
 
-function processHoken(
-  totalTen: number,
-  futanWari: number,
-  gendogaku: number | undefined,
-  prevPatientCharge: number
-): HokenCover {
-  const [patientCharge, gendogakuReached] = applyGendogaku(
-    totalTen * futanWari,
-    prevPatientCharge,
-    gendogaku
-  );
-  return {
-    kakari: totalTen * 10,
-    patientCharge,
-    futanWari,
-    gendogakuReached,
+// function processHokenOrig(
+//   totalTen: number,
+//   futanWari: number,
+//   gendogaku: number | undefined,
+//   prevPatientCharge: number
+// ): HokenCover {
+//   const [patientCharge, gendogakuReached] = applyGendogaku(
+//     totalTen * futanWari,
+//     prevPatientCharge,
+//     gendogaku
+//   );
+//   return {
+//     kakari: totalTen * 10,
+//     patientCharge,
+//     futanWari,
+//     gendogakuReached,
+//   }
+// }
+
+interface CalcHokenCoverContext {
+  kakari: number;
+  gendogakuAlreadyReached: boolean;
+  gendogaku: number | undefined;
+  prevPatientCharge: number;
+}
+
+function calcHokenCover({ kakari, gendogakuAlreadyReached, gendogaku, prevPatientCharge }: CalcHokenCoverContext): Cover {
+  if( gendogakuAlreadyReached ){
+    return {
+      kakari,
+      patientCharge: 0,
+      gendogakuReached: false,
+    }
+  } else {
+    const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
+    return { kakari, patientCharge, gendogakuReached };
   }
+}
+
+interface ProcessHokenContext {
+  
+}
+
+function processHoken(ctx: ProcessHokenContext): Cover {
+
 }
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
@@ -396,6 +387,18 @@ function resolveShotokuKubun(futanKubun: 負担区分コードCode, kouhiList: K
   }
 }
 
+function calcGendogaku(shotokuKubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
+  iryouKingaku: number, isTasuuGaitou: boolean)
+  : number | undefined {
+  if (shotokuKubun === undefined) {
+    return undefined;
+  } else if (isTasuuGaitou) {
+    return gendogakuTasuuGaitouOfKubun(shotokuKubun);
+  } else {
+    return gendogakuOfKubunOpt(shotokuKubun, iryouKingaku);
+  }
+}
+
 export interface CalcFutanOpt {
   isBirthdayMonth75?: true;
   gendogaku?: {
@@ -404,6 +407,7 @@ export interface CalcFutanOpt {
   },
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
   debug?: boolean;
+  gendogakuTasuuGaitou?: true;
 }
 
 export function calcFutanOne(
@@ -433,7 +437,7 @@ export function calcFutanOne(
           throw new Error("Cannot find futanWari");
         }
         let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
-        if( resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover) ){
+        if (resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover)) {
           resolvedShotokuKubun = undefined;
         }
         if (opt.debug) {
@@ -443,7 +447,7 @@ export function calcFutanOne(
         let gendogaku: number | undefined = undefined;
         if (opt.isBirthdayMonth75) {
           if (resolvedShotokuKubun === "一般Ⅱ") {
-            gendogaku = gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku);
+            gendogaku = gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku);
           } else {
             gendogaku = gendogakuOfKubunOpt(
               resolvedShotokuKubun,
@@ -454,10 +458,14 @@ export function calcFutanOne(
             }
           }
         } else {
-          gendogaku = gendogakuOfKubunOpt(
-            resolvedShotokuKubun,
-            iryouKingaku
-          );
+          if (opt.gendogakuTasuuGaitou) {
+            gendogaku = gendogakuTasuuGaitouOfKubun(resolvedShotokuKubun);
+          } else {
+            gendogaku = gendogakuOfKubunOpt(
+              resolvedShotokuKubun,
+              iryouKingaku
+            );
+          }
         }
         if (opt.debug) {
           console.log(`限度額: ${gendogaku}`);
@@ -547,15 +555,15 @@ function kouhiListOfKubun(kubun: 負担区分コードCode, allKouhiList: KouhiD
 }
 
 function hairyosochiNotApplicable(opt: CalcFutanOpt, kouhiList: KouhiData[], prevCover: TotalCover): boolean {
-  if( opt.marucho ){
+  if (opt.marucho) {
     return true;
   }
-  for(let kouhi of kouhiList ){
-    if( kouhi.hasGendogaku ) {
+  for (let kouhi of kouhiList) {
+    if (kouhi.hasGendogaku) {
       return true;
     }
   }
-  if( prevCover.accHokenCover?.maruchoGendogakuReached ) {
+  if (prevCover.accHokenCover?.maruchoGendogakuReached) {
     return true;
   }
   return false;

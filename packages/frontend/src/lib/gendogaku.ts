@@ -3,19 +3,8 @@ import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
 
-export function gendogakuOfKubunOpt(
-  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費" | undefined,
-  iryouKingaku: number
-): number | undefined {
-  if (kubun === undefined) {
-    return undefined;
-  } else {
-    return gendogakuOfKubun(kubun, iryouKingaku);
-  }
-}
-
 export function gendogakuOfKubun(
-  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
+  kubun: LimitApplicationCertificateClassificationFlagLabel,
   iryouKingaku: number
 ): number {
   switch (kubun) {
@@ -35,13 +24,13 @@ export function gendogakuOfKubun(
     case "低所得Ⅰ":
     case "低所得Ⅰ（老福）":
     case "低所得Ⅰ（境）": return 8000;
-    case "ext国公費": return kuniKouhiHeiyouGendogaku(iryouKingaku);
+    // case "ext国公費": return kuniKouhiHeiyouGendogaku(iryouKingaku);
     default: throw new Error("Cannot handle kubun: " + kubun);
   }
 }
 
 export function gendogakuTasuuGaitouOfKubun(
-  kubun: LimitApplicationCertificateClassificationFlagLabel
+  kubun: LimitApplicationCertificateClassificationFlagLabel | "ext国公費",
 ): number {
   switch (kubun) {
     case "ア":
@@ -66,7 +55,11 @@ export function gendogakuTasuuGaitouOfKubun(
   }
 }
 
-export function gendogakuOfHeiryoSochiBirthdayMonth(iryouKingaku: number): number {
+export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
+  return calc(80100, iryouKingaku, 267000, 0.01);
+}
+
+export function gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku: number): number {
   return Math.min(9000, calc(6000, iryouKingaku, 30000, 0.10)); // 配慮措置（令和７年９月30日まで）
 }
 
@@ -91,10 +84,6 @@ export function isKuniKouhiOfHeiyou(houbetsuList: number[]): boolean {
     }
   }
   return false;
-}
-
-export function kuniKouhiHeiyouGendogaku(iryouKingaku: number): number {
-  return calc(80100, iryouKingaku, 267000, 0.01);
 }
 
 async function gendogaku(
