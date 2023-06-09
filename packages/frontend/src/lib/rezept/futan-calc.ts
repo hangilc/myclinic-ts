@@ -239,13 +239,21 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   shotokuKubun: ShotokuKubun | undefined | "ext国公費";
   iryouKingaku: number;
   prevPatientCharge: number;
+  isTasuuGaitou: boolean;
 }
 
 
 function processHokenWithFixedShotokuKubun({
-  totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge,
+  totalTen, futanWari, gendogakuReached, shotokuKubun, iryouKingaku, prevPatientCharge, isTasuuGaitou
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
+  function gendo(): number {
+    if( isTasuuGaitou ){
+      return gendogakuTasuuGaitouOfKubun(shotokuKubun);
+    } else {
+      return gendogakuOfKubun(shotokuKubun, iryouKingaku);
+    }
+  }
   if( gendogakuReached ){
     return { kakari, patientCharge: 0, gendogakuReached: false };
   } else {

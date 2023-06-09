@@ -35,4 +35,14 @@ describe("高額療養費", () => {
     ])
     assert(true);
   });
+
+  it("should handle 多数該当", () => {
+    const covers = calcFutan(3, "イ", [], [
+      mkTen("H", 34600),
+    ], { gendogakuTasuuGaitou: true });
+    expect(rep(covers)).deep.equal([
+      ["H", { kakari: 346000, charge: 93000 }]
+    ])
+    assert(true);
+  });
 });
