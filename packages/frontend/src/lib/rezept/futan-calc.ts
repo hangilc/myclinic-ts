@@ -89,14 +89,14 @@ export class Slot {
   get patientCharge(): number {
     const ks: Cover[] = [];
     this.kouhiCovers.forEach(c => {
-      if( c !== undefined ){
+      if (c !== undefined) {
         ks.push(c);
       }
     });
-    if( ks.length === 0 ){
+    if (ks.length === 0) {
       return this.hokenCover?.patientCharge ?? 0;
     } else {
-      return ks[ks.length-1].patientCharge;
+      return ks[ks.length - 1].patientCharge;
     }
   }
 
@@ -185,7 +185,7 @@ export const MaruAoNoFutan: KouhiData = new KouhiData(89, noFutanKouhiProcessor,
 // マル都（難病）
 export const MarutoNanbyou: KouhiData = new KouhiData(82,
   (arg: KouhiProcessorArg) => {
-    if( arg.debug ){
+    if (arg.debug) {
       console.log("    enter 公費難病");
       console.log("      ", JSON.stringify(arg));
     }
@@ -246,6 +246,7 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   isTasuuGaitou: boolean;
   shotokuKubunGroup?: ShotokuKubunGroup;
   isBirthdayMonth75?: boolean;
+  marucho: 10000 | 20000 | undefined;
   debug?: boolean;
 }
 
@@ -291,7 +292,7 @@ function processHokenWithFixedShotokuKubun({
       return { kakari, patientCharge: totalTen * futanWari, gendogakuReached: false };
     } else {
       let g = gendo();
-      if( isBirthdayMonth75 && g !== undefined ){
+      if (isBirthdayMonth75 && g !== undefined) {
         g /= 2;
       }
       const [patientCharge, gendogakuReached] = applyGendogaku(totalTen * futanWari, prevPatientCharge, g);
@@ -304,50 +305,29 @@ interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
   hasKuniKouhi: boolean;
 }
 
-function mkProcessHokenContext(
-  totalTen: number,
-  futanWari: number,
-  accHokenCover: Cover,
-  shotokuKubun: ShotokuKubun | undefined,
-  iryouKingaku: number,
-  curKouhiList: KouhiData[],
-  isTasuuGaitou: boolean,
-  shotokuKubunGroup?: ShotokuKubunGroup,
-  isBirthdayMonth75?: boolean,
-  debug?: boolean,
-): ProcessHokenContext {
-  return {
-    totalTen,
-    futanWari,
-    gendogakuReached: accHokenCover.gendogakuReached,
-    shotokuKubun,
-    iryouKingaku,
-    prevPatientCharge: accHokenCover.patientCharge,
-    hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi(k.houbetsu)) >= 0,
-    isTasuuGaitou,
-    shotokuKubunGroup,
-    isBirthdayMonth75,
-    debug,
-  }
-}
-
 function processHoken(arg: ProcessHokenContext): Cover {
   const { shotokuKubun, hasKuniKouhi, debug } = arg;
-  if( debug ){
+  if (debug) {
     console.log("    enter processHoken");
     console.log(`    arg: ${JSON.stringify(arg)}`);
   }
+  let cover: Cover;
   if (shotokuKubun === undefined) {
-    return processHokenWithFixedShotokuKubun(arg);
+    cover = processHokenWithFixedShotokuKubun(arg);
   } else if (shotokuKubun === "一般Ⅱ") { // 配慮措置
     throw new Error("Not implemented");
   } else {
     if (hasKuniKouhi) {
-      return processHokenWithFixedShotokuKubun(Object.assign({}, arg, { shotokuKubun: "ext国公費" }));
+      cover = processHokenWithFixedShotokuKubun(Object.assign({}, arg, { shotokuKubun: "ext国公費" }));
     } else {
-      return processHokenWithFixedShotokuKubun(arg);
+      cover = processHokenWithFixedShotokuKubun(arg);
     }
   }
+  if( arg.marucho !== undefined ){
+    const [patientCharge, gendogakuReached] = applyGendogaku(cover.patientCharge, arg.prevPatientCharge, arg.marucho);
+    cover = Object.assign({}, cover, { patientCharge, gendogakuReached});
+  }
+  return cover;
 }
 
 export interface TotalCoverInterface {
@@ -524,7 +504,7 @@ export function calcFutanOne(
     curTotalCover.setSlot(futanKubun, slot);
     const selectors = splitFutanKubun(futanKubun);
     for (let sel of selectors) {
-      if( opt.debug) {
+      if (opt.debug) {
         console.log(`  sel: ${sel}, kakari: ${kakari}`);
       }
       if (sel === "H") {
@@ -533,67 +513,25 @@ export function calcFutanOne(
         }
         const accHokenCover = mergeOptions(curTotalCover.accHokenCover, prevCover.accHokenCover, mergeCovers) ||
           { kakari: 0, patientCharge: 0, gendogakuReached: false };
-        const hokenCover = processHoken(mkProcessHokenContext(
-          totalTen, futanWari, accHokenCover, shotokuKubun, totalTenOfSelector("H", totalTens) * 10, curKouhiList,
-          opt.gendogakuTasuuGaitou ?? false, opt.shotokuKubunGroup, opt.isBirthdayMonth75, opt.debug,
-        ));
-        if( opt.debug ){
+        const hokenCover = processHoken({
+          totalTen,
+          futanWari,
+          gendogakuReached: accHokenCover.gendogakuReached,
+          shotokuKubun,
+          iryouKingaku: totalTen * 10,
+          prevPatientCharge: accHokenCover.patientCharge,
+          hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi(k.houbetsu)) >= 0,
+          isTasuuGaitou: opt.gendogakuTasuuGaitou ?? false,
+          shotokuKubunGroup: opt.shotokuKubunGroup,
+          isBirthdayMonth75: opt.isBirthdayMonth75,
+          marucho: opt.marucho,
+          debug: opt.debug,
+        });
+        if (opt.debug) {
           console.log(`    hokenCover: ${JSON.stringify(hokenCover)}`)
         }
         slot.hokenCover = hokenCover;
         kakari = hokenCover.patientCharge;
-        // let resolvedShotokuKubun = resolveShotokuKubun(futanKubun, kouhiList, shotokuKubun);
-        // if (resolvedShotokuKubun === "一般Ⅱ" && hairyosochiNotApplicable(opt, curKouhiList, prevCover)) {
-        //   resolvedShotokuKubun = undefined;
-        // }
-        // if (opt.debug) {
-        //   console.log(`所得区分: ${resolvedShotokuKubun}`)
-        // }
-        // const iryouKingaku = (totalTen * 10) + (prevCover.map.get(futanKubun)?.hokenCover?.kakari ?? 0);
-        // let gendogaku: number | undefined = undefined;
-        // if (opt.isBirthdayMonth75) {
-        //   if (resolvedShotokuKubun === "一般Ⅱ") {
-        //     gendogaku = gendogakuOfHairyoSochiBirthdayMonth(iryouKingaku);
-        //   } else {
-        //     gendogaku = gendogakuOfKubunOpt(
-        //       resolvedShotokuKubun,
-        //       iryouKingaku
-        //     );
-        //     if (gendogaku !== undefined) {
-        //       gendogaku /= 2.0;
-        //     }
-        //   }
-        // } else {
-        //   if (opt.gendogakuTasuuGaitou) {
-        //     gendogaku = gendogakuTasuuGaitouOfKubun(resolvedShotokuKubun);
-        //   } else {
-        //     gendogaku = gendogakuOfKubunOpt(
-        //       resolvedShotokuKubun,
-        //       iryouKingaku
-        //     );
-        //   }
-        // }
-        // if (opt.debug) {
-        //   console.log(`限度額: ${gendogaku}`);
-        // }
-        // slot.hokenCover = processHoken(totalTen, futanWari, gendogaku, prevCover.patientChargeOf(sel))
-        // kakari = slot.hokenCover.patientCharge;
-        // if (opt.marucho) {
-        //   const maruchoGendo = opt.marucho;
-        //   const hokenCover = slot.hokenCover;
-        //   if (hokenCover === undefined) {
-        //     throw new Error("マル長を適用する保険がない");
-        //   }
-        //   const accHokenCover = mergeOptions(hokenCover, prevCover.accHokenCover, mergeHokenCovers)!;
-        //   if (accHokenCover.maruchoGendogakuReached) {
-        //     hokenCover.patientCharge = 0;
-        //   } else {
-        //     if (accHokenCover.patientCharge > maruchoGendo) {
-        //       hokenCover.patientCharge = maruchoGendo - prevCover.patientChargeOf("H");
-        //       hokenCover.maruchoGendogakuReached = maruchoGendo;
-        //     }
-        //   }
-        // }
       } else {
         const index = kouhiSelectorToIndex(sel);
         const kouhiData = kouhiList[index];
@@ -605,7 +543,7 @@ export function calcFutanOne(
           gendogakuApplied: findGendo(opt, sel),
           debug: opt.debug,
         });
-        if( opt.debug ){
+        if (opt.debug) {
           console.log(`    kouhiCover: ${JSON.stringify(kouhiCover)}`);
         }
         slot.kouhiCovers[index] = kouhiCover;
