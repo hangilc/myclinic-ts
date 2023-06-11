@@ -1,5 +1,5 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
-import { 負担区分コード, 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
+import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 import { mergeOptions, optionFold, optionForEach } from "../option";
 import { calcGendogaku, isKuniKouhi2 } from "./gendogaku";
 
@@ -102,12 +102,12 @@ export class Slot {
     addToAccumMap(this.map, sel, cover, mergeCovers);
   }
 
-  debugDump(): void {
+  debugDump(): string {
     const obj: any = {};
     this.map.forEach((ten, code) => {
       obj[code] = ten;
     });
-    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
   }
 }
 
@@ -141,12 +141,12 @@ class TotalTens {
     return sum;
   }
 
-  debugDump(): void {
+  debugDump(): string {
     const obj: any = {};
     this.map.forEach((ten, code) => {
       obj[負担区分コードNameOf(code)] = ten;
     });
-    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
   }
 }
 
@@ -179,7 +179,7 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
     return charge;
   } else {
     if (charge + prevCharge > gendogaku) {
-      return gendogaku;
+      return gendogaku - prevCharge;
     } else {
       return charge;
     }
@@ -300,10 +300,11 @@ function processHokenWithFixedShotokuKubun({
     });
   }
   const g = gendo();
-  if( debug ){
+  if (debug) {
     console.log("gendogaku", g === undefined ? "none" : g);
+    console.log("applying gendogaku", totalTen * futanWari, prevPatientCharge);
   }
-  const remaining = applyGendogaku(totalTen * futanWari, prevPatientCharge, gendo());
+  const remaining = applyGendogaku(totalTen * futanWari, prevPatientCharge, g);
   return { kakari, remaining };
 }
 
@@ -321,7 +322,7 @@ function processHoken(arg: ProcessHokenContext): Cover {
     const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, arg.marucho);
     cover = Object.assign({}, cover, { remaining });
   }
-  if( debug ){
+  if (debug) {
     console.log("leave processHoken with", JSON.stringify(cover));
   }
   return cover;
@@ -346,13 +347,13 @@ class PatientChargeMap {
     return Array.from(this.map.values()).reduce(addNumbers, 0);
   }
 
-  debugDump(): void {
+  debugDump(): string {
     const obj: any = {};
     this.map.forEach((ten, code) => {
       const name = 負担区分コードNameOf(code);
       obj[name] = ten;
     });
-    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
   }
 
   static mergeAll(...eles: PatientChargeMap[]): PatientChargeMap {
@@ -385,10 +386,8 @@ export class TotalCover {
     return this.patientChargeMap.sum;
   }
 
-  debugDump(): void {
-    console.log("total cover slot "); this.slot.debugDump();
-    console.log("total cover tens"); this.tens.debugDump();
-    console.log("total cover patient charge"); this.patientChargeMap.debugDump();
+  debugDump(): string {
+    return `SLOT: ${this.slot.debugDump()}, CHARGE: ${this.patientChargeMap.debugDump()}`
   }
 }
 
@@ -467,12 +466,29 @@ export function calcFutanOne(
         }
         const accHokenCover = mergeOptions(curTotalCover.getCover("H"), prevCover.getCover("H"), mergeCovers) ||
           { kakari: 0, remaining: 0, gendogakuReached: false };
+        let iryouKingaku: number;
+        let prevPatientCharge: number;
+        if (futanKubunName === "H") {
+          const gendoCombined = resolveGendogakuCombined(curTotalCover, prevCover, futanWari, shotokuKubun, opt.shotokuKubunGroup);
+          if (gendoCombined) {
+            iryouKingaku = totalTens.totalTen * 10;
+            let pcm = PatientChargeMap.mergeAll(curTotalCover.patientChargeMap, prevCover.patientChargeMap);
+            prevPatientCharge = pcm.sum;
+          } else {
+            iryouKingaku = totalTen * 10;
+            prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
+          }
+        } else {
+          iryouKingaku = totalTen * 10;
+          prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
+        }
+
         const hokenCover = processHoken({
           totalTen,
           futanWari,
           shotokuKubun,
-          iryouKingaku: totalTen * 10,
-          prevPatientCharge: resolvePrevPatientCharge(curTotalCover, prevCover, futanWari, shotokuKubun, opt.shotokuKubunGroup),
+          iryouKingaku,
+          prevPatientCharge,
           hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi2(k.houbetsu, k.futanshaBangou)) >= 0,
           isTasuuGaitou: opt.gendogakuTasuuGaitou ?? false,
           shotokuKubunGroup: opt.shotokuKubunGroup,
@@ -501,8 +517,8 @@ export function calcFutanOne(
     }
     curTotalCover.patientChargeMap.addPatientCharge(futanKubun, patientCharge);
     if (opt.debug) {
-      console.log("leave futanKubun", 負担区分コードNameOf(futanKubun));
-      curTotalCover.debugDump();
+      console.log("leave futanKubun", 負担区分コードNameOf(futanKubun), "with", curTotalCover.debugDump());
+      ;
     }
   });
   return cur;
@@ -582,9 +598,8 @@ function canCombineGendogaku(shotokuKubun: ShotokuKubun, hokenFutan: number, kou
   }
 }
 
-function resolvePrevPatientCharge(curTotalCover: TotalCover, prevTotalCover: TotalCover,
-  futanWari: number, shotokuKubun: ShotokuKubun | undefined, shotokuKubunGroup: ShotokuKubunGroup | undefined): number {
-  let combine: boolean | undefined = undefined;
+function resolveGendogakuCombined(curTotalCover: TotalCover, prevTotalCover: TotalCover,
+  futanWari: number, shotokuKubun: ShotokuKubun | undefined, shotokuKubunGroup: ShotokuKubunGroup | undefined): boolean {
   if (shotokuKubun) {
     switch (shotokuKubun) {
       case "エ":
@@ -599,33 +614,22 @@ function resolvePrevPatientCharge(curTotalCover: TotalCover, prevTotalCover: Tot
       case "低所得Ⅰ":
       case "低所得Ⅰ（老福）":
       case "低所得Ⅰ（境）": {
-        combine = true;
-        break;
+        return true;
       }
     }
   }
-  if (combine === undefined) {
-    if (shotokuKubunGroup === "高齢受給" || shotokuKubunGroup === "後期高齢") {
-      combine = true;
+  if (shotokuKubunGroup === "高齢受給" || shotokuKubunGroup === "後期高齢") {
+    return true;
+  }
+  let hokenOnlyTen = 0;
+  let kouhiHeiyouTen = 0;
+  [curTotalCover, prevTotalCover].forEach(totalCover => totalCover.tens.map.forEach((ten, code) => {
+    const name = 負担区分コードNameOf(code)!;
+    if (name === "H") {
+      hokenOnlyTen += ten;
+    } else if (name.includes("H")) {
+      kouhiHeiyouTen += ten;
     }
-  }
-  if (combine === undefined) {
-    let hokenOnlyTen = 0;
-    let kouhiHeiyouTen = 0;
-    [curTotalCover, prevTotalCover].forEach(totalCover => totalCover.tens.map.forEach((ten, code) => {
-      const name = 負担区分コードNameOf(code)!;
-      if (name === "H") {
-        hokenOnlyTen += ten;
-      } else if (name.includes("H")) {
-        kouhiHeiyouTen += ten;
-      }
-    }));
-    combine = hokenOnlyTen * futanWari > 21000 && kouhiHeiyouTen * futanWari > 21000;
-  }
-  let pcm = PatientChargeMap.mergeAll(curTotalCover.patientChargeMap, prevTotalCover.patientChargeMap);
-  if (combine) {
-    return pcm.sum;
-  } else {
-    return pcm.map.get(負担区分コード["H"]) ?? 0;
-  }
+  }));
+  return hokenOnlyTen * futanWari > 21000 && kouhiHeiyouTen * futanWari > 21000;
 }

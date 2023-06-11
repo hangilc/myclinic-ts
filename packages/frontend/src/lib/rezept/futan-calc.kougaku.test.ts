@@ -1,6 +1,5 @@
-import { optionMap } from "../option";
-import { 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { AllHokenSelectors, calcFutan, KouhiKekkaku, MarutoNanbyou, TotalCover } from "./futan-calc";
+import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
+import { calcFutan, KouhiKekkaku, MarutoNanbyou, TotalCover } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -134,7 +133,7 @@ describe("高額療養費（70歳未満）", () => {
       mkTens(
         ["H1", 10000], ["H", 110000]
       ) 
-    ], { debug: true });
+    ], { debug: false });
     expect(patientChargeOf(covers)).equal(256180);
   });
 
