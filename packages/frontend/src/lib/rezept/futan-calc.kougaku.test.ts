@@ -137,6 +137,24 @@ describe("高額療養費（70歳未満）", () => {
     expect(patientChargeOf(covers)).equal(256180);
   });
 
+  it("事例17　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
+    const covers = calcFutan(3, "ア", [KouhiKekkaku], [
+      mkTens(
+        ["H1", 85000], ["H", 95000]
+      ) 
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(262180);
+  });
+
+  it("事例18　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
+    const covers = calcFutan(3, "イ", [KouhiKekkaku], [
+      mkTens(
+        ["H1", 85000], ["H", 5000]
+      ) 
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(57500);
+  });
+
 
 });
 
