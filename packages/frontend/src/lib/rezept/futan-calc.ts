@@ -5,14 +5,14 @@ import { calcGendogaku, isKuniKouhi2 } from "./gendogaku";
 
 interface Cover {
   kakari: number;
-  patientCharge: number;
+  remaining: number;
   gendogakuReached: boolean;
 }
 
 function mergeCovers(a: Cover, b: Cover): Cover {
   return {
     kakari: a.kakari + b.kakari,
-    patientCharge: a.patientCharge + b.patientCharge,
+    remaining: a.remaining + b.remaining,
     gendogakuReached: a.gendogakuReached || b.gendogakuReached,
   }
 }
@@ -70,17 +70,11 @@ export class Slot {
   }
 
   patientChargeOf(sel: HokenSelector): number {
-    return coverOptFold(this.coverOf(sel), c => c.patientCharge, 0);
+    return coverOptFold(this.coverOf(sel), c => c.remaining, 0);
   }
 
   kakariOf(sel: HokenSelector): number {
     return coverOptFold(this.coverOf(sel), c => c.kakari, 0);
-  }
-
-  get patientCharge(): number {
-    let sum = 0;
-    this.map.forEach(cover => sum += cover.patientCharge);
-    return sum;
   }
 
   merge(other: Slot): void {
@@ -96,6 +90,14 @@ export class Slot {
   addCover(sel: HokenSelector, cover: Cover): void {
     let c = optionFold(this.map.get(sel), c => mergeCovers(c, cover), cover);
     this.map.set(sel, c);
+  }
+
+  debugDump(): void {
+    const obj: any = {};
+    this.map.forEach((ten, code) => {
+      obj[code] = ten;
+    });
+    console.log(JSON.stringify(obj));
   }
 }
 
@@ -117,6 +119,14 @@ class TotalTens {
 
   get totalTen(): number {
     return Array.from(this.map.values()).reduce((a, b) => a + b, 0);
+  }
+
+  debugDump(): void {
+    const obj: any = {};
+    this.map.forEach((ten, code) => {
+      obj[code] = ten;
+    });
+    console.log(JSON.stringify(obj));
   }
 }
 
@@ -140,7 +150,7 @@ interface KouhiData {
 function noFutanKouhiProcessor({ kakari }: KouhiProcessorArg): Cover {
   return {
     kakari,
-    patientCharge: 0,
+    remaining: 0,
     gendogakuReached: false,
   }
 }
@@ -162,7 +172,7 @@ function mkGendogakuLimitProcessor(gendogaku: number): KouhiProcessor {
     const [patientCharge, gendogakuReached] = applyGendogaku(kakari, prevPatientCharge, gendogaku);
     return {
       kakari,
-      patientCharge,
+      remaining: patientCharge,
       gendogakuReached,
     }
   }
@@ -211,7 +221,7 @@ export const MarutoNanbyou: KouhiData = {
     }
     return {
       kakari,
-      patientCharge,
+      remaining: patientCharge,
       gendogakuReached,
     }
   }
@@ -223,7 +233,7 @@ export const KouhiKekkaku: KouhiData = {
   processor: ({ kakari, totalTen }: KouhiProcessorArg): Cover => {
     return {
       kakari,
-      patientCharge: totalTen * 0.5,
+      remaining: totalTen * 0.5,
       gendogakuReached: false,
     }
   }
@@ -277,10 +287,10 @@ function processHokenWithFixedShotokuKubun({
     });
   }
   if (gendogakuReached) {
-    return { kakari, patientCharge: 0, gendogakuReached: false };
+    return { kakari, remaining: 0, gendogakuReached: false };
   } else {
-    const [patientCharge, gendogakuReached] = applyGendogaku(totalTen * futanWari, prevPatientCharge, gendo());
-    return { kakari, patientCharge, gendogakuReached };
+    const [remaining, gendogakuReached] = applyGendogaku(totalTen * futanWari, prevPatientCharge, gendo());
+    return { kakari, remaining, gendogakuReached };
   }
 }
 
@@ -294,125 +304,23 @@ function processHoken(arg: ProcessHokenContext): Cover {
     console.log("    enter processHoken");
     console.log(`    arg: ${JSON.stringify(arg)}`);
   }
-  let cover: Cover;
-  if (shotokuKubun === undefined) {
-    cover = processHokenWithFixedShotokuKubun(arg);
-  } else if (shotokuKubun === "一般Ⅱ") { // 配慮措置
-    throw new Error("Not implemented");
-  } else {
-    if (hasKuniKouhi) {
-      cover = processHokenWithFixedShotokuKubun(Object.assign({}, arg, { shotokuKubun: "ext国公費" }));
-    } else {
-      cover = processHokenWithFixedShotokuKubun(arg);
-    }
-  }
+  let cover: Cover = processHokenWithFixedShotokuKubun(arg);
   if (arg.marucho !== undefined) {
-    const [patientCharge, gendogakuReached] = applyGendogaku(cover.patientCharge, arg.prevPatientCharge, arg.marucho);
-    cover = Object.assign({}, cover, { patientCharge, gendogakuReached });
+    const [remaining, gendogakuReached] = applyGendogaku(cover.remaining, arg.prevPatientCharge, arg.marucho);
+    cover = Object.assign({}, cover, { remaining, gendogakuReached });
   }
   return cover;
 }
 
-// export class TotalCover  {
-//   map: Map<HokenSelector, Cover> = new Map();
-
-//   setSlot(slot: Slot): void {
-//     this.mergeCover("H", slot.hokenCover);
-//     optionForEach(slot.hokenCover, this.mergeCover)
-//     this.map.set(futanCode, slot);
-//   }
-
-//   mergeCover(sel: HokenSelector, cover: Cover | undefined): void {
-//     if( cover === undefined ){
-//       return;
-//     }
-//     let c = optionFold(this.map.get(sel), c => mergeCovers(c, cover), cover);
-//     this.map.set(sel, c);
-//   }
-
-//   get accHokenCover(): Cover | undefined {
-//     return Array.from(this.map.entries())
-//       .reduce((acc: Cover | undefined, [_, slot]) => {
-//         return mergeOptions(acc, slot.hokenCover, mergeCovers);
-//       }, undefined);
-//   }
-
-//   accKouhiCover(sel: KouhiSelector): Cover | undefined {
-//     const index = kouhiSelectorToIndex(sel);
-//     return Array.from(this.map.entries())
-//       .reduce((acc: Cover | undefined, [_, slot]) => {
-//         return mergeOptions(acc, slot.kouhiCovers[index], mergeCovers);
-//       }, undefined);
-//   }
-
-//   // reduceByCodeGeneric<T>(code: HokenSelector, f: (acc: T, cover: Cover) => T, init: T): T {
-//   //   return Array.from(this.map.entries())
-//   //     .reduce((acc, [_, slot]) => {
-//   //       const cover = slot.coverOf(code);
-//   //       if (cover) {
-//   //         return f(acc, cover);
-//   //       } else {
-//   //         return acc;
-//   //       }
-//   //     }, init);
-//   // }
-
-//   // reduceByCode(code: HokenSelector, f: (cover: Cover) => number): number {
-//   //   return this.reduceByCodeGeneric<number>(code, ((acc, ele) => acc + f(ele)), 0);
-//   // }
-
-//   patientChargeOf(sel: HokenSelector): number {
-//     if( sel === "H" ){
-
-//     }
-//     return this.reduceByCode(code, c => c.patientCharge);
-//   }
-
-//   // kakariOf(code: HokenSelector): number {
-//   //   return this.reduceByCode(code, c => c.kakari);
-//   // }
-
-//   merge(other: TotalCover): TotalCover {
-//     const newMap: Map<負担区分コードCode, Slot> = new Map(this.map);
-//     Array.from(other.map.entries()).forEach(([kubun, slot]) => {
-//       const prev: Slot | undefined = newMap.get(kubun);
-//       if (prev === undefined) {
-//         newMap.set(kubun, slot);
-//       } else {
-//         newMap.set(kubun, prev.merge(slot));
-//       }
-//     });
-//     return new TotalCover(newMap);
-//   }
-
-//   get patientCharge(): number {
-//     return Array.from(this.map.values()).reduce((acc, ele) => acc + ele.patientCharge, 0);
-//   }
-
-//   static NullTotalCover(): TotalCover {
-//     return new TotalCover();
-//   }
-// }
-
-// function totalTenOfSelector(selector: HokenSelector, totalTens: Map<負担区分コードCode, number>): number {
-//   return Array.from(totalTens.entries()).reduce((acc: number, ele) => {
-//     const [futanKubun, totalTen] = ele;
-//     const futanName = 負担区分コードNameOf(futanKubun);
-//     if (futanNameIncludes(futanName, selector)) {
-//       return totalTen;
-//     } else {
-//       return 0;
-//     }
-//   }, 0);
-// }
-
 export class TotalCover {
   slot: Slot = new Slot();
   tens: TotalTens = new TotalTens();
+  patientCharge: number = 0;
 
   merge(other: TotalCover): void {
     this.slot.merge(other.slot);
     this.tens.merge(other.tens);
+    this.patientCharge += other.patientCharge;
   }
 
   getCover(sel: HokenSelector): Cover | undefined {
@@ -423,8 +331,9 @@ export class TotalCover {
     this.slot.addCover(sel, cover);
   }
 
-  get patientCharge(): number {
-    return this.slot.patientCharge;
+  debugDump(): void {
+    this.slot.debugDump();
+    this.tens.debugDump();
   }
 }
 
@@ -498,14 +407,14 @@ export function calcFutanOne(
           throw new Error("Cannot find futanWari");
         }
         const accHokenCover = mergeOptions(curTotalCover.getCover("H"), prevCover.getCover("H"), mergeCovers) ||
-          { kakari: 0, patientCharge: 0, gendogakuReached: false };
+          { kakari: 0, remaining: 0, gendogakuReached: false };
         const hokenCover = processHoken({
           totalTen,
           futanWari,
           gendogakuReached: accHokenCover.gendogakuReached,
           shotokuKubun,
           iryouKingaku: totalTen * 10,
-          prevPatientCharge: accHokenCover.patientCharge,
+          prevPatientCharge: accHokenCover.remaining,
           hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi2(k.houbetsu, k.futanshaBangou)) >= 0,
           isTasuuGaitou: opt.gendogakuTasuuGaitou ?? false,
           shotokuKubunGroup: opt.shotokuKubunGroup,
@@ -517,7 +426,8 @@ export function calcFutanOne(
           console.log(`    hokenCover: ${JSON.stringify(hokenCover)}`)
         }
         curTotalCover.addCover("H", hokenCover);
-        kakari = hokenCover.patientCharge;
+        curTotalCover.patientCharge = hokenCover.remaining;
+        kakari = hokenCover.remaining;
       } else {
         const index = kouhiSelectorToIndex(sel);
         const kouhiData = kouhiList[index];
@@ -533,10 +443,14 @@ export function calcFutanOne(
           console.log(`    kouhiCover: ${JSON.stringify(kouhiCover)}`);
         }
         curTotalCover.addCover(sel, kouhiCover);
-        kakari = kouhiCover.patientCharge;
+        curTotalCover.patientCharge = kouhiCover.remaining;
+        kakari = kouhiCover.remaining;
       }
     }
   });
+  if( opt.debug ){
+    cur.debugDump();
+  }
   return cur;
 }
 

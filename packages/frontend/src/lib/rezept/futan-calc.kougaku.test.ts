@@ -16,10 +16,6 @@ function patientChargeOf(totalCover: TotalCover): number {
   return round(totalCover.patientCharge);
 }
 
-function dj(arg: any): void {
-  console.log(JSON.stringify(arg, undefined, 2));
-}
-
 // 高額療養費の自己負担限度額の 見直しに係る計算事例 （平成27年1月）による
 describe("高額療養費（70歳未満）", () => {
   it("事例1　本人入院（標準報酬月額83万円以上）", () => {
@@ -106,13 +102,13 @@ describe("高額療養費（70歳未満）", () => {
     expect(patientChargeOf(covers)).equal(10000);
   });
 
-  it.only("事例13　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
+  it("事例13　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
     const covers = calcFutan(3, "ア", [KouhiKekkaku], [
       mkTens(
         ["H1", 6000], ["H", 9000]
       ) 
     ], { debug: true });
-    dj(covers);
+    expect(patientChargeOf(covers)).equal(30000);
   });
 
 
