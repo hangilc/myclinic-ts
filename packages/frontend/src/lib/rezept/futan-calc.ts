@@ -253,6 +253,19 @@ export const KouhiKekkaku: KouhiData = {
   }
 }
 
+// 更生医療
+export const KouhiKouseiIryou: KouhiData = {
+  houbetsu: 15,
+  processor: ({ kakari, totalTen, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg):
+    Cover => {
+    let remaining = totalTen * 1;
+    if (gendogakuApplied !== undefined) {
+      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
+    }
+    return { kakari, remaining }
+  }
+}
+
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
@@ -427,11 +440,9 @@ export interface CalcFutanOptions {
     kouhiBangou: number; // 1-based
   },
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
-  debug?: boolean;
-
-
   gendogakuTasuuGaitou?: true;
   shotokuKubunGroup?: ShotokuKubunGroup;
+  debug?: boolean;
 }
 
 export function calcFutanOne(

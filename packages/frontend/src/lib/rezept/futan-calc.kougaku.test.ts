@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiKekkaku, MarutoNanbyou, TotalCover } from "./futan-calc";
+import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, MarutoNanbyou, TotalCover } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -153,6 +153,60 @@ describe("高額療養費（70歳未満）", () => {
       ) 
     ], { debug: false });
     expect(patientChargeOf(covers)).equal(57500);
+  });
+
+  it("事例19　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
+    const covers = calcFutan(3, "イ", [KouhiKekkaku], [
+      mkTens(
+        ["H1", 5000], ["H", 95000]
+      ) 
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(173820);
+  });
+
+  it("事例20　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
+    const covers = calcFutan(3, "イ", [KouhiKekkaku], [
+      mkTens(
+        ["H1", 10000], ["H", 110000]
+      ) 
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(173820);
+  });
+
+  it("事例21　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
+    const covers = calcFutan(3, "イ", [KouhiKekkaku], [
+      mkTens(
+        ["H1", 85000], ["H", 95000]
+      ) 
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(179820);
+  });
+
+  it("事例22　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "ウ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 20000], ["H", 40000]
+      ) 
+    ], { gendogaku: { kingaku: 20000, kouhiBangou: 1 }, debug: false });
+    expect(patientChargeOf(covers)).equal(83430);
+  });
+
+  it("事例23　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "ウ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000], ["H", 30000]
+      ) 
+    ], { gendogaku: { kingaku: 30000, kouhiBangou: 1 }, debug: false });
+    expect(patientChargeOf(covers)).equal(83430);
+  });
+
+  it("事例23　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "エ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000]
+      ) 
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(5000);
   });
 
 
