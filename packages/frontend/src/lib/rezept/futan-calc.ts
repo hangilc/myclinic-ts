@@ -62,9 +62,22 @@ function kouhiSelectorToIndex(kouhiSelector: KouhiSelector): number {
   return parseInt(kouhiSelector) - 1;
 }
 
+function addNumbers(a: number, b: number): number {
+  return a + b;
+}
+
+function addToAccumMap<K, V>(map: Map<K, V>, key: K, value: V, acc: (a: V, b: V) => V): void {
+  const newValue = optionFold(map.get(key), cur => acc(cur, value), value);
+  map.set(key, newValue);
+}
+
+function mergeAccumMap<K, V>(dst: Map<K, V>, src: Map<K, V>, acc: (a: V, b: V) => V): void {
+  src.forEach((value, key) => addToAccumMap(dst, key, value, acc));
+}
+
 export class Slot {
   map: Map<HokenSelector, Cover> = new Map();
-  
+
   coverOf(sel: HokenSelector): Cover | undefined {
     return this.map.get(sel);
   }
@@ -77,19 +90,18 @@ export class Slot {
     return coverOptFold(this.coverOf(sel), c => c.kakari, 0);
   }
 
-  merge(other: Slot): void {
-    other.map.forEach((cover, sel) => this.addCover(sel, cover));
+  mergeFrom(other: Slot): void {
+    mergeAccumMap(this.map, other.map, mergeCovers);
   }
 
   clone(): Slot {
     const slot = new Slot();
-    slot.merge(this);
+    slot.mergeFrom(this);
     return slot;
   }
 
   addCover(sel: HokenSelector, cover: Cover): void {
-    let c = optionFold(this.map.get(sel), c => mergeCovers(c, cover), cover);
-    this.map.set(sel, c);
+    addToAccumMap(this.map, sel, cover, mergeCovers);
   }
 
   debugDump(): void {
@@ -109,16 +121,26 @@ class TotalTens {
   }
 
   addTen(futanCode: 負担区分コードCode, ten: number): void {
-    let c = optionFold(this.map.get(futanCode), e => e + ten, 0);
-    this.map.set(futanCode, c);
+    addToAccumMap(this.map, futanCode, ten, addNumbers);
   }
 
-  merge(other: TotalTens): void {
-    other.map.forEach((ten, code) => this.addTen(code, ten));
+  mergeFrom(other: TotalTens): void {
+    mergeAccumMap(this.map, other.map, addNumbers);
   }
 
   get totalTen(): number {
     return Array.from(this.map.values()).reduce((a, b) => a + b, 0);
+  }
+
+  sumOf(sel: HokenSelector): number {
+    let sum = 0;
+    this.map.forEach((ten, code) => {
+      const name = 負担区分コードRev.get(code)!;
+      if (name.includes(sel)) {
+        sum += ten;
+      }
+    })
+    return sum;
   }
 
   debugDump(): void {
@@ -312,15 +334,35 @@ function processHoken(arg: ProcessHokenContext): Cover {
   return cover;
 }
 
+class PatientChargeMap {
+  map: Map<負担区分コードCode, number> = new Map();
+
+  addPatientCharge(futanCode: 負担区分コードCode, patientCharge: number): void {
+    addToAccumMap(this.map, futanCode, patientCharge, addNumbers);
+  }
+
+  mergeFrom(other: PatientChargeMap): void {
+    mergeAccumMap(this.map, other.map, addNumbers);
+  }
+
+  patientChargeOf(futanKubun: 負担区分コードCode): number {
+    return this.map.get(futanKubun) ?? 0;
+  }
+
+  get sum(): number {
+    return Array.from(this.map.values()).reduce(addNumbers, 0);
+  }
+}
+
 export class TotalCover {
   slot: Slot = new Slot();
   tens: TotalTens = new TotalTens();
-  patientCharge: number = 0;
+  patientChargeMap: PatientChargeMap = new PatientChargeMap();
 
   merge(other: TotalCover): void {
-    this.slot.merge(other.slot);
-    this.tens.merge(other.tens);
-    this.patientCharge += other.patientCharge;
+    this.slot.mergeFrom(other.slot);
+    this.tens.mergeFrom(other.tens);
+    this.patientChargeMap.mergeFrom(other.patientChargeMap);
   }
 
   getCover(sel: HokenSelector): Cover | undefined {
@@ -329,6 +371,10 @@ export class TotalCover {
 
   addCover(sel: HokenSelector, cover: Cover) {
     this.slot.addCover(sel, cover);
+  }
+
+  get patientCharge(): number {
+    return this.patientChargeMap.sum;
   }
 
   debugDump(): void {
@@ -397,6 +443,7 @@ export function calcFutanOne(
     }
     const curKouhiList: KouhiData[] = kouhiListOfKubun(futanKubun, kouhiList);
     let kakari: number = totalTen * 10;
+    const futanKubunName: 負担区分コードName = 負担区分コードRev.get(futanKubun)!;
     const selectors = splitFutanKubun(futanKubun);
     for (let sel of selectors) {
       if (opt.debug) {
@@ -414,7 +461,7 @@ export function calcFutanOne(
           gendogakuReached: accHokenCover.gendogakuReached,
           shotokuKubun,
           iryouKingaku: totalTen * 10,
-          prevPatientCharge: accHokenCover.remaining,
+          prevPatientCharge: resolvePrevPatientCharge(),
           hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi2(k.houbetsu, k.futanshaBangou)) >= 0,
           isTasuuGaitou: opt.gendogakuTasuuGaitou ?? false,
           shotokuKubunGroup: opt.shotokuKubunGroup,
@@ -448,7 +495,7 @@ export function calcFutanOne(
       }
     }
   });
-  if( opt.debug ){
+  if (opt.debug) {
     cur.debugDump();
   }
   return cur;
@@ -496,7 +543,7 @@ function kouhiListOfKubun(kubun: 負担区分コードCode, allKouhiList: KouhiD
     if (k !== "H") {
       const i = parseInt(k);
       const kouhiData: KouhiData = allKouhiList[i - 1];
-      if( kouhiData === undefined ){
+      if (kouhiData === undefined) {
         throw new Error("Cannot find KouhiData");
       }
       ks.push(kouhiData);
@@ -509,6 +556,67 @@ function hairyosochiNotApplicable(hasMarucho: boolean, kouhiList: KouhiData[]): 
   return hasMarucho || kouhiList.length > 0;
 }
 
-function canCombineGendogaku(shotokuKubun: ShotokuKubun): boolean {
-  throw new Error("not implemented");
+function canCombineGendogaku(shotokuKubun: ShotokuKubun, hokenFutan: number, kouhiFutan: number): boolean {
+  switch (shotokuKubun) {
+    case "エ":
+    case "オ":
+    case "現役並みⅢ":
+    case "現役並みⅡ":
+    case "現役並みⅠ":
+    case "一般Ⅱ":
+    case "一般Ⅰ":
+    case "一般":
+    case "低所得Ⅱ":
+    case "低所得Ⅰ":
+    case "低所得Ⅰ（老福）":
+    case "低所得Ⅰ（境）":
+      return true;
+    default: return hokenFutan > 21000 && kouhiFutan > 21000;
+  }
+}
+
+function resolvePrevPatientCharge(curTotalCover: TotalCover, prevTotalCover: TotalCover,
+  futanWari: number, shotokuKubun: ShotokuKubun | undefined, shotokuKubunGroup: ShotokuKubunGroup | undefined): number {
+  let combine: boolean | undefined = undefined;
+  if (shotokuKubun) {
+    switch (shotokuKubun) {
+      case "エ":
+      case "オ":
+      case "現役並みⅢ":
+      case "現役並みⅡ":
+      case "現役並みⅠ":
+      case "一般Ⅱ":
+      case "一般Ⅰ":
+      case "一般":
+      case "低所得Ⅱ":
+      case "低所得Ⅰ":
+      case "低所得Ⅰ（老福）":
+      case "低所得Ⅰ（境）": {
+        combine = true;
+        break;
+      }
+    }
+  }
+  if( combine === undefined ){
+    if( shotokuKubunGroup === "高齢受給" || shotokuKubunGroup === "後期高齢" ){
+      combine = true;
+    }
+  }
+  if( combine === undefined ){
+    let hokenOnlyTen = 0;
+    let kouhiHeiyouTen = 0;
+    [curTotalCover, prevTotalCover].forEach(totalCover => totalCover.tens.map.forEach((ten, code) => {
+      const name = 負担区分コードNameOf(code)!;
+      if (name === "H") {
+        hokenOnlyTen += ten;
+      } else if (name.includes("H")) {
+        kouhiHeiyouTen += ten;
+      }
+    }));
+    combine = hokenOnlyTen * futanWari > 21000 && kouhiHeiyouTen * futanWari > 21000;
+  }
+  let patientCharge = 0;
+  [curTotalCover, prevTotalCover].forEach(totalCover => {
+
+  });
 }
