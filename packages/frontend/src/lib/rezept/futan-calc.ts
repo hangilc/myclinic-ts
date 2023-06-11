@@ -1,5 +1,5 @@
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
-import { 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
+import { 負担区分コード, 負担区分コードNameOf, 負担区分コードRev, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 import { mergeOptions, optionFold, optionForEach } from "../option";
 import { calcGendogaku, isKuniKouhi2 } from "./gendogaku";
 
@@ -352,6 +352,12 @@ class PatientChargeMap {
   get sum(): number {
     return Array.from(this.map.values()).reduce(addNumbers, 0);
   }
+
+  static mergeAll(...eles: PatientChargeMap[]): PatientChargeMap {
+    const dst = new PatientChargeMap();
+    eles.forEach(e => dst.mergeFrom(e));
+    return dst;
+  }
 }
 
 export class TotalCover {
@@ -461,7 +467,7 @@ export function calcFutanOne(
           gendogakuReached: accHokenCover.gendogakuReached,
           shotokuKubun,
           iryouKingaku: totalTen * 10,
-          prevPatientCharge: resolvePrevPatientCharge(),
+          prevPatientCharge: resolvePrevPatientCharge(curTotalCover, prevCover, futanWari, shotokuKubun, opt.shotokuKubunGroup),
           hasKuniKouhi: curKouhiList.findIndex(k => isKuniKouhi2(k.houbetsu, k.futanshaBangou)) >= 0,
           isTasuuGaitou: opt.gendogakuTasuuGaitou ?? false,
           shotokuKubunGroup: opt.shotokuKubunGroup,
@@ -615,8 +621,10 @@ function resolvePrevPatientCharge(curTotalCover: TotalCover, prevTotalCover: Tot
     }));
     combine = hokenOnlyTen * futanWari > 21000 && kouhiHeiyouTen * futanWari > 21000;
   }
-  let patientCharge = 0;
-  [curTotalCover, prevTotalCover].forEach(totalCover => {
-
-  });
+  let pcm = PatientChargeMap.mergeAll(curTotalCover.patientChargeMap, prevTotalCover.patientChargeMap);
+  if( combine ){
+    return pcm.sum;
+  } else {
+    return pcm.map.get(負担区分コード["H"]) ?? 0;
+  }
 }
