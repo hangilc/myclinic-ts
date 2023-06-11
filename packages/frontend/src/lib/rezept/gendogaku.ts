@@ -42,7 +42,7 @@ function gendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, isBirthdayMonth7
   }
 }
 
-export function gendogakuKuniKouhi(
+function gendogakuKuniKouhi(
   shotokuKubun: ShotokuKubun,
   iryouhi: number,
   isBirthdayMonth75: boolean,
@@ -64,11 +64,11 @@ export function gendogakuKuniKouhi(
     case "低所得Ⅱ":
     case "低所得Ⅰ":
       return fixed(8000, isBirthdayMonth75);
-    default: throw new Error("Cannot hanlde: " + shotokuKubun);
+    default: throw new Error("Cannot handle: " + shotokuKubun);
   }
 }
 
-export function gendogakuTasuuGaitou(
+function gendogakuTasuuGaitou(
   kubun: ShotokuKubun,
   isBirthdayMonth75: boolean,
 ): number {
@@ -112,9 +112,19 @@ const KuniKouhiHoubetsu = [
   13, 14, 18, 19, 28, 29, 10, 11, 20, 16, 15, 21, 22, 17, 52, 23, 54, 51, 53, 79, 12
 ]
 
+export function is特定疾病2(houbetsuBangou: number, futanshaBangou: number | undefined): boolean {
+  return [51, 52, 54].includes(houbetsuBangou) || (
+    futanshaBangou !== undefined && is肝がん(futanshaBangou)
+  );
+}
+
 export function is特定疾病(futanshaBangou: number): boolean {
   const houbetsu = houbetsuBangouOf(futanshaBangou);
-  return [51, 52, 54].includes(houbetsu) || is肝がん(futanshaBangou);
+  return is特定疾病2(houbetsu, futanshaBangou);
+}
+
+export function isKuniKouhi2(houbetsuBangou: number, futanshaBangou: number | undefined): boolean {
+  return (!is特定疾病2(houbetsuBangou, futanshaBangou) && KuniKouhiHoubetsu.includes(houbetsuBangou));
 }
 
 export function isKuniKouhi(futanshaBangou: number): boolean {
@@ -140,3 +150,4 @@ function fixed(gendogaku: number, isBirthdayMonth75: boolean): number {
     return gendogaku;
   }
 }
+
