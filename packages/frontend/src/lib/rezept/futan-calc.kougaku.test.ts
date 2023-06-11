@@ -200,13 +200,76 @@ describe("高額療養費（70歳未満）", () => {
     expect(patientChargeOf(covers)).equal(83430);
   });
 
-  it("事例23　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
+  it("事例24　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
     const covers = calcFutan(3, "エ", [KouhiKouseiIryou], [
       mkTens(
         ["H1", 30000]
       ) 
     ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
     expect(patientChargeOf(covers)).equal(5000);
+  });
+
+  it("事例25　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "エ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 10000], ["H", 20000]
+      ) 
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(57600);
+  });
+
+  it("事例26　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "エ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000], ["H", 30000]
+      ) 
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(57600);
+  });
+
+  it("事例27　本人入院（低所得者）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "オ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 10000], ["H", 20000]
+      ) 
+    ], { gendogaku: { kingaku: 0, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(35400);
+  });
+
+  it("事例28　本人入院（低所得者）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "オ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000], ["H", 10000]
+      ) 
+    ], { gendogaku: { kingaku: 0, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(30000);
+  });
+
+  it("事例29　本人入院（低所得者）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "オ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000], ["H", 30000]
+      ) 
+    ], { gendogaku: { kingaku: 0, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(35400);
+  });
+
+  it("事例30　本人入院（低所得者）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "オ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 10000], ["H", 20000]
+      ) 
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(35400);
+  });
+
+  it("事例31　本人入院（低所得者）・公費（更生医療）", () => {
+    const covers = calcFutan(3, "オ", [KouhiKouseiIryou], [
+      mkTens(
+        ["H1", 30000], ["H", 30000]
+      ) 
+    ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 },  debug: false });
+    expect(patientChargeOf(covers)).equal(35400);
   });
 
 
