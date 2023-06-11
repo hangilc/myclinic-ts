@@ -299,6 +299,10 @@ function processHokenWithFixedShotokuKubun({
       hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75
     });
   }
+  const g = gendo();
+  if( debug ){
+    console.log("gendogaku", g === undefined ? "none" : g);
+  }
   const remaining = applyGendogaku(totalTen * futanWari, prevPatientCharge, gendo());
   return { kakari, remaining };
 }
@@ -310,13 +314,15 @@ interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
 function processHoken(arg: ProcessHokenContext): Cover {
   const { shotokuKubun, hasKuniKouhi, debug } = arg;
   if (debug) {
-    console.log("    enter processHoken");
-    console.log(`    arg: ${JSON.stringify(arg)}`);
+    console.log("enter processHoken with arg:", JSON.stringify(arg));
   }
   let cover: Cover = processHokenWithFixedShotokuKubun(arg);
   if (arg.marucho !== undefined) {
     const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, arg.marucho);
     cover = Object.assign({}, cover, { remaining });
+  }
+  if( debug ){
+    console.log("leave processHoken with", JSON.stringify(cover));
   }
   return cover;
 }
