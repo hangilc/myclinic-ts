@@ -451,6 +451,7 @@ export function calcFutanOne(
     let kakari: number = totalTen * 10;
     const futanKubunName: 負担区分コードName = 負担区分コードRev.get(futanKubun)!;
     const selectors = splitFutanKubun(futanKubun);
+    let patientCharge = kakari;
     for (let sel of selectors) {
       if (opt.debug) {
         console.log(`  sel: ${sel}, kakari: ${kakari}`);
@@ -479,7 +480,7 @@ export function calcFutanOne(
           console.log(`    hokenCover: ${JSON.stringify(hokenCover)}`)
         }
         curTotalCover.addCover("H", hokenCover);
-        curTotalCover.patientCharge = hokenCover.remaining;
+        patientCharge = hokenCover.remaining;
         kakari = hokenCover.remaining;
       } else {
         const index = kouhiSelectorToIndex(sel);
@@ -496,10 +497,11 @@ export function calcFutanOne(
           console.log(`    kouhiCover: ${JSON.stringify(kouhiCover)}`);
         }
         curTotalCover.addCover(sel, kouhiCover);
-        curTotalCover.patientCharge = kouhiCover.remaining;
+        patientCharge = kouhiCover.remaining;
         kakari = kouhiCover.remaining;
       }
     }
+    curTotalCover.patientChargeMap.addPatientCharge(futanKubun, patientCharge);
   });
   if (opt.debug) {
     cur.debugDump();
