@@ -24,7 +24,6 @@ export function gendogakuOfKubun(
     case "低所得Ⅰ":
     case "低所得Ⅰ（老福）":
     case "低所得Ⅰ（境）": return 8000;
-    // case "ext国公費": return kuniKouhiHeiyouGendogaku(iryouKingaku);
     default: throw new Error("Cannot handle kubun: " + kubun);
   }
 }
