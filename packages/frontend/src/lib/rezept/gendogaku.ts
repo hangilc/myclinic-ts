@@ -33,7 +33,7 @@ function gendogaku(
       return calc(167400, iryouhi, 558000, 0.01, isBirthdayMonth75);
     case "ウ": case "現役並みⅠ":
       return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
-    case "エ": 
+    case "エ":
       return fixed(57600, isBirthdayMonth75);
     case "オ": case "オ（境）":
       return fixed(35400, isBirthdayMonth75);
@@ -43,9 +43,23 @@ function gendogaku(
         calc(6000, iryouhi, 30000, 0.10, isBirthdayMonth75)
       ); // 配慮措置（令和７年９月30日まで）
     case "一般Ⅰ": case "一般":
-      return fixed(18000, isBirthdayMonth75);
-    case "低所得Ⅱ": case "低所得Ⅰ": case "低所得Ⅰ（老福）": case "低所得Ⅰ（境）":
-      return fixed(8000, isBirthdayMonth75);
+      if (isNyuuin) {
+        return fixed(57600, isBirthdayMonth75);
+      } else {
+        return fixed(18000, isBirthdayMonth75);
+      }
+    case "低所得Ⅱ":
+      if (isNyuuin) {
+        return fixed(24600, isBirthdayMonth75);
+      } else {
+        return fixed(8000, isBirthdayMonth75);
+      }
+    case "低所得Ⅰ": case "低所得Ⅰ（老福）": case "低所得Ⅰ（境）":
+      if (isNyuuin) {
+        return fixed(15000, isBirthdayMonth75);
+      } else {
+        return fixed(8000, isBirthdayMonth75);
+      }
   }
 }
 
@@ -68,10 +82,13 @@ function gendogakuKuniKouhi(
     case "一般":
     case "一般Ⅱ":
     case "一般Ⅰ":
-      return fixed(12000, isBirthdayMonth75);
     case "低所得Ⅱ":
     case "低所得Ⅰ":
-      return fixed(8000, isBirthdayMonth75);
+      if( isNyuuin ){
+        return fixed(57600, isBirthdayMonth75);
+      } else {
+        return fixed(18000, isBirthdayMonth75);
+      }
     default: throw new Error("Cannot handle: " + shotokuKubun);
   }
 }
@@ -93,13 +110,20 @@ function gendogakuTasuuGaitou(
       return fixed(44400, isBirthdayMonth75);
     case "エ": return fixed(44400, isBirthdayMonth75);
     case "オ": return fixed(24600, isBirthdayMonth75);
-    case "一般":
     case "一般Ⅱ":
+    case "一般":
     case "一般Ⅰ":
-      return fixed(18000, isBirthdayMonth75);
-    case "低所得Ⅱ":
-    case "低所得Ⅰ":
-      return fixed(8000, isBirthdayMonth75);
+      if( isNyuuin ){
+        return fixed(44400, isBirthdayMonth75);
+      } else {
+        return fixed(18000, isBirthdayMonth75);
+      }
+    // case "低所得Ⅱ":
+    //   if( isNyuuin ){
+    //     return fixed(8000, isBirthdayMonth75);
+    //   }
+    // case "低所得Ⅰ":
+    //   return fixed(8000, isBirthdayMonth75);
     default: throw new Error("Cannot handle: " + kubun);
   }
 }

@@ -157,16 +157,17 @@ describe("高額療養費（高齢受給者）", () => {
     expect(patientChargeOf(covers)).equal(34500);
   });
 
-  // it("事例１８　高齢受給者入院（75歳到達月）（多数回該当）", () => {
-  //   const covers = calcFutan(3, "一般", [], [
-  //     mkTens(["H", 13500]),
-  //   ], {
-  //     gendogakuTasuuGaitou: true,
-  //     isBirthdayMonth75: true,
-  //     debug: true 
-  //   });
-  //   expect(patientChargeOf(covers)).equal(22200);
-  // });
+  it("事例１８　高齢受給者入院（75歳到達月）（多数回該当）", () => {
+    const covers = calcFutan(3, "一般", [], [
+      mkTens(["H", 13500]),
+    ], {
+      gendogakuTasuuGaitou: true,
+      isBirthdayMonth75: true,
+      isNyuuin: true,
+      debug: true 
+    });
+    expect(patientChargeOf(covers)).equal(22200);
+  });
 
 });
 

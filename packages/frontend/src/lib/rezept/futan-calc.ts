@@ -287,6 +287,7 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   isBirthdayMonth75?: boolean;
   marucho: 10000 | 20000 | undefined;
   isKourei1WariShiteiKouhi?: boolean;
+  isNyuuin?: boolean;
   debug?: boolean;
 }
 
@@ -300,7 +301,7 @@ function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): Sho
 
 function processHokenWithFixedShotokuKubun({
   totalTen, futanWari, shotokuKubun, iryouKingaku, prevPatientCharge,
-  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, debug
+  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, debug
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
   function gendo(): number | undefined {
@@ -315,7 +316,7 @@ function processHokenWithFixedShotokuKubun({
       }
     }
     return calcGendogaku(shotokuKubun, iryouKingaku, {
-      hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75
+      hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75, isNyuuin
     });
   }
   const g = gendo();
@@ -456,6 +457,7 @@ export interface CalcFutanOptions {
   gendogakuTasuuGaitou?: true;
   shotokuKubunGroup?: ShotokuKubunGroup;
   isKourei1WariShiteiKouhi?: boolean;
+  isNyuuin?: boolean;
   debug?: boolean;
 }
 
@@ -520,6 +522,7 @@ export function calcFutanOne(
           isBirthdayMonth75: opt.isBirthdayMonth75,
           marucho: opt.marucho,
           isKourei1WariShiteiKouhi: opt.isKourei1WariShiteiKouhi,
+          isNyuuin: opt.isNyuuin,
           debug: opt.debug,
         });
         curTotalCover.addCover("H", hokenCover);
