@@ -11,11 +11,11 @@ export interface GendogakuOptions {
 export function calcGendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, opts: GendogakuOptions = {}): number {
   const isBirthdayMonth75: boolean = opts.isBirthdayMonth75 ?? false;
   if( opts.hasKuniKouhi ){
-    return gendogakuKuniKouhi(shotokuKubun, iryouhi, false);
+    return gendogakuKuniKouhi(shotokuKubun, iryouhi, isBirthdayMonth75);
   } else if( opts.isTasuuGaitou ){
-    return gendogakuTasuuGaitou(shotokuKubun, false);
+    return gendogakuTasuuGaitou(shotokuKubun, isBirthdayMonth75);
   }
-  return gendogaku(shotokuKubun, iryouhi, false);
+  return gendogaku(shotokuKubun, iryouhi, isBirthdayMonth75);
 }
 
 function gendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, isBirthdayMonth75: boolean): number {
