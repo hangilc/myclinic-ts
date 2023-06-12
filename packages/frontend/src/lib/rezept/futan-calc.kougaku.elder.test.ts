@@ -45,4 +45,25 @@ describe("高額療養費（高齢受給者）", () => {
     expect(patientChargeOf(covers)).equal(84270);
   });
 
+  it("事例５　高齢受給者入院", () => {
+    const covers = calcFutan(3, "現役並みⅠ", [], [
+      mkTen("H", 27600),
+    ], { debug: false });
+    expect(patientChargeOf(covers)).equal(80190);
+  });
+
+  it("事例６　高齢受給者入院（75歳到達月）（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅠ", [], [
+      mkTen("H", 15200),
+    ], { isBirthdayMonth75: true, gendogakuTasuuGaitou: true, debug: false });
+    expect(patientChargeOf(covers)).equal(22200);
+  });
+
+  it("事例７　高齢受給者入院・難病医療", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [MarutoNanbyou], [
+      mkTen("H", 90500),
+    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, debug: false });
+    expect(patientChargeOf(covers)).equal(10000);
+  });
+
 });
