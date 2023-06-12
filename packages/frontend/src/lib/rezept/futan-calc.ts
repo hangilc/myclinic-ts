@@ -150,7 +150,7 @@ class TotalTens {
   }
 }
 
-interface KouhiProcessorArg {
+export interface KouhiProcessorArg {
   kakari: number;
   totalTen: number;
   hokenFutanWari: number | undefined;
@@ -161,7 +161,7 @@ interface KouhiProcessorArg {
 
 type KouhiProcessor = (arg: KouhiProcessorArg) => Cover;
 
-interface KouhiData {
+export interface KouhiData {
   processor: KouhiProcessor;
   houbetsu: number;
   futanshaBangou?: number;
@@ -286,6 +286,7 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   shotokuKubunGroup?: ShotokuKubunGroup;
   isBirthdayMonth75?: boolean;
   marucho: 10000 | 20000 | undefined;
+  isKourei1WariShiteiKouhi?: boolean;
   debug?: boolean;
 }
 
@@ -336,6 +337,13 @@ function processHoken(arg: ProcessHokenContext): Cover {
     console.log("enter processHoken with arg:", JSON.stringify(arg));
   }
   let cover: Cover = processHokenWithFixedShotokuKubun(arg);
+  if( arg.isKourei1WariShiteiKouhi !== undefined && arg.isKourei1WariShiteiKouhi ){
+    if( arg.futanWari === 2 ){
+      cover.remaining = arg.totalTen * 1;
+    } else {
+      throw new Error("Futan wari 2 expected");
+    }
+  }
   if (arg.marucho !== undefined) {
     const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, arg.marucho);
     cover = Object.assign({}, cover, { remaining });
@@ -447,6 +455,7 @@ export interface CalcFutanOptions {
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
   gendogakuTasuuGaitou?: true;
   shotokuKubunGroup?: ShotokuKubunGroup;
+  isKourei1WariShiteiKouhi?: boolean;
   debug?: boolean;
 }
 
@@ -510,6 +519,7 @@ export function calcFutanOne(
           shotokuKubunGroup: opt.shotokuKubunGroup,
           isBirthdayMonth75: opt.isBirthdayMonth75,
           marucho: opt.marucho,
+          isKourei1WariShiteiKouhi: opt.isKourei1WariShiteiKouhi,
           debug: opt.debug,
         });
         curTotalCover.addCover("H", hokenCover);

@@ -6,19 +6,26 @@ export interface GendogakuOptions {
   hasKuniKouhi?: boolean;
   isTasuuGaitou?: boolean;
   isBirthdayMonth75?: boolean;
+  isNyuuin?: boolean;
 }
 
 export function calcGendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, opts: GendogakuOptions = {}): number {
   const isBirthdayMonth75: boolean = opts.isBirthdayMonth75 ?? false;
-  if( opts.hasKuniKouhi ){
-    return gendogakuKuniKouhi(shotokuKubun, iryouhi, isBirthdayMonth75);
-  } else if( opts.isTasuuGaitou ){
-    return gendogakuTasuuGaitou(shotokuKubun, isBirthdayMonth75);
+  const isNyuuin: boolean = opts.isNyuuin ?? false;
+  if (opts.hasKuniKouhi) {
+    return gendogakuKuniKouhi(shotokuKubun, iryouhi, isBirthdayMonth75, isNyuuin);
+  } else if (opts.isTasuuGaitou) {
+    return gendogakuTasuuGaitou(shotokuKubun, isBirthdayMonth75, isNyuuin);
   }
-  return gendogaku(shotokuKubun, iryouhi, isBirthdayMonth75);
+  return gendogaku(shotokuKubun, iryouhi, isBirthdayMonth75, isNyuuin);
 }
 
-function gendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, isBirthdayMonth75: boolean): number {
+function gendogaku(
+  shotokuKubun: ShotokuKubun,
+  iryouhi: number,
+  isBirthdayMonth75: boolean,
+  isNyuuin: boolean
+): number {
   switch (shotokuKubun) {
     case "ア": case "現役並みⅢ":
       return calc(252600, iryouhi, 842000, 0.01, isBirthdayMonth75);
@@ -26,13 +33,13 @@ function gendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, isBirthdayMonth7
       return calc(167400, iryouhi, 558000, 0.01, isBirthdayMonth75);
     case "ウ": case "現役並みⅠ":
       return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
-    case "エ":
+    case "エ": 
       return fixed(57600, isBirthdayMonth75);
     case "オ": case "オ（境）":
       return fixed(35400, isBirthdayMonth75);
     case "一般Ⅱ":
       return Math.min(
-        fixed(18000, isBirthdayMonth75), 
+        fixed(18000, isBirthdayMonth75),
         calc(6000, iryouhi, 30000, 0.10, isBirthdayMonth75)
       ); // 配慮措置（令和７年９月30日まで）
     case "一般Ⅰ": case "一般":
@@ -46,6 +53,7 @@ function gendogakuKuniKouhi(
   shotokuKubun: ShotokuKubun,
   iryouhi: number,
   isBirthdayMonth75: boolean,
+  isNyuuin: boolean,
 ): number {
   switch (shotokuKubun) {
     case "ア":
@@ -71,6 +79,7 @@ function gendogakuKuniKouhi(
 function gendogakuTasuuGaitou(
   kubun: ShotokuKubun,
   isBirthdayMonth75: boolean,
+  isNyuuin: boolean,
 ): number {
   switch (kubun) {
     case "ア":
@@ -132,7 +141,7 @@ export function isKuniKouhi(futanshaBangou: number): boolean {
 }
 
 function calc(threshold: number, iryouhi: number, offset: number, ratio: number, isBirthdayMonth75: boolean): number {
-  if( isBirthdayMonth75 ){
+  if (isBirthdayMonth75) {
     threshold /= 2;
     offset /= 2;
   }
@@ -144,7 +153,7 @@ function calc(threshold: number, iryouhi: number, offset: number, ratio: number,
 }
 
 function fixed(gendogaku: number, isBirthdayMonth75: boolean): number {
-  if( isBirthdayMonth75 ){
+  if (isBirthdayMonth75) {
     return gendogaku / 2;
   } else {
     return gendogaku;
