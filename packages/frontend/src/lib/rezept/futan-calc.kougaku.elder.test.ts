@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, MarutoNanbyou, TotalCover } from "./futan-calc";
+import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, MarutoNanbyou, TotalCover } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -60,10 +60,36 @@ describe("高額療養費（高齢受給者）", () => {
   });
 
   it("事例７　高齢受給者入院・難病医療", () => {
-    const covers = calcFutan(3, "現役並みⅢ", [MarutoNanbyou], [
-      mkTen("H", 90500),
+    const covers = calcFutan(3, "現役並みⅢ", [KuniNanbyou], [
+      mkTen("H1", 90500),
     ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, debug: false });
     expect(patientChargeOf(covers)).equal(10000);
   });
 
+  it("事例８　高齢受給者入院・難病医療（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [KuniNanbyou], [
+      mkTens(["H1", 48200], ["H", 47100]),
+    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, gendogakuTasuuGaitou: true, debug: false });
+    expect(patientChargeOf(covers)).equal(140100);
+  });
+
+  it("事例９　高齢受給者入院・難病医療", () => {
+    const covers = calcFutan(3, "現役並みⅡ", [KuniNanbyou], [
+      mkTen("H1", 67100),
+    ], { gendogaku: { kingaku: 10000, kouhiBangou: 1 }, debug: false });
+    expect(patientChargeOf(covers)).equal(10000);
+  });
+
+  it("事例１０　高齢受給者入院・難病医療（75歳到達月）（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅡ", [KuniNanbyou], [
+      mkTens(["H1", 67100], ["H", 16599]),
+    ], {
+      isBirthdayMonth75: true, 
+      gendogaku: { kingaku: 10000, kouhiBangou: 1 }, 
+      gendogakuTasuuGaitou: true,
+      debug: false });
+    expect(patientChargeOf(covers)).equal(46500);
+  });
+
 });
+

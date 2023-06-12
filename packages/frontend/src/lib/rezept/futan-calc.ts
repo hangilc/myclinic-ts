@@ -218,29 +218,34 @@ export const MaruAoNoFutan: KouhiData = {
 // マル都（難病）
 export const MarutoNanbyou: KouhiData = {
   houbetsu: 82,
-  processor: (arg: KouhiProcessorArg): Cover => {
-    if (arg.debug) {
-      console.log("    enter 公費難病");
-      console.log("      ", JSON.stringify(arg));
+  processor: nanbyouProcessor,
+}
+
+function nanbyouProcessor(arg: KouhiProcessorArg): Cover {
+  if (arg.debug) {
+    console.log("    enter 公費難病");
+    console.log("      ", JSON.stringify(arg));
+  }
+  const { kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied, debug } = arg;
+  let patientCharge = kakari;
+  if (gendogakuApplied !== undefined) {
+    patientCharge = gendogakuApplied - prevPatientCharge;
+    if (patientCharge < 0) {
+      throw new Error("Cannot happen in MarutoNanbyou");
     }
-    const { kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied, debug } = arg;
-    let patientCharge = kakari;
-    if (gendogakuApplied !== undefined) {
-      patientCharge = gendogakuApplied - prevPatientCharge;
-      if (patientCharge < 0) {
-        throw new Error("Cannot happen in MarutoNanbyou");
-      }
-    } else {
-      if (hokenFutanWari === 3) {
-        patientCharge -= totalTen;
-      }
-    }
-    return {
-      kakari,
-      remaining: patientCharge,
+  } else {
+    if (hokenFutanWari === 3) {
+      patientCharge -= totalTen;
     }
   }
+  return {
+    kakari,
+    remaining: patientCharge,
+  }
 }
+
+// 難病（国, 54）
+export const KuniNanbyou: KouhiData = { houbetsu: 54, processor: nanbyouProcessor };
 
 // 結核患者の適正医療
 export const KouhiKekkaku: KouhiData = {
