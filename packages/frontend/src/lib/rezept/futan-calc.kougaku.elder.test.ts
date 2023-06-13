@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, MarutoNanbyou, SeikatsuHogo, TotalCover, type KouhiData, type KouhiProcessorArg } from "./futan-calc";
+import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, MarutoNanbyou, SeikatsuHogo, TotalCover, type HokenSelector, type KouhiData, type KouhiProcessorArg } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -13,6 +13,10 @@ const round = Math.round;
 
 function patientChargeOf(totalCover: TotalCover): number {
   return round(totalCover.patientCharge);
+}
+
+function coveredBy(sel: HokenSelector, totalCover: TotalCover): number {
+  return totalCover.slot.kakariOf(sel) - totalCover.slot.patientChargeOf(sel);
 }
 
 // 高額療養費の自己負担限度額の見直しに係る請求計算事例（高齢受給者）平成30年8月による
@@ -294,8 +298,8 @@ describe("高額療養費（高齢受給者）", () => {
       debug: true 
     });
     expect(patientChargeOf(covers)).equal(0);
-    console.log(covers.slot.map.get("1"));
-    console.log(covers.slot.map.get("2"));
+    expect(coveredBy("1", covers)).equal(24600);
+    expect(coveredBy("2", covers)).equal(15000);
   });
 
 });

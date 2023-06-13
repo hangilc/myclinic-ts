@@ -24,7 +24,7 @@ function coverOptFold<T>(coverOpt: Cover | undefined, f: (c: Cover) => T, defaul
 }
 
 type KouhiSelector = "1" | "2" | "3" | "4";
-type HokenSelector = "H" | KouhiSelector;
+export type HokenSelector = "H" | KouhiSelector;
 export const AllHokenSelectors = ["H", "1", "2", "3", "4"] as const;
 
 function isKouhiSelector(c: string): c is KouhiSelector {
@@ -534,6 +534,7 @@ export function calcFutanOne(
           marucho: opt.marucho,
           isKourei1WariShiteiKouhi: opt.isKourei1WariShiteiKouhi,
           isNyuuin: opt.isNyuuin,
+          isSeikatsuHogo: curKouhiList.findIndex(d => d.houbetsu === 12) >= 0,
           debug: opt.debug,
         });
         curTotalCover.addCover("H", hokenCover);
