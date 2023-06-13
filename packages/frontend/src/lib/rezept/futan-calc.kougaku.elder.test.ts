@@ -289,7 +289,7 @@ describe("高額療養費（高齢受給者）", () => {
     expect(patientChargeOf(covers)).equal(7600);
   });
 
-  it.only("事例２９　高齢受給者入院・難病医療・生活保護", () => {
+  it("事例２９　高齢受給者入院・難病医療・生活保護", () => {
     const covers = calcFutan(2, "低所得Ⅱ", [KuniNanbyou, SeikatsuHogo()], [
       mkTens(["H1", 15500], ["H2", 9000]),
     ], {
@@ -300,6 +300,80 @@ describe("高額療養費（高齢受給者）", () => {
     expect(patientChargeOf(covers)).equal(0);
     expect(coveredBy("1", covers)).equal(24600);
     expect(coveredBy("2", covers)).equal(15000);
+  });
+
+  it("事例３０　高齢受給者入院・難病医療・生活保護", () => {
+    const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou, SeikatsuHogo()], [
+      mkTens(["H1", 9600], ["H2", 7800]),
+    ], {
+      isNyuuin: true,
+      gendogaku: { kingaku: 0, kouhiBangou: 1 },
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(0);
+    expect(coveredBy("1", covers)).equal(15000);
+    expect(coveredBy("2", covers)).equal(15000);
+  });
+
+  it("事例３１　高齢受給者外来", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [], [
+      mkTens(["H", 87300]),
+    ], {
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(252910);
+  });
+
+  it("事例３２　高齢受給者外来（75歳到達月）（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [], [
+      mkTens(["H", 24800]),
+    ], {
+      isBirthdayMonth75: true,
+      gendogakuTasuuGaitou: true,
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(70050);
+  });
+
+  it("事例３３　高齢受給者外来（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅡ", [], [
+      mkTens(["H", 34600]),
+    ], {
+      gendogakuTasuuGaitou: true,
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(93000);
+  });
+
+  it("事例３４　高齢受給者外来", () => {
+    const covers = calcFutan(3, "現役並みⅠ", [], [
+      mkTens(["H", 30300]),
+    ], {
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(80460);
+  });
+
+  it("事例３５　高齢受給者外来・難病医療（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅢ", [KuniNanbyou], [
+      mkTens(["H1", 13500], ["H", 47000]),
+    ], {
+      gendogakuTasuuGaitou: true,
+      gendogaku: { kingaku: 10000, kouhiBangou: 1 },
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(140100);
+  });
+
+  it("事例３６　高齢受給者外来・難病医療（多数回該当）", () => {
+    const covers = calcFutan(3, "現役並みⅡ", [KuniNanbyou], [
+      mkTens(["H1", 13500], ["H", 47000]),
+    ], {
+      gendogakuTasuuGaitou: true,
+      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      debug: false 
+    });
+    expect(patientChargeOf(covers)).equal(93000);
   });
 
 });
