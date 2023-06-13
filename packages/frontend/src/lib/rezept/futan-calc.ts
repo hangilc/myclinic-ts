@@ -271,6 +271,16 @@ export const KouhiKouseiIryou: KouhiData = {
   }
 }
 
+// 生活保護
+export function SeikatsuHogo(jikofutan: number = 0): KouhiData {
+  function processor({ kakari, prevPatientCharge }: KouhiProcessorArg): Cover {
+    const remaining = applyGendogaku(kakari, prevPatientCharge, jikofutan);
+    return { kakari, remaining };
+  }
+
+  return { houbetsu: 12, processor };
+}
+
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";

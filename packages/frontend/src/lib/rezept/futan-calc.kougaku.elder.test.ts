@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, MarutoNanbyou, TotalCover, type KouhiData, type KouhiProcessorArg } from "./futan-calc";
+import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, MarutoNanbyou, SeikatsuHogo, TotalCover, type KouhiData, type KouhiProcessorArg } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -197,7 +197,7 @@ describe("高額療養費（高齢受給者）", () => {
     ], {
       isNyuuin: true,
       gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(10000);
   });
@@ -208,7 +208,7 @@ describe("高額療養費（高齢受給者）", () => {
     ], {
       isNyuuin: true,
       gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(57600);
   });
@@ -220,7 +220,7 @@ describe("高額療養費（高齢受給者）", () => {
       isNyuuin: true,
       gendogaku: { kingaku: 10000, kouhiBangou: 1 },
       isBirthdayMonth75: true,
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(28800);
   });
@@ -232,7 +232,7 @@ describe("高額療養費（高齢受給者）", () => {
       isNyuuin: true,
       gendogaku: { kingaku: 10000, kouhiBangou: 1 },
       isKourei1WariShiteiKouhi: true,
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(10800);
   });
@@ -245,7 +245,7 @@ describe("高額療養費（高齢受給者）", () => {
       gendogaku: { kingaku: 10000, kouhiBangou: 1 },
       isBirthdayMonth75: true,
       gendogakuTasuuGaitou: true,
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(22200);
   });
@@ -256,7 +256,7 @@ describe("高額療養費（高齢受給者）", () => {
     ], {
       isNyuuin: true,
       gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(5000);
   });
@@ -268,7 +268,7 @@ describe("高額療養費（高齢受給者）", () => {
       isNyuuin: true,
       gendogaku: { kingaku: 5000, kouhiBangou: 1 },
       isKourei1WariShiteiKouhi: true,
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(7300);
   });
@@ -280,9 +280,22 @@ describe("高額療養費（高齢受給者）", () => {
       isNyuuin: true,
       gendogaku: { kingaku: 5000, kouhiBangou: 1 },
       isKourei1WariShiteiKouhi: true,
-      debug: true 
+      debug: false 
     });
     expect(patientChargeOf(covers)).equal(7600);
+  });
+
+  it.only("事例２９　高齢受給者入院・難病医療・生活保護", () => {
+    const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou, SeikatsuHogo()], [
+      mkTens(["H1", 15500], ["H2", 9000]),
+    ], {
+      isNyuuin: true,
+      gendogaku: { kingaku: 0, kouhiBangou: 1 },
+      debug: true 
+    });
+    expect(patientChargeOf(covers)).equal(0);
+    console.log(covers.slot.map.get("1"));
+    console.log(covers.slot.map.get("2"));
   });
 
 });
