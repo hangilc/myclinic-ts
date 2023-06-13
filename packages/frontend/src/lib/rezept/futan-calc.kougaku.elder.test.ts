@@ -286,7 +286,7 @@ describe("高額療養費（高齢受給者）", () => {
   });
 
   it.only("事例２９　高齢受給者入院・難病医療・生活保護", () => {
-    const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou, SeikatsuHogo()], [
+    const covers = calcFutan(2, "低所得Ⅱ", [KuniNanbyou, SeikatsuHogo()], [
       mkTens(["H1", 15500], ["H2", 9000]),
     ], {
       isNyuuin: true,

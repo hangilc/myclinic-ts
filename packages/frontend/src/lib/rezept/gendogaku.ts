@@ -7,12 +7,15 @@ export interface GendogakuOptions {
   isTasuuGaitou?: boolean;
   isBirthdayMonth75?: boolean;
   isNyuuin?: boolean;
+  isSeikatsuHogo?: boolean;
 }
 
 export function calcGendogaku(shotokuKubun: ShotokuKubun, iryouhi: number, opts: GendogakuOptions = {}): number {
   const isBirthdayMonth75: boolean = opts.isBirthdayMonth75 ?? false;
   const isNyuuin: boolean = opts.isNyuuin ?? false;
-  if (opts.hasKuniKouhi) {
+  if( opts.isSeikatsuHogo ){
+    return gendogakuOfSeikatsuHogo(shotokuKubun, isBirthdayMonth75, isNyuuin);
+  } else if (opts.hasKuniKouhi) {
     return gendogakuKuniKouhi(shotokuKubun, iryouhi, isBirthdayMonth75, isNyuuin);
   } else if (opts.isTasuuGaitou) {
     return gendogakuTasuuGaitou(shotokuKubun, isBirthdayMonth75, isNyuuin);
@@ -118,14 +121,34 @@ function gendogakuTasuuGaitou(
       } else {
         return fixed(18000, isBirthdayMonth75);
       }
-    // case "低所得Ⅱ":
-    //   if( isNyuuin ){
-    //     return fixed(8000, isBirthdayMonth75);
-    //   }
-    // case "低所得Ⅰ":
-    //   return fixed(8000, isBirthdayMonth75);
     default: throw new Error("Cannot handle: " + kubun);
   }
+}
+
+function gendogakuOfSeikatsuHogo(kubun: ShotokuKubun, isBirthdayMonth75: boolean, isNyuuin: boolean): number {
+  switch (kubun) {
+    case "ア":
+    case "イ":
+    case "ウ":
+    case "エ":
+    case "オ":
+      return fixed(35400, isBirthdayMonth75);
+    case "現役並みⅢ":
+    case "現役並みⅡ":
+    case "現役並みⅠ":
+    case "一般":
+    case "一般Ⅱ":
+    case "一般Ⅰ":
+    case "低所得Ⅱ":
+    case "低所得Ⅰ":
+      if( isNyuuin ){
+        return fixed(15000, isBirthdayMonth75);
+      } else {
+        return fixed(8000, isBirthdayMonth75);
+      }
+    default: throw new Error("Cannot handle: " + kubun);
+  }
+
 }
 
 function houbetsuBangouOf(futanshaBangou: number): number {

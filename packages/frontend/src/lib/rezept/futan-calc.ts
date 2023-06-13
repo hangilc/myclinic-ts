@@ -298,6 +298,7 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   marucho: 10000 | 20000 | undefined;
   isKourei1WariShiteiKouhi?: boolean;
   isNyuuin?: boolean;
+  isSeikatsuHogo?: boolean;
   debug?: boolean;
 }
 
@@ -311,7 +312,7 @@ function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): Sho
 
 function processHokenWithFixedShotokuKubun({
   totalTen, futanWari, shotokuKubun, iryouKingaku, prevPatientCharge,
-  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, debug
+  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, isSeikatsuHogo, debug
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
   function gendo(): number | undefined {
@@ -326,7 +327,7 @@ function processHokenWithFixedShotokuKubun({
       }
     }
     return calcGendogaku(shotokuKubun, iryouKingaku, {
-      hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75, isNyuuin
+      hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75, isNyuuin, isSeikatsuHogo,
     });
   }
   const g = gendo();
