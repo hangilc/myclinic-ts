@@ -281,6 +281,18 @@ export function SeikatsuHogo(jikofutan: number = 0): KouhiData {
   return { houbetsu: 12, processor };
 }
 
+// 精神通院
+export const KuniSeishinTsuuin: KouhiData = {
+  houbetsu: 21,
+  processor: ({ kakari, totalTen, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg): Cover => {
+    let remaining = totalTen * 1;
+    if( gendogakuApplied !== undefined ){
+      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
+    }
+    return { kakari, remaining };
+  }
+}
+
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
@@ -532,7 +544,7 @@ export function calcFutanOne(
           shotokuKubunGroup: opt.shotokuKubunGroup,
           isBirthdayMonth75: opt.isBirthdayMonth75,
           marucho: opt.marucho,
-          isKourei1WariShiteiKouhi: opt.isKourei1WariShiteiKouhi,
+          isKourei1WariShiteiKouhi: curKouhiList.length === 0 ? opt.isKourei1WariShiteiKouhi : undefined,
           isNyuuin: opt.isNyuuin,
           isSeikatsuHogo: curKouhiList.findIndex(d => d.houbetsu === 12) >= 0,
           debug: opt.debug,
