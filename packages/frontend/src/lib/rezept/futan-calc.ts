@@ -286,7 +286,7 @@ export const KuniSeishinTsuuin: KouhiData = {
   houbetsu: 21,
   processor: ({ kakari, totalTen, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg): Cover => {
     let remaining = totalTen * 1;
-    if( gendogakuApplied !== undefined ){
+    if (gendogakuApplied !== undefined) {
       remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
     }
     return { kakari, remaining };
@@ -361,8 +361,8 @@ function processHoken(arg: ProcessHokenContext): Cover {
     console.log("enter processHoken with arg:", JSON.stringify(arg));
   }
   let cover: Cover = processHokenWithFixedShotokuKubun(arg);
-  if( arg.isKourei1WariShiteiKouhi !== undefined && arg.isKourei1WariShiteiKouhi ){
-    if( arg.futanWari === 2 ){
+  if (arg.isKourei1WariShiteiKouhi !== undefined && arg.isKourei1WariShiteiKouhi) {
+    if (arg.futanWari === 2) {
       cover.remaining = arg.totalTen * 1;
     } else {
       throw new Error("Futan wari 2 expected");
@@ -532,8 +532,7 @@ export function calcFutanOne(
           iryouKingaku = totalTen * 10;
           prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
         }
-
-        const hokenCover = processHoken({
+        const processHokenContext: ProcessHokenContext = {
           totalTen,
           futanWari,
           shotokuKubun,
@@ -548,7 +547,9 @@ export function calcFutanOne(
           isNyuuin: opt.isNyuuin,
           isSeikatsuHogo: curKouhiList.findIndex(d => d.houbetsu === 12) >= 0,
           debug: opt.debug,
-        });
+        };
+
+        let hokenCover = processHoken(processHokenContext);
         curTotalCover.addCover("H", hokenCover);
         patientCharge = hokenCover.remaining;
         kakari = hokenCover.remaining;

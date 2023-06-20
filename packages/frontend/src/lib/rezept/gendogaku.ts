@@ -43,7 +43,7 @@ function gendogaku(
     case "一般Ⅱ":
       return Math.min(
         fixed(18000, isBirthdayMonth75),
-        calc(6000, iryouhi, 30000, 0.10, isBirthdayMonth75)
+        calc(6000, iryouhi, 30000, 0.10, false)
       ); // 配慮措置（令和７年９月30日まで）
     case "一般Ⅰ": case "一般":
       if (isNyuuin) {
