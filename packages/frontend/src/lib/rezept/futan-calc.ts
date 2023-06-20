@@ -369,7 +369,8 @@ function processHoken(arg: ProcessHokenContext): Cover {
     }
   }
   if (arg.marucho !== undefined) {
-    const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, arg.marucho);
+    const gendo = arg.isBirthdayMonth75 ? arg.marucho / 2.0 : arg.marucho;
+    const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, gendo);
     cover = Object.assign({}, cover, { remaining });
   }
   if (debug) {
