@@ -307,7 +307,7 @@ export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
 
-interface ProcessHokenWithFixedShotokuKubunContext {
+interface ProcessHokenContext {
   totalTen: number;
   futanWari: number;
   shotokuKubun: ShotokuKubun | undefined;
@@ -336,8 +336,8 @@ function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): Sho
 function processHokenWithFixedShotokuKubun({
   totalTen, futanWari, shotokuKubun, iryouKingaku, prevPatientCharge,
   hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, isSeikatsuHogo,
-  hasKouhi, debug
-}: ProcessHokenWithFixedShotokuKubunContext): Cover {
+  hasKouhi, isKourei1WariShiteiKouhi, marucho, debug
+}: ProcessHokenContext): Cover {
   const kakari = totalTen * 10;
   function gendo(): number | undefined {
     if (shotokuKubun === undefined) {
@@ -363,34 +363,39 @@ function processHokenWithFixedShotokuKubun({
     console.log("applying gendogaku", totalTen * futanWari, prevPatientCharge);
   }
   const remaining = applyGendogaku(totalTen * futanWari, prevPatientCharge, g);
-  return { kakari, remaining };
-}
-
-interface ProcessHokenContext extends ProcessHokenWithFixedShotokuKubunContext {
-  hasKuniKouhi: boolean;
-}
-
-function processHoken(arg: ProcessHokenContext): Cover {
-  const { shotokuKubun, hasKuniKouhi, debug } = arg;
-  if (debug) {
-    console.log("enter processHoken with arg:", JSON.stringify(arg));
-  }
-  let cover: Cover = processHokenWithFixedShotokuKubun(arg);
-  if (arg.isKourei1WariShiteiKouhi !== undefined && arg.isKourei1WariShiteiKouhi) {
-    if (arg.futanWari === 2) {
-      cover.remaining = arg.totalTen * 1;
+  let cover = { kakari, remaining };
+  if (isKourei1WariShiteiKouhi !== undefined && isKourei1WariShiteiKouhi) {
+    if (futanWari === 2) {
+      cover.remaining = totalTen * 1;
     } else {
       throw new Error("Futan wari 2 expected");
     }
   }
-  if (arg.marucho !== undefined) {
-    const gendo = arg.isBirthdayMonth75 ? arg.marucho / 2.0 : arg.marucho;
-    const remaining = applyGendogaku(cover.remaining, arg.prevPatientCharge, gendo);
+  if (marucho !== undefined) {
+    const gendo = isBirthdayMonth75 ? marucho / 2.0 : marucho;
+    const remaining = applyGendogaku(cover.remaining, prevPatientCharge, gendo);
     cover = Object.assign({}, cover, { remaining });
   }
   if (debug) {
     console.log("leave processHoken with", JSON.stringify(cover));
   }
+  return cover;
+}
+
+function processHoken(arg: ProcessHokenContext): Cover {
+  const { debug, shotokuKubun } = arg;
+  if (debug) {
+    console.log("enter processHoken with arg:", JSON.stringify(arg));
+  }
+  let cover: Cover = processHokenWithFixedShotokuKubun(arg);
+  // if( shotokuKubun === "一般Ⅱ" ){
+  //   const c = processHokenWithFixedShotokuKubun(Object.assign({}, arg, {
+  //     shotokuKubun: "一般Ⅰ"
+  //   }));
+  //   if( c.remaining < cover.remaining ){
+  //     cover = c;
+  //   }
+  // }
   return cover;
 }
 
@@ -607,7 +612,13 @@ export function calcFutan(
   }
   let totalCover: TotalCover = new TotalCover();
   totalTensList.forEach(totalTens => {
-    const tc = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), totalCover, opt);
+    let tc = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), totalCover, opt);
+    if( shotokuKubun === "一般Ⅱ" ){
+      let tcAlt = calcFutanOne(futanWari, "一般Ⅰ", kouhiList, new TotalTens(totalTens), totalCover, opt);
+      if( tcAlt.patientCharge < tc.patientCharge ){
+        tc = tcAlt;
+      }
+    }
     totalCover.merge(tc);
   })
   return totalCover;

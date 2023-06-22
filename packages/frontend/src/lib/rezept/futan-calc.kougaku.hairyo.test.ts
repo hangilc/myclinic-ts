@@ -159,7 +159,6 @@ describe("高額療養費配慮措置", () => {
       mkTens(["H1", 4000], ["H", 5000]),
     ], {
       gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      debug: true,
     });
     expect(patientChargeOf(covers)).equal(13000);
     expect(coveredBy("1", covers)).equal(3000);
