@@ -165,4 +165,15 @@ describe("高額療養費配慮措置", () => {
     expect(coveredBy("1", covers)).equal(3000);
   });
 
+  it("【事例17】後期高齢者２割負担外来（難病）（配慮措置）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou], [
+      mkTens(["H1", 3500], ["H", 10500]),
+    ], {
+      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      debug: true,
+    });
+    expect(patientChargeOf(covers)).equal(18000);
+    expect(coveredBy("1", covers)).equal(2000);
+  });
+
 });
