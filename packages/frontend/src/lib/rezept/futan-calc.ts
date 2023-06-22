@@ -141,6 +141,16 @@ class TotalTens {
     return sum;
   }
 
+  sumOfFutanKubun(futanKubun: 負担区分コードCode): number {
+    let sum = 0;
+    this.map.forEach((ten, code) => {
+      if (code === futanKubun) {
+        sum += ten;
+      }
+    });
+    return sum;
+  }
+
   debugDump(): string {
     const obj: any = {};
     this.map.forEach((ten, code) => {
@@ -311,6 +321,7 @@ interface ProcessHokenWithFixedShotokuKubunContext {
   isKourei1WariShiteiKouhi?: boolean;
   isNyuuin?: boolean;
   isSeikatsuHogo?: boolean;
+  hasKouhi?: boolean;
   debug?: boolean;
 }
 
@@ -324,7 +335,8 @@ function defaultKuniKouhiShotokuKubun(shotokuKubunGroup: ShotokuKubunGroup): Sho
 
 function processHokenWithFixedShotokuKubun({
   totalTen, futanWari, shotokuKubun, iryouKingaku, prevPatientCharge,
-  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, isSeikatsuHogo, debug
+  hasKuniKouhi, isTasuuGaitou, shotokuKubunGroup, isBirthdayMonth75, isNyuuin, isSeikatsuHogo,
+  hasKouhi, debug
 }: ProcessHokenWithFixedShotokuKubunContext): Cover {
   const kakari = totalTen * 10;
   function gendo(): number | undefined {
@@ -337,6 +349,9 @@ function processHokenWithFixedShotokuKubun({
       } else {
         return undefined;
       }
+    }
+    if (shotokuKubun === "一般Ⅱ" && hasKouhi) {
+      shotokuKubun = "一般Ⅰ";
     }
     return calcGendogaku(shotokuKubun, iryouKingaku, {
       hasKuniKouhi, isTasuuGaitou, isBirthdayMonth75, isNyuuin, isSeikatsuHogo,
@@ -522,11 +537,11 @@ export function calcFutanOne(
         if (futanKubunName === "H") {
           const gendoCombined = resolveGendogakuCombined(curTotalCover, prevCover, futanWari, shotokuKubun, opt.shotokuKubunGroup);
           if (gendoCombined) {
-            iryouKingaku = totalTens.totalTen * 10;
+            iryouKingaku = (totalTens.sumOf("H") + prevCover.tens.sumOf("H")) * 10;
             let pcm = PatientChargeMap.mergeAll(curTotalCover.patientChargeMap, prevCover.patientChargeMap);
             prevPatientCharge = pcm.sum;
           } else {
-            iryouKingaku = totalTen * 10;
+            iryouKingaku = (totalTen + prevCover.tens.sumOfFutanKubun("1")) * 10;
             prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
           }
         } else {
@@ -547,6 +562,7 @@ export function calcFutanOne(
           isKourei1WariShiteiKouhi: curKouhiList.length === 0 ? opt.isKourei1WariShiteiKouhi : undefined,
           isNyuuin: opt.isNyuuin,
           isSeikatsuHogo: curKouhiList.findIndex(d => d.houbetsu === 12) >= 0,
+          hasKouhi: curKouhiList.length > 0,
           debug: opt.debug,
         };
 
@@ -662,7 +678,6 @@ function resolveGendogakuCombined(curTotalCover: TotalCover, prevTotalCover: Tot
       case "現役並みⅢ":
       case "現役並みⅡ":
       case "現役並みⅠ":
-      case "一般Ⅱ":
       case "一般Ⅰ":
       case "一般":
       case "低所得Ⅱ":
@@ -670,6 +685,9 @@ function resolveGendogakuCombined(curTotalCover: TotalCover, prevTotalCover: Tot
       case "低所得Ⅰ（老福）":
       case "低所得Ⅰ（境）": {
         return true;
+      }
+      case "一般Ⅱ": {
+        return false;
       }
     }
   }
