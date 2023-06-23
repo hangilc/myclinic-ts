@@ -7,6 +7,7 @@ import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { calcAge } from "../calc-age";
+import type { KouhiData } from "./futan-calc";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -48,6 +49,10 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
 
   }
   kouhiList.sort((a, b) => calcOrder(a.futansha) - calcOrder(b.futansha));
+}
+
+export function sortKouhiDataList(kouhiDataList: KouhiData[]): void {
+  
 }
 
 export async function getSortedKouhiListOfVisits(visits: Visit[]): Promise<Kouhi[]> {
