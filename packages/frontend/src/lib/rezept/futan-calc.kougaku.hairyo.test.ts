@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiHepatitis, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, type HokenSelector, type KouhiData, type TotalCover } from "./futan-calc";
+import { calcFutan, KouhiGroup1Group2Infection, KouhiHepatitis, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, type HokenSelector, type KouhiData, type TotalCover } from "./futan-calc";
 import { sortKouhiList } from "./util";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
@@ -222,12 +222,21 @@ describe("高額療養費配慮措置", () => {
   });
 
   it("【事例22】後期高齢者２割負担外来（新型コロナ感染症）", () => {
-    const covers = calcFutan(2, "一般Ⅱ", [], [
-      mkTens(["H", 4000]),
+    const covers = calcFutan(2, "一般Ⅱ", [KouhiGroup1Group2Infection], [
+      mkTens(["H1", 8500], ["H", 2500]),
     ], {
-      marucho: 10000,
     });
-    expect(patientChargeOf(covers)).equal(8000);
+    expect(patientChargeOf(covers)).equal(5000);
+    expect(coveredBy("1", covers)).equal(17000);
+  });
+
+  it("【事例23】後期高齢者２割負担外来（新型コロナ感染症）（配慮措置）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [KouhiGroup1Group2Infection], [
+      mkTens(["H1", 8000], ["H", 5500]),
+    ], {
+    });
+    expect(patientChargeOf(covers)).equal(8500);
+    expect(coveredBy("1", covers)).equal(16000);
   });
 
 });

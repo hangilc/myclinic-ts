@@ -315,6 +315,14 @@ export const KouhiHepatitis: KouhiData = {
   }
 }
 
+// 一類・二類感染症
+export const KouhiGroup1Group2Infection: KouhiData = {
+  houbetsu: 28,
+  processor: ({ kakari }: KouhiProcessorArg): Cover => {
+    return { kakari, remaining: 0 };
+  }
+}
+
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
