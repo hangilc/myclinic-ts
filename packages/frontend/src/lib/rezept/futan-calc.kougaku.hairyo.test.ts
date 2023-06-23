@@ -198,4 +198,36 @@ describe("高額療養費配慮措置", () => {
     expect(coveredBy("2", covers)).equal(6000);
   });
 
+  it("【事例20】後期高齢者２割負担外来（難病・肝炎）（配慮措置）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou, KouhiHepatitis], [
+      mkTens(["H1", 3200], ["H2", 2000], ["H", 9600]),
+    ], {
+      gendogaku: [
+        { kingaku: 5000, kouhiBangou: 1 },
+        { kingaku: 1000, kouhiBangou: 2 },
+      ],
+    });
+    expect(patientChargeOf(covers)).equal(18000);
+    expect(coveredBy("1", covers)).equal(1400);
+    expect(coveredBy("2", covers)).equal(3000);
+  });
+
+  it("【事例21】後期高齢者２割負担外来（マル長）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTens(["H", 4000]),
+    ], {
+      marucho: 10000,
+    });
+    expect(patientChargeOf(covers)).equal(8000);
+  });
+
+  it("【事例22】後期高齢者２割負担外来（新型コロナ感染症）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [], [
+      mkTens(["H", 4000]),
+    ], {
+      marucho: 10000,
+    });
+    expect(patientChargeOf(covers)).equal(8000);
+  });
+
 });

@@ -362,7 +362,7 @@ function processHokenWithFixedShotokuKubun({
         return undefined;
       }
     }
-    if (shotokuKubun === "一般Ⅱ" && hasKouhi) {
+    if (shotokuKubun === "一般Ⅱ" && (hasKouhi || marucho !== undefined)) {
       shotokuKubun = "一般Ⅰ";
     }
     return calcGendogaku(shotokuKubun, iryouKingaku, {
