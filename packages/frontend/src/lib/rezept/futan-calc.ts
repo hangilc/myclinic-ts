@@ -503,12 +503,14 @@ function mapTotalTens(
   return totalCover;
 }
 
+export interface CalcFutanGendogakuOption {
+  kingaku: number;
+  kouhiBangou: number; // 1-based
+}
+
 export interface CalcFutanOptions {
   isBirthdayMonth75?: true;
-  gendogaku?: {
-    kingaku: number;
-    kouhiBangou: number; // 1-based
-  },
+  gendogaku?: CalcFutanGendogakuOption | CalcFutanGendogakuOption[],
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
   gendogakuTasuuGaitou?: true;
   shotokuKubunGroup?: ShotokuKubunGroup;
@@ -636,11 +638,25 @@ export function calcFutan(
   return totalCover;
 }
 
-function findGendo(opt: CalcFutanOptions, sel: KouhiSelector): number | undefined { // for Nanbyou
+function findGendo(opt: CalcFutanOptions, sel: KouhiSelector): number | undefined { // for Nanbyou etc.
   const kouhiBangou = parseInt(sel);
-  if (opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou) {
-    return opt.gendogaku.kingaku;
+  if( opt.gendogaku !== undefined ){
+    if( Array.isArray(opt.gendogaku) ){
+      for(let gendo of opt.gendogaku ){
+        if( gendo.kouhiBangou === kouhiBangou ){
+          return gendo.kingaku;
+        }
+      }
+    } else {
+      const gendo = opt.gendogaku;
+      if( gendo.kouhiBangou === kouhiBangou ){
+        return gendo.kingaku;
+      }
+    }
   }
+  // if (opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou) {
+  //   return opt.gendogaku.kingaku;
+  // }
   return undefined;
 }
 

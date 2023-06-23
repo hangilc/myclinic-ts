@@ -188,10 +188,14 @@ describe("高額療養費配慮措置", () => {
     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou, KouhiHepatitis], [
       mkTens(["H1", 4000], ["H2", 3500], ["H", 4500]),
     ], {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      gendogaku: [
+        { kingaku: 5000, kouhiBangou: 1 },
+        { kingaku: 1000, kouhiBangou: 2 },
+      ],
     });
-    expect(patientChargeOf(covers)).equal(14000);
-    expect(coveredBy("1", covers)).equal(9000);
+    expect(patientChargeOf(covers)).equal(13500);
+    expect(coveredBy("1", covers)).equal(3000);
+    expect(coveredBy("2", covers)).equal(6000);
   });
 
 });
