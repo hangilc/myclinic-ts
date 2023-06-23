@@ -1,5 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, KouhiKouseiIryou, KuniNanbyou, type HokenSelector, type TotalCover } from "./futan-calc";
+import { calcFutan, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, type HokenSelector, type TotalCover } from "./futan-calc";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
@@ -169,10 +169,18 @@ describe("高額療養費配慮措置", () => {
       mkTens(["H1", 3500], ["H", 10500]),
     ], {
       gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      debug: true,
     });
     expect(patientChargeOf(covers)).equal(18000);
     expect(coveredBy("1", covers)).equal(2000);
+  });
+
+  it("【事例18】後期高齢者２割負担外来（結核）（配慮措置）", () => {
+    const covers = calcFutan(2, "一般Ⅱ", [KouhiKekkaku], [
+      mkTens(["H1", 6000], ["H", 8000]),
+    ], {
+    });
+    expect(patientChargeOf(covers)).equal(14000);
+    expect(coveredBy("1", covers)).equal(9000);
   });
 
 });
