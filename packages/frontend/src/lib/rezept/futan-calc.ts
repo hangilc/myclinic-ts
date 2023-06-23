@@ -303,6 +303,18 @@ export const KuniSeishinTsuuin: KouhiData = {
   }
 }
 
+// 肝炎治療特別促進事業
+export const KouhiHepatitis: KouhiData = {
+  houbetsu: 38,
+  processor: ({ kakari, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg): Cover => {
+    let remaining = kakari;
+    if( gendogakuApplied !== undefined ){
+      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
+    }
+    return { kakari, remaining };
+  }
+}
+
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
 export type ShotokuKubunGroup = "若年" | "高齢受給" | "後期高齢";
