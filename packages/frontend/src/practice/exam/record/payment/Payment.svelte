@@ -6,7 +6,6 @@
   import PaymentStatus from "./PaymentStatus.svelte";
   import * as kanjidate from "kanjidate";
   import { calcGendogaku, calcMonthlyFutan } from "@/lib/gendogaku";
-  import { calcMeisai } from "@/lib/meisai";
 
   export let visit: VisitEx;
   let mode = "disp";
@@ -18,8 +17,7 @@
 
   async function doDispClick() {
     if (visit.chargeOption != null) {
-      // const meisai = await api.getMeisai(visit.visitId);
-      const meisai = await calcMeisai(visit.visitId);
+      const meisai = await api.getMeisai(visit.visitId);
       const patientId = visit.patient.patientId;
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;

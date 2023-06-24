@@ -1,37 +1,51 @@
 import { compare負担区分コードName, 負担区分コード, 負担区分コードNameOf, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MarutoNanbyou, MaruToTaikiosen, Slot, sortFutanKubun, TotalCover } from "./futan-calc";
+import { calcFutan, HibakushaNoKo, MaruAoNoFutan, MarutoNanbyou, MaruToTaikiosen, Slot, sortFutanKubun, TotalCover, type HokenSelector } from "./futan-calc";
 
-function mkTotalTensMap(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
+// function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
+//   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
+// }
+
+// function summarizeObject(obj: any): any {
+//   const result: Record<any, any> = {};
+//   for(let key in obj){
+//     const val = obj[key];
+//     if( val !== undefined ){
+//       result[key] = val;
+//     }
+//   }
+//   return result;
+// }
+
+// function summarizeSlot(slot: Slot): any {
+//   return summarizeObject({
+//     hokenCover: summarizeObject(slot.hokenCover),
+//     kouhiCovers: slot.kouhiCovers.map(summarizeObject),
+//   });
+// }
+
+// function summarize(totalCover: TotalCover): any {
+//   const entries: [負担区分コードName, any][] = Array.from(totalCover.map.entries())
+//     .map(([code, slot]) => [負担区分コードNameOf(code), summarizeSlot(slot)]);
+//   entries.sort((a, b) => compare負担区分コードName(a[0], b[0]));
+//   return entries;
+// }
+
+// function dumpJson(arg: any): void {
+//   console.log(JSON.stringify(arg, undefined, 2));
+// }
+
+function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
 }
 
-function summarizeObject(obj: any): any {
-  const result: Record<any, any> = {};
-  for(let key in obj){
-    const val = obj[key];
-    if( val !== undefined ){
-      result[key] = val;
-    }
-  }
-  return result;
+const round = Math.round;
+
+function patientChargeOf(totalCover: TotalCover): number {
+  return round(totalCover.patientCharge);
 }
 
-function summarizeSlot(slot: Slot): any {
-  return summarizeObject({
-    hokenCover: summarizeObject(slot.hokenCover),
-    kouhiCovers: slot.kouhiCovers.map(summarizeObject),
-  });
-}
-
-function summarize(totalCover: TotalCover): any {
-  const entries: [負担区分コードName, any][] = Array.from(totalCover.map.entries())
-    .map(([code, slot]) => [負担区分コードNameOf(code), summarizeSlot(slot)]);
-  entries.sort((a, b) => compare負担区分コードName(a[0], b[0]));
-  return entries;
-}
-
-function dumpJson(arg: any): void {
-  console.log(JSON.stringify(arg, undefined, 2));
+function coveredBy(sel: HokenSelector, totalCover: TotalCover): number {
+  return totalCover.slot.kakariOf(sel) - totalCover.slot.patientChargeOf(sel);
 }
 
 describe("futan-calc", () => {
@@ -44,198 +58,113 @@ describe("futan-calc", () => {
   it("should handle single visit hoken only", () => {
     const totalTen = 300;
     const futanWari = 3;
-    const covers = calcFutan(futanWari, undefined, [], [mkTotalTensMap(["H", totalTen])]);
-    expect(covers.patientCharge).equal(totalTen * futanWari);
-    expect(summarize(covers)).deep.equal([["H", {
-      hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
-      kouhiCovers: [],
-    }]]);
-    expect(covers.patientCharge).equal(totalTen * futanWari);
+    const covers = calcFutan(futanWari, undefined, [], [
+      mkTens(["H", totalTen]),
+    ], {});
+    expect(patientChargeOf(covers)).equal(totalTen * futanWari);
   });
 
   it("should handle two visits hoken only", () => {
     const covers = calcFutan(3, undefined, [], [
-      mkTotalTensMap(["H", 300]),
-      mkTotalTensMap(["H", 900]),
+      mkTens(["H", 300]),
+      mkTens(["H", 900]),
     ]);
-    expect(covers.patientCharge).equal(3600);
-    expect(summarize(covers)).deep.equal([["H", {
-      hokenCover: { kakari: 12000, patientCharge: 3600, futanWari: 3},
-      kouhiCovers: [],
-    }]]);
-    expect(covers.patientCharge).equal(3600);
+    expect(patientChargeOf(covers)).equal(3600);
   });
 
   it("should handle gendogaku of ウ under 70", () => {
     const covers = calcFutan(3, "ウ", [], [
-      mkTotalTensMap(["H", 100000])
+      mkTens(["H", 100000])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 1000000, patientCharge: 87430, futanWari: 3, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(87430);
+    expect(patientChargeOf(covers)).equal(87430);
   });
 
   it("should handle gendogaku of ウ under 70 (case 2)", () => {
     const covers = calcFutan(3, "ウ", [], [
-      mkTotalTensMap(["H", 80000])
+      mkTens(["H", 80000])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 800000, patientCharge: 85430, futanWari: 3, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(85430);
+    expect(patientChargeOf(covers)).equal(85430);
   });
 
   it("should handle gendogaku of ウ under 70 (case 3)", () => {
     const covers = calcFutan(3, "ウ", [], [
-      mkTotalTensMap(["H", 26600])
+      mkTens(["H", 26600])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 266000, patientCharge: 79800, futanWari: 3},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(79800);
+    expect(patientChargeOf(covers)).equal(79800);
   });
 
   it("should handle gendogaku of 現役並みⅢ", () => {
     const covers = calcFutan(3, "現役並みⅢ", [], [
-      mkTotalTensMap(["H", 100000])
+      mkTens(["H", 100000])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 1000000, patientCharge: 254180, futanWari: 3, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(254180);
+    expect(patientChargeOf(covers)).equal(254180);
   });
 
   it("should handle gendogaku of 配慮措置", () => {
     const covers = calcFutan(2, "一般Ⅱ", [], [
-      mkTotalTensMap(["H", 8000])
+      mkTens(["H", 8000])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 80000, patientCharge: 11000, futanWari: 2, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(11000);
+    expect(patientChargeOf(covers)).equal(11000);
   });
 
   it("should handle gendogaku of 配慮措置 (case 2)", () => {
     const covers = calcFutan(2, "一般Ⅱ", [], [
-      mkTotalTensMap(["H", 13000])
+      mkTens(["H", 13000])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 130000, patientCharge: 16000, futanWari: 2, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(16000);
+    expect(patientChargeOf(covers)).equal(16000);
   });
 
   it("should handle gendogaku of 配慮措置 at birthday month", () => {
     const covers = calcFutan(2, "一般Ⅱ", [], [
-      mkTotalTensMap(["H", 10000])
+      mkTens(["H", 10000])
     ], { isBirthdayMonth75: true });
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 100000, patientCharge: 9000, futanWari: 2, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(9000);
+    expect(patientChargeOf(covers)).equal(9000);
   });
 
   it("should handle gendogaku of 配慮措置 at birthday month (case 2)", () => {
     const covers = calcFutan(2, "一般Ⅱ", [], [
-      mkTotalTensMap(["H", 4000])
+      mkTens(["H", 4000])
     ], { isBirthdayMonth75: true });
-    expect(summarize(covers)).deep.equal([
-      ["H", { 
-        hokenCover: { kakari: 40000, patientCharge: 7000, futanWari: 2, gendogakuReached: true},
-        kouhiCovers: [],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(7000);
+    expect(patientChargeOf(covers)).equal(7000);
   });
 
   it("should handle 公費 被爆者の子", () => {
     const totalTen = 400;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [HibakushaNoKo], [
-      mkTotalTensMap(["H1", totalTen])
+      mkTens(["H1", totalTen])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", { 
-        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
-        kouhiCovers: [
-          { kakari: 1200, patientCharge: 0, }
-        ],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(0);
+    expect(patientChargeOf(covers)).equal(0);
+    expect(coveredBy("1", covers)).equal(1200);
   });
 
   it("should handle 公費 マル青負担なし", () => {
     const totalTen = 400;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MaruAoNoFutan], [
-      mkTotalTensMap(["H1", totalTen])
+      mkTens(["H1", totalTen])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", { 
-        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
-        kouhiCovers: [
-          { kakari: 1200, patientCharge: 0, }
-        ],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(0);
+    expect(patientChargeOf(covers)).equal(0);
+    expect(coveredBy("1", covers)).equal(1200);
   });
 
   it("should handle 公費 大気汚染", () => {
     const totalTen = 400;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
-      mkTotalTensMap(["H1", totalTen])
+      mkTens(["H1", totalTen])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", { 
-        hokenCover: { kakari: totalTen * 10, patientCharge: 1200, futanWari},
-        kouhiCovers: [
-          { kakari: 1200, patientCharge: 1200, }
-        ],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(1200);
+    expect(patientChargeOf(covers)).equal(1200);
   });
 
   it("should handle 公費 大気汚染 限度額到達", () => {
     const totalTen = 4000;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
-      mkTotalTensMap(["H1", totalTen])
+      mkTens(["H1", totalTen])
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", { 
-        hokenCover: { kakari: totalTen * 10, patientCharge: 12000, futanWari},
-        kouhiCovers: [
-          { kakari: 12000, patientCharge: 6000, gendogakuReached: true }
-        ],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(6000);
+    expect(patientChargeOf(covers)).equal(6000);
+    expect(coveredBy("1", covers)).equal(6000);
   });
 
   it("should handle 公費 大気汚染 限度額到達 multiple visits", () => {
@@ -243,66 +172,39 @@ describe("futan-calc", () => {
     const totalTensSum = totalTens.reduce((a, b) => a + b, 0);
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MaruToTaikiosen(6000)], [
-      ...totalTens.map(totalTen => mkTotalTensMap(["H1", totalTen]))
+      ...totalTens.map(totalTen => mkTens(["H1", totalTen]))
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", { 
-        hokenCover: { kakari: totalTensSum * 10, patientCharge: totalTensSum * futanWari, futanWari},
-        kouhiCovers: [
-          { kakari: totalTensSum * futanWari, patientCharge: 6000, gendogakuReached: true }
-        ],
-      }]
-    ]);
-    expect(covers.patientCharge).equal(6000);
+    expect(patientChargeOf(covers)).equal(6000);
+    expect(coveredBy("1", covers)).equal(12000);
   });
 
   it("should handle 公費 マル都 難病", () => {
     const totalTen = 800;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MarutoNanbyou], [
-      mkTotalTensMap(["H1", totalTen]),
+      mkTens(["H1", totalTen]),
     ]);
-    expect(summarize(covers)).deep.equal([
-      ["H1", {
-        hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
-        kouhiCovers: [
-          { kakari: totalTen * futanWari, patientCharge: totalTen * 2 }
-        ]
-      }]
-    ]);
-    expect(covers.patientCharge).equal(totalTen * 2);
+    expect(patientChargeOf(covers)).equal(totalTen * 2);
+    expect(coveredBy("1", covers)).equal(800);
   });
 
   it("should handle 公費 マル都 難病 (gendo applied)", () => {
     const totalTen = 4000;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [MarutoNanbyou], [
-      mkTotalTensMap(["H1", totalTen]),
+      mkTens(["H1", totalTen]),
     ], { gendogaku: { kingaku: 6000, kouhiBangou: 1}});
-    expect(summarize(covers)).deep.equal([
-      ["H1", {
-        hokenCover: { kakari: totalTen * 10, patientCharge: totalTen * futanWari, futanWari},
-        kouhiCovers: [
-          { kakari: totalTen * futanWari, patientCharge: 6000, gendogakuReached: true }
-        ]
-      }]
-    ]);
-    expect(covers.patientCharge).equal(6000);
+    expect(patientChargeOf(covers)).equal(6000);
+    expect(coveredBy("1", covers)).equal(6000);
   });
 
   it("should handle マル長", () => {
     const totalTen = 28000;
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [], [
-      mkTotalTensMap(["H", totalTen]),
+      mkTens(["H", totalTen]),
     ], { marucho: 10000 });
-    expect(summarize(covers)).deep.equal([
-      ["H", {
-        hokenCover: { kakari: totalTen * 10, patientCharge: 10000, futanWari, maruchoGendogakuReached: 10000},
-        kouhiCovers: []
-      }]
-    ]);
-    expect(covers.patientCharge).equal(10000);
+    expect(patientChargeOf(covers)).equal(10000);
   });
 
   it("should handle マル長 (case 2: multiple visits)", () => {
@@ -310,53 +212,29 @@ describe("futan-calc", () => {
     const totalTen = totalTens.reduce((a, b) => a + b);
     const futanWari = 3;
     const covers = calcFutan(futanWari, undefined, [], [
-      ...totalTens.map(totalTen => mkTotalTensMap(["H", totalTen]))
+      ...totalTens.map(totalTen => mkTens(["H", totalTen]))
     ], { marucho: 10000 });
-    expect(summarize(covers)).deep.equal([
-      ["H", {
-        hokenCover: { kakari: totalTen * 10, patientCharge: 10000, futanWari, maruchoGendogakuReached: 10000},
-        kouhiCovers: []
-      }]
-    ]);
-    expect(covers.patientCharge).equal(10000);
+    expect(patientChargeOf(covers)).equal(10000);
   });
 
   it("should handle 難病", () => {
     const totalTen = 4000;
     const futanWari = 2;
     const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
-      mkTotalTensMap(["H", 1000], ["H1", 3000])
+      mkTens(["H", 1000], ["H1", 3000])
     ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
-    expect(summarize(covers)).deep.equal([
-      ["H", {
-        hokenCover: { kakari: 10000, futanWari: 2, patientCharge: 2000 },
-        kouhiCovers: [{}],
-      }],
-      ["H1", {
-        hokenCover: { kakari: 30000, futanWari: 2, patientCharge: 6000 },
-        kouhiCovers: [{ kakari: 6000, patientCharge: 5000, gendogakuReached: true}]
-      }],
-    ])
-    expect(covers.patientCharge).equal(7000);
+    expect(patientChargeOf(covers)).equal(7000);
+    expect(coveredBy("1", covers)).equal(1000);
   });
 
   it("should handle 難病 (case 2)", () => {
     const totalTen = 9000;
     const futanWari = 2;
     const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou], [
-      mkTotalTensMap(["H1", 4000], ["H", 5000])
+      mkTens(["H1", 4000], ["H", 5000])
     ], { gendogaku: { kingaku: 5000, kouhiBangou: 1 }});
-    expect(summarize(covers)).deep.equal([
-      ["H", {
-        hokenCover: { kakari: 50000, futanWari: 2, patientCharge: 8000, gendogakuReached: true },
-        kouhiCovers: [{}],
-      }],
-      ["H1", {
-        hokenCover: { kakari: 40000, futanWari: 2, patientCharge: 8000 },
-        kouhiCovers: [{ kakari: 8000, patientCharge: 5000, gendogakuReached: true}]
-      }],
-    ])
-    expect(covers.patientCharge).equal(13000);
+    expect(patientChargeOf(covers)).equal(13000);
+    expect(coveredBy("1", covers)).equal(3000);
   });
 
 });

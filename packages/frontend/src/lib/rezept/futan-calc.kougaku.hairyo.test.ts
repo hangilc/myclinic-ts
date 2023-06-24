@@ -1,6 +1,5 @@
 import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 import { calcFutan, KouhiGroup1Group2Infection, KouhiHepatitis, KouhiKekkaku, KouhiKouseiIryou, KuniNanbyou, type HokenSelector, type KouhiData, type TotalCover } from "./futan-calc";
-import { sortKouhiList } from "./util";
 
 function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
