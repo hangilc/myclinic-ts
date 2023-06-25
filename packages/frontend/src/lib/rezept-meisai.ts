@@ -1,7 +1,9 @@
 import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
+import { calcFutan } from "./rezept/futan-calc";
 import { calcVisits } from "./rezept/prepare";
 import { TensuuCollector } from "./rezept/tensuu-collector";
+import { futanWariOfHoken, resolveGendo, resolveShotokuKubun } from "./rezept/util";
 
 class KouhiCollector {
   list: Kouhi[] = [];
@@ -20,6 +22,10 @@ class KouhiCollector {
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const meisai = new Meisai([], 3, 0);
   const visit = await api.getVisit(visitId);
+  if( visit.shahokokuhoId === 0 && visit.koukikoureiId === 0 ){
+    meisai.futanWari = 10;
+    return meisai;
+  }
   const [year, month] = yearMonthOfVisit(visit);
   const visitIds = await api.listVisitIdByPatientAndMonth(visit.patientId, year, month);
   const visitExList = await api.batchGetVisitEx(visitIds);
@@ -31,7 +37,10 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
       curr = v;
       break;
     } else {
-      prevs.push(v);
+      const asVisit = v.asVisit;
+      if( asVisit.shahokokuhoId === visit.shahokokuhoId && asVisit.koukikoureiId === visit.koukikoureiId ){
+        prevs.push(v);
+      }
     }
   }
   if (curr === undefined) {
@@ -43,7 +52,16 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   });
   const tensuuCollector = new TensuuCollector();
   const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(prevs, kouhiCollector.idList(), tensuuCollector);
-  
+  const gendo = await resolveGendo([...prevs, curr].map(visitEx => visitEx.asVisit));
+  const shotokuKubun = resolveShotokuKubun(curr.hoken.shahokokuho, curr.hoken.koukikourei, gendo);
+  let futanWari = 3;
+  if( curr.hoken.shahokokuho && curr.hoken.shahokokuho.koureiStore > 0 ){
+    futanWari = curr.hoken.shahokokuho.koureiStore;
+  } else {
+    futanWari = curr.hoken.koukikourei!.futanWari;
+  }
+  const cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, [tensuuCollector.totalTen]);
+
   return meisai;
 }
 

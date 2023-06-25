@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { dateToSqlDate, Disease, Patient, Shahokokuho, Visit, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei } from "myclinic-model";
+import { dateToSqlDate, Disease, Patient, Shahokokuho, Visit, VisitEx, type DiseaseData, type HokenInfo, type Kouhi, type Koukikourei } from "myclinic-model";
 import { OnshiResult } from "onshi-result";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import { is負担区分コードName, KouhiOrderMap, RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 診療識別コード, 負担区分コード, 都道府県コード, type レセプト特記事項コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
@@ -7,7 +7,7 @@ import * as kanjidate from "kanjidate";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { calcAge } from "../calc-age";
-import type { KouhiData } from "./futan-calc";
+import type { KouhiData, ShotokuKubun } from "./futan-calc";
 
 export function formatYearMonth(year: number, month: number): string {
   let m = month.toString();
@@ -217,6 +217,7 @@ export function resolveGendogakuTokkiJikou(
   shahokokuho: Shahokokuho | undefined,
   koukikourei: Koukikourei | undefined,
   gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): レセプト特記事項コードCode | undefined {
+  gendo = resolveShotokuKubun(shahokokuho, koukikourei, gendo);
   if (gendo) {
     switch (gendo) {
       case "ア":
@@ -254,23 +255,25 @@ export function resolveGendogakuTokkiJikou(
         return undefined;
       }
     }
+  } else {
+    return undefined;
   }
-  if (koukikourei) {
-    switch (koukikourei.futanWari) {
-      case 3: return レセプト特記事項コード["区ア"];
-      case 2: return レセプト特記事項コード["区カ"];
-      case 1: return レセプト特記事項コード["区キ"];
-    }
-  } else if (shahokokuho) {
-    switch (shahokokuho.koureiStore) {
-      case 3: return レセプト特記事項コード["区ア"];
-      case 2:
-      case 1:
-        return レセプト特記事項コード["区エ"];
-      default: break;
-    }
-  }
-  return undefined;
+  // if (koukikourei) {
+  //   switch (koukikourei.futanWari) {
+  //     case 3: return レセプト特記事項コード["区ア"];
+  //     case 2: return レセプト特記事項コード["区カ"];
+  //     case 1: return レセプト特記事項コード["区キ"];
+  //   }
+  // } else if (shahokokuho) {
+  //   switch (shahokokuho.koureiStore) {
+  //     case 3: return レセプト特記事項コード["区ア"];
+  //     case 2:
+  //     case 1:
+  //       return レセプト特記事項コード["区エ"];
+  //     default: break;
+  //   }
+  // }
+  // return undefined;
 }
 
 export async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {
@@ -297,6 +300,30 @@ export async function resolveGendo(visits: Visit[]):
     }
   }
   return gendo;
+}
+
+export function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
+  koukikourei: Koukikourei | undefined,
+  gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): ShotokuKubun | undefined {
+    if( gendo ){
+      return gendo;
+    }
+    if (koukikourei) {
+      switch (koukikourei.futanWari) {
+        case 3: return "現役並みⅢ";
+        case 2: return "一般Ⅱ";
+        case 1: return "一般Ⅰ";
+      }
+    } else if (shahokokuho) {
+      switch (shahokokuho.koureiStore) {
+        case 3: return "現役並みⅢ";
+        case 2:
+        case 1:
+          return "一般";
+        default: break;
+      }
+    }
+      return undefined;
 }
 
 export async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | undefined> {
@@ -517,13 +544,17 @@ export function shikibetsuOfConduct(conductKind: number): 診療識別コードC
 
 export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
   if (hoken instanceof Shahokokuho) {
-    if (hoken.koureiStore > 0) {
-      return hoken.koureiStore;
-    } else {
-      return 3;
-    }
+    return futanWariOfShahokokuho(hoken);
   } else {
     return hoken.futanWari;
+  }
+}
+
+export function futanWariOfShahokokuho(shahokokuho: Shahokokuho): number {
+  if( shahokokuho.koureiStore > 0 ){
+    return shahokokuho.koureiStore;
+  } else {
+    return 3;
   }
 }
 
