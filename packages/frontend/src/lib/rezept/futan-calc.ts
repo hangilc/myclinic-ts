@@ -407,16 +407,7 @@ function processHoken(arg: ProcessHokenContext): Cover {
   if (debug) {
     console.log("enter processHoken with arg:", JSON.stringify(arg));
   }
-  let cover: Cover = processHokenWithFixedShotokuKubun(arg);
-  // if( shotokuKubun === "一般Ⅱ" ){
-  //   const c = processHokenWithFixedShotokuKubun(Object.assign({}, arg, {
-  //     shotokuKubun: "一般Ⅰ"
-  //   }));
-  //   if( c.remaining < cover.remaining ){
-  //     cover = c;
-  //   }
-  // }
-  return cover;
+  return processHokenWithFixedShotokuKubun(arg);
 }
 
 class PatientChargeMap {
@@ -610,6 +601,7 @@ export function calcFutanOne(
         });
         curTotalCover.addCover(sel, kouhiCover);
         patientCharge = kouhiCover.remaining;
+        
         kakari = kouhiCover.remaining;
       }
     }

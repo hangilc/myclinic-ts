@@ -1,4 +1,56 @@
+import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
+import api from "./api";
+import { calcVisits } from "./rezept/prepare";
+import { TensuuCollector } from "./rezept/tensuu-collector";
 
+class KouhiCollector {
+  list: Kouhi[] = [];
+
+  add(kouhi: Kouhi): void {
+    if (this.list.findIndex(k => k.kouhiId === kouhi.kouhiId) < 0) {
+      this.list.push(kouhi);
+    }
+  }
+
+  idList(): number[] {
+    return this.list.map(k => k.kouhiId);
+  }
+}
+
+export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
+  const meisai = new Meisai([], 3, 0);
+  const visit = await api.getVisit(visitId);
+  const [year, month] = yearMonthOfVisit(visit);
+  const visitIds = await api.listVisitIdByPatientAndMonth(visit.patientId, year, month);
+  const visitExList = await api.batchGetVisitEx(visitIds);
+  visitExList.sort((a, b) => a.visitedAt.localeCompare(b.visitedAt));
+  let prevs: VisitEx[] = [];
+  let curr: VisitEx | undefined = undefined;
+  for (let v of visitExList) {
+    if (v.visitId === visitId) {
+      curr = v;
+      break;
+    } else {
+      prevs.push(v);
+    }
+  }
+  if (curr === undefined) {
+    throw new Error("cannot happen.");
+  }
+  const kouhiCollector = new KouhiCollector();
+  [curr, ...prevs].forEach(v => {
+    v.hoken.kouhiList.forEach(k => kouhiCollector.add(k));
+  });
+  const tensuuCollector = new TensuuCollector();
+  const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(prevs, kouhiCollector.idList(), tensuuCollector);
+  
+  return meisai;
+}
+
+function yearMonthOfVisit(visit: Visit): [number, number] {
+  const d = visit.visitedAtAsDate;
+  return [d.getFullYear(), d.getMonth() + 1];
+}
 
 // import type { Kouhi, VisitEx } from "myclinic-model";
 // import api from "./api";
