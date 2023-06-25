@@ -576,3 +576,7 @@ export function isBirthdayMonth75(birthday: string, year: number, month: number)
     return false;
   }
 }
+
+export function roundTo10(n: number): number {
+  return Math.round(n / 10.0) * 10;
+}
