@@ -1,5 +1,6 @@
 import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
+import { resolveKouhiData } from "./resolve-kouhi-data";
 import { calcFutan } from "./rezept/futan-calc";
 import { calcVisits } from "./rezept/prepare";
 import { TensuuCollector } from "./rezept/tensuu-collector";
@@ -60,6 +61,7 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   } else {
     futanWari = curr.hoken.koukikourei!.futanWari;
   }
+  const kouhiDataList = kouhiCollector.list.map(kouhi => resolveKouhiData(kouhi));
   const cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, [tensuuCollector.totalTen]);
 
   return meisai;

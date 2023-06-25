@@ -3,7 +3,7 @@ import { 負担区分コードNameOf, 負担区分コードRev, type 負担区�
 import { mergeOptions, optionFold, optionForEach } from "../option";
 import { calcGendogaku, isKuniKouhi2 } from "./gendogaku";
 
-interface Cover {
+export interface Cover {
   kakari: number;
   remaining: number;
 }
@@ -211,6 +211,15 @@ export const HibakushaNoKo: KouhiData = {
   processor: noFutanKouhiProcessor
 };
 
+export function KouhiFutanNashi(houbetsu: number): KouhiData {
+  return {
+    houbetsu,
+    processor: ({ kakari }: KouhiProcessorArg): Cover => {
+      return { kakari, remaining: 0 };
+    }
+  }
+}
+
 // マル都（大気汚染）
 export function MaruToTaikiosen(gendogaku: number): KouhiData {
   return {
@@ -322,6 +331,9 @@ export const KouhiGroup1Group2Infection: KouhiData = {
     return { kakari, remaining: 0 };
   }
 }
+
+// 被爆者の子
+export const MaruToHibakushaNoKo: KouhiData = KouhiFutanNashi(82);
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
