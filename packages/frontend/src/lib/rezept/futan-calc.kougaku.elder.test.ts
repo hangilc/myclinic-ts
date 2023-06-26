@@ -451,132 +451,132 @@ describe("高額療養費（高齢受給者）", () => {
   });
 
   it("事例４４　高齢受給者外来・難病医療", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], 
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 9500]),
-     {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      });
     expect(patientChargeOf(covers)).equal(5000);
     expect(coveredBy("1", covers)).equal(13000);
   });
 
   it("事例４５　高齢受給者外来・難病医療", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], 
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 5500], ["H", 10000]),
-     {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      });
     expect(patientChargeOf(covers)).equal(18000);
     expect(coveredBy("1", covers)).equal(6000);
   });
 
   it("事例４６　高齢受給者外来・難病医療（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], 
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 9800], ["H", 11800]),
-     {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      isKourei1WariShiteiKouhi: true,
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+        isKourei1WariShiteiKouhi: true,
+      });
     expect(coveredBy("1", covers)).equal(13000);
     expect(patientChargeOf(covers)).equal(16800);
   });
 
   it("事例４７　高齢受給者外来・難病医療（75歳到達月）", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], 
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 9800]),
-     {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      isBirthdayMonth75: true,
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+        isBirthdayMonth75: true,
+      });
     expect(coveredBy("1", covers)).equal(4000);
     expect(patientChargeOf(covers)).equal(5000);
   });
 
   it("事例４８　高齢受給者外来・難病医療", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], [
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 12000], ["H", 1200]),
-    ], {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      });
     expect(coveredBy("1", covers)).equal(13000);
     expect(patientChargeOf(covers)).equal(7400);
   });
 
   it("事例４９　高齢受給者外来・難病医療", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], [
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 12400], ["H", 9600]),
-    ], {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+      });
     expect(coveredBy("1", covers)).equal(13000);
     expect(patientChargeOf(covers)).equal(18000);
   });
 
   it("事例５０　高齢受給者外来・難病医療（75歳到達月）", () => {
-    const covers = calcFutan(2, "一般", [KuniNanbyou], [
+    const covers = calcFutan(2, "一般", [KuniNanbyou],
       mkTens(["H1", 5100], ["H", 7400]),
-    ], {
-      gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-      isBirthdayMonth75: true,
-    });
+      {
+        gendogaku: { kingaku: 5000, kouhiBangou: 1 },
+        isBirthdayMonth75: true,
+      });
     expect(coveredBy("1", covers)).equal(4000);
     expect(patientChargeOf(covers)).equal(9000);
   });
 
   it("事例５１　高齢受給者外来・更生医療", () => {
-    const covers = calcFutan(2, "一般", [KouhiKouseiIryou], [
+    const covers = calcFutan(2, "一般", [KouhiKouseiIryou],
       mkTens(["H1", 10800]),
-    ], {
-    });
+      {
+      });
     expect(coveredBy("1", covers)).equal(7200);
     expect(patientChargeOf(covers)).equal(10800);
   });
 
   it("事例５２　高齢受給者外来・更生医療", () => {
-    const covers = calcFutan(2, "一般", [KouhiKouseiIryou], [
+    const covers = calcFutan(2, "一般", [KouhiKouseiIryou],
       mkTens(["H1", 16400], ["H", 11400]),
-    ], {
-    });
+      {
+      });
     expect(coveredBy("1", covers)).equal(1600);
     expect(patientChargeOf(covers)).equal(18000);
   });
 
   it("事例５３　高齢受給者外来・精神通院（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin], [
+    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin],
       mkTens(["H1", 4300], ["H", 9600]),
-    ], {
-      isKourei1WariShiteiKouhi: true,
-    });
+      {
+        isKourei1WariShiteiKouhi: true,
+      });
     expect(coveredBy("1", covers)).equal(4300);
     expect(patientChargeOf(covers)).equal(13900);
   });
 
   it("事例５４　高齢受給者外来・精神通院（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin], [
+    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin],
       mkTens(["H1", 9500], ["H", 400]),
-    ], {
-      isKourei1WariShiteiKouhi: true,
-    });
+      {
+        isKourei1WariShiteiKouhi: true,
+      });
     expect(coveredBy("1", covers)).equal(8500);
     expect(patientChargeOf(covers)).equal(9900);
   });
 
   it("事例５５　高齢受給者外来・精神通院（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin], [
+    const covers = calcFutan(2, "一般", [KuniSeishinTsuuin],
       mkTens(["H1", 9300], ["H", 5100]),
-    ], {
-      isKourei1WariShiteiKouhi: true,
-    });
+      {
+        isKourei1WariShiteiKouhi: true,
+      });
     expect(coveredBy("1", covers)).equal(8700);
     expect(patientChargeOf(covers)).equal(14400);
   });
 
   it("事例５６　高齢受給者外来・難病医療・生活保護", () => {
-    const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou, SeikatsuHogo()], [
+    const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou, SeikatsuHogo()],
       mkTens(["H1", 4800], ["H2", 4500]),
-    ], {
-      gendogaku: { kingaku: 0, kouhiBangou: 1 },
-    });
+      {
+        gendogaku: { kingaku: 0, kouhiBangou: 1 },
+      });
     expect(coveredBy("1", covers)).equal(8000);
     expect(patientChargeOf(covers)).equal(0);
   });
