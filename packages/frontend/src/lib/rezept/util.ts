@@ -52,7 +52,7 @@ export function sortKouhiList(kouhiList: Kouhi[]): void {
 }
 
 export function sortKouhiDataList(kouhiDataList: KouhiData[]): void {
-  
+
 }
 
 export async function getSortedKouhiListOfVisits(visits: Visit[]): Promise<Kouhi[]> {
@@ -309,25 +309,25 @@ export async function resolveGendo(visits: Visit[]):
 export function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
   koukikourei: Koukikourei | undefined,
   gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): ShotokuKubun | undefined {
-    if( gendo ){
-      return gendo;
+  if (gendo) {
+    return gendo;
+  }
+  if (koukikourei) {
+    switch (koukikourei.futanWari) {
+      case 3: return "現役並みⅢ";
+      case 2: return "一般Ⅱ";
+      case 1: return "一般Ⅰ";
     }
-    if (koukikourei) {
-      switch (koukikourei.futanWari) {
-        case 3: return "現役並みⅢ";
-        case 2: return "一般Ⅱ";
-        case 1: return "一般Ⅰ";
-      }
-    } else if (shahokokuho) {
-      switch (shahokokuho.koureiStore) {
-        case 3: return "現役並みⅢ";
-        case 2:
-        case 1:
-          return "一般";
-        default: break;
-      }
+  } else if (shahokokuho) {
+    switch (shahokokuho.koureiStore) {
+      case 3: return "現役並みⅢ";
+      case 2:
+      case 1:
+        return "一般";
+      default: break;
     }
-      return undefined;
+  }
+  return undefined;
 }
 
 export async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | undefined> {
@@ -555,7 +555,7 @@ export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
 }
 
 export function futanWariOfShahokokuho(shahokokuho: Shahokokuho): number {
-  if( shahokokuho.koureiStore > 0 ){
+  if (shahokokuho.koureiStore > 0) {
     return shahokokuho.koureiStore;
   } else {
     return 3;
@@ -564,11 +564,11 @@ export function futanWariOfShahokokuho(shahokokuho: Shahokokuho): number {
 
 export function isBirthdayMonth75(birthday: string, year: number, month: number): boolean {
   const bd = new Date(birthday);
-  if( (bd.getMonth() + 1) === month ){
+  if ((bd.getMonth() + 1) === month) {
     const endOfMonth = new Date(year, month - 1, kanjidate.lastDayOfMonth(year, month));
     const age = calcAge(bd, endOfMonth);
-    if( age === 75 ){
-      if( bd.getDate() === 1 ){
+    if (age === 75) {
+      if (bd.getDate() === 1) {
         return false;
       } else {
         return true;
