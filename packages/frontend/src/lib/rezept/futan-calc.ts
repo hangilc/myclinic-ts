@@ -395,7 +395,6 @@ export function calcFutanOne(
   shotokuKubun: ShotokuKubun | undefined,
   kouhiList: KouhiData[],
   totalTens: TotalTens,
-  prevCover: TotalCover,
   opt: CalcFutanOptions = {},
 ): TotalCover {
   if (opt.debug) {
@@ -409,7 +408,6 @@ export function calcFutanOne(
     }
     const curKouhiList: KouhiData[] = kouhiListOfKubun(futanKubun, kouhiList);
     let kakari: number = totalTen * 10;
-    const futanKubunName: 負担区分コードName = 負担区分コードRev.get(futanKubun)!;
     const selectors = splitFutanKubun(futanKubun);
     let patientCharge = kakari;
     for (let sel of selectors) {
@@ -420,23 +418,21 @@ export function calcFutanOne(
         if (futanWari === undefined) {
           throw new Error("Cannot find futanWari");
         }
-        const accHokenCover = mergeOptions(curTotalCover.getCover("H"), prevCover.getCover("H"), mergeCovers) ||
-          { kakari: 0, remaining: 0, gendogakuReached: false };
+        const accHokenCover = curTotalCover.getCover("H") || { kakari: 0, remaining: 0 };
         let iryouKingaku: number;
         let prevPatientCharge: number;
-        if (futanKubunName === "H") {
-          const gendoCombined = resolveGendogakuCombined(curTotalCover, prevCover, futanWari, shotokuKubun, opt.shotokuKubunGroup);
+        if (futanKubun === "1") { // 保険単独
+          const gendoCombined = resolveGendogakuCombined(curTotalCover, futanWari, shotokuKubun, opt.shotokuKubunGroup);
           if (gendoCombined) {
-            iryouKingaku = (totalTens.sumOf("H") + prevCover.tens.sumOf("H")) * 10;
-            let pcm = PatientChargeMap.mergeAll(curTotalCover.patientChargeMap, prevCover.patientChargeMap);
-            prevPatientCharge = pcm.sum;
+            iryouKingaku = totalTens.sumOf("H") * 10;
+            prevPatientCharge = curTotalCover.patientChargeMap.sum;
           } else {
-            iryouKingaku = (totalTen + prevCover.tens.sumOfFutanKubun("1")) * 10;
-            prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
+            iryouKingaku = totalTen * 10;
+            prevPatientCharge = 0;
           }
         } else {
           iryouKingaku = totalTen * 10;
-          prevPatientCharge = prevCover.patientChargeMap.patientChargeOf(futanKubun);
+          prevPatientCharge = 0;
         }
         const processHokenContext: ProcessHokenContext = {
           totalTen,
@@ -467,7 +463,7 @@ export function calcFutanOne(
           kakari,
           totalTen,
           hokenFutanWari: futanWari,
-          prevPatientCharge: curTotalCover.slot.patientChargeOf(sel) + prevCover.slot.patientChargeOf(sel),
+          prevPatientCharge: curTotalCover.slot.patientChargeOf(sel),
           gendogakuApplied: findGendo(opt, sel),
           debug: opt.debug,
         });
@@ -493,17 +489,13 @@ export function calcFutan(
   totalTens: Map<負担区分コードCode, number>,
   opt: CalcFutanOptions = {},
 ): TotalCover {
-  let totalCover: TotalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), totalCover, opt);
-  totalTensList.forEach(totalTens => {
-    let tc = 
-    if( shotokuKubun === "一般Ⅱ" ){
-      let tcAlt = calcFutanOne(futanWari, "一般Ⅰ", kouhiList, new TotalTens(totalTens), totalCover, opt);
-      if( tcAlt.patientCharge < tc.patientCharge ){
-        tc = tcAlt;
-      }
+  let totalCover: TotalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), opt);
+  if( shotokuKubun === "一般Ⅱ" ){
+    let tcAlt = calcFutanOne(futanWari, "一般Ⅰ", kouhiList, new TotalTens(totalTens), opt);
+    if( tcAlt.patientCharge < totalCover.patientCharge ){
+      totalCover = tcAlt;
     }
-    totalCover.merge(tc);
-  })
+  }
   return totalCover;
 }
 
@@ -574,7 +566,7 @@ function canCombineGendogaku(shotokuKubun: ShotokuKubun, hokenFutan: number, kou
   }
 }
 
-function resolveGendogakuCombined(curTotalCover: TotalCover, prevTotalCover: TotalCover,
+function resolveGendogakuCombined(curTotalCover: TotalCover,
   futanWari: number, shotokuKubun: ShotokuKubun | undefined, shotokuKubunGroup: ShotokuKubunGroup | undefined): boolean {
   if (shotokuKubun) {
     switch (shotokuKubun) {
@@ -601,7 +593,7 @@ function resolveGendogakuCombined(curTotalCover: TotalCover, prevTotalCover: Tot
   }
   let hokenOnlyTen = 0;
   let kouhiHeiyouTen = 0;
-  [curTotalCover, prevTotalCover].forEach(totalCover => totalCover.tens.map.forEach((ten, code) => {
+  [curTotalCover].forEach(totalCover => totalCover.tens.map.forEach((ten, code) => {
     const name = 負担区分コードNameOf(code)!;
     if (name === "H") {
       hokenOnlyTen += ten;
