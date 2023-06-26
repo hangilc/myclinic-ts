@@ -169,7 +169,7 @@ export interface KouhiProcessorArg {
   debug?: boolean;
 }
 
-type KouhiProcessor = (arg: KouhiProcessorArg) => Cover;
+export type KouhiProcessor = (arg: KouhiProcessorArg) => Cover;
 
 export interface KouhiData {
   processor: KouhiProcessor;
@@ -177,14 +177,7 @@ export interface KouhiData {
   futanshaBangou?: number;
 }
 
-function noFutanKouhiProcessor({ kakari }: KouhiProcessorArg): Cover {
-  return {
-    kakari,
-    remaining: 0,
-  }
-}
-
-function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): number {
+export function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | undefined): number {
   if (gendogaku === undefined) {
     return charge;
   } else {
@@ -195,145 +188,6 @@ function applyGendogaku(charge: number, prevCharge: number, gendogaku: number | 
     }
   }
 }
-
-function mkGendogakuLimitProcessor(gendogaku: number): KouhiProcessor {
-  return ({ kakari, prevPatientCharge }: KouhiProcessorArg): Cover => {
-    const patientCharge = applyGendogaku(kakari, prevPatientCharge, gendogaku);
-    return {
-      kakari,
-      remaining: patientCharge,
-    }
-  }
-}
-
-export const HibakushaNoKo: KouhiData = {
-  houbetsu: 82,
-  processor: noFutanKouhiProcessor
-};
-
-export function KouhiFutanNashi(houbetsu: number): KouhiData {
-  return {
-    houbetsu,
-    processor: ({ kakari }: KouhiProcessorArg): Cover => {
-      return { kakari, remaining: 0 };
-    }
-  }
-}
-
-// マル都（大気汚染）
-export function MaruToTaikiosen(gendogaku: number): KouhiData {
-  return {
-    houbetsu: 82,
-    processor: mkGendogakuLimitProcessor(gendogaku),
-  }
-}
-
-// マル青
-export const MaruAoNoFutan: KouhiData = {
-  houbetsu: 89,
-  processor: noFutanKouhiProcessor,
-};
-
-// マル都（難病）
-export const MarutoNanbyou: KouhiData = {
-  houbetsu: 82,
-  processor: nanbyouProcessor,
-}
-
-function nanbyouProcessor(arg: KouhiProcessorArg): Cover {
-  if (arg.debug) {
-    console.log("    enter 公費難病");
-    console.log("      ", JSON.stringify(arg));
-  }
-  const { kakari, totalTen, hokenFutanWari, prevPatientCharge, gendogakuApplied, debug } = arg;
-  let patientCharge = kakari;
-  if (gendogakuApplied !== undefined) {
-    patientCharge = gendogakuApplied - prevPatientCharge;
-    if (patientCharge < 0) {
-      throw new Error("Cannot happen in MarutoNanbyou");
-    }
-  } else {
-    if (hokenFutanWari === 3) {
-      patientCharge -= totalTen;
-    }
-  }
-  return {
-    kakari,
-    remaining: patientCharge,
-  }
-}
-
-// 難病（国, 54）
-export const KuniNanbyou: KouhiData = { houbetsu: 54, processor: nanbyouProcessor };
-
-// 結核患者の適正医療
-export const KouhiKekkaku: KouhiData = {
-  houbetsu: 10,
-  processor: ({ kakari, totalTen }: KouhiProcessorArg): Cover => {
-    return {
-      kakari,
-      remaining: totalTen * 0.5,
-    }
-  }
-}
-
-// 更生医療
-export const KouhiKouseiIryou: KouhiData = {
-  houbetsu: 15,
-  processor: ({ kakari, totalTen, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg):
-    Cover => {
-    let remaining = totalTen * 1;
-    if (gendogakuApplied !== undefined) {
-      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
-    }
-    return { kakari, remaining }
-  }
-}
-
-// 生活保護
-export function SeikatsuHogo(jikofutan: number = 0): KouhiData {
-  function processor({ kakari, prevPatientCharge }: KouhiProcessorArg): Cover {
-    const remaining = applyGendogaku(kakari, prevPatientCharge, jikofutan);
-    return { kakari, remaining };
-  }
-
-  return { houbetsu: 12, processor };
-}
-
-// 精神通院
-export const KuniSeishinTsuuin: KouhiData = {
-  houbetsu: 21,
-  processor: ({ kakari, totalTen, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg): Cover => {
-    let remaining = totalTen * 1;
-    if (gendogakuApplied !== undefined) {
-      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
-    }
-    return { kakari, remaining };
-  }
-}
-
-// 肝炎治療特別促進事業
-export const KouhiHepatitis: KouhiData = {
-  houbetsu: 38,
-  processor: ({ kakari, gendogakuApplied, prevPatientCharge }: KouhiProcessorArg): Cover => {
-    let remaining = kakari;
-    if( gendogakuApplied !== undefined ){
-      remaining = applyGendogaku(remaining, prevPatientCharge, gendogakuApplied);
-    }
-    return { kakari, remaining };
-  }
-}
-
-// 一類・二類感染症
-export const KouhiGroup1Group2Infection: KouhiData = {
-  houbetsu: 28,
-  processor: ({ kakari }: KouhiProcessorArg): Cover => {
-    return { kakari, remaining: 0 };
-  }
-}
-
-// 被爆者の子
-export const MaruToHibakushaNoKo: KouhiData = KouhiFutanNashi(82);
 
 export type ShotokuKubun = LimitApplicationCertificateClassificationFlagLabel;
 
@@ -519,9 +373,15 @@ export interface CalcFutanGendogakuOption {
   kouhiBangou: number; // 1-based
 }
 
+export interface CalcFutanPerVisitChargeOption {
+  kingaku: number;
+  kouhiBangou: number; // 1-based
+}
+
 export interface CalcFutanOptions {
   isBirthdayMonth75?: true;
   gendogaku?: CalcFutanGendogakuOption | CalcFutanGendogakuOption[],
+  perVisitCharges?: CalcFutanPerVisitChargeOption[],
   marucho?: 10000 | 20000 | undefined; // value specifies gendogaku (10000 or 20000)
   gendogakuTasuuGaitou?: true;
   shotokuKubunGroup?: ShotokuKubunGroup;
@@ -630,15 +490,12 @@ export function calcFutan(
   futanWari: number | undefined,
   shotokuKubun: ShotokuKubun | undefined,
   kouhiList: KouhiData[],
-  totalTensList: Map<負担区分コードCode, number>[], // in chronological order (new one is before old one)
+  totalTens: Map<負担区分コードCode, number>,
   opt: CalcFutanOptions = {},
 ): TotalCover {
-  if (totalTensList.length === 0) {
-    throw new Error("Empty total tens list");
-  }
-  let totalCover: TotalCover = new TotalCover();
+  let totalCover: TotalCover = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), totalCover, opt);
   totalTensList.forEach(totalTens => {
-    let tc = calcFutanOne(futanWari, shotokuKubun, kouhiList, new TotalTens(totalTens), totalCover, opt);
+    let tc = 
     if( shotokuKubun === "一般Ⅱ" ){
       let tcAlt = calcFutanOne(futanWari, "一般Ⅰ", kouhiList, new TotalTens(totalTens), totalCover, opt);
       if( tcAlt.patientCharge < tc.patientCharge ){
@@ -666,9 +523,6 @@ function findGendo(opt: CalcFutanOptions, sel: KouhiSelector): number | undefine
       }
     }
   }
-  // if (opt.gendogaku && opt.gendogaku.kouhiBangou === kouhiBangou) {
-  //   return opt.gendogaku.kingaku;
-  // }
   return undefined;
 }
 
