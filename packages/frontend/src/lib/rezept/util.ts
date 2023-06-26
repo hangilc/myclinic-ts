@@ -188,7 +188,11 @@ export async function commonRecord給付割合(visit: Visit): Promise<string> {
   if (visit.shahokokuhoId > 0) {
     const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
     if (is国保(shahokokuho.hokenshaBangou)) {
-      return "70";
+      if (shahokokuho.koureiStore > 0) {
+        return ((10 - shahokokuho.koureiStore) * 10).toString();
+      } else {
+        return "70";
+      }
     }
   }
   return "";
