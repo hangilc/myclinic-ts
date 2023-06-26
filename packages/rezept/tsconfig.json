@@ -15,6 +15,9 @@
     "isolatedModules": true,
     "declaration": true,
     "declarationMap": true,
-    "moduleResolution": "Node"
+    "strict": true,
+    "outDir": "./dist",
+    "moduleResolution": "node",
+    "esModuleInterop": true
   }
 }
