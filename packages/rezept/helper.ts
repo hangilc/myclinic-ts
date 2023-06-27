@@ -111,3 +111,14 @@ export function partition<T, U>(items: (T | U)[], pred: (arg: T | U) => arg is T
   return [ts, us];
 }
 
+export function kizaiKingakuToTen(kingaku: number): number {
+  return Math.floor(Math.round(kingaku / 10.0));
+}
+
+export function shochiYakuzaiKingakuToTen(kingaku: number): number {
+  if (kingaku <= 15) {
+    return 0
+  } else {
+    return Math.ceil((kingaku - 15) / 10) + 1
+  }
+}

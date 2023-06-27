@@ -52,6 +52,13 @@ export interface RezeptShinryou {
   comments: RezeptComment[];
 }
 
+export interface RezeptDrug {
+  shikibetsuCode: 診療識別コードCode;
+  futanKubun: 負担区分コードCode;
+  master: RezeptIyakuhinMaster;
+  comments: RezeptComment[];
+}
+
 export interface RezeptConduct { // 処置
   futanKubun: 負担区分コードCode;
   shikibetsuCode: 診療識別コードCode;
@@ -66,7 +73,8 @@ export interface RezeptConductShinryou {
 }
 
 export interface RezeptConductDrug {
-  
+  master: RezeptIyakuhinMaster;
+  amount: number;
 }
 
 export interface RezeptConductKizai {
@@ -84,5 +92,12 @@ export interface RezeptShinryouMaster {
   tensuu: number;
   name: string;
   houkatsukensa: string;
+}
+
+export interface RezeptIyakuhinMaster {
+  iyakuhincode: number;
+  yakka: number;
+  name: string;
+  unit: string;
 }
 

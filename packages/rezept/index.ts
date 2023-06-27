@@ -6,6 +6,8 @@ import { 診療行為レコードData } from "records/shinryoukoui-record";
 import { 特定器材レコードData } from "records/tokuteikizai-record";
 import { 医薬品レコードData } from "records/iyakuhin-record";
 import { cvtVisitsToShinryouDataList } from "shinryoukoui-item-util";
+import { TensuuCollector } from "tensuu-collector";
+import { cvtVisitsToIyakuhinDataList } from "iyakuhin-item-util";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -46,7 +48,7 @@ export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
   kizaiDataList: 特定器材レコードData[];
 } {
   const shinryouDataList = cvtVisitsToShinryouDataList(visits);
-  const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
+  const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visits);
   const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
   shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
   iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
