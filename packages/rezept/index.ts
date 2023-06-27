@@ -2,6 +2,10 @@ import { mk医療機関情報レコード } from "./records/medical-institute-re
 import { 診査支払い機関コード, 診査支払い機関コードCode } from "./codes";
 import { calcSeikyuuMonth, extract都道府県コードfromAddress } from "./helper";
 import { ClinicInfo, RezeptVisit } from "./rezept-types";
+import { 診療行為レコードData } from "records/shinryoukoui-record";
+import { 特定器材レコードData } from "records/tokuteikizai-record";
+import { 医薬品レコードData } from "records/iyakuhin-record";
+import { cvtVisitsToShinryouDataList } from "shinryoukoui-item-util";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -35,4 +39,21 @@ function create医療機関情報レコード(seikyuu: 診査支払い機関コ�
     電話番号: clinicInfo.tel,
   });
 }
+
+export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
+  shinryouDataList: 診療行為レコードData[];
+  iyakuhinDataList: 医薬品レコードData[];
+  kizaiDataList: 特定器材レコードData[];
+} {
+  const shinryouDataList = cvtVisitsToShinryouDataList(visits);
+  const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visitExList, kouhiIdList);
+  const kizaiDataList = cvtVisitsToKizaiDataList(visitExList, kouhiIdList);
+  shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  return {
+    shinryouDataList, iyakuhinDataList, kizaiDataList,
+  }
+}
+
 
