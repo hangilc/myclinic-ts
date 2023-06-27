@@ -6,7 +6,7 @@ import type { 診療行為レコードData } from "./records/shinryoukoui-record
 import type { Santeibi } from "./santeibi";
 import { isEqualList, withClassified, partition } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
-import { RezeptComment, RezeptShinryou, RezeptShinryouMaster } from "rezept-types";
+import { RezeptComment, RezeptShinryou, RezeptShinryouMaster, RezeptVisit } from "rezept-types";
 
 function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   function isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
@@ -113,7 +113,7 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
       return this.shinryouList.map((shinryou, index) => {
         const master = shinryou.master;
         const len = this.shinryouList.length;
-        const comments: RezeptComment[] = shinryou.asShinryou().comments;
+        const comments: RezeptComment[] = shinryou.comments;
         const data = {
           診療識別: index === 0 ? shikibetsu : "",
           負担区分: futanKubun,
@@ -134,35 +134,35 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
   }
 }
 
-function resolveShinryouShikibetsu(master: ShinryouMaster): 診療識別コードCode {
-  const shinryouShubetsu = Math.floor(parseInt(master.shuukeisaki) / 10).toString();
-  if (!is診療識別コードCode(shinryouShubetsu)) {
-    throw new Error("Unknown 診療識別コード: " + shinryouShubetsu);
-  }
-  return shinryouShubetsu;
-}
+// function resolveShinryouShikibetsu(master: ShinryouMaster): 診療識別コードCode {
+//   const shinryouShubetsu = Math.floor(parseInt(master.shuukeisaki) / 10).toString();
+//   if (!is診療識別コードCode(shinryouShubetsu)) {
+//     throw new Error("Unknown 診療識別コード: " + shinryouShubetsu);
+//   }
+//   return shinryouShubetsu;
+// }
 
-function resolveShinryouKouhi(shinryou: ShinryouEx, visit: Visit): number[] {
-  return visit.kouhiIdList;
-}
+// function resolveShinryouKouhi(shinryou: ShinryouEx, visit: Visit): number[] {
+//   return visit.kouhiIdList;
+// }
 
-function resolveConductShinryouKouhi(shinryou: ConductShinryouEx, visit: Visit): number[] {
-  return visit.kouhiIdList;
-}
+// function resolveConductShinryouKouhi(shinryou: ConductShinryouEx, visit: Visit): number[] {
+//   return visit.kouhiIdList;
+// }
 
-function commentsOfShinryou(shinryou: ShinryouEx): RezeptComment[] {
-  const comms = shinryou.asShinryou().comments;
-  if (comms.length > 0) {
-    console.log("comms", comms);
-  }
-  return comms;
-}
+// function commentsOfShinryou(shinryou: ShinryouEx): RezeptComment[] {
+//   const comms = shinryou.asShinryou().comments;
+//   if (comms.length > 0) {
+//     console.log("comms", comms);
+//   }
+//   return comms;
+// }
 
-function commentsOfConductShinryou(shinryou: ConductShinryouEx): RezeptComment[] {
-  return [];
-}
+// function commentsOfConductShinryou(shinryou: ConductShinryouEx): RezeptComment[] {
+//   return [];
+// }
 
-function houkatsuClassifier(shinryou: ShinryouEx): [string | undefined, ShinryouEx] {
+function houkatsuClassifier(shinryou: RezeptShinryou): [string | undefined, RezeptShinryou] {
   const g = shinryou.master.houkatsukensa;
   if (isHoukatsuGroup(g)) {
     return [g, shinryou];
@@ -171,17 +171,16 @@ function houkatsuClassifier(shinryou: ShinryouEx): [string | undefined, Shinryou
   }
 }
 
-function isShinryouEx(arg: any): arg is ShinryouEx {
-  return arg instanceof ShinryouEx;
-}
+// function isShinryouEx(arg: any): arg is ShinryouEx {
+//   return arg instanceof ShinryouEx;
+// }
 
-export function processShinryouOfVisitEx(visitEx: VisitEx, kouhiIdList: number[],
+export function processShinryouOfVisit(visit: RezeptVisit,
   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
     item: SimpleShinryou | HoukatsuKensaShinryou) => void): void {
-  const visit: Visit = visitEx.asVisit;
-  const sqldate = visit.visitedAt.substring(0, 10);
-  const shinryouList: [診療識別コードCode, ShinryouEx][] = visitEx.shinryouList.map(shinryou => [
-    resolveShinryouShikibetsu(shinryou.master),
+  const sqldate = visit.visitedAt;
+  const shinryouList: [診療識別コードCode, RezeptShinryou][] = visit.shinryouList.map(shinryou => [
+    shinryou.shikibetsuCode,
     shinryou
   ]);
   const conductShinryouList: [診療識別コードCode, ConductShinryouEx][] =

@@ -48,6 +48,7 @@ export interface RezeptShinryou {
   shikibetsuCode: 診療識別コードCode;
   futanKubun: 負担区分コードCode;
   master: RezeptShinryouMaster;
+  comments: RezeptComment[];
 }
 
 export interface RezeptConduct {
