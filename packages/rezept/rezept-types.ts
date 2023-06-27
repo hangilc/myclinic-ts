@@ -42,6 +42,7 @@ export interface KouhiData {
 export interface RezeptVisit {
   visitedAt: string; // 0000-00-00
   shinryouList: RezeptShinryou[];
+  conducts: RezeptConduct[];
 }
 
 export interface RezeptShinryou {
@@ -51,9 +52,24 @@ export interface RezeptShinryou {
   comments: RezeptComment[];
 }
 
-export interface RezeptConduct {
+export interface RezeptConduct { // 処置
   futanKubun: 負担区分コードCode;
   shikibetsuCode: 診療識別コードCode;
+  shinryouList: RezeptConductShinryou[];
+  drugList: RezeptConductDrug[];
+  kizaiList: RezeptConductKizai[];
+}
+
+export interface RezeptConductShinryou {
+
+}
+
+export interface RezeptConductDrug {
+  
+}
+
+export interface RezeptConductKizai {
+  
 }
 
 export interface RezeptComment {

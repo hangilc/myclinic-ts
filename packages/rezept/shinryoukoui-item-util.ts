@@ -4,9 +4,9 @@ import {
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuStep } from "./houkatsu";
 import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import type { Santeibi } from "./santeibi";
-import { isEqualList, withClassified, partition } from "./helper";
+import { isEqualList, withClassified, partition, classifyBy, withClassifiedBy } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
-import { RezeptComment, RezeptShinryou, RezeptShinryouMaster, RezeptVisit } from "rezept-types";
+import { RezeptComment, RezeptConduct, RezeptConductShinryou, RezeptShinryou, RezeptShinryouMaster, RezeptVisit } from "rezept-types";
 
 function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   function isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
@@ -162,18 +162,14 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
 //   return [];
 // }
 
-function houkatsuClassifier(shinryou: RezeptShinryou): [string | undefined, RezeptShinryou] {
+function houkatsuClassifier(shinryou: RezeptShinryou): string | undefined {
   const g = shinryou.master.houkatsukensa;
   if (isHoukatsuGroup(g)) {
-    return [g, shinryou];
+    return g;
   } else {
-    return [undefined, shinryou];
+    return undefined;
   }
 }
-
-// function isShinryouEx(arg: any): arg is ShinryouEx {
-//   return arg instanceof ShinryouEx;
-// }
 
 export function processShinryouOfVisit(visit: RezeptVisit,
   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
@@ -183,29 +179,37 @@ export function processShinryouOfVisit(visit: RezeptVisit,
     shinryou.shikibetsuCode,
     shinryou
   ]);
-  const conductShinryouList: [診療識別コードCode, ConductShinryouEx][] =
-    visitEx.conducts
-      .flatMap(c => {
-        const shikibetsu = shikibetsuOfConduct(c.kind.code);
-        return c.shinryouList.map((cs): [診療識別コードCode, ConductShinryouEx] => [shikibetsu, cs]);
+  const conducts: [診療識別コードCode, RezeptConduct][] =
+    visit.conducts.map(c => [c.shikibetsuCode, c]);
+  // const list: [診療識別コードCode, RezeptShinryou | RezeptConduct][] = [...shinryouList, ...conducts];
+
+  // function resolveFutanKubun(s: RezeptShinryou | RezeptConduct): 負担区分コードCode {
+  //   return s.futanKubun;
+  // }
+
+  withClassifiedBy(visit.shinryouList, s => s.shikibetsuCode, (shikibetsu, ss) => {
+    withClassifiedBy(ss, s => s.futanKubun, (futanKubun, ss) => {
+      withClassifiedBy(ss, houkatsuClassifier, (g, ss) => {
+        if (g === undefined) {
+          ss.forEach(s => {
+            handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
+              s.master, s.comments
+            ));
+          })
+        } else {
+          const step = getHoukatsuStep(sqldate);
+          handler(shikibetsu, futanKubun, sqldate, new HoukatsuKensaShinryou(
+            getHoukatsuStep(sqldate), ss
+          ));
+        }
       });
-  const list: [診療識別コードCode, ShinryouEx | ConductShinryouEx][] = [...shinryouList, ...conductShinryouList];
-  function resolveFutanKubun(s: ShinryouEx | ConductShinryouEx): 負担区分コードCode {
-    if (s instanceof ShinryouEx) {
-      return calcFutanKubun(
-        visitHasHoken(visit),
-        resolveShinryouKouhi(s, visit),
-        kouhiIdList);
-    } else {
-      return calcFutanKubun(
-        visitHasHoken(visit),
-        resolveConductShinryouKouhi(s, visit),
-        kouhiIdList);
-    }
-  }
+    });
+  });
+
+
   withClassified(list, (shikibetsu, ss) => {
     withClassified(ss.map(s => [resolveFutanKubun(s), s]), (futanKubun, ss) => {
-      const [shinryouList, conductShinryouList] = partition<ShinryouEx, ConductShinryouEx>(ss, isShinryouEx);
+      const [shinryouList, conducts] = partition<RezeptShinryou, RezeptConduct>(ss, isShinryouEx);
       withClassified(shinryouList.map(houkatsuClassifier), (g, ss) => {
         if (g === undefined) {
           ss.forEach(s => {
