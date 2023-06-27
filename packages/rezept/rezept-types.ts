@@ -61,7 +61,8 @@ export interface RezeptConduct { // 処置
 }
 
 export interface RezeptConductShinryou {
-
+  master: RezeptShinryouMaster;
+  comments: RezeptComment[];
 }
 
 export interface RezeptConductDrug {

@@ -181,11 +181,6 @@ export function processShinryouOfVisit(visit: RezeptVisit,
   ]);
   const conducts: [診療識別コードCode, RezeptConduct][] =
     visit.conducts.map(c => [c.shikibetsuCode, c]);
-  // const list: [診療識別コードCode, RezeptShinryou | RezeptConduct][] = [...shinryouList, ...conducts];
-
-  // function resolveFutanKubun(s: RezeptShinryou | RezeptConduct): 負担区分コードCode {
-  //   return s.futanKubun;
-  // }
 
   withClassifiedBy(visit.shinryouList, s => s.shikibetsuCode, (shikibetsu, ss) => {
     withClassifiedBy(ss, s => s.futanKubun, (futanKubun, ss) => {
@@ -206,37 +201,23 @@ export function processShinryouOfVisit(visit: RezeptVisit,
     });
   });
 
-
-  withClassified(list, (shikibetsu, ss) => {
-    withClassified(ss.map(s => [resolveFutanKubun(s), s]), (futanKubun, ss) => {
-      const [shinryouList, conducts] = partition<RezeptShinryou, RezeptConduct>(ss, isShinryouEx);
-      withClassified(shinryouList.map(houkatsuClassifier), (g, ss) => {
-        if (g === undefined) {
-          ss.forEach(s => {
-            handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-              s.master, commentsOfShinryou(s)
-            ));
-          })
-        } else {
-          const step = getHoukatsuStep(sqldate);
-          handler(shikibetsu, futanKubun, sqldate, new HoukatsuKensaShinryou(
-            getHoukatsuStep(sqldate), ss
+  withClassifiedBy(visit.conducts, c => c.shikibetsuCode, (shikibetsu, cs) => {
+    withClassifiedBy(cs, c => c.futanKubun, (futanKubun, cs) => {
+      cs.forEach(c => {
+        c.shinryouList.forEach(s => {
+          handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
+            s.master, s.comments
           ));
-        }
-      });
-      conductShinryouList.forEach(s => {
-        handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-          s.master, commentsOfConductShinryou(s)
-        ));
+        });
       })
-    })
-  })
+    });
+  });
 }
 
-export function cvtVisitsToShinryouDataList(visits: VisitEx[], kouhiIdList: number[]): 診療行為レコードData[] {
+export function cvtVisitsToShinryouDataList(visits: RezeptVisit[]): 診療行為レコードData[] {
   const comb = new Combiner<診療行為レコードData>();
   visits.forEach(visit => {
-    processShinryouOfVisitEx(visit, kouhiIdList, (shikibetsu, futanKubun, sqldate, s) => {
+    processShinryouOfVisit(visit, (shikibetsu, futanKubun, sqldate, s) => {
       comb.combine(shikibetsu, futanKubun, sqldate, s);
     });
   });
