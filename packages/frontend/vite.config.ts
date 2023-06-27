@@ -29,6 +29,7 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
         ".", 
         "../model",
         "../onshi-result",
+        "../rezept",
       ],
     }
   }
