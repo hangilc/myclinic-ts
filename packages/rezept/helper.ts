@@ -1,4 +1,5 @@
-import { 都道府県コード } from "./codes";
+import { Hokensha, RezeptKouhi } from "rezept-types";
+import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担者種別コードCode, 都道府県コード } from "./codes";
 import * as kanjidate from "kanjidate";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
@@ -120,5 +121,115 @@ export function shochiYakuzaiKingakuToTen(kingaku: number): number {
     return 0
   } else {
     return Math.ceil((kingaku - 15) / 10) + 1
+  }
+}
+
+export function resolveGendogakuTokkiJikou(
+  hokensha: Hokensha | undefined,
+  shotokuKubun: ShotokuKubunCode | undefined): レセプト特記事項コードCode | undefined {
+  if (shotokuKubun) {
+    switch (shotokuKubun) {
+      case "ア":
+      case "現役並みⅢ":
+        return レセプト特記事項コード["区ア"];
+      case "イ":
+      case "現役並みⅡ":
+        return レセプト特記事項コード["区イ"];
+      case "ウ":
+      case "現役並みⅠ":
+        return レセプト特記事項コード["区ウ"];
+      case "エ":
+      case "一般":
+        return レセプト特記事項コード["区エ"];
+      case "オ":
+      case "低所得Ⅱ":
+      case "低所得Ⅰ":
+        return レセプト特記事項コード["区オ"];
+      case "低所得Ⅰ（老福）": {
+        return レセプト特記事項コード["区オ"];
+      }
+      case "低所得Ⅰ（境）": {
+        return レセプト特記事項コード["区オ"];
+      }
+      case "オ（境）": {
+        return レセプト特記事項コード["区オ"];
+      }
+      case "一般Ⅱ": return レセプト特記事項コード["区カ"];
+      case "一般Ⅰ": return レセプト特記事項コード["区キ"];
+      default: {
+        return undefined;
+      }
+    }
+  } else if (hokensha) {
+    if (isKoukikourei(hokensha.futanshaBangou)) {
+      switch (hokensha.futanWari) {
+        case 3: return レセプト特記事項コード["区ア"];
+        case 2: return レセプト特記事項コード["区カ"];
+        case 1: return レセプト特記事項コード["区キ"];
+      }
+    } else if (hokensha.isKoureiJukyuusha) {
+      switch (hokensha.futanWari) {
+        case 3: return レセプト特記事項コード["区ア"];
+        case 2:
+        case 1:
+          return レセプト特記事項コード["区エ"];
+        default: break;
+      }
+    }
+    return undefined;
+  } else {
+    return undefined;
+  }
+}
+
+export function isKokuho(futanshaBangou: number): boolean {
+  return futanshaBangou < 1000000;
+}
+
+export function isKoukikourei(futanshaBangou: number): boolean {
+  return houbetsuOf(futanshaBangou) === 39;
+}
+
+export function houbetsuOf(futanshaBangou: number): number {
+  return Math.floor(futanshaBangou / 1000000);
+}
+
+function shahokokuhoRezeptShubetsOffset(hokensha: Hokensha): number {
+  if (hokensha.isKoureiJukyuusha) {
+    if (hokensha.futanWari === 3) {
+      return RezeptShubetuCodeOffset.高齢受給７割;
+    } else {
+      return RezeptShubetuCodeOffset.高齢受給一般;
+    }
+  } else {
+    if( hokensha.isHonnin ){
+      return RezeptShubetuCodeOffset.本人;
+    } else {
+      return RezeptShubetuCodeOffset.家族;
+    }
+  }
+}
+
+function koukikoureiRezeptShubetsuOffset(koukikoureiFutanWari: number): number {
+  if (koukikoureiFutanWari === 3) {
+    return RezeptShubetuCodeOffset.高齢受給７割;
+  } else {
+    return RezeptShubetuCodeOffset.高齢受給一般;
+  }
+}
+
+export function resolve保険種別(hokensha: Hokensha | undefined, kouhiListLength: number): number {
+  if (hokensha) {
+    if (isKoukikourei(hokensha.futanshaBangou)) {
+      let base = RezeptShubetsuCodeBase.後期高齢単独 + kouhiListLength * 10;
+      let offset = koukikoureiRezeptShubetsuOffset(hokensha.futanWari);
+      return base + offset;
+    } else {
+      let base = RezeptShubetsuCodeBase.社保国保単独 + kouhiListLength * 10;
+      let offset = shahokokuhoRezeptShubetsOffset(hokensha);
+      return base + offset;
+    }
+  } else {
+    return RezeptShubetsuCodeBase.公費単独 + kouhiListLength * 10;
   }
 }

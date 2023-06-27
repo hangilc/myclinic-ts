@@ -19,7 +19,10 @@ export interface Cover {
 }
 
 export interface Hokensha {
-
+  futanWari: number;
+  futanshaBangou: number;
+  isHonnin: boolean;
+  isKoureiJukyuusha?: boolean;
 }
 
 export interface KouhiProcessorArg {
@@ -78,6 +81,8 @@ export interface RezeptConductDrug {
 }
 
 export interface RezeptConductKizai {
+  master: RezeptKizaiMaster;
+  amount: number;
   
 }
 
@@ -101,3 +106,20 @@ export interface RezeptIyakuhinMaster {
   unit: string;
 }
 
+export interface RezeptKizaiMaster {
+  kizaicode: number;
+  kingaku: number;
+  name: string;
+  unit: string;
+}
+
+export interface RezeptPatient {
+  name: string;
+  sex: "M" | "F";
+  birthday: string; // 0000-00-00
+  patientId?: string;
+}
+
+export interface RezeptKouhi {
+
+}
