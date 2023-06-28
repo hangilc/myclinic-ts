@@ -20,7 +20,9 @@ export interface Cover {
 
 export interface Hokensha {
   futanWari: number;
-  futanshaBangou: number;
+  hokenshaBangou: number;
+  hihokenshaKigou?: string;
+  hihokenshaBangou: string;
   isHonnin: boolean;
   isKoureiJukyuusha?: boolean;
 }

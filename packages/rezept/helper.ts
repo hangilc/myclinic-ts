@@ -1,6 +1,7 @@
-import { Hokensha, RezeptKouhi } from "rezept-types";
-import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担者種別コードCode, 都道府県コード } from "./codes";
 import * as kanjidate from "kanjidate";
+import { Hokensha, RezeptVisit } from "./rezept-types";
+import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担者種別コードCode, 都道府県コード } from "./codes";
+import { toZenkaku } from "./zenkaku";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);
@@ -161,7 +162,7 @@ export function resolveGendogakuTokkiJikou(
       }
     }
   } else if (hokensha) {
-    if (isKoukikourei(hokensha.futanshaBangou)) {
+    if (isKoukikourei(hokensha.hokenshaBangou)) {
       switch (hokensha.futanWari) {
         case 3: return レセプト特記事項コード["区ア"];
         case 2: return レセプト特記事項コード["区カ"];
@@ -202,7 +203,7 @@ function shahokokuhoRezeptShubetsOffset(hokensha: Hokensha): number {
       return RezeptShubetuCodeOffset.高齢受給一般;
     }
   } else {
-    if( hokensha.isHonnin ){
+    if (hokensha.isHonnin) {
       return RezeptShubetuCodeOffset.本人;
     } else {
       return RezeptShubetuCodeOffset.家族;
@@ -220,7 +221,7 @@ function koukikoureiRezeptShubetsuOffset(koukikoureiFutanWari: number): number {
 
 export function resolve保険種別(hokensha: Hokensha | undefined, kouhiListLength: number): number {
   if (hokensha) {
-    if (isKoukikourei(hokensha.futanshaBangou)) {
+    if (isKoukikourei(hokensha.hokenshaBangou)) {
       let base = RezeptShubetsuCodeBase.後期高齢単独 + kouhiListLength * 10;
       let offset = koukikoureiRezeptShubetsuOffset(hokensha.futanWari);
       return base + offset;
@@ -232,4 +233,73 @@ export function resolve保険種別(hokensha: Hokensha | undefined, kouhiListLen
   } else {
     return RezeptShubetsuCodeBase.公費単独 + kouhiListLength * 10;
   }
+}
+
+export function commonRecord給付割合(hokensha: Hokensha): string {
+  if (isKokuho(hokensha.hokenshaBangou)) {
+    if (hokensha.isKoureiJukyuusha) {
+      return ((10 - hokensha.futanWari) * 10).toString();
+    } else {
+      return "70";
+    }
+  } else {
+    return "";
+  }
+}
+
+export function optionFold<T, U>(opt: T | undefined, f: (t: T) => U, defaultValue: U): U {
+  if (opt === undefined) {
+    return defaultValue;
+  } else {
+    return f(opt);
+  }
+}
+
+export function formatHokenshaBangou(hokenshaBangou: number): string {
+  if (hokenshaBangou < 1000000) {
+    return pad(hokenshaBangou, 8, " ");
+  } else {
+    return pad(hokenshaBangou, 8, "0");
+  }
+}
+
+function isAllAscii(s: string): boolean {
+  for (let c of s) {
+    if (c.charCodeAt(0) >= 256) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function adjustString(s: string): string {
+  if (isAllAscii(s)) {
+    return s;
+  } else {
+    return toZenkaku(s);
+  }
+}
+
+export function adjustOptString(s: string | undefined): string | undefined {
+  if (s === undefined) {
+    return undefined;
+  } else {
+    return adjustString(s);
+  }
+}
+
+export function hokenshaRecordBangou(hokensha: Hokensha | undefined): string | undefined {
+  return hokensha?.hihokenshaBangou;
+}
+
+export function hokenRecordJitsuNissu(visits: RezeptVisit[]): number {
+  const days: string[] = [];
+  visits
+    .map(visit => visit.visitedAt)
+    .forEach(d => {
+      if (!days.includes(d)) {
+        days.push(d);
+      }
+    })
+  return days.length;
 }
