@@ -1,5 +1,5 @@
 import * as kanjidate from "kanjidate";
-import { Kouhi, Koukikourei, Roujin, Shahokokuho } from "myclinic-model";
+import { dateToSqlDate, Kouhi, Koukikourei, Roujin, Shahokokuho } from "myclinic-model";
 
 export function padNumber(n: number, finalSize: number){
   let s = n.toString();
@@ -98,4 +98,22 @@ export function monthOfSqlDate(s: string): number {
   }
   return parseInt(m[1]);
 }
+
+export function firstDayOfMonth(year: number, month: number): string {
+  const d = new Date(year, month - 1, 1);
+  return dateToSqlDate(d);
+}
+
+export function lastDayOfMonth(year: number, month: number): string {
+  const d = new Date(year, month, 1);
+  return dateToSqlDate(kanjidate.addDays(d, -1));
+}
+
+export function firstAndLastDayOf(sqldate: string): [string, string] {
+  const year = yearOfSqlDate(sqldate);
+  const month = monthOfSqlDate(sqldate);
+  return [firstDayOfMonth(year, month), lastDayOfMonth(year, month)];
+}
+
+
 

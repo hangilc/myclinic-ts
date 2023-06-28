@@ -1,11 +1,14 @@
-import { map } from "cypress/types/bluebird";
-import type { Conduct, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
+import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
 import type { Hokensha, RezeptConduct, RezeptConductDrug, RezeptConductKizai, RezeptConductShinryou, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptShinryou, RezeptVisit } from "myclinic-rezept/rezept-types";
+import { OnshiResult } from "onshi-result";
+import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
+import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
+import { firstAndLastDayOf } from "./util";
 
 const KouhiOrder: number[] = [
   13, 14, 18, 29, 30, 10, 11, 20, 21, 15,
@@ -148,7 +151,100 @@ class HokenCollector {
   }
 }
 
+async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {
+  const onshi = await api.findOnshi(visitId);
+  if (onshi) {
+    const result = OnshiResult.cast(JSON.parse(onshi.kakunin));
+    if (result.isValid) {
+      return result.resultList[0];
+    }
+  }
+  return undefined;
+}
+
+async function resolveGendo(visitIds: number[]):
+  Promise<LimitApplicationCertificateClassificationFlagLabel | undefined> {
+  let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
+  for (let visitId of visitIds) {
+    const resultItem = await resolveOnshi(visitId);
+    if (resultItem) {
+      const g = resultItem.limitApplicationCertificateRelatedInfo?.limitApplicationCertificateClassificationFlag;
+      if (g) {
+        gendo = g;
+      }
+    }
+  }
+  return gendo;
+}
+
+function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
+  koukikourei: Koukikourei | undefined,
+  gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): ShotokuKubunCode | undefined {
+  if (gendo) {
+    return gendo;
+  }
+  if (koukikourei) {
+    switch (koukikourei.futanWari) {
+      case 3: return "現役並みⅢ";
+      case 2: return "一般Ⅱ";
+      case 1: return "一般Ⅰ";
+    }
+  } else if (shahokokuho) {
+    switch (shahokokuho.koureiStore) {
+      case 3: return "現役並みⅢ";
+      case 2:
+      case 1:
+        return "一般";
+      default: break;
+    }
+  }
+  return undefined;
+}
+
+async function resolveShotokuKubunOfVisits(shahokokuho: Shahokokuho | undefined,
+  koukikourei: Koukikourei | undefined, visitIds: number[]): Promise<ShotokuKubunCode | undefined> {
+  const gendo = await resolveGendo(visitIds);
+  return resolveShotokuKubun(shahokokuho, koukikourei, gendo);
+}
+
+async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
+  const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
+  return dex.adjList.map(e => {
+    const [adj, master] = e;
+    return adj.shuushokugocode;
+  });
+}
+
+async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: string): Promise<RezeptDisease[]> {
+  const result: RezeptDisease[] = [];
+  const ds = await api.listDiseaseActiveAt(patientId, firstDay, lastDay);
+  for (let i = 0; i < ds.length; i++) {
+    const disease = ds[i];
+    const adjCodes = await adjCodesOfDisease(disease.diseaseId);
+    let endReason: "N" | "C" | "S" | "D";
+    switch (disease.endReasonStore) {
+      case "N": case "C": case "S": case "D": {
+        endReason = disease.endReasonStore;
+        break;
+      }
+      default: {
+        throw new Error("Unknown end reason: " + disease.endReasonStore);
+      }
+    }
+    result.push({
+      shoubyoumeicode: disease.shoubyoumeicode,
+      adjcodes: adjCodes,
+      startDate: disease.startDate,
+      endReason: endReason,
+    });
+  }
+  return result;
+}
+
 export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
+  if (modelVisits.length === 0) {
+    throw new Error("Cannot happen");
+  }
   const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
   const hokenCollector = new HokenCollector();
   hokenCollector.scanVisits(visitExList);
@@ -159,8 +255,13 @@ export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> 
     futansha: kouhi.futansha,
     jukyuusha: kouhi.jukyuusha,
   }));
-  const shotokuKubun: ShotokuKubunCode | undefined = ;
-  const diseases: RezeptDisease[] = ;
+  const shotokuKubun: ShotokuKubunCode | undefined = await resolveShotokuKubunOfVisits(
+    hokenCollector.shahokokuho, hokenCollector.koukikourei, modelVisits.map(visit => visit.visitId)
+  );
+  const patientId: number = modelVisits[0].patientId;
+  const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
+  const [lastDay, firstDay] = firstAndLastDayOf(visitedAt);
+  const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
   return {
     visits,
     hokensha,
