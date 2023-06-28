@@ -52,9 +52,6 @@
       units,
     }
     return createRezept(arg);
-
-    // const ctx = await RezeptContext.load(year, month);
-    // return await ctx.createFor(shiharaiSelect);
   }
 
   async function doStart() {

@@ -1,12 +1,14 @@
-import type { Kouhi, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
+import { map } from "cypress/types/bluebird";
+import type { Conduct, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
+import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
-import type { ShotokuKubunCode } from "myclinic-rezept/codes";
+import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
-import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "myclinic-rezept/rezept-types";
+import type { Hokensha, RezeptConduct, RezeptConductDrug, RezeptConductKizai, RezeptConductShinryou, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptShinryou, RezeptVisit } from "myclinic-rezept/rezept-types";
 import api from "./api";
 
 const KouhiOrder: number[] = [
-  13, 14, 18, 29, 30, 10, 11, 20, 21, 15, 
+  13, 14, 18, 29, 30, 10, 11, 20, 21, 15,
   16, 24, 22, 28, 17, 79, 19, 23, 52, 54,
   51, 38, 53, 66, 62, 25, 12
 ];
@@ -16,7 +18,7 @@ const KouhiOrderMap: Record<number, number> = calcKouhiOrderMap();
 function calcKouhiOrderMap(): Record<number, number> {
   const map: Record<number, number> = {};
   KouhiOrder.forEach((k, i) => {
-    map[k] = i+1;
+    map[k] = i + 1;
   });
   return map;
 }
@@ -41,12 +43,124 @@ export async function loadVisits(year: number, month: number): Promise<{
   }
 }
 
+function hokenOfShinryou(shinryou: ShinryouEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
+  kouhiList: Kouhi[]): [Shahokokuho | undefined, Koukikourei | undefined, Kouhi[]] {
+  return [shahokokuho, koukikourei, kouhiList];
+}
+
+function hokenOfConduct(conduct: ConductEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
+  kouhiList: Kouhi[]): [Shahokokuho | undefined, Koukikourei | undefined, Kouhi[]] {
+  return [shahokokuho, koukikourei, kouhiList];
+}
+
+class HokenCollector {
+  shahokokuho: Shahokokuho | undefined = undefined;
+  koukikourei: Koukikourei | undefined = undefined;
+  kouhilist: Kouhi[] = [];
+
+  addShahokokuho(shahokokuho: Shahokokuho): void {
+    if (this.shahokokuho === undefined) {
+      this.shahokokuho = shahokokuho;
+    } else {
+      if (this.shahokokuho.shahokokuhoId !== shahokokuho.shahokokuhoId) {
+        throw new Error("Inconsistent shahokokuho");
+      }
+    }
+  }
+
+  addKoukikourei(koukikourei: Koukikourei): void {
+    if (this.koukikourei === undefined) {
+      this.koukikourei = koukikourei;
+    } else {
+      if (this.koukikourei.koukikoureiId !== koukikourei.koukikoureiId) {
+        throw new Error("Inconsistent shahokokuho");
+      }
+    }
+  }
+
+  addKouhi(kouhi: Kouhi): void {
+    const index = this.kouhilist.findIndex(k => k.kouhiId === kouhi.kouhiId);
+    if (index < 0) {
+      this.kouhilist.push(kouhi);
+    }
+  }
+
+  add(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined, kouhiList: Kouhi[]): void {
+    if (shahokokuho) {
+      this.addShahokokuho(shahokokuho);
+    }
+    if (koukikourei) {
+      this.addKoukikourei(koukikourei);
+    }
+    kouhiList.forEach(kouhi => this.addKouhi(kouhi));
+  }
+
+  finishAdd(): void {
+    sortKouhiList(this.kouhilist);
+  }
+
+  scanVisits(visits: VisitEx[]): void {
+    visits.forEach(visit => {
+      visit.shinryouList.forEach(shinryou => {
+        const [shahokokuho, koukikourei, kouhiList] = hokenOfShinryou(
+          shinryou, visit.hoken.shahokokuho, visit.hoken.koukikourei, visit.hoken.kouhiList);
+        this.add(shahokokuho, koukikourei, kouhiList);
+      });
+      visit.conducts.forEach(conduct => {
+        const [shahokokuho, koukikourei, kouhiList] = hokenOfConduct(
+          conduct, visit.hoken.shahokokuho, visit.hoken.koukikourei, visit.hoken.kouhiList);
+        this.add(shahokokuho, koukikourei, kouhiList);
+      });
+    });
+    this.finishAdd();
+  }
+
+  getFutanKubun(): 負担区分コードCode {
+    let name = this.kouhilist.map((_k, i) => (i + 1).toString()).join("");
+    if (this.shahokokuho || this.koukikourei) {
+      name = "H" + name;
+    }
+    if (!is負担区分コードName(name)) {
+      throw new Error("Cannot happen");
+    }
+    return 負担区分コード[name];
+  }
+
+  getFutanKubunOf(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined, kouhiList: Kouhi[])
+    : 負担区分コードCode {
+    const kouhiIndexList: number[] = [];
+    kouhiList.forEach(kouhi => {
+      const i = this.kouhilist.findIndex(k => k.kouhiId === kouhi.kouhiId);
+      if (i < 0) {
+        throw new Error("Cannot happen");
+      }
+      kouhiIndexList.push(i + 1);
+    });
+    kouhiIndexList.sort();
+    let name = kouhiIndexList.map(i => i.toString()).join("");
+    if (shahokokuho || koukikourei) {
+      name = "H" + name;
+    }
+    if (!is負担区分コードName(name)) {
+      throw new Error("Cannot happen");
+    }
+    return 負担区分コード[name];
+  }
+}
+
 export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
-  const visits: RezeptVisit[] = await Promise.all(modelVisits.map(modelVisit => cvtModelVisitToRezeptVisit(modelVisit)));
-  const hokensha: Hokensha | undefined = undefined;
-  const kouhiList: RezeptKouhi[] = [];
-  const shotokuKubun: ShotokuKubunCode | undefined = undefined;
-  const diseases: RezeptDisease[] = [];
+  const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
+  const hokenCollector = new HokenCollector();
+  hokenCollector.scanVisits(visitExList);
+  const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
+    cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
+  const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);
+  const kouhiList: RezeptKouhi[] = hokenCollector.kouhilist.map(kouhi => ({
+    futansha: kouhi.futansha,
+    jukyuusha: kouhi.jukyuusha,
+  }));
+  const shotokuKubun: ShotokuKubunCode | undefined = ;
+  const diseases: RezeptDisease[] = ;
   return {
     visits,
     hokensha,
@@ -56,11 +170,18 @@ export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> 
   }
 }
 
-async function cvtModelVisitToRezeptVisit(modelVisit: Visit): Promise<RezeptVisit> {
-  const visitEx = await api.getVisitEx(modelVisit.visitId);
+function commentsOfVisit(visit: VisitEx): RezeptComment[] {
+  return [];
+}
+
+function shoujouShoukiOfVisit(visit: VisitEx): RezeptShoujouShouki[] {
+  return [];
+}
+
+async function cvtModelVisitToRezeptVisit(visitEx: VisitEx, hokenCollector: HokenCollector): Promise<RezeptVisit> {
   const modelPatient = visitEx.patient;
   let sex: "M" | "F" = "M";
-  if( modelPatient.sex === "F" ) {
+  if (modelPatient.sex === "F") {
     sex = "F";
   }
   const patient: RezeptPatient = {
@@ -70,16 +191,105 @@ async function cvtModelVisitToRezeptVisit(modelVisit: Visit): Promise<RezeptVisi
   }
   return {
     visitedAt: visitEx.visitedAt.substring(0, 10),
-    shinryouList: [],
-    conducts: [],
+    shinryouList: visitEx.shinryouList.map(shinryou => cvtToRezeptShinryou(shinryou, visitEx.hoken, hokenCollector)),
+    conducts: visitEx.conducts.map(conduct => cvtToRezeptConduct(conduct, visitEx.hoken, hokenCollector)),
     patient,
-    shoujouShoukiList: [],
-    comments: []
+    shoujouShoukiList: shoujouShoukiOfVisit(visitEx),
+    comments: commentsOfVisit(visitEx),
   }
 }
 
-function cvtToRezeptShinryou(shinryou: ShinryouEx): RezeptShinryou {
-  
+function cvtToRezeptShinryou(shinryou: ShinryouEx, hoken: HokenInfo, hokenCollector: HokenCollector): RezeptShinryou {
+  const [shahokokuho, koukikourei, kouhiList] = hokenOfShinryou(shinryou, hoken.shahokokuho,
+    hoken.koukikourei, hoken.kouhiList);
+  return {
+    shikibetsuCode: resolveShinryouShikibetsu(shinryou.master),
+    futanKubun: hokenCollector.getFutanKubunOf(shahokokuho, koukikourei, kouhiList),
+    master: {
+      shinryoucode: shinryou.master.shinryoucode,
+      tensuu: parseInt(shinryou.master.tensuuStore),
+      name: shinryou.master.name,
+      houkatsukensa: shinryou.master.houkatsukensa,
+    },
+    comments: shinryou.asShinryou().comments,
+  };
+}
+
+function shikibetsuOfConduct(conductKind: number): 診療識別コードCode {
+  switch (conductKind) {
+    case 3: return 診療識別コード.画像診断;
+    default: return 診療識別コード.処置;
+  }
+}
+
+function cvtToRezeptConduct(conduct: ConductEx, hoken: HokenInfo, hokenCollector: HokenCollector): RezeptConduct {
+  const [shahokokuho, koukikourei, kouhiList] = hokenOfConduct(conduct, hoken.shahokokuho,
+    hoken.koukikourei, hoken.kouhiList);
+  return {
+    shikibetsuCode: shikibetsuOfConduct(conduct.kind.code),
+    futanKubun: hokenCollector.getFutanKubunOf(shahokokuho, koukikourei, kouhiList),
+    shinryouList: conduct.shinryouList.map(cs => cvtToRezeptConductShinryou(cs)),
+    drugList: conduct.drugs.map(cd => cvtToRezeptConductDrug(cd)),
+    kizaiList: [],
+  };
+}
+
+function commenctsOfConductShinryou(cs: ConductShinryouEx): RezeptComment[] {
+  return [];
+}
+
+function commenctsOfConductDrug(cs: ConductDrugEx): RezeptComment[] {
+  return [];
+}
+
+function commenctsOfConductKizai(cs: ConductKizaiEx): RezeptComment[] {
+  return [];
+}
+
+function cvtToRezeptConductShinryou(cs: ConductShinryouEx): RezeptConductShinryou {
+  return {
+    master: {
+      shinryoucode: cs.master.shinryoucode,
+      tensuu: parseInt(cs.master.tensuuStore),
+      name: cs.master.name,
+      houkatsukensa: cs.master.houkatsukensa,
+    },
+    comments: commenctsOfConductShinryou(cs),
+  }
+}
+
+function cvtToRezeptConductDrug(cd: ConductDrugEx): RezeptConductDrug {
+  return {
+    master: {
+      iyakuhincode: cd.master.iyakuhincode,
+      yakka: parseFloat(cd.master.yakkaStore),
+      name: cd.master.name,
+      unit: cd.master.unit,
+    },
+    amount: cd.amount,
+    comments: commenctsOfConductDrug(cd),
+  };
+}
+
+function cvtToRezeptConductKizai(ck: ConductKizaiEx): RezeptConductKizai {
+  return {
+    master: {
+      kizaicode: ck.master.kizaicode,
+      kingaku: parseFloat(ck.master.kingakuStore),
+      name: ck.master.name,
+      unit: ck.master.unit,
+    },
+    amount: ck.amount,
+    comments: commenctsOfConductKizai(ck),
+  };
+}
+
+function resolveShinryouShikibetsu(master: ShinryouMaster): 診療識別コードCode {
+  const shinryouShubetsu = Math.floor(parseInt(master.shuukeisaki) / 10).toString();
+  if (!is診療識別コードCode(shinryouShubetsu)) {
+    throw new Error("Unknown 診療識別コード: " + shinryouShubetsu);
+  }
+  return shinryouShubetsu;
 }
 
 async function listVisitForRezept(year: number, month: number): Promise<Visit[]> {
@@ -241,9 +451,9 @@ async function classifyByHokenOnlyShubetsu(visits: Visit[]): Promise<Map<string,
 }
 
 function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): Hokensha | undefined {
-  if( shahokokuho ){
+  if (shahokokuho) {
     let futanWari = 3;
-    if( shahokokuho.koureiStore > 0 ){
+    if (shahokokuho.koureiStore > 0) {
       futanWari = shahokokuho.koureiStore;
     }
     return {

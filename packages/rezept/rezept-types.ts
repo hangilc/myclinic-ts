@@ -78,12 +78,13 @@ export interface RezeptConductShinryou {
 export interface RezeptConductDrug {
   master: RezeptIyakuhinMaster;
   amount: number;
+  comments: RezeptComment[];
 }
 
 export interface RezeptConductKizai {
   master: RezeptKizaiMaster;
   amount: number;
-  
+  comments: RezeptComment[];
 }
 
 export interface RezeptComment {
