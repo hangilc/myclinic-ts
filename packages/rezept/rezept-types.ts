@@ -5,12 +5,6 @@ export interface ClinicInfo {
   address: string,
   tel: string,
   kikancode: string,
-  // postalCode: string,
-  // fax: string,
-  // todoufukencode: string,
-  // tensuuhyoucode: string,
-  // homepage: string,
-  // doctorName: string,
 }
 
 export interface Cover {
@@ -123,5 +117,6 @@ export interface RezeptPatient {
 }
 
 export interface RezeptKouhi {
-
+  futansha: number;
+  jukyuusha: number;
 }

@@ -2,15 +2,16 @@ import { mk医療機関情報レコード } from "./records/medical-institute-re
 import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode } from "./codes";
 import { adjustOptString, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, hokenRecordJitsuNissu, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
 import { ClinicInfo, Hokensha, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
-import { 診療行為レコードData } from "records/shinryoukoui-record";
-import { 特定器材レコードData } from "records/tokuteikizai-record";
-import { 医薬品レコードData } from "records/iyakuhin-record";
-import { cvtVisitsToShinryouDataList } from "shinryoukoui-item-util";
-import { TensuuCollector } from "tensuu-collector";
-import { cvtVisitsToIyakuhinDataList } from "iyakuhin-item-util";
-import { cvtVisitsToKizaiDataList } from "tokuteikizai-item-util";
-import { mkレセプト共通レコード } from "records/common-record";
-import { mk保険者レコード } from "records/hokensha-record";
+import { 診療行為レコードData } from "./records/shinryoukoui-record";
+import { 特定器材レコードData } from "./records/tokuteikizai-record";
+import { 医薬品レコードData } from "./records/iyakuhin-record";
+import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
+import { TensuuCollector } from "./tensuu-collector";
+import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
+import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
+import { mkレセプト共通レコード } from "./records/common-record";
+import { mk保険者レコード } from "./records/hokensha-record";
+import { mk公費レコード } from "./records/kouhi-record";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -37,6 +38,12 @@ export function createRezept(arg: CreateRezeptArg, serial: number): string {
     if (hokensha) {
       const hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
       rows.push(create保険者レコード(hokensha, visits, tenCol.getHokenTotal(), hokenFutan));
+    }
+    if (kouhiList.length > 0) {
+      const kouhiTotals: number[] = tenCol.getKouhiTotals();
+      kouhiList.forEach((kouhi, index) => {
+        rows.push(create公費レコード(kouhi, visits, kouhiTotals[index], undefined));
+      })
     }
   }
   return rows.join("\r\n") + "\r\n\x1A";
@@ -97,6 +104,21 @@ function create保険者レコード(
     合計点数,
     医療保険負担金額
   });
+}
+
+function create公費レコード(
+  kouhi: RezeptKouhi,
+  visits: RezeptVisit[],
+  souten: number,
+  futanKingaku: number | undefined,
+): string {
+  return mk公費レコード({
+    負担者番号: kouhi.futansha,
+    受給者番号: kouhi.jukyuusha,
+    診療実日数: kouhiRecordJitsuNissuu(kouhi.kouhiId, visits),
+    合計点数: souten,
+    負担金額: futanKingaku,
+  })
 }
 
 export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
