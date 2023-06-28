@@ -1,6 +1,8 @@
 import type { Kouhi, Koukikourei, Shahokokuho, Visit } from "myclinic-model";
+import type { RezeptUnit } from "myclinic-rezept";
+import type { ShotokuKubunCode } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
-import type { Hokensha } from "myclinic-rezept/rezept-types";
+import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "myclinic-rezept/rezept-types";
 import api from "./api";
 
 const KouhiOrder: number[] = [
@@ -37,6 +39,47 @@ export async function loadVisits(year: number, month: number): Promise<{
     shaho: shahoList,
     kokuho: kokuhoList,
   }
+}
+
+export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
+  const visits: RezeptVisit[] = await Promise.all(modelVisits.map(modelVisit => cvtModelVisitToRezeptVisit(modelVisit)));
+  const hokensha: Hokensha | undefined = undefined;
+  const kouhiList: RezeptKouhi[] = [];
+  const shotokuKubun: ShotokuKubunCode | undefined = undefined;
+  const diseases: RezeptDisease[] = [];
+  return {
+    visits,
+    hokensha,
+    kouhiList,
+    shotokuKubun,
+    diseases,
+  }
+}
+
+async function cvtModelVisitToRezeptVisit(modelVisit: Visit): Promise<RezeptVisit> {
+  const visitEx = await api.getVisitEx(modelVisit.visitId);
+  const modelPatient = visitEx.patient;
+  let sex: "M" | "F" = "M";
+  if( modelPatient.sex === "F" ) {
+    sex = "F";
+  }
+  const patient: RezeptPatient = {
+    name: modelPatient.rezeptName || modelPatient.fullName("　"),
+    sex,
+    birthday: modelPatient.birthday,
+  }
+  return {
+    visitedAt: visitEx.visitedAt.substring(0, 10),
+    shinryouList: [],
+    conducts: [],
+    patient,
+    shoujouShoukiList: [],
+    comments: []
+  }
+}
+
+function cvtToRezeptShinryou(shinryou: ShinryouEx): RezeptShinryou {
+  
 }
 
 async function listVisitForRezept(year: number, month: number): Promise<Visit[]> {

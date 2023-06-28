@@ -3,7 +3,7 @@
   import api from "@/lib/api";
   import type { ClinicInfo, Visit } from "myclinic-model";
   import { listKouhi } from "./list-kouhi";
-  import { hello, type RezeptUnit } from "myclinic-rezept";
+  import type { RezeptUnit } from "myclinic-rezept";
   import { createRezept, type CreateRezeptArg } from "myclinic-rezept";
   import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
   import type { ShotokuKubunCode } from "myclinic-rezept/codes";
