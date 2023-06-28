@@ -17,7 +17,7 @@ export interface Hokensha {
   hokenshaBangou: number;
   hihokenshaKigou?: string;
   hihokenshaBangou: string;
-  isHonnin: boolean;
+  isHonnin?: boolean;
   isKoureiJukyuusha?: boolean;
   edaban?: string;
 }

@@ -3,10 +3,11 @@
   import api from "@/lib/api";
   import type { ClinicInfo, Visit } from "myclinic-model";
   import { listKouhi } from "./list-kouhi";
-  import { hello } from "myclinic-rezept";
+  import { hello, type RezeptUnit } from "myclinic-rezept";
   import { createRezept, type CreateRezeptArg } from "myclinic-rezept";
   import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
   import type { ShotokuKubunCode } from "myclinic-rezept/codes";
+  import { loadVisits } from "@/lib/rezept-adapter";
 
   export let isVisible: boolean;
   let year: number;
@@ -40,21 +41,15 @@
       console.error("Cannot get ClinicInfo");
       return "";
     }
-    const visitsList: RezeptVisit[][] = [];
-    // const hokensha: Hokensha | undefined = undefined;
-    // const kouhiList: RezeptKouhi[] = [];
-    // const shotokuKubun: ShotokuKubunCode | undefined = undefined;
-    // const diseases: RezeptDisease[] = [];
+    const visits = await loadVisits(year, month);
+    console.log(visits);
+    const units: RezeptUnit[] = [];
     const arg: CreateRezeptArg = {
       seikyuuSaki: shiharaiSelect,
       year,
       month,
       clinicInfo,
-      visitsList,
-      hokensha: undefined,
-      kouhiList: [],
-      shotokuKubun: undefined,
-      diseases: [],
+      units,
     }
     return createRezept(arg);
 
