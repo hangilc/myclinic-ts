@@ -16,32 +16,41 @@ import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
 import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
 import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mkコメントレコード } from "./records/comment-record";
-import { create診療報酬請求書レコード } from "records/seikyuu-record";
+import { create診療報酬請求書レコード } from "./records/seikyuu-record";
+
+export const hello: string = "hello";
+
+export interface RezeptUnit {
+  visits: RezeptVisit[];
+  hokensha: Hokensha | undefined;
+  kouhiList: RezeptKouhi[];
+  shotokuKubun: ShotokuKubunCode | undefined;
+  diseases: RezeptDisease[];
+}
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
   year: number;
   month: number;
   clinicInfo: ClinicInfo;
-  visitsList: RezeptVisit[][];
-  hokensha: Hokensha | undefined;
-  kouhiList: RezeptKouhi[];
-  patient: RezeptPatient;
-  shotokuKubun: ShotokuKubunCode | undefined;
-  diseases: RezeptDisease[];
+  units: RezeptUnit[];
 }
 
-export function createRezept(arg: CreateRezeptArg, serial: number): string {
-  const { seikyuuSaki, year, month, clinicInfo, visitsList, hokensha, kouhiList, patient, shotokuKubun,
-    diseases, } = arg;
+export function createRezept(arg: CreateRezeptArg): string {
+  const { seikyuuSaki, year, month, clinicInfo, units } = arg;
   const rows: string[] = [];
   rows.push(create医療機関情報レコード(
     seikyuuSaki === "shaho" ? 診査支払い機関コード.社保基金 : 診査支払い機関コード.国健連合,
     year, month, clinicInfo));
+  let serial = 1;
   let rezeptCount = 0;
   let rezeptSouten = 0;
-  for (let visits of visitsList) {
-    rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, patient, visits, shotokuKubun));
+  for (let unit of units) {
+    const { visits, hokensha, kouhiList, shotokuKubun, diseases } = unit;
+    if (visits.length === 0) {
+      continue;
+    }
+    rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, visits[0].patient, visits, shotokuKubun));
     const tenCol = new TensuuCollector();
     const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(visits, tenCol);
     if (hokensha) {

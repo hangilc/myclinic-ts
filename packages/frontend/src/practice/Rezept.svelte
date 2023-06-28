@@ -3,8 +3,10 @@
   import api from "@/lib/api";
   import type { ClinicInfo, Visit } from "myclinic-model";
   import { listKouhi } from "./list-kouhi";
-  import { RezeptContext } from "@/lib/rezept/prepare";
-  import { 診査支払い機関コード } from "@/lib/rezept/codes";
+  import { hello } from "myclinic-rezept";
+  import { createRezept, type CreateRezeptArg } from "myclinic-rezept";
+  import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
+  import type { ShotokuKubunCode } from "myclinic-rezept/codes";
 
   export let isVisible: boolean;
   let year: number;
@@ -34,17 +36,34 @@
   }
 
   async function createContent(): Promise<string> {
-    const ctx = await RezeptContext.load(year, month);
-    return await ctx.createFor(shiharaiSelect);
+    if( !clinicInfo ){
+      console.error("Cannot get ClinicInfo");
+      return "";
+    }
+    const visitsList: RezeptVisit[][] = [];
+    // const hokensha: Hokensha | undefined = undefined;
+    // const kouhiList: RezeptKouhi[] = [];
+    // const shotokuKubun: ShotokuKubunCode | undefined = undefined;
+    // const diseases: RezeptDisease[] = [];
+    const arg: CreateRezeptArg = {
+      seikyuuSaki: shiharaiSelect,
+      year,
+      month,
+      clinicInfo,
+      visitsList,
+      hokensha: undefined,
+      kouhiList: [],
+      shotokuKubun: undefined,
+      diseases: [],
+    }
+    return createRezept(arg);
+
+    // const ctx = await RezeptContext.load(year, month);
+    // return await ctx.createFor(shiharaiSelect);
   }
 
   async function doStart() {
     preShow = await createContent();
-  }
-
-  async function doStartOrig() {
-    const content: string = await createContent();
-    preShow = content;
   }
 
   async function doDownload() {

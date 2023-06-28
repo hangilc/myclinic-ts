@@ -2,7 +2,7 @@ import * as kanjidate from "kanjidate";
 import { HokenSelector, Hokensha, RezeptVisit } from "./rezept-types";
 import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担区分コードNameOf, 負担者種別コードCode, 都道府県コード } from "./codes";
 import { toZenkaku } from "./zenkaku";
-import { DateSet } from "date-set";
+import { DateSet } from "./date-set";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);

@@ -43,6 +43,7 @@ export interface RezeptVisit {
   visitedAt: string; // 0000-00-00
   shinryouList: RezeptShinryou[];
   conducts: RezeptConduct[];
+  patient: RezeptPatient;
   shoujouShoukiList: RezeptShoujouShouki[];
   comments: RezeptComment[];
 }
