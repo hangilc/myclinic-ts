@@ -1,7 +1,8 @@
 import * as kanjidate from "kanjidate";
-import { Hokensha, RezeptVisit } from "./rezept-types";
-import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担者種別コードCode, 都道府県コード } from "./codes";
+import { HokenSelector, Hokensha, RezeptVisit } from "./rezept-types";
+import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担区分コードNameOf, 負担者種別コードCode, 都道府県コード } from "./codes";
 import { toZenkaku } from "./zenkaku";
+import { DateSet } from "date-set";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);
@@ -292,14 +293,26 @@ export function hokenshaRecordBangou(hokensha: Hokensha | undefined): string | u
   return hokensha?.hihokenshaBangou;
 }
 
-export function hokenRecordJitsuNissu(visits: RezeptVisit[]): number {
+function visitHasHokenSelector(visit: RezeptVisit, selector: HokenSelector): boolean {
+  for(let shinryou of visit.shinryouList) {
+    if( futanKubunIncludes(shinryou.futanKubun, selector) ){
+      return true;
+    }
+  }
+  return false;
+}
+
+export function calcJitsuNissuu(visits: RezeptVisit[], selector: HokenSelector): number {
+  let ds = new DateSet();
   const days: string[] = [];
-  visits
-    .map(visit => visit.visitedAt)
-    .forEach(d => {
-      if (!days.includes(d)) {
-        days.push(d);
-      }
-    })
-  return days.length;
+  visits.forEach(visit => {
+    if( visitHasHokenSelector(visit, selector) ){
+      ds.add(visit.visitedAt);
+    }
+  });
+  return ds.length;
+}
+
+export function futanKubunIncludes(futanKubun: 負担区分コードCode, selector: HokenSelector): boolean {
+  return 負担区分コードNameOf(futanKubun).includes(selector);
 }

@@ -1,7 +1,7 @@
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
 import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode } from "./codes";
-import { adjustOptString, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, hokenRecordJitsuNissu, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
-import { ClinicInfo, Hokensha, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
+import { adjustOptString, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, calcJitsuNissuu, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
+import { ClinicInfo, HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
 import { 診療行為レコードData } from "./records/shinryoukoui-record";
 import { 特定器材レコードData } from "./records/tokuteikizai-record";
 import { 医薬品レコードData } from "./records/iyakuhin-record";
@@ -12,6 +12,8 @@ import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { mk保険者レコード } from "./records/hokensha-record";
 import { mk公費レコード } from "./records/kouhi-record";
+import { mk資格確認レコード } from "records/shikaku-kakunin-record";
+import { endReasonToKubun, mk症病名レコード } from "records/shoubyoumei-record";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -23,10 +25,12 @@ export interface CreateRezeptArg {
   kouhiList: RezeptKouhi[];
   patient: RezeptPatient;
   shotokuKubun: ShotokuKubunCode | undefined;
+  diseases: RezeptDisease[];
 }
 
 export function createRezept(arg: CreateRezeptArg, serial: number): string {
-  const { seikyuuSaki, year, month, clinicInfo, visitsList, hokensha, kouhiList, patient, shotokuKubun } = arg;
+  const { seikyuuSaki, year, month, clinicInfo, visitsList, hokensha, kouhiList, patient, shotokuKubun,
+    diseases, } = arg;
   const rows: string[] = [];
   rows.push(create医療機関情報レコード(
     seikyuuSaki === "shaho" ? 診査支払い機関コード.社保基金 : 診査支払い機関コード.国健連合,
@@ -42,9 +46,34 @@ export function createRezept(arg: CreateRezeptArg, serial: number): string {
     if (kouhiList.length > 0) {
       const kouhiTotals: number[] = tenCol.getKouhiTotals();
       kouhiList.forEach((kouhi, index) => {
-        rows.push(create公費レコード(kouhi, visits, kouhiTotals[index], undefined));
+        let sel: HokenSelector;
+        switch (index) {
+          case 0: sel = "1"; break;
+          case 1: sel = "2"; break;
+          case 2: sel = "3"; break;
+          case 3: sel = "4"; break;
+          default: throw new Error("Too many kouhi.");
+        }
+        rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], undefined));
       })
     }
+    if (hokensha && hokensha.edaban) {
+      const edaban = hokensha.edaban;
+      rows.push(create資格確認レコード(edaban));
+    }
+    {
+      diseases.forEach((disease, i) => {
+        const adjCodes = disease.adjcodes;
+        rows.push(mk症病名レコード({
+          傷病名コード: disease.shoubyoumeicode,
+          診療開始日: disease.startDate.replaceAll("-", ""),
+          転帰区分: endReasonToKubun(disease.endReason),
+          修飾語コード: (adjCodes.length > 5 ? adjCodes.slice(0, 5) : adjCodes).join(""),
+          主傷病: i === 0,
+        }));
+      })
+    }
+
   }
   return rows.join("\r\n") + "\r\n\x1A";
 }
@@ -100,7 +129,7 @@ function create保険者レコード(
     保険者番号: formatHokenshaBangou(hokensha.hokenshaBangou),
     被保険者証記号: adjustOptString(hokensha.hihokenshaKigou),
     被保険者証番号: hokensha.hihokenshaBangou,
-    診療実日数: hokenRecordJitsuNissu(visits),
+    診療実日数: calcJitsuNissuu(visits, "H"),
     合計点数,
     医療保険負担金額
   });
@@ -108,6 +137,7 @@ function create保険者レコード(
 
 function create公費レコード(
   kouhi: RezeptKouhi,
+  selector: HokenSelector,
   visits: RezeptVisit[],
   souten: number,
   futanKingaku: number | undefined,
@@ -115,9 +145,16 @@ function create公費レコード(
   return mk公費レコード({
     負担者番号: kouhi.futansha,
     受給者番号: kouhi.jukyuusha,
-    診療実日数: kouhiRecordJitsuNissuu(kouhi.kouhiId, visits),
+    診療実日数: calcJitsuNissuu(visits, selector),
     合計点数: souten,
     負担金額: futanKingaku,
+  })
+}
+
+function create資格確認レコード(edaban: string | undefined): string {
+  return mk資格確認レコード({
+    確認区分コード: undefined,
+    枝番: edaban,
   })
 }
 

@@ -19,6 +19,7 @@ export interface Hokensha {
   hihokenshaBangou: string;
   isHonnin: boolean;
   isKoureiJukyuusha?: boolean;
+  edaban?: string;
 }
 
 export interface KouhiProcessorArg {
@@ -119,4 +120,18 @@ export interface RezeptPatient {
 export interface RezeptKouhi {
   futansha: number;
   jukyuusha: number;
+}
+
+export type HokenSelector = "H" | "1" | "2" | "3" | "4";
+
+export interface RezeptDisease {
+  shoubyoumeicode: number;
+  adjcodes: number[];
+  startDate: string; // 0000-00-00
+  endReason: 
+    "N" // 継続
+    | "C" // 治癒
+    | "S" // 中止
+    | "D" // 死亡
+    ;
 }
