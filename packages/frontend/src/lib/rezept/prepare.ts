@@ -116,7 +116,6 @@ export class RezeptContext {
         visit.comments.forEach(comm => {
           const shikibetsucode = castTo診療識別コードCode(comm.shikibetsucode ?? 診療識別コード.全体に係る識別コード);
           rows.push(mkコメントレコード({
-
             診療識別: shikibetsucode,
             負担区分: futanKubun,
             コメントコード: comm.code,

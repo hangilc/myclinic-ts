@@ -1,4 +1,4 @@
-import { 診療識別コードCode, 負担区分コードCode } from "codes";
+import { 症状詳記区分コードCode, 診療識別コードCode, 負担区分コードCode } from "codes";
 
 export interface ClinicInfo {    
   name: string,
@@ -43,6 +43,8 @@ export interface RezeptVisit {
   visitedAt: string; // 0000-00-00
   shinryouList: RezeptShinryou[];
   conducts: RezeptConduct[];
+  shoujouShoukiList: RezeptShoujouShouki[];
+  comments: RezeptComment[];
 }
 
 export interface RezeptShinryou {
@@ -86,7 +88,8 @@ export interface RezeptConductKizai {
 export interface RezeptComment {
   code: number;
   text: string;
-  shikibetsucode?: 診療識別コードCode;
+  shikibetsuCode?: 診療識別コードCode;
+  futanKubun?: 負担区分コードCode;
 }
 
 export interface RezeptShinryouMaster {
@@ -134,4 +137,9 @@ export interface RezeptDisease {
     | "S" // 中止
     | "D" // 死亡
     ;
+}
+
+export interface RezeptShoujouShouki {
+  kubun: 症状詳記区分コードCode;
+  text: string;
 }

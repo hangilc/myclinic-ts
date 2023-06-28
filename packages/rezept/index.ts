@@ -1,10 +1,10 @@
 import { mk医療機関情報レコード } from "./records/medical-institute-record";
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode } from "./codes";
+import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード, 負担区分コードCode } from "./codes";
 import { adjustOptString, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, calcJitsuNissuu, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
-import { ClinicInfo, HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
-import { 診療行為レコードData } from "./records/shinryoukoui-record";
-import { 特定器材レコードData } from "./records/tokuteikizai-record";
-import { 医薬品レコードData } from "./records/iyakuhin-record";
+import { ClinicInfo, HokenSelector, Hokensha, RezeptComment, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
+import { mk診療行為レコード, 診療行為レコードData } from "./records/shinryoukoui-record";
+import { mk特定器材レコード, 特定器材レコードData } from "./records/tokuteikizai-record";
+import { mk医薬品レコード, 医薬品レコードData } from "./records/iyakuhin-record";
 import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
 import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
@@ -12,8 +12,10 @@ import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { mk保険者レコード } from "./records/hokensha-record";
 import { mk公費レコード } from "./records/kouhi-record";
-import { mk資格確認レコード } from "records/shikaku-kakunin-record";
-import { endReasonToKubun, mk症病名レコード } from "records/shoubyoumei-record";
+import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
+import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
+import { mk症状詳記レコード } from "./records/shoujoushouki-record";
+import { mkコメントレコード } from "./records/comment-record";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -71,6 +73,31 @@ export function createRezept(arg: CreateRezeptArg, serial: number): string {
           修飾語コード: (adjCodes.length > 5 ? adjCodes.slice(0, 5) : adjCodes).join(""),
           主傷病: i === 0,
         }));
+      })
+    }
+    {
+      visits.forEach(visit => {
+        visit.shoujouShoukiList.forEach(shouki => {
+          rows.push(mk症状詳記レコード({
+            症状詳記区分: shouki.kubun,
+            症状詳記データ: shouki.text,
+          }))
+        })
+      })
+    }
+    rows.push(...shinryouDataList.map(mk診療行為レコード));
+    rows.push(...iyakuhinDataList.map(mk医薬品レコード));
+    rows.push(...kizaiDataList.map(mk特定器材レコード));
+    for (let visit of visits) {
+      visit.comments.forEach(comm => {
+        const futanKubun = resolveFutankubunOfVisitComment(comm, visit);
+        const shikibetsucode = comm.shikibetsuCode ?? 診療識別コード.全体に係る識別コード;
+        rows.push(mkコメントレコード({
+          診療識別: shikibetsucode,
+          負担区分: futanKubun,
+          コメントコード: comm.code,
+          文字データ: comm.text,
+        }))
       })
     }
 
@@ -174,3 +201,16 @@ export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
   }
 }
 
+function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {
+  if( comm.futanKubun ) {
+    return comm.futanKubun;
+  } else {
+    if( calcJitsuNissuu([visit], "H") ) {
+      return "1";
+    } else if( calcJitsuNissuu([visit], "1") ){
+      return "5";
+    } else {
+      throw new Error("No hoken and no kouhi.");
+    }
+  }
+}

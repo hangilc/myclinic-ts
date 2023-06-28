@@ -10,7 +10,7 @@ import { RezeptComment, RezeptConduct, RezeptConductShinryou, RezeptShinryou, Re
 
 function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   function isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
-    return a.code === b.code && a.text === b.text && a.shikibetsucode === b.shikibetsucode;
+    return a.code === b.code && a.text === b.text && a.shikibetsuCode === b.shikibetsuCode;
   }
 
   return isEqualList(a, b, isEqualComments);
