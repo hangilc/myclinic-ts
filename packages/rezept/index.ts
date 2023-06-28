@@ -16,6 +16,7 @@ import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
 import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
 import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mkコメントレコード } from "./records/comment-record";
+import { create診療報酬請求書レコード } from "records/seikyuu-record";
 
 export interface CreateRezeptArg {
   seikyuuSaki: "kokuho" | "shaho";
@@ -37,6 +38,8 @@ export function createRezept(arg: CreateRezeptArg, serial: number): string {
   rows.push(create医療機関情報レコード(
     seikyuuSaki === "shaho" ? 診査支払い機関コード.社保基金 : 診査支払い機関コード.国健連合,
     year, month, clinicInfo));
+  let rezeptCount = 0;
+  let rezeptSouten = 0;
   for (let visits of visitsList) {
     rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, patient, visits, shotokuKubun));
     const tenCol = new TensuuCollector();
@@ -100,8 +103,13 @@ export function createRezept(arg: CreateRezeptArg, serial: number): string {
         }))
       })
     }
-
+    rezeptCount += (hokensha ? 1 : 0) + kouhiList.length;
+    rezeptSouten += tenCol.getRezeptSouten();
   }
+  rows.push(create診療報酬請求書レコード({
+    rezeptCount: rezeptCount,
+    totalTen: rezeptSouten,
+  }))
   return rows.join("\r\n") + "\r\n\x1A";
 }
 
@@ -202,12 +210,12 @@ export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
 }
 
 function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {
-  if( comm.futanKubun ) {
+  if (comm.futanKubun) {
     return comm.futanKubun;
   } else {
-    if( calcJitsuNissuu([visit], "H") ) {
+    if (calcJitsuNissuu([visit], "H")) {
       return "1";
-    } else if( calcJitsuNissuu([visit], "1") ){
+    } else if (calcJitsuNissuu([visit], "1")) {
       return "5";
     } else {
       throw new Error("No hoken and no kouhi.");
