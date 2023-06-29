@@ -17,6 +17,7 @@ import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei
 import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mkコメントレコード } from "./records/comment-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
+import { Combiner } from "tekiyou-item";
 
 export const hello: string = "hello";
 
@@ -53,7 +54,8 @@ export function createRezept(arg: CreateRezeptArg): string {
     }
     rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, patient, visits, shotokuKubun));
     const tenCol = new TensuuCollector();
-    const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(visits, tenCol);
+    const comb = new Combiner();
+    calcVisits(visits, tenCol, comb);
     if (hokensha) {
       const hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
       rows.push(create保険者レコード(hokensha, visits, tenCol.getHokenTotal(), hokenFutan));
@@ -203,20 +205,13 @@ function create資格確認レコード(edaban: string | undefined): string {
   })
 }
 
-export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector): {
-  shinryouDataList: 診療行為レコードData[];
-  iyakuhinDataList: 医薬品レコードData[];
-  kizaiDataList: 特定器材レコードData[];
-} {
-  const shinryouDataList = cvtVisitsToShinryouDataList(visits);
-  const iyakuhinDataList = cvtVisitsToIyakuhinDataList(visits);
-  const kizaiDataList = cvtVisitsToKizaiDataList(visits);
+export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector, comb: Combiner): void {
+  cvtVisitsToShinryouDataList(visits, comb);
+  cvtVisitsToIyakuhinDataList(visits, comb);
+  cvtVisitsToKizaiDataList(visits, comb);
   shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
   iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
   kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
-  return {
-    shinryouDataList, iyakuhinDataList, kizaiDataList,
-  }
 }
 
 function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {

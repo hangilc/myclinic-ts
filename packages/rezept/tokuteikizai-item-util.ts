@@ -1,16 +1,20 @@
 import type { 診療識別コードCode, 負担区分コードCode } from "./codes";
-import type { 特定器材レコードData } from "./records/tokuteikizai-record";
+import { mk特定器材レコード, type 特定器材レコードData } from "./records/tokuteikizai-record";
 import type { Santeibi } from "./santeibi";
 import { kizaiKingakuToTen, withClassifiedBy } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
 import { RezeptKizaiMaster, RezeptVisit } from "rezept-types";
 
-class SingleUnit implements TekiyouItem<特定器材レコードData> {
+class SingleUnit implements TekiyouItem {
   readonly isSingleItem = true;
+  shikibetsu: 診療識別コードCode;
+  futanKubun: 負担区分コードCode;
   master: RezeptKizaiMaster;
   amount: number;
 
-  constructor( master: RezeptKizaiMaster, amount: number) {
+  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: RezeptKizaiMaster, amount: number) {
+    this.shikibetsu = shikibetsu;
+    this.futanKubun = futanKubun;
     this.master = master;
     this.amount = amount;
   }
@@ -32,10 +36,10 @@ class SingleUnit implements TekiyouItem<特定器材レコードData> {
     return `${this.master.name} ${this.amount}${this.master.unit}`;
   }
 
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 特定器材レコードData[] {
-    return [{
-      診療識別: shikibetsu,
-      負担区分: futanKubun,
+  toRecords(santeibi: Santeibi): string[] {
+    const data = {
+      診療識別: this.shikibetsu,
+      負担区分: this.futanKubun,
       特定器材コード: this.master.kizaicode,
       使用量: this.amount,
       点数: this.ten,
@@ -47,34 +51,33 @@ class SingleUnit implements TekiyouItem<特定器材レコードData> {
       コメントコード３: undefined,
       コメント文字３: undefined,
       算定日情報: santeibi.getSanteibiMap(),
-    }];
+    };
+    return [mk特定器材レコード(data)];
   }
 }
 
-export function processKizaiOfVisit(visit: RezeptVisit,
-  handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
+export function handleKizaiTekiyouOfVisit(visit: RezeptVisit,
+  handler: (shikibetsu: 診療識別コードCode, sqldate: string,
     item: SingleUnit) => void): void {
-  const sqldate = visit.visitedAt.substring(0, 10);
+  const sqldate = visit.visitedAt;
   withClassifiedBy(visit.conducts, c => c.shikibetsuCode, (shikibetsu, cs) => {
     withClassifiedBy(cs, c => c.futanKubun, (futanKubun, cs) => {
       cs.forEach(c => {
         c.kizaiList.forEach(k => {
-          const unit = new SingleUnit(k.master, k.amount);
-          handler(shikibetsu, futanKubun, sqldate, unit);
+          const unit = new SingleUnit(shikibetsu, futanKubun, k.master, k.amount);
+          handler(shikibetsu, sqldate, unit);
         });
       });
     })
   })
 }
 
-export function cvtVisitsToKizaiDataList(visits: RezeptVisit[]): 特定器材レコードData[] {
-  const comb = new Combiner<特定器材レコードData>();
+export function handleKizaiTekiyouOfVisits(visits: RezeptVisit[], comb: Combiner): void {
   visits.forEach(visit => {
-    processKizaiOfVisit(visit, (shikibetsu, futanKubun, sqldate, s) => {
-      comb.combine(shikibetsu, futanKubun, sqldate, s);
+    handleKizaiTekiyouOfVisit(visit, (shikibetsu, sqldate, s) => {
+      comb.combine(shikibetsu, s, sqldate);
     });
   });
-  return comb.toDataList();
 }
 
 

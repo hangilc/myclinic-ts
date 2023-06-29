@@ -1,23 +1,29 @@
 import { sort診療識別コードCodeList, type 症状詳記区分コードCode, type 診療識別コードCode, type 負担区分コードCode } from "./codes";
 import { Santeibi } from "./santeibi";
 
-export interface TekiyouItem<R> {
+// export interface TekiyouItem<R> {
+//   isSame(other: any): boolean;
+//   toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): R[];
+// }
+
+export interface TekiyouItem {
   isSame(other: any): boolean;
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): R[];
+  toRecords(santeibi: Santeibi): string[];
 }
 
-class CombineUnit<R> {
-  item: TekiyouItem<R>;
+class CombineUnit {
+  shikibetsu: 診療識別コードCode;
+  item: TekiyouItem;
   santei: Santeibi;
-  debug: boolean = false;
 
-  constructor(item: TekiyouItem<R>, sqldate: string) {
+  constructor(shikibetsu: 診療識別コードCode, item: TekiyouItem, sqldate: string) {
+    this.shikibetsu = shikibetsu;
     this.item = item;
     this.santei = new Santeibi();
     this.santei.add(sqldate);
   }
 
-  tryAdd(arg: TekiyouItem<R>, sqldate: string): boolean {
+  tryAdd(arg: TekiyouItem, sqldate: string): boolean {
     if (this.item.isSame(arg)) {
       this.santei.add(sqldate);
       return true;
@@ -26,57 +32,30 @@ class CombineUnit<R> {
     }
   }
 
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode,): R[] {
-    return this.item.toRecords(shikibetsu, futanKubun, this.santei);
+  toRecords(): string[] {
+    return this.item.toRecords(this.santei);
   }
 }
 
-export class Combiner<R> {
-  map: Map<診療識別コードCode, Map<負担区分コードCode, CombineUnit<R>[]>> = new Map();
-
-  getShikibetsu(shikibetsu: 診療識別コードCode): Map<負担区分コードCode, CombineUnit<R>[]> {
-    const bmap = this.map.get(shikibetsu);
-    if (bmap) {
-      return bmap;
-    } else {
-      const newBmap = new Map<負担区分コードCode, CombineUnit<R>[]>();
-      this.map.set(shikibetsu, newBmap);
-      return newBmap;
-    }
-  }
+export class Combiner {
+  units: CombineUnit[] = [];
 
   combine(
     shikibetsu: 診療識別コードCode,
-    futanKubun: 負担区分コードCode,
-    sqldate: string,
-    item: TekiyouItem<R>): void {
-    const bmap = this.getShikibetsu(shikibetsu);
-    const cs = bmap.get(futanKubun);
-    if (cs) {
-      for (let c of cs) {
-        if (c.tryAdd(item, sqldate)) {
-          return;
-        }
+    item: TekiyouItem,
+    sqldate: string): void {
+    for(let unit of this.units){
+      if( unit.tryAdd(item, sqldate) ) {
+        return;
       }
-      cs.push(new CombineUnit(item, sqldate));
-    } else {
-      bmap.set(futanKubun, [new CombineUnit(item, sqldate)]);
     }
+    this.units.push(new CombineUnit(shikibetsu, item, sqldate));
   }
 
-  toDataList(): R[] {
-    const result: R[] = [];
-    const keys = Array.from(this.map.keys());
-    sort診療識別コードCodeList(keys);
-    for (let shikibetsu of keys) {
-      const bmap = this.map.get(shikibetsu)!;
-      for (let futanKubun of bmap.keys()) {
-        const cs = bmap.get(futanKubun)!;
-        cs.forEach(u => {
-          result.push(...u.toRecords(shikibetsu, futanKubun));
-        })
-      }
-    }
-    return result;
+  toRecords(): string[] {
+    this.units.sort((a, b) => a.shikibetsu.localeCompare(b.shikibetsu));
+    const recs: string[] = [];
+    this.units.forEach(unit => recs.push(...unit.toRecords()));
+    return recs;
   }
 }

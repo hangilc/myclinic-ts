@@ -1,6 +1,6 @@
 import type { 診療識別コードCode, 負担区分コードCode, } from "./codes";
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuStep } from "./houkatsu";
-import type { 診療行為レコードData } from "./records/shinryoukoui-record";
+import { mk診療行為レコード, type 診療行為レコードData } from "./records/shinryoukoui-record";
 import type { Santeibi } from "./santeibi";
 import { isEqualList, withClassifiedBy } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
@@ -14,12 +14,16 @@ function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   return isEqualList(a, b, isEqualComments);
 }
 
-export class SimpleShinryou implements TekiyouItem<診療行為レコードData> {
+export class SimpleShinryou implements TekiyouItem {
   readonly isSimpleShinryou = true;
+  shikibetsu: 診療識別コードCode;
+  futanKubun: 負担区分コードCode;
   master: RezeptShinryouMaster;
   comments: RezeptComment[];
 
-  constructor(master: RezeptShinryouMaster, comments: RezeptComment[]) {
+  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: RezeptShinryouMaster, comments: RezeptComment[]) {
+    this.shikibetsu = shikibetsu;
+    this.futanKubun = futanKubun;
     this.master = master;
     this.comments = comments;
   }
@@ -41,11 +45,11 @@ export class SimpleShinryou implements TekiyouItem<診療行為レコードData>
     return this.master.name;
   }
 
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 診療行為レコードData[] {
+  toRecords(santeibi: Santeibi): string[] {
     const comments = this.comments;
     const data: 診療行為レコードData = {
-      診療識別: shikibetsu,
-      負担区分: futanKubun,
+      診療識別: this.shikibetsu,
+      負担区分: this.futanKubun,
       診療行為コード: this.master.shinryoucode,
       点数: this.ten,
       回数: santeibi.getSum(),
@@ -57,16 +61,20 @@ export class SimpleShinryou implements TekiyouItem<診療行為レコードData>
       コメント文字３: comments[2]?.text,
       算定日情報: santeibi.getSanteibiMap(),
     }
-    return [data];
+    return [mk診療行為レコード(data)];
   }
 }
 
-export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコードData> {
+export class HoukatsuKensaShinryou implements TekiyouItem {
   readonly isHoukatsuKensaShinryou = true;
+  shikibetsu: 診療識別コードCode;
+  futanKubun: 負担区分コードCode;
   houkatsuStep: HoukatsuStep;
   shinryouList: RezeptShinryou[];
 
-  constructor(houkatsuStep: HoukatsuStep, shinryouList: RezeptShinryou[]) {
+  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep, shinryouList: RezeptShinryou[]) {
+    this.shikibetsu = shikibetsu;
+    this.futanKubun = futanKubun;
     this.houkatsuStep = houkatsuStep;
     this.shinryouList = shinryouList;
     this.shinryouList.sort((a, b) => a.master.shinryoucode - b.master.shinryoucode);
@@ -100,7 +108,7 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
     return this.shinryouList.map(s => s.master.name).join("、");
   }
 
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 診療行為レコードData[] {
+  toRecords(santeibi: Santeibi): string[] {
     if (this.shinryouList.length === 0) {
       return [];
     } else {
@@ -108,6 +116,8 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
       if (!isHoukatsuGroup(g)) {
         throw new Error("Invalid houkatsu group: " + g);
       }
+      const shikibetsu = this.shikibetsu;
+      const futanKubun = this.futanKubun;
       return this.shinryouList.map((shinryou, index) => {
         const master = shinryou.master;
         const len = this.shinryouList.length;
@@ -125,8 +135,8 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
           コメントコード３: comments[2]?.code,
           コメント文字３: comments[2]?.text,
           算定日情報: santeibi.getSanteibiMap(),
-        }
-        return data;
+        };
+        return mk診療行為レコード(data);
       });
     }
   }
@@ -141,8 +151,8 @@ function houkatsuClassifier(shinryou: RezeptShinryou): string | undefined {
   }
 }
 
-export function processShinryouOfVisit(visit: RezeptVisit,
-  handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
+export function handleShinryouTekiyouOfVisit(visit: RezeptVisit,
+  handler: (shikibetsu: 診療識別コードCode, sqldate: string,
     item: SimpleShinryou | HoukatsuKensaShinryou) => void): void {
   const sqldate = visit.visitedAt;
   withClassifiedBy(visit.shinryouList, s => s.shikibetsuCode, (shikibetsu, ss) => {
@@ -150,14 +160,14 @@ export function processShinryouOfVisit(visit: RezeptVisit,
       withClassifiedBy(ss, houkatsuClassifier, (g, ss) => {
         if (g === undefined) {
           ss.forEach(s => {
-            handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-              s.master, s.comments
+            handler(shikibetsu, sqldate, new SimpleShinryou(
+              shikibetsu, futanKubun, s.master, s.comments
             ));
           })
         } else {
           const step = getHoukatsuStep(sqldate);
-          handler(shikibetsu, futanKubun, sqldate, new HoukatsuKensaShinryou(
-            getHoukatsuStep(sqldate), ss
+          handler(shikibetsu, sqldate, new HoukatsuKensaShinryou(
+            shikibetsu, futanKubun, getHoukatsuStep(sqldate), ss
           ));
         }
       });
@@ -168,8 +178,8 @@ export function processShinryouOfVisit(visit: RezeptVisit,
     withClassifiedBy(cs, c => c.futanKubun, (futanKubun, cs) => {
       cs.forEach(c => {
         c.shinryouList.forEach(s => {
-          handler(shikibetsu, futanKubun, sqldate, new SimpleShinryou(
-            s.master, s.comments
+          handler(shikibetsu, sqldate, new SimpleShinryou(
+            shikibetsu, futanKubun, s.master, s.comments
           ));
         });
       })
@@ -177,13 +187,11 @@ export function processShinryouOfVisit(visit: RezeptVisit,
   });
 }
 
-export function cvtVisitsToShinryouDataList(visits: RezeptVisit[]): 診療行為レコードData[] {
-  const comb = new Combiner<診療行為レコードData>();
+export function handleShinryouTekiyouOfVisits(visits: RezeptVisit[], comb: Combiner): void {
   visits.forEach(visit => {
-    processShinryouOfVisit(visit, (shikibetsu, futanKubun, sqldate, s) => {
-      comb.combine(shikibetsu, futanKubun, sqldate, s);
+    handleShinryouTekiyouOfVisit(visit, (shikibetsu, sqldate, s) => {
+      comb.combine(shikibetsu, s, sqldate);
     });
   });
-  return comb.toDataList();
 }
 

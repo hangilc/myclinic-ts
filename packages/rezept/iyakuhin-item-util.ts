@@ -1,16 +1,20 @@
 import type { 診療識別コードCode, 負担区分コードCode } from "./codes";
-import type { 医薬品レコードData } from "./records/iyakuhin-record";
+import { mk医薬品レコード, type 医薬品レコードData } from "./records/iyakuhin-record";
 import type { Santeibi } from "./santeibi";
 import { shochiYakuzaiKingakuToTen, withClassified, withClassifiedBy } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
 import { RezeptIyakuhinMaster, RezeptVisit } from "rezept-types";
 
-class SingleConductUnit implements TekiyouItem<医薬品レコードData> {
+class SingleConductUnit implements TekiyouItem {
   readonly isSingleItem = true;
+  shikibetsu: 診療識別コードCode;
+  futanKubun: 負担区分コードCode;
   master: RezeptIyakuhinMaster;
   amount: number;
 
-  constructor(master: RezeptIyakuhinMaster, amount: number) {
+  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: RezeptIyakuhinMaster, amount: number) {
+    this.shikibetsu = shikibetsu;
+    this.futanKubun = futanKubun;
     this.master = master;
     this.amount = amount;
   }
@@ -32,10 +36,10 @@ class SingleConductUnit implements TekiyouItem<医薬品レコードData> {
     return `${this.master.name} ${this.amount}${this.master.unit}`;
   }
 
-  toRecords(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, santeibi: Santeibi): 医薬品レコードData[] {
-    return [{
-      診療識別: shikibetsu,
-      負担区分: futanKubun,
+  toRecords(santeibi: Santeibi): string[] {
+    const data = {
+      診療識別: this.shikibetsu,
+      負担区分: this.futanKubun,
       医薬品コード: this.master.iyakuhincode,
       使用量: this.amount,
       点数: this.ten,
@@ -47,33 +51,32 @@ class SingleConductUnit implements TekiyouItem<医薬品レコードData> {
       コメントコード３: undefined,
       コメント文字３: undefined,
       算定日情報: santeibi.getSanteibiMap(),
-    }];
+    };
+    return [mk医薬品レコード(data)];
   }
 }
 
-export function processIyakuhinOfVisit(visit: RezeptVisit,
-  handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
+export function handleIyakuhinTekiyouOfVisit(visit: RezeptVisit,
+  handler: (shikibetsu: 診療識別コードCode, sqldate: string,
     item: SingleConductUnit) => void): void {
-  const sqldate = visit.visitedAt.substring(0, 10);
+  const sqldate = visit.visitedAt;
   withClassifiedBy(visit.conducts, c => c.shikibetsuCode, (shikibetsu, cs) => {
     withClassifiedBy(cs, c => c.futanKubun, (futanKubun, cs) => {
       cs.forEach(c => {
         c.drugList.forEach(d => {
-          const unit = new SingleConductUnit(d.master, d.amount);
-          handler(shikibetsu, futanKubun, sqldate, unit);
+          const unit = new SingleConductUnit(shikibetsu, futanKubun, d.master, d.amount);
+          handler(shikibetsu, sqldate, unit);
         });
       })
     })
   })
 }
 
-export function cvtVisitsToIyakuhinDataList(visits: RezeptVisit[]): 医薬品レコードData[] {
-  const comb = new Combiner<医薬品レコードData>();
+export function handleIyakuhinTekiyouOfVisits(visits: RezeptVisit[], comb: Combiner): void {
   visits.forEach(visit => {
-    processIyakuhinOfVisit(visit, (shikibetsu, futanKubun, sqldate, s) => {
-      comb.combine(shikibetsu, futanKubun, sqldate, s);
+    handleIyakuhinTekiyouOfVisit(visit, (shikibetsu, sqldate, s) => {
+      comb.combine(shikibetsu, s, sqldate);
     });
   });
-  return comb.toDataList();
 }
 
