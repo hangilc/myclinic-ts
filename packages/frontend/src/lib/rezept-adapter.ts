@@ -274,7 +274,7 @@ export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> 
     patientId: patientId.toString(),
   }
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
-  const [lastDay, firstDay] = firstAndLastDayOf(visitedAt);
+  const [firstDay, lastDay] = firstAndLastDayOf(visitedAt);
   const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
   return {
     visits,
@@ -335,7 +335,7 @@ function cvtToRezeptConduct(conduct: ConductEx, hoken: HokenInfo, hokenCollector
     futanKubun: hokenCollector.getFutanKubunOf(shahokokuho, koukikourei, kouhiList),
     shinryouList: conduct.shinryouList.map(cs => cvtToRezeptConductShinryou(cs)),
     drugList: conduct.drugs.map(cd => cvtToRezeptConductDrug(cd)),
-    kizaiList: [],
+    kizaiList: conduct.kizaiList.map(ck => cvtToRezeptConductKizai(ck)),
   };
 }
 
@@ -589,9 +589,6 @@ function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Kouki
     let futanWari = 3;
     if (shahokokuho.koureiStore > 0) {
       futanWari = shahokokuho.koureiStore;
-    }
-    if( shahokokuho.hihokenshaKigou === "194" && shahokokuho.hihokenshaBangou === "5678" ){
-      console.log("shahokokuho", shahokokuho);
     }
     return {
       futanWari,
