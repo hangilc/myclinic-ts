@@ -1,3 +1,4 @@
+import { pad } from "../helper";
 import type {  Visit } from "myclinic-model";
 import { DateSet } from "../date-set";
 
@@ -21,7 +22,7 @@ export function mk公費レコード({
   return [
     "KO", // 1 レコード識別情報
     負担者番号.toString(), // 2
-    受給者番号.toString(), // 3
+    pad(受給者番号.toString(), 7, "0"), // 3
     "", // 4 任意給付区分
     診療実日数.toString(), // 5
     合計点数.toString(), // 6

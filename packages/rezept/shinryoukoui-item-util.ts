@@ -1,12 +1,10 @@
-import {
-  is診療識別コードCode, type 診療識別コードCode, type 負担区分コードCode,
-} from "./codes";
+import type { 診療識別コードCode, 負担区分コードCode, } from "./codes";
 import { getHoukatsuStep, houkatsuTenOf, isHoukatsuGroup, type HoukatsuStep } from "./houkatsu";
 import type { 診療行為レコードData } from "./records/shinryoukoui-record";
 import type { Santeibi } from "./santeibi";
-import { isEqualList, withClassified, partition, classifyBy, withClassifiedBy } from "./helper";
+import { isEqualList, withClassifiedBy } from "./helper";
 import { Combiner, type TekiyouItem } from "./tekiyou-item";
-import { RezeptComment, RezeptConduct, RezeptConductShinryou, RezeptShinryou, RezeptShinryouMaster, RezeptVisit } from "rezept-types";
+import { RezeptComment, RezeptShinryou, RezeptShinryouMaster, RezeptVisit } from "rezept-types";
 
 function isSameComments(a: RezeptComment[], b: RezeptComment[]): boolean {
   function isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
@@ -134,34 +132,6 @@ export class HoukatsuKensaShinryou implements TekiyouItem<診療行為レコー�
   }
 }
 
-// function resolveShinryouShikibetsu(master: ShinryouMaster): 診療識別コードCode {
-//   const shinryouShubetsu = Math.floor(parseInt(master.shuukeisaki) / 10).toString();
-//   if (!is診療識別コードCode(shinryouShubetsu)) {
-//     throw new Error("Unknown 診療識別コード: " + shinryouShubetsu);
-//   }
-//   return shinryouShubetsu;
-// }
-
-// function resolveShinryouKouhi(shinryou: ShinryouEx, visit: Visit): number[] {
-//   return visit.kouhiIdList;
-// }
-
-// function resolveConductShinryouKouhi(shinryou: ConductShinryouEx, visit: Visit): number[] {
-//   return visit.kouhiIdList;
-// }
-
-// function commentsOfShinryou(shinryou: ShinryouEx): RezeptComment[] {
-//   const comms = shinryou.asShinryou().comments;
-//   if (comms.length > 0) {
-//     console.log("comms", comms);
-//   }
-//   return comms;
-// }
-
-// function commentsOfConductShinryou(shinryou: ConductShinryouEx): RezeptComment[] {
-//   return [];
-// }
-
 function houkatsuClassifier(shinryou: RezeptShinryou): string | undefined {
   const g = shinryou.master.houkatsukensa;
   if (isHoukatsuGroup(g)) {
@@ -175,13 +145,6 @@ export function processShinryouOfVisit(visit: RezeptVisit,
   handler: (shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, sqldate: string,
     item: SimpleShinryou | HoukatsuKensaShinryou) => void): void {
   const sqldate = visit.visitedAt;
-  const shinryouList: [診療識別コードCode, RezeptShinryou][] = visit.shinryouList.map(shinryou => [
-    shinryou.shikibetsuCode,
-    shinryou
-  ]);
-  const conducts: [診療識別コードCode, RezeptConduct][] =
-    visit.conducts.map(c => [c.shikibetsuCode, c]);
-
   withClassifiedBy(visit.shinryouList, s => s.shikibetsuCode, (shikibetsu, ss) => {
     withClassifiedBy(ss, s => s.futanKubun, (futanKubun, ss) => {
       withClassifiedBy(ss, houkatsuClassifier, (g, ss) => {

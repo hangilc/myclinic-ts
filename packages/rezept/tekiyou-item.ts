@@ -9,6 +9,7 @@ export interface TekiyouItem<R> {
 class CombineUnit<R> {
   item: TekiyouItem<R>;
   santei: Santeibi;
+  debug: boolean = false;
 
   constructor(item: TekiyouItem<R>, sqldate: string) {
     this.item = item;
