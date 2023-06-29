@@ -22,6 +22,7 @@ export const hello: string = "hello";
 
 export interface RezeptUnit {
   visits: RezeptVisit[];
+  patient: RezeptPatient;
   hokensha: Hokensha | undefined;
   kouhiList: RezeptKouhi[];
   shotokuKubun: ShotokuKubunCode | undefined;
@@ -46,11 +47,11 @@ export function createRezept(arg: CreateRezeptArg): string {
   let rezeptCount = 0;
   let rezeptSouten = 0;
   for (let unit of units) {
-    const { visits, hokensha, kouhiList, shotokuKubun, diseases } = unit;
+    const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = unit;
     if (visits.length === 0) {
       continue;
     }
-    rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, visits[0].patient, visits, shotokuKubun));
+    rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, patient, visits, shotokuKubun));
     const tenCol = new TensuuCollector();
     const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(visits, tenCol);
     if (hokensha) {
@@ -71,7 +72,7 @@ export function createRezept(arg: CreateRezeptArg): string {
         rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], undefined));
       })
     }
-    if (hokensha && hokensha.edaban) {
+    if (hokensha && hokensha.edaban !== undefined) {
       const edaban = hokensha.edaban;
       rows.push(create資格確認レコード(edaban));
     }

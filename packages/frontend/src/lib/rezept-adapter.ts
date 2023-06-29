@@ -1,4 +1,4 @@
-import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
+import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
@@ -251,6 +251,9 @@ export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> 
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
   const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);
+  if( hokensha ){
+    hokensha.edaban = await resolveEdaban(modelVisits);
+  }
   const kouhiList: RezeptKouhi[] = hokenCollector.kouhilist.map(kouhi => ({
     futansha: kouhi.futansha,
     jukyuusha: kouhi.jukyuusha,
@@ -258,12 +261,24 @@ export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> 
   const shotokuKubun: ShotokuKubunCode | undefined = await resolveShotokuKubunOfVisits(
     hokenCollector.shahokokuho, hokenCollector.koukikourei, modelVisits.map(visit => visit.visitId)
   );
-  const patientId: number = modelVisits[0].patientId;
+  const modelPatient: Patient = visitExList[0].patient;
+  const patientId: number = modelPatient.patientId;
+  let sex: "M" | "F" = "M";
+  if (modelPatient.sex === "F") {
+    sex = "F";
+  }
+  const patient: RezeptPatient = {
+    name: modelPatient.rezeptName || modelPatient.fullName("　"),
+    sex,
+    birthday: modelPatient.birthday,
+    patientId: patientId.toString(),
+  }
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
   const [lastDay, firstDay] = firstAndLastDayOf(visitedAt);
   const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
   return {
     visits,
+    patient,
     hokensha,
     kouhiList,
     shotokuKubun,
@@ -280,21 +295,10 @@ function shoujouShoukiOfVisit(visit: VisitEx): RezeptShoujouShouki[] {
 }
 
 async function cvtModelVisitToRezeptVisit(visitEx: VisitEx, hokenCollector: HokenCollector): Promise<RezeptVisit> {
-  const modelPatient = visitEx.patient;
-  let sex: "M" | "F" = "M";
-  if (modelPatient.sex === "F") {
-    sex = "F";
-  }
-  const patient: RezeptPatient = {
-    name: modelPatient.rezeptName || modelPatient.fullName("　"),
-    sex,
-    birthday: modelPatient.birthday,
-  }
   return {
     visitedAt: visitEx.visitedAt.substring(0, 10),
     shinryouList: visitEx.shinryouList.map(shinryou => cvtToRezeptShinryou(shinryou, visitEx.hoken, hokenCollector)),
     conducts: visitEx.conducts.map(conduct => cvtToRezeptConduct(conduct, visitEx.hoken, hokenCollector)),
-    patient,
     shoujouShoukiList: shoujouShoukiOfVisit(visitEx),
     comments: commentsOfVisit(visitEx),
   }
@@ -551,11 +555,43 @@ async function classifyByHokenOnlyShubetsu(visits: Visit[]): Promise<Map<string,
   return classify(items);
 }
 
+async function shahokokuhoOfVisit(visit: Visit): Promise<Shahokokuho | undefined> {
+  if (visit.shahokokuhoId > 0) {
+    return await api.getShahokokuho(visit.shahokokuhoId);
+  } else {
+    return undefined;
+  }
+}
+
+async function resolveEdaban(visits: Visit[]): Promise<string | undefined> {
+  let onshiEdaban: string | undefined = undefined;
+  let hokenshoEdaban: string | undefined = undefined;
+  for (let visit of visits) {
+    const ri = await resolveOnshi(visit.visitId);
+    if (ri) {
+      if (ri.insuredBranchNumber !== undefined) {
+        onshiEdaban = ri.insuredBranchNumber;
+      }
+    } else {
+      const shahokokuho = await shahokokuhoOfVisit(visit);
+      if (shahokokuho) {
+        if (shahokokuho.edaban !== "") {
+          hokenshoEdaban = shahokokuho.edaban;
+        }
+      }
+    }
+  }
+  return onshiEdaban || hokenshoEdaban;
+}
+
 function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): Hokensha | undefined {
   if (shahokokuho) {
     let futanWari = 3;
     if (shahokokuho.koureiStore > 0) {
       futanWari = shahokokuho.koureiStore;
+    }
+    if( shahokokuho.hihokenshaKigou === "194" && shahokokuho.hihokenshaBangou === "5678" ){
+      console.log("shahokokuho", shahokokuho);
     }
     return {
       futanWari,
