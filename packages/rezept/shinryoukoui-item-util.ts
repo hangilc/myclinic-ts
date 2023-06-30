@@ -37,6 +37,14 @@ export class SimpleShinryou implements TekiyouItem {
     }
   }
 
+  getFutanKubun(): 負担区分コードCode {
+    return this.futanKubun;
+  }
+
+  getTen(): number {
+    return this.ten;
+  }
+
   get ten(): number {
     return this.master.tensuu;
   }
@@ -84,8 +92,16 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
     if (other instanceof HoukatsuKensaShinryou) {
       return isEqualList(this.shinryouList, other.shinryouList, (a, b) => a.master.shinryoucode === b.master.shinryoucode);
     } else {
-      return true;
+      return false;
     }
+  }
+
+  getFutanKubun(): 負担区分コードCode {
+    return this.futanKubun;
+  }
+
+  getTen(): number {
+    return this.ten;
   }
 
   get ten(): number {

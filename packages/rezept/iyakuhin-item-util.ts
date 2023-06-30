@@ -28,6 +28,14 @@ class SingleConductUnit implements TekiyouItem {
     }
   }
 
+  getFutanKubun(): 負担区分コードCode {
+    return this.futanKubun;
+  }
+
+  getTen(): number {
+    return this.ten;
+  }
+
   get ten(): number {
     return shochiYakuzaiKingakuToTen(this.master.yakka * this.amount);
   }

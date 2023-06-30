@@ -2,13 +2,10 @@ import { mk医療機関情報レコード } from "./records/medical-institute-re
 import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード, 負担区分コードCode } from "./codes";
 import { adjustOptString, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, calcJitsuNissuu, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
 import { ClinicInfo, HokenSelector, Hokensha, RezeptComment, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
-import { mk診療行為レコード, 診療行為レコードData } from "./records/shinryoukoui-record";
-import { mk特定器材レコード, 特定器材レコードData } from "./records/tokuteikizai-record";
-import { mk医薬品レコード, 医薬品レコードData } from "./records/iyakuhin-record";
-import { cvtVisitsToShinryouDataList } from "./shinryoukoui-item-util";
+import { handleShinryouTekiyouOfVisits } from "./shinryoukoui-item-util";
 import { TensuuCollector } from "./tensuu-collector";
-import { cvtVisitsToIyakuhinDataList } from "./iyakuhin-item-util";
-import { cvtVisitsToKizaiDataList } from "./tokuteikizai-item-util";
+import { handleIyakuhinTekiyouOfVisits } from "./iyakuhin-item-util";
+import { handleKizaiTekiyouOfVisits } from "./tokuteikizai-item-util";
 import { mkレセプト共通レコード } from "./records/common-record";
 import { mk保険者レコード } from "./records/hokensha-record";
 import { mk公費レコード } from "./records/kouhi-record";
@@ -17,9 +14,7 @@ import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei
 import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mkコメントレコード } from "./records/comment-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
-import { Combiner } from "tekiyou-item";
-
-export const hello: string = "hello";
+import { Combiner } from "./tekiyou-item";
 
 export interface RezeptUnit {
   visits: RezeptVisit[];
@@ -100,9 +95,10 @@ export function createRezept(arg: CreateRezeptArg): string {
         })
       })
     }
-    rows.push(...shinryouDataList.map(mk診療行為レコード));
-    rows.push(...iyakuhinDataList.map(mk医薬品レコード));
-    rows.push(...kizaiDataList.map(mk特定器材レコード));
+    rows.push(...comb.toRecords());
+    // rows.push(...shinryouDataList.map(mk診療行為レコード));
+    // rows.push(...iyakuhinDataList.map(mk医薬品レコード));
+    // rows.push(...kizaiDataList.map(mk特定器材レコード));
     for (let visit of visits) {
       visit.comments.forEach(comm => {
         const futanKubun = resolveFutankubunOfVisitComment(comm, visit);
@@ -206,12 +202,15 @@ function create資格確認レコード(edaban: string | undefined): string {
 }
 
 export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector, comb: Combiner): void {
-  cvtVisitsToShinryouDataList(visits, comb);
-  cvtVisitsToIyakuhinDataList(visits, comb);
-  cvtVisitsToKizaiDataList(visits, comb);
-  shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
-  iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
-  kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  handleShinryouTekiyouOfVisits(visits, comb);
+  handleIyakuhinTekiyouOfVisits(visits, comb);
+  handleKizaiTekiyouOfVisits(visits, comb);
+  comb.iter((shikibetsu, futanKubun, ten, count) => {
+    collector.add(futanKubun, ten * count);
+  });
+  // shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  // iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
+  // kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
 }
 
 function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {

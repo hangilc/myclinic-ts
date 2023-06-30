@@ -42,6 +42,15 @@
       return "";
     }
     const visitsMap = await loadVisits(year, month);
+    // // DEBUG
+    // visitsMap.shaho = visitsMap.shaho.filter(visits => {
+    //   if( visits[0].patientId === 1801 ){
+    //     return true;
+    //   } else {
+    //     return false;
+    //   }
+    // })
+    // // end of DEBUG
     const visitsList = visitsMap[shiharaiSelect];
     const units: RezeptUnit[] = await Promise.all(visitsList.map(visits => cvtVistsToUnit(visits)));
     const arg: CreateRezeptArg = {

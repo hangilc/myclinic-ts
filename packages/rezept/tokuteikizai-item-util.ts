@@ -28,6 +28,14 @@ class SingleUnit implements TekiyouItem {
     }
   }
 
+  getFutanKubun(): 負担区分コードCode {
+    return this.futanKubun;
+  }
+
+  getTen(): number {
+    return this.ten;
+  }
+
   get ten(): number {
     return kizaiKingakuToTen(this.master.kingaku * this.amount);
   }
