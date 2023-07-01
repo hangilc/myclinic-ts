@@ -480,6 +480,29 @@ appEvent.conductShinryouEntered.subscribe(async conductShinryou => {
   }
 });
 
+appEvent.conductShinryouUpdated.subscribe(async conductShinryou => {
+  if (conductShinryou == null) {
+    return;
+  }
+  const conduct = await api.getConduct(conductShinryou.conductId);
+  const visitsValue = get(visits);
+  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+  if (index >= 0) {
+    const visit = visitsValue[index];
+    const ci = visit.conducts.findIndex(c => c.conductId === conductShinryou.conductId);
+    if (ci >= 0) {
+      const conduct = visit.conducts[ci];
+      const updatedEx = await api.getConductShinryouEx(conductShinryou.conductShinryouId);
+      const si = conduct.shinryouList.findIndex(s => s.conductShinryouId === conductShinryou.conductShinryouId);
+      if( si < 0 ){
+        console.log("cannot happen (conduct shinryouupdated handler)");
+      }
+      conduct.shinryouList.splice(si, 1, updatedEx);
+      visits.set(visitsValue);
+    }
+  }
+});
+
 appEvent.conductShinryouDeleted.subscribe(async conductShinryou => {
   if (conductShinryou == null) {
     return;

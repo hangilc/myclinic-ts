@@ -52,6 +52,7 @@ export interface RezeptShinryou {
   futanKubun: 負担区分コードCode;
   master: RezeptShinryouMaster;
   comments: RezeptComment[];
+  amount?: number;
 }
 
 export interface RezeptDrug {
@@ -72,6 +73,7 @@ export interface RezeptConduct { // 処置
 export interface RezeptConductShinryou {
   master: RezeptShinryouMaster;
   comments: RezeptComment[];
+  amount?: number;
 }
 
 export interface RezeptConductDrug {

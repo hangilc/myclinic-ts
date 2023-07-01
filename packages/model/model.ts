@@ -738,6 +738,10 @@ export class ShinryouMemo {
       }
     }
   }
+
+  get amount(): number | undefined {
+    return this.json.amount;
+  }
 }
 
 export class Shinryou {
@@ -754,6 +758,10 @@ export class Shinryou {
 
   get comments(): RezeptComment[] {
     return this.parseMemo().comments;
+  }
+
+  get amount(): number | undefined {
+    return this.parseMemo().amount;
   }
 
   static cast(arg: any): Shinryou {
@@ -815,15 +823,21 @@ export class ConductShinryouEx {
     public conductShinryouId: number,
     public conductId: number,
     public shinryoucode: number,
-    public master: ShinryouMaster
+    public master: ShinryouMaster,
+    public memo?: string,
   ) { }
+
+  get amount(): number | undefined {
+    return ConductShinryouMemo.parseJson(this.memo).amount;
+  }
 
   static cast(arg: any): ConductShinryouEx {
     return new ConductShinryouEx(
       arg.conductShinryouId,
       arg.conductId,
       arg.shinryoucode,
-      ShinryouMaster.cast(arg.master)
+      ShinryouMaster.cast(arg.master),
+      arg.memo,
     );
   }
 }
@@ -1179,18 +1193,40 @@ export class GazouLabel {
   }
 }
 
+class ConductShinryouMemo {
+  amount?: number | undefined;
+
+  constructor(json: any) {
+    this.amount = json.amount;
+  }
+
+  static parseJson(str: string | undefined): ConductShinryouMemo {
+    if( str ){
+      return new ConductShinryouMemo(JSON.parse(str));
+    } else {
+      return {};
+    }
+  }
+}
+
 export class ConductShinryou {
   constructor(
     public conductShinryouId: number,
     public conductId: number,
-    public shinryoucode: number
+    public shinryoucode: number,
+    public memo?: string,
   ) { }
+
+  get amount(): number | undefined {
+    return ConductShinryouMemo.parseJson(this.memo).amount;
+  }
 
   static cast(arg: any): ConductShinryou {
     return new ConductShinryou(
       arg.conductShinryouId,
       arg.conductId,
-      arg.shinryoucode
+      arg.shinryoucode,
+      arg.memo,
     );
   }
 }

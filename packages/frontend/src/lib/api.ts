@@ -694,6 +694,17 @@ export default {
     );
   },
 
+  updateConductShinryou(
+    conductShinryou: m.ConductShinryou
+  ): Promise<m.ConductShinryou> {
+    return post(
+      "update-conduct-shinryou",
+      conductShinryou,
+      {},
+      m.ConductShinryou.cast
+    );
+  },
+
   enterConductDrug(conductDrug: m.ConductDrug): Promise<m.ConductDrug> {
     return post("enter-conduct-drug", conductDrug, {}, m.ConductDrug.cast);
   },

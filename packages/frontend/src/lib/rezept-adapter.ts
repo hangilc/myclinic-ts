@@ -360,6 +360,7 @@ function cvtToRezeptConductShinryou(cs: ConductShinryouEx): RezeptConductShinryo
       houkatsukensa: cs.master.houkatsukensa,
     },
     comments: commenctsOfConductShinryou(cs),
+    amount: cs.amount,
   }
 }
 

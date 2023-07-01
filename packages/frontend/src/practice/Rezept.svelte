@@ -33,7 +33,6 @@
 
   async function initClinicInfo() {
     clinicInfo = await api.getClinicInfo();
-    console.log(clinicInfo);
   }
 
   async function createContent(): Promise<string> {
@@ -43,8 +42,8 @@
     }
     const visitsMap = await loadVisits(year, month);
     // // DEBUG
-    // visitsMap.shaho = visitsMap.shaho.filter(visits => {
-    //   if( visits[0].patientId === 1801 ){
+    // visitsMap.kokuho = visitsMap.kokuho.filter(visits => {
+    //   if( visits[0].patientId === 7438 ){
     //     return true;
     //   } else {
     //     return false;
@@ -60,6 +59,7 @@
       clinicInfo,
       units,
     }
+    console.log("arg", arg);
     return createRezept(arg);
   }
 

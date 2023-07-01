@@ -20,12 +20,20 @@ export class SimpleShinryou implements TekiyouItem {
   futanKubun: 負担区分コードCode;
   master: RezeptShinryouMaster;
   comments: RezeptComment[];
+  amount: number | undefined;
 
-  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, master: RezeptShinryouMaster, comments: RezeptComment[]) {
+  constructor(
+    shikibetsu: 診療識別コードCode,
+    futanKubun: 負担区分コードCode,
+    master: RezeptShinryouMaster,
+    comments: RezeptComment[],
+    amount: number | undefined,
+  ) {
     this.shikibetsu = shikibetsu;
     this.futanKubun = futanKubun;
     this.master = master;
     this.comments = comments;
+    this.amount = amount;
   }
 
   isSame(other: any): boolean {
@@ -59,6 +67,7 @@ export class SimpleShinryou implements TekiyouItem {
       診療識別: this.shikibetsu,
       負担区分: this.futanKubun,
       診療行為コード: this.master.shinryoucode,
+      数量データ: this.amount,
       点数: this.ten,
       回数: santeibi.getSum(),
       コメントコード１: comments[0]?.code,
@@ -80,7 +89,12 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
   houkatsuStep: HoukatsuStep;
   shinryouList: RezeptShinryou[];
 
-  constructor(shikibetsu: 診療識別コードCode, futanKubun: 負担区分コードCode, houkatsuStep: HoukatsuStep, shinryouList: RezeptShinryou[]) {
+  constructor(
+    shikibetsu: 診療識別コードCode,
+    futanKubun: 負担区分コードCode,
+    houkatsuStep: HoukatsuStep,
+    shinryouList: RezeptShinryou[]
+  ) {
     this.shikibetsu = shikibetsu;
     this.futanKubun = futanKubun;
     this.houkatsuStep = houkatsuStep;
@@ -90,7 +104,11 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
 
   isSame(other: any): boolean {
     if (other instanceof HoukatsuKensaShinryou) {
-      return isEqualList(this.shinryouList, other.shinryouList, (a, b) => a.master.shinryoucode === b.master.shinryoucode);
+      return isEqualList(
+        this.shinryouList,
+        other.shinryouList,
+        (a, b) => a.master.shinryoucode === b.master.shinryoucode
+      );
     } else {
       return false;
     }
@@ -142,6 +160,7 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
           診療識別: index === 0 ? shikibetsu : "",
           負担区分: futanKubun,
           診療行為コード: master.shinryoucode,
+          数量データ: shinryou.amount,
           点数: (index === len - 1) ? this.ten : undefined,
           回数: santeibi.getSum(),
           コメントコード１: comments[0]?.code,
@@ -177,7 +196,7 @@ export function handleShinryouTekiyouOfVisit(visit: RezeptVisit,
         if (g === undefined) {
           ss.forEach(s => {
             handler(shikibetsu, sqldate, new SimpleShinryou(
-              shikibetsu, futanKubun, s.master, s.comments
+              shikibetsu, futanKubun, s.master, s.comments, s.amount
             ));
           })
         } else {
@@ -195,7 +214,7 @@ export function handleShinryouTekiyouOfVisit(visit: RezeptVisit,
       cs.forEach(c => {
         c.shinryouList.forEach(s => {
           handler(shikibetsu, sqldate, new SimpleShinryou(
-            shikibetsu, futanKubun, s.master, s.comments
+            shikibetsu, futanKubun, s.master, s.comments, s.amount
           ));
         });
       })
