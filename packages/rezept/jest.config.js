@@ -1,8 +1,4 @@
-module.exports = {
-  "testMatch": [
-    "**/*.test.ts"
-  ],
-  "transform": {
-    "\.+ts$": "ts-jest"
-  }
+export default {
+    preset: "ts-jest",
+    testEnvironment: "node"
 }

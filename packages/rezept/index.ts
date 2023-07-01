@@ -208,9 +208,6 @@ export function calcVisits(visits: RezeptVisit[], collector: TensuuCollector, co
   comb.iter((shikibetsu, futanKubun, ten, count) => {
     collector.add(futanKubun, ten * count);
   });
-  // shinryouDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
-  // iyakuhinDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
-  // kizaiDataList.filter(dl => dl.点数 !== undefined).forEach(dl => collector.add(dl.負担区分, dl.点数! * dl.回数));
 }
 
 function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {
