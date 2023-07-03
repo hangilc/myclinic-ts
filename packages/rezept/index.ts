@@ -18,6 +18,7 @@ import { Combiner } from "./tekiyou-item";
 export * from "./futan-calc";
 export * from "./tensuu-collector";
 export * from "./tekiyou-item";
+export * from "./kouhi-registry";
 export { roundTo10 } from "./helper";
 
 export interface RezeptUnit {

@@ -1,26 +1,26 @@
 import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 import { resolveKouhiData } from "./resolve-kouhi-data";
-import { cvtVisitsToUnit, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
+import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
 import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
 
-class KouhiCollector {
-  list: Kouhi[] = [];
+// class KouhiCollector {
+//   list: Kouhi[] = [];
 
-  add(kouhi: Kouhi): void {
-    if (this.list.findIndex(k => k.kouhiId === kouhi.kouhiId) < 0) {
-      this.list.push(kouhi);
-    }
-  }
+//   add(kouhi: Kouhi): void {
+//     if (this.list.findIndex(k => k.kouhiId === kouhi.kouhiId) < 0) {
+//       this.list.push(kouhi);
+//     }
+//   }
 
-  sort(): void {
-    sortKouhiList(this.list);
-  }
+//   sort(): void {
+//     sortKouhiList(this.list);
+//   }
 
-  idList(): number[] {
-    return this.list.map(k => k.kouhiId);
-  }
-}
+//   idList(): number[] {
+//     return this.list.map(k => k.kouhiId);
+//   }
+// }
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const meisai = new Meisai([], 3, 0);
@@ -28,6 +28,9 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   if( visit.shahokokuhoId === 0 && visit.koukikoureiId === 0 ){
     meisai.futanWari = 10;
     return meisai;
+  }
+  if( visit.shahokokuhoId !== 0 && visit.koukikoureiId !== 0 ){
+    throw new Error("Dupliecate hoken");
   }
   const [year, month] = yearMonthOfVisit(visit);
   const visitIds = await api.listVisitIdByPatientAndMonth(visit.patientId, year, month);
@@ -49,11 +52,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   if (curr === undefined) {
     throw new Error("cannot happen.");
   }
-  const kouhiCollector = new KouhiCollector();
-  [curr, ...prevs].forEach(v => {
-    v.hoken.kouhiList.forEach(k => kouhiCollector.add(k));
-  });
-  kouhiCollector.sort();
+  const hokenCollector = new HokenCollector();
+  hokenCollector.scanVisits([curr, ...prevs]);
   const gendo = await resolveGendo([...prevs, curr].map(visitEx => visitEx.visitId));
   const shotokuKubun = resolveShotokuKubun(curr.hoken.shahokokuho, curr.hoken.koukikourei, gendo);
   let futanWari = 3;
@@ -64,9 +64,9 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   } else if( curr.hoken.koukikourei ) {
     futanWari = curr.hoken.koukikourei!.futanWari;
   }
-  const kouhiDataList = kouhiCollector.list.map(kouhi => resolveKouhiData(kouhi));
+  const kouhiDataList = hokenCollector.kouhiList.map(kouhi => resolveKouhiData(kouhi));
   let prevCover: TotalCover;
-  let prevRezeptVisits = (await cvtVisitsToUnit(prevs.map(v => v.asVisit))).visits;
+  let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
   {
     const tensuuCollector = new TensuuCollector();
     const comb = new Combiner();

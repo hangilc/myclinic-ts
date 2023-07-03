@@ -56,10 +56,10 @@ function hokenOfConduct(conduct: ConductEx, shahokokuho: Shahokokuho | undefined
   return [shahokokuho, koukikourei, kouhiList];
 }
 
-class HokenCollector {
+export class HokenCollector {
   shahokokuho: Shahokokuho | undefined = undefined;
   koukikourei: Koukikourei | undefined = undefined;
-  kouhilist: Kouhi[] = [];
+  kouhiList: Kouhi[] = [];
 
   addShahokokuho(shahokokuho: Shahokokuho): void {
     if (this.shahokokuho === undefined) {
@@ -82,9 +82,9 @@ class HokenCollector {
   }
 
   addKouhi(kouhi: Kouhi): void {
-    const index = this.kouhilist.findIndex(k => k.kouhiId === kouhi.kouhiId);
+    const index = this.kouhiList.findIndex(k => k.kouhiId === kouhi.kouhiId);
     if (index < 0) {
-      this.kouhilist.push(kouhi);
+      this.kouhiList.push(kouhi);
     }
   }
 
@@ -99,7 +99,7 @@ class HokenCollector {
   }
 
   finishAdd(): void {
-    sortKouhiList(this.kouhilist);
+    sortKouhiList(this.kouhiList);
   }
 
   scanVisits(visits: VisitEx[]): void {
@@ -119,7 +119,7 @@ class HokenCollector {
   }
 
   getFutanKubun(): 負担区分コードCode {
-    let name = this.kouhilist.map((_k, i) => (i + 1).toString()).join("");
+    let name = this.kouhiList.map((_k, i) => (i + 1).toString()).join("");
     if (this.shahokokuho || this.koukikourei) {
       name = "H" + name;
     }
@@ -133,7 +133,7 @@ class HokenCollector {
     : 負担区分コードCode {
     const kouhiIndexList: number[] = [];
     kouhiList.forEach(kouhi => {
-      const i = this.kouhilist.findIndex(k => k.kouhiId === kouhi.kouhiId);
+      const i = this.kouhiList.findIndex(k => k.kouhiId === kouhi.kouhiId);
       if (i < 0) {
         throw new Error("Cannot happen");
       }
@@ -254,7 +254,7 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   if( hokensha ){
     hokensha.edaban = await resolveEdaban(modelVisits);
   }
-  const kouhiList: RezeptKouhi[] = hokenCollector.kouhilist.map(kouhi => ({
+  const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => ({
     futansha: kouhi.futansha,
     jukyuusha: kouhi.jukyuusha,
   }));
@@ -286,6 +286,11 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   }
 }
 
+export async function cvtModelVisitsToRezeptVisits(visits: VisitEx[], hokenCollector: HokenCollector): 
+  Promise<RezeptVisit[]> {
+    return await Promise.all(visits.map(visit => cvtModelVisitToRezeptVisit(visit, hokenCollector)));
+}
+
 function commentsOfVisit(visit: VisitEx): RezeptComment[] {
   return [];
 }
@@ -294,7 +299,7 @@ function shoujouShoukiOfVisit(visit: VisitEx): RezeptShoujouShouki[] {
   return [];
 }
 
-async function cvtModelVisitToRezeptVisit(visitEx: VisitEx, hokenCollector: HokenCollector): Promise<RezeptVisit> {
+export async function cvtModelVisitToRezeptVisit(visitEx: VisitEx, hokenCollector: HokenCollector): Promise<RezeptVisit> {
   return {
     visitedAt: visitEx.visitedAt.substring(0, 10),
     shinryouList: visitEx.shinryouList.map(shinryou => cvtToRezeptShinryou(shinryou, visitEx.hoken, hokenCollector)),

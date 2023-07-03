@@ -1,6 +1,6 @@
 import type { Kouhi } from "myclinic-model";
-import type { Cover, KouhiData, KouhiProcessorArg } from "./rezept/futan-calc";
-import { KouhiFutanNashi, KuniNanbyou, MaruToHibakushaNoKo } from "./rezept/kouhi-registry";
+import type { Cover, KouhiData, KouhiProcessorArg } from "myclinic-rezept";
+import { KouhiFutanNashi, KuniNanbyou, MaruToHibakushaNoKo } from "myclinic-rezept";
 
 export function resolveKouhiData(kouhi: Kouhi): KouhiData {
   switch(Math.floor(kouhi.futansha / 1000000)) {
