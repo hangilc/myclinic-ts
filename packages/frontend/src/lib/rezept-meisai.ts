@@ -1,10 +1,8 @@
 import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 import { resolveKouhiData } from "./resolve-kouhi-data";
-import { calcFutan, TotalCover } from "./rezept/futan-calc";
-import { calcVisits } from "./rezept/prepare";
-import { TensuuCollector } from "./rezept/tensuu-collector";
-import { resolveGendo, resolveShotokuKubun, roundTo10 } from "./rezept/util";
+import { cvtVisitsToUnit, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
+import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
 
 class KouhiCollector {
   list: Kouhi[] = [];
@@ -13,6 +11,10 @@ class KouhiCollector {
     if (this.list.findIndex(k => k.kouhiId === kouhi.kouhiId) < 0) {
       this.list.push(kouhi);
     }
+  }
+
+  sort(): void {
+    sortKouhiList(this.list);
   }
 
   idList(): number[] {
@@ -51,7 +53,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   [curr, ...prevs].forEach(v => {
     v.hoken.kouhiList.forEach(k => kouhiCollector.add(k));
   });
-  const gendo = await resolveGendo([...prevs, curr].map(visitEx => visitEx.asVisit));
+  kouhiCollector.sort();
+  const gendo = await resolveGendo([...prevs, curr].map(visitEx => visitEx.visitId));
   const shotokuKubun = resolveShotokuKubun(curr.hoken.shahokokuho, curr.hoken.koukikourei, gendo);
   let futanWari = 3;
   if( curr.hoken.shahokokuho ){
@@ -63,17 +66,20 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
   const kouhiDataList = kouhiCollector.list.map(kouhi => resolveKouhiData(kouhi));
   let prevCover: TotalCover;
+  let prevRezeptVisits = (await cvtVisitsToUnit(prevs.map(v => v.asVisit))).visits;
   {
     const tensuuCollector = new TensuuCollector();
-    const { shinryouDataList, iyakuhinDataList, kizaiDataList } = calcVisits(prevs, kouhiCollector.idList(), tensuuCollector);
-    prevCover = calcFutan(futanWari, shotokuKubun, kouhiDataList, [tensuuCollector.totalTen]);
+    const comb = new Combiner();
+    calcVisits(prevRezeptVisits, tensuuCollector, comb);
+    prevCover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
   }
   let cover: TotalCover;
   {
     const tensuuCollector = new TensuuCollector();
-    const { shinryouDataList, iyakuhinDataList, kizaiDataList } = 
-      calcVisits([...prevs, curr], kouhiCollector.idList(), tensuuCollector);
-    cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, [tensuuCollector.totalTen]);
+    const comb = new Combiner();
+    const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
+    calcVisits(currRezeptVisits, tensuuCollector, comb);
+    cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
   }
   meisai.futanWari = futanWari;
   meisai.charge = roundTo10(cover.patientCharge - prevCover.patientCharge);

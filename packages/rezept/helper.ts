@@ -126,6 +126,10 @@ export function shochiYakuzaiKingakuToTen(kingaku: number): number {
   }
 }
 
+export function roundTo10(n: number): number {
+  return Math.round(n / 10.0) * 10;
+}
+
 export function resolveGendogakuTokkiJikou(
   hokensha: Hokensha | undefined,
   shotokuKubun: ShotokuKubunCode | undefined): レセプト特記事項コードCode | undefined {

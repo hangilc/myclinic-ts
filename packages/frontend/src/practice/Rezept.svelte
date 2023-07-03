@@ -7,7 +7,7 @@
   import { createRezept, type CreateRezeptArg } from "myclinic-rezept";
   import type { Hokensha, RezeptDisease, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
   import type { ShotokuKubunCode } from "myclinic-rezept/codes";
-  import { cvtVistsToUnit, loadVisits } from "@/lib/rezept-adapter";
+  import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
 
   export let isVisible: boolean;
   let year: number;
@@ -51,7 +51,7 @@
     // })
     // // end of DEBUG
     const visitsList = visitsMap[shiharaiSelect];
-    const units: RezeptUnit[] = await Promise.all(visitsList.map(visits => cvtVistsToUnit(visits)));
+    const units: RezeptUnit[] = await Promise.all(visitsList.map(visits => cvtVisitsToUnit(visits)));
     const arg: CreateRezeptArg = {
       seikyuuSaki: shiharaiSelect,
       year,

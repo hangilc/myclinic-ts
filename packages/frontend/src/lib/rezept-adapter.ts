@@ -162,7 +162,7 @@ async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {
   return undefined;
 }
 
-async function resolveGendo(visitIds: number[]):
+export async function resolveGendo(visitIds: number[]):
   Promise<LimitApplicationCertificateClassificationFlagLabel | undefined> {
   let gendo: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
   for (let visitId of visitIds) {
@@ -177,7 +177,7 @@ async function resolveGendo(visitIds: number[]):
   return gendo;
 }
 
-function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
+export function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
   koukikourei: Koukikourei | undefined,
   gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): ShotokuKubunCode | undefined {
   if (gendo) {
@@ -241,7 +241,7 @@ async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: s
   return result;
 }
 
-export async function cvtVistsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
+export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
   if (modelVisits.length === 0) {
     throw new Error("Cannot happen");
   }
@@ -502,7 +502,7 @@ function is国保(hokenshaBangou: number): boolean {
   return hokenshaBangou < 1000000;
 }
 
-function sortKouhiList(kouhiList: Kouhi[]): void {
+export function sortKouhiList(kouhiList: Kouhi[]): void {
   function houbetsu(futansha: number): number {
     return Math.floor(futansha / 1000000);
   }
