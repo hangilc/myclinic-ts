@@ -1,26 +1,38 @@
-import { Kouhi, Meisai, Visit, VisitEx } from "myclinic-model";
+import { Kouhi, Meisai, MeisaiSectionEnum, MeisaiSectionType, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 import { resolveKouhiData } from "./resolve-kouhi-data";
 import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
 import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
+import { rev診療識別コード } from "myclinic-rezept/dist/codes";
 
-// class KouhiCollector {
-//   list: Kouhi[] = [];
+const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
 
-//   add(kouhi: Kouhi): void {
-//     if (this.list.findIndex(k => k.kouhiId === kouhi.kouhiId) < 0) {
-//       this.list.push(kouhi);
-//     }
-//   }
-
-//   sort(): void {
-//     sortKouhiList(this.list);
-//   }
-
-//   idList(): number[] {
-//     return this.list.map(k => k.kouhiId);
-//   }
-// }
+const ShikibetuSectionMap: Record<string, string> = {
+  "全体に係る識別コード": "その他",
+  "初診": "初・再診料",
+  "再診": "初・再診料",
+  "医学管理": "医学管理等",
+  "在宅": "在宅医療",
+  "投薬・内服": "投薬",
+  "投薬・屯服": "投薬",
+  "投薬・外用": "投薬",
+  "投薬・調剤": "投薬",
+  "投薬・処方": "投薬",
+  "投薬・麻毒": "投薬",
+  "投薬・調基": "投薬",
+  "投薬・その他": "投薬",
+  "注射・皮下筋肉内": "注射",
+  "注射・静脈内": "注射",
+  "注射・その他": "注射",
+  "薬剤料減点": "注射",
+  "処置": "処置",
+  "手術": "その他",
+  "麻酔": "その他",
+  "検査・病理": "検査",
+  "画像診断": "画像診断",
+  "その他": "その他",
+  "全体に係る識別コード９９": "その他",
+}
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const meisai = new Meisai([], 3, 0);
@@ -80,6 +92,16 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
     calcVisits(currRezeptVisits, tensuuCollector, comb);
     cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
+  }
+  {
+    const tensuuCollector = new TensuuCollector();
+    const comb = new Combiner();
+    const currRezeptVisits = (await cvtVisitsToUnit([curr].map(v => v.asVisit))).visits;
+    calcVisits(currRezeptVisits, tensuuCollector, comb);
+    comb.iterMeisai((shikibetsu, futanKubun, ten, count, label) => {
+      const shikibetsuName = rev診療識別コード[shikibetsu];
+      console.log(shikibetsuName);
+    });
   }
   meisai.futanWari = futanWari;
   meisai.charge = roundTo10(cover.patientCharge - prevCover.patientCharge);

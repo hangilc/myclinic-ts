@@ -4,6 +4,7 @@ import { Santeibi } from "./santeibi";
 export interface TekiyouItem {
   isSame(other: any): boolean;
   toRecords(santeibi: Santeibi): string[];
+  toLabel(): string;
   getTen(): number;
   getFutanKubun(): 負担区分コードCode;
 }
@@ -27,6 +28,10 @@ class CombineUnit {
     } else {
       return false;
     }
+  }
+
+  toLabel(): string {
+    return this.item.toLabel();
   }
 
   toRecords(): string[] {
@@ -70,6 +75,26 @@ export class Combiner {
       const ten = unit.item.getTen();
       const count = unit.santei.getSum();
       f(shikibetsu, futanKubun, ten, count);
+    })
+  }
+
+  iterMeisai(
+    f: (
+      shikibetsu: 診療識別コードCode,
+      futanKubun: 負担区分コードCode,
+      ten: number,
+      count: number,
+      label: string
+    ) => void
+  ): void {
+    this.ensureSorted();
+    this.units.forEach(unit => {
+      const shikibetsu = unit.shikibetsu;
+      const futanKubun = unit.item.getFutanKubun();
+      const ten = unit.item.getTen();
+      const count = unit.santei.getSum();
+      const label = unit.toLabel();
+      f(shikibetsu, futanKubun, ten, count, label);
     })
   }
 

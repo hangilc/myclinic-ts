@@ -61,6 +61,10 @@ export class SimpleShinryou implements TekiyouItem {
     return this.master.name;
   }
 
+  toLabel(): string {
+    return this.master.name;
+  }
+
   toRecords(santeibi: Santeibi): string[] {
     const comments = this.comments;
     const data: 診療行為レコードData = {
@@ -140,6 +144,10 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
 
   get label(): string {
     return this.shinryouList.map(s => s.master.name).join("、");
+  }
+
+  toLabel(): string {
+    return this.shinryouList.map(shinryou => shinryou.master.name).join("、");
   }
 
   toRecords(santeibi: Santeibi): string[] {

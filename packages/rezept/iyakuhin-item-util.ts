@@ -44,6 +44,10 @@ class SingleConductUnit implements TekiyouItem {
     return `${this.master.name} ${this.amount}${this.master.unit}`;
   }
 
+  toLabel(): string {
+    return `${this.master.name} ${this.amount}${this.master.unit}`;
+  }
+
   toRecords(santeibi: Santeibi): string[] {
     const data = {
       診療識別: this.shikibetsu,
