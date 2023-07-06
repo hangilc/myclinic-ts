@@ -1195,6 +1195,7 @@ export class GazouLabel {
 
 class ConductShinryouMemo {
   amount?: number | undefined;
+  comments?: { code: number, text: string }[];
 
   constructor(json: any) {
     this.amount = json.amount;
