@@ -276,7 +276,6 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
   const [firstDay, lastDay] = firstAndLastDayOf(visitedAt);
   const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
-  console.log("visits", visits);
   return {
     visits,
     patient,
