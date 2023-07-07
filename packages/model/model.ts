@@ -831,6 +831,10 @@ export class ConductShinryouEx {
     return ConductShinryouMemo.parseJson(this.memo).amount;
   }
 
+  get comments(): RezeptComment[] {
+    return ConductShinryouMemo.parseJson(this.memo).comments ?? [];
+  }
+
   static cast(arg: any): ConductShinryouEx {
     return new ConductShinryouEx(
       arg.conductShinryouId,
@@ -1199,6 +1203,7 @@ class ConductShinryouMemo {
 
   constructor(json: any) {
     this.amount = json.amount;
+    this.comments = json.comments;
   }
 
   static parseJson(str: string | undefined): ConductShinryouMemo {
