@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { ShinryouMaster, VisitEx } from "myclinic-model";
+  import { ConductShinryou, type ShinryouMaster, type VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
@@ -33,11 +33,12 @@
   async function doEnter() {
     const master = $selected;
     if( master != null ){
-      const cs = {
-        conductShinryouId: 0,
-        conductId: conductId,
-        shinryoucode: master.shinryoucode
-      };
+      const cs = new ConductShinryou(0, conductId, master.shinryoucode);
+      // const cs = {
+      //   conductShinryouId: 0,
+      //   conductId: conductId,
+      //   shinryoucode: master.shinryoucode,
+      // };
       await api.enterConductShinryou(cs);
     }
   }

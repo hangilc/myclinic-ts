@@ -1,5 +1,5 @@
 import {
-  ConductKindType, CreateConductRequest, CreateShinryouConductRequest, Shinryou, VisitEx
+  ConductKindType, ConductShinryou, CreateConductRequest, CreateShinryouConductRequest, Shinryou, VisitEx
 } from "myclinic-model"
 import api from "@/lib/api"
 import { dateParam } from "@/lib/date-param"
@@ -87,7 +87,12 @@ async function conductReq(
     visitId: visitId,
     kind: kind.code,
     labelOption: labelOption,
-    shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
+    shinryouList: s.map(({ shinryoucode }) => {
+      return new ConductShinryou(
+        0, 0, shinryoucode
+      )
+    }),
+    // shinryouList: s.map(obj => Object.assign(obj, { conductShinryouId: 0, conductId: 0 })),
     drugs: d.map(obj => Object.assign(obj, { conductDrugId: 0, conductId: 0 })),
     kizaiList: k.map(obj => Object.assign(obj, { conductKizaiId: 0, conductId: 0 }))
   });
