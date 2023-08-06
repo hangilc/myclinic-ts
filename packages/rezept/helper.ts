@@ -1,6 +1,7 @@
 import * as kanjidate from "kanjidate";
-import { HokenSelector, Hokensha, RezeptVisit } from "./rezept-types";
-import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, ShotokuKubunCode, レセプト特記事項コード, レセプト特記事項コードCode, 負担区分コードCode, 負担区分コードNameOf, 負担者種別コードCode, 都道府県コード } from "./codes";
+import type { HokenSelector, Hokensha, RezeptVisit } from "./rezept-types";
+import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コードNameOf, 都道府県コード } from "./codes";
+import type { ShotokuKubunCode, レセプト特記事項コードCode, 負担区分コードCode } from "./codes";
 import { toZenkaku } from "./zenkaku";
 import { DateSet } from "./date-set";
 

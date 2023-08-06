@@ -1,4 +1,4 @@
-import { 症状詳記区分コードCode, 診療識別コードCode, 負担区分コードCode } from "codes";
+import type { 症状詳記区分コードCode, 診療識別コードCode, 負担区分コードCode } from "./codes";
 
 export interface ClinicInfo {    
   name: string,
