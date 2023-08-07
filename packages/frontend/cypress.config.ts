@@ -20,6 +20,7 @@ export default defineConfig({
     },
     env: {
       "API": "http://localhost:38080/api",
+      // "API": "http://localhost:8080/api",
       "PRINTER-API": "http://localhost:48080",
     },
     video: false,

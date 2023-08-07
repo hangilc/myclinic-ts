@@ -33,6 +33,7 @@ function getBackend(): string {
     if (import.meta.env.VITE_BACKEND_PORT) {
       port = import.meta.env.VITE_BACKEND_PORT;
     }
+    console.log("PORT", port);
     return `${proto}//${host}:${port}`;
   } else {
     return "http://localhost:8080";
