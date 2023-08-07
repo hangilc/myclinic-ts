@@ -78,7 +78,7 @@ describe("Start Visit", () => {
         cy.get(`input[data-cy=hoken-input][data-shahokokuho-id=${shahokokuho.shahokokuhoId}]`).should("be.checked");
         const query = onshi_query_from_hoken(shahokokuho, patient.birthday, at);
         const onshiResult = mockOnshiSuccessResult(query, onshiCreationModifier.patient(patient));
-        cy.intercept("POST", "http://localhost/onshi/kakunin", onshiResult.toJSON());
+        cy.intercept("POST", "/onshi/kakunin", onshiResult.toJSON());
         cy.get("button").contains("資格確認").click();
         cy.get("[data-cy=onshi-confirmed]");
         cy.get("button").contains("入力").click();
