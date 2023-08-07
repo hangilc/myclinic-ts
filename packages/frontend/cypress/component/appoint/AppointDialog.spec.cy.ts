@@ -254,7 +254,9 @@ describe("AppointDialog", () => {
     }).as("register");
     cy.mount(AppointDialog, { props });
     driver.setPatientInput("看護 花子");
+    console.log("befoer checkKenshin");
     driver.checkKenshin();
+    console.log("after checkKenshin");
     driver.shouldHaveUncheckedWithVisit();
     driver.checkWithVisit();
     driver.enter();
