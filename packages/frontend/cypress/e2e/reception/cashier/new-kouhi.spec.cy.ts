@@ -1,4 +1,4 @@
-import { Patient } from "myclinic-model";
+import { Kouhi, Patient } from "myclinic-model";
 import tmpl from "@cypress/fixtures/new-kouhi-template.json";
 import { fillDateForm } from "@cypress/lib/form";
 
@@ -80,8 +80,8 @@ describe("new-kouhi (reception)", () => {
         cy.request(Cypress.env("API") + `/get-kouhi?kouhi-id=${kouhiId}`)
           .its("body")
           .then((response) => {
-            const a = Object.assign({}, tmpl, { kouhiId: response.kouhiId});
-            const b = response;
+            const a = Kouhi.cast(Object.assign({}, tmpl, { kouhiId: response.kouhiId}));
+            const b = Kouhi.cast(response);
             console.log({a, b});
             expect(a).deep.equal(b);
             cy.request(Cypress.env("API") + `/delete-kouhi?kouhi-id=${a.kouhiId}`);

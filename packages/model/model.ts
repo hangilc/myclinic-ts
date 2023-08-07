@@ -151,7 +151,7 @@ export class Patient {
       arg.birthday,
       arg.address,
       arg.phone,
-      arg.memo,
+      arg.memo ?? undefined,
     );
   }
 
@@ -479,7 +479,7 @@ export class Kouhi {
       arg.validFrom,
       arg.validUpto,
       arg.patientId,
-      arg.memo,
+      arg.memo || undefined,
     );
   }
 }
@@ -765,7 +765,7 @@ export class Shinryou {
   }
 
   static cast(arg: any): Shinryou {
-    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode, arg.memo);
+    return new Shinryou(arg.shinryouId, arg.visitId, arg.shinryoucode, arg.memo || undefined);
   }
 }
 
@@ -841,7 +841,7 @@ export class ConductShinryouEx {
       arg.conductId,
       arg.shinryoucode,
       ShinryouMaster.cast(arg.master),
-      arg.memo,
+      arg.memo ?? undefined,
     );
   }
 }
@@ -1232,7 +1232,7 @@ export class ConductShinryou {
       arg.conductShinryouId,
       arg.conductId,
       arg.shinryoucode,
-      arg.memo,
+      arg.memo ?? undefined,
     );
   }
 }
@@ -1869,7 +1869,7 @@ export class Appoint {
       arg.appointTimeId,
       arg.patientName,
       arg.patientId,
-      arg.memo,
+      arg.memo ?? undefined,
     );
   }
 
