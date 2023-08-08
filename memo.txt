@@ -9,12 +9,18 @@
     1. start mysql 
         > docker run -p 33060:3306 hangilc/myclinic-mysql-demo:....
     2. start server
-        > MYCLINIC_DB_PORT=33060
-        > MYCLINIC_DB_USER=myuser
-        > MYCLINIC_DB_PASS=mypass
-        > MYCLINIC_NON_SSL_SERVER_PORT=38080
+        > export MYCLINIC_DB_PORT=33060
+        > export MYCLINIC_DB_USER=myuser
+        > export MYCLINIC_DB_PASS=mypass
+        > export MYCLINIC_NON_SSL_SERVER_PORT=38080
         > sbt
             [SBT]> server/reStart
-    3. npm run test-client -w packages/frontend
+    3. ORIGIN=http://localhost:38080 npm run test-client -w packages/frontend
     4. run cypress
-        > ORIGIN=http://localhost:38080 npm run cy:run 
+        > npm run cy:run -w packages/frontend
+       or run single test
+        > npm run cy:run -w packages/frontend -- --spec cypress/e2e/...spec.cy.ts
+       or run component tests
+        > npm run cy:run -w packages/frontend -- --component
+       or run in brwoser
+        > npm run cy;open -w packages/frontend

@@ -1,11 +1,10 @@
 import { AppointTimeData } from "@/appoint/appoint-time-data";
 import AppointDialog from "@/appoint/AppointDialog.svelte";
 import { getBase } from "@/lib/api";
-// import { dialogOpen } from "@cypress/lib/dialog";
 import { ConfirmDriver } from "@cypress/lib/drivers";
 import { Appoint, AppointTime } from "myclinic-model";
-// import { createTypeReferenceDirectiveResolutionCache } from "typescript";
 import { AppointDialogDriver as driver } from "./column-helper";
+import patient2 from "@cypress/fixtures/patient-2.json";
 
 describe("AppointDialog", () => {
   beforeEach(() => {
@@ -183,6 +182,9 @@ describe("AppointDialog", () => {
       new AppointTime(appointTimeId, "2023-02-13", "10:00:00", "10:20:00", "regular", 1),
       [appoint], undefined
     )
+    cy.intercept("GET", getBase() + "/get-patient?*", (req) => {
+      req.reply(patient2);
+    });
     cy.intercept("POST", getBase() + "/update-appoint", (req) => {
       expect(JSON.parse(req.body)).deep.equal({
         appointId, 
@@ -254,9 +256,7 @@ describe("AppointDialog", () => {
     }).as("register");
     cy.mount(AppointDialog, { props });
     driver.setPatientInput("看護 花子");
-    console.log("befoer checkKenshin");
     driver.checkKenshin();
-    console.log("after checkKenshin");
     driver.shouldHaveUncheckedWithVisit();
     driver.checkWithVisit();
     driver.enter();
