@@ -79,6 +79,7 @@ export function createRezept(arg: CreateRezeptArg): string {
       rows.push(create資格確認レコード(edaban));
     }
     {
+      diseases.sort((a, b) => a.startDate.localeCompare(b.startDate));
       diseases.forEach((disease, i) => {
         const adjCodes = disease.adjcodes;
         rows.push(mk症病名レコード({
@@ -101,9 +102,6 @@ export function createRezept(arg: CreateRezeptArg): string {
       })
     }
     rows.push(...comb.toRecords());
-    // rows.push(...shinryouDataList.map(mk診療行為レコード));
-    // rows.push(...iyakuhinDataList.map(mk医薬品レコード));
-    // rows.push(...kizaiDataList.map(mk特定器材レコード));
     for (let visit of visits) {
       visit.comments.forEach(comm => {
         const futanKubun = resolveFutankubunOfVisitComment(comm, visit);
