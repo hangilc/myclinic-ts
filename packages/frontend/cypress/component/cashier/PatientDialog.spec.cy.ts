@@ -1,10 +1,14 @@
 import { Hoken } from "@/cashier/patient-dialog/hoken";
 import { PatientData } from "@/cashier/patient-dialog/patient-data";
 import PatientDialog from "@/cashier/patient-dialog/PatientDialog.svelte";
+import { getBase } from "@/lib/api";
+import { onshi_query_from_hoken } from "@/lib/onshi-query-from-hoken";
 // import { getBase } from "@/lib/api";
 import patientJson from "@cypress/fixtures/patient-1.json";
+import { dialogOpen } from "@cypress/lib/dialog";
+import { mockOnshiSuccessResult, onshiCreationModifier } from "@cypress/lib/onshi-mock";
 // import { dialogOpen } from "@cypress/lib/dialog";
-import { Patient, Shahokokuho } from "myclinic-model";
+import { dateToSqlDateTime, Patient, Shahokokuho } from "myclinic-model";
 
 describe("PatientDialog", () => {
   it("should mount", () => {
@@ -36,32 +40,40 @@ describe("PatientDialog", () => {
     cy.mount(PatientDialog, { props });
   });
 
-  // it("should invoke kakunin with shahokokuho", () => {
-  //   const patient = Patient.cast(patientJson);
-  //   const shaho = new Shahokokuho(1, patient.patientId, 123456, "23-1", "87654321",
-  //     1, "2022-11-01", "0000-00-00", 0, "01");
-  //   const hoken = new Hoken(shaho, 0);
-  //   const data: PatientData = new PatientData(
-  //     patient,
-  //     [hoken]
-  //   );
-  //   const props = {
-  //     destroy: () => { },
-  //     data
-  //   };
-  //   const at = dateToSqlDateTime(new Date());
-  //   cy.intercept("GET",
-  //     getBase() + "/start-visit?*",
-  //     (req) => {
-  //       const patientId = req.query["patient-id"] as number;
-  //       const at = req.query["at"] as string;
-  //       const visit = new Visit(1, patientId, at, shaho.shahokokuhoId, 0, 0, 0, 0, 0, undefined);
-  //       req.reply(visit);
-  //     }
-  //   ).as("startVisit");
-  //   cy.mount(PatientDialog, { props });
-  //   cy.get("button").contains("診察受付").click();
-  //   dialogOpen("オンライン資格確認");
-  //   cy.get("@startVisit").should("not.exist");
-  // });
+  it.only("should register visit with valid hoken shahokokuho", () => {
+    const patient = Patient.cast(patientJson);
+    const shaho = new Shahokokuho(1, patient.patientId, 123456, "23-1", "87654321",
+      1, "2022-11-01", "0000-00-00", 0, "01");
+    const hoken = new Hoken(shaho, 0);
+    const data: PatientData = new PatientData(
+      patient,
+      [hoken]
+    );
+    const props = {
+      destroy: () => { },
+      data
+    };
+    const at = dateToSqlDateTime(new Date());
+    cy.intercept("GET",
+      getBase() + "/get-patient?*",
+      (req) => {
+        const patientId = req.query["patient-id"] as number;
+        expect(patientId).equal("1");
+        req.reply(patient);
+      }
+    );
+    const onshiServer = "http://onshi-server";
+    const onshiSecret = "SECRET";
+    cy.intercept("GET", getBase() + "/dict-get?key=onshi-server", JSON.stringify(onshiServer));
+    cy.intercept("GET", getBase() + "/dict-get?key=onshi-secret", JSON.stringify(onshiSecret));
+    const query = onshi_query_from_hoken(shaho, patient.birthday, "2022-08-09");
+    const onshiResult = mockOnshiSuccessResult(query, onshiCreationModifier.patient(patient));
+    cy.intercept("POST", onshiServer + "/onshi/kakunin", JSON.stringify(onshiResult));
+    cy.mount(PatientDialog, { props });
+    cy.get("button").contains("診察受付").click();
+    dialogOpen("診察受付");
+    cy.get("button").contains("資格確認").click();
+    cy.get("[data-cy='onshi-confirmed']").contains("資格確認済");
+    cy.get("button").contains("入力").click();
+  });
 });

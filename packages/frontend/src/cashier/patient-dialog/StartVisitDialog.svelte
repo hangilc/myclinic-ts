@@ -191,27 +191,6 @@
         error = e.map(e => e.toString()).join("");
       }
       inProgressNotice = "";
-
-      // const q = onshi_query_from_hoken(
-      //   item.value,
-      //   patient.birthday,
-      //   dateToSql(at)
-      // );
-      // try {
-      //   const result = await onshiConfirm(q);
-      //   if (result.isValid) {
-      //     item.confirmed = result;
-      //     updateHokenConfirmedCount();
-      //     shahokokuhoList = [...shahokokuhoList];
-      //     koukikoureiList = [...koukikoureiList];
-      //   } else {
-      //     error = result.getErrorMessage();
-      //   }
-      // } catch (ex: any) {
-      //   error = "資格確認サーバーエラー：" + ex.toString();
-      // } finally {
-      //   inProgressNotice = "";
-      // }
     }
   }
 
@@ -277,12 +256,6 @@
       {/each}
       {#each kouhiList as kouhi (kouhi.kouhiId)}
         <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha, kouhi.memoAsJson)}</div>
-        <!-- <div>
-          <label>
-            <input type="checkbox" checked data-cy="kouhi-input" data-kouhi-id={kouhi.kouhiId}/>
-            <span data-cy="kouhi-label">{kouhiRep(kouhi.futansha)}</span>
-          </label>
-        </div> -->
       {/each}
     </div>
   </div>

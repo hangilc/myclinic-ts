@@ -7,7 +7,6 @@ import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
 import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, OnshiError, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
 import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
 import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
-import { pad } from "./pad";
 
 export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
   {
