@@ -28,6 +28,8 @@ downloads
 
 work
 workspaces/jslib/out
+.env
+
 
 
 
