@@ -1,5 +1,5 @@
 import * as kanjidate from "kanjidate";
-import type { HokenSelector, Hokensha, RezeptVisit } from "./rezept-types";
+import type { HokenSelector, Hokensha, RezeptComment, RezeptVisit } from "./rezept-types";
 import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コードNameOf, 都道府県コード } from "./codes";
 import type { ShotokuKubunCode, レセプト特記事項コードCode, 負担区分コードCode } from "./codes";
 import { toZenkaku } from "./zenkaku";
@@ -320,4 +320,18 @@ export function calcJitsuNissuu(visits: RezeptVisit[], selector: HokenSelector):
 
 export function futanKubunIncludes(futanKubun: 負担区分コードCode, selector: HokenSelector): boolean {
   return 負担区分コードNameOf(futanKubun).includes(selector);
+}
+
+export function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: RezeptVisit): 負担区分コードCode {
+  if (comm.futanKubun) {
+    return comm.futanKubun;
+  } else {
+    if (calcJitsuNissuu([visit], "H")) {
+      return "1";
+    } else if (calcJitsuNissuu([visit], "1")) {
+      return "5";
+    } else {
+      throw new Error("No hoken and no kouhi.");
+    }
+  }
 }

@@ -164,7 +164,7 @@ export class HoukatsuKensaShinryou implements TekiyouItem {
         const master = shinryou.master;
         const len = this.shinryouList.length;
         const comments: RezeptComment[] = shinryou.comments;
-        const data = {
+        const data: 診療行為レコードData = {
           診療識別: index === 0 ? shikibetsu : "",
           負担区分: futanKubun,
           診療行為コード: master.shinryoucode,

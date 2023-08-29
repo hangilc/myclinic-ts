@@ -1,15 +1,15 @@
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode } from "codes";
-import { calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatYearMonth, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "helper";
-import { handleIyakuhinTekiyouOfVisits } from "iyakuhin-item-util";
+import { calcVisits } from "calc-visits";
+import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード } from "codes";
+import { resolveFutankubunOfVisitComment } from "helper";
 import { ClinicInfo } from "myclinic-model";
-import { mkレセプト共通レコード } from "records/common-record";
-import { mk医療機関情報レコード } from "records/medical-institute-record";
+import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "record-creators";
+import { mkコメントレコード } from "records/comment-record";
 import { create診療報酬請求書レコード } from "records/seikyuu-record";
-import { Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "rezept-types";
-import { handleShinryouTekiyouOfVisits } from "shinryoukoui-item-util";
+import { endReasonToKubun, mk症病名レコード } from "records/shoubyoumei-record";
+import { mk症状詳記レコード } from "records/shoujoushouki-record";
+import { HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "rezept-types";
 import { Combiner } from "tekiyou-item";
 import { TensuuCollector } from "tensuu-collector";
-import { handleKizaiTekiyouOfVisits } from "tokuteikizai-item-util";
 
 interface PatientUnit {
   getRows(serial: number): string[];
@@ -31,7 +31,7 @@ export class RezeptFrame {
   }
 
   add(unit: PatientUnit): void {
-    this.rows.push(...unit.getRows());
+    this.rows.push(...unit.getRows(this.serial++));
     this.rezeptCount += (unit.hasHoken() ? 1 : 0) + unit.getKouhiListLength();
     this.rezeptSouten += unit.getSouten();
   }
@@ -48,57 +48,6 @@ export class RezeptFrame {
   }
 }
 
-function create医療機関情報レコード(seikyuu: 診査支払い機関コードCode, year: number, month: number,
-  clinicInfo: ClinicInfo): string {
-  const [seikyuuYear, seikyuuMonth] = calcSeikyuuMonth(year, month);
-
-  return mk医療機関情報レコード({
-    診査支払い機関: seikyuu,
-    都道府県: extract都道府県コードfromAddress(clinicInfo.address),
-    医療機関コード: clinicInfo.kikancode,
-    医療機関名称: clinicInfo.name,
-    year: seikyuuYear,
-    month: seikyuuMonth,
-    電話番号: clinicInfo.tel,
-  });
-}
-
-function createレセプト共通レコード(
-  year: number,
-  month: number,
-  serial: number,
-  hokensha: Hokensha | undefined,
-  kouhiList: RezeptKouhi[],
-  patient: RezeptPatient,
-  visits: RezeptVisit[],
-  shotokuKubun: ShotokuKubunCode | undefined,
-): string {
-  const tokkijikouGendo = resolveGendogakuTokkiJikou(hokensha, shotokuKubun);
-  return mkレセプト共通レコード({
-    レセプト番号: serial,
-    レセプト種別: resolve保険種別(hokensha, kouhiList.length),
-    診療年月: formatYearMonth(year, month),
-    氏名: patient.name,
-    男女区分: patient.sex === "M" ? 男女区分コード.男 : 男女区分コード.女,
-    生年月日: patient.birthday.replaceAll("-", ""),
-    給付割合: optionFold(hokensha, commonRecord給付割合, ""),
-    レセプト特記事項: tokkijikouGendo ?? "",
-    カルテ番号等: patient.patientId,
-    検索番号: "",
-    請求情報: "",
-  });
-}
-
-function calcVisits(visits: RezeptVisit[], collector: TensuuCollector, comb: Combiner): void {
-  handleShinryouTekiyouOfVisits(visits, comb);
-  handleIyakuhinTekiyouOfVisits(visits, comb);
-  handleKizaiTekiyouOfVisits(visits, comb);
-  comb.iter((shikibetsu, futanKubun, ten, count) => {
-    collector.add(futanKubun, ten * count);
-  });
-}
-
-
 export interface RezeptUnit {
   visits: RezeptVisit[];
   patient: RezeptPatient;
@@ -114,7 +63,6 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
   if (visits.length === 0) {
     throw new Error("No visits");
   }
-  rows.push(createレセプト共通レコード(year, month, serial++, hokensha, kouhiList, patient, visits, shotokuKubun));
   const tenCol = new TensuuCollector();
   const comb = new Combiner();
   calcVisits(visits, tenCol, comb);
