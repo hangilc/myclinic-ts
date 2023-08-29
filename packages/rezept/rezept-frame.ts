@@ -1,15 +1,14 @@
-import { calcVisits } from "calc-visits";
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード } from "codes";
-import { resolveFutankubunOfVisitComment } from "helper";
-import { ClinicInfo } from "myclinic-model";
-import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "record-creators";
-import { mkコメントレコード } from "records/comment-record";
-import { create診療報酬請求書レコード } from "records/seikyuu-record";
-import { endReasonToKubun, mk症病名レコード } from "records/shoubyoumei-record";
-import { mk症状詳記レコード } from "records/shoujoushouki-record";
-import { HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "rezept-types";
-import { Combiner } from "tekiyou-item";
-import { TensuuCollector } from "tensuu-collector";
+import { calcVisits } from "./calc-visits";
+import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード } from "./codes";
+import { resolveFutankubunOfVisitComment } from "./helper";
+import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "./record-creators";
+import { mkコメントレコード } from "./records/comment-record";
+import { create診療報酬請求書レコード } from "./records/seikyuu-record";
+import { endReasonToKubun, mk症病名レコード } from "./records/shoubyoumei-record";
+import { mk症状詳記レコード } from "./records/shoujoushouki-record";
+import { ClinicInfo, HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
+import { Combiner } from "./tekiyou-item";
+import { TensuuCollector } from "./tensuu-collector";
 
 interface PatientUnit {
   getRows(serial: number): string[];

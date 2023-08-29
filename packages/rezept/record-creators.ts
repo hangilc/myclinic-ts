@@ -1,11 +1,11 @@
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コードCode } from "codes";
-import { adjustOptString, calcJitsuNissuu, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "helper";
-import { mkレセプト共通レコード } from "records/common-record";
-import { mk保険者レコード } from "records/hokensha-record";
-import { mk公費レコード } from "records/kouhi-record";
-import { mk医療機関情報レコード } from "records/medical-institute-record";
-import { mk資格確認レコード } from "records/shikaku-kakunin-record";
-import { ClinicInfo, HokenSelector, Hokensha, RezeptKouhi, RezeptPatient, RezeptVisit } from "rezept-types";
+import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コードCode } from "./codes";
+import { adjustOptString, calcJitsuNissuu, calcSeikyuuMonth, commonRecord給付割合, extract都道府県コードfromAddress, formatHokenshaBangou, formatYearMonth, optionFold, resolveGendogakuTokkiJikou, resolve保険種別 } from "./helper";
+import { mkレセプト共通レコード } from "./records/common-record";
+import { mk保険者レコード } from "./records/hokensha-record";
+import { mk公費レコード } from "./records/kouhi-record";
+import { mk医療機関情報レコード } from "./records/medical-institute-record";
+import { mk資格確認レコード } from "./records/shikaku-kakunin-record";
+import { ClinicInfo, HokenSelector, Hokensha, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
 
 export function create医療機関情報レコード(seikyuu: 診査支払い機関コードCode, year: number, month: number,
   clinicInfo: ClinicInfo): string {

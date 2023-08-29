@@ -6,14 +6,15 @@ import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { mkコメントレコード } from "./records/comment-record";
 import { create診療報酬請求書レコード } from "./records/seikyuu-record";
 import { Combiner } from "./tekiyou-item";
-import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "record-creators";
-import { calcVisits } from "calc-visits";
+import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "./record-creators";
+import { calcVisits } from "./calc-visits";
 import { resolveFutankubunOfVisitComment } from "./helper";
 export * from "./futan-calc";
 export * from "./tensuu-collector";
 export * from "./tekiyou-item";
 export * from "./kouhi-registry";
 export * from "./rezept-frame";
+export * from "./calc-visits";
 export { roundTo10 } from "./helper";
 
 export interface RezeptUnit {
