@@ -3,17 +3,16 @@
 
   export let isVisible: boolean;
   let henreiData: string = "";
+  let seikyuuFile: string = "";
   let seikyuuData: string = "";
   let seikyuuTail: string = "";
+  let rezepts: [string, string[]][] = [];
 
   function doImport() {
     if( henreiData === "" ){
       return;
     }
     let [seikyuu, tail] = parseHenreiData(henreiData);
-    console.log(seikyuu);
-    console.log();
-    console.log(tail);
     henreiData = "";
     seikyuuData = seikyuu.join("\n");
     seikyuuTail = tail.join("\n");
@@ -30,22 +29,59 @@
       }
       (isSeikyuu ? seikyuu : tail).push(row);
     }
+    seikyuuFile = mkFileName(seikyuu[0]);
     return [seikyuu, tail];
   }
 
   function doAdd() {
-    
+    let seikyuuRows: string[] = seikyuuData.split("\n");
+    let tailRows: string[] = seikyuuTail.split("\n");
+    let line = seikyuuRows[0];
+    if( !line.startsWith("RE") ){
+      alert("Invalid Seikyuu first row ('RE' expected).");
+      return;
+    }
+    let values = line.split(",");
+    let ym = values[3];
+    let name = values[4];
+    name = name.replaceAll(" ", "");
+    name = name.replaceAll("　", "");
+    let patientId = values[13];
+    let file = `henrei-${ym}-${name}-${patientId}.csv`;
+    rezepts = [[file, [...seikyuuRows, ...tailRows]], ...rezepts];
+    console.log(rezepts);
+  }
+
+  function mkFileName(line: string): string {
+    if( !line.startsWith("RE") ){
+      throw new Error("Invalid Seikyuu first row ('RE' expected).");
+    }
+    let values = line.split(",");
+    let ym = values[3];
+    let name = values[4];
+    name = name.replaceAll(" ", "");
+    name = name.replaceAll("　", "");
+    let patientId = values[13];
+    return `henrei-${ym}-${name}-${patientId}.csv`;
   }
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
   <ServiceHeader title="返戻" />
-  <textarea bind:value={henreiData} class="import-data"/>
+  <textarea bind:value={henreiData} class="import-data" />
   <button on:click={doImport}>取込</button>
   <div class="seikyuu-area">
+    <div>{seikyuuFile}</div>
     <textarea bind:value={seikyuuData} class="seikyuu-data" />
     <pre class="seikyuu-tail">{seikyuuTail}</pre>
     <button on:click={doAdd}>追加</button>
+  </div>
+  <div class="rezept-area">
+    <div>
+      {#each rezepts.map(item => item[0]) as file}
+        <div>{file}</div>
+      {/each}
+    </div>
   </div>
 </div>
 
@@ -57,7 +93,7 @@
     margin-bottom: 6px;
   }
 
-  .seikyuu-area {
+  .seikyuu-area, .rezept-area {
     margin: 10px 0;
   }
 
