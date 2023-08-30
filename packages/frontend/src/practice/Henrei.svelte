@@ -7,6 +7,7 @@
   let seikyuuData: string = "";
   let seikyuuTail: string = "";
   let rezepts: [string, string[]][] = [];
+  let downloadLink: HTMLAnchorElement;
 
   function doImport() {
     if( henreiData === "" ){
@@ -64,6 +65,15 @@
     let patientId = values[13];
     return `henrei-${ym}-${name}-${patientId}.csv`;
   }
+
+  function doCreate() {
+    let text = rezepts.flatMap(item => item[1]).join("\r\n");
+    text = "\r\n" + "\r\n\x1A";
+    let enc = new TextEncoder();
+    const file = new Blob([text], { type: "text/plain" });
+    downloadLink.href = URL.createObjectURL(file);
+    downloadLink.download = "RECEIPT.HEN";
+  }
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
@@ -81,6 +91,12 @@
       {#each rezepts.map(item => item[0]) as file}
         <div>{file}</div>
       {/each}
+    </div>
+    <div>
+      <button on:click={doCreate}>作成</button>
+    </div>
+    <div>
+      <a bind:this={downloadLink}>Download</a>
     </div>
   </div>
 </div>
