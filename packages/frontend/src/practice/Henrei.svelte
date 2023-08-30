@@ -4,6 +4,7 @@
   import type { ClinicInfo } from "myclinic-model";
   import { 診査支払い機関コード } from "myclinic-rezept/codes";
   import { extract都道府県コードfromAddress, pad } from "myclinic-rezept/helper";
+  import Rezept from "./Rezept.svelte";
 
   export let isVisible: boolean;
   let shiharaiKikan: "shaho" | "kokuho" = "shaho";
@@ -20,6 +21,23 @@
     const y = d.getFullYear();
     const m = pad(d.getMonth() + 1, 2, "0");
     return `${y}${m}`;
+  }
+
+  function rezeptCount(): number {
+    return rezepts.length;
+  }
+
+  function rezeptSouten(): number {
+    return rezepts.flatMap(item => item[1]).reduce((prev, ele) => {
+      if( ele.startsWith("SI") || ele.startsWith("IY") || ele.startsWith("TO") ){
+        let values = ele.split(",");
+        let ten = parseInt(values[5]);
+        let count = parseInt(values[6]);
+        return prev + ten * count;
+      } else {
+        return prev;
+      }
+    }, 0);
   }
 
   function doImport() {
@@ -63,7 +81,6 @@
     let patientId = values[13];
     let file = `henrei-${ym}-${name}-${patientId}.csv`;
     rezepts = [[file, [...seikyuuRows, ...tailRows]], ...rezepts];
-    console.log(rezepts);
   }
 
   function mkFileName(line: string): string {
@@ -81,8 +98,9 @@
 
   async function doCreate() {
     let text = (await mkClinicInfoRecord()) + "\r\n";
-    text += rezepts.flatMap((item) => item[1]).join("\r\n");
-    text += "\r\n" + "\r\n\x1A";
+    text += rezepts.flatMap((item) => item[1]).join("\r\n") + "\r\n";
+    text += mkGoukeiRecord() + "\r\n";
+    text += "\x1A";
     const file = new Blob([text], { type: "text/plain" });
     downloadLink.href = URL.createObjectURL(file);
     downloadLink.download = "RECEIPTC.HEN";
@@ -101,6 +119,16 @@
       "00"
     ].join(",");
   }
+
+  function mkGoukeiRecord() {
+    return [
+    "GO",
+    rezeptCount(),
+    rezeptSouten(),
+    "99"
+    ].join(",");
+  }
+
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
