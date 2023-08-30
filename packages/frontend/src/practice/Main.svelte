@@ -6,6 +6,7 @@
   import { currentPatient } from "./exam/ExamVars";
   import JihiKenshin from "./jihi-kenshin/JihiKenshin.svelte";
   import Rezept from "./Rezept.svelte";
+  import Henrei from "./Henrei.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -25,4 +26,5 @@
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
+  <Henrei isVisible={$serviceStore === "henrei" } />
 </div>

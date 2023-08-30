@@ -30,6 +30,7 @@
   <a href="javascript:void(0)" on:click={(_) => start("phone")}>電話</a>
   <a href="javascript:void(0)" on:click={(_) => start("jihi-kenshin")}>自費健診</a>
   <a href="javascript:void(0)" on:click={(_) => start("rezept")}>レセプト</a>
+  <a href="javascript:void(0)" on:click={(_) => start("henrei")}>返戻</a>
 </div>
 
 <style>
