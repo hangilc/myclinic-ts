@@ -1,7 +1,13 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
+  import api from "@/lib/api";
+  import type { ClinicInfo } from "myclinic-model";
+  import { 診査支払い機関コード } from "myclinic-rezept/codes";
+  import { extract都道府県コードfromAddress, pad } from "myclinic-rezept/helper";
 
   export let isVisible: boolean;
+  let shiharaiKikan: "shaho" | "kokuho" = "shaho";
+  let seikyuuYearMonth: string = defaultSeikyuuYearMonth();
   let henreiData: string = "";
   let seikyuuFile: string = "";
   let seikyuuData: string = "";
@@ -9,8 +15,15 @@
   let rezepts: [string, string[]][] = [];
   let downloadLink: HTMLAnchorElement;
 
+  function defaultSeikyuuYearMonth(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = pad(d.getMonth() + 1, 2, "0");
+    return `${y}${m}`;
+  }
+
   function doImport() {
-    if( henreiData === "" ){
+    if (henreiData === "") {
       return;
     }
     let [seikyuu, tail] = parseHenreiData(henreiData);
@@ -20,12 +33,12 @@
   }
 
   function parseHenreiData(data: string): [string[], string[]] {
-    const rows = henreiData.split(/\r?\n/).filter(s => s !== "");
+    const rows = henreiData.split(/\r?\n/).filter((s) => s !== "");
     let seikyuu: string[] = [];
-    let tail: string[] = []
+    let tail: string[] = [];
     let isSeikyuu = true;
-    for(let row of rows) {
-      if( row.startsWith("HR") ) {
+    for (let row of rows) {
+      if (row.startsWith("HR")) {
         isSeikyuu = false;
       }
       (isSeikyuu ? seikyuu : tail).push(row);
@@ -38,7 +51,7 @@
     let seikyuuRows: string[] = seikyuuData.split("\n");
     let tailRows: string[] = seikyuuTail.split("\n");
     let line = seikyuuRows[0];
-    if( !line.startsWith("RE") ){
+    if (!line.startsWith("RE")) {
       alert("Invalid Seikyuu first row ('RE' expected).");
       return;
     }
@@ -54,7 +67,7 @@
   }
 
   function mkFileName(line: string): string {
-    if( !line.startsWith("RE") ){
+    if (!line.startsWith("RE")) {
       throw new Error("Invalid Seikyuu first row ('RE' expected).");
     }
     let values = line.split(",");
@@ -66,18 +79,41 @@
     return `henrei-${ym}-${name}-${patientId}.csv`;
   }
 
-  function doCreate() {
-    let text = rezepts.flatMap(item => item[1]).join("\r\n");
-    text = "\r\n" + "\r\n\x1A";
-    let enc = new TextEncoder();
+  async function doCreate() {
+    let text = (await mkClinicInfoRecord()) + "\r\n";
+    text += rezepts.flatMap((item) => item[1]).join("\r\n");
+    text += "\r\n" + "\r\n\x1A";
     const file = new Blob([text], { type: "text/plain" });
     downloadLink.href = URL.createObjectURL(file);
-    downloadLink.download = "RECEIPT.HEN";
+    downloadLink.download = "RECEIPTC.HEN";
+  }
+
+  async function mkClinicInfoRecord() {
+    const clinicInfo: ClinicInfo = await api.getClinicInfo();
+    return [
+      "HI",
+      shiharaiKikan === "shaho" ? 診査支払い機関コード.社保基金 : 診査支払い機関コード.国健連合,
+      seikyuuYearMonth,
+      extract都道府県コードfromAddress(clinicInfo.address),
+      1,
+      clinicInfo.kikancode,
+      "",
+      "00"
+    ].join(",");
   }
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
   <ServiceHeader title="返戻" />
+  <div class="shiharai-kikan-area">
+    <form on:submit|preventDefault={() => {}}>
+      <input type="radio" bind:group={shiharaiKikan} value="shaho"> 社保
+      <input type="radio" bind:group={shiharaiKikan} value="kokuho"> 国保
+    </form>
+  </div>
+  <div class="seikyuu-month-area">
+    請求月：<input type="text" bind:value={seikyuuYearMonth} />
+  </div>
   <textarea bind:value={henreiData} class="import-data" />
   <button on:click={doImport}>取込</button>
   <div class="seikyuu-area">
@@ -88,7 +124,7 @@
   </div>
   <div class="rezept-area">
     <div>
-      {#each rezepts.map(item => item[0]) as file}
+      {#each rezepts.map((item) => item[0]) as file}
         <div>{file}</div>
       {/each}
     </div>
@@ -96,7 +132,7 @@
       <button on:click={doCreate}>作成</button>
     </div>
     <div>
-      <a bind:this={downloadLink}>Download</a>
+        <a bind:this={downloadLink}>Download</a>
     </div>
   </div>
 </div>
@@ -109,7 +145,10 @@
     margin-bottom: 6px;
   }
 
-  .seikyuu-area, .rezept-area {
+  .shiharai-kikan-area,
+  .seikyuu-month-area,
+  .seikyuu-area,
+  .rezept-area {
     margin: 10px 0;
   }
 
