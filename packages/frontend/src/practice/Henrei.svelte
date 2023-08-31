@@ -31,7 +31,11 @@
     return rezepts.flatMap(item => item[1]).reduce((prev, ele) => {
       if( ele.startsWith("SI") || ele.startsWith("IY") || ele.startsWith("TO") ){
         let values = ele.split(",");
-        let ten = parseInt(values[5]);
+        let tenValue = values[5];
+        if( tenValue === "" ){
+          return prev;
+        }
+        let ten = parseInt(tenValue);
         let count = parseInt(values[6]);
         return prev + ten * count;
       } else {
@@ -122,7 +126,7 @@
 
   function mkGoukeiRecord() {
     return [
-    "GO",
+    "HG",
     rezeptCount(),
     rezeptSouten(),
     "99"
