@@ -4,7 +4,6 @@
   import type { ClinicInfo } from "myclinic-model";
   import { 診査支払い機関コード } from "myclinic-rezept/codes";
   import { extract都道府県コードfromAddress, pad } from "myclinic-rezept/helper";
-  import Rezept from "./Rezept.svelte";
 
   export let isVisible: boolean;
   let shiharaiKikan: "shaho" | "kokuho" = "shaho";
@@ -101,10 +100,13 @@
   }
 
   async function doCreate() {
-    let text = (await mkClinicInfoRecord()) + "\r\n";
-    text += rezepts.flatMap((item) => item[1]).join("\r\n") + "\r\n";
-    text += mkGoukeiRecord() + "\r\n";
-    text += "\x1A";
+    // let text = (await mkClinicInfoRecord()) + "\r\n";
+    let text = "";
+    text += rezepts.flatMap((item) => item[1])
+      .filter(item => !item.startsWith("HR"))
+      .join("\r\n") + "\r\n";
+    // text += mkGoukeiRecord() + "\r\n";
+    // text += "\x1A";
     const file = new Blob([text], { type: "text/plain" });
     downloadLink.href = URL.createObjectURL(file);
     downloadLink.download = "RECEIPTC.HEN";
