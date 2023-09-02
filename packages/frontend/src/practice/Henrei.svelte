@@ -1,10 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
-  import api from "@/lib/api";
-  import type { ClinicInfo } from "myclinic-model";
-  import { 診査支払い機関コード } from "myclinic-rezept/codes";
   import {
-    extract都道府県コードfromAddress,
     pad,
   } from "myclinic-rezept/helper";
 
@@ -13,15 +9,88 @@
   let seikyuuYearMonth: string = defaultSeikyuuYearMonth();
   let henreiData: string = "";
   let seikyuuFile: string = "";
+  let henreiReason: string = "";
   let seikyuuData: string = "";
   let seikyuuTail: string = "";
   let downloadLink: HTMLAnchorElement;
+  let nopHref = "javascript:void(0)";
+
+  function doReset() {
+    henreiData = "";
+    seikyuuFile = "";
+    henreiReason = "";
+    seikyuuData = "";
+    seikyuuTail = "";
+    const href = downloadLink.href;
+    downloadLink.href = "";
+    if (href !== nopHref) {
+      URL.revokeObjectURL(href);
+    }
+  }
 
   function defaultSeikyuuYearMonth(): string {
     const d = new Date();
     const y = d.getFullYear();
     const m = pad(d.getMonth() + 1, 2, "0");
     return `${y}${m}`;
+  }
+
+  function doImport() {
+    if (henreiData === "") {
+      return;
+    }
+    let [seikyuu, tail] = parseHenreiData(henreiData);
+    seikyuuData = seikyuu.join("\n");
+    seikyuuTail = tail.join("\n");
+  }
+
+  function mkFileName(line: string): string {
+    if (!line.startsWith("RE")) {
+      throw new Error("Invalid Seikyuu first row ('RE' expected).");
+    }
+    let values = line.split(",");
+    let ym = values[3];
+    let name = values[4];
+    name = name.replaceAll(" ", "");
+    name = name.replaceAll("　", "");
+    let patientId = values[13];
+    return `henrei-${ym}-${name}-${patientId}.csv`;
+  }
+
+  function addToFileName(fileName: string, postfix: string): string {
+    const i = fileName.lastIndexOf(".");
+    if (i >= 0) {
+      return fileName.substring(0, i) + postfix + fileName.substring(i);
+    } else {
+      return fileName + postfix;
+    }
+  }
+
+  function parseHenreiData(data: string): [string[], string[]] {
+    const rows = henreiData.split(/\r?\n/).filter((s) => s !== "");
+    let seikyuu: string[] = [];
+    let tail: string[] = [];
+    let isSeikyuu = true;
+    for (let row of rows) {
+      if (row.startsWith("HR")) {
+        henreiReason = row;
+        isSeikyuu = false;
+        continue;
+      }
+      (isSeikyuu ? seikyuu : tail).push(row);
+    }
+    seikyuuFile = mkFileName(seikyuu[0]);
+    return [seikyuu, tail];
+  }
+
+  async function doCreate() {
+    let seikyuuRows: string[] = seikyuuData.split(/\r?\n/);
+    let tailRows: string[] = seikyuuTail.split(/\r?\n/);
+    let fixedFileName = addToFileName(seikyuuFile, "-fixed");
+    let text = [...seikyuuRows, ...tailRows].join("\r\n") + "\r\n";
+    const file = new Blob([text], { type: "text/plain" });
+    downloadLink.href = URL.createObjectURL(file);
+    downloadLink.download = fixedFileName;
   }
 
   function rezeptSouten(rows: string[]): number {
@@ -44,124 +113,35 @@
       }
     }, 0);
   }
-
-  function doImport() {
-    if (henreiData === "") {
-      return;
-    }
-    let [seikyuu, tail] = parseHenreiData(henreiData);
-    seikyuuData = seikyuu.join("\n");
-    seikyuuTail = tail.join("\n");
-    const href = downloadLink.href;
-    downloadLink.href = "";
-    if (href) {
-      URL.revokeObjectURL(href);
-    }
-  }
-
-  function parseHenreiData(data: string): [string[], string[]] {
-    const rows = henreiData.split(/\r?\n/).filter((s) => s !== "");
-    let seikyuu: string[] = [];
-    let tail: string[] = [];
-    let isSeikyuu = true;
-    for (let row of rows) {
-      if (row.startsWith("HR")) {
-        isSeikyuu = false;
-      }
-      (isSeikyuu ? seikyuu : tail).push(row);
-    }
-    seikyuuFile = mkFileName(seikyuu[0]);
-    return [seikyuu, tail];
-  }
-
-  function mkFileName(line: string): string {
-    if (!line.startsWith("RE")) {
-      throw new Error("Invalid Seikyuu first row ('RE' expected).");
-    }
-    let values = line.split(",");
-    let ym = values[3];
-    let name = values[4];
-    name = name.replaceAll(" ", "");
-    name = name.replaceAll("　", "");
-    let patientId = values[13];
-    return `henrei-${ym}-${name}-${patientId}.csv`;
-  }
-
-  function doAdd() {
-    let seikyuuRows: string[] = seikyuuData.split(/\r?\n/);
-    let tailRows: string[] = seikyuuTail.split(/\r?\n/);
-    let line = seikyuuRows[0];
-    if (!line.startsWith("RE")) {
-      alert("Invalid Seikyuu first row ('RE' expected).");
-      return;
-    }
-    let values = line.split(",");
-    let ym = values[3];
-    let name = values[4];
-    name = name.replaceAll(" ", "");
-    name = name.replaceAll("　", "");
-    let patientId = values[13];
-    let file = `henrei-${ym}-${name}-${patientId}.csv`;
-    rezepts = [[file, [...seikyuuRows, ...tailRows]], ...rezepts];
-  }
-
-  async function doCreate() {
-    // let text = (await mkClinicInfoRecord()) + "\r\n";
-    let text = "";
-    text +=
-      rezepts
-        .flatMap((item) => item[1])
-        .filter((item) => !item.startsWith("HR"))
-        .join("\r\n") + "\r\n";
-    // text += mkGoukeiRecord() + "\r\n";
-    // text += "\x1A";
-    const file = new Blob([text], { type: "text/plain" });
-    downloadLink.href = URL.createObjectURL(file);
-    downloadLink.download = "RECEIPTC.HEN";
-  }
-
-  async function mkClinicInfoRecord() {
-    const clinicInfo: ClinicInfo = await api.getClinicInfo();
-    return [
-      "HI",
-      shiharaiKikan === "shaho"
-        ? 診査支払い機関コード.社保基金
-        : 診査支払い機関コード.国健連合,
-      seikyuuYearMonth,
-      extract都道府県コードfromAddress(clinicInfo.address),
-      1,
-      clinicInfo.kikancode,
-      "",
-      "00",
-    ].join(",");
-  }
-
-  function mkGoukeiRecord() {
-    return ["HG", rezeptCount(), rezeptSouten(), "99"].join(",");
-  }
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
   <ServiceHeader title="返戻" />
-  <div class="shiharai-kikan-area">
+  <div class="area">
     <form on:submit|preventDefault={() => {}}>
       <input type="radio" bind:group={shiharaiKikan} value="shaho" /> 社保
       <input type="radio" bind:group={shiharaiKikan} value="kokuho" /> 国保
     </form>
   </div>
-  <div class="seikyuu-month-area">
+  <div class="area">
     請求月：<input type="text" bind:value={seikyuuYearMonth} />
   </div>
   <textarea bind:value={henreiData} class="import-data" />
   <button on:click={doImport}>取込</button>
-  <div class="seikyuu-area">
-    <div>{seikyuuFile}</div>
+  <div class="area">{seikyuuFile}</div>
+  {#if henreiReason !== ""}
+    <div class="area reason-area">{henreiReason}</div>
+  {/if}
+  <div class="area">
     <textarea bind:value={seikyuuData} class="seikyuu-data" />
     <pre class="seikyuu-tail">{seikyuuTail}</pre>
     <button on:click={doCreate}>作成</button>
   </div>
-  <div>
-    <a href="" bind:this={downloadLink}>Download</a>
+  <div class="area">
+    <a href={nopHref} bind:this={downloadLink}>Download</a>
+  </div>
+  <div class="area">
+    <button on:click={doReset}>リセット</button>
   </div>
 </div>
 
@@ -173,10 +153,15 @@
     margin-bottom: 6px;
   }
 
-  .shiharai-kikan-area,
-  .seikyuu-month-area,
-  .seikyuu-area {
+  .area {
     margin: 10px 0;
+  }
+
+  .reason-area {
+    border: 1px solid gray;
+    border-radius: 4px;
+    width: 70ch;
+    padding: 10px;
   }
 
   .seikyuu-data {
