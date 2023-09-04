@@ -15,6 +15,7 @@
   let clinicInfo: ClinicInfo | undefined = undefined;
   let preShow: string | undefined = undefined;
   let shiharaiSelect: "shaho"| "kokuho" = "shaho";
+  let henreiData: string = "";
 
   initDate();
   initClinicInfo();
@@ -96,6 +97,29 @@
     alert(s);
   }
 
+  function doImportHenrei() {
+    const items: string[][] = [];
+    let curr: string[] = [];
+    function flush() {
+      if( curr.length > 0 ){
+        items.push(curr);
+        curr = [];
+      }
+    }
+    for(let line of henreiData.split(/\r?\n/)) {
+      console.log(line);
+      if( line === "" ) {
+        continue;
+      }
+      if( line.startsWith("RE") ){
+        flush();
+      }
+      curr.push(line);
+    }
+    flush();
+    console.log(items);
+  }
+
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
@@ -110,6 +134,11 @@
       <a href="javascript:void(0)" on:click={doListKouhi}>公費リスト</a>
     </div>
   </ServiceHeader>
+  <div class="area henrei">
+    <div>返戻</div>
+    <textarea bind:value={henreiData}/>
+    <button on:click={doImportHenrei}>返戻取込</button>
+  </div>
   {#if preShow !== undefined}
   <pre class="show">{preShow}</pre>
   {/if}
@@ -126,6 +155,15 @@
 
   input[type=radio] {
     width: auto;
+  }
+
+  .area {
+    margin: 10px 0;
+  }
+
+  .area.henrei textarea {
+    width: 60ch;
+    height: 10ch;
   }
 
 </style>
