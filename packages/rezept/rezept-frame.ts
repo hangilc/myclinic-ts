@@ -10,7 +10,7 @@ import { ClinicInfo, HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, Rezept
 import { Combiner } from "./tekiyou-item";
 import { TensuuCollector } from "./tensuu-collector";
 
-interface PatientUnit {
+export interface PatientUnit {
   getRows(serial: number): string[];
   hasHoken(): boolean ;
   getKouhiListLength(): number;

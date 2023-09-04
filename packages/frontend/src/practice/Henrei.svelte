@@ -93,26 +93,6 @@
     downloadLink.download = fixedFileName;
   }
 
-  function rezeptSouten(rows: string[]): number {
-    return rows.reduce((prev, ele) => {
-      if (
-        ele.startsWith("SI") ||
-        ele.startsWith("IY") ||
-        ele.startsWith("TO")
-      ) {
-        let values = ele.split(",");
-        let tenValue = values[5];
-        if (tenValue === "") {
-          return prev;
-        }
-        let ten = parseInt(tenValue);
-        let count = parseInt(values[6]);
-        return prev + ten * count;
-      } else {
-        return prev;
-      }
-    }, 0);
-  }
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
