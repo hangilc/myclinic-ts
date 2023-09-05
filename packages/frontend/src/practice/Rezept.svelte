@@ -53,7 +53,7 @@
     }
     const visitsMap = await loadVisits(year, month);
     // // DEBUG
-    // visitsMap.kokuho = visitsMap.kokuho.filter(visits => {
+    // visitsMap.shaho = visitsMap.shaho.filter(visits => {
     //   if( visits[0].patientId === 7438 ){
     //     return true;
     //   } else {
@@ -65,15 +65,6 @@
     const units: RezeptUnit[] = await Promise.all(
       visitsList.map((visits) => cvtVisitsToUnit(visits))
     );
-    // const arg: CreateRezeptArg = {
-    //   seikyuuSaki: shiharaiSelect,
-    //   year,
-    //   month,
-    //   clinicInfo,
-    //   units,
-    // }
-    // console.log("arg", arg);
-    // return createRezept(arg);
     const frame = new RezeptFrame(shiharaiSelect, year, month, clinicInfo);
     for (const unit of units) {
       const patientUnit = rezeptUnitToPatientUnit(unit, year, month);
@@ -141,6 +132,18 @@
     return items;
   }
 
+  function modifyHenreiSerial(serial: number, rows: string[]): string[] {
+    return rows.map(row => {
+      if( row.startsWith("RE") ){
+        const values = row.split(",");
+        values[1] = serial.toString();
+        return values.join(",");
+      } else {
+        return row;
+      }
+    });
+  }
+
   function henreiToPatientUnit(henrei: string[]): PatientUnit {
     let hokensha: string | undefined = undefined;
     let kouhiList: string[] = [];
@@ -166,8 +169,8 @@
       }
     }
     return {
-      getRows(): string[] {
-        return henrei;
+      getRows(serial: number): string[] {
+        return modifyHenreiSerial(serial, henrei);
       },
       hasHoken(): boolean {
         return hokensha !== undefined;
