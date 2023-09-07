@@ -24,3 +24,12 @@
         > npm run cy:run -w packages/frontend -- --component
        or run in brwoser
         > npm run cy;open -w packages/frontend
+
+* 単純胸部Ｘ線
+  * 単純撮影（アナログ撮影）
+    memo 
+      {"amount": 1, "comments": [{"code": 820181220, "text": ""}]}
+  * 単純撮影（イ）の写真診断
+    memo
+      {"amount": 1}
+      
