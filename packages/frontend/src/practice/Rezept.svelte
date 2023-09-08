@@ -5,18 +5,9 @@
   import { listKouhi } from "./list-kouhi";
   import type { PatientUnit, RezeptUnit } from "myclinic-rezept";
   import {
-    createRezept,
     RezeptFrame,
-    type CreateRezeptArg,
     rezeptUnitToPatientUnit,
   } from "myclinic-rezept";
-  import type {
-    Hokensha,
-    RezeptDisease,
-    RezeptKouhi,
-    RezeptVisit,
-  } from "myclinic-rezept/rezept-types";
-  import type { ShotokuKubunCode } from "myclinic-rezept/codes";
   import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
 
   export let isVisible: boolean;

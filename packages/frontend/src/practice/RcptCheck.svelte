@@ -1,9 +1,13 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import { pad } from "@/lib/pad";
+  import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
+  import type { Visit } from "myclinic-model";
 
   export let isVisible = false;
   let shinryouYearMonth: string = defaultShinryouYearMonth();
+  let patientTotal = 0;
+  let current = 0;
 
   function defaultShinryouYearMonth(): string {
     let now = new Date();
@@ -16,7 +20,26 @@
     return `${y}${m}`;
   }
 
-  async function doStart() {}
+  function getYear(): number {
+    return parseInt(shinryouYearMonth.substring(0, 4));
+  }
+
+  function getMonth(): number {
+    return parseInt(shinryouYearMonth.substring(4, 6));
+  }
+
+  async function doStart() {
+    const year = getYear();
+    const month = getMonth();
+    const visitMap = await loadVisits(year, month);
+    const visitsList: Visit[][] = [...visitMap.shaho, ...visitMap.kokuho];
+    current = 0;
+    patientTotal = visitsList.length;
+    for(const visits of visitsList) {
+      current += 1;
+      const u = await cvtVisitsToUnit(visits);
+    }
+  }
 </script>
 
 <div style:display={isVisible ? "" : "none"} class="wrapper">
@@ -26,6 +49,11 @@
   </div>
   <div>
     <button on:click={doStart}>スタート</button>
+  </div>
+  <div>
+    {#if patientTotal > 0}
+      {current} / {patientTotal}
+    {/if}
   </div>
 </div>
 
