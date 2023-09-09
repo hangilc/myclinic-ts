@@ -2,9 +2,9 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import { pad } from "@/lib/pad";
-  import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
+  import { loadVisits } from "@/lib/rezept-adapter";
   import type { Patient, Visit, VisitEx } from "myclinic-model";
-  import { checkForRcpt, type CheckError } from "./rcpt-check/check";
+  import { checkForRcpt, type CheckError, type CheckResult } from "./rcpt-check/check";
 
   export let isVisible = false;
   let shinryouYearMonth: string = defaultShinryouYearMonth();
@@ -50,6 +50,36 @@
       const errs = checkForRcpt(patientVisits);
       if( errs !== "ok" && errs !== "no-visit" ){
         errors = [...errors, { patient: patientVisits[0].patient, checkErrors: errs}];
+        const patient = patientVisits[0].patient;
+      }
+    }
+  }
+
+  async function recheck(patientId: number): Promise<CheckResult> {
+    const visitIds = await api.listVisitIdByPatientAndMonth(patientId, getYear(), getMonth());
+    const visits = await Promise.all(visitIds.map(async visitId => await api.getVisitEx(visitId)));
+    return checkForRcpt(visits);
+  }
+
+  async function doFix(fix: (() => Promise<boolean>) | undefined, patientId: number) {
+    if( !fix ){
+      return;
+    }
+    const ok = await fix();
+    if( ok ){
+      const errs = await recheck(patientId);
+      if( errs === "ok" ){
+        errors = errors.filter(e => e.patient.patientId !== patientId);
+      } else if( errs === "no-visit" ){
+        alert("No visits");
+      } else {
+        errors = errors.map(e => {
+          if( e.patient.patientId === patientId ){
+            return { patient: e.patient, checkErrors: errs };
+          } else {
+            return e;
+          }
+        })
       }
     }
   }
@@ -70,13 +100,14 @@
   </div>
   <div>
     {#each errors as error (error.patient.patientId)}
-      <div>
+      <div class="error-wrapper">
         <div>({error.patient.patientId}) {error.patient.fullName()}</div>
-        {#each error.checkErrors as ce (ce.code)}
-          <div>
-            <div>{ce.code}</div>
+        {#each error.checkErrors as ce}
+          <div class="error-code-wrapper">
+            <div class="error-code">{ce.code}</div>
+            {#if ce.hint}<div class="hint-wrapper">| {ce.hint}</div>{/if}
             {#if ce.fix}
-            <div><button>Fix</button></div>
+            <div class="fix-wrapper"><button on:click={() => doFix(ce.fix, error.patient.patientId)}>Fix</button></div>
             {/if}
           </div>
         {/each}
@@ -88,5 +119,29 @@
 <style>
   .wrapper > div {
     margin-bottom: 10px;
+  }
+
+  .error-wrapper {
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 3px;
+    margin-bottom: 6px;
+  }
+
+  .error-code-wrapper + .error-code-wrapper{
+    margin-top: 6px;
+  }
+
+  .error-wrapper .error-code {
+    display: inline-block;
+  }
+
+  .error-wrapper .hint-wrapper {
+    display: inline-block;
+  }
+
+  .error-wrapper .fix-wrapper {
+    display: inline-block;
+    margin-left: 10px;
   }
 </style>

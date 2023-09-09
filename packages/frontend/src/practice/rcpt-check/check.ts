@@ -3,7 +3,7 @@ import { isShohousen, parseShohousen } from "@/lib/shohousen/parse-shohousen";
 import type { VisitEx } from "myclinic-model";
 
 export type Fixer = () => Promise<boolean>;
-export type CheckError = { code: string, fix?: Fixer };
+export type CheckError = { code: string, fix?: Fixer, hint?: string };
 export type CheckResult = "ok" | "no-visit" | CheckError[];
 
 export function checkForRcpt(visits: VisitEx[]): CheckResult {
@@ -32,6 +32,7 @@ function checkGeneric1(visit: VisitEx): CheckError | undefined {
       if( shohousen.totalDrugs === 1 ){
         return {
           code: "一般名処方加算１（１品目）",
+          hint: visit.visitedAt.toString(),
           fix: async () => {
             try {
               const shinryou = visit.shinryouList[idx];
