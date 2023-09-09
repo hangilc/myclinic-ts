@@ -835,6 +835,15 @@ export class ConductShinryouEx {
     return ConductShinryouMemo.parseJson(this.memo).comments ?? [];
   }
 
+  asConductShinryou(): ConductShinryou {
+    return new ConductShinryou(
+      this.conductShinryouId,
+      this.conductId,
+      this.shinryoucode,
+      this.memo
+    );
+  }
+
   static cast(arg: any): ConductShinryouEx {
     return new ConductShinryouEx(
       arg.conductShinryouId,
