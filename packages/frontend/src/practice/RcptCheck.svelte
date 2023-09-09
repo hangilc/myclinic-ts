@@ -3,7 +3,7 @@
   import api from "@/lib/api";
   import { pad } from "@/lib/pad";
   import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
-  import type { Visit, VisitEx } from "myclinic-model";
+  import type { Patient, Visit, VisitEx } from "myclinic-model";
   import { checkForRcpt, type CheckError } from "./rcpt-check/check";
 
   export let isVisible = false;
@@ -11,7 +11,7 @@
   let patientTotal = 0;
   let current = 0;
   let serial = 1;
-  let errors: [number, CheckError][] = [];
+  let errors: { patient: Patient, checkErrors: CheckError[] }[] = [];
 
   function defaultShinryouYearMonth(): string {
     let now = new Date();
@@ -49,8 +49,7 @@
       let patientVisits: VisitEx[] = await Promise.all(visits.map(async visit => await api.getVisitEx(visit.visitId)));
       const errs = checkForRcpt(patientVisits);
       if( errs !== "ok" && errs !== "no-visit" ){
-        const es: [number, CheckError][] = errs.map(e => [serial++, e]);
-        errors = [...errors, ...es];
+        errors = [...errors, { patient: patientVisits[0].patient, checkErrors: errs}];
       }
     }
   }
@@ -70,18 +69,17 @@
     {/if}
   </div>
   <div>
-    {#each errors as error (error[0])}
-      {@const checkError = error[1]}
-      {@const code = checkError[0]}
-      {@const visit = checkError[1]}
-      {@const patient = visit.patient}
+    {#each errors as error (error.patient.patientId)}
       <div>
-        {code}: ({patient.patientId}) {patient.fullName()}
-        {#if code === "一般名処方加算１（１品目）"}
+        <div>({error.patient.patientId}) {error.patient.fullName()}</div>
+        {#each error.checkErrors as ce (ce.code)}
           <div>
-            <button on:click={}>Fix</button>
+            <div>{ce.code}</div>
+            {#if ce.fix}
+            <div><button>Fix</button></div>
+            {/if}
           </div>
-        {/if}
+        {/each}
       </div>
     {/each}
   </div>
