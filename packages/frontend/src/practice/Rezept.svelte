@@ -8,7 +8,7 @@
     RezeptFrame,
     rezeptUnitToPatientUnit,
   } from "myclinic-rezept";
-  import { cvtVisitsToUnit, loadVisits } from "@/lib/rezept-adapter";
+  import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient } from "@/lib/rezept-adapter";
 
   export let isVisible: boolean;
   let year: number;
@@ -17,6 +17,7 @@
   let preShow: string | undefined = undefined;
   let shiharaiSelect: "shaho" | "kokuho" = "shaho";
   let henreiData: string = "";
+  let patientFilter: string = "";
 
   initDate();
   initClinicInfo();
@@ -42,16 +43,13 @@
       console.error("Cannot get ClinicInfo");
       return "";
     }
-    const visitsMap = await loadVisits(year, month);
-    // // DEBUG
-    // visitsMap.shaho = visitsMap.shaho.filter(visits => {
-    //   if( visits[0].patientId === 7438 ){
-    //     return true;
-    //   } else {
-    //     return false;
-    //   }
-    // })
-    // // end of DEBUG
+    let visitsMap: { shaho: Visit[][], kokuho: Visit[][]};
+    if( patientFilter !== "" ){
+      const patientId = parseInt(patientFilter);
+      visitsMap = await loadVisitsForPatient(year, month, patientId);
+    } else {
+      visitsMap = await loadVisits(year, month);
+    }
     const visitsList = visitsMap[shiharaiSelect];
     const units: RezeptUnit[] = await Promise.all(
       visitsList.map((visits) => cvtVisitsToUnit(visits))
@@ -188,7 +186,10 @@
       <a href="javascript:void(0)" on:click={doListKouhi}>公費リスト</a>
     </div>
   </ServiceHeader>
-  <div class="area henrei">
+  <div>
+    Restrict <input type="text" placeholder="患者番号" bind:value={patientFilter}/>
+  </div>
+<div class="area henrei">
     <div>返戻</div>
     <textarea bind:value={henreiData} />
     <!-- <button on:click={doImportHenrei}>返戻取込</button> -->

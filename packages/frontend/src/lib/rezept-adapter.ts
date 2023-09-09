@@ -26,11 +26,10 @@ function calcKouhiOrderMap(): Record<number, number> {
   return map;
 }
 
-export async function loadVisits(year: number, month: number): Promise<{
+async function doLoadVisits(visits: Visit[]): Promise<{
   shaho: Visit[][];
   kokuho: Visit[][];
 }> {
-  const visits = await listVisitForRezept(year, month);
   const patientVisitsMap = classifyByPatient(visits);
   const shahoList: Visit[][] = [];
   const kokuhoList: Visit[][] = [];
@@ -44,6 +43,24 @@ export async function loadVisits(year: number, month: number): Promise<{
     shaho: shahoList,
     kokuho: kokuhoList,
   }
+
+}
+
+export async function loadVisits(year: number, month: number): Promise<{
+  shaho: Visit[][];
+  kokuho: Visit[][];
+}> {
+  const visits = await listVisitForRezept(year, month);
+  return await doLoadVisits(visits);
+}
+
+export async function loadVisitsForPatient(year: number, month: number, patientId: number): Promise<{
+  shaho: Visit[][];
+  kokuho: Visit[][];
+}> {
+  const visitIds = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+  const visits = await Promise.all(visitIds.map(visitId => api.getVisit(visitId)));
+  return doLoadVisits(visits);
 }
 
 function hokenOfShinryou(shinryou: ShinryouEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
@@ -251,7 +268,7 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
   const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);
-  if( hokensha ){
+  if (hokensha) {
     hokensha.edaban = await resolveEdaban(modelVisits);
   }
   const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => ({
@@ -286,9 +303,9 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   }
 }
 
-export async function cvtModelVisitsToRezeptVisits(visits: VisitEx[], hokenCollector: HokenCollector): 
+export async function cvtModelVisitsToRezeptVisits(visits: VisitEx[], hokenCollector: HokenCollector):
   Promise<RezeptVisit[]> {
-    return await Promise.all(visits.map(visit => cvtModelVisitToRezeptVisit(visit, hokenCollector)));
+  return await Promise.all(visits.map(visit => cvtModelVisitToRezeptVisit(visit, hokenCollector)));
 }
 
 function commentsOfVisit(visit: VisitEx): RezeptComment[] {
