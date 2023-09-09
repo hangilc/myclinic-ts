@@ -7,12 +7,13 @@
   import Popup from "@/lib/Popup.svelte";
   import { resolveAppointKind } from "./appoint-kind";
   import type { ColumnData } from "./column-data";
-  import type { AppointTime } from "myclinic-model";
+  import type { AppEvent, AppointTime } from "myclinic-model";
   import BindAppointTimesDialog from "./BindAppointTimesDialog.svelte";
   import api from "@/lib/api";
   import SplitAppointTimeDialog from "./SplitAppointTimeDialog.svelte";
   import { confirm } from "@/lib/confirm-call";
   import OnshiConfirmForDate from "./OnshiConfirmForDate.svelte";
+  import EventHistoryDialog from "./EventHistoryDialog.svelte";
 
   export let data: AppointTimeData;
   export let column: ColumnData;
@@ -64,7 +65,7 @@
             await api.updateAppointTime(a);
             Object.assign(appointTimeTemplate, {
               kind: a.kind,
-              capacity: a.capacity
+              capacity: a.capacity,
             });
           },
         },
@@ -120,13 +121,13 @@
   function doOnshiKakunin(destroy: () => void): void {
     const date = column.date;
     destroy();
-    const d: OnshiConfirmForDate =new OnshiConfirmForDate({
+    const d: OnshiConfirmForDate = new OnshiConfirmForDate({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         date,
-        siblings: [data]
-      }
+        siblings: [data],
+      },
     });
   }
 
@@ -134,11 +135,9 @@
     event: MouseEvent,
     trigger: (e: MouseEvent) => void
   ): void {
-    if (isAdmin) {
-      event.preventDefault();
-      console.log(event.clientY);
-      trigger(event);
-    }
+    event.preventDefault();
+    console.log(event.clientY);
+    trigger(event);
   }
 
   function capacityRep(data: AppointTimeData): string {
@@ -157,12 +156,28 @@
     const rep = resolveAppointKind(data.appointTime.kind)?.label;
     return rep ? `[${rep}]` : "";
   }
+
+  async function doHistoryDialog(destroy: () => void) {
+    const appointTimeId = data.appointTime.appointTimeId;
+    const hist: AppEvent[] = await api.appointHistoryAt(appointTimeId);
+    const map: Record<number, AppointTime> = { [appointTimeId]: data.appointTime };
+    destroy();
+    const d: EventHistoryDialog = new EventHistoryDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        events: hist,
+        appointTimeMap: map,
+      }
+    })
+  }
 </script>
 
-<div class={`top ${data.appointTime.kind} ${vacant(data)}`}
+<div
+  class={`top ${data.appointTime.kind} ${vacant(data)}`}
   data-cy="appoint-time-block"
   data-is-vacant={vacant(data) ? "" : undefined}
-  >
+>
   <Popup let:triggerClick let:destroy>
     <div
       class="time-box"
@@ -170,12 +185,15 @@
       on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
     >
       <div>
-        <span data-cy="time-disp">{timeText(data)}</span> <span
-          data-cy="capacity-disp"
-        >{capacityRep(data)}</span></div>
+        <span data-cy="time-disp">{timeText(data)}</span>
+        <span data-cy="capacity-disp">{capacityRep(data)}</span>
+      </div>
       <div data-cy="kind-disp">{appointKindRep(data)}</div>
     </div>
     <div slot="menu" class="context-menu">
+      <a href="javascript:void(0)" on:click={() => doHistoryDialog(destroy)}
+        >変更履歴</a
+      >
       {#if isAdmin}
         <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}
           >編集</a
@@ -187,7 +205,9 @@
           >分割</a
         >
         <a href="javascript:void(0)" on:click={() => doDelete(destroy)}>削除</a>
-        <a href="javascript:void(0)" on:click={() => doOnshiKakunin(destroy)}>資格確認</a>
+        <a href="javascript:void(0)" on:click={() => doOnshiKakunin(destroy)}
+          >資格確認</a
+        >
       {/if}
     </div>
   </Popup>

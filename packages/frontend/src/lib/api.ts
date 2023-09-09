@@ -1328,6 +1328,14 @@ export default {
     );
   },
 
+  appointHistoryAt(appointTimeId: number): Promise<m.AppEvent[]> {
+    return get(
+      "appoint-history-at",
+      { "appoint-time-id": appointTimeId.toString() },
+      castList(m.AppEvent.cast)
+    )
+  },
+
   getOnshi(visitId: number): Promise<m.Onshi> {
     return get("get-onshi", { "visit-id": visitId.toString() }, m.Onshi.cast);
   },
