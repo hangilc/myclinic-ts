@@ -77,6 +77,11 @@
       {@const patient = visit.patient}
       <div>
         {code}: ({patient.patientId}) {patient.fullName()}
+        {#if code === "一般名処方加算１（１品目）"}
+          <div>
+            <button on:click={}>Fix</button>
+          </div>
+        {/if}
       </div>
     {/each}
   </div>

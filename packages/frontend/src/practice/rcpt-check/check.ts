@@ -26,11 +26,23 @@ function checkGeneric1(visit: VisitEx): ["一般名処方加算１（１品目�
     let texts = visit.texts.filter(t => isShohousen(t.content));
     if( texts.length === 1 ){
       const shohousen = parseShohousen(texts[0].content);
-      console.log("shohousen", shohousen);
       if( shohousen.totalDrugs === 1 ){
         return ["一般名処方加算１（１品目）", visit];
       }
     }
   }
   return undefined;
+}
+
+async function fixGeneric1(visit: VisitEx) {
+  const idx = visit.shinryouList.findIndex(s => s.shinryoucode === 120004270);
+  if( idx >= 0 ){
+    let texts = visit.texts.filter(t => isShohousen(t.content));
+    if( texts.length === 1 ){
+      const shohousen = parseShohousen(texts[0].content);
+      if( shohousen.totalDrugs === 1 ){
+        
+      }
+    }
+  }
 }
