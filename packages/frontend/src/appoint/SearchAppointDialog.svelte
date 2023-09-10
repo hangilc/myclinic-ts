@@ -1,15 +1,16 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  // import { pad } from "@/lib/pad";
   import { setFocus } from "@/lib/set-focus";
   import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
   import type { Appoint, AppointTime } from "myclinic-model";
-  import { formatDate } from "./helper";
+  import * as kanjidate from "kanjidate";
+  import { resolveAppointKind } from "./appoint-kind";
 
   export let destroy: () => void;
   let result: [Appoint, AppointTime][] = [];
   let searchValue: string = "";
+  let curYear = (new Date()).getFullYear();
 
   async function doSearch() {
     const t = searchValue.trim();
@@ -33,6 +34,29 @@
       }
     }
   }
+
+  function formatDate(date: string): string {
+    const y = new Date(date).getFullYear();
+    if( y === curYear ){
+      return kanjidate.format("{M}月{D}日（{W}）", date);
+    } else {
+      return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+    }
+  }
+
+  function memoPart(a: Appoint, at: AppointTime): string {
+    const parts: string[] = [];
+    if( a.memoString ){
+      parts.push(a.memoString);
+    }
+    parts.push(...a.tags);
+    const kind = resolveAppointKind(at.kind);
+    if( kind ){
+      parts.push(kind.label);
+    }
+    return parts.join("、");
+  }
+
 </script>
 
 <Dialog {destroy} title="予約検索">
@@ -44,11 +68,13 @@
     {#each result as r (r[0].appointId)}
       {@const appoint=r[0]}
       {@const appointTime=r[1]}
+      {@const memo=memoPart(appoint, appointTime)}
       <div class="item">
         {appoint.patientName}
         {#if appoint.patientId > 0}
         ({appoint.patientId})
         {/if}
+        {#if memo}（{memo}）{/if}
         {formatDate(appointTime.date)}
         {appointTime.fromTime} - {appointTime.untilTime}
       </div>

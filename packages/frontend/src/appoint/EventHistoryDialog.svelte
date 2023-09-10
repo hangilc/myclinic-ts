@@ -47,6 +47,7 @@
         {@const at = appointTimeMap[a.appointTimeId]}
         <div class="item">
           【{kindRep(e.kind)}】
+          {#if a.memoString}（{a.memoString}） {/if}
           {formatDate(at.date)}
           {at.fromTime} - {at.untilTime}
           <span class="patient-name">{a.patientName}</span>
