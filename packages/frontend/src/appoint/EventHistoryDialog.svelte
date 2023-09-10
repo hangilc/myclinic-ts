@@ -1,19 +1,23 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import { Appoint, AppointTime, type AppEvent } from "myclinic-model";
-  import { formatDate } from "./helper";
   import * as kanjidate from "kanjidate";
 
   export let destroy: () => void;
   export let events: AppEvent[];
   export let appointTimeMap: Record<number, AppointTime>;
+  let curYear = (new Date()).getFullYear();
 
   function kindRep(kind: string): string {
-    switch(kind) {
-      case "created": return "作成";
-      case "updated": return "変更";
-      case "deleted": return "削除";
-      default: return kind;
+    switch (kind) {
+      case "created":
+        return "作成";
+      case "updated":
+        return "変更";
+      case "deleted":
+        return "削除";
+      default:
+        return kind;
     }
   }
 
@@ -24,28 +28,37 @@
   function formatCreatedAt(at: string): string {
     return kanjidate.format(kanjidate.f9, at);
   }
+
+  function formatDate(date: string): string {
+    const y = new Date(date).getFullYear();
+    if( y === curYear ){
+      return kanjidate.format("{M}月{D}日（{W}）", date);
+    } else {
+      return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+    }
+  }
 </script>
 
 <Dialog {destroy} title="変更履歴">
   <div class="result">
     {#each events as e (e.appEventId)}
       {#if e.model === "appoint"}
-        {@const a=Appoint.cast(JSON.parse(e.data))}
-        {@const at=appointTimeMap[a.appointTimeId]}
+        {@const a = Appoint.cast(JSON.parse(e.data))}
+        {@const at = appointTimeMap[a.appointTimeId]}
         <div class="item">
           【{kindRep(e.kind)}】
           {formatDate(at.date)}
           {at.fromTime} - {at.untilTime}
           <span class="patient-name">{a.patientName}</span>
           {#if a.patientId > 0}
-          ({a.patientId})
+            ({a.patientId})
           {/if}
           <span>{formatMemo(a.memo)}</span>
           {#each a.tags as tag}
-          <span>{tag}</span>
+            <span>{tag}</span>
           {/each}
           ({formatCreatedAt(e.createdAt)})
-        </div> 
+        </div>
       {/if}
     {/each}
   </div>
