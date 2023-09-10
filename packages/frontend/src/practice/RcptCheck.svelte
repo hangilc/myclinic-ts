@@ -47,7 +47,7 @@
       }
       current += 1;
       let patientVisits: VisitEx[] = await Promise.all(visits.map(async visit => await api.getVisitEx(visit.visitId)));
-      const errs = checkForRcpt(patientVisits);
+      const errs = await checkForRcpt(patientVisits);
       if( errs !== "ok" && errs !== "no-visit" ){
         errors = [...errors, { patient: patientVisits[0].patient, checkErrors: errs}];
         const patient = patientVisits[0].patient;

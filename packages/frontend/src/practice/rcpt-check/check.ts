@@ -1,12 +1,13 @@
 import api from "@/lib/api";
 import { isShohousen, parseShohousen } from "@/lib/shohousen/parse-shohousen";
 import type { ConductShinryou, VisitEx } from "myclinic-model";
+import { checkOnshi } from "./check-onshi";
 
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
 export type CheckResult = "ok" | "no-visit" | CheckError[];
 
-export function checkForRcpt(visits: VisitEx[]): CheckResult {
+export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
   if (visits.length === 0) {
     return "no-visit";
   }
@@ -19,6 +20,7 @@ export function checkForRcpt(visits: VisitEx[]): CheckResult {
   visits.forEach(visit => chk(checkGeneric1(visit)));
   visits.forEach(visit => chk(checkXpSatsuei(visit)));
   visits.forEach(visit => chk(checkXpShindan(visit)));
+  (await Promise.all(visits.map(visit => checkOnshi(visit)))).forEach(e => chk(e));
   return errs.length === 0 ? "ok" : errs;
 }
 
