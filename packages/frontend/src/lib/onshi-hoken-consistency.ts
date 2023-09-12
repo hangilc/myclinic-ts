@@ -164,22 +164,22 @@ export function checkOnshiShahokokuhoConsistency(
       ));
     }
   }
-  if (r.personalFamilyClassification != undefined) {
-    const honnin = r.personalFamilyClassification;
-    if (honnin === "本人") {
-      if (shahokokuho.honninStore === 0) {
-        errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
-          shahokokuho.honninStore, 1
-        ));
-      }
-    } else {
-      if (shahokokuho.honninStore !== 0) {
-        errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
-          shahokokuho.honninStore, 0
-        ));
-      }
-    }
-  }
+  // if (r.personalFamilyClassification != undefined) {
+  //   const honnin = r.personalFamilyClassification;
+  //   if (honnin === "本人") {
+  //     if (shahokokuho.honninStore === 0) {
+  //       errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
+  //         shahokokuho.honninStore, 1
+  //       ));
+  //     }
+  //   } else {
+  //     if (shahokokuho.honninStore !== 0) {
+  //       errors.push(new OnshiHokenInconsistency.InconsistentHonninKazoku(
+  //         shahokokuho.honninStore, 0
+  //       ));
+  //     }
+  //   }
+  // }
   return errors;
 }
 
