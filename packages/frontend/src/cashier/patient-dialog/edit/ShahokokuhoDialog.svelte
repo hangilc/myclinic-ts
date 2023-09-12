@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import type { Patient, Shahokokuho } from "myclinic-model";
+  import { Shahokokuho, type Patient } from "myclinic-model";
   import ShahokokuhoDialogContent from "./ShahokokuhoDialogContent.svelte";
   import { countInvalidUsage } from "@/lib/hoken-check";
 
@@ -12,7 +12,6 @@
   export let onEntered: (entered: Shahokokuho) => void = (_) => {};
   export let onUpdated: (updated: Shahokokuho) => void = (_) => {};
   let prevInvalids: number = 0;
-  let error: string = "";
 
   checkPrevInvalids();
 
@@ -39,25 +38,10 @@
           if( invalids > prevInvalids ){
             return ["有効期間外の使用が発生するので、変更できません。"];
           }
-          // let errs = await checkHokenInterval(shahokokuho);
-          // errs = errs.filter((e) => {
-          //   if (e instanceof Used) {
-          //     return true;
-          //   } else {
-          //     return false;
-          //   }
-          // });
-          // if (errs.length > 0) {
-          //   return errs.map((e) => {
-          //     if (e instanceof OverlapExists) {
-          //       return "有効期間が重なる保険が存在するようになるので、変更できません。";
-          //     } else if (e instanceof Used) {
-          //       return "使用されている診察があるので、変更できません。";
-          //     } else {
-          //       return "Shahokokuho error";
-          //     }
-          //   });
-          // }
+          const usage = await api.countShahokokuhoUsage(init.shahokokuhoId);
+          if( usage > 0 && !Shahokokuho.isContentEqual(init, shahokokuho) ){
+            return ["この保険はすでに使われているので、内容の変更ができません。"];
+          }
           await api.updateShahokokuho(shahokokuho);
           onUpdated(shahokokuho);
           return [];
@@ -70,9 +54,6 @@
 </script>
 
 <Dialog {destroy} {title}>
-  {#if error}
-    <div class="error">{error}</div>
-  {/if}
   <ShahokokuhoDialogContent
     {init}
     {patient}
@@ -81,9 +62,3 @@
   />
 </Dialog>
 
-<style>
-  .error {
-    margin: 10px 0;
-    color: red;
-  }
-</style>

@@ -375,6 +375,21 @@ export class Shahokokuho {
     return isValidAt(this.validFrom, this.validUpto, at);
   }
 
+  static isContentEqual(a: Shahokokuho, b: Shahokokuho): boolean {
+    return a.shahokokuhoId === b.shahokokuhoId &&
+      a.patientId === b.patientId &&
+      a.hokenshaBangou === b.hokenshaBangou &&
+      a.hihokenshaKigou === b.hihokenshaKigou &&
+      a.hihokenshaBangou === b.hihokenshaBangou &&
+      a.honninStore === b.honninStore &&
+      a.koureiStore === b.koureiStore &&
+      a.edaban === b.edaban;
+  }
+
+  static isValidTermEqual(a: Shahokokuho, b: Shahokokuho): boolean {
+    return a.validFrom === b.validFrom && a.validUpto === b.validUpto;
+  }
+
   static cast(arg: any): Shahokokuho {
     return new Shahokokuho(
       arg.shahokokuhoId,
@@ -434,6 +449,14 @@ export class Koukikourei {
     return isValidAt(this.validFrom, this.validUpto, at);
   }
 
+  static isContentEqual(a: Koukikourei, b: Koukikourei): boolean {
+    return a.koukikoureiId === b.koukikoureiId &&
+    a.patientId === b.patientId &&
+    a.hokenshaBangou === b.hokenshaBangou &&
+    a.hihokenshaBangou === b.hihokenshaBangou &&
+    a.futanWari === b.futanWari;
+  }
+
   static cast(arg: any): Koukikourei {
     return new Koukikourei(
       arg.koukikoureiId,
@@ -469,6 +492,13 @@ export class Kouhi {
 
   isValidAt(at: Date | string): boolean {
     return isValidAt(this.validFrom, this.validUpto, at);
+  }
+
+  static isContentEqual(a: Kouhi, b: Kouhi): boolean {
+    return a.kouhiId === b.kouhiId &&
+    a.futansha === b.futansha &&
+    a.jukyuusha === b.jukyuusha &&
+    a.patientId === b.patientId;
   }
 
   static cast(arg: any): Kouhi {

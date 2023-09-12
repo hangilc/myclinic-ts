@@ -1,9 +1,14 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import type { Patient, Koukikourei } from "myclinic-model";
+  import { type Patient, Koukikourei } from "myclinic-model";
   import KoukikoureiDialogContent from "./KoukikoureiDialogContent.svelte";
-  import { OverlapExists, Used, checkHokenInterval } from "@/lib/hoken-check";
+  import {
+    OverlapExists,
+    Used,
+    checkHokenInterval,
+    countInvalidUsage,
+  } from "@/lib/hoken-check";
 
   export let destroy: () => void;
   export let title: string;
@@ -11,6 +16,15 @@
   export let patient: Patient;
   export let onEntered: (entered: Koukikourei) => void = (_) => {};
   export let onUpdated: (entered: Koukikourei) => void = (_) => {};
+  let prevInvalids = 0;
+
+  checkPrevInvalids();
+
+  async function checkPrevInvalids() {
+    if (init) {
+      prevInvalids = await countInvalidUsage(init);
+    }
+  }
 
   async function doEnter(koukikourei: Koukikourei): Promise<string[]> {
     if (init === null) {
@@ -24,24 +38,13 @@
         if (koukikourei.koukikoureiId <= 0) {
           return ["Invalid koukikoureiId"];
         } else {
-          let errs = await checkHokenInterval(koukikourei);
-          errs = errs.filter((e) => {
-            if (e instanceof Used) {
-              return true;
-            } else {
-              return false;
-            }
-          });
-         if (errs.length > 0) {
-            return errs.map((e) => {
-              if (e instanceof OverlapExists) {
-                return "有効期間が重なる保険が存在するようになるので、変更できません。";
-              } else if (e instanceof Used) {
-                return "使用されている診察があるので、変更できません。";
-              } else {
-                return "Shahokokuho error";
-              }
-            });
+          const invalids = await countInvalidUsage(koukikourei);
+          if( invalids > prevInvalids ){
+            return ["有効期間外の使用が発生するので、変更できません。"];
+          }
+          const usage = await api.countKoukikoureiUsage(init.koukikoureiId);
+          if( usage > 0 && !Koukikourei.isContentEqual(init, koukikourei) ){
+            return ["この保険はすでに使われているので、内容の変更ができません。"];
           }
           await api.updateKoukikourei(koukikourei);
           onUpdated(koukikourei);
