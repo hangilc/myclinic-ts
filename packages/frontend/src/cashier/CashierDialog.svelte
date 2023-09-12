@@ -21,6 +21,9 @@
   export let destroy: () => void;
   export let receiptHook: (data: ReceiptDrawerData) => void = (_) => {};
 
+  let showPrevPaymentList = false;
+  let prevPayments: Payment[] = [];
+
   function patientLine(p: Patient): string {
     return `(${p.patientId}) ${p.fullName()} ${p.fullYomi()}`;
   }
@@ -59,6 +62,16 @@
         ops,
       },
     });
+  }
+
+  async function doShowPrevPayment() {
+    prevPayments = await api.listPayment(visit.visitId);
+    showPrevPaymentList = true;
+  }
+
+  function doHidePrevPayment() {
+    showPrevPaymentList = false;
+    prevPayments = [];
   }
 </script>
 
@@ -103,8 +116,60 @@
     {#if visit.lastPayment}
       {@const amount = visit.lastPayment?.amount ?? 0}
       <div class="last-payment">
-        前回受領額：{amount.toLocaleString()}円
-        今回差額：{(charge.charge - amount).toLocaleString()}円
+        前回受領額：{amount.toLocaleString()}円 今回差額：{(
+          charge.charge - amount
+        ).toLocaleString()}円
+      </div>
+    {/if}
+  </div>
+  <div class="prev-payment-wrapper">
+    <div class="prev-payment-menu">
+      <div class="prev-payment-title">領収履歴</div>
+      {#if !showPrevPaymentList}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="gray"
+          width="16"
+          on:click={doShowPrevPayment}
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+          />
+        </svg>
+      {:else}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="gray"
+          width="16"
+          on:click={doHidePrevPayment}
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M4.5 15.75l7.5-7.5 7.5 7.5"
+          />
+        </svg>
+      {/if}
+    </div>
+    {#if showPrevPaymentList}
+      <div class="prev-payment-list">
+        {#if prevPayments.length > 0}
+          {#each prevPayments as pay}
+            <div>
+              {pay.paytime} {pay.amount.toLocaleString()}円
+            </div>
+          {/each}
+        {:else}
+          （なし）
+        {/if}
       </div>
     {/if}
   </div>
@@ -172,6 +237,24 @@
   .charge {
     color: blue;
     font-weight: bold;
+  }
+
+  .prev-payment-wrapper {
+    margin: 10px 0;
+  }
+
+  .prev-payment-menu {
+    display: flex;
+    align-content: center;
+  }
+
+  .prev-payment-menu .prev-payment-title {
+    display: inline-block;
+    margin-right: 6px;
+  }
+
+  .prev-payment-menu svg {
+    cursor: pointer;
   }
 
   .commands {

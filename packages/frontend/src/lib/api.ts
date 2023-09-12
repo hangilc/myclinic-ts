@@ -352,6 +352,10 @@ export default {
     return post("enter-payment", payment, {}, castBoolean);
   },
 
+  listPayment(visitId: number): Promise<m.Payment[]> {
+    return get("list-payment", { "visit-id": visitId.toString() }, castList(m.Payment.cast));
+  },
+
   shohousenDrawer(textId: number): Promise<DrawerOp[]> {
     return get(
       "shohousen-drawer",
