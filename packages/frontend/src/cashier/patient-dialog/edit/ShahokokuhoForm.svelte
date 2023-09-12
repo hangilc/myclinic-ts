@@ -23,7 +23,7 @@
   let edaban: string;
   let validateValidFrom: () => VResult<Date | null>;
   let validateValidUpto: () => VResult<Date | null>;
-  let honninStoreDiabled = false;
+  // let honninStoreDiabled = false;
   export function setData(data: Shahokokuho | null): void {
     updateValues(data);
   }
@@ -80,12 +80,12 @@
 
   function doHokenshaBangouChange(): void {
     dispatch("value-change");
-    if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
-      honninStore = 1;
-      honninStoreDiabled = true;
-    } else {
-      honninStoreDiabled = false;
-    }
+    // if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
+    //   honninStore = 1;
+    //   honninStoreDiabled = true;
+    // } else {
+    //   honninStoreDiabled = false;
+    // }
   }
 </script>
 
@@ -143,7 +143,6 @@
         value={h.code}
         on:change={doUserInput}
         data-cy="honnin-input"
-        disabled={honninStoreDiabled}
       />
       <label for={id}>{h.rep}</label>
     {/each}
