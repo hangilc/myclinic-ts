@@ -563,9 +563,8 @@ describe("FaceConfirmedWindow", () => {
       "POST",
       apiBase() + "/update-patient",
       (req) => {
-        const memo = JSON.parse(req.body.memo);
+        const memo = JSON.parse(JSON.parse(req.body).memo);
         expect(memo["onshi-name"]).equal("●橋　大地");
-        console.log(req.body);
         req.reply("true");
       }
     ).as("updatePatient");
@@ -588,7 +587,9 @@ describe("FaceConfirmedWindow", () => {
       cy.get("button").contains("患者選択").click();
     });
     dialogClose("患者確認");
-    cy.get("@updatePatient").should("be.calledOnce");
+    cy.wait("@updatePatient");
+    cy.get('[data-cy="resolved-patient-id"]').should("exist");
+    cy.get("button").contains("既存患者検索").should("not.exist");
   });
 
 });

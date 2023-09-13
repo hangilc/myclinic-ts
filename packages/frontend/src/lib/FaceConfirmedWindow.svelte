@@ -295,12 +295,13 @@
     return hokenshaBangouRep(hokenshaBangou);
   }
 
-  async function setOnshiName(patientId: number, name: string) {
+  async function setOnshiName(patientId: number, name: string): Promise<Patient> {
     const patient: Patient = await api.getPatient(patientId);
     const memo = patient.memoAsJson;
     memo["onshi-name"] = name;
     patient.memo = JSON.stringify(memo);
     await api.updatePatient(patient);
+    return patient;
   }
 
   function doSearchForPatient(r: ResultItem) {
@@ -318,8 +319,8 @@
                 patient,
                 onshiPatient,
                 onConfirmed: async () => {
-                  await setOnshiName(patient.patientId, onshiPatient.name);
-                  d.$destroy();
+                  let updated = await setOnshiName(patient.patientId, onshiPatient.name);
+                  await advanceWithPatient(updated, r);
                 },
                 onCancel: () => {
                   d.$destroy();
