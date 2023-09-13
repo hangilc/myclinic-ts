@@ -40,6 +40,8 @@
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import type { EventEmitter } from "./event-emitter";
+  import FaceConfirmedSearchPatientDialog from "./FaceConfirmedSearchPatientDialog.svelte";
+  import FaceConfirmedConfirmSelectPatient from "./FaceConfirmedConfirmSelectPatient.svelte";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -292,6 +294,45 @@
     }
     return hokenshaBangouRep(hokenshaBangou);
   }
+
+  async function setOnshiName(patientId: number, name: string) {
+    const patient: Patient = await api.getPatient(patientId);
+    const memo = patient.memoAsJson;
+    memo["onshi-name"] = name;
+    patient.memo = JSON.stringify(memo);
+    await api.updatePatient(patient);
+  }
+
+  function doSearchForPatient(r: ResultItem) {
+    const d: FaceConfirmedSearchPatientDialog = new FaceConfirmedSearchPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        onSelect: (patient: Patient) => {
+          const onshiPatient = new OnshiPatient(r);
+          if( patient.birthday === onshiPatient.birthday ){
+            const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
+              target: document.body,
+              props: {
+                destroy: () => dd.$destroy(),
+                patient,
+                onshiPatient,
+                onConfirmed: async () => {
+                  await setOnshiName(patient.patientId, onshiPatient.name);
+                  d.$destroy();
+                },
+                onCancel: () => {
+                  d.$destroy();
+                }
+              }
+            })
+          } else {
+            alert("誕生日が違うのでこの患者を選択できません。");
+          }
+        }
+      }
+    })
+  }
 </script>
 
 <Floating title="顔認証完了" {destroy} {style}>
@@ -327,8 +368,8 @@
         >
         {resolved.patient.fullName()}
       </div>
-      <div>新規保険</div>
       {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
+      <div>新規保険</div>
         <div>
           （現在有効な{currentRep(
             resolved.shahokokuhoOpt,
@@ -359,6 +400,7 @@
       <button on:click={doClose}>閉じる</button>
     {:else if resolvedState instanceof NoPatient}
       {@const resolved = resolvedState}
+      <button on:click={() => doSearchForPatient(resolved.result)}>既存患者検索</button>
       <button on:click={() => doRegisterPatient(resolved.result)}
         >新規患者登録</button
       >
@@ -413,5 +455,9 @@
     text-decoration: none;
     margin-right: 4px;
     font-size: 0.8rem;
+  }
+
+  .commands button + button {
+    margin-left: 4px;
   }
 </style>

@@ -6,6 +6,7 @@ import { birthdayRep } from "./util";
 import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 
 export class OnshiPatient {
+  name: string;
   lastName: string;
   firstName: string;
   lastNameYomi: string;
@@ -18,6 +19,7 @@ export class OnshiPatient {
     const [lastName, firstName] = r.name.split("　");
     const [lastNameYomi, firstNameYomi] = r.nameKana ? r.nameKana.split(" ") : ["", ""];
     const sex = r.sex === "男" ? "M" : "F";
+    this.name = r.name;
     this.lastName = lastName;
     this.firstName = firstName;
     this.lastNameYomi = lastNameYomi;

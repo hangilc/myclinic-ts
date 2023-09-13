@@ -39,7 +39,6 @@ describe("FaceConfirmedWindow", () => {
       birthday: "1960-06-12",
     });
     const result = createOnshiResult(m.patient(patientTmpl), m.shahokokuho(createShahokokuho()));
-    console.log(result);
     cy.intercept(
       "GET",
       apiBase() + "/search-patient?text=*",
@@ -474,7 +473,7 @@ describe("FaceConfirmedWindow", () => {
     })
   });
 
-  it.only("should start visit with kouhi", () => {
+  it("should start visit with kouhi", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
@@ -525,6 +524,71 @@ describe("FaceConfirmedWindow", () => {
         })
       })
     })
+  });
+
+  it.only("should choose from existing patient", () => {
+    const patientTmpl = createPatient({
+      patientId: 100,
+      lastName: "髙橋",
+      firstName: "大地",
+      lastNameYomi: "たかはし",
+      firstNameYomi: "だいち",
+      sex: "M",
+      birthday: "1960-06-12",
+      address: "東京",
+      phone: "03"
+    });
+    const result = createOnshiResult(m.patient(Object.assign({}, patientTmpl, {
+      lastName: "●橋",
+    })), m.shahokokuho(createShahokokuho()));
+    cy.intercept(
+      "GET",
+      apiBase() + "/search-patient?text=*",
+      (req) => {
+        if( req.query.text === "大地"){
+          req.reply([10, [patientTmpl]])
+        } else {
+          req.reply([10, []])
+        }
+      }
+    );
+    cy.mount(FaceConfirmedWindow, {
+      props: {
+        destroy: () => { },
+        result
+      }
+    });
+    cy.get("button").contains("既存患者検索").click();
+    cy.intercept(
+      "POST",
+      apiBase() + "/update-patient",
+      (req) => {
+        const memo = JSON.parse(req.body.memo);
+        expect(memo["onshi-name"]).equal("●橋　大地");
+        console.log(req.body);
+        req.reply("true");
+      }
+    ).as("updatePatient");
+    cy.intercept(
+      "GET",
+      apiBase() + "/get-patient?*",
+      (req) => {
+        if( req.query["patient-id"] === "100" ){
+          req.reply(patientTmpl);
+        }
+      }
+    );
+    dialogOpen("患者検索").within(() => {
+      cy.get("input").type("大地");
+      cy.get("button").contains("検索").click();
+      cy.get(`div.patient-wrapper[data-patient-id="100"] button`).click();
+    });
+    dialogClose("患者検索");
+    dialogOpen("患者確認").within(() => {
+      cy.get("button").contains("患者選択").click();
+    });
+    dialogClose("患者確認");
+    cy.get("@updatePatient").should("be.calledOnce");
   });
 
 });
