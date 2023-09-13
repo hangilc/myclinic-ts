@@ -99,7 +99,7 @@ describe("FaceConfirmedWindow", () => {
         cy.get("[data-cy=resolved-patient-id]").contains(patient1.patientId.toString());
       });
     });
-  }); //
+  });
 
   it("should enter new shahokokuho when none available", () => {
     enterPatient(createPatient()).as("patient");
@@ -129,7 +129,7 @@ describe("FaceConfirmedWindow", () => {
       });
       cy.get("button").contains("診察登録").should("exist");
     });
-  }); //
+  });
 
   it("should enter kourei jukyuu", () => {
     enterPatient(createPatient()).as("patient");
@@ -434,7 +434,7 @@ describe("FaceConfirmedWindow", () => {
         })
       })
     })
-  }); //
+  });
 
   it("should start visit", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
@@ -472,7 +472,7 @@ describe("FaceConfirmedWindow", () => {
         cy.get("@onRegister").should("be.called");
       })
     })
-  }); //
+  });
 
   it.only("should start visit with kouhi", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
@@ -525,7 +525,7 @@ describe("FaceConfirmedWindow", () => {
         })
       })
     })
-  }); //
+  });
 
 });
 
