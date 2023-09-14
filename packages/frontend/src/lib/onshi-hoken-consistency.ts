@@ -1,5 +1,4 @@
 import { Koukikourei, Shahokokuho, } from "myclinic-model";
-import type { OnshiResult } from "onshi-result";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { isKoukikourei } from "./hoken-rep";
 import { toHankaku } from "./zenkaku";

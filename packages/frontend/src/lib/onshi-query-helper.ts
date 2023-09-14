@@ -8,6 +8,29 @@ import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, Ons
 import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
 import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
 
+export async function onshiConfirmByHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
+  {
+    limitAppConsFlag,
+    queryCallback,
+    idToken,
+  }: {
+    limitAppConsFlag?: LimitApplicationCertificateRelatedConsFlgCode;
+    queryCallback?: (q: OnshiKakuninQuery) => void;
+    idToken?: string,
+  } = {}
+): Promise<OnshiResult> {
+  const errors: (OnshiHokenConsistencyError | OnshiPatientInconsistency)[] = [];
+  const patient: Patient = await api.getPatient(hoken.patientId);
+  const query = onshi_query_from_hoken(hoken, patient.birthday, confirmationDate, limitAppConsFlag);
+  if (idToken) {
+    query.idToken = idToken;
+  }
+  if (queryCallback) {
+    queryCallback(query);
+  }
+  return await onshiConfirm(query);
+}
+
 export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
   {
     limitAppConsFlag,
@@ -20,16 +43,17 @@ export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confir
   } = {}
 ):
   Promise<[OnshiResult, (OnshiHokenConsistencyError | OnshiPatientInconsistency)[]]> {
+  // const patient: Patient = await api.getPatient(hoken.patientId);
+  // const query = onshi_query_from_hoken(hoken, patient.birthday, confirmationDate, limitAppConsFlag);
+  // if (idToken) {
+  //   query.idToken = idToken;
+  // }
+  // if (queryCallback) {
+  //   queryCallback(query);
+  // }
+  // const result = await onshiConfirm(query);
+  const result = await onshiConfirmByHoken(hoken, confirmationDate, { limitAppConsFlag, queryCallback, idToken });
   const errors: (OnshiHokenConsistencyError | OnshiPatientInconsistency)[] = [];
-  const patient: Patient = await api.getPatient(hoken.patientId);
-  const query = onshi_query_from_hoken(hoken, patient.birthday, confirmationDate, limitAppConsFlag);
-  if( idToken ){
-    query.idToken = idToken;
-  }
-  if( queryCallback ){
-    queryCallback(query);
-  }
-  const result = await onshiConfirm(query);
   if (result.isValid) {
     const ri: ResultItem = result.resultList[0];
     if (hoken instanceof Shahokokuho) {
@@ -37,6 +61,7 @@ export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confir
     } else {
       errors.push(...checkOnshiKoukikoureiConsistency(ri, hoken));
     }
+    const patient: Patient = await api.getPatient(hoken.patientId);
     errors.push(...checkOnshiPatientConsistency(ri, patient));
   } else {
     errors.push(new OnshiError(result.getErrorMessage()));

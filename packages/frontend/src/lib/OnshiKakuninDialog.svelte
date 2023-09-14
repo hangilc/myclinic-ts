@@ -71,12 +71,6 @@
       </div>
     </div>
   {/if}
-  <!-- {#if errors.length > 0}
-    <div class="error-result">
-      <div>資格確認失敗</div>
-      {#each errors as error}<div>{error}</div>{/each}
-    </div>
-  {/if} -->
   <slot name="commands">
     <div class="commands">
       <button on:click={doClose}>閉じる</button>

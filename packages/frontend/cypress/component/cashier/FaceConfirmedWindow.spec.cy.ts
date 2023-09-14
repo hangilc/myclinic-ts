@@ -526,7 +526,7 @@ describe("FaceConfirmedWindow", () => {
     })
   });
 
-  it.only("should choose from existing patient", () => {
+  it("should choose from existing patient", () => {
     const patientTmpl = createPatient({
       patientId: 100,
       lastName: "髙橋",

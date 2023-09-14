@@ -5,6 +5,13 @@ import * as kanjidate from "kanjidate";
 
 export type OnshiPatientInconsistencyKind = "名前" | "よみ" | "生年月日" | "性別";
 
+const KindMap: Record<OnshiPatientInconsistencyKind, string> = {
+  "名前": "name",
+  "よみ": "yomi",
+  "生年月日": "birthday",
+  "性別": "sex,"
+};
+
 export class OnshiPatientInconsistency {
   readonly isOnshiPatientInconsistency = true;
   kind: OnshiPatientInconsistencyKind;
@@ -15,6 +22,10 @@ export class OnshiPatientInconsistency {
     this.kind = kind;
     this.onshiValue = onshiValue;
     this.patientValue = patientValue;
+  }
+
+  kindSlug(): string {
+    return KindMap[this.kind];
   }
 
   toString(): string {
