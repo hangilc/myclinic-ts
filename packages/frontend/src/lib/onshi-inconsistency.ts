@@ -1,4 +1,4 @@
-import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+import { Koukikourei, Shahokokuho, type Patient } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
 import { toHankaku } from "./zenkaku";
@@ -110,7 +110,21 @@ export function checkOnshiKoukikoureiInconsistency(ri: ResultItem, koukikourei: 
     stripLeadingZero(koukikourei.hihokenshaBangou) === stripLeadingZero(hihokenshaBangou),
     () => fmt("被保険者番号", hihokenshaBangou, koukikourei.hihokenshaBangou));
   const futanWari = ri.koukikoureiFutanWari ?? 0;
-  cmp("koukikourei-futanwari", koukikourei.futanWari === futanWari, 
+  cmp("koukikourei-futanwari", koukikourei.futanWari === futanWari,
     () => fmt("負担割", futanWari.toString(), koukikourei.futanWari.toString()));
   return errors;
+}
+
+export function checkOnshiInconsistency(ri: ResultItem, patient: Patient, hoken: Shahokokuho | Koukikourei | undefined):
+  OnshiInconsistency[] {
+  const errs: OnshiInconsistency[] = [];
+  errs.push(...checkOnshiPatientInconsistency(ri, patient));
+  if (hoken) {
+    if (hoken instanceof Shahokokuho) {
+      errs.push(...checkOnshiShahokokuhoInconsistency(ri, hoken));
+    } else if (hoken instanceof Koukikourei) {
+      errs.push(...checkOnshiKoukikoureiInconsistency(ri, hoken))
+    }
+  }
+  return errs;
 }
