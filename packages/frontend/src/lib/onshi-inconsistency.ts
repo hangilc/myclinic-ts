@@ -1,4 +1,4 @@
-import type { Patient, Shahokokuho } from "myclinic-model";
+import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
 import * as kanjidate from "kanjidate";
 import { toHankaku } from "./zenkaku";
@@ -6,9 +6,12 @@ import { toHankaku } from "./zenkaku";
 export type OnshiPatientInconsistencyKind = "patient-name" | "patient-yomi" | "patient-birthday" | "patient-sex";
 export type OnshiShahokokuhoInconsistencyKind = "shahokokuho-hokenshabangou" | "shahokokuho-hihokenshakigou" |
   "shahokokuho-hihokenshabangou" | "shahokokuho-edaban" | "shahokokuho-kourei";
+export type OnshiKoukikoureiInconsistencyKind = "koukikourei-hokenshabangou" | "koukikourei-hihokenshabangou" |
+  "koukikourei-futanwari";
 export type OnshiInconsistencyKind =
   OnshiPatientInconsistencyKind |
-  OnshiShahokokuhoInconsistencyKind;
+  OnshiShahokokuhoInconsistencyKind |
+  OnshiKoukikoureiInconsistencyKind;
 
 export class OnshiInconsistency {
   kind: OnshiInconsistencyKind;
@@ -60,7 +63,7 @@ function stripLeadingZero(s: string): string {
   return s.replace(/^[0０]+/, "");
 }
 
-export function checkShahokokuhoInconsistency(ri: ResultItem, shahokokuho: Shahokokuho): OnshiInconsistency[] {
+export function checkOnshiShahokokuhoInconsistency(ri: ResultItem, shahokokuho: Shahokokuho): OnshiInconsistency[] {
   const errors: OnshiInconsistency[] = [];
   function cmp(kind: OnshiInconsistencyKind, isEqual: boolean, mkMessage: () => string) {
     if (!isEqual) {
@@ -89,4 +92,25 @@ export function checkShahokokuhoInconsistency(ri: ResultItem, shahokokuho: Shaho
   return errors;
 }
 
-
+export function checkOnshiKoukikoureiInconsistency(ri: ResultItem, koukikourei: Koukikourei): OnshiInconsistency[] {
+  const errors: OnshiInconsistency[] = [];
+  function cmp(kind: OnshiInconsistencyKind, isEqual: boolean, mkMessage: () => string) {
+    if (!isEqual) {
+      errors.push(new OnshiInconsistency(kind, mkMessage()));
+    }
+  }
+  function fmt(kind: string, onshiValue: string, shahokokuhoValue: string): string {
+    return `後期高齢保険の${kind}が一致しません。登録されている情報：${shahokokuhoValue}。確認された情報：${onshiValue}。`;
+  }
+  const hokenshaBangou = ri.insurerNumber ?? "";
+  cmp("koukikourei-hokenshabangou", stripLeadingZero(koukikourei.hokenshaBangou) === stripLeadingZero(hokenshaBangou),
+    () => fmt("保険者番号", hokenshaBangou, koukikourei.hokenshaBangou));
+  const hihokenshaBangou = ri.insuredIdentificationNumber ?? "";
+  cmp("koukikourei-hihokenshabangou",
+    stripLeadingZero(koukikourei.hihokenshaBangou) === stripLeadingZero(hihokenshaBangou),
+    () => fmt("被保険者番号", hihokenshaBangou, koukikourei.hihokenshaBangou));
+  const futanWari = ri.koukikoureiFutanWari ?? 0;
+  cmp("koukikourei-futanwari", koukikourei.futanWari === futanWari, 
+    () => fmt("負担割", futanWari.toString(), koukikourei.futanWari.toString()));
+  return errors;
+}
