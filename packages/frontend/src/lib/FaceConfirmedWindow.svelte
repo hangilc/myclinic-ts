@@ -40,8 +40,9 @@
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import type { EventEmitter } from "./event-emitter";
-  import FaceConfirmedSearchPatientDialog from "./FaceConfirmedSearchPatientDialog.svelte";
-  import FaceConfirmedConfirmSelectPatient from "./FaceConfirmedConfirmSelectPatient.svelte";
+  import FaceConfirmedSearchPatientDialog from "./face-confirmed/FaceConfirmedSearchPatientDialog.svelte";
+  import FaceConfirmedConfirmSelectPatient from "./face-confirmed/FaceConfirmedConfirmSelectPatient.svelte";
+  import { checkOnshiPatientInconsistency } from "./onshi-inconsistency";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -312,26 +313,34 @@
         destroy: () => d.$destroy(),
         onshiName: r.name,
         onSelect: (patient: Patient) => {
-          const onshiPatient = new OnshiPatient(r);
-          if( patient.birthday === onshiPatient.birthday ){
-            const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
-              target: document.body,
-              props: {
-                destroy: () => dd.$destroy(),
-                patient,
-                onshiPatient,
-                onConfirmed: async () => {
-                  let updated = await setOnshiName(patient.patientId, onshiPatient.name);
-                  await advanceWithPatient(updated, r);
-                },
-                onCancel: () => {
-                  d.$destroy();
-                }
-              }
-            })
+          const errs = checkOnshiPatientInconsistency(r, patient);
+          if( errs.length === 0 ){
+            advanceWithPatient(patient, r);
+          } else if( errs.length === 1 && errs[0].kind === "patient-name" ){
+
           } else {
-            alert("誕生日が違うのでこの患者を選択できません。");
+            // nop
           }
+          // const onshiPatient = new OnshiPatient(r);
+          // if( patient.birthday === onshiPatient.birthday ){
+          //   const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
+          //     target: document.body,
+          //     props: {
+          //       destroy: () => dd.$destroy(),
+          //       patient,
+          //       onshiPatient,
+          //       onConfirmed: async () => {
+          //         let updated = await setOnshiName(patient.patientId, onshiPatient.name);
+          //         await advanceWithPatient(updated, r);
+          //       },
+          //       onCancel: () => {
+          //         d.$destroy();
+          //       }
+          //     }
+          //   })
+          // } else {
+          //   alert("誕生日が違うのでこの患者を選択できません。");
+          // }
         }
       }
     })

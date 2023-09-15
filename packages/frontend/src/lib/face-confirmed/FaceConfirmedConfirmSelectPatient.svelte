@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Patient } from "myclinic-model";
-  import Dialog from "./Dialog.svelte";
-  import type { OnshiPatient } from "./face-confirm-window";
+  import Dialog from "../Dialog.svelte";
+  import type { OnshiPatient } from "../face-confirm-window";
   import * as kanjidate from "kanjidate";
 
   export let destroy: () => void;

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Patient } from "myclinic-model";
-  import Dialog from "./Dialog.svelte";
-  import api from "./api";
+  import Dialog from "../Dialog.svelte";
+  import api from "../api";
 
   export let destroy: () => void;
   export let onSelect: (patient: Patient) => void;
