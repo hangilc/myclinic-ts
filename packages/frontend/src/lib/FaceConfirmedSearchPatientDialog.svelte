@@ -5,7 +5,8 @@
 
   export let destroy: () => void;
   export let onSelect: (patient: Patient) => void;
-  let searchText = "";
+  export let onshiName: string = "";
+  let searchText = onshiName;
   let searchResult: Patient[] = [];
 
   async function doSearch() {

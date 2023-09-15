@@ -114,6 +114,7 @@
       }
     }
     resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
+    console.log("resolvedState", resolvedState);
   }
 
   async function advanceWithHoken(
@@ -309,6 +310,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
+        onshiName: r.name,
         onSelect: (patient: Patient) => {
           const onshiPatient = new OnshiPatient(r);
           if( patient.birthday === onshiPatient.birthday ){
