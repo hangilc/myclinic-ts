@@ -523,7 +523,7 @@ describe("FaceConfirmedWindow", () => {
     })
   });
 
-  it.only("should choose from existing patient", () => {
+  it("should choose from existing patient", () => {
     const patientTmpl = createPatient({
       patientId: 100,
       lastName: "髙橋",
@@ -581,13 +581,13 @@ describe("FaceConfirmedWindow", () => {
       cy.get(`div.patient-wrapper[data-patient-id="100"] button`).click();
     });
     dialogClose("患者検索");
-    // dialogOpen("患者確認").within(() => {
-    //   cy.get("button").contains("患者選択").click();
-    // });
-    // dialogClose("患者確認");
-    // cy.wait("@updatePatient");
-    // cy.get('[data-cy="resolved-patient-id"]').should("exist");
-    // cy.get("button").contains("既存患者検索").should("not.exist");
+    dialogOpen("患者確認").within(() => {
+      cy.get("button").contains("患者決定").click();
+    });
+    dialogClose("患者確認");
+    cy.wait("@updatePatient");
+    cy.get('[data-cy="resolved-patient-id"]').should("exist");
+    cy.get("button").contains("既存患者検索").should("not.exist");
   });
 
 });

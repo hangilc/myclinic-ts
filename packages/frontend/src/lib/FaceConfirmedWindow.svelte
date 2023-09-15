@@ -317,30 +317,25 @@
           if( errs.length === 0 ){
             advanceWithPatient(patient, r);
           } else if( errs.length === 1 && errs[0].kind === "patient-name" ){
-
+            const onshiPatient = new OnshiPatient(r);
+            const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
+              target: document.body,
+              props: {
+                destroy: () => dd.$destroy(),
+                patient,
+                onshiPatient,
+                onConfirmed: async () => {
+                  let updated = await setOnshiName(patient.patientId, onshiPatient.name);
+                  await advanceWithPatient(updated, r);
+                },
+                onCancel: () => {
+                  // nop
+                }
+              }
+            })
           } else {
-            // nop
+            alert(errs.map(e => e.toString()).join("\n"));
           }
-          // const onshiPatient = new OnshiPatient(r);
-          // if( patient.birthday === onshiPatient.birthday ){
-          //   const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
-          //     target: document.body,
-          //     props: {
-          //       destroy: () => dd.$destroy(),
-          //       patient,
-          //       onshiPatient,
-          //       onConfirmed: async () => {
-          //         let updated = await setOnshiName(patient.patientId, onshiPatient.name);
-          //         await advanceWithPatient(updated, r);
-          //       },
-          //       onCancel: () => {
-          //         d.$destroy();
-          //       }
-          //     }
-          //   })
-          // } else {
-          //   alert("誕生日が違うのでこの患者を選択できません。");
-          // }
         }
       }
     })

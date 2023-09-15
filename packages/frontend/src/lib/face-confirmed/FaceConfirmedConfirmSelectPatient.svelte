@@ -24,10 +24,16 @@
 <Dialog title="患者確認" destroy={doCancel}>
   <div class="wrapper">
     <div>
-      氏名：{patient.fullName(" ")}
+      カルテ氏名
     </div>
     <div>
-      オンライン資格氏名：{onshiPatient.lastName} {onshiPatient.firstName}
+      {patient.fullName(" ")}
+    </div>
+    <div>
+      オンライン資格氏名
+    </div>
+    <div>
+      {onshiPatient.lastName} {onshiPatient.firstName}
     </div>
     <div>
       患者番号：{patient.patientId}
@@ -49,7 +55,7 @@
     </div>
   </div>
   <div class="commands">
-    <button on:click={doSelect}>患者選択</button>
+    <button on:click={doSelect}>患者決定</button>
     <button on:click={doCancel}>キャンセル</button>
   </div>
 </Dialog>
