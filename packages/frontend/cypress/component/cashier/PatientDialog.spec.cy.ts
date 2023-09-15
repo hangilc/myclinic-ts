@@ -101,8 +101,7 @@ describe("PatientDialog", () => {
     cy.intercept("GET", getBase() + "/dict-get?key=onshi-secret", JSON.stringify(onshiSecret));
     const query = onshi_query_from_hoken(shaho, patient.birthday, "2022-08-09");
     const onshiResult = mockOnshiSuccessResult(query, onshiCreationModifier.patient(
-      Patient.cast(Object.assign({}, patientJson, { birthday: "1957-01-01"}))
-      // Patient.cast(Object.assign({}, patientJson, { lastName: "●療"}))
+      Patient.cast(Object.assign({}, patientJson, { lastName: "●療"}))
     ));
     cy.intercept("POST", onshiServer + "/onshi/kakunin", JSON.stringify(onshiResult));
     dialogOpen("社保国保情報").within(() => {
