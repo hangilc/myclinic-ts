@@ -5,20 +5,24 @@
   import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
   import { onshiDateToSqlDate } from "onshi-result/util";
   import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
-  import { onshiConfirmHoken } from "./onshi-query-helper";
   import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
   import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
-  import { checkOnshiInconsistency } from "./onshi-inconsistency";
+  import { OnshiInconsistency, checkOnshiInconsistency } from "./onshi-inconsistency";
   import api from "./api";
 
   export let destroy: () => void;
   export let hoken: Shahokokuho | Koukikourei;
   export let confirmDate: string;
+  export let onOnshiNameUpdated: (updated: Patient) => void = (_) => {};
   let result: OnshiResult | undefined = undefined;
   let errors: string[] = [];
   let announce: string = "";
   let query: OnshiKakuninQuery | undefined = undefined;
   let showDetail = false;
+  let updateOnshiNameData: undefined | {
+    patientId: number,
+    onshiName: string
+  } = undefined;
 
   startQuery();
 
@@ -38,6 +42,12 @@
         const e = checkOnshiInconsistency(ri, patient, hoken);
         if (e.length > 0) {
           errors = e.map((e) => e.toString());
+          if( hasPatientNameInconsistency(e) && countPatientInconsistencies(e) === 1 ){
+            updateOnshiNameData = {
+              patientId: patient.patientId,
+              onshiName: ri.name,
+            };
+          }
         } else {
           errors = [];
           announce = "資格確認成功";
@@ -48,6 +58,26 @@
     } catch (ex: any) {
       errors = ["資格確認サーバー問い合わせエラー。", ex.toString()];
     }
+  }
+
+  function countPatientInconsistencies(errs: OnshiInconsistency[]): number {
+    return errs.reduce((acc, ele) => {
+      const kind = ele.kind;
+      if( kind.startsWith("patient-") ){
+        return acc + 1;
+      } else {
+        return acc;
+      }
+    }, 0);
+  }
+
+  function hasPatientNameInconsistency(errs: OnshiInconsistency[]): boolean {
+    for(let e of errs){
+      if( e.kind === "patient-name" ){
+        return true;
+      }
+    }
+    return false;
   }
 
   async function getPatient(): Promise<Patient> {
@@ -83,6 +113,12 @@
     </div>
   {/if}
   {#if announce}<div class="announce">{announce}</div>{/if}
+  {#if updateOnshiNameData}
+  <div class="update-onshi-name-wrapper">
+    この名前をオンライン資格確認の際には使用しますか？
+    <button data-cy="update-onshi-name-button">はい</button>
+  </div>
+  {/if}
   <slot name="commands">
     <div class="commands">
       <button on:click={doClose}>閉じる</button>
@@ -175,6 +211,10 @@
     margin: 10px 0;
   }
 
-  .detail-wrapper {
+  .update-onshi-name-wrapper {
+    margin: 10px 0;
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 10px;
   }
 </style>
