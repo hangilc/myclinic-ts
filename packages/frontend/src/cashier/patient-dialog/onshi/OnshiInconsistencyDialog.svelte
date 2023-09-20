@@ -39,20 +39,6 @@
 </Dialog>
 
 <style>
-  .query {
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
-
-  .query span:nth-of-type(even) {
-    margin-left: 10px;
-  }
-
-  /* .query-state {
-    margin: 10px 0;
-    padding: 10px;
-  }
- */
   .commands {
     margin-top: 10px;
     text-align: right;
@@ -82,9 +68,5 @@
     max-height: 300px;
     overflow-y: auto;
     padding: 6px;
-  }
-
-  .announce {
-    margin: 10px 0;
   }
 </style>

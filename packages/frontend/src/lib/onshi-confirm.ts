@@ -103,8 +103,6 @@ export async function onshiConfirm(
   });
   clearTimeout(timerId);
   const result = await response.json();
-  console.log("query result:", JSON.stringify(result, undefined, 2));
-  console.log("before OnshiResult.cast");
   try {
     return OnshiResult.cast(result);
   } catch (ex) {

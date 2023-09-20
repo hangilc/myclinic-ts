@@ -13,7 +13,7 @@
   export let destroy: () => void;
   export let hoken: Shahokokuho | Koukikourei;
   export let confirmDate: string;
-  export let onOnshiNameUpdated: (updated: Patient) => void = (_) => {};
+  export let onOnshiNameUpdated: (updated: Patient) => void;
   let result: OnshiResult | undefined = undefined;
   let errors: string[] = [];
   let announce: string = "";
@@ -93,6 +93,19 @@
     const sql = onshiDateToSqlDate(arg);
     return kanjidate.format(kanjidate.f2, sql);
   }
+
+  async function doSetOnshiName() {
+    if( updateOnshiNameData ){
+      const d = updateOnshiNameData;
+      const patient = await api.getPatient(d.patientId);
+      const m = patient.memoAsJson;
+      m["onshi-name"] = d.onshiName;
+      patient.memo = JSON.stringify(m);
+      await api.updatePatient(patient);
+      destroy();
+      onOnshiNameUpdated(patient);
+    }
+  }
 </script>
 
 <Dialog title="オンライン資格確認" destroy={doClose} styleWidth="300px">
@@ -116,7 +129,7 @@
   {#if updateOnshiNameData}
   <div class="update-onshi-name-wrapper">
     この名前をオンライン資格確認の際には使用しますか？
-    <button data-cy="update-onshi-name-button">はい</button>
+    <button data-cy="update-onshi-name-button" on:click={doSetOnshiName}>はい</button>
   </div>
   {/if}
   <slot name="commands">

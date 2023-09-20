@@ -94,6 +94,10 @@
           destroy: () => d.$destroy(),
           hoken: value,
           confirmDate,
+          onOnshiNameUpdated: updated => {
+            data.patient = updated;
+            patient = updated;
+          },
         }
       });
     }

@@ -48,6 +48,9 @@
           destroy: () => d.$destroy(),
           hoken,
           confirmDate,
+          onOnshiNameUpdated: (updated) => {
+            patient = updated;
+          }
         },
       });
     } else {
