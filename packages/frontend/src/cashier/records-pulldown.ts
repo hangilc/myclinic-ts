@@ -1,14 +1,10 @@
-<script lang="ts">
 import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
 import RecentVisitsDialog from "@/lib/RecentVisitsDialog.svelte";
 import type { Patient, Visit } from "myclinic-model";
 import { openRecords } from "./open-records";
 import VisitsByDateDialog from "@/lib/VisitsByDateDialog.svelte";
 
-export let destroy: () => void;
-
-function doSearch(): void {
-  destroy();
+export function doSearch(): void {
   const d: SearchPatientDialog = new SearchPatientDialog({
     target: document.body,
     props: {
@@ -25,8 +21,7 @@ function doSearch(): void {
   });
 }
 
-function doRecentVisit(): void {
-  destroy();
+export function doRecentVisit(): void {
   const d: RecentVisitsDialog = new RecentVisitsDialog({
     target: document.body,
     props: {
@@ -39,8 +34,7 @@ function doRecentVisit(): void {
   });
 }
 
-function doByDate(): void {
-  destroy();
+export function doByDate(): void {
   const d: VisitsByDateDialog = new VisitsByDateDialog({
     target: document.body,
     props: {
@@ -52,21 +46,20 @@ function doByDate(): void {
     },
   });
 }
-</script>
 
-<div class="top">
-  <a href="javascript:void(0)" on:click={doSearch}>患者検索</a>
-  <a href="javascript:void(0)" on:click={doRecentVisit}>最近の診察</a>
-  <a href="javascript:void(0)" on:click={doByDate}>日付別</a>
-</div>
+// <div class="top">
+//   <a href="javascript:void(0)" on:click={doSearch}>患者検索</a>
+//   <a href="javascript:void(0)" on:click={doRecentVisit}>最近の診察</a>
+//   <a href="javascript:void(0)" on:click={doByDate}>日付別</a>
+// </div>
 
-<style>
-  a {
-    display: block;
-    margin-bottom: 4px;
-  }
+// <style>
+//   a {
+//     display: block;
+//     margin-bottom: 4px;
+//   }
 
-  a:last-of-type {
-    margin-bottom: 0;
-  }
-</style>
+//   a:last-of-type {
+//     margin-bottom: 0;
+//   }
+// </style>

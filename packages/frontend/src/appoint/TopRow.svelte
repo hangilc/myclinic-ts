@@ -1,18 +1,17 @@
 <script lang="ts">
-  import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
   import Bars3 from "@/icons/Bars3.svelte";
   import SearchAppointDialog from "./SearchAppointDialog.svelte";
   import api from "@/lib/api";
   import EventHistoryDialog from "./EventHistoryDialog.svelte";
   import { Appoint, type AppEvent, type AppointTime } from "myclinic-model";
+  import { popupTrigger, popupTriggerAdmin } from "@/lib/popup-helper";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;
   export let onThisWeek: () => void;
 
-  function doAlloc(destroy: () => void) {
-    destroy();
+  function doAlloc() {
     onCreateAppoints();
   }
 
@@ -30,13 +29,12 @@
     }
   }
 
-  async function doEventLog(destroy: () => void) {
-    destroy();
+  async function doEventLog() {
     const limit = 30;
     const offset = 0;
     const events = await api.listAppointEvents(limit, offset);
     const appointTimeMap: Record<number, AppointTime> = {};
-    const proms = events.map(e => populateMap(e, appointTimeMap));
+    const proms = events.map((e) => populateMap(e, appointTimeMap));
     await Promise.all(proms);
     console.log(appointTimeMap);
     const d: EventHistoryDialog = new EventHistoryDialog({
@@ -67,10 +65,18 @@
   <button on:click={() => onMoveWeeks(4)}>次の月</button>
   <div class="menu">
     <a href="javascript:void(0)" on:click={doSearch}>予約検索</a>
-    <Popup let:trigger let:destroy>
-      <Bars3 onClick={trigger} style="cursor: pointer;" dy="-2px" width="18" 
-        dataCy="bars3-menu"/>
-      <div slot="menu" class="context-menu">
+    <Bars3
+      onClick={popupTriggerAdmin(
+        isAdmin,
+        [["予約枠わりあて", doAlloc]],
+        [["変更履歴", doEventLog]]
+      )}
+      style="cursor: pointer;"
+      dy="-2px"
+      width="18"
+      dataCy="bars3-menu"
+    />
+    <!-- <div slot="menu" class="context-menu">
         {#if isAdmin}
           <a href="javascript:void(0)" on:click={() => doAlloc(destroy)}
             data-cy="alloc-appoints-link"
@@ -80,8 +86,7 @@
         <a href="javascript:void(0)" on:click={() => doEventLog(destroy)}
           >変更履歴</a
         >
-      </div>
-    </Popup>
+      </div> -->
   </div>
 </div>
 

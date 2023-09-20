@@ -51,7 +51,7 @@
 
   .menu a {
     display: block;
-    color: black;
+    /* color: black; */
     line-height: 1;
   }
 

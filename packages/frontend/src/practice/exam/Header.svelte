@@ -7,9 +7,7 @@
   import { startPatient, showPatientsByDate, showAppoints } from "./ExamVars";
   import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
-  import Popup from "@/lib/Popup.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
-  import { ViewportCoord } from "@/lib/viewport-coord";
   import PopupMenu from "@/lib/PopupMenu.svelte";
 
   function updateSelectPatientDialog(sel: string): void {

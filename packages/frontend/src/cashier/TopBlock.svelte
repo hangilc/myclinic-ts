@@ -1,16 +1,16 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import Popup from "@/lib/Popup.svelte";
   import type { Patient } from "myclinic-model";
   import NewPatientDialog from "./NewPatientDialog.svelte";
   import { PatientData } from "./patient-dialog/patient-data";
   import SearchPatientResultDialog from "./SearchPatientResultDialog.svelte";
-  import RecordsPulldown from "./RecordsPulldown.svelte";
-  import TopBlockAuxMenu from "./TopBlockAuxMenu.svelte";
+  import * as recordPulldown from "./records-pulldown";
+  import * as auxMenu from "./top-block-aux-menu";
   import Bars3 from "@/icons/Bars3.svelte";
   import { onshiFaceList } from "@/lib/onshi-face";
   import FaceListDialog from "./FaceListDialog.svelte";
   import type { EventEmitter } from "@/lib/event-emitter";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   let searchText = "";
@@ -56,7 +56,6 @@
       }
     })
   }
-
 </script>
 
 <div class="top">
@@ -67,17 +66,21 @@
   </form>
   <button on:click={doNewPatient}>新規患者</button>
   <button on:click={doListFaceConfirm}>顔認証一覧</button>
-  <Popup let:trigger let:destroy>
-    <a href="javascript:void(0)" class="records-link" on:click={trigger}
+    <a href="javascript:void(0)" class="records-link" on:click={popupTrigger([
+      ["患者検索", recordPulldown.doSearch],
+      ["最近の診察", recordPulldown.doRecentVisit],
+      ["日付別", recordPulldown.doByDate],
+    ])}
       >診療録</a
     >
-    <RecordsPulldown slot="menu" {destroy}/>
-  </Popup>
-  <Popup let:trigger let:destroy>
-    <Bars3 onClick={trigger} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"
+    <!-- <RecordsPulldown slot="menu" {destroy}/> -->
+
+    <Bars3 onClick={popupTrigger([
+      ["未収処理", auxMenu.doMishuu],
+      ["手書き領収書印刷", auxMenu.doBlankReceipt],
+    ])} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"
       dataCy="bars3-menu"/>
-    <TopBlockAuxMenu slot="menu" {destroy}/>
-  </Popup>
+    <!-- <TopBlockAuxMenu slot="menu" {destroy}/> -->
 </div>
 
 <style>

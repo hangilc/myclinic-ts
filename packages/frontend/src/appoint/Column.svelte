@@ -3,9 +3,9 @@
   import * as kanjidate from "kanjidate";
   import AppointTimeBlock from "./AppointTimeBlock.svelte";
   import FilledCircle from "@/icons/FilledCircle.svelte";
-  import Popup from "@/lib/Popup.svelte";
   import { isAdmin } from "./appoint-vars";
-  import ColumnContextMenu from "./ColumnContextMenu.svelte";
+  import { popupTrigger } from "@/lib/popup-helper";
+  import { doAddAppointTime, doOnshiConfirm } from "./column-context-menu";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -32,10 +32,13 @@
 
 <div class={`top ${isAdmin ? "admin" : ""}`} 
   data-cy="appoint-column" data-date={data.date}>
-  <Popup let:destroy let:triggerClick>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class={`date ${data.op.code}`}
-      on:contextmenu={(e) => doContextMenu(e, triggerClick)}
+      on:contextmenu={popupTrigger([
+        ["予約枠追加", () => doAddAppointTime(data.date, data.appointTimes)],
+        ["資格確認", () => doOnshiConfirm(data.date, data.appointTimes)],
+      ])}
       data-cy="date-block"
     >
       <span data-cy="date-disp">{kanjidate.format(dateFormat, data.date)}</span>
@@ -52,13 +55,12 @@
       {/each}
       <div class="date-label">{data.op.name ?? ""}</div>
     </div>
-    <ColumnContextMenu
+    <!-- <ColumnContextMenu
       slot="menu"
       {destroy}
       date={data.date}
       siblings={data.appointTimes}
-    />
-  </Popup>
+    /> -->
   {#each data.appointTimes as at (at.appointTime.fromTime)}
     <AppointTimeBlock data={at} column={data} />
   {/each}

@@ -4,7 +4,6 @@
   import AppointDialog from "./AppointDialog.svelte";
   import { appointTimeTemplate, isAdmin } from "./appoint-vars";
   import AppointTimeDialog from "./AppointTimeDialog.svelte";
-  import Popup from "@/lib/Popup.svelte";
   import { resolveAppointKind } from "./appoint-kind";
   import type { ColumnData } from "./column-data";
   import type { AppEvent, AppointTime } from "myclinic-model";
@@ -14,6 +13,7 @@
   import { confirm } from "@/lib/confirm-call";
   import OnshiConfirmForDate from "./OnshiConfirmForDate.svelte";
   import EventHistoryDialog from "./EventHistoryDialog.svelte";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let data: AppointTimeData;
   export let column: ColumnData;
@@ -46,8 +46,7 @@
     }
   }
 
-  function doOpenEditDialog(destroy: () => void): void {
-    destroy();
+  function doOpenEditDialog(): void {
     if (isAdmin) {
       const tmpl: AppointTime = Object.assign(
         {},
@@ -73,8 +72,7 @@
     }
   }
 
-  function doOpenBindDialog(destroy: () => void): void {
-    destroy();
+  function doOpenBindDialog(): void {
     const n = column.planBind(data.appointTime);
     if (n != undefined) {
       const b = Object.assign({}, data.appointTime, {
@@ -95,8 +93,7 @@
     }
   }
 
-  function doOpenSplitDialog(destroy: () => void): void {
-    destroy();
+  function doOpenSplitDialog(): void {
     const d: SplitAppointTimeDialog = new SplitAppointTimeDialog({
       target: document.body,
       props: {
@@ -106,8 +103,7 @@
     });
   }
 
-  function doDelete(destroy: () => void): void {
-    destroy();
+  function doDelete(): void {
     if (data.appoints.length > 0) {
       alert("予約がはいっているので、この予約枠を削除できません。");
       return;
@@ -118,9 +114,8 @@
     }
   }
 
-  function doOnshiKakunin(destroy: () => void): void {
+  function doOnshiKakunin(): void {
     const date = column.date;
-    destroy();
     const d: OnshiConfirmForDate = new OnshiConfirmForDate({
       target: document.body,
       props: {
@@ -129,15 +124,6 @@
         siblings: [data],
       },
     });
-  }
-
-  function doContextMenu(
-    event: MouseEvent,
-    trigger: (e: MouseEvent) => void
-  ): void {
-    event.preventDefault();
-    console.log(event.clientY);
-    trigger(event);
   }
 
   function capacityRep(data: AppointTimeData): string {
@@ -157,20 +143,31 @@
     return rep ? `[${rep}]` : "";
   }
 
-  async function doHistoryDialog(destroy: () => void) {
+  async function doHistoryDialog() {
     const appointTimeId = data.appointTime.appointTimeId;
     const hist: AppEvent[] = await api.appointHistoryAt(appointTimeId);
-    const map: Record<number, AppointTime> = { [appointTimeId]: data.appointTime };
-    destroy();
+    const map: Record<number, AppointTime> = {
+      [appointTimeId]: data.appointTime,
+    };
     const d: EventHistoryDialog = new EventHistoryDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         events: hist,
         appointTimeMap: map,
-      }
-    })
+      },
+    });
   }
+
+  const adminMenus: [string, () => void][] = isAdmin ? 
+    [
+      ["編集", doOpenEditDialog],
+      ["結合", doOpenBindDialog],
+      ["分割", doOpenSplitDialog],
+      ["削除", doDelete],
+      ["資格確認", doOnshiKakunin],
+    ] :
+    [];
 </script>
 
 <div
@@ -178,19 +175,22 @@
   data-cy="appoint-time-block"
   data-is-vacant={vacant(data) ? "" : undefined}
 >
-  <Popup let:triggerClick let:destroy>
-    <div
-      class="time-box"
-      on:click={doTimeBoxClick}
-      on:contextmenu={(evt) => doContextMenu(evt, triggerClick)}
-    >
-      <div>
-        <span data-cy="time-disp">{timeText(data)}</span>
-        <span data-cy="capacity-disp">{capacityRep(data)}</span>
-      </div>
-      <div data-cy="kind-disp">{appointKindRep(data)}</div>
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+    class="time-box"
+    on:click={doTimeBoxClick}
+    on:contextmenu={popupTrigger([
+      ["変更履歴", () => doHistoryDialog()],
+      ...adminMenus,
+    ])}
+  >
+    <div>
+      <span data-cy="time-disp">{timeText(data)}</span>
+      <span data-cy="capacity-disp">{capacityRep(data)}</span>
     </div>
-    <div slot="menu" class="context-menu">
+    <div data-cy="kind-disp">{appointKindRep(data)}</div>
+  </div>
+  <!-- <div slot="menu" class="context-menu">
       <a href="javascript:void(0)" on:click={() => doHistoryDialog(destroy)}
         >変更履歴</a
       >
@@ -209,8 +209,8 @@
           >資格確認</a
         >
       {/if}
-    </div>
-  </Popup>
+    </div> -->
+
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
       <AppointPatient data={appoint} appointTimeData={data} />
