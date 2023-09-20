@@ -6,8 +6,8 @@
   import CashierDialog from "./CashierDialog.svelte";
   import type { WqueueData } from "./wq-data";
   import { openRecords } from "./open-records";
-  import WqTableAuxMenu from "./WqTableAuxMenu.svelte";
-  import Popup from "@/lib/Popup.svelte";
+  import * as auxMenu from "./wq-table-aux-menu";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let items: WqueueData[];
 
@@ -35,7 +35,6 @@
   function doRecord(patient: Patient): void {
     openRecords(patient);
   }
-
 </script>
 
 <div class="top">
@@ -61,7 +60,12 @@
     {@const wq = item.wq}
     {@const visit = item.visit}
     {@const patient = item.patient}
-    <div class="wq-row" data-cy="wq-row" data-patient-id={patient.patientId} data-visit-id={visit.visitId}>
+    <div
+      class="wq-row"
+      data-cy="wq-row"
+      data-patient-id={patient.patientId}
+      data-visit-id={visit.visitId}
+    >
       <div>{wq.waitStateType.label}</div>
       <div>{patient.patientId}</div>
       <div>{patient.fullName(" ")}</div>
@@ -77,26 +81,28 @@
           <a href="javascript:void(0)" on:click={() => doRecord(patient)}
             >診療録</a
           >
-          <Popup let:destroy let:triggerClick>
-            <svg
-              width="1.2rem"
-              class="menu-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-              on:click={triggerClick}
-              data-cy="aux-menu-icon"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-            <WqTableAuxMenu slot="menu" {destroy} {visit} {patient}/>
-          </Popup>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <svg
+            width="1.2rem"
+            class="menu-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            on:click={popupTrigger([
+              ["患者", () => auxMenu.doPatient(patient)],
+              ["削除", () => auxMenu.doDeleteVisit(visit)],
+            ])}
+            data-cy="aux-menu-icon"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4 6h16M4 12h8m-8 6h16"
+            />
+          </svg>
+          <!-- <WqTableAuxMenu slot="menu" {destroy} {visit} {patient}/> -->
         </div>
       </div>
     </div>
