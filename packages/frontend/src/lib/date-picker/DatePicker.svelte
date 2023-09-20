@@ -9,9 +9,11 @@
   import { composeDate } from "./date-picker-misc";
 
   export let date: Date;
-  export let destroy: () => void;
+  // export let destroy: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let onEnter: (date: Date) => void;
+  export let onCancel: () => void;
+
   let gengou: string;
   let nen: number;
   let month: number;
@@ -55,14 +57,14 @@
 
   function doEnter(): void {
     onEnter(date);
-    destroy();
   }
 
   function doCancel(): void {
-    destroy();
+    onCancel();
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   <div class="top-row">
     <GengouPart {gengou} {gengouList} onChange={onGengouChange} />
