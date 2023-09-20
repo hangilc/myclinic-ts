@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";

@@ -16,6 +16,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="screen-layer"
   style={`opacity: ${opacity}; z-index: ${zIndex}`}
   on:click={doClick}

@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import SideMenu from "./SideMenu.svelte";
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";

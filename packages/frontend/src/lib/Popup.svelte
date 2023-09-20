@@ -52,6 +52,7 @@
 <slot {trigger} {triggerClick} {destroy} {destroyAnd} />
 {#if show}
   <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="menu" use:open on:keydown={doMenuKey} tabindex="0">
     <slot name="menu" />
   </div>

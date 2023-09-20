@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   type T = $$Generic;
   export let data: T;
   export let onSelect: (t: T) => void = () => {};

@@ -15,6 +15,6 @@
     "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result; npm run compile -w packages/rezept"
   },
   "devDependencies": {
-    "typescript": "^4.8.4"
+    "typescript": "5.2.2"
   }
 }

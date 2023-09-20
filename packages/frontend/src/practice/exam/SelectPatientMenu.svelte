@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   export let onSelect: (sel: string) => void;
   export let destroy: () => void;
 </script>

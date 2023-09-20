@@ -1,4 +1,4 @@
-<script type="ts">
+<script lang="ts">
   import ServiceHeader from "../../ServiceHeader.svelte";
   import SelectPatientMenu from "./SelectPatientMenu.svelte";
   import SelectRegisteredPatientDialog from "./select-patient-dialogs/SelectRegisteredPatientDialog.svelte";
@@ -9,7 +9,8 @@
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
   import Popup from "@/lib/Popup.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
-
+  import { ViewportCoord } from "@/lib/viewport-coord";
+  import PopupMenu from "@/lib/PopupMenu.svelte";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -77,25 +78,32 @@
     const d: OnshiKakuninFormDialog = new OnshiKakuninFormDialog({
       target: document.body,
       props: {
-        destroy: () => d.$destroy()
-      }
+        destroy: () => d.$destroy(),
+      },
+    });
+  }
+
+  function doSelectPatientPopup(evt: MouseEvent) {
+    const m: PopupMenu = new PopupMenu({
+      target: document.body,
+      props: {
+        event: evt,
+        menu: [
+          ["受付患者選択", () => updateSelectPatientDialog("registered")],
+          ["患者検索", () => updateSelectPatientDialog("search")],
+          ["最近の診察", () => updateSelectPatientDialog("recent")],
+          ["予約患者", () => updateSelectPatientDialog("appoint")],
+          ["日付別", () => updateSelectPatientDialog("by-date")],
+        ],
+        destroy: () => m.$destroy(),
+      },
     });
   }
 </script>
 
 <ServiceHeader title="診察">
   <svelte:fragment>
-    <Popup let:destroy let:trigger>
-      <a
-        href="javascript:void(0);"
-        on:click={trigger}>患者選択</a
-      >
-      <SelectPatientMenu
-        slot="menu"
-        onSelect={updateSelectPatientDialog}
-        {destroy}
-      />
-    </Popup>
+    <a href="javascript:void(0);" on:click={doSelectPatientPopup}>患者選択</a>
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
