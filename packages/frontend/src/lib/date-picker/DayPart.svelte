@@ -1,8 +1,8 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import Popup from "../Popup.svelte";
   import { range_from_one_upto } from "../range";
   import DayPartPulldown from "./DayPartPulldown.svelte";
+  import { dayPartPulldown } from "./day-part-pulldown";
 
   export let day: number;
   export let gengou: string;
@@ -20,10 +20,9 @@
 </script>
 
 <span class="top">
-  <Popup let:destroy let:triggerClick>
-    <span on:click={triggerClick}>{day}</span><span>日</span>
-    <DayPartPulldown slot="menu" {destroy} dayList={calcDayList()} {day} {onChange}/>
-  </Popup>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span on:click={dayPartPulldown(calcDayList(), day, onChange)}>{day}</span><span>日</span>
+    <!-- <DayPartPulldown slot="menu" {destroy} dayList={calcDayList()} {day} {onChange}/> -->
 </span>
 
 <style>

@@ -34,9 +34,7 @@
   function open(e: HTMLElement) {
     const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
     const clickLocation = ViewportCoord.fromEvent(event);
-    console.log("click", clickLocation);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
-    console.log(e);
   }
 </script>
 
@@ -57,16 +55,6 @@
 
   .menu:focus {
     outline: none;
-  }
-
-  .menu a {
-    display: block;
-    /* color: black; */
-    line-height: 1;
-  }
-
-  .menu a + a {
-    margin-top: 4px;
   }
 
 </style>
