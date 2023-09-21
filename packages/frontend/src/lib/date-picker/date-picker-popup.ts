@@ -12,6 +12,7 @@ function defaultGengouList(): string[] {
 
 export function datePickerPopup(date: Date, onEnter: (d: Date) => void, opts: PopupOpts = {}): (e: MouseEvent) => void {
   return (e: MouseEvent) => {
+    console.log("e", e);
     const d: DatePickerPopup = new DatePickerPopup({
       target: document.body,
       props: {

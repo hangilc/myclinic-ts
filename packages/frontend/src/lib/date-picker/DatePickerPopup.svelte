@@ -32,12 +32,41 @@
   let context: PopupContext | undefined = undefined;
 
   function open(e: HTMLElement) {
-    const anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
     const clickLocation = ViewportCoord.fromEvent(event);
+    console.log("click", clickLocation);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
+    console.log(e);
   }
 </script>
 
-<div use:open>
+<div use:open class="menu">
   <DatePicker {date} {gengouList} onCancel={doCancel} onEnter={doEnter}/>
 </div>
+
+<style>
+  .menu {
+    position: absolute;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    background-color: white;
+    opacity: 1;
+  }
+
+  .menu:focus {
+    outline: none;
+  }
+
+  .menu a {
+    display: block;
+    /* color: black; */
+    line-height: 1;
+  }
+
+  .menu a + a {
+    margin-top: 4px;
+  }
+
+</style>
