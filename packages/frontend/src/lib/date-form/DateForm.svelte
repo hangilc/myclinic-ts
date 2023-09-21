@@ -11,7 +11,7 @@
     updateValues(value);
   }
   let dispatch = createEventDispatcher<{ "value-change": void }>();
-  let gengou: string = gengouList.length > 0 ? gengouList[0] : "";;
+  let gengou: string = gengouList.length > 0 ? gengouList[0] : "";
   let nen: string;
   let month: string;
   let day: string;
@@ -85,9 +85,15 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="top date-form">
   <div class="inputs">
-    <select bind:value={gengou} class="gengou" on:change={doInputChange} data-cy="gengou-select">
+    <select
+      bind:value={gengou}
+      class="gengou"
+      on:change={doInputChange}
+      data-cy="gengou-select"
+    >
       {#each gengouList as g}
         <option data-cy="gengou-option">{g}</option>
       {/each}
@@ -107,7 +113,7 @@
       on:change={doInputChange}
       data-cy="month-input"
     />
-    <span on:click={doMonthClick} class="month-span" >月</span>
+    <span on:click={doMonthClick} class="month-span">月</span>
     <input
       type="text"
       class="day"
@@ -115,7 +121,7 @@
       on:change={doInputChange}
       data-cy="day-input"
     />
-    <span on:click={doDayClick} class="day-span" >日</span>
+    <span on:click={doDayClick} class="day-span">日</span>
   </div>
 </div>
 
