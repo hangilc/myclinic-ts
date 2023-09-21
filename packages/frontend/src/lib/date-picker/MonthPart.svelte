@@ -1,5 +1,4 @@
 <script lang="ts">
-import MonthPulldown from "./MonthPulldown.svelte";
   import { monthPulldown } from "./month-pulldown";
 
   export let month: number;

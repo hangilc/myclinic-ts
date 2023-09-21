@@ -58,4 +58,18 @@
   .menu:focus {
     outline: none;
   }
+
+  .menu {
+    position: absolute;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    background-color: white;
+    opacity: 1;
+  }
+
+  .menu:focus {
+    outline: none;
+  }
 </style>

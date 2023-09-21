@@ -1,12 +1,9 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
-  import GengouPulldown from "./GengouPulldown.svelte";
   import { gengouPulldown } from "./gengou-pulldown";
-
 
   export let gengou: string;
   export let gengouList: string[];
-  // let anchor: HTMLElement;
   export let onChange: (gengou: string) => void;
 
   let selected: Writable<string> = writable(gengou);

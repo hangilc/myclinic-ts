@@ -1,7 +1,6 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
   import * as kanjidate from "kanjidate";
-  import NenPulldown from "./NenPulldown.svelte";
   import { nenPulldown } from "./nen-pulldown";
 
   export let nen: number;
