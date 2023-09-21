@@ -58,7 +58,7 @@
       stroke-width="1.5"
       stroke="gray"
       width="1.3em"
-      on:click={datePickerPopup(resolvePickerDefault(), setValue)}
+      on:click={datePickerPopup(resolvePickerDefault, setValue)}
     >
       <path
         stroke-linecap="round"

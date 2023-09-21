@@ -21,7 +21,7 @@
 
 <span class="top">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <span on:click={dayPartPulldown(calcDayList(), day, onChange)}>{day}</span><span>日</span>
+    <span on:click={dayPartPulldown(calcDayList, () => day, onChange)}>{day}</span><span>日</span>
     <!-- <DayPartPulldown slot="menu" {destroy} dayList={calcDayList()} {day} {onChange}/> -->
 </span>
 
