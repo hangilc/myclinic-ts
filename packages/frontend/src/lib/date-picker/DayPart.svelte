@@ -1,7 +1,6 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
   import { range_from_one_upto } from "../range";
-  import DayPartPulldown from "./DayPartPulldown.svelte";
   import { dayPartPulldown } from "./day-part-pulldown";
 
   export let day: number;

@@ -21,21 +21,16 @@
   let setFormValue: (value: Date | null) => void;
 
   function resolvePickerDefault(): Date {
-    if (init) {
-      return init;
+    const vs = validate();
+    if (vs.isValid) {
+      if (vs.value === null) {
+        return datePickerDefault();
+      } else {
+        return vs.value;
+      }
     } else {
       return datePickerDefault();
     }
-    // const vs = validate();
-    // if (vs.isValid) {
-    //   if (vs.value === null) {
-    //     return datePickerDefault();
-    //   } else {
-    //     return vs.value;
-    //   }
-    // } else {
-    //   return datePickerDefault();
-    // }
   }
 </script>
 

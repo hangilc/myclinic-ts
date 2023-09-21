@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Popup from "../Popup.svelte";
 import MonthPulldown from "./MonthPulldown.svelte";
+  import { monthPulldown } from "./month-pulldown";
 
   export let month: number;
   export let onChange: (month: number) => void;
@@ -9,10 +9,9 @@ import MonthPulldown from "./MonthPulldown.svelte";
 </script>
 
 <span class="top">
-  <Popup let:destroy let:trigger>
-    <span on:click={trigger}>{month}</span><span>月</span>
-    <MonthPulldown slot="menu" {onChange} {month} {destroy}/>
-  </Popup>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span on:click={monthPulldown(() => month, onChange)}>{month}</span><span>月</span>
+    <!-- <MonthPulldown slot="menu" {onChange} {month} {destroy}/> -->
 </span>
 
 <style>
