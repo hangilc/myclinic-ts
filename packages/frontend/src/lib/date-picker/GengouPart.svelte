@@ -1,12 +1,10 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
-  import Popup from "../Popup.svelte";
-  import GengouPulldown from "./GengouPulldown.svelte";
+  import { gengouPulldown } from "./gengou-pulldown";
 
 
   export let gengou: string;
   export let gengouList: string[];
-  // let anchor: HTMLElement;
   export let onChange: (gengou: string) => void;
 
   let selected: Writable<string> = writable(gengou);
@@ -15,10 +13,10 @@
 </script>
 
 <span class="top">
-  <Popup let:destroy let:trigger>
-    <span on:click={trigger}>{gengou}</span>
-    <GengouPulldown slot="menu" {destroy} {selected} {gengouList}/>
-  </Popup>
+    <!-- svelte-ignore missing-declaration -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <span on:click={gengouPulldown(selected, { gengouList })}>{gengou}</span>
+    <!-- <GengouPulldown slot="menu" {destroy} {selected} {gengouList}/> -->
 </span>
 
 <style>

@@ -9,6 +9,7 @@
   export let onEnter: (d: Date) => void;
   export let onCancel: () => void = () => {};
   export let event: MouseEvent;
+  let context: PopupContext | undefined = undefined;
 
   event.preventDefault();
 
@@ -29,7 +30,6 @@
     onCancel();
   }
 
-  let context: PopupContext | undefined = undefined;
 
   function open(e: HTMLElement) {
     const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;

@@ -49,18 +49,14 @@ export function locateContextMenu(
 ): [number, number] {
   const { x, y } = clickLocation;
   const anchorRect = anchor.getBoundingClientRect();
-  console.log("anchorRect", anchorRect);
   const [dx, dy] = [x - anchorRect.x, y - anchorRect.y];
-  console.log("dx, dy", dx, dy);
   const eleRect = ele.getBoundingClientRect();
   const win = document.documentElement;
   function setLeft(left: number): void {
     ele.style.left = window.scrollX + x + left + "px";
-    console.log("ele left", ele.style.left);
   }
   function setTop(top: number): void {
     ele.style.top = window.scrollY + y + top + "px";
-    console.log("ele top", ele.style.top);
   }
   if (x + eleRect.width > win.clientWidth - 4) {
     setLeft(x - eleRect.width);
