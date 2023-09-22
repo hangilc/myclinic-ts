@@ -29,12 +29,16 @@
   function doEnter(): void {
     const vs = validate();
     if( vs.isValid ){
-      destroy();
+      popupDestroy();
       onEnter(vs.value);
       errors = [];
     } else {
       errors = errorMessagesOf(vs.errors);
     }
+  }
+
+  function doCancel() {
+    popupDestroy();
   }
 
   function doFormChange(): void {
@@ -59,7 +63,7 @@
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>
-    <button on:click={destroy}>キャンセル</button>
+    <button on:click={doCancel}>キャンセル</button>
   </div>
 </div>
 

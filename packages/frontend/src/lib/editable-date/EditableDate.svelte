@@ -38,8 +38,8 @@
       slot="menu"
       date={date || datePickerDefault()}
       {destroy}
-      onEnter={doChange} -->
-    />
+      onEnter={doChange}
+    /> -->
 </div>
 
 <style>
