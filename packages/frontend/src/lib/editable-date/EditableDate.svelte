@@ -25,16 +25,18 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore missing-declaration -->
 <div class="disp">
-    <span class="repr" on:click={dateFormPulldown(() => date, doChange)}>{format(date)}</span>
-    <!-- <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} /> -->
+  <span class="repr" on:click={dateFormPulldown(() => date, doChange)}
+    >{format(date)}</span
+  >
+  <!-- <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} /> -->
   <slot name="icons" />
-    <CalendarIcon
-      dy="0px"
-      dx="4px"
-      onClick={datePickerPopup(() => date || datePickerDefault(), doChange)}
-      style="cursor: pointer;"
-    />
-    <!-- <DatePicker
+  <CalendarIcon
+    dy="0px"
+    dx="4px"
+    onClick={datePickerPopup(() => date || datePickerDefault(), doChange)}
+    style="cursor: pointer;"
+  />
+  <!-- <DatePicker
       slot="menu"
       date={date || datePickerDefault()}
       {destroy}

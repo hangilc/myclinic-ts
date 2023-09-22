@@ -5,7 +5,7 @@ export function dateFormPulldown(init: () => Date | null, onEnter: (d: Date | nu
     const d: DateFormPulldown = new DateFormPulldown({
       target: document.body,
       props: {
-        destroy: () => d.$destroy,
+        destroy: () => d.$destroy(),
         event,
         init: init(),
         onEnter,
