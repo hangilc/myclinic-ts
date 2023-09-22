@@ -54,9 +54,11 @@ export function locateContextMenu(
   const win = document.documentElement;
   function setLeft(left: number): void {
     ele.style.left = window.scrollX + x + left + "px";
+    console.log("setLeft", ele.style.left);
   }
   function setTop(top: number): void {
     ele.style.top = window.scrollY + y + top + "px";
+    console.log("setTop", ele.style.top);
   }
   if (x + eleRect.width > win.clientWidth - 4) {
     setLeft(x - eleRect.width);

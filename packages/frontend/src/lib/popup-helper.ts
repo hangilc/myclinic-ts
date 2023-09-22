@@ -30,8 +30,7 @@ export function popupTriggerAdmin(
 export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): (event: MouseEvent) => void {
   return async (event: MouseEvent) => {
     const m = await menu();
-    console.log(event);
-    console.log(m);
+    console.log("event", event);
     const p: PopupMenu = new PopupMenu({
       target: document.body,
       props: {

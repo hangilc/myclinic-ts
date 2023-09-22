@@ -19,6 +19,7 @@
 
   function open(e: HTMLElement) {
     const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
+    console.log("anchor", anchor);
     const clickLocation = ViewportCoord.fromEvent(event);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
   }
