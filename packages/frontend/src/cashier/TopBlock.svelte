@@ -66,7 +66,7 @@
   </form>
   <button on:click={doNewPatient}>新規患者</button>
   <button on:click={doListFaceConfirm}>顔認証一覧</button>
-    <a href="javascript:void(0)" class="records-link" on:click={popupTrigger([
+    <a href="javascript:void(0)" class="records-link" on:click={popupTrigger(() => [
       ["患者検索", recordPulldown.doSearch],
       ["最近の診察", recordPulldown.doRecentVisit],
       ["日付別", recordPulldown.doByDate],
@@ -75,7 +75,7 @@
     >
     <!-- <RecordsPulldown slot="menu" {destroy}/> -->
 
-    <Bars3 onClick={popupTrigger([
+    <Bars3 onClick={popupTrigger(() => [
       ["未収処理", auxMenu.doMishuu],
       ["手書き領収書印刷", auxMenu.doBlankReceipt],
     ])} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"

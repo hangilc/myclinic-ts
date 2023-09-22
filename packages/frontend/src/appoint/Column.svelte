@@ -35,7 +35,7 @@
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       class={`date ${data.op.code}`}
-      on:contextmenu={popupTrigger([
+      on:contextmenu={popupTrigger(() => [
         ["予約枠追加", () => doAddAppointTime(data.date, data.appointTimes)],
         ["資格確認", () => doOnshiConfirm(data.date, data.appointTimes)],
       ])}

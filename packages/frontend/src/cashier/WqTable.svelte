@@ -90,7 +90,7 @@
             viewBox="0 0 24 24"
             stroke="currentColor"
             stroke-width="2"
-            on:click={popupTrigger([
+            on:click={popupTrigger(() => [
               ["患者", () => auxMenu.doPatient(patient)],
               ["削除", () => auxMenu.doDeleteVisit(visit)],
             ])}

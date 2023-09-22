@@ -5,7 +5,6 @@
   import api from "@/lib/api";
   import EventHistoryDialog from "./EventHistoryDialog.svelte";
   import { Appoint, type AppEvent, type AppointTime } from "myclinic-model";
-  import { popupTrigger, popupTriggerAdmin } from "@/lib/popup-helper";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;

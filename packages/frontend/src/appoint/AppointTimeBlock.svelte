@@ -179,7 +179,7 @@
   <div
     class="time-box"
     on:click={doTimeBoxClick}
-    on:contextmenu={popupTrigger([
+    on:contextmenu={popupTrigger(() => [
       ["変更履歴", () => doHistoryDialog()],
       ...adminMenus,
     ])}

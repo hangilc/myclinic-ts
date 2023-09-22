@@ -11,8 +11,8 @@
   import { onDestroy } from "svelte";
   import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
   import { printApi } from "../printApi";
-  import Popup from "../Popup.svelte";
   import type { EventEmitter } from "../event-emitter";
+  import { popupTrigger } from "../popup-helper";
 
   export let sendAs: string;
   export let sendTo: string;
@@ -148,8 +148,13 @@
   function doBeep(): void {
     api.hotlineBeep(sendTo);
   }
+
+  function composeRegulars(): [string, () => void][] {
+    return regulars.map(r => [stripPlaceholder(r), () => insertIntoMessage(r)]);
+  }
 </script>
 
+<!-- svelte-ignore missing-declaration -->
 <div class="top hotline">
   <textarea bind:this={hotlineInput} class="input-textarea" />
   <div class="commands">
@@ -157,13 +162,12 @@
     <button on:click={doRoger}>了解</button>
     <button on:click={doBeep}>Beep</button>
     <div class="link-commands">
-      <Popup let:destroy let:trigger>
         <a
           href="javascript:void(0)"
-          on:click={trigger}
+          on:click={popupTrigger(composeRegulars)}
           >常用</a
         >
-        <div slot="menu" class="popup-menu">
+        <!-- <div slot="menu" class="popup-menu">
           {#each regulars as r}
             <a
               href="javascript:void(0)"
@@ -175,15 +179,13 @@
               {stripPlaceholder(r)}
             </a>
           {/each}
-        </div>
-      </Popup>
-      <Popup let:destroy let:trigger triggerHook={setupPatients}>
+        </div> -->
         <a
           href="javascript:void(0)"
-          on:click={trigger}
+          on:click={() => {}}
           >患者</a
         >
-        <div slot="menu" class="popup-menu">
+        <!-- <div slot="menu" class="popup-menu">
           {#each wqPatients as p}
             <a
               href="javascript:void(0)"
@@ -193,8 +195,7 @@
               }}>{p.lastName} {p.firstName}</a
             >
           {/each}
-        </div>
-      </Popup>
+        </div> -->
     </div>
   </div>
   <div class="messages">

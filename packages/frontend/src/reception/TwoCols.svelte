@@ -3,14 +3,10 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
-  import { showError } from "@/lib/show-error";
   import { hotlineTrigger } from "./reception-vars";
 
   const service = writable("main");
 
-  function doDialog(): void {
-    showError("メッセージ");
-  }
 </script>
 
 <div class="two-cols">
@@ -21,7 +17,6 @@
     <div class="left-box">
       <Hotline sendAs="reception" sendTo="practice" messageTrigger={hotlineTrigger}/>
     </div>
-    <button on:click={doDialog}>Dialog</button>
   </div>
   <div class="right"><Main serviceStore={service} /></div>
 </div>
