@@ -9,6 +9,7 @@
 
   event.preventDefault();
 
+
   function popupDestroy() {
     if (context) {
       context?.destroy();
@@ -17,7 +18,7 @@
   }
 
   function open(e: HTMLElement) {
-    const anchor = event.currentTarget as HTMLElement | SVGSVGElement;
+    const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
     const clickLocation = ViewportCoord.fromEvent(event);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
   }

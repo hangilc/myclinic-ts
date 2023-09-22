@@ -12,7 +12,7 @@
   import { getRegulars, hotlineNameRep } from "@/lib/hotline/hotline-config";
   import { printApi } from "../printApi";
   import type { EventEmitter } from "../event-emitter";
-  import { popupTrigger } from "../popup-helper";
+  import { popupTrigger, popupTriggerAsync } from "../popup-helper";
 
   export let sendAs: string;
   export let sendTo: string;
@@ -153,7 +153,8 @@
     return regulars.map(r => [stripPlaceholder(r), () => insertIntoMessage(r)]);
   }
 
-  function composePatients(): [string, () => void][] {
+  async function composePatients(): Promise<[string, () => void][]> {
+    await setupPatients();
     return wqPatients.map(p => [p.fullName(" "), () => insertPatient(p)]);
   }
 </script>
@@ -173,7 +174,7 @@
         >
         <a
           href="javascript:void(0)"
-          on:click={composePatients}
+          on:click={popupTriggerAsync(composePatients)}
           >患者</a
         >
         <!-- <div slot="menu" class="popup-menu">
