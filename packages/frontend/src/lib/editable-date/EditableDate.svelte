@@ -1,9 +1,9 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import DateFormPulldown from "../date-form/DateFormPulldown.svelte";
   import DatePicker from "../date-picker/DatePicker.svelte";
-  import Popup from "../Popup.svelte";
   import CalendarIcon from "../../icons/CalendarIcon.svelte";
+  import { dateFormPulldown } from "../date-form/date-form-pulldown";
+  import { datePickerPopup } from "../date-picker/date-picker-popup";
 
   export let date: Date | null;
   export let format: (date: Date | null) => string = (date: Date | null) => {
@@ -22,26 +22,24 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore missing-declaration -->
 <div class="disp">
-  <Popup let:destroy let:trigger>
-    <span class="repr" on:click={trigger}>{format(date)}</span>
-    <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} />
-  </Popup>
+    <span class="repr" on:click={dateFormPulldown(() => date, doChange)}>{format(date)}</span>
+    <!-- <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} /> -->
   <slot name="icons" />
-  <Popup let:destroy let:triggerClick>
     <CalendarIcon
       dy="0px"
       dx="4px"
-      onClick={triggerClick}
+      onClick={datePickerPopup(() => date || datePickerDefault(), doChange)}
       style="cursor: pointer;"
     />
-    <DatePicker
+    <!-- <DatePicker
       slot="menu"
       date={date || datePickerDefault()}
       {destroy}
-      onEnter={doChange}
+      onEnter={doChange} -->
     />
-  </Popup>
 </div>
 
 <style>

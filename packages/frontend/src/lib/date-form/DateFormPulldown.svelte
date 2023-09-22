@@ -1,12 +1,30 @@
 <script lang="ts">
+  import { PopupContext } from "../popup-context";
   import { errorMessagesOf, VResult } from "../validation";
+  import { ViewportCoord } from "../viewport-coord";
   import DateForm from "./DateForm.svelte";
 
   export let init: Date | null;
   export let destroy: () => void;
   export let onEnter: (value: Date | null) => void;
+  export let event: MouseEvent;
+  let context: PopupContext | undefined = undefined;
+
   let validate: () => VResult<Date | null>;
   let errors: string[] = [];
+
+  function popupDestroy() {
+    if (context) {
+      context?.destroy();
+    }
+    destroy();
+  }
+
+  function open(e: HTMLElement) {
+    const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
+    const clickLocation = ViewportCoord.fromEvent(event);
+    context = new PopupContext(anchor, e, clickLocation, popupDestroy);
+  }
 
   function doEnter(): void {
     const vs = validate();
@@ -29,7 +47,7 @@
   }
 </script>
 
-<div>
+<div class="menu" use:open>
   {#if errors.length > 0}
   <div class="error">
     {#each errors as e}
@@ -46,6 +64,20 @@
 </div>
 
 <style>
+  .menu {
+    position: absolute;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid gray;
+    background-color: white;
+    opacity: 1;
+  }
+
+  .menu:focus {
+    outline: none;
+  }
+
   .error {
     color: red;
     margin-bottom: 6px;
