@@ -1,3 +1,4 @@
+import { ElderlyRecipientCertificateInfo } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { ViewportCoord } from "./viewport-coord";
 
 export function locatePulldown(
@@ -49,27 +50,26 @@ export function locateContextMenu(
 ): [number, number] {
   const { x, y } = clickLocation;
   const anchorRect = anchor.getBoundingClientRect();
-  const [dx, dy] = [x - anchorRect.x, y - anchorRect.y];
+  let [dx, dy] = [x - anchorRect.x + 4, y - anchorRect.y + 4];
   const eleRect = ele.getBoundingClientRect();
   const win = document.documentElement;
-  function setLeft(left: number): void {
-    ele.style.left = window.scrollX + x + left + "px";
+
+  function setLeft(dx: number): void {
+    ele.style.left = window.scrollX + anchorRect.x + dx + "px";
     console.log("setLeft", ele.style.left);
   }
-  function setTop(top: number): void {
-    ele.style.top = window.scrollY + y + top + "px";
+  function setTop(dy: number): void {
+    ele.style.top = window.scrollY + anchorRect.y + dy + "px";
     console.log("setTop", ele.style.top);
   }
-  if (x + eleRect.width > win.clientWidth - 4) {
-    setLeft(x - eleRect.width);
-  } else {
-    setLeft(4);
+
+  if( anchorRect.x + dx + eleRect.width > win.clientWidth ){
+    dx = - eleRect.width - 4;
   }
-  if (y + eleRect.height > win.clientHeight - 4) {
-    setTop(-eleRect.height - 4);
-  } else {
-    setTop(4);
+  if( anchorRect.y + dy + eleRect.height > win.clientHeight ){
+    dy = - eleRect.height - 4;
   }
+  setLeft(dx);
+  setTop(dy);
   return [dx, dy];
 }
-
