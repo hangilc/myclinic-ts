@@ -5,6 +5,7 @@
   import api from "@/lib/api";
   import EventHistoryDialog from "./EventHistoryDialog.svelte";
   import { Appoint, type AppEvent, type AppointTime } from "myclinic-model";
+  import { popupTriggerAdmin } from "@/lib/popup-helper";
 
   export let onCreateAppoints: () => void;
   export let onMoveWeeks: (n: number) => void;
@@ -66,9 +67,9 @@
     <a href="javascript:void(0)" on:click={doSearch}>予約検索</a>
     <Bars3
       onClick={popupTriggerAdmin(
-        isAdmin,
-        [["予約枠わりあて", doAlloc]],
-        [["変更履歴", doEventLog]]
+        () => isAdmin,
+        () => [["予約枠わりあて", doAlloc]],
+        () => [["変更履歴", doEventLog]]
       )}
       style="cursor: pointer;"
       dy="-2px"
