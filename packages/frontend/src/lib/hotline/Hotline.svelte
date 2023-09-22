@@ -152,6 +152,10 @@
   function composeRegulars(): [string, () => void][] {
     return regulars.map(r => [stripPlaceholder(r), () => insertIntoMessage(r)]);
   }
+
+  function composePatients(): [string, () => void][] {
+    return wqPatients.map(p => [p.fullName(" "), () => insertPatient(p)]);
+  }
 </script>
 
 <!-- svelte-ignore missing-declaration -->
@@ -167,22 +171,9 @@
           on:click={popupTrigger(composeRegulars)}
           >常用</a
         >
-        <!-- <div slot="menu" class="popup-menu">
-          {#each regulars as r}
-            <a
-              href="javascript:void(0)"
-              on:click={() => {
-                destroy();
-                insertIntoMessage(r);
-              }}
-            >
-              {stripPlaceholder(r)}
-            </a>
-          {/each}
-        </div> -->
         <a
           href="javascript:void(0)"
-          on:click={() => {}}
+          on:click={composePatients}
           >患者</a
         >
         <!-- <div slot="menu" class="popup-menu">

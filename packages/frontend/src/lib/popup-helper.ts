@@ -26,3 +26,18 @@ export function popupTriggerAdmin(
   }
   return popupTrigger(f);
 }
+
+export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): (event: MouseEvent) => void {
+  return async (event: MouseEvent) => {
+    const p: PopupMenu = new PopupMenu({
+      target: document.body,
+      props: {
+        destroy: () => p.$destroy(),
+        menu: await menu(),
+        event
+      }
+    });
+  }
+}
+
+
