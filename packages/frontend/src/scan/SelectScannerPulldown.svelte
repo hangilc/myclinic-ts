@@ -1,4 +1,18 @@
 <script lang="ts">
+  import Popup from "@/lib/Popup.svelte";
+  import { contextMenuLocator } from "@/lib/popup-helper";
+  import type { ScannerDevice } from "myclinic-model/model";
+
+  export let destroy: () => void;
+  export let event: MouseEvent;
+  export let list: ScannerDevice[];
+</script>
+
+<Popup let:dispose {destroy} locator={contextMenuLocator(event)}>
+  <button on:click={dispose}>close</button>
+</Popup>
+
+<!-- <script lang="ts">
   import SelectItem2 from "@/lib/SelectItem2.svelte";
   import type { ScannerDevice } from "myclinic-model/model";
 
@@ -20,4 +34,4 @@
       >{d.description}</SelectItem2
     >
   {/each}
-</div>
+</div> -->

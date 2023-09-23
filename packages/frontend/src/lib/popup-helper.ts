@@ -1,4 +1,6 @@
 import PopupMenu from "./PopupMenu.svelte"
+import { alloc, release } from "./zindex";
+import Screen from "./Screen.svelte";
 
 export function popupTrigger(menu: () => [string, () => void][]): (event: MouseEvent) => void {
   return (event: MouseEvent) => {
@@ -39,6 +41,57 @@ export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): 
         event
       }
     });
+  }
+}
+
+type Locator = (e: HTMLElement) => (() => void);
+
+type ContextMenuOpt = {
+  offsetX?: number,
+  offsetY?: number;
+}
+
+class PopupContext {
+  zIndexScreen: number;
+  zIndexMenu: number;
+  screen: Screen;
+  resizeHandler: ((e: UIEvent) => void) | undefined = undefined;
+
+  constructor(e: HTMLElement, screenClickHandler: () => void) {
+    this.zIndexScreen = alloc();
+    this.zIndexMenu = alloc();
+    this.screen = new Screen({
+      target: document.body,
+      props: {
+        zIndex: this.zIndexScreen,
+        onClick: () => {
+          screenClickHandler();
+        },
+        opacity: "0",
+      },
+    });
+  }
+
+  discard() {
+    if (this.resizeHandler) {
+      window.removeEventListener("resize", this.resizeHandler);
+    }
+    this.screen.$destroy();
+    release(this.zIndexMenu);
+    release(this.zIndexScreen);
+  }
+}
+
+export function contextMenuLocator(event: MouseEvent, discard: () => void, opt: ContextMenuOpt = {}): Locator {
+  return (e: HTMLElement) => {
+    const offsetX = opt.offsetX ?? 4;
+    const offsetY = opt.offsetY ?? 4;
+    const clickX = event.clientX;
+    const clickY = event.clientY;
+    const ctx = new PopupContext(e, discard);
+    e.style.left = window.scrollX + clickX + offsetX + "px";
+    e.style.top = window.scrollY + clickY + offsetY + "px";
+    return () => { };
   }
 }
 

@@ -116,6 +116,17 @@
       close();
     }
   }
+
+  function doScannerPopup(event: MouseEvent) {
+    const d: SelectScannerPulldown = new SelectScannerPulldown({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        event,
+        list: scannerList,
+      }
+    })
+  }
 </script>
 
 <div class="top" data-cy="scan-block">
@@ -136,7 +147,7 @@
   <div class="title">スキャナー</div>
   <div class="work" data-cy="scanner-selection-workarea">
     <span data-cy="scanner-text">{scannerText}</span>
-      <a href="javascript:void(0)" on:click={popupTrigger(() => [])}>選択</a>
+      <a href="javascript:void(0)" on:click={doScannerPopup}>選択</a>
       <!-- <SelectScannerPulldown slot="menu" {destroy} list={scannerList}
         current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/> -->
   </div>
