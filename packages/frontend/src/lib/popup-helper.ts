@@ -44,7 +44,7 @@ export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): 
   }
 }
 
-type Locator = (e: HTMLElement) => (() => void);
+type Locator = (e: HTMLElement, dispose: () => void) => (() => void);
 
 type ContextMenuOpt = {
   offsetX?: number,
@@ -83,16 +83,16 @@ class PopupContext {
   }
 }
 
-export function contextMenuLocator(event: MouseEvent, discard: () => void, opt: ContextMenuOpt = {}): Locator {
-  return (e: HTMLElement) => {
+export function contextMenuLocator(event: MouseEvent, opt: ContextMenuOpt = {}): Locator {
+  return (e: HTMLElement, dispose: () => void) => {
     const offsetX = opt.offsetX ?? 4;
     const offsetY = opt.offsetY ?? 4;
     const clickX = event.clientX;
     const clickY = event.clientY;
-    const ctx = new PopupContext(e, discard);
+    const ctx = new PopupContext(e, dispose);
     e.style.left = window.scrollX + clickX + offsetX + "px";
     e.style.top = window.scrollY + clickY + offsetY + "px";
-    return () => { };
+    return () => ctx.discard();
   }
 }
 

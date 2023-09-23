@@ -3,7 +3,7 @@
   import { ViewportCoord } from "./viewport-coord";
 
   export let destroy: () => void;
-  export let locator: (e: HTMLElement) => (() => void);
+  export let locator: (e: HTMLElement, dispose: () => void) => (() => void);
   
   let discard: () => void = () => {};
   // async function trigger(event: MouseEvent) {
@@ -27,7 +27,7 @@
   }
 
   function open(e: HTMLElement): void {
-    discard = locator(e);
+    discard = locator(e, dispose);
   }
 
   function doMenuKey(event: KeyboardEvent): void {

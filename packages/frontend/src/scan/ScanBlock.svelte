@@ -124,6 +124,8 @@
         destroy: () => d.$destroy(),
         event,
         list: scannerList,
+        current: manager.scanDevice,
+        onSelect: (d) => manager.setDevice(d),
       }
     })
   }

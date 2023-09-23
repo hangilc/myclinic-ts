@@ -7,6 +7,8 @@
   export let destroy: () => void;
   export let event: MouseEvent;
   export let list: ScannerDevice[];
+  export let current: ScannerDevice | undefined;
+  export let onSelect: (d: ScannerDevice) => void;
 </script>
 
 <Popup let:dispose {destroy} locator={contextMenuLocator(event)}>
@@ -14,7 +16,7 @@
     <SelectItem2
       data={d}
       isCurrent={d === current}
-      onSelect={doSelect}
+      onSelect={(d) => { dispose(); onSelect(d)}}
       dataCy="scanner-item"
       dataId={encodeURIComponent(d.deviceId)}>{d.description}</SelectItem2
     >
