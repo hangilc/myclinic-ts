@@ -13,9 +13,9 @@
   import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
   import type { Meisai, VisitEx } from "myclinic-model";
-  import Popup from "@/lib/Popup.svelte";
   import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
   import { calcGendogaku } from "@/lib/gendogaku";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let visit: VisitEx;
 
@@ -78,6 +78,26 @@
     }
   }
 
+  function composeMenu(): [string, () => void][] {
+    const m: [string, () => void][] = [];
+    function add(label: string, action: () => void) {
+      m.push([label, action]);
+    }
+    add("この診察を削除", doDeleteVisit);
+    if( visit.visitId !== $tempVisitId ){
+      add("暫定診察に設定", doSetTempVisitId);
+    } else {
+      add("暫定診察の解除", doClearTempVisitId);
+    }
+    add("診療明細", doMeisai);
+    add("負担割オーバーライド", doFutanwariOverride);
+    if( isMishuu(visit) ){
+      add("未収リストへ", doMishuuList);
+    }
+    add("限度額", doGendogaku);
+    return m;
+  }
+
 </script>
 
 <div
@@ -87,11 +107,10 @@
 >
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
-  <Popup let:destroyAnd let:trigger>
-    <a href="javascript:void(0)" on:click={trigger}
+    <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
       >操作</a
     >
-    <div slot="menu" class="popup-menu">
+    <!-- <div slot="menu" class="popup-menu">
       <a href="javascript:void(0)" on:click={destroyAnd(doDeleteVisit)}
         >この診察を削除</a
       >
@@ -114,8 +133,7 @@
         <a href="javascript:void(0)" on:click={destroyAnd(doMishuuList)}>未収リストへ</a>
       {/if}
       <a href="javascript:void(0)" on:click={destroyAnd(doGendogaku)}>限度額</a>
-    </div>
-  </Popup>
+    </div> -->
 </div>
 
 {#if showMeisai}

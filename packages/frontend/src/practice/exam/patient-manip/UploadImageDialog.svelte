@@ -4,7 +4,7 @@
   import { pad } from "@/lib/pad";
   import { currentPatient } from "../ExamVars";
   import api from "@/lib/api";
-  import Popup from "@/lib/Popup.svelte";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let destroy: () => void;
   const initTag = "other";
@@ -85,11 +85,10 @@
 <Dialog {destroy} title="画像保存">
   <div class="tag-wrapper">
     Tag: <input type="text" bind:value={tag} />
-    <Popup let:destroy let:trigger>
-      <a href="javascript:void(0)" on:click={trigger}
-        >例</a
-      >
-      <div class="popup-menu" slot="menu">
+    <a href="javascript:void(0)" on:click={popupTrigger(() => examples.map(e => [
+      e[0], () => tag = e[1]
+    ]))}>例</a>
+    <!-- <div class="popup-menu" slot="menu">
         {#each examples as e}
           <a
             href="javascript:void(0)"
@@ -99,8 +98,7 @@
             }}>{e[0]}</a
           >
         {/each}
-      </div>
-    </Popup>
+      </div> -->
   </div>
   <form>
     <input type="file" bind:this={fileInput} multiple />
