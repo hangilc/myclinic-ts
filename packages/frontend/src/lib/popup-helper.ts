@@ -5,6 +5,15 @@ import Screen from "./Screen.svelte";
 export type PopupMenuItemOpt = {
   modifier?: (a: HTMLAnchorElement) => void;
 }
+
+export function dataCySetter(value: string): PopupMenuItemOpt {
+  return {
+    modifier: (a: HTMLAnchorElement) => {
+      a.setAttribute("data-cy", value);
+    }
+  }
+}
+
 export type PopupMenuItem = [string, () => void, PopupMenuItemOpt?]
 
 export function popupTrigger(menu: () => PopupMenuItem[]): (event: MouseEvent) => void {

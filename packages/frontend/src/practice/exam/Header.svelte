@@ -1,6 +1,5 @@
 <script lang="ts">
   import ServiceHeader from "../../ServiceHeader.svelte";
-  import SelectPatientMenu from "./SelectPatientMenu.svelte";
   import SelectRegisteredPatientDialog from "./select-patient-dialogs/SelectRegisteredPatientDialog.svelte";
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
@@ -9,6 +8,7 @@
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
   import PopupMenu from "@/lib/PopupMenu.svelte";
+  import { dataCySetter } from "@/lib/popup-helper";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -88,7 +88,7 @@
         event: evt,
         menu: [
           ["受付患者選択", () => updateSelectPatientDialog("registered")],
-          ["患者検索", () => updateSelectPatientDialog("search")],
+          ["患者検索", () => updateSelectPatientDialog("search"), dataCySetter("select-patient-menu")],
           ["最近の診察", () => updateSelectPatientDialog("recent")],
           ["予約患者", () => updateSelectPatientDialog("appoint")],
           ["日付別", () => updateSelectPatientDialog("by-date")],
@@ -101,7 +101,7 @@
 
 <ServiceHeader title="診察">
   <svelte:fragment>
-    <a href="javascript:void(0);" on:click={doSelectPatientPopup}>患者選択</a>
+    <a href="javascript:void(0);" on:click={doSelectPatientPopup} data-cy="select-patient-menu">患者選択</a>
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
