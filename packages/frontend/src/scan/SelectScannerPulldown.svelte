@@ -1,5 +1,6 @@
 <script lang="ts">
   import Popup from "@/lib/Popup.svelte";
+  import SelectItem2 from "@/lib/SelectItem2.svelte";
   import { contextMenuLocator } from "@/lib/popup-helper";
   import type { ScannerDevice } from "myclinic-model/model";
 
@@ -9,7 +10,15 @@
 </script>
 
 <Popup let:dispose {destroy} locator={contextMenuLocator(event)}>
-  <button on:click={dispose}>close</button>
+  {#each list as d}
+    <SelectItem2
+      data={d}
+      isCurrent={d === current}
+      onSelect={doSelect}
+      dataCy="scanner-item"
+      dataId={encodeURIComponent(d.deviceId)}>{d.description}</SelectItem2
+    >
+  {/each}
 </Popup>
 
 <!-- <script lang="ts">

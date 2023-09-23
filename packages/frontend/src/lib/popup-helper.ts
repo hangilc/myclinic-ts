@@ -70,6 +70,7 @@ class PopupContext {
         opacity: "0",
       },
     });
+    e.style.zIndex = this.zIndexMenu.toString();
   }
 
   discard() {
