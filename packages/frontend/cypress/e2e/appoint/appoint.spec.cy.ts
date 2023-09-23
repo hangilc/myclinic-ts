@@ -19,7 +19,6 @@ describe("Appoint", () => {
   it("should batch add appoint times", () => {
     cy.visit("/appoint/?admin=true");
     cy.get("[data-cy=bars3-menu]").click();
-    // cy.get("a").contains("予約枠わりあて").click();
     cy.get("[data-cy=alloc-appoints-link]").click();
     cy.get("[data-cy=appoint-time-block]").should("exist");
   });

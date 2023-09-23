@@ -2,6 +2,7 @@
   import { PopupContext } from "./popup-context";
   import type { PopupMenuItem } from "./popup-helper";
   import { ViewportCoord } from "./viewport-coord";
+  import PopupMenuLink from "./PopupMenuLink.svelte";
 
   export let event: MouseEvent;
   export let menu: PopupMenuItem[];
@@ -23,15 +24,11 @@
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
   }
 
-  function doAction(action: () => void) {
-    popupDestroy();
-    action();
-  }
 </script>
 
 <div use:open class="menu">
   {#each menu as m}
-    <a href="javascript:void(0)" on:click={() => doAction(m[1])}>{m[0]}</a>
+    <PopupMenuLink item={m} {popupDestroy}/>
   {/each}
 </div>
 
@@ -50,13 +47,7 @@
     outline: none;
   }
 
-  .menu a {
-    display: block;
-    /* color: black; */
-    line-height: 1;
-  }
-
-  .menu a + a {
+  .menu :global(a + a) {
     margin-top: 4px;
   }
 

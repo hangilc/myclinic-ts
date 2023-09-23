@@ -58,13 +58,18 @@
 
   function auxMenu(): PopupMenuItem[] {
     const m: PopupMenuItem[] = [];
-    if( isAdmin ){
-      m.push(["予約枠わりあて", doAlloc]);
+    if (isAdmin) {
+      m.push([
+        "予約枠わりあて",
+        doAlloc,
+        {
+          modifier: (a) => a.setAttribute("data-cy", "alloc-appoints-link"),
+        },
+      ]);
     }
     m.push(["変更履歴", doEventLog]);
     return m;
   }
-
 </script>
 
 <div class="top">
