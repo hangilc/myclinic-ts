@@ -2,7 +2,12 @@ import PopupMenu from "@/lib/PopupMenu.svelte"
 import { alloc, release } from "./zindex";
 import Screen from "./Screen.svelte";
 
-export function popupTrigger(menu: () => [string, () => void][]): (event: MouseEvent) => void {
+export type PopupMenuItemOpt = {
+  modifier?: (a: HTMLAnchorElement) => void;
+}
+export type PopupMenuItem = [string, () => void, PopupMenuItemOpt?]
+
+export function popupTrigger(menu: () => PopupMenuItem[]): (event: MouseEvent) => void {
   return (event: MouseEvent) => {
     const p: PopupMenu = new PopupMenu({
       target: document.body,
@@ -15,21 +20,7 @@ export function popupTrigger(menu: () => [string, () => void][]): (event: MouseE
   }
 }
 
-export function popupTriggerAdmin(
-  isAdmin: () => boolean, adminMenus: () => [string, () => void][], menus: () => [string, () => void][]):
-  (event: MouseEvent) => void {
-  function f(): [string, () => void][] {
-    const m: [string, () => void][] = [];
-    if (isAdmin()) {
-      m.push(...adminMenus());
-    }
-    m.push(...menus());
-    return m;
-  }
-  return popupTrigger(f);
-}
-
-export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): (event: MouseEvent) => void {
+export function popupTriggerAsync(menu: () => Promise<PopupMenuItem[]>): (event: MouseEvent) => void {
   return async (event: MouseEvent) => {
     const m = await menu();
     console.log("event", event);

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { PopupContext } from "./popup-context";
+  import type { PopupMenuItem } from "./popup-helper";
   import { ViewportCoord } from "./viewport-coord";
 
   export let event: MouseEvent;
-  export let menu: [string, () => void][];
+  export let menu: PopupMenuItem[];
   export let destroy: () => void;
   let context: PopupContext | undefined = undefined;
 
   event.preventDefault();
-
 
   function popupDestroy() {
     if (context) {
