@@ -1,4 +1,4 @@
-import PopupMenu from "./PopupMenu.svelte"
+import PopupMenu from "@/lib/PopupMenu.svelte"
 import { alloc, release } from "./zindex";
 import Screen from "./Screen.svelte";
 
@@ -44,20 +44,13 @@ export function popupTriggerAsync(menu: () => Promise<[string, () => void][]>): 
   }
 }
 
-type Locator = (e: HTMLElement, dispose: () => void) => (() => void);
-
-type ContextMenuOpt = {
-  offsetX?: number,
-  offsetY?: number;
-}
-
 class PopupContext {
   zIndexScreen: number;
   zIndexMenu: number;
   screen: Screen;
   resizeHandler: ((e: UIEvent) => void) | undefined = undefined;
 
-  constructor(e: HTMLElement, screenClickHandler: () => void) {
+  constructor(e: HTMLElement, anchor: HTMLElement | SVGElement, dx: number, dy: number, screenClickHandler: () => void) {
     this.zIndexScreen = alloc();
     this.zIndexMenu = alloc();
     this.screen = new Screen({
@@ -71,6 +64,16 @@ class PopupContext {
       },
     });
     e.style.zIndex = this.zIndexMenu.toString();
+    let syncTimer: any = undefined;
+    this.resizeHandler = (_evt) => {
+      if (!syncTimer) {
+        syncTimer = setTimeout(() => {
+          syncLocation(anchor, e, dx, dy);
+          syncTimer = undefined;
+        }, 250);
+      }
+    };
+    window.addEventListener("resize", this.resizeHandler);
   }
 
   discard() {
@@ -83,17 +86,75 @@ class PopupContext {
   }
 }
 
+type Locator = (e: HTMLElement, dispose: () => void) => (() => void);
+
+export type OverflowHandlerArg = {
+  eleSize: number, winWidth: number, winHeight: number, clickedAt: number, offset: number
+}
+
+type ContextMenuOpt = {
+  offsetX?: number;
+  offsetY?: number;
+  rightOverflow?: (arg: OverflowHandlerArg) => number;
+  bottomOverflow?: (arg: OverflowHandlerArg) => number;
+}
+
+function defaultOverflowHandler(arg: OverflowHandlerArg): number {
+  return arg.clickedAt - arg.eleSize - arg.offset;
+}
+
 export function contextMenuLocator(event: MouseEvent, opt: ContextMenuOpt = {}): Locator {
-  return (e: HTMLElement, dispose: () => void) => {
+  return (ele: HTMLElement, dispose: () => void) => {
     const offsetX = opt.offsetX ?? 4;
     const offsetY = opt.offsetY ?? 4;
     const clickX = event.clientX;
     const clickY = event.clientY;
-    const ctx = new PopupContext(e, dispose);
-    e.style.left = window.scrollX + clickX + offsetX + "px";
-    e.style.top = window.scrollY + clickY + offsetY + "px";
+    let anchor: HTMLElement | SVGElement = (event.currentTarget || event.target) as HTMLElement | SVGElement;
+    let anchorRect = anchor.getBoundingClientRect();
+    ele.style.left = "0";
+    ele.style.top = "0";
+    ele.style.width = "auto";
+    let eleRect = ele.getBoundingClientRect();
+    let dx = clickX - anchorRect.x + offsetX;
+    let dy = clickY - anchorRect.y + offsetY;
+    let win = document.documentElement;
+    if (anchorRect.x + dx + eleRect.width > win.clientWidth) {
+      let handler = opt.rightOverflow ?? defaultOverflowHandler;
+      dx = handler({
+        eleSize: eleRect.width,
+        winWidth: win.clientWidth,
+        winHeight: win.clientHeight,
+        clickedAt: clickX,
+        offset: offsetX,
+      }) - anchorRect.x;
+    }
+    if (anchorRect.y + dy + eleRect.height > win.clientHeight) {
+      let handler = opt.bottomOverflow ?? defaultOverflowHandler;
+      dy = handler({
+        eleSize: eleRect.height,
+        winWidth: win.clientWidth,
+        winHeight: win.clientHeight,
+        clickedAt: clickY,
+        offset: offsetY,
+      }) - anchorRect.y;
+    }
+    ele.style.left = window.scrollX + anchorRect.x + dx + "px";
+    ele.style.top = window.scrollY + anchorRect.y + dy + "px";
+    const ctx = new PopupContext(ele, anchor, dx, dy, dispose);
     return () => ctx.discard();
   }
 }
+
+function syncLocation(
+  anchor: HTMLElement | SVGElement,
+  menu: HTMLElement,
+  dx: number,
+  dy: number
+): void {
+  const anchorRect = anchor.getBoundingClientRect();
+  menu.style.left = window.scrollX + anchorRect.x + dx + "px";
+  menu.style.top = window.scrollY + anchorRect.y + dy + "px";
+}
+
 
 

@@ -1,25 +1,9 @@
 <script lang="ts">
-  import { PopupContext } from "./popup-context";
-  import { ViewportCoord } from "./viewport-coord";
 
   export let destroy: () => void;
   export let locator: (e: HTMLElement, dispose: () => void) => (() => void);
   
   let discard: () => void = () => {};
-  // async function trigger(event: MouseEvent) {
-  //   event.preventDefault();
-  //   anchor = event.currentTarget as HTMLElement | SVGSVGElement;
-  //   await triggerHook();
-  //   show = true;
-  // }
-
-  // async function triggerClick(event: MouseEvent) {
-  //   event.preventDefault();
-  //   anchor = event.currentTarget as HTMLElement | SVGSVGElement;
-  //   await triggerHook();
-  //   clickLocation = ViewportCoord.fromEvent(event);
-  //   show = true;
-  // }
 
   function dispose() {
     discard();

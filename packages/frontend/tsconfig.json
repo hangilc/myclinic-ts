@@ -24,7 +24,8 @@
         "cypress/*"
       ]
     },
-      "strict": true
+    "types": ["svelte"],
+    "strict": true
   },
   "include": [
     "src/**/*.d.ts",
@@ -32,6 +33,9 @@
     "src/**/*.js",
     "src/**/*.svelte",
     "cypress/**/*.ts"
+  ],
+  "exclude": [
+    "./node_modules"
   ],
   "references": [
     {
