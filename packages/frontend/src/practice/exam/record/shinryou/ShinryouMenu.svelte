@@ -8,7 +8,7 @@
   import { enterTo } from "./helper";
   import CopySelectedDialog from "./CopySelectedDialog.svelte";
   import DeleteSelectedDialog from "./DeleteSelectedDialog.svelte";
-  import Popup from "@/lib/Popup.svelte";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let visit: VisitEx;
   // let auxLink: HTMLAnchorElement;
@@ -113,11 +113,17 @@
 
 <div>
   <a href="javascript:void(0)" on:click={doRegular}>[診療行為]</a>
-  <Popup let:destroyAnd let:trigger>
-    <a href="javascript:void(0)" on:click={trigger}
+    <a href="javascript:void(0)" on:click={popupTrigger(() => [
+      ["検査", doKensa],
+      ["検索入力", doSearch],
+      ["選択削除", doDeleteSelected],
+      ["重複削除", doDeleteDuplicate],
+      ["選択コピー", doCopySelected],
+      ["全部コピー", doCopyAll],
+    ])}
       >その他</a
     >
-    <div slot="menu" class="popup-menu">
+    <!-- <div slot="menu" class="popup-menu">
       <a href="javascript:void(0)" on:click={destroyAnd(doKensa)}>検査</a>
       <a href="javascript:void(0)" on:click={destroyAnd(doSearch)}>検索入力</a>
       <a href="javascript:void(0)" on:click={destroyAnd(doDeleteSelected)}
@@ -132,8 +138,7 @@
       <a href="javascript:void(0)" on:click={destroyAnd(doCopyAll)}
         >全部コピー</a
       >
-    </div>
-  </Popup>
+    </div> -->
 </div>
 
 <!-- <Pulldown anchor={auxLink} bind:this={auxPopup}>

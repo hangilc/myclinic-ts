@@ -9,8 +9,8 @@
   import { listTextCommands } from "./text-commands";
   import { confirm } from "@/lib/confirm-call";
   import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
-  import Popup from "@/lib/Popup.svelte";
   import { setFocus } from "@/lib/set-focus";
+  import { popupTrigger } from "@/lib/popup-helper";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -128,12 +128,14 @@
         >
       {/if}
       {#if isShohousen()}
-        <Popup let:trigger let:destroy>
           <a
             href="javascript:void(0)"
-            on:click={trigger}>処方箋</a
+            on:click={popupTrigger(() => [
+              ["処方箋印刷", doPrintShohousen],
+              ["処方箋フォーマット", doFormatShohousen],
+            ])}>処方箋</a
           >
-          <div slot="menu" class="shohousen-menu">
+          <!-- <div slot="menu" class="shohousen-menu">
             <a
               href="javascript:void(0)"
               on:click={() => {
@@ -148,8 +150,7 @@
                 doFormatShohousen();
               }}>処方箋フォーマット</a
             >
-          </div>
-        </Popup>
+          </div> -->
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>

@@ -49,7 +49,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Widget title="処置編集" let:close={close} onClose={onClose} bind:this={widget}>
+<Widget title="処置編集" onClose={onClose} bind:this={widget}>
   <div class="enterCommands">
     <a href="javascript:void(0)" on:click={doAddShinryou}>診療行為追加</a>
     <a href="javascript:void(0)" on:click={doAddDrug}>薬剤追加</a>

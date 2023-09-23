@@ -8,11 +8,12 @@
   import { makePatientText, makeScannerText } from "./misc";
   import { ScanManager } from "./scan-manager";
   import { scannerProbed } from "./scan-vars";
-  import ScanKindPulldown from "./ScanKindPulldown.svelte";
   import { UploadStatus, type ScannedDocData } from "./scanned-doc-data";
   import ScannedDoc from "./ScannedDoc.svelte";
   import ScanProgress from "./ScanProgress.svelte";
   import SelectScannerPulldown from "./SelectScannerPulldown.svelte";
+  import { popupTrigger } from "@/lib/popup-helper";
+  import { kindChoices } from "./kind-choices";
 
   export let remove: () => void;
 
@@ -127,19 +128,17 @@
   <div class="title">文書の種類</div>
   <div class="work" data-cy="document-kind-workarea">
     <span data-cy="document-kind-text">{kindText}</span>
-    <Popup let:destroy let:trigger>
-      <a href="javascript:void(0)" on:click={trigger}>選択</a>
-      <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/>
-    </Popup>
+      <a href="javascript:void(0)" on:click={popupTrigger(() => Object.keys(kindChoices).map(k => [
+        k, () => manager.setKindKey(k)
+      ]))}>選択</a>
+      <!-- <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/> -->
   </div>
   <div class="title">スキャナー</div>
   <div class="work" data-cy="scanner-selection-workarea">
     <span data-cy="scanner-text">{scannerText}</span>
-    <Popup let:destroy let:trigger>
-      <a href="javascript:void(0)" on:click={trigger}>選択</a>
-      <SelectScannerPulldown slot="menu" {destroy} list={scannerList}
-        current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/>
-    </Popup>
+      <a href="javascript:void(0)" on:click={popupTrigger(() => [])}>選択</a>
+      <!-- <SelectScannerPulldown slot="menu" {destroy} list={scannerList}
+        current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/> -->
   </div>
   <div class="commands" data-cy="scan-commands">
     <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>

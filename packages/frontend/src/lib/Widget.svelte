@@ -18,7 +18,7 @@
 <div class="top widget">
   <div class="title">{title}</div>
   <div class="body"><slot close={close} /></div>
-  <div class="commands"><slot name="commands" /></div>
+  <div class="commands"><slot name="commands" {close} /></div>
 </div>
 {/if}
 

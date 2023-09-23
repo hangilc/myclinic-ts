@@ -83,7 +83,7 @@
   }
 </script>
 
-<Widget title="注射処置入力" let:close bind:this={widget} {onClose}>
+<Widget title="注射処置入力" bind:this={widget} {onClose}>
   <div>薬剤名称：{$searchSelected?.name || ""}</div>
   <div>
     用量：<input
@@ -110,7 +110,7 @@
       </SelectItem>
     {/each}
   </div>
-  <svelte:fragment slot="commands">
+  <svelte:fragment slot="commands" let:close>
     <button on:click={() => doEnter(close)}>入力</button>
     <button on:click={close}>キャンセル</button>
   </svelte:fragment>
