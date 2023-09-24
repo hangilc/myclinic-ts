@@ -57,6 +57,7 @@
 
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="disp" on:click={onDispClick}>
   {#if (visit.hoken.shahokokuho || visit.hoken.koukikourei) && onshiConfirmed !== undefined}
     {#if onshiConfirmed}

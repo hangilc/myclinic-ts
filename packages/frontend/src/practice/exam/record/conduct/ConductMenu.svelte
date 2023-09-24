@@ -58,7 +58,7 @@
   <EnterInjectWidget {visit} bind:this={enterInjectWidget} />
 </div>
 
-<style>
+<!-- <style>
   .popup-menu a {
     display: block;
     margin-bottom: 4px;
@@ -68,4 +68,4 @@
   .popup-menu a:last-of-type {
     margin-bottom: 0;
   }
-</style>
+</style> -->

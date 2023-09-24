@@ -47,6 +47,7 @@
     <input type="text" bind:value={searchText} use:setFocus data-cy="search-text-input"/>
     <button type="submit">検索</button>
   </form>
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="result" on:keydown={doKeyDown}>
     {#each result as p (p.patientId)}
       <SelectItem {selected} data={p}>

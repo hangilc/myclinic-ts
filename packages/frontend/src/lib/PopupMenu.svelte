@@ -7,6 +7,7 @@
   export let event: MouseEvent;
   export let menu: PopupMenuItem[];
   export let destroy: () => void;
+  export let modifier: (menu: HTMLElement) => void = (_) => {};
   let context: PopupContext | undefined = undefined;
 
   event.preventDefault();
@@ -22,6 +23,7 @@
     const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
     const clickLocation = ViewportCoord.fromEvent(event);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
+    modifier(e);
   }
 
 </script>

@@ -128,13 +128,4 @@
   a {
     margin: 0 6px;
   }
-
-  .context-menu a {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .context-menu a:last-of-type {
-    margin-bottom: 0;
-  }
 </style>

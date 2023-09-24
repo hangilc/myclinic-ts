@@ -14,11 +14,16 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/dist/**", "**/.{idea,git,cache,output,temp}/**",
       "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress}.config.*"],
     globals: true,
-    deps: {
-      // inline: true
-      inline:
-        // TODO: Replace with true once https://github.com/vitest-dev/vitest/issues/2806 is fixed.
-        [/^(?!.*vitest).*$/],
-    }
+    // deps: {
+    //   // inline: true
+    //   inline:
+    //     // TODO: Replace with true once https://github.com/vitest-dev/vitest/issues/2806 is fixed.
+    //     [/^(?!.*vitest).*$/],
+    // },
+    // server: {
+    //   deps: {
+    //     inline: [/^(?!.*vitest).*$/],
+    //   }
+    // }
   },
 })

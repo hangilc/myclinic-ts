@@ -222,14 +222,4 @@
     font-size: 14px;
     overflow-y: auto;
   }
-
-  .popup-menu a {
-    display: block;
-    margin-bottom: 4px;
-    color: black;
-  }
-
-  .popup-menu a:last-of-type {
-    margin-bottom: 0;
-  }
 </style>

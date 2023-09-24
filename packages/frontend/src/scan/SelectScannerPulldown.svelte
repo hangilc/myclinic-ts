@@ -9,9 +9,13 @@
   export let list: ScannerDevice[];
   export let current: ScannerDevice | undefined;
   export let onSelect: (d: ScannerDevice) => void;
+
+  function modifier(m: HTMLElement) {
+    m.setAttribute("data-cy", "select-scanner-pulldown");
+  }
 </script>
 
-<Popup let:dispose {destroy} locator={contextMenuLocator(event)}>
+<Popup let:dispose {destroy} locator={contextMenuLocator(event)} {modifier}>
   {#each list as d}
     <SelectItem2
       data={d}

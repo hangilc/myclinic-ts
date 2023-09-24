@@ -2,6 +2,7 @@
 
   export let destroy: () => void;
   export let locator: (e: HTMLElement, dispose: () => void) => (() => void);
+  export let modifier: (e: HTMLElement) => void = (_) => {};
   
   let discard: () => void = () => {};
 
@@ -12,6 +13,7 @@
 
   function open(e: HTMLElement): void {
     discard = locator(e, dispose);
+    modifier(e);
   }
 
   function doMenuKey(event: KeyboardEvent): void {
@@ -23,6 +25,7 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <div class="menu" on:keydown={doMenuKey} use:open tabindex="0"><slot {dispose}/></div>
 
 <style>

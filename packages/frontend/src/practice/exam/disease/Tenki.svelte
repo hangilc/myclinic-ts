@@ -149,7 +149,6 @@
   <div class="date-wrapper" data-cy="end-date-input">
     <DateFormWithCalendar
       init={new Date()}
-      iconWidth="18px"
       bind:validate={validateEndDate}
       bind:setValue={setEndDate}
     >

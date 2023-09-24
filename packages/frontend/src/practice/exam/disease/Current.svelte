@@ -12,6 +12,7 @@
 
 <div data-cy="disease-current">
   {#each list as d (d.disease.diseaseId)}
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       on:click={() => onDiseaseClick(d)}
       class="diseaseWrapper"

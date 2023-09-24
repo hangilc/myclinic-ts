@@ -15,6 +15,7 @@
 {#if isEditing}
   <TextForm text={text} index={index} onClose={() => isEditing = false} />
 {:else}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="top" on:click={() => isEditing = true}>
     <div>{@html conv(text.content)}</div>
   </div>

@@ -16,14 +16,19 @@ export function dataCySetter(value: string): PopupMenuItemOpt {
 
 export type PopupMenuItem = [string, () => void, PopupMenuItemOpt?]
 
-export function popupTrigger(menu: () => PopupMenuItem[]): (event: MouseEvent) => void {
+export type PopupTriggerOpt = {
+  modifier?: (menu: HTMLElement) => void;
+}
+
+export function popupTrigger(menu: () => PopupMenuItem[], opt: PopupTriggerOpt = {}): (event: MouseEvent) => void {
   return (event: MouseEvent) => {
     const p: PopupMenu = new PopupMenu({
       target: document.body,
       props: {
         destroy: () => p.$destroy(),
         menu: menu(),
-        event
+        event,
+        modifier: opt.modifier ?? ((_) => {}),
       }
     });
   }

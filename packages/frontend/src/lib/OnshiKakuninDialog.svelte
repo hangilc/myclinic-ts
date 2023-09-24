@@ -142,6 +142,7 @@
       <div class="detail-toggle">
         <span>確認情報詳細</span>
         {#if !showDetail}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -158,6 +159,7 @@
           />
         </svg>
         {:else}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

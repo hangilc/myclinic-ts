@@ -18,6 +18,7 @@
 </script>
 
 {#if mode === "disp"}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="disp" on:click={doDispClick}>
   [{kindRep(conduct.kind)}]
 </div>

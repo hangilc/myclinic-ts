@@ -114,16 +114,6 @@
     margin: 10px 0;
   }
 
-  .popup-menu a {
-    display: block;
-    margin-bottom: 4px;
-    color: black;
-  }
-
-  .popup-menu a:last-of-type {
-    margin-bottom: 0;
-  }
-
   .commands {
     margin-top: 10px;
     display: flex;

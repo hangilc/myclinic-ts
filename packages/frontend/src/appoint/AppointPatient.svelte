@@ -20,6 +20,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="top" on:click={doClick} data-cy="appoint-patient"
   data-patient-id={data.patientId}>
   <div>

@@ -12,6 +12,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="select-item" class:selected={isCurrent} 
     on:click={onClick} style:cursor={cursor}
     data-cy={dataCy} data-id={dataId}>

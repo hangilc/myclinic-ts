@@ -25,7 +25,7 @@ export class ValidationResult<T> {
   constructor(public result: Valid<T> | Invalid[]) {}
 
   get isValid(): boolean {
-    return this.result instanceof Valid<T>;
+    return this.result instanceof Valid;
   }
 
   get errorStrings(): string[] {
@@ -39,14 +39,14 @@ export class ValidationResult<T> {
   and1(
     vtor: (src: T) => ValidationResult<T> | Valid<T> | Invalid
   ): ValidationResult<T> {
-    if (this.result instanceof Valid<T>) {
+    if (this.result instanceof Valid) {
       const r = vtor(this.result.value);
-      if (r instanceof ValidationResult<T>) {
+      if (r instanceof ValidationResult) {
         return r;
-      } else if (r instanceof Valid<T>) {
-        return new ValidationResult<T>(r);
+      } else if (r instanceof Valid) {
+        return new ValidationResult(r);
       } else {
-        return new ValidationResult<T>([r]);
+        return new ValidationResult([r]);
       }
     } else {
       return this;
@@ -69,22 +69,22 @@ export class ValidationResult<T> {
   to<U>(
     vtor: (src: T) => ValidationResult<U> | Valid<U> | Invalid
   ): ValidationResult<U> {
-    if (this.result instanceof Valid<T>) {
+    if (this.result instanceof Valid) {
       const r = vtor(this.result.value);
-      if (r instanceof ValidationResult<U>) {
+      if (r instanceof ValidationResult) {
         return r;
-      } else if (r instanceof Valid<U>) {
-        return new ValidationResult<U>(r);
+      } else if (r instanceof Valid) {
+        return new ValidationResult(r);
       } else {
-        return new ValidationResult<U>([r]);
+        return new ValidationResult([r]);
       }
     } else {
-      return new ValidationResult<U>(this.result);
+      return new ValidationResult(this.result);
     }
   }
 
   fold<U>(fValid: (v: T) => U, fError: (es: Invalid[]) => U): U {
-    if (this.result instanceof Valid<T>) {
+    if (this.result instanceof Valid) {
       return fValid(this.result.value);
     } else {
       return fError(this.result);
@@ -92,7 +92,7 @@ export class ValidationResult<T> {
   }
 
   map<U>(f: (t: T) => U): ValidationResult<U> {
-    if (this.result instanceof Valid<T>) {
+    if (this.result instanceof Valid) {
       return new ValidationResult<U>(new Valid<U>(f(this.result.value)));
     } else {
       return new ValidationResult<U>(this.result);
@@ -104,7 +104,7 @@ export class ValidationResult<T> {
     prefix?: string,
     cb: (isValid: boolean) => void = (_) => {}
   ): T {
-    if (this.result instanceof Valid<T>) {
+    if (this.result instanceof Valid) {
       cb(true);
       return this.result.value;
     } else {
@@ -124,7 +124,7 @@ export function and<T>(
     if (vtors.length === 0) {
       return r;
     } else {
-      if (r instanceof Valid<T>) {
+      if (r instanceof Valid) {
         return and(vtors[0], ...vtors.slice(1))(r.value);
       } else {
         return r;

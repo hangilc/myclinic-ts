@@ -274,13 +274,4 @@
   .time-box {
     user-select: none;
   }
-
-  .context-menu a {
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .context-menu a:last-of-type {
-    margin-bottom: 0;
-  }
 </style>

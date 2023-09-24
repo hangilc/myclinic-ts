@@ -143,7 +143,7 @@
     <span data-cy="document-kind-text">{kindText}</span>
       <a href="javascript:void(0)" on:click={popupTrigger(() => Object.keys(kindChoices).map(k => [
         k, () => manager.setKindKey(k)
-      ]))}>選択</a>
+      ]), { modifier: m => m.setAttribute("data-cy", "scan-kind-pulldown")})}>選択</a>
       <!-- <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/> -->
   </div>
   <div class="title">スキャナー</div>

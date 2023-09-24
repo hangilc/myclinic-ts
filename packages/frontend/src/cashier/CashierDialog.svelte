@@ -75,7 +75,8 @@
   }
 </script>
 
-<Dialog {destroy} title="会計">
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <Dialog {destroy} title="会計">
   <div class="body">
     <div class="patient">
       {patientLine(patient)})

@@ -232,14 +232,4 @@
     margin-bottom: 4px;
     line-height: 1;
   }
-
-  .popup-menu a {
-    display: block;
-    margin-bottom: 4px;
-    color: black;
-  }
-
-  .popup-menu a:last-of-type {
-    margin-bottom: 0;
-  }
 </style>

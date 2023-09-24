@@ -93,7 +93,9 @@
             on:click={popupTrigger(() => [
               ["患者", () => auxMenu.doPatient(patient)],
               ["削除", () => auxMenu.doDeleteVisit(visit)],
-            ])}
+            ], {
+              modifier: m => m.setAttribute("data-cy", "wq-row-aux-menu")
+            })}
             data-cy="aux-menu-icon"
           >
             <path

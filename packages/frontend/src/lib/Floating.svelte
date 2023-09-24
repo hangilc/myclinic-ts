@@ -28,6 +28,7 @@
 <div class="floating" bind:this={floating} {style}>
   <div class="title-wrapper">
     <div class="title" bind:this={titleElement}>{title}</div>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

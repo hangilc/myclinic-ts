@@ -34,6 +34,7 @@
 </script>
 
 {#if mode === "disp"}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div
     class="disp"
     class:has-charge={visit.chargeOption != null}

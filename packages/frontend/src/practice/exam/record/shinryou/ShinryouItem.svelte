@@ -32,6 +32,7 @@
 </script>
 
 {#if mode === "disp"}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div on:click={() => mode = "edit"} class="disp">{shinryou.master.name}</div>
 {:else if mode === "edit"}
 <div class="edit">

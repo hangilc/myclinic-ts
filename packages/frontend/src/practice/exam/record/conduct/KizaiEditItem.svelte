@@ -12,6 +12,7 @@
 </script>
 
 {#if mode === "disp"}
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="disp" on:click={doDispClick}>
   * {conductKizai.master.name}{conductKizai.amount}{conductKizai.master.unit}
 </div>

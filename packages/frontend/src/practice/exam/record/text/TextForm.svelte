@@ -165,14 +165,4 @@
     resize: vertical;
     box-sizing: border-box;
   }
-
-  .shohousen-menu a {
-    display: block;
-    margin-bottom: 4px;
-    color: black;
-  }
-
-  .shohousen-menu a:last-of-type {
-    margin-bottom: 0;
-  }
 </style>

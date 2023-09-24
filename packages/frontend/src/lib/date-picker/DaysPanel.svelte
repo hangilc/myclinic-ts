@@ -18,6 +18,7 @@
   <span>金</span>
   <span>土</span>
   {#each items as di (di.date)}
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <span class={di.kind} class:selected={di.isCurrent} on:click={() => doClick(di.date)}>
       {di.date.getDate()}
     </span>

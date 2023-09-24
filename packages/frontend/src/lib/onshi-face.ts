@@ -30,7 +30,7 @@ export function parseFaceXml(xml: string): OnshiResult {
       skipLike: /\d+/,
     }
   });
-  const json = parser.parse(xml);
+  const json = parser.parse(xml) as any;
   if (!Array.isArray(json.XmlMsg.MessageBody.ResultList)) {
     json.XmlMsg.MessageBody.ResultList = [json.XmlMsg.MessageBody.ResultList];
   }

@@ -32,6 +32,7 @@
 <Dialog title="顔認証一覧" {destroy} styleWidth="360px">
   {#if list.length > 0}
     {#each list as c (c.fileName)}
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div class="item" on:click={() => doSelect(c)}>
         <span>{c.name}</span>
         <span>{onshiDateTimeRep(c.createdAt)}</span>
