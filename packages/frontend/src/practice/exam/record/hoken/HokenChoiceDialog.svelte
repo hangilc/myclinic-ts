@@ -79,6 +79,8 @@
   }
 
   async function doEnter() {
+    console.log("visitId", visit.visitId);
+    console.log(hokenItems);
     if (
       hokenItems.filter((item) => item.savedConfirm && !item.checked).length > 0
     ) {
