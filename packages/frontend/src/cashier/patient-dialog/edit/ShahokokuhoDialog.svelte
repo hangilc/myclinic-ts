@@ -4,6 +4,7 @@
   import { Shahokokuho, type Patient } from "myclinic-model";
   import ShahokokuhoDialogContent from "./ShahokokuhoDialogContent.svelte";
   import { countInvalidUsage } from "@/lib/hoken-check";
+  import { tryUpdateShahokokuho } from "@/lib/hoken-lib";
 
   export let destroy: () => void;
   export let title: string;
@@ -16,36 +17,40 @@
   checkPrevInvalids();
 
   async function checkPrevInvalids() {
-    if( init ){
+    if (init) {
       prevInvalids = await countInvalidUsage(init);
     }
   }
 
   async function doEnter(shahokokuho: Shahokokuho): Promise<string[]> {
-    if (init === null) {
-      shahokokuho.shahokokuhoId = 0;
-    }
     try {
       if (init === null) {
+        shahokokuho.shahokokuhoId = 0;
         const entered = await api.enterShahokokuho(shahokokuho);
         onEntered(entered);
         return [];
       } else {
         if (shahokokuho.shahokokuhoId <= 0) {
           return ["Invalid shahokokuhoId"];
-        } else {
-          const invalids = await countInvalidUsage(shahokokuho);
-          if( invalids > prevInvalids ){
-            return ["有効期間外の使用が発生するので、変更できません。"];
-          }
-          const usage = await api.countShahokokuhoUsage(init.shahokokuhoId);
-          if( usage > 0 && !Shahokokuho.isContentEqual(init, shahokokuho) ){
-            return ["この保険はすでに使われているので、内容の変更ができません。"];
-          }
-          await api.updateShahokokuho(shahokokuho);
-          onUpdated(shahokokuho);
-          return [];
         }
+        const result = await tryUpdateShahokokuho(shahokokuho);
+        switch(result) {
+          case "not-allowed": return ["「有効期限終了」以外は変更できません。"];
+          case "invalid-valid-upto": return ["有効期間外の使用が発生するので、変更できません。"];
+          case "success": break;
+          default: return ["ERROR"];
+        }
+        // const invalids = await countInvalidUsage(shahokokuho);
+        // if (invalids > prevInvalids) {
+        //   return ["有効期間外の使用が発生するので、変更できません。"];
+        // }
+        // const usage = await api.countShahokokuhoUsage(init.shahokokuhoId);
+        // if (usage > 0 && !Shahokokuho.isContentEqual(init, shahokokuho)) {
+        //   return ["この保険はすでに使われているので、内容の変更ができません。"];
+        // }
+        // await api.updateShahokokuho(shahokokuho);
+        onUpdated(shahokokuho);
+        return [];
       }
     } catch (ex: any) {
       return [ex.toString()];
@@ -61,4 +66,3 @@
     onEnter={doEnter}
   />
 </Dialog>
-
