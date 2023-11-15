@@ -9,7 +9,8 @@ export async function tryUpdateShahokokuho(shahokokuho: Shahokokuho): Promise<Tr
   }
   const usage: number = await api.countShahokokuhoUsage(shahokokuho.shahokokuhoId);
   if (usage > 0) {
-    if (!isEqualShahokokuho(Object.assign({}, prev, shahokokuho.validUpto), shahokokuho)) {
+    console.log("cmp", Object.assign({}, prev, shahokokuho.validUpto), shahokokuho);
+    if (!isEqualShahokokuho(Object.assign({}, prev, { validUpto: shahokokuho.validUpto }), shahokokuho)) {
       return "not-allowed";
     }
     if( shahokokuho.validUpto !== "0000-00-00" ){
