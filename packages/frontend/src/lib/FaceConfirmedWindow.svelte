@@ -376,7 +376,7 @@
         {resolved.patient.fullName()}
       </div>
       {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
-      <div>新規保険</div>
+      <div>{resolved.shahokokuhoOpt ? "新規社保国保" : "新規後期高齢"}</div>
         <div>
           （現在有効な{currentRep(
             resolved.shahokokuhoOpt,
@@ -417,7 +417,7 @@
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}
       <button on:click={() => doRegisterNewHoken(resolved)}
-        >新規保険証登録</button
+        >{resolved.shahokokuhoOpt ? "新規社保国保登録" : "新規後期高齢登録"}</button
       >
     {:else if resolvedState instanceof AllResolved}
       {@const resolved = resolvedState}

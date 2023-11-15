@@ -146,7 +146,7 @@ describe("FaceConfirmedWindow", () => {
       };
       cy.mount(FaceConfirmedWindow, { props });
       cy.intercept("POST", apiBase() + "/enter-shahokokuho").as("enterShahokokuho");
-      cy.get("button").contains("新規保険証登録").click();
+      cy.get("button").contains("新規社保国保登録").click();
       dialogOpen("新規社保国保登録").within(() => {
         cy.get("button").contains("入力").click();
       });
@@ -175,7 +175,7 @@ describe("FaceConfirmedWindow", () => {
       };
       cy.mount(FaceConfirmedWindow, { props });
       cy.intercept("POST", apiBase() + "/enter-koukikourei").as("enterKoukikourei");
-      cy.get("button").contains("新規保険証登録").click();
+      cy.get("button").contains("新規後期高齢登録").click();
       dialogOpen("新規後期高齢保険登録").within(() => {
         cy.get("button").contains("入力").click();
       });
@@ -221,7 +221,7 @@ describe("FaceConfirmedWindow", () => {
           const body = resp.response!.body;
           expect(body).deep.equal(curHoken);
         });
-        cy.get("button").contains("新規保険証登録").click();
+        cy.get("button").contains("新規社保国保登録").click();
         dialogOpen("新規社保国保登録").within(() => cy.get("button").contains("入力").click());
         dialogClose("新規社保国保登録");
         cy.wait("@updateShahokokuho").then(resp => {
@@ -244,7 +244,7 @@ describe("FaceConfirmedWindow", () => {
         validFrom: "2022-10-01",
         validUpto: "2100-09-30",
       })).as("curHoken");
-      cy.get<Shahokokuho>("@curHoken").then((curHoken: Shahokokuho) => {
+      cy.get<Koukikourei>("@curHoken").then((curHoken: Koukikourei) => {
         const newHokenTmpl = createKoukikourei({
           patientId: patient.patientId,
           hokenshaBangou: "39132424",
@@ -268,7 +268,7 @@ describe("FaceConfirmedWindow", () => {
           const body = resp.response!.body;
           expect(body).deep.equal(curHoken);
         });
-        cy.get("button").contains("新規保険証登録").click();
+        cy.get("button").contains("新規後期高齢登録").click();
         dialogOpen("新規後期高齢保険登録").within(() => cy.get("button").contains("入力").click());
         dialogClose("新規後期高齢保険登録");
         cy.wait("@updateKoukikourei").then(resp => {
@@ -280,6 +280,56 @@ describe("FaceConfirmedWindow", () => {
         cy.get("button").contains("診察登録").should("exist");
       });
     })
+  });
+
+  it.only("should handle koukikourei futanwari conflict", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      const hokenTmpl = {
+        patientId: patient.patientId,
+        hokenshaBangou: "39123434",
+        validFrom: "2022-10-01",
+        validUpto: "2100-09-30",
+      };
+      enterKoukikourei(createKoukikourei(Object.assign({}, hokenTmpl, {
+        futanWari: 2,
+      }))).as("curHoken");
+      cy.get<Koukikourei>("@curHoken").then((curHoken: Koukikourei) => {
+        const newHokenTmpl = createKoukikourei(Object.assign({}, hokenTmpl, {
+          futanWari: 3,
+        }));
+        const result = createOnshiResult(m.patient(patient), m.koukikourei(newHokenTmpl));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        cy.intercept("GET", apiBase() + "/find-available-koukikourei?*").as("findKoukikourei");
+        cy.intercept("POST", apiBase() + "/update-koukikourei").as("updateKoukikourei");
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.wait("@findKoukikourei").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal(curHoken);
+        });
+        cy.get("button").contains("新規後期高齢登録").click();
+        dialogOpen("新規後期高齢保険登録").within(() => {
+          cy.get("button").contains("入力").click();
+        });
+        dialogClose("新規後期高齢保険登録");
+        cy.wait("@updateKoukikourei").then(resp => {
+          const body = JSON.parse(resp.request.body);
+          console.log("body", body);
+          expect(body).deep.equal(Object.assign({}, curHoken, {
+            validUpto: "2022-09-30",
+          }))
+        });
+        cy.get("button").contains("診察登録").should("exist");
+      });
+    });
   });
 
   it("should handle current shahokokuho in conflict case", () => {
@@ -338,7 +388,7 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it("should handle current koukikourei in conflict case", () => {
+  it("should handle current koukikourei in conflict", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
       enterKoukikourei(createKoukikourei({
@@ -436,7 +486,7 @@ describe("FaceConfirmedWindow", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
-      enterShahokokuho(createShahokokuho({ 
+      enterShahokokuho(createShahokokuho({
         patientId: patient.patientId,
         validFrom: prevDate,
         validUpto: "0000-00-00",
@@ -474,12 +524,12 @@ describe("FaceConfirmedWindow", () => {
     const prevDate = dateToSqlDate(kanjidate.addMonths(new Date(), -2));
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
-      enterShahokokuho(createShahokokuho({ 
+      enterShahokokuho(createShahokokuho({
         patientId: patient.patientId,
         validFrom: prevDate,
         validUpto: "0000-00-00",
       })).as("shahokokuho");
-      enterKouhi(createKouhi({ 
+      enterKouhi(createKouhi({
         patientId: patient.patientId,
         validFrom: prevDate,
         validUpto: "0000-00-00",
@@ -496,7 +546,7 @@ describe("FaceConfirmedWindow", () => {
           const props = {
             destroy: () => { },
             result,
-            onRegister: (_entered: Visit) => {}
+            onRegister: (_entered: Visit) => { }
           };
           cy.spy(props, "onRegister").as("onRegister");
           cy.mount(FaceConfirmedWindow, { props });
@@ -542,7 +592,7 @@ describe("FaceConfirmedWindow", () => {
       "GET",
       apiBase() + "/search-patient?text=*",
       (req) => {
-        if( req.query.text === "大地" || req.query.text === "●橋　大地"){
+        if (req.query.text === "大地" || req.query.text === "●橋　大地") {
           req.reply([10, [patientTmpl]])
         } else {
           req.reply([10, []])
@@ -569,7 +619,7 @@ describe("FaceConfirmedWindow", () => {
       "GET",
       apiBase() + "/get-patient?*",
       (req) => {
-        if( req.query["patient-id"] === "100" ){
+        if (req.query["patient-id"] === "100") {
           req.reply(patientTmpl);
         }
       }
