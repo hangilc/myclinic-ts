@@ -15,7 +15,7 @@
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";
   import type { ResultItem } from "onshi-result/ResultItem";
-  import { hokenshaBangouRep, kouhiRep } from "./hoken-rep";
+  import { hokenshaBangouRep, isKoukikourei, kouhiRep } from "./hoken-rep";
   import RegisterOnshiPatientDialog from "./RegisterOnshiPatientDialog.svelte";
   import {
     dateToSqlDate,
@@ -280,7 +280,11 @@
       at,
       hoken
     );
-    hotlineTrigger?.emit(`[Bot] ${resolved.patient.fullName("")}様の診察をマイナンバーカードで受け付けました。`)
+    hotlineTrigger?.emit(
+      `[Bot] ${resolved.patient.fullName(
+        ""
+      )}様の診察をマイナンバーカードで受け付けました。`
+    );
     const onshi = new Onshi(visit.visitId, JSON.stringify(result.toJSON()));
     await api.setOnshi(onshi);
     doClose();
@@ -297,7 +301,10 @@
     return hokenshaBangouRep(hokenshaBangou);
   }
 
-  async function setOnshiName(patientId: number, name: string): Promise<Patient> {
+  async function setOnshiName(
+    patientId: number,
+    name: string
+  ): Promise<Patient> {
     const patient: Patient = await api.getPatient(patientId);
     const memo = patient.memoAsJson;
     memo["onshi-name"] = name;
@@ -307,38 +314,43 @@
   }
 
   function doSearchForPatient(r: ResultItem) {
-    const d: FaceConfirmedSearchPatientDialog = new FaceConfirmedSearchPatientDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        onshiName: r.name,
-        onSelect: (patient: Patient) => {
-          const errs = checkOnshiPatientInconsistency(r, patient);
-          if( errs.length === 0 ){
-            advanceWithPatient(patient, r);
-          } else if( errs.length === 1 && errs[0].kind === "patient-name" ){
-            const onshiPatient = new OnshiPatient(r);
-            const dd: FaceConfirmedConfirmSelectPatient = new FaceConfirmedConfirmSelectPatient({
-              target: document.body,
-              props: {
-                destroy: () => dd.$destroy(),
-                patient,
-                onshiPatient,
-                onConfirmed: async () => {
-                  let updated = await setOnshiName(patient.patientId, onshiPatient.name);
-                  await advanceWithPatient(updated, r);
-                },
-                onCancel: () => {
-                  // nop
-                }
-              }
-            })
-          } else {
-            alert(errs.map(e => e.toString()).join("\n"));
-          }
-        }
-      }
-    })
+    const d: FaceConfirmedSearchPatientDialog =
+      new FaceConfirmedSearchPatientDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          onshiName: r.name,
+          onSelect: (patient: Patient) => {
+            const errs = checkOnshiPatientInconsistency(r, patient);
+            if (errs.length === 0) {
+              advanceWithPatient(patient, r);
+            } else if (errs.length === 1 && errs[0].kind === "patient-name") {
+              const onshiPatient = new OnshiPatient(r);
+              const dd: FaceConfirmedConfirmSelectPatient =
+                new FaceConfirmedConfirmSelectPatient({
+                  target: document.body,
+                  props: {
+                    destroy: () => dd.$destroy(),
+                    patient,
+                    onshiPatient,
+                    onConfirmed: async () => {
+                      let updated = await setOnshiName(
+                        patient.patientId,
+                        onshiPatient.name
+                      );
+                      await advanceWithPatient(updated, r);
+                    },
+                    onCancel: () => {
+                      // nop
+                    },
+                  },
+                });
+            } else {
+              alert(errs.map((e) => e.toString()).join("\n"));
+            }
+          },
+        },
+      });
   }
 </script>
 
@@ -376,8 +388,8 @@
         {resolved.patient.fullName()}
       </div>
       {#if resolved.shahokokuhoOpt || resolved.koukikoureiOpt}
-      <div>{resolved.shahokokuhoOpt ? "新規社保国保" : "新規後期高齢"}</div>
         <div>
+          {resolved.shahokokuhoOpt ? "社保国保" : "後期高齢"}
           （現在有効な{currentRep(
             resolved.shahokokuhoOpt,
             resolved.koukikoureiOpt
@@ -398,7 +410,9 @@
         {/if}
       </div>
       {#each resolved.kouhiList as kouhi (kouhi.kouhiId)}
-        <div data-kouhi-id={kouhi.kouhiId}>{kouhiRep(kouhi.futansha, kouhi.memoAsJson)}</div>
+        <div data-kouhi-id={kouhi.kouhiId}>
+          {kouhiRep(kouhi.futansha, kouhi.memoAsJson)}
+        </div>
       {/each}
     {/if}
   </div>
@@ -407,7 +421,9 @@
       <button on:click={doClose}>閉じる</button>
     {:else if resolvedState instanceof NoPatient}
       {@const resolved = resolvedState}
-      <button on:click={() => doSearchForPatient(resolved.result)}>既存患者検索</button>
+      <button on:click={() => doSearchForPatient(resolved.result)}
+        >既存患者検索</button
+      >
       <button on:click={() => doRegisterPatient(resolved.result)}
         >新規患者登録</button
       >
@@ -417,7 +433,9 @@
     {:else if resolvedState instanceof NewHoken}
       {@const resolved = resolvedState}
       <button on:click={() => doRegisterNewHoken(resolved)}
-        >{resolved.shahokokuhoOpt ? "新規社保国保登録" : "新規後期高齢登録"}</button
+        >{isKoukikourei(parseInt(resolved.resultItem.insurerNumber ?? "0"))
+          ? "新規後期高齢登録"
+          : "新規社保国保登録"}</button
       >
     {:else if resolvedState instanceof AllResolved}
       {@const resolved = resolvedState}

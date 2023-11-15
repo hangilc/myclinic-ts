@@ -117,7 +117,7 @@ describe("FaceConfirmedWindow", () => {
       };
       cy.mount(FaceConfirmedWindow, { props });
       cy.intercept("POST", apiBase() + "/enter-shahokokuho").as("enterShahokokuho");
-      cy.get("button").contains("新規保険証登録").click();
+      cy.get("button").contains("新規社保国保登録").click();
       dialogOpen("新規社保国保登録").within(() => {
         cy.get("button").contains("入力").click();
       });
@@ -282,7 +282,7 @@ describe("FaceConfirmedWindow", () => {
     })
   });
 
-  it.only("should handle koukikourei futanwari conflict", () => {
+  it("should handle koukikourei futanwari conflict", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient: Patient) => {
       const hokenTmpl = {
@@ -368,7 +368,7 @@ describe("FaceConfirmedWindow", () => {
       };
       cy.mount(FaceConfirmedWindow, { props });
       cy.get("[data-cy=message]").contains("可能であれば有効期限終了を設定します。");
-      cy.get("button").contains("新規保険証登録").click();
+      cy.get("button").contains("新規社保国保登録").click();
       cy.intercept("GET", apiBase() + "/shahokokuho-usage-since*").as("usageSince");
       cy.on("window:alert", (t) => {
         expect(t).contains("失効している保険証");
@@ -424,7 +424,7 @@ describe("FaceConfirmedWindow", () => {
       };
       cy.mount(FaceConfirmedWindow, { props });
       cy.get("[data-cy=message]").contains("可能であれば有効期限終了を設定します。");
-      cy.get("button").contains("新規保険証登録").click();
+      cy.get("button").contains("新規後期高齢登録").click();
       cy.intercept("GET", apiBase() + "/koukikourei-usage-since*").as("usageSince");
       cy.on("window:alert", (t) => {
         expect(t).contains("失効している保険証");
