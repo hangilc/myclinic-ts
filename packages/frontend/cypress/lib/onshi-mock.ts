@@ -213,6 +213,7 @@ type OnshiBodyModifier = (body: MessageBodyCreationSpec) => MessageBodyCreationS
 type OnshiResultModifier = (result: ResultOfQualificationConfirmationCreationSpec) => ResultOfQualificationConfirmationCreationSpec | void;
 
 function convertShahokokuhoKourei(koureiStore: number, aux?: KoureiAux): ElderlyRecipientCertificateInfoCreationSpec | undefined {
+  console.log("enter convertShahokokuhoKourei", koureiStore, aux);
   if (koureiStore === 0) {
     return undefined;
   } else {

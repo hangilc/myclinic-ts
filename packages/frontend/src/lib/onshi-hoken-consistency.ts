@@ -218,6 +218,7 @@ export function shahokokuhoOnshiConsistent(
   shahokokuho: Shahokokuho,
   r: ResultItem
 ): string | undefined {
+  console.log("enter shahokokuhoOnshiConsistent", shahokokuho, r);
   const hokenshaBangou = parseInt(r.insurerNumber || "0");
   if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
     return `保険者番号が一致しません。${shahokokuho.hokenshaBangou} - ${hokenshaBangou}`;

@@ -1,6 +1,6 @@
 import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 import { createOnshiResult } from "@cypress/lib/onshi-mock";
-import { createPatient, enterPatient } from "@cypress/lib/patient";
+import { createPatient, enterPatient, type PatientCreationSpec } from "@cypress/lib/patient";
 import { createShahokokuho } from "@cypress/lib/shahokokuho-mock";
 import type { OnshiResult } from "onshi-result";
 import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
@@ -280,6 +280,56 @@ describe("FaceConfirmedWindow", () => {
         cy.get("button").contains("診察登録").should("exist");
       });
     })
+  });
+
+  it.only("should handle shahokokuho new kourei conflict", () => {
+    enterPatient(createPatient({})).then((patient: Patient) => {
+      const hokenTmpl = {
+        patientId: patient.patientId,
+        hokenshaBangou: 123456,
+        validFrom: "2023-04-14",
+        validUpto: "2025-04-13",
+      }
+      enterShahokokuho(createShahokokuho(Object.assign({}, hokenTmpl, {
+        kourei: 0
+      }))).then((curHoken: Shahokokuho) => {
+        const newHoken = createShahokokuho(Object.assign({}, hokenTmpl, {
+          validFrom: "2024-04-14",
+          koureiStore: 2
+        }));
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(newHoken));
+        console.log("result", result);
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        cy.intercept("GET", apiBase() + "/find-available-shahokokuho?*").as("findShahokokuho");
+        cy.intercept("POST", apiBase() + "/update-shahokokuho").as("updateShahokokuho");
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.wait("@findShahokokuho").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal(curHoken);
+        });
+        cy.get("button").contains("新規社保国保登録").click();
+        dialogOpen("新規社保国保登録").within(() => {
+          cy.get("button").contains("入力").click();
+        });
+        dialogClose("新規後期高齢保険登録");
+        cy.wait("@updateShahokokuho").then(resp => {
+          const body = JSON.parse(resp.request.body);
+          console.log("body", body);
+          expect(body).deep.equal(Object.assign({}, curHoken, {
+            validUpto: "2024-04-13",
+          }))
+        });
+        cy.get("button").contains("診察登録").should("exist");
+        });
+  });
   });
 
   it("should handle koukikourei futanwari conflict", () => {
