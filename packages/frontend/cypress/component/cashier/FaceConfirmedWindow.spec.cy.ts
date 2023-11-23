@@ -10,7 +10,7 @@ import { enterShahokokuho, getShahokokuho, shahokokuhoUsage } from "@cypress/lib
 import { createKoukikourei, enterKoukikourei } from "@cypress/lib/koukikourei";
 import { endVisit, getVisit, startVisit } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
-import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
+import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
 import { KouhiDialogDriver } from "@cypress/lib/kouhi-dialog";
 import { createKouhi, enterKouhi } from "@cypress/lib/kouhi";
 
@@ -690,7 +690,7 @@ describe("FaceConfirmedWindow", () => {
     cy.get("button").contains("既存患者検索").should("not.exist");
   });
 
-  it.only("should update validUpto of Shahokokuho", () => {
+  it("should update validUpto of Shahokokuho", () => {
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
@@ -724,11 +724,58 @@ describe("FaceConfirmedWindow", () => {
             cy.get("button").contains("新規社保国保登録").click();
             dialogOpen("新規社保国保登録").within(() => {
               cy.get("button").contains("入力").click();
-              dialogClose("新規社保国保登録");
-              getShahokokuho(oldHoken.shahokokuhoId).then(updated => {
-                const expectedValidUpto = dateToSqlDate(kanjidate.addDays(new Date(newHoken.validFrom), -1));
-                expect(updated.validUpto).equals(expectedValidUpto);
-              })
+            })
+            dialogClose("新規社保国保登録");
+            cy.get("button").contains("診察登録");
+            getShahokokuho(oldHoken.shahokokuhoId).then(updated => {
+              const expectedValidUpto = dateToSqlDate(kanjidate.addDays(new Date(newHoken.validFrom), -1));
+              expect(updated.validUpto).equals(expectedValidUpto);
+            })
+          });
+        })
+      });
+    })
+  });
+
+  it.only("should not update validUpto of Shahokokuho", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "0000-00-00",
+      }
+      enterShahokokuho(createShahokokuho(oldHokenTmpl)).then((oldHoken: Shahokokuho) => {
+        console.log("oldShahokokuho", oldHoken);
+        startVisit(patient.patientId, "2024-05-01 14:00:00").then((oldVisit: Visit) => {
+          console.log("oldVisit", oldVisit);
+          endVisit(oldVisit.visitId, 0).then(() => {
+            shahokokuhoUsage(oldHoken.shahokokuhoId).then(visits => {
+              expect(visits.length).equals(1);
+              expect(visits[0].shahokokuhoId).equals(oldHoken.shahokokuhoId);
+            });
+            const newHoken = createShahokokuho(Object.assign({}, oldHokenTmpl, {
+              validFrom: "2024-04-14",
+            }));
+            const result = createOnshiResult(m.patient(patient), m.shahokokuho(newHoken));
+            console.log("result", result);
+            cy.intercept(
+              "GET",
+              apiBase() + "/search-patient?text=*",
+              [10, [patient]]);
+            const props = {
+              destroy: () => { },
+              result,
+              onRegister: () => { }
+            };
+            cy.mount(FaceConfirmedWindow, { props });
+            cy.get("button").contains("新規社保国保登録").click();
+            dialogOpen("新規社保国保登録").within(() => {
+              cy.get("button").contains("入力").click();
+            })
+            dialogClose("新規社保国保登録");
+            cy.get("button").contains("診察登録");
+            getShahokokuho(oldHoken.shahokokuhoId).then(updated => {
+              expect(updated.validUpto).equals("0000-00-00");
             })
           });
         })
