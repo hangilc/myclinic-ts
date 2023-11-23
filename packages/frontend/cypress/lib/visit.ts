@@ -9,6 +9,10 @@ export function startVisit(patientId: number, atDateTime: Date | string): Cypres
     .then(body => Visit.cast(body))
 }
 
+export function endVisit(visitId: number, charge: number): Cypress.Chainable<any> {
+  return cy.request(apiBase() + `/enter-charge-value?visit-id=${visitId}&charge-value=${charge}`)
+}
+
 export function getVisitEx(visitId: number): Cypress.Chainable<VisitEx> {
   return cy.request(apiBase() + `/get-visit-ex?visit-id=${visitId}`)
     .its("body")

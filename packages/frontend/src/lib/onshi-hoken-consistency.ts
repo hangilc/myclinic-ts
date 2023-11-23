@@ -2,6 +2,7 @@ import { Koukikourei, Shahokokuho, } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { isKoukikourei } from "./hoken-rep";
 import { toHankaku } from "./zenkaku";
+import { onshiDateToSqlDate } from "onshi-result/util";
 
 export namespace OnshiHokenInconsistency {
   export class Inconsistency {
@@ -238,6 +239,14 @@ export function shahokokuhoOnshiConsistent(
   const kourei: number = r.kourei != undefined ? r.kourei.futanWari ?? 0 : 0;
   if (shahokokuho.koureiStore !== kourei) {
     return `高齢が一致しません。${shahokokuho.koureiStore} - ${kourei}`;
+  }
+  const validFrom: string = onshiDateToSqlDate(r.insuredCardValidDate ?? "00000000");
+  if( shahokokuho.validFrom !== validFrom ){
+    return "期限開始が一致しません。";
+  }
+  const validUpto: string = r.insuredCardExpirationDate ? onshiDateToSqlDate(r.insuredCardExpirationDate) : "0000-00-00";
+  if( shahokokuho.validUpto !== validUpto ){
+    return "期限終了が一致しません。";
   }
   if (r.personalFamilyClassification != undefined) {
     const honnin = r.personalFamilyClassification;

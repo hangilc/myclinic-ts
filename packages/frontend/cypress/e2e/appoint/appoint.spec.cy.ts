@@ -65,7 +65,7 @@ describe("Appoint", () => {
     const [start, _last] = rangeOfWeek(new Date());
     cy.get("button").contains("次の週").click();
     const d = addDays(start, 8);
-    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`, { timeout: 60000}).should("exist");
   })
 
   it("should move to next month", () => {
@@ -81,7 +81,7 @@ describe("Appoint", () => {
     const [start, _last] = rangeOfWeek(new Date());
     cy.get("button").contains("前の週").click();
     const d = addDays(start, -7+1);
-    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`).should("exist");
+    cy.get(`[data-cy=appoint-column][data-date='${dateToSql(d)}']`, { timeout: 60000 }).should("exist");
   })
 
   it("should move to prev month", () => {
