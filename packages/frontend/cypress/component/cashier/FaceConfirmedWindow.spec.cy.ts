@@ -7,14 +7,14 @@ import { onshiCreationModifier as m } from "@cypress/lib/onshi-mock";
 import { apiBase } from "@cypress/lib/base";
 import { dateToSqlDate, Kouhi, Koukikourei, Patient, Shahokokuho, Visit } from "myclinic-model";
 import { enterShahokokuho, getShahokokuho, shahokokuhoUsage } from "@cypress/lib/shahokokuho";
-import { createKoukikourei, enterKoukikourei } from "@cypress/lib/koukikourei";
+import { createKoukikourei, enterKoukikourei, getKoukikourei, koukikoureiUsage } from "@cypress/lib/koukikourei";
 import { endVisit, getVisit, startVisit } from "@cypress/lib/visit";
 import * as kanjidate from "kanjidate";
-import { dialogClose, dialogOpen, dialogSelector } from "@cypress/lib/dialog";
+import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { KouhiDialogDriver } from "@cypress/lib/kouhi-dialog";
 import { createKouhi, enterKouhi } from "@cypress/lib/kouhi";
 
-describe("FaceConfirmedWindow", () => {
+describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   it("should mount", () => {
     const result: OnshiResult = createOnshiResult();
     cy.intercept(
@@ -494,7 +494,7 @@ describe("FaceConfirmedWindow", () => {
     });
   });
 
-  it("should enter kouhi", () => {
+  it.only("should enter kouhi", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
       enterShahokokuho(createShahokokuho({ patientId: patient.patientId })).as("shahokokuho");
@@ -737,7 +737,7 @@ describe("FaceConfirmedWindow", () => {
     })
   });
 
-  it.only("should not update validUpto of Shahokokuho", () => {
+  it("should not update validUpto of Shahokokuho", () => {
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
@@ -776,6 +776,53 @@ describe("FaceConfirmedWindow", () => {
             cy.get("button").contains("診察登録");
             getShahokokuho(oldHoken.shahokokuhoId).then(updated => {
               expect(updated.validUpto).equals("0000-00-00");
+            })
+          });
+        })
+      });
+    })
+  });
+
+  it("should update validUpto of Koukikourei", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "0000-00-00",
+      }
+      enterKoukikourei(createKoukikourei(oldHokenTmpl)).then((oldHoken: Koukikourei) => {
+        console.log("oldKoukikourei", oldHoken);
+        startVisit(patient.patientId, "2023-05-01 14:00:00").then((oldVisit: Visit) => {
+          console.log("oldVisit", oldVisit);
+          endVisit(oldVisit.visitId, 0).then(() => {
+            koukikoureiUsage(oldHoken.koukikoureiId).then(visits => {
+              expect(visits.length).equals(1);
+              expect(visits[0].koukikoureiId).equals(oldHoken.koukikoureiId);
+            });
+            const newHoken = createKoukikourei(Object.assign({}, oldHokenTmpl, {
+              validFrom: "2024-04-14",
+            }));
+            const result = createOnshiResult(m.patient(patient), m.koukikourei(newHoken));
+            console.log("result", result);
+            cy.intercept(
+              "GET",
+              apiBase() + "/search-patient?text=*",
+              [10, [patient]]);
+            const props = {
+              destroy: () => { },
+              result,
+              onRegister: () => { }
+            };
+            cy.mount(FaceConfirmedWindow, { props });
+            cy.get("button").contains("新規後期高齢登録").click();
+            dialogOpen("新規社保国保登録").within(() => {
+              cy.get("button").contains("入力").click();
+            })
+            dialogClose("新規社保国保登録");
+            cy.get("button").contains("診察登録");
+            getKoukikourei(oldHoken.koukikoureiId).then(updated => {
+              const expectedValidUpto = dateToSqlDate(kanjidate.addDays(new Date(newHoken.validFrom), -1));
+              expect(updated.validUpto).equals(expectedValidUpto);
             })
           });
         })

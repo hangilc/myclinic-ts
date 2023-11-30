@@ -4,7 +4,7 @@ import * as kanjidate from "kanjidate";
 import api from "./api";
 import { birthdayRep } from "./util";
 import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
-import { tryUpdateShahokokuho } from "./hoken-lib";
+import { tryUpdateKoukikourei, tryUpdateShahokokuho } from "./hoken-lib";
 
 export class OnshiPatient {
   name: string;
@@ -96,7 +96,11 @@ export async function invalidateShahokokuho(shahokokuho: Shahokokuho, validUpto:
 
 export async function invalidateKoukikourei(koukikourei: Koukikourei, validUpto: string) {
   const s = Object.assign({}, koukikourei, { validUpto: validUpto });
-  await api.updateKoukikourei(s);
+  // await api.updateKoukikourei(s);
+  const r = await tryUpdateKoukikourei(s);
+  if( r !== "success" ){
+    console.error("ERROR (tryUpdateKoukikourei)", r);
+  }
 }
 
 export async function fixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)

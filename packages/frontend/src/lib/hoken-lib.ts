@@ -1,8 +1,9 @@
-import type { Shahokokuho } from "myclinic-model";
+import type { Koukikourei, Shahokokuho } from "myclinic-model";
 import api from "./api";
 
-export type TryUpdateShahokokuhoResult = "success" | "not-allowed" | "invalid-valid-upto";
-export async function tryUpdateShahokokuho(shahokokuho: Shahokokuho): Promise<TryUpdateShahokokuhoResult> {
+export type TryUpdateHokenResult = "success" | "not-allowed" | "invalid-valid-upto";
+
+export async function tryUpdateShahokokuho(shahokokuho: Shahokokuho): Promise<TryUpdateHokenResult> {
   const prev: Shahokokuho = await api.getShahokokuho(shahokokuho.shahokokuhoId);
   if (isEqualShahokokuho(prev, shahokokuho)) {
     return "success";
@@ -36,3 +37,37 @@ function isEqualShahokokuho(a: Shahokokuho, b: Shahokokuho): boolean {
     a.koureiStore === b.koureiStore &&
     a.edaban === b.edaban;
 }
+
+export async function tryUpdateKoukikourei(koukikourei: Koukikourei): Promise<TryUpdateHokenResult> {
+  const prev: Koukikourei = await api.getKoukikourei(koukikourei.koukikoureiId);
+  if (isEqualKoukikourei(prev, koukikourei)) {
+    return "success";
+  }
+  const usage: number = await api.countKoukikoureiUsage(koukikourei.koukikoureiId);
+  if (usage > 0) {
+    console.log("cmp", Object.assign({}, prev, koukikourei.validUpto), koukikourei);
+    if (!isEqualKoukikourei(Object.assign({}, prev, { validUpto: koukikourei.validUpto }), koukikourei)) {
+      return "not-allowed";
+    }
+    if( koukikourei.validUpto !== "0000-00-00" ){
+      const u: number = await api.countKoukikoureiUsageAfter(koukikourei.koukikoureiId, koukikourei.validUpto);
+      if( u > 0 ){
+        return "invalid-valid-upto";
+      }
+    }
+  }
+  await api.updateKoukikourei(koukikourei);
+  return "success";
+}
+
+function isEqualKoukikourei(a: Koukikourei, b: Koukikourei): boolean {
+  return a.koukikoureiId === b.koukikoureiId &&
+    a.patientId === b.patientId &&
+    a.hokenshaBangou === b.hokenshaBangou &&
+    a.hihokenshaBangou === b.hihokenshaBangou &&
+    a.futanWari === b.futanWari &&
+    a.validFrom === b.validFrom &&
+    a.validUpto === b.validUpto
+}
+
+

@@ -1,4 +1,4 @@
-import { dateToSqlDate, Koukikourei } from "myclinic-model";
+import { dateToSqlDate, Koukikourei, Visit } from "myclinic-model";
 import { apiBase } from "./base";
 
 export interface KoukikoureiCreationSpec {
@@ -33,3 +33,7 @@ export function enterKoukikourei(koukikourei: Koukikourei): Cypress.Chainable<Ko
     .then((response) => Koukikourei.cast(response.body));
 }
 
+export function koukikoureiUsage(koukikoureiId: number): Cypress.Chainable<Visit[]> {
+  return cy.request("GET", apiBase() + `/koukikourei-usage?koukikourei-id=${koukikoureiId}`)
+    .its("body").then(body => body.map((obj: any) => Visit.cast(obj)));
+}

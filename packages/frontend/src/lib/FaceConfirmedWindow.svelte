@@ -103,6 +103,9 @@
     );
     if (shahoOpt) {
       const err = shahokokuhoOnshiConsistent(shahoOpt, r);
+      if( err ){
+        console.error("INCONSISTENT", err);
+      }
       if (!err) {
         resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
         return;
