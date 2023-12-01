@@ -1,5 +1,5 @@
 import { dateToSql } from "@/lib/util";
-import { dialogOpen } from "@cypress/lib/dialog";
+import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { rangeOfWeek } from "./appoint-helper";
 import { addDays } from "kanjidate";
 import { ConfirmDriver } from "@cypress/lib/drivers";
@@ -45,7 +45,8 @@ describe("Appoint", { defaultCommandTimeout: 60000 },  () => {
       cy.get("[data-cy=search-patient-input]").type("1");
       cy.get("[data-cy=search-icon]").click();
       cy.get("button").contains("入力").click();
-    })
+    });
+    dialogClose("診察予約入力");
     cy.get("@slot").within(() => {
       cy.get("[data-cy=appoint-patient][data-patient-id=1]").click();
     });

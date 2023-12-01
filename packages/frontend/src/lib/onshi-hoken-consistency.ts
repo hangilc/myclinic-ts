@@ -287,6 +287,14 @@ export function koukikoureiOnshiConsistent(
   if (futanWari > 0 && koukikourei.futanWari !== futanWari) {
     return `負担割が一致しません。${koukikourei.futanWari} - ${futanWari}`;
   }
+  const validFrom: string | undefined = r.insuredCardValidDate;
+  if( koukikourei.validFrom !== validFrom ){
+    return "期限開始が一致しません。";
+  }
+  const validUpto: string = r.insuredCardExpirationDate ?? "0000-00-00";
+  if( koukikourei.validUpto !== validUpto ){
+    return "期限終了が一致しません。";
+  }
   return undefined;
 }
 

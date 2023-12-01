@@ -494,7 +494,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     });
   });
 
-  it.only("should enter kouhi", () => {
+  it("should enter kouhi", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then(patient => {
       enterShahokokuho(createShahokokuho({ patientId: patient.patientId })).as("shahokokuho");
@@ -783,7 +783,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     })
   });
 
-  it("should update validUpto of Koukikourei", () => {
+  it("should update validUpto of koukikourei", () => {
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
@@ -815,10 +815,10 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
             };
             cy.mount(FaceConfirmedWindow, { props });
             cy.get("button").contains("新規後期高齢登録").click();
-            dialogOpen("新規社保国保登録").within(() => {
+            dialogOpen("新規後期高齢保険登録").within(() => {
               cy.get("button").contains("入力").click();
             })
-            dialogClose("新規社保国保登録");
+            dialogClose("新規後期高齢保険登録");
             cy.get("button").contains("診察登録");
             getKoukikourei(oldHoken.koukikoureiId).then(updated => {
               const expectedValidUpto = dateToSqlDate(kanjidate.addDays(new Date(newHoken.validFrom), -1));
