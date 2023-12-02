@@ -830,5 +830,51 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     })
   });
 
+  it("should not update validUpto of Koukikourei", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "0000-00-00",
+      }
+      enterKoukikourei(createKoukikourei(oldHokenTmpl)).then((oldHoken: Koukikourei) => {
+        console.log("oldKoukikourei", oldHoken);
+        startVisit(patient.patientId, "2024-05-01 14:00:00").then((oldVisit: Visit) => {
+          console.log("oldVisit", oldVisit);
+          endVisit(oldVisit.visitId, 0).then(() => {
+            koukikoureiUsage(oldHoken.koukikoureiId).then(visits => {
+              expect(visits.length).equals(1);
+              expect(visits[0].koukikoureiId).equals(oldHoken.koukikoureiId);
+            });
+            const newHoken = createKoukikourei(Object.assign({}, oldHokenTmpl, {
+              validFrom: "2024-04-14",
+            }));
+            const result = createOnshiResult(m.patient(patient), m.koukikourei(newHoken));
+            console.log("result", result);
+            cy.intercept(
+              "GET",
+              apiBase() + "/search-patient?text=*",
+              [10, [patient]]);
+            const props = {
+              destroy: () => { },
+              result,
+              onRegister: () => { }
+            };
+            cy.mount(FaceConfirmedWindow, { props });
+            cy.get("button").contains("新規後期高齢登録").click();
+            dialogOpen("新規後期高齢保険登録").within(() => {
+              cy.get("button").contains("入力").click();
+            })
+            dialogClose("新規後期高齢保険登録");
+            cy.get("button").contains("診察登録");
+            getKoukikourei(oldHoken.koukikoureiId).then(updated => {
+              expect(updated.validUpto).equals("0000-00-00");
+            })
+          });
+        })
+      });
+    })
+  });
+
 });
 
