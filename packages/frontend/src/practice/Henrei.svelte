@@ -1,12 +1,15 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
+  import { cvtVisitsToUnit, loadVisitsForPatient } from "@/lib/rezept-adapter";
+  import type { Visit } from "myclinic-model";
+  import { rezeptUnitToPatientUnit } from "myclinic-rezept";
   import {
     pad,
   } from "myclinic-rezept/helper";
 
   export let isVisible: boolean;
   let shiharaiKikan: "shaho" | "kokuho" = "shaho";
-  let seikyuuYearMonth: string = defaultSeikyuuYearMonth();
+  // let seikyuuYearMonth: string = defaultSeikyuuYearMonth();
   let henreiData: string = "";
   let seikyuuFile: string = "";
   let henreiReason: string = "";
@@ -28,12 +31,12 @@
     }
   }
 
-  function defaultSeikyuuYearMonth(): string {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = pad(d.getMonth() + 1, 2, "0");
-    return `${y}${m}`;
-  }
+  // function defaultSeikyuuYearMonth(): string {
+  //   const d = new Date();
+  //   const y = d.getFullYear();
+  //   const m = pad(d.getMonth() + 1, 2, "0");
+  //   return `${y}${m}`;
+  // }
 
   function doImport() {
     if (henreiData === "") {
@@ -93,6 +96,40 @@
     downloadLink.download = fixedFileName;
   }
 
+  function parseSeikyuu(src: string): { year: number, month: number, patientId: number, serial: number } {
+    const lines: string[] = src.split(/\r?\n/);
+    for(let line of lines){
+      if( line.startsWith("RE") ){
+        const toks = line.split(",");
+        const item = toks[3];
+        return {
+          year: parseInt(item.substring(0, 4)),
+          month: parseInt(item.substring(4, 6)),
+          patientId: parseInt(toks[13]),
+          serial: parseInt(toks[1]),
+        }
+      }
+    }
+    throw new Error("Cannot find RE record.");
+  }
+
+  async function doRecalc() {
+    const { year, month, patientId, serial } = parseSeikyuu(seikyuuData);
+    const { shaho, kokuho } = await loadVisitsForPatient(year, month, patientId);
+    let visits: Visit[] = [];
+    if( shaho.length === 1 && kokuho.length === 0 ){
+      visits = shaho[0];
+    } else if( kokuho.length === 1 && shaho.length === 0 ){
+      visits = kokuho[0];
+    } else {
+      throw new Error("Cannot handle visits");
+    }
+    const unit = await cvtVisitsToUnit(visits);
+    const patientUnit = rezeptUnitToPatientUnit(unit, year, month);
+    const rows = patientUnit.getRows(serial);
+    seikyuuData = rows.join("\r\n") + "\r\n";
+  }
+
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
@@ -103,9 +140,9 @@
       <input type="radio" bind:group={shiharaiKikan} value="kokuho" /> 国保
     </form>
   </div>
-  <div class="area">
+  <!-- <div class="area">
     請求月：<input type="text" bind:value={seikyuuYearMonth} />
-  </div>
+  </div> -->
   <textarea bind:value={henreiData} class="import-data" />
   <button on:click={doImport}>取込</button>
   <div class="area">{seikyuuFile}</div>
@@ -115,6 +152,7 @@
   <div class="area">
     <textarea bind:value={seikyuuData} class="seikyuu-data" />
     <pre class="seikyuu-tail">{seikyuuTail}</pre>
+    <button on:click={doRecalc}>再計算</button>
     <button on:click={doCreate}>作成</button>
   </div>
   <div class="area">

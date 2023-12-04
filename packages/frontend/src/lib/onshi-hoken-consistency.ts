@@ -244,7 +244,7 @@ export function shahokokuhoOnshiConsistent(
   if( shahokokuho.validFrom !== validFrom ){
     return "期限開始が一致しません。";
   }
-  const validUpto: string = r.insuredCardExpirationDate ? onshiDateToSqlDate(r.insuredCardExpirationDate) : "0000-00-00";
+  const validUpto: string = r.insuredCardExpirationDate ? r.insuredCardExpirationDate : "0000-00-00";
   if( shahokokuho.validUpto !== validUpto ){
     return "期限終了が一致しません。";
   }

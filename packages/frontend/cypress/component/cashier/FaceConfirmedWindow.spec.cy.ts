@@ -876,5 +876,55 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     })
   });
 
+  it("should assert same validUpto in Shahokokuho", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "2024-02-12",
+      }
+      enterShahokokuho(createShahokokuho(oldHokenTmpl)).then((oldHoken: Shahokokuho) => {
+        console.log("oldShahokokuho", oldHoken);
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(oldHoken));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.get("button").contains("診察登録").should("exist");
+      });
+    })
+  });
+
+  it("should assert same validUpto in Koukikourei", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "2024-02-12",
+      }
+      enterKoukikourei(createKoukikourei(oldHokenTmpl)).then((oldHoken: Koukikourei) => {
+        console.log("oldKoukikourei", oldHoken);
+        const result = createOnshiResult(m.patient(patient), m.koukikourei(oldHoken));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.get("button").contains("診察登録").should("exist");
+      });
+    })
+  });
+
 });
 

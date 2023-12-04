@@ -235,6 +235,7 @@ async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
 async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: string): Promise<RezeptDisease[]> {
   const result: RezeptDisease[] = [];
   const ds = await api.listDiseaseActiveAt(patientId, firstDay, lastDay);
+  ds.sort((a, b) => a.startDate.localeCompare(b.startDate));
   for (let i = 0; i < ds.length; i++) {
     const disease = ds[i];
     const adjCodes = await adjCodesOfDisease(disease.diseaseId);

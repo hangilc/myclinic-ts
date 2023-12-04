@@ -112,6 +112,9 @@
       }
     } else if (koukiOpt) {
       const err = koukikoureiOnshiConsistent(koukiOpt, r);
+      if( err ){
+        console.error("INCONSISTENT", err);
+      }
       if (!err) {
         resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
         return;
