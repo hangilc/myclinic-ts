@@ -3,9 +3,7 @@
   import { cvtVisitsToUnit, loadVisitsForPatient } from "@/lib/rezept-adapter";
   import type { Visit } from "myclinic-model";
   import { rezeptUnitToPatientUnit } from "myclinic-rezept";
-  import {
-    pad,
-  } from "myclinic-rezept/helper";
+  import Diff from "diff";
 
   export let isVisible: boolean;
   let shiharaiKikan: "shaho" | "kokuho" = "shaho";
@@ -130,6 +128,13 @@
     seikyuuData = rows.join("\r\n") + "\r\n";
   }
 
+  function doDiff() {
+    const [oldText] = parseHenreiData(henreiData);
+    const newText = seikyuuData;
+    const diff = Diff.diffLines(oldText.join("\r\n"), newText);
+    console.log(diff);
+  }
+
 </script>
 
 <div style:display={isVisible ? "" : "none"}>
@@ -153,6 +158,7 @@
     <textarea bind:value={seikyuuData} class="seikyuu-data" />
     <pre class="seikyuu-tail">{seikyuuTail}</pre>
     <button on:click={doRecalc}>再計算</button>
+    <button on:click={doDiff}>差分</button>
     <button on:click={doCreate}>作成</button>
   </div>
   <div class="area">
