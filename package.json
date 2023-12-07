@@ -16,11 +16,10 @@
     "deploy": "bash scripts/deploy.sh"
   },
   "devDependencies": {
-    "@types/diff": "^5.0.8",
     "typescript": "5.2.2"
   },
   "dependencies": {
-    "diff": "^5.1.0",
+    "@types/diff-match-patch": "^1.0.36",
     "diff-match-patch": "^1.0.5"
   }
 }

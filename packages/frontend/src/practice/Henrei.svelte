@@ -3,7 +3,7 @@
   import { cvtVisitsToUnit, loadVisitsForPatient } from "@/lib/rezept-adapter";
   import type { Visit } from "myclinic-model";
   import { rezeptUnitToPatientUnit } from "myclinic-rezept";
-  import Diff from "diff";
+  import DiffMatchPatch from "diff-match-patch";
 
   export let isVisible: boolean;
   let shiharaiKikan: "shaho" | "kokuho" = "shaho";
@@ -131,8 +131,16 @@
   function doDiff() {
     const [oldText] = parseHenreiData(henreiData);
     const newText = seikyuuData;
-    const diff = Diff.diffLines(oldText.join("\r\n"), newText);
-    console.log(diff);
+    const dmp = new DiffMatchPatch();
+    const diffs = dmp.diff_main(oldText.join("\r\n"), newText);
+    for(let [c, s] of diffs){
+      s = s.replaceAll("\\r\\n", "\n");
+      if( c === 1 ){
+        console.log("+", s);
+      } else if( c === -1 ){
+        console.log("-", s);
+      }
+    }
   }
 
 </script>
