@@ -83,6 +83,9 @@ export class HokenCollector {
       this.shahokokuho = shahokokuho;
     } else {
       if (this.shahokokuho.shahokokuhoId !== shahokokuho.shahokokuhoId) {
+        console.error("ERROR", this.shahokokuho.shahokokuhoId, shahokokuho.shahokokuhoId);
+        console.error("this.shahokokuho", this.shahokokuho);
+        console.error("shahokokuho", shahokokuho);
         throw new Error("Inconsistent shahokokuho");
       }
     }
@@ -121,6 +124,7 @@ export class HokenCollector {
 
   scanVisits(visits: VisitEx[]): void {
     visits.forEach(visit => {
+      console.log("visit", visit);
       visit.shinryouList.forEach(shinryou => {
         const [shahokokuho, koukikourei, kouhiList] = hokenOfShinryou(
           shinryou, visit.hoken.shahokokuho, visit.hoken.koukikourei, visit.hoken.kouhiList);
