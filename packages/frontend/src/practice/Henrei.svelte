@@ -15,6 +15,7 @@
   let seikyuuTail: string = "";
   let downloadLink: HTMLAnchorElement;
   let nopHref = "javascript:void(0)";
+  let diffs: DiffMatchPatch.Diff[] = [];
 
   function doReset() {
     henreiData = "";
@@ -27,6 +28,7 @@
     if (href !== nopHref) {
       URL.revokeObjectURL(href);
     }
+    diffs = [];
   }
 
   // function defaultSeikyuuYearMonth(): string {
@@ -129,17 +131,18 @@
   }
 
   function doDiff() {
+    diffs = [];
     const [oldText] = parseHenreiData(henreiData);
     const newText = seikyuuData;
     const dmp = new DiffMatchPatch();
-    const diffs = dmp.diff_main(oldText.join("\r\n"), newText);
-    for(let [c, s] of diffs){
-      s = s.replaceAll("\\r\\n", "\n");
-      if( c === 1 ){
-        console.log("+", s);
-      } else if( c === -1 ){
-        console.log("-", s);
-      }
+    diffs = dmp.diff_main(oldText.join("\n"), newText.replaceAll(/\r?\n/g, "\n"));
+  }
+
+  function diffClass(c: number): string {
+    switch(c){
+      case 1: return "insert";
+      case -1: return "delete";
+      default: return "no-change";
     }
   }
 
@@ -169,6 +172,18 @@
     <button on:click={doDiff}>差分</button>
     <button on:click={doCreate}>作成</button>
   </div>
+  {#if diffs.length > 0}
+  <div class="area diff">
+    {#each diffs as d}
+      {@const c = d[0]}
+      {@const ss = d[1].split("\n")}
+      {#each ss as s, i}
+        {#if i > 0}<br />{/if}
+        <span class={diffClass(c)}>{s}</span>
+      {/each}
+    {/each}
+  </div>
+  {/if}
   <div class="area">
     <a href={nopHref} bind:this={downloadLink}>Download</a>
   </div>
@@ -206,5 +221,21 @@
   .seikyuu-tail {
     width: 80ch;
     overflow-x: auto;
+  }
+
+  .diff .insert {
+    font-weight: bold;
+    color: blue;
+    background-color: rgba(0, 0, 255, 0.2);
+  }
+
+  .diff .delete {
+    font-weight: bold;
+    color: red;
+    background-color: rgba(255, 0, 0, 0.2);
+  }
+
+  .diff .no-change {
+    font: gray;
   }
 </style>

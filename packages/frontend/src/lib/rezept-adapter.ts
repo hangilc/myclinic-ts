@@ -124,7 +124,6 @@ export class HokenCollector {
 
   scanVisits(visits: VisitEx[]): void {
     visits.forEach(visit => {
-      console.log("visit", visit);
       visit.shinryouList.forEach(shinryou => {
         const [shahokokuho, koukikourei, kouhiList] = hokenOfShinryou(
           shinryou, visit.hoken.shahokokuho, visit.hoken.koukikourei, visit.hoken.kouhiList);
