@@ -59,7 +59,8 @@ export async function loadVisitsForPatient(year: number, month: number, patientI
   kokuho: Visit[][];
 }> {
   const visitIds = await api.listVisitIdByPatientAndMonth(patientId, year, month);
-  const visits = await Promise.all(visitIds.map(visitId => api.getVisit(visitId)));
+  let visits = await Promise.all(visitIds.map(visitId => api.getVisit(visitId)));
+  visits = visits.filter(v => v.shahokokuhoId > 0 || v.koukikoureiId > 0);
   return doLoadVisits(visits);
 }
 
