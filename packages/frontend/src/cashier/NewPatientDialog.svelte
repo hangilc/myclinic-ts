@@ -6,6 +6,7 @@
   import { PatientData } from "./patient-dialog/patient-data";
   import PatientForm from "./PatientForm.svelte";
   import type { EventEmitter } from "@/lib/event-emitter";
+  import NewPatientFromHokenDialog from "./NewPatientFromHokenDialog.svelte";
 
   export let destroy: () => void;
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
@@ -35,6 +36,16 @@
       }
     }
   }
+
+  function doFromHoken(): void {
+    destroy();
+    const d: NewPatientFromHokenDialog = new NewPatientFromHokenDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+      }
+    })
+  }
 </script>
 
 <Dialog {destroy} title="新規患者入力">
@@ -47,6 +58,7 @@
   {/if}
   <PatientForm init={undefined} on:value-change={doChange} bind:validate />
   <div class="commands">
+    <a href="javascript:void(0)" on:click={doFromHoken}>保険証から作成</a>
     <button on:click={doEnter}>入力</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
@@ -60,6 +72,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: center;
     margin-top: 10px;
   }
 
