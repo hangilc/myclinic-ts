@@ -23,7 +23,9 @@
       error = "生年月日が入力されていません。";
       return;
     }
-    console.log("birthdate", birthdate);
+    const q = {
+      hokensha: ""
+    }
   }
 </script>
 
@@ -47,7 +49,7 @@
   {/if}
   <div>
     <div class="input-row">
-      <span>生年月日</span>
+      <span class="input-key">生年月日：</span>
       <div class="input-block birthday-input" data-cy="birthday-input-wrapper">
         <DateFormWithCalendar init={null} bind:validate={validateBirthdate}/>
       </div>
@@ -83,6 +85,10 @@
     display: inline-block;
     width: 12ch;
     text-align: right;
+  }
+
+  .input-block {
+    display: inline-block;
   }
 
   .error {
