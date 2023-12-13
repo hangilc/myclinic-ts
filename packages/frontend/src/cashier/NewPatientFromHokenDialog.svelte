@@ -1,31 +1,59 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
-  import { valid, type VResult } from "@/lib/validation";
+  import { onshiConfirm, type OnshiKakuninQuery } from "@/lib/onshi-confirm";
+  import { type VResult } from "@/lib/validation";
+  import { dateToSqlDate } from "myclinic-model";
 
   export let destroy: () => void;
   let mode: "shahokokuho" | "koukikourei" = "shahokokuho";
   let validateBirthdate: () => VResult<Date | null>;
   let error: string = "";
+  let hokensha = "";
+  let hihokensha = "";
+  let hihokenshaKigou = "";
+  let edaban = "";
 
   function doClose(): void {
     destroy();
   }
 
-  function doEnter() {
+  function validate(): OnshiKakuninQuery | string {
+    hokensha = hokensha.trim();
+    if( !hokensha ){
+      return "保険者番号が入力されていません。";
+    }
+    hihokensha = hihokensha.trim();
+    if( !hihokensha ){
+      return "被保険者番号が入力されていません。";
+    }
     const validatedBirthdate = validateBirthdate();
     if( validatedBirthdate.isError ){
-      error = validatedBirthdate.errorMessages.join("\n");
-      return;
+      return validatedBirthdate.errorMessages.join("\n");
     }
     const birthdate = validatedBirthdate.value;
     if( !birthdate ){
-      error = "生年月日が入力されていません。";
+      return "生年月日が入力されていません。";
+    }
+    return {
+      hokensha,
+      hihokensha,
+      birthdate: dateToSqlDate(birthdate),
+      confirmationDate: dateToSqlDate(new Date()),
+      kigou: hihokenshaKigou === "" ? undefined : hihokenshaKigou,
+      edaban: edaban === "" ? undefined : edaban,
+      limitAppConsFlag: "1",
+    }
+  }
+
+  async function doEnter() {
+    const validated = validate();
+    if( typeof validated === "string" ){
+      error = validated;
       return;
     }
-    const q = {
-      hokensha: ""
-    }
+    const confirm = await onshiConfirm(validated);
+    console.log("confirm", confirm);
   }
 </script>
 
@@ -55,19 +83,22 @@
       </div>
     </div>
     <div class="input-row">
-      <span class="input-key">保険者番号：</span><input type="text" />
+      <span class="input-key">保険者番号：</span><input type="text" bind:value={hokensha}/>
     </div>
   </div>
   {#if mode === "shahokokuho"}
     <div class="input-row">
-      <span class="input-key">被保険者記号：</span><input type="text" />
+      <span class="input-key">被保険者記号：</span><input type="text" bind:value={hihokenshaKigou}/>
     </div>
     <div class="input-row">
-      <span class="input-key">被保険者番号：</span><input type="text" />
+      <span class="input-key">被保険者番号：</span><input type="text" bind:value={hihokensha}/>
+    </div>
+    <div class="input-row">
+      <span class="input-key">枝番：</span><input type="text" bind:value={edaban}/>
     </div>
   {:else}
     <div class="input-row">
-      <span class="input-key">被保険者番号：</span><input type="text" />
+      <span class="input-key">被保険者番号：</span><input type="text" bind:value={hihokensha}/>
     </div>
   {/if}
   <div class="commands">
