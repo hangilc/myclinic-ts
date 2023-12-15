@@ -6,7 +6,9 @@
   import { create_hoken_from_onshi_kakunin } from "@/lib/onshi-hoken-consistency";
   import { onshiToPatient } from "@/lib/onshi-patient";
   import { type VResult } from "@/lib/validation";
+  import { hotlineTrigger } from "@/reception/reception-vars";
   import { Koukikourei, Patient, Shahokokuho, dateToSqlDate } from "myclinic-model";
+  import { PatientData } from "./patient-dialog/patient-data";
 
   export let destroy: () => void;
   let mode: "shahokokuho" | "koukikourei" = "shahokokuho";
@@ -70,6 +72,8 @@
     } else if( hoken instanceof Koukikourei ){
       await api.enterKoukikourei(hoken);
     }
+    doClose();
+    PatientData.start(entered, { hotlineTrigger: hotlineTrigger})
   }
 </script>
 
