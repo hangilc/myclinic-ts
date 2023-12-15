@@ -1,6 +1,5 @@
 import type { Patient } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
-import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 import * as kanjidate from "kanjidate";
 
 export type OnshiPatientInconsistencyKind = "名前" | "よみ" | "生年月日" | "性別";

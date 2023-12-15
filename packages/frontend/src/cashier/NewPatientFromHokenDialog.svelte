@@ -1,9 +1,11 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
+  import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { onshiConfirm, type OnshiKakuninQuery } from "@/lib/onshi-confirm";
+  import { onshiToPatient } from "@/lib/onshi-patient";
   import { type VResult } from "@/lib/validation";
-  import { dateToSqlDate } from "myclinic-model";
+  import { Patient, dateToSqlDate } from "myclinic-model";
 
   export let destroy: () => void;
   let mode: "shahokokuho" | "koukikourei" = "shahokokuho";
@@ -53,7 +55,9 @@
       return;
     }
     const confirm = await onshiConfirm(validated);
-    console.log("confirm", confirm);
+    const patient = onshiToPatient(confirm);
+    const entered: Patient = await api.enterPatient(patient);
+    console.log("entered", entered);
   }
 </script>
 
