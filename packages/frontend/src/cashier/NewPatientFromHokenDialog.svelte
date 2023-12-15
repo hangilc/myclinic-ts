@@ -3,9 +3,10 @@
   import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { onshiConfirm, type OnshiKakuninQuery } from "@/lib/onshi-confirm";
+  import { create_hoken_from_onshi_kakunin } from "@/lib/onshi-hoken-consistency";
   import { onshiToPatient } from "@/lib/onshi-patient";
   import { type VResult } from "@/lib/validation";
-  import { Patient, dateToSqlDate } from "myclinic-model";
+  import { Koukikourei, Patient, Shahokokuho, dateToSqlDate } from "myclinic-model";
 
   export let destroy: () => void;
   let mode: "shahokokuho" | "koukikourei" = "shahokokuho";
@@ -58,6 +59,17 @@
     const patient = onshiToPatient(confirm);
     const entered: Patient = await api.enterPatient(patient);
     console.log("entered", entered);
+    const hoken = create_hoken_from_onshi_kakunin(entered.patientId, confirm.resultList[0]);
+    console.log("hoken", hoken);
+    if( typeof hoken === "string" ){
+      error = hoken;
+      return;
+    }
+    if( hoken instanceof Shahokokuho ){
+      await api.enterShahokokuho(hoken);
+    } else if( hoken instanceof Koukikourei ){
+      await api.enterKoukikourei(hoken);
+    }
   }
 </script>
 
