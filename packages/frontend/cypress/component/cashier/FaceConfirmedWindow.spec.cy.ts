@@ -909,7 +909,6 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
         validUpto: "2024-02-12",
       }
       enterKoukikourei(createKoukikourei(oldHokenTmpl)).then((oldHoken: Koukikourei) => {
-        console.log("oldKoukikourei", oldHoken);
         const result = createOnshiResult(m.patient(patient), m.koukikourei(oldHoken));
         cy.intercept(
           "GET",
@@ -925,6 +924,34 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
       });
     })
   });
+
+  it.only("should handle edaban fix", () => {
+    enterPatient(createPatient()).then((patient: Patient) => {
+      const oldHokenTmpl = {
+        patientId: patient.patientId,
+        validFrom: "2023-02-13",
+        validUpto: "2024-02-12",
+        edaban: "",
+      };
+      enterShahokokuho(createShahokokuho(oldHokenTmpl)).then((hoken: Shahokokuho) => {
+        expect(hoken.edaban).equals("");
+        const newHokenTmpl = Object.assign({}, hoken.asJson(), { edaban: "01" });
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(createShahokokuho(newHokenTmpl)));
+        console.log("resultItem", result.resultList[0]);
+        expect(result.resultList[0].insuredBranchNumber).equals("01");
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+      });
+    });
+  })
 
 });
 

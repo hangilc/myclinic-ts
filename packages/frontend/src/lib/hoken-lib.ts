@@ -1,5 +1,6 @@
 import type { Koukikourei, Shahokokuho } from "myclinic-model";
 import api from "./api";
+import type { ResultItem } from "onshi-result/ResultItem";
 
 export type TryUpdateHokenResult = "success" | "not-allowed" | "invalid-valid-upto";
 
@@ -72,5 +73,3 @@ function isEqualKoukikourei(a: Koukikourei, b: Koukikourei): boolean {
     a.validFrom === b.validFrom &&
     a.validUpto === b.validUpto
 }
-
-

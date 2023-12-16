@@ -29,10 +29,10 @@
   } from "myclinic-model";
   import api from "./api";
   import {
-    create_hoken_from_onshi_kakunin,
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./onshi-hoken-consistency";
+  import { createHokenFromOnshiResult } from "./onshi-hoken";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
@@ -200,7 +200,7 @@
   async function doRegisterNewHoken(newHoken: NewHoken) {
     const patient: Patient = newHoken.patient;
     const result: ResultItem = newHoken.resultItem;
-    const hoken = create_hoken_from_onshi_kakunin(patient.patientId, result);
+    const hoken = createHokenFromOnshiResult(patient.patientId, result);
     if (typeof hoken === "string") {
       alert(hoken);
     } else if (hoken instanceof Shahokokuho) {

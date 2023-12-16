@@ -118,10 +118,10 @@ export class Patient {
 
   get rezeptName(): string | undefined {
     const name = this.memoAsJson["rezept-name"];
-    if( typeof name === "string" ){
+    if (typeof name === "string") {
       return name;
     } else {
-      if( name ){
+      if (name) {
         console.error("Invalid rezept-name", name);
       }
       return undefined;
@@ -130,10 +130,10 @@ export class Patient {
 
   get onshiName(): string | undefined {
     const name = this.memoAsJson["onshi-name"];
-    if( typeof name === "string" ){
+    if (typeof name === "string") {
       return name;
     } else {
-      if( name ){
+      if (name) {
         console.error("Invalid onshi-name", name);
       }
       return undefined;
@@ -200,7 +200,7 @@ export class RezeptShoujouShouki {
   kubun: string;
   text: string;
 
-  constructor(kubun: string, text: string){
+  constructor(kubun: string, text: string) {
     this.kubun = kubun;
     this.text = text;
   }
@@ -247,7 +247,7 @@ export class Visit {
   }
 
   memoAsJson(): any {
-    if( this.attributesStore ){
+    if (this.attributesStore) {
       return JSON.parse(this.attributesStore);
     } else {
       return {};
@@ -256,7 +256,7 @@ export class Visit {
 
   get comments(): RezeptComment[] {
     const comm = this.memoAsJson()["comments"];
-    if( comm ){
+    if (comm) {
       console.log("comments json", comm);
       return comm.map(RezeptComment.cast);
     } else {
@@ -264,9 +264,9 @@ export class Visit {
     }
   }
 
-  get shoujouShoukiList() : RezeptShoujouShouki[] {
+  get shoujouShoukiList(): RezeptShoujouShouki[] {
     const list = this.memoAsJson()["shoujou-shouki-list"];
-    if( list ){
+    if (list) {
       return list.map(RezeptShoujouShouki.cast);
     } else {
       return [];
@@ -353,6 +353,19 @@ export const HonninKazoku = {
   Kazoku: new HonninKazokuType(0, "家族"),
 };
 
+export interface ShahokokuhoInterface {
+  shahokokuhoId: number;
+  patientId: number;
+  hokenshaBangou: number;
+  hihokenshaKigou: string;
+  hihokenshaBangou: string;
+  honninStore: number;
+  validFrom: string;
+  validUpto: string;
+  koureiStore: number;
+  edaban: string;
+}
+
 export class Shahokokuho {
   constructor(
     public shahokokuhoId: number,
@@ -364,8 +377,42 @@ export class Shahokokuho {
     public validFrom: string,
     public validUpto: string,
     public koureiStore: number,
-    public edaban: string
+    public edaban: string,
   ) { }
+
+  asJson(): ShahokokuhoInterface {
+    return {
+      shahokokuhoId: this.shahokokuhoId,
+      patientId: this.patientId,
+      hokenshaBangou: this.hokenshaBangou,
+      hihokenshaKigou: this.hihokenshaKigou,
+      hihokenshaBangou: this.hihokenshaBangou,
+      honninStore: this.honninStore,
+      validFrom: this.validFrom,
+      validUpto: this.validUpto,
+      koureiStore: this.koureiStore,
+      edaban: this.edaban,
+    }
+  }
+
+  static fromJson(json: ShahokokuhoInterface): Shahokokuho {
+    return new Shahokokuho(
+      json.shahokokuhoId,
+      json.patientId,
+      json.hokenshaBangou,
+      json.hihokenshaKigou,
+      json.hihokenshaBangou,
+      json.honninStore,
+      json.validFrom,
+      json.validUpto,
+      json.koureiStore,
+      json.edaban,
+    )
+  }
+
+  clone(): Shahokokuho {
+    return Shahokokuho.fromJson(this.asJson());
+  }
 
   get honnninKazokuType(): HonninKazokuType {
     return HonninKazokuType.fromCode(this.honninStore);
@@ -451,10 +498,10 @@ export class Koukikourei {
 
   static isContentEqual(a: Koukikourei, b: Koukikourei): boolean {
     return a.koukikoureiId === b.koukikoureiId &&
-    a.patientId === b.patientId &&
-    a.hokenshaBangou === b.hokenshaBangou &&
-    a.hihokenshaBangou === b.hihokenshaBangou &&
-    a.futanWari === b.futanWari;
+      a.patientId === b.patientId &&
+      a.hokenshaBangou === b.hokenshaBangou &&
+      a.hihokenshaBangou === b.hihokenshaBangou &&
+      a.futanWari === b.futanWari;
   }
 
   static cast(arg: any): Koukikourei {
@@ -496,9 +543,9 @@ export class Kouhi {
 
   static isContentEqual(a: Kouhi, b: Kouhi): boolean {
     return a.kouhiId === b.kouhiId &&
-    a.futansha === b.futansha &&
-    a.jukyuusha === b.jukyuusha &&
-    a.patientId === b.patientId;
+      a.futansha === b.futansha &&
+      a.jukyuusha === b.jukyuusha &&
+      a.patientId === b.patientId;
   }
 
   static cast(arg: any): Kouhi {
@@ -1246,7 +1293,7 @@ class ConductShinryouMemo {
   }
 
   static parseJson(str: string | undefined): ConductShinryouMemo {
-    if( str ){
+    if (str) {
       return new ConductShinryouMemo(JSON.parse(str));
     } else {
       return {};

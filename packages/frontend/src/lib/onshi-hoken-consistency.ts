@@ -3,6 +3,7 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import { isKoukikourei } from "./hoken-rep";
 import { toHankaku } from "./zenkaku";
 import { onshiDateToSqlDate } from "onshi-result/util";
+import type { ShahokokuhoInterface } from "myclinic-model/model";
 
 export namespace OnshiHokenInconsistency {
   export class Inconsistency {
@@ -215,6 +216,87 @@ export function checkOnshiKoukikoureiConsistency(
   return errors;
 }
 
+export type ShahokokuhoOnshiInconsistency =
+  "inconsistent-hokensha-bangou" |
+  "inconsistent-hihokensha-kigou" |
+  "inconsistent-hihokensha-bangou" |
+  "inconsistent-edaban" |
+  "inconsistent-honnin-kazoku" |
+  "inconsistent-kourei" |
+  "inconsistent-valid-from" |
+  "inconsistent-valid-upto";
+
+export function checkShahokokuhoOnshiConsistency(shahokokuho: Shahokokuho, resultItem: ResultItem): ShahokokuhoOnshiInconsistency[] {
+  const diff: ShahokokuhoOnshiInconsistency[] = [];
+  const hokenshaBangou = parseInt(resultItem.insurerNumber || "0");
+  if (shahokokuho.hokenshaBangou !== hokenshaBangou) {
+    diff.push("inconsistent-hokensha-bangou");
+  }
+  const hihokenshaKigou = resultItem.insuredCardSymbol ?? "";
+  if (toHankaku(shahokokuho.hihokenshaKigou) !== toHankaku(hihokenshaKigou)) {
+    diff.push("inconsistent-hihokensha-kigou");
+  }
+  const hihokenshaBangou = resultItem.insuredIdentificationNumber || "";
+  if (toHankaku(stripLeadingZero(shahokokuho.hihokenshaBangou)) !== toHankaku(stripLeadingZero(hihokenshaBangou))) {
+    diff.push("inconsistent-hihokensha-bangou");
+  }
+  const edaban = resultItem.insuredBranchNumber || "";
+  if (shahokokuho.edaban !== "" && toHankaku(stripLeadingZero(shahokokuho.edaban)) !== toHankaku(stripLeadingZero(edaban))) {
+    diff.push("inconsistent-edaban");
+  }
+  const kourei: number = resultItem.kourei != undefined ? resultItem.kourei.futanWari ?? 0 : 0;
+  if (shahokokuho.koureiStore !== kourei) {
+    diff.push("inconsistent-kourei");
+  }
+  const validFrom: string | undefined = resultItem.insuredCardValidDate;
+  if (shahokokuho.validFrom !== validFrom) {
+    diff.push("inconsistent-valid-from");
+  }
+  const validUpto: string = resultItem.insuredCardExpirationDate ? resultItem.insuredCardExpirationDate : "0000-00-00";
+  if (shahokokuho.validUpto !== validUpto) {
+    diff.push("inconsistent-valid-upto");
+  }
+  if (resultItem.personalFamilyClassification != undefined) {
+    const honnin = resultItem.personalFamilyClassification;
+    if (honnin === "本人") {
+      if (shahokokuho.honninStore === 0) {
+        diff.push("inconsistent-honnin-kazoku");
+      }
+    } else {
+      if (shahokokuho.honninStore !== 0) {
+        diff.push("inconsistent-honnin-kazoku");
+      }
+    }
+  }
+  return diff;
+}
+
+export function canFixShahokokuhoSafely(orig: Shahokokuho, curr: Shahokokuho, inconsistencies: ShahokokuhoOnshiInconsistency[])
+  : Shahokokuho | undefined {
+  const m: ShahokokuhoInterface = orig.asJson();
+  for(let i of inconsistencies){
+    switch(i){
+      case  "inconsistent-edaban": {
+        if( m.edaban === undefined || m.edaban === "" ) {
+          m.edaban = curr.edaban;
+          break;
+        } else {
+          // fall through
+        }
+      }
+      case  "inconsistent-honnin-kazoku": {
+        m.honninStore = curr.honninStore;
+        break;
+      }
+      case  "inconsistent-valid-upto": {
+
+      }
+      default: return undefined;
+    }
+  }
+  return Shahokokuho.fromJson(m);
+}
+
 export function shahokokuhoOnshiConsistent(
   shahokokuho: Shahokokuho,
   r: ResultItem
@@ -241,11 +323,11 @@ export function shahokokuhoOnshiConsistent(
     return `高齢が一致しません。${shahokokuho.koureiStore} - ${kourei}`;
   }
   const validFrom: string | undefined = r.insuredCardValidDate;
-  if( shahokokuho.validFrom !== validFrom ){
+  if (shahokokuho.validFrom !== validFrom) {
     return "期限開始が一致しません。";
   }
   const validUpto: string = r.insuredCardExpirationDate ? r.insuredCardExpirationDate : "0000-00-00";
-  if( shahokokuho.validUpto !== validUpto ){
+  if (shahokokuho.validUpto !== validUpto) {
     return "期限終了が一致しません。";
   }
   if (r.personalFamilyClassification != undefined) {
@@ -288,11 +370,11 @@ export function koukikoureiOnshiConsistent(
     return `負担割が一致しません。${koukikourei.futanWari} - ${futanWari}`;
   }
   const validFrom: string | undefined = r.insuredCardValidDate;
-  if( koukikourei.validFrom !== validFrom ){
+  if (koukikourei.validFrom !== validFrom) {
     return "期限開始が一致しません。";
   }
   const validUpto: string = r.insuredCardExpirationDate ?? "0000-00-00";
-  if( koukikourei.validUpto !== validUpto ){
+  if (koukikourei.validUpto !== validUpto) {
     return "期限終了が一致しません。";
   }
   return undefined;
@@ -302,51 +384,3 @@ function stripLeadingZero(s: string): string {
   return s.replace(/^[0０]+/, "");
 }
 
-export function create_hoken_from_onshi_kakunin(patientId: number, r: ResultItem):
-  Shahokokuho | Koukikourei | string {
-  const validFromOpt: string | undefined = r.insuredCardValidDate;
-  if (validFromOpt === undefined) {
-    return "保険証の有効期限開始日がありません。";
-  }
-  const validFrom = validFromOpt;
-  const validUpto: string = r.insuredCardExpirationDate ?? "0000-00-00";
-  const hokenshaBangou: string = r.insurerNumber ?? "";
-  if (hokenshaBangou === "") {
-    return "保険者番号が取得できません。";
-  }
-  const hokenshaNumber: number = parseInt(hokenshaBangou);
-  if (isNaN(hokenshaNumber)) {
-    return "保険者番号が数値でありません。" + hokenshaBangou;
-  }
-  const hihokenshaBangou: string = r.insuredIdentificationNumber ?? "";
-  if (hihokenshaBangou === "") {
-    return "被保険者番号が取得できません。";
-  }
-  if (isKoukikourei(hokenshaNumber)) {
-    console.log(r);
-    const futanWari: number | undefined = r.koukikoureiFutanWari;
-    if (futanWari === undefined) {
-      return "後期高齢保険の負担割合が取得できません。"
-    }
-    return new Koukikourei(0, patientId, hokenshaBangou, hihokenshaBangou, futanWari, validFrom, validUpto);
-  } else {
-    const kigou = r.insuredCardSymbol ?? "";
-    const honninStore: number | undefined = r.honninStore;
-    if (honninStore === undefined) {
-      return "本人・家族の情報が得られませんでした。";
-    }
-    const kourei = r.elderlyRecipientCertificateInfo;
-    let koureiStore: number;
-    if (kourei === undefined) {
-      koureiStore = 0;
-    } else {
-      if (kourei.futanWari === undefined) {
-        return "高齢受給者証の負担割合が取得できません。";
-      }
-      koureiStore = kourei.futanWari;
-    }
-    const edaban: string = r.insuredBranchNumber ?? "";
-    return new Shahokokuho(0, patientId, hokenshaNumber, kigou, hihokenshaBangou, honninStore,
-      validFrom, validUpto, koureiStore, edaban)
-  }
-}
