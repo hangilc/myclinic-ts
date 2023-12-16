@@ -10,13 +10,16 @@ export async function tryUpdateShahokokuho(shahokokuho: Shahokokuho): Promise<Tr
   }
   const usage: number = await api.countShahokokuhoUsage(shahokokuho.shahokokuhoId);
   if (usage > 0) {
-    console.log("cmp", Object.assign({}, prev, shahokokuho.validUpto), shahokokuho);
-    if (!isEqualShahokokuho(Object.assign({}, prev, { validUpto: shahokokuho.validUpto }), shahokokuho)) {
+    let cmp = Object.assign({}, prev, { validUpto: shahokokuho.validUpto });
+    if( prev.edaban === "" || prev.edaban === undefined ){
+      cmp.edaban = shahokokuho.edaban;
+    }
+    if (!isEqualShahokokuho(cmp, shahokokuho)) {
       return "not-allowed";
     }
-    if( shahokokuho.validUpto !== "0000-00-00" ){
+    if (shahokokuho.validUpto !== "0000-00-00") {
       const u: number = await api.countShahokokuhoUsageAfter(shahokokuho.shahokokuhoId, shahokokuho.validUpto);
-      if( u > 0 ){
+      if (u > 0) {
         return "invalid-valid-upto";
       }
     }
@@ -49,9 +52,9 @@ export async function tryUpdateKoukikourei(koukikourei: Koukikourei): Promise<Tr
     if (!isEqualKoukikourei(Object.assign({}, prev, { validUpto: koukikourei.validUpto }), koukikourei)) {
       return "not-allowed";
     }
-    if( koukikourei.validUpto !== "0000-00-00" ){
+    if (koukikourei.validUpto !== "0000-00-00") {
       const u: number = await api.countKoukikoureiUsageAfter(koukikourei.koukikoureiId, koukikourei.validUpto);
-      if( u > 0 ){
+      if (u > 0) {
         return "invalid-valid-upto";
       }
     }

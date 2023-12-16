@@ -35,7 +35,7 @@
         }
         const result = await tryUpdateShahokokuho(shahokokuho);
         switch(result) {
-          case "not-allowed": return ["「期限終了」以外は変更できません。"];
+          case "not-allowed": return ["変更が許可されませんでした。"];
           case "invalid-valid-upto": return ["有効期間外の使用が発生するので、変更できません。"];
           case "success": break;
           default: return ["ERROR"];
