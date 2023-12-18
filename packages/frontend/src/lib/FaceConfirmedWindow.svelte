@@ -35,6 +35,7 @@
   import {
   checkKoukikoureiInconsistency,
     createHokenFromOnshiResult,
+    tryFixEdaban,
     type ShahokokuhoOnshiInconsistency,
   } from "./onshi-hoken";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
@@ -117,13 +118,7 @@
         resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
         return;
       }
-      if (
-        inconsistencies.length === 1 &&
-        inconsistencies[0] === "inconsistent-edaban" &&
-        shahoOpt.edaban === ""
-      ) {
-        shahoOpt.edaban = onshiHoken.edaban;
-        await api.updateShahokokuho(shahoOpt);
+      if ( await tryFixEdaban(shahoOpt, onshiHoken, inconsistencies) ){
         resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
         return;
       }
