@@ -52,7 +52,7 @@ export function createHokenFromOnshiResult(patientId: number, r: ResultItem):
   }
 }
 
-export type OnshiShahokokuhoInconsistency =
+export type ShahokokuhoOnshiInconsistency =
   "inconsistent-hokensha-bangou" |
   "inconsistent-hihokensha-kigou" |
   "inconsistent-hihokensha-bangou" |
@@ -62,30 +62,30 @@ export type OnshiShahokokuhoInconsistency =
   "inconsistent-valid-from" |
   "inconsistent-valid-upto";
 
-export function checkOnshiShahokokuhoInconsistency(shahokokuho: Shahokokuho, onshi: Shahokokuho): OnshiShahokokuhoInconsistency[] {
-  const diff: OnshiShahokokuhoInconsistency[] = [];
-  if( shahokokuho.hokenshaBangou !== onshi.hokenshaBangou ){
+export function checkShahokokuhoInconsistency(a: Shahokokuho, onshi: Shahokokuho): ShahokokuhoOnshiInconsistency[] {
+  const diff: ShahokokuhoOnshiInconsistency[] = [];
+  if( a.hokenshaBangou !== onshi.hokenshaBangou ){
     diff.push("inconsistent-hokensha-bangou");
   }
-  if (toHankaku(shahokokuho.hihokenshaKigou) !== toHankaku(onshi.hihokenshaKigou)) {
+  if (toHankaku(a.hihokenshaKigou) !== toHankaku(onshi.hihokenshaKigou)) {
     diff.push("inconsistent-hihokensha-kigou");
   }
-  if (toHankaku(shahokokuho.hihokenshaBangou) !== toHankaku(onshi.hihokenshaBangou)) {
+  if (toHankaku(a.hihokenshaBangou) !== toHankaku(onshi.hihokenshaBangou)) {
     diff.push("inconsistent-hihokensha-bangou");
   }
-  if (toHankaku(shahokokuho.edaban) !== toHankaku(onshi.edaban)) {
+  if (toHankaku(a.edaban) !== toHankaku(onshi.edaban)) {
     diff.push("inconsistent-edaban");
   }
-  if (shahokokuho.koureiStore !== onshi.koureiStore) {
+  if (a.koureiStore !== onshi.koureiStore) {
     diff.push("inconsistent-kourei");
   }
-  if (shahokokuho.validFrom !== onshi.validFrom) {
+  if (a.validFrom !== onshi.validFrom) {
     diff.push("inconsistent-valid-from");
   }
-  if (shahokokuho.validUpto !== onshi.validUpto) {
+  if (a.validUpto !== onshi.validUpto) {
     diff.push("inconsistent-valid-upto");
   }
-  if( shahokokuho.honninStore !== onshi.honninStore ){
+  if( a.honninStore !== onshi.honninStore ){
     diff.push("inconsistent-honnin-kazoku");
   }
   return diff;

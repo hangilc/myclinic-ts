@@ -188,6 +188,47 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     });
   });
 
+  it("should automatically update edaban when it was empty", () => {
+    enterPatient(createPatient()).as("patient");
+    cy.get<Patient>("@patient").then((patient: Patient) => {
+      const hokenTmpl = {
+        patientId: patient.patientId,
+        hokenshaBangou: 32123434,
+        edaban: "",
+        validFrom: "2022-06-01",
+        validUpto: "0000-00-00",
+      };
+      enterShahokokuho(createShahokokuho(hokenTmpl)).as("curHoken");
+      cy.get<Shahokokuho>("@curHoken").then((curHoken: Shahokokuho) => {
+        const newHokenTmpl = Object.assign({}, hokenTmpl, { edaban: "01" });
+        const result = createOnshiResult(m.patient(patient), m.shahokokuho(createShahokokuho(newHokenTmpl)));
+        cy.intercept(
+          "GET",
+          apiBase() + "/search-patient?text=*",
+          [10, [patient]]);
+        cy.intercept("GET", apiBase() + "/find-available-shahokokuho?*").as("findShahokokuho");
+        cy.intercept("POST", apiBase() + "/update-shahokokuho").as("updateShahokokuho");
+        const props = {
+          destroy: () => { },
+          result,
+          onRegister: () => { }
+        };
+        cy.mount(FaceConfirmedWindow, { props });
+        cy.wait("@findShahokokuho").then(resp => {
+          const body = resp.response!.body;
+          expect(body).deep.equal(curHoken);
+        });
+        cy.wait("@updateShahokokuho").then(resp => {
+          const body = JSON.parse(resp.request.body);
+          expect(body).deep.equal(Object.assign({}, curHoken, {
+            edaban: "01",
+          }))
+        });
+        cy.get("button").contains("診察登録").should("exist");
+      });
+    })
+  });
+
   it("should fix valid upto of current shahokokuho in regular case", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient: Patient) => {
@@ -925,7 +966,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     })
   });
 
-  it.only("should handle edaban fix", () => {
+  it("should handle edaban fix", () => {
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,

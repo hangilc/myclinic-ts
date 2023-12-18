@@ -32,7 +32,10 @@
     koukikoureiOnshiConsistent,
     shahokokuhoOnshiConsistent,
   } from "./onshi-hoken-consistency";
-  import { createHokenFromOnshiResult } from "./onshi-hoken";
+  import {
+    createHokenFromOnshiResult,
+    type ShahokokuhoOnshiInconsistency,
+  } from "./onshi-hoken";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
@@ -43,6 +46,7 @@
   import FaceConfirmedSearchPatientDialog from "./face-confirmed/FaceConfirmedSearchPatientDialog.svelte";
   import FaceConfirmedConfirmSelectPatient from "./face-confirmed/FaceConfirmedConfirmSelectPatient.svelte";
   import { checkOnshiPatientInconsistency } from "./onshi-inconsistency";
+  import { checkShahokokuhoInconsistency } from "./onshi-hoken";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -101,18 +105,31 @@
       patient.patientId,
       at
     );
-    if (shahoOpt) {
-      const err = shahokokuhoOnshiConsistent(shahoOpt, r);
-      if( err ){
-        console.error("INCONSISTENT", err);
-      }
-      if (!err) {
+    const onshiHoken = createHokenFromOnshiResult(patient.patientId, r);
+    if (typeof onshiHoken === "string") {
+      alert(onshiHoken);
+      return;
+    }
+    if (shahoOpt && onshiHoken instanceof Shahokokuho) {
+      let inconsistencies = checkShahokokuhoInconsistency(shahoOpt, onshiHoken);
+      if (inconsistencies.length === 0 && !koukiOpt) {
         resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
         return;
       }
-    } else if (koukiOpt) {
+      if (
+        inconsistencies.length === 1 &&
+        inconsistencies[0] === "inconsistent-edaban" &&
+        shahoOpt.edaban === ""
+      ) {
+        shahoOpt.edaban = onshiHoken.edaban;
+        await api.updateShahokokuho(shahoOpt);
+        resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
+        return;
+      }
+    }
+    if (koukiOpt) {
       const err = koukikoureiOnshiConsistent(koukiOpt, r);
-      if( err ){
+      if (err) {
         console.error("INCONSISTENT", err);
       }
       if (!err) {
@@ -121,7 +138,6 @@
       }
     }
     resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
-    console.log("resolvedState", resolvedState);
   }
 
   async function advanceWithHoken(
