@@ -90,3 +90,53 @@ export function checkShahokokuhoInconsistency(a: Shahokokuho, onshi: Shahokokuho
   }
   return diff;
 }
+
+function stripLeadingZero(s: string): string {
+  return s.replace(/^[0０]+/, "");
+}
+
+export type KoukikoureiInconsistency = 
+  "inconsistent-hokensha-bangou" |
+  "inconsistent-hihokensha-bangou" |
+  "inconsistent-futanwari" |
+  "inconsistent-valid-from" |
+  "inconsistent-valid-upto";
+
+export function checkKoukikoureiInconsistency(a: Koukikourei, onshi: Koukikourei): KoukikoureiInconsistency[] {
+  const result: KoukikoureiInconsistency[] = [];
+  if (toHankaku(stripLeadingZero(a.hokenshaBangou)) !== toHankaku(stripLeadingZero(onshi.hokenshaBangou))) {
+    result.push("inconsistent-hokensha-bangou");
+  }
+  if (toHankaku(stripLeadingZero(a.hihokenshaBangou)) !== toHankaku(stripLeadingZero(onshi.hihokenshaBangou)) ) {
+    result.push("inconsistent-hihokensha-bangou");
+  }
+  if( a.futanWari !== onshi.futanWari ){
+    result.push("inconsistent-futanwari");
+  }
+  if (a.validFrom !== onshi.validFrom) {
+    result.push("inconsistent-valid-from");
+  }
+  if (a.validUpto !== onshi.validUpto) {
+    result.push("inconsistent-valid-upto");
+  }
+  return result;
+}
+
+export async function tryFixPrevHoken(prev: Shahokokuho | Koukikourei, onshi: Shahokokuho | Koukikourei): Promise<string[] | undefined> {
+  if( prev instanceof Shahokokuho ){
+    if( onshi instanceof Shahokokuho ){
+      const inconsistencies = checkShahokokuhoInconsistency(prev, onshi);
+      if( inconsistencies.length === 0 ){
+        return undefined;
+      }
+    } else {
+
+    }
+  } else {
+    if( onshi instanceof Shahokokuho ){
+
+    } else {
+      
+    }
+  }
+}

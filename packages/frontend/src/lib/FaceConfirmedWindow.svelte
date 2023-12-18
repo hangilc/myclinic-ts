@@ -33,6 +33,7 @@
     shahokokuhoOnshiConsistent,
   } from "./onshi-hoken-consistency";
   import {
+  checkKoukikoureiInconsistency,
     createHokenFromOnshiResult,
     type ShahokokuhoOnshiInconsistency,
   } from "./onshi-hoken";
@@ -127,15 +128,13 @@
         return;
       }
     }
-    if (koukiOpt) {
-      const err = koukikoureiOnshiConsistent(koukiOpt, r);
-      if (err) {
-        console.error("INCONSISTENT", err);
-      }
-      if (!err) {
+    if( koukiOpt && onshiHoken instanceof Koukikourei ){
+      let inconsistencies = checkKoukikoureiInconsistency(koukiOpt, onshiHoken);
+      if (inconsistencies.length === 0 && !koukiOpt) {
         resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
         return;
       }
+
     }
     resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
   }
