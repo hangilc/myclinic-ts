@@ -130,7 +130,7 @@
     }
     if( koukiOpt && onshiHoken instanceof Koukikourei ){
       let inconsistencies = checkKoukikoureiInconsistency(koukiOpt, onshiHoken);
-      if (inconsistencies.length === 0 && !koukiOpt) {
+      if (inconsistencies.length === 0 && !shahoOpt) {
         resolvedState = new AllResolved(patient, koukiOpt, kouhiList);
         return;
       }
