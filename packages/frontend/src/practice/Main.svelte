@@ -1,6 +1,5 @@
 <script lang="ts">
   import Exam from "./exam/Exam.svelte";
-  import Cashier from "./cashier/Cashier.svelte";
   import type { Writable } from "svelte/store";
   import Phone from "./phone/Phone.svelte";
   import { currentPatient } from "./exam/ExamVars";
@@ -8,6 +7,7 @@
   import RcptCheck from "./RcptCheck.svelte";
   import Rezept from "./Rezept.svelte";
   import Henrei from "./Henrei.svelte";
+  import Cashier from "@/cashier/Cashier.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -23,7 +23,9 @@
 
 <div>
   <Exam isVisible={$serviceStore === "exam"} />
-  <Cashier isVisible={$serviceStore === "cashier"} />
+  {#if $serviceStore === "cashier"}
+    <Cashier isAdmin={true} />
+  {/if}
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />

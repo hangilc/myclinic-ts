@@ -10,6 +10,7 @@
 
   export let wqItems: WqueueData[] = [];
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
+  export let isAdmin: boolean = false;
   let unsubs: (() => void)[] = [];
 
   onDestroy(() => unsubs.forEach((f) => f()));
@@ -67,7 +68,7 @@
 </script>
 
 <div>
-  <TopBlock {hotlineTrigger}/>
+  <TopBlock {hotlineTrigger} {isAdmin} />
   <WqTable items={wqItems} />
   <button on:click={refresh}>更新</button>
 </div>

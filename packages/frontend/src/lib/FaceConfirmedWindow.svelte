@@ -9,8 +9,6 @@
     NoPatient,
     NoResultItem,
     OnshiPatient,
-    fixKoukikoureiValidUpto,
-    fixShahokokuhoValidUpto,
     searchPatient,
   } from "./face-confirm-window";
   import Floating from "./Floating.svelte";

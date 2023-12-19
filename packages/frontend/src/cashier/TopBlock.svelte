@@ -13,6 +13,7 @@
   import { popupTrigger } from "@/lib/popup-helper";
 
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
+  export let isAdmin: boolean = false;
   let searchText = "";
 
   async function doSearch() {

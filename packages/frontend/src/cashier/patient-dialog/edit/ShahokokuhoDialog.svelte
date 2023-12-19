@@ -40,15 +40,6 @@
           case "success": break;
           default: return ["ERROR"];
         }
-        // const invalids = await countInvalidUsage(shahokokuho);
-        // if (invalids > prevInvalids) {
-        //   return ["有効期間外の使用が発生するので、変更できません。"];
-        // }
-        // const usage = await api.countShahokokuhoUsage(init.shahokokuhoId);
-        // if (usage > 0 && !Shahokokuho.isContentEqual(init, shahokokuho)) {
-        //   return ["この保険はすでに使われているので、内容の変更ができません。"];
-        // }
-        // await api.updateShahokokuho(shahokokuho);
         onUpdated(shahokokuho);
         return [];
       }

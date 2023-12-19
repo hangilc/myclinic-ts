@@ -13,6 +13,7 @@ export class PatientData {
   hokenCache: HokenCache;
   stack: Opener[] = [];
   hotlineTrigger: EventEmitter<string> | undefined = undefined;
+  isAdmin: boolean = false;
 
   constructor(patient: Patient, currentList: Hoken[]) {
     this.patient = patient;
@@ -81,13 +82,14 @@ export class PatientData {
   static async start(patient: Patient, config: StartConfig = {}) {
     const hokenList: Hoken[] = await fetchHokenList(patient.patientId);
     const data = new PatientData(patient, hokenList);
+    data.isAdmin = config.isAdmin ?? false;
     data.hotlineTrigger = config.hotlineTrigger;
     function open(): void {
       const d: PatientDialog = new PatientDialog({
         target: document.body,
         props: {
           data,
-          destroy: () => d.$destroy(),
+          destroy: () => d.$destroy()
         },
       });
     }
@@ -97,4 +99,5 @@ export class PatientData {
 
 export interface StartConfig {
   hotlineTrigger?: EventEmitter<string>;
+  isAdmin?: boolean;
 }
