@@ -373,7 +373,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     });
   });
 
-  it.only("should handle koukikourei futanwari conflict", () => {
+  it("should handle koukikourei futanwari conflict", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient: Patient) => {
       const hokenTmpl = {
