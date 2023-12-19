@@ -33,15 +33,21 @@
         if (shahokokuho.shahokokuhoId <= 0) {
           return ["Invalid shahokokuhoId"];
         }
-        const result = await tryUpdateShahokokuho(shahokokuho);
-        switch(result) {
-          case "not-allowed": return ["変更が許可されませんでした。"];
-          case "invalid-valid-upto": return ["有効期間外の使用が発生するので、変更できません。"];
-          case "success": break;
-          default: return ["ERROR"];
+        const usage = await api.countShahokokuhoUsage(shahokokuho.shahokokuhoId);
+        if( usage === 0 ){
+          await api.updateShahokokuho(shahokokuho);
+          onUpdated(shahokokuho);
+          return [];
+        } else {
+          return ["使用されている保険は内容を変更できません。"];
         }
-        onUpdated(shahokokuho);
-        return [];
+        // const result = await tryUpdateShahokokuho(shahokokuho);
+        // switch(result) {
+        //   case "not-allowed": return ["変更が許可されませんでした。"];
+        //   case "invalid-valid-upto": return ["有効期間外の使用が発生するので、変更できません。"];
+        //   case "success": break;
+        //   default: return ["ERROR"];
+        // }
       }
     } catch (ex: any) {
       return [ex.toString()];
