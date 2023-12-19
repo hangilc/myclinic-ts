@@ -37,6 +37,7 @@
     createHokenFromOnshiResult,
     tryFixEdaban,
     type ShahokokuhoOnshiInconsistency,
+    tryFixPrevHoken,
   } from "./onshi-hoken";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
@@ -54,6 +55,7 @@
   export let result: OnshiResult;
   export let onRegister: (visit: Visit) => void = () => {};
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
+  let error: string = "";
 
   let resultItem: ResultItem | undefined =
     result.resultList.length === 1 ? result.resultList[0] : undefined;
@@ -143,21 +145,14 @@
   ) {
     const validFrom = validFromOf(hoken);
     let errMsg: string = "";
-    if (shahoOpt) {
-      const err = await fixShahokokuhoValidUpto(shahoOpt, validFrom);
-      if (err) {
-        errMsg += "現在有効な社保国保が、" + err;
+    const prev: Shahokokuho | Koukikourei | undefined = shahoOpt || koukiOpt;
+    if( prev !== undefined ){
+      const err = await tryFixPrevHoken(prev, hoken);
+      if( err !== undefined ){
+        errMsg = "以前の保険の有効期限を更新できませんでした。" + err.join("");
       }
     }
-    if (koukiOpt) {
-      const err = await fixKoukikoureiValidUpto(koukiOpt, validFrom);
-      if (err) {
-        errMsg += "現在有効な後期高齢保険が、" + err;
-      }
-    }
-    if (errMsg) {
-      alert(errMsg);
-    }
+    error = errMsg;
     resolvedState = new AllResolved(patient, hoken, kouhiList);
   }
 
@@ -432,6 +427,9 @@
       {/each}
     {/if}
   </div>
+  {#if error !== ""}
+    <div class="error">{error}</div>
+  {/if}
   <div class="commands">
     {#if resolvedState instanceof NoResultItem || resolvedState instanceof MultipleResultItems || resolvedState instanceof Initializing}
       <button on:click={doClose}>閉じる</button>
@@ -483,6 +481,12 @@
   .message {
     padding: 10px;
     margin: 10px 0;
+  }
+
+  .error {
+    margin: 10px 0;
+    padding: 10px;
+    color: red;
   }
 
   .commands {

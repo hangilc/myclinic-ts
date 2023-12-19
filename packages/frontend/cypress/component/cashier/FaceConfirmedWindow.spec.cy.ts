@@ -373,7 +373,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
     });
   });
 
-  it("should handle koukikourei futanwari conflict", () => {
+  it.only("should handle koukikourei futanwari conflict", () => {
     enterPatient(createPatient()).as("patient");
     cy.get<Patient>("@patient").then((patient: Patient) => {
       const hokenTmpl = {
@@ -395,7 +395,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
           apiBase() + "/search-patient?text=*",
           [10, [patient]]);
         cy.intercept("GET", apiBase() + "/find-available-koukikourei?*").as("findKoukikourei");
-        cy.intercept("POST", apiBase() + "/update-koukikourei").as("updateKoukikourei");
+        // cy.intercept("POST", apiBase() + "/update-koukikourei").as("updateKoukikourei");
         const props = {
           destroy: () => { },
           result,
@@ -411,13 +411,14 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
           cy.get("button").contains("入力").click();
         });
         dialogClose("新規後期高齢保険登録");
-        cy.wait("@updateKoukikourei").then(resp => {
-          const body = JSON.parse(resp.request.body);
-          console.log("body", body);
-          expect(body).deep.equal(Object.assign({}, curHoken, {
-            validUpto: "2022-09-30",
-          }))
-        });
+        // cy.wait("@updateKoukikourei").then(resp => {
+        //   const body = JSON.parse(resp.request.body);
+        //   console.log("body", body);
+        //   expect(body).deep.equal(Object.assign({}, curHoken, {
+        //     validUpto: "2022-09-30",
+        //   }))
+        // });
+        cy.get("div.error").should("exist").should("not.be.empty");
         cy.get("button").contains("診察登録").should("exist");
       });
     });

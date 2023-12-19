@@ -153,33 +153,45 @@ export function checkKoukikoureiInconsistency(a: Koukikourei, onshi: Koukikourei
 }
 
 export async function tryFixPrevHoken(prev: Shahokokuho | Koukikourei, onshi: Shahokokuho | Koukikourei): Promise<string[] | undefined> {
+  if (prev instanceof Shahokokuho && onshi instanceof Shahokokuho) {
+    const inconsistencies = checkShahokokuhoInconsistency(prev, onshi);
+    if (inconsistencies.length === 0) {
+      return undefined;
+    }
+    if (prev.hokenshaBangou === onshi.hokenshaBangou && prev.hihokenshaBangou === onshi.hihokenshaBangou &&
+      prev.validFrom === onshi.validFrom) {
+      return inconsistencies.map(inconsistencyToMessage);
+    }
+  }
+  if (prev instanceof Koukikourei && onshi instanceof Koukikourei) {
+    const inconsistencies = checkKoukikoureiInconsistency(prev, onshi);
+    console.log("koukikourei inconsistencies", inconsistencies, prev, onshi);
+    if (inconsistencies.length === 0) {
+      return undefined;
+    }
+    if (prev.hokenshaBangou === onshi.hokenshaBangou && prev.hihokenshaBangou === onshi.hihokenshaBangou &&
+      prev.validFrom === onshi.validFrom) {
+      return inconsistencies.map(inconsistencyToMessage);
+    }
+  }
   if (prev instanceof Shahokokuho) {
-    if (onshi instanceof Shahokokuho) {
-      const inconsistencies = checkShahokokuhoInconsistency(prev, onshi);
-      if (inconsistencies.length === 0) {
-        return undefined;
-      }
-      if (prev.hokenshaBangou === onshi.hokenshaBangou && prev.hihokenshaBangou === onshi.hihokenshaBangou &&
-        prev.validFrom === onshi.validFrom) {
-        return inconsistencies.map(inconsistencyToMessage);
-      }
-      const err = await tryFixShahokokuhoValidUpto(prev, onshi.validFrom);
-      if( err ){
-        return ["以前の保険の有効期限を変更できませんでした。"]
-      }
+    const err = await tryFixShahokokuhoValidUpto(prev, onshi.validFrom);
+    if (err) {
+      return ["以前の保険の有効期限を変更できませんでした。"]
     } else {
       return undefined;
     }
   } else {
-    if (onshi instanceof Shahokokuho) {
-
+    const err = await tryFixKoukikoureiValidUpto(prev, onshi.validFrom);
+    if (err) {
+      return ["以前の保険の有効期限を変更できませんでした。"]
     } else {
-
+      return undefined;
     }
   }
 }
 
-export async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)
+async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)
   : Promise<string | undefined> {
   const shahokokuhoId = shahokokuho.shahokokuhoId;
   const visits = await api.shahokokuhoUsageSince(shahokokuhoId, otherStartDate);
@@ -196,7 +208,7 @@ export async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, other
   }
 }
 
-export async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
+async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
   : Promise<string | undefined> {
   const koukikoureiId = koukikourei.koukikoureiId;
   const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
