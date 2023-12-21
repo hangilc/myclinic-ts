@@ -164,6 +164,10 @@ export function clearTempVisitId(): void {
   tempVisitId.set(null);
 }
 
+async function checkAvailableHoken(visitId: number): Promise<boolean> {
+  return true;
+}
+
 reqChangePatient.subscribe(async value => {
   if (value == null) {
     return;

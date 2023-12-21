@@ -253,6 +253,7 @@
         title: "公費登録",
         destroy: () => d.$destroy(),
         init: null,
+        isAdmin: false,
         onEntered: async (_entered: Kouhi) => {
           const kouhiList = await api.listAvailableKouhi(
             resolved.patient.patientId,

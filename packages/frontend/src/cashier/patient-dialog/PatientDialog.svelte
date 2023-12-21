@@ -121,6 +121,7 @@
           },
           patient: p,
           init: null,
+          isAdmin: data.isAdmin,
           title: "新規公費",
           onEntered: (entered: Kouhi) => {
             data.hokenCache.enterHokenType(entered);

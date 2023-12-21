@@ -9,9 +9,10 @@
   export let title: string;
   export let init: Kouhi | null;
   export let patient: Patient;
-  export let onEntered: (entered: Kouhi) => void = _ => {};
-  export let onUpdated: (entered: Kouhi) => void = _ => {};
+  export let onEntered: (entered: Kouhi) => void = (_) => {};
+  export let onUpdated: (entered: Kouhi) => void = (_) => {};
   export let styleWidth = "360px";
+  export let isAdmin: boolean;
   let prevInvalids = 0;
 
   checkPrevInvalids();
@@ -35,14 +36,24 @@
         if (kouhi.kouhiId <= 0) {
           return ["Invalid kouhiId"];
         } else {
-          const invalids = await countInvalidUsage(kouhi);
-          if( invalids > prevInvalids ){
-            return ["有効期間外の使用が発生するので、変更できません。"];
+          if (!isAdmin) {
+            const usage = await api.countKouhiUsage(kouhi.kouhiId);
+            if (usage > 0) {
+              return [
+                "この公費はすでに使用されているので、内容を変更できません。",
+              ];
+            }
           }
-          const usage = await api.countKouhiUsage(init.kouhiId);
-          if( usage > 0 && !Kouhi.isContentEqual(init, kouhi) ){
-            return ["この保険はすでに使われているので、内容の変更ができません。"];
-          }
+          // const invalids = await countInvalidUsage(kouhi);
+          // if (invalids > prevInvalids) {
+          //   return ["有効期間外の使用が発生するので、変更できません。"];
+          // }
+          // const usage = await api.countKouhiUsage(init.kouhiId);
+          // if (usage > 0 && !Kouhi.isContentEqual(init, kouhi)) {
+          //   return [
+          //     "この保険はすでに使われているので、内容の変更ができません。",
+          //   ];
+          // }
           await api.updateKouhi(kouhi);
           onUpdated(kouhi);
           return [];
@@ -54,13 +65,8 @@
   }
 </script>
 
-<Dialog {destroy} {title} styleWidth={styleWidth}>
-  <KouhiDialogContent
-    {init}
-    {patient}
-    onClose={destroy}
-    onEnter={doEnter}
-  />
+<Dialog {destroy} {title} {styleWidth}>
+  <KouhiDialogContent {init} {patient} onClose={destroy} onEnter={doEnter} />
 </Dialog>
 
 <style>
