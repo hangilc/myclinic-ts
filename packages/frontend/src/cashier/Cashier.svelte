@@ -69,6 +69,6 @@
 
 <div>
   <TopBlock {hotlineTrigger} {isAdmin} />
-  <WqTable items={wqItems} />
+  <WqTable items={wqItems} {isAdmin} />
   <button on:click={refresh}>更新</button>
 </div>

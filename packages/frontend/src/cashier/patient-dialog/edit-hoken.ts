@@ -24,6 +24,7 @@ export function editHoken(
           },
           title: "社保国保編集",
           patient,
+          isAdmin: data.isAdmin,
           onUpdated: (updated: Shahokokuho) => {
             data.hokenCache.updateWithHokenType(updated);
           },

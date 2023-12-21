@@ -8,8 +8,8 @@ import type { EventEmitter } from "@/lib/event-emitter";
 // export let visit: Visit;
 // export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
 
-export function doPatient(patient: Patient, hotlineTrigger?: EventEmitter<string>) {
-  PatientData.start(patient, { hotlineTrigger });
+export function doPatient(patient: Patient, hotlineTrigger?: EventEmitter<string>, isAdmin: boolean = false) {
+  PatientData.start(patient, { hotlineTrigger, isAdmin });
 }
 
 export async function doDeleteVisit(visit: Visit) {

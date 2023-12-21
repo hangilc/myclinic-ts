@@ -34,7 +34,7 @@
   }
 
   async function doPatientSelected(patient: Patient) {
-    PatientData.start(patient, { hotlineTrigger });
+    PatientData.start(patient, { hotlineTrigger, isAdmin });
   }
 
   function doNewPatient(): void {

@@ -12,6 +12,7 @@
   export let patient: Patient;
   export let onEntered: (entered: Shahokokuho) => void = (_) => {};
   export let onUpdated: (updated: Shahokokuho) => void = (_) => {};
+  export let isAdmin: boolean;
   let prevInvalids: number = 0;
 
   checkPrevInvalids();
@@ -33,14 +34,19 @@
         if (shahokokuho.shahokokuhoId <= 0) {
           return ["Invalid shahokokuhoId"];
         }
-        const usage = await api.countShahokokuhoUsage(shahokokuho.shahokokuhoId);
-        if( usage === 0 ){
-          await api.updateShahokokuho(shahokokuho);
-          onUpdated(shahokokuho);
-          return [];
-        } else {
-          return ["使用されている保険は内容を変更できません。"];
+        if (!isAdmin) {
+          const usage = await api.countShahokokuhoUsage(
+            shahokokuho.shahokokuhoId
+          );
+          if (usage > 0) {
+            return [
+              "この保険証はすでに使用されているので、内容を変更できません。",
+            ];
+          }
         }
+        await api.updateShahokokuho(shahokokuho);
+        onUpdated(shahokokuho);
+        return [];
         // const result = await tryUpdateShahokokuho(shahokokuho);
         // switch(result) {
         //   case "not-allowed": return ["変更が許可されませんでした。"];

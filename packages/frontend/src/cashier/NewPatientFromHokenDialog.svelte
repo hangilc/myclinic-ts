@@ -5,7 +5,7 @@
   import { onshiConfirm, type OnshiKakuninQuery } from "@/lib/onshi-confirm";
   import { onshiToPatient } from "@/lib/onshi-patient";
   import { type VResult } from "@/lib/validation";
-  import { hotlineTrigger } from "@/reception/reception-vars";
+  import { hotlineTrigger } from "@/lib/event-emitter";
   import { Koukikourei, Patient, Shahokokuho, dateToSqlDate } from "myclinic-model";
   import { PatientData } from "./patient-dialog/patient-data";
   import { createHokenFromOnshiResult } from "@/lib/onshi-hoken";

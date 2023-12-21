@@ -21,13 +21,16 @@
   let regulars: string[] = getRegulars(sendAs);
   let hotlineInput: HTMLTextAreaElement;
   let wqPatients: Patient[] = [];
-
   let hotlines: HotlineEx[] = [];
   let lastAppEventId = 0;
   const unsubs: (() => void)[] = [];
+
   init();
+
   if( messageTrigger ){
-    messageTrigger.subscribe(msg => sendMessage(msg));
+    messageTrigger.subscribe(msg => {
+      sendMessage(msg);
+    });
   }
 
   async function init() {

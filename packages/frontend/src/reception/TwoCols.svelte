@@ -3,7 +3,7 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
-  import { hotlineTrigger } from "./reception-vars";
+  import { hotlineTrigger } from "@/lib/event-emitter";
 
   const service = writable("main");
 

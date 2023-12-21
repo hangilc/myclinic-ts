@@ -21,3 +21,5 @@ export class EventEmitter<T> {
     })
   }
 }
+
+export const hotlineTrigger = new EventEmitter<string>;

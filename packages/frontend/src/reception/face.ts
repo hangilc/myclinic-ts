@@ -1,7 +1,7 @@
 import api from "@/lib/api"
 import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
 import { onshiFace, onshiFaceArchive } from "@/lib/onshi-face";
-import { hotlineTrigger } from "./reception-vars";
+import { hotlineTrigger } from "@/lib/event-emitter";
 
 export async function faceStart() {
   const server = (await api.dictGet("onshi-server")).replace(/^http/, "ws");

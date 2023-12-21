@@ -75,6 +75,7 @@
           patient: p,
           init: null,
           title: "新規社保国保",
+          isAdmin: data.isAdmin,
           onEntered: (entered: Shahokokuho) => {
             data.hokenCache.enterHokenType(entered);
           },

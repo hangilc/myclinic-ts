@@ -3,6 +3,7 @@
   import Main from "./Main.svelte";
   import { writable } from "svelte/store";
   import Hotline from "@/lib/hotline/Hotline.svelte";
+  import { hotlineTrigger } from "@/lib/event-emitter";
 
   const service = writable("exam");
 
@@ -14,7 +15,7 @@
       <SideMenu serviceStore={service} />
     </div>
     <div class="left-box">
-      <Hotline sendAs="practice" sendTo="reception" />
+      <Hotline sendAs="practice" sendTo="reception" messageTrigger={hotlineTrigger} />
     </div>
   </div>
   <div class="right"><Main serviceStore={service} /></div>

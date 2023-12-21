@@ -8,8 +8,10 @@
   import { openRecords } from "./open-records";
   import * as auxMenu from "./wq-table-aux-menu";
   import { popupTrigger } from "@/lib/popup-helper";
+  import { hotlineTrigger } from "@/lib/event-emitter";
 
   export let items: WqueueData[];
+  export let isAdmin: boolean;
 
   function formatDob(birthday: string): string {
     return kanjidate.format(kanjidate.f2, birthday);
@@ -91,7 +93,7 @@
             stroke="currentColor"
             stroke-width="2"
             on:click={popupTrigger(() => [
-              ["患者", () => auxMenu.doPatient(patient)],
+              ["患者", () => auxMenu.doPatient(patient, hotlineTrigger, isAdmin)],
               ["削除", () => auxMenu.doDeleteVisit(visit)],
             ], {
               modifier: m => m.setAttribute("data-cy", "wq-row-aux-menu")

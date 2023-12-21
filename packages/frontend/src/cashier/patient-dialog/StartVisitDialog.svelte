@@ -18,7 +18,7 @@
   import { confirm } from "@/lib/confirm-call";
   import type { Hoken, HokenType } from "./hoken";
   import { KoukikoureiItem, ShahokokuhoItem } from "./start-visit-dialog";
-  import { hotlineTrigger } from "@/reception/reception-vars";
+  import { hotlineTrigger } from "@/lib/event-emitter";
 
   export let destroy: () => void;
   export let patient: Patient;
