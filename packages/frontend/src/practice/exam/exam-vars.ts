@@ -165,7 +165,12 @@ export function clearTempVisitId(): void {
 }
 
 async function checkAvailableHoken(visitId: number): Promise<boolean> {
-  return true;
+  const visit = await api.getVisit(visitId);
+  const patientId = visit.patientId;
+  const at = visit.visitedAtAsDate;
+  const shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
+  const koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
+  return shahokokuhoList.length + koukikoureiList.length <= 1;
 }
 
 reqChangePatient.subscribe(async value => {
@@ -193,7 +198,10 @@ reqChangePatient.subscribe(async value => {
         initNav(patient.patientId)
       );
       if (value.visitId != null) {
-        api.changeWqueueState(value.visitId, m.WqueueState.InExam.code)
+        api.changeWqueueState(value.visitId, m.WqueueState.InExam.code);
+        if( ! await checkAvailableHoken(value.visitId) ){
+          examAlerts.update(alerts => [...alerts, "現在の診察で重複している保険があります。"]);
+        }
       }
     }
   }

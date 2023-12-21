@@ -1,7 +1,7 @@
 <script>
   import Header from "./Header.svelte";
   import PatientsByDateBox from "./patients-by-date-box/PatientsByDateBox.svelte";
-  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage, showAppoints } from "./exam-vars";
+  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage, showAppoints, examAlerts } from "./exam-vars";
   import PatientDisp from "./patient-disp/PatientDisp.svelte";
   import PatientManip from "./PatientManip.svelte";
   import RecordsWrapper from "./RecordsWrapper.svelte";
@@ -19,6 +19,13 @@
     {#if $currentPatient !== null}
       <PatientDisp patient={$currentPatient} />
       <PatientManip />
+      {#if $examAlerts.length > 0}
+        <div class="exam-alerts">
+          {#each $examAlerts as alert}
+            <div>{alert}</div>
+          {/each}
+        </div>
+      {/if}
       <Nav page={$navPage} total={$navTotal} {gotoPage} />
       <RecordsWrapper />
       <Nav page={$navPage} total={$navTotal} {gotoPage} />
@@ -62,5 +69,12 @@
   .exam-right {
     flex: 0 0 240px;
     width: 240px;
+  }
+
+  .exam-alerts {
+    margin: 10px 0;
+    border: 1px solid red;
+    padding: 10px;
+    color: red;
   }
 </style>
