@@ -8,10 +8,11 @@ export const currentPatient: Writable<m.Patient | null> = writable(null);
 export const currentVisitId: Writable<number | null> = writable(null);
 export const tempVisitId: Writable<number | null> = writable(null);
 export const visits: Writable<m.VisitEx[]> = writable([]);
-let totalVisits: number = 0;
 export const navPage: Writable<number> = writable(0);
 export const navTotal: Writable<number> = writable(0);
 export const mishuuList: Writable<m.VisitEx[]> = writable([]);
+export const examAlerts: Writable<string[]> = writable([]);
+let totalVisits: number = 0;
 
 export const recordsPerPage = 10;
 
@@ -147,6 +148,7 @@ function resetAll(): void {
   resetVisits();
   resetNav();
   clearMishuuList();
+  examAlerts.set([]);
 }
 
 export function setTempVisitId(visitId: number, errorHandler: (err: string) => void): void {

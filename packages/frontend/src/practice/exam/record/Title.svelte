@@ -6,7 +6,7 @@
     setTempVisitId,
     clearTempVisitId,
     addToMishuuList,
-  } from "../ExamVars";
+  } from "../exam-vars";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
   import { onDestroy } from "svelte";

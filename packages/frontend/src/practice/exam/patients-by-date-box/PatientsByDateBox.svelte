@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "../../../lib/api";
-  import { showPatientsByDate, startPatient } from "../ExamVars";
+  import { showPatientsByDate, startPatient } from "../exam-vars";
   import type * as m from "myclinic-model";
   import RightBox from "../RightBox.svelte";
   import type { Patient } from "myclinic-model";

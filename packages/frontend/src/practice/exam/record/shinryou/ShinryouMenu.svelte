@@ -4,7 +4,7 @@
   import RegularDialog from "./RegularDialog.svelte";
   import KensaDialog from "./KensaDialog.svelte";
   import SearchDialog from "./SearchDialog.svelte";
-  import { getCopyTarget } from "@/practice/exam/ExamVars";
+  import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { enterTo } from "./helper";
   import CopySelectedDialog from "./CopySelectedDialog.svelte";
   import DeleteSelectedDialog from "./DeleteSelectedDialog.svelte";

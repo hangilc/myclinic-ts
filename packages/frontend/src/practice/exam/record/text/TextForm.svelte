@@ -3,7 +3,7 @@
   import api from "@/lib/api";
   import type { Op } from "@/lib/drawer/op";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
-  import { getCopyTarget } from "../../ExamVars";
+  import { getCopyTarget } from "../../exam-vars";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";

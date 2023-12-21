@@ -5,7 +5,7 @@
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Meisai, type Payment } from "myclinic-model";
   import type { Readable } from "svelte/store";
-  import { endPatient } from "../ExamVars";
+  import { endPatient } from "../exam-vars";
   import ChargeForm from "./ChargeForm.svelte";
 
   export let destroy: () => void;

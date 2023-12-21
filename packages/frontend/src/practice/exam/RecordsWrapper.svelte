@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { visits, scrollToVisitsTop, clearScrollToVisitsTop } from "./ExamVars";
+  import { visits, scrollToVisitsTop, clearScrollToVisitsTop } from "./exam-vars";
   import Record from "./record/Record.svelte";
 
   async function onLast() {

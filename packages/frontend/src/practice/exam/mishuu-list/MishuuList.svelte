@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { mishuuList, clearMishuuList } from "@/practice/exam/ExamVars";
+  import { mishuuList, clearMishuuList } from "@/practice/exam/exam-vars";
   import RightBox from "../RightBox.svelte";
   import * as kanjidate from "kanjidate";
   import type { Payment, VisitEx } from "myclinic-model";

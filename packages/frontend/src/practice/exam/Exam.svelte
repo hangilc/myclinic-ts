@@ -1,7 +1,7 @@
 <script>
   import Header from "./Header.svelte";
   import PatientsByDateBox from "./patients-by-date-box/PatientsByDateBox.svelte";
-  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage, showAppoints } from "./ExamVars";
+  import { currentPatient, showPatientsByDate, navPage, navTotal, gotoPage, showAppoints } from "./exam-vars";
   import PatientDisp from "./patient-disp/PatientDisp.svelte";
   import PatientManip from "./PatientManip.svelte";
   import RecordsWrapper from "./RecordsWrapper.svelte";

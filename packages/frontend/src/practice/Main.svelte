@@ -2,7 +2,7 @@
   import Exam from "./exam/Exam.svelte";
   import type { Writable } from "svelte/store";
   import Phone from "./phone/Phone.svelte";
-  import { currentPatient } from "./exam/ExamVars";
+  import { currentPatient } from "./exam/exam-vars";
   import JihiKenshin from "./jihi-kenshin/JihiKenshin.svelte";
   import RcptCheck from "./RcptCheck.svelte";
   import Rezept from "./Rezept.svelte";

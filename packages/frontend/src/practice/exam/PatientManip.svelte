@@ -3,7 +3,7 @@
   import { confirm } from "@/lib/confirm-call";
   import { Payment, Visit, WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
-  import { endPatient, currentPatient, currentVisitId } from "./ExamVars";
+  import { endPatient, currentPatient, currentVisitId } from "./exam-vars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";

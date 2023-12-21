@@ -4,7 +4,6 @@
   import { Shahokokuho, type Patient } from "myclinic-model";
   import ShahokokuhoDialogContent from "./ShahokokuhoDialogContent.svelte";
   import { countInvalidUsage } from "@/lib/hoken-check";
-  import { tryUpdateShahokokuho } from "@/lib/hoken-lib";
 
   export let destroy: () => void;
   export let title: string;
@@ -47,13 +46,6 @@
         await api.updateShahokokuho(shahokokuho);
         onUpdated(shahokokuho);
         return [];
-        // const result = await tryUpdateShahokokuho(shahokokuho);
-        // switch(result) {
-        //   case "not-allowed": return ["変更が許可されませんでした。"];
-        //   case "invalid-valid-upto": return ["有効期間外の使用が発生するので、変更できません。"];
-        //   case "success": break;
-        //   default: return ["ERROR"];
-        // }
       }
     } catch (ex: any) {
       return [ex.toString()];

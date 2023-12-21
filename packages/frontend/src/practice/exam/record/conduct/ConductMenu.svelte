@@ -2,7 +2,7 @@
   import type { VisitEx } from "myclinic-model";
   import EnterXpWidget from "./EnterXpWidget.svelte";
   import EnterInjectWidget from "./EnterInjectWidget.svelte";
-  import { getCopyTarget } from "../../ExamVars";
+  import { getCopyTarget } from "../../exam-vars";
   import { enterTo } from "../shinryou/helper";
   import api from "@/lib/api";
   import { popupTrigger } from "@/lib/popup-helper";

@@ -3,7 +3,7 @@
   import SelectRegisteredPatientDialog from "./select-patient-dialogs/SelectRegisteredPatientDialog.svelte";
   import SelectPatientBySearch from "./select-patient-dialogs/SelectPatientBySearch.svelte";
   import RecentVisitsDialog from "./select-patient-dialogs/RecentVisitsDialog.svelte";
-  import { startPatient, showPatientsByDate, showAppoints } from "./ExamVars";
+  import { startPatient, showPatientsByDate, showAppoints } from "./exam-vars";
   import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
   import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";

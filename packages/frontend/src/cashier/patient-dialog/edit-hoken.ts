@@ -40,6 +40,7 @@ export function editHoken(
         target: document.body,
         props: {
           init: koukikourei,
+          isAdmin: data.isAdmin,
           destroy: () => {
             d.$destroy();
             data.goback();

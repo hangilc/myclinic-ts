@@ -2,7 +2,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import { pad } from "@/lib/pad";
-  import { currentPatient } from "../ExamVars";
+  import { currentPatient } from "../exam-vars";
   import api from "@/lib/api";
   import { popupTrigger } from "@/lib/popup-helper";
 

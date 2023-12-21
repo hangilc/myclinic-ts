@@ -11,7 +11,7 @@
   import ConductWrapper from "./conduct/ConductWrapper.svelte";
   import Payment from "./payment/Payment.svelte";
   import { afterUpdate } from "svelte";
-  import { currentVisitId } from "../ExamVars";
+  import { currentVisitId } from "../exam-vars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
 

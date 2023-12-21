@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import type { Appoint, AppointTime } from "myclinic-model";
-  import { currentPatient, showAppoints, startPatient } from "../ExamVars";
+  import { currentPatient, showAppoints, startPatient } from "../exam-vars";
   import RightBox from "../RightBox.svelte";
 
   let today = new Date();

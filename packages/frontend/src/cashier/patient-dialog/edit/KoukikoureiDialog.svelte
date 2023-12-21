@@ -4,9 +4,6 @@
   import { type Patient, Koukikourei } from "myclinic-model";
   import KoukikoureiDialogContent from "./KoukikoureiDialogContent.svelte";
   import {
-    OverlapExists,
-    Used,
-    checkHokenInterval,
     countInvalidUsage,
   } from "@/lib/hoken-check";
 
@@ -16,6 +13,7 @@
   export let patient: Patient;
   export let onEntered: (entered: Koukikourei) => void = (_) => {};
   export let onUpdated: (entered: Koukikourei) => void = (_) => {};
+  export let isAdmin: boolean;
   let prevInvalids = 0;
 
   checkPrevInvalids();
@@ -34,23 +32,23 @@
       if (init === null) {
         const entered = await api.enterKoukikourei(koukikourei);
         onEntered(entered);
+        return [];
       } else {
         if (koukikourei.koukikoureiId <= 0) {
           return ["Invalid koukikoureiId"];
-        } else {
-          const invalids = await countInvalidUsage(koukikourei);
-          if( invalids > prevInvalids ){
-            return ["有効期間外の使用が発生するので、変更できません。"];
-          }
-          const usage = await api.countKoukikoureiUsage(init.koukikoureiId);
-          if( usage > 0 && !Koukikourei.isContentEqual(init, koukikourei) ){
-            return ["この保険はすでに使われているので、内容の変更ができません。"];
-          }
-          await api.updateKoukikourei(koukikourei);
-          onUpdated(koukikourei);
         }
+        if (!isAdmin) {
+          const usage = await api.countKoukikoureiUsage(init.koukikoureiId);
+          if (usage > 0) {
+            return [
+              "この保険証はすでに使用されているので、内容を変更できません。",
+            ];
+          }
+        }
+        await api.updateKoukikourei(koukikourei);
+        onUpdated(koukikourei);
+        return [];
       }
-      return [];
     } catch (ex: any) {
       return [ex.toString()];
     }

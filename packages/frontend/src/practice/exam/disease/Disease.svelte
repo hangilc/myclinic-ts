@@ -3,7 +3,7 @@
   import Current from "./Current.svelte";
   import Tenki from "./Tenki.svelte";
   import Edit from "./edit/Edit.svelte";
-  import { currentPatient } from "../ExamVars";
+  import { currentPatient } from "../exam-vars";
   import { onDestroy } from "svelte";
   import RightBox from "../RightBox.svelte";
   import { DiseaseEnv } from "./disease-env";
