@@ -19,7 +19,7 @@
   async function doSearch() {
     const result: Patient[] = await api.searchPatientSmart(searchText);
     if (result.length === 1) {
-      PatientData.start(result[0], { hotlineTrigger });
+      PatientData.start(result[0], { hotlineTrigger, isAdmin });
     } else {
       const d: SearchPatientResultDialog = new SearchPatientResultDialog({
         target: document.body,
