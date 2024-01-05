@@ -1,13 +1,13 @@
 <script lang="ts">
   import { errorMessagesOf, type VResult } from "@/lib/validation";
-  import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+  import type { Patient, Shahokokuho } from "myclinic-model";
   import ShahokokuhoForm from "./ShahokokuhoForm.svelte";
   import { dateToSql } from "@/lib/util";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import Refer from "./refer/Refer.svelte";
-  import api from "@/lib/api";
-  import { fetchHokenList } from "../fetch-hoken-list";
+  import { batchFromHoken, fetchHokenList } from "../fetch-hoken-list";
   import type { Hoken } from "../hoken";
+  import api from "@/lib/api";
 
   export let patient: Patient;
   export let init: Shahokokuho | null;
@@ -64,9 +64,15 @@
   }
 
   async function initRefer(): Promise<Hoken[]> {
-    const list = await fetchHokenList(patient.patientId);
-    console.log("list", list);
-    return list;
+    const [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
+      await api.listAllHoken(patient.patientId);
+    const hs: Hoken[] = await batchFromHoken(
+      shahokokuhoList,
+      koukikoureiList,
+      roujinList,
+      kouhiList
+    );
+    return hs;
   }
 
   async function doReferAnother() {
@@ -105,9 +111,6 @@
 <style>
   .form-wrapper {
     display: flex;
-  }
-  .refer {
-    width: 300px;
   }
   .error {
     margin: 10px 0;
