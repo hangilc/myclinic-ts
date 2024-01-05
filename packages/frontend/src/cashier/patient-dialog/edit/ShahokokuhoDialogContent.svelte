@@ -1,9 +1,13 @@
 <script lang="ts">
   import { errorMessagesOf, type VResult } from "@/lib/validation";
-  import type { Patient, Shahokokuho } from "myclinic-model";
+  import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import ShahokokuhoForm from "./ShahokokuhoForm.svelte";
   import { dateToSql } from "@/lib/util";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import Refer from "./refer/Refer.svelte";
+  import api from "@/lib/api";
+  import { fetchHokenList } from "../fetch-hoken-list";
+  import type { Hoken } from "../hoken";
 
   export let patient: Patient;
   export let init: Shahokokuho | null;
@@ -11,6 +15,7 @@
   export let onClose: () => void;
   let validate: () => VResult<Shahokokuho>;
   let errors: string[] = [];
+  let showRefer = false;
 
   async function doEnter() {
     const vs = validate();
@@ -50,25 +55,47 @@
           confirmDate,
           onOnshiNameUpdated: (updated) => {
             patient = updated;
-          }
+          },
         },
       });
     } else {
       errors = errorMessagesOf(vs.errors);
     }
   }
+
+  async function initRefer(): Promise<Hoken[]> {
+    const list = await fetchHokenList(patient.patientId);
+    console.log("list", list);
+    return list;
+  }
+
+  async function doReferAnother() {
+    if (!showRefer) {
+      showRefer = true;
+    } else {
+      showRefer = false;
+    }
+  }
 </script>
 
 <div>
-  {#if errors.length > 0}
-    <div class="error">
-      {#each errors as e}
-        <div>{e}</div>
-      {/each}
+  <div class="form-wrapper">
+    {#if showRefer}
+      <Refer init={initRefer} />
+    {/if}
+    <div>
+      {#if errors.length > 0}
+        <div class="error">
+          {#each errors as e}
+            <div>{e}</div>
+          {/each}
+        </div>
+      {/if}
+      <ShahokokuhoForm {patient} {init} bind:validate />
     </div>
-  {/if}
-  <ShahokokuhoForm {patient} {init} bind:validate />
+  </div>
   <div class="commands">
+    <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
     <a href="javascript:void(0)" on:click={doOnshiConfirm}>資格確認</a>
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
@@ -76,6 +103,12 @@
 </div>
 
 <style>
+  .form-wrapper {
+    display: flex;
+  }
+  .refer {
+    width: 300px;
+  }
   .error {
     margin: 10px 0;
     color: red;

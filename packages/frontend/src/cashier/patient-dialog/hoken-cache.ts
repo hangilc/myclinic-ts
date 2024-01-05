@@ -1,10 +1,10 @@
 import { Hoken, type HokenType } from "./hoken";
 
-export class Hoken1<T extends HokenType> extends Hoken {
-  constructor(value: T, usageCount: number) {
-    super(value, usageCount);
-  }
-}
+// export class Hoken1<T extends HokenType> extends Hoken {
+//   constructor(value: T, usageCount: number) {
+//     super(value, usageCount);
+//   }
+// }
 
 export class HokenCache {
   #cache: Hoken[];
