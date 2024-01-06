@@ -11,7 +11,6 @@
   export let patient: Patient;
   export let onEntered: (entered: Kouhi) => void = (_) => {};
   export let onUpdated: (entered: Kouhi) => void = (_) => {};
-  export let styleWidth = "360px";
   export let isAdmin: boolean;
   let prevInvalids = 0;
 
@@ -65,7 +64,7 @@
   }
 </script>
 
-<Dialog {destroy} {title} {styleWidth}>
+<Dialog {destroy} {title}>
   <KouhiDialogContent {init} {patient} onClose={destroy} onEnter={doEnter} />
 </Dialog>
 

@@ -112,6 +112,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    align-items: center;
     margin-top: 10px;
   }
 
