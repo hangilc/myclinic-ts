@@ -21,7 +21,7 @@
   updateValues(init);
 
   function updateValues(init: Kouhi | null): void {
-    if( init === null ){
+    if (init === null) {
       futansha = "";
       jukyuusha = "";
       validFrom = null;
@@ -43,7 +43,7 @@
       validFrom: validateValidFrom(),
       validUpto: validateValidUpto(),
       memo: init ? init.memo : undefined,
-    }
+    };
     return validateKouhi(input);
   }
 
@@ -59,13 +59,23 @@
 <div class="panel">
   <span>負担者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={futansha} 
-      on:change={doUserInput} data-cy="futansha-input"/>
+    <input
+      type="text"
+      class="regular"
+      bind:value={futansha}
+      on:change={doUserInput}
+      data-cy="futansha-input"
+    />
   </div>
   <span>受給者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={jukyuusha} on:change={doUserInput}
-    data-cy="jukyuusha-input"/>
+    <input
+      type="text"
+      class="regular"
+      bind:value={jukyuusha}
+      on:change={doUserInput}
+      data-cy="jukyuusha-input"
+    />
   </div>
   <span>期限開始</span>
   <div data-cy="valid-from-input">
@@ -93,6 +103,7 @@
     grid-template-columns: auto 1fr;
     row-gap: 6px;
     column-gap: 6px;
+    width: 320px;
   }
 
   .panel > :nth-child(odd) {

@@ -108,6 +108,7 @@
     grid-template-columns: auto 1fr;
     row-gap: 6px;
     column-gap: 6px;
+    
   }
 
   .panel > :nth-child(odd) {
