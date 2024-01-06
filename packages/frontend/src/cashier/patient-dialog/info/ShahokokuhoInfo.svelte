@@ -4,7 +4,7 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { formatValidFrom, formatValidUpto } from "./misc";
 
-  export let patient: Patient;
+  export let patient: Patient | null;
   export let hoken: Hoken;
   let shahokokuho: Shahokokuho = hoken.asShahokokuho;
   let usageCount: number = hoken.usageCount;
@@ -20,8 +20,10 @@
 </script>
 
 <div class="panel">
+  {#if patient}
   <span>({patient.patientId})</span>
   <span>{patient.fullName(" ")}</span>
+  {/if}
   <span>保険者番号</span>
   <span>{shahokokuho.hokenshaBangou}</span>
   <span>記号・番号</span>

@@ -14,7 +14,8 @@
     "tag-date": "git tag --format='%(refname) %(creatordate)'",
     "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result; npm run compile -w packages/rezept",
     "deploy": "bash scripts/deploy.sh",
-    "test": "npm run test -w packages/frontend && npm run test -w packages/onshi-result && npm run test -w packages/rezept"
+    "test": "npm run test -w packages/frontend && npm run test -w packages/onshi-result && npm run test -w packages/rezept",
+    "dev": "npm run dev -w packages/frontend"
   },
   "devDependencies": {
     "typescript": "5.2.2"
