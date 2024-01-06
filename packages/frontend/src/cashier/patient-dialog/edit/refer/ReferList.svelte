@@ -62,13 +62,13 @@
     </div>
   {/each}
   {#each koukikoureiList as h (h.koukikourei.koukikoureiId)}
-    <div class="koukikourei">
+    <div class="koukikourei box">
       <KoukikoureiBox koukikourei={h.koukikourei} usageCount={h.usageCount} />
       <button on:click={() => onKoukikoureiSelect(h.koukikourei, h.usageCount)}>選択</button>
     </div>
   {/each}
   {#each kouhiList as h (h.kouhi.kouhiId)}
-    <div class="kouhi">
+    <div class="kouhi box">
       <KouhiBox kouhi={h.kouhi} usageCount={h.usageCount} />
       <button on:click={() => onKouhiSelect(h.kouhi, h.usageCount)}>選択</button>
     </div>

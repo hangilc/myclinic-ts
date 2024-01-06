@@ -3,7 +3,7 @@
   import type { Hoken } from "../hoken";
   import { formatValidFrom, formatValidUpto } from "./misc";
 
-  export let patient: Patient;
+  export let patient: Patient | null;
   export let hoken: Hoken;
   let usageCount: number = hoken.usageCount;
   let kouhi: Kouhi = hoken.asKouhi;
@@ -11,8 +11,10 @@
 </script>
 
 <div class="panel">
+  {#if patient}
   <span>({patient.patientId})</span>
   <span>{patient.fullName(" ")}</span>
+  {/if}
   <span>負担者番号</span>
   <span>{kouhi.futansha}</span>
   <span>受給者番号</span>

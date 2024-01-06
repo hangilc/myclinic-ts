@@ -4,6 +4,10 @@
   import KoukikoureiForm from "./KoukikoureiForm.svelte";
   import { dateToSql } from "@/lib/util";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import type { Hoken } from "../hoken";
+  import api from "@/lib/api";
+  import { batchFromHoken } from "../fetch-hoken-list";
+  import Refer from "./refer/Refer.svelte";
 
   export let patient: Patient;
   export let init: Koukikourei | null;
@@ -11,13 +15,14 @@
   export let onClose: () => void;
   let validate: () => VResult<Koukikourei>;
   let errors: string[] = [];
+  let showRefer = false;
 
   async function doEnter() {
     const vs = validate();
-    if( vs.isValid ){
+    if (vs.isValid) {
       errors = [];
       const errs = await onEnter(vs.value);
-      if( errs.length === 0 ){
+      if (errs.length === 0) {
         onClose();
       } else {
         errors = errs;
@@ -57,9 +62,60 @@
       errors = errorMessagesOf(vs.errors);
     }
   }
+
+  async function initRefer(): Promise<Hoken[]> {
+    let [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
+      await api.listAllHoken(patient.patientId);
+    koukikoureiList = koukikoureiList.filter((h) => {
+      if (init) {
+        return h.koukikoureiId !== init.koukikoureiId;
+      } else {
+        return true;
+      }
+    });
+    const hs: Hoken[] = await batchFromHoken(
+      shahokokuhoList,
+      koukikoureiList,
+      roujinList,
+      kouhiList
+    );
+    return hs;
+  }
+
+  async function doReferAnother() {
+    if (!showRefer) {
+      showRefer = true;
+    } else {
+      showRefer = false;
+    }
+  }
 </script>
 
 <div>
+  <div class="form-wrapper">
+    {#if showRefer}
+      <Refer init={initRefer} />
+    {/if}
+    <div>
+      {#if errors.length > 0}
+        <div class="error">
+          {#each errors as e}
+            <div>{e}</div>
+          {/each}
+        </div>
+      {/if}
+      <KoukikoureiForm {patient} {init} bind:validate />
+    </div>
+  </div>
+  <div class="commands">
+    <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
+    <a href="javascript:void(0)" on:click={doOnshiConfirm}>資格確認</a>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doClose}>キャンセル</button>
+  </div>
+</div>
+
+<!-- <div>
   {#if errors.length > 0}
     <div class="error">
       {#each errors as e}
@@ -67,15 +123,20 @@
       {/each}
     </div>
   {/if}
-  <KoukikoureiForm {patient} {init} bind:validate/>
+  <KoukikoureiForm {patient} {init} bind:validate />
   <div class="commands">
+    <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
     <a href="javascript:void(0)" on:click={doOnshiConfirm}>資格確認</a>
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
   </div>
-</div>
+</div> -->
 
 <style>
+  .form-wrapper {
+    display: flex;
+    gap: 10px;
+  }
   .error {
     margin: 10px 0;
     color: red;
