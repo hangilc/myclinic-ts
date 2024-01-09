@@ -49,7 +49,7 @@
         usageCount: h.usageCount,
       }));
     } else {
-      koukikoureiList = [];
+      kouhiList = [];
     }
   });
 </script>

@@ -37,13 +37,13 @@
   async function initRefer(): Promise<Hoken[]> {
     let [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
       await api.listAllHoken(patient.patientId);
-    kouhiList = kouhiList.filter((h) => {
-      if (init) {
-        return h.kouhiId !== init.kouhiId;
-      } else {
-        return true;
-      }
-    });
+    // kouhiList = kouhiList.filter((h) => {
+    //   if (init) {
+    //     return h.kouhiId !== init.kouhiId;
+    //   } else {
+    //     return true;
+    //   }
+    // });
     const hs: Hoken[] = await batchFromHoken(
       shahokokuhoList,
       koukikoureiList,

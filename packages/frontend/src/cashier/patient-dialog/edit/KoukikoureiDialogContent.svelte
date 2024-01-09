@@ -66,13 +66,14 @@
   async function initRefer(): Promise<Hoken[]> {
     let [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
       await api.listAllHoken(patient.patientId);
-    koukikoureiList = koukikoureiList.filter((h) => {
-      if (init) {
-        return h.koukikoureiId !== init.koukikoureiId;
-      } else {
-        return true;
-      }
-    });
+    // console.log("koukikoureiList", koukikoureiList);
+    // koukikoureiList = koukikoureiList.filter((h) => {
+    //   if (init) {
+    //     return h.koukikoureiId !== init.koukikoureiId;
+    //   } else {
+    //     return true;
+    //   }
+    // });
     const hs: Hoken[] = await batchFromHoken(
       shahokokuhoList,
       koukikoureiList,
@@ -114,23 +115,6 @@
     <button on:click={doClose}>キャンセル</button>
   </div>
 </div>
-
-<!-- <div>
-  {#if errors.length > 0}
-    <div class="error">
-      {#each errors as e}
-        <div>{e}</div>
-      {/each}
-    </div>
-  {/if}
-  <KoukikoureiForm {patient} {init} bind:validate />
-  <div class="commands">
-    <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
-    <a href="javascript:void(0)" on:click={doOnshiConfirm}>資格確認</a>
-    <button on:click={doEnter}>入力</button>
-    <button on:click={doClose}>キャンセル</button>
-  </div>
-</div> -->
 
 <style>
   .form-wrapper {

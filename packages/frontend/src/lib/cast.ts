@@ -69,12 +69,13 @@ export function castTuple4<A, B, C, D>(
   castC: Caster<C>,
   castD: Caster<D>
 ): (arg: any) => [A, B, C, D] {
-  return (arg: any) => [
+  return (arg: any) => {
+    return [
     castA(arg[0]),
     castB(arg[1]),
     castC(arg[2]),
     castD(arg[3]),
-  ];
+  ]};
 }
 
 export function castList<T>(cast: Caster<T>): Caster<T[]> {
