@@ -107,8 +107,8 @@
 
   async function doOnshiConfirm(item: HokenItem) {
     const [result, errs] = await onshiConfirmHoken(item.hoken, visitDate);
-    if( errs.length> 0 ){
-      errors = errs.map(e => e.toString());
+    if (errs.length > 0) {
+      errors = errs.map((e) => e.toString());
     } else {
       item.confirm = result;
       hokenItems = [...hokenItems];
@@ -138,8 +138,12 @@
           const newKouhi = Object.assign({}, kouhi, { memo: newMemo });
           api.updateKouhi(newKouhi);
         },
-      }
-    })
+      },
+    });
+  }
+
+  function doDetail(item: HokenItem): void {
+    
   }
 </script>
 
@@ -169,6 +173,7 @@
             on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
           >
         {/if}
+        <a href="javascript:void(0)" on:click={() => doDetail(hokenItem)}>詳細</a>
       </div>
     {/each}
     {#each kouhiItems as kouhiItem (kouhiItem.kouhi.kouhiId)}
@@ -177,7 +182,11 @@
           type="checkbox"
           bind:checked={kouhiItem.checked}
         />{kouhiItem.rep()}
-        <a href="javascript:void(0)" class="memo-link" on:click={() => doMemo(kouhiItem.kouhi)}>メモ</a>
+        <a
+          href="javascript:void(0)"
+          class="memo-link"
+          on:click={() => doMemo(kouhiItem.kouhi)}>メモ</a
+        >
       </div>
     {/each}
   </div>
@@ -230,5 +239,9 @@
   .error {
     margin-bottom: 10px;
     color: red;
+  }
+
+  .detail {
+    margin: 4px 20px;
   }
 </style>
