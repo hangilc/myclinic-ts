@@ -20,6 +20,7 @@
 </script>
 
 {Hoken.kouhiRep(kouhi)}
+  (P-{kouhi.kouhiId})
 【負担者】{kouhi.futansha}
 【受給者】{kouhi.jukyuusha}
 【期限開始】{formatValidFrom(kouhi.validFrom)}

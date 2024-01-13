@@ -34,6 +34,7 @@
 </script>
 
 <sapn data-cy="rep">{Hoken.shahokokuhoRep(shahokokuho)}</sapn>
+ (S-{shahokokuho.shahokokuhoId})
 【保険者番号】<span data-cy="hokensha-bangou">{shahokokuho.hokenshaBangou}</span>
 【被保険者記号】<span data-cy="hihokensha-kigou">{shahokokuho.hihokenshaKigou}</span>
 【被保険者番号】<span data-cy="hihokensha-bangou">{shahokokuho.hihokenshaBangou}</span>

@@ -142,9 +142,6 @@
     });
   }
 
-  function doDetail(item: HokenItem): void {
-    
-  }
 </script>
 
 <Dialog title="保険選択" destroy={doClose} styleWidth="260px">
@@ -158,22 +155,31 @@
   <div>
     {#each hokenItems as hokenItem (hokenItem.id)}
       <div class="item">
-        <input type="checkbox" bind:checked={hokenItem.checked} />
-        <span>{hokenItem.rep()}</span>
-        {#if !hokenItem.confirm}
-          <a
-            href="javascript:void(0)"
-            class="confirm-link"
-            on:click={() => doOnshiConfirm(hokenItem)}>資格確認</a
+        <div>
+          <input type="checkbox" bind:checked={hokenItem.checked} />
+          <span>{hokenItem.rep()}</span>
+          {#if !hokenItem.confirm}
+            <a
+              href="javascript:void(0)"
+              class="confirm-link"
+              on:click={() => doOnshiConfirm(hokenItem)}>資格確認</a
+            >
+          {:else}
+            <a
+              href="javascript:void(0)"
+              class="has-been-confirmed-link"
+              on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
+            >
+          {/if}
+          <a href="javascript:void(0)" on:click={() => hokenItem.showDetail = !hokenItem.showDetail}
+            >詳細</a
           >
-        {:else}
-          <a
-            href="javascript:void(0)"
-            class="has-been-confirmed-link"
-            on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
-          >
+        </div>
+        {#if hokenItem.showDetail}
+        <div class="detail">
+
+        </div>
         {/if}
-        <a href="javascript:void(0)" on:click={() => doDetail(hokenItem)}>詳細</a>
       </div>
     {/each}
     {#each kouhiItems as kouhiItem (kouhiItem.kouhi.kouhiId)}

@@ -7,6 +7,7 @@ export class HokenItem {
   checked: boolean = false;
   confirm: OnshiResult | undefined = undefined;
   savedConfirm: OnshiResult | undefined = undefined;
+  showDetail: boolean = false;
 
   constructor(hoken: Shahokokuho | Koukikourei){
     this.hoken = hoken;

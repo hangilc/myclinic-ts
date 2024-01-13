@@ -37,6 +37,7 @@
 </script>
 
 {Hoken.koukikoureiRep(koukikourei)}
+  (K-{koukikourei.koukikoureiId})
 【保険者番号】{koukikourei.hokenshaBangou}
 【被保険者番号】{koukikourei.hihokenshaBangou}
 【負担割】{toZenkaku(koukikourei.futanWari.toString())}割 【期限開始】{formatValidFrom(
