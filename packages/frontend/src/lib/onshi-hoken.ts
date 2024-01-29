@@ -62,7 +62,8 @@ export type ShahokokuhoOnshiInconsistency =
   "inconsistent-honnin-kazoku" |
   "inconsistent-kourei" |
   "inconsistent-valid-from" |
-  "inconsistent-valid-upto";
+  "inconsistent-valid-upto"
+  ;
 
 export function checkShahokokuhoInconsistency(a: Shahokokuho, onshi: Shahokokuho): ShahokokuhoOnshiInconsistency[] {
   const diff: ShahokokuhoOnshiInconsistency[] = [];
@@ -81,12 +82,12 @@ export function checkShahokokuhoInconsistency(a: Shahokokuho, onshi: Shahokokuho
   if (a.koureiStore !== onshi.koureiStore) {
     diff.push("inconsistent-kourei");
   }
-  if (a.validFrom !== onshi.validFrom) {
-    diff.push("inconsistent-valid-from");
-  }
-  if (a.validUpto !== onshi.validUpto) {
-    diff.push("inconsistent-valid-upto");
-  }
+  // if (a.validFrom !== onshi.validFrom) {
+  //   diff.push("inconsistent-valid-from");
+  // }
+  // if (a.validUpto !== onshi.validUpto) {
+  //   diff.push("inconsistent-valid-upto");
+  // }
   if (a.honninStore !== onshi.honninStore) {
     diff.push("inconsistent-honnin-kazoku");
   }
@@ -143,12 +144,12 @@ export function checkKoukikoureiInconsistency(a: Koukikourei, onshi: Koukikourei
   if (a.futanWari !== onshi.futanWari) {
     result.push("inconsistent-futanwari");
   }
-  if (a.validFrom !== onshi.validFrom) {
-    result.push("inconsistent-valid-from");
-  }
-  if (a.validUpto !== onshi.validUpto) {
-    result.push("inconsistent-valid-upto");
-  }
+  // if (a.validFrom !== onshi.validFrom) {
+  //   result.push("inconsistent-valid-from");
+  // }
+  // if (a.validUpto !== onshi.validUpto) {
+  //   result.push("inconsistent-valid-upto");
+  // }
   return result;
 }
 
@@ -165,7 +166,6 @@ export async function tryFixPrevHoken(prev: Shahokokuho | Koukikourei, onshi: Sh
   }
   if (prev instanceof Koukikourei && onshi instanceof Koukikourei) {
     const inconsistencies = checkKoukikoureiInconsistency(prev, onshi);
-    console.log("koukikourei inconsistencies", inconsistencies, prev, onshi);
     if (inconsistencies.length === 0) {
       return undefined;
     }
