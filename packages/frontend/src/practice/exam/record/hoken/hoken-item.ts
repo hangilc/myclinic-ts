@@ -33,6 +33,7 @@ export class HokenItem {
 export class KouhiItem {
   kouhi: Kouhi;
   checked: boolean;
+  showDetail: boolean = false;
 
   constructor(kouhi: Kouhi, checked: boolean = false) {
     this.kouhi = kouhi;

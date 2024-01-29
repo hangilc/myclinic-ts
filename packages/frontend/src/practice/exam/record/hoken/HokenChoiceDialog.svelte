@@ -4,7 +4,8 @@
   import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import {
     type Visit,
-    type Kouhi, Koukikourei,
+    type Kouhi,
+    Koukikourei,
     Shahokokuho,
     Onshi,
     HokenIdSet,
@@ -15,6 +16,7 @@
   import HokenMemoEditorDialog from "./HokenMemoEditorDialog.svelte";
   import ShahokokuhoDetail from "./ShahokokuhoDetail.svelte";
   import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
+  import KouhiDetail from "./KouhiDetail.svelte";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -142,7 +144,6 @@
       },
     });
   }
-
 </script>
 
 <Dialog title="保険選択" destroy={doClose} styleWidth="260px">
@@ -172,18 +173,20 @@
               on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
             >
           {/if}
-          <a href="javascript:void(0)" on:click={() => hokenItem.showDetail = !hokenItem.showDetail}
+          <a
+            href="javascript:void(0)"
+            on:click={() => (hokenItem.showDetail = !hokenItem.showDetail)}
             >詳細</a
           >
         </div>
         {#if hokenItem.showDetail}
-        <div class="detail">
-          {#if hokenItem.hoken instanceof Shahokokuho}
-            <ShahokokuhoDetail shahokokuho={hokenItem.hoken} />
-          {:else if hokenItem.hoken instanceof Koukikourei}
-            <KoukikoureiDetail koukikourei={hokenItem.hoken} />
-          {/if}
-        </div>
+          <div class="detail">
+            {#if hokenItem.hoken instanceof Shahokokuho}
+              <ShahokokuhoDetail shahokokuho={hokenItem.hoken} />
+            {:else if hokenItem.hoken instanceof Koukikourei}
+              <KoukikoureiDetail koukikourei={hokenItem.hoken} />
+            {/if}
+          </div>
         {/if}
       </div>
     {/each}
@@ -198,6 +201,14 @@
           class="memo-link"
           on:click={() => doMemo(kouhiItem.kouhi)}>メモ</a
         >
+        <a
+          href="javascript:void(0)"
+          on:click={() => (kouhiItem.showDetail = !kouhiItem.showDetail)}
+          >詳細</a
+        >
+        {#if kouhiItem.showDetail}
+          <div class="detail"><KouhiDetail kouhi={kouhiItem.kouhi} /></div>
+        {/if}
       </div>
     {/each}
   </div>
@@ -253,6 +264,8 @@
   }
 
   .detail {
-    margin: 4px 20px;
+    margin: 4px 10px;
+    padding: 10px;
+    border: 1px solid gray;
   }
 </style>
