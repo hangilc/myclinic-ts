@@ -4,8 +4,7 @@
   import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import {
     type Visit,
-    type Kouhi,
-    type Koukikourei,
+    type Kouhi, Koukikourei,
     Shahokokuho,
     Onshi,
     HokenIdSet,
@@ -14,6 +13,8 @@
   import type { OnshiResult } from "onshi-result";
   import OnshiDispDialog from "./OnshiDispDialog.svelte";
   import HokenMemoEditorDialog from "./HokenMemoEditorDialog.svelte";
+  import ShahokokuhoDetail from "./ShahokokuhoDetail.svelte";
+  import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -177,7 +178,11 @@
         </div>
         {#if hokenItem.showDetail}
         <div class="detail">
-
+          {#if hokenItem.hoken instanceof Shahokokuho}
+            <ShahokokuhoDetail shahokokuho={hokenItem.hoken} />
+          {:else if hokenItem.hoken instanceof Koukikourei}
+            <KoukikoureiDetail koukikourei={hokenItem.hoken} />
+          {/if}
         </div>
         {/if}
       </div>
