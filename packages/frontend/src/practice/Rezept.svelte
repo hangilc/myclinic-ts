@@ -107,7 +107,6 @@
       }
     }
     for (let line of henreiData.split(/\r?\n/)) {
-      console.log(line);
       if (line === "") {
         continue;
       }
@@ -117,7 +116,6 @@
       curr.push(line);
     }
     flush();
-    console.log(items);
     return items;
   }
 

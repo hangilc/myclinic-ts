@@ -1,11 +1,15 @@
 import type { Kouhi } from "myclinic-model";
 import type { Cover, KouhiData, KouhiProcessorArg } from "myclinic-rezept";
-import { KouhiFutanNashi, KuniNanbyou, MaruToHibakushaNoKo } from "myclinic-rezept";
+import { KouhiFutanNashi, KuniNanbyou, MaruAoNoFutan, MaruToHibakushaNoKo } from "myclinic-rezept";
 
 export function resolveKouhiData(kouhi: Kouhi): KouhiData {
+  console.log("enter resolveKouhiData", kouhi);
   switch(Math.floor(kouhi.futansha / 1000000)) {
     case 54: { // 難病
       return KuniNanbyou;
+    }
+    case 89: { // マル青
+      return MaruAoNoFutan;
     }
   }
   switch(Math.floor(kouhi.futansha / 1000)) {
