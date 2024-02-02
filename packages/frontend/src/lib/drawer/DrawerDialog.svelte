@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "../Dialog.svelte";
   import DrawerSvg from "./DrawerSvg.svelte";
-  import type { Op } from "./op";
+  import type { Op } from "@/lib/drawer/compiler/op";
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
 

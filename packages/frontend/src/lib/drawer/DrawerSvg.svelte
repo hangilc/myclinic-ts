@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Op } from "@/lib/drawer/op";
+  import type { Op } from "@/lib/drawer/compiler/op";
   import { drawerToSvg } from "./drawer-svg";
   import { onMount } from "svelte";
 

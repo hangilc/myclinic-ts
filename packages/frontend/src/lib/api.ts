@@ -1,8 +1,12 @@
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
-import { type Op as DrawerOp, castOp as castDrawerOp } from "./drawer/op";
+import { type Op as DrawerOp } from "./drawer/compiler/op";
 import type { ReceiptDrawerData } from "./drawer/receipt-drawer-data";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+
+function castDrawerOp(obj: any): DrawerOp {
+  return obj;
+}
 
 const backend: string = getBackend();
 const base: string = backend + "/api";

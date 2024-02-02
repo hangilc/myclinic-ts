@@ -1,10 +1,4 @@
-import { OpCircle, OpCreateFont, OpCreatePen, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, OpSetPen, OpSetTextColor, type Op } from "./op";
-
-// export function drawerJsonToSvg(opsJson: string, width, height, viewBox) {
-//   let ops = JSON.parse(opsJson);
-//   let options = { width, height, viewBox };
-//   return drawerToSvg(ops, options);
-// }
+import type { Op } from "./compiler/op";
 
 interface Pen {
   width: string;
@@ -89,16 +83,6 @@ export function drawerToSvg(ops: Op[], options: any) {
     pen_style = pen.penstyle;
   }
 
-  // function mmToPixel(dpi: number, mm: number) {
-  //   let inch = mm / 25.4;
-  //   return Math.floor(dpi * inch);
-  // }
-
-  // function pixelToMm(dpi: number, px: number) {
-  //   let inch = px / dpi;
-  //   return inch * 25.4;
-  // }
-
   function create_font(
     name: string,
     font_name: string,
@@ -121,16 +105,6 @@ export function drawerToSvg(ops: Op[], options: any) {
     text_color = "rgb(" + r + "," + g + "," + b + ")";
   }
 
-  // function encodeText(text: string) {
-  //   text = text.replace(/ /g, "&nbsp;");
-  //   text = text.replace(/&/g, "&amp;");
-  //   text = text.replace(/>/g, "&gt;");
-  //   text = text.replace(/</g, "&lt;");
-  //   text = text.replace(/"/g, "&quot;");
-  //   text = text.replace(/'/g, "&#039;");
-  //   return text;
-  // }
-
   function draw_chars(chars: string, xs: number[], ys: number[]) {
     let e = document.createElementNS(ns, "text");
     let attrs: Record<string, string> = {
@@ -140,8 +114,6 @@ export function drawerToSvg(ops: Op[], options: any) {
       "font-weight": font_weight ? "bold" : "normal",
       "font-italic": font_italic ? "italic" : "normal",
       "text-anchor": "start",
-      //'dominant-baseline': "text-after-edge",
-      // dy: "1em",
       dy: ys.length ? Array(ys.length).fill("1em").join(" ") : "1em"
     };
     for (let key in attrs) {
@@ -178,26 +150,46 @@ export function drawerToSvg(ops: Op[], options: any) {
 
   for (i = 0, n = ops.length; i < n; i++) {
     op = ops[i];
-    if( op instanceof OpMoveTo ){
-      draw_move_to(op.x, op.y);
-    } else if( op instanceof OpLineTo ){
-      svg.appendChild(draw_line_to(op.x, op.y));
-    } else if( op instanceof OpCreatePen ){
-      create_pen(op.name, op.r, op.g, op.b, op.width, op.penstyle);
-    } else if( op instanceof OpSetPen ){
-      set_pen(op.name);
-    } else if( op instanceof OpCreateFont ){
-      create_font(op.name, op.fontName, op.size, op.weight, op.italic);
-    } else if( op instanceof OpSetFont ){
-      set_font(op.name);
-    } else if( op instanceof OpSetTextColor ){
-      set_text_color(op.r, op.g, op.b);
-    } else if( op instanceof OpDrawChars ){
-      svg.appendChild(draw_chars(op.chars, op.xs, op.ys));
-    } else if( op instanceof OpCircle ){
-      svg.appendChild(draw_circle(op.x, op.y, op.r));
-    } else {
-      console.error("Unknown drawer op: " + op);
+    switch (op[0]) {
+      case "move_to": {
+        draw_move_to(op[1], op[2]);
+        break;
+      }
+      case "line_to": {
+        svg.appendChild(draw_line_to(op[1], op[2]));
+        break;
+      }
+      case "create_pen": {
+        create_pen(op[1], op[2], op[3], op[4], op[5], op[6]);
+        break;
+      }
+      case "set_pen": {
+        set_pen(op[1]);
+        break;
+      }
+      case "create_font": {
+        create_font(op[1], op[2], op[3], op[4], op[5]);
+        break;
+      }
+      case "set_font": {
+        set_font(op[1]);
+        break;
+      }
+      case "set_text_color": {
+        set_text_color(op[1], op[2], op[3]);
+        break;
+      }
+      case "draw_chars": {
+        svg.appendChild(draw_chars(op[1], op[2], op[3]));
+        break;
+      }
+      case "circle": {
+        svg.appendChild(draw_circle(op[1], op[2], op[3]));
+        break;
+      }
+      default: {
+        console.error("Unknown drawer op: " + op);
+      }
     }
   }
   return svg;

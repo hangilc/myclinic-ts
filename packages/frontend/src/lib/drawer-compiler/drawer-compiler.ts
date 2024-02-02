@@ -1,4 +1,4 @@
-import { OpCreateFont, OpCreatePen, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, OpSetPen, OpSetTextColor, type Op } from "../drawer/op";
+import type { OpCreateFont, OpCreatePen, OpDrawChars, OpLineTo, OpMoveTo, OpSetFont, OpSetPen, OpSetTextColor, Op } from "../drawer/compiler/op";
 import { Box } from "./box";
 import { breakLine } from "./break-line";
 import { HorizAlign, VertAlign, VertDirection } from "./enums";
@@ -43,7 +43,7 @@ export class DrawerCompiler {
     const save = this.curFont;
     if (this.curFont !== name) {
       this.ops.push(new OpSetFont(name));
-      if( !(name in this.fontSizeMap) ){
+      if (!(name in this.fontSizeMap)) {
         throw new Error("Cannot find font: " + name);
       }
       this.curFont = name;
@@ -247,7 +247,7 @@ export class DrawerCompiler {
     const fontSize = this.curFontSize;
     const lines = s.split(/\r?\n/).flatMap(line => breakLine(line, fontSize, b.width));
     let lb = b.setHeight(fontSize, VertDirection.Top);
-    for(let line of lines) {
+    for (let line of lines) {
       this.text(lb, line, { halign: HorizAlign.Left, valign: VertAlign.Top });
       lb = lb.flipBottom();
     }
@@ -263,7 +263,7 @@ export class DrawerCompiler {
     for (let m in this.marks) {
       const b = this.getMark(m);
       this.frame(b);
-      this.text(b, m, { halign: HorizAlign.Left, valign: VertAlign.Top});
+      this.text(b, m, { halign: HorizAlign.Left, valign: VertAlign.Top });
     }
   }
 }

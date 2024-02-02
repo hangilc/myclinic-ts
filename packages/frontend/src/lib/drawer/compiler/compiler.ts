@@ -60,10 +60,39 @@ export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
 }
 
+function locateY(box: Box, fontSize: number,  valign: VAlign) {
+  switch(valign){
+    case "top": return box.top;
+    case "center": return b.cy(box) - fontSize / 2.0;
+    case "bottom": return box.bottom - fontSize;
+    default: throw new Error(`unknown valign: ${valign}`)
+  }
+}
+
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   const charWidths  = stringToCharWidths(text, fontSize);
+  const y = locateY(box, fontSize, valign);
+  if( charWidths.length === 0 ){
+    return;
+  } else if( charWidths.length === 1 ){
+    drawChars(ctx, text, [box.left], [y]);
+    return;
+  }
   const length = sumOfNumbers(charWidths);
   const remain = b.width(box) - length;
+  const gap = remain / (charWidths.length - 1);
+  let x = box.left;
+  let xs: number[] = [];
+  let ys: number[] = [];
+  for(let i=0;i<charWidths.length;i++){
+    if( i > 0 ){
+      x += gap;
+    }
+    xs.push(x);
+    ys.push(y);
+    x += charWidths[i];
+  }
+  drawChars(ctx, text, xs, ys);
 }
 

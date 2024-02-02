@@ -1,4 +1,4 @@
-import type { Op } from "./drawer/op"
+import type { Op } from "@/lib/drawer/compiler/op"
 
 export const base: string = "http://localhost:48080";
 

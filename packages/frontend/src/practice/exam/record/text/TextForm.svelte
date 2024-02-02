@@ -1,7 +1,7 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
   import api from "@/lib/api";
-  import type { Op } from "@/lib/drawer/op";
+  import type { Op } from "@/lib/drawer/compiler/op";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
   import { getCopyTarget } from "../../exam-vars";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
@@ -64,7 +64,7 @@
 
   async function doPrintShohousen() {
     // ops = await api.shohousenDrawer(text.textId);
-    ops = drawShohousen();
+    const ops = drawShohousen();
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
       props: {
@@ -137,22 +137,6 @@
               ["処方箋フォーマット", doFormatShohousen],
             ])}>処方箋</a
           >
-          <!-- <div slot="menu" class="shohousen-menu">
-            <a
-              href="javascript:void(0)"
-              on:click={() => {
-                destroy();
-                doPrintShohousen();
-              }}>処方箋印刷</a
-            >
-            <a
-              href="javascript:void(0)"
-              on:click={() => {
-                destroy();
-                doFormatShohousen();
-              }}>処方箋フォーマット</a
-            >
-          </div> -->
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>

@@ -15,6 +15,14 @@ export function height(box: Box): number {
   return box.bottom - box.top;
 }
 
+export function cx(box: Box): number {
+  return (box.left + box.right) / 2.0;
+}
+
+export function cy(box: Box): number {
+  return (box.top + box.bottom) / 2.0;
+}
+
 export function paperSizeToBox(paperSize: PaperSize): Box {
   return { left: 0, top: 0, right: paperSize.width, bottom: paperSize.height };
 }

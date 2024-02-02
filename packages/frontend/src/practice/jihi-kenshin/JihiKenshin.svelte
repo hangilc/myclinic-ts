@@ -1,6 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
-  import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
+  // import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
   import { HorizAlign, VertAlign } from "@/lib/drawer-compiler/enums";
@@ -419,19 +419,19 @@
     if (showMarker) {
       comp.labelMarks();
     }
-    const d: DrawerDialog2 = new DrawerDialog2({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "自費健診印刷",
-        ops: comp.ops,
-        width: A4[0],
-        height: A4[1],
-        previewScale: 2,
-        displayWidth: A4[0] * 2 + 20,
-        displayHeight: A4[1] * 2 + 20,
-      },
-    });
+    // const d: DrawerDialog2 = new DrawerDialog2({
+    //   target: document.body,
+    //   props: {
+    //     destroy: () => d.$destroy(),
+    //     title: "自費健診印刷",
+    //     ops: comp.ops,
+    //     width: A4[0],
+    //     height: A4[1],
+    //     previewScale: 2,
+    //     displayWidth: A4[0] * 2 + 20,
+    //     displayHeight: A4[1] * 2 + 20,
+    //   },
+    // });
   }
 </script>
 

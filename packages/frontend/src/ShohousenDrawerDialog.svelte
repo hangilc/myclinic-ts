@@ -1,6 +1,6 @@
 <script lang="ts">
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte"
-  import type { Op } from "@/lib/drawer/op"
+  import type { Op } from "@/lib/drawer/compiler/op"
 
   export let destroy: () => void;
   export let ops: Op[];
