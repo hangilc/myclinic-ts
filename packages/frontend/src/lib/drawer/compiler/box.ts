@@ -75,3 +75,43 @@ export function inset(dx: number, dy: number = dx): Modifier {
     bottom: box.bottom - dy,
   })
 }
+
+export function sliceTop(height: number): Modifier {
+  return box => ({
+    left: box.left,
+    top: box.top,
+    right: box.right,
+    bottom: box.top + height,
+  })
+}
+
+export function shrinkHoriz(shrinkLeft: number, shrinkRight: number): Modifier {
+  return box => ({
+    left: box.left + shrinkLeft,
+    top: box.top,
+    right: box.right - shrinkRight,
+    bottom: box.bottom,
+  })
+}
+
+export function splitToColumns(box: Box, ...at: number[]): Box[] {
+  const cols: Box[] = [];
+  let left = box.left;
+  for(let i=0;i<at.length;i++){
+    const right = box.left + at[i];
+    cols.push({
+      left, top: box.top, right, bottom: box.bottom
+    });
+    left = right;
+  }
+  return cols;
+}
+
+export function divideToRows(box: Box, nrow: number): Box[] {
+  const at: number[] = [];
+  const w = width(box);
+  for(let i=1;i<nrow;i++){
+    at.push(w * i / nrow);
+  }
+  return splitToColumns(box, ...at);
+}

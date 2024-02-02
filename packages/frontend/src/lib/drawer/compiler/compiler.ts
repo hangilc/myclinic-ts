@@ -96,3 +96,41 @@ export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, va
   drawChars(ctx, text, xs, ys);
 }
 
+export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign) {
+  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  const charWidths  = stringToCharWidths(text, fontSize);
+  const length = sumOfNumbers(charWidths);
+  const y = locateY(box, fontSize, valign);
+  let x: number;
+  switch(halign){
+    case "left": {
+      x = box.left;
+      break;
+    }
+    case "center": {
+      x = b.cx(box) - length / 2.0;
+      break;
+    }
+    case "right": {
+      x = box.right - length;
+      break;
+    }
+  }
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for(let i=0;i<charWidths.length;i++){
+    xs.push(x);
+    ys.push(y);
+    x += charWidths[i];
+  }
+  drawChars(ctx, text, xs, ys);
+}
+
+export function rect(ctx: DrawerContext, box: Box) {
+  moveTo(ctx, box.left, box.top);
+  lineTo(ctx, box.right, box.top);
+  lineTo(ctx, box.right, box.bottom);
+  lineTo(ctx, box.left, box.bottom);
+  lineTo(ctx, box.left, box.top);
+}
+
