@@ -11,6 +11,7 @@
   import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
+  import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -62,7 +63,8 @@
   let ops: Op[] = [];
 
   async function doPrintShohousen() {
-    ops = await api.shohousenDrawer(text.textId);
+    // ops = await api.shohousenDrawer(text.textId);
+    ops = drawShohousen();
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
       props: {
