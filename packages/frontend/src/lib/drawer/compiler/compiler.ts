@@ -2,6 +2,11 @@ import type { DrawerContext } from "./context";
 import { FontWeightBold, FontWeightNormal } from "./font-weight";
 import type { Op } from "./op";
 import * as fsm from "./font-size-manager";
+import * as b from "./box";
+import type { Box } from "./box";
+import type { HAlign, VAlign } from "./align";
+import { stringToCharWidths } from "./char-width";
+import { sumOfNumbers } from "./util";
 
 export function getOps(ctx: DrawerContext): Op[] {
   return ctx.ops;
@@ -53,5 +58,12 @@ export function setPen(ctx: DrawerContext, name: string) {
 
 export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
+}
+
+export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
+  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  const charWidths  = stringToCharWidths(text, fontSize);
+  const length = sumOfNumbers(charWidths);
+  const remain = b.width(box) - length;
 }
 

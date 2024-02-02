@@ -7,11 +7,11 @@ export interface Box {
   bottom: number;
 }
 
-export function widthOf(box: Box): number {
+export function width(box: Box): number {
   return box.right - box.left;
 }
 
-export function heightOf(box: Box): number {
+export function height(box: Box): number {
   return box.bottom - box.top;
 }
 

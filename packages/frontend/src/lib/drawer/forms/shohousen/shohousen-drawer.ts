@@ -46,5 +46,5 @@ function drawTitle(ctx: DrawerContext, box: Box) {
   // compiler.textIn("(この処方せんは、どの保険薬局でも有効です。)", box2, HAlign.Center, VAlign.Top);
   box = b.modify(box, b.shiftDown(1), b.setLeft(51), b.setRight(93));
   c.setFont(ctx, "mincho-5");
-
+  c.drawTextJustified(ctx, "処方せん", box, "top");
 }

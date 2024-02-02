@@ -21,3 +21,11 @@ export function setFont(fsm: FontSizeManager, name: string) {
   }
   fsm.currentSize = size;
 }
+
+export function getCurrentFontSize(fsm: FontSizeManager): number {
+  const size = fsm.currentSize;
+  if( size === undefined ){
+    throw new Error("Cannot find current font size");
+  }
+  return size;
+}
