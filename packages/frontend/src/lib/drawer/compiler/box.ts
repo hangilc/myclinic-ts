@@ -19,10 +19,6 @@ export function paperSizeToBox(paperSize: PaperSize): Box {
   return { left: 0, top: 0, right: paperSize.width, bottom: paperSize.height };
 }
 
-export function inset(box: Box, dx: number, dy: number = dx): Box {
-  return { left: box.left + dx, top: box.top + dy, right: box.right - dx, bottom: box.bottom - dy };
-}
-
 export type Modifier = (src: Box) => Box;
 
 export function modify(box: Box, ...modifiers: Modifier[]): Box {
@@ -61,4 +57,13 @@ export function setRight(right: number): Modifier {
     right,
     bottom: box.bottom
   });
+}
+
+export function inset(dx: number, dy: number = dx): Modifier {
+  return box => ({
+    left: box.left + dx,
+    top: box.top + dy,
+    right : box.right - dx,
+    bottom: box.bottom - dy,
+  })
 }

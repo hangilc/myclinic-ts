@@ -1,6 +1,7 @@
 import type { DrawerContext } from "./context";
 import { FontWeightBold, FontWeightNormal } from "./font-weight";
 import type { Op } from "./op";
+import * as fsm from "./font-size-manager";
 
 export function getOps(ctx: DrawerContext): Op[] {
   return ctx.ops;
@@ -25,10 +26,12 @@ export function createFont(
     }
   }
   ctx.ops.push(["create_font", name, fontName, size, resolveWeight(), italic]);
+  fsm.registerFontSize(ctx.fsm, name, size);
 }
 
 export function setFont(ctx: DrawerContext, name: string) {
   ctx.ops.push(["set_font", name]);
+  fsm.setFont(ctx.fsm, name);
 }
 
 export function setTextColor(ctx: DrawerContext, r: number, g: number, b: number) {
