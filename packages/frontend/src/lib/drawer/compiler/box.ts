@@ -22,3 +22,43 @@ export function paperSizeToBox(paperSize: PaperSize): Box {
 export function inset(box: Box, dx: number, dy: number = dx): Box {
   return { left: box.left + dx, top: box.top + dy, right: box.right - dx, bottom: box.bottom - dy };
 }
+
+export type Modifier = (src: Box) => Box;
+
+export function modify(box: Box, ...modifiers: Modifier[]): Box {
+  modifiers.forEach(m => {
+    box = m(box);
+  });
+  return box;
+}
+
+export function shift(dx: number, dy: number): Modifier {
+  return box => ({
+    left: box.left + dx,
+    top: box.top + dy,
+    right: box.right + dx,
+    bottom: box.bottom + dy
+  });
+}
+
+export function shiftDown(dy: number): Modifier {
+  return shift(0, dy);
+}
+
+export function setLeft(left: number): Modifier {
+  return box => ({
+    left: left,
+    top: box.top,
+    right: box.right,
+    bottom: box.bottom,
+  })
+}
+
+export function setRight(right: number): Modifier {
+  return box => ({
+    left: box.left,
+    top: box.top,
+    right,
+    bottom: box.bottom
+  });
+}

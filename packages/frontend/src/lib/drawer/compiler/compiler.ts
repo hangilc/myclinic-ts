@@ -39,10 +39,16 @@ export function drawChars(ctx: DrawerContext, str: string, xs: number[], ys: num
   ctx.ops.push(["draw_chars", str, xs, ys]);
 }
 
-export type OpCreatePen = ["create_pen", name: string, r: number, g: number, b: number, width: number, penStyle: number[]];
-
 export function createPen(ctx: DrawerContext, name: string, r: number, g: number, b: number,
   width: number, penStyle: number[] = []) {
     ctx.ops.push(["create_pen", name, r, g, b, width, penStyle])
+}
+
+export function setPen(ctx: DrawerContext, name: string) {
+  ctx.ops.push(["set_pen", name]);
+}
+
+export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
+  ctx.ops.push(["circle", x, y, r]);
 }
 
