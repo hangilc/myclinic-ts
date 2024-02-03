@@ -47,6 +47,7 @@ function drawHoken(ctx: DrawerContext, box: Box) {
   b.withSplitRows(box, b.evenSplitter(2), ([r1, r2]) => {
     r1 = b.modify(r1, b.setWidth(59, "left"));
     c.rect(ctx, r1);
+    c.rect(ctx, r2);
     b.withSplitColumns(r1, b.splitAt(leftColumnWidth), ([c1, c2]) => {
       drawHokenRow1(ctx, c1, c2);
     });
@@ -65,5 +66,11 @@ function drawHokenRow1(ctx: DrawerContext, c1: Box, c2: Box) {
 }
 
 function drawHokenRow2(ctx: DrawerContext, c1: Box, c2: Box) {
-
+  c.frameRight(ctx, c1);
+  c.setFont(ctx, "mincho-1.4");
+  b.withSplitRows(c1, b.evenSplitter(2), ([r1, r2]) => {
+    c.drawTextJustified(ctx, "被保険者証・被保険", r1, "center");
+    c.drawTextJustified(ctx, "者手帳の記号・番号", r2, "center");
+  });
+  c.mark(ctx, "hihokenshaBox", c2);
 }
