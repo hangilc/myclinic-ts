@@ -3,7 +3,7 @@ import { FontWeightBold, FontWeightNormal } from "./font-weight";
 import type { Op } from "./op";
 import * as fsm from "./font-size-manager";
 import * as b from "./box";
-import type { Box } from "./box";
+import type { Box, Splitter } from "./box";
 import type { HAlign, VAlign } from "./align";
 import { stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
@@ -58,6 +58,10 @@ export function setPen(ctx: DrawerContext, name: string) {
 
 export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
+}
+
+export function mark(ctx: DrawerContext, key: string, box: Box) {
+  ctx.marks[key] = box;
 }
 
 function locateY(box: Box, fontSize: number,  valign: VAlign) {
@@ -132,5 +136,32 @@ export function rect(ctx: DrawerContext, box: Box) {
   lineTo(ctx, box.right, box.bottom);
   lineTo(ctx, box.left, box.bottom);
   lineTo(ctx, box.left, box.top);
+}
+
+export function frameRight(ctx: DrawerContext, box: Box) {
+  moveTo(ctx, box.right, box.top);
+  lineTo(ctx, box.right, box.bottom);
+}
+
+export function frameLeft(ctx: DrawerContext, box: Box) {
+  moveTo(ctx, box.left, box.top);
+  lineTo(ctx, box.left, box.bottom);
+}
+
+export function frameTop(ctx: DrawerContext, box: Box) {
+  moveTo(ctx, box.left, box.top);
+  lineTo(ctx, box.right, box.top);
+}
+
+export function frameBottom(ctx: DrawerContext, box: Box) {
+  moveTo(ctx, box.left, box.bottom);
+  lineTo(ctx, box.right, box.bottom);
+}
+
+export function frameInnerColumnBorders(ctx: DrawerContext, box: Box, splitter: Splitter) {
+  splitter(b.width(box)).forEach(at => {
+    moveTo(ctx, box.left + at, box.top);
+    lineTo(ctx, box.left + at, box.bottom);
+  })
 }
 
