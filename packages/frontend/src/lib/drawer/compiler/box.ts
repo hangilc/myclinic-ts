@@ -77,7 +77,21 @@ export function shrinkHoriz(shrinkLeft: number, shrinkRight: number): Modifier {
   return offset(shrinkLeft, 0, -shrinkRight, 0);
 }
 
+export function setWidth(w: number, anchor: "left" | "center" | "right" ): Modifier {
+  return box => {
+    switch(anchor){
+      case "left": return Object.assign({}, box, { right: box.left + w});
+      case "center": return Object.assign({}, box, { left: cx(box) - w/2.0, right: cx(box) + w/2.0});
+      case "right": return Object.assign({}, box, { left: box.right - w})
+    }
+  }
+}
+
 export type Splitter = (ext: number) => number[];
+
+export function splitAt(...at: number[]): Splitter {
+  return (_) => at;
+}
 
 export function evenSplitter(n: number): Splitter {
   return ext => {
@@ -114,4 +128,16 @@ export function splitToRows(box: Box, splitter: Splitter): Box[] {
   }
   cols.push(Object.assign({}, box, { top, }));
   return cols;
+}
+
+export function withSplitColumns(box: Box, splitter: Splitter, f: (cols: Box[]) => void): Box[] {
+  const cols = splitToColumns(box, splitter);
+  f(cols);
+  return cols;
+}
+
+export function withSplitRows(box: Box, splitter: Splitter, f: (rows: Box[]) => void): Box[] {
+  const rows = splitToRows(box, splitter);
+  f(rows);
+  return rows;
 }
