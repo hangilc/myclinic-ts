@@ -12,7 +12,10 @@ export function drawChoizai1(ctx: DrawerContext, box: Box) {
   c.setFont(ctx, "mincho-2");
   c.drawTextJustified(ctx, "調剤年月日", b.modify(layout.chouzaiLabel, b.inset(1, 0)), "center");
   drawChoizaiDate(ctx, layout.chouzai);
+  c.setFont(ctx, "mincho-1.5");
+  c.drawTextJustified(ctx, "公費負担者番号", b.modify(layout.kouhiLabel, b.inset(0.5, 0)), "center");
   c.drawVertLines(ctx, layout.kouhi, b.evenSplitter(8));
+  c.mark(ctx, "futanshaBangou2Box", layout.kouhi);
 }
 
 function drawChoizaiDate(ctx: DrawerContext, box: Box) {
