@@ -7,6 +7,9 @@ import { drawTopBox } from "./top-box";
 import { mkLayout, mkMainLayout } from "./layout";
 import { drawPatientClinic } from "./patient-clinic";
 import { drawIssue } from "./issue";
+import { drawDrugs } from "./drugs";
+import { drawMemo } from "./memo";
+import { drawChoizai1 } from "./chouzai1";
 
 export function drawShohousen(): Op[] {
   const layout = mkLayout();
@@ -21,6 +24,9 @@ export function drawShohousen(): Op[] {
   drawTopBox(ctx, layout.kouhiHoken);
   drawPatientClinic(ctx, mainLayout.patientClinic);
   drawIssue(ctx, mainLayout.issue);
+  drawDrugs(ctx, mainLayout.drugs);
+  drawMemo(ctx, mainLayout.memo);
+  drawChoizai1(ctx, mainLayout.chouzai1);
   return c.getOps(ctx);
 }
 

@@ -246,3 +246,10 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
   });
   return marks;
 }
+
+export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) {
+  splitter(b.width(box)).forEach(at => {
+    moveTo(ctx, box.left + at, box.top);
+    lineTo(ctx, box.left + at, box.bottom);
+  });
+}
