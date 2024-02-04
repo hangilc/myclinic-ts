@@ -9,7 +9,8 @@ import { drawPatientClinic } from "./patient-clinic";
 import { drawIssue } from "./issue";
 import { drawDrugs } from "./drugs";
 import { drawMemo } from "./memo";
-import { drawChoizai1 } from "./chouzai1";
+import { drawChouzai1 } from "./chouzai1";
+import { drawChouzai2 } from "./chouzai2";
 
 export function drawShohousen(): Op[] {
   const layout = mkLayout();
@@ -26,7 +27,8 @@ export function drawShohousen(): Op[] {
   drawIssue(ctx, mainLayout.issue);
   drawDrugs(ctx, mainLayout.drugs);
   drawMemo(ctx, mainLayout.memo);
-  drawChoizai1(ctx, mainLayout.chouzai1);
+  drawChouzai1(ctx, mainLayout.chouzai1);
+  drawChouzai2(ctx, mainLayout.chouzai2);
   return c.getOps(ctx);
 }
 

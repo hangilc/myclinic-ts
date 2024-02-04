@@ -3,7 +3,7 @@ import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import type { DrawerContext } from "../../compiler/context";
 
-export function drawChoizai1(ctx: DrawerContext, box: Box) {
+export function drawChouzai1(ctx: DrawerContext, box: Box) {
   const layout = b.withSplitColumns(box, b.splitAt(14.5, 82, 95.5), cs => {
     return { chouzaiLabel: cs[0], chouzai: cs[1], kouhiLabel: cs[2], kouhi: cs[3] }
   });
