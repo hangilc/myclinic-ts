@@ -2,21 +2,23 @@ import type { Op } from "../../compiler/op";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import * as b from "../../compiler/box";
 import type { Box } from "../../compiler/box";
-import { A5 } from "../../compiler/paper-size";
 import * as c from "../../compiler/compiler";
 import { drawTopBox } from "./top-box";
+import { mkLayout, mkMainLayout } from "./layout";
+import { drawPatientClinic } from "./patient-clinic";
 
 export function drawShohousen(): Op[] {
+  const layout = mkLayout();
+  const mainLayout = mkMainLayout(layout.main);
   const ctx = mkDrawerContext();
   initFont(ctx);
-  const paperBox = b.paperSizeToBox(A5);
-  const outerBox = b.modify(paperBox, b.inset(3));
   c.setTextColor(ctx, 0, 255, 0);
   c.createPen(ctx, "default-pen", 0, 255, 0, 0.16);
+  c.createPen(ctx, "layout", 0, 0, 0, 0.20);
   c.setPen(ctx, "default-pen");
-  drawTitle(ctx, outerBox);
-  const r = b.modify(outerBox, b.shiftDown(13), b.sliceTop(10.5))
-  drawTopBox(ctx, r);
+  drawTitle(ctx, layout.title);
+  drawTopBox(ctx, layout.kouhiHoken);
+  drawPatientClinic(ctx, mainLayout.patientClinic);
   return c.getOps(ctx);
 }
 

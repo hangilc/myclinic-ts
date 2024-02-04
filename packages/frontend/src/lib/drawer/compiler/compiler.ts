@@ -73,6 +73,15 @@ function locateY(box: Box, fontSize: number,  valign: VAlign) {
   }
 }
 
+function locateX(box: Box, fontSize: number, halign: HAlign) {
+  switch(halign){
+    case "left": return box.left;
+    case "center": return b.cx(box) - fontSize / 2.0;
+    case "right": return box.right - fontSize;
+    default: throw new Error("`unknown halign: ${halign}");
+  }
+}
+
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   const charWidths  = stringToCharWidths(text, fontSize);
@@ -96,6 +105,32 @@ export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, va
     xs.push(x);
     ys.push(y);
     x += charWidths[i];
+  }
+  drawChars(ctx, text, xs, ys);
+}
+
+export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, box: Box, halign: HAlign) {
+  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  const x = locateX(box, fontSize, halign);
+  if( text.length === 0 ){
+    return;
+  } else if( text.length === 1 ){
+    drawChars(ctx, text, [x], [box.top]);
+    return;
+  }
+  const length = text.length * fontSize;
+  const remain = b.height(box) - length;
+  const gap = remain / (text.length - 1);
+  let y = box.top;
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for(let i=0;i<text.length;i++){
+    if( i > 0 ){
+      y += gap;
+    }
+    xs.push(x);
+    ys.push(y);
+    y += fontSize;
   }
   drawChars(ctx, text, xs, ys);
 }
@@ -165,3 +200,49 @@ export function frameInnerColumnBorders(ctx: DrawerContext, box: Box, splitter: 
   })
 }
 
+export function textWidth(ctx: DrawerContext, text: string): number {
+  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  const charWidths  = stringToCharWidths(text, fontSize);
+  return sumOfNumbers(charWidths);
+}
+
+export interface CompositeMarkTo {
+  kind: "mark-to";
+  at: number;
+}
+
+export interface CompositeText {
+  kind: "text";
+  text: string;
+}
+
+export interface CompositeGap {
+  kind: "gap";
+  width: number;
+}
+
+export type CompositeItem = CompositeMarkTo | CompositeText | CompositeGap;
+
+export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[]): Box[] {
+  let pos = 0;
+  let marks: Box[] = [];
+  comps.forEach(item => {
+    switch(item.kind) {
+      case "mark-to": {
+        marks.push(Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
+        pos = item.at;
+          break;
+      }
+      case "text": {
+        drawText(ctx, item.text, b.modify(box, b.inset(pos, 0)), "left", "center");
+        pos += textWidth(ctx, item.text);
+        break;
+      }
+      case "gap": {
+        pos += item.width;
+        break;
+      }
+    }
+  });
+  return marks;
+}

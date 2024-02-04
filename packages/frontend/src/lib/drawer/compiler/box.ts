@@ -104,6 +104,18 @@ export function evenSplitter(n: number): Splitter {
   }
 }
 
+export function splitWidths(...widths: number[]): Splitter {
+  return (_) => {
+    const at: number[] = [];
+    let c = 0;
+    widths.forEach(w => {
+      c += w;
+      at.push(c);
+    })
+    return at;
+  }
+}
+
 export function splitToColumns(box: Box, splitter: Splitter): Box[] {
   const at: number[] = splitter(width(box));
   const cols: Box[] = [];
@@ -130,14 +142,10 @@ export function splitToRows(box: Box, splitter: Splitter): Box[] {
   return cols;
 }
 
-export function withSplitColumns(box: Box, splitter: Splitter, f: (cols: Box[]) => void): Box[] {
-  const cols = splitToColumns(box, splitter);
-  f(cols);
-  return cols;
+export function withSplitColumns<T>(box: Box, splitter: Splitter, f: (cols: Box[]) => T): T {
+  return f(splitToColumns(box, splitter));
 }
 
-export function withSplitRows(box: Box, splitter: Splitter, f: (rows: Box[]) => void): Box[] {
-  const rows = splitToRows(box, splitter);
-  f(rows);
-  return rows;
+export function withSplitRows<T>(box: Box, splitter: Splitter, f: (rows: Box[]) => T): T {
+  return f(splitToRows(box, splitter));
 }
