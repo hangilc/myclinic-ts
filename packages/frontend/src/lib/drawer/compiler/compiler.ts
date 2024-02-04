@@ -7,9 +7,28 @@ import type { Box, Splitter } from "./box";
 import type { HAlign, VAlign } from "./align";
 import { stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
+import { scaleOp } from "./scale";
 
-export function getOps(ctx: DrawerContext): Op[] {
-  return ctx.ops;
+export interface GetOpsOpt {
+  scale?: number;
+  offsetX?: number;
+  offsetY?: number;
+}
+
+export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
+  const scale = opt.scale ?? 1;
+  const offsetX = opt.offsetX ?? 0;
+  const offsetY = opt.offsetY ?? 0;
+  if( scale === 1 && offsetX === 0 && offsetY === 0 ){
+    return ctx.ops;
+  } else {
+    let ops = ctx.ops;
+    if( scale !== 1 ){
+      ops = ops.map(op => scaleOp(op, scale));
+    }
+    return ops;
+  }
+  
 }
 
 export function moveTo(ctx: DrawerContext, x: number, y: number) {

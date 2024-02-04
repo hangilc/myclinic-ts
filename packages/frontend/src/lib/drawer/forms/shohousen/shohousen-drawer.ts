@@ -31,7 +31,7 @@ export function drawShohousen(): Op[] {
   drawChouzai1(ctx, mainLayout.chouzai1);
   drawChouzai2(ctx, mainLayout.chouzai2);
   drawPharmacy(ctx, layout.pharma);
-  return c.getOps(ctx);
+  return c.getOps(ctx, { scale: 0.962 });
 }
 
 function initFont(ctx: DrawerContext) {

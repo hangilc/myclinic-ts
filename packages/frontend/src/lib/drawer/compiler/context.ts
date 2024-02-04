@@ -8,7 +8,7 @@ export interface DrawerContext {
   marks: Record<string, Box>;
 }
 
-export function mkDrawerContext() {
+export function mkDrawerContext(): DrawerContext {
   return {
     ops: [],
     fsm: mkFontManager(),
