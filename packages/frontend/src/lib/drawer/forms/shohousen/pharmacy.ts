@@ -31,5 +31,20 @@ function drawLeft(ctx: DrawerContext, box: Box) {
 }
 
 function drawRight(ctx: DrawerContext, box: Box) {
-
+  const layout = b.withSplitRows(box, b.splitAt(3, 10, 13), rs => {
+    return { label1: rs[0], r1: rs[1], label2: rs[2], r2: rs[3] };
+  });
+  [layout.r1, layout.label2, layout.r2].forEach(box => c.frameTop(ctx, box));
+  c.drawVertLines(ctx, box, b.splitAt(19.5, 39));
+  c.setFont(ctx, "mincho-2");
+  b.withSplitColumns(layout.label1, b.splitAt(19.5, 39), cs => {
+    c.drawTextJustified(ctx, "調剤基本料", b.modify(cs[0], b.inset(2, 0)), "center");
+    c.drawTextJustified(ctx, "管理指導料", b.modify(cs[1], b.inset(2, 0)), "center");
+    c.drawTextJustified(ctx, "総合計", b.modify(cs[2], b.inset(2, 0)), "center");
+  });
+  b.withSplitColumns(layout.label2, b.splitAt(19.5, 39), cs => {
+    c.drawTextJustified(ctx, "患者負担金", b.modify(cs[0], b.inset(2, 0)), "center");
+    c.drawTextJustified(ctx, "請求金額", b.modify(cs[1], b.inset(2, 0)), "center");
+    c.drawTextJustified(ctx, "調剤済印", b.modify(cs[2], b.inset(2, 0)), "center");
+  })
 }
