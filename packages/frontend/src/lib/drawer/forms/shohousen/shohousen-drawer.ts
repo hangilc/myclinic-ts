@@ -6,6 +6,7 @@ import * as c from "../../compiler/compiler";
 import { drawTopBox } from "./top-box";
 import { mkLayout, mkMainLayout } from "./layout";
 import { drawPatientClinic } from "./patient-clinic";
+import { drawIssue } from "./issue";
 
 export function drawShohousen(): Op[] {
   const layout = mkLayout();
@@ -19,6 +20,7 @@ export function drawShohousen(): Op[] {
   drawTitle(ctx, layout.title);
   drawTopBox(ctx, layout.kouhiHoken);
   drawPatientClinic(ctx, mainLayout.patientClinic);
+  drawIssue(ctx, mainLayout.issue);
   return c.getOps(ctx);
 }
 

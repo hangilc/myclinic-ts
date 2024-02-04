@@ -107,7 +107,5 @@ function drawClinic(ctx: DrawerContext, box: Box) {
     c.drawTextJustified(ctx, "保険医氏名", label, "center");
     c.mark(ctx, "clinicDoctorBox", info);
     c.drawText(ctx, "印", b.modify(hanko, b.shift(1.5, 0)), "left", "center");
-    c.setPen(ctx, "layout");
-    c.rect(ctx, info);
   })(layout.lower);
 }

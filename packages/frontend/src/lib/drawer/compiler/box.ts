@@ -99,7 +99,6 @@ export function evenSplitter(n: number): Splitter {
     for(let i=1;i<n;i++){
       at.push(ext * i / n);
     }
-    console.log("split", ext, at);
     return at;
   }
 }
