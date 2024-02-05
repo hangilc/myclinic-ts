@@ -71,6 +71,7 @@
       clinicPhone: clinicInfo.tel,
       clinicKikancode: clinicInfo.kikancode,
       doctorName: clinicInfo.doctorName,
+      hokenshaBangou: "1234567",
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,

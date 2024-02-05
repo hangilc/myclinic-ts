@@ -14,7 +14,7 @@ import { drawChouzai2 } from "./chouzai2";
 import { drawPharmacy } from "./pharmacy";
 import { drawData, type ShohousenData } from "./data";
 
-export function drawShohousen(data: ShohousenData): Op[] {
+export function drawShohousen(data: ShohousenData = {}): Op[] {
   const layout = mkLayout();
   const mainLayout = mkMainLayout(layout.main);
   const ctx = mkDrawerContext();

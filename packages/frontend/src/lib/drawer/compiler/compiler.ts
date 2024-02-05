@@ -20,19 +20,19 @@ export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
   const scale = opt.scale ?? 1;
   const offsetX = opt.offsetX ?? 0;
   const offsetY = opt.offsetY ?? 0;
-  if( scale === 1 && offsetX === 0 && offsetY === 0 ){
+  if (scale === 1 && offsetX === 0 && offsetY === 0) {
     return ctx.ops;
   } else {
     let ops = ctx.ops;
-    if( scale !== 1 ){
+    if (scale !== 1) {
       ops = ops.map(op => scaleOp(op, scale));
     }
-    if( offsetX !== 0 || offsetY !== 0 ){
+    if (offsetX !== 0 || offsetY !== 0) {
       ops = ops.map(op => offsetOp(op, offsetX, offsetY))
     }
     return ops;
   }
-  
+
 }
 
 export function moveTo(ctx: DrawerContext, x: number, y: number) {
@@ -72,7 +72,7 @@ export function drawChars(ctx: DrawerContext, str: string, xs: number[], ys: num
 
 export function createPen(ctx: DrawerContext, name: string, r: number, g: number, b: number,
   width: number, penStyle: number[] = []) {
-    ctx.ops.push(["create_pen", name, r, g, b, width, penStyle])
+  ctx.ops.push(["create_pen", name, r, g, b, width, penStyle])
 }
 
 export function setPen(ctx: DrawerContext, name: string) {
@@ -89,14 +89,14 @@ export function mark(ctx: DrawerContext, key: string, box: Box) {
 
 export function getMark(ctx: DrawerContext, key: string): Box {
   const mark = ctx.marks[key];
-  if( !mark ){
+  if (!mark) {
     throw new Error(`Cannot find mark: ${key}.`);
   }
   return mark;
 }
 
-function locateY(box: Box, fontSize: number,  valign: VAlign) {
-  switch(valign){
+function locateY(box: Box, fontSize: number, valign: VAlign) {
+  switch (valign) {
     case "top": return box.top;
     case "center": return b.cy(box) - fontSize / 2.0;
     case "bottom": return box.bottom - fontSize;
@@ -105,7 +105,7 @@ function locateY(box: Box, fontSize: number,  valign: VAlign) {
 }
 
 function locateX(box: Box, fontSize: number, halign: HAlign) {
-  switch(halign){
+  switch (halign) {
     case "left": return box.left;
     case "center": return b.cx(box) - fontSize / 2.0;
     case "right": return box.right - fontSize;
@@ -115,11 +115,11 @@ function locateX(box: Box, fontSize: number, halign: HAlign) {
 
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  const charWidths  = stringToCharWidths(text, fontSize);
+  const charWidths = stringToCharWidths(text, fontSize);
   const y = locateY(box, fontSize, valign);
-  if( charWidths.length === 0 ){
+  if (charWidths.length === 0) {
     return;
-  } else if( charWidths.length === 1 ){
+  } else if (charWidths.length === 1) {
     drawChars(ctx, text, [box.left], [y]);
     return;
   }
@@ -129,8 +129,8 @@ export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, va
   let x = box.left;
   let xs: number[] = [];
   let ys: number[] = [];
-  for(let i=0;i<charWidths.length;i++){
-    if( i > 0 ){
+  for (let i = 0; i < charWidths.length; i++) {
+    if (i > 0) {
       x += gap;
     }
     xs.push(x);
@@ -143,9 +143,9 @@ export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, va
 export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, box: Box, halign: HAlign) {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   const x = locateX(box, fontSize, halign);
-  if( text.length === 0 ){
+  if (text.length === 0) {
     return;
-  } else if( text.length === 1 ){
+  } else if (text.length === 1) {
     drawChars(ctx, text, [x], [box.top]);
     return;
   }
@@ -155,8 +155,8 @@ export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, bo
   let y = box.top;
   const xs: number[] = [];
   const ys: number[] = [];
-  for(let i=0;i<text.length;i++){
-    if( i > 0 ){
+  for (let i = 0; i < text.length; i++) {
+    if (i > 0) {
       y += gap;
     }
     xs.push(x);
@@ -168,11 +168,11 @@ export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, bo
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign) {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  const charWidths  = stringToCharWidths(text, fontSize);
+  const charWidths = stringToCharWidths(text, fontSize);
   const length = sumOfNumbers(charWidths);
   const y = locateY(box, fontSize, valign);
   let x: number;
-  switch(halign){
+  switch (halign) {
     case "left": {
       x = box.left;
       break;
@@ -188,12 +188,26 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
   }
   const xs: number[] = [];
   const ys: number[] = [];
-  for(let i=0;i<charWidths.length;i++){
+  for (let i = 0; i < charWidths.length; i++) {
     xs.push(x);
     ys.push(y);
     x += charWidths[i];
   }
   drawChars(ctx, text, xs, ys);
+}
+
+export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box, ncol: number,
+  justify: "left" | "right" = "left") {
+  let start = 0;
+  if (justify === "right") {
+    start = ncol - text.length;
+  }
+  const cols = b.splitToColumns(box, b.evenSplitter(ncol));
+  for(let i=0;i<text.length;i++){
+    const ch = text.charAt(i);
+    drawText(ctx, ch, cols[start], "center", "center");
+    start += 1;
+  }
 }
 
 export function rect(ctx: DrawerContext, box: Box) {
@@ -233,7 +247,7 @@ export function frameInnerColumnBorders(ctx: DrawerContext, box: Box, splitter: 
 
 export function textWidth(ctx: DrawerContext, text: string): number {
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  const charWidths  = stringToCharWidths(text, fontSize);
+  const charWidths = stringToCharWidths(text, fontSize);
   return sumOfNumbers(charWidths);
 }
 
@@ -258,11 +272,11 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
   let pos = 0;
   let marks: Box[] = [];
   comps.forEach(item => {
-    switch(item.kind) {
+    switch (item.kind) {
       case "mark-to": {
         marks.push(Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
         pos = item.at;
-          break;
+        break;
       }
       case "text": {
         drawText(ctx, item.text, b.modify(box, b.inset(pos, 0)), "left", "center");
