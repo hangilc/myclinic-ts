@@ -79,8 +79,8 @@ function drawSex(ctx: DrawerContext, box: Box) {
   c.drawText(ctx, "男", male, "center", "center");
   c.drawText(ctx, "・", dot, "center", "center");
   c.drawText(ctx, "女", female, "center", "center");
-  c.mark(ctx, "patientMaleBox", male);
-  c.mark(ctx, "patientFemaleBox", female);
+  c.mark(ctx, "sexMaleBox", male);
+  c.mark(ctx, "sexFemaleBox", female);
 }
 
 function drawClinic(ctx: DrawerContext, box: Box) {

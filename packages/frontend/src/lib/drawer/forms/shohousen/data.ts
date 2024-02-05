@@ -18,6 +18,8 @@ export interface ShohousenData {
   futansha2?: string;
   jukyuusha2?: string;
   shimei?: string;
+  birthdate?: string; // YYYY-MM-DD
+  sex?: string; // "M" or "F"
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
@@ -35,6 +37,12 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
   drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangou2Box"), data.futansha2 ?? "");
   drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangou2Box"), data.jukyuusha2 ?? "");
   drawShimei(ctx, c.getMark(ctx, "patientNameBox"), data.shimei ?? "");
+  drawBirthDate(ctx, 
+    c.getMark(ctx, "birthdayYearBox"), 
+    c.getMark(ctx, "birthdayMonthBox"), 
+    c.getMark(ctx, "birthdayDayBox"), 
+    data.birthdate ?? "");
+  drawSex(ctx, c.getMark(ctx, "sexMaleBox"), c.getMark(ctx, "sexFemaleBox"), data.sex ?? "");
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -118,3 +126,25 @@ function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
   }
 }
 
+function drawBirthDate(ctx: DrawerContext, yearBox: Box, monthBox: Box, dayBox: Box, birthdate: string) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(birthdate);
+  if( m ){
+    const year = m[1];
+    const month = m[2].replace(/^0/, "");
+    const day = m[3].replace(/^0/, "");
+    c.setFont(ctx, "gothic-2.5");
+    c.drawText(ctx, year, yearBox, "right", "center");
+    c.drawText(ctx, month, monthBox, "right", "center");
+    c.drawText(ctx, day, dayBox, "right", "center");
+  }
+}
+
+function drawSex(ctx: DrawerContext, maleBox: Box, femaleBox: Box, sex: string) {
+  if( sex === "M" ){
+    c.setFont(ctx, "gothic-3");
+    c.drawText(ctx, "○", maleBox, "center", "center");
+  } else if( sex === "F" ){
+    c.setFont(ctx, "gothic-3");
+    c.drawText(ctx, "○", femaleBox, "center", "center");
+  }
+}

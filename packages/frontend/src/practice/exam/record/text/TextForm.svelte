@@ -77,6 +77,8 @@
       futansha2: "23456789",
       jukyuusha2: "6543210",
       shimei: "田中隆",
+      birthdate: "1957-06-12",
+      sex: "M",
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
