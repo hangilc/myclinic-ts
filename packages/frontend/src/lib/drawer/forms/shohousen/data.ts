@@ -1,3 +1,4 @@
+import { hokenshaBangouRep } from "@/lib/hoken-rep";
 import type { Box } from "../../compiler/box";
 import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
@@ -10,6 +11,12 @@ export interface ShohousenData {
   clinicKikancode?: string;
   doctorName?: string;
   hokenshaBangou?: string;
+  hihokensha?: string;
+  futansha?: string;
+  jukyuusha?: string;
+  futansha2?: string;
+  jukyuusha2?: string;
+  shimei?: string;
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
@@ -21,6 +28,12 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
   drawDoctorName(ctx, c.getMark(ctx, "clinicDoctorBox"), data.doctorName ?? "");
   c.setTextColor(ctx, 0, 0, 0);
   drawHokenshaBangou(ctx, c.getMark(ctx, "hokenshaBangouBox"), data.hokenshaBangou ?? "");
+  drawHihokensha(ctx, c.getMark(ctx, "hihokenshaBox"), data.hihokensha ?? "");
+  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangouBox"), data.futansha ?? "");
+  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangouBox"), data.jukyuusha ?? "");
+  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangou2Box"), data.futansha2 ?? "");
+  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangou2Box"), data.jukyuusha2 ?? "");
+  drawShimei(ctx, c.getMark(ctx, "patientNameBox"), data.shimei ?? "");
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -48,8 +61,48 @@ function drawDoctorName(ctx: DrawerContext, box: Box, name: string) {
   c.drawText(ctx, name, box, "right", "top");
 }
 
-function drawHokenshaBangou(ctx: DrawerContext, box: Box, bangou: string) {
-  c.setFont(ctx, "gothic-4");
-  c.drawTextInEvenColumns(ctx, bangou, box, 8, "right");
-
+function normalizeHokenshaBangou(bangou: string): string {
+  if (bangou.length <= 6) {
+    return "0".repeat(6 - bangou.length) + bangou;
+  } else if( bangou.length <= 8) {
+    return "0".repeat(8 - bangou.length) + bangou;
+  } else {
+    throw new Error(`Invalid hokenshaBangou: ${bangou}.`);
+  }
 }
+
+function drawHokenshaBangou(ctx: DrawerContext, box: Box, bangou: string) {
+  bangou = bangou.trim();
+  if (bangou) {
+    bangou = normalizeHokenshaBangou(bangou);
+    c.setFont(ctx, "gothic-4");
+    c.drawTextInEvenColumns(ctx, bangou, box, 8, "right");
+  }
+}
+
+function drawHihokensha(ctx: DrawerContext, box: Box, hihokensha: string) {
+  box = b.modify(box, b.shrinkHoriz(5, 0));
+  c.setFont(ctx, "gothic-4");
+  c.drawText(ctx, hihokensha, box, "left", "center");
+}
+
+function drawKouhiFutansha(ctx: DrawerContext, box: Box, futansha: string) {
+  if( futansha !== "" ){
+    c.setFont(ctx, "gothic-4");
+    c.drawTextInEvenColumns(ctx, futansha, box, 8, "right");
+  }
+}
+
+function drawKouhiJukyuusha(ctx: DrawerContext, box: Box, jukyuusha: string) {
+  if( jukyuusha !== "" ){
+    c.setFont(ctx, "gothic-4");
+    c.drawTextInEvenColumns(ctx, jukyuusha, box, 7, "right");
+  }
+}
+
+function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
+  box = b.modify(box, b.shrinkHoriz(2, 0));
+  c.setFont(ctx, "mincho-4.5");
+  c.drawText(ctx, shimei, box, "left", "center");
+}
+

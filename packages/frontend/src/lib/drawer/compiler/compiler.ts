@@ -198,6 +198,7 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
 
 export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box, ncol: number,
   justify: "left" | "right" = "left") {
+    console.log("even", text, ncol);
   let start = 0;
   if (justify === "right") {
     start = ncol - text.length;

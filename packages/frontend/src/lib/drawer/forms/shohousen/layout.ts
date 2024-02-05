@@ -12,7 +12,6 @@ export interface Layout {
 
 export function mkLayout(): Layout {
   const wrap = b.modify(b.paperSizeToBox(A5), b.inset(3));
-  console.log("wrap", wrap);
   let [title, kouhiHoken, , main, , pharma] = b.splitToRows(wrap, b.splitWidths(
     13, 10.5, 2, 154.5, 1, 24.5));
   return { wrap, title, kouhiHoken, main, pharma };

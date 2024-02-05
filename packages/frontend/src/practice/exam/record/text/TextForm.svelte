@@ -63,15 +63,20 @@
   let ops: Op[] = [];
 
   async function doPrintShohousen() {
-    // ops = await api.shohousenDrawer(text.textId);
     const clinicInfo = await api.getClinicInfo();
     const ops = drawShohousen({
       clinicAddress: clinicInfo.address,
       clinicName: clinicInfo.name,
-      clinicPhone: clinicInfo.tel,
+      clinicPhone: `電話 ${clinicInfo.tel}`,
       clinicKikancode: clinicInfo.kikancode,
       doctorName: clinicInfo.doctorName,
       hokenshaBangou: "1234567",
+      hihokensha: "チナフ・234",
+      futansha: "12345678",
+      jukyuusha: "7654321",
+      futansha2: "23456789",
+      jukyuusha2: "6543210",
+      shimei: "田中隆",
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
