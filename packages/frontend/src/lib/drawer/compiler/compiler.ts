@@ -113,8 +113,12 @@ function locateX(box: Box, fontSize: number, halign: HAlign) {
   }
 }
 
+export function currentFontSize(ctx: DrawerContext): number {
+  return fsm.getCurrentFontSize(ctx.fsm);
+}
+
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
-  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  const fontSize = currentFontSize(ctx);
   const charWidths = stringToCharWidths(text, fontSize);
   const y = locateY(box, fontSize, valign);
   if (charWidths.length === 0) {
@@ -209,6 +213,15 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
     drawText(ctx, ch, cols[start], "center", "center");
     start += 1;
   }
+}
+
+export function drawLines(ctx: DrawerContext, lines: string[], box: Box) {
+  const fontSize = currentFontSize(ctx);
+  let r = b.modify(box, b.sliceTop(fontSize));
+  lines.forEach(line => {
+    drawText(ctx, line, r, "left", "top");
+    r = b.modify(r, b.shift(0, fontSize));
+  })
 }
 
 export function rect(ctx: DrawerContext, box: Box) {

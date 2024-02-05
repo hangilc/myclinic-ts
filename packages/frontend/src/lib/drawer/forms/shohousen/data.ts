@@ -3,6 +3,7 @@ import type { Box } from "../../compiler/box";
 import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import type { DrawerContext } from "../../compiler/context";
+import { breakLines } from "../../compiler/break-lines";
 
 export interface ShohousenData {
   clinicAddress?: string;
@@ -101,8 +102,19 @@ function drawKouhiJukyuusha(ctx: DrawerContext, box: Box, jukyuusha: string) {
 }
 
 function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
-  box = b.modify(box, b.shrinkHoriz(2, 0));
+  box = b.modify(box, b.shrinkHoriz(2, 2));
   c.setFont(ctx, "mincho-4.5");
-  c.drawText(ctx, shimei, box, "left", "center");
+  let lines = breakLines(shimei, c.currentFontSize(ctx), b.width(box));
+  if( lines.length === 0 ){
+    return;
+  } else if( lines.length === 1 ){
+    c.drawText(ctx, shimei, box, "left", "center");
+  } else if ( lines.length === 2 ){
+    c.drawLines(ctx, lines, box);
+  } else {
+    c.setFont(ctx, "mincho-2.5");
+    lines = breakLines(shimei, c.currentFontSize(ctx), b.width(box));
+    c.drawLines(ctx, lines, box);
+  }
 }
 
