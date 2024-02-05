@@ -8,6 +8,7 @@ import type { HAlign, VAlign } from "./align";
 import { stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
 import { scaleOp } from "./scale";
+import { offsetOp } from "./offset";
 
 export interface GetOpsOpt {
   scale?: number;
@@ -25,6 +26,9 @@ export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
     let ops = ctx.ops;
     if( scale !== 1 ){
       ops = ops.map(op => scaleOp(op, scale));
+    }
+    if( offsetX !== 0 || offsetY !== 0 ){
+      ops = ops.map(op => offsetOp(op, offsetX, offsetY))
     }
     return ops;
   }
