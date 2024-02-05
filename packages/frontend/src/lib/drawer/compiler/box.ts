@@ -77,6 +77,10 @@ export function shrinkHoriz(shrinkLeft: number, shrinkRight: number): Modifier {
   return offset(shrinkLeft, 0, -shrinkRight, 0);
 }
 
+export function shrinkVert(shrinkTop: number, shrinkBottom: number): Modifier {
+  return offset(0, shrinkTop, 0, -shrinkBottom);
+}
+
 export function setWidth(w: number, anchor: "left" | "center" | "right" ): Modifier {
   return box => {
     switch(anchor){

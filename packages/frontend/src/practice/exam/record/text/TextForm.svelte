@@ -64,7 +64,14 @@
 
   async function doPrintShohousen() {
     // ops = await api.shohousenDrawer(text.textId);
-    const ops = drawShohousen();
+    const clinicInfo = await api.getClinicInfo();
+    const ops = drawShohousen({
+      clinicAddress: clinicInfo.address,
+      clinicName: clinicInfo.name,
+      clinicPhone: clinicInfo.tel,
+      clinicKikancode: clinicInfo.kikancode,
+      doctorName: clinicInfo.doctorName,
+    });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
       props: {
