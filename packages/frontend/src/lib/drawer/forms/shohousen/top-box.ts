@@ -26,7 +26,7 @@ function drawKouhi(ctx: DrawerContext, box: Box) {
 function drawKouhiRow1(ctx: DrawerContext, c1: Box, c2: Box) {
   c.frameRight(ctx, c1);
   c.setFont(ctx, "mincho-2");
-  c.drawTextJustified(ctx, "公費負担者番号", c1, "center");
+  c.drawTextJustified(ctx, "公費負担者番号", b.modify(c1, b.inset(0.5, 0)), "center");
   c.mark(ctx, "futanshaBangouBox", c2);
   c.frameInnerColumnBorders(ctx, c2, b.evenSplitter(8));
 }
@@ -35,8 +35,8 @@ function drawKouhiRow2(ctx: DrawerContext, c1: Box, c2: Box) {
   c.frameRight(ctx, c1);
   c.setFont(ctx, "mincho-2");
   b.withSplitRows(c1, b.evenSplitter(2), ([r1, r2]) => {
-    c.drawTextJustified(ctx, "公費負担医療", r1, "center");
-    c.drawTextJustified(ctx, "公の受給者番号", r2, "center");
+    c.drawTextJustified(ctx, "公費負担医療", b.modify(r1, b.inset(0.5)), "center");
+    c.drawTextJustified(ctx, "公の受給者番号", b.modify(r2, b.inset(0.5, 0)), "center");
   });
   c.mark(ctx, "jukyuushaBangouBox", c2);
   c.frameInnerColumnBorders(ctx, c2, b.evenSplitter(7));
@@ -60,7 +60,7 @@ function drawHoken(ctx: DrawerContext, box: Box) {
 function drawHokenRow1(ctx: DrawerContext, c1: Box, c2: Box) {
   c.frameRight(ctx, c1);
   c.setFont(ctx, "mincho-2");
-  c.drawTextJustified(ctx, "保険者番号", c1, "center");
+  c.drawTextJustified(ctx, "保険者番号", b.modify(c1, b.inset(0.5, 0)), "center");
   c.mark(ctx, "hokenshaBangouBox", c2);
   c.frameInnerColumnBorders(ctx, c2, b.evenSplitter(8));
 }
@@ -69,8 +69,8 @@ function drawHokenRow2(ctx: DrawerContext, c1: Box, c2: Box) {
   c.frameRight(ctx, c1);
   c.setFont(ctx, "mincho-1.4");
   b.withSplitRows(c1, b.evenSplitter(2), ([r1, r2]) => {
-    c.drawTextJustified(ctx, "被保険者証・被保険", r1, "center");
-    c.drawTextJustified(ctx, "者手帳の記号・番号", r2, "center");
+    c.drawTextJustified(ctx, "被保険者証・被保険", b.modify(r1, b.inset(0.5, 0)), "center");
+    c.drawTextJustified(ctx, "者手帳の記号・番号", b.modify(r2, b.inset(0.5, 0)), "center");
   });
   c.mark(ctx, "hihokenshaBox", c2);
 }

@@ -87,6 +87,14 @@ export function mark(ctx: DrawerContext, key: string, box: Box) {
   ctx.marks[key] = box;
 }
 
+export function getMark(ctx: DrawerContext, key: string): Box {
+  const mark = ctx.marks[key];
+  if( !mark ){
+    throw new Error(`Cannot find mark: ${key}.`);
+  }
+  return mark;
+}
+
 function locateY(box: Box, fontSize: number,  valign: VAlign) {
   switch(valign){
     case "top": return box.top;

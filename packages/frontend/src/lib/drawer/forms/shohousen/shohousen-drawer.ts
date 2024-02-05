@@ -12,8 +12,9 @@ import { drawMemo } from "./memo";
 import { drawChouzai1 } from "./chouzai1";
 import { drawChouzai2 } from "./chouzai2";
 import { drawPharmacy } from "./pharmacy";
+import { drawData, type ShohousenData } from "./data";
 
-export function drawShohousen(): Op[] {
+export function drawShohousen(data: ShohousenData): Op[] {
   const layout = mkLayout();
   const mainLayout = mkMainLayout(layout.main);
   const ctx = mkDrawerContext();
@@ -31,6 +32,7 @@ export function drawShohousen(): Op[] {
   drawChouzai1(ctx, mainLayout.chouzai1);
   drawChouzai2(ctx, mainLayout.chouzai2);
   drawPharmacy(ctx, layout.pharma);
+  drawData(ctx, data);
   return c.getOps(ctx, { scale: 0.962, offsetX: 0.25, offsetY: 0 });
 }
 
