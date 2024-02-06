@@ -19,8 +19,11 @@ export interface ShohousenData {
   jukyuusha2?: string;
   shimei?: string;
   birthdate?: string; // YYYY-MM-DD
-  sex?: "M" | "F"; 
-  hokenKubun?: "hihokensha" | "hifuyousha"; 
+  sex?: "M" | "F";
+  hokenKubun?: "hihokensha" | "hifuyousha";
+  koufuDate?: string; // YYYY-MM-DD
+  validUptoDate?: string; // YYYY-MM-DD
+  drugs?: string;
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
@@ -38,16 +41,27 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
   drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangou2Box"), data.futansha2 ?? "");
   drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangou2Box"), data.jukyuusha2 ?? "");
   drawShimei(ctx, c.getMark(ctx, "patientNameBox"), data.shimei ?? "");
-  drawBirthDate(ctx, 
-    c.getMark(ctx, "birthdayYearBox"), 
-    c.getMark(ctx, "birthdayMonthBox"), 
-    c.getMark(ctx, "birthdayDayBox"), 
+  drawDate(ctx,
+    c.getMark(ctx, "birthdayYearBox"),
+    c.getMark(ctx, "birthdayMonthBox"),
+    c.getMark(ctx, "birthdayDayBox"),
     data.birthdate ?? "");
   drawSex(ctx, c.getMark(ctx, "sexMaleBox"), c.getMark(ctx, "sexFemaleBox"), data.sex ?? "");
-  drawHokenKubun(ctx, 
+  drawHokenKubun(ctx,
     c.getMark(ctx, "patientHihokenshaBox"),
     c.getMark(ctx, "patientHifuyoushaBox"),
     data.hokenKubun ?? "");
+  drawDate(ctx,
+    c.getMark(ctx, "issueYearBox"),
+    c.getMark(ctx, "issueMonthBox"),
+    c.getMark(ctx, "issueDayBox"),
+    data.koufuDate ?? "");
+  drawDate(ctx,
+    c.getMark(ctx, "validYearBox"),
+    c.getMark(ctx, "validMonthBox"),
+    c.getMark(ctx, "validDayBox"),
+    data.validUptoDate ?? "");
+  // drawDrugLines(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugLines ?? []);
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -78,7 +92,7 @@ function drawDoctorName(ctx: DrawerContext, box: Box, name: string) {
 function normalizeHokenshaBangou(bangou: string): string {
   if (bangou.length <= 6) {
     return "0".repeat(6 - bangou.length) + bangou;
-  } else if( bangou.length <= 8) {
+  } else if (bangou.length <= 8) {
     return "0".repeat(8 - bangou.length) + bangou;
   } else {
     throw new Error(`Invalid hokenshaBangou: ${bangou}.`);
@@ -101,14 +115,14 @@ function drawHihokensha(ctx: DrawerContext, box: Box, hihokensha: string) {
 }
 
 function drawKouhiFutansha(ctx: DrawerContext, box: Box, futansha: string) {
-  if( futansha !== "" ){
+  if (futansha !== "") {
     c.setFont(ctx, "gothic-4");
     c.drawTextInEvenColumns(ctx, futansha, box, 8, "right");
   }
 }
 
 function drawKouhiJukyuusha(ctx: DrawerContext, box: Box, jukyuusha: string) {
-  if( jukyuusha !== "" ){
+  if (jukyuusha !== "") {
     c.setFont(ctx, "gothic-4");
     c.drawTextInEvenColumns(ctx, jukyuusha, box, 7, "right");
   }
@@ -118,11 +132,11 @@ function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
   box = b.modify(box, b.shrinkHoriz(2, 2));
   c.setFont(ctx, "mincho-4.5");
   let lines = breakLines(shimei, c.currentFontSize(ctx), b.width(box));
-  if( lines.length === 0 ){
+  if (lines.length === 0) {
     return;
-  } else if( lines.length === 1 ){
+  } else if (lines.length === 1) {
     c.drawText(ctx, shimei, box, "left", "center");
-  } else if ( lines.length === 2 ){
+  } else if (lines.length === 2) {
     c.drawLines(ctx, lines, box);
   } else {
     c.setFont(ctx, "mincho-2.5");
@@ -131,9 +145,9 @@ function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
   }
 }
 
-function drawBirthDate(ctx: DrawerContext, yearBox: Box, monthBox: Box, dayBox: Box, birthdate: string) {
+function drawDate(ctx: DrawerContext, yearBox: Box, monthBox: Box, dayBox: Box, birthdate: string) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(birthdate);
-  if( m ){
+  if (m) {
     const year = m[1];
     const month = m[2].replace(/^0/, "");
     const day = m[3].replace(/^0/, "");
@@ -145,22 +159,28 @@ function drawBirthDate(ctx: DrawerContext, yearBox: Box, monthBox: Box, dayBox: 
 }
 
 function drawSex(ctx: DrawerContext, maleBox: Box, femaleBox: Box, sex: "M" | "F" | "") {
-  if( sex === "M" ){
+  if (sex === "M") {
     c.setFont(ctx, "gothic-3");
     c.drawText(ctx, "○", maleBox, "center", "center");
-  } else if( sex === "F" ){
+  } else if (sex === "F") {
     c.setFont(ctx, "gothic-3");
     c.drawText(ctx, "○", femaleBox, "center", "center");
   }
 }
 
-function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: Box, 
+function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: Box,
   hokenKubun?: "hihokensha" | "hifuyousha" | "") {
-    if( hokenKubun === "hihokensha" ){
-      c.setFont(ctx, "gothic-3");
-      c.drawText(ctx, "○", hihokenshaBox, "center", "center");
-    } else if( hokenKubun === "hifuyousha" ){
-      c.setFont(ctx, "gothic-3");
-      c.drawText(ctx, "○", hifuyoushaBox, "center", "center");
-    }
+  if (hokenKubun === "hihokensha") {
+    c.setFont(ctx, "gothic-3");
+    c.drawText(ctx, "○", hihokenshaBox, "center", "center");
+  } else if (hokenKubun === "hifuyousha") {
+    c.setFont(ctx, "gothic-3");
+    c.drawText(ctx, "○", hifuyoushaBox, "center", "center");
   }
+}
+
+function drawDrugLines(ctx: DrawerContext, box: Box, lines: string[]) {
+  box = b.modify(box, b.inset(1));
+  c.setFont(ctx, "gothic-4.5");
+  c.drawLines(ctx, lines, box);
+}

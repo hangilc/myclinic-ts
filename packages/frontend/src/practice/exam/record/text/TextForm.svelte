@@ -80,6 +80,9 @@
       birthdate: "1957-06-12",
       sex: "M",
       hokenKubun: "hifuyousha",
+      koufuDate: "2024-01-23",
+      validUptoDate: "2024-01-30",
+      drugs: "院外処方\nＲｐ）\n１）カロナール錠５００ｍｇ　３錠\n　　分３　毎食後　５日分",
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
