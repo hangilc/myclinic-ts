@@ -19,7 +19,8 @@ export interface ShohousenData {
   jukyuusha2?: string;
   shimei?: string;
   birthdate?: string; // YYYY-MM-DD
-  sex?: string; // "M" or "F"
+  sex?: "M" | "F"; 
+  hokenKubun?: "hihokensha" | "hifuyousha"; 
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
@@ -43,6 +44,10 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
     c.getMark(ctx, "birthdayDayBox"), 
     data.birthdate ?? "");
   drawSex(ctx, c.getMark(ctx, "sexMaleBox"), c.getMark(ctx, "sexFemaleBox"), data.sex ?? "");
+  drawHokenKubun(ctx, 
+    c.getMark(ctx, "patientHihokenshaBox"),
+    c.getMark(ctx, "patientHifuyoushaBox"),
+    data.hokenKubun ?? "");
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -139,7 +144,7 @@ function drawBirthDate(ctx: DrawerContext, yearBox: Box, monthBox: Box, dayBox: 
   }
 }
 
-function drawSex(ctx: DrawerContext, maleBox: Box, femaleBox: Box, sex: string) {
+function drawSex(ctx: DrawerContext, maleBox: Box, femaleBox: Box, sex: "M" | "F" | "") {
   if( sex === "M" ){
     c.setFont(ctx, "gothic-3");
     c.drawText(ctx, "○", maleBox, "center", "center");
@@ -148,3 +153,14 @@ function drawSex(ctx: DrawerContext, maleBox: Box, femaleBox: Box, sex: string) 
     c.drawText(ctx, "○", femaleBox, "center", "center");
   }
 }
+
+function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: Box, 
+  hokenKubun?: "hihokensha" | "hifuyousha" | "") {
+    if( hokenKubun === "hihokensha" ){
+      c.setFont(ctx, "gothic-3");
+      c.drawText(ctx, "○", hihokenshaBox, "center", "center");
+    } else if( hokenKubun === "hifuyousha" ){
+      c.setFont(ctx, "gothic-3");
+      c.drawText(ctx, "○", hifuyoushaBox, "center", "center");
+    }
+  }

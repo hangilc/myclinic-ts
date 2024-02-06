@@ -79,6 +79,7 @@
       shimei: "田中隆",
       birthdate: "1957-06-12",
       sex: "M",
+      hokenKubun: "hifuyousha",
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
