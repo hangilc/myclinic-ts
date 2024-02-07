@@ -1,5 +1,5 @@
 import type { DrawerContext } from "./context";
-import { FontWeightBold, FontWeightNormal } from "./font-weight";
+import { FontWeightBold, FontWeightDontCare, FontWeightNormal } from "./font-weight";
 import type { Op } from "./op";
 import * as fsm from "./font-size-manager";
 import * as b from "./box";
@@ -45,7 +45,7 @@ export function lineTo(ctx: DrawerContext, x: number, y: number) {
 
 export function createFont(
   ctx: DrawerContext, name: string, fontName: string, size: number,
-  weight: number | "bold" = FontWeightNormal, italic: boolean = false) {
+  weight: number | "bold" = FontWeightDontCare, italic: boolean = false) {
   function resolveWeight(): number {
     if (weight === "bold") {
       return FontWeightBold;
@@ -202,7 +202,6 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
 
 export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box, ncol: number,
   justify: "left" | "right" = "left") {
-    console.log("even", text, ncol);
   let start = 0;
   if (justify === "right") {
     start = ncol - text.length;
