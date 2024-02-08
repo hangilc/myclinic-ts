@@ -16,6 +16,7 @@ interface DaysLine {
   kind: "days";
   days: string;
   unit: string;
+  extra?: string;
 }
 
 export type ParsedLine = FirstLine | RegularLine | DaysLine;
@@ -29,5 +30,16 @@ export function parseFirstLine(line: string): FirstLine {
     return { kind: "first", drug: m[1], amountPart: { amount: m[2], unit: m[3]}}
   } else {
     return { kind: "first", drug: line };
+  }
+}
+
+const reDays = /.*([０-９]+)(日分|回分)(（.+）)?\s*$/;
+
+export function parseNonFirstLine(line: string): RegularLine | DaysLine {
+  const m = line.match(reDays);
+  if( m ){
+    const days = m[1];
+    const unit = m[2];
+    const extra = m[3];
   }
 }
