@@ -1,5 +1,10 @@
-export type CommandResult = void;
+export interface CommandMemo {
+  kind: "memo";
+  content: string;
+}
 
-export function handleCommand(cmd: string): CommandResult {
+export type ShohousenCommand = CommandMemo;
+
+export function parseCommand(cmd: string): ShohousenCommand {
 
 }

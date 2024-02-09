@@ -1,27 +1,48 @@
 import { toZenkaku } from "@/lib/zenkaku";
-import type { ParsedLine } from "./parsed-line";
+import { parseFirstLine, type ParsedLine, parseNonFirstLine } from "./parsed-line";
+import { parseCommand, type ShohousenCommand } from "./command";
 
 let reStart = /^([ ＿]*[0-9０-９]+[)）])|@/mg;
 
 type Drug = ParsedLine[];
 
-export function formatShohousen(content: string) {
-  const lines: string[] = [];
-  const parsed = extractChunks(content);
-  if( parsed.prolog !== "" ){
-    const s = parsed.prolog.replace(/\n$/, "");
-    lines.push(...s.split("\n"));
-  }
-  let index: number = 1;
-  parsed.chunks.forEach(chunk => {
-    if( chunk.startsWith("@") ){
+export interface ParsedShohousen {
+  prolog: string[];
+  drugs: Drug[];
+  commands: ShohousenCommand[];
+}
 
+export function parseShohousen(content: string): ParsedShohousen {
+  const parsed = extractChunks(content);
+  let prolog: string[] = [];
+  const drugs: Drug[] = [];
+  const commands: ShohousenCommand[] = [];
+  if (parsed.prolog !== "") {
+    const s = parsed.prolog.replace(/\n$/, "");
+    prolog = s.split("\n");
+  }
+  parsed.chunks.forEach(chunk => {
+    if (chunk.startsWith("@")) {
+      commands.push(parseCommand(chunk.substring(1)));
     } else {
-      const drug = toZenkaku(chunk.replace(reStart, "").trim());
-      console.log("drug", drug);
+      drugs.push(parseChunk(chunk.replace(reStart, "")));
     }
   })
-  return lines.join("\n");
+  return { prolog, drugs, commands };
+}
+
+function parseChunk(chunk: string): Drug {
+  chunk = toZenkaku(chunk);
+  chunk = chunk.trim();
+  const lines: ParsedLine[] = [];
+  chunk.split("\n").forEach((line, i) => {
+    if( i === 0 ){
+      lines.push(parseFirstLine(line));
+    } else {
+      lines.push(parseNonFirstLine(line));
+    }
+  });
+  return lines;
 }
 
 export function extractChunks(content: string): { prolog: string, chunks: string[] } {
@@ -38,14 +59,14 @@ function extractByStarter(re: RegExp, text: string): { prolog: string, chunks: s
       starts.push(m.index);
     }
   }
-  if( starts.length === 0 ){
+  if (starts.length === 0) {
     return { prolog: "", chunks: [] };
   }
   const prolog = text.substring(0, starts[0]);
   const result: string[] = [];
   starts.push(text.length);
   let start = starts[0];
-  for(let j=1;j<starts.length;j++){
+  for (let j = 1; j < starts.length; j++) {
     const end = starts[j];
     result.push(text.substring(start, end));
     start = end;

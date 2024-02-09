@@ -1,5 +1,5 @@
-import { extractChunks, formatShohousen } from "./parse-shohousen"
-import { parseFirstLine } from "./parsed-line";
+import { extractChunks, parseShohousen } from "./parse-shohousen"
+import { parseFirstLine, parseNonFirstLine } from "./parsed-line";
 
 describe("shohousen parser", () => {
   it("should extract chunks", () => {
@@ -10,35 +10,49 @@ describe("shohousen parser", () => {
     expect(result.chunks[1]).equal("@memo:オンライン対応");
   });
 
-  it("should format prolog", () => {
-    const f = formatShohousen("院外処方\nＲｐ）\n１）カロナール");
-    expect(f).matches(/^院外処方\nＲｐ）/);
-  });
-
   it("should parse first line (1)", () => {
     const f = parseFirstLine("カロナール錠５００ｍｇ　３錠");
-    expect(f.kind).equal("first");
-    expect(f.drug).equal("カロナール錠５００ｍｇ");
-    expect(f.amountPart).not.undefined
-    expect(f.amountPart?.amount).equal("３");
-    expect(f.amountPart?.unit).equal("錠");
+    expect(f).deep.equal({
+      kind: "drug-amount",
+      drug: "カロナール錠５００ｍｇ",
+      amount: "３",
+      unit: "錠",
+    })
   })
 
   it("should parse first line (2)", () => {
     const f = parseFirstLine("デルモベート軟膏０．０５％５ｇ　５ｇ");
-    expect(f.kind).equal("first");
-    expect(f.drug).equal("デルモベート軟膏０．０５％５ｇ");
-    expect(f.amountPart).not.undefined
-    expect(f.amountPart?.amount).equal("５");
-    expect(f.amountPart?.unit).equal("ｇ");
+    expect(f).deep.equal({
+      kind: "drug-amount",
+      drug: "デルモベート軟膏０．０５％５ｇ",
+      amount: "５",
+      unit: "ｇ",
+    })
   })
 
   it("should parse first line (3)", () => {
     const f = parseFirstLine("アローゼン顆粒　０．５ｇ");
-    expect(f.kind).equal("first");
-    expect(f.drug).equal("アローゼン顆粒");
-    expect(f.amountPart).not.undefined
-    expect(f.amountPart?.amount).equal("０．５");
-    expect(f.amountPart?.unit).equal("ｇ");
+    expect(f).deep.equal({
+      kind: "drug-amount",
+      drug: "アローゼン顆粒",
+      amount: "０．５",
+      unit: "ｇ",
+    })
+  })
+
+  it("should parse days line (1)", () => {
+    const p = parseNonFirstLine("　　分３　毎食後　５日分");
+    expect(p).deep.equal({ kind: "days", str: "　　分３　毎食後", days: "５", unit: "日分", extra: "" })
+  })
+
+  it("should parse shohousen (1)", () => {
+    const p = parseShohousen("院外処方\nＲｐ）\n１）カロナール錠５００ｍｇ　３錠\n分３　毎食後　５日分\n");
+    expect(p.prolog).deep.equal(["院外処方", "Ｒｐ）"]);
+    expect(p.drugs).deep.equal([
+      [
+        { kind: "drug-amount", drug: "カロナール錠５００ｍｇ", amount: "３", unit: "錠" },
+        { kind: "days", str: "分３　毎食後", days: "５", unit: "日分", extra: "" }
+      ]
+    ])
   })
 })
