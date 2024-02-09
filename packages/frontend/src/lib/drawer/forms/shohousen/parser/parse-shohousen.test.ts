@@ -1,5 +1,6 @@
 import { extractChunks, parseShohousen } from "./parse-shohousen"
 import { parseFirstLine, parseNonFirstLine } from "./parsed-line";
+import { renderDrugAmount } from "./render";
 
 describe("shohousen parser", () => {
   it("should extract chunks", () => {
@@ -54,5 +55,10 @@ describe("shohousen parser", () => {
         { kind: "days", str: "分３　毎食後", days: "５", unit: "日分", extra: "" }
       ]
     ])
+  })
+
+  it("should render drug amount (1)", () => {
+    const r = renderDrugAmount("カロナール錠５００ｍｇ", "３", "錠", 31, 21);
+    expect(r).matches(/^カロナール錠５００ｍｇ　{9}３錠$/)
   })
 })

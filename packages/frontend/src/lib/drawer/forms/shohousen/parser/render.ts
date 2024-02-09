@@ -3,6 +3,7 @@ import type { ParsedLine } from "./parsed-line";
 export class RenderDrugContext {
   maxLine: number = 31;
   amountUnitTabStop: number = 21;
+  daysTabStop: number = 19;
 }
 
 export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new RenderDrugContext()): string[] {
@@ -27,12 +28,23 @@ export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new Rend
   return lines;
 }
 
-function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
+export function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
   const rem = tab - drug.length - amount.length;
   if( rem > 0 && unit.length <= (maxLine - tab) ){
-
+    const pad = "　".repeat(rem);
+    return [`${drug}${pad}${amount}${unit}`];
   } else {
-    
+    return breakToLines(`${drug}　${amount}${unit}`, maxLine);
+  }
+}
+
+export function renderDays(str: string, days: string, unit: string, maxLine: number, tab: number): string[] {
+  const rem = tab - str.length - days.length;
+  if( rem > 0 && unit.length <= (maxLine - tab) ){
+    const pad = "　".repeat(rem);
+    return [`${str}${pad}${days}${unit}`];
+  } else {
+    return breakToLines(`${str}　${days}${unit}`, maxLine);
   }
 }
 
