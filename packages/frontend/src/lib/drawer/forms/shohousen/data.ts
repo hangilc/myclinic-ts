@@ -61,7 +61,9 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
     c.getMark(ctx, "validMonthBox"),
     c.getMark(ctx, "validDayBox"),
     data.validUptoDate ?? "");
-  // drawDrugLines(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugLines ?? []);
+  if( data.drugs ){
+    drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugs);
+  }
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -179,8 +181,7 @@ function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: B
   }
 }
 
-function drawDrugLines(ctx: DrawerContext, box: Box, lines: string[]) {
+function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
   box = b.modify(box, b.inset(1));
   c.setFont(ctx, "gothic-4.5");
-  c.drawLines(ctx, lines, box);
 }

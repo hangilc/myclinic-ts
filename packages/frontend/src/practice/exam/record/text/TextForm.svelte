@@ -1,7 +1,6 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
   import api from "@/lib/api";
-  import type { Op } from "@/lib/drawer/compiler/op";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
   import { getCopyTarget } from "../../exam-vars";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
@@ -12,6 +11,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
+  import { dateToSqlDate } from "myclinic-model/model";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -66,14 +66,44 @@
     const hoken = await api.getHokenInfoForVisit(visitId);
     let hokenshaBangou: string | undefined = undefined;
     let hihokensha: string | undefined = undefined;
+    let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
     if( hoken.shahokokuho ){
       const shahokokuho = hoken.shahokokuho;
       hokenshaBangou = shahokokuho.hokenshaBangou.toString();
       hihokensha = shahokokuho.hihokenshaKigou + "・" + shahokokuho.hihokenshaBangou;
+      hokenKubun = shahokokuho.honninStore === 0 ? "hifuyousha" : "hihokensha";
     } else if( hoken.koukikourei ){
       hokenshaBangou = hoken.koukikourei.hokenshaBangou;
       hihokensha = hoken.koukikourei.hihokenshaBangou;
+      hokenKubun = "hihokensha";
     }
+    let futansha: string | undefined = undefined;
+    let jukyuusha: string | undefined = undefined;
+    if( hoken.kouhiList.length >= 1 ){
+      const kouhi = hoken.kouhiList[0];
+      futansha = kouhi.futansha.toString();
+      jukyuusha = kouhi.jukyuusha.toString();
+    }
+    let futansha2: string | undefined = undefined;
+    let jukyuusha2: string | undefined = undefined;
+    if( hoken.kouhiList.length >= 2 ){
+      const kouhi = hoken.kouhiList[1];
+      futansha2 = kouhi.futansha.toString();
+      jukyuusha2 = kouhi.jukyuusha.toString();
+    }
+    let shimei: string | undefined = undefined;
+    let birthdate: string | undefined = undefined;
+    let sex: "M" | "F" | undefined = undefined;
+    {
+      const visit = await api.getVisit(text.visitId);
+      const patient = await api.getPatient(visit.patientId);
+      shimei = `${patient.lastName}${patient.firstName}`;
+      birthdate = patient.birthday;
+      if( patient.sex === "M" || patient.sex === "F" ){
+        sex = patient.sex;
+      }
+    }
+    let koufuDate: string = dateToSqlDate(new Date());
     const ops = drawShohousen({
       clinicAddress: clinicInfo.address,
       clinicName: clinicInfo.name,
@@ -82,17 +112,17 @@
       doctorName: clinicInfo.doctorName,
       hokenshaBangou,
       hihokensha,
-      futansha: "12345678",
-      jukyuusha: "7654321",
-      futansha2: "23456789",
-      jukyuusha2: "6543210",
-      shimei: "田中隆",
-      birthdate: "1957-06-12",
-      sex: "M",
-      hokenKubun: "hifuyousha",
-      koufuDate: "2024-01-23",
-      validUptoDate: "2024-01-30",
-      drugs: "院外処方\nＲｐ）\n１）カロナール錠５００ｍｇ　３錠\n　　分３　毎食後　５日分",
+      futansha,
+      jukyuusha,
+      futansha2,
+      jukyuusha2,
+      shimei,
+      birthdate,
+      sex,
+      hokenKubun,
+      koufuDate,
+      validUptoDate: undefined,
+      drugs: text.content,
     });
     const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
       target: document.body,
