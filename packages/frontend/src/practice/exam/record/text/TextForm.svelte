@@ -60,18 +60,28 @@
     return text.content.startsWith("院外処方\nＲｐ）");
   }
 
-  let ops: Op[] = [];
-
   async function doPrintShohousen() {
     const clinicInfo = await api.getClinicInfo();
+    const visitId = text.visitId;
+    const hoken = await api.getHokenInfoForVisit(visitId);
+    let hokenshaBangou: string | undefined = undefined;
+    let hihokensha: string | undefined = undefined;
+    if( hoken.shahokokuho ){
+      const shahokokuho = hoken.shahokokuho;
+      hokenshaBangou = shahokokuho.hokenshaBangou.toString();
+      hihokensha = shahokokuho.hihokenshaKigou + "・" + shahokokuho.hihokenshaBangou;
+    } else if( hoken.koukikourei ){
+      hokenshaBangou = hoken.koukikourei.hokenshaBangou;
+      hihokensha = hoken.koukikourei.hihokenshaBangou;
+    }
     const ops = drawShohousen({
       clinicAddress: clinicInfo.address,
       clinicName: clinicInfo.name,
       clinicPhone: `電話 ${clinicInfo.tel}`,
       clinicKikancode: clinicInfo.kikancode,
       doctorName: clinicInfo.doctorName,
-      hokenshaBangou: "1234567",
-      hihokensha: "チナフ・234",
+      hokenshaBangou,
+      hihokensha,
       futansha: "12345678",
       jukyuusha: "7654321",
       futansha2: "23456789",

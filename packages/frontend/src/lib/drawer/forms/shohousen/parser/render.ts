@@ -9,14 +9,16 @@ export class RenderDrugContext {
 export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new RenderDrugContext()): string[] {
   const lines: string[] = [];
   const maxLine = ctx.maxLine;
-  const tab = ctx.amountUnitTabStop;
+  const amountTab = ctx.amountUnitTabStop;
+  const daysTab = ctx.daysTabStop;
   drug.forEach(line => {
     switch(line.kind) {
       case "drug-amount": {
-        lines.push(...renderDrugAmount(line.drug, line.amount, line.unit, maxLine, tab));
+        lines.push(...renderDrugAmount(line.drug, line.amount, line.unit, maxLine, amountTab));
         break;
       }
       case "days": {
+        lines.push(...renderDays(line.str, line.days, line.unit, maxLine, daysTab));
         break;
       }
       default: {
