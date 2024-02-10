@@ -7,7 +7,6 @@ import { drawTopBox } from "./top-box";
 import { mkLayout, mkMainLayout } from "./layout";
 import { drawPatientClinic } from "./patient-clinic";
 import { drawIssue } from "./issue";
-import { drawDrugs } from "./drugs";
 import { drawMemo } from "./memo";
 import { drawChouzai1 } from "./chouzai1";
 import { drawChouzai2 } from "./chouzai2";
@@ -63,4 +62,15 @@ function drawTitle(ctx: DrawerContext, box: Box) {
   box = b.modify(box, b.shiftDown(6));
   c.setFont(ctx, "mincho-2.5");
   c.drawText(ctx, "(この処方せんは、どの保険薬局でも有効です。)", box, "center", "top");
+}
+
+function drawDrugs(ctx: DrawerContext, box: Box) {
+  const layout = b.withSplitColumns(box, b.splitAt(4), cs => {
+    return { label: cs[0], content: cs[1] }
+  })
+  c.rect(ctx, box);
+  c.frameRight(ctx, layout.label);
+  c.setFont(ctx, "mincho-2.5");
+  c.drawTextJustifiedVertically(ctx, "処方", b.modify(layout.label, b.inset(0, 24)), "center");
+  c.mark(ctx, "drugsPaneBox", layout.content);
 }

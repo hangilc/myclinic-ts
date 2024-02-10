@@ -31,6 +31,7 @@ export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new Rend
 }
 
 export function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
+  drug = drug.trim();
   const rem = tab - drug.length - amount.length;
   if( rem > 0 && unit.length <= (maxLine - tab) ){
     const pad = "　".repeat(rem);
@@ -41,6 +42,7 @@ export function renderDrugAmount(drug: string, amount: string, unit: string, max
 }
 
 export function renderDays(str: string, days: string, unit: string, maxLine: number, tab: number): string[] {
+  str = str.trim();
   const rem = tab - str.length - days.length;
   if( rem > 0 && unit.length <= (maxLine - tab) ){
     const pad = "　".repeat(rem);

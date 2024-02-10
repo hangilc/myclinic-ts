@@ -4,6 +4,9 @@ import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import type { DrawerContext } from "../../compiler/context";
 import { breakLines } from "../../compiler/break-lines";
+import { parseShohousen } from "./parser/parse-shohousen";
+import { renderDrug } from "./parser/render";
+import { toZenkaku } from "@/lib/zenkaku";
 
 export interface ShohousenData {
   clinicAddress?: string;
@@ -184,4 +187,28 @@ function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: B
 function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
   box = b.modify(box, b.inset(1));
   c.setFont(ctx, "gothic-4.5");
+  const parsed = parseShohousen(content);
+  const lines: string[] = [];
+  let pad = "";
+  let blankPad = " ".repeat(2);
+  if( parsed.drugs.length >= 10 ){
+    pad = " ";
+    blankPad = " " + blankPad;
+  }
+  blankPad = toZenkaku(blankPad);
+  parsed.drugs.forEach((drug, i) => {
+    let index = (i+1).toString();
+    if( i < 10 ){
+      index = pad + index;
+    }
+    index = toZenkaku(`${index})`);
+    renderDrug(drug).forEach((dl, j) => {
+      if( j === 0 ){
+        lines.push(index + dl);
+      } else {
+        lines.push(blankPad + dl);
+      }
+    })
+  });
+  c.drawLines(ctx, lines, box);
 }
