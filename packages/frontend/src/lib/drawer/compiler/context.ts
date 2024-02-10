@@ -6,6 +6,7 @@ export interface DrawerContext {
   ops: Op[];
   fsm: FontSizeManager;
   marks: Record<string, Box>;
+  currentFont: string | undefined;
 }
 
 export function mkDrawerContext(): DrawerContext {
@@ -13,6 +14,7 @@ export function mkDrawerContext(): DrawerContext {
     ops: [],
     fsm: mkFontManager(),
     marks: {},
+    currentFont: undefined,
   }
 }
 

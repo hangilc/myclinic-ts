@@ -52,7 +52,7 @@ export function renderDays(str: string, days: string, unit: string, maxLine: num
   }
 }
 
-function breakToLines(str: string, lineSize: number): string[] {
+export function breakToLines(str: string, lineSize: number): string[] {
   const lines: string[] = [];
   while( str !== "" ){
     str = str.trimStart();

@@ -1,4 +1,3 @@
-import { hokenshaBangouRep } from "@/lib/hoken-rep";
 import type { Box } from "../../compiler/box";
 import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
@@ -59,14 +58,19 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
     c.getMark(ctx, "issueMonthBox"),
     c.getMark(ctx, "issueDayBox"),
     data.koufuDate ?? "");
+  drawValidUpto(ctx, data.validUptoDate);
+  if (data.drugs) {
+    drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugs);
+  }
+}
+
+function drawValidUpto(ctx: DrawerContext, date: string | undefined) {
   drawDate(ctx,
     c.getMark(ctx, "validYearBox"),
     c.getMark(ctx, "validMonthBox"),
     c.getMark(ctx, "validDayBox"),
-    data.validUptoDate ?? "");
-  if( data.drugs ){
-    drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugs);
-  }
+    date ?? ""
+  );
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
@@ -189,21 +193,42 @@ function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
   c.setFont(ctx, "gothic-4.5");
   const parsed = parseShohousen(content);
   const lines: string[] = [];
+  const memo: string[] = [];
+  parsed.commands.forEach(cmd => {
+    switch (cmd.kind) {
+      case "memo": {
+        memo.push(cmd.content);
+        break;
+      }
+      case "online-taiou": {
+        memo.push("オンライン対応");
+        break;
+      }
+      case "valid-upto": {
+        const font = c.getCurrentFont(ctx);
+        drawValidUpto(ctx, cmd.date);
+        if( font ){
+          c.setFont(ctx, font);
+        }
+        break;
+      }
+    }
+  });
   let pad = "";
   let blankPad = " ".repeat(2);
-  if( parsed.drugs.length >= 10 ){
+  if (parsed.drugs.length >= 10) {
     pad = " ";
     blankPad = " " + blankPad;
   }
   blankPad = toZenkaku(blankPad);
   parsed.drugs.forEach((drug, i) => {
-    let index = (i+1).toString();
-    if( (i + 1) < 10 ){
+    let index = (i + 1).toString();
+    if ((i + 1) < 10) {
       index = pad + index;
     }
     index = toZenkaku(`${index})`);
     renderDrug(drug).forEach((dl, j) => {
-      if( j === 0 ){
+      if (j === 0) {
         lines.push(index + dl);
       } else {
         lines.push(blankPad + dl);

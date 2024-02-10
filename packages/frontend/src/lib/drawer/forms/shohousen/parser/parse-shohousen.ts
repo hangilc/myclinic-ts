@@ -2,7 +2,7 @@ import { toZenkaku } from "@/lib/zenkaku";
 import { parseFirstLine, type ParsedLine, parseNonFirstLine } from "./parsed-line";
 import { parseCommand, type ShohousenCommand } from "./command";
 
-let reStart = /^([ 　]*[0-9０-９]+[)）])|@/mg;
+let reStart = /^([ 　]*[0-9０-９]+[)）])|[@＠]/mg;
 
 type Drug = ParsedLine[];
 
@@ -22,7 +22,7 @@ export function parseShohousen(content: string): ParsedShohousen {
     prolog = s.split("\n");
   }
   parsed.chunks.forEach(chunk => {
-    if (chunk.startsWith("@")) {
+    if (chunk.startsWith("@") || chunk.startsWith("＠") ) {
       commands.push(parseCommand(chunk.substring(1)));
     } else {
       drugs.push(parseChunk(chunk.replace(reStart, "")));

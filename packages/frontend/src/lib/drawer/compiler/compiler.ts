@@ -60,6 +60,7 @@ export function createFont(
 export function setFont(ctx: DrawerContext, name: string) {
   ctx.ops.push(["set_font", name]);
   fsm.setFont(ctx.fsm, name);
+  ctx.currentFont = name;
 }
 
 export function setTextColor(ctx: DrawerContext, r: number, g: number, b: number) {
@@ -81,6 +82,10 @@ export function setPen(ctx: DrawerContext, name: string) {
 
 export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
+}
+
+export function getCurrentFont(ctx: DrawerContext): string | undefined {
+  return ctx.currentFont;
 }
 
 export function mark(ctx: DrawerContext, key: string, box: Box) {
