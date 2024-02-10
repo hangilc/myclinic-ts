@@ -198,7 +198,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
   blankPad = toZenkaku(blankPad);
   parsed.drugs.forEach((drug, i) => {
     let index = (i+1).toString();
-    if( i < 10 ){
+    if( (i + 1) < 10 ){
       index = pad + index;
     }
     index = toZenkaku(`${index})`);

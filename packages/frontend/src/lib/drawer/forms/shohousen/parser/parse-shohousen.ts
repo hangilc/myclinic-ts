@@ -2,7 +2,7 @@ import { toZenkaku } from "@/lib/zenkaku";
 import { parseFirstLine, type ParsedLine, parseNonFirstLine } from "./parsed-line";
 import { parseCommand, type ShohousenCommand } from "./command";
 
-let reStart = /^([ ＿]*[0-9０-９]+[)）])|@/mg;
+let reStart = /^([ 　]*[0-9０-９]+[)）])|@/mg;
 
 type Drug = ParsedLine[];
 
@@ -35,9 +35,22 @@ function parseChunk(chunk: string): Drug {
   chunk = toZenkaku(chunk);
   chunk = chunk.trim();
   const lines: ParsedLine[] = [];
+  let state: "first" | "append" | "rest" = "first";
   chunk.split("\n").forEach((line, i) => {
     if( i === 0 ){
+      state = "first";
+    }
+    if( state === "first" ){
       lines.push(parseFirstLine(line));
+      state = "append";
+    } else if( state === "append" ){
+      const fp = parseFirstLine(line);
+      if( fp.kind === "drug-amount" ){
+        lines.push(fp);
+      } else {
+        lines.push(parseNonFirstLine(line));
+        state = "rest";
+      }
     } else {
       lines.push(parseNonFirstLine(line));
     }
