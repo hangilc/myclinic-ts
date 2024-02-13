@@ -3,7 +3,7 @@ import * as b from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import type { DrawerContext } from "../../compiler/context";
 import { breakLines } from "../../compiler/break-lines";
-import { parseShohousen } from "./parser/parse-shohousen";
+import { parseShohousen, type Drug } from "./parser/parse-shohousen";
 import { renderDrug } from "./parser/render";
 import { toZenkaku } from "@/lib/zenkaku";
 
@@ -29,6 +29,28 @@ export interface ShohousenData {
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
+  let drugs: Drug[] = [];
+  let memoLines: string[] = [];
+  if( data.drugs ){
+    const parsedContent = parseShohousen(data.drugs);
+    parsedContent.commands.forEach(cmd => {
+      switch(cmd.kind){
+        case "memo": {
+          memoLines.push(cmd.content);
+          break;
+        }
+        case "online-taiou": {
+          memoLines.push("オンライン対応");
+          break;
+        }
+        case "valid-upto": {
+          data.validUptoDate = cmd.date;
+          break;
+        }
+      }
+    });
+    drugs = parsedContent.drugs;
+  }
   c.setTextColor(ctx, 0, 255, 0);
   drawClinicInfo(ctx, c.getMark(ctx, "clinicInfoBox"),
     data.clinicAddress ?? "", data.clinicName ?? "",
@@ -59,9 +81,7 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
     c.getMark(ctx, "issueDayBox"),
     data.koufuDate ?? "");
   drawValidUpto(ctx, data.validUptoDate);
-  if (data.drugs) {
-    drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), data.drugs);
-  }
+  drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), c.getMark(ctx, "memoPaneBox"), drugs, memoLines);
 }
 
 function drawValidUpto(ctx: DrawerContext, date: string | undefined) {
@@ -188,40 +208,21 @@ function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: B
   }
 }
 
-function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
+function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], memo: string[]) {
   box = b.modify(box, b.inset(1));
+  memoBox = b.modify(memoBox, b.inset(1));
   c.setFont(ctx, "gothic-4.5");
-  const parsed = parseShohousen(content);
-  const lines: string[] = [];
-  const memo: string[] = [];
-  parsed.commands.forEach(cmd => {
-    switch (cmd.kind) {
-      case "memo": {
-        memo.push(cmd.content);
-        break;
-      }
-      case "online-taiou": {
-        memo.push("オンライン対応");
-        break;
-      }
-      case "valid-upto": {
-        const font = c.getCurrentFont(ctx);
-        drawValidUpto(ctx, cmd.date);
-        if( font ){
-          c.setFont(ctx, font);
-        }
-        break;
-      }
-    }
-  });
+  let fontSize = c.currentFontSize(ctx);
+  const drugLines: string[] = [];
+  const memoLines: string[] = [];
   let pad = "";
   let blankPad = " ".repeat(2);
-  if (parsed.drugs.length >= 10) {
+  if (drugs.length >= 10) {
     pad = " ";
     blankPad = " " + blankPad;
   }
   blankPad = toZenkaku(blankPad);
-  parsed.drugs.forEach((drug, i) => {
+  drugs.forEach((drug, i) => {
     let index = (i + 1).toString();
     if ((i + 1) < 10) {
       index = pad + index;
@@ -229,11 +230,17 @@ function drawDrugs(ctx: DrawerContext, box: Box, content: string) {
     index = toZenkaku(`${index})`);
     renderDrug(drug).forEach((dl, j) => {
       if (j === 0) {
-        lines.push(index + dl);
+        drugLines.push(index + dl);
       } else {
-        lines.push(blankPad + dl);
+        drugLines.push(blankPad + dl);
       }
     })
   });
-  c.drawLines(ctx, lines, box);
+  memo.forEach(m => {
+    const lines = breakLines(m, fontSize, b.width(memoBox));
+    memoLines.push(...lines);
+  });
+  c.drawLines(ctx, drugLines, box);
+  c.drawLines(ctx, memoLines, memoBox);
+
 }

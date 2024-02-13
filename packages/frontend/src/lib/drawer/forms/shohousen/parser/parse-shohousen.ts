@@ -4,7 +4,7 @@ import { parseCommand, type ShohousenCommand } from "./command";
 
 let reStart = /^([ 　]*[0-9０-９]+[)）])|[@＠]/mg;
 
-type Drug = ParsedLine[];
+export type Drug = ParsedLine[];
 
 export interface ParsedShohousen {
   prolog: string[];
