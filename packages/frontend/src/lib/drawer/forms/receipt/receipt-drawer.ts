@@ -123,12 +123,17 @@ function drawHokengai(ctx: DrawerContext, box: Box) {
 }
 
 function drawInstitute(ctx: DrawerContext, box: Box) {
-  c.rect(ctx, box);
+  c.mark(ctx, "instituteBox", box);
 }
 
 function drawRyoushuu(ctx: DrawerContext, box: Box) {
   c.rect(ctx, box);
-  
+  const h = b.height(box) / 5.0;
+  const rows = b.splitToRows(box, b.splitAt(h));
+  c.frameBottom(ctx, rows[0]);
+  c.setFont(ctx, "mincho-4");
+  c.drawText(ctx, "領収印", rows[0], "center", "center");
+  c.mark(ctx, "ryoushuuBox", rows[1]);
 }
 
 
