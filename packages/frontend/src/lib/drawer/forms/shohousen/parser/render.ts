@@ -2,17 +2,30 @@ import type { ParsedLine } from "./parsed-line";
 
 export class RenderDrugContext {
   maxLine: number = 31;
-  amountUnitTabStop: number = 21;
-  daysTabStop: number = 19;
+  amountUnitTab: number = 21;
+  daysTab: number = 18;
+
+  constructor(arg: { maxLine?: number, amountUnitTab?: number, daysTab?: number } = {}) {
+    if( arg.maxLine !== undefined ){
+      this.maxLine = arg.maxLine;
+    }
+    if( arg.amountUnitTab !== undefined ){
+      this.amountUnitTab = arg.amountUnitTab;
+    }
+    if( arg.daysTab !== undefined ){
+      this.daysTab = arg.daysTab;
+    }
+  }
 }
 
 export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new RenderDrugContext()): string[] {
   const lines: string[] = [];
-  const maxLine = ctx.maxLine;
-  const amountTab = ctx.amountUnitTabStop;
-  const daysTab = ctx.daysTabStop;
+  const indexLen = drug.length < 10 ? 2 : 3;
+  const maxLine = ctx.maxLine - indexLen;
+  const amountTab = ctx.amountUnitTab;
+  const daysTab = ctx.daysTab;
   drug.forEach(line => {
-    switch(line.kind) {
+    switch (line.kind) {
       case "drug-amount": {
         lines.push(...renderDrugAmount(line.drug, line.amount, line.unit, maxLine, amountTab));
         break;
@@ -30,33 +43,40 @@ export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new Rend
   return lines;
 }
 
-export function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
-  drug = drug.trim();
-  const rem = tab - drug.length - amount.length;
-  if( rem > 0 && unit.length <= (maxLine - tab) ){
-    const pad = "　".repeat(rem);
-    return [`${drug}${pad}${amount}${unit}`];
-  } else {
-    return breakToLines(`${drug}　${amount}${unit}`, maxLine);
+function renderWithTab(pre: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
+  const lines: string[] = [];
+  pre = pre.trim();
+  let iter = 1;
+  while(true){
+    if( iter++ > 5 ){
+      throw new Error(`Too long pre: ${pre} (in renderWithTab).`);
+    }
+    const rem = tab - pre.length - amount.length;
+    if( rem > 0 ){
+      const pad = "　".repeat(rem);
+      lines.push(`${pre}${pad}${amount}${unit}`);
+      break;
+    } else {
+      lines.push(pre.substring(0, maxLine));
+      pre = pre.substring(maxLine);
+    }
   }
+  return lines;
+}
+
+export function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
+  return renderWithTab(drug, amount, unit, maxLine, tab);
 }
 
 export function renderDays(str: string, days: string, unit: string, maxLine: number, tab: number): string[] {
-  str = str.trim();
-  const rem = tab - str.length - days.length;
-  if( rem > 0 && unit.length <= (maxLine - tab) ){
-    const pad = "　".repeat(rem);
-    return [`${str}${pad}${days}${unit}`];
-  } else {
-    return breakToLines(`${str}　${days}${unit}`, maxLine);
-  }
+  return renderWithTab(str, days, unit, maxLine, tab);
 }
 
 export function breakToLines(str: string, lineSize: number): string[] {
   const lines: string[] = [];
-  while( str !== "" ){
+  while (str !== "") {
     str = str.trimStart();
-    if( str.length <= lineSize ){
+    if (str.length <= lineSize) {
       lines.push(str);
       break;
     } else {

@@ -4,8 +4,9 @@ import * as c from "../../compiler/compiler";
 import type { DrawerContext } from "../../compiler/context";
 import { breakLines } from "../../compiler/break-lines";
 import { parseShohousen, type Drug } from "./parser/parse-shohousen";
-import { renderDrug } from "./parser/render";
+import { RenderDrugContext, renderDrug } from "./parser/render";
 import { toZenkaku } from "@/lib/zenkaku";
+import { requiredHeight } from "../../compiler/util";
 
 export interface ShohousenData {
   clinicAddress?: string;
@@ -31,10 +32,10 @@ export interface ShohousenData {
 export function drawData(ctx: DrawerContext, data: ShohousenData) {
   let drugs: Drug[] = [];
   let memoLines: string[] = [];
-  if( data.drugs ){
+  if (data.drugs) {
     const parsedContent = parseShohousen(data.drugs);
     parsedContent.commands.forEach(cmd => {
-      switch(cmd.kind){
+      switch (cmd.kind) {
         case "memo": {
           memoLines.push(cmd.content);
           break;
@@ -208,10 +209,11 @@ function drawHokenKubun(ctx: DrawerContext, hihokenshaBox: Box, hifuyoushaBox: B
   }
 }
 
-function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], memo: string[]) {
-  box = b.modify(box, b.inset(1));
-  memoBox = b.modify(memoBox, b.inset(1));
-  c.setFont(ctx, "gothic-4.5");
+function prepareDrugMemoLines(ctx: DrawerContext, font: string, renderDrugContext: RenderDrugContext, memoBox: Box,
+  drugs: Drug[], memo: string[]): {
+    drugLines: string[]; memoLines: string[], fontSize: number
+  } {
+  c.setFont(ctx, font);
   let fontSize = c.currentFontSize(ctx);
   const drugLines: string[] = [];
   const memoLines: string[] = [];
@@ -228,7 +230,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], me
       index = pad + index;
     }
     index = toZenkaku(`${index})`);
-    renderDrug(drug).forEach((dl, j) => {
+    renderDrug(drug, renderDrugContext).forEach((dl, j) => {
       if (j === 0) {
         drugLines.push(index + dl);
       } else {
@@ -240,7 +242,44 @@ function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], me
     const lines = breakLines(m, fontSize, b.width(memoBox));
     memoLines.push(...lines);
   });
-  c.drawLines(ctx, drugLines, box);
-  c.drawLines(ctx, memoLines, memoBox);
+  if (drugLines.length > 0) {
+    drugLines.push("------以下余白------");
+  }
+  drugLines.unshift("Ｒｐ）");
+  return { drugLines, memoLines, fontSize };
+}
+
+function tryDrawDrugs(ctx: DrawerContext, font: string, renderDrugContext: RenderDrugContext,
+  box: Box, memoBox: Box, drugs: Drug[], memo: string[]): boolean {
+  const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, font, renderDrugContext, memoBox, drugs, memo);
+  if (requiredHeight(drugLines.length, fontSize) <= b.height(box) &&
+    requiredHeight(memoLines.length, fontSize) <= b.height(memoBox)) {
+    c.drawLines(ctx, drugLines, box);
+    c.drawLines(ctx, memoLines, memoBox);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], memo: string[]) {
+  box = b.modify(box, b.inset(1));
+  memoBox = b.modify(memoBox, b.inset(1));
+  const fontSave = c.getCurrentFont(ctx);
+  try {
+    if (tryDrawDrugs(ctx, "gothic-4.5", new RenderDrugContext({}), box, memoBox, drugs, memo)) {
+      // nop
+    } else if (tryDrawDrugs(ctx, "gothic-3.5", new RenderDrugContext({ maxLine: 36 }), box, memoBox, drugs, memo)) {
+      // nop
+    } else {
+      const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, "gothic-3.5",
+        new RenderDrugContext({ maxLine: 36 }), memoBox, drugs, memo);
+      c.drawLines(ctx, [...drugLines, ...memoLines], box);
+    }
+  } finally {
+    if (fontSave) {
+      c.setFont(ctx, fontSave);
+    }
+  }
 
 }

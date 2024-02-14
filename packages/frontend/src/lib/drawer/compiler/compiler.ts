@@ -316,3 +316,4 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
     lineTo(ctx, box.left + at, box.bottom);
   });
 }
+
