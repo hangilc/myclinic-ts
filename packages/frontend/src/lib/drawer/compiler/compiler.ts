@@ -212,7 +212,7 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
     start = ncol - text.length;
   }
   const cols = b.splitToColumns(box, b.evenSplitter(ncol));
-  for(let i=0;i<text.length;i++){
+  for (let i = 0; i < text.length; i++) {
     const ch = text.charAt(i);
     drawText(ctx, ch, cols[start], "center", "center");
     start += 1;
@@ -261,6 +261,31 @@ export function frameInnerColumnBorders(ctx: DrawerContext, box: Box, splitter: 
     moveTo(ctx, box.left + at, box.top);
     lineTo(ctx, box.left + at, box.bottom);
   })
+}
+
+export function frameInnerRowBorders(ctx: DrawerContext, box: Box, splitter: Splitter) {
+  splitter(b.height(box)).forEach(at => {
+    moveTo(ctx, box.left, box.top + at);
+    lineTo(ctx, box.right, box.top + at);
+  })
+}
+
+export function withGrid(ctx: DrawerContext, box: Box, rowSplitter: Splitter | number, colSplitter: Splitter | number,
+  f: (cells: Box[][]) => void) {
+  const rSplitter: Splitter = typeof rowSplitter === "number" ? b.evenSplitter(rowSplitter) : rowSplitter;
+  const cSplitter: Splitter = typeof colSplitter === "number" ? b.evenSplitter(colSplitter) : colSplitter;
+  rect(ctx, box);
+  frameInnerRowBorders(ctx, box, rSplitter);
+  frameInnerColumnBorders(ctx, box, cSplitter);
+  const cells: Box[][] = [];
+  b.withSplitRows(box, rSplitter, rows => {
+    rows.forEach(row => {
+      b.withSplitColumns(row, cSplitter, cols => {
+        cells.push(cols);
+      })
+    })
+  });
+  f(cells);
 }
 
 export function textWidth(ctx: DrawerContext, text: string): number {
