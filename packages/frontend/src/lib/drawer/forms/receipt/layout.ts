@@ -12,6 +12,9 @@ export interface ReceiptLayout {
   row3: Box;
   row4: Box;
   row5: Box;
+  hokengai: Box;
+  institute: Box;
+  ryoushuu: Box;
 }
 
 function nextRow(upper: Box, space: number, height: number, width: number): Box {
@@ -29,6 +32,10 @@ export function mkLayout(): ReceiptLayout {
   const row3 = nextRow(date, 3, 10, 120);
   const row4 = nextRow(row3, 3, 10, 120);
   const row5 = nextRow(row4, 1, 10, 120);
+  const hokengai = nextRow(row5, 3, 25, 48);
+  const institute = b.modify(hokengai, b.flipRight(), b.shift(11, 0), b.setHeight(25, "top"), b.setWidth(30, "left"),
+    b.shrinkHoriz(-4, 0));
+  const ryoushuu = b.modify(institute, b.flipRight(), b.shift(7, 0), b.setHeight(29, "top"), b.setWidth(24, "left"));
   return {
     paperBox: frameBox,
     title: b.modify(frameBox, b.shift(0, 4), b.setWidth(28, "center"), b.setHeight(6, "top")),
@@ -39,5 +46,8 @@ export function mkLayout(): ReceiptLayout {
     row3,
     row4,
     row5,
+    hokengai,
+    institute,
+    ryoushuu,
   }
 }

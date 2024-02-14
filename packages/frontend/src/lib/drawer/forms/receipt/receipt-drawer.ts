@@ -21,6 +21,9 @@ export function drawReceipt(data: ReceiptDrawerData): Op[] {
   drawRow3(ctx, layout.row3);
   drawRow4(ctx, layout.row4);
   drawRow5(ctx, layout.row5);
+  drawHokengai(ctx, layout.hokengai);
+  drawInstitute(ctx, layout.institute);
+  drawRyoushuu(ctx, layout.ryoushuu);
   return c.getOps(ctx, { scale: 1, offsetX: 0, offsetY: 0 });
 }
 
@@ -66,7 +69,6 @@ function drawIssue(ctx: DrawerContext, box: Box) {
 }
 
 function drawRow3(ctx: DrawerContext, box: Box) {
-  c.rect(ctx, box);
   c.setFont(ctx, "mincho-4");
   c.withGrid(ctx, box, 2, 3, cells => {
     c.drawText(ctx, "患者番号", cells[0][0], "center", "center");
@@ -79,7 +81,6 @@ function drawRow3(ctx: DrawerContext, box: Box) {
 }
 
 function drawRow4(ctx: DrawerContext, box: Box) {
-  c.rect(ctx, box);
   c.setFont(ctx, "mincho-4");
   c.withGrid(ctx, box, 2, 5, cells => {
     c.drawText(ctx, "初・再診料", cells[0][0], "center", "center");
@@ -96,7 +97,6 @@ function drawRow4(ctx: DrawerContext, box: Box) {
 }
 
 function drawRow5(ctx: DrawerContext, box: Box) {
-  c.rect(ctx, box);
   c.setFont(ctx, "mincho-4");
   c.withGrid(ctx, box, 2, 5, cells => {
     c.drawText(ctx, "投薬", cells[0][0], "center", "center");
@@ -110,6 +110,25 @@ function drawRow5(ctx: DrawerContext, box: Box) {
     c.mark(ctx, "sonotaBox", cells[1][3]);
     c.mark(ctx, "soutenBox", cells[1][4]);
   });
+}
+
+function drawHokengai(ctx: DrawerContext, box: Box) {
+  c.setFont(ctx, "mincho-4");
+  c.withGrid(ctx, box, 5, 1, cells => {
+    c.drawText(ctx, "保険外", cells[0][0], "center", "center");
+    for(let i=1;i<5;i++){
+      c.mark(ctx, `hokengai${i}Box`, cells[i][0]);
+    }
+  })
+}
+
+function drawInstitute(ctx: DrawerContext, box: Box) {
+  c.rect(ctx, box);
+}
+
+function drawRyoushuu(ctx: DrawerContext, box: Box) {
+  c.rect(ctx, box);
+  
 }
 
 
