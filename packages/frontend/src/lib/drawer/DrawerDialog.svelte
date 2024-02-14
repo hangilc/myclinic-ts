@@ -1,17 +1,18 @@
 <script lang="ts">
   import Dialog from "../Dialog.svelte";
   import DrawerSvg from "./DrawerSvg.svelte";
-  import type { Op } from "@/lib/drawer/compiler/op";
+  import type { Op } from "./compiler/op";
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
 
   export let destroy: () => void;
   export let ops: Op[];
-  export let svgViewBox: string;
-  export let svgWidth: string;
-  export let svgHeight: string;
+  export let width: number = 210;
+  export let height: number = 297;
+  export let scale: number = 1.5;
+  export let viewBox: string = `0 0 ${width} ${height}`;
   export let title: string = "プレビュー";
-  export let kind: string;
+  export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
 
   let printPref: string = "手動";
@@ -24,25 +25,28 @@
       setup: [],
       pages: [ops],
     };
-    await printApi.printDrawer(req, settingSelect === "手動" ? "" : settingSelect);
-    if( setDefaultChecked && settingSelect !== printPref ){
+    await printApi.printDrawer(
+      req,
+      settingSelect === "手動" ? "" : settingSelect
+    );
+    if (setDefaultChecked && settingSelect !== printPref && kind) {
       printApi.setPrintPref(kind, settingSelect);
     }
     doClose();
   }
 
-  onMount(() =>
-    printApi
-      .listPrintSetting()
-      .then((result) => {
-        settingList = ["手動", ...result];
-        return printApi.getPrintPref(kind);
-      })
-      .then((pref) => {
-        printPref = pref ?? "手動";
-        settingSelect = pref ?? "手動";
-      })
-  );
+  onMount(async () => {
+    const result = await printApi.listPrintSetting();
+    console.log("result", result);
+    console.log("kind", kind);
+    settingList = ["手動", ...result];
+    let pref: string | null = null;
+    if (kind) {
+      pref = await printApi.getPrintPref(kind);
+    }
+    printPref = pref ?? "手動";
+    settingSelect = pref ?? "手動";
+  });
 
   function doClose(): void {
     destroy();
@@ -51,7 +55,12 @@
 </script>
 
 <Dialog {destroy} {onClose} {title}>
-  <DrawerSvg {ops} viewBox={svgViewBox} width={svgWidth} height={svgHeight} />
+  <DrawerSvg
+    {ops}
+    {viewBox}
+    width={`${width * scale}`}
+    height={`${height * scale}`}
+  />
   <div>
     <span>設定</span>
     <select bind:value={settingSelect}>

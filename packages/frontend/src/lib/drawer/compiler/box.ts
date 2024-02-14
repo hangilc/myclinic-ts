@@ -27,8 +27,12 @@ export function cy(box: Box): number {
   return (box.top + box.bottom) / 2.0;
 }
 
-export function paperSizeToBox(paperSize: PaperSize): Box {
-  return { left: 0, top: 0, right: paperSize.width, bottom: paperSize.height };
+export function paperSizeToBox(paperSize: PaperSize, opt: { landscape?: boolean } = {}): Box {
+  let box = { left: 0, top: 0, right: paperSize.width, bottom: paperSize.height };
+  if (opt.landscape) {
+    box = { left: 0, top: 0, right: box.bottom, bottom: box.right };
+  }
+  return box;
 }
 
 export type Modifier = (src: Box) => Box;
@@ -81,14 +85,41 @@ export function shrinkVert(shrinkTop: number, shrinkBottom: number): Modifier {
   return offset(0, shrinkTop, 0, -shrinkBottom);
 }
 
-export function setWidth(w: number, anchor: "left" | "center" | "right" ): Modifier {
+export function setWidth(w: number, anchor: "left" | "center" | "right"): Modifier {
   return box => {
-    switch(anchor){
-      case "left": return Object.assign({}, box, { right: box.left + w});
-      case "center": return Object.assign({}, box, { left: cx(box) - w/2.0, right: cx(box) + w/2.0});
-      case "right": return Object.assign({}, box, { left: box.right - w})
+    switch (anchor) {
+      case "left": return Object.assign({}, box, { right: box.left + w });
+      case "center": return Object.assign({}, box, { left: cx(box) - w / 2.0, right: cx(box) + w / 2.0 });
+      case "right": return Object.assign({}, box, { left: box.right - w })
     }
   }
+}
+
+export function setHeight(h: number, anchor: "top" | "center" | "bottom"): Modifier {
+  return box => {
+    switch (anchor) {
+      case "top": return Object.assign({}, box, { bottom: box.top + h });
+      case "center": return Object.assign({}, box, { top: cy(box) - h / 2.0, bottom: cy(box) + h / 2.0 });
+      case "bottom": return Object.assign({}, box, { top: box.bottom - h });
+    }
+  }
+}
+
+export function innerBox(left: number, top: number, right: number, bottom: number): Modifier {
+  return box => ({
+    left: box.left + left,
+    top: box.top + top,
+    right: box.left + right,
+    bottom: box.top + bottom,
+  });
+}
+
+export function flipRight(): Modifier {
+  return box => Object.assign({}, box, { left: box.right, right: box.left + width(box)})
+}
+
+export function flipDown(): Modifier {
+  return box => Object.assign({}, box, { top: box.bottom, bottom: box.bottom + height(box) })
 }
 
 export type Splitter = (ext: number) => number[];
@@ -100,7 +131,7 @@ export function splitAt(...at: number[]): Splitter {
 export function evenSplitter(n: number): Splitter {
   return ext => {
     const at: number[] = [];
-    for(let i=1;i<n;i++){
+    for (let i = 1; i < n; i++) {
       at.push(ext * i / n);
     }
     return at;
@@ -123,7 +154,7 @@ export function splitToColumns(box: Box, splitter: Splitter): Box[] {
   const at: number[] = splitter(width(box));
   const cols: Box[] = [];
   let left = box.left;
-  for(let i=0;i<at.length;i++){
+  for (let i = 0; i < at.length; i++) {
     const right = box.left + at[i];
     cols.push(Object.assign({}, box, { left, right }));
     left = right;
@@ -136,7 +167,7 @@ export function splitToRows(box: Box, splitter: Splitter): Box[] {
   const at: number[] = splitter(height(box));
   const cols: Box[] = [];
   let top = box.top;
-  for(let i=0;i<at.length;i++){
+  for (let i = 0; i < at.length; i++) {
     const bottom = box.top + at[i];
     cols.push(Object.assign({}, box, { top, bottom }));
     top = bottom;

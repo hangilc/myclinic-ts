@@ -7,7 +7,7 @@
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
   import { confirm } from "@/lib/confirm-call";
-  import ShohousenDrawerDialog from "@/ShohousenDrawerDialog.svelte";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
@@ -124,11 +124,16 @@
       validUptoDate: undefined,
       drugs: text.content,
     });
-    const d: ShohousenDrawerDialog = new ShohousenDrawerDialog({
+    const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         ops,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen",
+        title: "処方箋印刷",
       },
     });
     onClose();
