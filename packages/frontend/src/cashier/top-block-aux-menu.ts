@@ -26,24 +26,24 @@ export async function doBlankReceipt() {
     clinicInfo.homepage
   ];
   { // test
-    receipt.patientName = "田中隆";
-    receipt.charge = 1200;
-    receipt.visitDate = "2024-02-15";
-    receipt.issueDate = "2024-02-16";
-    receipt.patientId = "1234";
-    receipt.hoken = "国保";
-    receipt.futanWari = "3";
-    receipt.shoshin = "170";
-    receipt.kanri = "180";
-    receipt.zaitaku = "190";
-    receipt.kensa = "200";
-    receipt.gazou = "210";
-    receipt.touyaku = "220";
-    receipt.chuusha = "230";
-    receipt.shochi = "240";
-    receipt.sonota = "250";
-    receipt.souten = "260";
-    receipt.hokengai = ["保険外１", "保険外２", "保険外３", "保険外４"]
+    // receipt.patientName = "田中隆";
+    // receipt.charge = 1200;
+    // receipt.visitDate = "2024-02-15";
+    // receipt.issueDate = "2024-02-16";
+    // receipt.patientId = "1234";
+    // receipt.hoken = "国保";
+    // receipt.futanWari = "3";
+    // receipt.shoshin = "170";
+    // receipt.kanri = "180";
+    // receipt.zaitaku = "190";
+    // receipt.kensa = "200";
+    // receipt.gazou = "210";
+    // receipt.touyaku = "220";
+    // receipt.chuusha = "230";
+    // receipt.shochi = "240";
+    // receipt.sonota = "250";
+    // receipt.souten = "260";
+    // receipt.hokengai = ["保険外１", "保険外２", "保険外３", "保険外４"]
   }
   const ops = drawReceipt(receipt);
   const dlog: DrawerDialog = new DrawerDialog({
