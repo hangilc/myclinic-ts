@@ -25,6 +25,9 @@ export async function doBlankReceipt() {
     clinicInfo.fax,
     clinicInfo.homepage
   ];
+  { // test
+    receipt.patientName = "田中隆";
+  }
   const ops = drawReceipt(receipt);
   const dlog: DrawerDialog = new DrawerDialog({
     target: document.body,

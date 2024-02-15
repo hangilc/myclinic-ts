@@ -16,3 +16,7 @@ export function stringToCharcodes(str: string): number[] {
 export function stringToCharWidths(str: string, fontSize: number): number[] {
   return stringToCharcodes(str).map(code => charWidth(code, fontSize));
 }
+
+export function stringDrawWidth(str: string, fontSize: number): number {
+  return stringToCharWidths(str, fontSize).reduce((acc, ele) => acc + ele, 0);
+}
