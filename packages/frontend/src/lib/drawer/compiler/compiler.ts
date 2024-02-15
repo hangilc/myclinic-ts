@@ -219,12 +219,26 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
   }
 }
 
-export function drawLines(ctx: DrawerContext, lines: string[], box: Box) {
+export interface DrawLinesOptArg {
+  leading?: number;
+}
+
+class DrawLinesOpt {
+  leading: number;
+
+  constructor(arg: DrawLinesOptArg) {
+    this.leading = arg.leading ?? 0;
+  }
+}
+
+export function drawLines(ctx: DrawerContext, lines: string[], box: Box, optArg: DrawLinesOptArg = {}) {
+  const opt = new DrawLinesOpt(optArg);
   const fontSize = currentFontSize(ctx);
   let r = b.modify(box, b.sliceTop(fontSize));
-  lines.forEach(line => {
+  const leading = opt.leading;
+  lines.forEach((line, i) => {
     drawText(ctx, line, r, "left", "top");
-    r = b.modify(r, b.shift(0, fontSize));
+    r = b.modify(r, b.shift(0, fontSize + leading));
   })
 }
 

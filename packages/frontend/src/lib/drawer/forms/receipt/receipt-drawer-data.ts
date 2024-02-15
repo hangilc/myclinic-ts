@@ -25,7 +25,9 @@ export class ReceiptDrawerData {
   shochi: string = "";
   sonota: string = "";
   souten: string = "";
-  hokengai: string[] = ["", "", "", ""]
+  hokengai: string[] = [];
+  clinicName: string = "";
+  addressLines: string[] = [];
 
   setPatient(patient: Patient): void {
     this.patientName = `${patient.lastName} ${patient.firstName}`

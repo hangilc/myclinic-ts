@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
+  import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import Dialog from "@/lib/Dialog.svelte";
   import {
     type Meisai,

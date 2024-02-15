@@ -6,7 +6,7 @@ import shinryouNames from "@cypress/fixtures/shinryou-set1.json";
 import { batchResolveShinryoucodeByName } from "@cypress/lib/masters";
 import { batchEnterShinryou } from "@cypress/lib/shinryou";
 import { getMeisai } from "@cypress/lib/meisai";
-import type { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
+import type { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
 
 describe("CashierDialog", () => {
   it("should have proper height of cashier detail", () => {

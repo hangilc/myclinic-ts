@@ -1,11 +1,11 @@
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import type { Op } from "../../compiler/op";
-import type { ReceiptDrawerData } from "../../receipt-drawer-data";
+import type { ReceiptDrawerData } from "./receipt-drawer-data";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import type { Box } from "../../compiler/box";
-import { A6 } from "../../compiler/paper-size";
 import { mkLayout } from "./layout";
+import { drawData } from "./data";
 
 export function drawReceipt(data: ReceiptDrawerData): Op[] {
   const ctx = mkDrawerContext();
@@ -24,6 +24,7 @@ export function drawReceipt(data: ReceiptDrawerData): Op[] {
   drawHokengai(ctx, layout.hokengai);
   drawInstitute(ctx, layout.institute);
   drawRyoushuu(ctx, layout.ryoushuu);
+  drawData(ctx, data);
   return c.getOps(ctx, { scale: 1, offsetX: 0, offsetY: 0 });
 }
 

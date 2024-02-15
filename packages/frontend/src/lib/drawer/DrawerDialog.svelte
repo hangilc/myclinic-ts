@@ -37,8 +37,6 @@
 
   onMount(async () => {
     const result = await printApi.listPrintSetting();
-    console.log("result", result);
-    console.log("kind", kind);
     settingList = ["手動", ...result];
     let pref: string | null = null;
     if (kind) {

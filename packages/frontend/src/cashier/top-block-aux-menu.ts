@@ -1,8 +1,9 @@
 
-import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
+import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
 import MishuuDialog from "./MishuuDialog.svelte";
 import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
+import api from "@/lib/api";
 
 export function doMishuu(): void {
   const d: MishuuDialog = new MishuuDialog({
@@ -15,8 +16,15 @@ export function doMishuu(): void {
 
 export async function doBlankReceipt() {
   let receipt = new ReceiptDrawerData();
-  console.log("receipt", receipt);
-  // let ops = await api.drawReceipt(receipt);
+  const clinicInfo = await api.getClinicInfo();
+  receipt.clinicName = clinicInfo.name;
+  receipt.addressLines = [
+    clinicInfo.postalCode,
+    clinicInfo.address,
+    clinicInfo.tel,
+    clinicInfo.fax,
+    clinicInfo.homepage
+  ];
   const ops = drawReceipt(receipt);
   const dlog: DrawerDialog = new DrawerDialog({
     target: document.body,

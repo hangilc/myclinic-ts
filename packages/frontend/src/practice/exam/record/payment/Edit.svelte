@@ -10,7 +10,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { dateTimeToSql } from "@/lib/util";
   import api from "@/lib/api";
-  import { ReceiptDrawerData } from "@/lib/drawer/receipt-drawer-data";
+  import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import { pad } from "@/lib/pad";
   import { showError } from "@/lib/show-error";
   import { confirm } from "@/lib/confirm-call";
