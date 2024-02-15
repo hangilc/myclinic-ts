@@ -23,7 +23,7 @@ export function drawData(ctx: DrawerContext, data: ReceiptDrawerData) {
   renderDetail(ctx, data.shochi ?? "", c.getMark(ctx, "shochiBox"));
   renderDetail(ctx, data.sonota ?? "", c.getMark(ctx, "sonotaBox"));
   renderDetail(ctx, data.souten ?? "", c.getMark(ctx, "soutenBox"));
-  renderHokengai(ctx, data.hokengai ?? [], c.getMark(ctx, ""));
+  renderHokengai(ctx, data.hokengai ?? [], [1,2,3,4].map(i => c.getMark(ctx, `hokengai${i}Box`)));
   renderInstitute(ctx, data.clinicName ?? "", data.addressLines ?? [], c.getMark(ctx, "instituteBox"));
 }
 
@@ -76,14 +76,13 @@ function renderDetail(ctx: DrawerContext, text: string, box: Box) {
   c.drawText(ctx, text, box, "center", "center");
 }
 
-function renderHokengai(ctx: DrawerContext, hokengai: string[], box: Box ){
-  box = b.modify(box, b.shrinkHoriz(1, 0));
-  const rows = b.splitToRows(box, b.evenSplitter(4));
+function renderHokengai(ctx: DrawerContext, hokengai: string[], boxes: Box[] ){
   c.setFont(ctx, "mincho-4");
   for(let i=0;i<hokengai.length;i++){
     const str = hokengai[i];
-    if( i < rows.length ){
-      c.drawText(ctx, str, rows[i], "left", "center");
+    if( i < boxes.length ){
+      const box = b.modify(boxes[i], b.shrinkHoriz(1, 0));
+      c.drawText(ctx, str, box, "left", "center");
     }
   }
 
