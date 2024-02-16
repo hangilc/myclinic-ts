@@ -53,7 +53,7 @@ export function createFont(
       return weight;
     }
   }
-  ctx.ops.push(["create_font", name, fontName, size, resolveWeight(), italic]);
+  ctx.ops.push(["create_font", name, fontName, size, resolveWeight(), italic ? 1 : 0]);
   fsm.registerFontSize(ctx.fsm, name, size);
 }
 

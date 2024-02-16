@@ -6,6 +6,7 @@
   import { pad } from "@/lib/pad";
   import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import api from "@/lib/api";
+  import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
 
   let pdfFiles: string[] = [];
 
@@ -47,8 +48,9 @@
       const file = receiptPdfFileName(visit);
       files.push(file);
       const meisai = await api.getMeisai(visit.visitId);
-      const data = ReceiptDrawerData.create(visit, meisai);
-      const ops = await api.drawReceipt(data);
+      const clinicInfo = await api.getClinicInfo();
+      const data = ReceiptDrawerData.create(visit, meisai, clinicInfo);
+      const ops = drawReceipt(data);
       await api.createPdfFile(ops, "A6_Landscape", file);
       await api.stampPdf(file, "receipt");
     });

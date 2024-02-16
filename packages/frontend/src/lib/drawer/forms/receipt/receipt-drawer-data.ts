@@ -3,6 +3,7 @@ import {
   type Meisai,
   MeisaiSectionEnum,
   type VisitEx,
+  ClinicInfo,
 } from "myclinic-model"
 import { hokenRep } from "@/lib/hoken-rep"
 import * as kanjidate from "kanjidate"
@@ -98,13 +99,25 @@ export class ReceiptDrawerData {
     this.issueDate = kanjidate.format(kanjidate.f2, issueDate);
   }
 
-  static create(visit: VisitEx, meisai: Meisai): ReceiptDrawerData {
+  setClinic(clinicInfo: ClinicInfo): void {
+    this.clinicName = clinicInfo.name;
+    this.addressLines = [
+      clinicInfo.postalCode,
+      clinicInfo.address,
+      clinicInfo.tel,
+      clinicInfo.fax,
+      clinicInfo.homepage
+    ];
+  }
+
+  static create(visit: VisitEx, meisai: Meisai, clinicInfo: ClinicInfo): ReceiptDrawerData {
     const data = new ReceiptDrawerData();
     data.setPatient(visit.patient)
     data.setMeisai(meisai);
     data.setVisitDate(new Date(visit.visitedAt));
     data.setIssueDate(new Date());
-    data.hoken = hokenRep(visit)
+    data.hoken = hokenRep(visit);
+    data.setClinic(clinicInfo);
     return data;
   }
 

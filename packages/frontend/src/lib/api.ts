@@ -76,7 +76,7 @@ async function post<T>(
   cmd: string,
   data: any,
   params: ParamsInit,
-  cast: Caster<T>
+  cast: Caster<T>,
 ): Promise<T> {
   return postRaw(cmd, JSON.stringify(data), params, cast);
 }
@@ -376,9 +376,9 @@ export default {
     return get("get-meisai", { "visit-id": visitId.toString() }, m.Meisai.cast);
   },
 
-  drawReceipt(data: ReceiptDrawerData): Promise<DrawerOp[]> {
-    return post("draw-receipt", data, {}, castList(castDrawerOp));
-  },
+  // drawReceipt(data: ReceiptDrawerData): Promise<DrawerOp[]> {
+  //   return post("draw-receipt", data, {}, castList(castDrawerOp));
+  // },
 
   createPdfFile(
     ops: DrawerOp[],
@@ -392,7 +392,7 @@ export default {
         "paper-size": paperSize,
         "file-name": fileName,
       },
-      castBoolean
+      castBoolean,
     );
   },
 
