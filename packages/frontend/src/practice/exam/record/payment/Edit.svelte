@@ -14,6 +14,7 @@
   import { pad } from "@/lib/pad";
   import { showError } from "@/lib/show-error";
   import { confirm } from "@/lib/confirm-call";
+  import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
 
   export let visit: VisitEx;
   export let meisai: Meisai | null = null;
@@ -76,8 +77,9 @@
   async function doReceiptPdf() {
     if (meisai != null) {
       const patient = visit.patient;
-      const data = ReceiptDrawerData.create(visit, meisai);
-      const ops = await api.drawReceipt(data);
+      const clinicInfo = await api.getClinicInfo();
+      const data = ReceiptDrawerData.create(visit, meisai, clinicInfo);
+      const ops = drawReceipt(data);
       const timestamp = makeTimestamp(new Date());
       const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
       await api.createPdfFile(ops, "A6_Landscape", fileName);

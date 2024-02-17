@@ -1,6 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
-  // import DrawerDialog2 from "@/lib/drawer/DrawerDialog2.svelte";
+  import DrawerDialog2 from "@/lib/drawer/DrawerDialog.svelte";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
   import { HorizAlign, VertAlign } from "@/lib/drawer-compiler/enums";
