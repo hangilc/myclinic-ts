@@ -69,7 +69,7 @@ export function setRight(right: number): Modifier {
   return box => Object.assign({}, box, { right, });
 }
 
-export function inset(dx: number, dy: number = dx): Modifier {
+export function inset(dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): Modifier {
   return offset(dx, dy, -dx, -dy);
 }
 

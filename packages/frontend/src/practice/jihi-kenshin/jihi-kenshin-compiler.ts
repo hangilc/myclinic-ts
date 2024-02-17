@@ -1,4 +1,6 @@
-import { Box } from "@/lib/drawer-compiler/box";
+import { type Box } from "@/lib/drawer/compiler/box";
+import * as b from "@lib/drawer/compiler/box";
+import * as c from "@lib/drawer/compiler/compiler";
 import { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
 import {
   HorizAlign,
@@ -7,7 +9,8 @@ import {
   VertDirection,
 } from "@/lib/drawer-compiler/enums";
 import { FontWeightBold } from "@/lib/drawer-compiler/weight-consts";
-import { A4 } from "@/lib/drawer-compiler/paper-size";
+import { A4 } from "@/lib/drawer/compiler/paper-size";
+import { mkDrawerContext, type DrawerContext } from "@/lib/drawer/compiler/context";
 
 
 const firstColWidth = 22;
@@ -190,74 +193,74 @@ function compileBottom(c: DrawerCompiler, box: Box): void {
   });
 }
 
-export function createJihiKenshinCompiler(): DrawerCompiler {
-  const comp = new DrawerCompiler();
-  const paper: Box = Box.fromPaperSize(A4);
-  comp.createFont("title", "MS Gothic", 7, FontWeightBold);
-  comp.createFont("regular", "MS Mincho", 4);
-  comp.createFont("large", "MS Mincho", 5.5);
-  comp.createFont("entry", "MS Gothic", 4);
-  comp.createFont("small-entry", "MS Gothic", 3);
-  comp.createFont("large-entry", "MS Gothic", 5.5);
-  comp.createPen("regular", 0, 0, 0, 0.1);
-  comp.setPen("regular");
-  const frame = paper.inset(16, 42, 26, 42);
-  comp.setFont("title");
-  comp.textAt(frame.cx, frame.top - 7, "健康診断書", {
-    halign: HorizAlign.Center,
-    valign: VertAlign.Bottom,
-    interCharsSpace: 1,
-  });
-  comp.setFont("regular");
-  comp.frame(frame);
-  const rows = frame.splitToRows(...Array(9).fill(9), 9 * 9);
-  compileShimei(comp, rows[0]);
-  compileJuusho(comp, rows[1]);
-  compileShincho(
-    comp,
-    rows[2].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileTaijuu(
-    comp,
-    rows[3].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileShinsatsu(
-    comp,
-    rows[4].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileShiryoku(
-    comp,
-    rows[5].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileChouryoku(
-    comp,
-    rows[6].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileKetsuatsu(
-    comp,
-    rows[7].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileShindenzu(
-    comp,
-    rows[8].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
-  );
-  compileKioureki(
-    comp,
-    Box.combineRows(
-      rows
-        .slice(2, 4)
-        .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
-    )
-  );
-  compileXp(
-    comp,
-    Box.combineRows(
-      rows
-        .slice(4, 9)
-        .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
-    )
-  );
-  compileKensa(comp, rows[9]);
-  compileBottom(comp, rows[10]);
-  return comp;
+export function createJihiKenshinCompiler(): DrawerContext {
+  const ctx: DrawerContext = mkDrawerContext();
+  const paper: Box = b.paperSizeToBox(A4);
+  c.createFont(ctx, "title", "MS Gothic", 7, FontWeightBold);
+  c.createFont(ctx, "regular", "MS Mincho", 4);
+  c.createFont(ctx, "large", "MS Mincho", 5.5);
+  c.createFont(ctx, "entry", "MS Gothic", 4);
+  c.createFont(ctx, "small-entry", "MS Gothic", 3);
+  c.createFont(ctx, "large-entry", "MS Gothic", 5.5);
+  c.createPen(ctx, "regular", 0, 0, 0, 0.1);
+  c.setPen(ctx, "regular");
+  const frame = b.modify(paper, b.inset(16, 42, 26, 42));
+  c.setFont(ctx, "title");
+  // c.textAt(frame.cx, frame.top - 7, "健康診断書", {
+  //   halign: HorizAlign.Center,
+  //   valign: VertAlign.Bottom,
+  //   interCharsSpace: 1,
+  // });
+  // c.setFont("regular");
+  // c.frame(frame);
+  // const rows = frame.splitToRows(...Array(9).fill(9), 9 * 9);
+  // compileShimei(comp, rows[0]);
+  // compileJuusho(comp, rows[1]);
+  // compileShincho(
+  //   comp,
+  //   rows[2].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileTaijuu(
+  //   comp,
+  //   rows[3].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileShinsatsu(
+  //   comp,
+  //   rows[4].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileShiryoku(
+  //   comp,
+  //   rows[5].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileChouryoku(
+  //   comp,
+  //   rows[6].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileKetsuatsu(
+  //   comp,
+  //   rows[7].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileShindenzu(
+  //   comp,
+  //   rows[8].setWidth(firstColWidth + secondColWidth, HorizDirection.Left)
+  // );
+  // compileKioureki(
+  //   comp,
+  //   Box.combineRows(
+  //     rows
+  //       .slice(2, 4)
+  //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
+  //   )
+  // );
+  // compileXp(
+  //   comp,
+  //   Box.combineRows(
+  //     rows
+  //       .slice(4, 9)
+  //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
+  //   )
+  // );
+  // compileKensa(comp, rows[9]);
+  // compileBottom(comp, rows[10]);
+  return ctx;
 }
