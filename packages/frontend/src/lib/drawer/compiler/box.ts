@@ -162,6 +162,8 @@ export function splitWidths(...widths: number[]): Splitter {
   }
 }
 
+export const splitHeights: (...heights: number[]) => Splitter = splitWidths;
+
 export function splitToColumns(box: Box, splitter: Splitter): Box[] {
   const at: number[] = splitter(width(box));
   const cols: Box[] = [];

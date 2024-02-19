@@ -192,7 +192,6 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
   const opt = new DrawerTextOption(optArg);
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   let charWidths = stringToCharWidths(text, fontSize);
-  console.log("charWidths 1", charWidths);
   if( opt.interCharsSpace !== 0 ){
     charWidths = charWidths.map((cs, i) => {
       if( i !== charWidths.length - 1 ){
