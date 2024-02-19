@@ -14,6 +14,7 @@
   import TextInputDialog from "./TextInputDialog.svelte";
   import { encodeUrineResult } from "./urine-exam";
   import { convLine } from "./conv-line";
+  import * as c from "@/lib/drawer/compiler/compiler";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -310,128 +311,129 @@
 
   function doDisplay() {
     const comp = createJihiKenshinCompiler();
-    comp.setFont("entry");
-    set(comp, "氏名", name);
-    if (birthdate) {
-      set(comp, "生年月日", kanjidate.format(kanjidate.f2, birthdate));
-    }
-    set(comp, "性別", sex);
-    set(comp, "住所", address);
-    set(comp, "身長", [height || comp.space(18), " cm"]);
-    set(comp, "体重", [weight || comp.space(18), " kg"]);
-    set(comp, "診察", physicalExam);
-    if (hasNoVisualAcuityInput()) {
-      const b = comp.getMark("視力");
-      comp.line(...b.leftBottom(), ...b.rightTop());
-    } else {
-      const lts = ["左", comp.space(1), visualAcuityLeft || comp.space(8)];
-      if (visualAcuityLeftCorrected) {
-        lts.push(comp.space(1), "(", visualAcuityLeftCorrected, ")");
-      }
-      set(comp, "視力左", lts);
-      const rts = ["右", comp.space(1), visualAcuityRight || comp.space(8)];
-      if (visualAcuityRightCorrected) {
-        rts.push(comp.space(1), "(", visualAcuityRightCorrected, ")");
-      }
-      set(comp, "視力右", rts);
-    }
-    if (hearingExamConducted === "実施") {
-      const b = comp.getMark("聴力");
-      let [left, right] = b.splitToEvenCols(2);
-      left = comp.textAndAdvance(left.insetLeft(1), "左", {
-        valign: VertAlign.Center,
-      });
-      let [top, bottom] = left.insetLeft(0.5).splitToEvenRows(2);
-      let saveFont = comp.setFont("small-entry");
-      comp.text(top, "4000Hz 所見" + hearingLeft4000Loss, {
-        valign: VertAlign.Center,
-      });
-      comp.text(bottom, "1000Hz 所見" + hearingLeft1000Loss, {
-        valign: VertAlign.Center,
-      });
-      comp.setFont(saveFont);
-      right = comp.textAndAdvance(right.insetLeft(1), "右", {
-        valign: VertAlign.Center,
-      });
-      [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
-      saveFont = comp.setFont("small-entry");
-      comp.text(top, "4000Hz 所見" + hearingRight4000Loss, {
-        valign: VertAlign.Center,
-      });
-      comp.text(bottom, "1000Hz 所見" + hearingRight1000Loss, {
-        valign: VertAlign.Center,
-      });
-      comp.setFont(saveFont);
-    } else {
-      const b = comp.getMark("聴力");
-      comp.line(...b.leftBottom(), ...b.rightTop());
-    }
-    set(comp, "血圧", bloodPressure);
-    set(comp, "心電図", shindenzu);
-    comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);
-    comp.paragraph(comp.getMark("Ｘ線").inset(1, 0, 2, 0), xp);
-    if (xpConductedDate) {
-      set(comp, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
-    }
-    [...Array(9).keys()].forEach((i) => {
-      set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
-      let [value, unit]: (string | (string | TextVariant)[])[] =
-        kensaValues[i].split(/\s+/);
-      if (unit === "ten_thousand_per_ul") {
-        unit = [
-          "x10",
-          comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
-          "/μL",
-        ];
-      }
-      if (value) {
-        comp.getMark(`血液検査結果${i + 1}`).withCols(
-          [18],
-          (b) => {
-            comp.text(b, value, {
-              halign: HorizAlign.Right,
-              valign: VertAlign.Center,
-            });
-          },
-          (b) => {
-            comp.text(b.shrinkToRight(1), unit ?? "", {
-              halign: HorizAlign.Left,
-              valign: VertAlign.Center,
-            });
-          }
-        );
-      } else {
-        const b = comp.getMark(`血液検査結果${i + 1}`);
-        comp.line(...b.leftBottom(), ...b.rightTop());
-      }
-    });
-    let prevFont = comp.curFont;
-    renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
-    renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);
-    renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
-    renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
-    comp.setFont(prevFont);
-    set(comp, "発行日", kanjidate.format(kanjidate.f2, issueDate));
-    set(comp, "住所1", address1);
-    set(comp, "住所2", address2);
-    set(comp, "クリニック名", clinicName);
-    comp.withFont("large-entry", () => set(comp, "医師名", doctorName));
-    if (showMarker) {
-      comp.labelMarks();
-    }
-    // const d: DrawerDialog2 = new DrawerDialog2({
-    //   target: document.body,
-    //   props: {
-    //     destroy: () => d.$destroy(),
-    //     title: "自費健診印刷",
-    //     ops: comp.ops,
-    //     width: A4[0],
-    //     height: A4[1],
-    //     previewScale: 2,
-    //     displayWidth: A4[0] * 2 + 20,
-    //     displayHeight: A4[1] * 2 + 20,
-    //   },
+    // comp.setFont("entry");
+    // set(comp, "氏名", name);
+    // if (birthdate) {
+    //   set(comp, "生年月日", kanjidate.format(kanjidate.f2, birthdate));
+    // }
+    // set(comp, "性別", sex);
+    // set(comp, "住所", address);
+    // set(comp, "身長", [height || comp.space(18), " cm"]);
+    // set(comp, "体重", [weight || comp.space(18), " kg"]);
+    // set(comp, "診察", physicalExam);
+    // if (hasNoVisualAcuityInput()) {
+    //   const b = comp.getMark("視力");
+    //   comp.line(...b.leftBottom(), ...b.rightTop());
+    // } else {
+    //   const lts = ["左", comp.space(1), visualAcuityLeft || comp.space(8)];
+    //   if (visualAcuityLeftCorrected) {
+    //     lts.push(comp.space(1), "(", visualAcuityLeftCorrected, ")");
+    //   }
+    //   set(comp, "視力左", lts);
+    //   const rts = ["右", comp.space(1), visualAcuityRight || comp.space(8)];
+    //   if (visualAcuityRightCorrected) {
+    //     rts.push(comp.space(1), "(", visualAcuityRightCorrected, ")");
+    //   }
+    //   set(comp, "視力右", rts);
+    // }
+    // if (hearingExamConducted === "実施") {
+    //   const b = comp.getMark("聴力");
+    //   let [left, right] = b.splitToEvenCols(2);
+    //   left = comp.textAndAdvance(left.insetLeft(1), "左", {
+    //     valign: VertAlign.Center,
+    //   });
+    //   let [top, bottom] = left.insetLeft(0.5).splitToEvenRows(2);
+    //   let saveFont = comp.setFont("small-entry");
+    //   comp.text(top, "4000Hz 所見" + hearingLeft4000Loss, {
+    //     valign: VertAlign.Center,
+    //   });
+    //   comp.text(bottom, "1000Hz 所見" + hearingLeft1000Loss, {
+    //     valign: VertAlign.Center,
+    //   });
+    //   comp.setFont(saveFont);
+    //   right = comp.textAndAdvance(right.insetLeft(1), "右", {
+    //     valign: VertAlign.Center,
+    //   });
+    //   [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
+    //   saveFont = comp.setFont("small-entry");
+    //   comp.text(top, "4000Hz 所見" + hearingRight4000Loss, {
+    //     valign: VertAlign.Center,
+    //   });
+    //   comp.text(bottom, "1000Hz 所見" + hearingRight1000Loss, {
+    //     valign: VertAlign.Center,
+    //   });
+    //   comp.setFont(saveFont);
+    // } else {
+    //   const b = comp.getMark("聴力");
+    //   comp.line(...b.leftBottom(), ...b.rightTop());
+    // }
+    // set(comp, "血圧", bloodPressure);
+    // set(comp, "心電図", shindenzu);
+    // comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);
+    // comp.paragraph(comp.getMark("Ｘ線").inset(1, 0, 2, 0), xp);
+    // if (xpConductedDate) {
+    //   set(comp, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
+    // }
+    // [...Array(9).keys()].forEach((i) => {
+    //   set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
+    //   let [value, unit]: (string | (string | TextVariant)[])[] =
+    //     kensaValues[i].split(/\s+/);
+    //   if (unit === "ten_thousand_per_ul") {
+    //     unit = [
+    //       "x10",
+    //       comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
+    //       "/μL",
+    //     ];
+    //   }
+    //   if (value) {
+    //     comp.getMark(`血液検査結果${i + 1}`).withCols(
+    //       [18],
+    //       (b) => {
+    //         comp.text(b, value, {
+    //           halign: HorizAlign.Right,
+    //           valign: VertAlign.Center,
+    //         });
+    //       },
+    //       (b) => {
+    //         comp.text(b.shrinkToRight(1), unit ?? "", {
+    //           halign: HorizAlign.Left,
+    //           valign: VertAlign.Center,
+    //         });
+    //       }
+    //     );
+    //   } else {
+    //     const b = comp.getMark(`血液検査結果${i + 1}`);
+    //     comp.line(...b.leftBottom(), ...b.rightTop());
+    //   }
     // });
+    // let prevFont = comp.curFont;
+    // renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
+    // renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);
+    // renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
+    // renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
+    // comp.setFont(prevFont);
+    // set(comp, "発行日", kanjidate.format(kanjidate.f2, issueDate));
+    // set(comp, "住所1", address1);
+    // set(comp, "住所2", address2);
+    // set(comp, "クリニック名", clinicName);
+    // comp.withFont("large-entry", () => set(comp, "医師名", doctorName));
+    // if (showMarker) {
+    //   comp.labelMarks();
+    // }
+
+
+
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "自費健診印刷",
+        ops: c.getOps(comp),
+        width: A4[0],
+        height: A4[1],
+        scale: 2,
+      },
+    });
   }
 </script>
 

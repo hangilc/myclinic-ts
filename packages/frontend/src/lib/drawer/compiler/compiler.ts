@@ -175,9 +175,35 @@ export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, bo
   drawChars(ctx, text, xs, ys);
 }
 
-export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign) {
+export interface DrawTextOptionArg {
+  interCharsSpace?: number;
+}
+
+class DrawerTextOption {
+  interCharsSpace: number;
+
+  constructor(arg: DrawTextOptionArg) {
+    this.interCharsSpace = arg.interCharsSpace ?? 0;
+  }
+}
+
+export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
+    optArg: DrawTextOptionArg = {}) {
+  const opt = new DrawerTextOption(optArg);
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  const charWidths = stringToCharWidths(text, fontSize);
+  let charWidths = stringToCharWidths(text, fontSize);
+  console.log("charWidths 1", charWidths);
+  if( opt.interCharsSpace !== 0 ){
+    charWidths = charWidths.map((cs, i) => {
+      if( i !== charWidths.length - 1 ){
+        return cs + opt.interCharsSpace;
+      } else {
+        return cs;
+      }
+    })
+  }
+  console.log("charWidths 2", charWidths);
+
   const length = sumOfNumbers(charWidths);
   const y = locateY(box, fontSize, valign);
   let x: number;
@@ -249,6 +275,8 @@ export function rect(ctx: DrawerContext, box: Box) {
   lineTo(ctx, box.left, box.bottom);
   lineTo(ctx, box.left, box.top);
 }
+
+export const frame: (ctx: DrawerContext, box: Box) => void = rect;
 
 export function frameRight(ctx: DrawerContext, box: Box) {
   moveTo(ctx, box.right, box.top);

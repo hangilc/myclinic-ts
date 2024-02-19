@@ -61,6 +61,10 @@ export function shiftDown(dy: number): Modifier {
   return shift(0, dy);
 }
 
+export function shiftUp(dy: number): Modifier {
+  return shift(0, -dy);
+}
+
 export function setLeft(left: number): Modifier {
   return box => Object.assign({}, box, { left, });
 }
@@ -118,8 +122,16 @@ export function flipRight(): Modifier {
   return box => Object.assign({}, box, { left: box.right, right: box.left + width(box)})
 }
 
+export function flipLeft(): Modifier {
+  return box => Object.assign({}, box, { left: box.left - width(box), right: box.left })
+}
+
 export function flipDown(): Modifier {
   return box => Object.assign({}, box, { top: box.bottom, bottom: box.bottom + height(box) })
+}
+
+export function flipUp(): Modifier {
+  return box => Object.assign({}, box, { top: box.bottom - height(box), bottom: box.top })
 }
 
 export type Splitter = (ext: number) => number[];
