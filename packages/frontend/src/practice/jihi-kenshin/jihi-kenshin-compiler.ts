@@ -106,26 +106,21 @@ function compileShiryoku(ctx: DrawerContext, row: Box): void {
 //   c.addMark("心電図", cols[1]);
 // }
 
-// function compileKioureki(ctx: DrawerContext, row: Box): void {
-//   c.frame(row);
-//   c.text(row.inset(1), "既往歴", {
-//     halign: HorizAlign.Left,
-//     valign: VertAlign.Top
-//   });
-//   c.addMark("既往歴", row.shiftTopValue(6));
-// }
+function compileKioureki(ctx: DrawerContext, row: Box): void {
+  c.frame(ctx, row);
+  c.drawText(ctx, "既往歴", b.modify(row, b.inset(1)), "left", "top");
+  c.mark(ctx, "既往歴", b.modify(row, b.shrinkVert(6, 0)));
+}
 
-// function compileXp(ctx: DrawerContext, row: Box): void {
-//   c.frame(row);
-//   c.text(row.inset(1), "胸部Ｘ線（大角）", {
-//     halign: HorizAlign.Left,
-//     valign: VertAlign.Top
-//   });
-//   c.addMark("Ｘ線", row.shiftTopValue(6).shiftBottomValue(-6));
-//   const bottom = row.setHeight(6, VertDirection.Bottom).inset(1, 0, 0, 0);
-//   const b = c.text(bottom, "撮影日", { halign: HorizAlign.Left, valign: VertAlign.Center });
-//   c.addMark("Ｘ線撮影日", bottom.setLeft(b.right).inset(4, 0, 0, 0));
-// }
+function compileXp(ctx: DrawerContext, row: Box): void {
+  c.frame(ctx, row);
+  c.drawText(ctx, "胸部Ｘ線（大角）", b.modify(row, b.inset(1)), "left", "top");
+  c.mark(ctx, "Ｘ線", b.modify(row, b.shrinkVert(6, 6)));
+  // const bottom = row.setHeight(6, VertDirection.Bottom).inset(1, 0, 0, 0);
+  const bottom = b.modify(row, b.setHeight(6, "bottom"), b.shrinkHoriz(1, 0));
+  const bb = c.text(bottom, "撮影日", { halign: HorizAlign.Left, valign: VertAlign.Center });
+  c.addMark("Ｘ線撮影日", bottom.setLeft(b.right).inset(4, 0, 0, 0));
+}
 
 // function compileKensa(ctx: DrawerContext, box: Box): void {
 //   const cols = box.splitToCols(firstColWidth, 84);
@@ -231,7 +226,7 @@ export function createJihiKenshinCompiler(): DrawerContext {
   c.setFont(ctx, "regular");
   c.frame(ctx, frame);
   // const rows = frame.splitToRows(...Array(9).fill(9), 9 * 9);
-  const rows = b.splitToRows(frame, b.splitHeights(...Array(9).fill(9), 9*9));
+  const rows = b.splitToRows(frame, b.splitHeights(...Array(9).fill(9), 9 * 9));
   compileShimei(ctx, rows[0]);
   compileJuusho(ctx, rows[1]);
   compileFormat1(ctx, b.modify(rows[2], b.setWidth(firstColWidth + secondColWidth, "left")), "身長");
@@ -253,6 +248,10 @@ export function createJihiKenshinCompiler(): DrawerContext {
   //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
   //   )
   // );
+  compileKioureki(
+    ctx,
+    b.modify(b.combine(rows.slice(2, 4)), b.shrinkHoriz(firstColWidth + secondColWidth, 0))
+  );
   // compileXp(
   //   ctx,
   //   Box.combineRows(
@@ -261,6 +260,10 @@ export function createJihiKenshinCompiler(): DrawerContext {
   //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
   //   )
   // );
+  compileXp(
+    ctx,
+    b.modify(b.combine(rows.slice(4, 9)), b.shrinkHoriz(firstColWidth + secondColWidth, 0))
+  );
   // compileKensa(ctx, rows[9]);
   // compileBottom(ctx, rows[10]);
   return ctx;

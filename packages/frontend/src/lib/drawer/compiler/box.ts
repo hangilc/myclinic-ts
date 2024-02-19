@@ -197,3 +197,12 @@ export function withSplitColumns<T>(box: Box, splitter: Splitter, f: (cols: Box[
 export function withSplitRows<T>(box: Box, splitter: Splitter, f: (rows: Box[]) => T): T {
   return f(splitToRows(box, splitter));
 }
+
+export function combine(boxes: Box[]): Box {
+  return {
+    left: boxes[0].left,
+    top: boxes[0].top,
+    right: boxes[boxes.length-1].right,
+    bottom: boxes[boxes.length-1].bottom,
+  }
+}
