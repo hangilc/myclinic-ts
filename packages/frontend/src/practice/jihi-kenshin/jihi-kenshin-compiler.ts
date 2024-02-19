@@ -28,8 +28,11 @@ function compileShimei(ctx: DrawerContext, row: Box): void {
   // c.text(cols[2].inset(1), "生年月日", { halign: HorizAlign.Justify, valign: VertAlign.Center });
   c.drawTextJustified(ctx, "生年月日", b.modify(cols[2], b.shrinkHoriz(1, 1)), "center");
   // c.addMark("生年月日", cols[3]);
+  c.mark(ctx, "生年月日", cols[3])
   // c.text(cols[4], "性別", Centered);
+  c.drawText(ctx, "性別", cols[4], "center", "center");
   // c.addMark("性別", cols[5]);
+  c.mark(ctx, "性別", cols[5]);
 }
 
 // function compileJuusho(c: DrawerCompiler, row: Box): void {
