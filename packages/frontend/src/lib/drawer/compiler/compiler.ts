@@ -188,13 +188,13 @@ class DrawerTextOption {
 }
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
-    optArg: DrawTextOptionArg = {}) {
+  optArg: DrawTextOptionArg = {}) {
   const opt = new DrawerTextOption(optArg);
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   let charWidths = stringToCharWidths(text, fontSize);
-  if( opt.interCharsSpace !== 0 ){
+  if (opt.interCharsSpace !== 0) {
     charWidths = charWidths.map((cs, i) => {
-      if( i !== charWidths.length - 1 ){
+      if (i !== charWidths.length - 1) {
         return cs + opt.interCharsSpace;
       } else {
         return cs;
@@ -248,11 +248,11 @@ export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, h
   const fontSize = currentFontSize(ctx);
   const tw = fontSize;
   let th = fontSize * text.length;
-  if( text.length > 1 && opt.interCharsSpace !== 0 ){
+  if (text.length > 1 && opt.interCharsSpace !== 0) {
     th += opt.interCharsSpace * (text.length - 1);
   }
   let x: number;
-  switch(halign){
+  switch (halign) {
     case "center": {
       x = b.cx(box) - tw / 2.0;
       break;
@@ -267,7 +267,7 @@ export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, h
     }
   }
   let y: number;
-  switch(valign){
+  switch (valign) {
     case "center": {
       y = b.cy(box) - th / 2.0;
       break;
@@ -281,7 +281,7 @@ export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, h
       break;
     }
   }
-  for(let i=0;i<text.length;i++){
+  for (let i = 0; i < text.length; i++) {
     const ch = text.charAt(i);
     drawChars(ctx, ch, [x], [y]);
     y += fontSize + opt.interCharsSpace;
@@ -412,24 +412,76 @@ export interface CompositeGapTo {
 
 export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo;
 
-export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[]) {
+export interface DrawCompositeOptionArg {
+  halign?: HAlign;
+  valign?: VAlign;
+}
+
+class DrawCompositeOption {
+  halign: HAlign;
+  valign: VAlign;
+
+  constructor(arg: DrawCompositeOptionArg) {
+    this.halign = arg.halign ?? "left";
+    this.valign = arg.valign ?? "center";
+  }
+}
+
+export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[]): number {
+  let w = 0;
+  for (let i = 0; i < comps.length; i++) {
+    const comp = comps[i];
+    switch (comp.kind) {
+      case "text": {
+        w += textWidth(ctx, comp.text);
+        break;
+      }
+      case "gap": {
+        w += comp.width;
+        break;
+      }
+      default: {
+        throw new Error(`Cannot calculate width of composite: ${comp}`);
+      }
+    }
+  }
+  return w;
+}
+
+export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[],
+  optArg: DrawCompositeOptionArg = {}) {
+  const opt = new DrawCompositeOption(optArg);
+  switch (opt.halign) {
+    case "center": {
+      const cw = compositeWidth(ctx, comps);
+      const extra = (b.width(box) - cw) / 2.0;
+      box = b.modify(box, b.shrinkHoriz(extra, extra));
+      break;
+    }
+    case "right": {
+      const cw = compositeWidth(ctx, comps);
+      const x = box.right - cw;
+      box = b.modify(box, b.setLeft(x));
+      break;
+    }
+  }
   let pos = 0;
   comps.forEach(item => {
     switch (item.kind) {
       case "text": {
-        drawText(ctx, item.text, b.modify(box, b.inset(pos, 0)), "left", "center");
+        drawText(ctx, item.text, b.modify(box, b.shift(pos, 0)), "left", opt.valign);
         pos += textWidth(ctx, item.text);
         break;
       }
       case "gap": {
-        if( item.mark ){
+        if (item.mark) {
           mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width }));
         }
         pos += item.width;
         break;
       }
       case "gap-to": {
-        if( item.mark ){
+        if (item.mark) {
           mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
         }
         pos = item.at;

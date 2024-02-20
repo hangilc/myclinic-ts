@@ -184,21 +184,26 @@ function compileKennyou(ctx: DrawerContext, box: Box): void {
   c.drawTextVertically(ctx, "検尿", cols[0], "center", "center", { interCharsSpace: 4 });
   const rows = b.splitToRows(cols[1], b.evenSplitter(3));
   rows.forEach((r) => c.frame(ctx, r));
-  // c.drawComposite(ctx, rows[0], [
-  //   { kind: "text", text: "蛋白（"}, 
-  //   { kind: "gap", width: 11},
-  //   { kind: "mark", }
-  //   c.space(11, { mark: "尿蛋白" }), "）"], Centered);
-  // c.drawComposite(ctx, rows[1], ["潜血（", c.space(11, { mark: "尿潜血" }), "）"], Centered);
-  // c.drawComposite(ctx, rows[2], ["糖　（", c.space(11, { mark: "尿糖" }), "）"], Centered);
+  c.drawComposite(ctx, rows[0], [
+    { kind: "text", text: "蛋白（"}, 
+    { kind: "gap", width: 11, mark: "尿蛋白"},
+    { kind: "text", text: "）" },
+  ], { halign: "center", valign: "center"});
+  c.drawComposite(ctx, rows[1], [
+    { kind: "text", text: "潜血（"}, 
+    { kind: "gap", width: 11, mark: "尿潜血"},
+    { kind: "text", text: "）" },
+  ], { halign: "center", valign: "center"});
+  c.drawComposite(ctx, rows[2], [
+    { kind: "text", text: "糖　（"}, 
+    { kind: "gap", width: 11, mark: "尿糖"},
+    { kind: "text", text: "）" },
+  ], { halign: "center", valign: "center"});
 }
 
 function compileTokkijikou(ctx: DrawerContext, box: Box): void {
-  // c.text(box.inset(1, 1, 0, 0), "その他特記事項", {
-  //   halign: HorizAlign.Left,
-  //   valign: VertAlign.Top
-  // });
-  // c.addMark("その他特記事項", box.shiftTopValue(6));
+  c.drawText(ctx, "その他特記事項", b.modify(box, b.inset(1, 1, 0, 0)), "left", "top");
+  c.mark(ctx, "その他特記事項", b.modify(box, b.shrinkVert(6, 0)));
 }
 
 // function compileBottom(ctx: DrawerContext, box: Box): void {
@@ -231,6 +236,26 @@ function compileTokkijikou(ctx: DrawerContext, box: Box): void {
 //     valign: VertAlign.Center
 //   });
 // }
+
+function compileBottom(ctx: DrawerContext, box: Box): void {
+  c.frame(ctx, box);
+  c.drawText(ctx, "診断の結果上記の通り相違ないことを証明する。", b.modify(box, b.inset(4,4)), "left", "top");
+  c.mark(ctx, "発行日", b.modify(box, b.shift(16, 12), b.setWidth(46, "left"), b.setHeight(6, "top")));
+  const addr1: Box = b.modify(box, b.shift(72, 12), b.setWidth(72, "left"), b.setHeight(6, "top"));
+  const addr2: Box = b.modify(addr1, b.flipDown());
+  c.mark(ctx, "住所1", addr1);
+  c.mark(ctx, "住所2", addr2);
+  const clinicName = b.modify(addr2, b.flipDown(), b.setHeight(7.5, "top"));
+  c.mark(ctx, "クリニック名", clinicName);
+  const doctorName = b.modify(clinicName, b.flipDown(), b.shift(0, 3), b.setLeft(36), b.setHeight(6, "top"));
+  c.drawComposite(ctx, doctorName, [
+    { kind: "text", text: "診断医師氏名" }, c.space(43,
+    {
+      mark: "医師名", modify: b => b.setTop(doctorName.top).setBottom(doctorName.bottom)
+    }), "印"], {
+    valign: VertAlign.Center
+  });
+}
 
 export function createJihiKenshinCompiler(): DrawerContext {
   const ctx: DrawerContext = mkDrawerContext();
@@ -275,6 +300,6 @@ export function createJihiKenshinCompiler(): DrawerContext {
     b.modify(b.combine(rows.slice(4, 9)), b.shrinkHoriz(firstColWidth + secondColWidth, 0))
   );
   compileKensa(ctx, rows[9]);
-  // compileBottom(ctx, rows[10]);
+  compileBottom(ctx, rows[10]);
   return ctx;
 }
