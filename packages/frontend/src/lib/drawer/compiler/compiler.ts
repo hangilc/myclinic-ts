@@ -230,6 +230,64 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
   drawChars(ctx, text, xs, ys);
 }
 
+export interface DrawTextVerticallyOptionArg {
+  interCharsSpace?: number;
+}
+
+class DrawerTextVerticallyOption {
+  interCharsSpace: number;
+
+  constructor(arg: DrawTextVerticallyOptionArg) {
+    this.interCharsSpace = arg.interCharsSpace ?? 0;
+  }
+}
+
+export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
+  optArg: DrawTextOptionArg = {}) {
+  const opt = new DrawerTextVerticallyOption(optArg);
+  const fontSize = currentFontSize(ctx);
+  const tw = fontSize;
+  let th = fontSize * text.length;
+  if( text.length > 1 && opt.interCharsSpace !== 0 ){
+    th += opt.interCharsSpace * (text.length - 1);
+  }
+  let x: number;
+  switch(halign){
+    case "center": {
+      x = b.cx(box) - tw / 2.0;
+      break;
+    }
+    case "right": {
+      x = box.right - tw;
+      break;
+    }
+    default: {
+      x = box.left;
+      break;
+    }
+  }
+  let y: number;
+  switch(valign){
+    case "center": {
+      y = b.cy(box) - th / 2.0;
+      break;
+    }
+    case "bottom": {
+      y = box.bottom - th;
+      break;
+    }
+    default: {
+      y = box.top;
+      break;
+    }
+  }
+  for(let i=0;i<text.length;i++){
+    const ch = text.charAt(i);
+    drawChars(ctx, ch, [x], [y]);
+    y += fontSize + opt.interCharsSpace;
+  }
+}
+
 export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box, ncol: number,
   justify: "left" | "right" = "left") {
   let start = 0;
@@ -335,11 +393,6 @@ export function textWidth(ctx: DrawerContext, text: string): number {
   return sumOfNumbers(charWidths);
 }
 
-export interface CompositeMarkTo {
-  kind: "mark-to";
-  at: number;
-}
-
 export interface CompositeText {
   kind: "text";
   text: string;
@@ -348,32 +401,42 @@ export interface CompositeText {
 export interface CompositeGap {
   kind: "gap";
   width: number;
+  mark?: string;
 }
 
-export type CompositeItem = CompositeMarkTo | CompositeText | CompositeGap;
+export interface CompositeGapTo {
+  kind: "gap-to";
+  at: number;
+  mark?: string;
+}
 
-export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[]): Box[] {
+export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo;
+
+export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[]) {
   let pos = 0;
-  let marks: Box[] = [];
   comps.forEach(item => {
     switch (item.kind) {
-      case "mark-to": {
-        marks.push(Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
-        pos = item.at;
-        break;
-      }
       case "text": {
         drawText(ctx, item.text, b.modify(box, b.inset(pos, 0)), "left", "center");
         pos += textWidth(ctx, item.text);
         break;
       }
       case "gap": {
+        if( item.mark ){
+          mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width }));
+        }
         pos += item.width;
+        break;
+      }
+      case "gap-to": {
+        if( item.mark ){
+          mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
+        }
+        pos = item.at;
         break;
       }
     }
   });
-  return marks;
 }
 
 export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) {

@@ -118,8 +118,9 @@ function compileXp(ctx: DrawerContext, row: Box): void {
   c.mark(ctx, "Ｘ線", b.modify(row, b.shrinkVert(6, 6)));
   // const bottom = row.setHeight(6, VertDirection.Bottom).inset(1, 0, 0, 0);
   const bottom = b.modify(row, b.setHeight(6, "bottom"), b.shrinkHoriz(1, 0));
-  const bb = c.text(bottom, "撮影日", { halign: HorizAlign.Left, valign: VertAlign.Center });
-  c.addMark("Ｘ線撮影日", bottom.setLeft(b.right).inset(4, 0, 0, 0));
+  const tw = c.textWidth(ctx, "撮影日");
+  c.drawText(ctx, "撮影日", bottom, "left", "center");
+  c.mark(ctx, "Ｘ線撮影日",  b.modify(bottom, b.shrinkHoriz(tw + 4, 0)));
 }
 
 // function compileKensa(ctx: DrawerContext, box: Box): void {
@@ -155,25 +156,50 @@ function compileXp(ctx: DrawerContext, row: Box): void {
 //   );
 // }
 
-// function compileKennyou(ctx: DrawerContext, box: Box): void {
-//   c.frame(box);
-//   const cols = box.splitToCols(7);
-//   c.frame(cols[0]);
-//   c.vertText(cols[0], "検尿", { interCharsSpace: 4 });
-//   const rows = cols[1].splitToEvenRows(3);
-//   rows.forEach((r) => c.frame(r));
-//   c.text(rows[0], ["蛋白（", c.space(11, { mark: "尿蛋白" }), "）"], Centered);
-//   c.text(rows[1], ["潜血（", c.space(11, { mark: "尿潜血" }), "）"], Centered);
-//   c.text(rows[2], ["糖　（", c.space(11, { mark: "尿糖" }), "）"], Centered);
-// }
+function compileKensa(ctx: DrawerContext, box: Box): void {
+  const cols = b.splitToColumns(box, b.splitWidths(firstColWidth, 84));
+  c.frame(ctx, cols[0]);
+  c.drawText(ctx, "血液検査", cols[0], "center", "center");
+  const rows = b.splitToRows(cols[1], b.evenSplitter(9));
+  rows.forEach((r, i) => {
+    const cs = b.splitToColumns(r, b.splitWidths(32));
+    cs.forEach((col) => c.frame(ctx, col));
+    c.mark(ctx, `血液検査名${i + 1}`, cs[0]);
+    c.mark(ctx, `血液検査結果${i + 1}`, cs[1]);
+  });
+  compileKennyou(
+    ctx,
+    b.modify(b.combine(rows.slice(0, 3)), b.flipRight(), b.setWidth(b.width(cols[2]), "left"))
+  );
+  compileTokkijikou(
+    ctx,
+    b.modify(b.combine(rows.slice(3)), b.flipRight(), b.setWidth(b.width(cols[2]), "left")),
+  );
+}
 
-// function compileTokkijikou(ctx: DrawerContext, box: Box): void {
-//   c.text(box.inset(1, 1, 0, 0), "その他特記事項", {
-//     halign: HorizAlign.Left,
-//     valign: VertAlign.Top
-//   });
-//   c.addMark("その他特記事項", box.shiftTopValue(6));
-// }
+function compileKennyou(ctx: DrawerContext, box: Box): void {
+  c.frame(ctx, box);
+  const cols = b.splitToColumns(box, b.splitWidths(7));
+  c.frame(ctx, cols[0]);
+  c.drawTextVertically(ctx, "検尿", cols[0], "center", "center", { interCharsSpace: 4 });
+  const rows = b.splitToRows(cols[1], b.evenSplitter(3));
+  rows.forEach((r) => c.frame(ctx, r));
+  // c.drawComposite(ctx, rows[0], [
+  //   { kind: "text", text: "蛋白（"}, 
+  //   { kind: "gap", width: 11},
+  //   { kind: "mark", }
+  //   c.space(11, { mark: "尿蛋白" }), "）"], Centered);
+  // c.drawComposite(ctx, rows[1], ["潜血（", c.space(11, { mark: "尿潜血" }), "）"], Centered);
+  // c.drawComposite(ctx, rows[2], ["糖　（", c.space(11, { mark: "尿糖" }), "）"], Centered);
+}
+
+function compileTokkijikou(ctx: DrawerContext, box: Box): void {
+  // c.text(box.inset(1, 1, 0, 0), "その他特記事項", {
+  //   halign: HorizAlign.Left,
+  //   valign: VertAlign.Top
+  // });
+  // c.addMark("その他特記事項", box.shiftTopValue(6));
+}
 
 // function compileBottom(ctx: DrawerContext, box: Box): void {
 //   c.frame(box);
@@ -240,31 +266,15 @@ export function createJihiKenshinCompiler(): DrawerContext {
   compileFormat1(ctx, b.modify(rows[6], b.setWidth(firstColWidth + secondColWidth, "left")), "聴力");
   compileFormat1(ctx, b.modify(rows[7], b.setWidth(firstColWidth + secondColWidth, "left")), "血圧");
   compileFormat1(ctx, b.modify(rows[8], b.setWidth(firstColWidth + secondColWidth, "left")), "心電図");
-  // compileKioureki(
-  //   ctx,
-  //   Box.combineRows(
-  //     rows
-  //       .slice(2, 4)
-  //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
-  //   )
-  // );
   compileKioureki(
     ctx,
     b.modify(b.combine(rows.slice(2, 4)), b.shrinkHoriz(firstColWidth + secondColWidth, 0))
   );
-  // compileXp(
-  //   ctx,
-  //   Box.combineRows(
-  //     rows
-  //       .slice(4, 9)
-  //       .map((row) => row.inset(firstColWidth + secondColWidth, 0, 0, 0))
-  //   )
-  // );
   compileXp(
     ctx,
     b.modify(b.combine(rows.slice(4, 9)), b.shrinkHoriz(firstColWidth + secondColWidth, 0))
   );
-  // compileKensa(ctx, rows[9]);
+  compileKensa(ctx, rows[9]);
   // compileBottom(ctx, rows[10]);
   return ctx;
 }

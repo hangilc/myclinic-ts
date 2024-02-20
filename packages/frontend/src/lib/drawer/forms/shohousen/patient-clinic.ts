@@ -58,20 +58,20 @@ function drawPatient(ctx: DrawerContext, box: Box) {
 }
 
 function drawBirthdate(ctx: DrawerContext, box: Box) {
-  const [year, month, day] = c.drawComposite(ctx, box, [
-    { kind: "mark-to", at: 9 },
+  c.drawComposite(ctx, box, [
+    { kind: "gap-to", at: 9, mark: "birthdayYearBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "年"},
-    { kind: "mark-to", at: 17 },
+    { kind: "gap-to", at: 17, mark: "birthdayMonthBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "月"},
-    { kind: "mark-to", at: 25 },
+    { kind: "gap-to", at: 25, mark: "birthdayDayBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "日"},
   ]);
-  c.mark(ctx, "birthdayYearBox", year);
-  c.mark(ctx, "birthdayMonthBox", month);
-  c.mark(ctx, "birthdayDayBox", day);
+  // c.mark(ctx, "birthdayYearBox", year);
+  // c.mark(ctx, "birthdayMonthBox", month);
+  // c.mark(ctx, "birthdayDayBox", day);
 }
 
 function drawSex(ctx: DrawerContext, box: Box) {

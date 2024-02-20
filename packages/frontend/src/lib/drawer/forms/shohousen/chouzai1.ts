@@ -19,14 +19,14 @@ export function drawChouzai1(ctx: DrawerContext, box: Box) {
 }
 
 function drawChoizaiDate(ctx: DrawerContext, box: Box) {
-  const [year, month, day] = c.drawComposite(ctx, box, [
-    { kind: "mark-to", at: 28 },
+  c.drawComposite(ctx, box, [
+    { kind: "gap-to", at: 28 },
     { kind: "gap", width: 1},
     { kind: "text", text: "年"},
-    { kind: "mark-to", at: 41 },
+    { kind: "gap-to", at: 41 },
     { kind: "gap", width: 1},
     { kind: "text", text: "月"},
-    { kind: "mark-to", at: 53 },
+    { kind: "gap-to", at: 53 },
     { kind: "gap", width: 1},
     { kind: "text", text: "日"},
   ]);

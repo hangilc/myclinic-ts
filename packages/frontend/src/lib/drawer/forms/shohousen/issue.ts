@@ -28,36 +28,36 @@ export function drawIssue(ctx: DrawerContext,  box: Box) {
 }
 
 function drawIssueDate(ctx: DrawerContext, box: Box) {
-  const [year, month, day] = c.drawComposite(ctx, box, [
-    { kind: "mark-to", at: 16 },
+  c.drawComposite(ctx, box, [
+    { kind: "gap-to", at: 16, mark: "issueYearBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "年"},
-    { kind: "mark-to", at: 24 },
+    { kind: "gap-to", at: 24, mark: "issueMonthBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "月"},
-    { kind: "mark-to", at: 32 },
+    { kind: "gap-to", at: 32, mark: "issueDayBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "日"},
   ]);
-  c.mark(ctx, "issueYearBox", year);
-  c.mark(ctx, "issueMonthBox", month);
-  c.mark(ctx, "issueDayBox", day);
+  // c.mark(ctx, "issueYearBox", year);
+  // c.mark(ctx, "issueMonthBox", month);
+  // c.mark(ctx, "issueDayBox", day);
 }
 
 function drawValidUpto(ctx: DrawerContext, box: Box) {
-  const [year, month, day] = c.drawComposite(ctx, box, [
-    { kind: "mark-to", at: 16 },
+  c.drawComposite(ctx, box, [
+    { kind: "gap-to", at: 16, mark: "validYearBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "年"},
-    { kind: "mark-to", at: 24 },
+    { kind: "gap-to", at: 24, mark: "validMonthBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "月"},
-    { kind: "mark-to", at: 32 },
+    { kind: "gap-to", at: 32, mark: "validDayBox" },
     { kind: "gap", width: 1},
     { kind: "text", text: "日"},
   ]);
-  c.mark(ctx, "validYearBox", year);
-  c.mark(ctx, "validMonthBox", month);
-  c.mark(ctx, "validDayBox", day);
+  // c.mark(ctx, "validYearBox", year);
+  // c.mark(ctx, "validMonthBox", month);
+  // c.mark(ctx, "validDayBox", day);
 }
 
