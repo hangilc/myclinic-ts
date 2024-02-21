@@ -3,7 +3,7 @@ import { FontWeightBold, FontWeightDontCare, FontWeightNormal } from "./font-wei
 import type { Op } from "./op";
 import * as fsm from "./font-size-manager";
 import * as b from "./box";
-import type { Box, Splitter } from "./box";
+import type { Box, Modifier, Splitter } from "./box";
 import type { HAlign, VAlign } from "./align";
 import { stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
@@ -402,12 +402,14 @@ export interface CompositeGap {
   kind: "gap";
   width: number;
   mark?: string;
+  modifiers?: Modifier[];
 }
 
 export interface CompositeGapTo {
   kind: "gap-to";
   at: number;
   mark?: string;
+  modifiers?: Modifier[];
 }
 
 export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo;
@@ -475,14 +477,22 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       }
       case "gap": {
         if (item.mark) {
-          mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width }));
+          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width });
+          if( item.modifiers ){
+            mb = b.modify(mb, ...item.modifiers);
+          }
+          mark(ctx, item.mark, mb);
         }
         pos += item.width;
         break;
       }
       case "gap-to": {
         if (item.mark) {
-          mark(ctx, item.mark, Object.assign({}, box, { left: box.left + pos, right: box.left + item.at }));
+          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + item.at });
+          if( item.modifiers ){
+            mb = b.modify(mb, ...item.modifiers);
+          }
+          mark(ctx, item.mark, mb);
         }
         pos = item.at;
         break;

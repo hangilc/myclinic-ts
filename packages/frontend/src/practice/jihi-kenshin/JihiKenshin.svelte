@@ -15,6 +15,8 @@
   import { encodeUrineResult } from "./urine-exam";
   import { convLine } from "./conv-line";
   import * as c from "@/lib/drawer/compiler/compiler";
+  import * as b from "@/lib/drawer/compiler/box";
+  import type { DrawerContext } from "@/lib/drawer/compiler/context";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -242,13 +244,17 @@
   }
 
   function set(
-    c: DrawerCompiler,
+    ctx: DrawerContext,
     name: string,
-    value: string | (string | TextVariant)[]
+    value: string
   ): void {
-    c.text(c.getMark(name).shrinkToRight(2), value, {
-      valign: VertAlign.Center,
-    });
+    c.drawText(
+      ctx,
+      value,
+      b.modify(c.getMark(ctx, name), b.shrinkHoriz(2, 0)),
+      "left",
+      "center"
+    );
   }
 
   function renderUrineExam(
@@ -310,17 +316,17 @@
   }
 
   function doDisplay() {
-    const comp = createJihiKenshinCompiler();
-    // comp.setFont("entry");
-    // set(comp, "氏名", name);
-    // if (birthdate) {
-    //   set(comp, "生年月日", kanjidate.format(kanjidate.f2, birthdate));
-    // }
-    // set(comp, "性別", sex);
-    // set(comp, "住所", address);
-    // set(comp, "身長", [height || comp.space(18), " cm"]);
-    // set(comp, "体重", [weight || comp.space(18), " kg"]);
-    // set(comp, "診察", physicalExam);
+    const ctx = createJihiKenshinCompiler();
+    c.setFont(ctx, "entry");
+    set(ctx, "氏名", name);
+    if (birthdate) {
+      set(ctx, "生年月日", kanjidate.format(kanjidate.f2, birthdate));
+    }
+    set(ctx, "性別", sex);
+    set(ctx, "住所", address);
+    // set(ctx, "身長", [height || comp.space(18), " cm"]);
+    // set(ctx, "体重", [weight || comp.space(18), " kg"]);
+    // set(ctx, "診察", physicalExam);
     // if (hasNoVisualAcuityInput()) {
     //   const b = comp.getMark("視力");
     //   comp.line(...b.leftBottom(), ...b.rightTop());
@@ -329,12 +335,12 @@
     //   if (visualAcuityLeftCorrected) {
     //     lts.push(comp.space(1), "(", visualAcuityLeftCorrected, ")");
     //   }
-    //   set(comp, "視力左", lts);
+    //   set(ctx, "視力左", lts);
     //   const rts = ["右", comp.space(1), visualAcuityRight || comp.space(8)];
     //   if (visualAcuityRightCorrected) {
     //     rts.push(comp.space(1), "(", visualAcuityRightCorrected, ")");
     //   }
-    //   set(comp, "視力右", rts);
+    //   set(ctx, "視力右", rts);
     // }
     // if (hearingExamConducted === "実施") {
     //   const b = comp.getMark("聴力");
@@ -367,15 +373,15 @@
     //   const b = comp.getMark("聴力");
     //   comp.line(...b.leftBottom(), ...b.rightTop());
     // }
-    // set(comp, "血圧", bloodPressure);
-    // set(comp, "心電図", shindenzu);
+    // set(ctx, "血圧", bloodPressure);
+    // set(ctx, "心電図", shindenzu);
     // comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);
     // comp.paragraph(comp.getMark("Ｘ線").inset(1, 0, 2, 0), xp);
     // if (xpConductedDate) {
-    //   set(comp, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
+    //   set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
     // }
     // [...Array(9).keys()].forEach((i) => {
-    //   set(comp, `血液検査名${i + 1}`, kensaLabels[i]);
+    //   set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
     //   let [value, unit]: (string | (string | TextVariant)[])[] =
     //     kensaValues[i].split(/\s+/);
     //   if (unit === "ten_thousand_per_ul") {
@@ -412,23 +418,21 @@
     // renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
     // renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
     // comp.setFont(prevFont);
-    // set(comp, "発行日", kanjidate.format(kanjidate.f2, issueDate));
-    // set(comp, "住所1", address1);
-    // set(comp, "住所2", address2);
-    // set(comp, "クリニック名", clinicName);
-    // comp.withFont("large-entry", () => set(comp, "医師名", doctorName));
+    // set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
+    // set(ctx, "住所1", address1);
+    // set(ctx, "住所2", address2);
+    // set(ctx, "クリニック名", clinicName);
+    // comp.withFont("large-entry", () => set(ctx, "医師名", doctorName));
     // if (showMarker) {
     //   comp.labelMarks();
     // }
-
-
 
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         title: "自費健診印刷",
-        ops: c.getOps(comp),
+        ops: c.getOps(ctx),
         width: A4[0],
         height: A4[1],
         scale: 2,

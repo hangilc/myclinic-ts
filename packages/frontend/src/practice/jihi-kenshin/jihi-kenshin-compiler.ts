@@ -120,7 +120,7 @@ function compileXp(ctx: DrawerContext, row: Box): void {
   const bottom = b.modify(row, b.setHeight(6, "bottom"), b.shrinkHoriz(1, 0));
   const tw = c.textWidth(ctx, "撮影日");
   c.drawText(ctx, "撮影日", bottom, "left", "center");
-  c.mark(ctx, "Ｘ線撮影日",  b.modify(bottom, b.shrinkHoriz(tw + 4, 0)));
+  c.mark(ctx, "Ｘ線撮影日", b.modify(bottom, b.shrinkHoriz(tw + 4, 0)));
 }
 
 // function compileKensa(ctx: DrawerContext, box: Box): void {
@@ -185,20 +185,20 @@ function compileKennyou(ctx: DrawerContext, box: Box): void {
   const rows = b.splitToRows(cols[1], b.evenSplitter(3));
   rows.forEach((r) => c.frame(ctx, r));
   c.drawComposite(ctx, rows[0], [
-    { kind: "text", text: "蛋白（"}, 
-    { kind: "gap", width: 11, mark: "尿蛋白"},
+    { kind: "text", text: "蛋白（" },
+    { kind: "gap", width: 11, mark: "尿蛋白" },
     { kind: "text", text: "）" },
-  ], { halign: "center", valign: "center"});
+  ], { halign: "center", valign: "center" });
   c.drawComposite(ctx, rows[1], [
-    { kind: "text", text: "潜血（"}, 
-    { kind: "gap", width: 11, mark: "尿潜血"},
+    { kind: "text", text: "潜血（" },
+    { kind: "gap", width: 11, mark: "尿潜血" },
     { kind: "text", text: "）" },
-  ], { halign: "center", valign: "center"});
+  ], { halign: "center", valign: "center" });
   c.drawComposite(ctx, rows[2], [
-    { kind: "text", text: "糖　（"}, 
-    { kind: "gap", width: 11, mark: "尿糖"},
+    { kind: "text", text: "糖　（" },
+    { kind: "gap", width: 11, mark: "尿糖" },
     { kind: "text", text: "）" },
-  ], { halign: "center", valign: "center"});
+  ], { halign: "center", valign: "center" });
 }
 
 function compileTokkijikou(ctx: DrawerContext, box: Box): void {
@@ -239,7 +239,7 @@ function compileTokkijikou(ctx: DrawerContext, box: Box): void {
 
 function compileBottom(ctx: DrawerContext, box: Box): void {
   c.frame(ctx, box);
-  c.drawText(ctx, "診断の結果上記の通り相違ないことを証明する。", b.modify(box, b.inset(4,4)), "left", "top");
+  c.drawText(ctx, "診断の結果上記の通り相違ないことを証明する。", b.modify(box, b.inset(4, 4)), "left", "top");
   c.mark(ctx, "発行日", b.modify(box, b.shift(16, 12), b.setWidth(46, "left"), b.setHeight(6, "top")));
   const addr1: Box = b.modify(box, b.shift(72, 12), b.setWidth(72, "left"), b.setHeight(6, "top"));
   const addr2: Box = b.modify(addr1, b.flipDown());
@@ -249,12 +249,10 @@ function compileBottom(ctx: DrawerContext, box: Box): void {
   c.mark(ctx, "クリニック名", clinicName);
   const doctorName = b.modify(clinicName, b.flipDown(), b.shift(0, 3), b.setLeft(36), b.setHeight(6, "top"));
   c.drawComposite(ctx, doctorName, [
-    { kind: "text", text: "診断医師氏名" }, c.space(43,
-    {
-      mark: "医師名", modify: b => b.setTop(doctorName.top).setBottom(doctorName.bottom)
-    }), "印"], {
-    valign: VertAlign.Center
-  });
+    { kind: "text", text: "診断医師氏名" },
+    { kind: "gap", width: 43, mark: "医師名", modifiers: [b.setTop(doctorName.top), b.setBottom(doctorName.bottom)] },
+    { kind: "text", text: "印" }
+  ]);
 }
 
 export function createJihiKenshinCompiler(): DrawerContext {
