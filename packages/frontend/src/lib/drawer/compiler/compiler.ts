@@ -84,7 +84,10 @@ export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
 }
 
-export function getCurrentFont(ctx: DrawerContext): string | undefined {
+export function getCurrentFont(ctx: DrawerContext): string {
+  if( ctx.currentFont === undefined ){
+    throw new Error("Cannot get current font");
+  }
   return ctx.currentFont;
 }
 
@@ -300,20 +303,20 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
   }
 }
 
-export interface DrawLinesOptArg {
+export interface DrawTextsOptArg {
   leading?: number;
 }
 
-class DrawLinesOpt {
+class DrawTextsOpt {
   leading: number;
 
-  constructor(arg: DrawLinesOptArg) {
+  constructor(arg: DrawTextsOptArg) {
     this.leading = arg.leading ?? 0;
   }
 }
 
-export function drawLines(ctx: DrawerContext, lines: string[], box: Box, optArg: DrawLinesOptArg = {}) {
-  const opt = new DrawLinesOpt(optArg);
+export function drawTexts(ctx: DrawerContext, lines: string[], box: Box, optArg: DrawTextsOptArg = {}) {
+  const opt = new DrawTextsOpt(optArg);
   const fontSize = currentFontSize(ctx);
   let r = b.modify(box, b.sliceTop(fontSize));
   const leading = opt.leading;

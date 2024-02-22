@@ -251,19 +251,9 @@
   ): void {
     let box = b.modify(c.getMark(ctx, name), b.shrinkHoriz(2, 0));
     if (typeof value === "string") {
-      c.drawText(
-        ctx,
-        value,
-        box,
-        "left",
-        "center"
-      );
+      c.drawText(ctx, value, box, "left", "center");
     } else {
-      c.drawComposite(
-        ctx,
-        box,
-        value
-      )
+      c.drawComposite(ctx, box, value);
     }
   }
 
@@ -326,7 +316,7 @@
   // }
 
   function diagonal(ctx: DrawerContext, box: Box) {
-    c.line(ctx, b.leftBottom(box), b.rightTop(box))
+    c.line(ctx, b.leftBottom(box), b.rightTop(box));
   }
 
   function doDisplay() {
@@ -338,62 +328,89 @@
     }
     set(ctx, "性別", sex);
     set(ctx, "住所", address);
-    set(ctx, "身長", height || [ { kind: "gap", width: 18 }, { kind: "text", text: " cm" }]);
-    set(ctx, "体重", weight || [ { kind: "gap", width: 18 }, { kind: "text", text: " kg" }]);
+    set(
+      ctx,
+      "身長",
+      height || [
+        { kind: "gap", width: 18 },
+        { kind: "text", text: " cm" },
+      ]
+    );
+    set(
+      ctx,
+      "体重",
+      weight || [
+        { kind: "gap", width: 18 },
+        { kind: "text", text: " kg" },
+      ]
+    );
     set(ctx, "診察", physicalExam);
     if (hasNoVisualAcuityInput()) {
       diagonal(ctx, c.getMark(ctx, "視力"));
     } else {
       const lts: CompositeItem[] = [
-        { kind: "text", text: "左" }, 
+        { kind: "text", text: "左" },
         { kind: "gap", width: 1 },
-        visualAcuityLeft ? { kind: "text", text: visualAcuityLeft } : { kind: "gap", width: 8 }
+        visualAcuityLeft
+          ? { kind: "text", text: visualAcuityLeft }
+          : { kind: "gap", width: 8 },
       ];
       if (visualAcuityLeftCorrected) {
-        lts.push({ kind: "gap", width: 1 }, { kind: "text", text: `(${visualAcuityLeftCorrected})` });
+        lts.push(
+          { kind: "gap", width: 1 },
+          { kind: "text", text: `(${visualAcuityLeftCorrected})` }
+        );
       }
       set(ctx, "視力左", lts);
       const rts: CompositeItem[] = [
-        { kind: "text", text: "右" }, 
+        { kind: "text", text: "右" },
         { kind: "gap", width: 1 },
-        visualAcuityRight ? { kind: "text", text: visualAcuityRight } : { kind: "gap", width: 8 }
+        visualAcuityRight
+          ? { kind: "text", text: visualAcuityRight }
+          : { kind: "gap", width: 8 },
       ];
       if (visualAcuityRightCorrected) {
-        rts.push({ kind: "gap", width: 1 }, { kind: "text", text: `(${visualAcuityRightCorrected})` });
+        rts.push(
+          { kind: "gap", width: 1 },
+          { kind: "text", text: `(${visualAcuityRightCorrected})` }
+        );
       }
       set(ctx, "視力右", rts);
     }
-    // if (hearingExamConducted === "実施") {
-    //   const b = comp.getMark("聴力");
-    //   let [left, right] = b.splitToEvenCols(2);
-    //   left = comp.textAndAdvance(left.insetLeft(1), "左", {
-    //     valign: VertAlign.Center,
-    //   });
-    //   let [top, bottom] = left.insetLeft(0.5).splitToEvenRows(2);
-    //   let saveFont = comp.setFont("small-entry");
-    //   comp.text(top, "4000Hz 所見" + hearingLeft4000Loss, {
-    //     valign: VertAlign.Center,
-    //   });
-    //   comp.text(bottom, "1000Hz 所見" + hearingLeft1000Loss, {
-    //     valign: VertAlign.Center,
-    //   });
-    //   comp.setFont(saveFont);
-    //   right = comp.textAndAdvance(right.insetLeft(1), "右", {
-    //     valign: VertAlign.Center,
-    //   });
-    //   [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
-    //   saveFont = comp.setFont("small-entry");
-    //   comp.text(top, "4000Hz 所見" + hearingRight4000Loss, {
-    //     valign: VertAlign.Center,
-    //   });
-    //   comp.text(bottom, "1000Hz 所見" + hearingRight1000Loss, {
-    //     valign: VertAlign.Center,
-    //   });
-    //   comp.setFont(saveFont);
-    // } else {
-    //   const b = comp.getMark("聴力");
-    //   comp.line(...b.leftBottom(), ...b.rightTop());
-    // }
+    if (hearingExamConducted === "実施") {
+      const bb = c.getMark(ctx, "聴力");
+      let [left, right] = b.splitToColumns(bb, b.evenSplitter(2));
+      let fontSize = c.currentFontSize(ctx);
+      b.withSplitColumns(
+        b.modify(left, b.shrinkHoriz(1, 0)),
+        b.splitAt(fontSize + 0.5),
+        ([c1, c2]) => {
+          c.drawText(ctx, "左", c1, "left", "center");
+          b.withSplitRows(c2, b.evenSplitter(2), ([top, bottom]) => {
+            let saveFont = c.getCurrentFont(ctx);
+            c.setFont(ctx, "small-entry");
+            c.drawText(ctx, "4000Hz 所見" + hearingLeft4000Loss, top, "left", "center");
+            c.drawText(ctx, "1000Hz 所見" + hearingLeft1000Loss, bottom, "left", "center");
+            c.setFont(ctx, saveFont);
+          });
+        }
+      );
+      //   right = c.textAndAdvance(ctx, right.insetLeft(1), "右", {
+      //     valign: VertAlign.Center,
+      //   });
+      //   [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
+      //   saveFont = c.setFont(ctx, "small-entry");
+      //   c.text(ctx, top, "4000Hz 所見" + hearingRight4000Loss, {
+      //     valign: VertAlign.Center,
+      //   });
+      //   c.text(ctx, bottom, "1000Hz 所見" + hearingRight1000Loss, {
+      //     valign: VertAlign.Center,
+      //   });
+      //   c.setFont(ctx, saveFont);
+      // } else {
+      //   const b = c.getMark(ctx, "聴力");
+      //   c.line(ctx, ...b.leftBottom(), ...b.rightTop());
+    }
     // set(ctx, "血圧", bloodPressure);
     // set(ctx, "心電図", shindenzu);
     // comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);

@@ -93,5 +93,5 @@ function renderInstitute(ctx: DrawerContext, name: string, addressLines: string[
   c.setFont(ctx, "gothic-4");
   c.drawText(ctx, name, rows[0], "left", "top");
   c.setFont(ctx, "gothic-2.6");
-  c.drawLines(ctx, addressLines, rows[1], { leading: 1 });
+  c.drawTexts(ctx, addressLines, rows[1], { leading: 1 });
 }

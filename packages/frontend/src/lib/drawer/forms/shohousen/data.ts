@@ -167,11 +167,11 @@ function drawShimei(ctx: DrawerContext, box: Box, shimei: string) {
   } else if (lines.length === 1) {
     c.drawText(ctx, shimei, box, "left", "center");
   } else if (lines.length === 2) {
-    c.drawLines(ctx, lines, box);
+    c.drawTexts(ctx, lines, box);
   } else {
     c.setFont(ctx, "mincho-2.5");
     lines = breakLines(shimei, c.currentFontSize(ctx), b.width(box));
-    c.drawLines(ctx, lines, box);
+    c.drawTexts(ctx, lines, box);
   }
 }
 
@@ -254,8 +254,8 @@ function tryDrawDrugs(ctx: DrawerContext, font: string, renderDrugContext: Rende
   const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, font, renderDrugContext, memoBox, drugs, memo);
   if (requiredHeight(drugLines.length, fontSize) <= b.height(box) &&
     requiredHeight(memoLines.length, fontSize) <= b.height(memoBox)) {
-    c.drawLines(ctx, drugLines, box);
-    c.drawLines(ctx, memoLines, memoBox);
+    c.drawTexts(ctx, drugLines, box);
+    c.drawTexts(ctx, memoLines, memoBox);
     return true;
   } else {
     return false;
@@ -274,7 +274,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], me
     } else {
       const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, "gothic-3.5",
         new RenderDrugContext({ maxLine: 36 }), memoBox, drugs, memo);
-      c.drawLines(ctx, [...drugLines, ...memoLines], box);
+      c.drawTexts(ctx, [...drugLines, ...memoLines], box);
     }
   } finally {
     if (fontSave) {
