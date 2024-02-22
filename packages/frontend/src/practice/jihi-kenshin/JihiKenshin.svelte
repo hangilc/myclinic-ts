@@ -389,27 +389,52 @@
           b.withSplitRows(c2, b.evenSplitter(2), ([top, bottom]) => {
             let saveFont = c.getCurrentFont(ctx);
             c.setFont(ctx, "small-entry");
-            c.drawText(ctx, "4000Hz 所見" + hearingLeft4000Loss, top, "left", "center");
-            c.drawText(ctx, "1000Hz 所見" + hearingLeft1000Loss, bottom, "left", "center");
+            c.drawText(
+              ctx,
+              "4000Hz 所見" + hearingLeft4000Loss,
+              top,
+              "left",
+              "center"
+            );
+            c.drawText(
+              ctx,
+              "1000Hz 所見" + hearingLeft1000Loss,
+              bottom,
+              "left",
+              "center"
+            );
             c.setFont(ctx, saveFont);
           });
         }
       );
-      //   right = c.textAndAdvance(ctx, right.insetLeft(1), "右", {
-      //     valign: VertAlign.Center,
-      //   });
-      //   [top, bottom] = right.insetLeft(0.5).splitToEvenRows(2);
-      //   saveFont = c.setFont(ctx, "small-entry");
-      //   c.text(ctx, top, "4000Hz 所見" + hearingRight4000Loss, {
-      //     valign: VertAlign.Center,
-      //   });
-      //   c.text(ctx, bottom, "1000Hz 所見" + hearingRight1000Loss, {
-      //     valign: VertAlign.Center,
-      //   });
-      //   c.setFont(ctx, saveFont);
-      // } else {
-      //   const b = c.getMark(ctx, "聴力");
-      //   c.line(ctx, ...b.leftBottom(), ...b.rightTop());
+      b.withSplitColumns(
+        b.modify(right, b.shrinkHoriz(1, 0)),
+        b.splitAt(fontSize + 0.5),
+        ([c1, c2]) => {
+          c.drawText(ctx, "右", c1, "left", "center");
+          b.withSplitRows(c2, b.evenSplitter(2), ([top, bottom]) => {
+            let saveFont = c.getCurrentFont(ctx);
+            c.setFont(ctx, "small-entry");
+            c.drawText(
+              ctx,
+              "4000Hz 所見" + hearingRight4000Loss,
+              top,
+              "left",
+              "center"
+            );
+            c.drawText(
+              ctx,
+              "1000Hz 所見" + hearingRight1000Loss,
+              bottom,
+              "left",
+              "center"
+            );
+            c.setFont(ctx, saveFont);
+          });
+        }
+      );
+    } else {
+      diagonal(ctx, c.getMark(ctx, "聴力"));
     }
     // set(ctx, "血圧", bloodPressure);
     // set(ctx, "心電図", shindenzu);
