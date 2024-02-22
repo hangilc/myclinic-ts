@@ -27,6 +27,22 @@ export function cy(box: Box): number {
   return (box.top + box.bottom) / 2.0;
 }
 
+export function leftTop(box: Box): [number, number] {
+  return [box.left, box.top];
+}
+
+export function rightTop(box: Box): [number, number] {
+  return [box.right, box.top];
+}
+
+export function leftBottom(box: Box): [number, number] {
+  return [box.left, box.bottom];
+}
+
+export function rightBottom(box: Box): [number, number] {
+  return [box.right, box.bottom];
+}
+
 export function paperSizeToBox(paperSize: PaperSize, opt: { landscape?: boolean } = {}): Box {
   let box = { left: 0, top: 0, right: paperSize.width, bottom: paperSize.height };
   if (opt.landscape) {

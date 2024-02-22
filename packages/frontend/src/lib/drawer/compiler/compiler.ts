@@ -201,8 +201,6 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
       }
     })
   }
-  console.log("charWidths 2", charWidths);
-
   const length = sumOfNumbers(charWidths);
   const y = locateY(box, fontSize, valign);
   let x: number;
@@ -353,6 +351,13 @@ export function frameTop(ctx: DrawerContext, box: Box) {
 export function frameBottom(ctx: DrawerContext, box: Box) {
   moveTo(ctx, box.left, box.bottom);
   lineTo(ctx, box.right, box.bottom);
+}
+
+export function line(ctx: DrawerContext, ...points: [number, number][]) {
+  const start = points.shift();
+  if( !start ){ return }
+  moveTo(ctx, ...start);
+  points.forEach(([x, y]) => lineTo(ctx, x, y));
 }
 
 export function frameInnerColumnBorders(ctx: DrawerContext, box: Box, splitter: Splitter) {

@@ -8,7 +8,7 @@
   import * as kanjidate from "kanjidate";
   import type { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
   import type { TextVariant } from "@/lib/drawer-compiler/text-variant";
-  import type { Box } from "@/lib/drawer-compiler/box";
+  import type { Box } from "@/lib/drawer/compiler/box";
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
   import TextInputDialog from "./TextInputDialog.svelte";
@@ -17,6 +17,7 @@
   import * as c from "@/lib/drawer/compiler/compiler";
   import * as b from "@/lib/drawer/compiler/box";
   import type { DrawerContext } from "@/lib/drawer/compiler/context";
+  import type { CompositeItem } from "@/lib/drawer/compiler/compiler";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -246,73 +247,86 @@
   function set(
     ctx: DrawerContext,
     name: string,
-    value: string
+    value: string | c.CompositeItem[]
   ): void {
-    c.drawText(
-      ctx,
-      value,
-      b.modify(c.getMark(ctx, name), b.shrinkHoriz(2, 0)),
-      "left",
-      "center"
-    );
+    let box = b.modify(c.getMark(ctx, name), b.shrinkHoriz(2, 0));
+    if (typeof value === "string") {
+      c.drawText(
+        ctx,
+        value,
+        box,
+        "left",
+        "center"
+      );
+    } else {
+      c.drawComposite(
+        ctx,
+        box,
+        value
+      )
+    }
   }
 
-  function renderUrineExam(
-    comp: DrawerCompiler,
-    box: Box,
-    value: string
-  ): void {
-    const prevFont = comp.curFont;
-    const align = {
-      halign: HorizAlign.Center,
-      valign: VertAlign.Center,
-    };
-    function opt(aux: object): object {
-      return Object.assign({}, align, aux);
-    }
-    switch (value) {
-      case "":
-        break;
-      case "-": {
-        comp.text(box.shift(1, 0), "－", opt({ dy: -0.5 })); // en-dash
-        break;
-      }
-      case "+/-": {
-        comp.text(box, "±", opt({ dy: -0.5 }));
-        break;
-      }
-      case "+": {
-        comp.text(box, "＋", opt({ dy: -0.2 }));
-        break;
-      }
-      case "2+": {
-        comp.text(box, "2＋", opt({ dy: -0.2 }));
-        break;
-      }
-      case "3+": {
-        comp.text(box, "3＋", opt({ dy: -0.2 }));
-        break;
-      }
-      case "4+": {
-        comp.text(box, "4＋", opt({ dy: -0.2 }));
-        break;
-      }
-      default: {
-        comp.text(box, value, align);
-        break;
-      }
-    }
-    comp.setFont(prevFont);
-  }
+  // function renderUrineExam(
+  //   comp: DrawerCompiler,
+  //   box: Box,
+  //   value: string
+  // ): void {
+  //   const prevFont = comp.curFont;
+  //   const align = {
+  //     halign: HorizAlign.Center,
+  //     valign: VertAlign.Center,
+  //   };
+  //   function opt(aux: object): object {
+  //     return Object.assign({}, align, aux);
+  //   }
+  //   switch (value) {
+  //     case "":
+  //       break;
+  //     case "-": {
+  //       comp.text(box.shift(1, 0), "－", opt({ dy: -0.5 })); // en-dash
+  //       break;
+  //     }
+  //     case "+/-": {
+  //       comp.text(box, "±", opt({ dy: -0.5 }));
+  //       break;
+  //     }
+  //     case "+": {
+  //       comp.text(box, "＋", opt({ dy: -0.2 }));
+  //       break;
+  //     }
+  //     case "2+": {
+  //       comp.text(box, "2＋", opt({ dy: -0.2 }));
+  //       break;
+  //     }
+  //     case "3+": {
+  //       comp.text(box, "3＋", opt({ dy: -0.2 }));
+  //       break;
+  //     }
+  //     case "4+": {
+  //       comp.text(box, "4＋", opt({ dy: -0.2 }));
+  //       break;
+  //     }
+  //     default: {
+  //       comp.text(box, value, align);
+  //       break;
+  //     }
+  //   }
+  //   comp.setFont(prevFont);
+  // }
 
-  function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
-    const r: Box = box.inset(1, 1, 2, 1);
-    const lines = value.split(/\r?\n/);
-    c.textLines(
-      r,
-      lines.map((line) => convLine(line, c)),
-      { leading: 1 }
-    );
+  // function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
+  //   const r: Box = box.inset(1, 1, 2, 1);
+  //   const lines = value.split(/\r?\n/);
+  //   c.textLines(
+  //     r,
+  //     lines.map((line) => convLine(line, c)),
+  //     { leading: 1 }
+  //   );
+  // }
+
+  function diagonal(ctx: DrawerContext, box: Box) {
+    c.line(ctx, b.leftBottom(box), b.rightTop(box))
   }
 
   function doDisplay() {
@@ -324,24 +338,31 @@
     }
     set(ctx, "性別", sex);
     set(ctx, "住所", address);
-    // set(ctx, "身長", [height || comp.space(18), " cm"]);
-    // set(ctx, "体重", [weight || comp.space(18), " kg"]);
-    // set(ctx, "診察", physicalExam);
-    // if (hasNoVisualAcuityInput()) {
-    //   const b = comp.getMark("視力");
-    //   comp.line(...b.leftBottom(), ...b.rightTop());
-    // } else {
-    //   const lts = ["左", comp.space(1), visualAcuityLeft || comp.space(8)];
-    //   if (visualAcuityLeftCorrected) {
-    //     lts.push(comp.space(1), "(", visualAcuityLeftCorrected, ")");
-    //   }
-    //   set(ctx, "視力左", lts);
-    //   const rts = ["右", comp.space(1), visualAcuityRight || comp.space(8)];
-    //   if (visualAcuityRightCorrected) {
-    //     rts.push(comp.space(1), "(", visualAcuityRightCorrected, ")");
-    //   }
-    //   set(ctx, "視力右", rts);
-    // }
+    set(ctx, "身長", height || [ { kind: "gap", width: 18 }, { kind: "text", text: " cm" }]);
+    set(ctx, "体重", weight || [ { kind: "gap", width: 18 }, { kind: "text", text: " kg" }]);
+    set(ctx, "診察", physicalExam);
+    if (hasNoVisualAcuityInput()) {
+      diagonal(ctx, c.getMark(ctx, "視力"));
+    } else {
+      const lts: CompositeItem[] = [
+        { kind: "text", text: "左" }, 
+        { kind: "gap", width: 1 },
+        visualAcuityLeft ? { kind: "text", text: visualAcuityLeft } : { kind: "gap", width: 8 }
+      ];
+      if (visualAcuityLeftCorrected) {
+        lts.push({ kind: "gap", width: 1 }, { kind: "text", text: `(${visualAcuityLeftCorrected})` });
+      }
+      set(ctx, "視力左", lts);
+      const rts: CompositeItem[] = [
+        { kind: "text", text: "右" }, 
+        { kind: "gap", width: 1 },
+        visualAcuityRight ? { kind: "text", text: visualAcuityRight } : { kind: "gap", width: 8 }
+      ];
+      if (visualAcuityRightCorrected) {
+        rts.push({ kind: "gap", width: 1 }, { kind: "text", text: `(${visualAcuityRightCorrected})` });
+      }
+      set(ctx, "視力右", rts);
+    }
     // if (hearingExamConducted === "実施") {
     //   const b = comp.getMark("聴力");
     //   let [left, right] = b.splitToEvenCols(2);
