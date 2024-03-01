@@ -9,6 +9,7 @@ import { stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
 import { scaleOp } from "./scale";
 import { offsetOp } from "./offset";
+import { breakLines } from "./break-lines";
 
 export interface GetOpsOpt {
   scale?: number;
@@ -95,10 +96,13 @@ export function mark(ctx: DrawerContext, key: string, box: Box) {
   ctx.marks[key] = box;
 }
 
-export function getMark(ctx: DrawerContext, key: string): Box {
-  const mark = ctx.marks[key];
+export function getMark(ctx: DrawerContext, key: string, ...modifiers: Modifier[]): Box {
+  let mark = ctx.marks[key];
   if (!mark) {
     throw new Error(`Cannot find mark: ${key}.`);
+  }
+  if( modifiers.length > 0 ){
+    mark = b.modify(mark, ...modifiers)
   }
   return mark;
 }
@@ -324,6 +328,28 @@ export function drawTexts(ctx: DrawerContext, lines: string[], box: Box, optArg:
     drawText(ctx, line, r, "left", "top");
     r = b.modify(r, b.shift(0, fontSize + leading));
   })
+}
+
+interface ParagraphOptArg {
+
+}
+
+class ParagraphOpt {
+  constructor(arg: ParagraphOptArg) {
+
+  }
+}
+
+export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg: ParagraphOptArg = {}) {
+  const texts: string[] = content.split("\n");
+  let fontSize = currentFontSize(ctx);
+  const lines: string[] = [];
+  const w = b.width(box);
+  texts.forEach(text => {
+    const ls = breakLines(text, fontSize, w);
+    lines.push(...ls);
+  });
+  drawTexts(ctx, lines, box);
 }
 
 export function rect(ctx: DrawerContext, box: Box) {

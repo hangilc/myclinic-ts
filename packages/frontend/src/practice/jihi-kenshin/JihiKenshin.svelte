@@ -436,13 +436,13 @@
     } else {
       diagonal(ctx, c.getMark(ctx, "聴力"));
     }
-    // set(ctx, "血圧", bloodPressure);
-    // set(ctx, "心電図", shindenzu);
-    // comp.paragraph(comp.getMark("既往歴").inset(1, 0, 2, 0), kioureki);
-    // comp.paragraph(comp.getMark("Ｘ線").inset(1, 0, 2, 0), xp);
-    // if (xpConductedDate) {
-    //   set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
-    // }
+    set(ctx, "血圧", bloodPressure);
+    set(ctx, "心電図", shindenzu);
+    c.paragraph(ctx, kioureki, c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)));
+    c.paragraph(ctx, xp, c.getMark(ctx, "Ｘ線", b.inset(1, 0, 2, 0)));
+    if (xpConductedDate) {
+      set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
+    }
     // [...Array(9).keys()].forEach((i) => {
     //   set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
     //   let [value, unit]: (string | (string | TextVariant)[])[] =
