@@ -443,38 +443,37 @@
     if (xpConductedDate) {
       set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
     }
-    // [...Array(9).keys()].forEach((i) => {
-    //   set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
-    //   let [value, unit]: (string | (string | TextVariant)[])[] =
-    //     kensaValues[i].split(/\s+/);
-    //   if (unit === "ten_thousand_per_ul") {
-    //     unit = [
-    //       "x10",
-    //       comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
-    //       "/μL",
-    //     ];
-    //   }
-    //   if (value) {
-    //     comp.getMark(`血液検査結果${i + 1}`).withCols(
-    //       [18],
-    //       (b) => {
-    //         comp.text(b, value, {
-    //           halign: HorizAlign.Right,
-    //           valign: VertAlign.Center,
-    //         });
-    //       },
-    //       (b) => {
-    //         comp.text(b.shrinkToRight(1), unit ?? "", {
-    //           halign: HorizAlign.Left,
-    //           valign: VertAlign.Center,
-    //         });
-    //       }
-    //     );
-    //   } else {
-    //     const b = comp.getMark(`血液検査結果${i + 1}`);
-    //     comp.line(...b.leftBottom(), ...b.rightTop());
-    //   }
-    // });
+    [...Array(9).keys()].forEach((i) => {
+      set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
+      let [value, unit]: string[] = kensaValues[i].split(/\s+/);
+      if (unit === "ten_thousand_per_ul") {
+        unit = [
+          "x10",
+          comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
+          "/μL",
+        ];
+      }
+      // if (value) {
+      //   comp.getMark(`血液検査結果${i + 1}`).withCols(
+      //     [18],
+      //     (b) => {
+      //       comp.text(b, value, {
+      //         halign: HorizAlign.Right,
+      //         valign: VertAlign.Center,
+      //       });
+      //     },
+      //     (b) => {
+      //       comp.text(b.shrinkToRight(1), unit ?? "", {
+      //         halign: HorizAlign.Left,
+      //         valign: VertAlign.Center,
+      //       });
+      //     }
+      //   );
+      // } else {
+      //   const b = comp.getMark(`血液検査結果${i + 1}`);
+      //   comp.line(...b.leftBottom(), ...b.rightTop());
+      // }
+    });
     // let prevFont = comp.curFont;
     // renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
     // renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);

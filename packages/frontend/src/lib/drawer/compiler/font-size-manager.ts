@@ -29,3 +29,11 @@ export function getCurrentFontSize(fsm: FontSizeManager): number {
   }
   return size;
 }
+
+export function getFontSizeOf(fsm: FontSizeManager, fontName: string): number {
+  const size = fsm.sizeMap[fontName];
+  if( size == undefined ){
+    throw new Error(`Cannot find font: ${fontName}`);
+  }
+  return size;
+}

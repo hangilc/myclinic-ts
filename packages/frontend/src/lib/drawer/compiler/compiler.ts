@@ -5,7 +5,7 @@ import * as fsm from "./font-size-manager";
 import * as b from "./box";
 import type { Box, Modifier, Splitter } from "./box";
 import type { HAlign, VAlign } from "./align";
-import { stringToCharWidths } from "./char-width";
+import { stringDrawWidth, stringToCharWidths } from "./char-width";
 import { sumOfNumbers } from "./util";
 import { scaleOp } from "./scale";
 import { offsetOp } from "./offset";
@@ -127,6 +127,10 @@ function locateX(box: Box, fontSize: number, halign: HAlign) {
 
 export function currentFontSize(ctx: DrawerContext): number {
   return fsm.getCurrentFontSize(ctx.fsm);
+}
+
+export function getFontSizeOf(ctx: DrawerContext, fontName: string): number {
+  return fsm.getFontSizeOf(ctx.fsm, fontName);
 }
 
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
@@ -422,9 +426,14 @@ export function withGrid(ctx: DrawerContext, box: Box, rowSplitter: Splitter | n
 }
 
 export function textWidth(ctx: DrawerContext, text: string): number {
-  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  const charWidths = stringToCharWidths(text, fontSize);
-  return sumOfNumbers(charWidths);
+  return stringDrawWidth(text, fsm.getCurrentFontSize(ctx.fsm));
+  // const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  // const charWidths = stringToCharWidths(text, fontSize);
+  // return sumOfNumbers(charWidths);
+}
+
+export function textWidthWithFont(ctx: DrawerContext, text: string, fontName: string): number {
+  return stringDrawWidth(text, getFontSizeOf(ctx, fontName));
 }
 
 export interface CompositeText {
@@ -446,7 +455,15 @@ export interface CompositeGapTo {
   modifiers?: Modifier[];
 }
 
-export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo;
+export interface TextByFont {
+  kind: "text-by-font";
+  text: string;
+  fontName: string;
+  dx?: number;
+  dy?: number;
+}
+
+export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont;
 
 export interface DrawCompositeOptionArg {
   halign?: HAlign;
@@ -474,6 +491,10 @@ export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[]): numb
       }
       case "gap": {
         w += comp.width;
+        break;
+      }
+      case "text-by-font": {
+        w += textWidthWithFont(ctx, comp.text, comp.fontName);
         break;
       }
       default: {
@@ -529,6 +550,15 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           mark(ctx, item.mark, mb);
         }
         pos = item.at;
+        break;
+      }
+      case "text-by-font": {
+        const fontSave = getCurrentFont(ctx);
+        const dx = item.dx ?? 0;
+        const dy = item.dy ?? 0;
+        drawText(ctx, item.text, b.modify(box, b.shift(pos + dx, dy)), "left", opt.valign);
+        pos += textWidthWithFont(ctx, item.text, item.fontName);
+        setFont(ctx, fontSave);
         break;
       }
     }
