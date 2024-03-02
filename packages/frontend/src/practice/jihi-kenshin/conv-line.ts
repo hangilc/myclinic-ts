@@ -14,7 +14,6 @@ const re = new RegExp(
 );
 
 export function convLine(line: string, c: DrawerCompiler): Line {
-  console.log(re);
   let start = 0;
   const result: (string | TextVariant)[] = [];
   while(true){

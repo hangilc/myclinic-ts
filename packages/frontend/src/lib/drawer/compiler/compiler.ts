@@ -188,13 +188,16 @@ export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, bo
 
 export interface DrawTextOptionArg {
   interCharsSpace?: number;
+  dy?: number;
 }
 
 class DrawerTextOption {
   interCharsSpace: number;
+  dy: number;
 
   constructor(arg: DrawTextOptionArg) {
     this.interCharsSpace = arg.interCharsSpace ?? 0;
+    this.dy = arg.dy ?? 0;
   }
 }
 
@@ -213,7 +216,7 @@ export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAl
     })
   }
   const length = sumOfNumbers(charWidths);
-  const y = locateY(box, fontSize, valign);
+  const y = locateY(box, fontSize, valign) + opt.dy;
   let x: number;
   switch (halign) {
     case "left": {

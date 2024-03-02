@@ -3,17 +3,13 @@
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { A4 } from "@/lib/drawer-compiler/paper-size";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
-  import { HorizAlign, VertAlign } from "@/lib/drawer-compiler/enums";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import * as kanjidate from "kanjidate";
-  import type { DrawerCompiler } from "@/lib/drawer-compiler/drawer-compiler";
-  import type { TextVariant } from "@/lib/drawer-compiler/text-variant";
   import type { Box } from "@/lib/drawer/compiler/box";
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
   import TextInputDialog from "./TextInputDialog.svelte";
   import { encodeUrineResult } from "./urine-exam";
-  import { convLine } from "./conv-line";
   import * as c from "@/lib/drawer/compiler/compiler";
   import * as b from "@/lib/drawer/compiler/box";
   import type { DrawerContext } from "@/lib/drawer/compiler/context";
@@ -91,6 +87,7 @@
   }
 
   async function applyData() {
+    tokkijikou = "";
     const d: TextInputDialog = new TextInputDialog({
       target: document.body,
       props: {
@@ -213,7 +210,6 @@
         urineGlucose = encodeUrineResult(m[1]);
       }
     }
-    // console.log("collect", collect);
     if (tokkijikou && !tokkijikou.endsWith("\n")) {
       tokkijikou += "\n";
     }
@@ -257,63 +253,56 @@
     }
   }
 
-  // function renderUrineExam(
-  //   comp: DrawerCompiler,
-  //   box: Box,
-  //   value: string
-  // ): void {
-  //   const prevFont = comp.curFont;
-  //   const align = {
-  //     halign: HorizAlign.Center,
-  //     valign: VertAlign.Center,
-  //   };
-  //   function opt(aux: object): object {
-  //     return Object.assign({}, align, aux);
-  //   }
-  //   switch (value) {
-  //     case "":
-  //       break;
-  //     case "-": {
-  //       comp.text(box.shift(1, 0), "－", opt({ dy: -0.5 })); // en-dash
-  //       break;
-  //     }
-  //     case "+/-": {
-  //       comp.text(box, "±", opt({ dy: -0.5 }));
-  //       break;
-  //     }
-  //     case "+": {
-  //       comp.text(box, "＋", opt({ dy: -0.2 }));
-  //       break;
-  //     }
-  //     case "2+": {
-  //       comp.text(box, "2＋", opt({ dy: -0.2 }));
-  //       break;
-  //     }
-  //     case "3+": {
-  //       comp.text(box, "3＋", opt({ dy: -0.2 }));
-  //       break;
-  //     }
-  //     case "4+": {
-  //       comp.text(box, "4＋", opt({ dy: -0.2 }));
-  //       break;
-  //     }
-  //     default: {
-  //       comp.text(box, value, align);
-  //       break;
-  //     }
-  //   }
-  //   comp.setFont(prevFont);
-  // }
+  function renderUrineExam(
+    ctx: DrawerContext,
+    box: Box,
+    value: string
+  ): void {
+    const prevFont = c.getCurrentFont(ctx);
+    switch (value) {
+      case "":
+        break;
+      case "-": {
+        c.drawText(ctx, "－", b.modify(box, b.shift(1, 0)), "center", "center", { dy: -0.5 }); // en-dash
+        break;
+      }
+      case "+/-": {
+        c.drawText(ctx, "±", box, "center", "center", { dy: -0.5 });
+        break;
+      }
+      case "+": {
+        c.drawText(ctx, "＋", box, "center", "center", { dy: -0.2 });
+        break;
+      }
+      case "2+": {
+        c.drawText(ctx, "2＋", box, "center", "center", { dy: -0.2 });
+        break;
+      }
+      case "3+": {
+        c.drawText(ctx, "3＋", box, "center", "center", { dy: -0.2 });
+        break;
+      }
+      case "4+": {
+        c.drawText(ctx, "4＋", box, "center", "center", { dy: -0.2 });
+        break;
+      }
+      default: {
+        c.drawText(ctx, value, box, "center", "center");
+        break;
+      }
+    }
+    c.setFont(ctx, prevFont);
+  }
 
-  // function renderTokkijikou(c: DrawerCompiler, box: Box, value: string): void {
-  //   const r: Box = box.inset(1, 1, 2, 1);
-  //   const lines = value.split(/\r?\n/);
-  //   c.textLines(
-  //     r,
-  //     lines.map((line) => convLine(line, c)),
-  //     { leading: 1 }
-  //   );
-  // }
+  function renderTokkijikou(ctx: DrawerContext, box: Box, value: string): void {
+    const r: Box = b.modify(box, b.inset(1, 1, 2, 1));
+    const lines = value.split(/\r?\n/);
+    // c.textLines(
+    //   r,
+    //   lines.map((line) => convLine(line, c)),
+    //   { leading: 1 }
+    // );
+  }
 
   function diagonal(ctx: DrawerContext, box: Box) {
     c.line(ctx, b.leftBottom(box), b.rightTop(box));
@@ -446,40 +435,37 @@
     [...Array(9).keys()].forEach((i) => {
       set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
       let [value, unit]: string[] = kensaValues[i].split(/\s+/);
-      if (unit === "ten_thousand_per_ul") {
-        unit = [
-          "x10",
-          comp.str("4", { font: "small-entry", dy: -1.2, padRight: 1.0 }),
-          "/μL",
-        ];
+      if (value) {
+        b.withSplitColumns(
+          c.getMark(ctx, `血液検査結果${i + 1}`),
+          b.splitAt(18),
+          ([left, right]) => {
+            c.drawText(ctx, value, left, "right", "center");
+            const unitBox = b.modify(right, b.shrinkHoriz(1, 0));
+            if (unit === "ten_thousand_per_ul") {
+              c.drawComposite(ctx, unitBox, [
+                { kind: "text", text: "x10" },
+                { kind: "text-by-font", text: "4", fontName: "small-entry", dy: -1.2 },
+                { kind: "gap", width: 1.0 },
+                { kind: "text", text: "/μL" },
+              ]);
+            } else {
+              c.drawText(ctx, unit, unitBox, "left", "center");
+            }
+          }
+        );
+      } else {
+        const bb = c.getMark(ctx, `血液検査結果${i + 1}`);
+        c.line(ctx, b.leftBottom(bb), b.rightTop(bb));
+        // c.line(...b.leftBottom(), ...b.rightTop());
       }
-      // if (value) {
-      //   comp.getMark(`血液検査結果${i + 1}`).withCols(
-      //     [18],
-      //     (b) => {
-      //       comp.text(b, value, {
-      //         halign: HorizAlign.Right,
-      //         valign: VertAlign.Center,
-      //       });
-      //     },
-      //     (b) => {
-      //       comp.text(b.shrinkToRight(1), unit ?? "", {
-      //         halign: HorizAlign.Left,
-      //         valign: VertAlign.Center,
-      //       });
-      //     }
-      //   );
-      // } else {
-      //   const b = comp.getMark(`血液検査結果${i + 1}`);
-      //   comp.line(...b.leftBottom(), ...b.rightTop());
-      // }
     });
-    // let prevFont = comp.curFont;
-    // renderUrineExam(comp, comp.getMark("尿蛋白"), urineProtein);
-    // renderUrineExam(comp, comp.getMark("尿潜血"), urineBlood);
-    // renderUrineExam(comp, comp.getMark("尿糖"), urineGlucose);
-    // renderTokkijikou(comp, comp.getMark("その他特記事項"), tokkijikou);
-    // comp.setFont(prevFont);
+    let prevFont = c.getCurrentFont(ctx);
+    renderUrineExam(ctx, c.getMark(ctx, "尿蛋白"), urineProtein);
+    renderUrineExam(ctx, c.getMark(ctx, "尿潜血"), urineBlood);
+    renderUrineExam(ctx, c.getMark(ctx, "尿糖"), urineGlucose);
+    renderTokkijikou(ctx, c.getMark(ctx, "その他特記事項"), tokkijikou);
+    c.setFont(ctx, prevFont);
     // set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
     // set(ctx, "住所1", address1);
     // set(ctx, "住所2", address2);
