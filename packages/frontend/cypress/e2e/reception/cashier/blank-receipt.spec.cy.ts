@@ -1,6 +1,9 @@
 import { castList } from "@/lib/cast";
-import { castOp } from "@/lib/drawer/op";
 import { dialogOpen } from "./misc";
+
+function castOp(arg: any): any {
+  return arg;
+}
 
 describe("Blank Receipt", () => {
   it("should open blank receipt dialog", () => {
