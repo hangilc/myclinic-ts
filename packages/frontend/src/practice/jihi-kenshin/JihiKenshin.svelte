@@ -14,6 +14,7 @@
   import * as b from "@/lib/drawer/compiler/box";
   import type { DrawerContext } from "@/lib/drawer/compiler/context";
   import type { CompositeItem } from "@/lib/drawer/compiler/compiler";
+  import { hasCompTmpl, parseCompTmpl } from "./composite-template";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -143,7 +144,7 @@
       }
       m = /^赤血球数\s+([\d.]+)/.exec(line);
       if (m) {
-        setLaboExam("赤血球数", m[1], "ten_thousand_per_ul", collect);
+        setLaboExam("赤血球数", m[1], "[[ten_thousand_per_ul]]", collect);
       }
       m = /^ﾍﾓｸﾞﾛﾋﾞﾝ\s+([\d.]+)/.exec(line);
       if (m) {
@@ -155,7 +156,7 @@
       }
       m = /^血小板数\s+([\d.]+)/.exec(line);
       if (m) {
-        setLaboExam("血小板数", m[1], "ten_thousand_per_ul", collect);
+        setLaboExam("血小板数", m[1], "[[ten_thousand_per_ul]]", collect);
       }
       m = /^AST\(GOT\)\s+([\d.]+)/.exec(line);
       if (m) {
@@ -253,17 +254,20 @@
     }
   }
 
-  function renderUrineExam(
-    ctx: DrawerContext,
-    box: Box,
-    value: string
-  ): void {
+  function renderUrineExam(ctx: DrawerContext, box: Box, value: string): void {
     const prevFont = c.getCurrentFont(ctx);
     switch (value) {
       case "":
         break;
       case "-": {
-        c.drawText(ctx, "－", b.modify(box, b.shift(1, 0)), "center", "center", { dy: -0.5 }); // en-dash
+        c.drawText(
+          ctx,
+          "－",
+          b.modify(box, b.shift(1, 0)),
+          "center",
+          "center",
+          { dy: -0.5 }
+        ); // en-dash
         break;
       }
       case "+/-": {
@@ -306,6 +310,19 @@
 
   function diagonal(ctx: DrawerContext, box: Box) {
     c.line(ctx, b.leftBottom(box), b.rightTop(box));
+  }
+
+  function rewriteComp(key: string): CompositeItem[] {
+    if (key === "ten_thousand_per_ul") {
+      return [
+        { kind: "text", text: "x10" },
+        { kind: "text-by-font", text: "4", fontName: "small-entry", dy: -1.2 },
+        { kind: "gap", width: 1.0 },
+        { kind: "text", text: "/μL" },
+      ];
+    } else {
+      throw new Error(`Unknown composite template key: ${key}`);
+    }
   }
 
   function doDisplay() {
@@ -442,13 +459,8 @@
           ([left, right]) => {
             c.drawText(ctx, value, left, "right", "center");
             const unitBox = b.modify(right, b.shrinkHoriz(1, 0));
-            if (unit === "ten_thousand_per_ul") {
-              c.drawComposite(ctx, unitBox, [
-                { kind: "text", text: "x10" },
-                { kind: "text-by-font", text: "4", fontName: "small-entry", dy: -1.2 },
-                { kind: "gap", width: 1.0 },
-                { kind: "text", text: "/μL" },
-              ]);
+            if( hasCompTmpl(unit) ){
+              c.drawComposite(ctx, unitBox, parseCompTmpl(unit, rewriteComp));
             } else {
               c.drawText(ctx, unit, unitBox, "left", "center");
             }
@@ -457,7 +469,6 @@
       } else {
         const bb = c.getMark(ctx, `血液検査結果${i + 1}`);
         c.line(ctx, b.leftBottom(bb), b.rightTop(bb));
-        // c.line(...b.leftBottom(), ...b.rightTop());
       }
     });
     let prevFont = c.getCurrentFont(ctx);
