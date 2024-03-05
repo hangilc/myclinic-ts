@@ -10,6 +10,7 @@ import { sumOfNumbers } from "./util";
 import { scaleOp } from "./scale";
 import { offsetOp } from "./offset";
 import { breakLines } from "./break-lines";
+import { hasCompTmpl, parseCompTmpl } from "@/practice/jihi-kenshin/composite-template";
 
 export interface GetOpsOpt {
   scale?: number;
@@ -380,6 +381,20 @@ export function drawTexts(ctx: DrawerContext, texts: string[], box: Box, optArg:
     optArg);
 }
 
+export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box, 
+  writer: (key: string) => CompositeItem[], optArg: DrawTextsOptArg = {}) {
+  const opt = new DrawTextsOpt(optArg, ctx);
+  drawTextsInBoxes(ctx, texts, box,
+    (tt, bb) => {
+      if( hasCompTmpl(tt) ){
+        drawComposite(ctx, bb, parseCompTmpl(tt, writer), optArg);
+      } else {
+        drawText(ctx, tt, bb, opt.halign, opt.valign, optArg);
+      }
+    },
+    optArg);
+}
+
 interface ParagraphOptArg {
 
 }
@@ -473,9 +488,6 @@ export function withGrid(ctx: DrawerContext, box: Box, rowSplitter: Splitter | n
 
 export function textWidth(ctx: DrawerContext, text: string): number {
   return stringDrawWidth(text, fsm.getCurrentFontSize(ctx.fsm));
-  // const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  // const charWidths = stringToCharWidths(text, fontSize);
-  // return sumOfNumbers(charWidths);
 }
 
 export function textWidthWithFont(ctx: DrawerContext, text: string, fontName: string): number {
