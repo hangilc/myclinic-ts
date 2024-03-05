@@ -1,7 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import { A4 } from "@/lib/drawer-compiler/paper-size";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import * as kanjidate from "kanjidate";
@@ -15,6 +14,7 @@
   import type { DrawerContext } from "@/lib/drawer/compiler/context";
   import type { CompositeItem } from "@/lib/drawer/compiler/compiler";
   import { hasCompTmpl, parseCompTmpl } from "./composite-template";
+  import { A4 } from "@/lib/drawer/compiler/paper-size";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -485,8 +485,8 @@
         destroy: () => d.$destroy(),
         title: "自費健診印刷",
         ops: c.getOps(ctx),
-        width: A4[0],
-        height: A4[1],
+        width: A4.width,
+        height: A4.height,
         scale: 2,
       },
     });

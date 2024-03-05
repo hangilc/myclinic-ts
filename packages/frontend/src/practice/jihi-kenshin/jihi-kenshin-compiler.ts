@@ -1,16 +1,9 @@
 import { type Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-// import { DrawerContext } from "@/lib/drawer-compiler/drawer-compiler";
-// import {
-//   HorizAlign,
-//   HorizDirection,
-//   VertAlign,
-//   VertDirection,
-// } from "@/lib/drawer-compiler/enums";
-import { FontWeightBold } from "@/lib/drawer-compiler/weight-consts";
 import { A4 } from "@/lib/drawer/compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "@/lib/drawer/compiler/context";
+import { FontWeightBold } from "@/lib/drawer/compiler/font-weight";
 
 
 const firstColWidth = 22;
