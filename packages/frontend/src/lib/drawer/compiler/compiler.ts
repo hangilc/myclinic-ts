@@ -317,19 +317,18 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
 export interface DrawTextsInBoxesOptArg {
   lineHeight?: number;
   leading?: number;
-  halign?: HAlign;
-  valign?: VAlign;
+  valignChunk?: VAlign;
 }
 
 export class DrawTextsInBoxesOpt {
   lineHeight: number;
   leading: number;
-  valign: VAlign;
+  valignChunk: VAlign;
 
   constructor(arg: DrawTextsInBoxesOptArg, ctx: DrawerContext) {
     this.lineHeight = arg.lineHeight ?? currentFontSize(ctx);
     this.leading = arg.leading ?? 0;
-    this.valign = arg.valign ?? "center";
+    this.valignChunk = arg.valignChunk ?? "top";
   }
 }
 
@@ -337,15 +336,15 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
   writer: (t: string, b: Box) => void, optArg: DrawTextsInBoxesOptArg = {}) {
   const opt = new DrawTextsInBoxesOpt(optArg, ctx);
   let top = box.top;
-  if (opt.valign === "center" || opt.valign === "bottom") {
+  if (opt.valignChunk === "center" || opt.valignChunk === "bottom") {
     let totalHeight = opt.lineHeight * texts.length;
     if (opt.leading !== 0 && texts.length > 1) {
       totalHeight += opt.leading * (texts.length - 1);
     }
-    if (opt.valign === "center") {
+    if (opt.valignChunk === "center") {
       const rem = b.height(box) - totalHeight;
       top += rem * 0.5;
-    } else if (opt.valign === "bottom") {
+    } else if (opt.valignChunk === "bottom") {
       top = box.bottom - totalHeight;
     }
   }
@@ -356,20 +355,19 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
   })
 }
 
-// export interface DrawTextsOptArg extends DrawTextsInBoxesOpt {
-//   halign?: HAlign;
-// }
-
-export type DrawTextsOptArg = DrawTextsInBoxesOptArg & {
+export type DrawTextsOptArg = DrawTextsInBoxesOptArg & DrawTextOptionArg & {
   halign?: HAlign;
+  valign?: VAlign;
 }
 
 class DrawTextsOpt extends DrawTextsInBoxesOpt {
   halign: HAlign;
+  valign: VAlign;
 
   constructor(arg: DrawTextsOptArg, ctx: DrawerContext) {
     super(arg, ctx);
     this.halign = arg.halign ?? "left";
+    this.valign = arg.valign ?? "top";
   }
 }
 
@@ -377,16 +375,9 @@ export function drawTexts(ctx: DrawerContext, texts: string[], box: Box, optArg:
   const opt = new DrawTextsOpt(optArg, ctx);
   drawTextsInBoxes(ctx, texts, box,
     (tt, bb) => {
-      drawText(ctx, tt, bb, opt.halign, )
+      drawText(ctx, tt, bb, opt.halign, opt.valign, optArg);
     },
     optArg);
-  const fontSize = currentFontSize(ctx);
-  let r = b.modify(box, b.sliceTop(fontSize));
-  const leading = opt.leading;
-  lines.forEach((line, i) => {
-    drawText(ctx, line, r, "left", "top");
-    r = b.modify(r, b.shift(0, fontSize + leading));
-  })
 }
 
 interface ParagraphOptArg {
