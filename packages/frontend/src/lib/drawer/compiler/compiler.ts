@@ -630,3 +630,9 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
   });
 }
 
+export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
+  const save = getCurrentFont(ctx);
+  setFont(ctx, fontName);
+  f();
+  setFont(ctx, save);
+}

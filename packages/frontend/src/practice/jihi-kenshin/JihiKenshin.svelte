@@ -59,7 +59,7 @@
   let address2 = "";
   let clinicName = "";
   let doctorName = "";
-  let showMarker: boolean = false;
+  // let showMarker: boolean = false;
 
   applyClinicInfo();
 
@@ -302,11 +302,6 @@
     const r: Box = b.modify(box, b.inset(1, 1, 2, 1));
     const lines = value.split(/\r?\n/);
     c.drawTextTmpls(ctx, lines, box, rewriteComp, { leading: 1 });
-    // c.textLines(
-    //   r,
-    //   lines.map((line) => convLine(line, c)),
-    //   { leading: 1 }
-    // );
   }
 
   function diagonal(ctx: DrawerContext, box: Box) {
@@ -478,14 +473,11 @@
     renderUrineExam(ctx, c.getMark(ctx, "尿糖"), urineGlucose);
     renderTokkijikou(ctx, c.getMark(ctx, "その他特記事項"), tokkijikou);
     c.setFont(ctx, prevFont);
-    // set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
-    // set(ctx, "住所1", address1);
-    // set(ctx, "住所2", address2);
-    // set(ctx, "クリニック名", clinicName);
-    // comp.withFont("large-entry", () => set(ctx, "医師名", doctorName));
-    // if (showMarker) {
-    //   comp.labelMarks();
-    // }
+    set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
+    set(ctx, "住所1", address1);
+    set(ctx, "住所2", address2);
+    set(ctx, "クリニック名", clinicName);
+    c.withFont(ctx, "large-entry", () => set(ctx, "医師名", doctorName));
 
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -635,9 +627,9 @@
         <span>医師名</span>
         <input type="text" bind:value={doctorName} />
       </div>
-      <div>
+      <!-- <div>
         <input type="checkbox" bind:value={showMarker} /> マーカー表示
-      </div>
+      </div> -->
     </div>
     <div class="col2">
       <div>
