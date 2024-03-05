@@ -301,6 +301,7 @@
   function renderTokkijikou(ctx: DrawerContext, box: Box, value: string): void {
     const r: Box = b.modify(box, b.inset(1, 1, 2, 1));
     const lines = value.split(/\r?\n/);
+    c.drawTextTmpls(ctx, lines, box, rewriteComp, { leading: 1 });
     // c.textLines(
     //   r,
     //   lines.map((line) => convLine(line, c)),
