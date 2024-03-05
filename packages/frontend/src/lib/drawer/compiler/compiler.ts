@@ -86,7 +86,7 @@ export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
 }
 
 export function getCurrentFont(ctx: DrawerContext): string {
-  if( ctx.currentFont === undefined ){
+  if (ctx.currentFont === undefined) {
     throw new Error("Cannot get current font");
   }
   return ctx.currentFont;
@@ -101,7 +101,7 @@ export function getMark(ctx: DrawerContext, key: string, ...modifiers: Modifier[
   if (!mark) {
     throw new Error(`Cannot find mark: ${key}.`);
   }
-  if( modifiers.length > 0 ){
+  if (modifiers.length > 0) {
     mark = b.modify(mark, ...modifiers)
   }
   return mark;
@@ -314,20 +314,72 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
   }
 }
 
-export interface DrawTextsOptArg {
+export interface DrawTextsInBoxesOptArg {
+  lineHeight?: number;
   leading?: number;
+  halign?: HAlign;
+  valign?: VAlign;
 }
 
-class DrawTextsOpt {
+export class DrawTextsInBoxesOpt {
+  lineHeight: number;
   leading: number;
+  valign: VAlign;
 
-  constructor(arg: DrawTextsOptArg) {
+  constructor(arg: DrawTextsInBoxesOptArg, ctx: DrawerContext) {
+    this.lineHeight = arg.lineHeight ?? currentFontSize(ctx);
     this.leading = arg.leading ?? 0;
+    this.valign = arg.valign ?? "center";
   }
 }
 
-export function drawTexts(ctx: DrawerContext, lines: string[], box: Box, optArg: DrawTextsOptArg = {}) {
-  const opt = new DrawTextsOpt(optArg);
+export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
+  writer: (t: string, b: Box) => void, optArg: DrawTextsInBoxesOptArg = {}) {
+  const opt = new DrawTextsInBoxesOpt(optArg, ctx);
+  let top = box.top;
+  if (opt.valign === "center" || opt.valign === "bottom") {
+    let totalHeight = opt.lineHeight * texts.length;
+    if (opt.leading !== 0 && texts.length > 1) {
+      totalHeight += opt.leading * (texts.length - 1);
+    }
+    if (opt.valign === "center") {
+      const rem = b.height(box) - totalHeight;
+      top += rem * 0.5;
+    } else if (opt.valign === "bottom") {
+      top = box.bottom - totalHeight;
+    }
+  }
+  let bb = b.modify(box, b.setHeight(opt.lineHeight, "top"), b.setTop(top));
+  texts.forEach(t => {
+    writer(t, bb);
+    bb = b.modify(bb, b.shiftDown(opt.lineHeight + opt.leading));
+  })
+}
+
+// export interface DrawTextsOptArg extends DrawTextsInBoxesOpt {
+//   halign?: HAlign;
+// }
+
+export type DrawTextsOptArg = DrawTextsInBoxesOptArg & {
+  halign?: HAlign;
+}
+
+class DrawTextsOpt extends DrawTextsInBoxesOpt {
+  halign: HAlign;
+
+  constructor(arg: DrawTextsOptArg, ctx: DrawerContext) {
+    super(arg, ctx);
+    this.halign = arg.halign ?? "left";
+  }
+}
+
+export function drawTexts(ctx: DrawerContext, texts: string[], box: Box, optArg: DrawTextsOptArg = {}) {
+  const opt = new DrawTextsOpt(optArg, ctx);
+  drawTextsInBoxes(ctx, texts, box,
+    (tt, bb) => {
+      drawText(ctx, tt, bb, opt.halign, )
+    },
+    optArg);
   const fontSize = currentFontSize(ctx);
   let r = b.modify(box, b.sliceTop(fontSize));
   const leading = opt.leading;
@@ -391,7 +443,7 @@ export function frameBottom(ctx: DrawerContext, box: Box) {
 
 export function line(ctx: DrawerContext, ...points: [number, number][]) {
   const start = points.shift();
-  if( !start ){ return }
+  if (!start) { return }
   moveTo(ctx, ...start);
   points.forEach(([x, y]) => lineTo(ctx, x, y));
 }
@@ -536,7 +588,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "gap": {
         if (item.mark) {
           let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width });
-          if( item.modifiers ){
+          if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
           mark(ctx, item.mark, mb);
@@ -547,7 +599,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "gap-to": {
         if (item.mark) {
           let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + item.at });
-          if( item.modifiers ){
+          if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
           mark(ctx, item.mark, mb);
