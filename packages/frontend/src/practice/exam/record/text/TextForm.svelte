@@ -12,6 +12,7 @@
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { dateToSqlDate } from "myclinic-model/model";
+  import { isFaxToPharmacyText } from "./shohousen-text-helper";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -20,6 +21,9 @@
 
   function onEnter(): void {
     const content = textarea.value.trim();
+    if( isFaxToPharmacyText(content) ) {
+      
+    }
     const newText: m.Text = Object.assign({}, text, { content });
     if (newText.textId === 0) {
       api.enterText(newText);
