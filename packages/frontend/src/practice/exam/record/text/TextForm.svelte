@@ -6,23 +6,28 @@
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
-  import { confirm } from "@/lib/confirm-call";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { dateToSqlDate } from "myclinic-model/model";
-  import { isFaxToPharmacyText } from "./shohousen-text-helper";
+  import { confirmOnlinePresc, isFaxToPharmacyText } from "./shohousen-text-helper";
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
 
-  function onEnter(): void {
+  async function onEnter() {
     const content = textarea.value.trim();
     if( isFaxToPharmacyText(content) ) {
-      
+      const err = await confirmOnlinePresc(text);
+      if( err ){
+        const proceed = confirm(`${err}\nこのまま入力しますか？`);
+        if( !proceed ){
+          return;
+        }
+      }
     }
     const newText: m.Text = Object.assign({}, text, { content });
     if (newText.textId === 0) {
@@ -35,9 +40,9 @@
   }
 
   function onDelete(): void {
-    confirm("この文章を削除していいですか？", () =>
+    if( confirm("この文章を削除していいですか？") ) {
       api.deleteText(text.textId)
-    );
+    }
   }
 
   function containsHikitsugi(): boolean {

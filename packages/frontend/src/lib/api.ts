@@ -352,6 +352,11 @@ export default {
     return get("delete-text", { "text-id": textId.toString() }, castBoolean);
   },
 
+  listTextForVisit(visitId: number): Promise<m.Text[]> {
+    return get("list-text-for-visit", { "visit-id": visitId.toString() },
+    castList(m.Text.cast));
+  },
+
   enterPayment(payment: m.Payment): Promise<boolean> {
     return post("enter-payment", payment, {}, castBoolean);
   },
