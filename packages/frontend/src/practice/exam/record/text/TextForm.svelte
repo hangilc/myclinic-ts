@@ -69,6 +69,10 @@
     return text.content.startsWith("院外処方\nＲｐ）");
   }
 
+  function isTodaysShohousen(): boolean {
+    
+  }
+
   async function doPrintShohousen() {
     const clinicInfo = await api.getClinicInfo();
     const visitId = text.visitId;
