@@ -73,3 +73,17 @@ function isEqualKoukikourei(a: Koukikourei, b: Koukikourei): boolean {
     a.validFrom === b.validFrom &&
     a.validUpto === b.validUpto
 }
+
+// export async function findAvailableHoken(patientId: number, at: string): Promise<{
+//   shahokokuho: Shahokokuho | undefined,
+//   koukikourei: Koukikourei | undefined,
+// }> {
+//   const shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
+//   const koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
+//   shahokokuhoList.sort((a, b) => -(a.shahokokuhoId - b.shahokokuhoId));
+//   koukikoureiList.sort((a, b) => -(a.koukikoureiId - b.koukikoureiId));
+//   return {
+//     shahokokuho: shahokokuhoList.length > 0 ? shahokokuhoList[0] : undefined,
+//     koukikourei: koukikoureiList.length > 0 ? koukikoureiList[0] : undefined,
+//   }
+// }

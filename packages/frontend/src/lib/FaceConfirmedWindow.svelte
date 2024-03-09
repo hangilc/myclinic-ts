@@ -27,14 +27,9 @@
   } from "myclinic-model";
   import api from "./api";
   import {
-    koukikoureiOnshiConsistent,
-    shahokokuhoOnshiConsistent,
-  } from "./onshi-hoken-consistency";
-  import {
   checkKoukikoureiInconsistency,
     createHokenFromOnshiResult,
     tryFixEdaban,
-    type ShahokokuhoOnshiInconsistency,
     tryFixPrevHoken,
   } from "./onshi-hoken";
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
