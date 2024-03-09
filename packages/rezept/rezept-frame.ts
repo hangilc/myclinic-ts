@@ -56,7 +56,12 @@ export interface RezeptUnit {
   diseases: RezeptDisease[];
 }
 
-export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number): PatientUnit {
+export interface RezeptUnitToPatientUnitOption {
+  searchNumber?: number;
+}
+
+export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number,
+    opt: RezeptUnitToPatientUnitOption = {}): PatientUnit {
   const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = rezeptUnit;
   const rows: string[] = [];
   if (visits.length === 0) {
@@ -126,7 +131,8 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
   return {
     getRows(serial: number): string[] {
       return [
-        createレセプト共通レコード(year, month, serial, hokensha, kouhiList, patient, visits, shotokuKubun),
+        createレセプト共通レコード(year, month, serial, hokensha, kouhiList, patient, visits, shotokuKubun,
+          opt.searchNumber),
         ...rows
       ];
     },

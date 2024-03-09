@@ -96,7 +96,7 @@
     downloadLink.download = fixedFileName;
   }
 
-  function parseSeikyuu(src: string): { year: number, month: number, patientId: number, serial: number } {
+  function parseSeikyuu(src: string): { year: number, month: number, patientId: number, serial: number, searchNumber: number } {
     const lines: string[] = src.split(/\r?\n/);
     for(let line of lines){
       if( line.startsWith("RE") ){
@@ -107,6 +107,7 @@
           month: parseInt(item.substring(4, 6)),
           patientId: parseInt(toks[13]),
           serial: parseInt(toks[1]),
+          searchNumber: parseInt(toks[18]),
         }
       }
     }
@@ -114,7 +115,7 @@
   }
 
   async function doRecalc() {
-    const { year, month, patientId, serial } = parseSeikyuu(seikyuuData);
+    const { year, month, patientId, serial, searchNumber } = parseSeikyuu(seikyuuData);
     const { shaho, kokuho } = await loadVisitsForPatient(year, month, patientId);
     let visits: Visit[] = [];
     if( shaho.length === 1 && kokuho.length === 0 ){
@@ -125,7 +126,7 @@
       throw new Error("Cannot handle visits");
     }
     const unit = await cvtVisitsToUnit(visits);
-    const patientUnit = rezeptUnitToPatientUnit(unit, year, month);
+    const patientUnit = rezeptUnitToPatientUnit(unit, year, month, { searchNumber });
     const rows = patientUnit.getRows(serial);
     seikyuuData = rows.join("\r\n") + "\r\n";
   }
