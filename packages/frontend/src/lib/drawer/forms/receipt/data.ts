@@ -4,6 +4,7 @@ import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import type { Box } from "../../compiler/box";
 import { stringDrawWidth } from "../../compiler/char-width";
+import * as kanjidate from "kanjidate";
 
 export function drawData(ctx: DrawerContext, data: ReceiptDrawerData) {
   renderPatient(ctx, data.patientName ?? "", c.getMark(ctx, "nameBox"));
@@ -54,12 +55,17 @@ function renderKingaku(ctx: DrawerContext, kingaku: number, box: Box) {
 function renderDate(ctx: DrawerContext, date: string, box: Box) {
   const m = date.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if( m ){
-    const year = m[1];
-    const month = m[2].replace(/^0/, "");
-    const day = m[3].replace(/^0/, "");
-    const s = `${year}年${month}月${day}日`;
+    // const year = m[1];
+    // const month = m[2].replace(/^0/, "");
+    // const day = m[3].replace(/^0/, "");
+    // const s = `${year}年${month}月${day}日`;
+    const d = new Date(date);
+    const s = kanjidate.format(kanjidate.f2, d);
     c.setFont(ctx, "mincho-4");
     c.drawText(ctx, s, box, "left", "center");
+  } else {
+    c.setFont(ctx, "mincho-4");
+    c.drawText(ctx, date, box, "left", "center");
   }
 }
 
