@@ -69,11 +69,20 @@
     return text.content.startsWith("院外処方\nＲｐ）");
   }
 
-  function isTodaysShohousen(): boolean {
-    
+  async function isTodaysShohousen(): Promise<boolean> {
+    const visit = await api.getVisit(text.visitId);
+    const visitedAt = visit.visitedAt.substring(0, 10);
+    const today = dateToSqlDate(new Date());
+    return visitedAt === today;
   }
 
   async function doPrintShohousen() {
+    if( !(await isTodaysShohousen()) ){
+      if( !confirm("本日の処方線でありませんが、印刷しますか？") ){
+        onClose();
+        return;
+      }
+    }
     const clinicInfo = await api.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
