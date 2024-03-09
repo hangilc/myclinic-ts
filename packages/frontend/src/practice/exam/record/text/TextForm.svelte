@@ -97,7 +97,6 @@
     } else if( hoken.koukikourei ){
       hokenshaBangou = hoken.koukikourei.hokenshaBangou;
       hihokensha = hoken.koukikourei.hihokenshaBangou;
-      hokenKubun = "hihokensha";
     }
     let futansha: string | undefined = undefined;
     let jukyuusha: string | undefined = undefined;

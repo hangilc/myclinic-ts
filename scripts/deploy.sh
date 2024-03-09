@@ -5,5 +5,6 @@ echo $STAMP
 
 npm run compile
 npm run build -w packages/frontend
-ssh changclinic-server cp -r  vite vite-$STAMP
-rsync -avg packages/frontend/dist/ changclinic-server:~/vite/
+rsync -avg packages/frontend/dist/ changclinic-server:~/vite-$STAMP
+ssh changclinic-server rm -f vite
+ssh changclinic-server ln -s vite-$STAMP vite
