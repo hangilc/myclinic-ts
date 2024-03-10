@@ -58,7 +58,8 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="disp" on:click={onDispClick}>
+<div class="disp" on:click={onDispClick} data-type="hoken" 
+  data-onshi-confirmed={onshiConfirmed ?? "false"}>
   {#if (visit.hoken.shahokokuho || visit.hoken.koukikourei) && onshiConfirmed !== undefined}
     {#if onshiConfirmed}
       <svg

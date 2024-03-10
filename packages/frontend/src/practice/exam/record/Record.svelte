@@ -39,7 +39,7 @@
   });
 </script>
 
-<div class="top">
+<div class="top" data-type="record" data-visit-id={visit.visitId}>
   <Title bind:visit />
   <TwoCols isCurrent={$currentVisitId === visit.visitId}>
     <div slot="left">

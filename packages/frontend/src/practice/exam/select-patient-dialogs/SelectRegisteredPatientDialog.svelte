@@ -49,8 +49,8 @@
     <div class="select">
       {#each entries as data}
         <SelectItem {data} {selected}>
-          {@const [_wq, _visit, patient] = data}
-          <span>{patient.lastName}{patient.firstName}</span>
+          {@const [_wq, visit, patient] = data}
+          <span data-visit-id={visit.visitId}>{patient.lastName}{patient.firstName}</span>
         </SelectItem>
       {/each}
     </div>

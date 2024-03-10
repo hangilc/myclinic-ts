@@ -92,6 +92,7 @@ export async function onshiConfirm(
     console.log("timeout");
     controller.abort();
   }, timeout * 1000);
+  console.log("onshi-confirm", server + "/onshi/kakunin");
   const response = await fetch(server + "/onshi/kakunin", {
     method: "POST",
     headers: {
