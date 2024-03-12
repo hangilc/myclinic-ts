@@ -37,10 +37,15 @@ function formatFutanWari(futanWari: string) {
 }
 
 function renderPatient(ctx: DrawerContext, name: string, box: Box) {
-  c.setFont(ctx, "mincho-6");
+  const font = "mincho-6"
+  c.setFont(ctx, font);
   let fontSize = c.currentFontSize(ctx);
   if (stringDrawWidth(name, fontSize) <= b.width(box)) {
     c.drawText(ctx, name, box, "center", "bottom");
+  } else {
+    c.setFont(ctx, "mincho-4");
+    c.paragraph(ctx, name, box, { valign: "bottom" });
+    c.setFont(ctx, font);
   }
 }
 
@@ -91,7 +96,6 @@ function renderHokengai(ctx: DrawerContext, hokengai: string[], boxes: Box[] ){
       c.drawText(ctx, str, box, "left", "center");
     }
   }
-
 }
 
 function renderInstitute(ctx: DrawerContext, name: string, addressLines: string[], box: Box) {
