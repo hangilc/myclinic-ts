@@ -7,6 +7,7 @@ import type { ShahokokuhoInterface } from "myclinic-model/model";
 
 export namespace OnshiHokenInconsistency {
   export class Inconsistency {
+    isHokenInconsistency: boolean = true;
     messageLead: string;
     hokenValue: string;
     onshiValue: string;

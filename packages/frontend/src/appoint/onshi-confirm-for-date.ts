@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
+import { messageOfOnshiConfirmHokenResult, onshiConfirmHoken } from "@/lib/onshi-query-helper";
 import type { Appoint, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 
@@ -112,44 +112,10 @@ export function getPatientRep(appoint: Appoint): string {
 }
 
 async function confirmHoken(hoken: Shahokokuho | Koukikourei, date: string, idToken: string): Promise<ConfirmStatus> {
-  const [_r, e] = await onshiConfirmHoken(hoken, date, { idToken });
-  if( e.length > 0 ){
-    return inconsistent(e.join(""));
+  const result = await onshiConfirmHoken(hoken, date, { idToken });
+  if (!result.ok) {
+    return inconsistent(messageOfOnshiConfirmHokenResult(result));
   } else {
     return confirmed();
   }
 }
-
-// async function confirmShahokokuho(shahokokuho: Shahokokuho, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
-//   const q = onshi_query_from_hoken(shahokokuho, patient.birthday, date);
-//   q.idToken = idToken;
-//   const r = await onshiConfirm(q);
-//   if (r.isValid && r.resultList.length === 1) {
-//     const o = r.resultList[0];
-//     const err = shahokokuhoOnshiConsistent(shahokokuho, o);
-//     if (err) {
-//       return inconsistent(err);
-//     } else {
-//       return confirmed();
-//     }
-//   } else {
-//     return confirmError(r.getErrorMessage());
-//   }
-// }
-
-// async function confirmKoukikourei(koukikourei: Koukikourei, patient: Patient, date: string, idToken: string): Promise<ConfirmStatus> {
-//   const q = onshi_query_from_hoken(koukikourei, patient.birthday, date);
-//   q.idToken = idToken;
-//   const r = await onshiConfirm(q);
-//   if (r.isValid && r.resultList.length === 1) {
-//     const o = r.resultList[0];
-//     const err = koukikoureiOnshiConsistent(koukikourei, o);
-//     if (err) {
-//       return inconsistent(err);
-//     } else {
-//       return confirmed();
-//     }
-//   } else {
-//     return confirmError(r.getErrorMessage());
-//   }
-// }

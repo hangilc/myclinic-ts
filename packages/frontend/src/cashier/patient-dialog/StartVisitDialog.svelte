@@ -11,7 +11,7 @@
   } from "myclinic-model";
   import * as kanjidate from "kanjidate";
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
-  import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
+  import { messageOfOnshiConfirmHokenResult, onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import { dateToSql } from "@/lib/util";
   import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
@@ -181,14 +181,14 @@
     if (checked.length === 1) {
       const item = checked[0];
       inProgressNotice = "オンライン資格確認中";
-      const [result, e] = await onshiConfirmHoken(item.value, dateToSql(at));
-      if( e.length === 0 ){
-        item.confirmed = result;
+      const result = await onshiConfirmHoken(item.value, dateToSql(at));
+      if( result.ok ){
+        item.confirmed = result.result;
           updateHokenConfirmedCount();
           shahokokuhoList = [...shahokokuhoList];
           koukikoureiList = [...koukikoureiList];
       } else {
-        error = e.map(e => e.toString()).join("");
+        error = messageOfOnshiConfirmHokenResult(result);
       }
       inProgressNotice = "";
     }

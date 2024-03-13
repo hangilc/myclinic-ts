@@ -109,12 +109,16 @@
   }
 
   async function doOnshiConfirm(item: HokenItem) {
-    const [result, errs] = await onshiConfirmHoken(item.hoken, visitDate);
-    if (errs.length > 0) {
-      errors = errs.map((e) => e.toString());
-    } else {
-      item.confirm = result;
+    const result = await onshiConfirmHoken(item.hoken, visitDate);
+    if( result.ok ){
+      item.confirm = result.result;
       hokenItems = [...hokenItems];
+    } else {
+      errors = errs.map((e) => e.toString());
+      if( errs.every(e => e.isHokenInconsistency) ){
+
+      }
+
     }
   }
 

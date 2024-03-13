@@ -4,7 +4,7 @@ import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result
 import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
-import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, OnshiError, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
+import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, OnshiError, OnshiHokenInconsistency, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
 import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
 import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
 
@@ -31,6 +31,24 @@ export async function onshiConfirmByHoken(hoken: Shahokokuho | Koukikourei, conf
   return await onshiConfirm(query);
 }
 
+export type OnshiConfirmHokenResult = { ok: true, result: OnshiResult }
+  | { ok: false, error: "inconsistent", messages: string[], result: OnshiResult }
+  | { ok: false, error: "not-confirmed", message: string }
+
+export function messageOfOnshiConfirmHokenResult(result: OnshiConfirmHokenResult): string {
+  if (!result.ok) {
+    if (result.error === "inconsistent") {
+      return result.messages.join("");
+    } else if (result.error == "not-confirmed") {
+      return result.message;
+    } else {
+      return "Unknown inconsistency";
+    }
+  } else {
+    return "";
+  }
+}
+
 export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
   {
     limitAppConsFlag,
@@ -42,30 +60,24 @@ export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confir
     idToken?: string,
   } = {}
 ):
-  Promise<[OnshiResult, (OnshiHokenConsistencyError | OnshiPatientInconsistency)[]]> {
-  // const patient: Patient = await api.getPatient(hoken.patientId);
-  // const query = onshi_query_from_hoken(hoken, patient.birthday, confirmationDate, limitAppConsFlag);
-  // if (idToken) {
-  //   query.idToken = idToken;
-  // }
-  // if (queryCallback) {
-  //   queryCallback(query);
-  // }
-  // const result = await onshiConfirm(query);
+  Promise<OnshiConfirmHokenResult> {
   const result = await onshiConfirmByHoken(hoken, confirmationDate, { limitAppConsFlag, queryCallback, idToken });
-  const errors: (OnshiHokenConsistencyError | OnshiPatientInconsistency)[] = [];
   if (result.isValid) {
     const ri: ResultItem = result.resultList[0];
+    const messages: string[] = [];
+    const inconsistencies: OnshiHokenConsistencyError[] = [];
     if (hoken instanceof Shahokokuho) {
-      errors.push(...checkOnshiShahokokuhoConsistency(ri, hoken));
+      inconsistencies.push(...checkOnshiShahokokuhoConsistency(ri, hoken));
     } else {
-      errors.push(...checkOnshiKoukikoureiConsistency(ri, hoken));
+      inconsistencies.push(...checkOnshiKoukikoureiConsistency(ri, hoken));
     }
-    const patient: Patient = await api.getPatient(hoken.patientId);
-    errors.push(...checkOnshiPatientConsistency(ri, patient));
+    if (inconsistencies.length === 0) {
+      return { ok: true, result };
+    } else {
+      return { ok: false, error: "inconsistent", messages: inconsistencies.map(s => s.toString()), result };
+    }
   } else {
-    errors.push(new OnshiError(result.getErrorMessage()));
+    return { ok: false, error: "not-confirmed", message: result.getErrorMessage() };
   }
-  return [result, errors];
 }
 
