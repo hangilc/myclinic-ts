@@ -1,7 +1,10 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { onshiConfirmHoken } from "@/lib/onshi-query-helper";
+  import {
+    messageOfOnshiConfirmHokenResult,
+    onshiConfirmHoken,
+  } from "@/lib/onshi-query-helper";
   import {
     type Visit,
     type Kouhi,
@@ -17,6 +20,7 @@
   import ShahokokuhoDetail from "./ShahokokuhoDetail.svelte";
   import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
   import KouhiDetail from "./KouhiDetail.svelte";
+  import { createHokenFromOnshiResult } from "@/lib/onshi-hoken";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -46,6 +50,7 @@
     return new KouhiItem(h, visit.hasKouhiId(h.kouhiId));
   });
   let errors: string[] = [];
+  let fEnterHokenFromOnshi: (() => void) | undefined = undefined;
 
   function countSelectedHoken(hokenItems: HokenItem[]): number {
     return hokenItems.filter((item) => item.checked).length;
@@ -82,8 +87,6 @@
   }
 
   async function doEnter() {
-    console.log("visitId", visit.visitId);
-    console.log(hokenItems);
     if (
       hokenItems.filter((item) => item.savedConfirm && !item.checked).length > 0
     ) {
@@ -110,15 +113,30 @@
 
   async function doOnshiConfirm(item: HokenItem) {
     const result = await onshiConfirmHoken(item.hoken, visitDate);
-    if( result.ok ){
+    fEnterHokenFromOnshi = undefined;
+    if (result.ok) {
       item.confirm = result.result;
       hokenItems = [...hokenItems];
     } else {
-      errors = errs.map((e) => e.toString());
-      if( errs.every(e => e.isHokenInconsistency) ){
+      errors = [messageOfOnshiConfirmHokenResult(result)];
+      if (result.error === "inconsistent") {
+        fEnterHokenFromOnshi = doEnterHokenFromOnshi(result.result);
+      }
+    }
+  }
+
+  function doEnterHokenFromOnshi(result: OnshiResult): () => void {
+    return async () => {
+      const hoken = createHokenFromOnshiResult(visit.patientId, result.resultList[0]);
+      if( typeof hoken === "string" ){
+        fEnterHokenFromOnshi = undefined;
+        errors = [hoken];
+      } else {
+        hoken.validFrom = visit.visitedAt.substring(0, 10);
+        hoken.validUpto = "0000-00-00";
+        console.log("hoken", hoken);
 
       }
-
     }
   }
 
@@ -156,6 +174,14 @@
       {#each errors as error}
         <div>{error}</div>
       {/each}
+    </div>
+  {/if}
+  {#if fEnterHokenFromOnshi}
+    <div class="show-enter-hoken-button-wrapper">
+      <button
+        on:click={() => (fEnterHokenFromOnshi ? fEnterHokenFromOnshi() : {})}
+        >新規保険入力</button
+      >
     </div>
   {/if}
   <div>
@@ -271,5 +297,9 @@
     margin: 4px 10px;
     padding: 10px;
     border: 1px solid gray;
+  }
+
+  .show-enter-hoken-button-wrapper {
+    margin: 4px 10px 10px 10px;
   }
 </style>
