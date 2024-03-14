@@ -20,7 +20,7 @@
   import ShahokokuhoDetail from "./ShahokokuhoDetail.svelte";
   import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
   import KouhiDetail from "./KouhiDetail.svelte";
-  import { createHokenFromOnshiResult } from "@/lib/onshi-hoken";
+  import { createHokenFromOnshiResult, tryFixKoukikoureiValidUpto, tryFixShahokokuhoValidUpto } from "@/lib/onshi-hoken";
   import type { Hoken } from "@/cashier/patient-dialog/hoken";
 
   export let destroy: () => void;
@@ -128,6 +128,8 @@
 
   function doEnterHokenFromOnshi(result: OnshiResult, current: Shahokokuho | Koukikourei): () => void {
     return async () => {
+      fEnterHokenFromOnshi = undefined;
+      errors = [];
       const hoken = createHokenFromOnshiResult(visit.patientId, result.resultList[0]);
       if( typeof hoken === "string" ){
         fEnterHokenFromOnshi = undefined;
@@ -136,12 +138,35 @@
         const startDate = visit.visitedAt.substring(0, 10);
         hoken.validFrom = startDate;
         hoken.validUpto = "0000-00-00";
+        let enteredShahokokuho: Shahokokuho | undefined = undefined;
+        let enteredKoukikourei: Koukikourei | undefined = undefined;
         if( hoken instanceof Shahokokuho ){
-          const _entered = await api.enterShahokokuho(hoken);
+          enteredShahokokuho = await api.enterShahokokuho(hoken);
         } else if( hoken instanceof Koukikourei ) {
-          const _entered = await api.enterKoukikourei(hoken);
+          enteredKoukikourei = await api.enterKoukikourei(hoken);
         }
-        const avails = await api.listAvailableShahokokuho(visit.patientId, startDate);
+        const hokenIdSet: HokenIdSet = new HokenIdSet(0, 0, 0, visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id);
+        if( enteredShahokokuho ){
+          hokenIdSet.shahokokuhoId = enteredShahokokuho.shahokokuhoId;
+        }
+        if( enteredKoukikourei ){
+          hokenIdSet.koukikoureiId = enteredKoukikourei.koukikoureiId;
+        }
+        await api.updateHokenIds(visit.visitId, hokenIdSet);
+        if( visit.shahokokuhoId > 0 ){
+          const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
+          const err = await tryFixShahokokuhoValidUpto(shahokokuho, startDate);
+          if( err ) {
+            errors.push(err);
+          }
+        }
+        if( visit.koukikoureiId > 0 ){
+          const koukikourei = await api.getKoukikourei(visit.koukikoureiId);
+          const err = await tryFixKoukikoureiValidUpto(koukikourei, startDate);
+          if( err ){
+            errors.push(err);
+          }
+        }
       }
     }
   }

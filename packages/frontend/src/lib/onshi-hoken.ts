@@ -191,7 +191,7 @@ export async function tryFixPrevHoken(prev: Shahokokuho | Koukikourei, onshi: Sh
   }
 }
 
-async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)
+export async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)
   : Promise<string | undefined> {
   const shahokokuhoId = shahokokuho.shahokokuhoId;
   const visits = await api.shahokokuhoUsageSince(shahokokuhoId, otherStartDate);
@@ -208,7 +208,7 @@ async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDa
   }
 }
 
-async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
+export async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
   : Promise<string | undefined> {
   const koukikoureiId = koukikourei.koukikoureiId;
   const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
