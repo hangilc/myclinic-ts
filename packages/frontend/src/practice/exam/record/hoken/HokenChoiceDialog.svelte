@@ -21,6 +21,7 @@
   import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
   import KouhiDetail from "./KouhiDetail.svelte";
   import { createHokenFromOnshiResult } from "@/lib/onshi-hoken";
+  import type { Hoken } from "@/cashier/patient-dialog/hoken";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -120,22 +121,27 @@
     } else {
       errors = [messageOfOnshiConfirmHokenResult(result)];
       if (result.error === "inconsistent") {
-        fEnterHokenFromOnshi = doEnterHokenFromOnshi(result.result);
+        fEnterHokenFromOnshi = doEnterHokenFromOnshi(result.result, item.hoken);
       }
     }
   }
 
-  function doEnterHokenFromOnshi(result: OnshiResult): () => void {
+  function doEnterHokenFromOnshi(result: OnshiResult, current: Shahokokuho | Koukikourei): () => void {
     return async () => {
       const hoken = createHokenFromOnshiResult(visit.patientId, result.resultList[0]);
       if( typeof hoken === "string" ){
         fEnterHokenFromOnshi = undefined;
         errors = [hoken];
       } else {
-        hoken.validFrom = visit.visitedAt.substring(0, 10);
+        const startDate = visit.visitedAt.substring(0, 10);
+        hoken.validFrom = startDate;
         hoken.validUpto = "0000-00-00";
-        console.log("hoken", hoken);
-
+        if( hoken instanceof Shahokokuho ){
+          const _entered = await api.enterShahokokuho(hoken);
+        } else if( hoken instanceof Koukikourei ) {
+          const _entered = await api.enterKoukikourei(hoken);
+        }
+        const avails = await api.listAvailableShahokokuho(visit.patientId, startDate);
       }
     }
   }
