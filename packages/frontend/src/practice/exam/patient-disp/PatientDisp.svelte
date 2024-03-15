@@ -45,7 +45,7 @@
   }
 </script>
 
-<div class="patient-disp">
+<div class="patient-disp" data-patient-disp={patient.patientId}>
   <div>
     [{patient.patientId}]
     {patient.lastName}
