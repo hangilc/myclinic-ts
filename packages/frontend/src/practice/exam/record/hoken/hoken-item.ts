@@ -1,5 +1,5 @@
 import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
-import { Shahokokuho, type Kouhi, type Koukikourei } from "myclinic-model";
+import { Shahokokuho, type Kouhi, Koukikourei } from "myclinic-model";
 import type { OnshiResult } from "onshi-result";
 
 export class HokenItem {
@@ -26,6 +26,16 @@ export class HokenItem {
       return shahokokuhoRep(this.hoken)
     } else {
       return koukikoureiRep(this.hoken.futanWari);
+    }
+  }
+
+  hokenType(): string {
+    if( this.hoken instanceof Shahokokuho ){
+      return "shahokokuho";
+    } else if( this.hoken instanceof Koukikourei ){
+      return "koukikourei";
+    } else {
+      return "unknown";
     }
   }
 }

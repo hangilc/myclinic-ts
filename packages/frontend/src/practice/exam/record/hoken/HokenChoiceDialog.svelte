@@ -25,7 +25,7 @@
     tryFixKoukikoureiValidUpto,
     tryFixShahokokuhoValidUpto,
   } from "@/lib/onshi-hoken";
-  import { koukikoureiUpdated, shahokokuhoUpdated, visitUpdated } from "@/app-events";
+  import { koukikoureiDeleted, koukikoureiUpdated, shahokokuhoDeleted, shahokokuhoUpdated, visitUpdated } from "@/app-events";
   import { onDestroy } from "svelte";
 
   export let destroy: () => void;
@@ -51,7 +51,17 @@
        await updateHokenData();
       }
     }),
+    shahokokuhoDeleted.subscribe(async (updated) => {
+      if( updated && updated.patientId === visit.patientId ){
+       await updateHokenData();
+      }
+    }),
     koukikoureiUpdated.subscribe(async (updated) => {
+      if( updated && updated.patientId === visit.patientId ){
+       await updateHokenData();
+      }
+    }),
+    koukikoureiDeleted.subscribe(async (updated) => {
       if( updated && updated.patientId === visit.patientId ){
        await updateHokenData();
       }
@@ -283,7 +293,8 @@
   {/if}
   <div>
     {#each hokenItems as hokenItem (hokenItem.id)}
-      <div class="item">
+      <div class="item" data-type="hoken-item" data-hoken-type={hokenItem.hokenType()} 
+        data-hoken-id={hokenItem.id}}>
         <div>
           <input type="checkbox" bind:checked={hokenItem.checked} />
           <span>{hokenItem.rep()}</span>
