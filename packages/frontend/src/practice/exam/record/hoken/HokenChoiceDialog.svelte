@@ -20,8 +20,13 @@
   import ShahokokuhoDetail from "./ShahokokuhoDetail.svelte";
   import KoukikoureiDetail from "./KoukikoureiDetail.svelte";
   import KouhiDetail from "./KouhiDetail.svelte";
-  import { createHokenFromOnshiResult, tryFixKoukikoureiValidUpto, tryFixShahokokuhoValidUpto } from "@/lib/onshi-hoken";
-  import type { Hoken } from "@/cashier/patient-dialog/hoken";
+  import {
+    createHokenFromOnshiResult,
+    tryFixKoukikoureiValidUpto,
+    tryFixShahokokuhoValidUpto,
+  } from "@/lib/onshi-hoken";
+  import { koukikoureiUpdated, shahokokuhoUpdated, visitUpdated } from "@/app-events";
+  import { onDestroy } from "svelte";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -30,8 +35,46 @@
   export let kouhiList: Kouhi[];
   export let onshiResult: OnshiResult | undefined;
   export let visitDate: string;
-  let hokenItems: HokenItem[] = [...shahokokuhoList, ...koukikoureiList].map(
-    (h) => {
+  let hokenItems: HokenItem[] = makeHokenItems();
+  let kouhiItems: KouhiItem[] = makeKouhiItems();
+  let errors: string[] = [];
+  let fEnterHokenFromOnshi: (() => void) | undefined = undefined;
+  const unsubs = [
+    visitUpdated.subscribe(async (updated) => {
+      if (updated && updated.visitId === visit.visitId) {
+        visit = updated;
+        await updateHokenData();
+      }
+    }),
+    shahokokuhoUpdated.subscribe(async (updated) => {
+      if( updated && updated.patientId === visit.patientId ){
+       await updateHokenData();
+      }
+    }),
+    koukikoureiUpdated.subscribe(async (updated) => {
+      if( updated && updated.patientId === visit.patientId ){
+       await updateHokenData();
+      }
+    }),
+  ];
+
+  onDestroy(() => unsubs.forEach((f) => f()));
+
+  async function updateHokenData() {
+    const patientId = visit.patientId;
+        const at = visit.visitedAt.substring(0, 10);
+        shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
+        koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
+        kouhiList = await api.listAvailableKouhi(patientId, at);
+        onshiResult = undefined;
+        hokenItems = makeHokenItems();
+        kouhiItems = makeKouhiItems();
+        errors = [];
+        fEnterHokenFromOnshi = undefined;
+  }
+
+  function makeHokenItems() {
+    return [...shahokokuhoList, ...koukikoureiList].map((h) => {
       const item = new HokenItem(h);
       if (h instanceof Shahokokuho) {
         if (visit.shahokokuhoId === h.shahokokuhoId) {
@@ -45,13 +88,14 @@
         }
       }
       return item;
-    }
-  );
-  let kouhiItems: KouhiItem[] = kouhiList.map((h) => {
-    return new KouhiItem(h, visit.hasKouhiId(h.kouhiId));
-  });
-  let errors: string[] = [];
-  let fEnterHokenFromOnshi: (() => void) | undefined = undefined;
+    });
+  }
+
+  function makeKouhiItems() {
+    return kouhiList.map((h) => {
+      return new KouhiItem(h, visit.hasKouhiId(h.kouhiId));
+    });
+  }
 
   function countSelectedHoken(hokenItems: HokenItem[]): number {
     return hokenItems.filter((item) => item.checked).length;
@@ -126,12 +170,18 @@
     }
   }
 
-  function doEnterHokenFromOnshi(result: OnshiResult, current: Shahokokuho | Koukikourei): () => void {
+  function doEnterHokenFromOnshi(
+    result: OnshiResult,
+    current: Shahokokuho | Koukikourei
+  ): () => void {
     return async () => {
       fEnterHokenFromOnshi = undefined;
       errors = [];
-      const hoken = createHokenFromOnshiResult(visit.patientId, result.resultList[0]);
-      if( typeof hoken === "string" ){
+      const hoken = createHokenFromOnshiResult(
+        visit.patientId,
+        result.resultList[0]
+      );
+      if (typeof hoken === "string") {
         fEnterHokenFromOnshi = undefined;
         errors = [hoken];
       } else {
@@ -140,35 +190,51 @@
         hoken.validUpto = "0000-00-00";
         let enteredShahokokuho: Shahokokuho | undefined = undefined;
         let enteredKoukikourei: Koukikourei | undefined = undefined;
-        if( hoken instanceof Shahokokuho ){
+        let prevShahokokuho = await api.listAvailableShahokokuho(
+          visit.patientId,
+          startDate
+        );
+        for(let prev of prevShahokokuho){
+          console.log("prev", prev);
+        }
+        let prevKoukikourei = await api.listAvailableKoukikourei(
+          visit.patientId,
+          startDate
+        );
+        if (hoken instanceof Shahokokuho) {
           enteredShahokokuho = await api.enterShahokokuho(hoken);
-        } else if( hoken instanceof Koukikourei ) {
+        } else if (hoken instanceof Koukikourei) {
           enteredKoukikourei = await api.enterKoukikourei(hoken);
         }
-        const hokenIdSet: HokenIdSet = new HokenIdSet(0, 0, 0, visit.kouhi1Id, visit.kouhi2Id, visit.kouhi3Id);
-        if( enteredShahokokuho ){
+        const hokenIdSet: HokenIdSet = new HokenIdSet(
+          0,
+          0,
+          0,
+          visit.kouhi1Id,
+          visit.kouhi2Id,
+          visit.kouhi3Id
+        );
+        if (enteredShahokokuho) {
           hokenIdSet.shahokokuhoId = enteredShahokokuho.shahokokuhoId;
         }
-        if( enteredKoukikourei ){
+        if (enteredKoukikourei) {
           hokenIdSet.koukikoureiId = enteredKoukikourei.koukikoureiId;
         }
         await api.updateHokenIds(visit.visitId, hokenIdSet);
-        if( visit.shahokokuhoId > 0 ){
-          const shahokokuho = await api.getShahokokuho(visit.shahokokuhoId);
-          const err = await tryFixShahokokuhoValidUpto(shahokokuho, startDate);
-          if( err ) {
+        for (let prev of prevShahokokuho) {
+          const err = await tryFixShahokokuhoValidUpto(prev, startDate);
+          if (err) {
             errors.push(err);
           }
         }
-        if( visit.koukikoureiId > 0 ){
-          const koukikourei = await api.getKoukikourei(visit.koukikoureiId);
-          const err = await tryFixKoukikoureiValidUpto(koukikourei, startDate);
-          if( err ){
+        for (let prev of prevKoukikourei) {
+          const err = await tryFixKoukikoureiValidUpto(prev, startDate);
+          if (err) {
             errors.push(err);
           }
         }
       }
-    }
+    };
   }
 
   function doShowConfirmed(result: OnshiResult | undefined): void {

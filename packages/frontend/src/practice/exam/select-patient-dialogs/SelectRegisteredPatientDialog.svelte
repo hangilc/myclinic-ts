@@ -23,7 +23,6 @@
     const list = await api.listWqueueFull();
     entries = list.filter((d) => {
       const state = WqueueStateType.fromCode(d[0].waitState);
-      console.log("state", state);
       return (
         state == WqueueState.WaitExam ||
         state == WqueueState.WaitReExam ||

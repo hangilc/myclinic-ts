@@ -201,8 +201,10 @@ export async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, other
       "に確認されました。その旨を管理者に連絡してください。";
   } else {
     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-    if (shahokokuho.validUpto === "0000-00-00" || shahokokuho.validUpto > at) {
+    if( shahokokuho.validFrom <= at ){
       await api.updateShahokokuho(Object.assign({}, shahokokuho, { validUpto: at }))
+    } else {
+      await api.deleteShahokokuho(shahokokuho.shahokokuhoId);
     }
     return undefined;
   }
@@ -218,8 +220,10 @@ export async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, other
       "に確認されました。その旨を管理者に連絡してください。";
   } else {
     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-    if (koukikourei.validUpto === "0000-00-00" || koukikourei.validUpto > at) {
-      await api.updateKoukikourei(Object.assign({}, koukikourei, { validUpto: at }));
+    if( koukikourei.validFrom <= at ){
+      await api.updateKoukikourei(Object.assign({}, koukikourei, { validUpto: at }))
+    } else {
+      await api.deleteKoukikourei(koukikourei.koukikoureiId);
     }
     return undefined;
   }
