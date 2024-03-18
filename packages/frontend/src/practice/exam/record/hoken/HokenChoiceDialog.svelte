@@ -297,7 +297,7 @@
         data-hoken-id={hokenItem.id}}>
         <div>
           <input type="checkbox" bind:checked={hokenItem.checked} />
-          <span>{hokenItem.rep()}</span>
+          <span data-type="hoken-item-rep">{hokenItem.rep()}</span>
           {#if !hokenItem.confirm}
             <a
               href="javascript:void(0)"
