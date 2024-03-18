@@ -308,6 +308,7 @@
             <a
               href="javascript:void(0)"
               class="has-been-confirmed-link"
+              data-type="hoken-item-confirmed-link"
               on:click={() => doShowConfirmed(hokenItem.confirm)}>確認済</a
             >
           {/if}
