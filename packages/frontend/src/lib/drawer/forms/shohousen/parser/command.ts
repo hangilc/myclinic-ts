@@ -16,7 +16,7 @@ export type ShohousenCommand = CommandMemo | OnlineTaiou | ValidUpto;
 
 const reCommand = /^([^:： 　]+)(?:[:： 　](.*))?/;
 
-export function parseCommand(cmd: string): ShohousenCommand {
+export function parseCommand(cmd: string): ShohousenCommand | undefined {
   const m = cmd.match(reCommand);
   if( m ){
     const key = m[1];
@@ -25,6 +25,7 @@ export function parseCommand(cmd: string): ShohousenCommand {
       case "memo": return { kind: "memo", content: arg.trim() };
       case "オンライン対応": return { kind: "online-taiou" };
       case "有効期限": return { kind: "valid-upto", date: getDate(arg) }
+      case "futanwari": return undefined;
       default: {
         throw new Error(`Unknown command: ${cmd}`);
       }
