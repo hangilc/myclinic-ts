@@ -39,10 +39,20 @@ async function getPrevText(text: Text): Promise<Text | null> {
   }
 }
 
+export async function getFollowingText(text: Text): Promise<Text | null> {
+  const texts = await api.listTextForVisit(text.visitId);
+  const i = texts.findIndex(t => t.textId === text.textId);
+
+}
+
 function isPrescription(content: string): boolean {
   return /^院外処方/.test(content);
 }
 
 function hasOnline(content: string): boolean {
   return /オンライン対応/.test(content);
+}
+
+export function isOnlineShohousen(content: string): boolean {
+  return hasOnline(content);
 }

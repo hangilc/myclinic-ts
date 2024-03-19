@@ -11,7 +11,7 @@
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { dateToSqlDate } from "myclinic-model/model";
-  import { confirmOnlinePresc, isFaxToPharmacyText } from "./shohousen-text-helper";
+  import { confirmOnlinePresc, isFaxToPharmacyText, isOnlineShohousen } from "./shohousen-text-helper";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -20,6 +20,9 @@
 
   async function onEnter() {
     const content = textarea.value.trim();
+    if( isOnlineShohousen(content) ){
+      
+    }
     if( isFaxToPharmacyText(content) ) {
       const err = await confirmOnlinePresc(text);
       if( err ){

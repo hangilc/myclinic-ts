@@ -25,7 +25,7 @@ export function parseShohousen(content: string): ParsedShohousen {
     if (chunk.startsWith("@") || chunk.startsWith("＠") ) {
       const parsed = parseCommand(chunk.substring(1));
       if( parsed ){
-        commands.push();
+        commands.push(parsed);
       }
     } else {
       drugs.push(parseChunk(chunk.replace(reStart, "")));
