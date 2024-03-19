@@ -25,8 +25,15 @@
     tryFixKoukikoureiValidUpto,
     tryFixShahokokuhoValidUpto,
   } from "@/lib/onshi-hoken";
-  import { koukikoureiDeleted, koukikoureiUpdated, shahokokuhoDeleted, shahokokuhoUpdated, visitUpdated } from "@/app-events";
+  import {
+    koukikoureiDeleted,
+    koukikoureiUpdated,
+    shahokokuhoDeleted,
+    shahokokuhoUpdated,
+    visitUpdated,
+  } from "@/app-events";
   import { onDestroy } from "svelte";
+  import * as AsyncQueue from "@/lib/async-queue";
 
   export let destroy: () => void;
   export let visit: Visit;
@@ -35,6 +42,7 @@
   export let kouhiList: Kouhi[];
   export let onshiResult: OnshiResult | undefined;
   export let visitDate: string;
+  let aq = AsyncQueue.create();
   let hokenItems: HokenItem[] = makeHokenItems();
   let kouhiItems: KouhiItem[] = makeKouhiItems();
   let errors: string[] = [];
@@ -42,45 +50,53 @@
   const unsubs = [
     visitUpdated.subscribe(async (updated) => {
       if (updated && updated.visitId === visit.visitId) {
+        console.log("visitUpdated");
         visit = updated;
-        await updateHokenData();
+        AsyncQueue.append(aq, updateHokenData);
       }
     }),
     shahokokuhoUpdated.subscribe(async (updated) => {
-      if( updated && updated.patientId === visit.patientId ){
-       await updateHokenData();
+      if (updated && updated.patientId === visit.patientId) {
+        console.log("shahokokuhoUpdated");
+        AsyncQueue.append(aq, updateHokenData);
       }
     }),
     shahokokuhoDeleted.subscribe(async (updated) => {
-      if( updated && updated.patientId === visit.patientId ){
-       await updateHokenData();
+      if (updated && updated.patientId === visit.patientId) {
+        console.log("shahokokuhoDeleted");
+        AsyncQueue.append(aq, updateHokenData);
       }
     }),
     koukikoureiUpdated.subscribe(async (updated) => {
-      if( updated && updated.patientId === visit.patientId ){
-       await updateHokenData();
+      if (updated && updated.patientId === visit.patientId) {
+        console.log("koukikoureiUpdated");
+        AsyncQueue.append(aq, updateHokenData);
       }
     }),
     koukikoureiDeleted.subscribe(async (updated) => {
-      if( updated && updated.patientId === visit.patientId ){
-       await updateHokenData();
+      if (updated && updated.patientId === visit.patientId) {
+        console.log("koukikoureiDeleted");
+        AsyncQueue.append(aq, updateHokenData);
       }
     }),
   ];
 
-  onDestroy(() => unsubs.forEach((f) => f()));
+  onDestroy(() => {
+    AsyncQueue.abort(aq);
+    unsubs.forEach((f) => f());
+  });
 
   async function updateHokenData() {
     const patientId = visit.patientId;
-        const at = visit.visitedAt.substring(0, 10);
-        shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
-        koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
-        kouhiList = await api.listAvailableKouhi(patientId, at);
-        onshiResult = undefined;
-        hokenItems = makeHokenItems();
-        kouhiItems = makeKouhiItems();
-        errors = [];
-        fEnterHokenFromOnshi = undefined;
+    const at = visit.visitedAt.substring(0, 10);
+    shahokokuhoList = await api.listAvailableShahokokuho(patientId, at);
+    koukikoureiList = await api.listAvailableKoukikourei(patientId, at);
+    kouhiList = await api.listAvailableKouhi(patientId, at);
+    onshiResult = undefined;
+    hokenItems = makeHokenItems();
+    kouhiItems = makeKouhiItems();
+    errors = [];
+    fEnterHokenFromOnshi = undefined;
   }
 
   function makeHokenItems() {
@@ -204,7 +220,7 @@
           visit.patientId,
           startDate
         );
-        for(let prev of prevShahokokuho){
+        for (let prev of prevShahokokuho) {
           console.log("prev", prev);
         }
         let prevKoukikourei = await api.listAvailableKoukikourei(
@@ -293,8 +309,12 @@
   {/if}
   <div>
     {#each hokenItems as hokenItem (hokenItem.id)}
-      <div class="item" data-type="hoken-item" data-hoken-type={hokenItem.hokenType()} 
-        data-hoken-id={hokenItem.id}}>
+      <div
+        class="item"
+        data-type="hoken-item"
+        data-hoken-type={hokenItem.hokenType()}
+        data-hoken-id="{hokenItem.id}}"
+      >
         <div>
           <input type="checkbox" bind:checked={hokenItem.checked} />
           <span data-type="hoken-item-rep">{hokenItem.rep()}</span>
