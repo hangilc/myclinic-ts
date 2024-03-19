@@ -11,7 +11,7 @@
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { dateToSqlDate } from "myclinic-model/model";
-  import { confirmOnlinePresc, isFaxToPharmacyText, isOnlineShohousen } from "./shohousen-text-helper";
+  import { confirmOnlinePresc, getFollowingText, isFaxToPharmacyText, isOnlineShohousen } from "./shohousen-text-helper";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -20,9 +20,6 @@
 
   async function onEnter() {
     const content = textarea.value.trim();
-    if( isOnlineShohousen(content) ){
-      
-    }
     if( isFaxToPharmacyText(content) ) {
       const err = await confirmOnlinePresc(text);
       if( err ){
@@ -84,6 +81,15 @@
       if( !confirm("本日の処方線でありませんが、印刷しますか？") ){
         onClose();
         return;
+      }
+    }
+    if( isOnlineShohousen(text.content) ){
+      const follow = await getFollowingText(text);
+      if( follow == null || !isFaxToPharmacyText(follow.content) ){
+        const ok = confirm("オンライン処方箋のようですが、送信先の薬局が指定されていません。\nこのまま印刷しますか？");
+        if( !ok ){
+          return;
+        }
       }
     }
     const clinicInfo = await api.getClinicInfo();
