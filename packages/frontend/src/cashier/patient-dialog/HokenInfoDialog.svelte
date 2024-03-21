@@ -23,7 +23,7 @@
   export let hoken: Hoken;
   export let destroy: () => void;
   let patient: Patient = data.patient;
-  let panel = Hoken.fold(
+  let panel = Hoken.fold<any>(
     hoken.value,
     (_) => ShahokokuhoInfo,
     (_) => KoukikoureiInfo,
