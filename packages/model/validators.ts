@@ -1,4 +1,4 @@
-import { PatientSummary } from "model";
+import { PatientSummary } from "myclinic-model";
 import { object, number, string, parse } from "valibot";
 
 const PatientSummarySchema = object({
@@ -7,6 +7,5 @@ const PatientSummarySchema = object({
 });
 
 export function validatePatientSummary(obj: any): PatientSummary {
-  const src = { patientId: obj["patient-id"], content: obj.content };
-  return parse(PatientSummarySchema, src);
+  return parse(PatientSummarySchema, obj);
 }
