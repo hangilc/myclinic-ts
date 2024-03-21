@@ -1,4 +1,5 @@
 import { castList, castNumber, castOption, castOptionUndefined, castString } from "./cast";
+export * from "./validators";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
@@ -2017,4 +2018,11 @@ export class ClinicInfo {
       arg.doctorName,
     )
   }
+}
+
+export class PatientSummary {
+  constructor(
+    public patientId: number,
+    public content: string,
+  ) {}
 }

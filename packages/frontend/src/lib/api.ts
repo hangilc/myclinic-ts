@@ -3,6 +3,9 @@ import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp } from "./drawer/compiler/op";
 import type { ReceiptDrawerData } from "./drawer/forms/receipt/receipt-drawer-data";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+import {
+  validatePatientSummary
+} from "myclinic-model";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1535,6 +1538,14 @@ export default {
 
   listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
     return get("list-patient-by-onshi-name", { text: onshiName}, castList(m.Patient.cast));
-  }
+  },
+
+  findPatientSummary(patientId: number): Promise<m.PatientSummary | null> {
+    return get("find-patient-summary", { "patient-id": patientId.toString() }, castOption(validatePatientSummary));
+  },
+
+  enterPatientSummary(summary: m.PatientSummary): Promise<void> {
+    return post("enter-patient-summary", summary, {}, (_) => {});
+  },
 
 };

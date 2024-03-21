@@ -16,6 +16,9 @@
   "license": "MIT",
   "homepage": "https://github.com/hangilc/myclinic-ts#readme",
   "devDependencies": {
-    "typescript": "^4.8.4"
+    "typescript": "5.2.2"
+  },
+  "dependencies": {
+    "valibot": "^0.30.0"
   }
 }
