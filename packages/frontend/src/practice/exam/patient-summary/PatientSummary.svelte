@@ -4,6 +4,7 @@
   import type { PatientSummary } from "myclinic-model";
   import Disp from "./Disp.svelte";
   import Edit from "./Edit.svelte";
+  import RightBox from "../RightBox.svelte";
 
   let patientId: number | undefined = undefined;
   let content: string = "";
@@ -28,15 +29,30 @@
     content = newContent;
     mode = "disp";
   }
-
 </script>
 
-{#if patientId !== undefined}
-  <div>スマリー</div>
-  {#if mode === "disp"}
-    <Disp {content} onEdit={() => mode = "edit"}/>
-  {:else}
-    <Edit patientId={patientId} content={content} onCancel={() => mode = "disp"} 
-      onEnter={doEnter}/>
-  {/if}
-{/if}
+<RightBox
+  title="サマリー"
+  display={patientId !== undefined}
+  dataCy="patient-summary-box"
+>
+  <div class="workarea">
+    {#if mode === "disp"}
+      <Disp {content} onEdit={() => (mode = "edit")} />
+    {:else if patientId !== undefined}
+      <Edit
+        {patientId}
+        {content}
+        onCancel={() => (mode = "disp")}
+        onEnter={doEnter}
+      />
+    {/if}
+  </div>
+</RightBox>
+
+<style>
+  .workarea {
+    margin-top: 6px;
+  }
+
+</style>

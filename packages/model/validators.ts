@@ -1,4 +1,4 @@
-import { PatientSummary } from "myclinic-model";
+import { PatientSummary } from "./model";
 import { object, number, string, parse } from "valibot";
 
 const PatientSummarySchema = object({

@@ -1548,4 +1548,8 @@ export default {
     return post("enter-patient-summary", summary, {}, (_) => {});
   },
 
+  setPatientSummary(summary: m.PatientSummary): Promise<void> {
+    return post("set-patient-summary", summary, {}, (_) => {});
+  },
+
 };

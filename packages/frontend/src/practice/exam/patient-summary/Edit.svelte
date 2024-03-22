@@ -7,7 +7,7 @@
   export let onCancel: () => void;
 
   async function doEnter() {
-    await api.enterPatientSummary({ patientId, content });
+    await api.setPatientSummary({ patientId, content });
     onEnter(content);
   }
 </script>
@@ -19,3 +19,11 @@
   <button on:click={doEnter}>入力</button>
   <button on:click={onCancel}>キャンセル</button>
 </div>
+
+<style>
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: 10em;
+  }
+</style>
