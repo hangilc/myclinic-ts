@@ -1,2 +1,2 @@
-FROM hangilc/myclinic-mysql-demo:1.0.4
+FROM hangilc/myclinic-mysql-demo:1.0.5
 COPY ./fixture.sql /docker-entrypoint-initdb.d/c-fixture.sql
