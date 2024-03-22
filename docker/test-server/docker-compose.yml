@@ -8,7 +8,7 @@ services:
   files:
     image: "hangilc/myclinic-files-demo:1.0.2"
   server:
-    image: "hangilc/myclinic-scala:1.0.12"
+    image: "hangilc/myclinic-scala:1.0.13"
     ports:
       - "38080:8080"
     environment:
