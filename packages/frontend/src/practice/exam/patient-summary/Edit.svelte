@@ -15,9 +15,10 @@
 <div>
   <textarea bind:value={content}></textarea>
 </div>
-<div>
-  <button on:click={doEnter}>入力</button>
-  <button on:click={onCancel}>キャンセル</button>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="commands">
+  <a on:click={doEnter}>入力</a>
+  <a on:click={onCancel}>キャンセル</a>
 </div>
 
 <style>
@@ -26,4 +27,14 @@
     width: 100%;
     height: 10em;
   }
+  .commands {
+    margin-top: 6px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+  }
+
+  .commands a {
+    cursor: pointer;
+  }
+
 </style>
