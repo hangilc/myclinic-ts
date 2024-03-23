@@ -6,6 +6,7 @@
 
   let today = new Date();
   let data: [AppointTime, Appoint[]][] = [];
+  let showList = true;
 
   showAppoints.subscribe((show) => {
     if (show) {
@@ -22,43 +23,61 @@
   }
 
   async function doSelect(appoint: Appoint) {
-    if( appoint.patientId > 0 ){
+    if (appoint.patientId > 0) {
       const patient = await api.getPatient(appoint.patientId);
       startPatient(patient);
     }
   }
+
+  function doCollapse() {
+    showList = false;
+  }
+
+  function doExtend() {
+    showList = true;
+  }
 </script>
 
 <RightBox title="予約患者">
-  <div class="list">
-    {#each data as [appointTime, appoints], i}
-      {#each appoints as appoint (appoint.appointId)}
-        <a href={appoint.patientId > 0 ? "javascript:void(0)" : undefined}
-          on:click={() => doSelect(appoint)}
-          class:current={$currentPatient && $currentPatient.patientId === appoint.patientId}
-          >{appoint.patientName}</a
-        >
+  {#if showList}
+    <div class="list">
+      {#each data as [appointTime, appoints], i}
+        {#each appoints as appoint (appoint.appointId)}
+          <a
+            href={appoint.patientId > 0 ? "javascript:void(0)" : undefined}
+            on:click={() => doSelect(appoint)}
+            class:current={$currentPatient &&
+              $currentPatient.patientId === appoint.patientId}
+            >{appoint.patientName}</a
+          >
+        {/each}
+        {#if appointTime.untilTime <= "12:00:00" && data[i + 1] && data[i + 1][0].fromTime > "12:00:00"}
+          <hr />
+        {/if}
       {/each}
-      {#if appointTime.untilTime <= "12:00:00" && data[i + 1] && data[i + 1][0].fromTime > "12:00:00"}
-        <hr />
-      {/if}
-    {/each}
-  </div>
+    </div>
+  {/if}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="commands">
     <a href="javascript:void(0)" on:click={refresh}>更新</a>
-    <button on:click={doClose}>閉じる</button>
+    <a on:click={doClose}>閉じる</a>
+    {#if showList}
+    <a on:click={doCollapse}>圧縮</a>
+    {:else}
+    <a on:click={doExtend}>伸展</a>
+    {/if}
   </div>
 </RightBox>
 
 <style>
   .commands {
-    display: flex;
-    justify-content: right;
-    align-items: center;;
+    margin-top: 8px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
   }
 
-  .commands button {
-    margin-left: 6px;
+  a {
+    cursor: pointer;
   }
 
   .list {
