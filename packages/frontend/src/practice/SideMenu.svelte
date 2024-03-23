@@ -32,6 +32,7 @@
   <a href="javascript:void(0)" on:click={(_) => start("rcpt-check")}>レセプトチェック</a>
   <a href="javascript:void(0)" on:click={(_) => start("rezept")}>レセプト</a>
   <a href="javascript:void(0)" on:click={(_) => start("henrei")}>返戻</a>
+  <a href="javascript:void(0)" on:click={(_) => start("big-char")}>大きい文字</a>
 </div>
 
 <style>

@@ -8,6 +8,7 @@
   import Rezept from "./Rezept.svelte";
   import Henrei from "./Henrei.svelte";
   import Cashier from "@/cashier/Cashier.svelte";
+  import BigChar from "./BigChar.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -31,4 +32,5 @@
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei" } />
+  <BigChar isVisible={$serviceStore === "big-char"} />
 </div>
