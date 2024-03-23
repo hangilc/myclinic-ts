@@ -9,22 +9,8 @@
 
 <style>
   .top {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  .left {
-    flex: 0 0 50%;
-    padding-right: 4px;
-  }
-
-  .left.isCurrent {
-    border-left: 3px solid orange;
-    padding-left: 4px;
-  }
-
-  .right {
-    flex: 0 0 50%;
-    padding-left: 4px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
   }
 </style>

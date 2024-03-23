@@ -14,7 +14,7 @@
 
   async function doEnter() {
     try {
-      const json = JSON.parse(memo);
+      const json = JSON.parse(memo || "{}");
       const newMemo = JSON.stringify(json);
       const newShinryou = Object.assign({}, shinryou, { memo: newMemo });
       const updated = await api.updateConductShinryou(newShinryou);
@@ -36,6 +36,12 @@
 </Dialog>
 
 <style>
+  textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 6em;
+    resize: vertical;
+  }
   .commands {
     display: flex;
     justify-content: right;

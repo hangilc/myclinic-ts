@@ -1,7 +1,7 @@
 <script lang="ts">
   export let title: string;
 
-  let show = false;
+  export let show = false;
   export let onClose: () => void = () => {};
 
   function close(): void {
@@ -27,7 +27,7 @@
     border: 1px solid gray;
     margin: 10px 0;
     padding: 10px;
-    width: 100%;
+    /* width: 100%; */
   }
 
   .title {

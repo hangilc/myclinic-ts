@@ -49,7 +49,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Widget title="処置編集" onClose={onClose} bind:this={widget}>
+<Widget title="処置編集" onClose={onClose} bind:this={widget} show={true}>
   <div class="enterCommands">
     <a href="javascript:void(0)" on:click={doAddShinryou}>診療行為追加</a>
     <a href="javascript:void(0)" on:click={doAddDrug}>薬剤追加</a>
@@ -73,6 +73,6 @@
   {/each}
   <svelte:fragment slot="commands">
     <button on:click={() => doDelete(close)}>削除</button>
-    <button on:click={close}>閉じる</button>
+    <button on:click={onClose}>閉じる</button>
   </svelte:fragment>
 </Widget>

@@ -13,9 +13,7 @@
 </script>
 
 {#if showContent}
-  <div class="content">
-    {content}
-  </div>
+  <pre class="content">{content}</pre>
 {/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="commands">
@@ -32,6 +30,7 @@
     height: 10em;
     overflow-y: auto;
     resize: vertical;
+    white-space: pre-wrap;
   }
   .commands {
     margin-top: 6px;

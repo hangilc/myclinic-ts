@@ -1,9 +1,5 @@
 <script lang="ts">
-  import type {
-    ConductKindType,
-    ConductEx,
-    VisitEx,
-  } from "myclinic-model";
+  import type { ConductKindType, ConductEx, VisitEx } from "myclinic-model";
   import EditWidget from "./EditWidget.svelte";
 
   export let conduct: ConductEx;
@@ -18,7 +14,6 @@
 
   function doDispClick(): void {
     mode = "edit";
-    editWidget.open();
   }
 </script>
 
@@ -37,13 +32,14 @@
       <div>* {kizai.master.name} {kizai.amount}{kizai.master.unit}</div>
     {/each}
   </div>
+{:else if mode === "edit"}
+  <EditWidget
+    {conduct}
+    {visit}
+    onClose={() => (mode = "disp")}
+    bind:this={editWidget}
+  />
 {/if}
-<EditWidget
-  {conduct}
-  {visit}
-  onClose={() => (mode = "disp")}
-  bind:this={editWidget}
-/>
 
 <style>
   .disp {
