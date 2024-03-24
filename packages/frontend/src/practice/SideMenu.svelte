@@ -6,6 +6,10 @@
   function start(srv: string) {
     serviceStore.set(srv);
   }
+
+  function menu(srv: string): () => void {
+    return () => start(srv);
+  }
 </script>
 
 <div class="top">
@@ -19,20 +23,19 @@
     on:click={(_) => start("cashier")}
     class:current={$serviceStore === "cashier"}>会計</a
   >
-  <a href="javascript:void(0)">受付</a>
-  <a href="javascript:void(0)">ファックス済処方箋</a>
+  <a href="javascript:void(0)" on:click={menu("fax-shohousen")}>ファックス済処方箋</a>
   <a href="javascript:void(0)">訪問介護</a>
   <a href="javascript:void(0)">主治医意見書</a>
   <a href="javascript:void(0)">ファックス送信</a>
   <a href="javascript:void(0)">印刷設定</a>
   <a href="javascript:void(0)">紹介状</a>
   <a href="javascript:void(0)">診断書</a>
-  <a href="javascript:void(0)" on:click={(_) => start("phone")}>電話</a>
-  <a href="javascript:void(0)" on:click={(_) => start("jihi-kenshin")}>自費健診</a>
-  <a href="javascript:void(0)" on:click={(_) => start("rcpt-check")}>レセプトチェック</a>
-  <a href="javascript:void(0)" on:click={(_) => start("rezept")}>レセプト</a>
-  <a href="javascript:void(0)" on:click={(_) => start("henrei")}>返戻</a>
-  <a href="javascript:void(0)" on:click={(_) => start("big-char")}>大きい文字</a>
+  <a href="javascript:void(0)" on:click={menu("phone")}>電話</a>
+  <a href="javascript:void(0)" on:click={menu("jihi-kenshin")}>自費健診</a>
+  <a href="javascript:void(0)" on:click={menu("rcpt-check")}>レセプトチェック</a>
+  <a href="javascript:void(0)" on:click={menu("rezept")}>レセプト</a>
+  <a href="javascript:void(0)" on:click={menu("henrei")}>返戻</a>
+  <a href="javascript:void(0)" on:click={menu("big-char")}>大きい文字</a>
 </div>
 
 <style>

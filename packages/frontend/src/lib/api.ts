@@ -357,7 +357,7 @@ export default {
 
   listTextForVisit(visitId: number): Promise<m.Text[]> {
     return get("list-text-for-visit", { "visit-id": visitId.toString() },
-    castList(m.Text.cast));
+      castList(m.Text.cast));
   },
 
   enterPayment(payment: m.Payment): Promise<boolean> {
@@ -652,7 +652,7 @@ export default {
     return post(
       "update-shinryou",
       shinryou,
-      { },
+      {},
       m.Shinryou.cast
     )
   },
@@ -1527,7 +1527,7 @@ export default {
   getHokenInfoForVisit(visitId: number): Promise<m.HokenInfo> {
     return get("get-hoken-info-for-visit", { "visit-id": visitId.toString() }, m.HokenInfo.cast);
   },
-  
+
   listDiseaseActiveAt(patientId: number, from: Date | string, upto: Date | string): Promise<m.Disease[]> {
     return get("list-disease-active-at", {
       "patient-id": patientId.toString(),
@@ -1537,7 +1537,7 @@ export default {
   },
 
   listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
-    return get("list-patient-by-onshi-name", { text: onshiName}, castList(m.Patient.cast));
+    return get("list-patient-by-onshi-name", { text: onshiName }, castList(m.Patient.cast));
   },
 
   findPatientSummary(patientId: number): Promise<m.PatientSummary | null> {
@@ -1545,11 +1545,16 @@ export default {
   },
 
   enterPatientSummary(summary: m.PatientSummary): Promise<void> {
-    return post("enter-patient-summary", summary, {}, (_) => {});
+    return post("enter-patient-summary", summary, {}, (_) => { });
   },
 
   setPatientSummary(summary: m.PatientSummary): Promise<void> {
-    return post("set-patient-summary", summary, {}, (_) => {});
+    return post("set-patient-summary", summary, {}, (_) => { });
+  },
+
+  listVisitIdInDateInterval(fromDate: string, uptoDate: string): Promise<number[]> {
+    return get("list-visit-id-in-date-interval", { from: fromDate, upto: uptoDate },
+      castList(castNumber))
   },
 
 };

@@ -1,12 +1,20 @@
 import api from "@/lib/api";
 import type { Text } from "myclinic-model/model";
 
-const regex = /^.+[にへ]ファックス[(（][+0-9-]*[）)]で送付する/;
+const regex = /^.+[にへ]ファックス[(（]([+0-9-]+)[）)]で送付する/;
 
 export function isFaxToPharmacyText(t: string): boolean {
   const m = t.match(regex);
-  console.log("m", m);
   return m != null;
+}
+
+export function probeFaxToPharmacyText(t: string): string | undefined {
+  const m = t.match(regex);
+  if( m ){
+    return m[1];
+  } else {
+    return undefined;
+  }
 }
 
 export async function confirmOnlinePresc(anchorText: Text): Promise<string | null> {
