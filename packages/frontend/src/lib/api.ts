@@ -75,6 +75,19 @@ async function get<T>(
   return cast(await resp.json());
 }
 
+async function getText(
+  cmd: string,
+  params: ParamsInit
+): Promise<string> {
+  let arg = `${base}/${cmd}`;
+  if (typeof params === "object" && Object.keys(params).length !== 0) {
+    const q = new URLSearchParams(params).toString();
+    arg += `?${q}`;
+  }
+  const resp = await fetch(arg);
+  return await resp.text();
+}
+
 async function post<T>(
   cmd: string,
   data: any,
@@ -1555,6 +1568,14 @@ export default {
   listVisitIdInDateInterval(fromDate: string, uptoDate: string): Promise<number[]> {
     return get("list-visit-id-in-date-interval", { from: fromDate, upto: uptoDate },
       castList(castNumber))
+  },
+
+  getPharmaAddr(): Promise<any> {
+    return get("list-pharma-addr", {}, a => a);
+  },
+
+  getPharmaData(): Promise<string> {
+    return getText("list-pharma-data", {});
   },
 
 };

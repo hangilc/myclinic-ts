@@ -1,6 +1,6 @@
 <script lang="ts">
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import { defaultDates, probeFaxShohousen, type FaxShohousen } from "./fax-shohousen-helper";
+  import { defaultDates, probeFaxShohousen, type FaxShohousen, fetchPharmaData } from "./fax-shohousen-helper";
   import api from "@/lib/api";
   import { dateToSqlDate } from "myclinic-model";
 
@@ -19,7 +19,17 @@
         fs.push(f);
       }
     }
-    console.log(fs);
+    const byPharma: Record<string, FaxShohousen[]> = {};
+    fs.forEach(f => {
+      let a: FaxShohousen[] | undefined = byPharma[f.pharma];
+      if( !a ){
+        a = []
+        byPharma[f.pharma] = a;
+      }
+      a.push(f);
+    });
+    const dataMap = await fetchPharmaData();
+    console.log(dataMap);
   }
 
 </script>

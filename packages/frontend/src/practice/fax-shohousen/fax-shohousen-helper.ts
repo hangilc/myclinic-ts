@@ -38,3 +38,74 @@ export async function probeFaxShohousen(visitId: number): Promise<FaxShohousen |
   }
   return undefined;
 }
+
+export interface PharmaData {
+  name: string;
+  fax: string;
+  tel: string;
+  addr: string;
+  labelAddr: string;
+}
+
+export async function fetchPharmaData(): Promise<Record<string, PharmaData>> {
+  const dataStr = await api.getPharmaData();
+  const dataMap = parsePharmaData(dataStr);
+  const addr = await api.getPharmaAddr();
+  for(let fax in addr) {
+    const d = dataMap[fax];
+    if( d ){
+      d.labelAddr = addr[fax];
+    }
+  }
+  return dataMap;
+}
+
+function parsePharmaData(data: string): Record<string, PharmaData> {
+  const items = data.split(/\r?\n(?:\s*\r?\n)+/);
+  const result: Record<string, PharmaData> = {};
+  items.forEach(item => {
+    const d = parsePharmaItem(item);
+    if( d ){
+      result[d.fax] = d;
+    }
+  });
+  return result;
+}
+
+function parsePharmaItem(src: string): PharmaData | undefined {
+  const lines = src.split(/\r?\n/);
+  let name: string | undefined = undefined;
+  let tel: string | undefined = undefined;
+  let fax: string | undefined = undefined;
+  let addr: string | undefined = undefined;
+  lines.forEach(line => {
+    line = line.trim();
+    let m = line.match(/^【(.+)】/);
+    if( m ){
+      name = m[1];
+      return;
+    }
+    m = line.match(/^tel:\s*([0-9-]+)/);
+    if( m ){
+      tel = m[1];
+      return;
+    }
+    m = line.match(/^fax:\s*([+0-9-]+)/);
+    if( m ){
+      fax = m[1];
+      return;
+    }
+    m = line.match(/^(〒.+)/);
+    if( m ){
+      addr = m[1];
+      return;
+    }
+  });
+  if( name && fax && addr ){
+    return {
+      name, fax, tel: tel ?? "", addr, labelAddr: ""
+    }
+  } else {
+    return undefined;
+  }
+}
