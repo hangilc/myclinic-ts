@@ -4,8 +4,26 @@
   import type * as m from "myclinic-model";
   import RightBox from "../RightBox.svelte";
   import type { Patient } from "myclinic-model";
+  import EditableDate from "@/lib/editable-date/EditableDate.svelte";
 
+  export let date: Date = new Date();
+  let patients: Patient[] = [];
   let selectedPatientId: number | null = null;
+
+  update();
+
+  async function update() {
+    const ds = await fetchData(date);
+    const ps = ds.map(([v, p]) => p);
+    const m: Set<number> = new Set();
+    patients = [];
+    ps.forEach((p) => {
+      if (!m.has(p.patientId)) {
+        m.add(p.patientId);
+        patients.push(p);
+      }
+    });
+  }
 
   function onCloseClick() {
     showPatientsByDate.set(false);
@@ -26,11 +44,11 @@
 </script>
 
 <RightBox title="日付別患者リスト">
-  {#await fetchData(new Date())}
-    <div>Loading...</div>
-  {:then dataList}
-    {#each dataList as data}
-      {@const [_visit, patient] = data}
+  <div>
+    <EditableDate bind:date onChange={update} />
+  </div>
+  <div class="list">
+    {#each patients as patient (patient.patientId)}
       <a
         href="javascript:void(0)"
         on:click={() => doSelect(patient)}
@@ -39,11 +57,10 @@
         >{patient.lastName}{patient.firstName}</a
       >
     {/each}
-  {:catch err}
-    <div style:color="red">{err}</div>
-  {/await}
+  </div>
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="commands">
-    <button on:click={onCloseClick}>閉じる</button>
+    <a on:click={onCloseClick}>閉じる</a>
   </div>
 </RightBox>
 
@@ -57,7 +74,16 @@
   }
 
   .commands {
-    display: flex;
-    justify-content: flex-end;
+    margin-top: 8px;
+    border-top: 1px solid #ccc;
+    padding-top: 6px;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  .list {
+    margin-top: 10px;
   }
 </style>

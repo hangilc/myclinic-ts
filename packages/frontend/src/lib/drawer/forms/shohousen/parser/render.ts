@@ -1,7 +1,7 @@
 import type { ParsedLine } from "./parsed-line";
 
 export class RenderDrugContext {
-  maxLine: number = 31;
+  maxLine: number = 30;
   amountUnitTab: number = 21;
   daysTab: number = 18;
 

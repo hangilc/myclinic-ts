@@ -9,19 +9,19 @@
   import { composeDate } from "./date-picker-misc";
 
   export let date: Date;
-  // export let destroy: () => void;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
   export let onEnter: (date: Date) => void;
   export let onCancel: () => void;
+  export let commands: ("today")[] = ["today"];
 
   let gengou: string;
   let nen: number;
   let month: number;
   let day: number;
   let items: DateItem[];
-  update_with(date);
+  updateWith(date);
 
-  function update_with(d: Date): void {
+  function updateWith(d: Date): void {
     const wareki = kanjidate.toGengou(
       d.getFullYear(),
       d.getMonth() + 1,
@@ -36,23 +36,23 @@
   }
 
   function onGengouChange(g: string): void {
-    update_with(composeDate(g, nen, month, day));
+    updateWith(composeDate(g, nen, month, day));
   }
 
   function onNenChange(n: number): void {
-    update_with(composeDate(gengou, n, month, day));
+    updateWith(composeDate(gengou, n, month, day));
   }
 
   function onMonthChange(m: number): void {
-    update_with(composeDate(gengou, nen, m, day));
+    updateWith(composeDate(gengou, nen, m, day));
   }
 
   function onDayChange(d: number): void {
-    update_with(composeDate(gengou, nen, month, d));
+    updateWith(composeDate(gengou, nen, month, d));
   }
 
   function onDaysPanelChange(d: Date): void {
-    update_with(d);
+    updateWith(d);
   }
 
   function doEnter(): void {
@@ -61,6 +61,10 @@
 
   function doCancel(): void {
     onCancel();
+  }
+
+  function doToday() {
+    updateWith(new Date());
   }
 </script>
 
@@ -106,6 +110,13 @@
     </svg>
   </div>
   <DaysPanel {items} onChange={onDaysPanelChange}/>
+  <div class="commands">
+    {#each commands as command}
+      {#if command === "today"}
+        <button on:click={doToday}>今日</button>
+      {/if}
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -128,5 +139,9 @@
     color: red;
     margin-left: 2px;
     cursor: pointer;
+  }
+
+  .commands button {
+    font-size: 10px;
   }
 </style>

@@ -11,10 +11,6 @@
   import { popupTrigger } from "@/lib/popup-helper";
 
   export let visit: VisitEx;
-  // let auxLink: HTMLAnchorElement;
-  // let regularDialog: RegularDialog;
-  // let kensaDialog: KensaDialog;
-  // let searchDialog: SearchDialog;
 
   async function doRegular() {
     const names = await api.getShinryouRegular();

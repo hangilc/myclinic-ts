@@ -1,6 +1,5 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import DatePicker from "../date-picker/DatePicker.svelte";
   import CalendarIcon from "../../icons/CalendarIcon.svelte";
   import { dateFormPulldown } from "../date-form/date-form-pulldown";
   import { datePickerPopup } from "../date-picker/date-picker-popup";
@@ -28,20 +27,13 @@
   <span class="repr" on:click={dateFormPulldown(() => date, doChange)}
     >{format(date)}</span
   >
-  <!-- <DateFormPulldown slot="menu" {destroy} init={date} onEnter={doChange} /> -->
   <slot name="icons" />
   <CalendarIcon
-    dy="0px"
+    dy="-3.5px"
     dx="4px"
     onClick={datePickerPopup(() => date || datePickerDefault(), doChange)}
     style="cursor: pointer;"
   />
-  <!-- <DatePicker
-      slot="menu"
-      date={date || datePickerDefault()}
-      {destroy}
-      onEnter={doChange}
-    /> -->
 </div>
 
 <style>
