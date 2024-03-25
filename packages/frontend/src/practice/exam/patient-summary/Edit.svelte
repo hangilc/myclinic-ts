@@ -26,6 +26,7 @@
     box-sizing: border-box;
     width: 100%;
     height: 10em;
+    resize: vertical;
   }
   .commands {
     margin-top: 6px;
