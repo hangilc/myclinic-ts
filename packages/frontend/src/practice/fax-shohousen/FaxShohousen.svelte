@@ -5,13 +5,33 @@
     probeFaxShohousen,
     type FaxShohousen,
     fetchPharmaData,
+    type FaxedShohousenItem,
+    type PharmaData,
+    mkLetterText,
   } from "./fax-shohousen-helper";
   import api from "@/lib/api";
-  import { dateToSqlDate } from "myclinic-model";
+  import { ClinicInfo, dateToSqlDate } from "myclinic-model";
 
   let [fromDate, uptoDate] = defaultDates(new Date());
   let labelStartRow = 1;
   let labelStartCol = 1;
+  let items: FaxedShohousenItem[] = [];
+  let pharmaMapCache: Record<string, PharmaData> | undefined = undefined;
+  let clinicInfoCache: ClinicInfo | undefined = undefined;
+
+  async function getPharmaMap(): Promise<Record<string, PharmaData>> {
+    if (!pharmaMapCache) {
+      pharmaMapCache = await fetchPharmaData();
+    }
+    return pharmaMapCache;
+  }
+
+  async function getClinicInfo(): Promise<ClinicInfo> {
+    if (!clinicInfoCache) {
+      clinicInfoCache = await api.getClinicInfo();
+    }
+    return clinicInfoCache;
+  }
 
   async function doCreate() {
     const visitIds = await api.listVisitIdInDateInterval(
@@ -34,26 +54,35 @@
       }
       a.push(f);
     });
-    const dataMap = await fetchPharmaData();
-    const recs: {
-      pharma: string;
-      list: { name: string; visitedAt: string }[];
-    }[] = [];
+    items = [];
     const notFound: string[] = [];
+    const pharmaMap = await getPharmaMap();
     for (const fax in byPharma) {
       const list = byPharma[fax];
-      const pharma = dataMap[fax]?.name;
+      const pharma = pharmaMap[fax]?.name;
       if (!pharma && !notFound.includes(fax)) {
         notFound.push(fax);
       } else {
-        const recs = list.map((f) => ({
+        const rs = list.map((f) => ({
           name: `${f.patient.lastName}${f.patient.firstName}`,
           visitedAt: f.visitedAt,
         }));
-        recs.push()
-        recs.push({ pharma: pharma, list: recs });
+        items.push({ pharmaName: pharma, pharmaFax: fax, records: rs });
       }
     }
+    if (notFound.length > 0) {
+      alert("Unrsolved pharmacy fax: " + notFound.join(", "));
+    }
+    items.sort((a, b) => b.records.length - a.records.length);
+    items = items;
+  }
+
+  async function doPharmaLetterPdf() {
+    const clinicInfo = await getClinicInfo();
+    const pages: string[][] = items.map(item => {
+      return mkLetterText(item.pharmaName, fromDate, uptoDate, item.records, clinicInfo);
+    });
+    console.log(pages);
   }
 </script>
 
@@ -77,53 +106,14 @@
   </div>
 </form>
 
-<div
-  id="faxed-progress-report"
-  class="alert alert-info alert-dismissible my-3 d-none"
-  role="alert"
->
-  <div class="faxed-part-message"></div>
-  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-    <span aria-hidden="true">&times;</span>
-  </button>
-</div>
-
-<div id="faxed-error-report" class="card mt-3 d-none">
-  <div class="card-header text-white bg-danger">エラー</div>
-  <div class="card-body"></div>
-</div>
-
-<div id="faxed-data-file-status" class="faxed-group-status card mt-3">
-  <div class="card-header">データ</div>
+<div>
+  <div>薬局レターＰＤＦ</div>
   <div class="card-body">
-    <div class="faxed-part-message"></div>
-    <div class="form-inline mt-2">
-      <button type="button" class="btn btn-link faxed-part-create">作成</button>
+    {#if items.length > 0}
+    <div>
+      <button type="button" on:click={doPharmaLetterPdf}>表示</button>
     </div>
-  </div>
-</div>
-
-<div id="faxed-shohousen-pdf-status" class="faxed-group-status card mt-3">
-  <div class="card-header">処方箋ＰＤＦ</div>
-  <div class="card-body">
-    <div class="faxed-part-message"></div>
-    <div class="form-inline mt-2">
-      <button type="button" class="btn btn-link faxed-part-create">作成</button>
-      <button type="button" class="btn btn-link faxed-part-display">表示</button
-      >
-    </div>
-  </div>
-</div>
-
-<div id="faxed-pharma-letter-pdf-status" class="faxed-group-status card mt-3">
-  <div class="card-header">薬局レターＰＤＦ</div>
-  <div class="card-body">
-    <div class="faxed-part-message"></div>
-    <div class="form-inline mt-2">
-      <button type="button" class="btn btn-link faxed-part-create">作成</button>
-      <button type="button" class="btn btn-link faxed-part-display">表示</button
-      >
-    </div>
+    {/if}
   </div>
 </div>
 

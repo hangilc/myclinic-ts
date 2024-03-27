@@ -1,7 +1,7 @@
 import api from "@/lib/api";
 import { sqlDateToDate } from "@/lib/date-util";
 import { probeFaxToPharmacyText } from "@/lib/shohousen-text-helper";
-import type { Patient } from "myclinic-model";
+import type { ClinicInfo, Patient } from "myclinic-model";
 
 export function defaultDates(today: Date): [Date, Date] {
   const d = today.getDate();
@@ -112,12 +112,19 @@ function parsePharmaItem(src: string): PharmaData | undefined {
   }
 }
 
-interface FaxedShohousenRecord {
+export interface FaxedShohousenRecord {
   name: string;
   visitedAt: string;
 }
 
-export function mkLetterText(pharma: string, fromDate: Date, uptoDate: Date, records: FaxedShohousenRecord[]): string[] {
+export interface FaxedShohousenItem {
+  pharmaName: string;
+  pharmaFax: string;
+  records: FaxedShohousenRecord[];
+}
+
+export function mkLetterText(pharma: string, fromDate: Date, uptoDate: Date, records: FaxedShohousenRecord[],
+    clinicInfo: ClinicInfo): string[] {
   function formatDate(d: Date): string {
     return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`
   }
@@ -126,10 +133,18 @@ export function mkLetterText(pharma: string, fromDate: Date, uptoDate: Date, rec
   lines.push("担当者様");
   lines.push("");
   lines.push(`${formatDate(fromDate)}から${formatDate(uptoDate)}までに当院からファックスした処方箋の原本です。`);
+  lines.push(`${records.length}件`);
   lines.push("");
   records.forEach(rec => {
     const d = sqlDateToDate(rec.visitedAt);
     lines.push(`${rec.name} ${formatDate(d)}`);
-  })
+  });
+  lines.push("");
+  lines.push(`${formatDate(new Date())}`);
+  lines.push(clinicInfo.address);
+  lines.push(`電話　${clinicInfo.tel}`);
+  lines.push(clinicInfo.name);
+  lines.push(clinicInfo.doctorName);
+
   return lines;
 }
