@@ -102,6 +102,7 @@
       let ctx: DrawerContext = mkDrawerContext();
       c.createFont(ctx, "default", "MS Gothic", 4);
       c.setFont(ctx, "default");
+      c.paragraph(ctx, lines.join("\n"), drawBox);
       return c.getOps(ctx);
     });
     const filename = "test.pdf";
