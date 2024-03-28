@@ -104,7 +104,9 @@
       c.setFont(ctx, "default");
       return c.getOps(ctx);
     });
-    
+    const filename = "test.pdf";
+    await api.createMultiPagePdfFile(opsList, "A4", filename);
+
   }
 </script>
 
