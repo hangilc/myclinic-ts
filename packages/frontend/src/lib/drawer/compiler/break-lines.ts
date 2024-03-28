@@ -21,8 +21,9 @@ export function breakLines(str: string, fontSize: number, lineWidth: number): st
       }
     }
   });
-  if( line.length > 0 ){
-    lines.push(line.join(""));
-  }
+  lines.push(line.join(""));
+  // if( line.length > 0 ){
+  //   lines.push(line.join(""));
+  // }
   return lines;
 }

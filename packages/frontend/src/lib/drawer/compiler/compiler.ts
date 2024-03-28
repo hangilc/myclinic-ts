@@ -361,16 +361,19 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
 export type DrawTextsOptArg = DrawTextsInBoxesOptArg & DrawTextOptionArg & {
   halign?: HAlign;
   valign?: VAlign;
+  leading?: number;
 }
 
 class DrawTextsOpt extends DrawTextsInBoxesOpt {
   halign: HAlign;
   valign: VAlign;
+  leading: number;
 
   constructor(arg: DrawTextsOptArg, ctx: DrawerContext) {
     super(arg, ctx);
     this.halign = arg.halign ?? "left";
     this.valign = arg.valign ?? "top";
+    this.leading = arg.leading ?? 0;
   }
 }
 
@@ -399,13 +402,16 @@ export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box,
 
 interface ParagraphOptArg {
   valign?: VAlign;
+  leading?: number;
 }
 
 class ParagraphOpt {
   valign: VAlign;
+  leading: number;
 
   constructor(arg: ParagraphOptArg) {
     this.valign = arg.valign ?? "top";
+    this.leading = arg.leading ?? 0;
   }
 }
 
@@ -418,7 +424,7 @@ export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg:
     const ls = breakLines(text, fontSize, w);
     lines.push(...ls);
   });
-  drawTexts(ctx, lines, box, { valignChunk: optArg.valign });
+  drawTexts(ctx, lines, box, { valignChunk: optArg.valign, leading: optArg.leading });
 }
 
 export function rect(ctx: DrawerContext, box: Box) {

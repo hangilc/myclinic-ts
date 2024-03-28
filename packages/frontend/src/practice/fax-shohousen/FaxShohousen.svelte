@@ -9,7 +9,7 @@
     type PharmaData,
     mkLetterText,
   } from "./fax-shohousen-helper";
-  import api from "@/lib/api";
+  import api, { getBackend, getBase } from "@/lib/api";
   import { ClinicInfo, dateToSqlDate } from "myclinic-model";
   import type { Op } from "@/lib/drawer/compiler/op";
   import * as c from "@/lib/drawer/compiler/compiler";
@@ -97,17 +97,17 @@
       );
     });
     const paperBox = b.paperSizeToBox(A4);
-    const drawBox = b.modify(paperBox, b.inset(4));
+    const drawBox = b.modify(paperBox, b.inset(20));
     const opsList: Op[][] = pages.map((lines) => {
       let ctx: DrawerContext = mkDrawerContext();
       c.createFont(ctx, "default", "MS Gothic", 4);
       c.setFont(ctx, "default");
-      c.paragraph(ctx, lines.join("\n"), drawBox);
+      c.paragraph(ctx, lines.join("\n"), drawBox, { leading: 1 });
       return c.getOps(ctx);
     });
-    const filename = "test.pdf";
+    const filename = "faxed-shohousen-pharma-letter.pdf";
     await api.createMultiPagePdfFile(opsList, "A4", filename);
-
+    window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank")
   }
 </script>
 

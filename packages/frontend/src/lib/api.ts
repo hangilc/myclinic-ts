@@ -25,7 +25,7 @@ export function getBase(): string {
   return base;
 }
 
-function getBackend(): string {
+export function getBackend(): string {
   if (!import.meta.env.SSR) {
     const l = window.location;
     let proto = l.protocol.toLowerCase();
