@@ -11,6 +11,14 @@
   } from "./fax-shohousen-helper";
   import api from "@/lib/api";
   import { ClinicInfo, dateToSqlDate } from "myclinic-model";
+  import type { Op } from "@/lib/drawer/compiler/op";
+  import * as c from "@/lib/drawer/compiler/compiler";
+  import * as b from "@lib/drawer/compiler/box";
+  import { A4 } from "@lib/drawer/compiler/paper-size";
+  import {
+    mkDrawerContext,
+    type DrawerContext,
+  } from "@/lib/drawer/compiler/context";
 
   let [fromDate, uptoDate] = defaultDates(new Date());
   let labelStartRow = 1;
@@ -79,10 +87,24 @@
 
   async function doPharmaLetterPdf() {
     const clinicInfo = await getClinicInfo();
-    const pages: string[][] = items.map(item => {
-      return mkLetterText(item.pharmaName, fromDate, uptoDate, item.records, clinicInfo);
+    const pages: string[][] = items.map((item) => {
+      return mkLetterText(
+        item.pharmaName,
+        fromDate,
+        uptoDate,
+        item.records,
+        clinicInfo
+      );
     });
-    console.log(pages);
+    const paperBox = b.paperSizeToBox(A4);
+    const drawBox = b.modify(paperBox, b.inset(4));
+    const opsList: Op[][] = pages.map((lines) => {
+      let ctx: DrawerContext = mkDrawerContext();
+      c.createFont(ctx, "default", "MS Gothic", 4);
+      c.setFont(ctx, "default");
+      return c.getOps(ctx);
+    });
+    
   }
 </script>
 
@@ -110,9 +132,9 @@
   <div>薬局レターＰＤＦ</div>
   <div class="card-body">
     {#if items.length > 0}
-    <div>
-      <button type="button" on:click={doPharmaLetterPdf}>表示</button>
-    </div>
+      <div>
+        <button type="button" on:click={doPharmaLetterPdf}>表示</button>
+      </div>
     {/if}
   </div>
 </div>
