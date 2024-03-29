@@ -166,9 +166,9 @@
 <form>
   <div>
     <span>開始日</span>
-    <EditableDate date={fromDate} />
+    <EditableDate bind:date={fromDate}/>
     <span class="ml-2">終了日</span>
-    <EditableDate date={uptoDate} />
+    <EditableDate bind:date={uptoDate} />
   </div>
   <div>
     <span>ラベル開始</span>
