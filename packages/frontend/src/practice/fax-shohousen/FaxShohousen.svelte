@@ -27,6 +27,10 @@
   let items: FaxedShohousenItem[] = [];
   let pharmaMapCache: Record<string, PharmaData> | undefined = undefined;
   let clinicInfoCache: ClinicInfo | undefined = undefined;
+  let startRow = "1";
+  let startCol = "1";
+  let labelStart = "1";
+  let labelCount = "";
 
   async function getPharmaMap(): Promise<Record<string, PharmaData>> {
     if (!pharmaMapCache) {
@@ -84,6 +88,7 @@
     }
     items.sort((a, b) => b.records.length - a.records.length);
     items = items;
+    labelCount = items.length.toString();
   }
 
   async function doPharmaLetterPdf() {
@@ -112,11 +117,29 @@
   }
 
   async function doAddressLabel() {
+    function printableItems() {
+      let c = nLabelCount;
+      let n = items.length;
+      n -= (nLabelStart - 1);
+      let m = 24 - (3 * (nStartRow - 1) + nStartCol - 1);
+      return Math.min(c, n, m);
+    }
+    const nStartRow = parseInt(startRow);
+    const nStartCol = parseInt(startCol);
+    const nLabelStart = parseInt(labelStart);
+    const nLabelCount = parseInt(labelCount);
+    if( isNaN(nStartRow) || isNaN(nStartCol) || isNaN(nLabelStart) || isNaN(nLabelCount) ) {
+      alert("Invalid input");
+      return;
+    }
     const pharmaMap = await getPharmaMap();
     const ctx = mkDrawerContext();
     c.createFont(ctx, "default", "MS Mincho", 3.8);
     c.setFont(ctx, "default");
-    const texts = items
+    const labelItems = items.slice(nLabelStart - 1, nLabelStart - 1 + printableItems());
+    console.log("items", items);
+    console.log("labelItems", labelItems);
+    const texts = labelItems
       .map((item) => {
         const fax = item.pharmaFax;
         const pharma = pharmaMap[fax];
@@ -126,11 +149,13 @@
           alert("Cannot find address for: " + fax);
           return "";
         }
-      })
-      .filter((t) => t !== "");
-    drawSeal8x3(ctx, texts);
+      });
+    drawSeal8x3(ctx, texts, {
+      startRow: nStartRow,
+      startCol: nStartCol
+    });
     const filename = "faxed-shohousen-pharm-addr.pdf";
-    await api.createMultiPagePdfFile([c.getOps(ctx)], "A4", filename);
+    await api.createPdfFile(c.getOps(ctx), "A4", filename);
     window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
   }
 </script>
@@ -152,6 +177,14 @@
   </div>
   <div class="form-inline mt-2">
     <button type="button" on:click={doCreate}>すべて作成</button>
+    {#if items.length > 0}
+      <div>{items.length}件</div>
+      <div>
+        {#each items as item (item.pharmaFax)}
+          <div>{item.pharmaName}</div>
+        {/each}
+      </div>
+    {/if}
   </div>
 </form>
 
@@ -170,10 +203,10 @@
   <div>薬局住所ラベルＰＤＦ</div>
   <div>
     {#if items.length > 0}
-      開始行：<input type="text" />
-      開始列：<input type="text" />
-      ラベル開始：<input type="text" />
-      ラベル数：<input type="text" />
+      開始行：<input type="text" class="short-input" bind:value={startRow}/>
+      開始列：<input type="text" class="short-input" bind:value={startCol}/>
+      ラベル開始：<input type="text" class="short-input" bind:value={labelStart}/>
+      ラベル数：<input type="text" class="short-input" bind:value={labelCount}/>
       <button type="button" on:click={doAddressLabel}>表示</button>
     {/if}
   </div>
@@ -186,6 +219,10 @@
   }
 
   .label-input {
+    width: 4em;
+  }
+
+  .short-input {
     width: 4em;
   }
 </style>
