@@ -114,7 +114,7 @@
   async function doAddressLabel() {
     const pharmaMap = await getPharmaMap();
     const ctx = mkDrawerContext();
-    c.createFont(ctx, "default", "serif", 3.8);
+    c.createFont(ctx, "default", "MS Mincho", 3.8);
     c.setFont(ctx, "default");
     const texts = items
       .map((item) => {
@@ -170,6 +170,10 @@
   <div>薬局住所ラベルＰＤＦ</div>
   <div>
     {#if items.length > 0}
+      開始行：<input type="text" />
+      開始列：<input type="text" />
+      ラベル開始：<input type="text" />
+      ラベル数：<input type="text" />
       <button type="button" on:click={doAddressLabel}>表示</button>
     {/if}
   </div>

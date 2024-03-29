@@ -31,8 +31,12 @@ export function drawSeal8x3(ctx: DrawerContext, texts: string[], optArg: DrawSea
   let i = 0;
   let row = opt.startRow;
   let col = opt.startCol;
+  out:
   for (; row <= 8; row++) {
     for (; col <= 3; col++) {
+      if (i >= texts.length) {
+        break out;
+      }
       let cell = getCell(drawBox, row, col);
       cell = opt.cellModifier(cell);
       const lines = texts[i++].split("\n");
