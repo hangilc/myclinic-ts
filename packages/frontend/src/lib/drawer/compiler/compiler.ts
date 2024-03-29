@@ -336,7 +336,6 @@ export class DrawTextsInBoxesOpt {
 export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
   writer: (t: string, b: Box) => void, optArg: DrawTextsInBoxesOptArg = {}) {
   const opt = new DrawTextsInBoxesOpt(optArg, ctx);
-  console.log("opt", opt);
   let top = box.top;
   if (opt.valignChunk === "center" || opt.valignChunk === "bottom") {
     let totalHeight = opt.lineHeight * texts.length;
@@ -350,7 +349,6 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
       top = box.bottom - totalHeight;
     }
   }
-  console.log("top", top, box);
   let bb = b.modify(box, b.setHeight(opt.lineHeight, "top"), b.setTop(top));
   texts.forEach(t => {
     writer(t, bb);

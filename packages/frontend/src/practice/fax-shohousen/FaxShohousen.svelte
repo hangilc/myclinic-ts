@@ -19,6 +19,7 @@
     mkDrawerContext,
     type DrawerContext,
   } from "@/lib/drawer/compiler/context";
+  import { drawSeal8x3 } from "@/lib/drawer/forms/seal8x3/sealx8x3";
 
   let [fromDate, uptoDate] = defaultDates(new Date());
   let labelStartRow = 1;
@@ -107,7 +108,30 @@
     });
     const filename = "faxed-shohousen-pharma-letter.pdf";
     await api.createMultiPagePdfFile(opsList, "A4", filename);
-    window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank")
+    window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
+  }
+
+  async function doAddressLabel() {
+    const pharmaMap = await getPharmaMap();
+    const ctx = mkDrawerContext();
+    c.createFont(ctx, "default", "serif", 3.8);
+    c.setFont(ctx, "default");
+    const texts = items
+      .map((item) => {
+        const fax = item.pharmaFax;
+        const pharma = pharmaMap[fax];
+        if (pharma) {
+          return pharma.labelAddr;
+        } else {
+          alert("Cannot find address for: " + fax);
+          return "";
+        }
+      })
+      .filter((t) => t !== "");
+    drawSeal8x3(ctx, texts);
+    const filename = "faxed-shohousen-pharm-addr.pdf";
+    await api.createMultiPagePdfFile([c.getOps(ctx)], "A4", filename);
+    window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
   }
 </script>
 
@@ -133,7 +157,7 @@
 
 <div>
   <div>薬局レターＰＤＦ</div>
-  <div class="card-body">
+  <div>
     {#if items.length > 0}
       <div>
         <button type="button" on:click={doPharmaLetterPdf}>表示</button>
@@ -142,38 +166,14 @@
   </div>
 </div>
 
-<div id="faxed-pharma-label-pdf-status" class="faxed-group-status card mt-3">
-  <div class="card-header">薬局住所ラベルＰＤＦ</div>
-  <div class="card-body">
-    <div class="faxed-part-message"></div>
-    <div class="form-inline mt-2">
-      <button type="button" class="btn btn-link faxed-part-create">作成</button>
-      <button type="button" class="btn btn-link faxed-part-display">表示</button
-      >
-    </div>
+<div>
+  <div>薬局住所ラベルＰＤＦ</div>
+  <div>
+    {#if items.length > 0}
+      <button type="button" on:click={doAddressLabel}>表示</button>
+    {/if}
   </div>
 </div>
-
-<div id="faxed-clinic-label-pdf-status" class="faxed-group-status card mt-3">
-  <div class="card-header">クリニック住所ラベルＰＤＦ</div>
-  <div class="card-body">
-    <div class="faxed-part-message"></div>
-    <div class="form-inline mt-2">
-      <button type="button" class="btn btn-link faxed-part-create">作成</button>
-      <button type="button" class="btn btn-link faxed-part-display">表示</button
-      >
-    </div>
-  </div>
-</div>
-
-<ul class="nav nav-tabs mt-3">
-  <li class="nav-item">
-    <a class="nav-link faxed-part-prev-groups" href="javascript:void(0)"
-      >処理済一覧</a
-    >
-  </li>
-</ul>
-<div id="faxed-nav-content-prev-groups" class="faxed-nav-content d-none"></div>
 
 <style>
   .title {
