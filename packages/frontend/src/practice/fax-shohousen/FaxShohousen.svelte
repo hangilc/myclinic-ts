@@ -137,8 +137,6 @@
     c.createFont(ctx, "default", "MS Mincho", 3.8);
     c.setFont(ctx, "default");
     const labelItems = items.slice(nLabelStart - 1, nLabelStart - 1 + printableItems());
-    console.log("items", items);
-    console.log("labelItems", labelItems);
     const texts = labelItems
       .map((item) => {
         const fax = item.pharmaFax;
@@ -157,6 +155,10 @@
     const filename = "faxed-shohousen-pharm-addr.pdf";
     await api.createPdfFile(c.getOps(ctx), "A4", filename);
     window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
+    startRow = "1";
+    startCol = "1";
+    labelStart = (nLabelStart + labelItems.length).toString();
+    labelCount = (items.length - (parseInt(labelStart) - 1)).toString();
   }
 </script>
 
