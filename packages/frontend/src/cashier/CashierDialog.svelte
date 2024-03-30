@@ -51,6 +51,7 @@
     receipt.charge = charge.charge;
     const clinicInfo = await api.getClinicInfo();
     receipt.setClinic(clinicInfo);
+    receipt.hokengai = (visit.attributes?.hokengai) ?? [];
     receiptHook(receipt);
     let ops = drawReceipt(receipt);
     const dlog: DrawerDialog = new DrawerDialog({

@@ -93,7 +93,13 @@ function renderHokengai(ctx: DrawerContext, hokengai: string[], boxes: Box[] ){
     const str = hokengai[i];
     if( i < boxes.length ){
       const box = b.modify(boxes[i], b.shrinkHoriz(1, 0));
-      c.drawText(ctx, str, box, "left", "center");
+      if( str.length < 12 ){
+        c.drawText(ctx, str, box, "left", "center");
+      } else {
+        c.setFont(ctx, "mincho-2.6");
+        c.drawText(ctx, str, box, "left", "center");
+        c.setFont(ctx, "mincho-4");
+      }
     }
   }
 }

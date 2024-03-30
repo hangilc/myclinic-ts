@@ -31,6 +31,7 @@ export function drawReceipt(data: ReceiptDrawerData): Op[] {
 function setupFonts(ctx: DrawerContext) {
   c.createFont(ctx, "mincho-6", "MS Mincho", 6);
   c.createFont(ctx, "mincho-4", "MS Mincho", 4);
+  c.createFont(ctx, "mincho-2.6", "MS Mincho", 2.6);
   c.createFont(ctx, "gothic-5", "MS Gothic", 5);
   c.createFont(ctx, "gothic-4", "MS Gothic", 4);
   c.createFont(ctx, "gothic-2.6", "MS Gothic", 2.6);

@@ -1052,11 +1052,18 @@ export class ConductEx {
   }
 }
 
+export interface VisitAttributesArg {
+  futanWari?: number;
+  hokengai?: string[];
+}
+
 export class VisitAttributes {
   futanWari: number | undefined;
+  hokengai: string[];
 
-  constructor({ futanWari = undefined }: { futanWari?: number }) {
-    this.futanWari = futanWari;
+  constructor(arg: VisitAttributesArg = {}) {
+    this.futanWari = arg.futanWari;
+    this.hokengai = arg.hokengai ?? [];
   }
 
   updateWith(other: VisitAttributes): VisitAttributes {

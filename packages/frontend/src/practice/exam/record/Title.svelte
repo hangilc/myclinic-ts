@@ -16,6 +16,7 @@
   import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
   import { calcGendogaku } from "@/lib/gendogaku";
   import { popupTrigger } from "@/lib/popup-helper";
+  import HokengaiDialog from "./HokengaiDialog.svelte";
 
   export let visit: VisitEx;
 
@@ -71,11 +72,31 @@
     const year = yearOfSqlDate(visit.visitedAt);
     const month = monthOfSqlDate(visit.visitedAt);
     const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
-    if( !gendogaku ){
-      alert("限度額を確定できません。")
+    if (!gendogaku) {
+      alert("限度額を確定できません。");
     } else {
       alert(`限度額： ${gendogaku.toLocaleString()}円`);
     }
+  }
+
+  function doHokengai() {
+    const attrs = visit.attributes;
+    const hokengai: string[] = attrs?.hokengai ?? [];
+
+    const d: HokengaiDialog = new HokengaiDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        hokengai,
+        onEnter: async (entered: string[]) => {
+          const newAttr = Object.assign({}, attrs, { hokengai: entered });
+          const origVisit = await api.getVisit(visit.visitId);
+          origVisit.attributesStore = JSON.stringify(newAttr);
+          await api.updateVisit(origVisit);
+          visit.attributesStore = origVisit.attributesStore;
+        },
+      },
+    });
   }
 
   function composeMenu(): [string, () => void][] {
@@ -84,20 +105,20 @@
       m.push([label, action]);
     }
     add("この診察を削除", doDeleteVisit);
-    if( visit.visitId !== $tempVisitId ){
+    if (visit.visitId !== $tempVisitId) {
       add("暫定診察に設定", doSetTempVisitId);
     } else {
       add("暫定診察の解除", doClearTempVisitId);
     }
     add("診療明細", doMeisai);
     add("負担割オーバーライド", doFutanwariOverride);
-    if( isMishuu(visit) ){
+    if (isMishuu(visit)) {
       add("未収リストへ", doMishuuList);
     }
     add("限度額", doGendogaku);
+    add("保険外", doHokengai);
     return m;
   }
-
 </script>
 
 <div
@@ -107,10 +128,10 @@
 >
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
-    <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
-      >操作</a
-    >
-    <!-- <div slot="menu" class="popup-menu">
+  <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
+    >操作</a
+  >
+  <!-- <div slot="menu" class="popup-menu">
       <a href="javascript:void(0)" on:click={destroyAnd(doDeleteVisit)}
         >この診察を削除</a
       >
