@@ -22,8 +22,6 @@
   import { drawSeal8x3 } from "@/lib/drawer/forms/seal8x3/sealx8x3";
 
   let [fromDate, uptoDate] = defaultDates(new Date());
-  let labelStartRow = 1;
-  let labelStartCol = 1;
   let items: FaxedShohousenItem[] = [];
   let pharmaMapCache: Record<string, PharmaData> | undefined = undefined;
   let clinicInfoCache: ClinicInfo | undefined = undefined;
@@ -120,7 +118,7 @@
     function printableItems() {
       let c = nLabelCount;
       let n = items.length;
-      n -= (nLabelStart - 1);
+      n -= nLabelStart - 1;
       let m = 24 - (3 * (nStartRow - 1) + nStartCol - 1);
       return Math.min(c, n, m);
     }
@@ -128,7 +126,12 @@
     const nStartCol = parseInt(startCol);
     const nLabelStart = parseInt(labelStart);
     const nLabelCount = parseInt(labelCount);
-    if( isNaN(nStartRow) || isNaN(nStartCol) || isNaN(nLabelStart) || isNaN(nLabelCount) ) {
+    if (
+      isNaN(nStartRow) ||
+      isNaN(nStartCol) ||
+      isNaN(nLabelStart) ||
+      isNaN(nLabelCount)
+    ) {
       alert("Invalid input");
       return;
     }
@@ -136,21 +139,23 @@
     const ctx = mkDrawerContext();
     c.createFont(ctx, "default", "MS Mincho", 3.8);
     c.setFont(ctx, "default");
-    const labelItems = items.slice(nLabelStart - 1, nLabelStart - 1 + printableItems());
-    const texts = labelItems
-      .map((item) => {
-        const fax = item.pharmaFax;
-        const pharma = pharmaMap[fax];
-        if (pharma) {
-          return pharma.labelAddr;
-        } else {
-          alert("Cannot find address for: " + fax);
-          return "";
-        }
-      });
+    const labelItems = items.slice(
+      nLabelStart - 1,
+      nLabelStart - 1 + printableItems()
+    );
+    const texts = labelItems.map((item) => {
+      const fax = item.pharmaFax;
+      const pharma = pharmaMap[fax];
+      if (pharma) {
+        return pharma.labelAddr;
+      } else {
+        alert("Cannot find address for: " + fax);
+        return "";
+      }
+    });
     drawSeal8x3(ctx, texts, {
       startRow: nStartRow,
-      startCol: nStartCol
+      startCol: nStartCol,
     });
     const filename = "faxed-shohousen-pharm-addr.pdf";
     await api.createPdfFile(c.getOps(ctx), "A4", filename);
@@ -163,35 +168,31 @@
 </script>
 
 <div class="title">ファックス済処方箋</div>
-<form>
+<div class="create">
+  <div class="section-title">データ</div>
   <div>
     <span>開始日</span>
-    <EditableDate bind:date={fromDate}/>
+    <EditableDate bind:date={fromDate} />
     <span class="ml-2">終了日</span>
     <EditableDate bind:date={uptoDate} />
   </div>
-  <div>
-    <span>ラベル開始</span>
-    <label>行</label>
-    <input type="number" class="label-input" bind:value={labelStartRow} />
-    <label>列</label>
-    <input type="number" class="label-input" bind:value={labelStartCol} />
+  <div class="commands">
+    <button on:click={doCreate}>作成</button>
   </div>
-  <div class="form-inline mt-2">
-    <button type="button" on:click={doCreate}>すべて作成</button>
+  <div class="detail">
     {#if items.length > 0}
       <div>{items.length}件</div>
-      <div>
+      <ol>
         {#each items as item (item.pharmaFax)}
-          <div>{item.pharmaName}</div>
+          <li>{item.pharmaName}</li>
         {/each}
-      </div>
+      </ol>
     {/if}
   </div>
-</form>
+</div>
 
-<div>
-  <div>薬局レターＰＤＦ</div>
+<div class="letter">
+  <div class="section-title">薬局レターＰＤＦ</div>
   <div>
     {#if items.length > 0}
       <div>
@@ -201,17 +202,31 @@
   </div>
 </div>
 
-<div>
-  <div>薬局住所ラベルＰＤＦ</div>
-  <div>
-    {#if items.length > 0}
-      開始行：<input type="text" class="short-input" bind:value={startRow}/>
-      開始列：<input type="text" class="short-input" bind:value={startCol}/>
-      ラベル開始：<input type="text" class="short-input" bind:value={labelStart}/>
-      ラベル数：<input type="text" class="short-input" bind:value={labelCount}/>
-      <button type="button" on:click={doAddressLabel}>表示</button>
-    {/if}
+<div class="address">
+  <div class="section-title">薬局住所ラベルＰＤＦ</div>
+  {#if items.length > 0}
+  <div class="form">
+    <div>
+      開始行：<input type="text" class="short-input" bind:value={startRow} />
+      開始列：<input type="text" class="short-input" bind:value={startCol} />
+    </div>
+    <div>
+      ラベル開始：<input
+        type="text"
+        class="short-input"
+        bind:value={labelStart}
+      />
+      ラベル数：<input
+        type="text"
+        class="short-input"
+        bind:value={labelCount}
+      />
+    </div>
   </div>
+  <div class="commands">
+    <button type="button" on:click={doAddressLabel}>表示</button>
+  </div>
+  {/if}
 </div>
 
 <style>
@@ -220,8 +235,26 @@
     margin-bottom: 10px;
   }
 
-  .label-input {
-    width: 4em;
+  .create,
+  .letter,
+  .address {
+    margin: 10px 0;
+  }
+
+  .create .commands {
+    margin-top: 4px;
+  }
+
+  .create .detail {
+    margin: 10px;
+  }
+
+  .section-title {
+    font-weight: bold;
+  }
+
+  .address .form {
+    margin: 10px;
   }
 
   .short-input {
