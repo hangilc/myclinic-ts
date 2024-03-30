@@ -3,6 +3,7 @@
   import type { Appoint, AppointTime } from "myclinic-model";
   import { currentPatient, showAppoints, startPatient } from "../exam-vars";
   import RightBox from "../RightBox.svelte";
+  import { pad } from "@/lib/pad";
 
   let today = new Date();
   let data: [AppointTime, Appoint[]][] = [];
@@ -48,7 +49,7 @@
             on:click={() => doSelect(appoint)}
             class:current={$currentPatient &&
               $currentPatient.patientId === appoint.patientId}
-            >{appoint.patientName}</a
+            >{pad(appoint.patientId, 4, "0")} {appoint.patientName}</a
           >
         {/each}
         {#if appointTime.untilTime <= "12:00:00" && data[i + 1] && data[i + 1][0].fromTime > "12:00:00"}
