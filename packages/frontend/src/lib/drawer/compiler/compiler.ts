@@ -384,12 +384,12 @@ export function drawTexts(ctx: DrawerContext, texts: string[], box: Box, optArg:
     optArg);
 }
 
-export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box, 
+export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box,
   writer: (key: string) => CompositeItem[], optArg: DrawTextsOptArg = {}) {
   const opt = new DrawTextsOpt(optArg, ctx);
   drawTextsInBoxes(ctx, texts, box,
     (tt, bb) => {
-      if( hasCompTmpl(tt) ){
+      if (hasCompTmpl(tt)) {
         drawComposite(ctx, bb, parseCompTmpl(tt, writer), optArg);
       } else {
         drawText(ctx, tt, bb, opt.halign, opt.valign, optArg);
@@ -423,6 +423,76 @@ export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg:
     lines.push(...ls);
   });
   drawTexts(ctx, lines, box, { valignChunk: optArg.valign, leading: optArg.leading });
+}
+
+export interface DrawTextAtOptArg {
+  halign?: HAlign;
+  valign?: VAlign;
+  interCharsSpace?: number;
+}
+
+class DrawTextAtOpt {
+  halign: HAlign;
+  valign: VAlign;
+  interCharsSpace: number;
+
+  constructor(arg: DrawTextAtOptArg = {}) {
+    this.halign = arg.halign ?? "left";
+    this.valign = arg.valign ?? "top";
+    this.interCharsSpace = arg.interCharsSpace ?? 0;
+  }
+}
+
+export function drawTextAt(ctx: DrawerContext, text: string, x: number, y: number, optArg: DrawTextAtOptArg = {}) {
+  const opt = new DrawTextAtOpt(optArg);
+  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+  let charWidths = stringToCharWidths(text, fontSize);
+  if (opt.interCharsSpace !== 0) {
+    charWidths = charWidths.map((cs, i) => {
+      if (i !== charWidths.length - 1) {
+        return cs + opt.interCharsSpace;
+      } else {
+        return cs;
+      }
+    })
+  }
+  const length = sumOfNumbers(charWidths);
+  switch (opt.halign) {
+    case "left": {
+      // nop
+      break;
+    }
+    case "center": {
+      x = x - length / 2.0;
+      break;
+    }
+    case "right": {
+      x = x - length;
+      break;
+    }
+  }
+  switch(opt.valign) {
+    case "top": {
+      // nop
+      break;
+    }
+    case "center": {
+      y = y - fontSize / 2.0;
+      break;
+    }
+    case "bottom": {
+      y = y - fontSize;
+      break;
+    }
+  }
+  const xs: number[] = [];
+  const ys: number[] = [];
+  for (let i = 0; i < charWidths.length; i++) {
+    xs.push(x);
+    ys.push(y);
+    x += charWidths[i];
+  }
+  drawChars(ctx, text, xs, ys);
 }
 
 export function rect(ctx: DrawerContext, box: Box) {

@@ -10,6 +10,7 @@
   import Cashier from "@/cashier/Cashier.svelte";
   import BigChar from "./BigChar.svelte";
   import FaxShohousen from "./fax-shohousen/FaxShohousen.svelte";
+  import HoumonKango from "./houmon-kaigo/HoumonKango.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -29,6 +30,7 @@
     <Cashier isAdmin={true} />
   {/if}
   {#if $serviceStore === "fax-shohousen"}<FaxShohousen />{/if}
+  <HoumonKango isVisible={$serviceStore === "houmon-kango"} />
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
