@@ -190,21 +190,27 @@ export function drawTextJustifiedVertically(ctx: DrawerContext, text: string, bo
 export interface DrawTextOptionArg {
   interCharsSpace?: number;
   dy?: number;
+  modifiers?: Modifier[];
 }
 
 class DrawerTextOption {
   interCharsSpace: number;
   dy: number;
+  modifiers: Modifier[];
 
   constructor(arg: DrawTextOptionArg) {
     this.interCharsSpace = arg.interCharsSpace ?? 0;
     this.dy = arg.dy ?? 0;
+    this.modifiers = arg.modifiers ?? [];
   }
 }
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
   optArg: DrawTextOptionArg = {}) {
   const opt = new DrawerTextOption(optArg);
+  if( opt.modifiers.length > 0 ){
+    box = b.modify(box, ...opt.modifiers);
+  }
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
   let charWidths = stringToCharWidths(text, fontSize);
   if (opt.interCharsSpace !== 0) {
@@ -575,6 +581,7 @@ export function textWidthWithFont(ctx: DrawerContext, text: string, fontName: st
 export interface CompositeText {
   kind: "text";
   text: string;
+  mark?: string;
 }
 
 export interface CompositeGap {
@@ -662,7 +669,11 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
   comps.forEach(item => {
     switch (item.kind) {
       case "text": {
-        drawText(ctx, item.text, b.modify(box, b.shift(pos, 0)), "left", opt.valign);
+        const textBox = b.modify(box, b.shift(pos, 0))
+        drawText(ctx, item.text, textBox, "left", opt.valign);
+        if( item.mark ){
+          mark(ctx, item.mark, textBox);
+        }
         pos += textWidth(ctx, item.text);
         break;
       }

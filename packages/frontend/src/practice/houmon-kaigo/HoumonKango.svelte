@@ -51,10 +51,10 @@
       <button>患者終了</button>
     {/if}
   </div>
-  {#if patient}
-    <div>
+  {#if patient || true}
+    <!-- <div>
       患者：{patient.lastName} {patient.firstName}
-    </div>
+    </div> -->
     <div>
       開始日：<EditableDate bind:date={startDate}/>
       終了日：<EditableDate bind:date={uptoDate}/>

@@ -161,7 +161,7 @@ export function flipUp(): Modifier {
 export type Splitter = (ext: number) => number[];
 
 export function splitAt(...at: number[]): Splitter {
-  return (_) => at;
+  return (ext) => at.map(a => a >= 0 ? a : (ext + a));
 }
 
 export function evenSplitter(n: number): Splitter {
