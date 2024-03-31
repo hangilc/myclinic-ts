@@ -276,7 +276,76 @@ function renderRow3_4(ctx: DrawerContext, box: Box) {
 }
 
 function renderRow3_5(ctx: DrawerContext, box: Box) {
+  const cols = b.splitToColumns(box, b.splitAt(23.5));
+  c.rectAll(ctx, cols);
+  c.drawTexts(ctx, ["装着・使用", "医療機器等"], b.modify(cols[0], b.inset(2)),
+    { halign: "left", valign: "center", valignChunk: "center", leading: 2 });
+  const rows = b.splitToRows(b.modify(cols[1], b.inset(2)), b.evenSplitter(7));
+  c.drawComposite(ctx, rows[0], [
+    { kind: "text", text: "１", mark: "自動腹膜灌流装置" },
+    { kind: "text", text: "．自動腹膜灌流装置" },
+    { kind: "gap-to", at: 46},
+    { kind: "text", text: "２", mark: "透析液供給装置" },
+    { kind: "text", text: "．透析液供給装置" },
+    { kind: "gap-to", at: 90 },
+    { kind: "text", text: "３" },
+    { kind: "text", text: "．酸素療法（" },
+    { kind: "gap", width: 12, mark: "酸素療法" },
+    { kind: "text", text: "/min）" },
+  ]);
+  c.drawComposite(ctx, rows[1], [
+    { kind: "text", text: "４", mark: "吸引器" },
+    { kind: "text", text: "．吸引器" },
+    { kind: "gap-to", at: 46},
+    { kind: "text", text: "５", mark: "中心静脈栄養" },
+    { kind: "text", text: "．中心静脈栄養" },
+    { kind: "gap-to", at: 90 },
+    { kind: "text", text: "６", mark: "輸液ポンプ" },
+    { kind: "text", text: "．輸液ポンプ" },
+  ]);
+  const row2 = rows[2];
+  let pos1: number = 0;
+  let pos2: number = 0;
+  let pos3: number = 0;
+  c.drawComposite(ctx, row2, [
+    { kind: "text", text: "７．経管栄養（経鼻・胃ろう：チューブサイズ"},
+    { kind: "gap", width: 21, callback: (box) => { pos1 = box.right - row2.left }, mark: "経管栄養チューブサイズ"},
+    { kind: "text", text: "、" },
+    { kind: "gap", width: 15, callback: (box) => { pos2 = box.right - row2.left }, mark: "経管栄養交換日"},
+    { kind: "text", text: "日に１回交換" },
+    { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left }},
+    { kind: "text", text: "）"},
+  ]);
+  c.drawComposite(ctx, rows[3], [
+    { kind: "text", text: "８．留置カテーテル（サイズ"},
+    { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ"},
+    { kind: "text", text: "、" },
+    { kind: "gap-to", at: pos2,  mark: "留置カテーテル交換日"},
+    { kind: "text", text: "日に１回交換）" },
+  ]);
+  c.drawComposite(ctx, rows[4], [
+    { kind: "text", text: "９．人工呼吸器（" },
+    { kind: "text", text: "陽圧式", mark: "人工呼吸器陽圧式" },
+    { kind: "text", text: "・" },
+    { kind: "text", text: "陰圧式", mark: "人工呼吸器陰圧式" },
+    { kind: "text", text: "：設定" },
+    { kind: "gap-to", at: pos3, mark: "人工呼吸器設定" },
+    { kind: "text", text: "）" },
+  ]);
+  c.drawComposite(ctx, rows[5], [
+    { kind: "text", text: "１０", mark: "気管カニューレ" },
+    { kind: "text", text: "．気管カニューレ（サイズ" },
+    { kind: "gap", width: 11, mark: "気管カニューレサイズ" },
+    { kind: "text", text: "）" },
+  ]);
+  c.drawComposite(ctx, rows[6], [
+    { kind: "text", text: "１１", mark: "人工肛門" },
+    { kind: "text", text: "．人工肛門" },
+    { kind: "gap", width: 18 },
+    { kind: "text", text: "１２", mark: "人工膀胱" },
+    { kind: "text", text: "．人工膀胱" },
 
+  ])
 }
 
 function renderRow4(ctx: DrawerContext, box: Box) {

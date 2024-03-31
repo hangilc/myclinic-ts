@@ -51,6 +51,10 @@ export function paperSizeToBox(paperSize: PaperSize, opt: { landscape?: boolean 
   return box;
 }
 
+export function clone(box: Box): Box {
+  return Object.assign({}, box);
+}
+
 export type Modifier = (src: Box) => Box;
 
 export function modify(box: Box, ...modifiers: Modifier[]): Box {

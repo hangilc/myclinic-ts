@@ -208,7 +208,7 @@ class DrawerTextOption {
 export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
   optArg: DrawTextOptionArg = {}) {
   const opt = new DrawerTextOption(optArg);
-  if( opt.modifiers.length > 0 ){
+  if (opt.modifiers.length > 0) {
     box = b.modify(box, ...opt.modifiers);
   }
   const fontSize = fsm.getCurrentFontSize(ctx.fsm);
@@ -355,7 +355,7 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
       top = box.bottom - totalHeight;
     }
   }
-  let bb = b.modify(box, b.setHeight(opt.lineHeight, "top"), b.setTop(top));
+  let bb = b.modify(box, b.setTop(top), b.setHeight(opt.lineHeight, "top"));
   texts.forEach(t => {
     writer(t, bb);
     bb = b.modify(bb, b.shiftDown(opt.lineHeight + opt.leading));
@@ -477,7 +477,7 @@ export function drawTextAt(ctx: DrawerContext, text: string, x: number, y: numbe
       break;
     }
   }
-  switch(opt.valign) {
+  switch (opt.valign) {
     case "top": {
       // nop
       break;
@@ -593,6 +593,7 @@ export interface CompositeGap {
   width: number;
   mark?: string;
   modifiers?: Modifier[];
+  callback?: (box: Box) => void;
 }
 
 export interface CompositeGapTo {
@@ -675,19 +676,24 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
         drawText(ctx, item.text, textBox, "left", opt.valign);
-        if( item.mark ){
+        if (item.mark) {
           mark(ctx, item.mark, textBox);
         }
         pos += textWidth(ctx, item.text);
         break;
       }
       case "gap": {
-        if (item.mark) {
+        if (item.mark || item.callback) {
           let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width });
           if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
-          mark(ctx, item.mark, mb);
+          if( item.mark ){
+            mark(ctx, item.mark, mb);
+          }
+          if (item.callback) {
+            item.callback(b.clone(mb));
+          }
         }
         pos += item.width;
         break;
