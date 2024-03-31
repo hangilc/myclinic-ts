@@ -405,15 +405,18 @@ export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box,
 }
 
 interface ParagraphOptArg {
+  halign?: HAlign;
   valign?: VAlign;
   leading?: number;
 }
 
 class ParagraphOpt {
+  halign: HAlign;
   valign: VAlign;
   leading: number;
 
   constructor(arg: ParagraphOptArg) {
+    this.halign = arg.halign ?? "left";
     this.valign = arg.valign ?? "top";
     this.leading = arg.leading ?? 0;
   }
@@ -428,7 +431,7 @@ export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg:
     const ls = breakLines(text, fontSize, w);
     lines.push(...ls);
   });
-  drawTexts(ctx, lines, box, { valignChunk: optArg.valign, leading: optArg.leading });
+  drawTexts(ctx, lines, box, { halign: optArg.halign, valignChunk: optArg.valign, leading: optArg.leading });
 }
 
 export interface DrawTextAtOptArg {
@@ -675,11 +678,12 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
     switch (item.kind) {
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
+        const tw = textWidth(ctx, item.text);
         drawText(ctx, item.text, textBox, "left", opt.valign);
         if (item.mark) {
-          mark(ctx, item.mark, textBox);
+          mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")));
         }
-        pos += textWidth(ctx, item.text);
+        pos += tw;
         break;
       }
       case "gap": {
@@ -732,7 +736,80 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
 
 export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
   const save = getCurrentFont(ctx);
-  setFont(ctx, fontName);
-  f();
-  setFont(ctx, save);
+  try {
+    setFont(ctx, fontName);
+    f();
+  } finally {
+    setFont(ctx, save);
+  }
+}
+
+export function withMark(ctx: DrawerContext, markName: string, f: (box: Box) => void,
+  modifiers: Modifier[] = []) {
+  let box = getMark(ctx, markName);
+  if (modifiers.length > 0) {
+    box = b.modify(box, ...modifiers);
+  }
+  f(box);
+}
+
+export interface DataRendererOpt {
+  font?: string;
+  halign?: HAlign;
+  valign?: VAlign;
+  modifiers?: Modifier[],
+  circle?: boolean | number;
+  tryFonts?: string[];
+  leading?: number;
+}
+
+export function renderData(ctx: DrawerContext, markName: string, data: string | undefined,
+  opt: DataRendererOpt = {}): void {
+  if (data != null) {
+    const halign: HAlign = opt.halign ?? "left";
+    const valign: VAlign = opt.valign ?? "center";
+    let markBox = getMark(ctx, markName);
+    if (opt.modifiers) {
+      markBox = b.modify(markBox, ...opt.modifiers);
+    }
+    if (opt.tryFonts && opt.tryFonts.length > 0) {
+      const fontSave = getCurrentFont(ctx);
+      let done = false;
+      for (let font of opt.tryFonts) {
+        setFont(ctx, font);
+        const tw = textWidth(ctx, data);
+        if (tw <= b.width(markBox)) {
+          drawText(ctx, data, markBox, halign, valign);
+          done = true;
+          break;
+        }
+      }
+      if (!done) {
+        const lastFont: string = opt.tryFonts[opt.tryFonts.length-1]!;
+        setFont(ctx, lastFont);
+        paragraph(ctx, data, markBox, { valign, leading: opt.leading })
+      }
+      setFont(ctx, fontSave);
+    } else {
+      let fontSave = "";
+      if (opt.font) {
+        fontSave = getCurrentFont(ctx);
+        setFont(ctx, opt.font);
+      }
+      if (opt.circle) {
+        let r: number;
+        if (typeof opt.circle === "number") {
+          r = opt.circle;
+        } else {
+          r = currentFontSize(ctx) / 2.0;
+        }
+        circle(ctx, b.cx(markBox), b.cy(markBox), r);
+      } else {
+        drawText(ctx, data, markBox, halign, valign);
+      }
+      if (opt.font) {
+        setFont(ctx, fontSave);
+      }
+    }
+  }
 }

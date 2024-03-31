@@ -1,52 +1,51 @@
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import type { Op } from "../../compiler/op";
-import { HoumonKangoData, type HoumonKangoDataArg } from "./houmon-kango-data";
+import { extendData, type HoumonKangoData } from "./houmon-kango-data";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import { mkBox, type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
-import type { ClinicInfo } from "myclinic-model";
-import type LabelEdit from "@/practice/exam/record/conduct/LabelEdit.svelte";
 
-export function drawHoumonKango(arg: HoumonKangoDataArg = {}): Op[] {
-  const data = new HoumonKangoData(arg);
+export function drawHoumonKango(data: HoumonKangoData): Op[] {
+  extendData(data);
   const ctx = mkDrawerContext();
   const paper: Box = b.paperSizeToBox(A4);
   setupFonts(ctx);
   c.createPen(ctx, "regular", 0, 0, 0, 0.2);
   c.setPen(ctx, "regular");
-  drawTitle(ctx, data.title, paper);
+  drawTitle(ctx, paper, data);
   c.setFont(ctx, "regular");
-  drawSubtitle(ctx, data.subtitle, paper);
+  drawSubtitle(ctx, paper, data);
   const mainBox = b.modify(paper, b.inset(16, 33, 19, 56));
   c.rect(ctx, mainBox);
   const rows: Box[] = b.splitToRows(mainBox, b.splitAt(
     8.5, 17, 27.5, 117.5, -75, -52, -42, -32.5, -18.5
   ));
   rows.forEach(row => c.rect(ctx, row));
-  renderRow0(ctx, rows[0]);
-  renderRow1(ctx, rows[1]);
-  renderRow2(ctx, rows[2]);
-  renderRow3(ctx, rows[3]);
-  renderRow4(ctx, rows[4]);
-  renderRow5(ctx, rows[5]);
-  renderRow6(ctx, rows[6]);
-  renderRow7(ctx, rows[7]);
-  renderRow8(ctx, rows[8]);
-  renderRow9(ctx, rows[9]);
+  renderRow0(ctx, rows[0], data);
+  renderRow1(ctx, rows[1], data);
+  renderRow2(ctx, rows[2], data);
+  renderRow3(ctx, rows[3], data);
+  renderRow4(ctx, rows[4], data);
+  renderRow5(ctx, rows[5], data);
+  renderRow6(ctx, rows[6], data);
+  renderRow7(ctx, rows[7], data);
+  renderRow8(ctx, rows[8], data);
+  renderRow9(ctx, rows[9], data);
   c.drawTextAt(ctx, "上記のとおり、指定訪問看護の実施を指示する。", mainBox.left, mainBox.bottom + 3,
     { halign: "left", valign: "top" });
   const addrBox = mkBox(
     mainBox.left + 75, mainBox.bottom + 10, mainBox.right, mainBox.bottom + 35
   );
-  renderAddr(ctx, addrBox);
+  renderAddr(ctx, addrBox, data);
   const recipientBox = mkBox(
     mainBox.left, addrBox.bottom + 2, mainBox.right, addrBox.bottom + 6
   )
   c.drawComposite(ctx, recipientBox, [
     { kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）" },
-    { kind: "text", text: "殿"},
-  ])
+    { kind: "text", text: "殿" },
+  ]);
+  c.setFont(ctx, "input-regular");
   return c.getOps(ctx);
 }
 
@@ -55,35 +54,79 @@ function setupFonts(ctx: DrawerContext) {
   c.createFont(ctx, "regular", "MS Mincho", 3.5);
   c.createFont(ctx, "small", "MS Mincho", 3);
   c.createFont(ctx, "input-regular", "MS Gothic", 3.5);
+  c.createFont(ctx, "input-small", "MS Gothic", 3.0);
+  c.createFont(ctx, "input-very-small", "MS Gothic", 2.5);
 }
 
-function drawTitle(ctx: DrawerContext, title: string, paper: Box) {
+function drawTitle(ctx: DrawerContext, paper: Box, data: HoumonKangoData) {
   c.setFont(ctx, "title");
-  c.drawTextAt(ctx, title, b.cx(paper), 13, { halign: "center", valign: "top" });
+  const fontSize = c.currentFontSize(ctx);
+  c.mark(ctx, "タイトル", b.modify(paper, b.setHeight(fontSize, "top"), b.shiftDown(13)));
+  c.renderData(ctx, "タイトル", data["タイトル"], { font: "title", halign: "center", valign: "top" })
 }
 
-function drawSubtitle(ctx: DrawerContext, subtitle: string, paper: Box) {
-  let box = b.modify(paper, b.setTop(24), b.setRight(113));
-  c.drawText(ctx, subtitle, box, "right", "top");
+function drawSubtitle(ctx: DrawerContext, paper: Box, data: HoumonKangoData) {
+  const fontSize = c.currentFontSize(ctx);
+  let box = b.modify(paper, b.setTop(24), b.setHeight(fontSize, "top"), b.setRight(113));
+  c.mark(ctx, "サブタイトル", box);
+  c.renderData(ctx, "サブタイトル", data["サブタイトル"], { halign: "right" });
   box = b.modify(box, b.flipRight(), b.setRight(paper.right));
   c.drawComposite(ctx, box, [
-    { kind: "text", text: "（令和" },
+    { kind: "text", text: "（" },
+    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間開始（元号）" },
     { kind: "gap", width: 7, mark: "訪問看護指示期間開始（年）" },
     { kind: "text", text: "年" },
     { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（月）" },
     { kind: "text", text: "月" },
     { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（日）" },
-    { kind: "text", text: "日～令和" },
+    { kind: "text", text: "日～" },
+    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間期限（元号）" },
     { kind: "gap", width: 7, mark: "訪問看護指示期間期限（年）" },
     { kind: "text", text: "年" },
     { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（月）" },
     { kind: "text", text: "月" },
     { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（日）" },
     { kind: "text", text: "日）" },
-  ], { halign: "left", valign: "top" })
+  ], { halign: "left", valign: "top" });
+  c.renderData(ctx, "訪問看護指示期間開始（元号）", data["訪問看護指示期間開始（元号）"]);
+  c.renderData(ctx, "訪問看護指示期間開始（年）", data["訪問看護指示期間開始（年）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
+  c.renderData(ctx, "訪問看護指示期間開始（月）", data["訪問看護指示期間開始（月）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
+  c.renderData(ctx, "訪問看護指示期間開始（日）", data["訪問看護指示期間開始（日）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
+  c.renderData(ctx, "訪問看護指示期間期限（元号）", data["訪問看護指示期間期限（元号）"]);
+  c.renderData(ctx, "訪問看護指示期間期限（年）", data["訪問看護指示期間期限（年）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
+  c.renderData(ctx, "訪問看護指示期間期限（月）", data["訪問看護指示期間期限（月）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
+  c.renderData(ctx, "訪問看護指示期間期限（日）", data["訪問看護指示期間期限（日）"], {
+    font: "input-regular",
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 0.5)]
+  });
 }
 
-function renderRow0(ctx: DrawerContext, box: Box) {
+function ropt(opt: c.DataRendererOpt): c.DataRendererOpt {
+  return Object.assign({ font: "input-regular" }, opt);
+}
+
+function renderRow0(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20, 83.5));
   cols.forEach(col => c.rect(ctx, col));
   {
@@ -113,48 +156,67 @@ function renderRow0(ctx: DrawerContext, box: Box) {
       { kind: "gap", width: 8, mark: "生年月日（日）" },
       { kind: "text", text: "日" },
     ], { valign: "center" });
-    c.drawComposite(ctx, b.modify(rr[1], b.shrinkHoriz(63, 0)), [
+    c.drawComposite(ctx, b.modify(rr[1], b.shrinkHoriz(62, 0)), [
       { kind: "text", text: "（" },
-      { kind: "gap", width: 6, mark: "年齢" },
+      { kind: "gap", width: 7, mark: "年齢" },
       { kind: "text", text: "歳）" },
     ], { valign: "center" })
   }
+  c.renderData(ctx, "患者氏名", data["患者氏名"], ropt({ halign: "center" }));
+  c.renderData(ctx, "生年月日（元号：明治）", data["生年月日（元号：明治）"], ropt({ circle: true }));
+  c.renderData(ctx, "生年月日（元号：大正）", data["生年月日（元号：大正）"], ropt({ circle: true }));
+  c.renderData(ctx, "生年月日（元号：昭和）", data["生年月日（元号：昭和）"], ropt({ circle: true }));
+  c.renderData(ctx, "生年月日（元号：平成）", data["生年月日（元号：平成）"], ropt({ circle: true }));
+  c.renderData(ctx, "生年月日（年）", data["生年月日（年）"], 
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
+  c.renderData(ctx, "生年月日（月）", data["生年月日（月）"], 
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
+  c.renderData(ctx, "生年月日（日）", data["生年月日（日）"], 
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
+  c.renderData(ctx, "年齢", data["年齢"], 
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
 }
 
-function renderRow1(ctx: DrawerContext, box: Box) {
+function renderRow1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "患者住所", cols[0], "left", "center", {
     modifiers: [b.shrinkHoriz(1.5, 0)]
   });
   c.mark(ctx, "患者住所", cols[1]);
+  c.renderData(ctx, "患者住所", data["患者住所"], ropt({ modifiers: [b.shrinkHoriz(2, 0)]}));
 }
 
-function renderRow2(ctx: DrawerContext, box: Box) {
+function renderRow2(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(29));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "主たる傷病名", cols[0], "left", "center", {
     modifiers: [b.shrinkHoriz(1.5, 0)]
   });
   c.mark(ctx, "主たる傷病名", cols[1]);
+  c.renderData(ctx, "主たる傷病名", data["主たる傷病名"], ropt({
+    tryFonts: ["input-regular", "input-small"],
+    modifiers: [b.inset(2, 1, 1, 1)],
+    leading: 0.5,
+  }))
 }
 
-function renderRow3(ctx: DrawerContext, box: Box) {
+function renderRow3(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(8.5));
   c.rectAll(ctx, cols);
   c.drawTextVertically(ctx, "現在の状況・該当項目に〇等", cols[0], "center", "center", {
     interCharsSpace: 1.5
   });
   const rows: Box[] = b.splitToRows(cols[1], b.splitAt(12, 28, 42.5, 49.5, 56.5));
-  renderRow3_0(ctx, rows[0]);
-  renderRow3_1(ctx, rows[1]);
-  renderRow3_2(ctx, rows[2]);
-  renderRow3_3(ctx, rows[3]);
-  renderRow3_4(ctx, rows[4]);
-  renderRow3_5(ctx, rows[5]);
+  renderRow3_0(ctx, rows[0], data);
+  renderRow3_1(ctx, rows[1], data);
+  renderRow3_2(ctx, rows[2], data);
+  renderRow3_3(ctx, rows[3], data);
+  renderRow3_4(ctx, rows[4], data);
+  renderRow3_5(ctx, rows[5], data);
 }
 
-function renderRow3_0(ctx: DrawerContext, box: Box) {
+function renderRow3_0(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20.5));
   c.rectAll(ctx, cols);
   b.withSplitRows(b.modify(cols[0], b.inset(2)), b.evenSplitter(2), ([row0, row1]) => {
@@ -162,9 +224,14 @@ function renderRow3_0(ctx: DrawerContext, box: Box) {
     c.drawText(ctx, "状態", row1, "left", "center");
   });
   c.mark(ctx, "病状", cols[1]);
+  c.renderData(ctx, "病状", data["病状"], ropt({
+    tryFonts: ["input-regular", "input-small"],
+    modifiers: [b.inset(2, 1, 1, 1)],
+    leading: 0.5,
+  }))
 }
 
-function renderRow3_1(ctx: DrawerContext, box: Box) {
+function renderRow3_1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20.5));
   c.rectAll(ctx, cols);
   b.withSplitRows(b.modify(cols[0], b.inset(2)), b.evenSplitter(3), (rows) => {
@@ -173,9 +240,14 @@ function renderRow3_1(ctx: DrawerContext, box: Box) {
     c.drawText(ctx, "量・用法", rows[2], "left", "center");
   });
   c.mark(ctx, "薬剤", cols[1]);
+  c.renderData(ctx, "薬剤", data["薬剤"], ropt({
+    tryFonts: ["input-regular", "input-small"],
+    modifiers: [b.inset(2, 1, 1, 1)],
+    leading: 0.5,
+  }))
 }
 
-function renderRow3_2(ctx: DrawerContext, box: Box) {
+function renderRow3_2(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20.5));
   c.rectAll(ctx, cols);
   b.withSplitRows(b.modify(cols[0], b.inset(2, 2, 2, 3)), b.evenSplitter(2), ([row0, row1]) => {
@@ -183,12 +255,12 @@ function renderRow3_2(ctx: DrawerContext, box: Box) {
     c.drawText(ctx, "自立度", row1, "left", "center");
   });
   b.withSplitRows(cols[1], b.evenSplitter(2), rows => {
-    renderRow3_2_0(ctx, rows[0]);
-    renderRow3_2_1(ctx, rows[1]);
+    renderRow3_2_0(ctx, rows[0], data);
+    renderRow3_2_1(ctx, rows[1], data);
   })
 }
 
-function renderRow3_2_0(ctx: DrawerContext, box: Box) {
+function renderRow3_2_0(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(27.5));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "寝たきり度", cols[0], "left", "center", {
@@ -213,7 +285,7 @@ function renderRow3_2_0(ctx: DrawerContext, box: Box) {
   ]);
 }
 
-function renderRow3_2_1(ctx: DrawerContext, box: Box) {
+function renderRow3_2_1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(27.5));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "認知症の状況", cols[0], "left", "center", {
@@ -236,7 +308,7 @@ function renderRow3_2_1(ctx: DrawerContext, box: Box) {
   ]);
 }
 
-function renderRow3_3(ctx: DrawerContext, box: Box) {
+function renderRow3_3(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(48));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "要介護認定の状況", cols[0], "left", "center", {
@@ -266,7 +338,7 @@ function renderRow3_3(ctx: DrawerContext, box: Box) {
   ])
 }
 
-function renderRow3_4(ctx: DrawerContext, box: Box) {
+function renderRow3_4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols = b.splitToColumns(box, b.splitAt(48));
   c.rectAll(ctx, cols);
   c.drawText(ctx, "褥瘡の深さ", cols[0], "left", "center", {
@@ -290,7 +362,7 @@ function renderRow3_4(ctx: DrawerContext, box: Box) {
   ])
 }
 
-function renderRow3_5(ctx: DrawerContext, box: Box) {
+function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols = b.splitToColumns(box, b.splitAt(23.5));
   c.rectAll(ctx, cols);
   c.drawTexts(ctx, ["装着・使用", "医療機器等"], b.modify(cols[0], b.inset(2)),
@@ -368,7 +440,7 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
   ])
 }
 
-function renderRow4(ctx: DrawerContext, box: Box) {
+function renderRow4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const rows = b.splitToRows(box, b.evenSplitter(2));
   let w1: number = 0;
   let w2: number = 0;
@@ -384,7 +456,7 @@ function renderRow4(ctx: DrawerContext, box: Box) {
   c.mark(ctx, "留意事項：療養生活指導上の留意事項", m);
 }
 
-function renderRow5(ctx: DrawerContext, box: Box) {
+function renderRow5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   function labelMark(box: Box, num: string, label: string, markKey: string) {
     c.drawComposite(ctx, box, [
       { kind: "text", text: num, mark: `${markKey}マーク` },
@@ -406,7 +478,7 @@ function renderRow5(ctx: DrawerContext, box: Box) {
   });
 }
 
-function renderRow6(ctx: DrawerContext, box: Box) {
+function renderRow6(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   b.withSplitRows(box, b.evenSplitter(2), rows => {
     c.drawText(ctx, "在宅患者訪問点滴注射に関する指示（投与薬剤・投与量・投与方法等）", rows[0],
       "left", "center", { modifiers: [b.shrinkHoriz(2, 0)] });
@@ -414,7 +486,7 @@ function renderRow6(ctx: DrawerContext, box: Box) {
   })
 }
 
-function renderRow7(ctx: DrawerContext, box: Box) {
+function renderRow7(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   function labelMark(box: Box, label: string, mark: string) {
     c.drawComposite(ctx, box, [
       { kind: "gap", width: 2 },
@@ -430,7 +502,7 @@ function renderRow7(ctx: DrawerContext, box: Box) {
   })
 }
 
-function renderRow8(ctx: DrawerContext, box: Box) {
+function renderRow8(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   b.withSplitRows(b.modify(box, b.shrinkHoriz(2, 0)), b.evenSplitter(3), rows => {
     const fontSave = c.getCurrentFont(ctx);
     let pos: number = 0;
@@ -448,7 +520,7 @@ function renderRow8(ctx: DrawerContext, box: Box) {
   })
 }
 
-function renderRow9(ctx: DrawerContext, box: Box) {
+function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   b.withSplitRows(b.modify(box, b.shrinkHoriz(2, 0)), b.evenSplitter(4), rows => {
     const right = b.width(rows[0]) - 15;
     c.drawText(ctx, "他の訪問看護ステーションへの指示", rows[0], "left", "center");
@@ -476,18 +548,18 @@ function renderRow9(ctx: DrawerContext, box: Box) {
   });
 }
 
-function renderAddr(ctx: DrawerContext, box: Box) {
+function renderAddr(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const fontSize = c.currentFontSize(ctx);
   function renderIssueDate(box: Box) {
     c.drawComposite(ctx, box, [
       { kind: "gap", width: fontSize * 4 },
       { kind: "gap", width: fontSize * 2, mark: "発行日（元号）" },
       { kind: "gap", width: 9, mark: "発行日（年）" },
-      { kind: "text", text: "年"},
+      { kind: "text", text: "年" },
       { kind: "gap", width: 6, mark: "発行日（月）" },
-      { kind: "text", text: "月"},
+      { kind: "text", text: "月" },
       { kind: "gap", width: 6, mark: "発行日（日）" },
-      { kind: "text", text: "日"},
+      { kind: "text", text: "日" },
     ])
   }
   function withSplitBox(box: Box, f: (box1: Box, box2: Box) => void) {
@@ -516,7 +588,7 @@ function renderAddr(ctx: DrawerContext, box: Box) {
       c.drawTextJustified(ctx, "医師氏名", label, "center");
       c.drawComposite(ctx, value, [
         { kind: "gap", width: 70, mark: "医師氏名" },
-        { kind: "text", text: "印"},
+        { kind: "text", text: "印" },
       ])
     })
   })

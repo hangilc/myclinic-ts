@@ -1,8 +1,6 @@
 <script lang="ts">
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
-  import type { Op } from "@/lib/drawer/compiler/op";
   import { drawHoumonKango } from "@/lib/drawer/forms/houmon-kango/houmon-kango-drawer";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import type { Patient } from "myclinic-model";
@@ -27,7 +25,18 @@
   }
 
   function doCreate() {
-    const ops = drawHoumonKango({});
+    const ops = drawHoumonKango({
+      "タイトル": "介護予防訪問看護・訪問看護指示書",
+      "サブタイトル": "訪問看護指示期間",
+      validFrom: "2024-10-01",
+      validUpto: "2024-12-31",
+      "患者氏名": "診療太郎",
+      birthdate: "1943-07-12",
+      "患者住所": "〒177-01 東京都",
+      "主たる傷病名": "高血圧、高脂血症",
+      "病状": "血圧とＬＤＬコレステロールはほぼ正常範囲内にコントロールされている。",
+      "薬剤": "アムロジピン５ｍｇ、アトルバスタチン１０ｍｇ",
+    });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
