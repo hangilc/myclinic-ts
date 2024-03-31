@@ -344,6 +344,11 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     { kind: "gap", width: 18 },
     { kind: "text", text: "１２", mark: "人工膀胱" },
     { kind: "text", text: "．人工膀胱" },
+    { kind: "gap", width: 10 },
+    { kind: "text", text: "１３", mark: "装置その他マーク" },
+    { kind: "text", text: "．その他（" },
+    { kind: "gap-to", at: pos3, mark: "装置その他" },
+    { kind: "text", text: "）" },
 
   ])
 }
