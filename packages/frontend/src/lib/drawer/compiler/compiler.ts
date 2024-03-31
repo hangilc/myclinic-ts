@@ -598,7 +598,7 @@ export interface CompositeGap {
 
 export interface CompositeGapTo {
   kind: "gap-to";
-  at: number;
+  at: number | "end";
   mark?: string;
   modifiers?: Modifier[];
 }
@@ -688,7 +688,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
-          if( item.mark ){
+          if (item.mark) {
             mark(ctx, item.mark, mb);
           }
           if (item.callback) {
@@ -699,14 +699,15 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
         break;
       }
       case "gap-to": {
+        const at: number = item.at === "end" ? b.width(box) : item.at;
         if (item.mark) {
-          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + item.at });
+          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + at });
           if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
           mark(ctx, item.mark, mb);
         }
-        pos = item.at;
+        pos = at;
         break;
       }
       case "text-by-font": {

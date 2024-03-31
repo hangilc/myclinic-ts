@@ -3,8 +3,10 @@ import type { Op } from "../../compiler/op";
 import { HoumonKangoData, type HoumonKangoDataArg } from "./houmon-kango-data";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
-import type { Box } from "../../compiler/box";
+import { mkBox, type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
+import type { ClinicInfo } from "myclinic-model";
+import type LabelEdit from "@/practice/exam/record/conduct/LabelEdit.svelte";
 
 export function drawHoumonKango(arg: HoumonKangoDataArg = {}): Op[] {
   const data = new HoumonKangoData(arg);
@@ -19,7 +21,7 @@ export function drawHoumonKango(arg: HoumonKangoDataArg = {}): Op[] {
   const mainBox = b.modify(paper, b.inset(16, 33, 19, 56));
   c.rect(ctx, mainBox);
   const rows: Box[] = b.splitToRows(mainBox, b.splitAt(
-    8.5, 17, 27.5, 117.5, -75, -52, -42, -32, -18.5
+    8.5, 17, 27.5, 117.5, -75, -52, -42, -32.5, -18.5
   ));
   rows.forEach(row => c.rect(ctx, row));
   renderRow0(ctx, rows[0]);
@@ -32,6 +34,12 @@ export function drawHoumonKango(arg: HoumonKangoDataArg = {}): Op[] {
   renderRow7(ctx, rows[7]);
   renderRow8(ctx, rows[8]);
   renderRow9(ctx, rows[9]);
+  c.drawTextAt(ctx, "上記のとおり、指定訪問看護の実施を指示する。", mainBox.left, mainBox.bottom + 3,
+    { halign: "left", valign: "top" });
+  const addrBox = mkBox(
+    mainBox.left + 75, mainBox.bottom + 10, mainBox.right, mainBox.bottom + 35
+  );
+  renderAddr(ctx, addrBox);
   return c.getOps(ctx);
 }
 
@@ -284,7 +292,7 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
   c.drawComposite(ctx, rows[0], [
     { kind: "text", text: "１", mark: "自動腹膜灌流装置" },
     { kind: "text", text: "．自動腹膜灌流装置" },
-    { kind: "gap-to", at: 46},
+    { kind: "gap-to", at: 46 },
     { kind: "text", text: "２", mark: "透析液供給装置" },
     { kind: "text", text: "．透析液供給装置" },
     { kind: "gap-to", at: 90 },
@@ -296,7 +304,7 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
   c.drawComposite(ctx, rows[1], [
     { kind: "text", text: "４", mark: "吸引器" },
     { kind: "text", text: "．吸引器" },
-    { kind: "gap-to", at: 46},
+    { kind: "gap-to", at: 46 },
     { kind: "text", text: "５", mark: "中心静脈栄養" },
     { kind: "text", text: "．中心静脈栄養" },
     { kind: "gap-to", at: 90 },
@@ -308,19 +316,19 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
   let pos2: number = 0;
   let pos3: number = 0;
   c.drawComposite(ctx, row2, [
-    { kind: "text", text: "７．経管栄養（経鼻・胃ろう：チューブサイズ"},
-    { kind: "gap", width: 21, callback: (box) => { pos1 = box.right - row2.left }, mark: "経管栄養チューブサイズ"},
+    { kind: "text", text: "７．経管栄養（経鼻・胃ろう：チューブサイズ" },
+    { kind: "gap", width: 21, callback: (box) => { pos1 = box.right - row2.left }, mark: "経管栄養チューブサイズ" },
     { kind: "text", text: "、" },
-    { kind: "gap", width: 15, callback: (box) => { pos2 = box.right - row2.left }, mark: "経管栄養交換日"},
+    { kind: "gap", width: 15, callback: (box) => { pos2 = box.right - row2.left }, mark: "経管栄養交換日" },
     { kind: "text", text: "日に１回交換" },
-    { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left }},
-    { kind: "text", text: "）"},
+    { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left } },
+    { kind: "text", text: "）" },
   ]);
   c.drawComposite(ctx, rows[3], [
-    { kind: "text", text: "８．留置カテーテル（サイズ"},
-    { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ"},
+    { kind: "text", text: "８．留置カテーテル（サイズ" },
+    { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ" },
     { kind: "text", text: "、" },
-    { kind: "gap-to", at: pos2,  mark: "留置カテーテル交換日"},
+    { kind: "gap-to", at: pos2, mark: "留置カテーテル交換日" },
     { kind: "text", text: "日に１回交換）" },
   ]);
   c.drawComposite(ctx, rows[4], [
@@ -354,25 +362,156 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
 }
 
 function renderRow4(ctx: DrawerContext, box: Box) {
-
+  const rows = b.splitToRows(box, b.evenSplitter(2));
+  let w1: number = 0;
+  let w2: number = 0;
+  c.drawComposite(ctx, b.modify(rows[0], b.shrinkHoriz(2, 0)), [
+    { kind: "text", text: "留意事項及び指示事項" },
+    { kind: "gap", width: 0, callback: (box) => { w1 = box.left } },
+  ])
+  c.drawComposite(ctx, b.modify(rows[1], b.shrinkHoriz(2, 0)), [
+    { kind: "text", text: "Ⅰ療養生活指導上の留意事項" },
+    { kind: "gap", width: 0, callback: (box) => { w2 = box.left } },
+  ]);
+  const m = b.modify(box, b.setLeft(Math.max(w1, w2) + 3));
+  c.mark(ctx, "留意事項：療養生活指導上の留意事項", m);
 }
 
 function renderRow5(ctx: DrawerContext, box: Box) {
-
+  function labelMark(box: Box, num: string, label: string, markKey: string) {
+    c.drawComposite(ctx, box, [
+      { kind: "text", text: num, mark: `${markKey}マーク` },
+      { kind: "text", text: `．${label}` },
+      { kind: "gap-to", at: "end", mark: markKey },
+    ])
+  }
+  const cols = b.splitToColumns(box, b.splitAt(8.5));
+  b.withSplitRows(cols[0], b.evenSplitter(4), ([box]) => {
+    c.drawText(ctx, "Ⅱ", box, "left", "center", {
+      modifiers: [b.shrinkHoriz(2, 0)]
+    });
+  });
+  b.withSplitRows(cols[1], b.evenSplitter(4), rows => {
+    labelMark(rows[0], "１", "リハビリテーション", "留意事項：リハビリテーション");
+    labelMark(rows[1], "２", "褥瘡の処置など", "留意事項：褥瘡の処置など");
+    labelMark(rows[2], "３", "装置・使用機器等の操作援助・管理", "留意事項：装置");
+    labelMark(rows[3], "４", "その他", "留意事項：その他");
+  });
 }
 
 function renderRow6(ctx: DrawerContext, box: Box) {
-
+  b.withSplitRows(box, b.evenSplitter(2), rows => {
+    c.drawText(ctx, "在宅患者訪問点滴注射に関する指示（投与薬剤・投与量・投与方法等）", rows[0],
+      "left", "center", { modifiers: [b.shrinkHoriz(2, 0)] });
+    c.mark(ctx, "点滴指示", rows[1]);
+  })
 }
 
 function renderRow7(ctx: DrawerContext, box: Box) {
+  function labelMark(box: Box, label: string, mark: string) {
+    c.drawComposite(ctx, box, [
+      { kind: "gap", width: 2 },
+      { kind: "text", text: label },
+      { kind: "gap", width: 3 },
+      { kind: "gap-to", at: "end", mark },
+    ])
+  }
 
+  b.withSplitRows(box, b.evenSplitter(2), rows => {
+    labelMark(rows[0], "緊急時の連絡先", "緊急時の連絡先");
+    labelMark(rows[1], "不在時の対応法", "不在時の対応法");
+  })
 }
 
 function renderRow8(ctx: DrawerContext, box: Box) {
-
+  b.withSplitRows(b.modify(box, b.shrinkHoriz(2, 0)), b.evenSplitter(3), rows => {
+    const fontSave = c.getCurrentFont(ctx);
+    let pos: number = 0;
+    c.drawComposite(ctx, rows[0], [
+      { kind: "text", text: "特記すべき留意事項" },
+      { kind: "gap", width: 0, callback: (box) => { pos = box.left } },
+    ])
+    c.setFont(ctx, "small");
+    c.drawText(ctx, "（注：薬の相互作用・副作用についての留意点、薬物アレルギーの既往、定期巡回・随時対応型訪問",
+      b.modify(rows[0], b.setLeft(pos)), "left", "center");
+    c.drawText(ctx, "介護看護及び複合型サービス利用時の留意事項等があれば記載して下さい。）",
+      rows[1], "left", "center");
+    c.mark(ctx, "特記すべき留意事項", rows[2]);
+    c.setFont(ctx, fontSave);
+  })
 }
 
 function renderRow9(ctx: DrawerContext, box: Box) {
+  b.withSplitRows(b.modify(box, b.shrinkHoriz(2, 0)), b.evenSplitter(4), rows => {
+    const right = b.width(rows[0]) - 15;
+    c.drawText(ctx, "他の訪問看護ステーションへの指示", rows[0], "left", "center");
+    c.drawComposite(ctx, rows[1], [
+      { kind: "gap", width: 10 },
+      { kind: "text", text: "（" },
+      { kind: "text", text: "無", mark: "他の訪問看護ステーションへの指示：無" },
+      { kind: "text", text: "　" },
+      { kind: "text", text: "有", mark: "他の訪問看護ステーションへの指示：有" },
+      { kind: "text", text: "：指定訪問看護ステーション名" },
+      { kind: "gap-to", at: right, mark: "他の訪問看護ステーションへの指示" },
+      { kind: "text", text: "）" },
+    ])
+    c.drawText(ctx, "たんの吸引等実施のための訪問介護事業所への指示", rows[2], "left", "center");
+    c.drawComposite(ctx, rows[3], [
+      { kind: "gap", width: 10 },
+      { kind: "text", text: "（" },
+      { kind: "text", text: "無", mark: "たんの吸引等実施のための訪問介護事業所への指示：無" },
+      { kind: "text", text: "　" },
+      { kind: "text", text: "有", mark: "たんの吸引等実施のための訪問介護事業所への指示：有" },
+      { kind: "text", text: "：指定訪問介護事業所名" },
+      { kind: "gap-to", at: right, mark: "たんの吸引等実施のための訪問介護事業所への指示" },
+      { kind: "text", text: "）" },
+    ])
+  });
+}
 
+function renderAddr(ctx: DrawerContext, box: Box) {
+  const fontSize = c.currentFontSize(ctx);
+  function renderIssueDate(box: Box) {
+    c.drawComposite(ctx, box, [
+      { kind: "gap", width: fontSize * 4 },
+      { kind: "gap", width: fontSize * 2, mark: "発行日（元号）" },
+      { kind: "gap", width: 9, mark: "発行日（年）" },
+      { kind: "text", text: "年"},
+      { kind: "gap", width: 6, mark: "発行日（月）" },
+      { kind: "text", text: "月"},
+      { kind: "gap", width: 6, mark: "発行日（日）" },
+      { kind: "text", text: "日"},
+    ])
+  }
+  function withSplitBox(box: Box, f: (box1: Box, box2: Box) => void) {
+    const cols = b.splitToColumns(box, b.splitWidths(fontSize * 5, fontSize));
+    f(cols[0], cols[2]);
+  }
+  b.withSplitRows(box, b.evenSplitter(6), rows => {
+    renderIssueDate(rows[0]);
+    withSplitBox(rows[1], (label, value) => {
+      c.drawText(ctx, "医療機関名", label, "left", "center");
+      c.mark(ctx, "医療機関名", value);
+    })
+    withSplitBox(rows[2], (label, value) => {
+      c.drawTextJustified(ctx, "住所", label, "center");
+      c.mark(ctx, "医療機関（住所）", value);
+    })
+    withSplitBox(rows[3], (label, value) => {
+      c.drawTextJustified(ctx, "電話", label, "center");
+      c.mark(ctx, "医療機関（電話）", value);
+    })
+    withSplitBox(rows[4], (label, value) => {
+      c.drawText(ctx, "（ＦＡＸ）", label, "left", "center");
+      c.mark(ctx, "医療機関（ＦＡＸ）", value);
+    })
+    withSplitBox(rows[5], (label, value) => {
+      c.drawTextJustified(ctx, "医師氏名", label, "center");
+      c.drawComposite(ctx, value, [
+        { kind: "gap", width: 70, mark: "医師氏名" },
+        { kind: "text", text: "印"},
+      ])
+    })
+    c.rect(ctx, c.getMark(ctx, "医師氏名"))
+  })
 }

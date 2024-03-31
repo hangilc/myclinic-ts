@@ -102,7 +102,7 @@ export function setBottom(bottom: number): Modifier {
 }
 
 export function inset(dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): Modifier {
-  return offset(dx, dy, -dx, -dy);
+  return offset(dx, dy, -dx2, -dy2);
 }
 
 export function sliceTop(height: number): Modifier {
