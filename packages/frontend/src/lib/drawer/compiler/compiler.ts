@@ -509,6 +509,10 @@ export function rect(ctx: DrawerContext, box: Box) {
   lineTo(ctx, box.left, box.top);
 }
 
+export function rectAll(ctx: DrawerContext, boxes: Box[]) {
+  boxes.forEach(box => rect(ctx, box));
+}
+
 export const frame: (ctx: DrawerContext, box: Box) => void = rect;
 
 export function frameRight(ctx: DrawerContext, box: Box) {
