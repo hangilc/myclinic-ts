@@ -40,6 +40,13 @@ export function drawHoumonKango(arg: HoumonKangoDataArg = {}): Op[] {
     mainBox.left + 75, mainBox.bottom + 10, mainBox.right, mainBox.bottom + 35
   );
   renderAddr(ctx, addrBox);
+  const recipientBox = mkBox(
+    mainBox.left, addrBox.bottom + 2, mainBox.right, addrBox.bottom + 6
+  )
+  c.drawComposite(ctx, recipientBox, [
+    { kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）" },
+    { kind: "text", text: "殿"},
+  ])
   return c.getOps(ctx);
 }
 
@@ -512,6 +519,5 @@ function renderAddr(ctx: DrawerContext, box: Box) {
         { kind: "text", text: "印"},
       ])
     })
-    c.rect(ctx, c.getMark(ctx, "医師氏名"))
   })
 }
