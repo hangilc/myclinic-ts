@@ -82,13 +82,20 @@ export interface HoumonKangoData {
   "人工呼吸器陽圧式"?: string;
   "人工呼吸器陰圧式"?: string;
   "人工呼吸器設定"?: string;
-  
+
   "気管カニューレ"?: string;
   "気管カニューレサイズ"?: string;
   "人工肛門"?: string;
   "人工膀胱"?: string;
   "装置その他マーク"?: string;
   "装置その他"?: string;
+
+  "留意事項"?: string;
+
+  "留意事項：リハビリテーション"?: string;
+  "留意事項：褥瘡の処置など"?: string;
+  "留意事項：装置"?: string;
+  "留意事項：その他"?: string;
 
   
   issueDate?: string;

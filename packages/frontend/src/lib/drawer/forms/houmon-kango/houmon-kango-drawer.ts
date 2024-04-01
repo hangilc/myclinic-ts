@@ -536,7 +536,10 @@ function renderRow4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap", width: 0, callback: (box) => { w2 = box.left } },
   ]);
   const m = b.modify(box, b.setLeft(Math.max(w1, w2) + 3));
-  c.mark(ctx, "留意事項：療養生活指導上の留意事項", m);
+  c.mark(ctx, "留意事項", m);
+  c.renderData(ctx, "留意事項", data["留意事項"], ropt({
+    modifiers: [b.inset(2)], paragraph: true, leading: 1
+  }))
 }
 
 function renderRow5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -559,6 +562,23 @@ function renderRow5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     labelMark(rows[2], "３", "装置・使用機器等の操作援助・管理", "留意事項：装置");
     labelMark(rows[3], "４", "その他", "留意事項：その他");
   });
+  c.renderData(ctx, "留意事項：リハビリテーション", data["留意事項：リハビリテーション"], ropt({
+    tryFonts: ["input-regular", "input-small", "input-very-samll"],
+    valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
+  }));
+  c.renderData(ctx, "留意事項：褥瘡の処置など", data["留意事項：褥瘡の処置など"], ropt({
+    tryFonts: ["input-regular", "input-small", "input-very-samll"],
+    valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
+  }));
+  c.renderData(ctx, "留意事項：装置", data["留意事項：装置"], ropt({
+    tryFonts: ["input-regular", "input-small", "input-very-samll"],
+    valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
+  }));
+  c.renderData(ctx, "留意事項：その他", data["留意事項：その他"], ropt({
+    tryFonts: ["input-regular", "input-small", "input-very-samll"],
+    valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
+  }));
+
 }
 
 function renderRow6(ctx: DrawerContext, box: Box, data: HoumonKangoData) {

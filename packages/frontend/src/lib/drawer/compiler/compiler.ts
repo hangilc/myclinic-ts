@@ -762,6 +762,7 @@ export interface DataRendererOpt {
   tryFonts?: string[];
   fallbackParagraph?: boolean;
   leading?: number;
+  paragraph?: boolean; 
 }
 
 export function renderData(ctx: DrawerContext, markName: string, data: string | undefined,
@@ -796,6 +797,16 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         }
       }
       setFont(ctx, fontSave);
+    } else if( opt.paragraph ) {
+      let fontSave = "";
+      if (opt.font) {
+        fontSave = getCurrentFont(ctx);
+        setFont(ctx, opt.font);
+      }
+      paragraph(ctx, data, markBox, { halign: opt.halign ?? "left", leading: opt.leading })
+      if (opt.font) {
+        setFont(ctx, fontSave);
+      }
     } else {
       let fontSave = "";
       if (opt.font) {
@@ -818,4 +829,8 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
       }
     }
   }
+}
+
+export function rectMark(ctx: DrawerContext, markName: string) {
+  rect(ctx, getMark(ctx, markName));
 }
