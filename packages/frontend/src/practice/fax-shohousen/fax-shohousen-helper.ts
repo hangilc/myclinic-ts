@@ -9,7 +9,7 @@ export function defaultDates(today: Date): [Date, Date] {
     const fromDate = new Date(today);
     fromDate.setDate(1);
     fromDate.setMonth(fromDate.getMonth() - 1);
-    fromDate.setDate(15);
+    fromDate.setDate(16);
     const uptoDate = new Date(today);
     uptoDate.setDate(0);
     return [fromDate, uptoDate];

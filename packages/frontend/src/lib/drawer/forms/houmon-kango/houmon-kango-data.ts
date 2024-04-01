@@ -37,7 +37,7 @@ export interface HoumonKangoData {
   "寝たきり度(B2)"?: string;
   "寝たきり度(C1)"?: string;
   "寝たきり度(C2)"?: string;
-  ninchi?: "Ｉ" | "IIa" | "IIb" | "IIIa" | "IIIb" | "IV" | "Ｍ"; 
+  ninchi?: "Ｉ" | "IIa" | "IIb" | "IIIa" | "IIIb" | "IV" | "Ｍ";
   "認知症の状況(Ｉ)"?: string;
   "認知症の状況(IIa)"?: string;
   "認知症の状況(IIb)"?: string;
@@ -64,7 +64,42 @@ export interface HoumonKangoData {
   "透析液供給装置"?: string;
   "酸素療法"?: string;
   "酸素療法流速"?: string;
+  "吸引器"?: string;
+  "中心静脈栄養"?: string;
+  "輸液ポンプ"?: string;
 
+
+    { kind: "text", text: "８", mark: "留置カテーテル" },
+    { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ" },
+    { kind: "text", text: "、" },
+    { kind: "gap-to", at: pos2, mark: "留置カテーテル交換日" },
+    { kind: "text", text: "日に１回交換）" },
+  
+    { kind: "text", text: "９", mark: "人工呼吸器" },
+    { kind: "text", text: "．人工呼吸器（" },
+    { kind: "text", text: "陽圧式", mark: "人工呼吸器陽圧式" },
+    { kind: "text", text: "・" },
+    { kind: "text", text: "陰圧式", mark: "人工呼吸器陰圧式" },
+    { kind: "text", text: "：設定" },
+    { kind: "gap-to", at: pos3, mark: "人工呼吸器設定" },
+    { kind: "text", text: "）" },
+  
+    { kind: "text", text: "１０", mark: "気管カニューレ" },
+    { kind: "text", text: "．気管カニューレ（サイズ" },
+    { kind: "gap", width: 11, mark: "気管カニューレサイズ" },
+    { kind: "text", text: "）" },
+  
+    { kind: "text", text: "１１", mark: "人工肛門" },
+    { kind: "text", text: "．人工肛門" },
+    { kind: "gap", width: 18 },
+    { kind: "text", text: "１２", mark: "人工膀胱" },
+    { kind: "text", text: "．人工膀胱" },
+    { kind: "gap", width: 10 },
+    { kind: "text", text: "１３", mark: "装置その他マーク" },
+    { kind: "text", text: "．その他（" },
+    { kind: "gap-to", at: pos3, mark: "装置その他" },
+    { kind: "text", text: "）" },
+  
   issueDate?: string;
 }
 
@@ -108,13 +143,13 @@ export function extendData(data: HoumonKangoData): void {
   if (data.netakiri) {
     extend(data, `寝たきり度(${data.netakiri})`, "1");
   }
-  if( data.ninchi ){
+  if (data.ninchi) {
     extend(data, `認知症の状況(${data.ninchi})`, "1");
   }
-  if( data.youkaigo ){
+  if (data.youkaigo) {
     extend(data, `要介護認定の状況（${data.youkaigo}）`, "1");
   }
-  if( data.jukusou ){
+  if (data.jukusou) {
     extend(data, `褥瘡の深さ(${data.jukusou})`, "1");
   }
 }

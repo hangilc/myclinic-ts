@@ -425,6 +425,10 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "６", mark: "輸液ポンプ" },
     { kind: "text", text: "．輸液ポンプ" },
   ]);
+  c.renderData(ctx, "吸引器", data["吸引器"], ropt({ circle: true }));
+  c.renderData(ctx, "中心静脈栄養", data["中心静脈栄養"], ropt({ circle: true }));
+  c.renderData(ctx, "輸液ポンプ", data["輸液ポンプ"], ropt({ circle: true }));
+
   const row2 = rows[2];
   let pos1: number = 0;
   let pos2: number = 0;
@@ -438,15 +442,19 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left } },
     { kind: "text", text: "）" },
   ]);
+
   c.drawComposite(ctx, rows[3], [
-    { kind: "text", text: "８．留置カテーテル（サイズ" },
+    { kind: "text", text: "８", mark: "留置カテーテル" },
+    { kind: "text", text: "．留置カテーテル（サイズ" },
     { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ" },
     { kind: "text", text: "、" },
     { kind: "gap-to", at: pos2, mark: "留置カテーテル交換日" },
     { kind: "text", text: "日に１回交換）" },
   ]);
+
   c.drawComposite(ctx, rows[4], [
-    { kind: "text", text: "９．人工呼吸器（" },
+    { kind: "text", text: "９", mark: "人工呼吸器" },
+    { kind: "text", text: "．人工呼吸器（" },
     { kind: "text", text: "陽圧式", mark: "人工呼吸器陽圧式" },
     { kind: "text", text: "・" },
     { kind: "text", text: "陰圧式", mark: "人工呼吸器陰圧式" },
@@ -454,12 +462,14 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap-to", at: pos3, mark: "人工呼吸器設定" },
     { kind: "text", text: "）" },
   ]);
+
   c.drawComposite(ctx, rows[5], [
     { kind: "text", text: "１０", mark: "気管カニューレ" },
     { kind: "text", text: "．気管カニューレ（サイズ" },
     { kind: "gap", width: 11, mark: "気管カニューレサイズ" },
     { kind: "text", text: "）" },
   ]);
+
   c.drawComposite(ctx, rows[6], [
     { kind: "text", text: "１１", mark: "人工肛門" },
     { kind: "text", text: "．人工肛門" },
@@ -471,8 +481,8 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "．その他（" },
     { kind: "gap-to", at: pos3, mark: "装置その他" },
     { kind: "text", text: "）" },
+  ]);
 
-  ])
 }
 
 function renderRow4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
