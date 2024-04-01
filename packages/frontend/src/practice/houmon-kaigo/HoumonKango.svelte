@@ -39,6 +39,7 @@
       netakiri: "J2",
       ninchi: "Ｉ",
       youkaigo: "要支援1",
+      jukusou: "D3",
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

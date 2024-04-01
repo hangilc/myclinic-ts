@@ -54,6 +54,12 @@ export interface HoumonKangoData {
   "要介護認定の状況（要介護3）"?: string;
   "要介護認定の状況（要介護4）"?: string;
   "要介護認定の状況（要介護5）"?: string;
+  jukusou?: "3" | "4" | "D3" | "D4" | "D5";
+  "褥瘡の深さ(3)"?: string;
+  "褥瘡の深さ(4)"?: string;
+  "褥瘡の深さ(D3)"?: string;
+  "褥瘡の深さ(D4)"?: string;
+  "褥瘡の深さ(D5)"?: string;
 
   issueDate?: string;
 }
@@ -103,5 +109,8 @@ export function extendData(data: HoumonKangoData): void {
   }
   if( data.youkaigo ){
     extend(data, `要介護認定の状況（${data.youkaigo}）`, "1");
+  }
+  if( data.jukusou ){
+    extend(data, `褥瘡の深さ(${data.jukusou})`, "1");
   }
 }

@@ -8,7 +8,6 @@ import { A4 } from "../../compiler/paper-size";
 
 export function drawHoumonKango(data: HoumonKangoData): Op[] {
   extendData(data);
-  console.log("data", data);
   const ctx = mkDrawerContext();
   const paper: Box = b.paperSizeToBox(A4);
   setupFonts(ctx);
@@ -352,7 +351,6 @@ function renderRow3_3(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "５", mark: "要介護認定の状況（要介護5）" },
     { kind: "text", text: "）" },
   ]);
-  console.log("youkaigo", data["要介護認定の状況(要支援1)"]);
   c.renderData(ctx, "要介護認定の状況（自立）", data["要介護認定の状況（自立）"], ropt({ circle: true }));
   c.renderData(ctx, "要介護認定の状況（要支援1）", data["要介護認定の状況（要支援1）"], ropt({ circle: true }));
   c.renderData(ctx, "要介護認定の状況（要支援2）", data["要介護認定の状況（要支援2）"], ropt({ circle: true }));
@@ -384,7 +382,12 @@ function renderRow3_4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "D4", mark: "褥瘡の深さ(D4)" },
     { kind: "gap", width: 3 },
     { kind: "text", text: "D5", mark: "褥瘡の深さ(D5)" },
-  ])
+  ]);
+  c.renderData(ctx, "褥瘡の深さ(3)", data["褥瘡の深さ(3)"], ropt({ circle: true }));
+  c.renderData(ctx, "褥瘡の深さ(4)", data["褥瘡の深さ(4)"], ropt({ circle: true }));
+  c.renderData(ctx, "褥瘡の深さ(D3)", data["褥瘡の深さ(D3)"], ropt({ circle: true }));
+  c.renderData(ctx, "褥瘡の深さ(D4)", data["褥瘡の深さ(D4)"], ropt({ circle: true }));
+  c.renderData(ctx, "褥瘡の深さ(D5)", data["褥瘡の深さ(D5)"], ropt({ circle: true }));
 }
 
 function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
