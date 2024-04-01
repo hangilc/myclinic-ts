@@ -411,7 +411,7 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   c.renderData(ctx, "自動腹膜灌流装置", data["自動腹膜灌流装置"], ropt({ circle: true }));
   c.renderData(ctx, "透析液供給装置", data["透析液供給装置"], ropt({ circle: true }));
   c.renderData(ctx, "酸素療法", data["酸素療法"], ropt({ circle: true }));
-  c.renderData(ctx, "酸素療法流速", data["酸素療法流速"], ropt({ 
+  c.renderData(ctx, "酸素療法流速", data["酸素療法流速"], ropt({
     halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
   }));
 
@@ -434,7 +434,12 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   let pos2: number = 0;
   let pos3: number = 0;
   c.drawComposite(ctx, row2, [
-    { kind: "text", text: "７．経管栄養（経鼻・胃ろう：チューブサイズ" },
+    { kind: "text", text: "７", mark: "経管栄養" },
+    { kind: "text", text: "．経管栄養（" },
+    { kind: "text", text: "経鼻", mark: "経管栄養経鼻" },
+    { kind: "text", text: "・" },
+    { kind: "text", text: "胃ろう", mark: "経管栄養胃ろう" },
+    { kind: "text", text: "：チューブサイズ" },
     { kind: "gap", width: 21, callback: (box) => { pos1 = box.right - row2.left }, mark: "経管栄養チューブサイズ" },
     { kind: "text", text: "、" },
     { kind: "gap", width: 15, callback: (box) => { pos2 = box.right - row2.left }, mark: "経管栄養交換日" },
@@ -442,6 +447,15 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left } },
     { kind: "text", text: "）" },
   ]);
+  c.renderData(ctx, "経管栄養", data["経管栄養"], ropt({ circle: true }));
+  c.renderData(ctx, "経管栄養経鼻", data["経管栄養経鼻"], ropt({ circle: true }));
+  c.renderData(ctx, "経管栄養胃ろう", data["経管栄養胃ろう"], ropt({ circle: true }));
+  c.renderData(ctx, "経管栄養チューブサイズ", data["経管栄養チューブサイズ"], ropt({
+    halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
+  }));
+  c.renderData(ctx, "経管栄養交換日", data["経管栄養交換日"], ropt({
+    halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
+  }));
 
   c.drawComposite(ctx, rows[3], [
     { kind: "text", text: "８", mark: "留置カテーテル" },
@@ -451,6 +465,14 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap-to", at: pos2, mark: "留置カテーテル交換日" },
     { kind: "text", text: "日に１回交換）" },
   ]);
+  c.renderData(ctx, "留置カテーテル", data["留置カテーテル"], ropt({ circle: true }));
+  c.renderData(ctx, "留置カテーテルサイズ", data["留置カテーテルサイズ"], ropt({
+    halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
+  }));
+  c.renderData(ctx, "留置カテーテル交換日", data["留置カテーテル交換日"], ropt({
+    halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
+  }));
+
 
   c.drawComposite(ctx, rows[4], [
     { kind: "text", text: "９", mark: "人工呼吸器" },
@@ -462,6 +484,13 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap-to", at: pos3, mark: "人工呼吸器設定" },
     { kind: "text", text: "）" },
   ]);
+  c.renderData(ctx, "人工呼吸器", data["人工呼吸器"], ropt({ circle: true }));
+  c.renderData(ctx, "人工呼吸器陽圧式", data["人工呼吸器陽圧式"], ropt({ circle: true }));
+  c.renderData(ctx, "人工呼吸器陰圧式", data["人工呼吸器陰圧式"], ropt({ circle: true }));
+  c.renderData(ctx, "人工呼吸器設定", data["人工呼吸器設定"], ropt({
+    halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
+  }));
+
 
   c.drawComposite(ctx, rows[5], [
     { kind: "text", text: "１０", mark: "気管カニューレ" },
@@ -469,6 +498,10 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap", width: 11, mark: "気管カニューレサイズ" },
     { kind: "text", text: "）" },
   ]);
+  c.renderData(ctx, "気管カニューレ", data["気管カニューレ"], ropt({ circle: true }));
+  c.renderData(ctx, "気管カニューレサイズ", data["気管カニューレサイズ"], ropt({
+    halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
+  }));
 
   c.drawComposite(ctx, rows[6], [
     { kind: "text", text: "１１", mark: "人工肛門" },
@@ -482,7 +515,12 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap-to", at: pos3, mark: "装置その他" },
     { kind: "text", text: "）" },
   ]);
-
+  c.renderData(ctx, "人工肛門", data["人工肛門"], ropt({ circle: true }));
+  c.renderData(ctx, "人工膀胱", data["人工膀胱"], ropt({ circle: true }));
+  c.renderData(ctx, "装置その他マーク", data["装置その他マーク"], ropt({ circle: true }));
+  c.renderData(ctx, "装置その他", data["装置その他"], ropt({
+    halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
+  }));
 }
 
 function renderRow4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {

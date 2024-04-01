@@ -68,37 +68,28 @@ export interface HoumonKangoData {
   "中心静脈栄養"?: string;
   "輸液ポンプ"?: string;
 
+  "経管栄養"?: string;
+  "経管栄養経鼻"?: string;
+  "経管栄養胃ろう"?: string;
+  "経管栄養チューブサイズ"?: string;
+  "経管栄養交換日"?: string;
 
-    { kind: "text", text: "８", mark: "留置カテーテル" },
-    { kind: "gap-to", at: pos1, mark: "留置カテーテルサイズ" },
-    { kind: "text", text: "、" },
-    { kind: "gap-to", at: pos2, mark: "留置カテーテル交換日" },
-    { kind: "text", text: "日に１回交換）" },
+  "留置カテーテル"?: string;
+  "留置カテーテルサイズ"?: string;
+  "留置カテーテル交換日"?: string;
+
+  "人工呼吸器"?: string;
+  "人工呼吸器陽圧式"?: string;
+  "人工呼吸器陰圧式"?: string;
+  "人工呼吸器設定"?: string;
   
-    { kind: "text", text: "９", mark: "人工呼吸器" },
-    { kind: "text", text: "．人工呼吸器（" },
-    { kind: "text", text: "陽圧式", mark: "人工呼吸器陽圧式" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "陰圧式", mark: "人工呼吸器陰圧式" },
-    { kind: "text", text: "：設定" },
-    { kind: "gap-to", at: pos3, mark: "人工呼吸器設定" },
-    { kind: "text", text: "）" },
-  
-    { kind: "text", text: "１０", mark: "気管カニューレ" },
-    { kind: "text", text: "．気管カニューレ（サイズ" },
-    { kind: "gap", width: 11, mark: "気管カニューレサイズ" },
-    { kind: "text", text: "）" },
-  
-    { kind: "text", text: "１１", mark: "人工肛門" },
-    { kind: "text", text: "．人工肛門" },
-    { kind: "gap", width: 18 },
-    { kind: "text", text: "１２", mark: "人工膀胱" },
-    { kind: "text", text: "．人工膀胱" },
-    { kind: "gap", width: 10 },
-    { kind: "text", text: "１３", mark: "装置その他マーク" },
-    { kind: "text", text: "．その他（" },
-    { kind: "gap-to", at: pos3, mark: "装置その他" },
-    { kind: "text", text: "）" },
+  "気管カニューレ"?: string;
+  "気管カニューレサイズ"?: string;
+  "人工肛門"?: string;
+  "人工膀胱"?: string;
+  "装置その他マーク"?: string;
+  "装置その他"?: string;
+
   
   issueDate?: string;
 }
