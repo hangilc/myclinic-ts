@@ -760,6 +760,7 @@ export interface DataRendererOpt {
   modifiers?: Modifier[],
   circle?: boolean | number;
   tryFonts?: string[];
+  fallbackParagraph?: boolean;
   leading?: number;
 }
 
@@ -773,6 +774,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
       markBox = b.modify(markBox, ...opt.modifiers);
     }
     if (opt.tryFonts && opt.tryFonts.length > 0) {
+      const fallbackPara = opt.fallbackParagraph ?? true;
       const fontSave = getCurrentFont(ctx);
       let done = false;
       for (let font of opt.tryFonts) {
@@ -787,7 +789,11 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
       if (!done) {
         const lastFont: string = opt.tryFonts[opt.tryFonts.length-1]!;
         setFont(ctx, lastFont);
-        paragraph(ctx, data, markBox, { valign, leading: opt.leading })
+        if( fallbackPara ){
+          paragraph(ctx, data, markBox, { valign, leading: opt.leading })
+        } else {
+          drawText(ctx, data, markBox, halign, valign);
+        }
       }
       setFont(ctx, fontSave);
     } else {

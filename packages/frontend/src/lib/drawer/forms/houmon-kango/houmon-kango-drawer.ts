@@ -8,6 +8,7 @@ import { A4 } from "../../compiler/paper-size";
 
 export function drawHoumonKango(data: HoumonKangoData): Op[] {
   extendData(data);
+  console.log("data", data);
   const ctx = mkDrawerContext();
   const paper: Box = b.paperSizeToBox(A4);
   setupFonts(ctx);
@@ -283,6 +284,14 @@ function renderRow3_2_0(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "gap", width: 6 },
     { kind: "text", text: "C2", mark: "寝たきり度(C2)" },
   ]);
+  c.renderData(ctx, "寝たきり度(J1)", data["寝たきり度(J1)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(J2)", data["寝たきり度(J2)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(A1)", data["寝たきり度(A1)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(A2)", data["寝たきり度(A2)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(B1)", data["寝たきり度(B1)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(B2)", data["寝たきり度(B2)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(C1)", data["寝たきり度(C1)"], ropt({ circle: true }));
+  c.renderData(ctx, "寝たきり度(C2)", data["寝たきり度(C2)"], ropt({ circle: true }));
 }
 
 function renderRow3_2_1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -292,20 +301,27 @@ function renderRow3_2_1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     modifiers: [b.shrinkHoriz(1.5, 0)]
   });
   c.drawComposite(ctx, b.modify(cols[1], b.shrinkHoriz(5, 0)), [
-    { kind: "text", text: "Ｉ", mark: "認知症の状況(1)" },
+    { kind: "text", text: "Ｉ", mark: "認知症の状況(Ｉ)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "IIa", mark: "認知症の状況(2a)" },
+    { kind: "text", text: "IIa", mark: "認知症の状況(IIa)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "IIb", mark: "認知症の状況(2b)" },
+    { kind: "text", text: "IIb", mark: "認知症の状況(IIb)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "IIIa", mark: "認知症の状況(3a)" },
+    { kind: "text", text: "IIIa", mark: "認知症の状況(IIIa)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "IIIb", mark: "認知症の状況(3b)" },
+    { kind: "text", text: "IIIb", mark: "認知症の状況(IIIb)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "IV", mark: "認知症の状況(4)" },
+    { kind: "text", text: "IV", mark: "認知症の状況(IV)" },
     { kind: "gap", width: 6 },
-    { kind: "text", text: "Ｍ", mark: "認知症の状況(M)" },
+    { kind: "text", text: "Ｍ", mark: "認知症の状況(Ｍ)" },
   ]);
+  c.renderData(ctx, "認知症の状況(Ｉ)", data["認知症の状況(Ｉ)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(IIa)", data["認知症の状況(IIa)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(IIb)", data["認知症の状況(IIb)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(IIIa)", data["認知症の状況(IIIa)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(IIIb)", data["認知症の状況(IIIb)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(IV)", data["認知症の状況(IV)"], ropt({ circle: true }));
+  c.renderData(ctx, "認知症の状況(Ｍ)", data["認知症の状況(Ｍ)"], ropt({ circle: true }));
 }
 
 function renderRow3_3(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -319,23 +335,32 @@ function renderRow3_3(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "自立", mark: "要介護認定の状況（自立）" },
     { kind: "gap", width: 6 },
     { kind: "text", text: "要支援（" },
-    { kind: "text", text: "１", mark: "要介護認定の状況(要支援1)" },
+    { kind: "text", text: "１", mark: "要介護認定の状況（要支援1）" },
     { kind: "gap", width: 3.5 },
-    { kind: "text", text: "２", mark: "要介護認定の状況(要支援2)" },
+    { kind: "text", text: "２", mark: "要介護認定の状況（要支援2）" },
     { kind: "text", text: "）" },
     { kind: "gap", width: 7.5 },
     { kind: "text", text: "要介護（" },
-    { kind: "text", text: "１", mark: "要介護認定の状況(要介護1)" },
+    { kind: "text", text: "１", mark: "要介護認定の状況（要介護1）" },
     { kind: "gap", width: 3 },
-    { kind: "text", text: "２", mark: "要介護認定の状況(要介護2)" },
+    { kind: "text", text: "２", mark: "要介護認定の状況（要介護2）" },
     { kind: "gap", width: 3 },
-    { kind: "text", text: "３", mark: "要介護認定の状況(要介護3)" },
+    { kind: "text", text: "３", mark: "要介護認定の状況（要介護3）" },
     { kind: "gap", width: 3 },
-    { kind: "text", text: "４", mark: "要介護認定の状況(要介護4)" },
+    { kind: "text", text: "４", mark: "要介護認定の状況（要介護4）" },
     { kind: "gap", width: 3 },
-    { kind: "text", text: "５", mark: "要介護認定の状況(要介護5)" },
+    { kind: "text", text: "５", mark: "要介護認定の状況（要介護5）" },
     { kind: "text", text: "）" },
-  ])
+  ]);
+  console.log("youkaigo", data["要介護認定の状況(要支援1)"]);
+  c.renderData(ctx, "要介護認定の状況（自立）", data["要介護認定の状況（自立）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要支援1）", data["要介護認定の状況（要支援1）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要支援2）", data["要介護認定の状況（要支援2）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要介護1）", data["要介護認定の状況（要介護1）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要介護2）", data["要介護認定の状況（要介護2）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要介護3）", data["要介護認定の状況（要介護3）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要介護4）", data["要介護認定の状況（要介護4）"], ropt({ circle: true }));
+  c.renderData(ctx, "要介護認定の状況（要介護5）", data["要介護認定の状況（要介護5）"], ropt({ circle: true }));
 }
 
 function renderRow3_4(ctx: DrawerContext, box: Box, data: HoumonKangoData) {

@@ -36,6 +36,9 @@
       "主たる傷病名": "高血圧、高脂血症",
       "病状": "血圧とＬＤＬコレステロールはほぼ正常範囲内にコントロールされている。",
       "薬剤": "アムロジピン５ｍｇ、アトルバスタチン１０ｍｇ",
+      netakiri: "J2",
+      ninchi: "Ｉ",
+      youkaigo: "要支援1",
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

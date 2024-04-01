@@ -28,6 +28,33 @@ export interface HoumonKangoData {
   "主たる傷病名"?: string;
   "病状"?: string;
   "薬剤"?: string;
+  netakiri?: "J1" | "J2" | "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+  "寝たきり度(J1)"?: string;
+  "寝たきり度(J2)"?: string;
+  "寝たきり度(A1)"?: string;
+  "寝たきり度(A2)"?: string;
+  "寝たきり度(B1)"?: string;
+  "寝たきり度(B2)"?: string;
+  "寝たきり度(C1)"?: string;
+  "寝たきり度(C2)"?: string;
+  ninchi?: "Ｉ" | "IIa" | "IIb" | "IIIa" | "IIIb" | "IV" | "Ｍ"; 
+  "認知症の状況(Ｉ)"?: string;
+  "認知症の状況(IIa)"?: string;
+  "認知症の状況(IIb)"?: string;
+  "認知症の状況(IIIa)"?: string;
+  "認知症の状況(IIIb)"?: string;
+  "認知症の状況(IV)"?: string;
+  "認知症の状況(Ｍ)"?: string;
+  youkaigo?: "自立" | "要支援1" | "要支援2" | "要介護1" | "要介護2" | "要介護3" | "要介護4" | "要介護5";
+  "要介護認定の状況（自立）"?: string;
+  "要介護認定の状況（要支援1）"?: string;
+  "要介護認定の状況（要支援2）"?: string;
+  "要介護認定の状況（要介護1）"?: string;
+  "要介護認定の状況（要介護2）"?: string;
+  "要介護認定の状況（要介護3）"?: string;
+  "要介護認定の状況（要介護4）"?: string;
+  "要介護認定の状況（要介護5）"?: string;
+
   issueDate?: string;
 }
 
@@ -44,21 +71,21 @@ function extend(data: any, key: string, value: string | undefined) {
 }
 
 export function extendData(data: HoumonKangoData): void {
-  if( data.validFrom ){
+  if (data.validFrom) {
     const k = new KanjiDate(new Date(data.validFrom));
     extend(data, "訪問看護指示期間開始（元号）", k.gengou);
     extend(data, "訪問看護指示期間開始（年）", k.nen.toString());
     extend(data, "訪問看護指示期間開始（月）", k.month.toString());
     extend(data, "訪問看護指示期間開始（日）", k.day.toString());
   }
-  if( data.validUpto ){
+  if (data.validUpto) {
     const k = new KanjiDate(new Date(data.validUpto));
     extend(data, "訪問看護指示期間期限（元号）", k.gengou);
     extend(data, "訪問看護指示期間期限（年）", k.nen.toString());
     extend(data, "訪問看護指示期間期限（月）", k.month.toString());
     extend(data, "訪問看護指示期間期限（日）", k.day.toString());
   }
-  if( data.birthdate ){
+  if (data.birthdate) {
     const k = new KanjiDate(new Date(data.birthdate));
     const at = data.issueDate ? new Date(data.issueDate) : new Date();
     const age = calcAge(data.birthdate, at);
@@ -67,5 +94,14 @@ export function extendData(data: HoumonKangoData): void {
     extend(data, "生年月日（月）", k.month.toString());
     extend(data, "生年月日（日）", k.day.toString());
     extend(data, "年齢", age.toString());
+  }
+  if (data.netakiri) {
+    extend(data, `寝たきり度(${data.netakiri})`, "1");
+  }
+  if( data.ninchi ){
+    extend(data, `認知症の状況(${data.ninchi})`, "1");
+  }
+  if( data.youkaigo ){
+    extend(data, `要介護認定の状況（${data.youkaigo}）`, "1");
   }
 }
