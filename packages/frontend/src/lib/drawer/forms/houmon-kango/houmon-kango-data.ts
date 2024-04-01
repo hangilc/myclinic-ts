@@ -60,6 +60,10 @@ export interface HoumonKangoData {
   "褥瘡の深さ(D3)"?: string;
   "褥瘡の深さ(D4)"?: string;
   "褥瘡の深さ(D5)"?: string;
+  "自動腹膜灌流装置"?: string;
+  "透析液供給装置"?: string;
+  "酸素療法"?: string;
+  "酸素療法流速"?: string;
 
   issueDate?: string;
 }

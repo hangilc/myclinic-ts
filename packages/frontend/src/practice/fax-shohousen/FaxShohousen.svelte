@@ -19,7 +19,7 @@
     mkDrawerContext,
     type DrawerContext,
   } from "@/lib/drawer/compiler/context";
-  import { drawSeal8x3 } from "@/lib/drawer/forms/seal8x3/sealx8x3";
+  import { drawSeal8x3, drawSeal8x3Frames } from "@/lib/drawer/forms/seal8x3/sealx8x3";
 
   let [fromDate, uptoDate] = defaultDates(new Date());
   let items: FaxedShohousenItem[] = [];
@@ -111,6 +111,17 @@
     });
     const filename = "faxed-shohousen-pharma-letter.pdf";
     await api.createMultiPagePdfFile(opsList, "A4", filename);
+    window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
+  }
+
+  async function doAddressFrames() {
+    const ctx = mkDrawerContext();
+    c.createPen(ctx, "default", 0, 0, 0, 0.2);
+    c.setPen(ctx, "default");
+    drawSeal8x3Frames(ctx);
+    const ops = c.getOps(ctx);
+    const filename = "faxed-shohousen-pharm-addr-frames.pdf";
+    await api.createPdfFile(c.getOps(ctx), "A4", filename);
     window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");
   }
 
@@ -224,9 +235,14 @@
     </div>
   </div>
   <div class="commands">
-    <button type="button" on:click={doAddressLabel}>表示</button>
+    <button type="button" 
+    on:click={doAddressLabel}
+    >表示</button>
   </div>
   {/if}
+</div>
+<div>
+  <button on:click={doAddressFrames}>住所ラベル枠印刷</button>
 </div>
 
 <style>

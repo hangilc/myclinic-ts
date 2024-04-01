@@ -23,6 +23,18 @@ class DrawSeal8x3Opt {
   }
 }
 
+export function drawSeal8x3Frames(ctx: DrawerContext) {
+  const drawBox = b.modify(b.paperSizeToBox(A4), b.inset(
+    6, 12.9, 6, 12.9
+  ));
+  for(let row=1;row<=8;row++){
+    for(let col=1;col<=3;col++){
+      const cell = getCell(drawBox, row, col);
+      c.rect(ctx, cell);
+    }
+  }
+}
+
 export function drawSeal8x3(ctx: DrawerContext, texts: string[], optArg: DrawSeal8x3OptArg = {}) {
   const opt = new DrawSeal8x3Opt(optArg);
   const drawBox = b.modify(b.paperSizeToBox(A4), b.inset(

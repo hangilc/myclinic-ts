@@ -167,14 +167,14 @@ function renderRow0(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   c.renderData(ctx, "生年月日（元号：大正）", data["生年月日（元号：大正）"], ropt({ circle: true }));
   c.renderData(ctx, "生年月日（元号：昭和）", data["生年月日（元号：昭和）"], ropt({ circle: true }));
   c.renderData(ctx, "生年月日（元号：平成）", data["生年月日（元号：平成）"], ropt({ circle: true }));
-  c.renderData(ctx, "生年月日（年）", data["生年月日（年）"], 
-    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
-  c.renderData(ctx, "生年月日（月）", data["生年月日（月）"], 
-    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
-  c.renderData(ctx, "生年月日（日）", data["生年月日（日）"], 
-    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
-  c.renderData(ctx, "年齢", data["年齢"], 
-    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]}));
+  c.renderData(ctx, "生年月日（年）", data["生年月日（年）"],
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)] }));
+  c.renderData(ctx, "生年月日（月）", data["生年月日（月）"],
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)] }));
+  c.renderData(ctx, "生年月日（日）", data["生年月日（日）"],
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)] }));
+  c.renderData(ctx, "年齢", data["年齢"],
+    ropt({ halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)] }));
 }
 
 function renderRow1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -184,7 +184,7 @@ function renderRow1(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     modifiers: [b.shrinkHoriz(1.5, 0)]
   });
   c.mark(ctx, "患者住所", cols[1]);
-  c.renderData(ctx, "患者住所", data["患者住所"], ropt({ modifiers: [b.shrinkHoriz(2, 0)]}));
+  c.renderData(ctx, "患者住所", data["患者住所"], ropt({ modifiers: [b.shrinkHoriz(2, 0)] }));
 }
 
 function renderRow2(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -403,11 +403,18 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
     { kind: "text", text: "２", mark: "透析液供給装置" },
     { kind: "text", text: "．透析液供給装置" },
     { kind: "gap-to", at: 90 },
-    { kind: "text", text: "３" },
+    { kind: "text", text: "３", mark: "酸素療法" },
     { kind: "text", text: "．酸素療法（" },
-    { kind: "gap", width: 12, mark: "酸素療法" },
+    { kind: "gap", width: 12, mark: "酸素療法流速" },
     { kind: "text", text: "/min）" },
   ]);
+  c.renderData(ctx, "自動腹膜灌流装置", data["自動腹膜灌流装置"], ropt({ circle: true }));
+  c.renderData(ctx, "透析液供給装置", data["透析液供給装置"], ropt({ circle: true }));
+  c.renderData(ctx, "酸素療法", data["酸素療法"], ropt({ circle: true }));
+  c.renderData(ctx, "酸素療法流速", data["酸素療法流速"], ropt({ 
+    halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
+  }));
+
   c.drawComposite(ctx, rows[1], [
     { kind: "text", text: "４", mark: "吸引器" },
     { kind: "text", text: "．吸引器" },

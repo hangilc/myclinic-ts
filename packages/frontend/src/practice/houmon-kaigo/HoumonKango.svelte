@@ -40,6 +40,8 @@
       ninchi: "Ｉ",
       youkaigo: "要支援1",
       jukusou: "D3",
+      "酸素療法": "1",
+      "酸素療法流速": "3", 
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
