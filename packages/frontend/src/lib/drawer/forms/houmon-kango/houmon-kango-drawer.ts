@@ -5,6 +5,7 @@ import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import { mkBox, type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
+import { createRenderer, createRendererData } from "../../compiler/create-renderer";
 
 export function drawHoumonKango(data: HoumonKangoData): Op[] {
   extendData(data);
@@ -45,7 +46,10 @@ export function drawHoumonKango(data: HoumonKangoData): Op[] {
     { kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）" },
     { kind: "text", text: "殿" },
   ]);
+  c.renderData(ctx, "提出先（訪問看護ステーション）", data["提出先（訪問看護ステーション）"], ropt({}));
   c.setFont(ctx, "input-regular");
+  // console.log(createRendererData(ctx));
+  // console.log(createRenderer(ctx));
   return c.getOps(ctx);
 }
 
@@ -587,6 +591,10 @@ function renderRow6(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       "left", "center", { modifiers: [b.shrinkHoriz(2, 0)] });
     c.mark(ctx, "点滴指示", rows[1]);
   })
+  c.renderData(ctx, "点滴指示", data["点滴指示"], ropt({
+    modifiers: [b.shrinkHoriz(2, 1)],
+    tryFonts: ["input-regular", "input-small"]
+  }))
 }
 
 function renderRow7(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -602,7 +610,14 @@ function renderRow7(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   b.withSplitRows(box, b.evenSplitter(2), rows => {
     labelMark(rows[0], "緊急時の連絡先", "緊急時の連絡先");
     labelMark(rows[1], "不在時の対応法", "不在時の対応法");
-  })
+  });
+  c.renderData(ctx, "緊急時の連絡先", data["緊急時の連絡先"], ropt({
+    modifiers: [b.shrinkHoriz(2, 1)]
+  }));
+  c.renderData(ctx, "不在時の対応法", data["不在時の対応法"], ropt({
+    modifiers: [b.shrinkHoriz(2, 1)]
+  }));
+
 }
 
 function renderRow8(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
@@ -620,6 +635,9 @@ function renderRow8(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       rows[1], "left", "center");
     c.mark(ctx, "特記すべき留意事項", rows[2]);
     c.setFont(ctx, fontSave);
+    c.renderData(ctx, "特記すべき留意事項", data["特記すべき留意事項"], ropt({
+      modifiers: [b.shrinkHoriz(2, 2)]
+    }))
   })
 }
 
@@ -634,9 +652,14 @@ function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       { kind: "text", text: "　" },
       { kind: "text", text: "有", mark: "他の訪問看護ステーションへの指示：有" },
       { kind: "text", text: "：指定訪問看護ステーション名" },
-      { kind: "gap-to", at: right, mark: "他の訪問看護ステーションへの指示" },
+      { kind: "gap-to", at: right, mark: "他の訪問看護ステーションへの指示：ステーション名" },
       { kind: "text", text: "）" },
     ])
+    c.renderData(ctx, "他の訪問看護ステーションへの指示：無", data["他の訪問看護ステーションへの指示：無"], ropt({ circle: true }));
+    c.renderData(ctx, "他の訪問看護ステーションへの指示：有", data["他の訪問看護ステーションへの指示：有"], ropt({ circle: true }));
+    c.renderData(ctx, "他の訪問看護ステーションへの指示：ステーション名", data["他の訪問看護ステーションへの指示：ステーション名"], ropt({
+      modifiers: [b.shrinkHoriz(2, 1)]
+    }));
     c.drawText(ctx, "たんの吸引等実施のための訪問介護事業所への指示", rows[2], "left", "center");
     c.drawComposite(ctx, rows[3], [
       { kind: "gap", width: 10 },
@@ -645,9 +668,14 @@ function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       { kind: "text", text: "　" },
       { kind: "text", text: "有", mark: "たんの吸引等実施のための訪問介護事業所への指示：有" },
       { kind: "text", text: "：指定訪問介護事業所名" },
-      { kind: "gap-to", at: right, mark: "たんの吸引等実施のための訪問介護事業所への指示" },
+      { kind: "gap-to", at: right, mark: "たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名" },
       { kind: "text", text: "）" },
     ])
+    c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：無", data["たんの吸引等実施のための訪問介護事業所への指示：無"], ropt({}));
+    c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：有", data["たんの吸引等実施のための訪問介護事業所への指示：有"], ropt({}));
+    c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名",
+      data["たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名"],
+      ropt({ modifiers: [b.shrinkHoriz(2, 1)] }));
   });
 }
 
@@ -694,5 +722,16 @@ function renderAddr(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
         { kind: "text", text: "印" },
       ])
     })
-  })
+  });
+  c.renderData(ctx, "発行日（元号）", data["発行日（元号）"], ropt({
+    font: "regular"
+  }));
+  c.renderData(ctx, "発行日（年）", data["発行日（年）"], ropt({}));
+  c.renderData(ctx, "発行日（月）", data["発行日（月）"], ropt({}));
+  c.renderData(ctx, "発行日（日）", data["発行日（日）"], ropt({}));
+  c.renderData(ctx, "医療機関名", data["医療機関名"], ropt({}));
+  c.renderData(ctx, "医療機関（住所）", data["医療機関（住所）"], ropt({}));
+  c.renderData(ctx, "医療機関（電話）", data["医療機関（電話）"], ropt({}));
+  c.renderData(ctx, "医療機関（ＦＡＸ）", data["医療機関（ＦＡＸ）"], ropt({}));
+  c.renderData(ctx, "医師氏名", data["医師氏名"], ropt({}));
 }

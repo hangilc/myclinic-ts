@@ -97,7 +97,31 @@ export interface HoumonKangoData {
   "留意事項：装置"?: string;
   "留意事項：その他"?: string;
 
-  
+  "点滴指示"?: string;
+
+  "緊急時の連絡先"?: string;
+  "不在時の対応法"?: string;
+
+  "特記すべき留意事項"?: string;
+
+  "他の訪問看護ステーションへの指示：無"?: string;
+  "他の訪問看護ステーションへの指示：有"?: string;
+  "他の訪問看護ステーションへの指示：ステーション名"?: string;
+  "たんの吸引等実施のための訪問介護事業所への指示：無"?: string;
+  "たんの吸引等実施のための訪問介護事業所への指示：有"?: string;
+  "たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名"?: string;
+
+  "発行日（元号）"?: string;
+  "発行日（年）"?: string;
+  "発行日（月）"?: string;
+  "発行日（日）"?: string;
+  "医療機関名"?: string;
+  "医療機関（住所）"?: string;
+  "医療機関（電話）"?: string;
+  "医療機関（ＦＡＸ）"?: string;
+  "医師氏名"?: string;
+  "提出先（訪問看護ステーション）"?: string;
+
   issueDate?: string;
 }
 
@@ -151,3 +175,4 @@ export function extendData(data: HoumonKangoData): void {
     extend(data, `褥瘡の深さ(${data.jukusou})`, "1");
   }
 }
+
