@@ -46,7 +46,11 @@ export function drawHoumonKango(data: HoumonKangoData): Op[] {
     { kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）" },
     { kind: "text", text: "殿" },
   ]);
-  c.renderData(ctx, "提出先（訪問看護ステーション）", data["提出先（訪問看護ステーション）"], ropt({}));
+  c.renderData(ctx, "提出先（訪問看護ステーション）", data["提出先（訪問看護ステーション）"], ropt({
+    tryFonts: ["input-regular", "input-small", "input-small"],
+    halign: "right",
+    modifiers: [b.shrinkHoriz(0, 2)]
+  }));
   c.setFont(ctx, "input-regular");
   // console.log(createRendererData(ctx));
   // console.log(createRenderer(ctx));
