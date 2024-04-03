@@ -93,8 +93,11 @@ export function getCurrentFont(ctx: DrawerContext): string {
   return ctx.currentFont;
 }
 
-export function mark(ctx: DrawerContext, key: string, box: Box) {
+export function mark(ctx: DrawerContext, key: string, box: Box, ropt?: DataRendererOpt) {
   ctx.marks[key] = box;
+  if( ropt ){
+    ctx.dataRenderOptions[key] = ropt;
+  }
 }
 
 export function getMark(ctx: DrawerContext, key: string, ...modifiers: Modifier[]): Box {
@@ -322,20 +325,17 @@ export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box
 }
 
 export interface DrawTextsInBoxesOptArg {
-  lineHeight?: number;
   leading?: number;
-  valignChunk?: VAlign;
+  valign?: VAlign;
 }
 
 export class DrawTextsInBoxesOpt {
-  lineHeight: number;
   leading: number;
-  valignChunk: VAlign;
+  valign: VAlign;
 
   constructor(arg: DrawTextsInBoxesOptArg, ctx: DrawerContext) {
-    this.lineHeight = arg.lineHeight ?? currentFontSize(ctx);
     this.leading = arg.leading ?? 0;
-    this.valignChunk = arg.valignChunk ?? "top";
+    this.valign = arg.valign ?? "top";
   }
 }
 
@@ -343,22 +343,23 @@ export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
   writer: (t: string, b: Box) => void, optArg: DrawTextsInBoxesOptArg = {}) {
   const opt = new DrawTextsInBoxesOpt(optArg, ctx);
   let top = box.top;
-  if (opt.valignChunk === "center" || opt.valignChunk === "bottom") {
-    let totalHeight = opt.lineHeight * texts.length;
+  const lineHeight = currentFontSize(ctx);
+  if (opt.valign === "center" || opt.valign === "bottom") {
+    let totalHeight = lineHeight * texts.length;
     if (opt.leading !== 0 && texts.length > 1) {
       totalHeight += opt.leading * (texts.length - 1);
     }
-    if (opt.valignChunk === "center") {
+    if (opt.valign === "center") {
       const rem = b.height(box) - totalHeight;
       top += rem * 0.5;
-    } else if (opt.valignChunk === "bottom") {
+    } else if (opt.valign === "bottom") {
       top = box.bottom - totalHeight;
     }
   }
-  let bb = b.modify(box, b.setTop(top), b.setHeight(opt.lineHeight, "top"));
+  let bb = b.modify(box, b.setTop(top), b.setHeight(lineHeight, "top"));
   texts.forEach(t => {
     writer(t, bb);
-    bb = b.modify(bb, b.shiftDown(opt.lineHeight + opt.leading));
+    bb = b.modify(bb, b.shiftDown(lineHeight + opt.leading));
   })
 }
 
@@ -431,7 +432,7 @@ export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg:
     const ls = breakLines(text, fontSize, w);
     lines.push(...ls);
   });
-  drawTexts(ctx, lines, box, { halign: optArg.halign, valignChunk: optArg.valign, leading: optArg.leading });
+  drawTexts(ctx, lines, box, { halign: optArg.halign, valign: optArg.valign, leading: optArg.leading });
 }
 
 export interface DrawTextAtOptArg {
@@ -589,12 +590,14 @@ export interface CompositeText {
   kind: "text";
   text: string;
   mark?: string;
+  ropt?: DataRendererOpt;
 }
 
 export interface CompositeGap {
   kind: "gap";
   width: number;
   mark?: string;
+  ropt?: DataRendererOpt;
   modifiers?: Modifier[];
   callback?: (box: Box) => void;
 }
@@ -603,6 +606,7 @@ export interface CompositeGapTo {
   kind: "gap-to";
   at: number | "end";
   mark?: string;
+  ropt?: DataRendererOpt;
   modifiers?: Modifier[];
 }
 
@@ -681,7 +685,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
         const tw = textWidth(ctx, item.text);
         drawText(ctx, item.text, textBox, "left", opt.valign);
         if (item.mark) {
-          mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")));
+          mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
         }
         pos += tw;
         break;
@@ -693,7 +697,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
             mb = b.modify(mb, ...item.modifiers);
           }
           if (item.mark) {
-            mark(ctx, item.mark, mb);
+            mark(ctx, item.mark, mb, item.ropt);
           }
           if (item.callback) {
             item.callback(b.clone(mb));
@@ -709,7 +713,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           if (item.modifiers) {
             mb = b.modify(mb, ...item.modifiers);
           }
-          mark(ctx, item.mark, mb);
+          mark(ctx, item.mark, mb, item.ropt);
         }
         pos = at;
         break;
@@ -762,7 +766,7 @@ export interface DataRendererOpt {
   tryFonts?: string[];
   fallbackParagraph?: boolean;
   leading?: number;
-  paragraph?: boolean; 
+  paragraph?: boolean;
 }
 
 export function renderData(ctx: DrawerContext, markName: string, data: string | undefined,
@@ -788,16 +792,16 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         }
       }
       if (!done) {
-        const lastFont: string = opt.tryFonts[opt.tryFonts.length-1]!;
+        const lastFont: string = opt.tryFonts[opt.tryFonts.length - 1]!;
         setFont(ctx, lastFont);
-        if( fallbackPara ){
+        if (fallbackPara) {
           paragraph(ctx, data, markBox, { valign, leading: opt.leading })
         } else {
           drawText(ctx, data, markBox, halign, valign);
         }
       }
       setFont(ctx, fontSave);
-    } else if( opt.paragraph ) {
+    } else if (opt.paragraph) {
       let fontSave = "";
       if (opt.font) {
         fontSave = getCurrentFont(ctx);
@@ -833,4 +837,11 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
 
 export function rectMark(ctx: DrawerContext, markName: string) {
   rect(ctx, getMark(ctx, markName));
+}
+
+export function fillData(ctx: DrawerContext, data: any) {
+  for (let markName in ctx.marks) {
+    const opt = ctx.dataRenderOptions[markName] ?? [];
+    renderData(ctx, markName, data[markName], opt);
+  }
 }

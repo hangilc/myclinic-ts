@@ -1,6 +1,9 @@
 <script lang="ts">
+  import PreTextDialog from "@/lib/PreTextDialog.svelte";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import { mkDrawerContext } from "@/lib/drawer/compiler/context";
+  import { createRendererData } from "@/lib/drawer/compiler/create-renderer";
   import { drawHoumonKango } from "@/lib/drawer/forms/houmon-kango/houmon-kango-drawer";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import type { Patient } from "myclinic-model";
@@ -93,6 +96,20 @@
       },
     });
   }
+
+  function doDataTemplate() {
+    const ctx = mkDrawerContext();
+    drawHoumonKango({}, ctx);
+    const text = createRendererData(ctx);
+    const d: PreTextDialog = new PreTextDialog({
+      target: document.body,
+      props: {
+        title: "訪問看護データ",
+        destroy: () => d.$destroy(),
+        text,
+      }
+    });
+  }
 </script>
 
 {#if isVisible}
@@ -117,6 +134,11 @@
     </div>
     <button on:click={doCreate}>作成</button>
   {/if}
+  <div>
+    <div>
+      <button on:click={doDataTemplate}>データテンプレート</button>
+    </div>
+  </div>
 {/if}
 
 <style>

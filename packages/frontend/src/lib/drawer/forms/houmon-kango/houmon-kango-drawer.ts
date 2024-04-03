@@ -6,17 +6,18 @@ import * as b from "../../compiler/box";
 import { mkBox, type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import { createRenderer, createRendererData } from "../../compiler/create-renderer";
+import type { DataRendererOpt } from "../../compiler/compiler";
 
-export function drawHoumonKango(data: HoumonKangoData): Op[] {
+export function drawHoumonKango(data: HoumonKangoData, ctxArg?: DrawerContext): Op[] {
   extendData(data);
-  const ctx = mkDrawerContext();
+  const ctx: DrawerContext = ctxArg ?? mkDrawerContext();
   const paper: Box = b.paperSizeToBox(A4);
   setupFonts(ctx);
   c.createPen(ctx, "regular", 0, 0, 0, 0.2);
   c.setPen(ctx, "regular");
-  drawTitle(ctx, paper, data);
+  drawTitle(ctx, paper);
   c.setFont(ctx, "regular");
-  drawSubtitle(ctx, paper, data);
+  drawSubtitle(ctx, paper);
   const mainBox = b.modify(paper, b.inset(16, 33, 19, 56));
   c.rect(ctx, mainBox);
   const rows: Box[] = b.splitToRows(mainBox, b.splitAt(
@@ -43,17 +44,17 @@ export function drawHoumonKango(data: HoumonKangoData): Op[] {
     mainBox.left, addrBox.bottom + 2, mainBox.right, addrBox.bottom + 6
   )
   c.drawComposite(ctx, recipientBox, [
-    { kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）" },
+    {
+      kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）", ropt: {
+        tryFonts: ["input-regular", "input-small", "input-small"],
+        halign: "right",
+        modifiers: [b.shrinkHoriz(0, 2)]
+      }
+    },
     { kind: "text", text: "殿" },
   ]);
-  c.renderData(ctx, "提出先（訪問看護ステーション）", data["提出先（訪問看護ステーション）"], ropt({
-    tryFonts: ["input-regular", "input-small", "input-small"],
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 2)]
-  }));
   c.setFont(ctx, "input-regular");
-  // console.log(createRendererData(ctx));
-  // console.log(createRenderer(ctx));
+  c.fillData(ctx, data);
   return c.getOps(ctx);
 }
 
@@ -66,68 +67,67 @@ function setupFonts(ctx: DrawerContext) {
   c.createFont(ctx, "input-very-small", "MS Gothic", 2.5);
 }
 
-function drawTitle(ctx: DrawerContext, paper: Box, data: HoumonKangoData) {
+function drawTitle(ctx: DrawerContext, paper: Box) {
   c.setFont(ctx, "title");
   const fontSize = c.currentFontSize(ctx);
-  c.mark(ctx, "タイトル", b.modify(paper, b.setHeight(fontSize, "top"), b.shiftDown(13)));
-  c.renderData(ctx, "タイトル", data["タイトル"], { font: "title", halign: "center", valign: "top" })
+  c.mark(ctx, "タイトル", b.modify(paper, b.setHeight(fontSize, "top"), b.shiftDown(13)),
+    { font: "title", halign: "center", valign: "top" });
 }
 
-function drawSubtitle(ctx: DrawerContext, paper: Box, data: HoumonKangoData) {
+function drawSubtitle(ctx: DrawerContext, paper: Box) {
   const fontSize = c.currentFontSize(ctx);
   let box = b.modify(paper, b.setTop(24), b.setHeight(fontSize, "top"), b.setRight(113));
-  c.mark(ctx, "サブタイトル", box);
-  c.renderData(ctx, "サブタイトル", data["サブタイトル"], { halign: "right" });
+  c.mark(ctx, "サブタイトル", box, { font: "regular", halign: "right" });
   box = b.modify(box, b.flipRight(), b.setRight(paper.right));
+  const gengouRopt = { font: "regular" };
+  const ropt: DataRendererOpt = { halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)] }
   c.drawComposite(ctx, box, [
     { kind: "text", text: "（" },
-    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間開始（元号）" },
-    { kind: "gap", width: 7, mark: "訪問看護指示期間開始（年）" },
+    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間開始（元号）", ropt: gengouRopt },
+    { kind: "gap", width: 7, mark: "訪問看護指示期間開始（年）", ropt },
     { kind: "text", text: "年" },
-    { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（月）" },
+    { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（月）", ropt },
     { kind: "text", text: "月" },
-    { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（日）" },
+    { kind: "gap", width: 4.5, mark: "訪問看護指示期間開始（日）", ropt },
     { kind: "text", text: "日～" },
-    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間期限（元号）" },
-    { kind: "gap", width: 7, mark: "訪問看護指示期間期限（年）" },
+    { kind: "gap", width: fontSize * 2, mark: "訪問看護指示期間期限（元号）", ropt: { font: "regular" } },
+    { kind: "gap", width: 7, mark: "訪問看護指示期間期限（年）", ropt },
     { kind: "text", text: "年" },
-    { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（月）" },
+    { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（月）", ropt },
     { kind: "text", text: "月" },
-    { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（日）" },
+    { kind: "gap", width: 4.5, mark: "訪問看護指示期間期限（日）", ropt },
     { kind: "text", text: "日）" },
   ], { halign: "left", valign: "top" });
-  c.renderData(ctx, "訪問看護指示期間開始（元号）", data["訪問看護指示期間開始（元号）"]);
-  c.renderData(ctx, "訪問看護指示期間開始（年）", data["訪問看護指示期間開始（年）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
-  c.renderData(ctx, "訪問看護指示期間開始（月）", data["訪問看護指示期間開始（月）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
-  c.renderData(ctx, "訪問看護指示期間開始（日）", data["訪問看護指示期間開始（日）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
-  c.renderData(ctx, "訪問看護指示期間期限（元号）", data["訪問看護指示期間期限（元号）"]);
-  c.renderData(ctx, "訪問看護指示期間期限（年）", data["訪問看護指示期間期限（年）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
-  c.renderData(ctx, "訪問看護指示期間期限（月）", data["訪問看護指示期間期限（月）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
-  c.renderData(ctx, "訪問看護指示期間期限（日）", data["訪問看護指示期間期限（日）"], {
-    font: "input-regular",
-    halign: "right",
-    modifiers: [b.shrinkHoriz(0, 0.5)]
-  });
+  // c.renderData(ctx, "訪問看護指示期間開始（年）", data["訪問看護指示期間開始（年）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
+  // c.renderData(ctx, "訪問看護指示期間開始（月）", data["訪問看護指示期間開始（月）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
+  // c.renderData(ctx, "訪問看護指示期間開始（日）", data["訪問看護指示期間開始（日）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
+  // c.renderData(ctx, "訪問看護指示期間期限（年）", data["訪問看護指示期間期限（年）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
+  // c.renderData(ctx, "訪問看護指示期間期限（月）", data["訪問看護指示期間期限（月）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
+  // c.renderData(ctx, "訪問看護指示期間期限（日）", data["訪問看護指示期間期限（日）"], {
+  //   font: "input-regular",
+  //   halign: "right",
+  //   modifiers: [b.shrinkHoriz(0, 0.5)]
+  // });
 }
 
 function ropt(opt: c.DataRendererOpt): c.DataRendererOpt {
@@ -402,7 +402,7 @@ function renderRow3_5(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
   const cols = b.splitToColumns(box, b.splitAt(23.5));
   c.rectAll(ctx, cols);
   c.drawTexts(ctx, ["装着・使用", "医療機器等"], b.modify(cols[0], b.inset(2)),
-    { halign: "left", valign: "center", valignChunk: "center", leading: 2 });
+    { halign: "left", valign: "center", leading: 2 });
   const rows = b.splitToRows(b.modify(cols[1], b.inset(2)), b.evenSplitter(7));
   c.drawComposite(ctx, rows[0], [
     { kind: "text", text: "１", mark: "自動腹膜灌流装置" },
