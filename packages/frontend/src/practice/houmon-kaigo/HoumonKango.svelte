@@ -12,6 +12,9 @@
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import type { Patient } from "myclinic-model";
   import { type DataInterface, mkDataMap } from "./data-form";
+  import { KanjiDate, GengouList, calcAge } from "kanjidate";
+  import ChevronDown from "@/icons/ChevronDown.svelte";
+  import ChevronUp from "@/icons/ChevronUp.svelte";
 
   export let isVisible: boolean;
   let patient: Patient | undefined = undefined;
@@ -20,6 +23,12 @@
   let issueDate: Date = new Date();
   let dataMap: DataInterface = mkDataMap();
   let showInputs = false;
+  type DataMapKeys = keyof DataInterface;
+  const gengouList: string[] = GengouList.map((g) => g.kanji);
+  let showTitleInputChoices = false;
+
+  dataMap["タイトル"] = "介護予防訪問看護・訪問看護指示書";
+  dataMap["サブタイトル"] = "訪問看護指示期間";
 
   function doSelectPatient() {
     const d: SearchPatientDialog = new SearchPatientDialog({
@@ -29,13 +38,46 @@
         title: "患者選択",
         onEnter: (selected: Patient) => {
           patient = selected;
+          setPatient(patient);
         },
       },
     });
   }
 
+  function onIssueDateChange() {
+    if (issueDate && patient) {
+      setAge(patient);
+    }
+  }
+
+  function clear(names: string[]) {
+    const m: any = dataMap;
+    names.forEach((name) => {
+      if (name in m) {
+        m[name] = "";
+      }
+    });
+  }
+
   function setPatient(patient: Patient) {
-    dataMap["患者氏名"] = `${patient.lastName}${patient.firstName}`
+    dataMap["患者氏名"] = `${patient.lastName}${patient.firstName}`;
+    dataMap["患者住所"] = patient.address;
+    const k = new KanjiDate(new Date(patient.birthday));
+    clear(gengouList.map((g) => `生年月日（元号：${g}）`));
+    const m: any = dataMap;
+    const gname = `生年月日（元号：${k.gengou}）`;
+    if (gname in m) {
+      m[gname] = "1";
+    }
+    dataMap["生年月日（年）"] = k.nen.toString();
+    dataMap["生年月日（月）"] = k.month.toString();
+    dataMap["生年月日（日）"] = k.day.toString();
+    setAge(patient);
+  }
+
+  function setAge(patient: Patient) {
+    const age = calcAge(new Date(patient.birthday), issueDate ?? new Date());
+    dataMap["年齢"] = age.toString();
   }
 
   function doCreate() {
@@ -96,6 +138,13 @@
       },
     });
   }
+
+  function doTitleInputChoice(event: MouseEvent) {
+    let target = event.target as HTMLElement;
+    dataMap["タイトル"] = target.innerText;
+    dataMap["サブタイトル"] = target.getAttribute("data-subtitle") ?? "";
+    showTitleInputChoices = false;
+  }
 </script>
 
 {#if isVisible}
@@ -112,11 +161,51 @@
     {patient.firstName}
   {/if}
   <div>
+    <div>
+      タイトル：<input
+        type="text"
+        bind:value={dataMap["タイトル"]}
+        class="title-input"
+      />
+      <a
+        class="title-selector-link"
+        href="javascript:void(0)"
+        on:click={() => (showTitleInputChoices = !showTitleInputChoices)}
+      >
+        {#if showTitleInputChoices}
+          <ChevronUp />
+        {:else}
+          <ChevronDown />
+        {/if}
+      </a>
+    </div>
+    {#if showTitleInputChoices}
+      <!-- svelte-ignore missing-declaration -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="title-input-choice-wrapper">
+        <div
+          class="title-input-choice"
+          on:click={doTitleInputChoice}
+          data-subtitle="訪問看護指示期間"
+        >
+          介護予防訪問看護・訪問看護指示書
+        </div>
+        <div
+          class="title-input-choice"
+          on:click={doTitleInputChoice}
+          data-subtitle="指示期間"
+        >
+          訪問リハビリテーション診療情報提供書
+        </div>
+      </div>
+    {/if}
+  </div>
+  <div>
     開始日：<EditableDate bind:date={startDate} />
     終了日：<EditableDate bind:date={uptoDate} />
   </div>
   <div>
-    発行日：<EditableDate bind:date={issueDate} />
+    発行日：<EditableDate bind:date={issueDate} onChange={onIssueDateChange} />
   </div>
   <div>
     {#if showInputs}
@@ -172,6 +261,7 @@
         />
         <span>患者氏名</span><input
           type="text"
+          name="患者氏名"
           bind:value={dataMap["患者氏名"]}
         />
         <span>生年月日（元号：明治）</span><input
@@ -569,6 +659,30 @@
   .title {
     font-size: 1.5rem;
     margin-bottom: 10px;
+  }
+
+  .title-input {
+    width: 20em;
+  }
+
+  .title-selector-link {
+    cursor: pointer;
+    position: relative;
+    top: 4px;
+  }
+
+  .title-input-choice-wrapper {
+    width: fit-content;
+    margin: 3px 10px;
+    padding: 0 10px;
+  }
+
+  .title-input-choice {
+    cursor: pointer;
+  }
+
+  .title-input-choice:hover {
+    background-color: #ccc;
   }
 
   .data-inputs {
