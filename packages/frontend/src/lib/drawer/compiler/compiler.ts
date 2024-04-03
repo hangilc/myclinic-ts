@@ -817,7 +817,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         fontSave = getCurrentFont(ctx);
         setFont(ctx, opt.font);
       }
-      if (opt.circle) {
+      if (opt.circle && !(data === "" || data === "0" || data === "false") ) {
         let r: number;
         if (typeof opt.circle === "number") {
           r = opt.circle;

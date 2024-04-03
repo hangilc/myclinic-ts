@@ -22,6 +22,7 @@
 <style>
   pre {
     height: 26em;
+    width: 40em;
     overflow: auto;
   }
 </style>
