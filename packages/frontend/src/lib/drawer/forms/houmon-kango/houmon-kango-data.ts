@@ -92,9 +92,13 @@ export interface HoumonKangoData {
 
   "留意事項"?: string;
 
+  "留意事項：リハビリテーションマーク"?: string;
   "留意事項：リハビリテーション"?: string;
+  "留意事項：褥瘡の処置などマーク"?: string;
   "留意事項：褥瘡の処置など"?: string;
+  "留意事項：装置マーク"?: string;
   "留意事項：装置"?: string;
+  "留意事項：その他マーク"?: string;
   "留意事項：その他"?: string;
 
   "点滴指示"?: string;
