@@ -5,7 +5,6 @@ import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import { mkBox, type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
-import { createRenderer, createRendererData } from "../../compiler/create-renderer";
 import type { DataRendererOpt } from "../../compiler/compiler";
 
 const roptGengou: DataRendererOpt = { font: "regular" };
@@ -32,18 +31,18 @@ export function drawHoumonKango(data: HoumonKangoData, ctxArg?: DrawerContext): 
   renderRow1(ctx, rows[1]);
   renderRow2(ctx, rows[2]);
   renderRow3(ctx, rows[3]);
-  renderRow4(ctx, rows[4], data);
-  renderRow5(ctx, rows[5], data);
-  renderRow6(ctx, rows[6], data);
-  renderRow7(ctx, rows[7], data);
-  renderRow8(ctx, rows[8], data);
-  renderRow9(ctx, rows[9], data);
+  renderRow4(ctx, rows[4]);
+  renderRow5(ctx, rows[5]);
+  renderRow6(ctx, rows[6]);
+  renderRow7(ctx, rows[7]);
+  renderRow8(ctx, rows[8]);
+  renderRow9(ctx, rows[9]);
   c.drawTextAt(ctx, "上記のとおり、指定訪問看護の実施を指示する。", mainBox.left, mainBox.bottom + 3,
     { halign: "left", valign: "top" });
   const addrBox = mkBox(
     mainBox.left + 75, mainBox.bottom + 10, mainBox.right, mainBox.bottom + 35
   );
-  renderAddr(ctx, addrBox, data);
+  renderAddr(ctx, addrBox);
   const recipientBox = mkBox(
     mainBox.left, addrBox.bottom + 2, mainBox.right, addrBox.bottom + 6
   )
@@ -193,11 +192,6 @@ function renderRow3_0(ctx: DrawerContext, box: Box) {
     modifiers: [b.inset(2, 1, 1, 1)],
     leading: 0.5,
   });
-  // c.renderData(ctx, "病状", data["病状"], ropt({
-  //   tryFonts: ["input-regular", "input-small"],
-  //   modifiers: [b.inset(2, 1, 1, 1)],
-  //   leading: 0.5,
-  // }))
 }
 
 function renderRow3_1(ctx: DrawerContext, box: Box) {
@@ -213,11 +207,6 @@ function renderRow3_1(ctx: DrawerContext, box: Box) {
     modifiers: [b.inset(2, 1, 1, 1)],
     leading: 0.5,
   });
-  // c.renderData(ctx, "薬剤", data["薬剤"], ropt({
-  //   tryFonts: ["input-regular", "input-small"],
-  //   modifiers: [b.inset(2, 1, 1, 1)],
-  //   leading: 0.5,
-  // }))
 }
 
 function renderRow3_2(ctx: DrawerContext, box: Box) {
@@ -256,14 +245,6 @@ function renderRow3_2_0(ctx: DrawerContext, box: Box) {
     { kind: "gap", width: 6 },
     { kind: "text", text: "C2", mark: "寝たきり度(C2)", ropt: roptCircle },
   ]);
-  // c.renderData(ctx, "寝たきり度(J1)", data["寝たきり度(J1)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(J2)", data["寝たきり度(J2)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(A1)", data["寝たきり度(A1)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(A2)", data["寝たきり度(A2)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(B1)", data["寝たきり度(B1)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(B2)", data["寝たきり度(B2)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(C1)", data["寝たきり度(C1)"], ropt({ circle: true }));
-  // c.renderData(ctx, "寝たきり度(C2)", data["寝たきり度(C2)"], ropt({ circle: true }));
 }
 
 function renderRow3_2_1(ctx: DrawerContext, box: Box) {
@@ -287,13 +268,6 @@ function renderRow3_2_1(ctx: DrawerContext, box: Box) {
     { kind: "gap", width: 6 },
     { kind: "text", text: "Ｍ", mark: "認知症の状況(Ｍ)", ropt: roptCircle },
   ]);
-  // c.renderData(ctx, "認知症の状況(Ｉ)", data["認知症の状況(Ｉ)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(IIa)", data["認知症の状況(IIa)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(IIb)", data["認知症の状況(IIb)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(IIIa)", data["認知症の状況(IIIa)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(IIIb)", data["認知症の状況(IIIb)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(IV)", data["認知症の状況(IV)"], ropt({ circle: true }));
-  // c.renderData(ctx, "認知症の状況(Ｍ)", data["認知症の状況(Ｍ)"], ropt({ circle: true }));
 }
 
 function renderRow3_3(ctx: DrawerContext, box: Box) {
@@ -324,14 +298,6 @@ function renderRow3_3(ctx: DrawerContext, box: Box) {
     { kind: "text", text: "５", mark: "要介護認定の状況（要介護5）", ropt: roptCircle },
     { kind: "text", text: "）" },
   ]);
-  // c.renderData(ctx, "要介護認定の状況（自立）", data["要介護認定の状況（自立）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要支援1）", data["要介護認定の状況（要支援1）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要支援2）", data["要介護認定の状況（要支援2）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要介護1）", data["要介護認定の状況（要介護1）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要介護2）", data["要介護認定の状況（要介護2）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要介護3）", data["要介護認定の状況（要介護3）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要介護4）", data["要介護認定の状況（要介護4）"], ropt({ circle: true }));
-  // c.renderData(ctx, "要介護認定の状況（要介護5）", data["要介護認定の状況（要介護5）"], ropt({ circle: true }));
 }
 
 function renderRow3_4(ctx: DrawerContext, box: Box) {
@@ -356,11 +322,6 @@ function renderRow3_4(ctx: DrawerContext, box: Box) {
     { kind: "gap", width: 3 },
     { kind: "text", text: "D5", mark: "褥瘡の深さ(D5)", ropt: roptCircle },
   ]);
-  // c.renderData(ctx, "褥瘡の深さ(3)", data["褥瘡の深さ(3)"], ropt({ circle: true }));
-  // c.renderData(ctx, "褥瘡の深さ(4)", data["褥瘡の深さ(4)"], ropt({ circle: true }));
-  // c.renderData(ctx, "褥瘡の深さ(D3)", data["褥瘡の深さ(D3)"], ropt({ circle: true }));
-  // c.renderData(ctx, "褥瘡の深さ(D4)", data["褥瘡の深さ(D4)"], ropt({ circle: true }));
-  // c.renderData(ctx, "褥瘡の深さ(D5)", data["褥瘡の深さ(D5)"], ropt({ circle: true }));
 }
 
 function renderRow3_5(ctx: DrawerContext, box: Box) {
@@ -385,12 +346,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     },
     { kind: "text", text: "/min）" },
   ]);
-  // c.renderData(ctx, "自動腹膜灌流装置", data["自動腹膜灌流装置"], ropt({ circle: true }));
-  // c.renderData(ctx, "透析液供給装置", data["透析液供給装置"], ropt({ circle: true }));
-  // c.renderData(ctx, "酸素療法", data["酸素療法"], ropt({ circle: true }));
-  // c.renderData(ctx, "酸素療法流速", data["酸素療法流速"], ropt({
-  //   halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
-  // }));
 
   c.drawComposite(ctx, rows[1], [
     { kind: "text", text: "４", mark: "吸引器", ropt: roptCircle },
@@ -402,9 +357,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     { kind: "text", text: "６", mark: "輸液ポンプ", ropt: roptCircle },
     { kind: "text", text: "．輸液ポンプ" },
   ]);
-  // c.renderData(ctx, "吸引器", data["吸引器"], ropt({ circle: true }));
-  // c.renderData(ctx, "中心静脈栄養", data["中心静脈栄養"], ropt({ circle: true }));
-  // c.renderData(ctx, "輸液ポンプ", data["輸液ポンプ"], ropt({ circle: true }));
 
   const row2 = rows[2];
   let pos1: number = 0;
@@ -432,15 +384,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     { kind: "gap", width: 0, callback: (box) => { pos3 = box.right - row2.left } },
     { kind: "text", text: "）" },
   ]);
-  // c.renderData(ctx, "経管栄養", data["経管栄養"], ropt({ circle: true }));
-  // c.renderData(ctx, "経管栄養経鼻", data["経管栄養経鼻"], ropt({ circle: true }));
-  // c.renderData(ctx, "経管栄養胃ろう", data["経管栄養胃ろう"], ropt({ circle: true }));
-  // c.renderData(ctx, "経管栄養チューブサイズ", data["経管栄養チューブサイズ"], ropt({
-  //   halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
-  // }));
-  // c.renderData(ctx, "経管栄養交換日", data["経管栄養交換日"], ropt({
-  //   halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
-  // }));
 
   c.drawComposite(ctx, rows[3], [
     { kind: "text", text: "８", mark: "留置カテーテル", ropt: roptCircle },
@@ -458,13 +401,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     },
     { kind: "text", text: "日に１回交換）" },
   ]);
-  // c.renderData(ctx, "留置カテーテル", data["留置カテーテル"], ropt({ circle: true }));
-  // c.renderData(ctx, "留置カテーテルサイズ", data["留置カテーテルサイズ"], ropt({
-  //   halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
-  // }));
-  // c.renderData(ctx, "留置カテーテル交換日", data["留置カテーテル交換日"], ropt({
-  //   halign: "right", modifiers: [b.shrinkHoriz(0, 0.5)]
-  // }));
 
   c.drawComposite(ctx, rows[4], [
     { kind: "text", text: "９", mark: "人工呼吸器", ropt: roptCircle },
@@ -480,12 +416,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     },
     { kind: "text", text: "）" },
   ]);
-  // c.renderData(ctx, "人工呼吸器", data["人工呼吸器"], ropt({ circle: true }));
-  // c.renderData(ctx, "人工呼吸器陽圧式", data["人工呼吸器陽圧式"], ropt({ circle: true }));
-  // c.renderData(ctx, "人工呼吸器陰圧式", data["人工呼吸器陰圧式"], ropt({ circle: true }));
-  // c.renderData(ctx, "人工呼吸器設定", data["人工呼吸器設定"], ropt({
-  //   halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
-  // }));
 
 
   c.drawComposite(ctx, rows[5], [
@@ -498,10 +428,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     },
     { kind: "text", text: "）" },
   ]);
-  // c.renderData(ctx, "気管カニューレ", data["気管カニューレ"], ropt({ circle: true }));
-  // c.renderData(ctx, "気管カニューレサイズ", data["気管カニューレサイズ"], ropt({
-  //   halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
-  // }));
 
   c.drawComposite(ctx, rows[6], [
     { kind: "text", text: "１１", mark: "人工肛門", ropt: roptCircle },
@@ -519,12 +445,6 @@ function renderRow3_5(ctx: DrawerContext, box: Box) {
     },
     { kind: "text", text: "）" },
   ]);
-  // c.renderData(ctx, "人工肛門", data["人工肛門"], ropt({ circle: true }));
-  // c.renderData(ctx, "人工膀胱", data["人工膀胱"], ropt({ circle: true }));
-  // c.renderData(ctx, "装置その他マーク", data["装置その他マーク"], ropt({ circle: true }));
-  // c.renderData(ctx, "装置その他", data["装置その他"], ropt({
-  //   halign: "left", modifiers: [b.shrinkHoriz(0.5, 0.5)]
-  // }));
 }
 
 function renderRow4(ctx: DrawerContext, box: Box) {
@@ -543,9 +463,6 @@ function renderRow4(ctx: DrawerContext, box: Box) {
   c.mark(ctx, "留意事項", m, {
     modifiers: [b.inset(2)], paragraph: true, leading: 1
   });
-  // c.renderData(ctx, "留意事項", data["留意事項"], ropt({
-  //   modifiers: [b.inset(2)], paragraph: true, leading: 1
-  // }))
 }
 
 function renderRow5(ctx: DrawerContext, box: Box) {
@@ -573,22 +490,6 @@ function renderRow5(ctx: DrawerContext, box: Box) {
     labelMark(rows[2], "３", "装置・使用機器等の操作援助・管理", "留意事項：装置");
     labelMark(rows[3], "４", "その他", "留意事項：その他");
   });
-  // c.renderData(ctx, "留意事項：リハビリテーション", data["留意事項：リハビリテーション"], ropt({
-  //   tryFonts: ["input-regular", "input-small", "input-very-samll"],
-  //   valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
-  // }));
-  // c.renderData(ctx, "留意事項：褥瘡の処置など", data["留意事項：褥瘡の処置など"], ropt({
-  //   tryFonts: ["input-regular", "input-small", "input-very-samll"],
-  //   valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
-  // }));
-  // c.renderData(ctx, "留意事項：装置", data["留意事項：装置"], ropt({
-  //   tryFonts: ["input-regular", "input-small", "input-very-samll"],
-  //   valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
-  // }));
-  // c.renderData(ctx, "留意事項：その他", data["留意事項：その他"], ropt({
-  //   tryFonts: ["input-regular", "input-small", "input-very-samll"],
-  //   valign: "center", modifiers: [b.shrinkHoriz(1, 1)]
-  // }));
 
 }
 
@@ -601,10 +502,6 @@ function renderRow6(ctx: DrawerContext, box: Box) {
       tryFonts: ["input-regular", "input-small"]
     });
   })
-  // c.renderData(ctx, "点滴指示", data["点滴指示"], ropt({
-  //   modifiers: [b.shrinkHoriz(2, 1)],
-  //   tryFonts: ["input-regular", "input-small"]
-  // }))
 }
 
 function renderRow7(ctx: DrawerContext, box: Box) {
@@ -625,12 +522,6 @@ function renderRow7(ctx: DrawerContext, box: Box) {
     labelMark(rows[0], "緊急時の連絡先", "緊急時の連絡先");
     labelMark(rows[1], "不在時の対応法", "不在時の対応法");
   });
-  // c.renderData(ctx, "緊急時の連絡先", data["緊急時の連絡先"], ropt({
-  //   modifiers: [b.shrinkHoriz(2, 1)]
-  // }));
-  // c.renderData(ctx, "不在時の対応法", data["不在時の対応法"], ropt({
-  //   modifiers: [b.shrinkHoriz(2, 1)]
-  // }));
 
 }
 
@@ -651,13 +542,10 @@ function renderRow8(ctx: DrawerContext, box: Box) {
       modifiers: [b.shrinkHoriz(2, 2)]
     });
     c.setFont(ctx, fontSave);
-    // c.renderData(ctx, "特記すべき留意事項", data["特記すべき留意事項"], ropt({
-    //   modifiers: [b.shrinkHoriz(2, 2)]
-    // }))
   })
 }
 
-function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
+function renderRow9(ctx: DrawerContext, box: Box) {
   b.withSplitRows(b.modify(box, b.shrinkHoriz(2, 0)), b.evenSplitter(4), rows => {
     const right = b.width(rows[0]) - 15;
     c.drawText(ctx, "他の訪問看護ステーションへの指示", rows[0], "left", "center");
@@ -675,11 +563,6 @@ function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       },
       { kind: "text", text: "）" },
     ])
-    // c.renderData(ctx, "他の訪問看護ステーションへの指示：無", data["他の訪問看護ステーションへの指示：無"], ropt({ circle: true }));
-    // c.renderData(ctx, "他の訪問看護ステーションへの指示：有", data["他の訪問看護ステーションへの指示：有"], ropt({ circle: true }));
-    // c.renderData(ctx, "他の訪問看護ステーションへの指示：ステーション名", data["他の訪問看護ステーションへの指示：ステーション名"], ropt({
-    //   modifiers: [b.shrinkHoriz(2, 1)]
-    // }));
     c.drawText(ctx, "たんの吸引等実施のための訪問介護事業所への指示", rows[2], "left", "center");
     c.drawComposite(ctx, rows[3], [
       { kind: "gap", width: 10 },
@@ -694,15 +577,10 @@ function renderRow9(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       },
       { kind: "text", text: "）" },
     ])
-    // c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：無", data["たんの吸引等実施のための訪問介護事業所への指示：無"], ropt({}));
-    // c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：有", data["たんの吸引等実施のための訪問介護事業所への指示：有"], ropt({}));
-    // c.renderData(ctx, "たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名",
-    //   data["たんの吸引等実施のための訪問介護事業所への指示：指定訪問介護事業所名"],
-    //   ropt({ modifiers: [b.shrinkHoriz(2, 1)] }));
   });
 }
 
-function renderAddr(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
+function renderAddr(ctx: DrawerContext, box: Box) {
   const fontSize = c.currentFontSize(ctx);
   function renderIssueDate(box: Box) {
     c.drawComposite(ctx, box, [
@@ -746,15 +624,4 @@ function renderAddr(ctx: DrawerContext, box: Box, data: HoumonKangoData) {
       ])
     })
   });
-  // c.renderData(ctx, "発行日（元号）", data["発行日（元号）"], ropt({
-  //   font: "regular"
-  // }));
-  // c.renderData(ctx, "発行日（年）", data["発行日（年）"], ropt({}));
-  // c.renderData(ctx, "発行日（月）", data["発行日（月）"], ropt({}));
-  // c.renderData(ctx, "発行日（日）", data["発行日（日）"], ropt({}));
-  // c.renderData(ctx, "医療機関名", data["医療機関名"], ropt({}));
-  // c.renderData(ctx, "医療機関（住所）", data["医療機関（住所）"], ropt({}));
-  // c.renderData(ctx, "医療機関（電話）", data["医療機関（電話）"], ropt({}));
-  // c.renderData(ctx, "医療機関（ＦＡＸ）", data["医療機関（ＦＡＸ）"], ropt({}));
-  // c.renderData(ctx, "医師氏名", data["医師氏名"], ropt({}));
 }
