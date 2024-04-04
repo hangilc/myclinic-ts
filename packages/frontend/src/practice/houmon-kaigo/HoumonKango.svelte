@@ -10,11 +10,13 @@
   } from "@/lib/drawer/compiler/create-renderer";
   import { drawHoumonKango } from "@/lib/drawer/forms/houmon-kango/houmon-kango-drawer";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import type { Patient } from "myclinic-model";
+  import type { ClinicInfo, Patient } from "myclinic-model";
   import { type DataInterface, mkDataMap } from "./data-form";
-  import { KanjiDate, GengouList, calcAge } from "kanjidate";
+  import { KanjiDate, GengouList, calcAge, lastDayOfMonth } from "kanjidate";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
+  import { convertToLastDateOfMonth, incDay, incMonth } from "@/lib/date-util";
+  import api from "@/lib/api";
 
   export let isVisible: boolean;
   let patient: Patient | undefined = undefined;
@@ -26,9 +28,19 @@
   type DataMapKeys = keyof DataInterface;
   const gengouList: string[] = GengouList.map((g) => g.kanji);
   let showTitleInputChoices = false;
+  let clinicInfo: ClinicInfo;
+  let dataSource: string = "";
+
+  init();
 
   dataMap["タイトル"] = "介護予防訪問看護・訪問看護指示書";
   dataMap["サブタイトル"] = "訪問看護指示期間";
+  doIssueDateChange();
+
+  async function init() {
+    clinicInfo = await api.getClinicInfo();
+    setClinicInfo(clinicInfo);
+  }
 
   function doSelectPatient() {
     const d: SearchPatientDialog = new SearchPatientDialog({
@@ -42,12 +54,6 @@
         },
       },
     });
-  }
-
-  function onIssueDateChange() {
-    if (issueDate && patient) {
-      setAge(patient);
-    }
   }
 
   function clear(names: string[]) {
@@ -78,6 +84,10 @@
   function setAge(patient: Patient) {
     const age = calcAge(new Date(patient.birthday), issueDate ?? new Date());
     dataMap["年齢"] = age.toString();
+  }
+
+  function clearAge() {
+    dataMap["年齢"] = "";
   }
 
   function doCreate() {
@@ -145,6 +155,80 @@
     dataMap["サブタイトル"] = target.getAttribute("data-subtitle") ?? "";
     showTitleInputChoices = false;
   }
+
+  function doStartDateChange() {
+    if (startDate) {
+      const k = new KanjiDate(startDate);
+      dataMap["訪問看護指示期間開始（元号）"] = k.gengou;
+      dataMap["訪問看護指示期間開始（年）"] = k.nen.toString();
+      dataMap["訪問看護指示期間開始（月）"] = k.month.toString();
+      dataMap["訪問看護指示期間開始（日）"] = k.day.toString();
+      if (!uptoDate) {
+        if (startDate.getDate() === 1) {
+          const d = incMonth(startDate, 2);
+          uptoDate = convertToLastDateOfMonth(d);
+        } else {
+          let d = incMonth(startDate, 3);
+          d = incDay(d, -1);
+          uptoDate = d;
+        }
+        doUptoDateChange();
+      }
+    } else {
+      dataMap["訪問看護指示期間開始（元号）"] = "";
+      dataMap["訪問看護指示期間開始（年）"] = "";
+      dataMap["訪問看護指示期間開始（月）"] = "";
+      dataMap["訪問看護指示期間開始（日）"] = "";
+    }
+  }
+
+  function doUptoDateChange() {
+    if (uptoDate) {
+      const k = new KanjiDate(uptoDate);
+      dataMap["訪問看護指示期間期限（元号）"] = k.gengou;
+      dataMap["訪問看護指示期間期限（年）"] = k.nen.toString();
+      dataMap["訪問看護指示期間期限（月）"] = k.month.toString();
+      dataMap["訪問看護指示期間期限（日）"] = k.day.toString();
+    } else {
+      dataMap["訪問看護指示期間期限（元号）"] = "";
+      dataMap["訪問看護指示期間期限（年）"] = "";
+      dataMap["訪問看護指示期間期限（月）"] = "";
+      dataMap["訪問看護指示期間期限（日）"] = "";
+    }
+  }
+
+  function doIssueDateChange() {
+    if (issueDate) {
+      const k = new KanjiDate(issueDate);
+      dataMap["発行日（元号）"] = k.gengou;
+      dataMap["発行日（年）"] = k.nen.toString();
+      dataMap["発行日（月）"] = k.month.toString();
+      dataMap["発行日（日）"] = k.day.toString();
+    } else {
+      dataMap["発行日（元号）"] = "";
+      dataMap["発行日（年）"] = "";
+      dataMap["発行日（月）"] = "";
+      dataMap["発行日（日）"] = "";
+    }
+    if (issueDate && patient) {
+      setAge(patient);
+    } else {
+      clearAge();
+    }
+  }
+
+  function setClinicInfo(info: ClinicInfo) {
+    dataMap["医療機関名"] = info.name;
+    dataMap["医療機関（住所）"] = `${info.postalCode} ${info.address}`;
+    dataMap["医療機関（電話）"] = info.tel;
+    dataMap["医療機関（ＦＡＸ）"] = info.fax;
+    dataMap["医師氏名"] = info.doctorName;
+  }
+
+  function doIncorporateData() {
+    const src = dataSource;
+    console.log(src);
+  }
 </script>
 
 {#if isVisible}
@@ -201,11 +285,27 @@
     {/if}
   </div>
   <div>
-    開始日：<EditableDate bind:date={startDate} />
-    終了日：<EditableDate bind:date={uptoDate} />
+    開始日：<EditableDate bind:date={startDate} onChange={doStartDateChange} />
+    終了日：<EditableDate bind:date={uptoDate} onChange={doUptoDateChange} />
   </div>
   <div>
-    発行日：<EditableDate bind:date={issueDate} onChange={onIssueDateChange} />
+    発行日：<EditableDate bind:date={issueDate} onChange={doIssueDateChange} />
+  </div>
+  <div>
+    <span>提出先：</span><input
+      type="text"
+      class="send-to-input"
+      bind:value={dataMap["提出先（訪問看護ステーション）"]}
+    />
+  </div>
+  <div class="data-source-wrapper">
+    <span>データ：</span>
+    <div>
+      <textarea bind:value={dataSource}/>
+      <div>
+        <button on:click={doIncorporateData}>取込</button>
+      </div>
+    </div>
   </div>
   <div>
     {#if showInputs}
@@ -219,10 +319,6 @@
     {/if}
     <div style:display={showInputs ? "block" : "none"}>
       <div class="data-inputs">
-        <span>タイトル</span><input
-          type="text"
-          bind:value={dataMap["タイトル"]}
-        />
         <span>サブタイトル</span><input
           type="text"
           bind:value={dataMap["サブタイトル"]}
@@ -683,6 +779,20 @@
 
   .title-input-choice:hover {
     background-color: #ccc;
+  }
+
+  .send-to-input {
+    width: 20em;
+  }
+
+  .data-source-wrapper {
+    display: grid;
+    grid-template-columns: 4em 26em;
+  }
+
+  .data-source-wrapper textarea{
+    width: 100%;
+    height: 10em;
   }
 
   .data-inputs {
