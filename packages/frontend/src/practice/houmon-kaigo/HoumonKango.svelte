@@ -229,11 +229,18 @@
 
   function doIncorporateData() {
     const parsed = parseDataSource(dataSource);
+    const keys = Object.keys(dataMap);
+    const m: any = dataMap;
     dataSourceErrors = parsed.errors;
     for(let key in parsed.data){
       const value = parsed.data[key];
-      
+      if( keys.includes(key) ){
+        m[key] = value;
+      } else {
+        dataSourceErrors = [...dataSourceErrors, `Invalid key: ${key}`]
+      }
     }
+    dataMap = dataMap;
   }
 </script>
 
