@@ -6,7 +6,7 @@ export function parseDataSource(src: string): {
 } {
   const data: Record<string, string> = {};
   const errors: string[] = [];
-  const seps: string[] = [":::", "|", ":"];
+  const seps: string[] = [":::", "|", "：", ":"];
   src.split(/\r?\n/).forEach(line => {
     line = line.trim();
     if (line === "") {

@@ -24,7 +24,7 @@
   let startDate: Date | null = null;
   let uptoDate: Date | null = null;
   let issueDate: Date = new Date();
-  let dataMap: DataInterface = mkDataMap();
+  let dataMap: DataInterface;
   let showInputs = false;
   type DataMapKeys = keyof DataInterface;
   const gengouList: string[] = GengouList.map((g) => g.kanji);
@@ -34,14 +34,19 @@
   let dataSourceErrors: string[] = [];
 
   init();
+  initDataMap();
 
-  dataMap["タイトル"] = "介護予防訪問看護・訪問看護指示書";
-  dataMap["サブタイトル"] = "訪問看護指示期間";
   doIssueDateChange();
 
   async function init() {
     clinicInfo = await api.getClinicInfo();
     setClinicInfo(clinicInfo);
+  }
+
+  function initDataMap() {
+    dataMap = mkDataMap();
+    dataMap["タイトル"] = "介護予防訪問看護・訪問看護指示書";
+    dataMap["サブタイトル"] = "訪問看護指示期間";
   }
 
   function doSelectPatient() {
@@ -56,6 +61,12 @@
         },
       },
     });
+  }
+
+  function doClearPatient() {
+    patient = undefined;
+    initDataMap();
+    dataSource = "";
   }
 
   function clear(names: string[]) {
@@ -232,12 +243,12 @@
     const keys = Object.keys(dataMap);
     const m: any = dataMap;
     dataSourceErrors = parsed.errors;
-    for(let key in parsed.data){
+    for (let key in parsed.data) {
       const value = parsed.data[key];
-      if( keys.includes(key) ){
+      if (keys.includes(key)) {
         m[key] = value;
       } else {
-        dataSourceErrors = [...dataSourceErrors, `Invalid key: ${key}`]
+        dataSourceErrors = [...dataSourceErrors, `Invalid key: ${key}`];
       }
     }
     dataMap = dataMap;
@@ -250,7 +261,7 @@
     {#if patient === undefined}
       <button on:click={doSelectPatient}>患者選択</button>
     {:else}
-      <button>患者終了</button>
+      <button on:click={doClearPatient}>患者終了</button>
     {/if}
   </div>
   {#if patient}
@@ -308,13 +319,13 @@
     <span>提出先：</span><input
       type="text"
       class="send-to-input"
-      bind:value={dataMap["提出先（訪問看護ステーション）"]}
+      bind:value={dataMap["提出先"]}
     />
   </div>
   <div class="data-source-wrapper">
     <span>データ：</span>
     <div>
-      <textarea bind:value={dataSource}/>
+      <textarea bind:value={dataSource} />
       {#if dataSourceErrors.length > 0}
         <div class="data-source-errors">
           {#each dataSourceErrors as err}
@@ -326,6 +337,9 @@
         <button on:click={doIncorporateData}>取込</button>
       </div>
     </div>
+  </div>
+  <div>
+    <button on:click={doCreate}>作成</button>
   </div>
   <div>
     {#if showInputs}
@@ -750,15 +764,11 @@
           type="text"
           bind:value={dataMap["医師氏名"]}
         />
-        <span>提出先（訪問看護ステーション）</span><input
-          type="text"
-          bind:value={dataMap["提出先（訪問看護ステーション）"]}
-        />
+        <span>提出先</span><input type="text" bind:value={dataMap["提出先"]} />
       </div>
     </div>
   </div>
-  <button on:click={doCreate}>作成</button>
-  <div>
+  <div class="dev-wrapper">
     <div>
       <button on:click={doDataInterface}>データインターフェイス</button>
     </div>
@@ -810,7 +820,7 @@
     grid-template-columns: 4em 26em;
   }
 
-  .data-source-wrapper textarea{
+  .data-source-wrapper textarea {
     width: 100%;
     height: 10em;
   }
@@ -831,5 +841,9 @@
     padding: 10px;
     border: 1px solid gray;
     margin: 10px;
+  }
+
+  .dev-wrapper {
+    margin-top: 10px;
   }
 </style>

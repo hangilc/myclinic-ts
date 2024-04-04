@@ -124,7 +124,7 @@ export interface HoumonKangoData {
   "医療機関（電話）"?: string;
   "医療機関（ＦＡＸ）"?: string;
   "医師氏名"?: string;
-  "提出先（訪問看護ステーション）"?: string;
+  "提出先"?: string;
 
   issueDate?: string;
 }

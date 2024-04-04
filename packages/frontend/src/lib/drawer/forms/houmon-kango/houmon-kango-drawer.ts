@@ -48,7 +48,7 @@ export function drawHoumonKango(data: HoumonKangoData, ctxArg?: DrawerContext): 
   )
   c.drawComposite(ctx, recipientBox, [
     {
-      kind: "gap", width: 70, mark: "提出先（訪問看護ステーション）", ropt: {
+      kind: "gap", width: 70, mark: "提出先", ropt: {
         tryFonts: ["input-regular", "input-small", "input-small"],
         halign: "right",
         modifiers: [b.shrinkHoriz(0, 2)]

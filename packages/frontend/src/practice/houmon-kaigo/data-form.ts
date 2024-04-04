@@ -103,7 +103,7 @@ export interface DataInterface {
   '医療機関（電話）'?: string;
   '医療機関（ＦＡＸ）'?: string;
   '医師氏名'?: string;
-  '提出先（訪問看護ステーション）'?: string;
+  '提出先'?: string;
 };
 
 export function mkDataMap(): DataInterface {
@@ -212,7 +212,7 @@ export function mkDataMap(): DataInterface {
     '医療機関（電話）': "",
     '医療機関（ＦＡＸ）': "",
     '医師氏名': "",
-    '提出先（訪問看護ステーション）': "",
+    '提出先': "",
   };
   return dataMap;
 }
@@ -271,5 +271,5 @@ export const devDataMap: any = {
   "医療機関（電話）": "03-1234-5678",
   "医療機関（ＦＡＸ）": "03-4321-8765",
   医師氏名: "診療太郎",
-  "提出先（訪問看護ステーション）": "某看護ステーション",
+  "提出先": "某看護ステーション",
 };
