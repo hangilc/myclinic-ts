@@ -17,6 +17,7 @@
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import { convertToLastDateOfMonth, incDay, incMonth } from "@/lib/date-util";
   import api from "@/lib/api";
+  import { parseDataSource } from "./houmon-kaigo-helper";
 
   export let isVisible: boolean;
   let patient: Patient | undefined = undefined;
@@ -30,6 +31,7 @@
   let showTitleInputChoices = false;
   let clinicInfo: ClinicInfo;
   let dataSource: string = "";
+  let dataSourceErrors: string[] = [];
 
   init();
 
@@ -226,8 +228,12 @@
   }
 
   function doIncorporateData() {
-    const src = dataSource;
-    console.log(src);
+    const parsed = parseDataSource(dataSource);
+    dataSourceErrors = parsed.errors;
+    for(let key in parsed.data){
+      const value = parsed.data[key];
+      
+    }
   }
 </script>
 
@@ -302,6 +308,13 @@
     <span>データ：</span>
     <div>
       <textarea bind:value={dataSource}/>
+      {#if dataSourceErrors.length > 0}
+        <div class="data-source-errors">
+          {#each dataSourceErrors as err}
+            <div>{err}</div>
+          {/each}
+        </div>
+      {/if}
       <div>
         <button on:click={doIncorporateData}>取込</button>
       </div>
@@ -793,6 +806,13 @@
   .data-source-wrapper textarea{
     width: 100%;
     height: 10em;
+  }
+
+  .data-source-errors {
+    color: red;
+    border: 1px solid red;
+    margin: 4px 10;
+    padding: 10px;
   }
 
   .data-inputs {
