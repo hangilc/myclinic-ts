@@ -12,7 +12,8 @@
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import { dateToSqlDate, type ClinicInfo, type Patient } from "myclinic-model";
   import { type DataInterface, mkDataMap } from "./data-form";
-  import { KanjiDate, GengouList, calcAge, lastDayOfMonth } from "kanjidate";
+  import { KanjiDate, GengouList, calcAge } from "kanjidate";
+  import * as kanjidate from "kanjidate";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import { convertToLastDateOfMonth, incDay, incMonth, sqlDateToDate } from "@/lib/date-util";
@@ -275,7 +276,14 @@
     dataMap = dataMap;
   }
 
-  function doCapture() {
+  function capture(): {
+    patient: Patient | undefined,
+    startDate: Date | null,
+    uptoDate: Date | null,
+    issueDate: Date | null,
+    data: string,
+    map: Record<string, string>,
+  } {
     const cap: Record<string, string> = {};
     const excludes: string[] = [
       "患者氏名",
@@ -323,6 +331,20 @@
         }
       }
     }
+    return {
+      patient,
+      startDate,
+      uptoDate,
+      issueDate,
+      data: Object.entries(cap)
+      .map(([key, value]) => `${key}:::${value}`)
+      .join("\n"),
+      map: cap,
+    }
+  }
+
+  function doCapture() {
+    const { data: cap } = capture();
     dataSource = Object.entries(cap)
       .map(([key, value]) => `${key}:::${value}`)
       .join("\n");
@@ -339,7 +361,21 @@
   }
 
   function doShinryouroku() {
-    const 
+    const { data, startDate, uptoDate, map } = capture();
+    const startPart = startDate ? `${kanjidate.format(kanjidate.f1, startDate)}から` : "";
+    const uptoPart = uptoDate ? `${kanjidate.format(kanjidate.f1, uptoDate)}まで` : "";
+    const shijisho: string = map["タイトル"] || "訪問看護指示書"
+    const lines: string[] = [];
+    lines.push(`${shijisho}作成`, "\n");
+    if( map["提出先"] ){
+      lines.push(`${map["提出先"]}。`)
+    }
+    if( startPart && uptoPart ){
+      lines.push(`${startPart}、${uptoPart}。`)
+    }
+    const text = lines.join("");
+    navigator.clipboard.writeText(text);
+    alert("クリップボードに診療録用文をコピーしました。")
   }
 </script>
 
