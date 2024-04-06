@@ -10,14 +10,14 @@
   } from "@/lib/drawer/compiler/create-renderer";
   import { drawHoumonKango } from "@/lib/drawer/forms/houmon-kango/houmon-kango-drawer";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import type { ClinicInfo, Patient } from "myclinic-model";
+  import { dateToSqlDate, type ClinicInfo, type Patient } from "myclinic-model";
   import { type DataInterface, mkDataMap } from "./data-form";
   import { KanjiDate, GengouList, calcAge, lastDayOfMonth } from "kanjidate";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
-  import { convertToLastDateOfMonth, incDay, incMonth } from "@/lib/date-util";
+  import { convertToLastDateOfMonth, incDay, incMonth, sqlDateToDate } from "@/lib/date-util";
   import api from "@/lib/api";
-  import { parseDataSource } from "./houmon-kaigo-helper";
+  import { parseDataSource } from "./houmon-kango-helper";
 
   export let isVisible: boolean;
   let patient: Patient | undefined = undefined;
@@ -32,6 +32,7 @@
   let clinicInfo: ClinicInfo;
   let dataSource: string = "";
   let dataSourceErrors: string[] = [];
+  const dataMarker = "[[[訪問看護]]]";
 
   init();
   initDataMap();
@@ -57,7 +58,7 @@
         title: "患者選択",
         onEnter: (selected: Patient) => {
           patient = selected;
-          setPatient(patient);
+          doPatientUpdate(patient);
         },
       },
     });
@@ -78,7 +79,7 @@
     });
   }
 
-  function setPatient(patient: Patient) {
+  function doPatientUpdate(patient: Patient) {
     dataMap["患者氏名"] = `${patient.lastName}${patient.firstName}`;
     dataMap["患者住所"] = patient.address;
     const k = new KanjiDate(new Date(patient.birthday));
@@ -238,20 +239,107 @@
     dataMap["医師氏名"] = info.doctorName;
   }
 
-  function doIncorporateData() {
-    const parsed = parseDataSource(dataSource);
+  async function doRestore() {
+    let src = dataSource;
+    {
+      const i = src.indexOf(dataMarker);
+      if( i >= 0 ){
+        src = src.substring(i + dataMarker.length);
+      }
+    }
+    const parsed = parseDataSource(src);
     const keys = Object.keys(dataMap);
     const m: any = dataMap;
     dataSourceErrors = parsed.errors;
     for (let key in parsed.data) {
       const value = parsed.data[key];
-      if (keys.includes(key)) {
+      if( key === "patient-id" ){
+        const patientId = parseInt(value);
+        patient = await api.getPatient(patientId);
+        doPatientUpdate(patient);
+      } else if( key === "start-date" ){
+        startDate = sqlDateToDate(value);
+        doStartDateChange();
+      } else if( key === "upto-date" ){
+        uptoDate = sqlDateToDate(value);
+        doUptoDateChange();
+      } else if( key === "issue-date" ){
+        issueDate = sqlDateToDate(value);
+        doIssueDateChange();
+      } else if (keys.includes(key)) {
         m[key] = value;
       } else {
         dataSourceErrors = [...dataSourceErrors, `Invalid key: ${key}`];
       }
     }
     dataMap = dataMap;
+  }
+
+  function doCapture() {
+    const cap: Record<string, string> = {};
+    const excludes: string[] = [
+      "患者氏名",
+      "生年月日（元号：昭和）",
+      "生年月日（年）",
+      "生年月日（月）",
+      "生年月日（日）",
+      "年齢",
+      "訪問看護指示期間開始（元号）",
+      "訪問看護指示期間開始（年）",
+      "訪問看護指示期間開始（月）",
+      "訪問看護指示期間開始（日）",
+      "訪問看護指示期間期限（元号）",
+      "訪問看護指示期間期限（年）",
+      "訪問看護指示期間期限（月）",
+      "訪問看護指示期間期限（日）",
+      "患者住所",
+      "発行日（元号）",
+      "発行日（年）",
+      "発行日（月）",
+      "発行日（日）",
+      "医療機関（住所）",
+      "医療機関（電話）",
+      "医療機関（ＦＡＸ）",
+      "医師氏名",
+      "医療機関名",
+    ];
+    if (patient) {
+      cap["patient-id"] = patient.patientId.toString();
+    }
+    if (startDate) {
+      cap["start-date"] = dateToSqlDate(startDate);
+    }
+    if (uptoDate) {
+      cap["upto-date"] = dateToSqlDate(uptoDate);
+    }
+    if (issueDate) {
+      cap["issue-date"] = dateToSqlDate(issueDate);
+    }
+    for (let key in dataMap) {
+      if (!excludes.includes(key)) {
+        const value = dataMap[key as DataMapKeys];
+        if (value) {
+          cap[key] = value;
+        }
+      }
+    }
+    dataSource = Object.entries(cap)
+      .map(([key, value]) => `${key}:::${value}`)
+      .join("\n");
+  }
+
+  function doUpdateDates() {
+    issueDate = new Date();
+    doIssueDateChange();
+    if( uptoDate ){
+      startDate = incDay(uptoDate, 1);
+      uptoDate = null;
+      doStartDateChange();
+    }
+  }
+
+  function doShinryouroku() {
+    const 
   }
 </script>
 
@@ -334,7 +422,10 @@
         </div>
       {/if}
       <div>
-        <button on:click={doIncorporateData}>取込</button>
+        <button on:click={doCapture}>指示書→データ</button>
+        <button on:click={doRestore}>データ→指示書</button>
+        <button on:click={doUpdateDates}>指示書日付更新</button>
+        <button on:click={doShinryouroku}>指示書→診療録</button>
       </div>
     </div>
   </div>

@@ -10,7 +10,7 @@
   import Cashier from "@/cashier/Cashier.svelte";
   import BigChar from "./BigChar.svelte";
   import FaxShohousen from "./fax-shohousen/FaxShohousen.svelte";
-  import HoumonKango from "./houmon-kaigo/HoumonKango.svelte";
+  import HoumonKango from "./houmon-kango/HoumonKango.svelte";
 
   export let serviceStore: Writable<string>;
 

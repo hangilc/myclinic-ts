@@ -34,6 +34,6 @@ export function lastDayOfMonth(year: number, month: number): number {
 
 export function incDay(date: Date, amount: number): Date {
   date = new Date(date);
-  date.setDate(date.getDay() + amount);
+  date.setDate(date.getDate() + amount);
   return date;
 }
