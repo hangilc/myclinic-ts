@@ -67,6 +67,9 @@
 
   function doClearPatient() {
     patient = undefined;
+    startDate = null;
+    uptoDate = null;
+    issueDate = new Date();
     initDataMap();
     dataSource = "";
   }
@@ -362,17 +365,23 @@
 
   function doShinryouroku() {
     const { data, startDate, uptoDate, map } = capture();
-    const startPart = startDate ? `${kanjidate.format(kanjidate.f1, startDate)}から` : "";
-    const uptoPart = uptoDate ? `${kanjidate.format(kanjidate.f1, uptoDate)}まで` : "";
-    const shijisho: string = map["タイトル"] || "訪問看護指示書"
+    const startPart = startDate ? `${kanjidate.format(kanjidate.f2, startDate)}から` : "";
+    const uptoPart = uptoDate ? `${kanjidate.format(kanjidate.f2, uptoDate)}まで` : "";
+    let shijisho = map["タイトル"];
+    if( shijisho.includes("訪問看護指示書") ){
+      shijisho = "訪問看護指示書";
+    }
     const lines: string[] = [];
-    lines.push(`${shijisho}作成`, "\n");
+    lines.push(`${shijisho}作成。`, "\n");
     if( map["提出先"] ){
       lines.push(`${map["提出先"]}。`)
     }
     if( startPart && uptoPart ){
       lines.push(`${startPart}、${uptoPart}。`)
     }
+    lines.push("\n\n[[[訪問看護]]]\n");
+    lines.push(data);
+    lines.push("\n");
     const text = lines.join("");
     navigator.clipboard.writeText(text);
     alert("クリップボードに診療録用文をコピーしました。")
