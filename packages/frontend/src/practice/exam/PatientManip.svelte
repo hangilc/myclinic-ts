@@ -40,7 +40,7 @@
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
-          meisai,
+          meisai: rezeptMeisai,
           gendogaku,
           payments,
         },

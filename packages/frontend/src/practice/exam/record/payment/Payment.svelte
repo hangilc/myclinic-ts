@@ -28,7 +28,7 @@
       const gendogaku = await calcGendogaku(patientId, year, month);
       const monthlyFutan = await calcMonthlyFutan(patientId, year, month);
       mode = "edit";
-      edit.open(meisai, gendogaku, monthlyFutan);
+      edit.open(rezeptMeisai, gendogaku, monthlyFutan);
     }
   }
 </script>
