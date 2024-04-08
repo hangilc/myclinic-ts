@@ -86,9 +86,9 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
   { // new dev
-    const prevPayers = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, year, month);
+    const prevPayers = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
     const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
-    const curPayers = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, year, month);
+    const curPayers = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
     
     // {
     //   const tensuuCollector = new TensuuCollector();
@@ -131,7 +131,6 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     calcVisits(currRezeptVisits, tensuuCollector, comb);
     comb.iterMeisai((shikibetsu, futanKubun, ten, count, label) => {
       const shikibetsuName = rev診療識別コード[shikibetsu];
-      console.log(shikibetsuName);
     });
   }
   meisai.futanWari = futanWari;
@@ -185,7 +184,7 @@ function isBirthdayMonth75(patient: Patient, year: number, month: number): boole
 }
 
 function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunCode | undefined,
-  hokenCollector: HokenCollector, year: number, month: number
+  hokenCollector: HokenCollector, patient: Patient, year: number, month: number
 ): Payer[] {
   const tensuuCollector = new TensuuCollector();
   const comb = new Combiner();
@@ -196,7 +195,7 @@ function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunC
     const opt: GendogakuOptions = {
       hasKuniKouhi: hasKuniKouhi(hokenCollector.kouhiList),
       isTasuuGaitou: false, // 直近12カ月の間に3回以上高額療養費の対象になったか
-      isBirthdayMonth75: isBirthdayMonth75(curr.patient, year, month),
+      isBirthdayMonth75: isBirthdayMonth75(patient, year, month),
       isNyuuin: false,
       isSeikatsuHogo: hasSeikatsuHogo(hokenCollector.kouhiList),
     };
