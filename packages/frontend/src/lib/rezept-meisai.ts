@@ -7,6 +7,7 @@ import { rev診療識別コード } from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
 import type { Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
+import { calcGendogaku } from "myclinic-rezept/gendogaku";
 
 const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
 
@@ -82,6 +83,16 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const kouhiDataList = hokenCollector.kouhiList.map(kouhi => resolveKouhiData(kouhi));
   let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
+  { // new dev
+
+    {
+      const tensuuCollector = new TensuuCollector();
+      const comb = new Combiner();
+      calcVisits(prevRezeptVisits, tensuuCollector, comb);
+      const totalTen = tensuuCollector.totalTen;
+      const hokenGendo = calcGendogaku(shotokuKubun, totalTen * 10, )
+    }
+  }
   {
     const tensuuCollector = new TensuuCollector();
     const comb = new Combiner();
