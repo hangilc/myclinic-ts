@@ -5,7 +5,7 @@ import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveG
 import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
 import { rev診療識別コード } from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
+import { calcJikofutan, calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
 import { calcGendogaku, isKuniKouhi2, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
@@ -86,10 +86,14 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
   { // new dev
-    const prevPayers = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
+    const [prevTotalTen, prevPayers] = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
     const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
-    const curPayers = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
-    
+    const [currTotalTen, currPayers] = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
+    const prevJikofutan = calcJikofutan(prevTotalTen * 10, prevPayers);
+    const currJikofutan = calcJikofutan(currTotalTen * 10, currPayers);
+    console.log("prevPays", prevPayers);
+    console.log("currPays", currPayers);
+    console.log("new jikofutan", currJikofutan);
     // {
     //   const tensuuCollector = new TensuuCollector();
     //   const comb = new Combiner();
@@ -131,6 +135,7 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     calcVisits(currRezeptVisits, tensuuCollector, comb);
     comb.iterMeisai((shikibetsu, futanKubun, ten, count, label) => {
       const shikibetsuName = rev診療識別コード[shikibetsu];
+      console.log("label", label);
     });
   }
   meisai.futanWari = futanWari;
@@ -185,11 +190,13 @@ function isBirthdayMonth75(patient: Patient, year: number, month: number): boole
 
 function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunCode | undefined,
   hokenCollector: HokenCollector, patient: Patient, year: number, month: number
-): Payer[] {
+): [number, Payer[]] {
   const tensuuCollector = new TensuuCollector();
   const comb = new Combiner();
   calcVisits(visits, tensuuCollector, comb);
-  const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
+  const totalTen = [...tensuuCollector.totalTen.values()].reduce((a, e) => a + e, 0);;
+  console.log("totalTen", totalTen);
+  // const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
   let hokenGendogaku: number | undefined = undefined;
   if (shotokuKubun) {
     const opt: GendogakuOptions = {
@@ -203,7 +210,7 @@ function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunC
   }
   const payers = resolvePayers(hokenCollector, hokenGendogaku);
   calcPayments(totalTen * 10, payers);
-  return payers;
+  return [totalTen, payers];
 }
 
 // function calcPayments(visits: RezeptVisit[]): { totalTen: number } {

@@ -22,6 +22,7 @@
       cashierVisitId.set(visitId);
       const meisai = await api.getMeisai(visitId);
       const rezeptMeisai = await calcRezeptMeisai(visitId);
+      console.log("meisai", rezeptMeisai);
       const visit = await api.getVisit(visitId);
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;
