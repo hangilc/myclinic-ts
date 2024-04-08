@@ -170,6 +170,11 @@ export class HokenCollector {
     }
     return 負担区分コード[name];
   }
+  
+  getHoken(): Shahokokuho | Koukikourei | undefined {
+    return this.shahokokuho ?? this.koukikourei;
+  }
+
 }
 
 async function resolveOnshi(visitId: number): Promise<ResultItem | undefined> {

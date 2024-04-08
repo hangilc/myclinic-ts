@@ -3,7 +3,8 @@ interface PaymentContext {
   totalBill: number;
 }
 
-interface Payer {
+export interface Payer {
+  kind: string;
   calc(bill: number, ctx: PaymentContext): number;
   payment: number;
 }
@@ -12,7 +13,7 @@ export function calcPayments(bill: number, payers: Payer[]) {
   const ctx = { totalBill: bill };
   payers.forEach(p => {
     const payment = p.calc(bill, ctx);
-    p.payment = payment;
+    p.payment += payment;
     bill -= p.payment;
   });
 }
@@ -24,6 +25,7 @@ export function calcJikofutan(bill: number, payers: { payment: number }[]): numb
 
 export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
   return {
+    kind: "hoken",
     calc(bill: number) {
       let jikofutan = bill * futanWari / 10.0;
       if( gendogaku != undefined ){
@@ -39,6 +41,7 @@ export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
 
 export function mkNanbyouPayer(gendogaku: number): Payer {
   return {
+    kind: "nanbyou",
     calc(bill: number, ctx: PaymentContext) {
       let jikofutan = bill;
       if( jikofutan > ctx.totalBill * 0.2 ){
@@ -48,6 +51,16 @@ export function mkNanbyouPayer(gendogaku: number): Payer {
         jikofutan = gendogaku;
       }
       return bill - jikofutan;
+    },
+    payment: 0,
+  }
+}
+
+export function mkUnknownPayer(): Payer {
+  return {
+    kind: "unknown",
+    calc(bill: number) {
+      return bill;
     },
     payment: 0,
   }
