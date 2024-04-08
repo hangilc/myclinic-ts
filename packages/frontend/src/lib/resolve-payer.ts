@@ -2,9 +2,9 @@ import { mkHokenPayer, mkNanbyouPayer, mkUnknownPayer, type Payer } from "myclin
 import { resolveFutanWari } from "./futan-wari";
 import type { Kouhi, Koukikourei, Shahokokuho } from "myclinic-model";
 
-export function resolveHokenPayer(hoken: Shahokokuho | Koukikourei ): Payer {
+export function resolveHokenPayer(hoken: Shahokokuho | Koukikourei, gendogaku?: number ): Payer {
   const futanWari = resolveFutanWari(hoken);
-  return mkHokenPayer(futanWari);
+  return mkHokenPayer(futanWari, gendogaku);
 }
 
 export interface KouhiContext {

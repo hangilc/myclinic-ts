@@ -1,13 +1,15 @@
-import { Kouhi, Koukikourei, Meisai, MeisaiSectionEnum, MeisaiSectionType, Shahokokuho, Visit, VisitEx } from "myclinic-model";
+import { Kouhi, Koukikourei, Meisai, MeisaiSectionEnum, MeisaiSectionType, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 import { resolveKouhiData } from "./resolve-kouhi-data";
 import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
 import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
 import { rev診療識別コード } from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
-import type { Payer } from "myclinic-rezept/futan/calc";
+import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
-import { calcGendogaku } from "myclinic-rezept/gendogaku";
+import { calcGendogaku, isKuniKouhi2, type GendogakuOptions } from "myclinic-rezept/gendogaku";
+import { calcAge } from "./calc-age";
+import type { ShotokuKubunCode } from "myclinic-rezept/codes";
 
 const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
 
@@ -84,15 +86,30 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
   { // new dev
-
-    {
-      const tensuuCollector = new TensuuCollector();
-      const comb = new Combiner();
-      calcVisits(prevRezeptVisits, tensuuCollector, comb);
-      const totalTen = tensuuCollector.totalTen;
-      const hokenGendo = calcGendogaku(shotokuKubun, totalTen * 10, )
-    }
-  }
+    const prevPayers = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, year, month);
+    const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
+    const curPayers = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, year, month);
+    
+    // {
+    //   const tensuuCollector = new TensuuCollector();
+    //   const comb = new Combiner();
+    //   calcVisits(prevRezeptVisits, tensuuCollector, comb);
+    //   const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
+    //   let hokenGendogaku: number | undefined = undefined;
+    //   if (shotokuKubun) {
+    //     const opt: GendogakuOptions = {
+    //       hasKuniKouhi: hasKuniKouhi(hokenCollector.kouhiList),
+    //       isTasuuGaitou: false, // 直近12カ月の間に3回以上高額療養費の対象になったか
+    //       isBirthdayMonth75: isBirthdayMonth75(curr.patient, year, month),
+    //       isNyuuin: false,
+    //       isSeikatsuHogo: hasSeikatsuHogo(hokenCollector.kouhiList),
+    //     };
+    //     hokenGendogaku = calcGendogaku(shotokuKubun, totalTen * 10, opt);
+    //   }
+    //   const payers = resolvePayers(hokenCollector, hokenGendogaku);
+    //   calcPayments(totalTen * 10, payers);
+    // }
+  } // end of new dev
   {
     const tensuuCollector = new TensuuCollector();
     const comb = new Combiner();
@@ -127,14 +144,66 @@ function yearMonthOfVisit(visit: Visit): [number, number] {
   return [d.getFullYear(), d.getMonth() + 1];
 }
 
-function resolvePayers(hokenCollector: HokenCollector): Payer[] {
+function resolvePayers(hokenCollector: HokenCollector, hokenGendogaku?: number): Payer[] {
   let hoken: Shahokokuho | Koukikourei | undefined = hokenCollector.getHoken();
   const payers: Payer[] = [];
-  if( hoken ){
-    payers.push(resolveHokenPayer(hoken));
+  if (hoken) {
+    payers.push(resolveHokenPayer(hoken, hokenGendogaku));
   }
   const kouhiContext = {};
   payers.push(...hokenCollector.kouhiList.map(kouhi => resolveKouhiPayer(kouhi, kouhiContext)))
+  return payers;
+}
+
+function hasKuniKouhi(kouhiList: Kouhi[]): boolean {
+  for (const kouhi of kouhiList) {
+    const houbetsu = Math.floor(kouhi.futansha / 1000000);
+    if (isKuniKouhi2(houbetsu, kouhi.futansha)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function hasSeikatsuHogo(kouhiList: Kouhi[]): boolean {
+  for (const kouhi of kouhiList) {
+    const houbetsu = Math.floor(kouhi.futansha / 1000000);
+    if (houbetsu === 12) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function isBirthdayMonth75(patient: Patient, year: number, month: number): boolean {
+  const bd = new Date(patient.birthday)
+  const m = bd.getMonth() + 1;
+  if (m === month) {
+    return calcAge(bd, new Date(year, month - 1, 1)) === 75;
+  }
+  return false;
+}
+
+function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunCode | undefined,
+  hokenCollector: HokenCollector, year: number, month: number
+): Payer[] {
+  const tensuuCollector = new TensuuCollector();
+  const comb = new Combiner();
+  calcVisits(visits, tensuuCollector, comb);
+  const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
+  let hokenGendogaku: number | undefined = undefined;
+  if (shotokuKubun) {
+    const opt: GendogakuOptions = {
+      hasKuniKouhi: hasKuniKouhi(hokenCollector.kouhiList),
+      isTasuuGaitou: false, // 直近12カ月の間に3回以上高額療養費の対象になったか
+      isBirthdayMonth75: isBirthdayMonth75(curr.patient, year, month),
+      isNyuuin: false,
+      isSeikatsuHogo: hasSeikatsuHogo(hokenCollector.kouhiList),
+    };
+    hokenGendogaku = calcGendogaku(shotokuKubun, totalTen * 10, opt);
+  }
+  const payers = resolvePayers(hokenCollector, hokenGendogaku);
+  calcPayments(totalTen * 10, payers);
   return payers;
 }
 
