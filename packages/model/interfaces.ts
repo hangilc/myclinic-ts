@@ -422,7 +422,7 @@ export const VisitExObject = {
 };
 
 export enum MeisaiSectionEnum {
-  ShoshinSaisin = "初・再診料",
+  ShoshinSaishin = "初・再診料",
   IgakuKanri = "医学管理等",
   Zaitaku = "在宅医療",
   Kensa = "検査",

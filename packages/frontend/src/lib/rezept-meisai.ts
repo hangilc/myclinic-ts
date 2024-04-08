@@ -1,15 +1,15 @@
-import { Kouhi, Koukikourei, Meisai, MeisaiSectionEnum, MeisaiSectionType, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
+import { Kouhi, Koukikourei, Meisai, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 import { resolveKouhiData } from "./resolve-kouhi-data";
-import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun, sortKouhiList } from "./rezept-adapter";
+import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
 import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
-import { rev診療識別コード } from "myclinic-rezept/dist/codes";
+import { rev診療識別コード, 診療識別コード} from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcJikofutan, calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
 import { calcGendogaku, isKuniKouhi2, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
-import type { ShotokuKubunCode } from "myclinic-rezept/codes";
+import type { ShotokuKubunCode, 診療識別コードName } from "myclinic-rezept/codes";
 
 const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
 
@@ -42,6 +42,7 @@ const ShikibetuSectionMap: Record<string, string> = {
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const meisai = new Meisai([], 3, 0);
+  initMeisaiItems(meisai);
   const visit = await api.getVisit(visitId);
   if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
     meisai.futanWari = 10;
@@ -135,9 +136,12 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     calcVisits(currRezeptVisits, tensuuCollector, comb);
     comb.iterMeisai((shikibetsu, futanKubun, ten, count, label) => {
       const shikibetsuName = rev診療識別コード[shikibetsu];
-      console.log("label", label);
+      const section = cvtShinryouShikibetsuCodeToMeisaiSection(shikibetsuName);
+      const item = new MeisaiSectionItem(ten, count, label);
+      addToMeisai(meisai, section, item);
     });
   }
+  cleanupMeisaiItems(meisai);
   meisai.futanWari = futanWari;
   meisai.charge = roundTo10(cover.patientCharge - prevCover.patientCharge);
   return meisai;
@@ -196,7 +200,6 @@ function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunC
   calcVisits(visits, tensuuCollector, comb);
   const totalTen = [...tensuuCollector.totalTen.values()].reduce((a, e) => a + e, 0);;
   console.log("totalTen", totalTen);
-  // const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
   let hokenGendogaku: number | undefined = undefined;
   if (shotokuKubun) {
     const opt: GendogakuOptions = {
@@ -213,10 +216,53 @@ function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunC
   return [totalTen, payers];
 }
 
-// function calcPayments(visits: RezeptVisit[]): { totalTen: number } {
-//   const tensuuCollector = new TensuuCollector();
-//   const comb = new Combiner();
-//   calcVisits(visits, tensuuCollector, comb);
-//   tensuuCollector.
-//   return calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
-// }
+function cvtShinryouShikibetsuCodeToMeisaiSection(shikibetsu: 診療識別コードName): MeisaiSectionType {
+  const m = MeisaiSectionEnum;
+  switch(shikibetsu){
+    case "全体に係る識別コード": return m.Sonota;
+    case "初診": return m.ShoshinSaishin;
+    case "再診": return m.ShoshinSaishin;
+    case "医学管理": return m.IgakuKanri;
+    case "在宅": return m.Zaitaku;
+    case "投薬・内服": return m.Touyaku;
+    case "投薬・屯服": return m.Touyaku;
+    case "投薬・外用": return m.Touyaku;
+    case "投薬・調剤": return m.Touyaku;
+    case "投薬・処方": return m.Touyaku;
+    case "投薬・麻毒": return m.Touyaku;
+    case "投薬・調基": return m.Touyaku;
+    case "投薬・その他": return m.Touyaku;
+    case "注射・皮下筋肉内": return m.Chuusha;
+    case "注射・静脈内": return m.Chuusha;
+    case "注射・その他": return m.Chuusha;
+    case "薬剤料減点": return m.Touyaku;
+    case "処置": return m.Shochi;
+    case "手術": return m.Sonota;
+    case "麻酔": return m.Sonota;
+    case "検査・病理": return m.Kensa;
+    case "画像診断": return m.Gazou;
+    case "その他": return m.Sonota;
+    case "全体に係る識別コード９９": return m.Sonota;
+    default: throw new Error(`Unknown shikibetsu: ${shikibetsu}`)
+  }
+}
+
+function initMeisaiItems(meisai: Meisai) {
+  Object.values(MeisaiSectionEnum).forEach(sect => {
+    const data = new MeisaiSectionData(sect, []);
+    meisai.items.push(data);
+  })
+}
+
+function addToMeisai(meisai: Meisai, section: MeisaiSectionType, item: MeisaiSectionItem) {
+  for(const data of meisai.items){
+    if( data.section === section ){
+      data.entries.push(item);
+    }
+  }
+  console.error(`Unknown section: ${section}`);
+}
+
+function cleanupMeisaiItems(meisai: Meisai) {
+  meisai.items = meisai.items.filter(item => item.entries.length > 0);
+}

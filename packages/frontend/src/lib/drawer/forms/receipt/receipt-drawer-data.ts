@@ -50,7 +50,7 @@ export class ReceiptDrawerData {
         ten = "";
       }
       switch (sect.section) {
-        case MeisaiSectionEnum.ShoshinSaisin: {
+        case MeisaiSectionEnum.ShoshinSaishin: {
           this.shoshin = ten;
           break;
         }

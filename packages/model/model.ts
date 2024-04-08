@@ -1202,7 +1202,7 @@ export class MeisaiSectionType {
 }
 
 export const MeisaiSectionEnum: Record<string, MeisaiSectionType> = {
-  ShoshinSaisin: new MeisaiSectionType("初・再診料"),
+  ShoshinSaishin: new MeisaiSectionType("初・再診料"),
   IgakuKanri: new MeisaiSectionType("医学管理等"),
   Zaitaku: new MeisaiSectionType("在宅医療"),
   Kensa: new MeisaiSectionType("検査"),
