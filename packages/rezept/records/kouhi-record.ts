@@ -7,8 +7,8 @@ export interface 公費レコードData {
   受給者番号: number;
   診療実日数: number;
   合計点数: number;
-  負担金額?: number;
-  公費給付対象外来一部負担金?: number;
+  負担金額?: number; // 患者の一部負担金額
+  公費給付対象外来一部負担金?: number; //　保険単独と公費併用で、紙レセプトで保険負担金額欄にカッコ付きで記載する金額
 }
 
 export function mk公費レコード({

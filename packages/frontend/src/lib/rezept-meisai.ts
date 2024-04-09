@@ -83,8 +83,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   } else if (curr.hoken.koukikourei) {
     futanWari = curr.hoken.koukikourei!.futanWari;
   }
-  const kouhiDataList = hokenCollector.kouhiList.map(kouhi => resolveKouhiData(kouhi));
-  let prevCover: TotalCover;
+  // const kouhiDataList = hokenCollector.kouhiList.map(kouhi => resolveKouhiData(kouhi));
+  // let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
   let jikofutan = 0;
   { // new dev
