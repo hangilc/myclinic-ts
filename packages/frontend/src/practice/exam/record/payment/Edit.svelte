@@ -130,7 +130,7 @@
           限度額：{gendogaku !== undefined
             ? `${gendogaku.toLocaleString()}円`
             : "（未提出）"}
-          負担額：{monthlyFutan !== undefined
+          当月負担額合計：{monthlyFutan !== undefined
             ? `${monthlyFutan.toLocaleString()}円`
             : "（未計算）"}
         </div>
