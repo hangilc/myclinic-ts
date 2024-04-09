@@ -86,49 +86,29 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const kouhiDataList = hokenCollector.kouhiList.map(kouhi => resolveKouhiData(kouhi));
   let prevCover: TotalCover;
   let prevRezeptVisits = await cvtModelVisitsToRezeptVisits(prevs, hokenCollector);
+  let jikofutan = 0;
   { // new dev
     const [prevTotalTen, prevPayers] = calcPaymentsOfVisits(prevRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
     const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
     const [currTotalTen, currPayers] = calcPaymentsOfVisits(currRezeptVisits, shotokuKubun, hokenCollector, curr.patient, year, month);
     const prevJikofutan = calcJikofutan(prevTotalTen * 10, prevPayers);
     const currJikofutan = calcJikofutan(currTotalTen * 10, currPayers);
-    console.log("prevPays", prevPayers);
-    console.log("currPays", currPayers);
-    console.log("new jikofutan", currJikofutan);
-    // {
-    //   const tensuuCollector = new TensuuCollector();
-    //   const comb = new Combiner();
-    //   calcVisits(prevRezeptVisits, tensuuCollector, comb);
-    //   const totalTen = Object.values(tensuuCollector.totalTen).reduce((a, e) => a + e, 0);
-    //   let hokenGendogaku: number | undefined = undefined;
-    //   if (shotokuKubun) {
-    //     const opt: GendogakuOptions = {
-    //       hasKuniKouhi: hasKuniKouhi(hokenCollector.kouhiList),
-    //       isTasuuGaitou: false, // 直近12カ月の間に3回以上高額療養費の対象になったか
-    //       isBirthdayMonth75: isBirthdayMonth75(curr.patient, year, month),
-    //       isNyuuin: false,
-    //       isSeikatsuHogo: hasSeikatsuHogo(hokenCollector.kouhiList),
-    //     };
-    //     hokenGendogaku = calcGendogaku(shotokuKubun, totalTen * 10, opt);
-    //   }
-    //   const payers = resolvePayers(hokenCollector, hokenGendogaku);
-    //   calcPayments(totalTen * 10, payers);
-    // }
+    jikofutan = currJikofutan - prevJikofutan;
   } // end of new dev
-  {
-    const tensuuCollector = new TensuuCollector();
-    const comb = new Combiner();
-    calcVisits(prevRezeptVisits, tensuuCollector, comb);
-    prevCover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
-  }
-  let cover: TotalCover;
-  {
-    const tensuuCollector = new TensuuCollector();
-    const comb = new Combiner();
-    const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
-    calcVisits(currRezeptVisits, tensuuCollector, comb);
-    cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
-  }
+  // {
+  //   const tensuuCollector = new TensuuCollector();
+  //   const comb = new Combiner();
+  //   calcVisits(prevRezeptVisits, tensuuCollector, comb);
+  //   prevCover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
+  // }
+  // let cover: TotalCover;
+  // {
+  //   const tensuuCollector = new TensuuCollector();
+  //   const comb = new Combiner();
+  //   const currRezeptVisits = (await cvtVisitsToUnit([curr, ...prevs].map(v => v.asVisit))).visits;
+  //   calcVisits(currRezeptVisits, tensuuCollector, comb);
+  //   cover = calcFutan(futanWari, shotokuKubun, kouhiDataList, tensuuCollector.totalTen);
+  // }
   {
     const tensuuCollector = new TensuuCollector();
     const comb = new Combiner();
@@ -143,7 +123,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
   cleanupMeisaiItems(meisai);
   meisai.futanWari = futanWari;
-  meisai.charge = roundTo10(cover.patientCharge - prevCover.patientCharge);
+  // meisai.charge = roundTo10(cover.patientCharge - prevCover.patientCharge);
+  meisai.charge = roundTo10(jikofutan);
   return meisai;
 }
 

@@ -111,7 +111,7 @@
       add("暫定診察の解除", doClearTempVisitId);
     }
     add("診療明細", doMeisai);
-    add("負担割オーバーライド", doFutanwariOverride);
+    // add("負担割オーバーライド", doFutanwariOverride);
     if (isMishuu(visit)) {
       add("未収リストへ", doMishuuList);
     }
