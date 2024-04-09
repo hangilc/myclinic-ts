@@ -43,16 +43,6 @@
               ];
             }
           }
-          // const invalids = await countInvalidUsage(kouhi);
-          // if (invalids > prevInvalids) {
-          //   return ["有効期間外の使用が発生するので、変更できません。"];
-          // }
-          // const usage = await api.countKouhiUsage(init.kouhiId);
-          // if (usage > 0 && !Kouhi.isContentEqual(init, kouhi)) {
-          //   return [
-          //     "この保険はすでに使われているので、内容の変更ができません。",
-          //   ];
-          // }
           await api.updateKouhi(kouhi);
           onUpdated(kouhi);
           return [];

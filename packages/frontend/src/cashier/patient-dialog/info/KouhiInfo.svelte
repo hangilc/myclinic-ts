@@ -36,6 +36,16 @@
   <span>{formatValidFrom(kouhi.validFrom)}</span>
   <span>期限終了</span>
   <span>{formatValidUpto(kouhi.validUpto)}</span>
+  {#if kouhi.futansha === 54136015}
+    <span>限度額</span>
+    <span>
+      {#if kouhi.memoAsJson["gendogaku"]}
+        {kouhi.memoAsJson["gendogaku"].toLocaleString()}円
+      {:else}
+        （不明）
+      {/if}
+    </span>
+  {/if}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <a on:click={doUsageClick} class="usage-link"><span>使用回数</span></a>
   <span>{usageCount}回</span>

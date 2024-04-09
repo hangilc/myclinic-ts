@@ -12,6 +12,7 @@
   let dispatch = createEventDispatcher<{ "value-change": void }>();
   let futansha: string;
   let jukyuusha: string;
+  let gendogaku: string;
   let validFrom: Date | null;
   let validUpto: Date | null;
   let gengouList = gengouListUpto("平成");
@@ -24,13 +25,25 @@
     if (init === null) {
       futansha = "";
       jukyuusha = "";
+      gendogaku = "";
       validFrom = null;
       validUpto = null;
     } else {
       futansha = init.futansha.toString();
       jukyuusha = init.jukyuusha.toString();
+      gendogaku = init.memoAsJson.gendogaku ? init.memoAsJson.gendogaku.toString : "";
       validFrom = parseSqlDate(init.validFrom);
       validUpto = parseOptionalSqlDate(init.validUpto);
+    }
+  }
+
+  function validateMemo(): string | undefined {
+    if( init?.futansha === 54136015) {
+      if( gendogaku === "" ) {
+        
+      }
+    } else {
+      return init ? init.memo : undefined;
     }
   }
 
@@ -42,7 +55,7 @@
       jukyuusha: validResult(jukyuusha).validate(toInt),
       validFrom: validateValidFrom(),
       validUpto: validateValidUpto(),
-      memo: init ? init.memo : undefined,
+      memo: validateMemo(),
     };
     return validateKouhi(input);
   }
@@ -77,6 +90,18 @@
       data-cy="jukyuusha-input"
     />
   </div>
+  {#if init?.futansha === 54136015}
+    <span>限度額</span>
+    <div>
+      <input
+        type="text"
+        class="regular"
+        bind:value={gendogaku}
+        on:change={doUserInput}
+        data-cy="gendogaku-input"
+      />
+    </div>
+  {/if}
   <span>期限開始</span>
   <div data-cy="valid-from-input">
     <DateFormWithCalendar
