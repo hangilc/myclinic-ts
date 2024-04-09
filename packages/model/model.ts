@@ -518,6 +518,16 @@ export class Koukikourei {
   }
 }
 
+export interface KouhiInterface {
+  kouhiId: number;
+  futansha: number;
+  jukyuusha: number;
+  validFrom: string;
+  validUpto: string;
+  patientId: number;
+  memo: string | undefined;
+}
+
 export class Kouhi {
   constructor(
     public kouhiId: number,
