@@ -1,5 +1,16 @@
+import { isShuushokugoMaster } from "interfaces";
 import { KouhiInterface, PatientSummary, dateToSqlDate } from "./model";
 import * as v from "valibot";
+
+export function validationError(e: any): string {
+  if( e instanceof v.ValiError ){
+    return e.issues.map(issue => issue.message).join("\n");
+  } else if( e instanceof Error ){
+    return e.message;
+  } else {
+    return e.toString();
+  }
+}
 
 const KouhiSchema = v.object({
   kouhiId: v.number(),
@@ -12,11 +23,13 @@ const KouhiSchema = v.object({
     v.string([v.regex(/^((\d{4}-\d{2}-\d{2})|(0000-00-00))$/)]),
     coerceToUptoDate),
   patientId: v.number(),
-  memo: v.union([v.string(), v.undefined_()]),
+  memo: v.union([v.string([v.custom(encodedJson, "メモのJSON形式エラー。")]), v.undefined_()]),
 });
 
+
 export function validateKouhi(obj: any): KouhiInterface {
-  return v.parse(KouhiSchema, obj);
+  const kouhi: KouhiInterface = v.parse(KouhiSchema, obj);
+  return kouhi;
 }
 
 const PatientSummarySchema = v.object({
@@ -43,5 +56,14 @@ function coerceToUptoDate(arg: unknown): unknown {
     return "0000-00-00";
   } else {
     return arg;
+  }
+}
+
+function encodedJson(s: string): boolean {
+  try {
+    JSON.parse(s);
+    return true;
+  } catch(e) {
+    return false;
   }
 }

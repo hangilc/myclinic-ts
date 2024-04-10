@@ -124,5 +124,33 @@ describe("model validators", () => {
     };
     const kouhi = validateKouhi(obj);
     expect(kouhi).toMatchObject(Object.assign({}, obj, { futansha: parseInt(obj.futansha), jukyuusha: parseInt(obj.jukyuusha) }));
-  })
+  });
+
+  it("should rule out invalid JSON memo in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+      memo: '{a:2}',
+    };
+    expect(() => validateKouhi(obj)).toThrow(ValiError);
+  });
+
+  it("should validate memo in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+      memo: '{"gendogaku":5000}',
+    };
+    const kouhi = validateKouhi(obj);
+    expect(kouhi).toMatchObject(obj);
+  });
+
 });

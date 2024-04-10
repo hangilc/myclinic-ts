@@ -78,21 +78,6 @@
   </div>
 </div>
 
-<!-- <div>
-  {#if errors.length > 0}
-    <div class="error">
-      {#each errors as e}
-        <div>{e}</div>
-      {/each}
-    </div>
-  {/if}
-  <KouhiForm {patient} {init} bind:validate/>
-  <div class="commands">
-    <button on:click={doEnter}>入力</button>
-    <button on:click={doClose}>キャンセル</button>
-  </div>
-</div> -->
-
 <style>
   .form-wrapper {
     display: flex;

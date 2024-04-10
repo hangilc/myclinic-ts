@@ -3,7 +3,6 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { type Patient, Kouhi } from "myclinic-model";
   import KouhiDialogContent from "./KouhiDialogContent.svelte";
-  import { countInvalidUsage } from "@/lib/hoken-check";
 
   export let destroy: () => void;
   export let title: string;
@@ -12,15 +11,6 @@
   export let onEntered: (entered: Kouhi) => void = (_) => {};
   export let onUpdated: (entered: Kouhi) => void = (_) => {};
   export let isAdmin: boolean;
-  let prevInvalids = 0;
-
-  checkPrevInvalids();
-
-  async function checkPrevInvalids() {
-    if (init) {
-      prevInvalids = await countInvalidUsage(init);
-    }
-  }
 
   async function doEnter(kouhi: Kouhi): Promise<string[]> {
     if (init === null) {

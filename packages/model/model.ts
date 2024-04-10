@@ -539,6 +539,10 @@ export class Kouhi {
     public memo: string | undefined,
   ) { }
 
+  static fromInterface(obj: KouhiInterface): Kouhi {
+    return new Kouhi(obj.kouhiId, obj.futansha, obj.jukyuusha, obj.validFrom, obj.validUpto, obj.patientId, obj.memo);
+  }
+
   get memoAsJson(): any {
     try {
       return this.memo ? JSON.parse(this.memo) : {};
@@ -2041,5 +2045,5 @@ export class PatientSummary {
   constructor(
     public patientId: number,
     public content: string,
-  ) {}
+  ) { }
 }
