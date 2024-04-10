@@ -2,7 +2,11 @@
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import { type Patient, Kouhi } from "myclinic-model";
-  import KouhiDialogContent from "./KouhiDialogContent.svelte";
+  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import { gengouListUpto } from "@/lib/gengou-list-upto";
+  import type { VResult } from "@/lib/validation";
+  import { dialogClose } from "@cypress/lib/dialog";
+  import DateInput from "@/lib/date-input/DateInput.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -11,42 +15,151 @@
   export let onEntered: (entered: Kouhi) => void = (_) => {};
   export let onUpdated: (entered: Kouhi) => void = (_) => {};
   export let isAdmin: boolean;
+  let futansha: string = init?.futansha.toString() ?? "";
+  let jukyuusha: string = init?.jukyuusha.toString() ?? "";
+  let gendogaku: string = init?.memoAsJson.gendogaku ?? "";
+  let validFrom: Date | null = null;
+  let validUpto: Date | null = null;
+  let gengouList = gengouListUpto("平成");
+  let validateValidFrom: () => VResult<Date | null>;
+  let validateValidUpto: () => VResult<Date | null>;
 
-  async function doEnter(kouhi: Kouhi): Promise<string[]> {
-    if (init === null) {
-      kouhi.kouhiId = 0;
+  // async function doEnter(kouhi: Kouhi): Promise<string[]> {
+  //   if (init === null) {
+  //     kouhi.kouhiId = 0;
+  //   }
+  //   try {
+  //     if (init === null) {
+  //       const entered = await api.enterKouhi(kouhi);
+  //       onEntered(entered);
+  //       return [];
+  //     } else {
+  //       if (kouhi.kouhiId <= 0) {
+  //         return ["Invalid kouhiId"];
+  //       } else {
+  //         if (!isAdmin) {
+  //           const usage = await api.countKouhiUsage(kouhi.kouhiId);
+  //           if (usage > 0) {
+  //             return [
+  //               "この公費はすでに使用されているので、内容を変更できません。",
+  //             ];
+  //           }
+  //         }
+  //         await api.updateKouhi(kouhi);
+  //         onUpdated(kouhi);
+  //         return [];
+  //       }
+  //     }
+  //   } catch (ex: any) {
+  //     return [ex.toString()];
+  //   }
+  // }
+
+  async function doEnter() {
+    const input = {
+      kouhiId: init?.kouhiId ?? 0,
+      futansha,
+      jukyuusha,
+      validFrom: validateValidFrom()
     }
-    try {
-      if (init === null) {
-        const entered = await api.enterKouhi(kouhi);
-        onEntered(entered);
-        return [];
-      } else {
-        if (kouhi.kouhiId <= 0) {
-          return ["Invalid kouhiId"];
-        } else {
-          if (!isAdmin) {
-            const usage = await api.countKouhiUsage(kouhi.kouhiId);
-            if (usage > 0) {
-              return [
-                "この公費はすでに使用されているので、内容を変更できません。",
-              ];
-            }
-          }
-          await api.updateKouhi(kouhi);
-          onUpdated(kouhi);
-          return [];
-        }
-      }
-    } catch (ex: any) {
-      return [ex.toString()];
-    }
+  }
+
+  function doClose() {
+    destroy();
+  }
+
+  async function doReferAnother() {
+
   }
 </script>
 
 <Dialog {destroy} {title}>
-  <KouhiDialogContent {init} {patient} onClose={destroy} onEnter={doEnter} />
+  <div>
+    <span data-cy="patient-id">({patient.patientId})</span>
+    <span data-cy="patient-name">{patient.fullName(" ")}</span>
+  </div>
+  <div class="panel">
+    <span>負担者番号</span>
+    <div>
+      <input
+        type="text"
+        class="regular"
+        bind:value={futansha}
+        data-cy="futansha-input"
+      />
+    </div>
+    <span>受給者番号</span>
+    <div>
+      <input
+        type="text"
+        class="regular"
+        bind:value={jukyuusha}
+        data-cy="jukyuusha-input"
+      />
+    </div>
+    {#if init?.futansha === 54136015}
+      <span>限度額</span>
+      <div>
+        <input
+          type="text"
+          class="regular"
+          bind:value={gendogaku}
+          data-cy="gendogaku-input"
+        />
+      </div>
+    {/if}
+    <span>期限開始</span>
+    <div data-cy="valid-from-input">
+      <DateInput />
+    </div>
+    <span>期限終了</span>
+    <div data-cy="valid-upto-input">
+      <DateFormWithCalendar
+        init={validUpto}
+        {gengouList}
+        bind:validate={validateValidUpto}
+      />
+    </div>
+  </div>
+  <div class="commands">
+    <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doClose}>キャンセル</button>
+  </div>
 </Dialog>
 
 <style>
+  .panel {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 6px;
+    column-gap: 6px;
+    width: 340px;
+  }
+
+  .panel > :nth-child(odd) {
+    text-align: right;
+  }
+
+  input[type="text"].regular {
+    width: 6rem;
+  }
+  .form-wrapper {
+    display: flex;
+    gap: 10px;
+  }
+  .error {
+    margin: 10px 0;
+    color: red;
+  }
+  .commands {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-top: 10px;
+  }
+
+  .commands * + * {
+    margin-left: 4px;
+  }
 </style>

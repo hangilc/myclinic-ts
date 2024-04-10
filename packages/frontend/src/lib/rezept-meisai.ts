@@ -1,8 +1,7 @@
 import { Kouhi, Koukikourei, Meisai, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
-import { resolveKouhiData } from "./resolve-kouhi-data";
 import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
-import { calcFutan, calcVisits, Combiner, roundTo10, TensuuCollector, type TotalCover } from "myclinic-rezept";
+import { calcVisits, Combiner, roundTo10, TensuuCollector } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード} from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcJikofutan, calcPayments, type Payer } from "myclinic-rezept/futan/calc";
