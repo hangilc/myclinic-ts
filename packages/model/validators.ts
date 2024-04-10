@@ -16,7 +16,7 @@ const gengouStrings: string[] = kanjidate.GengouList.map(g => g.kanji);
 
 const DateInputSchema = v.transform(v.object({
   gengou: v.picklist(gengouStrings, "元号のエラー。"),
-  nen: v.coerce(v.number("年のエラー。", [v.minValue(1)]), Number),
+  nen: v.coerce(v.number("年のエラー。", [v.minValue(1, "年の値が１以上でありません。")]), Number),
   month: v.coerce(v.number("月のエラー。", [v.minValue(1), v.maxValue(12)]), Number),
   day: v.coerce(v.number("日のエラー。", [v.minValue(1), v.maxValue(31)]), Number),
 }
