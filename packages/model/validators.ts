@@ -33,9 +33,18 @@ const KouhiSchema = v.object({
   kouhiId: v.number(),
   futansha: v.coerce(v.number("負担者番号のエラー。"), Number),
   jukyuusha: v.coerce(v.number("受給者番号のエラー。"), Number),
-  validFrom: v.coerce(
-    v.string("期限開始のエラー。", [v.regex(/^\d{4}-\d{2}-\d{2}$/, "期限開始の形式エラー。")]),
-    coerceToDate),
+  validFrom: v.coerce(v.string(), (input) => {
+    if (typeof input === "string") {
+      return input;
+    } else if( input instanceof Date ){
+      return dateToSqlDate(input);
+    } else {
+      return dateToSqlDate(v.parse(DateInputSchema, input));
+    }
+  }),
+  // validFrom: v.coerce(
+  //   v.string("期限開始のエラー。", [v.regex(/^\d{4}-\d{2}-\d{2}$/, "期限開始の形式エラー。")]),
+  //   coerceToDate),
   validUpto: v.coerce(
     v.string([v.regex(/^((\d{4}-\d{2}-\d{2})|(0000-00-00))$/)]),
     coerceToUptoDate),

@@ -62,6 +62,32 @@ describe("model validators", () => {
     expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
   });
 
+  it("should coerce DateInput object to valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: { gengou: "令和", nen: "5", month: "11", day: "1" },
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const kouhi = validateKouhi(obj);
+    expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
+  });
+
+  it("should check DateInput object to valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: { gengou: "令和", nen: "5", month: "", day: "1" },
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const kouhi = validateKouhi(obj);
+    expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
+  });
+
   it("should coerce to valildUpto in kouhi", () => {
     const obj = {
       kouhiId: 1,
