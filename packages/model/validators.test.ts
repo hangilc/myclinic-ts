@@ -3,7 +3,10 @@ import { sqlDate, validateKouhi } from "./validators";
 
 describe("model validators", () => {
   it("should validate sqlDate", () => {
-    expect(parse(sqlDate(), "")).toBe("2024-01-02");
+    expect(parse(sqlDate(), "2024-01-02")).toBe("2024-01-02");
+    expect(parse(sqlDate(), new Date(2024, 0, 2))).toBe("2024-01-02");
+    expect(parse(sqlDate(), { gengou: "令和", nen: "6", month: "1", day: "2" })).toBe("2024-01-02");
+    expect(parse(sqlDate(), true)).toThrow();
   })
   // it("should validate kouhi", () => {
   //   const obj = {

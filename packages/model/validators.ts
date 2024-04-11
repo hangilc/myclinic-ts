@@ -18,8 +18,12 @@ const gengouStrings: string[] = kanjidate.GengouList.map(g => g.kanji);
 const DateInputSchema = v.transform(v.object({
   gengou: v.picklist(gengouStrings, "元号のエラー。"),
   nen: v.coerce(v.number("年のエラー。", [v.minValue(1, "年の値が１以上でありません。")]), Number),
-  month: v.coerce(v.number("月のエラー。", [v.minValue(1), v.maxValue(12)]), Number),
-  day: v.coerce(v.number("日のエラー。", [v.minValue(1), v.maxValue(31)]), Number),
+  month: v.coerce(v.number("月のエラー。", [
+    v.minValue(1, "月の値が１以上でありません。"),
+    v.maxValue(12, "月の値が１２以下でありません。")]), Number),
+  day: v.coerce(v.number("日のエラー。", [
+    v.minValue(1, "日の値が１異常でありません。"),
+    v.maxValue(31, "日の値が３１以下でありません。")]), Number),
 }
 ), (input) => {
   const y = kanjidate.fromGengou(input.gengou, input.nen);
@@ -56,9 +60,26 @@ export function sqlDate(arg1?: ErrorMessage | Pipe<string>, arg2?: Pipe<string>)
     message,
     pipe,
     _parse(input, config) {
-      if( typeof input === "string" ){
-        if( /^\d{4}-\d{2}-\d{2}$/.test(input.trim()) ){
+      if (typeof input === "string") {
+        if (/^\d{4}-\d{2}-\d{2}$/.test(input.trim())) {
           return pipeResult(this, input, config);
+        }
+      }
+      if (input instanceof Date) {
+        const s = dateToSqlDate(input);
+        return pipeResult(this, s, config);
+      }
+      if (typeof input === "object") {
+        const result = DateInputSchema._parse(input, config);
+        if (result.issues) {
+          return {
+            typed: false,
+            output: undefined,
+            issues: result.issues
+          }
+        } else {
+          const d = dateToSqlDate(result.output as Date);
+          return pipeResult(this, d, config);
         }
       }
 
