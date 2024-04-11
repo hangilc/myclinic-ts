@@ -1,5 +1,4 @@
-import { ValiError, date, parse, string, regex } from "valibot";
-import { KouhiSchemaVariant, sqlDate, validateKouhi } from "./validators";
+import { DateInput, getErrorMessage, validateKouhi } from "./validators";
 
 describe("model validators", () => {
 
@@ -12,87 +11,80 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const kouhi = parse(KouhiSchemaVariant(string("期限開始のエラー。",
-     [regex(/^((\d{4}-\d{2}-\d{2})|(0000-00-00))$/, "期限開始のエラー。")])), obj);
-    expect(kouhi).toMatchObject(obj);
+    expect(validateKouhi(obj)).toMatchObject(obj);
   });
 
-  // it("should check futansha and jukyuusha in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     validFrom: "2023-11-01",
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   try {
-  //     validateKouhi(obj);
-  //   } catch (e) {
-  //     expect(e).toBeInstanceOf(ValiError);
-  //     const ve = e as ValiError;
-  //     expect(ve.issues.map(i => i.message)).toEqual(["負担者番号のエラー。", "受給者番号のエラー。"]);
-  //   }
-  // });
+  it("should check futansha and jukyuusha in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    try {
+      validateKouhi(obj);
+    } catch (e) {
+      expect(getErrorMessage(e)).toBe("負担者：設定されていません。")
+    }
+  });
 
-  // it("should validate valildFrom in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: "20231101",
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   try {
-  //     validateKouhi(obj);
-  //   } catch (e) {
-  //     expect(e).toBeInstanceOf(ValiError);
-  //     const ve = e as ValiError;
-  //     expect(ve.issues.map(i => i.message)).toEqual(["期限開始のエラー。"]);
-  //   }
-  // });
+  it("should validate valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "20231101",
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    try {
+      validateKouhi(obj);
+    } catch (e) {
+      expect(getErrorMessage(e)).toBe("期限開始：日付が不適切です。");
+    }
+  });
 
-  // it("should coerce Date to valildFrom in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: new Date(2023, 10, 1),
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
-  // });
+  it("should coerce Date to valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: new Date(2023, 10, 1),
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const kouhi = validateKouhi(obj);
+    expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
+  });
 
-  // it("should coerce DateInput object to valildFrom in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: { gengou: "令和", nen: "5", month: "11", day: "1" },
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
-  // });
+  it("should coerce DateInput object to valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: new DateInput({ gengou: "令和", nen: "5", month: "11", day: "1" }),
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const kouhi = validateKouhi(obj);
+    expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
+  });
 
-  // it("should check DateInput object to valildFrom in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: { gengou: "令和", nen: "5", month: "", day: "1" },
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   try {
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
-  //   } catch(e: any) {
-  //     console.log(e);
-  //   }
-  // });
+  it("should check DateInput object to valildFrom in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: new DateInput({ gengou: "令和", nen: "5", month: "", day: "1" }),
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    try {
+      validateKouhi(obj);
+    } catch (e: any) {
+      expect(getErrorMessage(e)).toBe("期限開始：月：空白です。");
+    }
+  });
 
   // it("should coerce to valildUpto in kouhi", () => {
   //   const obj = {
