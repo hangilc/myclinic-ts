@@ -1,6 +1,7 @@
 import { KouhiInterface, PatientSummary, dateToSqlDate } from "./model";
 import * as v from "valibot";
 import * as kanjidate from "kanjidate";
+import { BaseSchema, ErrorMessage, Pipe, defaultArgs, pipeResult, schemaIssue } from "valibot";
 
 export function validationError(e: any): string {
   if (e instanceof v.ValiError) {
@@ -29,6 +30,45 @@ export function validateDateInput(obj: any): Date {
   return v.parse(DateInputSchema, obj);
 }
 
+export interface SqlDateSchema<TInput = any, TOutput = string> extends BaseSchema<TInput, TOutput> {
+  /**
+   * The schema type.
+   */
+  type: 'string';
+  /**
+   * The error message.
+   */
+  message: ErrorMessage | undefined;
+  /**
+   * The validation and transformation pipeline.
+   */
+  pipe: Pipe<string> | undefined;
+}
+
+export function sqlDate(pipe?: Pipe<string>): SqlDateSchema;
+export function sqlDate(message?: ErrorMessage, pipe?: Pipe<string>): SqlDateSchema;
+export function sqlDate(arg1?: ErrorMessage | Pipe<string>, arg2?: Pipe<string>): SqlDateSchema {
+  const [message, pipe] = defaultArgs(arg1, arg2);
+  return {
+    type: 'string',
+    expects: 'sqldate',
+    async: false,
+    message,
+    pipe,
+    _parse(input, config) {
+      if( typeof input === "string" ){
+        if( /^\d{4}-\d{2}-\d{2}$/.test(input.trim()) ){
+          return pipeResult(this, input, config);
+        }
+      }
+
+      // Otherwise, return schema issue
+      return schemaIssue(this, sqlDate, input, config);
+    },
+  };
+}
+
+
 const KouhiSchema = v.object({
   kouhiId: v.number(),
   futansha: v.coerce(v.number("負担者番号のエラー。"), Number),
@@ -36,7 +76,7 @@ const KouhiSchema = v.object({
   validFrom: v.coerce(v.string(), (input) => {
     if (typeof input === "string") {
       return input;
-    } else if( input instanceof Date ){
+    } else if (input instanceof Date) {
       return dateToSqlDate(input);
     } else {
       return dateToSqlDate(v.parse(DateInputSchema, input));
