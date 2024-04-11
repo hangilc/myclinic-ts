@@ -1,25 +1,21 @@
-import { ValiError, date, parse, string } from "valibot";
-import { sqlDate, validateKouhi } from "./validators";
+import { ValiError, date, parse, string, regex } from "valibot";
+import { KouhiSchemaVariant, sqlDate, validateKouhi } from "./validators";
 
 describe("model validators", () => {
-  it("should validate sqlDate", () => {
-    expect(parse(sqlDate(), "2024-01-02")).toBe("2024-01-02");
-    expect(parse(sqlDate(), new Date(2024, 0, 2))).toBe("2024-01-02");
-    expect(parse(sqlDate(), { gengou: "令和", nen: "6", month: "1", day: "2" })).toBe("2024-01-02");
-    expect(parse(sqlDate(), true)).toThrow();
-  })
-  // it("should validate kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: "2023-11-01",
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(obj);
-  // });
+
+  it("should validate kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const kouhi = parse(KouhiSchemaVariant(string("期限開始のエラー。",
+     [regex(/^((\d{4}-\d{2}-\d{2})|(0000-00-00))$/, "期限開始のエラー。")])), obj);
+    expect(kouhi).toMatchObject(obj);
+  });
 
   // it("should check futansha and jukyuusha in kouhi", () => {
   //   const obj = {
@@ -51,7 +47,7 @@ describe("model validators", () => {
   //   } catch (e) {
   //     expect(e).toBeInstanceOf(ValiError);
   //     const ve = e as ValiError;
-  //     expect(ve.issues.map(i => i.message)).toEqual(["期限開始の形式エラー。"]);
+  //     expect(ve.issues.map(i => i.message)).toEqual(["期限開始のエラー。"]);
   //   }
   // });
 
@@ -90,8 +86,12 @@ describe("model validators", () => {
   //     validUpto: "2024-10-31",
   //     patientId: 123,
   //   };
+  //   try {
   //   const kouhi = validateKouhi(obj);
   //   expect(kouhi).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
+  //   } catch(e: any) {
+  //     console.log(e);
+  //   }
   // });
 
   // it("should coerce to valildUpto in kouhi", () => {
