@@ -76,13 +76,13 @@ describe("model validators", () => {
       kouhiId: 1,
       futansha: 12345678,
       jukyuusha: 11111111,
-      validFrom: new DateInput({ gengou: "令和", nen: "5", month: "", day: "1" }),
+      validFrom: new DateInput({ gengou: "令和", nen: "", month: "", day: "1" }),
       validUpto: "2024-10-31",
       patientId: 123,
     };
     const r = validateKouhi(obj);
     expect(r.isSuccess()).toBe(false);
-    expect(r.getErrorMessage()).toBe("期限開始：月：空白です。")
+    expect(r.getErrorMessage()).toBe("期限開始：年：空白です。\n期限開始：月：空白です。")
   });
 
   it("should coerce to valildUpto in kouhi", () => {
@@ -140,31 +140,33 @@ describe("model validators", () => {
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
   });
 
-  // it("should coerce empty string to valildUpto in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: "2023-11-01",
-  //     validUpto: "",
-  //     patientId: 123,
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
-  // });
+  it("should coerce empty string to valildUpto in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "2023-11-01",
+      validUpto: "",
+      patientId: 123,
+    };
+    const r = validateKouhi(obj);
+    expect(r.isSuccess()).toBe(true);
+    expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
+  });
 
-  // it("should coerce string to number in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: "12345678",
-  //     jukyuusha: "11111111",
-  //     validFrom: "2023-11-01",
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(Object.assign({}, obj, { futansha: parseInt(obj.futansha), jukyuusha: parseInt(obj.jukyuusha) }));
-  // });
+  it("should coerce string to number in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: "12345678",
+      jukyuusha: "11111111",
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+    };
+    const r = validateKouhi(obj);
+    expect(r.isSuccess()).toBe(true);
+    expect(r.getValue()).toMatchObject(Object.assign({}, obj, { futansha: parseInt(obj.futansha), jukyuusha: parseInt(obj.jukyuusha) }));
+  });
 
   // it("should rule out invalid JSON memo in kouhi", () => {
   //   const obj = {

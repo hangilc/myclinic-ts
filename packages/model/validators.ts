@@ -169,7 +169,7 @@ export class DateInput {
   }
 }
 
-function validateGengou(arg: any): Gengou {
+function coerceToGengou(arg: any): Gengou {
   if (arg instanceof Gengou) {
     return arg;
   } else if (typeof arg === "string") {
@@ -182,45 +182,54 @@ function validateGengou(arg: any): Gengou {
   throw new Error("不適切な元号。");
 }
 
-function validateNen(arg: any): number {
+function coerceToNen(arg: any): number {
   return refine(coerceToNumber(arg), [minValue(1)]);
 }
 
-function validateMonth(arg: any): number {
+function coerceToMonth(arg: any): number {
   return refine(coerceToNumber(arg), [minValue(1), maxValue(12)]);
 }
 
-function validateDay(arg: any): number {
+function coerceToDay(arg: any): number {
   return refine(coerceToNumber(arg), [minValue(1), maxValue(31)]);
 }
 
-function validateDateInput(arg: DateInput): Date {
-  const g = withPath("元号", () => validateGengou(arg.gengou)).getValue();
-  const n = withPath("年", () => validateNen(arg.nen)).getValue();
-  const m = withPath("月", () => validateMonth(arg.month)).getValue();
-  const d = withPath("日", () => validateDay(arg.day)).getValue();
-  const y = g.nenStartYear + n - 1;
-  return new Date(y, m - 1, d);
+function validateDateInput(arg: DateInput): ValidationResult<Date> {
+
+  const g = withPath("元号", () => coerceToGengou(arg.gengou));
+  const n = withPath("年", () => coerceToNen(arg.nen));
+  const m = withPath("月", () => coerceToMonth(arg.month));
+  const d = withPath("日", () => coerceToDay(arg.day));
+  const errors = ValidationResult.collectErrors(g, n, m, d);
+  if (errors.length > 0) {
+    return ValidationResult.errorResult(errors);
+  }
+  const y = g.getValue().nenStartYear + n.getValue() - 1;
+  return new ValidationResult(new Date(y, m.getValue() - 1, d.getValue()));
 }
 
-function validateSqlDate(arg: any): string {
+function coerceToSqlDate(arg: any): string {
   if (typeof arg === "string") {
     return refine(arg, [isNotEmptyString, isSqlDate]);
   } else if (arg instanceof Date) {
     return dateToSqlDate(arg);
   } else if (arg instanceof DateInput) {
-    const date = validateDateInput(arg);
-    return dateToSqlDate(date);
+    const r = validateDateInput(arg);
+    if( r.isSuccess() ){
+      return dateToSqlDate(r.getValue());
+    } else {
+      throw new ValidationError(r.getErrorMessages());
+    }
   } else {
     throw new Error("日付でありません。");
   }
 }
 
 function validateOptSqlDate(arg: any): string {
-  if (arg == null) {
+  if (arg == null || arg === "") {
     return "0000-00-00";
   } else {
-    return validateSqlDate(arg);
+    return coerceToSqlDate(arg);
   }
 }
 
@@ -246,7 +255,7 @@ export function validateKouhi(obj: any): ValidationResult<KouhiInterface> {
   const kouhiId = withPath("kouhiId", () => validateNonNegative(obj.kouhiId));
   const futansha = withPath("負担者", () => validateNonNegative(obj.futansha));
   const jukyuusha = withPath("受給者", () => validateNonNegative(obj.jukyuusha));
-  const validFrom = withPath("期限開始", () => validateSqlDate(obj.validFrom));
+  const validFrom = withPath("期限開始", () => coerceToSqlDate(obj.validFrom));
   const validUpto = withPath("期限終了", () => validateOptSqlDate(obj.validUpto));
   const patientId = withPath("患者番号", () => validateNonNegative(obj.patientId));
   const memo = withPath("メモ", () => validateOptJsonStringified(obj.memo));
