@@ -1,11 +1,39 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
+  import { KanjiDate, GengouList } from "kanjidate";
+  import type { DateInputInterface } from "myclinic-model/validators";
+  import { sqlDateToDate } from "../date-util";
 
-  export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
-  let gengou: string = gengouList.length > 0 ? gengouList[0] : "";
+  export let initValue: Date | string | undefined = undefined;
+  export let gengouList: string[] = GengouList.map((g) => g.kanji);
+  export function getInputs(): DateInputInterface {
+    return {
+      gengou, nen, month, day
+    };
+  }
+  let gengou: string;
   let nen: string;
   let month: string;
   let day: string;
+
+  init();
+
+  function init() {
+    if( initValue == null || initValue == "0000-00-00" ){
+      gengou = gengouList.length > 0 ? gengouList[0] : "";
+    } else {
+      let d: Date;
+      if( initValue instanceof Date ){
+        d = initValue;
+      } else {
+        d = sqlDateToDate(initValue);
+      }
+      const k = new KanjiDate(d);
+      gengou = k.gengou;
+      nen = k.nen.toString();
+      month = (d.getMonth() + 1).toString();
+      day = d.getDate().toString();
+    }
+  }
 
   function doMonthClick() {
 

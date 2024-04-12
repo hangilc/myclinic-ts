@@ -7,6 +7,8 @@
   import type { VResult } from "@/lib/validation";
   import { dialogClose } from "@cypress/lib/dialog";
   import DateInput from "@/lib/date-input/DateInput.svelte";
+  import type { DateInputInterface } from "myclinic-model/validators";
+  import { validateKouhi } from "myclinic-model";
 
   export let destroy: () => void;
   export let title: string;
@@ -15,14 +17,15 @@
   export let onEntered: (entered: Kouhi) => void = (_) => {};
   export let onUpdated: (entered: Kouhi) => void = (_) => {};
   export let isAdmin: boolean;
+  let getValidFromInputs: () => DateInputInterface;
+  let getValidUptoInputs: () => DateInputInterface;
   let futansha: string = init?.futansha.toString() ?? "";
   let jukyuusha: string = init?.jukyuusha.toString() ?? "";
   let gendogaku: string = init?.memoAsJson.gendogaku ?? "";
   let validFrom: Date | null = null;
   let validUpto: Date | null = null;
   let gengouList = gengouListUpto("平成");
-  let validateValidFrom: () => VResult<Date | null>;
-  let validateValidUpto: () => VResult<Date | null>;
+  let errors: string[] = [];
 
   // async function doEnter(kouhi: Kouhi): Promise<string[]> {
   //   if (init === null) {
@@ -56,11 +59,22 @@
   // }
 
   async function doEnter() {
+    const kouhiId = init?.kouhiId ?? 0;
     const input = {
       kouhiId: init?.kouhiId ?? 0,
       futansha,
       jukyuusha,
-      validFrom: validateValidFrom()
+      validFrom: getValidFromInputs(),
+      validUpto: getValidUptoInputs(),
+      patientId: patient.patientId,
+      memo: "",
+    }
+    const r = validateKouhi(input);
+    if( r.isError() ){
+      errors = r.getErrorMessages();
+    } else {
+      const kouhi = r.getValue();
+      console.log("kouhi", kouhi);
     }
   }
 
@@ -74,6 +88,9 @@
 </script>
 
 <Dialog {destroy} {title}>
+  {#if errors.length > 0}
+    <div class="error">{#each errors as err}<div>{err}</div>{/each}</div>
+  {/if}
   <div>
     <span data-cy="patient-id">({patient.patientId})</span>
     <span data-cy="patient-name">{patient.fullName(" ")}</span>
@@ -110,15 +127,11 @@
     {/if}
     <span>期限開始</span>
     <div data-cy="valid-from-input">
-      <DateInput />
+      <DateInput bind:getInputs={getValidFromInputs} initValue={init?.validFrom}/>
     </div>
     <span>期限終了</span>
     <div data-cy="valid-upto-input">
-      <DateFormWithCalendar
-        init={validUpto}
-        {gengouList}
-        bind:validate={validateValidUpto}
-      />
+      <DateInput bind:getInputs={getValidUptoInputs} initValue={init?.validUpto}/>
     </div>
   </div>
   <div class="commands">
@@ -161,5 +174,10 @@
 
   .commands * + * {
     margin-left: 4px;
+  }
+
+  .error {
+    color: red;
+    margin: 10px 0;
   }
 </style>

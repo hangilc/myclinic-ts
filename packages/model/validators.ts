@@ -1,4 +1,4 @@
-import { KouhiInterface, dateToSqlDate } from "./model";
+import { KouhiInterface, PatientSummary, dateToSqlDate } from "./model";
 import { Gengou, GengouList } from "kanjidate";
 
 class ValidationError {
@@ -111,7 +111,7 @@ function refined<T>(arg: T, pred: (arg: T) => boolean, message: string): T {
   }
 }
 
-function validateNonNegative(arg: any): number {
+function coerceToNonNegative(arg: any): number {
   return refine(coerceToNumber(arg), [isInt, isNonNegative]);
 }
 
@@ -140,6 +140,14 @@ function isSqlDate(arg: string): string {
     return arg;
   } else {
     throw new Error("日付が不適切です。");
+  }
+}
+
+function ensureString(arg: any): string {
+  if( typeof arg === "string" ) {
+    return arg;
+  } else {
+    throw new Error("文字列でありｍせん。");
   }
 }
 
@@ -225,7 +233,7 @@ function coerceToSqlDate(arg: any): string {
   }
 }
 
-function validateOptSqlDate(arg: any): string {
+function coerceToOptSqlDate(arg: any): string {
   if (arg == null || arg === "") {
     return "0000-00-00";
   } else {
@@ -233,7 +241,7 @@ function validateOptSqlDate(arg: any): string {
   }
 }
 
-function validateOptJsonStringified(arg: any): string | undefined {
+function coerceToOptJsonStringified(arg: any): string | undefined {
   if (arg === undefined) {
     return arg;
   } else if (typeof arg === "string") {
@@ -252,13 +260,13 @@ function validateOptJsonStringified(arg: any): string | undefined {
 }
 
 export function validateKouhi(obj: any): ValidationResult<KouhiInterface> {
-  const kouhiId = withPath("kouhiId", () => validateNonNegative(obj.kouhiId));
-  const futansha = withPath("負担者", () => validateNonNegative(obj.futansha));
-  const jukyuusha = withPath("受給者", () => validateNonNegative(obj.jukyuusha));
+  const kouhiId = withPath("kouhiId", () => coerceToNonNegative(obj.kouhiId));
+  const futansha = withPath("負担者", () => coerceToNonNegative(obj.futansha));
+  const jukyuusha = withPath("受給者", () => coerceToNonNegative(obj.jukyuusha));
   const validFrom = withPath("期限開始", () => coerceToSqlDate(obj.validFrom));
-  const validUpto = withPath("期限終了", () => validateOptSqlDate(obj.validUpto));
-  const patientId = withPath("患者番号", () => validateNonNegative(obj.patientId));
-  const memo = withPath("メモ", () => validateOptJsonStringified(obj.memo));
+  const validUpto = withPath("期限終了", () => coerceToOptSqlDate(obj.validUpto));
+  const patientId = withPath("患者番号", () => coerceToNonNegative(obj.patientId));
+  const memo = withPath("メモ", () => coerceToOptJsonStringified(obj.memo));
   const errors = ValidationResult.collectErrors(kouhiId, futansha, jukyuusha, validFrom, validUpto, patientId, memo);
   if (errors.length > 0) {
     return ValidationResult.errorResult(errors);
@@ -273,4 +281,19 @@ export function validateKouhi(obj: any): ValidationResult<KouhiInterface> {
       memo: memo.getValue(),
     });
   }
+}
+
+export function validatePatientSummary(obj: any): ValidationResult<PatientSummary> {
+  const patientId = withPath("患者番号", () => coerceToNonNegative(obj.patientId));
+  const content = withPath("内容", () => ensureString(obj.content));
+  const errors = ValidationResult.collectErrors(patientId, content);
+  if( errors.length > 0 ){
+    return ValidationResult.errorResult(errors);
+  } else {
+    return new ValidationResult<PatientSummary>({
+      patientId: patientId.getValue(),
+      content: content.getValue(),
+    })
+  }
+
 }
