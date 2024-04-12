@@ -1,25 +1,75 @@
 import { KouhiInterface, dateToSqlDate } from "./model";
 import { Gengou, GengouList } from "kanjidate";
 
-export function getErrorMessage(e: any): string {
-  if (e instanceof Error) {
-    return e.message;
-  } else {
-    return e.toString();
+class ValidationError {
+  messages: string[];
+
+  constructor(messages: string[]) {
+    this.messages = messages;
   }
 }
 
-function withPath<TInput, TOutput>(path: string, src: TInput, vtor: (src: TInput) => TOutput): TOutput {
-  try {
-    return vtor(src);
-  } catch (e: any) {
-    let msg: string;
-    if (e instanceof Error) {
-      msg = e.message;
-    } else {
-      msg = e.toString();
+class ValidationResult<T> {
+  value: T;
+  errors: string[];
+
+  constructor(value: T) {
+    this.value = value;
+    this.errors = [];
+  }
+
+  static errorResult<T>(errors: string[]): ValidationResult<T> {
+    const r = new ValidationResult<T>(anyValue());
+    r.errors = errors;
+    return r;
+  }
+
+  static collectErrors(...results: ValidationResult<unknown>[]): string[] {
+    const errors: string[] = [];
+    results.forEach(r => errors.push(...r.errors));
+    return errors;
+  }
+
+  getValue(): T {
+    if (this.isError()) {
+      throw new ValidationError(this.getErrorMessages());
     }
-    throw new Error(`${path}${path === "" ? "" : "："}${msg}`)
+    return this.value;
+  }
+
+  isSuccess(): boolean {
+    return !this.isError();
+  }
+
+  isError(): boolean {
+    return this.errors.length > 0;
+  }
+
+  getErrorMessages(): string[] {
+    return this.errors;
+  }
+
+  getErrorMessage(sep: string = "\n"): string {
+    return this.getErrorMessages().join("\n");
+  }
+}
+
+function anyValue(): any {
+  return undefined;
+}
+
+function withPath<TOutput>(path: string, vtor: () => TOutput): ValidationResult<TOutput> {
+  try {
+    return new ValidationResult(vtor());
+  } catch (e: any) {
+    let pre = path === "" ? "" : `${path}：`;
+    if (e instanceof Error) {
+      return ValidationResult.errorResult([`${pre}${e.message}`]);
+    } else if (e instanceof ValidationError) {
+      return ValidationResult.errorResult(e.messages.map(m => `${pre}${m}`));
+    } else {
+      return ValidationResult.errorResult([e.toString()]);
+    }
   }
 }
 
@@ -145,10 +195,10 @@ function validateDay(arg: any): number {
 }
 
 function validateDateInput(arg: DateInput): Date {
-  const g = withPath("元号", arg.gengou, validateGengou);
-  const n = withPath("年", arg.nen, validateNen);
-  const m = withPath("月", arg.month, validateMonth);
-  const d = withPath("日", arg.day, validateDay);
+  const g = withPath("元号", () => validateGengou(arg.gengou)).getValue();
+  const n = withPath("年", () => validateNen(arg.nen)).getValue();
+  const m = withPath("月", () => validateMonth(arg.month)).getValue();
+  const d = withPath("日", () => validateDay(arg.day)).getValue();
   const y = g.nenStartYear + n - 1;
   return new Date(y, m - 1, d);
 }
@@ -174,32 +224,44 @@ function validateOptSqlDate(arg: any): string {
   }
 }
 
-export function validateKouhi(obj: any): KouhiInterface {
-  function validateMemo(arg: any): string | undefined {
-    if (arg === undefined) {
-      return arg;
-    } else if (typeof arg === "string") {
-      arg = arg.trim();
-      if (arg === "{}" || arg === "") {
-        return undefined;
-      }
-      try {
-        JSON.parse(arg);
-        return arg;
-      } catch (e) {
-        // nop
-      }
+function validateOptJsonStringified(arg: any): string | undefined {
+  if (arg === undefined) {
+    return arg;
+  } else if (typeof arg === "string") {
+    arg = arg.trim();
+    if (arg === "{}" || arg === "") {
+      return undefined;
     }
-    throw new Error("JSON 形式でありません。");
+    try {
+      JSON.parse(arg);
+      return arg;
+    } catch (e) {
+      // nop
+    }
   }
+  throw new Error("JSON 形式でありません。");
+}
 
-  return {
-    kouhiId: withPath("kouhiId", obj.kouhiId, validateNonNegative),
-    futansha: withPath("負担者", obj.futansha, validateNonNegative),
-    jukyuusha: withPath("受給者", obj.jukyuusha, validateNonNegative),
-    validFrom: withPath("期限開始", obj.validFrom, validateSqlDate),
-    validUpto: withPath("期限終了", obj.validUpto, validateOptSqlDate),
-    patientId: withPath("患者番号", obj.patientId, validateNonNegative),
-    memo: withPath("メモ", obj.memo, validateMemo),
+export function validateKouhi(obj: any): ValidationResult<KouhiInterface> {
+  const kouhiId = withPath("kouhiId", () => validateNonNegative(obj.kouhiId));
+  const futansha = withPath("負担者", () => validateNonNegative(obj.futansha));
+  const jukyuusha = withPath("受給者", () => validateNonNegative(obj.jukyuusha));
+  const validFrom = withPath("期限開始", () => validateSqlDate(obj.validFrom));
+  const validUpto = withPath("期限終了", () => validateOptSqlDate(obj.validUpto));
+  const patientId = withPath("患者番号", () => validateNonNegative(obj.patientId));
+  const memo = withPath("メモ", () => validateOptJsonStringified(obj.memo));
+  const errors = ValidationResult.collectErrors(kouhiId, futansha, jukyuusha, validFrom, validUpto, patientId, memo);
+  if (errors.length > 0) {
+    return ValidationResult.errorResult(errors);
+  } else {
+    return new ValidationResult<KouhiInterface>({
+      kouhiId: kouhiId.getValue(),
+      futansha: futansha.getValue(),
+      jukyuusha: jukyuusha.getValue(),
+      validFrom: validFrom.getValue(),
+      validUpto: validUpto.getValue(),
+      patientId: patientId.getValue(),
+      memo: memo.getValue(),
+    });
   }
 }
