@@ -1,28 +1,31 @@
 <script lang="ts">
   import { KanjiDate, GengouList } from "kanjidate";
-  import type { DateInputInterface } from "myclinic-model/validators";
+  import { DateInput as ValidationDateInput } from "myclinic-model";
   import { sqlDateToDate } from "../date-util";
 
   export let initValue: Date | string | undefined = undefined;
   export let gengouList: string[] = GengouList.map((g) => g.kanji);
-  export function getInputs(): DateInputInterface {
-    return {
-      gengou, nen, month, day
-    };
+  export function getInputs(): ValidationDateInput {
+    return new ValidationDateInput({
+      gengou,
+      nen,
+      month,
+      day,
+    });
   }
-  let gengou: string;
-  let nen: string;
-  let month: string;
-  let day: string;
+  let gengou: string = "";
+  let nen: string = "";
+  let month: string = "";
+  let day: string = "";
 
   init();
 
   function init() {
-    if( initValue == null || initValue == "0000-00-00" ){
+    if (initValue == null || initValue == "0000-00-00") {
       gengou = gengouList.length > 0 ? gengouList[0] : "";
     } else {
       let d: Date;
-      if( initValue instanceof Date ){
+      if (initValue instanceof Date) {
         d = initValue;
       } else {
         d = sqlDateToDate(initValue);
@@ -35,51 +38,26 @@
     }
   }
 
-  function doMonthClick() {
+  function doMonthClick() {}
 
-  }
+  function doNenClick() {}
 
-  function doNenClick() {
-
-  }
-
-  function doDayClick() {
-    
-  }
+  function doDayClick() {}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="top date-form">
   <div class="inputs">
-    <select
-      bind:value={gengou}
-      class="gengou"
-      data-cy="gengou-select"
-    >
+    <select bind:value={gengou} class="gengou" data-cy="gengou-select">
       {#each gengouList as g}
         <option data-cy="gengou-option">{g}</option>
       {/each}
     </select>
-    <input
-      type="text"
-      class="nen"
-      bind:value={nen}
-      data-cy="nen-input"
-    />
+    <input type="text" class="nen" bind:value={nen} data-cy="nen-input" />
     <span on:click={doNenClick} class="nen-span">年</span>
-    <input
-      type="text"
-      class="month"
-      bind:value={month}
-      data-cy="month-input"
-    />
+    <input type="text" class="month" bind:value={month} data-cy="month-input" />
     <span on:click={doMonthClick} class="month-span">月</span>
-    <input
-      type="text"
-      class="day"
-      bind:value={day}
-      data-cy="day-input"
-    />
+    <input type="text" class="day" bind:value={day} data-cy="day-input" />
     <span on:click={doDayClick} class="day-span">日</span>
   </div>
 </div>

@@ -239,6 +239,7 @@ function coerceToSqlDate(arg: any): string {
     return dateToSqlDate(arg);
   } else if (arg instanceof DateInput) {
     const r = validateDateInput(arg);
+    console.log("r", r);
     if (r.isSuccess()) {
       return dateToSqlDate(r.getValue());
     } else {
@@ -251,6 +252,8 @@ function coerceToSqlDate(arg: any): string {
 
 function coerceToOptSqlDate(arg: any): string {
   if (arg == null || arg === "") {
+    return "0000-00-00";
+  } else if (arg instanceof DateInput && arg.nen === "" && arg.month === "" && arg.day === "") {
     return "0000-00-00";
   } else {
     return coerceToSqlDate(arg);

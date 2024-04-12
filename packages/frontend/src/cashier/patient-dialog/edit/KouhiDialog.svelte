@@ -68,13 +68,17 @@
       validUpto: getValidUptoInputs(),
       patientId: patient.patientId,
       memo: "",
-    }
+    };
     const r = validateKouhi(input);
     if( r.isError() ){
       errors = r.getErrorMessages();
     } else {
       const kouhi = r.getValue();
-      console.log("kouhi", kouhi);
+      if( init == null ){
+        const entered = await api.enterKouhi(kouhi);
+        onEntered(entered);
+        destroy();
+      }
     }
   }
 

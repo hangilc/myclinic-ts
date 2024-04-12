@@ -1126,7 +1126,7 @@ export default {
     return post("enter-koukikourei", koukikourei, {}, m.Koukikourei.cast);
   },
 
-  enterKouhi(kouhi: m.Kouhi): Promise<m.Kouhi> {
+  enterKouhi(kouhi: m.KouhiInterface): Promise<m.Kouhi> {
     return post("enter-kouhi", kouhi, {}, m.Kouhi.cast);
   },
 
@@ -1150,7 +1150,7 @@ export default {
     return post("update-koukikourei", koukikourei, {}, castBoolean);
   },
 
-  updateKouhi(kouhi: m.Kouhi): Promise<boolean> {
+  updateKouhi(kouhi: m.KouhiInterface): Promise<boolean> {
     return post("update-kouhi", kouhi, {}, castBoolean);
   },
 
