@@ -183,18 +183,19 @@ describe("model validators", () => {
     expect(r.getErrorMessage()).toBe("メモ：JSON 形式でありません。");
   });
 
-  // it("should validate memo in kouhi", () => {
-  //   const obj = {
-  //     kouhiId: 1,
-  //     futansha: 12345678,
-  //     jukyuusha: 11111111,
-  //     validFrom: "2023-11-01",
-  //     validUpto: "2024-10-31",
-  //     patientId: 123,
-  //     memo: '{"gendogaku":5000}',
-  //   };
-  //   const kouhi = validateKouhi(obj);
-  //   expect(kouhi).toMatchObject(obj);
-  // });
+  it("should validate memo in kouhi", () => {
+    const obj = {
+      kouhiId: 1,
+      futansha: 12345678,
+      jukyuusha: 11111111,
+      validFrom: "2023-11-01",
+      validUpto: "2024-10-31",
+      patientId: 123,
+      memo: '{"gendogaku":5000}',
+    };
+    const r = validateKouhi(obj);
+    expect(r.isSuccess()).toBe(true);
+    expect(r.getValue()).toMatchObject(obj);
+  });
 
 });
