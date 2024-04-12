@@ -73,6 +73,22 @@ function withPath<TOutput>(path: string, vtor: () => TOutput): ValidationResult<
   }
 }
 
+export function ensureOptional<T>(obj: any, v: (obj: any) => T): T | undefined {
+  if (obj == null) {
+    return undefined;
+  } else {
+    return v(obj);
+  }
+}
+
+export function validateNullOptional<T>(obj: any, v: (obj: any) => ValidationResult<T>): ValidationResult<T | null> {
+  if (obj == null) {
+    return new ValidationResult(null);
+  } else {
+    return v(obj);
+  }
+}
+
 function coerceToNumber(arg: any): number {
   let n: number;
   if (typeof arg === "number") {
@@ -144,7 +160,7 @@ function isSqlDate(arg: string): string {
 }
 
 function ensureString(arg: any): string {
-  if( typeof arg === "string" ) {
+  if (typeof arg === "string") {
     return arg;
   } else {
     throw new Error("文字列でありｍせん。");
@@ -223,7 +239,7 @@ function coerceToSqlDate(arg: any): string {
     return dateToSqlDate(arg);
   } else if (arg instanceof DateInput) {
     const r = validateDateInput(arg);
-    if( r.isSuccess() ){
+    if (r.isSuccess()) {
       return dateToSqlDate(r.getValue());
     } else {
       throw new ValidationError(r.getErrorMessages());
@@ -287,7 +303,7 @@ export function validatePatientSummary(obj: any): ValidationResult<PatientSummar
   const patientId = withPath("患者番号", () => coerceToNonNegative(obj.patientId));
   const content = withPath("内容", () => ensureString(obj.content));
   const errors = ValidationResult.collectErrors(patientId, content);
-  if( errors.length > 0 ){
+  if (errors.length > 0) {
     return ValidationResult.errorResult(errors);
   } else {
     return new ValidationResult<PatientSummary>({
