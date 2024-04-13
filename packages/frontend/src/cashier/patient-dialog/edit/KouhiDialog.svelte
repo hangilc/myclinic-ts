@@ -1,14 +1,10 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { type Patient, Kouhi } from "myclinic-model";
-  import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
+  import { type Patient, Kouhi, fromMemoStore } from "myclinic-model";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
-  import type { VResult } from "@/lib/validation";
-  import { dialogClose } from "@cypress/lib/dialog";
   import DateInput from "@/lib/date-input/DateInput.svelte";
-  import type { DateInputInterface } from "myclinic-model/validators";
-  import { validateKouhi } from "myclinic-model";
+  import { toKouhi, toSafeConvert, type DateInputInterface } from "myclinic-model";
 
   export let destroy: () => void;
   export let title: string;
@@ -21,9 +17,8 @@
   let getValidUptoInputs: () => DateInputInterface;
   let futansha: string = init?.futansha.toString() ?? "";
   let jukyuusha: string = init?.jukyuusha.toString() ?? "";
-  let gendogaku: string = init?.memoAsJson.gendogaku ?? "";
-  let validFrom: Date | null = null;
-  let validUpto: Date | null = null;
+  let memo: any = (init ? fromMemoStore(init.memo) : {}) ?? {};
+  let gendogaku: string = memo.gendogaku ?? "";
   let gengouList = gengouListUpto("平成");
   let errors: string[] = [];
 
@@ -69,7 +64,7 @@
       patientId: patient.patientId,
       memo: "",
     };
-    const r = validateKouhi(input);
+    const r = toSafeConvert(toKouhi)(input);
     if( r.isError() ){
       errors = r.getErrorMessages();
     } else {
@@ -131,11 +126,11 @@
     {/if}
     <span>期限開始</span>
     <div data-cy="valid-from-input">
-      <DateInput bind:getInputs={getValidFromInputs} initValue={init?.validFrom}/>
+      <DateInput bind:getInputs={getValidFromInputs} initValue={init?.validFrom} {gengouList}/>
     </div>
     <span>期限終了</span>
     <div data-cy="valid-upto-input">
-      <DateInput bind:getInputs={getValidUptoInputs} initValue={init?.validUpto}/>
+      <DateInput bind:getInputs={getValidUptoInputs} initValue={init?.validUpto} {gengouList}/>
     </div>
   </div>
   <div class="commands">

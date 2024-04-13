@@ -1,5 +1,5 @@
 import { Gengou, GengouList } from "kanjidate";
-import { KouhiInterface, PatientSummary } from "./model";
+import { Kouhi, KouhiInterface, KouhiMemoInterface, PatientSummary, PatientSummaryInterface } from "./model";
 import { pipe } from "./pipe";
 
 export class MultiError {
@@ -31,6 +31,14 @@ export function ensureString(arg: unknown): string {
     return arg;
   } else {
     throw new Error("文字列でありません。");
+  }
+}
+
+export function ensureNumber(arg: unknown): number {
+  if (typeof arg === "number") {
+    return arg;
+  } else {
+    throw new Error("数値でありません。");
   }
 }
 
@@ -145,17 +153,17 @@ export class DateInput {
     this.day = day;
   }
 }
-export function convertDateInputToDate(arg: DateInput): ConversionResult<Date> {
-  const g = convert("元号", arg.gengou, toGengou);
-  const n = convert("年", arg.nen, toNen);
-  const m = convert("月", arg.month, toMonth);
-  const d = convert("日", arg.day, toDay);
-  const errors = ConversionResult.collectErrors(g, n, m, d);
+export function dateInputToDate(arg: DateInput): Date {
+  const errors: string[] = [];
+  const g = toSafeConvert("元号", toGengou)(arg.gengou).copyErrorsTo(errors);
+  const n = toSafeConvert("年", toNen)(arg.nen).copyErrorsTo(errors);
+  const m = toSafeConvert("月", toMonth)(arg.month).copyErrorsTo(errors);
+  const d = toSafeConvert("日", toDay)(arg.day).copyErrorsTo(errors);
   if (errors.length > 0) {
-    return ConversionResult.errorResult(errors);
+    throw new MultiError(errors);
   }
   const y = g.getValue().nenStartYear + n.getValue() - 1;
-  return new ConversionResult(new Date(y, m.getValue() - 1, d.getValue()));
+  return new Date(y, m.getValue() - 1, d.getValue());
 }
 
 
@@ -274,7 +282,7 @@ export function toSqlDate(arg: unknown): string {
   } else if (arg instanceof Date) {
     return dateToSqlDate(arg);
   } else if (arg instanceof DateInput) {
-    return dateToSqlDate(convertDateInputToDate(arg).getValue());
+    return pipe(dateInputToDate, dateToSqlDate)(arg);
   } else {
     throw new Error("日付に変換")
   }
@@ -319,9 +327,9 @@ export function nullToUndefined<T>(arg: T | null): T | undefined {
   }
 }
 
-export function mapOptional<T, U>(f: (src: T) => U): (arg: T | undefined) => U | undefined {
-  return (arg: T | undefined) => {
-    if (arg === undefined) {
+export function mapOptional<T, U>(f: (src: T) => U): (arg: T | undefined | null) => U | undefined {
+  return (arg: T | undefined | null) => {
+    if (arg == null) {
       return undefined;
     } else {
       return f(arg);
@@ -329,70 +337,69 @@ export function mapOptional<T, U>(f: (src: T) => U): (arg: T | undefined) => U |
   }
 }
 
-export function convert<S, T>(src: S, f: (src: S) => T): ConversionResult<T>;
-export function convert<S, T>(path: string, src: S, f: (src: S) => T): ConversionResult<T>;
+export function mapNullOptional<T, U>(f: (src: T) => U): (arg: T | undefined | null) => U | null {
+  return (arg: T | undefined | null) => {
+    if (arg == null) {
+      return null;
+    } else {
+      return f(arg);
+    }
+  }
+}
 
-export function convert<S, T>(...args: any[]): ConversionResult<T> {
+export function toSafeConvert<S, T>(f: (src: S) => T): (src: S) => ConversionResult<T>;
+export function toSafeConvert<S, T>(path: string, f: (src: S) => T): (src: S) => ConversionResult<T>;
+
+export function toSafeConvert<S, T>(...args: any[]): (src: S) => ConversionResult<T> {
   let path: string | undefined = undefined;
-  let src: S;
   let conv: (arg: S) => T;
-  if (args.length === 2) {
-    src = args[0];
-    conv = args[1];
-  } else if (args.length === 3) {
+  if (args.length === 1) {
+    conv = args[0];
+  } else if (args.length === 2) {
     path = args[0];
-    src = args[1];
-    conv = args[2];
+    conv = args[1];
   } else {
     throw new Error("Invalid function call (convert).");
   }
-  try {
-    return new ConversionResult(conv(src));
-  } catch (e: any) {
-    let errors: string[];
-    let pre = "";
-    if (typeof path === "string") {
-      pre = path + "：";
+  return (src: S) => {
+    try {
+      return new ConversionResult(conv(src));
+    } catch (e: any) {
+      let errors: string[];
+      let pre = "";
+      if (typeof path === "string") {
+        pre = path + "：";
+      }
+      if (e instanceof MultiError) {
+        errors = e.messages;
+      } else if (e instanceof Error) {
+        errors = [e.message];
+      } else {
+        errors = [e.toString()];
+      }
+      errors = errors.map(e => pre + e);
+      return ConversionResult.errorResult(errors);
     }
-    if (e instanceof MultiError) {
-      errors = e.messages;
-    } else if (e instanceof Error) {
-      errors = [e.message];
-    } else {
-      errors = [e.toString()];
-    }
-    errors = errors.map(e => pre + e);
-    return ConversionResult.errorResult(errors);
   }
 }
 
-export function toMemo(arg: unknown): string | undefined {
-  return pipe(
-    (arg: unknown) => {
-      if (arg === undefined || arg === null || typeof arg === "string") {
-        return arg;
-      } else {
-        throw new Error("不適切な値。")
-      }
-    },
-    arg => arg === "" ? "{}" : arg,
-    ensureOptJsonStringified
-  )(arg);
+export function interfaceToKouhi(src: KouhiInterface): Kouhi {
+  return Kouhi.fromInterface(src);
 }
 
-export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
+export function toKouhi(obj: any): KouhiInterface {
   const errors: string[] = [];
-  const kouhiId = convert("kouhiId", obj.kouhiId, toNonNegativeInteger).copyErrorsTo(errors);
-  const futansha = convert("負担者", obj.futansha, toNonNegativeInteger).copyErrorsTo(errors);
-  const jukyuusha = convert("受給者", obj.jukyuusha, toNonNegativeInteger).copyErrorsTo(errors);
-  const validFrom = convert("期限開始", obj.validFrom, toSqlDate).copyErrorsTo(errors);
-  const validUpto = convert("期限終了", obj.validUpto, toOptSqlDate).copyErrorsTo(errors);
-  const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger).copyErrorsTo(errors);
-  const memo = convert("メモ", obj.memo, toMemo).copyErrorsTo(errors);
+  const kouhiId = toSafeConvert("kouhiId", toNonNegativeInteger)(obj.kouhiId).copyErrorsTo(errors);
+  const futansha = toSafeConvert("負担者", toNonNegativeInteger)(obj.futansha).copyErrorsTo(errors);
+  const jukyuusha = toSafeConvert("受給者", toNonNegativeInteger)(obj.jukyuusha).copyErrorsTo(errors);
+  const validFrom = toSafeConvert("期限開始", toSqlDate)(obj.validFrom).copyErrorsTo(errors);
+  const validUpto = toSafeConvert("期限終了", toOptSqlDate)(obj.validUpto).copyErrorsTo(errors);
+  const patientId = toSafeConvert("患者番号", toNonNegativeInteger)(obj.patientId).copyErrorsTo(errors);
+  const memo = toSafeConvert("メモ", toMemo)(obj.memo).copyErrorsTo(errors);
   if (errors.length > 0) {
-    return ConversionResult.errorResult(errors);
+    throw new MultiError(errors);
   } else {
-    return new ConversionResult<KouhiInterface>({
+    return {
       kouhiId: kouhiId.getValue(),
       futansha: futansha.getValue(),
       jukyuusha: jukyuusha.getValue(),
@@ -400,20 +407,80 @@ export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
       validUpto: validUpto.getValue(),
       patientId: patientId.getValue(),
       memo: memo.getValue(),
-    });
+    };
   }
 }
 
-export function convertToPatientSummary(arg: any): ConversionResult<PatientSummary> {
+export function interfaceToPatientSummary(src: PatientSummaryInterface): PatientSummary {
+  return new PatientSummary(src);
+}
+
+export function toPatientSummary(arg: any): PatientSummaryInterface {
   const errors: string[] = [];
-  const patientId = convert("patientId", arg.patientId, toNonNegativeInteger).copyErrorsTo(errors);
-  const content = convert("内容", arg.content, ensureString).copyErrorsTo(errors);
+  const patientId = toSafeConvert("patientId", toNonNegativeInteger)(arg.patientId).copyErrorsTo(errors);
+  const content = toSafeConvert("内容", ensureString)(arg.content).copyErrorsTo(errors);
   if (errors.length > 0) {
-    return ConversionResult.errorResult(errors);
+    throw new MultiError(errors);
   } else {
-    return new ConversionResult({
+    return {
       patientId: patientId.getValue(),
       content: content.getValue(),
-    })
+    };
   }
+}
+
+export type MemoStore = string | undefined;
+
+export function ensureKouhiMemo(arg: any): KouhiMemoInterface {
+  let obj: any = arg;
+  if (obj == null || obj === "") {
+    obj = {};
+  }
+  if (typeof obj !== "object") {
+    throw new Error("公費メモの形式が不適切です。");
+  }
+  const errors: string[] = [];
+  let gendogaku: ConversionResult<number | undefined> = new ConversionResult(undefined);
+  for (const k in obj) {
+    switch (k) {
+      case "gendogaku": {
+        gendogaku = toSafeConvert(pipe(ensureNumber, isInteger, isNonNegative))(obj[k]).copyErrorsTo(errors);
+        break;
+      }
+      default: {
+        errors.push(`不明の公費メモキー（${k}）`);
+        break;
+      }
+    }
+  }
+  if (errors.length > 0) {
+    throw new MultiError(errors);
+  }
+  return {
+    gendogaku: gendogaku.getValue()
+  };
+}
+
+export function toKouhiMemo(memoStore: MemoStore): KouhiMemoInterface {
+  if (typeof memoStore === "string") {
+    try {
+      return ensureKouhiMemo(JSON.parse(memoStore));
+    } catch(e){
+      throw new Error("公費メモが JSON 形式でありません。")
+    }
+  } else {
+    return ensureKouhiMemo(memoStore);
+  }
+}
+
+export function kouhiMemoToMemoStore(memo: KouhiMemoInterface): string | undefined {
+  if( Object.keys(memo).length === 0){
+    return undefined;
+  } else {
+    return JSON.stringify(memo);
+  }
+}
+
+export function toKouhiMemoStore(arg: any): string | undefined {
+  
 }

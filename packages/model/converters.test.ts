@@ -1,4 +1,4 @@
-import { DateInput, convertToKouhi } from "./converters";
+import { DateInput, toKouhi, toSafeConvert } from "./converters";
 
 describe("model validators", () => {
 
@@ -11,7 +11,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     console.log(r);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(obj);
@@ -24,7 +24,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(false);
     expect(r.getErrorMessage()).toBe("負担者：設定されていません。\n受給者：設定されていません。");
   });
@@ -38,7 +38,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(false);
     expect(r.getErrorMessage()).toBe("期限開始：日付が不適切です。");
   });
@@ -52,8 +52,8 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const kouhi = convertToKouhi(obj);
-    const r = convertToKouhi(obj);
+    const kouhi = toSafeConvert(toKouhi)(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
   });
@@ -67,7 +67,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validFrom: "2023-11-01" }));
   });
@@ -81,7 +81,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(false);
     expect(r.getErrorMessage()).toBe("期限開始：年：空白です。\n期限開始：月：空白です。")
   });
@@ -95,7 +95,7 @@ describe("model validators", () => {
       validUpto: new Date(2024, 9, 31),
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "2024-10-31" }));
   });
@@ -109,7 +109,7 @@ describe("model validators", () => {
       validUpto: "0000-00-00",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(obj);
   });
@@ -123,7 +123,7 @@ describe("model validators", () => {
       validUpto: null,
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
   });
@@ -136,7 +136,7 @@ describe("model validators", () => {
       validFrom: "2023-11-01",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
   });
@@ -150,7 +150,7 @@ describe("model validators", () => {
       validUpto: "",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { validUpto: "0000-00-00" }));
   });
@@ -164,7 +164,7 @@ describe("model validators", () => {
       validUpto: "2024-10-31",
       patientId: 123,
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(Object.assign({}, obj, { futansha: parseInt(obj.futansha), jukyuusha: parseInt(obj.jukyuusha) }));
   });
@@ -179,7 +179,7 @@ describe("model validators", () => {
       patientId: 123,
       memo: '{a:2}',
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(false);
     expect(r.getErrorMessage()).toBe("メモ：JSON 形式でありません。");
   });
@@ -194,7 +194,7 @@ describe("model validators", () => {
       patientId: 123,
       memo: '{"gendogaku":5000}',
     };
-    const r = convertToKouhi(obj);
+    const r = toSafeConvert(toKouhi)(obj);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(obj);
   });

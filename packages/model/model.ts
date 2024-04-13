@@ -509,6 +509,10 @@ export class Koukikourei {
   }
 }
 
+export interface KouhiMemoInterface {
+  gendogaku?: number ;
+}
+
 export interface KouhiInterface {
   kouhiId: number;
   futansha: number;

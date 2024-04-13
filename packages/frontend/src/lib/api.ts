@@ -1,12 +1,13 @@
+import {
+  toKouhi, toPatientSummary,
+  toSafeConvert, mapOptional, interfaceToPatientSummary, undefinedToNull, interfaceToKouhi
+} from "myclinic-model";
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
-import {
-  ensureOptional,
-  validateNullOptional,
-  toPatientSummary,
-} from "myclinic-model";
+import { pipe } from "myclinic-model/pipe";
+import { mapNullOptional } from "myclinic-model/model";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -523,7 +524,7 @@ export default {
         "patient-id": patientId.toString(),
         at: dateParam(at),
       },
-      castList(m.Kouhi.cast)
+      castList(pipe(toKouhi, interfaceToKouhi))
     );
   },
 
@@ -548,7 +549,7 @@ export default {
         castList(m.Shahokokuho.cast),
         castList(m.Koukikourei.cast),
         castList(m.Roujin.cast),
-        castList(m.Kouhi.cast)
+        castList(pipe(toKouhi, interfaceToKouhi))
       )
     );
   },
@@ -1103,7 +1104,7 @@ export default {
           castList(m.Shahokokuho.cast)(shahoList),
           castList(m.Koukikourei.cast)(koukiList),
           castList(m.Roujin.cast)(roujinList),
-          castList(m.Kouhi.cast)(kouhiList),
+          castList(pipe(toKouhi, interfaceToKouhi))(kouhiList),
         ];
       }
     );
@@ -1126,7 +1127,7 @@ export default {
   },
 
   enterKouhi(kouhi: m.KouhiInterface): Promise<m.Kouhi> {
-    return post("enter-kouhi", kouhi, {}, m.Kouhi.cast);
+    return post("enter-kouhi", kouhi, {}, pipe(toKouhi, interfaceToKouhi));
   },
 
   getShahokokuho(shahokokuhoId: number): Promise<m.Shahokokuho> {
@@ -1138,7 +1139,7 @@ export default {
   },
 
   getKouhi(kouhiId: number): Promise<m.Kouhi> {
-    return get("get-kouhi", { "kouhi-id": kouhiId.toString() }, m.Kouhi.cast);
+    return get("get-kouhi", { "kouhi-id": kouhiId.toString() }, pipe(toKouhi, interfaceToKouhi));
   },
 
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
@@ -1555,7 +1556,7 @@ export default {
 
   findPatientSummary(patientId: number): Promise<m.PatientSummary | null> {
     return get("find-patient-summary", { "patient-id": patientId.toString() },
-      body => validateNullOptional(body, validatePatientSummary).getValue());
+      mapNullOptional(pipe(toPatientSummary, interfaceToPatientSummary)));
   },
 
   enterPatientSummary(summary: m.PatientSummary): Promise<void> {
