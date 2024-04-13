@@ -1,12 +1,11 @@
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
-import type { ReceiptDrawerData } from "./drawer/forms/receipt/receipt-drawer-data";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 import {
   ensureOptional,
   validateNullOptional,
-  validatePatientSummary
+  toPatientSummary,
 } from "myclinic-model";
 
 function castDrawerOp(obj: any): DrawerOp {

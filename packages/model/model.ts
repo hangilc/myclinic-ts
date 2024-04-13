@@ -2032,9 +2032,20 @@ export class ClinicInfo {
   }
 }
 
+export interface PatientSummaryInterface {
+  patientId: number;
+  content: string;
+}
+
 export class PatientSummary {
-  constructor(
-    public patientId: number,
-    public content: string,
-  ) { }
+  patientId: number;
+  content: string;
+
+  constructor({
+    patientId,
+    content,
+  }: PatientSummaryInterface) {
+    this.patientId = patientId;
+    this.content = content;
+  }
 }

@@ -1,5 +1,5 @@
 import { Gengou, GengouList } from "kanjidate";
-import { KouhiInterface } from "./model";
+import { KouhiInterface, PatientSummary } from "./model";
 import { pipe } from "./pipe";
 
 export class MultiError {
@@ -46,7 +46,7 @@ export function nonEmptyString(s: string): string {
   if (s !== "") {
     return s;
   } else {
-    throw new Error("空白文字列です。")
+    throw new Error("空白です。")
   }
 }
 
@@ -219,7 +219,7 @@ export function minValue(limit: number): (arg: number) => number {
 
 export function maxValue(limit: number): (arg: number) => number {
   return arg => {
-    if (arg >= limit) {
+    if (arg <= limit) {
       return arg;
     } else {
       throw new Error(`${limit}以下の数でありません。`)
@@ -312,10 +312,20 @@ export function undefinedToNull<T>(arg: T | undefined): T | null {
 }
 
 export function nullToUndefined<T>(arg: T | null): T | undefined {
-  if( arg === null ){
+  if (arg === null) {
     return undefined;
   } else {
     return arg;
+  }
+}
+
+export function mapOptional<T, U>(f: (src: T) => U): (arg: T | undefined) => U | undefined {
+  return (arg: T | undefined) => {
+    if (arg === undefined) {
+      return undefined;
+    } else {
+      return f(arg);
+    }
   }
 }
 
@@ -342,7 +352,7 @@ export function convert<S, T>(...args: any[]): ConversionResult<T> {
     let errors: string[];
     let pre = "";
     if (typeof path === "string") {
-      pre += "：";
+      pre = path + "：";
     }
     if (e instanceof MultiError) {
       errors = e.messages;
@@ -391,5 +401,19 @@ export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
       patientId: patientId.getValue(),
       memo: memo.getValue(),
     });
+  }
+}
+
+export function convertToPatientSummary(arg: any): ConversionResult<PatientSummary> {
+  const errors: string[] = [];
+  const patientId = convert("patientId", arg.patientId, toNonNegativeInteger).copyErrorsTo(errors);
+  const content = convert("内容", arg.content, ensureString).copyErrorsTo(errors);
+  if (errors.length > 0) {
+    return ConversionResult.errorResult(errors);
+  } else {
+    return new ConversionResult({
+      patientId: patientId.getValue(),
+      content: content.getValue(),
+    })
   }
 }
