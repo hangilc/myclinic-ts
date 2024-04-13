@@ -1,5 +1,6 @@
 import { castList, castNumber, castOption, castOptionUndefined, castString } from "./cast";
 export * from "./converters";
+import { dateToSqlDate } from "./converters";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;

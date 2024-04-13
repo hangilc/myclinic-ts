@@ -233,6 +233,20 @@ export function isSqlDate(arg: string): string {
   }
 }
 
+function padNumber(n: number | string, finalSize: number, pad: string) {
+  let s: string;
+  if (typeof n === "number") {
+    s = n.toString();
+  } else {
+    s = n;
+  }
+  while (s.length < finalSize) {
+    s = pad + s;
+  }
+  return s;
+}
+
+
 export function dateToSqlDate(d: Date): string {
   const year: number = d.getFullYear();
   const month: number = d.getMonth() + 1;
@@ -253,8 +267,20 @@ export function toSqlDate(arg: unknown): string {
     return isSqlDate(s);
   } else if( arg instanceof Date ){
     return dateToSqlDate(arg);
+  } else if ( arg instanceof DateInput ){
+    return dateToSqlDate(convertDateInputToDate(arg).getValue());
   } else {
     throw new Error("日付に変換")
+  }
+}
+
+export function toOptSqlDate(arg: unknown): string {
+  if (arg == null || arg === "") {
+    return "0000-00-00";
+  } else if (arg instanceof DateInput && arg.nen === "" && arg.month === "" && arg.day === "") {
+    return "0000-00-00";
+  } else {
+    return toSqlDate(arg);
   }
 }
 
@@ -300,8 +326,8 @@ export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
   const futansha = convert("負担者", obj.futansha, toNonNegativeInteger);
   const jukyuusha = convert("受給者", obj.jukyuusha, toNonNegativeInteger);
   const validFrom = convert("期限開始", obj.validFrom, toSqlDate);
-  const validUpto = convert("期限終了", obj.validUpto, ToOptSqlDate(obj.validUpto));
-  const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger(obj.patientId));
+  const validUpto = convert("期限終了", obj.validUpto, toOptSqlDate);
+  const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger);
   const memo = convert("メモ", obj.memo, ToOptJsonStringified(obj.memo));
   const errors = ConversionResult.collectErrors(kouhiId, futansha, jukyuusha, validFrom, validUpto, patientId, memo);
   if (errors.length > 0) {
