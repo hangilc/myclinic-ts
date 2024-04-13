@@ -25,5 +25,5 @@ export function pipe<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, R>(f1: (arg: A1) =
   f9: (arg: A9) => A10, f10: (arg: A10) => R): (arg: A1) => R;
 
 export function pipe(...fs: ((arg: any) => any)[]): (arg: any) => any {
-  return (arg: any) => fs.reduce((acc, ele) => acc(ele))(arg);
+  return (arg: any) => fs.reduce((acc, f) => f(acc), arg);
 }

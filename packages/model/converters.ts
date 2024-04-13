@@ -59,6 +59,7 @@ export function toNumber(arg: unknown): number {
     const s = nonEmptyString(arg.trim());
     n = Number(arg);
   } else {
+    console.log("arg", arg);
     throw new Error("数値でありません。");
   }
   n = isNotNaN(n);
@@ -202,7 +203,7 @@ export function isInteger(n: number): number {
   if (Number.isInteger(n)) {
     return n;
   } else {
-    throw new Error("整数でありません。");
+    throw new Error(`整数でありません。`);
   }
 }
 
@@ -372,12 +373,12 @@ export function toMemo(arg: unknown): string | undefined {
 export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
   const errors: string[] = [];
   const kouhiId = convert("kouhiId", obj.kouhiId, toNonNegativeInteger).copyErrorsTo(errors);
-  const futansha = convert("負担者", obj.futansha, toNonNegativeInteger);
-  const jukyuusha = convert("受給者", obj.jukyuusha, toNonNegativeInteger);
-  const validFrom = convert("期限開始", obj.validFrom, toSqlDate);
-  const validUpto = convert("期限終了", obj.validUpto, toOptSqlDate);
-  const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger);
-  const memo = convert("メモ", obj.memo, toMemo);
+  const futansha = convert("負担者", obj.futansha, toNonNegativeInteger).copyErrorsTo(errors);
+  const jukyuusha = convert("受給者", obj.jukyuusha, toNonNegativeInteger).copyErrorsTo(errors);
+  const validFrom = convert("期限開始", obj.validFrom, toSqlDate).copyErrorsTo(errors);
+  const validUpto = convert("期限終了", obj.validUpto, toOptSqlDate).copyErrorsTo(errors);
+  const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger).copyErrorsTo(errors);
+  const memo = convert("メモ", obj.memo, toMemo).copyErrorsTo(errors);
   if (errors.length > 0) {
     return ConversionResult.errorResult(errors);
   } else {
