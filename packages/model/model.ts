@@ -1,5 +1,5 @@
 import { castList, castNumber, castOption, castOptionUndefined, castString } from "./cast";
-export * from "./validators";
+export * from "./converters";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
@@ -14,16 +14,6 @@ export function padNumber(n: number | string, finalSize: number, pad: string) {
   return s;
 }
 
-export function dateToSqlDate(d: Date): string {
-  const year: number = d.getFullYear();
-  const month: number = d.getMonth() + 1;
-  const day: number = d.getDate();
-  return `${padNumber(year, 4, "0")}-${padNumber(month, 2, "0")}-${padNumber(
-    day,
-    2,
-    "0"
-  )}`;
-}
 
 export function optionalDateToSqlDate(d: Date | undefined): string {
   if (d == null) {
