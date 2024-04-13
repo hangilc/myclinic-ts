@@ -1,6 +1,6 @@
 import { Gengou, GengouList } from "kanjidate";
-import { KouhiInterface } from "model";
-import { pipe } from "pipe";
+import { KouhiInterface } from "./model";
+import { pipe } from "./pipe";
 
 export class MultiError {
   messages: string[];
@@ -302,9 +302,17 @@ export function ensureOptJsonStringified(arg: string | undefined | null): string
   }
 }
 
-export function undefinedToNull<T>(arg: T | undefined | null): T | null {
+export function undefinedToNull<T>(arg: T | undefined): T | null {
   if (arg === undefined) {
     return null;
+  } else {
+    return arg;
+  }
+}
+
+export function nullToUndefined<T>(arg: T | null): T | undefined {
+  if( arg === null ){
+    return undefined;
   } else {
     return arg;
   }
