@@ -11,7 +11,7 @@ export class MultiError {
 }
 
 export function nonNull(arg: unknown, message?: string): unknown {
-  if( arg != null ){
+  if (arg != null) {
     return arg;
   } else {
     throw new Error(message ?? "設定されていません。")
@@ -19,7 +19,7 @@ export function nonNull(arg: unknown, message?: string): unknown {
 }
 
 export function isNotNaN(n: number): number {
-  if( !isNaN(n) ) {
+  if (!isNaN(n)) {
     return n;
   } else {
     throw new Error("数値でありません")
@@ -27,7 +27,7 @@ export function isNotNaN(n: number): number {
 }
 
 export function ensureString(arg: unknown): string {
-  if( typeof arg === "string" ){
+  if (typeof arg === "string") {
     return arg;
   } else {
     throw new Error("文字列でありません。");
@@ -35,7 +35,7 @@ export function ensureString(arg: unknown): string {
 }
 
 export function ensureArray(arg: unknown, message?: string): unknown[] {
-  if( Array.isArray(arg) ) {
+  if (Array.isArray(arg)) {
     return arg;
   } else {
     throw new Error(message ?? "配列でありません。")
@@ -43,7 +43,7 @@ export function ensureArray(arg: unknown, message?: string): unknown[] {
 }
 
 export function nonEmptyString(s: string): string {
-  if( s !== "" ){
+  if (s !== "") {
     return s;
   } else {
     throw new Error("空白文字列です。")
@@ -107,6 +107,11 @@ export class ConversionResult<T> {
 
   getErrorMessage(sep: string = "\n"): string {
     return this.getErrorMessages().join("\n");
+  }
+
+  copyErrorsTo(dst: string[]): ConversionResult<T> {
+    dst.push(...this.errors);
+    return this;
   }
 }
 
@@ -178,7 +183,7 @@ function toDay(arg: any): number {
 }
 
 export function isPositive(n: number): number {
-  if( n > 0 ){
+  if (n > 0) {
     return n;
   } else {
     throw new Error("正の数でありません。")
@@ -186,7 +191,7 @@ export function isPositive(n: number): number {
 }
 
 export function isNonNegative(n: number): number {
-  if( n >= 0 ){
+  if (n >= 0) {
     return n;
   } else {
     throw new Error("負の数です。")
@@ -194,7 +199,7 @@ export function isNonNegative(n: number): number {
 }
 
 export function isInteger(n: number): number {
-  if( Number.isInteger(n) ){
+  if (Number.isInteger(n)) {
     return n;
   } else {
     throw new Error("整数でありません。");
@@ -203,7 +208,7 @@ export function isInteger(n: number): number {
 
 export function minValue(limit: number): (arg: number) => number {
   return arg => {
-    if( arg >= limit ){
+    if (arg >= limit) {
       return arg;
     } else {
       throw new Error(`${limit}以上の数でありません。`)
@@ -213,7 +218,7 @@ export function minValue(limit: number): (arg: number) => number {
 
 export function maxValue(limit: number): (arg: number) => number {
   return arg => {
-    if( arg >= limit ){
+    if (arg >= limit) {
       return arg;
     } else {
       throw new Error(`${limit}以下の数でありません。`)
@@ -259,15 +264,15 @@ export function dateToSqlDate(d: Date): string {
 }
 
 export function toSqlDate(arg: unknown): string {
-  if( typeof arg === "string" ){
+  if (typeof arg === "string") {
     let s: string = arg;
-    if( s.length > 10 ){
+    if (s.length > 10) {
       s = s.substring(0, 10);
     }
     return isSqlDate(s);
-  } else if( arg instanceof Date ){
+  } else if (arg instanceof Date) {
     return dateToSqlDate(arg);
-  } else if ( arg instanceof DateInput ){
+  } else if (arg instanceof DateInput) {
     return dateToSqlDate(convertDateInputToDate(arg).getValue());
   } else {
     throw new Error("日付に変換")
@@ -284,6 +289,27 @@ export function toOptSqlDate(arg: unknown): string {
   }
 }
 
+export function ensureOptJsonStringified(arg: string | undefined | null): string | undefined {
+  if (arg === undefined || arg === null) {
+    return undefined;
+  } else {
+    try {
+      JSON.parse(arg);
+      return arg;
+    } catch (e) {
+      throw new Error("JSON 形式でありません。");
+    }
+  }
+}
+
+export function undefinedToNull<T>(arg: T | undefined | null): T | null {
+  if (arg === undefined) {
+    return null;
+  } else {
+    return arg;
+  }
+}
+
 export function convert<S, T>(src: S, f: (src: S) => T): ConversionResult<T>;
 export function convert<S, T>(path: string, src: S, f: (src: S) => T): ConversionResult<T>;
 
@@ -291,10 +317,10 @@ export function convert<S, T>(...args: any[]): ConversionResult<T> {
   let path: string | undefined = undefined;
   let src: S;
   let conv: (arg: S) => T;
-  if( args.length === 2 ){
+  if (args.length === 2) {
     src = args[0];
     conv = args[1];
-  } else if( args.length === 3 ){
+  } else if (args.length === 3) {
     path = args[0];
     src = args[1];
     conv = args[2];
@@ -303,15 +329,15 @@ export function convert<S, T>(...args: any[]): ConversionResult<T> {
   }
   try {
     return new ConversionResult(conv(src));
-  } catch(e: any) {
+  } catch (e: any) {
     let errors: string[];
     let pre = "";
-    if( typeof path === "string" ){
+    if (typeof path === "string") {
       pre += "：";
     }
-    if( e instanceof MultiError ){
+    if (e instanceof MultiError) {
       errors = e.messages;
-    } else if (e instanceof Error ){
+    } else if (e instanceof Error) {
       errors = [e.message];
     } else {
       errors = [e.toString()];
@@ -321,15 +347,29 @@ export function convert<S, T>(...args: any[]): ConversionResult<T> {
   }
 }
 
+export function toMemo(arg: unknown): string | undefined {
+  return pipe(
+    (arg: unknown) => {
+      if (arg === undefined || arg === null || typeof arg === "string") {
+        return arg;
+      } else {
+        throw new Error("不適切な値。")
+      }
+    },
+    arg => arg === "" ? "{}" : arg,
+    ensureOptJsonStringified
+  )(arg);
+}
+
 export function convertToKouhi(obj: any): ConversionResult<KouhiInterface> {
-  const kouhiId = convert("kouhiId", obj.kouhiId, toNonNegativeInteger);
+  const errors: string[] = [];
+  const kouhiId = convert("kouhiId", obj.kouhiId, toNonNegativeInteger).copyErrorsTo(errors);
   const futansha = convert("負担者", obj.futansha, toNonNegativeInteger);
   const jukyuusha = convert("受給者", obj.jukyuusha, toNonNegativeInteger);
   const validFrom = convert("期限開始", obj.validFrom, toSqlDate);
   const validUpto = convert("期限終了", obj.validUpto, toOptSqlDate);
   const patientId = convert("患者番号", obj.patientId, toNonNegativeInteger);
-  const memo = convert("メモ", obj.memo, ToOptJsonStringified(obj.memo));
-  const errors = ConversionResult.collectErrors(kouhiId, futansha, jukyuusha, validFrom, validUpto, patientId, memo);
+  const memo = convert("メモ", obj.memo, toMemo);
   if (errors.length > 0) {
     return ConversionResult.errorResult(errors);
   } else {
