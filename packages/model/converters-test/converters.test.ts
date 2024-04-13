@@ -1,4 +1,4 @@
-import { DateInput, toKouhi, toSafeConvert } from "./converters";
+import { DateInput, toKouhi, toSafeConvert } from "../converters";
 
 describe("model validators", () => {
 
@@ -12,7 +12,6 @@ describe("model validators", () => {
       patientId: 123,
     };
     const r = toSafeConvert(toKouhi)(obj);
-    console.log(r);
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(obj);
   });

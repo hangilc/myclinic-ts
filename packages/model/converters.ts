@@ -395,7 +395,7 @@ export function toKouhi(obj: any): KouhiInterface {
   const validFrom = toSafeConvert("期限開始", toSqlDate)(obj.validFrom).copyErrorsTo(errors);
   const validUpto = toSafeConvert("期限終了", toOptSqlDate)(obj.validUpto).copyErrorsTo(errors);
   const patientId = toSafeConvert("患者番号", toNonNegativeInteger)(obj.patientId).copyErrorsTo(errors);
-  const memo = toSafeConvert("メモ", toMemo)(obj.memo).copyErrorsTo(errors);
+  const memo = toSafeConvert("メモ", toKouhiMemoStore)(obj.memo).copyErrorsTo(errors);
   if (errors.length > 0) {
     throw new MultiError(errors);
   } else {
@@ -429,16 +429,22 @@ export function toPatientSummary(arg: any): PatientSummaryInterface {
   }
 }
 
+export function jsonParse(message: string): (arg: any) => any {
+  return (arg: any) => {
+    try {
+      return JSON.parse(arg);
+    } catch (e) {
+      throw new Error(message);
+    }
+
+  }
+}
+
+export const jsonStringify: (arg: any) => string = (arg: any) => JSON.stringify(arg);
+
 export type MemoStore = string | undefined;
 
-export function ensureKouhiMemo(arg: any): KouhiMemoInterface {
-  let obj: any = arg;
-  if (obj == null || obj === "") {
-    obj = {};
-  }
-  if (typeof obj !== "object") {
-    throw new Error("公費メモの形式が不適切です。");
-  }
+export function ensureKouhiMemo<T extends object>(obj: T): KouhiMemoInterface {
   const errors: string[] = [];
   let gendogaku: ConversionResult<number | undefined> = new ConversionResult(undefined);
   for (const k in obj) {
@@ -448,7 +454,7 @@ export function ensureKouhiMemo(arg: any): KouhiMemoInterface {
         break;
       }
       default: {
-        errors.push(`不明の公費メモキー（${k}）`);
+        errors.push(`不明のキー（${k}）`);
         break;
       }
     }
@@ -461,26 +467,39 @@ export function ensureKouhiMemo(arg: any): KouhiMemoInterface {
   };
 }
 
-export function toKouhiMemo(memoStore: MemoStore): KouhiMemoInterface {
+export function memoStoreToKouhiMemo(memoStore: string | undefined): KouhiMemoInterface {
   if (typeof memoStore === "string") {
-    try {
-      return ensureKouhiMemo(JSON.parse(memoStore));
-    } catch(e){
-      throw new Error("公費メモが JSON 形式でありません。")
-    }
+    return pipe(
+      jsonParse("JSON 形式でありません。"),
+      ensureKouhiMemo
+    )(memoStore);
   } else {
-    return ensureKouhiMemo(memoStore);
+    return ensureKouhiMemo({});
   }
 }
 
-export function kouhiMemoToMemoStore(memo: KouhiMemoInterface): string | undefined {
-  if( Object.keys(memo).length === 0){
-    return undefined;
-  } else {
-    return JSON.stringify(memo);
-  }
+export function toMemoStore<T extends object>(conv: (arg: object) => T): (arg: unknown) => string | undefined {
+  return pipe(
+    (arg: unknown) => {
+      if( arg === undefined || arg === null || arg === "" ){
+        return {};
+      } else if( typeof arg === "object" ){
+        return arg;
+      } else if( typeof arg === "string" ){
+        const json = jsonParse("JSON 形式でありません。")(arg);
+        if( typeof json !== "object" ){
+          throw new Error("形式が不適切です。");
+        }
+        return json;
+      } else {
+        throw new Error("変換できません。");
+      }
+    },
+    conv,
+    jsonStringify,
+    (arg) => (arg === "{}") ? undefined : arg,
+  )
 }
 
-export function toKouhiMemoStore(arg: any): string | undefined {
-  
-}
+export const toKouhiMemoStore: (arg: unknown) => string | undefined = toMemoStore(ensureKouhiMemo);
+
