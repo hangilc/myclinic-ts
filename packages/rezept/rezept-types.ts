@@ -126,6 +126,7 @@ export interface RezeptPatient {
 export interface RezeptKouhi {
   futansha: number;
   jukyuusha: number;
+  jikofutan?: number;
 }
 
 export type HokenSelector = "H" | "1" | "2" | "3" | "4";

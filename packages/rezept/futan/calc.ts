@@ -5,15 +5,19 @@ interface PaymentContext {
 
 export interface Payer {
   kind: string;
-  calc(bill: number, ctx: PaymentContext): number;
+  calc(bill: number, self: Payer, ctx: PaymentContext): void;
   payment: number;
+  jikofutan?: number;
 }
 
 export function calcPayments(bill: number, payers: Payer[]) {
   const ctx = { totalBill: bill };
   payers.forEach(p => {
     const payment = p.calc(bill, ctx);
-    p.payment += payment;
+    p.payment += payment.amount;
+    if( payment.jikofutan !== undefined ){
+      p.jikofutan = payment.jikofutan;
+    }
     bill -= p.payment;
   });
 }
@@ -26,32 +30,36 @@ export function calcJikofutan(bill: number, payers: { payment: number }[]): numb
 export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
   return {
     kind: "hoken",
-    calc(bill: number) {
-      let jikofutan = bill * futanWari / 10.0;
+    calc(bill: number, self: Payer) {
+      if( self.jikofutan !== undefined ){
+        return;
+      }
+      let jiko = bill * futanWari / 10.0;
       if( gendogaku != undefined ){
-        if( jikofutan > gendogaku ){
-          jikofutan = gendogaku;
+        if( self.payment + jiko > gendogaku ){
+          jiko = gendogaku;
         }
       }
-      return bill - jikofutan;
+      self.payment += bill - jiko
     },
     payment: 0,
   }
 }
 
 export function mkNanbyouPayer(gendogaku: number): Payer {
-  console.log("nanbyou", gendogaku);
   return {
     kind: "nanbyou",
-    calc(bill: number, ctx: PaymentContext) {
-      let jikofutan = bill;
-      if( jikofutan > ctx.totalBill * 0.2 ){
-        jikofutan = ctx.totalBill * 0.2;
+    calc(bill: number, self: Payer, ctx: PaymentContext) {
+      let jiko = bill;
+      let jikofutan: number | undefined = undefined;
+      if( jiko > ctx.totalBill * 0.2 ){
+        jiko = ctx.totalBill * 0.2;
       }
-      if( jikofutan > gendogaku ){
+      if( jiko > gendogaku ){
+        jiko = gendogaku;
         jikofutan = gendogaku;
       }
-      return bill - jikofutan;
+      return { amount: bill - jiko, jikofutan };
     },
     payment: 0,
   }

@@ -62,6 +62,7 @@ export interface RezeptUnitToPatientUnitOption {
 
 export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number,
     opt: RezeptUnitToPatientUnitOption = {}): PatientUnit {
+  console.log("rezeptUnitToPatientUnit");
   const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = rezeptUnit;
   const rows: string[] = [];
   if (visits.length === 0) {
@@ -74,6 +75,7 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
     const hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
     rows.push(create保険者レコード(hokensha, visits, tenCol.getHokenTotal(), hokenFutan));
   }
+  console.log("kouhiList", kouhiList);
   if (kouhiList.length > 0) {
     const kouhiTotals: number[] = tenCol.getKouhiTotals();
     kouhiList.forEach((kouhi, index) => {

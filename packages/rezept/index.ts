@@ -67,7 +67,7 @@ export function createRezept(arg: CreateRezeptArg): string {
           case 3: sel = "4"; break;
           default: throw new Error("Too many kouhi.");
         }
-        rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], undefined));
+        rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], kouhi.jikofutan));
       })
     }
     if (hokensha && hokensha.edaban !== undefined) {
