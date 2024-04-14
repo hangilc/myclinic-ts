@@ -31,37 +31,6 @@
   let gengouList = gengouListUpto("平成");
   let errors: string[] = [];
 
-  // async function doEnter(kouhi: Kouhi): Promise<string[]> {
-  //   if (init === null) {
-  //     kouhi.kouhiId = 0;
-  //   }
-  //   try {
-  //     if (init === null) {
-  //       const entered = await api.enterKouhi(kouhi);
-  //       onEntered(entered);
-  //       return [];
-  //     } else {
-  //       if (kouhi.kouhiId <= 0) {
-  //         return ["Invalid kouhiId"];
-  //       } else {
-  //         if (!isAdmin) {
-  //           const usage = await api.countKouhiUsage(kouhi.kouhiId);
-  //           if (usage > 0) {
-  //             return [
-  //               "この公費はすでに使用されているので、内容を変更できません。",
-  //             ];
-  //           }
-  //         }
-  //         await api.updateKouhi(kouhi);
-  //         onUpdated(kouhi);
-  //         return [];
-  //       }
-  //     }
-  //   } catch (ex: any) {
-  //     return [ex.toString()];
-  //   }
-  // }
-
   async function doEnter() {
     const kouhiId = init?.kouhiId ?? 0;
     const memoInput: KouhiMemoInterface = Object.assign({}, memo, {
@@ -138,7 +107,7 @@
         data-cy="jukyuusha-input"
       />
     </div>
-    {#if init?.futansha === 54136015}
+    {#if futansha === "54136015"}
       <span>限度額</span>
       <div>
         <input
