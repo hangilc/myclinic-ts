@@ -40,6 +40,7 @@ export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
 }
 
 export function mkNanbyouPayer(gendogaku: number): Payer {
+  console.log("nanbyou", gendogaku);
   return {
     kind: "nanbyou",
     calc(bill: number, ctx: PaymentContext) {

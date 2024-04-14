@@ -18,9 +18,9 @@
 
   async function doDispClick() {
     if (visit.chargeOption != null) {
-      const meisai = await api.getMeisai(visit.visitId);
+      // const meisai = await api.getMeisai(visit.visitId);
       const rezeptMeisai = await calcRezeptMeisai(visit.visitId);
-      console.log("meisai", meisai.charge, rezeptMeisai.charge);
+      // console.log("meisai", meisai.charge, rezeptMeisai.charge);
       const patientId = visit.patient.patientId;
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;

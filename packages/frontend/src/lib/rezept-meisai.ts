@@ -140,6 +140,7 @@ function resolvePayers(hokenCollector: HokenCollector, hokenGendogaku?: number):
   }
   const kouhiContext = {};
   payers.push(...hokenCollector.kouhiList.map(kouhi => resolveKouhiPayer(kouhi, kouhiContext)))
+  console.log("payers", payers);
   return payers;
 }
 
@@ -179,7 +180,6 @@ function calcPaymentsOfVisits(visits: RezeptVisit[], shotokuKubun: ShotokuKubunC
   const comb = new Combiner();
   calcVisits(visits, tensuuCollector, comb);
   const totalTen = [...tensuuCollector.totalTen.values()].reduce((a, e) => a + e, 0);;
-  console.log("totalTen", totalTen);
   let hokenGendogaku: number | undefined = undefined;
   if (shotokuKubun) {
     const opt: GendogakuOptions = {
@@ -238,9 +238,10 @@ function addToMeisai(meisai: Meisai, section: MeisaiSectionType, item: MeisaiSec
   for(const data of meisai.items){
     if( data.section === section ){
       data.entries.push(item);
+      return;
     }
   }
-  console.error(`Unknown section: ${section}`);
+  console.error("Unknown section", section);
 }
 
 function cleanupMeisaiItems(meisai: Meisai) {
