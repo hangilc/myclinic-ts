@@ -442,15 +442,26 @@ export function jsonParse(message: string): (arg: any) => any {
 
 export const jsonStringify: (arg: any) => string = (arg: any) => JSON.stringify(arg);
 
-export type MemoStore = string | undefined;
+function convertDefined<T, U>(f: (arg: T) => U): (arg: T | undefined | null) => U | undefined {
+  return (arg: T | undefined | null) => {
+    if (arg == null) {
+      return undefined;
+    } else {
+      return f(arg);
+    }
+  }
+}
 
-export function ensureKouhiMemo<T extends object>(obj: T): KouhiMemoInterface {
+export function toKouhiMemo<T extends object>(obj: T): KouhiMemoInterface {
   const errors: string[] = [];
   let gendogaku: ConversionResult<number | undefined> = new ConversionResult(undefined);
   for (const k in obj) {
     switch (k) {
       case "gendogaku": {
-        gendogaku = toSafeConvert(pipe(ensureNumber, isInteger, isNonNegative))(obj[k]).copyErrorsTo(errors);
+        gendogaku = toSafeConvert(pipe(
+          arg => arg === "" ? undefined : arg,
+          convertDefined(pipe(toNumber, isInteger, isNonNegative))
+        ))(obj[k]).copyErrorsTo(errors);
         break;
       }
       default: {
@@ -470,24 +481,25 @@ export function ensureKouhiMemo<T extends object>(obj: T): KouhiMemoInterface {
 export function memoStoreToKouhiMemo(memoStore: string | undefined): KouhiMemoInterface {
   if (typeof memoStore === "string") {
     return pipe(
+      arg => arg === "" ? "{}" : arg,
       jsonParse("JSON 形式でありません。"),
-      ensureKouhiMemo
+      toKouhiMemo
     )(memoStore);
   } else {
-    return ensureKouhiMemo({});
+    return toKouhiMemo({});
   }
 }
 
 export function toMemoStore<T extends object>(conv: (arg: object) => T): (arg: unknown) => string | undefined {
   return pipe(
     (arg: unknown) => {
-      if( arg === undefined || arg === null || arg === "" ){
+      if (arg === undefined || arg === null || arg === "") {
         return {};
-      } else if( typeof arg === "object" ){
+      } else if (typeof arg === "object") {
         return arg;
-      } else if( typeof arg === "string" ){
+      } else if (typeof arg === "string") {
         const json = jsonParse("JSON 形式でありません。")(arg);
-        if( typeof json !== "object" ){
+        if (typeof json !== "object") {
           throw new Error("形式が不適切です。");
         }
         return json;
@@ -501,5 +513,5 @@ export function toMemoStore<T extends object>(conv: (arg: object) => T): (arg: u
   )
 }
 
-export const toKouhiMemoStore: (arg: unknown) => string | undefined = toMemoStore(ensureKouhiMemo);
+export const toKouhiMemoStore: (arg: unknown) => string | undefined = toMemoStore(toKouhiMemo);
 

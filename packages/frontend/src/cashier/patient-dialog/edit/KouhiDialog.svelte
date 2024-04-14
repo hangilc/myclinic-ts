@@ -1,10 +1,19 @@
 <script lang="ts">
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import { type Patient, Kouhi, fromMemoStore } from "myclinic-model";
+  import {
+    type Patient,
+    Kouhi,
+    type KouhiMemoInterface,
+    memoStoreToKouhiMemo,
+  } from "myclinic-model";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
   import DateInput from "@/lib/date-input/DateInput.svelte";
-  import { toKouhi, toSafeConvert, type DateInputInterface } from "myclinic-model";
+  import {
+    toKouhi,
+    toSafeConvert,
+    type DateInputInterface,
+  } from "myclinic-model";
 
   export let destroy: () => void;
   export let title: string;
@@ -17,8 +26,8 @@
   let getValidUptoInputs: () => DateInputInterface;
   let futansha: string = init?.futansha.toString() ?? "";
   let jukyuusha: string = init?.jukyuusha.toString() ?? "";
-  let memo: any = (init ? fromMemoStore(init.memo) : {}) ?? {};
-  let gendogaku: string = memo.gendogaku ?? "";
+  let memo: KouhiMemoInterface = memoStoreToKouhiMemo(init?.memo ?? undefined);
+  let gendogaku: string = memo.gendogaku?.toString() ?? "";
   let gengouList = gengouListUpto("平成");
   let errors: string[] = [];
 
@@ -55,6 +64,9 @@
 
   async function doEnter() {
     const kouhiId = init?.kouhiId ?? 0;
+    const memoInput: KouhiMemoInterface = Object.assign({}, memo, {
+      gendogaku,
+    });
     const input = {
       kouhiId: init?.kouhiId ?? 0,
       futansha,
@@ -62,16 +74,29 @@
       validFrom: getValidFromInputs(),
       validUpto: getValidUptoInputs(),
       patientId: patient.patientId,
-      memo: "",
+      memo: memoInput,
     };
     const r = toSafeConvert(toKouhi)(input);
-    if( r.isError() ){
+    if (r.isError()) {
       errors = r.getErrorMessages();
     } else {
       const kouhi = r.getValue();
-      if( init == null ){
+      if (init == null) {
         const entered = await api.enterKouhi(kouhi);
         onEntered(entered);
+        destroy();
+      } else {
+        if (!isAdmin) {
+          const usage = await api.countKouhiUsage(kouhi.kouhiId);
+          if (usage > 0) {
+            errors = [
+              "この公費はすでに使用されているので、内容を変更できません。",
+            ];
+            return;
+          }
+        }
+        await api.updateKouhi(kouhi);
+        onUpdated(Kouhi.fromInterface(kouhi));
         destroy();
       }
     }
@@ -81,14 +106,14 @@
     destroy();
   }
 
-  async function doReferAnother() {
-
-  }
+  async function doReferAnother() {}
 </script>
 
 <Dialog {destroy} {title}>
   {#if errors.length > 0}
-    <div class="error">{#each errors as err}<div>{err}</div>{/each}</div>
+    <div class="error">
+      {#each errors as err}<div>{err}</div>{/each}
+    </div>
   {/if}
   <div>
     <span data-cy="patient-id">({patient.patientId})</span>
@@ -126,11 +151,19 @@
     {/if}
     <span>期限開始</span>
     <div data-cy="valid-from-input">
-      <DateInput bind:getInputs={getValidFromInputs} initValue={init?.validFrom} {gengouList}/>
+      <DateInput
+        bind:getInputs={getValidFromInputs}
+        initValue={init?.validFrom}
+        {gengouList}
+      />
     </div>
     <span>期限終了</span>
     <div data-cy="valid-upto-input">
-      <DateInput bind:getInputs={getValidUptoInputs} initValue={init?.validUpto} {gengouList}/>
+      <DateInput
+        bind:getInputs={getValidUptoInputs}
+        initValue={init?.validUpto}
+        {gengouList}
+      />
     </div>
   </div>
   <div class="commands">

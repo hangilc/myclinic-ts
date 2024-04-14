@@ -1,4 +1,4 @@
-import { memoStoreToKouhiMemo, toKouhiMemoStore, toSafeConvert } from "../converters";
+import { memoStoreToKouhiMemo, toKouhiMemo, toKouhiMemoStore, toSafeConvert } from "../converters";
 
 describe("Memo converters", () => {
   it("should convert to memo store", () => {
@@ -43,5 +43,17 @@ describe("Memo converters", () => {
     const r = toSafeConvert(memoStoreToKouhiMemo)("");
     expect(r.isSuccess()).toBe(true);
     expect(r.getValue()).toMatchObject(memo);
+  })
+
+  it("should convert string gendogaku", () => {
+    const r = toSafeConvert(toKouhiMemo)({ gendogaku: "2000"});
+    expect(r.isSuccess()).toBe(true);
+    expect(r.getValue()).toMatchObject({ gendogaku: 2000 });
+  })
+
+  it("should convert empty string gendogaku", () => {
+    const r = toSafeConvert(toKouhiMemo)({ gendogaku: ""});
+    expect(r.isSuccess()).toBe(true);
+    expect(r.getValue()).toMatchObject({ gendogaku: undefined });
   })
 })
