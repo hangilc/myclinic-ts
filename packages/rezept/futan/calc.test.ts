@@ -56,7 +56,7 @@ describe("futan/calc", () => {
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);
   });
 
-  it.only("should handle nanbyou case 20 (multiple visits)", () => {
+  it("should handle nanbyou case 20 (multiple visits)", () => {
     const hoken = mkHokenPayer(3, 257180);
     const nanbyou = mkNanbyouPayer(30000);
     const bill = 1300000;
@@ -69,7 +69,7 @@ describe("futan/calc", () => {
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);
   });
 
-  it.only("should handle nanbyou case 20 (multiple visits, round 2)", () => {
+  it("should handle nanbyou case 20 (multiple visits, round 2)", () => {
     const hoken = mkHokenPayer(3, 257180);
     const nanbyou = mkNanbyouPayer(30000);
     const bill = 1300000;

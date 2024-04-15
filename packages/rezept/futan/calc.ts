@@ -11,6 +11,12 @@ export interface Payer {
   gendogakuReached: boolean;
 }
 
+export const PayerObject = {
+  needsJikofutanReport(self: Payer): boolean {
+    return self.gendogakuReached;
+  }
+}
+
 export function calcPayments(bill: number, payers: Payer[]) {
   const ctx = { totalBill: bill };
   payers.forEach(p => {

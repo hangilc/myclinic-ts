@@ -12,7 +12,7 @@ import { resolveFutankubunOfVisitComment } from "./helper";
 // export * from "./futan-calc";
 export * from "./tensuu-collector";
 export * from "./tekiyou-item";
-export * from "./kouhi-registry";
+// export * from "./kouhi-registry";
 export * from "./rezept-frame";
 export * from "./calc-visits";
 export { roundTo10 } from "./helper";
