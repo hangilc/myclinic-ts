@@ -68,5 +68,20 @@ describe("futan/calc", () => {
     expect(nanbyou).toMatchObject({ payment: 227180 });
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);
   });
+
+  it.only("should handle nanbyou case 20 (multiple visits, round 2)", () => {
+    const hoken = mkHokenPayer(3, 257180);
+    const nanbyou = mkNanbyouPayer(30000);
+    const bill = 1300000;
+    const bill2 = 1200000;
+    const bill1 = bill - bill2;
+    calcPayments(bill1, [hoken, nanbyou]);
+    console.log(bill1, hoken, nanbyou);
+    calcPayments(bill2, [hoken, nanbyou]);
+    console.log(bill2, hoken, nanbyou);
+    expect(hoken).toMatchObject({ payment: 1042820 });
+    expect(nanbyou).toMatchObject({ payment: 227180 });
+    expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);
+  });
 });
 
