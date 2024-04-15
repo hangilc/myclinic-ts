@@ -1,23 +1,29 @@
-import { Payer, PayerObject, calcPayments, mkHokenPayer } from "./calc";
+import { Payer, PayerObject, calcPayments, mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash } from "./calc";
 import { GendogakuOptions, calcGendogaku } from "../gendogaku";
 import { ShotokuKubunCode } from "codes";
 
-function calc(totalTen: number, kubun: ShotokuKubunCode, futanWari: number, jikofutan: number, gendogakuOption: GendogakuOptions = {}) {
+function calc(totalTen: number, kubun: ShotokuKubunCode | undefined, futanWari: number, jikofutan: number, 
+  gendogakuOption: GendogakuOptions = {}, kouhiList: Payer[] = []): Payer {
   const iryouhi = totalTen * 10;
-  const gendo = calcGendogaku(kubun, iryouhi, gendogakuOption);
+  let gendo: number | undefined = undefined;
+  if( kubun !== undefined ){
+    gendo = calcGendogaku(kubun, iryouhi, gendogakuOption);
+  }
   const hoken = mkHokenPayer(futanWari, gendo);
-  calcPayments(iryouhi, [hoken]);
-  expect(PayerObject.jikofutan(hoken)).toBe(jikofutan);
-
+  const payers = [hoken, ...kouhiList];
+  calcPayments(iryouhi, payers);
+  expect(PayerObject.finalJikofutan(payers)).toBe(jikofutan);
+  return hoken;
 }
 
 describe("futan-calc", () => {
 
   it("should handle single visit hoken only", () => {
-    const totalTen = 300;
-    const hoken: Payer = mkHokenPayer(3);
-    calcPayments(totalTen * 10, [hoken]);
-    expect(PayerObject.jikofutan(hoken)).toBe(900);
+    calc(300, undefined, 3, 900);
+    // const totalTen = 300;
+    // const hoken: Payer = mkHokenPayer(3);
+    // calcPayments(totalTen * 10, [hoken]);
+    // expect(PayerObject.jikofutan(hoken)).toBe(900);
   });
 
   it("should handle gendogaku of ウ under 70", () => {
@@ -52,25 +58,17 @@ describe("futan-calc", () => {
     calc(4000, "一般Ⅱ", 2, 7000, { isBirthdayMonth75: true });
   });
 
-  //   it("should handle 公費 被爆者の子", () => {
-  //     const totalTen = 400;
-  //     const futanWari = 3;
-  //     const covers = calcFutan(futanWari, undefined, [MarutoHibakushaNoKo],
-  //       mkTens(["H1", totalTen])
-  //     );
-  //     expect(patientChargeOf(covers)).toBe(0);
-  //     expect(coveredBy("1", covers)).toBe(1200);
-  //   });
+  it("should handle 公費 被爆者の子", () => {
+    const hibakusha: Payer = mkKouhiHibakusha();
+    calc(400, undefined, 3, 0, {}, [hibakusha]);
+    expect(hibakusha.kakari).toBe(1200);
+  });
 
-  //   it("should handle 公費 マル青負担なし", () => {
-  //     const totalTen = 400;
-  //     const futanWari = 3;
-  //     const covers = calcFutan(futanWari, undefined, [MaruAoNoFutan],
-  //       mkTens(["H1", totalTen])
-  //     );
-  //     expect(patientChargeOf(covers)).toBe(0);
-  //     expect(coveredBy("1", covers)).toBe(1200);
-  //   });
+    it("should handle 公費 マル青負担なし", () => {
+      const maruao = mkKouhiMaruaoFutanNash();
+      calc(400, undefined, 3, 0, {}, [maruao]);
+      expect(maruao.kakari).toBe(1200);
+    });
 
   //   it("should handle 公費 大気汚染", () => {
   //     const totalTen = 400;

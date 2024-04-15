@@ -17,6 +17,9 @@ export const PayerObject = {
   },
   jikofutan(self: Payer): number {
     return self.kakari - self.payment;
+  },
+  finalJikofutan(payers: Payer[]): number {
+    return PayerObject.jikofutan(payers[payers.length - 1]);
   }
 }
 
@@ -84,11 +87,30 @@ export function mkNanbyouPayer(gendogaku: number): Payer {
   });
 }
 
-export function mkUnknownPayer(): Payer {
-  return mkPayer("unknown", (bill: number, self: Payer, ctx: PaymentContext) => {
+export function mkKouhiHibakusha(): Payer {
+  return mkKouhiFutanNashi("hibakusha");
+}
+
+export function mkKouhiMaruaoFutanNash(): Payer {
+  return mkKouhiFutanNashi("maruao");
+}
+
+export function mkKouhiFutanNashi(kind: string): Payer {
+  return mkPayer(kind, (bill: number, self: Payer, ctx: PaymentContext) => {
     self.kakari += bill;
     self.payment = bill;
+  })
+}
+
+export function mkMaruToTaikiosen(gendogaku: number): Payer {
+  return mkPayer("taikiosen", (bill: number, self: Payer, ctx: PaymentContext) => {
+    self.kakari += bill;
+    if( self.payment + bill )
   });
+}
+
+export function mkUnknownPayer(): Payer {
+  return mkKouhiFutanNashi("unknown");
 }
 
 // 公費
