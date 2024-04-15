@@ -38,11 +38,11 @@ function mkPayer(kind: string, calc: (bill: number, self: Payer, ctx: PaymentCon
 export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
   return mkPayer("hoken", (bill: number, self: Payer, _ctx: PaymentContext) => {
     self.kakari += bill;
-    let jiko = bill * futanWari / 10.0;
     if (self.gendogakuReached) {
-      self.payment += bill - jiko;
+      self.payment += bill;
       return;
     }
+    let jiko = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (self.payment + jiko > gendogaku) {
         jiko = gendogaku - self.payment;
@@ -56,12 +56,9 @@ export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
 
 export function mkNanbyouPayer(gendogaku: number): Payer {
   return mkPayer("nanbyou", (bill: number, self: Payer, ctx: PaymentContext) => {
-    console.log("nanbyou bill", bill);
     self.kakari += bill;
     if (self.gendogakuReached) {
-      console.log("nanbyou gendogaku reached");
       self.payment += bill;
-      console.log("nanbyou payment", self.payment);
       return;
     }
     let jiko = bill;
