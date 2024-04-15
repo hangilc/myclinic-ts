@@ -14,6 +14,9 @@ export interface Payer {
 export const PayerObject = {
   needsJikofutanReport(self: Payer): boolean {
     return self.gendogakuReached;
+  },
+  jikofutan(self: Payer): number {
+    return self.kakari - self.payment;
   }
 }
 
