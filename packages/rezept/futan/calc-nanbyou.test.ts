@@ -1,4 +1,4 @@
-import { calcJikofutan, calcPayments, mkHokenPayer, mkNanbyouPayer } from "./calc";
+import { calcJikofutan, calcPayments, mkHokenPayer, mkKouhiNanbyou } from "./calc";
 
 describe("futan/calc", () => {
   it("should calc jiko futan", () => {
@@ -16,7 +16,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou with futanWari 3", () => {
     const hoken = mkHokenPayer(3);
-    const nanbyou = mkNanbyouPayer(5000);
+    const nanbyou = mkKouhiNanbyou(5000);
     const bill = 2000;
     calcPayments(bill, [hoken, nanbyou]);
     expect(hoken).toMatchObject({ payment: 1400 });
@@ -26,7 +26,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou with futanWari 2", () => {
     const hoken = mkHokenPayer(2);
-    const nanbyou = mkNanbyouPayer(5000);
+    const nanbyou = mkKouhiNanbyou(5000);
     const bill = 2000;
     calcPayments(bill, [hoken, nanbyou]);
     expect(hoken).toMatchObject({ payment: 1600 });
@@ -36,7 +36,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou with futanWari 1", () => {
     const hoken = mkHokenPayer(1);
-    const nanbyou = mkNanbyouPayer(5000);
+    const nanbyou = mkKouhiNanbyou(5000);
     const bill = 2000;
     calcPayments(bill, [hoken, nanbyou]);
     expect(hoken).toMatchObject({ payment: 1800 });
@@ -48,7 +48,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou case 20", () => {
     const hoken = mkHokenPayer(3, 257180);
-    const nanbyou = mkNanbyouPayer(30000);
+    const nanbyou = mkKouhiNanbyou(30000);
     const bill = 1300000;
     calcPayments(bill, [hoken, nanbyou]);
     expect(hoken).toMatchObject({ payment: 1042820 });
@@ -58,7 +58,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou case 20 (multiple visits)", () => {
     const hoken = mkHokenPayer(3, 257180);
-    const nanbyou = mkNanbyouPayer(30000);
+    const nanbyou = mkKouhiNanbyou(30000);
     const bill = 1300000;
     const bill1 = 1200000;
     const bill2 = bill - bill1;
@@ -71,7 +71,7 @@ describe("futan/calc", () => {
 
   it("should handle nanbyou case 20 (multiple visits, round 2)", () => {
     const hoken = mkHokenPayer(3, 257180);
-    const nanbyou = mkNanbyouPayer(30000);
+    const nanbyou = mkKouhiNanbyou(30000);
     const bill = 1300000;
     const bill2 = 1200000;
     const bill1 = bill - bill2;

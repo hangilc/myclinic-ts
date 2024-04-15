@@ -67,7 +67,7 @@ export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
   );
 }
 
-export function mkNanbyouPayer(gendogaku: number): Payer {
+export function mkKouhiNanbyou(gendogaku: number): Payer {
   return mkPayer("nanbyou", (bill: number, self: Payer, ctx: PaymentContext) => {
     self.kakari += bill;
     if (self.gendogakuReached) {
@@ -105,8 +105,19 @@ export function mkKouhiFutanNashi(kind: string): Payer {
 export function mkMaruToTaikiosen(gendogaku: number): Payer {
   return mkPayer("taikiosen", (bill: number, self: Payer, ctx: PaymentContext) => {
     self.kakari += bill;
-    if( self.payment + bill )
+    if (PayerObject.jikofutan(self) > gendogaku) {
+      self.payment = self.kakari - gendogaku;
+    }
   });
+}
+
+export function mkKouhiMarucho(gendogaku: number): Payer {
+  return mkPayer("marucho", (bill: number, self: Payer, ctx: PaymentContext) => {
+    self.kakari += bill;
+    if (PayerObject.jikofutan(self) > gendogaku) {
+      self.payment = self.kakari - gendogaku;
+    }
+  })
 }
 
 export function mkUnknownPayer(): Payer {
