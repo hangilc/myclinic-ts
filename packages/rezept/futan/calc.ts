@@ -1,24 +1,22 @@
 
 interface PaymentContext {
-  totalBill: number;
+  totalBill: number;  // total ten * 10 of current visit
 }
 
 export interface Payer {
   kind: string;
   calc(bill: number, self: Payer, ctx: PaymentContext): void;
+  kakari: number;
   payment: number;
-  jikofutan?: number;
+  gendogakuReached: boolean;
 }
 
 export function calcPayments(bill: number, payers: Payer[]) {
   const ctx = { totalBill: bill };
   payers.forEach(p => {
-    const payment = p.calc(bill, ctx);
-    p.payment += payment.amount;
-    if( payment.jikofutan !== undefined ){
-      p.jikofutan = payment.jikofutan;
-    }
-    bill -= p.payment;
+    const prevPayment = p.payment;
+    p.calc(bill, p, ctx);
+    bill -= (p.payment - prevPayment);
   });
 }
 
@@ -27,52 +25,62 @@ export function calcJikofutan(bill: number, payers: { payment: number }[]): numb
   return bill;
 }
 
-export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
+function mkPayer(kind: string, calc: (bill: number, self: Payer, ctx: PaymentContext) => void): Payer {
   return {
-    kind: "hoken",
-    calc(bill: number, self: Payer) {
-      if( self.jikofutan !== undefined ){
-        return;
-      }
-      let jiko = bill * futanWari / 10.0;
-      if( gendogaku != undefined ){
-        if( self.payment + jiko > gendogaku ){
-          jiko = gendogaku;
-        }
-      }
-      self.payment += bill - jiko
-    },
+    kind,
+    calc,
+    kakari: 0,
     payment: 0,
+    gendogakuReached: false,
   }
+}
+
+export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
+  return mkPayer("hoken", (bill: number, self: Payer, _ctx: PaymentContext) => {
+    self.kakari += bill;
+    let jiko = bill * futanWari / 10.0;
+    if (self.gendogakuReached) {
+      self.payment += bill - jiko;
+      return;
+    }
+    if (gendogaku !== undefined) {
+      if (self.payment + jiko > gendogaku) {
+        jiko = gendogaku - self.payment;
+        self.gendogakuReached = true;
+      }
+    }
+    self.payment += bill - jiko;
+  }
+  );
 }
 
 export function mkNanbyouPayer(gendogaku: number): Payer {
-  return {
-    kind: "nanbyou",
-    calc(bill: number, self: Payer, ctx: PaymentContext) {
-      let jiko = bill;
-      let jikofutan: number | undefined = undefined;
-      if( jiko > ctx.totalBill * 0.2 ){
-        jiko = ctx.totalBill * 0.2;
-      }
-      if( jiko > gendogaku ){
-        jiko = gendogaku;
-        jikofutan = gendogaku;
-      }
-      return { amount: bill - jiko, jikofutan };
-    },
-    payment: 0,
-  }
+  return mkPayer("nanbyou", (bill: number, self: Payer, ctx: PaymentContext) => {
+    console.log("nanbyou bill", bill);
+    self.kakari += bill;
+    if (self.gendogakuReached) {
+      console.log("nanbyou gendogaku reached");
+      self.payment += bill;
+      console.log("nanbyou payment", self.payment);
+      return;
+    }
+    let jiko = bill;
+    if (jiko > ctx.totalBill * 0.2) {
+      jiko = ctx.totalBill * 0.2;
+    }
+    if (self.payment + jiko > gendogaku) {
+      jiko = gendogaku - self.payment;
+      self.gendogakuReached = true;
+    }
+    self.payment += bill - jiko;
+  });
 }
 
 export function mkUnknownPayer(): Payer {
-  return {
-    kind: "unknown",
-    calc(bill: number) {
-      return bill;
-    },
-    payment: 0,
-  }
+  return mkPayer("unknown", (bill: number, self: Payer, ctx: PaymentContext) => {
+    self.kakari += bill;
+    self.payment = bill;
+  });
 }
 
 // 公費
