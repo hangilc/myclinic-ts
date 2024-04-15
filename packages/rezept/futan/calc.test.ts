@@ -76,9 +76,7 @@ describe("futan/calc", () => {
     const bill2 = 1200000;
     const bill1 = bill - bill2;
     calcPayments(bill1, [hoken, nanbyou]);
-    console.log(bill1, hoken, nanbyou);
     calcPayments(bill2, [hoken, nanbyou]);
-    console.log(bill2, hoken, nanbyou);
     expect(hoken).toMatchObject({ payment: 1042820 });
     expect(nanbyou).toMatchObject({ payment: 227180 });
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);

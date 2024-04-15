@@ -45,8 +45,9 @@ export function mkHokenPayer(futanWari: number, gendogaku?: number): Payer {
     let jiko = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (self.payment + jiko > gendogaku) {
-        jiko = gendogaku - self.payment;
+        self.payment = self.kakari - gendogaku;
         self.gendogakuReached = true;
+        return;
       }
     }
     self.payment += bill - jiko;
@@ -66,7 +67,7 @@ export function mkNanbyouPayer(gendogaku: number): Payer {
       jiko = ctx.totalBill * 0.2;
     }
     if (self.payment + jiko > gendogaku) {
-      self.payment += bill + self.payment - gendogaku;
+      self.payment = self.kakari - gendogaku;
       self.gendogakuReached = true;
     } else {
       self.payment += bill - jiko;
