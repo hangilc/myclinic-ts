@@ -99,16 +99,7 @@ describe("futan-calc", () => {
     });
 
     it("should handle 難病", () => {
-      const gendo1 = calcGendogaku("一般Ⅱ", 1000 * 10, { });
-      const gendo2 = calcGendogaku("一般Ⅱ", 3000 * 10, { });
-      console.log("gendo1", gendo1);
-      console.log("gendo2", gendo2);
-      const hoken = mkHokenPayer(2, gendo1);
-      const kouhi = mkKouhiNanbyou(5000);
-      calcPayments(1000*10, [hoken, kouhi]);
-      calcPayments(3000*10, [hoken]);
-      expect(PayerObject.finalJikofutan([hoken, kouhi])).toBe(7000);
-      expect(kouhi.payment).toBe(1000);
+      calc(4000, "一般Ⅱ", 2, 7000);
       // const totalTen = 4000;
       // const futanWari = 2;
       // const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou],
