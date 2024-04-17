@@ -92,24 +92,26 @@ describe("futan-calc", () => {
   it("should handle 難病", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiNanbyou(5000);
-    const shotokuKubun: ShotokuKubunCode = "一般Ⅱ";
     const paymentsList = calcPaymentsMulti(
       [
         [3000 * 10, [hoken, kouhi]],
         [1000 * 10, [hoken]],
-      ], { futanWari: 2, shotokuKubun });
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
     expect(totalJikofutanOf(paymentsList)).toBe(7000);
     expect(kouhi.payment.payment).toBe(1000);
   });
 
-  //   it("should handle 難病 (case 2)", () => {
-  //     const totalTen = 9000;
-  //     const futanWari = 2;
-  //     const covers = calcFutan(futanWari, "一般Ⅱ", [MarutoNanbyou],
-  //       mkTens(["H1", 4000], ["H", 5000]),
-  //       { gendogaku: { kingaku: 5000, kouhiBangou: 1 } });
-  //     expect(patientChargeOf(covers)).toBe(13000);
-  //     expect(coveredBy("1", covers)).toBe(3000);
-  //   });
+  it("should handle 難病 (case 2)", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiNanbyou(5000);
+    const paymentsList = calcPaymentsMulti(
+      [
+        [4000 * 10, [hoken, kouhi]],
+        [5000 * 10, [hoken]],
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
+    console.log(paymentsList);
+    expect(totalJikofutanOf(paymentsList)).toBe(13000);
+    expect(kouhi.payment.payment).toBe(3000);
+  });
 
 });

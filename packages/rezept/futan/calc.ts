@@ -1,5 +1,6 @@
 import { GendogakuOptions, calcGendogaku } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
+import { resolveGendogakuTokkiJikou } from "helper";
 
 interface Payment {
   kind: string;
@@ -54,7 +55,21 @@ function mergePayment(self: Payment, arg: Payment) {
 export function calcPayments(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
   const result: Payment[] = [];
   for (let payer of payers) {
-    const pay = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
+    let pay: { payment: number, gendogakuReached?: boolean };
+    if( payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ" && payers.length > 1 ) {
+      ctx = Object.assign({}, ctx, { shotokuKubun: "一般Ⅰ" });
+    }
+    if( payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ" ) {
+      const pay1 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
+      if( pay1.gendogakuReached ){
+        const pay2 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result, shotokuKubun: "一般Ⅰ" }));
+        pay = (pay1.payment > pay2.payment) ? pay1 : pay2;
+      } else {
+        pay = pay1;
+      }
+    } else {
+      pay = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
+    }
     result.push({ kind: payer.getKind(), kakari: bill, payment: pay.payment, gendogakuReached: pay.gendogakuReached ?? false });
     bill -= pay.payment;
   }
@@ -73,48 +88,6 @@ export function calcPaymentsMulti(bills: [number, Payer[]][], ctx: PaymentContex
   }
   return result;
 }
-
-// interface PaymentContext {
-//   futanWari?: number;  // Hoken futanWari
-//   shotokuKubun?: ShotokuKubunCode;
-//   gendogakuOptions?: GendogakuOptions;
-// }
-
-// interface ExtendedPaymentContext extends PaymentContext {
-//   totalBill: number;  // total ten * 10
-//   accumJikofutan?: number;
-// }
-
-// export interface Payer {
-//   kind: string;
-//   calc(self: Payer, bill: number, ctx: ExtendedPaymentContext): void;
-//   kakari: number;
-//   payment: number;
-//   gendogakuReached: boolean;
-// }
-
-// export const PayerObject = {
-//   needsJikofutanReport(self: Payer): boolean {
-//     return self.gendogakuReached;
-//   },
-//   jikofutan(self: Payer): number {
-//     return self.kakari - self.payment;
-//   },
-//   finalJikofutan(payers: Payer[]): number {
-//     return PayerObject.jikofutan(payers[payers.length - 1]);
-//   }
-// }
-
-// export function calcPayments(bill: number, payers: Payer[], ctx: PaymentContext): ExtendedPaymentContext {
-//   const internalCtx: ExtendedPaymentContext = Object.assign({}, ctx, { totalBill: bill });
-//   payers.forEach(p => {
-//     const prevPayment = p.payment;
-//     p.calc(p, bill, internalCtx);
-//     bill -= (p.payment - prevPayment);
-//   });
-//   internalCtx.accumJikofutan = (internalCtx.accumJikofutan ?? 0) + PayerObject.finalJikofutan(payers);
-//   return internalCtx;
-// }
 
 function getPaymentByKind(kind: string, payments: Payment[]): Payment {
   for (let payment of payments) {
@@ -143,7 +116,12 @@ export function mkHokenPayer(): Payer {
     let jikofutan = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {
-        return { payment: bill - gendogaku, gendogakuReached: true };
+        let payment = bill - gendogaku;
+        if( ctx.shotokuKubun !== "一般Ⅱ") {
+          const prevJikofutan = totalJikofutanOf(ctx.prevPayments ?? []);
+          payment + prevJikofutan;
+        }
+        return { payment, gendogakuReached: true };
       }
     }
     return { payment: bill - jikofutan };
