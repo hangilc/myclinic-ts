@@ -109,7 +109,6 @@ describe("futan-calc", () => {
         [4000 * 10, [hoken, kouhi]],
         [5000 * 10, [hoken]],
       ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
-    console.log(paymentsList);
     expect(totalJikofutanOf(paymentsList)).toBe(13000);
     expect(kouhi.payment.payment).toBe(3000);
   });

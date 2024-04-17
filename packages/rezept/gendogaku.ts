@@ -27,6 +27,15 @@ function gendogaku(
   isBirthdayMonth75: boolean,
   isNyuuin: boolean
 ): number {
+  return Math.round(gendogakuFrac(shotokuKubun, iryouhi, isBirthdayMonth75, isNyuuin));
+}
+
+function gendogakuFrac(
+  shotokuKubun: ShotokuKubunCode,
+  iryouhi: number,
+  isBirthdayMonth75: boolean,
+  isNyuuin: boolean
+): number {
   switch (shotokuKubun) {
     case "ア": case "現役並みⅢ":
       return calc(252600, iryouhi, 842000, 0.01, isBirthdayMonth75);
