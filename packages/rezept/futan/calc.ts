@@ -43,6 +43,19 @@ interface PaymentContext {
   prevPayments?: Payment[][];
 }
 
+function getCurrentPaymentByKind(kind: string, ctx: PaymentContext): Payment {
+  for(let p of ctx.currentPayments ?? []) {
+    if( p.kind === kind ){
+      return p;
+    }
+  }
+  throw new Error(`Cannot find payment of kind ${kind}`);
+}
+
+function getCurrentHokenPaymetOf(ctx: PaymentContext): Payment {
+  return getCurrentPaymentByKind("hoken", ctx);
+}
+
 function mergePayment(self: Payment, arg: Payment) {
   if (self.kind !== arg.kind) {
     throw new Error(`Inconsistent payments: ${self.kind}, ${arg.kind}`);
@@ -174,6 +187,14 @@ export function mkKouhiMarucho(gendogaku: number): Payer {
     } else {
       return { payment: 0 };
     }
+  })
+}
+
+export function mkKouhiKekkaku(): Payer {
+  return mkPayer("kekkaku", (bill: number, ctx: PaymentContext) => {
+    const hoken = getCurrentHokenPaymetOf(ctx);
+    const jikofutan = Math.round(hoken.kakari * 0.05);
+    return { payment: bill - jikofutan, gendogakuReached: true };
   })
 }
 
