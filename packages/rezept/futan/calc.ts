@@ -1,6 +1,5 @@
 import { GendogakuOptions, calcGendogaku } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
-import { resolveGendogakuTokkiJikou } from "helper";
 
 interface Payment {
   kind: string;

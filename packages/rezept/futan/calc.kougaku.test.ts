@@ -56,12 +56,15 @@ describe("高額療養費（70歳未満）", () => {
     expect(PaymentObject.jikofutanOf(hoken.payment)).toBe(35400);
   });
 
-//   it("事例7　本人入院（標準報酬月額83万円以上）（多数回該当）", () => {
-//     const covers = calcFutan(3, "ア", [],
-//       mkTen("H", 94576),
-//       { gendogakuTasuuGaitou: true });
-//     expect(patientChargeOf(covers)).toBe(140100);
-//   });
+  it("事例7　本人入院（標準報酬月額83万円以上）（多数回該当）", () => {
+    const hoken = mkHokenPayer();
+    calcPayments(94576*10, [hoken], { shotokuKubun: "ア", gendogakuOptions: { isTasuuGaitou: true } });
+    expect(PaymentObject.jikofutanOf(hoken.payment)).toBe(140100);
+    // const covers = calcFutan(3, "ア", [],
+    //   mkTen("H", 94576),
+    //   { gendogakuTasuuGaitou: true });
+    // expect(patientChargeOf(covers)).toBe(140100);
+  });
 
 //   it("事例8　本人入院（標準報酬月額53万～79万円）（多数回該当）", () => {
 //     const covers = calcFutan(3, "イ", [],
