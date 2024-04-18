@@ -10,7 +10,8 @@ interface Payment {
 
 export const PaymentObject = {
   jikofutanOf(self: Payment): number { return self.kakari - self.payment; },
-  finalJikofutanOf(payments: Payment[]): number { return PaymentObject.jikofutanOf(payments[payments.length - 1]); }
+  finalJikofutanOf(payments: Payment[]): number { return PaymentObject.jikofutanOf(payments[payments.length - 1]); },
+  uncoveredOf(self: Payment): number { return self.kakari - self.payment; }
 }
 
 function mkEmptyPayment(kind: string): Payment {
@@ -32,10 +33,13 @@ export interface Payer {
 export const PayerObject = {
   jikofutanOf(payers: Payer[]): number {
     return PaymentObject.jikofutanOf(payers[payers.length - 1].payment);
+  },
+  uncoveredOf(self: Payer): number {
+    return PaymentObject.uncoveredOf(self.payment);
   }
 }
 
-interface PaymentContext {
+export interface PaymentContext {
   futanWari?: number;
   shotokuKubun?: ShotokuKubunCode;
   gendogakuOptions?: GendogakuOptions;
@@ -125,6 +129,7 @@ export function mkHokenPayer(): Payer {
     if (ctx.shotokuKubun !== undefined) {
       gendogaku = calcGendogaku(ctx.shotokuKubun, bill, ctx.gendogakuOptions);
     }
+    console.log("gendogaku", "hoken", gendogaku, ctx.shotokuKubun, bill);
     let jikofutan = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {
@@ -194,7 +199,7 @@ export function mkKouhiKekkaku(): Payer {
   return mkPayer("kekkaku", (bill: number, ctx: PaymentContext) => {
     const hoken = getCurrentHokenPaymetOf(ctx);
     const jikofutan = Math.round(hoken.kakari * 0.05);
-    return { payment: bill - jikofutan, gendogakuReached: true };
+    return { payment: bill - jikofutan };
   })
 }
 
