@@ -1,4 +1,4 @@
-import { GendogakuOptions, calcGendogaku } from "../gendogaku";
+import { GendogakuOptions, KuniKouhiHoubetsu, calcGendogaku } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
 
 interface Payment {
@@ -26,6 +26,7 @@ type PaymentCalc = (bill: number, ctx: PaymentContext) => { payment: number, gen
 
 export interface Payer {
   getKind(): string;
+  getHoubetsuBangou(): number | undefined;
   calc: PaymentCalc;
   payment: Payment;
 }
@@ -68,8 +69,21 @@ function mergePayment(self: Payment, arg: Payment) {
   self.payment += arg.payment;
 }
 
+function hasKuniKouhi(payers: Payer[]): boolean {
+  for (const payer of payers) {
+    const houbetsu = payer.getHoubetsuBangou();
+    if (houbetsu !== undefined) {
+      if (KuniKouhiHoubetsu.includes(houbetsu)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 export function calcPayments(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
   const result: Payment[] = [];
+  ctx.gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, { hasKuniKouhi: hasKuniKouhi(payers)})
   for (let payer of payers) {
     let pay: { payment: number, gendogakuReached?: boolean };
     if (payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ" && payers.length > 1) {
@@ -114,9 +128,10 @@ function getPaymentByKind(kind: string, payments: Payment[]): Payment {
   throw new Error(`Cannot find payment of kind: ${kind}`);
 }
 
-function mkPayer(kind: string, calc: PaymentCalc): Payer {
+function mkPayer(kind: string, houbetsuBangou: number | undefined, calc: PaymentCalc): Payer {
   return {
     getKind(): string { return kind; },
+    getHoubetsuBangou(): number | undefined { return houbetsuBangou; },
     calc,
     payment: mkEmptyPayment(kind),
   }
@@ -124,22 +139,22 @@ function mkPayer(kind: string, calc: PaymentCalc): Payer {
 
 export function mkHokenPayer(): Payer {
   function hasGassanKouhi(payments: Payment[]): boolean {
-    for(const payment of payments){
-      if( payment.kind !== "hoken" && payment.kakari >= 21000 ){
+    for (const payment of payments) {
+      if (payment.kind !== "hoken" && payment.kakari >= 21000) {
         return true;
       }
     }
     return false;
   }
-  return mkPayer("hoken", (bill: number, ctx: PaymentContext) => {
+  return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
     let futanWari: number = ctx.futanWari ?? 3;
     let gendogakuBill = bill;
-    if( ctx.shotokuKubun !== "一般Ⅱ") {
-      if( ctx.prevPayments ){
+    if (ctx.shotokuKubun !== "一般Ⅱ") {
+      if (ctx.prevPayments) {
         ctx.prevPayments.forEach(payments => {
-          if( hasGassanKouhi(payments) ){
+          if (hasGassanKouhi(payments)) {
             payments.forEach(payment => {
-              if( payment.kind === "hoken" ){
+              if (payment.kind === "hoken") {
                 gendogakuBill += payment.kakari;
               }
             })
@@ -178,7 +193,7 @@ export function mkHokenPayer(): Payer {
 }
 
 export function mkKouhiNanbyou(gendogaku: number): Payer {
-  return mkPayer("nanbyou", (bill: number, ctx: PaymentContext) => {
+  return mkPayer("nanbyou", 54, (bill: number, ctx: PaymentContext) => {
     let jikofutan = bill;
     const futanWari = ctx.futanWari ?? 3;
     if (futanWari > 2) {
@@ -193,22 +208,22 @@ export function mkKouhiNanbyou(gendogaku: number): Payer {
   });
 }
 
-export function mkKouhiFutanNashi(kind: string): Payer {
-  return mkPayer(kind, (bill: number, ctx: PaymentContext) => {
+export function mkKouhiFutanNashi(kind: string, houbetsuBangou: number | undefined): Payer {
+  return mkPayer(kind, houbetsuBangou, (bill: number, ctx: PaymentContext) => {
     return { payment: bill, gendogakuReached: true };
   })
 }
 
 export function mkKouhiHibakusha(): Payer {
-  return mkKouhiFutanNashi("hibakusha");
+  return mkKouhiFutanNashi("hibakusha", 18);
 }
 
 export function mkKouhiMaruaoFutanNash(): Payer {
-  return mkKouhiFutanNashi("maruao");
+  return mkKouhiFutanNashi("maruao", 89);
 }
 
 export function mkMaruToTaikiosen(gendogaku: number): Payer {
-  return mkPayer("taikiosen", (bill: number, ctx: PaymentContext) => {
+  return mkPayer("taikiosen", 82, (bill: number, ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
@@ -218,7 +233,7 @@ export function mkMaruToTaikiosen(gendogaku: number): Payer {
 }
 
 export function mkKouhiMarucho(gendogaku: number): Payer {
-  return mkPayer("marucho", (bill: number, ctx: PaymentContext) => {
+  return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
@@ -228,15 +243,27 @@ export function mkKouhiMarucho(gendogaku: number): Payer {
 }
 
 export function mkKouhiKekkaku(): Payer {
-  return mkPayer("kekkaku", (bill: number, ctx: PaymentContext) => {
+  return mkPayer("kekkaku", 10, (bill: number, ctx: PaymentContext) => {
     const hoken = getCurrentHokenPaymetOf(ctx);
     const jikofutan = Math.round(hoken.kakari * 0.05);
     return { payment: bill - jikofutan };
   })
 }
 
+export function mkKouhiKousei(gendogaku: number): Payer {
+  return mkPayer("kousei", 15, (bill: number, ctx: PaymentContext) => {
+    const hoken = getCurrentHokenPaymetOf(ctx);
+    let jikofutan = hoken.kakari * 0.1;
+    if (jikofutan > gendogaku) {
+      return { payment: bill - gendogaku, gendogakuReached: true };
+    } else {
+      return { payment: bill - jikofutan };
+    }
+  })
+}
+
 export function mkUnknownPayer(): Payer {
-  return mkKouhiFutanNashi("unknown");
+  return mkKouhiFutanNashi("unknown", undefined);
 }
 
 // 公費

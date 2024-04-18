@@ -1,4 +1,4 @@
-import { PayerObject, PaymentContext, PaymentObject, calcPayments, calcPaymentsMulti, mkHokenPayer, mkKouhiKekkaku, mkKouhiMarucho, totalJikofutanOf } from "./calc";
+import { PayerObject, PaymentContext, PaymentObject, calcPayments, calcPaymentsMulti, mkHokenPayer, mkKouhiKekkaku, mkKouhiKousei, mkKouhiMarucho, totalJikofutanOf } from "./calc";
 
 // import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
 // import { calcFutan, TotalCover } from "./futan-calc";
@@ -108,7 +108,7 @@ describe("高額療養費（70歳未満）", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiKekkaku();
     const payments = calcPaymentsMulti([
-      [85000 * 10, [hoken, kouhi], { shotokuKubun: "ア", gendogakuOptions: { hasKuniKouhi: true } }],
+      [85000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
       [5000 * 10, [hoken], { shotokuKubun: "ア" }],
     ])
     expect(totalJikofutanOf(payments)).toBe(57500);
@@ -121,7 +121,7 @@ describe("高額療養費（70歳未満）", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiKekkaku();
     const payments = calcPaymentsMulti([
-      [5000 * 10, [hoken, kouhi], { shotokuKubun: "ア", gendogakuOptions: { hasKuniKouhi: true } }],
+      [5000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
       [95000 * 10, [hoken], { shotokuKubun: "ア" }],
     ])
     expect(totalJikofutanOf(payments)).toBe(256180);
@@ -134,7 +134,7 @@ describe("高額療養費（70歳未満）", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiKekkaku();
     const payments = calcPaymentsMulti([
-      [10000 * 10, [hoken, kouhi], { shotokuKubun: "ア", gendogakuOptions: { hasKuniKouhi: true } }],
+      [10000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
       [110000 * 10, [hoken], { shotokuKubun: "ア" }],
     ])
     expect(totalJikofutanOf(payments)).toBe(256180);
@@ -147,7 +147,7 @@ describe("高額療養費（70歳未満）", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiKekkaku();
     const payments = calcPaymentsMulti([
-      [85000 * 10, [hoken, kouhi], { shotokuKubun: "ア", gendogakuOptions: { hasKuniKouhi: true } }],
+      [85000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
       [95000 * 10, [hoken], { shotokuKubun: "ア" }],
     ])
     expect(totalJikofutanOf(payments)).toBe(262180);
@@ -161,7 +161,7 @@ describe("高額療養費（70歳未満）", () => {
     const kouhi = mkKouhiKekkaku();
     const shotokuKubun = "イ"
     const payments = calcPaymentsMulti([
-      [85000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { hasKuniKouhi: true } }],
+      [85000 * 10, [hoken, kouhi], { shotokuKubun }],
       [5000 * 10, [hoken], { shotokuKubun }],
     ])
     expect(totalJikofutanOf(payments)).toBe(57500);
@@ -175,7 +175,7 @@ describe("高額療養費（70歳未満）", () => {
     const kouhi = mkKouhiKekkaku();
     const shotokuKubun = "イ"
     const payments = calcPaymentsMulti([
-      [5000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { hasKuniKouhi: true } }],
+      [5000 * 10, [hoken, kouhi], { shotokuKubun }],
       [95000 * 10, [hoken], { shotokuKubun }],
     ])
     expect(totalJikofutanOf(payments)).toBe(173820);
@@ -189,7 +189,7 @@ describe("高額療養費（70歳未満）", () => {
     const kouhi = mkKouhiKekkaku();
     const shotokuKubun = "イ"
     const payments = calcPaymentsMulti([
-      [10000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { hasKuniKouhi: true } }],
+      [10000 * 10, [hoken, kouhi], { shotokuKubun }],
       [110000 * 10, [hoken], { shotokuKubun }],
     ])
     expect(totalJikofutanOf(payments)).toBe(173820);
@@ -203,7 +203,7 @@ describe("高額療養費（70歳未満）", () => {
     const kouhi = mkKouhiKekkaku();
     const shotokuKubun = "イ"
     const payments = calcPaymentsMulti([
-      [85000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { hasKuniKouhi: true } }],
+      [85000 * 10, [hoken, kouhi], { shotokuKubun }],
       [95000 * 10, [hoken], { shotokuKubun }],
     ])
     expect(totalJikofutanOf(payments)).toBe(179820);
@@ -213,6 +213,17 @@ describe("高額療養費（70歳未満）", () => {
   });
 
   it("事例22　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(30000);
+    const shotokuKubun = "ウ"
+    const payments = calcPaymentsMulti([
+      [20000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { } }],
+      [40000 * 10, [hoken], { shotokuKubun }],
+    ])
+    expect(totalJikofutanOf(payments)).toBe(83430);
+    expect(kouhi.payment.kakari).toBe(60000);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(123430);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(20000);
     //     const covers = calcFutan(3, "ウ", [KouhiKouseiIryou],
     //       mkTens(
     //         ["H1", 20000], ["H", 40000]

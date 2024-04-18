@@ -171,7 +171,7 @@ function is肝がん(futanshaBangou: number): boolean {
     jissiKikanBangouOf(futanshaBangou) === 602;
 }
 
-const KuniKouhiHoubetsu = [
+export const KuniKouhiHoubetsu = [
   13, 14, 18, 19, 28, 29, 10, 11, 20, 16, 15, 21, 22, 17, 52, 23, 54, 51, 53, 79, 12
 ]
 
@@ -213,4 +213,29 @@ function fixed(gendogaku: number, isBirthdayMonth75: boolean): number {
     return gendogaku;
   }
 }
+// export const KuniKouhiHoubetsu = [
+//   13, 14, 18, 19, 28, 29, 10, 11, 20, 16, 15, 21, 22, 17, 52, 23, 54, 51, 53, 79, 12
+// ]
+
+// export function isKuniKouhi(houbetsu: number): boolean {
+//   // exclude 51, 52, 54
+
+//   if ([51, 52, 54].includes(houbetsu)) {
+//     return false;
+//   } else {
+//     return KuniKouhiHoubetsu.includes(houbetsu);
+//   }
+// }
+
+export function isKuniKouhiOfHeiyou(houbetsuList: number[]): boolean {
+  // 公費併用の場合は、一つでも国公費ならば、国公費で限度額計算
+  for (let h of houbetsuList) {
+    if (isKuniKouhi(h)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+
 
