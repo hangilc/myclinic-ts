@@ -96,9 +96,9 @@ export function calcPayments(bill: number, payers: Payer[], ctx: PaymentContext)
   return result;
 }
 
-export function calcPaymentsMulti(bills: [number, Payer[]][], ctx: PaymentContext): Payment[][] {
+export function calcPaymentsMulti(bills: [number, Payer[], PaymentContext][]): Payment[][] {
   const result: Payment[][] = [];
-  for (const [bill, payers] of bills) {
+  for (const [bill, payers, ctx] of bills) {
     const payments = calcPayments(bill, payers, Object.assign({}, ctx, { prevPayments: result }));
     result.push(payments);
   }
@@ -124,19 +124,33 @@ function mkPayer(kind: string, calc: PaymentCalc): Payer {
 
 export function mkHokenPayer(): Payer {
   return mkPayer("hoken", (bill: number, ctx: PaymentContext) => {
+    console.log("enter hoken", ctx);
     let futanWari: number = ctx.futanWari ?? 3;
     let gendogaku: number | undefined = undefined;
     if (ctx.shotokuKubun !== undefined) {
       gendogaku = calcGendogaku(ctx.shotokuKubun, bill, ctx.gendogakuOptions);
     }
-    console.log("gendogaku", "hoken", gendogaku, ctx.shotokuKubun, bill);
+    console.log("hoken gendogaku", gendogaku);
     let jikofutan = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {
         let payment = bill - gendogaku;
         if( ctx.shotokuKubun !== "一般Ⅱ") {
-          const prevJikofutan = totalJikofutanOf(ctx.prevPayments ?? []);
-          payment + prevJikofutan;
+          let accJikofutan = 0;
+          if( ctx.prevPayments ){
+            console.log("prevPayments", ctx.prevPayments);
+            ctx.prevPayments.forEach(payments => {
+              payments.forEach(payment => {
+                if( payment.kind !== "hoken" ){
+                  if( payment.kakari >= 21000 ){
+                    accJikofutan += PaymentObject.jikofutanOf(payment);
+                  }
+                }
+              })
+            })
+          }
+          console.log("accjikofutan", accJikofutan);
+          payment += accJikofutan;
         }
         return { payment, gendogakuReached: true };
       }

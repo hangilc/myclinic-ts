@@ -94,9 +94,9 @@ describe("futan-calc", () => {
     const kouhi = mkKouhiNanbyou(5000);
     const paymentsList = calcPaymentsMulti(
       [
-        [3000 * 10, [hoken, kouhi]],
-        [1000 * 10, [hoken]],
-      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
+        [3000 * 10, [hoken, kouhi], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
+        [1000 * 10, [hoken], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
+      ]);
     expect(totalJikofutanOf(paymentsList)).toBe(7000);
     expect(kouhi.payment.payment).toBe(1000);
   });
@@ -106,9 +106,9 @@ describe("futan-calc", () => {
     const kouhi = mkKouhiNanbyou(5000);
     const paymentsList = calcPaymentsMulti(
       [
-        [4000 * 10, [hoken, kouhi]],
-        [5000 * 10, [hoken]],
-      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
+        [4000 * 10, [hoken, kouhi], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
+        [5000 * 10, [hoken], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
+      ]);
     expect(totalJikofutanOf(paymentsList)).toBe(13000);
     expect(kouhi.payment.payment).toBe(3000);
   });
