@@ -224,39 +224,47 @@ describe("高額療養費（70歳未満）", () => {
     expect(kouhi.payment.kakari).toBe(60000);
     expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(123430);
     expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(20000);
-    //     const covers = calcFutan(3, "ウ", [KouhiKouseiIryou],
-    //       mkTens(
-    //         ["H1", 20000], ["H", 40000]
-    //       ),
-    //       { gendogaku: { kingaku: 20000, kouhiBangou: 1 }, debug: false });
-    //     expect(patientChargeOf(covers)).toBe(83430);
   });
 
   it("事例23　本人入院（標準報酬月額28万円～50万円）・公費（更生医療）", () => {
-    //     const covers = calcFutan(3, "ウ", [KouhiKouseiIryou],
-    //       mkTens(
-    //         ["H1", 30000], ["H", 30000]
-    //       ),
-    //       { gendogaku: { kingaku: 30000, kouhiBangou: 1 }, debug: false });
-    //     expect(patientChargeOf(covers)).toBe(83430);
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(30000);
+    const shotokuKubun = "ウ"
+    const payments = calcPaymentsMulti([
+      [30000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { } }],
+      [30000 * 10, [hoken], { shotokuKubun }],
+    ])
+    expect(totalJikofutanOf(payments)).toBe(83430);
+    expect(kouhi.payment.kakari).toBe(80430);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(133860);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(30000);
   });
 
   it("事例24　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
-    //     const covers = calcFutan(3, "エ", [KouhiKouseiIryou],
-    //       mkTens(
-    //         ["H1", 30000]
-    //       ),
-    //       { gendogaku: { kingaku: 5000, kouhiBangou: 1 }, debug: false });
-    //     expect(patientChargeOf(covers)).toBe(5000);
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(5000);
+    const shotokuKubun = "エ"
+    const payments = calcPaymentsMulti([
+      [30000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { } }],
+    ])
+    expect(totalJikofutanOf(payments)).toBe(5000);
+    expect(kouhi.payment.kakari).toBe(80430);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(80430);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
   });
 
   it("事例25　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
-    //     const covers = calcFutan(3, "エ", [KouhiKouseiIryou],
-    //       mkTens(
-    //         ["H1", 10000], ["H", 20000]
-    //       ),
-    //       { gendogaku: { kingaku: 5000, kouhiBangou: 1 }, debug: false });
-    //     expect(patientChargeOf(covers)).toBe(57600);
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(5000);
+    const shotokuKubun = "エ"
+    const payments = calcPaymentsMulti([
+      [10000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { } }],
+      [20000 * 10, [hoken], { shotokuKubun, gendogakuOptions: { } }],
+    ])
+    expect(totalJikofutanOf(payments)).toBe(57600);
+    expect(kouhi.payment.kakari).toBe(30000);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(82600);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
   });
 
   it("事例26　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
