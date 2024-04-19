@@ -268,12 +268,17 @@ describe("高額療養費（70歳未満）", () => {
   });
 
   it("事例26　本人入院（標準報酬月額26万円以下）・公費（更生医療）", () => {
-    //     const covers = calcFutan(3, "エ", [KouhiKouseiIryou],
-    //       mkTens(
-    //         ["H1", 30000], ["H", 30000]
-    //       ),
-    //       { gendogaku: { kingaku: 5000, kouhiBangou: 1 }, debug: false });
-    //     expect(patientChargeOf(covers)).toBe(57600);
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(5000);
+    const shotokuKubun = "エ"
+    const payments = calcPaymentsMulti([
+      [30000 * 10, [hoken, kouhi], { shotokuKubun, gendogakuOptions: { } }],
+      [30000 * 10, [hoken], { shotokuKubun, gendogakuOptions: { } }],
+    ])
+    expect(totalJikofutanOf(payments)).toBe(57600);
+    expect(kouhi.payment.kakari).toBe(80430);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(133030);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
   });
 
   it("事例27　本人入院（低所得者）・公費（更生医療）", () => {
