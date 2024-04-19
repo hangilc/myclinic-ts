@@ -163,9 +163,11 @@ export function mkHokenPayer(): Payer {
       }
     }
     let gendogaku: number | undefined = undefined;
+    console.log("ctx", ctx);
     if (ctx.shotokuKubun !== undefined) {
       gendogaku = calcGendogaku(ctx.shotokuKubun, gendogakuBill, ctx.gendogakuOptions);
     }
+    console.log("gendogaku", gendogaku);
     let jikofutan = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {

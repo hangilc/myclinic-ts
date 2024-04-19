@@ -34,44 +34,68 @@ function gendogakuFrac(
   shotokuKubun: ShotokuKubunCode,
   iryouhi: number,
   isBirthdayMonth75: boolean,
-  isNyuuin: boolean
+  isNyuuin: boolean,
 ): number {
-  switch (shotokuKubun) {
-    case "ア": case "現役並みⅢ":
-      return calc(252600, iryouhi, 842000, 0.01, isBirthdayMonth75);
-    case "イ": case "現役並みⅡ":
-      return calc(167400, iryouhi, 558000, 0.01, isBirthdayMonth75);
-    case "ウ": case "現役並みⅠ":
-      return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
-    case "エ":
-      return fixed(57600, isBirthdayMonth75);
-    case "オ": case "オ（境）":
-      return fixed(35400, isBirthdayMonth75);
+  switch(shotokuKubun) {
+    case "ア": return calc(842000, iryouhi, 252600, 0.01, false);
+    case "イ": return calc(558000, iryouhi, 167400, 0.01, false);
+    case "ウ": return calc(267000, iryouhi, 80100, 0.01, false);
+    case "エ": return fixed(57600, false);
+    case "オ": return fixed(35400, false);
+    case "現役並みⅢ": return calc(267000, iryouhi, 80100, 0.01, isBirthdayMonth75);
+    case "現役並みⅡ": return fixed(44400, isBirthdayMonth75);
+    case "現役並みⅠ": return fixed(44400, isBirthdayMonth75);
+    case "一般":
     case "一般Ⅱ":
-      return Math.min(
-        fixed(18000, isBirthdayMonth75),
-        calc(6000, iryouhi, 30000, 0.10, false)
-      ); // 配慮措置（令和７年９月30日まで）
-    case "一般Ⅰ": case "一般":
-      if (isNyuuin) {
-        return fixed(57600, isBirthdayMonth75);
-      } else {
-        return fixed(18000, isBirthdayMonth75);
-      }
+    case "一般Ⅰ":
     case "低所得Ⅱ":
-      if (isNyuuin) {
-        return fixed(24600, isBirthdayMonth75);
-      } else {
-        return fixed(8000, isBirthdayMonth75);
-      }
-    case "低所得Ⅰ": case "低所得Ⅰ（老福）": case "低所得Ⅰ（境）":
-      if (isNyuuin) {
-        return fixed(15000, isBirthdayMonth75);
-      } else {
-        return fixed(8000, isBirthdayMonth75);
-      }
+    case "低所得Ⅰ":
+default: throw new Error(`Unknown shotoku kubun: ${shotokuKubun}`);
   }
 }
+
+// function gendogakuFrac(
+//   shotokuKubun: ShotokuKubunCode,
+//   iryouhi: number,
+//   isBirthdayMonth75: boolean,
+//   isNyuuin: boolean
+// ): number {
+//   switch (shotokuKubun) {
+//     case "ア": case "現役並みⅢ":
+//       return calc(252600, iryouhi, 842000, 0.01, isBirthdayMonth75);
+//     case "イ": case "現役並みⅡ":
+//       return calc(167400, iryouhi, 558000, 0.01, isBirthdayMonth75);
+//     case "ウ": case "現役並みⅠ":
+//       return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
+//     case "エ":
+//       return fixed(57600, isBirthdayMonth75);
+//     case "オ": case "オ（境）":
+//       return fixed(35400, isBirthdayMonth75);
+//     case "一般Ⅱ":
+//       return Math.min(
+//         fixed(18000, isBirthdayMonth75),
+//         calc(6000, iryouhi, 30000, 0.10, false)
+//       ); // 配慮措置（令和７年９月30日まで）
+//     case "一般Ⅰ": case "一般":
+//       if (isNyuuin) {
+//         return fixed(57600, isBirthdayMonth75);
+//       } else {
+//         return fixed(18000, isBirthdayMonth75);
+//       }
+//     case "低所得Ⅱ":
+//       if (isNyuuin) {
+//         return fixed(24600, isBirthdayMonth75);
+//       } else {
+//         return fixed(8000, isBirthdayMonth75);
+//       }
+//     case "低所得Ⅰ": case "低所得Ⅰ（老福）": case "低所得Ⅰ（境）":
+//       if (isNyuuin) {
+//         return fixed(15000, isBirthdayMonth75);
+//       } else {
+//         return fixed(8000, isBirthdayMonth75);
+//       }
+//   }
+// }
 
 function gendogakuKuniKouhi(
   shotokuKubun: ShotokuKubunCode,
@@ -79,29 +103,45 @@ function gendogakuKuniKouhi(
   isBirthdayMonth75: boolean,
   isNyuuin: boolean,
 ): number {
-  switch (shotokuKubun) {
-    case "ア":
-    case "イ":
-    case "ウ":
-    case "エ":
-    case "オ":
-      return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
-    case "現役並みⅢ":
-    case "現役並みⅡ":
-    case "現役並みⅠ":
-    case "一般":
-    case "一般Ⅱ":
-    case "一般Ⅰ":
-    case "低所得Ⅱ":
-    case "低所得Ⅰ":
-      if( isNyuuin ){
-        return fixed(57600, isBirthdayMonth75);
-      } else {
-        return fixed(18000, isBirthdayMonth75);
-      }
-    default: throw new Error("Cannot handle: " + shotokuKubun);
+  switch(shotokuKubun) {
+    case "ア": return calc(842000, iryouhi, 252600, 0.01, false);
+    case "イ": return calc(558000, iryouhi, 167400, 0.01, false);
+    case "ウ": return calc(267000, iryouhi, 80100, 0.01, false);
+    case "エ": return fixed(57600, false);
+    case "オ": return fixed(35400, false);
+    default: throw new Error(`Unknown shotoku kubun: ${shotokuKubun}`);
   }
 }
+
+// function gendogakuKuniKouhi(
+//   shotokuKubun: ShotokuKubunCode,
+//   iryouhi: number,
+//   isBirthdayMonth75: boolean,
+//   isNyuuin: boolean,
+// ): number {
+//   switch (shotokuKubun) {
+//     case "ア":
+//     case "イ":
+//     case "ウ":
+//     case "エ":
+//     case "オ":
+//       return calc(80100, iryouhi, 267000, 0.01, isBirthdayMonth75);
+//     case "現役並みⅢ":
+//     case "現役並みⅡ":
+//     case "現役並みⅠ":
+//     case "一般":
+//     case "一般Ⅱ":
+//     case "一般Ⅰ":
+//     case "低所得Ⅱ":
+//     case "低所得Ⅰ":
+//       if( isNyuuin ){
+//         return fixed(57600, isBirthdayMonth75);
+//       } else {
+//         return fixed(18000, isBirthdayMonth75);
+//       }
+//     default: throw new Error("Cannot handle: " + shotokuKubun);
+//   }
+// }
 
 function gendogakuTasuuGaitou(
   kubun: ShotokuKubunCode,
@@ -194,7 +234,7 @@ export function isKuniKouhi(futanshaBangou: number): boolean {
   return (!is特定疾病(futanshaBangou)) && KuniKouhiHoubetsu.includes(houbetsuBangouOf(futanshaBangou));
 }
 
-function calc(threshold: number, iryouhi: number, offset: number, ratio: number, isBirthdayMonth75: boolean): number {
+function calc(threshold: number, iryouhi: number, offset: number, ratio: number, isBirthdayMonth75: boolean = false): number {
   if (isBirthdayMonth75) {
     threshold /= 2;
     offset /= 2;
@@ -206,7 +246,7 @@ function calc(threshold: number, iryouhi: number, offset: number, ratio: number,
   }
 }
 
-function fixed(gendogaku: number, isBirthdayMonth75: boolean): number {
+function fixed(gendogaku: number, isBirthdayMonth75: boolean = false): number {
   if (isBirthdayMonth75) {
     return gendogaku / 2;
   } else {

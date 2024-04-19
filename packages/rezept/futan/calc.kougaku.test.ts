@@ -1,23 +1,5 @@
 import { PayerObject, PaymentContext, PaymentObject, calcPayments, calcPaymentsMulti, mkHokenPayer, mkKouhiKekkaku, mkKouhiKousei, mkKouhiMarucho, totalJikofutanOf } from "./calc";
 
-// import { 負担区分コード, type 負担区分コードCode, type 負担区分コードName } from "./codes";
-// import { calcFutan, TotalCover } from "./futan-calc";
-// import { KouhiKekkaku, KouhiKouseiIryou } from "./kouhi-registry";
-
-// function mkTens(...items: [負担区分コードName, number][]): Map<負担区分コードCode, number> {
-//   return new Map(items.map(([kubunName, ten]) => [負担区分コード[kubunName], ten]));
-// }
-
-// function mkTen(futanCodeName: 負担区分コードName, ten: number): Map<負担区分コードCode, number> {
-//   return mkTens([futanCodeName, ten]);
-// }
-
-// const round = Math.round;
-
-// function patientChargeOf(totalCover: TotalCover): number {
-//   return round(totalCover.patientCharge);
-// }
-
 // 高額療養費の自己負担限度額の 見直しに係る計算事例 （平成27年1月）による
 describe("高額療養費（70歳未満）", () => {
   it("事例1　本人入院（標準報酬月額83万円以上）", () => {

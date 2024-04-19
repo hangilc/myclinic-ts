@@ -45,14 +45,14 @@ describe("futan/calc-nanbyou", () => {
 
   // 難病計算例７０歳未満.pdf
 
-  it("should handle nanbyou case 20", () => {
-    // const hoken = mkHokenPayer(3, 257180);
+  it.only("should handle nanbyou case 20", () => {
     const hoken = mkHokenPayer();
     const nanbyou = mkKouhiNanbyou(30000);
     const bill = 1300000;
-    calcPayments(bill, [hoken, nanbyou], { futanWari: 3, shotokuKubun: "ア"});
-    expect(hoken.payment).toMatchObject({ payment: 1042820 });
-    expect(nanbyou.payment).toMatchObject({ payment: 227180 });
+    const payments = calcPayments(bill, [hoken, nanbyou], { shotokuKubun: "ア"});
+    console.log("payments", payments);
+    expect(hoken.payment.payment).toBe(1042820);
+    expect(nanbyou.payment.payment).toBe(227180);
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);
   });
 
