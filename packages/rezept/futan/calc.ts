@@ -1,4 +1,4 @@
-import { GendogakuOptions, KuniKouhiHoubetsu, calcGendogaku } from "../gendogaku";
+import { GendogakuOptions, calcGendogaku } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
 
 interface Payment {
@@ -177,7 +177,7 @@ export function mkHokenPayer(): Payer {
       return combineGassan(acc, g);
     }, { hokenKakari: 0, jikofutan: 0 });
     let gendogakuBill = bill;
-    if (ctx.shotokuKubun !== "一般Ⅱ") {
+    if (ctx.shotokuKubun !== "一般Ⅱ" && ctx.shotokuKubun !== undefined) {
       gendogakuBill += gassan.hokenKakari;
     }
     let gendogaku: number | undefined = undefined;
@@ -185,12 +185,12 @@ export function mkHokenPayer(): Payer {
       gendogaku = calcGendogaku(ctx.gendogakuOptions ?? {});
     }
     let jikofutan = bill * futanWari / 10.0;
+    if( ctx.shotokuKubun !== "一般Ⅱ" && ctx.shotokuKubun !== undefined ){
+      jikofutan -= gassan.jikofutan;
+    }
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {
         let payment = bill - gendogaku;
-        if (ctx.shotokuKubun !== "一般Ⅱ") {
-          payment += gassan.jikofutan;
-        }
         return { payment, gendogakuReached: true };
       }
     }
