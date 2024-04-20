@@ -137,6 +137,31 @@ function mkPayer(kind: string, houbetsuBangou: number | undefined, calc: Payment
   }
 }
 
+function calcGassanJikofutan(payments: Payment[], isUnder70: boolean): number {
+  let accJikofutan = 0;
+  if( isUnder70 ){
+    let hokenApplicable = false;
+    let acc = 0;
+    payments.forEach(payment => {
+      if( payment.kind === "hoken" ){
+        hokenApplicable = (payment.kakari - payment.payment) >= 21000;
+      } else {
+        acc += payment.kakari - payment.payment;
+      }
+    })
+    if( hokenApplicable ){
+      accJikofutan += acc;
+    }
+  } else {
+    payments.forEach(payment => {
+      if( payment.kind !== "hoken" ){
+        accJikofutan += payment.kakari - payment.payment;
+      }
+    })
+  }
+  return accJikofutan;
+}
+
 export function mkHokenPayer(): Payer {
   function hasGassanKouhi(payments: Payment[]): boolean {
     for (const payment of payments) {
