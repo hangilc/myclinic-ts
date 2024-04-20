@@ -137,80 +137,59 @@ function mkPayer(kind: string, houbetsuBangou: number | undefined, calc: Payment
   }
 }
 
-function calcGassanJikofutan(payments: Payment[], isUnder70: boolean): number {
-  let accJikofutan = 0;
-  if( isUnder70 ){
-    let hokenApplicable = false;
-    let acc = 0;
-    payments.forEach(payment => {
-      if( payment.kind === "hoken" ){
-        hokenApplicable = (payment.kakari - payment.payment) >= 21000;
-      } else {
-        acc += payment.kakari - payment.payment;
-      }
-    })
-    if( hokenApplicable ){
-      accJikofutan += acc;
-    }
-  } else {
-    payments.forEach(payment => {
-      if( payment.kind !== "hoken" ){
-        accJikofutan += payment.kakari - payment.payment;
-      }
-    })
+interface Gassan {
+  hokenKakari: number;
+  jikofutan: number;
+}
+
+function combineGassan(a: Gassan, b: Gassan): Gassan {
+  return {
+    hokenKakari: a.hokenKakari + b.hokenKakari,
+    jikofutan: a.jikofutan + b.jikofutan,
+  };
+}
+
+function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
+  if( isUnder70 === undefined ){
+    throw new Error("Missing info: isUnder70");
   }
-  return accJikofutan;
+  let hokenKakari = 0;
+  let jikofutan = 0;
+  payments.forEach(payment => {
+    if( payment.kind === "hoken" ){
+      hokenKakari += payment.kakari;
+    } else {
+      jikofutan += payment.kakari - payment.payment;
+    }
+  })
+  if( isUnder70 && hokenKakari < 21000 ) {
+    hokenKakari = 0;
+    jikofutan = 0;
+  }
+  return { hokenKakari, jikofutan };
 }
 
 export function mkHokenPayer(): Payer {
-  function hasGassanKouhi(payments: Payment[]): boolean {
-    for (const payment of payments) {
-      if (payment.kind !== "hoken" && payment.kakari >= 21000) {
-        return true;
-      }
-    }
-    return false;
-  }
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
     let futanWari: number = ctx.futanWari ?? 3;
+    const gassan = (ctx.prevPayments ?? []).reduce((acc, ele) => {
+      const g = calcGassan(ele, ctx.gendogakuOptions?.isNyuuin);
+      return combineGassan(acc, g);
+    }, { hokenKakari: 0, jikofutan: 0 });
     let gendogakuBill = bill;
     if (ctx.shotokuKubun !== "一般Ⅱ") {
-      if (ctx.prevPayments) {
-        ctx.prevPayments.forEach(payments => {
-          if (hasGassanKouhi(payments)) {
-            payments.forEach(payment => {
-              if (payment.kind === "hoken") {
-                gendogakuBill += payment.kakari;
-              }
-            })
-          }
-        })
-      }
+      gendogakuBill += gassan.hokenKakari;
     }
     let gendogaku: number | undefined = undefined;
-    console.log("ctx", ctx);
     if (ctx.shotokuKubun !== undefined) {
-      gendogaku = calcGendogaku(ctx.shotokuKubun, gendogakuBill, ctx.gendogakuOptions);
+      gendogaku = calcGendogaku(ctx.gendogakuOptions ?? {});
     }
-    console.log("gendogaku", gendogaku);
     let jikofutan = bill * futanWari / 10.0;
     if (gendogaku !== undefined) {
       if (jikofutan > gendogaku) {
         let payment = bill - gendogaku;
         if (ctx.shotokuKubun !== "一般Ⅱ") {
-          let accJikofutan = 0;
-          if (ctx.prevPayments) {
-            ctx.prevPayments.forEach(payments => {
-              payments.forEach(payment => {
-                if (payment.kind !== "hoken") {
-                  if (payment.kakari >= 21000) {
-                    accJikofutan += PaymentObject.jikofutanOf(payment);
-                  }
-                }
-              })
-            })
-          }
-          payment += accJikofutan;
+          payment += gassan.jikofutan;
         }
         return { payment, gendogakuReached: true };
       }
