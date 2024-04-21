@@ -73,8 +73,9 @@ export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
     if( isSeikatsuHogo(h) ){
       return "seikatsuhogo";
     }
+    return "other";
   }
-  return "other";
+  return "none";
 }
 
 export function calcGendogaku(opts: GendogakuOptions): number {

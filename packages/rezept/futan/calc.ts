@@ -1,5 +1,6 @@
 import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi, isBirthday75, isSeikatsuHogo, isTokuteiKyuufu, isUnder70 } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
+import { number } from "valibot";
 
 interface Payment {
   kind: string;
@@ -73,6 +74,7 @@ function mkPaymentContext(setting: PaymentSetting): PaymentContext {
       isBirthdayMonth75: setting.isBirthdayMonth75,
     },
     currentPayments: [],
+    currentPayers: [],
     prevPayments: [],
   }
 }
@@ -81,6 +83,7 @@ interface PaymentContext {
   futanWari: number;
   gendogakuOptions: GendogakuOptions;
   currentPayments: Payment[];
+  currentPayers: Payer[];
   prevPayments: Payment[][];
 }
 
@@ -109,7 +112,7 @@ function collectHoubetsuBangou(payers: Payer[]): number[] {
   const result: number[] = [];
   payers.forEach(p => {
     const h = p.getHoubetsuBangou();
-    if( h !== undefined ){
+    if (h !== undefined) {
       result.push(h);
     }
   })
@@ -117,6 +120,7 @@ function collectHoubetsuBangou(payers: Payer[]): number[] {
 }
 
 function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
+  ctx = Object.assign({}, ctx, { currentPayers: payers });
   const gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, {
     iryouhi: bill,
     heiyouKouhi: classifyKouhi(collectHoubetsuBangou(payers)),
@@ -153,10 +157,40 @@ function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] 
   return result;
 }
 
+function isHokenTandoku(payers: Payer[]): boolean {
+  return payers.length === 1 && payers[0].getKind() === "hoken";
+}
+
+function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
+  function hokenOnly([_bill, payers]: [number, Payer[]]): boolean {
+    return isHokenTandoku(payers);
+  }
+  let hokenTandoku: [number, Payer[]] | undefined = undefined;
+  bills.forEach(billPayers => {
+    if (hokenOnly(billPayers)) {
+      if (hokenTandoku !== undefined) {
+        throw new Error("Multiple hoken tandoku");
+      }
+      hokenTandoku = billPayers;
+    }
+  });
+  if (hokenTandoku === undefined) {
+    return bills;
+  } else {
+    if (hokenOnly(bills[bills.length - 1])) {
+      return bills;
+    } else {
+      return [
+        ...bills.filter(billPayers => billPayers !== hokenTandoku),
+        hokenTandoku,
+      ];
+    }
+  }
+}
+
 export function calcPayments(bills: [number, Payer[]][], settingArg: Partial<PaymentSetting>): Payment[][] {
-  console.log("enter calcPayments", settingArg);
+  bills = reorderBills(bills);
   const setting: PaymentSetting = Object.assign(defaultPaymentSetting(), settingArg);
-  console.log("calcPayments setting", setting);
   const baseContext = mkPaymentContext(setting);
   const result: Payment[][] = [];
   bills.forEach(([bill, payers]) => {
@@ -258,22 +292,26 @@ function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
 
 export function mkHokenPayer(): Payer {
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
-    let futanWari: number = ctx.futanWari ?? 3;
-    const gassan = ctx.prevPayments.reduce((acc, ele) => {
-      const g = calcGassan(ele, ctx.gendogakuOptions.isNyuuin);
-      return combineGassan(acc, g);
-    }, { hokenKakari: 0, jikofutan: 0 });
-    let gendogakuBill = bill;
-    gendogakuBill += gassan.hokenKakari;
-    let gendogaku: number | undefined = undefined;
-    if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
-      gendogaku = calcGendogaku(ctx.gendogakuOptions);
-    }
-    let jikofutan = bill * futanWari / 10.0;
-    if (gendogaku !== undefined) {
-      if (jikofutan + gassan.jikofutan > gendogaku) {
-        let payment = bill - gendogaku + gassan.jikofutan;
-        return { payment, gendogakuReached: true };
+    const futanWari: number = ctx.futanWari;
+    const jikofutan = bill * ctx.futanWari / 10.0;
+    if (isHokenTandoku(ctx.currentPayers)) {
+      if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
+        const gassan = ctx.prevPayments.reduce((acc, ele) => {
+          const g = calcGassan(ele, ctx.gendogakuOptions.isNyuuin);
+          return combineGassan(acc, g);
+        }, { hokenKakari: 0, jikofutan: 0 });
+        const gendogakuBill = bill + gassan.hokenKakari;
+        const gendogaku = calcGendogaku(Object.assign({}, ctx.gendogakuOptions, { iryouhi: gendogakuBill }));
+        if (jikofutan + gassan.jikofutan > gendogaku) {
+          return { payment: bill - gendogaku + gassan.jikofutan, gendogakuReached: true };
+        }
+      }
+    } else {
+      if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
+        const gendogaku = calcGendogaku(ctx.gendogakuOptions);
+        if (jikofutan > gendogaku) {
+          return { payment: bill - gendogaku, gendogakuReached: true };
+        }
       }
     }
     return { payment: bill - jikofutan };
