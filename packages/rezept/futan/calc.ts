@@ -105,16 +105,26 @@ function mergePayment(self: Payment, arg: Payment) {
   self.payment += arg.payment;
 }
 
+function collectHoubetsuBangou(payers: Payer[]): number[] {
+  const result: number[] = [];
+  payers.forEach(p => {
+    const h = p.getHoubetsuBangou();
+    if( h !== undefined ){
+      result.push(h);
+    }
+  })
+  return result;
+}
+
 function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
   const gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, {
     iryouhi: bill,
+    heiyouKouhi: classifyKouhi(collectHoubetsuBangou(payers)),
   });
   let kakari = bill;
   const result: Payment[] = [];
   payers.forEach(p => {
-    const gopts: GendogakuOptions = Object.assign({}, gendogakuOptions, {
-      heiyouKouhi: classifyKouhi(p.getHoubetsuBangou()),
-    });
+    const gopts: GendogakuOptions = Object.assign({}, gendogakuOptions);
     const curCtx: PaymentContext = Object.assign({}, ctx, { currentPayments: result })
     let payment: { payment: number, gendogakuReached?: boolean };
     if (p.getKind() === "hoken" && gopts.shotokuKubun === "一般Ⅱ" &&

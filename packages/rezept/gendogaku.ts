@@ -65,15 +65,14 @@ export function isTokuteiKyuufu(houbetsuBangou: number): boolean {
   return TokuteiKyuufuHoubetsuBangou.includes(houbetsuBangou);
 }
 
-export function classifyKouhi(houbetsuBangou?: number): HeiyouKouhi {
-  if( houbetsuBangou === undefined ){
-    return "none";
-  }
-  if( isTokuteiKyuufu(houbetsuBangou) ){
-    return "nanbyou";
-  }
-  if( isSeikatsuHogo(houbetsuBangou) ){
-    return "seikatsuhogo";
+export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
+  for(const h of houbetsuBangouList){
+    if( isTokuteiKyuufu(h) ){
+      return "nanbyou";
+    }
+    if( isSeikatsuHogo(h) ){
+      return "seikatsuhogo";
+    }
   }
   return "other";
 }
@@ -148,7 +147,7 @@ function kourei(opts: GendogakuOptions): number {
       case "低所得Ⅱ": return fixed(24600, opts.isBirthdayMonth75);
       case "低所得Ⅰ": return fixed(15000, opts.isBirthdayMonth75);
     }
-    throw new Error("Cannot determine gendogaku.");
+    throw new Error(`Cannot determine gendogaku. (${opts.shotokuKubun})`);
   }
   if (opts.heiyouKouhi === "seikatsuhogo") {
     return fixed(opts.isNyuuin ? 15000 : 8000, opts.isBirthdayMonth75);
