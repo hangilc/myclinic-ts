@@ -11,6 +11,7 @@ export interface GendogakuOptions {
   hasTokuteiKyuufu: boolean;
   hasSeikatsuHogo: boolean;
   hasOtherKouhi: boolean;
+  isBirthday75: boolean;
 }
 
 // ７０歳になる月の翌月から限度額計算変更（１日生まれの場合はその月から）
@@ -55,6 +56,16 @@ export function calcGendogaku(opts: GendogakuOptions): number {
     gendogaku = kourei(opts);
   }
   return Math.round(gendogaku);
+}
+
+export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku: number, limitApplied: boolean } {
+  const g = 6000 + (iryouhi - 30000) * 0.1;
+  const limit = isBirthday75 ? 9000 : 18000;
+  if (g >= limit) {
+    return { gendogaku: limit, limitApplied: true };
+  } else {
+    return { gendogaku: Math.round(g), limitApplied: false };
+  }
 }
 
 function under70(opts: GendogakuOptions): number {
@@ -107,7 +118,7 @@ function kourei(opts: GendogakuOptions): number {
         case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
         case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
         case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-        case "一般": return opts.isTasuuGaitou ? 44400 : 57600;
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return opts.isTasuuGaitou ? 44400 : 57600;
         case "低所得Ⅱ": return 24600;
         case "低所得Ⅰ": return 15000;
       }
@@ -116,7 +127,7 @@ function kourei(opts: GendogakuOptions): number {
         case "現役並みⅢ": proportional(252600, opts.iryouhi, 842000);
         case "現役並みⅡ": proportional(167400, opts.iryouhi, 558000);
         case "現役並みⅠ": proportional(80100, opts.iryouhi, 267000);
-        case "一般": return 18000;
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return 18000;
         case "低所得Ⅱ": // fall through
         case "低所得Ⅰ": return 8000;
       }
@@ -128,7 +139,7 @@ function kourei(opts: GendogakuOptions): number {
       case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
       case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
       case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-      case "一般": return opts.isTasuuGaitou ? 44400 : 57600;
+      case "一般": case "一般Ⅱ": case "一般Ⅰ": return opts.isTasuuGaitou ? 44400 : 57600;
       case "低所得Ⅱ": return 24600;
       case "低所得Ⅰ": return 15000;
     }
@@ -137,7 +148,7 @@ function kourei(opts: GendogakuOptions): number {
       case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
       case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
       case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-      case "一般": return 18000;
+      case "一般": case "一般Ⅱ": case "一般Ⅰ": return 18000;
       case "低所得Ⅱ": // fall through
       case "低所得Ⅰ": return 8000;
     }
