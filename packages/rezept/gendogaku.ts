@@ -49,13 +49,11 @@ export function isTokuteiKyuufu(houbetsuBangou: number): boolean {
 }
 
 export function calcGendogaku(opts: GendogakuOptions): number {
-  let gendogaku: number;
   if (opts.isUnder70) { // ７０歳未満
-    gendogaku = under70(opts);
+    return under70(opts);
   } else { // ７０歳以上
-    gendogaku = kourei(opts);
+    return kourei(opts);
   }
-  return Math.round(gendogaku);
 }
 
 export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku: number, limitApplied: boolean } {
@@ -69,21 +67,25 @@ export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku
 }
 
 function under70(opts: GendogakuOptions): number {
+  function regular(): number {
+    switch (opts.shotokuKubun) {
+      case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
+      case "イ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
+      case "ウ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
+      case "エ": return opts.isTasuuGaitou ? 44400 : 57600;
+      case "オ": return opts.isTasuuGaitou ? 24600 : 35400;
+    }
+    throw new Error("Cannot determine gendogaku.");
+  }
   if (opts.hasSeikatsuHogo) {
     return 35400;
   }
   if (opts.hasOtherKouhi) {
-    return proportional(80100, opts.iryouhi, 267000);
+    return proportional(80100, opts.iryouhi, 267000, false);
   }
   if (opts.hasTokuteiKyuufu) {
     if (opts.isNyuuin) {
-      switch (opts.shotokuKubun) {
-        case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
-        case "イ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
-        case "ウ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-        case "エ": return opts.isTasuuGaitou ? 44400 : 57600;
-        case "オ": return opts.isTasuuGaitou ? 24600 : 35400;
-      }
+      return regular();
     } else {
       switch (opts.shotokuKubun) {
         case "ア": return proportional(252600, opts.iryouhi, 842000);
@@ -95,67 +97,51 @@ function under70(opts: GendogakuOptions): number {
     }
     throw new Error("Cannot determine gendogaku (nanbyou under70)");
   }
-  switch (opts.shotokuKubun) {
-    case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
-    case "イ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
-    case "ウ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-    case "エ": return opts.isTasuuGaitou ? 44400 : 57600;
-    case "オ": return opts.isTasuuGaitou ? 24600 : 35400;
-  }
-  throw new Error("Cannot calculate gendogaku.");
+  return regular();
 }
 
 function kourei(opts: GendogakuOptions): number {
+  function regular(isTasuuGaitou: boolean): number {
+    switch (opts.shotokuKubun) {
+      case "現役並みⅢ": return isTasuuGaitou ?
+        fixed(140100, opts.isBirthday75) :
+        proportional(252600, opts.iryouhi, 842000, opts.isBirthday75);
+      case "現役並みⅡ": return isTasuuGaitou ?
+        fixed(93000, opts.isBirthday75) :
+        proportional(167400, opts.iryouhi, 558000, opts.isBirthday75);
+      case "現役並みⅠ": return isTasuuGaitou ?
+        fixed(44400, opts.isBirthday75) :
+        proportional(80100, opts.iryouhi, 267000, opts.isBirthday75);
+      case "一般": case "一般Ⅱ": case "一般Ⅰ": return fixed(isTasuuGaitou ? 44400 : 57600, opts.isBirthday75);
+      case "低所得Ⅱ": return fixed(24600, opts.isBirthday75);
+      case "低所得Ⅰ": return fixed(15000, opts.isBirthday75);
+    }
+    throw new Error("Cannot determine gendogaku.");
+  }
   if (opts.hasSeikatsuHogo) {
-    return opts.isNyuuin ? 15000 : 8000;
+    return fixed(opts.isNyuuin ? 15000 : 8000, opts.isBirthday75);
   }
   if (opts.hasOtherKouhi) {
-    return opts.isNyuuin ? 57600 : 18000;
-  }
-  if (opts.hasTokuteiKyuufu) {
-    if (opts.isNyuuin) {
-      switch (opts.shotokuKubun) {
-        case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
-        case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
-        case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-        case "一般": case "一般Ⅱ": case "一般Ⅰ": return opts.isTasuuGaitou ? 44400 : 57600;
-        case "低所得Ⅱ": return 24600;
-        case "低所得Ⅰ": return 15000;
-      }
-    } else {
-      switch (opts.shotokuKubun) {
-        case "現役並みⅢ": proportional(252600, opts.iryouhi, 842000);
-        case "現役並みⅡ": proportional(167400, opts.iryouhi, 558000);
-        case "現役並みⅠ": proportional(80100, opts.iryouhi, 267000);
-        case "一般": case "一般Ⅱ": case "一般Ⅰ": return 18000;
-        case "低所得Ⅱ": // fall through
-        case "低所得Ⅰ": return 8000;
-      }
-    }
-    throw new Error("Cannot determine gendogaku (nanbyou kourei)");
+    return fixed(opts.isNyuuin ? 57600 : 18000, opts.isBirthday75);
   }
   if (opts.isNyuuin) {
-    switch (opts.shotokuKubun) {
-      case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
-      case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
-      case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-      case "一般": case "一般Ⅱ": case "一般Ⅰ": return opts.isTasuuGaitou ? 44400 : 57600;
-      case "低所得Ⅱ": return 24600;
-      case "低所得Ⅰ": return 15000;
-    }
+    return regular(opts.isTasuuGaitou);
   } else {
-    switch (opts.shotokuKubun) {
-      case "現役並みⅢ": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);
-      case "現役並みⅡ": return opts.isTasuuGaitou ? 93000 : proportional(167400, opts.iryouhi, 558000);
-      case "現役並みⅠ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
-      case "一般": case "一般Ⅱ": case "一般Ⅰ": return 18000;
-      case "低所得Ⅱ": // fall through
-      case "低所得Ⅰ": return 8000;
-    }
+    return regular(false);
   }
-  throw new Error("Cannot calculate gendogaku.");
 }
 
-function proportional(base: number, iryouhi: number, offset: number): number {
-  return base + (iryouhi - offset) * 0.01;
+function proportional(base: number, iryouhi: number, offset: number, isBirthday75: boolean = false): number {
+  if (isBirthday75) {
+    base /= 2.0;
+    offset /= 2.0;
+  }
+  return Math.round(base + (iryouhi - offset) * 0.01);
+}
+
+function fixed(value: number, isBirthday75: boolean): number {
+  if (isBirthday75) {
+    value /= 2.0;
+  }
+  return Math.round(value);
 }
