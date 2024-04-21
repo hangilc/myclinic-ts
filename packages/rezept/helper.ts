@@ -335,3 +335,15 @@ export function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: Reze
     }
   }
 }
+
+export function parseSqlDate(sqlDate: string): { year: number, month: number, day: number } {
+  const m = sqlDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if( !m ){
+    throw new Error(`Invalid sqldate: ${sqlDate}`);
+  }
+  return {
+    year: parseInt(m[1]),
+    month: parseInt(m[2]),
+    day: parseInt(m[3]),
+  }
+}

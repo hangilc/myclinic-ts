@@ -1,4 +1,4 @@
-import { GendogakuOptions, calcGendogaku } from "../gendogaku";
+import { GendogakuOptions, calcGendogaku, classifyKouhi, isBirthday75, isSeikatsuHogo, isTokuteiKyuufu, isUnder70 } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
 
 interface Payment {
@@ -40,12 +40,48 @@ export const PayerObject = {
   }
 }
 
-export interface PaymentContext {
-  futanWari?: number;
+export interface PaymentSetting {
+  futanWari: number;
+  isUnder70: boolean;
+  isBirthdayMonth75: boolean;
   shotokuKubun?: ShotokuKubunCode;
-  gendogakuOptions?: GendogakuOptions;
-  currentPayments?: Payment[];
-  prevPayments?: Payment[][];
+  isTasuuGaitou?: boolean;
+  isNyuuin?: boolean;
+}
+
+export function defaultPaymentSetting(): PaymentSetting {
+  return {
+    futanWari: 3,
+    isUnder70: true,
+    isBirthdayMonth75: false,
+    shotokuKubun: undefined,
+    isTasuuGaitou: false,
+    isNyuuin: false,
+  }
+}
+
+function mkPaymentContext(setting: PaymentSetting): PaymentContext {
+  return {
+    futanWari: setting.futanWari,
+    gendogakuOptions: {
+      isUnder70: setting.isUnder70,
+      shotokuKubun: setting.shotokuKubun ?? "不明",
+      iryouhi: 0,
+      isTasuuGaitou: setting.isTasuuGaitou ?? false,
+      isNyuuin: setting.isNyuuin ?? false,
+      heiyouKouhi: "none",
+      isBirthdayMonth75: setting.isBirthdayMonth75,
+    },
+    currentPayments: [],
+    prevPayments: [],
+  }
+}
+
+interface PaymentContext {
+  futanWari: number;
+  gendogakuOptions: GendogakuOptions;
+  currentPayments: Payment[];
+  prevPayments: Payment[][];
 }
 
 function getCurrentPaymentByKind(kind: string, ctx: PaymentContext): Payment {
@@ -69,55 +105,99 @@ function mergePayment(self: Payment, arg: Payment) {
   self.payment += arg.payment;
 }
 
-function hasKuniKouhi(payers: Payer[]): boolean {
-  for (const payer of payers) {
-    const houbetsu = payer.getHoubetsuBangou();
-    if (houbetsu !== undefined) {
-      if (KuniKouhiHoubetsu.includes(houbetsu)) {
-        return true;
+function reorderPayers(payers: Payer[]): Payer[] {
+  let index = -1;
+  payers.forEach((payer, i) => {
+    if (payer.getKind() === "hoken") {
+      if (index !== -1) {
+        throw new Error("Multiple hoken.");
       }
+      index = i;
     }
+  })
+  if (index === -1 || index === payers.length - 1) {
+    return payers;
+  } else {
+    return [
+      ...payers.filter(p => p.getKind() !== "hoken"),
+      ...payers.filter(p => p.getKind() === "hoken"),
+    ];
   }
-  return false;
 }
 
-export function calcPayments(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
+function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
+  const gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, {
+    iryouhi: bill,
+  });
+  let kakari = bill;
   const result: Payment[] = [];
-  ctx.gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, { hasKuniKouhi: hasKuniKouhi(payers)})
-  for (let payer of payers) {
-    let pay: { payment: number, gendogakuReached?: boolean };
-    if (payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ" && payers.length > 1) {
-      ctx = Object.assign({}, ctx, { shotokuKubun: "一般Ⅰ" });
-    }
-    if (payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ") {
-      const pay1 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
-      if (pay1.gendogakuReached) {
-        const pay2 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result, shotokuKubun: "一般Ⅰ" }));
-        pay = (pay1.payment > pay2.payment) ? pay1 : pay2;
-      } else {
-        pay = pay1;
-      }
-    } else {
-      pay = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
-    }
-    result.push({ kind: payer.getKind(), kakari: bill, payment: pay.payment, gendogakuReached: pay.gendogakuReached ?? false });
-    bill -= pay.payment;
-  }
-  payers.forEach((payer, i) => {
+  reorderPayers(payers).forEach(p => {
+    const gopts: GendogakuOptions = Object.assign({}, gendogakuOptions, {
+      heiyouKouhi: classifyKouhi(p.getHoubetsuBangou()),
+    })
+    const payment = p.calc(kakari, Object.assign({}, ctx, { gendogakuOptions: gopts }));
+    result.push({
+      kind: p.getKind(), kakari: bill, payment: payment.payment,
+      gendogakuReached: payment.gendogakuReached ?? false
+    });
+    kakari -= payment.payment;
+  })
+  payers.forEach((p, i) => {
     const r = result[i];
-    mergePayment(payer.payment, r);
+    mergePayment(p.payment, r);
   })
   return result;
 }
 
-export function calcPaymentsMulti(bills: [number, Payer[], PaymentContext][]): Payment[][] {
+export function calcPayments(bills: [number, Payer[]][], settingArg: Partial<PaymentSetting>): Payment[][] {
+  const setting: PaymentSetting = Object.assign(defaultPaymentSetting(), settingArg);
+  const baseContext = mkPaymentContext(setting);
   const result: Payment[][] = [];
-  for (const [bill, payers, ctx] of bills) {
-    const payments = calcPayments(bill, payers, Object.assign({}, ctx, { prevPayments: result }));
+  bills.forEach(([bill, payers]) => {
+    const payments = calcOne(bill, payers, Object.assign({}, baseContext, { prevPayments: result}));
     result.push(payments);
-  }
+  })
   return result;
 }
+
+
+// export function calcPaymentsOld(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
+//   const result: Payment[] = [];
+//   ctx.gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, { hasKuniKouhi: hasKuniKouhi(payers) })
+//   for (let payer of payers) {
+//     let pay: { payment: number, gendogakuReached?: boolean };
+//     if (payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ" && payers.length > 1) {
+//       ctx = Object.assign({}, ctx, { shotokuKubun: "一般Ⅰ" });
+//     }
+//     if (payer.getKind() === "hoken" && ctx.shotokuKubun === "一般Ⅱ") {
+//       const pay1 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
+//       if (pay1.gendogakuReached) {
+//         const pay2 = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result, shotokuKubun: "一般Ⅰ" }));
+//         pay = (pay1.payment > pay2.payment) ? pay1 : pay2;
+//       } else {
+//         pay = pay1;
+//       }
+//     } else {
+//       pay = payer.calc(bill, Object.assign({}, ctx, { currentPayments: result }));
+//     }
+//     result.push({ kind: payer.getKind(), kakari: bill, payment: pay.payment, gendogakuReached: pay.gendogakuReached ?? false });
+//     bill -= pay.payment;
+//   }
+//   payers.forEach((payer, i) => {
+//     const r = result[i];
+//     mergePayment(payer.payment, r);
+//   })
+//   return result;
+// }
+
+// export function calcPaymentsMultiOld(bills: [number, Payer[], PaymentContext][]): Payment[][] {
+//   const result: Payment[][] = [];
+//   for (const [bill, payers, ctx] of bills) {
+//     const payments = calcPayments(bill, payers, Object.assign({}, ctx, { prevPayments: result }));
+//     result.push(payments);
+//   }
+//   return result;
+// }
 
 function getPaymentByKind(kind: string, payments: Payment[]): Payment {
   for (let payment of payments) {
@@ -150,19 +230,19 @@ function combineGassan(a: Gassan, b: Gassan): Gassan {
 }
 
 function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
-  if( isUnder70 === undefined ){
+  if (isUnder70 === undefined) {
     throw new Error("Missing info: isUnder70");
   }
   let hokenKakari = 0;
   let jikofutan = 0;
   payments.forEach(payment => {
-    if( payment.kind === "hoken" ){
+    if (payment.kind === "hoken") {
       hokenKakari += payment.kakari;
     } else {
       jikofutan += payment.kakari - payment.payment;
     }
   })
-  if( isUnder70 && hokenKakari < 21000 ) {
+  if (isUnder70 && hokenKakari < 21000) {
     hokenKakari = 0;
     jikofutan = 0;
   }
@@ -177,15 +257,15 @@ export function mkHokenPayer(): Payer {
       return combineGassan(acc, g);
     }, { hokenKakari: 0, jikofutan: 0 });
     let gendogakuBill = bill;
-    if (ctx.shotokuKubun !== "一般Ⅱ" && ctx.shotokuKubun !== undefined) {
+    if (ctx.gendogakuOptions.shotokuKubun !== "一般Ⅱ" ) {
       gendogakuBill += gassan.hokenKakari;
     }
     let gendogaku: number | undefined = undefined;
-    if (ctx.shotokuKubun !== undefined) {
-      gendogaku = calcGendogaku(ctx.gendogakuOptions ?? {});
+    if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
+      gendogaku = calcGendogaku(ctx.gendogakuOptions);
     }
     let jikofutan = bill * futanWari / 10.0;
-    if( ctx.shotokuKubun !== "一般Ⅱ" && ctx.shotokuKubun !== undefined ){
+    if (ctx.gendogakuOptions.shotokuKubun !== "一般Ⅱ" ) {
       jikofutan -= gassan.jikofutan;
     }
     if (gendogaku !== undefined) {

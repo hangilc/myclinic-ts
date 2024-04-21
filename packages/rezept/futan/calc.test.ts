@@ -1,12 +1,19 @@
-import { mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen, mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject, calcPaymentsMulti, PaymentObject, totalJikofutanOf } from "./calc";
-import { GendogakuOptions } from "../gendogaku";
+import {
+  mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen,
+  mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject,
+  totalJikofutanOf, PaymentSetting
+} from "./calc";
 import { ShotokuKubunCode } from "../codes";
 
 function calc(totalTen: number, shotokuKubun: ShotokuKubunCode | undefined, futanWari: number, jikofutan: number,
-  gendogakuOptions: GendogakuOptions = {}, kouhiList: Payer[] = []): Payer {
+  setting: Partial<PaymentSetting> = {}, kouhiList: Payer[] = []): Payer {
   const hoken = mkHokenPayer();
   const payers = [hoken, ...kouhiList];
-  calcPayments(totalTen * 10, payers, { futanWari, shotokuKubun, gendogakuOptions });
+  calcPayments([[totalTen * 10, payers]], {
+    futanWari,
+    isUnder70: setting.isUnder70 ?? false,
+    isBirthdayMonth75: setting.isBirthdayMonth75 ?? false,
+  });
   expect(PayerObject.jikofutanOf(payers)).toBe(jikofutan);
   return hoken;
 }
@@ -92,11 +99,11 @@ describe("futan-calc", () => {
   it("should handle 難病", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiNanbyou(5000);
-    const paymentsList = calcPaymentsMulti(
+    const paymentsList = calcPayments(
       [
-        [3000 * 10, [hoken, kouhi], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
-        [1000 * 10, [hoken], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
-      ]);
+        [3000 * 10, [hoken, kouhi]],
+        [1000 * 10, [hoken]],
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
     expect(totalJikofutanOf(paymentsList)).toBe(7000);
     expect(kouhi.payment.payment).toBe(1000);
   });
@@ -104,11 +111,11 @@ describe("futan-calc", () => {
   it("should handle 難病 (case 2)", () => {
     const hoken = mkHokenPayer();
     const kouhi = mkKouhiNanbyou(5000);
-    const paymentsList = calcPaymentsMulti(
+    const paymentsList = calcPayments(
       [
-        [4000 * 10, [hoken, kouhi], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
-        [5000 * 10, [hoken], { futanWari: 2, shotokuKubun: "一般Ⅱ" }],
-      ]);
+        [4000 * 10, [hoken, kouhi]],
+        [5000 * 10, [hoken]],
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
     expect(totalJikofutanOf(paymentsList)).toBe(13000);
     expect(kouhi.payment.payment).toBe(3000);
   });
