@@ -79,6 +79,7 @@ export function classifyKouhi(houbetsuBangou?: number): HeiyouKouhi {
 }
 
 export function calcGendogaku(opts: GendogakuOptions): number {
+  console.log("enter calcGendogaku", opts);
   if (opts.isUnder70) { // ７０歳未満
     return under70(opts);
   } else { // ７０歳以上
@@ -97,6 +98,7 @@ export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku
 }
 
 function under70(opts: GendogakuOptions): number {
+  console.log("enter under70", opts);
   function regular(): number {
     switch (opts.shotokuKubun) {
       case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);

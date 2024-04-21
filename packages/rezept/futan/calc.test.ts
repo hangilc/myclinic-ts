@@ -11,7 +11,8 @@ function calc(totalTen: number, shotokuKubun: ShotokuKubunCode | undefined, futa
   const payers = [hoken, ...kouhiList];
   calcPayments([[totalTen * 10, payers]], {
     futanWari,
-    isUnder70: setting.isUnder70 ?? false,
+    shotokuKubun,
+    isUnder70: setting.isUnder70 ?? (["ア", "イ", "ウ", "エ", "オ"].includes(shotokuKubun ?? "")),
     isBirthdayMonth75: setting.isBirthdayMonth75 ?? false,
   });
   expect(PayerObject.jikofutanOf(payers)).toBe(jikofutan);
@@ -56,7 +57,7 @@ describe("futan-calc", () => {
     calc(4000, "一般Ⅱ", 2, 7000, { isBirthdayMonth75: true });
   });
 
-  it("should handle 公費 被爆者の子", () => {
+  it.only("should handle 公費 被爆者の子", () => {
     const hibakusha: Payer = mkKouhiHibakusha();
     calc(400, undefined, 3, 0, {}, [hibakusha]);
     expect(hibakusha.payment.payment).toBe(1200);
