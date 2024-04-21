@@ -57,7 +57,7 @@ describe("futan-calc", () => {
     calc(4000, "一般Ⅱ", 2, 7000, { isBirthdayMonth75: true });
   });
 
-  it.only("should handle 公費 被爆者の子", () => {
+  it("should handle 公費 被爆者の子", () => {
     const hibakusha: Payer = mkKouhiHibakusha();
     calc(400, undefined, 3, 0, {}, [hibakusha]);
     expect(hibakusha.payment.payment).toBe(1200);
@@ -104,7 +104,7 @@ describe("futan-calc", () => {
       [
         [3000 * 10, [hoken, kouhi]],
         [1000 * 10, [hoken]],
-      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ", isUnder70: false });
     expect(totalJikofutanOf(paymentsList)).toBe(7000);
     expect(kouhi.payment.payment).toBe(1000);
   });
@@ -116,7 +116,7 @@ describe("futan-calc", () => {
       [
         [4000 * 10, [hoken, kouhi]],
         [5000 * 10, [hoken]],
-      ], { futanWari: 2, shotokuKubun: "一般Ⅱ" });
+      ], { futanWari: 2, shotokuKubun: "一般Ⅱ", isUnder70: false });
     expect(totalJikofutanOf(paymentsList)).toBe(13000);
     expect(kouhi.payment.payment).toBe(3000);
   });
