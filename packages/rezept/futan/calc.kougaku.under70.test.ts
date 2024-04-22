@@ -121,45 +121,44 @@ describe("高額療養費（70歳未満）", () => {
     expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(2500);
   });
 
-  // it("事例16　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
-  //   const hoken = mkHokenPayer();
-  //   const kouhi = mkKouhiKekkaku();
-  //   const payments = calcPayments([
-  //     [10000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
-  //     [110000 * 10, [hoken], { shotokuKubun: "ア" }],
-  //   ])
-  //   expect(totalJikofutanOf(payments)).toBe(256180);
-  //   expect(kouhi.payment.kakari).toBe(30000);
-  //   expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(281180);
-  //   expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
-  // });
+  it("事例16　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKekkaku();
+    const payments = calcPayments([
+      [10000 * 10, [hoken, kouhi]],
+      [110000 * 10, [hoken]],
+    ], opt("ア"))
+    expect(totalJikofutanOf(payments)).toBe(256180);
+    expect(kouhi.payment.kakari).toBe(30000);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(281180);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
+  });
 
-  // it("事例17　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
-  //   const hoken = mkHokenPayer();
-  //   const kouhi = mkKouhiKekkaku();
-  //   const payments = calcPayments([
-  //     [85000 * 10, [hoken, kouhi], { shotokuKubun: "ア" }],
-  //     [95000 * 10, [hoken], { shotokuKubun: "ア" }],
-  //   ])
-  //   expect(totalJikofutanOf(payments)).toBe(262180);
-  //   expect(kouhi.payment.kakari).toBe(85930);
-  //   expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(305610);
-  //   expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(42500);
-  // });
+  it("事例17　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKekkaku();
+    const payments = calcPayments([
+      [85000 * 10, [hoken, kouhi]],
+      [95000 * 10, [hoken]],
+    ], opt("ア"))
+    expect(totalJikofutanOf(payments)).toBe(262180);
+    expect(kouhi.payment.kakari).toBe(85930);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(305610);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(42500);
+  });
 
-  // it("事例18　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
-  //   const hoken = mkHokenPayer();
-  //   const kouhi = mkKouhiKekkaku();
-  //   const shotokuKubun = "イ"
-  //   const payments = calcPayments([
-  //     [85000 * 10, [hoken, kouhi], { shotokuKubun }],
-  //     [5000 * 10, [hoken], { shotokuKubun }],
-  //   ])
-  //   expect(totalJikofutanOf(payments)).toBe(57500);
-  //   expect(kouhi.payment.kakari).toBe(85930);
-  //   expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(100930);
-  //   expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(42500);
-  // });
+  it("事例18　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKekkaku();
+    const payments = calcPayments([
+      [85000 * 10, [hoken, kouhi]],
+      [5000 * 10, [hoken]],
+    ], opt("イ", { isNyuuin: false }))
+    expect(totalJikofutanOf(payments)).toBe(57500);
+    expect(kouhi.payment.kakari).toBe(85930);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(100930);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(42500);
+  });
 
   // it("事例19　本人入院外（標準報酬月額53万～79万円）・公費（結核患者の適正医療）", () => {
   //   const hoken = mkHokenPayer();
