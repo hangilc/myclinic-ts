@@ -280,76 +280,95 @@ describe("高額療養費計算例（７０歳以上）", () => {
     expect(totalJikofutanOf(payments)).toBe(24600);
   });
 
-  //   it("事例２０　高齢受給者入院（75歳到達月）（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-  //     const covers = calcFutan(2, "低所得Ⅱ", [],
-  //       mkTens(["H", 5500]),
-  //       {
-  //         isNyuuin: true,
-  //         isBirthdayMonth75: true,
-  //         isKourei1WariShiteiKouhi: true,
-  //         debug: false,
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(5500);
-  //   });
+  it("事例２０　高齢受給者入院（75歳到達月）（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
+    const hoken = mkHokenPayer();
+    const payments = calcPayments(
+      [
+        [5500 * 10, [hoken]],
+      ],
+      opt("低所得Ⅱ", { futanWari: 1 })
+    );
+    expect(totalJikofutanOf(payments)).toBe(5500);
+  });
 
-  //   it("事例２１　高齢受給者入院・難病医療", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 41300]),
-  //       {
-  //         isNyuuin: true,
-  //         gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(10000);
-  //   });
+  it("事例２１　高齢受給者入院・難病医療", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiNanbyou(10000);
+    const payments = calcPayments(
+      [
+        [41300 * 10, [hoken, kouhi]],
+      ],
+      opt("一般", { futanWari: 2 })
+    );
+    expect(totalJikofutanOf(payments)).toBe(10000);
+    expect(kouhi.payment.kakari).toBe(57600);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(57600);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(10000);
+  });
 
-  //   it("事例２２　高齢受給者入院・難病医療", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 5500], ["H", 30000]),
-  //       {
-  //         isNyuuin: true,
-  //         gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(57600);
-  //   });
+  it("事例２２　高齢受給者入院・難病医療", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiNanbyou(10000);
+    const payments = calcPayments(
+      [
+        [5500 * 10, [hoken, kouhi]],
+        [30000 * 10, [hoken]],
+      ],
+      opt("一般", { futanWari: 2 })
+    );
+    expect(totalJikofutanOf(payments)).toBe(57600);
+    expect(kouhi.payment.kakari).toBe(11000);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(58600);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(10000);
+  });
 
-  //   it("事例２３　高齢受給者入院・難病医療（75歳到達月）", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 16500], ["H", 15500]),
-  //       {
-  //         isNyuuin: true,
-  //         gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-  //         isBirthdayMonth75: true,
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(28800);
-  //   });
+  it("事例２３　高齢受給者入院・難病医療（75歳到達月）", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiNanbyou(10000);
+    const payments = calcPayments(
+      [
+        [16500 * 10, [hoken, kouhi]],
+        [15500 * 10, [hoken]],
+      ],
+      opt("一般", { futanWari: 2, isBirthdayMonth75: true })
+    );
+    expect(totalJikofutanOf(payments)).toBe(28800);
+    expect(kouhi.payment.kakari).toBe(28800);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(47600);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(10000);
+  });
 
-  //   it("事例２４　高齢受給者入院・難病医療（多数回該当）（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 23100], ["H", 800]),
-  //       {
-  //         isNyuuin: true,
-  //         gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-  //         isKourei1WariShiteiKouhi: true,
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(10800);
-  //   });
+    it("事例２４　高齢受給者入院・難病医療（多数回該当）（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
+      const hoken = mkHokenPayer();
+      const kouhi = mkKouhiNanbyou(10000);
+      const payments = calcPayments(
+        [
+          [23100 * 10, [hoken, kouhi]],
+          [800 * 10, [hoken]],
+        ],
+        opt("一般", { futanWari: 1, isTasuuGaitou: true })
+      );
+      expect(totalJikofutanOf(payments)).toBe(10800);
+      expect(kouhi.payment.kakari).toBe(23100);
+      expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(23900);
+      expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(10000);
+    });
 
-  //   it("事例２５　高齢受給者入院・難病医療（75歳到達月）（多数回該当）", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 14500], ["H", 15100]),
-  //       {
-  //         isNyuuin: true,
-  //         gendogaku: { kingaku: 10000, kouhiBangou: 1 },
-  //         isBirthdayMonth75: true,
-  //         gendogakuTasuuGaitou: true,
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(22200);
-  //   });
+    it("事例２５　高齢受給者入院・難病医療（75歳到達月）（多数回該当）", () => {
+      const hoken = mkHokenPayer();
+      const kouhi = mkKouhiNanbyou(10000);
+      const payments = calcPayments(
+        [
+          [14500 * 10, [hoken, kouhi]],
+          [15100 * 10, [hoken]],
+        ],
+        opt("一般", { futanWari: 2, isTasuuGaitou: true, isBirthdayMonth75: true })
+      );
+      expect(totalJikofutanOf(payments)).toBe(22200);
+      expect(kouhi.payment.kakari).toBe(22200);
+      expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(34400);
+      expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(10000);
+    });
 
   //   it("事例２６　高齢受給者入院・難病医療", () => {
   //     const covers = calcFutan(2, "低所得Ⅰ", [KuniNanbyou],
