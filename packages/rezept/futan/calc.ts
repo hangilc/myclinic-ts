@@ -294,12 +294,11 @@ function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
 
 export function mkHokenPayer(): Payer {
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
-    const futanWari: number = ctx.futanWari;
     const jikofutan = bill * ctx.futanWari / 10.0;
     if (isHokenTandoku(ctx.currentPayers)) {
       if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
         const gassan = ctx.prevPayments.reduce((acc, ele) => {
-          const g = calcGassan(ele, ctx.gendogakuOptions.isNyuuin);
+          const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
           return combineGassan(acc, g);
         }, { hokenKakari: 0, jikofutan: 0 });
         const gendogakuBill = bill + gassan.hokenKakari;
