@@ -231,46 +231,54 @@ describe("高額療養費計算例（７０歳以上）", () => {
     expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(44300);
   });
 
-  //   it("事例１６　高齢受給者入院・更生医療", () => {
-  //     const covers = calcFutan(3, "現役並みⅠ", [KouhiKouseiIryou],
-  //       mkTens(["H1", 20900], ["H", 500]),
-  //       {
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(22400);
-  //   });
+  it("事例１６　高齢受給者入院・更生医療", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiKousei(100000);
+    const payments = calcPayments(
+      [
+        [20900 * 10, [hoken, kouhi]],
+        [500 * 10, [hoken]],
+      ],
+      opt("現役並みⅠ", {})
+    );
+    expect(totalJikofutanOf(payments)).toBe(22400);
+    expect(kouhi.payment.kakari).toBe(57600);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(59100);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(20900);
+  });
 
-  //   it("事例１７　高齢受給者入院（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
-  //     const covers = calcFutan(2, "一般", [],
-  //       mkTens(["H", 34500]),
-  //       {
-  //         isKourei1WariShiteiKouhi: true,
-  //         debug: false
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(34500);
-  //   });
+  it("事例１７　高齢受給者入院（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
+    const hoken = mkHokenPayer();
+    const payments = calcPayments(
+      [
+        [34500 * 10, [hoken]],
+      ],
+      opt("一般", { futanWari: 1 })
+    );
+    expect(totalJikofutanOf(payments)).toBe(34500);
+  });
 
-  //   it("事例１８　高齢受給者入院（75歳到達月）（多数回該当）", () => {
-  //     const covers = calcFutan(2, "一般", [],
-  //       mkTens(["H", 13500]),
-  //       {
-  //         gendogakuTasuuGaitou: true,
-  //         isBirthdayMonth75: true,
-  //         isNyuuin: true,
-  //         debug: false,
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(22200);
-  //   });
+  it("事例１８　高齢受給者入院（75歳到達月）（多数回該当）", () => {
+    const hoken = mkHokenPayer();
+    const payments = calcPayments(
+      [
+        [13500 * 10, [hoken]],
+      ],
+      opt("一般", { isTasuuGaitou: true, isBirthdayMonth75: true })
+    );
+    expect(totalJikofutanOf(payments)).toBe(22200);
+  });
 
-  //   it("事例１９　高齢受給者入院", () => {
-  //     const covers = calcFutan(2, "低所得Ⅱ", [],
-  //       mkTens(["H", 16700]),
-  //       {
-  //         isNyuuin: true,
-  //         debug: false,
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(24600);
-  //   });
+  it("事例１９　高齢受給者入院", () => {
+    const hoken = mkHokenPayer();
+    const payments = calcPayments(
+      [
+        [16700 * 10, [hoken]],
+      ],
+      opt("低所得Ⅱ", { futanWari: 2 })
+    );
+    expect(totalJikofutanOf(payments)).toBe(24600);
+  });
 
   //   it("事例２０　高齢受給者入院（75歳到達月）（特例措置対象者：生年月日が昭和19年4月1日以前）", () => {
   //     const covers = calcFutan(2, "低所得Ⅱ", [],
