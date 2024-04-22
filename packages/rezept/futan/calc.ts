@@ -238,7 +238,6 @@ export function calcPayments(bills: [number, Payer[]][], settingArg: Partial<Pay
 // }
 
 function getPaymentByKind(kind: string, payments: Payment[]): Payment {
-  console.log("getPaymentByKind", kind, payments)
   for (let payment of payments) {
     if (payment.kind === kind) {
       return payment;
