@@ -102,7 +102,6 @@ export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku
 }
 
 function under70(opts: GendogakuOptions): number {
-  console.log("under70", opts.shotokuKubun, opts.iryouhi, opts.heiyouKouhi);
   function regular(): number {
     switch (opts.shotokuKubun) {
       case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);

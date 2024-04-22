@@ -273,15 +273,19 @@ function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
     throw new Error("Missing info: isUnder70");
   }
   let hokenKakari = 0;
+  let kouhiKakari = 0;
   let jikofutan = 0;
   payments.forEach(payment => {
     if (payment.kind === "hoken") {
       hokenKakari += payment.kakari;
     } else {
+      if( payment.kakari > kouhiKakari ){
+        kouhiKakari = payment.kakari;
+      }
       jikofutan += payment.kakari - payment.payment;
     }
   })
-  if (isUnder70 && hokenKakari < 21000) {
+  if (isUnder70 && kouhiKakari < 21000) {
     hokenKakari = 0;
     jikofutan = 0;
   }
