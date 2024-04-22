@@ -48,26 +48,30 @@ export function isSeikatsuHogo(houbetsuBangou: number): boolean {
   return houbetsuBangou === 12;
 }
 
-const TokuteiKyuufuHoubetsuBangou = [
-  18, // 原子爆弾被爆者に対する援護に関する法律
-  52, // 児童福祉法による小児慢性特定疾病医療費
-  21, 15, 16, 24, // 障害者自立支援法
-  20, // 精神保健及び精神障害者福祉に関する法律による措置入院
-  22, // 麻薬及び向精神薬取締法による入院措置
-  23, // 母子保健法による養育医療
-  29, 10, 11, // 感染症の予防及び感染症の患者に対する医療に関する法律
-  66, // 石綿による健康被害の救済に関する法律
-  62, // 特定Ｂ型肝炎ウイルス感染者給付金等の支給に関する特別措置法
-  51, 54 // 難病
-]
+// const TokuteiKyuufuHoubetsuBangou = [
+//   18, // 原子爆弾被爆者に対する援護に関する法律
+//   52, // 児童福祉法による小児慢性特定疾病医療費
+//   21, 15, 16, 24, // 障害者自立支援法
+//   20, // 精神保健及び精神障害者福祉に関する法律による措置入院
+//   22, // 麻薬及び向精神薬取締法による入院措置
+//   23, // 母子保健法による養育医療
+//   29, 10, 11, // 感染症の予防及び感染症の患者に対する医療に関する法律
+//   66, // 石綿による健康被害の救済に関する法律
+//   62, // 特定Ｂ型肝炎ウイルス感染者給付金等の支給に関する特別措置法
+//   51, 54 // 難病
+// ]
 
-export function isTokuteiKyuufu(houbetsuBangou: number): boolean {
-  return TokuteiKyuufuHoubetsuBangou.includes(houbetsuBangou);
+// export function isTokuteiKyuufu(houbetsuBangou: number): boolean {
+//   return TokuteiKyuufuHoubetsuBangou.includes(houbetsuBangou);
+// }
+
+export function isNanbyou(houbetsuBangou: number): boolean {
+  return houbetsuBangou === 51 || houbetsuBangou === 54;
 }
 
 export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
   for(const h of houbetsuBangouList){
-    if( isTokuteiKyuufu(h) ){
+    if( isNanbyou(h) ){
       return "nanbyou";
     }
     if( isSeikatsuHogo(h) ){
@@ -78,8 +82,8 @@ export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
   return "none";
 }
 
+
 export function calcGendogaku(opts: GendogakuOptions): number {
-  console.log("enter calcGendogaku", opts);
   if (opts.isUnder70) { // ７０歳未満
     return under70(opts);
   } else { // ７０歳以上
@@ -98,7 +102,7 @@ export function hairyosochi(iryouhi: number, isBirthday75: boolean): { gendogaku
 }
 
 function under70(opts: GendogakuOptions): number {
-  console.log("enter under70", opts);
+  console.log("under70", opts.shotokuKubun, opts.iryouhi, opts.heiyouKouhi);
   function regular(): number {
     switch (opts.shotokuKubun) {
       case "ア": return opts.isTasuuGaitou ? 140100 : proportional(252600, opts.iryouhi, 842000);

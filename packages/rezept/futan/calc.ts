@@ -1,6 +1,5 @@
-import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi, isBirthday75, isSeikatsuHogo, isTokuteiKyuufu, isUnder70 } from "../gendogaku";
+import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
-import { number } from "valibot";
 
 interface Payment {
   kind: string;
@@ -147,7 +146,6 @@ function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] 
       kind: p.getKind(), kakari, payment: payment.payment,
       gendogakuReached: payment.gendogakuReached ?? false
     });
-    console.log("kakari", kakari, "payment", payment);
     kakari -= payment.payment;
   });
   payers.forEach((p, i) => {
