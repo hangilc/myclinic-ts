@@ -148,8 +148,18 @@ function kourei(opts: GendogakuOptions): number {
         fixed(44400, opts.isBirthdayMonth75) :
         proportional(80100, opts.iryouhi, 267000, opts.isBirthdayMonth75);
       case "一般": case "一般Ⅱ": case "一般Ⅰ": return fixed(isTasuuGaitou ? 44400 : 57600, opts.isBirthdayMonth75);
-      case "低所得Ⅱ": return fixed(24600, opts.isBirthdayMonth75);
-      case "低所得Ⅰ": return fixed(15000, opts.isBirthdayMonth75);
+      case "低所得Ⅱ": 
+        if( opts.isNyuuin ){
+          return fixed(24600, opts.isBirthdayMonth75);
+        } else {
+          return fixed(18000, opts.isBirthdayMonth75);
+        }
+      case "低所得Ⅰ": 
+        if( opts.isNyuuin ){
+          return fixed(15000, opts.isBirthdayMonth75);
+        } else {
+          return fixed(8000, opts.isBirthdayMonth75);
+        }
     }
     throw new Error(`Cannot determine gendogaku. (${opts.shotokuKubun})`);
   }

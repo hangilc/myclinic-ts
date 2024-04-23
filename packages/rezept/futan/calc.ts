@@ -388,6 +388,12 @@ export function mkKouhiKousei(gendogaku: number): Payer {
   })
 }
 
+export function mkSeikatsuHogo(): Payer {
+  return mkPayer("seikatsuhogo", 12, (bill: number, ctx: PaymentContext) => {
+    return { payment: bill };
+  })
+}
+
 export function mkUnknownPayer(): Payer {
   return mkKouhiFutanNashi("unknown", undefined);
 }
