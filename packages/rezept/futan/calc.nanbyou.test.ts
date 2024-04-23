@@ -51,7 +51,6 @@ describe("futan/calc-nanbyou", () => {
     const bill = 1300000;
     const payments = calcPayments([[bill, [hoken, nanbyou]]], { 
       futanWari: 3, shotokuKubun: "ア", isUnder70: true });
-    console.log("payments", payments);
     expect(hoken.payment.payment).toBe(1042820);
     expect(nanbyou.payment.payment).toBe(227180);
     expect(calcJikofutan(bill, [hoken, nanbyou])).toBe(30000);

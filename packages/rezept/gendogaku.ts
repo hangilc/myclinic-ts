@@ -36,7 +36,7 @@ export function isBirthday75(rezeptYear: number, rezeptMonth: number,
   if (birthdateDay === 1) {
     return false;
   }
-  if( rezeptMonth !== birthdateMonth ){
+  if (rezeptMonth !== birthdateMonth) {
     return false;
   } else {
     const age = rezeptYear - birthdateYear;
@@ -70,11 +70,11 @@ export function isNanbyou(houbetsuBangou: number): boolean {
 }
 
 export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
-  for(const h of houbetsuBangouList){
-    if( isNanbyou(h) ){
+  for (const h of houbetsuBangouList) {
+    if (isNanbyou(h)) {
       return "nanbyou";
     }
-    if( isSeikatsuHogo(h) ){
+    if (isSeikatsuHogo(h)) {
       return "seikatsuhogo";
     }
     return "other";
@@ -112,7 +112,7 @@ function under70(opts: GendogakuOptions): number {
     }
     throw new Error("Cannot determine gendogaku.");
   }
-  if ( opts.heiyouKouhi === "seikatsuhogo") {
+  if (opts.heiyouKouhi === "seikatsuhogo") {
     return 35400;
   }
   if (opts.heiyouKouhi === "other") {
@@ -136,43 +136,84 @@ function under70(opts: GendogakuOptions): number {
 }
 
 function kourei(opts: GendogakuOptions): number {
-  function regular(isTasuuGaitou: boolean): number {
-    switch (opts.shotokuKubun) {
-      case "現役並みⅢ": return isTasuuGaitou ?
-        fixed(140100, opts.isBirthdayMonth75) :
-        proportional(252600, opts.iryouhi, 842000, opts.isBirthdayMonth75);
-      case "現役並みⅡ": return isTasuuGaitou ?
-        fixed(93000, opts.isBirthdayMonth75) :
-        proportional(167400, opts.iryouhi, 558000, opts.isBirthdayMonth75);
-      case "現役並みⅠ": return isTasuuGaitou ?
-        fixed(44400, opts.isBirthdayMonth75) :
-        proportional(80100, opts.iryouhi, 267000, opts.isBirthdayMonth75);
-      case "一般": case "一般Ⅱ": case "一般Ⅰ": return fixed(isTasuuGaitou ? 44400 : 57600, opts.isBirthdayMonth75);
-      case "低所得Ⅱ": 
-        if( opts.isNyuuin ){
-          return fixed(24600, opts.isBirthdayMonth75);
-        } else {
-          return fixed(18000, opts.isBirthdayMonth75);
-        }
-      case "低所得Ⅰ": 
-        if( opts.isNyuuin ){
-          return fixed(15000, opts.isBirthdayMonth75);
-        } else {
-          return fixed(8000, opts.isBirthdayMonth75);
-        }
-    }
-    throw new Error(`Cannot determine gendogaku. (${opts.shotokuKubun})`);
+  function g3(isTasuuGaitou: boolean): number {
+    return isTasuuGaitou ?
+      fixed(140100, opts.isBirthdayMonth75) :
+      proportional(252600, opts.iryouhi, 842000, opts.isBirthdayMonth75);
   }
+  function g2(isTasuuGaitou: boolean): number {
+    return isTasuuGaitou ?
+      fixed(93000, opts.isBirthdayMonth75) :
+      proportional(167400, opts.iryouhi, 558000, opts.isBirthdayMonth75);
+  }
+  function g1(isTasuuGaitou: boolean): number {
+    return isTasuuGaitou ?
+      fixed(44400, opts.isBirthdayMonth75) :
+      proportional(80100, opts.iryouhi, 267000, opts.isBirthdayMonth75);
+  }
+  function nyuuinIppan(): number {
+    return fixed(opts.isTasuuGaitou ? 44400 : 57600, opts.isBirthdayMonth75);
+  }
+  function gairaiIppan(): number {
+    return fixed(18000, opts.isBirthdayMonth75);
+  }
+  function nyuuinTeishotoku2(): number {
+    return fixed(24600, opts.isBirthdayMonth75);
+  }
+
+  function nyuuinTeishotoku1(): number {
+    return fixed(15000, opts.isBirthdayMonth75);
+  }
+  function gairaiTeishotoku(): number {
+    return fixed(8000, opts.isBirthdayMonth75);
+  }
+
   if (opts.heiyouKouhi === "seikatsuhogo") {
     return fixed(opts.isNyuuin ? 15000 : 8000, opts.isBirthdayMonth75);
-  }
-  if (opts.heiyouKouhi === "other") {
+  } else if (opts.heiyouKouhi === "other") {
     return fixed(opts.isNyuuin ? 57600 : 18000, opts.isBirthdayMonth75);
-  }
-  if (opts.isNyuuin) {
-    return regular(opts.isTasuuGaitou);
-  } else {
-    return regular(false);
+  } else if (opts.heiyouKouhi === "nanbyou") {
+    if (opts.isNyuuin) {
+      switch (opts.shotokuKubun) {
+        case "現役並みⅢ": return g3(opts.isTasuuGaitou);
+        case "現役並みⅡ": return g2(opts.isTasuuGaitou);
+        case "現役並みⅠ": return g1(opts.isTasuuGaitou);
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return nyuuinIppan();
+        case "低所得Ⅱ": return nyuuinTeishotoku2();
+        case "低所得Ⅰ": return nyuuinTeishotoku1();
+      }
+      throw new Error("Cannot determine gendogaku.");
+    } else {
+      switch (opts.shotokuKubun) {
+        case "現役並みⅢ": return g3(false);
+        case "現役並みⅡ": return g2(false);
+        case "現役並みⅠ": return g1(false);
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return gairaiIppan();
+        case "低所得Ⅱ": case "低所得Ⅰ": return gairaiTeishotoku();
+      }
+      throw new Error("Cannot determine gendogaku.");
+    }
+  } else { // 医療保険
+    if (opts.isNyuuin) {
+      switch (opts.shotokuKubun) {
+        case "現役並みⅢ": return g3(opts.isTasuuGaitou);
+        case "現役並みⅡ": return g2(opts.isTasuuGaitou);
+        case "現役並みⅠ": return g1(opts.isTasuuGaitou);
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return nyuuinIppan();
+        case "低所得Ⅱ": return nyuuinTeishotoku2();
+        case "低所得Ⅰ": return nyuuinTeishotoku1();
+      }
+      throw new Error("Cannot determine gendogaku.");
+    } else {
+      switch (opts.shotokuKubun) {
+        case "現役並みⅢ": return g3(opts.isTasuuGaitou);
+        case "現役並みⅡ": return g2(opts.isTasuuGaitou);
+        case "現役並みⅠ": return g1(opts.isTasuuGaitou);
+        case "一般": case "一般Ⅱ": case "一般Ⅰ": return gairaiIppan();
+        case "低所得Ⅱ": case "低所得Ⅰ": return gairaiTeishotoku();
+      }
+      throw new Error("Cannot determine gendogaku.");
+    }
   }
 }
 
