@@ -578,15 +578,17 @@ describe("高額療養費計算例（７０歳以上）", () => {
     expect(totalJikofutanOf(payments)).toBe(8000);
   });
 
-  //   it("事例４４　高齢受給者外来・難病医療", () => {
-  //     const covers = calcFutan(2, "一般", [KuniNanbyou],
-  //       mkTens(["H1", 9500]),
-  //       {
-  //         gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-  //       });
-  //     expect(patientChargeOf(covers)).toBe(5000);
-  //     expect(coveredBy("1", covers)).toBe(13000);
-  //   });
+  it("事例４４　高齢受給者外来・難病医療", () => {
+    const hoken = mkHokenPayer();
+    const kouhi = mkKouhiNanbyou(5000);
+    const payments = calcPayments([
+      [9500 * 10, [hoken, kouhi]],
+    ], opt("一般", { isNyuuin: false }));
+    expect(totalJikofutanOf(payments)).toBe(5000);
+    expect(kouhi.payment.kakari).toBe(18000);
+    expect(PaymentObject.uncoveredOf(hoken.payment)).toBe(18000);
+    expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(5000);
+  });
 
   //   it("事例４５　高齢受給者外来・難病医療", () => {
   //     const covers = calcFutan(2, "一般", [KuniNanbyou],
