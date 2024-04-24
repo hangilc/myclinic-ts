@@ -1,13 +1,13 @@
 import {
   mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen,
   mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject,
-  totalJikofutanOf, PaymentSetting, reorderPayers
+  totalJikofutanOf, PaymentSetting, reorderPayers, mkHokenHairyosochi
 } from "./calc";
 import { ShotokuKubunCode } from "../codes";
 
 function calc(totalTen: number, shotokuKubun: ShotokuKubunCode | undefined, futanWari: number, jikofutan: number,
   setting: Partial<PaymentSetting> = {}, kouhiList: Payer[] = []): Payer {
-  const hoken = mkHokenPayer();
+  const hoken = shotokuKubun === "一般Ⅱ" ? mkHokenHairyosochi() :  mkHokenPayer();
   const payers = [hoken, ...kouhiList];
   calcPayments([[totalTen * 10, payers]], {
     futanWari,

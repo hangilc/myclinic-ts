@@ -177,14 +177,14 @@ function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
 export function reorderPayers(payers: Payer[]): Payer[] {
   let index = -1;
   payers.forEach((payer, i) => {
-    if( payer.getKind() === "marucho" ){
-      if( index >= 0 ){
+    if (payer.getKind() === "marucho") {
+      if (index >= 0) {
         throw new Error("Multiple marucho");
       }
       index = i;
     }
   });
-  if( index <= 0 ){
+  if (index <= 0) {
     return payers;
   } else {
     const [marucho] = payers.splice(index, 1);
@@ -298,6 +298,13 @@ export function mkHokenHairyosochi(): Payer {
         return { payment: bill - h.gendogaku + gassan.jikofutan, gendogakuReached: true };
       } else {
         const jikofutan = bill * ctx.futanWari / 10.0;
+        const gassan = ctx.prevPayments.reduce((acc, ele) => {
+          const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
+          return combineGassan(acc, g);
+        }, { hokenKakari: 0, jikofutan: 0 });
+        if (jikofutan + gassan.jikofutan > (ctx.gendogakuOptions.isBirthdayMonth75 ? 9000 : 18000)) {
+          return { payment: bill - (ctx.gendogakuOptions.isBirthdayMonth75 ? 9000 : 18000) + gassan.jikofutan, gendogakuReached: true }
+        }
         if (jikofutan > h.gendogaku) {
           return { payment: bill - h.gendogaku, gendogakuReached: true };
         } else {
@@ -392,7 +399,7 @@ export function mkKouhiSeishinTsuuin(): Payer {
 export function mkMaruchoPayer(gendogaku: number): Payer {
   return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
     let jikofutan = bill * ctx.futanWari / 10.0;
-    if( jikofutan > gendogaku ){
+    if (jikofutan > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
       return { payment: bill - jikofutan };
