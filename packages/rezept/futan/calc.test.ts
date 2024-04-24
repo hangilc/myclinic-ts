@@ -1,7 +1,7 @@
 import {
   mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen,
   mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject,
-  totalJikofutanOf, PaymentSetting
+  totalJikofutanOf, PaymentSetting, reorderPayers
 } from "./calc";
 import { ShotokuKubunCode } from "../codes";
 
@@ -23,6 +23,12 @@ describe("futan-calc", () => {
 
   it("should handle single visit hoken only", () => {
     calc(300, undefined, 3, 900);
+  });
+
+  it("should reorder payers", () => {
+    let payers: Payer[] = [];
+    expect(reorderPayers(payers)).toEqual(payers);
+    const hoken = mkHokenPayer();
   });
 
   it("should handle gendogaku of ウ under 70", () => {

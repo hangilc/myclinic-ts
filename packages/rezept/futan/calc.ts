@@ -129,19 +129,7 @@ function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] 
   payers.forEach(p => {
     const gopts: GendogakuOptions = Object.assign({}, gendogakuOptions);
     const curCtx: PaymentContext = Object.assign({}, ctx, { currentPayments: result })
-    let payment: { payment: number, gendogakuReached?: boolean };
-    // if (p.getKind() === "hoken" && gopts.shotokuKubun === "一般Ⅱ" &&
-    //   payers.filter(p => p.getKind() !== "hoken").length === 0) { // 配慮措置
-    //   const jikofutan = kakari * ctx.futanWari / 10.0;
-    //   const h = hairyosochi(kakari, gopts.isBirthdayMonth75);
-    //   if (jikofutan <= h.gendogaku) {
-    //     payment = { payment: kakari - jikofutan, gendogakuReached: false };
-    //   } else {
-    //     payment = { payment: kakari - h.gendogaku, gendogakuReached: true };
-    //   }
-    // } else {
-      payment = p.calc(kakari, Object.assign({}, curCtx, { gendogakuOptions: gopts }));
-    // }
+    const payment = p.calc(kakari, Object.assign({}, curCtx, { gendogakuOptions: gopts }));
     result.push({
       kind: p.getKind(), kakari, payment: payment.payment,
       gendogakuReached: payment.gendogakuReached ?? false
@@ -183,6 +171,24 @@ function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
         hokenTandoku,
       ];
     }
+  }
+}
+
+export function reorderPayers(payers: Payer[]): Payer[] {
+  let index = -1;
+  payers.forEach((payer, i) => {
+    if( payer.getKind() === "marucho" ){
+      if( index >= 0 ){
+        throw new Error("Multiple marucho");
+      }
+      index = i;
+    }
+  });
+  if( index <= 0 ){
+    return payers;
+  } else {
+    const [marucho] = payers.splice(index, 1);
+    return [marucho, ...payers];
   }
 }
 
@@ -380,6 +386,17 @@ export function mkKouhiSeishinTsuuin(): Payer {
     const hoken = getCurrentHokenPaymetOf(ctx);
     let jikofutan = hoken.kakari * 0.1;
     return { payment: bill - jikofutan };
+  })
+}
+
+export function mkMaruchoPayer(gendogaku: number): Payer {
+  return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
+    let jikofutan = bill * ctx.futanWari / 10.0;
+    if( jikofutan > gendogaku ){
+      return { payment: bill - gendogaku, gendogakuReached: true };
+    } else {
+      return { payment: bill - jikofutan };
+    }
   })
 }
 
