@@ -278,7 +278,7 @@ function calcGassan(payments: Payment[], isUnder70?: boolean): Gassan {
     if (payment.kind === "hoken") {
       hokenKakari += payment.kakari;
     } else {
-      if( payment.kakari > kouhiKakari ){
+      if (payment.kakari > kouhiKakari) {
         kouhiKakari = payment.kakari;
       }
       jikofutan += payment.kakari - payment.payment;
@@ -309,6 +309,7 @@ export function mkHokenPayer(): Payer {
     } else {
       if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
         const gendogaku = calcGendogaku(ctx.gendogakuOptions);
+        console.log("jikofutan", jikofutan);
         if (jikofutan > gendogaku) {
           return { payment: bill - gendogaku, gendogakuReached: true };
         }
@@ -385,6 +386,14 @@ export function mkKouhiKousei(gendogaku: number): Payer {
     } else {
       return { payment: bill - jikofutan };
     }
+  })
+}
+
+export function mkKouhiSeishinTsuuin(): Payer {
+  return mkPayer("seishin-tsuuin", 21, (bill: number, ctx: PaymentContext) => {
+    const hoken = getCurrentHokenPaymetOf(ctx);
+    let jikofutan = hoken.kakari * 0.1;
+    return { payment: bill - jikofutan };
   })
 }
 
