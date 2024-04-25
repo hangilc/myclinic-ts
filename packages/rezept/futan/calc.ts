@@ -276,7 +276,6 @@ export function mkHokenPayer(): Payer {
     } else {
       if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
         const gendogaku = calcGendogaku(ctx.gendogakuOptions);
-        console.log("jikofutan", jikofutan);
         if (jikofutan > gendogaku) {
           return { payment: bill - gendogaku, gendogakuReached: true };
         }
@@ -290,26 +289,19 @@ export function mkHokenHairyosochi(): Payer {
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
     if (isHokenTandoku(ctx.currentPayers)) {
       const h = hairyosochi(bill, ctx.gendogakuOptions.isBirthdayMonth75);
-      if (h.limitApplied) {
-        const gassan = ctx.prevPayments.reduce((acc, ele) => {
-          const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
-          return combineGassan(acc, g);
-        }, { hokenKakari: 0, jikofutan: 0 });
-        return { payment: bill - h.gendogaku + gassan.jikofutan, gendogakuReached: true };
+      const jikofutan = bill * ctx.futanWari / 10.0;
+      let result: { payment: number, gendogakuReached?: boolean };
+      if( jikofutan > h.gendogaku ){
+        result = { payment: bill - h.gendogaku, gendogakuReached: true };
       } else {
-        const jikofutan = bill * ctx.futanWari / 10.0;
-        const gassan = ctx.prevPayments.reduce((acc, ele) => {
-          const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
-          return combineGassan(acc, g);
-        }, { hokenKakari: 0, jikofutan: 0 });
-        if (jikofutan + gassan.jikofutan > (ctx.gendogakuOptions.isBirthdayMonth75 ? 9000 : 18000)) {
-          return { payment: bill - (ctx.gendogakuOptions.isBirthdayMonth75 ? 9000 : 18000) + gassan.jikofutan, gendogakuReached: true }
-        }
-        if (jikofutan > h.gendogaku) {
-          return { payment: bill - h.gendogaku, gendogakuReached: true };
-        } else {
-          return { payment: bill - jikofutan };
-        }
+        result = { payment: bill - jikofutan };
+      }
+      const hoken = mkHokenPayer();
+      const unapplied = hoken.calc(bill, ctx);
+      if( unapplied.payment > result.payment ){
+        return unapplied;
+      } else {
+        return result;
       }
     } else {
       const p = mkHokenPayer();

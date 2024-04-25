@@ -116,7 +116,7 @@ describe("futan-calc", () => {
   });
 
   it("should handle 難病 (case 2)", () => {
-    const hoken = mkHokenPayer();
+    const hoken = mkHokenHairyosochi();
     const kouhi = mkKouhiNanbyou(5000);
     const paymentsList = calcPayments(
       [
@@ -126,5 +126,4 @@ describe("futan-calc", () => {
     expect(totalJikofutanOf(paymentsList)).toBe(13000);
     expect(kouhi.payment.payment).toBe(3000);
   });
-
 });

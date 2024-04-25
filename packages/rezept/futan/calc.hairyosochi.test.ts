@@ -6,7 +6,7 @@ function calc(ten: number, opt: Partial<PaymentSetting>, jikofutan: number) {
   const hoken = mkHokenHairyosochi();
   const payments = calcPayments([
     [ten * 10, [hoken]]
-  ], Object.assign({}, { shotokuKubun: "一般Ⅱ", futanWari: 2 }, opt))
+  ], Object.assign({}, { shotokuKubun: "一般Ⅱ", futanWari: 2, isUnder70: false }, opt))
   expect(totalJikofutanOf(payments)).toBe(jikofutan);
 }
 
