@@ -174,22 +174,37 @@ function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
   }
 }
 
+const KouhiOrder: number[] = [
+  13, 14, 18, 29, 30, 10, 11, 20, 21, 15,
+  16, 24, 22, 28, 17, 79, 19, 23, 52, 54,
+  51, 38, 53, 66, 62, 25, 12
+];
+
+const KouhiOrderWeights: Record<number, number> = {};
+
+KouhiOrder.forEach((houbetsu, i) => {
+  KouhiOrderWeights[houbetsu] = i + 10;
+})
+
 export function reorderPayers(payers: Payer[]): Payer[] {
-  let index = -1;
-  payers.forEach((payer, i) => {
-    if (payer.getKind() === "marucho") {
-      if (index >= 0) {
-        throw new Error("Multiple marucho");
+  const items: { payer: Payer, weight: number }[] = payers.map(payer => {
+    const houbetsu = payer.getHoubetsuBangou();
+    if( houbetsu !== undefined ){
+      const w = KouhiOrderWeights[houbetsu];
+      if( w === undefined ){
+        throw new Error(`Unknown houbetsu bangou: ${houbetsu}`)
       }
-      index = i;
+      return { payer, weight: w };
+    } else {
+      switch(payer.getKind()){
+        case "hoken": return { payer, weight: 0 };
+        case "marucho": return { payer, weight: 1 };
+        default: throw new Error(`Unknown payer kind: ${payer.getKind()}`);
+      }
     }
-  });
-  if (index <= 0) {
-    return payers;
-  } else {
-    const [marucho] = payers.splice(index, 1);
-    return [marucho, ...payers];
-  }
+  })
+  items.sort((a, b) => a.weight - b.weight);
+  return items.map(item => item.payer);
 }
 
 export function calcPayments(bills: [number, Payer[]][], settingArg: Partial<PaymentSetting>): Payment[][] {
