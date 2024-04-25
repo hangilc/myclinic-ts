@@ -116,14 +116,14 @@ function under70(opts: GendogakuOptions): number {
     }
     throw new Error("Cannot determine gendogaku.");
   }
+  if( opts.marucho ){
+    return fixed(opts.marucho, opts.isBirthdayMonth75);
+  }
   if (opts.heiyouKouhi === "seikatsuhogo") {
     return 35400;
   }
   if (opts.heiyouKouhi === "other") {
     return proportional(80100, opts.iryouhi, 267000, false);
-  }
-  if( opts.marucho ){
-    return fixed(opts.marucho, opts.isBirthdayMonth75);
   }
   if (opts.heiyouKouhi === "nanbyou") {
     if (opts.isNyuuin) {
@@ -176,13 +176,16 @@ function kourei(opts: GendogakuOptions): number {
     return fixed(8000, opts.isBirthdayMonth75);
   }
 
+  if( opts.marucho ){
+    return fixed(opts.marucho, opts.isBirthdayMonth75);
+  }
   if (opts.heiyouKouhi === "seikatsuhogo") {
     return fixed(opts.isNyuuin ? 15000 : 8000, opts.isBirthdayMonth75);
-  } else if (opts.heiyouKouhi === "other") {
+  } 
+  if (opts.heiyouKouhi === "other") {
     return fixed(opts.isNyuuin ? 57600 : 18000, opts.isBirthdayMonth75);
-  } else if( opts.marucho ){
-    return fixed(opts.marucho, opts.isBirthdayMonth75);
-  } else if (opts.heiyouKouhi === "nanbyou") {
+  } 
+  if (opts.heiyouKouhi === "nanbyou") {
     if (opts.isNyuuin) {
       switch (opts.shotokuKubun) {
         case "現役並みⅢ": return g3(opts.isTasuuGaitou);
@@ -205,7 +208,8 @@ function kourei(opts: GendogakuOptions): number {
       }
       throw new Error("Cannot determine gendogaku.");
     }
-  } else { // 医療保険
+  } 
+  { // 医療保険
     if (opts.isNyuuin) {
       switch (opts.shotokuKubun) {
         case "現役並みⅢ": return g3(opts.isTasuuGaitou);

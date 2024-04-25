@@ -306,7 +306,7 @@ export function mkHokenPayer(): Payer {
 
 export function mkHokenHairyosochi(): Payer {
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
-    if (isHokenTandoku(ctx.currentPayers) && !ctx.gendogakuOptions.marucho ) {
+    if (!ctx.gendogakuOptions.isNyuuin && isHokenTandoku(ctx.currentPayers) && !ctx.gendogakuOptions.marucho ) {
       const h = hairyosochi(bill, ctx.gendogakuOptions.isBirthdayMonth75);
       const jikofutan = bill * ctx.futanWari / 10.0;
       let result: { payment: number, gendogakuReached?: boolean };
