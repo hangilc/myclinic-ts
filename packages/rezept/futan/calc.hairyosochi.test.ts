@@ -91,6 +91,7 @@ describe("後期高齢者医療制度の負担割合見直し", () => {
   });
 
   it("【事例15】後期高齢者２割負担外来（難病）", () => {
+    calc1(mkKouhiNanbyou(5000), 3000, 1000, {}, 7000, )
     //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou],
     //       mkTens(["H1", 3000], ["H", 1000]),
     //       {
