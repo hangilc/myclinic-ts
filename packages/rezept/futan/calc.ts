@@ -119,6 +119,7 @@ function collectHoubetsuBangou(payers: Payer[]): number[] {
 }
 
 function calcOne(bill: number, payers: Payer[], ctx: PaymentContext): Payment[] {
+  payers = reorderPayers(payers);
   ctx = Object.assign({}, ctx, { currentPayers: payers });
   const gendogakuOptions = Object.assign({}, ctx.gendogakuOptions, {
     iryouhi: bill,
@@ -197,8 +198,8 @@ export function reorderPayers(payers: Payer[]): Payer[] {
       return { payer, weight: w };
     } else {
       switch(payer.getKind()){
-        case "hoken": return { payer, weight: 0 };
-        case "marucho": return { payer, weight: 1 };
+        case "hoken": return { payer, weight: 1 };
+        case "marucho": return { payer, weight: 0 };
         default: throw new Error(`Unknown payer kind: ${payer.getKind()}`);
       }
     }
@@ -403,7 +404,7 @@ export function mkKouhiSeishinTsuuin(): Payer {
   })
 }
 
-export function mkMaruchoPayer(gendogaku: number): Payer {
+export function mkMarucho(gendogaku: number): Payer {
   return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
     let jikofutan = bill * ctx.futanWari / 10.0;
     if (jikofutan > gendogaku) {

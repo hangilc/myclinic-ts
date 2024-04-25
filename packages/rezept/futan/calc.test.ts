@@ -1,13 +1,13 @@
 import {
   mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen,
   mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject,
-  totalJikofutanOf, PaymentSetting, reorderPayers, mkHokenHairyosochi
+  totalJikofutanOf, PaymentSetting, reorderPayers, mkHokenHairyosochi, mkKouhiKekkaku, mkMarucho
 } from "./calc";
 import { ShotokuKubunCode } from "../codes";
 
 function calc(totalTen: number, shotokuKubun: ShotokuKubunCode | undefined, futanWari: number, jikofutan: number,
   setting: Partial<PaymentSetting> = {}, kouhiList: Payer[] = []): Payer {
-  const hoken = shotokuKubun === "一般Ⅱ" ? mkHokenHairyosochi() :  mkHokenPayer();
+  const hoken = shotokuKubun === "一般Ⅱ" ? mkHokenHairyosochi() : mkHokenPayer();
   const payers = [hoken, ...kouhiList];
   calcPayments([[totalTen * 10, payers]], {
     futanWari,
@@ -28,7 +28,10 @@ describe("futan-calc", () => {
   it("should reorder payers", () => {
     let payers: Payer[] = [];
     expect(reorderPayers(payers)).toEqual(payers);
-    const hoken = mkHokenPayer();
+    const h = mkHokenPayer();
+    expect(reorderPayers([mkKouhiNanbyou(1000), h]).map(p => p.getKind())).toEqual(["hoken", "nanbyou"]);
+    expect(reorderPayers([mkMarucho(10000), mkKouhiNanbyou(1000), mkKouhiKekkaku(), h]).map(p => p.getKind()))
+      .toEqual(["hoken", "marucho", "kekkaku", "nanbyou"]);
   });
 
   it("should handle gendogaku of ウ under 70", () => {
