@@ -1,4 +1,4 @@
-import { Payer, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, totalJikofutanOf } from "./calc";
+import { Payer, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, mkKouhiKousei, mkKouhiNanbyou, totalJikofutanOf } from "./calc";
 
 // 後期高齢者医療制度の負担割合見直しに係る計算事例集（令和５年４月）
 
@@ -21,6 +21,21 @@ function calcWithKouhi(kouhi: Payer, ten: number,
   expect(kouhi.payment.kakari).toBe(kouhiKakari);
   expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(kouhiJikofutan);
 }
+
+function calc1(kouhi: Payer, heiyouTen: number, hokenTandokuTen: number,
+  opt: Partial<PaymentSetting>, jikofutan: number, kouhiKakari: number, kouhiJikofutan: number) {
+  const hoken = mkHokenHairyosochi();
+  const payments = calcPayments([
+    [heiyouTen * 10, [hoken, kouhi]],
+    [hokenTandokuTen * 10, [hoken]],
+  ], Object.assign({}, { shotokuKubun: "一般Ⅱ", futanWari: 2, isUnder70: false }, opt));
+  console.log("payments", payments);
+  expect(totalJikofutanOf(payments)).toBe(jikofutan);
+  expect(kouhi.payment.kakari).toBe(kouhiKakari);
+  expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(kouhiJikofutan);
+}
+
+
 
 describe("後期高齢者医療制度の負担割合見直し", () => {
   it("【事例１】後期高齢者２割負担外来", () => {
@@ -56,59 +71,23 @@ describe("後期高齢者医療制度の負担割合見直し", () => {
   });
 
   it("【事例9】後期高齢者２割負担外来（マル長）（75歳到達月）", () => {
-    //     const covers = calcFutan(2, "一般Ⅱ", [],
-    //       mkTen("H", 7000),
-    //       {
-    //         marucho: 10000,
-    //         isBirthdayMonth75: true,
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(5000);
+    calc(7000, { marucho: 10000, isBirthdayMonth75: true }, 5000);
   });
 
   it("【事例10】後期高齢者２割負担外来（難病）", () => {
-    //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou],
-    //       mkTen("H1", 10000),
-    //       {
-    //         gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(5000);
-    //     expect(coveredBy("1", covers)).toBe(13000);
+    calcWithKouhi(mkKouhiNanbyou(5000), 10000, {}, 5000, 13000, 5000);
   });
 
   it("【事例11】後期高齢者２割負担外来（難病）", () => {
-    //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou],
-    //       mkTen("H1", 8000),
-    //       {
-    //         gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(5000);
-    //     expect(coveredBy("1", covers)).toBe(11000);
+    calcWithKouhi(mkKouhiNanbyou(5000), 8000, {}, 5000, 13000, 11000);
   });
 
   it("【事例12】後期高齢者２割負担外来（難病）（75歳到達月）", () => {
-    //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou],
-    //       mkTen("H1", 8000),
-    //       {
-    //         gendogaku: { kingaku: 5000, kouhiBangou: 1 },
-    //         isBirthdayMonth75: true,
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(5000);
-    //     expect(coveredBy("1", covers)).toBe(4000);
+    calcWithKouhi(mkKouhiNanbyou(5000), 8000, { isBirthdayMonth75: true }, 5000, 13000, 4000);
   });
 
   it("【事例14】後期高齢者２割負担外来（マル長）（更生医療）", () => {
-    //     const covers = calcFutan(2, "一般Ⅱ", [KouhiKouseiIryou],
-    //       mkTen("H1", 6000),
-    //       {
-    //         marucho: 10000,
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(6000);
-    //     expect(coveredBy("1", covers)).toBe(4000);
+    calcWithKouhi(mkKouhiKousei(30000), 6000, { marucho: 10000 }, 6000, 10000, 6000);
   });
 
   it("【事例15】後期高齢者２割負担外来（難病）", () => {
