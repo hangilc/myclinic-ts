@@ -1,7 +1,7 @@
 import {
   mkHokenPayer, mkKouhiHibakusha, mkKouhiMaruaoFutanNash, mkMaruToTaikiosen,
-  mkKouhiNanbyou, mkKouhiMarucho, Payer, calcPayments, PayerObject,
-  totalJikofutanOf, PaymentSetting, reorderPayers, mkHokenHairyosochi, mkKouhiKekkaku, mkMarucho
+  mkKouhiNanbyou, Payer, calcPayments, PayerObject,
+  totalJikofutanOf, PaymentSetting, reorderPayers, mkHokenHairyosochi, mkKouhiKekkaku, defaultPaymentSetting
 } from "./calc";
 import { ShotokuKubunCode } from "../codes";
 
@@ -14,6 +14,7 @@ function calc(totalTen: number, shotokuKubun: ShotokuKubunCode | undefined, futa
     shotokuKubun,
     isUnder70: setting.isUnder70 ?? (["ア", "イ", "ウ", "エ", "オ"].includes(shotokuKubun ?? "")),
     isBirthdayMonth75: setting.isBirthdayMonth75 ?? false,
+    marucho: setting.marucho
   });
   expect(PayerObject.jikofutanOf(payers)).toBe(jikofutan);
   return hoken;
@@ -30,8 +31,8 @@ describe("futan-calc", () => {
     expect(reorderPayers(payers)).toEqual(payers);
     const h = mkHokenPayer();
     expect(reorderPayers([mkKouhiNanbyou(1000), h]).map(p => p.getKind())).toEqual(["hoken", "nanbyou"]);
-    expect(reorderPayers([mkMarucho(10000), mkKouhiNanbyou(1000), mkKouhiKekkaku(), h]).map(p => p.getKind()))
-      .toEqual(["hoken", "marucho", "kekkaku", "nanbyou"]);
+    expect(reorderPayers([mkKouhiNanbyou(1000), mkKouhiKekkaku(), h]).map(p => p.getKind()))
+      .toEqual(["hoken", "kekkaku", "nanbyou"]);
   });
 
   it("should handle gendogaku of ウ under 70", () => {
@@ -102,8 +103,7 @@ describe("futan-calc", () => {
   });
 
   it("should handle マル長", () => {
-    const kouhi = mkKouhiMarucho(10000);
-    calc(28000, undefined, 3, 10000, {}, [kouhi]);
+    calc(28000, undefined, 3, 10000, { marucho: 10000 }, []);
   });
 
   it("should handle 難病", () => {

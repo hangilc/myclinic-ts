@@ -80,9 +80,8 @@ describe("高額療養費（70歳未満）", () => {
 
   it("事例12　本人入院（長）", () => {
     const hoken = mkHokenPayer();
-    const kouhi = mkKouhiMarucho(10000);
-    calcPayments([[17500 * 10, [hoken, kouhi]]], opt("ウ"));
-    expect(PayerObject.jikofutanOf([hoken, kouhi])).toBe(10000);
+    calcPayments([[17500 * 10, [hoken]]], opt("ウ", { marucho: 10000 }));
+    expect(PayerObject.jikofutanOf([hoken])).toBe(10000);
   });
 
   it("事例13　本人入院（標準報酬月額83万円以上）・公費（結核患者の適正医療）", () => {

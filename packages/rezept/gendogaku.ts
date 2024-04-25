@@ -4,6 +4,8 @@ export type ShotokuKubunEx = ShotokuKubunCode | "不明";
 
 export type HeiyouKouhi = "none" | "nanbyou" | "seikatsuhogo" | "other"
 
+const UNLIMITED = 10000000;
+
 export interface GendogakuOptions {
   isUnder70: boolean;
   shotokuKubun: ShotokuKubunEx;
@@ -12,6 +14,7 @@ export interface GendogakuOptions {
   isNyuuin: boolean;
   heiyouKouhi: HeiyouKouhi,
   isBirthdayMonth75: boolean;
+  marucho: number | undefined;
 }
 
 // ７０歳になる月の翌月から限度額計算変更（１日生まれの場合はその月から）
@@ -109,6 +112,7 @@ function under70(opts: GendogakuOptions): number {
       case "ウ": return opts.isTasuuGaitou ? 44400 : proportional(80100, opts.iryouhi, 267000);
       case "エ": return opts.isTasuuGaitou ? 44400 : 57600;
       case "オ": return opts.isTasuuGaitou ? 24600 : 35400;
+      case "不明": return UNLIMITED;
     }
     throw new Error("Cannot determine gendogaku.");
   }
@@ -117,6 +121,9 @@ function under70(opts: GendogakuOptions): number {
   }
   if (opts.heiyouKouhi === "other") {
     return proportional(80100, opts.iryouhi, 267000, false);
+  }
+  if( opts.marucho ){
+    return fixed(opts.marucho, opts.isBirthdayMonth75);
   }
   if (opts.heiyouKouhi === "nanbyou") {
     if (opts.isNyuuin) {
@@ -128,6 +135,7 @@ function under70(opts: GendogakuOptions): number {
         case "ウ": return proportional(80100, opts.iryouhi, 267000);
         case "エ": return 57600;
         case "オ": return 35400;
+        case "不明": return UNLIMITED;
       }
     }
     throw new Error("Cannot determine gendogaku (nanbyou under70)");
@@ -172,6 +180,8 @@ function kourei(opts: GendogakuOptions): number {
     return fixed(opts.isNyuuin ? 15000 : 8000, opts.isBirthdayMonth75);
   } else if (opts.heiyouKouhi === "other") {
     return fixed(opts.isNyuuin ? 57600 : 18000, opts.isBirthdayMonth75);
+  } else if( opts.marucho ){
+    return fixed(opts.marucho, opts.isBirthdayMonth75);
   } else if (opts.heiyouKouhi === "nanbyou") {
     if (opts.isNyuuin) {
       switch (opts.shotokuKubun) {
@@ -181,6 +191,7 @@ function kourei(opts: GendogakuOptions): number {
         case "一般": case "一般Ⅱ": case "一般Ⅰ": return nyuuinIppan();
         case "低所得Ⅱ": return nyuuinTeishotoku2();
         case "低所得Ⅰ": return nyuuinTeishotoku1();
+        case "不明": return UNLIMITED;
       }
       throw new Error("Cannot determine gendogaku.");
     } else {
@@ -190,6 +201,7 @@ function kourei(opts: GendogakuOptions): number {
         case "現役並みⅠ": return g1(false);
         case "一般": case "一般Ⅱ": case "一般Ⅰ": return gairaiIppan();
         case "低所得Ⅱ": case "低所得Ⅰ": return gairaiTeishotoku();
+        case "不明": return UNLIMITED;
       }
       throw new Error("Cannot determine gendogaku.");
     }
@@ -202,6 +214,7 @@ function kourei(opts: GendogakuOptions): number {
         case "一般": case "一般Ⅱ": case "一般Ⅰ": return nyuuinIppan();
         case "低所得Ⅱ": return nyuuinTeishotoku2();
         case "低所得Ⅰ": return nyuuinTeishotoku1();
+        case "不明": return UNLIMITED;
       }
       throw new Error("Cannot determine gendogaku.");
     } else {
@@ -211,6 +224,7 @@ function kourei(opts: GendogakuOptions): number {
         case "現役並みⅠ": return g1(opts.isTasuuGaitou);
         case "一般": case "一般Ⅱ": case "一般Ⅰ": return gairaiIppan();
         case "低所得Ⅱ": case "低所得Ⅰ": return gairaiTeishotoku();
+        case "不明": return UNLIMITED;
       }
       throw new Error("Cannot determine gendogaku.");
     }

@@ -1,4 +1,4 @@
-import { Payer, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, mkMarucho, totalJikofutanOf } from "./calc";
+import { Payer, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, totalJikofutanOf } from "./calc";
 
 // 後期高齢者医療制度の負担割合見直しに係る計算事例集（令和５年４月）
 
@@ -51,15 +51,8 @@ describe("後期高齢者医療制度の負担割合見直し", () => {
     calc(5000, { isBirthdayMonth75: true }, 8000);
   });
 
-  it.only("【事例8】後期高齢者２割負担外来（マル長）", () => {
-    calcWithKouhi(mkMarucho(10000), 15000, {}, 10000, 140000, 10000);
-    //     const covers = calcFutan(2, "一般Ⅱ", [],
-    //       mkTen("H", 15000),
-    //       {
-    //         marucho: 10000,
-    //         debug: false,
-    //       });
-    //     expect(patientChargeOf(covers)).toBe(10000);
+  it("【事例8】後期高齢者２割負担外来（マル長）", () => {
+    calc(15000, { marucho: 10000 }, 10000);
   });
 
   it("【事例9】後期高齢者２割負担外来（マル長）（75歳到達月）", () => {
