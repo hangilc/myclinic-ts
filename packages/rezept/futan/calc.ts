@@ -302,6 +302,23 @@ export function mkHokenPayer(): Payer {
 }
 
 export function mkHokenHairyosochi(): Payer {
+  function prevKouhi(payers: Payer[]): Payer[] {
+    const result: Payer[] = [];
+    for(const p of payers){
+      if( p.getKind() === "hoken" ){
+        break;
+      } else {
+        result.push(p);
+      }
+    }
+    return result;
+  }
+  function isDone(payers: Payer[]): boolean {
+    for(const p of payers){
+      return true;
+    }
+    return false;
+  }
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
     if (isHokenTandoku(ctx.currentPayers)) {
       const h = hairyosochi(bill, ctx.gendogakuOptions.isBirthdayMonth75);
@@ -320,6 +337,9 @@ export function mkHokenHairyosochi(): Payer {
         return result;
       }
     } else {
+      if( isDone(prevKouhi(ctx.currentPayers)) ){ // マル長
+        return { }
+      }
       const p = mkHokenPayer();
       return p.calc(bill, ctx);
     }
