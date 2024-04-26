@@ -1,7 +1,7 @@
 import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
 
-interface Payment {
+export interface Payment {
   kind: string;
   kakari: number;
   payment: number;
@@ -407,16 +407,16 @@ export function mkKouhiSeishinTsuuin(): Payer {
   })
 }
 
-// export function mkMarucho(gendogaku: number): Payer {
-//   return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
-//     let jikofutan = bill * ctx.futanWari / 10.0;
-//     if (jikofutan > gendogaku) {
-//       return { payment: bill - gendogaku, gendogakuReached: true };
-//     } else {
-//       return { payment: bill - jikofutan };
-//     }
-//   })
-// }
+// 肝炎治療特別促進事業
+export function mkKouhiHepatitis(gendogaku: number): Payer {
+  return mkPayer("hepatitis", 38, (bill: number, ctx: PaymentContext) => {
+    if( bill > gendogaku ){
+      return { payment: bill - gendogaku, gendogakuReached: true };
+    } else {
+      return { payment: 0 };
+    }
+  })
+}
 
 export function mkSeikatsuHogo(): Payer {
   return mkPayer("seikatsuhogo", 12, (bill: number, ctx: PaymentContext) => {

@@ -1,4 +1,6 @@
-import { Payer, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, mkKouhiKekkaku, mkKouhiKousei, mkKouhiNanbyou, totalJikofutanOf } from "./calc";
+import { Payer, Payment, PaymentObject, PaymentSetting, calcPayments, mkHokenHairyosochi, mkKouhiKekkaku, mkKouhiKousei, mkKouhiNanbyou, totalJikofutanOf } from "./calc";
+
+import { execSpec, type Spec  } from "./spec";
 
 // 後期高齢者医療制度の負担割合見直しに係る計算事例集（令和５年４月）
 
@@ -33,12 +35,27 @@ function calc1(kouhi: Payer, heiyouTen: number, hokenTandokuTen: number,
   expect(PaymentObject.jikofutanOf(kouhi.payment)).toBe(kouhiJikofutan);
 }
 
+function opt(arg: Partial<PaymentSetting>): Partial<PaymentSetting> {
+  return Object.assign({}, { shotokuKubun: "一般Ⅱ", futanWari: 2, isUnder70: false, isNyuuin: false }, arg);
+}
 
+const specs: Spec[] = [
+  {
+    title: "【事例１】後期高齢者２割負担外来",
+    hokenType: "hairyosochi",
+    futanWari: 2,
+    bills: [[20000, ["hoken"]]],
+    asserts: [{ jikofutan: 4000 }]
+  }
+]
 
 describe("後期高齢者医療制度の負担割合見直し", () => {
-  it("【事例１】後期高齢者２割負担外来", () => {
-    calc(2000, {}, 4000);
-  });
+  specs.forEach(spec => {
+    it(spec.title, () => execSpec(spec));
+  })
+  // it("【事例１】後期高齢者２割負担外来", () => {
+  //   // calc(2000, {}, 4000);
+  // });
 
   it("【事例2】後期高齢者２割負担外来", () => {
     calc(20000, {}, 18000);
@@ -89,23 +106,27 @@ describe("後期高齢者医療制度の負担割合見直し", () => {
   });
 
   it("【事例15】後期高齢者２割負担外来（難病）", () => {
-    calc1(mkKouhiNanbyou(5000), 3000, 1000, { }, 7000, 6000, 5000);
+    calc1(mkKouhiNanbyou(5000), 3000, 1000, {}, 7000, 6000, 5000);
   });
 
   it("【事例16】後期高齢者２割負担外来（難病）（配慮措置）", () => {
-    calc1(mkKouhiNanbyou(5000), 4000, 5000, { }, 13000, 8000, 5000);
+    calc1(mkKouhiNanbyou(5000), 4000, 5000, {}, 13000, 8000, 5000);
   });
 
   it("【事例17】後期高齢者２割負担外来（難病）（配慮措置）", () => {
-    calc1(mkKouhiNanbyou(5000), 3500, 10500, { }, 18000, 7000, 5000);
+    calc1(mkKouhiNanbyou(5000), 3500, 10500, {}, 18000, 7000, 5000);
   });
 
   it("【事例18】後期高齢者２割負担外来（結核）（配慮措置）", () => {
-    calc1(mkKouhiKekkaku(), 6000, 8000, { }, 14000, 12000, 3000);
+    calc1(mkKouhiKekkaku(), 6000, 8000, {}, 14000, 12000, 3000);
   });
 
+  function assertJikofutan(payments: Payment[][], jikofutan: number) {
+    expect(totalJikofutanOf(payments)).toBe(jikofutan);
+  }
+
   it("【事例19】後期高齢者２割負担外来（難病・肝炎）（配慮措置）", () => {
-    calc1(mkKouhiNanbyou(5000), 6000, 8000, { }, 14000, 12000, 3000);
+    calc1(mkKouhiNanbyou(5000), 6000, 8000, {}, 14000, 12000, 3000);
     //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou, KouhiHepatitis],
     //       mkTens(["H1", 4000], ["H2", 3500], ["H", 4500]),
     //       {
