@@ -42,52 +42,91 @@ function opt(arg: Partial<PaymentSetting>): Partial<PaymentSetting> {
 const specs: Spec[] = [
   {
     title: "【事例１】後期高齢者２割負担外来",
-    hokenType: "hairyosochi",
-    futanWari: 2,
+    payers: [["hoken:hairyosochi"]],
     bills: [[20000, ["hoken"]]],
     asserts: [{ jikofutan: 4000 }]
-  }
+  },
+  {
+    title: "【事例2】後期高齢者２割負担外来",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[200000, ["hoken"]]],
+    asserts: [{ jikofutan: 18000 }]
+  },
+  {
+    title: "【事例2】後期高齢者２割負担外来",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[80000, ["hoken"]]],
+    asserts: [{ jikofutan: 11000 }]
+  },
+  {
+    title: "【事例3】後期高齢者２割負担外来（配慮措置）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[80000, ["hoken"]]],
+    asserts: [{ jikofutan: 11000 }]
+  },
+  {
+    title: "【事例4】後期高齢者２割負担外来（配慮措置）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[130000, ["hoken"]]],
+    asserts: [{ jikofutan: 16000 }]
+  },
+  {
+    title: "【事例5】後期高齢者２割負担外来（75歳到達月）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[100000, ["hoken"]]],
+    setting: { isBirthdayMonth75: true },
+    asserts: [{ jikofutan: 9000 }]
+  },
+  {
+    title: "【事例6】後期高齢者２割負担外来（配慮措置）（75歳到達月）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[40000, ["hoken"]]],
+    setting: { isBirthdayMonth75: true },
+    asserts: [{ jikofutan: 7000 }]
+  },
+  {
+    title: "【事例7】後期高齢者２割負担外来（配慮措置）（75歳到達月）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[50000, ["hoken"]]],
+    setting: { isBirthdayMonth75: true },
+    asserts: [{ jikofutan: 8000 }]
+  },
+  {
+    title: "【事例8】後期高齢者２割負担外来（マル長）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[150000, ["hoken"]]],
+    setting: { marucho: 10000 },
+    asserts: [{ jikofutan: 10000 }]
+  },
+  {
+    title: "【事例9】後期高齢者２割負担外来（マル長）（75歳到達月）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[70000, ["hoken"]]],
+    setting: { marucho: 10000, isBirthdayMonth75: true },
+    asserts: [{ jikofutan: 5000 }]
+  },
+  {
+    title: "【事例10】後期高齢者２割負担外来（難病）",
+    payers: [["hoken:hairyosochi"]],
+    bills: [[70000, ["hoken"]]],
+    setting: { marucho: 10000, isBirthdayMonth75: true },
+    asserts: [{ jikofutan: 5000 }]
+  },
+
 ]
 
 describe("後期高齢者医療制度の負担割合見直し", () => {
   specs.forEach(spec => {
     it(spec.title, () => execSpec(spec));
   })
-  // it("【事例１】後期高齢者２割負担外来", () => {
-  //   // calc(2000, {}, 4000);
+
+  // it("【事例8】後期高齢者２割負担外来（マル長）", () => {
+  //   calc(15000, { marucho: 10000 }, 10000);
   // });
 
-  it("【事例2】後期高齢者２割負担外来", () => {
-    calc(20000, {}, 18000);
-  });
-
-  it("【事例3】後期高齢者２割負担外来（配慮措置）", () => {
-    calc(8000, {}, 11000);
-  });
-
-  it("【事例4】後期高齢者２割負担外来（配慮措置）", () => {
-    calc(13000, {}, 16000);
-  });
-
-  it("【事例5】後期高齢者２割負担外来（75歳到達月）", () => {
-    calc(10000, { isBirthdayMonth75: true }, 9000);
-  });
-
-  it("【事例6】後期高齢者２割負担外来（配慮措置）（75歳到達月）", () => {
-    calc(4000, { isBirthdayMonth75: true }, 7000);
-  });
-
-  it("【事例7】後期高齢者２割負担外来（配慮措置）（75歳到達月）", () => {
-    calc(5000, { isBirthdayMonth75: true }, 8000);
-  });
-
-  it("【事例8】後期高齢者２割負担外来（マル長）", () => {
-    calc(15000, { marucho: 10000 }, 10000);
-  });
-
-  it("【事例9】後期高齢者２割負担外来（マル長）（75歳到達月）", () => {
-    calc(7000, { marucho: 10000, isBirthdayMonth75: true }, 5000);
-  });
+  // it("【事例9】後期高齢者２割負担外来（マル長）（75歳到達月）", () => {
+  //   calc(7000, { marucho: 10000, isBirthdayMonth75: true }, 5000);
+  // });
 
   it("【事例10】後期高齢者２割負担外来（難病）", () => {
     calcWithKouhi(mkKouhiNanbyou(5000), 10000, {}, 5000, 18000, 5000);
@@ -121,12 +160,7 @@ describe("後期高齢者医療制度の負担割合見直し", () => {
     calc1(mkKouhiKekkaku(), 6000, 8000, {}, 14000, 12000, 3000);
   });
 
-  function assertJikofutan(payments: Payment[][], jikofutan: number) {
-    expect(totalJikofutanOf(payments)).toBe(jikofutan);
-  }
-
   it("【事例19】後期高齢者２割負担外来（難病・肝炎）（配慮措置）", () => {
-    calc1(mkKouhiNanbyou(5000), 6000, 8000, {}, 14000, 12000, 3000);
     //     const covers = calcFutan(2, "一般Ⅱ", [KuniNanbyou, KouhiHepatitis],
     //       mkTens(["H1", 4000], ["H2", 3500], ["H", 4500]),
     //       {

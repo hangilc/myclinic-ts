@@ -1,12 +1,15 @@
 import { Payer, PaymentSetting, calcPayments, mkHokenHairyosochi, mkHokenPayer, totalJikofutanOf } from "./calc";
 
+type PayerSpec = ["hoken", { futanWari: number}] |
+  ["hoken:hairyosochi"]
+
 export interface Spec {
   title: string;
-  futanWari: 1 | 2 | 3;
-  hokenType?: "regular" | "hairyosochi";
+  payers: PayerSpec[]
   bills: [number, string[]][];
   setting?: {
-
+    isBirthdayMonth75?: boolean;
+    marucho?: 10000 | 20000;
   };
   asserts: ({
     jikofutan: number;
@@ -21,20 +24,25 @@ export interface Spec {
 }
 
 export function execSpec(spec: Spec) {
-  const hoken = (spec.hokenType ?? "regular") === "regular" ? mkHokenPayer() : mkHokenHairyosochi();
+  const payers: Payer[] = [];
+  const setting: Partial<PaymentSetting> = Object.assign({}, spec.setting);
+  const payerMap: Record<string, Payer> = {};
+  spec.payers.forEach(payerSpec => {
+    const [payer, auxSetting] = createPayer(payerSpec);
+    payers.push(payer);
+    payerMap[payer.getKind()] = payer;
+    Object.assign(setting, auxSetting);
+  })
   const bills: [number, Payer[]][] = spec.bills.map(([bill, payerNames]) => {
     const payers: Payer[] = payerNames.map(name => {
-      if (name === "hoken") {
-        return hoken;
-      } else {
-        throw new Error("Unkown payer: " + name);
+      const payer = payerMap[name];
+      if( !payer ){
+        throw new Error("Unknown payer: " + name);
       }
+      return payer;
     });
     return [bill, payers];
   });
-  const setting: Partial<PaymentSetting> = {
-    futanWari: spec.futanWari,
-  };
   const payments = calcPayments(bills, setting);
   spec.asserts.forEach(a => {
     if( a.jikofutan !== undefined ){
@@ -43,4 +51,17 @@ export function execSpec(spec: Spec) {
 
     }
   })
+}
+
+function createPayer(spec: PayerSpec): [Payer, Partial<PaymentSetting>] {
+  const [kind, aux] = spec;
+  switch(kind){
+    case "hoken": {
+      return [mkHokenPayer(), { futanWari: aux.futanWari }]
+    }
+    case "hoken:hairyosochi": {
+      return [mkHokenHairyosochi(), { futanWari: 2 }];
+    }
+    default: throw new Error("Unknown Payer kind: " + kind);
+  }
 }
