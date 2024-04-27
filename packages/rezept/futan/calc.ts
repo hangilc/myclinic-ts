@@ -192,16 +192,16 @@ KouhiOrder.forEach((houbetsu, i) => {
 export function reorderPayers(payers: Payer[]): Payer[] {
   const items: { payer: Payer, weight: number }[] = payers.map((payer, i) => {
     const houbetsu = payer.getHoubetsuBangou();
-    if( houbetsu !== undefined ){
+    if (houbetsu !== undefined) {
       let w = KouhiOrderWeights[houbetsu];
-      if( w === undefined ){
+      if (w === undefined) {
         w = i + 100;
       } else {
         w = w + 10;
       }
       return { payer, weight: w };
     } else {
-      switch(payer.getKind()){
+      switch (payer.getKind()) {
         case "hoken": return { payer, weight: 0 };
         default: throw new Error(`Unknown payer kind: ${payer.getKind()}`);
       }
@@ -282,22 +282,20 @@ export function mkHokenPayer(): Payer {
     const jikofutan = bill * ctx.futanWari / 10.0;
     if (isHokenTandoku(ctx.currentPayers)) {
       // if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
-        const gassan = ctx.prevPayments.reduce((acc, ele) => {
-          const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
-          return combineGassan(acc, g);
-        }, { hokenKakari: 0, jikofutan: 0 });
-        const gendogakuBill = bill + gassan.hokenKakari;
-        const gendogaku = calcGendogaku(Object.assign({}, ctx.gendogakuOptions, { iryouhi: gendogakuBill }));
-        if (jikofutan + gassan.jikofutan > gendogaku) {
-          return { payment: bill - gendogaku + gassan.jikofutan, gendogakuReached: true };
-        }
+      const gassan = ctx.prevPayments.reduce((acc, ele) => {
+        const g = calcGassan(ele, ctx.gendogakuOptions.isUnder70);
+        return combineGassan(acc, g);
+      }, { hokenKakari: 0, jikofutan: 0 });
+      const gendogakuBill = bill + gassan.hokenKakari;
+      const gendogaku = calcGendogaku(Object.assign({}, ctx.gendogakuOptions, { iryouhi: gendogakuBill }));
+      if (jikofutan + gassan.jikofutan > gendogaku) {
+        return { payment: bill - gendogaku + gassan.jikofutan, gendogakuReached: true };
+      }
       // }
     } else {
-      if (ctx.gendogakuOptions.shotokuKubun !== "不明") {
-        const gendogaku = calcGendogaku(ctx.gendogakuOptions);
-        if (jikofutan > gendogaku) {
-          return { payment: bill - gendogaku, gendogakuReached: true };
-        }
+      const gendogaku = calcGendogaku(ctx.gendogakuOptions);
+      if (jikofutan > gendogaku) {
+        return { payment: bill - gendogaku, gendogakuReached: true };
       }
     }
     return { payment: bill - jikofutan };
@@ -306,18 +304,18 @@ export function mkHokenPayer(): Payer {
 
 export function mkHokenHairyosochi(): Payer {
   return mkPayer("hoken", undefined, (bill: number, ctx: PaymentContext) => {
-    if (!ctx.gendogakuOptions.isNyuuin && isHokenTandoku(ctx.currentPayers) && !ctx.gendogakuOptions.marucho ) {
+    if (!ctx.gendogakuOptions.isNyuuin && isHokenTandoku(ctx.currentPayers) && !ctx.gendogakuOptions.marucho) {
       const h = hairyosochi(bill, ctx.gendogakuOptions.isBirthdayMonth75);
       const jikofutan = bill * ctx.futanWari / 10.0;
       let result: { payment: number, gendogakuReached?: boolean };
-      if( jikofutan > h.gendogaku ){
+      if (jikofutan > h.gendogaku) {
         result = { payment: bill - h.gendogaku, gendogakuReached: true };
       } else {
         result = { payment: bill - jikofutan };
       }
       const hoken = mkHokenPayer();
       const unapplied = hoken.calc(bill, ctx);
-      if( unapplied.payment > result.payment ){
+      if (unapplied.payment > result.payment) {
         return unapplied;
       } else {
         return result;
@@ -410,11 +408,18 @@ export function mkKouhiSeishinTsuuin(): Payer {
 // 肝炎治療特別促進事業
 export function mkKouhiHepatitis(gendogaku: number): Payer {
   return mkPayer("hepatitis", 38, (bill: number, ctx: PaymentContext) => {
-    if( bill > gendogaku ){
+    if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
       return { payment: 0 };
     }
+  })
+}
+
+// １類・２類感染症
+export function mkKouhiGroup1Infection(): Payer {
+  return mkPayer("group1-infection", 28, (bill: number, ctx: PaymentContext) => {
+    return { payment: bill };
   })
 }
 
