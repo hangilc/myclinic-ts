@@ -423,6 +423,17 @@ export function mkKouhiGroup1Infection(): Payer {
   })
 }
 
+// 小児慢性
+export function mkKouhiShouniMansei(gendogaku: number): Payer {
+  return mkPayer("shouni-mansei", 52, (bill: number, ctx: PaymentContext) => {
+    if( bill > gendogaku ){
+      return { payment: bill - gendogaku, gendogakuReached: true };
+    } else {
+      return { payment: 0 };
+    }
+  })
+}
+
 export function mkSeikatsuHogo(): Payer {
   return mkPayer("seikatsuhogo", 12, (bill: number, ctx: PaymentContext) => {
     return { payment: bill };

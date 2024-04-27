@@ -1,8 +1,8 @@
-import { Payer, Payment, PaymentSetting, calcPayments, mkHokenHairyosochi, mkHokenPayer, mkKouhiGroup1Infection, mkKouhiHepatitis, mkKouhiKekkaku, mkKouhiKousei, mkKouhiNanbyou, totalJikofutanOf } from "./calc";
+import { Payer, Payment, PaymentSetting, calcPayments, mkHokenHairyosochi, mkHokenPayer, mkKouhiGroup1Infection, mkKouhiHepatitis, mkKouhiKekkaku, mkKouhiKousei, mkKouhiNanbyou, mkKouhiShouniMansei, totalJikofutanOf } from "./calc";
 
 type PayerSpec = ["hoken", { futanWari: number }] |
 ["hoken:hairyosochi"] |
-["nanbyou" | "kousei" | "hepatitis", { gendogaku: number }] |
+["nanbyou" | "kousei" | "hepatitis" | "shouni-mansei", { gendogaku: number }] |
 ["kekkaku" | "group1-infection"]
 
 export interface Spec {
@@ -15,6 +15,7 @@ export interface Spec {
     marucho?: 10000 | 20000;
     isNyuuin?: boolean;
     isUnder70?: boolean;
+    isTasuuGaitou?: boolean;
   };
   asserts: (["jikofutan", number]
     | ["payment", {
@@ -38,17 +39,19 @@ export function execSpecTests(specs: SpecExec[]) {
   }
   selects.forEach(spec => {
     it(spec.title, () => {
-      const paymentsList = execSpec(spec);
-      (spec.debug ?? []).forEach(d => {
-        switch (d) {
-          case "payments": console.log("payments", paymentsList); break;
-        }
-      })
+      function cb(info: { payments: Payment[][]}) {
+        (spec.debug ?? []).forEach(d => {
+          switch (d) {
+            case "payments": console.log("payments", info.payments); break;
+          }
+        })
+      }
+      const paymentsList = execSpec(spec, cb);
     })
   });
 }
 
-export function execSpec(spec: Spec): Payment[][] {
+export function execSpec(spec: Spec, cb?: (info: { payments: Payment[][] }) => void) {
   const payers: Payer[] = [];
   const setting: Partial<PaymentSetting> = {};
   const payerMap: Record<string, Payer> = {};
@@ -70,6 +73,9 @@ export function execSpec(spec: Spec): Payment[][] {
     return [bill, payers];
   });
   const payments = calcPayments(bills, setting);
+  if (cb) {
+    cb({ payments, });
+  }
   spec.asserts.forEach(([kind, aux]) => {
     if (kind === "jikofutan") {
       expect(totalJikofutanOf(payments)).toBe(aux);
@@ -95,7 +101,6 @@ export function execSpec(spec: Spec): Payment[][] {
       throw new Error("Unknown assert kind: " + kind);
     }
   });
-  return payments;
 }
 
 function createPayer(spec: PayerSpec): [Payer, Partial<PaymentSetting>] {
@@ -115,6 +120,9 @@ function createPayer(spec: PayerSpec): [Payer, Partial<PaymentSetting>] {
     }
     case "hepatitis": {
       return [mkKouhiHepatitis(aux.gendogaku), {}];
+    }
+    case "shouni-mansei": {
+      return [mkKouhiShouniMansei(aux.gendogaku), {}]
     }
     case "kekkaku": {
       return [mkKouhiKekkaku(), {}];

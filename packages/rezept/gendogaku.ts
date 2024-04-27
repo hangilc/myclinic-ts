@@ -69,7 +69,13 @@ export function isSeikatsuHogo(houbetsuBangou: number): boolean {
 // }
 
 export function isNanbyou(houbetsuBangou: number): boolean {
-  return houbetsuBangou === 51 || houbetsuBangou === 54;
+  switch(houbetsuBangou) {
+    case 51: case 54:
+    case 52: { // 小児慢性 
+      return true;
+    }
+    default: return false;
+  }
 }
 
 export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
