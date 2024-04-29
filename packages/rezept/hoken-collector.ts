@@ -1,4 +1,4 @@
-import { is負担区分コードName, 負担区分コードName } from "./codes";
+import { is負担区分コードName, 負担区分コードCode, 負担区分コードCodeOf, 負担区分コードName } from "./codes";
 import { sortKouhiList } from "./kouhi-order";
 import { Hokensha, RezeptKouhi } from "./rezept-types";
 
@@ -49,23 +49,33 @@ export function unifyHokenList(hokenList: { hokensha?: Hokensha, kouhiList: Reze
   return hcols.map(hcol => hcol.toHokenCollection());
 }
 
-export function futanKubunOfHokenCollection(hc: HokenCollection, arg: { hokensha?: Hokensha, kouhilist: RezeptKouhi[] }):
-  負担区分コードName {
-    if( arg.hokensha !== undefined && hc.hokensha !== arg.hokensha ){
-      throw new Error("Inconsistent hoken");
-    }
-  const h: string = arg.hokensha === undefined ? "" : "H";
-  const k: string = arg.kouhilist.map(k => {
+export function futanKubunNameByHokenCollection(
+  hc: HokenCollection, hokensha: Hokensha | undefined,
+  kouhiList: RezeptKouhi[]
+): 負担区分コードName {
+  if (hokensha !== undefined && hc.hokensha !== hokensha) {
+    throw new Error("Inconsistent hoken");
+  }
+  const h: string = hokensha === undefined ? "" : "H";
+  const ids: number[] = kouhiList.map(k => {
     const i = hc.kouhiList.indexOf(k);
-    if( i < 0 ){
+    if (i < 0) {
       throw new Error("Unknown kouhi");
     }
-    return (i + 1).toString();
-  }).join("");
-  const result = h + k;
-  if( is負担区分コードName(result) ){
+    return i + 1;
+  });
+  ids.sort();
+  const result = h + ids.join("");
+  if (is負担区分コードName(result)) {
     return result;
   } else {
     throw new Error("Cannot happen");
   }
+}
+
+export function futanKubunCodeByHokenCollection(hc: HokenCollection, hokensha: Hokensha | undefined,
+  kouhiList: RezeptKouhi[]
+): 負担区分コードCode {
+  const name = futanKubunNameByHokenCollection(hc, hokensha, kouhiList);
+  return 負担区分コードCodeOf(name);
 }

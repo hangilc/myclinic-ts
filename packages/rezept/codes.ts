@@ -332,6 +332,10 @@ export function 負担区分コードNameOf(code: 負担区分コードCode): �
   return 負担区分コードRev.get(code)!;
 }
 
+export function 負担区分コードCodeOf(name: 負担区分コードName): 負担区分コードCode {
+  return 負担区分コード[name];
+}
+
 export function compare負担区分コードName(a: 負担区分コードName, b: 負担区分コードName): number {
   if (a.startsWith("H") && !b.startsWith("H")) {
     return 1;
