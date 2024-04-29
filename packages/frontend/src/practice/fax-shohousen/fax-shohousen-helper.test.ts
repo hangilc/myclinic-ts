@@ -5,7 +5,7 @@ describe("fax-shohousen-helper", () => {
   it("should calculate upper half dates", () => {
     const today = new Date(2024, 2, 2);
     const [fromDate, uptoDate] = defaultDates(today);
-    expect(dateToSqlDate(fromDate)).to.be.equal("2024-02-15")
+    expect(dateToSqlDate(fromDate)).to.be.equal("2024-02-16")
     expect(dateToSqlDate(uptoDate)).to.be.equal("2024-02-29");
   });
 

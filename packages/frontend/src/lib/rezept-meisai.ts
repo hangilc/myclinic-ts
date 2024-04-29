@@ -4,9 +4,9 @@ import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveG
 import { calcVisits, Combiner, roundTo10, TensuuCollector } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード} from "myclinic-rezept/dist/codes";
 import type { RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcJikofutan, calcPayments, type Payer } from "myclinic-rezept/futan/calc";
+import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
-import { calcGendogaku, isKuniKouhi2, type GendogakuOptions } from "myclinic-rezept/gendogaku";
+import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
 import type { ShotokuKubunCode, 診療識別コードName } from "myclinic-rezept/codes";
 

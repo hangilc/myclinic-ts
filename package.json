@@ -22,7 +22,8 @@
     "dev": "npm run dev -w packages/frontend"
   },
   "devDependencies": {
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "vite": "^4.5.3"
   },
   "dependencies": {
     "@types/diff-match-patch": "^1.0.36",

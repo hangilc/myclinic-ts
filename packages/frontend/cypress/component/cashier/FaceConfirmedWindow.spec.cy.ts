@@ -13,6 +13,7 @@ import * as kanjidate from "kanjidate";
 import { dialogClose, dialogOpen } from "@cypress/lib/dialog";
 import { KouhiDialogDriver } from "@cypress/lib/kouhi-dialog";
 import { createKouhi, enterKouhi } from "@cypress/lib/kouhi";
+import { incMonth } from "@/lib/date-util";
 
 describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   it("should mount", () => {
@@ -561,7 +562,8 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
           drv.setFutansha("13123456");
           drv.setJukyuusha("12345678");
           drv.setValidFrom("2023-04-01");
-          drv.setValidUpto("2024-03-31");
+          // drv.setValidUpto("2024-03-31");
+          drv.setValidUpto(dateToSqlDate(incMonth(new Date(), 1))),
           drv.enter();
         });
         dialogClose("公費登録");
@@ -733,9 +735,12 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should update validUpto of Shahokokuho", () => {
+    const hokenshaBangou1 = 12345678;
+    const hokenshaBangou2 = 22222222;
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
+        hokenshaBangou: hokenshaBangou1,
         validFrom: "2023-02-13",
         validUpto: "0000-00-00",
       }
@@ -750,6 +755,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
             });
             const newHoken = createShahokokuho(Object.assign({}, oldHokenTmpl, {
               validFrom: "2024-04-14",
+              hokenshaBangou: hokenshaBangou2,
             }));
             const result = createOnshiResult(m.patient(patient), m.shahokokuho(newHoken));
             console.log("result", result);
@@ -780,16 +786,18 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should not update validUpto of Shahokokuho", () => {
+    const hokenshaBangou1 = 12345678;
+    const hokenshaBangou2 = 11111111;
+    const visitedAt = `${dateToSqlDate(incMonth(new Date(), +1))} 14:00:00`;
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
+        hokenshaBangou: hokenshaBangou1,
         validFrom: "2023-02-13",
         validUpto: "0000-00-00",
       }
       enterShahokokuho(createShahokokuho(oldHokenTmpl)).then((oldHoken: Shahokokuho) => {
-        console.log("oldShahokokuho", oldHoken);
-        startVisit(patient.patientId, "2024-05-01 14:00:00").then((oldVisit: Visit) => {
-          console.log("oldVisit", oldVisit);
+        startVisit(patient.patientId, visitedAt).then((oldVisit: Visit) => {
           endVisit(oldVisit.visitId, 0).then(() => {
             shahokokuhoUsage(oldHoken.shahokokuhoId).then(visits => {
               expect(visits.length).equals(1);
@@ -797,6 +805,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
             });
             const newHoken = createShahokokuho(Object.assign({}, oldHokenTmpl, {
               validFrom: "2024-04-14",
+              hokenshaBangou: hokenshaBangou2,
             }));
             const result = createOnshiResult(m.patient(patient), m.shahokokuho(newHoken));
             console.log("result", result);
@@ -826,9 +835,12 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should update validUpto of koukikourei", () => {
+    const hokenshaBangou1 = "39123456";
+    const hokenshaBangou2 = "39111111";
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
+        hokenshaBangou: hokenshaBangou1,
         validFrom: "2023-02-13",
         validUpto: "0000-00-00",
       }
@@ -843,6 +855,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
             });
             const newHoken = createKoukikourei(Object.assign({}, oldHokenTmpl, {
               validFrom: "2024-04-14",
+              hokenshaBangou: hokenshaBangou2,
             }));
             const result = createOnshiResult(m.patient(patient), m.koukikourei(newHoken));
             console.log("result", result);
@@ -873,9 +886,12 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should not update validUpto of Koukikourei", () => {
+    const hokenshaBangou1 = "39123456";
+    const hokenshaBangou2 = "39111111";
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
+        hokenshaBangou: hokenshaBangou1,
         validFrom: "2023-02-13",
         validUpto: "0000-00-00",
       }
@@ -890,6 +906,7 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
             });
             const newHoken = createKoukikourei(Object.assign({}, oldHokenTmpl, {
               validFrom: "2024-04-14",
+              hokenshaBangou: hokenshaBangou2,
             }));
             const result = createOnshiResult(m.patient(patient), m.koukikourei(newHoken));
             console.log("result", result);
@@ -919,14 +936,14 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should assert same validUpto in Shahokokuho", () => {
+    const validUpto = dateToSqlDate(incMonth(new Date(), 1));
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
         validFrom: "2023-02-13",
-        validUpto: "2024-02-12",
+        validUpto: validUpto,
       }
       enterShahokokuho(createShahokokuho(oldHokenTmpl)).then((oldHoken: Shahokokuho) => {
-        console.log("oldShahokokuho", oldHoken);
         const result = createOnshiResult(m.patient(patient), m.shahokokuho(oldHoken));
         cy.intercept(
           "GET",
@@ -944,11 +961,12 @@ describe("FaceConfirmedWindow", { defaultCommandTimeout: 30000 }, () => {
   });
 
   it("should assert same validUpto in Koukikourei", () => {
+    const validUpto = dateToSqlDate(incMonth(new Date(), 1));
     enterPatient(createPatient()).then((patient: Patient) => {
       const oldHokenTmpl = {
         patientId: patient.patientId,
         validFrom: "2023-02-13",
-        validUpto: "2024-02-12",
+        validUpto: validUpto,
       }
       enterKoukikourei(createKoukikourei(oldHokenTmpl)).then((oldHoken: Koukikourei) => {
         const result = createOnshiResult(m.patient(patient), m.koukikourei(oldHoken));

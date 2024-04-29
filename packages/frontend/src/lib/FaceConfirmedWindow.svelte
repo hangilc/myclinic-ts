@@ -96,6 +96,7 @@
     const at = dateToSqlDate(new Date());
     const shahoOpt =
       (await api.findAvailableShahokokuho(patient.patientId, at)) ?? undefined;
+    console.log("shahoOpt", shahoOpt);
     const koukiOpt =
       (await api.findAvailableKoukikourei(patient.patientId, at)) ?? undefined;
     const kouhiList: Kouhi[] = await api.listAvailableKouhi(
@@ -108,6 +109,7 @@
       return;
     }
     if (shahoOpt && onshiHoken instanceof Shahokokuho) {
+      console.log("onshiHoken", onshiHoken);
       let inconsistencies = checkShahokokuhoInconsistency(shahoOpt, onshiHoken);
       if (inconsistencies.length === 0 && !koukiOpt) {
         resolvedState = new AllResolved(patient, shahoOpt, kouhiList);
@@ -126,6 +128,7 @@
       }
 
     }
+    console.log("goto NewHoken");
     resolvedState = new NewHoken(patient, r, shahoOpt, koukiOpt, kouhiList);
   }
 
@@ -250,10 +253,12 @@
         init: null,
         isAdmin: false,
         onEntered: async (_entered: Kouhi) => {
+          console.log("kouhi entered", _entered);
           const kouhiList = await api.listAvailableKouhi(
             resolved.patient.patientId,
             new Date()
           );
+          console.log("kouhi list", kouhiList);
           resolvedState = resolved.copy((c) => (c.kouhiList = kouhiList));
         },
       },
