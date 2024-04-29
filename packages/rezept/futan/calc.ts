@@ -1,5 +1,6 @@
 import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi } from "../gendogaku";
 import { ShotokuKubunCode } from "../codes";
+import { getKouhiOrderWeight } from "../kouhi-order";
 
 export interface Payment {
   kind: string;
@@ -177,29 +178,12 @@ function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
   }
 }
 
-const KouhiOrder: number[] = [
-  13, 14, 18, 29, 30, 10, 11, 20, 21, 15,
-  16, 24, 22, 28, 17, 79, 19, 23, 52, 54,
-  51, 38, 53, 66, 62, 25, 12
-];
-
-const KouhiOrderWeights: Record<number, number> = {};
-
-KouhiOrder.forEach((houbetsu, i) => {
-  KouhiOrderWeights[houbetsu] = i + 1;
-})
-
 export function reorderPayers(payers: Payer[]): Payer[] {
   const items: { payer: Payer, weight: number }[] = payers.map((payer, i) => {
     const houbetsu = payer.getHoubetsuBangou();
     if (houbetsu !== undefined) {
-      let w = KouhiOrderWeights[houbetsu];
-      if (w === undefined) {
-        w = i + 100;
-      } else {
-        w = w + 10;
-      }
-      return { payer, weight: w };
+      let w = getKouhiOrderWeight(houbetsu);
+       return { payer, weight: w };
     } else {
       switch (payer.getKind()) {
         case "hoken": return { payer, weight: 0 };
