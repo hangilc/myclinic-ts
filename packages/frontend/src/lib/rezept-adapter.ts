@@ -170,7 +170,7 @@ export class HokenCollector {
     }
     return 負担区分コード[name];
   }
-  
+
   getHoken(): Shahokokuho | Koukikourei | undefined {
     return this.shahokokuho ?? this.koukikourei;
   }
@@ -617,7 +617,7 @@ async function resolveEdaban(visits: Visit[]): Promise<string | undefined> {
   return onshiEdaban || hokenshoEdaban;
 }
 
-function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): Hokensha | undefined {
+export function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined): Hokensha | undefined {
   if (shahokokuho) {
     let futanWari = 3;
     if (shahokokuho.koureiStore > 0) {
@@ -640,5 +640,12 @@ function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei: Kouki
     }
   } else {
     return undefined;
+  }
+}
+
+export function createRezeptKouhi(src: Kouhi): RezeptKouhi {
+  return {
+    futansha: src.futansha,
+    jukyuusha: src.jukyuusha,
   }
 }

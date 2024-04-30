@@ -3,43 +3,73 @@ import api from "./api";
 import { cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
 import { calcVisits, Combiner, roundTo10, TensuuCollector } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード} from "myclinic-rezept/dist/codes";
-import type { RezeptVisit } from "myclinic-rezept/rezept-types";
+import type { Hokensha, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
 import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
 import type { ShotokuKubunCode, 診療識別コードName } from "myclinic-rezept/codes";
 
-const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
+// const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
 
-const ShikibetuSectionMap: Record<string, string> = {
-  "全体に係る識別コード": "その他",
-  "初診": "初・再診料",
-  "再診": "初・再診料",
-  "医学管理": "医学管理等",
-  "在宅": "在宅医療",
-  "投薬・内服": "投薬",
-  "投薬・屯服": "投薬",
-  "投薬・外用": "投薬",
-  "投薬・調剤": "投薬",
-  "投薬・処方": "投薬",
-  "投薬・麻毒": "投薬",
-  "投薬・調基": "投薬",
-  "投薬・その他": "投薬",
-  "注射・皮下筋肉内": "注射",
-  "注射・静脈内": "注射",
-  "注射・その他": "注射",
-  "薬剤料減点": "注射",
-  "処置": "処置",
-  "手術": "その他",
-  "麻酔": "その他",
-  "検査・病理": "検査",
-  "画像診断": "画像診断",
-  "その他": "その他",
-  "全体に係る識別コード９９": "その他",
+// const ShikibetuSectionMap: Record<string, string> = {
+//   "全体に係る識別コード": "その他",
+//   "初診": "初・再診料",
+//   "再診": "初・再診料",
+//   "医学管理": "医学管理等",
+//   "在宅": "在宅医療",
+//   "投薬・内服": "投薬",
+//   "投薬・屯服": "投薬",
+//   "投薬・外用": "投薬",
+//   "投薬・調剤": "投薬",
+//   "投薬・処方": "投薬",
+//   "投薬・麻毒": "投薬",
+//   "投薬・調基": "投薬",
+//   "投薬・その他": "投薬",
+//   "注射・皮下筋肉内": "注射",
+//   "注射・静脈内": "注射",
+//   "注射・その他": "注射",
+//   "薬剤料減点": "注射",
+//   "処置": "処置",
+//   "手術": "その他",
+//   "麻酔": "その他",
+//   "検査・病理": "検査",
+//   "画像診断": "画像診断",
+//   "その他": "その他",
+//   "全体に係る識別コード９９": "その他",
+// }
+
+export async function calcRezeptMeisaiBak(visitId: number): Promise<Meisai> {
+  const current = await api.getVisitEx(visitId);
+  const prevs = await getPrevVisits(current.asVisit);
+
 }
 
-export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
+class HokenRegistry {
+  registry: Map<number, Hokensha> = new Map();
+
+  get(src: Shahokokuho | Koukikourei): Hokensha {
+    
+  }
+}
+
+async function getPrevVisits(current: Visit): Promise<VisitEx[]> {
+  const [year, month] = yearMonthOfVisit(current);
+  const monthVisitIds = await api.listVisitIdByPatientAndMonth(current.patientId, year, month);
+  const prevVisitIds = monthVisitIds.filter(id => id < current.visitId);
+  prevVisitIds.sort();
+  const prevVisits: VisitEx[] = [];
+  for(const prevVisitId of prevVisitIds){
+    const prevVisit = await api.getVisitEx(prevVisitId);
+    const asVisit: Visit = prevVisit.asVisit;
+    if( asVisit.shahokokuhoId === current.shahokokuhoId && asVisit.koukikoureiId == current.koukikoureiId ){
+      prevVisits.push(prevVisit);
+    }
+  }
+  return prevVisits;
+}
+
+export async function calcRezeptMeisaiBak(visitId: number): Promise<Meisai> {
   const meisai = new Meisai([], 3, 0);
   initMeisaiItems(meisai);
   const visit = await api.getVisit(visitId);
