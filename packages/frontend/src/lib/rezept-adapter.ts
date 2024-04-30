@@ -10,30 +10,37 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { firstAndLastDayOf } from "./util";
 
-import type { RezeptItem } from "myclinic-rezept";
+import type { CalcItem } from "myclinic-rezept";
 
-function shinryouItemKey(master: ShinryouMaster): string {
-  return `shinryou:${master.shinryoucode}`;
+
+export function mkPayerFromShahokokuho(shahokokuho: Shahokokuho): Payer {
+  
 }
 
-function kizaiItemKey(master: KizaiMaster): string {
-  return `kizai:${master.kizaicode}`;
-}
+export class CalcItemRegistry {
+  registry: Map<string, CalcItem> = new Map();
 
-export function mkShinryouItem(shinryou: ShinryouEx): RezeptItem {
-  const master = shinryou.master;
-  return {
-    ten: parseInt(master.tensuuStore),
-    label: master.name,
-    shikibetsu: resolveShinryouShikibetsu(master),
-    toRecords() { throw new Error("Not implemented")}
+  addShinryou(master: ShinryouMaster) {
+    const key = `shinryou:${master.shinryoucode}`;
+    let item = this.registry.get(key);
+    if( item === undefined ){
+      item = { ten: parseInt(master.tensuuStore), count: 1 };
+      this.registry.set(key, item);
+    } else {
+      item.count += 1;
+    }
   }
-}
 
-export class ItemRegistry {
-  registry: Map<string, RezeptItem> = new Map();
-
-  addShinryou()
+  addKizai(master: KizaiMaster) {
+    const key = `kizai:${master.kizaicode}`;
+    let item = this.registry.get(key);
+    if( item === undefined ){
+      item = { ten: parseInt(master.kingakuStore), count: 1 };
+      this.registry.set(key, item);
+    } else {
+      item.count += 1;
+    }
+  }
 }
 
 const KouhiOrder: number[] = [
