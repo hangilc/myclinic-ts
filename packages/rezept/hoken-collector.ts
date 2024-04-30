@@ -3,15 +3,15 @@ import { sortKouhiList } from "./kouhi-order";
 import { Hokensha, RezeptKouhi } from "./rezept-types";
 
 export interface HokenCollection {
-  hokensha?: Hokensha;
+  hokensha: Hokensha;
   kouhiList: RezeptKouhi[];
 }
 
 class HCol {
-  hokensha: Hokensha | undefined;
+  hokensha: Hokensha;
   kouhiList: RezeptKouhi[] = [];
 
-  constructor(hokensha: Hokensha | undefined, kouhiList: RezeptKouhi[]) {
+  constructor(hokensha: Hokensha, kouhiList: RezeptKouhi[]) {
     this.hokensha = hokensha;
     this.kouhiList = [...kouhiList];
   }
@@ -35,7 +35,7 @@ class HCol {
   }
 }
 
-export function unifyHokenList(hokenList: { hokensha?: Hokensha, kouhiList: RezeptKouhi[] }[]): HokenCollection[] {
+export function unifyHokenList(hokenList: { hokensha: Hokensha, kouhiList: RezeptKouhi[] }[]): HokenCollection[] {
   const hcols: HCol[] = [];
   hokenList.forEach(h => {
     for (let hcol of hcols) {

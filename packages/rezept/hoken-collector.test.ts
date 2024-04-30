@@ -165,4 +165,25 @@ describe("hoken-collector", () => {
     expect(futanKubunCodeByHokenCollection(hc[0], hokensha, [kouhi1])).toBe("2");
     expect(futanKubunCodeByHokenCollection(hc[0], hokensha, [])).toBe("1");
   })
+
+  it("should throw with inconsistent hoken", () => {
+    const hokensha: Hokensha = {
+      futanWari: 3,
+      hokenshaBangou: 123456,
+      hihokenshaKigou: "a-3",
+      hihokenshaBangou: "123",
+    }
+    const another: Hokensha = {
+      futanWari: 3,
+      hokenshaBangou: 11111111,
+      hihokenshaKigou: "a-3",
+      hihokenshaBangou: "123",
+    }
+    const hc = unifyHokenList([
+      { hokensha, kouhiList: [] },
+      { hokensha, kouhiList: [] },
+    ])
+    expect(() => futanKubunNameByHokenCollection(hc[0], another, [])).toThrow();
+  })
+
 });
