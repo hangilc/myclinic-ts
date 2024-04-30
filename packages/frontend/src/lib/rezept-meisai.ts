@@ -43,12 +43,15 @@ import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-coll
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const current = await api.getVisitEx(visitId);
   const prevs = await getPrevVisits(current.asVisit);
-  const hokenCollections = createHokenCollections([...prevs, current]);
-  console.log(hokenCollections);
+  const hokenCollection = createHokenCollection([...prevs, current]);
   return new Meisai([], 3, 0);
 }
 
-function createHokenCollections(visits: VisitEx[]): HokenCollection[] {
+interface MeisaiItem {
+  
+}
+
+function createHokenCollection(visits: VisitEx[]): HokenCollection | undefined {
   const hokenRegistry = new HokenRegistry();
   const kouhiRegistry = new KouhiRegistry();
   const args = visits.filter(visit => {
@@ -69,7 +72,11 @@ function createHokenCollections(visits: VisitEx[]): HokenCollection[] {
     let kouhiList: RezeptKouhi[] = visit.hoken.kouhiList.map(k => kouhiRegistry.get(k));
     return { hokensha, kouhiList };
   })
-  return unifyHokenList(args);
+  const cols = unifyHokenList(args);
+  if( cols.length >= 2 ){
+    throw new Error("Cannot happen");
+  }
+  return cols[0];
 }
 
 class HokenRegistry {

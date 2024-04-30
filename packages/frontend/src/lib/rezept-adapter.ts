@@ -1,7 +1,7 @@
-import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient, KizaiMaster } from "myclinic-model";
+import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient, KizaiMaster, Meisai } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
-import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
+import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
 import type { Hokensha, RezeptConduct, RezeptConductDrug, RezeptConductKizai, RezeptConductShinryou, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptShinryou, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { OnshiResult } from "onshi-result";
@@ -12,9 +12,48 @@ import { firstAndLastDayOf } from "./util";
 
 import type { CalcItem } from "myclinic-rezept";
 
+type MeisaiSection = "初・再診料" |
+  "医学管理等" |
+  "在宅医療" |
+  "検査" |
+  "画像診断" |
+  "投薬" |
+  "注射" |
+  "処置" |
+  "その他"
+
+function cvtShinryouShikibetsuCodeNameToMeisaiSection(shikibetsu: 診療識別コードName): MeisaiSection {
+  switch (shikibetsu) {
+    case "全体に係る識別コード": return "その他";
+    case "初診": return "初・再診料";
+    case "再診": return "初・再診料";
+    case "医学管理": return "医学管理等";
+    case "在宅": return "在宅医療";
+    case "投薬・内服": return "投薬";
+    case "投薬・屯服": return "投薬";
+    case "投薬・外用": return "投薬";
+    case "投薬・調剤": return "投薬";
+    case "投薬・処方": return "投薬";
+    case "投薬・麻毒": return "投薬";
+    case "投薬・調基": return "投薬";
+    case "投薬・その他": return "投薬";
+    case "注射・皮下筋肉内": return "注射";
+    case "注射・静脈内": return "注射";
+    case "注射・その他": return "注射";
+    case "薬剤料減点": return "注射";
+    case "処置": return "処置";
+    case "手術": return "その他";
+    case "麻酔": return "その他";
+    case "検査・病理": return "検査";
+    case "画像診断": return "画像診断";
+    case "その他": return "その他";
+    case "全体に係る識別コード９９": return "その他";
+    default: throw new Error(`Unknown shikibetsu code: ${shikibetsu}`)
+  }
+}
 
 export function mkPayerFromShahokokuho(shahokokuho: Shahokokuho): Payer {
-  
+
 }
 
 export class CalcItemRegistry {
@@ -23,7 +62,7 @@ export class CalcItemRegistry {
   addShinryou(master: ShinryouMaster) {
     const key = `shinryou:${master.shinryoucode}`;
     let item = this.registry.get(key);
-    if( item === undefined ){
+    if (item === undefined) {
       item = { ten: parseInt(master.tensuuStore), count: 1 };
       this.registry.set(key, item);
     } else {
@@ -34,7 +73,7 @@ export class CalcItemRegistry {
   addKizai(master: KizaiMaster) {
     const key = `kizai:${master.kizaicode}`;
     let item = this.registry.get(key);
-    if( item === undefined ){
+    if (item === undefined) {
       item = { ten: parseInt(master.kingakuStore), count: 1 };
       this.registry.set(key, item);
     } else {
