@@ -1,4 +1,4 @@
-import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient } from "myclinic-model";
+import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient, KizaiMaster } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
@@ -9,6 +9,32 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { firstAndLastDayOf } from "./util";
+
+import type { RezeptItem } from "myclinic-rezept";
+
+function shinryouItemKey(master: ShinryouMaster): string {
+  return `shinryou:${master.shinryoucode}`;
+}
+
+function kizaiItemKey(master: KizaiMaster): string {
+  return `kizai:${master.kizaicode}`;
+}
+
+export function mkShinryouItem(shinryou: ShinryouEx): RezeptItem {
+  const master = shinryou.master;
+  return {
+    ten: parseInt(master.tensuuStore),
+    label: master.name,
+    shikibetsu: resolveShinryouShikibetsu(master),
+    toRecords() { throw new Error("Not implemented")}
+  }
+}
+
+export class ItemRegistry {
+  registry: Map<string, RezeptItem> = new Map();
+
+  addShinryou()
+}
 
 const KouhiOrder: number[] = [
   13, 14, 18, 29, 30, 10, 11, 20, 21, 15,

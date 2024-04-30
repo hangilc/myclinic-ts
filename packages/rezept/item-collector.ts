@@ -3,14 +3,15 @@ import { HokenCollection, futanKubunCodeByHokenCollection } from "hoken-collecto
 import { Hokensha, RezeptKouhi } from "rezept-types";
 
 export interface RezeptItem {
-  getTen(): number;
-  getLabel(): string;
-  getShikibetsu(): 診療識別コードName;
+  ten: number;
+  label: string;
+  shikibetsu: 診療識別コードName;
+  toRecords(): string[];
 }
 
 export const RezeptItemObject = {
   totalTenOfList(list: RezeptItem[]): number {
-    return list.reduce((acc, ele) => acc + ele.getTen(), 0);
+    return list.reduce((acc, ele) => acc + ele.ten, 0);
   }
 }
 

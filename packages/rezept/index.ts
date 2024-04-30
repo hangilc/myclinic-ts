@@ -9,11 +9,12 @@ import { Combiner } from "./tekiyou-item";
 import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "./record-creators";
 import { calcVisits } from "./calc-visits";
 import { resolveFutankubunOfVisitComment } from "./helper";
+export { roundTo10 } from "./helper";
 export * from "./tensuu-collector";
 export * from "./tekiyou-item";
 export * from "./rezept-frame";
 export * from "./calc-visits";
-export { roundTo10 } from "./helper";
+export * from "./item-collector";
 
 export interface RezeptUnit {
   visits: RezeptVisit[];
