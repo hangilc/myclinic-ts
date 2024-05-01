@@ -5,7 +5,7 @@
     Wqueue,
     WqueueState,
   } from "myclinic-model";
-  import { type MeisaiWrapper } from "@/lib/rezept-meisai";
+  import { MeisaiWrapper } from "@/lib/rezept-meisai";
   import RightBox from "../../RightBox.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { dateTimeToSql } from "@/lib/util";
@@ -78,7 +78,7 @@
     if (meisai != null) {
       const patient = visit.patient;
       const clinicInfo = await api.getClinicInfo();
-      const data = ReceiptDrawerData.create(visit, meisai.meisai, clinicInfo);
+      const data = ReceiptDrawerData.create(visit, new MeisaiWrapper(meisai), clinicInfo);
       const ops = drawReceipt(data);
       const timestamp = makeTimestamp(new Date());
       const fileName = `Receipt-${patient.patientId}-${timestamp}.pdf`;
@@ -124,7 +124,7 @@
     {#if meisai != null}
       <div>
         <div>診療報酬総点 {meisai.totalTen()}点</div>
-        <div>負担割 {meisai.meisai.futanWari}割</div>
+        <div>負担割 {meisai.futanWari}割</div>
         <div>現在の請求額 {visit.chargeOption?.charge || 0}円</div>
         <div>
           限度額：{gendogaku !== undefined
@@ -140,7 +140,7 @@
             bind:this={chargeInput}
             class="charge-input"
             use:setFocus
-            value={meisai.meisai.charge}
+            value={meisai.charge}
           />円
         </div>
       </div>

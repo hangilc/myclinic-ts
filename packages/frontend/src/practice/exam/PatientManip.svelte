@@ -11,7 +11,7 @@
   import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
-  import { calcRezeptMeisai } from "@/lib/rezept-meisai";
+  import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -20,9 +20,7 @@
     const visitId = $currentVisitId;
     if (visitId && visitId > 0 && patient) {
       cashierVisitId.set(visitId);
-      const meisai = await api.getMeisai(visitId);
       const rezeptMeisai = await calcRezeptMeisai(visitId);
-      console.log("meisai", rezeptMeisai);
       const visit = await api.getVisit(visitId);
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;
@@ -41,7 +39,7 @@
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
-          meisai: rezeptMeisai,
+          meisai: new MeisaiWrapper(rezeptMeisai),
           gendogaku,
           payments,
         },

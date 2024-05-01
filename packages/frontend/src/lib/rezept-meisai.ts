@@ -33,8 +33,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
 }
 
 function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
-  if( hoken instanceof Shahokokuho ){
-    if( hoken.koureiStore > 0 ){
+  if (hoken instanceof Shahokokuho) {
+    if (hoken.koureiStore > 0) {
       return hoken.koureiStore;
     } else {
       return 3;
@@ -113,10 +113,26 @@ export interface Meisai {
 }
 
 export class MeisaiWrapper {
-  meisai: Meisai;
+  private meisai: Meisai;
 
   constructor(meisai: Meisai) {
     this.meisai = meisai;
+  }
+
+  get items(): MeisaiItem[] {
+    return this.meisai.items;
+  }
+
+  get futanWari(): number {
+    return this.meisai.futanWari;
+  }
+
+  get charge(): number {
+    return this.meisai.charge;
+  }
+
+  getInterface(): Meisai {
+    return this.meisai;
   }
 
   totalTen(): number {

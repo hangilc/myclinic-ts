@@ -35,15 +35,14 @@ export class ReceiptDrawerData {
     this.patientId = patient.patientId.toString()
   }
 
-  setMeisai(meisai: Meisai): void {
-    const wrapper = new MeisaiWrapper(meisai);
+  setMeisai(meisai: MeisaiWrapper): void {
     this.charge = meisai.charge
     if (meisai.futanWari == 10) {
       this.futanWari = "";
     } else {
       this.futanWari = meisai.futanWari.toString();
     }
-    for(const [sect, data] of wrapper.getGrouped()){
+    for(const [sect, data] of meisai.getGrouped()){
       console.log(data);
       let ten: string;
       if (data.sectionTotalTen > 0) {
@@ -90,7 +89,7 @@ export class ReceiptDrawerData {
         }
       }
     }
-    this.souten = wrapper.totalTen().toLocaleString();
+    this.souten = meisai.totalTen().toLocaleString();
   }
 
   setVisitDate(visitDate: Date): void {
@@ -112,7 +111,7 @@ export class ReceiptDrawerData {
     ];
   }
 
-  static create(visit: VisitEx, meisai: Meisai, clinicInfo: ClinicInfo): ReceiptDrawerData {
+  static create(visit: VisitEx, meisai: MeisaiWrapper, clinicInfo: ClinicInfo): ReceiptDrawerData {
     const data = new ReceiptDrawerData();
     data.setPatient(visit.patient)
     data.setMeisai(meisai);

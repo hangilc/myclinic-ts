@@ -3,14 +3,15 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
-  import { WqueueState, type Meisai, type Payment } from "myclinic-model";
+  import { WqueueState, type Payment } from "myclinic-model";
+  import { MeisaiWrapper, type Meisai } from "@/lib/rezept-meisai";
   import type { Readable } from "svelte/store";
   import { endPatient } from "../exam-vars";
   import ChargeForm from "./ChargeForm.svelte";
 
   export let destroy: () => void;
   export let visitId: Readable<number | null>;
-  export let meisai: Meisai;
+  export let meisai: MeisaiWrapper;
   export let gendogaku: number | undefined;
   export let payments: Payment[] | undefined = undefined;
 
@@ -42,23 +43,24 @@
     }
   }
 
-  function mkMeisaiItems(meisai: Meisai | null): string[] {
+  function mkMeisaiItems(meisai: MeisaiWrapper | null): string[] {
     if (meisai == null) {
       return [];
     } else {
-      return meisai.items.map((item) => {
-        const label: string = item.section.label;
-        const subtotal: number = item.totalTen;
-        return `${label}：${subtotal}点`;
-      });
+      return Array.from(meisai.getGrouped().values()).map(data => `${data.sectionName}：${data.sectionTotalTen}`)
+      // return meisai.items.map((item) => {
+      //   const label: string = item.section.label;
+      //   const subtotal: number = item.totalTen;
+      //   return `${label}：${subtotal}点`;
+      // });
     }
   }
 
-  function mkSummary(meisai: Meisai | null): string {
+  function mkSummary(meisai: MeisaiWrapper | null): string {
     if (meisai == null) {
       return "";
     } else {
-      const totalTen: number = meisai.totalTen;
+      const totalTen: number = meisai.totalTen();
       return `総点：${totalTen}点、負担割：${meisai.futanWari}割`;
     }
   }
