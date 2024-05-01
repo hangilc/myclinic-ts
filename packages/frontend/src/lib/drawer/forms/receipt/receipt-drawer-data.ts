@@ -1,12 +1,12 @@
 import {
   type Patient,
-  type Meisai,
   MeisaiSectionEnum,
   type VisitEx,
   ClinicInfo,
 } from "myclinic-model"
 import { hokenRep } from "@/lib/hoken-rep"
 import * as kanjidate from "kanjidate"
+import { type Meisai, MeisaiWrapper } from "@/lib/rezept-meisai"
 
 export class ReceiptDrawerData {
   patientName: string = "";
@@ -36,59 +36,61 @@ export class ReceiptDrawerData {
   }
 
   setMeisai(meisai: Meisai): void {
+    const wrapper = new MeisaiWrapper(meisai);
     this.charge = meisai.charge
     if (meisai.futanWari == 10) {
       this.futanWari = "";
     } else {
       this.futanWari = meisai.futanWari.toString();
     }
-    meisai.items.forEach(sect => {
+    for(const [sect, data] of wrapper.getGrouped()){
+      console.log(data);
       let ten: string;
-      if (sect.totalTen > 0) {
-        ten = sect.totalTen.toString();
+      if (data.sectionTotalTen > 0) {
+        ten = data.sectionTotalTen.toLocaleString();
       } else {
         ten = "";
       }
-      switch (sect.section) {
-        case MeisaiSectionEnum.ShoshinSaishin: {
+      switch (sect) {
+        case "初・再診料": {
           this.shoshin = ten;
           break;
         }
-        case MeisaiSectionEnum.IgakuKanri: {
+        case "医学管理等": {
           this.kanri = ten;
           break;
         }
-        case MeisaiSectionEnum.Zaitaku: {
+        case "在宅医療": {
           this.zaitaku = ten;
           break;
         }
-        case MeisaiSectionEnum.Kensa: {
+        case "検査": {
           this.kensa = ten;
           break;
         }
-        case MeisaiSectionEnum.Gazou: {
+        case "画像診断": {
           this.gazou = ten;
           break;
         }
-        case MeisaiSectionEnum.Touyaku: {
+        case "投薬": {
           this.touyaku = ten;
           break;
         }
-        case MeisaiSectionEnum.Chuusha: {
+        case "注射": {
           this.chuusha = ten;
           break;
         }
-        case MeisaiSectionEnum.Shochi: {
+        case "処置": {
           this.shochi = ten;
           break;
         }
-        case MeisaiSectionEnum.Sonota: {
+        case "その他": {
           this.sonota = ten;
           break;
         }
       }
-      this.souten = meisai.totalTen.toString()
-    });
+    }
+    this.souten = wrapper.totalTen().toLocaleString();
   }
 
   setVisitDate(visitDate: Date): void {
