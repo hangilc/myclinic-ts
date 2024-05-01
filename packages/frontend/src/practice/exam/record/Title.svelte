@@ -14,17 +14,17 @@
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
   import type { Meisai, VisitEx } from "myclinic-model";
   import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
-  import { calcGendogaku } from "@/lib/gendogaku";
+  // import { calcGendogaku } from "@/lib/gendogaku";
   import { popupTrigger } from "@/lib/popup-helper";
   import HokengaiDialog from "./HokengaiDialog.svelte";
 
   export let visit: VisitEx;
 
-  let taskRunner: TaskRunner | null = null;
+  // let taskRunner: TaskRunner | null = null;
   let showMeisai = false;
 
   onDestroy(() => {
-    taskRunner?.cancel();
+    // taskRunner?.cancel();
   });
 
   function doDeleteVisit(): void {
@@ -68,16 +68,16 @@
     return meisai.totalTen.toLocaleString();
   }
 
-  async function doGendogaku() {
-    const year = yearOfSqlDate(visit.visitedAt);
-    const month = monthOfSqlDate(visit.visitedAt);
-    const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
-    if (!gendogaku) {
-      alert("限度額を確定できません。");
-    } else {
-      alert(`限度額： ${gendogaku.toLocaleString()}円`);
-    }
-  }
+  // async function doGendogaku() {
+  //   const year = yearOfSqlDate(visit.visitedAt);
+  //   const month = monthOfSqlDate(visit.visitedAt);
+  //   const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
+  //   if (!gendogaku) {
+  //     alert("限度額を確定できません。");
+  //   } else {
+  //     alert(`限度額： ${gendogaku.toLocaleString()}円`);
+  //   }
+  // }
 
   function doHokengai() {
     const attrs = visit.attributes;
@@ -115,7 +115,7 @@
     if (isMishuu(visit)) {
       add("未収リストへ", doMishuuList);
     }
-    add("限度額", doGendogaku);
+    // add("限度額", doGendogaku);
     add("保険外", doHokengai);
     return m;
   }

@@ -8,7 +8,7 @@
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
-  import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
+  // import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
@@ -25,23 +25,23 @@
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;
       const month = kd.month;
-      const gendogaku: number | undefined = await calcGendogaku(
-        patient.patientId,
-        year,
-        month
-      );
-      let payments: Payment[] | undefined = undefined;
-      if (gendogaku != undefined) {
-        payments = await listMonthlyPayment(patient.patientId, year, month);
-      }
+      // const gendogaku: number | undefined = await calcGendogaku(
+      //   patient.patientId,
+      //   year,
+      //   month
+      // );
+      // let payments: Payment[] | undefined = undefined;
+      // if (gendogaku != undefined) {
+      //   payments = await listMonthlyPayment(patient.patientId, year, month);
+      // }
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
           meisai: new MeisaiWrapper(rezeptMeisai),
-          gendogaku,
-          payments,
+          // gendogaku,
+          // payments,
         },
       });
     }

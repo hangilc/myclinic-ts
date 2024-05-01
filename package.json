@@ -16,7 +16,7 @@
     "local-test-sbt": "cd ~/myclinic-scala && MYCLINIC_DB_PORT=33060 MYCLINIC_DB_USER=myuser MYCLINIC_DB_PASS=mypass MYCLINIC_NON_SSL_SERVER_PORT=38080 sbt",
     "local-test-client": "ORIGIN=http://localhost:38080 npm run test-client -w packages/frontend",
     "tag-date": "git tag --format='%(refname) %(creatordate)'",
-    "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result; npm run compile -w packages/rezept",
+    "compile": "npm run compile -w packages/model; npm run compile -w packages/onshi-result; npm run compile -w packages/rezept; npm run compile -w packages/util",
     "deploy": "bash scripts/deploy.sh",
     "test": "npm run test -w packages/frontend && npm run test -w packages/onshi-result && npm run test -w packages/rezept",
     "dev": "npm run dev -w packages/frontend"

@@ -12,8 +12,8 @@
   export let destroy: () => void;
   export let visitId: Readable<number | null>;
   export let meisai: MeisaiWrapper;
-  export let gendogaku: number | undefined;
-  export let payments: Payment[] | undefined = undefined;
+  // export let gendogaku: number | undefined;
+  // export let payments: Payment[] | undefined = undefined;
 
   let meisaiItems: string[] = mkMeisaiItems(meisai);
   let summary: string = mkSummary(meisai);
@@ -21,27 +21,27 @@
   let mode = "disp";
   let isMishuu = false;
   const mishuuId = genid();
-  let monthlyFutan: number | undefined = undefined;
+  // let monthlyFutan: number | undefined = undefined;
 
-  updateMonthlyFutan();
+  // updateMonthlyFutan();
 
-  function updateMonthlyFutan(): void {
-    if ($visitId != null) {
-      let futan = 0;
-      (payments ?? []).forEach((payment) => {
-        if (payment.visitId === $visitId) {
-          // nop
-        } else {
-          futan += payment.amount;
-        }
-      });
-      const value = parseInt(chargeValue || "0");
-      if (value > 0) {
-        futan += value;
-      }
-      monthlyFutan = futan;
-    }
-  }
+  // function updateMonthlyFutan(): void {
+  //   if ($visitId != null) {
+  //     let futan = 0;
+  //     (payments ?? []).forEach((payment) => {
+  //       if (payment.visitId === $visitId) {
+  //         // nop
+  //       } else {
+  //         futan += payment.amount;
+  //       }
+  //     });
+  //     const value = parseInt(chargeValue || "0");
+  //     if (value > 0) {
+  //       futan += value;
+  //     }
+  //     monthlyFutan = futan;
+  //   }
+  // }
 
   function mkMeisaiItems(meisai: MeisaiWrapper | null): string[] {
     if (meisai == null) {
@@ -71,7 +71,7 @@
 
   function doFormEnter(n: number): void {
     chargeValue = n.toString();
-    updateMonthlyFutan();
+    // updateMonthlyFutan();
     mode = "disp";
   }
 
@@ -129,14 +129,14 @@
       </div>
     {/if}
   </div>
-  <div>
+  <!-- <div>
     限度額：{gendogaku !== undefined
       ? `${gendogaku.toLocaleString()}円`
       : "（未提出）"}
     負担額：{monthlyFutan !== undefined
       ? `${monthlyFutan.toLocaleString()}円`
       : "（未計算）"}
-  </div>
+  </div> -->
   <div class="commands">
     <input type="checkbox" bind:value={isMishuu} id={mishuuId} /><label
       for={mishuuId}>未収扱</label
