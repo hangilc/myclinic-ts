@@ -11,6 +11,8 @@ import { calcAge } from "./calc-age";
 import { is診療識別コードCode, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
+import type { DateWrapperLike } from "myclinic-util";
+import { isUnder6, resolveFutanWari } from "./futan-wari";
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const current = await api.getVisitEx(visitId);
@@ -20,7 +22,7 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const items: MeisaiItem[] = visitToMeisaiItems(current, at);
     return { items, charge: items.reduce((acc, ele) => acc + ele.ten, 0) * 10, futanWari: 10 };
   } else {
-    const futanWari = futanWariOfHoken(hoken);
+    const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
     let charge = roundTo10(currentItems.reduce((acc, ele) => acc + ele.ten, 0) * futanWari);
@@ -32,16 +34,8 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
 }
 
-function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
-  if (hoken instanceof Shahokokuho) {
-    if (hoken.koureiStore > 0) {
-      return hoken.koureiStore;
-    } else {
-      return 3;
-    }
-  } else {
-    return hoken.futanWari;
-  }
+function getFutanWari(hoken: Shahokokuho | Koukikourei, at: DateWrapperLike, birthdate: DateWrapperLike): number {
+  return resolveFutanWari(hoken, () => isUnder6(at, birthdate));
 }
 
 function getHokenOfVisit(visit: VisitEx): Shahokokuho | Koukikourei | undefined {
