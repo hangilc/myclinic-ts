@@ -1,8 +1,8 @@
-import { Kouhi, Koukikourei, Meisai, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, Visit, VisitEx } from "myclinic-model";
+import { Kouhi, Koukikourei, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
-import { createHokensha, createRezeptKouhi, cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
-import { calcVisits, Combiner, roundTo10, TensuuCollector } from "myclinic-rezept";
-import { rev診療識別コード, 診療識別コード} from "myclinic-rezept/dist/codes";
+// import { createHokensha, createRezeptKouhi, cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
+import { calcVisits, Combiner, isHoukatsuGroup, roundTo10, TensuuCollector, type HoukatsuGroup } from "myclinic-rezept";
+import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
@@ -11,115 +11,142 @@ import { calcAge } from "./calc-age";
 import type { ShotokuKubunCode, 診療識別コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 
-// const MeisaiSectionTypes: MeisaiSectionType[] = Object.values(MeisaiSectionEnum);
-
-// const ShikibetuSectionMap: Record<string, string> = {
-//   "全体に係る識別コード": "その他",
-//   "初診": "初・再診料",
-//   "再診": "初・再診料",
-//   "医学管理": "医学管理等",
-//   "在宅": "在宅医療",
-//   "投薬・内服": "投薬",
-//   "投薬・屯服": "投薬",
-//   "投薬・外用": "投薬",
-//   "投薬・調剤": "投薬",
-//   "投薬・処方": "投薬",
-//   "投薬・麻毒": "投薬",
-//   "投薬・調基": "投薬",
-//   "投薬・その他": "投薬",
-//   "注射・皮下筋肉内": "注射",
-//   "注射・静脈内": "注射",
-//   "注射・その他": "注射",
-//   "薬剤料減点": "注射",
-//   "処置": "処置",
-//   "手術": "その他",
-//   "麻酔": "その他",
-//   "検査・病理": "検査",
-//   "画像診断": "画像診断",
-//   "その他": "その他",
-//   "全体に係る識別コード９９": "その他",
-// }
-
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const current = await api.getVisitEx(visitId);
-  const prevs = await getPrevVisits(current.asVisit);
-  const hokenCollection = createHokenCollection([...prevs, current]);
-  return new Meisai([], 3, 0);
+  const hoken = getHokenOfVisit(current);
+  if( hoken === undefined ){
+
+  } else {
+    const prevs = await getPrevVisits(current.asVisit);
+  }
+
+  return {
+    items: [],
+    futanWari: 3,
+    charge: 0,
+  }
+}
+
+function getHokenOfVisit(visit: VisitEx): Shahokokuho | Koukikourei | undefined {
+  const hoken = visit.hoken;
+  if( hoken.shahokokuho && hoken.koukikourei ){
+    throw new Error("Multiple hoken");
+  }
+  return hoken.shahokokuho || hoken.koukikourei || undefined;
+}
+
+const MeisaiSectionStrings = ["初・再診料", "医学管理等", "在宅医療", "検査", "画像診断", "投薬", "注射", "処置", "その他"] as const;
+type MeisaiSection = typeof MeisaiSectionStrings[number];
+
+const ShinryouShikibetsuCodeNameToMeisaiSectionMap: { [K in 診療識別コードName]: MeisaiSection } = {
+  "全体に係る識別コード": "その他",
+  "初診": "初・再診料",
+  "再診": "初・再診料",
+  "医学管理": "医学管理等",
+  "在宅": "在宅医療",
+  "投薬・内服": "投薬",
+  "投薬・屯服": "投薬",
+  "投薬・外用": "投薬",
+  "投薬・調剤": "投薬",
+  "投薬・処方": "投薬",
+  "投薬・麻毒": "投薬",
+  "投薬・調基": "投薬",
+  "投薬・その他": "投薬",
+  "注射・皮下筋肉内": "注射",
+  "注射・静脈内": "注射",
+  "注射・その他": "注射",
+  "薬剤料減点": "注射",
+  "処置": "処置",
+  "手術": "その他",
+  "麻酔": "その他",
+  "検査・病理": "検査",
+  "画像診断": "画像診断",
+  "その他": "その他",
+  "全体に係る識別コード９９": "その他",
+};
+
+function shinryouShikibetsuCodeNameToMeisaiSection(shikibetsu: 診療識別コードName): MeisaiSection {
+  return ShinryouShikibetsuCodeNameToMeisaiSectionMap[shikibetsu];
+}
+
+function shinryouMasterToShinryouShikibetsuCodeName(master: ShinryouMaster): 診療識別コードName {
+
+}
+
+function shinryouMasterToMeisaiSection(master: ShinryouMaster): MeisaiSection {
+  const name = shinryouMasterToShinryouShikibetsuCodeName(master)
+  return shinryouShikibetsuCodeNameToMeisaiSection(name);
 }
 
 interface MeisaiItem {
-  
+  section: MeisaiSection;
+  ten: number;
+  label: string;
 }
 
-function createHokenCollection(visits: VisitEx[]): HokenCollection | undefined {
-  const hokenRegistry = new HokenRegistry();
-  const kouhiRegistry = new KouhiRegistry();
-  const args = visits.filter(visit => {
-    const hoken = visit.hoken;
-    if( hoken.shahokokuho && hoken.koukikourei ){
-      throw new Error("Duplicate hoken");
+interface Meisai {
+  items: MeisaiItem[];
+  futanWari: number;
+  charge: number;
+}
+
+class MeisaiWrapper {
+  meisai: Meisai;
+
+  constructor(meisai: Meisai) {
+    this.meisai = meisai;
+  }
+
+  getGrouped(): Map<MeisaiSection, { sectionName: string, sectionTotalTen: number, items: MeisaiItem[] }> {
+    const itemsMap: Map<MeisaiSection, MeisaiItem[]> = new Map();
+    this.meisai.items.forEach(item => {
+      const sect = item.section;
+      let b = itemsMap.get(sect);
+      if (b === undefined) {
+        b = [];
+        itemsMap.set(sect, b);
+      }
+      b.push(item);
+    })
+    const result: Map<MeisaiSection, { sectionName: string, sectionTotalTen: number, items: MeisaiItem[] }> = new Map();
+    for (const [sect, items] of itemsMap.entries()) {
+      result.set(sect, ({
+        sectionName: sect,
+        sectionTotalTen: items.reduce((acc, ele) => acc + ele.ten, 0),
+        items,
+      }))
     }
-    return hoken.shahokokuho || hoken.koukikourei;
-  }).map(visit => {
-    let hokensha: Hokensha;
-    if( visit.hoken.shahokokuho ){
-      hokensha = hokenRegistry.getByShahokokuho(visit.hoken.shahokokuho);
-    } else if( visit.hoken.koukikourei ){
-      hokensha = hokenRegistry.getByKoukikourei(visit.hoken.koukikourei);
+    return result;
+  }
+}
+
+class HoukatsuCollector {
+  map: Map<string, ShinryouEx[]> = new Map();
+
+  add(group: HoukatsuGroup, shinryou: ShinryouEx) {
+    let s = this.map.get(group);
+    if( !s ){
+      s = [];
+      this.map.set(group, s);
+    }
+    s.push(shinryou);
+  }
+}
+
+function shinryouListToMeisaiItems(shinryouList: ShinryouEx[]): MeisaiItem[] {
+  const items: MeisaiItem[] = [];
+  const houkatsuCollector = new HoukatsuCollector();
+  shinryouList.forEach(s => {
+    const houkatsu = s.master.houkatsukensa;
+    if( isHoukatsuGroup(houkatsu) ){
+      houkatsuCollector.add(houkatsu, s);
     } else {
-      throw new Error("Cannot happen");
+      items.push({ })
     }
-    let kouhiList: RezeptKouhi[] = visit.hoken.kouhiList.map(k => kouhiRegistry.get(k));
-    return { hokensha, kouhiList };
   })
-  const cols = unifyHokenList(args);
-  if( cols.length >= 2 ){
-    throw new Error("Cannot happen");
-  }
-  return cols[0];
+  return items;
 }
 
-class HokenRegistry {
-  shahokokuhoRegistry: Map<number, Hokensha> = new Map();
-  koukikoureiRegistry: Map<number, Hokensha> = new Map();
-
-  getByShahokokuho(src: Shahokokuho): Hokensha {
-    let h = this.shahokokuhoRegistry.get(src.shahokokuhoId);
-    if( h === undefined ){
-      h = createHokensha(src, undefined);
-      if( h === undefined ){
-        throw new Error("Failed to create hokensha.");
-      }
-      this.shahokokuhoRegistry.set(src.shahokokuhoId, h);
-    }
-    return h;
-  }
-
-  getByKoukikourei(src: Koukikourei): Hokensha {
-    let h = this.koukikoureiRegistry.get(src.koukikoureiId);
-    if( h === undefined ){
-      h = createHokensha(undefined, src);
-      if( h === undefined ){
-        throw new Error("Failed to create hokensha.");
-      }
-      this.koukikoureiRegistry.set(src.koukikoureiId, h);
-    }
-    return h;
-  }
-}
-
-class KouhiRegistry {
-  registry: Map<number, RezeptKouhi> = new Map();
-
-  get(kouhi: Kouhi): RezeptKouhi {
-    let k = this.registry.get(kouhi.kouhiId);
-    if( k === undefined ){
-      k = createRezeptKouhi(kouhi);
-      this.registry.set(kouhi.kouhiId, k);
-    }
-    return k;
-  }
-}
 
 async function getPrevVisits(current: Visit): Promise<VisitEx[]> {
   const [year, month] = yearMonthOfVisit(current);
@@ -127,10 +154,10 @@ async function getPrevVisits(current: Visit): Promise<VisitEx[]> {
   const prevVisitIds = monthVisitIds.filter(id => id < current.visitId);
   prevVisitIds.sort();
   const prevVisits: VisitEx[] = [];
-  for(const prevVisitId of prevVisitIds){
+  for (const prevVisitId of prevVisitIds) {
     const prevVisit = await api.getVisitEx(prevVisitId);
     const asVisit: Visit = prevVisit.asVisit;
-    if( asVisit.shahokokuhoId === current.shahokokuhoId && asVisit.koukikoureiId == current.koukikoureiId ){
+    if (asVisit.shahokokuhoId === current.shahokokuhoId && asVisit.koukikoureiId == current.koukikoureiId) {
       prevVisits.push(prevVisit);
     }
   }

@@ -15,6 +15,7 @@ export * from "./tekiyou-item";
 export * from "./rezept-frame";
 export * from "./calc-visits";
 export * from "./item-collector";
+export { isHoukatsuGroup, type HoukatsuGroup } from "./houkatsu";
 
 export interface RezeptUnit {
   visits: RezeptVisit[];
