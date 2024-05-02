@@ -27,24 +27,42 @@ export function assocAppend<K, V>(key: K, value: V, alist: Assoc<K, V>) {
   alist.push([key, value]);
 }
 
-// export function assocGroupBy<K, V, U>(alist: Assoc<K, V>, combine: (a: V, b: V) eq: Eq<K> = (a, b) => a === b): Assoc<K, U> {
-
-// }
+export function assocSet<K, V>(key: K, value: V, alist: Assoc<K, V>, eq: Eq<K> = (a, b) => a === b) {
+  const i = alist.findIndex(([k]) => eq(k, key));
+  if( i >= 0 ){
+    alist.splice(i, 1, [key, value]);
+  } else {
+    alist.push([key, value]);
+  }
+}
 
 export function groupBy<K, T>(getKey: (item: T) => K, items: T[], eq: Eq<K> = (a, b) => a === b): Assoc<K, T[]> {
-  const result: Assoc<K, T[]> = assocEmpty();
-  items.forEach(item => {
-    const k = getKey(item);
-    const v = assocGetOrAppend(k, result, () => [], eq);
-    v.push(item);
-  });
-  return result;
+  function add(acc: T[], ele: T): T[] {
+    acc.push(ele);
+    return acc;
+  }
+  return groupByGeneric<K, T, T[]>(getKey, items, eq, () => [], add);
+}
+
+export function groupByGeneric<K, T, U>(getKey: (item: T) => K, items: T[],
+  eq: Eq<K>, empty: () => U, add: (acc: U, item: T) => U): Assoc<K, U> {
+    const result: Assoc<K, U> = [];
+    items.forEach(item => {
+      const k = getKey(item);
+      let u = assocGet(k, result, eq);
+      if( u === undefined ){
+        u = empty();
+      }
+      u = add(u, item);
+      assocSet(k, u, result, eq);
+    })
+    return result;
 }
 
 export function eqArray<T>(a: T[], b: T[]): boolean {
-  if( a.length === b.length ){
-    for(let i=0;i<a.length;i++){
-      if( a[i] !== b[i] ){
+  if (a.length === b.length) {
+    for (let i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) {
         return false;
       }
     }
