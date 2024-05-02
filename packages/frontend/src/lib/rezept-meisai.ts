@@ -4,7 +4,7 @@ import api from "./api";
 import { calcVisits, Combiner, isHoukatsuGroup, roundTo10, TensuuCollector, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
+import { calcPayments, mkHokenPayer, type Payer } from "myclinic-rezept/futan/calc";
 import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
 import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
@@ -258,7 +258,68 @@ function yearMonthOfVisit(visit: Visit): [number, number] {
 }
 
 class PayerRegisry {
-  
+  private registry: PayerSet[] = [];
+
+  register(hoken: Payer, kouhiList: Payer[]) {
+    function addKouhi(kouhiList: Payer[], kouhi: Payer) {
+      if (!kouhiList.includes(kouhi)) {
+        kouhiList.push(kouhi);
+      }
+    }
+    const set = this.getSet(hoken);
+    kouhiList.forEach(kouhi => addKouhi(set.kouhiList, kouhi));
+  }
+
+  getPayerSets(): PayerSet[] {
+    this.registry.forEach(set => sortKouhiPayers(set.kouhiList));
+    return this.registry;
+  }
+
+  getSet(hoken: Payer): PayerSet {
+    for (let set of this.registry) {
+      if (set.hoken === hoken) {
+        return set;
+      }
+    }
+    const set = { hoken, kouhiList: [] };
+    this.registry.push(set);
+    return set;
+  }
+}
+
+function sortKouhiPayers(kouhiPayers: Payer[]) {
+  function w(payer: Payer): number {
+    const houbetsu = payer.getHoubetsuBangou();
+    if (houbetsu === undefined) {
+      throw new Error("Cannot find houbetsu bangou");
+    }
+    return getKouhiOrderWeight(houbetsu);
+  }
+  kouhiPayers.sort((a, b) => w(a) - w(b));
+}
+
+interface PayerSet {
+  hoken: Payer;
+  kouhiList: Payer[];
+}
+
+class HokenRegistry {
+  registry: Map<string, Payer> = new Map();
+
+  get(hoken: Shahokokuho | Koukikourei): Payer {
+    let key: string;
+    if (hoken instanceof Shahokokuho) {
+      key = `s:${hoken.shahokokuhoId}`;
+    } else {
+      key = `k:${hoken.koukikoureiId}`;
+    }
+    let payer = this.registry.get(key);
+    if (payer === undefined) {
+      payer = mkHokenPayer();
+      this.registry.set(key, payer);
+    }
+    return payer;
+  }
 }
 
 class KouhiRegistry {
@@ -271,19 +332,6 @@ class KouhiRegistry {
       this.registry.set(kouhi.kouhiId, payer);
     }
     return payer;
-  }
-
-  getKouhiList(): Payer[] {
-    function w(payer: Payer): number {
-      const houbetsu = payer.getHoubetsuBangou();
-      if( houbetsu === undefined ){
-        throw new Error("Cannot find houbetsu bangou");
-      }
-      return getKouhiOrderWeight(houbetsu);
-    }
-    const payers = Array.from(this.registry.values());
-    payers.sort((a, b) => w(a) - w(b));
-    return payers;
   }
 }
 
