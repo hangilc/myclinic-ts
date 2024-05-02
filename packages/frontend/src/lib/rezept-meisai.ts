@@ -11,7 +11,7 @@ import { calcAge } from "./calc-age";
 import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
-import type { DateWrapperLike } from "myclinic-util";
+import { eqArray, type DateWrapperLike, groupBy } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
 import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
 
@@ -28,16 +28,23 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const prevs = await getPrevVisits(current.asVisit);
     const hokenRegistry = new HokenRegistry();
     const kouhiRegistry = new KouhiRegistry();
+    const payersRegistry = new PayerRegisry();
     const visitItems: [Payer[], MeisaiItem[]][] = [...prevs, current].map(visit => {
       const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
-      if( !hoken ){
+      if (!hoken) {
         throw new Error("Missing hoken");
       }
       const hokenPayer = hokenRegistry.get(hoken);
       const kouhiPayers = visit.hoken.kouhiList.map(kouhi => {
         const ctx: KouhiContext = {};
-        return kouhiRegistry.get(kouhi, ctx);
+        return kouhiRegistry.get(kouhi, ctx)
+      });
+      sortKouhiPayers(kouhiPayers);
+      payersRegistry.register(hokenPayer, kouhiPayers);
+      return [[hokenPayer, ...kouhiPayers], visitToMeisaiItems(visit, at)];
     });
+    const grouped: [[Payer[], MeisaiItem[]]] = groupBy(a => a[0], visitItems, eqArray).map(([payers, itemsList]) => {
+      
     })
     let charge = roundTo10(currentItems.reduce((acc, ele) => acc + ele.ten, 0) * futanWari);
     return {
