@@ -5,14 +5,15 @@ import { calcVisits, Combiner, isHoukatsuGroup, roundTo10, TensuuCollector, type
 import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcPayments, type Payer } from "myclinic-rezept/futan/calc";
-import { resolveHokenPayer, resolveKouhiPayer } from "./resolve-payer";
+import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
 import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
-import { is診療識別コードCode, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
+import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
 import type { DateWrapperLike } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
+import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const current = await api.getVisitEx(visitId);
@@ -255,6 +256,55 @@ function yearMonthOfVisit(visit: Visit): [number, number] {
   const d = visit.visitedAtAsDate;
   return [d.getFullYear(), d.getMonth() + 1];
 }
+
+class PayerRegisry {
+  
+}
+
+class KouhiRegistry {
+  registry: Map<number, Payer> = new Map();
+
+  get(kouhi: Kouhi, ctx: KouhiContext): Payer {
+    let payer = this.registry.get(kouhi.kouhiId);
+    if (payer === undefined) {
+      payer = resolveKouhiPayer(kouhi, ctx)
+      this.registry.set(kouhi.kouhiId, payer);
+    }
+    return payer;
+  }
+
+  getKouhiList(): Payer[] {
+    function w(payer: Payer): number {
+      const houbetsu = payer.getHoubetsuBangou();
+      if( houbetsu === undefined ){
+        throw new Error("Cannot find houbetsu bangou");
+      }
+      return getKouhiOrderWeight(houbetsu);
+    }
+    const payers = Array.from(this.registry.values());
+    payers.sort((a, b) => w(a) - w(b));
+    return payers;
+  }
+}
+
+function getFutanKubunOf(hoken: Shahokokuho | Koukikourei | undefined, kouhiList: Payer[], kouhiPayers: Payer[])
+  : 負担区分コードName {
+  const kouhiIndexList: number[] = [];
+  kouhiList.forEach(kouhi => {
+    const i = kouhiPayers.findIndex(k => k === kouhi);
+    if (i < 0) {
+      throw new Error("Unknown kouhi payer");
+    }
+    kouhiIndexList.push(i + 1);
+  });
+  kouhiIndexList.sort();
+  const name = (hoken === undefined ? "" : "H") + kouhiIndexList.join("");
+  if (!is負担区分コードName(name)) {
+    throw new Error(`Invalid 負担区分コードName: ${name}`)
+  }
+  return name;
+}
+
 
 // export async function calcRezeptMeisaiBak(visitId: number): Promise<Meisai> {
 //   const meisai = new Meisai([], 3, 0);
