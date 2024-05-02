@@ -26,6 +26,19 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
+    const hokenRegistry = new HokenRegistry();
+    const kouhiRegistry = new KouhiRegistry();
+    const visitItems: [Payer[], MeisaiItem[]][] = [...prevs, current].map(visit => {
+      const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
+      if( !hoken ){
+        throw new Error("Missing hoken");
+      }
+      const hokenPayer = hokenRegistry.get(hoken);
+      const kouhiPayers = visit.hoken.kouhiList.map(kouhi => {
+        const ctx: KouhiContext = {};
+        return kouhiRegistry.get(kouhi, ctx);
+    });
+    })
     let charge = roundTo10(currentItems.reduce((acc, ele) => acc + ele.ten, 0) * futanWari);
     return {
       items: currentItems,
