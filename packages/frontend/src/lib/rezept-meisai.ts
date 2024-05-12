@@ -11,7 +11,7 @@ import { calcAge } from "./calc-age";
 import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
-import { eqArray, type DateWrapperLike, groupBy } from "myclinic-util";
+import { eqArray, type DateWrapperLike, groupBy, groupByGeneric } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
 import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
 
@@ -28,24 +28,29 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const prevs = await getPrevVisits(current.asVisit);
     const hokenRegistry = new HokenRegistry();
     const kouhiRegistry = new KouhiRegistry();
-    const payersRegistry = new PayerRegisry();
-    const visitItems: [Payer[], MeisaiItem[]][] = [...prevs, current].map(visit => {
-      const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
-      if (!hoken) {
-        throw new Error("Missing hoken");
-      }
-      const hokenPayer = hokenRegistry.get(hoken);
-      const kouhiPayers = visit.hoken.kouhiList.map(kouhi => {
-        const ctx: KouhiContext = {};
-        return kouhiRegistry.get(kouhi, ctx)
-      });
-      sortKouhiPayers(kouhiPayers);
-      payersRegistry.register(hokenPayer, kouhiPayers);
-      return [[hokenPayer, ...kouhiPayers], visitToMeisaiItems(visit, at)];
-    });
-    const grouped: [[Payer[], MeisaiItem[]]] = groupBy(a => a[0], visitItems, eqArray).map(([payers, itemsList]) => {
-      
-    })
+    const payerRegistry = new PayerRegistry();
+    const prevItemsList: [Payer[], MeisaiItem[]][] = prevs.map(visit => visitToItems(
+      visit, hokenRegistry, kouhiRegistry,
+      payerRegistry, at
+    ));
+    const currItems: [Payer[], MeisaiItem[]] = visitToItems(current, hokenRegistry, kouhiRegistry,
+      payerRegistry, at
+    )
+    const prevGrouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
+      a => a[0], prevItemsList, eqArray,
+      () => [], (acc, item) => [...acc, ...item[1]]
+    );
+    const grouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
+      a => a[0], [...prevItemsList, currItems], eqArray,
+      () => [], (acc, item) => [...acc, ...item[1]]
+    );
+    const prevTens: [number, Payer[]][] = prevGrouped.map(([payers, items]) => [
+      totalTenOfMeisaiItems(items), payers
+    ])
+    const tens: [number, Payer[]][] = grouped.map(([payers, items]) => [
+      totalTenOfMeisaiItems(items), payers
+    ])
+
     let charge = roundTo10(currentItems.reduce((acc, ele) => acc + ele.ten, 0) * futanWari);
     return {
       items: currentItems,
@@ -53,6 +58,24 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
       charge
     };
   }
+}
+
+function visitToItems(
+  visit: VisitEx, hokenRegistry: HokenRegistry, kouhiRegistry: KouhiRegistry, payerRegistry: PayerRegistry,
+  at: string):
+  [Payer[], MeisaiItem[]] {
+  const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
+  if (!hoken) {
+    throw new Error("Missing hoken");
+  }
+  const hokenPayer = hokenRegistry.get(hoken);
+  const kouhiPayers = visit.hoken.kouhiList.map(kouhi => {
+    const ctx: KouhiContext = {};
+    return kouhiRegistry.get(kouhi, ctx)
+  });
+  sortKouhiPayers(kouhiPayers);
+  payerRegistry.register(hokenPayer, kouhiPayers);
+  return [[hokenPayer, ...kouhiPayers], visitToMeisaiItems(visit, at)];
 }
 
 function getFutanWari(hoken: Shahokokuho | Koukikourei, at: DateWrapperLike, birthdate: DateWrapperLike): number {
@@ -119,6 +142,10 @@ interface MeisaiItem {
   section: MeisaiSection;
   ten: number;
   label: string;
+}
+
+function totalTenOfMeisaiItems(items: MeisaiItem[]): number {
+  return items.reduce((acc, ele) => acc + ele.ten, 0);
 }
 
 export interface Meisai {
@@ -277,7 +304,7 @@ function yearMonthOfVisit(visit: Visit): [number, number] {
   return [d.getFullYear(), d.getMonth() + 1];
 }
 
-class PayerRegisry {
+class PayerRegistry {
   private registry: PayerSet[] = [];
 
   register(hoken: Payer, kouhiList: Payer[]) {
@@ -372,6 +399,7 @@ function getFutanKubunOf(hoken: Shahokokuho | Koukikourei | undefined, kouhiList
   }
   return name;
 }
+
 
 
 // export async function calcRezeptMeisaiBak(visitId: number): Promise<Meisai> {
