@@ -6,7 +6,7 @@ import { rev診療識別コード, 診療識別コード } from "myclinic-rezept
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { calcPayments, mkHokenPayer, PaymentObject, type Payer, reorderPayers, PayerObject } from "myclinic-rezept/futan/calc";
 import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
-import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
+import { calcGendogaku, isUnder70, type GendogakuOptions, isBirthday75 } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
 import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
@@ -14,6 +14,7 @@ import { kizaiKingakuToTen } from "myclinic-rezept/helper";
 import { eqArray, type DateWrapperLike, groupBy, groupByGeneric } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
 import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
+import { resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   const current = await api.getVisitEx(visitId);
@@ -24,10 +25,15 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     return { items, charge: items.reduce((acc, ele) => acc + ele.ten, 0) * 10, futanWari: 10 };
   } else {
     const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
+    const birthday = current.patient.birthday;
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
-    const prevCharge = calcCharge(prevs, at);
-    const totalCharge = calcCharge([...prevs, current], at);
+    const visits = [...prevs, current];
+    const gendo = await resolveGendo(visits.map(visitEx => visitEx.visitId));
+    const shotokuKubun = resolveShotokuKubun(hoken, gendo);
+    console.log("shotokuKubun", shotokuKubun);
+    const prevCharge = calcCharge(prevs, futanWari, at, birthday, shotokuKubun);
+    const totalCharge = calcCharge(visits, futanWari, at, birthday, shotokuKubun);
     let charge = totalCharge - prevCharge;
     return {
       items: currentItems,
@@ -37,7 +43,16 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
 }
 
-function calcCharge(visits: VisitEx[], at: string): number {
+function resolveTasuuGaitou(visits: VisitEx[]): boolean {
+  return false;
+}
+
+function resolveMarucho(visits: VisitEx[]): number | undefined {
+  return undefined;
+}
+
+function calcCharge(visits: VisitEx[], futanWari: number, at: string, birthday: string,
+  shotokuKubun: ShotokuKubunCode | undefined): number {
   const hokenRegistry = new HokenRegistry();
   const kouhiRegistry = new KouhiRegistry();
   const payerRegistry = new PayerRegistry();
@@ -52,15 +67,33 @@ function calcCharge(visits: VisitEx[], at: string): number {
   const calcs: [number, Payer[]][] = grouped.map(([payers, items]) => [
     totalTenOfMeisaiItems(items) * 10, payers
   ])
-  calcPayments(calcs, {});
+  const ym = parseSqldate(at);
+  const bd = parseSqldate(birthday);
+  calcPayments(calcs, {
+    futanWari,
+    isUnder70: isUnder70(ym.year, ym.month, bd.year, bd.month, bd.day),
+    isBirthdayMonth75: isBirthday75(ym.year, ym.month, bd.year, bd.month, bd.day),
+    shotokuKubun,
+    isTasuuGaitou: resolveTasuuGaitou(visits),
+    isNyuuin: false,
+    marucho: resolveMarucho(visits),
+  });
   const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
   return roundTo10(PayerObject.jikofutanOf(payers));
+}
+
+function parseSqldate(sqldate: string): { year: number, month: number, day: number } {
+  return {
+    year: parseInt(sqldate.substring(0, 4)),
+    month: parseInt(sqldate.substring(5, 7)),
+    day: parseInt(sqldate.substring(8, 10)),
+  }
 }
 
 function mergePayers(payers: Payer[]): Payer[] {
   const list: Payer[] = [];
   payers.forEach(p => {
-    if( !list.includes(p) ){
+    if (!list.includes(p)) {
       list.push(p);
     }
   });

@@ -1,4 +1,4 @@
-import type { DiseaseData, ConductDrugEx, ConductEx, ConductKizaiEx, ConductShinryouEx, HokenInfo, Kouhi, Koukikourei, RezeptShoujouShouki, Shahokokuho, Shinryou, ShinryouEx, ShinryouMaster, Visit, VisitEx, Patient, KizaiMaster, Meisai } from "myclinic-model";
+import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type Shinryou, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, type KizaiMaster, type Meisai } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import type { RezeptUnit } from "myclinic-rezept";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
@@ -271,20 +271,19 @@ export async function resolveGendo(visitIds: number[]):
   return gendo;
 }
 
-export function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
-  koukikourei: Koukikourei | undefined,
+export function resolveShotokuKubun(hoken: Shahokokuho | Koukikourei | undefined,
   gendo: LimitApplicationCertificateClassificationFlagLabel | undefined): ShotokuKubunCode | undefined {
   if (gendo) {
     return gendo;
   }
-  if (koukikourei) {
-    switch (koukikourei.futanWari) {
+  if (hoken instanceof Koukikourei) {
+    switch (hoken.futanWari) {
       case 3: return "現役並みⅢ";
       case 2: return "一般Ⅱ";
       case 1: return "一般Ⅰ";
     }
-  } else if (shahokokuho) {
-    switch (shahokokuho.koureiStore) {
+  } else if (hoken instanceof Shahokokuho) {
+    switch (hoken.koureiStore) {
       case 3: return "現役並みⅢ";
       case 2:
       case 1:
@@ -295,10 +294,10 @@ export function resolveShotokuKubun(shahokokuho: Shahokokuho | undefined,
   return undefined;
 }
 
-async function resolveShotokuKubunOfVisits(shahokokuho: Shahokokuho | undefined,
-  koukikourei: Koukikourei | undefined, visitIds: number[]): Promise<ShotokuKubunCode | undefined> {
+async function resolveShotokuKubunOfVisits(hoken: Shahokokuho | Koukikourei | undefined,
+  visitIds: number[]): Promise<ShotokuKubunCode | undefined> {
   const gendo = await resolveGendo(visitIds);
-  return resolveShotokuKubun(shahokokuho, koukikourei, gendo);
+  return resolveShotokuKubun(hoken, gendo);
 }
 
 async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
@@ -354,7 +353,7 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
     jukyuusha: kouhi.jukyuusha,
   }));
   const shotokuKubun: ShotokuKubunCode | undefined = await resolveShotokuKubunOfVisits(
-    hokenCollector.shahokokuho, hokenCollector.koukikourei, modelVisits.map(visit => visit.visitId)
+    hokenCollector.shahokokuho ?? hokenCollector.koukikourei, modelVisits.map(visit => visit.visitId)
   );
   const modelPatient: Patient = visitExList[0].patient;
   const patientId: number = modelPatient.patientId;
