@@ -41,7 +41,6 @@
   }
 
   async function doMeisai() {
-    const meisai = await api.getMeisai(visit.visitId);
     showMeisai = true;
   }
 

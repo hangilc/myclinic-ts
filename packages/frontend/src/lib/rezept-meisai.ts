@@ -32,9 +32,9 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const gendo = await resolveGendo(visits.map(visitEx => visitEx.visitId));
     const shotokuKubun = resolveShotokuKubun(hoken, gendo);
     console.log("shotokuKubun", shotokuKubun);
-    const prevCharge = calcCharge(prevs, futanWari, at, birthday, shotokuKubun);
-    const totalCharge = calcCharge(visits, futanWari, at, birthday, shotokuKubun);
-    let charge = totalCharge - prevCharge;
+    const prevCharge = calcFutan(prevs, futanWari, at, birthday, shotokuKubun);
+    const totalCharge = calcFutan(visits, futanWari, at, birthday, shotokuKubun);
+    let charge = roundTo10(totalCharge - prevCharge);
     return {
       items: currentItems,
       futanWari,
@@ -51,7 +51,7 @@ function resolveMarucho(visits: VisitEx[]): number | undefined {
   return undefined;
 }
 
-function calcCharge(visits: VisitEx[], futanWari: number, at: string, birthday: string,
+function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: string,
   shotokuKubun: ShotokuKubunCode | undefined): number {
   const hokenRegistry = new HokenRegistry();
   const kouhiRegistry = new KouhiRegistry();
@@ -79,7 +79,7 @@ function calcCharge(visits: VisitEx[], futanWari: number, at: string, birthday: 
     marucho: resolveMarucho(visits),
   });
   const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
-  return roundTo10(PayerObject.jikofutanOf(payers));
+  return PayerObject.jikofutanOf(payers);
 }
 
 function parseSqldate(sqldate: string): { year: number, month: number, day: number } {
