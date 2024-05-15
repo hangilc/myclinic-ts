@@ -31,7 +31,6 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const visits = [...prevs, current];
     const gendo = await resolveGendo(visits.map(visitEx => visitEx.visitId));
     const shotokuKubun = resolveShotokuKubun(hoken, gendo);
-    console.log("shotokuKubun", shotokuKubun);
     const prevCharge = calcFutan(prevs, futanWari, at, birthday, shotokuKubun);
     const totalCharge = calcFutan(visits, futanWari, at, birthday, shotokuKubun);
     let charge = roundTo10(totalCharge - prevCharge);
@@ -421,6 +420,7 @@ class KouhiRegistry {
     let payer = this.registry.get(kouhi.kouhiId);
     if (payer === undefined) {
       payer = resolveKouhiPayer(kouhi, ctx)
+      console.log("kouhiPayer", payer);
       this.registry.set(kouhi.kouhiId, payer);
     }
     return payer;

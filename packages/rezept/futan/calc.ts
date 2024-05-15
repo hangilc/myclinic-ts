@@ -38,7 +38,7 @@ export interface Payer {
 
 export const PayerObject = {
   jikofutanOf(payers: Payer[]): number {
-    if( payers.length === 0 ){
+    if (payers.length === 0) {
       return 0;
     }
     return PaymentObject.jikofutanOf(payers[payers.length - 1].payment);
@@ -190,11 +190,12 @@ export function reorderPayers(payers: Payer[]): Payer[] {
     const houbetsu = payer.getHoubetsuBangou();
     if (houbetsu !== undefined) {
       let w = getKouhiOrderWeight(houbetsu);
-       return { payer, weight: w };
+      return { payer, weight: w };
     } else {
       switch (payer.getKind()) {
         case "hoken": return { payer, weight: 0 };
-        default: throw new Error(`Unknown payer kind: ${payer.getKind()}`);
+        default: return { payer, weight: 200 };
+        // default: throw new Error(`Unknown payer kind: ${payer.getKind()}`);
       }
     }
   })
@@ -348,14 +349,22 @@ export function mkKouhiMaruaoFutanNash(): Payer {
   return mkKouhiFutanNashi("maruao", 89);
 }
 
+// マル都・都大気汚染医療費助成
 export function mkMaruToTaikiosen(gendogaku: number): Payer {
   return mkPayer("taikiosen", 82, (bill: number, ctx: PaymentContext) => {
     if (bill > gendogaku) {
-      return { payment: bill - gendogaku, gendogakuReached: true };
+      return { payment: bill - gendogaku, gendogakuReached: gendogaku !== 0 };
     } else {
       return { payment: 0 };
     }
   });
+}
+
+// マル都・被爆者の子
+export function mkMaruToHibakushaNoKo(): Payer {
+  return mkPayer("hibakusha-no-ko", 82, (bill: number) => {
+    return { payment: bill };
+  })
 }
 
 export function mkKouhiMarucho(gendogaku: number): Payer {
@@ -417,7 +426,7 @@ export function mkKouhiGroup1Infection(): Payer {
 // 小児慢性
 export function mkKouhiShouniMansei(gendogaku: number): Payer {
   return mkPayer("shouni-mansei", 52, (bill: number, ctx: PaymentContext) => {
-    if( bill > gendogaku ){
+    if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
       return { payment: 0 };
@@ -425,6 +434,40 @@ export function mkKouhiShouniMansei(gendogaku: number): Payer {
   })
 }
 
+// マル青
+export function mkMaruAo(): Payer {
+  return mkPayer("maru-ao", 89, (bill: number) => {
+    return { payment: bill };
+  })
+}
+
+// マル障・心身障害者（負担なし）
+export function mkMaruShoFutanNashi(): Payer {
+  return mkPayer("maru-sho-futan-nashi", 80, (bill: number) => {
+    return { payment: bill };
+  });
+}
+
+// マル障・心身障害者（負担あり）
+export function mkMaruShoFutanAri(gendogaku: number): Payer {
+  return mkPayer("maru-sho-futan-ari", 80, (bill: number, ctx: PaymentContext) => {
+    let jikofutan = bill;
+    const futanWari = ctx.futanWari;
+    if (futanWari > 1) {
+      const hoken = getPaymentByKind("hoken", ctx.currentPayments);
+      jikofutan = hoken.kakari * 1 / 10.0;
+    }
+    if (jikofutan > gendogaku) {
+      return { payment: bill - gendogaku, gendogakuReached: true };
+    } else {
+      return { payment: bill - jikofutan };
+    }
+  });
+}
+
+
+
+// 生活保護
 export function mkSeikatsuHogo(): Payer {
   return mkPayer("seikatsuhogo", 12, (bill: number, ctx: PaymentContext) => {
     return { payment: bill };

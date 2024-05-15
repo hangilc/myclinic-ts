@@ -140,67 +140,67 @@ function calc(threshold: number, iryouhi: number, offset: number, ratio: number)
   }
 }
 
-export async function calcMonthlyIryouhi(patientId: number, year: number, month: number): Promise<number> {
-  const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
-  const ms: Meisai[] = await Promise.all(visitIds.map(async visitId => await api.getMeisai(visitId)));
-  let totalTen: number = 0;
-  ms.forEach(m => totalTen += m.totalTen);
-  return totalTen * 10;
-}
+// async function calcMonthlyIryouhi(patientId: number, year: number, month: number): Promise<number> {
+//   const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+//   const ms: Meisai[] = await Promise.all(visitIds.map(async visitId => await api.getMeisai(visitId)));
+//   let totalTen: number = 0;
+//   ms.forEach(m => totalTen += m.totalTen);
+//   return totalTen * 10;
+// }
 
-export async function calcGendogaku(patientId: number, year: number, month: number): Promise<number | undefined> {
-  const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
-  visitIds.sort();
-  const results: OnshiResult[] = [];
-  (await Promise.all(visitIds.map(async (visitId) => await api.findOnshi(visitId))))
-    .forEach(o => {
-      if (o !== undefined) {
-        const json = JSON.parse(o.kakunin);
-        const result = OnshiResult.cast(json);
-        results.push(result);
-      }
-    });
-  const limitList: LimitApplicationCertificateClassificationFlagLabel[] = [];
-  results.forEach(o => {
-    const limit = o.messageBody.resultList[0].limitApplicationCertificateRelatedInfo;
-    if (limit) {
-      const label: LimitApplicationCertificateClassificationFlagLabel | undefined =
-        limit.limitApplicationCertificateClassificationFlag;
-      if (label) {
-        limitList.push(label);
-      }
-    }
-  });
-  let kubun: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
-  if (limitList.length === 0) {
-    if (results.length > 0) {
-      const r = results[results.length - 1];
-      switch (r.probeKoukikourei()) {
-        case 3: kubun = "現役並みⅢ"; break;
-        case 2: kubun = "一般Ⅱ"; break;
-        case 1: kubun = "一般Ⅰ"; break;
-        case undefined: break;
-        default: throw new Error("Invalid koukikourei result: " + r.probeKoukikourei());
-      }
-      if (kubun === undefined) {
-        switch (r.probeKoureiJukyuu()) {
-          case 3: kubun = "現役並みⅢ"; break;
-          case 2:
-          case 1: kubun = "一般"; break;
-          case undefined: break;
-          default: throw new Error("Invalid kourei jukyuu result: " + r.probeKoureiJukyuu());
-        }
-      }
-    }
-  } else {
-    kubun = limitList[limitList.length - 1];
-  }
-  if (kubun) {
-    return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
-  } else {
-    return undefined;
-  }
-}
+// async function calcGendogaku(patientId: number, year: number, month: number): Promise<number | undefined> {
+//   const visitIds: number[] = await api.listVisitIdByPatientAndMonth(patientId, year, month);
+//   visitIds.sort();
+//   const results: OnshiResult[] = [];
+//   (await Promise.all(visitIds.map(async (visitId) => await api.findOnshi(visitId))))
+//     .forEach(o => {
+//       if (o !== undefined) {
+//         const json = JSON.parse(o.kakunin);
+//         const result = OnshiResult.cast(json);
+//         results.push(result);
+//       }
+//     });
+//   const limitList: LimitApplicationCertificateClassificationFlagLabel[] = [];
+//   results.forEach(o => {
+//     const limit = o.messageBody.resultList[0].limitApplicationCertificateRelatedInfo;
+//     if (limit) {
+//       const label: LimitApplicationCertificateClassificationFlagLabel | undefined =
+//         limit.limitApplicationCertificateClassificationFlag;
+//       if (label) {
+//         limitList.push(label);
+//       }
+//     }
+//   });
+//   let kubun: LimitApplicationCertificateClassificationFlagLabel | undefined = undefined;
+//   if (limitList.length === 0) {
+//     if (results.length > 0) {
+//       const r = results[results.length - 1];
+//       switch (r.probeKoukikourei()) {
+//         case 3: kubun = "現役並みⅢ"; break;
+//         case 2: kubun = "一般Ⅱ"; break;
+//         case 1: kubun = "一般Ⅰ"; break;
+//         case undefined: break;
+//         default: throw new Error("Invalid koukikourei result: " + r.probeKoukikourei());
+//       }
+//       if (kubun === undefined) {
+//         switch (r.probeKoureiJukyuu()) {
+//           case 3: kubun = "現役並みⅢ"; break;
+//           case 2:
+//           case 1: kubun = "一般"; break;
+//           case undefined: break;
+//           default: throw new Error("Invalid kourei jukyuu result: " + r.probeKoureiJukyuu());
+//         }
+//       }
+//     }
+//   } else {
+//     kubun = limitList[limitList.length - 1];
+//   }
+//   if (kubun) {
+//     return await gendogaku(kubun, () => calcMonthlyIryouhi(patientId, year, month));
+//   } else {
+//     return undefined;
+//   }
+// }
 
 export async function calcMonthlyFutan(patientId: number, year: number, month: number): Promise<number> {
   const visitIds = await api.listVisitIdByPatientAndMonth(patientId, year, month);

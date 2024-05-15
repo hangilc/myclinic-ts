@@ -10,7 +10,6 @@ export function futanWariOfHoken(hoken: Shahokokuho | Koukikourei): number {
 }
 
 export function resolveFutanWari(hoken: Shahokokuho | Koukikourei, testUnder6: () => boolean): number {
-  console.log("enter resolveFutanWari", hoken, testUnder6());
   if (hoken instanceof Shahokokuho) {
     if (hoken.koureiStore > 0) {
       return hoken.koureiStore;
