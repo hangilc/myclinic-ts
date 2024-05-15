@@ -149,10 +149,11 @@ interface MeisaiItem {
   section: MeisaiSection;
   ten: number;
   label: string;
+  count: number;
 }
 
-function totalTenOfMeisaiItems(items: MeisaiItem[]): number {
-  return items.reduce((acc, ele) => acc + ele.ten, 0);
+export function totalTenOfMeisaiItems(items: MeisaiItem[]): number {
+  return items.reduce((acc, ele) => acc + ele.ten * ele.count, 0);
 }
 
 export interface Meisai {
@@ -236,6 +237,7 @@ function shinryouListToMeisaiItems(shinryouList: ShinryouEx[], at: string): Meis
         section: shinryouMasterToMeisaiSection(s.master),
         ten: parseInt(s.master.tensuuStore),
         label: s.master.name,
+        count: 1,
       })
     }
   })
@@ -249,6 +251,7 @@ function shinryouListToMeisaiItems(shinryouList: ShinryouEx[], at: string): Meis
       section: "検査",
       ten,
       label: l.map(s => s.master.name).join("、"),
+      count: 1,
     }
   })
   items.push(...houkatsuItems);
@@ -261,6 +264,7 @@ function conductShinryouListToMeisaiItems(conductShinryouList: ConductShinryouEx
       section: "処置",
       label: s.master.name,
       ten: parseInt(s.master.tensuuStore),
+      count: 1,
     }
   })
 }
@@ -272,6 +276,7 @@ function kizaiListToMeisaiItems(kizaiList: ConductKizaiEx[]): MeisaiItem[] {
       section: "処置",
       label: kizai.master.name,
       ten: kizaiKingakuToTen(kingaku * kizai.amount),
+      count: 1,
     }
   })
 }
@@ -389,23 +394,23 @@ class KouhiRegistry {
   }
 }
 
-function getFutanKubunOf(hoken: Shahokokuho | Koukikourei | undefined, kouhiList: Payer[], kouhiPayers: Payer[])
-  : 負担区分コードName {
-  const kouhiIndexList: number[] = [];
-  kouhiList.forEach(kouhi => {
-    const i = kouhiPayers.findIndex(k => k === kouhi);
-    if (i < 0) {
-      throw new Error("Unknown kouhi payer");
-    }
-    kouhiIndexList.push(i + 1);
-  });
-  kouhiIndexList.sort();
-  const name = (hoken === undefined ? "" : "H") + kouhiIndexList.join("");
-  if (!is負担区分コードName(name)) {
-    throw new Error(`Invalid 負担区分コードName: ${name}`)
-  }
-  return name;
-}
+// function getFutanKubunOf(hoken: Shahokokuho | Koukikourei | undefined, kouhiList: Payer[], kouhiPayers: Payer[])
+//   : 負担区分コードName {
+//   const kouhiIndexList: number[] = [];
+//   kouhiList.forEach(kouhi => {
+//     const i = kouhiPayers.findIndex(k => k === kouhi);
+//     if (i < 0) {
+//       throw new Error("Unknown kouhi payer");
+//     }
+//     kouhiIndexList.push(i + 1);
+//   });
+//   kouhiIndexList.sort();
+//   const name = (hoken === undefined ? "" : "H") + kouhiIndexList.join("");
+//   if (!is負担区分コードName(name)) {
+//     throw new Error(`Invalid 負担区分コードName: ${name}`)
+//   }
+//   return name;
+// }
 
 
 

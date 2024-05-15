@@ -12,11 +12,12 @@
   import { onDestroy } from "svelte";
   import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
-  import type { Meisai, VisitEx } from "myclinic-model";
+  import type { VisitEx } from "myclinic-model";
   import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
   // import { calcGendogaku } from "@/lib/gendogaku";
   import { popupTrigger } from "@/lib/popup-helper";
   import HokengaiDialog from "./HokengaiDialog.svelte";
+  import { type Meisai, MeisaiWrapper, calcRezeptMeisai, totalTenOfMeisaiItems } from "@/lib/rezept-meisai";
 
   export let visit: VisitEx;
 
@@ -65,7 +66,8 @@
   }
 
   function totalTenOf(meisai: Meisai): string {
-    return meisai.totalTen.toLocaleString();
+    // return meisai.totalTen.toLocaleString();
+    return totalTenOfMeisaiItems(meisai.items).toLocaleString();
   }
 
   // async function doGendogaku() {
@@ -160,18 +162,20 @@
 {#if showMeisai}
   <Dialog destroy={() => (showMeisai = false)} title="診療明細">
     <div class="meisai-top">
-      {#await api.getMeisai(visit.visitId) then meisai}
-        {#each meisai.items as item}
+      <!-- {#await api.getMeisai(visit.visitId) then meisai} -->
+      {#await calcRezeptMeisai(visit.visitId) then meisai}
+        {@const grouped = new MeisaiWrapper(meisai).getGrouped()}
+        {#each grouped.keys() as section}
           <div>
-            <div>{item.section.label}</div>
-            {#each item.entries as entry}
+            <div>{section}</div>
+            {#each grouped.get(section)?.items ?? [] as entry}
               <div class="meisai-detail-item-row">
                 <div class="meisai-detail-item label">{entry.label}</div>
                 <div class="meisai-detail-item tanka-count">
-                  {entry.tanka.toLocaleString()}x{entry.count.toLocaleString()}
+                  {entry.ten.toLocaleString()}x{entry.count.toLocaleString()}
                 </div>
                 <div class="meisai-detail-item subtotal">
-                  {(entry.tanka * entry.count).toLocaleString()}
+                  {(entry.ten * entry.count).toLocaleString()}
                 </div>
               </div>
             {/each}
