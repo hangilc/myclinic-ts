@@ -1,10 +1,10 @@
 import { ConductEx, ConductKizaiEx, ConductShinryouEx, Kouhi, Koukikourei, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
 import api from "./api";
 // import { createHokensha, createRezeptKouhi, cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
-import { calcVisits, Combiner, isHoukatsuGroup, roundTo10, TensuuCollector, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf } from "myclinic-rezept";
+import { calcVisits, Combiner, isHoukatsuGroup, TensuuCollector, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf, roundTo10 } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcPayments, mkHokenPayer, type Payer } from "myclinic-rezept/futan/calc";
+import { calcPayments, mkHokenPayer, PaymentObject, type Payer, reorderPayers, PayerObject } from "myclinic-rezept/futan/calc";
 import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
 import { calcGendogaku, type GendogakuOptions } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
@@ -26,38 +26,45 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
-    const hokenRegistry = new HokenRegistry();
-    const kouhiRegistry = new KouhiRegistry();
-    const payerRegistry = new PayerRegistry();
-    const prevItemsList: [Payer[], MeisaiItem[]][] = prevs.map(visit => visitToItems(
-      visit, hokenRegistry, kouhiRegistry,
-      payerRegistry, at
-    ));
-    const currItems: [Payer[], MeisaiItem[]] = visitToItems(current, hokenRegistry, kouhiRegistry,
-      payerRegistry, at
-    )
-    const prevGrouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
-      a => a[0], prevItemsList, eqArray,
-      () => [], (acc, item) => [...acc, ...item[1]]
-    );
-    const grouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
-      a => a[0], [...prevItemsList, currItems], eqArray,
-      () => [], (acc, item) => [...acc, ...item[1]]
-    );
-    const prevTens: [number, Payer[]][] = prevGrouped.map(([payers, items]) => [
-      totalTenOfMeisaiItems(items), payers
-    ])
-    const tens: [number, Payer[]][] = grouped.map(([payers, items]) => [
-      totalTenOfMeisaiItems(items), payers
-    ])
-
-    let charge = roundTo10(currentItems.reduce((acc, ele) => acc + ele.ten, 0) * futanWari);
+    const prevCharge = calcCharge(prevs, at);
+    const totalCharge = calcCharge([...prevs, current], at);
+    let charge = totalCharge - prevCharge;
     return {
       items: currentItems,
       futanWari,
       charge
     };
   }
+}
+
+function calcCharge(visits: VisitEx[], at: string): number {
+  const hokenRegistry = new HokenRegistry();
+  const kouhiRegistry = new KouhiRegistry();
+  const payerRegistry = new PayerRegistry();
+  const itemsList: [Payer[], MeisaiItem[]][] = visits.map(visit => visitToItems(
+    visit, hokenRegistry, kouhiRegistry,
+    payerRegistry, at
+  ));
+  const grouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
+    a => a[0], itemsList, eqArray,
+    () => [], (acc, item) => [...acc, ...item[1]]
+  );
+  const calcs: [number, Payer[]][] = grouped.map(([payers, items]) => [
+    totalTenOfMeisaiItems(items) * 10, payers
+  ])
+  calcPayments(calcs, {});
+  const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
+  return roundTo10(PayerObject.jikofutanOf(payers));
+}
+
+function mergePayers(payers: Payer[]): Payer[] {
+  const list: Payer[] = [];
+  payers.forEach(p => {
+    if( !list.includes(p) ){
+      list.push(p);
+    }
+  });
+  return reorderPayers(list);
 }
 
 function visitToItems(

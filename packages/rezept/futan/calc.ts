@@ -9,6 +9,10 @@ export interface Payment {
   gendogakuReached: boolean;
 }
 
+export function roundTo10(n: number): number {
+  return Math.round(n / 10.0) * 10;
+}
+
 export const PaymentObject = {
   jikofutanOf(self: Payment): number { return self.kakari - self.payment; },
   finalJikofutanOf(payments: Payment[]): number { return PaymentObject.jikofutanOf(payments[payments.length - 1]); },
@@ -34,6 +38,9 @@ export interface Payer {
 
 export const PayerObject = {
   jikofutanOf(payers: Payer[]): number {
+    if( payers.length === 0 ){
+      return 0;
+    }
     return PaymentObject.jikofutanOf(payers[payers.length - 1].payment);
   },
   uncoveredOf(self: Payer): number {
