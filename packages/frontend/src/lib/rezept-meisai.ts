@@ -119,7 +119,7 @@ function visitToItems(
 }
 
 function getFutanWari(hoken: Shahokokuho | Koukikourei, at: DateWrapperLike, birthdate: DateWrapperLike): number {
-  return resolveFutanWari(hoken, () => isUnder6(at, birthdate));
+  return resolveFutanWari(hoken, () => isUnder6(birthdate, at));
 }
 
 function getHokenOfVisit(visit: VisitEx): Shahokokuho | Koukikourei | undefined {

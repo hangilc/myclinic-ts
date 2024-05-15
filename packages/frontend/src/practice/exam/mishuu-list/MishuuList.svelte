@@ -7,6 +7,7 @@
   import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import api from "@/lib/api";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
+  import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
 
   let pdfFiles: string[] = [];
 
@@ -47,9 +48,10 @@
     const promises = visits.map(async (visit) => {
       const file = receiptPdfFileName(visit);
       files.push(file);
-      const meisai = await api.getMeisai(visit.visitId);
+      // const meisai = await api.getMeisai(visit.visitId);
+      const meisai = await calcRezeptMeisai(visit.visitId);
       const clinicInfo = await api.getClinicInfo();
-      const data = ReceiptDrawerData.create(visit, meisai, clinicInfo);
+      const data = ReceiptDrawerData.create(visit, new MeisaiWrapper(meisai), clinicInfo);
       const ops = drawReceipt(data);
       await api.createPdfFile(ops, "A6_Landscape", file);
       await api.stampPdf(file, "receipt");
