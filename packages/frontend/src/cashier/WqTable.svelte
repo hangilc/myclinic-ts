@@ -9,6 +9,7 @@
   import * as auxMenu from "./wq-table-aux-menu";
   import { popupTrigger } from "@/lib/popup-helper";
   import { hotlineTrigger } from "@/lib/event-emitter";
+  import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
 
   export let items: WqueueData[];
   export let isAdmin: boolean;
@@ -18,7 +19,8 @@
   }
 
   async function doCashier(visit: Visit) {
-    let meisai = await api.getMeisai(visit.visitId);
+    // let meisai = await api.getMeisai(visit.visitId);
+    let meisai = await calcRezeptMeisai(visit.visitId);
     let patient = await api.getPatient(visit.patientId);
     let charge = await api.getCharge(visit.visitId);
     let visitEx = await api.getVisitEx(visit.visitId);
@@ -28,7 +30,7 @@
         destroy: () => d.$destroy(),
         patient,
         visit: visitEx,
-        meisai,
+        meisai: new MeisaiWrapper(meisai),
         charge,
       },
     });

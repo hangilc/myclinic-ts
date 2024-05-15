@@ -3,7 +3,6 @@
   import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import Dialog from "@/lib/Dialog.svelte";
   import {
-    type Meisai,
     type Charge,
     type Patient,
     Payment,
@@ -14,10 +13,11 @@
   import { hokenRep } from "@/lib/hoken-rep";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
+  import type { MeisaiWrapper } from "@/lib/rezept-meisai";
 
   export let patient: Patient;
   export let visit: VisitEx;
-  export let meisai: Meisai;
+  export let meisai: MeisaiWrapper;
   export let charge: Charge;
   export let destroy: () => void;
   export let receiptHook: (data: ReceiptDrawerData) => void = (_) => {};
@@ -90,10 +90,25 @@
     </div>
     <div class="detail-wrapper">
       {#if meisai.items.length > 0}
+        {@const grouped = meisai.getGrouped()}
         <div class="detail">
           <div class="col1" />
           <div class="col2" />
-          {#each meisai.items as item}
+          {#each grouped.keys() as section}
+            <div class="item-row">
+              <div class="item-cell1 header">{section}</div>
+              <div class="item-cell2" />
+            </div>
+            {#each grouped.get(section)?.items ?? [] as entry}
+              <div class="item-row">
+                <div class="item-cell1">{entry.label}</div>
+                <div class="item-cell2">
+                  {entry.ten.toLocaleString()}x{entry.count}={(entry.ten * entry.count).toLocaleString()}
+                </div>
+              </div>
+            {/each}
+          {/each}
+          <!-- {#each meisai.items as item}
             <div class="item-row">
               <div class="item-cell1 header">{item.section.label}</div>
               <div class="item-cell2" />
@@ -106,7 +121,7 @@
                 </div>
               </div>
             {/each}
-          {/each}
+          {/each} -->
         </div>
       {:else}
         明細なし
@@ -115,7 +130,7 @@
   </div>
   <div class="summary">
     <div>
-      総点：{meisai.totalTen.toLocaleString()}点、、負担割：{meisai.futanWari}割
+      総点：{meisai.totalTen().toLocaleString()}点、、負担割：{meisai.futanWari}割
     </div>
     <div class="charge">請求額：{charge.charge.toLocaleString()}円</div>
     {#if visit.lastPayment}

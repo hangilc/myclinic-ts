@@ -394,9 +394,9 @@ export default {
     return post("shohousen-drawer", text, {}, castList(castDrawerOp));
   },
 
-  getMeisai(visitId: number): Promise<m.Meisai> {
-    return get("get-meisai", { "visit-id": visitId.toString() }, m.Meisai.cast);
-  },
+  // getMeisai(visitId: number): Promise<m.Meisai> {
+  //   return get("get-meisai", { "visit-id": visitId.toString() }, m.Meisai.cast);
+  // },
 
   // drawReceipt(data: ReceiptDrawerData): Promise<DrawerOp[]> {
   //   return post("draw-receipt", data, {}, castList(castDrawerOp));
