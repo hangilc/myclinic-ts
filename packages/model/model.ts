@@ -1069,10 +1069,12 @@ export interface VisitAttributesArg {
 export class VisitAttributes {
   futanWari: number | undefined;
   hokengai: string[];
+  nanbyouGendogaku: number | undefined;
 
-  constructor(arg: VisitAttributesArg = {}) {
+  constructor(arg: Partial<VisitAttributes> = {}) {
     this.futanWari = arg.futanWari;
     this.hokengai = arg.hokengai ?? [];
+    this.nanbyouGendogaku = arg.nanbyouGendogaku;
   }
 
   updateWith(other: VisitAttributes): VisitAttributes {

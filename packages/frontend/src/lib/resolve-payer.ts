@@ -2,7 +2,7 @@ import { mkKouhiNanbyou, mkMaruAo, mkMaruShoFutanAri, mkMaruShoFutanNashi, mkMar
 import type { Kouhi } from "myclinic-model";
 
 export interface KouhiContext {
-  nannbyouGendogaku?: number;
+  nanbyouGendogaku?: number;
 }
 
 export function resolveKouhiPayer(kouhi: Kouhi, ctx: KouhiContext): Payer {
@@ -25,7 +25,7 @@ export function resolveKouhiPayer(kouhi: Kouhi, ctx: KouhiContext): Payer {
   const houbetsu = part(kouhi.futansha, 2);
   switch (houbetsu) {
     case 54: { // 難病
-      const gendogaku = ctx.nannbyouGendogaku ?? kouhi.memoAsJson.gendogaku ?? 100000;
+      const gendogaku = ctx.nanbyouGendogaku ?? kouhi.memoAsJson.gendogaku ?? 100000;
       return mkKouhiNanbyou(gendogaku);
     }
     default: break;

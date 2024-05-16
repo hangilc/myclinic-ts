@@ -9,24 +9,33 @@
   } from "../exam-vars";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
-  import { onDestroy } from "svelte";
-  import type { TaskRunner } from "@/lib/unit-task";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
-  import type { VisitEx } from "myclinic-model";
-  import { monthOfSqlDate, yearOfSqlDate } from "@/lib/util";
-  // import { calcGendogaku } from "@/lib/gendogaku";
+  import type { Kouhi, VisitEx } from "myclinic-model";
   import { popupTrigger } from "@/lib/popup-helper";
   import HokengaiDialog from "./HokengaiDialog.svelte";
-  import { type Meisai, MeisaiWrapper, calcRezeptMeisai, totalTenOfMeisaiItems } from "@/lib/rezept-meisai";
+  import {
+    type Meisai,
+    MeisaiWrapper,
+    calcRezeptMeisai,
+    totalTenOfMeisaiItems,
+  } from "@/lib/rezept-meisai";
+  import { resolveKouhiPayer } from "@/lib/resolve-payer";
 
   export let visit: VisitEx;
 
-  // let taskRunner: TaskRunner | null = null;
   let showMeisai = false;
+  let hasNanbyou: boolean = hasNanbyouKouhi(visit.hoken.kouhiList);
 
-  onDestroy(() => {
-    // taskRunner?.cancel();
-  });
+  function hasNanbyouKouhi(kouhiList: Kouhi[]): boolean {
+    for (const kouhi of kouhiList) {
+      const payer = resolveKouhiPayer(kouhi, {});
+      console.log("payer", payer.getKind());
+      if (payer.getKind() === "nanbyou") {
+        return true;
+      }
+    }
+    return false;
+  }
 
   function doDeleteVisit(): void {
     api.deleteVisit(visit.visitId);
@@ -69,17 +78,6 @@
     return totalTenOfMeisaiItems(meisai.items).toLocaleString();
   }
 
-  // async function doGendogaku() {
-  //   const year = yearOfSqlDate(visit.visitedAt);
-  //   const month = monthOfSqlDate(visit.visitedAt);
-  //   const gendogaku = await calcGendogaku(visit.patient.patientId, year, month);
-  //   if (!gendogaku) {
-  //     alert("限度額を確定できません。");
-  //   } else {
-  //     alert(`限度額： ${gendogaku.toLocaleString()}円`);
-  //   }
-  // }
-
   function doHokengai() {
     const attrs = visit.attributes;
     const hokengai: string[] = attrs?.hokengai ?? [];
@@ -100,7 +98,10 @@
     });
   }
 
+  async function doNanbyouGendogaku() {}
+
   function composeMenu(): [string, () => void][] {
+    console.log("hasNanbyou", hasNanbyou);
     const m: [string, () => void][] = [];
     function add(label: string, action: () => void) {
       m.push([label, action]);
@@ -116,7 +117,9 @@
     if (isMishuu(visit)) {
       add("未収リストへ", doMishuuList);
     }
-    // add("限度額", doGendogaku);
+    if (hasNanbyou) {
+      add("難病限度額設定", doNanbyouGendogaku);
+    }
     add("保険外", doHokengai);
     return m;
   }

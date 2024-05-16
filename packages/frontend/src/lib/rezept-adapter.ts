@@ -9,6 +9,7 @@ import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-r
 import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { firstAndLastDayOf } from "./util";
+import type { KouhiContext } from "./resolve-payer";
 
 // import type { CalcItem } from "myclinic-rezept";
 
@@ -714,5 +715,22 @@ export function createRezeptKouhi(src: Kouhi): RezeptKouhi {
   return {
     futansha: src.futansha,
     jukyuusha: src.jukyuusha,
+  }
+}
+
+export function createKouhiContextFromVisits(visits: VisitEx[]): KouhiContext {
+  let ctx: KouhiContext = {};
+  for(let visit of visits){
+    const attr = visit.attributes;
+    if( attr) {
+      ifExists(attr.nanbyouGendogaku, gendo => ctx.nanbyouGendogaku = gendo )
+    }
+  }
+  return ctx;
+}
+
+function ifExists<T>(arg: T | undefined, f: (t: T) => void) {
+  if( arg !== undefined ){
+    f(arg);
   }
 }
