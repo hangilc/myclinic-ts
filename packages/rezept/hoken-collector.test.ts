@@ -1,3 +1,4 @@
+import { mkHokenPayer } from "futan/calc";
 import { unifyHokenList, type HokenCollection, futanKubunNameByHokenCollection, futanKubunCodeByHokenCollection } from "./hoken-collector";
 import { Hokensha, RezeptKouhi } from "./rezept-types";
 
@@ -8,6 +9,7 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const hc = unifyHokenList([
       { hokensha, kouhiList: [] },
@@ -26,6 +28,7 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const kouhi: RezeptKouhi = {
       futansha: 12345678,
@@ -50,6 +53,7 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
@@ -79,12 +83,14 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const hokensha2: Hokensha = {
       futanWari: 3,
       hokenshaBangou: 12345678,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const hc = unifyHokenList([
       { hokensha: hokensha1, kouhiList: [] },
@@ -110,12 +116,14 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const hokensha2: Hokensha = {
       futanWari: 3,
       hokenshaBangou: 12345678,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
@@ -143,6 +151,7 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
@@ -172,12 +181,14 @@ describe("hoken-collector", () => {
       hokenshaBangou: 123456,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const another: Hokensha = {
       futanWari: 3,
       hokenshaBangou: 11111111,
       hihokenshaKigou: "a-3",
       hihokenshaBangou: "123",
+      payer: mkHokenPayer(),
     }
     const hc = unifyHokenList([
       { hokensha, kouhiList: [] },

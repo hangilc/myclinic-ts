@@ -1,3 +1,4 @@
+import { Payer } from "futan/calc";
 import type { 症状詳記区分コードCode, 診療識別コードCode, 負担区分コードCode } from "./codes";
 
 export interface ClinicInfo {    
@@ -20,6 +21,7 @@ export interface Hokensha {
   isHonnin?: boolean;
   isKoureiJukyuusha?: boolean;
   edaban?: string;
+  payer: Payer;
 }
 
 export interface KouhiProcessorArg {
@@ -37,6 +39,7 @@ export interface KouhiData {
   processor: KouhiProcessor;
   houbetsu: number;
   futanshaBangou?: number;
+  payer: Payer;
 }
 
 export interface RezeptVisit {
