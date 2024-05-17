@@ -10,7 +10,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
   import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
-  import type { Kouhi, VisitEx } from "myclinic-model";
+  import type { Kouhi, VisitAttributes, VisitEx } from "myclinic-model";
   import { popupTrigger } from "@/lib/popup-helper";
   import HokengaiDialog from "./HokengaiDialog.svelte";
   import {
@@ -29,7 +29,6 @@
   function hasNanbyouKouhi(kouhiList: Kouhi[]): boolean {
     for (const kouhi of kouhiList) {
       const payer = resolveKouhiPayer(kouhi, {});
-      console.log("payer", payer.getKind());
       if (payer.getKind() === "nanbyou") {
         return true;
       }
@@ -78,6 +77,13 @@
     return totalTenOfMeisaiItems(meisai.items).toLocaleString();
   }
 
+  async function updateVisitAttributes(attr: VisitAttributes) {
+    const origVisit = await api.getVisit(visit.visitId);
+    origVisit.attributesStore = JSON.stringify(attr);
+    await api.updateVisit(origVisit);
+    visit.attributesStore = origVisit.attributesStore;
+  }
+
   function doHokengai() {
     const attrs = visit.attributes;
     const hokengai: string[] = attrs?.hokengai ?? [];
@@ -89,19 +95,33 @@
         hokengai,
         onEnter: async (entered: string[]) => {
           const newAttr = Object.assign({}, attrs, { hokengai: entered });
-          const origVisit = await api.getVisit(visit.visitId);
-          origVisit.attributesStore = JSON.stringify(newAttr);
-          await api.updateVisit(origVisit);
-          visit.attributesStore = origVisit.attributesStore;
+          await updateVisitAttributes(newAttr);
+          // const origVisit = await api.getVisit(visit.visitId);
+          // origVisit.attributesStore = JSON.stringify(newAttr);
+          // await api.updateVisit(origVisit);
+          // visit.attributesStore = origVisit.attributesStore;
         },
       },
     });
   }
 
-  async function doNanbyouGendogaku() {}
+  async function doNanbyouGendogaku() {
+    const gendo = prompt("難病限度額", visit.attributes?.nanbyouGendogaku?.toString() ?? "");
+    if (gendo == null) {
+      return;
+    }
+    const gendogaku: number | undefined =
+      gendo === "" ? undefined : parseInt(gendo);
+    if (gendogaku !== undefined && isNaN(gendogaku)) {
+      alert("Invalid number");
+      return;
+    }
+    const attr: VisitAttributes = Object.assign({}, visit.attributes);
+    attr.nanbyouGendogaku = gendogaku;
+    await updateVisitAttributes(attr);
+  }
 
   function composeMenu(): [string, () => void][] {
-    console.log("hasNanbyou", hasNanbyou);
     const m: [string, () => void][] = [];
     function add(label: string, action: () => void) {
       m.push([label, action]);

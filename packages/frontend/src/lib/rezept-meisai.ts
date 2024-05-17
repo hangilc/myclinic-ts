@@ -50,14 +50,27 @@ function resolveMarucho(visits: VisitEx[]): number | undefined {
   return undefined;
 }
 
+function createKouhiContext(visits: VisitEx[]): KouhiContext {
+  const ctx: KouhiContext = {};
+  visits.map(visit => visit.attributes).forEach(attr => {
+    if( attr ){
+      if( attr.nanbyouGendogaku !== undefined ){
+        ctx.nanbyouGendogaku = attr.nanbyouGendogaku;
+      }
+    }
+  })
+  return ctx;
+}
+
 function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: string,
   shotokuKubun: ShotokuKubunCode | undefined): number {
   const hokenRegistry = new HokenRegistry();
   const kouhiRegistry = new KouhiRegistry();
   const payerRegistry = new PayerRegistry();
+  const kouhiContext = createKouhiContext(visits);
   const itemsList: [Payer[], MeisaiItem[]][] = visits.map(visit => visitToItems(
     visit, hokenRegistry, kouhiRegistry,
-    payerRegistry, at
+    payerRegistry, at, kouhiContext
   ));
   const grouped: [Payer[], MeisaiItem[]][] = groupByGeneric<Payer[], [Payer[], MeisaiItem[]], MeisaiItem[]>(
     a => a[0], itemsList, eqArray,
@@ -101,7 +114,7 @@ function mergePayers(payers: Payer[]): Payer[] {
 
 function visitToItems(
   visit: VisitEx, hokenRegistry: HokenRegistry, kouhiRegistry: KouhiRegistry, payerRegistry: PayerRegistry,
-  at: string):
+  at: string, kouhiContext: KouhiContext):
   [Payer[], MeisaiItem[]] {
   const hoken = visit.hoken.shahokokuho || visit.hoken.koukikourei;
   if (!hoken) {
@@ -109,8 +122,7 @@ function visitToItems(
   }
   const hokenPayer = hokenRegistry.get(hoken);
   const kouhiPayers = visit.hoken.kouhiList.map(kouhi => {
-    const ctx: KouhiContext = {};
-    return kouhiRegistry.get(kouhi, ctx)
+    return kouhiRegistry.get(kouhi, kouhiContext)
   });
   sortKouhiPayers(kouhiPayers);
   payerRegistry.register(hokenPayer, kouhiPayers);
