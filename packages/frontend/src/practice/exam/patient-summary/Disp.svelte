@@ -17,11 +17,11 @@
 {/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="commands">
-  <a on:click={onEdit}>編集</a>
+  <a href="javascript:void(0)" on:click={onEdit}>編集</a>
   {#if showContent}
-    <a on:click={doCollapse}>圧縮</a>
+    <a href="javascript:void(0)" on:click={doCollapse}>圧縮</a>
   {:else}
-    <a on:click={doExtend}>伸展</a>
+    <a href="javascript:void(0)" on:click={doExtend}>伸展</a>
   {/if}
 </div>
 

@@ -39,7 +39,7 @@
 【期限開始】{formatValidFrom(kouhi.validFrom)}
 【期限終了】{formatValidUpto(kouhi.validUpto)}] 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<a on:click={doUsageClick} class="usage-link">【使用回数】</a>{usageCount}回
+<a href="javascript:void(0)" on:click={doUsageClick} class="usage-link">【使用回数】</a>{usageCount}回
 {#if showUsageDates}
   <div class="usage-dates-box">
     {#if usageList.length === 0}

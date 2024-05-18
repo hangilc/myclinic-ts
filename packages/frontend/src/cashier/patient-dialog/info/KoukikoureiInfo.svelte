@@ -40,7 +40,7 @@
   <span>期限終了</span>
   <span>{formatValidUpto(koukikourei.validUpto)}</span>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <a on:click={doUsageClick} class="usage-link"><span>使用回数</span></a>
+  <a href="javascript:void(0)" on:click={doUsageClick} class="usage-link"><span>使用回数</span></a>
   <span>{usageCount}回</span>
 </div>
 {#if showUsageDates}

@@ -1,5 +1,5 @@
 import { Gengou, GengouList } from "kanjidate";
-import { Kouhi, KouhiInterface, KouhiMemoInterface, PatientSummary, PatientSummaryInterface } from "./model";
+import { Kouhi, type KouhiInterface, type KouhiMemoInterface, PatientSummary, type PatientSummaryInterface } from "./model";
 import { pipe } from "./pipe";
 
 export class MultiError {

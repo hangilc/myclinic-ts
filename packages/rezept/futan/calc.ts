@@ -1,5 +1,5 @@
-import { GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi } from "../gendogaku";
-import { ShotokuKubunCode } from "../codes";
+import { type GendogakuOptions, calcGendogaku, classifyKouhi, hairyosochi } from "../gendogaku";
+import { type ShotokuKubunCode } from "../codes";
 import { getKouhiOrderWeight } from "../kouhi-order";
 
 export interface Payment {

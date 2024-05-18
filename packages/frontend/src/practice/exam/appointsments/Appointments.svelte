@@ -61,11 +61,11 @@
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="commands">
     <a href="javascript:void(0)" on:click={refresh}>更新</a>
-    <a on:click={doClose}>閉じる</a>
+    <a href="javascript:void(0)" on:click={doClose}>閉じる</a>
     {#if showList}
-    <a on:click={doCollapse}>圧縮</a>
+    <a href="javascript:void(0)" on:click={doCollapse}>圧縮</a>
     {:else}
-    <a on:click={doExtend}>伸展</a>
+    <a href="javascript:void(0)" on:click={doExtend}>伸展</a>
     {/if}
   </div>
 </RightBox>

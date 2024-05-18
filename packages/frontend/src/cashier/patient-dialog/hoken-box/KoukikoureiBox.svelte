@@ -57,7 +57,7 @@
 )}
 【期限終了】{formatValidUpto(koukikourei.validUpto)}]
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<a on:click={doUsageClick} class="usage-link">【使用回数】</a>{usageCount}回
+<a href="javascript:void(0)" on:click={doUsageClick} class="usage-link">【使用回数】</a>{usageCount}回
 <a href="javascript:;" on:click={doOnshiConfirm}>資格確認</a>
 {#if showUsageDates}
   <div class="usage-dates-box">

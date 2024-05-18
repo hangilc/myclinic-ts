@@ -1,4 +1,4 @@
-import { Payer } from "futan/calc";
+import { type Payer } from "./futan/calc";
 import type { 症状詳記区分コードCode, 診療識別コードCode, 負担区分コードCode } from "./codes";
 
 export interface ClinicInfo {    
@@ -128,7 +128,7 @@ export interface RezeptPatient {
 export interface RezeptKouhi {
   futansha: number;
   jukyuusha: number;
-  jikofutan?: number;
+  // jikofutan?: number;
   payer: Payer;
 }
 

@@ -17,8 +17,8 @@
 </div>
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="commands">
-  <a on:click={doEnter}>入力</a>
-  <a on:click={onCancel}>キャンセル</a>
+  <a href="javascript:void(0)" on:click={doEnter}>入力</a>
+  <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>
 
 <style>

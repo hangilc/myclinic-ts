@@ -60,7 +60,7 @@
   </div>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="commands">
-    <a on:click={onCloseClick}>閉じる</a>
+    <a href="javascript:void(0)" on:click={onCloseClick}>閉じる</a>
   </div>
 </RightBox>
 

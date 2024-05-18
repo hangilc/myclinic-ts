@@ -1,4 +1,4 @@
-import { ShotokuKubunCode } from "./codes";
+import { type ShotokuKubunCode } from "./codes";
 
 export type ShotokuKubunEx = ShotokuKubunCode | "不明";
 

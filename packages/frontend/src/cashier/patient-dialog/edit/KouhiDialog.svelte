@@ -158,10 +158,6 @@
   input[type="text"].regular {
     width: 6rem;
   }
-  .form-wrapper {
-    display: flex;
-    gap: 10px;
-  }
   .error {
     margin: 10px 0;
     color: red;

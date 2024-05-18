@@ -1,4 +1,4 @@
-import { RezeptKouhi } from "rezept-types";
+import { type RezeptKouhi } from "./rezept-types";
 
 const KouhiOrder: number[] = [
   13, 14, 18, 29, 30, 10, 11, 20, 21, 15,

@@ -345,6 +345,7 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
   const kouhiRegistry = new KouhiRegistry();
   const hokenCollector = new HokenCollector();
+  hokenCollector.scanVisits(visitExList);
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
   const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);

@@ -67,7 +67,7 @@
   >{formatValidUpto(shahokokuho.validUpto)}</span
 >
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<a on:click={doUsageClick} class="usage-link"
+<a href="javascript:void(0)" on:click={doUsageClick} class="usage-link"
   >【使用回数】<span data-cy="usage-count">{usageCount}</span>回</a
 >
 <a href="javascript:;" on:click={doOnshiConfirm}>資格確認</a>

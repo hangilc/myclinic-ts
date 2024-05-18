@@ -1,6 +1,6 @@
-import { is負担区分コードName, 負担区分コードCode, 負担区分コードCodeOf, 負担区分コードName } from "./codes";
+import { is負担区分コードName, type 負担区分コードCode, 負担区分コードCodeOf, type 負担区分コードName } from "./codes";
 import { sortKouhiList } from "./kouhi-order";
-import { Hokensha, RezeptKouhi } from "./rezept-types";
+import { type Hokensha, type RezeptKouhi } from "./rezept-types";
 
 export interface HokenCollection {
   hokensha: Hokensha;
