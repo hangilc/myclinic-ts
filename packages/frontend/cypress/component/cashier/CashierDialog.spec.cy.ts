@@ -84,3 +84,7 @@ describe("CashierDialog", () => {
     });
   });
 })
+
+async function calcMeisai(visitId: number): Promise<Meisai> {
+  return calcRezeptMeisai(visitId);
+}
