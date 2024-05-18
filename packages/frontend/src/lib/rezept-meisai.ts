@@ -406,7 +406,7 @@ interface PayerSet {
   kouhiList: Payer[];
 }
 
-class HokenRegistry {
+export class HokenRegistry {
   registry: Map<string, Payer> = new Map();
 
   get(hoken: Shahokokuho | Koukikourei): Payer {
@@ -423,9 +423,13 @@ class HokenRegistry {
     }
     return payer;
   }
+
+  values(): Payer[] {
+    return Array.from(this.registry.values());
+  }
 }
 
-class KouhiRegistry {
+export class KouhiRegistry {
   registry: Map<number, Payer> = new Map();
 
   get(kouhi: Kouhi, ctx: KouhiContext): Payer {

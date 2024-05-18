@@ -1,5 +1,5 @@
-import { mkHokenPayer } from "futan/calc";
-import { unifyHokenList, type HokenCollection, futanKubunNameByHokenCollection, futanKubunCodeByHokenCollection } from "./hoken-collector";
+import { mkHokenPayer, mkKouhiHibakusha, mkKouhiSeishinTsuuin } from "futan/calc";
+import { unifyHokenList, futanKubunNameByHokenCollection, futanKubunCodeByHokenCollection } from "./hoken-collector";
 import { Hokensha, RezeptKouhi } from "./rezept-types";
 
 describe("hoken-collector", () => {
@@ -33,6 +33,7 @@ describe("hoken-collector", () => {
     const kouhi: RezeptKouhi = {
       futansha: 12345678,
       jukyuusha: 11111111,
+      payer: mkKouhiHibakusha(),
     }
     let hc = unifyHokenList([
       { hokensha, kouhiList: [] },
@@ -58,10 +59,12 @@ describe("hoken-collector", () => {
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
       jukyuusha: 11111111,
+      payer: mkKouhiHibakusha(),
     }
     const kouhi2: RezeptKouhi = {
       futansha: 54345678,
       jukyuusha: 11111111,
+      payer: mkKouhiSeishinTsuuin(),
     }
     let hc = unifyHokenList([
       { hokensha, kouhiList: [] },
@@ -128,10 +131,12 @@ describe("hoken-collector", () => {
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
       jukyuusha: 11111111,
+      payer: mkKouhiHibakusha(),
     }
     const kouhi2: RezeptKouhi = {
       futansha: 54345678,
       jukyuusha: 11111111,
+      payer: mkKouhiSeishinTsuuin(),
     }
     let hc = unifyHokenList([
       { hokensha: hokensha1, kouhiList: [] },
@@ -156,10 +161,12 @@ describe("hoken-collector", () => {
     const kouhi1: RezeptKouhi = {
       futansha: 10345678,
       jukyuusha: 11111111,
+      payer: mkKouhiHibakusha(),
     }
     const kouhi2: RezeptKouhi = {
       futansha: 54345678,
       jukyuusha: 11111111,
+      payer: mkKouhiSeishinTsuuin(),
     }
     let hc = unifyHokenList([
       { hokensha, kouhiList: [] },

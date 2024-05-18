@@ -39,7 +39,6 @@ export interface KouhiData {
   processor: KouhiProcessor;
   houbetsu: number;
   futanshaBangou?: number;
-  payer: Payer;
 }
 
 export interface RezeptVisit {
@@ -130,6 +129,7 @@ export interface RezeptKouhi {
   futansha: number;
   jukyuusha: number;
   jikofutan?: number;
+  payer: Payer;
 }
 
 export type HokenSelector = "H" | "1" | "2" | "3" | "4";

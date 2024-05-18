@@ -10,6 +10,8 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { firstAndLastDayOf } from "./util";
 import type { KouhiContext } from "./resolve-payer";
+import { mkHokenHairyosochi, mkHokenPayer, type Payer } from "myclinic-rezept/futan/calc";
+import { HokenRegistry, KouhiRegistry } from "./rezept-meisai";
 
 // import type { CalcItem } from "myclinic-rezept";
 
@@ -341,21 +343,37 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
     throw new Error("Cannot happen");
   }
   const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
+  const kouhiRegistry = new KouhiRegistry();
   const hokenCollector = new HokenCollector();
-  hokenCollector.scanVisits(visitExList);
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
   const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);
   if (hokensha) {
     hokensha.edaban = await resolveEdaban(modelVisits);
   }
-  const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => ({
-    futansha: kouhi.futansha,
-    jukyuusha: kouhi.jukyuusha,
-  }));
+  const kouhiContext: KouhiContext = createKouhiContextFromVisits(visitExList);
+  const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => {
+    const payer: Payer = kouhiRegistry.get(kouhi, kouhiContext);
+    return {
+      futansha: kouhi.futansha,
+      jukyuusha: kouhi.jukyuusha,
+      payer,
+    };
+  });
   const shotokuKubun: ShotokuKubunCode | undefined = await resolveShotokuKubunOfVisits(
     hokenCollector.shahokokuho ?? hokenCollector.koukikourei, modelVisits.map(visit => visit.visitId)
   );
+  if (shotokuKubun === "一般Ⅱ") { // 配慮措置：令和７年９月３０日まで
+    const at: string = modelVisits[0].visitedAt;
+    const year = parseInt(at.substring(0, 4));
+    const month = parseInt(at.substring(5, 7));
+    console.log("一般Ⅱ", year, month);
+    if (year <= 2024 || (year === 2025 && month <= 9)) {
+      if (hokensha) {
+        hokensha.payer = mkHokenHairyosochi();
+      }
+    }
+  }
   const modelPatient: Patient = visitExList[0].patient;
   const patientId: number = modelPatient.patientId;
   let sex: "M" | "F" = "M";
@@ -394,7 +412,10 @@ function shoujouShoukiOfVisit(visit: VisitEx): RezeptShoujouShouki[] {
   return [];
 }
 
-export async function cvtModelVisitToRezeptVisit(visitEx: VisitEx, hokenCollector: HokenCollector): Promise<RezeptVisit> {
+export async function cvtModelVisitToRezeptVisit(
+  visitEx: VisitEx,
+  hokenCollector: HokenCollector,
+): Promise<RezeptVisit> {
   return {
     visitedAt: visitEx.visitedAt.substring(0, 10),
     shinryouList: visitEx.shinryouList.map(shinryou => cvtToRezeptShinryou(shinryou, visitEx.hoken, hokenCollector)),
@@ -699,38 +720,40 @@ export function createHokensha(shahokokuho: Shahokokuho | undefined, koukikourei
       isHonnin: shahokokuho.honninStore !== 0,
       isKoureiJukyuusha: shahokokuho.koureiStore > 0,
       edaban: shahokokuho.edaban,
+      payer: mkHokenPayer(),
     }
   } else if (koukikourei) {
     return {
       futanWari: koukikourei.futanWari,
       hokenshaBangou: parseInt(koukikourei.hokenshaBangou),
       hihokenshaBangou: koukikourei.hihokenshaBangou,
+      payer: mkHokenPayer(),
     }
   } else {
     return undefined;
   }
 }
 
-export function createRezeptKouhi(src: Kouhi): RezeptKouhi {
-  return {
-    futansha: src.futansha,
-    jukyuusha: src.jukyuusha,
-  }
-}
+// export function createRezeptKouhi(src: Kouhi): RezeptKouhi {
+//   return {
+//     futansha: src.futansha,
+//     jukyuusha: src.jukyuusha,
+//   }
+// }
 
 export function createKouhiContextFromVisits(visits: VisitEx[]): KouhiContext {
   let ctx: KouhiContext = {};
-  for(let visit of visits){
+  for (let visit of visits) {
     const attr = visit.attributes;
-    if( attr) {
-      ifExists(attr.nanbyouGendogaku, gendo => ctx.nanbyouGendogaku = gendo )
+    if (attr) {
+      ifExists(attr.nanbyouGendogaku, gendo => ctx.nanbyouGendogaku = gendo)
     }
   }
   return ctx;
 }
 
 function ifExists<T>(arg: T | undefined, f: (t: T) => void) {
-  if( arg !== undefined ){
+  if (arg !== undefined) {
     f(arg);
   }
 }
