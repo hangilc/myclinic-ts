@@ -2,7 +2,7 @@ import CashierDialog from "@/cashier/CashierDialog.svelte";
 import { newPatient } from "@cypress/lib/patient";
 import { getVisitEx, startVisit } from "@cypress/lib/visit";
 import { Charge, type Patient, type Visit, type VisitEx } from "myclinic-model";
-import { type Meisai } from "@/lib/rezept-meisai";
+import { MeisaiWrapper, type Meisai } from "@/lib/rezept-meisai";
 import shinryouNames from "@cypress/fixtures/shinryou-set1.json";
 import { batchResolveShinryoucodeByName } from "@cypress/lib/masters";
 import { batchEnterShinryou } from "@cypress/lib/shinryou";
@@ -33,9 +33,15 @@ describe("CashierDialog", () => {
     })
     cy.get<Patient>("@patient").then(patient => {
       cy.get<VisitEx>("@visitEx").then(visit => {
-        cy.wrap<Meisai>(calcRezeptMeisai(visit.visitId)).then(meisai => {
-
-        });
+        cy.wrap(calcMeisai(visit.visitId)).then((meisai: any) => {
+          const charge = new Charge(visit.visitId, meisai.charge);
+          const props = {
+            patient, visit, meisai, charge,
+            destroy: () => { }
+          };
+          cy.mount(CashierDialog, { props });
+          cy.get(".detail-wrapper").invoke("outerHeight").should("be.lt", 300);
+        })
         // cy.get<Meisai>("@meisai").then(meisai => {
         //   const charge = new Charge(visit.visitId, meisai.charge);
         //   const props = {
@@ -57,7 +63,7 @@ describe("CashierDialog", () => {
     });
     cy.get<Visit>("@visit").then(visit => {
       getVisitEx(visit.visitId).as("visitEx");
-      getMeisai(visit.visitId).as("meisai")
+      // getMeisai(visit.visitId).as("meisai")
     });
     const f = {
       receiptHook: (data: ReceiptDrawerData) => {
@@ -69,7 +75,7 @@ describe("CashierDialog", () => {
     cy.intercept("GET", "http://localhost:48080/pref/receipt", "null");
     cy.get<Patient>("@patient").then(patient => {
       cy.get<VisitEx>("@visitEx").then(visit => {
-        cy.get<Meisai>("@meisai").then(meisai => {
+        cy.wrap(calcMeisai(visit.visitId)).then((meisai: any) => {
           const charge = new Charge(visit.visitId, 1000);
           const props = {
             patient, visit, meisai, charge,
@@ -85,6 +91,6 @@ describe("CashierDialog", () => {
   });
 })
 
-async function calcMeisai(visitId: number): Promise<Meisai> {
-  return calcRezeptMeisai(visitId);
+function calcMeisai(visitId: number): Promise<MeisaiWrapper> {
+  return calcRezeptMeisai(visitId).then(meisai => new MeisaiWrapper(meisai));
 }
