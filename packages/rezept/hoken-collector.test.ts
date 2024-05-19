@@ -1,4 +1,4 @@
-import { mkHokenPayer, mkKouhiHibakusha, mkKouhiSeishinTsuuin } from "futan/calc";
+import { mkHokenPayer, mkKouhiHibakusha, mkKouhiSeishinTsuuin } from "./futan/calc";
 import { unifyHokenList, futanKubunNameByHokenCollection, futanKubunCodeByHokenCollection } from "./hoken-collector";
 import { Hokensha, RezeptKouhi } from "./rezept-types";
 

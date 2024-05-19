@@ -1,5 +1,6 @@
+import { Payer, PaymentSetting, calcPayments } from "./futan/calc";
 import { calcVisits } from "./calc-visits";
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード } from "./codes";
+import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード, 負担区分コードNameOf } from "./codes";
 import { resolveFutankubunOfVisitComment } from "./helper";
 import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "./record-creators";
 import { mkコメントレコード } from "./records/comment-record";
@@ -9,10 +10,11 @@ import { mk症状詳記レコード } from "./records/shoujoushouki-record";
 import { ClinicInfo, HokenSelector, Hokensha, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptVisit } from "./rezept-types";
 import { Combiner } from "./tekiyou-item";
 import { TensuuCollector } from "./tensuu-collector";
+import { futanKubunNameToHokenCollection } from "./hoken-collector";
 
 export interface PatientUnit {
   getRows(serial: number): string[];
-  hasHoken(): boolean ;
+  hasHoken(): boolean;
   getKouhiListLength(): number;
   getSouten(): number;
 }
@@ -61,9 +63,11 @@ export interface RezeptUnitToPatientUnitOption {
 }
 
 export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number,
-    opt: RezeptUnitToPatientUnitOption = {}): PatientUnit {
-  console.log("rezeptUnitToPatientUnit");
+  opt: RezeptUnitToPatientUnitOption = {}, ctx: Partial<PaymentSetting> = {}): PatientUnit {
   const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = rezeptUnit;
+  if (!hokensha) {
+    throw new Error("No hokensha");
+  }
   const rows: string[] = [];
   if (visits.length === 0) {
     throw new Error("No visits");
@@ -71,11 +75,11 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
   const tenCol = new TensuuCollector();
   const comb = new Combiner();
   calcVisits(visits, tenCol, comb);
+  doCalcPayments(hokensha, kouhiList, tenCol, ctx);
   if (hokensha) {
     const hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
     rows.push(create保険者レコード(hokensha, visits, tenCol.getHokenTotal(), hokenFutan));
   }
-  console.log("kouhiList", kouhiList);
   if (kouhiList.length > 0) {
     const kouhiTotals: number[] = tenCol.getKouhiTotals();
     kouhiList.forEach((kouhi, index) => {
@@ -129,7 +133,7 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
         文字データ: comm.text,
       }))
     })
-  } 
+  }
   return {
     getRows(serial: number): string[] {
       return [
@@ -148,4 +152,21 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
       return tenCol.getRezeptSouten();
     }
   }
+}
+
+function doCalcPayments(hokensha: Hokensha, kouhiList: RezeptKouhi[], tencol: TensuuCollector, ctx: Partial<PaymentSetting>) {
+  const bills: [number, Payer[]][] = [];
+  for (let [kubun, ten] of tencol.totalTen.entries()) {
+    const kubunName = 負担区分コードNameOf(kubun);
+    const h = futanKubunNameToHokenCollection(kubunName, hokensha, kouhiList);
+    const payers: Payer[] = [];
+    if (h.hokensha != undefined) {
+      payers.push(h.hokensha.payer);
+    }
+    payers.push(...h.kouhiList.map(k => k.payer));
+    bills.push([ten, payers]);
+  }
+  calcPayments(bills, ctx);
+  console.log("hoken payment", hokensha?.payer.payment);
+  console.log("kouhi payments", kouhiList.map(k => JSON.stringify(k.payer.payment)).join("\n"));
 }

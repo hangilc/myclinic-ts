@@ -18,7 +18,6 @@ export class TensuuCollector {
   getKouhiTotals(): number[] {
     let totals = [0, 0, 0, 0];
     this.traverse((key, ten) => {
-      console.log("key", key, ten);
       for (let i = 1; i <= 4; i++) {
         if (key.includes(i.toString())) {
           totals[i - 1] += ten;

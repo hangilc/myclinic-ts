@@ -93,9 +93,9 @@ export class DateWrapper {
   }
 
   static from(arg: DateWrapperLike): DateWrapper {
-    if( arg instanceof DateWrapper ){
+    if (arg instanceof DateWrapper) {
       return arg;
-    } else if( arg instanceof Date ){
+    } else if (arg instanceof Date) {
       return new DateWrapper(arg);
     } else {
       return DateWrapper.fromSqlDate(arg);
@@ -113,18 +113,23 @@ export function calcAge(birthdate: DateWrapperLike, at: DateWrapperLike = new Da
   birthdate = DateWrapper.from(birthdate);
   at = DateWrapper.from(at);
   let age = at.getYear() - birthdate.getYear();
-  if( compare(at.monthDayTuple(), birthdate.monthDayTuple()) < 0 ) {
+  if (compare(at.monthDayTuple(), birthdate.monthDayTuple()) < 0) {
     age -= 1;
   }
   return age;
 }
 
+export function sqlDateToDate(sqlDate: string): Date {
+  const obj = sqlDateToObject(sqlDate);
+  return new Date(obj.year, obj.month, obj.day);
+}
 
-function sqlDateToDate(sqlDate: string): Date {
-  const year = parseInt(sqlDate.substring(0, 4));
-  const month = parseInt(sqlDate.substring(5, 7)) - 1;
-  const day = parseInt(sqlDate.substring(8, 10));
-  return new Date(year, month, day);
+export function sqlDateToObject(sqlDate: string): { year: number, month: number, day: number } {
+  return {
+    year: parseInt(sqlDate.substring(0, 4)),
+    month: parseInt(sqlDate.substring(5, 7)) - 1,
+    day: parseInt(sqlDate.substring(8, 10)),
+  }
 }
 
 function incYear(date: Date, amount: number): Date {
@@ -138,8 +143,8 @@ function incMonth(date: Date, amount: number): Date {
   const day = date.getDate();
   date.setDate(1);
   date.setMonth(date.getMonth() + amount);
-  const lastDay = lastDayOfMonth(date.getFullYear(), date.getMonth()+1);
-  if( day > lastDay ){
+  const lastDay = lastDayOfMonth(date.getFullYear(), date.getMonth() + 1);
+  if (day > lastDay) {
     date.setDate(lastDay);
   } else {
     date.setDate(day);

@@ -1,6 +1,6 @@
 import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type Shinryou, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, type KizaiMaster, type Meisai } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
-import type { RezeptUnit } from "myclinic-rezept";
+// import type { RezeptUnit } from "myclinic-rezept";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
 import type { Hokensha, RezeptConduct, RezeptConductDrug, RezeptConductKizai, RezeptConductShinryou, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptShinryou, RezeptVisit } from "myclinic-rezept/rezept-types";
@@ -10,8 +10,10 @@ import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { firstAndLastDayOf } from "./util";
 import type { KouhiContext } from "./resolve-payer";
-import { mkHokenHairyosochi, mkHokenPayer, type Payer } from "myclinic-rezept/futan/calc";
-import { HokenRegistry, KouhiRegistry } from "./rezept-meisai";
+import { mkHokenHairyosochi, mkHokenPayer, type Payer, type PaymentSetting } from "myclinic-rezept/futan/calc";
+import { HokenRegistry, KouhiRegistry, createPaymentSetting, getFutanWari } from "./rezept-meisai";
+import type { Hoken } from "@/cashier/patient-dialog/hoken";
+import { sqlDateToObject } from "myclinic-util";
 
 // import type { CalcItem } from "myclinic-rezept";
 
@@ -80,6 +82,16 @@ import { HokenRegistry, KouhiRegistry } from "./rezept-meisai";
 //     }
 //   }
 // }
+
+export interface RezeptUnit {
+  visits: RezeptVisit[];
+  patient: RezeptPatient;
+  hokensha: Hokensha | undefined;
+  kouhiList: RezeptKouhi[];
+  shotokuKubun: ShotokuKubunCode | undefined;
+  diseases: RezeptDisease[];
+  paymentSetting: Partial<PaymentSetting>;
+}
 
 const KouhiOrder: number[] = [
   13, 14, 18, 29, 30, 10, 11, 20, 21, 15,
@@ -338,6 +350,14 @@ async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: s
   return result;
 }
 
+function shahokokuhoOrKoukikourei(hoken: HokenInfo): Shahokokuho | Koukikourei {
+  const ret = hoken.shahokokuho ?? hoken.koukikourei;
+  if (ret == undefined) {
+    throw new Error("No hoken");
+  }
+  return ret;
+}
+
 export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit> {
   if (modelVisits.length === 0) {
     throw new Error("Cannot happen");
@@ -348,6 +368,8 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   hokenCollector.scanVisits(visitExList);
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
+  const futanWari = getFutanWari(shahokokuhoOrKoukikourei(
+    visitExList[0].hoken), visitExList[0].visitedAt, visitExList[0].patient.birthday)
   const hokensha: Hokensha | undefined = createHokensha(hokenCollector.shahokokuho, hokenCollector.koukikourei);
   if (hokensha) {
     hokensha.edaban = await resolveEdaban(modelVisits);
@@ -390,6 +412,13 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
   const [firstDay, lastDay] = firstAndLastDayOf(visitedAt);
   const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
+  const paymentSetting: Partial<PaymentSetting> = createPaymentSetting(
+    futanWari, 
+    Object.assign({}, sqlDateToObject(modelVisits[0].visitedAt), { day: undefined }),
+    sqlDateToObject(visitExList[0].patient.birthday),
+    modelVisits,
+    shotokuKubun,
+  );
   return {
     visits,
     patient,
@@ -397,6 +426,7 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
     kouhiList,
     shotokuKubun,
     diseases,
+    paymentSetting,
   }
 }
 

@@ -3,12 +3,15 @@
   import api from "@/lib/api";
   import type { ClinicInfo, Visit } from "myclinic-model";
   import { listKouhi } from "./list-kouhi";
-  import type { PatientUnit, RezeptUnit } from "myclinic-rezept";
+  import type { PatientUnit } from "myclinic-rezept";
   import {
     RezeptFrame,
     rezeptUnitToPatientUnit,
   } from "myclinic-rezept";
-  import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient } from "@/lib/rezept-adapter";
+  import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient, type RezeptUnit } from "@/lib/rezept-adapter";
+  import { createPaymentSetting } from "@/lib/rezept-meisai";
+  import type { PaymentSetting } from "myclinic-rezept/futan/calc";
+  import { sqlDateToObject } from "myclinic-util";
 
   export let isVisible: boolean;
   let year: number;
@@ -56,7 +59,7 @@
     );
     const frame = new RezeptFrame(shiharaiSelect, year, month, clinicInfo);
     for (const unit of units) {
-      const patientUnit = rezeptUnitToPatientUnit(unit, year, month);
+      const patientUnit = rezeptUnitToPatientUnit(unit, year, month, {}, unit.paymentSetting);
       frame.add(patientUnit);
     }
     for (const unit of parseHenreiData()) {
@@ -66,6 +69,7 @@
     frame.finish();
     return frame.output();
   }
+
 
   async function doStart() {
     preShow = await createContent();

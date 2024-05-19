@@ -73,6 +73,25 @@ export function futanKubunNameByHokenCollection(
   }
 }
 
+export function futanKubunNameToHokenCollection(
+  kubun: 負担区分コードName,
+  hokensha: Hokensha | undefined, kouhiList: RezeptKouhi[]): { hokensha: Hokensha | undefined, kouhiList: RezeptKouhi[] } {
+  const result: { hokensha: Hokensha | undefined, kouhiList: RezeptKouhi[] } = {
+    hokensha: undefined,
+    kouhiList: []
+  }
+  kubun.split("").forEach(k => {
+    switch (k) {
+      case "H": { result.hokensha = hokensha; break; }
+      case "1": { result.kouhiList.push(kouhiList[0]); break; }
+      case "2": { result.kouhiList.push(kouhiList[1]); break; }
+      case "3": { result.kouhiList.push(kouhiList[2]); break; }
+      case "4": { result.kouhiList.push(kouhiList[3]); break; }
+    }
+  })
+  return result;
+}
+
 export function futanKubunCodeByHokenCollection(hc: HokenCollection, hokensha: Hokensha | undefined,
   kouhiList: RezeptKouhi[]
 ): 負担区分コードCode {

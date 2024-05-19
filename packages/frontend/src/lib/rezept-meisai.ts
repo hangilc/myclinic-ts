@@ -4,14 +4,14 @@ import api from "./api";
 import { calcVisits, Combiner, isHoukatsuGroup, TensuuCollector, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf, roundTo10 } from "myclinic-rezept";
 import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
 import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcPayments, mkHokenPayer, PaymentObject, type Payer, reorderPayers, PayerObject } from "myclinic-rezept/futan/calc";
+import { calcPayments, mkHokenPayer, PaymentObject, type Payer, reorderPayers, PayerObject, type PaymentSetting } from "myclinic-rezept/futan/calc";
 import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
 import { calcGendogaku, isUnder70, type GendogakuOptions, isBirthday75 } from "myclinic-rezept/gendogaku";
 import { calcAge } from "./calc-age";
 import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
 import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
-import { eqArray, type DateWrapperLike, groupBy, groupByGeneric } from "myclinic-util";
+import { eqArray, type DateWrapperLike, groupBy, groupByGeneric, sqlDateToObject } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
 import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
 import { resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
@@ -42,19 +42,19 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
 }
 
-function resolveTasuuGaitou(visits: VisitEx[]): boolean {
+function resolveTasuuGaitou(visits: Visit[]): boolean {
   return false;
 }
 
-function resolveMarucho(visits: VisitEx[]): number | undefined {
+function resolveMarucho(visits: Visit[]): number | undefined {
   return undefined;
 }
 
 function createKouhiContext(visits: VisitEx[]): KouhiContext {
   const ctx: KouhiContext = {};
   visits.map(visit => visit.attributes).forEach(attr => {
-    if( attr ){
-      if( attr.nanbyouGendogaku !== undefined ){
+    if (attr) {
+      if (attr.nanbyouGendogaku !== undefined) {
         ctx.nanbyouGendogaku = attr.nanbyouGendogaku;
       }
     }
@@ -79,9 +79,32 @@ function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: s
   const calcs: [number, Payer[]][] = grouped.map(([payers, items]) => [
     totalTenOfMeisaiItems(items) * 10, payers
   ])
-  const ym = parseSqldate(at);
-  const bd = parseSqldate(birthday);
-  calcPayments(calcs, {
+  const ym = sqlDateToObject(at);
+  const bd = sqlDateToObject(birthday);
+  calcPayments(calcs,
+    createPaymentSetting(futanWari, ym, bd, visits.map(v => v.asVisit), shotokuKubun)
+    //   {
+    //   futanWari,
+    //   isUnder70: isUnder70(ym.year, ym.month, bd.year, bd.month, bd.day),
+    //   isBirthdayMonth75: isBirthday75(ym.year, ym.month, bd.year, bd.month, bd.day),
+    //   shotokuKubun,
+    //   isTasuuGaitou: resolveTasuuGaitou(visits),
+    //   isNyuuin: false,
+    //   marucho: resolveMarucho(visits),
+    // }
+  );
+  const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
+  return PayerObject.jikofutanOf(payers);
+}
+
+export function createPaymentSetting(futanWari: number, rezeptYearMonth: { year: number, month: number },
+  birthdate: { year: number, month: number, day: number },
+  visits: Visit[],
+  shotokuKubun: ShotokuKubunCode | undefined,
+): Partial<PaymentSetting> {
+  const ym = rezeptYearMonth;
+  const bd = birthdate;
+  return {
     futanWari,
     isUnder70: isUnder70(ym.year, ym.month, bd.year, bd.month, bd.day),
     isBirthdayMonth75: isBirthday75(ym.year, ym.month, bd.year, bd.month, bd.day),
@@ -89,18 +112,16 @@ function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: s
     isTasuuGaitou: resolveTasuuGaitou(visits),
     isNyuuin: false,
     marucho: resolveMarucho(visits),
-  });
-  const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
-  return PayerObject.jikofutanOf(payers);
-}
-
-function parseSqldate(sqldate: string): { year: number, month: number, day: number } {
-  return {
-    year: parseInt(sqldate.substring(0, 4)),
-    month: parseInt(sqldate.substring(5, 7)),
-    day: parseInt(sqldate.substring(8, 10)),
   }
 }
+
+// export function parseSqldateToObject(sqldate: string): { year: number, month: number, day: number } {
+//   return {
+//     year: parseInt(sqldate.substring(0, 4)),
+//     month: parseInt(sqldate.substring(5, 7)),
+//     day: parseInt(sqldate.substring(8, 10)),
+//   }
+// }
 
 function mergePayers(payers: Payer[]): Payer[] {
   const list: Payer[] = [];
@@ -129,7 +150,7 @@ function visitToItems(
   return [[hokenPayer, ...kouhiPayers], visitToMeisaiItems(visit, at)];
 }
 
-function getFutanWari(hoken: Shahokokuho | Koukikourei, at: DateWrapperLike, birthdate: DateWrapperLike): number {
+export function getFutanWari(hoken: Shahokokuho | Koukikourei, at: DateWrapperLike, birthdate: DateWrapperLike): number {
   return resolveFutanWari(hoken, () => isUnder6(birthdate, at));
 }
 
@@ -436,7 +457,6 @@ export class KouhiRegistry {
     let payer = this.registry.get(kouhi.kouhiId);
     if (payer === undefined) {
       payer = resolveKouhiPayer(kouhi, ctx)
-      console.log("kouhiPayer", payer);
       this.registry.set(kouhi.kouhiId, payer);
     }
     return payer;
