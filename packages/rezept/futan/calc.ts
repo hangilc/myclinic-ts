@@ -115,6 +115,7 @@ function mergePayment(self: Payment, arg: Payment) {
   }
   self.kakari += arg.kakari;
   self.payment += arg.payment;
+  self.gendogakuReached ||= arg.gendogakuReached;
 }
 
 function collectHoubetsuBangou(payers: Payer[]): number[] {
@@ -320,6 +321,7 @@ export function mkHokenHairyosochi(): Payer {
 }
 
 export function mkKouhiNanbyou(gendogaku: number): Payer {
+  console.log("gendogaku", gendogaku);
   return mkPayer("nanbyou", 54, (bill: number, ctx: PaymentContext) => {
     let jikofutan = bill;
     const futanWari = ctx.futanWari;
@@ -327,7 +329,9 @@ export function mkKouhiNanbyou(gendogaku: number): Payer {
       const hoken = getPaymentByKind("hoken", ctx.currentPayments);
       jikofutan = hoken.kakari * 2 / 10.0;
     }
+    console.log("jikofutan", jikofutan, gendogaku, jikofutan > gendogaku);
     if (jikofutan > gendogaku) {
+      console.log("reached");
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
       return { payment: bill - jikofutan };

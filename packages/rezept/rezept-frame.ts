@@ -164,7 +164,7 @@ function doCalcPayments(hokensha: Hokensha, kouhiList: RezeptKouhi[], tencol: Te
       payers.push(h.hokensha.payer);
     }
     payers.push(...h.kouhiList.map(k => k.payer));
-    bills.push([ten, payers]);
+    bills.push([ten * 10, payers]);
   }
   calcPayments(bills, ctx);
   console.log("hoken payment", hokensha?.payer.payment);

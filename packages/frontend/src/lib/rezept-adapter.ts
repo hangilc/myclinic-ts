@@ -363,7 +363,6 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
     throw new Error("Cannot happen");
   }
   const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
-  const kouhiRegistry = new KouhiRegistry();
   const hokenCollector = new HokenCollector();
   hokenCollector.scanVisits(visitExList);
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
@@ -374,7 +373,9 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   if (hokensha) {
     hokensha.edaban = await resolveEdaban(modelVisits);
   }
+  const kouhiRegistry = new KouhiRegistry();
   const kouhiContext: KouhiContext = createKouhiContextFromVisits(visitExList);
+  console.log("kouhiContext", kouhiContext);
   const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => {
     const payer: Payer = kouhiRegistry.get(kouhi, kouhiContext);
     return {
