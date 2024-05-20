@@ -77,7 +77,11 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
   calcVisits(visits, tenCol, comb);
   doCalcPayments(hokensha, kouhiList, tenCol, ctx);
   if (hokensha) {
-    const hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
+    let hokenFutan: number | undefined = undefined; // ToDo: 限度額に達した場合に設定
+    if( hokensha.payer.payment.gendogakuReached ){
+      const payment = hokensha.payer.payment;
+      hokenFutan = payment.kakari - payment.payment;
+    }
     rows.push(create保険者レコード(hokensha, visits, tenCol.getHokenTotal(), hokenFutan));
   }
   if (kouhiList.length > 0) {
@@ -91,7 +95,12 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
         case 3: sel = "4"; break;
         default: throw new Error("Too many kouhi.");
       }
-      rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], undefined));
+      let futanKingaku: number | undefined = undefined;
+      if( kouhi.payer.payment.gendogakuReached ){
+      const payment = kouhi.payer.payment;
+        futanKingaku = payment.kakari - payment.payment;
+      }
+      rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], futanKingaku));
     })
   }
   if (hokensha && hokensha.edaban !== undefined) {
@@ -167,6 +176,6 @@ function doCalcPayments(hokensha: Hokensha, kouhiList: RezeptKouhi[], tencol: Te
     bills.push([ten * 10, payers]);
   }
   calcPayments(bills, ctx);
-  console.log("hoken payment", hokensha?.payer.payment);
-  console.log("kouhi payments", kouhiList.map(k => JSON.stringify(k.payer.payment)).join("\n"));
+  // console.log("hoken payment", hokensha?.payer.payment);
+  // console.log("kouhi payments", kouhiList.map(k => JSON.stringify(k.payer.payment)).join("\n"));
 }

@@ -375,7 +375,6 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   }
   const kouhiRegistry = new KouhiRegistry();
   const kouhiContext: KouhiContext = createKouhiContextFromVisits(visitExList);
-  console.log("kouhiContext", kouhiContext);
   const kouhiList: RezeptKouhi[] = hokenCollector.kouhiList.map(kouhi => {
     const payer: Payer = kouhiRegistry.get(kouhi, kouhiContext);
     return {
