@@ -96,7 +96,7 @@
     downloadLink.download = fixedFileName;
   }
 
-  function parseSeikyuu(src: string): { year: number, month: number, patientId: number, serial: number, searchNumber: number } {
+  function parseSeikyuu(src: string): { year: number, month: number, patientId: number, serial: number, searchNumber: string } {
     const lines: string[] = src.split(/\r?\n/);
     for(let line of lines){
       if( line.startsWith("RE") ){
@@ -107,7 +107,7 @@
           month: parseInt(item.substring(4, 6)),
           patientId: parseInt(toks[13]),
           serial: parseInt(toks[1]),
-          searchNumber: parseInt(toks[18]),
+          searchNumber: toks[18],
         }
       }
     }
@@ -194,6 +194,10 @@
 </div>
 
 <style>
+  textarea {
+    resize:vertical;
+  }
+
   .import-data {
     width: 80ch;
     height: 20ch;

@@ -59,7 +59,7 @@ export interface RezeptUnit {
 }
 
 export interface RezeptUnitToPatientUnitOption {
-  searchNumber?: number;
+  searchNumber?: string;
 }
 
 export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number,

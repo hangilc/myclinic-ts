@@ -31,7 +31,7 @@ export function createレセプト共通レコード(
   patient: RezeptPatient,
   visits: RezeptVisit[],
   shotokuKubun: ShotokuKubunCode | undefined,
-  searchNumber?: number,
+  searchNumber?: string,
 ): string {
   const tokkijikouGendo = resolveGendogakuTokkiJikou(hokensha, shotokuKubun);
   return mkレセプト共通レコード({
@@ -44,7 +44,7 @@ export function createレセプト共通レコード(
     給付割合: optionFold(hokensha, commonRecord給付割合, ""),
     レセプト特記事項: tokkijikouGendo ?? "",
     カルテ番号等: patient.patientId,
-    検索番号: searchNumber == undefined ? "" : searchNumber.toString(),
+    検索番号: searchNumber == undefined ? "" : searchNumber,
     請求情報: "",
   });
 }
