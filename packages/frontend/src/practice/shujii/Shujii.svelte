@@ -1,6 +1,5 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawShujii } from "@/lib/drawer/forms/shujii/shujii-drawer";
 
@@ -14,7 +13,6 @@
     detail: "",
   };
   let ops: Op[] = drawShujii(dataMap);
-  let refresh: () => void;
 
   loadClinicInfo();
 
@@ -26,8 +24,6 @@
     dataMap.phone = clinicInfo.tel;
     dataMap.fax = clinicInfo.fax;
     ops = drawShujii(dataMap);
-    refresh();
-
   }
 </script>
 
@@ -51,15 +47,6 @@
     <span>detail</span><input type="text" bind:value={dataMap["detail"]} />
   </div>
 {/if}
-
-<DrawerSvg
-  {ops}
-  width="210px"
-  height="297px"
-  viewBox="0 0 210 297"
-  displayWidth={`${210 * 1.5}px`}
-  displayHeight={`${297 * 1.5}px`}
-/>
 
 <style>
   .title {
