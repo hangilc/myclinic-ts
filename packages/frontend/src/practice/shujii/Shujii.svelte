@@ -1,13 +1,10 @@
 <script lang="ts">
+  import api from "@/lib/api";
   import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawShujii } from "@/lib/drawer/forms/shujii/shujii-drawer";
 
   export let isVisible: boolean = false;
-  let ops: Op[] = [];
-
-  ops = drawShujii();
-
   let dataMap: ShujiiDrawerData = {
     doctorName: "",
     clinicName: "",
@@ -16,6 +13,22 @@
     fax: "",
     detail: "",
   };
+  let ops: Op[] = drawShujii(dataMap);
+  let refresh: () => void;
+
+  loadClinicInfo();
+
+  async function loadClinicInfo() {
+    const clinicInfo = await api.getClinicInfo();
+    dataMap.doctorName = clinicInfo.doctorName;
+    dataMap.clinicName = clinicInfo.name;
+    dataMap.clinicAddress = clinicInfo.address;
+    dataMap.phone = clinicInfo.tel;
+    dataMap.fax = clinicInfo.fax;
+    ops = drawShujii(dataMap);
+    refresh();
+
+  }
 </script>
 
 {#if isVisible}
