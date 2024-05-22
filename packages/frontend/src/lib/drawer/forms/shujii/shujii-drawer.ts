@@ -38,5 +38,5 @@ function rightBox(ctx: DC, box: Box) {
 }
 
 function detail(ctx: DC, box: Box) {
-  c.mark(ctx, "detail", b.modify(box, b.inset(2, 1, 2, 0)), { font: "regular" });
+  c.mark(ctx, "detail", b.modify(box, b.inset(2, 1, 2, 0)), { font: "regular", paragraph: true });
 }

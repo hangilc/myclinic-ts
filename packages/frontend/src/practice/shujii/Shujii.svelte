@@ -5,6 +5,7 @@
   import { drawShujii } from "@/lib/drawer/forms/shujii/shujii-drawer";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 
   export let isVisible: boolean = false;
   let patient: Patient | undefined = undefined;
@@ -33,7 +34,8 @@
 
   async function initPatient(init: Patient) {
     patient = init;
-    masterText = await api.getShujiiMasterText(init);
+    masterText = await api.getShujiiMasterText(init.patientId);
+    dataMap.detail = "";
   }
 
   function doSelectPatient() {
@@ -45,6 +47,28 @@
         onEnter: initPatient,
       }
     })
+  }
+
+  function doDisplay() {
+    const ops = drawShujii(dataMap);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        ops,
+        destroy: () => d.$destroy(),
+        width: 210 * 1.5,
+        height: 297 * 1.5,
+        viewBox: "0 0 210 297",
+        scale: 1.5,
+      },
+    });
+  }
+
+  async function doSave() {
+    if( patient ){
+      await api.saveShujiiMasterText(patient, masterText);
+      console.log("master text saved");
+    }
   }
 </script>
 
@@ -61,6 +85,9 @@
     </div>
     <div>
       <textarea bind:value={masterText} />
+    </div>
+    <div>
+      <button on:click={doSave}>保存</button>
     </div>
   </div>
   <div class="data-input">
@@ -80,6 +107,9 @@
     <span>fax</span><input type="text" bind:value={dataMap["fax"]} />
     <span>detail</span><input type="text" bind:value={dataMap["detail"]} />
   </div>
+  <div>
+    <button on:click={doDisplay}>表示</button>
+  </div>
 {/if}
 
 <style>
@@ -90,5 +120,10 @@
 
   .data-input > span {
     display: block;
+  }
+
+  textarea {
+    width: 720px;
+    height: 300px;
   }
 </style>
