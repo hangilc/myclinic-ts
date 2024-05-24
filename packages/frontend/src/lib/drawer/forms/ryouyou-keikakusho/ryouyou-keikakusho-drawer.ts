@@ -1,6 +1,7 @@
 import type { Op } from "../../compiler/op";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
+import * as p from "../../compiler/composite-item";
 import { mkDrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
@@ -33,7 +34,7 @@ function setupFonts(ctx: DC) {
 }
 
 function setupPens(ctx: DC) {
-  c.createPen(ctx, "thick", 0, 0, 0, 0.8);
+  c.createPen(ctx, "thick", 0, 0, 0, 0.6);
   c.createPen(ctx, "thin", 0, 0, 0, 0.2);
 }
 
@@ -43,8 +44,8 @@ function drawUpperArea(ctx: DC, box: Box) {
   c.drawText(ctx, "生活習慣病　療養計画書　初回用", box, "left", "bottom");
   const right: Box = b.modify(box, b.setWidth(80, "right"));
   c.drawComposite(ctx, right, [
-    { kind: "text", text: "（記入日：" }, 
-    { kind: "gap-to", at: 32, mark: "issue-year" },
+    p.text("（記入日："),
+    p.gapTo(32, { mark: "issue-year" }),
     { kind: "text", text: "年" },
     { kind: "gap-to", at: 50, mark: "issue-month" },
     { kind: "text", text: "月" },
@@ -59,6 +60,14 @@ function drawMiddleArea(ctx: DC, box: Box) {
   drawMiddleUpperRight(ctx, upperRight);
   c.setPen(ctx, "thick");
   c.rect(ctx, lower);
+  const rows = b.splitToRows(lower, b.splitAt(5, 50, 158));
+  rows.forEach(r => c.frameBottom(ctx, r));
+  c.setFont(ctx, "f4");
+  c.drawText(ctx, "ねらい：検査結果を理解できること・自分の生活上の問題点を抽出し、目標を設定できること",
+    rows[0], "center", "center", { dy: -0.25 });
+  drawMokuhyou(ctx, rows[1]);
+  drawJuuten(ctx, rows[2]);
+  drawKensa(ctx, rows[3]);
 }
 
 function drawMiddleUpperLeft(ctx: DC, box: Box) {
@@ -83,21 +92,21 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
     { kind: "text", text: "生年月日：" },
     { kind: "text", text: "明", mark: "birthdate-gengou-meiji" },
     { kind: "text", text: "・" },
-    { kind: "text", text: "大", mark: "birthdate-gengou-taishou"  },
+    { kind: "text", text: "大", mark: "birthdate-gengou-taishou" },
     { kind: "text", text: "・" },
-    { kind: "text", text: "昭", mark: "birthdate-gengou-shouwa"  },
+    { kind: "text", text: "昭", mark: "birthdate-gengou-shouwa" },
     { kind: "text", text: "・" },
-    { kind: "text", text: "平", mark: "birthdate-gengou-heisei"  },
+    { kind: "text", text: "平", mark: "birthdate-gengou-heisei" },
     { kind: "text", text: "・" },
-    { kind: "text", text: "令", mark: "birthdate-gengou-reiwa"  },
+    { kind: "text", text: "令", mark: "birthdate-gengou-reiwa" },
     { kind: "gap-to", at: 59, mark: "birthdate-nen" },
-    { kind: "text", text: "年"},
+    { kind: "text", text: "年" },
     { kind: "gap-to", at: 72, mark: "birthdate-month" },
-    { kind: "text", text: "月"},
+    { kind: "text", text: "月" },
     { kind: "gap-to", at: 84, mark: "birthdate-day" },
-    { kind: "text", text: "日生（"},
+    { kind: "text", text: "日生（" },
     { kind: "gap-to", at: 101 },
-    { kind: "text", text: "才）"},
+    { kind: "text", text: "才）" },
   ])
 }
 
@@ -106,7 +115,7 @@ function drawMiddleUpperRight(ctx: DC, box: Box) {
     return [
       { kind: "box", mark, pen: "thin", inset: 0.3 },
       { kind: "gap", width: 1 },
-      { kind: "text", text: label},
+      { kind: "text", text: label },
     ];
   }
 
@@ -124,6 +133,65 @@ function drawMiddleUpperRight(ctx: DC, box: Box) {
   ], { valign: "center", dy: -0.6 });
 }
 
+function drawMokuhyou(ctx: DC, box: Box) {
+  function boxed(label: string, mark: string): c.CompositeItem[] {
+    return [
+      { kind: "box", mark, pen: "thin", inset: 0.3 },
+      { kind: "gap", width: 1 },
+      { kind: "text", text: label },
+    ];
+  }
+
+  const cols = b.splitToColumns(box, b.splitAt(7));
+  c.setPen(ctx, "thick");
+  c.frameRight(ctx, cols[0]);
+  c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
+  const rows = b.splitToRows(cols[1], b.splitAt(12, 29));
+  {
+    const box = b.modify(rows[0], b.inset(1));
+    c.drawText(ctx, "【目標】", box, "left", "top");
+    b.withSplitRows(b.modify(rows[0], b.shrinkHoriz(17, 0)), b.evenSplitter(2), ([upper, lower]) => {
+      c.drawComposite(ctx, upper, [
+        ...boxed("体重(", "mokuhyou-体重-mark"),
+        p.gap(11, { mark: "mokuhyou-体重" }),
+        p.text("kg)"),
+        p.gap(3),
+        ...boxed("BMI:(", "mokuhyou-BMI-mark"),
+        p.gap(14, { mark: "mokuhyou-BMI" }),
+        p.text(")"),
+        p.gap(5),
+        ...boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
+        p.gap(22, { mark: "mokuhyou-bp" }),
+        p.text("mmHg)")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, lower, [
+        ...boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
+        p.gap(20, { mark: "mokuhyou-BP"}),
+        p.text("%)"),
+      ], { dy: -0.6 });
+    })
+  }
+}
+
+function drawJuuten(ctx: DC, box: Box) {
+  const cols = b.splitToColumns(box, b.splitAt(7));
+  c.setPen(ctx, "thick");
+  c.frameRight(ctx, cols[0]);
+  c.drawTextVertically(ctx, "︻重点を置く領域と指導項目︼", cols[0], "center", "center");
+
+}
+
+function drawKensa(ctx: DC, box: Box) {
+  const cols = b.splitToColumns(box, b.splitAt(7));
+  c.setPen(ctx, "thick");
+  c.frameRight(ctx, cols[0]);
+  c.drawTextVertically(ctx, "︻検査︼", cols[0], "center", "center");
+  // c.drawTextVertically(ctx, "┌│└", cols[0], "center", "center");
+
+}
+
 function drawLowerArea(ctx: DC, box: Box) {
 
 }
+
+// ︻ ︼

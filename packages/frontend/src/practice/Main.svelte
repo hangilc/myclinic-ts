@@ -12,7 +12,7 @@
   import FaxShohousen from "./fax-shohousen/FaxShohousen.svelte";
   import HoumonKango from "./houmon-kango/HoumonKango.svelte";
   import Shujii from "./shujii/Shujii.svelte";
-  import RYouyouKeikakusho from "./ryouyou-keikakusho/RYouyouKeikakusho.svelte";
+  import RYouyouKeikakusho from "./ryouyou-keikakusho/RyouyouKeikakusho.svelte";
 
   export let serviceStore: Writable<string>;
 

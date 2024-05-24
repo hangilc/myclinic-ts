@@ -13,5 +13,5 @@
 
 {#if isVisible}
   <!-- <DrawerSvg {ops} width="420" height="594" viewBox="0 0 210 297" /> -->
-  <DrawerSvg {ops} width="630" height="891" viewBox="0 0 210 297" />
+  <DrawerSvg {ops} width="840" height="1188" viewBox="0 0 210 297" />
 {/if}

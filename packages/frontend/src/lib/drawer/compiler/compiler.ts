@@ -305,7 +305,12 @@ export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, h
   }
   for (let i = 0; i < text.length; i++) {
     const ch = text.charAt(i);
-    drawChars(ctx, ch, [x], [y]);
+    if( ch === "╭" || ch === "╰" ){
+      const fontSize = currentFontSize(ctx);
+      drawChars(ctx, ch, [x+fontSize*0.25], [y]);
+    } else {
+      drawChars(ctx, ch, [x], [y]);
+    }
     y += fontSize + opt.interCharsSpace;
   }
 }
