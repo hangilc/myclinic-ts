@@ -95,7 +95,7 @@ export function getCurrentFont(ctx: DrawerContext): string {
 
 export function mark(ctx: DrawerContext, key: string, box: Box, ropt?: DataRendererOpt) {
   ctx.marks[key] = box;
-  if( ropt ){
+  if (ropt) {
     ctx.dataRenderOptions[key] = ropt;
   }
 }
@@ -618,20 +618,30 @@ export interface TextByFont {
   dy?: number;
 }
 
-export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont;
+export interface CompositeBox {
+  kind: "box";
+  mark?: string;
+  pen?: string;
+  inset?: number;
+}
+
+export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont | CompositeBox;
 
 export interface DrawCompositeOptionArg {
   halign?: HAlign;
   valign?: VAlign;
+  dy?: number;
 }
 
 class DrawCompositeOption {
   halign: HAlign;
   valign: VAlign;
+  dy: number;
 
   constructor(arg: DrawCompositeOptionArg) {
     this.halign = arg.halign ?? "left";
     this.valign = arg.valign ?? "center";
+    this.dy = arg.dy ?? 0;
   }
 }
 
@@ -650,6 +660,11 @@ export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[]): numb
       }
       case "text-by-font": {
         w += textWidthWithFont(ctx, comp.text, comp.fontName);
+        break;
+      }
+      case "box": {
+        const fontSize = currentFontSize(ctx);
+        w += fontSize;
         break;
       }
       default: {
@@ -683,7 +698,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
         const tw = textWidth(ctx, item.text);
-        drawText(ctx, item.text, textBox, "left", opt.valign);
+        drawText(ctx, item.text, textBox, "left", opt.valign, { dy: opt.dy });
         if (item.mark) {
           mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
         }
@@ -726,6 +741,22 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
         pos += textWidthWithFont(ctx, item.text, item.fontName);
         setFont(ctx, fontSave);
         break;
+      }
+      case "box": {
+        const fontSize = currentFontSize(ctx);
+        const outerBox: Box = b.modify(box,
+          b.setLeft(box.left + pos),
+          b.setHeight(fontSize, "center"),
+          b.setWidth(fontSize, "left"));
+        const innerBox: Box = b.modify(outerBox, b.inset(item.inset ?? 1));
+        if (item.pen) {
+          setPen(ctx, item.pen);
+        }
+        rect(ctx, innerBox);
+        if (item.mark) {
+          mark(ctx, item.mark, innerBox);
+        }
+        pos += b.width(outerBox);
       }
     }
   });
@@ -817,7 +848,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         fontSave = getCurrentFont(ctx);
         setFont(ctx, opt.font);
       }
-      if (opt.circle && !(data === "" || data === "0" || data === "false") ) {
+      if (opt.circle && !(data === "" || data === "0" || data === "false")) {
         let r: number;
         if (typeof opt.circle === "number") {
           r = opt.circle;
