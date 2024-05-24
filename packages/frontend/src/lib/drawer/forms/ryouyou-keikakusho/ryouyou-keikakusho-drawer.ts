@@ -102,23 +102,25 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
 }
 
 function drawMiddleUpperRight(ctx: DC, box: Box) {
+  function boxed(label: string, mark: string): c.CompositeItem[] {
+    return [
+      { kind: "box", mark, pen: "thin", inset: 0.3 },
+      { kind: "gap", width: 1 },
+      { kind: "text", text: label},
+    ];
+  }
+
   c.setPen(ctx, "thick");
   c.rect(ctx, box);
   const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
   c.setFont(ctx, "f4")
   c.drawText(ctx, "主病", upper, "left", "center");
   c.drawComposite(ctx, lower, [
-    { kind: "box", mark: "disease-diabetes", pen: "thin", inset: 0.3 },
-    { kind: "gap", width: 1 },
-    { kind: "text", text: "糖尿病"},
+    ...boxed("糖尿病", "disease-diabetes"),
     { kind: "gap", width: 3 },
-    { kind: "box", mark: "disease-hypertension", pen: "thin", inset: 0.3 },
-    { kind: "gap", width: 1 },
-    { kind: "text", text: "高血圧"},
+    ...boxed("高血圧", "disease-hypertension"),
     { kind: "gap", width: 3 },
-    { kind: "box", mark: "disease-lipidemia", pen: "thin", inset: 0.3 },
-    { kind: "gap", width: 1 },
-    { kind: "text", text: "脂質異常症"},
+    ...boxed("脂質異常症", "disease-hyperlipidemia"),
   ], { valign: "center", dy: -0.6 });
 }
 
