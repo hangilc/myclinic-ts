@@ -881,3 +881,12 @@ export function fillData(ctx: DrawerContext, data: any) {
     renderData(ctx, markName, data[markName], opt);
   }
 }
+
+export function withSavedFont(ctx: DrawerContext, newFontName: string, proc: () => void) {
+  const fontSave = getCurrentFont(ctx);
+  try {
+    proc();
+  } finally {
+    setFont(ctx, fontSave);
+  }
+}

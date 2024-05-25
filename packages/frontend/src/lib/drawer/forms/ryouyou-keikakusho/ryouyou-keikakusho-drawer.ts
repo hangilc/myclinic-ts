@@ -146,7 +146,8 @@ function drawMokuhyou(ctx: DC, box: Box) {
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
-  const rows = b.splitToRows(cols[1], b.splitAt(12, 29));
+  const rows = b.splitToRows(cols[1], b.splitAt(9.5, 26.5));
+  rows[2] = b.modify(rows[2], b.shrinkVert(0, 1));
   {
     const box = b.modify(rows[0], b.inset(1));
     c.drawText(ctx, "【目標】", box, "left", "top");
@@ -166,19 +167,96 @@ function drawMokuhyou(ctx: DC, box: Box) {
       ], { dy: -0.6 });
       c.drawComposite(ctx, lower, [
         ...boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
-        p.gap(20, { mark: "mokuhyou-BP"}),
+        p.gap(20, { mark: "mokuhyou-BP" }),
         p.text("%)"),
       ], { dy: -0.6 });
     })
   }
+  {
+    b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
+      const fontSave = c.getCurrentFont(ctx);
+      c.setFont(ctx, "f4");
+      lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+      b.withSplitRows(lower, b.evenSplitter(4), rs => {
+        c.drawText(ctx, "┌", rs[0], "left", "center");
+        c.drawText(ctx, "│", rs[1], "left", "center");
+        c.drawText(ctx, "│", rs[2], "left", "center");
+        c.drawText(ctx, "└", rs[3], "left", "center");
+        c.drawText(ctx, "┐", rs[0], "right", "center");
+        c.drawText(ctx, "│", rs[1], "right", "center");
+        c.drawText(ctx, "│", rs[2], "right", "center");
+        c.drawText(ctx, "┘", rs[3], "right", "center");
+      });
+      c.setFont(ctx, fontSave);
+      c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+    });
+  }
+  {
+    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
+      c.withSavedFont(ctx, "f4", () => {
+        lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+        b.withSplitRows(lower, b.evenSplitter(4), rs => {
+          c.drawText(ctx, "┌", rs[0], "left", "center");
+          c.drawText(ctx, "│", rs[1], "left", "center");
+          c.drawText(ctx, "│", rs[2], "left", "center");
+          c.drawText(ctx, "└", rs[3], "left", "center");
+          c.drawText(ctx, "┐", rs[0], "right", "center");
+          c.drawText(ctx, "│", rs[1], "right", "center");
+          c.drawText(ctx, "│", rs[2], "right", "center");
+          c.drawText(ctx, "┘", rs[3], "right", "center");
+        });
+        c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+      })
+    });
+  }
 }
 
 function drawJuuten(ctx: DC, box: Box) {
+  function boxed(label: string, mark: string): c.CompositeItem[] {
+    return [
+      { kind: "box", mark, pen: "thin", inset: 0.3 },
+      { kind: "gap", width: 1 },
+      { kind: "text", text: label },
+    ];
+  }
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻重点を置く領域と指導項目︼", cols[0], "center", "center");
-
+  b.withSplitRows(cols[1], b.splitAt(46, 76.5, 89), (rs) => {
+    rs.forEach(r => c.frameBottom(ctx, r));
+    const [shokuji, undou, tabako, sonota] = rs;
+    // 食事
+    b.withSplitColumns(shokuji, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      c.drawComposite(ctx, mark, [
+        ...boxed("食事", "juuten-食事-mark"),
+      ], { halign: "center", dy: -0.6 })
+    })
+    // 運動
+    b.withSplitColumns(undou, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      c.drawComposite(ctx, mark, [
+        ...boxed("運動", "juuten-運動-mark"),
+      ], { halign: "center", dy: -0.6 })
+    })
+    // たばこ
+    b.withSplitColumns(tabako, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      c.drawComposite(ctx, mark, [
+        ...boxed("たばこ", "juuten-たばこ-mark"),
+      ], { halign: "center", dy: -0.6 })
+    })
+    // その他
+    b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      c.drawComposite(ctx, mark, [
+        ...boxed("食事", "juuten-shokuji-mark"),
+      ], { halign: "center", dy: -0.6 })
+    })
+  })
 }
 
 function drawKensa(ctx: DC, box: Box) {
@@ -186,7 +264,6 @@ function drawKensa(ctx: DC, box: Box) {
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻検査︼", cols[0], "center", "center");
-  // c.drawTextVertically(ctx, "┌│└", cols[0], "center", "center");
 
 }
 
