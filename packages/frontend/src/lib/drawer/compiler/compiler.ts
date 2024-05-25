@@ -80,6 +80,7 @@ export function createPen(ctx: DrawerContext, name: string, r: number, g: number
 
 export function setPen(ctx: DrawerContext, name: string) {
   ctx.ops.push(["set_pen", name]);
+  ctx.currentPen = name;
 }
 
 export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
@@ -91,6 +92,13 @@ export function getCurrentFont(ctx: DrawerContext): string {
     throw new Error("Cannot get current font");
   }
   return ctx.currentFont;
+}
+
+export function getCurrentPen(ctx: DrawerContext): string {
+  if (ctx.currentPen === undefined) {
+    throw new Error("Cannot get current pen");
+  }
+  return ctx.currentPen;
 }
 
 export function mark(ctx: DrawerContext, key: string, box: Box, ropt?: DataRendererOpt) {
@@ -305,9 +313,9 @@ export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, h
   }
   for (let i = 0; i < text.length; i++) {
     const ch = text.charAt(i);
-    if( ch === "╭" || ch === "╰" ){
+    if (ch === "╭" || ch === "╰") {
       const fontSize = currentFontSize(ctx);
-      drawChars(ctx, ch, [x+fontSize*0.25], [y]);
+      drawChars(ctx, ch, [x + fontSize * 0.25], [y]);
     } else {
       drawChars(ctx, ch, [x], [y]);
     }
@@ -754,10 +762,15 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           b.setHeight(fontSize, "center"),
           b.setWidth(fontSize, "left"));
         const innerBox: Box = b.modify(outerBox, b.inset(item.inset ?? 1));
+        let penSave: string | undefined = undefined;
         if (item.pen) {
+          penSave = getCurrentPen(ctx);
           setPen(ctx, item.pen);
         }
         rect(ctx, innerBox);
+        if (penSave) {
+          setPen(ctx, penSave);
+        }
         if (item.mark) {
           mark(ctx, item.mark, innerBox);
         }

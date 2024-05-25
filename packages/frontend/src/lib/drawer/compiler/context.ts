@@ -9,6 +9,7 @@ export interface DrawerContext {
   marks: Record<string, Box>;
   dataRenderOptions: Record<string, DataRendererOpt>;
   currentFont: string | undefined;
+  currentPen: string | undefined;
 }
 
 export function mkDrawerContext(): DrawerContext {
@@ -18,6 +19,7 @@ export function mkDrawerContext(): DrawerContext {
     marks: {},
     dataRenderOptions: {},
     currentFont: undefined,
+    currentPen: undefined,
   }
 }
 
