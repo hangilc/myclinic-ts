@@ -638,7 +638,14 @@ export interface CompositeBox {
   inset?: number;
 }
 
-export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont | CompositeBox;
+export interface CompositeExpander {
+  kind: "expander";
+  mark?: string;
+  _w?: number;
+}
+
+export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont | CompositeBox |
+  CompositeExpander;
 
 export interface DrawCompositeOptionArg {
   halign?: HAlign;
@@ -658,8 +665,9 @@ class DrawCompositeOption {
   }
 }
 
-export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[]): number {
+export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): number {
   let w = 0;
+  let expanders: CompositeExpander[] = [];
   for (let i = 0; i < comps.length; i++) {
     const comp = comps[i];
     switch (comp.kind) {
@@ -680,8 +688,48 @@ export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[]): numb
         w += fontSize;
         break;
       }
+      case "expander": {
+        expanders.push(comp)
+        break;
+      }
       default: {
         throw new Error(`Cannot calculate width of composite: ${comp}`);
+      }
+    }
+  }
+  if (expanders.length > 0) {
+    const extra = boxWidth - w;
+    if (extra > 0) {
+      const ew = extra / expanders.length;
+      expanders.forEach(e => e._w = ew)
+      for (let i = 0; i < comps.length; i++) {
+        const comp = comps[i];
+        switch (comp.kind) {
+          case "text": {
+            w += textWidth(ctx, comp.text);
+            break;
+          }
+          case "gap": {
+            w += comp.width;
+            break;
+          }
+          case "text-by-font": {
+            w += textWidthWithFont(ctx, comp.text, comp.fontName);
+            break;
+          }
+          case "box": {
+            const fontSize = currentFontSize(ctx);
+            w += fontSize;
+            break;
+          }
+          case "expander": {
+            w += comp._w ?? 0;
+            break;
+          }
+          default: {
+            throw new Error(`Cannot calculate width of composite: ${comp}`);
+          }
+        }
       }
     }
   }
@@ -693,13 +741,13 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
   const opt = new DrawCompositeOption(optArg);
   switch (opt.halign) {
     case "center": {
-      const cw = compositeWidth(ctx, comps);
+      const cw = compositeWidth(ctx, comps, b.width(box));
       const extra = (b.width(box) - cw) / 2.0;
       box = b.modify(box, b.shrinkHoriz(extra, extra));
       break;
     }
     case "right": {
-      const cw = compositeWidth(ctx, comps);
+      const cw = compositeWidth(ctx, comps, b.width(box));
       const x = box.right - cw;
       box = b.modify(box, b.setLeft(x));
       break;
@@ -775,6 +823,10 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           mark(ctx, item.mark, innerBox);
         }
         pos += b.width(outerBox);
+        break;
+      }
+      case "expander": {
+        
       }
     }
   });

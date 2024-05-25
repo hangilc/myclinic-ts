@@ -233,7 +233,38 @@ function drawJuuten(ctx: DC, box: Box) {
       c.frameRight(ctx, mark);
       c.drawComposite(ctx, mark, [
         ...boxed("食事", "juuten-食事-mark"),
-      ], { halign: "center", dy: -0.6 })
+      ], { halign: "center", dy: -0.6 });
+      body = b.modify(body, b.inset(1));
+      b.withSplitRows(body, b.evenSplitter(8), rs => {
+        c.drawComposite(ctx, rs[0], [
+          ...boxed("今回は、指導の必要なし", "juuten-食事-指導の必要なし-mark")
+        ], { dy: -0.6 });
+        b.withSplitColumns(rs[1], b.splitAt(98), ([left, right]) => {
+          c.drawComposite(ctx, left, [
+            ...boxed("食事摂取量を適正にする", "juuten-食事-摂取量を適正にする-mark")
+          ], { dy: -0.6 });
+          c.drawComposite(ctx, right, [
+            ...boxed("食塩・調味料を控える", "juuten-食事-食塩・調味料を控える-mark")
+          ], { dy: -0.6 });
+        });
+        b.withSplitColumns(rs[2], b.splitAt(98), ([left, right]) => {
+          c.drawComposite(ctx, left, [
+            ...boxed("野菜・きのこ・海藻など食物繊維の摂取を増やす", "juuten-食事-食物繊維の摂取を増やす-mark")
+          ], { dy: -0.6 });
+          c.drawComposite(ctx, right, [
+            ...boxed("外食の際の注意事項(", "juuten-食事-外食の際の注意事項-mark"),
+            p.text(")"),
+          ], { dy: -0.6 });
+        });
+        b.withSplitColumns(rs[3], b.splitAt(98), ([left, right]) => {
+          c.drawComposite(ctx, left, [
+            ...boxed("油を使った料理(揚げ物や炒め物等)の摂取を減らす", "juuten-食事-油を使った料理の摂取を減らす-mark")
+          ], { dy: -0.6 });
+          c.drawComposite(ctx, right, [
+            ...boxed("その他", "juuten-食事-その他-mark")
+          ], { dy: -0.6 });
+        });
+      })
     })
     // 運動
     b.withSplitColumns(undou, b.splitAt(18), ([mark, body]) => {
