@@ -651,17 +651,20 @@ export interface DrawCompositeOptionArg {
   halign?: HAlign;
   valign?: VAlign;
   dy?: number;
+  boxModifiers?: Modifier[],
 }
 
 class DrawCompositeOption {
   halign: HAlign;
   valign: VAlign;
   dy: number;
+  boxModifiers: Modifier[];
 
   constructor(arg: DrawCompositeOptionArg) {
     this.halign = arg.halign ?? "left";
     this.valign = arg.valign ?? "center";
     this.dy = arg.dy ?? 0;
+    this.boxModifiers = arg.boxModifiers ?? [];
   }
 }
 
@@ -740,7 +743,6 @@ export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], 
       })
       const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
       const extra = (width - cw) / expanders;
-      console.log("extra", extra, cs, cw, width);
       if( extra > 0 ){
         cs.forEach(comp => {
           if( comp.kind === "expander" ){
@@ -832,6 +834,9 @@ export function calcTotalCompositeWidth(ctx: DrawerContext, comps: CompositeItem
 export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[],
   optArg: DrawCompositeOptionArg = {}) {
   const opt = new DrawCompositeOption(optArg);
+  if( opt.boxModifiers.length > 0 ){
+    box = b.modify(box, ...opt.boxModifiers);
+  }
   const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
   const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
   switch (opt.halign) {

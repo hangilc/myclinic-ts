@@ -2,13 +2,19 @@
   import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import {
-    drawRyouyouKeikakusho,
-    type RyouyouKeikakushoData,
-  } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-drawer";
+    drawRyouyouKeikakushoShokai,
+    type RyouyouKeikakushoShokaiData,
+  } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-shokai-drawer";
+  import {
+    type RyouyouKeikakushoKeizokuData,
+    drawRyouyouKeikakushoKeizoku,
+  } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-keizoku-drawer";
 
   export let isVisible = false;
-  const data: RyouyouKeikakushoData = {};
-  const ops: Op[] = drawRyouyouKeikakusho(data);
+  // const data: RyouyouKeikakushoShokaiData = {};
+  // const ops: Op[] = drawRyouyouKeikakushoShokai(data);
+  const data: RyouyouKeikakushoKeizokuData = {};
+  const ops: Op[] = drawRyouyouKeikakushoKeizoku(data);
 </script>
 
 {#if isVisible}

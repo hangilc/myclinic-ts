@@ -1,36 +1,34 @@
 import type { Op } from "../../compiler/op";
+import { mkDrawerContext, type DrawerContext as DC } from "../../compiler/context";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
-import { mkDrawerContext } from "../../compiler/context";
-import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 
-export interface RyouyouKeikakushoData {
+export interface RyouyouKeikakushoKeizokuData {
 
 }
 
-export function drawRyouyouKeikakusho(data: RyouyouKeikakushoData): Op[] {
+export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData): Op[] {
   const ctx = mkDrawerContext();
   setupFonts(ctx);
   setupPens(ctx);
   const paper: Box = b.paperSizeToBox(A4);
-  const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(10, 10)), b.splitAt(38, 262));
+  const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
   drawUpperArea(ctx, areas[0]);
   drawMiddleArea(ctx, areas[1]);
   drawLowerArea(ctx, areas[2]);
-  {
-    c.setPen(ctx, "thin");
-    c.rect(ctx, paper);
-  }
-
-  return c.getOps(ctx);
+  // {
+  //   c.setPen(ctx, "thin");
+  //   c.rect(ctx, paper);
+  // }
+ return c.getOps(ctx);
 }
 
 function setupFonts(ctx: DC) {
-  c.createFont(ctx, "f5", "MS Mincho", 5);
-  c.createFont(ctx, "f4", "MS Mincho", 4);
+  c.createFont(ctx, "f5", "MS Mincho", 4);
+  c.createFont(ctx, "f4", "MS Mincho", 3.5);
 }
 
 function setupPens(ctx: DC) {
@@ -41,8 +39,8 @@ function setupPens(ctx: DC) {
 function drawUpperArea(ctx: DC, box: Box) {
   c.setFont(ctx, "f5");
   box = b.modify(box, b.shrinkVert(0, 2));
-  c.drawText(ctx, "生活習慣病　療養計画書　初回用", box, "left", "bottom");
-  const right: Box = b.modify(box, b.setWidth(80, "right"));
+  c.drawText(ctx, "生活習慣病　療養計画書　継続用", box, "left", "bottom");
+  const right: Box = b.modify(box, b.setWidth(90, "right"));
   c.drawComposite(ctx, right, [
     p.text("（記入日："),
     p.gapTo(32, { mark: "issue-year" }),
@@ -51,19 +49,23 @@ function drawUpperArea(ctx: DC, box: Box) {
     { kind: "text", text: "月" },
     { kind: "gap-to", at: 65, mark: "issue-day" },
     { kind: "text", text: "日）" },
+    p.text("("),
+    p.gap(6, { mark: "issue-times" }),
+    p.text(")回目")
   ], { valign: "bottom", halign: "left", })
 }
+
 function drawMiddleArea(ctx: DC, box: Box) {
   const [upper, _gap, lower] = b.splitToRows(box, b.splitAt(14, 17));
-  const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(111, 119));
+  const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(98, 105));
   drawMiddleUpperLeft(ctx, upperLeft);
   drawMiddleUpperRight(ctx, upperRight);
   c.setPen(ctx, "thick");
   c.rect(ctx, lower);
-  const rows = b.splitToRows(lower, b.splitAt(5, 50, 158));
+  const rows = b.splitToRows(lower, b.splitAt(5, 58, 152));
   rows.forEach(r => c.frameBottom(ctx, r));
   c.setFont(ctx, "f4");
-  c.drawText(ctx, "ねらい：検査結果を理解できること・自分の生活上の問題点を抽出し、目標を設定できること",
+  c.drawText(ctx, "ねらい:重点目標の達成状況を理解できること・目標再設定と指導された生活習慣改善に取り組めること",
     rows[0], "center", "center", { dy: -0.25 });
   drawMokuhyou(ctx, rows[1]);
   drawJuuten(ctx, rows[2]);
@@ -78,9 +80,9 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
   c.frameBottom(ctx, row1);
   c.setFont(ctx, "f4");
   c.drawComposite(ctx, row1, [
-    { kind: "gap", width: 11 },
+    { kind: "gap", width: 8 },
     { kind: "text", text: "患者氏名：" },
-    { kind: "gap-to", at: 83, mark: "patient-name" },
+    { kind: "gap-to", at: 74, mark: "patient-name" },
     { kind: "text", text: "(" },
     { kind: "text", text: "男", mark: "patient-sex-male" },
     { kind: "text", text: "・" },
@@ -88,8 +90,7 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
     { kind: "text", text: "）" },
   ]);
   c.drawComposite(ctx, row2, [
-    { kind: "gap", width: 3 },
-    { kind: "text", text: "生年月日：" },
+    { kind: "text", text: "生年月日:" },
     { kind: "text", text: "明", mark: "birthdate-gengou-meiji" },
     { kind: "text", text: "・" },
     { kind: "text", text: "大", mark: "birthdate-gengou-taishou" },
@@ -99,26 +100,25 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
     { kind: "text", text: "平", mark: "birthdate-gengou-heisei" },
     { kind: "text", text: "・" },
     { kind: "text", text: "令", mark: "birthdate-gengou-reiwa" },
-    { kind: "gap-to", at: 59, mark: "birthdate-nen" },
+    p.gap(6, { mark: "birthdate-nen" }),
     { kind: "text", text: "年" },
-    { kind: "gap-to", at: 72, mark: "birthdate-month" },
+    p.gap(6, { mark: "birthdate-month" }),
     { kind: "text", text: "月" },
-    { kind: "gap-to", at: 84, mark: "birthdate-day" },
-    { kind: "text", text: "日生（" },
-    { kind: "gap-to", at: 101 },
-    { kind: "text", text: "才）" },
-  ])
+    p.gap(6, { mark: "birthdate-day" }),
+    { kind: "text", text: "日生(" },
+    p.expander({ mark: "birthdate-age"}),
+    { kind: "text", text: "才)" },
+  ], { boxModifiers: [b.shrinkHoriz(1, 1)]});
 }
 
 function drawMiddleUpperRight(ctx: DC, box: Box) {
   function boxed(label: string, mark: string): c.CompositeItem[] {
     return [
       { kind: "box", mark, pen: "thin", inset: 0.3 },
-      { kind: "gap", width: 1 },
+      { kind: "gap", width: 0.5 },
       { kind: "text", text: label },
     ];
   }
-
   c.setPen(ctx, "thick");
   c.rect(ctx, box);
   const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
@@ -146,8 +146,14 @@ function drawMokuhyou(ctx: DC, box: Box) {
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
-  const rows = b.splitToRows(cols[1], b.splitAt(9.5, 26.5));
-  rows[2] = b.modify(rows[2], b.shrinkVert(0, 1));
+  const rows: Box[] = [];
+  {
+    const h = b.height(box) - 13.5*3 - 2.5;
+    b.withSplitRows(cols[1], b.splitAt(h), rs => {
+      rows.push(rs[0]);
+      b.withSplitRows(rs[1], b.evenSplitter(3), rs => rows.push(...rs), { boxModifiers: [b.shiftUp(1.5)]});
+    }, { boxModifiers: [b.shrinkHoriz(0.5, 0.5)]});
+  }
   {
     const box = b.modify(rows[0], b.inset(1));
     c.drawText(ctx, "【目標】", box, "left", "top");
@@ -164,19 +170,37 @@ function drawMokuhyou(ctx: DC, box: Box) {
         ...boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
         p.gap(22, { mark: "mokuhyou-bp" }),
         p.text("mmHg)")
-      ], { dy: -0.6 });
+      ], { dy: -0.6, boxModifiers: [b.shiftDown(0.5)] });
       c.drawComposite(ctx, lower, [
         ...boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
         p.gap(20, { mark: "mokuhyou-BP" }),
         p.text("%)"),
-      ], { dy: -0.6 });
+      ], { dy: -0.6, boxModifiers: [b.shiftUp(0.5)] });
     })
   }
   {
     b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
-      c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
+      c.drawText(ctx, "【➀目標の達成状況】", upper, "left", "center");
       const fontSave = c.getCurrentFont(ctx);
-      c.setFont(ctx, "f4");
+      lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+      b.withSplitRows(lower, b.evenSplitter(4), rs => {
+        c.drawText(ctx, "┌", rs[0], "left", "center");
+        c.drawText(ctx, "│", rs[1], "left", "center");
+        c.drawText(ctx, "│", rs[2], "left", "center");
+        c.drawText(ctx, "└", rs[3], "left", "center");
+        c.drawText(ctx, "┐", rs[0], "right", "center");
+        c.drawText(ctx, "│", rs[1], "right", "center");
+        c.drawText(ctx, "│", rs[2], "right", "center");
+        c.drawText(ctx, "┘", rs[3], "right", "center");
+      });
+      c.setFont(ctx, fontSave);
+      c.mark(ctx, "mokuhyou-目標達成状況", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+    });
+  }
+  {
+    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➁達成目標】:患者と相談した目標", upper, "left", "center");
+      const fontSave = c.getCurrentFont(ctx);
       lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
       b.withSplitRows(lower, b.evenSplitter(4), rs => {
         c.drawText(ctx, "┌", rs[0], "left", "center");
@@ -193,8 +217,8 @@ function drawMokuhyou(ctx: DC, box: Box) {
     });
   }
   {
-    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
-      c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
+    b.withSplitRows(rows[3], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➂行動目標】:患者と相談した目標", upper, "left", "center");
       c.withSavedFont(ctx, "f4", () => {
         lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
         b.withSplitRows(lower, b.evenSplitter(4), rs => {
@@ -232,7 +256,7 @@ function drawJuuten(ctx: DC, box: Box) {
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻重点を置く領域と指導項目︼", cols[0], "center", "center");
-  b.withSplitRows(cols[1], b.splitAt(46, 76.5, 89), (rs) => {
+  b.withSplitRows(cols[1], b.splitAt(39, 69, 79), (rs) => {
     rs.forEach(r => c.frameBottom(ctx, r));
     const [shokuji, undou, tabako, sonota] = rs;
     const bodyModifier = b.inset(1);
@@ -246,7 +270,7 @@ function drawJuuten(ctx: DC, box: Box) {
         c.drawComposite(ctx, rs[0], [
           ...boxed("今回は、指導の必要なし", "juuten-食事-指導の必要なし-mark")
         ], { dy: -0.6 });
-        b.withSplitColumns(rs[1], b.splitAt(98), ([left, right]) => {
+        b.withSplitColumns(rs[1], b.splitAt(87), ([left, right]) => {
           c.drawComposite(ctx, left, [
             ...boxed("食事摂取量を適正にする", "juuten-食事-摂取量を適正にする-mark")
           ], { dy: -0.6 });
@@ -254,7 +278,7 @@ function drawJuuten(ctx: DC, box: Box) {
             ...boxed("食塩・調味料を控える", "juuten-食事-食塩・調味料を控える-mark")
           ], { dy: -0.6 });
         });
-        b.withSplitColumns(rs[2], b.splitAt(98), ([left, right]) => {
+        b.withSplitColumns(rs[2], b.splitAt(87), ([left, right]) => {
           c.drawComposite(ctx, left, [
             ...boxed("野菜・きのこ・海藻など食物繊維の摂取を増やす", "juuten-食事-食物繊維の摂取を増やす-mark")
           ], { dy: -0.6 });
@@ -264,7 +288,7 @@ function drawJuuten(ctx: DC, box: Box) {
             p.text(")"),
           ], { dy: -0.6 });
         });
-        b.withSplitColumns(rs[3], b.splitAt(98), ([left, right]) => {
+        b.withSplitColumns(rs[3], b.splitAt(87), ([left, right]) => {
           c.drawComposite(ctx, left, [
             ...boxed("油を使った料理(揚げ物や炒め物等)の摂取を減らす", "juuten-食事-油を使った料理の摂取を減らす-mark")
           ], { dy: -0.6 });
@@ -302,13 +326,16 @@ function drawJuuten(ctx: DC, box: Box) {
       c.drawComposite(ctx, mark, [
         ...boxed("運動", "juuten-運動-mark"),
       ], { halign: "center", dy: -0.6 })
-      b.withSplitRows(body, b.evenSplitter(5), rs => {
-        c.drawComposite(ctx, rs[0], [
+      b.withSplitRows(body, b.evenSplitter(6), rs => {
+        c.drawComposite(ctx, rs.shift()!, [
+          ...boxed("今回は、指導の必要なし", "juuten-運動-指導の必要なし-mark")
+        ], { dy: -0.6 });
+        c.drawComposite(ctx, rs.shift()!, [
           ...boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", "juuten-運動-種類-mark"),
           p.gap(82, { mark: "juuten-運動-種類" }),
           p.text(")"),
         ], { dy: -0.6 });
-        c.drawComposite(ctx, rs[1], [
+        c.drawComposite(ctx, rs.shift()!, [
           p.gap(7),
           p.text("時間(30分以上・"),
           p.gap(30, { mark: "juuten-運動-時間" }),
@@ -316,7 +343,7 @@ function drawJuuten(ctx: DC, box: Box) {
           p.gap(22, { mark: "juuten-運動-頻度" }),
           p.text("日)"),
         ], { dy: -0.6 });
-        c.drawComposite(ctx, rs[2], [
+        c.drawComposite(ctx, rs.shift()!, [
           p.gap(7),
           p.text("強度(息がはずむが会話が可能な強さ or 脈拍"),
           p.gap(14, { mark: "juuten-運動-強度-脈拍" }),
@@ -324,12 +351,12 @@ function drawJuuten(ctx: DC, box: Box) {
           p.gap(14, { mark: "juuten-運動-強度-その他" }),
           p.text(")"),
         ], { dy: -0.6 });
-        c.drawComposite(ctx, rs[3], [
+        c.drawComposite(ctx, rs.shift()!, [
           ...boxed("日常生活の活動量増加(例:1日1万歩・", "juuten-運動-活動量-mark"),
           p.gap(36, { mark: "juuten-運動-活動量" }),
           p.text(")"),
         ], { dy: -0.6 });
-        c.drawComposite(ctx, rs[4], [
+        c.drawComposite(ctx, rs.shift()!, [
           ...boxed("運動時の注意事項など(", "juuten-運動-注意事項-mark"),
           p.gap(62, { mark: "juuten-運動-注意事項" }),
           p.text(")"),
@@ -342,13 +369,11 @@ function drawJuuten(ctx: DC, box: Box) {
       c.drawComposite(ctx, mark, [
         ...boxed("たばこ", "juuten-たばこ-mark"),
       ], { halign: "center", dy: -0.6 });
-      b.withSplitRows(body, b.evenSplitter(2), rs => {
-        c.drawComposite(ctx, rs[0], boxed("非喫煙者である", "juuten-たばこ-非喫煙者-mark"), { dy: -0.6 });
-        b.withSplitColumns(rs[1], b.splitAt(46), cs => {
-          c.drawComposite(ctx, cs[0], boxed("禁煙・節煙の有効性", "juuten-たばこ-禁煙・節煙の有効性-mark"), { dy: -0.6 });
-          c.drawComposite(ctx, cs[1], boxed("禁煙の実施補法等", "juuten-たばこ-禁煙の実施補法等-mark"), { dy: -0.6 });
-        });
-      }, { boxModifiers: [bodyModifier] });
+      c.drawComposite(ctx, body, [
+        ...boxed("喫煙・節煙の有効性", "juuten-たばこ-禁煙・節煙の有効性-mark"),
+        p.gapTo(43),
+        ...boxed("禁煙の実施補法等", "juuten-たばこ-禁煙の実施補法等-mark"),
+      ], { dy: -0.6, boxModifiers: [bodyModifier] });
     })
     // その他
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
@@ -374,7 +399,7 @@ function drawJuuten(ctx: DC, box: Box) {
           c.drawComposite(ctx, cs[3], boxed("減量", "juuten-その他-減量"), { dy: -0.6 });
         });
         c.drawComposite(ctx, rs[1], boxed("家庭での計測(歩数、体重、血圧、腹囲等)", "juuten-その他-家庭での計測"), { dy: -0.6 });
-        c.drawComposite(ctx, rs[2], 
+        c.drawComposite(ctx, rs[2],
           boxedAndGap("その他(", 88, ")", "juuten-その他-その他-mark", "juuten-その他-その他"),
           { dy: -0.6 });
       }, { boxModifiers: [bodyModifier] });
@@ -394,22 +419,24 @@ function drawKensa(ctx: DC, box: Box) {
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻検査︼", cols[0], "center", "center");
-  b.withSplitRows(cols[1], b.splitAt(30), rs => {
+  b.withSplitRows(cols[1], b.splitAt(26), rs => {
     c.withPen(ctx, "thin", () => {
       c.frameBottom(ctx, rs[0]);
     });
+    const tab = 78;
+    const tab2 = 106;
     b.withSplitRows(rs[0], b.evenSplitter(5), rs => {
       c.drawComposite(ctx, rs[0], [
         p.text("【血液検査項目】(採血日"),
-        p.gap(8, { mark: "kensa-採血日-月"}),
+        p.gap(8, { mark: "kensa-採血日-月" }),
         p.text("月"),
-        p.gap(8, { mark: "kensa-採血日-日"}),
+        p.gap(8, { mark: "kensa-採血日-日" }),
         p.text("日)"),
-        p.gapTo(88),
+        p.gapTo(tab),
         ...boxed("総ｺﾚｽﾃﾛｰﾙ", "kensa-総コレステロール-mark"),
-        p.gapTo(122),
+        p.gapTo(tab2),
         p.text("("),
-        p.gap(40, { mark: "kensa-総コレステロール"}),
+        p.gap(40, { mark: "kensa-総コレステロール" }),
         p.text("mg/dl)")
       ], { dy: -0.6 });
       c.drawComposite(ctx, rs[1], [
@@ -425,11 +452,11 @@ function drawKensa(ctx: DC, box: Box) {
         p.text(")時間"),
         p.text(")"),
         p.gap(2),
-        p.gapTo(88),
+        p.gapTo(tab),
         ...boxed("中性脂肪", "kensa-中性脂肪-mark"),
-        p.gapTo(122),
+        p.gapTo(tab2),
         p.text("("),
-        p.gap(40, { mark: "kensa-中性脂肪"}),
+        p.gap(40, { mark: "kensa-中性脂肪" }),
         p.text("mg/dl)")
       ], { dy: -0.6 });
       c.drawComposite(ctx, rs[2], [
@@ -438,11 +465,11 @@ function drawKensa(ctx: DC, box: Box) {
         p.expander({ mark: "kensa-血糖-値" }),
         p.text("mg/dl)"),
         p.gap(2),
-        p.gapTo(88),
+        p.gapTo(tab),
         ...boxed("HDLｺﾚｽﾃﾛｰﾙ", "kensa-ＨＤＬコレステロール-mark"),
-        p.gapTo(122),
+        p.gapTo(tab2),
         p.text("("),
-        p.gap(40, { mark: "kensa-ＨＤＬコレステロール"}),
+        p.gap(40, { mark: "kensa-ＨＤＬコレステロール" }),
         p.text("mg/dl)")
       ], { dy: -0.6 });
       c.drawComposite(ctx, rs[3], [
@@ -452,22 +479,22 @@ function drawKensa(ctx: DC, box: Box) {
         p.expander({ mark: "kensa-HbA1c" }),
         p.text("%)"),
         p.gap(2),
-        p.gapTo(88),
+        p.gapTo(tab),
         ...boxed("LDLｺﾚｽﾃﾛｰﾙ", "kensa-ＬＤＬコレステロール-mark"),
-        p.gapTo(122),
+        p.gapTo(tab2),
         p.text("("),
-        p.gap(40, { mark: "kensa-ＬＤＬコレステロール"}),
+        p.gap(40, { mark: "kensa-ＬＤＬコレステロール" }),
         p.text("mg/dl)")
       ], { dy: -0.6 });
       c.drawComposite(ctx, rs[4], [
         p.text("※血液検査結果を手交している場合は記載不要"),
-        p.gapTo(88),
+        p.gapTo(tab),
         ...boxed("その他", "kensa-血液検査項目-その他-mark"),
         p.text("("),
-        p.gap(67, { mark: "kensa-血液検査項目-その他"}),
+        p.gap(62, { mark: "kensa-血液検査項目-その他" }),
         p.text(")")
       ], { dy: -0.6 });
-    }, { rowModifiers: [b.shrinkHoriz(1, 1)]});
+    }, { rowModifiers: [b.shrinkHoriz(1, 1)] });
     b.withSplitRows(rs[1], b.evenSplitter(3), rs => {
       c.drawComposite(ctx, rs[0], [
         p.text("【その他】")
@@ -486,15 +513,46 @@ function drawKensa(ctx: DC, box: Box) {
         ...boxed("その他", "kensa-その他-その他-mark"),
         p.gapTo(24),
         p.text("("),
-        p.gap(64),
+        p.gap(58),
         p.text(")"),
       ], { dy: -0.6 });
-    }, { rowModifiers: [b.shrinkHoriz(1, 1)]});
+    }, { rowModifiers: [b.shrinkHoriz(1, 1)] });
   });
 }
 
 function drawLowerArea(ctx: DC, box: Box) {
-
+  function boxed(label: string, mark: string): c.CompositeItem[] {
+    return [
+      { kind: "box", mark, pen: "thin", inset: 0.3 },
+      { kind: "gap", width: 0.5 },
+      { kind: "text", text: label },
+    ];
+  }
+  b.withSplitRows(box, b.splitAt(5, 15, 25), ([upper, middle, lower]) => {
+    c.drawText(ctx, "※実施項目は、□にチェック、(  )内には具体的に記入", upper, "left", "center", { dy: -0.6 });
+    const sigWidth = 70.5;
+    b.withSplitColumns(middle, b.splitAt(26, 99.5), ([_, left, right]) => {
+      left = b.modify(left, b.setWidth(sigWidth, "left"));
+      right = b.modify(right, b.setWidth(sigWidth, "left"));
+      c.withPen(ctx, "thin", () => {
+        c.rect(ctx, left);
+        c.drawText(ctx, "患者署名", left, "left", "top", { modifiers: [b.inset(0.5)] });
+        c.rect(ctx, right);
+        c.drawText(ctx, "医師氏名", right, "left", "top", { modifiers: [b.inset(0.5)] });
+        c.mark(ctx, "医師氏名", b.modify(right, b.shrinkHoriz(18, 0)));
+      })
+    });
+    b.withSplitRows(lower, b.evenSplitter(2), rs => {
+      const lines = [
+        "患者が療養計画書の内容について説明を受けた上で十分に理解したことを確認した。",
+        "(なお、上記項目に担当医がチェックした場合については患者署名を省略して差し支えない)",
+      ];
+      c.drawComposite(ctx, rs[0], [
+        ...boxed(lines[0], "患者署名省略-mark"),
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[1], [
+        p.text(lines[1]),
+      ], { dy: -0.6 });
+    }, { boxModifiers: [b.shrinkHoriz(26, 0), b.shiftDown(1)]});
+  });
 }
-
-// ︻ ︼
