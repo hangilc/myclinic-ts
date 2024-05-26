@@ -11,13 +11,47 @@
   } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-keizoku-drawer";
 
   export let isVisible = false;
-  // const data: RyouyouKeikakushoShokaiData = {};
-  // const ops: Op[] = drawRyouyouKeikakushoShokai(data);
-  const data: RyouyouKeikakushoKeizokuData = {};
-  const ops: Op[] = drawRyouyouKeikakushoKeizoku(data);
+  let mode: "shokai" | "keizoku" = "shokai";
+  let ops: Op[] = [];
+  $: if (isVisible && ops.length === 0) {
+    doSwitchMode();
+  }
+
+  function doSwitchMode() {
+    console.log("doSwitchMode");
+    if (mode === "shokai") {
+      startShokai();
+    } else if (mode === "keizoku") {
+      startKeizoku();
+    }
+  }
+
+  function startShokai() {
+    const data: RyouyouKeikakushoShokaiData = {};
+    ops = drawRyouyouKeikakushoShokai(data);
+  }
+
+  function startKeizoku() {
+    const data: RyouyouKeikakushoKeizokuData = {};
+    ops = drawRyouyouKeikakushoKeizoku(data);
+  }
 </script>
 
 {#if isVisible}
-  <!-- <DrawerSvg {ops} width="420" height="594" viewBox="0 0 210 297" /> -->
-  <DrawerSvg {ops} width="840" height="1188" viewBox="0 0 210 297" />
+  <div>
+    <input
+      type="radio"
+      value="shokai"
+      bind:group={mode}
+      on:change={doSwitchMode}
+    />
+    初回
+    <input
+      type="radio"
+      value="keizoku"
+      bind:group={mode}
+      on:change={doSwitchMode}
+    /> 継続
+  </div>
+  <DrawerSvg bind:ops={ops} width={`${210*3}`} height={`${297*3}`} viewBox="0 0 210 297"/>
 {/if}

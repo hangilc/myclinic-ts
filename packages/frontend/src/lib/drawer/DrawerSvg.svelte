@@ -10,25 +10,29 @@
   export let displayWidth: string | undefined = undefined;
   export let displayHeight: string | undefined = undefined;
   let wrapper: HTMLElement;
+  $: refresh(ops);
 
   export function resize(newWidth: string, newHeight: string): void {
     wrapper.innerHTML = "";
     width = newWidth;
     height = newHeight;
-    refresh();
+    refresh(ops);
   }
 
-  function refresh(): void {
+  export function refresh(ops: Op[]): void {
     let option = {
       viewBox,
       width,
       height,
     };
-    wrapper.appendChild(drawerToSvg(ops, option));
+    if (wrapper) {
+      wrapper.innerHTML = "";
+      wrapper.appendChild(drawerToSvg(ops, option));
+    }
   }
 
   onMount(() => {
-    refresh();
+    refresh(ops);
   });
 </script>
 
