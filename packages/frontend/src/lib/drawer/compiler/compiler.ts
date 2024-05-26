@@ -635,7 +635,6 @@ export interface CompositeBox {
   kind: "box";
   mark?: string;
   pen?: string;
-  inset?: number;
 }
 
 export interface CompositeExpander {
@@ -650,20 +649,17 @@ export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | Text
 export interface DrawCompositeOptionArg {
   halign?: HAlign;
   valign?: VAlign;
-  dy?: number;
   boxModifiers?: Modifier[],
 }
 
 class DrawCompositeOption {
   halign: HAlign;
   valign: VAlign;
-  dy: number;
   boxModifiers: Modifier[];
 
   constructor(arg: DrawCompositeOptionArg) {
     this.halign = arg.halign ?? "left";
     this.valign = arg.valign ?? "center";
-    this.dy = arg.dy ?? 0;
     this.boxModifiers = arg.boxModifiers ?? [];
   }
 }
@@ -857,7 +853,9 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
         const tw = item._w;
-        drawText(ctx, item.text, textBox, "left", opt.valign, { dy: opt.dy });
+        drawText(ctx, item.text, textBox, "left", opt.valign, { 
+          // dy: opt.dy 
+        });
         if (item.mark) {
           mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
         }
@@ -903,7 +901,9 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           b.setLeft(box.left + pos),
           b.setHeight(fontSize, "center"),
           b.setWidth(fontSize, "left"));
-        const innerBox: Box = b.modify(outerBox, b.inset(item.inset ?? 1));
+        let inset = fontSize * 0.075;
+        let shiftDown = fontSize * 0.15;
+        const innerBox: Box = b.modify(outerBox, b.inset(inset), b.shiftDown(shiftDown));
         let penSave: string | undefined = undefined;
         if (item.pen) {
           penSave = getCurrentPen(ctx);
