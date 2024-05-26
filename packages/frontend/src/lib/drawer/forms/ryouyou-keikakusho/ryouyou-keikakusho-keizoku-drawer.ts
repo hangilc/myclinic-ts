@@ -300,20 +300,23 @@ function drawJuuten(ctx: DC, box: Box) {
           ...boxed("節酒:[減らす(種類・量:", "juuten-食事-節酒-mark"),
           p.gap(42, { mark: "shokuji-食事-節酒" }),
           p.text("を週"),
-          p.gap(8, { mark: "shokuji-食事-節酒-回" }),
+          p.expander({ mark: "shokuji-食事-節酒-回" }),
           p.text("回)]"),
+          p.gapTo(106),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs[5], [
           ...boxed("間食:[減らす(種類・量:", "juuten-食事-間食-mark"),
           p.gap(42, { mark: "shokuji-食事-間食" }),
           p.text("を週"),
-          p.gap(8, { mark: "shokuji-食事-間食-回" }),
+          p.expander({ mark: "shokuji-食事-間食-回" }),
           p.text("回)]"),
+          p.gapTo(106),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs[6], [
           ...boxed("食べ方:(ゆっくり食べる・その他(", "juuten-食事-食べ方-mark"),
-          p.gap(44, { mark: "juuten-食事-食べ方" }),
+          p.expander({ mark: "juuten-食事-食べ方" }),
           p.text("))"),
+          p.gapTo(106,)
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs[7], [
           ...boxed("食事時間:朝食、昼食、夕食を規則正しくとる", "juuten-食事-食事時間-mark"),
@@ -332,34 +335,39 @@ function drawJuuten(ctx: DC, box: Box) {
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs.shift()!, [
           ...boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", "juuten-運動-種類-mark"),
-          p.gap(82, { mark: "juuten-運動-種類" }),
+          p.expander({ mark: "juuten-運動-種類" }),
           p.text(")"),
+          p.gapTo(126),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs.shift()!, [
           p.gap(7),
           p.text("時間(30分以上・"),
           p.gap(30, { mark: "juuten-運動-時間" }),
           p.text(")、頻度(ほぼ毎日・週"),
-          p.gap(22, { mark: "juuten-運動-頻度" }),
+          p.expander({ mark: "juuten-運動-頻度" }),
           p.text("日)"),
+          p.gapTo(126),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs.shift()!, [
           p.gap(7),
           p.text("強度(息がはずむが会話が可能な強さ or 脈拍"),
           p.gap(14, { mark: "juuten-運動-強度-脈拍" }),
           p.text("拍/分 or "),
-          p.gap(14, { mark: "juuten-運動-強度-その他" }),
+          p.expander({ mark: "juuten-運動-強度-その他" }),
           p.text(")"),
+          p.gapTo(126),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs.shift()!, [
           ...boxed("日常生活の活動量増加(例:1日1万歩・", "juuten-運動-活動量-mark"),
-          p.gap(36, { mark: "juuten-運動-活動量" }),
+          p.expander({ mark: "juuten-運動-活動量" }),
           p.text(")"),
+          p.gapTo(102),
         ], { dy: -0.6 });
         c.drawComposite(ctx, rs.shift()!, [
           ...boxed("運動時の注意事項など(", "juuten-運動-注意事項-mark"),
-          p.gap(62, { mark: "juuten-運動-注意事項" }),
+          p.expander({ mark: "juuten-運動-注意事項" }),
           p.text(")"),
+          p.gapTo(102),
         ], { dy: -0.6 });
       }, { boxModifiers: [bodyModifier] });
     })
