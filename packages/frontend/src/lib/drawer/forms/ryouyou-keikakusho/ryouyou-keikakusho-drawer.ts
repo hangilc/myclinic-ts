@@ -221,6 +221,13 @@ function drawJuuten(ctx: DC, box: Box) {
       { kind: "text", text: label },
     ];
   }
+  function boxedAndGap(label: string, gap: number, trail: string, boxMark: string, gapMark: string): c.CompositeItem[] {
+    return [
+      ...boxed(label, boxMark),
+      p.gap(gap, { mark: gapMark }),
+      p.text(trail),
+    ]
+  }
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
@@ -336,17 +343,40 @@ function drawJuuten(ctx: DC, box: Box) {
         ...boxed("たばこ", "juuten-たばこ-mark"),
       ], { halign: "center", dy: -0.6 });
       b.withSplitRows(body, b.evenSplitter(2), rs => {
-
+        c.drawComposite(ctx, rs[0], boxed("非喫煙者である", "juuten-たばこ-非喫煙者-mark"), { dy: -0.6 });
+        b.withSplitColumns(rs[1], b.splitAt(46), cs => {
+          c.drawComposite(ctx, cs[0], boxed("禁煙・節煙の有効性", "juuten-たばこ-禁煙・節煙の有効性-mark"), { dy: -0.6 });
+          c.drawComposite(ctx, cs[1], boxed("禁煙の実施補法等", "juuten-たばこ-禁煙の実施補法等-mark"), { dy: -0.6 });
+        });
       }, { boxModifiers: [bodyModifier] });
     })
     // その他
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
-      c.drawComposite(ctx, mark, [
-        ...boxed("食事", "juuten-shokuji-mark"),
-      ], { halign: "center", dy: -0.6 })
+      {
+        const line1 = [...boxed("その", "juuten-shokuji-mark")];
+        const line2 = [p.gap(5), p.text("他")];
+        const w = Math.max(c.calcTotalCompositeWidth(ctx, line1, b.width(mark)), c.calcTotalCompositeWidth(ctx, line2, b.width(mark)));
+        const h = c.currentFontSize(ctx) * 2;
+        const dx = (b.width(mark) - w) / 2;
+        const dy = (b.height(mark) - h) / 2;
+        const innerBox = b.modify(mark, b.innerBox(dx, dy, dx + w, dy + h));
+        b.withSplitRows(innerBox, b.evenSplitter(2), rs => {
+          c.drawComposite(ctx, rs[0], line1, { dy: -0.6 });
+          c.drawComposite(ctx, rs[1], line2, { dy: -0.6 });
+        })
+      }
       b.withSplitRows(body, b.evenSplitter(3), rs => {
-
+        b.withSplitColumns(rs[0], b.splitAt(24, 48, 92), cs => {
+          c.drawComposite(ctx, cs[0], boxed("仕事", "juuten-その他-仕事"), { dy: -0.6 });
+          c.drawComposite(ctx, cs[1], boxed("余暇", "juuten-その他-余暇"), { dy: -0.6 });
+          c.drawComposite(ctx, cs[2], boxed("睡眠の確保(質・量)", "juuten-その他-睡眠の確保"), { dy: -0.6 });
+          c.drawComposite(ctx, cs[3], boxed("減量", "juuten-その他-減量"), { dy: -0.6 });
+        });
+        c.drawComposite(ctx, rs[1], boxed("家庭での計測(歩数、体重、血圧、腹囲等)", "juuten-その他-家庭での計測"), { dy: -0.6 });
+        c.drawComposite(ctx, rs[2], 
+          boxedAndGap("その他(", 88, ")", "juuten-その他-その他-mark", "juuten-その他-その他"),
+          { dy: -0.6 });
       }, { boxModifiers: [bodyModifier] });
     })
   })

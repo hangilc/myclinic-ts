@@ -749,6 +749,10 @@ export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], 
   return result;
 }
 
+export function calcTotalCompositeWidth(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): number {
+  return calcCompositeWidths(ctx, comps, boxWidth).reduce((acc, ele) => acc + ele._w, 0);
+}
+
 // export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): number {
 //   let w = 0;
 //   let expanders: CompositeExpander[] = [];
