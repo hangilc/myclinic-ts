@@ -85,6 +85,10 @@ export function shiftUp(dy: number): Modifier {
   return shift(0, -dy);
 }
 
+export function shiftToRight(dx: number): Modifier {
+  return shift(dx, 0);
+}
+
 export function setLeft(left: number): Modifier {
   return box => Object.assign({}, box, { left, });
 }

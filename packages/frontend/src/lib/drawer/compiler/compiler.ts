@@ -665,105 +665,189 @@ class DrawCompositeOption {
   }
 }
 
-export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): number {
-  let w = 0;
-  let expanders: CompositeExpander[] = [];
-  for (let i = 0; i < comps.length; i++) {
-    const comp = comps[i];
-    switch (comp.kind) {
-      case "text": {
-        w += textWidth(ctx, comp.text);
-        break;
+function splitByGapTo(comps: CompositeItem[], boxWidth: number): { comps: CompositeItem[], width: number }[] {
+  const result: { comps: CompositeItem[], width: number }[] = [];
+  let lastAt = 0;
+  let cs: CompositeItem[] = [];
+  comps.forEach((c, index) => {
+    if( c.kind === "gap-to" ){
+      cs.push(c);
+      let at: number;
+      if( c.at === "end" ){
+        if( index !== (comps.length - 1) ){
+          throw new Error("gap-to end should be the last composite item");
+        }
+        at = boxWidth;
+      } else {
+        at = c.at;
       }
-      case "gap": {
-        w += comp.width;
-        break;
-      }
-      case "text-by-font": {
-        w += textWidthWithFont(ctx, comp.text, comp.fontName);
-        break;
-      }
-      case "box": {
-        const fontSize = currentFontSize(ctx);
-        w += fontSize;
-        break;
-      }
-      case "expander": {
-        expanders.push(comp)
-        break;
-      }
-      default: {
-        throw new Error(`Cannot calculate width of composite: ${comp}`);
-      }
+      cs.push(c);
+      result.push({ comps: cs, width: at - lastAt });
+      cs = [];
+      lastAt = at;
+    } else {
+      cs.push(c);
     }
+  });
+  if( cs.length > 0 ){
+    result.push({ comps: cs, width: boxWidth - lastAt });
   }
-  if (expanders.length > 0) {
-    const extra = boxWidth - w;
-    if (extra > 0) {
-      const ew = extra / expanders.length;
-      expanders.forEach(e => e._w = ew)
-      for (let i = 0; i < comps.length; i++) {
-        const comp = comps[i];
-        switch (comp.kind) {
-          case "text": {
-            w += textWidth(ctx, comp.text);
-            break;
-          }
-          case "gap": {
-            w += comp.width;
-            break;
-          }
-          case "text-by-font": {
-            w += textWidthWithFont(ctx, comp.text, comp.fontName);
-            break;
-          }
-          case "box": {
-            const fontSize = currentFontSize(ctx);
-            w += fontSize;
-            break;
-          }
-          case "expander": {
-            w += comp._w ?? 0;
-            break;
-          }
-          default: {
-            throw new Error(`Cannot calculate width of composite: ${comp}`);
-          }
+  return result;
+}
+
+export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): (CompositeItem & { _w: number })[] {
+  const blocks = splitByGapTo(comps, boxWidth);
+  const result: (CompositeItem & { _w: number })[] = [];
+  blocks.forEach(block => {
+    const comps = block.comps;
+    const width = block.width;
+    let expanders = 0;
+    let pos = 0;
+    const cs = comps.map(comp => {
+      function setWidth(c: CompositeItem, w: number): (CompositeItem & { _w: number }) {
+        pos += w;
+        return Object.assign({}, comp, { _w: w });
+      }
+      switch (comp.kind) {
+        case "text": {
+          return setWidth(comp, textWidth(ctx, comp.text));
+        }
+        case "gap": {
+          return setWidth(comp, comp.width);
+        }
+        case "gap-to": {
+          return setWidth(comp, width - pos);
+        }
+        case "text-by-font": {
+          return setWidth(comp, textWidthWithFont(ctx, comp.text, comp.fontName));
+        }
+        case "box": {
+          return setWidth(comp, currentFontSize(ctx));
+        }
+        case "expander": {
+          expanders += 1;
+          return setWidth(comp, 0);
+        }
+        default: {
+          throw new Error(`Cannot calculate width of composite: ${comp}`);
         }
       }
+    });
+    if( expanders > 0 ){
+      const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
+      const extra = (width - cw) / expanders;
+      if( extra > 0 ){
+        cs.forEach(comp => {
+          if( comp.kind === "expander" ){
+            comp._w = extra;
+          }
+        })
+      }
     }
-  }
-  return w;
+    result.push(...cs);
+  });
+  return result;
 }
+
+// export function compositeWidth(ctx: DrawerContext, comps: CompositeItem[], boxWidth: number): number {
+//   let w = 0;
+//   let expanders: CompositeExpander[] = [];
+//   for (let i = 0; i < comps.length; i++) {
+//     const comp = comps[i];
+//     switch (comp.kind) {
+//       case "text": {
+//         w += textWidth(ctx, comp.text);
+//         break;
+//       }
+//       case "gap": {
+//         w += comp.width;
+//         break;
+//       }
+//       case "text-by-font": {
+//         w += textWidthWithFont(ctx, comp.text, comp.fontName);
+//         break;
+//       }
+//       case "box": {
+//         const fontSize = currentFontSize(ctx);
+//         w += fontSize;
+//         break;
+//       }
+//       case "expander": {
+//         expanders.push(comp)
+//         break;
+//       }
+//       default: {
+//         throw new Error(`Cannot calculate width of composite: ${comp}`);
+//       }
+//     }
+//   }
+//   if (expanders.length > 0) {
+//     const extra = boxWidth - w;
+//     if (extra > 0) {
+//       const ew = extra / expanders.length;
+//       expanders.forEach(e => e._w = ew)
+//       for (let i = 0; i < comps.length; i++) {
+//         const comp = comps[i];
+//         switch (comp.kind) {
+//           case "text": {
+//             w += textWidth(ctx, comp.text);
+//             break;
+//           }
+//           case "gap": {
+//             w += comp.width;
+//             break;
+//           }
+//           case "text-by-font": {
+//             w += textWidthWithFont(ctx, comp.text, comp.fontName);
+//             break;
+//           }
+//           case "box": {
+//             const fontSize = currentFontSize(ctx);
+//             w += fontSize;
+//             break;
+//           }
+//           case "expander": {
+//             w += comp._w ?? 0;
+//             break;
+//           }
+//           default: {
+//             throw new Error(`Cannot calculate width of composite: ${comp}`);
+//           }
+//         }
+//       }
+//     }
+//   }
+//   return w;
+// }
 
 export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[],
   optArg: DrawCompositeOptionArg = {}) {
   const opt = new DrawCompositeOption(optArg);
+  const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
+  const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
+  console.log("cs", cs);
   switch (opt.halign) {
     case "center": {
-      const cw = compositeWidth(ctx, comps, b.width(box));
       const extra = (b.width(box) - cw) / 2.0;
       box = b.modify(box, b.shrinkHoriz(extra, extra));
       break;
     }
     case "right": {
-      const cw = compositeWidth(ctx, comps, b.width(box));
       const x = box.right - cw;
       box = b.modify(box, b.setLeft(x));
       break;
     }
   }
   let pos = 0;
-  comps.forEach(item => {
+  cs.forEach(item => {
     switch (item.kind) {
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
-        const tw = textWidth(ctx, item.text);
+        const tw = item._w;
         drawText(ctx, item.text, textBox, "left", opt.valign, { dy: opt.dy });
         if (item.mark) {
           mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
         }
-        pos += tw;
         break;
       }
       case "gap": {
@@ -779,7 +863,6 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
             item.callback(b.clone(mb));
           }
         }
-        pos += item.width;
         break;
       }
       case "gap-to": {
@@ -791,16 +874,14 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           }
           mark(ctx, item.mark, mb, item.ropt);
         }
-        pos = at;
         break;
       }
       case "text-by-font": {
-        const fontSave = getCurrentFont(ctx);
-        const dx = item.dx ?? 0;
-        const dy = item.dy ?? 0;
-        drawText(ctx, item.text, b.modify(box, b.shift(pos + dx, dy)), "left", opt.valign);
-        pos += textWidthWithFont(ctx, item.text, item.fontName);
-        setFont(ctx, fontSave);
+        withFont(ctx, item.fontName, () => {
+          const dx = item.dx ?? 0;
+          const dy = item.dy ?? 0;
+          drawText(ctx, item.text, b.modify(box, b.shift(pos + dx, dy)), "left", opt.valign);
+        })
         break;
       }
       case "box": {
@@ -822,13 +903,17 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
         if (item.mark) {
           mark(ctx, item.mark, innerBox);
         }
-        pos += b.width(outerBox);
         break;
       }
       case "expander": {
-        
+        if( item.mark ){
+          mark(ctx, item.mark, b.modify(box, b.shiftToRight(pos), b.setWidth(item._w, "left")));
+        }
+        break;
       }
+      default: throw new Error("Cannot happen");
     }
+    pos += item._w;
   });
 }
 

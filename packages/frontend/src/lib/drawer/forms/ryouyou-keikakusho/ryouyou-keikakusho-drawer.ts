@@ -253,6 +253,7 @@ function drawJuuten(ctx: DC, box: Box) {
           ], { dy: -0.6 });
           c.drawComposite(ctx, right, [
             ...boxed("外食の際の注意事項(", "juuten-食事-外食の際の注意事項-mark"),
+            p.expander({ mark: "juuten-食事-外食の際の注意事項" }),
             p.text(")"),
           ], { dy: -0.6 });
         });

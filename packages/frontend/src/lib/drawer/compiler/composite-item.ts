@@ -1,4 +1,4 @@
-import type { CompositeBox, CompositeGap, CompositeGapTo, CompositeText, TextByFont } from "./compiler";
+import type { CompositeBox, CompositeExpander, CompositeGap, CompositeGapTo, CompositeText, TextByFont } from "./compiler";
 
 export function text(text: string, opt: Partial<CompositeText> = {}): CompositeText {
   return Object.assign({
@@ -7,7 +7,7 @@ export function text(text: string, opt: Partial<CompositeText> = {}): CompositeT
   }, opt);
 }
 
-export function gap(width: number, opt: Partial<CompositeGap>= {}): CompositeGap {
+export function gap(width: number, opt: Partial<CompositeGap> = {}): CompositeGap {
   return Object.assign({
     kind: "gap",
     width,
@@ -33,5 +33,11 @@ export function textByFont(text: string, fontName: string, opt: Partial<TextByFo
 export function box(opt: Partial<CompositeBox> = {}): CompositeBox {
   return Object.assign({
     kind: "box",
+  }, opt);
+}
+
+export function expander(opt: Partial<CompositeExpander> = {}): CompositeExpander {
+  return Object.assign({
+    kind: "expander",
   }, opt);
 }
