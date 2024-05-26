@@ -671,7 +671,6 @@ function splitByGapTo(comps: CompositeItem[], boxWidth: number): { comps: Compos
   let cs: CompositeItem[] = [];
   comps.forEach((c, index) => {
     if( c.kind === "gap-to" ){
-      cs.push(c);
       let at: number;
       if( c.at === "end" ){
         if( index !== (comps.length - 1) ){
@@ -734,8 +733,14 @@ export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], 
       }
     });
     if( expanders > 0 ){
+      cs.forEach(c => {
+        if( c.kind === "gap-to" ){
+          c._w = 0;
+        }
+      })
       const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
       const extra = (width - cw) / expanders;
+      console.log("extra", extra, cs, cw, width);
       if( extra > 0 ){
         cs.forEach(comp => {
           if( comp.kind === "expander" ){
@@ -829,7 +834,6 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
   const opt = new DrawCompositeOption(optArg);
   const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
   const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
-  console.log("cs", cs);
   switch (opt.halign) {
     case "center": {
       const extra = (b.width(box) - cw) / 2.0;
@@ -935,6 +939,16 @@ export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
     f();
   } finally {
     setFont(ctx, save);
+  }
+}
+
+export function withPen(ctx: DrawerContext, penName: string, f: () => void) {
+  const save = getCurrentPen(ctx);
+  try {
+    setPen(ctx, penName);
+    f();
+  } finally {
+    setPen(ctx, save);
   }
 }
 

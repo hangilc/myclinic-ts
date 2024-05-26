@@ -151,7 +151,7 @@ export function innerBox(left: number, top: number, right: number, bottom: numbe
 }
 
 export function flipRight(): Modifier {
-  return box => Object.assign({}, box, { left: box.right, right: box.left + width(box)})
+  return box => Object.assign({}, box, { left: box.right, right: box.left + width(box) })
 }
 
 export function flipLeft(): Modifier {
@@ -229,19 +229,25 @@ export function withSplitColumns<T>(box: Box, splitter: Splitter, f: (cols: Box[
 export function withSplitRows<T>(box: Box, splitter: Splitter, f: (rows: Box[]) => T,
   opt: Partial<{
     boxModifiers?: Modifier[],
-  }> = {}  
+    rowModifiers?: Modifier[],
+  }> = {}
 ): T {
-  if( opt.boxModifiers ){
+  if (opt.boxModifiers) {
     box = modify(box, ...opt.boxModifiers);
   }
-  return f(splitToRows(box, splitter));
+  let rows = splitToRows(box, splitter);
+  if (opt.rowModifiers) {
+    const m = opt.rowModifiers;
+    rows = rows.map(r => modify(r, ...m));
+  }
+  return f(rows);
 }
 
 export function combine(boxes: Box[]): Box {
   return {
     left: boxes[0].left,
     top: boxes[0].top,
-    right: boxes[boxes.length-1].right,
-    bottom: boxes[boxes.length-1].bottom,
+    right: boxes[boxes.length - 1].right,
+    bottom: boxes[boxes.length - 1].bottom,
   }
 }

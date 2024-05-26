@@ -383,11 +383,114 @@ function drawJuuten(ctx: DC, box: Box) {
 }
 
 function drawKensa(ctx: DC, box: Box) {
+  function boxed(label: string, mark: string): c.CompositeItem[] {
+    return [
+      { kind: "box", mark, pen: "thin", inset: 0.3 },
+      { kind: "gap", width: 0.5 },
+      { kind: "text", text: label },
+    ];
+  }
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
   c.drawTextVertically(ctx, "︻検査︼", cols[0], "center", "center");
-
+  b.withSplitRows(cols[1], b.splitAt(30), rs => {
+    c.withPen(ctx, "thin", () => {
+      c.frameBottom(ctx, rs[0]);
+    });
+    b.withSplitRows(rs[0], b.evenSplitter(5), rs => {
+      c.drawComposite(ctx, rs[0], [
+        p.text("【血液検査項目】(採血日"),
+        p.gap(8, { mark: "kensa-採血日-月"}),
+        p.text("月"),
+        p.gap(8, { mark: "kensa-採血日-日"}),
+        p.text("日)"),
+        p.gapTo(88),
+        ...boxed("総ｺﾚｽﾃﾛｰﾙ", "kensa-総コレステロール-mark"),
+        p.gapTo(122),
+        p.text("("),
+        p.gap(40, { mark: "kensa-総コレステロール"}),
+        p.text("mg/dl)")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[1], [
+        ...boxed("血糖", "kensa-血糖-mark"),
+        p.text("("),
+        ...boxed("空腹時", "kensa-血糖-空腹時-mark"),
+        p.gap(3),
+        ...boxed("随時", "kensa-血糖-随時-mark"),
+        p.gap(4),
+        ...boxed("食後", "kensa-血糖-食後-mark"),
+        p.text("("),
+        p.expander({ mark: "kensa-血糖-食後" }),
+        p.text(")時間"),
+        p.text(")"),
+        p.gap(2),
+        p.gapTo(88),
+        ...boxed("中性脂肪", "kensa-中性脂肪-mark"),
+        p.gapTo(122),
+        p.text("("),
+        p.gap(40, { mark: "kensa-中性脂肪"}),
+        p.text("mg/dl)")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[2], [
+        p.gap(40),
+        p.text("("),
+        p.expander({ mark: "kensa-血糖-値" }),
+        p.text("mg/dl)"),
+        p.gap(2),
+        p.gapTo(88),
+        ...boxed("HDLｺﾚｽﾃﾛｰﾙ", "kensa-ＨＤＬコレステロール-mark"),
+        p.gapTo(122),
+        p.text("("),
+        p.gap(40, { mark: "kensa-ＨＤＬコレステロール"}),
+        p.text("mg/dl)")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[3], [
+        ...boxed("HbA1c:", ""),
+        p.gapTo(40),
+        p.text("("),
+        p.expander({ mark: "kensa-HbA1c" }),
+        p.text("%)"),
+        p.gap(2),
+        p.gapTo(88),
+        ...boxed("LDLｺﾚｽﾃﾛｰﾙ", "kensa-ＬＤＬコレステロール-mark"),
+        p.gapTo(122),
+        p.text("("),
+        p.gap(40, { mark: "kensa-ＬＤＬコレステロール"}),
+        p.text("mg/dl)")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[4], [
+        p.text("※血液検査結果を手交している場合は記載不要"),
+        p.gapTo(88),
+        ...boxed("その他", "kensa-血液検査項目-その他-mark"),
+        p.text("("),
+        p.gap(67, { mark: "kensa-血液検査項目-その他"}),
+        p.text(")")
+      ], { dy: -0.6 });
+    }, { rowModifiers: [b.shrinkHoriz(1, 1)]});
+    b.withSplitRows(rs[1], b.evenSplitter(3), rs => {
+      c.drawComposite(ctx, rs[0], [
+        p.text("【その他】")
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[1], [
+        ...boxed("栄養状態", "kensa-栄養状態-mark"),
+        p.gapTo(24),
+        p.text("(低栄養状態の恐れ"),
+        p.gap(8),
+        p.text("良好"),
+        p.gap(8),
+        p.text("肥満"),
+        p.text(")"),
+      ], { dy: -0.6 });
+      c.drawComposite(ctx, rs[2], [
+        ...boxed("その他", "kensa-その他-その他-mark"),
+        p.gapTo(24),
+        p.text("("),
+        p.gap(64),
+        p.text(")"),
+      ], { dy: -0.6 });
+    }, { rowModifiers: [b.shrinkHoriz(1, 1)]});
+  });
 }
 
 function drawLowerArea(ctx: DC, box: Box) {
