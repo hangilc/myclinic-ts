@@ -228,13 +228,13 @@ function drawJuuten(ctx: DC, box: Box) {
   b.withSplitRows(cols[1], b.splitAt(46, 76.5, 89), (rs) => {
     rs.forEach(r => c.frameBottom(ctx, r));
     const [shokuji, undou, tabako, sonota] = rs;
+    const bodyModifier = b.inset(1);
     // 食事
     b.withSplitColumns(shokuji, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
       c.drawComposite(ctx, mark, [
         ...boxed("食事", "juuten-食事-mark"),
       ], { halign: "center", dy: -0.6 });
-      body = b.modify(body, b.inset(1));
       b.withSplitRows(body, b.evenSplitter(8), rs => {
         c.drawComposite(ctx, rs[0], [
           ...boxed("今回は、指導の必要なし", "juuten-食事-指導の必要なし-mark")
@@ -287,7 +287,7 @@ function drawJuuten(ctx: DC, box: Box) {
         c.drawComposite(ctx, rs[7], [
           ...boxed("食事時間:朝食、昼食、夕食を規則正しくとる", "juuten-食事-食事時間-mark"),
         ], { dy: -0.6 })
-      })
+      }, { boxModifiers: [bodyModifier] })
     })
     // 運動
     b.withSplitColumns(undou, b.splitAt(18), ([mark, body]) => {
@@ -295,13 +295,49 @@ function drawJuuten(ctx: DC, box: Box) {
       c.drawComposite(ctx, mark, [
         ...boxed("運動", "juuten-運動-mark"),
       ], { halign: "center", dy: -0.6 })
+      b.withSplitRows(body, b.evenSplitter(5), rs => {
+        c.drawComposite(ctx, rs[0], [
+          ...boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", "juuten-運動-種類-mark"),
+          p.gap(82, { mark: "juuten-運動-種類" }),
+          p.text(")"),
+        ], { dy: -0.6 });
+        c.drawComposite(ctx, rs[1], [
+          p.gap(7),
+          p.text("時間(30分以上・"),
+          p.gap(30, { mark: "juuten-運動-時間" }),
+          p.text(")、頻度(ほぼ毎日・週"),
+          p.gap(22, { mark: "juuten-運動-頻度" }),
+          p.text("日)"),
+        ], { dy: -0.6 });
+        c.drawComposite(ctx, rs[2], [
+          p.gap(7),
+          p.text("強度(息がはずむが会話が可能な強さ or 脈拍"),
+          p.gap(14, { mark: "juuten-運動-強度-脈拍" }),
+          p.text("拍/分 or "),
+          p.gap(14, { mark: "juuten-運動-強度-その他" }),
+          p.text(")"),
+        ], { dy: -0.6 });
+        c.drawComposite(ctx, rs[3], [
+          ...boxed("日常生活の活動量増加(例:1日1万歩・", "juuten-運動-活動量-mark"),
+          p.gap(36, { mark: "juuten-運動-活動量" }),
+          p.text(")"),
+        ], { dy: -0.6 });
+        c.drawComposite(ctx, rs[4], [
+          ...boxed("運動時の注意事項など(", "juuten-運動-注意事項-mark"),
+          p.gap(62, { mark: "juuten-運動-注意事項" }),
+          p.text(")"),
+        ], { dy: -0.6 });
+      }, { boxModifiers: [bodyModifier] });
     })
     // たばこ
     b.withSplitColumns(tabako, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
       c.drawComposite(ctx, mark, [
         ...boxed("たばこ", "juuten-たばこ-mark"),
-      ], { halign: "center", dy: -0.6 })
+      ], { halign: "center", dy: -0.6 });
+      b.withSplitRows(body, b.evenSplitter(2), rs => {
+
+      }, { boxModifiers: [bodyModifier] });
     })
     // その他
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
@@ -309,6 +345,9 @@ function drawJuuten(ctx: DC, box: Box) {
       c.drawComposite(ctx, mark, [
         ...boxed("食事", "juuten-shokuji-mark"),
       ], { halign: "center", dy: -0.6 })
+      b.withSplitRows(body, b.evenSplitter(3), rs => {
+
+      }, { boxModifiers: [bodyModifier] });
     })
   })
 }

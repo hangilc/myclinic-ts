@@ -226,7 +226,14 @@ export function withSplitColumns<T>(box: Box, splitter: Splitter, f: (cols: Box[
   return f(splitToColumns(box, splitter));
 }
 
-export function withSplitRows<T>(box: Box, splitter: Splitter, f: (rows: Box[]) => T): T {
+export function withSplitRows<T>(box: Box, splitter: Splitter, f: (rows: Box[]) => T,
+  opt: Partial<{
+    boxModifiers?: Modifier[],
+  }> = {}  
+): T {
+  if( opt.boxModifiers ){
+    box = modify(box, ...opt.boxModifiers);
+  }
   return f(splitToRows(box, splitter));
 }
 
