@@ -5,10 +5,8 @@ import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
-
-export interface RyouyouKeikakushoKeizokuData {
-
-}
+import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
+import type { RyouyouKeikakushoKeizokuData } from "./ryouyou-keikakusho-data";
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData): Op[] {
   const ctx = mkDrawerContext();
@@ -23,6 +21,12 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData)
   //   c.setPen(ctx, "thin");
   //   c.rect(ctx, paper);
   // }
+  // console.log(Object.keys(ctx.marks).join("\n"));
+  // console.log(createRendererInterface(ctx));
+  // console.log(createRendererMap(ctx, "keizokuDataMap"));
+  console.log(createRendererInputs(ctx, "keizokuDataMap"));
+  // Object.keys(ctx.marks).forEach(k => console.log(k));
+  
   return c.getOps(ctx);
 }
 

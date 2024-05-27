@@ -6,7 +6,7 @@ import { mkDrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
-// import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
+import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
 import type { RyouyouKeikakushoShokaiData } from "./ryouyou-keikakusho-data";
 
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): Op[] {
@@ -26,6 +26,7 @@ export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): 
   // console.log(createRendererInterface(ctx));
   // console.log(createRendererMap(ctx, "shokaiDataMap"));
   // console.log(createRendererInputs(ctx, "shokaiDataMap"));
+  // Object.keys(ctx.marks).forEach(k => console.log(k));
 
   return c.getOps(ctx);
 }
