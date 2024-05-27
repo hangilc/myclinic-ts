@@ -2,14 +2,14 @@ import type { Op } from "../../compiler/op";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
-import { mkDrawerContext } from "../../compiler/context";
+import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
 import type { RyouyouKeikakushoShokaiData } from "./ryouyou-keikakusho-data";
 
-export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): Op[] {
+export function mkRyouyouKeikakushoShokaiContext(): DrawerContext {
   const ctx = mkDrawerContext();
   setupFonts(ctx);
   setupPens(ctx);
@@ -18,6 +18,11 @@ export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): 
   drawUpperArea(ctx, areas[0]);
   drawMiddleArea(ctx, areas[1]);
   drawLowerArea(ctx, areas[2]);
+  return ctx;
+}
+
+export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): Op[] {
+  const ctx = mkRyouyouKeikakushoShokaiContext();
   c.fillData(ctx, data);
   // {
   //   c.setPen(ctx, "thin");

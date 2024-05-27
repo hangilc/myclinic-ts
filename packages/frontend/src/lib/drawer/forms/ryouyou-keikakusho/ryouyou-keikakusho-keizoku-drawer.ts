@@ -1,5 +1,5 @@
 import type { Op } from "../../compiler/op";
-import { mkDrawerContext, type DrawerContext as DC } from "../../compiler/context";
+import { mkDrawerContext, type DrawerContext as DC, type DrawerContext } from "../../compiler/context";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
@@ -8,7 +8,7 @@ import { A4 } from "../../compiler/paper-size";
 import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
 import type { RyouyouKeikakushoKeizokuData } from "./ryouyou-keikakusho-data";
 
-export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData): Op[] {
+export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
   const ctx = mkDrawerContext();
   setupFonts(ctx);
   setupPens(ctx);
@@ -17,6 +17,12 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData)
   drawUpperArea(ctx, areas[0]);
   drawMiddleArea(ctx, areas[1]);
   drawLowerArea(ctx, areas[2]);
+  return ctx;
+}
+
+export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData): Op[] {
+  const ctx = mkRyouyouKeikakushoKeizokuContext();
+  c.fillData(ctx, data);
   // {
   //   c.setPen(ctx, "thin");
   //   c.rect(ctx, paper);
@@ -24,7 +30,7 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData)
   // console.log(Object.keys(ctx.marks).join("\n"));
   // console.log(createRendererInterface(ctx));
   // console.log(createRendererMap(ctx, "keizokuDataMap"));
-  console.log(createRendererInputs(ctx, "keizokuDataMap"));
+  // console.log(createRendererInputs(ctx, "keizokuDataMap"));
   // Object.keys(ctx.marks).forEach(k => console.log(k));
   
   return c.getOps(ctx);
