@@ -6,10 +6,8 @@ import { mkDrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
-
-export interface RyouyouKeikakushoShokaiData {
-
-}
+// import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
+import type { RyouyouKeikakushoShokaiData } from "./ryouyou-keikakusho-data";
 
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): Op[] {
   const ctx = mkDrawerContext();
@@ -20,10 +18,14 @@ export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoShokaiData): 
   drawUpperArea(ctx, areas[0]);
   drawMiddleArea(ctx, areas[1]);
   drawLowerArea(ctx, areas[2]);
+  c.fillData(ctx, data);
   // {
   //   c.setPen(ctx, "thin");
   //   c.rect(ctx, paper);
   // }
+  // console.log(createRendererInterface(ctx));
+  // console.log(createRendererMap(ctx, "shokaiDataMap"));
+  // console.log(createRendererInputs(ctx, "shokaiDataMap"));
 
   return c.getOps(ctx);
 }
