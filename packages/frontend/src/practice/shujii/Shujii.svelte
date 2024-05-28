@@ -80,11 +80,11 @@
       {#if patient === undefined}
         （患者未選択）
       {:else}
-        患者：(Patient.patientId) {patient.lastName}{patient.firstName}
+        患者：({patient.patientId}) {patient.lastName}{patient.firstName}
       {/if}
     </div>
     <div>
-      <textarea bind:value={masterText} />
+      <textarea class="master" bind:value={masterText} />
     </div>
     <div>
       <button on:click={doSave}>保存</button>
@@ -105,7 +105,7 @@
     />
     <span>phone</span><input type="text" bind:value={dataMap["phone"]} />
     <span>fax</span><input type="text" bind:value={dataMap["fax"]} />
-    <span>detail</span><input type="text" bind:value={dataMap["detail"]} />
+    <span>detail</span><textarea bind:value={dataMap["detail"]} class="detail"/>
   </div>
   <div>
     <button on:click={doDisplay}>表示</button>
@@ -122,8 +122,13 @@
     display: block;
   }
 
-  textarea {
+  textarea.master {
     width: 720px;
     height: 300px;
+  }
+
+  textarea.detail {
+    width: 640px;
+    height: 120px;
   }
 </style>

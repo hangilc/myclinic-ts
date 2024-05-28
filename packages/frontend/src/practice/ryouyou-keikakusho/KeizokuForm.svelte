@@ -572,3 +572,9 @@
     bind:value={ryouyouKeikakushoData["患者署名省略-mark"]}
   />
 </div>
+
+<style>
+  .data-input span + input {
+    margin-left: 4px;
+  }
+</style>

@@ -542,3 +542,9 @@
     bind:value={ryouyouKeikakushoData["医師氏名"]}
   />
 </div>
+
+<style>
+  .data-input span + input {
+    margin-left: 4px;
+  }
+</style>
