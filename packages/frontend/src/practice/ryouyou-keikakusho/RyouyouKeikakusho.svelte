@@ -10,6 +10,7 @@
   } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-data";
   import KeizokuForm from "./KeizokuForm.svelte";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import api from "@/lib/api";
   // import {
   //   createDataMap,
   //   createInterface,
@@ -25,6 +26,13 @@
   export let isVisible = false;
   let mode: "shokai" | "keizoku" = "shokai";
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
+
+  async function test() {
+    const text = await api.getRyouyouKeikakushoMasterText(198);
+    console.log(text);
+    await api.saveRyouyouKeikakushoMasterText(198, "[1234]");
+
+  }
 
   function doDisp() {
     let ops: Op[];

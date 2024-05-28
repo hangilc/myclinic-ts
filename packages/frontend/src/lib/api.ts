@@ -1597,4 +1597,12 @@ export default {
       _ => { });
   },
 
+  getRyouyouKeikakushoMasterText(patientId: number): Promise<string> {
+    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, castString);
+  },
+
+  saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {
+    return postRaw("save-ryouyou-keikakusho-master-text", text, { "patient-id": patientId.toString() }, castBoolean);
+  }
+
 };
