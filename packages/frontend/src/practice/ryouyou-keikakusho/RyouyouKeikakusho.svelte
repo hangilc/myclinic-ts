@@ -1,14 +1,11 @@
 <script lang="ts">
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawRyouyouKeikakushoShokai } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-shokai-drawer";
   import { drawRyouyouKeikakushoKeizoku } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-keizoku-drawer";
-  import ShokaiForm from "./ShokaiForm.svelte";
   import {
     mkRyouyouKeikakushoData,
     type RyouyouKeikakushoData,
   } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-data";
-  import KeizokuForm from "./KeizokuForm.svelte";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import api from "@/lib/api";
   import type { Patient } from "myclinic-model";
@@ -17,18 +14,6 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import Form from "./Form.svelte";
-
-  // import {
-  //   createDataMap,
-  //   createInterface,
-  //   createKeizokuInputs,
-  //   createShokaiInputs,
-  // } from "@/lib/drawer/forms/ryouyou-keikakusho/meta";
-
-  // console.log(createInterface());
-  // console.log(createDataMap());
-  // console.log(createShokaiInputs());
-  // console.log(createKeizokuInputs());
 
   export let isVisible = false;
   let showDev = false;
@@ -109,7 +94,7 @@
   <div class="form-inputs">
     <Form bind:ryouyouKeikakushoData />
   </div>
-  <div>
+  <div class="display-commands">
     <button on:click={doDisp}>表示</button>
   </div>
   <div>
@@ -137,6 +122,9 @@
   .form-inputs {
     max-height: 300px;
     overflow: auto;
+    margin: 10px 0;
+    border: 1px solid gray;
+    padding: 10px;
   }
 
   .dev-menu {
@@ -150,5 +138,9 @@
     margin-left: 4px;
     position: relative;
     top: 3px;
+  }
+
+  .display-commands {
+    margin: 10px 0;
   }
 </style>

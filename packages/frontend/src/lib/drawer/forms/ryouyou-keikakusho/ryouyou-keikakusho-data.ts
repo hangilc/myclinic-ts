@@ -13,6 +13,7 @@ export interface RyouyouKeikakushoData {
   "birthdate-nen": string;
   "birthdate-month": string;
   "birthdate-day": string;
+  "patient-age": string;
   "disease-diabetes": string;
   "disease-hypertension": string;
   "disease-hyperlipidemia": string;
@@ -112,6 +113,7 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "birthdate-nen": "",
     "birthdate-month": "",
     "birthdate-day": "",
+    "patient-age": "",
     "disease-diabetes": "",
     "disease-hypertension": "",
     "disease-hyperlipidemia": "",

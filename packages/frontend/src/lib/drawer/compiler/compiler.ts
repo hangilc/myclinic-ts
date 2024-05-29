@@ -670,10 +670,10 @@ function splitByGapTo(comps: CompositeItem[], boxWidth: number): { comps: Compos
   let lastAt = 0;
   let cs: CompositeItem[] = [];
   comps.forEach((c, index) => {
-    if( c.kind === "gap-to" ){
+    if (c.kind === "gap-to") {
       let at: number;
-      if( c.at === "end" ){
-        if( index !== (comps.length - 1) ){
+      if (c.at === "end") {
+        if (index !== (comps.length - 1)) {
           throw new Error("gap-to end should be the last composite item");
         }
         at = boxWidth;
@@ -688,7 +688,7 @@ function splitByGapTo(comps: CompositeItem[], boxWidth: number): { comps: Compos
       cs.push(c);
     }
   });
-  if( cs.length > 0 ){
+  if (cs.length > 0) {
     result.push({ comps: cs, width: boxWidth - lastAt });
   }
   return result;
@@ -732,17 +732,17 @@ export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], 
         }
       }
     });
-    if( expanders > 0 ){
+    if (expanders > 0) {
       cs.forEach(c => {
-        if( c.kind === "gap-to" ){
+        if (c.kind === "gap-to") {
           c._w = 0;
         }
       })
       const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
       const extra = (width - cw) / expanders;
-      if( extra > 0 ){
+      if (extra > 0) {
         cs.forEach(comp => {
-          if( comp.kind === "expander" ){
+          if (comp.kind === "expander") {
             comp._w = extra;
           }
         })
@@ -831,7 +831,7 @@ export function calcTotalCompositeWidth(ctx: DrawerContext, comps: CompositeItem
 export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[],
   optArg: DrawCompositeOptionArg = {}) {
   const opt = new DrawCompositeOption(optArg);
-  if( opt.boxModifiers.length > 0 ){
+  if (opt.boxModifiers.length > 0) {
     box = b.modify(box, ...opt.boxModifiers);
   }
   const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
@@ -854,7 +854,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
       case "text": {
         const textBox = b.modify(box, b.shift(pos, 0))
         const tw = item._w;
-        drawText(ctx, item.text, textBox, "left", opt.valign, { 
+        drawText(ctx, item.text, textBox, "left", opt.valign, {
           // dy: opt.dy 
         });
         if (item.mark) {
@@ -920,7 +920,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
         break;
       }
       case "expander": {
-        if( item.mark ){
+        if (item.mark) {
           mark(ctx, item.mark, b.modify(box, b.shiftToRight(pos), b.setWidth(item._w, "left")));
         }
         break;
@@ -948,13 +948,17 @@ export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
   }
 }
 
-export function withPen(ctx: DrawerContext, penName: string, f: () => void) {
+export function withPen(ctx: DrawerContext, penName: string | undefined, f: () => void) {
   const save = getCurrentPen(ctx);
   try {
-    setPen(ctx, penName);
+    if (penName !== undefined) {
+      setPen(ctx, penName);
+    }
     f();
   } finally {
-    setPen(ctx, save);
+    if (penName !== undefined) {
+      setPen(ctx, save);
+    }
   }
 }
 
@@ -973,6 +977,7 @@ export interface DataRendererOpt {
   valign?: VAlign;
   modifiers?: Modifier[],
   circle?: boolean | number;
+  pen?: string;
   tryFonts?: string[];
   fallbackParagraph?: boolean;
   leading?: number;
@@ -986,7 +991,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
     const halign: HAlign = opt.halign ?? "left";
     const valign: VAlign = opt.valign ?? "center";
     let markBox = getMark(ctx, markName);
-    if( opt.render) {
+    if (opt.render) {
       opt.render(ctx, markBox, data);
       return;
     }
@@ -1039,7 +1044,9 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         } else {
           r = currentFontSize(ctx) / 2.0;
         }
-        circle(ctx, b.cx(markBox), b.cy(markBox), r);
+        withPen(ctx, opt.pen, () => {
+          circle(ctx, b.cx(markBox), b.cy(markBox), r);
+        });
       } else {
         drawText(ctx, data, markBox, halign, valign);
       }

@@ -1,14 +1,14 @@
 import type { Op } from "../../compiler/op";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
-import * as p from "../../compiler/composite-item";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import type { CompositeItem } from "../../compiler/compiler";
-import { mkWidgets } from "./widgets";
+import { mkItems, mkWidgets } from "./widgets";
+
+const p = mkItems();
 
 export function mkRyouyouKeikakushoShokaiContext(): DrawerContext {
   const ctx = mkDrawerContext();
@@ -29,6 +29,13 @@ export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
   //   c.setPen(ctx, "thin");
   //   c.rect(ctx, paper);
   // }
+  // {
+  //   c.setPen(ctx, "thin");
+  //   Object.keys(ctx.marks).forEach(mark => {
+  //     const box = c.getMark(ctx, mark);
+  //     c.rect(ctx, box);
+  //   });
+  // };
   return c.getOps(ctx);
 }
 
@@ -51,12 +58,12 @@ function drawUpperArea(ctx: DC, box: Box) {
   const right: Box = b.modify(box, b.setWidth(80, "right"));
   c.drawComposite(ctx, right, [
     p.text("（記入日:"),
-    p.gapTo(32, { mark: "issue-year" }),
-    { kind: "text", text: "年" },
-    { kind: "gap-to", at: 50, mark: "issue-month" },
-    { kind: "text", text: "月" },
-    { kind: "gap-to", at: 65, mark: "issue-day" },
-    { kind: "text", text: "日）" },
+    p.gapTo(32, { mark: "issue-year", ropt: { halign: "center" } }),
+    p.text("年"),
+    p.gapTo(50, { mark: "issue-month", ropt: { halign: "center" } }),
+    p.text("月"),
+    p.gapTo(65, { mark: "issue-day", ropt: { halign: "center" } }),
+    p.text("日）"),
   ], { valign: "bottom", halign: "left", })
 }
 
@@ -85,35 +92,44 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
   c.frameBottom(ctx, row1);
   c.setFont(ctx, "f4");
   c.drawComposite(ctx, row1, [
-    { kind: "gap", width: 11 },
-    { kind: "text", text: "患者氏名：" },
-    { kind: "gap-to", at: 83, mark: "patient-name" },
-    { kind: "text", text: "(" },
-    { kind: "text", text: "男", mark: "patient-sex-male" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "女", mark: "patient-sex-female" },
-    { kind: "text", text: "）" },
+    p.gap(11),
+    p.text("患者氏名："),
+    p.gapTo(83, { mark: "patient-name" }),
+    p.text("("),
+    p.text("男", { mark: "patient-sex-male" }),
+    p.text("・"),
+    p.text("女", { mark: "patient-sex-female" }),
+    p.text("）"),
   ]);
+  const fs = c.currentFontSize(ctx);
   c.drawComposite(ctx, row2, [
-    { kind: "gap", width: 3 },
-    { kind: "text", text: "生年月日：" },
-    { kind: "text", text: "明", mark: "birthdate-gengou-meiji" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "大", mark: "birthdate-gengou-taishou" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "昭", mark: "birthdate-gengou-shouwa" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "平", mark: "birthdate-gengou-heisei" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "令", mark: "birthdate-gengou-reiwa" },
-    { kind: "gap-to", at: 59, mark: "birthdate-nen" },
-    { kind: "text", text: "年" },
-    { kind: "gap-to", at: 72, mark: "birthdate-month" },
-    { kind: "text", text: "月" },
-    { kind: "gap-to", at: 84, mark: "birthdate-day" },
-    { kind: "text", text: "日生（" },
-    { kind: "gap-to", at: 101 },
-    { kind: "text", text: "才）" },
+    p.gap(3),
+    p.text("生年月日:"),
+    p.text("明", { mark: "birthdate-gengou-meiji" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("大", { mark: "birthdate-gengou-taishou" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("昭", { mark: "birthdate-gengou-shouwa" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("平", { mark: "birthdate-gengou-heisei" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("令", { mark: "birthdate-gengou-reiwa" }),
+    p.gapTo(59, { mark: "birthdate-nen" }),
+    p.text("年"),
+    p.gapTo(72, { mark: "birthdate-month" }),
+    p.text("月"),
+    p.gapTo(84, { mark: "birthdate-day" }),
+    p.text("日生("),
+    p.gapTo(101, { mark: "patient-age" }),
+    p.text("才)"),
   ])
 }
 

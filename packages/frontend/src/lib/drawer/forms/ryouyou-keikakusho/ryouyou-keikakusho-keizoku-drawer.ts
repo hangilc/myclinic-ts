@@ -6,7 +6,7 @@ import * as p from "../../compiler/composite-item";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
-import type { RyouyouKeikakushoKeizokuData } from "./ryouyou-keikakusho-data";
+import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 
 export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
   const ctx = mkDrawerContext();
@@ -20,7 +20,7 @@ export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
   return ctx;
 }
 
-export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoKeizokuData): Op[] {
+export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoKeizokuContext();
   c.fillData(ctx, data);
   // {
@@ -53,14 +53,14 @@ function drawUpperArea(ctx: DC, box: Box) {
   const right: Box = b.modify(box, b.setWidth(90, "right"));
   c.drawComposite(ctx, right, [
     p.text("（記入日:"),
-    p.gapTo(32, { mark: "issue-year" }),
-    { kind: "text", text: "年" },
-    { kind: "gap-to", at: 50, mark: "issue-month" },
-    { kind: "text", text: "月" },
-    { kind: "gap-to", at: 65, mark: "issue-day" },
-    { kind: "text", text: "日）" },
+    p.gapTo(32, { mark: "issue-year", ropt: { halign: "center" } }),
+    p.text("年"),
+    p.gapTo(50, { mark: "issue-month", ropt: { halign: "center" } }),
+    p.text("月"),
+    p.gapTo(65, {mark: "issue-day", ropt: { halign: "center" } }),
+    p.text("日）"),
     p.text("("),
-    p.gap(6, { mark: "issue-times" }),
+    p.gap(6, { mark: "issue-times", ropt: { halign: "center" }  }),
     p.text(")回目")
   ], { valign: "bottom", halign: "left", })
 }

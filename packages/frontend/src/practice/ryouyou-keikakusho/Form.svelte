@@ -23,6 +23,12 @@
   />
 </div>
 <div class="data-input">
+  <span>issue-times</span><input
+    type="text"
+    bind:value={ryouyouKeikakushoData["issue-times"]}
+  />
+</div>
+<div class="data-input">
   <span>patient-name</span><input
     type="text"
     bind:value={ryouyouKeikakushoData["patient-name"]}
@@ -86,6 +92,12 @@
   <span>birthdate-day</span><input
     type="text"
     bind:value={ryouyouKeikakushoData["birthdate-day"]}
+  />
+</div>
+<div class="data-input">
+  <span>patient-age</span><input
+    type="text"
+    bind:value={ryouyouKeikakushoData["patient-age"]}
   />
 </div>
 <div class="data-input">
@@ -543,12 +555,6 @@
   />
 </div>
 <div class="data-input">
-  <span>issue-times</span><input
-    type="text"
-    bind:value={ryouyouKeikakushoData["issue-times"]}
-  />
-</div>
-<div class="data-input">
   <span>birthdate-age</span><input
     type="text"
     bind:value={ryouyouKeikakushoData["birthdate-age"]}
@@ -578,3 +584,13 @@
     bind:value={ryouyouKeikakushoData["患者署名省略-mark"]}
   />
 </div>
+
+<style>
+  .data-input {
+    margin: 4px 0;
+  }
+
+  .data-input span + input {
+    margin-left: 4px;
+  }
+</style>

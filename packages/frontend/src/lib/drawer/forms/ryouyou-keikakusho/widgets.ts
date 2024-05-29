@@ -1,5 +1,5 @@
 import type { Box } from "../../compiler/box";
-import type { CompositeItem } from "../../compiler/compiler";
+import type { CompositeGapTo, CompositeItem, CompositeText } from "../../compiler/compiler";
 import * as p from "../../compiler/composite-item";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
@@ -31,4 +31,29 @@ export function mkWidgets(): Widgets {
     }
   }
   return widgets;
+}
+
+export function mkItems() {
+  const items = Object.assign({}, p, {
+    text(text: string, opt: Partial<CompositeText> = {}): CompositeText {
+      if( opt.mark ){
+        opt = Object.assign({
+          ropt: { circle: true, pen: "thin" }
+        }, opt );
+        if( opt.mark === "patient-sex-male" ){
+          console.log(opt);
+        }
+      }
+      return p.text(text, opt);
+    },
+    gapTo(at: number, opt: Partial<CompositeGapTo> = {}): CompositeGapTo {
+      if( opt.mark ){
+        opt = Object.assign({
+          ropt: { modifiers: [b.shrinkHoriz(1, 1)] }
+        }, opt);
+      }
+      return p.gapTo(at, opt);
+    }
+  });
+  return items;
 }
