@@ -48,11 +48,11 @@ function setupPens(ctx: DC) {
 
 function drawUpperArea(ctx: DC, box: Box) {
   c.setFont(ctx, "f5");
-  box = b.modify(box, b.shrinkVert(0, 2));
+  box = b.modify(box, b.shrinkVert(0, 2), b.setHeight(c.currentFontSize(ctx), "bottom"));
   c.drawText(ctx, "生活習慣病　療養計画書　継続用", box, "left", "bottom");
   const right: Box = b.modify(box, b.setWidth(90, "right"));
   c.drawComposite(ctx, right, [
-    p.text("（記入日："),
+    p.text("（記入日:"),
     p.gapTo(32, { mark: "issue-year" }),
     { kind: "text", text: "年" },
     { kind: "gap-to", at: 50, mark: "issue-month" },

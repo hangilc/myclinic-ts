@@ -51,3 +51,17 @@ export function createKeizokuInputs(): string {
   })
   return lines.join("\n");
 }
+
+export function createInputs(): string {
+  const ctxShokai = mkRyouyouKeikakushoShokaiContext();
+  const ctxKeizoku = mkRyouyouKeikakushoKeizokuContext();
+  const marks = Object.assign({}, ctxShokai.marks, ctxKeizoku.marks);
+  const dataName = "ryouyouKeikakushoData";
+  const lines: string[] = [];
+  Object.keys(marks).forEach(key => {
+    lines.push(`<div class="data-input"
+      ><span>${key}</span
+      ><input type="text" bind:value={${dataName}['${key}']}/></div>`);
+  })
+  return lines.join("\n");
+}
