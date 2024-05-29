@@ -634,13 +634,14 @@ export interface TextByFont {
 export interface CompositeBox {
   kind: "box";
   mark?: string;
+  ropt?: DataRendererOpt;
   pen?: string;
 }
 
 export interface CompositeExpander {
   kind: "expander";
   mark?: string;
-  _w?: number;
+  ropt?: DataRendererOpt;
 }
 
 export type CompositeItem = CompositeText | CompositeGap | CompositeGapTo | TextByFont | CompositeBox |
@@ -914,7 +915,7 @@ export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem
           setPen(ctx, penSave);
         }
         if (item.mark) {
-          mark(ctx, item.mark, innerBox);
+          mark(ctx, item.mark, innerBox, item.ropt);
         }
         break;
       }
@@ -976,6 +977,7 @@ export interface DataRendererOpt {
   fallbackParagraph?: boolean;
   leading?: number;
   paragraph?: boolean;
+  render?: (ctx: DrawerContext, box: Box, data: string | undefined) => void;
 }
 
 export function renderData(ctx: DrawerContext, markName: string, data: string | undefined,
@@ -984,6 +986,10 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
     const halign: HAlign = opt.halign ?? "left";
     const valign: VAlign = opt.valign ?? "center";
     let markBox = getMark(ctx, markName);
+    if( opt.render) {
+      opt.render(ctx, markBox, data);
+      return;
+    }
     if (opt.modifiers) {
       markBox = b.modify(markBox, ...opt.modifiers);
     }
