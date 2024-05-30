@@ -134,14 +134,6 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
 }
 
 function drawMiddleUpperRight(ctx: DC, box: Box) {
-  // function boxed(label: string, mark: string): c.CompositeItem[] {
-  //   return [
-  //     { kind: "box", mark, pen: "thin" },
-  //     { kind: "gap", width: 1 },
-  //     { kind: "text", text: label },
-  //   ];
-  // }
-
   c.setPen(ctx, "thick");
   c.rect(ctx, box);
   const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
@@ -157,14 +149,6 @@ function drawMiddleUpperRight(ctx: DC, box: Box) {
 }
 
 function drawMokuhyou(ctx: DC, box: Box) {
-  // function boxed(label: string, mark: string): c.CompositeItem[] {
-  //   return [
-  //     { kind: "box", mark, pen: "thin" },
-  //     { kind: "gap", width: 1 },
-  //     { kind: "text", text: label },
-  //   ];
-  // }
-
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
@@ -198,28 +182,7 @@ function drawMokuhyou(ctx: DC, box: Box) {
   {
     b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
       c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
-      const fontSave = c.getCurrentFont(ctx);
-      c.setFont(ctx, "f4");
-      lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
-      b.withSplitRows(lower, b.evenSplitter(4), rs => {
-        c.drawText(ctx, "┌", rs[0], "left", "center");
-        c.drawText(ctx, "│", rs[1], "left", "center");
-        c.drawText(ctx, "│", rs[2], "left", "center");
-        c.drawText(ctx, "└", rs[3], "left", "center");
-        c.drawText(ctx, "┐", rs[0], "right", "center");
-        c.drawText(ctx, "│", rs[1], "right", "center");
-        c.drawText(ctx, "│", rs[2], "right", "center");
-        c.drawText(ctx, "┘", rs[3], "right", "center");
-      });
-      c.setFont(ctx, fontSave);
-      c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
-    });
-  }
-  {
-    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
-      c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
-      c.withSavedFont(ctx, "f4", () => {
-        lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+      c.withFont(ctx, "f4", () => {
         b.withSplitRows(lower, b.evenSplitter(4), rs => {
           c.drawText(ctx, "┌", rs[0], "left", "center");
           c.drawText(ctx, "│", rs[1], "left", "center");
@@ -229,8 +192,36 @@ function drawMokuhyou(ctx: DC, box: Box) {
           c.drawText(ctx, "│", rs[1], "right", "center");
           c.drawText(ctx, "│", rs[2], "right", "center");
           c.drawText(ctx, "┘", rs[3], "right", "center");
+        }, { boxModifiers: [b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6)] });
+        c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(11, 9), b.shrinkVert(0, 0)), {
+          halign: "left",
+          valign: "center",
+          paragraph: true,
+          font: "f4"
         });
-        c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+      })
+    });
+  }
+  {
+    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
+      c.withFont(ctx, "f4", () => {
+        b.withSplitRows(lower, b.evenSplitter(4), rs => {
+          c.drawText(ctx, "┌", rs[0], "left", "center");
+          c.drawText(ctx, "│", rs[1], "left", "center");
+          c.drawText(ctx, "│", rs[2], "left", "center");
+          c.drawText(ctx, "└", rs[3], "left", "center");
+          c.drawText(ctx, "┐", rs[0], "right", "center");
+          c.drawText(ctx, "│", rs[1], "right", "center");
+          c.drawText(ctx, "│", rs[2], "right", "center");
+          c.drawText(ctx, "┘", rs[3], "right", "center");
+        }, { boxModifiers: [b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6)] });
+        c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(11, 9), b.shrinkVert(0, 0)), {
+          halign: "left",
+          valign: "center",
+          paragraph: true,
+          font: "f4"
+        });
       })
     });
   }

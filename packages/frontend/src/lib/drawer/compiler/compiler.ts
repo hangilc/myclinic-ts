@@ -1068,11 +1068,3 @@ export function fillData(ctx: DrawerContext, data: any) {
   }
 }
 
-export function withSavedFont(ctx: DrawerContext, newFontName: string, proc: () => void) {
-  const fontSave = getCurrentFont(ctx);
-  try {
-    proc();
-  } finally {
-    setFont(ctx, fontSave);
-  }
-}

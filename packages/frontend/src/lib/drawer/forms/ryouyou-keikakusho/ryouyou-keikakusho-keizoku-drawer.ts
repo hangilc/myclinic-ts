@@ -229,7 +229,7 @@ function drawMokuhyou(ctx: DC, box: Box) {
   {
     b.withSplitRows(rows[3], b.splitAt(5), ([upper, lower]) => {
       c.drawText(ctx, "【➂行動目標】:患者と相談した目標", upper, "left", "center");
-      c.withSavedFont(ctx, "f4", () => {
+      c.withFont(ctx, "f4", () => {
         lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
         b.withSplitRows(lower, b.evenSplitter(4), rs => {
           c.drawText(ctx, "┌", rs[0], "left", "center");

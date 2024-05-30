@@ -13,8 +13,8 @@ export function breakLines(str: string, fontSize: number, lineWidth: number): st
     } else {
       if( curWidth + cw > lineWidth ){
         lines.push(line.join(""));
-        line = [];
-        curWidth = 0;
+        line = [ch];
+        curWidth = cw;
       } else {
         line.push(ch);
         curWidth += cw;
