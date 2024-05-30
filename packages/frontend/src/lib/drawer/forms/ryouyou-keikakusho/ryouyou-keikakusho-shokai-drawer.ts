@@ -169,12 +169,12 @@ function drawMokuhyou(ctx: DC, box: Box) {
         p.text(")"),
         p.gap(5),
         ...widget.boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
-        p.gap(22, { mark: "mokuhyou-bp" }),
+        p.gap(22, { mark: "mokuhyou-BP" }),
         p.text("mmHg)")
       ]);
       c.drawComposite(ctx, lower, [
         ...widget.boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
-        p.gap(20, { mark: "mokuhyou-BP" }),
+        p.gap(20, { mark: "mokuhyou-HbA1c" }),
         p.text("%)"),
       ]);
     })

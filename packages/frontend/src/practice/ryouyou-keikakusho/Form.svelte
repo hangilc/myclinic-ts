@@ -149,9 +149,9 @@
   />
 </div>
 <div class="data-input">
-  <span>mokuhyou-bp</span><input
+  <span>mokuhyou-BP</span><input
     type="text"
-    bind:value={ryouyouKeikakushoData["mokuhyou-bp"]}
+    bind:value={ryouyouKeikakushoData["mokuhyou-BP"]}
   />
 </div>
 <div class="data-input">
@@ -161,9 +161,9 @@
   />
 </div>
 <div class="data-input">
-  <span>mokuhyou-BP</span><input
+  <span>mokuhyou-HbA1c</span><input
     type="text"
-    bind:value={ryouyouKeikakushoData["mokuhyou-BP"]}
+    bind:value={ryouyouKeikakushoData["mokuhyou-HbA1c"]}
   />
 </div>
 <div class="data-input">

@@ -9,9 +9,6 @@
     rezeptUnitToPatientUnit,
   } from "myclinic-rezept";
   import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient, type RezeptUnit } from "@/lib/rezept-adapter";
-  import { createPaymentSetting } from "@/lib/rezept-meisai";
-  import type { PaymentSetting } from "myclinic-rezept/futan/calc";
-  import { sqlDateToObject } from "myclinic-util";
 
   export let isVisible: boolean;
   let year: number;

@@ -5,5 +5,5 @@ describe("date-util", () => {
     expect(calcAge("2000-05-01", "2024-05-01")).toBe(24);
     expect(calcAge("2000-05-01", "2024-05-01")).toBe(24);
     expect(calcAge("2000-05-01", "2024-04-30")).toBe(23);
-  })
+  });
 })

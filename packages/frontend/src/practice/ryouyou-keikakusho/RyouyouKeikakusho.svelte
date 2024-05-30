@@ -14,12 +14,31 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import Form from "./Form.svelte";
+  import type { Store } from "./store";
+  import { calcAge, sqlDateToObject } from "myclinic-util";
+  import { KanjiDate } from "kanjidate";
+  import { sqlDateToDate } from "@/lib/date-util";
 
   export let isVisible = false;
   let showDev = false;
   let patient: Patient | undefined = undefined;
   let mode: "shokai" | "keizoku" = "shokai";
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
+  let store: string = `
+  
+  {
+      "issueDate": "2024-06-01",
+      "patientName": "診療太郎",
+      "patientSex": "M",
+      "patientBirthdate": "1957-06-02",
+      "diseases": ["diabetes", "hypertension", "hyperlipidemia"],
+      "targetBodyWeight": "75",
+      "targetBMI": "22.0",
+      "targetBloodPressure": "130/80",
+      "targetHbA1c": "7.0",
+      "achievementTarget": "達成目標の内容",
+      "behaviorTarget": "行動目標の内容"
+    } `;
 
   async function test() {
     const text = await api.getRyouyouKeikakushoMasterText(198);
@@ -71,6 +90,86 @@
     console.log(createInputs());
     alert("code output to console");
   }
+
+  function doStoreToForm() {
+    let s = store;
+    if (s === "") {
+      s = "{}";
+    }
+    const storeValue: Partial<Store> = JSON.parse(s);
+    if (storeValue.issueDate) {
+      const d = sqlDateToObject(storeValue.issueDate);
+      ryouyouKeikakushoData["issue-year"] = d.year.toString();
+      ryouyouKeikakushoData["issue-month"] = d.month.toString();
+      ryouyouKeikakushoData["issue-day"] = d.day.toString();
+    }
+    if (storeValue.patientName) {
+      ryouyouKeikakushoData["patient-name"] = storeValue.patientName;
+    }
+    if (storeValue.patientSex) {
+      if (storeValue.patientSex === "M") {
+        ryouyouKeikakushoData["patient-sex-male"] = "1";
+      } else if (storeValue.patientSex === "F") {
+        ryouyouKeikakushoData["patient-sex-female"] = "1";
+      }
+    }
+    if (storeValue.patientBirthdate) {
+      const d = new KanjiDate(sqlDateToDate(storeValue.patientBirthdate));
+      console.log("d", d);
+      switch (d.gengou) {
+        case "明治": {
+          ryouyouKeikakushoData["birthdate-gengou-meiji"] = "1";
+          break;
+        }
+        case "大正": {
+          ryouyouKeikakushoData["birthdate-gengou-taishou"] = "1";
+          break;
+        }
+        case "昭和": {
+          ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "1";
+          break;
+        }
+        case "平成": {
+          ryouyouKeikakushoData["birthdate-gengou-heisei"] = "1";
+          break;
+        }
+        case "令和": {
+          ryouyouKeikakushoData["birthdate-gengou-reiwa"] = "1";
+          break;
+        }
+      }
+      ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
+      ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
+      ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
+      const age = calcAge(storeValue.patientBirthdate, new Date());
+      ryouyouKeikakushoData["patient-age"] = age.toString();
+    }
+    if( storeValue.diseases ){
+      storeValue.diseases.forEach(disease => ryouyouKeikakushoData[`disease-${disease}`] = "1");
+    }
+    if( storeValue.targetBodyWeight ){
+      ryouyouKeikakushoData["mokuhyou-体重-mark"] = "1";
+      ryouyouKeikakushoData["mokuhyou-体重"] = storeValue.targetBodyWeight;
+    }
+    if( storeValue.targetBMI ){
+      ryouyouKeikakushoData["mokuhyou-BMI-mark"] = "1";
+      ryouyouKeikakushoData["mokuhyou-BMI"] = storeValue.targetBMI;
+    }
+    if( storeValue.targetBloodPressure ){
+      ryouyouKeikakushoData["mokuhyou-BP-mark"] = "1";
+      ryouyouKeikakushoData["mokuhyou-BP"] = storeValue.targetBloodPressure;
+    }
+    if( storeValue.targetHbA1c ){
+      ryouyouKeikakushoData["mokuhyou-HbA1c-mark"] = "1";
+      ryouyouKeikakushoData["mokuhyou-HbA1c"] = storeValue.targetHbA1c;
+    }
+    if( storeValue.achievementTarget ){
+      ryouyouKeikakushoData["mokuhyou-達成目標"] = storeValue.achievementTarget
+    }
+    if( storeValue.behaviorTarget ){
+      ryouyouKeikakushoData["mokuhyou-行動目標"] = storeValue.behaviorTarget
+    }
+}
 </script>
 
 {#if isVisible}
@@ -91,6 +190,12 @@
     初回
     <input type="radio" value="keizoku" bind:group={mode} /> 継続
   </div>
+  <div class="store-form-commands">
+    <button on:click={doStoreToForm}>Store to Form</button>
+  </div>
+  <div class="data-area">
+    <textarea bind:value={store} />
+  </div>
   <div class="form-inputs">
     <Form bind:ryouyouKeikakushoData />
   </div>
@@ -100,7 +205,9 @@
   <div>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="dev-menu">
-      <span>Dev</span><div class="chevrons"
+      <span>Dev</span>
+      <div
+        class="chevrons"
         on:click={() => {
           showDev = !showDev;
         }}
@@ -125,6 +232,8 @@
     margin: 10px 0;
     border: 1px solid gray;
     padding: 10px;
+    width: 600px;
+    resize: vertical;
   }
 
   .dev-menu {
@@ -140,7 +249,14 @@
     top: 3px;
   }
 
-  .display-commands {
+  .data-area textarea {
+    width: 600px;
+    height: 300px;
+    resize: vertical;
+  }
+
+  .display-commands,
+  .store-form-commands {
     margin: 10px 0;
   }
 </style>

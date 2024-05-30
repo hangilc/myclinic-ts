@@ -22,9 +22,9 @@ export interface RyouyouKeikakushoData {
   "mokuhyou-BMI-mark": string;
   "mokuhyou-BMI": string;
   "mokuhyou-BP-mark": string;
-  "mokuhyou-bp": string;
-  "mokuhyou-HbA1c-mark": string;
   "mokuhyou-BP": string;
+  "mokuhyou-HbA1c-mark": string;
+  "mokuhyou-HbA1c": string;
   "mokuhyou-達成目標": string;
   "mokuhyou-行動目標": string;
   "juuten-食事-mark": string;
@@ -122,9 +122,9 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "mokuhyou-BMI-mark": "",
     "mokuhyou-BMI": "",
     "mokuhyou-BP-mark": "",
-    "mokuhyou-bp": "",
-    "mokuhyou-HbA1c-mark": "",
     "mokuhyou-BP": "",
+    "mokuhyou-HbA1c-mark": "",
+    "mokuhyou-HbA1c": "",
     "mokuhyou-達成目標": "",
     "mokuhyou-行動目標": "",
     "juuten-食事-mark": "",

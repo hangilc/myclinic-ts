@@ -121,13 +121,13 @@ export function calcAge(birthdate: DateWrapperLike, at: DateWrapperLike = new Da
 
 export function sqlDateToDate(sqlDate: string): Date {
   const obj = sqlDateToObject(sqlDate);
-  return new Date(obj.year, obj.month, obj.day);
+  return new Date(obj.year, obj.month - 1, obj.day);
 }
 
 export function sqlDateToObject(sqlDate: string): { year: number, month: number, day: number } {
   return {
     year: parseInt(sqlDate.substring(0, 4)),
-    month: parseInt(sqlDate.substring(5, 7)) - 1,
+    month: parseInt(sqlDate.substring(5, 7)),
     day: parseInt(sqlDate.substring(8, 10)),
   }
 }
