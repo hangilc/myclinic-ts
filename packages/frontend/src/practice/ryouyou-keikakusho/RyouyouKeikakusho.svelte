@@ -66,7 +66,7 @@
         onEnter: (selected: Patient) => {
           patient = selected;
           doPatientUpdate(patient);
-        },
+        }
       },
     });
   }
