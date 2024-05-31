@@ -8,7 +8,7 @@
   } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-data";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import api from "@/lib/api";
-  import type { Patient } from "myclinic-model";
+  import type { ClinicInfo, Patient } from "myclinic-model";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import { createInputs } from "@/lib/drawer/forms/ryouyou-keikakusho/meta";
   import ChevronDown from "@/icons/ChevronDown.svelte";
@@ -24,26 +24,37 @@
   let patient: Patient | undefined = undefined;
   let mode: "shokai" | "keizoku" = "shokai";
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
-  let store: string = `
-  
+  let store: string = "";
+  let clinicInfo: ClinicInfo | undefined = undefined;
+
+  init();
+
+  async function init() {
+    clinicInfo = await api.getClinicInfo();
+  }
+
+  async function test() {
+    const text = await api.getRyouyouKeikakushoMasterText(198);
+    console.log(text);
+    await api.saveRyouyouKeikakushoMasterText(198, "[1234]");
+  }
+
+  function initStore() {
+    store = `
   {
       "issueDate": "2024-06-01",
-      "patientName": "診療太郎",
-      "patientSex": "M",
-      "patientBirthdate": "1957-06-02",
       "diseases": ["diabetes", "hypertension", "hyperlipidemia"],
       "targetBodyWeight": "75",
       "targetBMI": "22.0",
       "targetBloodPressure": "130/80",
       "targetHbA1c": "7.0",
       "achievementTarget": "達成目標の内容",
-      "behaviorTarget": "行動目標の内容"
+      "behaviorTarget": "行動目標の内容",
+      "immediates": {
+        "juuten-食事-mark": "1",
+        "juuten-運動-mark": "1"
+      }
     } `;
-
-  async function test() {
-    const text = await api.getRyouyouKeikakushoMasterText(198);
-    console.log(text);
-    await api.saveRyouyouKeikakushoMasterText(198, "[1234]");
   }
 
   function doSelectPatient() {
@@ -62,6 +73,7 @@
 
   function doPatientUpdate(p: Patient) {
     patient = p;
+    initStore();
   }
 
   function doClearPatient() {
@@ -96,6 +108,7 @@
     if (s === "") {
       s = "{}";
     }
+    ryouyouKeikakushoData = mkRyouyouKeikakushoData();
     const storeValue: Partial<Store> = JSON.parse(s);
     if (storeValue.issueDate) {
       const d = sqlDateToObject(storeValue.issueDate);
@@ -103,19 +116,20 @@
       ryouyouKeikakushoData["issue-month"] = d.month.toString();
       ryouyouKeikakushoData["issue-day"] = d.day.toString();
     }
-    if (storeValue.patientName) {
-      ryouyouKeikakushoData["patient-name"] = storeValue.patientName;
-    }
-    if (storeValue.patientSex) {
-      if (storeValue.patientSex === "M") {
-        ryouyouKeikakushoData["patient-sex-male"] = "1";
-      } else if (storeValue.patientSex === "F") {
-        ryouyouKeikakushoData["patient-sex-female"] = "1";
+    if (patient) {
+      ryouyouKeikakushoData["patient-name"] =
+        `${patient.lastName}${patient.firstName}`;
+      switch (patient.sex) {
+        case "M": {
+          ryouyouKeikakushoData["patient-sex-male"] = "1";
+          break;
+        }
+        case "F": {
+          ryouyouKeikakushoData["patient-sex-female"] = "1";
+          break;
+        }
       }
-    }
-    if (storeValue.patientBirthdate) {
-      const d = new KanjiDate(sqlDateToDate(storeValue.patientBirthdate));
-      console.log("d", d);
+      const d = new KanjiDate(sqlDateToDate(patient.birthday));
       switch (d.gengou) {
         case "明治": {
           ryouyouKeikakushoData["birthdate-gengou-meiji"] = "1";
@@ -141,35 +155,47 @@
       ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
       ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
       ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
-      const age = calcAge(storeValue.patientBirthdate, new Date());
+      const age = calcAge(patient.birthday, new Date());
       ryouyouKeikakushoData["patient-age"] = age.toString();
     }
-    if( storeValue.diseases ){
-      storeValue.diseases.forEach(disease => ryouyouKeikakushoData[`disease-${disease}`] = "1");
+    if (storeValue.diseases) {
+      storeValue.diseases.forEach(
+        (disease) => (ryouyouKeikakushoData[`disease-${disease}`] = "1")
+      );
     }
-    if( storeValue.targetBodyWeight ){
+    if (storeValue.targetBodyWeight) {
       ryouyouKeikakushoData["mokuhyou-体重-mark"] = "1";
       ryouyouKeikakushoData["mokuhyou-体重"] = storeValue.targetBodyWeight;
     }
-    if( storeValue.targetBMI ){
+    if (storeValue.targetBMI) {
       ryouyouKeikakushoData["mokuhyou-BMI-mark"] = "1";
       ryouyouKeikakushoData["mokuhyou-BMI"] = storeValue.targetBMI;
     }
-    if( storeValue.targetBloodPressure ){
+    if (storeValue.targetBloodPressure) {
       ryouyouKeikakushoData["mokuhyou-BP-mark"] = "1";
       ryouyouKeikakushoData["mokuhyou-BP"] = storeValue.targetBloodPressure;
     }
-    if( storeValue.targetHbA1c ){
+    if (storeValue.targetHbA1c) {
       ryouyouKeikakushoData["mokuhyou-HbA1c-mark"] = "1";
       ryouyouKeikakushoData["mokuhyou-HbA1c"] = storeValue.targetHbA1c;
     }
-    if( storeValue.achievementTarget ){
-      ryouyouKeikakushoData["mokuhyou-達成目標"] = storeValue.achievementTarget
+    if (storeValue.achievementTarget) {
+      ryouyouKeikakushoData["mokuhyou-達成目標"] = storeValue.achievementTarget;
     }
-    if( storeValue.behaviorTarget ){
-      ryouyouKeikakushoData["mokuhyou-行動目標"] = storeValue.behaviorTarget
+    if (storeValue.behaviorTarget) {
+      ryouyouKeikakushoData["mokuhyou-行動目標"] = storeValue.behaviorTarget;
     }
-}
+    if (storeValue.immediates) {
+      for (let key in storeValue.immediates) {
+        const value = storeValue.immediates[key];
+        // @ts-ignore
+        ryouyouKeikakushoData[key] = value;
+      }
+    }
+    if (clinicInfo) {
+      ryouyouKeikakushoData["医師氏名"] = clinicInfo.doctorName;
+    }
+  }
 </script>
 
 {#if isVisible}
