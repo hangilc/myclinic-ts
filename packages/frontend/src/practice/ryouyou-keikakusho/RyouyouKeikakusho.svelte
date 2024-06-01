@@ -32,6 +32,29 @@
   let diseaseDiabetes = false;
   let diseaseHypertension = true;
   let diseaseHyperLipidemia = false;
+  let formAreaWork: HTMLElement;
+  let juutenShokujiChecked = false;
+  const shokujiItems = [
+    ["juuten-食事-摂取量を適正にする-mark", "摂取量を適正にする"],
+    ["juuten-食事-食塩・調味料を控える-mark", "食塩・調味料を控える"],
+    ["juuten-食事-食物繊維の摂取を増やす-mark", "食物繊維の摂取を増やす"],
+    [
+      "juuten-食事-外食の際の注意事項-mark",
+      "外食の際の注意事項",
+      "juuten-食事-外食の際の注意事項",
+    ],
+    [
+      "juuten-食事-油を使った料理の摂取を減らす-mark",
+      "油を使った料理の摂取を減らす",
+    ],
+    ["juuten-食事-その他-mark", "その他"],
+    ["juuten-食事-節酒-mark", "節酒"],
+    ["juuten-食事-間食-mark", "間食"],
+    ["juuten-食事-食べ方-mark", "食べ方"],
+    ["juuten-食事-食事時間-mark", "食事時間"],
+  ] as const;
+
+  $: updateBox("juuten-食事-mark", juutenShokujiChecked);
 
   init();
 
@@ -288,6 +311,10 @@
       ryouyouKeikakushoData["patient-age"] = "";
     }
   }
+
+  function castToInput(e: Element | null): HTMLInputElement {
+    return e as HTMLInputElement;
+  }
 </script>
 
 {#if isVisible}
@@ -319,7 +346,7 @@
         on:change={onFormModeChange}
       /> Store
     </div>
-    <div class="form-area-work">
+    <div class="form-area-work" bind:this={formAreaWork}>
       {#if formMode === "input"}
         <div>
           <input type="radio" value="shokai" bind:group={mode} /> 初回
@@ -409,6 +436,49 @@
               updateValue("mokuhyou-行動目標", event.currentTarget.value);
             }}
           />
+        </div>
+        <div>
+          【<input bind:checked={juutenShokujiChecked} type="checkbox" />食事】
+          <div style="margin-left: 2em">
+            {#each shokujiItems as item}
+              <div>
+                <input
+                  type="checkbox"
+                  class={item[0]}
+                  on:change={(event) => {
+                    const checked = event.currentTarget.checked;
+                    if (checked) {
+                      juutenShokujiChecked = true;
+                    }
+                    updateBox(item[0], event.currentTarget.checked);
+                  }}
+                />
+                {item[1]}
+                {#if item[2]}
+                  <div style="margin-left: 2em;">
+                    <input
+                      type="text"
+                      on:change={(event) => {
+                        if (item[2] !== undefined) {
+                          const text = event.currentTarget.value;
+                          updateValue(item[2], text);
+                          if (text !== "") {
+                            const input = castToInput(
+                              formAreaWork.querySelector(`.${item[0]}`)
+                            );
+                            const checkbox = castToInput(input);
+                            if (!checkbox.checked) {
+                              checkbox.click();
+                            }
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                {/if}
+              </div>
+            {/each}
+          </div>
         </div>
       {:else if formMode === "store"}
         <div>{store}</div>
