@@ -119,43 +119,5 @@
     ])}
       >その他</a
     >
-    <!-- <div slot="menu" class="popup-menu">
-      <a href="javascript:void(0)" on:click={destroyAnd(doKensa)}>検査</a>
-      <a href="javascript:void(0)" on:click={destroyAnd(doSearch)}>検索入力</a>
-      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteSelected)}
-        >選択削除</a
-      >
-      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteDuplicate)}
-        >重複削除</a
-      >
-      <a href="javascript:void(0)" on:click={destroyAnd(doCopySelected)}
-        >選択コピー</a
-      >
-      <a href="javascript:void(0)" on:click={destroyAnd(doCopyAll)}
-        >全部コピー</a
-      >
-    </div> -->
 </div>
 
-<!-- <Pulldown anchor={auxLink} bind:this={auxPopup}>
-  <div>
-    <a href="javascript:void(0)" on:click={doKensa}>検査</a>
-    <a href="javascript:void(0)" on:click={doSearch}>検索入力</a>
-    <a href="javascript:void(0)" on:click={doDeleteSelected}>選択削除</a>
-    <a href="javascript:void(0)" on:click={doDeleteDuplicate}>重複削除</a>
-    <a href="javascript:void(0)" on:click={doCopySelected}>選択コピー</a>
-    <a href="javascript:void(0)" on:click={doCopyAll}>全部コピー</a>
-  </div>
-</Pulldown> -->
-
-<!-- <style>
-  .popup-menu a {
-    display: block;
-    margin-bottom: 4px;
-    color: black;
-  }
-
-  .popup-menu a:last-of-type {
-    margin-bottom: 0;
-  }
-</style> -->

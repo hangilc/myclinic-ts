@@ -307,6 +307,7 @@ function shinryouListToMeisaiItems(shinryouList: ShinryouEx[], at: string): Meis
     }
   })
   const step = getHoukatsuStep(at);
+  console.log("step", step);
   const houkatsuItems: MeisaiItem[] = Array.from(houkatsuCollector.map.entries()).map(([g, l]) => {
     let ten = houkatsuTenOf(g, l.length, step);
     if (ten === undefined) {
