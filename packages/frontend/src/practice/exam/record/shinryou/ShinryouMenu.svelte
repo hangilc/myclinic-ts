@@ -9,11 +9,13 @@
   import CopySelectedDialog from "./CopySelectedDialog.svelte";
   import DeleteSelectedDialog from "./DeleteSelectedDialog.svelte";
   import { popupTrigger } from "@/lib/popup-helper";
+  import { getRegularNames } from "./regular-names";
 
   export let visit: VisitEx;
 
   async function doRegular() {
-    const names = await api.getShinryouRegular();
+    const at = visit.visitedAt;
+    const names = getRegularNames(at);
     const d: RegularDialog = new RegularDialog({
       target: document.body,
       props: {

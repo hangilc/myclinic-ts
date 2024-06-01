@@ -15,28 +15,44 @@
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import Form from "./Form.svelte";
   import type { Store } from "./store";
-  import { calcAge, sqlDateToObject } from "myclinic-util";
+  import { DateWrapper, calcAge, sqlDateToObject } from "myclinic-util";
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
+  import { dateToSql } from "@/lib/util";
 
   export let isVisible = false;
   let showDev = false;
   let patient: Patient | undefined = undefined;
+  let formMode: "input" | "store" = "input";
   let mode: "shokai" | "keizoku" = "shokai";
+  let issueDate: string = dateToSql(new Date());
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
   let store: string = "";
   let clinicInfo: ClinicInfo | undefined = undefined;
+  let diseaseDiabetes = false;
+  let diseaseHypertension = true;
+  let diseaseHyperLipidemia = false;
 
   init();
 
   async function init() {
     clinicInfo = await api.getClinicInfo();
+    onIssueDateChange();
+    updateDiseases();
   }
 
-  async function test() {
-    const text = await api.getRyouyouKeikakushoMasterText(198);
-    console.log(text);
-    await api.saveRyouyouKeikakushoMasterText(198, "[1234]");
+  function updateBox(key: keyof RyouyouKeikakushoData, checked: boolean) {
+    updateValue(key, checked ? "1" : "");
+  }
+
+  function updateValue(key: keyof RyouyouKeikakushoData, value: string) {
+    ryouyouKeikakushoData[key] = value;
+  }
+
+  function updateDiseases() {
+    updateBox("disease-diabetes", diseaseDiabetes);
+    updateBox("disease-hypertension", diseaseHypertension);
+    updateBox("disease-hyperlipidemia", diseaseHyperLipidemia);
   }
 
   function initStore() {
@@ -65,15 +81,10 @@
         title: "患者選択",
         onEnter: (selected: Patient) => {
           patient = selected;
-          doPatientUpdate(patient);
-        }
+          onPatientChange();
+        },
       },
     });
-  }
-
-  function doPatientUpdate(p: Patient) {
-    patient = p;
-    initStore();
   }
 
   function doClearPatient() {
@@ -196,6 +207,87 @@
       ryouyouKeikakushoData["医師氏名"] = clinicInfo.doctorName;
     }
   }
+
+  function onFormModeChange() {
+    if (formMode === "input") {
+    } else if (formMode === "store") {
+      let s = {
+        mode,
+      };
+      store = JSON.stringify(s, undefined, 2);
+    }
+  }
+
+  function onIssueDateChange() {
+    if (issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const d = DateWrapper.from(issueDate);
+      ryouyouKeikakushoData["issue-year"] = d.getYear().toString();
+      ryouyouKeikakushoData["issue-month"] = d.getMonth().toString();
+      ryouyouKeikakushoData["issue-day"] = d.getDay().toString();
+    } else {
+      ryouyouKeikakushoData["issue-year"] = "";
+      ryouyouKeikakushoData["issue-month"] = "";
+      ryouyouKeikakushoData["issue-day"] = "";
+    }
+  }
+
+  function onPatientChange() {
+    if (patient) {
+      ryouyouKeikakushoData["patient-name"] =
+        `${patient.lastName}${patient.firstName}`;
+      switch (patient.sex) {
+        case "M": {
+          ryouyouKeikakushoData["patient-sex-male"] = "1";
+          break;
+        }
+        case "F": {
+          ryouyouKeikakushoData["patient-sex-female"] = "1";
+          break;
+        }
+      }
+      const d = new KanjiDate(sqlDateToDate(patient.birthday));
+      switch (d.gengou) {
+        case "明治": {
+          ryouyouKeikakushoData["birthdate-gengou-meiji"] = "1";
+          break;
+        }
+        case "大正": {
+          ryouyouKeikakushoData["birthdate-gengou-taishou"] = "1";
+          break;
+        }
+        case "昭和": {
+          ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "1";
+          break;
+        }
+        case "平成": {
+          ryouyouKeikakushoData["birthdate-gengou-heisei"] = "1";
+          break;
+        }
+        case "令和": {
+          ryouyouKeikakushoData["birthdate-gengou-reiwa"] = "1";
+          break;
+        }
+      }
+      ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
+      ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
+      ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
+      const age = calcAge(patient.birthday, issueDate ?? new Date());
+      ryouyouKeikakushoData["patient-age"] = age.toString();
+    } else {
+      ryouyouKeikakushoData["patient-name"] = "";
+      ryouyouKeikakushoData["patient-sex-male"] = "1";
+      ryouyouKeikakushoData["patient-sex-female"] = "";
+      ryouyouKeikakushoData["birthdate-gengou-meiji"] = "";
+      ryouyouKeikakushoData["birthdate-gengou-taishou"] = "";
+      ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "1";
+      ryouyouKeikakushoData["birthdate-gengou-heisei"] = "1";
+      ryouyouKeikakushoData["birthdate-gengou-reiwa"] = "";
+      ryouyouKeikakushoData["birthdate-nen"] = "";
+      ryouyouKeikakushoData["birthdate-month"] = "";
+      ryouyouKeikakushoData["birthdate-day"] = "";
+      ryouyouKeikakushoData["patient-age"] = "";
+    }
+  }
 </script>
 
 {#if isVisible}
@@ -211,10 +303,117 @@
       ({patient.patientId}) {patient.lastName} {patient.firstName}
     {/if}
   </div>
-  <div>
-    <input type="radio" value="shokai" bind:group={mode} />
-    初回
-    <input type="radio" value="keizoku" bind:group={mode} /> 継続
+  <div class="form-area">
+    <div>
+      <input
+        type="radio"
+        value="input"
+        bind:group={formMode}
+        on:change={onFormModeChange}
+      />
+      Input
+      <input
+        type="radio"
+        value="store"
+        bind:group={formMode}
+        on:change={onFormModeChange}
+      /> Store
+    </div>
+    <div class="form-area-work">
+      {#if formMode === "input"}
+        <div>
+          <input type="radio" value="shokai" bind:group={mode} /> 初回
+          <input type="radio" value="keizoku" bind:group={mode} /> 継続
+        </div>
+        <div>
+          発行日：<input
+            type="text"
+            bind:value={issueDate}
+            on:change={onIssueDateChange}
+          />
+        </div>
+        <div>
+          主病：<input
+            type="checkbox"
+            bind:checked={diseaseDiabetes}
+            on:change={updateDiseases}
+          />
+          糖尿病
+          <input
+            type="checkbox"
+            bind:checked={diseaseHypertension}
+            on:change={updateDiseases}
+          />
+          高血圧
+          <input
+            type="checkbox"
+            bind:checked={diseaseHyperLipidemia}
+            on:change={updateDiseases}
+          /> 高脂血症
+        </div>
+        <div>
+          <span>【目標】</span>
+          体重：<input
+            type="text"
+            style:width="6em"
+            on:change={(event) => {
+              const value = event.currentTarget.value;
+              updateBox("mokuhyou-体重-mark", value !== "");
+              updateValue("mokuhyou-体重", value);
+            }}
+          />
+          kg BMI：<input
+            type="text"
+            style:width="6em"
+            on:change={(event) => {
+              const value = event.currentTarget.value;
+              updateBox("mokuhyou-BMI-mark", value !== "");
+              updateValue("mokuhyou-BMI", value);
+            }}
+          />
+          血圧：<input
+            type="text"
+            style:width="6em"
+            on:change={(event) => {
+              const value = event.currentTarget.value;
+              updateBox("mokuhyou-BP-mark", value !== "");
+              updateValue("mokuhyou-BP", value);
+            }}
+          />
+          <span style="white-space:nowrap">
+            HbA1c：<input
+              type="text"
+              style:width="6em"
+              on:change={(event) => {
+                const value = event.currentTarget.value;
+                updateBox("mokuhyou-HbA1c-mark", value !== "");
+                updateValue("mokuhyou-HbA1c", value);
+              }}
+            />
+          </span>
+        </div>
+        <div style="display: flex; align-items:top">
+          【達成目標】
+          <textarea
+            style="width: 400px; height: 2.8em; resize: vertical"
+            on:change={(event) => {
+              updateValue("mokuhyou-達成目標", event.currentTarget.value);
+            }}
+          />
+        </div>
+        <div style="display: flex; align-items:top">
+          【行動目標】
+          <textarea
+            style="width: 400px; height: 2.8em; resize: vertical"
+            on:change={(event) => {
+              updateValue("mokuhyou-行動目標", event.currentTarget.value);
+            }}
+          />
+        </div>
+      {:else if formMode === "store"}
+        <div>{store}</div>
+      {/if}
+    </div>
   </div>
   <div class="store-form-commands">
     <button on:click={doStoreToForm}>Store to Form</button>
@@ -252,6 +451,20 @@
 {/if}
 
 <style>
+  .form-area {
+    margin: 10px 0;
+  }
+
+  .form-area-work {
+    border: 1px solid gray;
+    padding: 10px;
+    width: 600px;
+  }
+
+  .form-area-work > div {
+    margin: 4px 0;
+  }
+
   .form-inputs {
     max-height: 300px;
     overflow: auto;
