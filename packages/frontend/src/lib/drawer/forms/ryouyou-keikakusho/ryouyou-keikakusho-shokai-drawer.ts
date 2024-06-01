@@ -285,20 +285,22 @@ function drawJuuten(ctx: DC, box: Box) {
         });
         c.drawComposite(ctx, rs[3], [
           ...widget.boxed("節酒:[減らす(種類・量:", "juuten-食事-節酒-mark"),
-          p.gap(42, { mark: "shokuji-食事-節酒" }),
+          p.gap(42, { mark: "juuten-食事-節酒" }),
           p.text("を週"),
-          p.gap(8, { mark: "shokuji-食事-節酒-回" }),
+          p.gap(8, { mark: "juuten-食事-節酒-回", ropt: { halign: "center" } }),
           p.text("回)]"),
         ]);
         c.drawComposite(ctx, rs[4], [
           ...widget.boxed("間食:[減らす(種類・量:", "juuten-食事-間食-mark"),
-          p.gap(42, { mark: "shokuji-食事-間食" }),
+          p.gap(42, { mark: "juuten-食事-間食" }),
           p.text("を週"),
-          p.gap(8, { mark: "shokuji-食事-間食-回" }),
+          p.gap(8, { mark: "juuten-食事-間食-回", ropt: { halign: "center" } }),
           p.text("回)]"),
         ]);
         c.drawComposite(ctx, rs[5], [
-          ...widget.boxed("食べ方:(ゆっくり食べる・その他(", "juuten-食事-食べ方-mark"),
+          ...widget.boxed("食べ方:(", "juuten-食事-食べ方-mark"),
+          p.text("ゆっくり食べる", { mark: "juuten-食事-食べ方-ゆっくり食べる" }),
+          p.text("・その他("),
           p.gap(44, { mark: "juuten-食事-食べ方" }),
           p.text("))"),
         ]);

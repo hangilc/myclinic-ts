@@ -36,12 +36,13 @@ export interface RyouyouKeikakushoData {
   "juuten-食事-油を使った料理の摂取を減らす-mark": string;
   "juuten-食事-その他-mark": string;
   "juuten-食事-節酒-mark": string;
-  "shokuji-食事-節酒": string;
-  "shokuji-食事-節酒-回": string;
+  "juuten-食事-節酒": string;
+  "juuten-食事-節酒-回": string;
   "juuten-食事-間食-mark": string;
-  "shokuji-食事-間食": string;
-  "shokuji-食事-間食-回": string;
+  "juuten-食事-間食": string;
+  "juuten-食事-間食-回": string;
   "juuten-食事-食べ方-mark": string;
+  "juuten-食事-食べ方-ゆっくり食べる": string;
   "juuten-食事-食べ方": string;
   "juuten-食事-食事時間-mark": string;
   "juuten-運動-mark": string;
@@ -136,12 +137,13 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "juuten-食事-油を使った料理の摂取を減らす-mark": "",
     "juuten-食事-その他-mark": "",
     "juuten-食事-節酒-mark": "",
-    "shokuji-食事-節酒": "",
-    "shokuji-食事-節酒-回": "",
+    "juuten-食事-節酒": "",
+    "juuten-食事-節酒-回": "",
     "juuten-食事-間食-mark": "",
-    "shokuji-食事-間食": "",
-    "shokuji-食事-間食-回": "",
+    "juuten-食事-間食": "",
+    "juuten-食事-間食-回": "",
     "juuten-食事-食べ方-mark": "",
+    "juuten-食事-食べ方-ゆっくり食べる": "",
     "juuten-食事-食べ方": "",
     "juuten-食事-食事時間-mark": "",
     "juuten-運動-mark": "",

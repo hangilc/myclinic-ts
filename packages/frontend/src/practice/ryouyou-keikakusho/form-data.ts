@@ -20,6 +20,7 @@ export interface FormData {
     "juuten-食事-食べ方-mark": boolean;
     "juuten-食事-食事時間-mark": boolean;
   };
+  shokujiYukkuri: boolean;
   immediates: {
     [Key in keyof RyouyouKeikakushoData]?: string;
   };
@@ -45,6 +46,7 @@ export function mkFormData(): FormData {
       "juuten-食事-食べ方-mark": false,
       "juuten-食事-食事時間-mark": false,
     },
+    shokujiYukkuri: false,
     immediates: {
       "mokuhyou-体重": "",
       "mokuhyou-BMI": "",
@@ -52,6 +54,12 @@ export function mkFormData(): FormData {
       "mokuhyou-HbA1c": "",
       "mokuhyou-達成目標": "",
       "mokuhyou-行動目標": "",
+      "juuten-食事-外食の際の注意事項": "",
+      "juuten-食事-節酒": "",
+      "juuten-食事-節酒-回": "",
+      "juuten-食事-間食": "",
+      "juuten-食事-間食-回": "",
+      "juuten-食事-食べ方": "",
     },
   }
 }

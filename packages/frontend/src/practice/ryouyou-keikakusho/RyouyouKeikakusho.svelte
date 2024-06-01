@@ -54,7 +54,28 @@
     ["juuten-食事-食事時間-mark", "食事時間"],
   ] as const;
 
-  $: formData.shokujiCheck = formData.shokujiCheck || Object.values(formData.shokujiChecks).some(b => b)
+  $: formData.shokujiCheck =
+    formData.shokujiCheck ||
+    Object.values(formData.shokujiChecks).some((b) => b);
+
+  $: formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] =
+    formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] ||
+    formData.immediates["juuten-食事-外食の際の注意事項"] !== "";
+
+  $: formData.shokujiChecks["juuten-食事-節酒-mark"] =
+    formData.shokujiChecks["juuten-食事-節酒-mark"] ||
+    formData.immediates["juuten-食事-節酒"] !== "" ||
+    formData.immediates["juuten-食事-節酒-回"] !== "";
+
+  $: formData.shokujiChecks["juuten-食事-間食-mark"] =
+    formData.shokujiChecks["juuten-食事-間食-mark"] ||
+    formData.immediates["juuten-食事-間食"] !== "" ||
+    formData.immediates["juuten-食事-間食-回"] !== "";
+
+  $: formData.shokujiChecks["juuten-食事-食べ方-mark"] =
+    formData.shokujiChecks["juuten-食事-食べ方-mark"] ||
+    formData.shokujiYukkuri ||
+    formData.immediates["juuten-食事-食べ方"] !== "";
 
   init();
 
@@ -90,11 +111,12 @@
   }
 
   function populateShokuji() {
-    for(const key in formData.shokujiChecks) {
+    for (const key in formData.shokujiChecks) {
       // @ts-ignore
-      updateBox(key, formData.shokujiChecks[key])
+      updateBox(key, formData.shokujiChecks[key]);
     }
     updateBox("juuten-食事-mark", formData.shokujiCheck);
+    updateBox("juuten-食事-食べ方-ゆっくり食べる", formData.shokujiYukkuri);
   }
 
   function initStore() {
@@ -464,7 +486,14 @@
                 bind:checked={formData.shokujiChecks[
                   "juuten-食事-外食の際の注意事項-mark"
                 ]}
-              /> 外食の際の注意事項
+              />
+              外食の際の注意事項
+              <input
+                type="text"
+                bind:value={formData.immediates[
+                  "juuten-食事-外食の際の注意事項"
+                ]}
+              />
             </div>
             <div>
               <input
@@ -484,19 +513,48 @@
               <input
                 type="checkbox"
                 bind:checked={formData.shokujiChecks["juuten-食事-節酒-mark"]}
-              /> 節酒
+              />
+              節酒
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-食事-節酒"]}
+              />
+              を週
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-食事-節酒-回"]}
+                style="width: 4em"
+              /> 回
             </div>
             <div>
               <input
                 type="checkbox"
                 bind:checked={formData.shokujiChecks["juuten-食事-間食-mark"]}
-              /> 間食
+              />
+              間食
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-食事-間食"]}
+              />
+              を週
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-食事-間食-回"]}
+                style="width: 4em"
+              /> 回
             </div>
             <div>
               <input
                 type="checkbox"
                 bind:checked={formData.shokujiChecks["juuten-食事-食べ方-mark"]}
-              /> 食べ方
+              />
+              食べ方
+              <input type="checkbox" bind:checked={formData.shokujiYukkuri} />
+              ゆっくり食べる
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-食事-食べ方"]}
+              />
             </div>
             <div>
               <input
