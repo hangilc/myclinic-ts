@@ -365,7 +365,7 @@ function drawJuuten(ctx: DC, box: Box) {
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
       {
-        const line1 = [...widget.boxed("その", "juuten-shokuji-mark")];
+        const line1 = [...widget.boxed("その", "juuten-その他-mark")];
         const line2 = [p.gap(5), p.text("他")];
         const w = Math.max(c.calcTotalCompositeWidth(ctx, line1, b.width(mark)), c.calcTotalCompositeWidth(ctx, line2, b.width(mark)));
         const h = c.currentFontSize(ctx) * 2;

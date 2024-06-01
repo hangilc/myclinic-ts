@@ -59,7 +59,7 @@ export interface RyouyouKeikakushoData {
   "juuten-たばこ-非喫煙者-mark": string;
   "juuten-たばこ-禁煙・節煙の有効性-mark": string;
   "juuten-たばこ-禁煙の実施補法等-mark": string;
-  "juuten-shokuji-mark": string;
+  "juuten-その他-mark": string;
   "juuten-その他-仕事": string;
   "juuten-その他-余暇": string;
   "juuten-その他-睡眠の確保": string;
@@ -159,7 +159,7 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "juuten-たばこ-非喫煙者-mark": "",
     "juuten-たばこ-禁煙・節煙の有効性-mark": "",
     "juuten-たばこ-禁煙の実施補法等-mark": "",
-    "juuten-shokuji-mark": "",
+    "juuten-その他-mark": "",
     "juuten-その他-仕事": "",
     "juuten-その他-余暇": "",
     "juuten-その他-睡眠の確保": "",

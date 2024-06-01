@@ -19,19 +19,19 @@
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
   import { dateToSql } from "@/lib/util";
+  import { mkFormData, type FormData } from "./form-data";
 
   export let isVisible = false;
   let showDev = false;
   let patient: Patient | undefined = undefined;
   let formMode: "input" | "store" = "input";
-  let mode: "shokai" | "keizoku" = "shokai";
-  let issueDate: string = dateToSql(new Date());
+  let formData: FormData = mkFormData();
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
   let store: string = "";
   let clinicInfo: ClinicInfo | undefined = undefined;
-  let diseaseDiabetes = false;
-  let diseaseHypertension = true;
-  let diseaseHyperLipidemia = false;
+  // let diseaseDiabetes = false;
+  // let diseaseHypertension = true;
+  // let diseaseHyperLipidemia = false;
   let formAreaWork: HTMLElement;
   let juutenShokujiChecked = false;
   const shokujiItems = [
@@ -54,14 +54,12 @@
     ["juuten-食事-食事時間-mark", "食事時間"],
   ] as const;
 
-  $: updateBox("juuten-食事-mark", juutenShokujiChecked);
+  $: formData.shokujiCheck = formData.shokujiCheck || Object.values(formData.shokujiChecks).some(b => b)
 
   init();
 
   async function init() {
     clinicInfo = await api.getClinicInfo();
-    onIssueDateChange();
-    updateDiseases();
   }
 
   function updateBox(key: keyof RyouyouKeikakushoData, checked: boolean) {
@@ -72,10 +70,31 @@
     ryouyouKeikakushoData[key] = value;
   }
 
-  function updateDiseases() {
-    updateBox("disease-diabetes", diseaseDiabetes);
-    updateBox("disease-hypertension", diseaseHypertension);
-    updateBox("disease-hyperlipidemia", diseaseHyperLipidemia);
+  function populateDiseases() {
+    updateBox("disease-diabetes", formData.diseaseDiabetes);
+    updateBox("disease-hypertension", formData.diseaseHypertension);
+    updateBox("disease-hyperlipidemia", formData.diseaseHyperlipidemia);
+  }
+
+  function populateMokuhyou() {
+    updateBox(
+      "mokuhyou-体重-mark",
+      formData.immediates["mokuhyou-体重"] !== ""
+    );
+    updateBox("mokuhyou-BMI-mark", formData.immediates["mokuhyou-BMI"] !== "");
+    updateBox("mokuhyou-BP-mark", formData.immediates["mokuhyou-BP"] !== "");
+    updateBox(
+      "mokuhyou-HbA1c-mark",
+      formData.immediates["mokuhyou-HbA1c"] !== ""
+    );
+  }
+
+  function populateShokuji() {
+    for(const key in formData.shokujiChecks) {
+      // @ts-ignore
+      updateBox(key, formData.shokujiChecks[key])
+    }
+    updateBox("juuten-食事-mark", formData.shokujiCheck);
   }
 
   function initStore() {
@@ -104,7 +123,6 @@
         title: "患者選択",
         onEnter: (selected: Patient) => {
           patient = selected;
-          onPatientChange();
         },
       },
     });
@@ -115,8 +133,18 @@
   }
 
   function doDisp() {
+    populateWithIssueDate();
+    populateWithPatient();
+    populateDiseases();
+    populateMokuhyou();
+    populateShokuji();
+    for (let key in formData.immediates) {
+      // @ts-ignore
+      ryouyouKeikakushoData[key] = formData.immediates[key];
+    }
+
     let ops: Op[];
-    if (mode === "shokai") {
+    if (formData.mode === "shokai") {
       ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
     } else {
       ops = drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
@@ -234,16 +262,12 @@
   function onFormModeChange() {
     if (formMode === "input") {
     } else if (formMode === "store") {
-      let s = {
-        mode,
-      };
-      store = JSON.stringify(s, undefined, 2);
     }
   }
 
-  function onIssueDateChange() {
-    if (issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      const d = DateWrapper.from(issueDate);
+  function populateWithIssueDate() {
+    if (formData.issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const d = DateWrapper.from(formData.issueDate);
       ryouyouKeikakushoData["issue-year"] = d.getYear().toString();
       ryouyouKeikakushoData["issue-month"] = d.getMonth().toString();
       ryouyouKeikakushoData["issue-day"] = d.getDay().toString();
@@ -254,7 +278,7 @@
     }
   }
 
-  function onPatientChange() {
+  function populateWithPatient() {
     if (patient) {
       ryouyouKeikakushoData["patient-name"] =
         `${patient.lastName}${patient.firstName}`;
@@ -294,7 +318,7 @@
       ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
       ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
       ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
-      const age = calcAge(patient.birthday, issueDate ?? new Date());
+      const age = calcAge(patient.birthday, formData.issueDate || new Date());
       ryouyouKeikakushoData["patient-age"] = age.toString();
     } else {
       ryouyouKeikakushoData["patient-name"] = "";
@@ -349,33 +373,23 @@
     <div class="form-area-work" bind:this={formAreaWork}>
       {#if formMode === "input"}
         <div>
-          <input type="radio" value="shokai" bind:group={mode} /> 初回
-          <input type="radio" value="keizoku" bind:group={mode} /> 継続
+          <input type="radio" value="shokai" bind:group={formData.mode} /> 初回
+          <input type="radio" value="keizoku" bind:group={formData.mode} /> 継続
         </div>
         <div>
-          発行日：<input
-            type="text"
-            bind:value={issueDate}
-            on:change={onIssueDateChange}
-          />
+          発行日：<input type="text" bind:value={formData.issueDate} />
         </div>
         <div>
           主病：<input
             type="checkbox"
-            bind:checked={diseaseDiabetes}
-            on:change={updateDiseases}
+            bind:checked={formData.diseaseDiabetes}
           />
           糖尿病
-          <input
-            type="checkbox"
-            bind:checked={diseaseHypertension}
-            on:change={updateDiseases}
-          />
+          <input type="checkbox" bind:checked={formData.diseaseHypertension} />
           高血圧
           <input
             type="checkbox"
-            bind:checked={diseaseHyperLipidemia}
-            on:change={updateDiseases}
+            bind:checked={formData.diseaseHyperlipidemia}
           /> 高脂血症
         </div>
         <div>
@@ -383,39 +397,23 @@
           体重：<input
             type="text"
             style:width="6em"
-            on:change={(event) => {
-              const value = event.currentTarget.value;
-              updateBox("mokuhyou-体重-mark", value !== "");
-              updateValue("mokuhyou-体重", value);
-            }}
+            bind:value={formData.immediates["mokuhyou-体重"]}
           />
           kg BMI：<input
             type="text"
             style:width="6em"
-            on:change={(event) => {
-              const value = event.currentTarget.value;
-              updateBox("mokuhyou-BMI-mark", value !== "");
-              updateValue("mokuhyou-BMI", value);
-            }}
+            bind:value={formData.immediates["mokuhyou-BMI"]}
           />
           血圧：<input
             type="text"
             style:width="6em"
-            on:change={(event) => {
-              const value = event.currentTarget.value;
-              updateBox("mokuhyou-BP-mark", value !== "");
-              updateValue("mokuhyou-BP", value);
-            }}
+            bind:value={formData.immediates["mokuhyou-BP"]}
           />
           <span style="white-space:nowrap">
             HbA1c：<input
               type="text"
               style:width="6em"
-              on:change={(event) => {
-                const value = event.currentTarget.value;
-                updateBox("mokuhyou-HbA1c-mark", value !== "");
-                updateValue("mokuhyou-HbA1c", value);
-              }}
+              bind:value={formData.immediates["mokuhyou-HbA1c"]}
             />
           </span>
         </div>
@@ -423,61 +421,91 @@
           【達成目標】
           <textarea
             style="width: 400px; height: 2.8em; resize: vertical"
-            on:change={(event) => {
-              updateValue("mokuhyou-達成目標", event.currentTarget.value);
-            }}
+            bind:value={formData.immediates["mokuhyou-達成目標"]}
           />
         </div>
         <div style="display: flex; align-items:top">
           【行動目標】
           <textarea
             style="width: 400px; height: 2.8em; resize: vertical"
-            on:change={(event) => {
-              updateValue("mokuhyou-行動目標", event.currentTarget.value);
-            }}
+            bind:value={formData.immediates["mokuhyou-行動目標"]}
           />
         </div>
         <div>
-          【<input bind:checked={juutenShokujiChecked} type="checkbox" />食事】
+          【<input bind:checked={formData.shokujiCheck} type="checkbox" />食事】
           <div style="margin-left: 2em">
-            {#each shokujiItems as item}
-              <div>
-                <input
-                  type="checkbox"
-                  class={item[0]}
-                  on:change={(event) => {
-                    const checked = event.currentTarget.checked;
-                    if (checked) {
-                      juutenShokujiChecked = true;
-                    }
-                    updateBox(item[0], event.currentTarget.checked);
-                  }}
-                />
-                {item[1]}
-                {#if item[2]}
-                  <div style="margin-left: 2em;">
-                    <input
-                      type="text"
-                      on:change={(event) => {
-                        if (item[2] !== undefined) {
-                          const text = event.currentTarget.value;
-                          updateValue(item[2], text);
-                          if (text !== "") {
-                            const input = castToInput(
-                              formAreaWork.querySelector(`.${item[0]}`)
-                            );
-                            const checkbox = castToInput(input);
-                            if (!checkbox.checked) {
-                              checkbox.click();
-                            }
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                {/if}
-              </div>
-            {/each}
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-摂取量を適正にする-mark"
+                ]}
+              /> 摂取量を適正にする
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-食塩・調味料を控える-mark"
+                ]}
+              /> 食塩・調味料を控える
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-食物繊維の摂取を増やす-mark"
+                ]}
+              /> 食物繊維の摂取を増やす
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-外食の際の注意事項-mark"
+                ]}
+              /> 外食の際の注意事項
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-油を使った料理の摂取を減らす-mark"
+                ]}
+              /> 油を使った料理の摂取を減らす
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks["juuten-食事-その他-mark"]}
+              /> その他
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks["juuten-食事-節酒-mark"]}
+              /> 節酒
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks["juuten-食事-間食-mark"]}
+              /> 間食
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks["juuten-食事-食べ方-mark"]}
+              /> 食べ方
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.shokujiChecks[
+                  "juuten-食事-食事時間-mark"
+                ]}
+              /> 食事時間
+            </div>
           </div>
         </div>
       {:else if formMode === "store"}
