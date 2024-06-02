@@ -357,46 +357,49 @@
             bind:checked={formData.diseaseHyperlipidemia}
           /> 高脂血症
         </div>
-        <div>
+        <div style="display:grid;grid-template-columns:auto 1fr;">
           <span>【目標】</span>
-          体重：<input
-            type="text"
-            style:width="6em"
-            bind:value={formData.immediates["mokuhyou-体重"]}
-          />
-          kg BMI：<input
-            type="text"
-            style:width="6em"
-            bind:value={formData.immediates["mokuhyou-BMI"]}
-          />
-          血圧：<input
-            type="text"
-            style:width="6em"
-            bind:value={formData.immediates["mokuhyou-BP"]}
-          />
-          <span style="white-space:nowrap">
-            HbA1c：<input
+          <div style="line-height:1.8em">
+            体重：<input
               type="text"
               style:width="6em"
-              bind:value={formData.immediates["mokuhyou-HbA1c"]}
+              bind:value={formData.immediates["mokuhyou-体重"]}
             />
-          </span>
+            kg BMI：<input
+              type="text"
+              style:width="6em"
+              bind:value={formData.immediates["mokuhyou-BMI"]}
+            />
+            血圧：<input
+              type="text"
+              style:width="6em"
+              bind:value={formData.immediates["mokuhyou-BP"]}
+            />
+            <span style="white-space:nowrap">
+              HbA1c：<input
+                type="text"
+                style:width="6em"
+                bind:value={formData.immediates["mokuhyou-HbA1c"]}
+              />
+            </span>
+            <div style="display: flex; align-items:top;margin:4px 0;">
+              【達成目標】
+              <textarea
+                style="width: 400px; height: 2.8em; resize: vertical"
+                bind:value={formData.immediates["mokuhyou-達成目標"]}
+              />
+            </div>
+            <div style="display: flex; align-items:top;margin:4px 0">
+              【行動目標】
+              <textarea
+                style="width: 400px; height: 2.8em; resize: vertical"
+                bind:value={formData.immediates["mokuhyou-行動目標"]}
+              />
+            </div>
+          </div>
+          <span style="grid-column-start:1;grid-column-end:3;">【重点を置く領域と指導項目】</span>
         </div>
-        <div style="display: flex; align-items:top">
-          【達成目標】
-          <textarea
-            style="width: 400px; height: 2.8em; resize: vertical"
-            bind:value={formData.immediates["mokuhyou-達成目標"]}
-          />
-        </div>
-        <div style="display: flex; align-items:top">
-          【行動目標】
-          <textarea
-            style="width: 400px; height: 2.8em; resize: vertical"
-            bind:value={formData.immediates["mokuhyou-行動目標"]}
-          />
-        </div>
-        <div>
+        <div style="margin-left:2em;">
           【<input bind:checked={formData.shokujiCheck} type="checkbox" />食事】
           <div style="margin-left: 2em">
             <div>
@@ -509,7 +512,7 @@
             </div>
           </div>
         </div>
-        <div>
+        <div style="margin-left:2em;">
           【<input bind:checked={formData.undouCheck} type="checkbox" />運動】
           <div
             style="display:grid;grid-template-columns:auto 1fr;margin-left:2em;"
@@ -594,7 +597,7 @@
             </div>
           </div>
         </div>
-        <div>
+        <div style="margin-left:2em;">
           【<input
             bind:checked={formData.tabakoCheck}
             type="checkbox"
@@ -626,7 +629,7 @@
             </div>
           </div>
         </div>
-        <div>
+        <div style="margin-left:2em;">
           【<input
             bind:checked={formData.sonotaCheck}
             type="checkbox"
