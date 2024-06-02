@@ -180,9 +180,9 @@
       updateValue("kensa-採血日-月", issueDate.getMonth().toString());
       updateValue("kensa-採血日-日", issueDate.getDay().toString());
     }
-    for (const key in formData.tabakoChecks) {
+    for (const key in formData.kensaChecks) {
       // @ts-ignore
-      updateBox(key, formData.tabakoChecks[key]);
+      updateBox(key, formData.kensaChecks[key]);
     }
   }
 
@@ -724,12 +724,12 @@
                 <div>
                   血糖 (<input
                     type="checkbox"
-                    bind:value={formData.kensaChecks["kensa-血糖-空腹時-mark"]}
+                    bind:checked={formData.kensaChecks["kensa-血糖-空腹時-mark"]}
                   />
                   空腹時
                   <input
                     type="checkbox"
-                    bind:value={formData.kensaChecks["kensa-血糖-随時-mark"]}
+                    bind:checked={formData.kensaChecks["kensa-血糖-随時-mark"]}
                   />
                   随時
                   <span style="white-space:nowrap;"
