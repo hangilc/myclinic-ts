@@ -54,9 +54,20 @@
     ["juuten-食事-食事時間-mark", "食事時間"],
   ] as const;
 
-  $: formData.shokujiCheck =
-    formData.shokujiCheck ||
-    Object.values(formData.shokujiChecks).some((b) => b);
+  $: formData.shokujiCheck = calcCheck(formData.shokujiCheck, [
+    ...Object.values(formData.shokujiChecks),
+    formData.immediates["juuten-食事-外食の際の注意事項"] !== "",
+    formData.immediates["juuten-食事-節酒"] !== "",
+    formData.immediates["juuten-食事-節酒-回"] !== "",
+    formData.immediates["juuten-食事-間食"] !== "",
+    formData.immediates["juuten-食事-間食-回"] !== "",
+    formData.shokujiYukkuri,
+    formData.immediates["juuten-食事-食べ方"] !== "",
+  ]);
+
+  function calcCheck(shokujiCheck: boolean, values: boolean[]): boolean {
+    return shokujiCheck || values.some((b) => b);
+  }
 
   $: formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] =
     formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] ||
@@ -77,12 +88,42 @@
     formData.shokujiYukkuri ||
     formData.immediates["juuten-食事-食べ方"] !== "";
 
+  $: formData.undouCheck = calcCheck(formData.undouCheck, [
+    ...Object.values(formData.undouChecks),
+    formData.immediates["juuten-運動-種類"] !== "",
+    formData.immediates["juuten-運動-時間"] !== "",
+    formData.undouEveryDay,
+    formData.immediates["juuten-運動-頻度"] !== "",
+    formData.undouIntensityBreath,
+    formData.immediates["juuten-運動-強度-脈拍"] !== "",
+    formData.immediates["juuten-運動-強度-その他"] !== "",
+    formData.immediates["juuten-運動-活動量"] !== "",
+    formData.immediates["juuten-運動-注意事項"] !== "",
+  ]);
+
+  $: formData.undouChecks["juuten-運動-種類-mark"] =
+    formData.undouChecks["juuten-運動-種類-mark"] ||
+    formData.immediates["juuten-運動-種類"] !== "" ||
+    formData.immediates["juuten-運動-時間"] !== "" ||
+    formData.undouEveryDay ||
+    formData.immediates["juuten-運動-頻度"] !== "" ||
+    formData.undouIntensityBreath ||
+    formData.immediates["juuten-運動-強度-脈拍"] !== "" ||
+    formData.immediates["juuten-運動-強度-その他"] !== "";
+
+  $: formData.undouChecks["juuten-運動-活動量-mark"] =
+    formData.undouChecks["juuten-運動-活動量-mark"] ||
+    formData.immediates["juuten-運動-活動量"] !== "";
+
+  $: formData.undouChecks["juuten-運動-注意事項-mark"] =
+    formData.undouChecks["juuten-運動-注意事項-mark"] ||
+    formData.immediates["juuten-運動-注意事項"] !== "";
+
   init();
 
   async function init() {
     clinicInfo = await api.getClinicInfo();
   }
-
   function updateBox(key: keyof RyouyouKeikakushoData, checked: boolean) {
     updateValue(key, checked ? "1" : "");
   }
@@ -577,7 +618,9 @@
         </div>
         <div>
           【<input bind:checked={formData.undouCheck} type="checkbox" />運動】
-          <div style="margin-left:2em;display:flex;align-items:top">
+          <div
+            style="display:grid;grid-template-columns:auto 1fr;margin-left:2em;"
+          >
             <span style="flex-basis:auto;flex-shrink:0"
               ><input
                 type="checkbox"
@@ -634,9 +677,28 @@
             <span style="flex-basis:auto;flex-shrink:0"
               ><input
                 type="checkbox"
-                bind:checked={formData.undouChecks["juuten-運動-種類-mark"]}
+                bind:checked={formData.undouChecks["juuten-運動-活動量-mark"]}
               />&nbsp;</span
             >
+            <div>
+              日常生活の活動量増加 <input
+                type="text"
+                bind:value={formData.immediates["juuten-運動-活動量"]}
+              />
+            </div>
+            <span style="flex-basis:auto;flex-shrink:0"
+              ><input
+                type="checkbox"
+                bind:checked={formData.undouChecks["juuten-運動-注意事項-mark"]}
+              />&nbsp;</span
+            >
+            <div>
+              運動時の注意事項など
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-運動-注意事項"]}
+              />
+            </div>
           </div>
         </div>
       {:else if formMode === "store"}

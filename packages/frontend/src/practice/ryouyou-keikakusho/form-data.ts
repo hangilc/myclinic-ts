@@ -76,6 +76,13 @@ export function mkFormData(): FormData {
       "juuten-食事-間食": "",
       "juuten-食事-間食-回": "",
       "juuten-食事-食べ方": "",
+      "juuten-運動-種類" : "",
+      "juuten-運動-時間": "",
+      "juuten-運動-頻度": "",
+      "juuten-運動-強度-脈拍": "",
+      "juuten-運動-強度-その他": "",
+      "juuten-運動-活動量": "",
+      "juuten-運動-注意事項": "",
     },
   }
 }
