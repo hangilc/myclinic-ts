@@ -119,6 +119,14 @@
     updateBox("juuten-食事-食べ方-ゆっくり食べる", formData.shokujiYukkuri);
   }
 
+  function populateUndou() {
+    for (const key in formData.undouChecks) {
+      // @ts-ignore
+      updateBox(key, formData.undouChecks[key]);
+    }
+    updateBox("juuten-運動-mark", formData.undouCheck);
+  }
+
   function initStore() {
     store = `
   {
@@ -160,6 +168,7 @@
     populateDiseases();
     populateMokuhyou();
     populateShokuji();
+    populateUndou();
     for (let key in formData.immediates) {
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
@@ -564,6 +573,70 @@
                 ]}
               /> 食事時間
             </div>
+          </div>
+        </div>
+        <div>
+          【<input bind:checked={formData.undouCheck} type="checkbox" />運動】
+          <div style="margin-left:2em;display:flex;align-items:top">
+            <span style="flex-basis:auto;flex-shrink:0"
+              ><input
+                type="checkbox"
+                bind:checked={formData.undouChecks["juuten-運動-種類-mark"]}
+              />&nbsp;</span
+            >
+            <div style="flex-grow:1">
+              <div>
+                運動処方・種類
+                <input
+                  type="text"
+                  bind:value={formData.immediates["juuten-運動-種類"]}
+                />
+              </div>
+              <div>
+                時間（３０分以上 <input
+                  type="text"
+                  bind:value={formData.immediates["juuten-運動-時間"]}
+                />）
+              </div>
+              <div>
+                頻度<input
+                  type="checkbox"
+                  bind:checked={formData.undouEveryDay}
+                />
+                ほぼ毎日、 週
+                <input
+                  type="text"
+                  style="width:4em"
+                  bind:value={formData.immediates["juuten-運動-頻度"]}
+                /> 日
+              </div>
+              <div style="display:flex;align-items:top">
+                <span style="flex-basis:auto;flex-shrink:0">強度</span>
+                <div style="flex-grow:1">
+                  <input
+                    type="checkbox"
+                    bind:checked={formData.undouIntensityBreath}
+                  />
+                  息がはずむが会話が可能な強さ or
+                  <input
+                    type="text"
+                    style="width:4em"
+                    bind:value={formData.immediates["juuten-運動-強度-脈拍"]}
+                  />
+                  拍／分 or
+                  <input
+                    type="text"
+                    bind:value={formData.immediates["juuten-運動-強度-その他"]}
+                  />
+                </div>
+              </div>
+            </div>
+            <span style="flex-basis:auto;flex-shrink:0"
+              ><input
+                type="checkbox"
+                bind:checked={formData.undouChecks["juuten-運動-種類-mark"]}
+              />&nbsp;</span
+            >
           </div>
         </div>
       {:else if formMode === "store"}

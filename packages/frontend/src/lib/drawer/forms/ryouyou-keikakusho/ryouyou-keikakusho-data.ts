@@ -50,6 +50,8 @@ export interface RyouyouKeikakushoData {
   "juuten-運動-種類": string;
   "juuten-運動-時間": string;
   "juuten-運動-頻度": string;
+  "juuten-運動-ほぼ毎日": string;
+  "juuten-運動-息がはずむが会話が可能な強さ" : string;
   "juuten-運動-強度-脈拍": string;
   "juuten-運動-強度-その他": string;
   "juuten-運動-活動量-mark": string;
@@ -151,6 +153,8 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "juuten-運動-種類": "",
     "juuten-運動-時間": "",
     "juuten-運動-頻度": "",
+    "juuten-運動-ほぼ毎日": "",
+    "juuten-運動-息がはずむが会話が可能な強さ": "",
     "juuten-運動-強度-脈拍": "",
     "juuten-運動-強度-その他": "",
     "juuten-運動-活動量-mark": "",

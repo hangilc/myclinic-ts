@@ -21,6 +21,14 @@ export interface FormData {
     "juuten-食事-食事時間-mark": boolean;
   };
   shokujiYukkuri: boolean;
+  undouCheck: boolean;
+  undouChecks: {
+    "juuten-運動-種類-mark": boolean;
+    "juuten-運動-活動量-mark": boolean;
+    "juuten-運動-注意事項-mark": boolean;
+  };
+  undouEveryDay: boolean;
+  undouIntensityBreath: boolean;
   immediates: {
     [Key in keyof RyouyouKeikakushoData]?: string;
   };
@@ -47,6 +55,14 @@ export function mkFormData(): FormData {
       "juuten-食事-食事時間-mark": false,
     },
     shokujiYukkuri: false,
+    undouCheck: false,
+    undouChecks: {
+      "juuten-運動-種類-mark": false,
+      "juuten-運動-活動量-mark": false,
+      "juuten-運動-注意事項-mark": false,
+    },
+    undouEveryDay: false,
+    undouIntensityBreath: false,
     immediates: {
       "mokuhyou-体重": "",
       "mokuhyou-BMI": "",
