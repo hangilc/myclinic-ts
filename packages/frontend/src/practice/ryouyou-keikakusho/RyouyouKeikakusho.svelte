@@ -13,12 +13,9 @@
   import { createInputs } from "@/lib/drawer/forms/ryouyou-keikakusho/meta";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
-  import Form from "./Form.svelte";
-  import type { Store } from "./store";
-  import { DateWrapper, calcAge, sqlDateToObject } from "myclinic-util";
+  import { DateWrapper, calcAge } from "myclinic-util";
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
-  import { dateToSql } from "@/lib/util";
   import { mkFormData, type FormData } from "./form-data";
 
   export let isVisible = false;
@@ -29,30 +26,11 @@
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
   let store: string = "";
   let clinicInfo: ClinicInfo | undefined = undefined;
-  // let diseaseDiabetes = false;
-  // let diseaseHypertension = true;
-  // let diseaseHyperLipidemia = false;
   let formAreaWork: HTMLElement;
-  let juutenShokujiChecked = false;
-  const shokujiItems = [
-    ["juuten-食事-摂取量を適正にする-mark", "摂取量を適正にする"],
-    ["juuten-食事-食塩・調味料を控える-mark", "食塩・調味料を控える"],
-    ["juuten-食事-食物繊維の摂取を増やす-mark", "食物繊維の摂取を増やす"],
-    [
-      "juuten-食事-外食の際の注意事項-mark",
-      "外食の際の注意事項",
-      "juuten-食事-外食の際の注意事項",
-    ],
-    [
-      "juuten-食事-油を使った料理の摂取を減らす-mark",
-      "油を使った料理の摂取を減らす",
-    ],
-    ["juuten-食事-その他-mark", "その他"],
-    ["juuten-食事-節酒-mark", "節酒"],
-    ["juuten-食事-間食-mark", "間食"],
-    ["juuten-食事-食べ方-mark", "食べ方"],
-    ["juuten-食事-食事時間-mark", "食事時間"],
-  ] as const;
+
+  function calcCheck(shokujiCheck: boolean, values: boolean[]): boolean {
+    return shokujiCheck || values.some((b) => b);
+  }
 
   $: formData.shokujiCheck = calcCheck(formData.shokujiCheck, [
     ...Object.values(formData.shokujiChecks),
@@ -64,10 +42,6 @@
     formData.shokujiYukkuri,
     formData.immediates["juuten-食事-食べ方"] !== "",
   ]);
-
-  function calcCheck(shokujiCheck: boolean, values: boolean[]): boolean {
-    return shokujiCheck || values.some((b) => b);
-  }
 
   $: formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] =
     formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] ||
@@ -138,6 +112,7 @@
   async function init() {
     clinicInfo = await api.getClinicInfo();
   }
+
   function updateBox(key: keyof RyouyouKeikakushoData, checked: boolean) {
     updateValue(key, checked ? "1" : "");
   }
@@ -198,24 +173,6 @@
     updateBox("juuten-その他-mark", formData.sonotaCheck);
   }
 
-  function initStore() {
-    store = `
-  {
-      "issueDate": "2024-06-01",
-      "diseases": ["diabetes", "hypertension", "hyperlipidemia"],
-      "targetBodyWeight": "75",
-      "targetBMI": "22.0",
-      "targetBloodPressure": "130/80",
-      "targetHbA1c": "7.0",
-      "achievementTarget": "達成目標の内容",
-      "behaviorTarget": "行動目標の内容",
-      "immediates": {
-        "juuten-食事-mark": "1",
-        "juuten-運動-mark": "1"
-      }
-    } `;
-  }
-
   function doSelectPatient() {
     const d: SearchPatientDialog = new SearchPatientDialog({
       target: document.body,
@@ -269,100 +226,6 @@
     alert("code output to console");
   }
 
-  function doStoreToForm() {
-    let s = store;
-    if (s === "") {
-      s = "{}";
-    }
-    ryouyouKeikakushoData = mkRyouyouKeikakushoData();
-    const storeValue: Partial<Store> = JSON.parse(s);
-    if (storeValue.issueDate) {
-      const d = sqlDateToObject(storeValue.issueDate);
-      ryouyouKeikakushoData["issue-year"] = d.year.toString();
-      ryouyouKeikakushoData["issue-month"] = d.month.toString();
-      ryouyouKeikakushoData["issue-day"] = d.day.toString();
-    }
-    if (patient) {
-      ryouyouKeikakushoData["patient-name"] =
-        `${patient.lastName}${patient.firstName}`;
-      switch (patient.sex) {
-        case "M": {
-          ryouyouKeikakushoData["patient-sex-male"] = "1";
-          break;
-        }
-        case "F": {
-          ryouyouKeikakushoData["patient-sex-female"] = "1";
-          break;
-        }
-      }
-      const d = new KanjiDate(sqlDateToDate(patient.birthday));
-      switch (d.gengou) {
-        case "明治": {
-          ryouyouKeikakushoData["birthdate-gengou-meiji"] = "1";
-          break;
-        }
-        case "大正": {
-          ryouyouKeikakushoData["birthdate-gengou-taishou"] = "1";
-          break;
-        }
-        case "昭和": {
-          ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "1";
-          break;
-        }
-        case "平成": {
-          ryouyouKeikakushoData["birthdate-gengou-heisei"] = "1";
-          break;
-        }
-        case "令和": {
-          ryouyouKeikakushoData["birthdate-gengou-reiwa"] = "1";
-          break;
-        }
-      }
-      ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
-      ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
-      ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
-      const age = calcAge(patient.birthday, new Date());
-      ryouyouKeikakushoData["patient-age"] = age.toString();
-    }
-    if (storeValue.diseases) {
-      storeValue.diseases.forEach(
-        (disease) => (ryouyouKeikakushoData[`disease-${disease}`] = "1")
-      );
-    }
-    if (storeValue.targetBodyWeight) {
-      ryouyouKeikakushoData["mokuhyou-体重-mark"] = "1";
-      ryouyouKeikakushoData["mokuhyou-体重"] = storeValue.targetBodyWeight;
-    }
-    if (storeValue.targetBMI) {
-      ryouyouKeikakushoData["mokuhyou-BMI-mark"] = "1";
-      ryouyouKeikakushoData["mokuhyou-BMI"] = storeValue.targetBMI;
-    }
-    if (storeValue.targetBloodPressure) {
-      ryouyouKeikakushoData["mokuhyou-BP-mark"] = "1";
-      ryouyouKeikakushoData["mokuhyou-BP"] = storeValue.targetBloodPressure;
-    }
-    if (storeValue.targetHbA1c) {
-      ryouyouKeikakushoData["mokuhyou-HbA1c-mark"] = "1";
-      ryouyouKeikakushoData["mokuhyou-HbA1c"] = storeValue.targetHbA1c;
-    }
-    if (storeValue.achievementTarget) {
-      ryouyouKeikakushoData["mokuhyou-達成目標"] = storeValue.achievementTarget;
-    }
-    if (storeValue.behaviorTarget) {
-      ryouyouKeikakushoData["mokuhyou-行動目標"] = storeValue.behaviorTarget;
-    }
-    if (storeValue.immediates) {
-      for (let key in storeValue.immediates) {
-        const value = storeValue.immediates[key];
-        // @ts-ignore
-        ryouyouKeikakushoData[key] = value;
-      }
-    }
-    if (clinicInfo) {
-      ryouyouKeikakushoData["医師氏名"] = clinicInfo.doctorName;
-    }
-  }
-
   function onFormModeChange() {
     if (formMode === "input") {
     } else if (formMode === "store") {
@@ -389,9 +252,11 @@
       switch (patient.sex) {
         case "M": {
           ryouyouKeikakushoData["patient-sex-male"] = "1";
+          ryouyouKeikakushoData["patient-sex-female"] = "";
           break;
         }
         case "F": {
+          ryouyouKeikakushoData["patient-sex-male"] = "";
           ryouyouKeikakushoData["patient-sex-female"] = "1";
           break;
         }
@@ -426,22 +291,18 @@
       ryouyouKeikakushoData["patient-age"] = age.toString();
     } else {
       ryouyouKeikakushoData["patient-name"] = "";
-      ryouyouKeikakushoData["patient-sex-male"] = "1";
+      ryouyouKeikakushoData["patient-sex-male"] = "";
       ryouyouKeikakushoData["patient-sex-female"] = "";
       ryouyouKeikakushoData["birthdate-gengou-meiji"] = "";
       ryouyouKeikakushoData["birthdate-gengou-taishou"] = "";
-      ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "1";
-      ryouyouKeikakushoData["birthdate-gengou-heisei"] = "1";
+      ryouyouKeikakushoData["birthdate-gengou-shouwa"] = "";
+      ryouyouKeikakushoData["birthdate-gengou-heisei"] = "";
       ryouyouKeikakushoData["birthdate-gengou-reiwa"] = "";
       ryouyouKeikakushoData["birthdate-nen"] = "";
       ryouyouKeikakushoData["birthdate-month"] = "";
       ryouyouKeikakushoData["birthdate-day"] = "";
       ryouyouKeikakushoData["patient-age"] = "";
     }
-  }
-
-  function castToInput(e: Element | null): HTMLInputElement {
-    return e as HTMLInputElement;
   }
 </script>
 
@@ -824,15 +685,6 @@
         <div>{store}</div>
       {/if}
     </div>
-  </div>
-  <div class="store-form-commands">
-    <button on:click={doStoreToForm}>Store to Form</button>
-  </div>
-  <div class="data-area">
-    <textarea bind:value={store} />
-  </div>
-  <div class="form-inputs">
-    <Form bind:ryouyouKeikakushoData />
   </div>
   <div class="display-commands">
     <button on:click={doDisp}>表示</button>

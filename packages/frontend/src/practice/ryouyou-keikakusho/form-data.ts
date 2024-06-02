@@ -54,7 +54,7 @@ export function mkFormData(): FormData {
     mode: "shokai",
     issueDate: dateToSql(new Date()),
     diseaseDiabetes: false,
-    diseaseHypertension: true,
+    diseaseHypertension:  false,
     diseaseHyperlipidemia: false,
     shokujiCheck: false,
     shokujiChecks: {
