@@ -108,6 +108,67 @@
     formData.sonotaChecks["juuten-その他-その他-mark"] ||
     formData.immediates["juuten-その他-その他"] !== "";
 
+  $: formData.kensaChecks["kensa-血糖-mark"] = calcCheck(
+    formData.kensaChecks["kensa-血糖-mark"],
+    [
+      formData.kensaChecks["kensa-血糖-空腹時-mark"],
+      formData.kensaChecks["kensa-血糖-随時-mark"],
+      formData.kensaChecks["kensa-血糖-食後-mark"],
+      formData.immediates["kensa-血糖-食後"] !== "",
+      formData.immediates["kensa-血糖-値"] !== "",
+    ]
+  );
+
+  $: formData.kensaChecks["kensa-HbA1c-mark"] = calcCheck(
+    formData.kensaChecks["kensa-HbA1c-mark"], [
+      formData.immediates["kensa-HbA1c"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-総コレステロール-mark"] = calcCheck(
+    formData.kensaChecks["kensa-総コレステロール-mark"], [
+      formData.immediates["kensa-総コレステロール"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-中性脂肪-mark"] = calcCheck(
+    formData.kensaChecks["kensa-中性脂肪-mark"], [
+      formData.immediates["kensa-中性脂肪"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"] = calcCheck(
+    formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"], [
+      formData.immediates["kensa-ＨＤＬコレステロール"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"] = calcCheck(
+    formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"], [
+      formData.immediates["kensa-ＬＤＬコレステロール"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-血液検査項目-その他-mark"] = calcCheck(
+    formData.kensaChecks["kensa-血液検査項目-その他-mark"], [
+      formData.immediates["kensa-血液検査項目-その他"] !== "",
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-栄養状態-mark"] = calcCheck(
+    formData.kensaChecks["kensa-栄養状態-mark"], [
+      formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"],
+      formData.kensaChecks["kensa-栄養状態-良好"],
+      formData.kensaChecks["kensa-栄養状態-肥満"],
+    ]
+  )
+
+  $: formData.kensaChecks["kensa-その他-その他-mark"] = calcCheck(
+    formData.kensaChecks["kensa-その他-その他-mark"], [
+      formData.immediates["kensa-その他-その他"] !== "",
+    ]
+  )
+
   init();
 
   async function init() {
@@ -724,7 +785,9 @@
                 <div>
                   血糖 (<input
                     type="checkbox"
-                    bind:checked={formData.kensaChecks["kensa-血糖-空腹時-mark"]}
+                    bind:checked={formData.kensaChecks[
+                      "kensa-血糖-空腹時-mark"
+                    ]}
                   />
                   空腹時
                   <input
@@ -856,14 +919,38 @@
           <div style="margin-left:2em;">
             <div>【その他】</div>
             <div>
-              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-mark"]}/> 栄養状態（
-              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"]} /> 低栄養状態の恐れ
-              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-良好"]} /> 良好
-              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-肥満"]} /> 肥満 ）
+              <input
+                type="checkbox"
+                bind:checked={formData.kensaChecks["kensa-栄養状態-mark"]}
+              />
+              栄養状態（
+              <input
+                type="checkbox"
+                bind:checked={formData.kensaChecks[
+                  "kensa-栄養状態-低栄養状態の恐れ"
+                ]}
+              />
+              低栄養状態の恐れ
+              <input
+                type="checkbox"
+                bind:checked={formData.kensaChecks["kensa-栄養状態-良好"]}
+              />
+              良好
+              <input
+                type="checkbox"
+                bind:checked={formData.kensaChecks["kensa-栄養状態-肥満"]}
+              /> 肥満 ）
             </div>
             <div>
-              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-その他-その他-mark"]} /> その他
-              <input type="text" bind:value={formData.immediates["kensa-その他-その他"]}/>
+              <input
+                type="checkbox"
+                bind:checked={formData.kensaChecks["kensa-その他-その他-mark"]}
+              />
+              その他
+              <input
+                type="text"
+                bind:value={formData.immediates["kensa-その他-その他"]}
+              />
             </div>
           </div>
         </div>
@@ -913,16 +1000,6 @@
     margin: 4px 0;
   }
 
-  .form-inputs {
-    max-height: 300px;
-    overflow: auto;
-    margin: 10px 0;
-    border: 1px solid gray;
-    padding: 10px;
-    width: 600px;
-    resize: vertical;
-  }
-
   .dev-menu {
     display: flex;
     align-items: center;
@@ -936,14 +1013,7 @@
     top: 3px;
   }
 
-  .data-area textarea {
-    width: 600px;
-    height: 300px;
-    resize: vertical;
-  }
-
-  .display-commands,
-  .store-form-commands {
+  .display-commands {
     margin: 10px 0;
   }
 </style>
