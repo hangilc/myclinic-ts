@@ -397,7 +397,9 @@
               />
             </div>
           </div>
-          <span style="grid-column-start:1;grid-column-end:3;">【重点を置く領域と指導項目】</span>
+          <span style="grid-column-start:1;grid-column-end:3;"
+            >【重点を置く領域と指導項目】</span
+          >
         </div>
         <div style="margin-left:2em;">
           【<input bind:checked={formData.shokujiCheck} type="checkbox" />食事】
@@ -681,6 +683,65 @@
                 type="text"
                 bind:value={formData.immediates["juuten-その他-その他"]}
               />
+            </div>
+          </div>
+        </div>
+        <div>
+          <span>【検査】</span>
+          <div
+            style="display:grid;grid-template-columns:1fr 1fr;margin-left:2em;column-gap:6px"
+          >
+            <div>
+              【血液検査項目】
+              <span style="white-space:nowrap;"
+                >採血日 <input type="text" style="width:6em" /></span
+              >
+              <div style="display:grid;grid-template-columns:auto 1fr;">
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>
+                  血糖 (<input type="checkbox" />
+                  空腹時
+                  <input type="checkbox" />
+                  随時
+                  <span style="white-space:nowrap;"
+                    ><input type="checkbox" /> 食後
+                    <input type="text" style="width:2em" /> 時間)</span
+                  >
+                  (<input type="text" style="width:4em;" /> mg/dl)
+                </div>
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>
+                  HbA1c <input type="text" style="width:4em;" /> %
+                </div>
+              </div>
+            </div>
+            <div>
+              <div style="display:grid;grid-template-columns:auto 1fr;row-gap:4px">
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>総コレステロール <input type="text" style="width:4em;" /> mg/dl</div>
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>中性脂肪 <input type="text" style="width:4em;" /> mg/dl</div>
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>HDLコレステロール <input type="text" style="width:4em;" /> mg/dl</div>
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>LDLコレステロール <input type="text" style="width:4em;" /> mg/dl</div>
+                <span><input type="checkbox" />&nbsp;</span>
+                <div>その他 <input type="text" style="width:4em;" /> </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-left:2em;">
+            <div>【その他】</div>
+            <div>
+              <input type="checkbox" /> 栄養状態（
+                <input type="checkbox" /> 低栄養状態の恐れ
+                <input type="checkbox" /> 良好
+                <input type="checkbox" /> 肥満
+              ）
+            </div>
+            <div>
+              <input type="checkbox" /> その他
+              <input type="text" />
             </div>
           </div>
         </div>
