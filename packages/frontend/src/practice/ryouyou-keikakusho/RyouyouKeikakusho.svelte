@@ -119,7 +119,19 @@
     formData.undouChecks["juuten-運動-注意事項-mark"] ||
     formData.immediates["juuten-運動-注意事項"] !== "";
 
-  $: formData.tabakoCheck = calcCheck(formData.tabakoCheck, Object.values(formData.tabakoChecks))
+  $: formData.tabakoCheck = calcCheck(
+    formData.tabakoCheck,
+    Object.values(formData.tabakoChecks)
+  );
+
+  $: formData.sonotaCheck = calcCheck(formData.sonotaCheck, [
+    ...Object.values(formData.sonotaChecks),
+    formData.immediates["juuten-その他-その他"] !== "",
+  ]);
+
+  $: formData.sonotaChecks["juuten-その他-その他-mark"] =
+    formData.sonotaChecks["juuten-その他-その他-mark"] ||
+    formData.immediates["juuten-その他-その他"] !== "";
 
   init();
 
@@ -178,6 +190,14 @@
     updateBox("juuten-たばこ-mark", formData.tabakoCheck);
   }
 
+  function populateSonota() {
+    for (const key in formData.sonotaChecks) {
+      // @ts-ignore
+      updateBox(key, formData.sonotaChecks[key]);
+    }
+    updateBox("juuten-その他-mark", formData.sonotaCheck);
+  }
+
   function initStore() {
     store = `
   {
@@ -221,6 +241,7 @@
     populateShokuji();
     populateUndou();
     populateTabako();
+    populateSonota();
     for (let key in formData.immediates) {
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
@@ -741,6 +762,61 @@
                   "juuten-たばこ-禁煙の実施補法等-mark"
                 ]}
               /> 禁煙の実施補法等
+            </div>
+          </div>
+        </div>
+        <div>
+          【<input
+            bind:checked={formData.sonotaCheck}
+            type="checkbox"
+          />その他】
+          <div style="margin-left: 2em">
+            <span style="white-space:nowrap">
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks["juuten-その他-仕事-mark"]}
+              /> 仕事
+            </span>
+            <span style="white-space:nowrap">
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks["juuten-その他-余暇-mark"]}
+              /> 余暇
+            </span>
+            <span style="white-space:nowrap">
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks[
+                  "juuten-その他-睡眠の確保-mark"
+                ]}
+              /> 睡眠の確保
+            </span>
+            <span style="white-space:nowrap">
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks["juuten-その他-減量-mark"]}
+              /> 減量
+            </span>
+            <span style="white-space:nowrap">
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks[
+                  "juuten-その他-家庭での計測-mark"
+                ]}
+              /> 家庭での計測
+            </span>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.sonotaChecks[
+                  "juuten-その他-その他-mark"
+                ]}
+              />
+              その他
+              <input
+                type="text"
+                bind:value={formData.immediates["juuten-その他-その他"]}
+              />
             </div>
           </div>
         </div>

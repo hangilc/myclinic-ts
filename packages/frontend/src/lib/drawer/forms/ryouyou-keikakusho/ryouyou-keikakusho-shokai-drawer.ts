@@ -385,12 +385,12 @@ function drawJuuten(ctx: DC, box: Box) {
       }
       b.withSplitRows(body, b.evenSplitter(3), rs => {
         b.withSplitColumns(rs[0], b.splitAt(24, 48, 92), cs => {
-          c.drawComposite(ctx, cs[0], widget.boxed("仕事", "juuten-その他-仕事"));
-          c.drawComposite(ctx, cs[1], widget.boxed("余暇", "juuten-その他-余暇"));
-          c.drawComposite(ctx, cs[2], widget.boxed("睡眠の確保(質・量)", "juuten-その他-睡眠の確保"));
-          c.drawComposite(ctx, cs[3], widget.boxed("減量", "juuten-その他-減量"));
+          c.drawComposite(ctx, cs[0], widget.boxed("仕事", "juuten-その他-仕事-mark"));
+          c.drawComposite(ctx, cs[1], widget.boxed("余暇", "juuten-その他-余暇-mark"));
+          c.drawComposite(ctx, cs[2], widget.boxed("睡眠の確保(質・量)", "juuten-その他-睡眠の確保-mark"));
+          c.drawComposite(ctx, cs[3], widget.boxed("減量", "juuten-その他-減量-mark"));
         });
-        c.drawComposite(ctx, rs[1], widget.boxed("家庭での計測(歩数、体重、血圧、腹囲等)", "juuten-その他-家庭での計測"));
+        c.drawComposite(ctx, rs[1], widget.boxed("家庭での計測(歩数、体重、血圧、腹囲等)", "juuten-その他-家庭での計測-mark"));
         c.drawComposite(ctx, rs[2],
           boxedAndGap("その他(", 88, ")", "juuten-その他-その他-mark", "juuten-その他-その他"));
       }, { boxModifiers: [bodyModifier] });

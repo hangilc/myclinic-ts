@@ -63,11 +63,11 @@ export interface RyouyouKeikakushoData {
   "juuten-たばこ-禁煙・節煙の有効性-mark": string;
   "juuten-たばこ-禁煙の実施補法等-mark": string;
   "juuten-その他-mark": string;
-  "juuten-その他-仕事": string;
-  "juuten-その他-余暇": string;
-  "juuten-その他-睡眠の確保": string;
-  "juuten-その他-減量": string;
-  "juuten-その他-家庭での計測": string;
+  "juuten-その他-仕事-mark": string;
+  "juuten-その他-余暇-mark": string;
+  "juuten-その他-睡眠の確保-mark": string;
+  "juuten-その他-減量-mark": string;
+  "juuten-その他-家庭での計測-mark": string;
   "juuten-その他-その他-mark": string;
   "juuten-その他-その他": string;
   "kensa-採血日-月": string;
@@ -166,11 +166,11 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "juuten-たばこ-禁煙・節煙の有効性-mark": "",
     "juuten-たばこ-禁煙の実施補法等-mark": "",
     "juuten-その他-mark": "",
-    "juuten-その他-仕事": "",
-    "juuten-その他-余暇": "",
-    "juuten-その他-睡眠の確保": "",
-    "juuten-その他-減量": "",
-    "juuten-その他-家庭での計測": "",
+    "juuten-その他-仕事-mark": "",
+    "juuten-その他-余暇-mark": "",
+    "juuten-その他-睡眠の確保-mark": "",
+    "juuten-その他-減量-mark": "",
+    "juuten-その他-家庭での計測-mark": "",
     "juuten-その他-その他-mark": "",
     "juuten-その他-その他": "",
     "kensa-採血日-月": "",

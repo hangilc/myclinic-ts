@@ -34,7 +34,16 @@ export interface FormData {
     "juuten-たばこ-非喫煙者-mark": boolean;
     "juuten-たばこ-禁煙・節煙の有効性-mark": boolean;
     "juuten-たばこ-禁煙の実施補法等-mark": boolean;
-  }
+  };
+  sonotaCheck: boolean;
+  sonotaChecks: {
+    "juuten-その他-仕事-mark": boolean;
+    "juuten-その他-余暇-mark": boolean;
+    "juuten-その他-睡眠の確保-mark": boolean;
+    "juuten-その他-減量-mark": boolean;
+    "juuten-その他-家庭での計測-mark": boolean;
+    "juuten-その他-その他-mark": boolean;
+  };
   immediates: {
     [Key in keyof RyouyouKeikakushoData]?: string;
   };
@@ -75,6 +84,15 @@ export function mkFormData(): FormData {
       "juuten-たばこ-禁煙・節煙の有効性-mark": false,
       "juuten-たばこ-禁煙の実施補法等-mark": false,
     },
+    sonotaCheck: false,
+    sonotaChecks: {
+      "juuten-その他-仕事-mark": false,
+      "juuten-その他-余暇-mark": false,
+      "juuten-その他-睡眠の確保-mark": false,
+      "juuten-その他-減量-mark": false,
+      "juuten-その他-家庭での計測-mark": false,
+      "juuten-その他-その他-mark": false,
+    },
     immediates: {
       "mokuhyou-体重": "",
       "mokuhyou-BMI": "",
@@ -88,13 +106,14 @@ export function mkFormData(): FormData {
       "juuten-食事-間食": "",
       "juuten-食事-間食-回": "",
       "juuten-食事-食べ方": "",
-      "juuten-運動-種類" : "",
+      "juuten-運動-種類": "",
       "juuten-運動-時間": "",
       "juuten-運動-頻度": "",
       "juuten-運動-強度-脈拍": "",
       "juuten-運動-強度-その他": "",
       "juuten-運動-活動量": "",
       "juuten-運動-注意事項": "",
+      "juuten-その他-その他": "",
     },
   }
 }
