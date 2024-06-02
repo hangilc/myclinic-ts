@@ -107,7 +107,7 @@
 <style>
   .two-cols {
     display: grid;
-    grid-template-columns: 10em 20em;
+    grid-template-columns: 16em 20em;
   }
 
   .left {

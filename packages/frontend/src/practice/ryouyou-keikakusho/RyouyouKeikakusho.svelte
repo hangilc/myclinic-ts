@@ -120,54 +120,48 @@
   );
 
   $: formData.kensaChecks["kensa-HbA1c-mark"] = calcCheck(
-    formData.kensaChecks["kensa-HbA1c-mark"], [
-      formData.immediates["kensa-HbA1c"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-HbA1c-mark"],
+    [formData.immediates["kensa-HbA1c"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-総コレステロール-mark"] = calcCheck(
-    formData.kensaChecks["kensa-総コレステロール-mark"], [
-      formData.immediates["kensa-総コレステロール"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-総コレステロール-mark"],
+    [formData.immediates["kensa-総コレステロール"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-中性脂肪-mark"] = calcCheck(
-    formData.kensaChecks["kensa-中性脂肪-mark"], [
-      formData.immediates["kensa-中性脂肪"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-中性脂肪-mark"],
+    [formData.immediates["kensa-中性脂肪"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"] = calcCheck(
-    formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"], [
-      formData.immediates["kensa-ＨＤＬコレステロール"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"],
+    [formData.immediates["kensa-ＨＤＬコレステロール"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"] = calcCheck(
-    formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"], [
-      formData.immediates["kensa-ＬＤＬコレステロール"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"],
+    [formData.immediates["kensa-ＬＤＬコレステロール"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-血液検査項目-その他-mark"] = calcCheck(
-    formData.kensaChecks["kensa-血液検査項目-その他-mark"], [
-      formData.immediates["kensa-血液検査項目-その他"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-血液検査項目-その他-mark"],
+    [formData.immediates["kensa-血液検査項目-その他"] !== ""]
+  );
 
   $: formData.kensaChecks["kensa-栄養状態-mark"] = calcCheck(
-    formData.kensaChecks["kensa-栄養状態-mark"], [
+    formData.kensaChecks["kensa-栄養状態-mark"],
+    [
       formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"],
       formData.kensaChecks["kensa-栄養状態-良好"],
       formData.kensaChecks["kensa-栄養状態-肥満"],
     ]
-  )
+  );
 
   $: formData.kensaChecks["kensa-その他-その他-mark"] = calcCheck(
-    formData.kensaChecks["kensa-その他-その他-mark"], [
-      formData.immediates["kensa-その他-その他"] !== "",
-    ]
-  )
+    formData.kensaChecks["kensa-その他-その他-mark"],
+    [formData.immediates["kensa-その他-その他"] !== ""]
+  );
 
   init();
 
@@ -265,6 +259,9 @@
   }
 
   function doDisp() {
+    if (clinicInfo) {
+      ryouyouKeikakushoData["医師氏名"] = clinicInfo?.doctorName;
+    }
     populateWithIssueDate();
     populateWithPatient();
     populateDiseases();
