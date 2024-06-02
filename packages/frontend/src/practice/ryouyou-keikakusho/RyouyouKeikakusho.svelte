@@ -119,6 +119,8 @@
     formData.undouChecks["juuten-運動-注意事項-mark"] ||
     formData.immediates["juuten-運動-注意事項"] !== "";
 
+  $: formData.tabakoCheck = calcCheck(formData.tabakoCheck, Object.values(formData.tabakoChecks))
+
   init();
 
   async function init() {
@@ -168,6 +170,14 @@
     updateBox("juuten-運動-mark", formData.undouCheck);
   }
 
+  function populateTabako() {
+    for (const key in formData.tabakoChecks) {
+      // @ts-ignore
+      updateBox(key, formData.tabakoChecks[key]);
+    }
+    updateBox("juuten-たばこ-mark", formData.tabakoCheck);
+  }
+
   function initStore() {
     store = `
   {
@@ -210,6 +220,7 @@
     populateMokuhyou();
     populateShokuji();
     populateUndou();
+    populateTabako();
     for (let key in formData.immediates) {
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
@@ -698,6 +709,38 @@
                 type="text"
                 bind:value={formData.immediates["juuten-運動-注意事項"]}
               />
+            </div>
+          </div>
+        </div>
+        <div>
+          【<input
+            bind:checked={formData.tabakoCheck}
+            type="checkbox"
+          />たばこ】
+          <div style="margin-left: 2em">
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.tabakoChecks[
+                  "juuten-たばこ-非喫煙者-mark"
+                ]}
+              /> 非喫煙者
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.tabakoChecks[
+                  "juuten-たばこ-禁煙・節煙の有効性-mark"
+                ]}
+              /> 禁煙・節煙の有効性
+            </div>
+            <div>
+              <input
+                type="checkbox"
+                bind:checked={formData.tabakoChecks[
+                  "juuten-たばこ-禁煙の実施補法等-mark"
+                ]}
+              /> 禁煙の実施補法等
             </div>
           </div>
         </div>

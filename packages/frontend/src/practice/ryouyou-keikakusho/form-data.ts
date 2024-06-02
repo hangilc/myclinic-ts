@@ -29,6 +29,12 @@ export interface FormData {
   };
   undouEveryDay: boolean;
   undouIntensityBreath: boolean;
+  tabakoCheck: boolean;
+  tabakoChecks: {
+    "juuten-たばこ-非喫煙者-mark": boolean;
+    "juuten-たばこ-禁煙・節煙の有効性-mark": boolean;
+    "juuten-たばこ-禁煙の実施補法等-mark": boolean;
+  }
   immediates: {
     [Key in keyof RyouyouKeikakushoData]?: string;
   };
@@ -63,6 +69,12 @@ export function mkFormData(): FormData {
     },
     undouEveryDay: false,
     undouIntensityBreath: false,
+    tabakoCheck: false,
+    tabakoChecks: {
+      "juuten-たばこ-非喫煙者-mark": false,
+      "juuten-たばこ-禁煙・節煙の有効性-mark": false,
+      "juuten-たばこ-禁煙の実施補法等-mark": false,
+    },
     immediates: {
       "mokuhyou-体重": "",
       "mokuhyou-BMI": "",
