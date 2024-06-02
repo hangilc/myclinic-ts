@@ -399,13 +399,6 @@ function drawJuuten(ctx: DC, box: Box) {
 }
 
 function drawKensa(ctx: DC, box: Box) {
-  // function boxed(label: string, mark: string): c.CompositeItem[] {
-  //   return [
-  //     { kind: "box", mark, pen: "thin" },
-  //     { kind: "gap", width: 0.5 },
-  //     { kind: "text", text: label },
-  //   ];
-  // }
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
@@ -462,7 +455,7 @@ function drawKensa(ctx: DC, box: Box) {
         p.text("mg/dl)")
       ]);
       c.drawComposite(ctx, rs[3], [
-        ...widget.boxed("HbA1c:", ""),
+        ...widget.boxed("HbA1c:", "kensa-HbA1c-mark"),
         p.gapTo(40),
         p.text("("),
         p.expander({ mark: "kensa-HbA1c" }),
@@ -491,18 +484,19 @@ function drawKensa(ctx: DC, box: Box) {
       c.drawComposite(ctx, rs[1], [
         ...widget.boxed("栄養状態", "kensa-栄養状態-mark"),
         p.gapTo(24),
-        p.text("(低栄養状態の恐れ"),
+        p.text("("),
+        p.text("低栄養状態の恐れ", { mark: "kensa-栄養状態-低栄養状態の恐れ" }),
         p.gap(8),
-        p.text("良好"),
+        p.text("良好", { mark: "kensa-栄養状態-良好" }),
         p.gap(8),
-        p.text("肥満"),
+        p.text("肥満", { mark: "kensa-栄養状態-肥満" }),
         p.text(")"),
       ]);
       c.drawComposite(ctx, rs[2], [
         ...widget.boxed("その他", "kensa-その他-その他-mark"),
         p.gapTo(24),
         p.text("("),
-        p.gap(64),
+        p.gap(64, { mark: "kensa-その他-その他" }),
         p.text(")"),
       ]);
     }, { rowModifiers: [b.shrinkHoriz(1, 1)] });

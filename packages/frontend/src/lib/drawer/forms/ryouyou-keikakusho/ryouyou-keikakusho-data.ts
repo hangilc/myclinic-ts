@@ -84,6 +84,7 @@ export interface RyouyouKeikakushoData {
   "kensa-血糖-値": string;
   "kensa-ＨＤＬコレステロール-mark": string;
   "kensa-ＨＤＬコレステロール": string;
+  "kensa-HbA1c-mark": string;
   "kensa-HbA1c": string;
   "kensa-ＬＤＬコレステロール-mark": string;
   "kensa-ＬＤＬコレステロール": string;
@@ -91,6 +92,7 @@ export interface RyouyouKeikakushoData {
   "kensa-血液検査項目-その他": string;
   "kensa-栄養状態-mark": string;
   "kensa-その他-その他-mark": string;
+  "kensa-その他-その他": string;
   "医師氏名": string;
   "issue-times": string;
   "birthdate-age": string;
@@ -187,6 +189,7 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "kensa-血糖-値": "",
     "kensa-ＨＤＬコレステロール-mark": "",
     "kensa-ＨＤＬコレステロール": "",
+    "kensa-HbA1c-mark": "",
     "kensa-HbA1c": "",
     "kensa-ＬＤＬコレステロール-mark": "",
     "kensa-ＬＤＬコレステロール": "",
@@ -194,6 +197,7 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "kensa-血液検査項目-その他": "",
     "kensa-栄養状態-mark": "",
     "kensa-その他-その他-mark": "",
+    "kensa-その他-その他": "",
     "医師氏名": "",
     "issue-times": "",
     "birthdate-age": "",

@@ -44,6 +44,24 @@ export interface FormData {
     "juuten-その他-家庭での計測-mark": boolean;
     "juuten-その他-その他-mark": boolean;
   };
+  kensaDate: string;
+  kensaChecks: {
+    "kensa-血糖-mark": boolean;
+    "kensa-血糖-空腹時-mark": boolean;
+    "kensa-血糖-随時-mark": boolean;
+    "kensa-血糖-食後-mark": boolean;
+    "kensa-総コレステロール-mark": boolean;
+    "kensa-中性脂肪-mark": boolean;
+    "kensa-ＨＤＬコレステロール-mark": boolean;
+    "kensa-HbA1c-mark": boolean;
+    "kensa-ＬＤＬコレステロール-mark": boolean;
+    "kensa-栄養状態-mark": boolean;
+    "kensa-栄養状態-低栄養状態の恐れ": boolean;
+    "kensa-栄養状態-良好": boolean;
+    "kensa-栄養状態-肥満": boolean;
+    "kensa-血液検査項目-その他-mark": boolean;
+    "kensa-その他-その他-mark": boolean;
+  };
   immediates: {
     [Key in keyof RyouyouKeikakushoData]?: string;
   };
@@ -54,7 +72,7 @@ export function mkFormData(): FormData {
     mode: "shokai",
     issueDate: dateToSql(new Date()),
     diseaseDiabetes: false,
-    diseaseHypertension:  false,
+    diseaseHypertension: false,
     diseaseHyperlipidemia: false,
     shokujiCheck: false,
     shokujiChecks: {
@@ -92,6 +110,24 @@ export function mkFormData(): FormData {
       "juuten-その他-減量-mark": false,
       "juuten-その他-家庭での計測-mark": false,
       "juuten-その他-その他-mark": false,
+    },
+    kensaDate: "",
+    kensaChecks: {
+      "kensa-血糖-mark": false,
+      "kensa-血糖-空腹時-mark": false,
+      "kensa-血糖-随時-mark": false,
+      "kensa-血糖-食後-mark": false,
+      "kensa-総コレステロール-mark": false,
+      "kensa-中性脂肪-mark": false,
+      "kensa-ＨＤＬコレステロール-mark": false,
+      "kensa-HbA1c-mark": false,
+      "kensa-ＬＤＬコレステロール-mark": false,
+      "kensa-血液検査項目-その他-mark": false,
+      "kensa-栄養状態-mark": false,
+      "kensa-栄養状態-低栄養状態の恐れ": false,
+      "kensa-栄養状態-良好": false,
+      "kensa-栄養状態-肥満": false,
+      "kensa-その他-その他-mark": false,
     },
     immediates: {
       "mokuhyou-体重": "",

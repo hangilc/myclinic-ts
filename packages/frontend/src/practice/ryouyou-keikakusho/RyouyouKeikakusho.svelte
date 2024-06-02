@@ -17,6 +17,7 @@
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
   import { mkFormData, type FormData } from "./form-data";
+  import FaceConfirmedSearchPatientDialog from "@/lib/face-confirmed/FaceConfirmedSearchPatientDialog.svelte";
 
   export let isVisible = false;
   let showDev = false;
@@ -173,6 +174,18 @@
     updateBox("juuten-その他-mark", formData.sonotaCheck);
   }
 
+  function populateKensa() {
+    if (formData.kensaDate !== "") {
+      const issueDate = DateWrapper.from(formData.kensaDate);
+      updateValue("kensa-採血日-月", issueDate.getMonth().toString());
+      updateValue("kensa-採血日-日", issueDate.getDay().toString());
+    }
+    for (const key in formData.tabakoChecks) {
+      // @ts-ignore
+      updateBox(key, formData.tabakoChecks[key]);
+    }
+  }
+
   function doSelectPatient() {
     const d: SearchPatientDialog = new SearchPatientDialog({
       target: document.body,
@@ -199,6 +212,7 @@
     populateUndou();
     populateTabako();
     populateSonota();
+    populateKensa();
     for (let key in formData.immediates) {
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
@@ -694,54 +708,162 @@
             <div>
               【血液検査項目】
               <span style="white-space:nowrap;"
-                >採血日 <input type="text" style="width:6em" /></span
+                >採血日 <input
+                  type="text"
+                  style="width:6em"
+                  bind:value={formData.kensaDate}
+                /></span
               >
               <div style="display:grid;grid-template-columns:auto 1fr;">
-                <span><input type="checkbox" />&nbsp;</span>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks["kensa-血糖-mark"]}
+                  />&nbsp;</span
+                >
                 <div>
-                  血糖 (<input type="checkbox" />
+                  血糖 (<input
+                    type="checkbox"
+                    bind:value={formData.kensaChecks["kensa-血糖-空腹時-mark"]}
+                  />
                   空腹時
-                  <input type="checkbox" />
+                  <input
+                    type="checkbox"
+                    bind:value={formData.kensaChecks["kensa-血糖-随時-mark"]}
+                  />
                   随時
                   <span style="white-space:nowrap;"
-                    ><input type="checkbox" /> 食後
-                    <input type="text" style="width:2em" /> 時間)</span
+                    ><input
+                      type="checkbox"
+                      bind:checked={formData.kensaChecks[
+                        "kensa-血糖-食後-mark"
+                      ]}
+                    />
+                    食後
+                    <input
+                      type="text"
+                      style="width:2em"
+                      bind:value={formData.immediates["kensa-血糖-食後"]}
+                    /> 時間)</span
                   >
-                  (<input type="text" style="width:4em;" /> mg/dl)
+                  (<input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates["kensa-血糖-値"]}
+                  /> mg/dl)
                 </div>
-                <span><input type="checkbox" />&nbsp;</span>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks["kensa-HbA1c-mark"]}
+                  />&nbsp;</span
+                >
                 <div>
-                  HbA1c <input type="text" style="width:4em;" /> %
+                  HbA1c <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates["kensa-HbA1c"]}
+                  /> %
                 </div>
               </div>
             </div>
             <div>
-              <div style="display:grid;grid-template-columns:auto 1fr;row-gap:4px">
-                <span><input type="checkbox" />&nbsp;</span>
-                <div>総コレステロール <input type="text" style="width:4em;" /> mg/dl</div>
-                <span><input type="checkbox" />&nbsp;</span>
-                <div>中性脂肪 <input type="text" style="width:4em;" /> mg/dl</div>
-                <span><input type="checkbox" />&nbsp;</span>
-                <div>HDLコレステロール <input type="text" style="width:4em;" /> mg/dl</div>
-                <span><input type="checkbox" />&nbsp;</span>
-                <div>LDLコレステロール <input type="text" style="width:4em;" /> mg/dl</div>
-                <span><input type="checkbox" />&nbsp;</span>
-                <div>その他 <input type="text" style="width:4em;" /> </div>
+              <div
+                style="display:grid;grid-template-columns:auto 1fr;row-gap:4px"
+              >
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks[
+                      "kensa-総コレステロール-mark"
+                    ]}
+                  />&nbsp;</span
+                >
+                <div>
+                  総コレステロール <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates["kensa-総コレステロール"]}
+                  /> mg/dl
+                </div>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks["kensa-中性脂肪-mark"]}
+                  />&nbsp;</span
+                >
+                <div>
+                  中性脂肪 <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates["kensa-中性脂肪"]}
+                  /> mg/dl
+                </div>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks[
+                      "kensa-ＨＤＬコレステロール-mark"
+                    ]}
+                  />&nbsp;</span
+                >
+                <div>
+                  HDLコレステロール <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates[
+                      "kensa-ＨＤＬコレステロール"
+                    ]}
+                  /> mg/dl
+                </div>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks[
+                      "kensa-ＬＤＬコレステロール-mark"
+                    ]}
+                  />&nbsp;</span
+                >
+                <div>
+                  LDLコレステロール <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates[
+                      "kensa-ＬＤＬコレステロール"
+                    ]}
+                  /> mg/dl
+                </div>
+                <span
+                  ><input
+                    type="checkbox"
+                    bind:checked={formData.kensaChecks[
+                      "kensa-血液検査項目-その他-mark"
+                    ]}
+                  />&nbsp;</span
+                >
+                <div>
+                  その他 <input
+                    type="text"
+                    style="width:4em;"
+                    bind:value={formData.immediates[
+                      "kensa-血液検査項目-その他"
+                    ]}
+                  />
+                </div>
               </div>
             </div>
           </div>
           <div style="margin-left:2em;">
             <div>【その他】</div>
             <div>
-              <input type="checkbox" /> 栄養状態（
-                <input type="checkbox" /> 低栄養状態の恐れ
-                <input type="checkbox" /> 良好
-                <input type="checkbox" /> 肥満
-              ）
+              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-mark"]}/> 栄養状態（
+              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"]} /> 低栄養状態の恐れ
+              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-良好"]} /> 良好
+              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-栄養状態-肥満"]} /> 肥満 ）
             </div>
             <div>
-              <input type="checkbox" /> その他
-              <input type="text" />
+              <input type="checkbox" bind:checked={formData.kensaChecks["kensa-その他-その他-mark"]} /> その他
+              <input type="text" bind:value={formData.immediates["kensa-その他-その他"]}/>
             </div>
           </div>
         </div>
