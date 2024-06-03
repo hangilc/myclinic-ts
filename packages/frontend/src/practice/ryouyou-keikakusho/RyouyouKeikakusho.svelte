@@ -28,7 +28,7 @@
   let clinicInfo: ClinicInfo | undefined = undefined;
   let formAreaWork: HTMLElement;
 
-  function calcCheck(shokujiCheck: boolean, values: boolean[], dummy: any[] = []): boolean {
+  function calcCheck(shokujiCheck: boolean, values: boolean[]): boolean {
     return shokujiCheck || values.some((b) => b);
   }
 
@@ -41,7 +41,7 @@
     formData.immediates["juuten-食事-間食-回"] !== "",
     formData.shokujiYukkuri,
     formData.immediates["juuten-食事-食べ方"] !== "",
-  ], [formData.diseaseHypertension]);
+  ]);
 
   $: formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] =
     formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"] ||
