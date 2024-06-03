@@ -17,7 +17,6 @@
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
   import { mkFormData, type FormData } from "./form-data";
-  import FaceConfirmedSearchPatientDialog from "@/lib/face-confirmed/FaceConfirmedSearchPatientDialog.svelte";
 
   export let isVisible = false;
   let showDev = false;
@@ -163,6 +162,31 @@
     [formData.immediates["kensa-その他-その他"] !== ""]
   );
 
+  $: if (formData.diseaseDiabetes) {
+    if (formData.mode === "shokai") {
+      const t = formData.immediates["mokuhyou-達成目標"];
+      const m = "HbA1c値を 7.0 以下にコントロールする。";
+      if (!t || t.indexOf(m) < 0) {
+        formData.immediates["mokuhyou-達成目標"] = `${t}${m}`;
+      }
+      if (formData.immediates["mokuhyou-HbA1c"] === "") {
+        formData.immediates["mokuhyou-HbA1c"] = "7.0";
+      }
+    }
+  }
+
+  $: if (formData.diseaseHypertension) {
+    const t = formData.immediates["mokuhyou-達成目標"];
+    const m = "血圧の平均を 130/80 以下にコントロールする。";
+    if (!t || t.indexOf(m) < 0) {
+      formData.immediates["mokuhyou-達成目標"] = `${t}${m}`;
+    }
+    if (formData.immediates["mokuhyou-BP"] === "") {
+      formData.immediates["mokuhyou-BP"] = "130/80";
+    }
+    formData.shokujiChecks["juuten-食事-食塩・調味料を控える-mark"] = true;
+  }
+
   init();
 
   async function init() {
@@ -256,9 +280,11 @@
 
   function doClearPatient() {
     patient = undefined;
+    formData = mkFormData();
   }
 
   function doDisp() {
+    ryouyouKeikakushoData = mkRyouyouKeikakushoData();
     if (clinicInfo) {
       ryouyouKeikakushoData["医師氏名"] = clinicInfo?.doctorName;
     }

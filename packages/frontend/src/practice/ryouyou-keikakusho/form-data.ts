@@ -135,7 +135,7 @@ export function mkFormData(): FormData {
       "mokuhyou-BP": "",
       "mokuhyou-HbA1c": "",
       "mokuhyou-達成目標": "",
-      "mokuhyou-行動目標": "",
+      "mokuhyou-行動目標": "現在の食事と運動を継続する。処方の服用を継続する。",
       "juuten-食事-外食の際の注意事項": "",
       "juuten-食事-節酒": "",
       "juuten-食事-節酒-回": "",
