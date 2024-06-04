@@ -568,7 +568,7 @@
         </div>
         <div style="margin-left:2em;">
           【<input bind:checked={formData.shokujiCheck} type="checkbox" />食事】
-          <div style="margin-left: 2em">
+          <div style="margin-left: 2em" class="shokuji-area">
             <div>
               <input
                 type="checkbox"
@@ -1170,5 +1170,9 @@
 
   .display-commands {
     margin: 10px 0;
+  }
+
+  .shokuji-area > div {
+    margin: 3px 0;
   }
 </style>
