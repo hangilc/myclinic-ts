@@ -62,6 +62,7 @@
   function adaptUndouChecks() {
     if (!formData.undouChecks["juuten-運動-種類-mark"]) {
       formData.undouChecks["juuten-運動-種類-mark"] =
+        formData.undouWalking ||
         formData.immediates["juuten-運動-種類"] !== "" ||
         formData.immediates["juuten-運動-時間"] !== "" ||
         formData.undouEveryDay ||
@@ -113,53 +114,62 @@
     }
   }
 
+  function adaptKensaChecks() {
+    if (!formData.kensaChecks["kensa-血糖-食後-mark"]) {
+      formData.kensaChecks["kensa-血糖-食後-mark"] =
+        formData.immediates["kensa-血糖-食後"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-血糖-mark"]) {
+      formData.kensaChecks["kensa-血糖-mark"] =
+        formData.kensaChecks["kensa-血糖-mark"] ||
+        formData.kensaChecks["kensa-血糖-空腹時-mark"] ||
+        formData.kensaChecks["kensa-血糖-随時-mark"] ||
+        formData.kensaChecks["kensa-血糖-食後-mark"] ||
+        formData.immediates["kensa-血糖-値"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-HbA1c-mark"]) {
+      formData.kensaChecks["kensa-HbA1c-mark"] =
+        formData.immediates["kensa-HbA1c"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-総コレステロール-mark"]) {
+      formData.kensaChecks["kensa-総コレステロール-mark"] =
+        formData.immediates["kensa-総コレステロール"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-中性脂肪-mark"]) {
+      formData.kensaChecks["kensa-中性脂肪-mark"] =
+        formData.immediates["kensa-中性脂肪"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"]) {
+      formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"] =
+        formData.immediates["kensa-ＨＤＬコレステロール"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"]) {
+      formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"] =
+        formData.immediates["kensa-ＬＤＬコレステロール"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-血液検査項目-その他-mark"]) {
+      formData.kensaChecks["kensa-血液検査項目-その他-mark"] =
+        formData.immediates["kensa-血液検査項目-その他"] !== "";
+    }
+    if (!formData.kensaChecks["kensa-栄養状態-mark"]) {
+      formData.kensaChecks["kensa-栄養状態-mark"] =
+        formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"] ||
+        formData.kensaChecks["kensa-栄養状態-良好"] ||
+        formData.kensaChecks["kensa-栄養状態-肥満"];
+    }
+    if (!formData.kensaChecks["kensa-その他-その他-mark"]) {
+      formData.kensaChecks["kensa-その他-その他-mark"] =
+        formData.immediates["kensa-その他-その他"] !== "";
+    }
+  }
+
   function adaptChecks() {
     adaptShokujiChecks();
     adaptUndouChecks();
     adaptTabakoChecks();
     adaptSonotaChecks();
+    adaptKensaChecks();
   }
-
-  // $: formData.kensaChecks["kensa-血糖-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-血糖-mark"],
-  //   [
-  //     formData.kensaChecks["kensa-血糖-空腹時-mark"],
-  //     formData.kensaChecks["kensa-血糖-随時-mark"],
-  //     formData.kensaChecks["kensa-血糖-食後-mark"],
-  //     formData.immediates["kensa-血糖-食後"] !== "",
-  //     formData.immediates["kensa-血糖-値"] !== "",
-  //   ]
-  // );
-
-  // $: formData.kensaChecks["kensa-HbA1c-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-HbA1c-mark"],
-  //   [formData.immediates["kensa-HbA1c"] !== ""]
-  // );
-
-  // $: formData.kensaChecks["kensa-総コレステロール-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-総コレステロール-mark"],
-  //   [formData.immediates["kensa-総コレステロール"] !== ""]
-  // );
-
-  // $: formData.kensaChecks["kensa-中性脂肪-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-中性脂肪-mark"],
-  //   [formData.immediates["kensa-中性脂肪"] !== ""]
-  // );
-
-  // $: formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"],
-  //   [formData.immediates["kensa-ＨＤＬコレステロール"] !== ""]
-  // );
-
-  // $: formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"],
-  //   [formData.immediates["kensa-ＬＤＬコレステロール"] !== ""]
-  // );
-
-  // $: formData.kensaChecks["kensa-血液検査項目-その他-mark"] = calcCheck(
-  //   formData.kensaChecks["kensa-血液検査項目-その他-mark"],
-  //   [formData.immediates["kensa-血液検査項目-その他"] !== ""]
-  // );
 
   // $: formData.kensaChecks["kensa-栄養状態-mark"] = calcCheck(
   //   formData.kensaChecks["kensa-栄養状態-mark"],
@@ -286,7 +296,6 @@
       updateBox(key, formData.undouChecks[key]);
     }
     updateBox("juuten-運動-ウォーキング-mark", formData.undouWalking);
-    console.log("walking data", ryouyouKeikakushoData["juuten-運動-ウォーキング-mark"]);
     updateBox("juuten-運動-mark", formData.undouCheck);
   }
 
@@ -354,7 +363,6 @@
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
     }
-    console.log("walking data", ryouyouKeikakushoData["juuten-運動-ウォーキング-mark"]);
     let ops: Op[];
     if (formData.mode === "shokai") {
       ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
@@ -706,7 +714,11 @@
             <div style="flex-grow:1">
               <div>
                 運動処方・種類（
-                <input type="checkbox" bind:checked={formData.undouWalking} on:change={adaptChecks} /> 
+                <input
+                  type="checkbox"
+                  bind:checked={formData.undouWalking}
+                  on:change={adaptChecks}
+                />
                 ウォーキング
                 <input
                   type="text"
@@ -916,11 +928,13 @@
                     bind:checked={formData.kensaChecks[
                       "kensa-血糖-空腹時-mark"
                     ]}
+                    on:change={adaptChecks}
                   />
                   空腹時
                   <input
                     type="checkbox"
                     bind:checked={formData.kensaChecks["kensa-血糖-随時-mark"]}
+                    on:change={adaptChecks}
                   />
                   随時
                   <span style="white-space:nowrap;"
@@ -929,18 +943,21 @@
                       bind:checked={formData.kensaChecks[
                         "kensa-血糖-食後-mark"
                       ]}
+                      on:change={adaptChecks}
                     />
                     食後
                     <input
                       type="text"
                       style="width:2em"
                       bind:value={formData.immediates["kensa-血糖-食後"]}
+                      on:change={adaptChecks}
                     /> 時間)</span
                   >
                   (<input
                     type="text"
                     style="width:4em;"
                     bind:value={formData.immediates["kensa-血糖-値"]}
+                    on:change={adaptChecks}
                   /> mg/dl)
                 </div>
                 <span
@@ -954,6 +971,7 @@
                     type="text"
                     style="width:4em;"
                     bind:value={formData.immediates["kensa-HbA1c"]}
+                    on:change={adaptChecks}
                   /> %
                 </div>
               </div>
@@ -975,6 +993,7 @@
                     type="text"
                     style="width:4em;"
                     bind:value={formData.immediates["kensa-総コレステロール"]}
+                    on:change={adaptChecks}
                   /> mg/dl
                 </div>
                 <span
@@ -988,6 +1007,7 @@
                     type="text"
                     style="width:4em;"
                     bind:value={formData.immediates["kensa-中性脂肪"]}
+                    on:change={adaptChecks}
                   /> mg/dl
                 </div>
                 <span
@@ -1005,6 +1025,7 @@
                     bind:value={formData.immediates[
                       "kensa-ＨＤＬコレステロール"
                     ]}
+                    on:change={adaptChecks}
                   /> mg/dl
                 </div>
                 <span
@@ -1022,6 +1043,7 @@
                     bind:value={formData.immediates[
                       "kensa-ＬＤＬコレステロール"
                     ]}
+                    on:change={adaptChecks}
                   /> mg/dl
                 </div>
                 <span
@@ -1035,10 +1057,11 @@
                 <div>
                   その他 <input
                     type="text"
-                    style="width:4em;"
+                    style="width:14em;"
                     bind:value={formData.immediates[
                       "kensa-血液検査項目-その他"
                     ]}
+                    on:change={adaptChecks}
                   />
                 </div>
               </div>
@@ -1057,16 +1080,19 @@
                 bind:checked={formData.kensaChecks[
                   "kensa-栄養状態-低栄養状態の恐れ"
                 ]}
+                on:change={adaptChecks}
               />
               低栄養状態の恐れ
               <input
                 type="checkbox"
                 bind:checked={formData.kensaChecks["kensa-栄養状態-良好"]}
+                on:change={adaptChecks}
               />
               良好
               <input
                 type="checkbox"
                 bind:checked={formData.kensaChecks["kensa-栄養状態-肥満"]}
+                on:change={adaptChecks}
               /> 肥満 ）
             </div>
             <div>
@@ -1078,6 +1104,7 @@
               <input
                 type="text"
                 bind:value={formData.immediates["kensa-その他-その他"]}
+                on:change={adaptChecks}
               />
             </div>
           </div>
