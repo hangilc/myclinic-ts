@@ -75,8 +75,39 @@
         formData.undouChecks["juuten-運動-活動量-mark"] ||
         formData.immediates["juuten-運動-活動量"] !== "";
     }
+    if (!formData.undouChecks["juuten-運動-注意事項-mark"]) {
+      formData.undouChecks["juuten-運動-注意事項-mark"] =
+        formData.undouChecks["juuten-運動-注意事項-mark"] ||
+        formData.immediates["juuten-運動-注意事項"] !== "";
+    }
     if (!formData.undouCheck) {
       formData.undouCheck = Object.values(formData.undouChecks).some(
+        (checked) => checked
+      );
+    }
+  }
+
+  function adaptTabakoChecks() {
+    if (!formData.undouChecks["juuten-運動-注意事項-mark"]) {
+      formData.undouChecks["juuten-運動-注意事項-mark"] =
+        formData.undouChecks["juuten-運動-注意事項-mark"] ||
+        formData.immediates["juuten-運動-注意事項"] !== "";
+    }
+    if (!formData.tabakoCheck) {
+      formData.tabakoCheck = Object.values(formData.tabakoChecks).some(
+        (checked) => checked
+      );
+    }
+  }
+
+  function adaptSonotaChecks() {
+    if (!formData.sonotaChecks["juuten-その他-その他-mark"]) {
+      formData.sonotaChecks["juuten-その他-その他-mark"] =
+        formData.sonotaChecks["juuten-その他-その他-mark"] ||
+        formData.immediates["juuten-その他-その他"] !== "";
+    }
+    if (!formData.sonotaCheck) {
+      formData.sonotaCheck = Object.values(formData.sonotaChecks).some(
         (checked) => checked
       );
     }
@@ -85,26 +116,9 @@
   function adaptChecks() {
     adaptShokujiChecks();
     adaptUndouChecks();
+    adaptTabakoChecks();
+    adaptSonotaChecks();
   }
-
-
-  // $: formData.undouChecks["juuten-運動-注意事項-mark"] =
-  //   formData.undouChecks["juuten-運動-注意事項-mark"] ||
-  //   formData.immediates["juuten-運動-注意事項"] !== "";
-
-  // $: formData.tabakoCheck = calcCheck(
-  //   formData.tabakoCheck,
-  //   Object.values(formData.tabakoChecks)
-  // );
-
-  // $: formData.sonotaCheck = calcCheck(formData.sonotaCheck, [
-  //   ...Object.values(formData.sonotaChecks),
-  //   formData.immediates["juuten-その他-その他"] !== "",
-  // ]);
-
-  // $: formData.sonotaChecks["juuten-その他-その他-mark"] =
-  //   formData.sonotaChecks["juuten-その他-その他-mark"] ||
-  //   formData.immediates["juuten-その他-その他"] !== "";
 
   // $: formData.kensaChecks["kensa-血糖-mark"] = calcCheck(
   //   formData.kensaChecks["kensa-血糖-mark"],
@@ -177,6 +191,23 @@
   const default行動目標 =
     "現在の食事、運動を継続する。現在の処方の服用を継続する。";
 
+  function adaptDiabetes() {
+    if (formData.diseaseDiabetes) {
+      if (formData.immediates["mokuhyou-HbA1c"] === "") {
+        formData.immediates["mokuhyou-HbA1c"] = "7.0";
+      }
+      const t = formData.immediates["mokuhyou-達成目標"];
+      const m = "HbA1c の値を 7.0 以下にコントロールする。";
+      if (!t || t.indexOf(m) < 0) {
+        formData.immediates["mokuhyou-達成目標"] = `${t}${m}`;
+      }
+      if (formData.immediates["mokuhyou-行動目標"] === "") {
+        formData.immediates["mokuhyou-行動目標"] = default行動目標;
+      }
+      adaptChecks();
+    }
+  }
+
   function adaptHypertension() {
     if (formData.diseaseHypertension) {
       if (formData.immediates["mokuhyou-BP"] === "") {
@@ -193,6 +224,18 @@
       formData.shokujiChecks["juuten-食事-食塩・調味料を控える-mark"] = true;
       adaptChecks();
     }
+  }
+
+  function adaptHyperlipidemia() {
+    const t = formData.immediates["mokuhyou-達成目標"];
+    const m = "ＬＤＬコレステロールの値を 140 以下にコントロールする。";
+    if (!t || t.indexOf(m) < 0) {
+      formData.immediates["mokuhyou-達成目標"] = `${t}${m}`;
+    }
+    if (formData.immediates["mokuhyou-行動目標"] === "") {
+      formData.immediates["mokuhyou-行動目標"] = default行動目標;
+    }
+    adaptChecks();
   }
 
   init();
@@ -454,6 +497,7 @@
           主病：<input
             type="checkbox"
             bind:checked={formData.diseaseDiabetes}
+            on:change={adaptDiabetes}
           />
           糖尿病
           <input
@@ -465,6 +509,7 @@
           <input
             type="checkbox"
             bind:checked={formData.diseaseHyperlipidemia}
+            on:change={adaptHyperlipidemia}
           /> 高脂血症
         </div>
         <div style="display:grid;grid-template-columns:auto 1fr;">
@@ -744,6 +789,7 @@
         <div style="margin-left:2em;">
           【<input
             bind:checked={formData.tabakoCheck}
+            on:change={adaptChecks}
             type="checkbox"
           />たばこ】
           <div style="margin-left: 2em">
@@ -753,6 +799,7 @@
                 bind:checked={formData.tabakoChecks[
                   "juuten-たばこ-非喫煙者-mark"
                 ]}
+                on:change={adaptChecks}
               /> 非喫煙者
             </div>
             <div>
@@ -761,6 +808,7 @@
                 bind:checked={formData.tabakoChecks[
                   "juuten-たばこ-禁煙・節煙の有効性-mark"
                 ]}
+                on:change={adaptChecks}
               /> 禁煙・節煙の有効性
             </div>
             <div>
@@ -769,6 +817,7 @@
                 bind:checked={formData.tabakoChecks[
                   "juuten-たばこ-禁煙の実施補法等-mark"
                 ]}
+                on:change={adaptChecks}
               /> 禁煙の実施補法等
             </div>
           </div>
@@ -776,6 +825,7 @@
         <div style="margin-left:2em;">
           【<input
             bind:checked={formData.sonotaCheck}
+            on:change={adaptChecks}
             type="checkbox"
           />その他】
           <div style="margin-left: 2em">
@@ -783,12 +833,14 @@
               <input
                 type="checkbox"
                 bind:checked={formData.sonotaChecks["juuten-その他-仕事-mark"]}
+                on:change={adaptChecks}
               /> 仕事
             </span>
             <span style="white-space:nowrap">
               <input
                 type="checkbox"
                 bind:checked={formData.sonotaChecks["juuten-その他-余暇-mark"]}
+                on:change={adaptChecks}
               /> 余暇
             </span>
             <span style="white-space:nowrap">
@@ -797,12 +849,14 @@
                 bind:checked={formData.sonotaChecks[
                   "juuten-その他-睡眠の確保-mark"
                 ]}
+                on:change={adaptChecks}
               /> 睡眠の確保
             </span>
             <span style="white-space:nowrap">
               <input
                 type="checkbox"
                 bind:checked={formData.sonotaChecks["juuten-その他-減量-mark"]}
+                on:change={adaptChecks}
               /> 減量
             </span>
             <span style="white-space:nowrap">
@@ -811,6 +865,7 @@
                 bind:checked={formData.sonotaChecks[
                   "juuten-その他-家庭での計測-mark"
                 ]}
+                on:change={adaptChecks}
               /> 家庭での計測
             </span>
             <div>
@@ -819,11 +874,13 @@
                 bind:checked={formData.sonotaChecks[
                   "juuten-その他-その他-mark"
                 ]}
+                on:change={adaptChecks}
               />
               その他
               <input
                 type="text"
                 bind:value={formData.immediates["juuten-その他-その他"]}
+                on:change={adaptChecks}
               />
             </div>
           </div>
