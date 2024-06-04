@@ -317,7 +317,9 @@ function drawJuuten(ctx: DC, box: Box) {
       ], { halign: "center" })
       b.withSplitRows(body, b.evenSplitter(5), rs => {
         c.drawComposite(ctx, rs[0], [
-          ...widget.boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", "juuten-運動-種類-mark"),
+          ...widget.boxed("運動処方:種類(", "juuten-運動-種類-mark"),
+          p.text("ｳｫｰｷﾝｸﾞ", { mark: "juuten-運動-ウォーキング-mark" }),
+          p.text("・"),
           p.gap(82, { mark: "juuten-運動-種類" }),
           p.text(")"),
         ]);

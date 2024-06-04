@@ -27,6 +27,7 @@ export interface FormData {
     "juuten-運動-活動量-mark": boolean;
     "juuten-運動-注意事項-mark": boolean;
   };
+  undouWalking: boolean;
   undouEveryDay: boolean;
   undouIntensityBreath: boolean;
   tabakoCheck: boolean;
@@ -94,6 +95,7 @@ export function mkFormData(): FormData {
       "juuten-運動-活動量-mark": false,
       "juuten-運動-注意事項-mark": false,
     },
+    undouWalking: false,
     undouEveryDay: false,
     undouIntensityBreath: false,
     tabakoCheck: false,

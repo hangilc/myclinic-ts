@@ -48,6 +48,7 @@ export interface RyouyouKeikakushoData {
   "juuten-運動-mark": string;
   "juuten-運動-種類-mark": string;
   "juuten-運動-種類": string;
+  "juuten-運動-ウォーキング-mark": string;
   "juuten-運動-時間": string;
   "juuten-運動-頻度": string;
   "juuten-運動-ほぼ毎日": string;
@@ -152,6 +153,7 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "juuten-食事-食事時間-mark": "",
     "juuten-運動-mark": "",
     "juuten-運動-種類-mark": "",
+    "juuten-運動-ウォーキング-mark": "",
     "juuten-運動-種類": "",
     "juuten-運動-時間": "",
     "juuten-運動-頻度": "",

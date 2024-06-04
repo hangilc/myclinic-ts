@@ -285,6 +285,8 @@
       // @ts-ignore
       updateBox(key, formData.undouChecks[key]);
     }
+    updateBox("juuten-運動-ウォーキング-mark", formData.undouWalking);
+    console.log("walking data", ryouyouKeikakushoData["juuten-運動-ウォーキング-mark"]);
     updateBox("juuten-運動-mark", formData.undouCheck);
   }
 
@@ -352,7 +354,7 @@
       // @ts-ignore
       ryouyouKeikakushoData[key] = formData.immediates[key];
     }
-
+    console.log("walking data", ryouyouKeikakushoData["juuten-運動-ウォーキング-mark"]);
     let ops: Op[];
     if (formData.mode === "shokai") {
       ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
@@ -703,12 +705,14 @@
             >
             <div style="flex-grow:1">
               <div>
-                運動処方・種類
+                運動処方・種類（
+                <input type="checkbox" bind:checked={formData.undouWalking} on:change={adaptChecks} /> 
+                ウォーキング
                 <input
                   type="text"
                   bind:value={formData.immediates["juuten-運動-種類"]}
                   on:change={adaptChecks}
-                />
+                />）
               </div>
               <div>
                 時間（３０分以上 <input
