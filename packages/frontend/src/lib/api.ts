@@ -1597,8 +1597,8 @@ export default {
       _ => { });
   },
 
-  getRyouyouKeikakushoMasterText(patientId: number): Promise<string> {
-    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, castString);
+  getRyouyouKeikakushoMasterText(patientId: number): Promise<any> {
+    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, a => a);
   },
 
   saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {

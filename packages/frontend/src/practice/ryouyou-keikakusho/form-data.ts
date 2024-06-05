@@ -2,8 +2,10 @@ import { type RyouyouKeikakushoData } from "@/lib/drawer/forms/ryouyou-keikakush
 import { dateToSql } from "@/lib/util";
 
 export interface FormData {
+  format: number;
   mode: "shokai" | "keizoku";
   issueDate: string;
+  patientId: number;
   diseaseDiabetes: boolean;
   diseaseHypertension: boolean;
   diseaseHyperlipidemia: boolean;
@@ -70,8 +72,10 @@ export interface FormData {
 
 export function mkFormData(): FormData {
   return {
+    format: 1,
     mode: "shokai",
     issueDate: dateToSql(new Date()),
+    patientId: 0,
     diseaseDiabetes: false,
     diseaseHypertension: false,
     diseaseHyperlipidemia: false,
@@ -164,3 +168,42 @@ export function mkFormData(): FormData {
     },
   }
 }
+
+export function lastFormDataOf(dataList: FormData[]): FormData | undefined {
+  let issue: string = "";
+  let data: FormData | undefined = undefined;
+  dataList.forEach(d => {
+    if( d.issueDate > issue ){
+      data = d;
+      issue = d.issueDate;
+    }
+  });
+  return data;
+}
+
+export function effectiveFormDataOf(data: FormData): Partial<FormData> {
+  function removeIfDefault(obj: any){
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      if( typeof value === "object" ){
+        if( Object.keys(value).length === 0 ){
+          delete obj[key];
+        }
+      } else if( value == null || value === "" || value === false ){
+        delete obj[key];
+      }
+
+    })
+  }
+  let obj = Object.assign({}, data);
+  removeIfDefault(obj.shokujiChecks);
+  removeIfDefault(obj.undouChecks);
+  removeIfDefault(obj.tabakoChecks);
+  removeIfDefault(obj.sonotaChecks);
+  removeIfDefault(obj.kensaChecks);
+  removeIfDefault(obj.immediates);
+  removeIfDefault(obj);
+  return obj;
+}
+
+
