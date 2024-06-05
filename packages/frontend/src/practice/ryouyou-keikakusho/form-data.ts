@@ -169,27 +169,30 @@ export function mkFormData(): FormData {
   }
 }
 
-export function lastFormDataOf(dataList: FormData[]): FormData | undefined {
+export function indexOfLastFormData(dataList: Partial<FormData>[]): number {
   let issue: string = "";
-  let data: FormData | undefined = undefined;
-  dataList.forEach(d => {
-    if( d.issueDate > issue ){
-      data = d;
-      issue = d.issueDate;
+  let index = -1;
+  dataList.forEach((d, i) => {
+    if (d.issueDate) {
+
+      if (d.issueDate > issue) {
+        index = i;
+        issue = d.issueDate;
+      }
     }
   });
-  return data;
+  return index;
 }
 
 export function effectiveFormDataOf(data: FormData): Partial<FormData> {
-  function removeIfDefault(obj: any){
+  function removeIfDefault(obj: any) {
     Object.keys(obj).forEach(key => {
       const value = obj[key];
-      if( typeof value === "object" ){
-        if( Object.keys(value).length === 0 ){
+      if (typeof value === "object") {
+        if (Object.keys(value).length === 0) {
           delete obj[key];
         }
-      } else if( value == null || value === "" || value === false ){
+      } else if (value == null || value === "" || value === false) {
         delete obj[key];
       }
 

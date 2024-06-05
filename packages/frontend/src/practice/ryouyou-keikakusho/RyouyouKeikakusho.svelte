@@ -16,7 +16,12 @@
   import { DateWrapper, calcAge } from "myclinic-util";
   import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
-  import { effectiveFormDataOf, lastFormDataOf, mkFormData, type FormData } from "./form-data";
+  import {
+    effectiveFormDataOf,
+    indexOfLastFormData,
+    mkFormData,
+    type FormData,
+  } from "./form-data";
 
   export let isVisible = false;
   let showDev = false;
@@ -24,7 +29,9 @@
   let formData: FormData = mkFormData();
   let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
   let clinicInfo: ClinicInfo | undefined = undefined;
-  let stores: (Partial<FormData> & {id: number})[] = [];
+  let stores: Partial<FormData>[] = [];
+  let storesIndex = -1;
+  let storesAreaVisible = false;
 
   function adaptShokujiChecks() {
     if (!formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"]) {
@@ -294,6 +301,16 @@
     }
   }
 
+  function initWithStores(newStores: Partial<FormData>[]) {
+    stores = newStores;
+    storesIndex = -1;
+    const lastIndex = indexOfLastFormData(stores);
+    formData = Object.assign(
+      mkFormData(),
+      storesIndex >= 0 ? stores[lastIndex] : {}
+    );
+  }
+
   function doSelectPatient() {
     const d: SearchPatientDialog = new SearchPatientDialog({
       target: document.body,
@@ -302,8 +319,7 @@
         title: "患者選択",
         onEnter: async (selected: Patient) => {
           patient = selected;
-          stores = (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? [];
-          formData = lastFormDataOf(stores) ?? mkFormData();
+          initWithStores((await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []);
           formData.patientId = patient.patientId;
         },
       },
@@ -312,7 +328,7 @@
 
   function doClearPatient() {
     patient = undefined;
-    formData = mkFormData();
+    initWithStores([]);
   }
 
   function doDisp() {
@@ -429,13 +445,39 @@
   }
 
   async function doFreshSave() {
-    if( patient ){
+    if (patient) {
       const store = effectiveFormDataOf(formData);
       const newStores = [store, ...stores];
-      await api.saveRyouyouKeikakushoMasterText(patient.patientId, store)
-
+      await api.saveRyouyouKeikakushoMasterText(
+        patient.patientId,
+        JSON.stringify(newStores)
+      );
     }
   }
+
+  async function doUpdateSave() {
+    if (storesIndex >= 0 && patient) {
+      const eff = effectiveFormDataOf(formData);
+      const newStores = [...stores];
+      newStores[storesIndex] = eff;
+      await api.saveRyouyouKeikakushoMasterText(
+        patient.patientId,
+        JSON.stringify(newStores)
+      );
+    } else {
+      alert("選択されていないので、更新保存できません。");
+    }
+  }
+
+  function doSelectStore(index: number) {
+    const s = stores[index];
+    if (s !== undefined) {
+      formData = Object.assign(mkFormData(), s);
+      storesIndex = index;
+    }
+  }
+
+  async function doDeleteStore(index: number) {}
 </script>
 
 {#if isVisible}
@@ -447,8 +489,33 @@
     {/if}
     <button on:click={doDisp}>表示</button>
     <button on:click={doFreshSave}>新規保存</button>
+    {#if storesIndex >= 0}
+      <button on:click={doUpdateSave}>更新保存</button>
+    {/if}
+    {#if stores.length > 0}
+      <button on:click={() => (storesAreaVisible = !storesAreaVisible)}
+        >履歴</button
+      >
+    {/if}
   </div>
-  <div>
+  {#if storesAreaVisible}
+    <div
+      style="margin:10px 0; border: 1px solid gray; padding: 10px; width: 600px;"
+    >
+      {#each stores as store, index}
+        <div>
+          {store.issueDate}
+          <a href="javascript:void(0)" on:click={async () => { await doSelectStore(index); storesAreaVisible = false; }}
+            >選択</a
+          >
+          <a href="javascript:void(0)" on:click={() => doDeleteStore(index)}
+            >削除</a
+          >
+        </div>
+      {/each}
+    </div>
+  {/if}
+  <div style="margin-top: 10px;">
     {#if patient}
       ({patient.patientId}) {patient.lastName} {patient.firstName}
     {/if}
