@@ -303,12 +303,12 @@
 
   function initWithStores(newStores: Partial<FormData>[]) {
     stores = newStores;
-    storesIndex = -1;
     const lastIndex = indexOfLastFormData(stores);
     formData = Object.assign(
       mkFormData(),
-      storesIndex >= 0 ? stores[lastIndex] : {}
+      lastIndex >= 0 ? stores[lastIndex] : {}
     );
+    storesIndex = -1;
   }
 
   function doSelectPatient() {
@@ -319,7 +319,9 @@
         title: "患者選択",
         onEnter: async (selected: Patient) => {
           patient = selected;
-          initWithStores((await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []);
+          initWithStores(
+            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
+          );
           formData.patientId = patient.patientId;
         },
       },
@@ -447,11 +449,13 @@
   async function doFreshSave() {
     if (patient) {
       const store = effectiveFormDataOf(formData);
-      const newStores = [store, ...stores];
+      stores = [store, ...stores];
       await api.saveRyouyouKeikakushoMasterText(
         patient.patientId,
-        JSON.stringify(newStores)
+        JSON.stringify(stores)
       );
+      storesIndex = 0;
+      alert("新規保存しました。");
     }
   }
 
@@ -464,6 +468,7 @@
         patient.patientId,
         JSON.stringify(newStores)
       );
+      alert("更新しました。");
     } else {
       alert("選択されていないので、更新保存できません。");
     }
@@ -477,15 +482,30 @@
     }
   }
 
-  async function doDeleteStore(index: number) {}
+  async function doDeleteStore(index: number) {
+    if (patient) {
+      if( !confirm("この療養計画書の記録を削除していいですか？") ){
+        return;
+      }
+      stores = stores.filter((_s, i) => i !== index);
+      await api.saveRyouyouKeikakushoMasterText(
+        patient?.patientId,
+        JSON.stringify(stores)
+      );
+      if (storesIndex === index) {
+        initWithStores(stores);
+      } else if (storesIndex > index) {
+        storesIndex -= 1;
+      }
+    }
+  }
 </script>
 
 {#if isVisible}
   <div>
     {#if patient === undefined}
       <button on:click={doSelectPatient}>患者選択</button>
-    {:else}
-      <button on:click={doClearPatient}>患者終了</button>
+    {:else}      <button on:click={doClearPatient}>患者終了</button>
     {/if}
     <button on:click={doDisp}>表示</button>
     <button on:click={doFreshSave}>新規保存</button>
@@ -505,8 +525,12 @@
       {#each stores as store, index}
         <div>
           {store.issueDate}
-          <a href="javascript:void(0)" on:click={async () => { await doSelectStore(index); storesAreaVisible = false; }}
-            >選択</a
+          <a
+            href="javascript:void(0)"
+            on:click={async () => {
+              await doSelectStore(index);
+              storesAreaVisible = false;
+            }}>選択</a
           >
           <a href="javascript:void(0)" on:click={() => doDeleteStore(index)}
             >削除</a
@@ -576,14 +600,14 @@
           <div style="display: flex; align-items:top;margin:4px 0;">
             【達成目標】
             <textarea
-              style="width: 400px; height: 2.8em; resize: vertical"
+              style="width: 400px; height: 4em; resize: vertical"
               bind:value={formData.immediates["mokuhyou-達成目標"]}
             />
           </div>
           <div style="display: flex; align-items:top;margin:4px 0">
             【行動目標】
             <textarea
-              style="width: 400px; height: 2.8em; resize: vertical"
+              style="width: 400px; height: 4em; resize: vertical"
               bind:value={formData.immediates["mokuhyou-行動目標"]}
             />
           </div>

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { confirm } from "@/lib/confirm-call";
-  import Popup from "@/lib/Popup.svelte";
   import { printApi, type ScannerDevice } from "@/lib/printApi";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
