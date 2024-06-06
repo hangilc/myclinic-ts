@@ -20,6 +20,7 @@
     effectiveFormDataOf,
     indexOfLastFormData,
     mkFormData,
+    updateByPartial,
     type FormData,
   } from "./form-data";
 
@@ -245,8 +246,7 @@
   function populateMokuhyou() {
     updateBox(
       "mokuhyou-体重-mark",
-      // formData.immediates["mokuhyou-体重"] !== ""
-      !!formData.immediates["mokuhyou-体重"]
+      formData.immediates["mokuhyou-体重"] !== ""
     );
     console.log("taijuu", formData.immediates["mokuhyou-体重"]);
     updateBox("mokuhyou-BMI-mark", formData.immediates["mokuhyou-BMI"] !== "");
@@ -306,10 +306,11 @@
   function initWithStores(newStores: Partial<FormData>[]) {
     stores = newStores;
     const lastIndex = indexOfLastFormData(stores);
-    formData = Object.assign(
-      mkFormData(),
-      lastIndex >= 0 ? stores[lastIndex] : {}
-    );
+    formData = updateByPartial(mkFormData(), lastIndex >= 0 ? stores[lastIndex] : {});
+    // formData = Object.assign(
+    //   mkFormData(),
+    //   lastIndex >= 0 ? stores[lastIndex] : {}
+    // );
     storesIndex = -1;
   }
 
@@ -479,7 +480,8 @@
   function doSelectStore(index: number) {
     const s = stores[index];
     if (s !== undefined) {
-      formData = Object.assign(mkFormData(), s);
+      formData = updateByPartial(mkFormData(), s);
+      // formData = Object.assign(mkFormData(), s);
       storesIndex = index;
     }
   }

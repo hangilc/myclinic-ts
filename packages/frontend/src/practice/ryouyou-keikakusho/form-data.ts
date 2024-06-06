@@ -209,4 +209,16 @@ export function effectiveFormDataOf(data: FormData): Partial<FormData> {
   return obj;
 }
 
+export function updateByPartial(obj: any, partial: any): any {
+  for(const key in partial){
+    const value = partial[key];
+    if( typeof value === "object" ){
+      updateByPartial(obj[key], value);
+    } else {
+      obj[key] = value;
+    }
+  }
+  return obj;
+}
+
 
