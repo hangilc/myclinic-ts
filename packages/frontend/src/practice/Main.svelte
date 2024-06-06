@@ -13,6 +13,7 @@
   import HoumonKango from "./houmon-kango/HoumonKango.svelte";
   import Shujii from "./shujii/Shujii.svelte";
   import RyouyouKeikakusho from "./ryouyou-keikakusho/RyouyouKeikakusho.svelte";
+  import PrintSetting from "./print-setting/PrintSetting.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -35,6 +36,9 @@
   <HoumonKango isVisible={$serviceStore === "houmon-kango"} />
   <RyouyouKeikakusho isVisible={$serviceStore === "ryouyou-keikakusho"}/>
   <Shujii isVisible={$serviceStore === "shujii"} />
+  {#if $serviceStore === "print-setting"}
+    <PrintSetting />
+  {/if}
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />

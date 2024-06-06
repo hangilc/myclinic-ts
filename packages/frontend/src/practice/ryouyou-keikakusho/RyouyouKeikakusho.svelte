@@ -364,6 +364,7 @@
         ops,
         viewBox: "0 0 210 297",
         scale: 2,
+        kind: "ryouyou",
       },
     });
   }

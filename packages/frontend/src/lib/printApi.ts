@@ -74,6 +74,10 @@ export const printApi = {
     return get("beep", {});
   },
 
+  createPrintSetting(name: string): Promise<void> {
+    return post(`setting/${name}`, "");
+  },
+
   listPrintSetting(): Promise<string[]> {
     return get("setting/", {});
   },
