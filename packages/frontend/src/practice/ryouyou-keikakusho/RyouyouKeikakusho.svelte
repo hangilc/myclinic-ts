@@ -245,8 +245,10 @@
   function populateMokuhyou() {
     updateBox(
       "mokuhyou-体重-mark",
-      formData.immediates["mokuhyou-体重"] !== ""
+      // formData.immediates["mokuhyou-体重"] !== ""
+      !!formData.immediates["mokuhyou-体重"]
     );
+    console.log("taijuu", formData.immediates["mokuhyou-体重"]);
     updateBox("mokuhyou-BMI-mark", formData.immediates["mokuhyou-BMI"] !== "");
     updateBox("mokuhyou-BP-mark", formData.immediates["mokuhyou-BP"] !== "");
     updateBox(
