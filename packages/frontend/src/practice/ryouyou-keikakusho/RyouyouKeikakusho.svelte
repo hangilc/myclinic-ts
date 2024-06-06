@@ -484,7 +484,7 @@
 
   async function doDeleteStore(index: number) {
     if (patient) {
-      if( !confirm("この療養計画書の記録を削除していいですか？") ){
+      if (!confirm("この療養計画書の記録を削除していいですか？")) {
         return;
       }
       stores = stores.filter((_s, i) => i !== index);
@@ -505,10 +505,13 @@
   <div>
     {#if patient === undefined}
       <button on:click={doSelectPatient}>患者選択</button>
-    {:else}      <button on:click={doClearPatient}>患者終了</button>
+    {:else}
+      <button on:click={doClearPatient}>患者終了</button>
     {/if}
     <button on:click={doDisp}>表示</button>
-    <button on:click={doFreshSave}>新規保存</button>
+    {#if patient}
+      <button on:click={doFreshSave}>新規保存</button>
+    {/if}
     {#if storesIndex >= 0}
       <button on:click={doUpdateSave}>更新保存</button>
     {/if}
