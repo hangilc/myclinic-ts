@@ -16,9 +16,15 @@
     if( name === "" ){
       return;
     }
-    await printApi.createPrintSetting(name);
-    alert("印刷設定が作成されました。");
-    await init();
+    try {
+      const t = await printApi.createPrintSetting(name);
+      alert(t);
+      // alert("印刷設定が作成されました。");
+      await init();
+    } catch(ex: any) {
+      alert(ex.toString());
+    }
+      
   }
 </script>
 
