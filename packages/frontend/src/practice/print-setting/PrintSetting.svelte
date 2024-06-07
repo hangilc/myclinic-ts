@@ -13,18 +13,38 @@
 
   async function doCreate() {
     const name = newSettingInput.trim();
-    if( name === "" ){
+    if (name === "") {
       return;
     }
     try {
-      const t = await printApi.createPrintSetting(name);
-      alert(t);
-      // alert("印刷設定が作成されました。");
+      await printApi.createPrintSetting(name);
+      alert("印刷設定が作成されました。");
       await init();
-    } catch(ex: any) {
+    } catch (ex: any) {
       alert(ex.toString());
     }
-      
+  }
+
+  async function doDelete(setting: string) {
+    if( !confirm(`この印刷設定を削除していいですか？ ${setting}`) ){
+      return;
+    }
+    try {
+      await printApi.deletePrintSetting(setting);
+      alert("印刷設定が削除されました。");
+      await init();
+    } catch(ex: any){
+      alert(ex.toString());
+    }
+  }
+
+  async function doDetail(setting: string) {
+    try {
+      const result = await printApi.getPrintSettingDetail(setting);
+      alert(JSON.stringify(result, undefined, 2));
+    } catch(ex: any){
+      alert(ex.toString());
+    }
   }
 </script>
 
@@ -33,7 +53,8 @@
 <div>
   <h1>新規作成</h1>
   <div>
-    <input type="text" bind:value={newSettingInput} /> <button on:click={doCreate}>作成</button>
+    <input type="text" bind:value={newSettingInput} />
+    <button on:click={doCreate}>作成</button>
   </div>
 </div>
 
@@ -42,7 +63,9 @@
   <div>
     {#each settings as setting}
       <div>
-        <span>{setting}</span>
+        <span>{setting}</span> :
+        <a href="javascript:void(0)" on:click={() => doDetail(setting)}>詳細</a>
+        <a href="javascript:void(0)" on:click={() => doDelete(setting)}>削除</a>
       </div>
     {/each}
   </div>
