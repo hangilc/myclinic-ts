@@ -272,6 +272,8 @@
       updateBox(key, formData.undouChecks[key]);
     }
     updateBox("juuten-運動-ウォーキング-mark", formData.undouWalking);
+    updateBox("juuten-運動-ほぼ毎日", formData.undouEveryDay);
+    updateBox("juuten-運動-息がはずむが会話が可能な強さ", formData.undouIntensityBreath);
     updateBox("juuten-運動-mark", formData.undouCheck);
   }
 
@@ -367,6 +369,7 @@
         ops,
         viewBox: "0 0 210 297",
         scale: 2,
+        kind: "ryouyou",
       },
     });
   }

@@ -5,13 +5,15 @@ export const base: string = "http://localhost:48080";
 interface FetchOption {
   progress?: (loaded: number, total: number) => void;
   noResult?: boolean;
+  rawString?: boolean;
+  noCors?: boolean;
 }
 
-async function response(promise: Promise<any>, option: FetchOption): Promise<any> {
+async function response(promise: Promise<Response>, option: FetchOption): Promise<any> {
   if( option.progress ){
     const resp = await promise;
-    const len = parseInt(resp.headers.get("Content-length"));
-    const reader = resp.body.getReader();
+    const len = parseInt(resp.headers.get("Content-length")!);
+    const reader = resp.body!.getReader();
     let loaded = 0;
     while( true ){
       const { done, value } = await reader.read();
@@ -25,8 +27,14 @@ async function response(promise: Promise<any>, option: FetchOption): Promise<any
   }
   if( option.noResult !== undefined && option.noResult ){
     return promise; // returns Promise<Response>
-  } else {
+  } else if( option.rawString ){
     const resp = await promise;
+    return resp.text();
+  } else {
+    const resp: Response = await promise;
+    if( resp.status >= 300 ){
+      throw new Error(await resp.text());
+    }
     return resp.json();
   }
 }
@@ -46,7 +54,11 @@ function post(cmd: string, data: any, params: any = {}, option: FetchOption = {}
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
   }
-  return response(fetch(arg, { method: "POST", body: JSON.stringify(data) }), option);
+  const fopt: any = { method: "POST", body: JSON.stringify(data) };
+  if( option.noCors ){
+    fopt.mode = "no-cors";
+  }
+  return response(fetch(arg, fopt), option);
 }
 
 function del(cmd: string, params: any = {}, option: FetchOption = {}): Promise<any> {
@@ -72,6 +84,18 @@ export interface ScannerDevice {
 export const printApi = {
   beep(): Promise<boolean> {
     return get("beep", {});
+  },
+
+  createPrintSetting(name: string): Promise<void> {
+    return post(`setting/${name}`, "", {}, { rawString: true });
+  },
+
+  deletePrintSetting(name: string): Promise<void> {
+    return del(`setting/${name}`, {});
+  },
+
+  getPrintSettingDetail(name: string): Promise<any> {
+    return get(`setting/${name}/detail`, {});
   },
 
   listPrintSetting(): Promise<string[]> {

@@ -29,6 +29,7 @@
       req,
       settingSelect === "手動" ? "" : settingSelect
     );
+    console.log("post print", setDefaultChecked, settingSelect, printPref, kind);
     if (setDefaultChecked && settingSelect !== printPref && kind) {
       printApi.setPrintPref(kind, settingSelect);
     }
@@ -39,8 +40,10 @@
     const result = await printApi.listPrintSetting();
     settingList = ["手動", ...result];
     let pref: string | null = null;
+    console.log("kind", kind);
     if (kind) {
       pref = await printApi.getPrintPref(kind);
+      console.log("pref", pref);
     }
     printPref = pref ?? "手動";
     settingSelect = pref ?? "手動";
