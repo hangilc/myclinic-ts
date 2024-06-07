@@ -19,6 +19,7 @@
     try {
       await printApi.createPrintSetting(name);
       alert("印刷設定が作成されました。");
+      newSettingInput = "";
       await init();
     } catch (ex: any) {
       alert(ex.toString());
@@ -46,6 +47,25 @@
       alert(ex.toString());
     }
   }
+
+  async function doChangePrinter(setting: string) {
+    const pd = await printApi.printDialog(setting);
+    if( !pd ){
+      return;
+    }
+    const current = await printApi.getPrintSetting(setting);
+    pd.auxSetting = current.auxSetting;
+    try {
+      await printApi.setPrintSetting(setting, pd);
+      alert(`${setting} のプリンターが変更されました。`);
+    } catch(ex: any){
+      alert(ex.toString());
+    }
+  }
+
+  async function doChangeAux(setting: string) {
+
+  }
 </script>
 
 <ServiceHeader title="印刷設定" />
@@ -64,7 +84,9 @@
     {#each settings as setting}
       <div>
         <span>{setting}</span> :
-        <a href="javascript:void(0)" on:click={() => doDetail(setting)}>詳細</a>
+        <a href="javascript:void(0)" on:click={() => doDetail(setting)}>詳細</a> |
+        <a href="javascript:void(9)" on:click={() => doChangePrinter(setting)}>プリンターの変更</a> |
+        <a href="javascript:void(9)" on:click={() => doChangeAux(setting)}>移動・縮小の変更</a> |
         <a href="javascript:void(0)" on:click={() => doDelete(setting)}>削除</a>
       </div>
     {/each}

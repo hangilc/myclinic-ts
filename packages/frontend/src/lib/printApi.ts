@@ -6,7 +6,6 @@ interface FetchOption {
   progress?: (loaded: number, total: number) => void;
   noResult?: boolean;
   rawString?: boolean;
-  noCors?: boolean;
 }
 
 async function response(promise: Promise<Response>, option: FetchOption): Promise<any> {
@@ -54,10 +53,17 @@ function post(cmd: string, data: any, params: any = {}, option: FetchOption = {}
     const q = (new URLSearchParams(params)).toString()
     arg += `?${q}`
   }
-  const fopt: any = { method: "POST", body: JSON.stringify(data) };
-  if( option.noCors ){
-    fopt.mode = "no-cors";
+  const fopt = { method: "POST", body: JSON.stringify(data) };
+  return response(fetch(arg, fopt), option);
+}
+
+function put(cmd: string, data: any, params: any = {}, option: FetchOption = {}): Promise<any> {
+  let arg = `${base}/${cmd}`;
+  if (Object.keys(params).length !== 0) {
+    const q = (new URLSearchParams(params)).toString()
+    arg += `?${q}`
   }
+  const fopt = { method: "PUT", body: JSON.stringify(data) };
   return response(fetch(arg, fopt), option);
 }
 
@@ -98,8 +104,24 @@ export const printApi = {
     return get(`setting/${name}/detail`, {});
   },
 
+  getPrintSetting(name: string): Promise<any> {
+    return get(`setting/${name}`, {});
+  },
+
+  setPrintSetting(name: string, body: any): Promise<void> {
+    return put(`setting/${name}`, body, {}, { rawString: true});
+  },
+
   listPrintSetting(): Promise<string[]> {
     return get("setting/", {});
+  },
+
+  printDialog(setting?: string): Promise<any> {
+    if( setting ){
+      return get(`print-dialog/${setting}`, {});
+    } else {
+      return get("print-dialog/", {});
+    }
   },
 
   getPrintPref(kind: string): Promise<string | null> {
