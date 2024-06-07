@@ -29,6 +29,7 @@
       req,
       settingSelect === "手動" ? "" : settingSelect
     );
+    console.log("post print", setDefaultChecked, settingSelect, printPref, kind);
     if (setDefaultChecked && settingSelect !== printPref && kind) {
       printApi.setPrintPref(kind, settingSelect);
     }
