@@ -39,8 +39,10 @@
     const result = await printApi.listPrintSetting();
     settingList = ["手動", ...result];
     let pref: string | null = null;
+    console.log("kind", kind);
     if (kind) {
       pref = await printApi.getPrintPref(kind);
+      console.log("pref", pref);
     }
     printPref = pref ?? "手動";
     settingSelect = pref ?? "手動";

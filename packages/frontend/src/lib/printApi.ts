@@ -26,7 +26,10 @@ async function response(promise: Promise<any>, option: FetchOption): Promise<any
   if( option.noResult !== undefined && option.noResult ){
     return promise; // returns Promise<Response>
   } else {
-    const resp = await promise;
+    const resp: Response = await promise;
+    if( resp.status >= 300 ){
+      throw new Error(await resp.text());
+    }
     return resp.json();
   }
 }
@@ -76,6 +79,14 @@ export const printApi = {
 
   createPrintSetting(name: string): Promise<void> {
     return post(`setting/${name}`, "");
+  },
+
+  deletePrintSetting(name: string): Promise<void> {
+    return del(`setting/${name}`, {});
+  },
+
+  getPrintSettingDetail(name: string): Promise<any> {
+    return get(`setting/${name}/detail`, {});
   },
 
   listPrintSetting(): Promise<string[]> {
