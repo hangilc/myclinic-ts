@@ -28,6 +28,9 @@ async function response(promise: Promise<Response>, option: FetchOption): Promis
     return promise; // returns Promise<Response>
   } else if( option.rawString ){
     const resp = await promise;
+    if( resp.status >= 300 ){
+      throw new Error(await resp.text());
+    }
     return resp.text();
   } else {
     const resp: Response = await promise;
@@ -106,6 +109,10 @@ export const printApi = {
 
   getPrintSetting(name: string): Promise<any> {
     return get(`setting/${name}`, {});
+  },
+
+  getPrintAuxSetting(name: string): Promise<any> {
+    return get(`setting/${name}/aux`, {});
   },
 
   setPrintSetting(name: string, body: any): Promise<void> {

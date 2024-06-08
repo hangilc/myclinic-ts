@@ -101,6 +101,7 @@ export function createPaymentSetting(futanWari: number, rezeptYearMonth: { year:
   birthdate: { year: number, month: number, day: number },
   visits: Visit[],
   shotokuKubun: ShotokuKubunCode | undefined,
+  isKoukikourei?: boolean,
 ): Partial<PaymentSetting> {
   const ym = rezeptYearMonth;
   const bd = birthdate;
@@ -112,6 +113,7 @@ export function createPaymentSetting(futanWari: number, rezeptYearMonth: { year:
     isTasuuGaitou: resolveTasuuGaitou(visits),
     isNyuuin: false,
     marucho: resolveMarucho(visits),
+    isKoukikourei,
   }
 }
 

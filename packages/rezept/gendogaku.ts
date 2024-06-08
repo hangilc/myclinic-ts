@@ -15,6 +15,7 @@ export interface GendogakuOptions {
   heiyouKouhi: HeiyouKouhi,
   isBirthdayMonth75: boolean;
   marucho: number | undefined;
+  isKoukikourei: boolean;
 }
 
 // ７０歳になる月の翌月から限度額計算変更（１日生まれの場合はその月から）
@@ -93,7 +94,7 @@ export function classifyKouhi(houbetsuBangouList: number[]): HeiyouKouhi {
 
 
 export function calcGendogaku(opts: GendogakuOptions): number {
-  if (opts.isUnder70) { // ７０歳未満
+  if (opts.isUnder70 && !opts.isKoukikourei) { // ７０歳未満
     return under70(opts);
   } else { // ７０歳以上
     return kourei(opts);

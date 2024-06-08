@@ -64,7 +64,8 @@
   }
 
   async function doChangeAux(setting: string) {
-
+    const current = await printApi.getPrintAuxSetting(setting);
+    console.log(current);
   }
 </script>
 

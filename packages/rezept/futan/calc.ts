@@ -56,6 +56,7 @@ export interface PaymentSetting {
   isTasuuGaitou?: boolean;
   isNyuuin?: boolean;
   marucho?: number;
+  isKoukikourei?: boolean;
 }
 
 export function defaultPaymentSetting(): PaymentSetting {
@@ -66,6 +67,7 @@ export function defaultPaymentSetting(): PaymentSetting {
     shotokuKubun: undefined,
     isTasuuGaitou: false,
     isNyuuin: false,
+    isKoukikourei: false,
   }
 }
 
@@ -81,6 +83,7 @@ function mkPaymentContext(setting: PaymentSetting): PaymentContext {
       heiyouKouhi: "none",
       isBirthdayMonth75: setting.isBirthdayMonth75,
       marucho: setting.marucho,
+      isKoukikourei: setting.isKoukikourei ?? false,
     },
     currentPayments: [],
     currentPayers: [],
@@ -280,7 +283,13 @@ export function mkHokenPayer(): Payer {
         return combineGassan(acc, g);
       }, { hokenKakari: 0, jikofutan: 0 });
       const gendogakuBill = bill + gassan.hokenKakari;
-      const gendogaku = calcGendogaku(Object.assign({}, ctx.gendogakuOptions, { iryouhi: gendogakuBill }));
+      let gendogaku: number;
+      try {
+        gendogaku = calcGendogaku(Object.assign({}, ctx.gendogakuOptions, { iryouhi: gendogakuBill }));
+      } catch(ex: any){
+        console.log("Cannot determine gendogaku.", ctx.gendogakuOptions, { iryouhi: gendogakuBill });
+        throw ex;
+      }
       if (jikofutan + gassan.jikofutan > gendogaku) {
         return { payment: bill - gendogaku + gassan.jikofutan, gendogakuReached: true };
       }
