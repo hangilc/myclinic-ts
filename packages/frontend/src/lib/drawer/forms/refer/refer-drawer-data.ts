@@ -7,4 +7,6 @@ export interface ReferDrawerData {
   "diagnosis": string;
   "issue-date": string;
   "address": string;
+  "clinic-name": string;
+  "issuer-doctor-name": string;
 }

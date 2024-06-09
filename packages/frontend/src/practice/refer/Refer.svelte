@@ -16,6 +16,8 @@
     diagnosis: "診断：糖尿病",
     "issue-date": "令和6年6月9日",
     address: "〒123-4567\n東京都杉並区荻窪1-1-1\n電話 03-1234-5678\nＦＡＸ 03-1234-5555",
+    "clinic-name": "東京内科クリニック",
+    "issuer-doctor-name": "診療次郎",
   };
 
   let ops: Op[] = drawRefer(data);

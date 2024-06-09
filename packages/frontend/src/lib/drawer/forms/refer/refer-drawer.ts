@@ -3,6 +3,7 @@ import type { Op } from "../../compiler/op";
 import type { ReferDrawerData } from "./refer-drawer-data";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
+import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 
@@ -17,8 +18,9 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   drawPatientName(ctx, 30, 80);
   drawPatientInfo(ctx, 50, 86);
   drawDiagnosis(ctx, 30, 96);
-  drawIssueDate(ctx, 30, 220);
-  drawAddress(ctx, 118, 220);
+  drawFooter(ctx, 30, paper.right - 30, 216);
+  // drawIssueDate(ctx, 30, 220);
+  // drawAddress(ctx, 118, 220);
 
   c.rect(ctx, paper);
   c.fillData(ctx, data);
@@ -33,7 +35,7 @@ function setupFonts(ctx: DrawerContext) {
 }
 
 function setupPens(ctx: DrawerContext) {
-  c.createPen(ctx, "default", 0, 0, 0, 0.08);
+  c.createPen(ctx, "default", 0, 0, 0, 0.1);
   c.setPen(ctx, "default");
 }
 
@@ -80,17 +82,37 @@ function drawDiagnosis(ctx: DrawerContext, x: number, y: number) {
   })
 }
 
-function drawIssueDate(ctx: DrawerContext, x: number, y: number) {
-  const box = b.mkBox(x, y - 4, x + 10, y + 5);
+function drawFooter(ctx: DrawerContext, left: number, right: number, top: number) {
+  const box = b.mkBox(left, top, right, top + 50);
+  const issueDateBox = b.modify(box, b.setHeight(5, "top"), b.setWidth(30, "left"));
+  const addressBox = b.modify(box, b.setWidth(62, "right"));
+  drawIssueDate(ctx, issueDateBox);
+  drawIssuer(ctx, addressBox);
+}
+
+function drawIssueDate(ctx: DrawerContext, box: Box) {
   c.mark(ctx, "issue-date", box, {
     font: "serif-4", halign: "left", valign: "top",
   });
 }
 
-function drawAddress(ctx: DrawerContext, x: number, y: number) {
-  const box = b.mkBox(x, y - 4, x + 65, y +20);
+function drawIssuer(ctx: DrawerContext, box: Box) {
   c.mark(ctx, "address", box, {
     font: "serif-4", halign: "left", valign: "top", paragraph: true,
     leading: 2,
   });
+  const lower = b.modify(box, b.shrinkVert(28, 0));
+  c.mark(ctx, "clinic-name", lower, {
+    font: "serif-4", halign: "left", valign: "top",
+  })
+  const doctorLine = b.modify(lower, b.shrinkVert(8, 0), b.setHeight(6, "top"));
+  c.withFont(ctx, "serif-4", () => {
+    c.drawComposite(ctx, doctorLine, [
+      p.text("院長"),
+      p.gap(4),
+      p.gap(30, { mark: "issuer-doctor-name", ropt: { font: "serif-6", valign: "center" } }),
+      p.gap(12),
+      p.text("㊞", { mark: "stamp"}),
+    ], { valign: "center" })
+  })
 }
