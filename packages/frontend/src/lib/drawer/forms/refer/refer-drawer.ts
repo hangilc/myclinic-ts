@@ -12,8 +12,16 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   setupPens(ctx);
   const paper: Box = b.paperSizeToBox(A4);
   drawTitle(ctx, b.cx(paper), 41);
-  
+  drawReferHospital(ctx, 30, 58);
+  drawReferDoctor(ctx, 30, 64);
+  drawPatientName(ctx, 30, 80);
+  drawPatientInfo(ctx, 50, 86);
+  drawDiagnosis(ctx, 30, 96);
+  drawIssueDate(ctx, 30, 220);
+  drawAddress(ctx, 118, 220);
+
   c.rect(ctx, paper);
+  c.fillData(ctx, data);
   return c.getOps(ctx);
 }
 
@@ -25,12 +33,64 @@ function setupFonts(ctx: DrawerContext) {
 }
 
 function setupPens(ctx: DrawerContext) {
-  c.createPen(ctx, "default", 0, 0, 0, 0.05);
+  c.createPen(ctx, "default", 0, 0, 0, 0.08);
+  c.setPen(ctx, "default");
 }
 
 function drawTitle(ctx: DrawerContext, x: number, y: number) {
   const box = b.mkBox(x - 10, y - 5, x + 10, y + 5);
   c.mark(ctx, "title", box, {
-    
+    font: "serif-5-bold",
+    halign: "center",
+    valign: "center",
   })
+}
+
+function drawReferHospital(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 5, x + 10, y + 5);
+  c.mark(ctx, "refer-hospital", box, {
+    font: "serif-4", halign: "left", valign: "bottom",
+  })
+}
+function drawReferDoctor(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 5, x + 10, y + 5);
+  c.mark(ctx, "refer-doctor", box, {
+    font: "serif-4", halign: "left", valign: "bottom",
+  })
+}
+
+function drawPatientName(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 5, x + 10, y + 5);
+  c.mark(ctx, "patient-name", box, {
+    font: "serif-5", halign: "left", valign: "bottom",
+  })
+}
+
+function drawPatientInfo(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 5, x + 10, y + 5);
+  c.mark(ctx, "patient-info", box, {
+    font: "serif-4", halign: "left", valign: "bottom",
+  })
+}
+
+function drawDiagnosis(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 5, x + 10, y + 5);
+  c.mark(ctx, "diagnosis", box, {
+    font: "serif-5", halign: "left", valign: "bottom",
+  })
+}
+
+function drawIssueDate(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 4, x + 10, y + 5);
+  c.mark(ctx, "issue-date", box, {
+    font: "serif-4", halign: "left", valign: "top",
+  });
+}
+
+function drawAddress(ctx: DrawerContext, x: number, y: number) {
+  const box = b.mkBox(x, y - 4, x + 65, y +20);
+  c.mark(ctx, "address", box, {
+    font: "serif-4", halign: "left", valign: "top", paragraph: true,
+    leading: 2,
+  });
 }

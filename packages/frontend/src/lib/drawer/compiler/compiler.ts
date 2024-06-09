@@ -59,10 +59,12 @@ export function createFont(
   fsm.registerFontSize(ctx.fsm, name, size);
 }
 
-export function setFont(ctx: DrawerContext, name: string) {
-  ctx.ops.push(["set_font", name]);
-  fsm.setFont(ctx.fsm, name);
-  ctx.currentFont = name;
+export function setFont(ctx: DrawerContext, name: string | undefined) {
+  if (name) {
+    ctx.ops.push(["set_font", name]);
+    fsm.setFont(ctx.fsm, name);
+    ctx.currentFont = name;
+  }
 }
 
 export function setTextColor(ctx: DrawerContext, r: number, g: number, b: number) {
@@ -87,10 +89,10 @@ export function circle(ctx: DrawerContext, x: number, y: number, r: number) {
   ctx.ops.push(["circle", x, y, r]);
 }
 
-export function getCurrentFont(ctx: DrawerContext): string {
-  if (ctx.currentFont === undefined) {
-    throw new Error("Cannot get current font");
-  }
+export function getCurrentFont(ctx: DrawerContext): string | undefined {
+  // if (ctx.currentFont === undefined) {
+  //   throw new Error("Cannot get current font");
+  // }
   return ctx.currentFont;
 }
 
@@ -944,7 +946,9 @@ export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
     setFont(ctx, fontName);
     f();
   } finally {
-    setFont(ctx, save);
+    if (save) {
+      setFont(ctx, save);
+    }
   }
 }
 
@@ -1022,7 +1026,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
       }
       setFont(ctx, fontSave);
     } else if (opt.paragraph) {
-      let fontSave = "";
+      let fontSave: string | undefined = undefined;
       if (opt.font) {
         fontSave = getCurrentFont(ctx);
         setFont(ctx, opt.font);
@@ -1032,7 +1036,7 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
         setFont(ctx, fontSave);
       }
     } else {
-      let fontSave = "";
+      let fontSave: string | undefined = undefined;
       if (opt.font) {
         fontSave = getCurrentFont(ctx);
         setFont(ctx, opt.font);

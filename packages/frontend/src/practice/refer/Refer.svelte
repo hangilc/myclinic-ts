@@ -8,13 +8,25 @@
   export let isVisible = false;
 
   let data: ReferDrawerData = {
-
+    title: "紹介状",
+    "refer-hospital": "東京警察病院",
+    "refer-doctor": "麻酔科、松本一郎　先生御机下",
+    "patient-name": "患者：診療太郎",
+    "patient-info": "昭和30年7月21日生、80才、男性",
+    diagnosis: "診断：糖尿病",
+    "issue-date": "令和6年6月9日",
+    address: "〒123-4567\n東京都杉並区荻窪1-1-1\n電話 03-1234-5678\nＦＡＸ 03-1234-5555",
   };
 
   let ops: Op[] = drawRefer(data);
 </script>
 
 {#if isVisible}
-<ServiceHeader title="紹介状"/>
-<DrawerSvg {ops} width={`${210*2}px`} height={`${297*2}px`} viewBox="0 0 210 297"/>
+  <ServiceHeader title="紹介状" />
+  <DrawerSvg
+    {ops}
+    width={`${210 * 2}px`}
+    height={`${297 * 2}px`}
+    viewBox="0 0 210 297"
+  />
 {/if}
