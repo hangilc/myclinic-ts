@@ -1,5 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
+  import AuxSettingDialog from "@/lib/print-setting/AuxSettingDialog.svelte";
   import { printApi } from "@/lib/printApi";
 
   let settings: string[] = [];
@@ -66,6 +67,14 @@
   async function doChangeAux(setting: string) {
     const current = await printApi.getPrintAuxSetting(setting);
     console.log(current);
+    const d: AuxSettingDialog = new AuxSettingDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        settingName: setting,
+        auxSetting: current,
+      }
+    })
   }
 </script>
 

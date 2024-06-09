@@ -119,6 +119,10 @@ export const printApi = {
     return put(`setting/${name}`, body, {}, { rawString: true});
   },
 
+  setPrintAuxSetting(name: string, auxSetting: any): Promise<void> {
+    return put(`setting/${name}/aux`, auxSetting, {});
+  },
+
   listPrintSetting(): Promise<string[]> {
     return get("setting/", {});
   },
