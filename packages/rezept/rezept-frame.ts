@@ -1,6 +1,6 @@
 import { Payer, PaymentSetting, calcPayments } from "./futan/calc";
 import { calcVisits } from "./calc-visits";
-import { ShotokuKubunCode, 男女区分コード, 診査支払い機関コード, 診査支払い機関コードCode, 診療識別コード, 負担区分コードNameOf } from "./codes";
+import { ShotokuKubunCode, 診査支払い機関コード, 診療識別コード, 負担区分コードNameOf } from "./codes";
 import { resolveFutankubunOfVisitComment } from "./helper";
 import { createレセプト共通レコード, create保険者レコード, create公費レコード, create医療機関情報レコード, create資格確認レコード } from "./record-creators";
 import { mkコメントレコード } from "./records/comment-record";
@@ -56,6 +56,7 @@ export interface RezeptUnit {
   kouhiList: RezeptKouhi[];
   shotokuKubun: ShotokuKubunCode | undefined;
   diseases: RezeptDisease[];
+  paymentSetting: Partial<PaymentSetting>;
 }
 
 export interface RezeptUnitToPatientUnitOption {
