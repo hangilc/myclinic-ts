@@ -15,6 +15,7 @@
   import RyouyouKeikakusho from "./ryouyou-keikakusho/RyouyouKeikakusho.svelte";
   import PrintSetting from "./print-setting/PrintSetting.svelte";
   import Scan from "@/practice/scan/Scan.svelte";
+  import Refer from "./refer/Refer.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -43,6 +44,7 @@
   {#if $serviceStore === "scan"}
     <Scan />
   {/if}
+  <Refer isVisible={$serviceStore === "refer"} />
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
