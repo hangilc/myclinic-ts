@@ -14,6 +14,7 @@ import { mkHokenHairyosochi, mkHokenPayer, type Payer, type PaymentSetting } fro
 import { HokenRegistry, KouhiRegistry, createPaymentSetting, getFutanWari } from "./rezept-meisai";
 import type { Hoken } from "@/cashier/patient-dialog/hoken";
 import { sqlDateToObject } from "myclinic-util";
+import { isKoukikourei } from "./hoken-rep";
 
 // import type { CalcItem } from "myclinic-rezept";
 
@@ -412,12 +413,17 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
   const [firstDay, lastDay] = firstAndLastDayOf(visitedAt);
   const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
+  let optIsKoukikourei = false;
+  if( hokensha && isKoukikourei(hokensha.hokenshaBangou) ){
+    optIsKoukikourei = true;
+  }
   const paymentSetting: Partial<PaymentSetting> = createPaymentSetting(
     futanWari, 
     Object.assign({}, sqlDateToObject(modelVisits[0].visitedAt), { day: undefined }),
     sqlDateToObject(visitExList[0].patient.birthday),
     modelVisits,
     shotokuKubun,
+    optIsKoukikourei,
   );
   return {
     visits,
