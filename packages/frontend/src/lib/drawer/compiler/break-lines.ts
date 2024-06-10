@@ -22,8 +22,10 @@ export function breakLines(str: string, fontSize: number, lineWidth: number): st
     }
   });
   lines.push(line.join(""));
-  // if( line.length > 0 ){
-  //   lines.push(line.join(""));
-  // }
   return lines;
+}
+
+// breakParagraph -- splits str by newline then applies breakLines
+export function breakParagraph(str: string, fontSize: number, lineWidth: number): string[] {
+  return str.split(/\r?\n/).flatMap(line => breakLines(line, fontSize, lineWidth));
 }
