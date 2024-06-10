@@ -18,11 +18,11 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   drawPatientName(ctx, 30, 80);
   drawPatientInfo(ctx, 50, 86);
   drawDiagnosis(ctx, 30, 96);
-  drawFooter(ctx, 30, paper.right - 30, 216);
-  // drawIssueDate(ctx, 30, 220);
-  // drawAddress(ctx, 118, 220);
-
-  c.rect(ctx, paper);
+  if (drawContent(ctx, b.mkBox(30, 103, 170, 210), data.content)) {
+    drawFooter(ctx, 30, paper.right - 30, 216);
+  } else {
+    throw new Error("Too long content");
+  }
   c.fillData(ctx, data);
   return c.getOps(ctx);
 }
@@ -112,7 +112,11 @@ function drawIssuer(ctx: DrawerContext, box: Box) {
       p.gap(4),
       p.gap(30, { mark: "issuer-doctor-name", ropt: { font: "serif-6", valign: "center" } }),
       p.gap(12),
-      p.text("㊞", { mark: "stamp"}),
+      p.text("㊞", { mark: "stamp" }),
     ], { valign: "center" })
   })
+}
+
+function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
+  return true;
 }

@@ -6,7 +6,7 @@ import type { Op } from "./op";
 export interface DrawerContext {
   ops: Op[];
   fsm: FontSizeManager;
-  marks: Record<string, Box>;
+  marks: Record<string, { box: Box, ops: Op[] }>;
   dataRenderOptions: Record<string, DataRendererOpt>;
   currentFont: string | undefined;
   currentPen: string | undefined;

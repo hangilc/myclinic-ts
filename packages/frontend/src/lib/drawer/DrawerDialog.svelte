@@ -7,6 +7,7 @@
 
   export let destroy: () => void;
   export let ops: Op[];
+  export let opsAux: Op[][] = [];
   export let width: number = 210;
   export let height: number = 297;
   export let scale: number = 1.5;
@@ -14,6 +15,7 @@
   export let title: string = "プレビュー";
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
+  let pages: Op[][] = [ops, ...opsAux];
 
   let printPref: string = "手動";
   let settingSelect: string = "手動";

@@ -104,21 +104,22 @@ export function getCurrentPen(ctx: DrawerContext): string {
 }
 
 export function mark(ctx: DrawerContext, key: string, box: Box, ropt?: DataRendererOpt) {
-  ctx.marks[key] = box;
+  ctx.marks[key] = { box, ops: getOps(ctx) };
   if (ropt) {
     ctx.dataRenderOptions[key] = ropt;
   }
 }
 
-export function getMark(ctx: DrawerContext, key: string, ...modifiers: Modifier[]): Box {
+export function getMark(ctx: DrawerContext, key: string, ...modifiers: Modifier[]): { box: Box, ops: Op[] } {
   let mark = ctx.marks[key];
   if (!mark) {
     throw new Error(`Cannot find mark: ${key}.`);
   }
+  let box = mark.box;
   if (modifiers.length > 0) {
-    mark = b.modify(mark, ...modifiers)
+    box = b.modify(box, ...modifiers)
   }
-  return mark;
+  return { box, ops: mark.ops };
 }
 
 function locateY(box: Box, fontSize: number, valign: VAlign) {
@@ -520,6 +521,16 @@ export function drawTextAt(ctx: DrawerContext, text: string, x: number, y: numbe
   drawChars(ctx, text, xs, ys);
 }
 
+function withOps(ctx: DrawerContext, ops: Op[], f: () => void) {
+  const save: Op[] = ctx.ops;
+  ctx.ops = ops;
+  try {
+    f();
+  } finally {
+    ctx.ops = save;
+  }
+}
+
 export function rect(ctx: DrawerContext, box: Box) {
   moveTo(ctx, box.left, box.top);
   lineTo(ctx, box.right, box.top);
@@ -897,11 +908,14 @@ export function withPen(ctx: DrawerContext, penName: string | undefined, f: () =
 
 export function withMark(ctx: DrawerContext, markName: string, f: (box: Box) => void,
   modifiers: Modifier[] = []) {
-  let box = getMark(ctx, markName);
-  if (modifiers.length > 0) {
-    box = b.modify(box, ...modifiers);
-  }
-  f(box);
+  let mark = getMark(ctx, markName);
+  withOps(ctx, mark.ops, () => {
+    let box = mark.box;
+    if (modifiers.length > 0) {
+      box = b.modify(box, ...modifiers);
+    }
+    f(box);
+  })
 }
 
 export interface DataRendererOpt {
@@ -923,75 +937,81 @@ export function renderData(ctx: DrawerContext, markName: string, data: string | 
   if (data != null) {
     const halign: HAlign = opt.halign ?? "left";
     const valign: VAlign = opt.valign ?? "center";
-    let markBox = getMark(ctx, markName);
-    if (opt.render) {
-      opt.render(ctx, markBox, data);
-      return;
-    }
-    if (opt.modifiers) {
-      markBox = b.modify(markBox, ...opt.modifiers);
-    }
-    if (opt.tryFonts && opt.tryFonts.length > 0) {
-      const fallbackPara = opt.fallbackParagraph ?? true;
-      const fontSave = getCurrentFont(ctx);
-      let done = false;
-      for (let font of opt.tryFonts) {
-        setFont(ctx, font);
-        const tw = textWidth(ctx, data);
-        if (tw <= b.width(markBox)) {
-          drawText(ctx, data, markBox, halign, valign);
-          done = true;
-          break;
+    let mark = getMark(ctx, markName);
+    withOps(ctx, mark.ops, () => {
+      let markBox = mark.box;
+      if (opt.render) {
+        opt.render(ctx, markBox, data);
+        return;
+      }
+      if (opt.modifiers) {
+        markBox = b.modify(markBox, ...opt.modifiers);
+      }
+      if (opt.tryFonts && opt.tryFonts.length > 0) {
+        const fallbackPara = opt.fallbackParagraph ?? true;
+        const fontSave = getCurrentFont(ctx);
+        let done = false;
+        for (let font of opt.tryFonts) {
+          setFont(ctx, font);
+          const tw = textWidth(ctx, data);
+          if (tw <= b.width(markBox)) {
+            drawText(ctx, data, markBox, halign, valign);
+            done = true;
+            break;
+          }
         }
-      }
-      if (!done) {
-        const lastFont: string = opt.tryFonts[opt.tryFonts.length - 1]!;
-        setFont(ctx, lastFont);
-        if (fallbackPara) {
-          paragraph(ctx, data, markBox, { valign, leading: opt.leading })
-        } else {
-          drawText(ctx, data, markBox, halign, valign);
+        if (!done) {
+          const lastFont: string = opt.tryFonts[opt.tryFonts.length - 1]!;
+          setFont(ctx, lastFont);
+          if (fallbackPara) {
+            paragraph(ctx, data, markBox, { valign, leading: opt.leading })
+          } else {
+            drawText(ctx, data, markBox, halign, valign);
+          }
         }
-      }
-      setFont(ctx, fontSave);
-    } else if (opt.paragraph) {
-      let fontSave: string | undefined = undefined;
-      if (opt.font) {
-        fontSave = getCurrentFont(ctx);
-        setFont(ctx, opt.font);
-      }
-      paragraph(ctx, data, markBox, { halign: opt.halign ?? "left", leading: opt.leading })
-      if (opt.font) {
         setFont(ctx, fontSave);
-      }
-    } else {
-      let fontSave: string | undefined = undefined;
-      if (opt.font) {
-        fontSave = getCurrentFont(ctx);
-        setFont(ctx, opt.font);
-      }
-      if (opt.circle && !(data === "" || data === "0" || data === "false")) {
-        let r: number;
-        if (typeof opt.circle === "number") {
-          r = opt.circle;
-        } else {
-          r = currentFontSize(ctx) / 2.0;
+      } else if (opt.paragraph) {
+        let fontSave: string | undefined = undefined;
+        if (opt.font) {
+          fontSave = getCurrentFont(ctx);
+          setFont(ctx, opt.font);
         }
-        withPen(ctx, opt.pen, () => {
-          circle(ctx, b.cx(markBox), b.cy(markBox), r);
-        });
+        paragraph(ctx, data, markBox, { halign: opt.halign ?? "left", leading: opt.leading })
+        if (opt.font) {
+          setFont(ctx, fontSave);
+        }
       } else {
-        drawText(ctx, data, markBox, halign, valign);
+        let fontSave: string | undefined = undefined;
+        if (opt.font) {
+          fontSave = getCurrentFont(ctx);
+          setFont(ctx, opt.font);
+        }
+        if (opt.circle && !(data === "" || data === "0" || data === "false")) {
+          let r: number;
+          if (typeof opt.circle === "number") {
+            r = opt.circle;
+          } else {
+            r = currentFontSize(ctx) / 2.0;
+          }
+          withPen(ctx, opt.pen, () => {
+            circle(ctx, b.cx(markBox), b.cy(markBox), r);
+          });
+        } else {
+          drawText(ctx, data, markBox, halign, valign);
+        }
+        if (opt.font) {
+          setFont(ctx, fontSave);
+        }
       }
-      if (opt.font) {
-        setFont(ctx, fontSave);
-      }
-    }
+    });
   }
 }
 
 export function rectMark(ctx: DrawerContext, markName: string) {
-  rect(ctx, getMark(ctx, markName));
+  const mark = getMark(ctx, markName);
+  withOps(ctx, mark.ops, () => {
+    rect(ctx, mark.box);
+  })
 }
 
 export function fillData(ctx: DrawerContext, data: any) {
