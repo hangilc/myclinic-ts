@@ -5,6 +5,7 @@ import type { Op } from "./op";
 
 export interface DrawerContext {
   ops: Op[];
+  pages: Op[][];
   fsm: FontSizeManager;
   marks: Record<string, { box: Box, ops: Op[] }>;
   dataRenderOptions: Record<string, DataRendererOpt>;
@@ -13,8 +14,10 @@ export interface DrawerContext {
 }
 
 export function mkDrawerContext(): DrawerContext {
+  const ops: Op[] = [];
   return {
-    ops: [],
+    ops,
+    pages: [ops],
     fsm: mkFontManager(),
     marks: {},
     dataRenderOptions: {},

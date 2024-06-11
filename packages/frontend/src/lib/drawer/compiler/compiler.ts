@@ -18,14 +18,13 @@ export interface GetOpsOpt {
   offsetY?: number;
 }
 
-export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
-  const scale = opt.scale ?? 1;
-  const offsetX = opt.offsetX ?? 0;
-  const offsetY = opt.offsetY ?? 0;
+function adjustOps(ops: Op[], gopt: GetOpsOpt): Op[] {
+  const scale = gopt.scale ?? 1;
+  const offsetX = gopt.offsetX ?? 0;
+  const offsetY = gopt.offsetY ?? 0;
   if (scale === 1 && offsetX === 0 && offsetY === 0) {
-    return ctx.ops;
+    return ops;
   } else {
-    let ops = ctx.ops;
     if (scale !== 1) {
       ops = ops.map(op => scaleOp(op, scale));
     }
@@ -35,6 +34,14 @@ export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
     return ops;
   }
 
+}
+
+export function getOps(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[] {
+  return adjustOps(ctx.ops, opt);
+}
+
+export function getPages(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[][] {
+  return ctx.pages.map(ops => adjustOps(ops, opt));
 }
 
 export function moveTo(ctx: DrawerContext, x: number, y: number) {
