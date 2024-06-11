@@ -7,7 +7,7 @@ import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import { breakParagraph } from "../../compiler/break-lines";
-import { requiredHeight } from "../../compiler/util";
+import { drawableLines, requiredHeight } from "../../compiler/util";
 
 export function drawRefer(data: ReferDrawerData): Op[] {
   const ctx = mkDrawerContext();
@@ -144,9 +144,10 @@ function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
 
 function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: string): number {
   c.withFont(ctx, "serif-4", () => {
-    let fontSize = c.currentFontSize(ctx);
-    let leading = 1;
+    const fontSize = c.currentFontSize(ctx);
+    const leading = 1;
     let lines = breakParagraph(content, fontSize, b.width(box1));
+    let drawables: number = drawableLines(b.height(box1), fontSize, leading);
     c.newPage(ctx);
     c.rect(ctx, box2);
   });
