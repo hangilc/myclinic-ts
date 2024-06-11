@@ -20,10 +20,13 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   drawPatientName(ctx, 30, 80);
   drawPatientInfo(ctx, 50, 86);
   drawDiagnosis(ctx, 30, 96);
-  if (drawContent(ctx, b.mkBox(30, 108, 170, 210), data.content)) {
+  const contentBox1 = b.mkBox(30, 108, 170, 210)
+  const contentBox2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
+  if (drawContent(ctx, contentBox1, data.content)) {
     drawFooter(ctx, 30, paper.right - 30, 216);
   } else {
-    throw new Error("Too long content");
+    const y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
+    drawFooter(ctx, 30, paper.right - 30, y + 8);
   }
   c.fillData(ctx, data);
   return c.getOps(ctx);
@@ -137,5 +140,14 @@ function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
   } finally {
     c.setFont(ctx, fontSave);
   }
-  return true;
+}
+
+function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: string): number {
+  c.withFont(ctx, "serif-4", () => {
+    let fontSize = c.currentFontSize(ctx);
+    let leading = 1;
+    let lines = breakParagraph(content, fontSize, b.width(box1));
+    c.newPage(ctx);
+    c.rect(ctx, box2);
+  });
 }

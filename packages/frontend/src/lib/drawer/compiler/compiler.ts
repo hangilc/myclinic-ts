@@ -44,6 +44,12 @@ export function getPages(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[][] {
   return ctx.pages.map(ops => adjustOps(ops, opt));
 }
 
+export function newPage(ctx: DrawerContext) {
+  const ops: Op[] = [];
+  ctx.ops = ops;
+  ctx.pages.push(ops);
+}
+
 export function moveTo(ctx: DrawerContext, x: number, y: number) {
   ctx.ops.push(["move_to", x, y]);
 }
