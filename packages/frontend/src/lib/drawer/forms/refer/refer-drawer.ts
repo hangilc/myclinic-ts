@@ -6,6 +6,8 @@ import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
+import { breakParagraph } from "../../compiler/break-lines";
+import { requiredHeight } from "../../compiler/util";
 
 export function drawRefer(data: ReferDrawerData): Op[] {
   const ctx = mkDrawerContext();
@@ -18,7 +20,7 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   drawPatientName(ctx, 30, 80);
   drawPatientInfo(ctx, 50, 86);
   drawDiagnosis(ctx, 30, 96);
-  if (drawContent(ctx, b.mkBox(30, 103, 170, 210), data.content)) {
+  if (drawContent(ctx, b.mkBox(30, 108, 170, 210), data.content)) {
     drawFooter(ctx, 30, paper.right - 30, 216);
   } else {
     throw new Error("Too long content");
@@ -32,6 +34,7 @@ function setupFonts(ctx: DrawerContext) {
   c.createFont(ctx, "serif-5", "MS Mincho", 5);
   c.createFont(ctx, "serif-5-bold", "MS Mincho", 5, "bold", false);
   c.createFont(ctx, "serif-4", "MS Mincho", 4);
+  c.createFont(ctx, "serif-3", "MS Mincho", 3);
 }
 
 function setupPens(ctx: DrawerContext) {
@@ -118,5 +121,21 @@ function drawIssuer(ctx: DrawerContext, box: Box) {
 }
 
 function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
+  const fontSave = c.getCurrentFont(ctx);
+  try {
+    c.setFont(ctx, "serif-4");
+    let fontSize = c.currentFontSize(ctx);
+    let leading = 1;
+    let lines = breakParagraph(content, fontSize, b.width(box));
+    let reqHeight = requiredHeight(lines.length, fontSize, leading);
+    if( reqHeight <= b.height(box) ){
+      c.drawTexts(ctx, lines, box, { leading });
+      return true;
+    } else {
+      return false;
+    }
+  } finally {
+    c.setFont(ctx, fontSave);
+  }
   return true;
 }
