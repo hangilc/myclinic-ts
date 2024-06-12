@@ -6,8 +6,8 @@ import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
-import { breakParagraph } from "../../compiler/break-lines";
-import { drawableLines, requiredHeight } from "../../compiler/util";
+import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
+import { requiredHeight } from "../../compiler/util";
 
 export function drawRefer(data: ReferDrawerData): Op[] {
   const ctx = mkDrawerContext();
@@ -22,13 +22,16 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   drawDiagnosis(ctx, 30, 96);
   const contentBox1 = b.mkBox(30, 108, 170, 210)
   const contentBox2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
-  if (drawContent(ctx, contentBox1, data.content)) {
-    drawFooter(ctx, 30, paper.right - 30, 216);
-  } else {
-    const y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
-    drawFooter(ctx, 30, paper.right - 30, y + 8);
-  }
+  let y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
+  drawFooter(ctx, 30, paper.right - 30, y + 10);
+  // if (drawContent(ctx, contentBox1, data.content)) {
+  //   drawFooter(ctx, 30, paper.right - 30, 216);
+  // } else {
+  //   const y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
+  //   drawFooter(ctx, 30, paper.right - 30, y + 8);
+  // }
   c.fillData(ctx, data);
+  c.rect(ctx, paper);
   return c.getOps(ctx);
 }
 
@@ -131,7 +134,7 @@ function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
     let leading = 1;
     let lines = breakParagraph(content, fontSize, b.width(box));
     let reqHeight = requiredHeight(lines.length, fontSize, leading);
-    if( reqHeight <= b.height(box) ){
+    if (reqHeight <= b.height(box)) {
       c.drawTexts(ctx, lines, box, { leading });
       return true;
     } else {
@@ -143,12 +146,46 @@ function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
 }
 
 function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: string): number {
-  c.withFont(ctx, "serif-4", () => {
+  return c.withFont(ctx, "serif-4", () => {
     const fontSize = c.currentFontSize(ctx);
     const leading = 1;
-    let lines = breakParagraph(content, fontSize, b.width(box1));
-    let drawables: number = drawableLines(b.height(box1), fontSize, leading);
-    c.newPage(ctx);
-    c.rect(ctx, box2);
+    let lines = content.split(/\r?\n/);
+    let lineIndex = 0;
+    let currentLine: string | undefined = lines[lineIndex];
+    let h = 0;
+    let start = 0;
+    let chunks: string[] = [];
+    let mode: "box1" | "box2" = "box1"
+    while (currentLine != undefined) {
+      const lineWidth = mode === "box1" ? b.width(box1) : b.width(box2);
+      const boxHeight = mode === "box1" ? b.height(box1) : b.height(box2);
+      while (start < currentLine.length) {
+        const nextStart = breakNextLine(start, currentLine, fontSize, lineWidth);
+        console.log("next chunk", currentLine.substring(start, nextStart));
+        if (h === 0) {
+          chunks.push(currentLine.substring(start, nextStart));
+          h += fontSize;
+        } else {
+          if (h + leading + fontSize <= boxHeight) {
+            console.log("appending", currentLine.substring(start, nextStart));
+            chunks.push(currentLine.substring(start, nextStart));
+            h += leading + fontSize;
+          } else {
+            c.drawTexts(ctx, chunks, mode === "box1" ? box1 : box2, { leading });
+            mode = "box2";
+            c.newPage(ctx);
+            h = 0;
+          }
+        }
+        start = nextStart;
+      }
+      lineIndex += 1;
+      currentLine = lines[lineIndex];
+      start = 0;
+    }
+    if (chunks.length > 0) {
+      c.drawTexts(ctx, chunks, mode === "box1" ? box1 : box2, { leading });
+    }
+    return h + (mode === "box1" ? box1 : box2).top;
   });
 }

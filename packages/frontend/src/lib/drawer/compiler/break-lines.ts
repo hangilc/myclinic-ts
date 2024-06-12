@@ -1,5 +1,19 @@
 import { charWidth } from "./char-width";
 
+// returns length of nextr line
+export function breakNextLine(start: number, str: string, fontSize: number, lineWidth: number): number {
+  let w = 0;
+  for(let i=start;i<str.length;i++){
+    const code = str.charCodeAt(i);
+    const cw = charWidth(code, fontSize);
+    if( cw + w > lineWidth ){
+      return i;
+    }
+    w += cw;
+  }
+  return str.length;
+}
+
 export function breakLines(str: string, fontSize: number, lineWidth: number): string[] {
   const lines: string[] = [];
   let line: string[] = [];

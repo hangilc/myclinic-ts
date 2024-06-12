@@ -893,11 +893,11 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
   });
 }
 
-export function withFont(ctx: DrawerContext, fontName: string, f: () => void) {
+export function withFont<T>(ctx: DrawerContext, fontName: string, f: () => T) {
   const save = getCurrentFont(ctx);
   try {
     setFont(ctx, fontName);
-    f();
+    return f();
   } finally {
     if (save) {
       setFont(ctx, save);
