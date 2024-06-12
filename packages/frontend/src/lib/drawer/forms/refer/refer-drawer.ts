@@ -23,7 +23,13 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   const contentBox1 = b.mkBox(30, 108, 170, 210)
   const contentBox2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
   let y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
-  drawFooter(ctx, 30, paper.right - 30, y + 10);
+  y += 10;
+  if (y <= 220) {
+    drawFooter(ctx, 30, paper.right - 30, y + 10);
+  } else {
+    c.newPage(ctx);
+    drawFooter(ctx, 30, paper.right - 30, 40);
+  }
   // if (drawContent(ctx, contentBox1, data.content)) {
   //   drawFooter(ctx, 30, paper.right - 30, 216);
   // } else {
@@ -161,13 +167,11 @@ function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: str
       const boxHeight = mode === "box1" ? b.height(box1) : b.height(box2);
       while (start < currentLine.length) {
         const nextStart = breakNextLine(start, currentLine, fontSize, lineWidth);
-        console.log("next chunk", currentLine.substring(start, nextStart));
         if (h === 0) {
           chunks.push(currentLine.substring(start, nextStart));
           h += fontSize;
         } else {
           if (h + leading + fontSize <= boxHeight) {
-            console.log("appending", currentLine.substring(start, nextStart));
             chunks.push(currentLine.substring(start, nextStart));
             h += leading + fontSize;
           } else {
