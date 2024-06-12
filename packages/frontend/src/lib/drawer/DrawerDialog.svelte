@@ -6,7 +6,7 @@
   import { onMount } from "svelte";
 
   export let destroy: () => void;
-  export let ops: Op[];
+  export let ops: Op[] | undefined = undefined;;
   export let pages:
     | {
         setup: Op[];
@@ -21,6 +21,7 @@
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
   let pageIndex = 0;
+  let theOps: Op[] = ops ?? [];
 
   let thePages: {
     setup: Op[];
@@ -30,9 +31,10 @@
     adaptToPageIndex();
   }
 
+
   function setupThePages(): { setup: Op[]; pageOps: Op[][] } {
     if (pages == undefined) {
-      return { setup: [], pageOps: [ops] };
+      return { setup: [], pageOps: [theOps] };
     } else {
       return pages;
     }

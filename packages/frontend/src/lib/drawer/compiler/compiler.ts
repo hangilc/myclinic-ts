@@ -534,7 +534,7 @@ export function drawTextAt(ctx: DrawerContext, text: string, x: number, y: numbe
   drawChars(ctx, text, xs, ys);
 }
 
-function withOps(ctx: DrawerContext, ops: Op[], f: () => void) {
+export function withOps(ctx: DrawerContext, ops: Op[], f: () => void) {
   const save: Op[] = ctx.ops;
   ctx.ops = ops;
   try {

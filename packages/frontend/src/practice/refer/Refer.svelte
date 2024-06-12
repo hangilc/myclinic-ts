@@ -46,8 +46,7 @@
     "issuer-doctor-name": "診療次郎",
   };
 
-  let ops: Op[] = drawRefer(data);
-  console.log("ops", JSON.stringify(ops, undefined, 2));
+  let pages = drawRefer(data);
 </script>
 
 {#if isVisible}

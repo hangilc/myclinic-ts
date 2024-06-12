@@ -9,10 +9,13 @@ import type { Box } from "../../compiler/box";
 import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
 import { requiredHeight } from "../../compiler/util";
 
-export function drawRefer(data: ReferDrawerData): Op[] {
+export function drawRefer(data: ReferDrawerData): { setup: Op[], pageOps: Op[][] } {
   const ctx = mkDrawerContext();
-  setupFonts(ctx);
-  setupPens(ctx);
+  const setup: Op[] = [];
+  c.withOps(ctx, setup, () => {
+    setupFonts(ctx);
+    setupPens(ctx);
+  });
   const paper: Box = b.paperSizeToBox(A4);
   drawTitle(ctx, b.cx(paper), 41);
   drawReferHospital(ctx, 30, 58);
@@ -38,7 +41,7 @@ export function drawRefer(data: ReferDrawerData): Op[] {
   // }
   c.fillData(ctx, data);
   c.rect(ctx, paper);
-  return c.getOps(ctx);
+  return { setup, pageOps: c.getPages(ctx) };
 }
 
 function setupFonts(ctx: DrawerContext) {
