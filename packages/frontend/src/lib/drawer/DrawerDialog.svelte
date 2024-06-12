@@ -7,10 +7,12 @@
 
   export let destroy: () => void;
   export let ops: Op[];
-  export let pages: {
-    setup: Op[],
-    pageOps: Op[][],
-  } | undefined = undefined;
+  export let pages:
+    | {
+        setup: Op[];
+        pageOps: Op[][];
+      }
+    | undefined = undefined;
   export let width: number = 210;
   export let height: number = 297;
   export let scale: number = 1.5;
@@ -20,14 +22,31 @@
   export let onClose: () => void = () => {};
   let pageIndex = 0;
 
-  if( pages == undefined ){
-    pages = { setup: [], pageOps: [ops]};
-  } else {
+  let thePages: {
+    setup: Op[];
+    pageOps: Op[][];
+  } = setupThePages();
+  if (!ops) {
     adaptToPageIndex();
   }
 
+  function setupThePages(): { setup: Op[]; pageOps: Op[][] } {
+    if (pages == undefined) {
+      return { setup: [], pageOps: [ops] };
+    } else {
+      return pages;
+    }
+  }
+
   function adaptToPageIndex() {
-    ops = [...]
+    ops = [...thePages.setup, ...thePages.pageOps[pageIndex]];
+  }
+
+  function gotoPage(index: number) {
+    if (index >= 0 && index < thePages.pageOps.length) {
+      pageIndex = index;
+      adaptToPageIndex();
+    }
   }
 
   let printPref: string = "手動";
@@ -69,9 +88,13 @@
 
 <Dialog {destroy} {onClose} {title}>
   {#if pages && pages.pageOps.length >= 2}
-    <a href="javascript:void(0)">&lt;</a>
-
-    <a href="javascript:void(0)">&gt;</a>
+    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
+      >&lt;</a
+    >
+    {pageIndex + 1} / {pages?.pageOps.length}
+    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex + 1)}
+      >&gt;</a
+    >
   {/if}
   <DrawerSvg
     {ops}
