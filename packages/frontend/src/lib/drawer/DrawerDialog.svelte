@@ -7,7 +7,10 @@
 
   export let destroy: () => void;
   export let ops: Op[];
-  export let opsAux: Op[][] = [];
+  export let pages: {
+    setup: Op[],
+    pageOps: Op[][],
+  } | undefined = undefined;
   export let width: number = 210;
   export let height: number = 297;
   export let scale: number = 1.5;
@@ -15,7 +18,17 @@
   export let title: string = "プレビュー";
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
-  let pages: Op[][] = [ops, ...opsAux];
+  let pageIndex = 0;
+
+  if( pages == undefined ){
+    pages = { setup: [], pageOps: [ops]};
+  } else {
+    adaptToPageIndex();
+  }
+
+  function adaptToPageIndex() {
+    ops = [...]
+  }
 
   let printPref: string = "手動";
   let settingSelect: string = "手動";
@@ -55,6 +68,11 @@
 </script>
 
 <Dialog {destroy} {onClose} {title}>
+  {#if pages && pages.pageOps.length >= 2}
+    <a href="javascript:void(0)">&lt;</a>
+
+    <a href="javascript:void(0)">&gt;</a>
+  {/if}
   <DrawerSvg
     {ops}
     {viewBox}
