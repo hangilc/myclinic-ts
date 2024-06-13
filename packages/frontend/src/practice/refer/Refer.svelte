@@ -41,16 +41,36 @@
 高血圧症、高脂血症にて当院に通院されている方ですが、
 よろしくお願いいたします。`,
     "issue-date": "令和6年6月9日",
-    address: "〒123-4567\n東京都杉並区荻窪1-1-1\n電話 03-1234-5678\nＦＡＸ 03-1234-5555",
+    address:
+      "〒123-4567\n東京都杉並区荻窪1-1-1\n電話 03-1234-5678\nＦＡＸ 03-1234-5555",
     "clinic-name": "東京内科クリニック",
     "issuer-doctor-name": "診療次郎",
   };
 
-  let pages = drawRefer(data);
+  let pages: { setup: Op[]; pageOps: Op[][] } = drawRefer(data);
+  let ops: Op[] = [];
+  let pageIndex = 0;
+  gotoPage(0);
+
+  function gotoPage(index: number) {
+    if( index >= 0 && index < pages.pageOps.length ){
+      ops = [...pages.setup, ...pages.pageOps[index]];
+      pageIndex = index;
+    }
+  }
 </script>
 
 {#if isVisible}
   <ServiceHeader title="紹介状" />
+  {#if pages.pageOps.length > 1}
+    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
+      >&lt;</a
+    >
+    {pageIndex + 1} / {pages.pageOps.length}
+    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex + 1)}
+      >&gt;</a
+    >
+  {/if}
   <DrawerSvg
     {ops}
     width={`${210 * 2}px`}

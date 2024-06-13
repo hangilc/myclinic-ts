@@ -26,6 +26,7 @@ export function drawRefer(data: ReferDrawerData): { setup: Op[], pageOps: Op[][]
   const contentBox1 = b.mkBox(30, 108, 170, 210)
   const contentBox2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
   let y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
+  console.log("y", y);
   y += 10;
   if (y <= 220) {
     drawFooter(ctx, 30, paper.right - 30, y + 10);
@@ -181,6 +182,8 @@ function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: str
             c.drawTexts(ctx, chunks, mode === "box1" ? box1 : box2, { leading });
             mode = "box2";
             c.newPage(ctx);
+            c.setFont(ctx, "serif-4");
+            chunks = [];
             h = 0;
           }
         }

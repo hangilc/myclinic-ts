@@ -41,7 +41,7 @@
   }
 
   function adaptToPageIndex() {
-    ops = [...thePages.setup, ...thePages.pageOps[pageIndex]];
+    theOps = [...thePages.setup, ...thePages.pageOps[pageIndex]];
   }
 
   function gotoPage(index: number) {
@@ -58,8 +58,8 @@
 
   async function print(_close: () => void) {
     const req: PrintRequest = {
-      setup: [],
-      pages: [ops],
+      setup: thePages.setup,
+      pages: thePages.pageOps,
     };
     await printApi.printDrawer(
       req,
@@ -99,7 +99,7 @@
     >
   {/if}
   <DrawerSvg
-    {ops}
+    ops={theOps}
     {viewBox}
     width={`${width * scale}`}
     height={`${height * scale}`}
