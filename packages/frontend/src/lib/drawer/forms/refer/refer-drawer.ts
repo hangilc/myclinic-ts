@@ -7,7 +7,6 @@ import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
-import { requiredHeight } from "../../compiler/util";
 
 export function drawRefer(data: ReferDrawerData): Op[][] {
   const ctx = mkDrawerContext();
@@ -16,6 +15,7 @@ export function drawRefer(data: ReferDrawerData): Op[][] {
     setupFonts(ctx);
     setupPens(ctx);
   });
+  c.pushOps(ctx, setup);
   const paper: Box = b.paperSizeToBox(A4);
   drawTitle(ctx, b.cx(paper), 41);
   drawReferHospital(ctx, 30, 58);
@@ -23,10 +23,10 @@ export function drawRefer(data: ReferDrawerData): Op[][] {
   drawPatientName(ctx, 30, 80);
   drawPatientInfo(ctx, 50, 86);
   drawDiagnosis(ctx, 30, 96);
-  const contentBox1 = b.mkBox(30, 108, 170, 210)
-  const contentBox2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
-  let y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
-  console.log("y", y);
+  const contentBox1 = b.mkBox(30, 108, 170, 210);
+  const contentBox2_1 = b.mkBox(30, 108, 170, b.height(paper) - 40);
+  const contentBox2_2 = b.mkBox(30, 40, b.width(paper) - 30, b.height(paper) - 40);
+  let y = drawContentSplit(ctx, contentBox1, contentBox2_1, contentBox2_2, data.content);
   y += 10;
   if (y <= 220) {
     drawFooter(ctx, 30, paper.right - 30, y + 10);
@@ -34,15 +34,9 @@ export function drawRefer(data: ReferDrawerData): Op[][] {
     c.newPage(ctx);
     drawFooter(ctx, 30, paper.right - 30, 40);
   }
-  // if (drawContent(ctx, contentBox1, data.content)) {
-  //   drawFooter(ctx, 30, paper.right - 30, 216);
-  // } else {
-  //   const y = drawContentSplit(ctx, contentBox1, contentBox2, data.content);
-  //   drawFooter(ctx, 30, paper.right - 30, y + 8);
-  // }
   c.fillData(ctx, data);
   c.rect(ctx, paper);
-  return c.getPages(ctx).map(ops => [...setup, ...ops]);
+  return c.getPages(ctx);
 }
 
 function setupFonts(ctx: DrawerContext) {
@@ -136,27 +130,40 @@ function drawIssuer(ctx: DrawerContext, box: Box) {
   })
 }
 
-function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
-  const fontSave = c.getCurrentFont(ctx);
-  try {
-    c.setFont(ctx, "serif-4");
-    let fontSize = c.currentFontSize(ctx);
-    let leading = 1;
-    let lines = breakParagraph(content, fontSize, b.width(box));
-    let reqHeight = requiredHeight(lines.length, fontSize, leading);
-    if (reqHeight <= b.height(box)) {
-      c.drawTexts(ctx, lines, box, { leading });
-      return true;
-    } else {
-      return false;
-    }
-  } finally {
-    c.setFont(ctx, fontSave);
-  }
-}
+// function drawContent(ctx: DrawerContext, box: Box, content: string): boolean {
+//   const fontSave = c.getCurrentFont(ctx);
+//   try {
+//     c.setFont(ctx, "serif-4");
+//     let fontSize = c.currentFontSize(ctx);
+//     let leading = 1;
+//     let lines = breakParagraph(content, fontSize, b.width(box));
+//     let reqHeight = requiredHeight(lines.length, fontSize, leading);
+//     if (reqHeight <= b.height(box)) {
+//       c.drawTexts(ctx, lines, box, { leading });
+//       return true;
+//     } else {
+//       return false;
+//     }
+//   } finally {
+//     c.setFont(ctx, fontSave);
+//   }
+// }
 
-function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: string): number {
+function drawContentSplit(ctx: DrawerContext, box1: Box, box2_1: Box, box2_2: Box, content: string): number {
   return c.withFont(ctx, "serif-4", () => {
+    function currBox(): Box {
+      switch (mode) {
+        case "box1": return box1;
+        case "box2_1": return box2_1;
+        case "box2_2": return box2_2;
+      }
+    }
+    function boxHeight(): number {
+      return b.height(currBox());
+    }
+    function boxWidth(): number {
+      return b.width(currBox());
+    }
     const fontSize = c.currentFontSize(ctx);
     const leading = 1;
     let lines = content.split(/\r?\n/);
@@ -165,26 +172,30 @@ function drawContentSplit(ctx: DrawerContext, box1: Box, box2: Box, content: str
     let h = 0;
     let start = 0;
     let chunks: string[] = [];
-    let mode: "box1" | "box2" = "box1"
+    let mode: "box1" | "box2_1" | "box2_2" = "box1"
     while (currentLine != undefined) {
-      const lineWidth = mode === "box1" ? b.width(box1) : b.width(box2);
-      const boxHeight = mode === "box1" ? b.height(box1) : b.height(box2);
       while (start < currentLine.length) {
-        const nextStart = breakNextLine(start, currentLine, fontSize, lineWidth);
+        const nextStart = breakNextLine(start, currentLine, fontSize, boxWidth());
         if (h === 0) {
           chunks.push(currentLine.substring(start, nextStart));
           h += fontSize;
         } else {
-          if (h + leading + fontSize <= boxHeight) {
+          if (h + leading + fontSize <= boxHeight()) {
             chunks.push(currentLine.substring(start, nextStart));
             h += leading + fontSize;
           } else {
-            c.drawTexts(ctx, chunks, mode === "box1" ? box1 : box2, { leading });
-            mode = "box2";
-            c.newPage(ctx);
-            c.setFont(ctx, "serif-4");
-            chunks = [];
-            h = 0;
+            if (mode === "box1") {
+              mode = "box2_1";
+            } else {
+              c.drawTexts(ctx, chunks, currBox(), { leading });
+              if (mode === "box2_1") {
+                mode = "box2_2";
+              }
+              c.newPage(ctx);
+              c.setFont(ctx, "serif-4");
+              chunks = [];
+              h = 0;
+            }
           }
         }
         start = nextStart;

@@ -44,6 +44,10 @@ export function getPages(ctx: DrawerContext, opt: GetOpsOpt = {}): Op[][] {
   return ctx.pages.map(ops => adjustOps(ops, opt));
 }
 
+export function pushOps(ctx: DrawerContext, ops: Op[]) {
+  ctx.ops.push(...ops);
+}
+
 export function newPage(ctx: DrawerContext) {
   const ops: Op[] = [];
   ctx.ops = ops;
