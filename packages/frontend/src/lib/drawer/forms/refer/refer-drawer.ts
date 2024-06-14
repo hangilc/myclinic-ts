@@ -32,6 +32,7 @@ export function drawRefer(data: ReferDrawerData): Op[][] {
     drawFooter(ctx, 30, paper.right - 30, 40);
   }
   c.fillData(ctx, data);
+  addPages(ctx, b.mkBox(30, b.height(paper) - 22, b.width(paper) - 30, b.height(paper) - 18));
   c.rect(ctx, paper);
   return c.getPages(ctx);
 }
@@ -47,6 +48,16 @@ function setupFonts(ctx: DrawerContext) {
 function setupPens(ctx: DrawerContext) {
   c.createPen(ctx, "default", 0, 0, 0, 0.1);
   c.setPen(ctx, "default");
+}
+
+function addPages(ctx: DrawerContext, box: Box) {
+  c.withEachPage(ctx, (ops, i, n) => {
+    if (n >= 2) {
+      c.withOps(ctx, ops, () => {
+        c.drawText(ctx, `― ${i + 1}/${n} page ―`, box, "center", "center");
+      })
+    }
+  })
 }
 
 function drawTitle(ctx: DrawerContext, x: number, y: number) {

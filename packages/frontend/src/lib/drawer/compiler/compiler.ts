@@ -60,6 +60,13 @@ export function newPage(ctx: DrawerContext) {
   ctx.pages.push(ops);
 }
 
+export function withEachPage(ctx: DrawerContext, f: (ops: Op[], index: number, totalPages: number) => void) {
+  const n = ctx.pages.length;
+  for(let i=0;i<n;i++){
+    f(ctx.pages[i], i, n);
+  }
+}
+
 export function moveTo(ctx: DrawerContext, x: number, y: number) {
   ctx.ops.push(["move_to", x, y]);
 }
