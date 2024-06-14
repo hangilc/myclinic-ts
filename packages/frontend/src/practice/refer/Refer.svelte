@@ -7,8 +7,19 @@
   import type { ReferDrawerData } from "@/lib/drawer/forms/refer/refer-drawer-data";
 
   export let isVisible = false;
+  let title = "紹介状";
+  let referHospital = "";
+  let referDoctor = "";
+  let patientName = "";
+  let patientInfo = "";
+  let diagnosis = "";
+  let content = "";
+  let issueDate = "";
+  let address = "";
+  let clinicName = "";
+  let issuerDoctorName = "";
 
-  let data: ReferDrawerData = {
+  let dataExample: ReferDrawerData = {
     title: "紹介状",
     "refer-hospital": "東京警察病院",
     "refer-doctor": "麻酔科、松本一郎　先生御机下",
@@ -48,47 +59,59 @@
     "issuer-doctor-name": "診療次郎",
   };
 
-  let pages: Op[][] = drawRefer(data);
-  let ops: Op[] = [];
-  let pageIndex = 0;
-  gotoPage(0);
-
-  function gotoPage(index: number) {
-    if( index >= 0 && index < pages.length ){
-      ops = pages[index];
-      pageIndex = index;
-    }
-  }
-
   function doView() {
+    let data = {
+      title,
+      "refer-hospital": referHospital,
+      "refer-doctor": referDoctor,
+      "patient-name": patientName,
+      "patient-info": patientInfo,
+      diagnosis,
+      content,
+      "issue-date": issueDate,
+      address,
+      "clinic-name": clinicName,
+      "issuer-doctor-name": issuerDoctorName,
+    };
+
+    let pages = drawRefer(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
         pages,
         kind: "refer",
         destroy: () => d.$destroy(),
-        scale: 3,
-      }
-    })
+        scale: 2,
+      },
+    });
   }
 </script>
 
 {#if isVisible}
   <ServiceHeader title="紹介状" />
+  <div style="display:grid; grid-template-columns:auto 1fr;gap: 4px;">
+    <span>表題：</span>
+    <input type="text" bind:value={title} style="width: 6em;" />
+    <span>医療機関</span>
+    <input type="text" bind:value={referHospital} style="width: 16em;" />
+    <span>医師</span>
+    <input type="text" bind:value={referDoctor} style="width: 16em;" />
+    <span>患者氏名</span>
+    <input type="text" bind:value={patientName} style="width: 16em;" />
+    <span>患者情報</span>
+    <input type="text" bind:value={patientInfo} style="width: 16em;" />
+    <span>診断</span>
+    <input type="text" bind:value={diagnosis} style="width: 16em;" />
+    <span>内容</span>
+    <input type="text" bind:value={content} style="width: 16em;" />
+    <span>発行日</span>
+    <input type="text" bind:value={issueDate} style="width: 16em;" />
+    <span>住所</span>
+    <input type="text" bind:value={address} style="width: 16em;" />
+    <span>発行機関</span>
+    <input type="text" bind:value={clinicName} style="width: 16em;" />
+    <span>発行医師</span>
+    <input type="text" bind:value={issuerDoctorName} style="width: 16em;" />
+    </div>
   <button on:click={doView}>表示</button>
-  {#if pages.length > 1}
-    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
-      >&lt;</a
-    >
-    {pageIndex + 1} / {pages.length}
-    <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex + 1)}
-      >&gt;</a
-    >
-  {/if}
-  <DrawerSvg
-    {ops}
-    width={`${210 * 2}px`}
-    height={`${297 * 2}px`}
-    viewBox="0 0 210 297"
-  />
 {/if}
