@@ -1,10 +1,12 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
+  import api from "@/lib/api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawRefer } from "@/lib/drawer/forms/refer/refer-drawer";
   import type { ReferDrawerData } from "@/lib/drawer/forms/refer/refer-drawer-data";
+  import { DateWrapper } from "myclinic-util";
 
   export let isVisible = false;
   let title = "紹介状";
@@ -18,6 +20,21 @@
   let address = "";
   let clinicName = "";
   let issuerDoctorName = "";
+
+  loadClinicInfo();
+  initIssueDate();
+
+  function initIssueDate() {
+    const today = DateWrapper.from(new Date());
+    issueDate = `${today.getGengou()}${today.getNen()}年${today.getMonth()}月${today.getDay()}日`;
+  }
+
+  async function loadClinicInfo() {
+    const cl = await api.getClinicInfo();
+    address = `${cl.postalCode}\n${cl.address}\n電話 ${cl.tel}\nＦＡＸ ${cl.fax}`;
+    clinicName = cl.name;
+    issuerDoctorName = cl.doctorName;
+  }
 
   let dataExample: ReferDrawerData = {
     title: "紹介状",
@@ -60,10 +77,15 @@
   };
 
   function doView() {
+    let referDoctorValue: string = referDoctor.trim();
+    if( referDoctorValue === "" ){
+      referDoctorValue = "                      ";
+    }
+    referDoctorValue += " 先生御机下"
     let data = {
       title,
       "refer-hospital": referHospital,
-      "refer-doctor": referDoctor,
+      "refer-doctor": referDoctorValue,
       "patient-name": patientName,
       "patient-info": patientInfo,
       diagnosis,
@@ -95,7 +117,13 @@
     <span>医療機関</span>
     <input type="text" bind:value={referHospital} style="width: 16em;" />
     <span>医師</span>
-    <input type="text" bind:value={referDoctor} style="width: 16em;" />
+    <div>
+      <input
+        type="text"
+        bind:value={referDoctor}
+        style="width: 16em;"
+      />先生御机下
+    </div>
     <span>患者氏名</span>
     <input type="text" bind:value={patientName} style="width: 16em;" />
     <span>患者情報</span>
@@ -107,11 +135,14 @@
     <span>発行日</span>
     <input type="text" bind:value={issueDate} style="width: 16em;" />
     <span>住所</span>
-    <input type="text" bind:value={address} style="width: 16em;" />
+    <textarea
+      bind:value={address}
+      style="width: 18em;height:5.5em;resize:vertical"
+    />
     <span>発行機関</span>
     <input type="text" bind:value={clinicName} style="width: 16em;" />
     <span>発行医師</span>
     <input type="text" bind:value={issuerDoctorName} style="width: 16em;" />
-    </div>
+  </div>
   <button on:click={doView}>表示</button>
 {/if}

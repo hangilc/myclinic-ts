@@ -1,5 +1,6 @@
 import { cmpNumSeq } from "./cmp";
 import { padLeft } from "./pad";
+import * as wareki from "./wareki";
 
 export class DateWrapper {
   readonly date: Date;
@@ -77,6 +78,16 @@ export class DateWrapper {
 
   monthDayTuple(): [number, number] {
     return [this.getMonth(), this.getDay()];
+  }
+
+  getGengou(): string {
+    const w = wareki.warekiOf(this.getYear(), this.getMonth(), this.getDay());
+    return w.gengou.name;
+  }
+
+  getNen(): number {
+    const w = wareki.warekiOf(this.getYear(), this.getMonth(), this.getDay());
+    return w.nen;
   }
 
   toString(): string {
