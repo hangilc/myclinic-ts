@@ -6,13 +6,8 @@
   import { onMount } from "svelte";
 
   export let destroy: () => void;
-  export let ops: Op[] | undefined = undefined;;
-  export let pages:
-    | {
-        setup: Op[];
-        pageOps: Op[][];
-      }
-    | undefined = undefined;
+  export let ops: Op[] = [];
+  export let pages: Op[][] | undefined = undefined;
   export let width: number = 210;
   export let height: number = 297;
   export let scale: number = 1.5;
@@ -21,33 +16,22 @@
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
   let pageIndex = 0;
-  let theOps: Op[] = ops ?? [];
-
-  let thePages: {
-    setup: Op[];
-    pageOps: Op[][];
-  } = setupThePages();
-  if (!ops) {
+  if (pages) {
     adaptToPageIndex();
   }
 
-
-  function setupThePages(): { setup: Op[]; pageOps: Op[][] } {
-    if (pages == undefined) {
-      return { setup: [], pageOps: [theOps] };
-    } else {
-      return pages;
+  function adaptToPageIndex() {
+    if (pages) {
+      ops = pages[pageIndex];
     }
   }
 
-  function adaptToPageIndex() {
-    theOps = [...thePages.setup, ...thePages.pageOps[pageIndex]];
-  }
-
   function gotoPage(index: number) {
-    if (index >= 0 && index < thePages.pageOps.length) {
-      pageIndex = index;
-      adaptToPageIndex();
+    if (pages) {
+      if (index >= 0 && index < pages.length) {
+        pageIndex = index;
+        adaptToPageIndex();
+      }
     }
   }
 
@@ -59,12 +43,8 @@
   async function print(_close: () => void) {
     const req: PrintRequest = {
       setup: [],
-      pages: thePages.pageOps.map(ops => [...thePages.setup, ...ops]),
+      pages: pages || [ops],
     };
-    // const req: PrintRequest = {
-    //   setup: thePages.setup,
-    //   pages: thePages.pageOps,
-    // };
     await printApi.printDrawer(
       req,
       settingSelect === "手動" ? "" : settingSelect
@@ -93,17 +73,17 @@
 </script>
 
 <Dialog {destroy} {onClose} {title}>
-  {#if pages && pages.pageOps.length >= 2}
+  {#if pages && pages.length >= 2}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
       >&lt;</a
     >
-    {pageIndex + 1} / {pages?.pageOps.length}
+    {pageIndex + 1} / {pages?.length}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex + 1)}
       >&gt;</a
     >
   {/if}
   <DrawerSvg
-    ops={theOps}
+    ops={ops}
     {viewBox}
     width={`${width * scale}`}
     height={`${height * scale}`}

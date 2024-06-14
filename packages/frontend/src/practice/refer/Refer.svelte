@@ -48,19 +48,14 @@
     "issuer-doctor-name": "診療次郎",
   };
 
-  let pages: { setup: Op[]; pageOps: Op[][] } = drawRefer(data);
+  let pages: Op[][] = drawRefer(data);
   let ops: Op[] = [];
   let pageIndex = 0;
   gotoPage(0);
 
-  {
-    gotoPage(1);
-    console.log("ops", JSON.stringify(ops, undefined, 2))
-  }
-
   function gotoPage(index: number) {
-    if( index >= 0 && index < pages.pageOps.length ){
-      ops = [...pages.setup, ...pages.pageOps[index]];
+    if( index >= 0 && index < pages.length ){
+      ops = pages[index];
       pageIndex = index;
     }
   }
@@ -81,11 +76,11 @@
 {#if isVisible}
   <ServiceHeader title="紹介状" />
   <button on:click={doView}>表示</button>
-  {#if pages.pageOps.length > 1}
+  {#if pages.length > 1}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
       >&lt;</a
     >
-    {pageIndex + 1} / {pages.pageOps.length}
+    {pageIndex + 1} / {pages.length}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex + 1)}
       >&gt;</a
     >

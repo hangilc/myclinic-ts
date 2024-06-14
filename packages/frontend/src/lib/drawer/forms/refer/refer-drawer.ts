@@ -9,7 +9,7 @@ import type { Box } from "../../compiler/box";
 import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
 import { requiredHeight } from "../../compiler/util";
 
-export function drawRefer(data: ReferDrawerData): { setup: Op[], pageOps: Op[][] } {
+export function drawRefer(data: ReferDrawerData): Op[][] {
   const ctx = mkDrawerContext();
   const setup: Op[] = [];
   c.withOps(ctx, setup, () => {
@@ -42,7 +42,7 @@ export function drawRefer(data: ReferDrawerData): { setup: Op[], pageOps: Op[][]
   // }
   c.fillData(ctx, data);
   c.rect(ctx, paper);
-  return { setup, pageOps: c.getPages(ctx) };
+  return c.getPages(ctx).map(ops => [...setup, ...ops]);
 }
 
 function setupFonts(ctx: DrawerContext) {

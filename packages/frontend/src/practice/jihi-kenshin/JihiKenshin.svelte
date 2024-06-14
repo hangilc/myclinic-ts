@@ -246,7 +246,7 @@
     name: string,
     value: string | c.CompositeItem[]
   ): void {
-    let box = b.modify(c.getMark(ctx, name), b.shrinkHoriz(2, 0));
+    let box = b.modify(c.getMark(ctx, name).box, b.shrinkHoriz(2, 0));
     if (typeof value === "string") {
       c.drawText(ctx, value, box, "left", "center");
     } else {
@@ -348,7 +348,7 @@
     );
     set(ctx, "診察", physicalExam);
     if (hasNoVisualAcuityInput()) {
-      diagonal(ctx, c.getMark(ctx, "視力"));
+      diagonal(ctx, c.getMark(ctx, "視力").box);
     } else {
       const lts: CompositeItem[] = [
         { kind: "text", text: "左" },
@@ -380,7 +380,7 @@
       set(ctx, "視力右", rts);
     }
     if (hearingExamConducted === "実施") {
-      const bb = c.getMark(ctx, "聴力");
+      const bb = c.getMark(ctx, "聴力").box;
       let [left, right] = b.splitToColumns(bb, b.evenSplitter(2));
       let fontSize = c.currentFontSize(ctx);
       b.withSplitColumns(
@@ -436,12 +436,12 @@
         }
       );
     } else {
-      diagonal(ctx, c.getMark(ctx, "聴力"));
+      diagonal(ctx, c.getMark(ctx, "聴力").box);
     }
     set(ctx, "血圧", bloodPressure);
     set(ctx, "心電図", shindenzu);
-    c.paragraph(ctx, kioureki, c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)));
-    c.paragraph(ctx, xp, c.getMark(ctx, "Ｘ線", b.inset(1, 0, 2, 0)));
+    c.paragraph(ctx, kioureki, c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)).box);
+    c.paragraph(ctx, xp, c.getMark(ctx, "Ｘ線", b.inset(1, 0, 2, 0)).box);
     if (xpConductedDate) {
       set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
     }
@@ -450,7 +450,7 @@
       let [value, unit]: string[] = kensaValues[i].split(/\s+/);
       if (value) {
         b.withSplitColumns(
-          c.getMark(ctx, `血液検査結果${i + 1}`),
+          c.getMark(ctx, `血液検査結果${i + 1}`).box,
           b.splitAt(18),
           ([left, right]) => {
             c.drawText(ctx, value, left, "right", "center");
@@ -463,15 +463,15 @@
           }
         );
       } else {
-        const bb = c.getMark(ctx, `血液検査結果${i + 1}`);
+        const bb = c.getMark(ctx, `血液検査結果${i + 1}`).box;
         c.line(ctx, b.leftBottom(bb), b.rightTop(bb));
       }
     });
     let prevFont = c.getCurrentFont(ctx);
-    renderUrineExam(ctx, c.getMark(ctx, "尿蛋白"), urineProtein);
-    renderUrineExam(ctx, c.getMark(ctx, "尿潜血"), urineBlood);
-    renderUrineExam(ctx, c.getMark(ctx, "尿糖"), urineGlucose);
-    renderTokkijikou(ctx, c.getMark(ctx, "その他特記事項"), tokkijikou);
+    renderUrineExam(ctx, c.getMark(ctx, "尿蛋白").box, urineProtein);
+    renderUrineExam(ctx, c.getMark(ctx, "尿潜血").box, urineBlood);
+    renderUrineExam(ctx, c.getMark(ctx, "尿糖").box, urineGlucose);
+    renderTokkijikou(ctx, c.getMark(ctx, "その他特記事項").box, tokkijikou);
     c.setFont(ctx, prevFont);
     set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
     set(ctx, "住所1", address1);
