@@ -58,9 +58,13 @@
 
   async function print(_close: () => void) {
     const req: PrintRequest = {
-      setup: thePages.setup,
-      pages: thePages.pageOps,
+      setup: [],
+      pages: thePages.pageOps.map(ops => [...thePages.setup, ...ops]),
     };
+    // const req: PrintRequest = {
+    //   setup: thePages.setup,
+    //   pages: thePages.pageOps,
+    // };
     await printApi.printDrawer(
       req,
       settingSelect === "手動" ? "" : settingSelect

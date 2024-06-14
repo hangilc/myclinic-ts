@@ -1,5 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawRefer } from "@/lib/drawer/forms/refer/refer-drawer";
@@ -52,16 +53,34 @@
   let pageIndex = 0;
   gotoPage(0);
 
+  {
+    gotoPage(1);
+    console.log("ops", JSON.stringify(ops, undefined, 2))
+  }
+
   function gotoPage(index: number) {
     if( index >= 0 && index < pages.pageOps.length ){
       ops = [...pages.setup, ...pages.pageOps[index]];
       pageIndex = index;
     }
   }
+
+  function doView() {
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        pages,
+        kind: "refer",
+        destroy: () => d.$destroy(),
+        scale: 3,
+      }
+    })
+  }
 </script>
 
 {#if isVisible}
   <ServiceHeader title="紹介状" />
+  <button on:click={doView}>表示</button>
   {#if pages.pageOps.length > 1}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
       >&lt;</a
