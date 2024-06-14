@@ -9,13 +9,10 @@ import type { Box } from "../../compiler/box";
 import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
 
 export function drawRefer(data: ReferDrawerData): Op[][] {
-  const ctx = mkDrawerContext();
-  const setup: Op[] = [];
-  c.withOps(ctx, setup, () => {
+  const ctx = mkDrawerContext(ctx => {
     setupFonts(ctx);
     setupPens(ctx);
   });
-  c.pushOps(ctx, setup);
   const paper: Box = b.paperSizeToBox(A4);
   drawTitle(ctx, b.cx(paper), 41);
   drawReferHospital(ctx, 30, 58);
@@ -192,7 +189,6 @@ function drawContentSplit(ctx: DrawerContext, box1: Box, box2_1: Box, box2_2: Bo
                 mode = "box2_2";
               }
               c.newPage(ctx);
-              c.setFont(ctx, "serif-4");
               chunks = [];
               h = 0;
             }
@@ -205,8 +201,8 @@ function drawContentSplit(ctx: DrawerContext, box1: Box, box2_1: Box, box2_2: Bo
       start = 0;
     }
     if (chunks.length > 0) {
-      c.drawTexts(ctx, chunks, mode === "box1" ? box1 : box2, { leading });
+      c.drawTexts(ctx, chunks, currBox(), { leading });
     }
-    return h + (mode === "box1" ? box1 : box2).top;
+    return h + currBox().top;
   });
 }

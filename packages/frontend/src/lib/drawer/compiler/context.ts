@@ -11,18 +11,25 @@ export interface DrawerContext {
   dataRenderOptions: Record<string, DataRendererOpt>;
   currentFont: string | undefined;
   currentPen: string | undefined;
+  setup: Op[];
 }
 
-export function mkDrawerContext(): DrawerContext {
-  const ops: Op[] = [];
-  return {
-    ops,
-    pages: [ops],
+export function mkDrawerContext(initSetup: (ctx: DrawerContext) => void = _ => { }): DrawerContext {
+  const setup: Op[] = [];
+  const ctx: DrawerContext = {
+    ops: setup,
+    pages: [],
+    setup: [],
     fsm: mkFontManager(),
     marks: {},
     dataRenderOptions: {},
     currentFont: undefined,
     currentPen: undefined,
   }
+  initSetup(ctx);
+  ctx.ops = [...setup];
+  ctx.pages = [ctx.ops];
+  ctx.setup = setup;
+  return ctx;
 }
 

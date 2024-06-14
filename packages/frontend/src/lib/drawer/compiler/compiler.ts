@@ -49,8 +49,14 @@ export function pushOps(ctx: DrawerContext, ops: Op[]) {
 }
 
 export function newPage(ctx: DrawerContext) {
-  const ops: Op[] = [];
+  const ops: Op[] = [...ctx.setup];
   ctx.ops = ops;
+  if( ctx.currentFont ){
+    setFont(ctx, ctx.currentFont);
+  }
+  if( ctx.currentPen ){
+    setPen(ctx, ctx.currentPen);
+  }
   ctx.pages.push(ops);
 }
 
