@@ -90,6 +90,14 @@ export class DateWrapper {
     return w.nen;
   }
 
+  getAge(): number {
+    return this.getAgeAt(new Date());
+  }
+
+  getAgeAt(d: DateWrapperLike): number {
+    return calcAge(this, d);
+  }
+
   toString(): string {
     return JSON.stringify({ year: this.getYear(), month: this.getMonth(), day: this.getDay() });
   }

@@ -2,11 +2,10 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
-  import type { Op } from "@/lib/drawer/compiler/op";
   import { drawRefer } from "@/lib/drawer/forms/refer/refer-drawer";
-  import type { ReferDrawerData } from "@/lib/drawer/forms/refer/refer-drawer-data";
+  import type { ClinicInfo, Patient } from "myclinic-model";
   import { DateWrapper } from "myclinic-util";
+  import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
 
   export let isVisible = false;
   let title = "紹介状";
@@ -20,6 +19,8 @@
   let address = "";
   let clinicName = "";
   let issuerDoctorName = "";
+  let patient: Patient | undefined = undefined;
+  let clinicInfo: ClinicInfo | undefined = undefined;
 
   loadClinicInfo();
   initIssueDate();
@@ -30,58 +31,29 @@
   }
 
   async function loadClinicInfo() {
-    const cl = await api.getClinicInfo();
+    if( !clinicInfo ){
+      clinicInfo = await api.getClinicInfo();
+    }
+    const cl = clinicInfo;
     address = `${cl.postalCode}\n${cl.address}\n電話 ${cl.tel}\nＦＡＸ ${cl.fax}`;
     clinicName = cl.name;
     issuerDoctorName = cl.doctorName;
   }
 
-  let dataExample: ReferDrawerData = {
-    title: "紹介状",
-    "refer-hospital": "東京警察病院",
-    "refer-doctor": "麻酔科、松本一郎　先生御机下",
-    "patient-name": "患者：診療太郎",
-    "patient-info": "昭和30年7月21日生、80才、男性",
-    diagnosis: "診断：糖尿病",
-    content: `いつも大変お世話になっております。
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-高血圧症、高脂血症にて当院に通院されている方ですが、
-よろしくお願いいたします。`,
-    "issue-date": "令和6年6月9日",
-    address:
-      "〒123-4567\n東京都杉並区荻窪1-1-1\n電話 03-1234-5678\nＦＡＸ 03-1234-5555",
-    "clinic-name": "東京内科クリニック",
-    "issuer-doctor-name": "診療次郎",
-  };
+  function initWithPatient(p: Patient) {
+    patient = p;
+    patientName = `患者：${p.lastName}${p.firstName}`;
+    const bd = DateWrapper.from(p.birthday);
+    const sex = p.sex === "M" ? "男" : "女";
+    patientInfo = `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日生、${bd.getAge()}才、${sex}性`;
+  }
 
   function doView() {
     let referDoctorValue: string = referDoctor.trim();
-    if( referDoctorValue === "" ){
+    if (referDoctorValue === "") {
       referDoctorValue = "                      ";
     }
-    referDoctorValue += " 先生御机下"
+    referDoctorValue += " 先生御机下";
     let data = {
       title,
       "refer-hospital": referHospital,
@@ -107,10 +79,46 @@
       },
     });
   }
+
+  function doSelectPatient() {
+    const d: SearchPatientDialog = new SearchPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "患者選択",
+        onEnter: initWithPatient,
+      },
+    });
+  }
+
+  function doClearPatient() {
+    patient = undefined;
+    title = "紹介状";
+    referHospital = "";
+    referDoctor = "";
+    patientName = "";
+    patientInfo = "";
+    diagnosis = "";
+    content = "";
+    initIssueDate();
+    loadClinicInfo();
+  }
 </script>
 
 {#if isVisible}
   <ServiceHeader title="紹介状" />
+  <div style="margin: 10px 0;">
+    {#if patient === undefined}
+      <button on:click={doSelectPatient}>患者選択</button>
+    {:else}
+      <button on:click={doClearPatient}>患者終了</button>
+    {/if}
+    {#if patient}
+    <div style="margin-top: 4px;">
+      ({patient.patientId}) {patient.lastName} {patient.firstName} 
+    </div>
+    {/if}
+  </div>
   <div style="display:grid; grid-template-columns:auto 1fr;gap: 4px;">
     <span>表題：</span>
     <input type="text" bind:value={title} style="width: 6em;" />
@@ -118,11 +126,7 @@
     <input type="text" bind:value={referHospital} style="width: 16em;" />
     <span>医師</span>
     <div>
-      <input
-        type="text"
-        bind:value={referDoctor}
-        style="width: 16em;"
-      />先生御机下
+      <input type="text" bind:value={referDoctor} style="width: 16em;" /> 先生御机下
     </div>
     <span>患者氏名</span>
     <input type="text" bind:value={patientName} style="width: 16em;" />
@@ -131,7 +135,7 @@
     <span>診断</span>
     <input type="text" bind:value={diagnosis} style="width: 16em;" />
     <span>内容</span>
-    <input type="text" bind:value={content} style="width: 16em;" />
+    <textarea bind:value={content} style="width: 26em;height: 10em;" />
     <span>発行日</span>
     <input type="text" bind:value={issueDate} style="width: 16em;" />
     <span>住所</span>
