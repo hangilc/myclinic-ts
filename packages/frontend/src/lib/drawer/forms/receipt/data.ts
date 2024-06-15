@@ -7,25 +7,25 @@ import { stringDrawWidth } from "../../compiler/char-width";
 import * as kanjidate from "kanjidate";
 
 export function drawData(ctx: DrawerContext, data: ReceiptDrawerData) {
-  renderPatient(ctx, data.patientName ?? "", c.getMark(ctx, "nameBox"));
-  renderKingaku(ctx, data.charge ?? 0, c.getMark(ctx, "kingakuBox"));
-  renderVisitDate(ctx, data.visitDate ?? "", c.getMark(ctx, "dateBox"));
-  renderIssueDate(ctx, data.issueDate ?? "", c.getMark(ctx, "issueBox"));
-  renderDetail(ctx, data.patientId ?? "", c.getMark(ctx, "patientIdBox"));
-  renderDetail(ctx, data.hoken ?? "", c.getMark(ctx, "hokenBox"));
-  renderDetail(ctx, formatFutanWari(data.futanWari ?? ""), c.getMark(ctx, "futanWariBox"));
-  renderDetail(ctx, data.shoshin ?? "", c.getMark(ctx, "shoshinBox"));
-  renderDetail(ctx, data.kanri ?? "", c.getMark(ctx, "kanriBox"));
-  renderDetail(ctx, data.zaitaku ?? "", c.getMark(ctx, "zaitakuBox"));
-  renderDetail(ctx, data.kensa ?? "", c.getMark(ctx, "kensaBox"));
-  renderDetail(ctx, data.gazou ?? "", c.getMark(ctx, "gazouBox"));
-  renderDetail(ctx, data.touyaku ?? "", c.getMark(ctx, "touyakuBox"));
-  renderDetail(ctx, data.chuusha ?? "", c.getMark(ctx, "chuushaBox"));
-  renderDetail(ctx, data.shochi ?? "", c.getMark(ctx, "shochiBox"));
-  renderDetail(ctx, data.sonota ?? "", c.getMark(ctx, "sonotaBox"));
-  renderDetail(ctx, data.souten ?? "", c.getMark(ctx, "soutenBox"));
-  renderHokengai(ctx, data.hokengai ?? [], [1,2,3,4].map(i => c.getMark(ctx, `hokengai${i}Box`)));
-  renderInstitute(ctx, data.clinicName ?? "", data.addressLines ?? [], c.getMark(ctx, "instituteBox"));
+  renderPatient(ctx, data.patientName ?? "", c.getMark(ctx, "nameBox").box);
+  renderKingaku(ctx, data.charge ?? 0, c.getMark(ctx, "kingakuBox").box);
+  renderVisitDate(ctx, data.visitDate ?? "", c.getMark(ctx, "dateBox").box);
+  renderIssueDate(ctx, data.issueDate ?? "", c.getMark(ctx, "issueBox").box);
+  renderDetail(ctx, data.patientId ?? "", c.getMark(ctx, "patientIdBox").box);
+  renderDetail(ctx, data.hoken ?? "", c.getMark(ctx, "hokenBox").box);
+  renderDetail(ctx, formatFutanWari(data.futanWari ?? ""), c.getMark(ctx, "futanWariBox").box);
+  renderDetail(ctx, data.shoshin ?? "", c.getMark(ctx, "shoshinBox").box);
+  renderDetail(ctx, data.kanri ?? "", c.getMark(ctx, "kanriBox").box);
+  renderDetail(ctx, data.zaitaku ?? "", c.getMark(ctx, "zaitakuBox").box);
+  renderDetail(ctx, data.kensa ?? "", c.getMark(ctx, "kensaBox").box);
+  renderDetail(ctx, data.gazou ?? "", c.getMark(ctx, "gazouBox").box);
+  renderDetail(ctx, data.touyaku ?? "", c.getMark(ctx, "touyakuBox").box);
+  renderDetail(ctx, data.chuusha ?? "", c.getMark(ctx, "chuushaBox").box);
+  renderDetail(ctx, data.shochi ?? "", c.getMark(ctx, "shochiBox").box);
+  renderDetail(ctx, data.sonota ?? "", c.getMark(ctx, "sonotaBox").box);
+  renderDetail(ctx, data.souten ?? "", c.getMark(ctx, "soutenBox").box);
+  renderHokengai(ctx, data.hokengai ?? [], [1,2,3,4].map(i => c.getMark(ctx, `hokengai${i}Box`).box));
+  renderInstitute(ctx, data.clinicName ?? "", data.addressLines ?? [], c.getMark(ctx, "instituteBox").box);
 }
 
 function formatFutanWari(futanWari: string) {

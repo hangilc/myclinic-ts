@@ -3,7 +3,6 @@ import type { Op } from "../../compiler/op";
 import * as c from "@/lib/drawer/compiler/compiler";
 import * as b from "@/lib/drawer/compiler/box";
 import { type Box } from "@/lib/drawer/compiler/box";
-// import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
 
 export function drawShujii(data: ShujiiDrawerData): Op[] {
   let ctx = mkDrawerContext();
@@ -11,9 +10,6 @@ export function drawShujii(data: ShujiiDrawerData): Op[] {
   leftBox(ctx, b.mkBox(45, 80, 110, 95));
   rightBox(ctx, b.mkBox(133, 85, 176, 95));
   detail(ctx, b.mkBox(22, 164, 195, 185));
-  // console.log(createRendererInterface(ctx));
-  // console.log(createRendererMap(ctx))
-  // console.log(createRendererInputs(ctx))
   c.fillData(ctx, data);
 return c.getOps(ctx);
 }

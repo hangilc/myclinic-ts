@@ -25,17 +25,6 @@ export function mkRyouyouKeikakushoShokaiContext(): DrawerContext {
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoShokaiContext();
   c.fillData(ctx, data);
-  // {
-  //   c.setPen(ctx, "thin");
-  //   c.rect(ctx, paper);
-  // }
-  // {
-  //   c.setPen(ctx, "thin");
-  //   Object.keys(ctx.marks).forEach(mark => {
-  //     const box = c.getMark(ctx, mark);
-  //     c.rect(ctx, box);
-  //   });
-  // };
   return c.getOps(ctx);
 }
 

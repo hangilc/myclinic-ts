@@ -53,43 +53,43 @@ export function drawData(ctx: DrawerContext, data: ShohousenData) {
     drugs = parsedContent.drugs;
   }
   c.setTextColor(ctx, 0, 255, 0);
-  drawClinicInfo(ctx, c.getMark(ctx, "clinicInfoBox"),
+  drawClinicInfo(ctx, c.getMark(ctx, "clinicInfoBox").box,
     data.clinicAddress ?? "", data.clinicName ?? "",
     data.clinicPhone ?? "", data.clinicKikancode ?? "");
-  drawClinicPhone(ctx, c.getMark(ctx, "clinicPhoneBox"), data.clinicPhone ?? "");
-  drawDoctorName(ctx, c.getMark(ctx, "clinicDoctorBox"), data.doctorName ?? "");
+  drawClinicPhone(ctx, c.getMark(ctx, "clinicPhoneBox").box, data.clinicPhone ?? "");
+  drawDoctorName(ctx, c.getMark(ctx, "clinicDoctorBox").box, data.doctorName ?? "");
   c.setTextColor(ctx, 0, 0, 0);
-  drawHokenshaBangou(ctx, c.getMark(ctx, "hokenshaBangouBox"), data.hokenshaBangou ?? "");
-  drawHihokensha(ctx, c.getMark(ctx, "hihokenshaBox"), data.hihokensha ?? "");
-  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangouBox"), data.futansha ?? "");
-  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangouBox"), data.jukyuusha ?? "");
-  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangou2Box"), data.futansha2 ?? "");
-  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangou2Box"), data.jukyuusha2 ?? "");
-  drawShimei(ctx, c.getMark(ctx, "patientNameBox"), data.shimei ?? "");
+  drawHokenshaBangou(ctx, c.getMark(ctx, "hokenshaBangouBox").box, data.hokenshaBangou ?? "");
+  drawHihokensha(ctx, c.getMark(ctx, "hihokenshaBox").box, data.hihokensha ?? "");
+  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangouBox").box, data.futansha ?? "");
+  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangouBox").box, data.jukyuusha ?? "");
+  drawKouhiFutansha(ctx, c.getMark(ctx, "futanshaBangou2Box").box, data.futansha2 ?? "");
+  drawKouhiJukyuusha(ctx, c.getMark(ctx, "jukyuushaBangou2Box").box, data.jukyuusha2 ?? "");
+  drawShimei(ctx, c.getMark(ctx, "patientNameBox").box, data.shimei ?? "");
   drawDate(ctx,
-    c.getMark(ctx, "birthdayYearBox"),
-    c.getMark(ctx, "birthdayMonthBox"),
-    c.getMark(ctx, "birthdayDayBox"),
+    c.getMark(ctx, "birthdayYearBox").box,
+    c.getMark(ctx, "birthdayMonthBox").box,
+    c.getMark(ctx, "birthdayDayBox").box,
     data.birthdate ?? "");
-  drawSex(ctx, c.getMark(ctx, "sexMaleBox"), c.getMark(ctx, "sexFemaleBox"), data.sex ?? "");
+  drawSex(ctx, c.getMark(ctx, "sexMaleBox").box, c.getMark(ctx, "sexFemaleBox").box, data.sex ?? "");
   drawHokenKubun(ctx,
-    c.getMark(ctx, "patientHihokenshaBox"),
-    c.getMark(ctx, "patientHifuyoushaBox"),
+    c.getMark(ctx, "patientHihokenshaBox").box,
+    c.getMark(ctx, "patientHifuyoushaBox").box,
     data.hokenKubun ?? "");
   drawDate(ctx,
-    c.getMark(ctx, "issueYearBox"),
-    c.getMark(ctx, "issueMonthBox"),
-    c.getMark(ctx, "issueDayBox"),
+    c.getMark(ctx, "issueYearBox").box,
+    c.getMark(ctx, "issueMonthBox").box,
+    c.getMark(ctx, "issueDayBox").box,
     data.koufuDate ?? "");
   drawValidUpto(ctx, data.validUptoDate);
-  drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox"), c.getMark(ctx, "memoPaneBox"), drugs, memoLines);
+  drawDrugs(ctx, c.getMark(ctx, "drugsPaneBox").box, c.getMark(ctx, "memoPaneBox").box, drugs, memoLines);
 }
 
 function drawValidUpto(ctx: DrawerContext, date: string | undefined) {
   drawDate(ctx,
-    c.getMark(ctx, "validYearBox"),
-    c.getMark(ctx, "validMonthBox"),
-    c.getMark(ctx, "validDayBox"),
+    c.getMark(ctx, "validYearBox").box,
+    c.getMark(ctx, "validMonthBox").box,
+    c.getMark(ctx, "validDayBox").box,
     date ?? ""
   );
 }
