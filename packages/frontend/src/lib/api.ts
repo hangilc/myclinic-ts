@@ -8,6 +8,7 @@ import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 import { pipe } from "myclinic-model/pipe";
 import { mapNullOptional } from "myclinic-model/model";
+import type { ReferConfig } from "./refer";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1603,6 +1604,13 @@ export default {
 
   saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {
     return postRaw("save-ryouyou-keikakusho-master-text", text, { "patient-id": patientId.toString() }, castBoolean);
-  }
+  },
 
+  getConfig(name: string): Promise<any> {
+    return get("get-config", { name }, a => a);
+  },
+
+  setConfig(name: string, content: any): Promise<void> {
+    return post("set-config", content, { name }, a => a);
+  },
 };

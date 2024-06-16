@@ -6,6 +6,10 @@
   import type { ClinicInfo, Patient } from "myclinic-model";
   import { DateWrapper } from "myclinic-util";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
+  import type { ReferConfig } from "@/lib/refer";
+  import ReferConfigDialog from "@/lib/ReferConfigDialog.svelte";
+  import ChevronDown from "@/icons/ChevronDown.svelte";
+  import PopupMenu from "@/lib/PopupMenu.svelte";
 
   export let isVisible = false;
   let title = "紹介状";
@@ -21,9 +25,11 @@
   let issuerDoctorName = "";
   let patient: Patient | undefined = undefined;
   let clinicInfo: ClinicInfo | undefined = undefined;
+  let referConfig: ReferConfig[] = [];
 
   loadClinicInfo();
   initIssueDate();
+  loadConfig();
 
   function initIssueDate() {
     const today = DateWrapper.from(new Date());
@@ -31,13 +37,20 @@
   }
 
   async function loadClinicInfo() {
-    if( !clinicInfo ){
+    if (!clinicInfo) {
       clinicInfo = await api.getClinicInfo();
     }
     const cl = clinicInfo;
     address = `${cl.postalCode}\n${cl.address}\n電話 ${cl.tel}\nＦＡＸ ${cl.fax}`;
     clinicName = cl.name;
     issuerDoctorName = cl.doctorName;
+  }
+
+  async function loadConfig() {
+    const cfg = await api.getConfig("refer");
+    if (cfg != null) {
+      referConfig = cfg;
+    }
   }
 
   function initWithPatient(p: Patient) {
@@ -103,6 +116,37 @@
     initIssueDate();
     loadClinicInfo();
   }
+
+  async function doConfig() {
+    const curr = await api.getConfig("refer");
+    const d: ReferConfigDialog = new ReferConfigDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        configs: curr,
+        onEntered: (list: ReferConfig[]) => {
+          referConfig = list;
+        },
+      },
+    });
+  }
+
+  function doConfigPopup(evt: MouseEvent) {
+    const m: PopupMenu = new PopupMenu({
+      target: document.body,
+      props: {
+        event: evt,
+        menu: referConfig.map(cfg => {
+          const label = `${cfg.hospital}:${cfg.section}:${cfg.doctor}`;
+          return [label, () => {
+            referHospital = cfg.hospital;
+            referDoctor = [cfg.section, cfg.doctor].filter(s => s !== "").join("、");
+          }]
+        }),
+        destroy: () => m.$destroy(),
+      },
+    });
+  }
 </script>
 
 {#if isVisible}
@@ -113,17 +157,27 @@
     {:else}
       <button on:click={doClearPatient}>患者終了</button>
     {/if}
+    <a href="javascript:void(0)" style="margin-left:2em;" on:click={doConfig}
+      >Config</a
+    >
     {#if patient}
-    <div style="margin-top: 4px;">
-      ({patient.patientId}) {patient.lastName} {patient.firstName} 
-    </div>
+      <div style="margin-top: 4px;">
+        ({patient.patientId}) {patient.lastName}
+        {patient.firstName}
+      </div>
     {/if}
   </div>
   <div style="display:grid; grid-template-columns:auto 1fr;gap: 4px;">
     <span>表題：</span>
     <input type="text" bind:value={title} style="width: 6em;" />
     <span>医療機関</span>
-    <input type="text" bind:value={referHospital} style="width: 16em;" />
+    <div style="display:flex;items-align:center;">
+      <input type="text" bind:value={referHospital} style="width: 16em;" />
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <a style="margin-left:4px;cursor:pointer;" on:click={doConfigPopup}>
+        <ChevronDown />
+      </a>
+    </div>
     <span>医師</span>
     <div>
       <input type="text" bind:value={referDoctor} style="width: 16em;" /> 先生御机下

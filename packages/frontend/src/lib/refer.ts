@@ -1,0 +1,1 @@
+export interface ReferConfig { hospital: string, section: string, doctor: string }
