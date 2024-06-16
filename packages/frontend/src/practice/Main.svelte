@@ -16,6 +16,7 @@
   import PrintSetting from "./print-setting/PrintSetting.svelte";
   import Scan from "@/practice/scan/Scan.svelte";
   import Refer from "./refer/Refer.svelte";
+  import Shindansho from "./shindansho/Shindansho.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -45,6 +46,9 @@
     <Scan />
   {/if}
   <Refer isVisible={$serviceStore === "refer"} />
+  {#if $serviceStore === "shindansho"}
+    <Shindansho />
+  {/if}
   <Phone isVisible={$serviceStore === "phone"} />
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />

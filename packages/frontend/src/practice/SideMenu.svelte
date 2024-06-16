@@ -31,7 +31,7 @@
   <a href="javascript:void(0)" on:click={menu("print-setting")}>印刷設定</a>
   <a href="javascript:void(0)" on:click={menu("scan")}>スキャン</a>
   <a href="javascript:void(0)" on:click={menu("refer")}>紹介状</a>
-  <a href="javascript:void(0)">診断書</a>
+  <a href="javascript:void(0)" on:click={menu("shindansho")}>診断書</a>
   <a href="javascript:void(0)" on:click={menu("phone")}>電話</a>
   <a href="javascript:void(0)" on:click={menu("jihi-kenshin")}>自費健診</a>
   <a href="javascript:void(0)" on:click={menu("rcpt-check")}>レセプトチェック</a>
