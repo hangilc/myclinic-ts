@@ -10,6 +10,7 @@
   import ReferConfigDialog from "@/lib/ReferConfigDialog.svelte";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import PopupMenu from "@/lib/PopupMenu.svelte";
+  import type { ReferDrawerData } from "@/lib/drawer/forms/refer/refer-drawer-data";
 
   export let isVisible = false;
   let title = "紹介状";
@@ -61,16 +62,11 @@
     patientInfo = `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日生、${bd.getAge()}才、${sex}性`;
   }
 
-  function doView() {
-    let referDoctorValue: string = referDoctor.trim();
-    if (referDoctorValue === "") {
-      referDoctorValue = "                      ";
-    }
-    referDoctorValue += " 先生御机下";
-    let data = {
+  function composeFormData(): ReferDrawerData {
+    return {
       title,
       "refer-hospital": referHospital,
-      "refer-doctor": referDoctorValue,
+      "refer-doctor": referDoctor,
       "patient-name": patientName,
       "patient-info": patientInfo,
       diagnosis,
@@ -80,7 +76,30 @@
       "clinic-name": clinicName,
       "issuer-doctor-name": issuerDoctorName,
     };
+  }
 
+  function loadFormData(formData: ReferDrawerData) {
+    title = formData.title;
+    referHospital = formData["refer-hospital"];
+    referDoctor = formData["refer-doctor"];
+    patientName = formData["patient-name"];
+    patientInfo = formData["patient-info"];
+    diagnosis = formData.diagnosis;
+    content = formData.content;
+    issueDate = formData["issue-date"];
+    address = formData.address;
+    clinicName = formData["clinic-name"];
+    issuerDoctorName = formData["issuer-doctor-name"];
+  }
+
+  function doView() {
+    const formData = composeFormData();
+    let referDoctorValue: string = formData["refer-doctor"].trim();
+    if (referDoctorValue === "") {
+      referDoctorValue = "                      ";
+    }
+    referDoctorValue += " 先生御机下";
+    let data = Object.assign(formData, { "refer-doctor": referDoctorValue });
     let pages = drawRefer(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -136,16 +155,33 @@
       target: document.body,
       props: {
         event: evt,
-        menu: referConfig.map(cfg => {
+        menu: referConfig.map((cfg) => {
           const label = `${cfg.hospital}:${cfg.section}:${cfg.doctor}`;
-          return [label, () => {
-            referHospital = cfg.hospital;
-            referDoctor = [cfg.section, cfg.doctor].filter(s => s !== "").join("、");
-          }]
+          return [
+            label,
+            () => {
+              referHospital = cfg.hospital;
+              referDoctor = [cfg.section, cfg.doctor]
+                .filter((s) => s !== "")
+                .join("、");
+            },
+          ];
         }),
         destroy: () => m.$destroy(),
       },
     });
+  }
+
+  function doRecord() {
+    const formData = composeFormData();
+    const s = JSON.stringify(formData);
+    navigator.clipboard.writeText(s);
+    alert("クリップボードにコピーしました。");
+  }
+
+  async function doLoad() {
+    const formData = JSON.parse(await navigator.clipboard.readText());
+    loadFormData(formData);
   }
 </script>
 
@@ -202,5 +238,9 @@
     <span>発行医師</span>
     <input type="text" bind:value={issuerDoctorName} style="width: 16em;" />
   </div>
-  <button on:click={doView}>表示</button>
+  <div style="margin-top:10px;">
+    <button on:click={doView}>表示</button>
+    <button on:click={doRecord}>クリップボードへコピー</button>
+    <button on:click={doLoad}>クリップボードからペースト</button>
+  </div>
 {/if}
