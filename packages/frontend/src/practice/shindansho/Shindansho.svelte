@@ -1,45 +1,120 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
-  import DrawerSvg from "@/lib/drawer/DrawerSvg.svelte";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import {
     drawShindansho,
+    mkShindanshoDrawerData,
     type ShindanshoDrawerData,
   } from "@/lib/drawer/forms/shindansho/shindansho-drawer";
-  import { A4 } from "@/lib/drawer/compiler/paper-size";
+  import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
+  import type { ClinicInfo, Patient } from "myclinic-model";
+  import { DateWrapper } from "myclinic-util";
+  import api from "@/lib/api";
 
-  let data: ShindanshoDrawerData = {
-    "patient-name": "田中 一郎",
-    "birth-date": "平成2年3月21日生",
-    diagnosis: "高血圧症、高脂血症",
-    text: "血圧は 130/80 にコントロールされている。ＬＤＬコレステロールは 128 にコントロールされている。",
-    "issue-date": "令和2年8月7日",
-    "postal-code": "〒123-4567",
-    address: "東京都杉並区",
-    phone: "Tel: 03-1234-5678",
-    fax: "Fax: 03-4321-8765",
-    "clinic-name": "内科診療所",
-    "doctor-name": "診療太郎",
-  };
+  let data: ShindanshoDrawerData = mkShindanshoDrawerData();
+  let patient: Patient | undefined = undefined;
+  let clinicInfo: ClinicInfo | undefined = undefined;
 
-  // public String patientName = "田中 一郎";
-  // public String birthDate = "平成2年3月21日生";
-  // public String diagnosis = "高血圧症、高脂血症";
-  // public String text = "";
-  // public String issueDate = "令和2年8月7日";
-  // public String postalCode = "〒123-4567";
-  // public String address = "東京都杉並区";
-  // public String phone = "Tel: 03-1234-5678";
-  // public String fax = "Fax: 03-4321-8765";
-  // public String clinicName = "内科診療所";
-  // public String doctorName = "診療太郎";
+  initClinicInfo();
 
-  let ops = drawShindansho(data);
+  async function initClinicInfo() {
+    if (!clinicInfo) {
+      clinicInfo = await api.getClinicInfo();
+      setClinicInfo();
+    }
+  }
+
+  function setClinicInfo() {
+    if (clinicInfo) {
+      const cl = clinicInfo;
+      data = Object.assign(data, {
+        "postal-code": cl.postalCode,
+        address: cl.address,
+        phone: `Tel: ${cl.tel}`,
+        fax: `Fax: ${cl.fax}`,
+        "clinic-name": cl.name,
+        "doctor-name": cl.doctorName,
+      });
+    }
+  }
+
+  function doView() {
+    let ops = drawShindansho(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        ops: ops,
+        scale: 2,
+      },
+    });
+  }
+
+  function initPatient(p: Patient) {
+    patient = p;
+    const bd = DateWrapper.from(p.birthday);
+    data = Object.assign(mkShindanshoDrawerData(), {
+      "patient-name": `${p.lastName} ${p.firstName}`,
+      "birth-date": `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日生`,
+    });
+  }
+
+  function doSelectPatient() {
+    const d: SearchPatientDialog = new SearchPatientDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "患者選択",
+        onEnter: initPatient,
+      },
+    });
+  }
+
+  function doClear() {
+    patient = undefined;
+    data = mkShindanshoDrawerData();
+  }
 </script>
 
 <ServiceHeader title="診断書" />
-<DrawerSvg
-  {ops}
-  viewBox="0 0 211 298"
-  width={`${210 * 2}px`}
-  height={`${297 * 2}px`}
-/>
+<div style="margin:10px 0;">
+  <button on:click={doSelectPatient}>患者選択</button>
+  <a href="javascript:void(0)" on:click={doClear}>Clear</a>
+  <div style="margin-top: 10px;">
+    {#if patient === undefined}
+      （患者未選択）
+    {:else}
+      患者：({patient.patientId}) {patient.lastName}{patient.firstName}
+    {/if}
+  </div>
+</div>
+<div style="display:grid;grid-template-columns:max-content 16em;gap:4px;">
+  <span>patient-name</span>
+  <input type="text" bind:value={data["patient-name"]} />
+  <span>birth-date</span>
+  <input type="text" bind:value={data["birth-date"]} />
+  <span>diagnosis</span>
+  <input type="text" bind:value={data["diagnosis"]} />
+  <span>text</span>
+  <textarea
+    bind:value={data["text"]}
+    style="width: 26em;height:4em;resize:vertical;"
+  />
+  <span>issue-date</span>
+  <input type="text" bind:value={data["issue-date"]} />
+  <span>postal-code</span>
+  <input type="text" bind:value={data["postal-code"]} />
+  <span>address</span>
+  <input type="text" bind:value={data["address"]} />
+  <span>phone</span>
+  <input type="text" bind:value={data["phone"]} />
+  <span>fax</span>
+  <input type="text" bind:value={data["fax"]} />
+  <span>clinic-name</span>
+  <input type="text" bind:value={data["clinic-name"]} />
+  <span>doctor-name</span>
+  <input type="text" bind:value={data["doctor-name"]} />
+</div>
+<div>
+  <button on:click={doView}>表示</button>
+</div>
