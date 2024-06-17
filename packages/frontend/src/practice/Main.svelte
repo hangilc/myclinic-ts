@@ -27,7 +27,6 @@
       document.title = `(${p.patientId}) ${p.fullName("")}`;
     }
   });
-
 </script>
 
 <div>
@@ -37,7 +36,7 @@
   {/if}
   {#if $serviceStore === "fax-shohousen"}<FaxShohousen />{/if}
   <HoumonKango isVisible={$serviceStore === "houmon-kango"} />
-  <RyouyouKeikakusho isVisible={$serviceStore === "ryouyou-keikakusho"}/>
+  <RyouyouKeikakusho isVisible={$serviceStore === "ryouyou-keikakusho"} />
   <Shujii isVisible={$serviceStore === "shujii"} />
   {#if $serviceStore === "print-setting"}
     <PrintSetting />
@@ -49,10 +48,12 @@
   {#if $serviceStore === "shindansho"}
     <Shindansho />
   {/if}
-  <Phone isVisible={$serviceStore === "phone"} />
+  {#if $serviceStore === "phone"}
+    <Phone />
+  {/if}
   <JihiKenshin isVisible={$serviceStore === "jihi-kenshin"} />
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
-  <Henrei isVisible={$serviceStore === "henrei" } />
+  <Henrei isVisible={$serviceStore === "henrei"} />
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>
