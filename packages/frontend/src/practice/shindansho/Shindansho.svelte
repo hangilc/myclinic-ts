@@ -16,6 +16,12 @@
   let clinicInfo: ClinicInfo | undefined = undefined;
 
   initClinicInfo();
+  initIssueDate();
+
+  function initIssueDate() {
+    const today = DateWrapper.from(new Date());
+    data["issue-date"] = today.format1();
+  }
 
   async function initClinicInfo() {
     if (!clinicInfo) {
@@ -57,6 +63,8 @@
       "patient-name": `${p.lastName} ${p.firstName}`,
       "birth-date": `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日生`,
     });
+    setClinicInfo();
+    initIssueDate();
   }
 
   function doSelectPatient() {
@@ -73,6 +81,17 @@
   function doClear() {
     patient = undefined;
     data = mkShindanshoDrawerData();
+  }
+
+  function doRecord() {
+    const s = JSON.stringify(data);
+    navigator.clipboard.writeText(s);
+    alert("クリップボードにコピーしました。");
+  }
+
+  async function doLoad() {
+    const formData = JSON.parse(await navigator.clipboard.readText());
+    data = formData;
   }
 </script>
 
@@ -117,4 +136,6 @@
 </div>
 <div>
   <button on:click={doView}>表示</button>
+  <button on:click={doRecord}>クリップボードへコピー</button>
+  <button on:click={doLoad}>クリップボードからペースト</button>
 </div>

@@ -90,6 +90,10 @@ export class DateWrapper {
     return w.nen;
   }
 
+  format1(): string {
+    return `${this.getGengou()}${this.getNen()}年${this.getMonth()}月${this.getDay()}日`
+  }
+
   getAge(): number {
     return this.getAgeAt(new Date());
   }
