@@ -54,7 +54,7 @@
     {patient.firstNameYomi})
     {kanjidate.format(kanjidate.f2, patient.birthday)}生
     {kanjidate.calcAge(new Date(patient.birthday))}才
-    {sexRep(patient.sex)}姓
+    {sexRep(patient.sex)}性
     <a href="javascript:void(0)" on:click={toggleDetail}>詳細</a>
   </div>
   {#if showDetail}
