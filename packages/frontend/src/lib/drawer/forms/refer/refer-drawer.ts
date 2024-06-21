@@ -33,7 +33,6 @@ export function drawRefer(data: ReferDrawerData): Op[][] {
   }
   c.fillData(ctx, data);
   addPages(ctx, b.mkBox(30, b.height(paper) - 22, b.width(paper) - 30, b.height(paper) - 18));
-  c.rect(ctx, paper);
   return c.getPages(ctx);
 }
 
