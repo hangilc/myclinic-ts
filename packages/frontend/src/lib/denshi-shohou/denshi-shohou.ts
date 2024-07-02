@@ -1,10 +1,8 @@
 class Record {
-  group: number;
   recordNumber: number;
   code: string;
 
-  constructor(group: number, recordNumber: number, code: string) {
-    this.group = group;
+  constructor(recordNumber: number, code: string) {
     this.recordNumber = recordNumber;
     this.code = code;
   }
@@ -17,34 +15,240 @@ export class DenshiShohou {
     this.records = [];
   }
 
-  addRecord(group: number, recordNumber: number, values: string[]) {
-    this.records.push(new Record(group, recordNumber, values.join(",")));
+  addRecord(recordNumber: number, values: string[]) {
+    this.records.push(new Record(recordNumber, values.join(",")));
   }
 
-  医療機関情報(tensuuhyou: 点数表, kikanCode: string, todoufuken: 都道府県, name: string) {
-    this.addRecord(2, 1, [
-      点数表Map[tensuuhyou],
-      kikanCode,
-      都道府県Map[todoufuken],
-      name
+  // 医療機関情報グループ
+  医療機関レコード(医療機関コード種別: 点数表, 医療機関コード: string, 医療機関都道府県コード: 都道府県, 医療機関名称: string) {
+    this.addRecord(1, [
+      点数表Map[医療機関コード種別],
+      医療機関コード,
+      都道府県Map[医療機関都道府県コード],
+      医療機関名称
     ]);
   }
 
-  医療機関所在地レコード() {
-    this.addRecord(3, 2, [
+  医療機関所在地レコード(医療機関郵便番号: string | undefined, 医療機関所在地: string) {
+    this.addRecord(2, [
+      医療機関郵便番号 || "",
+      医療機関所在地
     ]);
   }
+
+  医療機関電話レコード(医療機関電話番号: string, ＦＡＸ番号: string | undefined, その他連絡先: string | undefined) {
+    this.addRecord(3, [
+      医療機関電話番号,
+      ＦＡＸ番号 || "",
+      その他連絡先 || "",
+    ]);
+  }
+
+  医療機関診療科レコード() {
+    this.addRecord(4, [
+
+    ]);
+  }
+
+  // 医師情報グループ
+  医師情報レコード() {
+    this.addRecord(5, [
+
+    ]);
+  }
+
+  // 患者情報グループ
+  患者氏名レコード() {
+    this.addRecord(11, [
+
+    ]);
+  }
+
+  患者性別レコード() {
+    this.addRecord(12, [
+
+    ]);
+  }
+  患者生年月日レコード() {
+    this.addRecord(13, [
+
+    ]);
+  }
+
+  患者一部負担区分レコード() {
+    this.addRecord(14, [
+
+    ]);
+  }
+
+  保険種別レコード() {
+    this.addRecord(21, [
+
+    ]);
+  }
+
+  保険者番号レコード() {
+    this.addRecord(22, [
+
+    ]);
+  }
+
+  記号番号レコード() {
+    this.addRecord(23, [
+
+    ]);
+  }
+
+  負担給付率レコード() {
+    this.addRecord(24, [
+
+    ]);
+  }
+
+  職務上の事由レコード() {
+    this.addRecord(25, [
+
+    ]);
+  }
+
+  第一公費レコード() {
+    this.addRecord(27, [
+
+    ]);
+  }
+
+  第二公費レコード() {
+    this.addRecord(28, [
+
+    ]);
+  }
+
+  第三公費レコード() {
+    this.addRecord(29, [
+
+    ]);
+  }
+
+  特殊公費レコード() {
+    this.addRecord(30, [
+
+    ]);
+  }
+
+  レセプト種別レコード() {
+    this.addRecord(31, [
+
+    ]);
+  }
+
+  // 処方箋管理情報グループ
+  処方箋交付年月日レコード() {
+    this.addRecord(51, [
+
+    ]);
+  }
+
+  使用期限年月日レコード() {
+    this.addRecord(52, [
+
+    ]);
+  }
+
+  麻薬施用レコード() {
+    this.addRecord(60, [
+
+    ]);
+  }
+
+  残薬確認欄レコード() {
+    this.addRecord(62, [
+
+    ]);
+  }
+
+  備考レコード() {
+    this.addRecord(81, [
+
+    ]);
+  }
+
+  処方箋番号レコード() {
+    this.addRecord(82, [
+
+    ]);
+  }
+
+  // RP 剤情報グループ
+  剤形レコード() {
+    this.addRecord(101, [
+
+    ]);
+  }
+
+  用法レコード() {
+    this.addRecord(111, [
+
+    ]);
+  }
+
+  用法補足レコード() {
+    this.addRecord(181, [
+
+    ]);
+  }
+
+  薬品レコード() {
+    this.addRecord(201, [
+
+    ]);
+  }
+
+  単位変換レコード() {
+    this.addRecord(211, [
+
+    ]);
+  }
+
+  不均等レコード() {
+    this.addRecord(221, [
+
+    ]);
+  }
+
+  負担区分レコード() {
+    this.addRecord(231, [
+
+    ]);
+  }
+
+  薬品１回服用量レコード() {
+    this.addRecord(241, [
+
+    ]);
+  }
+
+  薬品補足レコード() {
+    this.addRecord(281, [
+
+    ]);
+  }
+
+  提供診療情報レコード() {
+    this.addRecord(301, [
+
+    ]);
+  }
+
+  検査値データ等レコード() {
+    this.addRecord(302, [
+
+    ]);
+  }
+
 
   output(): string {
     const recs: Record[] = [...this.records];
-    recs.sort((a, b) => {
-      const g = a.group - b.group;
-      if( g !== 0 ){
-        return g;
-      } else {
-        return a.recordNumber - b.recordNumber;
-      }
-    });
+    recs.sort((a, b) => a.recordNumber - b.recordNumber);
     return ["SJ1", ...recs.map(r => r.code)].map(code => `${code}\n`).join("");
   }
 }
@@ -107,3 +311,88 @@ const 都道府県Map = {
 } as const;
 
 export type 都道府県 = keyof typeof 都道府県Map;
+
+const 診療科コード種別Map = {
+  "コードなし": "1",
+  "診療科コード": "2",
+} as const;
+
+export type 診療科コード種別 = keyof typeof 診療科コード種別Map;
+
+const 診療科コードMap = {
+  内科: "01",
+  精神科: "02",
+  小児科: "09",
+  外科: "10",
+  皮膚科: "19",
+  ひ尿器科: "20",
+  産婦人科: "23",
+  眼科: "26",
+  耳鼻いんこう科: "27",
+  放射線科: "30",
+  麻酔科: "31",
+  アレルギー科: "34",
+  リウマチ科: "35",
+  リハビリテーション科: "36",
+  病理診断科: "37",
+  臨床検査科: "38",
+  救急科: "39",
+  神経科: "03",
+  神経内科: "04",
+  呼吸器科: "05",
+  消化器科: "06",
+  胃腸科: "07",
+  循環器科: "08",
+  整形外科: "11",
+  形成外科: "12",
+  美容外科: "13",
+  脳神経外科: "14",
+  呼吸器外科: "15",
+  心臓血管外科: "16",
+  小児外科: "17",
+  皮膚ひ尿器科: "18",
+  性病科: "21",
+  肛門科: "22",
+  産科: "24",
+  婦人科: "25",
+  気管食道科: "28",
+  心療内科: "33",
+} as const;
+
+export type 診療科コード = keyof typeof 診療科コードMap;
+
+const 性別コードMap = {
+  男: "1",
+  女: "2",
+} as const;
+
+export type 性別コード = keyof typeof 性別コードMap;
+
+const 保険一部負担金区分コードMap = {
+  高齢者一般: "1",
+  高齢者７割: "2",
+  年齢６歳未満: "3",
+  高齢者８割: "5",
+} as const;
+
+export type 保険一部負担金区分コード = keyof typeof 保険一部負担金区分コードMap;
+
+const 保険種別コードMap = {
+  医保: "1",
+  国保: "2",
+  後期高齢者f: "7",
+} as const;
+
+export type 保険種別コード = keyof typeof 保険種別コードMap;
+
+const 被保険者等種別Map = {
+  被保険者: "1",
+  被扶養者: "2",
+} as const;
+
+export type 被保険者等種別 = keyof typeof 被保険者等種別Map;
+
+ 
+
+
+
