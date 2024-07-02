@@ -47,7 +47,7 @@ export class DenshiShohou {
   医療機関診療科レコード(診療科コード種別: 診療科コード種別, 診療科コード: 診療科コード | undefined, 診療科名: string) {
     this.addRecord(4, [
       診療科コード種別Map[診療科コード種別],
-      診療科コード ? 診療科コードMap[診療科コード] : "",
+      診療科コード !== undefined ? 診療科コードMap[診療科コード] : "",
       診療科名,
     ]);
   }
@@ -153,115 +153,181 @@ export class DenshiShohou {
     ]);
   }
 
-  レセプト種別レコード() {
+  レセプト種別レコード(レセプト種別コード: string) {
     this.addRecord(31, [
-
+      レセプト種別コード,
     ]);
   }
 
   // 処方箋管理情報グループ
-  処方箋交付年月日レコード() {
+  処方箋交付年月日レコード(処方箋交付年月日: string) {
     this.addRecord(51, [
-
+      処方箋交付年月日,
     ]);
   }
 
-  使用期限年月日レコード() {
+  使用期限年月日レコード(使用期限年月日: string) {
     this.addRecord(52, [
-
+      使用期限年月日,
     ]);
   }
 
-  麻薬施用レコード() {
+  麻薬施用レコード(麻薬施用者免許番号: string, 麻薬施用患者住所: string, 麻薬施用患者電話番号: string) {
     this.addRecord(60, [
-
+      麻薬施用者免許番号,
+      麻薬施用患者住所,
+      麻薬施用患者電話番号,
     ]);
   }
 
-  残薬確認欄レコード() {
+  残薬確認欄レコード(残薬確認対応フラグ: 残薬確認対応フラグ) {
     this.addRecord(62, [
-
+      残薬確認対応フラグMap[残薬確認対応フラグ],
     ]);
   }
 
-  備考レコード() {
+  備考レコード(備考連番: number, 備考種別: 備考種別 | undefined, 備考: string) {
     this.addRecord(81, [
-
+      備考連番.toString(),
+      備考種別 !== undefined ? 備考種別Map[備考種別] : "",
+      備考,
     ]);
   }
 
-  処方箋番号レコード() {
+  処方箋番号レコード(引換番号: string) {
     this.addRecord(82, [
-
+      "1",
+      引換番号,
     ]);
   }
 
   // RP 剤情報グループ
-  剤形レコード() {
+  剤形レコード(RP番号: number, 剤形区分: 剤形区分, 剤形名称: string | undefined, 調剤数量: number,) {
     this.addRecord(101, [
-
-    ]);
+      RP番号.toString(),
+      剤形区分Map[剤形区分],
+      剤形名称 ?? "",
+      調剤数量.toString(),
+    ]); 
   }
 
-  用法レコード() {
+  用法レコード(RP番号: number, 用法コード: string | undefined, 用法名称: string, 用法１日回数: number | undefined) {
     this.addRecord(111, [
-
+      RP番号.toString(),
+      "3", // 用法コード種別 = 電子処方箋用法マスタ
+      用法コード ?? "0X0XXXXXXXXX0000",
+      用法名称,
+      用法１日回数 !== undefined ? 用法１日回数.toString() : "",
     ]);
   }
 
-  用法補足レコード() {
+  用法補足レコード(RP番号: number, RP補足連番: number, 用法補足区分: 用法補足区分 | undefined, 
+    用法補足情報: string, 補足用法コード: string | undefined, 部位コード: string | undefined,
+  ) {
     this.addRecord(181, [
-
+      RP番号.toString(),
+      RP補足連番.toString(),
+      用法補足区分 !== undefined ? 用法補足区分Map[用法補足区分] : "",
+      用法補足情報,
+      補足用法コード ?? "",
+      部位コード ?? "",
     ]);
   }
 
-  薬品レコード() {
+  薬品レコード(RP番号: number, RP内連番: number, 情報区分: 情報区分, 薬品コード種別: 薬品コード種別,
+    薬品コード: string, 薬品名称: string, 分量: string, 力価フラグ: 力価フラグ, 単位名: string,
+  ) {
     this.addRecord(201, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      情報区分Map[情報区分],
+      薬品コード種別Map[薬品コード種別],
+      薬品コード,
+      薬品名称,
+      分量,
+      力価フラグMap[力価フラグ],
+      単位名,
     ]);
   }
 
-  単位変換レコード() {
+  単位変換レコード(RP番号: number, RP内連番: number, 単位変換係数: string) {
     this.addRecord(211, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      単位変換係数,
     ]);
   }
 
-  不均等レコード() {
+  不均等レコード(RP番号: number, RP内連番: number, 不均等１回目服用量: string, 不均等２回目服用量: string, 
+    不均等３回目服用量: string | undefined, 不均等４回目服用量: string | undefined,
+    不均等５回目服用量: string | undefined,
+  ) {
     this.addRecord(221, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      不均等１回目服用量,
+      不均等２回目服用量,
+      不均等３回目服用量 ?? "",
+      不均等４回目服用量 ?? "",
+      不均等５回目服用量 ?? "",
+      "",
+      "",
+      "",
+      "",
+      "",
     ]);
   }
 
-  負担区分レコード() {
+  負担区分レコード(RP番号: number, RP内連番: number, 第一公費負担区分: boolean, 第二公費負担区分: boolean,
+    第三公費負担区分: boolean, 特殊公費負担区分: boolean, 
+  ) {
     this.addRecord(231, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      第一公費負担区分 ? "1" : "",
+      第二公費負担区分 ? "1" : "",
+      第三公費負担区分 ? "1" : "",
+      特殊公費負担区分 ? "1" : "",
     ]);
   }
 
-  薬品１回服用量レコード() {
+  薬品１回服用量レコード(RP番号: number, RP内連番: number, 薬剤１回服用量: string,
+    薬剤１日服用回数: number | undefined,
+  ) {
     this.addRecord(241, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      薬剤１回服用量,
+      薬剤１日服用回数 !== undefined ? 薬剤１日服用回数.toString() : "",
     ]);
   }
 
-  薬品補足レコード() {
+  薬品補足レコード(RP番号: number, RP内連番: number, 薬品補足連番: number,
+    薬品補足区分: 薬品補足区分 | undefined, 薬品補足情報: string,
+  ) {
     this.addRecord(281, [
-
+      RP番号.toString(),
+      RP内連番.toString(),
+      薬品補足連番.toString(),
+      薬品補足区分 !== undefined ? 薬品補足区分Map[薬品補足区分] : "",
+      薬品補足情報,
+      "",
     ]);
   }
 
-  提供診療情報レコード() {
+  提供診療情報レコード(提供診療情報連番: number, 薬品名称: string | undefined, コメント: string) {
     this.addRecord(301, [
-
+      提供診療情報連番.toString(),
+      薬品名称 ?? "",
+      コメント,
     ]);
   }
 
-  検査値データ等レコード() {
+  検査値データ等レコード(検査値データ等連番: number, 検査値データ等: string) {
     this.addRecord(302, [
-
-    ]);
-  }
+      検査値データ等連番.toString(),
+      検査値データ等,
+    ]);  }
 
 
   output(): string {
@@ -458,6 +524,19 @@ const 用法補足区分Map = {
 
 export type 用法補足区分 = keyof typeof 用法補足区分Map;
 
+const 情報区分Map = {
+  "医薬品": "1",
+  "医療材料": "2",
+} as const;
+
+export type 情報区分 = keyof typeof 情報区分Map;
+
+const 力価フラグMap = {
+
+} as const;
+
+export type 力価フラグ = keyof typeof 力価フラグMap;
+
 const 薬品コード種別Map = {
   レセプト電算処理システム用コード: "2",
   YJコード: "4",
@@ -478,4 +557,16 @@ const 薬品補足区分Map = {
 
 export type 薬品補足区分 = keyof typeof 薬品補足区分Map;
 
+const 頻用用法コードMap = {
+  "１日１回起床時　服用": "1011000090000000",
+  "１日１回朝食前　服用": "1011000100000000",
+  "１日１回朝食後　服用" : "1011000400000000",
+  "１日１回昼食後　服用" : "1011004000000000",
+  "１日１回夕食後　服用" : "1011040000000000",
+  "１日１回就寝前　服用" : "1011100000000000",
+  "１日２回朝夕食後　服用" : "1012040400000000",
+  "１日３回朝昼夕食後　服用" : "1013044400000000",
+  "疼痛時　服用" : "1050110000000000",
+} as const;
 
+export type 頻用用法コード = keyof typeof 頻用用法コードMap;
