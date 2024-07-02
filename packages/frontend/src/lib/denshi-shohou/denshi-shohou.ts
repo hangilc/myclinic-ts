@@ -371,7 +371,7 @@ export type 性別コード = keyof typeof 性別コードMap;
 const 保険一部負担金区分コードMap = {
   高齢者一般: "1",
   高齢者７割: "2",
-  年齢６歳未満: "3",
+  "６歳未満": "3",
   高齢者８割: "5",
 } as const;
 
@@ -392,7 +392,72 @@ const 被保険者等種別Map = {
 
 export type 被保険者等種別 = keyof typeof 被保険者等種別Map;
 
- 
+const 職務上の事由コードMap = {
+  職務上: "1",
+  下船後3ヶ月以内: "2",
+  通勤災害: "3",
+} as const;
 
+export type 職務上の事由コード = keyof typeof 職務上の事由コードMap;
+
+const 残薬確認対応フラグMap = {
+  保険医療機関へ疑義照会した上で調剤f: "1",
+  保険医療機関へ情報提供: "2",
+} as const;
+
+export type 残薬確認対応フラグ = keyof typeof 残薬確認対応フラグMap;
+
+const 備考種別Map = {
+  "一包化": "1",
+  粉砕: "2",
+} as const;
+
+export type 備考種別 = keyof typeof 備考種別Map;
+
+const 剤形区分Map = {
+  内服: "1",
+  頓服: "2",
+  外用: "3",
+  内服滴剤: "4",
+  注射: "5",
+  医療材料: "6",
+  不明: "9",
+} as const;
+
+export type 剤形区分 = keyof typeof 剤形区分Map;
+
+const 用法補足区分Map = {
+  漸減: "1",
+  "一包化": "2",
+  隔日: "3",
+  粉砕: "4",
+  用法の続き: "5",
+  部位: "6",
+  "１回使用量": "7",
+  JAMI補足用法:  "8",
+  JAMI部位: "9",
+} as const;
+
+export type 用法補足区分 = keyof typeof 用法補足区分Map;
+
+const 薬品コード種別Map = {
+  レセプト電算処理システム用コード: "2",
+  YJコード: "4",
+  "一般名コード": "7",
+} as const;
+
+export type 薬品コード種別 = keyof typeof 薬品コード種別Map;
+
+const 薬品補足区分Map = {
+  "一包化": "1",
+  粉砕: "2",
+  後発品変更不可: "3",
+  剤形変更不可: "4",
+  含量規格変更不可: "5",
+  剤形変更不可及び含量規格変更不可: "6",
+  JAMI補足用法: "7",
+} as const;
+
+export type 薬品補足区分 = keyof typeof 薬品補足区分Map;
 
 
