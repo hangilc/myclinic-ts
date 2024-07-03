@@ -1,4 +1,9 @@
-import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別 } from "./denshi-shohou";
+import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード } from "./denshi-shohou";
+
+export interface 公費レコード {
+  公費負担者番号: string;
+  公費受給者番号?: string;
+}
 
 export interface PrescInfoData {
   医療機関コード種別: 点数表;
@@ -29,10 +34,15 @@ export interface PrescInfoData {
   被保険者証番号: string;
   被保険者被扶養者: 被保険者等種別;
   被保険者証枝番?: string;
+  負担割合?: number; // 患者負担割合
+  職務上の事由?: 職務上の事由コード;
+  第一公費レコード?: 公費レコード;
+  第二公費レコード?: 公費レコード;
+  第三公費レコード?: 公費レコード;
+  特殊公費レコード?: 公費レコード;
+  レセプト種別コード?: string;
 }
 
-// 記号番号レコード(被保険者証記号: string | undefined, 被保険者証番号: string, 被保険者被扶養者: 被保険者等種別,
-//   被保険者証枝番: string | undefined
 
 export function createPrescInfo(data: PrescInfoData): string {
   const shohou = new DenshiShohou();
@@ -61,5 +71,39 @@ export function createPrescInfo(data: PrescInfoData): string {
     data.被保険者被扶養者,
     data.被保険者証枝番,
   )
+  if( data.負担割合 !== undefined ){
+    const futan = data.負担割合;
+    let 患者負担率;
+    let 保険給付率;
+    if( futan === 0 ){
+      患者負担率 = "000";
+      保険給付率 = "100";
+    } else if( futan > 0 && futan < 10 ) {
+      患者負担率 = `0${futan}0`;
+      保険給付率 = `0${10-futan}0`;
+    } else {
+      throw new Error(`Invalid 負担割: ${futan}`)
+    }
+    shohou.負担給付率レコード(患者負担率, 保険給付率);
+  }
+  if( data.職務上の事由 !== undefined ){
+    shohou.職務上の事由レコード(data.職務上の事由);
+  }
+  if( data.第一公費レコード !== undefined ){
+    shohou.第一公費レコード(data.第一公費レコード.公費負担者番号, data.第一公費レコード.公費受給者番号);
+  }
+  if( data.第二公費レコード !== undefined ){
+    shohou.第二公費レコード(data.第二公費レコード.公費負担者番号, data.第二公費レコード.公費受給者番号);
+  }
+  if( data.第三公費レコード !== undefined ){
+    shohou.第三公費レコード(data.第三公費レコード.公費負担者番号, data.第三公費レコード.公費受給者番号);
+  }
+  if( data.特殊公費レコード !== undefined ){
+    shohou.特殊公費レコード(data.特殊公費レコード.公費負担者番号, data.特殊公費レコード.公費受給者番号);
+  }
+  if( data.レセプト種別コード !== undefined ){
+    shohou.レセプト種別レコード(data.レセプト種別コード);
+  }
   return shohou.output();
 }
+
