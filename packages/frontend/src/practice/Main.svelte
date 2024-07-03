@@ -17,6 +17,7 @@
   import Scan from "@/practice/scan/Scan.svelte";
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
+  import { createPrescInfo } from "@/lib/denshi-shohou/presc-info";
 
   export let serviceStore: Writable<string>;
 
@@ -27,6 +28,39 @@
       document.title = `(${p.patientId}) ${p.fullName("")}`;
     }
   });
+
+  function devShohou() {
+    console.log(
+      createPrescInfo({
+        医療機関コード種別: "医科",
+        医療機関コード: "1234567",
+        医療機関都道府県コード: "東京",
+        医療機関名称: "仮想医院",
+        医療機関郵便番号: "123-4567",
+        医療機関所在地: "東京都某所",
+        医療機関電話番号: "03-1234-5678",
+        ＦＡＸ番号: "03-1234-7777",
+        その他連絡先: "user@example.com",
+        診療科レコード: {
+          診療科コード種別: "診療科コード",
+          診療科コード: "内科",
+        },
+        医師漢字氏名: "診療　太郎",
+        患者コード: "1234",
+        患者漢字氏名: "診療　花子", // 性と名は全角スペースで区切る。
+        患者カナ氏名: "ｼﾝﾘｮｳ ﾊﾅｺ", // 半角カナで記録する。姓と名は半角スペースで区切る。
+        患者性別: "女",
+        患者生年月日: "19600712",
+        保険一部負担金区分: "高齢者一般",
+        保険種別: "後期高齢者",
+        保険者番号: "01234567",
+        被保険者証記号: "記号",
+        被保険者証番号: "123456",
+        被保険者被扶養者: "被保険者",
+        被保険者証枝番: "01",
+      })
+    );
+  }
 </script>
 
 <div>
@@ -56,4 +90,8 @@
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei"} />
   <BigChar isVisible={$serviceStore === "big-char"} />
+
+  <div>
+    <button on:click={devShohou}>処方</button>
+  </div>
 </div>

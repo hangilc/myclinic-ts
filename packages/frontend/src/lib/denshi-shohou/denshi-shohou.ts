@@ -6,6 +6,10 @@ class Record {
     this.recordNumber = recordNumber;
     this.code = code;
   }
+
+  render(): string {
+    return `${this.recordNumber},${this.code}`;
+  }
 }
 
 export class DenshiShohou {
@@ -62,9 +66,9 @@ export class DenshiShohou {
   }
 
   // 患者情報グループ
-  患者氏名レコード(患者コード: string, 患者漢字氏名: string, 患者カナ氏名: string) {
+  患者氏名レコード(患者コード: string | undefined, 患者漢字氏名: string, 患者カナ氏名: string) {
     this.addRecord(11, [
-      患者コード || "",
+      患者コード ?? "",
       患者漢字氏名,
       患者カナ氏名,
     ]);
@@ -332,8 +336,7 @@ export class DenshiShohou {
 
   output(): string {
     const recs: Record[] = [...this.records];
-    recs.sort((a, b) => a.recordNumber - b.recordNumber);
-    return ["SJ1", ...recs.map(r => r.code)].map(code => `${code}\n`).join("");
+    return ["SJ1", ...recs.map(r => r.render())].map(code => `${code}\n`).join("");
   }
 }
 
@@ -403,7 +406,7 @@ const 診療科コード種別Map = {
 
 export type 診療科コード種別 = keyof typeof 診療科コード種別Map;
 
-const 診療科コードMap = {
+export const 診療科コードMap = {
   内科: "01",
   精神科: "02",
   小児科: "09",
@@ -464,7 +467,7 @@ export type 保険一部負担金区分コード = keyof typeof 保険一部負�
 const 保険種別コードMap = {
   医保: "1",
   国保: "2",
-  後期高齢者f: "7",
+  後期高齢者: "7",
 } as const;
 
 export type 保険種別コード = keyof typeof 保険種別コードMap;
