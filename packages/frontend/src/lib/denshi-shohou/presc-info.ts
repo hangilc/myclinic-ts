@@ -1,4 +1,4 @@
-import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ } from "./denshi-shohou";
+import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分 } from "./denshi-shohou";
 
 export interface 公費レコード {
   公費負担者番号: string;
@@ -48,6 +48,7 @@ export interface PrescInfoData {
   備考レコード?: 備考レコード[];
   引換番号?: string;
   RP剤情報グループ: RP剤情報[];
+  提供情報レコード?: 提供情報レコード;
 }
 
 export interface 麻薬施用レコード {
@@ -88,6 +89,9 @@ export interface 薬品情報 {
   薬品レコード: 薬品レコード;
   単位変換レコード?: string;
   不均等レコード?: 不均等レコード;
+  負担区分レコード?: 負担区分レコード;
+  薬品１回服用量レコード?: 薬品１回服用量レコード;
+  薬品補足レコード?: 薬品補足レコード[];
 }
 
 export interface 薬品レコード {
@@ -104,6 +108,34 @@ export interface 不均等レコード {
   不均等１回目服用量: string; 不均等２回目服用量: string;
   不均等３回目服用量?: string; 不均等４回目服用量?: string;
   不均等５回目服用量?: string;
+}
+
+export interface 負担区分レコード {
+  第一公費負担区分?: boolean; 第二公費負担区分?: boolean;
+  第三公費負担区分?: boolean; 特殊公費負担区分?: boolean;
+}
+
+export interface 薬品１回服用量レコード {
+  薬剤１回服用量: string;
+  薬剤１日服用回数?: number;
+}
+
+export interface 薬品補足レコード {
+  薬品補足情報: string;
+}
+
+export interface 提供情報レコード {
+  提供診療情報レコード?: 提供診療情報レコード[];
+  検査値データ等レコード?: 検査値データ等レコード[];
+}
+
+export interface 提供診療情報レコード {
+  薬品名称?: string;
+  コメント: string;
+}
+
+export interface 検査値データ等レコード {
+  検査値データ等: string;
 }
 
 export function createPrescInfo(data: PrescInfoData): string {
@@ -231,18 +263,55 @@ export function createPrescInfo(data: PrescInfoData): string {
           }
         }
         {
-          if( drug.不均等レコード !== undefined ){
+          if (drug.不均等レコード !== undefined) {
             const f = drug.不均等レコード;
             shohou.不均等レコード(RP番号, RP内連番, f.不均等１回目服用量, f.不均等２回目服用量,
               f.不均等３回目服用量, f.不均等４回目服用量, f.不均等５回目服用量,
             );
           }
         }
+        {
+          if (drug.負担区分レコード !== undefined) {
+            const f = drug.負担区分レコード;
+            shohou.負担区分レコード(RP番号, RP内連番, f.第一公費負担区分, f.第二公費負担区分,
+              f.第三公費負担区分, f.特殊公費負担区分,
+            );
+          }
+        }
+        {
+          if( drug.薬品１回服用量レコード !== undefined ){
+            const f = drug.薬品１回服用量レコード;
+            shohou.薬品１回服用量レコード(RP番号, RP内連番, f.薬剤１回服用量, f.薬剤１日服用回数);
+          }
+        }
+        {
+          if( drug.薬品補足レコード !== undefined ){
+            drug.薬品補足レコード.forEach((rec, k) => {
+              const 薬品補足連番 = k + 1;
+              const 薬品補足情報 = rec.薬品補足情報;
+              let 薬品補足区分: 薬品補足区分 | undefined = tryCastTo薬品補足区分(薬品補足情報);
+              shohou.薬品補足レコード(RP番号, RP内連番, 薬品補足連番, 薬品補足区分, 薬品補足情報);
+            })
+          }
+        }
       });
     }
   });
+  if( data.提供情報レコード !== undefined ){
+    (data.提供情報レコード.提供診療情報レコード ?? []).forEach((rec, i) => {
+      const 提供診療情報連番 = i + 1;
+      shohou.提供診療情報レコード(提供診療情報連番, rec.薬品名称, rec.コメント); 
+    });
+    (data.提供情報レコード.検査値データ等レコード ?? []).forEach((rec, i) => {
+      const 検査値データ等連番 = i + 1;
+      shohou.検査値データ等レコード(検査値データ等連番, rec.検査値データ等); 
+    });
+  }
   return shohou.output();
 }
+
+
+
 
 
 

@@ -282,8 +282,9 @@ export class DenshiShohou {
     ]);
   }
 
-  負担区分レコード(RP番号: number, RP内連番: number, 第一公費負担区分: boolean, 第二公費負担区分: boolean,
-    第三公費負担区分: boolean, 特殊公費負担区分: boolean,
+  負担区分レコード(RP番号: number, RP内連番: number, 第一公費負担区分: boolean | undefined,
+    第二公費負担区分: boolean | undefined,
+    第三公費負担区分: boolean | undefined, 特殊公費負担区分: boolean | undefined,
   ) {
     this.addRecord(231, [
       RP番号.toString(),
@@ -550,7 +551,17 @@ const 薬品コード種別Map = {
 
 export type 薬品コード種別 = keyof typeof 薬品コード種別Map;
 
-const 薬品補足区分Map = {
+export const 薬品補足区分Keys = [
+  "一包化",
+  "粉砕",
+  "後発品変更不可",
+  "剤形変更不可",
+  "含量規格変更不可",
+  "剤形変更不可及び含量規格変更不可",
+  "JAMI補足用法",
+] as const;
+
+export const 薬品補足区分Map: { [key in typeof 薬品補足区分Keys[number]]: string } = {
   "一包化": "1",
   粉砕: "2",
   後発品変更不可: "3",
@@ -560,7 +571,11 @@ const 薬品補足区分Map = {
   JAMI補足用法: "7",
 } as const;
 
-export type 薬品補足区分 = keyof typeof 薬品補足区分Map;
+export type 薬品補足区分 = typeof 薬品補足区分Keys[number];
+
+export function tryCastTo薬品補足区分(key: string): 薬品補足区分 | undefined {
+  return 薬品補足区分Keys.find(k => k == key);
+}
 
 const 頻用用法コードMap = {
   "１日１回起床時　服用": "1011000090000000",
