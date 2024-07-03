@@ -1,4 +1,4 @@
-import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード } from "./denshi-shohou";
+import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ } from "./denshi-shohou";
 
 export interface 公費レコード {
   公費負担者番号: string;
@@ -41,8 +41,70 @@ export interface PrescInfoData {
   第三公費レコード?: 公費レコード;
   特殊公費レコード?: 公費レコード;
   レセプト種別コード?: string;
+  処方箋交付年月日: string;
+  使用期限年月日?: string;
+  麻薬施用レコード?: 麻薬施用レコード;
+  残薬確認対応フラグ?: 残薬確認対応フラグ;
+  備考レコード?: 備考レコード[];
+  引換番号?: string;
+  RP剤情報グループ: RP剤情報[];
 }
 
+export interface 麻薬施用レコード {
+  麻薬施用者免許番号: string;
+  麻薬施用患者住所: string;
+  麻薬施用患者電話番号: string;
+}
+
+export interface 備考レコード {
+  備考: string;
+}
+
+export interface RP剤情報 {
+  剤形レコード: 剤形レコード;
+  用法レコード: 用法レコード;
+  用法補足レコード?: 用法補足レコード[];
+  薬品情報グループ: 薬品情報[];
+}
+
+export interface 剤形レコード {
+  剤形区分: 剤形区分;
+  剤形名称?: string;
+  調剤数量: number;
+}
+
+export interface 用法レコード {
+  用法コード: string | undefined;
+  用法名称: string;
+  用法１日回数: number | undefined;
+}
+
+export interface 用法補足レコード {
+  用法補足区分?: 用法補足区分;
+  用法補足情報: string;
+}
+
+export interface 薬品情報 {
+  薬品レコード: 薬品レコード;
+  単位変換レコード?: string;
+  不均等レコード?: 不均等レコード;
+}
+
+export interface 薬品レコード {
+  情報区分: 情報区分;
+  薬品コード種別: 薬品コード種別;
+  薬品コード: string;
+  薬品名称: string;
+  分量: string;
+  力価フラグ: 力価フラグ;
+  単位名: string;
+}
+
+export interface 不均等レコード {
+  不均等１回目服用量: string; 不均等２回目服用量: string;
+  不均等３回目服用量?: string; 不均等４回目服用量?: string;
+  不均等５回目服用量?: string;
+}
 
 export function createPrescInfo(data: PrescInfoData): string {
   const shohou = new DenshiShohou();
@@ -71,39 +133,117 @@ export function createPrescInfo(data: PrescInfoData): string {
     data.被保険者被扶養者,
     data.被保険者証枝番,
   )
-  if( data.負担割合 !== undefined ){
+  if (data.負担割合 !== undefined) {
     const futan = data.負担割合;
     let 患者負担率;
     let 保険給付率;
-    if( futan === 0 ){
+    if (futan === 0) {
       患者負担率 = "000";
       保険給付率 = "100";
-    } else if( futan > 0 && futan < 10 ) {
+    } else if (futan > 0 && futan < 10) {
       患者負担率 = `0${futan}0`;
-      保険給付率 = `0${10-futan}0`;
+      保険給付率 = `0${10 - futan}0`;
     } else {
       throw new Error(`Invalid 負担割: ${futan}`)
     }
     shohou.負担給付率レコード(患者負担率, 保険給付率);
   }
-  if( data.職務上の事由 !== undefined ){
+  if (data.職務上の事由 !== undefined) {
     shohou.職務上の事由レコード(data.職務上の事由);
   }
-  if( data.第一公費レコード !== undefined ){
+  if (data.第一公費レコード !== undefined) {
     shohou.第一公費レコード(data.第一公費レコード.公費負担者番号, data.第一公費レコード.公費受給者番号);
   }
-  if( data.第二公費レコード !== undefined ){
+  if (data.第二公費レコード !== undefined) {
     shohou.第二公費レコード(data.第二公費レコード.公費負担者番号, data.第二公費レコード.公費受給者番号);
   }
-  if( data.第三公費レコード !== undefined ){
+  if (data.第三公費レコード !== undefined) {
     shohou.第三公費レコード(data.第三公費レコード.公費負担者番号, data.第三公費レコード.公費受給者番号);
   }
-  if( data.特殊公費レコード !== undefined ){
+  if (data.特殊公費レコード !== undefined) {
     shohou.特殊公費レコード(data.特殊公費レコード.公費負担者番号, data.特殊公費レコード.公費受給者番号);
   }
-  if( data.レセプト種別コード !== undefined ){
+  if (data.レセプト種別コード !== undefined) {
     shohou.レセプト種別レコード(data.レセプト種別コード);
   }
+  shohou.処方箋交付年月日レコード(data.処方箋交付年月日);
+  if (data.使用期限年月日 !== undefined) {
+    shohou.使用期限年月日レコード(data.使用期限年月日);
+  }
+  if (data.麻薬施用レコード !== undefined) {
+    shohou.麻薬施用レコード(
+      data.麻薬施用レコード.麻薬施用者免許番号,
+      data.麻薬施用レコード.麻薬施用患者住所,
+      data.麻薬施用レコード.麻薬施用患者電話番号);
+  }
+  if (data.残薬確認対応フラグ !== undefined) {
+    shohou.残薬確認欄レコード(data.残薬確認対応フラグ);
+  }
+  if (data.備考レコード !== undefined) {
+    data.備考レコード.forEach((rec, i) => {
+      let 備考連番 = i + 1;
+      let 備考種別: 備考種別 | undefined = undefined;
+      let 備考 = rec.備考;
+      switch (備考) {
+        case "一包化": case "粉砕": {
+          備考種別 = 備考;
+          break;
+        }
+      }
+      shohou.備考レコード(備考連番, 備考種別, 備考);
+    });
+  }
+  if (data.引換番号 !== undefined) {
+    shohou.処方箋番号レコード(data.引換番号);
+  }
+  data.RP剤情報グループ.forEach((rec, i) => {
+    const RP番号 = i + 1;
+    {
+      const 剤型レコード = rec.剤形レコード;
+      if (剤型レコード.剤形区分 === "不明" && 剤型レコード.剤形名称 === undefined) {
+        throw new Error(`Invalid 剤型レコード: ${剤型レコード.剤形区分}, ${剤型レコード.剤形名称}`);
+      }
+      shohou.剤形レコード(RP番号, 剤型レコード.剤形区分, 剤型レコード.剤形名称, 剤型レコード.調剤数量);
+    }
+    {
+      const 用法レコード = rec.用法レコード;
+      shohou.用法レコード(RP番号, 用法レコード.用法コード, 用法レコード.用法名称, 用法レコード.用法１日回数);
+    }
+    {
+      if (rec.用法補足レコード !== undefined) {
+        rec.用法補足レコード.forEach((hosoku, j) => {
+          const RP補足連番 = j + 1;
+          shohou.用法補足レコード(RP番号, RP補足連番, hosoku.用法補足区分, hosoku.用法補足情報, undefined, undefined);
+        });
+      }
+    }
+    {
+      rec.薬品情報グループ.forEach((drug, j) => {
+        const RP内連番 = j + 1;
+        {
+          let drugRec = drug.薬品レコード;
+          shohou.薬品レコード(RP番号, RP内連番, drugRec.情報区分, drugRec.薬品コード種別,
+            drugRec.薬品コード, drugRec.薬品名称, drugRec.分量, drugRec.力価フラグ, drugRec.単位名);
+        }
+        {
+          if (drug.単位変換レコード !== undefined) {
+            shohou.単位変換レコード(RP番号, RP内連番, drug.単位変換レコード);
+          }
+        }
+        {
+          if( drug.不均等レコード !== undefined ){
+            const f = drug.不均等レコード;
+            shohou.不均等レコード(RP番号, RP内連番, f.不均等１回目服用量, f.不均等２回目服用量,
+              f.不均等３回目服用量, f.不均等４回目服用量, f.不均等５回目服用量,
+            );
+          }
+        }
+      });
+    }
+  });
   return shohou.output();
 }
+
+
+
 

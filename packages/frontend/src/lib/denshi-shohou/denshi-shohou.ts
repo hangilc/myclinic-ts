@@ -206,13 +206,13 @@ export class DenshiShohou {
   }
 
   // RP 剤情報グループ
-  剤形レコード(RP番号: number, 剤形区分: 剤形区分, 剤形名称: string | undefined, 調剤数量: number,) {
+  剤形レコード(RP番号: number, 剤形区分: 剤形区分, 剤形名称: string | undefined, 調剤数量: number) {
     this.addRecord(101, [
       RP番号.toString(),
       剤形区分Map[剤形区分],
       剤形名称 ?? "",
       調剤数量.toString(),
-    ]); 
+    ]);
   }
 
   用法レコード(RP番号: number, 用法コード: string | undefined, 用法名称: string, 用法１日回数: number | undefined) {
@@ -225,7 +225,7 @@ export class DenshiShohou {
     ]);
   }
 
-  用法補足レコード(RP番号: number, RP補足連番: number, 用法補足区分: 用法補足区分 | undefined, 
+  用法補足レコード(RP番号: number, RP補足連番: number, 用法補足区分: 用法補足区分 | undefined,
     用法補足情報: string, 補足用法コード: string | undefined, 部位コード: string | undefined,
   ) {
     this.addRecord(181, [
@@ -262,7 +262,7 @@ export class DenshiShohou {
     ]);
   }
 
-  不均等レコード(RP番号: number, RP内連番: number, 不均等１回目服用量: string, 不均等２回目服用量: string, 
+  不均等レコード(RP番号: number, RP内連番: number, 不均等１回目服用量: string, 不均等２回目服用量: string,
     不均等３回目服用量: string | undefined, 不均等４回目服用量: string | undefined,
     不均等５回目服用量: string | undefined,
   ) {
@@ -283,7 +283,7 @@ export class DenshiShohou {
   }
 
   負担区分レコード(RP番号: number, RP内連番: number, 第一公費負担区分: boolean, 第二公費負担区分: boolean,
-    第三公費負担区分: boolean, 特殊公費負担区分: boolean, 
+    第三公費負担区分: boolean, 特殊公費負担区分: boolean,
   ) {
     this.addRecord(231, [
       RP番号.toString(),
@@ -331,7 +331,8 @@ export class DenshiShohou {
     this.addRecord(302, [
       検査値データ等連番.toString(),
       検査値データ等,
-    ]);  }
+    ]);
+  }
 
 
   output(): string {
@@ -494,7 +495,7 @@ const 残薬確認対応フラグMap = {
 
 export type 残薬確認対応フラグ = keyof typeof 残薬確認対応フラグMap;
 
-const 備考種別Map = {
+export const 備考種別Map = {
   "一包化": "1",
   粉砕: "2",
 } as const;
@@ -521,7 +522,7 @@ const 用法補足区分Map = {
   用法の続き: "5",
   部位: "6",
   "１回使用量": "7",
-  JAMI補足用法:  "8",
+  JAMI補足用法: "8",
   JAMI部位: "9",
 } as const;
 
@@ -535,7 +536,8 @@ const 情報区分Map = {
 export type 情報区分 = keyof typeof 情報区分Map;
 
 const 力価フラグMap = {
-
+  "薬価単位": "1",
+  "力価単位": "2",
 } as const;
 
 export type 力価フラグ = keyof typeof 力価フラグMap;
@@ -563,13 +565,13 @@ export type 薬品補足区分 = keyof typeof 薬品補足区分Map;
 const 頻用用法コードMap = {
   "１日１回起床時　服用": "1011000090000000",
   "１日１回朝食前　服用": "1011000100000000",
-  "１日１回朝食後　服用" : "1011000400000000",
-  "１日１回昼食後　服用" : "1011004000000000",
-  "１日１回夕食後　服用" : "1011040000000000",
-  "１日１回就寝前　服用" : "1011100000000000",
-  "１日２回朝夕食後　服用" : "1012040400000000",
-  "１日３回朝昼夕食後　服用" : "1013044400000000",
-  "疼痛時　服用" : "1050110000000000",
+  "１日１回朝食後　服用": "1011000400000000",
+  "１日１回昼食後　服用": "1011004000000000",
+  "１日１回夕食後　服用": "1011040000000000",
+  "１日１回就寝前　服用": "1011100000000000",
+  "１日２回朝夕食後　服用": "1012040400000000",
+  "１日３回朝昼夕食後　服用": "1013044400000000",
+  "疼痛時　服用": "1050110000000000",
 } as const;
 
 export type 頻用用法コード = keyof typeof 頻用用法コードMap;
