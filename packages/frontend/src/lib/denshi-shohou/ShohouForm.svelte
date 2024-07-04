@@ -5,6 +5,7 @@
   import { writable, type Writable } from "svelte/store";
   import { onMount } from "svelte";
   import type { RP剤情報 } from "./presc-info";
+  import { 頻用用法コードMap } from "./denshi-shohou";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -20,23 +21,27 @@
   let daysUnit = "日分";
   let mode: "内服" | "頓服" | "外用" = "内服";
   let searchInput: HTMLInputElement;
+  let usageList: [string, string, any][] = [];
 
   $: switch (mode) {
     case "内服": {
       amountLabel = "一日";
       daysLabel = "日数";
       daysUnit = "日分";
+      usageList = 頻用用法コードMap["内服"];
       break;
     }
     case "頓服": {
       amountLabel = "一回";
       daysLabel = "回数";
       daysUnit = "回分";
+      usageList = 頻用用法コードMap["頓服"];
       break;
     }
     case "外用": {
       amountLabel = "用量";
       daysLabel = "";
+      usageList = 頻用用法コードMap["外用"];
       break;
     }
   }
@@ -74,17 +79,17 @@
         return;
       }
     }
-    let drug: RP剤情報 = {
-      剤形レコード: {
-        剤形区分: mode,
-        調剤数量: daysValue,
-      },
-      用法レコード: {
-        用法コード: "1013044400000000",
-            用法名称: "１日３回朝昼夕食後　服用",
-            用法１日回数: 3,
-      },
-    };
+    // let drug: RP剤情報 = {
+    //   剤形レコード: {
+    //     剤形区分: mode,
+    //     調剤数量: daysValue,
+    //   },
+    //   用法レコード: {
+    //     用法コード: "1013044400000000",
+    //         用法名称: "１日３回朝昼夕食後　服用",
+    //         用法１日回数: 3,
+    //   },
+    // };
   }
 </script>
 
