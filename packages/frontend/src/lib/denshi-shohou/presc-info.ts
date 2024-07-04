@@ -75,9 +75,9 @@ export interface 剤形レコード {
 }
 
 export interface 用法レコード {
-  用法コード: string | undefined;
+  用法コード?: string;
   用法名称: string;
-  用法１日回数: number | undefined;
+  用法１日回数?: number;
 }
 
 export interface 用法補足レコード {

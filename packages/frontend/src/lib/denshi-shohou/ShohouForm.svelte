@@ -7,6 +7,7 @@
   import type { RP剤情報 } from "./presc-info";
   import { 頻用用法コードMap } from "./denshi-shohou";
   import ChevronDown from "@/icons/ChevronDown.svelte";
+  import ChevronUp from "@/icons/ChevronUp.svelte";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -17,6 +18,7 @@
   let amount = "";
   let unit = "";
   let usage = "";
+  let usageCode: string | undefined = undefined;
   let daysLabel = "日数";
   let days = "";
   let daysUnit = "日分";
@@ -24,6 +26,9 @@
   let searchInput: HTMLInputElement;
   let usageList: [string, string, any][] = [];
   let showUsageList = false;
+  let usageItemSelected: Writable<[string, string, any] | null> =
+    writable(null);
+  let searchInputDisabled = true;
 
   $: switch (mode) {
     case "内服": {
@@ -50,6 +55,15 @@
 
   searchSelected.subscribe((m) => {
     if (m) {
+    }
+  });
+
+  usageItemSelected.subscribe((item) => {
+    if (item) {
+      const [code, text, config] = item;
+      usage = text;
+      usageCode = code;
+      showUsageList = false;
     }
   });
 
@@ -80,17 +94,29 @@
         return;
       }
     }
-    // let drug: RP剤情報 = {
-    //   剤形レコード: {
-    //     剤形区分: mode,
-    //     調剤数量: daysValue,
-    //   },
-    //   用法レコード: {
-    //     用法コード: "1013044400000000",
-    //         用法名称: "１日３回朝昼夕食後　服用",
-    //         用法１日回数: 3,
-    //   },
-    // };
+    let drug: RP剤情報 = {
+      剤形レコード: {
+        剤形区分: mode,
+        調剤数量: daysValue,
+      },
+      用法レコード: {
+        用法コード: usageCode,
+        用法名称: usage,
+      },
+      薬品情報グループ: [
+        {
+          薬品レコード: {
+            情報区分: "医薬品",
+            薬品コード種別: "レセプト電算処理システム用コード",
+            薬品コード: "1122334455",
+            薬品名称: "アポカリプス",
+            分量: "3",
+            力価フラグ: "薬価単位",
+            単位名: "錠",
+          },
+        },
+      ],
+    };
   }
 </script>
 
@@ -121,17 +147,36 @@
         <input type="text" style="width:4em" bind:value={unit} />
       </div>
       <span>用法：</span>
-      <div class="inline-block">
-        <input type="text" bind:value={usage} />
+      <div
+        class="inline-block"
+        style="display:flex;items-align:center;gap:4px;"
+      >
+        <input
+          type="text"
+          bind:value={usage}
+          disabled={searchInputDisabled}
+          style="flex-grow:1;"
+        />
         {#if showUsageList}
+          <a
+            href="javascript:void(0)"
+            class="chevron"
+            on:click={() => (showUsageList = false)}><ChevronUp /></a
+          >
         {:else}
-        <ChevronDown />
+          <a
+            href="javascript:void(0)"
+            class="chevron"
+            on:click={() => (showUsageList = true)}><ChevronDown /></a
+          >
         {/if}
       </div>
       {#if showUsageList}
         <div style="grid-column:1/span 2" class="usage-examples">
           {#each usageList as usageItem (usageItem[0])}
-            <div>{usageItem[1]}</div>
+            <SelectItem data={usageItem} selected={usageItemSelected}>
+              <div>{usageItem[1]}</div>
+            </SelectItem>
           {/each}
         </div>
       {/if}
@@ -193,5 +238,10 @@
     margin-top: 10px;
     border: 1px solid gray;
     padding: 10px;
+  }
+
+  a.chevron {
+    text-decoration: none;
+    color: #333;
   }
 </style>
