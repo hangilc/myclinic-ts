@@ -6,6 +6,7 @@
   import { onMount } from "svelte";
   import type { RP剤情報 } from "./presc-info";
   import { 頻用用法コードMap } from "./denshi-shohou";
+  import ChevronDown from "@/icons/ChevronDown.svelte";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -22,6 +23,7 @@
   let mode: "内服" | "頓服" | "外用" = "内服";
   let searchInput: HTMLInputElement;
   let usageList: [string, string, any][] = [];
+  let showUsageList = false;
 
   $: switch (mode) {
     case "内服": {
@@ -46,11 +48,10 @@
     }
   }
 
-  searchSelected.subscribe(m => {
-    if( m ){
-
+  searchSelected.subscribe((m) => {
+    if (m) {
     }
-  })
+  });
 
   onMount(() => {
     searchInput.focus();
@@ -70,11 +71,11 @@
 
   function doEnter() {
     let daysValue: number;
-    if( mode === "外用" ){
+    if (mode === "外用") {
       daysValue = 1;
     } else {
       daysValue = parseInt(days);
-      if( isNaN(daysValue) || daysValue <= 0 ){
+      if (isNaN(daysValue) || daysValue <= 0) {
         alert("日数/回数の入力が正の整数でありません。");
         return;
       }
@@ -119,12 +120,23 @@
         <input type="text" style="width:4em" bind:value={amount} />
         <input type="text" style="width:4em" bind:value={unit} />
       </div>
-      <span>用量：</span>
+      <span>用法：</span>
       <div class="inline-block">
         <input type="text" bind:value={usage} />
+        {#if showUsageList}
+        {:else}
+        <ChevronDown />
+        {/if}
       </div>
+      {#if showUsageList}
+        <div style="grid-column:1/span 2" class="usage-examples">
+          {#each usageList as usageItem (usageItem[0])}
+            <div>{usageItem[1]}</div>
+          {/each}
+        </div>
+      {/if}
       {#if daysLabel !== ""}
-        <span>{daysLabel}</span>
+        <span>{daysLabel}：</span>
         <div class="inline-block">
           <input type="text" style="width:4em" bind:value={days} />
           {daysUnit}
@@ -170,6 +182,11 @@
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 6px;
+  }
+
+  .usage-examples {
+    max-height: 180px;
+    overflow-y: auto;
   }
 
   .display {

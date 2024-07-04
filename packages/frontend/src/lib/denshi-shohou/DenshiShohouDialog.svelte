@@ -41,7 +41,7 @@
 
 <style>
   .top {
-    width: 600px;
+    width: 360px;
   }
   .new-entry {
     margin: 10px 0;
