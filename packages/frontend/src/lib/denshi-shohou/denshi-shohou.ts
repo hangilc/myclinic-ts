@@ -24,11 +24,11 @@ export class DenshiShohou {
   }
 
   // 医療機関情報グループ
-  医療機関レコード(医療機関コード種別: 点数表, 医療機関コード: string, 医療機関都道府県コード: 都道府県, 医療機関名称: string) {
+  医療機関レコード(医療機関コード種別: 点数表, 医療機関コード: string, 医療機関都道府県コード: 都道府県コード, 医療機関名称: string) {
     this.addRecord(1, [
       点数表Map[医療機関コード種別],
       医療機関コード,
-      都道府県Map[医療機関都道府県コード],
+      医療機関都道府県コード,
       医療機関名称
     ]);
   }
@@ -400,6 +400,17 @@ const 都道府県Map = {
 } as const;
 
 export type 都道府県 = keyof typeof 都道府県Map;
+export type 都道府県コード = typeof 都道府県Map[keyof typeof 都道府県Map];
+export function tryCastTo都道府県コード(s: string): 都道府県コード | undefined {
+  return Object.values(都道府県Map).find(a => a === s);
+}
+export function castTo都道府県コード(s: string): 都道府県コード {
+  const code = tryCastTo都道府県コード(s);
+  if( code === undefined ){
+    throw new Error(`Invalid 都道府県コード: ${s}`)
+  }
+  return code;
+}
 
 const 診療科コード種別Map = {
   "コードなし": "1",

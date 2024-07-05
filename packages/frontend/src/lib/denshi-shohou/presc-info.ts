@@ -1,4 +1,4 @@
-import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分 } from "./denshi-shohou";
+import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード } from "./denshi-shohou";
 
 export interface 公費レコード {
   公費負担者番号: string;
@@ -8,7 +8,7 @@ export interface 公費レコード {
 export interface PrescInfoData {
   医療機関コード種別: 点数表;
   医療機関コード: string;
-  医療機関都道府県コード: 都道府県;
+  医療機関都道府県コード: 都道府県コード;
   医療機関名称: string;
   医療機関郵便番号?: string;
   医療機関所在地: string;

@@ -13,6 +13,7 @@
   export let onEnter: (drug: RP剤情報) => void;
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
+  let showSearchResult = false;
   let master: IyakuhinMaster | undefined;
   let searchSelected: Writable<IyakuhinMaster | null> = writable(null);
   let amountLabel = "";
@@ -57,6 +58,7 @@
   searchSelected.subscribe((m) => {
     if (m) {
       master = m;
+      showSearchResult = false;
     }
   });
 
@@ -82,6 +84,7 @@
       searchSelected.set(null);
       amount = "";
       unit = select?.unit ?? "";
+      showSearchResult = true;
     }
   }
 
@@ -140,7 +143,7 @@
     <input type="text" bind:value={searchText} bind:this={searchInput} />
     <button type="submit">検索</button>
   </form>
-  {#if searchResults.length > 0}
+  {#if showSearchResult }
     <div class="search-result">
       {#each searchResults as searchResult (searchResult.iyakuhincode)}
         <SelectItem data={searchResult} selected={searchSelected}>
