@@ -13,6 +13,7 @@
   export let onEnter: (drug: RP剤情報) => void;
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
+  let master: IyakuhinMaster | undefined;
   let searchSelected: Writable<IyakuhinMaster | null> = writable(null);
   let amountLabel = "";
   let amount = "";
@@ -55,6 +56,7 @@
 
   searchSelected.subscribe((m) => {
     if (m) {
+      master = m;
     }
   });
 
@@ -94,6 +96,18 @@
         return;
       }
     }
+    if( !master ){
+      alert("薬剤が指定されていません。");
+      return;
+    }
+    if( isNaN(parseFloat(amount)) ){
+      alert("分量の入力が不適切です。");
+      return;
+    }
+    if( unit == "" ){
+      alert("分量の単位の入力が不適切です。");
+      return;
+    }
     let drug: RP剤情報 = {
       剤形レコード: {
         剤形区分: mode,
@@ -108,15 +122,16 @@
           薬品レコード: {
             情報区分: "医薬品",
             薬品コード種別: "レセプト電算処理システム用コード",
-            薬品コード: "1122334455",
-            薬品名称: "アポカリプス",
-            分量: "3",
+            薬品コード: master.iyakuhincode.toString(),
+            薬品名称: master.name,
+            分量: amount,
             力価フラグ: "薬価単位",
-            単位名: "錠",
+            単位名: unit,
           },
         },
       ],
     };
+    onEnter(drug);
   }
 </script>
 
