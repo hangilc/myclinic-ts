@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Patient } from "myclinic-model";
   import { getClinicInfo } from "../cache";
   import Dialog from "../Dialog.svelte";
   import { castTo都道府県コード, tryCastTo都道府県コード, type 都道府県コード } from "./denshi-shohou";
@@ -9,8 +10,11 @@
     type 薬品情報,
   } from "./presc-info";
   import ShohouForm from "./ShohouForm.svelte";
+  import { convertZenkakuHiraganaToHankakuKatakana } from "../zenkaku";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
+  export let patient: Patient;
   export let prescRecords: 薬品情報[] = [];
   export let at: string;
 
@@ -26,8 +30,12 @@
   }
 
   async function doNew(drug: RP剤情報) {
+    function toKana(s: string): string {
+      return convertZenkakuHiraganaToHankakuKatakana(s);
+    }
     const clinicInfo = await getClinicInfo();
     const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
+    const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
     let shohou: PrescInfoData = {
       医療機関コード種別: "医科",
       医療機関コード: clinicInfo.kikancode,
@@ -41,12 +49,12 @@
         診療科コード種別: "診療科コード",
         診療科コード: "内科",
       },
-      医師漢字氏名: "診療　太郎",
-      患者コード: "1234",
-      患者漢字氏名: "診療　花子", // 性と名は全角スペースで区切る。
-      患者カナ氏名: "ｼﾝﾘｮｳ ﾊﾅｺ", // 半角カナで記録する。姓と名は半角スペースで区切る。
-      患者性別: "女",
-      患者生年月日: "19600712",
+      医師漢字氏名: `${clinicInfo.doctorLastName}　${clinicInfo.doctorFirstName}`,
+      患者コード: patient.patientId.toString(),
+      患者漢字氏名: `${patient.lastName}　${patient.firstName}`, // 性と名は全角スペースで区切る。
+      患者カナ氏名: patientNameKana, // 半角カナで記録する。姓と名は半角スペースで区切る。
+      患者性別: patient.sex === "M" ? "男" : "女",
+      患者生年月日: DateWrapper.from(patient.birthday).asSqlDate().replaceAll(/-/g, ""),
       保険一部負担金区分: "高齢者一般",
       保険種別: "後期高齢者",
       保険者番号: "01234567",

@@ -2020,6 +2020,8 @@ export class ClinicInfo {
     public kikancode: string,
     public homepage: string,
     public doctorName: string,
+    public doctorLastName: string,
+    public doctorFirstName: string,
   ) { }
 
   static cast(arg: any): ClinicInfo {
@@ -2034,6 +2036,8 @@ export class ClinicInfo {
       arg.kikancode,
       arg.homepage,
       arg.doctorName,
+      arg.doctorLastName,
+      arg.doctorFirstName,
     )
   }
 }

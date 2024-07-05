@@ -19,6 +19,7 @@
   import Shindansho from "./shindansho/Shindansho.svelte";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { DateWrapper } from "myclinic-util";
+  import api from "@/lib/api";
 
   export let serviceStore: Writable<string>;
 
@@ -30,12 +31,15 @@
     }
   });
 
-  function devShohou() {
+  async function devShohou() {
+    const visit = await api.getVisit(119132);
+    const patient = await api.getPatient(visit.patientId);
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        at: DateWrapper.from(new Date()).asSqlDate(),
+        patient,
+        at: DateWrapper.from(visit.visitedAt).asSqlDate(),
       },
     })
   }
