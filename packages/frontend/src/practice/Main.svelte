@@ -34,11 +34,14 @@
   async function devShohou() {
     const visit = await api.getVisit(119132);
     const patient = await api.getPatient(visit.patientId);
+    const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         patient,
+        visit,
+        hokenInfo,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
       },
     })

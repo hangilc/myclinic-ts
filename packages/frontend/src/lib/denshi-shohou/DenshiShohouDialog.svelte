@@ -1,20 +1,30 @@
 <script lang="ts">
-  import type { Patient } from "myclinic-model";
+  import type { HokenInfo, Kouhi, Patient, Visit } from "myclinic-model";
   import { getClinicInfo } from "../cache";
   import Dialog from "../Dialog.svelte";
-  import { castTo都道府県コード, tryCastTo都道府県コード, type 都道府県コード } from "./denshi-shohou";
+  import {
+    castTo都道府県コード,
+    type 保険一部負担金区分コード,
+    type 保険種別コード,
+    type 被保険者等種別,
+  } from "./denshi-shohou";
   import {
     createPrescInfo,
     type PrescInfoData,
     type RP剤情報,
+    type 公費レコード,
     type 薬品情報,
   } from "./presc-info";
   import ShohouForm from "./ShohouForm.svelte";
   import { convertZenkakuHiraganaToHankakuKatakana } from "../zenkaku";
   import { DateWrapper } from "myclinic-util";
+  import { isUnder6 } from "../futan-wari";
+  import { isKokuho } from "myclinic-rezept/helper";
 
   export let destroy: () => void;
   export let patient: Patient;
+  export let hokenInfo: HokenInfo;
+  export let visit: Visit;
   export let prescRecords: 薬品情報[] = [];
   export let at: string;
 
@@ -29,6 +39,125 @@
     destroy();
   }
 
+  function resolve保険一部負担金区分(
+    hoken: HokenInfo,
+    patient: Patient,
+    visit: Visit
+  ): 保険一部負担金区分コード | undefined {
+    if (hoken.koukikourei) {
+      switch (hoken.koukikourei.futanWari) {
+        case 3:
+          return "高齢者７割";
+        case 2:
+          return "高齢者８割";
+        case 1:
+          return "高齢者一般";
+        default: {
+          throw new Error(
+            `Invalid Koukikourei FutanWari: ${hoken.koukikourei.futanWari}.`
+          );
+        }
+      }
+    } else if (hoken.shahokokuho) {
+      switch (hoken.shahokokuho.koureiStore) {
+        case 3:
+          return "高齢者７割";
+        case 2:
+          return "高齢者８割";
+        case 1:
+          return "高齢者一般";
+        default: {
+          return undefined;
+        }
+      }
+    } else if (isUnder6(patient.birthday, visit.visitedAt)) {
+      return "６歳未満";
+    }
+    throw new Error("No hoken");
+  }
+
+  function resolve保険種別(hoken: HokenInfo): 保険種別コード {
+    if (hoken.koukikourei) {
+      return "後期高齢者";
+    } else if (hoken.shahokokuho) {
+      if (isKokuho(hoken.shahokokuho.hokenshaBangou)) {
+        return "国保";
+      } else {
+        return "医保";
+      }
+    } else {
+      throw new Error("No hoken");
+    }
+  }
+
+  function resolve保険者番号(hoken: HokenInfo): string {
+    if (hoken.koukikourei) {
+      return hoken.koukikourei.hokenshaBangou;
+    } else if (hoken.shahokokuho) {
+      const bangou = hoken.shahokokuho.hokenshaBangou.toString();
+      if( bangou.length < 6 ){
+        let pre = "0".repeat(6 - bangou.length);
+        return `${pre}${bangou}`;
+      } else if( bangou.length < 8 ) {
+        let pre = "0".repeat(8 - bangou.length);
+        return `${pre}${bangou}`;
+      } else {
+        return bangou;
+      }
+    } else {
+      throw new Error(`No hoken`);
+    }
+  }
+
+  function resolve被保険者証記号(hoken: HokenInfo): string | undefined {
+    if (hoken.shahokokuho) {
+      return hoken.shahokokuho.hihokenshaKigou;
+    } else {
+      return undefined;
+    }
+  }
+
+  function resolve被保険者証番号(hoken: HokenInfo): string {
+    if (hoken.shahokokuho) {
+      return hoken.shahokokuho.hihokenshaBangou;
+    } else if (hoken.koukikourei) {
+      return hoken.koukikourei.hihokenshaBangou;
+    } else {
+      throw new Error(`No hoken`);
+    }
+  }
+
+  function resolve被保険者被扶養者(hoken: HokenInfo): 被保険者等種別 {
+    if (hoken.shahokokuho) {
+      return hoken.shahokokuho.honninStore !== 0 ? "被保険者" : "被扶養者";
+    } else if (hoken.koukikourei) {
+      return "被保険者";
+    } else {
+      throw new Error(`No hoken`);
+    }
+  }
+
+  function resolve被保険者証枝番(hoken: HokenInfo): string | undefined {
+    if (hoken.shahokokuho) {
+      return hoken.shahokokuho.edaban !== "" ? hoken.shahokokuho.edaban : undefined;
+    } else if (hoken.koukikourei) {
+      return undefined;
+    } else {
+      throw new Error(`No hoken`);
+    }
+  }
+
+  function resolve公費レコード(kouhi: Kouhi | undefined): 公費レコード | undefined {
+    if( kouhi ){
+      return {
+        公費負担者番号: kouhi.futansha.toString(),
+        公費受給者番号: kouhi.jukyuusha.toString(),
+      }
+    } else {
+      return undefined;
+    }
+  }
+
   async function doNew(drug: RP剤情報) {
     function toKana(s: string): string {
       return convertZenkakuHiraganaToHankakuKatakana(s);
@@ -36,6 +165,9 @@
     const clinicInfo = await getClinicInfo();
     const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
     const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
+    let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
+    let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
+    let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
     let shohou: PrescInfoData = {
       医療機関コード種別: "医科",
       医療機関コード: clinicInfo.kikancode,
@@ -54,32 +186,20 @@
       患者漢字氏名: `${patient.lastName}　${patient.firstName}`, // 性と名は全角スペースで区切る。
       患者カナ氏名: patientNameKana, // 半角カナで記録する。姓と名は半角スペースで区切る。
       患者性別: patient.sex === "M" ? "男" : "女",
-      患者生年月日: DateWrapper.from(patient.birthday).asSqlDate().replaceAll(/-/g, ""),
-      保険一部負担金区分: "高齢者一般",
-      保険種別: "後期高齢者",
-      保険者番号: "01234567",
-      被保険者証記号: "記号",
-      被保険者証番号: "123456",
-      被保険者被扶養者: "被保険者",
-      被保険者証枝番: "01",
-      負担割合: 2, // 通常必要なし
-      職務上の事由: "職務上",
-      第一公費レコード: {
-        公費負担者番号: "12345678",
-        公費受給者番号: "33333333",
-      },
-      第二公費レコード: {
-        公費負担者番号: "22345678",
-        公費受給者番号: "44444444",
-      },
-      第三公費レコード: {
-        公費負担者番号: "32345678",
-        公費受給者番号: "55555555",
-      },
-      特殊公費レコード: {
-        公費負担者番号: "42345678",
-        公費受給者番号: "66666666",
-      },
+      患者生年月日: DateWrapper.from(patient.birthday)
+        .asSqlDate()
+        .replaceAll(/-/g, ""),
+      保険一部負担金区分: resolve保険一部負担金区分(hokenInfo, patient, visit),
+      保険種別: resolve保険種別(hokenInfo),
+      保険者番号: resolve保険者番号(hokenInfo),
+      被保険者証記号: resolve被保険者証記号(hokenInfo),
+      被保険者証番号: resolve被保険者証番号(hokenInfo),
+      被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
+      被保険者証枝番: resolve被保険者証枝番(hokenInfo),
+      第一公費レコード,
+      第二公費レコード,
+      第三公費レコード,
+      特殊公費レコード: undefined,
       レセプト種別コード: "1111",
       処方箋交付年月日: "20240703",
       使用期限年月日: "20240710",
