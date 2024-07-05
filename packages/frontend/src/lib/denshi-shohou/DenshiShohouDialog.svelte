@@ -20,6 +20,10 @@
   import { DateWrapper } from "myclinic-util";
   import { isUnder6 } from "../futan-wari";
   import { isKokuho } from "myclinic-rezept/helper";
+  import {
+    RezeptShubetsuCodeBase,
+    RezeptShubetuCodeOffset,
+  } from "myclinic-rezept/codes";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -95,10 +99,10 @@
       return hoken.koukikourei.hokenshaBangou;
     } else if (hoken.shahokokuho) {
       const bangou = hoken.shahokokuho.hokenshaBangou.toString();
-      if( bangou.length < 6 ){
+      if (bangou.length < 6) {
         let pre = "0".repeat(6 - bangou.length);
         return `${pre}${bangou}`;
-      } else if( bangou.length < 8 ) {
+      } else if (bangou.length < 8) {
         let pre = "0".repeat(8 - bangou.length);
         return `${pre}${bangou}`;
       } else {
@@ -139,7 +143,9 @@
 
   function resolve被保険者証枝番(hoken: HokenInfo): string | undefined {
     if (hoken.shahokokuho) {
-      return hoken.shahokokuho.edaban !== "" ? hoken.shahokokuho.edaban : undefined;
+      return hoken.shahokokuho.edaban !== ""
+        ? hoken.shahokokuho.edaban
+        : undefined;
     } else if (hoken.koukikourei) {
       return undefined;
     } else {
@@ -147,15 +153,59 @@
     }
   }
 
-  function resolve公費レコード(kouhi: Kouhi | undefined): 公費レコード | undefined {
-    if( kouhi ){
+  function resolve公費レコード(
+    kouhi: Kouhi | undefined
+  ): 公費レコード | undefined {
+    if (kouhi) {
       return {
         公費負担者番号: kouhi.futansha.toString(),
         公費受給者番号: kouhi.jukyuusha.toString(),
-      }
+      };
     } else {
       return undefined;
     }
+  }
+
+  function resolveレセプト種別コード(hoken: HokenInfo): string {
+    function f(): number {
+      let shahokokuho = hoken.shahokokuho;
+      let koukikourei = hoken.koukikourei;
+      let kouhiListLength = hoken.kouhiList.length;
+      if (koukikourei) {
+        let base = RezeptShubetsuCodeBase.後期高齢単独 + kouhiListLength * 10;
+        let offset: number;
+        if (koukikourei.futanWari === 3) {
+          offset = RezeptShubetuCodeOffset.高齢受給７割;
+        } else {
+          offset = RezeptShubetuCodeOffset.高齢受給一般;
+        }
+        return base + offset;
+      } else if (shahokokuho) {
+        let base = RezeptShubetsuCodeBase.社保国保単独 + kouhiListLength * 10;
+        let offset: number;
+        if (shahokokuho.koureiStore > 0) {
+          if (shahokokuho.koureiStore === 3) {
+            offset = RezeptShubetuCodeOffset.高齢受給７割;
+          } else {
+            offset = RezeptShubetuCodeOffset.高齢受給一般;
+          }
+        } else {
+          if (shahokokuho.honninStore !== 0) {
+            offset = RezeptShubetuCodeOffset.本人;
+          } else {
+            offset = RezeptShubetuCodeOffset.家族;
+          }
+        }
+        return base + offset;
+      } else {
+        return RezeptShubetsuCodeBase.公費単独 + kouhiListLength * 10;
+      }
+    }
+    let code = f().toString();
+    if( code.length !== 4 ){
+      throw new Error(`Invalid レセプト種別コード: ${code}`)
+    }
+    return code;
   }
 
   async function doNew(drug: RP剤情報) {
@@ -200,30 +250,30 @@
       第二公費レコード,
       第三公費レコード,
       特殊公費レコード: undefined,
-      レセプト種別コード: "1111",
-      処方箋交付年月日: "20240703",
-      使用期限年月日: "20240710",
-      備考レコード: [
-        {
-          備考: "一包化",
-        },
-        {
-          備考: "その他",
-        },
-      ],
+      レセプト種別コード: resolveレセプト種別コード(hokenInfo),
+      処方箋交付年月日: DateWrapper.from(visit.visitedAt).asSqlDate().replaceAll(/-/g, ""),
+      // 使用期限年月日: "20240710",
+      // 備考レコード: [
+      //   {
+      //     備考: "一包化",
+      //   },
+      //   {
+      //     備考: "その他",
+      //   },
+      // ],
       RP剤情報グループ: [drug],
-      提供情報レコード: {
-        提供診療情報レコード: [
-          {
-            薬品名称: "アポカリプス",
-            コメント: "新しく加えました。",
-          },
-          {
-            コメント: "薬追加しています。",
-          },
-        ],
-        検査値データ等レコード: [{ 検査値データ等: "血清クレアチニン値:0.87" }],
-      },
+      // 提供情報レコード: {
+      //   提供診療情報レコード: [
+      //     {
+      //       薬品名称: "アポカリプス",
+      //       コメント: "新しく加えました。",
+      //     },
+      //     {
+      //       コメント: "薬追加しています。",
+      //     },
+      //   ],
+      //   検査値データ等レコード: [{ 検査値データ等: "血清クレアチニン値:0.87" }],
+      // },
     };
     const info = createPrescInfo(shohou);
     console.log(info);
