@@ -17,9 +17,6 @@
   import Scan from "@/practice/scan/Scan.svelte";
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
-  import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
-  import { DateWrapper } from "myclinic-util";
-  import api from "@/lib/api";
 
   export let serviceStore: Writable<string>;
 
@@ -31,21 +28,6 @@
     }
   });
 
-  async function devShohou() {
-    const visit = await api.getVisit(119132);
-    const patient = await api.getPatient(visit.patientId);
-    const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
-    const d: DenshiShohouDialog = new DenshiShohouDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        patient,
-        visit,
-        hokenInfo,
-        at: DateWrapper.from(visit.visitedAt).asSqlDate(),
-      },
-    })
-  }
 </script>
 
 <div>
@@ -75,8 +57,4 @@
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei"} />
   <BigChar isVisible={$serviceStore === "big-char"} />
-
-  <div>
-    <button on:click={devShohou}>処方</button>
-  </div>
 </div>

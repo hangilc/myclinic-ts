@@ -14,6 +14,9 @@
   import { currentVisitId } from "../exam-vars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
+  import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
+  import { DateWrapper } from "myclinic-util";
+  import { createPrescInfo, type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -37,6 +40,23 @@
       onLast();
     }
   });
+
+  async function doNewShohou() {
+    const d: DenshiShohouDialog = new DenshiShohouDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patient: visit.patient,
+        visit: visit.asVisit,
+        hokenInfo: visit.hoken,
+        at: DateWrapper.from(visit.visitedAt).asSqlDate(),
+        onEnter: (data: PrescInfoData) => {
+          const shohou = createPrescInfo(data);
+          console.log("shohou", shohou);
+        },
+      },
+    })
+  }
 </script>
 
 <div class="top" data-type="record" data-visit-id={visit.visitId}>
@@ -56,6 +76,10 @@
           <a
             href="javascript:void(0)"
             on:click={() => (showNewTextEditor = true)}>新規文章</a
+          >
+          <a
+            href="javascript:void(0)"
+            on:click={doNewShohou}>新規処方</a
           >
         </div>
       {/if}

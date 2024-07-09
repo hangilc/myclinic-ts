@@ -31,6 +31,7 @@
   export let visit: Visit;
   export let prescRecords: 薬品情報[] = [];
   export let at: string;
+  export let onEnter: (data: PrescInfoData) => void;
 
   let records: { id: number; presc: 薬品情報 }[] = prescRecords.map(
     (r, id) => ({
@@ -275,8 +276,7 @@
       //   検査値データ等レコード: [{ 検査値データ等: "血清クレアチニン値:0.87" }],
       // },
     };
-    const info = createPrescInfo(shohou);
-    console.log(info);
+    onEnter(shohou);
   }
 </script>
 
