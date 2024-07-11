@@ -37,4 +37,3 @@ interface RegisterQueryBody {
   issueType: string; // "1": 電子処方箋, "2": 紙の処方箋
   idToken?: string;
 }
-
