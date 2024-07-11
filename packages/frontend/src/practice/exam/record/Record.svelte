@@ -16,7 +16,12 @@
   import api from "@/lib/api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { DateWrapper } from "myclinic-util";
-  import { createPrescInfo, type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+  import {
+    createPrescInfo,
+    type PrescInfoData,
+  } from "@/lib/denshi-shohou/presc-info";
+  import { onshiPrescReport } from "@/lib/onshi-presc";
+  import { getClinicInfo } from "@/lib/cache";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -42,6 +47,7 @@
   });
 
   async function doNewShohou() {
+    const clinicInfo = await getClinicInfo();
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,
       props: {
@@ -50,12 +56,13 @@
         visit: visit.asVisit,
         hokenInfo: visit.hoken,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
-        onEnter: (data: PrescInfoData) => {
+        onEnter: async (data: PrescInfoData) => {
           const shohou = createPrescInfo(data);
           console.log("shohou", shohou);
+          await onshiPrescReport(clinicInfo.kikancode, shohou, "紙の処方箋");
         },
       },
-    })
+    });
   }
 </script>
 
@@ -77,15 +84,12 @@
             href="javascript:void(0)"
             on:click={() => (showNewTextEditor = true)}>新規文章</a
           >
-          <a
-            href="javascript:void(0)"
-            on:click={doNewShohou}>新規処方</a
-          >
+          <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
         </div>
       {/if}
     </div>
     <div slot="right">
-      <Hoken bind:visit {onshiConfirmed}/>
+      <Hoken bind:visit {onshiConfirmed} />
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
       <DrugWrapper {visit} />
