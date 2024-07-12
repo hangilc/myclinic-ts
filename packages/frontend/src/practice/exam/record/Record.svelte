@@ -48,6 +48,7 @@
 
   async function doNewShohou() {
     const clinicInfo = await getClinicInfo();
+    let kikancode = "131" + clinicInfo.kikancode;
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,
       props: {
@@ -59,7 +60,8 @@
         onEnter: async (data: PrescInfoData) => {
           const shohou = createPrescInfo(data);
           console.log("shohou", shohou);
-          await onshiPrescReport(clinicInfo.kikancode, shohou, "紙の処方箋");
+          console.log("kikancode", kikancode);
+          await onshiPrescReport(kikancode, shohou, "紙の処方箋");
         },
       },
     });

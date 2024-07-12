@@ -214,6 +214,7 @@
       return convertZenkakuHiraganaToHankakuKatakana(s);
     }
     const clinicInfo = await getClinicInfo();
+    let kikancode = clinicInfo.kikancode;
     const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
     const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
     let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
@@ -221,7 +222,7 @@
     let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
     let shohou: PrescInfoData = {
       医療機関コード種別: "医科",
-      医療機関コード: clinicInfo.kikancode,
+      医療機関コード: kikancode,
       医療機関都道府県コード: castTo都道府県コード(clinicInfo.todoufukencode),
       医療機関名称: clinicInfo.name,
       医療機関郵便番号: postalCode,
