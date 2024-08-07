@@ -59,9 +59,9 @@
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
           const shohou = createPrescInfo(data);
-          console.log("shohou", shohou);
-          console.log("kikancode", kikancode);
-          await onshiPrescReport(kikancode, shohou, "紙の処方箋");
+          console.log(shohou);
+
+          // await onshiPrescReport(kikancode, shohou, "紙の処方箋");
         },
       },
     });
