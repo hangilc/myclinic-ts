@@ -22,6 +22,7 @@
   } from "@/lib/denshi-shohou/presc-info";
   import { onshiPrescReport } from "@/lib/onshi-presc";
   import { getClinicInfo } from "@/lib/cache";
+  import { register_presc, sign_presc } from "@/lib/hpki-api";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -59,9 +60,10 @@
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
           const shohou = createPrescInfo(data);
-          console.log(shohou);
-
-          // await onshiPrescReport(kikancode, shohou, "紙の処方箋");
+          const signed = await sign_presc(shohou);
+          console.log("signed", signed);
+          let result = await register_presc(signed, kikancode, "1");
+          console.log("result", result);
         },
       },
     });

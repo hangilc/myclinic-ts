@@ -33,3 +33,9 @@
     memo
       {"amount": 1}
       
+* configs 
+  - name: hpki-server
+    content: {"url": "http://127.0.0.1:6377"}
+  - name: presc-server
+    content: {"url": "http://127.0.0.1:8443/presc"}
+    
