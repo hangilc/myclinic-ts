@@ -23,6 +23,7 @@
   import { onshiPrescReport } from "@/lib/onshi-presc";
   import { getClinicInfo } from "@/lib/cache";
   import { register_presc, sign_presc } from "@/lib/hpki-api";
+  import { renderPrescInfo } from "@/lib/denshi-shohou/presc-info-renderer";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -59,11 +60,13 @@
         hokenInfo: visit.hoken,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
-          const shohou = createPrescInfo(data);
-          const signed = await sign_presc(shohou);
-          console.log("signed", signed);
-          let result = await register_presc(signed, kikancode, "1");
-          console.log("result", result);
+          let render = renderPrescInfo(data);
+          console.log("render", render);
+          // const shohou = createPrescInfo(data);
+          // const signed = await sign_presc(shohou);
+          // console.log("signed", signed);
+          // let result = await register_presc(signed, kikancode, "1");
+          // console.log("result", result);
         },
       },
     });
