@@ -1,0 +1,4 @@
+[debug] [myclinic-ts-build] Classpath dependencies List()
+[debug] [myclinic-ts-build] Dependencies from configurations List()
+[debug] Bloop wrote the configuration of project 'myclinic-ts-build' to '/home/hangil/myclinic-ts/project/.bloop/myclinic-ts-build.json'
+[success] Generated .bloop/myclinic-ts-build.json

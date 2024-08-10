@@ -58,6 +58,7 @@
   searchSelected.subscribe((m) => {
     if (m) {
       master = m;
+      unit = m.unit;
       showSearchResult = false;
     }
   });
@@ -80,10 +81,9 @@
     if (t != "") {
       const result = await api.searchIyakuhinMaster(t, at);
       searchResults = result;
-      let select = result[0];
       searchSelected.set(null);
       amount = "";
-      unit = select?.unit ?? "";
+      unit = "";
       showSearchResult = true;
     }
   }

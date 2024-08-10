@@ -17,13 +17,15 @@
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { DateWrapper } from "myclinic-util";
   import {
-    createPrescInfo,
     type PrescInfoData,
+    type RP剤情報,
   } from "@/lib/denshi-shohou/presc-info";
   import { onshiPrescReport } from "@/lib/onshi-presc";
   import { getClinicInfo } from "@/lib/cache";
   import { register_presc, sign_presc } from "@/lib/hpki-api";
-  import { renderPrescInfo } from "@/lib/denshi-shohou/presc-info-renderer";
+  import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
+  import { presc_example_1 } from "@/lib/denshi-shohou/presc-examples";
+  import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -48,6 +50,13 @@
     }
   });
 
+  function doRenderTest() {
+    let presc: RP剤情報[] = presc_example_1;
+    console.log("json", JSON.stringify(presc, undefined, 2));
+    let render = parseShohousen(renderPresc(presc)).formatForSave();
+    console.log(render);
+  }
+
   async function doNewShohou() {
     const clinicInfo = await getClinicInfo();
     let kikancode = "131" + clinicInfo.kikancode;
@@ -60,8 +69,8 @@
         hokenInfo: visit.hoken,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
-          let render = renderPrescInfo(data);
-          console.log("render", render);
+          let presc = data.RP剤情報グループ;
+          console.log("json", JSON.stringify(presc, undefined, 2));
           // const shohou = createPrescInfo(data);
           // const signed = await sign_presc(shohou);
           // console.log("signed", signed);
@@ -92,6 +101,8 @@
             on:click={() => (showNewTextEditor = true)}>新規文章</a
           >
           <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
+          <a href="javascript:void(0)" on:click={doRenderTest}>RenderTest</a>
+
         </div>
       {/if}
     </div>
