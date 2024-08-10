@@ -30,6 +30,8 @@ videos
 screenshots
 downloads
 
+target
+
 work
 workspaces/jslib/out
 .env
