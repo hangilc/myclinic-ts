@@ -8,6 +8,7 @@
   import { 頻用用法コードMap } from "./denshi-shohou";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
+  import UsageDialog from "./UsageDialog.svelte";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -136,6 +137,15 @@
     };
     onEnter(drug);
   }
+
+  function openUsageDialog() {
+    const dlog: UsageDialog = new UsageDialog({
+      target: document.body,
+      props: {
+        destroy: () => dlog.$destroy()
+      }
+    })
+  }
 </script>
 
 <div>
@@ -188,6 +198,7 @@
             on:click={() => (showUsageList = true)}><ChevronDown /></a
           >
         {/if}
+        <a href="javascript:void(0)" on:click={openUsageDialog}>検索</a>
       </div>
       {#if showUsageList}
         <div style="grid-column:1/span 2" class="usage-examples">

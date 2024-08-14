@@ -1613,4 +1613,8 @@ export default {
   setConfig(name: string, content: any): Promise<void> {
     return post("set-config", content, { name }, a => a);
   },
+
+  selectUsageMasterByUsageName(name: string): Promise<m.UsageMaster> {
+    return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster)
+  }
 };

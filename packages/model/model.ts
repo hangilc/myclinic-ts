@@ -2059,3 +2059,21 @@ export class PatientSummary {
     this.content = content;
   }
 }
+
+export interface UsageMaster {
+  usage_code: string;
+  kubun_code: string;
+  kubun_name: string;
+  detail_kubun_code: string;
+  detail_kubun_name: string;
+  timing_code: string;
+  timing_name: string;
+  usage_name: string;
+  usage_code_kubun: string;
+  tonpuku_condition: string;
+  admin_timing: string;
+  admin_time: string;
+  admin_interval: string;
+  admin_location: string;
+  usage_kana: string;
+}
