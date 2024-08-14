@@ -24,7 +24,7 @@
   import { getClinicInfo } from "@/lib/cache";
   import { register_presc, sign_presc } from "@/lib/hpki-api";
   import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
-  import { presc_example_1 } from "@/lib/denshi-shohou/presc-examples";
+  import * as examples from "@/lib/denshi-shohou/presc-examples";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
 
   export let visit: m.VisitEx;
@@ -51,7 +51,7 @@
   });
 
   function doRenderTest() {
-    let presc: RP剤情報[] = presc_example_1;
+    let presc: RP剤情報[] = examples.presc_example_2;
     console.log("json", JSON.stringify(presc, undefined, 2));
     let render = parseShohousen(renderPresc(presc)).formatForSave();
     console.log(render);

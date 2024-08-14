@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IyakuhinMaster } from "myclinic-model";
+  import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
   import api from "../api";
   import SelectItem from "../SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
@@ -12,6 +12,7 @@
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
+  const customUsageCode = "0X0XXXXXXXXX0000";
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
   let showSearchResult = false;
@@ -20,8 +21,10 @@
   let amountLabel = "";
   let amount = "";
   let unit = "";
+  let usageCode = customUsageCode;
   let usage = "";
-  let usageCode: string | undefined = undefined;
+  // let usageMaster: UsageMaster | undefined = undefined;
+  // let usageCode: string | undefined = undefined;
   let daysLabel = "日数";
   let days = "";
   let daysUnit = "日分";
@@ -29,8 +32,9 @@
   let searchInput: HTMLInputElement;
   let usageList: [string, string, any][] = [];
   let showUsageList = false;
-  let usageItemSelected: Writable<[string, string, any] | null> =
-    writable(null);
+  let stockUsageMasters: UsageMaster[] = [];
+  // let usageItemSelected: Writable<[string, string, any] | null> =
+  //   writable(null);
   let searchInputDisabled = true;
 
   $: switch (mode) {
@@ -64,14 +68,14 @@
     }
   });
 
-  usageItemSelected.subscribe((item) => {
-    if (item) {
-      const [code, text, config] = item;
-      usage = text;
-      usageCode = code;
-      showUsageList = false;
-    }
-  });
+  // usageItemSelected.subscribe((item) => {
+  //   if (item) {
+  //     // const [code, text, config] = item;
+  //     // usage = text;
+  //     // usageCode = code;
+  //     // showUsageList = false;
+  //   }
+  // });
 
   onMount(() => {
     searchInput.focus();
@@ -142,9 +146,22 @@
     const dlog: UsageDialog = new UsageDialog({
       target: document.body,
       props: {
-        destroy: () => dlog.$destroy()
+        destroy: () => dlog.$destroy(),
+        onEnter: master => {
+          usageCode = master.usage_code;
+          usage = master.usage_name;
+        }
       }
     })
+  }
+
+  function doCustomUsageInput() {
+    let input = prompt("任意用法");
+    if( input ){
+      usageCode = customUsageCode;
+      usage = input;
+    }
+    showUsageList = false;
   }
 </script>
 
@@ -179,12 +196,7 @@
         class="inline-block"
         style="display:flex;items-align:center;gap:4px;"
       >
-        <input
-          type="text"
-          bind:value={usage}
-          disabled={searchInputDisabled}
-          style="flex-grow:1;"
-        />
+      <div class="usage" style="flex-grow:1">{usage}</div>
         {#if showUsageList}
           <a
             href="javascript:void(0)"
@@ -202,11 +214,13 @@
       </div>
       {#if showUsageList}
         <div style="grid-column:1/span 2" class="usage-examples">
-          {#each usageList as usageItem (usageItem[0])}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div on:click={doCustomUsageInput}>（任意入力）</div>
+          <!-- {#each usageList as usageItem (usageItem[0])}
             <SelectItem data={usageItem} selected={usageItemSelected}>
               <div>{usageItem[1]}</div>
             </SelectItem>
-          {/each}
+          {/each} -->
         </div>
       {/if}
       {#if daysLabel !== ""}
@@ -258,9 +272,17 @@
     gap: 6px;
   }
 
+  .usage {
+    width: auto;
+  }
+
   .usage-examples {
     max-height: 180px;
     overflow-y: auto;
+  }
+
+  .usage-examples > div {
+    cursor: pointer;
   }
 
   .display {
