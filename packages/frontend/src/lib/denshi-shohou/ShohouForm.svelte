@@ -4,11 +4,10 @@
   import SelectItem from "../SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import { onMount } from "svelte";
-  import type { RP剤情報, 用法補足レコード } from "./presc-info";
-  import { 頻用用法コードMap } from "./denshi-shohou";
-  import ChevronDown from "@/icons/ChevronDown.svelte";
-  import ChevronUp from "@/icons/ChevronUp.svelte";
+  import type { RP剤情報, 不均等レコード, 用法補足レコード } from "./presc-info";
+  import { 頻用用法コードMap, type 用法補足区分 } from "./denshi-shohou";
   import UsageDialog from "./UsageDialog.svelte";
+  import { toHankaku } from "../zenkaku";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -23,9 +22,9 @@
   let unit = "";
   let usageCode = customUsageCode;
   let usage = "";
-  let usageHosokuRecords: 用法補足レコード[] = [];
   let hosokuIndex = 1;
-  let hosokuList: { index: number, info: string}[] = [];
+  let hosokuList: { index: number, code: 用法補足区分, info: string}[] = [];
+  let unevenUsage: 不均等レコード | undefined = undefined;
   let daysLabel = "日数";
   let days = "";
   let daysUnit = "日分";
@@ -34,8 +33,6 @@
   let usageList: [string, string, any][] = [];
   let showUsageList = false;
   let stockUsageMasters: UsageMaster[] = [];
-  // let usageItemSelected: Writable<[string, string, any] | null> =
-  //   writable(null);
   let searchInputDisabled = true;
 
   $: switch (mode) {
@@ -118,7 +115,7 @@
       return;
     }
     let 用法補足レコード: 用法補足レコード[] | undefined = hosokuList.map(h => ({
-      用法補足区分: "用法の続き",
+      用法補足区分: h.code,
       用法補足情報: h.info,
     }));
     用法補足レコード = 用法補足レコード.length === 0 ? undefined : 用法補足レコード;
@@ -143,6 +140,7 @@
             力価フラグ: "薬価単位",
             単位名: unit,
           },
+          不均等レコード: unevenUsage,
         },
       ],
     };
@@ -174,7 +172,7 @@
   function doAddHosoku() {
     let info = prompt("用法補足");
     if( info ){
-      hosokuList.push({ index: hosokuIndex, info });
+      hosokuList.push({ index: hosokuIndex, code: "用法の続き", info });
       hosokuIndex += 1;
       hosokuList = hosokuList;
     }
@@ -194,6 +192,53 @@
 
   function doDeleteHosoku(index: number) {
     hosokuList = hosokuList.filter(h => h.index !== index )
+  }
+
+  function doUneven() {
+    let input = prompt("不均等", "1-1-1");
+    if( input ){
+      input = toHankaku(input).trim();
+      const parts = input.split("-");
+      if( parts.length < 2 ){
+        alert("不均等は２つ以上のパートが必要です。");
+        return;
+      }
+      if( parts.length > 5 ){
+        alert("不均等のパートは５つ以下でなければなりません。");
+        return;
+      }
+      let uneven: 不均等レコード = {
+        不均等１回目服用量: parts[0].trim().toString(),
+        不均等２回目服用量: parts[1].trim().toString(),
+      };
+      if( parts.length >= 3 ){
+        uneven.不均等３回目服用量 = parts[2].trim().toString();
+      }
+      if( parts.length >= 4 ){
+        uneven.不均等４回目服用量 = parts[3].trim().toString();
+      }
+      if( parts.length >= 5 ){
+        uneven.不均等５回目服用量 = parts[4].trim().toString();
+      }
+      unevenUsage = uneven;
+    }
+  }
+
+  function formatUneven(uneven: 不均等レコード): string {
+    let parts: string[] = [
+      uneven.不均等１回目服用量,
+      uneven.不均等２回目服用量,
+      uneven.不均等３回目服用量,
+      uneven.不均等４回目服用量,
+      uneven.不均等５回目服用量,
+    ].filter(s => s !== undefined)
+    .reduce((acc: string[], ele: string | undefined) => {
+      if( ele ){
+        acc.push(ele);
+      }
+      return acc;
+    }, []);
+    return "(" + parts.join("-") + ")";
   }
 
 </script>
@@ -223,6 +268,10 @@
       <div class="inline-block">
         <input type="text" style="width:4em" bind:value={amount} />
         <input type="text" style="width:4em" bind:value={unit} />
+        <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
+        {#if unevenUsage }
+          <div>{formatUneven(unevenUsage)}</div>
+        {/if}
       </div>
       <span>用法：</span>
       <div
@@ -237,19 +286,6 @@
         </div>
       {/each}
         <a href="javascript:void(0)" on:click={() => showUsageList = !showUsageList}>頻用</a>
-        <!-- {#if showUsageList}
-          <a
-            href="javascript:void(0)"
-            class="chevron"
-            on:click={() => (showUsageList = false)}><ChevronUp /></a
-          >
-        {:else}
-          <a
-            href="javascript:void(0)"
-            class="chevron"
-            on:click={() => (showUsageList = true)}><ChevronDown /></a
-          >
-        {/if} -->
         <a href="javascript:void(0)" on:click={openUsageDialog}>検索</a>
         <a href="javascript:void(0)" on:click={doAddHosoku}>補足</a>
       </div>

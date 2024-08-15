@@ -1,4 +1,4 @@
-import type { PrescInfoData, RP剤情報 } from "./presc-info";
+import type { PrescInfoData, RP剤情報, 不均等レコード } from "./presc-info";
 
 export function renderPresc(presc: RP剤情報[]): string {
   let buf = new Buffer();
@@ -16,7 +16,8 @@ export function renderPresc(presc: RP剤情報[]): string {
       }
       i += 1;
       let rec = grp.薬品レコード;
-      buf.push(`${pre}${rec.薬品名称} ${rec.分量}${rec.単位名}`);
+      let tail = renderUneven(grp.不均等レコード);
+      buf.push(`${pre}${rec.薬品名称} ${rec.分量}${rec.単位名}${tail}`);
     });
     let times = "";
     switch(rp.剤形レコード.剤形区分) {
@@ -36,6 +37,25 @@ export function renderPresc(presc: RP剤情報[]): string {
     buf.push(`  ${usage}${times}`)
   })
   return buf.to_string();
+}
+
+function renderUneven(uneven: 不均等レコード | undefined): string {
+  if( !uneven ){
+    return "";
+  }
+  let parts: string[] = [
+    uneven.不均等１回目服用量,
+    uneven.不均等２回目服用量,
+    uneven.不均等３回目服用量,
+    uneven.不均等４回目服用量,
+    uneven.不均等５回目服用量,
+  ].reduce((acc: string[], ele: string | undefined) => {
+    if( ele ){
+      acc.push(ele)
+    }
+    return acc;
+  }, []);
+  return "(" + parts.join("-") + ")";
 }
 
 class Buffer {
