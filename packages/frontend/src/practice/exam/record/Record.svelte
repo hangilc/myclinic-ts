@@ -17,6 +17,7 @@
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { DateWrapper } from "myclinic-util";
   import {
+  createPrescInfo,
     type PrescInfoData,
     type RP剤情報,
   } from "@/lib/denshi-shohou/presc-info";
@@ -51,7 +52,7 @@
   });
 
   function doRenderTest() {
-    let presc: RP剤情報[] = examples.presc_example_2;
+    let presc: RP剤情報[] = examples.presc_example_7;
     console.log("json", JSON.stringify(presc, undefined, 2));
     let render = parseShohousen(renderPresc(presc)).formatForSave();
     console.log(render);
@@ -71,6 +72,7 @@
         onEnter: async (data: PrescInfoData) => {
           let presc = data.RP剤情報グループ;
           console.log("json", JSON.stringify(presc, undefined, 2));
+
           // const shohou = createPrescInfo(data);
           // const signed = await sign_presc(shohou);
           // console.log("signed", signed);

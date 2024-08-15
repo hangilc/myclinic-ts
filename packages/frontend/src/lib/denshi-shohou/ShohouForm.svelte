@@ -4,7 +4,7 @@
   import SelectItem from "../SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import { onMount } from "svelte";
-  import type { RP剤情報 } from "./presc-info";
+  import type { RP剤情報, 用法補足レコード } from "./presc-info";
   import { 頻用用法コードMap } from "./denshi-shohou";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
@@ -23,8 +23,9 @@
   let unit = "";
   let usageCode = customUsageCode;
   let usage = "";
-  // let usageMaster: UsageMaster | undefined = undefined;
-  // let usageCode: string | undefined = undefined;
+  let usageHosokuRecords: 用法補足レコード[] = [];
+  let hosokuIndex = 1;
+  let hosokuList: { index: number, info: string}[] = [];
   let daysLabel = "日数";
   let days = "";
   let daysUnit = "日分";
@@ -116,6 +117,11 @@
       alert("分量の単位の入力が不適切です。");
       return;
     }
+    let 用法補足レコード: 用法補足レコード[] | undefined = hosokuList.map(h => ({
+      用法補足区分: "用法の続き",
+      用法補足情報: h.info,
+    }));
+    用法補足レコード = 用法補足レコード.length === 0 ? undefined : 用法補足レコード;
     let drug: RP剤情報 = {
       剤形レコード: {
         剤形区分: mode,
@@ -125,6 +131,7 @@
         用法コード: usageCode,
         用法名称: usage,
       },
+      用法補足レコード,
       薬品情報グループ: [
         {
           薬品レコード: {
@@ -163,6 +170,32 @@
     }
     showUsageList = false;
   }
+
+  function doAddHosoku() {
+    let info = prompt("用法補足");
+    if( info ){
+      hosokuList.push({ index: hosokuIndex, info });
+      hosokuIndex += 1;
+      hosokuList = hosokuList;
+    }
+  }
+
+  function doEditHosoku(h: { index: number, info: string }) {
+    let info = prompt("用法補足", h.info);
+    if( info ){
+      hosokuList.forEach(item => {
+        if( item.index === h.index ){
+          item.info = h.info;
+        }
+      });
+      hosokuList = hosokuList;
+    }
+  }
+
+  function doDeleteHosoku(index: number) {
+    hosokuList = hosokuList.filter(h => h.index !== index )
+  }
+
 </script>
 
 <div>
@@ -194,10 +227,17 @@
       <span>用法：</span>
       <div
         class="inline-block"
-        style="display:flex;items-align:center;gap:4px;"
       >
       <div class="usage" style="flex-grow:1">{usage}</div>
-        {#if showUsageList}
+      {#each hosokuList as hosoku (hosoku.index)}
+        <div>
+          <span>{hosoku.info}</span>
+          <a href="javascript:void(0)" on:click={() => doEditHosoku(hosoku)}>編集</a>
+          <a href="javascript:void(0)" on:click={() => doDeleteHosoku(hosoku.index)}>削除</a>
+        </div>
+      {/each}
+        <a href="javascript:void(0)" on:click={() => showUsageList = !showUsageList}>頻用</a>
+        <!-- {#if showUsageList}
           <a
             href="javascript:void(0)"
             class="chevron"
@@ -209,8 +249,9 @@
             class="chevron"
             on:click={() => (showUsageList = true)}><ChevronDown /></a
           >
-        {/if}
+        {/if} -->
         <a href="javascript:void(0)" on:click={openUsageDialog}>検索</a>
+        <a href="javascript:void(0)" on:click={doAddHosoku}>補足</a>
       </div>
       {#if showUsageList}
         <div style="grid-column:1/span 2" class="usage-examples">
@@ -291,8 +332,4 @@
     padding: 10px;
   }
 
-  a.chevron {
-    text-decoration: none;
-    color: #333;
-  }
 </style>

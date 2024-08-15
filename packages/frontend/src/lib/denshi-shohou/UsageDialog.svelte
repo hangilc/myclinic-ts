@@ -7,37 +7,27 @@
   export let destroy: () => void;
   export let onEnter: (master: UsageMaster) => void;
   let searchText: string = "";
-  let master: UsageMaster | undefined = undefined;
   let items: UsageMaster[] = [];
-  
+
   async function doSearch() {
     let t = searchText.trim();
-    if( t == "" ){
+    if (t == "") {
       return;
     }
     items = await api.selectUsageMasterByUsageName(t);
   }
 
   function doItemClick(item: UsageMaster) {
-    master = item;
+    destroy();
+    onEnter(item);
   }
 
-  function doEnter() {
-    if( master ){
-      destroy();
-      onEnter(master);
-    }
-  }
 </script>
 
 <Dialog title="用法検索" {destroy}>
-  <div class="current">
-    <div style="flex-grow:1">{master?.usage_name ?? ""}</div>
-    <button on:click={doEnter} disabled={master == undefined}>入力</button>
-  </div>
-  <hr/>
   <form class="search-form" on:submit|preventDefault={doSearch}>
-    <input type="text" bind:value={searchText} use:setFocus/> <button on:click={doSearch}>検索</button>
+    <input type="text" bind:value={searchText} use:setFocus />
+    <button on:click={doSearch}>検索</button>
   </form>
   <div class="search-results">
     {#each items as item (item.usage_code)}
@@ -48,11 +38,6 @@
 </Dialog>
 
 <style>
-  .current {
-    margin-bottom: 10px;
-    display: flex;
-  }
-
   .search-results {
     width: 240px;
     max-height: 360px;

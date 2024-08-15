@@ -254,28 +254,7 @@
       特殊公費レコード: undefined,
       レセプト種別コード: resolveレセプト種別コード(hokenInfo),
       処方箋交付年月日: DateWrapper.from(visit.visitedAt).asSqlDate().replaceAll(/-/g, ""),
-      // 使用期限年月日: "20240710",
-      // 備考レコード: [
-      //   {
-      //     備考: "一包化",
-      //   },
-      //   {
-      //     備考: "その他",
-      //   },
-      // ],
       RP剤情報グループ: [drug],
-      // 提供情報レコード: {
-      //   提供診療情報レコード: [
-      //     {
-      //       薬品名称: "アポカリプス",
-      //       コメント: "新しく加えました。",
-      //     },
-      //     {
-      //       コメント: "薬追加しています。",
-      //     },
-      //   ],
-      //   検査値データ等レコード: [{ 検査値データ等: "血清クレアチニン値:0.87" }],
-      // },
     };
     onEnter(shohou);
   }
@@ -284,7 +263,7 @@
 <Dialog title="処方入力" {destroy}>
   <div class="top">
     <div>
-      {#each records as record (record.id)}{/each}
+      <!-- {#each records as record (record.id)}{/each} -->
     </div>
     <div class="new-entry">
       <ShohouForm {at} let:enter onEnter={doNew}>

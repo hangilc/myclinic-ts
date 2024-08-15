@@ -21,15 +21,19 @@ export function renderPresc(presc: RP剤情報[]): string {
     let times = "";
     switch(rp.剤形レコード.剤形区分) {
       case "内服": {
-        times = ` ${rp.剤形レコード.調剤数量}日分`;
+        times = `  ${rp.剤形レコード.調剤数量}日分`;
         break;
       }
       case "頓服": {
-        times = ` ${rp.剤形レコード.調剤数量}回分`;
+        times = `  ${rp.剤形レコード.調剤数量}回分`;
         break;
       }
     }
-    buf.push(`  ${rp.用法レコード.用法名称}${times}`)
+    let usage = rp.用法レコード.用法名称;
+    rp.用法補足レコード?.forEach(hosoku => {
+      usage = `${usage}　${hosoku.用法補足情報}`;
+    });
+    buf.push(`  ${usage}${times}`)
   })
   return buf.to_string();
 }

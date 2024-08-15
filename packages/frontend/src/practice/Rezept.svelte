@@ -7,8 +7,9 @@
   import {
     RezeptFrame,
     rezeptUnitToPatientUnit,
+    type RezeptUnit,
   } from "myclinic-rezept";
-  import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient, type RezeptUnit } from "@/lib/rezept-adapter";
+  import { cvtVisitsToUnit, loadVisits, loadVisitsForPatient } from "@/lib/rezept-adapter";
 
   export let isVisible: boolean;
   let year: number;

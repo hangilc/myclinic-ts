@@ -210,7 +210,7 @@
     <div style="display:flex;items-align:center;">
       <input type="text" bind:value={referHospital} style="width: 16em;" />
       <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <a style="margin-left:4px;cursor:pointer;" on:click={doConfigPopup}>
+      <a style="margin-left:4px;cursor:pointer;" on:click={doConfigPopup} href="javascript:void(0)">
         <ChevronDown />
       </a>
     </div>

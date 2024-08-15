@@ -6,13 +6,13 @@ export class RenderDrugContext {
   daysTab: number = 18;
 
   constructor(arg: { maxLine?: number, amountUnitTab?: number, daysTab?: number } = {}) {
-    if( arg.maxLine !== undefined ){
+    if (arg.maxLine !== undefined) {
       this.maxLine = arg.maxLine;
     }
-    if( arg.amountUnitTab !== undefined ){
+    if (arg.amountUnitTab !== undefined) {
       this.amountUnitTab = arg.amountUnitTab;
     }
-    if( arg.daysTab !== undefined ){
+    if (arg.daysTab !== undefined) {
       this.daysTab = arg.daysTab;
     }
   }
@@ -27,7 +27,7 @@ export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new Rend
   drug.forEach(line => {
     switch (line.kind) {
       case "drug-amount": {
-        lines.push(...renderDrugAmount(line.drug, line.amount, line.unit, maxLine, amountTab));
+        lines.push(...renderDrugAmount(line.drug, line.amount, line.unit, line.tail, maxLine, amountTab));
         break;
       }
       case "days": {
@@ -43,18 +43,24 @@ export function renderDrug(drug: ParsedLine[], ctx: RenderDrugContext = new Rend
   return lines;
 }
 
-function renderWithTab(pre: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
+function renderWithTab(
+  pre: string, amount: string, unit: string, tail: string | undefined, maxLine: number, tab: number
+): string[] {
+  let tail_str = tail ?? "";
   const lines: string[] = [];
   pre = pre.trim();
+  if( tail_str.length > maxLine - tab ){
+    return breakToLines(`${pre}　${amount}${unit}${tail_str}`, maxLine);
+  }
   let iter = 1;
-  while(true){
-    if( iter++ > 5 ){
+  while (true) {
+    if (iter++ > 5) {
       throw new Error(`Too long pre: ${pre} (in renderWithTab).`);
     }
     const rem = tab - pre.length - amount.length;
-    if( rem > 0 ){
+    if (rem > 0) {
       const pad = "　".repeat(rem);
-      lines.push(`${pre}${pad}${amount}${unit}`);
+      lines.push(`${pre}${pad}${amount}${unit}${tail_str}`);
       break;
     } else {
       lines.push(pre.substring(0, maxLine));
@@ -64,12 +70,14 @@ function renderWithTab(pre: string, amount: string, unit: string, maxLine: numbe
   return lines;
 }
 
-export function renderDrugAmount(drug: string, amount: string, unit: string, maxLine: number, tab: number): string[] {
-  return renderWithTab(drug, amount, unit, maxLine, tab);
+export function renderDrugAmount(
+  drug: string, amount: string, unit: string, tail: string | undefined, maxLine: number, tab: number
+): string[] {
+  return renderWithTab(drug, amount, unit, tail, maxLine, tab);
 }
 
 export function renderDays(str: string, days: string, unit: string, maxLine: number, tab: number): string[] {
-  return renderWithTab(str, days, unit, maxLine, tab);
+  return renderWithTab(str, days, unit, undefined, maxLine, tab);
 }
 
 export function breakToLines(str: string, lineSize: number): string[] {
