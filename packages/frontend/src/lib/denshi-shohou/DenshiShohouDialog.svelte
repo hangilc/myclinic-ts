@@ -24,6 +24,8 @@
     RezeptShubetsuCodeBase,
     RezeptShubetuCodeOffset,
   } from "myclinic-rezept/codes";
+  import NewDrugDialog from "./NewDrugDialog.svelte";
+  import { renderPresc } from "./presc-renderer";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -32,6 +34,8 @@
   export let prescRecords: 薬品情報[] = [];
   export let at: string;
   export let onEnter: (data: PrescInfoData) => void;
+  let drugIndex = 1;
+  let drugs: { index: number, drug: RP剤情報}[] = [];
 
   let records: { id: number; presc: 薬品情報 }[] = prescRecords.map(
     (r, id) => ({
@@ -258,18 +262,39 @@
     };
     onEnter(shohou);
   }
+
+  function doAdd() {
+    const form: NewDrugDialog = new NewDrugDialog({
+      target: document.body,
+      props: {
+        destroy: () => form.$destroy(),
+        at,
+        onEnter: drug => {
+          console.log("drug", drug);
+          drugs.push({ index: drugIndex, drug });
+          drugIndex += 1;
+          drugs = drugs;
+        }
+      }
+    })
+  }
 </script>
 
-<Dialog title="処方入力" {destroy}>
+<Dialog title="新規処方" {destroy}>
   <div class="top">
     <div>
-      <!-- {#each records as record (record.id)}{/each} -->
+      {#each drugs as drug (drug.index)}
+        <div>{drug.index}){renderPresc(drug.drug)}</div>
+      {/each}
     </div>
-    <div class="new-entry">
+    <div>
+      <button on:click={doAdd}>追加</button>
+    </div>
+    <!-- <div class="new-entry">
       <ShohouForm {at} let:enter onEnter={doNew}>
         <button on:click={enter}>Enter</button>
       </ShohouForm>
-    </div>
+    </div> -->
     <div class="commands">
       <button on:click={doCancel}>キャンセル</button>
     </div>
