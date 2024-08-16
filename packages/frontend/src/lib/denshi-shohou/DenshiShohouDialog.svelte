@@ -25,24 +25,24 @@
     RezeptShubetuCodeOffset,
   } from "myclinic-rezept/codes";
   import NewDrugDialog from "./NewDrugDialog.svelte";
-  import { renderPresc } from "./presc-renderer";
+  import { renderDrug, renderPresc } from "./presc-renderer";
 
   export let destroy: () => void;
   export let patient: Patient;
   export let hokenInfo: HokenInfo;
   export let visit: Visit;
-  export let prescRecords: 薬品情報[] = [];
   export let at: string;
   export let onEnter: (data: PrescInfoData) => void;
   let drugIndex = 1;
-  let drugs: { index: number, drug: RP剤情報}[] = [];
-
-  let records: { id: number; presc: 薬品情報 }[] = prescRecords.map(
-    (r, id) => ({
-      id,
-      presc: r,
-    })
-  );
+  let drugs: {
+    index: number;
+    drug: RP剤情報;
+    render: {
+      usage: string;
+      times: string;
+      drugs: string[];
+    };
+  }[] = [];
 
   function doCancel() {
     destroy();
@@ -207,13 +207,13 @@
       }
     }
     let code = f().toString();
-    if( code.length !== 4 ){
-      throw new Error(`Invalid レセプト種別コード: ${code}`)
+    if (code.length !== 4) {
+      throw new Error(`Invalid レセプト種別コード: ${code}`);
     }
     return code;
   }
 
-  async function doNew(drug: RP剤情報) {
+  async function doEnter() {
     function toKana(s: string): string {
       return convertZenkakuHiraganaToHankakuKatakana(s);
     }
@@ -257,8 +257,10 @@
       第三公費レコード,
       特殊公費レコード: undefined,
       レセプト種別コード: resolveレセプト種別コード(hokenInfo),
-      処方箋交付年月日: DateWrapper.from(visit.visitedAt).asSqlDate().replaceAll(/-/g, ""),
-      RP剤情報グループ: [drug],
+      処方箋交付年月日: DateWrapper.from(visit.visitedAt)
+        .asSqlDate()
+        .replaceAll(/-/g, ""),
+      RP剤情報グループ: drugs.map(drug => drug.drug),
     };
     onEnter(shohou);
   }
@@ -269,33 +271,36 @@
       props: {
         destroy: () => form.$destroy(),
         at,
-        onEnter: drug => {
+        onEnter: (drug) => {
           console.log("drug", drug);
-          drugs.push({ index: drugIndex, drug });
+          let render = renderDrug(drug);
+          drugs.push({ index: drugIndex, drug, render });
           drugIndex += 1;
           drugs = drugs;
-        }
-      }
-    })
+        },
+      },
+    });
   }
 </script>
 
 <Dialog title="新規処方" {destroy}>
   <div class="top">
-    <div>
-      {#each drugs as drug (drug.index)}
-        <div>{drug.index}){renderPresc(drug.drug)}</div>
+    <div class="drug-render">
+      {#each drugs as drug, i (drug.index)}
+        <div>{i + 1})</div>
+        <div>
+          {#each drug.render.drugs as d}
+            <div>{d}</div>
+          {/each}
+          <div>{drug.render.usage} {drug.render.times}</div>
+        </div>
       {/each}
     </div>
     <div>
       <button on:click={doAdd}>追加</button>
     </div>
-    <!-- <div class="new-entry">
-      <ShohouForm {at} let:enter onEnter={doNew}>
-        <button on:click={enter}>Enter</button>
-      </ShohouForm>
-    </div> -->
     <div class="commands">
+      <button on:click={doEnter}>入力</button>
       <button on:click={doCancel}>キャンセル</button>
     </div>
   </div>
@@ -305,8 +310,10 @@
   .top {
     width: 360px;
   }
-  .new-entry {
-    margin: 10px 0;
+  .drug-render {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px;
   }
   .commands {
     text-align: right;

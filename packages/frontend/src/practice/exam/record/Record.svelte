@@ -70,14 +70,14 @@
         hokenInfo: visit.hoken,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
-          let presc = data.RP剤情報グループ;
-          console.log("json", JSON.stringify(presc, undefined, 2));
+          // let presc = data.RP剤情報グループ;
+          // console.log("json", JSON.stringify(presc, undefined, 2));
 
-          // const shohou = createPrescInfo(data);
-          // const signed = await sign_presc(shohou);
-          // console.log("signed", signed);
-          // let result = await register_presc(signed, kikancode, "1");
-          // console.log("result", result);
+          const shohou = createPrescInfo(data);
+          const signed = await sign_presc(shohou);
+          console.log("signed", signed);
+          let result = await register_presc(signed, kikancode, "1");
+          console.log("result", result);
         },
       },
     });

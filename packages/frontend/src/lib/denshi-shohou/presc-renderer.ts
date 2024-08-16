@@ -39,14 +39,23 @@ export function renderPresc(presc: RP剤情報[]): string {
   return buf.to_string();
 }
 
-export function renderDrug(drug: RP剤情報): string[] {
-  const result: string[] = [];
-  let group = drug.薬品情報グループ;
-  group.forEach(grp => {
-    let rec = grp.薬品レコード;
-    let tail = renderUneven(grp.不均等レコード);
-    result.push(`${rec.薬品名称} ${rec.分量}${rec.単位名}${tail}`);
+export interface RenderedDrug {
+  usage: string;
+  times: string;
+  drugs: string[];
+}
+
+export function renderDrug(drug: RP剤情報): RenderedDrug {
+  let rd: RenderedDrug = {
+    usage: "",
+    times: "",
+    drugs: [],
+  };
+  let usage = drug.用法レコード.用法名称;
+  drug.用法補足レコード?.forEach(hosoku => {
+    usage = `${usage}　${hosoku.用法補足情報}`;
   });
+  rd.usage = usage;
   let times = "";
   switch (drug.剤形レコード.剤形区分) {
     case "内服": {
@@ -58,12 +67,13 @@ export function renderDrug(drug: RP剤情報): string[] {
       break;
     }
   }
-  let usage = drug.用法レコード.用法名称;
-  drug.用法補足レコード?.forEach(hosoku => {
-    usage = `${usage}　${hosoku.用法補足情報}`;
+  rd.times = times;
+  drug.薬品情報グループ.forEach(grp => {
+    let rec = grp.薬品レコード;
+    let tail = renderUneven(grp.不均等レコード);
+    rd.drugs.push(`${rec.薬品名称} ${rec.分量}${rec.単位名}${tail}`);
   });
-  result.push(`  ${usage}${times}`)
-  return result;
+  return rd;
 }
 
 function renderUneven(uneven: 不均等レコード | undefined): string {
