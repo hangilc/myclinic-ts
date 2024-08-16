@@ -4,10 +4,16 @@
   import SelectItem from "../SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import { onMount } from "svelte";
-  import type { RP剤情報, 不均等レコード, 用法補足レコード } from "./presc-info";
+  import type {
+    RP剤情報,
+    不均等レコード,
+    用法補足レコード,
+  } from "./presc-info";
   import { 頻用用法コードMap, type 用法補足区分 } from "./denshi-shohou";
   import UsageDialog from "./UsageDialog.svelte";
   import { toHankaku } from "../zenkaku";
+  import * as cache from "@lib/cache";
+  import CloudArrowUp from "@/icons/CloudArrowUp.svelte";
 
   export let at: string;
   export let onEnter: (drug: RP剤情報) => void;
@@ -22,8 +28,9 @@
   let unit = "";
   let usageCode = customUsageCode;
   let usage = "";
+  let usageMaster: UsageMaster | undefined = undefined;
   let hosokuIndex = 1;
-  let hosokuList: { index: number, code: 用法補足区分, info: string}[] = [];
+  let hosokuList: { index: number; code: 用法補足区分; info: string }[] = [];
   let unevenUsage: 不均等レコード | undefined = undefined;
   let daysLabel = "日数";
   let days = "";
@@ -32,8 +39,8 @@
   let searchInput: HTMLInputElement;
   let usageList: [string, string, any][] = [];
   let showUsageList = false;
-  let stockUsageMasters: UsageMaster[] = [];
-  let searchInputDisabled = true;
+  let freqUsageMasters: UsageMaster[] = [];
+  let showCloudArrowUp = false;
 
   $: switch (mode) {
     case "内服": {
@@ -66,14 +73,11 @@
     }
   });
 
-  // usageItemSelected.subscribe((item) => {
-  //   if (item) {
-  //     // const [code, text, config] = item;
-  //     // usage = text;
-  //     // usageCode = code;
-  //     // showUsageList = false;
-  //   }
-  // });
+  prep();
+
+  async function prep() {
+    freqUsageMasters = await cache.getShohouFreqUsage();
+  }
 
   onMount(() => {
     searchInput.focus();
@@ -102,23 +106,26 @@
         return;
       }
     }
-    if( !master ){
+    if (!master) {
       alert("薬剤が指定されていません。");
       return;
     }
-    if( isNaN(parseFloat(amount)) ){
+    if (isNaN(parseFloat(amount))) {
       alert("分量の入力が不適切です。");
       return;
     }
-    if( unit == "" ){
+    if (unit == "") {
       alert("分量の単位の入力が不適切です。");
       return;
     }
-    let 用法補足レコード: 用法補足レコード[] | undefined = hosokuList.map(h => ({
-      用法補足区分: h.code,
-      用法補足情報: h.info,
-    }));
-    用法補足レコード = 用法補足レコード.length === 0 ? undefined : 用法補足レコード;
+    let 用法補足レコード: 用法補足レコード[] | undefined = hosokuList.map(
+      (h) => ({
+        用法補足区分: h.code,
+        用法補足情報: h.info,
+      })
+    );
+    用法補足レコード =
+      用法補足レコード.length === 0 ? undefined : 用法補足レコード;
     let drug: RP剤情報 = {
       剤形レコード: {
         剤形区分: mode,
@@ -147,22 +154,30 @@
     onEnter(drug);
   }
 
+  function isInFreq(m: UsageMaster): boolean {
+    return freqUsageMasters.find(item => item.usage_code === m.usage_code) !== undefined;
+  }
+
   function openUsageDialog() {
     const dlog: UsageDialog = new UsageDialog({
       target: document.body,
       props: {
         destroy: () => dlog.$destroy(),
-        onEnter: master => {
+        onEnter: (master) => {
           usageCode = master.usage_code;
           usage = master.usage_name;
-        }
-      }
-    })
+          usageMaster = master;
+          if( !isInFreq(master) ) {
+            showCloudArrowUp = true;
+          }
+        },
+      },
+    });
   }
 
   function doCustomUsageInput() {
     let input = prompt("任意用法");
-    if( input ){
+    if (input) {
       usageCode = customUsageCode;
       usage = input;
     }
@@ -171,18 +186,18 @@
 
   function doAddHosoku() {
     let info = prompt("用法補足");
-    if( info ){
+    if (info) {
       hosokuList.push({ index: hosokuIndex, code: "用法の続き", info });
       hosokuIndex += 1;
       hosokuList = hosokuList;
     }
   }
 
-  function doEditHosoku(h: { index: number, info: string }) {
+  function doEditHosoku(h: { index: number; info: string }) {
     let info = prompt("用法補足", h.info);
-    if( info ){
-      hosokuList.forEach(item => {
-        if( item.index === h.index ){
+    if (info) {
+      hosokuList.forEach((item) => {
+        if (item.index === h.index) {
           item.info = h.info;
         }
       });
@@ -191,19 +206,19 @@
   }
 
   function doDeleteHosoku(index: number) {
-    hosokuList = hosokuList.filter(h => h.index !== index )
+    hosokuList = hosokuList.filter((h) => h.index !== index);
   }
 
   function doUneven() {
     let input = prompt("不均等", "1-1-1");
-    if( input ){
+    if (input) {
       input = toHankaku(input).trim();
       const parts = input.split("-");
-      if( parts.length < 2 ){
+      if (parts.length < 2) {
         alert("不均等は２つ以上のパートが必要です。");
         return;
       }
-      if( parts.length > 5 ){
+      if (parts.length > 5) {
         alert("不均等のパートは５つ以下でなければなりません。");
         return;
       }
@@ -211,13 +226,13 @@
         不均等１回目服用量: parts[0].trim().toString(),
         不均等２回目服用量: parts[1].trim().toString(),
       };
-      if( parts.length >= 3 ){
+      if (parts.length >= 3) {
         uneven.不均等３回目服用量 = parts[2].trim().toString();
       }
-      if( parts.length >= 4 ){
+      if (parts.length >= 4) {
         uneven.不均等４回目服用量 = parts[3].trim().toString();
       }
-      if( parts.length >= 5 ){
+      if (parts.length >= 5) {
         uneven.不均等５回目服用量 = parts[4].trim().toString();
       }
       unevenUsage = uneven;
@@ -231,16 +246,29 @@
       uneven.不均等３回目服用量,
       uneven.不均等４回目服用量,
       uneven.不均等５回目服用量,
-    ].filter(s => s !== undefined)
-    .reduce((acc: string[], ele: string | undefined) => {
-      if( ele ){
-        acc.push(ele);
-      }
-      return acc;
-    }, []);
+    ]
+      .filter((s) => s !== undefined)
+      .reduce((acc: string[], ele: string | undefined) => {
+        if (ele) {
+          acc.push(ele);
+        }
+        return acc;
+      }, []);
     return "(" + parts.join("-") + ")";
   }
 
+  async function doUploadUsage() {
+    if( usageMaster ){
+      let freqs = await api.getShohouFreqUsage();
+      if( freqs.find(item => item.usage_code === usageMaster?.usage_code) ){
+        return;
+      }
+      freqs.push(usageMaster);
+      await api.saveShohouFreqUsage(freqs);
+      freqUsageMasters = freqs;
+      cache.clearShohouFreqUsage();
+    }
+  }
 </script>
 
 <div>
@@ -248,7 +276,7 @@
     <input type="text" bind:value={searchText} bind:this={searchInput} />
     <button type="submit">検索</button>
   </form>
-  {#if showSearchResult }
+  {#if showSearchResult}
     <div class="search-result">
       {#each searchResults as searchResult (searchResult.iyakuhincode)}
         <SelectItem data={searchResult} selected={searchSelected}>
@@ -269,23 +297,34 @@
         <input type="text" style="width:4em" bind:value={amount} />
         <input type="text" style="width:4em" bind:value={unit} />
         <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
-        {#if unevenUsage }
+        {#if unevenUsage}
           <div>{formatUneven(unevenUsage)}</div>
         {/if}
       </div>
       <span>用法：</span>
-      <div
-        class="inline-block"
-      >
-      <div class="usage" style="flex-grow:1">{usage}</div>
-      {#each hosokuList as hosoku (hosoku.index)}
-        <div>
-          <span>{hosoku.info}</span>
-          <a href="javascript:void(0)" on:click={() => doEditHosoku(hosoku)}>編集</a>
-          <a href="javascript:void(0)" on:click={() => doDeleteHosoku(hosoku.index)}>削除</a>
+      <div class="inline-block">
+        <div class="usage" style="flex-grow:1; display: flex; align-items: center;">
+          {usage}
+          {#if showCloudArrowUp}
+            <a href="javascript:void(0)" style="margin-left: 4px;" on:click={doUploadUsage}><CloudArrowUp /></a>
+          {/if}
         </div>
-      {/each}
-        <a href="javascript:void(0)" on:click={() => showUsageList = !showUsageList}>頻用</a>
+        {#each hosokuList as hosoku (hosoku.index)}
+          <div>
+            <span>{hosoku.info}</span>
+            <a href="javascript:void(0)" on:click={() => doEditHosoku(hosoku)}
+              >編集</a
+            >
+            <a
+              href="javascript:void(0)"
+              on:click={() => doDeleteHosoku(hosoku.index)}>削除</a
+            >
+          </div>
+        {/each}
+        <a
+          href="javascript:void(0)"
+          on:click={() => (showUsageList = !showUsageList)}>頻用</a
+        >
         <a href="javascript:void(0)" on:click={openUsageDialog}>検索</a>
         <a href="javascript:void(0)" on:click={doAddHosoku}>補足</a>
       </div>
@@ -293,11 +332,9 @@
         <div style="grid-column:1/span 2" class="usage-examples">
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div on:click={doCustomUsageInput}>（任意入力）</div>
-          <!-- {#each usageList as usageItem (usageItem[0])}
-            <SelectItem data={usageItem} selected={usageItemSelected}>
-              <div>{usageItem[1]}</div>
-            </SelectItem>
-          {/each} -->
+          {#each freqUsageMasters as freq (freq.usage_code)}
+            <div>{freq.usage_name}</div>
+          {/each}
         </div>
       {/if}
       {#if daysLabel !== ""}
@@ -367,5 +404,4 @@
     border: 1px solid gray;
     padding: 10px;
   }
-
 </style>

@@ -13,7 +13,7 @@
   }
 </script>
 
-<Dialog title="新規薬剤" {destroy}>
+<Dialog title="新規薬剤" {destroy} styleWidth="360px">
   <ShohouForm {at} let:enter onEnter={doEnter}>
     <slot>
       <div>

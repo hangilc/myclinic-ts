@@ -1,9 +1,10 @@
-import type { ClinicInfo } from "myclinic-model";
+import type { ClinicInfo, UsageMaster } from "myclinic-model";
 import api from "./api";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
+let shohouFreqUsage: UsageMaster[] | undefined = undefined;
 
 export async function getClinicInfo(): Promise<ClinicInfo> {
   if( !clinicInfo ){
@@ -34,4 +35,19 @@ export async function getPrescUrl(): Promise<string> {
     prescUrl = url;
   }
   return prescUrl;
+}
+
+export async function getShohouFreqUsage(): Promise<UsageMaster[]> {
+  if( shohouFreqUsage === undefined ){
+    let value = await api.getShohouFreqUsage();
+    if( !value ){
+      value = [];
+    }
+    shohouFreqUsage = value;
+  }
+  return shohouFreqUsage;
+}
+
+export function clearShohouFreqUsage() {
+  shohouFreqUsage = undefined;
 }

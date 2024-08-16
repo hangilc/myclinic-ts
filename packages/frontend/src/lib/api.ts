@@ -1616,5 +1616,13 @@ export default {
 
   selectUsageMasterByUsageName(name: string): Promise<m.UsageMaster[]> {
     return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster[])
+  },
+
+  getShohouFreqUsage(): Promise<m.UsageMaster[]> {
+    return get("get-config", { name: "shohou-freq-usage" }, a => a ?? []);
+  },
+
+  saveShohouFreqUsage(usages: m.UsageMaster[]): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-usage"}, a => a);
   }
 };
