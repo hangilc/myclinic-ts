@@ -18,6 +18,7 @@
     <slot>
       <div>
         <button on:click={enter}>入力</button>
+        <button on:click={destroy}>キャンセル</button>
       </div>
     </slot>
     </ShohouForm>

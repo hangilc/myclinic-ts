@@ -281,6 +281,10 @@
       },
     });
   }
+
+  function doFreq() {
+    
+  }
 </script>
 
 <Dialog title="新規処方" {destroy}>
@@ -297,7 +301,8 @@
       {/each}
     </div>
     <div>
-      <button on:click={doAdd}>追加</button>
+      <button on:click={doFreq}>登録薬剤</button>
+      <button on:click={doAdd}>手動追以下</button>
     </div>
     <div class="commands">
       <button on:click={doEnter}>入力</button>

@@ -155,22 +155,32 @@
   }
 
   function isInFreq(m: UsageMaster): boolean {
-    return freqUsageMasters.find(item => item.usage_code === m.usage_code) !== undefined;
+    return (
+      freqUsageMasters.find((item) => item.usage_code === m.usage_code) !==
+      undefined
+    );
   }
 
-  function openUsageDialog() {
+  function setUsageMaster(master: UsageMaster) {
+    usageCode = master.usage_code;
+    usage = master.usage_name;
+    usageMaster = master;
+    if (!isInFreq(master)) {
+      showCloudArrowUp = true;
+    }
+  }
+
+  function doSetUsageMaster(master: UsageMaster) {
+    setUsageMaster(master);
+    showUsageList = false;
+  }
+
+  function doOpenUsageDialog() {
     const dlog: UsageDialog = new UsageDialog({
       target: document.body,
       props: {
         destroy: () => dlog.$destroy(),
-        onEnter: (master) => {
-          usageCode = master.usage_code;
-          usage = master.usage_name;
-          usageMaster = master;
-          if( !isInFreq(master) ) {
-            showCloudArrowUp = true;
-          }
-        },
+        onEnter: doSetUsageMaster,
       },
     });
   }
@@ -258,15 +268,16 @@
   }
 
   async function doUploadUsage() {
-    if( usageMaster ){
+    if (usageMaster) {
       let freqs = await api.getShohouFreqUsage();
-      if( freqs.find(item => item.usage_code === usageMaster?.usage_code) ){
+      if (freqs.find((item) => item.usage_code === usageMaster?.usage_code)) {
         return;
       }
       freqs.push(usageMaster);
       await api.saveShohouFreqUsage(freqs);
       freqUsageMasters = freqs;
       cache.clearShohouFreqUsage();
+      showCloudArrowUp = false;
     }
   }
 </script>
@@ -303,10 +314,17 @@
       </div>
       <span>用法：</span>
       <div class="inline-block">
-        <div class="usage" style="flex-grow:1; display: flex; align-items: center;">
+        <div
+          class="usage"
+          style="flex-grow:1; display: flex; align-items: center;"
+        >
           {usage}
           {#if showCloudArrowUp}
-            <a href="javascript:void(0)" style="margin-left: 4px;" on:click={doUploadUsage}><CloudArrowUp /></a>
+            <a
+              href="javascript:void(0)"
+              style="margin-left: 4px;"
+              on:click={doUploadUsage}><CloudArrowUp /></a
+            >
           {/if}
         </div>
         {#each hosokuList as hosoku (hosoku.index)}
@@ -325,15 +343,15 @@
           href="javascript:void(0)"
           on:click={() => (showUsageList = !showUsageList)}>頻用</a
         >
-        <a href="javascript:void(0)" on:click={openUsageDialog}>検索</a>
+        <a href="javascript:void(0)" on:click={doOpenUsageDialog}>検索</a>
         <a href="javascript:void(0)" on:click={doAddHosoku}>補足</a>
       </div>
       {#if showUsageList}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div style="grid-column:1/span 2" class="usage-examples">
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div on:click={doCustomUsageInput}>（任意入力）</div>
           {#each freqUsageMasters as freq (freq.usage_code)}
-            <div>{freq.usage_name}</div>
+            <div on:click={() => doSetUsageMaster(freq)}>{freq.usage_name}</div>
           {/each}
         </div>
       {/if}
