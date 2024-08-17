@@ -262,6 +262,7 @@
         .replaceAll(/-/g, ""),
       RP剤情報グループ: drugs.map(drug => drug.drug),
     };
+    destroy();
     onEnter(shohou);
   }
 

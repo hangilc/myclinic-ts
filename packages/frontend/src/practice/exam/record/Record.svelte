@@ -17,7 +17,7 @@
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { DateWrapper } from "myclinic-util";
   import {
-  createPrescInfo,
+    createPrescInfo,
     type PrescInfoData,
     type RP剤情報,
   } from "@/lib/denshi-shohou/presc-info";
@@ -73,11 +73,22 @@
           // let presc = data.RP剤情報グループ;
           // console.log("json", JSON.stringify(presc, undefined, 2));
 
-          const shohou = createPrescInfo(data);
-          const signed = await sign_presc(shohou);
-          console.log("signed", signed);
-          let result = await register_presc(signed, kikancode, "1");
-          console.log("result", result);
+          // const shohou = createPrescInfo(data);
+          // const signed = await sign_presc(shohou);
+          // console.log("signed", signed);
+          // let result = await register_presc(signed, kikancode, "1");
+          // console.log("result", result);
+          let text = new m.Text(
+            0,
+            visit.visitId,
+            "",
+            JSON.stringify({
+              kind: "shohou",
+              shohou: data,
+              register: undefined,
+            })
+          );
+          await api.enterText(text);
         },
       },
     });
@@ -104,7 +115,6 @@
           >
           <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
           <a href="javascript:void(0)" on:click={doRenderTest}>RenderTest</a>
-
         </div>
       {/if}
     </div>

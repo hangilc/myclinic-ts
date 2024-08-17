@@ -630,11 +630,12 @@ export class Text {
   constructor(
     public textId: number,
     public visitId: number,
-    public content: string
+    public content: string,
+    public memo?: string,
   ) { }
 
   static cast(arg: any): Text {
-    return new Text(arg.textId, arg.visitId, arg.content);
+    return new Text(arg.textId, arg.visitId, arg.content, arg.memo);
   }
 }
 
