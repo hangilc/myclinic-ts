@@ -10,7 +10,7 @@
   import PopupMenu from "@/lib/PopupMenu.svelte";
   import { dataCySetter } from "@/lib/popup-helper";
   import * as cache from "@/lib/cache";
-  import { searchPrescribed } from "@/lib/denshi-shohou/presc-api";
+  import { prescStatus, searchPrescribed } from "@/lib/denshi-shohou/presc-api";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -108,6 +108,16 @@
     const result = await searchPrescribed(kikancode, startDate, endDate);
     console.log("result", result);
   }
+
+
+  async function doPrescStatus() {
+    const prescriptionId = prompt("PrescriptionId");
+    if( prescriptionId ){
+      const kikancode = await cache.getShohouKikancode();
+      const result = await prescStatus(kikancode, prescriptionId);
+      console.log("result", result);
+    }
+  }
 </script>
 
 <ServiceHeader title="診察">
@@ -117,6 +127,7 @@
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
     <a href="javascript:void(0);" on:click={doSearchPresc}>処方検索</a>
+    <a href="javascript:void(0);" on:click={doPrescStatus}>処方状態</a>
   </svelte:fragment>
 </ServiceHeader>
 

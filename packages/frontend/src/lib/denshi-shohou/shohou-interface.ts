@@ -10,40 +10,42 @@ export interface RegisterRequest {
 }
 
 export interface RegisterResult {
-  MessageHeader: {
-    ArbitraryFileIdentifier?: string;
-    SegmentOfResult: string; // OQSCD003
-    ErrorCode?: string;
-    ErrorMessage?: string;
-    CharacterCodeIdentifier: string; // OQSCD005
-  },
-  MessageBody?: {
-    ProcessingResultStatus: string;
-    ProcessingResultCode?: string;
-    ProcessingResultMessage?: string;
-    PrescriptionId?: string;
-    AccessCode?: string;
-    XmlCheckResultList?: {
-      ResultCode: string;
-      ResultMessage: string;
-    }[];
-    CsvCheckResultList?: {
-      ResultCode: string;
-      ResultMessage: string;
-    }[];
-    VerifyResultList?: {
-      Status: string;
-      Message: string;
-      SignId: string;
-      FailureReasons?: {
-        MessageKey: string;
-        MessageCode: string;
-        Message: string;
+  XmlMsg: {
+    MessageHeader: {
+      ArbitraryFileIdentifier?: string;
+      SegmentOfResult: string; // OQSCD003
+      ErrorCode?: string;
+      ErrorMessage?: string;
+      CharacterCodeIdentifier: string; // OQSCD005
+    },
+    MessageBody?: {
+      ProcessingResultStatus: string;
+      ProcessingResultCode?: string;
+      ProcessingResultMessage?: string;
+      PrescriptionId?: string;
+      AccessCode?: string;
+      XmlCheckResultList?: {
+        ResultCode: string;
+        ResultMessage: string;
       }[];
-    }[];
-    GenerateSignResult? : {
-      GenerateSignStatus: string;
-      GenerateSignMessage: string;
+      CsvCheckResultList?: {
+        ResultCode: string;
+        ResultMessage: string;
+      }[];
+      VerifyResultList?: {
+        Status: string;
+        Message: string;
+        SignId: string;
+        FailureReasons?: {
+          MessageKey: string;
+          MessageCode: string;
+          Message: string;
+        }[];
+      }[];
+      GenerateSignResult?: {
+        GenerateSignStatus: string;
+        GenerateSignMessage: string;
+      }
     }
   }
 }
@@ -56,11 +58,33 @@ export class RegisterResultWrapper {
   }
 
   getPrescriptionId(): string | undefined {
-    return this.result.MessageBody?.PrescriptionId;
+    return this.result.XmlMsg.MessageBody?.PrescriptionId;
   }
 
   getAccessCode(): string | undefined {
-    return this.result.MessageBody?.AccessCode;
+    return this.result.XmlMsg.MessageBody?.AccessCode;
+  }
+}
+
+export interface SearchResult {
+  XmlMsg: {
+    MessageHeader: {
+      ArbitraryFileIdentifier?: string;
+      SegmentOfResult: string; // OQSCD003
+      ErrorCode?: string;
+      ErrorMessage?: string;
+      CharacterCodeIdentifier: string; // OQSCD005
+    },
+    MessageBody: {
+      ProcessingResultStatus: string;
+      ProcessingResultCode?: string;
+      ProcessingResultMessage?: string;
+      PrescriptionIdList?: {
+        PrescriptionId: string;
+        AccessCode: string;
+        CreateDateTime: string;
+      }[]
+    }
   }
 }
 
