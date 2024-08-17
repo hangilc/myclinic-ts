@@ -94,3 +94,27 @@ export async function prescStatus(
   console.log("searchPresc", json);
   return json;
 }
+
+export async function unregisterPresc(
+  kikancode: string,
+  prescriptionId: string,
+): Promise<string> {
+  let prescUrl = await getPrescUrl();
+  let url = `${prescUrl}/unregister`;
+  let result = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      kikancode,
+      body: {
+        PrescriptionId: prescriptionId,
+      }
+    }),
+  });
+  if (!result.ok) {
+    throw new Error(await result.text());
+  }
+  let json = await result.text();
+  console.log("unregister", json);
+  return json;
+}
