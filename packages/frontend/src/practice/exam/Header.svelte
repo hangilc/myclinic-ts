@@ -9,6 +9,8 @@
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
   import PopupMenu from "@/lib/PopupMenu.svelte";
   import { dataCySetter } from "@/lib/popup-helper";
+  import * as cache from "@/lib/cache";
+  import { searchPrescribed } from "@/lib/denshi-shohou/presc-api";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -97,6 +99,15 @@
       },
     });
   }
+
+
+  async function doSearchPresc() {
+    const kikancode = await cache.getShohouKikancode();
+    let startDate = "20240801000000";
+    let endDate = "20240818000000";
+    const result = await searchPrescribed(kikancode, startDate, endDate);
+    console.log("result", result);
+  }
 </script>
 
 <ServiceHeader title="診察">
@@ -105,6 +116,7 @@
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
+    <a href="javascript:void(0);" on:click={doSearchPresc}>処方検索</a>
   </svelte:fragment>
 </ServiceHeader>
 

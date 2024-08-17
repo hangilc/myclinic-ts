@@ -23,7 +23,6 @@
   } from "@/lib/denshi-shohou/presc-info";
   import { onshiPrescReport } from "@/lib/onshi-presc";
   import { getClinicInfo } from "@/lib/cache";
-  import { register_presc, sign_presc } from "@/lib/hpki-api";
   import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
   import * as examples from "@/lib/denshi-shohou/presc-examples";
   import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
@@ -70,14 +69,6 @@
         hokenInfo: visit.hoken,
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: async (data: PrescInfoData) => {
-          // let presc = data.RP剤情報グループ;
-          // console.log("json", JSON.stringify(presc, undefined, 2));
-
-          // const shohou = createPrescInfo(data);
-          // const signed = await sign_presc(shohou);
-          // console.log("signed", signed);
-          // let result = await register_presc(signed, kikancode, "1");
-          // console.log("result", result);
           let text = new m.Text(
             0,
             visit.visitId,

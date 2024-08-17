@@ -13,6 +13,12 @@ export async function getClinicInfo(): Promise<ClinicInfo> {
   return clinicInfo;
 }
 
+export async function getShohouKikancode(): Promise<string> {
+  let clinicInfo = await getClinicInfo();
+  let kikancode = "131" + clinicInfo.kikancode;
+  return `${clinicInfo.todoufukencode}${clinicInfo.tensuuhyoucode}${clinicInfo.kikancode}`;
+}
+
 export async function getHpkiUrl(): Promise<string> {
   if( hpkiUrl === undefined ){
     let server = await api.getConfig("hpki-server");

@@ -48,3 +48,19 @@ export interface RegisterResult {
   }
 }
 
+export class RegisterResultWrapper {
+  result: RegisterResult;
+
+  constructor(result: RegisterResult) {
+    this.result = result;
+  }
+
+  getPrescriptionId(): string | undefined {
+    return this.result.MessageBody?.PrescriptionId;
+  }
+
+  getAccessCode(): string | undefined {
+    return this.result.MessageBody?.AccessCode;
+  }
+}
+
