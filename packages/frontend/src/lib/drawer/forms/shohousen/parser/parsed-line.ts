@@ -1,4 +1,4 @@
-interface DrugAmountLine {
+export interface DrugAmountLine {
   kind: "drug-amount";
   drug: string;
   amount: string;
@@ -6,12 +6,12 @@ interface DrugAmountLine {
   tail?: string;
 }
 
-interface RegularLine {
+export interface RegularLine {
   kind: "regular";
   str: string;
 }
 
-interface DaysLine {
+export interface DaysLine {
   kind: "days";
   str: string;
   days: string;

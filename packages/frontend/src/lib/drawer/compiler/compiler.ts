@@ -98,6 +98,7 @@ export function setFont(ctx: DrawerContext, name: string | undefined) {
 }
 
 export function setTextColor(ctx: DrawerContext, r: number, g: number, b: number) {
+  ctx.textColor = { r, g, b };
   ctx.ops.push(["set_text_color", r, g, b]);
 }
 

@@ -11,6 +11,7 @@ export interface DrawerContext {
   dataRenderOptions: Record<string, DataRendererOpt>;
   currentFont: string | undefined;
   currentPen: string | undefined;
+  textColor: { r: number, g: number, b: number },
   setup: Op[];
 }
 
@@ -25,6 +26,7 @@ export function mkDrawerContext(initSetup: (ctx: DrawerContext) => void = _ => {
     dataRenderOptions: {},
     currentFont: undefined,
     currentPen: undefined,
+    textColor: { r: 0, g: 0, b: 0 },
   }
   initSetup(ctx);
   ctx.ops = [...setup];

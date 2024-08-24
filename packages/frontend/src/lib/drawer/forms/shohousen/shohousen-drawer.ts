@@ -12,6 +12,7 @@ import { drawChouzai1 } from "./chouzai1";
 import { drawChouzai2 } from "./chouzai2";
 import { drawPharmacy } from "./pharmacy";
 import { drawData, type ShohousenData } from "./data";
+import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen(data: ShohousenData = {}): Op[] {
   const layout = mkLayout();
@@ -22,7 +23,11 @@ export function drawShohousen(data: ShohousenData = {}): Op[] {
   c.createPen(ctx, "default-pen", 0, 255, 0, 0.16);
   c.createPen(ctx, "layout", 0, 0, 0, 0.20);
   c.setPen(ctx, "default-pen");
-  drawTitle(ctx, layout.title);
+  if( data.isDenshi ){
+    drawDenshiTitle(ctx, layout.denshiTitle, data.accessCode ?? "123456");
+  } else {
+    drawTitle(ctx, layout.title);
+  }
   drawTopBox(ctx, layout.kouhiHoken);
   drawPatientClinic(ctx, mainLayout.patientClinic);
   drawIssue(ctx, mainLayout.issue);
@@ -46,6 +51,7 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "mincho-1.8", "MS Mincho", 1.8);
   c.createFont(ctx, "mincho-1.5", "MS Mincho", 1.5);
   c.createFont(ctx, "mincho-1.4", "MS Mincho", 1.4);
+  c.createFont(ctx, "gothic-5-bold", "MS Gothic", 5.0, "bold");
   c.createFont(ctx, "gothic-4.5", "MS Gothic", 4.5);
   c.createFont(ctx, "gothic-4", "MS Gothic", 4);
   c.createFont(ctx, "gothic-4", "MS Gothic", 4);
@@ -73,4 +79,15 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
   c.setFont(ctx, "mincho-2.5");
   c.drawTextJustifiedVertically(ctx, "処方", b.modify(layout.label, b.inset(0, 24)), "center");
   c.mark(ctx, "drugsPaneBox", layout.content);
+}
+
+function drawDenshiTitle(ctx: DrawerContext, box: Box, accessCode: string) {
+  c.rect(ctx, box);
+  c.setFont(ctx, "mincho-5");
+  c.drawText(ctx, "処方内容（控え）", box, "left", "center");
+  const colorSave = ctx.textColor;
+  c.setFont(ctx, "gothic-5-bold");
+  c.setTextColor(ctx, 0, 0, 0);
+  let bb = b.modify(box, b.shrinkHoriz(43, 0));
+  c.drawText(ctx, `引換番号：${toZenkaku(accessCode)}`, bb, "left", "center");
 }

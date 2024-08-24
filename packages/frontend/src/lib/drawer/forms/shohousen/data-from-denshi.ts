@@ -1,6 +1,9 @@
-import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 import type { ShohousenData } from "./data";
 import { 点数表_to_code } from "@/lib/denshi-shohou/denshi-shohou";
+import type { ParsedLine } from "./parser/parsed-line";
+import { renderDrug } from "./parser/render";
+import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
 
 export function create_data_from_denshi(denshi: PrescInfoData): ShohousenData {
   console.log(JSON.stringify(denshi, undefined, 2));
@@ -25,14 +28,14 @@ export function create_data_from_denshi(denshi: PrescInfoData): ShohousenData {
     futansha2 = kouhi.公費負担者番号;
     jukyuusha2 = kouhi.公費受給者番号;
   }
-  let birthdate = `${denshi.患者生年月日.substring(0, 4)}-${denshi.患者生年月日.substring(4, 6)}-${denshi.患者生年月日.substring(6, 8)}`;
+  let birthdate = toSqldate(denshi.患者生年月日); 
   let sex: "M" | "F";
   if (denshi.患者性別 === "男") {
     sex = "M";
   } else {
     sex = "F";
   }
-
+  let drugs: string = renderPresc(denshi.RP剤情報グループ);
   return {
     clinicAddress: `〒{${denshi.医療機関郵便番号}} {${denshi.医療機関所在地}}`,
     clinicName: `${denshi.医療機関名称}`,
@@ -49,7 +52,24 @@ export function create_data_from_denshi(denshi: PrescInfoData): ShohousenData {
     birthdate,
     sex,
     hokenKubun: resolveHokenKubun(denshi.レセプト種別コード),
+    koufuDate: toSqldate(denshi.処方箋交付年月日) ,
+    validUptoDate: toOptionSqldate(denshi.使用期限年月日),
+    drugs,
+    isDenshi: true,
+    accessCode: denshi.引換番号,
   };
+}
+
+function toSqldate(denshi_date: string): string {
+  return `${denshi_date.substring(0, 4)}-${denshi_date.substring(4, 6)}-${denshi_date.substring(6, 8)}`;
+}
+
+function toOptionSqldate(denshi_date: string | undefined): string | undefined {
+  if( denshi_date == undefined ){
+    return undefined;
+  } else {
+    toSqldate(denshi_date);
+  }
 }
 
 function resolveHokenKubun(shubetsu: string | undefined): "hihokensha" | "hifuyousha" | undefined {

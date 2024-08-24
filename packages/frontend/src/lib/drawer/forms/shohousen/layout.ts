@@ -5,6 +5,7 @@ import { A5, type PaperSize } from "../../compiler/paper-size";
 export interface Layout {
   wrap: Box;
   title: Box;
+  denshiTitle: Box;
   kouhiHoken: Box;
   main: Box;
   pharma: Box;
@@ -14,7 +15,8 @@ export function mkLayout(): Layout {
   const wrap = b.modify(b.paperSizeToBox(A5), b.inset(3));
   let [title, kouhiHoken, , main, , pharma] = b.splitToRows(wrap, b.splitWidths(
     13, 10.5, 2, 154.5, 1, 24.5));
-  return { wrap, title, kouhiHoken, main, pharma };
+  let denshiTitle = b.modify(title, b.shrinkVert(0, 2), b.setLeft(wrap.left), b.setRight(wrap.right));
+  return { wrap, title, denshiTitle, kouhiHoken, main, pharma };
 }
 
 export interface MainLayout {
