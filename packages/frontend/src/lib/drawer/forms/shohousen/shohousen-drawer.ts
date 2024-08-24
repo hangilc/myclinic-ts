@@ -82,6 +82,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
 }
 
 function drawDenshiTitle(ctx: DrawerContext, box: Box, accessCode: string) {
+  console.log("height", b.height(box));
   c.rect(ctx, box);
   c.setFont(ctx, "mincho-5");
   c.drawText(ctx, "処方内容（控え）", box, "left", "center");
@@ -90,4 +91,5 @@ function drawDenshiTitle(ctx: DrawerContext, box: Box, accessCode: string) {
   c.setTextColor(ctx, 0, 0, 0);
   let bb = b.modify(box, b.shrinkHoriz(43, 0));
   c.drawText(ctx, `引換番号：${toZenkaku(accessCode)}`, bb, "left", "center");
+  c.setTextColor(ctx, colorSave.r, colorSave.g, colorSave.b);
 }
