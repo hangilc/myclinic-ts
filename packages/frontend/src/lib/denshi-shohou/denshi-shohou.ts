@@ -349,6 +349,16 @@ const 点数表Map = {
 
 export type 点数表 = keyof typeof 点数表Map;
 
+export function 点数表_to_code(key: string): string {
+  switch(key){
+    case "医科":
+      case "歯科": {
+        return 点数表Map[key];
+      }
+    default: throw new Error(`invalid 点数表: {${key}}`)
+  }
+}
+
 const 都道府県Map = {
   "北海道": "01",
   "青森": "02",

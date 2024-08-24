@@ -9,7 +9,8 @@
   import api from "@/lib/api";
   import { registerPresc } from "@/lib/denshi-shohou/presc-api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import { drawShohousen } from "@/lib/drawer/forms/shohousen2/shohousen-drawer";
+  import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
+  import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
 
   export let text: Text;
   if( !text.memo ){
@@ -48,7 +49,8 @@
   }
 
   function doPrint() {
-    let ops = drawShohousen();
+    let data = create_data_from_denshi(memo.shohou);
+    let ops = drawShohousen(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
