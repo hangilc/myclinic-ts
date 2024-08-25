@@ -7,7 +7,7 @@
   import * as cache from "@/lib/cache";
   import type { RegisterResult } from "@/lib/denshi-shohou/shohou-interface";
   import api from "@/lib/api";
-  import { registerPresc } from "@/lib/denshi-shohou/presc-api";
+  import { createQrCode, registerPresc } from "@/lib/denshi-shohou/presc-api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
@@ -49,21 +49,22 @@
   }
 
   function doPrint() {
-    let data = create_data_from_denshi(memo.shohou);
-    console.log("data", data);
-    let ops = drawShohousen(data);
-    const d: DrawerDialog = new DrawerDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        ops,
-        width: 148,
-        height: 210,
-        scale: 3,
-        kind: "shohousen",
-        title: "処方箋印刷",
-      },
-    });
+    createQrCode("654321");
+    // let data = create_data_from_denshi(memo.shohou);
+    // console.log("data", data);
+    // let ops = drawShohousen(data);
+    // const d: DrawerDialog = new DrawerDialog({
+    //   target: document.body,
+    //   props: {
+    //     destroy: () => d.$destroy(),
+    //     ops,
+    //     width: 148,
+    //     height: 210,
+    //     scale: 3,
+    //     kind: "shohousen",
+    //     title: "処方箋印刷",
+    //   },
+    // });
   }
 </script>
 

@@ -57,3 +57,4 @@ function base64Encode(src: string): string {
   console.log(decoded);
   return encoded;
 }
+

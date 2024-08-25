@@ -1,5 +1,6 @@
 import { getHpkiUrl, getPrescUrl } from "@/lib/cache";
 import type { SearchResult } from "./shohou-interface";
+import type { result } from "cypress/types/lodash";
 
 export async function registerPresc(presc_info: string, kikancode: string, issue_type: string): Promise<string> {
   let prescUrl = await getPrescUrl();
@@ -118,3 +119,22 @@ export async function unregisterPresc(
   console.log("unregister", json);
   return json;
 }
+
+export async function createQrCode(content: string) {
+  let prescUrl = await getPrescUrl();
+  // let prescUrl = "http://127.0.0.1:8443/presc";
+  let url = `${prescUrl}/qr-code`;
+  let result = await fetch(url, {
+    method: "POST",
+    headers: { 
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ content }),
+  });
+  if( !result.ok ){
+    throw new Error(await result.text());
+  }
+  let bytes = await result.arrayBuffer();
+  console.log(bytes);
+}
+
