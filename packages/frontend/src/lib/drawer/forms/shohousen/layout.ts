@@ -18,7 +18,6 @@ export function mkLayout(): Layout {
 }
 
 export function mkDenshiLayout(): Layout {
-  return mkLayout();
   const wrap = b.modify(b.paperSizeToBox(A5), b.inset(3));
   let [title, kouhiHoken, , main, , pharma] = b.splitToRows(wrap, b.splitWidths(
     13 + 10, 10.5, 2, 154.5 - 10, 1, 24.5));
@@ -35,6 +34,16 @@ export interface MainLayout {
 }
 
 export function mkMainLayout(box: Box): MainLayout {
+  const [patientClinic, issue, rest] = 
+    b.splitToRows(box, b.splitAt(18, 24.5));
+  const [rest2, chouzai1, chouzai2] =
+    b.splitToRows(rest, b.splitWidthsFromEnd(6.5, 5.0));
+  const [drugs, memo] = b.splitToRows(rest2, b.splitAt(b.height(rest2) * 0.713));
+  return { patientClinic, issue, drugs, memo, chouzai1, chouzai2 };
+}
+
+
+function mkMainLayoutOrig(box: Box): MainLayout {
   const [patientClinic, issue, drugs, memo, chouzai1, chouzai2] =
     b.splitToRows(box, b.splitAt(18, 24.5, 109, 143, 149.5));
   console.log("height", b.height(box));
