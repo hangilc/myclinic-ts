@@ -5,7 +5,6 @@ import { A5, type PaperSize } from "../../compiler/paper-size";
 export interface Layout {
   wrap: Box;
   title: Box;
-  denshiTitle: Box;
   kouhiHoken: Box;
   main: Box;
   pharma: Box;
@@ -15,8 +14,15 @@ export function mkLayout(): Layout {
   const wrap = b.modify(b.paperSizeToBox(A5), b.inset(3));
   let [title, kouhiHoken, , main, , pharma] = b.splitToRows(wrap, b.splitWidths(
     13, 10.5, 2, 154.5, 1, 24.5));
-  let denshiTitle = b.modify(title, b.shrinkVert(0, 2), b.setLeft(wrap.left), b.setRight(wrap.right));
-  return { wrap, title, denshiTitle, kouhiHoken, main, pharma };
+  return { wrap, title, kouhiHoken, main, pharma };
+}
+
+export function mkDenshiLayout(): Layout {
+  return mkLayout();
+  const wrap = b.modify(b.paperSizeToBox(A5), b.inset(3));
+  let [title, kouhiHoken, , main, , pharma] = b.splitToRows(wrap, b.splitWidths(
+    13 + 10, 10.5, 2, 154.5 - 10, 1, 24.5));
+  return { wrap, title, kouhiHoken, main, pharma };
 }
 
 export interface MainLayout {
@@ -29,7 +35,16 @@ export interface MainLayout {
 }
 
 export function mkMainLayout(box: Box): MainLayout {
-  const [patientClinic, issue, drugs, memo, chouzai1, chouzai2 ] = b.splitToRows(box, b.splitAt(18, 24.5, 109, 143, 149.5))
+  const [patientClinic, issue, drugs, memo, chouzai1, chouzai2] =
+    b.splitToRows(box, b.splitAt(18, 24.5, 109, 143, 149.5));
+  console.log("height", b.height(box));
+  console.log("patientClinic", b.height(patientClinic));
+  console.log("issue", b.height(issue));
+  console.log("drugs", b.height(drugs));
+  console.log("memo", b.height(memo));
+  console.log("chouzai1", b.height(chouzai1));
+  console.log("chouzai2", b.height(chouzai2));
+  // 0.713
 
   return { patientClinic, issue, drugs, memo, chouzai1, chouzai2 };
 }

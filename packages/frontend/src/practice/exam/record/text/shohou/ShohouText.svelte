@@ -50,6 +50,7 @@
 
   function doPrint() {
     let data = create_data_from_denshi(memo.shohou);
+    console.log("data", data);
     let ops = drawShohousen(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

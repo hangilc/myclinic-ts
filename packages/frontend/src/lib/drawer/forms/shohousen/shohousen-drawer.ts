@@ -4,7 +4,7 @@ import * as b from "../../compiler/box";
 import type { Box } from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import { drawTopBox } from "./top-box";
-import { mkLayout, mkMainLayout } from "./layout";
+import { mkLayout, mkMainLayout, type Layout, mkDenshiLayout } from "./layout";
 import { drawPatientClinic } from "./patient-clinic";
 import { drawIssue } from "./issue";
 import { drawMemo } from "./memo";
@@ -15,16 +15,21 @@ import { drawData, type ShohousenData } from "./data";
 import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen(data: ShohousenData = {}): Op[] {
-  const layout = mkLayout();
+  const layout = data.isDenshi ? mkDenshiLayout() : mkLayout();
   const mainLayout = mkMainLayout(layout.main);
   const ctx = mkDrawerContext();
   initFont(ctx);
   c.setTextColor(ctx, 0, 255, 0);
   c.createPen(ctx, "default-pen", 0, 255, 0, 0.16);
   c.createPen(ctx, "layout", 0, 0, 0, 0.20);
+  // {
+  //   c.setPen(ctx, "layout");
+  //   c.rect(ctx, mainLayout.patientClinic);
+  //   return c.getOps(ctx);
+  // }
   c.setPen(ctx, "default-pen");
   if( data.isDenshi ){
-    drawDenshiTitle(ctx, layout.denshiTitle, data.accessCode ?? "123456");
+    drawDenshiTitle(ctx, layout.title, data.accessCode ?? "123456");
   } else {
     drawTitle(ctx, layout.title);
   }
@@ -82,8 +87,6 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
 }
 
 function drawDenshiTitle(ctx: DrawerContext, box: Box, accessCode: string) {
-  console.log("height", b.height(box));
-  c.rect(ctx, box);
   c.setFont(ctx, "mincho-5");
   c.drawText(ctx, "処方内容（控え）", box, "left", "center");
   const colorSave = ctx.textColor;
