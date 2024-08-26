@@ -4,6 +4,7 @@
   import type { Op } from "./compiler/op";
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
+  import * as Base64 from "js-base64";
 
   export let destroy: () => void;
   export let ops: Op[] = [];
@@ -15,6 +16,7 @@
   export let title: string = "プレビュー";
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
+  export let stamp: ArrayBuffer | undefined = undefined;
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
@@ -39,6 +41,13 @@
   let settingSelect: string = "手動";
   let settingList: string[] = ["手動"];
   let setDefaultChecked = true;
+
+  let base64Data: string = "";
+  if (stamp) {
+    let bytes = new Uint8Array(stamp);
+    let encoded = Base64.fromUint8Array(bytes);
+    base64Data = encoded;
+  }
 
   async function print(_close: () => void) {
     const req: PrintRequest = {
@@ -83,11 +92,18 @@
     >
   {/if}
   <DrawerSvg
-    ops={ops}
+    {ops}
     {viewBox}
     width={`${width * scale}`}
     height={`${height * scale}`}
-  />
+  >
+    {#if base64Data !== ""}
+      <img
+        style="position:absolute;left:0;top:0;"
+        src={`data:image/jpeg;base64,${base64Data}`}
+      />
+    {/if}</DrawerSvg
+  >
   <div>
     <span>設定</span>
     <select bind:value={settingSelect}>

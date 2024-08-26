@@ -48,23 +48,25 @@
     showCommands = true;
   }
 
-  function doPrint() {
-    createQrCode("654321");
-    // let data = create_data_from_denshi(memo.shohou);
-    // console.log("data", data);
-    // let ops = drawShohousen(data);
-    // const d: DrawerDialog = new DrawerDialog({
-    //   target: document.body,
-    //   props: {
-    //     destroy: () => d.$destroy(),
-    //     ops,
-    //     width: 148,
-    //     height: 210,
-    //     scale: 3,
-    //     kind: "shohousen",
-    //     title: "処方箋印刷",
-    //   },
-    // });
+  async function doPrint() {
+    const qrcode = await createQrCode("654321");
+    console.log("qrcode", qrcode);
+    let data = create_data_from_denshi(memo.shohou);
+    console.log("data", data);
+    let ops = drawShohousen(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        ops,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen",
+        title: "処方箋印刷",
+        stamp: qrcode,
+      },
+    });
   }
 </script>
 
