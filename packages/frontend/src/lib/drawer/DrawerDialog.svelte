@@ -17,6 +17,7 @@
   export let kind: string | undefined = undefined;
   export let onClose: () => void = () => {};
   export let stamp: ArrayBuffer | undefined = undefined;
+  export let stampStyle: string = "";
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
@@ -99,7 +100,7 @@
   >
     {#if base64Data !== ""}
       <img
-        style="position:absolute;left:0;top:0;"
+        style={stampStyle}
         src={`data:image/jpeg;base64,${base64Data}`}
       />
     {/if}</DrawerSvg

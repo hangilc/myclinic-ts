@@ -65,6 +65,7 @@
         kind: "shohousen",
         title: "処方箋印刷",
         stamp: qrcode,
+        stampStyle: "position:absolute;left:90mm;top:5mm;height:15mm;width:15mm;"
       },
     });
   }
