@@ -11,6 +11,7 @@
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
+  import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
 
   export let text: Text;
   if( !text.memo ){
@@ -49,10 +50,8 @@
   }
 
   async function doPrint() {
-    const qrcode = await createQrCode("654321");
-    console.log("qrcode", qrcode);
+    const qrcode = await createQrCode(createQrCodeContent(memo.shohou));
     let data = create_data_from_denshi(memo.shohou);
-    console.log("data", data);
     let ops = drawShohousen(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -65,7 +64,7 @@
         kind: "shohousen",
         title: "処方箋印刷",
         stamp: qrcode,
-        stampStyle: "position:absolute;left:90mm;top:5mm;height:15mm;width:15mm;"
+        stampStyle: "position:absolute;left:90mm;top:0mm;height:20mm;width:20mm;"
       },
     });
   }
