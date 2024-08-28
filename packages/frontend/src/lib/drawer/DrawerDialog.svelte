@@ -5,6 +5,7 @@
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
   import * as Base64 from "js-base64";
+  import {getBase} from "@lib/api";
 
   export let destroy: () => void;
   export let ops: Op[] = [];
@@ -51,18 +52,34 @@
   }
 
   async function print(_close: () => void) {
-    const req: PrintRequest = {
-      setup: [],
-      pages: pages || [ops],
-    };
-    await printApi.printDrawer(
-      req,
-      settingSelect === "手動" ? "" : settingSelect
-    );
-    if (setDefaultChecked && settingSelect !== printPref && kind) {
-      printApi.setPrintPref(kind, settingSelect);
+    if (!stamp) {
+      const req: PrintRequest = {
+        setup: [],
+        pages: pages || [ops],
+      };
+      await printApi.printDrawer(
+        req,
+        settingSelect === "手動" ? "" : settingSelect
+      );
+      if (setDefaultChecked && settingSelect !== printPref && kind) {
+        printApi.setPrintPref(kind, settingSelect);
+      }
+      doClose();
+    } else {
+      const opsList: Op[][] = pages || [ops];
+      const paperSize = "A5";
+      const body = { paperSize, opsList, outFile: "test.pdf", stamp: base64Data, page: 1,
+        left: 115, top: 188, width: 15, height: 15
+       };
+      const result = await fetch(`${getBase()}/create-pdf-file-with-stamp`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      if( !result.ok ){
+        throw new Error(await result.text());
+      }
     }
-    doClose();
   }
 
   onMount(async () => {
@@ -99,10 +116,7 @@
     height={`${height * scale}`}
   >
     {#if base64Data !== ""}
-      <img
-        style={stampStyle}
-        src={`data:image/jpeg;base64,${base64Data}`}
-      />
+      <img style={stampStyle} src={`data:image/jpeg;base64,${base64Data}`} />
     {/if}</DrawerSvg
   >
   <div>

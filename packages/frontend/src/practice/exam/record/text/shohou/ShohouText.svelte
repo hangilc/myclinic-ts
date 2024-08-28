@@ -12,6 +12,7 @@
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
   import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
+  import * as Base64 from "js-base64";
 
   export let text: Text;
   if( !text.memo ){
@@ -64,7 +65,7 @@
         kind: "shohousen",
         title: "処方箋印刷",
         stamp: qrcode,
-        stampStyle: "position:absolute;left:90mm;top:0mm;height:25mm;width:25mm;"
+        stampStyle: "position:absolute;left:90mm;top:3mm;height:15mm;width:15mm;",
       },
     });
   }
