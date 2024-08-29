@@ -12,7 +12,6 @@
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
   import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
-  import * as Base64 from "js-base64";
 
   export let text: Text;
   if( !text.memo ){
@@ -21,7 +20,6 @@
   let memo: ShohouTextMemo = JSON.parse(text.memo);
   let drugs = memo.shohou.RP剤情報グループ.map((group) => renderDrug(group));
   let isDenshi = false;
-  let showCommands = false;
 
   async function doRegister() {
     if (!memo.register) {
@@ -47,7 +45,7 @@
   }
 
   function doDispClick() {
-    showCommands = true;
+
   }
 
   async function doPrint() {
@@ -66,8 +64,15 @@
         title: "処方箋印刷",
         stamp: qrcode,
         stampStyle: "position:absolute;left:90mm;top:3mm;height:15mm;width:15mm;",
+        stampPrintOption: { left: 115, top: 188, width: 15, height: 15 },
       },
     });
+  }
+
+  async function doDelete() {
+    if( memo.shohou.引換番号 == undefined ){
+      await api.deleteText(text.textId);
+    }
   }
 </script>
 
@@ -95,14 +100,17 @@
     {/if}
   </div>
 </div>
-{#if showCommands}
-  <div class="commands">
+<div class="commands">
+  {#if memo.shohou.引換番号 == undefined}
+    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+  {/if}
+</div>
+  <!-- <div class="commands">
     <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
     <a href="javascript:void(0)" on:click={() => (showCommands = false)}
       >キャンセル</a
     >
-  </div>
-{/if}
+  </div> -->
 
 <style>
   .drugs-wrapper {

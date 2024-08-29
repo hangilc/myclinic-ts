@@ -19,6 +19,7 @@
   export let onClose: () => void = () => {};
   export let stamp: ArrayBuffer | undefined = undefined;
   export let stampStyle: string = "";
+  export let stampPrintOption: { left: number, top: number, width: number, height: number} | undefined = undefined;
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
@@ -68,9 +69,10 @@
     } else {
       const opsList: Op[][] = pages || [ops];
       const paperSize = "A5";
-      const body = { paperSize, opsList, outFile: "test.pdf", stamp: base64Data, page: 1,
-        left: 115, top: 188, width: 15, height: 15
-       };
+      let opt = stampPrintOption ?? {
+        left: 10, top: 30, width: 15, height: 15
+      };
+      const body = { paperSize, opsList, outFile: "test.pdf", stamp: base64Data, page: 1, ...opt };
       const result = await fetch(`${getBase()}/create-pdf-file-with-stamp`, {
         method: "POST",
         headers: { "content-type": "application/json" },
