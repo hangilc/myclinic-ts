@@ -71,7 +71,9 @@
 
   async function doDelete() {
     if( memo.shohou.引換番号 == undefined ){
-      await api.deleteText(text.textId);
+      if( confirm("この処方内容を削除していいですか？") ){
+        await api.deleteText(text.textId);
+      }
     }
   }
 </script>
