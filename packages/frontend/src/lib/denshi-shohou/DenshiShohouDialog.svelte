@@ -25,7 +25,11 @@
     RezeptShubetuCodeOffset,
   } from "myclinic-rezept/codes";
   import NewDrugDialog from "./NewDrugDialog.svelte";
-  import { renderDrug, renderPresc } from "./presc-renderer";
+  import { renderDrug, renderPresc, type RenderedDrug } from "./presc-renderer";
+  import { sign_presc } from "../hpki-api";
+  import * as cache from "@/lib/cache";
+  import { registerPresc, unregisterPresc } from "./presc-api";
+  import type { RegisterResult } from "./shohou-interface";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -33,6 +37,63 @@
   export let visit: Visit;
   export let at: string;
   export let onEnter: (data: PrescInfoData) => void;
+  let shohou: PrescInfoData | undefined = undefined;
+  let prescriptionId: string | undefined = undefined;
+  let renderedDrugs: RenderedDrug[] = [];
+
+  init();
+
+  async function init() {
+    function toKana(s: string): string {
+      return convertZenkakuHiraganaToHankakuKatakana(s);
+    }
+    const clinicInfo = await getClinicInfo();
+    let kikancode = clinicInfo.kikancode;
+    const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
+    const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
+    let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
+    let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
+    let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
+    shohou = {
+      医療機関コード種別: "医科",
+      医療機関コード: kikancode,
+      医療機関都道府県コード: castTo都道府県コード(clinicInfo.todoufukencode),
+      医療機関名称: clinicInfo.name,
+      医療機関郵便番号: postalCode,
+      医療機関所在地: clinicInfo.address,
+      医療機関電話番号: clinicInfo.tel,
+      ＦＡＸ番号: clinicInfo.fax,
+      診療科レコード: {
+        診療科コード種別: "診療科コード",
+        診療科コード: "内科",
+      },
+      医師漢字氏名: `${clinicInfo.doctorLastName}　${clinicInfo.doctorFirstName}`,
+      患者コード: patient.patientId.toString(),
+      患者漢字氏名: `${patient.lastName}　${patient.firstName}`, // 性と名は全角スペースで区切る。
+      患者カナ氏名: patientNameKana, // 半角カナで記録する。姓と名は半角スペースで区切る。
+      患者性別: patient.sex === "M" ? "男" : "女",
+      患者生年月日: DateWrapper.from(patient.birthday)
+        .asSqlDate()
+        .replaceAll(/-/g, ""),
+      保険一部負担金区分: resolve保険一部負担金区分(hokenInfo, patient, visit),
+      保険種別: resolve保険種別(hokenInfo),
+      保険者番号: resolve保険者番号(hokenInfo),
+      被保険者証記号: resolve被保険者証記号(hokenInfo),
+      被保険者証番号: resolve被保険者証番号(hokenInfo),
+      被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
+      被保険者証枝番: resolve被保険者証枝番(hokenInfo),
+      第一公費レコード,
+      第二公費レコード,
+      第三公費レコード,
+      特殊公費レコード: undefined,
+      レセプト種別コード: resolveレセプト種別コード(hokenInfo),
+      処方箋交付年月日: DateWrapper.from(visit.visitedAt)
+        .asSqlDate()
+        .replaceAll(/-/g, ""),
+      RP剤情報グループ: [],
+    };
+  }
+
   let drugIndex = 1;
   let drugs: {
     index: number;
@@ -260,7 +321,7 @@
       処方箋交付年月日: DateWrapper.from(visit.visitedAt)
         .asSqlDate()
         .replaceAll(/-/g, ""),
-      RP剤情報グループ: drugs.map(drug => drug.drug),
+      RP剤情報グループ: drugs.map((drug) => drug.drug),
     };
     destroy();
     onEnter(shohou);
@@ -273,31 +334,62 @@
         destroy: () => form.$destroy(),
         at,
         onEnter: (drug) => {
-          console.log("drug", drug);
-          let render = renderDrug(drug);
-          drugs.push({ index: drugIndex, drug, render });
-          drugIndex += 1;
-          drugs = drugs;
+          if (shohou) {
+            shohou.RP剤情報グループ.push(drug);
+            renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
+          }
         },
       },
     });
   }
 
-  function doFreq() {
-    
+  function doFreq() {}
+
+  async function doRegister() {
+    if (shohou) {
+      const prescInfo = createPrescInfo(shohou);
+      const signed = await sign_presc(prescInfo);
+      const kikancode = await cache.getShohouKikancode();
+      let result = await registerPresc(signed, kikancode, "1");
+      console.log("result", result);
+      let register: RegisterResult = JSON.parse(result);
+      if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
+        let list = register.XmlMsg.MessageBody?.CsvCheckResultList;
+        if (list.length > 0) {
+          let ms = list.map((item) => item.ResultMessage).join("\n");
+          alert(ms);
+        }
+      }
+      shohou.引換番号 = register.XmlMsg.MessageBody?.AccessCode;
+      prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
+    }
+  }
+
+  async function doUnregister() {
+    if (prescriptionId) {
+      const kikancode = await cache.getShohouKikancode();
+      await unregisterPresc(kikancode, prescriptionId);
+      prescriptionId = undefined;
+      if( shohou ){
+        shohou.引換番号 = undefined;
+        shohou = shohou;
+      }
+    }
   }
 </script>
 
 <Dialog title="新規処方" {destroy}>
   <div class="top">
+    <div>院外処方</div>
+    <div>Ｒｐ）</div>
     <div class="drug-render">
-      {#each drugs as drug, i (drug.index)}
+      {#each renderedDrugs as drug, i}
         <div>{i + 1})</div>
         <div>
-          {#each drug.render.drugs as d}
+          {#each drug.drugs as d}
             <div>{d}</div>
           {/each}
-          <div>{drug.render.usage} {drug.render.times}</div>
+          <div>{drug.usage} {drug.times}</div>
         </div>
       {/each}
     </div>
@@ -306,7 +398,14 @@
       <button on:click={doAdd}>手動追以下</button>
     </div>
     <div class="commands">
-      <button on:click={doEnter}>入力</button>
+      {#if shohou}
+        {#if shohou.引換番号 == undefined}
+          <button on:click={doRegister}>発行</button>
+        {/if}
+      {/if}
+      {#if prescriptionId}
+        <button on:click={doUnregister}>発行取消</button>
+      {/if}
       <button on:click={doCancel}>キャンセル</button>
     </div>
   </div>
