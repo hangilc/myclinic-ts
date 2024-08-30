@@ -9,6 +9,7 @@ import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castO
 import { pipe } from "myclinic-model/pipe";
 import { mapNullOptional } from "myclinic-model/model";
 import type { ReferConfig } from "./refer";
+import type { RP剤情報 } from "./denshi-shohou/presc-info";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1624,5 +1625,13 @@ export default {
 
   saveShohouFreqUsage(usages: m.UsageMaster[]): Promise<void> {
     return post("set-config", usages, { name: "shohou-freq-usage"}, a => a);
+  },
+
+  getShohouFreqPrescription(): Promise<RP剤情報[]> {
+    return get("get-config", { name: "shohou-freq-prescription" }, a => a ?? []);
+  },
+
+  saveShohouFreqPrescription(usages: RP剤情報[]): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-prescription"}, a => a);
   }
 };

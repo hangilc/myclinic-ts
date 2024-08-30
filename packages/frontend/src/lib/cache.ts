@@ -1,10 +1,12 @@
 import type { ClinicInfo, UsageMaster } from "myclinic-model";
 import api from "./api";
+import type { RP剤情報 } from "./denshi-shohou/presc-info";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
 let shohouFreqUsage: UsageMaster[] | undefined = undefined;
+let shohouFreqPrescription: RP剤情報[] | undefined = undefined;
 
 export async function getClinicInfo(): Promise<ClinicInfo> {
   if( !clinicInfo ){
@@ -54,6 +56,21 @@ export async function getShohouFreqUsage(): Promise<UsageMaster[]> {
   return shohouFreqUsage;
 }
 
-export function clearShohouFreqUsage() {
-  shohouFreqUsage = undefined;
+export function setShohouFreqUsage(usageMasters: UsageMaster[]) {
+  shohouFreqUsage = usageMasters;
+}
+
+export async function getShohouFreqPrescription(): Promise<RP剤情報[]> {
+  if( shohouFreqPrescription === undefined ){
+    let value = await api.getShohouFreqPrescription();
+    if( !value ){
+      value = [];
+    }
+    shohouFreqPrescription = value;
+  }
+  return shohouFreqPrescription;
+}
+
+export function clearShohouFreqPrescription() {
+  shohouFreqPrescription = undefined;
 }

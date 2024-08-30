@@ -110,9 +110,7 @@
   }
 
   function doCancel() {
-    if( !shohou || shohou.引換番号 == undefined ){
-      destroy();
-    }
+    destroy();
   }
 
   function resolve保険一部負担金区分(

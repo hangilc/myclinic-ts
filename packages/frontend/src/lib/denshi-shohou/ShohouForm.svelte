@@ -276,7 +276,7 @@
       freqs.push(usageMaster);
       await api.saveShohouFreqUsage(freqs);
       freqUsageMasters = freqs;
-      cache.clearShohouFreqUsage();
+      cache.setShohouFreqUsage(freqs);
       showCloudArrowUp = false;
     }
   }
