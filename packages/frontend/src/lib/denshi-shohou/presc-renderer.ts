@@ -39,10 +39,13 @@ export function renderPresc(presc: RP剤情報[]): string {
   return buf.to_string();
 }
 
+let renderedDrugId = 1;
+
 export interface RenderedDrug {
   usage: string;
   times: string;
   drugs: string[];
+  id: number;
 }
 
 export function renderDrug(drug: RP剤情報): RenderedDrug {
@@ -50,7 +53,9 @@ export function renderDrug(drug: RP剤情報): RenderedDrug {
     usage: "",
     times: "",
     drugs: [],
+    id: renderedDrugId,
   };
+  renderedDrugId += 1;
   let usage = drug.用法レコード.用法名称;
   drug.用法補足レコード?.forEach(hosoku => {
     usage = `${usage}　${hosoku.用法補足情報}`;

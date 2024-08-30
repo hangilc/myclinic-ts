@@ -23,7 +23,7 @@
     RezeptShubetuCodeOffset,
   } from "myclinic-rezept/codes";
   import NewDrugDialog from "./NewDrugDialog.svelte";
-  import { renderDrug, renderPresc, type RenderedDrug } from "./presc-renderer";
+  import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
   import { registerPresc, unregisterPresc } from "./presc-api";
@@ -36,14 +36,29 @@
   export let patient: Patient;
   export let hokenInfo: HokenInfo;
   export let visit: Visit;
-  export let at: string;
-  let shohou: PrescInfoData | undefined = undefined;
-  let prescriptionId: string | undefined = undefined;
+  export let shohou: PrescInfoData | undefined = undefined;
+  export let prescriptionId: string | undefined = undefined;
   let renderedDrugs: RenderedDrug[] = [];
 
   init();
 
   async function init() {
+    if( !shohou ){
+      shohou = await initShohou();
+    }
+    adaptToShohou();
+  }
+
+  function adaptToShohou() {
+    if( shohou ){
+      renderedDrugs = shohou.RP剤情報グループ.map(g => renderDrug(g));
+    } else {
+      renderedDrugs = [];
+    }
+  }
+
+
+  async function initShohou(): Promise<PrescInfoData> {
     function toKana(s: string): string {
       return convertZenkakuHiraganaToHankakuKatakana(s);
     }
@@ -54,7 +69,7 @@
     let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
     let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
     let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
-    shohou = {
+    return {
       医療機関コード種別: "医科",
       医療機関コード: kikancode,
       医療機関都道府県コード: castTo都道府県コード(clinicInfo.todoufukencode),
@@ -94,19 +109,10 @@
     };
   }
 
-  let drugIndex = 1;
-  let drugs: {
-    index: number;
-    drug: RP剤情報;
-    render: {
-      usage: string;
-      times: string;
-      drugs: string[];
-    };
-  }[] = [];
-
   function doCancel() {
-    destroy();
+    if( !shohou || shohou.引換番号 == undefined ){
+      destroy();
+    }
   }
 
   function resolve保険一部負担金区分(
@@ -279,11 +285,11 @@
       target: document.body,
       props: {
         destroy: () => form.$destroy(),
-        at,
+        at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: (drug) => {
           if (shohou) {
             shohou.RP剤情報グループ.push(drug);
-            renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
+            adaptToShohou();
           }
         },
       },
@@ -343,7 +349,7 @@
     <div>院外処方</div>
     <div>Ｒｐ）</div>
     <div class="drug-render">
-      {#each renderedDrugs as drug, i}
+      {#each renderedDrugs as drug, i (drug.id)}
         <div>{i + 1})</div>
         <div>
           {#each drug.drugs as d}

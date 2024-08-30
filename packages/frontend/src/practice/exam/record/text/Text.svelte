@@ -1,7 +1,6 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
   import RegularText from "./regular/RegularText.svelte";
-  import type { ShohouTextMemo } from "./text-memo";
   import ShohouText from "./shohou/ShohouText.svelte";
 
   export let text: m.Text;

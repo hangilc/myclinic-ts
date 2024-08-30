@@ -8,6 +8,7 @@
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
   import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
+  import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
 
   export let text: Text;
   if (!text.memo) {
@@ -17,7 +18,22 @@
   let drugs = memo.shohou.RP剤情報グループ.map((group) => renderDrug(group));
   let accessCode: string | undefined = memo.shohou.引換番号;
 
-  function doDispClick() {}
+  async function doDispClick() {
+    const visit = await api.getVisit(text.visitId);
+    const patient = await api.getPatient(visit.patientId);
+    const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
+    const d: DenshiShohouDialog = new DenshiShohouDialog({
+      target: document.body,
+      props: {
+        patient,
+        visit,
+        hokenInfo,
+        shohou: memo.shohou,
+        prescriptionId: memo.prescriptionId,
+        destroy: () => d.$destroy(),
+      }
+    })
+  }
 
   async function doPrint() {
     const qrcode = await createQrCode(createQrCodeContent(memo.shohou));

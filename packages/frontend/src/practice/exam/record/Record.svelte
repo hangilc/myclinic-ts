@@ -67,20 +67,19 @@
         patient: visit.patient,
         visit: visit.asVisit,
         hokenInfo: visit.hoken,
-        at: DateWrapper.from(visit.visitedAt).asSqlDate(),
-        onEnter: async (data: PrescInfoData) => {
-          let text = new m.Text(
-            0,
-            visit.visitId,
-            "",
-            JSON.stringify({
-              kind: "shohou",
-              shohou: data,
-              register: undefined,
-            })
-          );
-          await api.enterText(text);
-        },
+        // onEnter: async (data: PrescInfoData) => {
+        //   let text = new m.Text(
+        //     0,
+        //     visit.visitId,
+        //     "",
+        //     JSON.stringify({
+        //       kind: "shohou",
+        //       shohou: data,
+        //       register: undefined,
+        //     })
+        //   );
+        //   await api.enterText(text);
+        // },
       },
     });
   }
