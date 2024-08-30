@@ -1,6 +1,5 @@
 <script lang="ts">
   export let isCurrent: boolean;
-  console.log("isCurrent", isCurrent);
 </script>
 
 <div class="top">

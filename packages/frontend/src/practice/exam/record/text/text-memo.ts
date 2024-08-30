@@ -6,5 +6,5 @@ export type TextMemo = ShohouTextMemo;
 export interface ShohouTextMemo {
   kind: "shohou";
   shohou: PrescInfoData;
-  register: RegisterResult | undefined;
+  prescriptionId: string | undefined;
 }
