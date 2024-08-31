@@ -17,6 +17,7 @@
   let memo: ShohouTextMemo = JSON.parse(text.memo);
   let drugs = memo.shohou.RP剤情報グループ.map((group) => renderDrug(group));
   let accessCode: string | undefined = memo.shohou.引換番号;
+  let prescriptionId: string | undefined = memo.prescriptionId;
 
   async function doDispClick() {
     const visit = await api.getVisit(text.visitId);
@@ -31,6 +32,7 @@
         shohou: memo.shohou,
         prescriptionId: memo.prescriptionId,
         destroy: () => d.$destroy(),
+        textId: text.textId,
       }
     })
   }
@@ -59,8 +61,8 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div class="top" on:click={doDispClick}>
-  <div>
+<div class="top">
+  <div class="disp" on:click={doDispClick}>
     <div>院外処方</div>
     <div>Ｒｐ）</div>
     <div class="drug-render">
@@ -79,11 +81,15 @@
     <div>
       引換番号：{accessCode}
     </div>
+    <div>
+      処方ＩＤ：{prescriptionId}
+    </div>
   {/if}
+  <a href="javascript:void(0)">データ編集</a>
 </div>
 
 <style>
-  .top {
+  .disp {
     cursor: pointer;
   }
   .drug-render {

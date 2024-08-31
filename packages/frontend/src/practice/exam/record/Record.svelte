@@ -67,6 +67,7 @@
         patient: visit.patient,
         visit: visit.asVisit,
         hokenInfo: visit.hoken,
+        textId: 0,
         // onEnter: async (data: PrescInfoData) => {
         //   let text = new m.Text(
         //     0,

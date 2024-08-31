@@ -38,6 +38,7 @@
   export let visit: Visit;
   export let shohou: PrescInfoData | undefined = undefined;
   export let prescriptionId: string | undefined = undefined;
+  export let textId: number = 0;
   let renderedDrugs: RenderedDrug[] = [];
 
   init();
@@ -297,7 +298,7 @@
   function doFreq() {}
 
   async function doRegister() {
-    if (shohou) {
+    if (shohou && textId === 0) {
       const prescInfo = createPrescInfo(shohou);
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
@@ -330,14 +331,12 @@
   }
 
   async function doUnregister() {
-    if (prescriptionId) {
+    if (prescriptionId && shohou) {
       const kikancode = await cache.getShohouKikancode();
       await unregisterPresc(kikancode, prescriptionId);
-      prescriptionId = undefined;
-      if( shohou ){
-        shohou.引換番号 = undefined;
-        shohou = shohou;
-      }
+      shohou.引換番号 = undefined;
+      onModified(shohou, undefined);
+      destroy();
     }
   }
 </script>
