@@ -1,5 +1,5 @@
 import { getHpkiUrl, getPrescUrl } from "@/lib/cache";
-import type { SearchResult } from "./shohou-interface";
+import type { SearchResult, StatusResult, UnregisterResult } from "./shohou-interface";
 
 export async function registerPresc(presc_info: string, kikancode: string, issue_type: string): Promise<string> {
   let prescUrl = await getPrescUrl();
@@ -74,7 +74,7 @@ export async function searchPresc(
 export async function prescStatus(
   kikancode: string,
   prescriptionId: string,
-): Promise<string> {
+): Promise<StatusResult> {
   let prescUrl = await getPrescUrl();
   let url = `${prescUrl}/presc-status`;
   let result = await fetch(url, {
@@ -91,14 +91,14 @@ export async function prescStatus(
     throw new Error(await result.text());
   }
   let json = await result.text();
-  console.log("searchPresc", json);
-  return json;
+  console.log("prescStatus", json);
+  return JSON.parse(json);
 }
 
 export async function unregisterPresc(
   kikancode: string,
   prescriptionId: string,
-): Promise<string> {
+): Promise<UnregisterResult> {
   let prescUrl = await getPrescUrl();
   let url = `${prescUrl}/unregister`;
   let result = await fetch(url, {
@@ -116,6 +116,24 @@ export async function unregisterPresc(
   }
   let json = await result.text();
   console.log("unregister", json);
+  return JSON.parse(json);
+}
+
+export async function shohouHikae(kikancode: string, prescriptionId: string): Promise<String> {
+  let prescUrl = await getPrescUrl();
+  let url = `${prescUrl}/hikae`;
+  let result = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ kikancode, body: {  PrescriptionId: prescriptionId }, }),
+  });
+  if (!result.ok) {
+    throw new Error(await result.text());
+  }
+  let json = await result.text();
+  console.log("hikae", json);
   return json;
 }
 
@@ -124,12 +142,12 @@ export async function createQrCode(content: string): Promise<ArrayBuffer> {
   let url = `${prescUrl}/qr-code`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { 
+    headers: {
       "content-type": "application/json",
     },
     body: JSON.stringify({ content }),
   });
-  if( !result.ok ){
+  if (!result.ok) {
     throw new Error(await result.text());
   }
   let bytes = await result.arrayBuffer();

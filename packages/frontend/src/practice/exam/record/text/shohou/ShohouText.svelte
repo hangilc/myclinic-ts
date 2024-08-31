@@ -3,12 +3,13 @@
   import type { ShohouTextMemo } from "../text-memo";
   import { renderDrug } from "@/lib/denshi-shohou/presc-renderer";
   import api from "@/lib/api";
-  import { createQrCode } from "@/lib/denshi-shohou/presc-api";
+  import { createQrCode, shohouHikae } from "@/lib/denshi-shohou/presc-api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
   import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
+  import * as cache from "@/lib/cache";
 
   export let text: Text;
   if (!text.memo) {
@@ -58,6 +59,13 @@
       },
     });
   }
+
+  async function doHikae() {
+    if( memo?.prescriptionId ){
+      const kikancode = await cache.getShohouKikancode();
+      let result = await shohouHikae(kikancode, memo?.prescriptionId);
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -86,6 +94,9 @@
     </div>
   {/if}
   <a href="javascript:void(0)">データ編集</a>
+  {#if memo?.prescriptionId}
+    <a href="javascript:void(0)" on:click={doHikae}>控え</a>
+  {/if}
 </div>
 
 <style>

@@ -26,9 +26,12 @@
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
-  import { registerPresc, unregisterPresc } from "./presc-api";
+  import { prescStatus, registerPresc, unregisterPresc } from "./presc-api";
   import type { RegisterResult } from "./shohou-interface";
-  import type { ShohouTextMemo } from "@/practice/exam/record/text/text-memo";
+  import {
+    modifyTextMemo,
+    type ShohouTextMemo,
+  } from "@/practice/exam/record/text/text-memo";
   import { Text } from "myclinic-model";
   import api from "../api";
 
@@ -44,20 +47,19 @@
   init();
 
   async function init() {
-    if( !shohou ){
+    if (!shohou) {
       shohou = await initShohou();
     }
     adaptToShohou();
   }
 
   function adaptToShohou() {
-    if( shohou ){
-      renderedDrugs = shohou.RP剤情報グループ.map(g => renderDrug(g));
+    if (shohou) {
+      renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
     } else {
       renderedDrugs = [];
     }
   }
-
 
   async function initShohou(): Promise<PrescInfoData> {
     function toKana(s: string): string {
@@ -298,7 +300,7 @@
   function doFreq() {}
 
   async function doRegister() {
-    if (shohou && textId === 0) {
+    if (shohou && !shohou.引換番号) {
       const prescInfo = createPrescInfo(shohou);
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
@@ -318,25 +320,67 @@
         kind: "shohou",
         shohou,
         prescriptionId,
+      };
+      if (textId === 0) {
+        let text: Text = {
+          textId: 0,
+          visitId: visit.visitId,
+          content: "",
+        };
+        text = modifyTextMemo(text, (m) => memo);
+        await api.enterText(text);
+        destroy();
+      } else {
+        let text = await api.getText(textId);
+        text = modifyTextMemo(text, (m) => memo);
+        await api.updateText(text);
+        destroy();
       }
-      let text: Text = {
-        textId: 0,
-        visitId: visit.visitId,
-        content: "",
-        memo: JSON.stringify(memo),
-      }
-      await api.enterText(text);
-      destroy();
     }
   }
 
   async function doUnregister() {
-    if (prescriptionId && shohou) {
+    async function unregister(textId: number) {
+      let text = await api.getText(textId);
+      text = modifyTextMemo(text, (m) => {
+        if (m) {
+          m.prescriptionId = undefined;
+          m.shohou.引換番号 = undefined;
+        }
+        return m;
+      });
+      await api.updateText(text);
+    }
+    if (prescriptionId && shohou && textId !== 0) {
       const kikancode = await cache.getShohouKikancode();
-      await unregisterPresc(kikancode, prescriptionId);
-      shohou.引換番号 = undefined;
-      onModified(shohou, undefined);
-      destroy();
+      const result = await unregisterPresc(kikancode, prescriptionId);
+      if (
+        result.XmlMsg.MessageHeader.SegmentOfResult === "1" &&
+        result.XmlMsg.MessageBody.ProcessingResultStatus === "1"
+      ) {
+        await unregister(textId);
+        destroy();
+        return;
+      }
+      if (
+        result.XmlMsg.MessageHeader.SegmentOfResult === "1" &&
+        result.XmlMsg.MessageBody.ProcessingResultStatus === "2" &&
+        result.XmlMsg.MessageBody.ProcessingResultCode === "EPSB1032W"
+      ) {
+        const status = await prescStatus(kikancode, prescriptionId);
+        if (
+          status.XmlMsg.MessageBody.PrescriptionStatus ===
+          "当該処方箋は処方箋取消されています。"
+        ) {
+          await unregister(textId);
+          destroy();
+          return;
+        }
+      }
+      let msg =
+        result.XmlMsg.MessageHeader.ErrorMessage ||
+        result.XmlMsg.MessageBody.ProcessingResultMessage;
+      alert(`エラー：${msg}`);
     }
   }
 </script>

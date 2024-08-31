@@ -359,6 +359,10 @@ export default {
     );
   },
 
+  getText(textId: number): Promise<m.Text> {
+    return get("get-text", { "text-id": textId.toString() }, m.Text.cast);
+  },
+
   enterText(text: m.Text): Promise<m.Text> {
     return post("enter-text", text, {}, m.Text.cast);
   },
