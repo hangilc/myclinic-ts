@@ -9,15 +9,9 @@ let shohouFreqUsage: FreqUsage[] | undefined = undefined;
 let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 
 export type FreqUsage = {
-  record: 用法レコード;
-  suppl: 用法補足レコード[];
-}
-
-export const FreqUsageObject = {
-  isEqual(a: FreqUsage, b: FreqUsage): boolean {
-    return 用法レコードObject.isEqual(a.record, b.record) &&
-      用法補足レコードObject.isEqualArray(a.suppl, b.suppl);
-  }
+  剤型区分: "内服" | "頓服" | "外用";
+  用法コード: string;
+  用法名称: string;
 }
 
 export type FreqPresc = {

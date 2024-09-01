@@ -4,17 +4,13 @@
   import Dialog from "../Dialog.svelte";
 
   export let destroy: () => void;
-  let usages: { index: number, usage: FreqUsage }[] = [];
-  let index = 1;
+  let usages: FreqUsage[] = [];
   let searchText = "";
 
   init();
 
   async function init() {
-    (await getShohouFreqUsage()).forEach(usage => {
-      usages.push({ index, usage, });
-      index += 1;
-    })
+    usages = await getShohouFreqUsage();
   }
 
   async function doSearch() {

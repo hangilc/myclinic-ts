@@ -10,6 +10,7 @@ import { pipe } from "myclinic-model/pipe";
 import { mapNullOptional } from "myclinic-model/model";
 import type { ReferConfig } from "./refer";
 import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
+import type { FreqUsage } from "./cache";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1623,11 +1624,11 @@ export default {
     return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster[])
   },
 
-  getShohouFreqUsage(): Promise<{ record: 用法レコード, suppl: 用法補足レコード[] }[]> {
+  getShohouFreqUsage(): Promise<FreqUsage[]> {
     return get("get-config", { name: "shohou-freq-usage" }, a => a ?? []);
   },
 
-  saveShohouFreqUsage(usages: { record: 用法レコード, suppl: 用法補足レコード[] }[]): Promise<void> {
+  saveShohouFreqUsage(usages: FreqUsage[]): Promise<void> {
     return post("set-config", usages, { name: "shohou-freq-usage" }, a => a);
   },
 
