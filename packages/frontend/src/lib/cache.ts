@@ -67,8 +67,9 @@ export async function getShohouFreqUsage(): Promise<FreqUsage[]> {
   return shohouFreqUsage;
 }
 
-export function setShohouFreqUsage(usageMasters: FreqUsage[]) {
-  shohouFreqUsage = usageMasters;
+export async function updateShohouFreqUsage(usages: FreqUsage[]) {
+  await api.saveShohouFreqUsage(usages);
+  shohouFreqUsage = usages;
 }
 
 export async function getShohouFreqPrescription(): Promise<FreqPresc[]> {
