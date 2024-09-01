@@ -1,15 +1,32 @@
 import type { ClinicInfo, UsageMaster } from "myclinic-model";
 import api from "./api";
-import type { RP剤情報 } from "./denshi-shohou/presc-info";
+import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
-let shohouFreqUsage: UsageMaster[] | undefined = undefined;
-let shohouFreqPrescription: RP剤情報[] | undefined = undefined;
+let shohouFreqUsage: FreqUsage[] | undefined = undefined;
+let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
+
+export type FreqUsage = {
+  record: 用法レコード;
+  suppl: 用法補足レコード[];
+}
+
+export const FreqUsageObject = {
+  isEqual(a: FreqUsage, b: FreqUsage): boolean {
+    return 用法レコードObject.isEqual(a.record, b.record) &&
+      用法補足レコードObject.isEqualArray(a.suppl, b.suppl);
+  }
+}
+
+export type FreqPresc = {
+  presc: RP剤情報;
+  comment: string;
+}
 
 export async function getClinicInfo(): Promise<ClinicInfo> {
-  if( !clinicInfo ){
+  if (!clinicInfo) {
     clinicInfo = await api.getClinicInfo();
   }
   return clinicInfo;
@@ -22,10 +39,10 @@ export async function getShohouKikancode(): Promise<string> {
 }
 
 export async function getHpkiUrl(): Promise<string> {
-  if( hpkiUrl === undefined ){
+  if (hpkiUrl === undefined) {
     let server = await api.getConfig("hpki-server");
     let url = server.url;
-    if( typeof url !== "string" ){
+    if (typeof url !== "string") {
       throw new Error("Cannot find hpki server url.");
     }
     hpkiUrl = url;
@@ -34,10 +51,10 @@ export async function getHpkiUrl(): Promise<string> {
 }
 
 export async function getPrescUrl(): Promise<string> {
-  if( prescUrl === undefined ){
+  if (prescUrl === undefined) {
     let server = await api.getConfig("presc-server");
     let url = server.url;
-    if( typeof url !== "string" ){
+    if (typeof url !== "string") {
       throw new Error("Cannot find presc server url.");
     }
     prescUrl = url;
@@ -45,10 +62,10 @@ export async function getPrescUrl(): Promise<string> {
   return prescUrl;
 }
 
-export async function getShohouFreqUsage(): Promise<UsageMaster[]> {
-  if( shohouFreqUsage === undefined ){
+export async function getShohouFreqUsage(): Promise<FreqUsage[]> {
+  if (shohouFreqUsage === undefined) {
     let value = await api.getShohouFreqUsage();
-    if( !value ){
+    if (!value) {
       value = [];
     }
     shohouFreqUsage = value;
@@ -56,19 +73,19 @@ export async function getShohouFreqUsage(): Promise<UsageMaster[]> {
   return shohouFreqUsage;
 }
 
-export function setShohouFreqUsage(usageMasters: UsageMaster[]) {
+export function setShohouFreqUsage(usageMasters: FreqUsage[]) {
   shohouFreqUsage = usageMasters;
 }
 
-export async function getShohouFreqPrescription(): Promise<RP剤情報[]> {
-  if( shohouFreqPrescription === undefined ){
+export async function getShohouFreqPrescription(): Promise<FreqPresc[]> {
+  if (shohouFreqPrescription === undefined) {
     let value = await api.getShohouFreqPrescription();
-    if( !value ){
+    if (!value) {
       value = [];
     }
     shohouFreqPrescription = value;
   }
-  return shohouFreqPrescription;
+  return shohouFreqPrescription ?? [];
 }
 
 export function clearShohouFreqPrescription() {

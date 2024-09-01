@@ -75,14 +75,40 @@ export interface 剤形レコード {
 }
 
 export interface 用法レコード {
-  用法コード?: string;
+  用法コード: string;
   用法名称: string;
   用法１日回数?: number;
 }
 
+export const 用法レコードObject = {
+  isEqual(a: 用法レコード, b: 用法レコード): boolean {
+    return a.用法コード == b.用法コード &&
+      a.用法名称 === b.用法コード &&
+      a.用法１日回数 == b.用法１日回数;
+  }
+};
+
 export interface 用法補足レコード {
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
+}
+
+export const 用法補足レコードObject = {
+  isEqual(a: 用法補足レコード, b: 用法補足レコード): boolean {
+    return a.用法補足区分 == b.用法補足区分 && a.用法補足情報 === b.用法補足情報;
+  },
+
+  isEqualArray(as: 用法補足レコード[], bs: 用法補足レコード[]): boolean {
+    if( as.length !== bs.length ){
+      return false;
+    }
+    for(let i=0;i<as.length;i++){
+      if( !用法補足レコードObject.isEqual(as[i], bs[i]) ){
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 export interface 薬品情報 {
@@ -279,13 +305,13 @@ export function createPrescInfo(data: PrescInfoData): string {
           }
         }
         {
-          if( drug.薬品１回服用量レコード !== undefined ){
+          if (drug.薬品１回服用量レコード !== undefined) {
             const f = drug.薬品１回服用量レコード;
             shohou.薬品１回服用量レコード(RP番号, RP内連番, f.薬剤１回服用量, f.薬剤１日服用回数);
           }
         }
         {
-          if( drug.薬品補足レコード !== undefined ){
+          if (drug.薬品補足レコード !== undefined) {
             drug.薬品補足レコード.forEach((rec, k) => {
               const 薬品補足連番 = k + 1;
               const 薬品補足情報 = rec.薬品補足情報;
@@ -297,14 +323,14 @@ export function createPrescInfo(data: PrescInfoData): string {
       });
     }
   });
-  if( data.提供情報レコード !== undefined ){
+  if (data.提供情報レコード !== undefined) {
     (data.提供情報レコード.提供診療情報レコード ?? []).forEach((rec, i) => {
       const 提供診療情報連番 = i + 1;
-      shohou.提供診療情報レコード(提供診療情報連番, rec.薬品名称, rec.コメント); 
+      shohou.提供診療情報レコード(提供診療情報連番, rec.薬品名称, rec.コメント);
     });
     (data.提供情報レコード.検査値データ等レコード ?? []).forEach((rec, i) => {
       const 検査値データ等連番 = i + 1;
-      shohou.検査値データ等レコード(検査値データ等連番, rec.検査値データ等); 
+      shohou.検査値データ等レコード(検査値データ等連番, rec.検査値データ等);
     });
   }
   return shohou.output();

@@ -22,7 +22,6 @@
     RezeptShubetsuCodeBase,
     RezeptShubetuCodeOffset,
   } from "myclinic-rezept/codes";
-  import NewDrugDialog from "./NewDrugDialog.svelte";
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
@@ -34,6 +33,7 @@
   } from "@/practice/exam/record/text/text-memo";
   import { Text } from "myclinic-model";
   import api from "../api";
+  import ShohouFormDialog from "./ShohouFormDialog.svelte";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -282,7 +282,7 @@
   }
 
   function doAdd() {
-    const form: NewDrugDialog = new NewDrugDialog({
+    const form: ShohouFormDialog = new ShohouFormDialog({
       target: document.body,
       props: {
         destroy: () => form.$destroy(),

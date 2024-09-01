@@ -9,7 +9,7 @@ import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castO
 import { pipe } from "myclinic-model/pipe";
 import { mapNullOptional } from "myclinic-model/model";
 import type { ReferConfig } from "./refer";
-import type { RP剤情報 } from "./denshi-shohou/presc-info";
+import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1623,19 +1623,19 @@ export default {
     return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster[])
   },
 
-  getShohouFreqUsage(): Promise<m.UsageMaster[]> {
+  getShohouFreqUsage(): Promise<{ record: 用法レコード, suppl: 用法補足レコード[] }[]> {
     return get("get-config", { name: "shohou-freq-usage" }, a => a ?? []);
   },
 
-  saveShohouFreqUsage(usages: m.UsageMaster[]): Promise<void> {
-    return post("set-config", usages, { name: "shohou-freq-usage"}, a => a);
+  saveShohouFreqUsage(usages: { record: 用法レコード, suppl: 用法補足レコード[] }[]): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-usage" }, a => a);
   },
 
-  getShohouFreqPrescription(): Promise<RP剤情報[]> {
+  getShohouFreqPrescription(): Promise<{ presc: RP剤情報, comment: string }[]> {
     return get("get-config", { name: "shohou-freq-prescription" }, a => a ?? []);
   },
 
-  saveShohouFreqPrescription(usages: RP剤情報[]): Promise<void> {
-    return post("set-config", usages, { name: "shohou-freq-prescription"}, a => a);
+  saveShohouFreqPrescription(usages: { presc: RP剤情報, comment: string }): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-prescription" }, a => a);
   }
 };
