@@ -165,6 +165,13 @@
     onEnter(shohou);
   }
 
+  function doFreqSelect(freq: FreqUsage) {
+    rp用法コード = freq.用法コード;
+    rp用法名称 = freq.用法名称;
+    showFreqUsage = false;
+  }
+
+  function dummy() {
   /*
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
@@ -437,6 +444,7 @@
     }
   }
     */
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -476,7 +484,7 @@
     {#if showFreqUsage}
       <div>
         {#each freqUsages as freq}
-          <div style="cursor:pointer;" on:click={doFreqSelect}>{freq.用法名称}</div>
+          <div style="cursor:pointer;" on:click={() => doFreqSelect(freq)}>{freq.用法名称}</div>
         {/each}
       </div>
     {/if}
