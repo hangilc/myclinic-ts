@@ -3,13 +3,21 @@
   import type { ShohouTextMemo } from "../text-memo";
   import { renderDrug } from "@/lib/denshi-shohou/presc-renderer";
   import api from "@/lib/api";
-  import { createQrCode, shohouHikae } from "@/lib/denshi-shohou/presc-api";
+  import {
+    createQrCode,
+    shohouHikae,
+    shohouHikaeFilename,
+  } from "@/lib/denshi-shohou/presc-api";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
   import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import * as cache from "@/lib/cache";
+  import {
+    checkShohouResult,
+    type HikaeResult,
+  } from "@/lib/denshi-shohou/shohou-interface";
 
   export let text: Text;
   if (!text.memo) {
@@ -34,8 +42,8 @@
         prescriptionId: memo.prescriptionId,
         destroy: () => d.$destroy(),
         textId: text.textId,
-      }
-    })
+      },
+    });
   }
 
   async function doPrint() {
@@ -61,10 +69,18 @@
   }
 
   async function doHikae() {
-    if( memo?.prescriptionId ){
-      const kikancode = await cache.getShohouKikancode();
-      let result = await shohouHikae(kikancode, memo?.prescriptionId);
+    if (memo?.prescriptionId) {
+      let filename = shohouHikaeFilename(memo?.prescriptionId);
+      let url = api.portalTmpFileUrl(filename);
+      window.open(url, "_blank");
     }
+  }
+
+  async function doDelete() {
+    if( !confirm("この処方を削除していいですか？") ){
+      return;
+    }
+    await api.deleteText(text.textId);
   }
 </script>
 
@@ -85,18 +101,16 @@
       {/each}
     </div>
   </div>
-  {#if accessCode}
-    <div>
+  <div>
+    {#if accessCode}
       引換番号：{accessCode}
-    </div>
-    <div>
-      処方ＩＤ：{prescriptionId}
-    </div>
-  {/if}
-  <a href="javascript:void(0)">データ編集</a>
-  {#if memo?.prescriptionId}
-    <a href="javascript:void(0)" on:click={doHikae}>控え</a>
-  {/if}
+      {#if memo?.prescriptionId}
+        <a href="javascript:void(0)" on:click={doHikae}>控え</a>
+      {/if}
+    {:else}
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
+  </div>
 </div>
 
 <style>

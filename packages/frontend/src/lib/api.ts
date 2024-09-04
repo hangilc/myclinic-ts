@@ -1638,5 +1638,11 @@ export default {
 
   saveShohouFreqPrescription(usages: { presc: RP剤情報, comment: string }): Promise<void> {
     return post("set-config", usages, { name: "shohou-freq-prescription" }, a => a);
+  },
+
+  decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
+    return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
   }
 };
+
+

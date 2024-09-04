@@ -119,7 +119,7 @@ export async function unregisterPresc(
   return JSON.parse(json);
 }
 
-export async function shohouHikae(kikancode: string, prescriptionId: string): Promise<String> {
+export async function shohouHikae(kikancode: string, prescriptionId: string): Promise<string> {
   let prescUrl = await getPrescUrl();
   let url = `${prescUrl}/hikae`;
   let result = await fetch(url, {
@@ -133,7 +133,6 @@ export async function shohouHikae(kikancode: string, prescriptionId: string): Pr
     throw new Error(await result.text());
   }
   let json = await result.text();
-  console.log("hikae", json);
   return json;
 }
 
@@ -152,5 +151,9 @@ export async function createQrCode(content: string): Promise<ArrayBuffer> {
   }
   let bytes = await result.arrayBuffer();
   return bytes;
+}
+
+export function shohouHikaeFilename(prescriptionId: string): string {
+  return `shohou-hikae-${prescriptionId}.pdf`
 }
 

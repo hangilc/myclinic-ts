@@ -25,8 +25,8 @@
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
-  import { prescStatus, registerPresc, unregisterPresc } from "./presc-api";
-  import type { RegisterResult } from "./shohou-interface";
+  import { prescStatus, registerPresc, shohouHikae, shohouHikaeFilename, unregisterPresc } from "./presc-api";
+  import { checkShohouResult, type HikaeResult, type RegisterResult } from "./shohou-interface";
   import {
     modifyTextMemo,
     type ShohouTextMemo,
@@ -329,13 +329,28 @@
         };
         text = modifyTextMemo(text, (m) => memo);
         await api.enterText(text);
-        destroy();
       } else {
         let text = await api.getText(textId);
         text = modifyTextMemo(text, (m) => memo);
         await api.updateText(text);
-        destroy();
       }
+      if( prescriptionId ){
+        await saveHikae(kikancode, prescriptionId);
+      }
+      destroy();
+    }
+
+    async function saveHikae(kikancode: string, prescriptionId: string) {
+      let resultString = await shohouHikae(kikancode, prescriptionId);
+      let result: HikaeResult = JSON.parse(resultString);
+      let err = checkShohouResult(result);
+      if( err ){
+        alert(err);
+        return;
+      }
+      let base64 = result.XmlMsg.MessageBody.PrescriptionReferenceInformationFile;
+      let filename = shohouHikaeFilename(prescriptionId);
+      await api.decodeBase64ToFile(filename, base64);
     }
   }
 

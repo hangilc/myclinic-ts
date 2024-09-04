@@ -136,6 +136,24 @@ export interface StatusResult {
   }
 }
 
+export interface HikaeResult {
+  XmlMsg: {
+    MessageHeader: {
+      ArbitraryFileIdentifier?: string;
+      SegmentOfResult: string; // OQSCD003
+      ErrorCode?: string;
+      ErrorMessage?: string;
+      CharacterCodeIdentifier: string; // OQSCD005
+    },
+    MessageBody: {
+      ProcessingResultStatus: string;
+      ProcessingResultCode?: string;
+      ProcessingResultMessage?: string;
+      PrescriptionReferenceInformationFile: string;
+    }
+  }
+}
+
 export interface SearchResult {
   XmlMsg: {
     MessageHeader: {
@@ -155,6 +173,28 @@ export interface SearchResult {
         CreateDateTime: string;
       }[]
     }
+  }
+}
+
+export interface ResultHeader {
+  XmlMsg: {
+    MessageHeader: {
+      ArbitraryFileIdentifier?: string;
+      SegmentOfResult: string; // OQSCD003
+      ErrorCode?: string;
+      ErrorMessage?: string;
+      CharacterCodeIdentifier: string; // OQSCD005
+    },
+  }
+
+}
+
+export function checkShohouResult(r: ResultHeader): string | undefined {
+  let h = r.XmlMsg.MessageHeader;
+  if( h.SegmentOfResult !== "1" ){
+    return h.ErrorMessage;
+  } else {
+    return undefined;
   }
 }
 
