@@ -26,6 +26,7 @@
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
   import {
+    modifyPresc,
     prescStatus,
     registerPresc,
     shohouHikae,
@@ -53,6 +54,7 @@
   export let prescriptionId: string | undefined = undefined;
   export let textId: number = 0;
   let renderedDrugs: RenderedDrug[] = [];
+  let shohouModified = false;
 
   init();
 
@@ -301,6 +303,7 @@
           if (shohou) {
             shohou.RP剤情報グループ.push(drug);
             adaptToShohou();
+            shohouModified = true;
           }
         },
       },
@@ -315,7 +318,6 @@
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
       let result = await registerPresc(signed, kikancode, "1");
-      console.log("result", result);
       let register: RegisterResult = JSON.parse(result);
       if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
         let list = register.XmlMsg.MessageBody?.CsvCheckResultList;
@@ -348,6 +350,62 @@
         await saveHikae(kikancode, prescriptionId);
       }
       destroy();
+    }
+  }
+
+  async function doModify() {
+    if (shohou && prescriptionId && shohouModified) {
+      const prescInfo = createPrescInfo(shohou);
+      const signed = await sign_presc(prescInfo);
+      const kikancode = await cache.getShohouKikancode();
+      let resultText = await modifyPresc(
+        prescriptionId,
+        signed,
+        kikancode,
+        "1"
+      );
+      console.log("result", resultText);
+      const result: RegisterResult = JSON.parse(resultText);
+      shohou.引換番号 = result.XmlMsg.MessageBody?.AccessCode;
+      prescriptionId = result.XmlMsg.MessageBody?.PrescriptionId;
+      if (prescriptionId) {
+        await saveHikae(kikancode, prescriptionId);
+        const filename = shohouHikaeFilename(prescriptionId);
+        window.open(api.portalTmpFileUrl(filename), "_blank");
+      }
+
+      // let register: RegisterResult = JSON.parse(result);
+      // if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
+      //   let list = register.XmlMsg.MessageBody?.CsvCheckResultList;
+      //   if (list.length > 0) {
+      //     let ms = list.map((item) => item.ResultMessage).join("\n");
+      //     alert(ms);
+      //   }
+      // }
+      // shohou.引換番号 = register.XmlMsg.MessageBody?.AccessCode;
+      // prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
+      // let memo: ShohouTextMemo = {
+      //   kind: "shohou",
+      //   shohou,
+      //   prescriptionId,
+      // };
+      // if (textId === 0) {
+      //   let text: Text = {
+      //     textId: 0,
+      //     visitId: visit.visitId,
+      //     content: "",
+      //   };
+      //   text = modifyTextMemo(text, (m) => memo);
+      //   await api.enterText(text);
+      // } else {
+      //   let text = await api.getText(textId);
+      //   text = modifyTextMemo(text, (m) => memo);
+      //   await api.updateText(text);
+      // }
+      // if (prescriptionId) {
+      //   await saveHikae(kikancode, prescriptionId);
+      // }
+      // destroy();
     }
   }
 
@@ -439,15 +497,24 @@
   }
 
   function doEditRpDrug(index: number) {
-    if( shohou ){
+    if (shohou) {
       const rp = shohou.RP剤情報グループ[index];
       const d: ShohouFormDialog = new ShohouFormDialog({
         target: document.body,
-        properties: {
+        props: {
           destroy: () => d.$destroy(),
-          
-        }
-      })
+          at: visit.visitedAt.substring(0, 10),
+          rpPresc: rp,
+          onEnter: (rpModified) => {
+            if (shohou) {
+              shohou.RP剤情報グループ[index] = rpModified;
+              shohou = shohou;
+              adaptToShohou();
+              shohouModified = true;
+            }
+          },
+        },
+      });
     }
   }
 </script>
@@ -484,6 +551,9 @@
           <button on:click={doRegister}>発行</button>
           <button on:click={doSave}>保存</button>
         {/if}
+      {/if}
+      {#if shohou && prescriptionId && shohouModified}
+        <button on:click={doModify}>変更登録</button>
       {/if}
       {#if prescriptionId}
         <button on:click={doUnregister}>発行取消</button>

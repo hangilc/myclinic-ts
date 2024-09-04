@@ -17,6 +17,22 @@ export async function registerPresc(presc_info: string, kikancode: string, issue
   return result.text();
 }
 
+export async function modifyPresc(prescription_id: string, presc_info: string, kikancode: string, issue_type: string): Promise<string> {
+  let prescUrl = await getPrescUrl();
+  let url = `${prescUrl}/modify`;
+  let result = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      prescription_id, presc_info, kikancode, issue_type
+    }),
+  });
+  if (!result.ok) {
+    throw new Error(await result.text());
+  }
+  return result.text();
+}
+
 export async function searchPrescribed(kikancode: string, start_date: string, end_date: string): Promise<string> {
   let prescUrl = await getPrescUrl();
   let url = `${prescUrl}/search-prescribed`;
@@ -127,7 +143,7 @@ export async function shohouHikae(kikancode: string, prescriptionId: string): Pr
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify({ kikancode, body: {  PrescriptionId: prescriptionId }, }),
+    body: JSON.stringify({ kikancode, body: { PrescriptionId: prescriptionId }, }),
   });
   if (!result.ok) {
     throw new Error(await result.text());

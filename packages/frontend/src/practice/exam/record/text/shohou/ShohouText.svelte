@@ -7,20 +7,9 @@
   } from "@/lib/denshi-shohou/presc-renderer";
   import api from "@/lib/api";
   import {
-    createQrCode,
-    shohouHikae,
     shohouHikaeFilename,
   } from "@/lib/denshi-shohou/presc-api";
-  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
-  import { create_data_from_denshi } from "@/lib/drawer/forms/shohousen/data-from-denshi";
-  import { createQrCodeContent } from "@/lib/denshi-shohou/shohou-qrcode";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
-  import * as cache from "@/lib/cache";
-  import {
-    checkShohouResult,
-    type HikaeResult,
-  } from "@/lib/denshi-shohou/shohou-interface";
 
   export let text: Text;
 

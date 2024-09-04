@@ -10,16 +10,21 @@
   import { toHankaku } from "../zenkaku";
 
   export let at: string; // YYYY-MM-DD
+  export let rpPresc: RP剤情報 | undefined = undefined;
   export let destroy: () => void;
   export let onEnter: (drug: RP剤情報) => void;
   const customUsageCode = "0X0XXXXXXXXX0000";
 
-  let rp剤形区分: 剤形区分 = "内服";
-  let rp調剤数量_value: string = "";
-  let rp用法コード: string = customUsageCode;
-  let rp用法名称: string = "";
-  let rp用法補足レコード: 用法補足レコード[] = [];
-  let rpDrugs: 薬品情報[] = [];
+  let rp剤形区分: 剤形区分 = rpPresc ? rpPresc.剤形レコード.剤形区分 : "内服";
+  let rp調剤数量_value: string = rpPresc
+    ? rpPresc.剤形レコード.調剤数量.toString()
+    : "";
+  let rp用法コード: string = rpPresc
+    ? rpPresc.用法レコード.用法コード
+    : customUsageCode;
+  let rp用法名称: string = rpPresc ? rpPresc.用法レコード.用法名称 : "";
+  let rp用法補足レコード: 用法補足レコード[] = rpPresc?.用法補足レコード ?? [];
+  let rpDrugs: 薬品情報[] = rpPresc?.薬品情報グループ ?? [];
 
   let showDrugSearch = false;
   let drugSearchText = "";
@@ -149,18 +154,34 @@
       alert("薬品が設定されていません。");
       return;
     }
-    const shohou: RP剤情報 = {
-      剤形レコード: {
-        剤形区分: rp剤形区分,
-        調剤数量,
-      },
-      用法レコード: {
-        用法コード: rp用法コード,
-        用法名称: rp用法名称,
-      },
-      用法補足レコード,
-      薬品情報グループ: rpDrugs,
-    };
+    let shohou: RP剤情報;
+    if (rpPresc) {
+      shohou = Object.assign({}, rpPresc, {
+        剤形レコード: {
+          剤形区分: rp剤形区分,
+          調剤数量,
+        },
+        用法レコード: {
+          用法コード: rp用法コード,
+          用法名称: rp用法名称,
+        },
+        用法補足レコード,
+        薬品情報グループ: rpDrugs,
+      });
+    } else {
+      shohou = {
+        剤形レコード: {
+          剤形区分: rp剤形区分,
+          調剤数量,
+        },
+        用法レコード: {
+          用法コード: rp用法コード,
+          用法名称: rp用法名称,
+        },
+        用法補足レコード,
+        薬品情報グループ: rpDrugs,
+      };
+    }
     destroy();
     onEnter(shohou);
   }
@@ -489,7 +510,7 @@
     <div>
       {#each rpDrugs as drug, i}
         <div>
-          {i+1}. {drug.薬品レコード.薬品名称}
+          {i + 1}. {drug.薬品レコード.薬品名称}
           {drug.薬品レコード.分量}{drug.薬品レコード.単位名}
         </div>
       {/each}
