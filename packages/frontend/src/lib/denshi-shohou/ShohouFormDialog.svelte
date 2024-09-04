@@ -7,6 +7,7 @@
   import Dialog from "../Dialog.svelte";
   import type { FreqUsage } from "../cache";
   import * as cache from "@/lib/cache";
+  import { toHankaku } from "../zenkaku";
 
   export let at: string; // YYYY-MM-DD
   export let destroy: () => void;
@@ -43,10 +44,9 @@
 
   async function doToggleDrugSearch() {
     showDrugSearch = !showDrugSearch;
-    console.log("search", showDrugSearch, searchTextInput);
     await tick();
-    if( showDrugSearch ){
-      if( searchTextInput ){
+    if (showDrugSearch) {
+      if (searchTextInput) {
         searchTextInput.focus();
       }
     }
@@ -67,13 +67,13 @@
   }
 
   function doAddDrug() {
-    if( !drugMaster ){
+    if (!drugMaster) {
       alert("医薬品が選択されていません。");
       return;
     }
     drugAmount = drugAmount.trim();
-    let amount = parseFloat(drugAmount);
-    if( isNaN(amount) ){
+    let amount = parseFloat(toHankaku(drugAmount));
+    if (isNaN(amount)) {
       alert("薬品分量が不適切です。");
       return;
     }
@@ -102,9 +102,9 @@
 
   async function doToggleUsageSearch() {
     showUsageSearch = !showUsageSearch;
-    if( showUsageSearch ){
+    if (showUsageSearch) {
       await tick();
-      if( usageSearchTextInput ){
+      if (usageSearchTextInput) {
         usageSearchTextInput.focus();
       }
     }
@@ -112,7 +112,7 @@
 
   async function doUsageSearch() {
     let t = usageSearchText.trim();
-    if( t ){
+    if (t) {
       usageSearchResult = await api.selectUsageMasterByUsageName(t);
       t = "";
     }
@@ -130,21 +130,22 @@
 
   function doEnter() {
     let 調剤数量_value = "1";
-    if( rp剤形区分 === "内服" || rp剤形区分 === "頓服" ){
+    if (rp剤形区分 === "内服" || rp剤形区分 === "頓服") {
       調剤数量_value = rp調剤数量_value;
     }
-    let 調剤数量 = parseFloat(調剤数量_value);
-    if( isNaN(調剤数量) ){
+    let 調剤数量 = parseFloat(toHankaku(調剤数量_value));
+    if (isNaN(調剤数量)) {
       alert("調剤日数・回数が不適切です。");
       return;
     }
     rp用法名称 = rp用法名称.trim();
-    if( rp用法名称 === "" ){
+    if (rp用法名称 === "") {
       alert("用法が入力されていません。");
       return;
     }
-    const 用法補足レコード = rp用法補足レコード.length === 0 ? undefined : rp用法補足レコード;
-    if( rpDrugs.length === 0 ){
+    const 用法補足レコード =
+      rp用法補足レコード.length === 0 ? undefined : rp用法補足レコード;
+    if (rpDrugs.length === 0) {
       alert("薬品が設定されていません。");
       return;
     }
@@ -161,7 +162,6 @@
       薬品情報グループ: rpDrugs,
     };
     destroy();
-    console.log("shohou", JSON.stringify(shohou, undefined, 2));
     onEnter(shohou);
   }
 
@@ -172,7 +172,7 @@
   }
 
   function dummy() {
-  /*
+    /*
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
   let showSearchResult = false;
@@ -458,11 +458,15 @@
     <div>
       薬品：<a href="javascript:void(0)" on:click={doToggleDrugSearch}
         >マスター</a
-      > <button on:click={doAddDrug}>追加</button>
+      >
     </div>
     {#if showDrugSearch}
       <form on:submit|preventDefault={doDrugSearch}>
-        <input type="text" bind:value={drugSearchText} bind:this={searchTextInput}/>
+        <input
+          type="text"
+          bind:value={drugSearchText}
+          bind:this={searchTextInput}
+        />
         <button type="submit">検索</button>
       </form>
       <div style="max-height:400px;overflow-y:auto;cursor:pointer;">
@@ -471,10 +475,24 @@
         {/each}
       </div>
     {/if}
+    {#if drugMaster}
+      <form on:submit|preventDefault={doAddDrug}>
+        <div>{drugMaster.name}</div>
+        <input
+          type="text"
+          style="width:6em"
+          bind:value={drugAmount}
+        />{drugMaster.unit}
+        <button type="submit">追加</button>
+      </form>
+    {/if}
     <div>
-      {#if drugMaster}
-        {drugMaster.name} <input type="text" style="width:6em" bind:value={drugAmount}/>{drugMaster.unit}
-      {/if}
+      {#each rpDrugs as drug, i}
+        <div>
+          {i+1}. {drug.薬品レコード.薬品名称}
+          {drug.薬品レコード.分量}{drug.薬品レコード.単位名}
+        </div>
+      {/each}
     </div>
   </div>
   <div>
@@ -484,13 +502,19 @@
     {#if showFreqUsage}
       <div>
         {#each freqUsages as freq}
-          <div style="cursor:pointer;" on:click={() => doFreqSelect(freq)}>{freq.用法名称}</div>
+          <div style="cursor:pointer;" on:click={() => doFreqSelect(freq)}>
+            {freq.用法名称}
+          </div>
         {/each}
       </div>
     {/if}
     {#if showUsageSearch}
       <form on:submit|preventDefault={doUsageSearch}>
-        <input type="text" bind:value={usageSearchText} bind:this={usageSearchTextInput}/>
+        <input
+          type="text"
+          bind:value={usageSearchText}
+          bind:this={usageSearchTextInput}
+        />
         <button type="submit">検索</button>
       </form>
       <div style="max-height:400px;overflow-y:auto;cursor:pointer;">
@@ -510,14 +534,6 @@
       {#if rp剤形区分 === "内服"}日分{/if}
       {#if rp剤形区分 === "頓服"}回分{/if}
     {/if}
-  </div>
-  <div>
-    {#each rpDrugs as drug}
-      <div>
-        {drug.薬品レコード.薬品名称}
-        {drug.薬品レコード.分量}{drug.薬品レコード.単位名}
-      </div>
-    {/each}
   </div>
   <div style="text-align:right;">
     <button on:click={doEnter}>入力</button>

@@ -15,17 +15,7 @@
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
-  import { DateWrapper } from "myclinic-util";
-  import {
-    createPrescInfo,
-    type PrescInfoData,
-    type RP剤情報,
-  } from "@/lib/denshi-shohou/presc-info";
-  import { onshiPrescReport } from "@/lib/onshi-presc";
   import { getClinicInfo } from "@/lib/cache";
-  import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
-  import * as examples from "@/lib/denshi-shohou/presc-examples";
-  import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -50,12 +40,12 @@
     }
   });
 
-  function doRenderTest() {
-    let presc: RP剤情報[] = examples.presc_example_7;
-    console.log("json", JSON.stringify(presc, undefined, 2));
-    let render = parseShohousen(renderPresc(presc)).formatForSave();
-    console.log(render);
-  }
+  // function doRenderTest() {
+  //   let presc: RP剤情報[] = examples.presc_example_7;
+  //   console.log("json", JSON.stringify(presc, undefined, 2));
+  //   let render = parseShohousen(renderPresc(presc)).formatForSave();
+  //   console.log(render);
+  // }
 
   async function doNewShohou() {
     const clinicInfo = await getClinicInfo();
@@ -68,19 +58,6 @@
         visit: visit.asVisit,
         hokenInfo: visit.hoken,
         textId: 0,
-        // onEnter: async (data: PrescInfoData) => {
-        //   let text = new m.Text(
-        //     0,
-        //     visit.visitId,
-        //     "",
-        //     JSON.stringify({
-        //       kind: "shohou",
-        //       shohou: data,
-        //       register: undefined,
-        //     })
-        //   );
-        //   await api.enterText(text);
-        // },
       },
     });
   }
@@ -105,7 +82,6 @@
             on:click={() => (showNewTextEditor = true)}>新規文章</a
           >
           <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
-          <a href="javascript:void(0)" on:click={doRenderTest}>RenderTest</a>
         </div>
       {/if}
     </div>

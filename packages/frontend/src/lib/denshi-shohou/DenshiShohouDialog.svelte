@@ -25,8 +25,18 @@
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import * as cache from "@/lib/cache";
-  import { prescStatus, registerPresc, shohouHikae, shohouHikaeFilename, unregisterPresc } from "./presc-api";
-  import { checkShohouResult, type HikaeResult, type RegisterResult } from "./shohou-interface";
+  import {
+    prescStatus,
+    registerPresc,
+    shohouHikae,
+    shohouHikaeFilename,
+    unregisterPresc,
+  } from "./presc-api";
+  import {
+    checkShohouResult,
+    type HikaeResult,
+    type RegisterResult,
+  } from "./shohou-interface";
   import {
     modifyTextMemo,
     type ShohouTextMemo,
@@ -334,24 +344,50 @@
         text = modifyTextMemo(text, (m) => memo);
         await api.updateText(text);
       }
-      if( prescriptionId ){
+      if (prescriptionId) {
         await saveHikae(kikancode, prescriptionId);
       }
       destroy();
     }
+  }
 
-    async function saveHikae(kikancode: string, prescriptionId: string) {
-      let resultString = await shohouHikae(kikancode, prescriptionId);
-      let result: HikaeResult = JSON.parse(resultString);
-      let err = checkShohouResult(result);
-      if( err ){
-        alert(err);
-        return;
+  async function doSave() {
+    if (shohou && !shohou.引換番号) {
+      const memo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou,
+        prescriptionId: undefined,
+      };
+      if (textId === 0) {
+        let text = modifyTextMemo(
+          {
+            textId: 0,
+            visitId: visit.visitId,
+            content: "",
+          },
+          (m) => memo
+        );
+        await api.enterText(text);
+      } else {
+        let text = await api.getText(textId);
+        text = modifyTextMemo(text, (m) => memo);
+        await api.updateText(text);
       }
-      let base64 = result.XmlMsg.MessageBody.PrescriptionReferenceInformationFile;
-      let filename = shohouHikaeFilename(prescriptionId);
-      await api.decodeBase64ToFile(filename, base64);
+      destroy();
     }
+  }
+
+  async function saveHikae(kikancode: string, prescriptionId: string) {
+    let resultString = await shohouHikae(kikancode, prescriptionId);
+    let result: HikaeResult = JSON.parse(resultString);
+    let err = checkShohouResult(result);
+    if (err) {
+      alert(err);
+      return;
+    }
+    let base64 = result.XmlMsg.MessageBody.PrescriptionReferenceInformationFile;
+    let filename = shohouHikaeFilename(prescriptionId);
+    await api.decodeBase64ToFile(filename, base64);
   }
 
   async function doUnregister() {
@@ -367,7 +403,7 @@
       await api.updateText(text);
     }
     if (prescriptionId && shohou && textId !== 0) {
-      if( !confirm("この処方の発行を取消ていいですか？") ){
+      if (!confirm("この処方の発行を取消ていいですか？")) {
         return;
       }
       const kikancode = await cache.getShohouKikancode();
@@ -401,19 +437,39 @@
       alert(`エラー：${msg}`);
     }
   }
+
+  function doEditRpDrug(index: number) {
+    if( shohou ){
+      const rp = shohou.RP剤情報グループ[index];
+      const d: ShohouFormDialog = new ShohouFormDialog({
+        target: document.body,
+        properties: {
+          destroy: () => d.$destroy(),
+          
+        }
+      })
+    }
+  }
 </script>
 
-<Dialog title="新規処方" {destroy}>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<Dialog title={textId === 0 ? "新規処方" : "処方編集"} {destroy}>
   <div class="top">
     <div>院外処方</div>
     <div>Ｒｐ）</div>
-    <div class="drug-render">
+    <div>
       {#each renderedDrugs as drug, i (drug.id)}
-        <div>{i + 1})</div>
-        <div>
-          {#each drug.drugs as d}
-            <div>{d}</div>
-          {/each}
+        <div
+          style="cursor:pointer;user-select:none;display:grid;grid-template-columns:auto 1fr;column-gap:4px;"
+          on:click={() => doEditRpDrug(i)}
+        >
+          <div>{i + 1})</div>
+          <div>
+            {#each drug.drugs as d}
+              <div>{d}</div>
+            {/each}
+          </div>
+          <div></div>
           <div>{drug.usage} {drug.times}</div>
         </div>
       {/each}
@@ -423,9 +479,10 @@
       <button on:click={doAdd}>手動追加</button>
     </div>
     <div class="commands">
-      {#if shohou}
+      {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
           <button on:click={doRegister}>発行</button>
+          <button on:click={doSave}>保存</button>
         {/if}
       {/if}
       {#if prescriptionId}
