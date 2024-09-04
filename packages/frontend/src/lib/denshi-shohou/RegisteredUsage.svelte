@@ -58,6 +58,8 @@
       }];
       usages = [];
       usages = us;
+      master = undefined;
+      searchText = "";
     }
   }
 
@@ -79,7 +81,7 @@
       <button type="submit">検索</button>
     </form>
   </div>
-  <div style="max-height:400px;overflow-y:auto;">
+  <div style="max-height:200px;overflow-y:auto;">
     {#each searchResult as master (master.usage_code)}
       <div style="cursor:pointer" on:click={() => doSelectMaster(master)}>
         {master.usage_name}
@@ -89,20 +91,20 @@
   {#if master}
     <div>{master.usage_name}</div>
   {/if}
-  <div>
+  <div style="margin:10px 0;">
     <input type="radio" bind:group={zaikeiKubun} value="内服" />内服
     <input type="radio" bind:group={zaikeiKubun} value="頓服" />頓服
     <input type="radio" bind:group={zaikeiKubun} value="外用" />外用
     <button on:click={doAdd}>追加</button>
   </div>
-  <div style="max-height:200px;overflow-y:auto;">
+  <div style="height:300px;overflow-y:auto;resize:vertical;">
     {#each usages as item, i}
       <div>
         {i + 1}. {item.用法名称}
       </div>
     {/each}
   </div>
-  <div style="text-align:right;">
+  <div style="text-align:right;margin-top:10px;">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
   </div>

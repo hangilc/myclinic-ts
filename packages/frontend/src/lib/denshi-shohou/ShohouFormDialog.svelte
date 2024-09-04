@@ -5,6 +5,8 @@
   import type { RP剤情報, 用法補足レコード, 薬品情報 } from "./presc-info";
   import { tick } from "svelte";
   import Dialog from "../Dialog.svelte";
+  import type { FreqUsage } from "../cache";
+  import * as cache from "@/lib/cache";
 
   export let at: string; // YYYY-MM-DD
   export let destroy: () => void;
@@ -30,7 +32,14 @@
   let usageSearchResult: UsageMaster[] = [];
   let usageSearchTextInput: HTMLInputElement;
 
-  $: console.log("searchTextInput", searchTextInput)
+  let showFreqUsage = false;
+  let freqUsages: FreqUsage[] = [];
+
+  init();
+
+  async function init() {
+    freqUsages = await cache.getShohouFreqUsage();
+  }
 
   async function doToggleDrugSearch() {
     showDrugSearch = !showDrugSearch;
@@ -85,6 +94,10 @@
     drugMaster = undefined;
     drugAmount = "";
     rpDrugs = drugs;
+  }
+
+  function doToggleFreqUsage() {
+    showFreqUsage = !showFreqUsage;
   }
 
   async function doToggleUsageSearch() {
@@ -152,6 +165,13 @@
     onEnter(shohou);
   }
 
+  function doFreqSelect(freq: FreqUsage) {
+    rp用法コード = freq.用法コード;
+    rp用法名称 = freq.用法名称;
+    showFreqUsage = false;
+  }
+
+  function dummy() {
   /*
   let searchText = "";
   let searchResults: IyakuhinMaster[] = [];
@@ -424,6 +444,7 @@
     }
   }
     */
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -457,7 +478,16 @@
     </div>
   </div>
   <div>
-    用法：<a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
+    用法：
+    <a href="javascript:void(0)" on:click={doToggleFreqUsage}>頻用</a>
+    <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
+    {#if showFreqUsage}
+      <div>
+        {#each freqUsages as freq}
+          <div style="cursor:pointer;" on:click={() => doFreqSelect(freq)}>{freq.用法名称}</div>
+        {/each}
+      </div>
+    {/if}
     {#if showUsageSearch}
       <form on:submit|preventDefault={doUsageSearch}>
         <input type="text" bind:value={usageSearchText} bind:this={usageSearchTextInput}/>

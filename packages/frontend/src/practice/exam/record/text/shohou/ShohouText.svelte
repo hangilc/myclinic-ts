@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { Text } from "myclinic-model";
   import type { ShohouTextMemo } from "../text-memo";
-  import { renderDrug } from "@/lib/denshi-shohou/presc-renderer";
+  import {
+    renderDrug,
+    type RenderedDrug,
+  } from "@/lib/denshi-shohou/presc-renderer";
   import api from "@/lib/api";
   import {
     createQrCode,
@@ -20,53 +23,65 @@
   } from "@/lib/denshi-shohou/shohou-interface";
 
   export let text: Text;
-  if (!text.memo) {
-    throw new Error("empty text memo");
+
+  let memo: ShohouTextMemo | undefined = undefined;
+  let drugs: RenderedDrug[] = [];
+  let accessCode: string | undefined = undefined;
+  let prescriptionId: string | undefined = undefined;
+
+  $: adaptToText(text);
+
+  function adaptToText(t: Text) {
+    if (t && t.memo) {
+      let m: ShohouTextMemo = JSON.parse(t.memo);
+      memo = m;
+      drugs = m.shohou.RP剤情報グループ.map((group) => renderDrug(group));
+      accessCode = m.shohou.引換番号;
+      prescriptionId = m.prescriptionId;
+    }
   }
-  let memo: ShohouTextMemo = JSON.parse(text.memo);
-  let drugs = memo.shohou.RP剤情報グループ.map((group) => renderDrug(group));
-  let accessCode: string | undefined = memo.shohou.引換番号;
-  let prescriptionId: string | undefined = memo.prescriptionId;
 
   async function doDispClick() {
-    const visit = await api.getVisit(text.visitId);
-    const patient = await api.getPatient(visit.patientId);
-    const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
-    const d: DenshiShohouDialog = new DenshiShohouDialog({
-      target: document.body,
-      props: {
-        patient,
-        visit,
-        hokenInfo,
-        shohou: memo.shohou,
-        prescriptionId: memo.prescriptionId,
-        destroy: () => d.$destroy(),
-        textId: text.textId,
-      },
-    });
+    if (memo) {
+      const visit = await api.getVisit(text.visitId);
+      const patient = await api.getPatient(visit.patientId);
+      const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
+      const d: DenshiShohouDialog = new DenshiShohouDialog({
+        target: document.body,
+        props: {
+          patient,
+          visit,
+          hokenInfo,
+          shohou: memo.shohou,
+          prescriptionId: memo.prescriptionId,
+          destroy: () => d.$destroy(),
+          textId: text.textId,
+        },
+      });
+    }
   }
 
-  async function doPrint() {
-    const qrcode = await createQrCode(createQrCodeContent(memo.shohou));
-    let data = create_data_from_denshi(memo.shohou);
-    let ops = drawShohousen(data);
-    const d: DrawerDialog = new DrawerDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        ops,
-        width: 148,
-        height: 210,
-        scale: 3,
-        kind: "shohousen",
-        title: "処方箋印刷",
-        stamp: qrcode,
-        stampStyle:
-          "position:absolute;left:90mm;top:3mm;height:15mm;width:15mm;",
-        stampPrintOption: { left: 115, top: 188, width: 15, height: 15 },
-      },
-    });
-  }
+  // async function doPrint() {
+  //   const qrcode = await createQrCode(createQrCodeContent(memo.shohou));
+  //   let data = create_data_from_denshi(memo.shohou);
+  //   let ops = drawShohousen(data);
+  //   const d: DrawerDialog = new DrawerDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       ops,
+  //       width: 148,
+  //       height: 210,
+  //       scale: 3,
+  //       kind: "shohousen",
+  //       title: "処方箋印刷",
+  //       stamp: qrcode,
+  //       stampStyle:
+  //         "position:absolute;left:90mm;top:3mm;height:15mm;width:15mm;",
+  //       stampPrintOption: { left: 115, top: 188, width: 15, height: 15 },
+  //     },
+  //   });
+  // }
 
   async function doHikae() {
     if (memo?.prescriptionId) {
@@ -77,7 +92,7 @@
   }
 
   async function doDelete() {
-    if( !confirm("この処方を削除していいですか？") ){
+    if (!confirm("この処方を削除していいですか？")) {
       return;
     }
     await api.deleteText(text.textId);

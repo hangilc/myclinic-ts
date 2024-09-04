@@ -367,6 +367,9 @@
       await api.updateText(text);
     }
     if (prescriptionId && shohou && textId !== 0) {
+      if( !confirm("この処方の発行を取消ていいですか？") ){
+        return;
+      }
       const kikancode = await cache.getShohouKikancode();
       const result = await unregisterPresc(kikancode, prescriptionId);
       if (
