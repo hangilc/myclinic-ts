@@ -15,6 +15,11 @@
   import { DateWrapper } from "myclinic-util";
   import { searchPresc } from "@/lib/denshi-shohou/presc-api";
   import { formatHokenshaBangou } from "myclinic-rezept/helper";
+  import {
+    checkShohouResult,
+    type SearchResult,
+  } from "@/lib/denshi-shohou/shohou-interface";
+  import PrescListDialog from "./PrescListDialog.svelte";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -104,43 +109,73 @@
     }
   }
 
-  async function doPrescList() {
-    let patient = $currentPatient;
-    if (patient) {
-      const kikancode = await cache.getShohouKikancode();
-      const patientId = patient.patientId;
-      let shahokokuho = await api.findAvailableShahokokuho(
-        patientId,
-        new Date()
+  async function searchPatientPresc(
+    patientId: number,
+    at: DateWrapper
+  ): Promise<SearchResult | undefined> {
+    let kikancode = await cache.getShohouKikancode();
+    let shahokokuho = await api.findAvailableShahokokuho(
+      patientId,
+      at.asSqlDate()
+    );
+    if (shahokokuho) {
+      return await searchPresc(
+        kikancode,
+        formatHokenshaBangou(shahokokuho.hokenshaBangou),
+        shahokokuho.hihokenshaKigou,
+        shahokokuho.hihokenshaBangou,
+        shahokokuho.edaban,
+        undefined,
+        undefined
       );
-      if (shahokokuho) {
-        let result = await searchPresc(
+    } else {
+      let koukikourei = await api.findAvailableKoukikourei(
+        patientId,
+        at.asSqlDate()
+      );
+      if (koukikourei) {
+        return await searchPresc(
           kikancode,
-          formatHokenshaBangou(shahokokuho.hokenshaBangou),
-          shahokokuho.hihokenshaKigou,
-          shahokokuho.hihokenshaBangou,
-          shahokokuho.edaban,
+          koukikourei.hokenshaBangou,
+          undefined,
+          koukikourei.hihokenshaBangou,
+          undefined,
           undefined,
           undefined
         );
-        console.log("result", result);
-      } else {
-        let koukikourei = await api.findAvailableKoukikourei(
-          patientId,
-          new Date()
-        );
-        if (koukikourei) {
-          let result = await searchPresc(
-            kikancode,
-            koukikourei.hokenshaBangou,
-            undefined,
-            koukikourei.hihokenshaBangou,
-            undefined,
-            undefined,
-            undefined
-          );
-          console.log("result", result);
+      }
+    }
+    return undefined;
+  }
+
+  async function doPrescList() {
+    let patient = $currentPatient;
+    if (patient) {
+      let result = await searchPatientPresc(
+        patient.patientId,
+        DateWrapper.from(new Date())
+      );
+      if (result) {
+        let err = checkShohouResult(result);
+        if (err) {
+          alert(err);
+          return;
         }
+        let list = result.XmlMsg.MessageBody.PrescriptionIdList;
+        if (list) {
+          list.sort(
+            (a, b) => -a.CreateDateTime.localeCompare(b.CreateDateTime)
+          );
+          const d: PrescListDialog = new PrescListDialog({
+            target: document.body,
+            props: {
+              destroy: () => d.$destroy(),
+              list,
+            }
+          })
+        }
+      } else {
+        alert("Empty result");
       }
     }
   }

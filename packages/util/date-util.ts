@@ -33,6 +33,10 @@ export class DateWrapper {
     return dateToSqlDate(this.date);
   }
 
+  asOnshiDate(): string {
+    return this.asSqlDate().substring(0, 10).replaceAll("-", "");
+  }
+
   incYear(n: number): DateWrapper {
     return new DateWrapper(incYear(this.date, n));
   }

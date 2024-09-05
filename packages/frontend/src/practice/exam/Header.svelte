@@ -16,6 +16,7 @@
     unregisterPresc,
   } from "@/lib/denshi-shohou/presc-api";
   import RegisteredUsage from "@/lib/denshi-shohou/RegisteredUsage.svelte";
+  import { DateWrapper } from "myclinic-util";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -111,9 +112,13 @@
 
   async function doSearchPresc() {
     const kikancode = await cache.getShohouKikancode();
-    let startDate = "20240801000000";
-    let endDate = "20240818000000";
-    const result = await searchPrescribed(kikancode, startDate, endDate);
+    let endDate = DateWrapper.from(new Date());
+    let startDate = endDate.incMonth(-3);
+    const result = await searchPrescribed(
+      kikancode,
+      startDate.asOnshiDate() + "000000",
+      endDate.asOnshiDate() + "000000"
+    );
     console.log("result", result);
   }
 
@@ -155,7 +160,7 @@
     <a href="javascript:void(0);" on:click={doSearchShohouSample}>登録薬剤</a>
     <a href="javascript:void(0);" on:click={doGlobalSearch}>全文検索</a>
     <a href="javascript:void(0);" on:click={doOnshiConfirmForm}>資格確認</a>
-    <a href="javascript:void(0);" on:click={doSearchPresc}>処方検索</a>
+    <a href="javascript:void(0);" on:click={doSearchPresc}>調剤検索</a>
     <a href="javascript:void(0);" on:click={doPrescStatus}>処方状態</a>
     <a href="javascript:void(0);" on:click={doUnregisterPresc}>処方取消</a>
     <a href="javascript:void(0);" on:click={doRegisteredUsage}>登録用法</a>
