@@ -354,7 +354,8 @@
   }
 
   async function doModify() {
-    if (shohou && prescriptionId && shohouModified) {
+    if (shohou && prescriptionId && shohouModified && textId !== 0) {
+      console.log("enter modify", prescriptionId);
       const prescInfo = createPrescInfo(shohou);
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
@@ -368,11 +369,19 @@
       const result: RegisterResult = JSON.parse(resultText);
       shohou.引換番号 = result.XmlMsg.MessageBody?.AccessCode;
       prescriptionId = result.XmlMsg.MessageBody?.PrescriptionId;
+      let memo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou,
+        prescriptionId,
+      };
+      let text = await api.getText(textId);
+      text = modifyTextMemo(text, (m) => memo);
+      await api.updateText(text);
       if (prescriptionId) {
+        console.log("prescriptionId", prescriptionId);
         await saveHikae(kikancode, prescriptionId);
-        const filename = shohouHikaeFilename(prescriptionId);
-        window.open(api.portalTmpFileUrl(filename), "_blank");
       }
+      destroy();
 
       // let register: RegisterResult = JSON.parse(result);
       // if (register.XmlMsg.MessageBody?.CsvCheckResultList) {

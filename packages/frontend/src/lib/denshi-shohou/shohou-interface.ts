@@ -130,7 +130,7 @@ export interface StatusResult {
       // "薬局にて回収済です。"
       ReceptionPharmacyCode?: string;
       ReceptionPharmacyName?: string;
-      MessageFlg?: string;
+      MessageFlg?: string; // 1: 伝達事項なし, 2: 伝達事項あり
       DispensingResult?: string;
     }
   }

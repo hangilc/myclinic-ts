@@ -7,9 +7,12 @@
   } from "@/lib/denshi-shohou/presc-renderer";
   import api from "@/lib/api";
   import {
+  prescStatus,
     shohouHikaeFilename,
   } from "@/lib/denshi-shohou/presc-api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
+  import * as cache from "@lib/cache";
+  import type { StatusResult } from "@/lib/denshi-shohou/shohou-interface";
 
   export let text: Text;
 
@@ -17,8 +20,11 @@
   let drugs: RenderedDrug[] = [];
   let accessCode: string | undefined = undefined;
   let prescriptionId: string | undefined = undefined;
+  let showDetail = false;
+  let statusResult: StatusResult | undefined = undefined;
 
   $: adaptToText(text);
+  $: if( !showDetail ){ statusResult = undefined }
 
   function adaptToText(t: Text) {
     if (t && t.memo) {
@@ -27,6 +33,7 @@
       drugs = m.shohou.RP剤情報グループ.map((group) => renderDrug(group));
       accessCode = m.shohou.引換番号;
       prescriptionId = m.prescriptionId;
+      showDetail = false;
     }
   }
 
@@ -86,6 +93,17 @@
     }
     await api.deleteText(text.textId);
   }
+
+  function toggleShowDetail() {
+    showDetail = !showDetail;
+  }
+
+  async function doStatus() {
+    if( prescriptionId ){
+      const kikancode = await cache.getShohouKikancode();
+      statusResult = await prescStatus(kikancode, prescriptionId);
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -110,11 +128,37 @@
       引換番号：{accessCode}
       {#if memo?.prescriptionId}
         <a href="javascript:void(0)" on:click={doHikae}>控え</a>
+        <a href="javascript:void(0)" on:click={toggleShowDetail}>詳細</a>
       {/if}
     {:else}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
   </div>
+  {#if showDetail}
+    <div style="margin:10px 0;border:1px solid gray;border-radius:4px;padding:10px;">
+      <div>処方ＩＤ：{prescriptionId}</div>
+      <div>
+        <a href="javascript:void(0)" on:click={doStatus}>処理状況</a>
+      </div>
+      {#if statusResult}
+        <div>
+          <div>{statusResult.XmlMsg.MessageBody.PrescriptionStatus}</div>
+          {#if statusResult.XmlMsg.MessageBody.ReceptionPharmacyName}
+            <div>
+              {statusResult.XmlMsg.MessageBody.ReceptionPharmacyName}
+              {#if statusResult.XmlMsg.MessageBody.ReceptionPharmacyCode}
+              （{statusResult.XmlMsg.MessageBody.ReceptionPharmacyCode}）
+              {/if}
+            </div>
+            <div>
+              {statusResult.XmlMsg.MessageBody.MessageFlg === "2" ? "伝達事項あり" : ""}
+              {statusResult.XmlMsg.MessageBody.DispensingResult ?? ""}
+            </div>
+          {/if}
+        </div>
+      {/if}
+    </div>
+  {/if}
 </div>
 
 <style>

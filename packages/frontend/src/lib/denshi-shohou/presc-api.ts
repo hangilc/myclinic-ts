@@ -17,7 +17,8 @@ export async function registerPresc(presc_info: string, kikancode: string, issue
   return result.text();
 }
 
-export async function modifyPresc(prescription_id: string, presc_info: string, kikancode: string, issue_type: string): Promise<string> {
+export async function modifyPresc(
+  prescription_id: string, presc_info: string, kikancode: string, issue_type: string): Promise<string> {
   let prescUrl = await getPrescUrl();
   let url = `${prescUrl}/modify`;
   let result = await fetch(url, {
