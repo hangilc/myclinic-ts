@@ -98,6 +98,14 @@ export class DateWrapper {
     return `${this.getGengou()}${this.getNen()}年${this.getMonth()}月${this.getDay()}日`
   }
 
+  fmtMonth(opt: FormatOption): string {
+    return fmt(this.getMonth(), opt);
+  }
+
+  fmtDay(opt: FormatOption): string {
+    return fmt(this.getDay(), opt);
+  }
+
   getAge(): number {
     return this.getAgeAt(new Date());
   }
@@ -114,8 +122,21 @@ export class DateWrapper {
     return new DateWrapper(date);
   }
 
+  static isSqlDate(s: string): boolean {
+    return /^\d{4}-\d{2}-\d{2}/.test(s);
+  }
+
   static fromSqlDate(sqldate: string): DateWrapper {
     const date = sqlDateToDate(sqldate);
+    return new DateWrapper(date);
+  }
+
+  static isOnshiDate(s: string): boolean {
+    return /^\d{4}\d{2}\d{2}/.test(s);
+  }
+
+  static fromOnshiDate(onshidate: string): DateWrapper {
+    const date = onshiDateToDate(onshidate);
     return new DateWrapper(date);
   }
 
@@ -124,8 +145,13 @@ export class DateWrapper {
       return arg;
     } else if (arg instanceof Date) {
       return new DateWrapper(arg);
-    } else {
+    } else if (DateWrapper.isSqlDate(arg)) {
       return DateWrapper.fromSqlDate(arg);
+    } else if (DateWrapper.isOnshiDate(arg)) {
+      return DateWrapper.fromOnshiDate(arg);
+    } else {
+      console.error("DateWrapper.from", arg);
+      throw new Error("Cannot convert to DateWrapper");
     }
   }
 
@@ -156,6 +182,20 @@ export function sqlDateToObject(sqlDate: string): { year: number, month: number,
     year: parseInt(sqlDate.substring(0, 4)),
     month: parseInt(sqlDate.substring(5, 7)),
     day: parseInt(sqlDate.substring(8, 10)),
+  }
+}
+
+export function onshiDateToDate(onshidate: string): Date {
+  const obj = onshiDateToObject(onshidate);
+  return new Date(obj.year, obj.month - 1, obj.day);
+
+}
+
+export function onshiDateToObject(onshidate: string): { year: number, month: number, day: number } {
+  return {
+    year: parseInt(onshidate.substring(0, 4)),
+    month: parseInt(onshidate.substring(4, 6)),
+    day: parseInt(onshidate.substring(6, 8)),
   }
 }
 
@@ -206,3 +246,22 @@ function compare(a: number[], b: number[]): 0 | 1 | -1 {
   return cmpNumSeq(a, b);
 }
 
+export interface FormatOption {
+  padding: boolean;
+  padSize?: number;
+  pad?: string;
+}
+
+export function fmt(n: number, opt: FormatOption): string {
+  let s = n.toString();
+  if (opt.padding) {
+    let padSize = opt.padSize ?? 2;
+    let extra = padSize - s.length;
+    if (extra > 0) {
+      let pad = opt.pad ?? "0";
+      let pre = pad.repeat(extra);
+      s = pre + s;
+    }
+  }
+  return s;
+}
