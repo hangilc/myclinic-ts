@@ -103,7 +103,10 @@ export class HokenCollector {
       this.koukikourei = koukikourei;
     } else {
       if (this.koukikourei.koukikoureiId !== koukikourei.koukikoureiId) {
-        throw new Error("Inconsistent shahokokuho");
+        console.error("ERROR", this.koukikourei.koukikoureiId, koukikourei.koukikoureiId);
+        console.error("this.koukikourei", this.koukikourei);
+        console.error("koukikourei", koukikourei);
+        throw new Error("Inconsistent koukikourei");
       }
     }
   }
