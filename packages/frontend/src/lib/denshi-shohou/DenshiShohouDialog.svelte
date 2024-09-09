@@ -346,10 +346,10 @@
         text = modifyTextMemo(text, (m) => memo);
         await api.updateText(text);
       }
+      destroy();
       if (prescriptionId) {
         await saveHikae(kikancode, prescriptionId);
       }
-      destroy();
     }
   }
 
@@ -377,11 +377,11 @@
       let text = await api.getText(textId);
       text = modifyTextMemo(text, (m) => memo);
       await api.updateText(text);
+      destroy();
       if (prescriptionId) {
         console.log("prescriptionId", prescriptionId);
         await saveHikae(kikancode, prescriptionId);
       }
-      destroy();
 
       // let register: RegisterResult = JSON.parse(result);
       // if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
