@@ -11,31 +11,80 @@
 
   async function init() {
     freqUsages = await api.getShohouFreqUsage();
+    console.log("freqUsage", freqUsages);
   }
 
   async function doSearch() {
     searchText = searchText.trim();
-    if( searchText === "" ){
+    if (searchText === "") {
+      searchResult = [];
       return;
     }
     searchResult = await api.selectUsageMasterByUsageName(searchText);
-    console.log(searchResult);
+    console.log("searchResult", searchResult);
+  }
+
+  async function doSearchSelect(master: UsageMaster) {
+    let kubun: "内服" | "頓服" | "外用" = "外用";
+    if( master.kubun_name === "内服" ){
+      if( master.timing_name === "頓用指示型") {
+        kubun = "頓服";
+      } else {
+        kubun = "内服";
+      }
+    }
+    let freq: FreqUsage = {
+      剤型区分: kubun,
+      用法コード: master.usage_code,
+      用法名称: master.usage_name,
+    };
+    let current = await api.getShohouFreqUsage();
+    current.push(freq);
+    await api.saveShohouFreqUsage(current);
+    init();
+  }
+
+  async function doDelete(usage: FreqUsage) {
+    if (!confirm(`「${usage.用法名称}」を削除していいですか？`)) {
+      return;
+    }
+    let usages = freqUsages.filter(
+      (item) => item.用法コード !== usage.用法コード
+    );
+    await api.saveShohouFreqUsage(usages);
+    init();
   }
 </script>
 
 <ServiceHeader title="処方用法管理" />
 <form on:submit|preventDefault={doSearch}>
-  <input type="text" bind:value={searchText} /> <button type="submit">検索</button>
+  <input type="text" bind:value={searchText} />
+  <button type="submit">検索</button>
 </form>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   {#each searchResult as master (master.usage_code)}
-    <div>
+    <div
+      style="cursor:pointer;user-select:none;"
+      class="search-result"
+      on:click={() => doSearchSelect(master)}
+    >
       {master.usage_name}
     </div>
   {/each}
 </div>
-<div>
+<div style="margin:10px 0;border:1px solid gray;padding:10px;">
   {#each freqUsages as usage (usage.用法コード)}
-    <div>{usage.用法名称}</div>
+    <div>
+      {usage.用法名称}
+      <a href="javascript:void(0)" on:click={() => doDelete(usage)}>削除</a>
+    </div>
   {/each}
 </div>
+
+<style>
+  .search-result:hover {
+    font-weight: bold;
+    background-color: #eee;
+  }
+</style>
