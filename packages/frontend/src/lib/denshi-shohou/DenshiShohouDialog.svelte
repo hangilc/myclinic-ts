@@ -482,9 +482,16 @@
           at: visit.visitedAt.substring(0, 10),
           rpPresc: rp,
           onEnter: (rpModified) => {
-            console.log("modified", rpModified);
             if (shohou) {
               shohou.RP剤情報グループ[index] = rpModified;
+              shohou = shohou;
+              adaptToShohou();
+              shohouModified = true;
+            }
+          },
+          onDelete: (rpPresc) => {
+            if( shohou ){
+              shohou.RP剤情報グループ.splice(index, 1);
               shohou = shohou;
               adaptToShohou();
               shohouModified = true;

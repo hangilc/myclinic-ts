@@ -13,6 +13,7 @@
   export let rpPresc: RP剤情報 | undefined = undefined;
   export let destroy: () => void;
   export let onEnter: (drug: RP剤情報) => void;
+  export let onDelete: (drug: RP剤情報) => void = (_) => {};
   const customUsageCode = "0X0XXXXXXXXX0000";
 
   let rp剤形区分: 剤形区分 = rpPresc ? rpPresc.剤形レコード.剤形区分 : "内服";
@@ -52,7 +53,7 @@
   }
 
   function adaptToKubun(allUsages: FreqUsage[], kubun: 剤形区分) {
-    freqUsages = allUsages.filter(u => u.剤型区分 == kubun);
+    freqUsages = allUsages.filter((u) => u.剤型区分 == kubun);
   }
 
   async function doToggleDrugSearch() {
@@ -69,8 +70,8 @@
     const t = drugSearchText.trim();
     if (t) {
       let rs = await api.searchIyakuhinMaster(t, at);
-      if( universalNameOnly ){
-        drugSearchResult = rs.filter(r => !r.name.includes("「"));
+      if (universalNameOnly) {
+        drugSearchResult = rs.filter((r) => !r.name.includes("「"));
       } else {
         drugSearchResult = rs;
       }
@@ -129,7 +130,7 @@
   async function doToggleUsageFreeText() {
     usageSelectMode = "text";
     await tick();
-    if(usageFreeTextInput){
+    if (usageFreeTextInput) {
       usageFreeTextInput.focus();
     }
   }
@@ -207,7 +208,7 @@
 
   function doUsageFreeText() {
     usageFreeTextValue = usageFreeTextValue.trim();
-    if( usageFreeTextValue === "" ){
+    if (usageFreeTextValue === "") {
       return;
     }
     rp用法コード = "0X0XXXXXXXXX0000";
@@ -219,279 +220,13 @@
     rp用法名称 = freq.用法名称;
   }
 
-  function dummy() {
-    /*
-  let searchText = "";
-  let searchResults: IyakuhinMaster[] = [];
-  let showSearchResult = false;
-  let master: IyakuhinMaster | undefined;
-  let searchSelected: Writable<IyakuhinMaster | null> = writable(null);
-  let amountLabel = "";
-  let amount = "";
-  let unit = "";
-  let usageCode = customUsageCode;
-  let usage = "";
-  let usageMaster: UsageMaster | undefined = undefined;
-  let hosokuIndex = 1;
-  let hosokuList: { index: number; code: 用法補足区分; info: string }[] = [];
-  let unevenUsage: 不均等レコード | undefined = undefined;
-  let daysLabel = "日数";
-  let days = "";
-  let daysUnit = "日分";
-  let mode: "内服" | "頓服" | "外用" = "内服";
-  let searchInput: HTMLInputElement;
-  let usageList: [string, string, any][] = [];
-  let showUsageList = false;
-  let freqUsageIndex = 1;
-  let freqUsages: { index: number; value: FreqUsage }[] = [];
-  let showCloudArrowUp = false;
-
-  $: switch (mode) {
-    case "内服": {
-      amountLabel = "一日";
-      daysLabel = "日数";
-      daysUnit = "日分";
-      usageList = 頻用用法コードMap["内服"];
-      break;
-    }
-    case "頓服": {
-      amountLabel = "一回";
-      daysLabel = "回数";
-      daysUnit = "回分";
-      usageList = 頻用用法コードMap["頓服"];
-      break;
-    }
-    case "外用": {
-      amountLabel = "用量";
-      daysLabel = "";
-      usageList = 頻用用法コードMap["外用"];
-      break;
-    }
-  }
-
-  searchSelected.subscribe((m) => {
-    if (m) {
-      master = m;
-      unit = m.unit;
-      showSearchResult = false;
-    }
-  });
-
-  prep();
-
-  async function prep() {
-    const list: { index: number, value: FreqUsage }[] = [];    
-    (await cache.getShohouFreqUsage()).forEach(item => {
-      list.push({
-        index: freqUsageIndex,
-        value: item
-      });
-      freqUsageIndex += 1;
-    })
-    freqUsages = list;
-  }
-
-  onMount(() => {
-    searchInput.focus();
-  });
-
-  async function doSearch() {
-    const t = searchText.trim();
-    if (t != "") {
-      const result = await api.searchIyakuhinMaster(t, at);
-      searchResults = result;
-      searchSelected.set(null);
-      amount = "";
-      unit = "";
-      showSearchResult = true;
-    }
-  }
-
-  function doEnter() {
-    let daysValue: number;
-    if (mode === "外用") {
-      daysValue = 1;
-    } else {
-      daysValue = parseInt(days);
-      if (isNaN(daysValue) || daysValue <= 0) {
-        alert("日数/回数の入力が正の整数でありません。");
-        return;
+  function doDelete() {
+    if (confirm("この処方を削除していいですか？")) {
+      destroy();
+      if (rpPresc) {
+        onDelete(rpPresc);
       }
     }
-    if (!master) {
-      alert("薬剤が指定されていません。");
-      return;
-    }
-    if (isNaN(parseFloat(amount))) {
-      alert("分量の入力が不適切です。");
-      return;
-    }
-    if (unit == "") {
-      alert("分量の単位の入力が不適切です。");
-      return;
-    }
-    let 用法補足レコード: 用法補足レコード[] | undefined = hosokuList.map(
-      (h) => ({
-        用法補足区分: h.code,
-        用法補足情報: h.info,
-      })
-    );
-    用法補足レコード =
-      用法補足レコード.length === 0 ? undefined : 用法補足レコード;
-    let drug: RP剤情報 = {
-      剤形レコード: {
-        剤形区分: mode,
-        調剤数量: daysValue,
-      },
-      用法レコード: {
-        用法コード: usageCode,
-        用法名称: usage,
-      },
-      用法補足レコード,
-      薬品情報グループ: [
-        {
-          薬品レコード: {
-            情報区分: "医薬品",
-            薬品コード種別: "レセプト電算処理システム用コード",
-            薬品コード: master.iyakuhincode.toString(),
-            薬品名称: master.name,
-            分量: amount,
-            力価フラグ: "薬価単位",
-            単位名: unit,
-          },
-          不均等レコード: unevenUsage,
-        },
-      ],
-    };
-    onEnter(drug);
-  }
-
-  function isInFreq(m: UsageMaster): boolean {
-    return (
-      freqUsages.find((item) => item.usage_code === m.usage_code) !== undefined
-    );
-  }
-
-  function setUsageMaster(freq: { index: number, value: FreqUsage}) {
-    usageCode = freq.value.record.usage_code;
-    usage = master.usage_name;
-    usageMaster = master;
-    if (!isInFreq(master)) {
-      showCloudArrowUp = true;
-    }
-  }
-
-  function doSetUsageMaster(freq: { index: number, value: FreqUsage}) {
-    setUsageMaster(freq);
-    showUsageList = false;
-  }
-
-  function doOpenUsageDialog() {
-    const dlog: UsageDialog = new UsageDialog({
-      target: document.body,
-      props: {
-        destroy: () => dlog.$destroy(),
-        onEnter: doSetUsageMaster,
-      },
-    });
-  }
-
-  function doCustomUsageInput() {
-    let input = prompt("任意用法");
-    if (input) {
-      usageCode = customUsageCode;
-      usage = input;
-    }
-    showUsageList = false;
-  }
-
-  function doAddHosoku() {
-    let info = prompt("用法補足");
-    if (info) {
-      hosokuList.push({ index: hosokuIndex, code: "用法の続き", info });
-      hosokuIndex += 1;
-      hosokuList = hosokuList;
-    }
-  }
-
-  function doEditHosoku(h: { index: number; info: string }) {
-    let info = prompt("用法補足", h.info);
-    if (info) {
-      hosokuList.forEach((item) => {
-        if (item.index === h.index) {
-          item.info = h.info;
-        }
-      });
-      hosokuList = hosokuList;
-    }
-  }
-
-  function doDeleteHosoku(index: number) {
-    hosokuList = hosokuList.filter((h) => h.index !== index);
-  }
-
-  function doUneven() {
-    let input = prompt("不均等", "1-1-1");
-    if (input) {
-      input = toHankaku(input).trim();
-      const parts = input.split("-");
-      if (parts.length < 2) {
-        alert("不均等は２つ以上のパートが必要です。");
-        return;
-      }
-      if (parts.length > 5) {
-        alert("不均等のパートは５つ以下でなければなりません。");
-        return;
-      }
-      let uneven: 不均等レコード = {
-        不均等１回目服用量: parts[0].trim().toString(),
-        不均等２回目服用量: parts[1].trim().toString(),
-      };
-      if (parts.length >= 3) {
-        uneven.不均等３回目服用量 = parts[2].trim().toString();
-      }
-      if (parts.length >= 4) {
-        uneven.不均等４回目服用量 = parts[3].trim().toString();
-      }
-      if (parts.length >= 5) {
-        uneven.不均等５回目服用量 = parts[4].trim().toString();
-      }
-      unevenUsage = uneven;
-    }
-  }
-
-  function formatUneven(uneven: 不均等レコード): string {
-    let parts: string[] = [
-      uneven.不均等１回目服用量,
-      uneven.不均等２回目服用量,
-      uneven.不均等３回目服用量,
-      uneven.不均等４回目服用量,
-      uneven.不均等５回目服用量,
-    ]
-      .filter((s) => s !== undefined)
-      .reduce((acc: string[], ele: string | undefined) => {
-        if (ele) {
-          acc.push(ele);
-        }
-        return acc;
-      }, []);
-    return "(" + parts.join("-") + ")";
-  }
-
-  async function doUploadUsage() {
-    if (usageMaster) {
-      let freqs = await api.getShohouFreqUsage();
-      if (freqs.find((item) => item.usage_code === usageMaster?.usage_code)) {
-        return;
-      }
-      freqs.push(usageMaster);
-      await api.saveShohouFreqUsage(freqs);
-      freqUsages = freqs;
-      cache.setShohouFreqUsage(freqs);
-      showCloudArrowUp = false;
-    }
-  }
-    */
   }
 </script>
 
@@ -572,7 +307,11 @@
         {/each}
       </div>
     {:else}
-      <input type="text" bind:this={usageFreeTextInput} bind:value={usageFreeTextValue} />
+      <input
+        type="text"
+        bind:this={usageFreeTextInput}
+        bind:value={usageFreeTextValue}
+      />
       <button on:click={doUsageFreeText}>入力</button>
     {/if}
     <div>{rp用法名称}</div>
@@ -590,6 +329,8 @@
   <div style="text-align:right;">
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
+    {#if rpPresc}
+      <button on:click={doDelete}>削除</button>
+    {/if}
   </div>
 </Dialog>
-
