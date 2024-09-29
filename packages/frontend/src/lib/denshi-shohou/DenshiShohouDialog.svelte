@@ -382,39 +382,6 @@
         console.log("prescriptionId", prescriptionId);
         await saveHikae(kikancode, prescriptionId);
       }
-
-      // let register: RegisterResult = JSON.parse(result);
-      // if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
-      //   let list = register.XmlMsg.MessageBody?.CsvCheckResultList;
-      //   if (list.length > 0) {
-      //     let ms = list.map((item) => item.ResultMessage).join("\n");
-      //     alert(ms);
-      //   }
-      // }
-      // shohou.引換番号 = register.XmlMsg.MessageBody?.AccessCode;
-      // prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
-      // let memo: ShohouTextMemo = {
-      //   kind: "shohou",
-      //   shohou,
-      //   prescriptionId,
-      // };
-      // if (textId === 0) {
-      //   let text: Text = {
-      //     textId: 0,
-      //     visitId: visit.visitId,
-      //     content: "",
-      //   };
-      //   text = modifyTextMemo(text, (m) => memo);
-      //   await api.enterText(text);
-      // } else {
-      //   let text = await api.getText(textId);
-      //   text = modifyTextMemo(text, (m) => memo);
-      //   await api.updateText(text);
-      // }
-      // if (prescriptionId) {
-      //   await saveHikae(kikancode, prescriptionId);
-      // }
-      // destroy();
     }
   }
 
@@ -515,6 +482,7 @@
           at: visit.visitedAt.substring(0, 10),
           rpPresc: rp,
           onEnter: (rpModified) => {
+            console.log("modified", rpModified);
             if (shohou) {
               shohou.RP剤情報グループ[index] = rpModified;
               shohou = shohou;

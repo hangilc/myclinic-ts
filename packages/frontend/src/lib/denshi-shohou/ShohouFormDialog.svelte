@@ -27,24 +27,32 @@
   let rpDrugs: 薬品情報[] = rpPresc?.薬品情報グループ ?? [];
 
   let showDrugSearch = false;
+  let universalNameOnly = true;
   let drugSearchText = "";
   let drugSearchResult: IyakuhinMaster[] = [];
   let drugMaster: IyakuhinMaster | undefined = undefined;
   let drugAmount: string = "";
   let searchTextInput: HTMLInputElement;
 
-  let showUsageSearch = false;
+  let usageSelectMode: "freq" | "master" | "text" = "freq";
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let usageSearchTextInput: HTMLInputElement;
+  let usageFreeTextValue = "";
+  let usageFreeTextInput: HTMLInputElement;
 
-  let showFreqUsage = false;
+  let allFreqUsages: FreqUsage[] = [];
   let freqUsages: FreqUsage[] = [];
 
   init();
+  $: adaptToKubun(allFreqUsages, rp剤形区分);
 
   async function init() {
-    freqUsages = await cache.getShohouFreqUsage();
+    allFreqUsages = await cache.getShohouFreqUsage();
+  }
+
+  function adaptToKubun(allUsages: FreqUsage[], kubun: 剤形区分) {
+    freqUsages = allUsages.filter(u => u.剤型区分 == kubun);
   }
 
   async function doToggleDrugSearch() {
@@ -60,7 +68,12 @@
   async function doDrugSearch() {
     const t = drugSearchText.trim();
     if (t) {
-      drugSearchResult = await api.searchIyakuhinMaster(t, at);
+      let rs = await api.searchIyakuhinMaster(t, at);
+      if( universalNameOnly ){
+        drugSearchResult = rs.filter(r => !r.name.includes("「"));
+      } else {
+        drugSearchResult = rs;
+      }
       drugSearchText = "";
     }
   }
@@ -102,16 +115,22 @@
   }
 
   function doToggleFreqUsage() {
-    showFreqUsage = !showFreqUsage;
+    usageSelectMode = "freq";
   }
 
   async function doToggleUsageSearch() {
-    showUsageSearch = !showUsageSearch;
-    if (showUsageSearch) {
-      await tick();
-      if (usageSearchTextInput) {
-        usageSearchTextInput.focus();
-      }
+    usageSelectMode = "master";
+    await tick();
+    if (usageSearchTextInput) {
+      usageSearchTextInput.focus();
+    }
+  }
+
+  async function doToggleUsageFreeText() {
+    usageSelectMode = "text";
+    await tick();
+    if(usageFreeTextInput){
+      usageFreeTextInput.focus();
     }
   }
 
@@ -186,10 +205,18 @@
     onEnter(shohou);
   }
 
+  function doUsageFreeText() {
+    usageFreeTextValue = usageFreeTextValue.trim();
+    if( usageFreeTextValue === "" ){
+      return;
+    }
+    rp用法コード = "0X0XXXXXXXXX0000";
+    rp用法名称 = usageFreeTextValue;
+  }
+
   function doFreqSelect(freq: FreqUsage) {
     rp用法コード = freq.用法コード;
     rp用法名称 = freq.用法名称;
-    showFreqUsage = false;
   }
 
   function dummy() {
@@ -489,6 +516,7 @@
           bind:this={searchTextInput}
         />
         <button type="submit">検索</button>
+        <input type="checkbox" bind:checked={universalNameOnly} />一般名のみ
       </form>
       <div style="max-height:400px;overflow-y:auto;cursor:pointer;">
         {#each drugSearchResult as m (m.iyakuhincode)}
@@ -520,16 +548,16 @@
     用法：
     <a href="javascript:void(0)" on:click={doToggleFreqUsage}>頻用</a>
     <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
-    {#if showFreqUsage}
-      <div>
+    <a href="javascript:void(0)" on:click={doToggleUsageFreeText}>自由文章</a>
+    {#if usageSelectMode === "freq"}
+      <div style="height:6em;overflow-y:auto;cursor:pointer;user-select:none">
         {#each freqUsages as freq}
-          <div style="cursor:pointer;" on:click={() => doFreqSelect(freq)}>
+          <div style="cursfor:pointer;" on:click={() => doFreqSelect(freq)}>
             {freq.用法名称}
           </div>
         {/each}
       </div>
-    {/if}
-    {#if showUsageSearch}
+    {:else if usageSelectMode === "master"}
       <form on:submit|preventDefault={doUsageSearch}>
         <input
           type="text"
@@ -543,6 +571,9 @@
           <div on:click={() => doSelectUsageMaster(u)}>{u.usage_name}</div>
         {/each}
       </div>
+    {:else}
+      <input type="text" bind:this={usageFreeTextInput} bind:value={usageFreeTextValue} />
+      <button on:click={doUsageFreeText}>入力</button>
     {/if}
     <div>{rp用法名称}</div>
     {#each rp用法補足レコード ?? [] as suppl}
@@ -562,149 +593,3 @@
   </div>
 </Dialog>
 
-<!--
-<div>
-  <form on:submit|preventDefault={doSearch}>
-    <input type="text" bind:value={searchText} bind:this={searchInput} />
-    <button type="submit">検索</button>
-  </form>
-  {#if showSearchResult}
-    <div class="search-result">
-      {#each searchResults as searchResult (searchResult.iyakuhincode)}
-        <SelectItem data={searchResult} selected={searchSelected}>
-          {searchResult.name}
-        </SelectItem>
-      {/each}
-    </div>
-  {/if}
-  <div class="input-area">
-    <div>
-      <input type="radio" value="内服" bind:group={mode} /> 内服
-      <input type="radio" value="頓服" bind:group={mode} /> 頓服
-      <input type="radio" value="外用" bind:group={mode} /> 外用
-    </div>
-    <div class="input-form">
-      <span>用量：</span>
-      <div class="inline-block">
-        <input type="text" style="width:4em" bind:value={amount} />
-        <input type="text" style="width:4em" bind:value={unit} />
-        <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
-        {#if unevenUsage}
-          <div>{formatUneven(unevenUsage)}</div>
-        {/if}
-      </div>
-      <span>用法：</span>
-      <div class="inline-block">
-        <div
-          class="usage"
-          style="flex-grow:1; display: flex; align-items: center;"
-        >
-          {usage}
-          {#if showCloudArrowUp}
-            <a
-              href="javascript:void(0)"
-              style="margin-left: 4px;"
-              on:click={doUploadUsage}><CloudArrowUp /></a
-            >
-          {/if}
-        </div>
-        {#each hosokuList as hosoku (hosoku.index)}
-          <div>
-            <span>{hosoku.info}</span>
-            <a href="javascript:void(0)" on:click={() => doEditHosoku(hosoku)}
-              >編集</a
-            >
-            <a
-              href="javascript:void(0)"
-              on:click={() => doDeleteHosoku(hosoku.index)}>削除</a
-            >
-          </div>
-        {/each}
-        <a
-          href="javascript:void(0)"
-          on:click={() => (showUsageList = !showUsageList)}>頻用</a
-        >
-        <a href="javascript:void(0)" on:click={doOpenUsageDialog}>検索</a>
-        <a href="javascript:void(0)" on:click={doAddHosoku}>補足</a>
-      </div>
-      {#if showUsageList}
-        <div style="grid-column:1/span 2" class="usage-examples">
-          <div on:click={doCustomUsageInput}>（任意入力）</div>
-          {#each freqUsages as freq (freq.index)}
-            <div on:click={() => doSetUsageMaster(freq)}>
-              {freq.value.record.用法名称}{#each freq.value.suppl as suppl}
-                <span>　{suppl.用法補足情報}</span>
-              {/each}
-            </div>
-          {/each}
-        </div>
-      {/if}
-      {#if daysLabel !== ""}
-        <span>{daysLabel}：</span>
-        <div class="inline-block">
-          <input type="text" style="width:4em" bind:value={days} />
-          {daysUnit}
-        </div>
-      {/if}
-    </div>
-  </div>
-  {#if $searchSelected}
-    <div class="display">
-      <span>{$searchSelected?.name ?? " "}</span>
-      {#if amount !== ""}
-        {amount}{unit}
-      {/if}
-      {usage}
-      {#if days !== ""}
-        {days}{daysUnit}
-      {/if}
-    </div>
-  {/if}
-  <slot enter={doEnter} />
-</div>
--->
-
-<style>
-  .inline-block {
-    display: inline-block;
-  }
-
-  .search-result {
-    margin: 10px 0;
-    max-height: 180px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 4px;
-    border: 1px solid gray;
-  }
-
-  .input-area {
-    margin: 10px 0;
-  }
-
-  .input-form {
-    margin: 10px 0;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 6px;
-  }
-
-  .usage {
-    width: auto;
-  }
-
-  .usage-examples {
-    max-height: 180px;
-    overflow-y: auto;
-  }
-
-  .usage-examples > div {
-    cursor: pointer;
-  }
-
-  .display {
-    margin-top: 10px;
-    border: 1px solid gray;
-    padding: 10px;
-  }
-</style>
