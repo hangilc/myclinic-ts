@@ -8,6 +8,7 @@
   import type { FreqUsage } from "../cache";
   import * as cache from "@/lib/cache";
   import { toHankaku } from "../zenkaku";
+  import ChevronUp from "@/icons/ChevronUp.svelte";
 
   export let at: string; // YYYY-MM-DD
   export let rpPresc: RP剤情報 | undefined = undefined;
@@ -35,7 +36,7 @@
   let drugAmount: string = "";
   let searchTextInput: HTMLInputElement;
 
-  let usageSelectMode: "freq" | "master" | "text" = "freq";
+  let usageSelectMode: "freq" | "master" | "text" | "aux" | "" = "";
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let usageSearchTextInput: HTMLInputElement;
@@ -135,18 +136,20 @@
     }
   }
 
+  function doToggleUsageAux() {
+    usageSelectMode = "aux";
+  }
+
+  function doToggleUsageEmpty() {
+    usageSelectMode = "";
+  }
+
   async function doUsageSearch() {
     let t = usageSearchText.trim();
     if (t) {
       usageSearchResult = await api.selectUsageMasterByUsageName(t);
       t = "";
     }
-  }
-
-  function doSelectUsageMaster(m: UsageMaster) {
-    rp用法コード = m.usage_code;
-    rp用法名称 = m.usage_name;
-    usageSearchResult = [];
   }
 
   function doCancel() {
@@ -206,6 +209,13 @@
     onEnter(shohou);
   }
 
+  function doSelectUsageMaster(m: UsageMaster) {
+    rp用法コード = m.usage_code;
+    rp用法名称 = m.usage_name;
+    usageSearchResult = [];
+    usageSelectMode = "";
+  }
+
   function doUsageFreeText() {
     usageFreeTextValue = usageFreeTextValue.trim();
     if (usageFreeTextValue === "") {
@@ -213,11 +223,13 @@
     }
     rp用法コード = "0X0XXXXXXXXX0000";
     rp用法名称 = usageFreeTextValue;
+    usageSelectMode = "";
   }
 
   function doFreqSelect(freq: FreqUsage) {
     rp用法コード = freq.用法コード;
     rp用法名称 = freq.用法名称;
+    usageSelectMode = "";
   }
 
   function doDelete() {
@@ -284,6 +296,12 @@
     <a href="javascript:void(0)" on:click={doToggleFreqUsage}>頻用</a>
     <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
     <a href="javascript:void(0)" on:click={doToggleUsageFreeText}>自由文章</a>
+    <a href="javascript:void(0)" on:click={doToggleUsageAux}>補足</a>
+    {#if usageSelectMode !== ""}
+      <a href="javascript:void(0)" on:click={doToggleUsageEmpty}>
+        <ChevronUp />
+      </a>
+    {/if}
     {#if usageSelectMode === "freq"}
       <div style="height:6em;overflow-y:auto;cursor:pointer;user-select:none">
         {#each freqUsages as freq}
@@ -306,13 +324,14 @@
           <div on:click={() => doSelectUsageMaster(u)}>{u.usage_name}</div>
         {/each}
       </div>
-    {:else}
+    {:else if usageSelectMode === "text"}
       <input
         type="text"
         bind:this={usageFreeTextInput}
         bind:value={usageFreeTextValue}
       />
       <button on:click={doUsageFreeText}>入力</button>
+    {:else if usageSelectMode === "aux"}
     {/if}
     <div>{rp用法名称}</div>
     {#each rp用法補足レコード ?? [] as suppl}
