@@ -2,11 +2,14 @@ import type { Op } from "../../compiler/op";
 import { mkDrawerContext, type DrawerContext as DC, type DrawerContext } from "../../compiler/context";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
-import * as p from "../../compiler/composite-item";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import { createRendererInputs, createRendererInterface, createRendererMap } from "../../compiler/create-renderer";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
+import { mkItems, mkWidgets } from "./widgets";
+
+const p = mkItems();
+const widgets = mkWidgets();
 
 export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
   const ctx = mkDrawerContext();
@@ -23,15 +26,6 @@ export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoKeizokuContext();
   c.fillData(ctx, data);
-  // {
-  //   c.setPen(ctx, "thin");
-  //   c.rect(ctx, paper);
-  // }
-  // console.log(Object.keys(ctx.marks).join("\n"));
-  // console.log(createRendererInterface(ctx));
-  // console.log(createRendererMap(ctx, "keizokuDataMap"));
-  // console.log(createRendererInputs(ctx, "keizokuDataMap"));
-  // Object.keys(ctx.marks).forEach(k => console.log(k));
   
   return c.getOps(ctx);
 }
@@ -90,56 +84,59 @@ function drawMiddleUpperLeft(ctx: DC, box: Box) {
   c.frameBottom(ctx, row1);
   c.setFont(ctx, "f4");
   c.drawComposite(ctx, row1, [
-    { kind: "gap", width: 8 },
-    { kind: "text", text: "患者氏名：" },
-    { kind: "gap-to", at: 74, mark: "patient-name" },
-    { kind: "text", text: "(" },
-    { kind: "text", text: "男", mark: "patient-sex-male" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "女", mark: "patient-sex-female" },
-    { kind: "text", text: "）" },
+    p.gap(8),
+    p.text("患者氏名："),
+    p.gapTo(74, { mark: "patient-name" }),
+    p.text("("),
+    p.text("男", { mark: "patient-sex-male" }),
+    p.text("・"),
+    p.text("女", { mark: "patient-sex-female" }),
+    p.text("）"),
   ]);
+  const fs = c.currentFontSize(ctx);
   c.drawComposite(ctx, row2, [
-    { kind: "text", text: "生年月日:" },
-    { kind: "text", text: "明", mark: "birthdate-gengou-meiji" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "大", mark: "birthdate-gengou-taishou" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "昭", mark: "birthdate-gengou-shouwa" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "平", mark: "birthdate-gengou-heisei" },
-    { kind: "text", text: "・" },
-    { kind: "text", text: "令", mark: "birthdate-gengou-reiwa" },
+    p.gap(3),
+    p.text("生年月日:"),
+    p.text("明", { mark: "birthdate-gengou-meiji" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("大", { mark: "birthdate-gengou-taishou" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("昭", { mark: "birthdate-gengou-shouwa" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("平", { mark: "birthdate-gengou-heisei" }),
+    p.gap(-fs / 4),
+    p.text("・"),
+    p.gap(-fs / 4),
+    p.text("令", { mark: "birthdate-gengou-reiwa" }),
     p.gap(6, { mark: "birthdate-nen" }),
-    { kind: "text", text: "年" },
+    p.text("年"),
     p.gap(6, { mark: "birthdate-month" }),
-    { kind: "text", text: "月" },
+    p.text("月"),
     p.gap(6, { mark: "birthdate-day" }),
-    { kind: "text", text: "日生(" },
-    p.expander({ mark: "birthdate-age" }),
-    { kind: "text", text: "才)" },
+    p.text("日生("),
+    p.gap(6, { mark: "patient-age" }),
+    p.text("才)"),
   ], { boxModifiers: [b.shrinkHoriz(1, 1)] });
 }
 
 function drawMiddleUpperRight(ctx: DC, box: Box) {
-  function boxed(label: string, mark: string): c.CompositeItem[] {
-    return [
-      { kind: "box", mark, pen: "thin" },
-      { kind: "gap", width: 0.5 },
-      { kind: "text", text: label },
-    ];
-  }
   c.setPen(ctx, "thick");
   c.rect(ctx, box);
   const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
   c.setFont(ctx, "f4")
   c.drawText(ctx, "主病", upper, "left", "center");
   c.drawComposite(ctx, lower, [
-    ...boxed("糖尿病", "disease-diabetes"),
+    ...widgets.boxed("糖尿病", "disease-diabetes"),
     { kind: "gap", width: 3 },
-    ...boxed("高血圧", "disease-hypertension"),
+    ...widgets.boxed("高血圧", "disease-hypertension"),
     { kind: "gap", width: 3 },
-    ...boxed("脂質異常症", "disease-hyperlipidemia"),
+    ...widgets.boxed("脂質異常症", "disease-hyperlipidemia"),
   ], { valign: "center" });
 }
 
