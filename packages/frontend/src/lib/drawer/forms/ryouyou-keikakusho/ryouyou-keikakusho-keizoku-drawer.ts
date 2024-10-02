@@ -26,7 +26,7 @@ export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoKeizokuContext();
   c.fillData(ctx, data);
-  
+
   return c.getOps(ctx);
 }
 
@@ -51,10 +51,10 @@ function drawUpperArea(ctx: DC, box: Box) {
     p.text("年"),
     p.gapTo(50, { mark: "issue-month", ropt: { halign: "center" } }),
     p.text("月"),
-    p.gapTo(65, {mark: "issue-day", ropt: { halign: "center" } }),
+    p.gapTo(65, { mark: "issue-day", ropt: { halign: "center" } }),
     p.text("日）"),
     p.text("("),
-    p.gap(6, { mark: "issue-times", ropt: { halign: "center" }  }),
+    p.gap(6, { mark: "issue-times", ropt: { halign: "center" } }),
     p.text(")回目")
   ], { valign: "bottom", halign: "left", })
 }
@@ -141,13 +141,13 @@ function drawMiddleUpperRight(ctx: DC, box: Box) {
 }
 
 function drawMokuhyou(ctx: DC, box: Box) {
-  function boxed(label: string, mark: string): c.CompositeItem[] {
-    return [
-      { kind: "box", mark, pen: "thin" },
-      { kind: "gap", width: 1 },
-      { kind: "text", text: label },
-    ];
-  }
+  // function boxed(label: string, mark: string): c.CompositeItem[] {
+  //   return [
+  //     { kind: "box", mark, pen: "thin" },
+  //     { kind: "gap", width: 1 },
+  //     { kind: "text", text: label },
+  //   ];
+  // }
 
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
@@ -166,20 +166,20 @@ function drawMokuhyou(ctx: DC, box: Box) {
     c.drawText(ctx, "【目標】", box, "left", "top");
     b.withSplitRows(b.modify(rows[0], b.shrinkHoriz(17, 0)), b.evenSplitter(2), ([upper, lower]) => {
       c.drawComposite(ctx, upper, [
-        ...boxed("体重(", "mokuhyou-体重-mark"),
+        ...widgets.boxed("体重(", "mokuhyou-体重-mark"),
         p.gap(11, { mark: "mokuhyou-体重" }),
         p.text("kg)"),
         p.gap(3),
-        ...boxed("BMI:(", "mokuhyou-BMI-mark"),
+        ...widgets.boxed("BMI:(", "mokuhyou-BMI-mark"),
         p.gap(14, { mark: "mokuhyou-BMI" }),
         p.text(")"),
         p.gap(5),
-        ...boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
+        ...widgets.boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
         p.gap(22, { mark: "mokuhyou-BP" }),
         p.text("mmHg)")
       ], { boxModifiers: [b.shiftDown(0.5)] });
       c.drawComposite(ctx, lower, [
-        ...boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
+        ...widgets.boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
         p.gap(20, { mark: "mokuhyou-HbA1c" }),
         p.text("%)"),
       ], { boxModifiers: [b.shiftUp(0.5)] });
@@ -201,7 +201,12 @@ function drawMokuhyou(ctx: DC, box: Box) {
         c.drawText(ctx, "┘", rs[3], "right", "center");
       });
       c.setFont(ctx, fontSave);
-      c.mark(ctx, "mokuhyou-目標達成状況", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+      c.mark(ctx, "mokuhyou-目標達成状況", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+        halign: "left",
+        valign: "center",
+        paragraph: true,
+        font: "f4"
+      });
     });
   }
   {
@@ -220,7 +225,12 @@ function drawMokuhyou(ctx: DC, box: Box) {
         c.drawText(ctx, "┘", rs[3], "right", "center");
       });
       c.setFont(ctx, fontSave);
-      c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+      c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+        halign: "left",
+        valign: "center",
+        paragraph: true,
+        font: "f4"
+      });
     });
   }
   {
@@ -238,7 +248,12 @@ function drawMokuhyou(ctx: DC, box: Box) {
           c.drawText(ctx, "│", rs[2], "right", "center");
           c.drawText(ctx, "┘", rs[3], "right", "center");
         });
-        c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)));
+        c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+          halign: "left",
+          valign: "center",
+          paragraph: true,
+          font: "f4"
+        });
       })
     });
   }
@@ -562,7 +577,7 @@ function drawLowerArea(ctx: DC, box: Box) {
         "(なお、上記項目に担当医がチェックした場合については患者署名を省略して差し支えない)",
       ];
       c.drawComposite(ctx, rs[0], [
-        ...boxed(lines[0], "患者署名省略-mark"),
+        ...widgets.boxed(lines[0], "患者署名省略-mark"),
       ]);
       c.drawComposite(ctx, rs[1], [
         p.text(lines[1]),
