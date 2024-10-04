@@ -515,12 +515,14 @@
     if( shohou ){
       let bikou = shohou.備考レコード;
       if( bikou  ){
-        if( !bikou.find(b => b.備考 === "一包化") ){
-          bikou.push({ 備考: "一包化"});
+        if( bikou.find(b => b.備考 === "一包化") ){
+          return;
         }
+        bikou.push({ 備考: "一包化"});
       } else {
         shohou.備考レコード = [{ 備考: "一包化"}];
       }
+      shohouModified = true;
       shohou = shohou;
     }
   }
