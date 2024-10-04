@@ -12,6 +12,7 @@
     createPrescInfo,
     type PrescInfoData,
     type RP剤情報,
+    type 備考レコード,
     type 公費レコード,
   } from "./presc-info";
   import { convertZenkakuHiraganaToHankakuKatakana } from "../zenkaku";
@@ -55,12 +56,16 @@
   export let textId: number = 0;
   let renderedDrugs: RenderedDrug[] = [];
   let shohouModified = false;
+  let showBikou = false;
+  let formBikou一包化 = false;
 
   init();
 
   async function init() {
     if (!shohou) {
       shohou = await initShohou();
+    } else {
+      console.log("shohou", shohou);
     }
     adaptToShohou();
   }
@@ -501,6 +506,30 @@
       });
     }
   }
+
+  function doToggleBikou() {
+    showBikou = !showBikou;
+  }
+
+  function setBikou一包化() {
+    if( shohou ){
+      let bikou = shohou.備考レコード;
+      if( bikou  ){
+        if( !bikou.find(b => b.備考 === "一包化") ){
+          bikou.push({ 備考: "一包化"});
+        }
+      } else {
+        shohou.備考レコード = [{ 備考: "一包化"}];
+      }
+      shohou = shohou;
+    }
+  }
+
+  function doFormBikou一包化Changed() {
+    if( formBikou一包化 ){
+      setBikou一包化();
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -528,7 +557,11 @@
     <div>
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
+      <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
     </div>
+    {#if showBikou}
+      <input type="checkbox" bind:checked={formBikou一包化} on:change={doFormBikou一包化Changed}> 一包化
+    {/if}
     <div class="commands">
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
