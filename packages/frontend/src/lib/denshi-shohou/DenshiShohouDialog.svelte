@@ -73,9 +73,15 @@
   function adaptToShohou() {
     if (shohou) {
       renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
+      formBikou一包化 = hasBikou一包化(shohou);
     } else {
       renderedDrugs = [];
+      formBikou一包化 = false;
     }
+  }
+
+  function hasBikou一包化(s: PrescInfoData | undefined): boolean {
+    return !!(s?.備考レコード?.find(b => b.備考 === "一包化"));
   }
 
   async function initShohou(): Promise<PrescInfoData> {
@@ -306,7 +312,10 @@
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: (drug) => {
           if (shohou) {
-            shohou.RP剤情報グループ.push(drug);
+            let rg = [...shohou.RP剤情報グループ, drug];
+            shohou = Object.assign({}, shohou, {
+              RP剤情報グループ: rg
+            })
             adaptToShohou();
             shohouModified = true;
           }
@@ -320,6 +329,7 @@
   async function doRegister() {
     if (shohou && !shohou.引換番号) {
       const prescInfo = createPrescInfo(shohou);
+      console.log("prescInfo", prescInfo);
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
       let result = await registerPresc(signed, kikancode, "1");
@@ -488,16 +498,22 @@
           rpPresc: rp,
           onEnter: (rpModified) => {
             if (shohou) {
-              shohou.RP剤情報グループ[index] = rpModified;
-              shohou = shohou;
+              let rg = [...shohou.RP剤情報グループ];
+              rg[index] = rpModified;
+              shohou = Object.assign({}, shohou, {
+                RP剤情報グループ: rg
+              });
               adaptToShohou();
               shohouModified = true;
             }
           },
           onDelete: (rpPresc) => {
             if( shohou ){
-              shohou.RP剤情報グループ.splice(index, 1);
-              shohou = shohou;
+              let rg = [...shohou.RP剤情報グループ];
+              rg.splice(index, 1);
+              shohou = Object.assign({}, shohou, {
+                RP剤情報グループ: rg
+              });
               adaptToShohou();
               shohouModified = true;
             }
@@ -518,18 +534,43 @@
         if( bikou.find(b => b.備考 === "一包化") ){
           return;
         }
+        bikou = [...bikou];
         bikou.push({ 備考: "一包化"});
       } else {
-        shohou.備考レコード = [{ 備考: "一包化"}];
+        bikou = [{ 備考: "一包化"}];
       }
+      shohou = Object.assign({}, shohou, {
+        備考レコード: bikou,
+      });
+      adaptToShohou();
       shohouModified = true;
-      shohou = shohou;
+    }
+  }
+
+  function clearBikou一包化() {
+    if( shohou ){
+      let bikou = shohou.備考レコード;
+      if( bikou  ){
+        if( !bikou.find(b => b.備考 === "一包化") ){
+          return;
+        }
+        bikou = [...bikou].filter(b => b.備考 !== "一包化");
+      } else {
+        return;
+      }
+      shohou = Object.assign({}, shohou, {
+        備考レコード: bikou,
+      });
+      adaptToShohou();
+      shohouModified = true;
     }
   }
 
   function doFormBikou一包化Changed() {
     if( formBikou一包化 ){
       setBikou一包化();
+    } else {
+      clearBikou一包化();
     }
   }
 </script>
