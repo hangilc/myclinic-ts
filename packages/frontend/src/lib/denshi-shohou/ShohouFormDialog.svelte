@@ -42,6 +42,7 @@
   let usageSearchTextInput: HTMLInputElement;
   let usageFreeTextValue = "";
   let usageFreeTextInput: HTMLInputElement;
+  let youhouHosokuText = "";
 
   let allFreqUsages: FreqUsage[] = [];
   let freqUsages: FreqUsage[] = [];
@@ -240,6 +241,22 @@
       }
     }
   }
+
+  function doAddYouhouHosoku() {
+    youhouHosokuText = youhouHosokuText.trim();
+    if( youhouHosokuText === "" ){
+      return;
+    }
+    rp用法補足レコード.push( {
+      用法補足区分: "用法の続き",
+      用法補足情報: youhouHosokuText,
+    });
+    rp用法補足レコード = rp用法補足レコード;
+  }
+
+  function doClearYouhouHosoku() {
+    rp用法補足レコード = [];
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -297,6 +314,7 @@
     <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
     <a href="javascript:void(0)" on:click={doToggleUsageFreeText}>自由文章</a>
     <a href="javascript:void(0)" on:click={doToggleUsageAux}>補足</a>
+    <a href="javascript:void(0)" on:click={doClearYouhouHosoku}>補足クリア</a>
     {#if usageSelectMode !== ""}
       <a href="javascript:void(0)" on:click={doToggleUsageEmpty}>
         <ChevronUp />
@@ -332,6 +350,8 @@
       />
       <button on:click={doUsageFreeText}>入力</button>
     {:else if usageSelectMode === "aux"}
+      用法補足：<input type="text" bind:value={youhouHosokuText} />
+      <button on:click={doAddYouhouHosoku}>追加</button>
     {/if}
     <div>{rp用法名称}</div>
     {#each rp用法補足レコード ?? [] as suppl}

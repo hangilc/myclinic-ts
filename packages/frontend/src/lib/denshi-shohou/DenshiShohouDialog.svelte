@@ -12,6 +12,7 @@
     createPrescInfo,
     type PrescInfoData,
     type RP剤情報,
+    type 備考レコード,
     type 公費レコード,
   } from "./presc-info";
   import { convertZenkakuHiraganaToHankakuKatakana } from "../zenkaku";
@@ -55,12 +56,16 @@
   export let textId: number = 0;
   let renderedDrugs: RenderedDrug[] = [];
   let shohouModified = false;
+  let showBikou = false;
+  let formBikou一包化 = false;
 
   init();
 
   async function init() {
     if (!shohou) {
       shohou = await initShohou();
+    } else {
+      console.log("shohou", shohou);
     }
     adaptToShohou();
   }
@@ -68,9 +73,15 @@
   function adaptToShohou() {
     if (shohou) {
       renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
+      formBikou一包化 = hasBikou一包化(shohou);
     } else {
       renderedDrugs = [];
+      formBikou一包化 = false;
     }
+  }
+
+  function hasBikou一包化(s: PrescInfoData | undefined): boolean {
+    return !!(s?.備考レコード?.find(b => b.備考 === "一包化"));
   }
 
   async function initShohou(): Promise<PrescInfoData> {
@@ -301,7 +312,10 @@
         at: DateWrapper.from(visit.visitedAt).asSqlDate(),
         onEnter: (drug) => {
           if (shohou) {
-            shohou.RP剤情報グループ.push(drug);
+            let rg = [...shohou.RP剤情報グループ, drug];
+            shohou = Object.assign({}, shohou, {
+              RP剤情報グループ: rg
+            })
             adaptToShohou();
             shohouModified = true;
           }
@@ -315,6 +329,7 @@
   async function doRegister() {
     if (shohou && !shohou.引換番号) {
       const prescInfo = createPrescInfo(shohou);
+      console.log("prescInfo", prescInfo);
       const signed = await sign_presc(prescInfo);
       const kikancode = await cache.getShohouKikancode();
       let result = await registerPresc(signed, kikancode, "1");
@@ -483,22 +498,79 @@
           rpPresc: rp,
           onEnter: (rpModified) => {
             if (shohou) {
-              shohou.RP剤情報グループ[index] = rpModified;
-              shohou = shohou;
+              let rg = [...shohou.RP剤情報グループ];
+              rg[index] = rpModified;
+              shohou = Object.assign({}, shohou, {
+                RP剤情報グループ: rg
+              });
               adaptToShohou();
               shohouModified = true;
             }
           },
           onDelete: (rpPresc) => {
             if( shohou ){
-              shohou.RP剤情報グループ.splice(index, 1);
-              shohou = shohou;
+              let rg = [...shohou.RP剤情報グループ];
+              rg.splice(index, 1);
+              shohou = Object.assign({}, shohou, {
+                RP剤情報グループ: rg
+              });
               adaptToShohou();
               shohouModified = true;
             }
           },
         },
       });
+    }
+  }
+
+  function doToggleBikou() {
+    showBikou = !showBikou;
+  }
+
+  function setBikou一包化() {
+    if( shohou ){
+      let bikou = shohou.備考レコード;
+      if( bikou  ){
+        if( bikou.find(b => b.備考 === "一包化") ){
+          return;
+        }
+        bikou = [...bikou];
+        bikou.push({ 備考: "一包化"});
+      } else {
+        bikou = [{ 備考: "一包化"}];
+      }
+      shohou = Object.assign({}, shohou, {
+        備考レコード: bikou,
+      });
+      adaptToShohou();
+      shohouModified = true;
+    }
+  }
+
+  function clearBikou一包化() {
+    if( shohou ){
+      let bikou = shohou.備考レコード;
+      if( bikou  ){
+        if( !bikou.find(b => b.備考 === "一包化") ){
+          return;
+        }
+        bikou = [...bikou].filter(b => b.備考 !== "一包化");
+      } else {
+        return;
+      }
+      shohou = Object.assign({}, shohou, {
+        備考レコード: bikou,
+      });
+      adaptToShohou();
+      shohouModified = true;
+    }
+  }
+
+  function doFormBikou一包化Changed() {
+    if( formBikou一包化 ){
+      setBikou一包化();
+    } else {
+      clearBikou一包化();
     }
   }
 </script>
@@ -528,7 +600,11 @@
     <div>
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
+      <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
     </div>
+    {#if showBikou}
+      <input type="checkbox" bind:checked={formBikou一包化} on:change={doFormBikou一包化Changed}> 一包化
+    {/if}
     <div class="commands">
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
