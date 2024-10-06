@@ -13,11 +13,13 @@
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import * as cache from "@lib/cache";
   import type { StatusResult } from "@/lib/denshi-shohou/shohou-interface";
+  import type { 備考レコード } from "@/lib/denshi-shohou/presc-info";
 
   export let text: Text;
 
   let memo: ShohouTextMemo | undefined = undefined;
   let drugs: RenderedDrug[] = [];
+  let bikou: 備考レコード[] = [];
   let accessCode: string | undefined = undefined;
   let prescriptionId: string | undefined = undefined;
   let showDetail = false;
@@ -31,6 +33,7 @@
       let m: ShohouTextMemo = JSON.parse(t.memo);
       memo = m;
       drugs = m.shohou.RP剤情報グループ.map((group) => renderDrug(group));
+      bikou = m.shohou.備考レコード ?? [];
       accessCode = m.shohou.引換番号;
       prescriptionId = m.prescriptionId;
       showDetail = false;
@@ -120,6 +123,11 @@
           {/each}
           <div>{drug.usage} {drug.times}</div>
         </div>
+      {/each}
+    </div>
+    <div>
+      {#each bikou as b}
+        <div>{b.備考}</div>
       {/each}
     </div>
   </div>
