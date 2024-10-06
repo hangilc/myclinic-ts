@@ -269,6 +269,12 @@
     });
     rp用法補足レコード = rp用法補足レコード;
   }
+
+  function doDeleteHosoku(index: number) {
+    let hs = [...rp用法補足レコード];
+    hs.splice(index, 1);
+    rp用法補足レコード = hs;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -375,8 +381,8 @@
       </div>
     {:else if usageSelectMode === "aux"}
       <div>
-        {#each rp用法補足レコード ?? [] as suppl}
-          <div>{suppl.用法補足情報}</div>
+        {#each rp用法補足レコード ?? [] as suppl, i}
+          <div><span>{suppl.用法補足情報}</span><a href="javascript:void(0)" on:click={() => doDeleteHosoku(i)}>削除</a></div>
         {/each}
       </div>
       <div>
