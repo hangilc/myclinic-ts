@@ -322,10 +322,26 @@
   </div>
   <div>
     用法：
-    <a href="javascript:void(0)" on:click={doToggleFreqUsage}>頻用</a>
-    <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
-    <a href="javascript:void(0)" on:click={doToggleUsageFreeText}>自由文章</a>
-    <a href="javascript:void(0)" on:click={doToggleUsageAux}>補足</a>
+    <a
+      href="javascript:void(0)"
+      on:click={doToggleFreqUsage}
+      class:bold={usageSelectMode === "freq"}>頻用</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doToggleUsageSearch}
+      class:bold={usageSelectMode === "master"}>マスター</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doToggleUsageFreeText}
+      class:bold={usageSelectMode === "text"}>自由文章</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doToggleUsageAux}
+      class:bold={usageSelectMode === "aux"}>補足</a
+    >
     {#if usageSelectMode === "freq"}
       <div style="height:6em;overflow-y:auto;cursor:pointer;user-select:none">
         {#each freqUsages as freq}
@@ -359,8 +375,13 @@
       </div>
     {:else if usageSelectMode === "aux"}
       <div>
-        用法補足：<input type="text" bind:value={youhouHosokuText} />
-        <button on:click={doAddYouhouHosoku}>追加</button>
+        {#each rp用法補足レコード ?? [] as suppl}
+          <div>{suppl.用法補足情報}</div>
+        {/each}
+      </div>
+      <div>
+        <input type="text" bind:value={youhouHosokuText} />
+        <button on:click={doAddYouhouHosoku}>用法補足追加</button>
       </div>
     {/if}
     <div>{rp用法名称}</div>
@@ -383,3 +404,9 @@
     {/if}
   </div>
 </Dialog>
+
+<style>
+  .bold {
+    font-weight: bold;
+  }
+</style>
