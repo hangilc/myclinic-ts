@@ -28,7 +28,6 @@
   let showDev = false;
   let patient: Patient | undefined = undefined;
   let formData: FormData = mkFormData();
-  let ryouyouKeikakushoData: RyouyouKeikakushoData = mkRyouyouKeikakushoData();
   let clinicInfo: ClinicInfo | undefined = undefined;
   let stores: Partial<FormData>[] = [];
   let storesIndex = -1;
@@ -229,90 +228,121 @@
     clinicInfo = await api.getClinicInfo();
   }
 
-  function updateBox(key: keyof RyouyouKeikakushoData, checked: boolean) {
-    updateValue(key, checked ? "1" : "");
+  function updateBox(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    key: keyof RyouyouKeikakushoData,
+    checked: boolean
+  ) {
+    updateValue(ryouyouKeikakushoData, key, checked ? "1" : "");
   }
 
-  function updateValue(key: keyof RyouyouKeikakushoData, value: string) {
+  function updateValue(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    key: keyof RyouyouKeikakushoData,
+    value: string
+  ) {
     ryouyouKeikakushoData[key] = value;
   }
 
-  function populateDiseases() {
-    updateBox("disease-diabetes", formData.diseaseDiabetes);
-    updateBox("disease-hypertension", formData.diseaseHypertension);
-    updateBox("disease-hyperlipidemia", formData.diseaseHyperlipidemia);
+  function populateDiseases(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
+    updateBox(
+      ryouyouKeikakushoData,
+      "disease-diabetes",
+      fdata.diseaseDiabetes
+    );
+    updateBox(
+      ryouyouKeikakushoData,
+      "disease-hypertension",
+      fdata.diseaseHypertension
+    );
+    updateBox(
+      ryouyouKeikakushoData,
+      "disease-hyperlipidemia",
+      fdata.diseaseHyperlipidemia
+    );
   }
 
-  function populateMokuhyou() {
+  function populateMokuhyou(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
     updateBox(
+      ryouyouKeikakushoData,
       "mokuhyou-体重-mark",
-      formData.immediates["mokuhyou-体重"] !== ""
+      fdata.immediates["mokuhyou-体重"] !== ""
     );
-    console.log("taijuu", formData.immediates["mokuhyou-体重"]);
-    updateBox("mokuhyou-BMI-mark", formData.immediates["mokuhyou-BMI"] !== "");
-    updateBox("mokuhyou-BP-mark", formData.immediates["mokuhyou-BP"] !== "");
     updateBox(
+      ryouyouKeikakushoData,
+      "mokuhyou-BMI-mark",
+      fdata.immediates["mokuhyou-BMI"] !== ""
+    );
+    updateBox(
+      ryouyouKeikakushoData,
+      "mokuhyou-BP-mark",
+      fdata.immediates["mokuhyou-BP"] !== ""
+    );
+    updateBox(
+      ryouyouKeikakushoData,
       "mokuhyou-HbA1c-mark",
-      formData.immediates["mokuhyou-HbA1c"] !== ""
+      fdata.immediates["mokuhyou-HbA1c"] !== ""
     );
   }
 
-  function populateShokuji() {
-    for (const key in formData.shokujiChecks) {
+  function populateShokuji(data: RyouyouKeikakushoData, fdata: FormData) {
+    for (const key in fdata.shokujiChecks) {
       // @ts-ignore
-      updateBox(key, formData.shokujiChecks[key]);
+      updateBox(data, key, fdata.shokujiChecks[key]);
     }
-    updateBox("juuten-食事-mark", formData.shokujiCheck);
-    updateBox("juuten-食事-食べ方-ゆっくり食べる", formData.shokujiYukkuri);
+    updateBox(data, "juuten-食事-mark", fdata.shokujiCheck);
+    updateBox(data, "juuten-食事-食べ方-ゆっくり食べる", fdata.shokujiYukkuri);
   }
 
-  function populateUndou() {
-    for (const key in formData.undouChecks) {
+  function populateUndou(data: RyouyouKeikakushoData, fdata: FormData) {
+    for (const key in fdata.undouChecks) {
       // @ts-ignore
-      updateBox(key, formData.undouChecks[key]);
+      updateBox(data, key, fdata.undouChecks[key]);
     }
-    updateBox("juuten-運動-ウォーキング-mark", formData.undouWalking);
-    updateBox("juuten-運動-ほぼ毎日", formData.undouEveryDay);
-    updateBox("juuten-運動-息がはずむが会話が可能な強さ", formData.undouIntensityBreath);
-    updateBox("juuten-運動-mark", formData.undouCheck);
+    updateBox(data, "juuten-運動-ウォーキング-mark", fdata.undouWalking);
+    updateBox(data, "juuten-運動-ほぼ毎日", fdata.undouEveryDay);
+    updateBox(data, 
+      "juuten-運動-息がはずむが会話が可能な強さ",
+      fdata.undouIntensityBreath
+    );
+    updateBox(data, "juuten-運動-mark", fdata.undouCheck);
   }
 
-  function populateTabako() {
-    for (const key in formData.tabakoChecks) {
+  function populateTabako(data: RyouyouKeikakushoData, fdata: FormData) {
+    for (const key in fdata.tabakoChecks) {
       // @ts-ignore
-      updateBox(key, formData.tabakoChecks[key]);
+      updateBox(data, key, fdata.tabakoChecks[key]);
     }
-    updateBox("juuten-たばこ-mark", formData.tabakoCheck);
+    updateBox(data, "juuten-たばこ-mark", fdata.tabakoCheck);
   }
 
-  function populateSonota() {
-    for (const key in formData.sonotaChecks) {
+  function populateSonota(data: RyouyouKeikakushoData, fdata: FormData) {
+    for (const key in fdata.sonotaChecks) {
       // @ts-ignore
-      updateBox(key, formData.sonotaChecks[key]);
+      updateBox(data, key, fdata.sonotaChecks[key]);
     }
-    updateBox("juuten-その他-mark", formData.sonotaCheck);
+    updateBox(data, "juuten-その他-mark", fdata.sonotaCheck);
   }
 
-  function populateKensa() {
-    if (formData.kensaDate !== "") {
-      const issueDate = DateWrapper.from(formData.kensaDate);
-      updateValue("kensa-採血日-月", issueDate.getMonth().toString());
-      updateValue("kensa-採血日-日", issueDate.getDay().toString());
+  function populateKensa(data: RyouyouKeikakushoData, fdata: FormData) {
+    if (fdata.kensaDate !== "") {
+      const issueDate = DateWrapper.from(fdata.kensaDate);
+      updateValue(data, "kensa-採血日-月", issueDate.getMonth().toString());
+      updateValue(data, "kensa-採血日-日", issueDate.getDay().toString());
     }
-    for (const key in formData.kensaChecks) {
+    for (const key in fdata.kensaChecks) {
       // @ts-ignore
-      updateBox(key, formData.kensaChecks[key]);
+      updateBox(data, key, fdata.kensaChecks[key]);
     }
   }
 
   function initWithStores(newStores: Partial<FormData>[]) {
     stores = newStores;
     const lastIndex = indexOfLastFormData(stores);
-    formData = updateByPartial(mkFormData(), lastIndex >= 0 ? stores[lastIndex] : {});
-    // formData = Object.assign(
-    //   mkFormData(),
-    //   lastIndex >= 0 ? stores[lastIndex] : {}
-    // );
+    formData = updateByPartial(
+      mkFormData(),
+      lastIndex >= 0 ? stores[lastIndex] : {}
+    );
     storesIndex = -1;
   }
 
@@ -325,7 +355,7 @@
         onEnter: async (selected: Patient) => {
           patient = selected;
           initWithStores(
-            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
+            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? [],
           );
           formData.patientId = patient.patientId;
         },
@@ -338,31 +368,57 @@
     initWithStores([]);
   }
 
-  function doDisp() {
-    ryouyouKeikakushoData = mkRyouyouKeikakushoData();
+  function createOps(fdata: FormData): Op[] {
+    let ryouyouKeikakushoData = mkRyouyouKeikakushoData();
     if (clinicInfo) {
       ryouyouKeikakushoData["医師氏名"] = clinicInfo?.doctorName;
     }
-    populateWithIssueDate();
-    populateWithPatient();
-    populateDiseases();
-    populateMokuhyou();
-    populateShokuji();
-    populateUndou();
-    populateTabako();
-    populateSonota();
-    populateKensa();
-    for (let key in formData.immediates) {
+    populateWithIssueDate(ryouyouKeikakushoData, fdata);
+    populateWithPatient(ryouyouKeikakushoData, fdata);
+    populateDiseases(ryouyouKeikakushoData, fdata);
+    populateMokuhyou(ryouyouKeikakushoData, fdata);
+    populateShokuji(ryouyouKeikakushoData, fdata);
+    populateUndou(ryouyouKeikakushoData, fdata);
+    populateTabako(ryouyouKeikakushoData, fdata);
+    populateSonota(ryouyouKeikakushoData, fdata);
+    populateKensa(ryouyouKeikakushoData, fdata);
+    for (let key in fdata.immediates) {
       // @ts-ignore
-      ryouyouKeikakushoData[key] = formData.immediates[key];
+      ryouyouKeikakushoData[key] = fdata.immediates[key];
     }
-    let ops: Op[];
-    if (formData.mode === "shokai") {
-      ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
+    if (fdata.mode === "shokai") {
+      return drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
     } else {
       ryouyouKeikakushoData["患者署名省略-mark"] = "1";
-      ops = drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
+      return drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
     }
+  }
+
+  function doDisp() {
+    // let ryouyouKeikakushoData = mkRyouyouKeikakushoData();
+    // if (clinicInfo) {
+    //   ryouyouKeikakushoData["医師氏名"] = clinicInfo?.doctorName;
+    // }
+    // populateWithIssueDate(ryouyouKeikakushoData, formData);
+    // populateWithPatient(ryouyouKeikakushoData, formData);
+    // populateDiseases(ryouyouKeikakushoData, formData);
+    // populateMokuhyou(ryouyouKeikakushoData, formData);
+    // populateShokuji(ryouyouKeikakushoData, formData);
+    // populateUndou(ryouyouKeikakushoData, formData);
+    // populateTabako(ryouyouKeikakushoData, formData);
+    // populateSonota(ryouyouKeikakushoData, formData);
+    // populateKensa(ryouyouKeikakushoData, formData);
+    // for (let key in formData.immediates) {
+    //   // @ts-ignore
+    //   ryouyouKeikakushoData[key] = formData.immediates[key];
+    // }
+    let ops: Op[] = createOps(formData);
+    // if (formData.mode === "shokai") {
+    //   ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
+    // } else {
+    //   ryouyouKeikakushoData["患者署名省略-mark"] = "1";
+    //   ops = drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
+    // }
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
@@ -380,9 +436,9 @@
     alert("code output to console");
   }
 
-  function populateWithIssueDate() {
-    if (formData.issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      const d = DateWrapper.from(formData.issueDate);
+  function populateWithIssueDate(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
+    if (fdata.issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const d = DateWrapper.from(fdata.issueDate);
       ryouyouKeikakushoData["issue-year"] = d.getYear().toString();
       ryouyouKeikakushoData["issue-month"] = d.getMonth().toString();
       ryouyouKeikakushoData["issue-day"] = d.getDay().toString();
@@ -393,7 +449,7 @@
     }
   }
 
-  function populateWithPatient() {
+  function populateWithPatient(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
     if (patient) {
       ryouyouKeikakushoData["patient-name"] =
         `${patient.lastName}${patient.firstName}`;
@@ -435,7 +491,7 @@
       ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
       ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
       ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
-      const age = calcAge(patient.birthday, formData.issueDate || new Date());
+      const age = calcAge(patient.birthday, fdata.issueDate || new Date());
       ryouyouKeikakushoData["patient-age"] = age.toString();
     } else {
       ryouyouKeikakushoData["patient-name"] = "";
@@ -485,7 +541,6 @@
     const s = stores[index];
     if (s !== undefined) {
       formData = updateByPartial(mkFormData(), s);
-      // formData = Object.assign(mkFormData(), s);
       storesIndex = index;
     }
   }
@@ -506,6 +561,15 @@
         storesIndex -= 1;
       }
     }
+  }
+
+  function doShowPdf(index: number) {
+    let store = stores[index];
+    if (!store) {
+      return;
+    }
+    let data = updateByPartial(mkFormData(), store);
+    console.log(data);
   }
 </script>
 
@@ -546,6 +610,7 @@
           <a href="javascript:void(0)" on:click={() => doDeleteStore(index)}
             >削除</a
           >
+          <a href="javascript:void(0)" on:click={() => doShowPdf(index)}>PDF</a>
         </div>
       {/each}
     </div>
