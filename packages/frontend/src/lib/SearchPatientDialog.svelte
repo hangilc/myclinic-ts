@@ -29,7 +29,6 @@
         selected.set(result[0]);
         enterButtonElement.disabled = false;
         enterButtonElement.focus();
-        console.log("focus");
         onSingleResult(result[0], destroy);
       }
     }

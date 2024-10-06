@@ -189,6 +189,8 @@
         formData.immediates["mokuhyou-行動目標"] = default行動目標;
       }
       adaptChecks();
+    } else {
+      formData.immediates["mokuhyou-HbA1c"] = "";
     }
   }
 
@@ -207,6 +209,8 @@
       }
       formData.shokujiChecks["juuten-食事-食塩・調味料を控える-mark"] = true;
       adaptChecks();
+    } else {
+      formData.immediates["mokuhyou-BP"] = "";
     }
   }
 
@@ -569,7 +573,8 @@
       return;
     }
     let data = updateByPartial(mkFormData(), store);
-    console.log(data);
+    let ops = createOps(data);
+    console.log("ops", ops);
   }
 </script>
 
