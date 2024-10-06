@@ -360,6 +360,7 @@
     if (formData.mode === "shokai") {
       ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
     } else {
+      ryouyouKeikakushoData["患者署名省略-mark"] = "1";
       ops = drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
     }
     const d: DrawerDialog = new DrawerDialog({

@@ -174,7 +174,7 @@ function drawMokuhyou(ctx: DC, box: Box) {
       c.withFont(ctx, "f4", () => {
         b.withSplitRows(lower, b.evenSplitter(4), rs => {
           c.drawText(ctx, "┌", rs[0], "left", "center");
-          c.drawText(ctx, "│", rs[1], "left", "center");
+          c.drawText(ctx, "│", rs[1], "left", "center"); 
           c.drawText(ctx, "│", rs[2], "left", "center");
           c.drawText(ctx, "└", rs[3], "left", "center");
           c.drawText(ctx, "┐", rs[0], "right", "center");
