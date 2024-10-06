@@ -46,7 +46,6 @@
   import { Text } from "myclinic-model";
   import api from "../api";
   import ShohouFormDialog from "./ShohouFormDialog.svelte";
-  import Add from "@/practice/exam/disease/add/Add.svelte";
 
   export let destroy: () => void;
   export let patient: Patient;

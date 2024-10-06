@@ -118,27 +118,43 @@
   }
 
   function doToggleFreqUsage() {
-    usageSelectMode = "freq";
+    if (usageSelectMode === "freq") {
+      usageSelectMode = "";
+    } else {
+      usageSelectMode = "freq";
+    }
   }
 
   async function doToggleUsageSearch() {
-    usageSelectMode = "master";
-    await tick();
-    if (usageSearchTextInput) {
-      usageSearchTextInput.focus();
+    if (usageSelectMode === "master") {
+      usageSelectMode = "";
+    } else {
+      usageSelectMode = "master";
+      await tick();
+      if (usageSearchTextInput) {
+        usageSearchTextInput.focus();
+      }
     }
   }
 
   async function doToggleUsageFreeText() {
-    usageSelectMode = "text";
-    await tick();
-    if (usageFreeTextInput) {
-      usageFreeTextInput.focus();
+    if (usageSelectMode === "text") {
+      usageSelectMode = "";
+    } else {
+      usageSelectMode = "text";
+      await tick();
+      if (usageFreeTextInput) {
+        usageFreeTextInput.focus();
+      }
     }
   }
 
   function doToggleUsageAux() {
-    usageSelectMode = "aux";
+    if (usageSelectMode === "aux") {
+      usageSelectMode = "";
+    } else {
+      usageSelectMode = "aux";
+    }
   }
 
   function doToggleUsageEmpty() {
@@ -244,18 +260,14 @@
 
   function doAddYouhouHosoku() {
     youhouHosokuText = youhouHosokuText.trim();
-    if( youhouHosokuText === "" ){
+    if (youhouHosokuText === "") {
       return;
     }
-    rp用法補足レコード.push( {
+    rp用法補足レコード.push({
       用法補足区分: "用法の続き",
       用法補足情報: youhouHosokuText,
     });
     rp用法補足レコード = rp用法補足レコード;
-  }
-
-  function doClearYouhouHosoku() {
-    rp用法補足レコード = [];
   }
 </script>
 
@@ -314,12 +326,6 @@
     <a href="javascript:void(0)" on:click={doToggleUsageSearch}>マスター</a>
     <a href="javascript:void(0)" on:click={doToggleUsageFreeText}>自由文章</a>
     <a href="javascript:void(0)" on:click={doToggleUsageAux}>補足</a>
-    <a href="javascript:void(0)" on:click={doClearYouhouHosoku}>補足クリア</a>
-    {#if usageSelectMode !== ""}
-      <a href="javascript:void(0)" on:click={doToggleUsageEmpty}>
-        <ChevronUp />
-      </a>
-    {/if}
     {#if usageSelectMode === "freq"}
       <div style="height:6em;overflow-y:auto;cursor:pointer;user-select:none">
         {#each freqUsages as freq}
@@ -343,15 +349,19 @@
         {/each}
       </div>
     {:else if usageSelectMode === "text"}
-      <input
-        type="text"
-        bind:this={usageFreeTextInput}
-        bind:value={usageFreeTextValue}
-      />
-      <button on:click={doUsageFreeText}>入力</button>
+      <div>
+        <input
+          type="text"
+          bind:this={usageFreeTextInput}
+          bind:value={usageFreeTextValue}
+        />
+        <button on:click={doUsageFreeText}>入力</button>
+      </div>
     {:else if usageSelectMode === "aux"}
-      用法補足：<input type="text" bind:value={youhouHosokuText} />
-      <button on:click={doAddYouhouHosoku}>追加</button>
+      <div>
+        用法補足：<input type="text" bind:value={youhouHosokuText} />
+        <button on:click={doAddYouhouHosoku}>追加</button>
+      </div>
     {/if}
     <div>{rp用法名称}</div>
     {#each rp用法補足レコード ?? [] as suppl}
