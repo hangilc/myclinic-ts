@@ -25,6 +25,18 @@ export class DateWrapper {
     return this.date.getDay();
   }
 
+  getHours(): number {
+    return this.date.getHours();
+  }
+
+  getMinutes(): number {
+    return this.date.getMinutes();
+  }
+
+  getSeconds(): number {
+    return this.date.getSeconds();
+  }
+
   asDate(): Date {
     return this.date;
   }
@@ -88,6 +100,15 @@ export class DateWrapper {
   getNen(): number {
     const w = wareki.warekiOf(this.getYear(), this.getMonth(), this.getDay());
     return w.nen;
+  }
+
+  getTimeStamp(): string {
+    function pad(n: number): string {
+      return padLeft(n, 2, "0");
+    }
+    const s1 = `${this.getYear()}${pad(this.getMonth())}${pad(this.getDay())}`;
+    const s2 = `${pad(this.getHours())}${pad(this.getMinutes())}${pad(this.getSeconds())}`
+    return s1 + s2;
   }
 
   format1(): string {

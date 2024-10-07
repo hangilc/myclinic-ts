@@ -248,12 +248,11 @@
     ryouyouKeikakushoData[key] = value;
   }
 
-  function populateDiseases(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
-    updateBox(
-      ryouyouKeikakushoData,
-      "disease-diabetes",
-      fdata.diseaseDiabetes
-    );
+  function populateDiseases(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    fdata: FormData
+  ) {
+    updateBox(ryouyouKeikakushoData, "disease-diabetes", fdata.diseaseDiabetes);
     updateBox(
       ryouyouKeikakushoData,
       "disease-hypertension",
@@ -266,7 +265,10 @@
     );
   }
 
-  function populateMokuhyou(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
+  function populateMokuhyou(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    fdata: FormData
+  ) {
     updateBox(
       ryouyouKeikakushoData,
       "mokuhyou-体重-mark",
@@ -305,7 +307,8 @@
     }
     updateBox(data, "juuten-運動-ウォーキング-mark", fdata.undouWalking);
     updateBox(data, "juuten-運動-ほぼ毎日", fdata.undouEveryDay);
-    updateBox(data, 
+    updateBox(
+      data,
       "juuten-運動-息がはずむが会話が可能な強さ",
       fdata.undouIntensityBreath
     );
@@ -359,7 +362,7 @@
         onEnter: async (selected: Patient) => {
           patient = selected;
           initWithStores(
-            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? [],
+            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
           );
           formData.patientId = patient.patientId;
         },
@@ -440,7 +443,10 @@
     alert("code output to console");
   }
 
-  function populateWithIssueDate(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
+  function populateWithIssueDate(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    fdata: FormData
+  ) {
     if (fdata.issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const d = DateWrapper.from(fdata.issueDate);
       ryouyouKeikakushoData["issue-year"] = d.getYear().toString();
@@ -453,7 +459,10 @@
     }
   }
 
-  function populateWithPatient(ryouyouKeikakushoData: RyouyouKeikakushoData, fdata: FormData) {
+  function populateWithPatient(
+    ryouyouKeikakushoData: RyouyouKeikakushoData,
+    fdata: FormData
+  ) {
     if (patient) {
       ryouyouKeikakushoData["patient-name"] =
         `${patient.lastName}${patient.firstName}`;
@@ -567,14 +576,30 @@
     }
   }
 
-  function doShowPdf(index: number) {
-    let store = stores[index];
-    if (!store) {
-      return;
+  async function doShowPdf(index: number) {
+    if (patient) {
+      let store = stores[index];
+      if (!store) {
+        return;
+      }
+      let data = updateByPartial(mkFormData(), store);
+      let ops = createOps(data);
+      let tm = DateWrapper.fromDate(new Date());
+      let filename = `${patient.patientId}-ryouyou-keikaku-${tm.getTimeStamp()}.pdf`;
+      await api.createPdfFile(ops, "A4", filename);
+      console.log("pdf", filename);
+      let result = await fetch(api.portalTmpFileUrl(filename), {
+        "method": "GET",
+      });
+      if( result.ok ){
+        let buf: ArrayBuffer = await result.arrayBuffer();
+        let formData = new FormData();
+        let blob = new Blob([buf], { type: "application/pdf" });
+        formData.append("uploadfile-1", blob, filename);
+        await api.uploadPatientImage(patient.patientId, formData);
+        alert(`PDF saved as ${filename}`);
+      }
     }
-    let data = updateByPartial(mkFormData(), store);
-    let ops = createOps(data);
-    console.log("ops", ops);
   }
 </script>
 
@@ -615,7 +640,7 @@
           <a href="javascript:void(0)" on:click={() => doDeleteStore(index)}
             >削除</a
           >
-          <a href="javascript:void(0)" on:click={() => doShowPdf(index)}>PDF</a>
+          <a href="javascript:void(0)" on:click={() => doShowPdf(index)}>PDF保存</a>
         </div>
       {/each}
     </div>
