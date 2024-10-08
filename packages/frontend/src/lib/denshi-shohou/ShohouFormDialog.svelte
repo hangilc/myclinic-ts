@@ -52,8 +52,8 @@
   let allFreqUsages: FreqUsage[] = [];
   let freqUsages: FreqUsage[] = [];
 
-  let showUnevenInput = false;
-  let unevenInput = "";
+  let showUnevenInput: boolean[] = [];
+  let unevenInput: string[] = rpDrugs.map(d => unevenRep(d.不均等レコード));
 
   init();
   $: adaptToKubun(allFreqUsages, rp剤形区分);
@@ -117,7 +117,10 @@
     return rec;
   }
 
-  function unevenRep(rec: 不均等レコード): string {
+  function unevenRep(rec: 不均等レコード | undefined): string {
+    if( rec == undefined ){
+      return "";
+    }
     let ps: (string | undefined)[] = [
       rec.不均等１回目服用量,
       rec.不均等２回目服用量,
@@ -139,11 +142,6 @@
       alert("薬品分量が不適切です。");
       return;
     }
-    let 不均等レコード: 不均等レコード | undefined = undefined;
-    if (unevenInput) {
-      不均等レコード = parseUneven(unevenInput);
-    }
-
     const m = drugMaster;
     const d: 薬品情報 = {
       薬品レコード: {
@@ -156,9 +154,6 @@
         単位名: m.unit,
       },
     };
-    if( 不均等レコード ){
-      d.不均等レコード = 不均等レコード;
-    }
     const drugs = [...rpDrugs, d];
     rpDrugs = [];
     drugMaster = undefined;
@@ -322,16 +317,30 @@
     rp用法補足レコード = hs;
   }
 
-  function toggleUneven() {
-    showUnevenInput = !showUnevenInput;
+  function doShowUnevenForm(i: number) {
+    showUnevenInput[i] = !showUnevenInput[i];
   }
 
-  function doSetUneven() {
-    unevenInput = unevenInput.trim();
-    if (unevenInput === "") {
-      return;
+  function doSetUneven(i: number) {
+    showUnevenInput[i] = false;
+    let input = (unevenInput[i] ?? "").trim();
+    let drug = rpDrugs[i];
+    if( input === "" ){
+      delete drug.不均等レコード;
+    } else {
+      let uneven = parseUneven(input);
+      drug.不均等レコード = uneven;
     }
-    showUnevenInput = false;
+    rpDrugs = rpDrugs;
+  }
+
+  function doUnsetUneven(i: number) {
+    showUnevenInput[i] = false;
+    delete unevenInput[i];
+    unevenInput = unevenInput;
+    let drug = rpDrugs[i];
+    delete drug.不均等レコード;
+    rpDrugs = rpDrugs;
   }
 </script>
 
@@ -372,13 +381,6 @@
           style="width:6em"
           bind:value={drugAmount}
         />{drugMaster.unit}
-        <a href="javascript:void(0)" on:click={toggleUneven}>不均等</a>
-        {#if showUnevenInput}
-          <div>
-            <input type="text" placeholder="1-1-0.5" />
-            <button on:click={doSetUneven}>不均等入力</button>
-          </div>
-        {/if}
         <div>
           <button type="submit">追加</button>
         </div>
@@ -389,9 +391,17 @@
         <div>
           {i + 1}. {drug.薬品レコード.薬品名称}
           {drug.薬品レコード.分量}{drug.薬品レコード.単位名}
+          <a href="javascript:void(0)" on:click={() => doShowUnevenForm(i)}>不均等</a>
         </div>
+        {#if showUnevenInput[i]}
+        <div>
+          <input type="text" bind:value={unevenInput[i]} placeholder="1-1-0.5"/>
+          <button on:click={() => doSetUneven(i)}>不均等入力</button>
+          <button on:click={() => doUnsetUneven(i)}>不均等クリア</button>
+        </div>
+        {/if}
         {#if drug.不均等レコード}
-          <div>{unevenRep(drug.不均等レコード)}</div>
+          <div>({unevenRep(drug.不均等レコード)})</div>
         {/if}
       {/each}
     </div>
