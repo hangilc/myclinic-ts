@@ -2,7 +2,12 @@
   import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
   import api from "../api";
   import { type 剤形区分 } from "./denshi-shohou";
-  import type { RP剤情報, 不均等レコード, 用法補足レコード, 薬品情報 } from "./presc-info";
+  import type {
+    RP剤情報,
+    不均等レコード,
+    用法補足レコード,
+    薬品情報,
+  } from "./presc-info";
   import { tick } from "svelte";
   import Dialog from "../Dialog.svelte";
   import type { FreqUsage } from "../cache";
@@ -91,25 +96,36 @@
   }
 
   function parseUneven(input: string): 不均等レコード {
-    let parts = input.split("-").map(p => p.trim());
-    if( parts.length < 2 ){
+    let parts = input.split("-").map((p) => p.trim());
+    if (parts.length < 2) {
       alert("不均等項目の数が２未満です。");
-      throw new Error("Invalid uneven usage"):
+      throw new Error("Invalid uneven usage");
     }
     let rec: 不均等レコード = {
       不均等１回目服用量: parts[0],
       不均等２回目服用量: parts[1],
-    }
-    if( parts[2] ){
+    };
+    if (parts[2]) {
       rec.不均等３回目服用量 = parts[2];
     }
-    if( parts[3] ){
+    if (parts[3]) {
       rec.不均等４回目服用量 = parts[3];
     }
-    if( parts[4] ){
+    if (parts[4]) {
       rec.不均等５回目服用量 = parts[4];
     }
     return rec;
+  }
+
+  function unevenRep(rec: 不均等レコード): string {
+    let ps: (string | undefined)[] = [
+      rec.不均等１回目服用量,
+      rec.不均等２回目服用量,
+      rec.不均等３回目服用量,
+      rec.不均等４回目服用量,
+      rec.不均等５回目服用量,
+    ].filter(p => p != undefined && p !== "");
+    return ps.join("-");
   }
 
   function doAddDrug() {
@@ -124,7 +140,7 @@
       return;
     }
     let 不均等レコード: 不均等レコード | undefined = undefined;
-    if( unevenInput ) {
+    if (unevenInput) {
       不均等レコード = parseUneven(unevenInput);
     }
 
@@ -139,8 +155,10 @@
         力価フラグ: "薬価単位",
         単位名: m.unit,
       },
-      不均等レコード,
     };
+    if( 不均等レコード ){
+      d.不均等レコード = 不均等レコード;
+    }
     const drugs = [...rpDrugs, d];
     rpDrugs = [];
     drugMaster = undefined;
@@ -186,10 +204,6 @@
     } else {
       usageSelectMode = "aux";
     }
-  }
-
-  function doToggleUsageEmpty() {
-    usageSelectMode = "";
   }
 
   async function doUsageSearch() {
@@ -254,6 +268,7 @@
       };
     }
     destroy();
+    console.log("enter", shohou);
     onEnter(shohou);
   }
 
@@ -313,7 +328,7 @@
 
   function doSetUneven() {
     unevenInput = unevenInput.trim();
-    if( unevenInput === "" ){
+    if (unevenInput === "") {
       return;
     }
     showUnevenInput = false;
@@ -359,9 +374,10 @@
         />{drugMaster.unit}
         <a href="javascript:void(0)" on:click={toggleUneven}>不均等</a>
         {#if showUnevenInput}
-        <div>
-          <input type="text" placeholder="1-1-0.5"> <button on:click={doSetUneven}>不均等入力</button>
-        </div>
+          <div>
+            <input type="text" placeholder="1-1-0.5" />
+            <button on:click={doSetUneven}>不均等入力</button>
+          </div>
         {/if}
         <div>
           <button type="submit">追加</button>
@@ -374,6 +390,9 @@
           {i + 1}. {drug.薬品レコード.薬品名称}
           {drug.薬品レコード.分量}{drug.薬品レコード.単位名}
         </div>
+        {#if drug.不均等レコード}
+          <div>{unevenRep(drug.不均等レコード)}</div>
+        {/if}
       {/each}
     </div>
   </div>
@@ -433,7 +452,12 @@
     {:else if usageSelectMode === "aux"}
       <div>
         {#each rp用法補足レコード ?? [] as suppl, i}
-          <div><span>{suppl.用法補足情報}</span><a href="javascript:void(0)" on:click={() => doDeleteHosoku(i)}>削除</a></div>
+          <div>
+            <span>{suppl.用法補足情報}</span><a
+              href="javascript:void(0)"
+              on:click={() => doDeleteHosoku(i)}>削除</a
+            >
+          </div>
         {/each}
       </div>
       <div>
