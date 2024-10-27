@@ -7,6 +7,7 @@ let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
 let shohouFreqUsage: FreqUsage[] | undefined = undefined;
 let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
+let onshiViewSecret: string | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -84,4 +85,11 @@ export async function getShohouFreqPrescription(): Promise<FreqPresc[]> {
 
 export function invalidateShohouFreqPrescription() {
   shohouFreqPrescription = undefined;
+}
+
+export async function getOnshiViewSecret(): Promise<string> {
+  if( onshiViewSecret === undefined ){
+    onshiViewSecret = await api.dictGet("onshi-secret");
+  }
+  return onshiViewSecret;
 }

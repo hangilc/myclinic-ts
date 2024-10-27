@@ -98,6 +98,10 @@ export class DateWrapper {
     return `${this.getGengou()}${this.getNen()}年${this.getMonth()}月${this.getDay()}日`
   }
 
+  fmtNen(opt: FormatOption): string {
+    return fmt(this.getNen(), opt);
+  }
+
   fmtMonth(opt: FormatOption): string {
     return fmt(this.getMonth(), opt);
   }

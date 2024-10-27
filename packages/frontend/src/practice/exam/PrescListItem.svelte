@@ -25,7 +25,9 @@
 
   function formatDate(shohouDate: string): string {
     const d = DateWrapper.fromOnshiDate(shohouDate);
-    return `${d.getGengou()}${d.fmtNen()}年${d.fmtMonth()}月${d.fmtDay()}日`;
+    console.log("date", shohouDate, d);
+    // return `${d.getGengou()}${d.fmtNen()}年${d.fmtMonth()}月${d.fmtDay()}日`;
+    return `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日`;
   }
 </script>
 
