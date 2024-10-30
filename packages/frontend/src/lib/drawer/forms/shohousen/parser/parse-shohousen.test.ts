@@ -58,7 +58,7 @@ describe("shohousen parser", () => {
   })
 
   it("should render drug amount (1)", () => {
-    const r = renderDrugAmount("カロナール錠５００ｍｇ", "３", "錠", 31, 21);
+    const r = renderDrugAmount("カロナール錠５００ｍｇ", "３", "錠", undefined, 31, 21);
     expect(r).matches(/^カロナール錠５００ｍｇ　{9}３錠$/)
   })
 })

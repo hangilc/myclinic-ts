@@ -630,11 +630,12 @@ export class Text {
   constructor(
     public textId: number,
     public visitId: number,
-    public content: string
+    public content: string,
+    public memo?: string,
   ) { }
 
   static cast(arg: any): Text {
-    return new Text(arg.textId, arg.visitId, arg.content);
+    return new Text(arg.textId, arg.visitId, arg.content, arg.memo);
   }
 }
 
@@ -2020,6 +2021,8 @@ export class ClinicInfo {
     public kikancode: string,
     public homepage: string,
     public doctorName: string,
+    public doctorLastName: string,
+    public doctorFirstName: string,
   ) { }
 
   static cast(arg: any): ClinicInfo {
@@ -2034,6 +2037,8 @@ export class ClinicInfo {
       arg.kikancode,
       arg.homepage,
       arg.doctorName,
+      arg.doctorLastName,
+      arg.doctorFirstName,
     )
   }
 }
@@ -2054,4 +2059,22 @@ export class PatientSummary {
     this.patientId = patientId;
     this.content = content;
   }
+}
+
+export interface UsageMaster {
+  usage_code: string;
+  kubun_code: string;
+  kubun_name: string;
+  detail_kubun_code: string;
+  detail_kubun_name: string;
+  timing_code: string;
+  timing_name: string;
+  usage_name: string;
+  usage_code_kubun: string;
+  tonpuku_condition: string;
+  admin_timing: string;
+  admin_time: string;
+  admin_interval: string;
+  admin_location: string;
+  usage_kana: string;
 }

@@ -13,4 +13,9 @@
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
+
+  .left.isCurrent {
+    border-left: 3px solid orange;
+    padding-left: 4px;
+  }
 </style>

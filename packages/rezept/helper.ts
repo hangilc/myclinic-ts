@@ -4,6 +4,7 @@ import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事�
 import type { ShotokuKubunCode, レセプト特記事項コードCode, 負担区分コードCode } from "./codes";
 import { toZenkaku } from "./zenkaku";
 import { DateSet } from "./date-set";
+import { Shahokokuho } from "myclinic-model";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);
@@ -299,8 +300,8 @@ export function hokenshaRecordBangou(hokensha: Hokensha | undefined): string | u
 }
 
 function visitHasHokenSelector(visit: RezeptVisit, selector: HokenSelector): boolean {
-  for(let shinryou of visit.shinryouList) {
-    if( futanKubunIncludes(shinryou.futanKubun, selector) ){
+  for (let shinryou of visit.shinryouList) {
+    if (futanKubunIncludes(shinryou.futanKubun, selector)) {
       return true;
     }
   }
@@ -311,7 +312,7 @@ export function calcJitsuNissuu(visits: RezeptVisit[], selector: HokenSelector):
   let ds = new DateSet();
   const days: string[] = [];
   visits.forEach(visit => {
-    if( visitHasHokenSelector(visit, selector) ){
+    if (visitHasHokenSelector(visit, selector)) {
       ds.add(visit.visitedAt);
     }
   });
@@ -338,7 +339,7 @@ export function resolveFutankubunOfVisitComment(comm: RezeptComment, visit: Reze
 
 export function parseSqlDate(sqlDate: string): { year: number, month: number, day: number } {
   const m = sqlDate.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if( !m ){
+  if (!m) {
     throw new Error(`Invalid sqldate: ${sqlDate}`);
   }
   return {

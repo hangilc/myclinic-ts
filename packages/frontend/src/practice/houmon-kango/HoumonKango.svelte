@@ -70,6 +70,7 @@
     startDate = null;
     uptoDate = null;
     issueDate = new Date();
+    init();
     initDataMap();
     dataSource = "";
   }

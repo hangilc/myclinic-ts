@@ -1,28 +1,21 @@
 <script lang="ts">
-  import { formatVisitText } from "@/lib/format-visit-text";
-  import type * as m from "myclinic-model"
-  import TextForm from "./TextForm.svelte"
+  import type * as m from "myclinic-model";
+  import RegularText from "./regular/RegularText.svelte";
+  import ShohouText from "./shohou/ShohouText.svelte";
 
   export let text: m.Text;
   export let index: number;
-  let isEditing = false;
-
-  function conv(s: string): string {
-    return formatVisitText(s);
+  let mode: "regular" | "shohou" = "regular";
+  if( text.memo ){
+    let memo = JSON.parse(text.memo);
+    if( memo.kind === "shohou" ){
+      mode = "shohou";
+    }
   }
 </script>
 
-{#if isEditing}
-  <TextForm text={text} index={index} onClose={() => isEditing = false} />
-{:else}
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="top" on:click={() => isEditing = true}>
-    <div>{@html conv(text.content)}</div>
-  </div>
+{#if mode === "regular"}
+  <RegularText {text} {index} />
+{:else if mode === "shohou"}
+  <ShohouText {text} />
 {/if}
-
-<style>
-  .top {
-    margin-bottom: 10px;
-  }
-</style>

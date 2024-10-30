@@ -51,8 +51,18 @@ function extendRecords(...rs: Record<string, string>[]): Record<string, string> 
 }
 
 const zenkakuMap: Record<string, string> = extendRecords(digitMap, lowerMap, upperMap, customMap);
+const hankakuMap: Record<string, string> = reverseMap(zenkakuMap);
 
-function toZenkakuWith(
+function reverseMap(map: Record<string, string>): Record<string, string> {
+  const r: Record<string, string> = {};
+  for(const key in map){
+    let value = map[key];
+    r[value] = key;
+  }
+  return r;
+}
+
+function mapWith(
   map: Record<string, string>,
   src: string,
   except: string[] = []): string {
@@ -67,5 +77,9 @@ function toZenkakuWith(
 }
 
 export function toZenkaku(src: string, except: string[] = []): string {
-  return toZenkakuWith(zenkakuMap, src, except);
+  return mapWith(zenkakuMap, src, except);
+}
+
+export function toHankaku(src: string, except: string[] = []): string {
+  return mapWith(hankakuMap, src, except);
 }

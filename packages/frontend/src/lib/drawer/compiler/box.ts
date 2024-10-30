@@ -194,6 +194,23 @@ export function splitWidths(...widths: number[]): Splitter {
   }
 }
 
+export function splitWidthsFromEnd(...widths: number[]): Splitter {
+  return (ext: number) => {
+    if( widths.length === 0 ){
+      return [];
+    } 
+    const at: number[] = [];
+    const sum = widths.reduce((acc, ele) => acc + ele, 0);
+    let c = ext - sum;
+    at.push(c);
+    for(let i=0;i<widths.length-1;i++){
+      c += widths[i];
+      at.push(c);
+    }
+    return at;
+  }
+}
+
 export const splitHeights: (...heights: number[]) => Splitter = splitWidths;
 
 export function splitToColumns(box: Box, splitter: Splitter): Box[] {

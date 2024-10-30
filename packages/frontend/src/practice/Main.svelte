@@ -17,6 +17,7 @@
   import Scan from "@/practice/scan/Scan.svelte";
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
+  import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -27,6 +28,7 @@
       document.title = `(${p.patientId}) ${p.fullName("")}`;
     }
   });
+
 </script>
 
 <div>
@@ -55,5 +57,8 @@
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei"} />
+  {#if $serviceStore === "shohou-usage"}
+    <ShohouUsage />
+  {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>

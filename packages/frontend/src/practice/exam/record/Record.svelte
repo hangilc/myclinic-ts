@@ -14,6 +14,8 @@
   import { currentVisitId } from "../exam-vars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
+  import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
+  import { getClinicInfo } from "@/lib/cache";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -37,6 +39,28 @@
       onLast();
     }
   });
+
+  // function doRenderTest() {
+  //   let presc: RP剤情報[] = examples.presc_example_7;
+  //   console.log("json", JSON.stringify(presc, undefined, 2));
+  //   let render = parseShohousen(renderPresc(presc)).formatForSave();
+  //   console.log(render);
+  // }
+
+  async function doNewShohou() {
+    const clinicInfo = await getClinicInfo();
+    let kikancode = "131" + clinicInfo.kikancode;
+    const d: DenshiShohouDialog = new DenshiShohouDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        patient: visit.patient,
+        visit: visit.asVisit,
+        hokenInfo: visit.hoken,
+        textId: 0,
+      },
+    });
+  }
 </script>
 
 <div class="top" data-type="record" data-visit-id={visit.visitId}>
@@ -57,11 +81,12 @@
             href="javascript:void(0)"
             on:click={() => (showNewTextEditor = true)}>新規文章</a
           >
+          <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
         </div>
       {/if}
     </div>
     <div slot="right">
-      <Hoken bind:visit {onshiConfirmed}/>
+      <Hoken bind:visit {onshiConfirmed} />
       <ShinryouMenu {visit} />
       <ShinryouWrapper {visit} />
       <DrugWrapper {visit} />

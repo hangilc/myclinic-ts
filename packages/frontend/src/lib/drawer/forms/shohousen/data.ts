@@ -27,6 +27,8 @@ export interface ShohousenData {
   koufuDate?: string; // YYYY-MM-DD
   validUptoDate?: string; // YYYY-MM-DD
   drugs?: string;
+  isDenshi?: boolean;
+  accessCode?: string;
 }
 
 export function drawData(ctx: DrawerContext, data: ShohousenData) {

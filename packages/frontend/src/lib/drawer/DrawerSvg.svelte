@@ -36,9 +36,18 @@
   });
 </script>
 
-<div
-  bind:this={wrapper}
-  style:width={displayWidth}
-  style:height={displayHeight}
-  style:overflow="auto"
-/>
+<div class="wrapper">
+  <div
+    bind:this={wrapper}
+    style:width={displayWidth}
+    style:height={displayHeight}
+    style:overflow="auto"
+  ></div>
+  <slot />
+</div>
+
+<style>
+  .wrapper {
+    position: relative;
+  }
+</style>

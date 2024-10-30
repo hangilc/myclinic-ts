@@ -9,6 +9,8 @@ import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castO
 import { pipe } from "myclinic-model/pipe";
 import { mapNullOptional } from "myclinic-model/model";
 import type { ReferConfig } from "./refer";
+import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
+import type { FreqUsage } from "./cache";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -356,6 +358,10 @@ export default {
       { "visit-id": visitId.toString() },
       castBoolean
     );
+  },
+
+  getText(textId: number): Promise<m.Text> {
+    return get("get-text", { "text-id": textId.toString() }, m.Text.cast);
   },
 
   enterText(text: m.Text): Promise<m.Text> {
@@ -1613,4 +1619,30 @@ export default {
   setConfig(name: string, content: any): Promise<void> {
     return post("set-config", content, { name }, a => a);
   },
+
+  selectUsageMasterByUsageName(name: string): Promise<m.UsageMaster[]> {
+    return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster[])
+  },
+
+  getShohouFreqUsage(): Promise<FreqUsage[]> {
+    return get("get-config", { name: "shohou-freq-usage" }, a => a ?? []);
+  },
+
+  saveShohouFreqUsage(usages: FreqUsage[]): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-usage" }, a => a);
+  },
+
+  getShohouFreqPrescription(): Promise<{ presc: RP剤情報, comment: string }[]> {
+    return get("get-config", { name: "shohou-freq-prescription" }, a => a ?? []);
+  },
+
+  saveShohouFreqPrescription(usages: { presc: RP剤情報, comment: string }): Promise<void> {
+    return post("set-config", usages, { name: "shohou-freq-prescription" }, a => a);
+  },
+
+  decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
+    return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
+  }
 };
+
+

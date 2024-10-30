@@ -1,17 +1,25 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import { Payment, Visit, WqueueState } from "myclinic-model";
+  import { WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./exam-vars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
-  // import { calcGendogaku, listMonthlyPayment } from "@/lib/gendogaku";
   import * as kanjidate from "kanjidate";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
+  import * as cache from "@lib/cache";
+  import { DateWrapper } from "myclinic-util";
+  import { searchPresc } from "@/lib/denshi-shohou/presc-api";
+  import { formatHokenshaBangou } from "myclinic-rezept/helper";
+  import {
+    checkShohouResult,
+    type SearchResult,
+  } from "@/lib/denshi-shohou/shohou-interface";
+  import PrescListDialog from "./PrescListDialog.svelte";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -25,28 +33,16 @@
       const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       const year = kd.year;
       const month = kd.month;
-      // const gendogaku: number | undefined = await calcGendogaku(
-      //   patient.patientId,
-      //   year,
-      //   month
-      // );
-      // let payments: Payment[] | undefined = undefined;
-      // if (gendogaku != undefined) {
-      //   payments = await listMonthlyPayment(patient.patientId, year, month);
-      // }
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           visitId: cashierVisitId,
           meisai: new MeisaiWrapper(rezeptMeisai),
-          // gendogaku,
-          // payments,
         },
       });
     }
   }
-
 
   function onEndPatientClick() {
     endPatient(WqueueState.WaitReExam);
@@ -97,7 +93,7 @@
   }
 
   function doMemo() {
-    if( $currentPatient ){
+    if ($currentPatient) {
       const patient = $currentPatient;
       const d: PatientMemoEditorDialog = new PatientMemoEditorDialog({
         target: document.body,
@@ -107,9 +103,80 @@
           onEnter: (newMemo: string | undefined) => {
             const newPatient = Object.assign({}, patient, { memo: newMemo });
             api.updatePatient(newPatient);
-          }
+          },
         },
       });
+    }
+  }
+
+  async function searchPatientPresc(
+    patientId: number,
+    at: DateWrapper
+  ): Promise<SearchResult | undefined> {
+    let kikancode = await cache.getShohouKikancode();
+    let shahokokuho = await api.findAvailableShahokokuho(
+      patientId,
+      at.asSqlDate()
+    );
+    if (shahokokuho) {
+      return await searchPresc(
+        kikancode,
+        formatHokenshaBangou(shahokokuho.hokenshaBangou),
+        shahokokuho.hihokenshaKigou,
+        shahokokuho.hihokenshaBangou,
+        shahokokuho.edaban,
+        undefined,
+        undefined
+      );
+    } else {
+      let koukikourei = await api.findAvailableKoukikourei(
+        patientId,
+        at.asSqlDate()
+      );
+      if (koukikourei) {
+        return await searchPresc(
+          kikancode,
+          koukikourei.hokenshaBangou,
+          undefined,
+          koukikourei.hihokenshaBangou,
+          undefined,
+          undefined,
+          undefined
+        );
+      }
+    }
+    return undefined;
+  }
+
+  async function doPrescList() {
+    let patient = $currentPatient;
+    if (patient) {
+      let result = await searchPatientPresc(
+        patient.patientId,
+        DateWrapper.from(new Date())
+      );
+      if (result) {
+        let err = checkShohouResult(result);
+        if (err) {
+          alert(err);
+          return;
+        }
+        let list = result.XmlMsg.MessageBody.PrescriptionIdList;
+        if (list) {
+          list.sort(
+            (a, b) => -a.CreateDateTime.localeCompare(b.CreateDateTime)
+          );
+          const d: PrescListDialog = new PrescListDialog({
+            target: document.body,
+            props: {
+              destroy: () => d.$destroy(),
+              list,
+            }
+          })
+        }
+      } else {
+        alert("Empty result");
+      }
     }
   }
 </script>
@@ -122,6 +189,7 @@
   <a href="javascript:void(0)" on:click={doMemo}>メモ編集</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
+  <a href="javascript:void(0)" on:click={doPrescList}>処方一覧</a>
 </div>
 
 <style>

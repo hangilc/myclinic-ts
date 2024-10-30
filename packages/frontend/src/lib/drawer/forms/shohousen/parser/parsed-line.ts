@@ -1,16 +1,17 @@
-interface DrugAmountLine {
+export interface DrugAmountLine {
   kind: "drug-amount";
   drug: string;
   amount: string;
   unit: string;
+  tail?: string;
 }
 
-interface RegularLine {
+export interface RegularLine {
   kind: "regular";
   str: string;
 }
 
-interface DaysLine {
+export interface DaysLine {
   kind: "days";
   str: string;
   days: string;
@@ -21,12 +22,12 @@ interface DaysLine {
 export type ParsedLine = DrugAmountLine | RegularLine | DaysLine;
 
 const tmplUnit = "錠|カプセル|ｇ|ｍｇ|包|ｍＬ|ブリスター|瓶|個|キット|枚|パック|袋|本";
-const reFirstLine = new RegExp(`^\\s*(.*)\\s+([０-９．]+)(${tmplUnit})\\s*$`);
+const reFirstLine = new RegExp(`^\\s*(.*)\\s+([０-９．]+)(${tmplUnit})(（.+）)?\\s*$`);
 
 export function parseFirstLine(line: string): DrugAmountLine | RegularLine {
   const m = line.match(reFirstLine);
   if (m) {
-    return { kind: "drug-amount", drug: m[1], amount: m[2], unit: m[3] };
+    return { kind: "drug-amount", drug: m[1], amount: m[2], unit: m[3], tail: m[4] };
   } else {
     return { kind: "regular", str: line };
   }

@@ -37,6 +37,7 @@
   <a href="javascript:void(0)" on:click={menu("rcpt-check")}>レセプトチェック</a>
   <a href="javascript:void(0)" on:click={menu("rezept")}>レセプト</a>
   <a href="javascript:void(0)" on:click={menu("henrei")}>返戻</a>
+  <a href="javascript:void(0)" on:click={menu("shohou-usage")}>処方用法管理</a>
   <a href="javascript:void(0)" on:click={menu("big-char")}>大きい文字</a>
 </div>
 
