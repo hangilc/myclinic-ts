@@ -102,6 +102,8 @@ export interface RezeptShinryouMaster {
   tensuu: number;
   name: string;
   houkatsukensa: string;
+  chuukasan: number | undefined,
+  chuukasanOrder: string | undefined,
 }
 
 export interface RezeptIyakuhinMaster {

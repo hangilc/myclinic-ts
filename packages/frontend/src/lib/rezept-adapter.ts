@@ -398,6 +398,8 @@ function cvtToRezeptShinryou(shinryou: ShinryouEx, hoken: HokenInfo, hokenCollec
       tensuu: parseInt(shinryou.master.tensuuStore),
       name: shinryou.master.name,
       houkatsukensa: shinryou.master.houkatsukensa,
+      chuukasan: shinryou.master.chuukasan,
+      chuukasanOrder: shinryou.master.chuukasanOrder,
     },
     comments: shinryou.asShinryou().comments,
   };
@@ -441,6 +443,8 @@ function cvtToRezeptConductShinryou(cs: ConductShinryouEx): RezeptConductShinryo
       tensuu: parseInt(cs.master.tensuuStore),
       name: cs.master.name,
       houkatsukensa: cs.master.houkatsukensa,
+      chuukasan: cs.master.chuukasan,
+      chuukasanOrder: cs.master.chuukasanOrder,
     },
     comments: commenctsOfConductShinryou(cs),
     amount: cs.amount,

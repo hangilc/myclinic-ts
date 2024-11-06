@@ -57,7 +57,6 @@
     );
     const frame = new RezeptFrame(shiharaiSelect, year, month, clinicInfo);
     for (const unit of units) {
-      console.log("unit", unit.patient.patientId, unit.patient.name);
       const patientUnit = rezeptUnitToPatientUnit(unit, year, month, {}, unit.paymentSetting);
       frame.add(patientUnit);
     }

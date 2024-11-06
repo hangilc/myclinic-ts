@@ -702,7 +702,9 @@ export class ShinryouMaster {
     public oushinkubun: string,
     public kensagroup: string,
     public validFrom: string,
-    public validUpto: string
+    public validUpto: string,
+    public chuukasan?: number,
+    public chuukasanOrder?: string,
   ) { }
 
   static cast(arg: any): ShinryouMaster {
@@ -716,7 +718,9 @@ export class ShinryouMaster {
       arg.oushinkubun,
       arg.kensagroup,
       arg.validFrom,
-      arg.validUpto
+      arg.validUpto,
+      arg.chuukasan,
+      arg.chuukasanOrder,
     );
   }
 }
