@@ -67,7 +67,7 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
   opt: RezeptUnitToPatientUnitOption = {}, ctx: Partial<PaymentSetting> = {}): PatientUnit {
   const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = rezeptUnit;
   if (!hokensha) {
-    throw new Error("No hokensha");
+    throw new Error(`No hokensha patient-id ${patient.patientId}`);
   }
   const rows: string[] = [];
   if (visits.length === 0) {
