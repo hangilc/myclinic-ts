@@ -25,6 +25,7 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     return { items, charge: items.reduce((acc, ele) => acc + ele.ten, 0) * 10, futanWari: 10 };
   } else {
     const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
+    console.log("futanWari", futanWari);
     const birthday = current.patient.birthday;
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
