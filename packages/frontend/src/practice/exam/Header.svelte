@@ -17,6 +17,8 @@
   } from "@/lib/denshi-shohou/presc-api";
   import RegisteredUsage from "@/lib/denshi-shohou/RegisteredUsage.svelte";
   import { DateWrapper } from "myclinic-util";
+  import SearchByPhoneDialog from "./SearchByPhoneDialog.svelte";
+  import type { Patient } from "myclinic-model";
 
   function updateSelectPatientDialog(sel: string): void {
     switch (sel) {
@@ -57,6 +59,19 @@
       }
       case "by-date": {
         showPatientsByDate.set(true);
+        break;
+      }
+      case "by-phone": {
+        const d: SearchByPhoneDialog = new SearchByPhoneDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            onSelected: (selected: Patient) => {
+              startPatient(selected);
+            },
+
+          }
+        })
         break;
       }
     }
@@ -104,6 +119,7 @@
           ["最近の診察", () => updateSelectPatientDialog("recent")],
           ["予約患者", () => updateSelectPatientDialog("appoint")],
           ["日付別", () => updateSelectPatientDialog("by-date")],
+          ["電話番号", () => updateSelectPatientDialog("by-phone")],
         ],
         destroy: () => m.$destroy(),
       },

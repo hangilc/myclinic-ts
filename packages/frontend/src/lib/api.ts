@@ -150,6 +150,10 @@ export default {
     }
   },
 
+  async seawrchPatientByPhone(text: string): Promise<m.Patient[]> {
+    return await get("search-patient-by-phone", { text }, castList(m.Patient.cast));
+  },
+
   batchGetPatient(patientIds: number[]): Promise<Record<number, m.Patient>> {
     return post<Record<number, m.Patient>>(
       "batch-get-patient",
