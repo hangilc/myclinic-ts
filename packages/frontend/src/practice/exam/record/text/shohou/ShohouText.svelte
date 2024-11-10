@@ -184,11 +184,9 @@
               {statusResult.XmlMsg.MessageBody.MessageFlg === "2"
                 ? "伝達事項あり"
                 : ""}
-              <pre style="white-space:pre-wrap">
-              {formatDispensingResult(
+              <pre style="white-space:pre-wrap">{formatDispensingResult(
                   statusResult.XmlMsg.MessageBody.DispensingResult
-                )}
-            </pre>
+                )}</pre>
             </div>
           {/if}
         </div>
