@@ -44,6 +44,10 @@
 </div>
 
 <style>
+  .select-item {
+    user-select: none;
+  }
+
   .select-item:hover {
     background-color: #eee;
   }
