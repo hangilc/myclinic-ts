@@ -41,7 +41,9 @@ export const PayerObject = {
     if (payers.length === 0) {
       return 0;
     }
-    return PaymentObject.jikofutanOf(payers[payers.length - 1].payment);
+    const total = payers[0].payment.kakari;
+    return payers.reduce((acc, ele) => acc - ele.payment.payment, total);
+    // return PaymentObject.jikofutanOf(payers[payers.length - 1].payment);
   },
   uncoveredOf(self: Payer): number {
     return PaymentObject.uncoveredOf(self.payment);

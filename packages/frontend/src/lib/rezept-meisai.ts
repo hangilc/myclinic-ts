@@ -1,19 +1,17 @@
-import { ConductEx, ConductKizaiEx, ConductShinryouEx, Kouhi, Koukikourei, MeisaiSectionData, MeisaiSectionEnum, MeisaiSectionItem, MeisaiSectionType, Patient, Shahokokuho, ShinryouEx, ShinryouMaster, Visit, VisitEx } from "myclinic-model";
+import {
+  ConductEx, ConductKizaiEx, ConductShinryouEx, Kouhi, Koukikourei, Shahokokuho, ShinryouEx, ShinryouMaster, Visit, VisitEx
+} from "myclinic-model";
 import api from "./api";
-// import { createHokensha, createRezeptKouhi, cvtModelVisitsToRezeptVisits, cvtVisitsToUnit, HokenCollector, resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
-import { calcVisits, Combiner, isHoukatsuGroup, TensuuCollector, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf, roundTo10 } from "myclinic-rezept";
-import { rev診療識別コード, 診療識別コード } from "myclinic-rezept/dist/codes";
-import type { Hokensha, RezeptKouhi, RezeptVisit } from "myclinic-rezept/rezept-types";
-import { calcPayments, mkHokenPayer, PaymentObject, type Payer, reorderPayers, PayerObject, type PaymentSetting } from "myclinic-rezept/futan/calc";
+import { isHoukatsuGroup, type HoukatsuGroup, getHoukatsuStep, houkatsuTenOf, roundTo10 } from "myclinic-rezept";
+import { rev診療識別コード } from "myclinic-rezept/dist/codes";
+import { calcPayments, mkHokenPayer, type Payer, reorderPayers, PayerObject, type PaymentSetting } from "myclinic-rezept/futan/calc";
 import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
-import { calcGendogaku, isUnder70, type GendogakuOptions, isBirthday75 } from "myclinic-rezept/gendogaku";
-import { calcAge } from "./calc-age";
-import { is診療識別コードCode, is負担区分コードName, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName, type 負担区分コードName } from "myclinic-rezept/codes";
-import { type HokenCollection, unifyHokenList } from "myclinic-rezept/hoken-collector";
+import { isUnder70, isBirthday75 } from "myclinic-rezept/gendogaku";
+import { is診療識別コードCode, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
 import { eqArray, type DateWrapperLike, groupBy, groupByGeneric, sqlDateToObject } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
-import { getKouhiOrderWeight, sortKouhiList } from "myclinic-rezept/kouhi-order";
+import { getKouhiOrderWeight } from "myclinic-rezept/kouhi-order";
 import { resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
 
 export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
@@ -25,7 +23,6 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
     return { items, charge: items.reduce((acc, ele) => acc + ele.ten, 0) * 10, futanWari: 10 };
   } else {
     const futanWari = getFutanWari(hoken, current.visitedAt, current.patient.birthday);
-    console.log("futanWari", futanWari);
     const birthday = current.patient.birthday;
     const currentItems: MeisaiItem[] = visitToMeisaiItems(current, at);
     const prevs = await getPrevVisits(current.asVisit);
@@ -77,23 +74,26 @@ function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: s
     a => a[0], itemsList, eqArray,
     () => [], (acc, item) => [...acc, ...item[1]]
   );
+  grouped.forEach((g, i) => {
+    console.log(`group(${i})`, g[0].length, g[1].length);
+  });
   const calcs: [number, Payer[]][] = grouped.map(([payers, items]) => [
     totalTenOfMeisaiItems(items) * 10, payers
-  ])
+  ]);
   const ym = sqlDateToObject(at);
   const bd = sqlDateToObject(birthday);
   calcPayments(calcs,
     createPaymentSetting(futanWari, ym, bd, visits.map(v => v.asVisit), shotokuKubun)
-    //   {
-    //   futanWari,
-    //   isUnder70: isUnder70(ym.year, ym.month, bd.year, bd.month, bd.day),
-    //   isBirthdayMonth75: isBirthday75(ym.year, ym.month, bd.year, bd.month, bd.day),
-    //   shotokuKubun,
-    //   isTasuuGaitou: resolveTasuuGaitou(visits),
-    //   isNyuuin: false,
-    //   marucho: resolveMarucho(visits),
-    // }
   );
+  calcs.forEach((c, i) => {
+    console.log(`calc(${i})`);
+    c[1].forEach((p, pi) => {
+      console.log("  ", `payer(${pi})`, p.payment.kind, p.payment.kakari, p.payment.payment);
+    })
+  })
+  // return calcs.reduce((acc, ele) =>
+  //   acc + PayerObject.jikofutanOf(ele[1])
+  //   , 0);
   const payers: Payer[] = mergePayers(calcs.flatMap(t => t[1]));
   return PayerObject.jikofutanOf(payers);
 }
@@ -310,7 +310,6 @@ function shinryouListToMeisaiItems(shinryouList: ShinryouEx[], at: string): Meis
     }
   })
   const step = getHoukatsuStep(at);
-  console.log("step", step);
   const houkatsuItems: MeisaiItem[] = Array.from(houkatsuCollector.map.entries()).map(([g, l]) => {
     let ten = houkatsuTenOf(g, l.length, step);
     if (ten === undefined) {

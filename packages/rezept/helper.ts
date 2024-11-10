@@ -4,7 +4,6 @@ import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事�
 import type { ShotokuKubunCode, レセプト特記事項コードCode, 負担区分コードCode } from "./codes";
 import { toZenkaku } from "./zenkaku";
 import { DateSet } from "./date-set";
-import { Shahokokuho } from "myclinic-model";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
   let d = new Date(year, month - 1, 1);

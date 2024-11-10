@@ -30,9 +30,6 @@
       cashierVisitId.set(visitId);
       const rezeptMeisai = await calcRezeptMeisai(visitId);
       const visit = await api.getVisit(visitId);
-      const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
-      const year = kd.year;
-      const month = kd.month;
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
