@@ -190,27 +190,6 @@
     </div>
     <div data-cy="kind-disp">{appointKindRep(data)}</div>
   </div>
-  <!-- <div slot="menu" class="context-menu">
-      <a href="javascript:void(0)" on:click={() => doHistoryDialog(destroy)}
-        >変更履歴</a
-      >
-      {#if isAdmin}
-        <a href="javascript:void(0)" on:click={() => doOpenEditDialog(destroy)}
-          >編集</a
-        >
-        <a href="javascript:void(0)" on:click={() => doOpenBindDialog(destroy)}
-          >結合</a
-        >
-        <a href="javascript:void(0)" on:click={() => doOpenSplitDialog(destroy)}
-          >分割</a
-        >
-        <a href="javascript:void(0)" on:click={() => doDelete(destroy)}>削除</a>
-        <a href="javascript:void(0)" on:click={() => doOnshiKakunin(destroy)}
-          >資格確認</a
-        >
-      {/if}
-    </div> -->
-
   {#if data.appoints.length > 0}
     {#each data.appoints as appoint (appoint.appointId)}
       <AppointPatient data={appoint} appointTimeData={data} />

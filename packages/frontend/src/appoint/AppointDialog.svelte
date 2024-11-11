@@ -10,6 +10,8 @@
   import { setFocus } from "@/lib/set-focus";
   import { confirm } from "@/lib/confirm-call";
   import Dialog from "@/lib/Dialog.svelte";
+  import { pad } from "@/lib/pad";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
   export let data: AppointTimeData;
@@ -182,6 +184,11 @@
   function doClose(): void {
     destroy();
   }
+
+  function birthdayRep(birthday: string): string {
+    const d = DateWrapper.fromSqlDate(birthday);
+    return `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日生`;
+  }
 </script>
 
 <Dialog {destroy} {title}>
@@ -234,7 +241,11 @@
                 isCurrent={p.patientId === patientId}
                 onSelect={doPatientSelect}
               >
-                {p.fullName()}
+              ({pad(p.patientId, 4, "0")})
+                <span style="font-weight:bold;">{p.fullName()}</span>
+                <span>
+                  {birthdayRep(p.birthday)}
+                </span>
               </SelectItem2>
             {/each}
           </div>
