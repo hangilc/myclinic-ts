@@ -32,13 +32,21 @@
       if (wq == null) {
         return;
       }
-      let item = await getWqueueData(wq);
-      const tmp = wqItems;
-      let i = tmp.findIndex((d) => d.visitId == wq.visitId);
-      if (i >= 0) {
-        tmp.splice(i, 1, item);
-        wqItems = tmp;
-      }
+      const wqData = await getWqueueData(wq);
+      wqItems = wqItems.map(item => {
+        if( item.visitId === wq.visitId ){
+          return wqData;
+        } else {
+          return item;
+        }
+      })
+      // let item = await getWqueueData(wq);
+      // const tmp = wqItems;
+      // let i = tmp.findIndex((d) => d.visitId == wq.visitId);
+      // if (i >= 0) {
+      //   tmp.splice(i, 1, item);
+      //   wqItems = tmp;
+      // }
     })
   );
 
@@ -47,12 +55,13 @@
       if (wq == null) {
         return;
       }
-      let i = wqItems.findIndex((d) => d.visitId == wq.visitId);
-      if (i >= 0) {
-        const tmp = wqItems;
-        tmp.splice(i, 1);
-        wqItems = tmp;
-      }
+      wqItems = wqItems.filter(item => item.visitId !== wq.visitId);
+      // let i = wqItems.findIndex((d) => d.visitId == wq.visitId);
+      // if (i >= 0) {
+      //   const tmp = wqItems;
+      //   tmp.splice(i, 1);
+      //   wqItems = tmp;
+      // }
     })
   );
 
