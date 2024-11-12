@@ -6,7 +6,7 @@ import * as b from "../../compiler/box";
 import * as p from "../../compiler/composite-item";
 import { A4 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
-import { breakNextLine, breakParagraph } from "../../compiler/break-lines";
+import { breakNextLine } from "../../compiler/break-lines";
 
 export function drawRefer(data: ReferDrawerData): Op[][] {
   const ctx = mkDrawerContext(ctx => {

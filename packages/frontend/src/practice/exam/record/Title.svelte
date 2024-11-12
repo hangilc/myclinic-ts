@@ -73,7 +73,6 @@
   }
 
   function totalTenOf(meisai: Meisai): string {
-    // return meisai.totalTen.toLocaleString();
     return totalTenOfMeisaiItems(meisai.items).toLocaleString();
   }
 
@@ -96,17 +95,16 @@
         onEnter: async (entered: string[]) => {
           const newAttr = Object.assign({}, attrs, { hokengai: entered });
           await updateVisitAttributes(newAttr);
-          // const origVisit = await api.getVisit(visit.visitId);
-          // origVisit.attributesStore = JSON.stringify(newAttr);
-          // await api.updateVisit(origVisit);
-          // visit.attributesStore = origVisit.attributesStore;
         },
       },
     });
   }
 
   async function doNanbyouGendogaku() {
-    const gendo = prompt("難病限度額", visit.attributes?.nanbyouGendogaku?.toString() ?? "");
+    const gendo = prompt(
+      "難病限度額",
+      visit.attributes?.nanbyouGendogaku?.toString() ?? ""
+    );
     if (gendo == null) {
       return;
     }
@@ -119,6 +117,12 @@
     const attr: VisitAttributes = Object.assign({}, visit.attributes);
     attr.nanbyouGendogaku = gendogaku;
     await updateVisitAttributes(attr);
+  }
+
+  async function doIssueShinryouMeisai() {
+    const shinryouList = visit.shinryouList;
+    const conducts = visit.conducts;
+    console.log(shinryouList);
   }
 
   function composeMenu(): [string, () => void][] {
@@ -141,6 +145,7 @@
       add("難病限度額設定", doNanbyouGendogaku);
     }
     add("保険外", doHokengai);
+    add("診療明細書発行", doIssueShinryouMeisai);
     return m;
   }
 </script>
@@ -153,32 +158,7 @@
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
   <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
-    >操作</a
-  >
-  <!-- <div slot="menu" class="popup-menu">
-      <a href="javascript:void(0)" on:click={destroyAnd(doDeleteVisit)}
-        >この診察を削除</a
-      >
-      {#if visit.visitId !== $tempVisitId}
-        <a
-          href="javascript:void(0)"
-          on:click={destroyAnd(doSetTempVisitId)}>暫定診察に設定</a
-        >
-      {:else}
-        <a
-          href="javascript:void(0)"
-          on:click={destroyAnd(doClearTempVisitId)}>暫定診察の解除</a
-        >
-      {/if}
-      <a href="javascript:void(0)" on:click={destroyAnd(doMeisai)}>診療明細</a>
-      <a href="javascript:void(0)" on:click={destroyAnd(doFutanwariOverride)}
-        >負担割オーバーライド</a
-      >
-      {#if isMishuu(visit)}
-        <a href="javascript:void(0)" on:click={destroyAnd(doMishuuList)}>未収リストへ</a>
-      {/if}
-      <a href="javascript:void(0)" on:click={destroyAnd(doGendogaku)}>限度額</a>
-    </div> -->
+    >操作</a>
 </div>
 
 {#if showMeisai}
