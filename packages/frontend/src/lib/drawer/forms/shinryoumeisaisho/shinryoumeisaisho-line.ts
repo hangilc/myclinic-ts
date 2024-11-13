@@ -26,19 +26,15 @@ export class LineCompiler {
     const lines: Line[] = [];
     const kubunLines: string[] = [];
     const nameLines: string[] = [];
-    const tensuuLines: string[] = [];
-    const kaisuuLines: string[] = [];
     kubunLines.push(...breakLines(kubun, this.fontSize, this.kubunWidth));
     nameLines.push(...breakLines(name, this.fontSize, this.nameWidth));
-    tensuuLines.push(...breakLines(tensuu, this.fontSize, this.tensuuWidth));
-    kaisuuLines.push(...breakLines(kaisuu, this.fontSize, this.kaisuuWidth));
-    const n = Math.max(kubunLines.length, nameLines.length, tensuuLines.length, kaisuuLines.length);
+    const n = Math.max(kubunLines.length, nameLines.length);
     for (let i = 0; i < n; i++) {
       lines.push({
         kubun: kubunLines[i] ?? "",
         name: nameLines[i] ?? "",
-        tensuu: tensuuLines[i] ?? "",
-        kaisuu: kaisuuLines[i] ?? "",
+        tensuu: i === n - 1 ? tensuu : "",
+        kaisuu: i === n - 1 ? kaisuu : "",
       })
     }
     return lines;

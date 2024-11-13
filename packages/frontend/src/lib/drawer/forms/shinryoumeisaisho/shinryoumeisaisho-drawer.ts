@@ -15,10 +15,12 @@ export function drawShinryoumeisaisho(data: ShinryoumeisaishoData): Op[][] {
   setupPens(ctx);
   const paper: Box = b.paperSizeToBox(A4);
   drawTitle(ctx, paper);
-  const outline: Box = b.modify(paper, b.inset(21, 39, 0, 48), b.setWidth(161, "left"));
+  const outline: Box = b.modify(paper, b.inset(21, 39, 0, 74), b.setWidth(161, "left"));
   const [upper, _, lower] = b.splitToRows(outline, b.splitAt(9, 13));
+  const addr = b.modify(lower, b.flipDown(), b.setHeight(30, "top"), b.shiftDown(2));
   drawUpper(ctx, upper, data);
   drawLower(ctx, lower, data);
+  drawAddr(ctx, addr, data);
   pages.push(c.getOps(ctx));
   return pages;
 }
@@ -66,7 +68,7 @@ function drawUpper(ctx: DrawerContext, box: Box, data: ShinryoumeisaishoData) {
 
 function drawLower(ctx: DrawerContext, box: Box, data: ShinryoumeisaishoData) {
   c.frame(ctx, box);
-  const [title, main] = b.splitToRows(box, b.splitAt(4));
+  let [title, main] = b.splitToRows(box, b.splitAt(4));
   [title, main].forEach(col => c.frame(ctx, col));
   const splits = [23, 106, 143];
   {
@@ -79,22 +81,36 @@ function drawLower(ctx: DrawerContext, box: Box, data: ShinryoumeisaishoData) {
   }
   {
     b.splitToColumns(main, b.splitAt(...splits)).forEach(col => c.frame(ctx, col));
-    let box = main;
-    [kubunCol, nameCol, tensuuCol, kaisuuCol].forEach(col => c.frame(ctx, col));
-    kubunCol = b.modify(kubunCol, b.inset(0.5));
-    nameCol = b.modify(nameCol, b.inset(0.5));
-    tensuuCol = b.modify(tensuuCol, b.inset(0.5));
-    kaisuuCol = b.modify(kaisuuCol, b.inset(0.5));
-    const lineComp = new LineCompiler(c.currentFontSize(ctx), b.width(kubunCol),
-      b.width(nameCol), b.width(tensuuCol), b.width(kaisuuCol));
+    main = b.modify(main, b.inset(0, 0.5));
+    let fontSize = c.currentFontSize(ctx);
+    let [kubunCol, nameCol, tensuuCol, kaisuuCol] = b.splitToColumns(main, b.splitAt(...splits))
+      .map(col => b.modify(col, b.inset(0.5, 0)));
+    nameCol = b.modify(nameCol, b.shrinkHoriz(fontSize, 0));
+    const lineComp = new LineCompiler(fontSize, b.width(kubunCol), b.width(nameCol),
+      b.width(tensuuCol), b.width(kaisuuCol));
     data.kubunList.forEach(kubun => {
       const lines = lineComp.breakToLines(kubun.kubunName, kubun.name, kubun.tensuu.toString(), kubun.count.toString());
-      lines.forEach(line => {
+      lines.forEach((line, i) => {
         c.drawText(ctx, line.kubun, kubunCol, "left", "top");
+        if (i === 0) {
+          const box = b.modify(nameCol, b.flipLeft(), b.setWidth(fontSize, "right"));
+          c.drawText(ctx, "*", box, "center", "top");
+        }
         c.drawText(ctx, line.name, nameCol, "left", "top");
         c.drawText(ctx, line.tensuu, tensuuCol, "right", "top");
         c.drawText(ctx, line.kaisuu, kaisuuCol, "right", "top");
+        kubunCol = b.modify(kubunCol, b.shrinkVert(fontSize, 0));
+        nameCol = b.modify(nameCol, b.shrinkVert(fontSize, 0));
+        tensuuCol = b.modify(tensuuCol, b.shrinkVert(fontSize, 0));
+        kaisuuCol = b.modify(kaisuuCol, b.shrinkVert(fontSize, 0));
       })
     })
   }
+}
+
+function drawAddr(ctx: DrawerContext, box: Box, data: ShinryoumeisaishoData) {
+  const fontSize = c.currentFontSize(ctx);
+  c.drawText(ctx, data.clinicAddress, box, "right", "top");
+  box = b.modify(box, b.shrinkVert(fontSize, 0));
+  c.drawText(ctx, data.clinicName, box, "right", "top");
 }
