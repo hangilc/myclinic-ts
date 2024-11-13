@@ -165,8 +165,8 @@ function getHokenOfVisit(visit: VisitEx): Shahokokuho | Koukikourei | undefined 
   return hoken.shahokokuho || hoken.koukikourei || undefined;
 }
 
-const MeisaiSectionStrings = ["初・再診料", "医学管理等", "在宅医療", "検査", "画像診断", "投薬", "注射", "処置", "その他"] as const;
-type MeisaiSection = typeof MeisaiSectionStrings[number];
+export const MeisaiSectionStrings = ["初・再診料", "医学管理等", "在宅医療", "検査", "画像診断", "投薬", "注射", "処置", "その他"] as const;
+export type MeisaiSection = typeof MeisaiSectionStrings[number];
 
 const ShinryouShikibetsuCodeNameToMeisaiSectionMap: { [K in 診療識別コードName]: MeisaiSection } = {
   "全体に係る識別コード": "その他",
@@ -356,11 +356,27 @@ function conductsToMeisaiItems(conducts: ConductEx[]): MeisaiItem[] {
   ]);
 }
 
-function visitToMeisaiItems(visit: VisitEx, at: string): MeisaiItem[] {
+export function visitToMeisaiItems(visit: VisitEx, at: string): MeisaiItem[] {
   return [
     ...shinryouListToMeisaiItems(visit.shinryouList, at),
     ...conductsToMeisaiItems(visit.conducts)
   ]
+}
+
+export function groupMeisaiItemsBySection(items: MeisaiItem[]): [MeisaiSection, MeisaiItem[]][] {
+  const map: Map<MeisaiSection, MeisaiItem[]> = new Map();
+  items.forEach(item => {
+    const bind = map.get(item.section);
+    if( bind ){
+      bind.push(item);
+    } else {
+      map.set(item.section, [item]);
+    }
+  })
+  return MeisaiSectionStrings.map(sec => {
+    const bind = map.get(sec) ?? [];
+    return [sec, bind];
+  });
 }
 
 async function getPrevVisits(current: Visit): Promise<VisitEx[]> {

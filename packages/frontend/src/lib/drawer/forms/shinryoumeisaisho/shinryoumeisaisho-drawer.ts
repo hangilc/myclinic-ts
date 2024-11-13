@@ -78,7 +78,8 @@ function drawLower(ctx: DrawerContext, box: Box, data: ShinryoumeisaishoData) {
     })
   }
   {
-    let [kubunCol, nameCol, tensuuCol, kaisuuCol] = b.splitToColumns(main, b.splitAt(...splits));
+    b.splitToColumns(main, b.splitAt(...splits)).forEach(col => c.frame(ctx, col));
+    let box = main;
     [kubunCol, nameCol, tensuuCol, kaisuuCol].forEach(col => c.frame(ctx, col));
     kubunCol = b.modify(kubunCol, b.inset(0.5));
     nameCol = b.modify(nameCol, b.inset(0.5));
