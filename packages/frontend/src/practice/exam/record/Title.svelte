@@ -20,6 +20,9 @@
     totalTenOfMeisaiItems,
   } from "@/lib/rezept-meisai";
   import { resolveKouhiPayer } from "@/lib/resolve-payer";
+  import { createShinryoumeisaishoData } from "./title/shinryoumeisaisho";
+  import { drawShinryoumeisaisho } from "@/lib/drawer/forms/shinryoumeisaisho/shinryoumeisaisho-drawer";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 
   export let visit: VisitEx;
 
@@ -122,7 +125,24 @@
   async function doIssueShinryouMeisai() {
     const shinryouList = visit.shinryouList;
     const conducts = visit.conducts;
-    console.log(shinryouList);
+    const clinicInfo = await api.getClinicInfo();
+    const data = createShinryoumeisaishoData(visit, clinicInfo);
+    data.kubunList = [
+      {
+        kubunName: "初診・再診",
+        name: "初診料",
+        tensuu: 120,
+        count: 1,
+      }
+    ]
+    const pages = drawShinryoumeisaisho(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+      }
+    })
   }
 
   function composeMenu(): [string, () => void][] {

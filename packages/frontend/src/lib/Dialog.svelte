@@ -156,6 +156,8 @@
     background-color: white;
     opacity: 1;
     border-radius: 8px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
   }
 
   .dialog:focus {

@@ -143,6 +143,10 @@ export class DateWrapper {
     return JSON.stringify({ year: this.getYear(), month: this.getMonth(), day: this.getDay() });
   }
 
+  render(f: (self: DateWrapper) => string): string {
+    return f(this);
+  }
+
   static fromDate(date: Date): DateWrapper {
     return new DateWrapper(date);
   }
