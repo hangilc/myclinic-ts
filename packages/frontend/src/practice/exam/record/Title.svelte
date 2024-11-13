@@ -127,14 +127,6 @@
     const conducts = visit.conducts;
     const clinicInfo = await api.getClinicInfo();
     const data = createShinryoumeisaishoData(visit, clinicInfo);
-    data.kubunList = [
-      {
-        kubunName: "初診・再診",
-        name: "初診料",
-        tensuu: 120,
-        count: 1,
-      }
-    ]
     const pages = drawShinryoumeisaisho(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
