@@ -74,14 +74,11 @@
     ])}
       >診療録</a
     >
-    <!-- <RecordsPulldown slot="menu" {destroy}/> -->
-
     <Bars3 onClick={popupTrigger(() => [
       ["未収処理", auxMenu.doMishuu],
       ["手書き領収書印刷", auxMenu.doBlankReceipt],
     ])} color="#666" dx="2px" dy="-4px" style="cursor: pointer;"
       dataCy="bars3-menu"/>
-    <!-- <TopBlockAuxMenu slot="menu" {destroy}/> -->
 </div>
 
 <style>

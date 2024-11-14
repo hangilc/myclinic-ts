@@ -18,6 +18,7 @@
   let hihokensha = "";
   let hihokenshaKigou = "";
   let edaban = "";
+  let phone = "";
 
   function doClose(): void {
     destroy();
@@ -40,6 +41,10 @@
     if( !birthdate ){
       return "生年月日が入力されていません。";
     }
+    phone = phone.trim();
+    if( !phone ){
+      return "電話番号が入力されていません。";
+    }
     return {
       hokensha,
       hihokensha,
@@ -59,6 +64,7 @@
     }
     const confirm = await onshiConfirm(validated);
     const patient = onshiToPatient(confirm);
+    patient.phone = phone;
     const entered: Patient = await api.enterPatient(patient);
     console.log("entered", entered);
     const hoken = createHokenFromOnshiResult(entered.patientId, confirm.resultList[0]);
@@ -121,6 +127,10 @@
       <span class="input-key">被保険者番号：</span><input type="text" bind:value={hihokensha}/>
     </div>
   {/if}
+  <hr />
+  <div>
+    電話番号：<input type="text" bind:value={phone} />
+  </div>
   <div class="commands">
     <button on:click={doEnter}>入力</button>
     <button on:click={doClose}>キャンセル</button>
@@ -152,6 +162,7 @@
   .commands {
     display: flex;
     justify-content: right;
+    margin-top: 10px;
   }
   .commands * + * {
     margin-left: 4px;
