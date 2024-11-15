@@ -42,6 +42,7 @@
       return "生年月日が入力されていません。";
     }
     phone = phone.trim();
+    console.log("phone", phone);
     if( !phone ){
       return "電話番号が入力されていません。";
     }
