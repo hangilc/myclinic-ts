@@ -68,8 +68,9 @@
   }
 
   async function doEnter() {
-    await cache.updateShohouFreqUsage(usages);
-    destroy();
+    alert("not implemented yet");
+    // await cache.updateShohouFreqUsage(usages);
+    // destroy();
   }
 </script>
 
