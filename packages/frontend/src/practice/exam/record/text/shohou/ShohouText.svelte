@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Text } from "myclinic-model";
+  import { Text, type Visit } from "myclinic-model";
   import type { ShohouTextMemo } from "../text-memo";
   import {
     renderDrug,
@@ -16,6 +16,8 @@
   import type { 備考レコード } from "@/lib/denshi-shohou/presc-info";
   import * as Base64 from "js-base64";
   import { XMLParser } from "fast-xml-parser";
+  import { getCopyTarget } from "@/practice/exam/exam-vars";
+  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 
   export let text: Text;
 
@@ -127,6 +129,24 @@
       return "";
     }
   }
+
+  async function doCopy() {
+    if (memo) {
+      const targetVisitId = getCopyTarget();
+      if (targetVisitId) {
+        const shohou = memo.shohou;
+        const drugs = shohou.RP剤情報グループ;
+        console.log("shohou", JSON.stringify(drugs, undefined, 2));
+        const newShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+        newShohou.RP剤情報グループ = drugs;
+        const newText = new Text(0, targetVisitId, "", JSON.stringify({
+          kind: "shohou",
+          shohou: newShohou,
+        }));
+        await api.enterText(newText);
+      }
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -161,6 +181,7 @@
     {:else}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
+    <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
   </div>
   {#if showDetail}
     <div
