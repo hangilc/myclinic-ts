@@ -11,6 +11,7 @@
   import api from "@/lib/api";
   import { parseSqlDate } from "@/lib/util";
   import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
+  import { extractDrugNames } from "./drugs-visit";
 
   const unsubs: (() => void)[] = [];
   let env: DiseaseEnv | undefined = undefined;
@@ -25,6 +26,12 @@
         env = undefined;
       } else {
         env = await DiseaseEnv.create(p);
+        const drugNames: string[] = extractDrugNames(env.lastVisit?.texts ?? []);
+        console.log("drugNames", drugNames);
+        const diseaseNames: string[] = env.currentList.map(disease => {
+          return disease.byoumeiMaster.name;
+        });
+        console.log("diseaseNames", diseaseNames);
         doMode("current");
       }
     })

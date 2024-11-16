@@ -3,7 +3,7 @@
   import api from "@/lib/api";
   import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
-  import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
+  import { isShohousen, parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
@@ -66,9 +66,9 @@
     }
   }
 
-  function isShohousen(): boolean {
-    return text.content.startsWith("院外処方\nＲｐ）");
-  }
+  // function isShohousen(): boolean {
+  //   return text.content.startsWith("院外処方\nＲｐ）");
+  // }
 
   async function isTodaysShohousen(): Promise<boolean> {
     const visit = await api.getVisit(text.visitId);
@@ -224,7 +224,7 @@
           >引継ぎコピー</a
         >
       {/if}
-      {#if isShohousen()}
+      {#if isShohousen(text.content)}
           <a
             href="javascript:void(0)"
             on:click={popupTrigger(() => [
