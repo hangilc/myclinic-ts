@@ -30,13 +30,13 @@ export class ReceiptDrawerData {
   clinicName: string = "";
   addressLines: string[] = [];
 
-  setPatient(patient: Patient): void {
-    this.patientName = `${patient.lastName} ${patient.firstName}`
-    this.patientId = patient.patientId.toString()
+  setPatient(patient: Patient, name?: string): void {
+    this.patientName = name ?? `${patient.lastName} ${patient.firstName}`;
+    this.patientId = patient.patientId.toString();
   }
 
   setMeisai(meisai: MeisaiWrapper): void {
-    this.charge = meisai.charge
+    // this.charge = meisai.charge
     if (meisai.futanWari == 10) {
       this.futanWari = "";
     } else {
@@ -112,13 +112,16 @@ export class ReceiptDrawerData {
   }
 
   static create(visit: VisitEx, meisai: MeisaiWrapper, clinicInfo: ClinicInfo): ReceiptDrawerData {
+    const attr = JSON.parse(visit.attributesStore ?? "{}");
     const data = new ReceiptDrawerData();
-    data.setPatient(visit.patient)
+    data.setPatient(visit.patient, attr.cashierReceiptName);
     data.setMeisai(meisai);
     data.setVisitDate(new Date(visit.visitedAt));
     data.setIssueDate(new Date());
     data.hoken = hokenRep(visit);
     data.setClinic(clinicInfo);
+    data.charge = visit.chargeOption?.charge ?? 0;
+    data.hokengai = attr.hokengai ?? [];
     return data;
   }
 

@@ -133,8 +133,32 @@
       props: {
         destroy: () => d.$destroy(),
         pages,
-      }
-    })
+      },
+    });
+  }
+
+  async function doReceiptName() {
+    const name = prompt("領収書宛名（患者名にする場合は空白を、空白にする場合はスペースを入力）");
+    if (name === undefined) {
+      return;
+    }
+    if (name === "") {
+      const v = await api.getVisit(visit.visitId);
+      const attr = Object.assign(JSON.parse(v.attributesStore ?? "{}"), {
+        cashierReceiptName: undefined,
+      });
+      v.attributesStore = JSON.stringify(attr);
+      await api.updateVisit(v);
+      visit.attributesStore = attr;
+    } else {
+      const v = await api.getVisit(visit.visitId);
+      const attr = Object.assign(JSON.parse(v.attributesStore ?? "{}"), {
+        cashierReceiptName: name,
+      });
+      v.attributesStore = JSON.stringify(attr);
+      await api.updateVisit(v);
+      visit.attributesStore = attr;
+    }
   }
 
   function composeMenu(): [string, () => void][] {
@@ -158,6 +182,7 @@
     }
     add("保険外", doHokengai);
     add("診療明細書発行", doIssueShinryouMeisai);
+    add("領収書宛名", doReceiptName);
     return m;
   }
 </script>
@@ -170,7 +195,8 @@
   <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
   >
   <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
-    >操作</a>
+    >操作</a
+  >
 </div>
 
 {#if showMeisai}
