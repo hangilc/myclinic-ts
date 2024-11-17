@@ -22,6 +22,7 @@
   import RegisterDiseaseForDrugDialog from "./RegisterDiseaseForDrugDialog.svelte";
   import { writable, type Writable } from "svelte/store";
   import { pred } from "@/lib/validator";
+  import SelectrDiseaseForDrugDialog from "./SelectrDiseaseForDrugDialog.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -51,6 +52,7 @@
       if (p == null) {
         clear();
         clear = () => {};
+        drugsWithouMatchingDisease = [];
         $env = undefined;
       } else {
         $env = await DiseaseEnv.create(p);
@@ -230,18 +232,33 @@
     });
   }
 
-  async function doRegisterDiseaseForDrug(drugName: string) {
-    const d: RegisterDiseaseForDrugDialog = new RegisterDiseaseForDrugDialog({
+  function doSelectDiseaseForDrug(drugName: string) {
+    const d: SelectrDiseaseForDrugDialog = new SelectrDiseaseForDrugDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         drugName,
-        onRegistered: () => {
+        env,
+        onSelected: async () => {
+          drugDiseases = await cache.getDrugDiseases();
           checkDrugs();
         },
       },
     });
   }
+
+  // async function doRegisterDiseaseForDrug(drugName: string) {
+  //   const d: RegisterDiseaseForDrugDialog = new RegisterDiseaseForDrugDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       drugName,
+  //       onRegistered: () => {
+  //         checkDrugs();
+  //       },
+  //     },
+  //   });
+  // }
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
     const at = $env?.lastVisit?.visitedAt.substring(0, 10);
@@ -295,8 +312,8 @@
         {/each}
         <div>
           <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
-          <button on:click={() => doRegisterDiseaseForDrug(d.name)}
-            >病名登録</button
+          <button on:click={() => doSelectDiseaseForDrug(d.name)}
+            >病名選択</button
           >
         </div>
       </div>
