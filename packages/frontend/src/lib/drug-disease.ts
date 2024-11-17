@@ -8,15 +8,21 @@ export interface DrugDisease {
   }
 }
 
-export function hasMatchingDrugDisease(drugName: string, diseaseNames: string[], drugDiseases: DrugDisease[]): boolean {
+export function hasMatchingDrugDisease(
+  drugName: string, diseaseNames: string[], drugDiseases: DrugDisease[]
+): true | { pre: string[], name: string, post: string[] }[] {
+  const fixes: { pre: string[], name: string, post: string[] }[] = [];
   for (let item of drugDiseases) {
     if (drugName.includes(item.drugName)) {
-      for(let diseaseName of diseaseNames) {
-        if( diseaseName.includes(item.diseaseName) ){
+      for (let diseaseName of diseaseNames) {
+        if (diseaseName.includes(item.diseaseName)) {
           return true;
         }
       }
+      if( item.fix ){
+        fixes.push(item.fix);
+      }
     }
   }
-  return false;
+  return fixes;
 }

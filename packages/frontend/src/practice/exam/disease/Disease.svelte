@@ -22,13 +22,16 @@
   let workarea: HTMLElement;
   let clear: () => void = () => {};
   let drugDiseases: DrugDisease[] = [];
-  let drugsWithouMatchingDisease: { id: number; name: string }[] = [];
+  let drugsWithouMatchingDisease: { id: number; name: string, fixes: {
+    pre: string[], name: string, post: string[]
+  }[] }[] = [];
   let drugsWithouMatchingDiseaseIndex = 1;
 
   init();
 
   async function init() {
     drugDiseases = await cache.getDrugDiseases();
+    console.log("drugDiseases", drugDiseases);
   }
 
   unsubs.push(
@@ -57,14 +60,22 @@
       });
       drugsWithouMatchingDisease = [];
       for (let drugName of drugNames) {
-        if (!hasMatchingDrugDisease(drugName, diseaseNames, drugDiseases)) {
+        const m = hasMatchingDrugDisease(drugName, diseaseNames, drugDiseases);
+        if( m === true ){
+          continue;
+        } else {
           drugsWithouMatchingDisease.push({
             id: drugsWithouMatchingDiseaseIndex++,
             name: drugName,
-          });
+            fixes: m,
+          })
         }
       }
     }
+  }
+
+  function fixName(fix: { pre: string[], name: string, post: string[] }): string {
+    return [...fix.pre, fix.name, ...fix.post].join("");
   }
 
   async function doMode(mode: Mode) {
@@ -134,11 +145,13 @@
             onDelete: (diseaseId: number) => {
               envValue.remove(diseaseId);
               envValue.editTarget = undefined;
+              checkDrugs();
               doMode("edit");
             },
             onUpdate: (entered: DiseaseData) => {
               envValue.updateDisease(entered);
               envValue.editTarget = undefined;
+              checkDrugs();
               doMode("edit");
             },
           },
@@ -162,7 +175,11 @@
           at: env.lastVisit.visitedAt.substring(0, 10),
           patientId: env.patient.patientId,
           onAdded: (d: DiseaseData) => {
-            env?.addDisease(d);
+            if( env ){
+              env.addDisease(d);
+              env = env;
+              checkDrugs();
+            }
           },
           onRegistered: () => checkDrugs(),
         },
@@ -190,6 +207,9 @@
     {#each drugsWithouMatchingDisease as d (d.id)}
       <div class="drug-without-matching-disease">
         <div>{d.name}</div>
+        {#each d.fixes as fix}
+          <div>{fixName(fix)}</div> <button>fix</button>
+        {/each}
         <div>
           <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
           <button on:click={() => doRegisterDiseaseForDrug(d.name)}>病名登録</button>
