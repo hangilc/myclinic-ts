@@ -16,7 +16,6 @@
   import { cache } from "@/lib/cache";
   import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
   import RegisterDiseaseForDrugDialog from "./RegisterDiseaseForDrugDialog.svelte";
-  import RegisterDrugDiseaseDialog from "./RegisterDrugDiseaseDialog.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: DiseaseEnv | undefined = undefined;
