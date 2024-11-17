@@ -11,7 +11,7 @@
     shohouHikaeFilename,
   } from "@/lib/denshi-shohou/presc-api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
-  import * as cache from "@lib/cache";
+  import { cache } from "@lib/cache";
   import type { StatusResult } from "@/lib/denshi-shohou/shohou-interface";
   import type { 備考レコード } from "@/lib/denshi-shohou/presc-info";
   import * as Base64 from "js-base64";

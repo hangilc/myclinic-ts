@@ -12,11 +12,23 @@
   import { parseSqlDate } from "@/lib/util";
   import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
   import { extractDrugNames } from "./drugs-visit";
+  import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
+  import { cache } from "@/lib/cache";
+  import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: DiseaseEnv | undefined = undefined;
   let workarea: HTMLElement;
   let clear: () => void = () => {};
+  let drugDiseases: DrugDisease[] = [];
+  let drugsWithouMatchingDisease: { id: number; name: string }[] = [];
+  let drugsWithouMatchingDiseaseIndex = 1;
+
+  init();
+
+  async function init() {
+    drugDiseases = await cache.getDrugDiseases();
+  }
 
   unsubs.push(
     currentPatient.subscribe(async (p) => {
@@ -26,12 +38,7 @@
         env = undefined;
       } else {
         env = await DiseaseEnv.create(p);
-        const drugNames: string[] = extractDrugNames(env.lastVisit?.texts ?? []);
-        console.log("drugNames", drugNames);
-        const diseaseNames: string[] = env.currentList.map(disease => {
-          return disease.byoumeiMaster.name;
-        });
-        console.log("diseaseNames", diseaseNames);
+        checkDrugs();
         doMode("current");
       }
     })
@@ -40,6 +47,24 @@
   onDestroy(() => {
     unsubs.forEach((f) => f());
   });
+
+  async function checkDrugs() {
+    if (env) {
+      const drugNames: string[] = extractDrugNames(env.lastVisit?.texts ?? []);
+      const diseaseNames: string[] = env.currentList.map((disease) => {
+        return disease.byoumeiMaster.name;
+      });
+      drugsWithouMatchingDisease = [];
+      for (let drugName of drugNames) {
+        if (!hasMatchingDrugDisease(drugName, diseaseNames, drugDiseases)) {
+          drugsWithouMatchingDisease.push({
+            id: drugsWithouMatchingDiseaseIndex++,
+            name: drugName,
+          });
+        }
+      }
+    }
+  }
 
   async function doMode(mode: Mode) {
     if (env == null) {
@@ -125,21 +150,70 @@
       }
     }
   }
+
+  async function doAddDiseaseForDrug(drugName: string) {
+    const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        drugName,
+      }
+    })
+  }
 </script>
 
 <RightBox title="病名" display={!!env} dataCy="disease-box">
   <div class="workarea" bind:this={workarea} />
+  <div class="drug-without-matching-disease-wrapper">
+    {#each drugsWithouMatchingDisease as d (d.id)}
+      <div class="drug-without-matching-disease">
+        <div>{d.name}</div>
+        <div>
+          <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
+        </div>
+      </div>
+    {/each}
+  </div>
   <div class="commands">
-    <a href="javascript:void(0)" on:click={() => doMode("current")} data-cy="current-link">現行</a>
-    <a href="javascript:void(0)" on:click={() => doMode("add")} data-cy="add-link">追加</a>
-    <a href="javascript:void(0)" on:click={() => doMode("tenki")} data-cy="tenki-link">転機</a>
-    <a href="javascript:void(0)" on:click={() => doMode("edit")} data-cy="edit-link">編集</a>
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("current")}
+      data-cy="current-link">現行</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("add")}
+      data-cy="add-link">追加</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("tenki")}
+      data-cy="tenki-link">転機</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("edit")}
+      data-cy="edit-link">編集</a
+    >
   </div>
 </RightBox>
 
 <style>
   .workarea {
     margin-top: 6px;
+  }
+
+  .drug-without-matching-disease {
+    font-size: 12px;
+    color: red;
+    border: 1px solid red;
+    border-radius: 4px;
+    margin: 4px 0;
+    padding: 4px;
+  }
+
+  .drug-without-matching-disease div + div {
+    margin-top: 4px;
   }
 
   .commands {

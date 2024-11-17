@@ -11,7 +11,7 @@
   import * as kanjidate from "kanjidate";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
-  import * as cache from "@lib/cache";
+  import { cache } from "@lib/cache";
   import { DateWrapper } from "myclinic-util";
   import { searchPresc } from "@/lib/denshi-shohou/presc-api";
   import { formatHokenshaBangou } from "myclinic-rezept/helper";

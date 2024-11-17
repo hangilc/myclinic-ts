@@ -1,7 +1,7 @@
-import { getHpkiUrl, getPrescUrl } from "./cache";
+import { cache } from "./cache";
 
 export async function sign_presc(presc_info: string): Promise<string> {
-  let hpkiUrl = await getHpkiUrl();
+  let hpkiUrl = await cache.getHpkiUrl();
   hpkiUrl = `${hpkiUrl}/sign-presc`;
   let result = await fetch(hpkiUrl, {
     method: "POST",

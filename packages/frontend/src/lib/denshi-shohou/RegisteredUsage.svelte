@@ -4,7 +4,7 @@
   import { type FreqUsage } from "../cache";
   import Dialog from "../Dialog.svelte";
   import { onMount } from "svelte";
-  import * as cache from "@/lib/cache";
+  import { cache } from "@/lib/cache";
 
   export let destroy: () => void;
   let usages: FreqUsage[] = [];

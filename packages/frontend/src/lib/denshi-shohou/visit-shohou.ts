@@ -1,6 +1,6 @@
 import type { ClinicInfo, HokenInfo, Kouhi, Patient, Visit } from "myclinic-model";
 import api from "../api";
-import { getClinicInfo } from "../cache";
+import { cache } from "../cache";
 import { convertZenkakuHiraganaToHankakuKatakana } from "../zenkaku";
 import type { PrescInfoData, 公費レコード } from "./presc-info";
 import {
@@ -72,7 +72,7 @@ export async function initPrescInfoDataFromVisitId(visitId: number): Promise<Pre
   const visit = await api.getVisit(visitId);
   const patient = await api.getPatient(visit.patientId);
   const hokenInfo = await api.getHokenInfoForVisit(visitId);
-  const clinicInfo = await getClinicInfo();
+  const clinicInfo = await cache.getClinicInfo();
   return initPrescInfoData(visit, patient, hokenInfo, clinicInfo);
 }
 

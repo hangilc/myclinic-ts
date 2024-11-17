@@ -9,7 +9,7 @@
   import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
   import PopupMenu from "@/lib/PopupMenu.svelte";
   import { dataCySetter } from "@/lib/popup-helper";
-  import * as cache from "@/lib/cache";
+  import { cache } from "@/lib/cache";
   import {
     prescStatus,
     searchPrescribed,

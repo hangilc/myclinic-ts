@@ -1,12 +1,12 @@
-import { getOnshiViewSecret, getPrescUrl } from "@/lib/cache";
+import { cache } from "@/lib/cache";
 import type { SearchResult, StatusResult, UnregisterResult } from "./shohou-interface";
 
 export async function registerPresc(presc_info: string, kikancode: string, issue_type: string): Promise<string> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/register`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       presc_info, kikancode, issue_type
     }),
@@ -19,11 +19,11 @@ export async function registerPresc(presc_info: string, kikancode: string, issue
 
 export async function modifyPresc(
   prescription_id: string, presc_info: string, kikancode: string, issue_type: string): Promise<string> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/modify`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       prescription_id, presc_info, kikancode, issue_type
     }),
@@ -35,11 +35,11 @@ export async function modifyPresc(
 }
 
 export async function searchPrescribed(kikancode: string, start_date: string, end_date: string): Promise<string> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/search-prescribed`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       kikancode,
       body: {
@@ -63,11 +63,11 @@ export async function searchPresc(
   issueDateFrom: string | undefined,
   issueDateTo: string | undefined,
 ): Promise<SearchResult> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/search`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       kikancode,
       body: {
@@ -92,11 +92,11 @@ export async function prescStatus(
   kikancode: string,
   prescriptionId: string,
 ): Promise<StatusResult> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/presc-status`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       kikancode,
       body: {
@@ -116,11 +116,11 @@ export async function unregisterPresc(
   kikancode: string,
   prescriptionId: string,
 ): Promise<UnregisterResult> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/unregister`;
   let result = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret() },
+    headers: { "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret() },
     body: JSON.stringify({
       kikancode,
       body: {
@@ -137,12 +137,12 @@ export async function unregisterPresc(
 }
 
 export async function shohouHikae(kikancode: string, prescriptionId: string): Promise<string> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/hikae`;
   let result = await fetch(url, {
     method: "POST",
     headers: {
-      "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret()
+      "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret()
     },
     body: JSON.stringify({ kikancode, body: { PrescriptionId: prescriptionId }, }),
   });
@@ -154,12 +154,12 @@ export async function shohouHikae(kikancode: string, prescriptionId: string): Pr
 }
 
 export async function createQrCode(content: string): Promise<ArrayBuffer> {
-  let prescUrl = await getPrescUrl();
+  let prescUrl = await cache.getPrescUrl();
   let url = `${prescUrl}/qr-code`;
   let result = await fetch(url, {
     method: "POST",
     headers: {
-      "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await getOnshiViewSecret()
+      "content-type": "application/json", "X-ONSHI-VIEW-SECRET": await cache.getOnshiViewSecret()
     },
     body: JSON.stringify({ content }),
   });

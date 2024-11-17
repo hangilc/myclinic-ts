@@ -1,6 +1,7 @@
 import type { ClinicInfo, UsageMaster } from "myclinic-model";
 import api from "./api";
 import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
+import type { DrugDisease } from "./drug-disease";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -8,6 +9,7 @@ let prescUrl: string | undefined = undefined;
 let shohouFreqUsage: FreqUsage[] | undefined = undefined;
 let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 let onshiViewSecret: string | undefined = undefined;
+let drugDiseases: DrugDisease[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -20,76 +22,162 @@ export type FreqPresc = {
   comment: string;
 }
 
-export async function getClinicInfo(): Promise<ClinicInfo> {
-  if (!clinicInfo) {
-    clinicInfo = await api.getClinicInfo();
-  }
-  return clinicInfo;
-}
+// export async function getClinicInfo(): Promise<ClinicInfo> {
+//   if (!clinicInfo) {
+//     clinicInfo = await api.getClinicInfo();
+//   }
+//   return clinicInfo;
+// }
 
-export async function getShohouKikancode(): Promise<string> {
-  let clinicInfo = await getClinicInfo();
-  let kikancode = "131" + clinicInfo.kikancode;
-  return `${clinicInfo.todoufukencode}${clinicInfo.tensuuhyoucode}${clinicInfo.kikancode}`;
-}
+// export async function getShohouKikancode(): Promise<string> {
+//   let clinicInfo = await cache.getClinicInfo();
+//   let kikancode = "131" + clinicInfo.kikancode;
+//   return `${clinicInfo.todoufukencode}${clinicInfo.tensuuhyoucode}${clinicInfo.kikancode}`;
+// }
 
-export async function getHpkiUrl(): Promise<string> {
-  if (hpkiUrl === undefined) {
-    let server = await api.getConfig("hpki-server");
-    let url = server.url;
-    if (typeof url !== "string") {
-      throw new Error("Cannot find hpki server url.");
+// export async function getHpkiUrl(): Promise<string> {
+//   if (hpkiUrl === undefined) {
+//     let server = await api.getConfig("hpki-server");
+//     let url = server.url;
+//     if (typeof url !== "string") {
+//       throw new Error("Cannot find hpki server url.");
+//     }
+//     hpkiUrl = url;
+//   }
+//   return hpkiUrl;
+// }
+
+// export async function getPrescUrl(): Promise<string> {
+//   if (prescUrl === undefined) {
+//     let server = await api.getConfig("presc-server");
+//     let url = server.url;
+//     if (typeof url !== "string") {
+//       throw new Error("Cannot find presc server url.");
+//     }
+//     prescUrl = url;
+//   }
+//   return prescUrl;
+// }
+
+// export async function getShohouFreqUsage(): Promise<FreqUsage[]> {
+//   if (shohouFreqUsage === undefined) {
+//     let value = await api.getShohouFreqUsage();
+//     if (!value) {
+//       value = [];
+//     }
+//     shohouFreqUsage = value;
+//   }
+//   return shohouFreqUsage;
+// }
+
+// export async function clearShohouFreqUsage() {
+//   shohouFreqUsage = undefined;
+// }
+
+// export async function getShohouFreqPrescription(): Promise<FreqPresc[]> {
+//   if (shohouFreqPrescription === undefined) {
+//     let value = await api.getShohouFreqPrescription();
+//     if (!value) {
+//       value = [];
+//     }
+//     shohouFreqPrescription = value;
+//   }
+//   return shohouFreqPrescription ?? [];
+// }
+
+// export function invalidateShohouFreqPrescription() {
+//   shohouFreqPrescription = undefined;
+// }
+
+// export async function getOnshiViewSecret(): Promise<string> {
+//   if (onshiViewSecret === undefined) {
+//     onshiViewSecret = await api.dictGet("onshi-secret");
+//   }
+//   return onshiViewSecret;
+// }
+
+
+
+export const cache = {
+  async getClinicInfo(): Promise<ClinicInfo> {
+    if (!clinicInfo) {
+      clinicInfo = await api.getClinicInfo();
     }
-    hpkiUrl = url;
-  }
-  return hpkiUrl;
-}
+    return clinicInfo;
+  },
 
-export async function getPrescUrl(): Promise<string> {
-  if (prescUrl === undefined) {
-    let server = await api.getConfig("presc-server");
-    let url = server.url;
-    if (typeof url !== "string") {
-      throw new Error("Cannot find presc server url.");
+  async getShohouKikancode(): Promise<string> {
+    let clinicInfo = await cache.getClinicInfo();
+    return `${clinicInfo.todoufukencode}${clinicInfo.tensuuhyoucode}${clinicInfo.kikancode}`;
+  },
+
+  async getHpkiUrl(): Promise<string> {
+    if (hpkiUrl === undefined) {
+      let server = await api.getConfig("hpki-server");
+      let url = server.url;
+      if (typeof url !== "string") {
+        throw new Error("Cannot find hpki server url.");
+      }
+      hpkiUrl = url;
     }
-    prescUrl = url;
-  }
-  return prescUrl;
-}
+    return hpkiUrl;
+  },
 
-export async function getShohouFreqUsage(): Promise<FreqUsage[]> {
-  if (shohouFreqUsage === undefined) {
-    let value = await api.getShohouFreqUsage();
-    if (!value) {
-      value = [];
+  async getPrescUrl(): Promise<string> {
+    if (prescUrl === undefined) {
+      let server = await api.getConfig("presc-server");
+      let url = server.url;
+      if (typeof url !== "string") {
+        throw new Error("Cannot find presc server url.");
+      }
+      prescUrl = url;
     }
-    shohouFreqUsage = value;
-  }
-  return shohouFreqUsage;
-}
+    return prescUrl;
+  },
 
-export async function invalidateShohouFreqUsage() {
-  shohouFreqUsage = undefined;
-}
-
-export async function getShohouFreqPrescription(): Promise<FreqPresc[]> {
-  if (shohouFreqPrescription === undefined) {
-    let value = await api.getShohouFreqPrescription();
-    if (!value) {
-      value = [];
+  async getShohouFreqUsage(): Promise<FreqUsage[]> {
+    if (shohouFreqUsage === undefined) {
+      let value = await api.getShohouFreqUsage();
+      if (!value) {
+        value = [];
+      }
+      shohouFreqUsage = value;
     }
-    shohouFreqPrescription = value;
-  }
-  return shohouFreqPrescription ?? [];
-}
+    return shohouFreqUsage;
+  },
 
-export function invalidateShohouFreqPrescription() {
-  shohouFreqPrescription = undefined;
-}
+  clearShohouFreqUsage() {
+    shohouFreqUsage = undefined;
+  },
+  
+  async getOnshiViewSecret(): Promise<string> {
+    if (onshiViewSecret === undefined) {
+      onshiViewSecret = await api.dictGet("onshi-secret");
+    }
+    return onshiViewSecret;
+  },
 
-export async function getOnshiViewSecret(): Promise<string> {
-  if( onshiViewSecret === undefined ){
-    onshiViewSecret = await api.dictGet("onshi-secret");
+  async getDrugDiseases(): Promise<DrugDisease[]> {
+    return [
+      {
+        id: "1",
+        drugName: "アムロジピン",
+        diseaseName: "高血圧",
+      },
+      {
+        id: "2",
+        drugName: "カンデサルタン",
+        diseaseName: "高血圧",
+      },
+      {
+        id: "3",
+        drugName: "アテノロール",
+        diseaseName: "高血圧",
+      },
+    ];
+  },
+
+  clearDrugDiseases() {
+    drugDiseases = undefined;
   }
-  return onshiViewSecret;
 }

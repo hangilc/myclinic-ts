@@ -1,7 +1,7 @@
 <script lang="ts">
   import { prescStatus } from "@/lib/denshi-shohou/presc-api";
   import type { StatusResult } from "@/lib/denshi-shohou/shohou-interface";
-  import * as cache from "@lib/cache";
+  import { cache } from "@lib/cache";
   import { DateWrapper } from "myclinic-util";
 
   export let item: {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import { invalidateShohouFreqUsage, type FreqUsage } from "@/lib/cache";
+  import { cache, type FreqUsage } from "@/lib/cache";
   import ServiceHeader from "@/ServiceHeader.svelte";
   import type { UsageMaster } from "myclinic-model";
   let freqUsages: FreqUsage[] = [];
@@ -13,7 +13,7 @@
   init();
 
   async function init() {
-    freqUsages = await api.getShohouFreqUsage();
+    freqUsages = await cache.getShohouFreqUsage();
     console.log("freqUsage", freqUsages);
   }
 
@@ -44,7 +44,7 @@
     let current = await api.getShohouFreqUsage();
     current.push(freq);
     await api.saveShohouFreqUsage(current);
-    invalidateShohouFreqUsage();
+    cache.clearShohouFreqUsage();
     init();
   }
 
@@ -56,7 +56,7 @@
       (item) => item.用法コード !== usage.用法コード
     );
     await api.saveShohouFreqUsage(usages);
-    invalidateShohouFreqUsage();
+    cache.clearShohouFreqUsage();
     init();
   }
 

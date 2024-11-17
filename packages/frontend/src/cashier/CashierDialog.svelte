@@ -14,7 +14,7 @@
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
   import type { MeisaiWrapper } from "@/lib/rezept-meisai";
-  import * as cache from "@/lib/cache";
+  import { cache } from "@/lib/cache";
 
   export let patient: Patient;
   export let visit: VisitEx;

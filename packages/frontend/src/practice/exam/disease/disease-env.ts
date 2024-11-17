@@ -26,7 +26,6 @@ export class DiseaseEnv {
     this.currentList = [...currentList];
     this.examples = examples;
     this.lastVisit = lastVisit;
-    console.log("lastVisit", lastVisit);
   }
 
   addDisease(d: DiseaseData): void {

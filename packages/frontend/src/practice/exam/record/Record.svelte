@@ -15,7 +15,7 @@
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
-  import { getClinicInfo } from "@/lib/cache";
+  import { cache } from "@/lib/cache";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -48,7 +48,7 @@
   // }
 
   async function doNewShohou() {
-    const clinicInfo = await getClinicInfo();
+    const clinicInfo = await cache.getClinicInfo();
     let kikancode = "131" + clinicInfo.kikancode;
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,

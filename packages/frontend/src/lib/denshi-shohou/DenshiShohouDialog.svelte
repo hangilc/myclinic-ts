@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { HokenInfo, Kouhi, Patient, Visit } from "myclinic-model";
-  import { getClinicInfo } from "../cache";
+  import { cache } from "../cache";
   import Dialog from "../Dialog.svelte";
   import {
     createPrescInfo,
@@ -10,7 +10,6 @@
   import { DateWrapper } from "myclinic-util";
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
-  import * as cache from "@/lib/cache";
   import {
     modifyPresc,
     prescStatus,
@@ -72,7 +71,7 @@
   }
 
   async function initShohou(): Promise<PrescInfoData> {
-    const clinicInfo = await getClinicInfo();
+    const clinicInfo = await cache.getClinicInfo();
     return initPrescInfoData(visit, patient, hokenInfo, clinicInfo);
   }
 

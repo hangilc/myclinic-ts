@@ -11,7 +11,7 @@
   import { tick } from "svelte";
   import Dialog from "../Dialog.svelte";
   import type { FreqUsage } from "../cache";
-  import * as cache from "@/lib/cache";
+  import { cache } from "@/lib/cache";
   import { toHankaku } from "../zenkaku";
   import ChevronUp from "@/icons/ChevronUp.svelte";
 
