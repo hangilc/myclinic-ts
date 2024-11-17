@@ -11,6 +11,7 @@ import { mapNullOptional } from "myclinic-model/model";
 import type { ReferConfig } from "./refer";
 import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
 import type { FreqUsage } from "./cache";
+import type { DrugDisease } from "./drug-disease";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1642,6 +1643,14 @@ export default {
 
   saveShohouFreqPrescription(usages: { presc: RP剤情報, comment: string }): Promise<void> {
     return post("set-config", usages, { name: "shohou-freq-prescription" }, a => a);
+  },
+
+  getDrugDiseases(): Promise<DrugDisease[]> {
+    return get("get-config", { name: "drug-disease" }, a => a ?? []);
+  },
+
+  setDrugDiseaes(drugDiseases: DrugDisease[]): Promise<void> {
+    return post("set-config", drugDiseases, { name: "drug-disease"}, a => a)
   },
 
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {

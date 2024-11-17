@@ -15,6 +15,8 @@
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
   import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
+  import RegisterDiseaseForDrugDialog from "./RegisterDiseaseForDrugDialog.svelte";
+  import RegisterDrugDiseaseDialog from "./RegisterDrugDiseaseDialog.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: DiseaseEnv | undefined = undefined;
@@ -152,11 +154,32 @@
   }
 
   async function doAddDiseaseForDrug(drugName: string) {
-    const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+    if (env?.lastVisit) {
+      const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          drugName,
+          at: env.lastVisit.visitedAt.substring(0, 10),
+          patientId: env.patient.patientId,
+          onAdded: (d: DiseaseData) => {
+            env?.addDisease(d);
+          },
+          onRegistered: () => checkDrugs(),
+        },
+      });
+    }
+  }
+
+  async function doRegisterDiseaseForDrug(drugName: string) {
+    const d: RegisterDiseaseForDrugDialog = new RegisterDiseaseForDrugDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         drugName,
+        onRegistered: () => {
+          checkDrugs();
+        }
       }
     })
   }
@@ -170,6 +193,7 @@
         <div>{d.name}</div>
         <div>
           <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
+          <button on:click={() => doRegisterDiseaseForDrug(d.name)}>病名登録</button>
         </div>
       </div>
     {/each}

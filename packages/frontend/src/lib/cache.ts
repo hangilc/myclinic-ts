@@ -158,23 +158,10 @@ export const cache = {
   },
 
   async getDrugDiseases(): Promise<DrugDisease[]> {
-    return [
-      {
-        id: "1",
-        drugName: "アムロジピン",
-        diseaseName: "高血圧",
-      },
-      {
-        id: "2",
-        drugName: "カンデサルタン",
-        diseaseName: "高血圧",
-      },
-      {
-        id: "3",
-        drugName: "アテノロール",
-        diseaseName: "高血圧",
-      },
-    ];
+    if( drugDiseases === undefined ){
+      drugDiseases = await api.getDrugDiseases();
+    }
+    return drugDiseases;
   },
 
   clearDrugDiseases() {

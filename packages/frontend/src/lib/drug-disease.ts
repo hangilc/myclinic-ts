@@ -1,11 +1,10 @@
 export interface DrugDisease {
-  id: string;
   drugName: string;
   diseaseName: string;
   fix?: {
-    pre: string;
+    pre: string[];
     name: string;
-    post: string;
+    post: string[];
   }
 }
 
