@@ -1,6 +1,5 @@
 <script lang="ts">
   import * as kanjidate from "kanjidate";
-  import SelectItem from "@/lib/SelectItem2.svelte";
   import api from "@/lib/api";
   import { popupTriggerAsync } from "@/lib/popup-helper";
 

@@ -1,8 +1,11 @@
 <script lang="ts">
   import type { DiseaseData } from "myclinic-model";
   import { startDateRep } from "./start-date-rep";
+  import type { Writable } from "svelte/store";
+  import type { DiseaseEnv } from "./disease-env";
 
-  export let list: DiseaseData[];
+  // export let list: DiseaseData[];
+  export let env: Writable<DiseaseEnv | undefined>;
   export let onSelect: (d: DiseaseData) => void = (_) => {};
 
   function onDiseaseClick(d: DiseaseData) {
@@ -11,7 +14,7 @@
 </script>
 
 <div data-cy="disease-current">
-  {#each list as d (d.disease.diseaseId)}
+  {#each ($env?.currentList ?? []) as d (d.disease.diseaseId)}
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div
       on:click={() => onDiseaseClick(d)}

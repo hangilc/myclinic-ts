@@ -11,8 +11,11 @@
   import { startDateRep } from "./start-date-rep";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
   import { dateToSql } from "@/lib/util";
+  import type { Writable } from "svelte/store";
+  import type { DiseaseEnv } from "./disease-env";
 
-  export let diseases: DiseaseData[];
+  // export let diseases: DiseaseData[];
+  export let env: Writable<DiseaseEnv | undefined>;
   export let onEnter: (result: [number, string, string][]) => void;
   let selected: DiseaseData[] = [];
   let validateEndDate: () => VResult<Date | null>;
@@ -123,7 +126,7 @@
 </script>
 
 <div data-cy="disease-tenki">
-  {#each diseases as d}
+  {#each ($env?.currentList ?? []) as d}
     {@const id = genid()}
     <div>
       <input

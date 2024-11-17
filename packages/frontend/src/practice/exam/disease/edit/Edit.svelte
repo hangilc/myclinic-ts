@@ -9,15 +9,17 @@
     type EditFormValues,
   } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
+  import type { DiseaseEnv } from "../disease-env";
 
-  export let diseases: DiseaseData[];
-  export let examples: DiseaseExample[] = [];
-  export let editTarget: DiseaseData | null = null;
+  export let env: Writable<DiseaseEnv | undefined>;
+  // export let diseases: DiseaseData[];
+  // export let examples: DiseaseExample[] = [];
+  // export let editTarget: DiseaseData | null = null;
   export let onDelete: (diseaseId: number) => void = (_) => {};
   export let onUpdate: (updated: DiseaseData) => void = (_) => {};
 
   let formValues: EditFormValues | undefined;
-  let diseaseDataSelected: Writable<DiseaseData | null> = writable(editTarget);
+  let diseaseDataSelected: Writable<DiseaseData | null> = writable($env?.editTarget ?? null);
 
   diseaseDataSelected.subscribe((sel) => {
     formValues = sel == undefined ? undefined : composeEditFormValues(sel);
@@ -45,7 +47,7 @@
       <span data-cy="no-disease-selected">（病名未選択）</span>
     {:else}
       <EditForm
-        {examples}
+        examples={$env?.examples ?? []}
         {formValues}
         onCancel={doFormCancel}
         onEnter={onUpdate}
@@ -54,7 +56,7 @@
     {/if}
   {/key}
   <div class="list select" data-cy="disease-list">
-    {#each diseases as data}
+    {#each ($env?.allList ?? []) as data}
       <SelectItem selected={diseaseDataSelected} {data}>
         <span
           class="disease-name"

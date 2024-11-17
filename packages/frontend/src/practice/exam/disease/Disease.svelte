@@ -10,21 +10,33 @@
   import type { Mode } from "./mode";
   import api from "@/lib/api";
   import { parseSqlDate } from "@/lib/util";
-  import type { DiseaseData, DiseaseEnterData } from "myclinic-model";
+  import type {
+    DiseaseData,
+    DiseaseEnterData,
+    ShuushokugoMaster,
+  } from "myclinic-model";
   import { extractDrugNames } from "./drugs-visit";
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
   import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
   import RegisterDiseaseForDrugDialog from "./RegisterDiseaseForDrugDialog.svelte";
+  import { writable, type Writable } from "svelte/store";
+  import { pred } from "@/lib/validator";
 
   const unsubs: (() => void)[] = [];
-  let env: DiseaseEnv | undefined = undefined;
+  let env: Writable<DiseaseEnv | undefined> = writable(undefined);
   let workarea: HTMLElement;
   let clear: () => void = () => {};
   let drugDiseases: DrugDisease[] = [];
-  let drugsWithouMatchingDisease: { id: number; name: string, fixes: {
-    pre: string[], name: string, post: string[]
-  }[] }[] = [];
+  let drugsWithouMatchingDisease: {
+    id: number;
+    name: string;
+    fixes: {
+      pre: string[];
+      name: string;
+      post: string[];
+    }[];
+  }[] = [];
   let drugsWithouMatchingDiseaseIndex = 1;
 
   init();
@@ -39,9 +51,9 @@
       if (p == null) {
         clear();
         clear = () => {};
-        env = undefined;
+        $env = undefined;
       } else {
-        env = await DiseaseEnv.create(p);
+        $env = await DiseaseEnv.create(p);
         checkDrugs();
         doMode("current");
       }
@@ -53,45 +65,50 @@
   });
 
   async function checkDrugs() {
-    if (env) {
-      const drugNames: string[] = extractDrugNames(env.lastVisit?.texts ?? []);
-      const diseaseNames: string[] = env.currentList.map((disease) => {
+    drugsWithouMatchingDisease = [];
+    const drugNames: string[] = extractDrugNames($env?.lastVisit?.texts ?? []);
+    const diseaseNames: string[] =
+      $env?.currentList?.map((disease) => {
         return disease.byoumeiMaster.name;
-      });
-      drugsWithouMatchingDisease = [];
-      for (let drugName of drugNames) {
-        const m = hasMatchingDrugDisease(drugName, diseaseNames, drugDiseases);
-        if( m === true ){
-          continue;
-        } else {
-          drugsWithouMatchingDisease.push({
-            id: drugsWithouMatchingDiseaseIndex++,
-            name: drugName,
-            fixes: m,
-          })
-        }
+      }) ?? [];
+    for (let drugName of drugNames) {
+      const m = hasMatchingDrugDisease(drugName, diseaseNames, drugDiseases);
+      if (m === true) {
+        continue;
+      } else {
+        drugsWithouMatchingDisease.push({
+          id: drugsWithouMatchingDiseaseIndex++,
+          name: drugName,
+          fixes: m,
+        });
       }
     }
   }
 
-  function fixName(fix: { pre: string[], name: string, post: string[] }): string {
+  function fixName(fix: {
+    pre: string[];
+    name: string;
+    post: string[];
+  }): string {
     return [...fix.pre, fix.name, ...fix.post].join("");
   }
 
   async function doMode(mode: Mode) {
-    if (env == null) {
-      return;
-    }
-    const envValue = env;
     clear();
     switch (mode) {
       case "current": {
         const b = new Current({
           target: workarea,
           props: {
-            list: env.currentList,
+            env,
             onSelect: (d: DiseaseData) => {
-              envValue.editTarget = d;
+              env.update((optEnv) => {
+                if (optEnv) {
+                  optEnv.editTarget = d;
+                }
+                return optEnv;
+              });
+              // envValue.editTarget = d;
               doMode("edit");
             },
           },
@@ -103,12 +120,20 @@
         const b = new Add({
           target: workarea,
           props: {
-            patientId: envValue.patient.patientId,
-            examples: envValue.examples,
+            env,
+            // patientId: envValue.patient.patientId,
+            // examples: envValue.examples,
             onEnter: async (data: DiseaseEnterData) => {
               const diseaseId: number = await api.enterDiseaseEx(data);
               const d: DiseaseData = await api.getDiseaseEx(diseaseId);
-              envValue.addDisease(d);
+              env.update((optEnv) => {
+                if (optEnv) {
+                  optEnv.addDisease(d);
+                }
+                return optEnv;
+              });
+              // envValue.addDisease(d);
+              checkDrugs();
               doMode("add");
             },
           },
@@ -120,14 +145,15 @@
         const b = new Tenki({
           target: workarea,
           props: {
-            diseases: envValue.currentList,
+            // diseases: envValue.currentList,
+            env,
             onEnter: async (result: [number, string, string][]) => {
               const promises = result.map((r) => {
                 const [diseaseId, date, reason] = r;
                 return api.endDisease(diseaseId, parseSqlDate(date), reason);
               });
               await Promise.all(promises);
-              envValue.removeFromCurrentList(result.map((d) => d[0]));
+              $env?.removeFromCurrentList(result.map((d) => d[0]));
               doMode("tenki");
             },
           },
@@ -136,21 +162,37 @@
         break;
       }
       case "edit": {
-        await envValue.fetchAllList();
+        await $env?.fetchAllList();
+        // await envValue.fetchAllList();
         const b = new Edit({
           target: workarea,
           props: {
-            diseases: env.allList ?? [],
-            editTarget: envValue.editTarget,
+            env,
+            // diseases: env.allList ?? [],
+            // editTarget: envValue.editTarget,
             onDelete: (diseaseId: number) => {
-              envValue.remove(diseaseId);
-              envValue.editTarget = undefined;
+              env.update((optEnv) => {
+                if (optEnv) {
+                  optEnv.remove(diseaseId);
+                  optEnv.editTarget = undefined;
+                }
+                return optEnv;
+              });
+              // envValue.remove(diseaseId);
+              // envValue.editTarget = undefined;
               checkDrugs();
               doMode("edit");
             },
             onUpdate: (entered: DiseaseData) => {
-              envValue.updateDisease(entered);
-              envValue.editTarget = undefined;
+              env.update((optEnv) => {
+                if (optEnv) {
+                  optEnv.updateDisease(entered);
+                  optEnv.editTarget = undefined;
+                }
+                return optEnv;
+              });
+              // envValue.updateDisease(entered);
+              // envValue.editTarget = undefined;
               checkDrugs();
               doMode("edit");
             },
@@ -166,25 +208,26 @@
   }
 
   async function doAddDiseaseForDrug(drugName: string) {
-    if (env?.lastVisit) {
-      const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          drugName,
-          at: env.lastVisit.visitedAt.substring(0, 10),
-          patientId: env.patient.patientId,
-          onAdded: (d: DiseaseData) => {
-            if( env ){
-              env.addDisease(d);
-              env = env;
-              checkDrugs();
+    const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        drugName,
+        env,
+        // at: env.lastVisit.visitedAt.substring(0, 10),
+        // patientId: env.patient.patientId,
+        onAdded: (d: DiseaseData) => {
+          env.update((optEnv) => {
+            if (optEnv) {
+              optEnv.addDisease(d);
             }
-          },
-          onRegistered: () => checkDrugs(),
+            return optEnv;
+          });
+          checkDrugs();
         },
-      });
-    }
+        onRegistered: () => checkDrugs(),
+      },
+    });
   }
 
   async function doRegisterDiseaseForDrug(drugName: string) {
@@ -195,9 +238,46 @@
         drugName,
         onRegistered: () => {
           checkDrugs();
+        },
+      },
+    });
+  }
+
+  async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
+    const at = $env?.lastVisit?.visitedAt.substring(0, 10);
+    const patientId = $env?.patient.patientId;
+    if (at && patientId) {
+      const adjList: ShuushokugoMaster[] = [];
+      [...fix.pre, ...fix.post].forEach(async (name) => {
+        const m = await api.resolveShuushokugoMasterByName(name, at);
+        if (!m) {
+          alert(`invalid name: ${name}`);
+          return;
+        } else {
+          adjList.push(m);
         }
+      });
+      const disease = await api.resolveByoumeiMasterByName(fix.name, at);
+      if (!disease) {
+        alert(`invalid name: ${name}`);
+        return;
       }
-    })
+      const data: DiseaseEnterData = {
+        patientId: patientId,
+        byoumeicode: disease.shoubyoumeicode,
+        startDate: at,
+        adjCodes: adjList.map((m) => m.shuushokugocode),
+      };
+      const diseaseId: number = await api.enterDiseaseEx(data);
+      const d: DiseaseData = await api.getDiseaseEx(diseaseId);
+      env.update((optEnv) => {
+        if (optEnv) {
+          optEnv.addDisease(d);
+        }
+        return optEnv;
+      });
+      checkDrugs();
+    }
   }
 </script>
 
@@ -208,11 +288,16 @@
       <div class="drug-without-matching-disease">
         <div>{d.name}</div>
         {#each d.fixes as fix}
-          <div>{fixName(fix)}</div> <button>fix</button>
+          <div>
+            <span class="fix-name">{fixName(fix)}</span>
+            <button on:click={() => doFix(fix)}>fix</button>
+          </div>
         {/each}
         <div>
           <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
-          <button on:click={() => doRegisterDiseaseForDrug(d.name)}>病名登録</button>
+          <button on:click={() => doRegisterDiseaseForDrug(d.name)}
+            >病名登録</button
+          >
         </div>
       </div>
     {/each}
@@ -257,6 +342,10 @@
 
   .drug-without-matching-disease div + div {
     margin-top: 4px;
+  }
+
+  .fix-name {
+    color: darkgreen;
   }
 
   .commands {

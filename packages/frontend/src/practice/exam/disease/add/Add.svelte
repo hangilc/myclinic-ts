@@ -16,10 +16,13 @@
   import { foldSearchResult } from "../fold-search-result";
   import DiseaseSearchForm from "../search/DiseaseSearchForm.svelte";
   import DatesPopup from "./DatesPopup.svelte";
+  import type { DiseaseEnv } from "../disease-env";
+  import type { Writable } from "svelte/store";
   // import DatesPulldown from "./DatesPopup.svelte";
 
-  export let patientId: number;
-  export let examples: DiseaseExample[] = [];
+  export let env: Writable<DiseaseEnv | undefined>;
+  // export let patientId: number;
+  // export let examples: DiseaseExample[] = [];
   export let onEnter: (data: DiseaseEnterData) => void = _ => {};
   let validateStartDate: () => VResult<Date | null>;
   let startDate: Date | undefined = new Date();
@@ -51,7 +54,8 @@
   }
 
   async function doEnter() {
-    if (byoumeiMaster != null && startDate) {
+    const patientId = $env?.patient.patientId;
+    if (byoumeiMaster != null && startDate && patientId) {
       const data: DiseaseEnterData = {
         patientId: patientId,
         byoumeicode: byoumeiMaster.shoubyoumeicode,
@@ -119,7 +123,7 @@
       bind:setValue={setStartDate}
       on:value-change={onStartDateChange}
     >
-      <DatesPopup slot="icons" onSelect={doChooseStartDate} {patientId} />
+      <DatesPopup slot="icons" onSelect={doChooseStartDate} patientId={$env?.patient.patientId ?? 0} />
     </DateFormWithCalendar>
   </div>
   <div class="command-box">
@@ -127,7 +131,7 @@
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm {examples} {startDate} onSelect={onSearchSelect} />
+  <DiseaseSearchForm examples={$env?.examples ?? []} {startDate} onSelect={onSearchSelect} />
 </div>
 
 <style>

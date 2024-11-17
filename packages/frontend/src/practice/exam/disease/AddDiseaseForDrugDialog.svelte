@@ -9,11 +9,14 @@
   } from "myclinic-model";
   import RegisterDrugDiseaseDialog from "./RegisterDrugDiseaseDialog.svelte";
   import type { DrugDisease } from "@/lib/drug-disease";
+  import type { Writable } from "svelte/store";
+  import type { DiseaseEnv } from "./disease-env";
 
   export let destroy: () => void;
   export let drugName: string;
-  export let at: string;
-  export let patientId: number;
+  export let env: Writable<DiseaseEnv | undefined>;
+  // export let at: string;
+  // export let patientId: number;
   export let onAdded: (d: DiseaseData) => void;
   export let onRegistered: (d: DrugDisease) => void;
   let searchText = "";
@@ -25,7 +28,8 @@
 
   async function doSearch() {
     const t = searchText.trim();
-    if (t !== "") {
+    let at = $env?.lastVisit?.visitedAt.substring(0, 10);
+    if (t !== "" && at) {
       if (searchMode === "master") {
         byoumeiResult = await api.searchByoumeiMaster(t, at);
       } else if (searchMode === "adj") {
@@ -49,7 +53,9 @@
   }
 
   async function doAdd(): Promise<DiseaseData | undefined> {
-    if (byoumeiMaster) {
+    let patientId = $env?.patient.patientId;
+    let at = $env?.lastVisit?.visitedAt.substring(0, 10);
+    if (byoumeiMaster && patientId && at) {
       const data: DiseaseEnterData = {
         patientId: patientId,
         byoumeicode: byoumeiMaster.shoubyoumeicode,
