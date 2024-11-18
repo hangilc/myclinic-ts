@@ -7,6 +7,7 @@
   export let destroy: () => void;
   export let item: DrugDisease;
   export let at: string;
+  export let onEnter: (dd: DrugDisease) => void;
   let drugName = item.drugName;
   let diseaseName = item.diseaseName;
   let searchText = "";
@@ -78,7 +79,7 @@
     const dd: DrugDisease = {
       drugName, diseaseName, fix: compileFix(),
     }
-    
+    onEnter(dd);
   }
 </script>
 

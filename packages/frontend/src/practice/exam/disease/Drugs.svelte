@@ -3,7 +3,11 @@
   import { cache } from "@/lib/cache";
   import type { DrugDisease } from "@/lib/drug-disease";
   import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
+  import type { Writable } from "svelte/store";
+  import type { DiseaseEnv } from "./disease-env";
+  import { DateWrapper } from "myclinic-util";
 
+  export let env: Writable<DiseaseEnv | undefined>;
   export let onChanged: () => void;
   let drugDiseases: { id: number; data: DrugDisease }[] = [];
   let index = 1;
@@ -36,12 +40,30 @@
     }
   }
 
+  function resolveAt(): string {
+    let at = $env?.lastVisit?.visitedAt.substring(0, 10);
+    if( at == undefined ){
+      at = DateWrapper.from(new Date()).asSqlDate();
+    }
+    return at;
+  }
+
   async function doEdit(item: { id: number, data: DrugDisease}) {
     const d: EditDrugDiseaseDialog = new EditDrugDiseaseDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         item: item.data,
+        at: resolveAt(),
+        onEnter: async (modified: DrugDisease) => {
+          drugDiseases = drugDiseases.map(dd => {
+            return dd.id === item.id ? { id: item.id, data: modified } : dd;
+          });
+          const dds = drugDiseases.map(e => e.data);
+          await api.setDrugDiseases(dds);
+          cache.clearDrugDiseases();
+          onChanged();
+        }
       }
     })
   }
