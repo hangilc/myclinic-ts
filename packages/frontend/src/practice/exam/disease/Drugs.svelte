@@ -1,0 +1,74 @@
+<script lang="ts">
+  import api from "@/lib/api";
+  import { cache } from "@/lib/cache";
+  import type { DrugDisease } from "@/lib/drug-disease";
+
+  export let onChanged: () => void;
+  let drugDiseases: { id: number; data: DrugDisease }[] = [];
+  let index = 1;
+
+  init();
+
+  async function init() {
+    drugDiseases = (await cache.getDrugDiseases()).map((dd) => ({
+      id: index++,
+      data: dd,
+    }));
+  }
+
+  function fixName(fix: {
+    pre: string[];
+    name: string;
+    post: string[];
+  }): string {
+    return [...fix.pre, fix.name, ...fix.post].join("");
+  }
+
+  async function doDelete(item: { id: number, data: DrugDisease}) {
+    if( confirm("この病名データを削除していいですか？") ){
+      const dds = drugDiseases.filter(e => e.id !== item.id).map(e => e.data);
+      await api.setDrugDiseases(dds);
+      cache.clearDrugDiseases();
+      drugDiseases = [];
+      init();
+      onChanged();
+    }
+  }
+</script>
+
+<div class="wrapper">
+  <div class="items-wrapper">
+    {#each drugDiseases as dd (dd.id)}
+      <div class="item">
+        <div>
+          {dd.data.drugName} | {dd.data.diseaseName} |
+          {#if dd.data.fix}
+            {fixName(dd.data.fix)}
+          {:else}
+            （なし）
+          {/if}
+        </div>
+        <div>
+          <button on:click={() => doDelete(dd)}>削除</button>
+        </div>
+      </div>
+      <hr />
+    {/each}
+  </div>
+</div>
+
+<style>
+  .wrapper {
+    height: 300px;
+    overflow-y: auto;
+    resize: vertical;
+  }
+
+  .items-wrapper > hr:last-of-type {
+    display: none;
+  }
+
+  .item {
+    font-size: 12px;
+  }
+</style>

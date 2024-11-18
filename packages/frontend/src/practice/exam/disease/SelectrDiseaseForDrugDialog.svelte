@@ -35,7 +35,7 @@
       };
       const dds = await cache.getDrugDiseases();
       dds.push(dd);
-      await api.setDrugDiseaes(dds);
+      await api.setDrugDiseases(dds);
       cache.clearDrugDiseases();
       destroy();
       onSelected();

@@ -19,10 +19,9 @@
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
   import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
-  import RegisterDiseaseForDrugDialog from "./RegisterDiseaseForDrugDialog.svelte";
   import { writable, type Writable } from "svelte/store";
-  import { pred } from "@/lib/validator";
   import SelectrDiseaseForDrugDialog from "./SelectrDiseaseForDrugDialog.svelte";
+  import Drugs from "./Drugs.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -203,6 +202,19 @@
         clear = () => b.$destroy();
         break;
       }
+      case "drugs": {
+        const b: Drugs = new Drugs({
+          target: workarea,
+          props: {
+            onChanged: async () => {
+              drugDiseases = await cache.getDrugDiseases();
+              checkDrugs();
+            }
+          }
+        });
+        clear = () => b.$destroy();
+        break;
+      }
       default: {
         break;
       }
@@ -246,19 +258,6 @@
       },
     });
   }
-
-  // async function doRegisterDiseaseForDrug(drugName: string) {
-  //   const d: RegisterDiseaseForDrugDialog = new RegisterDiseaseForDrugDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       drugName,
-  //       onRegistered: () => {
-  //         checkDrugs();
-  //       },
-  //     },
-  //   });
-  // }
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
     const at = $env?.lastVisit?.visitedAt.substring(0, 10);
@@ -339,6 +338,11 @@
       href="javascript:void(0)"
       on:click={() => doMode("edit")}
       data-cy="edit-link">編集</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("drugs")}
+      data-cy="edit-link">薬剤</a
     >
   </div>
 </RightBox>

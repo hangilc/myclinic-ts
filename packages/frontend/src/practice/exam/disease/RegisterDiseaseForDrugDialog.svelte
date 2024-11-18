@@ -17,7 +17,7 @@
       };
       const drugDiseases = await cache.getDrugDiseases();
       drugDiseases.push(dd);
-      await api.setDrugDiseaes(drugDiseases);
+      await api.setDrugDiseases(drugDiseases);
       cache.clearDrugDiseases();
       destroy();
       onRegistered();

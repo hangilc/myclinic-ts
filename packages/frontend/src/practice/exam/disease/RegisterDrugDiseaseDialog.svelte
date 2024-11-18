@@ -17,7 +17,7 @@
     drugDiseases.push({ drugName, diseaseName, fix: {
       pre, name: diseaseName, post
     }});
-    await api.setDrugDiseaes(drugDiseases);
+    await api.setDrugDiseases(drugDiseases);
     cache.clearDrugDiseases();
     destroy();
     onRegistered();

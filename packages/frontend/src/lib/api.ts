@@ -1649,7 +1649,7 @@ export default {
     return get("get-config", { name: "drug-disease" }, a => a ?? []);
   },
 
-  setDrugDiseaes(drugDiseases: DrugDisease[]): Promise<void> {
+  setDrugDiseases(drugDiseases: DrugDisease[]): Promise<void> {
     return post("set-config", drugDiseases, { name: "drug-disease"}, a => a)
   },
 
