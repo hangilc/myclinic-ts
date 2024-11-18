@@ -26,3 +26,12 @@ export function hasMatchingDrugDisease(
   }
   return fixes;
 }
+
+export function fullNameOfFix(fix: { pre: string[], name: string, post: string[] } | undefined): string {
+  if( fix ){
+    return [...fix.pre, fix.name, ...fix.post].join("");
+
+  } else {
+    return "";
+  }
+}
