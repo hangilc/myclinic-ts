@@ -2,6 +2,7 @@
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
   import type { DrugDisease } from "@/lib/drug-disease";
+  import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
 
   export let onChanged: () => void;
   let drugDiseases: { id: number; data: DrugDisease }[] = [];
@@ -34,6 +35,16 @@
       onChanged();
     }
   }
+
+  async function doEdit(item: { id: number, data: DrugDisease}) {
+    const d: EditDrugDiseaseDialog = new EditDrugDiseaseDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        item: item.data,
+      }
+    })
+  }
 </script>
 
 <div class="wrapper">
@@ -49,6 +60,7 @@
           {/if}
         </div>
         <div>
+          <button on:click={() => doEdit(dd)}>編集</button>
           <button on:click={() => doDelete(dd)}>削除</button>
         </div>
       </div>
