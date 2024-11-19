@@ -22,19 +22,23 @@
   updateFixFullName();
 
   function updateFixFullName() {
-    if( fixName !== "" ){
-      fixFullName = fullNameOfFix({ pre: fixPre, name: fixName, post: fixPost});
+    if (fixName !== "") {
+      fixFullName = fullNameOfFix({
+        pre: fixPre,
+        name: fixName,
+        post: fixPost,
+      });
     } else {
-      fixFullName =  "";
+      fixFullName = "";
     }
   }
 
   async function doSearch() {
     const t = searchText.trim();
-    if( t !== "" ){
-      if( searchMode === "byoumei" ){
+    if (t !== "") {
+      if (searchMode === "byoumei") {
         byoumeiResult = await api.searchByoumeiMaster(t, at);
-      } else  if( searchMode === "adj" ){
+      } else if (searchMode === "adj") {
         adjResult = await api.searchShuushokugoMaster(t, at);
       }
     }
@@ -45,8 +49,10 @@
     updateFixFullName();
   }
 
-  function compileFix(): { pre: string[], name: string, post: string[] } | undefined {
-    if( fixName !== "" ){
+  function compileFix():
+    | { pre: string[]; name: string; post: string[] }
+    | undefined {
+    if (fixName !== "") {
       return {
         pre: fixPre,
         name: fixName,
@@ -58,7 +64,7 @@
   }
 
   function doAdjSelect(m: ShuushokugoMaster) {
-    if( m.isPrefix ){
+    if (m.isPrefix) {
       fixPre.push(m.name);
     } else {
       fixPost.push(m.name);
@@ -67,53 +73,75 @@
 
   async function doEnter() {
     drugName = drugName.trim();
-    if( drugName === "" ){
+    if (drugName === "") {
       alert("薬剤名が空白です。");
       return;
     }
     diseaseName = diseaseName.trim();
-    if( diseaseName === "" ){
+    if (diseaseName === "") {
       alert("症病名が空白です。");
       return;
     }
     const dd: DrugDisease = {
-      drugName, diseaseName, fix: compileFix(),
-    }
+      drugName,
+      diseaseName,
+      fix: compileFix(),
+    };
+    destroy();
     onEnter(dd);
   }
 </script>
 
-<Dialog title="薬剤病名の編集" {destroy}>
-  <div>
+<Dialog title="薬剤病名の編集" {destroy} styleWidth="300px">
+  <div class="row">
     薬剤名：<input type="text" bind:value={drugName} />
   </div>
-  <div>
+  <div class="row">
     傷病名：<input type="text" bind:value={diseaseName} />
   </div>
-  <div>Ｆｉｘ：<span>{fixFullName}</span><button>削除</button></div>
+  <div>Ｆｉｘ：<span>{fixFullName}</span> <button>削除</button></div>
   <div>
-    <div>
+    <div class="commands row">
+      <button on:click={doEnter}>入力</button>
+    </div>
+    <hr />
+    <div class="row">
       <input type="radio" value="byoumei" bind:group={searchMode} />病名
       <input type="radio" value="adj" bind:group={searchMode} />修飾語
     </div>
-    <input type="text" bind:value={searchText} /> <button on:click={doSearch}>検索</button>
+    <form on:submit|preventDefault={doSearch}>
+      <input type="text" bind:value={searchText} />
+      <button type="submit">検索</button>
+    </form>
   </div>
-  {#if searchMode === "byoumei"}
-  <div>
-    {#each byoumeiResult as m (m.shoubyoumeicode)}
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div on:click={() => doByoumeiSelect(m.name)}>{m.name}</div>
-    {/each}
-  </div>
-  {:else if searchMode === "adj"}
-    <div>
-      {#each adjResult as m (m.shuushokugocode)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div on:click={() => doAdjSelect(m)}>{m.name}</div>
-      {/each}
-    </div>
-  {/if}
-  <div>
-    <button on:click={doEnter}>入力</button>
+  <div class="result-wrapper">
+    {#if searchMode === "byoumei"}
+      <div>
+        {#each byoumeiResult as m (m.shoubyoumeicode)}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div on:click={() => doByoumeiSelect(m.name)}>{m.name}</div>
+        {/each}
+      </div>
+    {:else if searchMode === "adj"}
+      <div>
+        {#each adjResult as m (m.shuushokugocode)}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div on:click={() => doAdjSelect(m)}>{m.name}</div>
+        {/each}
+      </div>
+    {/if}
   </div>
 </Dialog>
+
+<style>
+  .row {
+    margin: 4px 0;
+  }
+
+  .result-wrapper {
+    max-height: 300px;
+    overflow-y: auto;
+    cursor: pointer;
+  }
+
+</style>
