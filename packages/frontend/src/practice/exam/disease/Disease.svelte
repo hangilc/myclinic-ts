@@ -206,6 +206,7 @@
         const b: Drugs = new Drugs({
           target: workarea,
           props: {
+            env,
             onChanged: async () => {
               drugDiseases = await cache.getDrugDiseases();
               checkDrugs();

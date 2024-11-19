@@ -18,7 +18,7 @@
   // export let at: string;
   // export let patientId: number;
   export let onAdded: (d: DiseaseData) => void;
-  export let onRegistered: (d: DrugDisease) => void;
+  export let onRegistered: () => void;
   let searchText = "";
   let byoumeiResult: ByoumeiMaster[] = [];
   let adjResult: ShuushokugoMaster[] = [];
@@ -80,7 +80,7 @@
           diseaseName: byoumeiMaster.name,
           pre: adjMasters.filter((m) => m.isPrefix).map((m) => m.name),
           post: adjMasters.filter((m) => !m.isPrefix).map((m) => m.name),
-          onRegistered: () => {},
+          onRegistered,
         },
       });
     }
