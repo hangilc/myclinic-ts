@@ -2,6 +2,7 @@ import api from "@/lib/api";
 import { CachedValue } from "@/lib/cached-value";
 import type { Patient, VisitEx } from "myclinic-model";
 import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
+import { DateWrapper } from "myclinic-util";
 
 export class DiseaseEnv {
   patient: Patient;
@@ -10,7 +11,7 @@ export class DiseaseEnv {
   examples: DiseaseExample[];
   editTarget: DiseaseData | undefined = undefined;
   today: Date = new Date();
-  lastVisit: VisitEx | undefined;
+  visits: VisitEx[] = [];
 
   static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
     api.listDiseaseExample
@@ -20,12 +21,12 @@ export class DiseaseEnv {
     patient: Patient,
     currentList: DiseaseData[],
     examples: DiseaseExample[],
-    lastVisit?: VisitEx,
+    visits?: VisitEx[],
   ) {
     this.patient = patient;
     this.currentList = [...currentList];
     this.examples = examples;
-    this.lastVisit = lastVisit;
+    this.visits = visits ?? [];
   }
 
   addDisease(d: DiseaseData): void {
@@ -82,12 +83,12 @@ export class DiseaseEnv {
   static async create(patient: Patient): Promise<DiseaseEnv> {
     const cur = await api.listCurrentDiseaseEx(patient.patientId);
     const examples = await DiseaseEnv.examplesCache.get();
-    const lastVisitId = await api.listVisitIdByPatientReverse(patient.patientId, 0, 1);
-    let lastVisit: VisitEx | undefined = undefined;
-    if( lastVisitId.length > 0 ){
-      lastVisit = await api.getVisitEx(lastVisitId[0]);
-    }
-    return new DiseaseEnv(patient, cur, examples, lastVisit);
+    const today = DateWrapper.from(new Date()).asSqlDate();
+    const visitIds = await api.listVisitIdByDateIntervalAndPatient(today, today, patient.patientId);
+    let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
+    visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
+    console.log("visits", visits);
+    return new DiseaseEnv(patient, cur, examples, visits);
   }
 
 }

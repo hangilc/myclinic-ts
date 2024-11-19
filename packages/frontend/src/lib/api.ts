@@ -1584,6 +1584,12 @@ export default {
       castList(castNumber))
   },
 
+  listVisitIdByDateIntervalAndPatient(fromDate: string, uptoDate: string, patientId: number): Promise<number[]> {
+    return get("list-visit-id-by-date-interval-and-patient",
+      { from: fromDate, upto: uptoDate, "patient-id": patientId.toString() },
+      castList(castNumber))
+  },
+
   getPharmaAddr(): Promise<any> {
     return get("list-pharma-addr", {}, a => a);
   },
@@ -1650,7 +1656,7 @@ export default {
   },
 
   setDrugDiseases(drugDiseases: DrugDisease[]): Promise<void> {
-    return post("set-config", drugDiseases, { name: "drug-disease"}, a => a)
+    return post("set-config", drugDiseases, { name: "drug-disease" }, a => a)
   },
 
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {

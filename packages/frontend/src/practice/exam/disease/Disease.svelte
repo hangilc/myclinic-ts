@@ -18,10 +18,11 @@
   import { extractDrugNames } from "./drugs-visit";
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
-  import AddDiseaseForDrugDialog from "./AddDiseaseForDrugDialog.svelte";
   import { writable, type Writable } from "svelte/store";
   import SelectrDiseaseForDrugDialog from "./SelectrDiseaseForDrugDialog.svelte";
   import Drugs from "./Drugs.svelte";
+  import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
+  import { DateWrapper } from "myclinic-util";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -67,7 +68,8 @@
 
   async function checkDrugs() {
     drugsWithouMatchingDisease = [];
-    const drugNames: string[] = extractDrugNames($env?.lastVisit?.texts ?? []);
+    const texts = $env?.visits.flatMap((visit) => visit.texts) ?? [];
+    const drugNames: string[] = extractDrugNames(texts);
     const diseaseNames: string[] =
       $env?.currentList?.map((disease) => {
         return disease.byoumeiMaster.name;
@@ -210,8 +212,8 @@
             onChanged: async () => {
               drugDiseases = await cache.getDrugDiseases();
               checkDrugs();
-            }
-          }
+            },
+          },
         });
         clear = () => b.$destroy();
         break;
@@ -223,26 +225,47 @@
   }
 
   async function doAddDiseaseForDrug(drugName: string) {
-    const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+    const d: EditDrugDiseaseDialog = new EditDrugDiseaseDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        drugName,
-        env,
-        // at: env.lastVisit.visitedAt.substring(0, 10),
-        // patientId: env.patient.patientId,
-        onAdded: (d: DiseaseData) => {
-          env.update((optEnv) => {
-            if (optEnv) {
-              optEnv.addDisease(d);
-            }
-            return optEnv;
-          });
+        title: "薬剤病名の追加",
+        item: {
+          drugName,
+          diseaseName: "",
+        },
+        at: DateWrapper.from(new Date()).asSqlDate(),
+        onEnter: async (created: DrugDisease) => {
+          const dds = await cache.getDrugDiseases();
+          dds.push(created);
+          await api.setDrugDiseases(dds);
+          cache.clearDrugDiseases();
+          drugDiseases = dds;
+          if (created.fix) {
+            await addDiseaseByFix(created.fix);
+          }
           checkDrugs();
         },
-        onRegistered: () => checkDrugs(),
       },
     });
+    // const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
+    //   target: document.body,
+    //   props: {
+    //     destroy: () => d.$destroy(),
+    //     drugName,
+    //     env,
+    //     onAdded: (d: DiseaseData) => {
+    //       env.update((optEnv) => {
+    //         if (optEnv) {
+    //           optEnv.addDisease(d);
+    //         }
+    //         return optEnv;
+    //       });
+    //       checkDrugs();
+    //     },
+    //     onRegistered: () => checkDrugs(),
+    //   },
+    // });
   }
 
   function doSelectDiseaseForDrug(drugName: string) {
@@ -260,8 +283,12 @@
     });
   }
 
-  async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
-    const at = $env?.lastVisit?.visitedAt.substring(0, 10);
+  async function addDiseaseByFix(fix: {
+    pre: string[];
+    name: string;
+    post: string[];
+  }): Promise<boolean> {
+    const at = $env?.visits[0].visitedAt.substring(0, 10);
     const patientId = $env?.patient.patientId;
     if (at && patientId) {
       const adjList: ShuushokugoMaster[] = [];
@@ -277,7 +304,7 @@
       const disease = await api.resolveByoumeiMasterByName(fix.name, at);
       if (!disease) {
         alert(`invalid name: ${name}`);
-        return;
+        return false;
       }
       const data: DiseaseEnterData = {
         patientId: patientId,
@@ -293,6 +320,14 @@
         }
         return optEnv;
       });
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
+    if (await addDiseaseByFix(fix)) {
       checkDrugs();
     }
   }
