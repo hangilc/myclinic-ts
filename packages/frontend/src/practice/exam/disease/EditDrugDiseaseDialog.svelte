@@ -8,6 +8,7 @@
   export let item: DrugDisease;
   export let at: string;
   export let onEnter: (dd: DrugDisease) => void;
+  export let title = "薬剤病名の編集";
   let drugName = item.drugName;
   let diseaseName = item.diseaseName;
   let searchText = "";
@@ -92,7 +93,7 @@
   }
 </script>
 
-<Dialog title="薬剤病名の編集" {destroy} styleWidth="300px">
+<Dialog {title} {destroy} styleWidth="300px">
   <div class="row">
     薬剤名：<input type="text" bind:value={drugName} />
   </div>

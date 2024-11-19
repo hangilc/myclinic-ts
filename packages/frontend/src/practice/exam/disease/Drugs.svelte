@@ -67,8 +67,32 @@
       }
     })
   }
+
+  async function doNew() {
+    const d: EditDrugDiseaseDialog = new EditDrugDiseaseDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        item: {
+          drugName: "", diseaseName: "", fix: undefined,
+        },
+        at: resolveAt(),
+        title: "薬剤病名の追加",
+        onEnter: async (created: DrugDisease) => {
+          drugDiseases = [...drugDiseases, { id: index++, data: created}];
+          const dds = drugDiseases.map(e => e.data);
+          await api.setDrugDiseases(dds);
+          cache.clearDrugDiseases();
+          onChanged();
+        }
+      }
+    })
+  }
 </script>
 
+<div class="top-commands">
+  <button on:click={doNew}>新規登録</button>
+</div>
 <div class="wrapper">
   <div class="items-wrapper">
     {#each drugDiseases as dd (dd.id)}
@@ -96,6 +120,10 @@
     height: 300px;
     overflow-y: auto;
     resize: vertical;
+  }
+
+  .top-commands {
+    margin-bottom: 10px;
   }
 
   .items-wrapper > hr:last-of-type {
