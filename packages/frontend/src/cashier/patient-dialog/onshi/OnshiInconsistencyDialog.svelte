@@ -4,7 +4,7 @@
   import OnshiKakuninFormItem from "@/lib/OnshiKakuninFormItem.svelte";
   import { onshiDateToSqlDate } from "onshi-result/util";
   import type { ResultItem } from "onshi-result/dist/ResultItem";
-  import type { OnshiInconsistency } from "@/lib/onshi-inconsistency";
+  import type { OnshiInconsistency } from "@/lib/onshi-consistency";
 
   export let destroy: () => void;
   export let resultItem: ResultItem;

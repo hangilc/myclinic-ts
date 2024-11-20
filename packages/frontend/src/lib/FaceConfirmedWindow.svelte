@@ -41,8 +41,8 @@
   import type { EventEmitter } from "./event-emitter";
   import FaceConfirmedSearchPatientDialog from "./face-confirmed/FaceConfirmedSearchPatientDialog.svelte";
   import FaceConfirmedConfirmSelectPatient from "./face-confirmed/FaceConfirmedConfirmSelectPatient.svelte";
-  import { checkOnshiPatientInconsistency } from "./onshi-inconsistency";
   import { checkShahokokuhoInconsistency } from "./onshi-hoken";
+  import { checkOnshiPatientConsistency } from "./onshi-patient-consistency";
 
   export let destroy: () => void;
   export let result: OnshiResult;
@@ -331,10 +331,10 @@
           destroy: () => d.$destroy(),
           onshiName: r.name,
           onSelect: (patient: Patient) => {
-            const errs = checkOnshiPatientInconsistency(r, patient);
+            const errs = checkOnshiPatientConsistency(r, patient);
             if (errs.length === 0) {
               advanceWithPatient(patient, r);
-            } else if (errs.length === 1 && errs[0].kind === "patient-name") {
+            } else if (errs.length === 1 && errs[0].kind === "名前") {
               const onshiPatient = new OnshiPatient(r);
               const dd: FaceConfirmedConfirmSelectPatient =
                 new FaceConfirmedConfirmSelectPatient({

@@ -7,8 +7,11 @@
   import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
   import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
   import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
-  import { OnshiInconsistency, checkOnshiInconsistency } from "./onshi-inconsistency";
+  import {
+    checkOnshiInconsistency,
+  } from "./onshi-consistency";
   import api from "./api";
+  import { OnshiPatientInconsistency } from "./onshi-patient-consistency";
 
   export let destroy: () => void;
   export let hoken: Shahokokuho | Koukikourei;
@@ -19,10 +22,12 @@
   let announce: string = "";
   // let query: OnshiKakuninQuery | undefined = undefined;
   let showDetail = false;
-  let updateOnshiNameData: undefined | {
-    patientId: number,
-    onshiName: string
-  } = undefined;
+  let updateOnshiNameData:
+    | undefined
+    | {
+        patientId: number;
+        onshiName: string;
+      } = undefined;
 
   startQuery();
 
@@ -40,9 +45,15 @@
       if (result.isValid) {
         const ri = result.resultList[0];
         const e = checkOnshiInconsistency(ri, patient, hoken);
-        if (e.length > 0) {
-          errors = e.map((e) => e.toString());
-          if( hasPatientNameInconsistency(e) && countPatientInconsistencies(e) === 1 ){
+        if (e.patientInconsistency.length + e.hokenInconsistency.length > 0) {
+          errors = [
+            ...e.patientInconsistency.map((e) => e.toString()),
+            ...e.hokenInconsistency.map((e) => e.toString()),
+          ];
+          if (
+            hasPatientNameInconsistency(e.patientInconsistency) &&
+            countPatientInconsistencies(e.patientInconsistency) === 1
+          ) {
             updateOnshiNameData = {
               patientId: patient.patientId,
               onshiName: ri.name,
@@ -60,23 +71,33 @@
     }
   }
 
-  function countPatientInconsistencies(errs: OnshiInconsistency[]): number {
-    return errs.reduce((acc, ele) => {
-      const kind = ele.kind;
-      if( kind.startsWith("patient-") ){
-        return acc + 1;
-      } else {
-        return acc;
-      }
-    }, 0);
+  function countPatientInconsistencies(
+    errs: OnshiPatientInconsistency[]
+  ): number {
+    return errs.length;
+    // return errs.reduce((acc, ele) => {
+    //   const kind = ele.kind;
+    //   if( kind.startsWith("patient-") ){
+    //     return acc + 1;
+    //   } else {
+    //     return acc;
+    //   }
+    // }, 0);
   }
 
-  function hasPatientNameInconsistency(errs: OnshiInconsistency[]): boolean {
-    for(let e of errs){
-      if( e.kind === "patient-name" ){
+  function hasPatientNameInconsistency(
+    errs: OnshiPatientInconsistency[]
+  ): boolean {
+    for (let e of errs) {
+      if (e.kind === "名前") {
         return true;
       }
     }
+    // for(let e of errs){
+    //   if( e.kind === "patient-name" ){
+    //     return true;
+    //   }
+    // }
     return false;
   }
 
@@ -95,7 +116,7 @@
   }
 
   async function doSetOnshiName() {
-    if( updateOnshiNameData ){
+    if (updateOnshiNameData) {
       const d = updateOnshiNameData;
       const patient = await api.getPatient(d.patientId);
       const m = patient.memoAsJson;
@@ -127,10 +148,12 @@
   {/if}
   {#if announce}<div class="announce">{announce}</div>{/if}
   {#if updateOnshiNameData}
-  <div class="update-onshi-name-wrapper">
-    この名前をオンライン資格確認の際には使用しますか？
-    <button data-cy="update-onshi-name-button" on:click={doSetOnshiName}>はい</button>
-  </div>
+    <div class="update-onshi-name-wrapper">
+      この名前をオンライン資格確認の際には使用しますか？
+      <button data-cy="update-onshi-name-button" on:click={doSetOnshiName}
+        >はい</button
+      >
+    </div>
   {/if}
   <slot name="commands">
     <div class="commands">
@@ -142,39 +165,43 @@
       <div class="detail-toggle">
         <span>確認情報詳細</span>
         {#if !showDetail}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="gray"
-          width="16"
-          on:click={() => { showDetail = true}}
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-          />
-        </svg>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="gray"
+            width="16"
+            on:click={() => {
+              showDetail = true;
+            }}
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
         {:else}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="gray"
-          width="16"
-          on:click={() => { showDetail = false}}
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M4.5 15.75l7.5-7.5 7.5 7.5"
-          />
-        </svg>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="gray"
+            width="16"
+            on:click={() => {
+              showDetail = false;
+            }}
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4.5 15.75l7.5-7.5 7.5 7.5"
+            />
+          </svg>
         {/if}
       </div>
     </div>
@@ -189,15 +216,6 @@
 </Dialog>
 
 <style>
-  .query {
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
-
-  .query span:nth-of-type(even) {
-    margin-left: 10px;
-  }
-
   .commands {
     margin-top: 10px;
     text-align: right;

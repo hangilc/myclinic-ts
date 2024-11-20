@@ -184,6 +184,10 @@ export class DateWrapper {
     }
   }
 
+  static today(): DateWrapper {
+    return DateWrapper.from(new Date());
+  }
+
   static create(year: number, month: number, day: number): DateWrapper {
     return new DateWrapper(new Date(year, month - 1, day));
   }

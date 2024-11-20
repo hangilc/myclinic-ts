@@ -7,7 +7,7 @@
   import type { DiseaseEnv } from "./disease-env";
   import { DateWrapper } from "myclinic-util";
 
-  export let env: Writable<DiseaseEnv | undefined>;
+  // export let env: Writable<DiseaseEnv | undefined>;
   export let onChanged: () => void;
   let drugDiseases: { id: number; data: DrugDisease }[] = [];
   let index = 1;
@@ -41,11 +41,12 @@
   }
 
   function resolveAt(): string {
-    let at = $env?.lastVisit?.visitedAt.substring(0, 10);
-    if( at == undefined ){
-      at = DateWrapper.from(new Date()).asSqlDate();
-    }
-    return at;
+    return DateWrapper.today().asSqlDate();
+    // let at = $env?.lastVisit?.visitedAt.substring(0, 10);
+    // if( at == undefined ){
+    //   at = DateWrapper.from(new Date()).asSqlDate();
+    // }
+    // return at;
   }
 
   async function doEdit(item: { id: number, data: DrugDisease}) {

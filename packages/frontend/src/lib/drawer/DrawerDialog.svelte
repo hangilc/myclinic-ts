@@ -118,7 +118,7 @@
     height={`${height * scale}`}
   >
     {#if base64Data !== ""}
-      <img style={stampStyle} src={`data:image/jpeg;base64,${base64Data}`} />
+      <img style={stampStyle} src={`data:image/jpeg;base64,${base64Data}`} alt="stamp"/>
     {/if}</DrawerSvg
   >
   <div>
