@@ -69,6 +69,7 @@
 
   async function refresh() {
     const curr = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
+    console.log("refresh", curr);
     wqItems.set(curr);
     // wqItems = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
   }
