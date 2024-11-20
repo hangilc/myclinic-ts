@@ -53,6 +53,9 @@
         conductSpecs.push(conductReqMap[name]);
       } else {
         regularNames.push(name);
+        if( name === "生活習慣病管理料２" ){
+          regularNames.push("外来データ提出加算（生活習慣病管理料１・２）");
+        }
       }
     });
     try {
