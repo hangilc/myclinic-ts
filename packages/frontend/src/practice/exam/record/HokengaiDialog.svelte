@@ -1,5 +1,6 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
+  import { setFocus } from "@/lib/set-focus";
 
   export let destroy: () => void;
   export let hokengai: string[];
@@ -20,7 +21,7 @@
 
 <Dialog title="保険外" {destroy}>
   <div class="inputs">
-    <div class="item">1. <input type="text" bind:value={hokengai1} /></div>
+    <div class="item">1. <input type="text" bind:value={hokengai1} use:setFocus/></div>
     <div class="item">2. <input type="text" bind:value={hokengai2} /></div>
     <div class="item">3. <input type="text" bind:value={hokengai3} /></div>
     <div class="item">4. <input type="text" bind:value={hokengai4} /></div>

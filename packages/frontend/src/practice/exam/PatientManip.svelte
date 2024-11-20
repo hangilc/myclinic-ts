@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import { WqueueState } from "myclinic-model";
+  import { Visit, WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./exam-vars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
@@ -20,6 +20,7 @@
     type SearchResult,
   } from "@/lib/denshi-shohou/shohou-interface";
   import PrescListDialog from "./PrescListDialog.svelte";
+  import CashierHokengaiDialog from "./CashierHokengaiDialog.svelte";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -29,7 +30,14 @@
     if (visitId && visitId > 0 && patient) {
       cashierVisitId.set(visitId);
       const rezeptMeisai = await calcRezeptMeisai(visitId);
-      const visit = await api.getVisit(visitId);
+      let visit = await api.getVisit(visitId);
+      if (
+        visit.shahokokuhoId === 0 &&
+        visit.koukikoureiId === 0 &&
+        !hasHokengai(visit)
+      ) {
+        await fixHokengai(visit);
+      }
       const d: CashierDialog = new CashierDialog({
         target: document.body,
         props: {
@@ -39,6 +47,33 @@
         },
       });
     }
+  }
+
+  function fixHokengai(visit: Visit): Promise<void> {
+    return new Promise((resolve, _reject) => {
+      const d: CashierHokengaiDialog = new CashierHokengaiDialog({
+        target: document.body,
+        props: {
+          destroy: async (s: string | undefined) => {
+            if (s) {
+              visit = Object.assign({}, visit);
+              let attr = JSON.parse(visit.attributesStore ?? "{}");
+              attr.hokengai = [s];
+              await api.updateVisit(Object.assign({}, visit, {
+                attributesStore: JSON.stringify(attr)
+              }));
+            }
+            d.$destroy();
+            resolve();
+          },
+        },
+      });
+    });
+  }
+
+  function hasHokengai(visit: Visit): boolean {
+    const attr = JSON.parse(visit.attributesStore ?? "{}");
+    return attr.hokengai && attr.hokengai[0] && attr.hokengai[0] !== "";
   }
 
   function onEndPatientClick() {
@@ -168,8 +203,8 @@
             props: {
               destroy: () => d.$destroy(),
               list,
-            }
-          })
+            },
+          });
         }
       } else {
         alert("Empty result");

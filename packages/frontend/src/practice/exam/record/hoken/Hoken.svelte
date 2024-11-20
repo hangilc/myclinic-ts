@@ -97,7 +97,7 @@
       </svg>
     {/if}
   {/if}
-  {hokenRep(visit)}
+  <span style="user-select:none;">{hokenRep(visit)}</span>
 </div>
 
 <style>

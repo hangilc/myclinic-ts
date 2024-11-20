@@ -1659,6 +1659,14 @@ export default {
     return post("set-config", drugDiseases, { name: "drug-disease" }, a => a)
   },
 
+  getHokengaiHistory(): Promise<string[]> {
+    return get("get-config", { name: "hokengai-history" }, a => a ?? []);
+  },
+
+  setHokengaiHistory(hokengaiHistory: string[]): Promise<void> {
+    return post("set-config", hokengaiHistory, { name: "hokengai-history" }, a => a)
+  },
+
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
     return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
   }
