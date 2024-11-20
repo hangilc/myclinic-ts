@@ -74,9 +74,9 @@ function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: s
     a => a[0], itemsList, eqArray,
     () => [], (acc, item) => [...acc, ...item[1]]
   );
-  grouped.forEach((g, i) => {
-    console.log(`group(${i})`, g[0].length, g[1].length);
-  });
+  // grouped.forEach((g, i) => {
+  //   console.log(`group(${i})`, g[0].length, g[1].length);
+  // });
   const calcs: [number, Payer[]][] = grouped.map(([payers, items]) => [
     totalTenOfMeisaiItems(items) * 10, payers
   ]);
@@ -85,12 +85,12 @@ function calcFutan(visits: VisitEx[], futanWari: number, at: string, birthday: s
   calcPayments(calcs,
     createPaymentSetting(futanWari, ym, bd, visits.map(v => v.asVisit), shotokuKubun)
   );
-  calcs.forEach((c, i) => {
-    console.log(`calc(${i})`);
-    c[1].forEach((p, pi) => {
-      console.log("  ", `payer(${pi})`, p.payment.kind, p.payment.kakari, p.payment.payment);
-    })
-  })
+  // calcs.forEach((c, i) => {
+  //   console.log(`calc(${i})`);
+  //   c[1].forEach((p, pi) => {
+  //     console.log("  ", `payer(${pi})`, p.payment.kind, p.payment.kakari, p.payment.payment);
+  //   })
+  // })
   // return calcs.reduce((acc, ele) =>
   //   acc + PayerObject.jikofutanOf(ele[1])
   //   , 0);

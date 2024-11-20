@@ -44,7 +44,7 @@
 
   async function init() {
     drugDiseases = await cache.getDrugDiseases();
-    console.log("drugDiseases", drugDiseases);
+    // console.log("drugDiseases", drugDiseases);
   }
 
   unsubs.push(

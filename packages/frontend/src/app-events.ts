@@ -33,9 +33,9 @@ function connect(): void {
     log("got ws message", data);
     if (typeof data === "string") {
       const json = JSON.parse(data);
-      if (json.format !== "heart-beat") {
-        console.log(json);
-      }
+      // if (json.format !== "heart-beat") {
+      //   console.log(json);
+      // }
       dispatch(json);
     }
   });

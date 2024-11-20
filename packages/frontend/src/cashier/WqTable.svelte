@@ -10,9 +10,13 @@
   import { popupTrigger } from "@/lib/popup-helper";
   import { hotlineTrigger } from "@/lib/event-emitter";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
+  import type { Writable } from "svelte/store";
 
-  export let items: WqueueData[];
+  // export let items: WqueueData[];
+  export let items: Writable<WqueueData[]>;
   export let isAdmin: boolean;
+
+  $: console.log("items", $items);
 
   function formatDob(birthday: string): string {
     return kanjidate.format(kanjidate.f2, birthday);
@@ -60,7 +64,7 @@
     <div>生年月日</div>
     <div>操作</div>
   </div>
-  {#each items as item (item.visitId)}
+  {#each $items as item (item.visitId)}
     {@const wq = item.wq}
     {@const visit = item.visit}
     {@const patient = item.patient}

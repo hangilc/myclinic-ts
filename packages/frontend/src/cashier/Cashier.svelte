@@ -7,8 +7,10 @@
   import { WqueueData } from "./wq-data";
   import WqTable from "./WqTable.svelte";
   import type { EventEmitter } from "@/lib/event-emitter";
+  import { writable, type Writable } from "svelte/store";
 
-  export let wqItems: WqueueData[] = [];
+  // export let wqItems: WqueueData[] = [];
+  export let wqItems: Writable<WqueueData[]> = writable([]);
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   export let isAdmin: boolean = false;
   let unsubs: (() => void)[] = [];
@@ -23,7 +25,7 @@
         return;
       }
       let data = await getWqueueData(wq);
-      wqItems = [...wqItems, data];
+      wqItems.update((wqItems) => [...wqItems, data]);
     })
   );
 
@@ -33,20 +35,18 @@
         return;
       }
       const wqData = await getWqueueData(wq);
-      wqItems = wqItems.map(item => {
-        if( item.visitId === wq.visitId ){
-          return wqData;
-        } else {
-          return item;
-        }
-      })
-      // let item = await getWqueueData(wq);
-      // const tmp = wqItems;
-      // let i = tmp.findIndex((d) => d.visitId == wq.visitId);
-      // if (i >= 0) {
-      //   tmp.splice(i, 1, item);
-      //   wqItems = tmp;
-      // }
+      wqItems.update((wqItems) => {
+        console.log("before", wqItems);
+        const updated = wqItems.map((item) => {
+          if (item.visitId === wq.visitId) {
+            return wqData;
+          } else {
+            return item;
+          }
+        });
+        console.log("after", updated);
+        return updated;
+      });
     })
   );
 
@@ -55,13 +55,9 @@
       if (wq == null) {
         return;
       }
-      wqItems = wqItems.filter(item => item.visitId !== wq.visitId);
-      // let i = wqItems.findIndex((d) => d.visitId == wq.visitId);
-      // if (i >= 0) {
-      //   const tmp = wqItems;
-      //   tmp.splice(i, 1);
-      //   wqItems = tmp;
-      // }
+      wqItems.update((wqItems) =>
+        wqItems.filter((item) => item.visitId !== wq.visitId)
+      );
     })
   );
 
@@ -72,7 +68,9 @@
   }
 
   async function refresh() {
-    wqItems = (await api.listWqueueFull()).map(r => new WqueueData(...r));
+    const curr = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
+    wqItems.set(curr);
+    // wqItems = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
   }
 </script>
 

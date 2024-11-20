@@ -93,7 +93,7 @@
         close();
         endPatient();
       } else {
-        await api.changeWqueueState($visitId, WqueueState.WaitCashier.code);
+        // await api.changeWqueueState($visitId, WqueueState.WaitCashier.code);
         close();
         endPatient(WqueueState.WaitCashier);
       }
