@@ -19,7 +19,7 @@ export async function onshiConfirmByHoken(hoken: Shahokokuho | Koukikourei, conf
     idToken?: string,
   } = {}
 ): Promise<OnshiResult> {
-  const errors: (OnshiHokenConsistencyError | OnshiPatientInconsistency)[] = [];
+  // const errors: (OnshiHokenConsistencyError | OnshiPatientInconsistency)[] = [];
   const patient: Patient = await api.getPatient(hoken.patientId);
   const query = onshi_query_from_hoken(hoken, patient.birthday, confirmationDate, limitAppConsFlag);
   if (idToken) {

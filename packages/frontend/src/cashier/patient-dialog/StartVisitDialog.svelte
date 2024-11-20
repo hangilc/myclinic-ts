@@ -13,7 +13,6 @@
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
   import { messageOfOnshiConfirmHokenResult, onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import { dateToSql } from "@/lib/util";
-  import { onshiConfirm } from "@/lib/onshi-confirm";
   import { Onshi } from "myclinic-model/model";
   import { confirm } from "@/lib/confirm-call";
   import type { Hoken, HokenType } from "./hoken";

@@ -152,11 +152,16 @@ export function checkOnshiShahokokuhoConsistency(
   }
   {
     const edaban = r.insuredBranchNumber || "";
-    if (shahokokuho.edaban !== "" && toHankaku(stripLeadingZero(shahokokuho.edaban)) !== toHankaku(stripLeadingZero(edaban))) {
+    if (shahokokuho.edaban !== edaban) {
       errors.push(new OnshiHokenInconsistency.InconsistentEdaban(
         shahokokuho.edaban, edaban
       ));
     }
+    // if (shahokokuho.edaban !== "" && toHankaku(stripLeadingZero(shahokokuho.edaban)) !== toHankaku(stripLeadingZero(edaban))) {
+    //   errors.push(new OnshiHokenInconsistency.InconsistentEdaban(
+    //     shahokokuho.edaban, edaban
+    //   ));
+    // }
   }
   {
     const kourei: number = r.kourei != undefined ? r.kourei.futanWari ?? 0 : 0;
@@ -275,21 +280,21 @@ export function checkShahokokuhoOnshiConsistency(shahokokuho: Shahokokuho, resul
 export function canFixShahokokuhoSafely(orig: Shahokokuho, curr: Shahokokuho, inconsistencies: ShahokokuhoOnshiInconsistency[])
   : Shahokokuho | undefined {
   const m: ShahokokuhoInterface = orig.asJson();
-  for(let i of inconsistencies){
-    switch(i){
-      case  "inconsistent-edaban": {
-        if( m.edaban === undefined || m.edaban === "" ) {
+  for (let i of inconsistencies) {
+    switch (i) {
+      case "inconsistent-edaban": {
+        if (m.edaban === undefined || m.edaban === "") {
           m.edaban = curr.edaban;
           break;
         } else {
           // fall through
         }
       }
-      case  "inconsistent-honnin-kazoku": {
+      case "inconsistent-honnin-kazoku": {
         m.honninStore = curr.honninStore;
         break;
       }
-      case  "inconsistent-valid-upto": {
+      case "inconsistent-valid-upto": {
 
       }
       default: return undefined;
