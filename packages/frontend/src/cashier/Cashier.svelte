@@ -10,7 +10,7 @@
   import { writable, type Writable } from "svelte/store";
 
   // export let wqItems: WqueueData[] = [];
-  export let wqItems: Writable<WqueueData[]> = writable([]);
+  let wqItems: Writable<WqueueData[]> = writable([]);
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   export let isAdmin: boolean = false;
   let unsubs: (() => void)[] = [];
@@ -21,43 +21,49 @@
 
   unsubs.push(
     wqueueEntered.subscribe(async (wq) => {
+      refresh();
       if (wq == null) {
         return;
       }
-      let data = await getWqueueData(wq);
-      wqItems.update((wqItems) => [...wqItems, data]);
+    //   let data = await getWqueueData(wq);
+    //   wqItems.update((wqItems) => {
+    //     return [...wqItems, data]
+    // });
     })
   );
 
   unsubs.push(
     wqueueUpdated.subscribe(async (wq) => {
+      refresh();
       if (wq == null) {
         return;
       }
-      const wqData = await getWqueueData(wq);
-      wqItems.update((wqItems) => {
-        console.log("before", wqItems);
-        const updated = wqItems.map((item) => {
-          if (item.visitId === wq.visitId) {
-            return wqData;
-          } else {
-            return item;
-          }
-        });
-        console.log("after", updated);
-        return updated;
-      });
+      // const wqData = await getWqueueData(wq);
+      // wqItems.update((wqItems) => {
+      //   console.log("before", wqItems);
+      //   const updated = wqItems.map((item) => {
+      //     if (item.visitId === wq.visitId) {
+      //       return wqData;
+      //     } else {
+      //       return item;
+      //     }
+      //   });
+      //   console.log("after", updated);
+      //   return updated;
+      // });
     })
   );
 
   unsubs.push(
     wqueueDeleted.subscribe(async (wq) => {
+      refresh();
       if (wq == null) {
         return;
       }
-      wqItems.update((wqItems) =>
-        wqItems.filter((item) => item.visitId !== wq.visitId)
-      );
+      // console.log("deleted", wq);
+      // wqItems.update((wqItems) =>
+      //   wqItems.filter((item) => item.visitId !== wq.visitId)
+      // );
     })
   );
 
