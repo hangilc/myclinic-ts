@@ -9,6 +9,7 @@
   import MishuuList from "./mishuu-list/MishuuList.svelte";
   import Disease from "./disease/Disease.svelte";
   import Appointments from "./appointsments/Appointments.svelte";
+  import Epoch from "./Epoch.svelte";
 
   export let isVisible = false;
 </script>
@@ -40,6 +41,7 @@
     {#if $showPatientsByDate}
       <PatientsByDateBox />
     {/if}
+    <Epoch />
   </div>
 </div>
 
