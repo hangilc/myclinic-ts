@@ -9,7 +9,6 @@
   import MishuuList from "./mishuu-list/MishuuList.svelte";
   import Disease from "./disease/Disease.svelte";
   import Appointments from "./appointsments/Appointments.svelte";
-  import PatientSummary from "./patient-summary/PatientSummary.svelte";
 
   export let isVisible = false;
 </script>
@@ -41,7 +40,6 @@
     {#if $showPatientsByDate}
       <PatientsByDateBox />
     {/if}
-    <PatientSummary />
   </div>
 </div>
 

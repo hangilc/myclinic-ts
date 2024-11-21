@@ -1,7 +1,4 @@
-import {
-  toKouhi, toPatientSummary,
-  toSafeConvert, mapOptional, interfaceToPatientSummary, undefinedToNull, interfaceToKouhi
-} from "myclinic-model";
+import { toKouhi, interfaceToKouhi } from "myclinic-model";
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
@@ -1564,19 +1561,6 @@ export default {
 
   listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
     return get("list-patient-by-onshi-name", { text: onshiName }, castList(m.Patient.cast));
-  },
-
-  findPatientSummary(patientId: number): Promise<m.PatientSummary | null> {
-    return get("find-patient-summary", { "patient-id": patientId.toString() },
-      mapNullOptional(pipe(toPatientSummary, interfaceToPatientSummary)));
-  },
-
-  enterPatientSummary(summary: m.PatientSummary): Promise<void> {
-    return post("enter-patient-summary", summary, {}, (_) => { });
-  },
-
-  setPatientSummary(summary: m.PatientSummary): Promise<void> {
-    return post("set-patient-summary", summary, {}, (_) => { });
   },
 
   listVisitIdInDateInterval(fromDate: string, uptoDate: string): Promise<number[]> {

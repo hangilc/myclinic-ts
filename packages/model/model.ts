@@ -2047,24 +2047,6 @@ export class ClinicInfo {
   }
 }
 
-export interface PatientSummaryInterface {
-  patientId: number;
-  content: string;
-}
-
-export class PatientSummary {
-  patientId: number;
-  content: string;
-
-  constructor({
-    patientId,
-    content,
-  }: PatientSummaryInterface) {
-    this.patientId = patientId;
-    this.content = content;
-  }
-}
-
 export interface UsageMaster {
   usage_code: string;
   kubun_code: string;

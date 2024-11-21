@@ -1,5 +1,5 @@
 import { Gengou, GengouList } from "kanjidate";
-import { Kouhi, type KouhiInterface, type KouhiMemoInterface, PatientSummary, type PatientSummaryInterface } from "./model";
+import { Kouhi, type KouhiInterface, type KouhiMemoInterface, } from "./model";
 import { pipe } from "./pipe";
 
 export class MultiError {
@@ -407,24 +407,6 @@ export function toKouhi(obj: any): KouhiInterface {
       validUpto: validUpto.getValue(),
       patientId: patientId.getValue(),
       memo: memo.getValue(),
-    };
-  }
-}
-
-export function interfaceToPatientSummary(src: PatientSummaryInterface): PatientSummary {
-  return new PatientSummary(src);
-}
-
-export function toPatientSummary(arg: any): PatientSummaryInterface {
-  const errors: string[] = [];
-  const patientId = toSafeConvert("patientId", toNonNegativeInteger)(arg.patientId).copyErrorsTo(errors);
-  const content = toSafeConvert("内容", ensureString)(arg.content).copyErrorsTo(errors);
-  if (errors.length > 0) {
-    throw new MultiError(errors);
-  } else {
-    return {
-      patientId: patientId.getValue(),
-      content: content.getValue(),
     };
   }
 }
