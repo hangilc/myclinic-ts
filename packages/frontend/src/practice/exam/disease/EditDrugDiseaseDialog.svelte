@@ -48,6 +48,9 @@
   function doByoumeiSelect(name: string) {
     fixName = name;
     updateFixFullName();
+    if( diseaseName === "" ){
+      diseaseName = name;
+    }
   }
 
   function compileFix():
