@@ -6,6 +6,7 @@ import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 import { mkItems, mkWidgets } from "./widgets";
+import { seq, textBlock } from "../../compiler/seq";
 
 const p = mkItems();
 const widgets = mkWidgets();
@@ -23,6 +24,17 @@ export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
 }
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
+  const ctx = mkDrawerContext();
+  setupFonts(ctx);
+  setupPens(ctx);
+  const paper: Box = b.paperSizeToBox(A4);
+  const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
+  drawUpperAreaSeq(ctx, areas[0], data);
+
+  return c.getOps(ctx);
+}
+
+export function drawRyouyouKeikakushoKeizokuSave(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoKeizokuContext();
   c.fillData(ctx, data);
 
@@ -37,6 +49,28 @@ function setupFonts(ctx: DC) {
 function setupPens(ctx: DC) {
   c.createPen(ctx, "thick", 0, 0, 0, 0.6);
   c.createPen(ctx, "thin", 0, 0, 0, 0.2);
+}
+
+function drawUpperAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  c.setFont(ctx, "f5");
+  box = b.modify(box, b.shrinkVert(0, 2), b.setHeight(c.currentFontSize(ctx), "bottom"));
+  c.drawText(ctx, "生活習慣病　療養計画書　継続用", box, "left", "bottom");
+  const right: Box = b.modify(box, b.setWidth(90, "right"));
+  seq(ctx, right, [
+    textBlock(ctx, "（記入日:"),
+  ])
+  // c.drawComposite(ctx, right, [
+  //   p.text("（記入日:"),
+  //   p.gapTo(32, { mark: "issue-year", ropt: { halign: "center" } }),
+  //   p.text("年"),
+  //   p.gapTo(50, { mark: "issue-month", ropt: { halign: "center" } }),
+  //   p.text("月"),
+  //   p.gapTo(65, { mark: "issue-day", ropt: { halign: "center" } }),
+  //   p.text("日）"),
+  //   p.text("("),
+  //   p.gap(6, { mark: "issue-times", ropt: { halign: "center" } }),
+  //   p.text(")回目")
+  // ], { valign: "bottom", halign: "left", })
 }
 
 function drawUpperArea(ctx: DC, box: Box) {
