@@ -4,17 +4,19 @@ import * as b from "./box";
 import * as c from "./compiler";
 import type { HAlign, VAlign } from "./align";
 
+export type BlockWidth = number | { kind: "rightAt", rightAt: number } | "expand";
+
 export type Block = {
-  width: number | { kind: "rightAt", rightAt: number };
+  width: BlockWidth;
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
-export function seq(ctx: DrawerContext, box: Box, items: (Block | "expander")[], opt?: {
+export function seq(ctx: DrawerContext, box: Box, items: Block[], opt?: {
 }) {
   let x = 0;
   let expanderCount = 0;
   items.forEach(item => {
-    if (item === "expander") {
+    if (item.width === "expand") {
       expanderCount += 1;
     } else {
       if (typeof item.width === "number") {
@@ -40,10 +42,10 @@ export function seq(ctx: DrawerContext, box: Box, items: (Block | "expander")[],
   const expanderWidth = expanderCount > 0 ? extra / expanderCount : 0;
   x = 0;
   items.forEach(item => {
-    if (item === "expander") {
-      x += expanderWidth;
+    let renderWidth: number;
+    if (item.width === "expand") {
+      renderWidth = expanderWidth;
     } else {
-      let renderWidth: number;
       if (typeof item.width === "number") {
         renderWidth = item.width;
       } else {
@@ -55,10 +57,10 @@ export function seq(ctx: DrawerContext, box: Box, items: (Block | "expander")[],
           default: throw new Error(`Unknown width type: ${item.width}`);
         }
       }
-      const renderBox: Box = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(renderWidth, "left"));
-      item.render(ctx, renderBox);
-      x = renderBox.right - box.left;
     }
+    const renderBox: Box = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(renderWidth, "left"));
+    item.render(ctx, renderBox);
+    x = renderBox.right - box.left;
   })
 }
 
@@ -67,6 +69,7 @@ export function textBlock(ctx: DrawerContext, text: string, opt?: {
   halign?: HAlign;
   valign?: VAlign;
   rightAt?: number;
+  expand?: boolean;
   width?: number;
   render?: (ctx: DrawerContext, box: Box) => void;
 }): Block {
@@ -74,11 +77,13 @@ export function textBlock(ctx: DrawerContext, text: string, opt?: {
   const halign = opt?.halign ?? "left";
   const valign = opt?.valign ?? "top";
   const rightAt = opt?.rightAt;
-  let width: number | { kind: "rightAt", rightAt: number };
+  let width: BlockWidth;
   if( typeof opt?.width === "number" ){
     width = opt?.width;
   } else if( rightAt !== undefined ){
     width = { kind: "rightAt", rightAt };
+  } else if( opt?.expand ){
+    width = "expand";
   } else {
     width = textWidth(ctx, text, font);
   }

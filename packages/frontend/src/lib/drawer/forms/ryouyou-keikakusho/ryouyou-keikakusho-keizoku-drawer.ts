@@ -335,43 +335,40 @@ function drawJuutenSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
           ]);
           seq(ctx, right, [
             ...boxed(ctx, "外食の際の注意事項(", data, "juuten-食事-外食の際の注意事項-mark"),
-            p.expander({ mark: "juuten-食事-外食の際の注意事項" }),
+            textBlock(ctx, value(data, "juuten-食事-外食の際の注意事項"), { expand: true, valign: "center" }),
             textBlock(ctx, ")", { valign: "center" }),
           ]);
         });
-        // b.withSplitColumns(rs[3], b.splitAt(87), ([left, right]) => {
-        //   c.drawComposite(ctx, left, [
-        //     ...widgets.boxed("油を使った料理(揚げ物や炒め物等)の摂取を減らす", "juuten-食事-油を使った料理の摂取を減らす-mark")
-        //   ]);
-        //   c.drawComposite(ctx, right, [
-        //     ...widgets.boxed("その他", "juuten-食事-その他-mark")
-        //   ]);
-        // });
-        // c.drawComposite(ctx, rs[4], [
-        //   ...widgets.boxed("節酒:[減らす(種類・量:", "juuten-食事-節酒-mark"),
-        //   p.gap(42, { mark: "shokuji-食事-節酒" }),
-        //   p.text("を週"),
-        //   p.expander({ mark: "shokuji-食事-節酒-回" }),
-        //   p.text("回)]"),
-        //   p.gapTo(106),
-        // ]);
-        // c.drawComposite(ctx, rs[5], [
-        //   ...widgets.boxed("間食:[減らす(種類・量:", "juuten-食事-間食-mark"),
-        //   p.gap(42, { mark: "shokuji-食事-間食" }),
-        //   p.text("を週"),
-        //   p.expander({ mark: "shokuji-食事-間食-回" }),
-        //   p.text("回)]"),
-        //   p.gapTo(106),
-        // ]);
-        // c.drawComposite(ctx, rs[6], [
-        //   ...widgets.boxed("食べ方:(ゆっくり食べる・その他(", "juuten-食事-食べ方-mark"),
-        //   p.expander({ mark: "juuten-食事-食べ方" }),
-        //   p.text("))"),
-        //   p.gapTo(106,)
-        // ]);
-        // c.drawComposite(ctx, rs[7], [
-        //   ...widgets.boxed("食事時間:朝食、昼食、夕食を規則正しくとる", "juuten-食事-食事時間-mark"),
-        // ])
+        b.withSplitColumns(rs[3], b.splitAt(87), ([left, right]) => {
+          seq(ctx, left, [
+            ...boxed(ctx, "油を使った料理(揚げ物や炒め物等)の摂取を減らす", data, "juuten-食事-油を使った料理の摂取を減らす-mark")
+          ]);
+          seq(ctx, right, [
+            ...boxed(ctx, "その他", data, "juuten-食事-その他-mark")
+          ]);
+        });
+        seq(ctx, b.modify(rs[4], b.setWidth(106, "left")), [
+          ...boxed(ctx, "節酒:[減らす(種類・量:", data, "juuten-食事-節酒-mark"),
+          textBlock(ctx, value(data, "juuten-食事-節酒"), { width: 42, valign: "center" }),
+          textBlock(ctx, "を週", { valign: "center" }),
+          textBlock(ctx, value(data, "juuten-食事-節酒-回"), { expand: true, valign: "center" }),
+          textBlock(ctx, "回)]", { valign: "center" }),
+        ]);
+        seq(ctx, b.modify(rs[5], b.setWidth(106, "left")), [
+          ...boxed(ctx, "間食:[減らす(種類・量:", data, "juuten-食事-間食-mark"),
+          textBlock(ctx, value(data, "juuten-食事-間食"), { width: 42, valign: "center" }),
+          textBlock(ctx,"を週", { valign: "center" }),
+          textBlock(ctx, value(data, "juuten-食事-間食-回"), { expand: true, valign: "center" }),
+          textBlock(ctx,"回)]", { valign: "center" }),
+        ]);
+        seq(ctx, b.modify(rs[6], b.setWidth(106, "left")), [
+          ...boxed(ctx, "食べ方:(ゆっくり食べる・その他(", data, "juuten-食事-食べ方-mark"),
+          textBlock(ctx, value(data, "juuten-食事-食べ方"), { expand: true, valign: "center" }),
+          textBlock(ctx, "))", { valign: "center" }),
+        ]);
+        seq(ctx, rs[7], [
+          ...boxed(ctx, "食事時間:朝食、昼食、夕食を規則正しくとる", data, "juuten-食事-食事時間-mark"),
+        ])
       }, { boxModifiers: [bodyModifier] })
     })
     // 運動
