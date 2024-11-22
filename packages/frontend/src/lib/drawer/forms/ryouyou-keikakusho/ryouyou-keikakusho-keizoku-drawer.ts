@@ -74,14 +74,14 @@ function drawMiddleAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(98, 105));
   drawMiddleUpperLeftSeq(ctx, upperLeft, data);
   drawMiddleUpperRightSeq(ctx, upperRight, data);
-  // c.setPen(ctx, "thick");
-  // c.rect(ctx, lower);
-  // const rows = b.splitToRows(lower, b.splitAt(5, 58, 152));
-  // rows.forEach(r => c.frameBottom(ctx, r));
-  // c.setFont(ctx, "f4");
-  // c.drawText(ctx, "ねらい:重点目標の達成状況を理解できること・目標再設定と指導された生活習慣改善に取り組めること",
-  //   rows[0], "center", "center", { dy: -0.25 });
-  // drawMokuhyou(ctx, rows[1]);
+  c.setPen(ctx, "thick");
+  c.rect(ctx, lower);
+  const rows = b.splitToRows(lower, b.splitAt(5, 58, 152));
+  rows.forEach(r => c.frameBottom(ctx, r));
+  c.setFont(ctx, "f4");
+  c.drawText(ctx, "ねらい:重点目標の達成状況を理解できること・目標再設定と指導された生活習慣改善に取り組めること",
+    rows[0], "center", "center", { dy: -0.25 });
+  drawMokuhyouSeq(ctx, rows[1], data);
   // drawJuuten(ctx, rows[2]);
   // drawKensa(ctx, rows[3]);
 }
@@ -142,7 +142,7 @@ function drawMiddleUpperLeftSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) 
   ]);
 }
 
-function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): Block[] {
+function boxed(ctx: DrawerContext, label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): Block[] {
   let size = 3;
   return [
     textBlock(ctx, "", {
@@ -172,14 +172,124 @@ function drawMiddleUpperRightSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData)
   c.setFont(ctx, "f4")
   c.drawText(ctx, "主病", upper, "left", "center");
   seq(ctx, b.modify(lower, b.shrinkHoriz(1, 0)), [
-    ...boxed("糖尿病", data, "disease-diabetes"),
+    ...boxed(ctx, "糖尿病", data, "disease-diabetes"),
     gap(3),
-    ...boxed("高血圧", data, "disease-hypertension"),
+    ...boxed(ctx, "高血圧", data, "disease-hypertension"),
     gap(3),
-    ...boxed("脂質異常症", data, "disease-hyperlipidemia"),
+    ...boxed(ctx, "脂質異常症", data, "disease-hyperlipidemia"),
   ]);
 }
 
+function drawMokuhyouSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  const cols = b.splitToColumns(box, b.splitAt(7));
+  c.setPen(ctx, "thick");
+  c.frameRight(ctx, cols[0]);
+  c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
+  const rows: Box[] = [];
+  {
+    const h = b.height(box) - 13.5 * 3 - 2.5;
+    b.withSplitRows(cols[1], b.splitAt(h), rs => {
+      rows.push(rs[0]);
+      b.withSplitRows(rs[1], b.evenSplitter(3), rs => rows.push(...rs), { boxModifiers: [b.shiftUp(1.5)] });
+    }, { boxModifiers: [b.shrinkHoriz(0.5, 0.5)] });
+  }
+  {
+    const box = b.modify(rows[0], b.inset(1));
+    c.drawText(ctx, "【目標】", box, "left", "top");
+    b.withSplitRows(b.modify(rows[0], b.shrinkHoriz(17, 0)), b.evenSplitter(2), ([upper, lower]) => {
+      seq(ctx, b.modify(upper, b.shiftDown(0.5)), [
+        ...boxed(ctx, "体重(", data, "mokuhyou-体重-mark"),
+        textBlock(ctx, value(data, "mokuhyou-体重"), { width: 11, valign: "center", halign: "center" }),
+        textBlock(ctx, "kg)", { valign: "center" }),
+        gap(3),
+        ...boxed(ctx, "BMI:(", data, "mokuhyou-BMI-mark"),
+        textBlock(ctx, value(data, "mokuhyou-BMI"), { width: 14, valign: "center", halign: "center"}),
+        textBlock(ctx, ")", { valign: "center" }),
+        gap(5),
+        ...boxed(ctx, "収縮期／拡張期圧(", data, "mokuhyou-BP-mark"),
+        textBlock(ctx, value(data, "mokuhyou-BP"), { width: 22, valign: "center", halign: "center" }),
+        textBlock(ctx, "mmHg)", { valign: "center" })
+      ]);
+      seq(ctx, b.modify(lower, b.shiftUp(0.5)), [
+        ...boxed(ctx, "HbA1c:(", data, "mokuhyou-HbA1c-mark"),
+        textBlock(ctx, value(data, "mokuhyou-HbA1c"), { width: 20, valign: "center", halign: "center" }),
+        textBlock(ctx, "%)", { valign: "center", }),
+      ]);
+    })
+  }
+  {
+    b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➀目標の達成状況】", upper, "left", "center");
+      const fontSave = c.getCurrentFont(ctx);
+      lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+      b.withSplitRows(lower, b.evenSplitter(4), rs => {
+        c.drawText(ctx, "┌", rs[0], "left", "center");
+        c.drawText(ctx, "│", rs[1], "left", "center");
+        c.drawText(ctx, "│", rs[2], "left", "center");
+        c.drawText(ctx, "└", rs[3], "left", "center");
+        c.drawText(ctx, "┐", rs[0], "right", "center");
+        c.drawText(ctx, "│", rs[1], "right", "center");
+        c.drawText(ctx, "│", rs[2], "right", "center");
+        c.drawText(ctx, "┘", rs[3], "right", "center");
+      });
+      c.setFont(ctx, fontSave);
+      c.mark(ctx, "mokuhyou-目標達成状況", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+        halign: "left",
+        valign: "center",
+        paragraph: true,
+        font: "f4"
+      });
+    });
+  }
+  // {
+  //   b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
+  //     c.drawText(ctx, "【➁達成目標】:患者と相談した目標", upper, "left", "center");
+  //     const fontSave = c.getCurrentFont(ctx);
+  //     lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+  //     b.withSplitRows(lower, b.evenSplitter(4), rs => {
+  //       c.drawText(ctx, "┌", rs[0], "left", "center");
+  //       c.drawText(ctx, "│", rs[1], "left", "center");
+  //       c.drawText(ctx, "│", rs[2], "left", "center");
+  //       c.drawText(ctx, "└", rs[3], "left", "center");
+  //       c.drawText(ctx, "┐", rs[0], "right", "center");
+  //       c.drawText(ctx, "│", rs[1], "right", "center");
+  //       c.drawText(ctx, "│", rs[2], "right", "center");
+  //       c.drawText(ctx, "┘", rs[3], "right", "center");
+  //     });
+  //     c.setFont(ctx, fontSave);
+  //     c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+  //       halign: "left",
+  //       valign: "center",
+  //       paragraph: true,
+  //       font: "f4"
+  //     });
+  //   });
+  // }
+  // {
+  //   b.withSplitRows(rows[3], b.splitAt(5), ([upper, lower]) => {
+  //     c.drawText(ctx, "【➂行動目標】:患者と相談した目標", upper, "left", "center");
+  //     c.withFont(ctx, "f4", () => {
+  //       lower = b.modify(lower, b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6));
+  //       b.withSplitRows(lower, b.evenSplitter(4), rs => {
+  //         c.drawText(ctx, "┌", rs[0], "left", "center");
+  //         c.drawText(ctx, "│", rs[1], "left", "center");
+  //         c.drawText(ctx, "│", rs[2], "left", "center");
+  //         c.drawText(ctx, "└", rs[3], "left", "center");
+  //         c.drawText(ctx, "┐", rs[0], "right", "center");
+  //         c.drawText(ctx, "│", rs[1], "right", "center");
+  //         c.drawText(ctx, "│", rs[2], "right", "center");
+  //         c.drawText(ctx, "┘", rs[3], "right", "center");
+  //       });
+  //       c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(6, 6), b.shrinkVert(2, 2)), {
+  //         halign: "left",
+  //         valign: "center",
+  //         paragraph: true,
+  //         font: "f4"
+  //       });
+  //     })
+  //   });
+  // }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
