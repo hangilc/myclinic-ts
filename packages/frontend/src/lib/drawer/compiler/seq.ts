@@ -15,7 +15,11 @@ export function seq(ctx: DrawerContext, box: Box, items: (Block | "expander")[],
     if( ele === "expander" ){
       return acc;
     } else {
-      return acc + ele.width;
+      if( typeof ele.width === "number" ){
+        return acc + ele.width;
+      } else {
+        
+      }
     }
   }, 0);
   const extraWidth: number = Math.max(0, b.width(box) - blockWidth);
