@@ -6,22 +6,10 @@ import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 import { mkItems, mkWidgets } from "./widgets";
-import { seq, textBlock } from "../../compiler/seq";
+import { gap, seq, textBlock } from "../../compiler/seq";
 
 const p = mkItems();
 const widgets = mkWidgets();
-
-export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
-  const ctx = mkDrawerContext();
-  setupFonts(ctx);
-  setupPens(ctx);
-  const paper: Box = b.paperSizeToBox(A4);
-  const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
-  drawUpperArea(ctx, areas[0]);
-  drawMiddleArea(ctx, areas[1]);
-  drawLowerArea(ctx, areas[2]);
-  return ctx;
-}
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkDrawerContext();
@@ -30,13 +18,8 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] 
   const paper: Box = b.paperSizeToBox(A4);
   const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
   drawUpperAreaSeq(ctx, areas[0], data);
-
-  return c.getOps(ctx);
-}
-
-export function drawRyouyouKeikakushoKeizokuSave(data: RyouyouKeikakushoData): Op[] {
-  const ctx = mkRyouyouKeikakushoKeizokuContext();
-  c.fillData(ctx, data);
+  drawMiddleAreaSeq(ctx, areas[1], data);
+  // drawLowerAreaSeq(ctx, areas[2]);
 
   return c.getOps(ctx);
 }
@@ -51,6 +34,22 @@ function setupPens(ctx: DC) {
   c.createPen(ctx, "thin", 0, 0, 0, 0.2);
 }
 
+function value(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): string {
+  return data[key]?.toString() ?? "";
+}
+
+function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): boolean {
+  return !!data[key];
+}
+
+function circle(draw: boolean): (ctx: DrawerContext, box: Box) => void {
+  return (ctx: DrawerContext, box: Box) => {
+    if (draw) {
+      c.circle(ctx, b.cx(box), b.cy(box), b.height(box) * 0.8)
+    }
+  }
+}
+
 function drawUpperAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   c.setFont(ctx, "f5");
   box = b.modify(box, b.shrinkVert(0, 2), b.setHeight(c.currentFontSize(ctx), "bottom"));
@@ -58,19 +57,102 @@ function drawUpperAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   const right: Box = b.modify(box, b.setWidth(90, "right"));
   seq(ctx, right, [
     textBlock(ctx, "（記入日:"),
-  ])
-  // c.drawComposite(ctx, right, [
-  //   p.text("（記入日:"),
-  //   p.gapTo(32, { mark: "issue-year", ropt: { halign: "center" } }),
+    textBlock(ctx, value(data, "issue-year"), { rightAt: 32, halign: "center", }),
+    textBlock(ctx, "年"),
+    textBlock(ctx, value(data, "issue-month"), { rightAt: 50, halign: "center", }),
+    textBlock(ctx, "月"),
+    textBlock(ctx, value(data, "issue-day"), { rightAt: 65, halign: "center", }),
+    textBlock(ctx, "日"),
+    textBlock(ctx, "("),
+    textBlock(ctx, value(data, "issue-times"), { width: 6, halign: "center" }),
+    textBlock(ctx, ")回目"),
+  ]);
+}
+
+function drawMiddleAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  const [upper, _gap, lower] = b.splitToRows(box, b.splitAt(14, 17));
+  const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(98, 105));
+  drawMiddleUpperLeftSeq(ctx, upperLeft, data);
+  // drawMiddleUpperRight(ctx, upperRight);
+  // c.setPen(ctx, "thick");
+  // c.rect(ctx, lower);
+  // const rows = b.splitToRows(lower, b.splitAt(5, 58, 152));
+  // rows.forEach(r => c.frameBottom(ctx, r));
+  // c.setFont(ctx, "f4");
+  // c.drawText(ctx, "ねらい:重点目標の達成状況を理解できること・目標再設定と指導された生活習慣改善に取り組めること",
+  //   rows[0], "center", "center", { dy: -0.25 });
+  // drawMokuhyou(ctx, rows[1]);
+  // drawJuuten(ctx, rows[2]);
+  // drawKensa(ctx, rows[3]);
+}
+
+function drawMiddleUpperLeftSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  c.setPen(ctx, "thick");
+  c.rect(ctx, box);
+  const [row1, row2] = b.splitToRows(box, b.evenSplitter(2));
+  c.setPen(ctx, "thin");
+  c.frameBottom(ctx, row1);
+  c.setFont(ctx, "f4");
+  seq(ctx, row1, [
+    gap(8),
+    textBlock(ctx, "患者氏名："),
+    textBlock(ctx, value(data, "patient-name"), { rightAt: 74 }),
+    textBlock(ctx, "("),
+    textBlock(ctx, "男", { render: circle(booleanValue(data, "patient-sex-male")) }),
+    textBlock(ctx, "・"),
+    textBlock(ctx, "女", { render: circle(booleanValue(data, "patient-sex-female")) }),
+    textBlock(ctx, "）"),
+  ]);
+
+  // const fs = c.currentFontSize(ctx);
+  // c.drawComposite(ctx, row2, [
+  //   p.gap(3),
+  //   p.text("生年月日:"),
+  //   p.text("明", { mark: "birthdate-gengou-meiji" }),
+  //   p.gap(-fs / 4),
+  //   p.text("・"),
+  //   p.gap(-fs / 4),
+  //   p.text("大", { mark: "birthdate-gengou-taishou" }),
+  //   p.gap(-fs / 4),
+  //   p.text("・"),
+  //   p.gap(-fs / 4),
+  //   p.text("昭", { mark: "birthdate-gengou-shouwa" }),
+  //   p.gap(-fs / 4),
+  //   p.text("・"),
+  //   p.gap(-fs / 4),
+  //   p.text("平", { mark: "birthdate-gengou-heisei" }),
+  //   p.gap(-fs / 4),
+  //   p.text("・"),
+  //   p.gap(-fs / 4),
+  //   p.text("令", { mark: "birthdate-gengou-reiwa" }),
+  //   p.gap(6, { mark: "birthdate-nen" }),
   //   p.text("年"),
-  //   p.gapTo(50, { mark: "issue-month", ropt: { halign: "center" } }),
+  //   p.gap(6, { mark: "birthdate-month" }),
   //   p.text("月"),
-  //   p.gapTo(65, { mark: "issue-day", ropt: { halign: "center" } }),
-  //   p.text("日）"),
-  //   p.text("("),
-  //   p.gap(6, { mark: "issue-times", ropt: { halign: "center" } }),
-  //   p.text(")回目")
-  // ], { valign: "bottom", halign: "left", })
+  //   p.gap(6, { mark: "birthdate-day" }),
+  //   p.text("日生("),
+  //   p.gap(6, { mark: "patient-age" }),
+  //   p.text("才)"),
+  // ], { boxModifiers: [b.shrinkHoriz(1, 1)] });
+}
+
+function drawRyouyouKeikakushoKeizokuSave(data: RyouyouKeikakushoData): Op[] {
+  const ctx = mkRyouyouKeikakushoKeizokuContext();
+  c.fillData(ctx, data);
+
+  return c.getOps(ctx);
+}
+
+export function mkRyouyouKeikakushoKeizokuContext(): DrawerContext {
+  const ctx = mkDrawerContext();
+  setupFonts(ctx);
+  setupPens(ctx);
+  const paper: Box = b.paperSizeToBox(A4);
+  const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
+  drawUpperArea(ctx, areas[0]);
+  drawMiddleArea(ctx, areas[1]);
+  drawLowerArea(ctx, areas[2]);
+  return ctx;
 }
 
 function drawUpperArea(ctx: DC, box: Box) {
