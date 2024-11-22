@@ -6,7 +6,7 @@ import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 import { mkItems, mkWidgets } from "./widgets";
-import { gap, seq, textBlock } from "../../compiler/seq";
+import { gap, seq, textBlock, type Block } from "../../compiler/seq";
 
 const p = mkItems();
 const widgets = mkWidgets();
@@ -42,10 +42,10 @@ function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoD
   return !!data[key];
 }
 
-function circle(draw: boolean): (ctx: DrawerContext, box: Box) => void {
+function circle(draw: boolean, radius: number): (ctx: DrawerContext, box: Box) => void {
   return (ctx: DrawerContext, box: Box) => {
     if (draw) {
-      c.circle(ctx, b.cx(box), b.cy(box), b.height(box) * 0.8)
+      c.circle(ctx, b.cx(box), b.cy(box), radius)
     }
   }
 }
@@ -73,7 +73,7 @@ function drawMiddleAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   const [upper, _gap, lower] = b.splitToRows(box, b.splitAt(14, 17));
   const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(98, 105));
   drawMiddleUpperLeftSeq(ctx, upperLeft, data);
-  // drawMiddleUpperRight(ctx, upperRight);
+  drawMiddleUpperRightSeq(ctx, upperRight, data);
   // c.setPen(ctx, "thick");
   // c.rect(ctx, lower);
   // const rows = b.splitToRows(lower, b.splitAt(5, 58, 152));
@@ -87,6 +87,12 @@ function drawMiddleAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
 }
 
 function drawMiddleUpperLeftSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  function text(text: string): Block {
+    return textBlock(ctx, text, { valign: "center" });
+  }
+  function textCircle(text: string, key: keyof RyouyouKeikakushoData): Block {
+    return textBlock(ctx, text, { valign: "center", render: circle(booleanValue(data, key), 3) });
+  }
   c.setPen(ctx, "thick");
   c.rect(ctx, box);
   const [row1, row2] = b.splitToRows(box, b.evenSplitter(2));
@@ -95,46 +101,87 @@ function drawMiddleUpperLeftSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) 
   c.setFont(ctx, "f4");
   seq(ctx, row1, [
     gap(8),
-    textBlock(ctx, "患者氏名："),
-    textBlock(ctx, value(data, "patient-name"), { rightAt: 74 }),
-    textBlock(ctx, "("),
-    textBlock(ctx, "男", { render: circle(booleanValue(data, "patient-sex-male")) }),
-    textBlock(ctx, "・"),
-    textBlock(ctx, "女", { render: circle(booleanValue(data, "patient-sex-female")) }),
-    textBlock(ctx, "）"),
+    text("患者氏名："),
+    textBlock(ctx, value(data, "patient-name"), { rightAt: 74, valign: "center" }),
+    text("("),
+    textCircle("男", "patient-sex-male"),
+    text("・"),
+    textCircle("女", "patient-sex-female"),
+    text("）"),
   ]);
 
   const fs = c.currentFontSize(ctx);
   seq(ctx, b.modify(row2, b.shrinkHoriz(1, 1)), [
     gap(3),
-    textBlock(ctx, "生年月日:"),
-    textBlock(ctx, "明", { render: circle(booleanValue(data, "birthdate-gengou-meiji")) }),
+    text("生年月日:"),
+    textCircle("明", "birthdate-gengou-meiji"),
     gap(-fs / 4),
-    textBlock(ctx, "・"),
+    text("・"),
     gap(-fs / 4),
-    textBlock(ctx, "大", { render: circle(booleanValue(data, "birthdate-gengou-taishou")) }),
+    textCircle("大", "birthdate-gengou-taishou"),
     gap(-fs / 4),
-    textBlock(ctx, "・"),
+    text("・"),
     gap(-fs / 4),
-    textBlock(ctx, "昭", { render: circle(booleanValue(data, "birthdate-gengou-shouwa")) }),
+    textCircle("昭", "birthdate-gengou-shouwa"),
     gap(-fs / 4),
-    textBlock(ctx, "・"),
+    text("・"),
     gap(-fs / 4),
-    textBlock(ctx, "平", { render: circle(booleanValue(data, "birthdate-gengou-heisei")) }),
+    textCircle("平", "birthdate-gengou-heisei"),
     gap(-fs / 4),
-    textBlock(ctx, "・"),
+    text("・"),
     gap(-fs / 4),
-    textBlock(ctx, "令", { render: circle(booleanValue(data, "birthdate-gengou-reiwa")) }),
-    textBlock(ctx, value(data, "birthdate-nen"), { width: 6, halign: "center" }),
-    textBlock(ctx, "年"),
-    textBlock(ctx, value(data, "birthdate-month"), { width: 6, halign: "center" }),
-    textBlock(ctx, "月"),
-    textBlock(ctx, value(data, "birthdate-day"), { width: 6, halign: "center" }),
-    textBlock(ctx, "日生("),
-    textBlock(ctx, value(data, "patient-age"), { width: 6, halign: "center" }),
-    textBlock(ctx, "才)"),
+    textCircle("令", "birthdate-gengou-reiwa"),
+    textBlock(ctx, value(data, "birthdate-nen"), { width: 6, halign: "center", valign: "center" }),
+    text("年"),
+    textBlock(ctx, value(data, "birthdate-month"), { width: 6, halign: "center", valign: "center" }),
+    text("月"),
+    textBlock(ctx, value(data, "birthdate-day"), { width: 6, halign: "center", valign: "center" }),
+    text("日生("),
+    textBlock(ctx, value(data, "patient-age"), { width: 6, halign: "center", valign: "center" }),
+    text("才)"),
   ]);
 }
+
+function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): Block[] {
+  let size = 3;
+  return [
+    textBlock(ctx, "", {
+      width: size, render: (ctx: DrawerContext, box: Box) => {
+        c.withPen(ctx, "thin", () => {
+          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          c.frame(ctx, box);
+          if (booleanValue(data, key)) {
+            console.log("box checked", box);
+            c.withPen(ctx, "thick", () => {
+              c.moveTo(ctx, box.left, box.bottom);
+              c.lineTo(ctx, box.right, box.top);
+            });
+          }
+        });
+      }
+    }),
+    gap(1.5),
+    textBlock(ctx, label, { valign: "center" }),
+  ]
+}
+
+function drawMiddleUpperRightSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  c.setPen(ctx, "thick");
+  c.rect(ctx, box);
+  const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
+  c.setFont(ctx, "f4")
+  c.drawText(ctx, "主病", upper, "left", "center");
+  seq(ctx, b.modify(lower, b.shrinkHoriz(1, 0)), [
+    ...boxed("糖尿病", data, "disease-diabetes"),
+    gap(3),
+    ...boxed("高血圧", data, "disease-hypertension"),
+    gap(3),
+    ...boxed("脂質異常症", data, "disease-hyperlipidemia"),
+  ]);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 function drawRyouyouKeikakushoKeizokuSave(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkRyouyouKeikakushoKeizokuContext();
