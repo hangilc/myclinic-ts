@@ -296,13 +296,6 @@ function drawMokuhyouSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
 }
 
 function drawJuutenSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-  function boxedAndGap(label: string, gap: number, trail: string, boxMark: string, gapMark: string): c.CompositeItem[] {
-    return [
-      ...widgets.boxed(label, boxMark),
-      p.gap(gap, { mark: gapMark }),
-      p.text(trail),
-    ]
-  }
   const cols = b.splitToColumns(box, b.splitAt(7));
   c.setPen(ctx, "thick");
   c.frameRight(ctx, cols[0]);
@@ -357,9 +350,9 @@ function drawJuutenSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
         seq(ctx, b.modify(rs[5], b.setWidth(106, "left")), [
           ...boxed(ctx, "間食:[減らす(種類・量:", data, "juuten-食事-間食-mark"),
           textBlock(ctx, value(data, "juuten-食事-間食"), { width: 42, valign: "center" }),
-          textBlock(ctx,"を週", { valign: "center" }),
+          textBlock(ctx, "を週", { valign: "center" }),
           textBlock(ctx, value(data, "juuten-食事-間食-回"), { expand: true, valign: "center" }),
-          textBlock(ctx,"回)]", { valign: "center" }),
+          textBlock(ctx, "回)]", { valign: "center" }),
         ]);
         seq(ctx, b.modify(rs[6], b.setWidth(106, "left")), [
           ...boxed(ctx, "食べ方:(ゆっくり食べる・その他(", data, "juuten-食事-食べ方-mark"),
@@ -414,47 +407,50 @@ function drawJuutenSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
         ]);
       }, { boxModifiers: [bodyModifier] });
     })
-    // // たばこ
-    // b.withSplitColumns(tabako, b.splitAt(18), ([mark, body]) => {
-    //   c.frameRight(ctx, mark);
-    //   c.drawComposite(ctx, mark, [
-    //     ...widgets.boxed("たばこ", "juuten-たばこ-mark"),
-    //   ], { halign: "center" });
-    //   c.drawComposite(ctx, body, [
-    //     ...widgets.boxed("喫煙・節煙の有効性", "juuten-たばこ-禁煙・節煙の有効性-mark"),
-    //     p.gapTo(43),
-    //     ...widgets.boxed("禁煙の実施補法等", "juuten-たばこ-禁煙の実施補法等-mark"),
-    //   ], { boxModifiers: [bodyModifier] });
-    // })
+    // たばこ
+    b.withSplitColumns(tabako, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      seq(ctx, mark, [
+        ...boxed(ctx, "たばこ", data, "juuten-たばこ-mark"),
+      ], { halign: "center" });
+      seq(ctx, b.modify(body, bodyModifier), [
+        ...boxed(ctx, "喫煙・節煙の有効性", data, "juuten-たばこ-禁煙・節煙の有効性-mark"),
+        textBlock(ctx, "", { rightAt: 43 }),
+        ...boxed(ctx, "禁煙の実施補法等", data, "juuten-たばこ-禁煙の実施補法等-mark"),
+      ]);
+    })
     // その他
-    // b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
-    //   c.frameRight(ctx, mark);
-    //   {
-    //     const line1 = [...widgets.boxed("その", "juuten-shokuji-mark")];
-    //     const line2 = [p.gap(5), p.text("他")];
-    //     const w = Math.max(c.calcTotalCompositeWidth(ctx, line1, b.width(mark)), c.calcTotalCompositeWidth(ctx, line2, b.width(mark)));
-    //     const h = c.currentFontSize(ctx) * 2;
-    //     const dx = (b.width(mark) - w) / 2;
-    //     const dy = (b.height(mark) - h) / 2;
-    //     const innerBox = b.modify(mark, b.innerBox(dx, dy, dx + w, dy + h));
-    //     b.withSplitRows(innerBox, b.evenSplitter(2), rs => {
-    //       c.drawComposite(ctx, rs[0], line1);
-    //       c.drawComposite(ctx, rs[1], line2);
-    //     })
-    //   }
-    //   b.withSplitRows(body, b.evenSplitter(3), rs => {
-    //     b.withSplitColumns(rs[0], b.splitAt(24, 48, 92), cs => {
-    //       c.drawComposite(ctx, cs[0], widgets.boxed("仕事", "juuten-その他-仕事"));
-    //       c.drawComposite(ctx, cs[1], widgets.boxed("余暇", "juuten-その他-余暇"));
-    //       c.drawComposite(ctx, cs[2], widgets.boxed("睡眠の確保(質・量)", "juuten-その他-睡眠の確保"));
-    //       c.drawComposite(ctx, cs[3], widgets.boxed("減量", "juuten-その他-減量"));
-    //     });
-    //     c.drawComposite(ctx, rs[1], widgets.boxed("家庭での計測(歩数、体重、血圧、腹囲等)", "juuten-その他-家庭での計測"));
-    //     c.drawComposite(ctx, rs[2],
-    //       boxedAndGap("その他(", 88, ")", "juuten-その他-その他-mark", "juuten-その他-その他"));
-    //   }, { boxModifiers: [bodyModifier] });
-    // })
-  })
+    b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
+      c.frameRight(ctx, mark);
+      {
+        const line1 = [...boxed(ctx, "その", data, "juuten-食事-mark")];
+        const line2 = [textBlock(ctx, "他", { valign: "center" })];
+        const h = c.currentFontSize(ctx) * 2;
+        const dy = (b.height(mark) - h) / 2;
+        const innerBox = b.modify(mark, b.innerBox(0, dy, b.width(mark), dy + h));
+        b.withSplitRows(innerBox, b.evenSplitter(2), rs => {
+          seq(ctx, rs[0], line1, { halign: "center" });
+          seq(ctx, rs[1], line2, { halign: "center" });
+        })
+      }
+      b.withSplitRows(b.modify(body, bodyModifier), b.evenSplitter(3), rs => {
+        b.withSplitColumns(rs[0], b.splitAt(24, 48, 92), cs => {
+          seq(ctx, cs[0], boxed(ctx, "仕事", data, "juuten-その他-仕事-mark"));
+          seq(ctx, cs[1], boxed(ctx, "余暇", data, "juuten-その他-余暇-mark"));
+          seq(ctx, cs[2], boxed(ctx, "睡眠の確保(質・量)", data, "juuten-その他-睡眠の確保-mark"));
+          seq(ctx, cs[3], boxed(ctx, "減量", data, "juuten-その他-減量-mark"));
+        });
+        seq(ctx, rs[1], boxed(ctx, "家庭での計測(歩数、体重、血圧、腹囲等)", data, "juuten-その他-家庭での計測-mark"));
+        seq(ctx, rs[2], [
+          ...boxed(ctx, "その他(", data, "juuten-その他-その他-mark"),
+          textBlock(ctx, value(data, "juuten-その他-その他"), { width: 88, valign: "center" }),
+          textBlock(ctx, ")", { valign: "center" })
+          // boxedAndGap("その他(", 88, ")", "juuten-その他-その他-mark", "juuten-その他-その他"));
+        ]);
+      })
+    })
+  }
+  )
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
