@@ -12,6 +12,7 @@ export type Block = {
 }
 
 export function seq(ctx: DrawerContext, box: Box, items: Block[], opt?: {
+  halign?: HAlign
 }) {
   let x = 0;
   let expanderCount = 0;
@@ -38,9 +39,15 @@ export function seq(ctx: DrawerContext, box: Box, items: Block[], opt?: {
       }
     }
   });
+  const properWidth = expanderCount > 0 ? b.width(box) : x;
   const extra = Math.max(0, b.width(box) - x);
   const expanderWidth = expanderCount > 0 ? extra / expanderCount : 0;
   x = 0;
+  if( opt?.halign === "center" ){
+    x = (b.width(box) - properWidth) / 2.0;
+  } else if( opt?.halign === "right" ){
+    x = b.width(box) - properWidth;
+  }
   items.forEach(item => {
     let renderWidth: number;
     if (item.width === "expand") {
