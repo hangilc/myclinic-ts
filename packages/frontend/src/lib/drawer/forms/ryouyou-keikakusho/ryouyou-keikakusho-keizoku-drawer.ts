@@ -18,7 +18,7 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] 
   const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
   drawUpperArea(ctx, areas[0], data);
   drawMiddleArea(ctx, areas[1], data);
-  // drawLowerAreaSeq(ctx, areas[2], data);
+  drawLowerArea(ctx, areas[2], data);
 
   return c.getOps(ctx);
 }
@@ -42,28 +42,32 @@ function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoD
 }
 
 function textCircle(text: string, drawCircle: boolean): LineItemSpec {
-  return textBlock(text, { decorate: (ctx, box) => {
-    if( drawCircle ){
-      c.circle(ctx, b.cx(box), b.cy(box), 3);
+  return textBlock(text, {
+    decorate: (ctx, box) => {
+      if (drawCircle) {
+        c.circle(ctx, b.cx(box), b.cy(box), 3);
+      }
     }
-  }});
+  });
 }
 
 function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
   let size = 3;
   return [
-    r.gap(size, { decorate: (ctx, box) => {
-      c.withPen(ctx, "thin", () => {
-        box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
-        c.frame(ctx, box);
-        if (booleanValue(data, key)) {
-          c.withPen(ctx, "thick", () => {
-            c.moveTo(ctx, box.left, box.bottom);
-            c.lineTo(ctx, box.right, box.top);
-          });
-        }
-      });
-    }}),
+    r.gap(size, {
+      decorate: (ctx, box) => {
+        c.withPen(ctx, "thin", () => {
+          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          c.frame(ctx, box);
+          if (booleanValue(data, key)) {
+            c.withPen(ctx, "thick", () => {
+              c.moveTo(ctx, box.left, box.bottom);
+              c.lineTo(ctx, box.right, box.top);
+            });
+          }
+        });
+      }
+    }),
     r.gap(1.5),
     textBlock(label),
   ];
@@ -84,7 +88,7 @@ function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | LineItemSpe
   halign?: HAlign
 }) {
   const specs: LineItemSpec[] = extendedSpecs.map(spec => {
-    if( typeof spec === "string" ){
+    if (typeof spec === "string") {
       return textBlock(spec);
     } else {
       return spec;
@@ -378,7 +382,7 @@ function drawJuuten(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
         line(ctx, b.modify(rs[6], b.setWidth(106, "left")), [
           ...boxed("食べ方:(ゆっくり食べる・その他(", data, "juuten-食事-食べ方-mark"),
           expander(value(data, "juuten-食事-食べ方")),
-          "))", 
+          "))",
         ]);
         line(ctx, rs[7], [
           ...boxed("食事時間:朝食、昼食、夕食を規則正しくとる", data, "juuten-食事-食事時間-mark"),
@@ -444,28 +448,23 @@ function drawJuuten(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
       {
-        const line1 = [...boxed(ctx, "その", data, "juuten-食事-mark")];
-        const line2 = [textBlock(ctx, "他", { valign: "center" })];
-        const h = c.currentFontSize(ctx) * 2;
-        const dy = (b.height(mark) - h) / 2;
-        const innerBox = b.modify(mark, b.innerBox(0, dy, b.width(mark), dy + h));
-        b.withSplitRows(innerBox, b.evenSplitter(2), rs => {
-          seq(ctx, rs[0], line1, { halign: "center" });
-          seq(ctx, rs[1], line2, { halign: "center" });
-        })
+        const line1 = r.line(ctx, [...boxed("その", data, "juuten-食事-mark")]);
+        const line2 = r.line(ctx, [textBlock("他")]);
+        const para = r.paragraph(ctx, [line1, line2], { halign: "center" });
+        r.putIn(ctx, para, mark, { halign: "center", valign: "center" });
       }
       b.withSplitRows(b.modify(body, bodyModifier), b.evenSplitter(3), rs => {
         b.withSplitColumns(rs[0], b.splitAt(24, 48, 92), cs => {
-          seq(ctx, cs[0], boxed(ctx, "仕事", data, "juuten-その他-仕事-mark"));
-          seq(ctx, cs[1], boxed(ctx, "余暇", data, "juuten-その他-余暇-mark"));
-          seq(ctx, cs[2], boxed(ctx, "睡眠の確保(質・量)", data, "juuten-その他-睡眠の確保-mark"));
-          seq(ctx, cs[3], boxed(ctx, "減量", data, "juuten-その他-減量-mark"));
+          line(ctx, cs[0], boxed("仕事", data, "juuten-その他-仕事-mark"));
+          line(ctx, cs[1], boxed("余暇", data, "juuten-その他-余暇-mark"));
+          line(ctx, cs[2], boxed("睡眠の確保(質・量)", data, "juuten-その他-睡眠の確保-mark"));
+          line(ctx, cs[3], boxed("減量", data, "juuten-その他-減量-mark"));
         });
-        seq(ctx, rs[1], boxed(ctx, "家庭での計測(歩数、体重、血圧、腹囲等)", data, "juuten-その他-家庭での計測-mark"));
-        seq(ctx, rs[2], [
-          ...boxed(ctx, "その他(", data, "juuten-その他-その他-mark"),
-          textBlock(ctx, value(data, "juuten-その他-その他"), { width: 88, valign: "center" }),
-          textBlock(ctx, ")", { valign: "center" })
+        line(ctx, rs[1], boxed("家庭での計測(歩数、体重、血圧、腹囲等)", data, "juuten-その他-家庭での計測-mark"));
+        line(ctx, rs[2], [
+          ...boxed("その他(", data, "juuten-その他-その他-mark"),
+          gap(88, value(data, "juuten-その他-その他")),
+          ")",
         ]);
       })
     })
@@ -488,143 +487,119 @@ function drawKensa(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
       line(ctx, rs[0], [
         "【血液検査項目】(採血日",
         gap(8, value(data, "kensa-採血日-月")),
-        "月", 
+        "月",
         gap(8, value(data, "kensa-採血日-日")),
         "日)",
         advanceTo(tab),
         ...boxed("総ｺﾚｽﾃﾛｰﾙ", data, "kensa-総コレステロール-mark"),
         advanceTo(tab2),
         "(",
-        gap(40, value(data, "kensa-総コレステロール"), ),
+        gap(40, value(data, "kensa-総コレステロール"),),
         "mg/dl)",
       ]);
-      // {
-      //   let cols = b.splitToColumns(rs[1], b.splitAt(tab, tab2));
-      //   line(ctx, cols[0], [
-      //     ...boxed(ctx, "血糖", data, "kensa-血糖-mark"),
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     ...boxed(ctx, "空腹時", data, "kensa-血糖-空腹時-mark"),
-      //     textBlock(ctx, "", { width: 3 }),
-      //     ...boxed(ctx, "随時", data, "kensa-血糖-随時-mark"),
-      //     textBlock(ctx, "", { width: 4 }),
-      //     ...boxed(ctx, "食後", data, "kensa-血糖-食後-mark"),
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-血糖-食後"), { expand: true, valign: "center", halign: "center" }),
-      //     textBlock(ctx, ")時間", { valign: "center" }),
-      //     textBlock(ctx, ")", { valign: "center" }),
-      //     textBlock(ctx, "", { width: 2 }),
-      //   ]);
-      //   line(ctx, cols[1], [
-      //     ...boxed(ctx, "中性脂肪", data, "kensa-中性脂肪-mark"),
-      //   ]);
-      //   line(ctx, cols[2], [
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-中性脂肪"), { width: 40, halign: "center", valign: "center" }),
-      //     textBlock(ctx, "mg/dl)", { valign: "center" })
-      //   ])
-      // }
-      // {
-      //   const cols = b.splitToColumns(rs[2], b.splitAt(tab, tab2));
-      //   line(ctx, cols[0], [
-      //     textBlock(ctx, "", { width: 40 }),
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-血糖-値"), { expand: true, halign: "center", valign: "center" }),
-      //     textBlock(ctx, "mg/dl)", { valign: "center" }),
-      //     textBlock(ctx, "", { width: 2 }),
-      //   ]);
-      //   line(ctx, cols[1], [
-      //     ...boxed(ctx, "HDLｺﾚｽﾃﾛｰﾙ", data, "kensa-ＨＤＬコレステロール-mark"),
-      //   ]);
-      //   line(ctx, cols[2], [
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-ＨＤＬコレステロール"), { width: 40, halign: "center", valign: "center" }),
-      //     textBlock(ctx, "mg/dl)", { valign: "center" })
-      //   ]);
-      // }
-      // {
-      //   const cols = b.splitToColumns(rs[3], b.splitAt(tab, tab2));
-      //   line(ctx, cols[0], [
-      //     ...boxed(ctx, "HbA1c:", data, "kensa-HbA1c-mark"),
-      //     textBlock(ctx, "", { rightAt: 40 }),
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-HbA1c"), { expand: true, halign: "center", valign: "center" }),
-      //     textBlock(ctx, "%)", { valign: "center" }),
-      //     textBlock(ctx, "", { width: 2 }),
-      //   ]);
-      //   line(ctx, cols[1], [
-      //     ...boxed(ctx, "LDLｺﾚｽﾃﾛｰﾙ", data, "kensa-ＬＤＬコレステロール-mark"),
-      //   ]);
-      //   line(ctx, cols[2], [
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-ＬＤＬコレステロール"), { width: 40, halign: "center", valign: "center" }),
-      //     textBlock(ctx, "mg/dl)", { valign: "center" })
-         
-      //   ])
-      // }
-      // {
-      //   const cols = b.splitToColumns(rs[4], b.splitAt(tab));
-      //   line(ctx, cols[0], [
-      //     textBlock(ctx, "※血液検査結果を手交している場合は記載不要", { valign: "center" }),
-      //   ]);
-      //   line(ctx, cols[1], [
-      //     ...boxed(ctx, "その他", data, "kensa-血液検査項目-その他-mark"),
-      //     textBlock(ctx, "(", { valign: "center" }),
-      //     textBlock(ctx, value(data, "kensa-血液検査項目-その他"), { width: 62, halign: "center", valign: "center" }),
-      //     textBlock(ctx, ")", { valign: "center" })
-      //   ])
-      // }
+      {
+        line(ctx, rs[1], [
+          ...boxed("血糖", data, "kensa-血糖-mark"),
+          "(",
+          ...boxed("空腹時", data, "kensa-血糖-空腹時-mark"),
+          gap(3),
+          ...boxed("随時", data, "kensa-血糖-随時-mark"),
+          gap(4),
+          ...boxed("食後", data, "kensa-血糖-食後-mark"),
+          "(",
+          expander(value(data, "kensa-血糖-食後")),
+          ")時間",
+          ")",
+          gap(2),
+          advanceTo(tab),
+          ...boxed("中性脂肪", data, "kensa-中性脂肪-mark"),
+          advanceTo(tab2),
+          "(",
+          gap(40, value(data, "kensa-中性脂肪")),
+          "mg/dl)",
+        ]);
+      }
+      {
+        line(ctx, rs[2], [
+          gap(40),
+          "(", expander(value(data, "kensa-血糖-値")), "mg/dl)",
+          gap(2),
+          advanceTo(tab),
+          ...boxed("HDLｺﾚｽﾃﾛｰﾙ", data, "kensa-ＨＤＬコレステロール-mark"),
+          advanceTo(tab2),
+          "(", gap(40, value(data, "kensa-ＨＤＬコレステロール")), "mg/dl)",
+        ]);
+      }
+      {
+        line(ctx, rs[3], [
+          ...boxed("HbA1c:", data, "kensa-HbA1c-mark"),
+          advanceTo(40),
+          "(", expander(value(data, "kensa-HbA1c")), "%)",
+          gap(2),
+          advanceTo(tab),
+          ...boxed("LDLｺﾚｽﾃﾛｰﾙ", data, "kensa-ＬＤＬコレステロール-mark"),
+          advanceTo(tab2),
+          "(", gap(40, value(data, "kensa-ＬＤＬコレステロール")), "mg/dl)",
+        ])
+      }
+      {
+        line(ctx, rs[4], [
+          "※血液検査結果を手交している場合は記載不要", 
+          advanceTo(tab),
+          ...boxed("その他", data, "kensa-血液検査項目-その他-mark"),
+          "(", gap(62, value(data, "kensa-血液検査項目-その他")), ")",
+        ])
+      }
     }, { rowModifiers: [b.shrinkHoriz(1, 1)] });
-    // b.withSplitRows(rs[1], b.evenSplitter(3), rs => {
-    //   c.drawComposite(ctx, rs[0], [
-    //     p.text("【その他】")
-    //   ]);
-    //   line(ctx, rs[1], [
-    //     ...boxed(ctx, "栄養状態", data, "kensa-栄養状態-mark"),
-    //     textBlock(ctx, "", { rightAt: 24 }),
-    //     textBlock(ctx, "(低栄養状態の恐れ", { valign: "center" }),
-    //     textBlock(ctx, "", { width: 8 }),
-    //     textBlock(ctx, "良好", { valign: "center" }),
-    //     textBlock(ctx, "", { width: 8 }),
-    //     textBlock(ctx, "肥満", { valign: "center" }),
-    //     textBlock(ctx, ")", { valign: "center" }),
-    //   ]);
-    //   line(ctx, rs[2], [
-    //     ...boxed(ctx, "その他", data, "kensa-その他-その他-mark"),
-    //     textBlock(ctx, "", { rightAt: 24 }),
-    //     textBlock(ctx, "(", { valign: "center" }),
-    //     textBlock(ctx, "", { width: 58 }),
-    //     textBlock(ctx, ")", { valign: "center" }),
-    //   ]);
-    // }, { rowModifiers: [b.shrinkHoriz(1, 1), b.shrinkVert(0, 0.5)] });
+    b.withSplitRows(rs[1], b.evenSplitter(3), rs => {
+      line(ctx, rs[0], [ "【その他】" ]);
+      line(ctx, rs[1], [
+        ...boxed("栄養状態", data, "kensa-栄養状態-mark"),
+        advanceTo(24),
+        "(低栄養状態の恐れ",
+        gap(8),
+        "良好",
+        gap(8),
+        "肥満",
+        ")",
+      ]);
+      line(ctx, rs[2], [
+        ...boxed("その他", data, "kensa-その他-その他-mark"),
+        advanceTo(24),
+        "(",
+        gap(58),
+        ")",
+      ]);
+    }, { rowModifiers: [b.shrinkHoriz(1, 1), b.shrinkVert(0, 0.5)] });
   });
 }
 
-// function drawLowerAreaSeq(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-//   b.withSplitRows(box, b.splitAt(5, 15, 25), ([upper, middle, lower]) => {
-//     c.drawText(ctx, "※実施項目は、□にチェック、(  )内には具体的に記入", upper, "left", "center", { dy: -0.6 });
-//     const sigWidth = 70.5;
-//     b.withSplitColumns(middle, b.splitAt(26, 99.5), ([_, left, right]) => {
-//       left = b.modify(left, b.setWidth(sigWidth, "left"));
-//       right = b.modify(right, b.setWidth(sigWidth, "left"));
-//       c.withPen(ctx, "thin", () => {
-//         c.rect(ctx, left);
-//         c.drawText(ctx, "患者署名", left, "left", "top", { modifiers: [b.inset(0.5)] });
-//         c.rect(ctx, right);
-//         c.drawText(ctx, "医師氏名", right, "left", "top", { modifiers: [b.inset(0.5)] });
-//         c.mark(ctx, "医師氏名", b.modify(right, b.shrinkHoriz(18, 0)));
-//       })
-//     });
-//     b.withSplitRows(lower, b.evenSplitter(2), rs => {
-//       const lines = [
-//         "患者が療養計画書の内容について説明を受けた上で十分に理解したことを確認した。",
-//         "(なお、上記項目に担当医がチェックした場合については患者署名を省略して差し支えない)",
-//       ];
-//       seq(ctx, rs[0], [
-//         ...boxed(ctx, lines[0], data, "患者署名省略-mark"),
-//       ]);
-//       seq(ctx, rs[1], [
-//         textBlock(ctx, lines[1], { valign: "center" }),
-//       ]);
-//     }, { boxModifiers: [b.shrinkHoriz(26, 0), b.shiftDown(1)] });
-//   });
-// }
+function drawLowerArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
+  b.withSplitRows(box, b.splitAt(5, 15, 25), ([upper, middle, lower]) => {
+    c.drawText(ctx, "※実施項目は、□にチェック、(  )内には具体的に記入", upper, "left", "center", { dy: -0.6 });
+    const sigWidth = 70.5;
+    b.withSplitColumns(middle, b.splitAt(26, 99.5), ([_, left, right]) => {
+      left = b.modify(left, b.setWidth(sigWidth, "left"));
+      right = b.modify(right, b.setWidth(sigWidth, "left"));
+      c.withPen(ctx, "thin", () => {
+        c.rect(ctx, left);
+        c.drawText(ctx, "患者署名", left, "left", "top", { modifiers: [b.inset(0.5)] });
+        c.rect(ctx, right);
+        c.drawText(ctx, "医師氏名", right, "left", "top", { modifiers: [b.inset(0.5)] });
+        c.drawText(ctx, value(data, "医師氏名"), b.modify(right, b.shrinkHoriz(18, 0)), "left", "center");
+      })
+    });
+    b.withSplitRows(lower, b.evenSplitter(2), rs => {
+      const lines = [
+        "患者が療養計画書の内容について説明を受けた上で十分に理解したことを確認した。",
+        "(なお、上記項目に担当医がチェックした場合については患者署名を省略して差し支えない)",
+      ];
+      line(ctx, rs[0], [
+        ...boxed(lines[0], data, "患者署名省略-mark"),
+      ]);
+      line(ctx, rs[1], [
+        lines[1],
+      ]);
+    }, { boxModifiers: [b.shrinkHoriz(26, 0), b.shiftDown(1)] });
+  });
+}

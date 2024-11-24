@@ -47,6 +47,7 @@ export interface LineItemSpec {
 
 export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   maxWidth?: number;
+  valign?: VAlign;
 }): Block {
   const items: Block[] = [];
   let expanders: Block[] = [];
@@ -106,13 +107,16 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
     const expand = (maxWidth - itemWidth) / expanders.length;
     expanders.forEach(item => item.width = expand);
   }
+  const valign = opt?.valign ?? "top";
   return {
     width: items.reduce((acc, ele) => acc + ele.width, 0),
     height: maxHeight,
     render: (ctx: DrawerContext, box: Box) => {
       let x = 0;
       items.forEach(item => {
-        const itemBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(item.width, "left"));
+        const boundBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(item.width, "left"));
+        let itemBox = b.modify(boundBox, b.setHeight(item.height, "top"));
+        itemBox = b.align(itemBox, boundBox, "left", valign);
         item.render(ctx, itemBox);
         x += item.width;
       })
@@ -164,5 +168,32 @@ export function advanceTo(at: number): LineItemSpec {
     width: { kind: "advanceTo", advanceTo: at },
     getHeight: () => 0,
     render: () => { },
+  }
+}
+
+export function paragraph(ctx: DrawerContext, blocks: Block[], opt?: {
+  halign?: HAlign;
+  leading?: number;
+  decorate?: (ctx: DrawerContext, box: Box) => void;
+}): Block {
+  const width = blocks.reduce((acc, ele) => Math.max(acc, ele.width), 0);
+  const leading = opt?.leading ?? 0;
+  const height = blocks.reduce((acc, ele, i) => {
+    let h = i === 0 ? 0 : leading;
+    h += ele.height;
+    return acc + h;
+  }, 0);
+  return {
+    width,
+    height,
+    render: (ctx: DrawerContext, box: Box) => {
+      const halign = opt?.halign ?? "left";
+      blocks.forEach(block => {
+        box = b.withSlice(box, block.height, (box) => {
+          putIn(ctx, block, box, { halign });
+        });
+        box = b.modify(box, b.shrinkVert(leading, 0));
+      })
+    }
   }
 }
