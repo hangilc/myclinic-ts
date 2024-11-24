@@ -42,43 +42,54 @@ export interface LineItemSpec {
   width: WidthSpec;
   getHeight: (ctx: DrawerContext) => number;
   render: (ctx: DrawerContext, box: Box) => void;
+  decorate?: (ctx: DrawerContext, box: Box) => void;
 }
 
 export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   maxWidth?: number;
 }): Block {
   const items: Block[] = [];
-  const expanders: Block[] = [];
+  let expanders: Block[] = [];
   let maxHeight: number = 0;
   let x = 0;
   specs.forEach(spec => {
+    const render: (ctx: DrawerContext, box: Box) => void = (ctx, box) => {
+      spec.render(ctx, box);
+      if (spec.decorate) {
+        spec.decorate(ctx, box);
+      }
+    };
     switch (spec.width.kind) {
       case "measure": {
         const width = spec.width.getWidth(ctx);
         const height = spec.getHeight(ctx);
         maxHeight = Math.max(maxHeight, height);
-        items.push({ width, height, render: spec.render });
+        items.push({ width, height, render });
         break;
       }
       case "fixed": {
         const width = spec.width.size;
         const height = spec.getHeight(ctx);
         maxHeight = Math.max(maxHeight, height);
-        items.push({ width, height, render: spec.render });
+        items.push({ width, height, render });
         break;
       }
       case "expand": {
-        const item = { width: 0, height: 0, render: () => { } };
+        const item = { width: 0, height: 0, render };
         items.push(item);
         expanders.push(item);
         break;
       }
       case "advanceTo": {
+        const currentWidth = items.reduce((acc, ele) => acc + ele.width, 0);
         if (expanders.length > 0) {
-          const itemWidth = items.reduce((acc, ele) => acc + ele.width, 0);
           let maxWidth = spec.width.advanceTo;
-          const expand = (maxWidth - itemWidth) / expanders.length;
+          const expand = (maxWidth - currentWidth) / expanders.length;
           expanders.forEach(item => item.width = expand);
+          expanders = [];
+        } else {
+          const extra = spec.width.advanceTo - currentWidth;
+          items.push({ width: extra, height: spec.getHeight(ctx), render: () => {}})
         }
         x = spec.width.advanceTo;
         break;
@@ -109,35 +120,49 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   }
 }
 
-export function textBlock(textOpt: string | undefined): LineItemSpec {
+export function textBlock(textOpt: string | undefined, opt?: {
+  decorate?: (ctx: DrawerContext, box: Box) => void;
+}): LineItemSpec {
   const text = textOpt ?? "";
   return {
     width: { kind: "measure", getWidth: (ctx: DrawerContext) => c.textWidth(ctx, text) },
     getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
     render: (ctx: DrawerContext, box: Box) => c.drawText(ctx, text, box, "left", "top"),
+    decorate: opt?.decorate,
   }
 }
 
-export function gap(size: number, opt?: { text?: string }): LineItemSpec {
+export function gap(size: number, opt?: {
+  text?: string, halign?: HAlign, decorate?: (ctx: DrawerContext, box: Box) => void
+}): LineItemSpec {
   return {
     width: { kind: "fixed", size },
     getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
     render: (ctx: DrawerContext, box: Box) => {
       if (opt?.text) {
-        c.drawText(ctx, opt?.text, box, "left", "top");
+        c.drawText(ctx, opt?.text, box, opt?.halign ?? "left", "top");
       }
     },
+    decorate: opt?.decorate,
   }
 }
 
-export function expander(opt?: { text?: string }): LineItemSpec {
+export function expander(opt?: { text?: string, halign?: HAlign }): LineItemSpec {
   return {
     width: { kind: "expand" },
-    getHeight: () => 0,
+    getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
     render: (ctx: DrawerContext, box: Box) => {
       if (opt?.text) {
-        c.drawText(ctx, opt?.text ?? "", box, "left", "top");
+        c.drawText(ctx, opt?.text ?? "", box, opt?.halign ?? "left", "top");
       }
     },
   };
+}
+
+export function advanceTo(at: number): LineItemSpec {
+  return {
+    width: { kind: "advanceTo", advanceTo: at },
+    getHeight: () => 0,
+    render: () => { },
+  }
 }
