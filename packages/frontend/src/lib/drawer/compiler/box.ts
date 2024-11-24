@@ -1,3 +1,4 @@
+import type { HAlign, VAlign } from "./align";
 import type { PaperSize } from "./paper-size";
 
 export interface Box {
@@ -109,9 +110,9 @@ export function inset(dx: number, dy: number = dx, dx2: number = dx, dy2: number
   return offset(dx, dy, -dx2, -dy2);
 }
 
-export function sliceTop(height: number): Modifier {
-  return box => Object.assign({}, box, { bottom: box.top + height });
-}
+// export function sliceTop(height: number): Modifier {
+//   return box => Object.assign({}, box, { bottom: box.top + height });
+// }
 
 export function shrinkHoriz(shrinkLeft: number, shrinkRight: number): Modifier {
   return offset(shrinkLeft, 0, -shrinkRight, 0);
@@ -267,4 +268,43 @@ export function combine(boxes: Box[]): Box {
     right: boxes[boxes.length - 1].right,
     bottom: boxes[boxes.length - 1].bottom,
   }
+}
+
+export function align(box: Box, outer: Box, halign: HAlign, valign: VAlign): Box {
+  let left: number;
+  let top: number;
+  switch(halign){
+    case "left": {
+      left = outer.left;
+      break;
+    }
+    case "center": {
+      left = cx(outer) - width(box) * 0.5;
+      break;
+    }
+    case "right": {
+      left = outer.right - width(box);
+      break;
+    }
+  }
+  switch(valign){
+    case "top": {
+      top = outer.top;
+      break;
+    }
+    case "center": {
+      top = cy(outer) - height(box) * 0.5;
+      break;
+    }
+    case "bottom": {
+      top = outer.bottom - height(box);
+      break;
+    }
+  }
+  return mkBox(left, top, left + width(box), top + height(box));
+}
+
+export function withSlice(box: Box, size: number, f: (slice: Box) => void): Box {
+  f(modify(box, setHeight(size, "top")));
+  return modify(box, shrinkVert(size, 0));
 }
