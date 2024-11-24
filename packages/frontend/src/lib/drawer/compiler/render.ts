@@ -3,6 +3,8 @@ import type { DrawerContext } from "./context";
 import * as b from "./box";
 import * as c from "./compiler";
 import type { HAlign, VAlign } from "./align";
+import { spec } from "node:test/reporters";
+import type { number } from "valibot";
 
 export interface Block {
   width: number;
@@ -25,76 +27,80 @@ function boundsOfBlock(block: Block): Box {
   return mkBox(0, 0, block.width, block.height);
 }
 
-export type WidthSpec = {
-  kind: "measure";
-  getWidth: (ctx: DrawerContext) => number;
+export function mkTextBlock(ctx: DrawerContext, text: string, font?: string): Block {
+  const width = font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text);
+  const height = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
+  return {
+    width,
+    height,
+    render: (ctx: DrawerContext, box: Box) => {
+      c.drawText(ctx, text, box, "left", "top");
+    }
+  }
+}
+
+export type WidthSpec = number | "expand";
+
+export type LineItemSpec = {
+  kind: "block";
+  block: Block;
 } | {
-  kind: "fixed";
-  size: number;
+  kind: "text";
+  text: string;
+  width?: WidthSpec;
+  font?: string;
+  halign?: HAlign;
+  valign?: VAlign;
 } | {
-  kind: "expand";
-} | {
-  kind: "advanceTo";
+  kind: "advance-to";
   advanceTo: number;
 };
 
-export interface LineItemSpec {
-  width: WidthSpec;
-  getHeight: (ctx: DrawerContext) => number;
-  render: (ctx: DrawerContext, box: Box) => void;
-  decorate?: (ctx: DrawerContext, box: Box) => void;
+export type LineItemSpecExtender = {
+  decorate?: (ctx: DrawerContext, box: Box, boundBox: Box) => void;
+  modifyBox?: (box: Box) => Box;
 }
 
 export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   maxWidth?: number;
   valign?: VAlign;
 }): Block {
-  const items: Block[] = [];
-  let expanders: Block[] = [];
+  const items: { width: number, height: number, spec: (LineItemSpec & LineItemSpecExtender) }[] = [];
+  let expanders: { width: number, height: number, spec: (LineItemSpec & LineItemSpecExtender) }[] = [];
   let maxHeight: number = 0;
   let x = 0;
   specs.forEach(spec => {
-    const render: (ctx: DrawerContext, box: Box) => void = (ctx, box) => {
-      spec.render(ctx, box);
-      if (spec.decorate) {
-        spec.decorate(ctx, box);
-      }
-    };
-    switch (spec.width.kind) {
-      case "measure": {
-        const width = spec.width.getWidth(ctx);
-        const height = spec.getHeight(ctx);
-        maxHeight = Math.max(maxHeight, height);
-        items.push({ width, height, render });
-        break;
-      }
-      case "fixed": {
-        const width = spec.width.size;
-        const height = spec.getHeight(ctx);
-        maxHeight = Math.max(maxHeight, height);
-        items.push({ width, height, render });
-        break;
-      }
-      case "expand": {
-        const item = { width: 0, height: 0, render };
-        items.push(item);
-        expanders.push(item);
-        break;
-      }
-      case "advanceTo": {
-        const currentWidth = items.reduce((acc, ele) => acc + ele.width, 0);
-        if (expanders.length > 0) {
-          let maxWidth = spec.width.advanceTo;
-          const expand = (maxWidth - currentWidth) / expanders.length;
-          expanders.forEach(item => item.width = expand);
-          expanders = [];
-        } else {
-          const extra = spec.width.advanceTo - currentWidth;
-          items.push({ width: extra, height: spec.getHeight(ctx), render: () => {}})
+    if (spec.kind === "block") {
+      items.push({ width: spec.block.width, height: spec.block.height, spec });
+      x += spec.block.width;
+      maxHeight = Math.max(maxHeight, spec.block.height);
+    } else if (spec.kind === "text") {
+      if (spec.width == undefined) {
+        let width: number = 0;
+        if (spec.width == undefined) {
+          width = spec.font ? c.textWidthWithFont(ctx, spec.text, spec.font) : c.textWidth(ctx, spec.text);
+        } else if (typeof spec.width === "number") {
+          width = spec.width;
         }
-        x = spec.width.advanceTo;
-        break;
+        const height = spec.font ? c.getFontSizeOf(ctx, spec.font) : c.currentFontSize(ctx);
+        const item = { width, height, spec };
+        items.push(item);
+        if (spec.width === "expane") {
+          expanders.push(item);
+        }
       }
+    } else if (spec.kind === "advance-to") {
+      const currentWidth = items.reduce((acc, ele) => acc + ele.width, 0);
+      if (expanders.length > 0) {
+        let maxWidth = spec.advanceTo;
+        const expand = (maxWidth - currentWidth) / expanders.length;
+        expanders.forEach(item => item.width = expand);
+        expanders = [];
+      } else {
+        const extra = spec.advanceTo - currentWidth;
+        items.push({ width: extra, height: 0, spec })
+      }
+      x = spec.advanceTo;
     }
   });
   if (expanders.length > 0) {
@@ -107,7 +113,7 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
     const expand = (maxWidth - itemWidth) / expanders.length;
     expanders.forEach(item => item.width = expand);
   }
-  const valign = opt?.valign ?? "top";
+  const defaultVAlign = opt?.valign ?? "top";
   return {
     width: items.reduce((acc, ele) => acc + ele.width, 0),
     height: maxHeight,
@@ -116,58 +122,59 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
       items.forEach(item => {
         const boundBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(item.width, "left"));
         let itemBox = b.modify(boundBox, b.setHeight(item.height, "top"));
-        itemBox = b.align(itemBox, boundBox, "left", valign);
-        item.render(ctx, itemBox);
+        let halign: HAlign = "left";
+        let valign: VAlign = "top";
+        if (item.spec.kind === "text") {
+          if (item.spec.halign) {
+            halign = item.spec.halign;
+          }
+          if (item.spec.valign) {
+            valign = item.spec.valign;
+          }
+        }
+        itemBox = b.align(itemBox, boundBox, halign, valign);
+        if (item.spec.modifyBox) {
+          itemBox = item.spec.modifyBox(itemBox);
+        }
+        if (item.spec.kind === "block") {
+          item.spec.block.render(ctx, itemBox);
+        } else if (item.spec.kind === "text") {
+          const text = item.spec.text;
+          const font = item.spec.font;
+          if (font) {
+            c.withFont(ctx, font, () => c.drawText(ctx, text, itemBox, "left", "top"));
+          } else {
+            c.drawText(ctx, text, itemBox, "left", "top");
+          }
+        }
+        if (item.spec.decorate) {
+          item.spec.decorate(ctx, itemBox, boundBox);
+        }
         x += item.width;
       })
     }
   }
 }
 
-export function textBlock(textOpt: string | undefined, opt?: {
+export function textBlock(textOpt: string | undefined, width?: WidthSpec, opt?: {
+  font?: string;
+  halign?: HAlign;
   decorate?: (ctx: DrawerContext, box: Box) => void;
-}): LineItemSpec {
+}): LineItemSpec & LineItemSpecExtender {
   const text = textOpt ?? "";
   return {
-    width: { kind: "measure", getWidth: (ctx: DrawerContext) => c.textWidth(ctx, text) },
-    getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
-    render: (ctx: DrawerContext, box: Box) => c.drawText(ctx, text, box, "left", "top"),
+    kind: "text",
+    text,
+    width,
     decorate: opt?.decorate,
+    halign: opt?.halign,
   }
-}
-
-export function gap(size: number, opt?: {
-  text?: string, halign?: HAlign, decorate?: (ctx: DrawerContext, box: Box) => void
-}): LineItemSpec {
-  return {
-    width: { kind: "fixed", size },
-    getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
-    render: (ctx: DrawerContext, box: Box) => {
-      if (opt?.text) {
-        c.drawText(ctx, opt?.text, box, opt?.halign ?? "left", "top");
-      }
-    },
-    decorate: opt?.decorate,
-  }
-}
-
-export function expander(opt?: { text?: string, halign?: HAlign }): LineItemSpec {
-  return {
-    width: { kind: "expand" },
-    getHeight: (ctx: DrawerContext) => c.currentFontSize(ctx),
-    render: (ctx: DrawerContext, box: Box) => {
-      if (opt?.text) {
-        c.drawText(ctx, opt?.text ?? "", box, opt?.halign ?? "left", "top");
-      }
-    },
-  };
 }
 
 export function advanceTo(at: number): LineItemSpec {
   return {
-    width: { kind: "advanceTo", advanceTo: at },
-    getHeight: () => 0,
-    render: () => { },
+    kind: "advance-to",
+    advanceTo: at,
   }
 }
 

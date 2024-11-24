@@ -6,7 +6,7 @@ import * as r from "../../compiler/render";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec, advanceTo, } from "../../compiler/render";
+import { textBlock, type LineItemSpec, advanceTo, type LineItemSpecExtender, } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
@@ -42,7 +42,7 @@ function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoD
 }
 
 function textCircle(text: string, drawCircle: boolean): LineItemSpec {
-  return textBlock(text, {
+  return textBlock(text, undefined, {
     decorate: (ctx, box) => {
       if (drawCircle) {
         c.circle(ctx, b.cx(box), b.cy(box), 3);
@@ -51,11 +51,16 @@ function textCircle(text: string, drawCircle: boolean): LineItemSpec {
   });
 }
 
+function gap(size: number, text?: string): LineItemSpec {
+  return r.textBlock(text, size, { halign: "center" });
+}
+
 function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
   let size = 3;
   return [
-    r.gap(size, {
-      decorate: (ctx, box) => {
+    { kind: "block", block: {
+      width: 3, height: 3,
+      render: (ctx: DrawerContext, box: Box) => {
         c.withPen(ctx, "thin", () => {
           box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
           c.frame(ctx, box);
@@ -66,34 +71,29 @@ function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKei
             });
           }
         });
+
       }
-    }),
-    r.gap(1.5),
+    }},
+    gap(1.5),
     textBlock(label),
   ];
 }
 
-function gap(size: number, text?: string): LineItemSpec {
-  return r.gap(size, {
-    text: text,
-    halign: "center",
-  })
-}
-
 function expander(text?: string): LineItemSpec {
-  return r.expander({ text: text, halign: "center" });
+  return r.textBlock(text, "expand", { halign: "center" });
 }
 
-function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | LineItemSpec)[], opt?: {
+function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSpec & LineItemSpecExtender))[], opt?: {
   halign?: HAlign
 }) {
-  const specs: LineItemSpec[] = extendedSpecs.map(spec => {
+  const specs: (LineItemSpec & LineItemSpecExtender)[] = extendedSpecs.map(spec => {
     if (typeof spec === "string") {
-      return textBlock(spec);
+      return r.textBlock(spec);
     } else {
       return spec;
     }
-  })
+  });
+  console.log("specs", specs);
   const block = r.line(ctx, specs, { maxWidth: b.width(box) });
   r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
 }
