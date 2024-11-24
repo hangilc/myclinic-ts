@@ -10,7 +10,6 @@ import { textBlock, type LineItemSpec, advanceTo, type LineItemSpecExtender, } f
 import type { HAlign } from "../../compiler/align";
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
-  console.log("data", data);
   const ctx = mkDrawerContext();
   setupFonts(ctx);
   setupPens(ctx);
@@ -93,7 +92,6 @@ function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSp
       return spec;
     }
   });
-  console.log("specs", specs);
   const block = r.line(ctx, specs, { maxWidth: b.width(box) });
   r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
 }

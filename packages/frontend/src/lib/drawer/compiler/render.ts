@@ -3,8 +3,6 @@ import type { DrawerContext } from "./context";
 import * as b from "./box";
 import * as c from "./compiler";
 import type { HAlign, VAlign } from "./align";
-import { spec } from "node:test/reporters";
-import type { number } from "valibot";
 
 export interface Block {
   width: number;
@@ -75,19 +73,19 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
       x += spec.block.width;
       maxHeight = Math.max(maxHeight, spec.block.height);
     } else if (spec.kind === "text") {
+      let width: number = 0;
       if (spec.width == undefined) {
-        let width: number = 0;
-        if (spec.width == undefined) {
-          width = spec.font ? c.textWidthWithFont(ctx, spec.text, spec.font) : c.textWidth(ctx, spec.text);
-        } else if (typeof spec.width === "number") {
-          width = spec.width;
-        }
-        const height = spec.font ? c.getFontSizeOf(ctx, spec.font) : c.currentFontSize(ctx);
-        const item = { width, height, spec };
-        items.push(item);
-        if (spec.width === "expane") {
-          expanders.push(item);
-        }
+        width = spec.font ? c.textWidthWithFont(ctx, spec.text, spec.font) : c.textWidth(ctx, spec.text);
+      } else if (typeof spec.width === "number") {
+        width = spec.width;
+      }
+      x += width;
+      const height = spec.font ? c.getFontSizeOf(ctx, spec.font) : c.currentFontSize(ctx);
+      const item = { width, height, spec };
+      maxHeight = Math.max(maxHeight, height);
+      items.push(item);
+      if (spec.width === "expand") {
+        expanders.push(item);
       }
     } else if (spec.kind === "advance-to") {
       const currentWidth = items.reduce((acc, ele) => acc + ele.width, 0);
