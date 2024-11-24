@@ -448,7 +448,7 @@ function drawJuuten(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
     b.withSplitColumns(sonota, b.splitAt(18), ([mark, body]) => {
       c.frameRight(ctx, mark);
       {
-        const line1 = r.line(ctx, [...boxed("その", data, "juuten-食事-mark")]);
+        const line1 = r.line(ctx, [...boxed("その", data, "juuten-その他-mark")]);
         const line2 = r.line(ctx, [textBlock("他")]);
         const para = r.paragraph(ctx, [line1, line2], { halign: "center" });
         r.putIn(ctx, para, mark, { halign: "center", valign: "center" });
