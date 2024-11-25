@@ -77,12 +77,9 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
     let x = 0;
     blockSpecs.forEach(({ block, spec }) => {
       let itemBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(block.width, "left"));
-      const valign: VAlign = opt?.valign ?? "bottom";
-      itemBox = b.modify(itemBox, b.alignVert(box, valign));
-      if ((spec.dx !== undefined && spec.dx !== 0) || (spec.dy !== undefined && spec.dy !== 0)) {
-        itemBox = b.modify(itemBox, b.shift(spec.dx ?? 0, spec.dy ?? 0));
-      }
-      spec.render(ctx, itemBox);
+      const halign: HAlign = spec.halign ?? "left";
+      const valign: VAlign = spec.valign ??  opt?.valign ?? "bottom";
+      putIn(ctx, block, itemBox, { halign, valign, dx: spec.dx, dy: spec.dy });
       x += block.width;
     });
   }
