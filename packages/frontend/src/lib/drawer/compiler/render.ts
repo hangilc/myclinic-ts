@@ -82,8 +82,7 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
       if ((spec.dx !== undefined && spec.dx !== 0) || (spec.dy !== undefined && spec.dy !== 0)) {
         itemBox = b.modify(itemBox, b.shift(spec.dx ?? 0, spec.dy ?? 0));
       }
-      // spec.render(ctx, itemBox);
-      c.frame(ctx, itemBox);
+      spec.render(ctx, itemBox);
       x += block.width;
     });
   }
@@ -166,22 +165,21 @@ export type Extent = {
 
 function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): number[] {
   const chunks: { exts: Extent[], advanceTo: number | undefined }[] = [];
-  let curChunks: Extent[] = [];
+  let curChunk: Extent[] = [];
   exts.forEach(ext => {
+    curChunk.push(ext);
     if (ext.kind === "advance-to") {
-      chunks.push({ exts: curChunks, advanceTo: ext.at });
-      curChunks = [];
-    } else {
-      curChunks.push(ext);
+      chunks.push({ exts: curChunk, advanceTo: ext.at });
+      curChunk = [];
     }
   });
-  chunks.push({ exts: curChunks, advanceTo: maxSize });
+  chunks.push({ exts: curChunk, advanceTo: maxSize });
   const result: { size: number }[] = [];
   let pos = 0;
-  chunks.forEach(exts => {
-    const advanceTo = exts.advanceTo;
+  chunks.forEach(chunk => {
+    const advanceTo = chunk.advanceTo;
     const expands: { size: number }[] = [];
-    exts.exts.forEach(ext => {
+    chunk.exts.forEach(ext => {
       if (ext.kind === "calc") {
         const width = ext.calc(ctx);
         result.push({ size: width });
@@ -193,6 +191,10 @@ function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): nu
         const item = { size: 0 };
         result.push(item);
         expands.push(item);
+      } else if( ext.kind === "advance-to" ){
+        result.push({ size: 0 });
+      } else {
+        throw new Error("unhandled extent");
       }
     });
     if (expands.length > 0) {
