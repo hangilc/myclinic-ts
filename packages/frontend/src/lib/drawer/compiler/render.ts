@@ -82,7 +82,9 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
       if ((spec.dx !== undefined && spec.dx !== 0) || (spec.dy !== undefined && spec.dy !== 0)) {
         itemBox = b.modify(itemBox, b.shift(spec.dx ?? 0, spec.dy ?? 0));
       }
-      spec.render(ctx, itemBox);
+      // spec.render(ctx, itemBox);
+      c.frame(ctx, itemBox);
+      x += block.width;
     });
   }
   return { width, height, render };
@@ -183,6 +185,7 @@ function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): nu
       if (ext.kind === "calc") {
         const width = ext.calc(ctx);
         result.push({ size: width });
+        pos += width;
       } else if (ext.kind === "fixed") {
         result.push({ size: ext.value });
         pos += ext.value;
