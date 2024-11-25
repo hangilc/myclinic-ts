@@ -16,8 +16,8 @@ export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] 
   const paper: Box = b.paperSizeToBox(A4);
   const areas: Box[] = b.splitToRows(b.modify(paper, b.shrinkHoriz(20, 20)), b.splitAt(36, 247));
   drawUpperArea(ctx, areas[0], data);
-  drawMiddleArea(ctx, areas[1], data);
-  drawLowerArea(ctx, areas[2], data);
+  // drawMiddleArea(ctx, areas[1], data);
+  // drawLowerArea(ctx, areas[2], data);
 
   return c.getOps(ctx);
 }
