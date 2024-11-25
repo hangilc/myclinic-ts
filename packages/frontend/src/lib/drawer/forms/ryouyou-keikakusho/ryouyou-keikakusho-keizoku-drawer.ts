@@ -51,36 +51,36 @@ function textCircle(text: string, drawCircle: boolean): LineItemSpec {
 }
 
 function gap(size: number, text?: string): LineItemSpec {
-  return r.textBlock(text, size, { halign: "center" });
+  return r.textBlock(text, { kind: "fixed", value: size }, { halign: "center" })
 }
 
 function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
   let size = 3;
-  return [
-    { kind: "block", block: {
-      width: 3, height: 3,
-      render: (ctx: DrawerContext, box: Box) => {
-        c.withPen(ctx, "thin", () => {
-          // box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
-          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
-          c.frame(ctx, box);
-          if (booleanValue(data, key)) {
-            c.withPen(ctx, "thick", () => {
-              c.moveTo(ctx, box.left, box.bottom);
-              c.lineTo(ctx, box.right, box.top);
-            });
-          }
+  function drawBox(ctx: DrawerContext, box: Box) {
+    c.withPen(ctx, "thin", () => {
+      box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
+      c.frame(ctx, box);
+      if (booleanValue(data, key)) {
+        c.withPen(ctx, "thick", () => {
+          c.moveTo(ctx, box.left, box.bottom);
+          c.lineTo(ctx, box.right, box.top);
         });
-
       }
-    }},
+    });
+  }
+  return [
+    {
+      width: { kind: "fixed", value: size },
+      calcHeight: () => size,
+      render: drawBox,
+    },
     gap(1.5),
     textBlock(label),
   ];
 }
 
 function expander(text?: string): LineItemSpec {
-  return r.textBlock(text, "expand", { halign: "center" });
+  return r.textBlock(text, { kind: "expand" }, { halign: "center" });
 }
 
 function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSpec & LineItemSpecExtender))[], opt?: {
@@ -543,7 +543,7 @@ function drawKensa(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
       }
       {
         line(ctx, rs[4], [
-          "※血液検査結果を手交している場合は記載不要", 
+          "※血液検査結果を手交している場合は記載不要",
           advanceTo(tab),
           ...boxed("その他", data, "kensa-血液検査項目-その他-mark"),
           "(", gap(62, value(data, "kensa-血液検査項目-その他")), ")",
@@ -551,7 +551,7 @@ function drawKensa(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
       }
     }, { rowModifiers: [b.shrinkHoriz(1, 1)] });
     b.withSplitRows(rs[1], b.evenSplitter(3), rs => {
-      line(ctx, rs[0], [ "【その他】" ]);
+      line(ctx, rs[0], ["【その他】"]);
       line(ctx, rs[1], [
         ...boxed("栄養状態", data, "kensa-栄養状態-mark"),
         advanceTo(24),

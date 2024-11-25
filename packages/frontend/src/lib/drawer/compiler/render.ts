@@ -7,17 +7,22 @@ import type { HAlign, VAlign } from "./align";
 export interface Block {
   width: number;
   height: number;
-  render(ctx: DrawerContext, box: Box): void;
+  render: (ctx: DrawerContext, box: Box) => void;
 }
 
 export function putIn(ctx: DrawerContext, block: Block, outer: Box, opt?: {
-  halign?: HAlign,
-  valign?: VAlign,
+  halign?: HAlign;
+  valign?: VAlign;
+  dx?: number;
+  dy?: number;
 }) {
-  const bounds = b.align(boundsOfBlock(block), outer,
+  let bounds = b.align(boundsOfBlock(block), outer,
     opt?.halign ?? "left",
     opt?.valign ?? "top",
   );
+  if ((opt?.dx !== undefined && opt?.dx !== 0) || (opt?.dy !== undefined && opt?.dy !== 0)) {
+    bounds = b.modify(bounds, b.shift(opt?.dx ?? 0, opt?.dy ?? 0));
+  }
   block.render(ctx, bounds);
 }
 
@@ -26,8 +31,8 @@ function boundsOfBlock(block: Block): Box {
 }
 
 export function mkTextBlock(ctx: DrawerContext, text: string, font?: string): Block {
-  const width = font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text);
-  const height = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
+  const width = calcWidth(ctx, text, font);
+  const height = calcHeight(ctx, font);
   return {
     width,
     height,
@@ -40,135 +45,68 @@ export function mkTextBlock(ctx: DrawerContext, text: string, font?: string): Bl
 export type WidthSpec = number | "expand";
 
 export type LineItemSpec = {
-  kind: "block";
-  block: Block;
-} | {
-  kind: "text";
-  text: string;
-  width?: WidthSpec;
-  font?: string;
-  halign?: HAlign;
-  valign?: VAlign;
-} | {
-  kind: "advance-to";
-  advanceTo: number;
-};
+  width: Extent;
+  calcHeight: (ctx: DrawerContext) => number;
+  render: (ctx: DrawerContext, box: Box) => void;
+} & LineItemSpecExtender;
 
 export type LineItemSpecExtender = {
+  halign?: HAlign;
+  valign?: VAlign;
   decorate?: (ctx: DrawerContext, box: Box, boundBox: Box) => void;
-  modifyBox?: (box: Box) => Box;
+  dx?: number;
+  dy?: number;
 }
 
 export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   maxWidth?: number;
   valign?: VAlign;
 }): Block {
-  const items: { width: number, height: number, spec: (LineItemSpec & LineItemSpecExtender) }[] = [];
-  let expanders: { width: number, height: number, spec: (LineItemSpec & LineItemSpecExtender) }[] = [];
-  let maxHeight: number = 0;
-  let x = 0;
-  specs.forEach(spec => {
-    if (spec.kind === "block") {
-      items.push({ width: spec.block.width, height: spec.block.height, spec });
-      x += spec.block.width;
-      maxHeight = Math.max(maxHeight, spec.block.height);
-    } else if (spec.kind === "text") {
-      let width: number = 0;
-      if (spec.width == undefined) {
-        width = spec.font ? c.textWidthWithFont(ctx, spec.text, spec.font) : c.textWidth(ctx, spec.text);
-      } else if (typeof spec.width === "number") {
-        width = spec.width;
-      }
-      x += width;
-      const height = spec.font ? c.getFontSizeOf(ctx, spec.font) : c.currentFontSize(ctx);
-      const item = { width, height, spec };
-      maxHeight = Math.max(maxHeight, height);
-      items.push(item);
-      if (spec.width === "expand") {
-        expanders.push(item);
-      }
-    } else if (spec.kind === "advance-to") {
-      const currentWidth = items.reduce((acc, ele) => acc + ele.width, 0);
-      if (expanders.length > 0) {
-        let maxWidth = spec.advanceTo;
-        const expand = (maxWidth - currentWidth) / expanders.length;
-        expanders.forEach(item => item.width = expand);
-        expanders = [];
-      } else {
-        const extra = spec.advanceTo - currentWidth;
-        items.push({ width: extra, height: 0, spec })
-      }
-      x = spec.advanceTo;
-    }
-  });
-  if (expanders.length > 0) {
-    const itemWidth = items.reduce((acc, ele) => acc + ele.width, 0);
-    let maxWidth = opt?.maxWidth;
-    if (maxWidth == undefined) {
-      console.error("expanders without maxWidth");
-      maxWidth = itemWidth;
-    }
-    const expand = (maxWidth - itemWidth) / expanders.length;
-    expanders.forEach(item => item.width = expand);
+  const widths = resolveExtent(ctx, specs.map(spec => spec.width), opt?.maxWidth);
+  const blockSpecs: { block: Block, spec: LineItemSpec }[] = [];
+  for (let i = 0; i < specs.length; i++) {
+    const spec = specs[i];
+    const width = widths[i];
+    const height = spec.calcHeight(ctx);
+    const block = { width, height, render: spec.render };
+    blockSpecs.push({ block, spec });
   }
-  const defaultVAlign = opt?.valign ?? "top";
-  return {
-    width: items.reduce((acc, ele) => acc + ele.width, 0),
-    height: maxHeight,
-    render: (ctx: DrawerContext, box: Box) => {
-      let x = 0;
-      items.forEach(item => {
-        const boundBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(item.width, "left"));
-        let itemBox = boundBox;
-        let block: Block | undefined = undefined;
-        if (item.spec.kind === "block") {
-          block = item.spec.block;
-        } else if (item.spec.kind === "text") {
-          block = mkTextBlock(ctx, item.spec.text, item.spec.font);
-        }
-        if (block) {
-          itemBox = boundsOfBlock(block);
-          let halign: HAlign = "left";
-          let valign: VAlign = "top";
-          if (item.spec.kind === "text") {
-            if (item.spec.halign) {
-              halign = item.spec.halign;
-            }
-            if (item.spec.valign) {
-              valign = item.spec.valign;
-            }
-          }
-          itemBox = b.align(itemBox, boundBox, halign, valign);
-          block.render(ctx, itemBox);
-        }
-        if (item.spec.decorate) {
-          item.spec.decorate(ctx, itemBox, boundBox);
-        }
-        x += item.width;
-      })
-    }
+  const width = blockSpecs.reduce((acc, ele) => acc + ele.block.width, 0);
+  const height = blockSpecs.reduce((acc, ele) => Math.max(acc, ele.block.height), 0);
+  const render = (ctx: DrawerContext, box: Box) => {
+    let x = 0;
+    blockSpecs.forEach(({ block, spec }) => {
+      let itemBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(block.width, "left"));
+      const valign: VAlign = opt?.valign ?? "bottom";
+      itemBox = b.modify(itemBox, b.alignVert(box, valign));
+      if ((spec.dx !== undefined && spec.dx !== 0) || (spec.dy !== undefined && spec.dy !== 0)) {
+        itemBox = b.modify(itemBox, b.shift(spec.dx ?? 0, spec.dy ?? 0));
+      }
+      spec.render(ctx, itemBox);
+    });
   }
+  return { width, height, render };
 }
 
-export function textBlock(textOpt: string | undefined, width?: WidthSpec, opt?: {
+export function textBlock(textOpt: string | undefined, width?: Extent, opt?: LineItemSpecExtender & {
   font?: string;
-  halign?: HAlign;
-  decorate?: (ctx: DrawerContext, box: Box) => void;
-}): LineItemSpec & LineItemSpecExtender {
+}): LineItemSpec {
   const text = textOpt ?? "";
   return {
-    kind: "text",
-    text,
-    width,
-    decorate: opt?.decorate,
-    halign: opt?.halign,
+    width: width ?? {
+      kind: "calc", calc: (ctx: DrawerContext) => calcWidth(ctx, text, opt?.font),
+    },
+    calcHeight: (ctx: DrawerContext) => calcHeight(ctx, opt?.font),
+    render: (ctx: DrawerContext, box: Box) => c.drawText(ctx, text, box, "left", "top"),
+    ...opt
   }
 }
 
 export function advanceTo(at: number): LineItemSpec {
   return {
-    kind: "advance-to",
-    advanceTo: at,
+    width: { kind: "advance-to", at: at },
+    calcHeight: () => 0,
+    render: () => {},
   }
 }
 
@@ -199,6 +137,16 @@ export function paragraph(ctx: DrawerContext, blocks: Block[], opt?: {
   }
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+export function calcHeight(ctx: DrawerContext, font?: string): number {
+  return font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
+}
+
+export function calcWidth(ctx: DrawerContext, text: string, font?: string): number {
+  return font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text);
+}
+
 // Extent ////////////////////////////////////////////////////////////////////////////////////
 
 export type Extent = {
@@ -214,16 +162,47 @@ export type Extent = {
   at: number;
 }
 
-function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): {
-  size: number;
-  ext: Extent;
-} {
-  const chunks: { exts: Extent[], maxSize: number | undefined }[] = [];
-  let curChunk: Extent[] = [];
+function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): number[] {
+  const chunks: { exts: Extent[], advanceTo: number | undefined }[] = [];
+  let curChunks: Extent[] = [];
   exts.forEach(ext => {
-    if( ext.kind === "advance-to" ){
-      chunks.push({ exts: curChunk, maxSize: ext.at});
+    if (ext.kind === "advance-to") {
+      chunks.push({ exts: curChunks, advanceTo: ext.at });
+      curChunks = [];
+    } else {
+      curChunks.push(ext);
+    }
+  });
+  chunks.push({ exts: curChunks, advanceTo: maxSize });
+  const result: { size: number }[] = [];
+  let pos = 0;
+  chunks.forEach(exts => {
+    const advanceTo = exts.advanceTo;
+    const expands: { size: number }[] = [];
+    exts.exts.forEach(ext => {
+      if (ext.kind === "calc") {
+        const width = ext.calc(ctx);
+        result.push({ size: width });
+      } else if (ext.kind === "fixed") {
+        result.push({ size: ext.value });
+        pos += ext.value;
+      } else if (ext.kind === "expand") {
+        const item = { size: 0 };
+        result.push(item);
+        expands.push(item);
+      }
+    });
+    if (expands.length > 0) {
+      if (advanceTo == undefined) {
+        throw new Error("max-size is rquired for expand extent");
+      }
+      const extra = advanceTo - pos;
+      const expandSize = extra / expands.length;
+      expands.forEach(exp => exp.size = expandSize);
+    }
+    if (advanceTo != undefined) {
+      pos = advanceTo;
     }
   })
-
+  return result.map(r => r.size);
 }
