@@ -198,3 +198,32 @@ export function paragraph(ctx: DrawerContext, blocks: Block[], opt?: {
     }
   }
 }
+
+// Extent ////////////////////////////////////////////////////////////////////////////////////
+
+export type Extent = {
+  kind: "calc";
+  calc: (ctx: DrawerContext) => number;
+} | {
+  kind: "fixed";
+  value: number;
+} | {
+  kind: "expand";
+} | {
+  kind: "advance-to";
+  at: number;
+}
+
+function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): {
+  size: number;
+  ext: Extent;
+} {
+  const chunks: { exts: Extent[], maxSize: number | undefined }[] = [];
+  let curChunk: Extent[] = [];
+  exts.forEach(ext => {
+    if( ext.kind === "advance-to" ){
+      chunks.push({ exts: curChunk, maxSize: ext.at});
+    }
+  })
+
+}
