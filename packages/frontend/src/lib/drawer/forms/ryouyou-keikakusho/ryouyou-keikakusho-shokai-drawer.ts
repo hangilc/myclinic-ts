@@ -57,7 +57,8 @@ function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKei
       width: 3, height: 3,
       render: (ctx: DrawerContext, box: Box) => {
         c.withPen(ctx, "thin", () => {
-          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          // box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
           c.frame(ctx, box);
           if (booleanValue(data, key)) {
             c.withPen(ctx, "thick", () => {
@@ -82,6 +83,10 @@ function expander(text?: string): LineItemSpec {
   return r.textBlock(text, "expand", { halign: "center" });
 }
 
+function text(text: string): LineItemSpec {
+  return r.textBlock(text);
+}
+
 function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSpec & LineItemSpecExtender))[], opt?: {
   halign?: HAlign
 }) {
@@ -93,7 +98,7 @@ function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSp
     }
   });
   console.log("specs", specs);
-  const block = r.line(ctx, specs, { maxWidth: b.width(box) });
+  const block = r.line(ctx, specs, { maxWidth: b.width(box), valign: "center" });
   r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
 }
 
@@ -101,100 +106,102 @@ function drawUpperArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   c.setFont(ctx, "f5");
   box = b.modify(box, b.shrinkVert(0, 2), b.setHeight(5, "bottom"));
   c.drawText(ctx, "生活習慣病　療養計画書　初回用", box, "left", "bottom");
-  const right: Box = b.modify(box, b.setWidth(80, "right"));
+  const right: Box = b.modify(box, b.setWidth(90, "right"));
   line(ctx, right, [
     "（記入日:",
-    expander(value(data, "issue-year")),
-    advanceTo(32),
+    gap(16, value(data, "issue-year")),
     "年",
-    expander(value(data, "issue-month")),
-    advanceTo(50),
+    gap(8, value(data, "issue-month")),
     "月",
-    expander(value(data, "issue-day")),
-    advanceTo(65),
+    gap(8, value(data, "issue-day")),
     "日）",
-  ]);
+  ], { halign: "right" });
 }
 
 function drawMiddleArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-  // const [upper, _gap, lower] = b.splitToRows(box, b.splitAt(14, 17));
-  // const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(111, 119));
-  // drawMiddleUpperLeft(ctx, upperLeft);
-  // drawMiddleUpperRight(ctx, upperRight);
-  // c.setPen(ctx, "thick");
-  // c.rect(ctx, lower);
-  // const rows = b.splitToRows(lower, b.splitAt(5, 50, 158));
-  // rows.forEach(r => c.frameBottom(ctx, r));
-  // c.setFont(ctx, "f4");
-  // c.drawText(ctx, "ねらい：検査結果を理解できること・自分の生活上の問題点を抽出し、目標を設定できること",
-  //   rows[0], "center", "center", { dy: -0.25 });
-  // drawMokuhyou(ctx, rows[1]);
-  // drawJuuten(ctx, rows[2]);
-  // drawKensa(ctx, rows[3]);
+  const [upper, _gap, lower] = b.splitToRows(box, b.splitAt(14, 17));
+  const [upperLeft, _upperGap, upperRight] = b.splitToColumns(upper, b.splitAt(111, 119));
+  drawMiddleUpperLeft(ctx, upperLeft, data);
+  drawMiddleUpperRight(ctx, upperRight, data);
+  c.setPen(ctx, "thick");
+  c.rect(ctx, lower);
+  const rows = b.splitToRows(lower, b.splitAt(5, 50, 158));
+  rows.forEach(r => c.frameBottom(ctx, r));
+  c.setFont(ctx, "f4");
+  c.drawText(ctx, "ねらい：検査結果を理解できること・自分の生活上の問題点を抽出し、目標を設定できること",
+    rows[0], "center", "center", { dy: -0.25 });
+  drawMokuhyou(ctx, rows[1], data);
+  drawJuuten(ctx, rows[2], data);
+  drawKensa(ctx, rows[3], data);
 }
 
 function drawMiddleUpperLeft(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-  // c.setPen(ctx, "thick");
-  // c.rect(ctx, box);
-  // const [row1, row2] = b.splitToRows(box, b.evenSplitter(2));
-  // c.setPen(ctx, "thin");
-  // c.frameBottom(ctx, row1);
-  // c.setFont(ctx, "f4");
-  // c.drawComposite(ctx, row1, [
-  //   p.gap(11),
-  //   p.text("患者氏名："),
-  //   p.gapTo(83, { mark: "patient-name" }),
-  //   p.text("("),
-  //   p.text("男", { mark: "patient-sex-male" }),
-  //   p.text("・"),
-  //   p.text("女", { mark: "patient-sex-female" }),
-  //   p.text("）"),
-  // ]);
-  // const fs = c.currentFontSize(ctx);
-  // c.drawComposite(ctx, row2, [
-  //   p.gap(3),
-  //   p.text("生年月日:"),
-  //   p.text("明", { mark: "birthdate-gengou-meiji" }),
-  //   p.gap(-fs / 4),
-  //   p.text("・"),
-  //   p.gap(-fs / 4),
-  //   p.text("大", { mark: "birthdate-gengou-taishou" }),
-  //   p.gap(-fs / 4),
-  //   p.text("・"),
-  //   p.gap(-fs / 4),
-  //   p.text("昭", { mark: "birthdate-gengou-shouwa" }),
-  //   p.gap(-fs / 4),
-  //   p.text("・"),
-  //   p.gap(-fs / 4),
-  //   p.text("平", { mark: "birthdate-gengou-heisei" }),
-  //   p.gap(-fs / 4),
-  //   p.text("・"),
-  //   p.gap(-fs / 4),
-  //   p.text("令", { mark: "birthdate-gengou-reiwa" }),
-  //   p.gapTo(59, { mark: "birthdate-nen" }),
-  //   p.text("年"),
-  //   p.gapTo(72, { mark: "birthdate-month" }),
-  //   p.text("月"),
-  //   p.gapTo(84, { mark: "birthdate-day" }),
-  //   p.text("日生("),
-  //   p.gapTo(101, { mark: "patient-age" }),
-  //   p.text("才)"),
-  // ])
+  c.setPen(ctx, "thick");
+  c.rect(ctx, box);
+  const [row1, row2] = b.splitToRows(box, b.evenSplitter(2));
+  c.setPen(ctx, "thin");
+  c.frameBottom(ctx, row1);
+  c.setFont(ctx, "f4");
+  line(ctx, row1, [
+    gap(11),
+    "患者氏名：",
+    expander(value(data, "patient-name")),
+    advanceTo(83),
+    "(",
+    textCircle("男", booleanValue(data, "patient-sex-male")),
+    "・",
+    textCircle("女", booleanValue(data, "patient-sex-female")),
+    "）",
+  ]);
+  const fs = c.currentFontSize(ctx);
+  line(ctx, row2, [
+    gap(3),
+    text("生年月日:"),
+    textCircle("明", booleanValue(data, "birthdate-gengou-meiji")),
+    gap(-fs / 4),
+    text("・"),
+    gap(-fs / 4),
+    textCircle("大", booleanValue(data, "birthdate-gengou-taishou")),
+    gap(-fs / 4),
+    text("・"),
+    gap(-fs / 4),
+    textCircle("昭", booleanValue(data, "birthdate-gengou-shouwa")),
+    gap(-fs / 4),
+    text("・"),
+    gap(-fs / 4),
+    textCircle("平", booleanValue(data, "birthdate-gengou-heisei")),
+    gap(-fs / 4),
+    text("・"),
+    gap(-fs / 4),
+    textCircle("令", booleanValue(data, "birthdate-gengou-reiwa")),
+    expander(value(data,  "birthdate-nen")),
+    advanceTo(59),
+    text("年"),
+    expander(value(data, "birthdate-month")),
+    advanceTo(72),
+    text("月"),
+    expander(value(data, "birthdate-day")),
+    advanceTo(84),
+    text("日生("),
+    expander(value(data, "patient-age")),
+    advanceTo(101),
+    text("才)"),
+  ])
 }
 
 function drawMiddleUpperRight(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-  // c.setPen(ctx, "thick");
-  // c.rect(ctx, box);
-  // const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
-  // c.setFont(ctx, "f4")
-  // c.drawText(ctx, "主病", upper, "left", "center");
-  // c.drawComposite(ctx, lower, [
-  //   ...widget.boxed("糖尿病", "disease-diabetes"),
-  //   { kind: "gap", width: 3 },
-  //   ...widget.boxed("高血圧", "disease-hypertension"),
-  //   { kind: "gap", width: 3 },
-  //   ...widget.boxed("脂質異常症", "disease-hyperlipidemia"),
-  // ], { valign: "center" });
+  c.setPen(ctx, "thick");
+  c.rect(ctx, box);
+  const [upper, lower] = b.splitToRows(b.modify(box, b.shrinkHoriz(1, 1)), b.evenSplitter(2))
+  c.setFont(ctx, "f4")
+  c.drawText(ctx, "主病", upper, "left", "center");
+  line(ctx, b.modify(lower, b.shrinkHoriz(1, 0)), [
+    ...boxed("糖尿病", data, "disease-diabetes"),
+    gap(3),
+    ...boxed("高血圧", data, "disease-hypertension"),
+    gap(3),
+    ...boxed("脂質異常症", data, "disease-hyperlipidemia"),
+  ]);
 }
 
 function drawMokuhyou(ctx: DC, box: Box, data: RyouyouKeikakushoData) {

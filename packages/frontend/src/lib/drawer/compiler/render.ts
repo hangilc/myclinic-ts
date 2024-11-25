@@ -119,31 +119,27 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
       let x = 0;
       items.forEach(item => {
         const boundBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(item.width, "left"));
-        let itemBox = b.modify(boundBox, b.setHeight(item.height, "top"));
-        let halign: HAlign = "left";
-        let valign: VAlign = "top";
-        if (item.spec.kind === "text") {
-          if (item.spec.halign) {
-            halign = item.spec.halign;
-          }
-          if (item.spec.valign) {
-            valign = item.spec.valign;
-          }
-        }
-        itemBox = b.align(itemBox, boundBox, halign, valign);
-        if (item.spec.modifyBox) {
-          itemBox = item.spec.modifyBox(itemBox);
-        }
+        let itemBox = boundBox;
+        let block: Block | undefined = undefined;
         if (item.spec.kind === "block") {
-          item.spec.block.render(ctx, itemBox);
+          block = item.spec.block;
         } else if (item.spec.kind === "text") {
-          const text = item.spec.text;
-          const font = item.spec.font;
-          if (font) {
-            c.withFont(ctx, font, () => c.drawText(ctx, text, itemBox, "left", "top"));
-          } else {
-            c.drawText(ctx, text, itemBox, "left", "top");
+          block = mkTextBlock(ctx, item.spec.text, item.spec.font);
+        }
+        if (block) {
+          itemBox = boundsOfBlock(block);
+          let halign: HAlign = "left";
+          let valign: VAlign = "top";
+          if (item.spec.kind === "text") {
+            if (item.spec.halign) {
+              halign = item.spec.halign;
+            }
+            if (item.spec.valign) {
+              valign = item.spec.valign;
+            }
           }
+          itemBox = b.align(itemBox, boundBox, halign, valign);
+          block.render(ctx, itemBox);
         }
         if (item.spec.decorate) {
           item.spec.decorate(ctx, itemBox, boundBox);

@@ -61,7 +61,8 @@ function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKei
       width: 3, height: 3,
       render: (ctx: DrawerContext, box: Box) => {
         c.withPen(ctx, "thin", () => {
-          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          // box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
+          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
           c.frame(ctx, box);
           if (booleanValue(data, key)) {
             c.withPen(ctx, "thick", () => {
