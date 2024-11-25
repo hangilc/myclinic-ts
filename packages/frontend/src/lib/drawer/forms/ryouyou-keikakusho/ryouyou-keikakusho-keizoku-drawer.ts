@@ -6,7 +6,7 @@ import * as r from "../../compiler/render";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec, advanceTo, type LineItemSpecExtender, } from "../../compiler/render";
+import { textBlock, type LineItemSpec, advanceTo, } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {
@@ -51,14 +51,13 @@ function textCircle(text: string, drawCircle: boolean): LineItemSpec {
 }
 
 function gap(size: number, text?: string): LineItemSpec {
-  return r.textBlock(text, { kind: "fixed", value: size }, { halign: "center" })
+  return r.textBlock(text, { kind: "fixed", value: size }, { halign: "center", valign: "center" })
 }
 
 function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
   let size = 3;
   function drawBox(ctx: DrawerContext, box: Box) {
     c.withPen(ctx, "thin", () => {
-      box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
       c.frame(ctx, box);
       if (booleanValue(data, key)) {
         c.withPen(ctx, "thick", () => {
@@ -80,15 +79,15 @@ function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKei
 }
 
 function expander(text?: string): LineItemSpec {
-  return r.textBlock(text, { kind: "expand" }, { halign: "center" });
+  return r.textBlock(text, { kind: "expand" }, { halign: "center", valign: "center" });
 }
 
-function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSpec & LineItemSpecExtender))[], opt?: {
+function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | LineItemSpec)[], opt?: {
   halign?: HAlign
 }) {
-  const specs: (LineItemSpec & LineItemSpecExtender)[] = extendedSpecs.map(spec => {
+  const specs: LineItemSpec[] = extendedSpecs.map(spec => {
     if (typeof spec === "string") {
-      return r.textBlock(spec);
+      return r.textBlock(spec, undefined, { valign: "center" });
     } else {
       return spec;
     }
@@ -104,19 +103,16 @@ function drawUpperArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
   const right: Box = b.modify(box, b.setWidth(90, "right"));
   line(ctx, right, [
     "（記入日:",
-    expander(value(data, "issue-year")),
-    advanceTo(32),
+    gap(25 * 0.5, value(data, "issue-year")),
     "年",
-    expander(value(data, "issue-month")),
-    advanceTo(50),
+    gap(15 * 0.5, value(data, "issue-month")),
     "月",
-    expander(value(data, "issue-day")),
-    advanceTo(65),
+    gap(15 * 0.5, value(data, "issue-day")),
     "日",
     "(",
-    expander(value(data, "issue-times")),
+    gap(15 * 0.5, value(data, "issue-times")),
     ")回目",
-  ]);
+  ], { halign: "right"});
 }
 
 function drawMiddleArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {

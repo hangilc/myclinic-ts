@@ -15,7 +15,7 @@ export function putIn(ctx: DrawerContext, block: Block, outer: Box, opt?: {
   valign?: VAlign;
   dx?: number;
   dy?: number;
-}) {
+}): Box {
   let bounds = b.align(boundsOfBlock(block), outer,
     opt?.halign ?? "left",
     opt?.valign ?? "top",
@@ -24,6 +24,7 @@ export function putIn(ctx: DrawerContext, block: Block, outer: Box, opt?: {
     bounds = b.modify(bounds, b.shift(opt?.dx ?? 0, opt?.dy ?? 0));
   }
   block.render(ctx, bounds);
+  return bounds;
 }
 
 function boundsOfBlock(block: Block): Box {
@@ -48,19 +49,10 @@ export type LineItemSpec = {
   width: Extent;
   calcHeight: (ctx: DrawerContext) => number;
   render: (ctx: DrawerContext, box: Box) => void;
-} & LineItemSpecExtender;
-
-export type LineItemSpecExtender = {
-  halign?: HAlign;
-  valign?: VAlign;
-  decorate?: (ctx: DrawerContext, box: Box, boundBox: Box) => void;
-  dx?: number;
-  dy?: number;
 }
 
 export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   maxWidth?: number;
-  valign?: VAlign;
 }): Block {
   const widths = resolveExtent(ctx, specs.map(spec => spec.width), opt?.maxWidth);
   const blockSpecs: { block: Block, spec: LineItemSpec }[] = [];
@@ -77,11 +69,6 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
     let x = 0;
     blockSpecs.forEach(({ block, spec }) => {
       let itemBox = b.modify(box, b.shrinkHoriz(x, 0), b.setWidth(block.width, "left"));
-      const valign: VAlign = opt?.valign ?? "bottom";
-      itemBox = b.modify(itemBox, b.alignVert(box, valign));
-      if ((spec.dx !== undefined && spec.dx !== 0) || (spec.dy !== undefined && spec.dy !== 0)) {
-        itemBox = b.modify(itemBox, b.shift(spec.dx ?? 0, spec.dy ?? 0));
-      }
       spec.render(ctx, itemBox);
       x += block.width;
     });
@@ -89,8 +76,13 @@ export function line(ctx: DrawerContext, specs: LineItemSpec[], opt?: {
   return { width, height, render };
 }
 
-export function textBlock(textOpt: string | undefined, width?: Extent, opt?: LineItemSpecExtender & {
+export function textBlock(textOpt: string | undefined, width?: Extent, opt?: {
   font?: string;
+  halign?: HAlign;
+  valign?: VAlign;
+  dx?: number;
+  dy?: number;
+  decorate?: (ctx: DrawerContext, box: Box) => void;
 }): LineItemSpec {
   const text = textOpt ?? "";
   return {
@@ -98,8 +90,15 @@ export function textBlock(textOpt: string | undefined, width?: Extent, opt?: Lin
       kind: "calc", calc: (ctx: DrawerContext) => calcWidth(ctx, text, opt?.font),
     },
     calcHeight: (ctx: DrawerContext) => calcHeight(ctx, opt?.font),
-    render: (ctx: DrawerContext, box: Box) => c.drawText(ctx, text, box, "left", "top"),
-    ...opt
+    render: (ctx: DrawerContext, box: Box) => {
+      const block = mkTextBlock(ctx, text, opt?.font);
+      const halign = opt?.halign ?? "left";
+      const valign = opt?.valign ?? "top";
+      const renderBox = putIn(ctx, block, box, { halign, valign });
+      if( opt?.decorate ){
+        opt?.decorate(ctx, renderBox);
+      }
+    },
   }
 }
 
