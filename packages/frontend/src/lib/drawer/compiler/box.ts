@@ -1,3 +1,4 @@
+import type { HAlign, VAlign } from "./align";
 import type { PaperSize } from "./paper-size";
 
 export interface Box {
@@ -109,10 +110,6 @@ export function inset(dx: number, dy: number = dx, dx2: number = dx, dy2: number
   return offset(dx, dy, -dx2, -dy2);
 }
 
-export function sliceTop(height: number): Modifier {
-  return box => Object.assign({}, box, { bottom: box.top + height });
-}
-
 export function shrinkHoriz(shrinkLeft: number, shrinkRight: number): Modifier {
   return offset(shrinkLeft, 0, -shrinkRight, 0);
 }
@@ -164,6 +161,30 @@ export function flipDown(): Modifier {
 
 export function flipUp(): Modifier {
   return box => Object.assign({}, box, { top: box.bottom - height(box), bottom: box.top })
+}
+
+export function alignHoriz(outerBox: Box, halign: HAlign): Modifier {
+  return box => {
+    let left: number;
+    switch(halign){
+      case "left": left = outerBox.left; break;
+      case "center": left = cx(outerBox) - width(box) * 0.5; break;
+      case "right": left = outerBox.right - width(box); break;
+    }
+    return mkBox(left, box.top, left + width(box), box.bottom);
+  }
+}
+
+export function alignVert(outerBox: Box, valign: VAlign): Modifier {
+  return box => {
+    let top: number;
+    switch(valign){
+      case "top": top = outerBox.top; break;
+      case "center": top = cy(outerBox) - height(box) * 0.5; break;
+      case "bottom": top = outerBox.bottom - height(box); break;
+    }
+    return mkBox(box.left, top, box.right, top + height(box));
+  }
 }
 
 export type Splitter = (ext: number) => number[];
@@ -267,4 +288,13 @@ export function combine(boxes: Box[]): Box {
     right: boxes[boxes.length - 1].right,
     bottom: boxes[boxes.length - 1].bottom,
   }
+}
+
+export function align(box: Box, outer: Box, halign: HAlign, valign: VAlign): Box {
+  return modify(box, alignHoriz(outer, halign), alignVert(outer, valign));
+}
+
+export function withSlice(box: Box, size: number, f: (slice: Box) => void): Box {
+  f(modify(box, setHeight(size, "top")));
+  return modify(box, shrinkVert(size, 0));
 }

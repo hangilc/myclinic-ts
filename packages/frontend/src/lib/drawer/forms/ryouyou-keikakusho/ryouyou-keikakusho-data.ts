@@ -52,7 +52,7 @@ export interface RyouyouKeikakushoData {
   "juuten-運動-時間": string;
   "juuten-運動-頻度": string;
   "juuten-運動-ほぼ毎日": string;
-  "juuten-運動-息がはずむが会話が可能な強さ" : string;
+  "juuten-運動-息がはずむが会話が可能な強さ": string;
   "juuten-運動-強度-脈拍": string;
   "juuten-運動-強度-その他": string;
   "juuten-運動-活動量-mark": string;
@@ -92,6 +92,9 @@ export interface RyouyouKeikakushoData {
   "kensa-血液検査項目-その他-mark": string;
   "kensa-血液検査項目-その他": string;
   "kensa-栄養状態-mark": string;
+  "kensa-栄養状態-低栄養状態の恐れ-mark": string;
+  "kensa-栄養状態-良好": string;
+  "kensa-栄養状態-肥満": string;
   "kensa-その他-その他-mark": string;
   "kensa-その他-その他": string;
   "医師氏名": string;
@@ -198,7 +201,10 @@ export function mkRyouyouKeikakushoData(): RyouyouKeikakushoData {
     "kensa-血液検査項目-その他-mark": "",
     "kensa-血液検査項目-その他": "",
     "kensa-栄養状態-mark": "",
-    "kensa-その他-その他-mark": "",
+    "kensa-栄養状態-低栄養状態の恐れ-mark": "",
+    "kensa-栄養状態-良好": "",
+    "kensa-栄養状態-肥満": "",
+      "kensa-その他-その他-mark": "",
     "kensa-その他-その他": "",
     "医師氏名": "",
     "issue-times": "",
