@@ -1,67 +1,72 @@
 import type { Box } from "../../compiler/box";
-import type { CompositeGap, CompositeGapTo, CompositeItem, CompositeText } from "../../compiler/compiler";
-import * as p from "../../compiler/composite-item";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
+import * as r from "../../compiler/render";
 import type { DrawerContext } from "../../compiler/context";
+import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
+import { textBlock, type LineItemSpec } from "../../compiler/render";
+import type { HAlign } from "../../compiler/align";
 
-export interface Widgets {
-  box(mark: string): CompositeItem;
-  boxed(label: string, mark: string): CompositeItem[];
+export function value(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): string {
+  return data[key]?.toString() ?? "";
 }
 
-export function mkWidgets(): Widgets {
-  const widgets = {
-    box(mark: string): CompositeItem {
-      return p.box({
-        mark, pen: "thin", ropt: {
-          render: (ctx: DrawerContext, box: Box, data: string | undefined) => {
-            if (data != undefined && data !== "") {
-              c.withPen(ctx, "thick", () => {
-                c.moveTo(ctx, box.left, box.bottom);
-                c.lineTo(ctx, box.right, box.top);
-              });
-            }
-          }
-        }
-      })
-    },
-    boxed(label: string, mark: string): CompositeItem[] {
-      return [widgets.box(mark), p.gap(0.5), p.text(label)];
-    }
-  }
-  return widgets;
+export function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): boolean {
+  return !!data[key];
 }
 
-export function mkItems() {
-  const items = Object.assign({}, p, {
-    text(text: string, opt: Partial<CompositeText> = {}): CompositeText {
-      if( opt.mark ){
-        opt = Object.assign({
-          ropt: { circle: true, pen: "thin" }
-        }, opt );
-        if( opt.mark === "patient-sex-male" ){
-          console.log(opt);
-        }
+export function textCircle(text: string, drawCircle: boolean): LineItemSpec {
+  return textBlock(text, undefined, {
+    decorate: (ctx, box) => {
+      if (drawCircle) {
+        c.circle(ctx, b.cx(box), b.cy(box), 3);
       }
-      return p.text(text, opt);
-    },
-    gapTo(at: number, opt: Partial<CompositeGapTo> = {}): CompositeGapTo {
-      if( opt.mark ){
-        opt = Object.assign({
-          ropt: { modifiers: [b.shrinkHoriz(1, 1)] }
-        }, opt);
-      }
-      return p.gapTo(at, opt);
-    },
-    gap(width: number, opt: Partial<CompositeGap> = {}): CompositeGap {
-      if( opt.mark ){
-        opt = Object.assign({
-          ropt: { modifiers: [b.shrinkHoriz(1, 1)] }
-        }, opt);
-      }
-      return p.gap(width, opt);
     }
   });
-  return items;
+}
+
+export function gap(size: number, text?: string): LineItemSpec {
+  return r.textBlock(text, { kind: "fixed", value: size }, { halign: "center", valign: "center" })
+}
+
+export function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
+  let size = 3;
+  function drawBox(ctx: DrawerContext, box: Box) {
+    c.withPen(ctx, "thin", () => {
+      c.frame(ctx, box);
+      if (booleanValue(data, key)) {
+        c.withPen(ctx, "thick", () => {
+          c.moveTo(ctx, box.left, box.bottom);
+          c.lineTo(ctx, box.right, box.top);
+        });
+      }
+    });
+  }
+  return [
+    {
+      width: { kind: "fixed", value: size },
+      calcHeight: () => size,
+      render: drawBox,
+    },
+    gap(1.5),
+    textBlock(label),
+  ];
+}
+
+export function expander(text?: string): LineItemSpec {
+  return r.textBlock(text, { kind: "expand" }, { halign: "center", valign: "center" });
+}
+
+export function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | LineItemSpec)[], opt?: {
+  halign?: HAlign
+}) {
+  const specs: LineItemSpec[] = extendedSpecs.map(spec => {
+    if (typeof spec === "string") {
+      return r.textBlock(spec, undefined, { valign: "center" });
+    } else {
+      return spec;
+    }
+  });
+  const block = r.line(ctx, specs, { maxWidth: b.width(box) });
+  r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
 }

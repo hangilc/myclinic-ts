@@ -7,8 +7,9 @@ import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec, advanceTo, type LineItemSpecExtender } from "../../compiler/render";
+import { textBlock, type LineItemSpec, advanceTo } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
+import { booleanValue, boxed, expander, gap, line, textCircle, value } from "./widgets";
 
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkDrawerContext();
@@ -32,74 +33,8 @@ function setupPens(ctx: DC) {
   c.createPen(ctx, "thin", 0, 0, 0, 0.2);
 }
 
-function value(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): string {
-  return data[key]?.toString() ?? "";
-}
-
-function booleanValue(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): boolean {
-  return !!data[key];
-}
-
-function textCircle(text: string, drawCircle: boolean): LineItemSpec {
-  return textBlock(text, undefined, {
-    decorate: (ctx, box) => {
-      if (drawCircle) {
-        c.circle(ctx, b.cx(box), b.cy(box), 3);
-      }
-    }
-  });
-}
-
-function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
-  let size = 3;
-  return [
-    { kind: "block", block: {
-      width: 3, height: 3,
-      render: (ctx: DrawerContext, box: Box) => {
-        c.withPen(ctx, "thin", () => {
-          // box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.6));
-          box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(1.0));
-          c.frame(ctx, box);
-          if (booleanValue(data, key)) {
-            c.withPen(ctx, "thick", () => {
-              c.moveTo(ctx, box.left, box.bottom);
-              c.lineTo(ctx, box.right, box.top);
-            });
-          }
-        });
-
-      }
-    }},
-    gap(1.5),
-    textBlock(label),
-  ];
-}
-
-function gap(size: number, text?: string): LineItemSpec {
-  return r.textBlock(text, size, { halign: "center" });
-}
-
-function expander(text?: string): LineItemSpec {
-  return r.textBlock(text, "expand", { halign: "center" });
-}
-
 function text(text: string): LineItemSpec {
-  return r.textBlock(text);
-}
-
-function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | (LineItemSpec & LineItemSpecExtender))[], opt?: {
-  halign?: HAlign
-}) {
-  const specs: (LineItemSpec & LineItemSpecExtender)[] = extendedSpecs.map(spec => {
-    if (typeof spec === "string") {
-      return r.textBlock(spec);
-    } else {
-      return spec;
-    }
-  });
-  console.log("specs", specs);
-  const block = r.line(ctx, specs, { maxWidth: b.width(box), valign: "center" });
-  r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
+  return r.textBlock(text, undefined, { valign: "center" });
 }
 
 function drawUpperArea(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
@@ -205,36 +140,36 @@ function drawMiddleUpperRight(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
 }
 
 function drawMokuhyou(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
-  // const cols = b.splitToColumns(box, b.splitAt(7));
-  // c.setPen(ctx, "thick");
-  // c.frameRight(ctx, cols[0]);
-  // c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
-  // const rows = b.splitToRows(cols[1], b.splitAt(9.5, 26.5));
-  // rows[2] = b.modify(rows[2], b.shrinkVert(0, 1));
-  // {
-  //   const box = b.modify(rows[0], b.inset(1));
-  //   c.drawText(ctx, "【目標】", box, "left", "top");
-  //   b.withSplitRows(b.modify(rows[0], b.shrinkHoriz(17, 0)), b.evenSplitter(2), ([upper, lower]) => {
-  //     c.drawComposite(ctx, upper, [
-  //       ...widget.boxed("体重(", "mokuhyou-体重-mark"),
-  //       p.gap(11, { mark: "mokuhyou-体重" }),
-  //       p.text("kg)"),
-  //       p.gap(3),
-  //       ...widget.boxed("BMI:(", "mokuhyou-BMI-mark"),
-  //       p.gap(14, { mark: "mokuhyou-BMI" }),
-  //       p.text(")"),
-  //       p.gap(5),
-  //       ...widget.boxed("収縮期／拡張期圧(", "mokuhyou-BP-mark"),
-  //       p.gap(22, { mark: "mokuhyou-BP" }),
-  //       p.text("mmHg)")
-  //     ]);
-  //     c.drawComposite(ctx, lower, [
-  //       ...widget.boxed("HbA1c:(", "mokuhyou-HbA1c-mark"),
-  //       p.gap(20, { mark: "mokuhyou-HbA1c" }),
-  //       p.text("%)"),
-  //     ]);
-  //   })
-  // }
+  const cols = b.splitToColumns(box, b.splitAt(7));
+  c.setPen(ctx, "thick");
+  c.frameRight(ctx, cols[0]);
+  c.drawTextVertically(ctx, "︻目標︼", cols[0], "center", "center");
+  const rows = b.splitToRows(cols[1], b.splitAt(9.5, 26.5));
+  rows[2] = b.modify(rows[2], b.shrinkVert(0, 1));
+  {
+    const box = b.modify(rows[0], b.inset(1));
+    c.drawText(ctx, "【目標】", box, "left", "top");
+    b.withSplitRows(b.modify(rows[0], b.shrinkHoriz(17, 0)), b.evenSplitter(2), ([upper, lower]) => {
+      line(ctx, upper, [
+        ...boxed("体重(", data, "mokuhyou-体重-mark"),
+        gap(11, value(data, "mokuhyou-体重")),
+        text("kg)"),
+        gap(3),
+        ...boxed("BMI:(", data, "mokuhyou-BMI-mark"),
+        gap(14, value(data, "mokuhyou-BMI")),
+        text(")"),
+        gap(5),
+        ...boxed("収縮期／拡張期圧(", data, "mokuhyou-BP-mark"),
+        gap(22, value(data, "mokuhyou-BP")),
+        text("mmHg)")
+      ]);
+      line(ctx, lower, [
+        ...boxed("HbA1c:(", data, "mokuhyou-HbA1c-mark"),
+        gap(20, value(data, "mokuhyou-HbA1c")),
+        text("%)"),
+      ]);
+    })
+  }
   // {
   //   b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
   //     c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
