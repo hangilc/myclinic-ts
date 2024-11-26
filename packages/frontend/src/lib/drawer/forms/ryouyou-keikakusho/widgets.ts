@@ -4,7 +4,7 @@ import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
 import type { DrawerContext } from "../../compiler/context";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec } from "../../compiler/render";
+import { textBlock, type LineItemSpec, type Block } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
 
 export function value(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): string {
@@ -69,4 +69,47 @@ export function line(ctx: DrawerContext, box: Box, extendedSpecs: (string | Line
   });
   const block = r.line(ctx, specs, { maxWidth: b.width(box) });
   r.putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: "center" });
+}
+
+export function drawLeftSquareBracket(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.shrinkHoriz(b.width(box) * 0.5, 0));
+  c.withPen(ctx, "thin", () => {
+    c.frameTop(ctx, box);
+    c.frameLeft(ctx, box);
+    c.frameBottom(ctx, box);
+  });
+}
+export function drawRightSquareBracket(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.shrinkHoriz(0, b.width(box) * 0.5));
+  c.withPen(ctx, "thin", () => {
+    c.frameTop(ctx, box);
+    c.frameRight(ctx, box);
+    c.frameBottom(ctx, box);
+  });
+}
+
+export function drawBracketed(ctx: DrawerContext, box: Box, text: string, opt?: {
+  bracketWidth?: number;
+}) {
+  const calcHeight = () => b.height(box);
+  const bracketWidth = opt?.bracketWidth ?? 2;
+  line(ctx, box, [
+    {
+      width: { kind: "fixed", value: bracketWidth },
+      calcHeight,
+      render: (ctx, box) => drawLeftSquareBracket(ctx, box),
+    },
+    {
+      width: { kind: "expand" },
+      calcHeight,
+      render: (ctx, box) => {
+        c.paragraph(ctx, text, b.modify(box, b.shrinkHoriz(1, 1)));
+      },
+    },
+    {
+      width: { kind: "fixed", value: bracketWidth },
+      calcHeight,
+      render: (ctx, box) => drawRightSquareBracket(ctx, box),
+    }
+  ]);
 }

@@ -1,5 +1,5 @@
 import { mkBox, type Box } from "./box";
-import type { DrawerContext } from "./context";
+import { mkDrawerContext, type DrawerContext } from "./context";
 import * as b from "./box";
 import * as c from "./compiler";
 import type { HAlign, VAlign } from "./align";
@@ -95,7 +95,7 @@ export function textBlock(textOpt: string | undefined, width?: Extent, opt?: {
       const halign = opt?.halign ?? "left";
       const valign = opt?.valign ?? "top";
       const renderBox = putIn(ctx, block, box, { halign, valign });
-      if( opt?.decorate ){
+      if (opt?.decorate) {
         opt?.decorate(ctx, renderBox);
       }
     },
@@ -106,7 +106,7 @@ export function advanceTo(at: number): LineItemSpec {
   return {
     width: { kind: "advance-to", at: at },
     calcHeight: () => 0,
-    render: () => {},
+    render: () => { },
   }
 }
 
@@ -190,7 +190,7 @@ function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): nu
         const item = { size: 0 };
         result.push(item);
         expands.push(item);
-      } else if( ext.kind === "advance-to" ){
+      } else if (ext.kind === "advance-to") {
         result.push({ size: 0 });
       } else {
         throw new Error("unhandled extent");
@@ -209,4 +209,19 @@ function resolveExtent(ctx: DrawerContext, exts: Extent[], maxSize?: number): nu
     }
   })
   return result.map(r => r.size);
+}
+
+// Splitter //////////////////////////////////////////////////////////////////////////
+
+const dummyDrawerContext: DrawerContext = mkDrawerContext();
+
+export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
+  function cvt(ext: "*" | number): Extent {
+    if (ext === "*") {
+      return { kind: "expand" };
+    } else {
+      return { kind: "fixed", value: ext };
+    }
+  }
+  return (maxSize: number) => resolveExtent(dummyDrawerContext, exts.map(cvt), maxSize)
 }

@@ -9,7 +9,7 @@ import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 import { textBlock, type LineItemSpec, advanceTo } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
-import { booleanValue, boxed, expander, gap, line, textCircle, value } from "./widgets";
+import { booleanValue, boxed, drawBracketed, drawLeftSquareBracket, drawRightSquareBracket, expander, gap, line, textCircle, value } from "./widgets";
 
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkDrawerContext();
@@ -26,6 +26,7 @@ export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
 function setupFonts(ctx: DC) {
   c.createFont(ctx, "f5", "MS Mincho", 5);
   c.createFont(ctx, "f4", "MS Mincho", 4);
+  c.createFont(ctx, "f3.5", "MS Mincho", 3.5);
 }
 
 function setupPens(ctx: DC) {
@@ -109,7 +110,7 @@ function drawMiddleUpperLeft(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
     text("・"),
     gap(-fs / 4),
     textCircle("令", booleanValue(data, "birthdate-gengou-reiwa")),
-    expander(value(data,  "birthdate-nen")),
+    expander(value(data, "birthdate-nen")),
     advanceTo(59),
     text("年"),
     expander(value(data, "birthdate-month")),
@@ -170,52 +171,24 @@ function drawMokuhyou(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
       ]);
     })
   }
-  // {
-  //   b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
-  //     c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
-  //     c.withFont(ctx, "f4", () => {
-  //       b.withSplitRows(lower, b.evenSplitter(4), rs => {
-  //         c.drawText(ctx, "┌", rs[0], "left", "center");
-  //         c.drawText(ctx, "│", rs[1], "left", "center"); 
-  //         c.drawText(ctx, "│", rs[2], "left", "center");
-  //         c.drawText(ctx, "└", rs[3], "left", "center");
-  //         c.drawText(ctx, "┐", rs[0], "right", "center");
-  //         c.drawText(ctx, "│", rs[1], "right", "center");
-  //         c.drawText(ctx, "│", rs[2], "right", "center");
-  //         c.drawText(ctx, "┘", rs[3], "right", "center");
-  //       }, { boxModifiers: [b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6)] });
-  //       c.mark(ctx, "mokuhyou-達成目標", b.modify(lower, b.shrinkHoriz(11, 9), b.shrinkVert(0, 0)), {
-  //         halign: "left",
-  //         valign: "center",
-  //         paragraph: true,
-  //         font: "f4"
-  //       });
-  //     })
-  //   });
-  // }
-  // {
-  //   b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
-  //     c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
-  //     c.withFont(ctx, "f4", () => {
-  //       b.withSplitRows(lower, b.evenSplitter(4), rs => {
-  //         c.drawText(ctx, "┌", rs[0], "left", "center");
-  //         c.drawText(ctx, "│", rs[1], "left", "center");
-  //         c.drawText(ctx, "│", rs[2], "left", "center");
-  //         c.drawText(ctx, "└", rs[3], "left", "center");
-  //         c.drawText(ctx, "┐", rs[0], "right", "center");
-  //         c.drawText(ctx, "│", rs[1], "right", "center");
-  //         c.drawText(ctx, "│", rs[2], "right", "center");
-  //         c.drawText(ctx, "┘", rs[3], "right", "center");
-  //       }, { boxModifiers: [b.shrinkVert(-1.5, -1.5), b.shrinkHoriz(6, 6)] });
-  //       c.mark(ctx, "mokuhyou-行動目標", b.modify(lower, b.shrinkHoriz(11, 9), b.shrinkVert(0, 0)), {
-  //         halign: "left",
-  //         valign: "center",
-  //         paragraph: true,
-  //         font: "f4"
-  //       });
-  //     })
-  //   });
-  // }
+  {
+    b.withSplitRows(rows[1], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➀達成目標】:患者と相談した目標", upper, "left", "center");
+      c.withFont(ctx, "f4", () => {
+        lower = b.modify(lower, b.shrinkHoriz(3, 3), b.shrinkVert(2, 2));
+        drawBracketed(ctx, lower, value(data, "mokuhyou-達成目標"));
+      })
+    });
+  }
+  {
+    b.withSplitRows(rows[2], b.splitAt(5), ([upper, lower]) => {
+      c.drawText(ctx, "【➁行動目標】:患者と相談した目標", upper, "left", "center");
+      c.withFont(ctx, "f4", () => {
+        lower = b.modify(lower, b.shrinkHoriz(3, 3), b.shrinkVert(2, 2));
+        drawBracketed(ctx, lower, value(data, "mokuhyou-行動目標"));
+      })
+    });
+  }
 }
 
 function drawJuuten(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
