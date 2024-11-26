@@ -332,7 +332,9 @@ function drawJuuten(ctx: DC, box: Box, data: RyouyouKeikakushoData) {
           ...boxed("今回は、指導の必要なし", data, "juuten-運動-指導の必要なし-mark")
         ]);
         line(ctx, b.modify(rs.shift()!, b.setWidth(126, "left")), [
-          ...boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", data, "juuten-運動-種類-mark"),
+          ...boxed("運動処方:種類(", data, "juuten-運動-種類-mark"),
+          textCircle("ｳｫｰｷﾝｸﾞ", booleanValue(data, "juuten-運動-ウォーキング-mark" )),
+          // ...boxed("運動処方:種類(ｳｫｰｷﾝｸﾞ・", data, "juuten-運動-種類-mark"),
           expander(value(data, "juuten-運動-種類")),
           ")",
         ]);
