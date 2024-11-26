@@ -19,7 +19,9 @@ export function textCircle(text: string, drawCircle: boolean): LineItemSpec {
   return textBlock(text, undefined, {
     decorate: (ctx, box) => {
       if (drawCircle) {
-        c.circle(ctx, b.cx(box), b.cy(box), 3);
+        c.withPen(ctx, "thin", () => {
+          c.circle(ctx, b.cx(box), b.cy(box), 3);
+        })
       }
     }
   });
@@ -32,6 +34,7 @@ export function gap(size: number, text?: string): LineItemSpec {
 export function boxed(label: string, data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): LineItemSpec[] {
   let size = 3;
   function drawBox(ctx: DrawerContext, box: Box) {
+    box = b.modify(box, b.setHeight(size, "center"), b.shiftDown(0.2));
     c.withPen(ctx, "thin", () => {
       c.frame(ctx, box);
       if (booleanValue(data, key)) {
@@ -48,7 +51,7 @@ export function boxed(label: string, data: RyouyouKeikakushoData, key: keyof Ryo
       calcHeight: () => size,
       render: drawBox,
     },
-    gap(1.5),
+    gap(1.0),
     textBlock(label),
   ];
 }
