@@ -1,14 +1,15 @@
 <script lang="ts">
-  import { patientDeleted } from "@/app-events";
   import api from "@/lib/api";
   import type { Op } from "@/lib/drawer/compiler/op";
   import { drawShujii } from "@/lib/drawer/forms/shujii/shujii-drawer";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import TextsView from "@/lib/VisitsView.svelte";
+  import { writable, type Writable } from "svelte/store";
 
   export let isVisible: boolean = false;
-  let patient: Patient | undefined = undefined;
+  let patient: Writable<Patient | undefined> = writable(undefined);
   let masterText = "";
   let dataMap: ShujiiDrawerData = {
     doctorName: "",
@@ -33,7 +34,7 @@
   }
 
   async function initPatient(init: Patient) {
-    patient = init;
+    $patient = init;
     masterText = await api.getShujiiMasterText(init.patientId);
     dataMap.detail = "";
   }
@@ -45,8 +46,8 @@
         destroy: () => d.$destroy(),
         title: "患者選択",
         onEnter: initPatient,
-      }
-    })
+      },
+    });
   }
 
   function doDisplay() {
@@ -65,54 +66,69 @@
   }
 
   async function doSave() {
-    if( patient ){
-      await api.saveShujiiMasterText(patient, masterText);
+    if ($patient) {
+      await api.saveShujiiMasterText($patient, masterText);
       console.log("master text saved");
     }
   }
 </script>
 
 {#if isVisible}
-  <div class="title">主治医意見書</div>
-  <div>
-    <button on:click={doSelectPatient}>患者選択</button>
+  <div class="wrapper">
     <div>
-      {#if patient === undefined}
-        （患者未選択）
-      {:else}
-        患者：({patient.patientId}) {patient.lastName}{patient.firstName}
-      {/if}
+      <div class="title">主治医意見書</div>
+      <div>
+        <button on:click={doSelectPatient}>患者選択</button>
+        <div>
+          {#if $patient === undefined}
+            （患者未選択）
+          {:else}
+            患者：({$patient.patientId}) {$patient.lastName}{$patient.firstName}
+          {/if}
+        </div>
+        <div>
+          <textarea class="master" bind:value={masterText} />
+        </div>
+        <div>
+          <button on:click={doSave}>保存</button>
+        </div>
+      </div>
+      <div class="data-input">
+        <span>doctorName</span><input
+          type="text"
+          bind:value={dataMap["doctorName"]}
+        />
+        <span>clinicName</span><input
+          type="text"
+          bind:value={dataMap["clinicName"]}
+        />
+        <span>clinicAddress</span><input
+          type="text"
+          bind:value={dataMap["clinicAddress"]}
+        />
+        <span>phone</span><input type="text" bind:value={dataMap["phone"]} />
+        <span>fax</span><input type="text" bind:value={dataMap["fax"]} />
+        <span>detail</span><textarea
+          bind:value={dataMap["detail"]}
+          class="detail"
+        />
+      </div>
+      <div>
+        <button on:click={doDisplay}>表示</button>
+      </div>
     </div>
     <div>
-      <textarea class="master" bind:value={masterText} />
+      <TextsView {patient} />
     </div>
-    <div>
-      <button on:click={doSave}>保存</button>
-    </div>
-  </div>
-  <div class="data-input">
-    <span>doctorName</span><input
-      type="text"
-      bind:value={dataMap["doctorName"]}
-    />
-    <span>clinicName</span><input
-      type="text"
-      bind:value={dataMap["clinicName"]}
-    />
-    <span>clinicAddress</span><input
-      type="text"
-      bind:value={dataMap["clinicAddress"]}
-    />
-    <span>phone</span><input type="text" bind:value={dataMap["phone"]} />
-    <span>fax</span><input type="text" bind:value={dataMap["fax"]} />
-    <span>detail</span><textarea bind:value={dataMap["detail"]} class="detail"/>
-  </div>
-  <div>
-    <button on:click={doDisplay}>表示</button>
   </div>
 {/if}
 
 <style>
+  .wrapper {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+  }
+
   .title {
     font-size: 1.5rem;
     margin-bottom: 10px;

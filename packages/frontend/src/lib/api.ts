@@ -1590,7 +1590,7 @@ export default {
   },
 
   getShujiiMasterText(patientId: number): Promise<string> {
-    return get("get-shujii-master-text", { "patient-id": patientId.toString() }, castString);
+    return getText("get-shujii-master-text", { "patient-id": patientId.toString() });
   },
 
   saveShujiiMasterText(patient: m.Patient, text: string): Promise<void> {

@@ -31,14 +31,12 @@
   function shiftSelected(n: number): void {
     let i = get(selected);
     let j = i + n;
-    console.log("j", j);
     if (j >= 0 && j < commands.length && i !== j) {
       selected.set(j);
     }
   }
 
   function doKeyDown(event: KeyboardEvent): void {
-    console.log("arrow down");
     if (event.key === "ArrowDown") {
       event.preventDefault();
       shiftSelected(1);

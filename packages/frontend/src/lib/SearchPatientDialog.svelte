@@ -46,7 +46,7 @@
   }
 </script>
 
-<Dialog {destroy} {title}>
+<Dialog {destroy} {title} enableAutoFocus={false}>
   <form on:submit|preventDefault={doSearch}>
     <input
       type="text"

@@ -46,6 +46,9 @@
 
   onMount(() => {
     dialog.style.zIndex = zIndexDialog.toString();
+    if( enableAutoFocus ){
+      dialog.focus();
+    }
   });
 
   function doKeyDown(event: KeyboardEvent): void {
@@ -78,7 +81,6 @@
   style:width={styleWidth}
   on:keydown={doKeyDown}
   tabindex="0"
-  autofocus={enableAutoFocus}
 >
   <div class="title" data-cy="dialog-title">
     <span>{title}</span>
