@@ -10,7 +10,7 @@ let shohouFreqUsage: FreqUsage[] | undefined = undefined;
 let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 let onshiViewSecret: string | undefined = undefined;
 let drugDiseases: DrugDisease[] | undefined = undefined;
-let hokengaiHistory: string[] | undefined = [];
+let hokengaiHistory: string[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
