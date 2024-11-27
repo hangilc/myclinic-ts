@@ -5,8 +5,9 @@
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import TextsView from "@/lib/VisitsView.svelte";
+  import VisitsView from "@/lib/VisitsView.svelte";
   import { writable, type Writable } from "svelte/store";
+  import { onDestroy } from "svelte";
 
   export let isVisible: boolean = false;
   let patient: Writable<Patient | undefined> = writable(undefined);
@@ -19,9 +20,20 @@
     fax: "",
     detail: "",
   };
-  let ops: Op[] = drawShujii(dataMap);
 
   loadClinicInfo();
+
+  const unsubs = [
+    patient.subscribe(async (patient) => {
+      if (patient) {
+      } else {
+        masterText = "";
+        dataMap.detail = "";
+      }
+    }),
+  ];
+
+  onDestroy(() => unsubs.forEach((f) => f()));
 
   async function loadClinicInfo() {
     const clinicInfo = await api.getClinicInfo();
@@ -30,7 +42,6 @@
     dataMap.clinicAddress = clinicInfo.address;
     dataMap.phone = clinicInfo.tel;
     dataMap.fax = clinicInfo.fax;
-    ops = drawShujii(dataMap);
   }
 
   async function initPatient(init: Patient) {
@@ -39,15 +50,25 @@
     dataMap.detail = "";
   }
 
+  function clearPatient() {
+    $patient = undefined;
+    masterText = "";
+    dataMap.detail = "";
+  }
+
   function doSelectPatient() {
-    const d: SearchPatientDialog = new SearchPatientDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "患者選択",
-        onEnter: initPatient,
-      },
-    });
+    if (!$patient) {
+      const d: SearchPatientDialog = new SearchPatientDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          title: "患者選択",
+          onEnter: initPatient,
+        },
+      });
+    } else {
+      clearPatient();
+    }
   }
 
   function doDisplay() {
@@ -78,7 +99,13 @@
     <div>
       <div class="title">主治医意見書</div>
       <div>
-        <button on:click={doSelectPatient}>患者選択</button>
+        <button on:click={doSelectPatient}>
+          {#if !$patient}
+            患者選択
+          {:else}
+            患者終了
+          {/if}
+        </button>
         <div>
           {#if $patient === undefined}
             （患者未選択）
@@ -117,8 +144,8 @@
         <button on:click={doDisplay}>表示</button>
       </div>
     </div>
-    <div>
-      <TextsView {patient} />
+    <div class="visit-view">
+      <VisitsView {patient} />
     </div>
   </div>
 {/if}
@@ -127,6 +154,7 @@
   .wrapper {
     display: grid;
     grid-template-columns: 1fr 400px;
+    column-gap: 10px;
   }
 
   .title {
