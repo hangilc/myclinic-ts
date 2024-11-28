@@ -402,30 +402,7 @@
   }
 
   function doDisp() {
-    // let ryouyouKeikakushoData = mkRyouyouKeikakushoData();
-    // if (clinicInfo) {
-    //   ryouyouKeikakushoData["医師氏名"] = clinicInfo?.doctorName;
-    // }
-    // populateWithIssueDate(ryouyouKeikakushoData, formData);
-    // populateWithPatient(ryouyouKeikakushoData, formData);
-    // populateDiseases(ryouyouKeikakushoData, formData);
-    // populateMokuhyou(ryouyouKeikakushoData, formData);
-    // populateShokuji(ryouyouKeikakushoData, formData);
-    // populateUndou(ryouyouKeikakushoData, formData);
-    // populateTabako(ryouyouKeikakushoData, formData);
-    // populateSonota(ryouyouKeikakushoData, formData);
-    // populateKensa(ryouyouKeikakushoData, formData);
-    // for (let key in formData.immediates) {
-    //   // @ts-ignore
-    //   ryouyouKeikakushoData[key] = formData.immediates[key];
-    // }
     let ops: Op[] = createOps(formData);
-    // if (formData.mode === "shokai") {
-    //   ops = drawRyouyouKeikakushoShokai(ryouyouKeikakushoData);
-    // } else {
-    //   ryouyouKeikakushoData["患者署名省略-mark"] = "1";
-    //   ops = drawRyouyouKeikakushoKeizoku(ryouyouKeikakushoData);
-    // }
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
@@ -703,6 +680,15 @@
               bind:value={formData.immediates["mokuhyou-HbA1c"]}
             />
           </span>
+          {#if formData.mode === "keizoku"}
+          <div style="display: flex; align-items:top;margin:4px 0;">
+            【達成状況】
+            <textarea
+              style="width: 400px; height: 4em; resize: vertical"
+              bind:value={formData.immediates["mokuhyou-目標達成状況"]}
+            />
+          </div>
+          {/if}
           <div style="display: flex; align-items:top;margin:4px 0;">
             【達成目標】
             <textarea
