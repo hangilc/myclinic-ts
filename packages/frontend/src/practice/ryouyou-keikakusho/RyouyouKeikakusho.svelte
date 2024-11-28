@@ -509,7 +509,8 @@
         JSON.stringify(stores)
       );
       storesIndex = 0;
-      alert("新規保存しました。");
+      storesAreaVisible = true;
+      // alert("新規保存しました。");
     }
   }
 
@@ -522,7 +523,8 @@
         patient.patientId,
         JSON.stringify(newStores)
       );
-      alert("更新しました。");
+      // alert("更新しました。");
+      storesAreaVisible = true;
     } else {
       alert("選択されていないので、更新保存できません。");
     }
