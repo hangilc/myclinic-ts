@@ -39,11 +39,14 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        ops: ops,
-        width: A5.width,
-        height: A5.height,
-      }
-    })
+        ops,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen",
+        title: "処方箋印刷",
+      },
+    });
   }
 
 </script>

@@ -238,5 +238,14 @@ export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
       return { kind: "fixed", value: ext };
     }
   }
-  return (maxSize: number) => resolveExtent(dummyDrawerContext, exts.map(cvt), maxSize)
+  return (maxSize: number) => {
+    const pos: number[] = [];
+    const ws = resolveExtent(dummyDrawerContext, exts.map(cvt), maxSize);
+    let x = 0;
+    for(let i=0;i<ws.length-1;i++){
+      x += ws[i];
+      pos.push(x);
+    }
+    return pos;
+  };
 }
