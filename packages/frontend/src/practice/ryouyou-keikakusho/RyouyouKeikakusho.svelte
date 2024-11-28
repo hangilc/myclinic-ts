@@ -350,6 +350,7 @@
       mkFormData(),
       lastIndex >= 0 ? stores[lastIndex] : {}
     );
+    formData.immediates["issue-times"] = (stores.length + 1).toString();
     storesIndex = -1;
   }
 
