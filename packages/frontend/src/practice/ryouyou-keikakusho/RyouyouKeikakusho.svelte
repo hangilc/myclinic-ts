@@ -635,6 +635,9 @@
       </div>
       <div>
         発行日：<input type="text" bind:value={formData.issueDate} />
+        {#if formData.mode === "keizoku"}
+          <input type="text" bind:value={formData.immediates["issue-times"]} style="width:2rem"/> 回目
+        {/if}
       </div>
       <div>
         主病：<input
