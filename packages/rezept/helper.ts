@@ -263,7 +263,13 @@ export function optionFold<T, U>(opt: T | undefined, f: (t: T) => U, defaultValu
 
 export function formatHokenshaBangou(hokenshaBangou: number): string {
   if (hokenshaBangou < 1000000) {
-    return pad(hokenshaBangou, 8, " ");
+    let f = hokenshaBangou.toString();
+    if( f.length === 5 ){
+      f = "0" + f;
+      return pad(f, 8, " ");
+    } else {
+      return pad(hokenshaBangou, 8, " ");
+    }
   } else {
     return pad(hokenshaBangou, 8, "0");
   }
