@@ -38,7 +38,10 @@ export function mkTextBlock(ctx: DrawerContext, text: string, font?: string): Bl
     width,
     height,
     render: (ctx: DrawerContext, box: Box) => {
-      c.drawText(ctx, text, box, "left", "top");
+      c.withFont(ctx, font, () => {
+        c.drawText(ctx, text, box, "left", "top");
+
+      });
     }
   }
 }
@@ -89,7 +92,19 @@ export function textBlock(textOpt: string | undefined, width?: Extent, opt?: {
     width: width ?? {
       kind: "calc", calc: (ctx: DrawerContext) => calcWidth(ctx, text, opt?.font),
     },
-    calcHeight: (ctx: DrawerContext) => calcHeight(ctx, opt?.font),
+    calcHeight: (ctx: DrawerContext) => {
+      const font = opt?.font;
+      if( font ){
+        return c.getFontSizeOf(ctx, font);
+      } else {
+        const current = c.getCurrentFont(ctx);
+        if( current ){
+          return c.getFontSizeOf(ctx, current);
+        } else {
+          return 0;
+        }
+      }
+    },
     render: (ctx: DrawerContext, box: Box) => {
       const block = mkTextBlock(ctx, text, opt?.font);
       const halign = opt?.halign ?? "left";

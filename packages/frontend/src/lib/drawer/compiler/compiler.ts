@@ -51,10 +51,10 @@ export function pushOps(ctx: DrawerContext, ops: Op[]) {
 export function newPage(ctx: DrawerContext) {
   const ops: Op[] = [...ctx.setup];
   ctx.ops = ops;
-  if( ctx.currentFont ){
+  if (ctx.currentFont) {
     setFont(ctx, ctx.currentFont);
   }
-  if( ctx.currentPen ){
+  if (ctx.currentPen) {
     setPen(ctx, ctx.currentPen);
   }
   ctx.pages.push(ops);
@@ -62,7 +62,7 @@ export function newPage(ctx: DrawerContext) {
 
 export function withEachPage(ctx: DrawerContext, f: (ops: Op[], index: number, totalPages: number) => void) {
   const n = ctx.pages.length;
-  for(let i=0;i<n;i++){
+  for (let i = 0; i < n; i++) {
     f(ctx.pages[i], i, n);
   }
 }
@@ -911,15 +911,20 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
   });
 }
 
-export function withFont<T>(ctx: DrawerContext, fontName: string, f: () => T) {
-  const save = getCurrentFont(ctx);
-  try {
-    setFont(ctx, fontName);
-    return f();
-  } finally {
-    if (save) {
-      setFont(ctx, save);
+export function withFont<T>(ctx: DrawerContext, fontName: string | undefined, f: () => T) {
+  if (fontName) {
+
+    const save = getCurrentFont(ctx);
+    try {
+      setFont(ctx, fontName);
+      return f();
+    } finally {
+      if (save) {
+        setFont(ctx, save);
+      }
     }
+  } else {
+    return f();
   }
 }
 

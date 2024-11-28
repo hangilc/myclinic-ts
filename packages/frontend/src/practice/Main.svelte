@@ -18,6 +18,9 @@
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
+  import { drawShohousen2024 } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import { A4, A5 } from "@/lib/drawer/compiler/paper-size";
 
   export let serviceStore: Writable<string>;
 
@@ -28,6 +31,20 @@
       document.title = `(${p.patientId}) ${p.fullName("")}`;
     }
   });
+
+  /////////////////////////////////////////////////////////////////////////////////
+  function testShohousen() {
+    const ops = drawShohousen2024({});
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        ops: ops,
+        width: A5.width,
+        height: A5.height,
+      }
+    })
+  }
 
 </script>
 
@@ -61,4 +78,7 @@
     <ShohouUsage />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
+  <div>
+    <button on:click={testShohousen}>処方箋</button>
+  </div>
 </div>
