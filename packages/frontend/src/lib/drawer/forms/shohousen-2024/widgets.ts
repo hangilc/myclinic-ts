@@ -4,6 +4,7 @@ import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
 import type { DrawerContext } from "../../compiler/context";
 import type { Box } from "../../compiler/box";
+import type { VAlign } from "../../compiler/align";
 
 export function expander(text?: string): r.LineItemSpec {
   return r.textBlock(text, { kind: "expand" }, { halign: "center", valign: "center" });
@@ -47,4 +48,14 @@ export function drawRightSquareBracket(ctx: DrawerContext, box: Box) {
     c.frameRight(ctx, box);
     c.frameBottom(ctx, box);
   });
+}
+
+export function vertAlignedBlock(block: Block, height: number, valign: VAlign): Block {
+  return {
+    width: block.width,
+    height,
+    render: (ctx: DrawerContext, box: Box) => {
+      r.putIn(ctx, block, box, { valign });
+    }
+  }
 }

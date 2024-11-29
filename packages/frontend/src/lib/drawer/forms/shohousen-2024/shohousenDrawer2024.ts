@@ -120,6 +120,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
     drawClinicBox(ctx, col2);
   }
   drawIssueBox(ctx, block2);
+  drawDrugs(ctx, drugs);
 }
 
 function drawPatientBox(ctx: DrawerContext, box: Box) {
@@ -290,5 +291,39 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
       r.putIn(ctx, para, cBody, { halign: "center", valign: "center" })
     });
     w.drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
+  }
+}
+
+function drawDrugs(ctx: DrawerContext, box: Box) {
+  const [mark, col1, col2, body] = b.splitToColumns(box, b.splitAt(5, 18, 31));
+  [mark, col1, col2].forEach(box => c.frameRight(ctx, box))
+  {
+    c.drawTextJustifiedVertically(ctx, "処方", b.modify(mark, b.shrinkVert(14, 14)), "center");
+  }
+  {
+    const [label, body] = b.splitToRows(col1, b.splitAt(6));
+    c.frameBottom(ctx, label);
+    const para = r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "変更不可"),
+      w.vertAlignedBlock(r.mkTextBlock(ctx, "(医療上必要)", "f1.5"), c.currentFontSize(ctx), "center"),
+    ], { halign: "center" });
+    r.putIn(ctx, para, label, { halign: "center", valign: "center" });
+  }
+  {
+    const [label, body] = b.splitToRows(col2, b.splitAt(6));
+    c.frameBottom(ctx, label);
+    c.drawText(ctx, "患者希望", label, "center", "center");
+  }
+  {
+    const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
+    const [cLeft, cBody, cRight] = b.splitToColumns(upper, r.splitByExtent([1.5, "*", 1.5]));
+    w.drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkVert(1.5, 1.5)));
+    r.putIn(ctx, r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）"),
+      r.mkTextBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
+      r.mkTextBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
+      r.mkTextBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
+    ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
+    w.drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkVert(1.5, 1.5)));
   }
 }
