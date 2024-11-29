@@ -119,6 +119,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
     drawPatientBox(ctx, col1);
     drawClinicBox(ctx, col2);
   }
+  drawIssueBox(ctx, block2);
 }
 
 function drawPatientBox(ctx: DrawerContext, box: Box) {
@@ -245,5 +246,22 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
     c.withPen(ctx, "thin", () => {
       [0, 2, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
     })
+  }
+}
+
+function drawIssueBox(ctx: DrawerContext, box: Box) {
+  c.frame(ctx, box);
+  const [left, right] = b.splitToColumns(box, b.evenSplitter(2));
+  {
+    c.frameRight(ctx, left);
+    const [label, body] = b.splitToColumns(left, b.splitAt(25));
+    c.frameRight(ctx, label);
+    c.drawText(ctx, "交付年月日", label, "center", "center");
+    const line = r.line(ctx, [
+      w.text("令和"), w.gap(1), w.gap(3), w.gap(1), w.text("年"),
+      w.gap(1), w.gap(3), w.gap(1), w.text("月"),
+      w.gap(1), w.gap(3), w.gap(1), w.text("日"), 
+    ]);
+    r.putIn(ctx, line, body, { halign: "center", valign: "center" });
   }
 }
