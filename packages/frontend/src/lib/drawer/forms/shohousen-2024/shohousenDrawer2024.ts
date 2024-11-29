@@ -4,6 +4,7 @@ import type { ShohousenData2024 } from "./shohousenData2024";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
+import * as w from "./widgets";
 import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import { justifiedText } from "./widgets";
@@ -15,7 +16,8 @@ export function drawShohousen2024(data: ShohousenData2024): Op[] {
   c.setFont(ctx, "f2.5");
   c.setPen(ctx, "default");
   const paper = b.mkBox(0, 0, A5.width, A5.height);
-  const bounds = b.modify(paper, b.inset(4));
+  const bounds = b.modify(paper, b.inset(3));
+  console.log("bounds", bounds, paper);
   c.frame(ctx, bounds);
   let box = b.withSlice(bounds, 6, box => drawTitle(ctx, b.modify(box, b.setWidth(30, "center"))));
   box = b.withSlice(box, 2.5, (box) => {
@@ -31,6 +33,7 @@ export function drawShohousen2024(data: ShohousenData2024): Op[] {
 function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "f4", "MS Mincho", 4);
   c.createFont(ctx, "f2.5", "MS Mincho", 2.5);
+  c.createFont(ctx, "f1.5", "MS Mincho", 1.5);
 }
 
 function initPen(ctx: DrawerContext) {
@@ -38,7 +41,7 @@ function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "thin", 40, 40, 40, 0.1);
 }
 
-function drawTitle(ctx: DrawerContext, box: Box){
+function drawTitle(ctx: DrawerContext, box: Box) {
   const block = justifiedText(ctx, "処方箋", box, { font: "f4" });
   r.putIn(ctx, block, box, { halign: "center", valign: "center" });
 }
@@ -107,5 +110,71 @@ function drawUpperBox(ctx: DrawerContext, box: Box) {
 }
 
 function drawLowerBox(ctx: DrawerContext, box: Box) {
-  c.frame(ctx, box);
+  const [block1, block2, drugs, bikou, kaisuu, issueDate, pharma] = b.splitToRows(box, r.splitByExtent([33, 10, "*", 29, 13, 10, 10]));
+  { // block1
+    const [col1, col2] = b.splitToColumns(block1, b.evenSplitter(2));
+    c.frame(ctx, col1);
+    [col1, block2, drugs, bikou, kaisuu, issueDate, pharma].forEach(box => c.frame(ctx, box));
+    { // col1
+      const [mark, body] = b.splitToColumns(col1, b.splitAt(5));
+      c.frameRight(ctx, mark);
+      c.drawTextVertically(ctx, "患　者", mark, "center", "center");
+      const rows = b.splitToRows(body, b.splitAt(10, 23));
+      [rows[0], rows[1]].forEach(box => c.frameBottom(ctx, box));
+      {
+        const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
+        c.frameRight(ctx, c1);
+        c.drawText(ctx, "氏　名", c1, "center", "center");
+      }
+      { // rows[1]
+        const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
+        c.frameRight(ctx, c1);
+        c.drawText(ctx, "生年月日", c1, "center", "center");
+        const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
+        c.frameRight(ctx, col2);
+        {
+          { // cpl1
+            const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
+            const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
+            c.withFont(ctx, "f1.5", () => {
+              c.drawText(ctx, "明", meiji, "center", "center");
+              c.drawText(ctx, "大", taisho, "center", "center");
+              c.drawText(ctx, "昭", shouwa, "center", "center");
+              c.drawText(ctx, "平", heisei, "center", "center");
+              c.drawText(ctx, "令", reiwa, "center", "center");
+            })
+          }
+          { // col2
+            const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
+            const line = r.line(ctx, [
+              w.gap(2.5),
+              w.gap(1),
+              w.text("年"),
+              w.gap(1), w.gap(2.5), w.gap(1), w.text("月"),
+              w.gap(1), w.gap(2.5), w.gap(1), w.text("日"),
+            ]);
+            r.putIn(ctx, line, box, { halign: "right"});
+          }
+          { // col3
+            const box = b.modify(col3, b.setHeight(2.5, "center"));
+            const line = r.line(ctx, [
+              w.text("男"),
+              w.text("・"),
+              w.text("女"),
+            ]);
+            r.putIn(ctx, line, box, { halign: "center" });
+          }
+        }
+      }
+      { // rows[2]
+        const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
+        c.frameRight(ctx, c1);
+        c.drawText(ctx, "区　分", c1, "center", "center");
+        const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
+        c.frameRight(ctx, left);
+        c.drawText(ctx, "被保険者", left, "center", "center");
+        c.drawText(ctx, "被扶養者", right, "center", "center");
+      }
+    }
+  }
 }

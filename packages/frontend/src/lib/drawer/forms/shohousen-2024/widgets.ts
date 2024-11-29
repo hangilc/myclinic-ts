@@ -22,3 +22,11 @@ export function justifiedText(ctx: DrawerContext, text: string, box: Box, opt?: 
   }
   return r.line(ctx, specs, { maxWidth: b.width(box)});
 }
+
+export function gap(size: number, text?: string): r.LineItemSpec {
+  return r.textBlock(text, { kind: "fixed", value: size }, { halign: "center", valign: "center" })
+}
+
+export function text(text: string): r.LineItemSpec {
+  return r.textBlock(text, undefined, { valign: "center" });
+}
