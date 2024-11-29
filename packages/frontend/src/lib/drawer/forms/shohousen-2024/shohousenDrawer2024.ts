@@ -8,6 +8,7 @@ import * as w from "./widgets";
 import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import { justifiedText } from "./widgets";
+import { drawReceipt } from "../receipt/receipt-drawer";
 
 export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const ctx = mkDrawerContext();
@@ -115,66 +116,134 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
     const [col1, col2] = b.splitToColumns(block1, b.evenSplitter(2));
     c.frame(ctx, col1);
     [col1, block2, drugs, bikou, kaisuu, issueDate, pharma].forEach(box => c.frame(ctx, box));
-    { // col1
-      const [mark, body] = b.splitToColumns(col1, b.splitAt(5));
-      c.frameRight(ctx, mark);
-      c.drawTextVertically(ctx, "患　者", mark, "center", "center");
-      const rows = b.splitToRows(body, b.splitAt(10, 23));
-      [rows[0], rows[1]].forEach(box => c.frameBottom(ctx, box));
-      {
-        const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
-        c.frameRight(ctx, c1);
-        c.drawText(ctx, "氏　名", c1, "center", "center");
+    drawPatientBox(ctx, col1);
+    drawClinicBox(ctx, col2);
+  }
+}
+
+function drawPatientBox(ctx: DrawerContext, box: Box) {
+  const [mark, body] = b.splitToColumns(box, b.splitAt(5));
+  c.frameRight(ctx, mark);
+  c.drawTextVertically(ctx, "患　者", mark, "center", "center");
+  const rows = b.splitToRows(body, b.splitAt(10, 23));
+  [rows[0], rows[1]].forEach(box => c.frameBottom(ctx, box));
+  {
+    const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
+    c.frameRight(ctx, c1);
+    c.drawText(ctx, "氏　名", c1, "center", "center");
+  }
+  { // rows[1]
+    const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
+    c.frameRight(ctx, c1);
+    c.drawText(ctx, "生年月日", c1, "center", "center");
+    const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
+    c.frameRight(ctx, col2);
+    {
+      { // cpl1
+        const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
+        const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
+        c.withFont(ctx, "f1.5", () => {
+          c.drawText(ctx, "明", meiji, "center", "center");
+          c.drawText(ctx, "大", taisho, "center", "center");
+          c.drawText(ctx, "昭", shouwa, "center", "center");
+          c.drawText(ctx, "平", heisei, "center", "center");
+          c.drawText(ctx, "令", reiwa, "center", "center");
+        })
       }
-      { // rows[1]
-        const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
-        c.frameRight(ctx, c1);
-        c.drawText(ctx, "生年月日", c1, "center", "center");
-        const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
-        c.frameRight(ctx, col2);
-        {
-          { // cpl1
-            const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
-            const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
-            c.withFont(ctx, "f1.5", () => {
-              c.drawText(ctx, "明", meiji, "center", "center");
-              c.drawText(ctx, "大", taisho, "center", "center");
-              c.drawText(ctx, "昭", shouwa, "center", "center");
-              c.drawText(ctx, "平", heisei, "center", "center");
-              c.drawText(ctx, "令", reiwa, "center", "center");
-            })
-          }
-          { // col2
-            const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
-            const line = r.line(ctx, [
-              w.gap(2.5),
-              w.gap(1),
-              w.text("年"),
-              w.gap(1), w.gap(2.5), w.gap(1), w.text("月"),
-              w.gap(1), w.gap(2.5), w.gap(1), w.text("日"),
-            ]);
-            r.putIn(ctx, line, box, { halign: "right"});
-          }
-          { // col3
-            const box = b.modify(col3, b.setHeight(2.5, "center"));
-            const line = r.line(ctx, [
-              w.text("男"),
-              w.text("・"),
-              w.text("女"),
-            ]);
-            r.putIn(ctx, line, box, { halign: "center" });
-          }
-        }
+      { // col2
+        const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
+        const line = r.line(ctx, [
+          w.gap(2.5),
+          w.gap(1),
+          w.text("年"),
+          w.gap(1), w.gap(2.5), w.gap(1), w.text("月"),
+          w.gap(1), w.gap(2.5), w.gap(1), w.text("日"),
+        ]);
+        r.putIn(ctx, line, box, { halign: "right" });
       }
-      { // rows[2]
-        const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
-        c.frameRight(ctx, c1);
-        c.drawText(ctx, "区　分", c1, "center", "center");
-        const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
-        c.frameRight(ctx, left);
-        c.drawText(ctx, "被保険者", left, "center", "center");
-        c.drawText(ctx, "被扶養者", right, "center", "center");
+      { // col3
+        const box = b.modify(col3, b.setHeight(2.5, "center"));
+        const line = r.line(ctx, [
+          w.text("男"),
+          w.text("・"),
+          w.text("女"),
+        ]);
+        r.putIn(ctx, line, box, { halign: "center" });
       }
     }
+  }
+  { // rows[2]
+    const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
+    c.frameRight(ctx, c1);
+    c.drawText(ctx, "区　分", c1, "center", "center");
+    const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
+    c.frameRight(ctx, left);
+    c.drawText(ctx, "被保険者", left, "center", "center");
+    c.drawText(ctx, "被扶養者", right, "center", "center");
+  }
+}
+
+function drawClinicBox(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.shrinkHoriz(2, 0));
+  const [address, name, kikancode] = b.splitToRows(box, b.splitAt(10, 23));
+  { // address
+    let [left, right] = b.splitToColumns(address, b.splitAt(22));
+    const para = r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "保険医療機関の"),
+      r.mkTextBlock(ctx, "所在地及び名称"),
+    ]);
+    r.putIn(ctx, para, left, { halign: "center", valign: "center" });
+    const width = para.width;
+    b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
+      {
+        [left, right] = b.splitToColumns(upper, b.splitAt(22));
+        const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
+        let label = w.justifiedText(ctx, "電話番号", labelBox);
+        r.putIn(ctx, label, left, { halign: "center", valign: "center" });
+      }
+      {
+        [left, right] = b.splitToColumns(lower, b.splitAt(22));
+        const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
+        let label = w.justifiedText(ctx, "保険医氏名", labelBox);
+        r.putIn(ctx, label, left, { halign: "center", valign: "center" });
+        const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
+        c.withFont(ctx, "f1.5", () => {
+          c.drawText(ctx, "印", stampBox, "center", "center");
+        });
+        c.withPen(ctx, "thin", () => {
+          c.circle(ctx, b.cx(stampBox), b.cy(stampBox), 2.5 * 0.5);
+        })
+      }
+    });
+  }
+  drawKikanBox(ctx, kikancode);
+}
+
+function drawKikanBox(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.setHeight(6, "top"))
+  c.frame(ctx, box);
+  const [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel, kikancode] = b.splitToColumns(box, b.splitAt(23, 28, 38.5, 44, 51));
+  [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(box => c.frameRight(ctx, box));
+  c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
+  {
+    const para = r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "点数表"),
+      r.mkTextBlock(ctx, "番号"),
+    ], { halign: "center" });
+    r.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center"});
+  }
+  {
+    const para = r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "医療機関", "f1.5"),
+      r.mkTextBlock(ctx, "コード", "f1.5"),
+    ], { halign: "center" });
+    r.putIn(ctx, para, kikanLabel, { halign: "center", valign: "center"});
+  }
+  {
+    const cols = b.splitToColumns(kikancode, b.evenSplitter(7));
+    [1, 5].forEach(i => c.frameRight(ctx, cols[i]));
+    c.withPen(ctx, "thin", () => {
+      [0, 2, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
+    })
   }
 }
