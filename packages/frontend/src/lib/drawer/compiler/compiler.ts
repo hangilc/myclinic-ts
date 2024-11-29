@@ -179,6 +179,14 @@ export function getFontSizeOf(ctx: DrawerContext, fontName: string): number {
   return fsm.getFontSizeOf(ctx.fsm, fontName);
 }
 
+export function resolveFontHeight(ctx: DrawerContext, fontName?: string): number {
+  if( fontName ){
+    return getFontSizeOf(ctx, fontName);
+  } else {
+    return currentFontSize(ctx);
+  }
+}
+
 export function drawTextJustified(ctx: DrawerContext, text: string, box: Box, valign: VAlign) {
   const fontSize = currentFontSize(ctx);
   const charWidths = stringToCharWidths(text, fontSize);
