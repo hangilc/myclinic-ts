@@ -231,14 +231,14 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
       r.mkTextBlock(ctx, "点数表"),
       r.mkTextBlock(ctx, "番号"),
     ], { halign: "center" });
-    r.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center"});
+    r.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center" });
   }
   {
     const para = r.paragraph(ctx, [
       r.mkTextBlock(ctx, "医療機関", "f1.5"),
       r.mkTextBlock(ctx, "コード", "f1.5"),
     ], { halign: "center" });
-    r.putIn(ctx, para, kikanLabel, { halign: "center", valign: "center"});
+    r.putIn(ctx, para, kikanLabel, { halign: "center", valign: "center" });
   }
   {
     const cols = b.splitToColumns(kikancode, b.evenSplitter(7));
@@ -260,8 +260,35 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
     const line = r.line(ctx, [
       w.text("令和"), w.gap(1), w.gap(3), w.gap(1), w.text("年"),
       w.gap(1), w.gap(3), w.gap(1), w.text("月"),
-      w.gap(1), w.gap(3), w.gap(1), w.text("日"), 
+      w.gap(1), w.gap(3), w.gap(1), w.text("日"),
     ]);
     r.putIn(ctx, line, body, { halign: "center", valign: "center" });
+  }
+  {
+    const [label, body] = b.splitToColumns(right, b.splitAt(25));
+    c.frameRight(ctx, label);
+    r.putIn(ctx, r.paragraph(ctx, [
+      r.mkTextBlock(ctx, "処方箋の"),
+      r.mkTextBlock(ctx, "使用期間"),
+    ]), label, { halign: "center", valign: "center" });
+    const [issueLimit, comment] = b.splitToColumns(body, b.splitAt(24));
+    const line = r.line(ctx, [
+      w.text("令和"), w.gap(0.5), w.gap(2.5), w.gap(0.5), w.text("年"),
+      w.gap(0.5), w.gap(2.5), w.gap(0.5), w.text("月"),
+      w.gap(0.5), w.gap(2.5), w.gap(0.5), w.text("日"),
+    ]);
+    r.putIn(ctx, line, issueLimit, { halign: "center", valign: "center" });
+    const [cLeft, cBody, cRight] = b.splitToColumns(comment, r.splitByExtent([1.5, "*", 1.5]));
+    w.drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkVert(1.5, 1.5), b.shift(0.25, 0)));
+    c.withFont(ctx, "f1.5", () => {
+      const para = r.paragraph(ctx, [
+        r.mkTextBlock(ctx, "特に記載のある場合"),
+        r.mkTextBlock(ctx, "を除き、交付の日を含"),
+        r.mkTextBlock(ctx, "めて４日以内に保険薬"),
+        r.mkTextBlock(ctx, "局に提出すること。"),
+      ], { halign: "left", leading: 0.4 });
+      r.putIn(ctx, para, cBody, { halign: "center", valign: "center" })
+    });
+    w.drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
   }
 }

@@ -30,3 +30,21 @@ export function gap(size: number, text?: string): r.LineItemSpec {
 export function text(text: string): r.LineItemSpec {
   return r.textBlock(text, undefined, { valign: "center" });
 }
+
+export function drawLeftSquareBracket(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.shrinkHoriz(b.width(box) * 0.5, 0));
+  c.withPen(ctx, "thin", () => {
+    c.frameTop(ctx, box);
+    c.frameLeft(ctx, box);
+    c.frameBottom(ctx, box);
+  });
+}
+
+export function drawRightSquareBracket(ctx: DrawerContext, box: Box) {
+  box = b.modify(box, b.shrinkHoriz(0, b.width(box) * 0.5));
+  c.withPen(ctx, "thin", () => {
+    c.frameTop(ctx, box);
+    c.frameRight(ctx, box);
+    c.frameBottom(ctx, box);
+  });
+}
