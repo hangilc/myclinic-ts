@@ -118,7 +118,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
     drawPatientBox(ctx, col1);
     drawClinicBox(ctx, col2);
   }
-  // drawIssueBox(ctx, block2);
+  drawIssueBox(ctx, block2);
   // drawDrugs(ctx, drugs);
 }
 
@@ -210,21 +210,21 @@ function drawClinicBox(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "保険医療機関の"),
       blk.textBlock(ctx, "所在地及び名称"),
     ], "left");
-    blk.putIn(ctx, para, left, { halign: "center", valign: "center" });
+    blk.putIn(ctx, para, left, "center", "center");
     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
       {
         [left, right] = b.splitToColumns(upper, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
         let label = blk.justifiedText(ctx, "電話番号", b.width(labelBox));
-        blk.putIn(ctx, label, left, { halign: "center", valign: "center" });
+        blk.putIn(ctx, label, left, "center", "center");
       }
       {
         [left, right] = b.splitToColumns(lower, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
         let label = blk.justifiedText(ctx, "保険医氏名", b.width(labelBox));
-        blk.putIn(ctx, label, left, { halign: "center", valign: "center" });
+        blk.putIn(ctx, label, left, "center", "center");
         const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
-        blk.putIn(ctx, inkan(2.5), stampBox, { halign: "center", valign: "center"});
+        blk.putIn(ctx, inkan(2.5), stampBox, "center", "center");
       }
     });
   }
@@ -242,14 +242,14 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "点数表"),
       blk.textBlock(ctx, "番号"),
     ], "center");
-    blk.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center" });
+    blk.putIn(ctx, para, tensuuLabel, "center", "center");
   }
   {
-    const para = r.paragraph(ctx, [
+    const para = blk.stackedBlock([
       r.mkTextBlock(ctx, "医療機関", "f1.5"),
       r.mkTextBlock(ctx, "コード", "f1.5"),
-    ], { halign: "center" });
-    r.putIn(ctx, para, kikanLabel, { halign: "center", valign: "center" });
+    ], "center");
+    blk.putIn(ctx, para, kikanLabel, "center", "center");
   }
   {
     const cols = b.splitToColumns(kikancode, b.evenSplitter(7));
@@ -268,12 +268,12 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
     const [label, body] = b.splitToColumns(left, b.splitAt(25));
     c.frameRight(ctx, label);
     c.drawText(ctx, "交付年月日", label, "center", "center");
-    const line = r.line(ctx, [
-      w.text("令和"), w.gap(1), w.gap(3), w.gap(1), w.text("年"),
-      w.gap(1), w.gap(3), w.gap(1), w.text("月"),
-      w.gap(1), w.gap(3), w.gap(1), w.text("日"),
+    const line = blk.rowBlock(c.currentFontSize(ctx), [
+      blk.textItem(ctx, "令和"), blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "年"),
+      blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "月"),
+      blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "日"),
     ]);
-    r.putIn(ctx, line, body, { halign: "center", valign: "center" });
+    blk.putIn(ctx, line, body, "center", "center");
   }
   {
     const [label, body] = b.splitToColumns(right, b.splitAt(25));

@@ -190,20 +190,26 @@ export function containerItem(width: Extent, block: Block, halign: HAlign, valig
   }
 }
 
-export function gapItem(size: number, opt?: {
-  block?: Block,
-  halign?: HAlign,
-  valign?: VAlign
-}): RowItem {
-  return containerItem({ kind: "fixed", value: size }, opt?.block, opt?.halign, opt?.valign);
+export function gapItem(size: number): RowItem {
+  return {
+    width: { kind: "fixed", value: size },
+    render: () => {},
+  }
 }
 
-export function expanderItem(opt?: {
-  block?: Block,
-  halign?: HAlign,
-  valign?: VAlign
-}): RowItem {
-  return containerItem({ kind: "expand" }, opt?.block, opt?.halign, opt?.valign);
+export function gapContainerItem(size: number, block: Block, halign: HAlign, valign: VAlign): RowItem {
+  return containerItem({ kind: "fixed", value: size }, block, halign, valign);
+}
+
+export function expanderItem(): RowItem {
+  return { 
+    width: { kind: "expand" }, 
+    render: () => {} 
+  };
+}
+
+export function expanderContainerItem(block: Block, halign: HAlign, valign: VAlign): RowItem {
+  return containerItem({ kind: "expand" }, block, halign, valign);
 }
 
 // Row blocks //////////////////////////////////////////////////////////////////////////////
