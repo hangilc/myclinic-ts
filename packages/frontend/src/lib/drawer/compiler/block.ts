@@ -248,6 +248,16 @@ export function expanderContainerItem(block: Block, halign: HAlign, valign: VAli
   return containerItem({ kind: "expand" }, block, halign, valign);
 }
 
+export function squareItem(size: number, opt?: { pen?: string }): RowItem {
+  return {
+    width: fixedExtent(size),
+    render: (ctx: DrawerContext, box: Box) => {
+      const block = squareBlock(size, opt);
+      putIn(ctx, block, box, "center", "center");
+    }
+  }
+}
+
 // Row blocks //////////////////////////////////////////////////////////////////////////////
 
 export function justifiedText(ctx: DrawerContext, text: string, width: number, font?: string): Block {
