@@ -8,6 +8,7 @@ import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
 import type { RowItem } from "../../compiler/block";
+import { drawPharmacy } from "../shohousen/pharmacy";
 
 export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const ctx = mkDrawerContext();
@@ -122,6 +123,8 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
   drawDrugs(ctx, drugs);
   drawBikou(ctx, bikou);
   drawKaisuu(ctx, kaisuu);
+  drawIssueDate(ctx, issueDate);
+  drawPharma(ctx, pharma);
 }
 
 function drawPatientBox(ctx: DrawerContext, box: Box) {
@@ -472,4 +475,26 @@ function dateItems(ctx: DrawerContext): RowItem[] {
     blk.gapItem(gap),
     blk.textItem(ctx, "日"),
   ]
+}
+
+function drawIssueDate(ctx: DrawerContext, box: Box) {
+  const cols = b.splitToColumns(box, b.splitAt(25, 67, 98));
+  cols.forEach(col => c.frame(ctx, col));
+  c.drawText(ctx, "調剤炭年月日", cols[0], "center", "center");
+  { // cols[1]
+    const block = blk.rowBlock(c.currentFontSize(ctx), [
+      blk.textItem(ctx, "令和"),
+      blk.expanderItem(),
+      blk.textItem(ctx, "年"),
+      blk.expanderItem(),
+      blk.textItem(ctx, "月"),
+      blk.expanderItem(),
+      blk.textItem(ctx, "日"),
+    ], 27);
+    blk.putIn(ctx, block, cols[1], "center", "center");
+  }
+  c.drawText(ctx, "公費負担者番号", cols[2], "center", "center");
+}
+
+function drawPharma(ctx: DrawerContext, box: Box) {
 }
