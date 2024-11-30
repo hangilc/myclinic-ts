@@ -7,6 +7,7 @@ import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
+import type { RowItem } from "../../compiler/block";
 
 export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const ctx = mkDrawerContext();
@@ -410,4 +411,65 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
       c.drawText(ctx, "調剤実施回数（調剤回数に応じて、□に「レ」又は「×」を記載するとともに、調剤日及び次回調剤予定日を記載すること。）", bb,  "left", "center");
     })
   }
+  const font = "f2.3";
+  { // rows[1]
+    const block = blk.rowBlock(c.currentFontSize(ctx), [
+      blk.advanceToItem(5),
+      blk.squareItem(2, { pen: "thin"}),
+      blk.advanceToItem(7),
+      blk.textItem(ctx, "１回目調剤日（", { font }),
+      blk.gapItem(3),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+      blk.advanceToItem(50),
+      blk.squareItem(2, { pen: "thin"}),
+      blk.advanceToItem(52),
+      blk.textItem(ctx, "２回目調剤日（", { font }),
+      blk.gapItem(3),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+      blk.advanceToItem(97),
+      blk.squareItem(2, { pen: "thin"}),
+      blk.advanceToItem(99),
+      blk.textItem(ctx, "３回目調剤日（", { font }),
+      blk.gapItem(3),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+    ]);
+    blk.putIn(ctx, block, rows[1], "left", "center");
+  }
+  { // rows[2]
+    const block = blk.rowBlock(c.currentFontSize(ctx), [
+      blk.advanceToItem(7),
+      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.gapItem(0.7),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+      blk.advanceToItem(52),
+      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.gapItem(0.7),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+    ]);
+    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), "left", "center");
+  }
+}
+
+function dateItems(ctx: DrawerContext): RowItem[] {
+  let gap = 0.5;
+  let width = 2.5;
+  return [
+    blk.gapItem(gap),
+    blk.gapItem(width),
+    blk.gapItem(gap),
+    blk.textItem(ctx, "年"),
+    blk.gapItem(gap),
+    blk.gapItem(width),
+    blk.gapItem(gap),
+    blk.textItem(ctx, "月"),
+    blk.gapItem(gap),
+    blk.gapItem(width),
+    blk.gapItem(gap),
+    blk.textItem(ctx, "日"),
+  ]
 }

@@ -147,6 +147,10 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
       const extra = advanceTo - pos;
       const expandSize = extra / expands.length;
       expands.forEach(exp => exp.size = expandSize);
+    } else {
+      if( advanceTo != undefined ){
+        result[result.length-1].size = advanceTo - pos;
+      }
     }
     if (advanceTo != undefined) {
       pos = advanceTo;
@@ -186,6 +190,7 @@ export interface RowItem {
 
 export function rowBlock(height: number, items: RowItem[], maxWidth?: number): Block {
   const ws: number[] = resolveExtent(items.map(item => item.width), maxWidth);
+  console.log("ws", ws, items);
   if (!(items.length === ws.length)) {
     throw new Error("inconsistent ext result");
   }
@@ -219,9 +224,7 @@ export function containerItem(width: Extent, block: Block, halign: HAlign, valig
   return {
     width,
     render: (ctx: DrawerContext, box: Box) => {
-      if (block) {
-        putIn(ctx, block, box, halign, valign);
-      }
+      putIn(ctx, block, box, halign, valign);
     }
   }
 }
@@ -246,6 +249,14 @@ export function expanderItem(): RowItem {
 
 export function expanderContainerItem(block: Block, halign: HAlign, valign: VAlign): RowItem {
   return containerItem({ kind: "expand" }, block, halign, valign);
+}
+
+export function advanceToItem(at: number): RowItem {
+  return { width: advanceToExtent(at), render: () => { } };
+}
+
+export function advanceToContainerItem(at: number, block: Block, halign: HAlign, valign: VAlign): RowItem {
+  return containerItem(advanceToExtent(at), block, halign, valign);
 }
 
 export function squareItem(size: number, opt?: { pen?: string }): RowItem {
