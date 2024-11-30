@@ -14,7 +14,11 @@ export function textBlock(ctx: DrawerContext, text: string, font?: string): Bloc
   return {
     width: font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text),
     height: font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx),
-    render: (ctx: DrawerContext, box: Box) => c.drawText(ctx, text, box, "left", "top"),
+    render: (ctx: DrawerContext, box: Box) => {
+      c.withFont(ctx, font, () => {
+        c.drawText(ctx, text, box, "left", "top");
+      })
+    }
   }
 }
 
@@ -62,6 +66,26 @@ export function stackedBlock(blocks: Block[], halign: HAlign, opt?: { leading?: 
   }
 }
 
+export function setHeight(block: Block, height: number, valign: VAlign): Block {
+  return {
+    width: block.width,
+    height,
+    render: (ctx: DrawerContext, box: Box) => {
+      putIn(ctx, block, box, "left", valign);
+    }
+  }
+}
+
+export function squareBlock(size: number, opt?: { pen?: string }): Block {
+  return {
+    width: size,
+    height: size,
+    render: (ctx: DrawerContext, box: Box) => {
+      c.withPen(ctx, opt?.pen, () => c.frame(ctx, box));
+    }
+  }
+}
+
 // Extent ////////////////////////////////////////////////////////////////////////////////////
 
 export type Extent = {
@@ -72,6 +96,18 @@ export type Extent = {
 } | {
   kind: "advance-to";
   at: number;
+}
+
+export function fixedExtent(value: number): Extent {
+  return { kind: "fixed", value };
+}
+
+export function expandExtent(): Extent {
+  return { kind: "expand" };
+}
+
+export function advanceToExtent(at: number): Extent {
+  return { kind: "advance-to", at };
 }
 
 function resolveExtent(exts: Extent[], maxSize?: number): number[] {
@@ -193,7 +229,7 @@ export function containerItem(width: Extent, block: Block, halign: HAlign, valig
 export function gapItem(size: number): RowItem {
   return {
     width: { kind: "fixed", value: size },
-    render: () => {},
+    render: () => { },
   }
 }
 
@@ -202,9 +238,9 @@ export function gapContainerItem(size: number, block: Block, halign: HAlign, val
 }
 
 export function expanderItem(): RowItem {
-  return { 
-    width: { kind: "expand" }, 
-    render: () => {} 
+  return {
+    width: { kind: "expand" },
+    render: () => { }
   };
 }
 
