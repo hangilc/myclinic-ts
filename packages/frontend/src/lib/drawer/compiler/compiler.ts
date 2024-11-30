@@ -921,7 +921,6 @@ export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) 
 
 export function withFont<T>(ctx: DrawerContext, fontName: string | undefined, f: () => T) {
   if (fontName) {
-
     const save = getCurrentFont(ctx);
     try {
       setFont(ctx, fontName);

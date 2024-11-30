@@ -7,8 +7,7 @@ import * as r from "../../compiler/render";
 import * as w from "./widgets";
 import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
-import { justifiedText } from "./widgets";
-import { drawReceipt } from "../receipt/receipt-drawer";
+import * as blk from "../../compiler/block";
 
 export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const ctx = mkDrawerContext();
@@ -43,7 +42,7 @@ function initPen(ctx: DrawerContext) {
 }
 
 function drawTitle(ctx: DrawerContext, box: Box) {
-  const block = justifiedText(ctx, "処方箋", box, { font: "f4" });
+  const block = blk.justifiedText(ctx, "処方箋", b.width(box), "f4");
   r.putIn(ctx, block, box, { halign: "center", valign: "center" });
 }
 
@@ -96,10 +95,10 @@ function drawUpperBox(ctx: DrawerContext, box: Box) {
     { // cell4
       const [c1, c2] = b.splitToColumns(cell4, r.splitByExtent(["*", cellSize * 8]));
       c.frameRight(ctx, c1);
-      const block = r.paragraph(ctx, [
-        r.mkTextBlock(ctx, "被保険者証・被保険",),
-        r.mkTextBlock(ctx, "者手帳の記号・番号",),
-      ]);
+      const block = blk.stackedBlock([
+        blk.textBlock(ctx, "被保険者証・被保険"),
+        blk.textBlock(ctx, "者手帳の記号・番号"),
+      ], "left");
       r.putIn(ctx, block, c1, { halign: "center", valign: "center" });
       let rows = b.splitToColumns(c2, b.evenSplitter(8));
       [1, 3, 6].forEach(i => c.frameRight(ctx, rows[i]));
@@ -119,8 +118,8 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
     drawPatientBox(ctx, col1);
     drawClinicBox(ctx, col2);
   }
-  drawIssueBox(ctx, block2);
-  drawDrugs(ctx, drugs);
+  // drawIssueBox(ctx, block2);
+  // drawDrugs(ctx, drugs);
 }
 
 function drawPatientBox(ctx: DrawerContext, box: Box) {
@@ -154,21 +153,21 @@ function drawPatientBox(ctx: DrawerContext, box: Box) {
       }
       { // col2
         const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
-        const line = r.line(ctx, [
-          w.gap(2.5),
-          w.gap(1),
-          w.text("年"),
-          w.gap(1), w.gap(2.5), w.gap(1), w.text("月"),
-          w.gap(1), w.gap(2.5), w.gap(1), w.text("日"),
+        const line = blk.rowBlock(c.currentFontSize(ctx), [
+          blk.gapItem(2.5),
+          blk.gapItem(1),
+          blk.textItem(ctx, "年"),
+          blk.gapItem(1), blk.gapItem(2.5), blk.gapItem(1), blk.textItem(ctx, "月"),
+          blk.gapItem(1), blk.gapItem(2.5), blk.gapItem(1), blk.textItem(ctx, "日"),
         ]);
         r.putIn(ctx, line, box, { halign: "right" });
       }
       { // col3
         const box = b.modify(col3, b.setHeight(2.5, "center"));
-        const line = r.line(ctx, [
-          w.text("男"),
-          w.text("・"),
-          w.text("女"),
+        const line = blk.rowBlock(c.currentFontSize(ctx), [
+          blk.textItem(ctx, "男"),
+          blk.textItem(ctx, "・"),
+          blk.textItem(ctx, "女"),
         ]);
         r.putIn(ctx, line, box, { halign: "center" });
       }
@@ -185,36 +184,47 @@ function drawPatientBox(ctx: DrawerContext, box: Box) {
   }
 }
 
+function inkan(size: number, opt?: { font?: string, pen?: string }): blk.Block {
+  const font = opt?.font ?? "f1.5";
+  const pen = opt?.pen ?? "thin";
+  return {
+    width: size,
+    height: size,
+    render: (ctx: DrawerContext, box: Box) => {
+      c.withFont(ctx, font, () => {
+        c.drawText(ctx, "印", box, "center", "center");
+      });
+      c.withPen(ctx, pen, () => {
+        c.circle(ctx, b.cx(box), b.cy(box), size * 0.5);
+      });
+    }
+  }
+}
+
 function drawClinicBox(ctx: DrawerContext, box: Box) {
   box = b.modify(box, b.shrinkHoriz(2, 0));
   const [address, name, kikancode] = b.splitToRows(box, b.splitAt(10, 23));
   { // address
     let [left, right] = b.splitToColumns(address, b.splitAt(22));
-    const para = r.paragraph(ctx, [
-      r.mkTextBlock(ctx, "保険医療機関の"),
-      r.mkTextBlock(ctx, "所在地及び名称"),
-    ]);
-    r.putIn(ctx, para, left, { halign: "center", valign: "center" });
-    const width = para.width;
+    const para = blk.stackedBlock([
+      blk.textBlock(ctx, "保険医療機関の"),
+      blk.textBlock(ctx, "所在地及び名称"),
+    ], "left");
+    blk.putIn(ctx, para, left, { halign: "center", valign: "center" });
     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
       {
         [left, right] = b.splitToColumns(upper, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
-        let label = w.justifiedText(ctx, "電話番号", labelBox);
-        r.putIn(ctx, label, left, { halign: "center", valign: "center" });
+        let label = blk.justifiedText(ctx, "電話番号", b.width(labelBox));
+        blk.putIn(ctx, label, left, { halign: "center", valign: "center" });
       }
       {
         [left, right] = b.splitToColumns(lower, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
-        let label = w.justifiedText(ctx, "保険医氏名", labelBox);
-        r.putIn(ctx, label, left, { halign: "center", valign: "center" });
+        let label = blk.justifiedText(ctx, "保険医氏名", b.width(labelBox));
+        blk.putIn(ctx, label, left, { halign: "center", valign: "center" });
         const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
-        c.withFont(ctx, "f1.5", () => {
-          c.drawText(ctx, "印", stampBox, "center", "center");
-        });
-        c.withPen(ctx, "thin", () => {
-          c.circle(ctx, b.cx(stampBox), b.cy(stampBox), 2.5 * 0.5);
-        })
+        blk.putIn(ctx, inkan(2.5), stampBox, { halign: "center", valign: "center"});
       }
     });
   }
@@ -228,11 +238,11 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
   [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(box => c.frameRight(ctx, box));
   c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
   {
-    const para = r.paragraph(ctx, [
-      r.mkTextBlock(ctx, "点数表"),
-      r.mkTextBlock(ctx, "番号"),
-    ], { halign: "center" });
-    r.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center" });
+    const para = blk.stackedBlock([
+      blk.textBlock(ctx, "点数表"),
+      blk.textBlock(ctx, "番号"),
+    ], "center");
+    blk.putIn(ctx, para, tensuuLabel, { halign: "center", valign: "center" });
   }
   {
     const para = r.paragraph(ctx, [
