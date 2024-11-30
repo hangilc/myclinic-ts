@@ -120,6 +120,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box) {
   drawIssueBox(ctx, block2);
   drawDrugs(ctx, drugs);
   drawBikou(ctx, bikou);
+  drawKaisuu(ctx, kaisuu);
 }
 
 function drawPatientBox(ctx: DrawerContext, box: Box) {
@@ -398,5 +399,15 @@ function drawBikou(ctx: DrawerContext, box: Box) {
       blk.textItem(ctx, "保険医療機関へ情報提供"),
     ]);
     blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), "left", "center");
+  }
+}
+
+function drawKaisuu(ctx: DrawerContext, box: Box) {
+  const rows = b.splitToRows(box, b.evenSplitter(3));
+  { // rows[0]
+    const bb = b.modify(rows[0], b.shrinkHoriz(2.5, 0));
+    c.withFont(ctx, "f2.3", () => {
+      c.drawText(ctx, "調剤実施回数（調剤回数に応じて、□に「レ」又は「×」を記載するとともに、調剤日及び次回調剤予定日を記載すること。）", bb,  "left", "center");
+    })
   }
 }
