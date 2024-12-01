@@ -88,7 +88,11 @@ export function squareBlock(size: number, opt?: { pen?: string }): Block {
 
 // Extent ////////////////////////////////////////////////////////////////////////////////////
 
-export type Extent = {
+export type ExtentOpt = {
+  extentCallback?: (left: number, right: number) => void;
+}
+
+export type Extent = ({
   kind: "fixed";
   value: number;
 } | {
@@ -96,7 +100,7 @@ export type Extent = {
 } | {
   kind: "advance-to";
   at: number;
-}
+}) & ExtentOpt
 
 export function fixedExtent(value: number): Extent {
   return { kind: "fixed", value };
@@ -121,21 +125,21 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
     }
   });
   chunks.push({ exts: curChunk, advanceTo: maxSize });
-  const result: { size: number }[] = [];
+  const result: { size: number, callback?: (left: number, right: number) => void }[] = [];
   let pos = 0;
   chunks.forEach(chunk => {
     const advanceTo = chunk.advanceTo;
     const expands: { size: number }[] = [];
     chunk.exts.forEach(ext => {
       if (ext.kind === "fixed") {
-        result.push({ size: ext.value });
+        result.push({ size: ext.value, callback: ext.extentCallback });
         pos += ext.value;
       } else if (ext.kind === "expand") {
-        const item = { size: 0 };
+        const item = { size: 0, callback: ext.extentCallback };
         result.push(item);
         expands.push(item);
       } else if (ext.kind === "advance-to") {
-        result.push({ size: 0 });
+        result.push({ size: 0, callback: ext.extentCallback });
       } else {
         throw new Error("unhandled extent");
       }
@@ -148,13 +152,21 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
       const expandSize = extra / expands.length;
       expands.forEach(exp => exp.size = expandSize);
     } else {
-      if( advanceTo != undefined ){
-        result[result.length-1].size = advanceTo - pos;
+      if (advanceTo != undefined) {
+        result[result.length - 1].size = advanceTo - pos;
       }
     }
     if (advanceTo != undefined) {
       pos = advanceTo;
     }
+  });
+  pos = 0;
+  result.forEach(r => {
+    const right = pos + r.size;
+    if( r.callback ){
+      r.callback(pos, right);
+    }
+    pos = right;
   })
   return result.map(r => r.size);
 }
@@ -183,14 +195,13 @@ export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
 
 // RowBlock ////////////////////////////////////////////////////////////////////////////
 
-export interface RowItem {
+export type RowItem = {
   width: Extent;
   render: (ctx: DrawerContext, box: Box) => void;
-}
+} & ExtentOpt;
 
 export function rowBlock(height: number, items: RowItem[], maxWidth?: number): Block {
   const ws: number[] = resolveExtent(items.map(item => item.width), maxWidth);
-  console.log("ws", ws, items);
   if (!(items.length === ws.length)) {
     throw new Error("inconsistent ext result");
   }
@@ -229,9 +240,9 @@ export function containerItem(width: Extent, block: Block, halign: HAlign, valig
   }
 }
 
-export function gapItem(size: number): RowItem {
+export function gapItem(size: number, opt?: ExtentOpt): RowItem {
   return {
-    width: { kind: "fixed", value: size },
+    width: { kind: "fixed", value: size, ...opt },
     render: () => { },
   }
 }

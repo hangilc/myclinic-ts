@@ -415,20 +415,37 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
     })
   }
   const font = "f2.3";
+  let tab1: number = 0;
+  let tab2: number = 0;
+  { // rows[2]
+    const block = blk.rowBlock(c.currentFontSize(ctx), [
+      blk.advanceToItem(7),
+      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.gapItem(0.7, { extentCallback: (_, right) => tab1 = right }),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+      blk.advanceToItem(52),
+      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.gapItem(0.7, { extentCallback: (_, right) => tab2 = right }),
+      ...dateItems(ctx),
+      blk.textItem(ctx, "）", { font }),
+    ]);
+    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), "left", "center");
+  }
   { // rows[1]
     const block = blk.rowBlock(c.currentFontSize(ctx), [
       blk.advanceToItem(5),
       blk.squareItem(2, { pen: "thin"}),
       blk.advanceToItem(7),
       blk.textItem(ctx, "１回目調剤日（", { font }),
-      blk.gapItem(3),
+      blk.advanceToItem(tab1),
       ...dateItems(ctx),
       blk.textItem(ctx, "）", { font }),
       blk.advanceToItem(50),
       blk.squareItem(2, { pen: "thin"}),
       blk.advanceToItem(52),
       blk.textItem(ctx, "２回目調剤日（", { font }),
-      blk.gapItem(3),
+      blk.advanceToItem(tab2),
       ...dateItems(ctx),
       blk.textItem(ctx, "）", { font }),
       blk.advanceToItem(97),
@@ -440,21 +457,6 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
       blk.textItem(ctx, "）", { font }),
     ]);
     blk.putIn(ctx, block, rows[1], "left", "center");
-  }
-  { // rows[2]
-    const block = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.advanceToItem(7),
-      blk.textItem(ctx, "次回調剤予定日（", { font }),
-      blk.gapItem(0.7),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
-      blk.advanceToItem(52),
-      blk.textItem(ctx, "次回調剤予定日（", { font }),
-      blk.gapItem(0.7),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
-    ]);
-    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), "left", "center");
   }
 }
 
