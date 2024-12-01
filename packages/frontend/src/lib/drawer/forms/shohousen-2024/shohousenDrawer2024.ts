@@ -8,7 +8,6 @@ import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
 import type { RowItem } from "../../compiler/block";
-import { drawPharmacy } from "../shohousen/pharmacy";
 
 export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const ctx = mkDrawerContext();
@@ -27,6 +26,7 @@ export function drawShohousen2024(data: ShohousenData2024): Op[] {
   const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
   drawUpperBox(ctx, upperBox);
   drawLowerBox(ctx, lowerBox);
+  drawTrail(ctx, b.modify(box, b.flipDown(), b.setHeight(10, "top"), b.shiftDown(0.5)));
   return c.getOps(ctx);
 }
 
@@ -34,6 +34,7 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "f4", "MS Mincho", 4);
   c.createFont(ctx, "f2.5", "MS Mincho", 2.5);
   c.createFont(ctx, "f2.3", "MS Mincho", 2.3);
+  c.createFont(ctx, "f1.8", "MS Mincho", 1.8);
   c.createFont(ctx, "f1.5", "MS Mincho", 1.5);
 }
 
@@ -408,7 +409,8 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
   { // rows[0]
     const bb = b.modify(rows[0], b.shrinkHoriz(2.5, 0));
     c.withFont(ctx, "f2.3", () => {
-      c.drawText(ctx, "調剤実施回数（調剤回数に応じて、□に「レ」又は「×」を記載するとともに、調剤日及び次回調剤予定日を記載すること。）", bb, "left", "center");
+      c.drawText(ctx, "調剤実施回数（調剤回数に応じて、□に「レ」又は「×」を記載するとともに、調剤日及び次回調剤予定日を記載すること。）",
+        bb, "left", "center");
     })
   }
   const font = "f2.3";
@@ -521,4 +523,31 @@ function drawPharma(ctx: DrawerContext, box: Box) {
     const block = blk.stackedBlock([upper, lower], "left", { leading: 0.5 });
     blk.putIn(ctx, block, c3, "center", "center");
   }
+}
+
+function drawTrail(ctx: DrawerContext, box: Box) {
+  const tab = 6;
+  c.withFont(ctx, "f1.8", () => {
+    blk.stackedBlock([
+      blk.rowBlock(c.currentFontSize(ctx), [
+        blk.gapItem(0.5),
+        blk.textItem(ctx, "備考"),
+        blk.advanceToItem(tab),
+        blk.textItem(ctx, "１．「処方」欄には、薬名、分量、用法及び用量を記載すること。")
+      ]),
+      blk.rowBlock(c.currentFontSize(ctx), [
+        blk.advanceToItem(tab),
+        blk.textItem(ctx, "２．この用紙は、Ａ列５番を標準とすること。")
+      ]),
+      blk.rowBlock(c.currentFontSize(ctx), [
+        blk.advanceToItem(tab),
+        blk.textItem(ctx, "３．療養の給付及び公費負担医療に関する費用の請求に関する命令（昭和51年厚生省令第36号）第１条の公費負担医療については、「保健医療機関」とある")
+      ]),
+      blk.rowBlock(c.currentFontSize(ctx), [
+        blk.advanceToItem(tab),
+        blk.gapItem(2.5),
+        blk.textItem(ctx, "のは「公費負担医療の担当医療機関」と、「保険医氏名」とあるのは「公費負担医療の担当医氏名」と読み替えるものとすること。"),
+      ]),
+    ], "left").render(ctx, box);
+  })
 }
