@@ -89,7 +89,7 @@ export function squareBlock(size: number, opt?: { pen?: string }): Block {
 // Extent ////////////////////////////////////////////////////////////////////////////////////
 
 export type ExtentOpt = {
-  extentCallback?: (left: number, right: number) => void;
+  callback?: (left: number, right: number) => void;
 }
 
 export type Extent = ({
@@ -132,14 +132,14 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
     const expands: { size: number }[] = [];
     chunk.exts.forEach(ext => {
       if (ext.kind === "fixed") {
-        result.push({ size: ext.value, callback: ext.extentCallback });
+        result.push({ size: ext.value, callback: ext.callback });
         pos += ext.value;
       } else if (ext.kind === "expand") {
-        const item = { size: 0, callback: ext.extentCallback };
+        const item = { size: 0, callback: ext.callback };
         result.push(item);
         expands.push(item);
       } else if (ext.kind === "advance-to") {
-        result.push({ size: 0, callback: ext.extentCallback });
+        result.push({ size: 0, callback: ext.callback });
       } else {
         throw new Error("unhandled extent");
       }
@@ -198,7 +198,7 @@ export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
 export type RowItem = {
   width: Extent;
   render: (ctx: DrawerContext, box: Box) => void;
-} & ExtentOpt;
+};
 
 export function rowBlock(height: number, items: RowItem[], maxWidth?: number): Block {
   const ws: number[] = resolveExtent(items.map(item => item.width), maxWidth);
@@ -221,7 +221,17 @@ export function rowBlock(height: number, items: RowItem[], maxWidth?: number): B
   }
 }
 
-export function textItem(ctx: DrawerContext, text: string, opt?: { valign?: VAlign, font?: string }): RowItem {
+export type ContainerItemOpt = {
+  halign?: HAlign;
+  valign?: VAlign;
+}
+
+export type TextItemOpt = {
+  font?: string;
+  valign?: VAlign;
+}
+
+export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
   const block = textBlock(ctx, text, opt?.font);
   return {
     width: { kind: "fixed", value: block.width },
@@ -231,24 +241,24 @@ export function textItem(ctx: DrawerContext, text: string, opt?: { valign?: VAli
   }
 }
 
-export function containerItem(width: Extent, block: Block, halign: HAlign, valign: VAlign): RowItem {
+export function containerItem(width: Extent, block: Block, opt?: ContainerItemOpt): RowItem {
   return {
     width,
     render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, halign, valign);
+      putIn(ctx, block, box, opt?.halign ?? "left", opt?.valign ?? "top");
     }
   }
 }
 
-export function gapItem(size: number, opt?: ExtentOpt): RowItem {
+export function gapItem(size: number, opt?: { extentOpt?: ExtentOpt }): RowItem {
   return {
-    width: { kind: "fixed", value: size, ...opt },
+    width: { kind: "fixed", value: size, ...opt?.extentOpt },
     render: () => { },
   }
 }
 
-export function gapContainerItem(size: number, block: Block, halign: HAlign, valign: VAlign): RowItem {
-  return containerItem({ kind: "fixed", value: size }, block, halign, valign);
+export function gapContainerItem(size: number, block: Block, opt?: ContainerItemOpt): RowItem {
+  return containerItem({ kind: "fixed", value: size }, block, opt);
 }
 
 export function expanderItem(): RowItem {
@@ -258,16 +268,16 @@ export function expanderItem(): RowItem {
   };
 }
 
-export function expanderContainerItem(block: Block, halign: HAlign, valign: VAlign): RowItem {
-  return containerItem({ kind: "expand" }, block, halign, valign);
+export function expanderContainerItem(block: Block, opt?: ContainerItemOpt): RowItem {
+  return containerItem({ kind: "expand" }, block, opt);
 }
 
 export function advanceToItem(at: number): RowItem {
   return { width: advanceToExtent(at), render: () => { } };
 }
 
-export function advanceToContainerItem(at: number, block: Block, halign: HAlign, valign: VAlign): RowItem {
-  return containerItem(advanceToExtent(at), block, halign, valign);
+export function advanceToContainerItem(at: number, block: Block, opt?: ContainerItemOpt): RowItem {
+  return containerItem(advanceToExtent(at), block, opt);
 }
 
 export function squareItem(size: number, opt?: { pen?: string }): RowItem {
@@ -280,16 +290,50 @@ export function squareItem(size: number, opt?: { pen?: string }): RowItem {
   }
 }
 
+export function splitToChars(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem[] {
+  return Array.from(text).map(ch => textItem(ctx, ch, opt));
+}
+
+export function spacedItems(items: RowItem[], space: number): RowItem[] {
+  const rs: RowItem[] = [];
+  items.forEach((item, i) => {
+    if( i !== 0 ){
+      rs.push(gapItem(space));
+    }
+    rs.push(item);
+  })
+  return rs;
+}
+
+export function justifiedItems(items: RowItem[], width: number): RowItem[] {
+  const rs: RowItem[] = [];
+  items.forEach((item, i) => {
+    if( i !== 0 ){
+      rs.push(expanderItem());
+    }
+    rs.push(item);
+  })
+  return rs;
+}
+
+export function modifyItem(item: RowItem, ...fs: ((item: RowItem) => RowItem)[]): RowItem {
+  let i: RowItem = Object.assign({}, item);
+  fs.forEach(f => {
+    i = f(i);
+  });
+  return i;
+}
+
 // Row blocks //////////////////////////////////////////////////////////////////////////////
 
-export function justifiedText(ctx: DrawerContext, text: string, width: number, font?: string): Block {
-  const items: RowItem[] = [];
-  for (let i = 0; i < text.length; i++) {
-    if (i !== 0) {
-      items.push(expanderItem())
-    }
-    const c = text.charAt(i);
-    items.push(textItem(ctx, c, { font }));
-  }
+export function justifiedTextBlock(ctx: DrawerContext, text: string, width: number, font?: string): Block {
+  const chars = splitToChars(ctx, text, { font });
+  const items: RowItem[] = justifiedItems(chars, width);
   return rowBlock(c.resolveFontHeight(ctx, font), items, width);
+}
+
+export function spacedTextBlock(ctx: DrawerContext, text: string, space: number, font?: string): Block {
+  const chars = splitToChars(ctx, text, { font });
+  const items: RowItem[] = spacedItems(chars, space);
+  return rowBlock(c.resolveFontHeight(ctx, font), items);
 }
