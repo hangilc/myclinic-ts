@@ -40,7 +40,8 @@
       edaban: "01",
       futansha: "12345678",
       jukyuusha: "7654321",
-      shimei: "診療 太郎",
+      // shimei: "診療 太郎",
+      shimei: "ＢＯＲＮＡＬＥＳ‐ＬＡＲＡ ＥＭＥＬＤＡ　Ｍ．",
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

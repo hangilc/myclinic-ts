@@ -9,6 +9,7 @@ import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
 import type { Block, RowItem } from "../../compiler/block";
 import { pad } from "@/lib/pad";
+import type { Color } from "../../compiler/compiler";
 
 export function drawShohousen2024(data: Shohousen2024Data): Op[] {
   const ctx = mkDrawerContext();
@@ -39,6 +40,8 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "f1.8", "MS Mincho", 1.8);
   c.createFont(ctx, "f1.5", "MS Mincho", 1.5);
   c.createFont(ctx, "d6", "MS Gothic", 6);
+  c.createFont(ctx, "d4", "MS Gothic", 4);
+  c.createFont(ctx, "d3", "MS Gothic", 3);
   c.createFont(ctx, "d2.5", "MS Gothic", 2.5);
 }
 
@@ -179,6 +182,8 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   drawPharma(ctx, pharma);
 }
 
+const black: Color = { r: 0, g: 0, b: 0 };
+
 function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
   c.frameRight(ctx, mark);
@@ -189,9 +194,14 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
     c.frameRight(ctx, c1);
     c.drawText(ctx, "氏　名", c1, "center", "center");
-    blk.textPackBlock(ctx, data.shimei ?? "", c2, [
-
-    ]).render(ctx, c2);
+    blk.putIn(ctx,
+      blk.textPackBlock(ctx, data.shimei ?? "", c2, [
+        { textBlockOpt: { font: "d6", color: black }, stackedBlockOpt: { halign: "left" } },
+        { textBlockOpt: { font: "d4", color: black }, stackedBlockOpt: { halign: "left" } },
+        { textBlockOpt: { font: "d3", color: black }, stackedBlockOpt: { halign: "left" } },
+        { textBlockOpt: { font: "d2.5", color: black }, stackedBlockOpt: { halign: "left" } },
+      ]),
+      c2, "center", "center");
   }
   { // rows[1]
     const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
@@ -342,7 +352,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
     blk.putIn(ctx, blk.stackedBlock([
       blk.textBlock(ctx, "処方箋の"),
       blk.textBlock(ctx, "使用期間"),
-    ], "left"), label, "center", "center");
+    ], { halign: "left" }), label, "center", "center");
     const [issueLimit, comment] = b.splitToColumns(body, b.splitAt(24));
     const line = blk.rowBlock(c.currentFontSize(ctx), [
       blk.textItem(ctx, "令和"), blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "年"),
@@ -358,7 +368,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
         blk.textBlock(ctx, "を除き、交付の日を含"),
         blk.textBlock(ctx, "めて４日以内に保険薬"),
         blk.textBlock(ctx, "局に提出すること。"),
-      ], "left", { leading: 0.4 });
+      ], { halign: "left", leading: 0.4 });
       blk.putIn(ctx, para, cBody, "center", "center");
     });
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)), { pen: "thin" });
@@ -377,7 +387,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "変更不可"),
       blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), "center"),
-    ], "center");
+    ], { halign: "center" });
     blk.putIn(ctx, para, label, "center", "center");
   }
   {
@@ -394,7 +404,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
       blk.textBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
       blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
-    ], "left"), b.modify(cBody, b.shrinkHoriz(1, 0)), "left", "center")
+    ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), "left", "center")
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
   }
   {
@@ -427,7 +437,7 @@ function drawBikou(ctx: DrawerContext, box: Box) {
       const center = blk.stackedBlock([
         blk.textBlock(ctx, "「変更不可」蘭に「レ」又は「×」を記載", { font: "f2.3" }),
         blk.textBlock(ctx, "した場合は、署名又は記名・押印すること。", { font: "f2.3" }),
-      ], "left");
+      ], { halign: "left" });
       const row = blk.rowBlock(center.height, [
         {
           width: blk.fixedExtent(0.75),
@@ -571,14 +581,14 @@ function drawPharma(ctx: DrawerContext, box: Box) {
       top,
       blk.justifiedTextBlock(ctx, "及び名称", top.width, { textBlockOpt: { font } }),
       blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, { textBlockOpt: { font } }),
-    ], "center");
+    ], { halign: "center" });
     blk.putIn(ctx, label, c1, "center", "center");
   }
   blk.putIn(ctx, inkan(), b.modify(c2, b.shrinkHoriz(0, 4)), "right", "center");
   {
     const upper = blk.spacedTextBlock(ctx, "公費負担医療の", 0.8);
     const lower = blk.justifiedTextBlock(ctx, "受給者番号", upper.width);
-    const block = blk.stackedBlock([upper, lower], "left", { leading: 0.5 });
+    const block = blk.stackedBlock([upper, lower], { halign: "left", leading: 0.5 });
     blk.putIn(ctx, block, c3, "center", "center");
   }
 }
@@ -606,6 +616,6 @@ function drawTrail(ctx: DrawerContext, box: Box) {
         blk.gapItem(2.5),
         blk.textItem(ctx, "のは「公費負担医療の担当医療機関」と、「保険医氏名」とあるのは「公費負担医療の担当医氏名」と読み替えるものとすること。"),
       ]),
-    ], "left").render(ctx, box);
+    ], { halign: "left" }).render(ctx, box);
   })
 }

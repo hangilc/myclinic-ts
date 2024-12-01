@@ -357,7 +357,7 @@ export function spacedTextBlock(ctx: DrawerContext, text: string, space: number,
 }
 
 export interface TextPackBlockEnv {
-  textBlockOpt: TextBlockOpt;
+  textBlockOpt?: TextBlockOpt;
   stackedBlockOpt?: StackedBlockOpt;
 }
 
@@ -384,3 +384,4 @@ export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: 
     return stackedBlock(lines.map(line => textBlock(ctx, line, env.textBlockOpt)), env.stackedBlockOpt);
   }
 }
+
