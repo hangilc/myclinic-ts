@@ -1,19 +1,21 @@
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import type { Op } from "../../compiler/op";
-import type { ShohousenData2024 } from "./shohousenData2024";
+import type { Shohousen2024Data } from "./shohousenData2024";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
-import type { RowItem } from "../../compiler/block";
+import type { Block, RowItem } from "../../compiler/block";
+import { pad } from "@/lib/pad";
 
-export function drawShohousen2024(data: ShohousenData2024): Op[] {
+export function drawShohousen2024(data: Shohousen2024Data): Op[] {
   const ctx = mkDrawerContext();
   initFont(ctx);
   initPen(ctx);
   c.setFont(ctx, "f2.5");
+  c.setTextColor(ctx, 0, 255, 0);
   c.setPen(ctx, "default");
   const paper = b.mkBox(0, 0, A5.width, A5.height);
   const bounds = b.modify(paper, b.inset(3));
@@ -24,7 +26,7 @@ export function drawShohousen2024(data: ShohousenData2024): Op[] {
   });
   box = b.modify(bounds, b.inset(2, 13, 2, 13));
   const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
-  drawUpperBox(ctx, upperBox);
+  drawUpperBox(ctx, upperBox, data);
   drawLowerBox(ctx, lowerBox);
   drawTrail(ctx, b.modify(box, b.flipDown(), b.setHeight(10, "top"), b.shiftDown(0.5)));
   return c.getOps(ctx);
@@ -36,27 +38,67 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "f2.3", "MS Mincho", 2.3);
   c.createFont(ctx, "f1.8", "MS Mincho", 1.8);
   c.createFont(ctx, "f1.5", "MS Mincho", 1.5);
+  c.createFont(ctx, "d6", "MS Gothic", 6);
+  c.createFont(ctx, "d2.5", "MS Gothic", 2.5);
 }
 
 function initPen(ctx: DrawerContext) {
-  c.createPen(ctx, "default", 0, 0, 0, 0.25);
-  c.createPen(ctx, "thin", 40, 40, 40, 0.1);
+  c.createPen(ctx, "default", 0, 255, 0, 0.25);
+  c.createPen(ctx, "thin", 0, 255, 0, 0.1);
 }
 
 function drawTitle(ctx: DrawerContext, box: Box) {
-  const block = blk.justifiedTextBlock(ctx, "処方箋", b.width(box), "f4");
+  const block = blk.justifiedTextBlock(ctx, "処方箋", b.width(box), { textBlockOpt: { font: "f4" } });
   blk.putIn(ctx, block, box, "center", "center");
 }
 
-function drawEightDigits(ctx: DrawerContext, box: Box) {
+function drawEightDigits(ctx: DrawerContext, box: Box, bangou?: string) {
   let cols = b.splitToColumns(box, b.evenSplitter(8));
   [1, 3, 6].forEach(i => c.frameRight(ctx, cols[i]));
   c.withPen(ctx, "thin", () => {
     [0, 2, 4, 5].forEach(i => c.frameRight(ctx, cols[i]));
-  })
+  });
+  if (bangou !== undefined) {
+    withDataContext(ctx, "d6", () => {
+      const str = pad(bangou, 8, " ");
+      Array.from(str).forEach((ch, i) => {
+        c.drawText(ctx, ch, cols[i], "center", "center");
+      })
+    });
+  }
 }
 
-function drawUpperBox(ctx: DrawerContext, box: Box) {
+function drawSevenDigits(ctx: DrawerContext, box: Box, bangou?: string) {
+  let cols = b.splitToColumns(box, b.evenSplitter(7));
+  [2, 5].forEach(i => c.frameRight(ctx, cols[i]));
+  c.withPen(ctx, "thin", () => {
+    [0, 1, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
+  })
+  if (bangou !== undefined) {
+    withDataContext(ctx, "d6", () => {
+      const str = pad(bangou, 7, " ");
+      Array.from(str).forEach((ch, i) => {
+        c.drawText(ctx, ch, cols[i], "center", "center");
+      })
+    });
+  }
+}
+
+function withDataContext(ctx: DrawerContext, font: string, f: () => void) {
+  c.withFont(ctx, font, () => {
+    c.withTextColor(ctx, { r: 0, g: 0, b: 0 }, f);
+  });
+}
+
+function dataTextBlock(ctx: DrawerContext, text: string | undefined, font: string): Block {
+  if (text === undefined) {
+    return blk.emptyBlock();
+  } else {
+    return blk.textBlock(ctx, text, { font: font, color: { r: 0, g: 0, b: 0 } });
+  }
+}
+
+function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   c.frame(ctx, box);
   let [row1, row2] = b.splitToRows(box, b.evenSplitter(2));
   c.frameBottom(ctx, row1);
@@ -68,13 +110,13 @@ function drawUpperBox(ctx: DrawerContext, box: Box) {
       const [c1, c2] = b.splitToColumns(cell1, blk.splitByExtent(["*", cellSize * 8]));
       c.frameRight(ctx, c1);
       c.drawText(ctx, "公費負担者番号", c1, "center", "center");
-      drawEightDigits(ctx, c2);
+      drawEightDigits(ctx, c2, data.futansha);
     }
     { // cell2
       const [c1, c2] = b.splitToColumns(cell2, blk.splitByExtent(["*", cellSize * 8]));
       c.frameRight(ctx, c1);
       c.drawText(ctx, "保険者番号", c1, "center", "center");
-      drawEightDigits(ctx, c2);
+      drawEightDigits(ctx, c2, data.hokenshaBangou);
     }
   }
   { // lower row
@@ -88,11 +130,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box) {
         blk.textBlock(ctx, "の受給者番号",),
       ], "left");
       blk.putIn(ctx, block, c1, "center", "center");
-      let rows = b.splitToColumns(c2, b.evenSplitter(7));
-      [2, 5].forEach(i => c.frameRight(ctx, rows[i]));
-      c.withPen(ctx, "thin", () => {
-        [0, 1, 3, 4].forEach(i => c.frameRight(ctx, rows[i]));
-      })
+      drawSevenDigits(ctx, c2, data.jukyuusha);
     }
     { // cell4
       const [c1, c2] = b.splitToColumns(cell4, blk.splitByExtent(["*", cellSize * 8]));
@@ -102,13 +140,30 @@ function drawUpperBox(ctx: DrawerContext, box: Box) {
         blk.textBlock(ctx, "者手帳の記号・番号"),
       ], "left");
       blk.putIn(ctx, block, c1, "center", "center");
-      drawEightDigits(ctx, c2);
+      const hihokensha = blk.rowBlock(c.currentFontSize(ctx), [
+        blk.gapItem(1),
+        blk.expanderContainerItem(
+          dataTextBlock(ctx, data.hihokenshaKigou, "d2.5"), { halign: "center", valign: "center" }
+        ),
+        blk.textItem(ctx, "・"),
+        blk.expanderContainerItem(
+          dataTextBlock(ctx, data.hihokenshaBangou, "d2.5"), { halign: "center", valign: "center" }
+        ),
+        blk.textItem(ctx, "(枝番)"),
+        blk.gapContainerItem(3,
+          dataTextBlock(ctx, data.edaban, "d2.5"),
+          { halign: "center", valign: "center" }
+        ),
+        blk.gapItem(1),
+      ], b.width(c2));
+      blk.putIn(ctx, hihokensha, c2, "center", "center");
     }
   }
 }
 
 function drawLowerBox(ctx: DrawerContext, box: Box) {
-  const [block1, block2, drugs, bikou, kaisuu, issueDate, pharma] = b.splitToRows(box, blk.splitByExtent([33, 10, "*", 29, 13, 10, 10]));
+  const [block1, block2, drugs, bikou, kaisuu, issueDate, pharma] =
+    b.splitToRows(box, blk.splitByExtent([33, 10, "*", 29, 13, 10, 10]));
   { // block1
     const [col1, col2] = b.splitToColumns(block1, b.evenSplitter(2));
     c.frame(ctx, col1);
@@ -249,8 +304,8 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
   }
   {
     const para = blk.stackedBlock([
-      blk.textBlock(ctx, "医療機関", "f1.5"),
-      blk.textBlock(ctx, "コード", "f1.5"),
+      blk.textBlock(ctx, "医療機関", { font: "f1.5" }),
+      blk.textBlock(ctx, "コード", { font: "f1.5" }),
     ], "center");
     blk.putIn(ctx, para, kikanLabel, "center", "center");
   }
@@ -318,7 +373,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
     c.frameBottom(ctx, label);
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "変更不可"),
-      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", "f1.5"), c.currentFontSize(ctx), "center"),
+      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), "center"),
     ], "center");
     blk.putIn(ctx, para, label, "center", "center");
   }
@@ -367,8 +422,8 @@ function drawBikou(ctx: DrawerContext, box: Box) {
       const [left, right] = b.splitToColumns(label, b.splitAt(21));
       c.drawText(ctx, "保険医署名", left, "center", "center");
       const center = blk.stackedBlock([
-        blk.textBlock(ctx, "「変更不可」蘭に「レ」又は「×」を記載", "f2.3"),
-        blk.textBlock(ctx, "した場合は、署名又は記名・押印すること。", "f2.3"),
+        blk.textBlock(ctx, "「変更不可」蘭に「レ」又は「×」を記載", { font: "f2.3" }),
+        blk.textBlock(ctx, "した場合は、署名又は記名・押印すること。", { font: "f2.3" }),
       ], "left");
       const row = blk.rowBlock(center.height, [
         {
@@ -419,15 +474,15 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
   { // rows[2]
     const block = blk.rowBlock(c.currentFontSize(ctx), [
       blk.advanceToItem(7),
-      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.textItem(ctx, "次回調剤予定日（", { textBlockOpt: { font } }),
       blk.gapItem(0.7, { extentOpt: { callback: (_, right) => tab1 = right } }),
       ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
+      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
       blk.advanceToItem(52),
-      blk.textItem(ctx, "次回調剤予定日（", { font }),
+      blk.textItem(ctx, "次回調剤予定日（", { textBlockOpt: { font } }),
       blk.gapItem(0.7, { extentOpt: { callback: (_, right) => tab2 = right } }),
       ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
+      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
     ]);
     blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), "left", "center");
   }
@@ -436,24 +491,24 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
       blk.advanceToItem(5),
       blk.squareItem(2, { pen: "thin" }),
       blk.advanceToItem(7),
-      blk.textItem(ctx, "１回目調剤日（", { font }),
+      blk.textItem(ctx, "１回目調剤日（", { textBlockOpt: { font } }),
       blk.advanceToItem(tab1),
       ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
+      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
       blk.advanceToItem(50),
       blk.squareItem(2, { pen: "thin" }),
       blk.advanceToItem(52),
-      blk.textItem(ctx, "２回目調剤日（", { font }),
+      blk.textItem(ctx, "２回目調剤日（", { textBlockOpt: { font } }),
       blk.advanceToItem(tab2),
       ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
+      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
       blk.advanceToItem(97),
       blk.squareItem(2, { pen: "thin" }),
       blk.advanceToItem(99),
-      blk.textItem(ctx, "３回目調剤日（", { font }),
+      blk.textItem(ctx, "３回目調剤日（", { textBlockOpt: { font } }),
       blk.gapItem(3),
       ...dateItems(ctx),
-      blk.textItem(ctx, "）", { font }),
+      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
     ]);
     blk.putIn(ctx, block, rows[1], "left", "center");
   }
@@ -508,11 +563,11 @@ function drawPharma(ctx: DrawerContext, box: Box) {
   [c1, c2, c3].forEach(col => c.frameRight(ctx, col));
   {
     const font = "f2.3";
-    const top = blk.textBlock(ctx, "保険薬局の所在地", font);
+    const top = blk.textBlock(ctx, "保険薬局の所在地", { font });
     const label = blk.stackedBlock([
       top,
-      blk.justifiedTextBlock(ctx, "及び名称", top.width, font),
-      blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, font),
+      blk.justifiedTextBlock(ctx, "及び名称", top.width, { textBlockOpt: { font } }),
+      blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, { textBlockOpt: { font } }),
     ], "center");
     blk.putIn(ctx, label, c1, "center", "center");
   }

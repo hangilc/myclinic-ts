@@ -949,6 +949,26 @@ export function withPen(ctx: DrawerContext, penName: string | undefined, f: () =
   }
 }
 
+export interface Color {
+  r: number;
+  g: number;
+  b: number;
+}
+
+export function withTextColor(ctx: DrawerContext, color: Color | undefined, f: () => void) {
+  if( color ){
+    const save = ctx.textColor;
+    try {
+      setTextColor(ctx, color.r, color.g, color.b);
+      f();
+    } finally {
+      setTextColor(ctx, save.r, save.g, save.b);
+    }
+  } else {
+    f();
+  }
+}
+
 export function withMark(ctx: DrawerContext, markName: string, f: (box: Box) => void,
   modifiers: Modifier[] = []) {
   let mark = getMark(ctx, markName);

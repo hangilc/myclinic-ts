@@ -3,6 +3,7 @@ import type { DrawerContext } from "./context";
 import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
+import type { Color } from "./compiler";
 
 export interface Block {
   width: number;
@@ -10,14 +11,22 @@ export interface Block {
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
-export function textBlock(ctx: DrawerContext, text: string, font?: string): Block {
+export interface TextBlockOpt {
+  font?: string;
+  color?: Color;
+}
+
+export function textBlock(ctx: DrawerContext, text: string, opt?: TextBlockOpt): Block {
+  const font = opt?.font;
   return {
     width: font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text),
     height: font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx),
     render: (ctx: DrawerContext, box: Box) => {
-      c.withFont(ctx, font, () => {
-        c.drawText(ctx, text, box, "left", "top");
-      })
+      c.withTextColor(ctx, opt?.color, () => {
+        c.withFont(ctx, font, () => {
+          c.drawText(ctx, text, box, "left", "top");
+        });
+      });
     }
   }
 }
@@ -163,7 +172,7 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
   pos = 0;
   result.forEach(r => {
     const right = pos + r.size;
-    if( r.callback ){
+    if (r.callback) {
       r.callback(pos, right);
     }
     pos = right;
@@ -227,12 +236,12 @@ export type ContainerItemOpt = {
 }
 
 export type TextItemOpt = {
-  font?: string;
   valign?: VAlign;
+  textBlockOpt?: TextBlockOpt;
 }
 
-export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
-  const block = textBlock(ctx, text, opt?.font);
+export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt ): RowItem {
+  const block = textBlock(ctx, text, opt?.textBlockOpt);
   return {
     width: { kind: "fixed", value: block.width },
     render: (ctx: DrawerContext, box: Box) => {
@@ -297,7 +306,7 @@ export function splitToChars(ctx: DrawerContext, text: string, opt?: TextItemOpt
 export function spacedItems(items: RowItem[], space: number): RowItem[] {
   const rs: RowItem[] = [];
   items.forEach((item, i) => {
-    if( i !== 0 ){
+    if (i !== 0) {
       rs.push(gapItem(space));
     }
     rs.push(item);
@@ -308,7 +317,7 @@ export function spacedItems(items: RowItem[], space: number): RowItem[] {
 export function justifiedItems(items: RowItem[], width: number): RowItem[] {
   const rs: RowItem[] = [];
   items.forEach((item, i) => {
-    if( i !== 0 ){
+    if (i !== 0) {
       rs.push(expanderItem());
     }
     rs.push(item);
@@ -326,14 +335,14 @@ export function modifyItem(item: RowItem, ...fs: ((item: RowItem) => RowItem)[])
 
 // Row blocks //////////////////////////////////////////////////////////////////////////////
 
-export function justifiedTextBlock(ctx: DrawerContext, text: string, width: number, font?: string): Block {
-  const chars = splitToChars(ctx, text, { font });
+export function justifiedTextBlock(ctx: DrawerContext, text: string, width: number, opt?: TextItemOpt): Block {
+  const chars = splitToChars(ctx, text, opt);
   const items: RowItem[] = justifiedItems(chars, width);
-  return rowBlock(c.resolveFontHeight(ctx, font), items, width);
+  return rowBlock(c.resolveFontHeight(ctx, opt?.textBlockOpt?.font), items, width);
 }
 
-export function spacedTextBlock(ctx: DrawerContext, text: string, space: number, font?: string): Block {
-  const chars = splitToChars(ctx, text, { font });
+export function spacedTextBlock(ctx: DrawerContext, text: string, space: number, opt?: TextItemOpt): Block {
+  const chars = splitToChars(ctx, text, opt);
   const items: RowItem[] = spacedItems(chars, space);
-  return rowBlock(c.resolveFontHeight(ctx, font), items);
+  return rowBlock(c.resolveFontHeight(ctx, opt?.textBlockOpt?.font), items);
 }

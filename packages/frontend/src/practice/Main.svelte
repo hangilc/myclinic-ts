@@ -20,7 +20,6 @@
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
   import { drawShohousen2024 } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import { A4, A5 } from "@/lib/drawer/compiler/paper-size";
 
   export let serviceStore: Writable<string>;
 
@@ -34,7 +33,14 @@
 
   /////////////////////////////////////////////////////////////////////////////////
   function testShohousen() {
-    const ops = drawShohousen2024({});
+    const ops = drawShohousen2024({
+      hokenshaBangou: "123456",
+      hihokenshaKigou: "12-56",
+      hihokenshaBangou: "324111",
+      edaban: "01",
+      futansha: "12345678",
+      jukyuusha: "7654321",
+    });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
