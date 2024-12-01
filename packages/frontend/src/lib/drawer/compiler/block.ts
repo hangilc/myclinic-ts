@@ -6,10 +6,30 @@ import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakLines } from "./break-lines";
 
+export type Renderer = (ctx: DrawerContext, box: Box) => void;
+
 export interface Block {
   width: number;
   height: number;
-  render: (ctx: DrawerContext, box: Box) => void;
+  render: Renderer;
+}
+
+export type BlockModifier = (block: Block) => Block;
+
+export function modify(block: Block, ...modifiers: BlockModifier[]): Block {
+  modifiers.forEach(f => block = f(block));
+  return block;
+}
+
+export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) => void ): BlockModifier {
+  return (block: Block) => {
+    let blk = Object.assign({}, block);
+    const orig = blk.render;
+    blk.render = (ctx: DrawerContext, box: Box) => {
+      return f(ctx, box, orig);
+    }
+    return blk;
+  }
 }
 
 export interface TextBlockOpt {
@@ -30,6 +50,22 @@ export function textBlock(ctx: DrawerContext, text: string, opt?: TextBlockOpt):
       });
     }
   }
+}
+
+export interface DrawTextOpt {
+  halign?: HAlign;
+  valign?: VAlign;
+  textBlockOpt?: TextBlockOpt;
+  modifier?: BlockModifier
+}
+
+export function drawText(ctx: DrawerContext, text: string, box: Box, opt?: DrawTextOpt) {
+  let block = textBlock(ctx, text);
+  if( opt?.modifier ){
+    block = modify(block, opt?.modifier);
+  }
+  const bb = b.align(boundsOfBlock(block), box, opt?.halign ?? "left", opt?.valign ?? "top");
+  block.render(ctx, bb);
 }
 
 export function emptyBlock(): Block {

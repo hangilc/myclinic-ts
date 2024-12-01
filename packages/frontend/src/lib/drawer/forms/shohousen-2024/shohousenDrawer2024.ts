@@ -7,9 +7,10 @@ import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
-import type { Block, RowItem } from "../../compiler/block";
+import type { Block, BlockModifier, Renderer, RowItem } from "../../compiler/block";
 import { pad } from "@/lib/pad";
 import type { Color } from "../../compiler/compiler";
+import { DateWrapper } from "myclinic-util";
 
 export function drawShohousen2024(data: Shohousen2024Data): Op[] {
   const ctx = mkDrawerContext();
@@ -40,6 +41,7 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "f1.8", "MS Mincho", 1.8);
   c.createFont(ctx, "f1.5", "MS Mincho", 1.5);
   c.createFont(ctx, "d6", "MS Gothic", 6);
+  c.createFont(ctx, "d5", "MS Gothic", 5);
   c.createFont(ctx, "d4", "MS Gothic", 4);
   c.createFont(ctx, "d3", "MS Gothic", 3);
   c.createFont(ctx, "d2.5", "MS Gothic", 2.5);
@@ -48,6 +50,7 @@ function initFont(ctx: DrawerContext) {
 function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "default", 0, 255, 0, 0.25);
   c.createPen(ctx, "thin", 0, 255, 0, 0.1);
+  c.createPen(ctx, "data-thin", 0, 0, 0, 0.1);
 }
 
 function drawTitle(ctx: DrawerContext, box: Box) {
@@ -184,6 +187,17 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 
 const black: Color = { r: 0, g: 0, b: 0 };
 
+function dataCirc(draw: boolean): BlockModifier {
+  return blk.extendRender((ctx: DrawerContext, box: Box, orig: Renderer) => {
+    orig(ctx, box);
+    if (draw) {
+      c.withPen(ctx, "data-thin", () => {
+        c.circle(ctx, b.cx(box), b.cy(box), b.height(box) * 0.7);
+      })
+    }
+  });
+}
+
 function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
   c.frameRight(ctx, mark);
@@ -196,7 +210,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     c.drawText(ctx, "氏　名", c1, "center", "center");
     blk.putIn(ctx,
       blk.textPackBlock(ctx, data.shimei ?? "", c2, [
-        { textBlockOpt: { font: "d6", color: black }, stackedBlockOpt: { halign: "left" } },
+        { textBlockOpt: { font: "d5", color: black }, stackedBlockOpt: { halign: "left" } },
         { textBlockOpt: { font: "d4", color: black }, stackedBlockOpt: { halign: "left" } },
         { textBlockOpt: { font: "d3", color: black }, stackedBlockOpt: { halign: "left" } },
         { textBlockOpt: { font: "d2.5", color: black }, stackedBlockOpt: { halign: "left" } },
@@ -209,26 +223,44 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     c.drawText(ctx, "生年月日", c1, "center", "center");
     const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
     c.frameRight(ctx, col2);
+    const bdate = data.birthdate ? DateWrapper.from(data.birthdate) : undefined;
     {
       { // cpl1
         const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
         const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
+        const gengou = bdate?.getGengou();
         c.withFont(ctx, "f1.5", () => {
-          c.drawText(ctx, "明", meiji, "center", "center");
-          c.drawText(ctx, "大", taisho, "center", "center");
-          c.drawText(ctx, "昭", shouwa, "center", "center");
-          c.drawText(ctx, "平", heisei, "center", "center");
-          c.drawText(ctx, "令", reiwa, "center", "center");
+          blk.drawText(ctx, "明", meiji, { halign: "center", valign: "center", modifier: dataCirc(gengou === "明治"), });
+          blk.drawText(ctx, "大", taisho, { halign: "center", valign: "center", modifier: dataCirc(gengou === "大正"), });
+          blk.drawText(ctx, "昭", shouwa, { halign: "center", valign: "center", modifier: dataCirc(gengou === "昭和"), });
+          blk.drawText(ctx, "平", heisei, { halign: "center", valign: "center", modifier: dataCirc(gengou === "平成"), });
+          blk.drawText(ctx, "令", reiwa, { halign: "center", valign: "center", modifier: dataCirc(gengou === "令和"), });
         })
       }
       { // col2
         const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
         const line = blk.rowBlock(c.currentFontSize(ctx), [
-          blk.gapItem(2.5),
+          blk.gapContainerItem(2.5, blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
+            font: "d2.5", color: black
+          }),
+            { halign: "right", valign: "center" }
+          ),
           blk.gapItem(1),
           blk.textItem(ctx, "年"),
-          blk.gapItem(1), blk.gapItem(2.5), blk.gapItem(1), blk.textItem(ctx, "月"),
-          blk.gapItem(1), blk.gapItem(2.5), blk.gapItem(1), blk.textItem(ctx, "日"),
+          blk.gapItem(1),
+          blk.gapContainerItem(2.5,
+            blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
+            { halign: "right", valign: "center" }
+          ),
+          blk.gapItem(1),
+          blk.textItem(ctx, "月"),
+          blk.gapItem(1),
+          blk.gapContainerItem(2.5,
+            blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
+            { halign: "right", valign: "center" }
+          ),
+          blk.gapItem(1),
+          blk.textItem(ctx, "日"),
         ]);
         blk.putIn(ctx, line, box, "right", "center");
       }

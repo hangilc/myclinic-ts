@@ -40,8 +40,9 @@
       edaban: "01",
       futansha: "12345678",
       jukyuusha: "7654321",
-      // shimei: "診療 太郎",
-      shimei: "ＢＯＲＮＡＬＥＳ‐ＬＡＲＡ ＥＭＥＬＤＡ　Ｍ．",
+      shimei: "診療 太郎",
+      birthdate: "1957-06-02",
+      
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
