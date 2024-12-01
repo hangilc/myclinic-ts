@@ -647,8 +647,12 @@ export function textWidth(ctx: DrawerContext, text: string): number {
   return stringDrawWidth(text, fsm.getCurrentFontSize(ctx.fsm));
 }
 
-export function textWidthWithFont(ctx: DrawerContext, text: string, fontName: string): number {
-  return stringDrawWidth(text, getFontSizeOf(ctx, fontName));
+export function textWidthWithFont(ctx: DrawerContext, text: string, fontName: string | undefined): number {
+  if( fontName ){
+    return stringDrawWidth(text, getFontSizeOf(ctx, fontName));
+  } else {
+    return textWidth(ctx, text);
+  }
 }
 
 export interface CompositeText {
@@ -1084,3 +1088,6 @@ export function fillData(ctx: DrawerContext, data: any) {
   }
 }
 
+export function requiredHeight(nlines: number, fontSize: number, leading: number): number {
+  return nlines * fontSize + Math.max(0, leading * (nlines - 1));
+}

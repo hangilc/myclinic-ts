@@ -189,6 +189,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box) {
     const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
     c.frameRight(ctx, c1);
     c.drawText(ctx, "氏　名", c1, "center", "center");
+    
   }
   { // rows[1]
     const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));

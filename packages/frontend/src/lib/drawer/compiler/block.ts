@@ -4,6 +4,7 @@ import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
+import { breakLines } from "./break-lines";
 
 export interface Block {
   width: number;
@@ -49,7 +50,12 @@ export function putIn(ctx: DrawerContext, block: Block, outer: Box, halign: HAli
 
 // Blocks ////////////////////////////////////////////////////////////////////////////////////
 
-export function stackedBlock(blocks: Block[], halign: HAlign, opt?: { leading?: number }): Block {
+export interface StackedBlockOpt {
+  halign?: HAlign;
+  leading?: number;
+}
+
+export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
   if (blocks.length === 0) {
     return emptyBlock();
   } else if (blocks.length === 1) {
@@ -66,7 +72,10 @@ export function stackedBlock(blocks: Block[], halign: HAlign, opt?: { leading?: 
           if (i !== 0) {
             y += leading;
           }
-          const blockBox = b.modify(box, b.setHeight(block.height, "top"), b.shiftDown(y), b.alignHoriz(box, halign));
+          const blockBox = b.modify(box,
+            b.setHeight(block.height, "top"),
+            b.shiftDown(y),
+            b.alignHoriz(box, opt?.halign ?? "left"));
           block.render(ctx, blockBox);
           y += block.height;
         })
@@ -240,7 +249,7 @@ export type TextItemOpt = {
   textBlockOpt?: TextBlockOpt;
 }
 
-export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt ): RowItem {
+export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
   const block = textBlock(ctx, text, opt?.textBlockOpt);
   return {
     width: { kind: "fixed", value: block.width },
@@ -345,4 +354,33 @@ export function spacedTextBlock(ctx: DrawerContext, text: string, space: number,
   const chars = splitToChars(ctx, text, opt);
   const items: RowItem[] = spacedItems(chars, space);
   return rowBlock(c.resolveFontHeight(ctx, opt?.textBlockOpt?.font), items);
+}
+
+export interface TextPackBlockEnv {
+  textBlockOpt: TextBlockOpt;
+  stackedBlockOpt?: StackedBlockOpt;
+}
+
+export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: TextPackBlockEnv[]): Block {
+  for (let env of envs) {
+    const width = c.textWidthWithFont(ctx, text, env.textBlockOpt?.font);
+    if (width <= b.width(box)) {
+      return textBlock(ctx, text, env.textBlockOpt);
+    } else {
+      const fontSize = c.resolveFontHeight(ctx, env.textBlockOpt?.font);
+      const lines = breakLines(text, fontSize, b.width(box));
+      const height = c.requiredHeight(lines.length, fontSize, env.stackedBlockOpt?.leading ?? 0);
+      if (height <= b.height(box)) {
+        return stackedBlock(lines.map(line => textBlock(ctx, line, env.textBlockOpt)), env.stackedBlockOpt);
+      }
+    }
+  }
+  if (envs.length === 0) {
+    return textBlock(ctx, text);
+  } else {
+    const env = envs[envs.length - 1];
+    const fontSize = c.resolveFontHeight(ctx, env.textBlockOpt?.font);
+    const lines = breakLines(text, fontSize, b.width(box));
+    return stackedBlock(lines.map(line => textBlock(ctx, line, env.textBlockOpt)), env.stackedBlockOpt);
+  }
 }
