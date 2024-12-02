@@ -53,9 +53,14 @@ function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "data-thin", 0, 0, 0, 0.1);
 }
 
+const alignCenter = {
+  halign: "center", 
+  valign: "center",
+} as const;
+
 function drawTitle(ctx: DrawerContext, box: Box) {
   const block = blk.justifiedTextBlock(ctx, "処方箋", b.width(box), { textBlockOpt: { font: "f4" } });
-  blk.putIn(ctx, block, box, "center", "center");
+  blk.putIn(ctx, block, box, alignCenter);
 }
 
 function drawEightDigits(ctx: DrawerContext, box: Box, bangou?: string) {
@@ -135,7 +140,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         blk.textBlock(ctx, "公費負担医療",),
         blk.textBlock(ctx, "の受給者番号",),
       ], { halign: "left" });
-      blk.putIn(ctx, block, c1, "center", "center");
+      blk.putIn(ctx, block, c1, alignCenter);
       drawSevenDigits(ctx, c2, data.jukyuusha);
     }
     { // cell4
@@ -145,7 +150,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         blk.textBlock(ctx, "被保険者証・被保険"),
         blk.textBlock(ctx, "者手帳の記号・番号"),
       ], { halign: "left" });
-      blk.putIn(ctx, block, c1, "center", "center");
+      blk.putIn(ctx, block, c1, alignCenter);
       const hihokensha = blk.rowBlock(c.currentFontSize(ctx), [
         blk.gapItem(1),
         blk.expanderContainerItem(
@@ -161,8 +166,8 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
           { halign: "center", valign: "center" }
         ),
         blk.gapItem(1),
-      ], b.width(c2));
-      blk.putIn(ctx, hihokensha, c2, "center", "center");
+      ], { maxWidth: b.width(c2) });
+      blk.putIn(ctx, hihokensha, c2, alignCenter);
     }
   }
 }

@@ -16,12 +16,25 @@ export interface Block {
 
 export type BlockModifier = (block: Block) => Block;
 
+export type BlockOpt = {
+  modifiers: BlockModifier[];
+}
+
+
+export function mkBlock(width: number, height: number, render: Renderer, opt?: BlockOpt): Block {
+  let blk = { width, height, render };
+  if (opt?.modifiers) {
+    blk = modify(blk, ...opt?.modifiers);
+  }
+  return blk;
+}
+
 export function modify(block: Block, ...modifiers: BlockModifier[]): Block {
   modifiers.forEach(f => block = f(block));
   return block;
 }
 
-export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) => void ): BlockModifier {
+export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) => void): BlockModifier {
   return (block: Block) => {
     let blk = Object.assign({}, block);
     const orig = blk.render;
@@ -35,50 +48,56 @@ export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) =
 export interface TextBlockOpt {
   font?: string;
   color?: Color;
+  blockOpt?: BlockOpt;
 }
 
 export function textBlock(ctx: DrawerContext, text: string, opt?: TextBlockOpt): Block {
   const font = opt?.font;
-  return {
-    width: font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text),
-    height: font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx),
-    render: (ctx: DrawerContext, box: Box) => {
-      c.withTextColor(ctx, opt?.color, () => {
-        c.withFont(ctx, font, () => {
-          c.drawText(ctx, text, box, "left", "top");
-        });
+  const width = font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text);
+  const height = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
+  const render = (ctx: DrawerContext, box: Box) => {
+    c.withTextColor(ctx, opt?.color, () => {
+      c.withFont(ctx, font, () => {
+        c.drawText(ctx, text, box, "left", "top");
       });
-    }
-  }
+    });
+  };
+  return mkBlock(width, height, render, opt?.blockOpt);
 }
 
 export interface DrawTextOpt {
   halign?: HAlign;
   valign?: VAlign;
   textBlockOpt?: TextBlockOpt;
-  modifier?: BlockModifier
+  blockOpt?: BlockOpt;
 }
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, opt?: DrawTextOpt) {
-  let block = textBlock(ctx, text);
-  if( opt?.modifier ){
-    block = modify(block, opt?.modifier);
-  }
+  const textBlockOpt: TextBlockOpt = Object.assign({},
+    { blockOpt: opt?.blockOpt },
+    opt?.textBlockOpt
+  );
+  let block = textBlock(ctx, text, textBlockOpt);
   const bb = b.align(boundsOfBlock(block), box, opt?.halign ?? "left", opt?.valign ?? "top");
   block.render(ctx, bb);
 }
 
-export function emptyBlock(): Block {
-  return {
-    width: 0, height: 0, render: () => { },
-  }
+export function emptyBlock(opt?: BlockOpt): Block {
+  return mkBlock(0, 0, () => { }, opt);
 }
 
 export function boundsOfBlock(block: Block): Box {
   return b.mkBox(0, 0, block.width, block.height);
 }
 
-export function putIn(ctx: DrawerContext, block: Block, outer: Box, halign: HAlign, valign: VAlign): Box {
+export type PutInOpt = {
+  halign: HAlign;
+  valign: VAlign;
+}
+
+export function putIn(ctx: DrawerContext, block: Block, outer: Box, opt?: PutInOpt): Box {
+  let halign: HAlign = opt?.halign ?? "left";
+  let valign: VAlign = opt?.valign ?? "top";
   let bounds = b.align(boundsOfBlock(block), outer, halign, valign);
   block.render(ctx, bounds);
   return bounds;
@@ -89,6 +108,7 @@ export function putIn(ctx: DrawerContext, block: Block, outer: Box, halign: HAli
 export interface StackedBlockOpt {
   halign?: HAlign;
   leading?: number;
+  blockOpt?: BlockOpt;
 }
 
 export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
@@ -99,10 +119,10 @@ export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
   } else {
     const width = blocks.reduce((acc, ele) => Math.max(acc, ele.width), 0);
     const leading = opt?.leading ?? 0;
-    return {
+    return mkBlock(
       width,
-      height: blocks.reduce((acc, ele) => acc + ele.height, 0) + leading * (blocks.length - 1),
-      render: (ctx: DrawerContext, box: Box) => {
+      blocks.reduce((acc, ele) => acc + ele.height, 0) + leading * (blocks.length - 1),
+      (ctx: DrawerContext, box: Box) => {
         let y = 0;
         blocks.forEach((block, i) => {
           if (i !== 0) {
@@ -115,29 +135,43 @@ export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
           block.render(ctx, blockBox);
           y += block.height;
         })
-      }
-    }
+      },
+      opt?.blockOpt
+    );
   }
 }
 
-export function setHeight(block: Block, height: number, valign: VAlign): Block {
-  return {
-    width: block.width,
+export type SetHeightOpt = {
+  valign: VAlign;
+  blockOpt?: BlockOpt;
+}
+
+export function setHeight(block: Block, height: number, opt?: SetHeightOpt): Block {
+  const valign: VAlign = opt?.valign ?? "top";
+  return mkBlock(
+    block.width,
     height,
-    render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, "left", valign);
-    }
-  }
+    (ctx: DrawerContext, box: Box) => {
+      putIn(ctx, block, box, { halign: "left", valign });
+    },
+    opt?.blockOpt
+  );
 }
 
-export function squareBlock(size: number, opt?: { pen?: string }): Block {
-  return {
-    width: size,
-    height: size,
-    render: (ctx: DrawerContext, box: Box) => {
+export type SquareBlockOpt = {
+  pen?: string;
+  blockOpt?: BlockOpt;
+}
+
+export function squareBlock(size: number, opt?: SquareBlockOpt): Block {
+  return mkBlock(
+    size,
+    size,
+    (ctx: DrawerContext, box: Box) => {
       c.withPen(ctx, opt?.pen, () => c.frame(ctx, box));
-    }
-  }
+    },
+    opt?.blockOpt
+  )
 }
 
 // Extent ////////////////////////////////////////////////////////////////////////////////////
@@ -249,20 +283,35 @@ export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
 
 // RowBlock ////////////////////////////////////////////////////////////////////////////
 
-export type RowItem = {
+export interface RowItem {
   width: Extent;
   render: (ctx: DrawerContext, box: Box) => void;
 };
 
-export function rowBlock(height: number, items: RowItem[], maxWidth?: number): Block {
+export type RowItemOpt = {
+
+};
+
+export function mkRowItem(width: Extent, render: Renderer, opt?: RowItemOpt): RowItem {
+  let item = { width, render };
+  return item;
+}
+
+export type RowBlockOpt = {
+  maxWidth?: number;
+  blockOpt?: BlockOpt;
+}
+
+export function rowBlock(height: number, items: RowItem[], opt?: RowBlockOpt): Block {
+  const maxWidth = opt?.maxWidth;
   const ws: number[] = resolveExtent(items.map(item => item.width), maxWidth);
   if (!(items.length === ws.length)) {
     throw new Error("inconsistent ext result");
   }
-  return {
-    width: ws.reduce((acc, ele) => acc + ele, 0),
+  return mkBlock(
+    ws.reduce((acc, ele) => acc + ele, 0),
     height,
-    render: (ctx: DrawerContext, box: Box) => {
+    (ctx: DrawerContext, box: Box) => {
       let x = 0;
       for (let i = 0; i < items.length; i++) {
         const itemWidth = ws[i];
@@ -271,6 +320,27 @@ export function rowBlock(height: number, items: RowItem[], maxWidth?: number): B
         item.render(ctx, itemBox);
         x += itemWidth;
       }
+    },
+    opt?.blockOpt
+  )
+}
+
+export type TextItemOpt = {
+  valign?: VAlign;
+  textBlockOpt?: TextBlockOpt;
+  blockOpt?: BlockOpt;
+}
+
+export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
+  let textBlockOpt = Object.assign({}, opt?.textBlockOpt);
+  if( opt?.blockOpt ){
+    textBlockOpt.blockOpt = opt?.blockOpt;
+  }
+  const block = textBlock(ctx, text, textBlockOpt);
+  return {
+    width: { kind: "fixed", value: block.width },
+    render: (ctx: DrawerContext, box: Box) => {
+      putIn(ctx, block, box, { halign: "left", valign: (opt?.valign ?? "top") });
     }
   }
 }
@@ -280,26 +350,11 @@ export type ContainerItemOpt = {
   valign?: VAlign;
 }
 
-export type TextItemOpt = {
-  valign?: VAlign;
-  textBlockOpt?: TextBlockOpt;
-}
-
-export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
-  const block = textBlock(ctx, text, opt?.textBlockOpt);
-  return {
-    width: { kind: "fixed", value: block.width },
-    render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, "left", (opt?.valign ?? "top"));
-    }
-  }
-}
-
 export function containerItem(width: Extent, block: Block, opt?: ContainerItemOpt): RowItem {
   return {
     width,
     render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, opt?.halign ?? "left", opt?.valign ?? "top");
+      putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: opt?.valign ?? "top" });
     }
   }
 }
@@ -339,7 +394,7 @@ export function squareItem(size: number, opt?: { pen?: string }): RowItem {
     width: fixedExtent(size),
     render: (ctx: DrawerContext, box: Box) => {
       const block = squareBlock(size, opt);
-      putIn(ctx, block, box, "center", "center");
+      putIn(ctx, block, box, { halign: "center", valign: "center" });
     }
   }
 }
@@ -383,7 +438,7 @@ export function modifyItem(item: RowItem, ...fs: ((item: RowItem) => RowItem)[])
 export function justifiedTextBlock(ctx: DrawerContext, text: string, width: number, opt?: TextItemOpt): Block {
   const chars = splitToChars(ctx, text, opt);
   const items: RowItem[] = justifiedItems(chars, width);
-  return rowBlock(c.resolveFontHeight(ctx, opt?.textBlockOpt?.font), items, width);
+  return rowBlock(c.resolveFontHeight(ctx, opt?.textBlockOpt?.font), items, { maxWidth: width });
 }
 
 export function spacedTextBlock(ctx: DrawerContext, text: string, space: number, opt?: TextItemOpt): Block {
