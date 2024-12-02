@@ -54,7 +54,7 @@ function initPen(ctx: DrawerContext) {
 }
 
 const alignCenter = {
-  halign: "center", 
+  halign: "center",
   valign: "center",
 } as const;
 
@@ -220,7 +220,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         { textBlockOpt: { font: "d3", color: black }, stackedBlockOpt: { halign: "left" } },
         { textBlockOpt: { font: "d2.5", color: black }, stackedBlockOpt: { halign: "left" } },
       ]),
-      c2, "center", "center");
+      c2, alignCenter);
   }
   { // rows[1]
     const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
@@ -234,61 +234,90 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
         const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
         const gengou = bdate?.getGengou();
-        c.withFont(ctx, "f1.5", () => {
-          blk.drawText(ctx, "明", meiji, { halign: "center", valign: "center", modifier: dataCirc(gengou === "明治"), });
-          blk.drawText(ctx, "大", taisho, { halign: "center", valign: "center", modifier: dataCirc(gengou === "大正"), });
-          blk.drawText(ctx, "昭", shouwa, { halign: "center", valign: "center", modifier: dataCirc(gengou === "昭和"), });
-          blk.drawText(ctx, "平", heisei, { halign: "center", valign: "center", modifier: dataCirc(gengou === "平成"), });
-          blk.drawText(ctx, "令", reiwa, { halign: "center", valign: "center", modifier: dataCirc(gengou === "令和"), });
-        })
-      }
-      { // col2
-        const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
-        const line = blk.rowBlock(c.currentFontSize(ctx), [
-          blk.gapContainerItem(2.5, blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
-            font: "d2.5", color: black
-          }),
-            { halign: "right", valign: "center" }
-          ),
-          blk.gapItem(1),
-          blk.textItem(ctx, "年"),
-          blk.gapItem(1),
-          blk.gapContainerItem(2.5,
-            blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
-            { halign: "right", valign: "center" }
-          ),
-          blk.gapItem(1),
-          blk.textItem(ctx, "月"),
-          blk.gapItem(1),
-          blk.gapContainerItem(2.5,
-            blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
-            { halign: "right", valign: "center" }
-          ),
-          blk.gapItem(1),
-          blk.textItem(ctx, "日"),
-        ]);
-        blk.putIn(ctx, line, box, "right", "center");
-      }
-      { // col3
-        const box = b.modify(col3, b.setHeight(2.5, "center"));
-        const line = blk.rowBlock(c.currentFontSize(ctx), [
-          blk.textItem(ctx, "男"),
-          blk.textItem(ctx, "・"),
-          blk.textItem(ctx, "女"),
-        ]);
-        blk.putIn(ctx, line, box, "center", "center");
-      }
+        blk.drawText(ctx, "明", meiji, {
+          halign: "center",
+          valign: "center",
+          textBlockOpt: {
+            font: "f1.5",
+            color: black,
+            blockOpt: {
+              modifiers: [dataCirc(gengou === "明治")]
+            }
+          }
+        });
+        blk.drawText(ctx, "大", taisho, {
+          halign: "center",
+          valign: "center", 
+            {
+            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "大正")] } },
+          });
+        blk.drawText(ctx, "昭", shouwa, {
+          halign: "center",
+          valign: "center", 
+            {
+            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "昭和")] } },
+          });
+        blk.drawText(ctx, "平", heisei, {
+          halign: "center",
+          valign: "center", 
+            {
+            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "平成")] }, }
+          });
+        blk.drawText(ctx, "令", reiwa, {
+          halign: "center",
+          valign: "center", 
+            {
+            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "令和")] }, }
+          });
+      })
+    }
+    { // col2
+      const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
+      const line = blk.rowBlock(c.currentFontSize(ctx), [
+        blk.gapContainerItem(2.5, blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
+          font: "d2.5", color: black
+        }),
+          { halign: "right", valign: "center" }
+        ),
+        blk.gapItem(1),
+        blk.textItem(ctx, "年"),
+        blk.gapItem(1),
+        blk.gapContainerItem(2.5,
+          blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
+          { halign: "right", valign: "center" }
+        ),
+        blk.gapItem(1),
+        blk.textItem(ctx, "月"),
+        blk.gapItem(1),
+        blk.gapContainerItem(2.5,
+          blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
+          { halign: "right", valign: "center" }
+        ),
+        blk.gapItem(1),
+        blk.textItem(ctx, "日"),
+      ]);
+      blk.putIn(ctx, line, box, "right", "center");
+    }
+    { // col3
+      const box = b.modify(col3, b.setHeight(2.5, "center"));
+      const line = blk.rowBlock(c.currentFontSize(ctx), [
+        blk.textItem(ctx, "男"),
+        blk.textItem(ctx, "・"),
+        blk.textItem(ctx, "女"),
+      ]);
+      blk.putIn(ctx, line, box, "center", "center");
     }
   }
-  { // rows[2]
-    const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
-    c.frameRight(ctx, c1);
-    c.drawText(ctx, "区　分", c1, "center", "center");
-    const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
-    c.frameRight(ctx, left);
-    c.drawText(ctx, "被保険者", left, "center", "center");
-    c.drawText(ctx, "被扶養者", right, "center", "center");
-  }
+}
+{ // rows[2]
+  const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
+  c.frameRight(ctx, c1);
+  c.drawText(ctx, "区　分", c1, "center", "center");
+  const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
+  c.frameRight(ctx, left);
+  c.drawText(ctx, "被保険者", left, "center", "center");
+  c.drawText(ctx, "被扶養者", right, "center", "center");
+}
 }
 
 function inkan(sizeOpt?: number, opt?: { font?: string, pen?: string }): blk.Block {

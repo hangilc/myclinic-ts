@@ -69,14 +69,10 @@ export interface DrawTextOpt {
   halign?: HAlign;
   valign?: VAlign;
   textBlockOpt?: TextBlockOpt;
-  blockOpt?: BlockOpt;
 }
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, opt?: DrawTextOpt) {
-  const textBlockOpt: TextBlockOpt = Object.assign({},
-    { blockOpt: opt?.blockOpt },
-    opt?.textBlockOpt
-  );
+  const textBlockOpt = opt?.textBlockOpt;
   let block = textBlock(ctx, text, textBlockOpt);
   const bb = b.align(boundsOfBlock(block), box, opt?.halign ?? "left", opt?.valign ?? "top");
   block.render(ctx, bb);
@@ -328,14 +324,10 @@ export function rowBlock(height: number, items: RowItem[], opt?: RowBlockOpt): B
 export type TextItemOpt = {
   valign?: VAlign;
   textBlockOpt?: TextBlockOpt;
-  blockOpt?: BlockOpt;
 }
 
 export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
-  let textBlockOpt = Object.assign({}, opt?.textBlockOpt);
-  if( opt?.blockOpt ){
-    textBlockOpt.blockOpt = opt?.blockOpt;
-  }
+  let textBlockOpt = opt?.textBlockOpt;
   const block = textBlock(ctx, text, textBlockOpt);
   return {
     width: { kind: "fixed", value: block.width },
