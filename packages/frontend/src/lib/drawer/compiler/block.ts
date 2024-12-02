@@ -184,18 +184,18 @@ export type Extent = ({
 } | {
   kind: "advance-to";
   at: number;
-}) & ExtentOpt
+}) & { opt?: ExtentOpt }
 
-export function fixedExtent(value: number): Extent {
-  return { kind: "fixed", value };
+export function fixedExtent(value: number, opt?: ExtentOpt): Extent {
+  return { kind: "fixed", value, opt };
 }
 
-export function expandExtent(): Extent {
-  return { kind: "expand" };
+export function expandExtent(opt?: ExtentOpt): Extent {
+  return { kind: "expand", opt };
 }
 
-export function advanceToExtent(at: number): Extent {
-  return { kind: "advance-to", at };
+export function advanceToExtent(at: number, opt?: ExtentOpt): Extent {
+  return { kind: "advance-to", at, opt };
 }
 
 function resolveExtent(exts: Extent[], maxSize?: number): number[] {
@@ -322,73 +322,112 @@ export function rowBlock(height: number, items: RowItem[], opt?: RowBlockOpt): B
 }
 
 export type TextItemOpt = {
-  valign?: VAlign;
   textBlockOpt?: TextBlockOpt;
+  containerItemOpt?: ContainerItemOpt;
 }
 
 export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem {
   let textBlockOpt = opt?.textBlockOpt;
   const block = textBlock(ctx, text, textBlockOpt);
-  return {
-    width: { kind: "fixed", value: block.width },
-    render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, { halign: "left", valign: (opt?.valign ?? "top") });
-    }
-  }
+  return containerItem(
+    { kind: "fixed", value: block.width },
+    block,
+    opt?.containerItemOpt,
+  )
 }
 
 export type ContainerItemOpt = {
-  halign?: HAlign;
-  valign?: VAlign;
+  putInOpt?: PutInOpt;
+  rowItemOpt?: RowItemOpt;
 }
 
 export function containerItem(width: Extent, block: Block, opt?: ContainerItemOpt): RowItem {
-  return {
+  let putInOpt: PutInOpt = { halign: "left", valign: "top" };
+  if( opt?.putInOpt ){
+    putInOpt = Object.assign(putInOpt, opt?.putInOpt);
+  }
+  return mkRowItem(
     width,
-    render: (ctx: DrawerContext, box: Box) => {
-      putIn(ctx, block, box, { halign: opt?.halign ?? "left", valign: opt?.valign ?? "top" });
-    }
+    (ctx: DrawerContext, box: Box) => {
+      putIn(ctx, block, box, putInOpt);
+    },
+    opt?.rowItemOpt,
+  )
+}
+
+export type GapItemOpt = {
+  extentOpt?: ExtentOpt;
+  containerItemOpt?: ContainerItemOpt;
+  block?: Block;
+}
+
+export function gapItem(size: number, opt?: GapItemOpt): RowItem {
+  const width = fixedExtent(size, opt?.extentOpt);
+  if( opt?.block ){
+    return containerItem(
+      width,
+      opt?.block,
+      opt?.containerItemOpt
+    )
   }
+  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
 }
 
-export function gapItem(size: number, opt?: { extentOpt?: ExtentOpt }): RowItem {
-  return {
-    width: { kind: "fixed", value: size, ...opt?.extentOpt },
-    render: () => { },
+export type ExpanderItemOpt = {
+  extentOpt?: ExtentOpt;
+  containerItemOpt?: ContainerItemOpt;
+  block?: Block;
+}
+
+export function expanderItem(opt?: ExpanderItemOpt): RowItem {
+  const width = expandExtent(opt?.extentOpt);
+  if( opt?.block ){
+    return containerItem(
+      width,
+      opt?.block,
+      opt?.containerItemOpt
+    )
   }
+  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
 }
 
-export function gapContainerItem(size: number, block: Block, opt?: ContainerItemOpt): RowItem {
-  return containerItem({ kind: "fixed", value: size }, block, opt);
+export type AdvanceToItemOpt = {
+  extentOpt?: ExtentOpt;
+  containerItemOpt?: ContainerItemOpt;
+  block?: Block;
 }
 
-export function expanderItem(): RowItem {
-  return {
-    width: { kind: "expand" },
-    render: () => { }
-  };
-}
-
-export function expanderContainerItem(block: Block, opt?: ContainerItemOpt): RowItem {
-  return containerItem({ kind: "expand" }, block, opt);
-}
-
-export function advanceToItem(at: number): RowItem {
-  return { width: advanceToExtent(at), render: () => { } };
-}
-
-export function advanceToContainerItem(at: number, block: Block, opt?: ContainerItemOpt): RowItem {
-  return containerItem(advanceToExtent(at), block, opt);
-}
-
-export function squareItem(size: number, opt?: { pen?: string }): RowItem {
-  return {
-    width: fixedExtent(size),
-    render: (ctx: DrawerContext, box: Box) => {
-      const block = squareBlock(size, opt);
-      putIn(ctx, block, box, { halign: "center", valign: "center" });
-    }
+export function advanceToItem(at: number, opt?: AdvanceToItemOpt): RowItem {
+  const width = advanceToExtent(at, opt?.extentOpt);
+  if( opt?.block ){
+    return containerItem(
+      width,
+      opt?.block,
+      opt?.containerItemOpt
+    )
   }
+  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
+}
+
+export type SquareItemOpt = {
+  squareBlockOpt?: SquareBlockOpt;
+  rowItemOpt?: RowItemOpt;
+  putInOpt?: PutInOpt;
+}
+
+export function squareItem(size: number, opt?: SquareItemOpt): RowItem {
+  let putInOpt: PutInOpt = { halign: "center", valign: "center" };
+  if( opt?.putInOpt ){
+    Object.assign(putInOpt, opt?.putInOpt);
+  }
+  return mkRowItem(
+    fixedExtent(size),
+    (ctx: DrawerContext, box: Box) => {
+      const block = squareBlock(size, opt?.squareBlockOpt);
+      putIn(ctx, block, box, putInOpt);
+    },
+    opt?.rowItemOpt
+  )
 }
 
 export function splitToChars(ctx: DrawerContext, text: string, opt?: TextItemOpt): RowItem[] {
