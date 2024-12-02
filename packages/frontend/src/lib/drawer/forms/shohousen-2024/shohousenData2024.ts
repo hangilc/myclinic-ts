@@ -4,10 +4,12 @@ export interface Shohousen2024Data {
   clinicPhone?: string;
   clinicKikancode?: string;
   doctorName?: string;
+  clinicTodoufuken?: string;
   hokenshaBangou?: string;
   hihokenshaKigou?: string;
   hihokenshaBangou?: string;
   edaban?: string;
+  honnin?: true;
   futansha?: string;
   jukyuusha?: string;
   futansha2?: string;

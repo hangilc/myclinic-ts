@@ -375,24 +375,40 @@ function drawClinicBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         blk.putIn(ctx, label, left, alignCenter);
         const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
         blk.putIn(ctx, inkan(), stampBox, alignCenter);
+        blk.drawText(ctx, data.doctorName ?? "", b.modify(right, b.shrinkHoriz(2, 2)), {
+          halign: "left",
+          valign: "center",
+          textBlockOpt: {
+            font: "d3",
+            color: black,
+          }
+        });
       }
     });
   }
-  drawKikanBox(ctx, kikancode);
+  drawKikanBox(ctx, kikancode, data);
 }
 
-function drawKikanBox(ctx: DrawerContext, box: Box) {
+function drawKikanBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   box = b.modify(box, b.setHeight(6, "top"))
   c.frame(ctx, box);
   const [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel, kikancode] = b.splitToColumns(box, b.splitAt(23, 28, 38.5, 44, 51));
   [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(box => c.frameRight(ctx, box));
   c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
+  blk.drawText(ctx, data.clinicTodoufuken ?? "", fuken, {
+    textBlockOpt: { font: "d2.5", color: black },
+    ...alignCenter,
+  });
   {
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "点数表"),
       blk.textBlock(ctx, "番号"),
     ], { halign: "center" });
     blk.putIn(ctx, para, tensuuLabel, alignCenter);
+    blk.drawText(ctx, "1", tensuu, {
+      textBlockOpt: { font: "d2.5", color: black },
+      ...alignCenter,
+    });
   }
   {
     const para = blk.stackedBlock([
@@ -407,6 +423,16 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
     c.withPen(ctx, "thin", () => {
       [0, 2, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
     })
+    if (data.clinicKikancode) {
+      const chars = Array.from(data.clinicKikancode);
+      for (let i = 0; i < chars.length; i++) {
+        const chr = chars[i];
+        blk.drawText(ctx, chr, cols[i], {
+          textBlockOpt: { font: "d2.5", color: black },
+          ...alignCenter,
+        });
+      }
+    }
   }
 }
 
@@ -418,10 +444,42 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const [label, body] = b.splitToColumns(left, b.splitAt(25));
     c.frameRight(ctx, label);
     c.drawText(ctx, "交付年月日", label, "center", "center");
+    const date = data.koufuDate ? DateWrapper.from(data.koufuDate) : undefined;
     const line = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.textItem(ctx, "令和"), blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "年"),
-      blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "月"),
-      blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "日"),
+      blk.textItem(ctx, "令和"),
+      blk.gapItem(1),
+      blk.gapItem(3, {
+        block: blk.textBlock(ctx, date ? date.getNen().toString() : "", {
+          font: "d3", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }),
+      blk.gapItem(1),
+      blk.textItem(ctx, "年"),
+      blk.gapItem(1),
+      blk.gapItem(3, {
+        block: blk.textBlock(ctx, date ? date.getMonth().toString() : "", {
+          font: "d3", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }),
+      blk.gapItem(1),
+      blk.textItem(ctx, "月"),
+      blk.gapItem(1),
+      blk.gapItem(3, {
+        block: blk.textBlock(ctx, date ? date.getDay().toString() : "", {
+          font: "d3", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }),
+      blk.gapItem(1),
+      blk.textItem(ctx, "日"),
     ]);
     blk.putIn(ctx, line, body, alignCenter);
   }
@@ -433,10 +491,42 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.textBlock(ctx, "使用期間"),
     ], { halign: "left" }), label, alignCenter);
     const [issueLimit, comment] = b.splitToColumns(body, b.splitAt(24));
+    const date = data.validUptoDate ? DateWrapper.from(data.validUptoDate) : undefined;
     const line = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.textItem(ctx, "令和"), blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "年"),
-      blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "月"),
-      blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "日"),
+      blk.textItem(ctx, "令和"),
+      blk.gapItem(0.5),
+      blk.gapItem(2.5, {
+        block: blk.textBlock(ctx, date ? date.getNen().toString() : "", {
+          font: "d2.5", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }),
+      blk.gapItem(0.5),
+      blk.textItem(ctx, "年"),
+      blk.gapItem(0.5), 
+      blk.gapItem(2.5, {
+        block: blk.textBlock(ctx, date ? date.getMonth().toString() : "", {
+          font: "d2.5", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }), 
+      blk.gapItem(0.5), 
+      blk.textItem(ctx, "月"),
+      blk.gapItem(0.5), 
+      blk.gapItem(2.5, {
+        block: blk.textBlock(ctx, date ? date.getDay().toString() : "", {
+          font: "d2.5", color: black,
+        }),
+        containerItemOpt: {
+          putInOpt: alignCenter,
+        }
+      }), 
+      blk.gapItem(0.5), 
+      blk.textItem(ctx, "日"),
     ]);
     blk.putIn(ctx, line, issueLimit, alignCenter);
     const [cLeft, cBody, cRight] = b.splitToColumns(comment, blk.splitByExtent([1.5, "*", 1.5]));

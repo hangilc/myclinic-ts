@@ -45,7 +45,11 @@
       clinicAddress: "〒111-0000 杉並区某所南1-22-15",
       clinicName: "某内科クリニック",
       clinicPhone: "03-1111-2222",
-      
+      doctorName: "処方 二郎",
+      clinicTodoufuken: "13",
+      clinicKikancode: "1234567",
+      koufuDate: "2024-12-02",
+      validUptoDate: "2024-12-09",
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

@@ -127,6 +127,7 @@ export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
           const blockBox = b.modify(box,
             b.setHeight(block.height, "top"),
             b.shiftDown(y),
+            b.setWidth(block.width, "left"),
             b.alignHoriz(box, opt?.halign ?? "left"));
           block.render(ctx, blockBox);
           y += block.height;
