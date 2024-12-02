@@ -184,14 +184,14 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     c.frame(ctx, col1);
     [col1, block2, drugs, bikou, kaisuu, issueDate, pharma].forEach(box => c.frame(ctx, box));
     drawPatientBox(ctx, col1, data);
-    drawClinicBox(ctx, col2);
+    drawClinicBox(ctx, col2, data);
   }
-  drawIssueBox(ctx, block2);
-  drawDrugs(ctx, drugs);
-  drawBikou(ctx, bikou);
-  drawKaisuu(ctx, kaisuu);
-  drawIssueDate(ctx, issueDate);
-  drawPharma(ctx, pharma);
+  drawIssueBox(ctx, block2, data);
+  drawDrugs(ctx, drugs, data);
+  drawBikou(ctx, bikou, data);
+  drawKaisuu(ctx, kaisuu, data);
+  drawIssueDate(ctx, issueDate, data);
+  drawPharma(ctx, pharma, data);
 }
 
 const black: Color = { r: 0, g: 0, b: 0 };
@@ -324,7 +324,7 @@ function inkan(sizeOpt?: number, opt?: { font?: string, pen?: string }): blk.Blo
   }
 }
 
-function drawClinicBox(ctx: DrawerContext, box: Box) {
+function drawClinicBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   box = b.modify(box, b.shrinkHoriz(2, 0));
   const [address, name, kikancode] = b.splitToRows(box, b.splitAt(10, 23));
   { // address
@@ -334,12 +334,39 @@ function drawClinicBox(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "所在地及び名称"),
     ], { halign: "left" });
     blk.putIn(ctx, para, left, alignCenter);
+    {
+      let [addr, name] = b.splitToRows(b.modify(right, b.shrinkHoriz(2, 2)), b.evenSplitter(2));
+      blk.drawText(ctx, data.clinicAddress ?? "", addr, {
+        halign: "left",
+        valign: "center",
+        textBlockOpt: {
+          font: "d2.5",
+          color: black,
+        }
+      });
+      blk.drawText(ctx, data.clinicName ?? "", name, {
+        halign: "left",
+        valign: "center",
+        textBlockOpt: {
+          font: "d2.5",
+          color: black,
+        }
+      });
+    }
     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
       {
         [left, right] = b.splitToColumns(upper, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
         let label = blk.justifiedTextBlock(ctx, "電話番号", b.width(labelBox));
         blk.putIn(ctx, label, left, alignCenter);
+        blk.drawText(ctx, data.clinicPhone ?? "", b.modify(right, b.shrinkHoriz(2, 2)), {
+          halign: "left",
+          valign: "center",
+          textBlockOpt: {
+            font: "d3",
+            color: black,
+          }
+        });
       }
       {
         [left, right] = b.splitToColumns(lower, b.splitAt(22));
@@ -383,7 +410,7 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
   }
 }
 
-function drawIssueBox(ctx: DrawerContext, box: Box) {
+function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   c.frame(ctx, box);
   const [left, right] = b.splitToColumns(box, b.evenSplitter(2));
   {
@@ -427,7 +454,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
   }
 }
 
-function drawDrugs(ctx: DrawerContext, box: Box) {
+function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [mark, col1, col2, body] = b.splitToColumns(box, b.splitAt(5, 18, 31));
   [mark, col1, col2].forEach(box => c.frameRight(ctx, box))
   {
@@ -477,7 +504,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
   }
 }
 
-function drawBikou(ctx: DrawerContext, box: Box) {
+function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
   c.frameRight(ctx, mark);
   c.drawTextJustifiedVertically(ctx, "備考", b.modify(mark, b.setHeight(10, "center")), "center");
@@ -527,7 +554,7 @@ function drawBikou(ctx: DrawerContext, box: Box) {
   }
 }
 
-function drawKaisuu(ctx: DrawerContext, box: Box) {
+function drawKaisuu(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const rows = b.splitToRows(box, b.evenSplitter(3));
   { // rows[0]
     const bb = b.modify(rows[0], b.shrinkHoriz(2.5, 0));
@@ -601,7 +628,7 @@ function dateItems(ctx: DrawerContext): RowItem[] {
   ]
 }
 
-function drawIssueDate(ctx: DrawerContext, box: Box) {
+function drawIssueDate(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const cols = b.splitToColumns(box, b.splitAt(25, 67, 98));
   cols.forEach(col => c.frame(ctx, col));
   c.drawText(ctx, "調剤炭年月日", cols[0], "center", "center");
@@ -621,7 +648,7 @@ function drawIssueDate(ctx: DrawerContext, box: Box) {
   drawEightDigits(ctx, cols[3]);
 }
 
-function drawPharma(ctx: DrawerContext, box: Box) {
+function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   let [c1, c2, c3, c4] = b.splitToColumns(box, b.splitAt(25, 67, 98));
   {
     const cw = b.width(c4) / 8;

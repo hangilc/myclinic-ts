@@ -42,6 +42,9 @@
       jukyuusha: "7654321",
       shimei: "診療 太郎",
       birthdate: "1957-06-02",
+      clinicAddress: "〒111-0000 杉並区某所南1-22-15",
+      clinicName: "某内科クリニック",
+      clinicPhone: "03-1111-2222",
       
     });
     const d: DrawerDialog = new DrawerDialog({
