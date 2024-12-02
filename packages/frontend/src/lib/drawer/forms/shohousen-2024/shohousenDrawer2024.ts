@@ -260,25 +260,26 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     { // col2
       const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
       const line = blk.rowBlock(c.currentFontSize(ctx), [
-        blk.gapContainerItem(2.5, blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
-          font: "d2.5", color: black
+        blk.gapItem(2.5, {
+          block: blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
+            font: "d2.5", color: black
+          }),
+          containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
         }),
-          { halign: "right", valign: "center" }
-        ),
         blk.gapItem(1),
         blk.textItem(ctx, "年"),
         blk.gapItem(1),
-        blk.gapContainerItem(2.5,
-          blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
-          { halign: "right", valign: "center" }
-        ),
+        blk.gapItem(2.5, {
+          block: blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
+          containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
+        }),
         blk.gapItem(1),
         blk.textItem(ctx, "月"),
         blk.gapItem(1),
-        blk.gapContainerItem(2.5,
-          blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
-          { halign: "right", valign: "center" }
-        ),
+        blk.gapItem(2.5, {
+          block: blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
+          containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
+        }),
         blk.gapItem(1),
         blk.textItem(ctx, "日"),
       ]);
@@ -463,7 +464,10 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
     const line = blk.rowBlock(c.currentFontSize(ctx), [
       blk.textItem(ctx, "リフィル可"),
       blk.gapItem(2),
-      blk.containerItem(blk.fixedExtent(2), blk.squareBlock(2, { pen: "thin" }), { halign: "center", valign: "center" }),
+      blk.squareItem(2, {
+        squareBlockOpt: { pen: "thin" },
+        putInOpt: { halign: "center", valign: "center" },
+      }),
       blk.gapItem(3),
       blk.textItem(ctx, "("),
       blk.gapItem(5),
@@ -511,11 +515,11 @@ function drawBikou(ctx: DrawerContext, box: Box) {
     c.drawText(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）",
       b.modify(upper, b.shrinkHoriz(8, 0)), "left", "center");
     const lowerBlock = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.squareItem(2, { pen: "thin" }),
+      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
       blk.gapItem(1),
       blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
       blk.gapItem(10),
-      blk.squareItem(2, { pen: "thin" }),
+      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
       blk.gapItem(1),
       blk.textItem(ctx, "保険医療機関へ情報提供"),
     ]);
