@@ -209,21 +209,21 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
     }
   });
   chunks.push({ exts: curChunk, advanceTo: maxSize });
-  const result: { size: number, callback?: (left: number, right: number) => void }[] = [];
+  const result: { size: number, opt?: ExtentOpt }[] = [];
   let pos = 0;
   chunks.forEach(chunk => {
     const advanceTo = chunk.advanceTo;
     const expands: { size: number }[] = [];
     chunk.exts.forEach(ext => {
       if (ext.kind === "fixed") {
-        result.push({ size: ext.value, callback: ext.callback });
+        result.push({ size: ext.value, opt: ext.opt });
         pos += ext.value;
       } else if (ext.kind === "expand") {
-        const item = { size: 0, callback: ext.callback };
+        const item = { size: 0, opt: ext.opt };
         result.push(item);
         expands.push(item);
       } else if (ext.kind === "advance-to") {
-        result.push({ size: 0, callback: ext.callback });
+        result.push({ size: 0, opt: ext.opt });
       } else {
         throw new Error("unhandled extent");
       }
@@ -247,8 +247,8 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
   pos = 0;
   result.forEach(r => {
     const right = pos + r.size;
-    if (r.callback) {
-      r.callback(pos, right);
+    if (r.opt?.callback) {
+      r.opt?.callback(pos, right);
     }
     pos = right;
   })

@@ -153,18 +153,22 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.putIn(ctx, block, c1, alignCenter);
       const hihokensha = blk.rowBlock(c.currentFontSize(ctx), [
         blk.gapItem(1),
-        blk.expanderContainerItem(
-          dataTextBlock(ctx, data.hihokenshaKigou, "d2.5"), { halign: "center", valign: "center" }
-        ),
+        blk.expanderItem({
+          block: dataTextBlock(ctx, data.hihokenshaKigou, "d2.5"),
+          containerItemOpt: {
+            putInOpt: alignCenter
+          }
+        }),
         blk.textItem(ctx, "・"),
-        blk.expanderContainerItem(
-          dataTextBlock(ctx, data.hihokenshaBangou, "d2.5"), { halign: "center", valign: "center" }
-        ),
+        blk.expanderItem({
+          block: dataTextBlock(ctx, data.hihokenshaBangou, "d2.5"),
+          containerItemOpt: { putInOpt: { halign: "center", valign: "center" } }
+        }),
         blk.textItem(ctx, "(枝番)"),
-        blk.gapContainerItem(3,
-          dataTextBlock(ctx, data.edaban, "d2.5"),
-          { halign: "center", valign: "center" }
-        ),
+        blk.gapItem(3, {
+          block: dataTextBlock(ctx, data.edaban, "d2.5"),
+          containerItemOpt: { putInOpt: { halign: "center", valign: "center" } }
+        }),
         blk.gapItem(1),
       ], { maxWidth: b.width(c2) });
       blk.putIn(ctx, hihokensha, c2, alignCenter);
@@ -433,7 +437,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
     c.frameBottom(ctx, label);
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "変更不可"),
-      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx),{ valign: "center" }),
+      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), { valign: "center" }),
     ], { halign: "center" });
     blk.putIn(ctx, para, label, alignCenter);
   }
