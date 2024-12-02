@@ -191,6 +191,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 }
 
 const black: Color = { r: 0, g: 0, b: 0 };
+const green: Color = { r: 0, g: 255, b: 0 };
 
 function dataCirc(draw: boolean): BlockModifier {
   return blk.extendRender((ctx: DrawerContext, box: Box, orig: Renderer) => {
@@ -209,7 +210,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   c.drawTextVertically(ctx, "患　者", mark, "center", "center");
   const rows = b.splitToRows(body, b.splitAt(10, 23));
   [rows[0], rows[1]].forEach(box => c.frameBottom(ctx, box));
-  {
+  { // rows[0]
     const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
     c.frameRight(ctx, c1);
     c.drawText(ctx, "氏　名", c1, "center", "center");
@@ -229,47 +230,28 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
     c.frameRight(ctx, col2);
     const bdate = data.birthdate ? DateWrapper.from(data.birthdate) : undefined;
-    {
-      { // cpl1
-        const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
-        const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
-        const gengou = bdate?.getGengou();
-        blk.drawText(ctx, "明", meiji, {
+    { // col1
+      const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
+      const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
+      const gengou = bdate?.getGengou();
+      function drawGengou(label: string, box: Box, value: string) {
+        blk.drawText(ctx, label, box, {
           halign: "center",
           valign: "center",
           textBlockOpt: {
             font: "f1.5",
-            color: black,
+            color: green,
             blockOpt: {
-              modifiers: [dataCirc(gengou === "明治")]
+              modifiers: [dataCirc(gengou === value)]
             }
           }
         });
-        blk.drawText(ctx, "大", taisho, {
-          halign: "center",
-          valign: "center", 
-            {
-            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "大正")] } },
-          });
-        blk.drawText(ctx, "昭", shouwa, {
-          halign: "center",
-          valign: "center", 
-            {
-            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "昭和")] } },
-          });
-        blk.drawText(ctx, "平", heisei, {
-          halign: "center",
-          valign: "center", 
-            {
-            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "平成")] }, }
-          });
-        blk.drawText(ctx, "令", reiwa, {
-          halign: "center",
-          valign: "center", 
-            {
-            textBlockOpt: { blockOpt: { modifiers: [dataCirc(gengou === "令和")] }, }
-          });
-      })
+      }
+      drawGengou("明", meiji, "明治");
+      drawGengou("大", taisho, "大正");
+      drawGengou("昭", shouwa, "昭和");
+      drawGengou("平", heisei, "平成");
+      drawGengou("令", reiwa, "令和");
     }
     { // col2
       const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
@@ -296,7 +278,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         blk.gapItem(1),
         blk.textItem(ctx, "日"),
       ]);
-      blk.putIn(ctx, line, box, "right", "center");
+      blk.putIn(ctx, line, box, { halign: "right", valign: "center" });
     }
     { // col3
       const box = b.modify(col3, b.setHeight(2.5, "center"));
@@ -305,19 +287,18 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         blk.textItem(ctx, "・"),
         blk.textItem(ctx, "女"),
       ]);
-      blk.putIn(ctx, line, box, "center", "center");
+      blk.putIn(ctx, line, box, alignCenter);
     }
   }
-}
-{ // rows[2]
-  const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
-  c.frameRight(ctx, c1);
-  c.drawText(ctx, "区　分", c1, "center", "center");
-  const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
-  c.frameRight(ctx, left);
-  c.drawText(ctx, "被保険者", left, "center", "center");
-  c.drawText(ctx, "被扶養者", right, "center", "center");
-}
+  { // rows[2]
+    const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
+    c.frameRight(ctx, c1);
+    c.drawText(ctx, "区　分", c1, "center", "center");
+    const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
+    c.frameRight(ctx, left);
+    c.drawText(ctx, "被保険者", left, "center", "center");
+    c.drawText(ctx, "被扶養者", right, "center", "center");
+  }
 }
 
 function inkan(sizeOpt?: number, opt?: { font?: string, pen?: string }): blk.Block {
@@ -347,21 +328,21 @@ function drawClinicBox(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "保険医療機関の"),
       blk.textBlock(ctx, "所在地及び名称"),
     ], { halign: "left" });
-    blk.putIn(ctx, para, left, "center", "center");
+    blk.putIn(ctx, para, left, alignCenter);
     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
       {
         [left, right] = b.splitToColumns(upper, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
         let label = blk.justifiedTextBlock(ctx, "電話番号", b.width(labelBox));
-        blk.putIn(ctx, label, left, "center", "center");
+        blk.putIn(ctx, label, left, alignCenter);
       }
       {
         [left, right] = b.splitToColumns(lower, b.splitAt(22));
         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
         let label = blk.justifiedTextBlock(ctx, "保険医氏名", b.width(labelBox));
-        blk.putIn(ctx, label, left, "center", "center");
+        blk.putIn(ctx, label, left, alignCenter);
         const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
-        blk.putIn(ctx, inkan(), stampBox, "center", "center");
+        blk.putIn(ctx, inkan(), stampBox, alignCenter);
       }
     });
   }
@@ -379,14 +360,14 @@ function drawKikanBox(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "点数表"),
       blk.textBlock(ctx, "番号"),
     ], { halign: "center" });
-    blk.putIn(ctx, para, tensuuLabel, "center", "center");
+    blk.putIn(ctx, para, tensuuLabel, alignCenter);
   }
   {
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "医療機関", { font: "f1.5" }),
       blk.textBlock(ctx, "コード", { font: "f1.5" }),
     ], { halign: "center" });
-    blk.putIn(ctx, para, kikanLabel, "center", "center");
+    blk.putIn(ctx, para, kikanLabel, alignCenter);
   }
   {
     const cols = b.splitToColumns(kikancode, b.evenSplitter(7));
@@ -410,7 +391,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
       blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "月"),
       blk.gapItem(1), blk.gapItem(3), blk.gapItem(1), blk.textItem(ctx, "日"),
     ]);
-    blk.putIn(ctx, line, body, "center", "center");
+    blk.putIn(ctx, line, body, alignCenter);
   }
   {
     const [label, body] = b.splitToColumns(right, b.splitAt(25));
@@ -418,14 +399,14 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
     blk.putIn(ctx, blk.stackedBlock([
       blk.textBlock(ctx, "処方箋の"),
       blk.textBlock(ctx, "使用期間"),
-    ], { halign: "left" }), label, "center", "center");
+    ], { halign: "left" }), label, alignCenter);
     const [issueLimit, comment] = b.splitToColumns(body, b.splitAt(24));
     const line = blk.rowBlock(c.currentFontSize(ctx), [
       blk.textItem(ctx, "令和"), blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "年"),
       blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "月"),
       blk.gapItem(0.5), blk.gapItem(2.5), blk.gapItem(0.5), blk.textItem(ctx, "日"),
     ]);
-    blk.putIn(ctx, line, issueLimit, "center", "center");
+    blk.putIn(ctx, line, issueLimit, alignCenter);
     const [cLeft, cBody, cRight] = b.splitToColumns(comment, blk.splitByExtent([1.5, "*", 1.5]));
     drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.25, 0)), { pen: "thin" });
     c.withFont(ctx, "f1.5", () => {
@@ -435,7 +416,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box) {
         blk.textBlock(ctx, "めて４日以内に保険薬"),
         blk.textBlock(ctx, "局に提出すること。"),
       ], { halign: "left", leading: 0.4 });
-      blk.putIn(ctx, para, cBody, "center", "center");
+      blk.putIn(ctx, para, cBody, alignCenter);
     });
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)), { pen: "thin" });
   }
@@ -452,9 +433,9 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
     c.frameBottom(ctx, label);
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "変更不可"),
-      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), "center"),
+      blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx),{ valign: "center" }),
     ], { halign: "center" });
-    blk.putIn(ctx, para, label, "center", "center");
+    blk.putIn(ctx, para, label, alignCenter);
   }
   {
     const [label, body] = b.splitToRows(col2, b.splitAt(6));
@@ -470,7 +451,7 @@ function drawDrugs(ctx: DrawerContext, box: Box) {
       blk.textBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
       blk.textBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
       blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
-    ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), "left", "center")
+    ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
   }
   {
@@ -518,7 +499,7 @@ function drawBikou(ctx: DrawerContext, box: Box) {
           render: (ctx, box) => { drawRightSquareBracket(ctx, b.modify(box, b.shrinkVert(0, 0)), { pen: "thin" }) }
         }
       ])
-      blk.putIn(ctx, row, b.modify(right, b.inset(1.5)), "right", "top");
+      blk.putIn(ctx, row, b.modify(right, b.inset(1.5)), { halign: "right", valign: "top" });
     }
   }
   { // rows[2]
@@ -534,7 +515,7 @@ function drawBikou(ctx: DrawerContext, box: Box) {
       blk.gapItem(1),
       blk.textItem(ctx, "保険医療機関へ情報提供"),
     ]);
-    blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), "left", "center");
+    blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
   }
 }
 
@@ -563,7 +544,7 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
       ...dateItems(ctx),
       blk.textItem(ctx, "）", { textBlockOpt: { font } }),
     ]);
-    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), "left", "center");
+    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), { halign: "left", valign: "center" });
   }
   { // rows[1]
     const block = blk.rowBlock(c.currentFontSize(ctx), [
@@ -589,7 +570,7 @@ function drawKaisuu(ctx: DrawerContext, box: Box) {
       ...dateItems(ctx),
       blk.textItem(ctx, "）", { textBlockOpt: { font } }),
     ]);
-    blk.putIn(ctx, block, rows[1], "left", "center");
+    blk.putIn(ctx, block, rows[1], { halign: "left", valign: "center" });
   }
 }
 
@@ -625,8 +606,8 @@ function drawIssueDate(ctx: DrawerContext, box: Box) {
       blk.textItem(ctx, "月"),
       blk.expanderItem(),
       blk.textItem(ctx, "日"),
-    ], 27);
-    blk.putIn(ctx, block, cols[1], "center", "center");
+    ], { maxWidth: 27 });
+    blk.putIn(ctx, block, cols[1], alignCenter);
   }
   c.drawText(ctx, "公費負担者番号", cols[2], "center", "center");
   drawEightDigits(ctx, cols[3]);
@@ -648,14 +629,14 @@ function drawPharma(ctx: DrawerContext, box: Box) {
       blk.justifiedTextBlock(ctx, "及び名称", top.width, { textBlockOpt: { font } }),
       blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, { textBlockOpt: { font } }),
     ], { halign: "center" });
-    blk.putIn(ctx, label, c1, "center", "center");
+    blk.putIn(ctx, label, c1, alignCenter);
   }
-  blk.putIn(ctx, inkan(), b.modify(c2, b.shrinkHoriz(0, 4)), "right", "center");
+  blk.putIn(ctx, inkan(), b.modify(c2, b.shrinkHoriz(0, 4)), { halign: "right", valign: "center" });
   {
     const upper = blk.spacedTextBlock(ctx, "公費負担医療の", 0.8);
     const lower = blk.justifiedTextBlock(ctx, "受給者番号", upper.width);
     const block = blk.stackedBlock([upper, lower], { halign: "left", leading: 0.5 });
-    blk.putIn(ctx, block, c3, "center", "center");
+    blk.putIn(ctx, block, c3, alignCenter);
   }
 }
 
