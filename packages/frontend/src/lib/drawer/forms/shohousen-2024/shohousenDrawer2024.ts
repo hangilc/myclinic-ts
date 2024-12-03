@@ -627,6 +627,21 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       ])
       blk.putIn(ctx, row, b.modify(right, b.inset(1.5)), { halign: "right", valign: "top" });
     }
+    { // doctorName
+      let showSecondDoctorName = true;
+      if( showSecondDoctorName ) {
+        const bb = b.modify(doctorName, b.shrinkHoriz(15, 0));
+        blk.drawText(ctx, data.doctorName ?? "", bb, {
+          textBlockOpt: {
+            font: "d3",
+            color: black,
+          },
+          halign: "left",
+          valign: "top",
+        })
+      }
+
+    }
   }
   { // rows[2]
     const [upper, lower] = b.splitToRows(rows[2], b.evenSplitter(2));
@@ -667,7 +682,9 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
           text = para1.rest;
         });
       })
-
+    }
+    if( text !== "") {
+      alert("too long bikou");
     }
   }
 }
