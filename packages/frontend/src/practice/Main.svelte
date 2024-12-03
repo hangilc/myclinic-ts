@@ -40,6 +40,8 @@
       edaban: "01",
       futansha: "12345678",
       jukyuusha: "7654321",
+      futansha2: "11111111",
+      jukyuusha2: "7777777",
       shimei: "診療 太郎",
       birthdate: "1957-06-02",
       clinicAddress: "〒111-0000 杉並区某所南1-22-15",
