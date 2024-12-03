@@ -21,6 +21,7 @@ export interface Shohousen2024Data {
   koufuDate?: string; // YYYY-MM-DD
   validUptoDate?: string; // YYYY-MM-DD
   drugs?: string;
+  bikou?: string;
   isDenshi?: boolean;
   accessCode?: string;
 }

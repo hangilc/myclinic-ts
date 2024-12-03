@@ -344,7 +344,7 @@ export type ContainerItemOpt = {
 
 export function containerItem(width: Extent, block: Block, opt?: ContainerItemOpt): RowItem {
   let putInOpt: PutInOpt = { halign: "left", valign: "top" };
-  if( opt?.putInOpt ){
+  if (opt?.putInOpt) {
     putInOpt = Object.assign(putInOpt, opt?.putInOpt);
   }
   return mkRowItem(
@@ -364,14 +364,14 @@ export type GapItemOpt = {
 
 export function gapItem(size: number, opt?: GapItemOpt): RowItem {
   const width = fixedExtent(size, opt?.extentOpt);
-  if( opt?.block ){
+  if (opt?.block) {
     return containerItem(
       width,
       opt?.block,
       opt?.containerItemOpt
     )
   }
-  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
+  return mkRowItem(width, () => { }, opt?.containerItemOpt?.rowItemOpt);
 }
 
 export type ExpanderItemOpt = {
@@ -382,14 +382,14 @@ export type ExpanderItemOpt = {
 
 export function expanderItem(opt?: ExpanderItemOpt): RowItem {
   const width = expandExtent(opt?.extentOpt);
-  if( opt?.block ){
+  if (opt?.block) {
     return containerItem(
       width,
       opt?.block,
       opt?.containerItemOpt
     )
   }
-  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
+  return mkRowItem(width, () => { }, opt?.containerItemOpt?.rowItemOpt);
 }
 
 export type AdvanceToItemOpt = {
@@ -400,14 +400,14 @@ export type AdvanceToItemOpt = {
 
 export function advanceToItem(at: number, opt?: AdvanceToItemOpt): RowItem {
   const width = advanceToExtent(at, opt?.extentOpt);
-  if( opt?.block ){
+  if (opt?.block) {
     return containerItem(
       width,
       opt?.block,
       opt?.containerItemOpt
     )
   }
-  return mkRowItem(width, () => {}, opt?.containerItemOpt?.rowItemOpt);
+  return mkRowItem(width, () => { }, opt?.containerItemOpt?.rowItemOpt);
 }
 
 export type SquareItemOpt = {
@@ -418,7 +418,7 @@ export type SquareItemOpt = {
 
 export function squareItem(size: number, opt?: SquareItemOpt): RowItem {
   let putInOpt: PutInOpt = { halign: "center", valign: "center" };
-  if( opt?.putInOpt ){
+  if (opt?.putInOpt) {
     Object.assign(putInOpt, opt?.putInOpt);
   }
   return mkRowItem(
@@ -511,34 +511,39 @@ export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: 
 // others /////////////////////////////////////////////////////////////////////////////////////////
 
 export type ParagraphOpt = {
-  textBlockOpt: TextBlockOpt;
+  blockOpt?: BlockOpt;
   stackedBlockOpt: StackedBlockOpt;
 };
 
-export function paragraph(ctx: DrawerContext, text: string, box: Box, opt?: ParagraphOpt): {
-  box: Box; rest: string;
+export function paragraph(ctx: DrawerContext, text: string, width: number, height: number, opt?: ParagraphOpt): {
+  block: Block; rest: string;
 } {
-  const font = opt?.textBlockOpt.font;
-  const fontSize = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
-  const lineWidth = b.width(box);
+  const fontSize = c.currentFontSize(ctx);
+  const lineWidth = width;
   let start = 0;
-  const blocks: Block[] = [];
-  let height = 0;
-  while( start < text.length ) {
+  let blocks: Block[] = [];
+  let stacked: Block | undefined = undefined;
+  while (start < text.length) {
     const end = breakSingleLine(text, start, fontSize, lineWidth);
-    if( end === start || end >= text.length  ){
+    if (end === start || end >= text.length) {
       break;
     } else {
       const line = text.substring(start, end);
-      const block = textBlock(ctx, line, opt?.textBlockOpt);
-      if( height !== 0 && height + block.height > b.height(box) ){
+      const block = textBlock(ctx, line, { blockOpt: opt?.blockOpt });
+      const newBlocks = [...blocks, block];
+      const newStacked = stackedBlock(newBlocks, opt?.stackedBlockOpt);
+      if (stacked === undefined || newStacked.height <= height) {
+        blocks = newBlocks;
+        stacked = newStacked;
+        start = end;
+      } else {
         break;
       }
     }
   }
-  return { 
-    box: b.modify(box, b.setHeight(height, "top")),
-    rest: text.substring(start),
+  return {
+    block: stacked ?? emptyBlock(),
+    rest: text.substring(start)
   }
 }
 

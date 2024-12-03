@@ -599,8 +599,9 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   c.frameRight(ctx, mark);
   c.drawTextJustifiedVertically(ctx, "備考", b.modify(mark, b.setHeight(10, "center")), "center");
   const rows = b.splitToRows(body, b.splitAt(13, 22));
+  const [upperLeft, upperRight] = b.splitToColumns(rows[0], b.splitAt(70));
   { // rows[0]
-    const bb = b.modify(rows[0], b.setWidth(70, "left"));
+    const bb = upperLeft;
     c.frame(ctx, bb);
     const [label, doctorName] = b.splitToRows(bb, b.splitAt(7));
     {
@@ -641,6 +642,15 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.textItem(ctx, "保険医療機関へ情報提供"),
     ]);
     blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
+  }
+  {
+    let [bikou1, bikou2] = [upperRight, rows[2]];
+    let text = data.bikou ?? "";
+    if( text !== "" ){
+      let para1 = blk.paragraph(ctx, text, b.width(bikou1), b.height(bikou2));
+      para1.block.render(ctx, bikou1);
+      text = para1.rest;
+    }
   }
 }
 
