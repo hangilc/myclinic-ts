@@ -628,7 +628,7 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.putIn(ctx, row, b.modify(right, b.inset(1.5)), { halign: "right", valign: "top" });
     }
     { // doctorName
-      let showSecondDoctorName = true;
+      let showSecondDoctorName = false;
       if( showSecondDoctorName ) {
         const bb = b.modify(doctorName, b.shrinkHoriz(15, 0));
         blk.drawText(ctx, data.doctorName ?? "", bb, {
@@ -780,7 +780,7 @@ function drawIssueDate(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     blk.putIn(ctx, block, cols[1], alignCenter);
   }
   c.drawText(ctx, "公費負担者番号", cols[2], "center", "center");
-  drawEightDigits(ctx, cols[3]);
+  drawEightDigits(ctx, cols[3], data.futansha2);
 }
 
 function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
@@ -808,6 +808,7 @@ function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const block = blk.stackedBlock([upper, lower], { halign: "left", leading: 0.5 });
     blk.putIn(ctx, block, c3, alignCenter);
   }
+  drawSevenDigits(ctx, c4, data.jukyuusha2);
 }
 
 function drawTrail(ctx: DrawerContext, box: Box) {

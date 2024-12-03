@@ -543,3 +543,16 @@ export function paragraph(ctx: DrawerContext, text: string, width: number, heigh
   }
 }
 
+export type DrawSplitTextOpt = {
+  textBlockOpt?: TextBlockOpt;
+  putInOpt?: PutInOpt;
+}
+
+export function drawSplitText(ctx: DrawerContext, text: string, box: Box, opt?: DrawSplitTextOpt) {
+  const bs = b.splitToColumns(box, b.evenSplitter(text.length));
+  Array.from(text).forEach((ch, i) => {
+    console.log("ch", ch);
+    const block = textBlock(ctx, ch, opt?.textBlockOpt);
+    putIn(ctx, block, bs[i], opt?.putInOpt);
+  })
+}
