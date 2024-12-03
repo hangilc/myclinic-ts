@@ -73,10 +73,6 @@
     }
   }
 
-  // function isShohousen(): boolean {
-  //   return text.content.startsWith("院外処方\nＲｐ）");
-  // }
-
   async function isTodaysShohousen(): Promise<boolean> {
     const visit = await api.getVisit(text.visitId);
     const visitedAt = visit.visitedAt.substring(0, 10);
