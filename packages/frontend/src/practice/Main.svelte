@@ -50,7 +50,8 @@
       clinicKikancode: "1234567",
       koufuDate: "2024-12-02",
       validUptoDate: "2024-12-09",
-      bikou: "高７\n一包化をお願いします。",
+      bikou:
+        "高８\n一包化をお願いします。",
     });
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -65,7 +66,6 @@
       },
     });
   }
-
 </script>
 
 <div>

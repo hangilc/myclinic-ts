@@ -3,10 +3,10 @@ import { charWidth } from "./char-width";
 // returns length of nextr line
 export function breakNextLine(start: number, str: string, fontSize: number, lineWidth: number): number {
   let w = 0;
-  for(let i=start;i<str.length;i++){
+  for (let i = start; i < str.length; i++) {
     const code = str.charCodeAt(i);
     const cw = charWidth(code, fontSize);
-    if( cw + w > lineWidth ){
+    if (cw + w > lineWidth) {
       return i;
     }
     w += cw;
@@ -21,11 +21,11 @@ export function breakLines(str: string, fontSize: number, lineWidth: number): st
   Array.from(str).forEach(ch => {
     const code = ch.charCodeAt(0);
     const cw = charWidth(code, fontSize);
-    if( line.length === 0 ){
+    if (line.length === 0) {
       line.push(ch);
       curWidth += cw;
     } else {
-      if( curWidth + cw > lineWidth ){
+      if (curWidth + cw > lineWidth) {
         lines.push(line.join(""));
         line = [ch];
         curWidth = cw;
@@ -48,10 +48,15 @@ export function breakParagraph(str: string, fontSize: number, lineWidth: number)
 export function breakSingleLine(str: string, start: number, fontSize: number, lineWidth: number): number {
   let w = 0;
   let i = 0;
-  for(i=start;i<str.length;i++){
-    const code = str.charCodeAt(i);
+  for (i = start; i < str.length; i++) {
+    const ch = str.charAt(i);
+    if (ch === "\n") {
+      i += 1;
+      break;
+    }
+    const code = ch.charCodeAt(0);
     const cw = charWidth(code, fontSize);
-    if( w + cw > lineWidth && i !== start ){
+    if (w + cw > lineWidth && i !== start) {
       return i - 1;
     }
     w += cw;
@@ -62,9 +67,9 @@ export function breakSingleLine(str: string, start: number, fontSize: number, li
 export function breakMultipleLines(str: string, fontSize: number, lineWidth: number): string[] {
   const lines: string[] = [];
   let start = 0;
-  while( start < str.length ){
+  while (start < str.length) {
     let end = breakSingleLine(str, start, fontSize, lineWidth);
-    if( end === start || end >= str.length ){
+    if (end === start || end >= str.length) {
       break;
     } else {
       lines.push(str.substring(start, end));

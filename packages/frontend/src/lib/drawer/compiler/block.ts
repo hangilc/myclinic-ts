@@ -111,7 +111,7 @@ export function stackedBlock(blocks: Block[], opt?: StackedBlockOpt): Block {
   if (blocks.length === 0) {
     return emptyBlock();
   } else if (blocks.length === 1) {
-    return blocks[1];
+    return blocks[0];
   } else {
     const width = blocks.reduce((acc, ele) => Math.max(acc, ele.width), 0);
     const leading = opt?.leading ?? 0;
@@ -525,20 +525,16 @@ export function paragraph(ctx: DrawerContext, text: string, width: number, heigh
   let stacked: Block | undefined = undefined;
   while (start < text.length) {
     const end = breakSingleLine(text, start, fontSize, lineWidth);
-    if (end === start || end >= text.length) {
-      break;
+    const line = text.substring(start, end);
+    const block = textBlock(ctx, line, { blockOpt: opt?.blockOpt });
+    const newBlocks = [...blocks, block];
+    const newStacked = stackedBlock(newBlocks, opt?.stackedBlockOpt);
+    if (stacked === undefined || newStacked.height <= height) {
+      blocks = newBlocks;
+      stacked = newStacked;
+      start = end;
     } else {
-      const line = text.substring(start, end);
-      const block = textBlock(ctx, line, { blockOpt: opt?.blockOpt });
-      const newBlocks = [...blocks, block];
-      const newStacked = stackedBlock(newBlocks, opt?.stackedBlockOpt);
-      if (stacked === undefined || newStacked.height <= height) {
-        blocks = newBlocks;
-        stacked = newStacked;
-        start = end;
-      } else {
-        break;
-      }
+      break;
     }
   }
   return {

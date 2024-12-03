@@ -505,7 +505,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       }),
       blk.gapItem(0.5),
       blk.textItem(ctx, "年"),
-      blk.gapItem(0.5), 
+      blk.gapItem(0.5),
       blk.gapItem(2.5, {
         block: blk.textBlock(ctx, date ? date.getMonth().toString() : "", {
           font: "d2.5", color: black,
@@ -513,10 +513,10 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         containerItemOpt: {
           putInOpt: alignCenter,
         }
-      }), 
-      blk.gapItem(0.5), 
+      }),
+      blk.gapItem(0.5),
       blk.textItem(ctx, "月"),
-      blk.gapItem(0.5), 
+      blk.gapItem(0.5),
       blk.gapItem(2.5, {
         block: blk.textBlock(ctx, date ? date.getDay().toString() : "", {
           font: "d2.5", color: black,
@@ -524,8 +524,8 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         containerItemOpt: {
           putInOpt: alignCenter,
         }
-      }), 
-      blk.gapItem(0.5), 
+      }),
+      blk.gapItem(0.5),
       blk.textItem(ctx, "日"),
     ]);
     blk.putIn(ctx, line, issueLimit, alignCenter);
@@ -644,12 +644,30 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
   }
   {
-    let [bikou1, bikou2] = [upperRight, rows[2]];
+    let [bikou1, bikou2] = [upperRight, rows[1]];
+    bikou1 = b.modify(bikou1, b.shrinkHoriz(1, 1), b.shrinkVert(1, 0));
+    bikou2 = b.modify(bikou2, b.shrinkHoriz(1, 1), b.shrinkVert(1, 1));
     let text = data.bikou ?? "";
-    if( text !== "" ){
-      let para1 = blk.paragraph(ctx, text, b.width(bikou1), b.height(bikou2));
-      para1.block.render(ctx, bikou1);
-      text = para1.rest;
+    if (text !== "") {
+      const bikouBox = bikou1;
+      c.withTextColor(ctx, black, () => {
+        c.withFont(ctx, "d3", () => {
+          let para1 = blk.paragraph(ctx, text, b.width(bikouBox), b.height(bikouBox));
+          para1.block.render(ctx, bikouBox);
+          text = para1.rest;
+        });
+      })
+    }
+    if( text !== "") {
+      const bikouBox = bikou2;
+      c.withTextColor(ctx, black, () => {
+        c.withFont(ctx, "d3", () => {
+          let para1 = blk.paragraph(ctx, text, b.width(bikouBox), b.height(bikouBox));
+          para1.block.render(ctx, bikouBox);
+          text = para1.rest;
+        });
+      })
+
     }
   }
 }
