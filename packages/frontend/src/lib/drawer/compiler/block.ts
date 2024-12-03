@@ -4,7 +4,7 @@ import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
-import { breakLines } from "./break-lines";
+import { breakLines, breakSingleLine } from "./break-lines";
 
 export type Renderer = (ctx: DrawerContext, box: Box) => void;
 
@@ -505,6 +505,40 @@ export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: 
     const fontSize = c.resolveFontHeight(ctx, env.textBlockOpt?.font);
     const lines = breakLines(text, fontSize, b.width(box));
     return stackedBlock(lines.map(line => textBlock(ctx, line, env.textBlockOpt)), env.stackedBlockOpt);
+  }
+}
+
+// others /////////////////////////////////////////////////////////////////////////////////////////
+
+export type ParagraphOpt = {
+  textBlockOpt: TextBlockOpt;
+  stackedBlockOpt: StackedBlockOpt;
+};
+
+export function paragraph(ctx: DrawerContext, text: string, box: Box, opt?: ParagraphOpt): {
+  box: Box; rest: string;
+} {
+  const font = opt?.textBlockOpt.font;
+  const fontSize = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
+  const lineWidth = b.width(box);
+  let start = 0;
+  const blocks: Block[] = [];
+  let height = 0;
+  while( start < text.length ) {
+    const end = breakSingleLine(text, start, fontSize, lineWidth);
+    if( end === start || end >= text.length  ){
+      break;
+    } else {
+      const line = text.substring(start, end);
+      const block = textBlock(ctx, line, opt?.textBlockOpt);
+      if( height !== 0 && height + block.height > b.height(box) ){
+        break;
+      }
+    }
+  }
+  return { 
+    box: b.modify(box, b.setHeight(height, "top")),
+    rest: text.substring(start),
   }
 }
 

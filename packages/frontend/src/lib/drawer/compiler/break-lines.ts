@@ -43,3 +43,33 @@ export function breakLines(str: string, fontSize: number, lineWidth: number): st
 export function breakParagraph(str: string, fontSize: number, lineWidth: number): string[] {
   return str.split(/\r?\n/).flatMap(line => breakLines(line, fontSize, lineWidth));
 }
+
+// returns end of extracted line
+export function breakSingleLine(str: string, start: number, fontSize: number, lineWidth: number): number {
+  let w = 0;
+  let i = 0;
+  for(i=start;i<str.length;i++){
+    const code = str.charCodeAt(i);
+    const cw = charWidth(code, fontSize);
+    if( w + cw > lineWidth && i !== start ){
+      return i - 1;
+    }
+    w += cw;
+  }
+  return i;
+}
+
+export function breakMultipleLines(str: string, fontSize: number, lineWidth: number): string[] {
+  const lines: string[] = [];
+  let start = 0;
+  while( start < str.length ){
+    let end = breakSingleLine(str, start, fontSize, lineWidth);
+    if( end === start || end >= str.length ){
+      break;
+    } else {
+      lines.push(str.substring(start, end));
+      start = end;
+    }
+  }
+  return lines;
+}
