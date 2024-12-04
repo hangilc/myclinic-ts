@@ -1,19 +1,37 @@
-export function parseShohou(text: string) {
-  console.log("text", text);
+export interface Shohou {
+  groups: DrugGroup[];
+  commands: string[];
+}
+
+export function parseShohou(text: string): Shohou {
+  const shohou: Shohou = {
+    groups: [],
+    commands: []
+  };
   let end = seq(
     prolog(),
-    groupIndex(),
-    whitespaces(),
-    drugNameAndAmount(),
-    whitespaces(),
-    eol(),
-  )
-    (text, 0);
-  console.log("end", end ? text.substring(0, end) : "");
+    repeat(
+      drugGroup(g => shohou.groups.push(g))
+    ),
+    repeat(
+      command(s => shohou.commands.push(s))
+    ),
+    repeatUntil(blankLine(), eof())
+  )(text, 0);
+  if (end === undefined) {
+    throw new Error("cannot parse shohou");
+  }
+  return shohou;
 }
 
 function prolog(): Tokenizer {
   return seq(
+    optional(
+      seq(
+        str("院外処方"),
+        blankLine(),
+      )
+    ),
     or(
       str("Rp)"),
       str("Ｒｐ）"),
@@ -23,64 +41,236 @@ function prolog(): Tokenizer {
   );
 }
 
-function groupIndex(): Tokenizer {
+type Usage = ({
+  kind: "days"; days: string;
+} | {
+  kind: "times"; times: string;
+} | {
+  kind: "other";
+}) & { usage: string }
+
+interface Drug {
+  name: string, amount: string, unit: string
+}
+
+interface DrugGroup {
+  drugs: Drug[],
+  usage: Usage,
+}
+
+function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let drugs: Drug[] = [];
+    let usage: Usage | undefined = undefined;
+    let end = seq(
+      whitespaces(),
+      groupIndex(),
+      whitespaces(),
+      drugNameAndAmount(d => drugs.push(d)),
+      whitespaces(),
+      eol(),
+      repeat(
+        seq(
+          whitespaces(1),
+          drugNameAndAmount(d => drugs.push(d)),
+          whitespaces(),
+          eol(),
+        )),
+      whitespaces(1),
+      or(
+        usageDays(d => usage = d),
+        usageTimes(d => usage = d),
+        usageOther(d => usage = d),
+      ),
+      whitespaces(),
+      eolOrEof(),
+    )(src, start);
+    if (end !== undefined) {
+      if (usage === undefined) {
+        throw new Error("usage not found");
+      }
+      if (cb) {
+        cb({ drugs, usage });
+      }
+    }
+    return end;
+  }
+}
+
+function groupIndex(cb?: Callback): Tokenizer {
   return seq(
-    whitespaces(),
-    digits(),
+    digits(1, undefined, cb),
     or(str(")"), str("）"))
   )
 }
 
-function drugNameAndAmount(): Tokenizer {
+function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: string }) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
-    let name = "";
-    let end = nonWhitespaces()(src, start);
-    if (end === undefined) {
-      return undefined;
+    let data = {
+      name: "", amount: "", unit: ""
     }
-    name += src.substring(start, end);
-    start = end;
-    end = whitespaces()(src, start);
-    if (end === undefined) {
-      return undefined;
-    }
-    start = end;
-    end = drugAmount()(src, start);
-    if (end === undefined) {
-      return undefined;
-    }
-    start = end;
-    return start;
-  }
-}
-
-function drugAmount(): Tokenizer {
-  return (src: string, start: number): number | undefined => {
-    return seq(
-      digits(1),
-      optional(
+    let end = seq(
+      nonWhitespaces(1, undefined, s => data.name += s),
+      repeatUntil(
         seq(
-          or(str("."), str("．")),
-          digits(1),
+          whitespaces(0, undefined, s => data.name += s),
+          nonWhitespaces(1, undefined, s => data.name += s),
+        ),
+        seq(
+          whitespaces(),
+          drugAmount(d => { Object.assign(data, d) }),
         )
       ),
-      drugUnit()
     )(src, start);
+    if (end !== undefined) {
+      if (cb) { cb(data) }
+    }
+    return end;
   }
 }
 
-function drugUnit(): Tokenizer {
-  return or(
-    str("錠"), str("カプセル"), str("ｇ"), str("ｍｇ"), str("包"), str("ｍＬ"), str("ブリスター"),
-    str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
-  )
+function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let amount = "";
+    let unit = "";
+    let end = seq(
+      digits(1, undefined, cs => amount += cs),
+      optional(
+        seq(
+          withCallback(or(str("."), str("．")), s => amount += s),
+          digits(1, undefined, s => amount += s),
+        )
+      ),
+      drugUnit(s => unit += s)
+    )(src, start);
+    if (end !== undefined) {
+      if (cb) {
+        cb({ amount, unit });
+      }
+    }
+    return end;
+  }
 }
 
-type Tokenizer = (src: string, start: number) => number | undefined;
+function drugUnit(cb?: Callback): Tokenizer {
+  return withCallback(or(
+    str("錠"), str("カプセル"), str("ｇ"), str("ｍｇ"), str("包"), str("ｍＬ"), str("ブリスター"),
+    str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
+  ), cb);
+}
 
-function str(s: string): Tokenizer {
+function usageDays(cb?: (data: Usage) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    const data = {
+      kind: "days" as const,
+      usage: "",
+      days: "",
+    };
+    let end = seq(
+      nonWhitespaces(1, undefined, s => data.usage += s),
+      repeatUntil(
+        one(ch => ch !== "\n", s => data.usage += s),
+        seq(
+          whitespaces(1),
+          digits(1, 2, s => { data.days += s; }),
+          str("日分")
+        )
+      )
+    )(src, start);
+    if (end !== undefined) {
+      if (cb) { cb(data) }
+    }
+    return end;
+  }
+}
+
+function usageTimes(cb?: (data: Usage) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let usage = "";
+    let times = "";
+    let end = seq(
+      nonWhitespaces(1, undefined, s => usage += s),
+      repeatUntil(
+        one(ch => ch !== "\n", s => usage += s),
+        seq(
+          whitespaces(1),
+          digits(1, undefined, s => times += s),
+          str("回分")
+        )
+      )
+    )(src, start);
+    if (end !== undefined && cb) {
+      cb({ kind: "times", usage, times });
+    }
+    return end;
+  }
+}
+
+function usageOther(cb?: (data: Usage) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let usage = "";
+    let end = seq(
+      repeat(one(ch => ch !== "\n", s => usage += s), 1)
+    )(src, start);
+    if (end !== undefined && cb) {
+      cb({ kind: "other", usage: usage.trim() })
+    }
+    return end;
+  }
+}
+
+function command(cb?: (command: string) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let command = "";
+    let end = seq(
+      str("@"),
+      repeat(one(ch => ch !== "\n", s => command += s)),
+      eolOrEof(),
+    )(src, start);
+    if (end !== undefined && cb) {
+      cb(command);
+    }
+    return end;
+  }
+}
+
+function eof(): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    if( start === src.length ){
+      return start;
+    } else {
+      return undefined;
+    }
+  }
+}
+
+function eolOrEof(): Tokenizer {
+  return or(eof(), eol())
+}
+
+function blankLine(): Tokenizer {
+  return repeatUntil(one(isWhitespace), eol());
+}
+
+// Parser //////////////////////////////////////////////////////////////////////////////////////////////////
+
+type Tokenizer = (src: string, start: number) => number | undefined;
+type Callback = (m: string) => void;
+
+function withCallback(tok: Tokenizer, cb?: Callback): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let end = tok(src, start);
+    if (end !== undefined) {
+      if (cb) { cb(src.substring(start, end)) }
+    }
+    return end;
+  }
+}
+
+function str(s: string, cb?: Callback): Tokenizer {
   return (src: string, start: number): number | undefined => {
     if (src.substring(start).startsWith(s)) {
+      if (cb) { cb(s) }
       return start + s.length;
     } else {
       return undefined;
@@ -103,11 +293,12 @@ function regexp(re: RegExp): Tokenizer {
   }
 }
 
-function one(pred: (ch: string) => boolean): Tokenizer {
+function one(pred: (ch: string) => boolean, cb?: Callback): Tokenizer {
   return (src: string, start: number): number | undefined => {
     if (start < src.length) {
       const ch = src[start];
       if (pred(ch)) {
+        if (cb) { cb(ch) }
         return start + 1;
       } else {
         undefined;
@@ -132,13 +323,15 @@ function seq(...toks: Tokenizer[]): Tokenizer {
   }
 }
 
-function repeat(tok: Tokenizer, atLeast: number = 0, atMost: number | undefined = undefined): Tokenizer {
+function repeat(tok: Tokenizer, atLeast: number = 0, atMost: number | undefined = undefined, cb?: Callback): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let iter = 0;
+    const init = start;
     while (true) {
       let end = tok(src, start);
       if (end === undefined) {
         if (iter >= atLeast) {
+          if (cb) { cb(src.substring(init, start)) }
           return start;
         } else {
           return end;
@@ -147,8 +340,30 @@ function repeat(tok: Tokenizer, atLeast: number = 0, atMost: number | undefined 
       start = end;
       iter += 1;
       if (iter === atMost) {
+        if (cb) { cb(src.substring(init, start)) }
         return start;
       }
+      if (iter > 100) {
+        throw new Error("too many iter");
+      }
+    }
+  }
+}
+
+function repeatUntil(tok: Tokenizer, terminal: Tokenizer): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    let iter = 0;
+    while (true) {
+      let end = terminal(src, start);
+      if (end !== undefined) {
+        return end;
+      }
+      end = tok(src, start);
+      if (end === undefined) {
+        return undefined;
+      }
+      start = end;
+      iter += 1;
       if (iter > 100) {
         throw new Error("too many iter");
       }
@@ -176,20 +391,20 @@ function isWhitespace(ch: string): boolean {
   return ch === " " || ch === "\t" || ch === "　";
 }
 
-function whitespaces(atLeast: number = 0, atMost: number | undefined = undefined): Tokenizer {
-  return repeat(one(isWhitespace), atLeast, atMost);
+function whitespaces(atLeast: number = 0, atMost: number | undefined = undefined, cb?: Callback): Tokenizer {
+  return repeat(one(isWhitespace), atLeast, atMost, cb);
 }
 
-function nonWhitespaces(atLeast: number = 0, atMost: number | undefined = undefined): Tokenizer {
-  return repeat(one(ch => !isWhitespace(ch)), atLeast, atMost);
+function nonWhitespaces(atLeast: number = 0, atMost: number | undefined = undefined, cb?: Callback): Tokenizer {
+  return repeat(one(ch => ch !== "\n" && !isWhitespace(ch)), atLeast, atMost, cb);
 }
 
 function isDigit(ch: string): boolean {
-  return (ch >= "0" && ch <= "9") || (ch >= "１" && ch <= "９");
+  return (ch >= "0" && ch <= "9") || (ch >= "０" && ch <= "９");
 }
 
-function digits(atLeast: number = 0, atMost: number | undefined = undefined): Tokenizer {
-  return repeat(one(isDigit), atLeast, atMost);
+function digits(atLeast: number = 0, atMost: number | undefined = undefined, cb?: Callback): Tokenizer {
+  return repeat(one(isDigit), atLeast, atMost, cb);
 }
 
 function eol(): Tokenizer {

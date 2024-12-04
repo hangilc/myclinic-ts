@@ -34,10 +34,12 @@
 
   ///////////////////////////////////////////////////////////////////////////////
   function testShohousen() {
-    parseShohou(`Ｒｐ）
+    let shohou = parseShohou(`Ｒｐ）
 １）カロナール錠５００　３錠
+　　アンブロキソール錠１５ｍｇ　３錠
 　　分３　毎食後　５日分
 `)
+    console.log("shohou", shohou);
   }
 
   // function testShohousen() {
