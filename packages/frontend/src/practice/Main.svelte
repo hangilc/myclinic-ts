@@ -39,7 +39,7 @@
 　　アンブロキソール錠１５ｍｇ　３錠
 　　分３　毎食後　５日分
 `)
-    console.log("shohou", shohou);
+    console.log("shohou", JSON.stringify(shohou, undefined, 2));
   }
 
   // function testShohousen() {
