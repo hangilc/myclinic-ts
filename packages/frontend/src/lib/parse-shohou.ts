@@ -146,6 +146,13 @@ function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Toke
     let amount = "";
     let unit = "";
     let end = seq(
+      optional(
+        seq(
+          or(str("1"), str("１")),
+          str("回"),
+          whitespaces(),
+        )
+      ),
       digits(1, undefined, cs => amount += cs),
       optional(
         seq(
