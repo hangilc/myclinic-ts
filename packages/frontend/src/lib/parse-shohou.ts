@@ -43,7 +43,7 @@ function prolog(): Tokenizer {
   );
 }
 
-type Usage = ({
+export type Usage = ({
   kind: "days"; days: string;
 } | {
   kind: "times"; times: string;

@@ -1,4 +1,4 @@
-import type { Box } from "./box";
+import { mkBox, type Box } from "./box";
 import type { DrawerContext } from "./context";
 import * as c from "./compiler";
 import * as b from "./box";
@@ -508,21 +508,56 @@ export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: 
   }
 }
 
-// StackedBlockBuilder ////////////////////////////////////////////////////////////////////////////
+// ColumnBlockBuilder ////////////////////////////////////////////////////////////////////////////
 
-export class StackedBlockBuilder {
-  blocks: Block[];
+export type ColumnBlockBuilderOpt = {
+  blockOpt?: BlockOpt;
+}
 
-  constructor(blocks: Block[]) {
-    this.blocks = blocks;
+export class ColumnBlockBuilder {
+  width: number;
+  items: { y: number, block: Block }[] = [];
+  leading: number = 0;
+  ypos: number = 0;
+
+  constructor(width: number) {
+    this.width = width;
   }
 
-  build(opt?: StackedBlockOpt): Block {
-    return stackedBlock(this.blocks, opt);
+  build(opt?: ColumnBlockBuilderOpt): Block {
+    const render = (ctx: DrawerContext, box: Box) => {
+      this.items.forEach(item => {
+        console.log("y", item.y);
+        const bb = b.modify(box, b.setHeight(item.block.height, "top"), b.shiftDown(item.y));
+        item.block.render(ctx, bb);
+      })
+    }
+    return mkBlock(this.width, this.ypos, render, opt?.blockOpt);
   }
 
-  addBlock(block: Block): StackedBlockBuilder {
-    this.blocks.push(block);
+  setLeading(leading: number): ColumnBlockBuilder {
+    this.leading = leading;
+    return this;
+  }
+
+  addBlock(block: Block): ColumnBlockBuilder {
+    if( this.items.length > 0 ){
+      this.ypos += this.leading;
+    }
+    this.items.push({
+      y: this.ypos,
+      block,
+    });
+    this.ypos += block.height;
+    return this;
+  }
+
+  currentHeight(): number {
+    return this.ypos;
+  }
+
+  advanceTo(ypos: number): ColumnBlockBuilder {
+    this.ypos = ypos;
     return this;
   }
 }

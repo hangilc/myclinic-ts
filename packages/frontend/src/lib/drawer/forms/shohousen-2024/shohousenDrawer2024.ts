@@ -7,11 +7,13 @@ import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
-import type { Block, BlockModifier, Renderer, RowItem } from "../../compiler/block";
+import { ColumnBlockBuilder, type Block, type BlockModifier, type Renderer, type RowItem } from "../../compiler/block";
 import { pad } from "@/lib/pad";
 import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
-import type { Drug, Shohou } from "@/lib/parse-shohou";
+import type { Drug, Shohou, Usage } from "@/lib/parse-shohou";
+import Column from "@/appoint/Column.svelte";
+import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen2024(data: Shohousen2024Data): Op[] {
   const ctx = mkDrawerContext();
@@ -855,20 +857,53 @@ function drawTrail(ctx: DrawerContext, box: Box) {
 }
 
 function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
-  shohouBox = b.modify(shohouBox, b.inset(1, 0));
+  let font = "d3";
+  let fontSize = c.getFontSizeOf(ctx, font);
+  const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3 ;
+  const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
+  const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
+  const henkoufukaCol = new ColumnBlockBuilder(b.width(henkoufuka));
+  const kanjakibouCol = new ColumnBlockBuilder(b.width(kanjakibou));
+  const indexCol = new ColumnBlockBuilder(indexWidth);
+  const mainCol = new ColumnBlockBuilder(b.width(mainBox));
+  const cols = [henkoufukaCol, kanjakibouCol, indexCol, mainCol];
   c.withTextColor(ctx, black, () => {
-    c.withFont(ctx, "d3", () => {
-      for(let group of shohou.groups){
-        const drugBlocks: Block[] = [];
-        for(let drug of group.drugs){
-
-        }
-      }
-
+    c.withFont(ctx, font, () => {
+      shohou.groups.forEach((group, groupIndex) => {
+        indexCol.addBlock(blk.textBlock(ctx, indexLabel(groupIndex + 1)));
+        group.drugs.forEach((drug, drugIndex) => {
+          mainCol.addBlock(blk.textBlock(ctx, drugNameAndAmountLine(drug)));
+        });
+        mainCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
+        const y = Math.max(...cols.map(col => col.currentHeight()));
+        cols.forEach(col => col.advanceTo(y));
+      });
+      henkoufukaCol.build().render(ctx, henkoufuka);
+      kanjakibouCol.build().render(ctx, kanjakibou);
+      indexCol.build().render(ctx, indexBox);
+      mainCol.build().render(ctx, mainBox);
     })
   })
 }
 
+function indexLabel(index: number): string {
+  return toZenkaku(`${index})`);
+}
+
 function drugNameAndAmountLine(drug: Drug): string {
   return `${drug.name}　${drug.amount}${drug.unit}`
+}
+
+function drugUsageLine(usage: Usage): string {
+  switch(usage.kind){
+    case "days": {
+      return `${usage.usage}　${usage.days}日分`;
+    }
+    case "times": {
+      return `${usage.usage}　${usage.times}回分`;
+    }
+    case "other": {
+      return `${usage.usage}`;
+    }
+  }
 }
