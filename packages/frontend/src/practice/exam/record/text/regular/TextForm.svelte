@@ -18,9 +18,9 @@
     isOnlineShohousen,
   } from "@/lib/shohousen-text-helper";
   import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
-  import { drawShohousen2024 } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024";
   import { cache } from "@/lib/cache";
   import { parseShohou } from "@/lib/parse-shohou";
+  import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -247,7 +247,7 @@
       validUptoDate: undefined,
       drugs: shohou,
     };
-    const ops = drawShohousen2024(data);
+    const ops = drawShohousen2024NoRefill(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
@@ -255,7 +255,8 @@
         ops,
         width: 148,
         height: 210,
-        scale: 3,
+        // scale: 3,
+        scale: 8,
         kind: "shohousen2024",
         title: "処方箋印刷",
       },
