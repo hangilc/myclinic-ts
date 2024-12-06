@@ -180,85 +180,86 @@
   async function doPrintShohousen2024() {
     const shohou = parseShohou(text.content, false);
     console.log("shohou", JSON.stringify(shohou, undefined, 2));
-    // const clinicInfo = await cache.getClinicInfo();
-    // const visitId = text.visitId;
-    // const hoken = await api.getHokenInfoForVisit(visitId);
-    // let hokenshaBangou: string | undefined = undefined;
-    // let hihokenshaKigou = "";
-    // let hihokenshaBangou = "";
-    // let edaban = "";
-    // let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
-    // if (hoken.shahokokuho) {
-    //   const shahokokuho = hoken.shahokokuho;
-    //   hokenshaBangou = shahokokuho.hokenshaBangou.toString();
-    //   hihokenshaKigou = shahokokuho.hihokenshaKigou;
-    //   hihokenshaBangou = shahokokuho.hihokenshaBangou;
-    //   edaban = shahokokuho.edaban;
-    // } else if (hoken.koukikourei) {
-    //   hokenshaBangou = hoken.koukikourei.hokenshaBangou;
-    //   hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
-    // }
-    // let futansha: string | undefined = undefined;
-    // let jukyuusha: string | undefined = undefined;
-    // if (hoken.kouhiList.length >= 1) {
-    //   const kouhi = hoken.kouhiList[0];
-    //   futansha = kouhi.futansha.toString();
-    //   jukyuusha = kouhi.jukyuusha.toString();
-    // }
-    // let futansha2: string | undefined = undefined;
-    // let jukyuusha2: string | undefined = undefined;
-    // if (hoken.kouhiList.length >= 2) {
-    //   const kouhi = hoken.kouhiList[1];
-    //   futansha2 = kouhi.futansha.toString();
-    //   jukyuusha2 = kouhi.jukyuusha.toString();
-    // }
-    // let shimei: string | undefined = undefined;
-    // let birthdate: string | undefined = undefined;
-    // let sex: "M" | "F" | undefined = undefined;
-    // {
-    //   const visit = await api.getVisit(text.visitId);
-    //   const patient = await api.getPatient(visit.patientId);
-    //   shimei = `${patient.lastName}${patient.firstName}`;
-    //   birthdate = patient.birthday;
-    //   if (patient.sex === "M" || patient.sex === "F") {
-    //     sex = patient.sex;
-    //   }
-    // }
-    // let koufuDate: string = dateToSqlDate(new Date());
-    // const data: Shohousen2024Data = {
-    //   clinicAddress: clinicInfo.address,
-    //   clinicName: clinicInfo.name,
-    //   clinicPhone: `電話 ${clinicInfo.tel}`,
-    //   clinicKikancode: clinicInfo.kikancode,
-    //   doctorName: clinicInfo.doctorName,
-    //   hokenshaBangou,
-    //   hihokenshaKigou,
-    //   hihokenshaBangou,
-    //   edaban,
-    //   futansha,
-    //   jukyuusha,
-    //   futansha2,
-    //   jukyuusha2,
-    //   shimei,
-    //   birthdate,
-    //   sex,
-    //   hokenKubun,
-    //   koufuDate,
-    //   validUptoDate: undefined,
-    // };
-    // const ops = drawShohousen2024(data);
-    // const d: DrawerDialog = new DrawerDialog({
-    //   target: document.body,
-    //   props: {
-    //     destroy: () => d.$destroy(),
-    //     ops,
-    //     width: 148,
-    //     height: 210,
-    //     scale: 3,
-    //     kind: "shohousen2024",
-    //     title: "処方箋印刷",
-    //   },
-    // });
+    const clinicInfo = await cache.getClinicInfo();
+    const visitId = text.visitId;
+    const hoken = await api.getHokenInfoForVisit(visitId);
+    let hokenshaBangou: string | undefined = undefined;
+    let hihokenshaKigou = "";
+    let hihokenshaBangou = "";
+    let edaban = "";
+    let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
+    if (hoken.shahokokuho) {
+      const shahokokuho = hoken.shahokokuho;
+      hokenshaBangou = shahokokuho.hokenshaBangou.toString();
+      hihokenshaKigou = shahokokuho.hihokenshaKigou;
+      hihokenshaBangou = shahokokuho.hihokenshaBangou;
+      edaban = shahokokuho.edaban;
+    } else if (hoken.koukikourei) {
+      hokenshaBangou = hoken.koukikourei.hokenshaBangou;
+      hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
+    }
+    let futansha: string | undefined = undefined;
+    let jukyuusha: string | undefined = undefined;
+    if (hoken.kouhiList.length >= 1) {
+      const kouhi = hoken.kouhiList[0];
+      futansha = kouhi.futansha.toString();
+      jukyuusha = kouhi.jukyuusha.toString();
+    }
+    let futansha2: string | undefined = undefined;
+    let jukyuusha2: string | undefined = undefined;
+    if (hoken.kouhiList.length >= 2) {
+      const kouhi = hoken.kouhiList[1];
+      futansha2 = kouhi.futansha.toString();
+      jukyuusha2 = kouhi.jukyuusha.toString();
+    }
+    let shimei: string | undefined = undefined;
+    let birthdate: string | undefined = undefined;
+    let sex: "M" | "F" | undefined = undefined;
+    {
+      const visit = await api.getVisit(text.visitId);
+      const patient = await api.getPatient(visit.patientId);
+      shimei = `${patient.lastName}${patient.firstName}`;
+      birthdate = patient.birthday;
+      if (patient.sex === "M" || patient.sex === "F") {
+        sex = patient.sex;
+      }
+    }
+    let koufuDate: string = dateToSqlDate(new Date());
+    const data: Shohousen2024Data = {
+      clinicAddress: clinicInfo.address,
+      clinicName: clinicInfo.name,
+      clinicPhone: `電話 ${clinicInfo.tel}`,
+      clinicKikancode: clinicInfo.kikancode,
+      doctorName: clinicInfo.doctorName,
+      hokenshaBangou,
+      hihokenshaKigou,
+      hihokenshaBangou,
+      edaban,
+      futansha,
+      jukyuusha,
+      futansha2,
+      jukyuusha2,
+      shimei,
+      birthdate,
+      sex,
+      hokenKubun,
+      koufuDate,
+      validUptoDate: undefined,
+      drugs: shohou,
+    };
+    const ops = drawShohousen2024(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        ops,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
     onClose();
   }
 

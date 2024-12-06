@@ -51,11 +51,11 @@ type Usage = ({
   kind: "other";
 }) & { usage: string }
 
-interface Drug {
+export interface Drug {
   name: string, amount: string, unit: string
 }
 
-interface DrugGroup {
+export interface DrugGroup {
   drugs: Drug[],
   usage: Usage,
 }

@@ -11,6 +11,7 @@ import type { Block, BlockModifier, Renderer, RowItem } from "../../compiler/blo
 import { pad } from "@/lib/pad";
 import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
+import type { Drug, Shohou } from "@/lib/parse-shohou";
 
 export function drawShohousen2024(data: Shohousen2024Data): Op[] {
   const ctx = mkDrawerContext();
@@ -550,6 +551,11 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   {
     c.drawTextJustifiedVertically(ctx, "処方", b.modify(mark, b.shrinkVert(14, 14)), "center");
   }
+  let yupper = 0;
+  let ylower = 0;
+  let henkoufuka: Box = col1;
+  let kanjakibou: Box = col2;
+  let shohouBox: Box = body;
   {
     const [label, body] = b.splitToRows(col1, b.splitAt(6));
     c.frameBottom(ctx, label);
@@ -558,11 +564,13 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), { valign: "center" }),
     ], { halign: "center" });
     blk.putIn(ctx, para, label, alignCenter);
+    yupper = Math.max(yupper, b.height(label));
   }
   {
     const [label, body] = b.splitToRows(col2, b.splitAt(6));
     c.frameBottom(ctx, label);
     c.drawText(ctx, "患者希望", label, "center", "center");
+    yupper = Math.max(yupper, b.height(label));
   }
   {
     const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
@@ -575,6 +583,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
     ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
+    yupper = Math.max(yupper, b.height(upper));
   }
   {
     const bb = b.modify(body, b.shrinkHoriz(3, 0), b.shrinkVert(0, 2), b.setHeight(2.5, "bottom"));
@@ -591,6 +600,13 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.textItem(ctx, "回）"),
     ]);
     line.render(ctx, bb);
+    ylower = Math.max(ylower, body.bottom - bb.top);
+  }
+  if (data.drugs) {
+    henkoufuka = b.modify(henkoufuka, b.shrinkVert(yupper, ylower));
+    kanjakibou = b.modify(kanjakibou, b.shrinkVert(yupper, ylower));
+    shohouBox = b.modify(shohouBox, b.shrinkVert(yupper, ylower));
+    drawShohou(ctx, henkoufuka, kanjakibou, shohouBox, data.drugs);
   }
 }
 
@@ -629,7 +645,7 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     }
     { // doctorName
       let showSecondDoctorName = false;
-      if( showSecondDoctorName ) {
+      if (showSecondDoctorName) {
         const bb = b.modify(doctorName, b.shrinkHoriz(15, 0));
         blk.drawText(ctx, data.doctorName ?? "", bb, {
           textBlockOpt: {
@@ -673,7 +689,7 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         });
       })
     }
-    if( text !== "") {
+    if (text !== "") {
       const bikouBox = bikou2;
       c.withTextColor(ctx, black, () => {
         c.withFont(ctx, "d3", () => {
@@ -683,7 +699,7 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
         });
       })
     }
-    if( text !== "") {
+    if (text !== "") {
       alert("too long bikou");
     }
   }
@@ -836,4 +852,23 @@ function drawTrail(ctx: DrawerContext, box: Box) {
       ]),
     ], { halign: "left" }).render(ctx, box);
   })
+}
+
+function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
+  shohouBox = b.modify(shohouBox, b.inset(1, 0));
+  c.withTextColor(ctx, black, () => {
+    c.withFont(ctx, "d3", () => {
+      for(let group of shohou.groups){
+        const drugBlocks: Block[] = [];
+        for(let drug of group.drugs){
+
+        }
+      }
+
+    })
+  })
+}
+
+function drugNameAndAmountLine(drug: Drug): string {
+  return `${drug.name}　${drug.amount}${drug.unit}`
 }

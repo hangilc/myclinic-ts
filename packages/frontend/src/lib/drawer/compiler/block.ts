@@ -508,6 +508,25 @@ export function textPackBlock(ctx: DrawerContext, text: string, box: Box, envs: 
   }
 }
 
+// StackedBlockBuilder ////////////////////////////////////////////////////////////////////////////
+
+export class StackedBlockBuilder {
+  blocks: Block[];
+
+  constructor(blocks: Block[]) {
+    this.blocks = blocks;
+  }
+
+  build(opt?: StackedBlockOpt): Block {
+    return stackedBlock(this.blocks, opt);
+  }
+
+  addBlock(block: Block): StackedBlockBuilder {
+    this.blocks.push(block);
+    return this;
+  }
+}
+
 // others /////////////////////////////////////////////////////////////////////////////////////////
 
 export type ParagraphOpt = {

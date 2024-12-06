@@ -1,3 +1,5 @@
+import type { Shohou } from "@/lib/parse-shohou";
+
 export interface Shohousen2024Data {
   clinicAddress?: string;
   clinicName?: string;
@@ -20,7 +22,7 @@ export interface Shohousen2024Data {
   hokenKubun?: "hihokensha" | "hifuyousha";
   koufuDate?: string; // YYYY-MM-DD
   validUptoDate?: string; // YYYY-MM-DD
-  drugs?: string;
+  drugs?: Shohou;
   bikou?: string;
   isDenshi?: boolean;
   accessCode?: string;
