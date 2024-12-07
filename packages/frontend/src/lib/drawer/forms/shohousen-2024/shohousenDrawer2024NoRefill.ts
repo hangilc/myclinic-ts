@@ -12,7 +12,6 @@ import { pad } from "@/lib/pad";
 import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, Shohou, Usage } from "@/lib/parse-shohou";
-import Column from "@/appoint/Column.svelte";
 import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[] {
@@ -29,12 +28,10 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[] {
   box = b.withSlice(box, 2.5, (box) => {
     c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", box, "center", "center");
   });
-  // box = b.modify(bounds, b.inset(2, 13, 2, 13));
   box = b.modify(bounds, b.inset(2, 11, 2, 3));
   const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
   drawUpperBox(ctx, upperBox, data);
   drawLowerBox(ctx, lowerBox, data);
-  // drawTrail(ctx, b.modify(box, b.flipDown(), b.setHeight(10, "top"), b.shiftDown(0.5)));
   return c.getOps(ctx);
 }
 
@@ -122,13 +119,13 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const [cell1, cell2] = b.splitToColumns(row1, b.evenSplitter(2));
     c.frameRight(ctx, cell1);
     { // cell1
-      const [c1, c2] = b.splitToColumns(cell1, blk.splitByExtent(["*", cellSize * 8]));
+      const [c1, c2] = b.splitToColumns(cell1, blk.splitByExtent("*", cellSize * 8));
       c.frameRight(ctx, c1);
       c.drawText(ctx, "公費負担者番号", c1, "center", "center");
       drawEightDigits(ctx, c2, data.futansha);
     }
     { // cell2
-      const [c1, c2] = b.splitToColumns(cell2, blk.splitByExtent(["*", cellSize * 8]));
+      const [c1, c2] = b.splitToColumns(cell2, blk.splitByExtent("*", cellSize * 8));
       c.frameRight(ctx, c1);
       c.drawText(ctx, "保険者番号", c1, "center", "center");
       drawEightDigits(ctx, c2, data.hokenshaBangou);
@@ -138,7 +135,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     const [cell3, cell4] = b.splitToColumns(row2, b.evenSplitter(2));
     c.frameRight(ctx, cell3);
     { // cell3
-      const [c1, c2] = b.splitToColumns(cell3, blk.splitByExtent(["*", cellSize * 7]));
+      const [c1, c2] = b.splitToColumns(cell3, blk.splitByExtent("*", cellSize * 7));
       c.frameRight(ctx, c1);
       const block = blk.stackedBlock([
         blk.textBlock(ctx, "公費負担医療",),
@@ -148,7 +145,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       drawSevenDigits(ctx, c2, data.jukyuusha);
     }
     { // cell4
-      const [c1, c2] = b.splitToColumns(cell4, blk.splitByExtent(["*", cellSize * 8]));
+      const [c1, c2] = b.splitToColumns(cell4, blk.splitByExtent("*", cellSize * 8));
       c.frameRight(ctx, c1);
       const block = blk.stackedBlock([
         blk.textBlock(ctx, "被保険者証・被保険"),
@@ -182,8 +179,7 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 
 function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [block1, block2, drugs, bikou, issueDate, pharma] =
-    b.splitToRows(box, blk.splitByExtent([33, 10, "*", 20, 10, 10]));
-    // b.splitToRows(box, blk.splitByExtent([33, 10, "*", 29, 13, 10, 10]));
+    b.splitToRows(box, blk.splitByExtent(33, 10, "*", 20, 10, 10));
   { // block1
     const [col1, col2] = b.splitToColumns(block1, b.evenSplitter(2));
     c.frame(ctx, col1);
@@ -308,7 +304,7 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     c.frameRight(ctx, left);
     let tb = blk.drawText(ctx, "被保険者", left, alignCenter);
     console.log("hokenKubun", data.hokenKubun);
-    if( data.hokenKubun === "hihokensha" ){
+    if (data.hokenKubun === "hihokensha") {
       c.withPen(ctx, "data-thin", () => {
         c.circle(ctx, b.cx(tb), b.cy(tb), c.currentFontSize(ctx) * 0.6);
       });
@@ -540,7 +536,7 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
       blk.textItem(ctx, "日"),
     ]);
     blk.putIn(ctx, line, issueLimit, alignCenter);
-    const [cLeft, cBody, cRight] = b.splitToColumns(comment, blk.splitByExtent([1.5, "*", 1.5]));
+    const [cLeft, cBody, cRight] = b.splitToColumns(comment, blk.splitByExtent(1.5, "*", 1.5));
     drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.25, 0)), { pen: "thin" });
     c.withFont(ctx, "f1.5", () => {
       const para = blk.stackedBlock([
@@ -584,7 +580,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   }
   {
     const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
-    const [cLeft, cBody, cRight] = b.splitToColumns(upper, blk.splitByExtent([1.5, "*", 1.5]));
+    const [cLeft, cBody, cRight] = b.splitToColumns(upper, blk.splitByExtent(1.5, "*", 1.5));
     drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.3, 0)));
     blk.putIn(ctx, blk.stackedBlock([
       blk.textBlock(ctx, "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）"),
@@ -595,23 +591,6 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
     yupper = Math.max(yupper, b.height(upper));
   }
-  // {
-  //   const bb = b.modify(body, b.shrinkHoriz(3, 0), b.shrinkVert(0, 2), b.setHeight(2.5, "bottom"));
-  //   const line = blk.rowBlock(c.currentFontSize(ctx), [
-  //     blk.textItem(ctx, "リフィル可"),
-  //     blk.gapItem(2),
-  //     blk.squareItem(2, {
-  //       squareBlockOpt: { pen: "thin" },
-  //       putInOpt: { halign: "center", valign: "center" },
-  //     }),
-  //     blk.gapItem(3),
-  //     blk.textItem(ctx, "("),
-  //     blk.gapItem(5),
-  //     blk.textItem(ctx, "回）"),
-  //   ]);
-  //   line.render(ctx, bb);
-  //   ylower = Math.max(ylower, body.bottom - bb.top);
-  // }
   if (data.drugs) {
     henkoufuka = b.modify(henkoufuka, b.shrinkVert(yupper, ylower));
     kanjakibou = b.modify(kanjakibou, b.shrinkVert(yupper, ylower));
@@ -669,21 +648,6 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 
     }
   }
-  // { // rows[2]
-  //   const [upper, lower] = b.splitToRows(rows[2], b.evenSplitter(2));
-  //   c.drawText(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）",
-  //     b.modify(upper, b.shrinkHoriz(8, 0)), "left", "center");
-  //   const lowerBlock = blk.rowBlock(c.currentFontSize(ctx), [
-  //     blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-  //     blk.gapItem(1),
-  //     blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
-  //     blk.gapItem(10),
-  //     blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-  //     blk.gapItem(1),
-  //     blk.textItem(ctx, "保険医療機関へ情報提供"),
-  //   ]);
-  //   blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
-  // }
   {
     let [bikou1, bikou2] = [upperRight, rows[1]];
     bikou1 = b.modify(bikou1, b.shrinkHoriz(1, 1), b.shrinkVert(1, 0));
@@ -715,79 +679,24 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   }
 }
 
-function drawKaisuu(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
-  const rows = b.splitToRows(box, b.evenSplitter(3));
-  { // rows[0]
-    const bb = b.modify(rows[0], b.shrinkHoriz(2.5, 0));
-    c.withFont(ctx, "f2.3", () => {
-      c.drawText(ctx, "調剤実施回数（調剤回数に応じて、□に「レ」又は「×」を記載するとともに、調剤日及び次回調剤予定日を記載すること。）",
-        bb, "left", "center");
-    })
-  }
-  const font = "f2.3";
-  let tab1: number = 0;
-  let tab2: number = 0;
-  { // rows[2]
-    const block = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.advanceToItem(7),
-      blk.textItem(ctx, "次回調剤予定日（", { textBlockOpt: { font } }),
-      blk.gapItem(0.7, { extentOpt: { callback: (_, right) => tab1 = right } }),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
-      blk.advanceToItem(52),
-      blk.textItem(ctx, "次回調剤予定日（", { textBlockOpt: { font } }),
-      blk.gapItem(0.7, { extentOpt: { callback: (_, right) => tab2 = right } }),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
-    ]);
-    blk.putIn(ctx, block, b.modify(rows[2], b.shiftUp(0.7)), { halign: "left", valign: "center" });
-  }
-  { // rows[1]
-    const block = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.advanceToItem(5),
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.advanceToItem(7),
-      blk.textItem(ctx, "１回目調剤日（", { textBlockOpt: { font } }),
-      blk.advanceToItem(tab1),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
-      blk.advanceToItem(50),
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.advanceToItem(52),
-      blk.textItem(ctx, "２回目調剤日（", { textBlockOpt: { font } }),
-      blk.advanceToItem(tab2),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
-      blk.advanceToItem(97),
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.advanceToItem(99),
-      blk.textItem(ctx, "３回目調剤日（", { textBlockOpt: { font } }),
-      blk.gapItem(3),
-      ...dateItems(ctx),
-      blk.textItem(ctx, "）", { textBlockOpt: { font } }),
-    ]);
-    blk.putIn(ctx, block, rows[1], { halign: "left", valign: "center" });
-  }
-}
-
-function dateItems(ctx: DrawerContext): RowItem[] {
-  let gap = 0.5;
-  let width = 2.5;
-  return [
-    blk.gapItem(gap),
-    blk.gapItem(width),
-    blk.gapItem(gap),
-    blk.textItem(ctx, "年"),
-    blk.gapItem(gap),
-    blk.gapItem(width),
-    blk.gapItem(gap),
-    blk.textItem(ctx, "月"),
-    blk.gapItem(gap),
-    blk.gapItem(width),
-    blk.gapItem(gap),
-    blk.textItem(ctx, "日"),
-  ]
-}
+// function dateItems(ctx: DrawerContext): RowItem[] {
+//   let gap = 0.5;
+//   let width = 2.5;
+//   return [
+//     blk.gapItem(gap),
+//     blk.gapItem(width),
+//     blk.gapItem(gap),
+//     blk.textItem(ctx, "年"),
+//     blk.gapItem(gap),
+//     blk.gapItem(width),
+//     blk.gapItem(gap),
+//     blk.textItem(ctx, "月"),
+//     blk.gapItem(gap),
+//     blk.gapItem(width),
+//     blk.gapItem(gap),
+//     blk.textItem(ctx, "日"),
+//   ]
+// }
 
 function drawIssueDate(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const cols = b.splitToColumns(box, b.splitAt(25, 67, 98));
@@ -837,59 +746,40 @@ function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   drawSevenDigits(ctx, c4, data.jukyuusha2);
 }
 
-function drawTrail(ctx: DrawerContext, box: Box) {
-  const tab = 6;
-  c.withFont(ctx, "f1.8", () => {
-    blk.stackedBlock([
-      blk.rowBlock(c.currentFontSize(ctx), [
-        blk.gapItem(0.5),
-        blk.textItem(ctx, "備考"),
-        blk.advanceToItem(tab),
-        blk.textItem(ctx, "１．「処方」欄には、薬名、分量、用法及び用量を記載すること。")
-      ]),
-      blk.rowBlock(c.currentFontSize(ctx), [
-        blk.advanceToItem(tab),
-        blk.textItem(ctx, "２．この用紙は、Ａ列５番を標準とすること。")
-      ]),
-      blk.rowBlock(c.currentFontSize(ctx), [
-        blk.advanceToItem(tab),
-        blk.textItem(ctx, "３．療養の給付及び公費負担医療に関する費用の請求に関する命令（昭和51年厚生省令第36号）第１条の公費負担医療については、「保健医療機関」とある")
-      ]),
-      blk.rowBlock(c.currentFontSize(ctx), [
-        blk.advanceToItem(tab),
-        blk.gapItem(2.5),
-        blk.textItem(ctx, "のは「公費負担医療の担当医療機関」と、「保険医氏名」とあるのは「公費負担医療の担当医氏名」と読み替えるものとすること。"),
-      ]),
-    ], { halign: "left" }).render(ctx, box);
-  })
-}
-
 function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
   let font = "d3";
   let fontSize = c.getFontSizeOf(ctx, font);
-  const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3 ;
+  let leading = 0;
+  let lastLineHeight = leading + fontSize;
+  const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3;
   const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
   const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
-  const henkoufukaCol = new ColumnBlockBuilder(b.width(henkoufuka));
-  const kanjakibouCol = new ColumnBlockBuilder(b.width(kanjakibou));
-  const indexCol = new ColumnBlockBuilder(indexWidth);
   const mainCol = new ColumnBlockBuilder(b.width(mainBox));
-  const cols = [henkoufukaCol, kanjakibouCol, indexCol, mainCol];
   c.withTextColor(ctx, black, () => {
     c.withFont(ctx, font, () => {
       shohou.groups.forEach((group, groupIndex) => {
-        indexCol.addBlock(blk.textBlock(ctx, indexLabel(groupIndex + 1)));
+        const groupCol = new ColumnBlockBuilder(b.width(mainBox));
         group.drugs.forEach((drug, drugIndex) => {
-          mainCol.addBlock(blk.textBlock(ctx, drugNameAndAmountLine(drug)));
+          groupCol.addBlock(
+            blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug)), blk.boxCallback(box => {
+              if (drugIndex === 0) {
+                const top = box.top - mainBox.top;
+                const bottom = box.bottom - mainBox.top;
+                const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
+                blk.drawText(ctx, indexLabel(groupIndex + 1), ibox, { halign: "right", valign: "center" });
+              }
+            }))
+          );
         });
-        mainCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
-        const y = Math.max(...cols.map(col => col.currentHeight()));
-        cols.forEach(col => col.advanceTo(y));
+        groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
+        const remain = b.height(mainBox) - mainCol.currentHeight() - lastLineHeight;
+        if( groupCol.currentHeight() <= remain ){
+          mainCol.addBlock(groupCol.build());
+        } else {
+          console.log("next page");
+        }
       });
       mainCol.addBlock(blk.modify(blk.textBlock(ctx, "--- 以下余白 ---"), blk.extendLeft(20)));
-      henkoufukaCol.build().render(ctx, henkoufuka);
-      kanjakibouCol.build().render(ctx, kanjakibou);
-      indexCol.build().render(ctx, indexBox);
       mainCol.build().render(ctx, mainBox);
     })
   })
@@ -904,7 +794,7 @@ function drugNameAndAmountLine(drug: Drug): string {
 }
 
 function drugUsageLine(usage: Usage): string {
-  switch(usage.kind){
+  switch (usage.kind) {
     case "days": {
       return `${usage.usage}　${usage.days}日分`;
     }

@@ -54,6 +54,17 @@ export function extendLeft(offset: number): BlockModifier {
   }
 }
 
+export function boxCallback(cb: (box: Box) => void): BlockModifier {
+  return (block: Block): Block => {
+    return Object.assign({}, block, {
+      render: (ctx: DrawerContext, box: Box) => {
+        cb(box);
+        block.render(ctx, box);
+      }
+    })
+  }
+}
+
 export interface TextBlockOpt {
   font?: string;
   color?: Color;
@@ -268,7 +279,7 @@ function resolveExtent(exts: Extent[], maxSize?: number): number[] {
 
 // Splitter //////////////////////////////////////////////////////////////////////////
 
-export function splitByExtent(exts: ("*" | number)[]): b.Splitter {
+export function splitByExtent(...exts: ("*" | number)[]): b.Splitter {
   function cvt(ext: "*" | number): Extent {
     if (ext === "*") {
       return { kind: "expand" };
@@ -559,6 +570,19 @@ export class ColumnBlockBuilder {
     });
     this.ypos += block.height;
     return this;
+  }
+
+  popBlock(): Block | undefined {
+    const item = this.items.pop();
+    if( item === undefined ){
+      return item;
+    } else {
+      this.ypos = item.y;
+      if( this.items.length > 0 ){
+        this.ypos -= this.leading;
+      }
+      item.block;
+    }
   }
 
   currentHeight(): number {

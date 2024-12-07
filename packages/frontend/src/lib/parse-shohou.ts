@@ -116,7 +116,6 @@ function groupIndex(cb?: Callback): Tokenizer {
 
 function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: string }) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
-    console.log("enter DrugNameAndAmount", src.substring(start, start + 10));
     let data = {
       name: "", amount: "", unit: ""
     }
@@ -144,7 +143,6 @@ function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: str
 
 function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
-    console.log("enter drugAmount", src.substring(start, start + 10));
     let amount = "";
     let unit = "";
     let end = seq(
@@ -162,19 +160,12 @@ function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Toke
           digits(1, undefined, s => amount += s),
         )
       ),
-      drugUnit(s => unit += s),
+      report("drugUnit", drugUnit(s => unit += s)),
       peek(seq(
         whitespaces(),
         eol(),
       ))
     )(src, start);
-    {
-      if( end !== undefined ){
-        console.log("drugAmount matches", src.substring(start, end));
-      } else {
-        console.log("drugAmount fails");
-      }
-    }
     if (end !== undefined) {
       if (cb) {
         cb({ amount, unit });
@@ -191,12 +182,7 @@ function drugUnit(cb?: Callback): Tokenizer {
       str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
     )(src, start);
     if( end !== undefined ){
-      if( cb ){
-        console.log("drugUnit matches", src.substring(start, end));
-        cb(src.substring(start, end));
-      } else {
-        console.log("drugUnit fails");
-      }
+      if( cb ){ cb(src.substring(start, end)) }
     }
     return end;
   }
@@ -472,5 +458,18 @@ function nop(f: (src: string, start: number) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     f(src, start);
     return start;
+  }
+}
+
+function report(label: string, tok: Tokenizer): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    console.log(`matching ${label}: ${src.substring(start, start + 10)}`);
+    let end = tok(src, start);
+    if( end !== undefined ){
+      console.log(`matched ${label}: ${src.substring(start, end)}`);
+    } else {
+      console.log(`matching ${label} failed`);
+    }
+    return end;
   }
 }
