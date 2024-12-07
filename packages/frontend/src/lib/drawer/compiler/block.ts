@@ -45,6 +45,15 @@ export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) =
   }
 }
 
+export function extendLeft(offset: number): BlockModifier {
+  return (block: Block): Block => {
+    return mkBlock(block.width + offset, block.height, (ctx: DrawerContext, box: Box) => {
+      box = b.modify(box, b.shrinkHoriz(offset, 0));
+      block.render(ctx, box);
+    });
+  }
+}
+
 export interface TextBlockOpt {
   font?: string;
   color?: Color;
@@ -71,11 +80,12 @@ export interface DrawTextOpt {
   textBlockOpt?: TextBlockOpt;
 }
 
-export function drawText(ctx: DrawerContext, text: string, box: Box, opt?: DrawTextOpt) {
+export function drawText(ctx: DrawerContext, text: string, box: Box, opt?: DrawTextOpt): Box {
   const textBlockOpt = opt?.textBlockOpt;
   let block = textBlock(ctx, text, textBlockOpt);
   const bb = b.align(boundsOfBlock(block), box, opt?.halign ?? "left", opt?.valign ?? "top");
   block.render(ctx, bb);
+  return bb;
 }
 
 export function emptyBlock(opt?: BlockOpt): Block {
@@ -527,7 +537,6 @@ export class ColumnBlockBuilder {
   build(opt?: ColumnBlockBuilderOpt): Block {
     const render = (ctx: DrawerContext, box: Box) => {
       this.items.forEach(item => {
-        console.log("y", item.y);
         const bb = b.modify(box, b.setHeight(item.block.height, "top"), b.shiftDown(item.y));
         item.block.render(ctx, bb);
       })

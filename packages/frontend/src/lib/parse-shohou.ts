@@ -116,6 +116,7 @@ function groupIndex(cb?: Callback): Tokenizer {
 
 function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: string }) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
+    console.log("enter DrugNameAndAmount", src.substring(start, start + 10));
     let data = {
       name: "", amount: "", unit: ""
     }
@@ -129,8 +130,8 @@ function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: str
         seq(
           whitespaces(),
           drugAmount(d => { Object.assign(data, d) }),
-          // whitespaces(),
-          // eol(true),
+          whitespaces(),
+          peek(eol()),
         )
       ),
     )(src, start);
@@ -143,6 +144,7 @@ function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: str
 
 function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
+    console.log("enter drugAmount", src.substring(start, start + 10));
     let amount = "";
     let unit = "";
     let end = seq(
@@ -163,9 +165,16 @@ function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Toke
       drugUnit(s => unit += s),
       peek(seq(
         whitespaces(),
-        peek(eol()),
+        eol(),
       ))
     )(src, start);
+    {
+      if( end !== undefined ){
+        console.log("drugAmount matches", src.substring(start, end));
+      } else {
+        console.log("drugAmount fails");
+      }
+    }
     if (end !== undefined) {
       if (cb) {
         cb({ amount, unit });
@@ -176,10 +185,21 @@ function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Toke
 }
 
 function drugUnit(cb?: Callback): Tokenizer {
-  return withCallback(or(
-    str("錠"), str("カプセル"), str("ｇ"), str("ｍｇ"), str("包"), str("ｍＬ"), str("ブリスター"),
-    str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
-  ), cb);
+  return (src: string, start: number): number | undefined => {
+    let end = or(
+      str("錠"), str("カプセル"), str("ｇ"), str("ｍｇ"), str("包"), str("ｍＬ"), str("ブリスター"),
+      str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
+    )(src, start);
+    if( end !== undefined ){
+      if( cb ){
+        console.log("drugUnit matches", src.substring(start, end));
+        cb(src.substring(start, end));
+      } else {
+        console.log("drugUnit fails");
+      }
+    }
+    return end;
+  }
 }
 
 function usageDays(cb?: (data: Usage) => void): Tokenizer {
@@ -444,6 +464,13 @@ function peek(tok: Tokenizer): Tokenizer {
 function dbg(message: string): Tokenizer {
   return (src: string, start: number): number | undefined => {
     console.log(`DEBUG: ${message} ${src.substring(start, start + 10)}`);
+    return start;
+  }
+}
+
+function nop(f: (src: string, start: number) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    f(src, start);
     return start;
   }
 }

@@ -207,7 +207,7 @@ function dataCirc(draw: boolean): BlockModifier {
     orig(ctx, box);
     if (draw) {
       c.withPen(ctx, "data-thin", () => {
-        c.circle(ctx, b.cx(box), b.cy(box), b.height(box) * 0.7);
+        c.circle(ctx, b.cx(box), b.cy(box), b.height(box) * 0.6);
       })
     }
   });
@@ -306,8 +306,14 @@ function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     c.drawText(ctx, "区　分", c1, "center", "center");
     const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
     c.frameRight(ctx, left);
-    c.drawText(ctx, "被保険者", left, "center", "center");
-    c.drawText(ctx, "被扶養者", right, "center", "center");
+    let tb = blk.drawText(ctx, "被保険者", left, alignCenter);
+    console.log("hokenKubun", data.hokenKubun);
+    if( data.hokenKubun === "hihokensha" ){
+      c.withPen(ctx, "data-thin", () => {
+        c.circle(ctx, b.cx(tb), b.cy(tb), c.currentFontSize(ctx) * 0.6);
+      });
+    }
+    blk.drawText(ctx, "被扶養者", right, alignCenter);
   }
 }
 
@@ -880,6 +886,7 @@ function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohou
         const y = Math.max(...cols.map(col => col.currentHeight()));
         cols.forEach(col => col.advanceTo(y));
       });
+      mainCol.addBlock(blk.modify(blk.textBlock(ctx, "--- 以下余白 ---"), blk.extendLeft(20)));
       henkoufukaCol.build().render(ctx, henkoufuka);
       kanjakibouCol.build().render(ctx, kanjakibou);
       indexCol.build().render(ctx, indexBox);

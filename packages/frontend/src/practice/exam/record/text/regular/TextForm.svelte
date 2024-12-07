@@ -194,6 +194,7 @@
       hihokenshaKigou = shahokokuho.hihokenshaKigou;
       hihokenshaBangou = shahokokuho.hihokenshaBangou;
       edaban = shahokokuho.edaban;
+      hokenKubun = shahokokuho.honninStore !== 0 ? "hihokensha" : "hifuyousha";
     } else if (hoken.koukikourei) {
       hokenshaBangou = hoken.koukikourei.hokenshaBangou;
       hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
@@ -255,8 +256,7 @@
         ops,
         width: 148,
         height: 210,
-        // scale: 3,
-        scale: 8,
+        scale: 3,
         kind: "shohousen2024",
         title: "処方箋印刷",
       },
