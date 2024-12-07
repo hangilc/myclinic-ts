@@ -29,7 +29,8 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[] {
   box = b.withSlice(box, 2.5, (box) => {
     c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", box, "center", "center");
   });
-  box = b.modify(bounds, b.inset(2, 13, 2, 3));
+  // box = b.modify(bounds, b.inset(2, 13, 2, 13));
+  box = b.modify(bounds, b.inset(2, 11, 2, 3));
   const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
   drawUpperBox(ctx, upperBox, data);
   drawLowerBox(ctx, lowerBox, data);
@@ -181,8 +182,8 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 
 function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   const [block1, block2, drugs, bikou, issueDate, pharma] =
-    b.splitToRows(box, blk.splitByExtent([33, 10, "*", 23, 10, 10]));
-    // b.splitToRows(box, blk.splitByExtent([33, 10, "*", 29, 10, 10]));
+    b.splitToRows(box, blk.splitByExtent([33, 10, "*", 20, 10, 10]));
+    // b.splitToRows(box, blk.splitByExtent([33, 10, "*", 29, 13, 10, 10]));
   { // block1
     const [col1, col2] = b.splitToColumns(block1, b.evenSplitter(2));
     c.frame(ctx, col1);
@@ -560,35 +561,34 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   let kanjakibou: Box = col2;
   let shohouBox: Box = body;
   {
-    // const [label, body] = b.splitToRows(col1, b.splitAt(6));
-    const [label, body] = b.splitToRows(col1, b.splitAt(3.5));
+    const [label, body] = b.splitToRows(col1, b.splitAt(6));
     c.frameBottom(ctx, label);
     const para = blk.stackedBlock([
-      blk.textBlock(ctx, "変更不可", { font: "f1.5"}),
+      blk.textBlock(ctx, "変更不可"),
       blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), { valign: "center" }),
-    ], { halign: "center", leading: -0.4 });
+    ], { halign: "center" });
     blk.putIn(ctx, para, label, alignCenter);
     yupper = Math.max(yupper, b.height(label));
   }
   {
-    const [label, body] = b.splitToRows(col2, b.splitAt(3.5));
+    const [label, body] = b.splitToRows(col2, b.splitAt(6));
     c.frameBottom(ctx, label);
-    blk.drawText(ctx, "患者希望", label, { ...alignCenter, textBlockOpt: { font: "f1.5" }});
+    c.drawText(ctx, "患者希望", label, "center", "center");
     yupper = Math.max(yupper, b.height(label));
   }
-  // {
-  //   const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
-  //   const [cLeft, cBody, cRight] = b.splitToColumns(upper, blk.splitByExtent([1.5, "*", 1.5]));
-    // drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.3, 0)));
-    // blk.putIn(ctx, blk.stackedBlock([
-    //   blk.textBlock(ctx, "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）"),
-    //   blk.textBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
-    //   blk.textBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
-    //   blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
-    // ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
-    // drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
-  //   yupper = Math.max(yupper, b.height(upper));
-  // }
+  {
+    const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
+    const [cLeft, cBody, cRight] = b.splitToColumns(upper, blk.splitByExtent([1.5, "*", 1.5]));
+    drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.3, 0)));
+    blk.putIn(ctx, blk.stackedBlock([
+      blk.textBlock(ctx, "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）"),
+      blk.textBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
+      blk.textBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
+      blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
+    ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
+    drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
+    yupper = Math.max(yupper, b.height(upper));
+  }
   // {
   //   const bb = b.modify(body, b.shrinkHoriz(3, 0), b.shrinkVert(0, 2), b.setHeight(2.5, "bottom"));
   //   const line = blk.rowBlock(c.currentFontSize(ctx), [
@@ -615,36 +615,10 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 }
 
 function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
-  function bottomBlock(): Block {
-    return blk.stackedBlock([
-      blk.rowBlock(c.currentFontSize(ctx), [
-        blk.textItem(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）"),
-        blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-        blk.gapItem(1),
-        blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
-        blk.gapItem(10),
-        blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-        blk.gapItem(1),
-        blk.textItem(ctx, "保険医療機関へ情報提供"),
-        ])
-    ])
-    c.drawText(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）",
-      b.modify(upper, b.shrinkHoriz(8, 0)), "left", "center");
-    const lowerBlock = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.gapItem(1),
-      blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
-      blk.gapItem(10),
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.gapItem(1),
-      blk.textItem(ctx, "保険医療機関へ情報提供"),
-    ]);
-    blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
-  }
   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
   c.frameRight(ctx, mark);
   c.drawTextJustifiedVertically(ctx, "備考", b.modify(mark, b.setHeight(10, "center")), "center");
-  const rows = b.splitToRows(body, b.splitAt(13, 22));
+  const rows = b.splitToRows(body, b.splitAt(13));
   const [upperLeft, upperRight] = b.splitToColumns(rows[0], b.splitAt(70));
   { // rows[0]
     const bb = upperLeft;
@@ -689,21 +663,21 @@ function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
 
     }
   }
-  { // rows[2]
-    const [upper, lower] = b.splitToRows(rows[2], b.evenSplitter(2));
-    c.drawText(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）",
-      b.modify(upper, b.shrinkHoriz(8, 0)), "left", "center");
-    const lowerBlock = blk.rowBlock(c.currentFontSize(ctx), [
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.gapItem(1),
-      blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
-      blk.gapItem(10),
-      blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
-      blk.gapItem(1),
-      blk.textItem(ctx, "保険医療機関へ情報提供"),
-    ]);
-    blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
-  }
+  // { // rows[2]
+  //   const [upper, lower] = b.splitToRows(rows[2], b.evenSplitter(2));
+  //   c.drawText(ctx, "保険薬局が調剤時に残薬を確認した場合の対応（特に指示がある場合は「レ」又は「×」を記載すること。）",
+  //     b.modify(upper, b.shrinkHoriz(8, 0)), "left", "center");
+  //   const lowerBlock = blk.rowBlock(c.currentFontSize(ctx), [
+  //     blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
+  //     blk.gapItem(1),
+  //     blk.textItem(ctx, "保険医療機関へ疑義照会した上で調剤"),
+  //     blk.gapItem(10),
+  //     blk.squareItem(2, { squareBlockOpt: { pen: "thin" } }),
+  //     blk.gapItem(1),
+  //     blk.textItem(ctx, "保険医療機関へ情報提供"),
+  //   ]);
+  //   blk.putIn(ctx, lowerBlock, b.modify(lower, b.shrinkHoriz(24, 0)), { halign: "left", valign: "center" });
+  // }
   {
     let [bikou1, bikou2] = [upperRight, rows[1]];
     bikou1 = b.modify(bikou1, b.shrinkHoriz(1, 1), b.shrinkVert(1, 0));
