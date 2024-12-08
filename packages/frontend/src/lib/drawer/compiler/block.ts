@@ -5,6 +5,7 @@ import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakLines, breakSingleLine } from "./break-lines";
+import Column from "@/appoint/Column.svelte";
 
 export type Renderer = (ctx: DrawerContext, box: Box) => void;
 
@@ -545,6 +546,14 @@ export class ColumnBlockBuilder {
     this.width = width;
   }
 
+  clone(): ColumnBlockBuilder {
+    const builder = new ColumnBlockBuilder(this.width);
+    builder.items = this.items.map(item => Object.assign({}, item));
+    builder.leading = this.leading;
+    builder.ypos = this.ypos;
+    return builder;
+  }
+
   build(opt?: ColumnBlockBuilderOpt): Block {
     const render = (ctx: DrawerContext, box: Box) => {
       this.items.forEach(item => {
@@ -592,6 +601,10 @@ export class ColumnBlockBuilder {
   advanceTo(ypos: number): ColumnBlockBuilder {
     this.ypos = ypos;
     return this;
+  }
+
+  isEmpty(): boolean {
+    return this.items.length === 0;
   }
 }
 

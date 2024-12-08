@@ -160,7 +160,7 @@ function drugAmount(cb?: (data: { amount: string, unit: string }) => void): Toke
           digits(1, undefined, s => amount += s),
         )
       ),
-      report("drugUnit", drugUnit(s => unit += s)),
+      report("drugUnit", false, drugUnit(s => unit += s)),
       peek(seq(
         whitespaces(),
         eol(),
@@ -181,8 +181,8 @@ function drugUnit(cb?: Callback): Tokenizer {
       str("錠"), str("カプセル"), str("ｇ"), str("ｍｇ"), str("包"), str("ｍＬ"), str("ブリスター"),
       str("瓶"), str("個"), str("キット"), str("枚"), str("パック"), str("袋"), str("本"),
     )(src, start);
-    if( end !== undefined ){
-      if( cb ){ cb(src.substring(start, end)) }
+    if (end !== undefined) {
+      if (cb) { cb(src.substring(start, end)) }
     }
     return end;
   }
@@ -461,14 +461,18 @@ function nop(f: (src: string, start: number) => void): Tokenizer {
   }
 }
 
-function report(label: string, tok: Tokenizer): Tokenizer {
+function report(label: string, active: boolean, tok: Tokenizer): Tokenizer {
   return (src: string, start: number): number | undefined => {
-    console.log(`matching ${label}: ${src.substring(start, start + 10)}`);
+    if (active) {
+      console.log(`matching ${label}: ${src.substring(start, start + 10)}`);
+    }
     let end = tok(src, start);
-    if( end !== undefined ){
-      console.log(`matched ${label}: ${src.substring(start, end)}`);
-    } else {
-      console.log(`matching ${label} failed`);
+    if (active) {
+      if (end !== undefined) {
+        console.log(`matched ${label}: ${src.substring(start, end)}`);
+      } else {
+        console.log(`matching ${label} failed`);
+      }
     }
     return end;
   }

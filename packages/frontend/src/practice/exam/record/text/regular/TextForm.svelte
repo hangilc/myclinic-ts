@@ -179,7 +179,7 @@
 
   async function doPrintShohousen2024() {
     const shohou = parseShohou(text.content, false);
-    console.log("shohou", JSON.stringify(shohou, undefined, 2));
+    // console.log("shohou", JSON.stringify(shohou, undefined, 2));
     const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
@@ -248,12 +248,12 @@
       validUptoDate: undefined,
       drugs: shohou,
     };
-    const ops = drawShohousen2024NoRefill(data);
+    const pages = drawShohousen2024NoRefill(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        ops,
+        pages,
         width: 148,
         height: 210,
         scale: 3,
