@@ -7,7 +7,7 @@ import { A5 } from "../../compiler/paper-size";
 import type { Box } from "../../compiler/box";
 import * as blk from "../../compiler/block";
 import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
-import { ColumnBlockBuilder, type Block, type BlockModifier, type Renderer, type RowItem } from "../../compiler/block";
+import { ColumnBlockBuilder, type Block, type BlockModifier, type Renderer, type RowItem, type TextBlockOpt } from "../../compiler/block";
 import { pad } from "@/lib/pad";
 import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
@@ -15,22 +15,26 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
-  let shohouData = data.drugs ? initPrepareShohouData("d3", data.drugs) : undefined;
+  let shohouData: PrepareShohouData | undefined = data.drugs ? initPrepareShohouData("d3", data.drugs) : undefined;
   const paper = b.mkBox(0, 0, A5.width, A5.height);
   const bounds = b.modify(paper, b.inset(3));
   let iter = 0;
   const pages: Op[][] = [];
-  while(true){
+  while (true) {
     const ctx = prepareDrawerContext();
-    const page = preparePage(ctx, b.width(bounds), b.height(bounds), data);
-    page.block.render(ctx, bounds);
+    const layout = drawPage(ctx, bounds, data);
     pages.push(c.getOps(ctx));
-    if( shohouData === undefined ){
+    console.log("shohouData", shohouData);
+    if (shohouData === undefined) {
       break;
     } else {
-      break;
+      const result = drawShohou(ctx, layout, shohouData);
+      if (result.error) {
+        throw new Error(result.error);
+      }
+      shohouData = result.rest;
     }
-    if( iter++ > 10 ){
+    if (iter++ > 10) {
       throw new Error("too many iteration");
     }
   }
@@ -66,21 +70,19 @@ function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "data-thin", 0, 0, 0, 0.1);
 }
 
-function preparePage(ctx: DrawerContext, width: number, height: number, data: Shohousen2024Data): {
-  block: Block;
+function drawPage(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
+  henkoufuka: Box, kanjakibou: Box; shohouBox: Box;
 } {
-  const render = (ctx: DrawerContext, bounds: Box) => {
-    c.frame(ctx, bounds);
-    let box = b.withSlice(bounds, 6, box => drawTitle(ctx, b.modify(box, b.setWidth(30, "center"))));
-    box = b.withSlice(box, 2.5, (box) => {
-      c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", box, "center", "center");
-    });
-    box = b.modify(bounds, b.inset(2, 11, 2, 3));
-    const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
-    drawUpperBox(ctx, upperBox, data);
-    drawLowerBox(ctx, lowerBox, data);
-  }
-  return { block: blk.mkBlock(width, height, render) };
+  c.frame(ctx, box);
+  let bb = b.withSlice(box, 6, box => drawTitle(ctx, b.modify(box, b.setWidth(30, "center"))));
+  bb = b.withSlice(bb, 2.5, (box) => {
+    c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", box, "center", "center");
+  });
+  box = b.modify(box, b.inset(2, 11, 2, 3));
+  const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
+  drawUpperBox(ctx, upperBox, data);
+  const lowerInfo = drawLowerBox(ctx, lowerBox, data);
+  return { ...lowerInfo };
 }
 
 const alignCenter = {
@@ -206,7 +208,9 @@ function drawUpperBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   }
 }
 
-function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
+  henkoufuka: Box, kanjakibou: Box; shohouBox: Box;
+} {
   const [block1, block2, drugs, bikou, issueDate, pharma] =
     b.splitToRows(box, blk.splitByExtent(33, 10, "*", 20, 10, 10));
   { // block1
@@ -217,11 +221,11 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     drawClinicBox(ctx, col2, data);
   }
   drawIssueBox(ctx, block2, data);
-  drawDrugs(ctx, drugs, data);
+  let layout = drawDrugs(ctx, drugs);
   drawBikou(ctx, bikou, data);
-  // drawKaisuu(ctx, kaisuu, data);
   drawIssueDate(ctx, issueDate, data);
   drawPharma(ctx, pharma, data);
+  return layout;
 }
 
 const black: Color = { r: 0, g: 0, b: 0 };
@@ -579,14 +583,15 @@ function drawIssueBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
   }
 }
 
-function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+function drawDrugs(ctx: DrawerContext, box: Box): {
+  henkoufuka: Box; kanjakibou: Box; shohouBox: Box;
+} {
   const [mark, col1, col2, body] = b.splitToColumns(box, b.splitAt(5, 18, 31));
   [mark, col1, col2].forEach(box => c.frameRight(ctx, box))
   {
     c.drawTextJustifiedVertically(ctx, "処方", b.modify(mark, b.shrinkVert(14, 14)), "center");
   }
   let yupper = 0;
-  let ylower = 0;
   let henkoufuka: Box = col1;
   let kanjakibou: Box = col2;
   let shohouBox: Box = body;
@@ -619,12 +624,10 @@ function drawDrugs(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
     yupper = Math.max(yupper, b.height(upper));
   }
-  // if (data.drugs) {
-  //   henkoufuka = b.modify(henkoufuka, b.shrinkVert(yupper, ylower));
-  //   kanjakibou = b.modify(kanjakibou, b.shrinkVert(yupper, ylower));
-  //   shohouBox = b.modify(shohouBox, b.shrinkVert(yupper, ylower));
-  //   drawShohou(ctx, henkoufuka, kanjakibou, shohouBox, data.drugs);
-  // }
+  henkoufuka = b.modify(henkoufuka, b.shrinkVert(yupper, 0));
+  kanjakibou = b.modify(kanjakibou, b.shrinkVert(yupper, 0));
+  shohouBox = b.modify(shohouBox, b.shrinkVert(yupper, 0));
+  return { henkoufuka, kanjakibou, shohouBox };
 }
 
 function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
@@ -789,104 +792,96 @@ function mkLastLineBlock(ctx: DrawerContext, data: PrepareShohouData): Block {
   }), blk.extendLeft(20));
 }
 
-function prepareShohouBlock(ctx: DrawerContext, width: number, height: number, data: PrepareShohouData): {
-  blockOrError: Block | string;
-  rest?: PrepareShohouData;
-} {
-  const blocks: Block[] = [];
+function drawShohou(ctx: DrawerContext, layout: { henkoufuka: Box, kanjakibou: Box, shohouBox: Box },
+  data: PrepareShohouData): {
+    error?: string;
+    rest?: PrepareShohouData;
+  } {
   let font = data.font;
   let fontSize = c.getFontSizeOf(ctx, font);
   let leading = data.leading;
   const indexWidth = data.totalGroups < 10 ? fontSize * 2 : fontSize * 3;
-  const shohouBox = b.mkBox(0, 0, width, height);
-  const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
-  const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
+  const indexBox = b.modify(layout.shohouBox, b.setWidth(indexWidth, "left"));
+  const mainBox = b.modify(layout.shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
   let mainCol = new ColumnBlockBuilder(b.width(mainBox));
   let error: string | undefined = undefined;
   let rest: PrepareShohouData | undefined = undefined;
   let groupIndex = data.groupIndex;
-  c.withTextColor(ctx, black, () => {
-    c.withFont(ctx, font, () => {
-      data.groups.forEach((group, localGroupIndex) => {
-        const groupCol = new ColumnBlockBuilder(b.width(mainBox));
-        group.drugs.forEach((drug, drugIndex) => {
-          groupCol.addBlock(
-            blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug)), blk.boxCallback(box => {
-              if (drugIndex === 0) {
-                const top = box.top - mainBox.top;
-                const bottom = box.bottom - mainBox.top;
-                const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
-                blk.drawText(ctx, indexLabel(groupIndex++), ibox, { halign: "right", valign: "center" });
-              }
-            }))
-          );
-        });
-        groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
-        const groupBlock = groupCol.build();
-        if (mainCol.currentHeight() + leading + groupBlock.height <= height) {
-          mainCol.addBlock(groupBlock);
-        } else {
-          if (mainCol.isEmpty()) {
-            error = "薬剤グループ表示の高さが高すぎます";
-            return;
-          } else {
-            rest = Object.assign({}, data, {
-              groupIndex,
-              groups: data.groups.slice(localGroupIndex),
-            })
+  const textBlockOpt: TextBlockOpt = { font, color: black };
+  data.groups.forEach((group, localGroupIndex) => {
+    const groupCol = new ColumnBlockBuilder(b.width(mainBox));
+    group.drugs.forEach((drug, drugIndex) => {
+      groupCol.addBlock(
+        blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug), textBlockOpt), blk.boxCallback(box => {
+          if (drugIndex === 0) {
+            const top = box.top - mainBox.top;
+            const bottom = box.bottom - mainBox.top;
+            const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
+            blk.drawText(ctx, indexLabel(groupIndex++), ibox, { halign: "right", valign: "center", textBlockOpt, });
           }
-        }
-      });
-    })
-  })
-  if (error !== undefined) {
-    return { blockOrError: error };
-  } else {
-    return {
-      blockOrError: mainCol.build(),
-      rest,
+        }))
+      );
+    });
+    groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage), textBlockOpt));
+    const groupBlock = groupCol.build();
+    if (mainCol.currentHeight() + leading + groupBlock.height <= b.height(layout.shohouBox)) {
+      mainCol.addBlock(groupBlock);
+    } else {
+      if (mainCol.isEmpty()) {
+        error = "薬剤グループ表示の高さが高すぎます";
+        return;
+      } else {
+        rest = Object.assign({}, data, {
+          groupIndex,
+          groups: data.groups.slice(localGroupIndex),
+        });
+      }
     }
+  });
+  if (error === undefined) {
+    mainCol.build().render(ctx, mainBox);
   }
+  return { error, rest };
 }
 
-function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
-  let font = "d3";
-  let fontSize = c.getFontSizeOf(ctx, font);
-  let leading = 0;
-  let lastLineHeight = leading + fontSize;
-  const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3;
-  const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
-  const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
-  const mainCol = new ColumnBlockBuilder(b.width(mainBox));
-  c.withTextColor(ctx, black, () => {
-    c.withFont(ctx, font, () => {
-      shohou.groups.forEach((group, groupIndex) => {
-        const groupCol = new ColumnBlockBuilder(b.width(mainBox));
-        group.drugs.forEach((drug, drugIndex) => {
-          groupCol.addBlock(
-            blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug)), blk.boxCallback(box => {
-              if (drugIndex === 0) {
-                const top = box.top - mainBox.top;
-                const bottom = box.bottom - mainBox.top;
-                const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
-                blk.drawText(ctx, indexLabel(groupIndex + 1), ibox, { halign: "right", valign: "center" });
-              }
-            }))
-          );
-        });
-        groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
-        const remain = b.height(mainBox) - mainCol.currentHeight() - lastLineHeight;
-        if (groupCol.currentHeight() <= remain) {
-          mainCol.addBlock(groupCol.build());
-        } else {
-          console.log("next page");
-        }
-      });
-      mainCol.addBlock(blk.modify(blk.textBlock(ctx, "--- 以下余白 ---"), blk.extendLeft(20)));
-      mainCol.build().render(ctx, mainBox);
-    })
-  })
-}
+// function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
+//   let font = "d3";
+//   let fontSize = c.getFontSizeOf(ctx, font);
+//   let leading = 0;
+//   let lastLineHeight = leading + fontSize;
+//   const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3;
+//   const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
+//   const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
+//   const mainCol = new ColumnBlockBuilder(b.width(mainBox));
+//   c.withTextColor(ctx, black, () => {
+//     c.withFont(ctx, font, () => {
+//       shohou.groups.forEach((group, groupIndex) => {
+//         const groupCol = new ColumnBlockBuilder(b.width(mainBox));
+//         group.drugs.forEach((drug, drugIndex) => {
+//           groupCol.addBlock(
+//             blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug)), blk.boxCallback(box => {
+//               if (drugIndex === 0) {
+//                 const top = box.top - mainBox.top;
+//                 const bottom = box.bottom - mainBox.top;
+//                 const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
+//                 blk.drawText(ctx, indexLabel(groupIndex + 1), ibox, { halign: "right", valign: "center" });
+//               }
+//             }))
+//           );
+//         });
+//         groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
+//         const remain = b.height(mainBox) - mainCol.currentHeight() - lastLineHeight;
+//         if (groupCol.currentHeight() <= remain) {
+//           mainCol.addBlock(groupCol.build());
+//         } else {
+//           console.log("next page");
+//         }
+//       });
+//       mainCol.addBlock(blk.modify(blk.textBlock(ctx, "--- 以下余白 ---"), blk.extendLeft(20)));
+//       mainCol.build().render(ctx, mainBox);
+//     })
+//   })
+// }
 
 function indexLabel(index: number): string {
   return toZenkaku(`${index})`);
