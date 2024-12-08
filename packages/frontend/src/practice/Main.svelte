@@ -19,7 +19,6 @@
   import Shindansho from "./shindansho/Shindansho.svelte";
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
   import { parseShohou } from "@/lib/parse-shohou";
-  import { drawShohousen2024 } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
 
@@ -70,7 +69,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        ops,
+        pages: ops,
         width: 148,
         height: 210,
         scale: 3,
