@@ -5,85 +5,52 @@ import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakLines, breakSingleLine } from "./break-lines";
-import Column from "@/appoint/Column.svelte";
-
-export type Renderer = (ctx: DrawerContext, box: Box) => void;
+import { patientUpdated } from "@/app-events";
 
 export interface Block {
   width: number;
   height: number;
-  render: Renderer;
-}
-
-export type BlockModifier = (block: Block) => Block;
-
-export type BlockOpt = {
-  modifiers: BlockModifier[];
-}
-
-
-export function mkBlock(width: number, height: number, render: Renderer, opt?: BlockOpt): Block {
-  let blk = { width, height, render };
-  if (opt?.modifiers) {
-    blk = modify(blk, ...opt?.modifiers);
-  }
-  return blk;
-}
-
-export function modify(block: Block, ...modifiers: BlockModifier[]): Block {
-  modifiers.forEach(f => block = f(block));
-  return block;
-}
-
-export function extendRender(f: (ctx: DrawerContext, box: Box, orig: Renderer) => void): BlockModifier {
-  return (block: Block) => {
-    let blk = Object.assign({}, block);
-    const orig = blk.render;
-    blk.render = (ctx: DrawerContext, box: Box) => {
-      return f(ctx, box, orig);
-    }
-    return blk;
-  }
-}
-
-export function extendLeft(offset: number): BlockModifier {
-  return (block: Block): Block => {
-    return mkBlock(block.width + offset, block.height, (ctx: DrawerContext, box: Box) => {
-      box = b.modify(box, b.shrinkHoriz(offset, 0));
-      block.render(ctx, box);
-    });
-  }
-}
-
-export function boxCallback(cb: (box: Box) => void): BlockModifier {
-  return (block: Block): Block => {
-    return Object.assign({}, block, {
-      render: (ctx: DrawerContext, box: Box) => {
-        cb(box);
-        block.render(ctx, box);
-      }
-    })
-  }
+  render: (ctx: DrawerContext, dx: number, dy: number) => void;
 }
 
 export interface TextBlockOpt {
   font?: string;
   color?: Color;
-  blockOpt?: BlockOpt;
+}
+
+export interface Pack {
+  box: Box;
+  items: { dx: number, dy: number, block: Block }[];
+}
+
+export function putAt(block: Block, dx: number, dy: number, pack: Pack) {
+  pack.items.push({ dx, dy, block });
+}
+
+export function putAligned(block: Block, halign: HAlign, valign: VAlign, pack: Pack) {
+  const bb = b.align(mkBox(0, 0, block.width, block.height), pack.box, halign, valign);
+  putAt(block, bb.left, bb.top, pack);
+}
+
+export function renderPack(ctx: DrawerContext, pack: Pack) {
+  pack.items.forEach(({ dx, dy, block }) => {
+    block.render(ctx, dx, dy);
+  })
 }
 
 export function textBlock(ctx: DrawerContext, text: string, opt?: TextBlockOpt): Block {
   const font = opt?.font;
   const width = font ? c.textWidthWithFont(ctx, text, font) : c.textWidth(ctx, text);
   const height = font ? c.getFontSizeOf(ctx, font) : c.currentFontSize(ctx);
-  const render = (ctx: DrawerContext, box: Box) => {
+  const render = (ctx: DrawerContext, dx: number, dy: number) => {
     c.withTextColor(ctx, opt?.color, () => {
       c.withFont(ctx, font, () => {
-        c.drawText(ctx, text, box, "left", "top");
+        const bb = mkBox(dx, dy, dx + width, dy + height);
+        c.drawText(ctx, text, bb, "left", "top");
       });
     });
   };
-  return mkBlock(width, height, render, opt?.blockOpt);
+  return { width, height, render };
 }
 
 export interface DrawTextOpt {
@@ -570,7 +537,7 @@ export class ColumnBlockBuilder {
   }
 
   addBlock(block: Block): ColumnBlockBuilder {
-    if( this.items.length > 0 ){
+    if (this.items.length > 0) {
       this.ypos += this.leading;
     }
     this.items.push({
@@ -583,11 +550,11 @@ export class ColumnBlockBuilder {
 
   popBlock(): Block | undefined {
     const item = this.items.pop();
-    if( item === undefined ){
+    if (item === undefined) {
       return item;
     } else {
       this.ypos = item.y;
-      if( this.items.length > 0 ){
+      if (this.items.length > 0) {
         this.ypos -= this.leading;
       }
       item.block;
