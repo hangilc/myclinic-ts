@@ -15,30 +15,45 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
-  let shohouData: PrepareShohouData | undefined = data.drugs ? initPrepareShohouData("d3", data.drugs) : undefined;
   const paper = b.mkBox(0, 0, A5.width, A5.height);
   const bounds = b.modify(paper, b.inset(3));
-  let iter = 0;
-  const pages: Op[][] = [];
-  while (true) {
+  if (data.drugs === undefined) {
     const ctx = prepareDrawerContext();
-    const layout = drawPage(ctx, bounds, data);
-    pages.push(c.getOps(ctx));
-    console.log("shohouData", shohouData);
-    if (shohouData === undefined) {
-      break;
-    } else {
+    drawPage(ctx, bounds, data);
+    return [c.getOps(ctx)];
+  } else {
+    let iter = 0;
+    const pages: { ctx: DrawerContext, lastLineBox: Box, font: string }[] = [];
+    let shohouData: PrepareShohouData = initPrepareShohouData("d3", data.drugs);
+    while (true) {
+      const ctx = prepareDrawerContext();
+      const layout = drawPage(ctx, bounds, data);
       const result = drawShohou(ctx, layout, shohouData);
       if (result.error) {
         throw new Error(result.error);
       }
+      pages.push({ ctx, lastLineBox: result.lastLineBox, font: result.font });
+      if (result.rest === undefined) {
+        break;
+      }
       shohouData = result.rest;
+      if (iter++ > 10) {
+        throw new Error("too many iteration");
+      }
     }
-    if (iter++ > 10) {
-      throw new Error("too many iteration");
+    if (pages.length === 1) {
+      const page = pages[0];
+      const block = mkLastLineBlock(page.ctx, page.font);
+      blk.putIn(page.ctx, block, page.lastLineBox, { halign: "left", valign: "center" });
+    } else if (pages.length > 1) {
+      for(let i=0;i<pages.length;i++){
+        const page = pages[i];
+        const block = mkContinueLineBlock(page.ctx, page.font, i+1, pages.length);
+        blk.putIn(page.ctx, block, page.lastLineBox, { halign: "left", valign: "center" });
+      }
     }
+    return pages.map(page => c.getOps(page.ctx));
   }
-  return pages;
 }
 
 function prepareDrawerContext(): DrawerContext {
@@ -83,6 +98,23 @@ function drawPage(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
   drawUpperBox(ctx, upperBox, data);
   const lowerInfo = drawLowerBox(ctx, lowerBox, data);
   return { ...lowerInfo };
+}
+
+function mkLastLineBlock(ctx: DrawerContext, font: string): Block {
+  return blk.modify(blk.textBlock(ctx, "--- 以下余白 ---", {
+    font: font,
+    color: black,
+  }), blk.extendLeft(20));
+}
+
+function mkContinueLineBlock(ctx: DrawerContext, font: string, page: number, totalPages: number): Block {
+  const text = page < totalPages
+    ? `--- 次ページに続く　（${page} / ${totalPages}） ---`
+    : `--- 以下余白　（${page} / ${totalPages}） ---`;
+  return blk.modify(blk.textBlock(ctx, text, {
+    font: font,
+    color: red,
+  }), blk.extendLeft(20));
 }
 
 const alignCenter = {
@@ -230,6 +262,7 @@ function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
 
 const black: Color = { r: 0, g: 0, b: 0 };
 const green: Color = { r: 0, g: 255, b: 0 };
+const red: Color = { r: 255, g: 0, b: 0 };
 
 function dataCirc(draw: boolean): BlockModifier {
   return blk.extendRender((ctx: DrawerContext, box: Box, orig: Renderer) => {
@@ -596,7 +629,7 @@ function drawDrugs(ctx: DrawerContext, box: Box): {
   let kanjakibou: Box = col2;
   let shohouBox: Box = body;
   {
-    const [label, body] = b.splitToRows(col1, b.splitAt(6));
+    const [label, _] = b.splitToRows(col1, b.splitAt(6));
     c.frameBottom(ctx, label);
     const para = blk.stackedBlock([
       blk.textBlock(ctx, "変更不可"),
@@ -606,7 +639,7 @@ function drawDrugs(ctx: DrawerContext, box: Box): {
     yupper = Math.max(yupper, b.height(label));
   }
   {
-    const [label, body] = b.splitToRows(col2, b.splitAt(6));
+    const [label, _] = b.splitToRows(col2, b.splitAt(6));
     c.frameBottom(ctx, label);
     c.drawText(ctx, "患者希望", label, "center", "center");
     yupper = Math.max(yupper, b.height(label));
@@ -785,30 +818,28 @@ function calcLastLineHeight(ctx: DrawerContext, data: PrepareShohouData): number
   return leading + fontSize;
 }
 
-function mkLastLineBlock(ctx: DrawerContext, data: PrepareShohouData): Block {
-  return blk.modify(blk.textBlock(ctx, "--- 以下余白 ---", {
-    font: data.font,
-    color: black,
-  }), blk.extendLeft(20));
-}
-
 function drawShohou(ctx: DrawerContext, layout: { henkoufuka: Box, kanjakibou: Box, shohouBox: Box },
   data: PrepareShohouData): {
     error?: string;
     rest?: PrepareShohouData;
+    lastLineBox: Box;
+    font: string;
   } {
   let font = data.font;
   let fontSize = c.getFontSizeOf(ctx, font);
   let leading = data.leading;
   const indexWidth = data.totalGroups < 10 ? fontSize * 2 : fontSize * 3;
-  const indexBox = b.modify(layout.shohouBox, b.setWidth(indexWidth, "left"));
-  const mainBox = b.modify(layout.shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
+  const shohouBox = layout.shohouBox;
+  const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
+  const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
   let mainCol = new ColumnBlockBuilder(b.width(mainBox));
   let error: string | undefined = undefined;
   let rest: PrepareShohouData | undefined = undefined;
   let groupIndex = data.groupIndex;
   const textBlockOpt: TextBlockOpt = { font, color: black };
+  const lastLineHeight = calcLastLineHeight(ctx, data);
   data.groups.forEach((group, localGroupIndex) => {
+    const gi = groupIndex;
     const groupCol = new ColumnBlockBuilder(b.width(mainBox));
     group.drugs.forEach((drug, drugIndex) => {
       groupCol.addBlock(
@@ -817,14 +848,14 @@ function drawShohou(ctx: DrawerContext, layout: { henkoufuka: Box, kanjakibou: B
             const top = box.top - mainBox.top;
             const bottom = box.bottom - mainBox.top;
             const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
-            blk.drawText(ctx, indexLabel(groupIndex++), ibox, { halign: "right", valign: "center", textBlockOpt, });
+            blk.drawText(ctx, indexLabel(gi), ibox, { halign: "right", valign: "center", textBlockOpt, });
           }
         }))
       );
     });
     groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage), textBlockOpt));
     const groupBlock = groupCol.build();
-    if (mainCol.currentHeight() + leading + groupBlock.height <= b.height(layout.shohouBox)) {
+    if (mainCol.currentHeight() + leading + groupBlock.height + leading + lastLineHeight <= b.height(layout.shohouBox)) {
       mainCol.addBlock(groupBlock);
     } else {
       if (mainCol.isEmpty()) {
@@ -837,51 +868,14 @@ function drawShohou(ctx: DrawerContext, layout: { henkoufuka: Box, kanjakibou: B
         });
       }
     }
+    groupIndex += 1;
   });
   if (error === undefined) {
     mainCol.build().render(ctx, mainBox);
   }
-  return { error, rest };
+  const lastLineBox = b.modify(mainBox, b.shrinkVert(mainCol.currentHeight() + leading, 0), b.setHeight(fontSize, "top"));
+  return { error, rest, lastLineBox, font };
 }
-
-// function drawShohou(ctx: DrawerContext, henkoufuka: Box, kanjakibou: Box, shohouBox: Box, shohou: Shohou) {
-//   let font = "d3";
-//   let fontSize = c.getFontSizeOf(ctx, font);
-//   let leading = 0;
-//   let lastLineHeight = leading + fontSize;
-//   const indexWidth = shohou.groups.length < 10 ? fontSize * 2 : fontSize * 3;
-//   const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
-//   const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
-//   const mainCol = new ColumnBlockBuilder(b.width(mainBox));
-//   c.withTextColor(ctx, black, () => {
-//     c.withFont(ctx, font, () => {
-//       shohou.groups.forEach((group, groupIndex) => {
-//         const groupCol = new ColumnBlockBuilder(b.width(mainBox));
-//         group.drugs.forEach((drug, drugIndex) => {
-//           groupCol.addBlock(
-//             blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug)), blk.boxCallback(box => {
-//               if (drugIndex === 0) {
-//                 const top = box.top - mainBox.top;
-//                 const bottom = box.bottom - mainBox.top;
-//                 const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
-//                 blk.drawText(ctx, indexLabel(groupIndex + 1), ibox, { halign: "right", valign: "center" });
-//               }
-//             }))
-//           );
-//         });
-//         groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage)));
-//         const remain = b.height(mainBox) - mainCol.currentHeight() - lastLineHeight;
-//         if (groupCol.currentHeight() <= remain) {
-//           mainCol.addBlock(groupCol.build());
-//         } else {
-//           console.log("next page");
-//         }
-//       });
-//       mainCol.addBlock(blk.modify(blk.textBlock(ctx, "--- 以下余白 ---"), blk.extendLeft(20)));
-//       mainCol.build().render(ctx, mainBox);
-//     })
-//   })
-// }
 
 function indexLabel(index: number): string {
   return toZenkaku(`${index})`);
