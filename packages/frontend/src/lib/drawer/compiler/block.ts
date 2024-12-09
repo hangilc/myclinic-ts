@@ -6,110 +6,72 @@ import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakLines, breakSingleLine } from "./break-lines";
 import type { RenderedDrug } from "@/lib/denshi-shohou/presc-renderer";
+import { stringToCharWidths } from "./char-width";
 
-export type Renderable = {
-  render: (ctx: DrawerContext) => void;
+export interface Position {
+  x: number;
+  y: number;
 }
 
-export interface Item {
+export function shiftPosition(pos: Position, offset: Offset): Position {
+  return { x: pos.x + offset.dx, y: pos.y + offset.dy };
+}
+
+export interface Offset {
+  dx: number;
+  dy: number;
+}
+
+export function horizAlign(itemWidth: number, boundWidth: number, halign: HAlign): number {
+  switch(halign) {
+    case "left": return 0;
+    case "center": return (boundWidth - itemWidth) * 0.5;
+    case "right": return boundWidth - itemWidth;
+  }
+}
+
+export interface Extent {
   width: number;
   height: number;
-  putAt: (x: number, y: number) => Renderable;
 }
 
-function putItemAt(item: Item, x: number, y: number): Renderable & Box {
-  const bb = mkBox(x, y, x + item.width, y + item.height);
-  return { ...item.putAt(x, y), ...bb };
-}
-
-function putItemAligned(item: Item, box: Box, halign: HAlign, valign: VAlign): Renderable & Box {
-  let bb = mkBox(0, 0, item.width, item.height);
-  bb = b.align(bb, box, halign, valign);
-  return { ...item.putAt(bb.left, bb.top), ...bb };
-}
-
-export class ColumnBlock implements Item {
-  width: number;
-  children: { item: Item, halign: HAlign, name?: string }[] = [];
-
-  constructor(width: number) {
-    this.width = width;
-  }
-
-  add(item: Item, halign: HAlign = "left", name?: string) {
-    this.children.push({ item, halign, name });
-  }
-
-  get height(): number {
-    return this.children.reduce((acc, ele) => acc + ele.item.height, 0);
-  }
-
-  putAt(x: number, y: number): Renderable & { boxMap: Record<string, Box> } {
-    const boxMap: Record<string, Box> = {};
-    const rs = this.children.map(child => {
-      const bb = mkBox(x, y, x + this.width, y + child.item.height);
-      y += child.item.height;
-      const result = putItemAligned(child.item, bb, child.halign, "top");
-      if (child.name) {
-        boxMap[child.name] = bb;
-      }
-      return result.render;
-    });
-    return ({
-      render: (ctx: DrawerContext) => {
-        rs.forEach(r => r(ctx));
-      },
-      boxMap,
-    })
-  }
-}
-
-export interface TextItemOpt {
+export interface TextOpt {
   font?: string;
   color?: Color;
 }
 
-export function textItem(ctx: DrawerContext, text: string, opt?: TextItemOpt): Item {
-  const font = opt?.font;
-  const width = c.textWidthWithFont(ctx, text, font)
-  const height = c.resolveFontHeight(ctx, font);
+export function extentOfBox(box: Box): Extent {
+  return { width: b.width(box), height: b.height(box) }
+}
+
+export function leftTopOfBox(box: Box): Position {
+  return { x: box.left, y: box.top };
+}
+
+export function mkText(ctx: DrawerContext, text: string, opt?: TextOpt): {
+  extent: Extent;
+  renderAt: (ctx: DrawerContext, position: Position) => void;
+} {
+  const width = c.textWidthWithFont(ctx, text, opt?.font);
+  const height = c.resolveFontHeight(ctx, opt?.font);
   return {
-    width,
-    height,
-    putAt: (x: number, y: number) => ({
-      render: (ctx: DrawerContext) => {
-        const box = mkBox(x, y, x + width, y + height);
-        c.withTextColor(ctx, opt?.color, () => {
-          c.withFont(ctx, font, () => {
-            c.drawText(ctx, text, box, "left", "top");
-          })
-        })
+    extent: { width, height },
+    renderAt: (ctx: DrawerContext, { x, y }) => {
+      const fontSize = height;
+      let charWidths = stringToCharWidths(text, fontSize);
+      const xs: number[] = [];
+      const ys: number[] = [];
+      for (let i = 0; i < charWidths.length; i++) {
+        xs.push(x);
+        ys.push(y);
+        x += charWidths[i];
       }
-    }),
-  };
-}
-
-export function spacer(width: number, height: number): Item {
-  return {
-    width,
-    height,
-    putAt(x: number, y: number): Renderable {
-      return ({
-        render: () => {}
-      })
-    }
-  }
-}
-
-export function modifyItemHeight(item: Item, height: number, valign: VAlign): Item {
-  return {
-    width: item.width,
-    height,
-    putAt(x: number, y: number): Renderable {
-      const box = mkBox(x, y, x + item.width, y + height);
-      const bb = b.align(mkBox(0, 0, item.width, item.height), box, "left", valign);
-      return item.putAt(bb.left, bb.top);
-    }
+      c.withTextColor(ctx, opt?.color, () => {
+        c.withFont(ctx, opt?.font, () => {
+          c.drawChars(ctx, text, xs, ys);
+        })
+      });
+    },
   }
 }
 

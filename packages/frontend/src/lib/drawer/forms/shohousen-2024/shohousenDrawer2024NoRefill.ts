@@ -12,7 +12,8 @@ import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
-import type { Item } from "../../compiler/block";
+import type { Position, Extent, Offset } from "../../compiler/block";
+import type { HAlign } from "../../compiler/align";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
@@ -20,20 +21,34 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
   const outerBounds = b.modify(paper, b.inset(3));
   c.frame(ctx, outerBounds);
   const bounds = b.modify(outerBounds, b.inset(2));
-  const main = new blk.ColumnBlock(b.width(bounds));
-  main.add(titleItem(ctx), "center");
-  main.add(subtitleItem(ctx), "center");
-  main.putAt(bounds.left, bounds.top).render(ctx);
-  // let bb = b.withSlice(box, 6, box => drawTitle(ctx, b.modify(box, b.setWidth(30, "center"))));
-  // bb = b.withSlice(bb, 2.5, (box) => {
-  //   c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", box, "center", "center");
-  // });
-  // box = b.modify(box, b.inset(2, 11, 2, 3));
-  // const [upperBox, _, lowerBox] = b.splitToRows(box, b.splitAt(20, 22));
-  // drawUpperBox(ctx, upperBox, data);
-  // const lowerInfo = drawLowerBox(ctx, lowerBox, data);
-  // return { ...lowerInfo };
+  mainBlock(ctx, blk.extentOfBox(bounds)).renderAt(ctx, blk.leftTopOfBox(bounds));
   return [c.getOps(ctx)];
+}
+
+function mainBlock(ctx: DrawerContext, extent: Extent): {
+  renderAt: (ctx: DrawerContext, at: Position) => void
+} {
+  let yupper = 0;
+  let ylower = 0;
+  const children: { offset: Offset; renderAt: (ctx: DrawerContext, at: Position) => void }[] = [];
+  function addTop(item: { extent: Extent; renderAt: (ctx: DrawerContext, at: Position) => void; }, halign: HAlign) {
+    const offset = { dx: blk.horizAlign(item.extent.width, extent.width, halign), dy: yupper };
+    children.push({ offset, renderAt: item.renderAt })
+    yupper += item.extent.height;
+  }
+  addTop(mainTitle(ctx), "center");
+  return {
+    renderAt: (ctx: DrawerContext, at: Position) => {
+      children.forEach(ch => ch.renderAt(ctx, blk.shiftPosition(at, ch.offset)));
+    }
+  }
+}
+
+function mainTitle(ctx: DrawerContext): {
+  extent: Extent;
+  renderAt: (ctx: DrawerContext, at: Position) => void;
+} {
+  return blk.mkText(ctx, "処方箋", { font: "f4", color: green });
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
@@ -105,17 +120,6 @@ function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "default", 0, 255, 0, 0.25);
   c.createPen(ctx, "thin", 0, 255, 0, 0.1);
   c.createPen(ctx, "data-thin", 0, 0, 0, 0.1);
-}
-
-function titleItem(ctx: DrawerContext): Item {
-  let item = blk.textItem(ctx, "処方箋", { font: "f4", color: green });
-  item = blk.modifyItemHeight(item, 6, "center");
-  return item;
-}
-
-function subtitleItem(ctx: DrawerContext): Item {
-  let item = blk.textItem(ctx, "(この処方箋は、どの保険薬局でも有効です。)", { font: "f2.5", color: green });
-  return item;
 }
 
 // function drawPage(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
