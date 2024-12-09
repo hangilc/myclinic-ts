@@ -100,7 +100,6 @@ export function mkLocatedItem(item: Item, locator: Locator): Item {
   return {
     extent: item.extent,
     renderAt: (ctx: DrawerContext, pos: Position) => {
-      console.log("locator", pos, locator(pos));
       item.renderAt(ctx, locator(pos));
     }
   }

@@ -29,6 +29,7 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
 function mainBlock(ctx: DrawerContext, extent: Extent): Item  {
   const stacked = stackedItems(extent);
   stacked.addTop(mainTitle(ctx), "center");
+  stacked.addTop(subTitle(ctx), "center");
   return stacked;
 }
 
@@ -40,9 +41,13 @@ function stackedItems(extent: Extent): Item & {
   function addTop(item: Item, halign: HAlign) {
     const locitem = blk.mkLocatedItem(
       item,
-      blk.horizAlignLocator(item.extent.width, extent.width, halign)
+      blk.composedLocator(
+        blk.shiftLocator({ dx: 0, dy: yupper }),
+        blk.horizAlignLocator(item.extent.width, extent.width, halign)
+      ),
     );
     locatedItems.push(locitem);
+    yupper += item.extent.height;
   }
   return {
     extent,
@@ -60,7 +65,8 @@ function mainTitle(ctx: DrawerContext): Item {
 }
 
 function subTitle(ctx: DrawerContext): Item {
-  
+  let item = blk.mkText(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
+  return item;
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
