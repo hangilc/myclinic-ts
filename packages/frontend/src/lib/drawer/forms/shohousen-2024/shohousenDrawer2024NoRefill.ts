@@ -12,7 +12,7 @@ import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
-import type { Position, Extent, Offset } from "../../compiler/block";
+import type { Position, Extent, Offset, Item, } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
@@ -21,34 +21,46 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
   const outerBounds = b.modify(paper, b.inset(3));
   c.frame(ctx, outerBounds);
   const bounds = b.modify(outerBounds, b.inset(2));
-  mainBlock(ctx, blk.extentOfBox(bounds)).renderAt(ctx, blk.leftTopOfBox(bounds));
+  const main = mainBlock(ctx, blk.extentOfBox(bounds));
+  main.renderAt(ctx, blk.leftTopOfBox(bounds));
   return [c.getOps(ctx)];
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent): {
-  renderAt: (ctx: DrawerContext, at: Position) => void
+function mainBlock(ctx: DrawerContext, extent: Extent): Item  {
+  const stacked = stackedItems(extent);
+  stacked.addTop(mainTitle(ctx), "center");
+  return stacked;
+}
+
+function stackedItems(extent: Extent): Item & {
+  addTop: (item: Item, halign: HAlign) => void;
 } {
   let yupper = 0;
-  let ylower = 0;
-  const children: { offset: Offset; renderAt: (ctx: DrawerContext, at: Position) => void }[] = [];
-  function addTop(item: { extent: Extent; renderAt: (ctx: DrawerContext, at: Position) => void; }, halign: HAlign = "left") {
-    const offset = { dx: blk.horizAlign(item.extent.width, extent.width, halign), dy: yupper };
-    children.push({ offset, renderAt: item.renderAt })
-    yupper += item.extent.height;
+  let locatedItems: Item[] = [];
+  function addTop(item: Item, halign: HAlign) {
+    const locitem = blk.mkLocatedItem(
+      item,
+      blk.horizAlignLocator(item.extent.width, extent.width, halign)
+    );
+    locatedItems.push(locitem);
   }
-  addTop(blk.modifyItemHeight(mainTitle(ctx), 6, "center"), "center");
   return {
-    renderAt: (ctx: DrawerContext, at: Position) => {
-      children.forEach(ch => ch.renderAt(ctx, blk.shiftPosition(at, ch.offset)));
-    }
+    extent,
+    renderAt(ctx: DrawerContext, pos: Position) {
+      locatedItems.forEach(item => item.renderAt(ctx, pos));
+    },
+    addTop,
   }
 }
 
-function mainTitle(ctx: DrawerContext): {
-  extent: Extent;
-  renderAt: (ctx: DrawerContext, at: Position) => void;
-} {
-  return blk.mkText(ctx, "処方箋", { font: "f4", color: green });
+function mainTitle(ctx: DrawerContext): Item {
+  let item = blk.mkText(ctx, "処方箋", { font: "f4", color: green });
+  item = blk.modifyItemHeight(item, 6, "center");
+  return item;
+}
+
+function subTitle(ctx: DrawerContext): Item {
+  
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {

@@ -13,13 +13,21 @@ export interface Position {
   y: number;
 }
 
-export function shiftPosition(pos: Position, offset: Offset): Position {
-  return { x: pos.x + offset.dx, y: pos.y + offset.dy };
-}
-
 export interface Offset {
   dx: number;
   dy: number;
+}
+
+export type Locator = (pos: Position) => Position;
+
+export function identityLocator(): Locator {
+  return pos => pos;
+}
+
+export function shiftLocator(offset: Offset): Locator {
+  return (pos: Position): Position => {
+    return { x: pos.x + offset.dx, y: pos.y + offset.dy };
+  }
 }
 
 export function horizAlign(itemWidth: number, boundWidth: number, halign: HAlign): number {
@@ -38,16 +46,41 @@ export function vertAlign(itemHeight: number, boundHeight: number, valign: VAlig
   }
 }
 
-export function align(itemExtent: Extent, boundExtent: Extent, halign: HAlign, valign: VAlign): Offset {
-  return {
-    dx: horizAlign(itemExtent.width, boundExtent.width, halign),
-    dy: vertAlign(itemExtent.height, boundExtent.height, valign),
-  }
-}
-
 export interface Extent {
   width: number;
   height: number;
+}
+
+export function horizAlignLocator(width: number, boundWidth: number, halign: HAlign): Locator {
+  return (pos: Position): Position => {
+    return {
+      x: pos.x + horizAlign(width, boundWidth, halign),
+      y: pos.y,
+    }
+  }
+}
+
+export function vertAlignLocator(height: number, boundHeight: number, valign: VAlign): Locator {
+  return (pos: Position): Position => {
+    return {
+      x: pos.x,
+      y: pos.y + vertAlign(height, boundHeight, valign),
+    }
+  }
+}
+
+export function alignLocator(childExtent: Extent, parentExtent: Extent, halign: HAlign, valign: VAlign): Locator {
+  return composedLocator(
+    horizAlignLocator(childExtent.width, parentExtent.width, halign),
+    vertAlignLocator(childExtent.height, parentExtent.height, valign),
+  )
+}
+
+export function composedLocator(...locators: Locator[]): Locator {
+  return (pos: Position): Position => {
+    locators.forEach(locator => pos = locator(pos));
+    return pos;
+  }
 }
 
 export function extentOfBox(box: Box): Extent {
@@ -63,27 +96,28 @@ export interface Item {
   renderAt: (ctx: DrawerContext, pos: Position) => void;
 }
 
-export function extendItem(item: Item, extent: Extent, halign: HAlign, valign: VAlign): Item {
+export function mkLocatedItem(item: Item, locator: Locator): Item {
+  return {
+    extent: item.extent,
+    renderAt: (ctx: DrawerContext, pos: Position) => {
+      console.log("locator", pos, locator(pos));
+      item.renderAt(ctx, locator(pos));
+    }
+  }
+}
+
+export function modifyItemExtent(item: Item, extent: Extent, halign: HAlign, valign: VAlign): Item {
+  const locator = alignLocator(item.extent, extent, halign, valign);
   return {
     extent,
     renderAt(ctx: DrawerContext, pos: Position) {
-      const offset = align(item.extent, extent, halign, valign);
-      item.renderAt(ctx, shiftPosition(pos, offset));
+      item.renderAt(ctx, locator(pos));
     },
   }
 }
 
 export function modifyItemHeight(item: Item, height: number, valign: VAlign): Item {
-  return {
-    extent: { width: item.extent.width, height, },
-    renderAt(ctx: DrawerContext, pos: Position) {
-      const offset = {
-        dx: 0,
-        dy: vertAlign(item.extent.height, height, valign),
-      }
-      item.renderAt(ctx, shiftPosition(pos, offset));
-    },
-  }
+  return modifyItemExtent(item, { width: item.extent.width, height }, "left", valign);
 }
 
 export interface TextOpt {
