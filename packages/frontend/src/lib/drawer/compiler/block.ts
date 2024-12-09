@@ -124,7 +124,7 @@ export interface TextOpt {
   color?: Color;
 }
 
-export function mkText(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
+export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
   const width = c.textWidthWithFont(ctx, text, opt?.font);
   const height = c.resolveFontHeight(ctx, opt?.font);
   return {
@@ -145,6 +145,13 @@ export function mkText(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
         })
       });
     },
+  }
+}
+
+export function spacer(width: number, height: number): Item {
+  return {
+    extent: { width, height },
+    renderAt: () => {},
   }
 }
 
