@@ -30,14 +30,24 @@ export function horizAlign(itemWidth: number, boundWidth: number, halign: HAlign
   }
 }
 
+export function vertAlign(itemHeight: number, boundHeight: number, valign: VAlign): number {
+  switch(valign) {
+    case "top": return 0;
+    case "center": return (boundHeight - itemHeight) * 0.5;
+    case "bottom": return boundHeight - itemHeight;
+  }
+}
+
+export function align(itemExtent: Extent, boundExtent: Extent, halign: HAlign, valign: VAlign): Offset {
+  return {
+    dx: horizAlign(itemExtent.width, boundExtent.width, halign),
+    dy: vertAlign(itemExtent.height, boundExtent.height, valign),
+  }
+}
+
 export interface Extent {
   width: number;
   height: number;
-}
-
-export interface TextOpt {
-  font?: string;
-  color?: Color;
 }
 
 export function extentOfBox(box: Box): Extent {
@@ -48,10 +58,40 @@ export function leftTopOfBox(box: Box): Position {
   return { x: box.left, y: box.top };
 }
 
-export function mkText(ctx: DrawerContext, text: string, opt?: TextOpt): {
+export interface Item {
   extent: Extent;
-  renderAt: (ctx: DrawerContext, position: Position) => void;
-} {
+  renderAt: (ctx: DrawerContext, pos: Position) => void;
+}
+
+export function extendItem(item: Item, extent: Extent, halign: HAlign, valign: VAlign): Item {
+  return {
+    extent,
+    renderAt(ctx: DrawerContext, pos: Position) {
+      const offset = align(item.extent, extent, halign, valign);
+      item.renderAt(ctx, shiftPosition(pos, offset));
+    },
+  }
+}
+
+export function modifyItemHeight(item: Item, height: number, valign: VAlign): Item {
+  return {
+    extent: { width: item.extent.width, height, },
+    renderAt(ctx: DrawerContext, pos: Position) {
+      const offset = {
+        dx: 0,
+        dy: vertAlign(item.extent.height, height, valign),
+      }
+      item.renderAt(ctx, shiftPosition(pos, offset));
+    },
+  }
+}
+
+export interface TextOpt {
+  font?: string;
+  color?: Color;
+}
+
+export function mkText(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
   const width = c.textWidthWithFont(ctx, text, opt?.font);
   const height = c.resolveFontHeight(ctx, opt?.font);
   return {

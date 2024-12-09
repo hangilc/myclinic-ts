@@ -31,12 +31,12 @@ function mainBlock(ctx: DrawerContext, extent: Extent): {
   let yupper = 0;
   let ylower = 0;
   const children: { offset: Offset; renderAt: (ctx: DrawerContext, at: Position) => void }[] = [];
-  function addTop(item: { extent: Extent; renderAt: (ctx: DrawerContext, at: Position) => void; }, halign: HAlign) {
+  function addTop(item: { extent: Extent; renderAt: (ctx: DrawerContext, at: Position) => void; }, halign: HAlign = "left") {
     const offset = { dx: blk.horizAlign(item.extent.width, extent.width, halign), dy: yupper };
     children.push({ offset, renderAt: item.renderAt })
     yupper += item.extent.height;
   }
-  addTop(mainTitle(ctx), "center");
+  addTop(blk.modifyItemHeight(mainTitle(ctx), 6, "center"), "center");
   return {
     renderAt: (ctx: DrawerContext, at: Position) => {
       children.forEach(ch => ch.renderAt(ctx, blk.shiftPosition(at, ch.offset)));
