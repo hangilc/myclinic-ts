@@ -12,7 +12,10 @@ import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
-import { type Position, type Extent, type Offset, type Renderer, RowBuilder, text, type Item, Container, alignedItem, } from "../../compiler/block";
+import {
+  type Position, type Extent, type Offset, type Renderer, RowBuilder, text,
+  type Item, Container, alignedItem,
+} from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
@@ -30,13 +33,17 @@ function mainBlock(ctx: DrawerContext, extent: Extent): Renderer {
   const container = new Container();
   const rb = new RowBuilder(extent);
   const mainTitleRow = rb.getRow(6);
-  container.addAt(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
+  container.add(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
   const subTitleRow = rb.getRow(2);
-  container.addAt(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
+  container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
+  const mainRow = rb.getRemaining();
+  const inner = blk.insetExtent(mainRow.extent, 2, 3, 2, 3);
+  const mainAreaRenderer = mainArea(ctx, inner.extent);
+  container.add(mainAreaRenderer, blk.addOffsets(mainRow.offset, inner.offset));
   return container;
 }
 
-function mainTitle(ctx: DrawerContext, extent: Extent ): Item {
+function mainTitle(ctx: DrawerContext, extent: Extent): Item {
   const item = text(ctx, "処方箋", { font: "f4", color: green });
   return alignedItem(item, extent, "center", "center");
 }
@@ -44,6 +51,14 @@ function mainTitle(ctx: DrawerContext, extent: Extent ): Item {
 function subTitle(ctx: DrawerContext, extent: Extent): Item {
   let item = text(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
   return alignedItem(item, extent, "center", "center");
+}
+
+function mainArea(ctx: DrawerContext, extent: Extent): Renderer {
+  return {
+    renderAt: (ctx: DrawerContext, pos: Position) => {
+      c.frame(ctx, b.mkBox(pos.x, pos.y, pos.x + extent.width, pos.y + extent.height))
+    }
+  }
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {

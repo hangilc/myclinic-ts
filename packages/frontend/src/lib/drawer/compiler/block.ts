@@ -64,6 +64,16 @@ export function align(childExtent: Extent, parentExtent: Extent, halign: HAlign,
   }
 }
 
+export function insetExtent(extent: Extent, dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): {
+  offset: Offset;
+  extent: Extent;
+} {
+  return {
+    offset: { dx, dy },
+    extent: { width: extent.width - dx - dx2, height: extent.height - dy - dy2 }
+  };
+}
+
 export function extentOfBox(box: Box): Extent {
   return { width: b.width(box), height: b.height(box) }
 }
@@ -113,7 +123,7 @@ export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
 export class Container implements Renderer {
   children: { offset: Offset, renderer: Renderer }[] = [];
 
-  addAt(renderer: Renderer, offset: Offset) {
+  add(renderer: Renderer, offset: Offset) {
     this.children.push({ offset, renderer });
   }
 
