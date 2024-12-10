@@ -31,7 +31,8 @@ function mainBlock(ctx: DrawerContext, extent: Extent): Renderer {
   const rb = new RowBuilder(extent);
   const mainTitleRow = rb.getRow(6);
   container.addAt(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
-  const subtitleRow = rb.getRow(2);
+  const subTitleRow = rb.getRow(2);
+  container.addAt(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
   return container;
 }
 
@@ -41,8 +42,8 @@ function mainTitle(ctx: DrawerContext, extent: Extent ): Item {
 }
 
 function subTitle(ctx: DrawerContext, extent: Extent): Item {
-  let item = blk.text(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
-  return item;
+  let item = text(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
+  return alignedItem(item, extent, "center", "center");
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
