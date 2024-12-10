@@ -69,9 +69,11 @@ function mainArea(ctx: DrawerContext, extent: Extent): Renderer {
 }
 
 function kouhiRenderer(ctx: DrawerContext, extent: Extent): Renderer {
+  const con = new Container();
   const rb = new RowBuilder(extent);
   const [upper, lower] = rb.splitEven(2);
-  return text(ctx, "kouhi");
+  con.add(blk.frame(extent), { dx: 0, dy: 0 });
+  return con;
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {

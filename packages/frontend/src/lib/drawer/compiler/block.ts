@@ -82,6 +82,10 @@ export function leftTopOfBox(box: Box): Position {
   return { x: box.left, y: box.top };
 }
 
+export function positionExtentToBox(pos: Position, extent: Extent): Box {
+  return b.mkBox(pos.x, pos.y, pos.x + extent.width, pos.y + extent.height);
+}
+
 export interface Renderer {
   renderAt: (ctx: DrawerContext, pos: Position) => void;
 }
@@ -116,6 +120,14 @@ export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
           c.drawChars(ctx, text, xs, ys);
         })
       });
+    }
+  }
+}
+
+export function frame(extent: Extent): Renderer {
+  return {
+    renderAt: (ctx: DrawerContext, pos: Position) => {
+      c.frame(ctx, positionExtentToBox(pos, extent));
     }
   }
 }
