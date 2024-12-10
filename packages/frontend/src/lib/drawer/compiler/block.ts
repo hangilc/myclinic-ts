@@ -18,20 +18,26 @@ export interface Offset {
   dy: number;
 }
 
-export type Locator = (pos: Position) => Position;
-
-export function identityLocator(): Locator {
-  return pos => pos;
+export function addOffsets(...offsets: Offset[]): Offset {
+  let offset = { dx: 0, dy: 0 };
+  offsets.forEach(ofs => {
+    offset = {
+      dx: offset.dx + ofs.dx,
+      dy: offset.dy + ofs.dy,
+    };
+  })
+  return offset;
 }
 
-export function shiftLocator(offset: Offset): Locator {
-  return (pos: Position): Position => {
-    return { x: pos.x + offset.dx, y: pos.y + offset.dy };
+export function shiftPosition(pos: Position, offset: Offset): Position {
+  return {
+    x: pos.x + offset.dx,
+    y: pos.y + offset.dy,
   }
 }
 
 export function horizAlign(itemWidth: number, boundWidth: number, halign: HAlign): number {
-  switch(halign) {
+  switch (halign) {
     case "left": return 0;
     case "center": return (boundWidth - itemWidth) * 0.5;
     case "right": return boundWidth - itemWidth;
@@ -39,7 +45,7 @@ export function horizAlign(itemWidth: number, boundWidth: number, halign: HAlign
 }
 
 export function vertAlign(itemHeight: number, boundHeight: number, valign: VAlign): number {
-  switch(valign) {
+  switch (valign) {
     case "top": return 0;
     case "center": return (boundHeight - itemHeight) * 0.5;
     case "bottom": return boundHeight - itemHeight;
@@ -51,35 +57,10 @@ export interface Extent {
   height: number;
 }
 
-export function horizAlignLocator(width: number, boundWidth: number, halign: HAlign): Locator {
-  return (pos: Position): Position => {
-    return {
-      x: pos.x + horizAlign(width, boundWidth, halign),
-      y: pos.y,
-    }
-  }
-}
-
-export function vertAlignLocator(height: number, boundHeight: number, valign: VAlign): Locator {
-  return (pos: Position): Position => {
-    return {
-      x: pos.x,
-      y: pos.y + vertAlign(height, boundHeight, valign),
-    }
-  }
-}
-
-export function alignLocator(childExtent: Extent, parentExtent: Extent, halign: HAlign, valign: VAlign): Locator {
-  return composedLocator(
-    horizAlignLocator(childExtent.width, parentExtent.width, halign),
-    vertAlignLocator(childExtent.height, parentExtent.height, valign),
-  )
-}
-
-export function composedLocator(...locators: Locator[]): Locator {
-  return (pos: Position): Position => {
-    locators.forEach(locator => pos = locator(pos));
-    return pos;
+export function align(childExtent: Extent, parentExtent: Extent, halign: HAlign, valign: VAlign): Offset {
+  return {
+    dx: horizAlign(childExtent.width, parentExtent.width, halign),
+    dy: vertAlign(childExtent.height, parentExtent.height, valign),
   }
 }
 
@@ -91,46 +72,27 @@ export function leftTopOfBox(box: Box): Position {
   return { x: box.left, y: box.top };
 }
 
-export interface Item {
-  extent: Extent;
+export interface Renderer {
   renderAt: (ctx: DrawerContext, pos: Position) => void;
 }
 
-export function mkLocatedItem(item: Item, locator: Locator): Item {
-  return {
-    extent: item.extent,
-    renderAt: (ctx: DrawerContext, pos: Position) => {
-      item.renderAt(ctx, locator(pos));
-    }
-  }
-}
-
-export function modifyItemExtent(item: Item, extent: Extent, halign: HAlign, valign: VAlign): Item {
-  const locator = alignLocator(item.extent, extent, halign, valign);
-  return {
-    extent,
-    renderAt(ctx: DrawerContext, pos: Position) {
-      item.renderAt(ctx, locator(pos));
-    },
-  }
-}
-
-export function modifyItemHeight(item: Item, height: number, valign: VAlign): Item {
-  return modifyItemExtent(item, { width: item.extent.width, height }, "left", valign);
-}
+export type Item = {
+  extent: Extent;
+} & Renderer;
 
 export interface TextOpt {
   font?: string;
   color?: Color;
-}
+};
 
 export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
   const width = c.textWidthWithFont(ctx, text, opt?.font);
   const height = c.resolveFontHeight(ctx, opt?.font);
   return {
     extent: { width, height },
-    renderAt: (ctx: DrawerContext, { x, y }) => {
-      const fontSize = height;
+    renderAt: (ctx: DrawerContext, pos: Position) => {
+      let { x, y } = pos;
+      const fontSize = c.resolveFontHeight(ctx, opt?.font);
       let charWidths = stringToCharWidths(text, fontSize);
       const xs: number[] = [];
       const ys: number[] = [];
@@ -144,14 +106,63 @@ export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
           c.drawChars(ctx, text, xs, ys);
         })
       });
+    }
+  }
+}
+
+export class Container implements Renderer {
+  children: { offset: Offset, renderer: Renderer }[] = [];
+
+  addAt(renderer: Renderer, offset: Offset) {
+    this.children.push({ offset, renderer });
+  }
+
+  renderAt(ctx: DrawerContext, pos: Position) {
+    this.children.forEach(child => {
+      child.renderer.renderAt(ctx, shiftPosition(pos, child.offset));
+    })
+  }
+}
+
+export function alignedItem(item: Item, extent: Extent, halign: HAlign, valign: VAlign): Item {
+  return {
+    extent,
+    renderAt(ctx: DrawerContext, pos: Position) {
+      const offset = align(item.extent, extent, halign, valign);
+      item.renderAt(ctx, shiftPosition(pos, offset));
     },
   }
 }
 
-export function spacer(width: number, height: number): Item {
-  return {
-    extent: { width, height },
-    renderAt: () => {},
+export class RowBuilder {
+  extent: Extent;
+  top: number = 0;
+  bottom: number;
+
+  constructor(extent: Extent) {
+    this.extent = extent;
+    this.bottom = extent.height;
+  }
+
+  getRow(height: number): { offset: Offset, extent: Extent } {
+    const offset = { dx: 0, dy: this.top };
+    const extent = { width: this.extent.width, height };
+    this.top += height;
+    return { offset, extent };
+  }
+
+  getRowFromBottom(height: number): { offset: Offset, extent: Extent } {
+    const offset = { dx: 0, dy: this.bottom - height };
+    const extent = { width: this.extent.width, height };
+    this.bottom += height;
+    return { offset, extent };
+  }
+
+  getRemaining(): { offset: Offset, extent: Extent } {
+    const offset = { dx: 0, dy: this.top };
+    const extent = { width: this.extent.width, height: this.bottom - this.top };
+    this.top = this.bottom;
+    return { offset, extent };
   }
 }
 

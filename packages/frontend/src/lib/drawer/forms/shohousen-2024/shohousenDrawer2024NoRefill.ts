@@ -12,7 +12,7 @@ import type { Color } from "../../compiler/compiler";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
-import type { Position, Extent, Offset, Item, Locator, } from "../../compiler/block";
+import { type Position, type Extent, type Offset, type Renderer, RowBuilder, text, type Item, Container, alignedItem, } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 
 export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
@@ -26,67 +26,21 @@ export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
   return [c.getOps(ctx)];
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent): Item {
-  const stacked = stackedItems(extent);
-  stacked.addTop(mainTitle(ctx), "center");
-  stacked.addTop(subTitle(ctx), "center");
-  stacked.addTop(blk.spacer(0, 2.5), "left");
-  
-  return stacked;
+function mainBlock(ctx: DrawerContext, extent: Extent): Renderer {
+  const container = new Container();
+  const rb = new RowBuilder(extent);
+  const mainTitleRow = rb.getRow(6);
+  container.addAt(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
+  const subtitleRow = rb.getRow(2);
+  return container;
 }
 
-function containerItem(extent: Extent): Item & {
-  addItem: (item: Item, locator: Locator) => void;
-} {
-  let locatedItems: Item[] = [];
-  function addItem(item: Item, locator: Locator) {
-    const locitem = blk.mkLocatedItem(item, locator)
-    locatedItems.push(locitem);
-  }
-  return {
-    extent,
-    renderAt(ctx: DrawerContext, pos: Position) {
-      locatedItems.forEach(item => item.renderAt(ctx, pos));
-    },
-    addItem,
-  }
+function mainTitle(ctx: DrawerContext, extent: Extent ): Item {
+  const item = text(ctx, "処方箋", { font: "f4", color: green });
+  return alignedItem(item, extent, "center", "center");
 }
 
-function stackedItems(extent: Extent): Item & {
-  addTop: (item: Item, halign: HAlign) => void;
-  remainingExtent: () => Extent;
-} {
-  const container = containerItem(extent);
-  let yupper = 0;
-  let ylower = 0;
-
-  function addTop(item: Item, halign: HAlign = "left") {
-    const locator = blk.composedLocator(
-      blk.shiftLocator({ dx: 0, dy: yupper }),
-      blk.horizAlignLocator(item.extent.width, extent.width, halign)
-    );
-    container.addItem(item, locator);
-    yupper += item.extent.height;
-  }
-
-  function remainingExtent(): Extent {
-    return { width: extent.width, height: extent.height - yupper - ylower };
-  }
-  return {
-    extent,
-    renderAt: container.renderAt,
-    addTop,
-    remainingExtent,
-  }
-}
-
-function mainTitle(ctx: DrawerContext): Item {
-  let item = blk.text(ctx, "処方箋", { font: "f4", color: green });
-  item = blk.modifyItemHeight(item, 6, "center");
-  return item;
-}
-
-function subTitle(ctx: DrawerContext): Item {
+function subTitle(ctx: DrawerContext, extent: Extent): Item {
   let item = blk.text(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
   return item;
 }
