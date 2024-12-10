@@ -99,7 +99,7 @@ export interface TextOpt {
   color?: Color;
 };
 
-export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
+export function textItem(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
   const width = c.textWidthWithFont(ctx, text, opt?.font);
   const height = c.resolveFontHeight(ctx, opt?.font);
   return {
@@ -124,10 +124,58 @@ export function text(ctx: DrawerContext, text: string, opt?: TextOpt): Item {
   }
 }
 
-export function frame(extent: Extent): Renderer {
+export function frame(extent: Extent, pen?: string): Renderer {
+  return boxRenderer(extent, (ctx, box) => {
+    c.withPen(ctx, pen, () => {
+      c.frame(ctx, box);
+    });
+  });
+}
+
+export function frameBottom(extent: Extent, pen?: string): Renderer {
+  return boxRenderer(extent, (ctx, box) => {
+    c.withPen(ctx, pen, () => {
+      c.frameBottom(ctx, box)
+    });
+  });
+}
+
+export function frameRight(extent: Extent, pen?: string): Renderer {
+  return boxRenderer(extent, (ctx, box) => {
+    c.withPen(ctx, pen, () => {
+      c.frameRight(ctx, box)
+    });
+  });
+}
+
+export function boxRenderer(extent: Extent, f: (ctx: DrawerContext, box: Box) => void): Renderer {
   return {
     renderAt: (ctx: DrawerContext, pos: Position) => {
-      c.frame(ctx, positionExtentToBox(pos, extent));
+      const box = positionExtentToBox(pos, extent);
+      f(ctx, box);
+    }
+  }
+}
+
+export function alignedText(ctx: DrawerContext, text: string, extent: Extent,
+  halign: HAlign, valign: VAlign, opt?: TextOpt): Item {
+  const item = textItem(ctx, text, opt);
+  return alignedItem(item, extent, halign, valign);
+}
+
+export function stackedItem(...items: { item: Item, halign: HAlign}[]): Item {
+  const width = Math.max(0, ...items.map(ele => ele.item.extent.width));
+  const height = items.reduce((acc, ele) => acc + ele.item.extent.height, 0);
+  const extent: Extent = { width, height };
+  return {
+    extent,
+    renderAt(ctx: DrawerContext, pos: Position) {
+      let dy = 0;
+      items.forEach(({ item, halign }) => {
+        const dx = horizAlign(item.extent.width, width, halign);
+        item.renderAt(ctx, shiftPosition(pos, { dx, dy }));
+        dy += item.extent.height;
+      })
     }
   }
 }
@@ -135,8 +183,8 @@ export function frame(extent: Extent): Renderer {
 export class Container implements Renderer {
   children: { offset: Offset, renderer: Renderer }[] = [];
 
-  add(renderer: Renderer, offset: Offset) {
-    this.children.push({ offset, renderer });
+  add(renderer: Renderer, ...offsets: Offset[]) {
+    this.children.push({ offset: addOffsets(...offsets), renderer });
   }
 
   renderAt(ctx: DrawerContext, pos: Position) {
@@ -188,14 +236,14 @@ export class RowBuilder {
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    if( n === 0 ){
+    if (n === 0) {
       return [];
-    } else if( n === 1 ){
+    } else if (n === 1) {
       return [this.getRemaining()];
     } else {
       const rows: { offset: Offset, extent: Extent }[] = [];
       const rowHeight = this.extent.height / n;
-      for(let i=0;i<n-1;i++){
+      for (let i = 0; i < n - 1; i++) {
         rows.push(this.getRow(rowHeight))
       }
       rows.push(this.getRemaining());
@@ -209,7 +257,7 @@ export class ColumnBuilder {
   left: number = 0;
   right: number;
 
-  constructor(extent: Extent){
+  constructor(extent: Extent) {
     this.extent = extent;
     this.right = extent.width;
   }
@@ -230,20 +278,20 @@ export class ColumnBuilder {
 
   getRemaining(): { offset: Offset, extent: Extent } {
     const offset = { dx: this.left, dy: 0 };
-    const extent = { width: this.right - this.left, height: this.extent.height};
+    const extent = { width: this.right - this.left, height: this.extent.height };
     this.left = this.right;
     return { offset, extent };
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    if( n === 0 ) {
+    if (n === 0) {
       return [];
-    } else if( n === 1 ){
+    } else if (n === 1) {
       return [this.getRemaining()];
     } else {
       const cols: { offset: Offset, extent: Extent }[] = [];
       const colWidth = this.extent.width / n;
-      for(let i=0;i<n-1;i++){
+      for (let i = 0; i < n - 1; i++) {
         cols.push(this.getColumn(colWidth));
       }
       cols.push(this.getRemaining());

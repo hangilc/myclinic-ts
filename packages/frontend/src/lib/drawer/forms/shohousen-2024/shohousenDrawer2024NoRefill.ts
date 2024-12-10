@@ -13,23 +13,23 @@ import { DateWrapper } from "myclinic-util";
 import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import {
-  type Position, type Extent, type Offset, type Renderer, RowBuilder, text,
+  type Position, type Extent, type Offset, type Renderer, RowBuilder, textItem,
   type Item, Container, alignedItem, ColumnBuilder, addOffsets,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 
-export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
+export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
   const paper = b.mkBox(0, 0, A5.width, A5.height);
   const outerBounds = b.modify(paper, b.inset(3));
   c.frame(ctx, outerBounds);
   const bounds = b.modify(outerBounds, b.inset(2));
-  const main = mainBlock(ctx, blk.extentOfBox(bounds));
+  const main = mainBlock(ctx, blk.extentOfBox(bounds), data);
   main.renderAt(ctx, blk.leftTopOfBox(bounds));
   return [c.getOps(ctx)];
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent): Renderer {
+function mainBlock(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const container = new Container();
   const rb = new RowBuilder(extent);
   const mainTitleRow = rb.getRow(6);
@@ -38,22 +38,22 @@ function mainBlock(ctx: DrawerContext, extent: Extent): Renderer {
   container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
   const mainRow = rb.getRemaining();
   const inner = blk.insetExtent(mainRow.extent, 2, 3, 2, 3);
-  const mainAreaRenderer = mainArea(ctx, inner.extent);
+  const mainAreaRenderer = mainArea(ctx, inner.extent, data);
   container.add(mainAreaRenderer, blk.addOffsets(mainRow.offset, inner.offset));
   return container;
 }
 
 function mainTitle(ctx: DrawerContext, extent: Extent): Item {
-  const item = text(ctx, "処方箋", { font: "f4", color: green });
+  const item = textItem(ctx, "処方箋", { font: "f4", color: green });
   return alignedItem(item, extent, "center", "center");
 }
 
 function subTitle(ctx: DrawerContext, extent: Extent): Item {
-  let item = text(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
+  let item = textItem(ctx, "(この処方箋は、どの保険薬局でも有効です。)");
   return alignedItem(item, extent, "center", "center");
 }
 
-function mainArea(ctx: DrawerContext, extent: Extent): Renderer {
+function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
   const upperRow = rb.getRow(20);
@@ -61,18 +61,64 @@ function mainArea(ctx: DrawerContext, extent: Extent): Renderer {
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
     const [kouhiBox, hokenBox] = cb.splitEven(2);
-    con.add(kouhiRenderer(ctx, kouhiBox.extent), addOffsets(offset, kouhiBox.offset));
+    con.add(kouhiRenderer(ctx, kouhiBox.extent, data), addOffsets(offset, kouhiBox.offset));
   }
   rb.getRow(2);
   const lowerRow = rb.getRemaining();
   return con;
 }
 
-function kouhiRenderer(ctx: DrawerContext, extent: Extent): Renderer {
+function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
+  con.add(blk.frame(extent));
   const rb = new RowBuilder(extent);
   const [upper, lower] = rb.splitEven(2);
-  con.add(blk.frame(extent), { dx: 0, dy: 0 });
+  con.add(blk.frameBottom(upper.extent), upper.offset);
+  const digitWidth = 5;
+  {
+    const { offset, extent } = upper;
+    const cb = new ColumnBuilder(extent);
+    const digits = cb.getColumnFromRight(digitWidth * 8);
+    const label = cb.getRemaining();
+    con.add(blk.frameRight(label.extent), offset, label.offset);
+    con.add(blk.alignedText(ctx, "公費負担者番号", label.extent, "center", "center"), offset, label.offset);
+    con.add(eightDigits(ctx, digits.extent, data?.futansha), offset, digits.offset);
+  }
+  {
+    const { offset, extent } = lower;
+    const cb = new ColumnBuilder(extent);
+    const digits = cb.getColumnFromRight(digitWidth * 7);
+    const label = cb.getRemaining();
+    con.add(blk.frameRight(label.extent), offset, label.offset);
+    const text1 = blk.textItem(ctx, "公費負担医療");
+    const text2 = blk.textItem(ctx, "の受給者番号");
+    const stacked = blk.stackedItem({ item: text1, halign: "left"}, { item: text2, halign: "left" });
+    const labelItem = alignedItem(stacked, label.extent, "center", "center");
+    con.add(labelItem, offset, label.offset);
+    // con.add(eightDigits(ctx, digits.extent, data?.futansha), offset, digits.offset);
+  }
+  return con;
+}
+
+function eightDigits(ctx: DrawerContext, extent: Extent, digits?: string): Renderer {
+  const con = new Container();
+  const cb = new ColumnBuilder(extent);
+  const cols = cb.splitEven(8);
+  [1, 3, 6].forEach(i => {
+    const col = cols[i];
+    con.add(blk.frameRight(cols[i].extent), col.offset);
+  });
+  [0, 2, 4, 5].forEach(i => {
+    const col = cols[i];
+    con.add(blk.frameRight(cols[i].extent, "thin"), col.offset);
+  });
+  if (digits) {
+    const str = pad(digits, 8, " ");
+    Array.from(str).forEach(((ch, i) => {
+      const col = cols[i];
+      con.add(blk.alignedText(ctx, ch, col.extent, "center", "center", { font: "d6", color: black }), col.offset);
+    }));
+  }
   return con;
 }
 
@@ -189,21 +235,6 @@ function initPen(ctx: DrawerContext) {
 //   blk.putIn(ctx, block, box, alignCenter);
 // }
 
-// function drawEightDigits(ctx: DrawerContext, box: Box, bangou?: string) {
-//   let cols = b.splitToColumns(box, b.evenSplitter(8));
-//   [1, 3, 6].forEach(i => c.frameRight(ctx, cols[i]));
-//   c.withPen(ctx, "thin", () => {
-//     [0, 2, 4, 5].forEach(i => c.frameRight(ctx, cols[i]));
-//   });
-//   if (bangou !== undefined) {
-//     withDataContext(ctx, "d6", () => {
-//       const str = pad(bangou, 8, " ");
-//       Array.from(str).forEach((ch, i) => {
-//         c.drawText(ctx, ch, cols[i], "center", "center");
-//       })
-//     });
-//   }
-// }
 
 // function drawSevenDigits(ctx: DrawerContext, box: Box, bangou?: string) {
 //   let cols = b.splitToColumns(box, b.evenSplitter(7));
