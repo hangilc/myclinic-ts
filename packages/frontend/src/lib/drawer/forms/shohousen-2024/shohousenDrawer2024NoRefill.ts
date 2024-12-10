@@ -14,7 +14,7 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import {
   type Position, type Extent, type Offset, type Renderer, RowBuilder, text,
-  type Item, Container, alignedItem,
+  type Item, Container, alignedItem, ColumnBuilder, addOffsets,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 
@@ -54,11 +54,24 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
 }
 
 function mainArea(ctx: DrawerContext, extent: Extent): Renderer {
-  return {
-    renderAt: (ctx: DrawerContext, pos: Position) => {
-      c.frame(ctx, b.mkBox(pos.x, pos.y, pos.x + extent.width, pos.y + extent.height))
-    }
+  const con: Container = new Container();
+  const rb = new RowBuilder(extent);
+  const upperRow = rb.getRow(20);
+  {
+    let { offset, extent } = upperRow;
+    const cb = new ColumnBuilder(extent);
+    const [kouhiBox, hokenBox] = cb.splitEven(2);
+    con.add(kouhiRenderer(ctx, kouhiBox.extent), addOffsets(offset, kouhiBox.offset));
   }
+  rb.getRow(2);
+  const lowerRow = rb.getRemaining();
+  return con;
+}
+
+function kouhiRenderer(ctx: DrawerContext, extent: Extent): Renderer {
+  const rb = new RowBuilder(extent);
+  const [upper, lower] = rb.splitEven(2);
+  return text(ctx, "kouhi");
 }
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {

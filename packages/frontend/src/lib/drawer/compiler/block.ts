@@ -164,7 +164,7 @@ export class RowBuilder {
   getRowFromBottom(height: number): { offset: Offset, extent: Extent } {
     const offset = { dx: 0, dy: this.bottom - height };
     const extent = { width: this.extent.width, height };
-    this.bottom += height;
+    this.bottom -= height;
     return { offset, extent };
   }
 
@@ -173,6 +173,70 @@ export class RowBuilder {
     const extent = { width: this.extent.width, height: this.bottom - this.top };
     this.top = this.bottom;
     return { offset, extent };
+  }
+
+  splitEven(n: number): { offset: Offset, extent: Extent }[] {
+    if( n === 0 ){
+      return [];
+    } else if( n === 1 ){
+      return [this.getRemaining()];
+    } else {
+      const rows: { offset: Offset, extent: Extent }[] = [];
+      const rowHeight = this.extent.height / n;
+      for(let i=0;i<n-1;i++){
+        rows.push(this.getRow(rowHeight))
+      }
+      rows.push(this.getRemaining());
+      return rows;
+    }
+  }
+}
+
+export class ColumnBuilder {
+  extent: Extent;
+  left: number = 0;
+  right: number;
+
+  constructor(extent: Extent){
+    this.extent = extent;
+    this.right = extent.width;
+  }
+
+  getColumn(width: number): { offset: Offset, extent: Extent } {
+    const offset = { dx: this.left, dy: 0 };
+    const extent = { width, height: this.extent.height };
+    this.left += width;
+    return { offset, extent };
+  }
+
+  getColumnFromRight(width: number): { offset: Offset, extent: Extent } {
+    const offset = { dx: this.right - width, dy: 0 };
+    const extent = { width, height: this.extent.height };
+    this.right -= width;
+    return { offset, extent };
+  }
+
+  getRemaining(): { offset: Offset, extent: Extent } {
+    const offset = { dx: this.left, dy: 0 };
+    const extent = { width: this.right - this.left, height: this.extent.height};
+    this.left = this.right;
+    return { offset, extent };
+  }
+
+  splitEven(n: number): { offset: Offset, extent: Extent }[] {
+    if( n === 0 ) {
+      return [];
+    } else if( n === 1 ){
+      return [this.getRemaining()];
+    } else {
+      const cols: { offset: Offset, extent: Extent }[] = [];
+      const colWidth = this.extent.width / n;
+      for(let i=0;i<n-1;i++){
+        cols.push(this.getColumn(colWidth));
+      }
+      cols.push(this.getRemaining());
+      return cols;
+    }
   }
 }
 
