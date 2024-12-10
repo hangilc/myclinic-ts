@@ -17,6 +17,7 @@ import {
   type Item, Container, alignedItem, ColumnBuilder, addOffsets,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
+import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
 
 export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
@@ -61,7 +62,8 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data):
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
     const [kouhiBox, hokenBox] = cb.splitEven(2);
-    con.add(kouhiRenderer(ctx, kouhiBox.extent, data), addOffsets(offset, kouhiBox.offset));
+    con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
+    con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
   }
   rb.getRow(2);
   const lowerRow = rb.getRemaining();
@@ -90,14 +92,51 @@ function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
     const digits = cb.getColumnFromRight(digitWidth * 7);
     const label = cb.getRemaining();
     con.add(blk.frameRight(label.extent), offset, label.offset);
-    const text1 = blk.textItem(ctx, "公費負担医療");
-    const text2 = blk.textItem(ctx, "の受給者番号");
-    const stacked = blk.stackedItem({ item: text1, halign: "left"}, { item: text2, halign: "left" });
-    const labelItem = alignedItem(stacked, label.extent, "center", "center");
+    let labelItem = stackedTexts(ctx, ["公費負担医療", "の受給者番号"]);
+    labelItem = alignedItem(labelItem, label.extent, "center", "center");
     con.add(labelItem, offset, label.offset);
-    // con.add(eightDigits(ctx, digits.extent, data?.futansha), offset, digits.offset);
+    con.add(sevenDigits(ctx, digits.extent, data?.jukyuusha), offset, digits.offset);
   }
   return con;
+}
+
+function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const con = new Container();
+  con.add(blk.frame(extent));
+  const rb = new RowBuilder(extent);
+  const [upper, lower] = rb.splitEven(2);
+  con.add(blk.frameBottom(upper.extent), upper.offset);
+  const digitWidth = 5;
+  {
+    const { offset, extent } = upper;
+    const cb = new ColumnBuilder(extent);
+    const digits = cb.getColumnFromRight(digitWidth * 8);
+    const label = cb.getRemaining();
+    con.add(blk.frameRight(label.extent), offset, label.offset);
+    con.add(blk.alignedText(ctx, "保険者番号", label.extent, "center", "center"), offset, label.offset);
+    con.add(eightDigits(ctx, digits.extent, data?.hokenshaBangou), offset, digits.offset);
+  }
+  {
+    const { offset, extent } = lower;
+    const cb = new ColumnBuilder(extent);
+    const digits = cb.getColumnFromRight(digitWidth * 8);
+    const label = cb.getRemaining();
+    con.add(blk.frameRight(label.extent), offset, label.offset);
+    let labelItem = stackedTexts(ctx, ["被保険者証・被保険", "者手帳の記号・番号"]);
+    labelItem = alignedItem(labelItem, label.extent, "center", "center");
+    con.add(labelItem, offset, label.offset);
+    // con.add(sevenDigits(ctx, digits.extent, data?.jukyuusha), offset, digits.offset);
+  }
+  return con;
+}
+
+function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { font?: string, halign?: HAlign }): Item {
+  const font = opt?.font;
+  const halign = opt?.halign ?? "left";
+  const items = texts.map(text => blk.textItem(ctx, text, { font: opt?.font }));
+  const width = Math.max(...items.map(item => item.extent.width));
+  const height = c.resolveFontHeight(ctx, opt?.font);
+  return blk.stackedItems(...items.map(item => ({ item, halign })));
 }
 
 function eightDigits(ctx: DrawerContext, extent: Extent, digits?: string): Renderer {
@@ -114,6 +153,28 @@ function eightDigits(ctx: DrawerContext, extent: Extent, digits?: string): Rende
   });
   if (digits) {
     const str = pad(digits, 8, " ");
+    Array.from(str).forEach(((ch, i) => {
+      const col = cols[i];
+      con.add(blk.alignedText(ctx, ch, col.extent, "center", "center", { font: "d6", color: black }), col.offset);
+    }));
+  }
+  return con;
+}
+
+function sevenDigits(ctx: DrawerContext, extent: Extent, digits?: string): Renderer {
+  const con = new Container();
+  const cb = new ColumnBuilder(extent);
+  const cols = cb.splitEven(7);
+  [2, 5].forEach(i => {
+    const col = cols[i];
+    con.add(blk.frameRight(cols[i].extent), col.offset);
+  });
+  [0, 1, 3, 4].forEach(i => {
+    const col = cols[i];
+    con.add(blk.frameRight(cols[i].extent, "thin"), col.offset);
+  });
+  if (digits) {
+    const str = pad(digits, 7, " ");
     Array.from(str).forEach(((ch, i) => {
       const col = cols[i];
       con.add(blk.alignedText(ctx, ch, col.extent, "center", "center", { font: "d6", color: black }), col.offset);
@@ -236,22 +297,6 @@ function initPen(ctx: DrawerContext) {
 // }
 
 
-// function drawSevenDigits(ctx: DrawerContext, box: Box, bangou?: string) {
-//   let cols = b.splitToColumns(box, b.evenSplitter(7));
-//   [2, 5].forEach(i => c.frameRight(ctx, cols[i]));
-//   c.withPen(ctx, "thin", () => {
-//     [0, 1, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
-//   })
-//   if (bangou !== undefined) {
-//     withDataContext(ctx, "d6", () => {
-//       const str = pad(bangou, 7, " ");
-//       Array.from(str).forEach((ch, i) => {
-//         c.drawText(ctx, ch, cols[i], "center", "center");
-//       })
-//     });
-//   }
-// }
-
 // function withDataContext(ctx: DrawerContext, font: string, f: () => void) {
 //   c.withFont(ctx, font, () => {
 //     c.withTextColor(ctx, { r: 0, g: 0, b: 0 }, f);
@@ -332,6 +377,10 @@ function initPen(ctx: DrawerContext) {
 //     }
 //   }
 // }
+
+function kigouBangouRenderer(ctx: DrawerContext, extent: Extent): Renderer {
+  
+}
 
 // function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
 //   henkoufuka: Box, kanjakibou: Box; shohouBox: Box;

@@ -21,6 +21,7 @@
   import { cache } from "@/lib/cache";
   import { parseShohou } from "@/lib/parse-shohou";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
+  import { formatHokenshaBangou } from "myclinic-util";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -190,7 +191,7 @@
     let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
     if (hoken.shahokokuho) {
       const shahokokuho = hoken.shahokokuho;
-      hokenshaBangou = shahokokuho.hokenshaBangou.toString();
+      hokenshaBangou = formatHokenshaBangou(shahokokuho.hokenshaBangou);
       hihokenshaKigou = shahokokuho.hihokenshaKigou;
       hihokenshaBangou = shahokokuho.hihokenshaBangou;
       edaban = shahokokuho.edaban;

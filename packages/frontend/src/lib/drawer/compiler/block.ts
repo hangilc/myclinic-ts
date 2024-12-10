@@ -163,7 +163,7 @@ export function alignedText(ctx: DrawerContext, text: string, extent: Extent,
   return alignedItem(item, extent, halign, valign);
 }
 
-export function stackedItem(...items: { item: Item, halign: HAlign}[]): Item {
+export function stackedItems(...items: { item: Item, halign: HAlign }[]): Item {
   const width = Math.max(0, ...items.map(ele => ele.item.extent.width));
   const height = items.reduce((acc, ele) => acc + ele.item.extent.height, 0);
   const extent: Extent = { width, height };
@@ -300,6 +300,65 @@ export class ColumnBuilder {
   }
 }
 
+// FlexSize //////////////////////////////////////////////////////////////////////////////////
+
+export type FlexSizeBase = {
+  kind: "fixed";
+  value: number;
+} | {
+  kind: "expand";
+}
+
+export type FlexSize = FlexSizeBase | {
+  kind: "advance-to";
+  position: number;
+}
+
+function resolveFlexSizeBases(sizes: FlexSizeBase[], totalSize: number): number[] {
+  let sum = 0;
+  let nexp = 0;
+  sizes.forEach(size => {
+    switch(size.kind){
+      case "fixed": {
+        sum += size.value;
+        break;
+      }
+      case "expand": {
+        nexp += 1;
+      }
+    }
+  });
+  let expand = nexp > 0 ? totalSize / nexp : 0;
+  return sizes.map(size => {
+    switch(size.kind){
+      case "fixed": return size.value;
+      case "expand": return expand;
+    }
+  });
+}
+
+function resolveFlexSizes(sizes: FlexSize[], totalSize: number): number[] {
+  const groups: { sizes: FlexSizeBase[], totalSize: number }[] = [];
+  let acc: FlexSizeBase[] = [];
+  let lastPosition = 0;
+  sizes.forEach(size => {
+    if( size.kind === "advance-to" ){
+      acc.push({ kind: "fixed", value: 0 }); // placeholder for advance-to element
+      groups.push({ sizes: acc, totalSize: size.position - lastPosition });
+      lastPosition = size.position;
+      acc = [];
+    } else {
+      acc.push(size);
+    }
+  });
+  groups.push({ sizes: acc, totalSize });
+  const resolved: number[] = [];
+  groups.forEach(group => {
+    const rs = resolveFlexSizeBases(group.sizes, group.totalSize);
+    resolved.push(...rs);
+  });
+  return resolved;
+}
 
 // export interface Block {
 //   width: number;
