@@ -214,6 +214,11 @@ export class Container implements Renderer {
     this.add(aligned, bound.offset);
   }
 
+  addCreated(creator: (extent: Extent) => Renderer, at: OffsetExtent) {
+    const renderer = creator(at.extent);
+    this.add(renderer, at.offset);
+  }
+
   renderAt(ctx: DrawerContext, pos: Position) {
     this.children.forEach(child => {
       child.renderer.renderAt(ctx, shiftPosition(pos, child.offset));
@@ -228,6 +233,21 @@ export function alignedItem(item: Item, extent: Extent, halign: HAlign, valign: 
       const offset = align(item.extent, extent, halign, valign);
       item.renderAt(ctx, shiftPosition(pos, offset));
     },
+  }
+}
+
+export interface OffsetExtent {
+  offset: Offset;
+  extent: Extent;
+}
+
+export function insetOffsetExtent(oe: OffsetExtent, dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): OffsetExtent {
+  return {
+    offset: addOffsets(oe.offset, { dx, dy }),
+    extent: {
+      width: oe.extent.width - dx - dx2,
+      height: oe.extent.height - dy - dy2,
+    }
   }
 }
 
@@ -493,7 +513,7 @@ export function stuffedTextItem(ctx: DrawerContext, text: string, extent: Extent
   ifAllFails: StuffedItemSpec): Item {
   for (let spec of specs) {
     let item: Item = spec.innerItemCreator(ctx, text, extent.width);
-    if( extentSmallerOrEqual(item.extent, extent) ){
+    if (extentSmallerOrEqual(item.extent, extent)) {
       return spec.innerItemAligner(item);
     }
   }
@@ -526,7 +546,7 @@ export function breakToLines(ctx: DrawerContext, text: string, width: number, fo
 
 function repeat<T>(a: T, n: number): T[] {
   const as: T[] = [];
-  for(let i = 0;i<n;i++){
+  for (let i = 0; i < n; i++) {
     as.push(a);
   }
   return as;

@@ -14,7 +14,7 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import {
   type Position, type Extent, type Offset, type Renderer, RowBuilder, textItem,
-  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox,
+  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox, insetOffsetExtent,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
@@ -214,7 +214,7 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
       ])
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "氏　名"), label, "center", "center");
-      con.add(shimeiRenderer(ctx, data?.shimei, body.extent), body.offset);
+      con.addCreated((ext) => shimeiRenderer(ctx, data?.shimei, ext), insetOffsetExtent(body, 1));
     }
     {
       const cb = new ColumnBuilder(birthdate.extent, birthdate.offset);
@@ -240,19 +240,33 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
 }
 
 function shimeiRenderer(ctx: DrawerContext, shimei: string | undefined, extent: Extent): Renderer {
+  function singleLineSpec(font: string): blk.StuffedItemSpec {
+    return {
+      innerItemCreator: (ctx, text) => {
+        return textItem(ctx, text, { font, color: black });
+      },
+      innerItemAligner: (item) => {
+        return alignedItem(item, extent, "center", "center");
+      }
+    }
+  }
   if (shimei === undefined) {
     return emptyItem();
   } else {
     return blk.stuffedTextItem(ctx, shimei, extent, [
-
-    ], {
-      innerItemCreator: (ctx: DrawerContext, text: string, width: number): Item => {
-        return blk.wrappedTextItem(ctx, text, width, { font: "d2.5", color: black, halign: "left" })
-      },
-      innerItemAligner: (item: Item): Item => {
-        return blk.alignedItem(item, extent, "left", "top");
+      singleLineSpec("d5"),
+      singleLineSpec("d4"),
+      singleLineSpec("d3"),
+    ],
+      {
+        innerItemCreator: (ctx: DrawerContext, text: string, width: number): Item => {
+          return blk.wrappedTextItem(ctx, text, width, { font: "d2.5", color: black, halign: "left" })
+        },
+        innerItemAligner: (item: Item): Item => {
+          return blk.alignedItem(item, extent, "left", "top");
+        }
       }
-    });
+    );
   }
 }
 
