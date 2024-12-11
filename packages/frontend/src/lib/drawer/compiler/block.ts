@@ -61,7 +61,7 @@ export function eqExtent(a: Extent, b: Extent): boolean {
   return a.width === b.width && a.height === b.height;
 }
 
-export function extentSmallerOrEqual(a: Extent, b:Extent): boolean {
+export function extentSmallerOrEqual(a: Extent, b: Extent): boolean {
   return a.width <= b.width && a.height <= b.height;
 }
 
@@ -484,17 +484,20 @@ export interface StuffedTextSpec {
 
 export function stuffedTextItem(ctx: DrawerContext, text: string, extent: Extent, specs: StuffedTextSpec[], opt?: {
   halign?: HAlign;
+  ifAllFails: StuffedTextSpec | "use-last";
 }): Item {
   for (let spec of specs) {
+    let item: Item;
     if (spec.multiLine) {
-
+      item = wrappedTextItem(ctx, text, extent.width, { font: spec.font, halign: opt?.halign })
     } else {
-      const item = textItem(ctx, text, { font: spec.font });
-      if( extentSmallerOrEqual(item.extent, extent) ){
-        return item;
-      }
+      item = textItem(ctx, text, { font: spec.font });
+    }
+    if (extentSmallerOrEqual(item.extent, extent)) {
+      return item;
     }
   }
+  throw new Error("cannot stuff text");
 }
 
 // wrappedTextItem //////////////////////////////////////////////////////////////////////////////
