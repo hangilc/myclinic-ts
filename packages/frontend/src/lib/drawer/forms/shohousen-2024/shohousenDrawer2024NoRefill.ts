@@ -54,6 +54,8 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
   return alignedItem(item, extent, "center", "center");
 }
 
+//     b.splitToRows(box, blk.splitByExtent(33, 10, "*", 20, 10, 10));
+
 function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
@@ -65,8 +67,156 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data):
     con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
     con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
   }
-  rb.getRow(2);
-  const lowerRow = rb.getRemaining();
+  rb.getRow(3);
+  const kanjaRow = rb.getRow(33);
+  const koufuDateRow = rb.getRow(10);
+  const pharmaRow = rb.getRowFromBottom(10);
+  const shohouDateRow = rb.getRowFromBottom(10);
+  const bikouRow = rb.getRowFromBottom(20);
+  const drugsRow = rb.getRemaining();
+  con.add(kanjaRowRenderer(ctx, kanjaRow.extent, data), kanjaRow.offset);
+  return con;
+}
+
+function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const cb = new ColumnBuilder(extent);
+  const [patientArea, clinicArea] = cb.splitEven(2);
+  const con = new Container();
+  con.add(kanjaAreaRenderer(ctx, patientArea.extent, data), patientArea.offset);
+  con.add(clinicAreaRenderer(ctx, clinicArea.extent, data), clinicArea.offset);
+  return con;
+}
+
+// function drawPatientBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+//   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
+//   c.frameRight(ctx, mark);
+//   c.drawTextVertically(ctx, "患　者", mark, "center", "center");
+//   const rows = b.splitToRows(body, b.splitAt(10, 23));
+//   [rows[0], rows[1]].forEach(box => c.frameBottom(ctx, box));
+//   { // rows[0]
+//     const [c1, c2] = b.splitToColumns(rows[0], b.splitAt(20));
+//     c.frameRight(ctx, c1);
+//     c.drawText(ctx, "氏　名", c1, "center", "center");
+//     blk.putIn(ctx,
+//       blk.textPackBlock(ctx, data.shimei ?? "", c2, [
+//         { textBlockOpt: { font: "d5", color: black }, stackedBlockOpt: { halign: "left" } },
+//         { textBlockOpt: { font: "d4", color: black }, stackedBlockOpt: { halign: "left" } },
+//         { textBlockOpt: { font: "d3", color: black }, stackedBlockOpt: { halign: "left" } },
+//         { textBlockOpt: { font: "d2.5", color: black }, stackedBlockOpt: { halign: "left" } },
+//       ]),
+//       c2, alignCenter);
+//   }
+//   { // rows[1]
+//     const [c1, c2] = b.splitToColumns(rows[1], b.splitAt(20));
+//     c.frameRight(ctx, c1);
+//     c.drawText(ctx, "生年月日", c1, "center", "center");
+//     const [col1, col2, col3] = b.splitToColumns(c2, b.splitAt(4, 30));
+//     c.frameRight(ctx, col2);
+//     const bdate = data.birthdate ? DateWrapper.from(data.birthdate) : undefined;
+//     { // col1
+//       const box = b.modify(col1, b.shrinkVert(1, 1), b.setWidth(2.5, "center"));
+//       const [meiji, taisho, shouwa, heisei, reiwa] = b.splitToRows(box, b.evenSplitter(5));
+//       const gengou = bdate?.getGengou();
+//       function drawGengou(label: string, box: Box, value: string) {
+//         blk.drawText(ctx, label, box, {
+//           halign: "center",
+//           valign: "center",
+//           textBlockOpt: {
+//             font: "f1.5",
+//             color: green,
+//             blockOpt: {
+//               modifiers: [dataCirc(gengou === value)]
+//             }
+//           }
+//         });
+//       }
+//       drawGengou("明", meiji, "明治");
+//       drawGengou("大", taisho, "大正");
+//       drawGengou("昭", shouwa, "昭和");
+//       drawGengou("平", heisei, "平成");
+//       drawGengou("令", reiwa, "令和");
+//     }
+//     { // col2
+//       const box = b.modify(col2, b.setHeight(2.5, "center"), b.shrinkHoriz(0, 2.5));
+//       const line = blk.rowBlock(c.currentFontSize(ctx), [
+//         blk.gapItem(2.5, {
+//           block: blk.textBlock(ctx, bdate?.getNen().toString() ?? "", {
+//             font: "d2.5", color: black
+//           }),
+//           containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
+//         }),
+//         blk.gapItem(1),
+//         blk.textItem(ctx, "年"),
+//         blk.gapItem(1),
+//         blk.gapItem(2.5, {
+//           block: blk.textBlock(ctx, bdate?.getMonth().toString() ?? "", { font: "d2.5", color: black }),
+//           containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
+//         }),
+//         blk.gapItem(1),
+//         blk.textItem(ctx, "月"),
+//         blk.gapItem(1),
+//         blk.gapItem(2.5, {
+//           block: blk.textBlock(ctx, bdate?.getDay().toString() ?? "", { font: "d2.5", color: black }),
+//           containerItemOpt: { putInOpt: { halign: "right", valign: "center" } }
+//         }),
+//         blk.gapItem(1),
+//         blk.textItem(ctx, "日"),
+//       ]);
+//       blk.putIn(ctx, line, box, { halign: "right", valign: "center" });
+//     }
+//     { // col3
+//       const box = b.modify(col3, b.setHeight(2.5, "center"));
+//       const line = blk.rowBlock(c.currentFontSize(ctx), [
+//         blk.textItem(ctx, "男"),
+//         blk.textItem(ctx, "・"),
+//         blk.textItem(ctx, "女"),
+//       ]);
+//       blk.putIn(ctx, line, box, alignCenter);
+//     }
+//   }
+//   { // rows[2]
+//     const [c1, c2] = b.splitToColumns(rows[2], b.splitAt(20));
+//     c.frameRight(ctx, c1);
+//     c.drawText(ctx, "区　分", c1, "center", "center");
+//     const [left, right] = b.splitToColumns(c2, b.evenSplitter(2));
+//     c.frameRight(ctx, left);
+//     let tb = blk.drawText(ctx, "被保険者", left, alignCenter);
+//     if (data.hokenKubun === "hihokensha") {
+//       c.withPen(ctx, "data-thin", () => {
+//         c.circle(ctx, b.cx(tb), b.cy(tb), c.currentFontSize(ctx) * 0.6);
+//       });
+//     }
+//     blk.drawText(ctx, "被扶養者", right, alignCenter);
+//   }
+// }
+
+function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const con = new Container();
+  con.add(blk.frame(extent));
+  const cb = new ColumnBuilder(extent);
+  const mark = cb.getColumn(5);
+  const body = cb.getRemaining();
+  con.add(blk.frameRight(mark.extent));
+  con.add(blk.boxItem(mark.extent, (ctx, box) => {
+    box = b.modify(box, b.shrinkVert(10, 10));
+    c.drawTextJustifiedVertically(ctx, "患　者", box, "center");
+  }), mark.offset);
+  {
+    const rb = new RowBuilder(body.extent, body.offset);
+    const [name, birthdate, kubun ] = rb.splitEven(3);
+    {
+      const cb = new ColumnBuilder(name.extent, name.offset);
+      const [label, body] = cb.
+    }
+    const nameItem = alignedItem(textItem(ctx, "氏　名"), name.extent, "center", "center");
+    con.add(nameItem, name.offset);
+  }
+  return con;
+}
+
+function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const con = new Container();
+
   return con;
 }
 

@@ -4,7 +4,7 @@ import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
-import { breakLines, breakSingleLine } from "./break-lines";
+import { breakLines, breakMultipleLines, breakSingleLine } from "./break-lines";
 import type { RenderedDrug } from "@/lib/denshi-shohou/presc-renderer";
 import { stringToCharWidths } from "./char-width";
 
@@ -59,6 +59,10 @@ export interface Extent {
 
 export function eqExtent(a: Extent, b: Extent): boolean {
   return a.width === b.width && a.height === b.height;
+}
+
+export function extentSmallerOrEqual(a: Extent, b:Extent): boolean {
+  return a.width <= b.width && a.height <= b.height;
 }
 
 export function align(childExtent: Extent, parentExtent: Extent, halign: HAlign, valign: VAlign): Offset {
@@ -165,6 +169,16 @@ export function boxRenderer(extent: Extent, f: (ctx: DrawerContext, box: Box) =>
   }
 }
 
+export function boxItem(extent: Extent, f: (ctx: DrawerContext, box: Box) => void): Item {
+  return {
+    extent,
+    renderAt: (ctx: DrawerContext, pos: Position) => {
+      const box = positionExtentToBox(pos, extent);
+      f(ctx, box);
+    }
+  }
+}
+
 export function alignedText(ctx: DrawerContext, text: string, extent: Extent,
   halign: HAlign, valign: VAlign, opt?: TextOpt): Item {
   const item = textItem(ctx, text, opt);
@@ -216,31 +230,33 @@ export class RowBuilder {
   extent: Extent;
   top: number = 0;
   bottom: number;
+  offset: Offset;
 
-  constructor(extent: Extent) {
+  constructor(extent: Extent, offset?: Offset) {
     this.extent = extent;
     this.bottom = extent.height;
+    this.offset = offset ?? { dx: 0, dy: 0 };
   }
 
   getRow(height: number): { offset: Offset, extent: Extent } {
     const offset = { dx: 0, dy: this.top };
     const extent = { width: this.extent.width, height };
     this.top += height;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   getRowFromBottom(height: number): { offset: Offset, extent: Extent } {
     const offset = { dx: 0, dy: this.bottom - height };
     const extent = { width: this.extent.width, height };
     this.bottom -= height;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   getRemaining(): { offset: Offset, extent: Extent } {
     const offset = { dx: 0, dy: this.top };
     const extent = { width: this.extent.width, height: this.bottom - this.top };
     this.top = this.bottom;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
@@ -264,31 +280,33 @@ export class ColumnBuilder {
   extent: Extent;
   left: number = 0;
   right: number;
+  offset: Offset;
 
-  constructor(extent: Extent) {
+  constructor(extent: Extent, offset?: Offset) {
     this.extent = extent;
     this.right = extent.width;
+    this.offset = offset ?? { dx: 0, dy: 0 };
   }
 
   getColumn(width: number): { offset: Offset, extent: Extent } {
     const offset = { dx: this.left, dy: 0 };
     const extent = { width, height: this.extent.height };
     this.left += width;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   getColumnFromRight(width: number): { offset: Offset, extent: Extent } {
     const offset = { dx: this.right - width, dy: 0 };
     const extent = { width, height: this.extent.height };
     this.right -= width;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   getRemaining(): { offset: Offset, extent: Extent } {
     const offset = { dx: this.left, dy: 0 };
     const extent = { width: this.right - this.left, height: this.extent.height };
     this.left = this.right;
-    return { offset, extent };
+    return { offset: addOffsets(this.offset, offset), extent };
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
@@ -337,7 +355,6 @@ function resolveFlexSizeBases(sizes: FlexSizeBase[], totalSize?: number): number
       }
     }
   });
-  console.log("sum", sum);
   let expand = 0;
   if (nexp > 0) {
     if (totalSize !== undefined) {
@@ -418,7 +435,7 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
         break;
       }
       case "gap": {
-        if( rowItem.content ){
+        if (rowItem.content) {
           innerItem = rowItem.content(extent);
         } else {
           innerItem = emptyItem();
@@ -426,7 +443,7 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
         break;
       }
       case "expand": {
-        if( rowItem.content ) {
+        if (rowItem.content) {
           innerItem = rowItem.content(extent);
         } else {
           innerItem = emptyItem();
@@ -458,6 +475,48 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
   }
 }
 
+// stuffedTextItem //////////////////////////////////////////////////////////////////////////////
+
+export interface StuffedTextSpec {
+  font?: string;
+  multiLine: boolean;
+}
+
+export function stuffedTextItem(ctx: DrawerContext, text: string, extent: Extent, specs: StuffedTextSpec[], opt?: {
+  halign?: HAlign;
+}): Item {
+  for (let spec of specs) {
+    if (spec.multiLine) {
+
+    } else {
+      const item = textItem(ctx, text, { font: spec.font });
+      if( extentSmallerOrEqual(item.extent, extent) ){
+        return item;
+      }
+    }
+  }
+}
+
+// wrappedTextItem //////////////////////////////////////////////////////////////////////////////
+
+export function wrappedTextItem(ctx: DrawerContext, text: string, width: number, opt?: {
+  font?: string;
+  halign?: HAlign;
+}): Item {
+  const font = opt?.font;
+  const halign = opt?.halign ?? "left";
+  const lines = breakToLines(ctx, text, width, font);
+  const items = lines.map(line => textItem(ctx, line, { font }));
+  const args = items.map(item => ({ item, halign }));
+  return stackedItems(...args)
+}
+
+// Others ///////////////////////////////////////////////////////////////////////////////////////
+
+export function breakToLines(ctx: DrawerContext, text: string, width: number, font?: string): string[] {
+  const fontSize = c.resolveFontHeight(ctx, font);
+  return breakMultipleLines(text, fontSize, width);
+}
 
 // export interface Block {
 //   width: number;
