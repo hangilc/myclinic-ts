@@ -14,7 +14,7 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import {
   type Position, type Extent, type Offset, type Renderer, RowBuilder, textItem,
-  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox, insetOffsetExtent,
+  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox, insetOffsetExtent, insetExtent,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
@@ -203,9 +203,9 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
   }), mark.offset);
   {
     const rb = new RowBuilder(body.extent, body.offset);
-    const [name, birthdate, kubun] = rb.splitEven(3);
+    const [name, birthdateAndSex, kubun] = rb.splitEven(3);
     con.add(blk.frameBottom(name.extent), name.offset);
-    con.add(blk.frameBottom(birthdate.extent), birthdate.offset);
+    con.add(blk.frameBottom(birthdateAndSex.extent), birthdateAndSex.offset);
     {
       const cb = new ColumnBuilder(name.extent, name.offset);
       const [label, body] = cb.splitByFlexSizes([
@@ -214,16 +214,20 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
       ])
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "氏　名"), label, "center", "center");
-      con.addCreated((ext) => shimeiRenderer(ctx, data?.shimei, ext), insetOffsetExtent(body, 1));
+      con.addCreated((ext) => shimeiRenderer(ctx, ext, data?.shimei), insetOffsetExtent(body, 1));
     }
     {
-      const cb = new ColumnBuilder(birthdate.extent, birthdate.offset);
-      const [label, body] = cb.splitByFlexSizes([
+      const cb = new ColumnBuilder(birthdateAndSex.extent, birthdateAndSex.offset);
+      const [label, birthdate, sex] = cb.splitByFlexSizes([
         { kind: "fixed", value: 20 },
         { kind: "expand" },
+        { kind: "fixed", value: 10 }
       ]);
       con.add(blk.frameRight(label.extent), label.offset);
+      con.frameRight(birthdate);
       con.addAligned(textItem(ctx, "生年月日"), label, "center", "center");
+      con.addCreated((ext) => birthdateRenderer(ctx, ext, data?.birthdate), birthdate);
+      con.addCreated((ext) => sexRenderer(ctx, ext, data?.sex), sex);
     }
     {
       const cb = new ColumnBuilder(kubun.extent, kubun.offset);
@@ -239,7 +243,7 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
   return con;
 }
 
-function shimeiRenderer(ctx: DrawerContext, shimei: string | undefined, extent: Extent): Renderer {
+function shimeiRenderer(ctx: DrawerContext, extent: Extent, shimei: string | undefined): Renderer {
   function singleLineSpec(font: string): blk.StuffedItemSpec {
     return {
       innerItemCreator: (ctx, text) => {
@@ -268,6 +272,32 @@ function shimeiRenderer(ctx: DrawerContext, shimei: string | undefined, extent: 
       }
     );
   }
+}
+
+function birthdateRenderer(ctx: DrawerContext, extent: Extent, birthdate: string | undefined): Renderer {
+  function gengouRenderer(extent: Extent): Renderer {
+    const con = new Container();
+    const innerExtent = insetExtent(extent, 0, 0.5);
+    const rb = new RowBuilder(innerExtent.extent, innerExtent.offset);
+    const rows = rb.splitEven(5);
+    return con;
+  }
+   function bodyRenderer(extent: Extent): Renderer {
+    const con = new Container();
+    return con;
+   }
+  const con = new Container();
+  const cb = new ColumnBuilder(extent);
+  const [gengou, body] = cb.splitByFlexSizes([
+    { kind: "fixed", value: 4 }
+  ])
+  con.addCreated(gengouRenderer, gengou);
+  con.addCreated(bodyRenderer, body);
+  return con;
+}
+
+function sexRenderer(ctx: DrawerContext, extent: Extent, birthdate: string | undefined): Renderer {
+  return emptyItem();
 }
 
 function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {

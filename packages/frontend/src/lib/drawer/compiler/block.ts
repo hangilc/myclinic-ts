@@ -219,6 +219,18 @@ export class Container implements Renderer {
     this.add(renderer, at.offset);
   }
 
+  frame(at: OffsetExtent) {
+    this.add(frame(at.extent), at.offset);
+  }
+
+  frameRight(at: OffsetExtent) {
+    this.add(frameRight(at.extent), at.offset);
+  }
+
+  frameBottom(at: OffsetExtent) {
+    this.add(frameBottom(at.extent), at.offset);
+  }
+
   renderAt(ctx: DrawerContext, pos: Position) {
     this.children.forEach(child => {
       child.renderer.renderAt(ctx, shiftPosition(pos, child.offset));
