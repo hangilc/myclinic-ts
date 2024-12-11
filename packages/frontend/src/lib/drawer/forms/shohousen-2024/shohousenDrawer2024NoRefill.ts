@@ -203,15 +203,57 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
   }), mark.offset);
   {
     const rb = new RowBuilder(body.extent, body.offset);
-    const [name, birthdate, kubun ] = rb.splitEven(3);
+    const [name, birthdate, kubun] = rb.splitEven(3);
+    con.add(blk.frameBottom(name.extent), name.offset);
+    con.add(blk.frameBottom(birthdate.extent), birthdate.offset);
     {
       const cb = new ColumnBuilder(name.extent, name.offset);
-      const [label, body] = cb.
+      const [label, body] = cb.splitByFlexSizes([
+        { kind: "fixed", value: 20 },
+        { kind: "expand" },
+      ])
+      con.add(blk.frameRight(label.extent), label.offset);
+      con.addAligned(textItem(ctx, "氏　名"), label, "center", "center");
+      con.add(shimeiRenderer(ctx, data?.shimei, body.extent), body.offset);
     }
-    const nameItem = alignedItem(textItem(ctx, "氏　名"), name.extent, "center", "center");
-    con.add(nameItem, name.offset);
+    {
+      const cb = new ColumnBuilder(birthdate.extent, birthdate.offset);
+      const [label, body] = cb.splitByFlexSizes([
+        { kind: "fixed", value: 20 },
+        { kind: "expand" },
+      ]);
+      con.add(blk.frameRight(label.extent), label.offset);
+      con.addAligned(textItem(ctx, "生年月日"), label, "center", "center");
+    }
+    {
+      const cb = new ColumnBuilder(kubun.extent, kubun.offset);
+      const [label, body] = cb.splitByFlexSizes([
+        { kind: "fixed", value: 20 },
+        { kind: "expand" },
+      ]);
+      con.add(blk.frameRight(label.extent), label.offset);
+      con.add(blk.frameRight(label.extent), label.offset);
+      con.addAligned(textItem(ctx, "区　分"), label, "center", "center");
+    }
   }
   return con;
+}
+
+function shimeiRenderer(ctx: DrawerContext, shimei: string | undefined, extent: Extent): Renderer {
+  if (shimei === undefined) {
+    return emptyItem();
+  } else {
+    return blk.stuffedTextItem(ctx, shimei, extent, [
+
+    ], {
+      innerItemCreator: (ctx: DrawerContext, text: string, width: number): Item => {
+        return blk.wrappedTextItem(ctx, text, width, { font: "d2.5", color: black, halign: "left" })
+      },
+      innerItemAligner: (item: Item): Item => {
+        return blk.alignedItem(item, extent, "left", "top");
+      }
+    });
+  }
 }
 
 function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
@@ -290,7 +332,7 @@ function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohouse
     {
       kind: "expand", content: (): Item => {
         const kigou = data?.hihokenshaKigou;
-        if( kigou !== undefined ){
+        if (kigou !== undefined) {
           return textItem(ctx, kigou, textOpt);
         } else {
           return emptyItem();
@@ -304,7 +346,7 @@ function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohouse
     {
       kind: "expand", content: (): Item => {
         const bangou = data?.hihokenshaBangou;
-        if( bangou !== undefined ){
+        if (bangou !== undefined) {
           return textItem(ctx, bangou, textOpt);
         } else {
           return emptyItem();
@@ -316,11 +358,11 @@ function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohouse
       kind: "item", item: textItem(ctx, "(枝番)"), ...itemAlign
     },
     {
-      kind: "gap", 
-      width: 3, 
+      kind: "gap",
+      width: 3,
       content: () => {
         const edaban = data?.edaban;
-        if( edaban ){
+        if (edaban) {
           return textItem(ctx, edaban, textOpt);
         } else {
           return emptyItem();

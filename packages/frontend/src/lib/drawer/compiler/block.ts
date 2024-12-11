@@ -209,6 +209,11 @@ export class Container implements Renderer {
     this.children.push({ offset: addOffsets(...offsets), renderer });
   }
 
+  addAligned(item: Item, bound: { offset: Offset; extent: Extent }, halign: HAlign, valign: VAlign) {
+    const aligned = alignedItem(item, bound.extent, halign, valign);
+    this.add(aligned, bound.offset);
+  }
+
   renderAt(ctx: DrawerContext, pos: Position) {
     this.children.forEach(child => {
       child.renderer.renderAt(ctx, shiftPosition(pos, child.offset));
@@ -260,19 +265,20 @@ export class RowBuilder {
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    if (n === 0) {
-      return [];
-    } else if (n === 1) {
-      return [this.getRemaining()];
-    } else {
-      const rows: { offset: Offset, extent: Extent }[] = [];
-      const rowHeight = this.extent.height / n;
-      for (let i = 0; i < n - 1; i++) {
-        rows.push(this.getRow(rowHeight))
-      }
-      rows.push(this.getRemaining());
-      return rows;
-    }
+    return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
+  }
+
+  splitByFlexSizes(sizes: FlexSize[]): { offset: Offset, extent: Extent }[] {
+    const hs = resolveFlexSizes(sizes, this.bottom - this.top);
+    const rows: { offset: Offset, extent: Extent }[] = [];
+    hs.forEach(height => {
+      rows.push({
+        offset: addOffsets(this.offset, { dx: 0, dy: this.top }),
+        extent: { width: this.extent.width, height }
+      });
+      this.top += height;
+    })
+    return rows;
   }
 }
 
@@ -310,19 +316,20 @@ export class ColumnBuilder {
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    if (n === 0) {
-      return [];
-    } else if (n === 1) {
-      return [this.getRemaining()];
-    } else {
-      const cols: { offset: Offset, extent: Extent }[] = [];
-      const colWidth = this.extent.width / n;
-      for (let i = 0; i < n - 1; i++) {
-        cols.push(this.getColumn(colWidth));
-      }
-      cols.push(this.getRemaining());
-      return cols;
-    }
+    return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
+  }
+
+  splitByFlexSizes(sizes: FlexSize[]): { offset: Offset, extent: Extent }[] {
+    const ws = resolveFlexSizes(sizes, this.right - this.left);
+    const cols: { offset: Offset, extent: Extent }[] = [];
+    ws.forEach(width => {
+      cols.push({
+        offset: addOffsets(this.offset, { dx: this.left, dy: 0 }),
+        extent: { width, height: this.extent.height }
+      });
+      this.left += width;
+    })
+    return cols;
   }
 }
 
@@ -477,39 +484,35 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
 
 // stuffedTextItem //////////////////////////////////////////////////////////////////////////////
 
-export interface StuffedTextSpec {
-  font?: string;
-  multiLine: boolean;
+export type StuffedItemSpec = {
+  innerItemCreator: (ctx: DrawerContext, text: string, boundWidth: number) => Item;
+  innerItemAligner: (item: Item) => Item;
 }
 
-export function stuffedTextItem(ctx: DrawerContext, text: string, extent: Extent, specs: StuffedTextSpec[], opt?: {
-  halign?: HAlign;
-  ifAllFails: StuffedTextSpec | "use-last";
-}): Item {
+export function stuffedTextItem(ctx: DrawerContext, text: string, extent: Extent, specs: StuffedItemSpec[],
+  ifAllFails: StuffedItemSpec): Item {
   for (let spec of specs) {
-    let item: Item;
-    if (spec.multiLine) {
-      item = wrappedTextItem(ctx, text, extent.width, { font: spec.font, halign: opt?.halign })
-    } else {
-      item = textItem(ctx, text, { font: spec.font });
-    }
-    if (extentSmallerOrEqual(item.extent, extent)) {
-      return item;
+    let item: Item = spec.innerItemCreator(ctx, text, extent.width);
+    if( extentSmallerOrEqual(item.extent, extent) ){
+      return spec.innerItemAligner(item);
     }
   }
-  throw new Error("cannot stuff text");
+  let item = ifAllFails.innerItemCreator(ctx, text, extent.width);
+  console.log("item", item);
+  return ifAllFails.innerItemAligner(item);
 }
 
 // wrappedTextItem //////////////////////////////////////////////////////////////////////////////
 
 export function wrappedTextItem(ctx: DrawerContext, text: string, width: number, opt?: {
   font?: string;
+  color?: Color;
   halign?: HAlign;
 }): Item {
   const font = opt?.font;
   const halign = opt?.halign ?? "left";
   const lines = breakToLines(ctx, text, width, font);
-  const items = lines.map(line => textItem(ctx, line, { font }));
+  const items = lines.map(line => textItem(ctx, line, { font, color: opt?.color }));
   const args = items.map(item => ({ item, halign }));
   return stackedItems(...args)
 }
@@ -519,6 +522,14 @@ export function wrappedTextItem(ctx: DrawerContext, text: string, width: number,
 export function breakToLines(ctx: DrawerContext, text: string, width: number, font?: string): string[] {
   const fontSize = c.resolveFontHeight(ctx, font);
   return breakMultipleLines(text, fontSize, width);
+}
+
+function repeat<T>(a: T, n: number): T[] {
+  const as: T[] = [];
+  for(let i = 0;i<n;i++){
+    as.push(a);
+  }
+  return as;
 }
 
 // export interface Block {

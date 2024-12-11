@@ -67,13 +67,17 @@ export function breakSingleLine(str: string, start: number, fontSize: number, li
 export function breakMultipleLines(str: string, fontSize: number, lineWidth: number): string[] {
   const lines: string[] = [];
   let start = 0;
+  let iter = 0;
   while (start < str.length) {
     let end = breakSingleLine(str, start, fontSize, lineWidth);
-    if (end === start || end >= str.length) {
+    if( end === start ){
       break;
     } else {
       lines.push(str.substring(start, end));
       start = end;
+    }
+    if( ++iter >= 600 ){
+      throw new Error("too many iteration (breakMultipleLines)");
     }
   }
   return lines;
