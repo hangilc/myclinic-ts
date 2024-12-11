@@ -14,7 +14,7 @@ import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import {
   type Position, type Extent, type Offset, type Renderer, RowBuilder, textItem,
-  type Item, Container, alignedItem, ColumnBuilder, addOffsets,
+  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox,
 } from "../../compiler/block";
 import type { HAlign } from "../../compiler/align";
 import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
@@ -119,15 +119,69 @@ function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   {
     const { offset, extent } = lower;
     const cb = new ColumnBuilder(extent);
-    const digits = cb.getColumnFromRight(digitWidth * 8);
+    const kigouBangou = cb.getColumnFromRight(digitWidth * 8);
     const label = cb.getRemaining();
     con.add(blk.frameRight(label.extent), offset, label.offset);
     let labelItem = stackedTexts(ctx, ["被保険者証・被保険", "者手帳の記号・番号"]);
     labelItem = alignedItem(labelItem, label.extent, "center", "center");
     con.add(labelItem, offset, label.offset);
-    // con.add(sevenDigits(ctx, digits.extent, data?.jukyuusha), offset, digits.offset);
+    con.add(kigouBangouRenderer(ctx, kigouBangou.extent, data), offset, kigouBangou.offset);
   }
   return con;
+}
+
+function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const itemAlign = { halign: "center", valign: "center" } as const;
+  const textOpt = { font: "d2.5", color: black };
+  let item = flexRow(c.resolveFontHeight(ctx, undefined), [
+    {
+      kind: "gap", width: 1, ...itemAlign
+    },
+    {
+      kind: "expand", content: (): Item => {
+        const kigou = data?.hihokenshaKigou;
+        if( kigou !== undefined ){
+          return textItem(ctx, kigou, textOpt);
+        } else {
+          return emptyItem();
+        }
+      },
+      ...itemAlign
+    },
+    {
+      kind: "item", item: textItem(ctx, "・"), ...itemAlign
+    },
+    {
+      kind: "expand", content: (): Item => {
+        const bangou = data?.hihokenshaBangou;
+        if( bangou !== undefined ){
+          return textItem(ctx, bangou, textOpt);
+        } else {
+          return emptyItem();
+        }
+      },
+      ...itemAlign
+    },
+    {
+      kind: "item", item: textItem(ctx, "(枝番)"), ...itemAlign
+    },
+    {
+      kind: "gap", 
+      width: 3, 
+      content: () => {
+        const edaban = data?.edaban;
+        if( edaban ){
+          return textItem(ctx, edaban, textOpt);
+        } else {
+          return emptyItem();
+        }
+      }, ...itemAlign
+    },
+    {
+      kind: "gap", width: 1, ...itemAlign
+    },
+  ], extent.width);
+  return alignedItem(item, extent, "center", "center");
 }
 
 function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { font?: string, halign?: HAlign }): Item {
@@ -378,9 +432,6 @@ function initPen(ctx: DrawerContext) {
 //   }
 // }
 
-function kigouBangouRenderer(ctx: DrawerContext, extent: Extent): Renderer {
-  
-}
 
 // function drawLowerBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
 //   henkoufuka: Box, kanjakibou: Box; shohouBox: Box;

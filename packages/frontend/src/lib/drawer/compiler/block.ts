@@ -57,6 +57,10 @@ export interface Extent {
   height: number;
 }
 
+export function eqExtent(a: Extent, b: Extent): boolean {
+  return a.width === b.width && a.height === b.height;
+}
+
 export function align(childExtent: Extent, parentExtent: Extent, halign: HAlign, valign: VAlign): Offset {
   return {
     dx: horizAlign(childExtent.width, parentExtent.width, halign),
@@ -122,6 +126,10 @@ export function textItem(ctx: DrawerContext, text: string, opt?: TextOpt): Item 
       });
     }
   }
+}
+
+export function emptyItem(extent: Extent = { width: 0, height: 0 }): Item {
+  return { extent, renderAt: () => { } }
 }
 
 export function frame(extent: Extent, pen?: string): Renderer {
@@ -314,35 +322,44 @@ export type FlexSize = FlexSizeBase | {
   position: number;
 }
 
-function resolveFlexSizeBases(sizes: FlexSizeBase[], totalSize: number): number[] {
+function resolveFlexSizeBases(sizes: FlexSizeBase[], totalSize?: number): number[] {
   let sum = 0;
   let nexp = 0;
   sizes.forEach(size => {
-    switch(size.kind){
+    switch (size.kind) {
       case "fixed": {
         sum += size.value;
         break;
       }
       case "expand": {
         nexp += 1;
+        break;
       }
     }
   });
-  let expand = nexp > 0 ? totalSize / nexp : 0;
+  console.log("sum", sum);
+  let expand = 0;
+  if (nexp > 0) {
+    if (totalSize !== undefined) {
+      expand = (totalSize - sum) / nexp;
+    } else {
+      console.error("totalSize unspecified while processing expand");
+    }
+  }
   return sizes.map(size => {
-    switch(size.kind){
+    switch (size.kind) {
       case "fixed": return size.value;
       case "expand": return expand;
     }
   });
 }
 
-function resolveFlexSizes(sizes: FlexSize[], totalSize: number): number[] {
-  const groups: { sizes: FlexSizeBase[], totalSize: number }[] = [];
+function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
+  const groups: { sizes: FlexSizeBase[], totalSize?: number }[] = [];
   let acc: FlexSizeBase[] = [];
   let lastPosition = 0;
   sizes.forEach(size => {
-    if( size.kind === "advance-to" ){
+    if (size.kind === "advance-to") {
       acc.push({ kind: "fixed", value: 0 }); // placeholder for advance-to element
       groups.push({ sizes: acc, totalSize: size.position - lastPosition });
       lastPosition = size.position;
@@ -359,6 +376,88 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize: number): number[] {
   });
   return resolved;
 }
+
+// FlexRow /////////////////////////////////////////////////////////////////////////////////////
+
+export type FlexRowItem = ({
+  kind: "item";
+  item: Item;
+} | {
+  kind: "gap";
+  width: number;
+  content?: (extent: Extent) => Item;
+} | {
+  kind: "expand";
+  content?: (extent: Extent) => Item;
+} | {
+  kind: "advance-to";
+  position: number;
+}) & { halign: HAlign, valign: VAlign };
+
+export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: number): Item {
+  const flexSizes: FlexSize[] = rowItems.map(item => {
+    switch (item.kind) {
+      case "item": return { kind: "fixed", value: item.item.extent.width };
+      case "gap": return { kind: "fixed", value: item.width };
+      case "expand": return { kind: "expand" };
+      case "advance-to": return { kind: "advance-to", position: item.position };
+    }
+  })
+  const ws = resolveFlexSizes(flexSizes, maxWidth);
+  const items: Item[] = [];
+  if (rowItems.length !== ws.length) {
+    throw new Error("inconsistent ws length (flexRow)");
+  }
+  for (let i = 0; i < rowItems.length; i++) {
+    const rowItem = rowItems[i];
+    const extent = { width: ws[i], height };
+    let innerItem: Item;
+    switch (rowItem.kind) {
+      case "item": {
+        innerItem = rowItem.item;
+        break;
+      }
+      case "gap": {
+        if( rowItem.content ){
+          innerItem = rowItem.content(extent);
+        } else {
+          innerItem = emptyItem();
+        }
+        break;
+      }
+      case "expand": {
+        if( rowItem.content ) {
+          innerItem = rowItem.content(extent);
+        } else {
+          innerItem = emptyItem();
+        }
+        break;
+      }
+      case "advance-to": {
+        innerItem = emptyItem({ width: 0, height });
+        break;
+      }
+    }
+    items.push(alignedItem(innerItem, extent, rowItem.halign, rowItem.valign));
+  }
+  if (items.length !== ws.length) {
+    throw new Error("inconsistent items length (flexRow)");
+  }
+  const width = items.reduce((acc, ele) => acc + ele.extent.width, 0);
+  const con = new Container();
+  let dx = 0;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const itemWidth = ws[i];
+    con.add(item, { dx, dy: 0 });
+    dx += itemWidth;
+  }
+  return {
+    extent: { width, height },
+    renderAt: (ctx: DrawerContext, pos: Position) => con.renderAt(ctx, pos)
+  }
+}
+
 
 // export interface Block {
 //   width: number;
