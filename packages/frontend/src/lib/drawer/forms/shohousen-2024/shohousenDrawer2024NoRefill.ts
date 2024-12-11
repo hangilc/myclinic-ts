@@ -1,23 +1,29 @@
+import { pad } from "@/lib/pad";
+import type { HAlign } from "../../compiler/align";
+import * as blk from "../../compiler/block";
+import {
+  ColumnBuilder,
+  Container,
+  RowBuilder,
+  alignedItem,
+  emptyItem,
+  flexRow,
+  insetExtent,
+  insetOffsetExtent,
+  textItem,
+  type Extent,
+  type Item,
+  type Renderer,
+  type Position
+} from "../../compiler/block";
+import * as b from "../../compiler/box";
+import type { Color } from "../../compiler/compiler";
+import * as c from "../../compiler/compiler";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import type { Op } from "../../compiler/op";
-import type { Shohousen2024Data } from "./shohousenData2024";
-import * as c from "../../compiler/compiler";
-import * as b from "../../compiler/box";
 import { A5 } from "../../compiler/paper-size";
-import type { Box } from "../../compiler/box";
-import * as blk from "../../compiler/block";
-import { drawLeftSquareBracket, drawRightSquareBracket } from "../../compiler/drawing";
-import { pad } from "@/lib/pad";
-import type { Color } from "../../compiler/compiler";
+import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
-import type { Drug, DrugGroup, Shohou, Usage } from "@/lib/parse-shohou";
-import { toZenkaku } from "@/lib/zenkaku";
-import {
-  type Position, type Extent, type Offset, type Renderer, RowBuilder, textItem,
-  type Item, Container, alignedItem, ColumnBuilder, addOffsets, flexRow, emptyItem, positionExtentToBox, insetOffsetExtent, insetExtent,
-} from "../../compiler/block";
-import type { HAlign } from "../../compiler/align";
-import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
 
 export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
@@ -274,25 +280,84 @@ function shimeiRenderer(ctx: DrawerContext, extent: Extent, shimei: string | und
   }
 }
 
+function circleRenderer(radius: number, pen?: string): Renderer {
+  return {
+    renderAt(ctx: DrawerContext, pos: Position) {
+      c.withPen(ctx, pen, () => {
+        c.circle(ctx, pos.x, pos.y, radius);
+      })
+    }
+  }
+}
+
+function nenMonthDateRenderer(ctx: DrawerContext, date?: DateWrapper,
+  opt?: { nenWidth: number; monthWidth: number; dayWidth: number; gap?: number })
+  : Item {
+  const nenWidth = opt?.nenWidth ?? 2.5;
+  const monthWidth = opt?.monthWidth ?? 2.5;
+  const dayWidth = opt?.dayWidth ?? 2.5;
+  const gap = opt?.gap ?? 1;
+  function content(value: number | undefined): () => Item {
+    return () => value !== undefined ? 
+      textItem(ctx, value.toString(), { font: "d2.5", color: black }) : 
+      emptyItem();
+  }
+  const nenContent = content(date?.getNen());
+  const monthContent = content(date?.getMonth());
+  const dayContent = content(date?.getDay());
+  return flexRow(2.5, [
+    { kind: "gap", width: nenWidth, halign: "right", valign: "center", content: nenContent },
+    { kind: "gap", width: gap },
+    { kind: "item", item: textItem(ctx, "年") },
+    { kind: "gap", width: gap },
+    { kind: "gap", width: monthWidth, halign: "right", valign: "center", content: monthContent },
+    { kind: "gap", width: gap },
+    { kind: "item", item: textItem(ctx, "月") },
+    { kind: "gap", width: gap },
+    { kind: "gap", width: dayWidth, halign: "right", valign: "center", content: dayContent },
+    { kind: "gap", width: gap },
+    { kind: "item", item: textItem(ctx, "日") },
+  ]);
+}
+
 function birthdateRenderer(ctx: DrawerContext, extent: Extent, birthdate: string | undefined): Renderer {
-  function gengouRenderer(extent: Extent): Renderer {
+  function gengouRenderer(extent: Extent, gengou: string | undefined): Renderer {
     const con = new Container();
     const innerExtent = insetExtent(extent, 0, 0.5);
     const rb = new RowBuilder(innerExtent.extent, innerExtent.offset);
-    const rows = rb.splitEven(5);
+    const [meiji, taisho, shouwa, heisei, reiwa] = rb.splitEven(5);
+    const textOpt = { font: "f1.5" };
+    const radius = 0.9
+    con.addAligned(textItem(ctx, "明", textOpt), meiji, "center", "center");
+    con.addAligned(textItem(ctx, "大", textOpt), taisho, "center", "center");
+    con.addAligned(textItem(ctx, "昭", textOpt), shouwa, "center", "center");
+    con.addAligned(textItem(ctx, "平", textOpt), heisei, "center", "center");
+    con.addAligned(textItem(ctx, "令", textOpt), reiwa, "center", "center");
+    switch (gengou) {
+      case "明治": con.add(circleRenderer(radius, "data-thin"), blk.centerOfOffsetExtent(meiji)); break;
+      case "大正": con.add(circleRenderer(radius, "data-thin"), blk.centerOfOffsetExtent(taisho)); break;
+      case "昭和": con.add(circleRenderer(radius, "data-thin"), blk.centerOfOffsetExtent(shouwa)); break;
+      case "平成": con.add(circleRenderer(radius, "data-thin"), blk.centerOfOffsetExtent(heisei)); break;
+      case "令和": con.add(circleRenderer(radius, "data-thin"), blk.centerOfOffsetExtent(reiwa)); break;
+    }
     return con;
   }
-   function bodyRenderer(extent: Extent): Renderer {
+  function bodyRenderer(extent: Extent, date?: DateWrapper): Renderer {
     const con = new Container();
+    const innerBox = insetExtent(extent, 0, 0, 3, 0);
+    const item = nenMonthDateRenderer(ctx, date);
+    con.addAligned(item, innerBox, "right", "center");
     return con;
-   }
+  }
+  const bdate = birthdate ? DateWrapper.from(birthdate) : undefined;
   const con = new Container();
   const cb = new ColumnBuilder(extent);
   const [gengou, body] = cb.splitByFlexSizes([
-    { kind: "fixed", value: 4 }
+    { kind: "fixed", value: 4 },
+    { kind: "expand" },
   ])
-  con.addCreated(gengouRenderer, gengou);
-  con.addCreated(bodyRenderer, body);
+  con.addCreated((ext) => gengouRenderer(ext, bdate?.getGengou()), gengou);
+  con.addCreated((ext) => bodyRenderer(ext, bdate), body);
   return con;
 }
 

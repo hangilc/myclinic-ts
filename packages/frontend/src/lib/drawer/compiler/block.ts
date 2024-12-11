@@ -72,10 +72,8 @@ export function align(childExtent: Extent, parentExtent: Extent, halign: HAlign,
   }
 }
 
-export function insetExtent(extent: Extent, dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): {
-  offset: Offset;
-  extent: Extent;
-} {
+export function insetExtent(extent: Extent, dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy):
+  OffsetExtent {
   return {
     offset: { dx, dy },
     extent: { width: extent.width - dx - dx2, height: extent.height - dy - dy2 }
@@ -92,6 +90,10 @@ export function leftTopOfBox(box: Box): Position {
 
 export function positionExtentToBox(pos: Position, extent: Extent): Box {
   return b.mkBox(pos.x, pos.y, pos.x + extent.width, pos.y + extent.height);
+}
+
+export function centerOfExtent(ext: Extent): Offset {
+  return { dx: ext.width * 0.5, dy: ext.height * 0.5 };
 }
 
 export interface Renderer {
@@ -248,12 +250,15 @@ export function alignedItem(item: Item, extent: Extent, halign: HAlign, valign: 
   }
 }
 
+// OffsetExtent ////////////////////////////////////////////////////////////
+
 export interface OffsetExtent {
   offset: Offset;
   extent: Extent;
 }
 
-export function insetOffsetExtent(oe: OffsetExtent, dx: number, dy: number = dx, dx2: number = dx, dy2: number = dy): OffsetExtent {
+export function insetOffsetExtent(oe: OffsetExtent, dx: number, dy: number = dx,
+  dx2: number = dx, dy2: number = dy): OffsetExtent {
   return {
     offset: addOffsets(oe.offset, { dx, dy }),
     extent: {
@@ -261,6 +266,10 @@ export function insetOffsetExtent(oe: OffsetExtent, dx: number, dy: number = dx,
       height: oe.extent.height - dy - dy2,
     }
   }
+}
+
+export function centerOfOffsetExtent(oe: OffsetExtent): Offset {
+  return addOffsets(oe.offset, centerOfExtent(oe.extent));
 }
 
 export class RowBuilder {
@@ -448,7 +457,7 @@ export type FlexRowItem = ({
 } | {
   kind: "advance-to";
   position: number;
-}) & { halign: HAlign, valign: VAlign };
+}) & { halign?: HAlign, valign?: VAlign };
 
 export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: number): Item {
   const flexSizes: FlexSize[] = rowItems.map(item => {
@@ -494,7 +503,7 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
         break;
       }
     }
-    items.push(alignedItem(innerItem, extent, rowItem.halign, rowItem.valign));
+    items.push(alignedItem(innerItem, extent, rowItem.halign ?? "left", rowItem.valign ?? "top"));
   }
   if (items.length !== ws.length) {
     throw new Error("inconsistent items length (flexRow)");
