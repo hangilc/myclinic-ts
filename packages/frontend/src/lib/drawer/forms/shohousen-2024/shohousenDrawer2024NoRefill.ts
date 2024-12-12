@@ -14,7 +14,8 @@ import {
   type Extent,
   type Item,
   type Renderer,
-  type Position
+  type Position,
+  shiftPosition
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -361,8 +362,29 @@ function birthdateRenderer(ctx: DrawerContext, extent: Extent, birthdate: string
   return con;
 }
 
-function sexRenderer(ctx: DrawerContext, extent: Extent, birthdate: string | undefined): Renderer {
-  return emptyItem();
+function circleDecorator(draw: boolean, radius: number): (ext: Extent) => Renderer {
+  if( draw ) {
+    return (ext: Extent) => ({
+      renderAt(ctx: DrawerContext, pos: Position){
+         const center = shiftPosition(pos, blk.centerOfExtent(ext));
+         c.withPen(ctx, "data-thin", () => {
+          c.circle(ctx, center.x, center.y, radius);
+         });
+      }
+    })
+  } else {
+    return () => emptyItem();
+  }
+}
+
+function sexRenderer(ctx: DrawerContext, extent: Extent, sex: string | undefined): Renderer {
+  const fontSize = c.currentFontSize(ctx);
+  const row = flexRow(fontSize, [
+    { kind: "item", item: textItem(ctx, "男"), decorator: circleDecorator(sex === "M", 1.5)},
+    { kind: "item", item: textItem(ctx, "・")},
+    { kind: "item", item: textItem(ctx, "女"), decorator: circleDecorator(sex === "F", 1.5)},
+  ]);
+  return alignedItem(row, extent, "center", "center");
 }
 
 function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {

@@ -447,6 +447,7 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
 export type FlexRowItem = ({
   kind: "item";
   item: Item;
+  decorator?: (extent: Extent) => Renderer;
 } | {
   kind: "gap";
   width: number;
@@ -479,7 +480,15 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
     let innerItem: Item;
     switch (rowItem.kind) {
       case "item": {
-        innerItem = rowItem.item;
+        if( rowItem.decorator ){
+          const con = new Container();
+          con.add(rowItem.item);
+          const deco = rowItem.decorator(rowItem.item.extent);
+          con.add(deco);
+          innerItem = Object.assign(con, { extent: rowItem.item.extent });
+        } else {
+          innerItem = rowItem.item;
+        }
         break;
       }
       case "gap": {
