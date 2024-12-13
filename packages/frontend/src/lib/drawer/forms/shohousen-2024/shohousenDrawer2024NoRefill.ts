@@ -246,13 +246,7 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
       con.add(blk.frameRight(label.extent), label.offset);
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "区　分"), label, "center", "center");
-      let kubunValue: "honnin" | "hifuyousha" | undefined = undefined;
-      if (data?.honnin === true) {
-        kubunValue = "honnin";
-      } else if (data?.honnin === false) {
-        kubunValue = "hifuyousha";
-      }
-      con.addCreated((ext) => kubunRenderer(ctx, ext, kubunValue), body);
+      con.addCreated((ext) => kubunRenderer(ctx, ext, data?.hokenKubun), body);
     }
   }
   return con;
@@ -406,19 +400,19 @@ function decorateCircle(radius: number): (ext: Extent) => Renderer {
   });
 }
 
-function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "honnin" | "hifuyousha" | undefined): Renderer {
+function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "hihokensha" | "hifuyousha" | undefined): Renderer {
   const cb = new ColumnBuilder(extent);
-  const [honninCol, hifuyoushaCol] = cb.splitEven(2);
-  let honninLabel = textItem(ctx, "被保険者");
+  const [hihokenshaCol, hifuyoushaCol] = cb.splitEven(2);
+  let hihokenshaLabel = textItem(ctx, "被保険者");
   let hifuyoushaLabel = textItem(ctx, "被扶養者");
-  if (kubun === "honnin") {
-    honninLabel = decorateItem(honninLabel, decorateCircle(1.5));
+  if (kubun === "hihokensha") {
+    hihokenshaLabel = decorateItem(hihokenshaLabel, decorateCircle(1.5));
   } else if( kubun === "hifuyousha" ){
     hifuyoushaLabel = decorateItem(hifuyoushaLabel, decorateCircle(1.5));
   }
   const con = new Container();
-  con.frameRight(honninCol);
-  con.addAligned(honninLabel, honninCol, "center", "center");
+  con.frameRight(hihokenshaCol);
+  con.addAligned(hihokenshaLabel, hihokenshaCol, "center", "center");
   con.addAligned(hifuyoushaLabel, hifuyoushaCol, "center", "center");
   return con;
 }

@@ -11,7 +11,6 @@ export interface Shohousen2024Data {
   hihokenshaKigou?: string;
   hihokenshaBangou?: string;
   edaban?: string;
-  honnin?: true;
   futansha?: string;
   jukyuusha?: string;
   futansha2?: string;
