@@ -142,8 +142,8 @@ export function decorateItem(item: Item, deco: (extent: Extent) => Renderer): It
   return {
     extent: item.extent,
     renderAt(ctx, pos) {
-        item.renderAt(ctx, pos);
-        deco(item.extent).renderAt(ctx, pos);
+      item.renderAt(ctx, pos);
+      deco(item.extent).renderAt(ctx, pos);
     },
   }
 }
@@ -258,6 +258,34 @@ export function alignedItem(item: Item, extent: Extent, halign: HAlign, valign: 
       item.renderAt(ctx, shiftPosition(pos, offset));
     },
   }
+}
+
+export function justifiedItem(items: Item[], width: number): Item {
+  if (items.length === 0) {
+    return emptyItem();
+  } else if (items.length === 1) {
+    return items[0];
+  } else {
+
+    const height = items.reduce((acc, ele) => Math.max(acc, ele.extent.height), 0);
+    const rest = width - items.reduce((acc, ele) => acc + ele.extent.width, 0);
+    const gap = rest / (items.length - 1);
+    const con = new Container();
+    let dx = 0;
+    items.forEach((item, i) => {
+      if (i !== 0) {
+        dx += gap;
+      }
+      con.add(item, { dx, dy: 0 });
+      dx += item.extent.width;
+    })
+    return Object.assign(con, { extent: { width, height }});
+  }
+}
+
+export function justifiedText(ctx: DrawerContext, text: string, width: number): Item {
+  const items = Array.from(text).map(t => textItem(ctx, t));
+  return justifiedItem(items, width);
 }
 
 // OffsetExtent ////////////////////////////////////////////////////////////
@@ -490,7 +518,7 @@ export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: numb
     let innerItem: Item;
     switch (rowItem.kind) {
       case "item": {
-        if( rowItem.decorator ){
+        if (rowItem.decorator) {
           const con = new Container();
           con.add(rowItem.item);
           const deco = rowItem.decorator(rowItem.item.extent);
@@ -591,6 +619,7 @@ function repeat<T>(a: T, n: number): T[] {
   }
   return as;
 }
+
 
 // export interface Block {
 //   width: number;

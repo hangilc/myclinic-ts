@@ -304,7 +304,7 @@ function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "hihokensha" |
   let hifuyoushaLabel = textItem(ctx, "被扶養者");
   if (kubun === "hihokensha") {
     hihokenshaLabel = decorateItem(hihokenshaLabel, decorateCircle(1.5));
-  } else if( kubun === "hifuyousha" ){
+  } else if (kubun === "hifuyousha") {
     hifuyoushaLabel = decorateItem(hifuyoushaLabel, decorateCircle(1.5));
   }
   const con = new Container();
@@ -449,42 +449,54 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
-  const [addr, name, kikan] = rb.splitByFlexSizes([
+  const [addr, name, _, kikan] = rb.splitByFlexSizes([
     { kind: "fixed", value: 10 },
-    { kind: "fixed", value: 23 },
+    { kind: "expand" },
+    { kind: "advance-to", position: 23 },
     { kind: "expand" }
   ]);
-  con.addCreated((ext) => clinicAddressRenderer(ctx, ext, data), addr);
-  con.addCreated((ext) => clinicNameRenderer(ctx, ext, data), name);
-  con.addCreated((ext) => kikanRenderer(ctx, ext, data), kikan);
+  console.log("extent", extent);
+  console.log("addr", addr);
+  console.log("name", name);
+  console.log("kikan", kikan);
+  let labelWidth = 0;
+  con.addCreated((ext) => {
+    const result = clinicAddressRenderer(ctx, ext, data);
+    labelWidth = result.labelWidth;
+    return result;
+  }, addr);
+  con.addCreated((ext) => clinicNameRenderer(ctx, ext, labelWidth, data), name);
+  con.addCreated((ext) => kikanRenderer(ctx, ext, labelWidth, data), kikan);
   return con;
 }
 
-function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer & { labelWidth: number } {
   const con = new Container();
   const cb = new ColumnBuilder(extent);
-  const [left, _, right] = cb.splitByFlexSizes([ 
+  const [left, _, right] = cb.splitByFlexSizes([
     { kind: "fixed", value: 22 },
     { kind: "fixed", value: 2 },
     { kind: "expand" },
   ]);
+  let labelWidth = 0;
   {
     const labelItem = stackedTexts(ctx, ["保険医療機関の", "所在地及び名称"], { halign: "left" });
+    labelWidth = labelItem.extent.width;
     con.addAligned(labelItem, left, "center", "center");
   }
   {
     const rb = new RowBuilder(right.extent, right.offset);
     const [addr, name] = rb.splitEven(2);
-    if( data?.clinicAddress ){
+    if (data?.clinicAddress) {
       const addrItem = textItem(ctx, data?.clinicAddress, { font: "d2.5", color: black });
       con.addAligned(addrItem, addr, "left", "center");
     }
-    if( data?.clinicName ){
+    if (data?.clinicName) {
       const clinicNameItem = textItem(ctx, data?.clinicName, { font: "d2.5", color: black });
       con.addAligned(clinicNameItem, name, "left", "center");
     }
   }
-  return con;
+  return Object.assign(con, { labelWidth });
 }
 
 //     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
@@ -521,13 +533,35 @@ function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
 //     });
 //   }
 
-function clinicNameRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
   const con = new Container();
+  const rb = new RowBuilder(extent);
+  const [phone, name] = rb.splitEven(2);
+  {
+    const cb = new ColumnBuilder(phone.extent, phone.offset);
+    const [left, _, right] = cb.splitByFlexSizes([
+      { kind: "fixed", value: 22 },
+      { kind: "fixed", value: 2 },
+      { kind: "expand" },
+    ]);
+    const phoneItem = blk.justifiedText(ctx, "電話番号", labelWidth);
+    con.addAligned(phoneItem, left, "center", "center");
+  }
+  {
+    const cb = new ColumnBuilder(name.extent, name.offset);
+    const [left, _, right] = cb.splitByFlexSizes([
+      { kind: "fixed", value: 22 },
+      { kind: "fixed", value: 2 },
+      { kind: "expand" },
+    ]);
+    const nameItem = blk.justifiedText(ctx, "保険医氏名", labelWidth);
+    con.addAligned(nameItem, left, "center", "center");
+ }
 
   return con;
 }
 
-function kikanRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
   const con = new Container();
   const cb = new ColumnBuilder(extent);
   const [left, right] = cb.splitByFlexSizes([
