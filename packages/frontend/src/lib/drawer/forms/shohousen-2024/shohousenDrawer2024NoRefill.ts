@@ -245,6 +245,13 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
       con.add(blk.frameRight(label.extent), label.offset);
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "区　分"), label, "center", "center");
+      let kubunValue: "honnin" | "hifuyousha" | undefined = undefined;
+      if( data?.honnin === true ){
+        kubunValue = "honnin";
+      } else if( data?.honnin === false ){
+        kubunValue = "hifuyousha";
+      }
+      con.addCreated((ext) => kubunRenderer(ctx, ext, kubunValue), kubun);
     }
   }
   return con;
@@ -385,6 +392,11 @@ function sexRenderer(ctx: DrawerContext, extent: Extent, sex: string | undefined
     { kind: "item", item: textItem(ctx, "女"), decorator: circleDecorator(sex === "F", 1.5)},
   ]);
   return alignedItem(row, extent, "center", "center");
+}
+
+function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "honnin" | "hifuyousha" | undefined): Renderer {
+  console.log("kubun", kubun);
+  return emptyItem();
 }
 
 function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {

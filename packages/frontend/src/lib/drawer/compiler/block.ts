@@ -138,6 +138,16 @@ export function emptyItem(extent: Extent = { width: 0, height: 0 }): Item {
   return { extent, renderAt: () => { } }
 }
 
+export function decorateItem(item: Item, deco: (extent: Extent) => Renderer): Item {
+  return {
+    extent: item.extent,
+    renderAt(ctx, pos) {
+        item.renderAt(ctx, pos);
+        deco(item.extent).renderAt(ctx, pos);
+    },
+  }
+}
+
 export function frame(extent: Extent, pen?: string): Renderer {
   return boxRenderer(extent, (ctx, box) => {
     c.withPen(ctx, pen, () => {
