@@ -310,6 +310,8 @@ export function centerOfOffsetExtent(oe: OffsetExtent): Offset {
   return addOffsets(oe.offset, centerOfExtent(oe.extent));
 }
 
+// RowBuilder ///////////////////////////////////////////////////////////////////////////////
+
 export class RowBuilder {
   extent: Extent;
   top: number = 0;
@@ -347,8 +349,8 @@ export class RowBuilder {
     return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
   }
 
-  splitByFlexSizes(sizes: FlexSize[]): { offset: Offset, extent: Extent }[] {
-    const hs = resolveFlexSizes(sizes, this.bottom - this.top);
+  splitByFlexSizes(sizes: RowColumnFlexSize[]): { offset: Offset, extent: Extent }[] {
+    const hs = resolveRowColumnFlexSizes(sizes, this.bottom - this.top);
     const rows: { offset: Offset, extent: Extent }[] = [];
     hs.forEach(height => {
       rows.push({
@@ -360,6 +362,8 @@ export class RowBuilder {
     return rows;
   }
 }
+
+// ColumnBuilder //////////////////////////////////////////////////////////////////////////////
 
 export class ColumnBuilder {
   extent: Extent;
@@ -398,8 +402,8 @@ export class ColumnBuilder {
     return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
   }
 
-  splitByFlexSizes(sizes: FlexSize[]): { offset: Offset, extent: Extent }[] {
-    const ws = resolveFlexSizes(sizes, this.right - this.left);
+  splitByFlexSizes(sizes: RowColumnFlexSize[]): { offset: Offset, extent: Extent }[] {
+    const ws = resolveRowColumnFlexSizes(sizes, this.right - this.left);
     const cols: { offset: Offset, extent: Extent }[] = [];
     ws.forEach(width => {
       cols.push({
@@ -480,6 +484,27 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
   return resolved;
 }
 
+// RowColumnFlexSize ///////////////////////////////////////////////////////////////////////////
+
+export type RowColumnFlexSize = FlexSize & { "instruction-only"?: true };
+
+export function resolveRowColumnFlexSizes(sizes: RowColumnFlexSize[], totalSize?: number): number[] {
+  const ws = resolveFlexSizes(sizes, totalSize);
+  const result: number[] = [];
+  if( ws.length !== sizes.length ){
+    throw new Error("inconsistent width array length");
+  }
+  for(let i=0;i<sizes.length;i++){
+    const size = sizes[i];
+    if( size["instruction-only"] ){
+      continue;
+    }
+    const resolved = ws[i];
+    result.push(resolved);
+  }
+  return result;
+}
+
 // FlexRow /////////////////////////////////////////////////////////////////////////////////////
 
 export type FlexRowItem = ({
@@ -496,7 +521,7 @@ export type FlexRowItem = ({
 } | {
   kind: "advance-to";
   position: number;
-}) & { halign?: HAlign, valign?: VAlign };
+}) & { halign?: HAlign, valign?: VAlign, "instruction-only"?: true };
 
 export function flexRow(height: number, rowItems: FlexRowItem[], maxWidth?: number): Item {
   const flexSizes: FlexSize[] = rowItems.map(item => {
