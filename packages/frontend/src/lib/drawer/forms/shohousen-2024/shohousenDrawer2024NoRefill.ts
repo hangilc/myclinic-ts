@@ -449,10 +449,10 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
-  const [addr, name, _, kikan] = rb.splitByFlexSizes([
+  const [addr, name, kikan] = rb.splitByFlexSizes([
     { kind: "fixed", value: 10 },
     { kind: "expand" },
-    { kind: "advance-to", position: 23 },
+    { kind: "advance-to", position: 23, "instruction-only": true },
     { kind: "expand" }
   ]);
   console.log("extent", extent);
