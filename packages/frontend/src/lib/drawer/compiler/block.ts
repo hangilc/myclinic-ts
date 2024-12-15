@@ -4,7 +4,7 @@ import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
-import { breakMultipleLines } from "./break-lines";
+import { breakMultipleLines, breakSingleLine } from "./break-lines";
 import { stringToCharWidths } from "./char-width";
 
 export interface Position {
@@ -265,7 +265,6 @@ export function justifiedItem(items: Item[], width: number): Item {
   } else if (items.length === 1) {
     return items[0];
   } else {
-
     const height = items.reduce((acc, ele) => Math.max(acc, ele.extent.height), 0);
     const rest = width - items.reduce((acc, ele) => acc + ele.extent.width, 0);
     const gap = rest / (items.length - 1);
@@ -285,6 +284,33 @@ export function justifiedItem(items: Item[], width: number): Item {
 export function justifiedText(ctx: DrawerContext, text: string, width: number): Item {
   const items = Array.from(text).map(t => textItem(ctx, t));
   return justifiedItem(items, width);
+}
+
+export function verticallyJustifiedItem(items: Item[], height: number): Item {
+  if (items.length === 0) {
+    return emptyItem();
+  } else if (items.length === 1) {
+    return items[0];
+  } else {
+    const width = items.reduce((acc, ele) => Math.max(acc, ele.extent.width), 0);
+    const rest = height - items.reduce((acc, ele) => acc + ele.extent.height, 0);
+    const gap = rest / (items.length - 1);
+    const con = new Container();
+    let dy = 0;
+    items.forEach((item, i) => {
+      if (i !== 0) {
+        dy += gap;
+      }
+      con.add(item, { dx: 0, dy });
+      dy += item.extent.height;
+    })
+    return Object.assign(con, { extent: { width, height } });
+  }
+}
+
+export function verticallyJustifiedText(ctx: DrawerContext, text: string, height: number): Item {
+  const items = Array.from(text).map(t => textItem(ctx, t));
+  return verticallyJustifiedItem(items, height);
 }
 
 // OffsetExtent ////////////////////////////////////////////////////////////
@@ -325,7 +351,7 @@ export class RowBuilder {
   }
 
   static fromOffsetExtent(oe: OffsetExtent): ColumnBuilder {
-    return new ColumnBuilder(oe.extent, oe.offset);
+    return new RowBuilder(oe.extent, oe.offset);
   }
 
   splitBySizes(...specs: RowColumnFlexSize[]): OffsetExtent[] {
@@ -535,23 +561,6 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
 
 export type RowColumnFlexSize = FlexSize & { "instruction-only"?: true };
 
-// export function resolveRowColumnFlexSizes(sizes: RowColumnFlexSize[], totalSize?: number): number[] {
-//   const ws = resolveFlexSizes(sizes, totalSize);
-//   const result: number[] = [];
-//   if (ws.length !== sizes.length) {
-//     throw new Error("inconsistent width array length");
-//   }
-//   for (let i = 0; i < sizes.length; i++) {
-//     const size = sizes[i];
-//     if (size["instruction-only"]) {
-//       continue;
-//     }
-//     const resolved = ws[i];
-//     result.push(resolved);
-//   }
-//   return result;
-// }
-
 // FlexRow /////////////////////////////////////////////////////////////////////////////////////
 
 export type FlexRowItem = ({
@@ -704,6 +713,40 @@ export function interpose<T>(ts: T[], value: (i: number) => T): T[] {
       rs.push(t);
     })
     return rs;
+  }
+}
+
+export function flowTextIn(ctx: DrawerContext, extent: Extent, text: string, opt?: {
+  font?: string;
+  color?: Color;
+  leading?: number;
+}): { renderer: Renderer, rest: string } {
+  const font = opt?.font;
+  const fontSize = c.resolveFontHeight(ctx, font);
+  const lineWidth = extent.width;
+  let start = 0;
+  let leading = opt?.leading ?? 0;
+  let items: Item[] = [];
+  let iter = 0;
+  while (start < text.length) {
+    const nline = items.length + 1;
+    const nextHeight = fontSize * nline + leading * (nline - 1);
+    if( nextHeight > extent.height ){
+      break;
+    }
+    const end = breakSingleLine(text, start, fontSize, lineWidth);
+    const line = text.substring(start, end);
+    const item = textItem(ctx, line, { font, color: opt?.color });
+    items.push(item);
+    start = end;
+    if( ++iter > 200 ){
+      throw new Error("too many iteration (flowTextIn)");
+    }
+  }
+  const halign: HAlign = "left"
+  return {
+    renderer: stackedItems(...items.map(item => ({ item, halign }))),
+    rest: text.substring(start)
   }
 }
 
