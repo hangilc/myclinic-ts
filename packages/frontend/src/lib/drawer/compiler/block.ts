@@ -4,8 +4,7 @@ import * as c from "./compiler";
 import * as b from "./box";
 import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
-import { breakLines, breakMultipleLines, breakSingleLine } from "./break-lines";
-import type { RenderedDrug } from "@/lib/denshi-shohou/presc-renderer";
+import { breakMultipleLines } from "./break-lines";
 import { stringToCharWidths } from "./char-width";
 
 export interface Position {
@@ -279,7 +278,7 @@ export function justifiedItem(items: Item[], width: number): Item {
       con.add(item, { dx, dy: 0 });
       dx += item.extent.width;
     })
-    return Object.assign(con, { extent: { width, height }});
+    return Object.assign(con, { extent: { width, height } });
   }
 }
 
@@ -314,52 +313,75 @@ export function centerOfOffsetExtent(oe: OffsetExtent): Offset {
 
 export class RowBuilder {
   extent: Extent;
-  top: number = 0;
-  bottom: number;
   offset: Offset;
 
   constructor(extent: Extent, offset?: Offset) {
     this.extent = extent;
-    this.bottom = extent.height;
     this.offset = offset ?? { dx: 0, dy: 0 };
   }
 
-  getRow(height: number): { offset: Offset, extent: Extent } {
-    const offset = { dx: 0, dy: this.top };
-    const extent = { width: this.extent.width, height };
-    this.top += height;
-    return { offset: addOffsets(this.offset, offset), extent };
+  static fromOffsetExtent(oe: OffsetExtent): ColumnBuilder {
+    return new ColumnBuilder(oe.extent, oe.offset);
   }
 
-  getRowFromBottom(height: number): { offset: Offset, extent: Extent } {
-    const offset = { dx: 0, dy: this.bottom - height };
-    const extent = { width: this.extent.width, height };
-    this.bottom -= height;
-    return { offset: addOffsets(this.offset, offset), extent };
-  }
+  splitBySizes(...specs: RowColumnFlexSize[]): OffsetExtent[] {
+    const hs = resolveFlexSizes(specs, this.extent.height);
+    const rows: { offset: Offset, extent: Extent }[] = [];
+    let top = 0;
+    if (hs.length !== specs.length) {
+      throw new Error("inconsistent flex size length");
+    }
+    for (let i = 0; i < specs.length; i++) {
+      const spec = specs[i];
+      const height = hs[i];
+      if (!spec["instruction-only"]) {
+        rows.push({
+          offset: addOffsets(this.offset, { dx: 0, dy: top }),
+          extent: { width: this.extent.width, height }
+        });
+      }
+      top += height;
 
-  getRemaining(): { offset: Offset, extent: Extent } {
-    const offset = { dx: 0, dy: this.top };
-    const extent = { width: this.extent.width, height: this.bottom - this.top };
-    this.top = this.bottom;
-    return { offset: addOffsets(this.offset, offset), extent };
+    }
+    return rows;
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
+    return this.splitBySizes(...repeat({ kind: "expand" } as const, n));
   }
 
-  splitByFlexSizes(sizes: RowColumnFlexSize[]): { offset: Offset, extent: Extent }[] {
-    const hs = resolveRowColumnFlexSizes(sizes, this.bottom - this.top);
-    const rows: { offset: Offset, extent: Extent }[] = [];
-    hs.forEach(height => {
-      rows.push({
-        offset: addOffsets(this.offset, { dx: 0, dy: this.top }),
-        extent: { width: this.extent.width, height }
-      });
-      this.top += height;
-    })
-    return rows;
+  fixed(size: number): RowColumnFlexSize[] {
+    return [{ kind: "fixed", value: size }];
+  }
+
+
+  expand(): RowColumnFlexSize[] {
+    return [{ kind: "expand" }];
+  }
+
+  expandTo(position: number): RowColumnFlexSize[] {
+    return [{ kind: "expand" }, { kind: "advance-to", position, "instruction-only": true }]
+  }
+
+  skip(size: number): RowColumnFlexSize[] {
+    return [{ kind: "fixed", value: size, "instruction-only": true }]
+  }
+
+  tabTo(position: number): RowColumnFlexSize[] {
+    return [{ kind: "advance-to", position, "instruction-only": true }];
+  }
+
+  split(...specs: RowColumnFlexSize[][]): OffsetExtent[] {
+    const sizes: RowColumnFlexSize[] = [];
+    console.log("sizes", sizes);
+    specs.forEach(spec => sizes.push(...spec));
+    return this.splitBySizes(...sizes);
+  }
+
+  splitAt(...positions: number[]): OffsetExtent[] {
+    const specs: RowColumnFlexSize[][] = positions.map(pos => this.expandTo(pos));
+    specs.push(this.expand());
+    return this.split(...specs);
   }
 }
 
@@ -367,52 +389,74 @@ export class RowBuilder {
 
 export class ColumnBuilder {
   extent: Extent;
-  left: number = 0;
-  right: number;
   offset: Offset;
 
   constructor(extent: Extent, offset?: Offset) {
     this.extent = extent;
-    this.right = extent.width;
     this.offset = offset ?? { dx: 0, dy: 0 };
   }
 
-  getColumn(width: number): { offset: Offset, extent: Extent } {
-    const offset = { dx: this.left, dy: 0 };
-    const extent = { width, height: this.extent.height };
-    this.left += width;
-    return { offset: addOffsets(this.offset, offset), extent };
+  static fromOffsetExtent(oe: OffsetExtent): ColumnBuilder {
+    return new ColumnBuilder(oe.extent, oe.offset);
   }
 
-  getColumnFromRight(width: number): { offset: Offset, extent: Extent } {
-    const offset = { dx: this.right - width, dy: 0 };
-    const extent = { width, height: this.extent.height };
-    this.right -= width;
-    return { offset: addOffsets(this.offset, offset), extent };
-  }
+  splitBySizes(...specs: RowColumnFlexSize[]): OffsetExtent[] {
+    const ws = resolveFlexSizes(specs, this.extent.width);
+    const cols: { offset: Offset, extent: Extent }[] = [];
+    let left = 0;
+    if (ws.length !== specs.length) {
+      throw new Error("inconsistent flex size length");
+    }
+    for (let i = 0; i < specs.length; i++) {
+      const spec = specs[i];
+      const width = ws[i];
+      if (!spec["instruction-only"]) {
+        cols.push({
+          offset: addOffsets(this.offset, { dx: left, dy: 0 }),
+          extent: { width, height: this.extent.height }
+        });
+      }
+      left += width;
 
-  getRemaining(): { offset: Offset, extent: Extent } {
-    const offset = { dx: this.left, dy: 0 };
-    const extent = { width: this.right - this.left, height: this.extent.height };
-    this.left = this.right;
-    return { offset: addOffsets(this.offset, offset), extent };
+    }
+    return cols;
   }
 
   splitEven(n: number): { offset: Offset, extent: Extent }[] {
-    return this.splitByFlexSizes(repeat({ kind: "expand" }, n));
+    return this.splitBySizes(...repeat({ kind: "expand" } as const, n));
   }
 
-  splitByFlexSizes(sizes: RowColumnFlexSize[]): { offset: Offset, extent: Extent }[] {
-    const ws = resolveRowColumnFlexSizes(sizes, this.right - this.left);
-    const cols: { offset: Offset, extent: Extent }[] = [];
-    ws.forEach(width => {
-      cols.push({
-        offset: addOffsets(this.offset, { dx: this.left, dy: 0 }),
-        extent: { width, height: this.extent.height }
-      });
-      this.left += width;
-    })
-    return cols;
+  fixed(size: number): RowColumnFlexSize[] {
+    return [{ kind: "fixed", value: size }];
+  }
+
+
+  expand(): RowColumnFlexSize[] {
+    return [{ kind: "expand" }];
+  }
+
+  expandTo(position: number): RowColumnFlexSize[] {
+    return [{ kind: "expand" }, { kind: "advance-to", position, "instruction-only": true }]
+  }
+
+  skip(size: number): RowColumnFlexSize[] {
+    return [{ kind: "fixed", value: size, "instruction-only": true }]
+  }
+
+  tabTo(position: number): RowColumnFlexSize[] {
+    return [{ kind: "advance-to", position, "instruction-only": true }];
+  }
+
+  split(...specs: RowColumnFlexSize[][]): OffsetExtent[] {
+    const sizes: RowColumnFlexSize[] = [];
+    specs.forEach(spec => sizes.push(...spec));
+    return this.splitBySizes(...sizes);
+  }
+
+  splitAt(...positions: number[]): OffsetExtent[] {
+    const specs: RowColumnFlexSize[][] = positions.map(pos => this.expandTo(pos));
+    specs.push(this.expand());
+    return this.split(...specs);
   }
 }
 
@@ -488,22 +532,22 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
 
 export type RowColumnFlexSize = FlexSize & { "instruction-only"?: true };
 
-export function resolveRowColumnFlexSizes(sizes: RowColumnFlexSize[], totalSize?: number): number[] {
-  const ws = resolveFlexSizes(sizes, totalSize);
-  const result: number[] = [];
-  if( ws.length !== sizes.length ){
-    throw new Error("inconsistent width array length");
-  }
-  for(let i=0;i<sizes.length;i++){
-    const size = sizes[i];
-    if( size["instruction-only"] ){
-      continue;
-    }
-    const resolved = ws[i];
-    result.push(resolved);
-  }
-  return result;
-}
+// export function resolveRowColumnFlexSizes(sizes: RowColumnFlexSize[], totalSize?: number): number[] {
+//   const ws = resolveFlexSizes(sizes, totalSize);
+//   const result: number[] = [];
+//   if (ws.length !== sizes.length) {
+//     throw new Error("inconsistent width array length");
+//   }
+//   for (let i = 0; i < sizes.length; i++) {
+//     const size = sizes[i];
+//     if (size["instruction-only"]) {
+//       continue;
+//     }
+//     const resolved = ws[i];
+//     result.push(resolved);
+//   }
+//   return result;
+// }
 
 // FlexRow /////////////////////////////////////////////////////////////////////////////////////
 

@@ -41,14 +41,11 @@ export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
 function mainBlock(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const container = new Container();
   const rb = new RowBuilder(extent);
-  const mainTitleRow = rb.getRow(6);
+  const [mainTitleRow, subTitleRow, mainRow] = rb.split(rb.fixed(6), rb.fixed(2), rb.expand());
   container.add(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
-  const subTitleRow = rb.getRow(2);
   container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
-  const mainRow = rb.getRemaining();
-  const inner = blk.insetExtent(mainRow.extent, 2, 3, 2, 3);
-  const mainAreaRenderer = mainArea(ctx, inner.extent, data);
-  container.add(mainAreaRenderer, blk.addOffsets(mainRow.offset, inner.offset));
+  const inner = blk.insetOffsetExtent(mainRow, 2, 3, 2, 0);
+  container.addCreated((ext) => mainArea(ctx, ext, data), inner);
   return container;
 }
 
@@ -62,12 +59,13 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
   return alignedItem(item, extent, "center", "center");
 }
 
-//     b.splitToRows(box, blk.splitByExtent(33, 10, "*", 20, 10, 10));
-
 function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con: Container = new Container();
+  con.frame({ offset: { dx: 0, dy: 0 }, extent });
   const rb = new RowBuilder(extent);
-  const upperRow = rb.getRow(20);
+  const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
+    rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
+      rb.fixed(20), rb.fixed(10), rb.fixed(10))
   {
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
@@ -75,13 +73,6 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data):
     con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
     con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
   }
-  rb.getRow(3);
-  const kanjaRow = rb.getRow(33);
-  const koufuDateRow = rb.getRow(10);
-  const pharmaRow = rb.getRowFromBottom(10);
-  const shohouDateRow = rb.getRowFromBottom(10);
-  const bikouRow = rb.getRowFromBottom(20);
-  const drugsRow = rb.getRemaining();
   con.add(kanjaRowRenderer(ctx, kanjaRow.extent, data), kanjaRow.offset);
   return con;
 }
@@ -99,8 +90,7 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
   const con = new Container();
   con.add(blk.frame(extent));
   const cb = new ColumnBuilder(extent);
-  const mark = cb.getColumn(5);
-  const body = cb.getRemaining();
+  const [mark, body] = cb.split(cb.fixed(5), cb.expand());
   con.add(blk.frameRight(mark.extent));
   con.add(blk.boxItem(mark.extent, (ctx, box) => {
     box = b.modify(box, b.shrinkVert(10, 10));
@@ -112,22 +102,15 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
     con.add(blk.frameBottom(name.extent), name.offset);
     con.add(blk.frameBottom(birthdateAndSex.extent), birthdateAndSex.offset);
     {
-      const cb = new ColumnBuilder(name.extent, name.offset);
-      const [label, body] = cb.splitByFlexSizes([
-        { kind: "fixed", value: 20 },
-        { kind: "expand" },
-      ])
+      const cb = ColumnBuilder.fromOffsetExtent(name);
+      const [label, body] = cb.split(cb.fixed(20), cb.expand());
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "氏　名"), label, "center", "center");
       con.addCreated((ext) => shimeiRenderer(ctx, ext, data?.shimei), insetOffsetExtent(body, 1));
     }
     {
       const cb = new ColumnBuilder(birthdateAndSex.extent, birthdateAndSex.offset);
-      const [label, birthdate, sex] = cb.splitByFlexSizes([
-        { kind: "fixed", value: 20 },
-        { kind: "expand" },
-        { kind: "fixed", value: 10 }
-      ]);
+      const [label, birthdate, sex] = cb.split(cb.fixed(20), cb.expand(), cb.fixed(10));
       con.add(blk.frameRight(label.extent), label.offset);
       con.frameRight(birthdate);
       con.addAligned(textItem(ctx, "生年月日"), label, "center", "center");
@@ -136,10 +119,7 @@ function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
     }
     {
       const cb = new ColumnBuilder(kubun.extent, kubun.offset);
-      const [label, body] = cb.splitByFlexSizes([
-        { kind: "fixed", value: 20 },
-        { kind: "expand" },
-      ]);
+      const [label, body] = cb.split(cb.fixed(20), cb.expand());
       con.add(blk.frameRight(label.extent), label.offset);
       con.add(blk.frameRight(label.extent), label.offset);
       con.addAligned(textItem(ctx, "区　分"), label, "center", "center");
@@ -252,10 +232,7 @@ function birthdateRenderer(ctx: DrawerContext, extent: Extent, birthdate: string
   const bdate = birthdate ? DateWrapper.from(birthdate) : undefined;
   const con = new Container();
   const cb = new ColumnBuilder(extent);
-  const [gengou, body] = cb.splitByFlexSizes([
-    { kind: "fixed", value: 4 },
-    { kind: "expand" },
-  ])
+  const [gengou, body] = cb.split(cb.fixed(4), cb.expand());
   con.addCreated((ext) => gengouRenderer(ext, bdate?.getGengou()), gengou);
   con.addCreated((ext) => bodyRenderer(ext, bdate), body);
   return con;
@@ -277,6 +254,7 @@ function circleDecorator(draw: boolean, radius: number): (ext: Extent) => Render
 }
 
 function sexRenderer(ctx: DrawerContext, extent: Extent, sex: string | undefined): Renderer {
+  console.log("sex", sex);
   const fontSize = c.currentFontSize(ctx);
   const row = flexRow(fontSize, [
     { kind: "item", item: textItem(ctx, "男"), decorator: circleDecorator(sex === "M", 1.5) },
@@ -449,16 +427,7 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
-  const [addr, name, kikan] = rb.splitByFlexSizes([
-    { kind: "fixed", value: 10 },
-    { kind: "expand" },
-    { kind: "advance-to", position: 23, "instruction-only": true },
-    { kind: "expand" }
-  ]);
-  console.log("extent", extent);
-  console.log("addr", addr);
-  console.log("name", name);
-  console.log("kikan", kikan);
+  const [addr, name, kikan] = rb.splitAt(10, 23);
   let labelWidth = 0;
   con.addCreated((ext) => {
     const result = clinicAddressRenderer(ctx, ext, data);
@@ -473,11 +442,7 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
 function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer & { labelWidth: number } {
   const con = new Container();
   const cb = new ColumnBuilder(extent);
-  const [left, _, right] = cb.splitByFlexSizes([
-    { kind: "fixed", value: 22 },
-    { kind: "fixed", value: 2 },
-    { kind: "expand" },
-  ]);
+  const [left, right] = cb.split(cb.fixed(22), cb.skip(2), cb.expand());
   let labelWidth = 0;
   {
     const labelItem = stackedTexts(ctx, ["保険医療機関の", "所在地及び名称"], { halign: "left" });
@@ -499,75 +464,81 @@ function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return Object.assign(con, { labelWidth });
 }
 
-//     b.withSplitRows(name, b.evenSplitter(2), ([upper, lower]) => {
-//       {
-//         [left, right] = b.splitToColumns(upper, b.splitAt(22));
-//         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
-//         let label = blk.justifiedTextBlock(ctx, "電話番号", b.width(labelBox));
-//         blk.putIn(ctx, label, left, alignCenter);
-//         blk.drawText(ctx, data.clinicPhone ?? "", b.modify(right, b.shrinkHoriz(2, 2)), {
-//           halign: "left",
-//           valign: "center",
-//           textBlockOpt: {
-//             font: "d3",
-//             color: black,
-//           }
-//         });
-//       }
-//       {
-//         [left, right] = b.splitToColumns(lower, b.splitAt(22));
-//         const labelBox = b.modify(left, b.setHeight(2.5, "center"), b.setWidth(para.width, "center"));
-//         let label = blk.justifiedTextBlock(ctx, "保険医氏名", b.width(labelBox));
-//         blk.putIn(ctx, label, left, alignCenter);
-//         const stampBox = b.modify(right, b.setHeight(2.5, "bottom"), b.setWidth(2.5, "right"), b.shift(-3.5, -2.5));
-//         blk.putIn(ctx, inkan(), stampBox, alignCenter);
-//         blk.drawText(ctx, data.doctorName ?? "", b.modify(right, b.shrinkHoriz(2, 2)), {
-//           halign: "left",
-//           valign: "center",
-//           textBlockOpt: {
-//             font: "d3",
-//             color: black,
-//           }
-//         });
-//       }
-//     });
-//   }
-
 function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
   const con = new Container();
   const rb = new RowBuilder(extent);
   const [phone, name] = rb.splitEven(2);
   {
     const cb = new ColumnBuilder(phone.extent, phone.offset);
-    const [left, _, right] = cb.splitByFlexSizes([
-      { kind: "fixed", value: 22 },
-      { kind: "fixed", value: 2 },
-      { kind: "expand" },
-    ]);
-    const phoneItem = blk.justifiedText(ctx, "電話番号", labelWidth);
-    con.addAligned(phoneItem, left, "center", "center");
+    const [left, right] = cb.split(cb.fixed(22), cb.skip(2), cb.expand());
+    const phoneLabel = blk.justifiedText(ctx, "電話番号", labelWidth);
+    const phoneValue = data?.clinicPhone ? textItem(ctx, data?.clinicPhone, { font: "d2.5", color: black }) : emptyItem();
+    con.addAligned(phoneLabel, left, "center", "center");
+    con.addAligned(phoneValue, right, "left", "center");
   }
   {
     const cb = new ColumnBuilder(name.extent, name.offset);
-    const [left, _, right] = cb.splitByFlexSizes([
-      { kind: "fixed", value: 22 },
-      { kind: "fixed", value: 2 },
-      { kind: "expand" },
-    ]);
-    const nameItem = blk.justifiedText(ctx, "保険医氏名", labelWidth);
-    con.addAligned(nameItem, left, "center", "center");
- }
-
+    const [left, right, stamp] = cb.split(cb.fixed(22), cb.skip(2), cb.expand(), cb.skip(2), cb.fixed(2.5), cb.skip(8));
+    const nameLabel = blk.justifiedText(ctx, "保険医氏名", labelWidth);
+    const nameValue = data?.doctorName ? textItem(ctx, data?.doctorName, { font: "d2.5", color: black }) : emptyItem();
+    con.addAligned(nameLabel, left, "center", "center");
+    con.addAligned(nameValue, right, "left", "center");
+    con.addAligned(textItem(ctx, "㊞"), stamp, "center", "center");
+  }
   return con;
 }
+
+// function drawKikanBox(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+//   box = b.modify(box, b.setHeight(6, "top"))
+//   c.frame(ctx, box);
+//   const [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel, kikancode] = b.splitToColumns(box, b.splitAt(23, 28, 38.5, 44, 51));
+//   [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(box => c.frameRight(ctx, box));
+//   c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
+//   blk.drawText(ctx, data.clinicTodoufuken ?? "", fuken, {
+//     textBlockOpt: { font: "d2.5", color: black },
+//     ...alignCenter,
+//   });
+//   {
+//     const para = blk.stackedBlock([
+//       blk.textBlock(ctx, "点数表"),
+//       blk.textBlock(ctx, "番号"),
+//     ], { halign: "center" });
+//     blk.putIn(ctx, para, tensuuLabel, alignCenter);
+//     blk.drawText(ctx, "1", tensuu, {
+//       textBlockOpt: { font: "d2.5", color: black },
+//       ...alignCenter,
+//     });
+//   }
+//   {
+//     const para = blk.stackedBlock([
+//       blk.textBlock(ctx, "医療機関", { font: "f1.5" }),
+//       blk.textBlock(ctx, "コード", { font: "f1.5" }),
+//     ], { halign: "center" });
+//     blk.putIn(ctx, para, kikanLabel, alignCenter);
+//   }
+//   {
+//     const cols = b.splitToColumns(kikancode, b.evenSplitter(7));
+//     [1, 5].forEach(i => c.frameRight(ctx, cols[i]));
+//     c.withPen(ctx, "thin", () => {
+//       [0, 2, 3, 4].forEach(i => c.frameRight(ctx, cols[i]));
+//     })
+//     if (data.clinicKikancode) {
+//       const chars = Array.from(data.clinicKikancode);
+//       for (let i = 0; i < chars.length; i++) {
+//         const chr = chars[i];
+//         blk.drawText(ctx, chr, cols[i], {
+//           textBlockOpt: { font: "d2.5", color: black },
+//           ...alignCenter,
+//         });
+//       }
+//     }
+//   }
+// }
 
 function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
   const con = new Container();
   const cb = new ColumnBuilder(extent);
-  const [left, right] = cb.splitByFlexSizes([
-    { kind: "fixed", value: 22 },
-    { kind: "expand" },
-  ])
+  const [left, right] = cb.split(cb.fixed(22), cb.expand());
   return con;
 }
 
@@ -581,8 +552,7 @@ function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   {
     const { offset, extent } = upper;
     const cb = new ColumnBuilder(extent);
-    const digits = cb.getColumnFromRight(digitWidth * 8);
-    const label = cb.getRemaining();
+    const [label, digits] = cb.split(cb.expand(), cb.fixed(digitWidth * 8));
     con.add(blk.frameRight(label.extent), offset, label.offset);
     con.add(blk.alignedText(ctx, "公費負担者番号", label.extent, "center", "center"), offset, label.offset);
     con.add(eightDigits(ctx, digits.extent, data?.futansha), offset, digits.offset);
@@ -590,8 +560,7 @@ function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   {
     const { offset, extent } = lower;
     const cb = new ColumnBuilder(extent);
-    const digits = cb.getColumnFromRight(digitWidth * 7);
-    const label = cb.getRemaining();
+    const [label, digits] = cb.split(cb.expand(), cb.fixed(digitWidth * 7));
     con.add(blk.frameRight(label.extent), offset, label.offset);
     let labelItem = stackedTexts(ctx, ["公費負担医療", "の受給者番号"]);
     labelItem = alignedItem(labelItem, label.extent, "center", "center");
@@ -611,8 +580,7 @@ function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   {
     const { offset, extent } = upper;
     const cb = new ColumnBuilder(extent);
-    const digits = cb.getColumnFromRight(digitWidth * 8);
-    const label = cb.getRemaining();
+    const [label, digits] = cb.split(cb.expand(), cb.fixed(digitWidth * 8));
     con.add(blk.frameRight(label.extent), offset, label.offset);
     con.add(blk.alignedText(ctx, "保険者番号", label.extent, "center", "center"), offset, label.offset);
     con.add(eightDigits(ctx, digits.extent, data?.hokenshaBangou), offset, digits.offset);
@@ -620,8 +588,7 @@ function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   {
     const { offset, extent } = lower;
     const cb = new ColumnBuilder(extent);
-    const kigouBangou = cb.getColumnFromRight(digitWidth * 8);
-    const label = cb.getRemaining();
+    const [label, kigouBangou] = cb.split(cb.expand(), cb.fixed(digitWidth * 8));
     con.add(blk.frameRight(label.extent), offset, label.offset);
     let labelItem = stackedTexts(ctx, ["被保険者証・被保険", "者手帳の記号・番号"]);
     labelItem = alignedItem(labelItem, label.extent, "center", "center");
