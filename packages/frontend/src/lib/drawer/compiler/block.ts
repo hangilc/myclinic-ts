@@ -692,6 +692,21 @@ function repeat<T>(a: T, n: number): T[] {
   return as;
 }
 
+export function interpose<T>(ts: T[], value: (i: number) => T): T[] {
+  if( ts.length <= 1 ){
+    return ts;
+  } else {
+    const rs: T[] = [];
+    ts.forEach((t, i) => {
+      if( i !== 0 ){
+        rs.push(value(i-1));
+      }
+      rs.push(t);
+    })
+    return rs;
+  }
+}
+
 
 // export interface Block {
 //   width: number;

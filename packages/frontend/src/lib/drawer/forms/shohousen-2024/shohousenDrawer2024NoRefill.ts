@@ -16,7 +16,8 @@ import {
   type Renderer,
   type Position,
   shiftPosition,
-  decorateItem
+  decorateItem,
+  interpose
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -183,9 +184,9 @@ function nenMonthDateRenderer(ctx: DrawerContext, date?: DateWrapper,
       emptyItem();
   }
   let gengouItems: blk.FlexRowItem[] = [];
-  if( opt?.gengou ){
+  if (opt?.gengou) {
     gengouItems = [
-      { kind: "item", item: textItem(ctx, opt?.gengou)},
+      { kind: "item", item: textItem(ctx, opt?.gengou) },
       { kind: "gap", width: gap },
     ]
   }
@@ -516,12 +517,15 @@ function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohouse
   return alignedItem(item, extent, "center", "center");
 }
 
-function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { font?: string, halign?: HAlign }): Item {
+function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { font?: string, halign?: HAlign, leading?: number }): Item {
   const font = opt?.font;
   const halign = opt?.halign ?? "left";
-  const items = texts.map(text => blk.textItem(ctx, text, { font: opt?.font }));
-  const width = Math.max(...items.map(item => item.extent.width));
-  const height = c.resolveFontHeight(ctx, opt?.font);
+  const leading = opt?.leading ?? 0;
+  let items = texts.map(text => blk.textItem(ctx, text, { font }));
+  if( leading !== 0 ){
+    const spacer = emptyItem({ width: 0, height: leading });
+    items = interpose(items, () => spacer);
+  }
   return blk.stackedItems(...items.map(item => ({ item, halign })));
 }
 
@@ -695,11 +699,64 @@ function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohous
   }
   {
     const cb = ColumnBuilder.fromOffsetExtent(issueDateLimit);
-    const [label, body] = cb.splitAt(25);
+    const [label, body, append] = cb.splitAt(25, 48);
     con.frameRight(label);
+    con.addAligned(stackedTexts(ctx, ["処方箋の", "試用期間"], { halign: "center" }), label, "center", "center");
+    const dateItem = nenMonthDateRenderer(ctx, optionalDateWrapper(data?.validUptoDate), { gengou: "令和", gap: 0.3 });
+    con.addAligned(dateItem, body, "right", "center");
+    const texts = stackedTexts(ctx, [
+      "特に記載のある場合",
+      "を除き、交付の日を含",
+      "めて４日以内に保険薬",
+      "局に提出すること。",
+    ], { halign: "left", font: "f1.5", leading: 0.5 });
+    con.addAligned(brackettedItem(texts.extent.height, texts, { size: 0.75, }), append, "center", "center");
   }
   return con;
 }
+
+function brackettedItem(height: number, content: Item, opt?: {
+  size?: number, leftGap?: number, rightGap?: number, pen?: string
+}): Item {
+  const size = opt?.size ?? 0.75;
+  const leftGap = opt?.leftGap ?? 0.2;
+  const rightGap = opt?.rightGap ?? 0.2;
+  const width = content.extent.width + size * 2 + leftGap + rightGap;
+  const pen = opt?.pen ?? "thin";
+  const con = new Container();
+  const cb = new ColumnBuilder({ width, height });
+  const [left, body, right] = cb.split(cb.fixed(size), cb.skip(leftGap), cb.expand(), cb.skip(rightGap), cb.fixed(size));
+  const leftBra: Item = blk.boxItem(left.extent, (ctx, box) => {
+    c.withPen(ctx, pen, () => {
+      c.moveTo(ctx, box.right, box.top);
+      c.lineTo(ctx, box.left, box.top);
+      c.lineTo(ctx, box.left, box.bottom);
+      c.lineTo(ctx, box.right, box.bottom);
+    });
+  });
+  const rightBra: Item = blk.boxItem(left.extent, (ctx, box) => {
+    c.withPen(ctx, pen, () => {
+      c.moveTo(ctx, box.left, box.top);
+      c.lineTo(ctx, box.right, box.top);
+      c.lineTo(ctx, box.right, box.bottom);
+      c.lineTo(ctx, box.left, box.bottom);
+    });
+  });
+  con.add(leftBra, left.offset);
+  con.add(content, body.offset);
+  con.add(rightBra, right.offset);
+  return Object.assign(con, { extent: { width, height } });
+}
+
+function optionalDateWrapper(date: string | undefined): DateWrapper | undefined {
+  if (date !== undefined) {
+    return DateWrapper.from(date);
+  } else {
+    return undefined;
+  }
+}
+
+
 
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
