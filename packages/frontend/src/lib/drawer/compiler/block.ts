@@ -196,15 +196,16 @@ export function alignedText(ctx: DrawerContext, text: string, extent: Extent,
   return alignedItem(item, extent, halign, valign);
 }
 
-export function stackedItems(...items: { item: Item, halign: HAlign }[]): Item {
-  const width = Math.max(0, ...items.map(ele => ele.item.extent.width));
-  const height = items.reduce((acc, ele) => acc + ele.item.extent.height, 0);
+export function stackedItems(items: Item[], opt?: { halign?: HAlign }): Item {
+  const width = Math.max(0, ...items.map(ele => ele.extent.width));
+  const height = items.reduce((acc, ele) => acc + ele.extent.height, 0);
   const extent: Extent = { width, height };
+  const halign: HAlign = opt?.halign ?? "left";
   return {
     extent,
     renderAt(ctx: DrawerContext, pos: Position) {
       let dy = 0;
-      items.forEach(({ item, halign }) => {
+      items.forEach(item => {
         const dx = horizAlign(item.extent.width, width, halign);
         item.renderAt(ctx, shiftPosition(pos, { dx, dy }));
         dy += item.extent.height;
@@ -285,8 +286,10 @@ export function justifiedItem(items: Item[], width: number): Item {
   }
 }
 
-export function justifiedText(ctx: DrawerContext, text: string, width: number): Item {
-  const items = Array.from(text).map(t => textItem(ctx, t));
+export function justifiedText(ctx: DrawerContext, text: string, width: number, opt?: {
+  font?: string, color?: Color;
+}): Item {
+  const items = Array.from(text).map(t => textItem(ctx, t, { font: opt?.font, color: opt?.color }));
   return justifiedItem(items, width);
 }
 
@@ -714,11 +717,9 @@ export function wrappedTextItem(ctx: DrawerContext, text: string, width: number,
   halign?: HAlign;
 }): Item {
   const font = opt?.font;
-  const halign = opt?.halign ?? "left";
   const lines = breakToLines(ctx, text, width, font);
   const items = lines.map(line => textItem(ctx, line, { font, color: opt?.color }));
-  const args = items.map(item => ({ item, halign }));
-  return stackedItems(...args)
+  return stackedItems(items, { halign: opt?.halign })
 }
 
 // Others ///////////////////////////////////////////////////////////////////////////////////////
@@ -780,9 +781,41 @@ export function flowTextIn(ctx: DrawerContext, extent: Extent, text: string, opt
   }
   const halign: HAlign = "left"
   return {
-    renderer: stackedItems(...items.map(item => ({ item, halign }))),
+    renderer: stackedItems(items, { halign }),
     rest: text.substring(start)
   }
+}
+
+export function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { 
+  font?: string, color?: Color, halign?: HAlign, leading?: number }
+): Item {
+  const font = opt?.font;
+  const halign = opt?.halign ?? "left";
+  const leading = opt?.leading ?? 0;
+  let items = texts.map(text => textItem(ctx, text, { font, color: opt?.color }));
+  if (leading !== 0) {
+    const spacer = emptyItem({ width: 0, height: leading });
+    items = interpose(items, () => spacer);
+  }
+  return stackedItems(items, { halign });
+}
+
+export function stackedJustifiedTexts(ctx: DrawerContext, texts: string[], opt?: { 
+  font?: string, color?: Color, leading?: number }
+): Item {
+  const font = opt?.font;
+  let width = 0;
+  Array.from(texts).forEach(text => {
+    const tw = c.textWidthWithFont(ctx, text, font);
+    width = Math.max(width, tw);
+  });
+  const leading = opt?.leading ?? 0;
+  let items = texts.map(text => justifiedText(ctx, text, width, { font, color: opt?.color }));
+  if (leading !== 0) {
+    const spacer = emptyItem({ width: 0, height: leading });
+    items = interpose(items, () => spacer);
+  }
+  return stackedItems(items, { halign: "left" });
 }
 
 

@@ -19,7 +19,11 @@ import {
   decorateItem,
   interpose,
   expand,
-  fixed
+  fixed,
+  stackedItems,
+  skip,
+  stackedTexts,
+  stackedJustifiedTexts
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -389,15 +393,9 @@ function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, d
       }
     }
   }
-  con.addAligned(blk.stackedItems(
-    { item: textItem(ctx, "点数表"), halign: "center" },
-    { item: textItem(ctx, "番号"), halign: "center" },
-  ), tensuuLabel, "center", "center")
+  con.addAligned(stackedTexts(ctx, ["点数表", "番号"], { halign: "center" }), tensuuLabel, "center", "center")
   con.addAligned(textItem(ctx, "1", { font: "d2.5", color: black }), tensuu, "center", "center");
-  con.addAligned(blk.stackedItems(
-    { item: textItem(ctx, "医療機関", { font: "f1.5" }), halign: "center" },
-    { item: textItem(ctx, "コード", { font: "f1.5" }), halign: "center" },
-  ), kikanLabel, "center", "center");
+  con.addAligned(stackedTexts(ctx, ["医療機関", "コード"], { font: "f1.5", halign: "center"}), kikanLabel, "center", "center");
   {
     const cb = ColumnBuilder.fromOffsetExtent(kikancode);
     const cols = cb.splitEven(7);
@@ -521,18 +519,6 @@ function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohouse
     },
   ], extent.width);
   return alignedItem(item, extent, "center", "center");
-}
-
-function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { font?: string, halign?: HAlign, leading?: number }): Item {
-  const font = opt?.font;
-  const halign = opt?.halign ?? "left";
-  const leading = opt?.leading ?? 0;
-  let items = texts.map(text => blk.textItem(ctx, text, { font }));
-  if (leading !== 0) {
-    const spacer = emptyItem({ width: 0, height: leading });
-    items = interpose(items, () => spacer);
-  }
-  return blk.stackedItems(...items.map(item => ({ item, halign })));
 }
 
 function eightDigits(ctx: DrawerContext, extent: Extent, digits?: string): Renderer {
@@ -672,7 +658,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
       const [left, right] = ColumnBuilder.fromOffsetExtent(label).split(cb.fixed(21), cb.expand(), cb.fixed(2));
       con.addAligned(textItem(ctx, "保険医署名"), left, "center", "center");
       const texts = stackedTexts(ctx, [
-        "「変更不可」蘭に「レ」又は「×」を記載", 
+        "「変更不可」蘭に「レ」又は「×」を記載",
         "した場合は、署名又は記名・押印すること。"
       ], { halign: "left", font: "f2.3" });
       const bracket = brackettedItem(texts);
@@ -680,7 +666,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
     }
     {
       let showSecondDoctorName = true;
-      if( showSecondDoctorName && data?.doctorName ) {
+      if (showSecondDoctorName && data?.doctorName) {
         const [area] = ColumnBuilder.fromOffsetExtent(doctorName).split(cb.skip(15), cb.expand());
         con.addAligned(textItem(ctx, data?.doctorName, { font: "d3", color: black }), area, "left", "center");
       }
@@ -690,11 +676,11 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
       const upperRightInner = insetOffsetExtent(upperRight, 1, 1, 1, 0);
       let { renderer, rest: rest1 } = blk.flowTextIn(ctx, upperRightInner.extent, bikou, { font: "d3", color: black });
       con.add(renderer, upperRightInner.offset);
-      if( rest1 !== "" ){
+      if (rest1 !== "") {
         const restInner = insetOffsetExtent(rows[1], 1);
         let { renderer, rest: rest2 } = blk.flowTextIn(ctx, restInner.extent, rest1, { font: "d3", color: black });
         con.add(renderer, restInner.offset);
-        if( rest2 !== "" ){
+        if (rest2 !== "") {
           throw new Error(`too long bikou: ${rest2}`);
         }
       }
@@ -702,27 +688,6 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
   }
   return con;
 }
-
-// function drawIssueDate(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
-//   const cols = b.splitToColumns(box, b.splitAt(25, 67, 98));
-//   cols.forEach(col => c.frame(ctx, col));
-//   c.drawText(ctx, "調剤年月日", cols[0], "center", "center");
-//   { // cols[1]
-//     const block = blk.rowBlock(c.currentFontSize(ctx), [
-//       blk.textItem(ctx, "令和"),
-//       blk.expanderItem(),
-//       blk.textItem(ctx, "年"),
-//       blk.expanderItem(),
-//       blk.textItem(ctx, "月"),
-//       blk.expanderItem(),
-//       blk.textItem(ctx, "日"),
-//     ], { maxWidth: 27 });
-//     blk.putIn(ctx, block, cols[1], alignCenter);
-//   }
-//   c.drawText(ctx, "公費負担者番号", cols[2], "center", "center");
-//   drawEightDigits(ctx, cols[3], data.futansha2);
-// }
-
 
 function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
@@ -745,10 +710,59 @@ function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return con;
 }
 
+// function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+//   let [c1, c2, c3, c4] = b.splitToColumns(box, b.splitAt(25, 67, 98));
+//   {
+//     const cw = b.width(c4) / 8;
+//     c3 = b.modify(c3, b.shrinkHoriz(0, -cw));
+//     c4 = b.modify(c4, b.shrinkHoriz(cw, 0));
+//   }
+//   [c1, c2, c3].forEach(col => c.frameRight(ctx, col));
+//   {
+//     const font = "f2.3";
+//     const top = blk.textBlock(ctx, "保険薬局の所在地", { font });
+//     const label = blk.stackedBlock([
+//       top,
+//       blk.justifiedTextBlock(ctx, "及び名称", top.width, { textBlockOpt: { font } }),
+//       blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, { textBlockOpt: { font } }),
+//     ], { halign: "center" });
+//     blk.putIn(ctx, label, c1, alignCenter);
+//   }
+//   blk.putIn(ctx, inkan(), b.modify(c2, b.shrinkHoriz(0, 4)), { halign: "right", valign: "center" });
+//   {
+//     const upper = blk.spacedTextBlock(ctx, "公費負担医療の", 0.8);
+//     const lower = blk.justifiedTextBlock(ctx, "受給者番号", upper.width);
+//     const block = blk.stackedBlock([upper, lower], { halign: "left", leading: 0.5 });
+//     blk.putIn(ctx, block, c3, alignCenter);
+//   }
+//   drawSevenDigits(ctx, c4, data.jukyuusha2);
+// }
 
 
 function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
+  con.frameExtent(extent);
+  const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
+  con.frameRight(left);
+  {
+    const [label, body] = ColumnBuilder.fromOffsetExtent(left).splitAt(25);
+    con.frameRight(label);
+    const line1 = textItem(ctx, "保険薬局の所在地");
+    const line2 = blk.justifiedText(ctx, "及び名称", line1.extent.width);
+    const line3 = blk.justifiedText(ctx, "保険薬剤師氏名", line1.extent.width);
+    const labelItem = stackedItems([line1, line2, line3], { halign: "left" });
+    con.addAligned(labelItem, label, "center", "center");
+    const [area] = ColumnBuilder.fromOffsetExtent(body).split(expand(), skip(5));
+    con.addAligned(textItem(ctx, "㊞"), area, "right", "center");
+  }
+  {
+    const digitWidth = 5;
+    const [label, body] = ColumnBuilder.fromOffsetExtent(right).split(expand(), fixed(digitWidth * 7));
+    con.frameRight(label);
+    const labelItem = stackedJustifiedTexts(ctx, ["公費負担医療の", "受給者番号"]);
+    con.addAligned(labelItem, label, "center", "center");
+    con.add(sevenDigits(ctx, body.extent, data?.jukyuusha2), body.offset);
+  }
   return con;
 }
 
