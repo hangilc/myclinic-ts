@@ -31,8 +31,12 @@ import type { Op } from "../../compiler/op";
 import { A5 } from "../../compiler/paper-size";
 import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
+import type { Drug, Usage } from "@/lib/parse-shohou";
+import { toZenkaku } from "@/lib/zenkaku";
 
-export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
+export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][] {
+  const data: ShohousenData | undefined = drawerData ? createShohousenData(drawerData) : undefined;
+  console.log("data", data);
   const ctx = prepareDrawerContext();
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
@@ -44,7 +48,7 @@ export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   return [c.getOps(ctx)];
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const container = new Container();
   const rb = new RowBuilder(extent);
   const [mainTitleRow, subTitleRow, mainRow] = rb.split(rb.fixed(6), rb.fixed(2), rb.expand());
@@ -65,7 +69,7 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
   return alignedItem(item, extent, "center", "center");
 }
 
-function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
   const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
@@ -87,7 +91,7 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data):
   return con;
 }
 
-function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const cb = new ColumnBuilder(extent);
   const [patientArea, clinicArea] = cb.splitEven(2);
   const con = new Container();
@@ -96,7 +100,7 @@ function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
   return con;
 }
 
-function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.add(blk.frame(extent));
   const cb = new ColumnBuilder(extent);
@@ -309,7 +313,7 @@ function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "hihokensha" |
   return con;
 }
 
-function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
@@ -325,7 +329,7 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
   return con;
 }
 
-function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer & { labelWidth: number } {
+function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer & { labelWidth: number } {
   const con = new Container();
   const cb = new ColumnBuilder(extent);
   const [left, right] = cb.split(cb.fixed(22), cb.skip(2), cb.expand());
@@ -350,7 +354,7 @@ function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return Object.assign(con, { labelWidth });
 }
 
-function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
+function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: ShohousenData): Renderer {
   const con = new Container();
   const rb = new RowBuilder(extent);
   const [phone, name] = rb.splitEven(2);
@@ -374,7 +378,7 @@ function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: numb
   return con;
 }
 
-function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
+function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent })
   const cb = new ColumnBuilder(extent);
@@ -410,7 +414,7 @@ function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, d
   return con;
 }
 
-function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.add(blk.frame(extent));
   const rb = new RowBuilder(extent);
@@ -438,7 +442,7 @@ function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   return con;
 }
 
-function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.add(blk.frame(extent));
   const rb = new RowBuilder(extent);
@@ -466,7 +470,7 @@ function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
   return con;
 }
 
-function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const itemAlign = { halign: "center", valign: "center" } as const;
   const textOpt = { font: "d2.5", color: black };
   let item = flexRow(c.resolveFontHeight(ctx, undefined), [
@@ -564,7 +568,7 @@ function sevenDigits(ctx: DrawerContext, extent: Extent, digits?: string): Rende
   return con;
 }
 
-function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent });
   const cb = new ColumnBuilder(extent);
@@ -640,7 +644,7 @@ function optionalDateWrapper(date: string | undefined): DateWrapper | undefined 
   }
 }
 
-function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent });
   const cb = new ColumnBuilder(extent);
@@ -664,7 +668,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
       con.addAligned(bracket, right, "center", "center");
     }
     {
-      let showSecondDoctorName = true;
+      let showSecondDoctorName = false;
       if (showSecondDoctorName && data?.doctorName) {
         const [area] = ColumnBuilder.fromOffsetExtent(doctorName).split(cb.skip(15), cb.expand());
         con.addAligned(textItem(ctx, data?.doctorName, { font: "d3", color: black }), area, "left", "center");
@@ -688,7 +692,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
   return con;
 }
 
-function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frameExtent(extent);
   const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
@@ -709,7 +713,7 @@ function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return con;
 }
 
-function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frameExtent(extent);
   const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
@@ -891,7 +895,7 @@ function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
 //   return { henkoufuka, kanjakibou, shohouBox };
 // }
 
-function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
   const con = new Container();
   con.frameExtent(extent);
   const [mark, col1, col2, body] = ColumnBuilder.fromExtent(extent).splitAt(5, 18, 31);
@@ -928,14 +932,56 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024D
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
   }
-  const [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
-  const [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
-  const [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
-  con.add(textItem(ctx, "a", { color: black }), henkoufuka.offset);
-  con.add(textItem(ctx, "b", { color: black }), kanjakibou.offset);
-  con.add(textItem(ctx, "c", { color: black }), shohou.offset);
+  let shohouData = data?.shohouData;
+  if( shohouData ){
+    let [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
+    let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
+    let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
+    let iter = 0;
+    while( shohouHasMore(shohouData) ){
+      if( ++iter > 40 ){
+        throw new Error("too many iteration (advance shohou)");
+      }
+    }
+  }
   return con;
 }
+
+function shohouHasMore(data: ShohouData): boolean {
+  return data.groups.length === 0 && data.trailers.length === 0;
+}
+
+interface ShohouGroupItem {
+  kind: "group";
+  groupIndex: number;
+  group: ShohouGroup;
+}
+
+interface ShohouTrailersItem {
+  kind: "trailers";
+  trailers: string[];
+}
+
+type ShohouAdvanceItem = ShohouGroupItem | ShohouTrailersItem;
+
+function advanceShohouGroup(data: ShohouData, width: number): {
+  advanceItem: ShohouAdvanceItem | undefined;
+  rest: ShohouData;
+} {
+  let groupIndex = data.groupIndex;
+  if( data.groups.length > 0 ){
+    const group = data.groups[0];
+
+  } else {
+    if( data.trailers.length > 0 ){
+
+    } else {
+      return { advanceItem: undefined, rest: { groupIndex, groups: [], trailers: []}}
+    }
+  }
+}
+
+
 
 
 // export function drawShohousen2024NoRefill(data: Shohousen2024Data): Op[][] {
@@ -1008,6 +1054,68 @@ function initPen(ctx: DrawerContext) {
   c.createPen(ctx, "thin", 0, 255, 0, 0.1);
   c.createPen(ctx, "data-thin", 0, 0, 0, 0.1);
 }
+
+type ShohouData = {
+  groupIndex: number;
+  groups: ShohouGroup[];
+  trailers: string[];
+}
+
+type ShohouGroup = {
+  drugs: ShohouDrug[];
+  usage: string;
+  trailers: string[];
+}
+
+type Senpatsu = "henkoufuka" | "kanjakibou" | undefined;
+
+type ShohouDrug = {
+  text: string;
+  senpatsu: Senpatsu;
+}
+
+type ShohousenData = Shohousen2024Data & { shohouData: ShohouData };
+
+function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
+  const groups: ShohouGroup[] = [];
+  const trailers: string[] = [];
+  const drugs = drawerData.drugs;
+  if (drugs !== undefined) {
+    drugs.groups.forEach(g => {
+      const drugs: ShohouDrug[] = [];
+      g.drugs.forEach(d => {
+        drugs.push({ text: drugNameAndAmountLine(d), senpatsu: undefined });
+      });
+      const usage = drugUsageLine(g.usage);
+      const trailers: string[] = [];
+      groups.push({ drugs, usage, trailers });
+    });
+  }
+  return Object.assign({}, drawerData, { shohouData: { groupIndex: 1, groups, trailers }});
+}
+
+function indexLabel(index: number): string {
+  return toZenkaku(`${index})`);
+}
+
+function drugNameAndAmountLine(drug: Drug): string {
+  return `${drug.name}　${drug.amount}${drug.unit}`
+}
+
+function drugUsageLine(usage: Usage): string {
+  switch (usage.kind) {
+    case "days": {
+      return `${usage.usage}　${usage.days}日分`;
+    }
+    case "times": {
+      return `${usage.usage}　${usage.times}回分`;
+    }
+    case "other": {
+      return `${usage.usage}`;
+    }
+  }
+}
+
 
 // function drawPage(ctx: DrawerContext, box: Box, data: Shohousen2024Data): {
 //   henkoufuka: Box, kanjakibou: Box; shohouBox: Box;
