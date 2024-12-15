@@ -1,5 +1,4 @@
 import { pad } from "@/lib/pad";
-import type { HAlign } from "../../compiler/align";
 import * as blk from "../../compiler/block";
 import {
   ColumnBuilder,
@@ -17,7 +16,6 @@ import {
   type Position,
   shiftPosition,
   decorateItem,
-  interpose,
   expand,
   fixed,
   stackedItems,
@@ -33,16 +31,16 @@ import type { Op } from "../../compiler/op";
 import { A5 } from "../../compiler/paper-size";
 import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
-import Column from "@/appoint/Column.svelte";
 
 export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
-  const paper = b.mkBox(0, 0, A5.width, A5.height);
-  const outerBounds = b.modify(paper, b.inset(3));
-  c.frame(ctx, outerBounds);
-  const bounds = b.modify(outerBounds, b.inset(2));
-  const main = mainBlock(ctx, blk.extentOfBox(bounds), data);
-  main.renderAt(ctx, blk.leftTopOfBox(bounds));
+  const paper = { width: A5.width, height: A5.height };
+  const outerBounds = insetExtent(paper, 3);
+  const con = new Container();
+  con.frame(outerBounds);
+  const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
+  con.addCreated((ext) => mainBlock(ctx, ext, data), innerBounds);
+  con.renderAt(ctx, { x: 0, y: 0 });
   return [c.getOps(ctx)];
 }
 
@@ -80,6 +78,7 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data):
     con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
     con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
     con.addCreated((ext) => koufuDateRowRenderer(ctx, ext, data), koufuDateRow);
+    con.addCreated((ext) => drugsRenderer(ctx, ext, data), drugsRow);
     con.addCreated((ext) => bikouRowRenderer(ctx, ext, data), bikouRow);
     con.addCreated((ext) => shohouDateRowRenderer(ctx, ext, data), shohouDateRow);
     con.addCreated((ext) => pharmaRowRenderer(ctx, ext, data), pharmaRow);
@@ -395,7 +394,7 @@ function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, d
   }
   con.addAligned(stackedTexts(ctx, ["点数表", "番号"], { halign: "center" }), tensuuLabel, "center", "center")
   con.addAligned(textItem(ctx, "1", { font: "d2.5", color: black }), tensuu, "center", "center");
-  con.addAligned(stackedTexts(ctx, ["医療機関", "コード"], { font: "f1.5", halign: "center"}), kikanLabel, "center", "center");
+  con.addAligned(stackedTexts(ctx, ["医療機関", "コード"], { font: "f1.5", halign: "center" }), kikanLabel, "center", "center");
   {
     const cb = ColumnBuilder.fromOffsetExtent(kikancode);
     const cols = cb.splitEven(7);
@@ -710,35 +709,6 @@ function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return con;
 }
 
-// function drawPharma(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
-//   let [c1, c2, c3, c4] = b.splitToColumns(box, b.splitAt(25, 67, 98));
-//   {
-//     const cw = b.width(c4) / 8;
-//     c3 = b.modify(c3, b.shrinkHoriz(0, -cw));
-//     c4 = b.modify(c4, b.shrinkHoriz(cw, 0));
-//   }
-//   [c1, c2, c3].forEach(col => c.frameRight(ctx, col));
-//   {
-//     const font = "f2.3";
-//     const top = blk.textBlock(ctx, "保険薬局の所在地", { font });
-//     const label = blk.stackedBlock([
-//       top,
-//       blk.justifiedTextBlock(ctx, "及び名称", top.width, { textBlockOpt: { font } }),
-//       blk.justifiedTextBlock(ctx, "保険薬剤師氏名", top.width, { textBlockOpt: { font } }),
-//     ], { halign: "center" });
-//     blk.putIn(ctx, label, c1, alignCenter);
-//   }
-//   blk.putIn(ctx, inkan(), b.modify(c2, b.shrinkHoriz(0, 4)), { halign: "right", valign: "center" });
-//   {
-//     const upper = blk.spacedTextBlock(ctx, "公費負担医療の", 0.8);
-//     const lower = blk.justifiedTextBlock(ctx, "受給者番号", upper.width);
-//     const block = blk.stackedBlock([upper, lower], { halign: "left", leading: 0.5 });
-//     blk.putIn(ctx, block, c3, alignCenter);
-//   }
-//   drawSevenDigits(ctx, c4, data.jukyuusha2);
-// }
-
-
 function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
   con.frameExtent(extent);
@@ -763,6 +733,207 @@ function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2
     con.addAligned(labelItem, label, "center", "center");
     con.add(sevenDigits(ctx, body.extent, data?.jukyuusha2), body.offset);
   }
+  return con;
+}
+
+// // shohou /////////////////////////////////////////////////////////////////////////////////////////////
+
+// interface PrepareShohouData {
+//   font: string;
+//   leading: number;
+//   totalGroups: number;
+//   groupIndex: number;
+//   groups: DrugGroup[];
+//   commands: string[];
+// }
+
+// function initPrepareShohouData(font: string, shohou: Shohou): PrepareShohouData {
+//   return {
+//     font,
+//     leading: 0,
+//     totalGroups: shohou.groups.length,
+//     groupIndex: 1,
+//     ...shohou,
+//   }
+// }
+
+// function calcLastLineHeight(ctx: DrawerContext, data: PrepareShohouData): number {
+//   let fontSize = c.getFontSizeOf(ctx, data.font);
+//   let leading = data.leading;
+//   return leading + fontSize;
+// }
+
+// function drawShohou(ctx: DrawerContext, layout: { henkoufuka: Box, kanjakibou: Box, shohouBox: Box },
+//   data: PrepareShohouData): {
+//     error?: string;
+//     rest?: PrepareShohouData;
+//     lastLineBox: Box;
+//     font: string;
+//   } {
+//   let font = data.font;
+//   let fontSize = c.getFontSizeOf(ctx, font);
+//   let leading = data.leading;
+//   const indexWidth = data.totalGroups < 10 ? fontSize * 2 : fontSize * 3;
+//   const shohouBox = layout.shohouBox;
+//   const indexBox = b.modify(shohouBox, b.setWidth(indexWidth, "left"));
+//   const mainBox = b.modify(shohouBox, b.shrinkHoriz(b.width(indexBox) + 1, 1));
+//   let mainCol = new ColumnBlockBuilder(b.width(mainBox));
+//   let error: string | undefined = undefined;
+//   let rest: PrepareShohouData | undefined = undefined;
+//   let groupIndex = data.groupIndex;
+//   const textBlockOpt: TextBlockOpt = { font, color: black };
+//   const lastLineHeight = calcLastLineHeight(ctx, data);
+//   data.groups.forEach((group, localGroupIndex) => {
+//     const gi = groupIndex;
+//     const groupCol = new ColumnBlockBuilder(b.width(mainBox));
+//     group.drugs.forEach((drug, drugIndex) => {
+//       groupCol.addBlock(
+//         blk.modify(blk.textBlock(ctx, drugNameAndAmountLine(drug), textBlockOpt), blk.boxCallback(box => {
+//           if (drugIndex === 0) {
+//             const top = box.top - mainBox.top;
+//             const bottom = box.bottom - mainBox.top;
+//             const ibox = b.mkBox(indexBox.left, indexBox.top + top, indexBox.right, indexBox.top + bottom);
+//             blk.drawText(ctx, indexLabel(gi), ibox, { halign: "right", valign: "center", textBlockOpt, });
+//           }
+//         }))
+//       );
+//     });
+//     groupCol.addBlock(blk.textBlock(ctx, drugUsageLine(group.usage), textBlockOpt));
+//     const groupBlock = groupCol.build();
+//     if (mainCol.currentHeight() + leading + groupBlock.height + leading + lastLineHeight <= b.height(layout.shohouBox)) {
+//       mainCol.addBlock(groupBlock);
+//     } else {
+//       if (mainCol.isEmpty()) {
+//         error = "薬剤グループ表示の高さが高すぎます";
+//         return;
+//       } else {
+//         rest = Object.assign({}, data, {
+//           groupIndex,
+//           groups: data.groups.slice(localGroupIndex),
+//         });
+//       }
+//     }
+//     groupIndex += 1;
+//   });
+//   if (error === undefined) {
+//     mainCol.build().render(ctx, mainBox);
+//   }
+//   const lastLineBox = b.modify(mainBox, b.shrinkVert(mainCol.currentHeight() + leading, 0), b.setHeight(fontSize, "top"));
+//   return { error, rest, lastLineBox, font };
+// }
+
+// function indexLabel(index: number): string {
+//   return toZenkaku(`${index})`);
+// }
+
+// function drugNameAndAmountLine(drug: Drug): string {
+//   return `${drug.name}　${drug.amount}${drug.unit}`
+// }
+
+// function drugUsageLine(usage: Usage): string {
+//   switch (usage.kind) {
+//     case "days": {
+//       return `${usage.usage}　${usage.days}日分`;
+//     }
+//     case "times": {
+//       return `${usage.usage}　${usage.times}回分`;
+//     }
+//     case "other": {
+//       return `${usage.usage}`;
+//     }
+//   }
+// }
+
+// function drawDrugs(ctx: DrawerContext, box: Box): {
+//   henkoufuka: Box; kanjakibou: Box; shohouBox: Box;
+// } {
+//   const [mark, col1, col2, body] = b.splitToColumns(box, b.splitAt(5, 18, 31));
+//   [mark, col1, col2].forEach(box => c.frameRight(ctx, box))
+//   {
+//     c.drawTextJustifiedVertically(ctx, "処方", b.modify(mark, b.shrinkVert(14, 14)), "center");
+//   }
+//   let yupper = 0;
+//   let henkoufuka: Box = col1;
+//   let kanjakibou: Box = col2;
+//   let shohouBox: Box = body;
+//   {
+//     const [label, _] = b.splitToRows(col1, b.splitAt(6));
+//     c.frameBottom(ctx, label);
+//     const para = blk.stackedBlock([
+//       blk.textBlock(ctx, "変更不可"),
+//       blk.setHeight(blk.textBlock(ctx, "(医療上必要)", { font: "f1.5" }), c.currentFontSize(ctx), { valign: "center" }),
+//     ], { halign: "center" });
+//     blk.putIn(ctx, para, label, alignCenter);
+//     yupper = Math.max(yupper, b.height(label));
+//   }
+//   {
+//     const [label, _] = b.splitToRows(col2, b.splitAt(6));
+//     c.frameBottom(ctx, label);
+//     c.drawText(ctx, "患者希望", label, "center", "center");
+//     yupper = Math.max(yupper, b.height(label));
+//   }
+//   {
+//     const [upper, lower] = b.splitToRows(body, b.splitAt(12.5));
+//     const [cLeft, cBody, cRight] = b.splitToColumns(upper, blk.splitByExtent(1.5, "*", 1.5));
+//     drawLeftSquareBracket(ctx, b.modify(cLeft, b.shrinkHoriz(0.75, 0), b.shrinkVert(1.5, 1.5), b.shift(0.3, 0)));
+//     blk.putIn(ctx, blk.stackedBlock([
+//       blk.textBlock(ctx, "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）"),
+//       blk.textBlock(ctx, "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記"),
+//       blk.textBlock(ctx, "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先"),
+//       blk.textBlock(ctx, "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。"),
+//     ], { halign: "left" }), b.modify(cBody, b.shrinkHoriz(1, 0)), { halign: "left", valign: "center" })
+//     drawRightSquareBracket(ctx, b.modify(cRight, b.shrinkHoriz(0, 0.75), b.shrinkVert(1.5, 1.5), b.shift(-0.5, 0)));
+//     yupper = Math.max(yupper, b.height(upper));
+//   }
+//   henkoufuka = b.modify(henkoufuka, b.shrinkVert(yupper, 0));
+//   kanjakibou = b.modify(kanjakibou, b.shrinkVert(yupper, 0));
+//   shohouBox = b.modify(shohouBox, b.shrinkVert(yupper, 0));
+//   return { henkoufuka, kanjakibou, shohouBox };
+// }
+
+function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
+  const con = new Container();
+  con.frameExtent(extent);
+  const [mark, col1, col2, body] = ColumnBuilder.fromExtent(extent).splitAt(5, 18, 31);
+  con.frameRight(col1);
+  con.frameRight(col2);
+  const [col1Label] = RowBuilder.fromOffsetExtent(col1).split(fixed(6));
+  const [col2Label] = RowBuilder.fromOffsetExtent(col2).split(fixed(6));
+  let yoffset = 0;
+  {
+    con.frameRight(mark);
+    const label = blk.verticallyJustifiedText(ctx, "処方", 28);
+    con.addAligned(label, mark, "center", "center");
+  }
+  {
+    con.frameBottom(col1Label);
+    const line1 = textItem(ctx, "変更不可");
+    const line2 = textItem(ctx, "(医療上必要)", { font: "f1.5" });
+    const labelItem = stackedItems([line1, line2], { halign: "center" });
+    con.addAligned(labelItem, col1Label, "center", "center");
+  }
+  {
+    con.frameBottom(col2Label);
+    con.addAligned(textItem(ctx, "患者希望"), col2Label, "center", "center");
+  }
+  {
+    const texts = stackedTexts(ctx, [
+      "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）",
+      "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記",
+      "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先",
+      "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。",
+    ], { font: "f2.3" });
+    const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.2), fixed(texts.extent.height), skip(0.2), fixed(0));
+    const notice = brackettedItem(texts);
+    con.addAligned(notice, upper, "center", "center");
+    yoffset = lower.offset.dy;
+  }
+  const [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
+  const [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
+  const [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
+  con.add(textItem(ctx, "a", { color: black }), henkoufuka.offset);
+  con.add(textItem(ctx, "b", { color: black }), kanjakibou.offset);
+  con.add(textItem(ctx, "c", { color: black }), shohou.offset);
   return con;
 }
 
