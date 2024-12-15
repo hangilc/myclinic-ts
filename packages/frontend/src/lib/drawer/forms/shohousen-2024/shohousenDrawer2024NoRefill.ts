@@ -61,7 +61,6 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
 
 function mainArea(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con: Container = new Container();
-  con.frame({ offset: { dx: 0, dy: 0 }, extent });
   const rb = new RowBuilder(extent);
   const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
     rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
@@ -254,7 +253,6 @@ function circleDecorator(draw: boolean, radius: number): (ext: Extent) => Render
 }
 
 function sexRenderer(ctx: DrawerContext, extent: Extent, sex: string | undefined): Renderer {
-  console.log("sex", sex);
   const fontSize = c.currentFontSize(ctx);
   const row = flexRow(fontSize, [
     { kind: "item", item: textItem(ctx, "男"), decorator: circleDecorator(sex === "M", 1.5) },
@@ -427,7 +425,7 @@ function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
-  const [addr, name, kikan] = rb.splitAt(10, 23);
+  const [addr, name, kikan] = rb.split(rb.fixed(10), rb.expandTo(23), rb.skip(2), rb.fixed(6)); // rb.splitAt(10, 23);
   let labelWidth = 0;
   con.addCreated((ext) => {
     const result = clinicAddressRenderer(ctx, ext, data);
@@ -537,8 +535,43 @@ function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: numb
 
 function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: Shohousen2024Data): Renderer {
   const con = new Container();
+  con.frame({ offset: blk.zeroOffset(), extent })
   const cb = new ColumnBuilder(extent);
-  const [left, right] = cb.split(cb.fixed(22), cb.expand());
+  const [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel, kikancode] = cb.splitAt(23, 28, 38.5, 44, 51);
+  [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(box => con.frameRight(box));
+  con.addAligned(textItem(ctx, "都道府県番号"), fukenLabel, "center", "center");
+  {
+    const cb = ColumnBuilder.fromOffsetExtent(fuken);
+    const cols = cb.splitEven(2);
+    con.frameRight(cols[0], "thin");
+    if (data?.clinicTodoufuken) {
+      const fuken = pad(data?.clinicTodoufuken, 2, "0");
+      for (let i = 0; i < 2; i++) {
+        con.addAligned(textItem(ctx, fuken.charAt(i), { font: "d2.5", color: black }), cols[i], "center", "center");
+      }
+    }
+  }
+  con.addAligned(blk.stackedItems(
+    { item: textItem(ctx, "点数表"), halign: "center" },
+    { item: textItem(ctx, "番号"), halign: "center" },
+  ), tensuuLabel, "center", "center")
+  con.addAligned(textItem(ctx, "1", { font: "d2.5", color: black }), tensuu, "center", "center");
+  con.addAligned(blk.stackedItems(
+    { item: textItem(ctx, "医療機関", { font: "f1.5" }), halign: "center" },
+    { item: textItem(ctx, "コード", { font: "f1.5" }), halign: "center" },
+  ), kikanLabel, "center", "center");
+  {
+    const cb = ColumnBuilder.fromOffsetExtent(kikancode);
+    const cols = cb.splitEven(7);
+    [1, 5].forEach(i => con.frameRight(cols[i]));
+    [0, 2, 3, 4].forEach(i => con.frameRight(cols[i], "thin"));
+    if( data?.clinicKikancode ){
+      const kikancode = data?.clinicKikancode;
+      Array.from(kikancode).forEach((ch, i) => {
+        con.addAligned(textItem(ctx, ch, { font: "d2.5", color: black }), cols[i], "center", "center");
+      })
+    }
+  }
   return con;
 }
 

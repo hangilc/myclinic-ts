@@ -230,16 +230,16 @@ export class Container implements Renderer {
     this.add(renderer, at.offset);
   }
 
-  frame(at: OffsetExtent) {
-    this.add(frame(at.extent), at.offset);
+  frame(at: OffsetExtent, pen?: string) {
+    this.add(frame(at.extent, pen), at.offset);
   }
 
-  frameRight(at: OffsetExtent) {
-    this.add(frameRight(at.extent), at.offset);
+  frameRight(at: OffsetExtent, pen?: string) {
+    this.add(frameRight(at.extent, pen), at.offset);
   }
 
-  frameBottom(at: OffsetExtent) {
-    this.add(frameBottom(at.extent), at.offset);
+  frameBottom(at: OffsetExtent, pen?: string) {
+    this.add(frameBottom(at.extent, pen), at.offset);
   }
 
   renderAt(ctx: DrawerContext, pos: Position) {
@@ -309,6 +309,10 @@ export function centerOfOffsetExtent(oe: OffsetExtent): Offset {
   return addOffsets(oe.offset, centerOfExtent(oe.extent));
 }
 
+export function zeroOffset(): Offset {
+  return { dx: 0, dy: 0 };
+}
+
 // RowBuilder ///////////////////////////////////////////////////////////////////////////////
 
 export class RowBuilder {
@@ -373,7 +377,6 @@ export class RowBuilder {
 
   split(...specs: RowColumnFlexSize[][]): OffsetExtent[] {
     const sizes: RowColumnFlexSize[] = [];
-    console.log("sizes", sizes);
     specs.forEach(spec => sizes.push(...spec));
     return this.splitBySizes(...sizes);
   }
@@ -519,7 +522,7 @@ function resolveFlexSizes(sizes: FlexSize[], totalSize?: number): number[] {
       acc.push(size);
     }
   });
-  groups.push({ sizes: acc, totalSize });
+  groups.push({ sizes: acc, totalSize: (totalSize ? totalSize - lastPosition : undefined) });
   const resolved: number[] = [];
   groups.forEach(group => {
     const rs = resolveFlexSizeBases(group.sizes, group.totalSize);
