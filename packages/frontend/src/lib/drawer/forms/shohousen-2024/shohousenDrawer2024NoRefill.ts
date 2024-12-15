@@ -17,7 +17,9 @@ import {
   type Position,
   shiftPosition,
   decorateItem,
-  interpose
+  interpose,
+  expand,
+  fixed
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -27,6 +29,7 @@ import type { Op } from "../../compiler/op";
 import { A5 } from "../../compiler/paper-size";
 import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
+import Column from "@/appoint/Column.svelte";
 
 export function drawShohousen2024NoRefill(data?: Shohousen2024Data): Op[][] {
   const ctx = prepareDrawerContext();
@@ -652,86 +655,6 @@ function optionalDateWrapper(date: string | undefined): DateWrapper | undefined 
   }
 }
 
-// function drawBikou(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
-//   const [mark, body] = b.splitToColumns(box, b.splitAt(5));
-//   c.frameRight(ctx, mark);
-//   c.drawTextJustifiedVertically(ctx, "備考", b.modify(mark, b.setHeight(10, "center")), "center");
-//   const rows = b.splitToRows(body, b.splitAt(13));
-//   const [upperLeft, upperRight] = b.splitToColumns(rows[0], b.splitAt(70));
-//   { // rows[0]
-//     const bb = upperLeft;
-//     c.frame(ctx, bb);
-//     const [label, doctorName] = b.splitToRows(bb, b.splitAt(7));
-//     {
-//       const [left, right] = b.splitToColumns(label, b.splitAt(21));
-//       c.drawText(ctx, "保険医署名", left, "center", "center");
-//       const center = blk.stackedBlock([
-//         blk.textBlock(ctx, "「変更不可」蘭に「レ」又は「×」を記載", { font: "f2.3" }),
-//         blk.textBlock(ctx, "した場合は、署名又は記名・押印すること。", { font: "f2.3" }),
-//       ], { halign: "left" });
-//       const row = blk.rowBlock(center.height, [
-//         {
-//           width: blk.fixedExtent(0.75),
-//           render: (ctx, box) => { drawLeftSquareBracket(ctx, b.modify(box, b.shrinkVert(0, 0)), { pen: "thin" }) }
-//         },
-//         {
-//           width: blk.fixedExtent(center.width),
-//           render: (ctx, box) => center.render(ctx, box),
-//         },
-//         {
-//           width: blk.fixedExtent(0.75),
-//           render: (ctx, box) => { drawRightSquareBracket(ctx, b.modify(box, b.shrinkVert(0, 0)), { pen: "thin" }) }
-//         }
-//       ])
-//       blk.putIn(ctx, row, b.modify(right, b.inset(1.5)), { halign: "right", valign: "top" });
-//     }
-//     { // doctorName
-//       let showSecondDoctorName = false;
-//       if (showSecondDoctorName) {
-//         const bb = b.modify(doctorName, b.shrinkHoriz(15, 0));
-//         blk.drawText(ctx, data.doctorName ?? "", bb, {
-//           textBlockOpt: {
-//             font: "d3",
-//             color: black,
-//           },
-//           halign: "left",
-//           valign: "top",
-//         })
-//       }
-
-//     }
-//   }
-//   {
-//     let [bikou1, bikou2] = [upperRight, rows[1]];
-//     bikou1 = b.modify(bikou1, b.shrinkHoriz(1, 1), b.shrinkVert(1, 0));
-//     bikou2 = b.modify(bikou2, b.shrinkHoriz(1, 1), b.shrinkVert(1, 1));
-//     let text = data.bikou ?? "";
-//     if (text !== "") {
-//       const bikouBox = bikou1;
-//       c.withTextColor(ctx, black, () => {
-//         c.withFont(ctx, "d3", () => {
-//           let para1 = blk.paragraph(ctx, text, b.width(bikouBox), b.height(bikouBox));
-//           para1.block.render(ctx, bikouBox);
-//           text = para1.rest;
-//         });
-//       })
-//     }
-//     if (text !== "") {
-//       const bikouBox = bikou2;
-//       c.withTextColor(ctx, black, () => {
-//         c.withFont(ctx, "d3", () => {
-//           let para1 = blk.paragraph(ctx, text, b.width(bikouBox), b.height(bikouBox));
-//           para1.block.render(ctx, bikouBox);
-//           text = para1.rest;
-//         });
-//       })
-//     }
-//     if (text !== "") {
-//       alert("too long bikou");
-//     }
-//   }
-// }
-
 function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent });
@@ -780,15 +703,52 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen20
   return con;
 }
 
+// function drawIssueDate(ctx: DrawerContext, box: Box, data: Shohousen2024Data) {
+//   const cols = b.splitToColumns(box, b.splitAt(25, 67, 98));
+//   cols.forEach(col => c.frame(ctx, col));
+//   c.drawText(ctx, "調剤年月日", cols[0], "center", "center");
+//   { // cols[1]
+//     const block = blk.rowBlock(c.currentFontSize(ctx), [
+//       blk.textItem(ctx, "令和"),
+//       blk.expanderItem(),
+//       blk.textItem(ctx, "年"),
+//       blk.expanderItem(),
+//       blk.textItem(ctx, "月"),
+//       blk.expanderItem(),
+//       blk.textItem(ctx, "日"),
+//     ], { maxWidth: 27 });
+//     blk.putIn(ctx, block, cols[1], alignCenter);
+//   }
+//   c.drawText(ctx, "公費負担者番号", cols[2], "center", "center");
+//   drawEightDigits(ctx, cols[3], data.futansha2);
+// }
+
+
 function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
-  con.frame({ offset: blk.zeroOffset(), extent })
+  con.frameExtent(extent);
+  const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
+  con.frameRight(left);
+  {
+    const [label, body] = ColumnBuilder.fromOffsetExtent(left).splitAt(25);
+    con.frameRight(label);
+    con.addAligned(textItem(ctx, "調剤年月日"), label, "center", "center");
+    con.addAligned(nenMonthDateRenderer(ctx, undefined, { gengou: "令和" }), body, "center", "center");
+  }
+  {
+    const digitWidth = 5;
+    const [label, body] = ColumnBuilder.fromOffsetExtent(right).split(expand(), fixed(digitWidth * 8));
+    con.frameRight(label);
+    con.addAligned(textItem(ctx, "公費負担者番号"), label, "center", "center");
+    con.add(eightDigits(ctx, body.extent, data?.futansha2), body.offset);
+  }
   return con;
 }
 
+
+
 function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohousen2024Data): Renderer {
   const con = new Container();
-  con.frame({ offset: blk.zeroOffset(), extent })
   return con;
 }
 

@@ -234,6 +234,10 @@ export class Container implements Renderer {
     this.add(frame(at.extent, pen), at.offset);
   }
 
+  frameExtent(extent: Extent, pen?: string) {
+    this.frame({ offset: zeroOffset(), extent }, pen);
+  }
+
   frameRight(at: OffsetExtent, pen?: string) {
     this.add(frameRight(at.extent, pen), at.offset);
   }
@@ -354,6 +358,10 @@ export class RowBuilder {
     return new RowBuilder(oe.extent, oe.offset);
   }
 
+  static fromExtent(extent: Extent): RowBuilder {
+    return new RowBuilder(extent);
+  }
+
   splitBySizes(...specs: RowColumnFlexSize[]): OffsetExtent[] {
     const hs = resolveFlexSizes(specs, this.extent.height);
     const rows: { offset: Offset, extent: Extent }[] = [];
@@ -429,6 +437,10 @@ export class ColumnBuilder {
     return new ColumnBuilder(oe.extent, oe.offset);
   }
 
+  static fromExtent(extent: Extent): ColumnBuilder {
+    return new ColumnBuilder(extent);
+  }
+
   splitBySizes(...specs: RowColumnFlexSize[]): OffsetExtent[] {
     const ws = resolveFlexSizes(specs, this.extent.width);
     const cols: { offset: Offset, extent: Extent }[] = [];
@@ -487,6 +499,29 @@ export class ColumnBuilder {
     specs.push(this.expand());
     return this.split(...specs);
   }
+}
+
+// row column specs //////////////////////////////////////////////////////////////////////////
+
+export function fixed(size: number): RowColumnFlexSize[] {
+  return [{ kind: "fixed", value: size }];
+}
+
+
+export function expand(): RowColumnFlexSize[] {
+  return [{ kind: "expand" }];
+}
+
+export function expandTo(position: number): RowColumnFlexSize[] {
+  return [{ kind: "expand" }, { kind: "advance-to", position, "instruction-only": true }]
+}
+
+export function skip(size: number): RowColumnFlexSize[] {
+  return [{ kind: "fixed", value: size, "instruction-only": true }]
+}
+
+export function tabTo(position: number): RowColumnFlexSize[] {
+  return [{ kind: "advance-to", position, "instruction-only": true }];
 }
 
 // FlexSize //////////////////////////////////////////////////////////////////////////////////
