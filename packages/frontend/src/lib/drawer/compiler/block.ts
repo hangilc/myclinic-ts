@@ -346,6 +346,37 @@ export function zeroOffset(): Offset {
   return { dx: 0, dy: 0 };
 }
 
+// Block ////////////////////////////////////////////////////////////////////////////////////
+
+export type Block = OffsetExtent;
+
+export function shrinkBlockHoriz(block: Block, leftAmount: number, rightAmount: number): Block {
+  const extent = Object.assign({}, block.extent, { width: block.extent.width - leftAmount - rightAmount});
+  const offset = Object.assign({}, block.offset, { dx: block.offset.dx + leftAmount});
+  return { extent, offset };
+}
+
+export function shrinkBlockVert(block: Block, topAmount: number, bottomAmount: number): Block {
+  const extent = Object.assign({}, block.extent, { height: block.extent.height - topAmount - bottomAmount});
+  const offset = Object.assign({}, block.offset, { dy: block.offset.dy + topAmount});
+  return { extent, offset };
+}
+
+export function setBlockWidth(block: Block, width: number, halign: HAlign): Block {
+  const rem = block.extent.width - width;
+  switch(halign) {
+    case "left": {
+      return shrinkBlockHoriz(block, 0, rem);
+    }
+    case "center": {
+      return shrinkBlockHoriz(block, rem * 0.5, rem * 0.5);
+    }
+    case "right": {
+      return shrinkBlockHoriz(block, rem, 0);
+    }
+  }
+}
+
 // RowBuilder ///////////////////////////////////////////////////////////////////////////////
 
 export class RowBuilder {
