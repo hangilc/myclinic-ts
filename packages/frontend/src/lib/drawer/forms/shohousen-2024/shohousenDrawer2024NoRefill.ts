@@ -21,7 +21,9 @@ import {
   stackedItems,
   skip,
   stackedTexts,
-  stackedJustifiedTexts
+  stackedJustifiedTexts,
+  breakToTextItems,
+  GrowingColumn
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -933,13 +935,13 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     yoffset = lower.offset.dy;
   }
   let shohouData = data?.shohouData;
-  if( shohouData ){
+  if (shohouData) {
     let [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
     let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
     let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
     let iter = 0;
-    while( shohouHasMore(shohouData) ){
-      if( ++iter > 40 ){
+    while (shohouHasMore(shohouData)) {
+      if (++iter > 40) {
         throw new Error("too many iteration (advance shohou)");
       }
     }
@@ -947,40 +949,26 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
   return con;
 }
 
-function shohouHasMore(data: ShohouData): boolean {
-  return data.groups.length === 0 && data.trailers.length === 0;
-}
-
-interface ShohouGroupItem {
-  kind: "group";
-  groupIndex: number;
-  group: ShohouGroup;
-}
-
-interface ShohouTrailersItem {
-  kind: "trailers";
-  trailers: string[];
-}
-
-type ShohouAdvanceItem = ShohouGroupItem | ShohouTrailersItem;
-
-function advanceShohouGroup(data: ShohouData, width: number): {
-  advanceItem: ShohouAdvanceItem | undefined;
-  rest: ShohouData;
-} {
-  let groupIndex = data.groupIndex;
-  if( data.groups.length > 0 ){
-    const group = data.groups[0];
-
-  } else {
-    if( data.trailers.length > 0 ){
-
-    } else {
-      return { advanceItem: undefined, rest: { groupIndex, groups: [], trailers: []}}
+function shohouDataToItems(ctx: DrawerContext, data: ShohouData, 
+  henkoufukaWidth: number, kanjakibouWidth: number, shohouWidth: number, font: string): {
+  henkoufuka: Item, kanjakibou: Item, shohou: Item
+}[] {
+  const henkoufukaCol = new GrowingColumn(henkoufukaWidth);
+  const kanjakibouCol = new GrowingColumn(kanjakibouWidth);
+  const fontSize = c.resolveFontHeight(ctx, font);
+  const indexWidth = data.groups.length < 10 ? fontSize + 1 : fontSize * 2 + 1;
+  const indexCol = new GrowingColumn(indexWidth);
+  const drugCol = new GrowingColumn(shohouWidth - indexWidth);
+  for(let i=0;i<data.groups.length;i++){
+    const group = data.groups[i];
+    for(let drug of group.drugs){
+      const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
+      for(let nameItem of nameItems){
+        drugCol.add(nameItem);
+      }
     }
   }
 }
-
 
 
 
@@ -1056,7 +1044,6 @@ function initPen(ctx: DrawerContext) {
 }
 
 type ShohouData = {
-  groupIndex: number;
   groups: ShohouGroup[];
   trailers: string[];
 }
@@ -1091,7 +1078,7 @@ function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
       groups.push({ drugs, usage, trailers });
     });
   }
-  return Object.assign({}, drawerData, { shohouData: { groupIndex: 1, groups, trailers }});
+  return Object.assign({}, drawerData, { shohouData: { groups, trailers } });
 }
 
 function indexLabel(index: number): string {

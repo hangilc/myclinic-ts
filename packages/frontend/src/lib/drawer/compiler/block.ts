@@ -6,6 +6,7 @@ import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakMultipleLines, breakSingleLine } from "./break-lines";
 import { stringToCharWidths } from "./char-width";
+import type { number } from "valibot";
 
 export interface Position {
   x: number;
@@ -351,20 +352,20 @@ export function zeroOffset(): Offset {
 export type Block = OffsetExtent;
 
 export function shrinkBlockHoriz(block: Block, leftAmount: number, rightAmount: number): Block {
-  const extent = Object.assign({}, block.extent, { width: block.extent.width - leftAmount - rightAmount});
-  const offset = Object.assign({}, block.offset, { dx: block.offset.dx + leftAmount});
+  const extent = Object.assign({}, block.extent, { width: block.extent.width - leftAmount - rightAmount });
+  const offset = Object.assign({}, block.offset, { dx: block.offset.dx + leftAmount });
   return { extent, offset };
 }
 
 export function shrinkBlockVert(block: Block, topAmount: number, bottomAmount: number): Block {
-  const extent = Object.assign({}, block.extent, { height: block.extent.height - topAmount - bottomAmount});
-  const offset = Object.assign({}, block.offset, { dy: block.offset.dy + topAmount});
+  const extent = Object.assign({}, block.extent, { height: block.extent.height - topAmount - bottomAmount });
+  const offset = Object.assign({}, block.offset, { dy: block.offset.dy + topAmount });
   return { extent, offset };
 }
 
 export function setBlockWidth(block: Block, width: number, halign: HAlign): Block {
   const rem = block.extent.width - width;
-  switch(halign) {
+  switch (halign) {
     case "left": {
       return shrinkBlockHoriz(block, 0, rem);
     }
@@ -760,6 +761,12 @@ export function breakToLines(ctx: DrawerContext, text: string, width: number, fo
   return breakMultipleLines(text, fontSize, width);
 }
 
+export function breakToTextItems(ctx: DrawerContext, text: string, width: number, opt?: {
+  font?: string; color?: Color;
+}): Item[] {
+  return breakToLines(ctx, text, width, opt?.font).map(text => textItem(ctx, text, { font: opt?.font, color: opt?.color }));
+}
+
 function repeat<T>(a: T, n: number): T[] {
   const as: T[] = [];
   for (let i = 0; i < n; i++) {
@@ -769,13 +776,13 @@ function repeat<T>(a: T, n: number): T[] {
 }
 
 export function interpose<T>(ts: T[], value: (i: number) => T): T[] {
-  if( ts.length <= 1 ){
+  if (ts.length <= 1) {
     return ts;
   } else {
     const rs: T[] = [];
     ts.forEach((t, i) => {
-      if( i !== 0 ){
-        rs.push(value(i-1));
+      if (i !== 0) {
+        rs.push(value(i - 1));
       }
       rs.push(t);
     })
@@ -798,7 +805,7 @@ export function flowTextIn(ctx: DrawerContext, extent: Extent, text: string, opt
   while (start < text.length) {
     const nline = items.length + 1;
     const nextHeight = fontSize * nline + leading * (nline - 1);
-    if( nextHeight > extent.height ){
+    if (nextHeight > extent.height) {
       break;
     }
     const end = breakSingleLine(text, start, fontSize, lineWidth);
@@ -806,7 +813,7 @@ export function flowTextIn(ctx: DrawerContext, extent: Extent, text: string, opt
     const item = textItem(ctx, line, { font, color: opt?.color });
     items.push(item);
     start = end;
-    if( ++iter > 200 ){
+    if (++iter > 200) {
       throw new Error("too many iteration (flowTextIn)");
     }
   }
@@ -817,8 +824,9 @@ export function flowTextIn(ctx: DrawerContext, extent: Extent, text: string, opt
   }
 }
 
-export function stackedTexts(ctx: DrawerContext, texts: string[], opt?: { 
-  font?: string, color?: Color, halign?: HAlign, leading?: number }
+export function stackedTexts(ctx: DrawerContext, texts: string[], opt?: {
+  font?: string, color?: Color, halign?: HAlign, leading?: number
+}
 ): Item {
   const font = opt?.font;
   const halign = opt?.halign ?? "left";
@@ -831,8 +839,9 @@ export function stackedTexts(ctx: DrawerContext, texts: string[], opt?: {
   return stackedItems(items, { halign });
 }
 
-export function stackedJustifiedTexts(ctx: DrawerContext, texts: string[], opt?: { 
-  font?: string, color?: Color, leading?: number }
+export function stackedJustifiedTexts(ctx: DrawerContext, texts: string[], opt?: {
+  font?: string, color?: Color, leading?: number
+}
 ): Item {
   const font = opt?.font;
   let width = 0;
@@ -849,6 +858,34 @@ export function stackedJustifiedTexts(ctx: DrawerContext, texts: string[], opt?:
   return stackedItems(items, { halign: "left" });
 }
 
+export class GrowingColumn {
+  width: number;
+  contents: { dy: number, item: Item }[] = [];
+  top = 0;
+
+  constructor(width: number) {
+    this.width = width;
+  }
+
+  add(item: Item) {
+    this.contents.push({ dy: this.top, item });
+    this.top += item.extent.height;
+  }
+
+  advance(dy: number) {
+    this.top += dy;
+  }
+
+  toItem(): Item {
+    const extent = { width: this.width, height: this.top };
+    const renderAt = (ctx: DrawerContext, pos: Position) => {
+      this.contents.forEach(content => {
+        content.item.renderAt(ctx, shiftPosition(pos, { dx: 0, dy: content.dy }));
+      })
+    }
+    return { extent, renderAt };
+  }
+}
 
 // export interface Block {
 //   width: number;
