@@ -876,6 +876,10 @@ export class GrowingColumn {
     this.top += dy;
   }
 
+  advanceTo(top: number) {
+    this.top = top;
+  }
+
   toItem(): Item {
     const extent = { width: this.width, height: this.top };
     const renderAt = (ctx: DrawerContext, pos: Position) => {
@@ -884,6 +888,31 @@ export class GrowingColumn {
       })
     }
     return { extent, renderAt };
+  }
+}
+
+export class GrowingColumnGroup {
+  columns: GrowingColumn[] = [];
+
+  add(col: GrowingColumn) {
+    this.columns.push(col);
+  }
+
+  toItem(): Item {
+    const colItems: Item[] = this.columns.map(col => col.toItem());
+    const width = colItems.reduce((acc, ele) => acc + ele.extent.width, 0);
+    const height = Math.max(...colItems.map(col => col.extent.height));
+    const renderAt  = (ctx: DrawerContext, pos: Position) => {
+      let dx = 0;
+      colItems.forEach(item => {
+        item.renderAt(ctx, shiftPosition(pos, { dx, dy: 0 }));
+        dx += item.extent.width;
+      })
+    }
+    return {
+      extent: { width, height },
+      renderAt,
+    }
   }
 }
 

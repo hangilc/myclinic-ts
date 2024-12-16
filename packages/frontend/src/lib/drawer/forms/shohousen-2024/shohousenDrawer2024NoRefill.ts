@@ -940,11 +940,10 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
     let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
     let iter = 0;
-    while (shohouHasMore(shohouData)) {
-      if (++iter > 40) {
-        throw new Error("too many iteration (advance shohou)");
-      }
-    }
+    let itemGroups = shohouDataToItems(ctx, shohouData, henkoufuka.extent.width, kanjakibou.extent.width, shohou.extent.width, "d3");
+    itemGroups.forEach(ig => {
+      con.add(ig.shohou, shohou.offset);
+    })
   }
   return con;
 }
@@ -967,7 +966,21 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
         drugCol.add(nameItem);
       }
     }
+    const lines = [group.usage, ...group.trailers];
+    lines.forEach(line => {
+      const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
+      items.forEach(item => drugCol.add(item));
+    })
   }
+  const drugItem = drugCol.toItem();
+  const height = drugItem.extent.height;
+  henkoufukaCol.advanceTo(height);
+  kanjakibouCol.advanceTo(height);
+  return [{
+    henkoufuka: henkoufukaCol.toItem(),
+    kanjakibou: kanjakibouCol.toItem(),
+    shohou: drugItem,
+  }];
 }
 
 
