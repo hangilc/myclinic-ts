@@ -6,7 +6,6 @@ import type { HAlign, VAlign } from "./align";
 import type { Color } from "./compiler";
 import { breakMultipleLines, breakSingleLine } from "./break-lines";
 import { stringToCharWidths } from "./char-width";
-import type { number } from "valibot";
 
 export interface Position {
   x: number;
@@ -100,6 +99,8 @@ export interface Renderer {
   renderAt: (ctx: DrawerContext, pos: Position) => void;
 }
 
+// Item /////////////////////////////////////////////////////////////////////////////////
+
 export type Item = {
   extent: Extent;
 } & Renderer;
@@ -190,6 +191,7 @@ export function boxItem(extent: Extent, f: (ctx: DrawerContext, box: Box) => voi
     }
   }
 }
+
 
 export function alignedText(ctx: DrawerContext, text: string, extent: Extent,
   halign: HAlign, valign: VAlign, opt?: TextOpt): Item {
@@ -345,37 +347,6 @@ export function centerOfOffsetExtent(oe: OffsetExtent): Offset {
 
 export function zeroOffset(): Offset {
   return { dx: 0, dy: 0 };
-}
-
-// Block ////////////////////////////////////////////////////////////////////////////////////
-
-export type Block = OffsetExtent;
-
-export function shrinkBlockHoriz(block: Block, leftAmount: number, rightAmount: number): Block {
-  const extent = Object.assign({}, block.extent, { width: block.extent.width - leftAmount - rightAmount });
-  const offset = Object.assign({}, block.offset, { dx: block.offset.dx + leftAmount });
-  return { extent, offset };
-}
-
-export function shrinkBlockVert(block: Block, topAmount: number, bottomAmount: number): Block {
-  const extent = Object.assign({}, block.extent, { height: block.extent.height - topAmount - bottomAmount });
-  const offset = Object.assign({}, block.offset, { dy: block.offset.dy + topAmount });
-  return { extent, offset };
-}
-
-export function setBlockWidth(block: Block, width: number, halign: HAlign): Block {
-  const rem = block.extent.width - width;
-  switch (halign) {
-    case "left": {
-      return shrinkBlockHoriz(block, 0, rem);
-    }
-    case "center": {
-      return shrinkBlockHoriz(block, rem * 0.5, rem * 0.5);
-    }
-    case "right": {
-      return shrinkBlockHoriz(block, rem, 0);
-    }
-  }
 }
 
 // RowBuilder ///////////////////////////////////////////////////////////////////////////////
@@ -867,7 +838,11 @@ export class GrowingColumn {
     this.width = width;
   }
 
-  add(item: Item) {
+  add(item: Item, halign?: HAlign) {
+    if( halign !== undefined ){
+      const extent = { width: this.width, height: item.extent.height };
+      item = alignedItem(item, extent, halign, "top");
+    }
     this.contents.push({ dy: this.top, item });
     this.top += item.extent.height;
   }
@@ -892,7 +867,11 @@ export class GrowingColumn {
 }
 
 export class GrowingColumnGroup {
-  columns: GrowingColumn[] = [];
+  columns: GrowingColumn[];
+
+  constructor(...columns: GrowingColumn[]) {
+    this.columns = columns;
+  }
 
   add(col: GrowingColumn) {
     this.columns.push(col);

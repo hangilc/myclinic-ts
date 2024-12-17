@@ -23,7 +23,8 @@ import {
   stackedTexts,
   stackedJustifiedTexts,
   breakToTextItems,
-  GrowingColumn
+  GrowingColumn,
+  GrowingColumnGroup
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -38,19 +39,25 @@ import { toZenkaku } from "@/lib/zenkaku";
 
 export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][] {
   const data: ShohousenData | undefined = drawerData ? createShohousenData(drawerData) : undefined;
-  console.log("data", data);
-  const ctx = prepareDrawerContext();
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
-  const con = new Container();
-  con.frame(outerBounds);
   const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
-  con.addCreated((ext) => mainBlock(ctx, ext, data), innerBounds);
-  con.renderAt(ctx, { x: 0, y: 0 });
-  return [c.getOps(ctx)];
+  const pages: Renderer[] = [];
+  let rest: ShohouItemDict[] = [];
+  const result: Op[][] = [];
+  do {
+    const con = new Container();
+    con.frame(outerBounds);
+    const ctx = prepareDrawerContext();
+    const mainResult = mainBlock(ctx, innerBounds.extent, data);
+    con.add(mainResult.renderer, innerBounds.offset);
+    con.renderAt(ctx, { x: 0, y: 0 });
+    result.push(c.getOps(ctx));
+  } while( rest.length > 0 );
+  return result;
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer; rest: ShohouItemDict[] } {
   const container = new Container();
   const rb = new RowBuilder(extent);
   const [mainTitleRow, subTitleRow, mainRow] = rb.split(rb.fixed(6), rb.fixed(2), rb.expand());
@@ -58,7 +65,7 @@ function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Re
   container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
   const inner = blk.insetOffsetExtent(mainRow, 2, 3, 2, 0);
   container.addCreated((ext) => mainArea(ctx, ext, data), inner);
-  return container;
+  return { renderer: container, rest: [] };
 }
 
 function mainTitle(ctx: DrawerContext, extent: Extent): Item {
@@ -84,7 +91,7 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Ren
     con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
     con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
     con.addCreated((ext) => koufuDateRowRenderer(ctx, ext, data), koufuDateRow);
-    con.addCreated((ext) => drugsRenderer(ctx, ext, data), drugsRow);
+    con.addCreated((ext) => drugsRenderer(ctx, ext, data).renderer, drugsRow);
     con.addCreated((ext) => bikouRowRenderer(ctx, ext, data), bikouRow);
     con.addCreated((ext) => shohouDateRowRenderer(ctx, ext, data), shohouDateRow);
     con.addCreated((ext) => pharmaRowRenderer(ctx, ext, data), pharmaRow);
@@ -897,7 +904,7 @@ function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenD
 //   return { henkoufuka, kanjakibou, shohouBox };
 // }
 
-function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer, rest: ShohouItemDict[] } {
   const con = new Container();
   con.frameExtent(extent);
   const [mark, col1, col2, body] = ColumnBuilder.fromExtent(extent).splitAt(5, 18, 31);
@@ -934,35 +941,60 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
   }
+  let rest: ShohouItemDict[] = [];
   let shohouData = data?.shohouData;
   if (shohouData) {
+    const font = "d3.5";
+    const fontSize = c.resolveFontHeight(ctx, font);
     let [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
     let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
     let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
     let iter = 0;
-    let itemGroups = shohouDataToItems(ctx, shohouData, henkoufuka.extent.width, kanjakibou.extent.width, shohou.extent.width, "d3");
-    itemGroups.forEach(ig => {
-      con.add(ig.shohou, shohou.offset);
-    })
+    let itemGroups = shohouDataToItems(ctx, shohouData, henkoufuka.extent.width, kanjakibou.extent.width,
+      shohou.extent.width, "d3.5");
+    let dy = 0;
+    while (itemGroups.length > 0) {
+      const itemGroup = itemGroups[0];
+      const space = shohou.extent.height - dy;
+      if (space >= itemGroup.shohou.extent.height) {
+        con.add(itemGroup.shohou, shohou.offset, { dx: 0, dy });
+        dy += itemGroup.shohou.extent.height;
+        itemGroups.shift();
+      } else {
+        rest = itemGroups;
+        break;
+      }
+      if (++iter > 100) {
+        throw new Error("too many iteration (shohou)");
+      }
+    }
   }
-  return con;
+  return { renderer: con, rest }
 }
 
-function shohouDataToItems(ctx: DrawerContext, data: ShohouData, 
-  henkoufukaWidth: number, kanjakibouWidth: number, shohouWidth: number, font: string): {
-  henkoufuka: Item, kanjakibou: Item, shohou: Item
-}[] {
-  const henkoufukaCol = new GrowingColumn(henkoufukaWidth);
-  const kanjakibouCol = new GrowingColumn(kanjakibouWidth);
+interface ShohouItemDict {
+  henkoufuka: Item,
+  kanjakibou: Item,
+  shohou: Item
+}
+
+function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
+  henkoufukaWidth: number, kanjakibouWidth: number, shohouWidth: number, font: string): ShohouItemDict[] {
   const fontSize = c.resolveFontHeight(ctx, font);
-  const indexWidth = data.groups.length < 10 ? fontSize + 1 : fontSize * 2 + 1;
-  const indexCol = new GrowingColumn(indexWidth);
-  const drugCol = new GrowingColumn(shohouWidth - indexWidth);
-  for(let i=0;i<data.groups.length;i++){
+  const indexWidth = data.groups.length < 10 ? fontSize * 2 : fontSize * 3;
+  const result: ShohouItemDict[] = [];
+  for (let i = 0; i < data.groups.length; i++) {
     const group = data.groups[i];
-    for(let drug of group.drugs){
+    const henkoufukaCol = new GrowingColumn(henkoufukaWidth);
+    const kanjakibouCol = new GrowingColumn(kanjakibouWidth);
+    const indexCol = new GrowingColumn(indexWidth);
+    const drugCol = new GrowingColumn(shohouWidth - indexWidth);
+    const shohouCol = new GrowingColumnGroup(indexCol, drugCol);
+    const indexItem = textItem(ctx, indexLabel(i + 1), { font, color: black });
+    indexCol.add(indexItem, "right");
+    for (let drug of group.drugs) {
       const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
-      for(let nameItem of nameItems){
+      for (let nameItem of nameItems) {
         drugCol.add(nameItem);
       }
     }
@@ -971,16 +1003,15 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
       const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
       items.forEach(item => drugCol.add(item));
     })
+    const height = drugCol.top;
+    [henkoufukaCol, kanjakibouCol].forEach(col => col.advanceTo(height));
+    result.push({
+      henkoufuka: henkoufukaCol.toItem(),
+      kanjakibou: kanjakibouCol.toItem(),
+      shohou: shohouCol.toItem(),
+    })
   }
-  const drugItem = drugCol.toItem();
-  const height = drugItem.extent.height;
-  henkoufukaCol.advanceTo(height);
-  kanjakibouCol.advanceTo(height);
-  return [{
-    henkoufuka: henkoufukaCol.toItem(),
-    kanjakibou: kanjakibouCol.toItem(),
-    shohou: drugItem,
-  }];
+  return result;
 }
 
 
@@ -1046,6 +1077,7 @@ function initFont(ctx: DrawerContext) {
   c.createFont(ctx, "d6", "MS Gothic", 6);
   c.createFont(ctx, "d5", "MS Gothic", 5);
   c.createFont(ctx, "d4", "MS Gothic", 4);
+  c.createFont(ctx, "d3.5", "MS Gothic", 3.5);
   c.createFont(ctx, "d3", "MS Gothic", 3);
   c.createFont(ctx, "d2.5", "MS Gothic", 2.5);
 }
