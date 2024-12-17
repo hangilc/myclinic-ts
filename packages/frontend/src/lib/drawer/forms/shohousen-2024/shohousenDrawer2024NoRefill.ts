@@ -50,11 +50,9 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
     const con = new Container();
     con.frame(outerBounds);
     const ctx = prepareDrawerContext();
-    const mainResult = mainBlock(ctx, innerBounds.extent, data);
-    rest = mainResult.shohouResult.rest;
-    con.add(mainResult.renderer, innerBounds.offset);
+    con.addCreated((ext) => mainBlock(ctx, ext, data), innerBounds);
     pages.push({
-      ctx, renderer: con, lastLine: mainResult.shohouResult.lastLine 
+      ctx, renderer: con, lastLine: data?.__data.lastLine,
     })
     if( data !== undefined ){
       data.rest = rest;
@@ -942,7 +940,19 @@ type ShohouDrug = {
   senpatsu: Senpatsu;
 }
 
-type ShohousenData = Shohousen2024Data & { shohouData: ShohouData, rest?: ShohouItemDict[] };
+type ShohousenData = Shohousen2024Data & { 
+  __data: {
+    shohou: {
+      kind: "data";
+      data: ShohouData;
+    } | {
+      kind: "rest";
+      rest: ShohouItemDict[];
+    },
+    font: string;
+    lastLine: OffsetExtent;
+  }
+};
 
 function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
   const groups: ShohouGroup[] = [];
@@ -959,7 +969,14 @@ function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
       groups.push({ drugs, usage, trailers });
     });
   }
-  return Object.assign({}, drawerData, { shohouData: { groups, trailers } });
+  const shohouData: ShohouData = { groups, trailers };
+  return Object.assign({}, drawerData, {
+    __data: {
+      shohou: { kind: "data" as const, data: shohouData },
+      font: "d3.5",
+      lastLine: { offset: { dx: 0, dy: 0 }, extent: { width: 0, height: 0 }},
+    }
+  });
 }
 
 function indexLabel(index: number): string {
