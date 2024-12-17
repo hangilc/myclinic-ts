@@ -43,18 +43,32 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
   const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
-  const pages: Renderer[] = [];
+  const pages: { ctx: DrawerContext, renderer: Renderer, lastLine: OffsetExtent }[] = [];
   let rest: ShohouItemDict[] = [];
-  const result: Op[][] = [];
+  let iter = 0;
   do {
     const con = new Container();
     con.frame(outerBounds);
     const ctx = prepareDrawerContext();
     const mainResult = mainBlock(ctx, innerBounds.extent, data);
+    rest = mainResult.shohouResult.rest;
     con.add(mainResult.renderer, innerBounds.offset);
-    con.renderAt(ctx, { x: 0, y: 0 });
-    result.push(c.getOps(ctx));
+    pages.push({
+      ctx, renderer: con, lastLine: mainResult.shohouResult.lastLine 
+    })
+    if( data !== undefined ){
+      data.rest = rest;
+    }
+    if( ++iter > 5 ){
+      throw new Error("too amny iteration in drawShohousen2024NoRefill main");
+    }
   } while (rest.length > 0);
+  const result: Op[][] = [];
+  if( pages.length === 1 ){
+    const page = pages[0];
+    page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+    result.push(c.getOps(page.ctx));
+  }
   return result;
 }
 
@@ -65,8 +79,10 @@ function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { 
   container.add(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
   container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
   const inner = blk.insetOffsetExtent(mainRow, 2, 3, 2, 0);
-  container.addCreated((ext) => mainArea(ctx, ext, data), inner);
-  return { renderer: container, rest: [] };
+  const result = mainArea(ctx, inner.extent, data);
+  const shohouResult = result.shohouResult;
+  container.add(result.renderer, inner.offset);
+  return { renderer: container, shohouResult };
 }
 
 function mainTitle(ctx: DrawerContext, extent: Extent): Item {
@@ -79,12 +95,13 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
   return alignedItem(item, extent, "center", "center");
 }
 
-function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer, shohouResult: ShohouResult } {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
   const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
     rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
-      rb.fixed(20), rb.fixed(10), rb.fixed(10))
+      rb.fixed(20), rb.fixed(10), rb.fixed(10));
+  let shohouResult: ShohouResult;
   {
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
@@ -92,13 +109,18 @@ function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Ren
     con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
     con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
     con.addCreated((ext) => koufuDateRowRenderer(ctx, ext, data), koufuDateRow);
+    {
+      const result = drugsRenderer(ctx, drugsRow.extent, data);
+      con.add(result.renderer, drugsRow.offset);
+      shohouResult = result.shohouResult;
+    }
     con.addCreated((ext) => drugsRenderer(ctx, ext, data).renderer, drugsRow);
     con.addCreated((ext) => bikouRowRenderer(ctx, ext, data), bikouRow);
     con.addCreated((ext) => shohouDateRowRenderer(ctx, ext, data), shohouDateRow);
     con.addCreated((ext) => pharmaRowRenderer(ctx, ext, data), pharmaRow);
   }
   con.add(kanjaRowRenderer(ctx, kanjaRow.extent, data), kanjaRow.offset);
-  return con;
+  return { renderer: con, shohouResult };
 }
 
 function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
@@ -787,27 +809,30 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
   }
+  let shohouFont = "d3.5";
+  const shohouFontSize = c.resolveFontHeight(ctx, shohouFont);
   let rest: ShohouItemDict[] = [];
-  let shohouData = data?.shohouData;
-  if (shohouData) {
-    const font = "d3.5";
-    const fontSize = c.resolveFontHeight(ctx, font);
+  if (data?.rest !== undefined) {
+    rest = data?.rest;
+  } else if (data?.shohouData) {
+    const shohouData = data?.shohouData;
+    rest = shohouDataToItems(ctx, shohouData, col1.extent.width, col2.extent.width, body.extent.width, shohouFont);
+  }
+  let dy = 0;
+  if (rest.length > 0) {
+    const font = shohouFont;
     let [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
     let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
     let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());
     let iter = 0;
-    let itemGroups = shohouDataToItems(ctx, shohouData, henkoufuka.extent.width, kanjakibou.extent.width,
-      shohou.extent.width, "d3.5");
-    let dy = 0;
-    while (itemGroups.length > 0) {
-      const itemGroup = itemGroups[0];
+    while (rest.length > 0) {
+      const itemGroup = rest[0];
       const space = shohou.extent.height - dy;
       if (space >= itemGroup.shohou.extent.height) {
         con.add(itemGroup.shohou, shohou.offset, { dx: 0, dy });
         dy += itemGroup.shohou.extent.height;
-        itemGroups.shift();
+        rest.shift();
       } else {
-        rest = itemGroups;
         break;
       }
       if (++iter > 100) {
@@ -815,7 +840,11 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
       }
     }
   }
-  return { renderer: con, shohouResult: { rest, lastLine: undefined } };
+  let lastLine = {
+    extent: { width: body.extent.width, height: shohouFontSize },
+    offset: { dx: body.offset.dx, dy: body.offset.dy + dy }
+  };
+  return { renderer: con, shohouResult: { rest, lastLine } };
 }
 
 interface ShohouResult {
@@ -955,22 +984,16 @@ function drugUsageLine(usage: Usage): string {
   }
 }
 
-// function mkLastLineBlock(ctx: DrawerContext, font: string): Block {
-//   return blk.modify(blk.textBlock(ctx, "--- 以下余白 ---", {
-//     font: font,
-//     color: black,
-//   }), blk.extendLeft(20));
-// }
+function lastLineItem(ctx: DrawerContext, font: string): Item {
+  return textItem(ctx, "--- 以下余白 ---", { font, color: black });
+}
 
-// function mkContinueLineBlock(ctx: DrawerContext, font: string, page: number, totalPages: number): Block {
-//   const text = page < totalPages
-//     ? `--- 次ページに続く　（${page} / ${totalPages}） ---`
-//     : `--- 以下余白　（${page} / ${totalPages}） ---`;
-//   return blk.modify(blk.textBlock(ctx, text, {
-//     font: font,
-//     color: red,
-//   }), blk.extendLeft(20));
-// }
+function mkContinueLineBlock(ctx: DrawerContext, font: string, page: number, totalPages: number): Item {
+  const text = page < totalPages
+    ? `--- 次ページに続く　（${page} / ${totalPages}） ---`
+    : `--- 以下余白　（${page} / ${totalPages}） ---`;
+  return textItem(ctx, text, { font, color: red });
+}
 
 const black: Color = { r: 0, g: 0, b: 0 };
 const green: Color = { r: 0, g: 255, b: 0 };
