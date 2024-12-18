@@ -25,7 +25,8 @@ import {
   breakToTextItems,
   GrowingColumn,
   GrowingColumnGroup,
-  type OffsetExtent
+  type OffsetExtent,
+  insetItem,
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -37,50 +38,61 @@ import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
 import type { Drug, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
+import type { HAlign, VAlign } from "../../compiler/align";
 
 export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][] {
-  const data: ShohousenData | undefined = drawerData ? createShohousenData(drawerData) : undefined;
+  const env = createEnv("d3.5", drawerData);
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
   const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
-  const pages: { ctx: DrawerContext, renderer: Renderer, lastLine: OffsetExtent }[] = [];
-  let rest: ShohouItemDict[] = [];
+  const pages: { ctx: DrawerContext, renderer: Renderer, lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void }[] = [];
   let iter = 0;
   do {
     const con = new Container();
     con.frame(outerBounds);
     const ctx = prepareDrawerContext();
-    con.addCreated((ext) => mainBlock(ctx, ext, data), innerBounds);
+    con.addCreated((ext) => mainBlock(ctx, ext, env), innerBounds);
     pages.push({
-      ctx, renderer: con, lastLine: data?.__data.lastLine,
-    })
-    if( data !== undefined ){
-      data.rest = rest;
-    }
-    if( ++iter > 5 ){
+      ctx, renderer: con, lastLineRenderer: env.lastLineRenderer,
+    });
+    if (++iter > 5) {
       throw new Error("too amny iteration in drawShohousen2024NoRefill main");
     }
-  } while (rest.length > 0);
+  } while (!isDone(env));
   const result: Op[][] = [];
-  if( pages.length === 1 ){
+  if (pages.length === 1) {
     const page = pages[0];
+    page.lastLineRenderer((ext) => ({ 
+      item: lastLineItem(page.ctx, env.font), 
+      halign: "left", 
+      valign: "top"
+    }));
     page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
     result.push(c.getOps(page.ctx));
+  } else {
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      page.lastLineRenderer((ext) => ({
+        item: continueLineItem(page.ctx, env.font, i+1, pages.length),
+        halign: "left",
+        valign: "top"
+      }))
+      page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+      result.push(c.getOps(page.ctx));
+    }
   }
   return result;
 }
 
-function mainBlock(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer; shohouResult: ShohouResult } {
+function mainBlock(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   const container = new Container();
   const rb = new RowBuilder(extent);
   const [mainTitleRow, subTitleRow, mainRow] = rb.split(rb.fixed(6), rb.fixed(2), rb.expand());
   container.add(mainTitle(ctx, mainTitleRow.extent), mainTitleRow.offset);
   container.add(subTitle(ctx, subTitleRow.extent), subTitleRow.offset);
   const inner = blk.insetOffsetExtent(mainRow, 2, 3, 2, 0);
-  const result = mainArea(ctx, inner.extent, data);
-  const shohouResult = result.shohouResult;
-  container.add(result.renderer, inner.offset);
-  return { renderer: container, shohouResult };
+  container.addCreated((ext) => mainArea(ctx, ext, env), inner);
+  return container;
 }
 
 function mainTitle(ctx: DrawerContext, extent: Extent): Item {
@@ -93,44 +105,40 @@ function subTitle(ctx: DrawerContext, extent: Extent): Item {
   return alignedItem(item, extent, "center", "center");
 }
 
-function mainArea(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer, shohouResult: ShohouResult } {
+function mainArea(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
   const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
     rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
       rb.fixed(20), rb.fixed(10), rb.fixed(10));
-  let shohouResult: ShohouResult;
   {
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
     const [kouhiBox, hokenBox] = cb.splitEven(2);
-    con.add(kouhiRenderer(ctx, kouhiBox.extent, data), offset, kouhiBox.offset);
-    con.add(hokenRenderer(ctx, hokenBox.extent, data), offset, hokenBox.offset);
-    con.addCreated((ext) => koufuDateRowRenderer(ctx, ext, data), koufuDateRow);
-    {
-      const result = drugsRenderer(ctx, drugsRow.extent, data);
-      con.add(result.renderer, drugsRow.offset);
-      shohouResult = result.shohouResult;
-    }
-    con.addCreated((ext) => drugsRenderer(ctx, ext, data).renderer, drugsRow);
-    con.addCreated((ext) => bikouRowRenderer(ctx, ext, data), bikouRow);
-    con.addCreated((ext) => shohouDateRowRenderer(ctx, ext, data), shohouDateRow);
-    con.addCreated((ext) => pharmaRowRenderer(ctx, ext, data), pharmaRow);
+    con.add(kouhiRenderer(ctx, kouhiBox.extent, env), offset, kouhiBox.offset);
+    con.add(hokenRenderer(ctx, hokenBox.extent, env), offset, hokenBox.offset);
+    con.addCreated((ext) => koufuDateRowRenderer(ctx, ext, env), koufuDateRow);
+    con.addCreated((ext) => drugsRenderer(ctx, ext, env), drugsRow);
+    con.addCreated((ext) => bikouRowRenderer(ctx, ext, env), bikouRow);
+    con.addCreated((ext) => shohouDateRowRenderer(ctx, ext, env), shohouDateRow);
+    con.addCreated((ext) => pharmaRowRenderer(ctx, ext, env), pharmaRow);
   }
-  con.add(kanjaRowRenderer(ctx, kanjaRow.extent, data), kanjaRow.offset);
-  return { renderer: con, shohouResult };
-}
-
-function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
-  const cb = new ColumnBuilder(extent);
-  const [patientArea, clinicArea] = cb.splitEven(2);
-  const con = new Container();
-  con.add(kanjaAreaRenderer(ctx, patientArea.extent, data), patientArea.offset);
-  con.add(clinicAreaRenderer(ctx, clinicArea.extent, data), clinicArea.offset);
+  con.add(kanjaRowRenderer(ctx, kanjaRow.extent, env), kanjaRow.offset);
   return con;
 }
 
-function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
+  const cb = new ColumnBuilder(extent);
+  const [patientArea, clinicArea] = cb.splitEven(2);
+  const con = new Container();
+  con.add(kanjaAreaRenderer(ctx, patientArea.extent, env), patientArea.offset);
+  con.add(clinicAreaRenderer(ctx, clinicArea.extent, env), clinicArea.offset);
+  return con;
+}
+
+function kanjaAreaRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.add(blk.frame(extent));
   const cb = new ColumnBuilder(extent);
@@ -343,23 +351,25 @@ function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "hihokensha" |
   return con;
 }
 
-function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
   const [addr, name, kikan] = rb.split(rb.fixed(10), rb.expandTo(23), rb.skip(2), rb.fixed(6)); // rb.splitAt(10, 23);
   let labelWidth = 0;
   con.addCreated((ext) => {
-    const result = clinicAddressRenderer(ctx, ext, data);
+    const result = clinicAddressRenderer(ctx, ext, env);
     labelWidth = result.labelWidth;
     return result;
   }, addr);
-  con.addCreated((ext) => clinicNameRenderer(ctx, ext, labelWidth, data), name);
-  con.addCreated((ext) => kikanRenderer(ctx, ext, labelWidth, data), kikan);
+  con.addCreated((ext) => clinicNameRenderer(ctx, ext, labelWidth, env), name);
+  con.addCreated((ext) => kikanRenderer(ctx, ext, labelWidth, env), kikan);
   return con;
 }
 
-function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer & { labelWidth: number } {
+function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer & { labelWidth: number } {
+  const data = env.data;
   const con = new Container();
   const cb = new ColumnBuilder(extent);
   const [left, right] = cb.split(cb.fixed(22), cb.skip(2), cb.expand());
@@ -384,7 +394,8 @@ function clinicAddressRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return Object.assign(con, { labelWidth });
 }
 
-function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: ShohousenData): Renderer {
+function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   const rb = new RowBuilder(extent);
   const [phone, name] = rb.splitEven(2);
@@ -408,7 +419,8 @@ function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: numb
   return con;
 }
 
-function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, data?: ShohousenData): Renderer {
+function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent })
   const cb = new ColumnBuilder(extent);
@@ -444,7 +456,8 @@ function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, d
   return con;
 }
 
-function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function kouhiRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.add(blk.frame(extent));
   const rb = new RowBuilder(extent);
@@ -472,7 +485,8 @@ function kouhiRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
   return con;
 }
 
-function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function hokenRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.add(blk.frame(extent));
   const rb = new RowBuilder(extent);
@@ -495,12 +509,13 @@ function hokenRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     let labelItem = stackedTexts(ctx, ["被保険者証・被保険", "者手帳の記号・番号"]);
     labelItem = alignedItem(labelItem, label.extent, "center", "center");
     con.add(labelItem, offset, label.offset);
-    con.add(kigouBangouRenderer(ctx, kigouBangou.extent, data), offset, kigouBangou.offset);
+    con.add(kigouBangouRenderer(ctx, kigouBangou.extent, env), offset, kigouBangou.offset);
   }
   return con;
 }
 
-function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function kigouBangouRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const itemAlign = { halign: "center", valign: "center" } as const;
   const textOpt = { font: "d2.5", color: black };
   let item = flexRow(c.resolveFontHeight(ctx, undefined), [
@@ -598,7 +613,8 @@ function sevenDigits(ctx: DrawerContext, extent: Extent, digits?: string): Rende
   return con;
 }
 
-function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent });
   const cb = new ColumnBuilder(extent);
@@ -674,7 +690,8 @@ function optionalDateWrapper(date: string | undefined): DateWrapper | undefined 
   }
 }
 
-function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent });
   const cb = new ColumnBuilder(extent);
@@ -722,7 +739,8 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenDa
   return con;
 }
 
-function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.frameExtent(extent);
   const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
@@ -743,7 +761,8 @@ function shohouDateRowRenderer(ctx: DrawerContext, extent: Extent, data?: Shohou
   return con;
 }
 
-function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): Renderer {
+function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
+  const data = env.data;
   const con = new Container();
   con.frameExtent(extent);
   const [left, right] = ColumnBuilder.fromExtent(extent).splitEven(2);
@@ -770,7 +789,7 @@ function pharmaRowRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenD
   return con;
 }
 
-function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData): { renderer: Renderer, shohouResult: ShohouResult } {
+function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   const con = new Container();
   con.frameExtent(extent);
   const [mark, col1, col2, body] = ColumnBuilder.fromExtent(extent).splitAt(5, 18, 31);
@@ -807,13 +826,13 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
   }
-  let shohouFont = "d3.5";
+  let shohouFont = env.font;
   const shohouFontSize = c.resolveFontHeight(ctx, shohouFont);
   let rest: ShohouItemDict[] = [];
-  if (data?.rest !== undefined) {
-    rest = data?.rest;
-  } else if (data?.shohouData) {
-    const shohouData = data?.shohouData;
+  if (env.shohou.kind === "rest") {
+    rest = env.shohou.rest;
+  } else {
+    const shohouData = env.shohou.data;
     rest = shohouDataToItems(ctx, shohouData, col1.extent.width, col2.extent.width, body.extent.width, shohouFont);
   }
   let dy = 0;
@@ -840,9 +859,15 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, data?: ShohousenData)
   }
   let lastLine = {
     extent: { width: body.extent.width, height: shohouFontSize },
-    offset: { dx: body.offset.dx, dy: body.offset.dy + dy }
+    offset: { dx: body.offset.dx, dy: body.offset.dy + yoffset + dy }
   };
-  return { renderer: con, shohouResult: { rest, lastLine } };
+  let lastLineRenderer: (f: (extent: Extent) => { item: Item; halign: HAlign; valign: VAlign }) => void = (f) => {
+    const rs = f(lastLine.extent);
+    con.addAligned(rs.item, lastLine, rs.halign, rs.valign);
+  }
+  env.lastLineRenderer = lastLineRenderer;
+  env.shohou = { kind: "rest", rest };
+  return con;
 }
 
 interface ShohouResult {
@@ -940,24 +965,23 @@ type ShohouDrug = {
   senpatsu: Senpatsu;
 }
 
-type ShohousenData = Shohousen2024Data & { 
-  __data: {
-    shohou: {
-      kind: "data";
-      data: ShohouData;
-    } | {
-      kind: "rest";
-      rest: ShohouItemDict[];
-    },
-    font: string;
-    lastLine: OffsetExtent;
-  }
-};
+interface Env {
+  data?: Shohousen2024Data;
+  font: string;
+  lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void;
+  shohou: {
+    kind: "data";
+    data: ShohouData;
+  } | {
+    kind: "rest";
+    rest: ShohouItemDict[];
+  },
+}
 
-function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
+function createEnv(font: string, data?: Shohousen2024Data): Env {
   const groups: ShohouGroup[] = [];
   const trailers: string[] = [];
-  const drugs = drawerData.drugs;
+  const drugs = data?.drugs;
   if (drugs !== undefined) {
     drugs.groups.forEach(g => {
       const drugs: ShohouDrug[] = [];
@@ -970,13 +994,16 @@ function createShohousenData(drawerData: Shohousen2024Data): ShohousenData {
     });
   }
   const shohouData: ShohouData = { groups, trailers };
-  return Object.assign({}, drawerData, {
-    __data: {
-      shohou: { kind: "data" as const, data: shohouData },
-      font: "d3.5",
-      lastLine: { offset: { dx: 0, dy: 0 }, extent: { width: 0, height: 0 }},
-    }
-  });
+  return {
+    data,
+    font,
+    lastLineRenderer: () => { },
+    shohou: { kind: "data", data: shohouData },
+  }
+}
+
+function isDone(env: Env): boolean {
+  return env.shohou.kind === "rest" && env.shohou.rest.length === 0;
 }
 
 function indexLabel(index: number): string {
@@ -1005,11 +1032,14 @@ function lastLineItem(ctx: DrawerContext, font: string): Item {
   return textItem(ctx, "--- 以下余白 ---", { font, color: black });
 }
 
-function mkContinueLineBlock(ctx: DrawerContext, font: string, page: number, totalPages: number): Item {
-  const text = page < totalPages
-    ? `--- 次ページに続く　（${page} / ${totalPages}） ---`
-    : `--- 以下余白　（${page} / ${totalPages}） ---`;
-  return textItem(ctx, text, { font, color: red });
+function continueLineItem(ctx: DrawerContext, font: string, page: number, totalPages: number): Item {
+  if( page < totalPages ){
+    const text =  `--- 次ページに続く　（${page} / ${totalPages}） ---`;
+    return textItem(ctx, text, { font, color: red });
+  } else {
+    const text = `--- 以下余白　（${page} / ${totalPages}） ---`;
+    return textItem(ctx, text, { font, color: black });
+  }
 }
 
 const black: Color = { r: 0, g: 0, b: 0 };
