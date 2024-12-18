@@ -849,6 +849,8 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
       const space = shohou.extent.height - dy;
       if (space >= itemGroup.shohou.extent.height) {
         con.add(itemGroup.shohou, shohou.offset, { dx: 0, dy });
+        con.add(itemGroup.henkoufuka, henkoufuka.offset, { dx: 0, dy });
+        con.add(itemGroup.kanjakibou, kanjakibou.offset, { dx: 0, dy });
         dy += itemGroup.shohou.extent.height;
         rest.shift();
       } else {
@@ -893,9 +895,19 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
     const indexItem = textItem(ctx, indexLabel(i + 1), { font, color: black });
     indexCol.add(indexItem, "right");
     for (let drug of group.drugs) {
+      const senpatsu = drug.senpatsu;
       const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
       for (let nameItem of nameItems) {
         drugCol.add(nameItem);
+      }
+      if( senpatsu === "kanjakibou" ){
+        const item = textItem(ctx, "レ", { font, color: black });
+        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
+        kanjakibouCol.add(aligned);
+      } else if( senpatsu === "henkoufuka" ){
+        const item = textItem(ctx, "レ", { font, color: black });
+        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
+        henkoufukaCol.add(aligned);
       }
     }
     const lines = [group.usage, ...group.trailers];
@@ -979,19 +991,31 @@ interface Env {
 
 function createEnv(font: string, data?: Shohousen2024Data): Env {
   const groups: ShohouGroup[] = [];
-  const trailers: string[] = [];
+  const shohouTrailers: string[] = [];
   const bikou: string[] = [];
   let kigen: string | undefined = undefined;
   const drugs = data?.drugs;
   if (drugs !== undefined) {
     drugs.groups.forEach(g => {
       const drugs: ShohouDrug[] = [];
+      const groupTrailers: string[] = [];
       g.drugs.forEach(d => {
-        drugs.push({ text: drugNameAndAmountLine(d), senpatsu: undefined });
+        let senpatsu: Senpatsu = undefined;
+        d.comments.forEach(comm => {
+          comm = comm.trim();
+          if( comm === "患者希望") {
+            senpatsu = "kanjakibou";
+          } else if( comm === "変更不可" ){
+            senpatsu = "henkoufuka";
+          } else {
+            trailers.push(comm);
+          }
+        })
+        drugs.push({ text: drugNameAndAmountLine(d), senpatsu });
       });
       const usage = drugUsageLine(g.usage);
-      const trailers: string[] = [];
-      groups.push({ drugs, usage, trailers });
+      const trailers: string[] = g.comments;
+      groups.push({ drugs, usage, trailers: groupTrailers });
     });
     drugs.commands.forEach(command => {
       const cmd = parseCommand(command);
@@ -1007,7 +1031,7 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
       }
     });
   }
-  const shohouData: ShohouData = { groups, trailers };
+  const shohouData: ShohouData = { groups, trailers: shohouTrailers };
   return {
     data,
     font,
