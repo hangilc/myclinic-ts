@@ -25,8 +25,6 @@ import {
   breakToTextItems,
   GrowingColumn,
   GrowingColumnGroup,
-  type OffsetExtent,
-  insetItem,
 } from "../../compiler/block";
 import * as b from "../../compiler/box";
 import type { Color } from "../../compiler/compiler";
@@ -635,7 +633,7 @@ function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Ren
     const [label, body, append] = cb.splitAt(25, 48);
     con.frameRight(label);
     con.addAligned(stackedTexts(ctx, ["処方箋の", "試用期間"], { halign: "center" }), label, "center", "center");
-    const dateItem = nenMonthDateRenderer(ctx, optionalDateWrapper(data?.validUptoDate), { gengou: "令和", gap: 0.3 });
+    const dateItem = nenMonthDateRenderer(ctx, optionalDateWrapper(env.kigen), { gengou: "令和", gap: 0.3 });
     con.addAligned(dateItem, body, "right", "center");
     const texts = stackedTexts(ctx, [
       "特に記載のある場合",
@@ -722,7 +720,11 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Rendere
       }
     }
     {
-      let bikou = data?.bikou ?? "";
+      let bikou = "";
+      if( env.bikou.length > 0 ){
+        bikou = env.bikou.join("\n");
+        env.bikou = [];
+      }
       const upperRightInner = insetOffsetExtent(upperRight, 1, 1, 1, 0);
       let { renderer, rest: rest1 } = blk.flowTextIn(ctx, upperRightInner.extent, bikou, { font: "d3", color: black });
       con.add(renderer, upperRightInner.offset);
@@ -870,11 +872,6 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   return con;
 }
 
-interface ShohouResult {
-  rest: ShohouItemDict[];
-  lastLine: OffsetExtent;
-}
-
 interface ShohouItemDict {
   henkoufuka: Item,
   kanjakibou: Item,
@@ -976,11 +973,15 @@ interface Env {
     kind: "rest";
     rest: ShohouItemDict[];
   },
+  bikou: string[];
+  kigen: string | undefined;
 }
 
 function createEnv(font: string, data?: Shohousen2024Data): Env {
   const groups: ShohouGroup[] = [];
   const trailers: string[] = [];
+  const bikou: string[] = [];
+  let kigen: string | undefined = undefined;
   const drugs = data?.drugs;
   if (drugs !== undefined) {
     drugs.groups.forEach(g => {
@@ -992,6 +993,19 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
       const trailers: string[] = [];
       groups.push({ drugs, usage, trailers });
     });
+    drugs.commands.forEach(command => {
+      const cmd = parseCommand(command);
+      switch(cmd.kind) {
+        case "memo": {
+          bikou.push(cmd.arg);
+          break;
+        }
+        case "有効期限": {
+          kigen = cmd.arg;
+          break;
+        }
+      }
+    });
   }
   const shohouData: ShohouData = { groups, trailers };
   return {
@@ -999,6 +1013,25 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
     font,
     lastLineRenderer: () => { },
     shohou: { kind: "data", data: shohouData },
+    bikou,
+    kigen,
+  }
+}
+
+interface Command {
+  kind: string;
+  arg: string;
+}
+
+function parseCommand(cmd: string): Command {
+  const index = cmd.indexOf(":");
+  if( index > 0 ){
+    return {
+      kind: cmd.substring(0, index).trim(),
+      arg: cmd.substring(index + 1).trim(),
+    }
+  } else {
+    return { kind: cmd.trim(), arg: "" }
   }
 }
 

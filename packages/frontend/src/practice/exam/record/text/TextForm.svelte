@@ -152,7 +152,6 @@
       sex,
       hokenKubun,
       koufuDate,
-      validUptoDate: undefined,
       drugs: text.content,
     });
     const d: DrawerDialog = new DrawerDialog({

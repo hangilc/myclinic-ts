@@ -20,9 +20,7 @@ export interface Shohousen2024Data {
   sex?: "M" | "F";
   hokenKubun?: "hihokensha" | "hifuyousha";
   koufuDate?: string; // YYYY-MM-DD
-  validUptoDate?: string; // YYYY-MM-DD
   drugs?: Shohou;
-  bikou?: string;
   isDenshi?: boolean;
   accessCode?: string;
 }

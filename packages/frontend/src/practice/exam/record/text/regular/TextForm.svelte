@@ -180,7 +180,7 @@
 
   async function doPrintShohousen2024() {
     const shohou = parseShohou(text.content, false);
-    // console.log("shohou", JSON.stringify(shohou, undefined, 2));
+    console.log("shohou", JSON.stringify(shohou, undefined, 2));
     const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
