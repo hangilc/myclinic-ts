@@ -52,18 +52,23 @@ export type Usage = ({
 }) & { usage: string }
 
 export interface Drug {
-  name: string, amount: string, unit: string
+  name: string,
+  amount: string,
+  unit: string,
+  comments: string[],
 }
 
 export interface DrugGroup {
   drugs: Drug[],
   usage: Usage,
+  comments: string[],
 }
 
 function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let drugs: Drug[] = [];
     let usage: Usage | undefined = undefined;
+    let comments: string[] = [];
     let end = seq(
       whitespaces(),
       groupIndex(),
@@ -71,14 +76,10 @@ function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
       drugNameAndAmount(d => {
         drugs.push(d);
       }),
-      whitespaces(),
-      eol(),
       repeat(
         seq(
           whitespaces(1),
           drugNameAndAmount(d => drugs.push(d)),
-          whitespaces(),
-          eol(),
         )),
       whitespaces(1),
       or(
@@ -94,13 +95,21 @@ function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
       ),
       whitespaces(),
       eol(),
+      repeat(
+        seq(
+          whitespaces(1),
+          atMark(),
+          str("comment:"),
+          untilEol((com) => comments.push(com.trim()))
+        )
+      ),
     )(src, start);
     if (end !== undefined) {
       if (usage === undefined) {
         throw new Error("usage not found");
       }
       if (cb) {
-        cb({ drugs, usage });
+        cb({ drugs, usage, comments });
       }
     }
     return end;
@@ -114,10 +123,13 @@ function groupIndex(cb?: Callback): Tokenizer {
   )
 }
 
-function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: string }) => void): Tokenizer {
+function drugNameAndAmount(cb?: (data: Drug) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
-    let data = {
-      name: "", amount: "", unit: ""
+    let data: Drug = {
+      name: "", amount: "", unit: "", comments: [],
+    }
+    function addComment(s: string) {
+      data.comments.push(s.trim());
     }
     let end = seq(
       nonWhitespaces(1, undefined, s => data.name += s),
@@ -132,6 +144,18 @@ function drugNameAndAmount(cb?: (data: { name: string, amount: string, unit: str
           whitespaces(),
           peek(eol()),
         )
+      ),
+      whitespaces(),
+      eol(),
+      repeat(
+        seq(
+          whitespaces(1),
+          atMark(),
+          withCallback(seq(
+            or(str("comment:"), str("変更不可"), str("患者希望")),
+            untilEol()
+          ), (s) => addComment(s)),
+        ),
       ),
     )(src, start);
     if (end !== undefined) {
@@ -252,7 +276,7 @@ function command(cb?: (command: string) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let command = "";
     let end = seq(
-      or(str("@"), str("＠")),
+      atMark(),
       repeat(one(ch => ch !== "\n", s => command += s)),
       eol(),
     )(src, start);
@@ -275,6 +299,26 @@ function eof(): Tokenizer {
 
 function blankLine(): Tokenizer {
   return repeatUntil(one(isWhitespace), eol());
+}
+
+function untilEol(cb?: (s: string) => void): Tokenizer {
+  return (src: string, start: number): number | undefined => {
+    const chars: string[] = [];
+    let end = repeatUntil(
+      one((ch) => ch !== "\n", (ch) => chars.push(ch)),
+      eol(),
+    )(src, start);
+    if (end !== undefined) {
+      if (cb) {
+        cb(chars.join(""));
+      }
+    }
+    return end;
+  }
+}
+
+function atMark(): Tokenizer {
+  return or(str("@"), str("＠"));
 }
 
 // Parser //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -469,9 +513,9 @@ function report(label: string, active: boolean, tok: Tokenizer): Tokenizer {
     let end = tok(src, start);
     if (active) {
       if (end !== undefined) {
-        console.log(`matched ${label}: ${src.substring(start, end)}`);
+        console.log(`success ${label}: ${src.substring(start, end)}`);
       } else {
-        console.log(`matching ${label} failed`);
+        console.log(`failure ${label} failed`);
       }
     }
     return end;

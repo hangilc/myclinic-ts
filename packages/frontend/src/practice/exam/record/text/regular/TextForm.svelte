@@ -246,7 +246,6 @@
       sex,
       hokenKubun,
       koufuDate,
-      validUptoDate: undefined,
       drugs: shohou,
     };
     const pages = drawShohousen2024NoRefill(data);
