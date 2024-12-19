@@ -1,13 +1,77 @@
 export interface Shohou {
   groups: DrugGroup[];
-  commands: string[];
+  shohouComments: string[];
+  bikou: string[];
+  kigen?: string;
+}
+
+export type Usage = ({
+  kind: "days"; days: string;
+} | {
+  kind: "times"; times: string;
+} | {
+  kind: "other";
+}) & { usage: string }
+
+export type Senpatsu = "henkoufuka" | "kanjakibou";
+
+export interface Drug {
+  name: string,
+  amount: string,
+  unit: string,
+  senpatsu?: Senpatsu,
+  drugComments: string[],
+}
+
+export interface DrugGroup {
+  drugs: Drug[],
+  usage: Usage,
+  groupComments: string[],
 }
 
 export function parseShohou(text: string, debug: boolean = false): Shohou {
   const shohou: Shohou = {
     groups: [],
-    commands: []
+    shohouComments: [],
+    bikou: [],
   };
+  function handleCommand(cmd: string) {
+    cmd = cmd.trim();
+    let key: string;
+    let value: string;
+    const colon = cmd.indexOf(":");
+    if( colon >= 0 ){
+      key = cmd.substring(0, colon).trim();
+      value = cmd.substring(colon+1).trim();
+    } else {
+      key = cmd;
+      value = "";
+    }
+    switch(key){
+      case "memo": {
+        shohou.bikou.push(value);
+        break;
+      }
+      case "有効期限": {
+        shohou.kigen = value;
+        break;
+      }
+      case "オンライン対応": {
+        shohou.bikou.push("オンライン対応（原本郵送）");
+        break;
+      }
+      case "comment": {
+        shohou.shohouComments.push(value);
+        break;
+      }
+      default: {
+        alert(`Unknown shohou comment (${cmd})\n` + "Allowed comments are:\n@memo:...\n@有効期限:YYYY-MM-DD\n" +
+          "@オンライン対応\n@comment:..."
+        );
+        throw new Error(`Invalid shohou comment (${cmd})`)
+      }
+    }
+  }
   let end = seq(
     prolog(),
     repeat(
@@ -15,7 +79,7 @@ export function parseShohou(text: string, debug: boolean = false): Shohou {
     ),
     repeat(
       command(s => {
-        shohou.commands.push(s);
+        handleCommand(s);
       })
     ),
     repeatUntil(blankLine(), eof())
@@ -43,26 +107,7 @@ function prolog(): Tokenizer {
   );
 }
 
-export type Usage = ({
-  kind: "days"; days: string;
-} | {
-  kind: "times"; times: string;
-} | {
-  kind: "other";
-}) & { usage: string }
 
-export interface Drug {
-  name: string,
-  amount: string,
-  unit: string,
-  comments: string[],
-}
-
-export interface DrugGroup {
-  drugs: Drug[],
-  usage: Usage,
-  comments: string[],
-}
 
 function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
@@ -109,7 +154,7 @@ function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
         throw new Error("usage not found");
       }
       if (cb) {
-        cb({ drugs, usage, comments });
+        cb({ drugs, usage, groupComments: comments });
       }
     }
     return end;
@@ -126,10 +171,21 @@ function groupIndex(cb?: Callback): Tokenizer {
 function drugNameAndAmount(cb?: (data: Drug) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let data: Drug = {
-      name: "", amount: "", unit: "", comments: [],
+      name: "", amount: "", unit: "", senpatsu: undefined, drugComments: [],
     }
     function addComment(s: string) {
-      data.comments.push(s.trim());
+      s = s.trim();
+      if( s === "変更不可" ){
+        data.senpatsu = "henkoufuka";
+      } else if( s === "患者希望" ){
+        data.senpatsu = "kanjakibou";
+      } else if( s.startsWith("comment:") ){
+        const com = s.substring("comment:".length).trim();
+        data.drugComments.push(com);
+      } else {
+        alert(`Invalid drug comment (${s})` + "Allowed comments are:\n@変更不可\n@患者希望\n@comment:...");
+        throw new Error("invalid drug comment");
+      }
     }
     let end = seq(
       nonWhitespaces(1, undefined, s => data.name += s),

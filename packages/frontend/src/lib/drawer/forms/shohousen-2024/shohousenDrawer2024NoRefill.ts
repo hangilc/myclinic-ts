@@ -34,7 +34,7 @@ import type { Op } from "../../compiler/op";
 import { A5 } from "../../compiler/paper-size";
 import type { Shohousen2024Data } from "./shohousenData2024";
 import { DateWrapper } from "myclinic-util";
-import type { Drug, Usage } from "@/lib/parse-shohou";
+import type { Drug, Senpatsu, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { HAlign, VAlign } from "../../compiler/align";
 
@@ -60,9 +60,9 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   const result: Op[][] = [];
   if (pages.length === 1) {
     const page = pages[0];
-    page.lastLineRenderer((ext) => ({ 
-      item: lastLineItem(page.ctx, env.font), 
-      halign: "left", 
+    page.lastLineRenderer((ext) => ({
+      item: lastLineItem(page.ctx, env.font),
+      halign: "left",
       valign: "top"
     }));
     page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
@@ -71,7 +71,7 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
       page.lastLineRenderer((ext) => ({
-        item: continueLineItem(page.ctx, env.font, i+1, pages.length),
+        item: continueLineItem(page.ctx, env.font, i + 1, pages.length),
         halign: "left",
         valign: "top"
       }))
@@ -721,7 +721,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Rendere
     }
     {
       let bikou = "";
-      if( env.bikou.length > 0 ){
+      if (env.bikou.length > 0) {
         bikou = env.bikou.join("\n");
         env.bikou = [];
       }
@@ -900,17 +900,17 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
       for (let nameItem of nameItems) {
         drugCol.add(nameItem);
       }
-      if( senpatsu === "kanjakibou" ){
+      if (senpatsu === "kanjakibou") {
         const item = textItem(ctx, "レ", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         kanjakibouCol.add(aligned);
-      } else if( senpatsu === "henkoufuka" ){
+      } else if (senpatsu === "henkoufuka") {
         const item = textItem(ctx, "レ", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         henkoufukaCol.add(aligned);
       }
     }
-    const lines = [group.usage, ...group.trailers];
+    const lines = [group.usage, ...group.groupComments];
     lines.forEach(line => {
       const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
       items.forEach(item => drugCol.add(item));
@@ -958,20 +958,19 @@ function initPen(ctx: DrawerContext) {
 
 type ShohouData = {
   groups: ShohouGroup[];
-  trailers: string[];
+  shohouComments: string[];
 }
 
 type ShohouGroup = {
   drugs: ShohouDrug[];
   usage: string;
-  trailers: string[];
+  groupComments: string[];
 }
-
-type Senpatsu = "henkoufuka" | "kanjakibou" | undefined;
 
 type ShohouDrug = {
   text: string;
-  senpatsu: Senpatsu;
+  senpatsu?: Senpatsu;
+  drugComments: string[];
 }
 
 interface Env {
@@ -989,57 +988,100 @@ interface Env {
   kigen: string | undefined;
 }
 
-function createEnv(font: string, data?: Shohousen2024Data): Env {
-  const groups: ShohouGroup[] = [];
-  const shohouTrailers: string[] = [];
-  const bikou: string[] = [];
+function handleShohousenData(data?: Shohousen2024Data): {
+  shohouData: ShohouData;
+  bikou: string[];
+  kigen?: string;
+} {
+  const shohouData: ShohouData = { groups: [], shohouComments: [] };
+  let bikou: string[] = [];
   let kigen: string | undefined = undefined;
-  const drugs = data?.drugs;
-  if (drugs !== undefined) {
-    drugs.groups.forEach(g => {
-      const drugs: ShohouDrug[] = [];
-      const groupTrailers: string[] = [];
-      g.drugs.forEach(d => {
-        let senpatsu: Senpatsu = undefined;
-        d.comments.forEach(comm => {
-          comm = comm.trim();
-          if( comm === "患者希望") {
-            senpatsu = "kanjakibou";
-          } else if( comm === "変更不可" ){
-            senpatsu = "henkoufuka";
-          } else {
-            trailers.push(comm);
-          }
-        })
-        drugs.push({ text: drugNameAndAmountLine(d), senpatsu });
-      });
-      const usage = drugUsageLine(g.usage);
-      const trailers: string[] = g.comments;
-      groups.push({ drugs, usage, trailers: groupTrailers });
-    });
-    drugs.commands.forEach(command => {
-      const cmd = parseCommand(command);
-      switch(cmd.kind) {
-        case "memo": {
-          bikou.push(cmd.arg);
-          break;
-        }
-        case "有効期限": {
-          kigen = cmd.arg;
-          break;
-        }
-      }
-    });
+  function handleDrug(src: Drug): ShohouDrug {
+    const text = drugNameAndAmountLine(src);
+    const senpatsu = src.senpatsu;
+    const drugComments = src.drugComments;
+    return { text, senpatsu, drugComments };
   }
-  const shohouData: ShohouData = { groups, trailers: shohouTrailers };
+  if (data?.drugs !== undefined) {
+    const src = data?.drugs;
+    src.groups.forEach(srcGroup => {
+      const dstGroup: ShohouGroup = {
+        drugs: srcGroup.drugs.map(handleDrug),
+        usage: drugUsageLine(srcGroup.usage),
+        groupComments: srcGroup.groupComments,
+      };
+      shohouData.groups.push(dstGroup);
+    });
+    shohouData.shohouComments = src.shohouComments;
+    bikou = src.bikou;
+    kigen = src.kigen;
+  }
+  return { shohouData, bikou, kigen };
+}
+
+function createEnv(font: string, data?: Shohousen2024Data): Env {
+  const { shohouData, bikou, kigen } = handleShohousenData(data);
   return {
     data,
     font,
-    lastLineRenderer: () => { },
-    shohou: { kind: "data", data: shohouData },
+    lastLineRenderer: () => {},
+    shohou: {
+      kind: "data",
+      data: shohouData,
+    },
     bikou,
     kigen,
   }
+  // const groups: ShohouGroup[] = [];
+  // const shohouTrailers: string[] = [];
+  // const bikou: string[] = [];
+  // let kigen: string | undefined = undefined;
+  // const drugs = data?.drugs;
+  // if (drugs !== undefined) {
+  //   drugs.groups.forEach(g => {
+  //     const drugs: ShohouDrug[] = [];
+  //     const groupTrailers: string[] = [];
+  //     g.drugs.forEach(d => {
+  //       let senpatsu: Senpatsu = undefined;
+  //       d.comments.forEach(comm => {
+  //         comm = comm.trim();
+  //         if (comm === "患者希望") {
+  //           senpatsu = "kanjakibou";
+  //         } else if (comm === "変更不可") {
+  //           senpatsu = "henkoufuka";
+  //         } else {
+  //           trailers.push(comm);
+  //         }
+  //       })
+  //       drugs.push({ text: drugNameAndAmountLine(d), senpatsu });
+  //     });
+  //     const usage = drugUsageLine(g.usage);
+  //     const trailers: string[] = g.comments;
+  //     groups.push({ drugs, usage, trailers: groupTrailers });
+  //   });
+  //   drugs.commands.forEach(command => {
+  //     const cmd = parseCommand(command);
+  //     switch (cmd.kind) {
+  //       case "memo": {
+  //         bikou.push(cmd.arg);
+  //         break;
+  //       }
+  //       case "有効期限": {
+  //         kigen = cmd.arg;
+  //         break;
+  //       }
+  //     }
+  //   });
+  // }
+  // const shohouData: ShohouData = { groups, trailers: shohouTrailers };
+  // return {
+  //   data,
+  //   font,
+  //   lastLineRenderer: () => { },
+  //   shohou: { kind: "data", data: shohouData },
+  //   bikou,
+  //   kigen,
+  // }
 }
 
 interface Command {
@@ -1049,7 +1091,7 @@ interface Command {
 
 function parseCommand(cmd: string): Command {
   const index = cmd.indexOf(":");
-  if( index > 0 ){
+  if (index > 0) {
     return {
       kind: cmd.substring(0, index).trim(),
       arg: cmd.substring(index + 1).trim(),
@@ -1090,8 +1132,8 @@ function lastLineItem(ctx: DrawerContext, font: string): Item {
 }
 
 function continueLineItem(ctx: DrawerContext, font: string, page: number, totalPages: number): Item {
-  if( page < totalPages ){
-    const text =  `--- 次ページに続く　（${page} / ${totalPages}） ---`;
+  if (page < totalPages) {
+    const text = `--- 次ページに続く　（${page} / ${totalPages}） ---`;
     return textItem(ctx, text, { font, color: red });
   } else {
     const text = `--- 以下余白　（${page} / ${totalPages}） ---`;
