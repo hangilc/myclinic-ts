@@ -130,17 +130,6 @@
 </script>
 
 <Dialog title="オンライン資格確認" destroy={doClose} styleWidth="300px">
-  <!-- <div class="query">
-    {#if query}
-      <span>保険者番号</span><span>{query.hokensha}</span>
-      {#if query.kigou}
-        <span>被保険者記号</span><span>{query.kigou}</span>
-      {/if}
-      <span>被保険者番号</span><span>{query.hihokensha}</span>
-      <span>生年月日</span><span>{formatOnshiDate(query.birthdate)}</span>
-      <span>確認日</span><span>{formatOnshiDate(query.confirmationDate)}</span>
-    {/if}
-  </div> -->
   {#if errors.length > 0}
     <div class="error">
       {#each errors as error}<div>{error}</div>{/each}
