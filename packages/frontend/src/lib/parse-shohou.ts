@@ -35,42 +35,26 @@ export function parseShohou(text: string, debug: boolean = false): Shohou {
     shohouComments: [],
     bikou: [],
   };
+  const comhandlers: Record<string, { f: (value: string) => void, needValue: boolean }> = {
+    "memo": {
+      needValue: true,
+      f: (value) => shohou.bikou.push(value),
+    },
+    "有効期限": {
+      needValue: true,
+      f: (value) => shohou.kigen = value,
+    },
+    "オンライン対応": {
+      needValue: false,
+      f: () => shohou.bikou.push("オンライン対応（原本郵送）"),
+    },
+    "comment": {
+      needValue: true,
+      f: (value) => shohou.shohouComments.push(value),
+    },
+  }
   function handleCommand(cmd: string) {
-    cmd = cmd.trim();
-    let key: string;
-    let value: string;
-    const colon = cmd.indexOf(":");
-    if (colon >= 0) {
-      key = cmd.substring(0, colon).trim();
-      value = cmd.substring(colon + 1).trim();
-    } else {
-      key = cmd;
-      value = "";
-    }
-    switch (key) {
-      case "memo": {
-        shohou.bikou.push(value);
-        break;
-      }
-      case "有効期限": {
-        shohou.kigen = value;
-        break;
-      }
-      case "オンライン対応": {
-        shohou.bikou.push("オンライン対応（原本郵送）");
-        break;
-      }
-      case "comment": {
-        shohou.shohouComments.push(value);
-        break;
-      }
-      default: {
-        alert(`Unknown shohou comment (${cmd})\n` + "Allowed comments are:\n@memo:...\n@有効期限:YYYY-MM-DD\n" +
-          "@オンライン対応\n@comment:..."
-        );
-        throw new Error(`Invalid shohou comment (${cmd})`)
-      }
-    }
+    handleComment(cmd, comhandlers);
   }
   let end = seq(
     prolog(),
@@ -121,22 +105,36 @@ function parseComment(com: string): { key: string, value: string } {
   return { key, value };
 }
 
+function handleComment(com: string, handlers: Record<string, { f: (value: string) => void, needValue: boolean }>) {
+  com = com.trim();
+  const { key, value } = parseComment(com);
+  const bind = handlers[key];
+  if (bind) {
+    bind.f(value);
+  } else {
+    const msg = `Invalid drug comment (${com})`;
+    alert([
+      msg,
+      "Allowed comments are:",
+      ...(Object.entries(handlers).map(([k, v]) => v.needValue ? `@${k}:...` : `@${k}`))
+    ].join("\n"));
+    throw new Error(msg);
+  }
+}
+
 function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let drugs: Drug[] = [];
     let usage: Usage | undefined = undefined;
     let comments: string[] = [];
-    function addComment(com: string) {
-      com = com.trim();
-      const { key, value } = parseComment(com);
-      switch (key) {
-        case "comment": { comments.push(value); break; }
-        default: {
-          const valids = ["@comment:..."];
-          alert(`Invalid drug group comment (${com}).\n` + "Allowed comments are:\n" + valids.join("\n"));
-          throw new Error(`Invalid drug group comment (${com})`)
-        }
+    const comhandlers: Record<string, { f: (value: string) => void, needValue: boolean }> = {
+      "comment": {
+        needValue: true,
+        f: (value) => comments.push(value)
       }
+    }
+    function addComment(com: string) {
+      handleComment(com, comhandlers);
     }
     let end = seq(
       whitespaces(),
@@ -196,35 +194,22 @@ function drugNameAndAmount(cb?: (data: Drug) => void): Tokenizer {
     let data: Drug = {
       name: "", amount: "", unit: "", senpatsu: undefined, drugComments: [],
     }
-    function addComment(com: string) {
-      com = com.trim();
-      const { key, value } = parseComment(com);
-      const handlers: Record<string, { f: (value: string) => void, needValue: boolean }> = {
-        "変更不可": {
-          f: () => data.senpatsu = "henkoufuka",
-          needValue: false,
-        },
-        "患者希望": {
-          f: () => data.senpatsu = "kanjakibou",
-          needValue: false,
-        },
-        "comment": {
-          needValue: true,
-          f: (value) => data.drugComments.push(value.trim()),
-        }
-      };
-      const bind = handlers[key];
-      if (bind) {
-        bind.f(value);
-      } else {
-        const msg = `Invalid drug comment (${com})`;
-        alert([
-          msg,
-          "Allowed comments are:",
-          ...(Object.entries(handlers).map(([k, v]) => v.needValue ? `@${k}:...` : `@${k}`))
-        ].join("\n"));
-        throw new Error(msg);
+    const comhandlers: Record<string, { f: (value: string) => void, needValue: boolean }> = {
+      "変更不可": {
+        f: () => data.senpatsu = "henkoufuka",
+        needValue: false,
+      },
+      "患者希望": {
+        f: () => data.senpatsu = "kanjakibou",
+        needValue: false,
+      },
+      "comment": {
+        needValue: true,
+        f: (value) => data.drugComments.push(value.trim()),
       }
+    };
+    function addComment(com: string) {
+      handleComment(com, comhandlers);
     }
     let end = seq(
       nonWhitespaces(1, undefined, s => data.name += s),
