@@ -40,14 +40,14 @@ export function parseShohou(text: string, debug: boolean = false): Shohou {
     let key: string;
     let value: string;
     const colon = cmd.indexOf(":");
-    if( colon >= 0 ){
+    if (colon >= 0) {
       key = cmd.substring(0, colon).trim();
-      value = cmd.substring(colon+1).trim();
+      value = cmd.substring(colon + 1).trim();
     } else {
       key = cmd;
       value = "";
     }
-    switch(key){
+    switch (key) {
       case "memo": {
         shohou.bikou.push(value);
         break;
@@ -107,13 +107,37 @@ function prolog(): Tokenizer {
   );
 }
 
-
+function parseComment(com: string): { key: string, value: string } {
+  let key: string;
+  let value: string;
+  const colon = com.indexOf(":");
+  if (colon >= 0) {
+    key = com.substring(0, colon).trim();
+    value = com.substring(colon + 1).trim();
+  } else {
+    key = com;
+    value = "";
+  }
+  return { key, value };
+}
 
 function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
   return (src: string, start: number): number | undefined => {
     let drugs: Drug[] = [];
     let usage: Usage | undefined = undefined;
     let comments: string[] = [];
+    function addComment(com: string) {
+      com = com.trim();
+      const { key, value } = parseComment(com);
+      switch (key) {
+        case "comment": { comments.push(value); break; }
+        default: {
+          const valids = ["@comment:..."];
+          alert(`Invalid drug group comment (${com}).\n` + "Allowed comments are:\n" + valids.join("\n"));
+          throw new Error(`Invalid drug group comment (${com})`)
+        }
+      }
+    }
     let end = seq(
       whitespaces(),
       groupIndex(),
@@ -144,8 +168,7 @@ function drugGroup(cb?: (g: DrugGroup) => void): Tokenizer {
         seq(
           whitespaces(1),
           atMark(),
-          str("comment:"),
-          untilEol((com) => comments.push(com.trim()))
+          withCallback(untilEol(), addComment)
         )
       ),
     )(src, start);
@@ -173,18 +196,34 @@ function drugNameAndAmount(cb?: (data: Drug) => void): Tokenizer {
     let data: Drug = {
       name: "", amount: "", unit: "", senpatsu: undefined, drugComments: [],
     }
-    function addComment(s: string) {
-      s = s.trim();
-      if( s === "変更不可" ){
-        data.senpatsu = "henkoufuka";
-      } else if( s === "患者希望" ){
-        data.senpatsu = "kanjakibou";
-      } else if( s.startsWith("comment:") ){
-        const com = s.substring("comment:".length).trim();
-        data.drugComments.push(com);
+    function addComment(com: string) {
+      com = com.trim();
+      const { key, value } = parseComment(com);
+      const handlers: Record<string, { f: (value: string) => void, needValue: boolean }> = {
+        "変更不可": {
+          f: () => data.senpatsu = "henkoufuka",
+          needValue: false,
+        },
+        "患者希望": {
+          f: () => data.senpatsu = "kanjakibou",
+          needValue: false,
+        },
+        "comment": {
+          needValue: true,
+          f: (value) => data.drugComments.push(value.trim()),
+        }
+      };
+      const bind = handlers[key];
+      if (bind) {
+        bind.f(value);
       } else {
-        alert(`Invalid drug comment (${s})` + "Allowed comments are:\n@変更不可\n@患者希望\n@comment:...");
-        throw new Error("invalid drug comment");
+        const msg = `Invalid drug comment (${com})`;
+        alert([
+          msg,
+          "Allowed comments are:",
+          ...(Object.entries(handlers).map(([k, v]) => v.needValue ? `@${k}:...` : `@${k}`))
+        ].join("\n"));
+        throw new Error(msg);
       }
     }
     let end = seq(
@@ -207,10 +246,7 @@ function drugNameAndAmount(cb?: (data: Drug) => void): Tokenizer {
         seq(
           whitespaces(1),
           atMark(),
-          withCallback(seq(
-            or(str("comment:"), str("変更不可"), str("患者希望")),
-            untilEol()
-          ), (s) => addComment(s)),
+          withCallback(untilEol(), addComment),
         ),
       ),
     )(src, start);
