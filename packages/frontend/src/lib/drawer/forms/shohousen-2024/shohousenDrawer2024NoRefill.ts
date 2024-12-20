@@ -713,10 +713,11 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Rendere
       con.addAligned(bracket, right, "center", "center");
     }
     {
-      let showSecondDoctorName = false;
+      let showSecondDoctorName = env.needSecondSignature;
       if (showSecondDoctorName && data?.doctorName) {
-        const [area] = ColumnBuilder.fromOffsetExtent(doctorName).split(cb.skip(15), cb.expand());
+        const [area, inkan] = ColumnBuilder.fromOffsetExtent(doctorName).split(cb.skip(15), cb.expand(), fixed(2.5), skip(6));
         con.addAligned(textItem(ctx, data?.doctorName, { font: "d3", color: black }), area, "left", "center");
+        con.addAligned(textItem(ctx, "㊞", { font: "f2.5", color: lightRed }), inkan, "center", "center");
       }
     }
     {
@@ -986,6 +987,19 @@ interface Env {
   },
   bikou: string[];
   kigen: string | undefined;
+  needSecondSignature: boolean;
+}
+
+function needSecondSignature(data?: Shohousen2024Data): boolean {
+  const groups = data?.drugs?.groups ?? [];
+  for(let group of groups){
+    for(let drug of group.drugs){
+      if( drug.senpatsu === "henkoufuka" ){
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 function handleShohousenData(data?: Shohousen2024Data): {
@@ -1016,7 +1030,7 @@ function handleShohousenData(data?: Shohousen2024Data): {
     bikou = src.bikou;
     kigen = src.kigen;
   }
-  return { shohouData, bikou, kigen };
+  return { shohouData, bikou, kigen,  };
 }
 
 function createEnv(font: string, data?: Shohousen2024Data): Env {
@@ -1031,57 +1045,8 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
     },
     bikou,
     kigen,
+    needSecondSignature: needSecondSignature(data),
   }
-  // const groups: ShohouGroup[] = [];
-  // const shohouTrailers: string[] = [];
-  // const bikou: string[] = [];
-  // let kigen: string | undefined = undefined;
-  // const drugs = data?.drugs;
-  // if (drugs !== undefined) {
-  //   drugs.groups.forEach(g => {
-  //     const drugs: ShohouDrug[] = [];
-  //     const groupTrailers: string[] = [];
-  //     g.drugs.forEach(d => {
-  //       let senpatsu: Senpatsu = undefined;
-  //       d.comments.forEach(comm => {
-  //         comm = comm.trim();
-  //         if (comm === "患者希望") {
-  //           senpatsu = "kanjakibou";
-  //         } else if (comm === "変更不可") {
-  //           senpatsu = "henkoufuka";
-  //         } else {
-  //           trailers.push(comm);
-  //         }
-  //       })
-  //       drugs.push({ text: drugNameAndAmountLine(d), senpatsu });
-  //     });
-  //     const usage = drugUsageLine(g.usage);
-  //     const trailers: string[] = g.comments;
-  //     groups.push({ drugs, usage, trailers: groupTrailers });
-  //   });
-  //   drugs.commands.forEach(command => {
-  //     const cmd = parseCommand(command);
-  //     switch (cmd.kind) {
-  //       case "memo": {
-  //         bikou.push(cmd.arg);
-  //         break;
-  //       }
-  //       case "有効期限": {
-  //         kigen = cmd.arg;
-  //         break;
-  //       }
-  //     }
-  //   });
-  // }
-  // const shohouData: ShohouData = { groups, trailers: shohouTrailers };
-  // return {
-  //   data,
-  //   font,
-  //   lastLineRenderer: () => { },
-  //   shohou: { kind: "data", data: shohouData },
-  //   bikou,
-  //   kigen,
-  // }
 }
 
 interface Command {
@@ -1144,4 +1109,5 @@ function continueLineItem(ctx: DrawerContext, font: string, page: number, totalP
 const black: Color = { r: 0, g: 0, b: 0 };
 const green: Color = { r: 0, g: 255, b: 0 };
 const red: Color = { r: 255, g: 0, b: 0 };
+const lightRed: Color = { r:255, g: 127, b: 127 };
 

@@ -94,7 +94,10 @@ function prolog(): Tokenizer {
 function parseComment(com: string): { key: string, value: string } {
   let key: string;
   let value: string;
-  const colon = com.indexOf(":");
+  let colon = com.indexOf(":");
+  if( colon < 0 ){
+    colon = com.indexOf("：");
+  }
   if (colon >= 0) {
     key = com.substring(0, colon).trim();
     value = com.substring(colon + 1).trim();
