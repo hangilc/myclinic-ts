@@ -85,6 +85,13 @@ export const Sex: Record<string, SexType> = {
   Female: new SexType("F", "女"),
 };
 
+// patient memo
+type PatientMemo = {
+  "onshi-name"?: string;
+  "rezept-name"?: string;
+  "main-diesase"?: string;
+}
+
 export class Patient {
   constructor(
     public patientId: number,
