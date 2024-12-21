@@ -21,6 +21,8 @@
   } from "@/lib/denshi-shohou/shohou-interface";
   import PrescListDialog from "./PrescListDialog.svelte";
   import CashierHokengaiDialog from "./CashierHokengaiDialog.svelte";
+  import type { PatientMemo } from "myclinic-model/model";
+  import { PatientWrapper } from "@/lib/model-wrappers/PatientWrapper";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -132,9 +134,10 @@
         props: {
           destroy: () => d.$destroy(),
           memo: patient.memo,
-          onEnter: (newMemo: string | undefined) => {
-            const newPatient = Object.assign({}, patient, { memo: newMemo });
-            api.updatePatient(newPatient);
+          onEnter: async (newMemo: PatientMemo) => {
+            const patientWrapper = new PatientWrapper(patient);
+            patientWrapper.setMemo(newMemo);
+            await patientWrapper.savePatient();
           },
         },
       });

@@ -86,7 +86,7 @@ export const Sex: Record<string, SexType> = {
 };
 
 // patient memo
-type PatientMemo = {
+export type PatientMemo = {
   "onshi-name"?: string;
   "rezept-name"?: string;
   "main-diesase"?: string;
