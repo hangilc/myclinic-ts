@@ -171,6 +171,45 @@ export class Patient {
   }
 }
 
+export class PatientWrapper {
+  patient: Patient;
+
+  constructor(patient: Patient) {
+    this.patient = patient;
+  }
+
+  getMemo(): PatientMemo {
+    const memoStore = this.patient.memo;
+    let memo = { };
+    if( memoStore !== undefined ){
+      const json = JSON.parse(memoStore);
+      memo = Object.assign(memo, json);
+    }
+    return memo;
+  }
+
+  setMemo(memo: PatientMemo | undefined) {
+    let m: string | undefined = undefined;
+    if( memo !== undefined ){
+      const json = JSON.parse(JSON.stringify(memo));
+      if( Object.keys(json).length > 0 ){
+        m = JSON.stringify(json);
+      }
+    }
+    this.patient.memo = m;
+  }
+
+  getMainDisease(): string | undefined {
+    return this.getMemo()["main-diesase"];
+  }
+
+  setMainDisease(disease: string | undefined) {
+    const memo = this.getMemo();
+    memo["main-diesase"] = disease;
+    this.setMemo(memo);
+  }
+}
+
 export class RezeptComment {
   code: number;
   text: string;
