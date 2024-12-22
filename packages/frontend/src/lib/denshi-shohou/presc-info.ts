@@ -1,4 +1,7 @@
-import { DenshiShohou, 診療科コードMap, type 点数表, type 診療科コード, type 診療科コード種別, type 都道府県, type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, 備考種別Map, type 剤形区分, type 用法補足区分, type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード } from "./denshi-shohou";
+import { DenshiShohou, type 点数表, type 診療科コード, type 診療科コード種別, 
+  type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, 
+  type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, type 剤形区分, type 用法補足区分, 
+  type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード } from "./denshi-shohou";
 
 export interface 公費レコード {
   公費負担者番号: string;
@@ -336,6 +339,54 @@ export function createPrescInfo(data: PrescInfoData): string {
   return shohou.output();
 }
 
+// export interface 提供情報レコード {
+//   提供診療情報レコード?: 提供診療情報レコード[];
+//   検査値データ等レコード?: 検査値データ等レコード[];
+// }
+
+// export interface 提供診療情報レコード {
+//   薬品名称?: string;
+//   コメント: string;
+// }
+
+// export interface 検査値データ等レコード {
+//   検査値データ等: string;
+// }
+
+export class PrescInfoWrapper {
+  shohou: PrescInfoData;
+
+  constructor(shohou: PrescInfoData) {
+    this.shohou = shohou;
+  }
+
+  get提供情報レコード(): 提供情報レコード {
+    return this.shohou.提供情報レコード ?? {};
+  }
+
+  get提供情報レコード_提供診療情報レコード(): 提供診療情報レコード[] {
+    return this.get提供情報レコード().提供診療情報レコード ?? [];
+  }
+
+  set提供情報レコード_提供診療情報レコード(records: 提供診療情報レコード[]) {
+    let var提供情報レコード = Object.assign({}, this.get提供情報レコード(), {
+      提供診療情報レコード: records
+    });
+    this.shohou.提供情報レコード = var提供情報レコード;
+  }
+
+  get提供情報レコード_検査値データ等レコード(): 検査値データ等レコード[] {
+    return this.get提供情報レコード().検査値データ等レコード ?? [];
+  }
+
+  set提供情報レコード_検査値データ等レコード(records: 検査値データ等レコード[]) {
+    let var提供情報レコード = Object.assign({}, this.get提供情報レコード(), {
+      検査値データ等レコード: records
+    });
+    this.shohou.提供情報レコード = var提供情報レコード;
+  }
+
+}
 
 
 

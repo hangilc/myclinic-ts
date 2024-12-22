@@ -4,8 +4,10 @@
   import Dialog from "../Dialog.svelte";
   import {
     createPrescInfo,
+    PrescInfoWrapper,
     type PrescInfoData,
     type 備考レコード,
+    type 提供診療情報レコード,
   } from "./presc-info";
   import { DateWrapper } from "myclinic-util";
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
@@ -45,7 +47,8 @@
   let formBikou一包化 = false;
   let formBikouInputText = "";
   let showShinryouJouhou = false;
-  let formShinryouJouhouInput = "";
+  let formShinryouJouhouYakuzaiInput = "";
+  let formShinryouJouhouTextInput = "";
 
   init();
 
@@ -373,11 +376,6 @@
     formBikouInputText = "";
   }
 
-  function doAddShinryouJouhou() {
-    const t = formShinryouJouhouInput.trim();
-    
-  }
-
   function doDeleteBikou(index: number) {
     if (!shohou || !shohou.備考レコード) {
       return;
@@ -387,6 +385,34 @@
     shohou = Object.assign({}, shohou, { 備考レコード: bs });
     adaptToShohou();
     shohouModified = true;
+  }
+
+  function doAddShinryouJouhou() {
+    const text = formShinryouJouhouTextInput.trim();
+    if (text !== "" && shohou) {
+      const yakuzai = formShinryouJouhouYakuzaiInput.trim();
+      const entry = {
+        薬品名称: yakuzai !== "" ? yakuzai : undefined,
+        コメント: text,
+      };
+      const shohouWrap = new PrescInfoWrapper(shohou);
+      const cur = shohouWrap.get提供情報レコード_提供診療情報レコード();
+      const update = [...cur, entry];
+      shohouWrap.set提供情報レコード_提供診療情報レコード(update);
+      shohou = shohouWrap.shohou;
+      console.log("shohou", shohou);
+    }
+  }
+
+  function doDeleteJohou(johou: 提供診療情報レコード) {
+    if (shohou) {
+      const wrap = new PrescInfoWrapper(shohou);
+      const cur = wrap.get提供情報レコード_提供診療情報レコード();
+      const update = cur.filter(j => j !== johou);
+      wrap.set提供情報レコード_提供診療情報レコード(update);
+      shohou = wrap.shohou;
+      console.log("shohou", shohou);
+    }
   }
 </script>
 
@@ -416,7 +442,8 @@
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
       <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
-      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a>
+      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a
+      >
     </div>
     {#if showBikou}
       <div>
@@ -444,11 +471,28 @@
       <div>
         <div>提供診療情報レコード</div>
         {#each shohou?.提供情報レコード?.提供診療情報レコード ?? [] as joho}
+          <div>
+            {#if joho.薬品名称}
+              {joho.薬品名称} |
+            {/if}
+            {joho.コメント}
+            <a href="javascript:void(0)" on:click={() => doDeleteJohou(joho)}
+              >削除</a
+            >
+          </div>
         {/each}
-        <input type="text" bind:value={formShinryouJouhouInput} />
+        <div>
+          薬剤（任意）：<input
+            type="text"
+            bind:value={formShinryouJouhouYakuzaiInput}
+          />
+        </div>
+        <div>
+          <input type="text" bind:value={formShinryouJouhouTextInput} />
+        </div>
         <button on:click={doAddShinryouJouhou}>追加</button>
       </div>
-    {/if} 
+    {/if}
     <div class="commands">
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
