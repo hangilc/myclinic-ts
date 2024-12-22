@@ -1,4 +1,4 @@
-import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type Shinryou, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, type KizaiMaster, type Meisai } from "myclinic-model";
+import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type Shinryou, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, type KizaiMaster, type Meisai, PatientWrapper } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
 import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
@@ -249,9 +249,25 @@ async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
   });
 }
 
-async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: string): Promise<RezeptDisease[]> {
+const mainDiseaseCache: Record<string, number> = {};
+
+async function resolveMainDisease(mainDiseaseName: string, at: string): Promise<number> {
+  let shoubyoumeicode = mainDiseaseCache[mainDiseaseName];
+  if (shoubyoumeicode === undefined) {
+    const master = await api.resolveByoumeiMasterByName(mainDiseaseName, at);
+    if (!master) {
+      throw new Error(`Unknown main disease name: ${mainDiseaseName}`);
+    }
+    mainDiseaseCache[mainDiseaseName] = master.shoubyoumeicode;
+    return master.shoubyoumeicode;
+  } else {
+    return shoubyoumeicode;
+  }
+}
+
+async function diseasesOfPatient(patient: Patient, firstDay: string, lastDay: string): Promise<RezeptDisease[]> {
   const result: RezeptDisease[] = [];
-  const ds = await api.listDiseaseActiveAt(patientId, firstDay, lastDay);
+  const ds = await api.listDiseaseActiveAt(patient.patientId, firstDay, lastDay);
   ds.sort((a, b) => a.startDate.localeCompare(b.startDate));
   for (let i = 0; i < ds.length; i++) {
     const disease = ds[i];
@@ -271,7 +287,27 @@ async function diseasesOfPatient(patientId: number, firstDay: string, lastDay: s
       adjcodes: adjCodes,
       startDate: disease.startDate,
       endReason: endReason,
+      isMainDisease: false,
     });
+  }
+  const mainDiseaseName = new PatientWrapper(patient).getMainDisease();
+  console.log("mainDiseaseName", mainDiseaseName);
+  if (mainDiseaseName) {
+    const code = await resolveMainDisease(mainDiseaseName, firstDay);
+    let found = false;
+    for (let d of result) {
+      if (d.shoubyoumeicode === code) {
+        d.isMainDisease = true;
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      throw new Error(
+        `Cannot find main disease ${mainDiseaseName} in ($[aptient.patientId]) ${new PatientWrapper(patient).fullName()}`)
+    }
+  } else {
+    result[0].isMainDisease = true;
   }
   return result;
 }
@@ -291,7 +327,6 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   const visitExList: VisitEx[] = await Promise.all(modelVisits.map(mv => api.getVisitEx(mv.visitId)));
   const hokenCollector = new HokenCollector();
   hokenCollector.scanVisits(visitExList);
-  console.log("hokenCollector", hokenCollector);
   const visits: RezeptVisit[] = await Promise.all(visitExList.map(visitEx =>
     cvtModelVisitToRezeptVisit(visitEx, hokenCollector)));
   const futanWari = getFutanWari(shahokokuhoOrKoukikourei(
@@ -338,13 +373,13 @@ export async function cvtVisitsToUnit(modelVisits: Visit[]): Promise<RezeptUnit>
   }
   const visitedAt = modelVisits[0].visitedAt.substring(0, 10);
   const [firstDay, lastDay] = firstAndLastDayOf(visitedAt);
-  const diseases: RezeptDisease[] = await diseasesOfPatient(patientId, firstDay, lastDay);
+  const diseases: RezeptDisease[] = await diseasesOfPatient(modelPatient, firstDay, lastDay);
   let optIsKoukikourei = false;
-  if( hokensha && isKoukikourei(hokensha.hokenshaBangou) ){
+  if (hokensha && isKoukikourei(hokensha.hokenshaBangou)) {
     optIsKoukikourei = true;
   }
   const paymentSetting: Partial<PaymentSetting> = createPaymentSetting(
-    futanWari, 
+    futanWari,
     Object.assign({}, sqlDateToObject(modelVisits[0].visitedAt), { day: undefined }),
     sqlDateToObject(visitExList[0].patient.birthday),
     modelVisits,

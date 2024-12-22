@@ -146,6 +146,7 @@ export interface RezeptDisease {
     | "S" // 中止
     | "D" // 死亡
     ;
+  isMainDisease: boolean;
 }
 
 export interface RezeptShoujouShouki {

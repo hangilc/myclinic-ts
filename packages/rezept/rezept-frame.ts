@@ -117,7 +117,8 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
         診療開始日: disease.startDate.replaceAll("-", ""),
         転帰区分: endReasonToKubun(disease.endReason),
         修飾語コード: (adjCodes.length > 5 ? adjCodes.slice(0, 5) : adjCodes).join(""),
-        主傷病: i === 0,
+        // 主傷病: i === 0,
+        主傷病: disease.isMainDisease,
       }));
     })
   }

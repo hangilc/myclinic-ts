@@ -90,7 +90,7 @@ export const Sex: Record<string, SexType> = {
 export type PatientMemo = {
   "onshi-name"?: string;
   "rezept-name"?: string;
-  "main-diesase"?: string;
+  "main-disease"?: string;
 }
 
 export function decodePatientMemo(src: any): Result<PatientMemo> {
@@ -105,7 +105,7 @@ export function decodePatientMemo(src: any): Result<PatientMemo> {
     }
   }
   const memo: PatientMemo = {};
-  const validKeys = ["onshi-name", "rezept-name", "main-diesase"] as const;
+  const validKeys = ["onshi-name", "rezept-name", "main-disease"] as const;
   for(let key of validKeys){
     if( validKeys.includes(key) ){
       let value = src[key];
@@ -226,13 +226,18 @@ export class PatientWrapper {
   }
 
   getMainDisease(): string | undefined {
-    return this.getMemo()["main-diesase"];
+    console.log("memo", this.getMemo());
+    return this.getMemo()["main-disease"];
   }
 
   setMainDisease(disease: string | undefined) {
     const memo = this.getMemo();
-    memo["main-diesase"] = disease;
+    memo["main-disease"] = disease;
     this.setMemo(memo);
+  }
+
+  fullName(sep: string = ""): string {
+    return `${this.patient.lastName}${sep}${this.patient.firstName}`;
   }
 }
 
