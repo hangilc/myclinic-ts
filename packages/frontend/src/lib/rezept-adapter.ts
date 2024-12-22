@@ -520,18 +520,30 @@ function resolveShinryouShikibetsu(master: ShinryouMaster): 診療識別コー�
   return shinryouShubetsu;
 }
 
+export function hasHokenOrKouhi(visit: Visit): boolean {
+  if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
+    throw new Error("重複保険：" + visit.visitId);
+  }
+  if (visit.shahokokuhoId > 0 || visit.koukikoureiId > 0) {
+    return true;
+  } else {
+    return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
+  }
+}
+
 async function listVisitForRezept(year: number, month: number): Promise<Visit[]> {
   const visits = await api.listVisitByMonth(year, month);
-  return visits.filter(visit => {
-    if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
-      throw new Error("重複保険：" + visit.visitId);
-    }
-    if (visit.shahokokuhoId > 0 || visit.koukikoureiId > 0) {
-      return true;
-    } else {
-      return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
-    }
-  });
+  return visits.filter(hasHokenOrKouhi);
+  // return visits.filter(visit => {
+  //   if (visit.shahokokuhoId > 0 && visit.koukikoureiId > 0) {
+  //     throw new Error("重複保険：" + visit.visitId);
+  //   }
+  //   if (visit.shahokokuhoId > 0 || visit.koukikoureiId > 0) {
+  //     return true;
+  //   } else {
+  //     return visit.kouhi1Id > 0 || visit.kouhi2Id > 0 || visit.kouhi3Id > 0;
+  //   }
+  // });
 }
 
 function classifyByPatient(visits: Visit[]): Map<number, Visit[]> {

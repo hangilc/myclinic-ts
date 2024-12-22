@@ -2,7 +2,7 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import api from "@/lib/api";
   import { pad } from "@/lib/pad";
-  import { loadVisits } from "@/lib/rezept-adapter";
+  import { hasHokenOrKouhi, loadVisits } from "@/lib/rezept-adapter";
   import type { Patient, Visit, VisitEx } from "myclinic-model";
   import { checkForRcpt, type CheckError, type CheckResult } from "./rcpt-check/check";
 
@@ -57,7 +57,8 @@
 
   async function recheck(patientId: number): Promise<CheckResult> {
     const visitIds = await api.listVisitIdByPatientAndMonth(patientId, getYear(), getMonth());
-    const visits = await Promise.all(visitIds.map(async visitId => await api.getVisitEx(visitId)));
+    let visits = await Promise.all(visitIds.map(async visitId => await api.getVisitEx(visitId)));
+    visits = visits.filter(visit => hasHokenOrKouhi(visit.asVisit));
     return checkForRcpt(visits);
   }
 
