@@ -13,7 +13,6 @@
   import type { FreqUsage } from "../cache";
   import { cache } from "@/lib/cache";
   import { toHankaku } from "../zenkaku";
-  import ChevronUp from "@/icons/ChevronUp.svelte";
 
   export let at: string; // YYYY-MM-DD
   export let rpPresc: RP剤情報 | undefined = undefined;

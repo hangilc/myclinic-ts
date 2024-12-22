@@ -44,6 +44,8 @@
   let showBikou = false;
   let formBikou一包化 = false;
   let formBikouInputText = "";
+  let showShinryouJouhou = false;
+  let formShinryouJouhouInput = "";
 
   init();
 
@@ -74,57 +76,6 @@
     const clinicInfo = await cache.getClinicInfo();
     return initPrescInfoData(visit, patient, hokenInfo, clinicInfo);
   }
-
-  // async function initShohou(): Promise<PrescInfoData> {
-  //   function toKana(s: string): string {
-  //     return convertZenkakuHiraganaToHankakuKatakana(s);
-  //   }
-  //   const clinicInfo = await getClinicInfo();
-  //   let kikancode = clinicInfo.kikancode;
-  //   const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
-  //   const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
-  //   let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
-  //   let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
-  //   let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
-  //   return {
-  //     医療機関コード種別: "医科",
-  //     医療機関コード: kikancode,
-  //     医療機関都道府県コード: castTo都道府県コード(clinicInfo.todoufukencode),
-  //     医療機関名称: clinicInfo.name,
-  //     医療機関郵便番号: postalCode,
-  //     医療機関所在地: clinicInfo.address,
-  //     医療機関電話番号: clinicInfo.tel,
-  //     ＦＡＸ番号: clinicInfo.fax,
-  //     診療科レコード: {
-  //       診療科コード種別: "診療科コード",
-  //       診療科コード: "内科",
-  //     },
-  //     医師漢字氏名: `${clinicInfo.doctorLastName}　${clinicInfo.doctorFirstName}`,
-  //     患者コード: patient.patientId.toString(),
-  //     患者漢字氏名: `${patient.lastName}　${patient.firstName}`, // 性と名は全角スペースで区切る。
-  //     患者カナ氏名: patientNameKana, // 半角カナで記録する。姓と名は半角スペースで区切る。
-  //     患者性別: patient.sex === "M" ? "男" : "女",
-  //     患者生年月日: DateWrapper.from(patient.birthday)
-  //       .asSqlDate()
-  //       .replaceAll(/-/g, ""),
-  //     保険一部負担金区分: resolve保険一部負担金区分(hokenInfo, patient, visit),
-  //     保険種別: resolve保険種別(hokenInfo),
-  //     保険者番号: resolve保険者番号(hokenInfo),
-  //     被保険者証記号: resolve被保険者証記号(hokenInfo),
-  //     被保険者証番号: resolve被保険者証番号(hokenInfo),
-  //     被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
-  //     被保険者証枝番: resolve被保険者証枝番(hokenInfo),
-  //     第一公費レコード,
-  //     第二公費レコード,
-  //     第三公費レコード,
-  //     特殊公費レコード: undefined,
-  //     レセプト種別コード: resolveレセプト種別コード(hokenInfo),
-  //     処方箋交付年月日: DateWrapper.from(visit.visitedAt)
-  //       .asSqlDate()
-  //       .replaceAll(/-/g, ""),
-  //     RP剤情報グループ: [],
-  //   };
-  // }
 
   function doCancel() {
     destroy();
@@ -353,6 +304,10 @@
     showBikou = !showBikou;
   }
 
+  function doToggleShinryouJouhou() {
+    showShinryouJouhou = !showShinryouJouhou;
+  }
+
   function setBikou一包化() {
     if (shohou) {
       let bikou = shohou.備考レコード;
@@ -418,6 +373,11 @@
     formBikouInputText = "";
   }
 
+  function doAddShinryouJouhou() {
+    const t = formShinryouJouhouInput.trim();
+    
+  }
+
   function doDeleteBikou(index: number) {
     if (!shohou || !shohou.備考レコード) {
       return;
@@ -456,6 +416,7 @@
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
       <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
+      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a>
     </div>
     {#if showBikou}
       <div>
@@ -479,6 +440,15 @@
       <input type="text" bind:value={formBikouInputText} />
       <button on:click={doAddBikouText}>追加</button>
     {/if}
+    {#if showShinryouJouhou}
+      <div>
+        <div>提供診療情報レコード</div>
+        {#each shohou?.提供情報レコード?.提供診療情報レコード ?? [] as joho}
+        {/each}
+        <input type="text" bind:value={formShinryouJouhouInput} />
+        <button on:click={doAddShinryouJouhou}>追加</button>
+      </div>
+    {/if} 
     <div class="commands">
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
