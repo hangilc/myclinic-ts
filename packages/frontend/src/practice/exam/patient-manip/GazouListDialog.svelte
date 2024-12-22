@@ -2,7 +2,7 @@
   import api from "@/lib/api";
 
   import Dialog from "@/lib/Dialog.svelte";
-    import { getFileExtension } from "@/lib/file-ext";
+  import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
 
@@ -14,13 +14,13 @@
   let externalImageSrc: string = "";
   let externals: string[] = ["pdf"];
 
-  imgSrc.subscribe(src => {
-    if( src == null ){
+  imgSrc.subscribe((src) => {
+    if (src == null) {
       return;
     }
     const ext = getFileExtension(src) ?? "";
     const url = api.patientImageUrl(patientId, src);
-    if( externals.includes(ext) ){
+    if (externals.includes(ext)) {
       externalImageSrc = url;
       inlineImageSrc = "";
     } else {
@@ -39,6 +39,16 @@
   function doClose(): void {
     destroy();
   }
+
+  async function doDelete(src: string) {
+    if (confirm(`この画像を削除していいですか？\n${src}`)) {
+      await api.deletePatientImage(patientId, src);
+      init();
+      imgSrc.set(null);
+      inlineImageSrc = "";
+      externalImageSrc = "";
+    }
+  }
 </script>
 
 <Dialog {destroy} title="画像一覧">
@@ -49,13 +59,18 @@
   </div>
   {#if inlineImageSrc !== ""}
     <div class="image-wrapper">
-      <img src={inlineImageSrc} width="800px" alt="保存画像"/>
+      <img src={inlineImageSrc} width="800px" alt="保存画像" />
     </div>
   {/if}
   {#if externalImageSrc !== ""}
-    <a href={externalImageSrc} target="_blank" rel="noreferrer">別のタブで開く</a>
+    <a href={externalImageSrc} target="_blank" rel="noreferrer"
+      >別のタブで開く</a
+    >
   {/if}
   <div class="commands">
+    {#if $imgSrc}
+      <a href="javascript:void(0)" on:click={() => doDelete($imgSrc)}>削除</a>
+    {/if}
     <button on:click={doClose}>閉じる</button>
   </div>
 </Dialog>
