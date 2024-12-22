@@ -1,7 +1,8 @@
 import api from "@/lib/api";
 import { isShohousen, parseShohousen } from "@/lib/shohousen/parse-shohousen";
-import type { ConductShinryou, VisitEx } from "myclinic-model";
+import type { VisitEx } from "myclinic-model";
 import { checkOnshi } from "./check-onshi";
+import { checkMainDisease } from "./main-disease";
 
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
@@ -20,7 +21,8 @@ export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
   visits.forEach(visit => chk(checkGeneric1(visit)));
   visits.forEach(visit => chk(checkXpSatsuei(visit)));
   visits.forEach(visit => chk(checkXpShindan(visit)));
-  (await Promise.all(visits.map(visit => checkOnshi(visit)))).forEach(e => chk(e));
+  (await Promise.all(visits.map(visit => checkOnshi(visit)))).forEach(chk);
+  (await Promise.all(visits.map(visit => checkMainDisease(visit)))).forEach(chk);
   return errs.length === 0 ? "ok" : errs;
 }
 

@@ -291,7 +291,6 @@ async function diseasesOfPatient(patient: Patient, firstDay: string, lastDay: st
     });
   }
   const mainDiseaseName = new PatientWrapper(patient).getMainDisease();
-  console.log("mainDiseaseName", mainDiseaseName);
   if (mainDiseaseName) {
     const code = await resolveMainDisease(mainDiseaseName, firstDay);
     let found = false;

@@ -226,7 +226,6 @@ export class PatientWrapper {
   }
 
   getMainDisease(): string | undefined {
-    console.log("memo", this.getMemo());
     return this.getMemo()["main-disease"];
   }
 
