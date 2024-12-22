@@ -1,14 +1,13 @@
 <script lang="ts">
   import api from "@/lib/api";
   import { confirm } from "@/lib/confirm-call";
-  import { Visit, WqueueState } from "myclinic-model";
+  import { PatientWrapper, Visit, WqueueState } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endPatient, currentPatient, currentVisitId } from "./exam-vars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
-  import * as kanjidate from "kanjidate";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
   import { cache } from "@lib/cache";
@@ -22,7 +21,6 @@
   import PrescListDialog from "./PrescListDialog.svelte";
   import CashierHokengaiDialog from "./CashierHokengaiDialog.svelte";
   import type { PatientMemo } from "myclinic-model/model";
-  import { PatientWrapper } from "@/lib/model-wrappers/PatientWrapper";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -137,7 +135,7 @@
           onEnter: async (newMemo: PatientMemo) => {
             const patientWrapper = new PatientWrapper(patient);
             patientWrapper.setMemo(newMemo);
-            await patientWrapper.savePatient();
+            await api.updatePatient(patientWrapper.patient);
           },
         },
       });

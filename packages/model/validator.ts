@@ -1,66 +1,77 @@
-import { Patient } from "./model";
+import { Patient, decodePatientMemo } from "./model";
+import { Result, ok, error } from "./result";
 
-export type Result<T, E> = {
-  ok: true;
-  value: T;
-} | {
-  ok: false;
-  error: E;
-};
-
-export class ResultWrapper <T, E> {
-
+export function isInt(arg: any): Result<number> {
+  if (Number.isInteger(arg)) {
+    return ok(arg);
+  } else {
+    return error("not an integer");
+  }
 }
 
-export function matchesRegExp(src: string, re: RegExp): boolean {
-  return re.test(src);
+export function isString(arg: any): Result<string> {
+  if (typeof arg === "string") {
+    return ok(arg);
+  } else {
+    return error("not a string");
+  }
 }
 
-export function convToInt(src: string): ConvResult<number> {
-  if( src === "" ){
-    return {
-      ok: false,
-      error: "空白です。"
+export function isNotEmpty(value: string): Result<string> {
+  if (value !== "") {
+    return ok(value);
+  } else {
+    return error("empty");
+  }
+}
+
+export function isOneOf<T>(...choices: T[]): Check<T> {
+  return (value: T) => {
+    for (let c of choices) {
+      if (value === c) {
+        return ok(value);
+      }
+    }
+    return error("invalid value");
+  }
+}
+
+export function matches(re: RegExp): Check<string> {
+  return (value: string) => {
+    if( re.test(value) ){
+      return ok(value);
+    } else {
+      return error("invalid format");
     }
   }
-  if( matchesRegExp(src, /^\d+$/) ){
-    return {
-      ok: true,
-      value: parseInt(src),
-    }
+}
+
+export const isSqlDate = matches(/^\d{4}-\d{2}-\d{2}$/);
+
+type Conv<T> = (arg: any) => Result<T>;
+type Check<T> = (t: T) => Result<T>;
+
+export function expect<T>(name: string, arg: any, conv: Conv<T>, ...fs: Check<T>[]): T {
+  function error(msg: string): Error {
+    return new Error(`${name}: ${msg}`);
   }
-  return {
-    ok: false,
-    error: "整数に変換できません。"
+  let value: T = conv(arg).unwrap();
+  for (let f of fs) {
+    value = f(value).unwrap();
   }
-}
-
-export function isSqlDate(src: string): boolean {
-  return matchesRegExp(src, /^\d{4}-\d{2}-\d{2}$/);
-}
-
-export function isInt(arg: any): boolean {
-  return Number.isInteger(arg);
-}
-
-export function assertIsInt(arg: any, msg: string) {
-  if( !isInt(arg) ){
-    throw new Error(msg);
-  }
-}
-
-export function assertIsString(arg: any, msg: string) {
-  if( typeof arg !== "string" ){
-    throw new Error(msg);
-  }
-}
-
-export function assertNotEmpty(arg: any, msg: string) {
-
+  return value;
 }
 
 export function confirmPatient(arg: any): Patient {
-  assertIsInt(arg.patientId, "patientId が整数でありません。");
-  assertNotEmpty(arg.lastName, "lastName が")
+  expect("patientId", arg["patientId"], isInt);
+  expect("lastName", arg["lastName"], isString, isNotEmpty);
+  expect("firstName", arg["firstName"], isString, isNotEmpty);
+  expect("lastNameYomi", arg["lastNameYomi"], isString, isNotEmpty);
+  expect("firstNameYomi", arg["firstNameYomi"], isString, isNotEmpty);
+  expect("sex", arg["sex"], isString, isOneOf("M", "F"));
+  expect("birthday", arg["birthday"], isString, isSqlDate);
+  expect("address", arg["address"], isString);
+  expect("phone", arg["phone"], isString);
+  decodePatientMemo(arg.memo).expect("invalid patient memo");
   return arg;
 }

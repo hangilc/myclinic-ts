@@ -1,4 +1,5 @@
-import { castList, castNumber, castOption, castOptionUndefined, castString } from "./cast";
+import { Result, error, ok } from "./result";
+import { castList, castNumber, castOptionUndefined, castString } from "./cast";
 export * from "./converters";
 import { dateToSqlDate } from "./converters";
 
@@ -92,6 +93,44 @@ export type PatientMemo = {
   "main-diesase"?: string;
 }
 
+export function decodePatientMemo(src: any): Result<PatientMemo> {
+  if( src == null ){
+    return ok({});
+  }
+  if( typeof src === "string" ){
+    try {
+      src = JSON.parse(src);
+    } catch(_ex) {
+      return error("invalid JSON format");
+    }
+  }
+  const memo: PatientMemo = {};
+  const validKeys = ["onshi-name", "rezept-name", "main-diesase"] as const;
+  for(let key of validKeys){
+    if( validKeys.includes(key) ){
+      let value = src[key];
+      if( typeof value === null ){
+        value = undefined;
+      }
+      if( value === undefined || typeof value === "string" ){
+        memo[key] = value;
+      } else {
+        return error(`invalid patient memo value for ${key}: ${value}`);
+      }
+    }
+  }
+  return ok(memo);
+}
+
+export function encodePatientMemo(memo: PatientMemo): string | undefined {
+  const obj = JSON.parse(JSON.stringify(memo));
+  if( Object.keys(obj).length === 0 ){
+    return undefined;
+  } else {
+    return JSON.stringify(memo);
+  }
+}
+
 export class Patient {
   constructor(
     public patientId: number,
@@ -179,24 +218,11 @@ export class PatientWrapper {
   }
 
   getMemo(): PatientMemo {
-    const memoStore = this.patient.memo;
-    let memo = { };
-    if( memoStore !== undefined ){
-      const json = JSON.parse(memoStore);
-      memo = Object.assign(memo, json);
-    }
-    return memo;
+    return decodePatientMemo(this.patient.memo).unwrap();
   }
 
-  setMemo(memo: PatientMemo | undefined) {
-    let m: string | undefined = undefined;
-    if( memo !== undefined ){
-      const json = JSON.parse(JSON.stringify(memo));
-      if( Object.keys(json).length > 0 ){
-        m = JSON.stringify(json);
-      }
-    }
-    this.patient.memo = m;
+  setMemo(memo: PatientMemo) {
+    this.patient.memo = encodePatientMemo(memo);
   }
 
   getMainDisease(): string | undefined {
