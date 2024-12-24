@@ -68,6 +68,27 @@ export function initPrescInfoData(visit: Visit, patient: Patient, hokenInfo: Hok
   };
 }
 
+//!!!!! check rezept output after introducing this function !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+export function updatePrescInfoHokenData(shohou: PrescInfoData, hokenInfo: HokenInfo): PrescInfoData {
+  let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
+  let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
+  let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
+  return Object.assign({}, shohou, {
+    保険一部負担金区分: resolve保険一部負担金区分(hokenInfo, patient, visit),
+    保険種別: resolve保険種別(hokenInfo),
+    保険者番号: resolve保険者番号(hokenInfo),
+    被保険者証記号: resolve被保険者証記号(hokenInfo),
+    被保険者証番号: resolve被保険者証番号(hokenInfo),
+    被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
+    被保険者証枝番: resolve被保険者証枝番(hokenInfo),
+    第一公費レコード,
+    第二公費レコード,
+    第三公費レコード,
+    特殊公費レコード: undefined,
+    レセプト種別コード: resolveレセプト種別コード(hokenInfo),
+  });
+}
+
 export async function initPrescInfoDataFromVisitId(visitId: number): Promise<PrescInfoData> {
   const visit = await api.getVisit(visitId);
   const patient = await api.getPatient(visit.patientId);
@@ -108,6 +129,8 @@ function resolve保険一部負担金区分(
         );
       }
     }
+  } else if (isUnder6(patient.birthday, visit.visitedAt)) {
+    return "６歳未満";
   } else if (hoken.shahokokuho) {
     switch (hoken.shahokokuho.koureiStore) {
       case 3:
@@ -120,8 +143,6 @@ function resolve保険一部負担金区分(
         return undefined;
       }
     }
-  } else if (isUnder6(patient.birthday, visit.visitedAt)) {
-    return "６歳未満";
   }
   throw new Error("No hoken");
 }
