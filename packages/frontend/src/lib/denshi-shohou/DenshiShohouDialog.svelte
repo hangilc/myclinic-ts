@@ -33,6 +33,7 @@
   import api from "../api";
   import ShohouFormDialog from "./ShohouFormDialog.svelte";
   import { initPrescInfoData } from "./visit-shohou";
+  import ShowCodeDialog from "./ShowCodeDialog.svelte";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -414,6 +415,19 @@
       console.log("shohou", shohou);
     }
   }
+
+  function doShowCode() {
+    if( shohou ){
+      const prescInfo = createPrescInfo(shohou);
+      const d: ShowCodeDialog = new ShowCodeDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          code: prescInfo,
+        }
+      })
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -494,6 +508,9 @@
       </div>
     {/if}
     <div class="commands">
+      {#if shohou}
+        <a href="javascript:void(0)" on:click={doShowCode}>コード</a>
+      {/if}
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
           <button on:click={doRegister}>発行</button>
