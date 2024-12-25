@@ -339,20 +339,6 @@ export function createPrescInfo(data: PrescInfoData): string {
   return shohou.output();
 }
 
-// export interface 提供情報レコード {
-//   提供診療情報レコード?: 提供診療情報レコード[];
-//   検査値データ等レコード?: 検査値データ等レコード[];
-// }
-
-// export interface 提供診療情報レコード {
-//   薬品名称?: string;
-//   コメント: string;
-// }
-
-// export interface 検査値データ等レコード {
-//   検査値データ等: string;
-// }
-
 export class PrescInfoWrapper {
   shohou: PrescInfoData;
 

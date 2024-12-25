@@ -117,11 +117,12 @@ function resolve保険一部負担金区分(
       case 1:
         return "高齢者一般";
       default: {
+        if (isUnder6(patient.birthday, visit.visitedAt)) {
+          return "６歳未満";
+        }
         return undefined;
       }
     }
-  } else if (isUnder6(patient.birthday, visit.visitedAt)) {
-    return "６歳未満";
   }
   throw new Error("No hoken");
 }
