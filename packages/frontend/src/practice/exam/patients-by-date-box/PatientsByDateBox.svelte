@@ -5,6 +5,7 @@
   import RightBox from "../RightBox.svelte";
   import type { Patient } from "myclinic-model";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
+  import { pad } from "@/lib/pad";
 
   export let date: Date = new Date();
   let patients: Patient[] = [];
@@ -54,7 +55,7 @@
         on:click={() => doSelect(patient)}
         class="patient-link"
         class:selected={selectedPatientId === patient.patientId}
-        >{patient.lastName}{patient.firstName}</a
+        >({pad(patient.patientId, 4, "0")}) {patient.lastName}{patient.firstName}</a
       >
     {/each}
   </div>
