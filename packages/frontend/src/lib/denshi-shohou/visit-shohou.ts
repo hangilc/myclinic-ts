@@ -25,9 +25,6 @@ export function initPrescInfoData(visit: Visit, patient: Patient, hokenInfo: Hok
   let kikancode = clinicInfo.kikancode;
   const postalCode = clinicInfo.postalCode.replace(/^〒/, "");
   const patientNameKana = `${toKana(patient.lastNameYomi)} ${toKana(patient.firstNameYomi)}`;
-  let 第一公費レコード = resolve公費レコード(hokenInfo.kouhiList[0]);
-  let 第二公費レコード = resolve公費レコード(hokenInfo.kouhiList[1]);
-  let 第三公費レコード = resolve公費レコード(hokenInfo.kouhiList[2]);
   return {
     医療機関コード種別: "医科",
     医療機関コード: kikancode,
@@ -56,9 +53,9 @@ export function initPrescInfoData(visit: Visit, patient: Patient, hokenInfo: Hok
     被保険者証番号: resolve被保険者証番号(hokenInfo),
     被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
     被保険者証枝番: resolve被保険者証枝番(hokenInfo),
-    第一公費レコード,
-    第二公費レコード,
-    第三公費レコード,
+    第一公費レコード: resolve公費レコード(hokenInfo.kouhiList[0]),
+    第二公費レコード: resolve公費レコード(hokenInfo.kouhiList[1]),
+    第三公費レコード: resolve公費レコード(hokenInfo.kouhiList[2]),
     特殊公費レコード: undefined,
     レセプト種別コード: resolveレセプト種別コード(hokenInfo),
     処方箋交付年月日: DateWrapper.from(visit.visitedAt)
@@ -66,6 +63,23 @@ export function initPrescInfoData(visit: Visit, patient: Patient, hokenInfo: Hok
       .replaceAll(/-/g, ""),
     RP剤情報グループ: [],
   };
+}
+
+export function updatePrescInfoHokenData(data: PrescInfoData, visit: Visit, patient: Patient, hokenInfo: HokenInfo) {
+  Object.assign(data, {
+    保険一部負担金区分: resolve保険一部負担金区分(hokenInfo, patient, visit),
+    保険種別: resolve保険種別(hokenInfo),
+    保険者番号: resolve保険者番号(hokenInfo),
+    被保険者証記号: resolve被保険者証記号(hokenInfo),
+    被保険者証番号: resolve被保険者証番号(hokenInfo),
+    被保険者被扶養者: resolve被保険者被扶養者(hokenInfo),
+    被保険者証枝番: resolve被保険者証枝番(hokenInfo),
+    第一公費レコード: resolve公費レコード(hokenInfo.kouhiList[0]),
+    第二公費レコード: resolve公費レコード(hokenInfo.kouhiList[1]),
+    第三公費レコード: resolve公費レコード(hokenInfo.kouhiList[2]),
+    特殊公費レコード: undefined,
+    レセプト種別コード: resolveレセプト種別コード(hokenInfo),
+  })
 }
 
 export async function initPrescInfoDataFromVisitId(visitId: number): Promise<PrescInfoData> {

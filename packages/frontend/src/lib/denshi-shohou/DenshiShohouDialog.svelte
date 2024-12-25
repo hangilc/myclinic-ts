@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HokenInfo, Kouhi, Patient, Visit } from "myclinic-model";
+  import type { HokenInfo, Patient, Visit } from "myclinic-model";
   import { cache } from "../cache";
   import Dialog from "../Dialog.svelte";
   import {
@@ -32,7 +32,7 @@
   import { Text } from "myclinic-model";
   import api from "../api";
   import ShohouFormDialog from "./ShohouFormDialog.svelte";
-  import { initPrescInfoData } from "./visit-shohou";
+  import { initPrescInfoData, updatePrescInfoHokenData } from "./visit-shohou";
   import ShowCodeDialog from "./ShowCodeDialog.svelte";
 
   export let destroy: () => void;
@@ -428,6 +428,17 @@
       })
     }
   }
+
+  async function doUpdateHoken() {
+    if( shohou && shohou.引換番号 === undefined ){
+      visit = await api.getVisit(visit.visitId);
+      hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
+      console.log("hokenInfo", hokenInfo);
+      updatePrescInfoHokenData(shohou, visit, patient, hokenInfo);
+      shohou = shohou;
+      alert("保険情報を更新しました。");
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -513,6 +524,7 @@
       {/if}
       {#if shohou && shohou.RP剤情報グループ.length > 0}
         {#if shohou.引換番号 == undefined}
+          <a href="javascript:void(0)" on:click={doUpdateHoken}>保険情報更新</a>
           <button on:click={doRegister}>発行</button>
           <button on:click={doSave}>保存</button>
         {/if}
