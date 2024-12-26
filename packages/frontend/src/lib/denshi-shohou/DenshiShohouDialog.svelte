@@ -34,6 +34,7 @@
   import ShohouFormDialog from "./ShohouFormDialog.svelte";
   import { initPrescInfoData, updatePrescInfoHokenData } from "./visit-shohou";
   import ShowCodeDialog from "./ShowCodeDialog.svelte";
+  import EditableDate from "../editable-date/EditableDate.svelte";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -50,6 +51,8 @@
   let showShinryouJouhou = false;
   let formShinryouJouhouYakuzaiInput = "";
   let formShinryouJouhouTextInput = "";
+  let showKigen = false;
+  let kigen: Date | null = null;
 
   init();
 
@@ -66,9 +69,11 @@
     if (shohou) {
       renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
       formBikou一包化 = hasBikou一包化(shohou);
+      kigen = shohou.使用期限年月日
     } else {
       renderedDrugs = [];
       formBikou一包化 = false;
+      kigen = null;
     }
   }
 
@@ -439,6 +444,10 @@
       alert("保険情報を更新しました。");
     }
   }
+
+  function doToggleKigen() {
+    showKigen = !showKigen;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -467,8 +476,8 @@
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
       <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
-      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a
-      >
+      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a>
+      <a href="javascript:void(0)" on:click={doToggleKigen}>有効期限</a>
     </div>
     {#if showBikou}
       <div>
@@ -516,6 +525,17 @@
           <input type="text" bind:value={formShinryouJouhouTextInput} />
         </div>
         <button on:click={doAddShinryouJouhou}>追加</button>
+      </div>
+    {/if}
+    {#if showKigen}
+      <div>
+        <div>有効期限</div>
+        <div>
+          <EditableDate bind:date={kigen} />
+          {#if kigen != null}
+          <a href="javascript:void(0)" on:click={() => kigen = null}>クリア</a>
+          {/if}
+        </div>
       </div>
     {/if}
     <div class="commands">
