@@ -69,7 +69,7 @@
     if (shohou) {
       renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
       formBikou一包化 = hasBikou一包化(shohou);
-      kigen = shohou.使用期限年月日
+      // kigen = shohou.使用期限年月日
     } else {
       renderedDrugs = [];
       formBikou一包化 = false;
