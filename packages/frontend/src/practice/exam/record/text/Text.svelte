@@ -2,20 +2,16 @@
   import type * as m from "myclinic-model";
   import RegularText from "./regular/RegularText.svelte";
   import ShohouText from "./shohou/ShohouText.svelte";
+  import { TextMemoWrapper, type ShohouTextMemo } from "./text-memo";
 
   export let text: m.Text;
   export let index: number;
-  let mode: "regular" | "shohou" = "regular";
-  if( text.memo ){
-    let memo = JSON.parse(text.memo);
-    if( memo.kind === "shohou" ){
-      mode = "shohou";
-    }
-  }
+  const memoWrapper = TextMemoWrapper.fromText(text);
+  const shohouMemo = memoWrapper.probeShohouMemo();
 </script>
 
-{#if mode === "regular"}
+{#if shohouMemo}
+  <ShohouText memo={shohouMemo} textId={text.textId} />
+{:else}
   <RegularText {text} {index} />
-{:else if mode === "shohou"}
-  <ShohouText {text} />
 {/if}

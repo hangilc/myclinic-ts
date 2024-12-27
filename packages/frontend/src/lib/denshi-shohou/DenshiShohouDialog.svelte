@@ -9,7 +9,7 @@
     type 備考レコード,
     type 提供診療情報レコード,
   } from "./presc-info";
-  import { DateWrapper } from "myclinic-util";
+  import { DateWrapper, mapOptional } from "myclinic-util";
   import { renderDrug, type RenderedDrug } from "./presc-renderer";
   import { sign_presc } from "../hpki-api";
   import {
@@ -54,6 +54,9 @@
   let showKigen = false;
   let kigen: Date | null = null;
 
+  if( shohou && shohou.引換番号 ){
+    throw new Error("cannot edit registered denshi shohousen");
+  }
   init();
 
   async function init() {
@@ -69,7 +72,11 @@
     if (shohou) {
       renderedDrugs = shohou.RP剤情報グループ.map((g) => renderDrug(g));
       formBikou一包化 = hasBikou一包化(shohou);
-      // kigen = shohou.使用期限年月日
+      if( shohou.使用期限年月日 === undefined ){
+        kigen = null;
+      } else {
+        kigen = DateWrapper.fromOnshiDate(shohou.使用期限年月日).asDate();
+      }
     } else {
       renderedDrugs = [];
       formBikou一包化 = false;
@@ -414,7 +421,7 @@
     if (shohou) {
       const wrap = new PrescInfoWrapper(shohou);
       const cur = wrap.get提供情報レコード_提供診療情報レコード();
-      const update = cur.filter(j => j !== johou);
+      const update = cur.filter((j) => j !== johou);
       wrap.set提供情報レコード_提供診療情報レコード(update);
       shohou = wrap.shohou;
       console.log("shohou", shohou);
@@ -422,20 +429,20 @@
   }
 
   function doShowCode() {
-    if( shohou ){
+    if (shohou) {
       const prescInfo = createPrescInfo(shohou);
       const d: ShowCodeDialog = new ShowCodeDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           code: prescInfo,
-        }
-      })
+        },
+      });
     }
   }
 
   async function doUpdateHoken() {
-    if( shohou && shohou.引換番号 === undefined ){
+    if (shohou && shohou.引換番号 === undefined) {
       visit = await api.getVisit(visit.visitId);
       hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
       console.log("hokenInfo", hokenInfo);
@@ -447,6 +454,16 @@
 
   function doToggleKigen() {
     showKigen = !showKigen;
+  }
+
+  function onKigenChange() {
+    if (shohou) {
+      if( kigen == null ){
+        shohou.使用期限年月日 = undefined;
+      } else {
+        shohou.使用期限年月日 = DateWrapper.fromDate(kigen).asOnshiDate();
+      }
+    }
   }
 </script>
 
@@ -476,7 +493,8 @@
       <button on:click={doFreq}>登録薬剤</button>
       <button on:click={doAdd}>手動追加</button>
       <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
-      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a>
+      <a href="javascript:void(0)" on:click={doToggleShinryouJouhou}>診療情報</a
+      >
       <a href="javascript:void(0)" on:click={doToggleKigen}>有効期限</a>
     </div>
     {#if showBikou}
@@ -531,9 +549,11 @@
       <div>
         <div>有効期限</div>
         <div>
-          <EditableDate bind:date={kigen} />
+          <EditableDate bind:date={kigen} onChange={onKigenChange} />
           {#if kigen != null}
-          <a href="javascript:void(0)" on:click={() => kigen = null}>クリア</a>
+            <a href="javascript:void(0)" on:click={() => { kigen = null; onKigenChange(); }}
+              >クリア</a
+            >
           {/if}
         </div>
       </div>

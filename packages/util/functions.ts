@@ -80,3 +80,11 @@ export function zip<T, U>(a: T[], b: U[]): [T, U][] {
   }
   return result;
 }
+
+export function mapOptional<T, U>(src: T | undefined, f: (src: T) => U): U | undefined {
+  if( src === undefined ){
+    return undefined;
+  } else {
+    return f(src);
+  }
+}

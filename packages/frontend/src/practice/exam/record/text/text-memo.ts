@@ -28,3 +28,37 @@ export function modifyTextMemo(text: Text, f: (memo: TextMemo | undefined) => Te
   }
   return text;
 }
+
+export class TextMemoWrapper {
+  store: string | undefined;
+
+  constructor(store: string | undefined | null){
+    if( store === null ){
+      store = undefined;
+    }
+    this.store = store;
+  }
+
+  probeShohouMemo(): ShohouTextMemo | undefined {
+    const store = this.store;
+    if( store === undefined ){
+      return undefined;
+    } else {
+      const json = JSON.parse(store);
+      if( json.kind === "shohou" ){
+        return JSON.parse(store);
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  static fromText(text: Text) {
+    return new TextMemoWrapper(text.memo);
+  }
+
+  static setTextMemo(text: Text, memo: TextMemo) {
+    const store = JSON.stringify(memo);
+    text.memo = store;
+  }
+}

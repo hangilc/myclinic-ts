@@ -40,16 +40,9 @@
     }
   });
 
-  // function doRenderTest() {
-  //   let presc: RP剤情報[] = examples.presc_example_7;
-  //   console.log("json", JSON.stringify(presc, undefined, 2));
-  //   let render = parseShohousen(renderPresc(presc)).formatForSave();
-  //   console.log(render);
-  // }
-
   async function doNewShohou() {
     const clinicInfo = await cache.getClinicInfo();
-    let kikancode = "131" + clinicInfo.kikancode;
+    // let kikancode = "131" + clinicInfo.kikancode;
     const d: DenshiShohouDialog = new DenshiShohouDialog({
       target: document.body,
       props: {

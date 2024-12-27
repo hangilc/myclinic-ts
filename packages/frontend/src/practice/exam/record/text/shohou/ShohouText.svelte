@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Text, type Visit } from "myclinic-model";
-  import type { ShohouTextMemo } from "../text-memo";
+  import { TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
   import {
     renderDrug,
     type RenderedDrug,
@@ -13,143 +13,178 @@
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { cache } from "@lib/cache";
   import type { StatusResult } from "@/lib/denshi-shohou/shohou-interface";
-  import type { 備考レコード } from "@/lib/denshi-shohou/presc-info";
+  import type {
+    PrescInfoData,
+    備考レコード,
+  } from "@/lib/denshi-shohou/presc-info";
   import * as Base64 from "js-base64";
   import { XMLParser } from "fast-xml-parser";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
+  import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
+  import RegisteredShohouDialog from "@/lib/denshi-shohou/RegisteredShohouDialog.svelte";
+  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
 
-  export let text: Text;
+  export let memo: ShohouTextMemo;
+  export let textId: number;
+  let shohou: PrescInfoData = memo.shohou;
+  let prescriptionId: string | undefined = memo.prescriptionId;
 
-  let memo: ShohouTextMemo | undefined = undefined;
-  let drugs: RenderedDrug[] = [];
-  let bikou: 備考レコード[] = [];
-  let accessCode: string | undefined = undefined;
-  let prescriptionId: string | undefined = undefined;
-  let showDetail = false;
-  let statusResult: StatusResult | undefined = undefined;
-
-  $: adaptToText(text);
-  $: if (!showDetail) {
-    statusResult = undefined;
-  }
-
-  function adaptToText(t: Text) {
-    if (t && t.memo) {
-      let m: ShohouTextMemo = JSON.parse(t.memo);
-      memo = m;
-      drugs = m.shohou.RP剤情報グループ.map((group) => renderDrug(group));
-      bikou = m.shohou.備考レコード ?? [];
-      accessCode = m.shohou.引換番号;
-      prescriptionId = m.prescriptionId;
-      showDetail = false;
-    }
-  }
-
-  async function doDispClick() {
-    if (memo) {
-      const visit = await api.getVisit(text.visitId);
-      const patient = await api.getPatient(visit.patientId);
-      const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
-      const d: DenshiShohouDialog = new DenshiShohouDialog({
+  async function doClick() {
+    if( shohou.引換番号 && prescriptionId ) {
+      const d: RegisteredShohouDialog = new RegisteredShohouDialog({
         target: document.body,
         props: {
-          patient,
-          visit,
-          hokenInfo,
-          shohou: memo.shohou,
-          prescriptionId: memo.prescriptionId,
           destroy: () => d.$destroy(),
-          textId: text.textId,
-        },
-      });
+          shohou,
+          textId,
+          prescriptionId,
+          onUnregistered
+        }
+      })
+    } else if( shohou.引換番号 == undefined && prescriptionId == undefined) {
+      const text = await api.getText(textId);
+      const visit = await api.getVisit(text.visitId);
+      const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          shohou,
+          onDestroy: destroyThisText,
+          title: "未登録処方編集",
+          at: visit.visitedAt.substring(0, 10),
+        }
+      })
     }
   }
 
-  // async function doPrint() {
-  //   const qrcode = await createQrCode(createQrCodeContent(memo.shohou));
-  //   let data = create_data_from_denshi(memo.shohou);
-  //   let ops = drawShohousen(data);
-  //   const d: DrawerDialog = new DrawerDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       ops,
-  //       width: 148,
-  //       height: 210,
-  //       scale: 3,
-  //       kind: "shohousen",
-  //       title: "処方箋印刷",
-  //       stamp: qrcode,
-  //       stampStyle:
-  //         "position:absolute;left:90mm;top:3mm;height:15mm;width:15mm;",
-  //       stampPrintOption: { left: 115, top: 188, width: 15, height: 15 },
-  //     },
-  //   });
+  async function destroyThisText() {
+    await api.deleteText(textId);
+  }
+
+  async function onUnregistered() {
+    const text = await api.getText(textId);
+    const newMemo = TextMemoWrapper.fromText(text).probeShohouMemo();
+    if( !newMemo ){
+      throw new Error("no text memo for shohousen");
+    }
+    memo = newMemo;
+    shohou = memo.shohou;
+    prescriptionId = memo.prescriptionId;
+  }
+
+  // let drugs: RenderedDrug[] = [];
+  // let bikou: 備考レコード[] = [];
+  // let accessCode: string | undefined = undefined;
+  // let showDetail = false;
+  // let statusResult: StatusResult | undefined = undefined;
+
+  // $: adaptToMemo(memo);
+  // $: if (!showDetail) {
+  //   statusResult = undefined;
   // }
 
-  async function doHikae() {
-    if (memo?.prescriptionId) {
-      let filename = shohouHikaeFilename(memo?.prescriptionId);
-      let url = api.portalTmpFileUrl(filename);
-      window.open(url, "_blank");
-    }
-  }
+  // function adaptToMemo(m: ShohouTextMemo) {
+  //   drugs = m.shohou.RP剤情報グループ.map((group) => renderDrug(group));
+  //   bikou = m.shohou.備考レコード ?? [];
+  //   accessCode = m.shohou.引換番号;
+  //   prescriptionId = m.prescriptionId;
+  //   showDetail = false;
+  // }
 
-  async function doDelete() {
-    if (!confirm("この処方を削除していいですか？")) {
-      return;
-    }
-    await api.deleteText(text.textId);
-  }
+  // async function doDispClick() {
+  //   if (memo) {
+  //     const visit = await api.getVisit(text.visitId);
+  //     const patient = await api.getPatient(visit.patientId);
+  //     const hokenInfo = await api.getHokenInfoForVisit(visit.visitId);
+  //     const d: DenshiShohouDialog = new DenshiShohouDialog({
+  //       target: document.body,
+  //       props: {
+  //         patient,
+  //         visit,
+  //         hokenInfo,
+  //         shohou: memo.shohou,
+  //         prescriptionId: memo.prescriptionId,
+  //         destroy: () => d.$destroy(),
+  //         textId: text.textId,
+  //       },
+  //     });
+  //   }
+  // }
 
-  function toggleShowDetail() {
-    showDetail = !showDetail;
-  }
+  // async function doHikae() {
+  //   if (memo?.prescriptionId) {
+  //     let filename = shohouHikaeFilename(memo?.prescriptionId);
+  //     let url = api.portalTmpFileUrl(filename);
+  //     window.open(url, "_blank");
+  //   }
+  // }
 
-  async function doStatus() {
-    if (prescriptionId) {
-      const kikancode = await cache.getShohouKikancode();
-      statusResult = await prescStatus(kikancode, prescriptionId);
-    }
-  }
+  // async function doDelete() {
+  //   if (!confirm("この処方を削除していいですか？")) {
+  //     return;
+  //   }
+  //   await api.deleteText(text.textId);
+  // }
 
-  function formatDispensingResult(json: string | undefined): string {
-    if (!json) {
-      return "";
-    } else {
-      const decoded = Base64.decode(json);
-      const parser = new XMLParser({});
-      const parsed = parser.parse(decoded);
-      const dispensDoc = parsed.Document?.Dispensing?.DispensingDocument;
-      if (dispensDoc) {
-        const dispensDocDecoded = Base64.decode(dispensDoc);
-        return dispensDocDecoded;
-      }
-      return "";
-    }
-  }
+  // function toggleShowDetail() {
+  //   showDetail = !showDetail;
+  // }
 
-  async function doCopy() {
-    if (memo) {
-      const targetVisitId = getCopyTarget();
-      if (targetVisitId) {
-        const shohou = memo.shohou;
-        const drugs = shohou.RP剤情報グループ;
-        console.log("shohou", JSON.stringify(drugs, undefined, 2));
-        const newShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-        newShohou.RP剤情報グループ = drugs;
-        const newText = new Text(0, targetVisitId, "", JSON.stringify({
-          kind: "shohou",
-          shohou: newShohou,
-        }));
-        await api.enterText(newText);
-      }
-    }
-  }
+  // async function doStatus() {
+  //   if (prescriptionId) {
+  //     const kikancode = await cache.getShohouKikancode();
+  //     statusResult = await prescStatus(kikancode, prescriptionId);
+  //   }
+  // }
+
+  // function formatDispensingResult(json: string | undefined): string {
+  //   if (!json) {
+  //     return "";
+  //   } else {
+  //     const decoded = Base64.decode(json);
+  //     const parser = new XMLParser({});
+  //     const parsed = parser.parse(decoded);
+  //     const dispensDoc = parsed.Document?.Dispensing?.DispensingDocument;
+  //     if (dispensDoc) {
+  //       const dispensDocDecoded = Base64.decode(dispensDoc);
+  //       return dispensDocDecoded;
+  //     }
+  //     return "";
+  //   }
+  // }
+
+  // async function doCopy() {
+  //   if (memo) {
+  //     const targetVisitId = getCopyTarget();
+  //     if (targetVisitId) {
+  //       const shohou = memo.shohou;
+  //       const drugs = shohou.RP剤情報グループ;
+  //       console.log("shohou", JSON.stringify(drugs, undefined, 2));
+  //       const newShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+  //       newShohou.RP剤情報グループ = drugs;
+  //       const newText = new Text(
+  //         0,
+  //         targetVisitId,
+  //         "",
+  //         JSON.stringify({
+  //           kind: "shohou",
+  //           shohou: newShohou,
+  //         })
+  //       );
+  //       await api.enterText(newText);
+  //     }
+  //   }
+  // }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<div on:click={doClick} class="top">
+  <DenshiShohouDisp {shohou} />
+</div>
+
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!--
 <div class="top">
   <div class="disp" on:click={doDispClick}>
     <div>院外処方</div>
@@ -215,14 +250,10 @@
     </div>
   {/if}
 </div>
+-->
 
 <style>
-  .disp {
+  .top {
     cursor: pointer;
-  }
-  .drug-render {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 4px;
   }
 </style>
