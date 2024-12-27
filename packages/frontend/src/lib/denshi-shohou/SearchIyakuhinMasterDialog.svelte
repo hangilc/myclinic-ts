@@ -7,12 +7,12 @@
 
   export let destroy: () => void;
   export let at: string;
-  export let zaikei: 剤形区分;
   export let onEnter: (master: IyakuhinMaster) => void;
   let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
   let searchTextElement: HTMLInputElement;
   let universalNameOnly = true;
+  let zaikei: "内服" | "外用" | "すべて" = "内服"
 
   onMount(() => {
     searchTextElement?.focus();
@@ -26,7 +26,7 @@
     const t = searchText.trim();
     if (t) {
       let rs = await api.searchIyakuhinMaster(t, at);
-      if (zaikei === "内服" || zaikei === "頓服") {
+      if (zaikei === "内服" ) {
         rs = rs.filter((m) => m.zaikei === "1");
       } else if (zaikei === "外用") {
         rs = rs.filter((m) => m.zaikei === "6");
@@ -43,6 +43,12 @@
 </script>
 
 <Dialog title="医薬品マスター検索" {destroy}>
+  <div>
+    <input type="radio" value="内服" bind:group={zaikei} />内服
+    <input type="radio" value="外用" bind:group={zaikei} />外用
+    <input type="radio" value="その他" bind:group={zaikei} />その他
+
+  </div>
   <form on:submit|preventDefault={doSearch} class="search-form">
     <input type="text" bind:value={searchText} bind:this={searchTextElement} />
     <button type="submit">検索</button>

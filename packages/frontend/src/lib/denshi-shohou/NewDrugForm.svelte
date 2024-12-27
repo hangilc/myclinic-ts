@@ -1,25 +1,24 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
-  import type { 剤形区分 } from "./denshi-shohou";
   import type { 薬品レコード, 薬品情報 } from "./presc-info";
 
-  export let zaikei: 剤形区分;
   export let at: string;
   export let onCancel: () => void;
   export let onEnter: (drug: 薬品情報) => void;
   let master: IyakuhinMaster | undefined = undefined;
   let amount = "";
+  let amountInputElement: HTMLInputElement;
 
   function doSearchMaster() {
     const d: SearchIyakuhinMasterDialog = new SearchIyakuhinMasterDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        zaikei,
         at,
         onEnter: (m) => {
           master = m;
+          amountInputElement?.focus();
         },
       },
     });
@@ -64,7 +63,7 @@
   </div>
   <div style="text-align:right">分量：</div>
   <div>
-    <input type="text" bind:value={amount} style="width:2em;" />
+    <input type="text" bind:value={amount} style="width:2em;" bind:this={amountInputElement} />
     {master ? master.unit : ""}
   </div>
 </div>

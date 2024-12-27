@@ -1,69 +1,147 @@
 <script lang="ts">
+  import ChevronDown from "@/icons/ChevronDown.svelte";
   import Dialog from "../Dialog.svelte";
   import type { 剤形区分 } from "./denshi-shohou";
   import { amountDisp } from "./disp/disp-util";
   import NewDrugDialog from "./NewDrugDialog.svelte";
   import NewDrugForm from "./NewDrugForm.svelte";
-  import type { 薬品レコード, 薬品情報 } from "./presc-info";
+  import type { 用法レコード, 薬品レコード, 薬品情報 } from "./presc-info";
+  import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
+  import type { UsageMaster } from "myclinic-model";
 
   export let destroy: () => void;
   export let at: string;
   let rp剤形区分: 剤形区分 = "内服";
+  let showZaikeiAux = false;
   let drugs: 薬品情報[] = [];
   let showNewDrugForm = false;
+  let usageRecord: 用法レコード | undefined = undefined;
+  let timesText = "";
 
-  function doAddDrug() {
-    const d: NewDrugDialog = new NewDrugDialog({
+  function doUsageMasterSearch() {
+    const d: SearchUsageMasterDialog = new SearchUsageMasterDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        at,
-        zaikei: rp剤形区分,
-        onEnter: (master, amount) => {
-          const record: 薬品レコード = {
-            情報区分: "医薬品",
-            薬品コード種別: "レセプト電算処理システム用コード",
-            薬品コード: master.iyakuhincode.toString(),
-            薬品名称: master.name,
-            分量: amount,
-            力価フラグ: "薬価単位",
-            単位名: master.unit,
+        onEnter: (m: UsageMaster) => {
+          usageRecord = {
+            用法コード: m.usage_code,
+            用法名称: m.usage_name,
           };
-          const drug: 薬品情報 = {
-            薬品レコード: record,
-            不均等レコード: undefined,
-            薬品補足レコード: undefined,
-          };
-          drugs.push(drug);
-          drugs = drugs;
         },
       },
     });
   }
+
+  function indexRep(i: number): string {
+    return String.fromCharCode("a".charCodeAt(0) + i);
+  }
+
+  function doEnter() {
+
+  }
 </script>
 
 <Dialog title="新規薬剤グループ" {destroy} styleWidth="400px">
-  <div>
-    <input type="radio" bind:group={rp剤形区分} value="内服" />内服
-    <input type="radio" bind:group={rp剤形区分} value="頓服" />頓服
-    <input type="radio" bind:group={rp剤形区分} value="外用" />外用
-  </div>
-  <div>
-    {#each drugs as drug}
-      <div>{drug.薬品レコード.薬品名称} {amountDisp(drug.薬品レコード)}</div>
-    {/each}
-  </div>
-  <div style="margin-top:0px;">
-    <a
-      href="javascript:void(0)"
-      on:click={() => { showNewDrugForm = !showNewDrugForm }}
-      style="font-size:0.9rem">薬剤追加</a
-    >
-    {#if showNewDrugForm}
-      <div style="margin:10px 0;border:1px solid gray;border-radius:4px;padding:10px;">
-        <NewDrugForm onCancel={() => { showNewDrugForm = false;}} zaikei={rp剤形区分} {at} 
-          onEnter={(drug) => { drugs.push(drug); showNewDrugForm = false; }}/>
+  <div class="data-wrapper">
+    <div>剤型：</div>
+    <div>
+      <input type="radio" bind:group={rp剤形区分} value="内服" />内服
+      <input type="radio" bind:group={rp剤形区分} value="頓服" />頓服
+      <input type="radio" bind:group={rp剤形区分} value="外用" />外用
+      <a
+        href="javascript:void(0)"
+        on:click={() => (showZaikeiAux = !showZaikeiAux)}
+        style="position:relative;top:2px;margin-left:3px;"><ChevronDown /></a
+      >
+      {#if showZaikeiAux}
+        <div>
+          <input
+            type="radio"
+            bind:group={rp剤形区分}
+            value="内服滴剤"
+          />内服滴剤
+          <input type="radio" bind:group={rp剤形区分} value="注射" />注射
+          <input
+            type="radio"
+            bind:group={rp剤形区分}
+            value="医療材料"
+          />医療材料
+          <input type="radio" bind:group={rp剤形区分} value="不明" />不明
+        </div>
+      {/if}
+    </div>
+    <div>薬剤：</div>
+    <div>
+      <div class="drugs-wrapper">
+        {#each drugs as drug, i}
+          <div>{indexRep(i)})</div>
+          <div>
+            {drug.薬品レコード.薬品名称}
+            {amountDisp(drug.薬品レコード)}
+          </div>
+        {/each}
+      </div>
+      <div style="margin-top:0px;">
+        <a
+          href="javascript:void(0)"
+          on:click={() => {
+            showNewDrugForm = !showNewDrugForm;
+          }}
+          style="font-size:0.9rem">薬剤追加</a
+        >
+        {#if showNewDrugForm}
+          <div
+            style="margin:10px 0;border:1px solid gray;border-radius:4px;padding:10px;"
+          >
+            <NewDrugForm
+              onCancel={() => {
+                showNewDrugForm = false;
+              }}
+              {at}
+              onEnter={(drug) => {
+                drugs.push(drug);
+                drugs = drugs;
+                showNewDrugForm = false;
+              }}
+            />
+          </div>
+        {/if}
+      </div>
+    </div>
+    <div>用法：</div>
+    <div>
+      {usageRecord ? usageRecord.用法名称 : "（未設定）"}
+      <a
+        href="javascript:void(0)"
+        on:click={doUsageMasterSearch}
+        style="font-size:0.9rem">マスター検索</a
+      >
+    </div>
+    {#if rp剤形区分 === "内服" || rp剤形区分 === "頓服"}
+      <div>{ rp剤形区分 === "内服" ? "日数" : "回数"}：</div>
+      <div>
+        <input type="text" style="width:3rem" bind:value={timesText} />
+        { rp剤形区分 === "内服" ? "日分" : "回分"}
       </div>
     {/if}
   </div>
+  <div style="margin-top:10px;text-align:right">
+    <button on:click={doEnter} disabled={!(drugs.length > 0 && usageRecord && timesText)}>入力</button>
+    <button on:click={destroy}>キャンセル</button>
+  </div>
 </Dialog>
+
+<style>
+  .data-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px;
+  }
+
+  .drugs-wrapper {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px;
+  }
+</style>
