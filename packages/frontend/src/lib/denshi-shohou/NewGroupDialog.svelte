@@ -3,14 +3,20 @@
   import Dialog from "../Dialog.svelte";
   import type { 剤形区分 } from "./denshi-shohou";
   import { amountDisp } from "./disp/disp-util";
-  import NewDrugDialog from "./NewDrugDialog.svelte";
   import NewDrugForm from "./NewDrugForm.svelte";
-  import type { 用法レコード, 薬品レコード, 薬品情報 } from "./presc-info";
+  import type {
+    RP剤情報,
+    用法レコード,
+    薬品レコード,
+    薬品情報,
+    剤形レコード,
+  } from "./presc-info";
   import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
   import type { UsageMaster } from "myclinic-model";
 
   export let destroy: () => void;
   export let at: string;
+  export let onEnter: (group: RP剤情報) => void;
   let rp剤形区分: 剤形区分 = "内服";
   let showZaikeiAux = false;
   let drugs: 薬品情報[] = [];
@@ -37,8 +43,43 @@
     return String.fromCharCode("a".charCodeAt(0) + i);
   }
 
-  function doEnter() {
+  function resolve調剤数量(): number | string {
+    let times = 1;
+    if (rp剤形区分 === "内服" || rp剤形区分 === "頓服") {
+      timesText = timesText.trim();
+      if (!/^\d+$/.test(timesText)) {
+        return `${rp剤形区分 === "内服" ? "日数" : "回数"}の入力が不適切ですｓ。`;
+      }
+      times = parseInt(timesText);
+    }
+    return times;
+  }
 
+  function doEnter() {
+    let times = resolve調剤数量();
+    if (typeof times === "string") {
+      alert(times);
+      return;
+    }
+    let 剤形レコード: 剤形レコード = {
+      剤形区分: rp剤形区分,
+      調剤数量: times,
+    };
+    if (!usageRecord) {
+      alert("用法が設定されていません。");
+      return;
+    }
+    if (drugs.length === 0) {
+      alert("薬品が設定されていません。");
+      return;
+    }
+    let group: RP剤情報 = {
+      剤形レコード,
+      用法レコード: usageRecord,
+      薬品情報グループ: drugs,
+    };
+    destroy();
+    onEnter(group);
   }
 </script>
 
@@ -104,6 +145,7 @@
                 drugs = drugs;
                 showNewDrugForm = false;
               }}
+              zaikei={rp剤形区分}
             />
           </div>
         {/if}
@@ -119,15 +161,23 @@
       >
     </div>
     {#if rp剤形区分 === "内服" || rp剤形区分 === "頓服"}
-      <div>{ rp剤形区分 === "内服" ? "日数" : "回数"}：</div>
+      <div>{rp剤形区分 === "内服" ? "日数" : "回数"}：</div>
       <div>
         <input type="text" style="width:3rem" bind:value={timesText} />
-        { rp剤形区分 === "内服" ? "日分" : "回分"}
+        {rp剤形区分 === "内服" ? "日分" : "回分"}
       </div>
     {/if}
   </div>
   <div style="margin-top:10px;text-align:right">
-    <button on:click={doEnter} disabled={!(drugs.length > 0 && usageRecord && timesText)}>入力</button>
+    <button
+      on:click={doEnter}
+      disabled={!(
+        drugs.length > 0 &&
+        usageRecord &&
+        (((rp剤形区分 === "内服" || rp剤形区分 === "頓服") && timesText) ||
+          !(rp剤形区分 === "内服" || rp剤形区分 === "頓服"))
+      )}>入力</button
+    >
     <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>

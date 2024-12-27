@@ -2,17 +2,16 @@
   import type { IyakuhinMaster } from "myclinic-model";
   import api from "../api";
   import Dialog from "../Dialog.svelte";
-  import type { 剤形区分 } from "./denshi-shohou";
   import { onMount } from "svelte";
 
   export let destroy: () => void;
   export let at: string;
   export let onEnter: (master: IyakuhinMaster) => void;
+  export let masterZaikei: "内服" | "外用" | "すべて" = "内服"
   let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
   let searchTextElement: HTMLInputElement;
   let universalNameOnly = true;
-  let zaikei: "内服" | "外用" | "すべて" = "内服"
 
   onMount(() => {
     searchTextElement?.focus();
@@ -26,9 +25,9 @@
     const t = searchText.trim();
     if (t) {
       let rs = await api.searchIyakuhinMaster(t, at);
-      if (zaikei === "内服" ) {
+      if (masterZaikei === "内服" ) {
         rs = rs.filter((m) => m.zaikei === "1");
-      } else if (zaikei === "外用") {
+      } else if (masterZaikei === "外用") {
         rs = rs.filter((m) => m.zaikei === "6");
       }
       searchResult = rs;
@@ -44,9 +43,9 @@
 
 <Dialog title="医薬品マスター検索" {destroy}>
   <div>
-    <input type="radio" value="内服" bind:group={zaikei} />内服
-    <input type="radio" value="外用" bind:group={zaikei} />外用
-    <input type="radio" value="その他" bind:group={zaikei} />その他
+    <input type="radio" value="内服" bind:group={masterZaikei} />内服
+    <input type="radio" value="外用" bind:group={masterZaikei} />外用
+    <input type="radio" value="その他" bind:group={masterZaikei} />その他
 
   </div>
   <form on:submit|preventDefault={doSearch} class="search-form">

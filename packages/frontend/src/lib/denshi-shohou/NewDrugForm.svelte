@@ -2,15 +2,23 @@
   import type { IyakuhinMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
   import type { 薬品レコード, 薬品情報 } from "./presc-info";
+  import type { 剤形区分 } from "./denshi-shohou";
 
   export let at: string;
   export let onCancel: () => void;
   export let onEnter: (drug: 薬品情報) => void;
+  export let zaikei: 剤形区分;
   let master: IyakuhinMaster | undefined = undefined;
   let amount = "";
   let amountInputElement: HTMLInputElement;
 
   function doSearchMaster() {
+    let masterZaikei: "内服" | "外用" | "すべて" = "すべて";
+    if( zaikei === "内服" || zaikei === "頓服" ){
+      masterZaikei = "内服";
+    } else if( zaikei === "外用" ){
+      masterZaikei = "外用";
+    }
     const d: SearchIyakuhinMasterDialog = new SearchIyakuhinMasterDialog({
       target: document.body,
       props: {
@@ -20,6 +28,7 @@
           master = m;
           amountInputElement?.focus();
         },
+        masterZaikei,
       },
     });
   }

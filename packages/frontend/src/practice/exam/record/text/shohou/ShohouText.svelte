@@ -24,11 +24,29 @@
   import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
   import RegisteredShohouDialog from "@/lib/denshi-shohou/RegisteredShohouDialog.svelte";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import type { Unsubscriber } from "svelte/store";
+  import { textUpdated } from "@/app-events";
+  import { onDestroy } from "svelte";
 
   export let memo: ShohouTextMemo;
   export let textId: number;
   let shohou: PrescInfoData = memo.shohou;
   let prescriptionId: string | undefined = memo.prescriptionId;
+
+  let unsubs: Unsubscriber[] = [
+    textUpdated.subscribe(updated => {
+      if( updated && updated.textId === textId ){
+        const newMemo = TextMemoWrapper.fromText(updated).probeShohouMemo();
+        if( newMemo ){
+          memo = newMemo;
+          shohou = memo.shohou;
+          prescriptionId = memo.prescriptionId;
+        }
+      }
+    }),
+  ];
+
+  onDestroy(() => unsubs.forEach(f => f()));
 
   async function doClick() {
     if( shohou.引換番号 && prescriptionId ) {
@@ -53,9 +71,27 @@
           onDestroy: destroyThisText,
           title: "未登録処方編集",
           at: visit.visitedAt.substring(0, 10),
+          onSave: saveMemo,
+          onRegistered: async (shohou, prescriptionId) => {
+            const text = await api.getText(textId);
+            TextMemoWrapper.setTextMemo(text, {
+              kind: "shohou", shohou, prescriptionId,
+            });
+            await api.updateText(text);
+          },
         }
       })
     }
+  }
+
+  async function saveMemo(shohou: PrescInfoData) {
+    const text = await api.getText(textId);
+    TextMemoWrapper.setTextMemo(text, {
+      kind: "shohou",
+      shohou,
+      prescriptionId: undefined
+    });
+    await api.updateText(text);
   }
 
   async function destroyThisText() {
