@@ -7,13 +7,15 @@
   import { amountDisp, daysTimesDisp, usageDisp } from "./disp/disp-util";
   import NewGroupDialog from "./NewGroupDialog.svelte";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
-  import { createPrescInfo, type PrescInfoData } from "./presc-info";
+  import { createPrescInfo, type PrescInfoData, type 備考レコード } from "./presc-info";
   import {
     checkShohouResult,
     type HikaeResult,
     type RegisterResult,
   } from "./shohou-interface";
   import api from "../api";
+  import BikouForm from "./BikouForm.svelte";
+  import ShowCodeDialog from "./ShowCodeDialog.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -25,6 +27,7 @@
     shohou: PrescInfoData,
     prescriptionId: string
   ) => void;
+  let showBikou = false;
 
   function doDelete() {
     if (onDelete && confirm("この処方を削除していいですか？")) {
@@ -92,6 +95,28 @@
     let filename = shohouHikaeFilename(prescriptionId);
     await api.decodeBase64ToFile(filename, base64);
   }
+
+  function doToggleBikou() {
+    showBikou = !showBikou;
+  }
+
+  function addBikou(record: 備考レコード) {
+    let cur = shohou.備考レコード ?? [];
+    cur.push(record);
+    shohou.備考レコード = cur;
+    shohou = shohou;
+  }
+
+  function doCode() {
+    const code = createPrescInfo(shohou);
+    const d: ShowCodeDialog = new ShowCodeDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        code,
+      }
+    })
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -115,9 +140,12 @@
   </div>
   <div>
     <a href="javascript:void(0)" on:click={doNewGroup}>新規グループ</a>
+    <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
   </div>
+  {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} />{/if}
 
   <div class="commands">
+    <a href="javascript:void(0)" on:click={doCode}>コード</a>
     {#if onDelete}
     <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
