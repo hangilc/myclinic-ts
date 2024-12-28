@@ -2,6 +2,8 @@ import { cmpNumSeq } from "./cmp";
 import { padLeft } from "./pad";
 import * as wareki from "./wareki";
 
+const youbiList = ["日", "月", "火", "水", "木", "金", "土"] as const;
+
 export class DateWrapper {
   readonly date: Date;
 
@@ -23,6 +25,11 @@ export class DateWrapper {
 
   getDayOfWeek(): number {
     return this.date.getDay();
+  }
+
+  getYoubi(): "日" | "月" | "火" | "水" | "木" | "金" | "土" {
+    const i = this.getDayOfWeek();
+    return youbiList[i];
   }
 
   getHours(): number {
