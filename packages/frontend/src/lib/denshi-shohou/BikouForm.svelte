@@ -30,7 +30,7 @@
   }
 </script>
 
-<div style="border:1px solid gray;border-radius:4px;padding:10px;">
+<div style="border:1px solid gray;border-radius:4px;padding:10px;margin:4px 0;">
   {#each records as record}
     <div>
       {record.備考}

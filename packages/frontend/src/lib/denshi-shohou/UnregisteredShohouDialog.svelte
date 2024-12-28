@@ -16,6 +16,7 @@
   import api from "../api";
   import BikouForm from "./BikouForm.svelte";
   import ShowCodeDialog from "./ShowCodeDialog.svelte";
+  import KigenForm from "./KigenForm.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -28,6 +29,7 @@
     prescriptionId: string
   ) => void;
   let showBikou = false;
+  let showKigen = false;
 
   function doDelete() {
     if (onDelete && confirm("この処方を削除していいですか？")) {
@@ -124,6 +126,15 @@
       }
     })
   }
+
+  function doToggleKigen() {
+    showKigen = !showKigen;
+  }
+
+  function setKigen(kigen: string | undefined) {
+    shohou.使用期限年月日 = kigen;
+    shohou = shohou;
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -148,8 +159,10 @@
   <div>
     <a href="javascript:void(0)" on:click={doNewGroup}>新規グループ</a>
     <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
+    <a href="javascript:void(0)" on:click={doToggleKigen}>有効期限</a>
   </div>
   {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} onDelete={deleteBikou} />{/if}
+  {#if showKigen}<KigenForm kigen={shohou.使用期限年月日} onEnter={setKigen}/>{/if}
 
   <div class="commands">
     <a href="javascript:void(0)" on:click={doCode}>コード</a>
