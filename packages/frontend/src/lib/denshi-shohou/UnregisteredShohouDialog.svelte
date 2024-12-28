@@ -107,6 +107,13 @@
     shohou = shohou;
   }
 
+  function deleteBikou(record: 備考レコード) {
+    if( shohou.備考レコード != undefined ){
+      shohou.備考レコード = shohou.備考レコード.filter(r => r !== record);
+      shohou = shohou;
+    }
+  }
+
   function doCode() {
     const code = createPrescInfo(shohou);
     const d: ShowCodeDialog = new ShowCodeDialog({
@@ -142,7 +149,7 @@
     <a href="javascript:void(0)" on:click={doNewGroup}>新規グループ</a>
     <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
   </div>
-  {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} />{/if}
+  {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} onDelete={deleteBikou} />{/if}
 
   <div class="commands">
     <a href="javascript:void(0)" on:click={doCode}>コード</a>
