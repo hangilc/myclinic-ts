@@ -16,6 +16,9 @@
   import api from "@/lib/api";
   import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { cache } from "@/lib/cache";
+  import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
+  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -42,17 +45,35 @@
 
   async function doNewShohou() {
     const clinicInfo = await cache.getClinicInfo();
-    // let kikancode = "131" + clinicInfo.kikancode;
-    const d: DenshiShohouDialog = new DenshiShohouDialog({
+    const shohou = initPrescInfoData(visit.asVisit, visit.patient, visit.hoken, clinicInfo);
+    const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        patient: visit.patient,
-        visit: visit.asVisit,
-        hokenInfo: visit.hoken,
-        textId: 0,
-      },
-    });
+        title: "新規処方",
+        shohou,
+        onDelete: undefined,
+        at: visit.visitedAt.substring(0, 10),
+        onSave: (shohou: PrescInfoData) => {
+
+        },
+        onRegistered: (shohou: PrescInfoData, prescriptionId: string) => {
+          
+        }
+      }
+    })
+  //    const clinicInfo = await cache.getClinicInfo();
+  //   // let kikancode = "131" + clinicInfo.kikancode;
+  //   const d: DenshiShohouDialog = new DenshiShohouDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       patient: visit.patient,
+  //       visit: visit.asVisit,
+  //       hokenInfo: visit.hoken,
+  //       textId: 0,
+  //     },
+  //   });
   }
 </script>
 

@@ -68,7 +68,7 @@
         props: {
           destroy: () => d.$destroy(),
           shohou,
-          onDestroy: destroyThisText,
+          onDelete: destroyThisText,
           title: "未登録処方編集",
           at: visit.visitedAt.substring(0, 10),
           onSave: saveMemo,

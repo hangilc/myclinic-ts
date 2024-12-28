@@ -18,7 +18,7 @@
   export let destroy: () => void;
   export let title: string;
   export let shohou: PrescInfoData;
-  export let onDestroy: () => void;
+  export let onDelete: (() => void) | undefined;
   export let at: string;
   export let onSave: (shohou: PrescInfoData) => void;
   export let onRegistered: (
@@ -26,10 +26,10 @@
     prescriptionId: string
   ) => void;
 
-  function doDestroy() {
-    if (confirm("この処方を削除していいですか？")) {
+  function doDelete() {
+    if (onDelete && confirm("この処方を削除していいですか？")) {
       destroy();
-      onDestroy();
+      onDelete();
     }
   }
 
@@ -118,7 +118,9 @@
   </div>
 
   <div class="commands">
-    <a href="javascript:void(0)" on:click={doDestroy}>削除</a>
+    {#if onDelete}
+    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     <button on:click={doRegister}>登録</button>
     <button on:click={doSave}>保存</button>
     <button on:click={destroy}>キャンセル</button>
