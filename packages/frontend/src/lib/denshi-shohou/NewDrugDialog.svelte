@@ -4,6 +4,7 @@
   import Dialog from "../Dialog.svelte";
   import { onMount } from "svelte";
   import type { 剤形区分 } from "./denshi-shohou";
+  import { toHankaku } from "../zenkaku";
 
   export let destroy: () => void;
   export let at: string;
@@ -47,6 +48,7 @@
       alert("薬品名が設定されていません。");
       return;
     }
+    amountInput = toHankaku(amountInput);
     if( !/^\d+$|^\d+\.\d+$/.test(amountInput) ){
       alert("分量の入力が不適切です。");
       return;

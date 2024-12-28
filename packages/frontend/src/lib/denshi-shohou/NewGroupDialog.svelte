@@ -13,6 +13,7 @@
   } from "./presc-info";
   import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
   import type { UsageMaster } from "myclinic-model";
+  import { toHankaku } from "../zenkaku";
 
   export let destroy: () => void;
   export let at: string;
@@ -47,6 +48,7 @@
     let times = 1;
     if (rp剤形区分 === "内服" || rp剤形区分 === "頓服") {
       timesText = timesText.trim();
+      timesText = toHankaku(timesText);
       if (!/^\d+$/.test(timesText)) {
         return `${rp剤形区分 === "内服" ? "日数" : "回数"}の入力が不適切ですｓ。`;
       }

@@ -3,6 +3,7 @@
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
   import type { 薬品レコード, 薬品情報 } from "./presc-info";
   import type { 剤形区分 } from "./denshi-shohou";
+  import { toHankaku } from "../zenkaku";
 
   export let at: string;
   export let onCancel: () => void;
@@ -38,6 +39,7 @@
       alert("薬品名が設定されていません。");
       return;
     }
+    amount = toHankaku(amount.trim());
     if (!/^\d+$|^\d+\.\d+$/.test(amount)) {
       alert("分量の入力が不適切です。");
       return;
