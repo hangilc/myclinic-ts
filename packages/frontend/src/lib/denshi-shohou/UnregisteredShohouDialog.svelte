@@ -7,7 +7,7 @@
   import { amountDisp, daysTimesDisp, usageDisp } from "./disp/disp-util";
   import NewGroupDialog from "./NewGroupDialog.svelte";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
-  import { createPrescInfo, type PrescInfoData, type 備考レコード } from "./presc-info";
+  import { createPrescInfo, type PrescInfoData, type 備考レコード, type 提供情報レコード } from "./presc-info";
   import {
     checkShohouResult,
     type HikaeResult,
@@ -17,6 +17,7 @@
   import BikouForm from "./BikouForm.svelte";
   import ShowCodeDialog from "./ShowCodeDialog.svelte";
   import KigenForm from "./KigenForm.svelte";
+  import InfoForm from "./InfoForm.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -30,6 +31,7 @@
   ) => void;
   let showBikou = false;
   let showKigen = false;
+  let showInfo = false;
 
   function doDelete() {
     if (onDelete && confirm("この処方を削除していいですか？")) {
@@ -104,6 +106,7 @@
 
   function addBikou(record: 備考レコード) {
     let cur = shohou.備考レコード ?? [];
+    cur = [...cur];
     cur.push(record);
     shohou.備考レコード = cur;
     shohou = shohou;
@@ -135,6 +138,15 @@
     shohou.使用期限年月日 = kigen;
     shohou = shohou;
   }
+
+  function doToggleInfo() {
+    showInfo = !showInfo;
+  }
+
+  function setInfo(info: 提供情報レコード | undefined) {
+    shohou.提供情報レコード = info;
+    shohou = shohou;
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -160,9 +172,11 @@
     <a href="javascript:void(0)" on:click={doNewGroup}>新規グループ</a>
     <a href="javascript:void(0)" on:click={doToggleBikou}>備考</a>
     <a href="javascript:void(0)" on:click={doToggleKigen}>有効期限</a>
+    <a href="javascript:void(0)" on:click={doToggleInfo}>提供情報</a>
   </div>
   {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} onDelete={deleteBikou} />{/if}
   {#if showKigen}<KigenForm kigen={shohou.使用期限年月日} onEnter={setKigen}/>{/if}
+  {#if showInfo}<InfoForm record={shohou.提供情報レコード ?? {}} onEnter={setInfo}/>{/if}
 
   <div class="commands">
     <a href="javascript:void(0)" on:click={doCode}>コード</a>
