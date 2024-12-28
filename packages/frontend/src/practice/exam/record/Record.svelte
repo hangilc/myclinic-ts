@@ -19,6 +19,7 @@
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+  import { TextMemoWrapper } from "./text/text-memo";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -54,8 +55,12 @@
         shohou,
         onDelete: undefined,
         at: visit.visitedAt.substring(0, 10),
-        onSave: (shohou: PrescInfoData) => {
-
+        onSave: async (shohou: PrescInfoData) => {
+          const text = new m.Text(0, visit.visitId, "");
+          TextMemoWrapper.setTextMemo(text, {
+            kind: "shohou", shohou, prescriptionId: undefined
+          });
+          await api.enterText(text);
         },
         onRegistered: (shohou: PrescInfoData, prescriptionId: string) => {
           
