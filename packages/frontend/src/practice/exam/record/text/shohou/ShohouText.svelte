@@ -138,7 +138,7 @@
       console.log("shohou", JSON.stringify(drugs, undefined, 2));
       const newShohou = await initPrescInfoDataFromVisitId(targetVisitId);
       Object.assign(newShohou, {
-        RP剤情報グループ: shohou.RP剤情報グループ,
+        RP剤情報グループ: [...shohou.RP剤情報グループ],
         備考レコード: shohou.備考レコード,
         提供情報レコード: shohou.提供情報レコード,
       })
