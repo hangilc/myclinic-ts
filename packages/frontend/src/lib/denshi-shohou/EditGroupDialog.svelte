@@ -13,6 +13,7 @@
   import type { UsageMaster } from "myclinic-model";
   import { toHankaku } from "../zenkaku";
   import EditDrugDialog from "./EditDrugDialog.svelte";
+  import FreeStyleUsageDialog from "./FreeStyleUsageDialog.svelte";
 
   export let destroy: () => void;
   export let at: string;
@@ -39,6 +40,21 @@
         },
       },
     });
+  }
+
+  function doFreeStyleUsage() {
+    const d: FreeStyleUsageDialog = new FreeStyleUsageDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        onEnter: (text) => {
+          usageRecord = {
+            用法コード: "“ 0X0XXXXXXXXX0000",
+            用法名称: text,
+          };
+        }
+      }
+    })
   }
 
   function indexRep(i: number): string {
@@ -184,6 +200,7 @@
         on:click={doUsageMasterSearch}
         style="font-size:0.9rem">マスター検索</a
       >
+      <a href="javascript:void(0)" style="font-size:0.9rem" on:click={doFreeStyleUsage}>自由文章</a>
     </div>
     {#if zaikeiKubun === "内服" || zaikeiKubun === "頓服"}
       <div>{zaikeiKubun === "内服" ? "日数" : "回数"}：</div>

@@ -45,7 +45,7 @@
   <div>
     <input type="radio" value="内服" bind:group={masterZaikei} />内服
     <input type="radio" value="外用" bind:group={masterZaikei} />外用
-    <input type="radio" value="その他" bind:group={masterZaikei} />その他
+    <input type="radio" value="すべて" bind:group={masterZaikei} />すべて
 
   </div>
   <form on:submit|preventDefault={doSearch} class="search-form">
