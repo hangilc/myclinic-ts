@@ -1,5 +1,5 @@
 import { toZenkaku } from "myclinic-rezept/zenkaku";
-import type { RP剤情報, 不均等レコード, 薬品レコード, 薬品情報, 負担区分レコード } from "../presc-info";
+import type { RP剤情報, 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 負担区分レコード } from "../presc-info";
 
 export function amountDisp(rec: 薬品レコード): string {
   return `${toZenkaku(rec.分量)}${toZenkaku(rec.単位名)}`;
@@ -15,7 +15,7 @@ export function drugDisp(drug: 薬品情報): string {
   if (drug.負担区分レコード) {
     disp += ` ${futanKubunDisp(drug.負担区分レコード)}`;
   }
-  if( drug.薬品補足レコード ){
+  if (drug.薬品補足レコード) {
     disp += ` ${drug.薬品補足レコード.map(rec => rec.薬品補足情報).join(" ")}`;
   }
   return disp;
@@ -30,8 +30,19 @@ export function futanKubunDisp(rec: 負担区分レコード): string {
   ].filter(s => s !== "").join("・");
 }
 
-export function usageDisp(group: RP剤情報): string {
-  return group.用法レコード.用法名称;
+export function usageDisp(group: { 用法レコード: 用法レコード; 用法補足レコード?: 用法補足レコード[]; }): string {
+  let s = group.用法レコード.用法名称;
+  if (group.用法補足レコード) {
+    group.用法補足レコード.forEach(rec => {
+      let kubunRep = "";
+      let kubun = rec.用法補足区分;
+      if (kubun !== "用法の続き" && kubun !== "JAMI部位" && kubun !== "JAMI補足用法") {
+        kubunRep = `（${kubun}）`;
+      }
+      s += ` ${kubunRep}${rec.用法補足情報}`;
+    })
+  }
+  return s;
 }
 
 export function daysTimesDisp(group: RP剤情報): string {

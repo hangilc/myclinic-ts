@@ -2,18 +2,20 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import Dialog from "../Dialog.svelte";
   import type { 剤形区分 } from "./denshi-shohou";
-  import { drugDisp } from "./disp/disp-util";
+  import { drugDisp, usageDisp } from "./disp/disp-util";
   import type {
     RP剤情報,
     用法レコード,
     薬品情報,
     剤形レコード,
+    用法補足レコード,
   } from "./presc-info";
   import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
   import type { UsageMaster } from "myclinic-model";
   import { toHankaku } from "../zenkaku";
   import EditDrugDialog from "./EditDrugDialog.svelte";
   import FreeStyleUsageDialog from "./FreeStyleUsageDialog.svelte";
+  import UsageAdditionalsForm from "./UsageAdditionalsForm.svelte";
 
   export let destroy: () => void;
   export let at: string;
@@ -24,8 +26,11 @@
   let drugs: 薬品情報[] = group?.薬品情報グループ ?? [];
   let usageRecord: 用法レコード | undefined = group?.用法レコード ?? undefined;
   let timesText = group?.剤形レコード.調剤数量.toString() ?? "";
+  let usageAdditionals: 用法補足レコード[] | undefined =
+    group?.用法補足レコード ?? undefined;
   let showZaikeiAux = false;
   let title = group ? "薬剤グループ編集" : "新規薬剤グループ";
+  let showUsageAdditionals = false;
 
   function doUsageMasterSearch() {
     const d: SearchUsageMasterDialog = new SearchUsageMasterDialog({
@@ -52,9 +57,9 @@
             用法コード: "“ 0X0XXXXXXXXX0000",
             用法名称: text,
           };
-        }
-      }
-    })
+        },
+      },
+    });
   }
 
   function indexRep(i: number): string {
@@ -96,13 +101,18 @@
       剤形レコード,
       用法レコード: usageRecord,
       薬品情報グループ: drugs,
+      用法補足レコード: usageAdditionals,
     };
     destroy();
     onEnter(group);
   }
 
   function doDelete() {
-    if( group && onDelete && confirm("この薬剤グループを削除していいですか？") ){
+    if (
+      group &&
+      onDelete &&
+      confirm("この薬剤グループを削除していいですか？")
+    ) {
       destroy();
       onDelete();
     }
@@ -117,14 +127,17 @@
         at,
         onEnter: (newDrug) => {
           console.log("newDrug", newDrug);
-          drugs = drugs.map(d => d === drug ? newDrug : d)
+          drugs = drugs.map((d) => (d === drug ? newDrug : d));
         },
-        onDelete: drugs.length <= 1 ? undefined : () => {
-          drugs = drugs.filter(d => d !== drug);
-        },
+        onDelete:
+          drugs.length <= 1
+            ? undefined
+            : () => {
+                drugs = drugs.filter((d) => d !== drug);
+              },
         zaikei: zaikeiKubun,
-      }
-    })
+      },
+    });
   }
 
   function doAddDrug() {
@@ -139,8 +152,17 @@
         },
         onDelete: undefined,
         zaikei: zaikeiKubun,
-      }
-    })
+      },
+    });
+  }
+
+  function doToggleUsageAdditionals() {
+    showUsageAdditionals = !showUsageAdditionals;
+  }
+
+  function setUsageAdditionals(records: 用法補足レコード[] | undefined) {
+    usageAdditionals = records;
+    showUsageAdditionals = false;
   }
 </script>
 
@@ -194,13 +216,25 @@
     </div>
     <div>用法：</div>
     <div>
-      {usageRecord ? usageRecord.用法名称 : "（未設定）"}
-      <a
-        href="javascript:void(0)"
-        on:click={doUsageMasterSearch}
-        style="font-size:0.9rem">マスター検索</a
-      >
-      <a href="javascript:void(0)" style="font-size:0.9rem" on:click={doFreeStyleUsage}>自由文章</a>
+      {usageRecord ? usageDisp({ 用法レコード: usageRecord, 用法補足レコード: usageAdditionals }) : "（未設定）"}
+      <div>
+        <a
+          href="javascript:void(0)"
+          on:click={doUsageMasterSearch}
+          style="font-size:0.9rem">マスター検索</a
+        >
+        <a
+          href="javascript:void(0)"
+          style="font-size:0.9rem"
+          on:click={doFreeStyleUsage}>自由文章</a
+        >
+        <a
+          href="javascript:void(0)"
+          style="font-size:0.9rem"
+          on:click={doToggleUsageAdditionals}>用法補足</a
+        >
+        {#if showUsageAdditionals}<UsageAdditionalsForm records={usageAdditionals} onEnter={setUsageAdditionals}/>{/if}
+      </div>
     </div>
     {#if zaikeiKubun === "内服" || zaikeiKubun === "頓服"}
       <div>{zaikeiKubun === "内服" ? "日数" : "回数"}：</div>
@@ -211,7 +245,7 @@
     {/if}
   </div>
   <div style="margin-top:10px;text-align:right">
-    {#if group && onDelete }
+    {#if group && onDelete}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
     <button
