@@ -17,6 +17,7 @@ describe("shohousen parser", () => {
       kind: "drug-amount",
       drug: "カロナール錠５００ｍｇ",
       amount: "３",
+      tail: undefined,
       unit: "錠",
     })
   })
@@ -27,6 +28,7 @@ describe("shohousen parser", () => {
       kind: "drug-amount",
       drug: "デルモベート軟膏０．０５％５ｇ",
       amount: "５",
+      tail: undefined,
       unit: "ｇ",
     })
   })
@@ -37,6 +39,7 @@ describe("shohousen parser", () => {
       kind: "drug-amount",
       drug: "アローゼン顆粒",
       amount: "０．５",
+      tail: undefined,
       unit: "ｇ",
     })
   })
@@ -51,7 +54,7 @@ describe("shohousen parser", () => {
     expect(p.prolog).deep.equal(["院外処方", "Ｒｐ）"]);
     expect(p.drugs).deep.equal([
       [
-        { kind: "drug-amount", drug: "カロナール錠５００ｍｇ", amount: "３", unit: "錠" },
+        { kind: "drug-amount", drug: "カロナール錠５００ｍｇ", amount: "３", unit: "錠", tail: undefined },
         { kind: "days", str: "分３　毎食後", days: "５", unit: "日分", extra: "" }
       ]
     ])

@@ -40,13 +40,15 @@
     destroy();
   }
 
-  async function doDelete(src: string) {
-    if (confirm(`この画像を削除していいですか？\n${src}`)) {
-      await api.deletePatientImage(patientId, src);
-      init();
-      imgSrc.set(null);
-      inlineImageSrc = "";
-      externalImageSrc = "";
+  async function doDelete(src: string | null) {
+    if (src != null) {
+      if (confirm(`この画像を削除していいですか？\n${src}`)) {
+        await api.deletePatientImage(patientId, src);
+        init();
+        imgSrc.set(null);
+        inlineImageSrc = "";
+        externalImageSrc = "";
+      }
     }
   }
 </script>
@@ -68,7 +70,7 @@
     >
   {/if}
   <div class="commands">
-    {#if $imgSrc}
+    {#if $imgSrc != null}
       <a href="javascript:void(0)" on:click={() => doDelete($imgSrc)}>削除</a>
     {/if}
     <button on:click={doClose}>閉じる</button>

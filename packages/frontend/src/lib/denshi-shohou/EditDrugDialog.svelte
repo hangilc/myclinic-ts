@@ -148,7 +148,7 @@
           .join(" ")}{/if}
     </div>
   </div>
-  <div>
+  <div style="margin-top:4px;">
     <a href="javascript:void(0)" on:click={doToggleUneven}>不均等</a>
     <a href="javascript:void(0)" on:click={doToggleAdditionals}>補足</a>
   </div>

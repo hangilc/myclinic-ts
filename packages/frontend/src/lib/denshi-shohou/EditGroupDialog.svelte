@@ -2,12 +2,10 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import Dialog from "../Dialog.svelte";
   import type { 剤形区分 } from "./denshi-shohou";
-  import { amountDisp, drugDisp } from "./disp/disp-util";
-  import NewDrugForm from "./NewDrugForm.svelte";
+  import { drugDisp } from "./disp/disp-util";
   import type {
     RP剤情報,
     用法レコード,
-    薬品レコード,
     薬品情報,
     剤形レコード,
   } from "./presc-info";
@@ -26,7 +24,6 @@
   let usageRecord: 用法レコード | undefined = group?.用法レコード ?? undefined;
   let timesText = group?.剤形レコード.調剤数量.toString() ?? "";
   let showZaikeiAux = false;
-  let showNewDrugForm = false;
   let title = group ? "薬剤グループ編集" : "新規薬剤グループ";
 
   function doUsageMasterSearch() {
@@ -113,6 +110,22 @@
       }
     })
   }
+
+  function doAddDrug() {
+    const d: EditDrugDialog = new EditDrugDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        drug: undefined,
+        at,
+        onEnter: (newDrug) => {
+          drugs = [...drugs, newDrug];
+        },
+        onDelete: undefined,
+        zaikei: zaikeiKubun,
+      }
+    })
+  }
 </script>
 
 <Dialog {title} {destroy} styleWidth="400px">
@@ -158,29 +171,9 @@
       <div style="margin-top:0px;">
         <a
           href="javascript:void(0)"
-          on:click={() => {
-            showNewDrugForm = !showNewDrugForm;
-          }}
+          on:click={doAddDrug}
           style="font-size:0.9rem">薬剤追加</a
         >
-        {#if showNewDrugForm}
-          <div
-            style="margin:10px 0;border:1px solid gray;border-radius:4px;padding:10px;"
-          >
-            <NewDrugForm
-              onCancel={() => {
-                showNewDrugForm = false;
-              }}
-              {at}
-              onEnter={(drug) => {
-                drugs.push(drug);
-                drugs = drugs;
-                showNewDrugForm = false;
-              }}
-              zaikei={zaikeiKubun}
-            />
-          </div>
-        {/if}
       </div>
     </div>
     <div>用法：</div>

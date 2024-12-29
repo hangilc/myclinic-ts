@@ -1,8 +1,6 @@
 import type { PrescInfoData, RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 import type { ShohousenData } from "./data";
 import { 点数表_to_code } from "@/lib/denshi-shohou/denshi-shohou";
-import type { ParsedLine } from "./parser/parsed-line";
-import { renderDrug } from "./parser/render";
 import { renderPresc } from "@/lib/denshi-shohou/presc-renderer";
 
 export function create_data_from_denshi(denshi: PrescInfoData): ShohousenData {

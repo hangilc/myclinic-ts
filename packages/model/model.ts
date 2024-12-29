@@ -1,4 +1,4 @@
-import { Result, error, ok } from "./result";
+import { type Result, error, ok } from "./result";
 import { castList, castNumber, castOptionUndefined, castString } from "./cast";
 export * from "./converters";
 import { dateToSqlDate } from "./converters";
