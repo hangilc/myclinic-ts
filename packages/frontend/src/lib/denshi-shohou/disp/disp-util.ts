@@ -36,7 +36,7 @@ export function usageDisp(group: { 用法レコード: 用法レコード; 用�
     group.用法補足レコード.forEach(rec => {
       let kubunRep = "";
       let kubun = rec.用法補足区分;
-      if (kubun !== "用法の続き" && kubun !== "JAMI部位" && kubun !== "JAMI補足用法") {
+      if (kubun !== "用法の続き" && kubun !== "JAMI部位" && kubun !== "JAMI補足用法" && kubun !== "一包化") {
         kubunRep = `（${kubun}）`;
       }
       s += ` ${kubunRep}${rec.用法補足情報}`;

@@ -19,11 +19,16 @@
       info = "";
     }
   }
+
+  function doDelete(rec: 用法補足レコード) {
+    records = records?.filter(r => r !== rec);
+    onEnter(records);
+  }
 </script>
 
 <div style="border:1px solid gray;border-radius:4px;padding:10px;margin:4px 0;">
   {#each records ?? [] as record}
-    {record.用法補足情報}
+    {record.用法補足情報} <a href="javascript:void(0)" on:click={() => doDelete(record)}>削除</a>
   {/each}
   <div style="display:grid;grid-template-columns:auto 1fr;gap:4px;">
     <div>区分：</div>
