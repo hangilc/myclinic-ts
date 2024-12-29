@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Text, type Visit } from "myclinic-model";
+  import { Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
   import api from "@/lib/api";
   import {
@@ -101,13 +101,6 @@
     await api.deleteText(textId);
   }
 
-  async function doDelete() {
-    if (!confirm("この処方を削除していいですか？")) {
-      return;
-    }
-    await destroyThisText();
-  }
-
   async function onUnregistered() {
     const text = await api.getText(textId);
     const newMemo = TextMemoWrapper.fromText(text).probeShohouMemo();
@@ -168,8 +161,6 @@
         <a href="javascript:void(0)" on:click={doHikae}>控え</a>
         <a href="javascript:void(0)" on:click={toggleShowDetail}>詳細</a>
       {/if}
-    {:else}
-      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
     {#if targetVisitId && targetVisitId !== visitId}
       <a href="javascript:void(0)" on:click={doCopy}>コピー</a>

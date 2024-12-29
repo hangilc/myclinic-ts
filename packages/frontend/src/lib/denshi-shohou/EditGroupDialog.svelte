@@ -17,13 +17,16 @@
 
   export let destroy: () => void;
   export let at: string;
+  export let group: RP剤情報 | undefined;
   export let onEnter: (group: RP剤情報) => void;
-  let rp剤形区分: 剤形区分 = "内服";
+  export let onDelete: (() => void) | undefined = undefined;
+  let zaikeiKubun: 剤形区分 = group?.剤形レコード.剤形区分 ?? "内服";
+  let drugs: 薬品情報[] = group?.薬品情報グループ ?? [];
+  let usageRecord: 用法レコード | undefined = group?.用法レコード ?? undefined;
+  let timesText = group?.剤形レコード.調剤数量.toString() ?? "";
   let showZaikeiAux = false;
-  let drugs: 薬品情報[] = [];
   let showNewDrugForm = false;
-  let usageRecord: 用法レコード | undefined = undefined;
-  let timesText = "";
+  let title = group ? "薬剤グループ編集" : "新規薬剤グループ";
 
   function doUsageMasterSearch() {
     const d: SearchUsageMasterDialog = new SearchUsageMasterDialog({
@@ -46,11 +49,11 @@
 
   function resolve調剤数量(): number | string {
     let times = 1;
-    if (rp剤形区分 === "内服" || rp剤形区分 === "頓服") {
+    if (zaikeiKubun === "内服" || zaikeiKubun === "頓服") {
       timesText = timesText.trim();
       timesText = toHankaku(timesText);
       if (!/^\d+$/.test(timesText)) {
-        return `${rp剤形区分 === "内服" ? "日数" : "回数"}の入力が不適切ですｓ。`;
+        return `${zaikeiKubun === "内服" ? "日数" : "回数"}の入力が不適切ですｓ。`;
       }
       times = parseInt(timesText);
     }
@@ -64,7 +67,7 @@
       return;
     }
     let 剤形レコード: 剤形レコード = {
-      剤形区分: rp剤形区分,
+      剤形区分: zaikeiKubun,
       調剤数量: times,
     };
     if (!usageRecord) {
@@ -83,15 +86,22 @@
     destroy();
     onEnter(group);
   }
+
+  function doDelete() {
+    if( group && onDelete && confirm("この薬剤グループを削除していいですか？") ){
+      destroy();
+      onDelete();
+    }
+  }
 </script>
 
-<Dialog title="新規薬剤グループ" {destroy} styleWidth="400px">
+<Dialog {title} {destroy} styleWidth="400px">
   <div class="data-wrapper">
     <div>剤型：</div>
     <div>
-      <input type="radio" bind:group={rp剤形区分} value="内服" />内服
-      <input type="radio" bind:group={rp剤形区分} value="頓服" />頓服
-      <input type="radio" bind:group={rp剤形区分} value="外用" />外用
+      <input type="radio" bind:group={zaikeiKubun} value="内服" />内服
+      <input type="radio" bind:group={zaikeiKubun} value="頓服" />頓服
+      <input type="radio" bind:group={zaikeiKubun} value="外用" />外用
       <a
         href="javascript:void(0)"
         on:click={() => (showZaikeiAux = !showZaikeiAux)}
@@ -101,16 +111,16 @@
         <div>
           <input
             type="radio"
-            bind:group={rp剤形区分}
+            bind:group={zaikeiKubun}
             value="内服滴剤"
           />内服滴剤
-          <input type="radio" bind:group={rp剤形区分} value="注射" />注射
+          <input type="radio" bind:group={zaikeiKubun} value="注射" />注射
           <input
             type="radio"
-            bind:group={rp剤形区分}
+            bind:group={zaikeiKubun}
             value="医療材料"
           />医療材料
-          <input type="radio" bind:group={rp剤形区分} value="不明" />不明
+          <input type="radio" bind:group={zaikeiKubun} value="不明" />不明
         </div>
       {/if}
     </div>
@@ -147,7 +157,7 @@
                 drugs = drugs;
                 showNewDrugForm = false;
               }}
-              zaikei={rp剤形区分}
+              zaikei={zaikeiKubun}
             />
           </div>
         {/if}
@@ -162,22 +172,25 @@
         style="font-size:0.9rem">マスター検索</a
       >
     </div>
-    {#if rp剤形区分 === "内服" || rp剤形区分 === "頓服"}
-      <div>{rp剤形区分 === "内服" ? "日数" : "回数"}：</div>
+    {#if zaikeiKubun === "内服" || zaikeiKubun === "頓服"}
+      <div>{zaikeiKubun === "内服" ? "日数" : "回数"}：</div>
       <div>
         <input type="text" style="width:3rem" bind:value={timesText} />
-        {rp剤形区分 === "内服" ? "日分" : "回分"}
+        {zaikeiKubun === "内服" ? "日分" : "回分"}
       </div>
     {/if}
   </div>
   <div style="margin-top:10px;text-align:right">
+    {#if group && onDelete }
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     <button
       on:click={doEnter}
       disabled={!(
         drugs.length > 0 &&
         usageRecord &&
-        (((rp剤形区分 === "内服" || rp剤形区分 === "頓服") && timesText) ||
-          !(rp剤形区分 === "内服" || rp剤形区分 === "頓服"))
+        (((zaikeiKubun === "内服" || zaikeiKubun === "頓服") && timesText) ||
+          !(zaikeiKubun === "内服" || zaikeiKubun === "頓服"))
       )}>入力</button
     >
     <button on:click={destroy}>キャンセル</button>

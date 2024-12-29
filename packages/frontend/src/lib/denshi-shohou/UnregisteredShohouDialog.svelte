@@ -5,9 +5,9 @@
   import { sign_presc } from "../hpki-api";
   import { toZenkaku } from "../zenkaku";
   import { amountDisp, daysTimesDisp, usageDisp } from "./disp/disp-util";
-  import NewGroupDialog from "./NewGroupDialog.svelte";
+  import NewGroupDialog from "./EditGroupDialog.svelte";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
-  import { createPrescInfo, type PrescInfoData, type 備考レコード, type 提供情報レコード } from "./presc-info";
+  import { createPrescInfo, type PrescInfoData, type RP剤情報, type 備考レコード, type 提供情報レコード } from "./presc-info";
   import {
     checkShohouResult,
     type HikaeResult,
@@ -18,6 +18,7 @@
   import ShowCodeDialog from "./ShowCodeDialog.svelte";
   import KigenForm from "./KigenForm.svelte";
   import InfoForm from "./InfoForm.svelte";
+  import EditGroupDialog from "./EditGroupDialog.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -47,9 +48,14 @@
         destroy: () => d.$destroy(),
         at,
         onEnter: (group) => {
-          shohou.RP剤情報グループ.push(group);
-          shohou = shohou;
+          let cur = shohou.RP剤情報グループ;
+          cur = [...cur];
+          cur.push(group);
+          shohou = Object.assign({}, shohou, {
+            RP剤情報グループ: cur
+          })
         },
+        group: undefined,
       },
     });
   }
@@ -77,7 +83,9 @@
         alert(ms);
       }
     }
-    shohou.引換番号 = register.XmlMsg.MessageBody?.AccessCode;
+    shohou = Object.assign({}, shohou, {
+      引換番号: register.XmlMsg.MessageBody?.AccessCode
+    });
     const prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
     if (prescriptionId == undefined) {
       throw new Error("undefined prescriptionId");
@@ -108,14 +116,16 @@
     let cur = shohou.備考レコード ?? [];
     cur = [...cur];
     cur.push(record);
-    shohou.備考レコード = cur;
-    shohou = shohou;
+    shohou = Object.assign({}, shohou, {
+      備考レコード: cur
+    })
   }
 
   function deleteBikou(record: 備考レコード) {
     if( shohou.備考レコード != undefined ){
-      shohou.備考レコード = shohou.備考レコード.filter(r => r !== record);
-      shohou = shohou;
+      shohou = Object.assign({}, shohou, {
+        備考レコード: shohou.備考レコード.filter(r => r !== record)
+      });
     }
   }
 
@@ -135,8 +145,9 @@
   }
 
   function setKigen(kigen: string | undefined) {
-    shohou.使用期限年月日 = kigen;
-    shohou = shohou;
+    shohou = Object.assign({}, shohou, {
+      使用期限年月日: kigen,
+    });
   }
 
   function doToggleInfo() {
@@ -144,8 +155,28 @@
   }
 
   function setInfo(info: 提供情報レコード | undefined) {
-    shohou.提供情報レコード = info;
-    shohou = shohou;
+    shohou = Object.assign({}, shohou, {
+      提供情報レコード: info,
+    });
+  }
+
+  function doEditGroup(group: RP剤情報) {
+    const d: EditGroupDialog = new EditGroupDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        at,
+        group,
+        onEnter: (newGroup) => {
+          const gs = shohou.RP剤情報グループ.map(g => g === group ? newGroup : g);
+          shohou = Object.assign({}, shohou, { RP剤情報グループ: gs });
+        },
+        onDelete: shohou.RP剤情報グループ.length <= 1 ? undefined : () => {
+          const gs = shohou.RP剤情報グループ.filter(g => g !== group);
+          shohou = Object.assign({}, shohou, { RP剤情報グループ: gs })
+        },
+      }
+    })
   }
 </script>
 
@@ -155,7 +186,8 @@
   <div class="groups-wrapper">
     {#each shohou.RP剤情報グループ as group, i}
       <div>{toZenkaku((i + 1).toString())}）</div>
-      <div>
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div style="cursor:pointer" on:click={() => doEditGroup(group)}>
         <div>
           {#each group.薬品情報グループ as drug}
             <div>
@@ -174,14 +206,24 @@
     <a href="javascript:void(0)" on:click={doToggleKigen}>有効期限</a>
     <a href="javascript:void(0)" on:click={doToggleInfo}>提供情報</a>
   </div>
-  {#if showBikou}<BikouForm records={shohou.備考レコード ?? []} onEnter={addBikou} onDelete={deleteBikou} />{/if}
-  {#if showKigen}<KigenForm kigen={shohou.使用期限年月日} onEnter={setKigen}/>{/if}
-  {#if showInfo}<InfoForm record={shohou.提供情報レコード ?? {}} onEnter={setInfo}/>{/if}
+  {#if showBikou}<BikouForm
+      records={shohou.備考レコード ?? []}
+      onEnter={addBikou}
+      onDelete={deleteBikou}
+    />{/if}
+  {#if showKigen}<KigenForm
+      kigen={shohou.使用期限年月日}
+      onEnter={setKigen}
+    />{/if}
+  {#if showInfo}<InfoForm
+      record={shohou.提供情報レコード ?? {}}
+      onEnter={setInfo}
+    />{/if}
 
   <div class="commands">
     <a href="javascript:void(0)" on:click={doCode}>コード</a>
     {#if onDelete}
-    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
     <button on:click={doRegister}>登録</button>
     <button on:click={doSave}>保存</button>
