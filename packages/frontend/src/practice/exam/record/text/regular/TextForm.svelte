@@ -22,11 +22,16 @@
   import { parseShohou } from "@/lib/parse-shohou";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import { formatHokenshaBangou } from "myclinic-util";
+  import { TextMemoWrapper, type ShohouConvTextMemo } from "../text-memo";
+  import { createPrescInfo } from "@/lib/denshi-shohou/presc-info";
+  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
+  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
+  let memoKind: "shohou" | "shohou-conv" | undefined = TextMemoWrapper.fromText(text).getMemoKind();
 
   async function onEnter() {
     const content = textarea.value.trim();
@@ -298,6 +303,31 @@
       });
     }
   }
+
+  async function doShohouConv() {
+    const visit = await api.getVisit(text.visitId);
+    onClose();
+    const shohou = await initPrescInfoDataFromVisitId(text.visitId);
+    const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        shohou,
+        at: visit.visitedAt.substring(0, 10),
+        title: "新規電子処方変換",
+        onSave: async (shohou) => {
+          const newMemo: ShohouConvTextMemo = {
+            kind: "shohou-conv",
+            shohou,
+          };
+          TextMemoWrapper.setTextMemo(text, newMemo);
+          await api.updateText(text);
+        },
+        onRegistered: undefined,
+        onDelete: undefined,
+      }
+    })
+  }
 </script>
 
 <div>
@@ -327,6 +357,9 @@
             ["処方箋フォーマット", doFormatShohousen],
           ])}>処方箋</a
         >
+        {#if memoKind === undefined}
+            <a href="javascript:void(0)" on:click={doShohouConv}>電子処方箋変換</a>
+        {/if}
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>

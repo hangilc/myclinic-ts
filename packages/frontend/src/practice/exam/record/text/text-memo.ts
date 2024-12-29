@@ -1,7 +1,7 @@
 import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
 import type { Text } from "myclinic-model";
 
-export type TextMemo = ShohouTextMemo;
+export type TextMemo = ShohouTextMemo | ShohouConvTextMemo;
 
 export interface ShohouTextMemo {
   kind: "shohou";
@@ -9,24 +9,22 @@ export interface ShohouTextMemo {
   prescriptionId: string | undefined;
 }
 
+export interface ShohouConvTextMemo {
+  kind: "shohou-conv";
+  shohou: PrescInfoData;
+}
+
 export function getTextMemo(text: Text): TextMemo | undefined {
   let memoString = text.memo;
   if (!memoString) {
     return undefined;
   } else {
-    return JSON.parse(memoString);
+    const memo = JSON.parse(memoString);
+    if( memo.kind === "shohou" || memo.kind === "shohou-conv" ){
+      console.error("invalid text memo");
+    }
+    return memo;
   }
-}
-
-export function modifyTextMemo(text: Text, f: (memo: TextMemo | undefined) => TextMemo | undefined): Text {
-  let memo = getTextMemo(text);
-  let newMemo = f(memo);
-  if( newMemo == undefined ){
-    text.memo = undefined;
-  } else {
-    text.memo = JSON.stringify(newMemo);
-  }
-  return text;
 }
 
 export class TextMemoWrapper {
@@ -39,6 +37,22 @@ export class TextMemoWrapper {
     this.store = store;
   }
 
+  getMemoKind(): "shohou" | "shohou-conv" | undefined {
+    const store = this.store;
+    if( store === undefined ){
+      return undefined;
+    } else {
+      const json = JSON.parse(store);
+      if( json.kind === "shohou" ) {
+        return "shohou";
+      } else if( json.kind === "shohou-conv" ){
+        return "shohou-conv";
+      } else {
+        throw new Error("invalid text memo");
+      }
+    }
+  }
+
   probeShohouMemo(): ShohouTextMemo | undefined {
     const store = this.store;
     if( store === undefined ){
@@ -46,7 +60,21 @@ export class TextMemoWrapper {
     } else {
       const json = JSON.parse(store);
       if( json.kind === "shohou" ){
-        return JSON.parse(store);
+        return json;
+      } else {
+        return undefined;
+      }
+    }
+  }
+
+  probeShohouConvMemo(): ShohouConvTextMemo | undefined {
+    const store = this.store;
+    if( store === undefined ){
+      return undefined;
+    } else {
+      const json = JSON.parse(store);
+      if( json.kind === "shohou-conv" ){
+        return json;
       } else {
         return undefined;
       }

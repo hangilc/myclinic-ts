@@ -4,10 +4,22 @@
   import Dialog from "../Dialog.svelte";
   import { sign_presc } from "../hpki-api";
   import { toZenkaku } from "../zenkaku";
-  import { amountDisp, daysTimesDisp, drugDisp, unevenDisp, usageDisp } from "./disp/disp-util";
+  import {
+    amountDisp,
+    daysTimesDisp,
+    drugDisp,
+    unevenDisp,
+    usageDisp,
+  } from "./disp/disp-util";
   import NewGroupDialog from "./EditGroupDialog.svelte";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
-  import { createPrescInfo, type PrescInfoData, type RP剤情報, type 備考レコード, type 提供情報レコード } from "./presc-info";
+  import {
+    createPrescInfo,
+    type PrescInfoData,
+    type RP剤情報,
+    type 備考レコード,
+    type 提供情報レコード,
+  } from "./presc-info";
   import {
     checkShohouResult,
     type HikaeResult,
@@ -26,10 +38,9 @@
   export let onDelete: (() => void) | undefined;
   export let at: string;
   export let onSave: (shohou: PrescInfoData) => void;
-  export let onRegistered: (
-    shohou: PrescInfoData,
-    prescriptionId: string
-  ) => void;
+  export let onRegistered:
+    | ((shohou: PrescInfoData, prescriptionId: string) => void)
+    | undefined;
   let showBikou = false;
   let showKigen = false;
   let showInfo = false;
@@ -52,8 +63,8 @@
           cur = [...cur];
           cur.push(group);
           shohou = Object.assign({}, shohou, {
-            RP剤情報グループ: cur
-          })
+            RP剤情報グループ: cur,
+          });
         },
         group: undefined,
       },
@@ -70,6 +81,9 @@
       alert("既に登録されています。");
       return;
     }
+    if( !onRegistered ){
+      return;
+    }
     const prescInfo = createPrescInfo(shohou);
     console.log("prescInfo", prescInfo);
     const signed = await sign_presc(prescInfo);
@@ -84,7 +98,7 @@
       }
     }
     shohou = Object.assign({}, shohou, {
-      引換番号: register.XmlMsg.MessageBody?.AccessCode
+      引換番号: register.XmlMsg.MessageBody?.AccessCode,
     });
     const prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
     if (prescriptionId == undefined) {
@@ -117,14 +131,14 @@
     cur = [...cur];
     cur.push(record);
     shohou = Object.assign({}, shohou, {
-      備考レコード: cur
-    })
+      備考レコード: cur,
+    });
   }
 
   function deleteBikou(record: 備考レコード) {
-    if( shohou.備考レコード != undefined ){
+    if (shohou.備考レコード != undefined) {
       shohou = Object.assign({}, shohou, {
-        備考レコード: shohou.備考レコード.filter(r => r !== record)
+        備考レコード: shohou.備考レコード.filter((r) => r !== record),
       });
     }
   }
@@ -136,8 +150,8 @@
       props: {
         destroy: () => d.$destroy(),
         code,
-      }
-    })
+      },
+    });
   }
 
   function doToggleKigen() {
@@ -168,15 +182,20 @@
         at,
         group,
         onEnter: (newGroup) => {
-          const gs = shohou.RP剤情報グループ.map(g => g === group ? newGroup : g);
+          const gs = shohou.RP剤情報グループ.map((g) =>
+            g === group ? newGroup : g
+          );
           shohou = Object.assign({}, shohou, { RP剤情報グループ: gs });
         },
-        onDelete: shohou.RP剤情報グループ.length <= 1 ? undefined : () => {
-          const gs = shohou.RP剤情報グループ.filter(g => g !== group);
-          shohou = Object.assign({}, shohou, { RP剤情報グループ: gs })
-        },
-      }
-    })
+        onDelete:
+          shohou.RP剤情報グループ.length <= 1
+            ? undefined
+            : () => {
+                const gs = shohou.RP剤情報グループ.filter((g) => g !== group);
+                shohou = Object.assign({}, shohou, { RP剤情報グループ: gs });
+              },
+      },
+    });
   }
 </script>
 
@@ -222,7 +241,9 @@
     {#if onDelete}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
-    <button on:click={doRegister}>登録</button>
+    {#if onRegistered}
+      <button on:click={doRegister}>登録</button>
+    {/if}
     <button on:click={doSave}>保存</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
