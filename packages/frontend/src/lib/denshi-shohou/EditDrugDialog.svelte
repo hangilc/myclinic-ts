@@ -1,13 +1,19 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
-  import type { 不均等レコード, 薬品レコード, 薬品情報 } from "./presc-info";
+  import type {
+    不均等レコード,
+    薬品レコード,
+    薬品情報,
+    薬品補足レコード,
+  } from "./presc-info";
   import type { 剤形区分 } from "./denshi-shohou";
   import { toHankaku } from "../zenkaku";
   import Dialog from "../Dialog.svelte";
   import api from "../api";
   import UnevenForm from "./UnevenForm.svelte";
   import { unevenDisp } from "./disp/disp-util";
+  import DrugAdditionalsForm from "./DrugAdditionalsForm.svelte";
 
   export let destroy: () => void;
   export let drug: 薬品情報 | undefined;
@@ -17,19 +23,26 @@
   export let zaikei: 剤形区分;
   let master: IyakuhinMaster | undefined = undefined;
   let amount = "";
-  let unevenRecord: 不均等レコード | undefined = drug?.不均等レコード ?? undefined;
+  let unevenRecord: 不均等レコード | undefined =
+    drug?.不均等レコード ?? undefined;
+  let additionals: 薬品補足レコード[] | undefined =
+    drug?.薬品補足レコード ?? undefined;
   let amountInputElement: HTMLInputElement;
   let title = drug ? "薬剤編集" : "新規薬剤";
   let showUneven = false;
+  let showAdditionals = false;
 
   init();
 
   async function init() {
-    if( drug && drug.薬品レコード.薬品コード種別 === "レセプト電算処理システム用コード" ){
+    if (
+      drug &&
+      drug.薬品レコード.薬品コード種別 === "レセプト電算処理システム用コード"
+    ) {
       const iyakuhincode = parseInt(drug.薬品レコード.薬品コード);
       master = await api.getIyakuhinMaster(iyakuhincode, at);
     }
-    if( drug ){
+    if (drug) {
       amount = drug.薬品レコード.分量;
     }
   }
@@ -77,14 +90,14 @@
     const drug: 薬品情報 = {
       薬品レコード: record,
       不均等レコード: unevenRecord,
-      薬品補足レコード: undefined,
+      薬品補足レコード: additionals,
     };
     destroy();
     onEnter(drug);
   }
 
   function doDelete() {
-    if( drug && onDelete && confirm("この薬剤を削除していいですか？")){
+    if (drug && onDelete && confirm("この薬剤を削除していいですか？")) {
       destroy();
       onDelete();
     }
@@ -97,6 +110,15 @@
   function doSetUneven(rec: 不均等レコード | undefined) {
     unevenRecord = rec;
     showUneven = false;
+  }
+
+  function doToggleAdditionals() {
+    showAdditionals = !showAdditionals;
+  }
+
+  function doSetAdditionals(recs: 薬品補足レコード[] | undefined) {
+    additionals = recs;
+    showAdditionals = false;
   }
 </script>
 
@@ -121,17 +143,30 @@
       />
       {master ? master.unit : ""}
       {#if unevenRecord}({unevenDisp(unevenRecord)}){/if}
+      {#if additionals}{additionals
+          .map((rec) => rec.薬品補足情報)
+          .join(" ")}{/if}
     </div>
   </div>
   <div>
     <a href="javascript:void(0)" on:click={doToggleUneven}>不均等</a>
+    <a href="javascript:void(0)" on:click={doToggleAdditionals}>補足</a>
   </div>
-  {#if showUneven}<UnevenForm orig={drug?.不均等レコード} onEnter={doSetUneven}/>{/if}
+  {#if showUneven}<UnevenForm
+      orig={drug?.不均等レコード}
+      onEnter={doSetUneven}
+    />{/if}
+  {#if showAdditionals}<DrugAdditionalsForm
+      records={drug?.薬品補足レコード}
+      onEnter={doSetAdditionals}
+    />{/if}
   <div style="margin-top:10px;text-align:right;">
     {#if drug && onDelete}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
-    <button on:click={doEnter} disabled={!(master && amount)}>{drug ? "設定" : "追加"}</button>
+    <button on:click={doEnter} disabled={!(master && amount)}
+      >{drug ? "入力" : "追加"}</button
+    >
     <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>

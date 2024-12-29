@@ -15,6 +15,9 @@ export function drugDisp(drug: 薬品情報): string {
   if (drug.負担区分レコード) {
     disp += ` ${futanKubunDisp(drug.負担区分レコード)}`;
   }
+  if( drug.薬品補足レコード ){
+    disp += ` ${drug.薬品補足レコード.map(rec => rec.薬品補足情報).join(" ")}`;
+  }
   return disp;
 }
 
