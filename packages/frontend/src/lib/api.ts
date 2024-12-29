@@ -699,6 +699,17 @@ export default {
     );
   },
 
+  getIyakuhinMaster(
+    iyakuhincode: number,
+    at: Date | string,
+  ): Promise<m.IyakuhinMaster> {
+    return get(
+      "get-iyakuhin-master",
+      { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
+      m.IyakuhinMaster.cast,
+    )
+  },
+
   searchKizaiMaster(text: string, at: Date | string): Promise<m.KizaiMaster[]> {
     return get(
       "search-kizai-master",

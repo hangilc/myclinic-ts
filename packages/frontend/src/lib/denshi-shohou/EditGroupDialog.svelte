@@ -14,6 +14,7 @@
   import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
   import type { UsageMaster } from "myclinic-model";
   import { toHankaku } from "../zenkaku";
+  import EditDrugDialog from "./EditDrugDialog.svelte";
 
   export let destroy: () => void;
   export let at: string;
@@ -93,6 +94,24 @@
       onDelete();
     }
   }
+
+  function doEditDrug(drug: 薬品情報) {
+    const d: EditDrugDialog = new EditDrugDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        drug,
+        at,
+        onEnter: (newDrug) => {
+          drugs = drugs.map(d => d === drug ? newDrug : d)
+        },
+        onDelete: drugs.length <= 1 ? undefined : () => {
+          drugs = drugs.filter(d => d !== drug);
+        },
+        zaikei: zaikeiKubun,
+      }
+    })
+  }
 </script>
 
 <Dialog {title} {destroy} styleWidth="400px">
@@ -129,7 +148,8 @@
       <div class="drugs-wrapper">
         {#each drugs as drug, i}
           <div>{indexRep(i)})</div>
-          <div>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div style="cursor:pointer" on:click={() => doEditDrug(drug)}>
             {drug.薬品レコード.薬品名称}
             {amountDisp(drug.薬品レコード)}
           </div>
