@@ -2,7 +2,7 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import Dialog from "../Dialog.svelte";
   import type { 剤形区分 } from "./denshi-shohou";
-  import { amountDisp } from "./disp/disp-util";
+  import { amountDisp, drugDisp } from "./disp/disp-util";
   import NewDrugForm from "./NewDrugForm.svelte";
   import type {
     RP剤情報,
@@ -103,6 +103,7 @@
         drug,
         at,
         onEnter: (newDrug) => {
+          console.log("newDrug", newDrug);
           drugs = drugs.map(d => d === drug ? newDrug : d)
         },
         onDelete: drugs.length <= 1 ? undefined : () => {
@@ -150,8 +151,7 @@
           <div>{indexRep(i)})</div>
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div style="cursor:pointer" on:click={() => doEditDrug(drug)}>
-            {drug.薬品レコード.薬品名称}
-            {amountDisp(drug.薬品レコード)}
+            {drugDisp(drug)}
           </div>
         {/each}
       </div>

@@ -14,10 +14,17 @@
     <div>備考：{rec.備考}</div>
   {/each}
   {#if shohou.使用期限年月日}
-    <div>使用期限：{DateWrapper.fromOnshiDate(shohou.使用期限年月日).render(d => `${d.getYear()}年${d.getMonth()}月${d.getDay()}日（${d.getYoubi()}）`)}</div>
+    <div>
+      使用期限：{DateWrapper.fromOnshiDate(shohou.使用期限年月日).render(
+        (d) =>
+          `${d.getYear()}年${d.getMonth()}月${d.getDay()}日（${d.getYoubi()}）`
+      )}
+    </div>
   {/if}
   {#each shohou.提供情報レコード?.提供診療情報レコード ?? [] as rec}
-    <div>診療情報：{#if rec.薬品名称}（{rec.薬品名称}）{/if}{rec.コメント}</div>
+    <div>
+      診療情報：{#if rec.薬品名称}（{rec.薬品名称}）{/if}{rec.コメント}
+    </div>
   {/each}
   {#each shohou.提供情報レコード?.検査値データ等レコード ?? [] as rec}
     <div>検査値等：{rec.検査値データ等}</div>

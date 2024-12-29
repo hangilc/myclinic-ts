@@ -1,11 +1,13 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
-  import type { 薬品レコード, 薬品情報 } from "./presc-info";
+  import type { 不均等レコード, 薬品レコード, 薬品情報 } from "./presc-info";
   import type { 剤形区分 } from "./denshi-shohou";
   import { toHankaku } from "../zenkaku";
   import Dialog from "../Dialog.svelte";
   import api from "../api";
+  import UnevenForm from "./UnevenForm.svelte";
+  import { unevenDisp } from "./disp/disp-util";
 
   export let destroy: () => void;
   export let drug: 薬品情報 | undefined;
@@ -15,6 +17,7 @@
   export let zaikei: 剤形区分;
   let master: IyakuhinMaster | undefined = undefined;
   let amount = "";
+  let unevenRecord: 不均等レコード | undefined = drug?.不均等レコード ?? undefined;
   let amountInputElement: HTMLInputElement;
   let title = drug ? "薬剤編集" : "新規薬剤";
   let showUneven = false;
@@ -73,7 +76,7 @@
     };
     const drug: 薬品情報 = {
       薬品レコード: record,
-      不均等レコード: undefined,
+      不均等レコード: unevenRecord,
       薬品補足レコード: undefined,
     };
     destroy();
@@ -89,6 +92,11 @@
 
   function doToggleUneven() {
     showUneven = !showUneven;
+  }
+
+  function doSetUneven(rec: 不均等レコード | undefined) {
+    unevenRecord = rec;
+    showUneven = false;
   }
 </script>
 
@@ -112,16 +120,18 @@
         bind:this={amountInputElement}
       />
       {master ? master.unit : ""}
+      {#if unevenRecord}({unevenDisp(unevenRecord)}){/if}
     </div>
   </div>
   <div>
     <a href="javascript:void(0)" on:click={doToggleUneven}>不均等</a>
   </div>
+  {#if showUneven}<UnevenForm orig={drug?.不均等レコード} onEnter={doSetUneven}/>{/if}
   <div style="margin-top:10px;text-align:right;">
     {#if drug && onDelete}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
-    <button on:click={doEnter} disabled={!(master && amount)}>追加</button>
+    <button on:click={doEnter} disabled={!(master && amount)}>{drug ? "設定" : "追加"}</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>

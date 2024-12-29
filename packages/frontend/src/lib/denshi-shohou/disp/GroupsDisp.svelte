@@ -3,7 +3,7 @@
     RP剤情報,
   } from "@/lib/denshi-shohou/presc-info";
   import { toZenkaku } from "@/lib/zenkaku";
-  import { amountDisp, daysTimesDisp, usageDisp } from "./disp-util";
+  import { amountDisp, daysTimesDisp, drugDisp, usageDisp } from "./disp-util";
 
   export let groups: RP剤情報[];
 
@@ -15,7 +15,7 @@
     <div>
       <div>
         {#each group.薬品情報グループ as drug}
-          <div>{drug.薬品レコード.薬品名称} {amountDisp(drug.薬品レコード)}</div>
+          <div>{drugDisp(drug)}</div>
         {/each}
       </div>
       <div>{usageDisp(group)} {daysTimesDisp(group)}</div>

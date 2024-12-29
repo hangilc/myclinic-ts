@@ -4,7 +4,7 @@
   import Dialog from "../Dialog.svelte";
   import { sign_presc } from "../hpki-api";
   import { toZenkaku } from "../zenkaku";
-  import { amountDisp, daysTimesDisp, usageDisp } from "./disp/disp-util";
+  import { amountDisp, daysTimesDisp, drugDisp, unevenDisp, usageDisp } from "./disp/disp-util";
   import NewGroupDialog from "./EditGroupDialog.svelte";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
   import { createPrescInfo, type PrescInfoData, type RP剤情報, type 備考レコード, type 提供情報レコード } from "./presc-info";
@@ -190,10 +190,7 @@
       <div style="cursor:pointer" on:click={() => doEditGroup(group)}>
         <div>
           {#each group.薬品情報グループ as drug}
-            <div>
-              {drug.薬品レコード.薬品名称}
-              {amountDisp(drug.薬品レコード)}
-            </div>
+            <div>{drugDisp(drug)}</div>
           {/each}
         </div>
         <div>{usageDisp(group)} {daysTimesDisp(group)}</div>
