@@ -14,7 +14,6 @@
   import { currentVisitId } from "../exam-vars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
-  import DenshiShohouDialog from "@/lib/denshi-shohou/DenshiShohouDialog.svelte";
   import { cache } from "@/lib/cache";
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
