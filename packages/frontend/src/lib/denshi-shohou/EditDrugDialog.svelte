@@ -17,6 +17,7 @@
   let amount = "";
   let amountInputElement: HTMLInputElement;
   let title = drug ? "薬剤編集" : "新規薬剤";
+  let showUneven = false;
 
   init();
 
@@ -85,6 +86,10 @@
       onDelete();
     }
   }
+
+  function doToggleUneven() {
+    showUneven = !showUneven;
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -108,6 +113,9 @@
       />
       {master ? master.unit : ""}
     </div>
+  </div>
+  <div>
+    <a href="javascript:void(0)" on:click={doToggleUneven}>不均等</a>
   </div>
   <div style="margin-top:10px;text-align:right;">
     {#if drug && onDelete}
