@@ -9,6 +9,7 @@
     薬品情報,
     剤形レコード,
     用法補足レコード,
+    公費レコード,
   } from "./presc-info";
   import SearchUsageMasterDialog from "./SearchUsageMasterDialog.svelte";
   import type { UsageMaster } from "myclinic-model";
@@ -22,6 +23,12 @@
   export let group: RP剤情報 | undefined;
   export let onEnter: (group: RP剤情報) => void;
   export let onDelete: (() => void) | undefined = undefined;
+  export let kouhiList: [
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+  ];
   let zaikeiKubun: 剤形区分 = group?.剤形レコード.剤形区分 ?? "内服";
   let drugs: 薬品情報[] = group?.薬品情報グループ ?? [];
   let usageRecord: 用法レコード | undefined = group?.用法レコード ?? undefined;
@@ -135,6 +142,7 @@
                 drugs = drugs.filter((d) => d !== drug);
               },
         zaikei: zaikeiKubun,
+        kouhiList,
       },
     });
   }
@@ -151,6 +159,7 @@
         },
         onDelete: undefined,
         zaikei: zaikeiKubun,
+        kouhiList,
       },
     });
   }

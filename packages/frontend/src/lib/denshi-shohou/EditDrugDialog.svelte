@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
   import type {
     不均等レコード,
+    公費レコード,
     薬品レコード,
     薬品情報,
     薬品補足レコード,
+    負担区分レコード,
   } from "./presc-info";
   import type { 剤形区分 } from "./denshi-shohou";
   import { toHankaku } from "../zenkaku";
@@ -15,6 +16,7 @@
   import { unevenDisp } from "./disp/disp-util";
   import DrugAdditionalsForm from "./DrugAdditionalsForm.svelte";
   import SearchKizaiMasterDialog from "./SearchKizaiMasterDialog.svelte";
+  import FutanKubunForm from "./FutanKubunForm.svelte";
 
   export let destroy: () => void;
   export let drug: 薬品情報 | undefined;
@@ -22,13 +24,19 @@
   export let onEnter: (drug: 薬品情報) => void;
   export let onDelete: (() => void) | undefined;
   export let zaikei: 剤形区分;
+  export let kouhiList: [
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+  ];
   let master:
     | {
         kind: "iyakuhin" | "kizai";
         master: { code: string; name: string; unit: string };
       }
     | undefined;
-  let amount = "";
+  let amount = drug?.薬品レコード.分量 ?? "";
   let unevenRecord: 不均等レコード | undefined =
     drug?.不均等レコード ?? undefined;
   let additionals: 薬品補足レコード[] | undefined =
@@ -37,6 +45,8 @@
   let title = resolveTitle();
   let showUneven = false;
   let showAdditionals = false;
+  let futanKubun: 負担区分レコード | undefined = initFutanKubun();
+  let showFutanKubun = false;
 
   init();
 
@@ -46,6 +56,27 @@
       return `${t}編集`;
     } else {
       return `新規${t}`;
+    }
+  }
+
+  function initFutanKubun() : 負担区分レコード | undefined {
+    if( drug ){
+      return drug.負担区分レコード;
+    } else {
+      let kubun: 負担区分レコード = {};
+      if( kouhiList[0] ) {
+        kubun.第一公費負担区分 = true;
+      }
+      if( kouhiList[1] ) {
+        kubun.第二公費負担区分 = true;
+      }
+      if( kouhiList[2] ) {
+        kubun.第三公費負担区分 = true;
+      }
+      if( kouhiList[3] ) {
+        kubun.特殊公費負担区分 = true;
+      }
+      return Object.keys(kubun).length === 0 ? undefined : kubun;
     }
   }
 
@@ -74,9 +105,20 @@
         };
       }
     }
-    if (drug) {
-      amount = drug.薬品レコード.分量;
-    }
+  }
+
+  function countKouhi(
+    kouhiList: [
+      公費レコード | undefined,
+      公費レコード | undefined,
+      公費レコード | undefined,
+      公費レコード | undefined,
+    ]
+  ): number {
+    return kouhiList.reduce(
+      (acc, ele) => (ele != undefined ? acc + 1 : acc),
+      0
+    );
   }
 
   function doSearchMaster() {
@@ -93,8 +135,8 @@
                 code: m.kizaicode.toString(),
                 name: m.name,
                 unit: m.unit,
-              }
-            }
+              },
+            };
           },
         },
       });
@@ -151,6 +193,7 @@
       薬品レコード: record,
       不均等レコード: unevenRecord,
       薬品補足レコード: additionals,
+      負担区分レコード: futanKubun,
     };
     destroy();
     onEnter(drug);
@@ -178,14 +221,24 @@
 
   function doSetAdditionals(recs: 薬品補足レコード[] | undefined) {
     additionals = recs;
-    console.log("recs", recs);
     showAdditionals = false;
+  }
+
+  function doToggleFutanKubun() {
+    showFutanKubun = !showFutanKubun;
+  }
+
+  function doSetFutanKubun(rec: 負担区分レコード | undefined) {
+    futanKubun = rec;
+    showFutanKubun = false;
   }
 </script>
 
 <Dialog {title} {destroy}>
   <div class="form-grid">
-    <div style="text-align:right">{zaikei === "医療材料" ? "器材" : "薬剤"}名：</div>
+    <div style="text-align:right">
+      {zaikei === "医療材料" ? "器材" : "薬剤"}名：
+    </div>
     <div>
       {master ? master.master.name : "（未設定）"}
       <a
@@ -212,6 +265,9 @@
   <div style="margin-top:4px;">
     <a href="javascript:void(0)" on:click={doToggleUneven}>不均等</a>
     <a href="javascript:void(0)" on:click={doToggleAdditionals}>補足</a>
+    {#if countKouhi(kouhiList) > 0}
+      <a href="javascript:void(0)" on:click={doToggleFutanKubun}>負担区分</a>
+    {/if}
   </div>
   {#if showUneven}<UnevenForm
       orig={drug?.不均等レコード}
@@ -221,6 +277,7 @@
       records={drug?.薬品補足レコード}
       onEnter={doSetAdditionals}
     />{/if}
+  {#if showFutanKubun}<FutanKubunForm {futanKubun} {kouhiList}  onEnter={doSetFutanKubun}/>{/if}
   <div style="margin-top:10px;text-align:right;">
     {#if drug && onDelete}
       <a href="javascript:void(0)" on:click={doDelete}>削除</a>

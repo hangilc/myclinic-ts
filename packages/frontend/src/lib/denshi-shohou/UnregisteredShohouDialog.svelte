@@ -18,6 +18,7 @@
     type PrescInfoData,
     type RP剤情報,
     type 備考レコード,
+    type 公費レコード,
     type 提供情報レコード,
   } from "./presc-info";
   import {
@@ -52,6 +53,20 @@
     }
   }
 
+  function prepareKouhiList(): [
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+    公費レコード | undefined,
+  ] {
+    return [
+      shohou.第一公費レコード,
+      shohou.第二公費レコード,
+      shohou.第三公費レコード,
+      shohou.特殊公費レコード,
+    ];
+  }
+
   function doNewGroup() {
     const d: NewGroupDialog = new NewGroupDialog({
       target: document.body,
@@ -67,6 +82,7 @@
           });
         },
         group: undefined,
+        kouhiList: prepareKouhiList(),
       },
     });
   }
@@ -81,7 +97,7 @@
       alert("既に登録されています。");
       return;
     }
-    if( !onRegistered ){
+    if (!onRegistered) {
       return;
     }
     const prescInfo = createPrescInfo(shohou);
@@ -194,6 +210,7 @@
                 const gs = shohou.RP剤情報グループ.filter((g) => g !== group);
                 shohou = Object.assign({}, shohou, { RP剤情報グループ: gs });
               },
+        kouhiList: prepareKouhiList(),
       },
     });
   }
