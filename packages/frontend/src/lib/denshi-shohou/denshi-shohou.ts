@@ -580,6 +580,7 @@ export const 薬品補足区分Keys = [
   "含量規格変更不可",
   "剤形変更不可及び含量規格変更不可",
   "JAMI補足用法",
+  "先発医薬品患者希望",
 ] as const;
 
 export const 薬品補足区分Map: { [key in typeof 薬品補足区分Keys[number]]: string } = {
@@ -590,6 +591,7 @@ export const 薬品補足区分Map: { [key in typeof 薬品補足区分Keys[numb
   含量規格変更不可: "5",
   剤形変更不可及び含量規格変更不可: "6",
   JAMI補足用法: "7",
+  先発医薬品患者希望: "8",
 } as const;
 
 export type 薬品補足区分 = typeof 薬品補足区分Keys[number];

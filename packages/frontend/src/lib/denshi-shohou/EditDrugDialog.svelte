@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { IyakuhinMaster } from "myclinic-model";
+  import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
   import SearchIyakuhinMasterDialog from "./SearchIyakuhinMasterDialog.svelte";
   import type {
     不均等レコード,
@@ -14,6 +14,7 @@
   import UnevenForm from "./UnevenForm.svelte";
   import { unevenDisp } from "./disp/disp-util";
   import DrugAdditionalsForm from "./DrugAdditionalsForm.svelte";
+  import SearchKizaiMasterDialog from "./SearchKizaiMasterDialog.svelte";
 
   export let destroy: () => void;
   export let drug: 薬品情報 | undefined;
@@ -21,26 +22,57 @@
   export let onEnter: (drug: 薬品情報) => void;
   export let onDelete: (() => void) | undefined;
   export let zaikei: 剤形区分;
-  let master: IyakuhinMaster | undefined = undefined;
+  let master:
+    | {
+        kind: "iyakuhin" | "kizai";
+        master: { code: string; name: string; unit: string };
+      }
+    | undefined;
   let amount = "";
   let unevenRecord: 不均等レコード | undefined =
     drug?.不均等レコード ?? undefined;
   let additionals: 薬品補足レコード[] | undefined =
     drug?.薬品補足レコード ?? undefined;
   let amountInputElement: HTMLInputElement;
-  let title = drug ? "薬剤編集" : "新規薬剤";
+  let title = resolveTitle();
   let showUneven = false;
   let showAdditionals = false;
 
   init();
+
+  function resolveTitle(): string {
+    let t = zaikei === "医療材料" ? "器材" : "薬剤";
+    if (drug) {
+      return `${t}編集`;
+    } else {
+      return `新規${t}`;
+    }
+  }
 
   async function init() {
     if (
       drug &&
       drug.薬品レコード.薬品コード種別 === "レセプト電算処理システム用コード"
     ) {
-      const iyakuhincode = parseInt(drug.薬品レコード.薬品コード);
-      master = await api.getIyakuhinMaster(iyakuhincode, at);
+      if (zaikei === "医療材料") {
+        const kizaicode = parseInt(drug.薬品レコード.薬品コード);
+        const m = await api.getKizaiMaster(kizaicode, at);
+        master = {
+          kind: "kizai",
+          master: { code: m.kizaicode.toString(), name: m.name, unit: m.unit },
+        };
+      } else {
+        const iyakuhincode = parseInt(drug.薬品レコード.薬品コード);
+        const m = await api.getIyakuhinMaster(iyakuhincode, at);
+        master = {
+          kind: "iyakuhin",
+          master: {
+            code: m.iyakuhincode.toString(),
+            name: m.name,
+            unit: m.unit,
+          },
+        };
+      }
     }
     if (drug) {
       amount = drug.薬品レコード.分量;
@@ -48,24 +80,51 @@
   }
 
   function doSearchMaster() {
-    let masterZaikei: "内服" | "外用" | "すべて" = "すべて";
-    if (zaikei === "内服" || zaikei === "頓服") {
-      masterZaikei = "内服";
-    } else if (zaikei === "外用") {
-      masterZaikei = "外用";
-    }
-    const d: SearchIyakuhinMasterDialog = new SearchIyakuhinMasterDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        at,
-        onEnter: (m) => {
-          master = m;
-          amountInputElement?.focus();
+    if (zaikei === "医療材料") {
+      const d: SearchKizaiMasterDialog = new SearchKizaiMasterDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          at,
+          onEnter: (m) => {
+            master = {
+              kind: "kizai",
+              master: {
+                code: m.kizaicode.toString(),
+                name: m.name,
+                unit: m.unit,
+              }
+            }
+          },
         },
-        masterZaikei,
-      },
-    });
+      });
+    } else {
+      let masterZaikei: "内服" | "外用" | "すべて" = "すべて";
+      if (zaikei === "内服" || zaikei === "頓服") {
+        masterZaikei = "内服";
+      } else if (zaikei === "外用") {
+        masterZaikei = "外用";
+      }
+      const d: SearchIyakuhinMasterDialog = new SearchIyakuhinMasterDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          at,
+          onEnter: (m) => {
+            master = {
+              kind: "iyakuhin",
+              master: {
+                code: m.iyakuhincode.toString(),
+                name: m.name,
+                unit: m.unit,
+              },
+            };
+            amountInputElement?.focus();
+          },
+          masterZaikei,
+        },
+      });
+    }
   }
 
   function doEnter() {
@@ -78,14 +137,15 @@
       alert("分量の入力が不適切です。");
       return;
     }
+
     const record: 薬品レコード = {
-      情報区分: "医薬品",
+      情報区分: master.kind === "iyakuhin" ? "医薬品" : "医療材料",
       薬品コード種別: "レセプト電算処理システム用コード",
-      薬品コード: master.iyakuhincode.toString(),
-      薬品名称: master.name,
+      薬品コード: master.master.code,
+      薬品名称: master.master.name,
       分量: amount,
       力価フラグ: "薬価単位",
-      単位名: master.unit,
+      単位名: master.master.unit,
     };
     const drug: 薬品情報 = {
       薬品レコード: record,
@@ -118,15 +178,16 @@
 
   function doSetAdditionals(recs: 薬品補足レコード[] | undefined) {
     additionals = recs;
+    console.log("recs", recs);
     showAdditionals = false;
   }
 </script>
 
 <Dialog {title} {destroy}>
   <div class="form-grid">
-    <div style="text-align:right">薬剤名：</div>
+    <div style="text-align:right">{zaikei === "医療材料" ? "器材" : "薬剤"}名：</div>
     <div>
-      {master ? master.name : "（未設定）"}
+      {master ? master.master.name : "（未設定）"}
       <a
         href="javascript:void(0)"
         on:click={doSearchMaster}
@@ -141,7 +202,7 @@
         style="width:2em;"
         bind:this={amountInputElement}
       />
-      {master ? master.unit : ""}
+      {master ? master.master.unit : ""}
       {#if unevenRecord}({unevenDisp(unevenRecord)}){/if}
       {#if additionals}{additionals
           .map((rec) => rec.薬品補足情報)

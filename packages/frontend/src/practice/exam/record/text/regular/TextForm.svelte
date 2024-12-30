@@ -22,8 +22,18 @@
   import { parseShohou } from "@/lib/parse-shohou";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import { formatHokenshaBangou } from "myclinic-util";
-  import { TextMemoWrapper, type ShohouConvTextMemo } from "../text-memo";
-  import { createPrescInfo } from "@/lib/denshi-shohou/presc-info";
+  import {
+    copyTextMemo,
+    TextMemoWrapper,
+    type ShohouConvTextMemo,
+    type TextMemo,
+  } from "../text-memo";
+  import {
+    createPrescInfo,
+    eq公費レコード,
+    type PrescInfoData,
+    type 公費レコード,
+  } from "@/lib/denshi-shohou/presc-info";
   import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
 
@@ -274,6 +284,52 @@
     textarea.value = parseShohousen(textarea.value.trim()).formatForSave();
   }
 
+  function checkKouhiCompat(
+    src: PrescInfoData,
+    dst: PrescInfoData
+  ): string | undefined {
+    function compat(
+      a: 公費レコード | undefined,
+      b: 公費レコード | undefined
+    ): boolean {
+      if (a && b) {
+        return eq公費レコード(a, b);
+      } else {
+        return a === b;
+      }
+    }
+    if (!compat(src.第一公費レコード, dst.第一公費レコード)) {
+      return "第一公費レコードが一致しません。";
+    }
+    if (!compat(src.第二公費レコード, dst.第二公費レコード)) {
+      return "第二公費レコードが一致しません。";
+    }
+    if (!compat(src.第三公費レコード, dst.第三公費レコード)) {
+      return "第三公費レコードが一致しません。";
+    }
+    if (!compat(src.特殊公費レコード, dst.特殊公費レコード)) {
+      return "特殊公費レコードが一致しません。";
+    }
+    return undefined;
+  }
+
+  function checkMemoCompat(
+    src: TextMemo | undefined,
+    dst: TextMemo | undefined
+  ): string | undefined {
+    if (src === undefined && dst === undefined) {
+      return undefined;
+    } else if (src && dst) {
+      if (src.kind === "shohou" && dst.kind === src.kind) {
+        return checkKouhiCompat(src.shohou, dst.shohou);
+      } else if (src.kind === "shohou-conv" && dst.kind === src.kind) {
+        return checkKouhiCompat(src.shohou, dst.shohou);
+      } else {
+      }
+    }
+    return "inconsistent text memo";
+  }
+
   async function onCopy() {
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
@@ -281,6 +337,13 @@
         textId: 0,
         visitId: targetVisitId,
       });
+      const curMemo = TextMemoWrapper.fromText(text).getMemo();
+      const newMemo = await copyTextMemo(curMemo, targetVisitId);
+      const warn = checkMemoCompat(curMemo, newMemo);
+      if( typeof warn === "string" ){
+        alert(`警告：${warn}`);
+      }
+      TextMemoWrapper.setTextMemo(t, newMemo);
       api.enterText(t);
       onClose();
     } else {

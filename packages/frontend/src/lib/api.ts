@@ -718,6 +718,17 @@ export default {
     );
   },
 
+  getKizaiMaster(
+    kizaicode: number,
+    at: Date | string,
+  ): Promise<m.KizaiMaster> {
+    return get(
+      "get-kizai-master",
+      { kizaicode: kizaicode.toString(), at: dateParam(at) },
+      m.KizaiMaster.cast,
+    )
+  },
+
   getConductEx(conductId: number): Promise<m.ConductEx> {
     return get(
       "get-conduct-ex",

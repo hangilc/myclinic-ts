@@ -126,7 +126,6 @@
         drug,
         at,
         onEnter: (newDrug) => {
-          console.log("newDrug", newDrug);
           drugs = drugs.map((d) => (d === drug ? newDrug : d));
         },
         onDelete:
@@ -195,7 +194,7 @@
         </div>
       {/if}
     </div>
-    <div>薬剤：</div>
+    <div>{zaikeiKubun === "医療材料" ? "器材" : "薬剤"}：</div>
     <div>
       <div class="drugs-wrapper">
         {#each drugs as drug, i}
@@ -210,7 +209,7 @@
         <a
           href="javascript:void(0)"
           on:click={doAddDrug}
-          style="font-size:0.9rem">薬剤追加</a
+          style="font-size:0.9rem">{zaikeiKubun === "医療材料" ? "器材" : "薬剤"}追加</a
         >
       </div>
     </div>

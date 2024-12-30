@@ -1,4 +1,5 @@
 import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Text } from "myclinic-model";
 
 export type TextMemo = ShohouTextMemo | ShohouConvTextMemo;
@@ -20,7 +21,7 @@ export function getTextMemo(text: Text): TextMemo | undefined {
     return undefined;
   } else {
     const memo = JSON.parse(memoString);
-    if( memo.kind === "shohou" || memo.kind === "shohou-conv" ){
+    if (memo.kind === "shohou" || memo.kind === "shohou-conv") {
       console.error("invalid text memo");
     }
     return memo;
@@ -30,54 +31,53 @@ export function getTextMemo(text: Text): TextMemo | undefined {
 export class TextMemoWrapper {
   store: string | undefined;
 
-  constructor(store: string | undefined | null){
-    if( store === null ){
+  constructor(store: string | undefined | null) {
+    if (store === null) {
       store = undefined;
     }
     this.store = store;
   }
 
-  getMemoKind(): "shohou" | "shohou-conv" | undefined {
+  getMemo(): TextMemo | undefined {
     const store = this.store;
-    if( store === undefined ){
+    if (store === undefined) {
       return undefined;
     } else {
-      const json = JSON.parse(store);
-      if( json.kind === "shohou" ) {
+      return JSON.parse(store);
+    }
+  }
+
+  getMemoKind(): "shohou" | "shohou-conv" | undefined {
+    const memo = this.getMemo();
+    if( memo ){
+      if (memo.kind === "shohou") {
         return "shohou";
-      } else if( json.kind === "shohou-conv" ){
+      } else if (memo.kind === "shohou-conv") {
         return "shohou-conv";
       } else {
         throw new Error("invalid text memo");
       }
+
+    } else {
+      return undefined;
     }
   }
 
   probeShohouMemo(): ShohouTextMemo | undefined {
-    const store = this.store;
-    if( store === undefined ){
-      return undefined;
+    const memo = this.getMemo();
+    if( memo && memo.kind === "shohou" ){
+      return memo;
     } else {
-      const json = JSON.parse(store);
-      if( json.kind === "shohou" ){
-        return json;
-      } else {
-        return undefined;
-      }
+      return undefined;
     }
   }
 
   probeShohouConvMemo(): ShohouConvTextMemo | undefined {
-    const store = this.store;
-    if( store === undefined ){
-      return undefined;
+    const memo = this.getMemo();
+    if( memo && memo.kind === "shohou-conv" ){
+      return memo;
     } else {
-      const json = JSON.parse(store);
-      if( json.kind === "shohou-conv" ){
-        return json;
-      } else {
-        return undefined;
-      }
+      return undefined;
     }
   }
 
@@ -85,8 +85,47 @@ export class TextMemoWrapper {
     return new TextMemoWrapper(text.memo);
   }
 
-  static setTextMemo(text: Text, memo: TextMemo) {
-    const store = JSON.stringify(memo);
-    text.memo = store;
+  static setTextMemo(text: Text, memo: TextMemo | undefined) {
+    if( memo === undefined ){
+      text.memo = undefined;
+    } else {
+      const store = JSON.stringify(memo);
+      text.memo = store;
+    }
+  }
+}
+
+export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: number): Promise<TextMemo | undefined> {
+  if (src == undefined) {
+    return undefined;
+  } else {
+    if (src.kind === "shohou") {
+      const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+      Object.assign(dstShohou, {
+        引換番号: undefined,
+        RP剤情報グループ: src.shohou.RP剤情報グループ,
+        提供情報レコード: src.shohou.提供情報レコード,
+      });
+      const dstMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou: dstShohou,
+        prescriptionId: undefined,
+      };
+      return dstMemo;
+    } else if (src.kind === "shohou-conv") {
+      const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+      Object.assign(dstShohou, {
+        引換番号: undefined,
+        RP剤情報グループ: src.shohou.RP剤情報グループ,
+        提供情報レコード: src.shohou.提供情報レコード,
+      });
+      const dstMemo: ShohouConvTextMemo = {
+        kind: "shohou-conv",
+        shohou: dstShohou,
+      };
+      return dstMemo;
+    } else {
+      throw new Error("cannot happen");
+    }
   }
 }

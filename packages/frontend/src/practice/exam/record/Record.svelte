@@ -3,7 +3,7 @@
   import Title from "./Title.svelte";
   import TwoCols from "./TwoCols.svelte";
   import Text from "./text/Text.svelte";
-  import TextForm from "./text/TextForm.svelte";
+  import NewTextForm from "./text/NewTextForm.svelte";
   import Hoken from "./hoken/Hoken.svelte";
   import ShinryouMenu from "./shinryou/ShinryouMenu.svelte";
   import ShinryouWrapper from "./shinryou/ShinryouWrapper.svelte";
@@ -66,18 +66,6 @@
         }
       }
     })
-  //    const clinicInfo = await cache.getClinicInfo();
-  //   // let kikancode = "131" + clinicInfo.kikancode;
-  //   const d: DenshiShohouDialog = new DenshiShohouDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       patient: visit.patient,
-  //       visit: visit.asVisit,
-  //       hokenInfo: visit.hoken,
-  //       textId: 0,
-  //     },
-  //   });
   }
 </script>
 
@@ -89,8 +77,8 @@
         <Text {text} index={i} />
       {/each}
       {#if showNewTextEditor}
-        <TextForm
-          text={createNewText()}
+        <NewTextForm
+          visitId={visit.visitId}
           onClose={() => (showNewTextEditor = false)}
         />
       {:else}

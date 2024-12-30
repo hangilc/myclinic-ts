@@ -3,11 +3,6 @@ import { DenshiShohou, type 点数表, type 診療科コード, type 診療科�
   type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, type 剤形区分, type 用法補足区分, 
   type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード } from "./denshi-shohou";
 
-export interface 公費レコード {
-  公費負担者番号: string;
-  公費受給者番号?: string;
-}
-
 export interface PrescInfoData {
   医療機関コード種別: 点数表;
   医療機関コード: string;
@@ -52,6 +47,15 @@ export interface PrescInfoData {
   引換番号?: string;
   RP剤情報グループ: RP剤情報[];
   提供情報レコード?: 提供情報レコード;
+}
+
+export interface 公費レコード {
+  公費負担者番号: string;
+  公費受給者番号?: string;
+}
+
+export function eq公費レコード(a: 公費レコード, b: 公費レコード): boolean {
+  return a.公費負担者番号 === b.公費負担者番号 && a.公費受給者番号 === b.公費受給者番号;
 }
 
 export interface 麻薬施用レコード {
