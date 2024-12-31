@@ -25,10 +25,6 @@
       if (wq == null) {
         return;
       }
-    //   let data = await getWqueueData(wq);
-    //   wqItems.update((wqItems) => {
-    //     return [...wqItems, data]
-    // });
     })
   );
 
@@ -38,19 +34,6 @@
       if (wq == null) {
         return;
       }
-      // const wqData = await getWqueueData(wq);
-      // wqItems.update((wqItems) => {
-      //   console.log("before", wqItems);
-      //   const updated = wqItems.map((item) => {
-      //     if (item.visitId === wq.visitId) {
-      //       return wqData;
-      //     } else {
-      //       return item;
-      //     }
-      //   });
-      //   console.log("after", updated);
-      //   return updated;
-      // });
     })
   );
 
@@ -60,18 +43,14 @@
       if (wq == null) {
         return;
       }
-      // console.log("deleted", wq);
-      // wqItems.update((wqItems) =>
-      //   wqItems.filter((item) => item.visitId !== wq.visitId)
-      // );
     })
   );
 
-  async function getWqueueData(wq: Wqueue): Promise<WqueueData> {
-    let visit = await api.getVisit(wq.visitId);
-    let patient = await api.getPatient(visit.patientId);
-    return new WqueueData(wq, visit, patient);
-  }
+  // async function getWqueueData(wq: Wqueue): Promise<WqueueData> {
+  //   let visit = await api.getVisit(wq.visitId);
+  //   let patient = await api.getPatient(visit.patientId);
+  //   return new WqueueData(wq, visit, patient);
+  // }
 
   async function refresh() {
     const curr = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
