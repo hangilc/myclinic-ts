@@ -3,14 +3,13 @@
   import { cache } from "@/lib/cache";
   import type { DrugDisease } from "@/lib/drug-disease";
   import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
-  import type { Writable } from "svelte/store";
-  import type { DiseaseEnv } from "./disease-env";
   import { DateWrapper } from "myclinic-util";
 
-  // export let env: Writable<DiseaseEnv | undefined>;
   export let onChanged: () => void;
   let drugDiseases: { id: number; data: DrugDisease }[] = [];
   let index = 1;
+  let filterTextInput = "";
+  let filterText = "";
 
   init();
 
@@ -29,9 +28,11 @@
     return [...fix.pre, fix.name, ...fix.post].join("");
   }
 
-  async function doDelete(item: { id: number, data: DrugDisease}) {
-    if( confirm("この病名データを削除していいですか？") ){
-      const dds = drugDiseases.filter(e => e.id !== item.id).map(e => e.data);
+  async function doDelete(item: { id: number; data: DrugDisease }) {
+    if (confirm("この病名データを削除していいですか？")) {
+      const dds = drugDiseases
+        .filter((e) => e.id !== item.id)
+        .map((e) => e.data);
       await api.setDrugDiseases(dds);
       cache.clearDrugDiseases();
       drugDiseases = [];
@@ -42,14 +43,9 @@
 
   function resolveAt(): string {
     return DateWrapper.today().asSqlDate();
-    // let at = $env?.lastVisit?.visitedAt.substring(0, 10);
-    // if( at == undefined ){
-    //   at = DateWrapper.from(new Date()).asSqlDate();
-    // }
-    // return at;
   }
 
-  async function doEdit(item: { id: number, data: DrugDisease}) {
+  async function doEdit(item: { id: number; data: DrugDisease }) {
     const d: EditDrugDiseaseDialog = new EditDrugDiseaseDialog({
       target: document.body,
       props: {
@@ -57,16 +53,16 @@
         item: item.data,
         at: resolveAt(),
         onEnter: async (modified: DrugDisease) => {
-          drugDiseases = drugDiseases.map(dd => {
+          drugDiseases = drugDiseases.map((dd) => {
             return dd.id === item.id ? { id: item.id, data: modified } : dd;
           });
-          const dds = drugDiseases.map(e => e.data);
+          const dds = drugDiseases.map((e) => e.data);
           await api.setDrugDiseases(dds);
           cache.clearDrugDiseases();
           onChanged();
-        }
-      }
-    })
+        },
+      },
+    });
   }
 
   async function doNew() {
@@ -75,43 +71,58 @@
       props: {
         destroy: () => d.$destroy(),
         item: {
-          drugName: "", diseaseName: "", fix: undefined,
+          drugName: "",
+          diseaseName: "",
+          fix: undefined,
         },
         at: resolveAt(),
         title: "薬剤病名の追加",
         onEnter: async (created: DrugDisease) => {
-          drugDiseases = [...drugDiseases, { id: index++, data: created}];
-          const dds = drugDiseases.map(e => e.data);
+          drugDiseases = [...drugDiseases, { id: index++, data: created }];
+          const dds = drugDiseases.map((e) => e.data);
           await api.setDrugDiseases(dds);
           cache.clearDrugDiseases();
           onChanged();
-        }
-      }
-    })
+        },
+      },
+    });
+  }
+
+  function doFilter() {
+    filterText = filterTextInput.trim();
+    drugDiseases = drugDiseases;
   }
 </script>
 
 <div class="top-commands">
-  <button on:click={doNew}>新規登録</button>
+  <button on:click={doNew}>薬剤病名新規登録</button>
+</div>
+<div>
+  <input style="width:8em" type="text" bind:value={filterTextInput}/><button
+    style="margin-left:4px;"
+    on:click={doFilter}>フィルター</button
+  >
 </div>
 <div class="wrapper">
   <div class="items-wrapper">
     {#each drugDiseases as dd (dd.id)}
-      <div class="item">
-        <div>
-          {dd.data.drugName} | {dd.data.diseaseName} |
-          {#if dd.data.fix}
-            {fixName(dd.data.fix)}
-          {:else}
-            （なし）
-          {/if}
+      {#if filterText === "" || dd.data.drugName.indexOf(filterText) >= 0}
+        <div class="item">
+          <div>
+            {dd.data.drugName} | {dd.data.diseaseName} |
+            {#if dd.data.fix}
+              {fixName(dd.data.fix)}
+            {:else}
+              （なし）
+            {/if}
+          </div>
+          <div>
+            <button on:click={() => doEdit(dd)}>編集</button>
+            <button on:click={() => doDelete(dd)}>削除</button>
+          </div>
         </div>
-        <div>
-          <button on:click={() => doEdit(dd)}>編集</button>
-          <button on:click={() => doDelete(dd)}>削除</button>
-        </div>
-      </div>
-      <hr />
+        <hr />
+      {/if}
     {/each}
   </div>
 </div>
@@ -121,6 +132,7 @@
     height: 300px;
     overflow-y: auto;
     resize: vertical;
+    margin-top: 10px;
   }
 
   .top-commands {
