@@ -3,6 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { fullNameOfFix, type DrugDisease } from "@/lib/drug-disease";
   import type { ByoumeiMaster, ShuushokugoMaster } from "myclinic-model";
+  import { truncateDrugName } from "./drug-disease-util";
 
   export let destroy: () => void;
   export let item: DrugDisease;
@@ -99,11 +100,15 @@
     destroy();
     onEnter(dd);
   }
+
+  function doTruncateDrugName() {
+    drugName = truncateDrugName(drugName);
+  }
 </script>
 
 <Dialog {title} {destroy} styleWidth="300px">
   <div class="row">
-    薬剤名：<input type="text" bind:value={drugName} />
+    薬剤名：<input type="text" bind:value={drugName} /> <a href="javascript:void(0)" on:click={doTruncateDrugName}>短縮</a>
   </div>
   <div class="row">
     傷病名：<input type="text" bind:value={diseaseName} />
