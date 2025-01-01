@@ -32,6 +32,7 @@
     } else {
       fixFullName = "";
     }
+    diseaseName = fixFullName;
   }
 
   async function doSearch() {
@@ -48,9 +49,11 @@
   function doByoumeiSelect(name: string) {
     fixName = name;
     updateFixFullName();
-    if( diseaseName === "" ){
-      diseaseName = name;
-    }
+    // if (diseaseName === "") {
+    //   diseaseName = name;
+    // }
+    searchText = "";
+    byoumeiResult = [];
   }
 
   function compileFix():
@@ -73,6 +76,8 @@
     } else {
       fixPost.push(m.name);
     }
+    updateFixFullName();
+    adjResult = [];
   }
 
   async function doEnter() {
@@ -123,14 +128,14 @@
       <div>
         {#each byoumeiResult as m (m.shoubyoumeicode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div on:click={() => doByoumeiSelect(m.name)}>{m.name}</div>
+          <div class="item" on:click={() => doByoumeiSelect(m.name)}>{m.name}</div>
         {/each}
       </div>
     {:else if searchMode === "adj"}
       <div>
         {#each adjResult as m (m.shuushokugocode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div on:click={() => doAdjSelect(m)}>{m.name}</div>
+          <div class="item" on:click={() => doAdjSelect(m)}>{m.name}</div>
         {/each}
       </div>
     {/if}
@@ -146,6 +151,10 @@
     max-height: 300px;
     overflow-y: auto;
     cursor: pointer;
+    margin-top: 10px;
   }
 
+  .result-wrapper .item:hover {
+    background-color: #ddd;
+  }
 </style>
