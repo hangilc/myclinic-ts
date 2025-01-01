@@ -73,10 +73,11 @@
       data-cy="wq-row"
       data-patient-id={patient.patientId}
       data-visit-id={visit.visitId}
+      class:waitcashier={wq.waitState === 2}
     >
-      <div>{wq.waitStateType.label}</div>
+      <div class="wq-state">{wq.waitStateType.label}</div>
       <div>{patient.patientId}</div>
-      <div>{patient.fullName(" ")}</div>
+      <div class="patient-name">{patient.fullName(" ")}</div>
       <div>{patient.fullYomi(" ")}</div>
       <div>{patient.sexType.rep}</div>
       <div>{calcAge(patient.birthday)}才</div>
@@ -84,7 +85,8 @@
       <div class="manip">
         <div class="manip-content">
           {#if item.isWaitCashier}
-            <button on:click={() => doCashier(visit)}>会計</button>
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div class="do-cashier" on:click={() => doCashier(visit)}>会計</div>
           {/if}
           <a href="javascript:void(0)" on:click={() => doRecord(patient)}
             >診療録</a
@@ -184,9 +186,49 @@
     display: table-row;
   }
 
+  .wq-row .wq-state {
+    padding-left: 6px;
+  }
+
   .wq-row:nth-of-type(2n) {
-    /* background-color: #eee; */
     background-color: #17a2b811;
+  }
+
+  .wq-row.waitcashier {
+    /* animation: 1s forwards pump infinite */
+    background-color: #fdd;
+  }
+
+  .wq-row.waitcashier .wq-state {
+    font-weight: bold;
+    color: red;
+  }
+
+  .wq-row.waitcashier .patient-name {
+    font-weight: bold;
+  }
+
+  @keyframes pump {
+    0% {
+      border-color: rgba(255, 0, 0, 0);
+    }
+
+    100% {
+      border-color: rgba(255, 0, 0, 1.0);
+    }
+  }
+
+  .wq-row.waitcashier .do-cashier {
+    /* animation: 1s pump infinite; */
+    animation: 1s linear pump infinite;
+    border: 2px solid;
+    color: red;
+    padding: 5px 8px;
+    font-weight: bold;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
   }
 
   .wq-row > div {
