@@ -12,7 +12,7 @@
 
   export let destroy: () => void;
   let mode: "shahokokuho" | "koukikourei" = "shahokokuho";
-  let validateBirthdate: () => VResult<Date | null>;
+  let validateBirthdate: (() => VResult<Date | null>) | undefined = undefined;
   let error: string = "";
   let hokensha = "";
   let hihokensha = "";
@@ -25,6 +25,9 @@
   }
 
   function validate(): OnshiKakuninQuery | string {
+    if( !validateBirthdate ){
+      throw new Error("uninitialized validator");
+    }
     hokensha = hokensha.trim();
     if( !hokensha ){
       return "保険者番号が入力されていません。";

@@ -13,22 +13,26 @@
   export let init: Koukikourei | null;
   export let onEnter: (data: Koukikourei) => Promise<string[]>;
   export let onClose: () => void;
-  let validate: () => VResult<Koukikourei>;
+  let validate: (() => VResult<Koukikourei>) | undefined = undefined;
   let errors: string[] = [];
   let showRefer = false;
 
   async function doEnter() {
-    const vs = validate();
-    if (vs.isValid) {
-      errors = [];
-      const errs = await onEnter(vs.value);
-      if (errs.length === 0) {
-        onClose();
+    if (validate) {
+      const vs = validate();
+      if (vs.isValid) {
+        errors = [];
+        const errs = await onEnter(vs.value);
+        if (errs.length === 0) {
+          onClose();
+        } else {
+          errors = errs;
+        }
       } else {
-        errors = errs;
+        errors = errorMessagesOf(vs.errors);
       }
     } else {
-      errors = errorMessagesOf(vs.errors);
+      throw new Error("uninitialized validator");
     }
   }
 
@@ -37,29 +41,33 @@
   }
 
   async function doOnshiConfirm() {
-    const vs = validate();
-    if (vs.isValid) {
-      errors = [];
-      const hoken = vs.value;
-      let confirmDate: string;
-      if (hoken.validUpto === "0000-00-00") {
-        confirmDate = dateToSql(new Date());
-      } else {
-        confirmDate = hoken.validUpto;
-      }
-      const d: OnshiKakuninDialog = new OnshiKakuninDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          hoken,
-          confirmDate,
-          onOnshiNameUpdated: (updated) => {
-            patient = updated;
+    if (validate) {
+      const vs = validate();
+      if (vs.isValid) {
+        errors = [];
+        const hoken = vs.value;
+        let confirmDate: string;
+        if (hoken.validUpto === "0000-00-00") {
+          confirmDate = dateToSql(new Date());
+        } else {
+          confirmDate = hoken.validUpto;
+        }
+        const d: OnshiKakuninDialog = new OnshiKakuninDialog({
+          target: document.body,
+          props: {
+            destroy: () => d.$destroy(),
+            hoken,
+            confirmDate,
+            onOnshiNameUpdated: (updated) => {
+              patient = updated;
+            },
           },
-        },
-      });
+        });
+      } else {
+        errors = errorMessagesOf(vs.errors);
+      }
     } else {
-      errors = errorMessagesOf(vs.errors);
+      throw new Error("uninitialized validator");
     }
   }
 

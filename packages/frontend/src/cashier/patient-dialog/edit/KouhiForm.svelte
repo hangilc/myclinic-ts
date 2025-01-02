@@ -16,8 +16,8 @@
   let validFrom: Date | null;
   let validUpto: Date | null;
   let gengouList = gengouListUpto("平成");
-  let validateValidFrom: () => VResult<Date | null>;
-  let validateValidUpto: () => VResult<Date | null>;
+  let validateValidFrom: (() => VResult<Date | null>) | undefined = undefined;
+  let validateValidUpto: (() => VResult<Date | null>) | undefined = undefined;
 
   updateValues(init);
 
@@ -48,6 +48,9 @@
   }
 
   export function validate(): VResult<Kouhi> {
+    if( !(validateValidFrom && validateValidUpto) ){
+      throw new Error("uninitialized validator");
+    }
     const input = {
       kouhiId: validResult(init?.kouhiId ?? 0),
       patientId: validResult(patient.patientId),

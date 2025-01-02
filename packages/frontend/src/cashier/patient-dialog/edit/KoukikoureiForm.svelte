@@ -18,13 +18,13 @@
   let validFrom: Date | null;
   let validUpto: Date | null;
   let gengouList = gengouListUpto("平成");
-  let validateValidFrom: () => VResult<Date | null>
-  let validateValidUpto: () => VResult<Date | null>
+  let validateValidFrom: (() => VResult<Date | null>) | undefined = undefined;
+  let validateValidUpto: (() => VResult<Date | null>) | undefined = undefined;
 
   updateValues(init);
 
   function updateValues(data: Koukikourei | null): void {
-    if( data === null ){
+    if (data === null) {
       hokenshaBangou = "";
       hihokenshaBangou = "";
       futanWari = 1;
@@ -40,22 +40,25 @@
   }
 
   export function validate(): VResult<Koukikourei> {
-    const input = {
-      koukikoureiId: validResult(init?.koukikoureiId ?? 0),
-      patientId: validResult(patient.patientId),
-      hokenshaBangou: validResult(hokenshaBangou),
-      hihokenshaBangou: validResult(hihokenshaBangou),
-      futanWari: validResult(futanWari),
-      validFrom: validateValidFrom(),
-      validUpto: validateValidUpto(),
+    if (validateValidFrom && validateValidUpto) {
+      const input = {
+        koukikoureiId: validResult(init?.koukikoureiId ?? 0),
+        patientId: validResult(patient.patientId),
+        hokenshaBangou: validResult(hokenshaBangou),
+        hihokenshaBangou: validResult(hihokenshaBangou),
+        futanWari: validResult(futanWari),
+        validFrom: validateValidFrom(),
+        validUpto: validateValidUpto(),
+      };
+      return validateKoukikourei(input);
+    } else {
+      throw new Error("uninitialized validator");
     }
-    return validateKoukikourei(input);
   }
 
   function doUserInput(): void {
     dispatch("value-change");
   }
-
 </script>
 
 <div>
@@ -65,25 +68,40 @@
 <div class="panel">
   <span>保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={hokenshaBangou} 
-      on:change={doUserInput} data-cy="hokensha-bangou-input"/>
+    <input
+      type="text"
+      class="regular"
+      bind:value={hokenshaBangou}
+      on:change={doUserInput}
+      data-cy="hokensha-bangou-input"
+    />
   </div>
   <span>被保険者番号</span>
   <div>
-    <input type="text" class="regular" bind:value={hihokenshaBangou} on:change={doUserInput}
-    data-cy="hihokensha-bangou-input"/>
+    <input
+      type="text"
+      class="regular"
+      bind:value={hihokenshaBangou}
+      on:change={doUserInput}
+      data-cy="hihokensha-bangou-input"
+    />
   </div>
   <span>負担割</span>
   <div>
     {#each [1, 2, 3] as w}
       {@const id = genid()}
-      <input type="radio" value={w} bind:group={futanWari} on:change={doUserInput}
-      data-cy="futan-wari-input"/>
+      <input
+        type="radio"
+        value={w}
+        bind:group={futanWari}
+        on:change={doUserInput}
+        data-cy="futan-wari-input"
+      />
       <label for={id}>{toZenkaku(w.toString())}割</label>
     {/each}
   </div>
   <span>期限開始</span>
-  <div  data-cy="valid-from-input">
+  <div data-cy="valid-from-input">
     <DateFormWithCalendar
       init={validFrom}
       on:value-change={doUserInput}

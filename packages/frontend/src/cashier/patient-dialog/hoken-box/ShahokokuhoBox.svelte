@@ -23,7 +23,7 @@
   }
 
   function doOnshiConfirm() {
-    const confirmDate = (shahokokuho.validUpto = "0000-00-00"
+    const confirmDate = (shahokokuho.validUpto === "0000-00-00"
       ? dateToSqlDate(new Date())
       : shahokokuho.validUpto);
     const d: OnshiKakuninDialog = new OnshiKakuninDialog({

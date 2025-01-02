@@ -46,9 +46,12 @@
   }
   const dispatch = createEventDispatcher<{ "value-change": void }>();
 
-  let validateBirthday: () => VResult<Date | null>;
+  let validateBirthday: (() => VResult<Date | null>) | undefined = undefined;
 
   export function validate(): VResult<Patient> {
+    if( !validateBirthday ){
+      throw new Error("uninitialized validator");
+    }
     const input: PatientInput = {
       patientId: validResult(init?.patientId ?? 0),
       lastName: validResult(lastName),

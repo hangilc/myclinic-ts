@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PopupContext } from "../popup-context";
-  import { errorMessagesOf, VResult } from "../validation";
+  import { errorMessagesOf, invalid, VResult } from "../validation";
   import { ViewportCoord } from "../viewport-coord";
   import DateForm from "./DateForm.svelte";
 
@@ -10,7 +10,7 @@
   export let event: MouseEvent;
   let context: PopupContext | undefined = undefined;
 
-  let validate: () => VResult<Date | null>;
+  let validate: (() => VResult<Date | null>) | undefined = undefined;
   let errors: string[] = [];
 
   function popupDestroy() {
@@ -21,19 +21,23 @@
   }
 
   function open(e: HTMLElement) {
-    const anchor = (event.currentTarget || event.target) as HTMLElement | SVGSVGElement;
+    const anchor = (event.currentTarget || event.target) as
+      | HTMLElement
+      | SVGSVGElement;
     const clickLocation = ViewportCoord.fromEvent(event);
     context = new PopupContext(anchor, e, clickLocation, popupDestroy);
   }
 
   function doEnter(): void {
-    const vs = validate();
-    if( vs.isValid ){
-      popupDestroy();
-      onEnter(vs.value);
-      errors = [];
-    } else {
-      errors = errorMessagesOf(vs.errors);
+    if (validate) {
+      const vs = validate();
+      if (vs.isValid) {
+        popupDestroy();
+        onEnter(vs.value);
+        errors = [];
+      } else {
+        errors = errorMessagesOf(vs.errors);
+      }
     }
   }
 
@@ -42,24 +46,26 @@
   }
 
   function doFormChange(): void {
-    const vs = validate();
-    if( vs.isValid ){
-      errors = [];
-    } else {
-      errors = errorMessagesOf(vs.errors);
+    if (validate) {
+      const vs = validate();
+      if (vs.isValid) {
+        errors = [];
+      } else {
+        errors = errorMessagesOf(vs.errors);
+      }
     }
   }
 </script>
 
 <div class="menu" use:open>
   {#if errors.length > 0}
-  <div class="error">
-    {#each errors as e}
-      <div>{e}</div>
-    {/each}
-  </div>
+    <div class="error">
+      {#each errors as e}
+        <div>{e}</div>
+      {/each}
+    </div>
   {/if}
-  <DateForm {init} on:value-change={doFormChange} bind:validate/>
+  <DateForm {init} on:value-change={doFormChange} bind:validate />
   <div class="commands">
     <slot name="aux-commands" />
     <button on:click={doEnter}>入力</button>

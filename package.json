@@ -22,7 +22,8 @@
     "dev": "npm run dev -w packages/frontend"
   },
   "devDependencies": {
-    "typescript": "5.2.2",
+    "kanjidate": "1.4.7",
+    "typescript": "5.7.2",
     "vite": "^4.5.3"
   },
   "dependencies": {

@@ -6,16 +6,16 @@
 
   export let destroy: () => void;
   export let visit: VisitEx;
-  let futanWariDialog: Dialog;
+  // let futanWariDialog: Dialog;
   let currentRep: string;
   let input: HTMLInputElement;
   let error: string = "";
 
   $: currentRep = futanWariRep(visit);
 
-  export function open(): void {
-    futanWariDialog.open();
-  }
+  // export function open(): void {
+  //   futanWariDialog.open();
+  // }
 
   function futanWariRep(visit: VisitEx): string {
     const futanWari = visit.attributes?.futanWari;

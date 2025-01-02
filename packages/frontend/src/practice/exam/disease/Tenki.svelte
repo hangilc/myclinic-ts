@@ -18,8 +18,8 @@
   export let env: Writable<DiseaseEnv | undefined>;
   export let onEnter: (result: [number, string, string][]) => void;
   let selected: DiseaseData[] = [];
-  let validateEndDate: () => VResult<Date | null>;
-  let setEndDate: (d: Date | null) => void;
+  let validateEndDate: (() => VResult<Date | null>) | undefined = undefined;
+  let setEndDate: ((d: Date | null) => void) | undefined = undefined;
   let endDateErrors: string[] = [];
   let endReasons: DiseaseEndReasonType[] = [
     DiseaseEndReason.Cured,
@@ -43,6 +43,9 @@
   }
 
   function getEndDate(): Date | undefined {
+    if (!validateEndDate) {
+      throw new Error("uninitialized validator");
+    }
     endDateErrors = [];
     const vs = validateEndDate();
     if (vs.isValid) {
@@ -67,7 +70,12 @@
   }
 
   function modifyEndDate(f: (d: Date) => Date): void {
-    withEndDate((d) => setEndDate(f(d)));
+    withEndDate((d) => {
+      if (!setEndDate) {
+        throw new Error("uninitialized validator");
+      }
+      setEndDate(f(d));
+    });
   }
 
   function doWeekClick(event: MouseEvent): void {
@@ -76,11 +84,17 @@
   }
 
   function doTodayClick(): void {
+    if (!setEndDate) {
+      throw new Error("uninitialized validator");
+    }
     setEndDate(new Date());
   }
 
   function doEndOfMonthClick(): void {
     withEndDate((endDate) => {
+      if (!setEndDate) {
+        throw new Error("uninitialized validator");
+      }
       const lastDay = kanjidate.lastDayOfMonth(
         endDate.getFullYear(),
         endDate.getMonth() + 1
@@ -92,12 +106,18 @@
   }
 
   function doEndOfLastMonthClick(): void {
+    if (!setEndDate) {
+      throw new Error("uninitialized validator");
+    }
     const d = new Date();
     d.setDate(0);
     setEndDate(d);
   }
 
   function onSelectChange(): void {
+    if (!setEndDate) {
+      throw new Error("uninitialized validator");
+    }
     setEndDate(endDateForInput(selected.map((d) => d.disease.startDate)));
   }
 
@@ -126,7 +146,7 @@
 </script>
 
 <div data-cy="disease-tenki">
-  {#each ($env?.currentList ?? []) as d}
+  {#each $env?.currentList ?? [] as d}
     {@const id = genid()}
     <div>
       <input
@@ -159,10 +179,22 @@
     </DateFormWithCalendar>
   </div>
   <div class="date-manip">
-    <a href="javascript:void(0)" on:click={doWeekClick} data-cy="week-link">週</a>
-    <a href="javascript:void(0)" on:click={doTodayClick} data-cy="today-link">今日</a>
-    <a href="javascript:void(0)" on:click={doEndOfMonthClick} data-cy="end-of-month-link">月末</a>
-    <a href="javascript:void(0)" on:click={doEndOfLastMonthClick} data-cy="end-of-last-month-link">先月末</a>
+    <a href="javascript:void(0)" on:click={doWeekClick} data-cy="week-link"
+      >週</a
+    >
+    <a href="javascript:void(0)" on:click={doTodayClick} data-cy="today-link"
+      >今日</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doEndOfMonthClick}
+      data-cy="end-of-month-link">月末</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={doEndOfLastMonthClick}
+      data-cy="end-of-last-month-link">先月末</a
+    >
   </div>
   <div class="tenki">
     {#each endReasons as reason}

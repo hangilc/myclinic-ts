@@ -3,7 +3,12 @@
   import { confirm } from "@/lib/confirm-call";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { errorMessagesOf, isNotNull, validResult, type VResult } from "@/lib/validation";
+  import {
+    errorMessagesOf,
+    isNotNull,
+    validResult,
+    type VResult,
+  } from "@/lib/validation";
   // import type { Invalid } from "@/lib/validator";
   import { validateDisease } from "@/lib/validators/disease-validator";
   import {
@@ -24,8 +29,8 @@
   export let onEnter: (entered: DiseaseData) => void;
   export let onDelete: (diseaseId: number) => void;
   export let onCancel: () => void;
-  let validateStartDate: () => VResult<Date | null>;
-  let validateEndDate: () => VResult<Date | null>;
+  let validateStartDate: (() => VResult<Date | null>) | undefined = undefined;
+  let validateEndDate: (() => VResult<Date | null>) | undefined = undefined;
   let errors: string[] = [];
 
   let fullName: string = "";
@@ -40,6 +45,9 @@
   }
 
   async function doEnter() {
+    if (!(validateStartDate && validateEndDate)) {
+      throw new Error("uninitialized validator");
+    }
     clearErrors();
     const r: VResult<Disease> = validateDisease({
       diseaseId: validResult(formValues.diseaseId),
@@ -58,7 +66,7 @@
         r.value,
         formValues.shuushokugoMasters.map((m) => m.shuushokugocode)
       );
-      if( !ok ){
+      if (!ok) {
         errors = ["症病名の更新に失敗しました。"];
         return;
       }
@@ -126,10 +134,18 @@
   {/if}
   <div>名前：<span data-cy="disease-name">{fullName}</span></div>
   <div class="date-wrapper start-date" data-cy="start-date-input">
-    <DateFormWithCalendar init={formValues.startDate} {gengouList} bind:validate={validateStartDate}/>
+    <DateFormWithCalendar
+      init={formValues.startDate}
+      {gengouList}
+      bind:validate={validateStartDate}
+    />
   </div>
   <div class="date-wrapper end-date" data-cy="end-date-input">
-    <DateFormWithCalendar init={formValues.endDate} {gengouList} bind:validate={validateEndDate}/>
+    <DateFormWithCalendar
+      init={formValues.endDate}
+      {gengouList}
+      bind:validate={validateEndDate}
+    />
   </div>
   <div class="end-reason">
     {#each Object.values(DiseaseEndReason) as reason}

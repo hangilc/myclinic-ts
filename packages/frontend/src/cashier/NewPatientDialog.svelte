@@ -12,9 +12,12 @@
   export let hotlineTrigger: EventEmitter<string> | undefined = undefined;
   let errors: string[] = [];
   let isEnterClicked = false;
-  let validate: () => VResult<Patient>;
+  let validate: (() => VResult<Patient>) | undefined = undefined;
 
   async function doEnter() {
+    if( !validate ){
+      throw new Error("uninitialized validator");
+    }
     isEnterClicked = true;
     const vs = validate();
     if (vs.isValid) {
@@ -27,6 +30,9 @@
   }
 
   function doChange(): void {
+    if( !validate ){
+      throw new Error("uninitialized validator");
+    }
     if (isEnterClicked) {
       const vs = validate();
       if (vs.isValid) {

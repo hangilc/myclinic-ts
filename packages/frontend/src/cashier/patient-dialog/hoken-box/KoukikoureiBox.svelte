@@ -24,7 +24,7 @@
   }
 
   function doOnshiConfirm() {
-    const confirmDate = (koukikourei.validUpto = "0000-00-00"
+    const confirmDate = (koukikourei.validUpto === "0000-00-00"
       ? dateToSqlDate(new Date())
       : koukikourei.validUpto);
     const d: OnshiKakuninDialog = new OnshiKakuninDialog({

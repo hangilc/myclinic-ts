@@ -22,8 +22,8 @@
   export let onEntered: (entered: Kouhi) => void = (_) => {};
   export let onUpdated: (entered: Kouhi) => void = (_) => {};
   export let isAdmin: boolean;
-  let getValidFromInputs: () => DateInputInterface;
-  let getValidUptoInputs: () => DateInputInterface;
+  let getValidFromInputs: (() => DateInputInterface) | undefined = undefined;
+  let getValidUptoInputs: (() => DateInputInterface) | undefined = undefined;
   let futansha: string = init?.futansha.toString() ?? "";
   let jukyuusha: string = init?.jukyuusha.toString() ?? "";
   let memo: KouhiMemoInterface = memoStoreToKouhiMemo(init?.memo ?? undefined);
@@ -32,6 +32,9 @@
   let errors: string[] = [];
 
   async function doEnter() {
+    if (!(getValidFromInputs && getValidUptoInputs)) {
+      throw new Error("uninitialized validator");
+    }
     const kouhiId = init?.kouhiId ?? 0;
     const memoInput: KouhiMemoInterface = Object.assign({}, memo, {
       gendogaku,

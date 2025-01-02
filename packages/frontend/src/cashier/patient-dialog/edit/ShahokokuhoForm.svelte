@@ -21,9 +21,8 @@
   let validUpto: Date | null;
   let koureiStore: number;
   let edaban: string;
-  let validateValidFrom: () => VResult<Date | null>;
-  let validateValidUpto: () => VResult<Date | null>;
-  // let honninStoreDiabled = false;
+  let validateValidFrom: (() => VResult<Date | null>) | undefined;
+  let validateValidUpto: (() => VResult<Date | null>) | undefined;
   export function setData(data: Shahokokuho | null): void {
     updateValues(data);
   }
@@ -44,7 +43,7 @@
       hokenshaBangou = init.hokenshaBangou.toString();
       hihokenshaKigou = init.hihokenshaKigou;
       hihokenshaBangou = init.hihokenshaBangou;
-      if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
+      if (hokenshaBangouRep(hokenshaBangou) === "国保") {
         honninStore = 1;
       } else {
         honninStore = init.honninStore;
@@ -59,19 +58,23 @@
   let gengouList = gengouListUpto("平成");
 
   export function validate(): VResult<Shahokokuho> {
-    const input = {
-      shahokokuhoId: validResult(init?.shahokokuhoId ?? 0),
-      patientId: validResult(patient.patientId),
-      hokenshaBangou: validResult(hokenshaBangou).validate(toInt),
-      hihokenshaKigou: validResult(hihokenshaKigou),
-      hihokenshaBangou: validResult(hihokenshaBangou),
-      honninStore: validResult(honninStore),
-      validFrom: validateValidFrom(),
-      validUpto: validateValidUpto(),
-      koureiStore: validResult(koureiStore),
-      edaban: validResult(edaban),
-    };
-    return validateShahokokuho(input);
+    if (validateValidFrom && validateValidUpto) {
+      const input = {
+        shahokokuhoId: validResult(init?.shahokokuhoId ?? 0),
+        patientId: validResult(patient.patientId),
+        hokenshaBangou: validResult(hokenshaBangou).validate(toInt),
+        hihokenshaKigou: validResult(hihokenshaKigou),
+        hihokenshaBangou: validResult(hihokenshaBangou),
+        honninStore: validResult(honninStore),
+        validFrom: validateValidFrom(),
+        validUpto: validateValidUpto(),
+        koureiStore: validResult(koureiStore),
+        edaban: validResult(edaban),
+      };
+      return validateShahokokuho(input);
+    } else {
+      throw new Error("uninitialized validators");
+    }
   }
 
   function doUserInput(): void {
@@ -80,12 +83,6 @@
 
   function doHokenshaBangouChange(): void {
     dispatch("value-change");
-    // if( hokenshaBangouRep(hokenshaBangou) === "国保" ){
-    //   honninStore = 1;
-    //   honninStoreDiabled = true;
-    // } else {
-    //   honninStoreDiabled = false;
-    // }
   }
 </script>
 

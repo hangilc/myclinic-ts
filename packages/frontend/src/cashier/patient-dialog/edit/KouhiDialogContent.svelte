@@ -11,11 +11,14 @@
   export let init: Kouhi | null;
   export let onEnter: (data: Kouhi) => Promise<string[]>;
   export let onClose: () => void;
-  let validate: () => VResult<Kouhi>;
+  let validate: (() => VResult<Kouhi>) | undefined = undefined;
   let errors: string[] = [];
   let showRefer = false;
 
   async function doEnter() {
+    if( !validate ){
+      throw new Error("uninitialized validator");
+    }
     const vs = validate();
     if( vs.isValid ){
       errors = [];

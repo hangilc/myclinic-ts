@@ -13,7 +13,7 @@
   export let showRegisterButton = true;
   let selected: Writable<m.Patient | null> = writable(null);
   let patients: Array<m.Patient> = [];
-  let searchText: string;
+  let searchText: string = "";
   let selectButton: HTMLElement;
 
   async function doSearch(ev: Event) {

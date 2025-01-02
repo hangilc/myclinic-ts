@@ -21,18 +21,18 @@
   // import DatesPulldown from "./DatesPopup.svelte";
 
   export let env: Writable<DiseaseEnv | undefined>;
-  // export let patientId: number;
-  // export let examples: DiseaseExample[] = [];
   export let onEnter: (data: DiseaseEnterData) => void = _ => {};
-  let validateStartDate: () => VResult<Date | null>;
+  let validateStartDate: (() => VResult<Date | null>) | undefined = undefined;
   let startDate: Date | undefined = new Date();
-  let setStartDate: (d: Date | null) => void;
+  let setStartDate: ((d: Date | null) => void) | undefined;
   let byoumeiMaster: ByoumeiMaster | null = null;
   let adjList: ShuushokugoMaster[] = [];
   let startDateErrors: string[] = [];
-  // let chooseStartDateIcon: SVGSVGElement;
 
   function onStartDateChange(): void {
+    if( !validateStartDate ){
+      throw new Error("uninitialized validator");
+    }
     startDateErrors = [];
     const r = validateStartDate();
     if( r.isValid ){
@@ -49,6 +49,9 @@
   }
 
   function doChooseStartDate(date: Date): void {
+    if( !setStartDate ){
+      throw new Error("uninitialized validator");
+    }
     setStartDate(date);
     startDate = date;
   }

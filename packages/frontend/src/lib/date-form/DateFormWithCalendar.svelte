@@ -8,16 +8,24 @@
   export let init: Date | null;
   export let datePickerDefault: () => Date = () => new Date();
   export let gengouList: string[] = GengouList.map((g) => g.kanji);
-  let validateForm: () => VResult<Date | null>;
+  let validateForm: (() => VResult<Date | null>) | undefined;
   export function validate(): VResult<Date | null> {
-    return validateForm();
+    if (validateForm) {
+      return validateForm();
+    } else {
+      throw new Error("uninitialized validateForm");
+    }
   }
   export function setValue(value: Date | null) {
-    setFormValue(value);
-    dispatch("value-change");
+    if (setFormValue) {
+      setFormValue(value);
+      dispatch("value-change");
+    } else {
+      throw new Error("uninitialized setValue");
+    }
   }
   let dispatch = createEventDispatcher<{ "value-change": void }>();
-  let setFormValue: (value: Date | null) => void;
+  let setFormValue: ((value: Date | null) => void) | undefined;
 
   function resolvePickerDefault(): Date {
     const vs = validate();

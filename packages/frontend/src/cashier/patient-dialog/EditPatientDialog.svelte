@@ -11,14 +11,17 @@
   export let patient: Patient;
   let errors: string[] = [];
   let isEnterClicked = false;
-  let validate: () => VResult<Patient>;
+  let validate: (() => VResult<Patient>) | undefined = undefined;
 
   async function doEnter() {
+    if (!validate) {
+      throw new Error("uninitialized validator");
+    }
     isEnterClicked = true;
     const vs = validate();
     if (vs.isValid) {
       let ok = await api.updatePatient(vs.value);
-      if( !ok ){
+      if (!ok) {
         errors = ["患者情報の変更に失敗しました。"];
       } else {
         destroy();
@@ -35,6 +38,9 @@
   }
 
   function doChange(): void {
+    if (!validate) {
+      throw new Error("uninitialized validator");
+    }
     if (isEnterClicked) {
       const vs = validate();
       if (vs.isValid) {
