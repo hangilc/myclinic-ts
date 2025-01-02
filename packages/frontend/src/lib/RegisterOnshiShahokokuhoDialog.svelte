@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { Shahokokuho } from "myclinic-model";
   import Dialog from "./Dialog.svelte";
-  import * as kanjidate from "kanjidate";
+  
   import api from "./api";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let shahokokuho: Shahokokuho;
@@ -16,7 +17,7 @@
     if( s === "0000-00-00" ){
       return "なし";
     } else {
-      return kanjidate.format(kanjidate.f2, s);
+      return FormatDate.f2(s);
     }
   }
 

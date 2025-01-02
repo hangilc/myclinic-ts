@@ -1,13 +1,13 @@
 <script lang="ts">
   import DateForm from "./DateForm.svelte";
-  import { GengouList } from "kanjidate";
+  import { GengouList } from "myclinic-util";
   import { createEventDispatcher } from "svelte";
   import type { VResult } from "../validation";
   import { datePickerPopup } from "../date-picker/date-picker-popup";
 
   export let init: Date | null;
   export let datePickerDefault: () => Date = () => new Date();
-  export let gengouList: string[] = GengouList.map((g) => g.kanji);
+  export let gengouList: string[] = GengouList.map((g) => g.name);
   let validateForm: (() => VResult<Date | null>) | undefined;
   export function validate(): VResult<Date | null> {
     if (validateForm) {

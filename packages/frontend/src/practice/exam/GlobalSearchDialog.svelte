@@ -3,8 +3,9 @@
   import { calcPages } from "@/lib/calc-pages";
   import type { Patient, Visit, Text } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
-  import * as kanjidate from "kanjidate";
+  
   import Dialog from "@/lib/Dialog.svelte";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   let searchTextValue = "";
@@ -64,7 +65,7 @@
               {patient.lastName}
               {patient.firstName}
             </span>
-            {kanjidate.format(kanjidate.f2, visit.visitedAt)}
+            {FormatDate.f2(visit.visitedAt)}
           </div>
           {@html formatText(text.content)}
         </div>

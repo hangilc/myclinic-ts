@@ -3,7 +3,9 @@ import { isKoukikourei } from "./hoken-rep";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { toHankaku } from "./zenkaku";
 import api from "./api";
-import * as kanjidate from "kanjidate";
+import { FormatDate } from "myclinic-util";
+import { incDay } from "./date-util";
+
 
 export function createHokenFromOnshiResult(patientId: number, r: ResultItem):
   Shahokokuho | Koukikourei | string {
@@ -197,10 +199,10 @@ export async function tryFixShahokokuhoValidUpto(shahokokuho: Shahokokuho, other
   const visits = await api.shahokokuhoUsageSince(shahokokuhoId, otherStartDate);
   if (visits.length > 0) {
     return "失効している保険証の使用が" +
-      visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
+      visits.map(v => FormatDate.f2(v.visitedAt)).join("、") +
       "に確認されました。その旨を管理者に連絡してください。";
   } else {
-    const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
+    const at = dateToSqlDate(incDay(new Date(otherStartDate), -1));
     if( shahokokuho.validFrom <= at ){
       await api.updateShahokokuho(Object.assign({}, shahokokuho, { validUpto: at }))
     } else {
@@ -216,10 +218,10 @@ export async function tryFixKoukikoureiValidUpto(koukikourei: Koukikourei, other
   const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
   if (visits.length > 0) {
     return "失効している保険証の使用が" +
-      visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
+      visits.map(v => FormatDate.f2(v.visitedAt)).join("、") +
       "に確認されました。その旨を管理者に連絡してください。";
   } else {
-    const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
+    const at = dateToSqlDate(incDay(new Date(otherStartDate), -1));
     if( koukikourei.validFrom <= at ){
       await api.updateKoukikourei(Object.assign({}, koukikourei, { validUpto: at }))
     } else {

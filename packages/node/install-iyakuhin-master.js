@@ -5,10 +5,9 @@ import AdmZip from "adm-zip";
 import iconv from "iconv-lite";
 import { parse } from "csv-parse/sync";
 import mysql from "mysql";
-import * as kanjidate from "kanjidate";
+import { incDay } from "myclinic-util";
 
 import * as promptSync from "prompt-sync";
-import { count } from "node:console";
 let prompt = promptSync.default({ sigint: true });
 
 /**
@@ -330,7 +329,7 @@ function dateToSqldate(date) {
  * @returns {string} - previous day in "YYYY-MM-DD" format
  */
 function calcPrevDate(date) {
-  const prev = kanjidate.addDays(new Date(date), -1);
+  const prev = incDay(new Date(date), -1);
   return dateToSqldate(prev);
 }
 

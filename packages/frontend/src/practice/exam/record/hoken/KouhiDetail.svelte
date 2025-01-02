@@ -1,18 +1,19 @@
 <script lang="ts">
   import type { Kouhi } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  import { FormatDate } from "myclinic-util";
+  
 
   export let kouhi: Kouhi;
 
   function formatValidFrom(sqldate: string): string {
-    return kanjidate.format(kanjidate.f2, sqldate);
+    return FormatDate.f2(sqldate);
   }
 
   function formatValidUpto(sqldate: string): string {
     if (sqldate === "0000-00-00") {
       return "（期限なし）";
     } else {
-      return kanjidate.format(kanjidate.f2, sqldate);
+      return FormatDate.f2(sqldate);
     }
   }
 </script>

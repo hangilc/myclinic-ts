@@ -2,7 +2,8 @@
   import type { Patient } from "myclinic-model";
   import Dialog from "../Dialog.svelte";
   import type { OnshiPatient } from "../face-confirm-window";
-  import * as kanjidate from "kanjidate";
+  import { calcAge, FormatDate } from "myclinic-util";
+  
 
   export let destroy: () => void;
   export let onConfirmed: () => void;
@@ -39,10 +40,10 @@
       患者番号：{patient.patientId}
     </div>
     <div>
-      生年月日：{kanjidate.format(kanjidate.f5, patient.birthday)}
+      生年月日：{FormatDate.f5(patient.birthday)}
     </div>
     <div>
-      年齢：{kanjidate.calcAge(new Date(patient.birthday))}才
+      年齢：{calcAge(new Date(patient.birthday))}才
     </div>
     <div>
       性別：{patient.sex === "M" ? "男" : "女"}

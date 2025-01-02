@@ -1,4 +1,4 @@
-// import * as kanjidate from "kanjidate";
+// 
 import { dateToSqlDate, Kouhi, Koukikourei, Roujin, Shahokokuho } from "myclinic-model";
 import { DateWrapper, FormatDate } from "myclinic-util";
 
@@ -55,7 +55,6 @@ export function sexRep(sex: string): string {
 }
 
 export function birthdayRep(birthday: string): string {
-  // return kanjidate.format(kanjidate.f2, birthday);
   return FormatDate.f2(birthday);
 }
 
@@ -108,8 +107,6 @@ export function firstDayOfMonth(year: number, month: number): string {
 
 export function lastDayOfMonth(year: number, month: number): string {
   return DateWrapper.fromYearMonthDay(year, month, 1).incMonth(1).incDay(-1).asSqlDate();
-  // const d = new Date(year, month, 1);
-  // return dateToSqlDate(kanjidate.addDays(d, -1));
 }
 
 export function firstAndLastDayOf(sqldate: string): [string, string] {

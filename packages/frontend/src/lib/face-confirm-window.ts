@@ -1,10 +1,11 @@
 import { dateToSqlDate, Patient, type Kouhi, type Koukikourei, type Shahokokuho } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
-import * as kanjidate from "kanjidate";
+
 import api from "./api";
 import { birthdayRep } from "./util";
 import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
 import { tryUpdateKoukikourei, tryUpdateShahokokuho } from "./hoken-lib";
+import { incDay } from "./date-util";
 
 export class OnshiPatient {
   name: string;
@@ -84,7 +85,7 @@ export async function searchPatient(
 
 export function yesterdayAsSqlDate(): string {
   const today = new Date();
-  const yesterday = kanjidate.addDays(today, -1);
+  const yesterday = incDay(today, -1);
   return dateToSqlDate(yesterday);
 }
 
@@ -102,40 +103,6 @@ export async function invalidateKoukikourei(koukikourei: Koukikourei, validUpto:
     console.error("ERROR (tryUpdateKoukikourei)", r);
   }
 }
-
-// export async function fixShahokokuhoValidUpto(shahokokuho: Shahokokuho, otherStartDate: string)
-//   : Promise<string | undefined> {
-//   const shahokokuhoId = shahokokuho.shahokokuhoId;
-//   const visits = await api.shahokokuhoUsageSince(shahokokuhoId, otherStartDate);
-//   if (visits.length > 0) {
-//     return "失効している保険証の使用が" +
-//       visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
-//       "に確認されました。その旨を管理者に連絡してください。";
-//   } else {
-//     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-//     if (shahokokuho.validUpto === "0000-00-00" || shahokokuho.validUpto > at) {
-//       await invalidateShahokokuho(shahokokuho, at);
-//     }
-//     return undefined;
-//   }
-// }
-
-// export async function fixKoukikoureiValidUpto(koukikourei: Koukikourei, otherStartDate: string)
-//   : Promise<string | undefined> {
-//   const koukikoureiId = koukikourei.koukikoureiId;
-//   const visits = await api.koukikoureiUsageSince(koukikoureiId, otherStartDate);
-//   if (visits.length > 0) {
-//     return "失効している保険証の使用が" +
-//       visits.map(v => kanjidate.format(kanjidate.f2, v.visitedAt)).join("、") +
-//       "に確認されました。その旨を管理者に連絡してください。";
-//   } else {
-//     const at = dateToSqlDate(kanjidate.addDays(new Date(otherStartDate), -1));
-//     if (koukikourei.validUpto === "0000-00-00" || koukikourei.validUpto > at) {
-//       await invalidateKoukikourei(koukikourei, at);
-//     }
-//     return undefined;
-//   }
-// }
 
 export class NoResultItem {
   readonly classKind = "NoResultItem";

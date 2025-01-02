@@ -3,7 +3,7 @@
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  import * as kanjidate from "kanjidate";
+  
   import type { Box } from "@/lib/drawer/compiler/box";
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
@@ -15,6 +15,7 @@
   import type { CompositeItem } from "@/lib/drawer/compiler/compiler";
   import { hasCompTmpl, parseCompTmpl } from "./composite-template";
   import { A4 } from "@/lib/drawer/compiler/paper-size";
+  import { FormatDate } from "myclinic-util";
 
   export let isVisible: boolean;
   let name: string = "";
@@ -326,7 +327,7 @@
     c.setFont(ctx, "entry");
     set(ctx, "氏名", name);
     if (birthdate) {
-      set(ctx, "生年月日", kanjidate.format(kanjidate.f2, birthdate));
+      set(ctx, "生年月日", FormatDate.f2(birthdate));
     }
     set(ctx, "性別", sex);
     set(ctx, "住所", address);
@@ -443,7 +444,7 @@
     c.paragraph(ctx, kioureki, c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)).box);
     c.paragraph(ctx, xp, c.getMark(ctx, "Ｘ線", b.inset(1, 0, 2, 0)).box);
     if (xpConductedDate) {
-      set(ctx, "Ｘ線撮影日", kanjidate.format(kanjidate.f2, xpConductedDate));
+      set(ctx, "Ｘ線撮影日", FormatDate.f2(xpConductedDate));
     }
     [...Array(9).keys()].forEach((i) => {
       set(ctx, `血液検査名${i + 1}`, kensaLabels[i]);
@@ -473,7 +474,7 @@
     renderUrineExam(ctx, c.getMark(ctx, "尿糖").box, urineGlucose);
     renderTokkijikou(ctx, c.getMark(ctx, "その他特記事項").box, tokkijikou);
     c.setFont(ctx, prevFont);
-    set(ctx, "発行日", kanjidate.format(kanjidate.f2, issueDate));
+    set(ctx, "発行日", FormatDate.f2(issueDate));
     set(ctx, "住所1", address1);
     set(ctx, "住所2", address2);
     set(ctx, "クリニック名", clinicName);

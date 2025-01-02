@@ -1,5 +1,6 @@
 import { OnshiResult } from "onshi-result";
 import { parseFaceXml } from "./onshi-face";
+import { describe, expect, it } from "vitest";
 
 describe("onshi-face", () => {
   it("should run", () => {

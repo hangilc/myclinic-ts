@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
+  
   import {
     currentVisitId,
     tempVisitId,
@@ -23,6 +23,7 @@
   import { createShinryoumeisaishoData } from "./title/shinryoumeisaisho";
   import { drawShinryoumeisaisho } from "@/lib/drawer/forms/shinryoumeisaisho/shinryoumeisaisho-drawer";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import { FormatDate } from "myclinic-util";
 
   export let visit: VisitEx;
 
@@ -192,7 +193,7 @@
   class:current={visit.visitId === $currentVisitId}
   class:temp-visit={visit.visitId === $tempVisitId}
 >
-  <span class="datetime">{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
+  <span class="datetime">{FormatDate.f9(visit.visitedAt)}</span
   >
   <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
     >操作</a

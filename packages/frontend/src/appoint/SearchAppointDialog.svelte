@@ -4,7 +4,6 @@
   import { setFocus } from "@/lib/set-focus";
   import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
   import type { Appoint, AppointTime } from "myclinic-model";
-  // import * as kanjidate from "kanjidate";
   import { resolveAppointKind } from "./appoint-kind";
   import { DateWrapper } from "myclinic-util";
 

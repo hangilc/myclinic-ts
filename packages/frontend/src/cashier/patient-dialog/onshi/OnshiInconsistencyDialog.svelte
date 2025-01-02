@@ -1,10 +1,11 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
-  import * as kanjidate from "kanjidate";
+  
   import OnshiKakuninFormItem from "@/lib/OnshiKakuninFormItem.svelte";
   import { onshiDateToSqlDate } from "onshi-result/util";
   import type { ResultItem } from "onshi-result/dist/ResultItem";
   import type { OnshiInconsistency } from "@/lib/onshi-consistency";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let resultItem: ResultItem;
@@ -16,7 +17,7 @@
 
   function formatOnshiDate(arg: string): string {
     const sql = onshiDateToSqlDate(arg);
-    return kanjidate.format(kanjidate.f2, sql);
+    return FormatDate.f2(sql);
   }
 </script>
 

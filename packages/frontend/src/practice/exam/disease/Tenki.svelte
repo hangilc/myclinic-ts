@@ -1,8 +1,7 @@
 <script lang="ts">
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { genid } from "@/lib/genid";
-  import { addDays } from "kanjidate";
-  import * as kanjidate from "kanjidate";
+  
   import {
     DiseaseEndReason,
     type DiseaseData,
@@ -13,6 +12,7 @@
   import { dateToSql } from "@/lib/util";
   import type { Writable } from "svelte/store";
   import type { DiseaseEnv } from "./disease-env";
+  import { incDay, lastDayOfMonth } from "myclinic-util";
 
   // export let diseases: DiseaseData[];
   export let env: Writable<DiseaseEnv | undefined>;
@@ -80,7 +80,7 @@
 
   function doWeekClick(event: MouseEvent): void {
     const n = event.shiftKey ? -7 : 7;
-    modifyEndDate((d) => addDays(d, n));
+    modifyEndDate((d) => incDay(d, n));
   }
 
   function doTodayClick(): void {
@@ -95,7 +95,7 @@
       if (!setEndDate) {
         throw new Error("uninitialized validator");
       }
-      const lastDay = kanjidate.lastDayOfMonth(
+      const lastDay = lastDayOfMonth(
         endDate.getFullYear(),
         endDate.getMonth() + 1
       );

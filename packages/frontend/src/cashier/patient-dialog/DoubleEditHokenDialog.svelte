@@ -3,11 +3,12 @@
   import { Shahokokuho, Koukikourei, Patient, Visit } from "myclinic-model";
   import ShahokokuhoForm from "./edit/ShahokokuhoForm.svelte";
   import api from "@/lib/api";
-  import * as kanjidate from "kanjidate";
+  
   import KoukikoureiForm from "./edit/KoukikoureiForm.svelte";
   import type { VResult } from "@/lib/validation";
   import { shallowEqual } from "@/lib/shallow-equal";
   import { confirm } from "@/lib/confirm-call";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let hoken1: Shahokokuho | Koukikourei;
@@ -49,7 +50,7 @@
   }
 
   function formatDate(d: string): string {
-    return kanjidate.format(kanjidate.f2, d);
+    return FormatDate.f2(d);
   }
 
   function lastVisitDate(visits: Visit[]): string {

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { calcAge } from "@/lib/calc-age";
   import type { Patient, Visit } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
   import CashierDialog from "./CashierDialog.svelte";
   import type { WqueueData } from "./wq-data";
@@ -11,6 +10,7 @@
   import { hotlineTrigger } from "@/lib/event-emitter";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
   import type { Writable } from "svelte/store";
+  import { FormatDate } from "myclinic-util";
 
   // export let items: WqueueData[];
   export let items: Writable<WqueueData[]>;
@@ -19,7 +19,7 @@
   $: console.log("items", $items);
 
   function formatDob(birthday: string): string {
-    return kanjidate.format(kanjidate.f2, birthday);
+    return FormatDate.f2(birthday);
   }
 
   async function doCashier(visit: Visit) {

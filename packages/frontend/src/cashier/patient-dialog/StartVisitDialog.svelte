@@ -9,7 +9,7 @@
     Visit,
     type Patient,
   } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  
   import { kouhiRep, koukikoureiRep, shahokokuhoRep } from "@/lib/hoken-rep";
   import { messageOfOnshiConfirmHokenResult, onshiConfirmHoken } from "@/lib/onshi-query-helper";
   import { dateToSql } from "@/lib/util";
@@ -18,6 +18,7 @@
   import type { Hoken, HokenType } from "./hoken";
   import { KoukikoureiItem, ShahokokuhoItem } from "./start-visit-dialog";
   import { hotlineTrigger } from "@/lib/event-emitter";
+  import { calcAge, FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -199,8 +200,8 @@
 
   function formatBirthday(birthday: string): string {
     const d = new Date(birthday);
-    const age = kanjidate.calcAge(d);
-    return `${kanjidate.format(kanjidate.f2, d)}（${age}才）`;
+    const age = calcAge(d);
+    return `${FormatDate.f2(d)}（${age}才）`;
   }
 </script>
 

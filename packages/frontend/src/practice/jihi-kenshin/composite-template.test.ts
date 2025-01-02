@@ -1,5 +1,6 @@
 import type { CompositeItem } from "@/lib/drawer/compiler/compiler";
 import { parseCompTmpl } from "./composite-template";
+import { describe, it, expect } from "vitest";
 
 describe("composite-template", () => {
   it("should parse simple template", () => {

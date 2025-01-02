@@ -1,13 +1,13 @@
 <script lang="ts">
   import { mishuuList, clearMishuuList } from "@/practice/exam/exam-vars";
   import RightBox from "../RightBox.svelte";
-  import * as kanjidate from "kanjidate";
   import type { Payment, VisitEx } from "myclinic-model";
   import { pad } from "@/lib/pad";
   import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
   import api from "@/lib/api";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
+  import { DateWrapper, FormatDate } from "myclinic-util";
 
   let pdfFiles: string[] = [];
 
@@ -48,7 +48,6 @@
     const promises = visits.map(async (visit) => {
       const file = receiptPdfFileName(visit);
       files.push(file);
-      // const meisai = await api.getMeisai(visit.visitId);
       const meisai = await calcRezeptMeisai(visit.visitId);
       const clinicInfo = await api.getClinicInfo();
       const data = ReceiptDrawerData.create(visit, new MeisaiWrapper(meisai), clinicInfo);
@@ -79,7 +78,8 @@
       const pay: Payment = {
         visitId: visit.visitId,
         amount: visit.chargeOption?.charge || 0,
-        paytime: kanjidate.format(kanjidate.fSqlDateTime, new Date()),
+        // paytime: kanjidate.format(kanjidate.fSqlDateTime, new Date()),
+        paytime: DateWrapper.from(new Date()).asSqlDateTime(),
       };
       await api.enterPayment(pay);
     });
@@ -92,7 +92,7 @@
 {#if $mishuuList.length > 0}
   <RightBox title="未収リスト">
     {#each $mishuuList as visit (visit.visitId)}
-      {@const date = kanjidate.format(kanjidate.f2, visit.visitedAt)}
+      {@const date = FormatDate.f2(visit.visitedAt)}
       <div>
         {date} &nbsp; {(visit.chargeOption?.charge || 0).toLocaleString()}円
       </div>

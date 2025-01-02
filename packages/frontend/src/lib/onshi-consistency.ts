@@ -1,6 +1,6 @@
 import { Koukikourei, Shahokokuho, type Patient } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
-import * as kanjidate from "kanjidate";
+
 import { toHankaku } from "./zenkaku";
 import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
 import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, type OnshiHokenConsistencyError, type OnshiHokenInconsistency } from "./onshi-hoken-consistency";

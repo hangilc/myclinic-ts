@@ -1,10 +1,11 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { FileInfo, Patient } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import api from "@/lib/api";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -71,7 +72,7 @@
       {#each files as file (file.name)}
         <SelectItem {selected} data={file}>
           <div>
-            {file.name} ({kanjidate.format(kanjidate.f2, file.createdAt)})
+            {file.name} ({FormatDate.f2(file.createdAt)})
           </div>
         </SelectItem>
       {/each}

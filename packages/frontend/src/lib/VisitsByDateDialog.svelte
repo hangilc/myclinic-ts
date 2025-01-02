@@ -44,8 +44,6 @@
     const newDate = DateWrapper.from(date).incDay(-1).asDate();
     date = newDate;
     init();
-    // let newDate = kanjidate.addDays($date, -1);
-    // date.set(newDate);
   }
 
   function doNext(): void {

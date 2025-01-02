@@ -3,9 +3,10 @@
   import type * as m from "myclinic-model";
   import api from "@/lib/api";
   import { padNumber } from "@/lib/util";
-  import * as kanjidate from "kanjidate";
+  
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let onEnter: (patient: m.Patient, visitId?: number) => void;
@@ -44,7 +45,7 @@
         <SelectItem selected={selected} data={[patient, visit]}>
           {padNumber(patient.patientId, 4)} 
           {patient.lastName}{patient.firstName}
-          {kanjidate.format(kanjidate.f1, patient.birthday)}
+          {FormatDate.f1(patient.birthday)}
         </SelectItem>
       {/each}
     </div>

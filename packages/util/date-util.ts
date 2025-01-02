@@ -1,5 +1,5 @@
 import { cmpNumSeq } from "./cmp";
-import { padLeft } from "./pad";
+import { pad, padLeft } from "./pad";
 import * as wareki from "./wareki";
 
 const youbiList = ["日", "月", "火", "水", "木", "金", "土"] as const;
@@ -50,6 +50,14 @@ export class DateWrapper {
 
   asSqlDate(): string {
     return dateToSqlDate(this.date);
+  }
+
+  asSqlDateTime(): string {
+    const d = this;
+    function p(value: number): string {
+      return pad(value, 2, "0");
+    }
+    return `${d.getYear()}-${p(d.getMonth())}-${p(d.getDay())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
   }
 
   asOnshiDate(): string {
@@ -293,10 +301,9 @@ export function lastDayOfMonth(year: number, month: number): number {
   return d.getDate();
 }
 
-function incDay(date: Date, amount: number): Date {
-  date = new Date(date);
-  date.setDate(date.getDate() + amount);
-  return date;
+export function incDay(dateLike: DateWrapperLike, amount: number): Date {
+  let date = DateWrapper.from(dateLike).incDay(amount);
+  return date.asDate();
 }
 
 function dateToSqlDate(d: Date): string {

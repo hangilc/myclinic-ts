@@ -14,7 +14,6 @@
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import { DateWrapper, calcAge } from "myclinic-util";
-  import { KanjiDate } from "kanjidate";
   import { sqlDateToDate } from "@/lib/date-util";
   import {
     effectiveFormDataOf,
@@ -456,8 +455,8 @@
           break;
         }
       }
-      const d = new KanjiDate(sqlDateToDate(patient.birthday));
-      switch (d.gengou) {
+      const d = DateWrapper.from(sqlDateToDate(patient.birthday));
+      switch (d.getGengou()) {
         case "明治": {
           ryouyouKeikakushoData["birthdate-gengou-meiji"] = "1";
           break;
@@ -479,9 +478,9 @@
           break;
         }
       }
-      ryouyouKeikakushoData["birthdate-nen"] = d.nen.toString();
-      ryouyouKeikakushoData["birthdate-month"] = d.month.toString();
-      ryouyouKeikakushoData["birthdate-day"] = d.day.toString();
+      ryouyouKeikakushoData["birthdate-nen"] = d.getNen().toString();
+      ryouyouKeikakushoData["birthdate-month"] = d.getMonth().toString();
+      ryouyouKeikakushoData["birthdate-day"] = d.getDay().toString();
       const age = calcAge(patient.birthday, fdata.issueDate || new Date());
       ryouyouKeikakushoData["patient-age"] = age.toString();
     } else {

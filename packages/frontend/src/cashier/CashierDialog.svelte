@@ -9,12 +9,12 @@
     dateToSqlDateTime,
     VisitEx,
   } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
   import { hokenRep } from "@/lib/hoken-rep";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
   import type { MeisaiWrapper } from "@/lib/rezept-meisai";
   import { cache } from "@/lib/cache";
+  import { FormatDate } from "myclinic-util";
 
   export let patient: Patient;
   export let visit: VisitEx;
@@ -45,18 +45,6 @@
     let receipt = ReceiptDrawerData.create(
       visit, meisai, await cache.getClinicInfo()
     );
-    // let receipt = new ReceiptDrawerData();
-    // receipt.setPatient(patient);
-    // receipt.visitDate = kanjidate.format(kanjidate.f2, visit.visitedAtAsDate);
-    // receipt.issueDate = kanjidate.format(kanjidate.f2, new Date());
-    // receipt.hoken = hokenRep(visit);
-    // receipt.futanWari =
-    //   meisai.futanWari === 10 ? "" : meisai.futanWari.toString();
-    // receipt.setMeisai(meisai);
-    // receipt.charge = charge.charge;
-    // const clinicInfo = await api.getClinicInfo();
-    // receipt.setClinic(clinicInfo);
-    // receipt.hokengai = (visit.attributes?.hokengai) ?? [];
     receiptHook(receipt);
     let ops = drawReceipt(receipt);
     const dlog: DrawerDialog = new DrawerDialog({
@@ -91,7 +79,7 @@
       {patientLine(patient)})
     </div>
     <div>
-      {kanjidate.format(kanjidate.f9, visit.visitedAt)}
+      {FormatDate.f9(visit.visitedAt)}
     </div>
     <div class="detail-wrapper">
       {#if meisai.items.length > 0}

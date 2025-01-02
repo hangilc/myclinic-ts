@@ -1,9 +1,10 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Visit } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+
   import api from "@/lib/api";
   import type { PatientData } from "../cashier/choose-patient-dialog";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let patients: Patient[];
@@ -56,7 +57,7 @@
       <span>よみ</span>
       <span>{patient.fullYomi(" ")}</span>
       <span>生年月日</span>
-      <span>{kanjidate.format(kanjidate.f2, patient.birthday)}</span>
+      <span>{FormatDate.f2(patient.birthday)}</span>
     </div>
     {#each dataList as data (data.patient.patientId)}
       <div class="data-list">
@@ -69,8 +70,7 @@
             {#if data.lastVisit !== undefined}
               <span>直近の受診</span>
               <span
-                >{kanjidate.format(
-                  kanjidate.f2,
+                >{FormatDate.f2(
                   data.lastVisit.visitedAt.substring(0, 10)
                 )}</span
               >
@@ -104,12 +104,14 @@
     padding: 10px;
   }
 
-  .info, .disp {
+  .info,
+  .disp {
     display: grid;
     grid-template-columns: auto 1fr;
   }
 
-  .info > *:nth-child(odd), .disp > *:nth-child(odd) {
+  .info > *:nth-child(odd),
+  .disp > *:nth-child(odd) {
     margin-right: 10px;
   }
 

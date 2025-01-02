@@ -1,16 +1,19 @@
 <script lang="ts">
+  import { DateWrapper, FormatDate } from "myclinic-util";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
-  import * as kanjidate from "kanjidate";
+  
   import type { ResultItem } from "onshi-result/ResultItem";
 
   export let result: ResultItem;
 
   function onshiDateRep(onshiDate: string): string {
-    return kanjidate.format(kanjidate.f2, onshiDate);
+    return FormatDate.f2(onshiDate);
   }
 
   function onshiDateTimeRep(onshiDateTime: string): string {
-    return kanjidate.format("{G}{N}年{M}月{D}日 {h}時{m}分{s}秒", onshiDateTime);
+    // return kanjidate.format("{G}{N}年{M}月{D}日 {h}時{m}分{s}秒", onshiDateTime);
+    return DateWrapper.from(onshiDateTime).render(d => 
+      `${d.gengou}${d.nen}年${d.month}月${d.day}日 ${d.getHours()}時${d.getMinutes()}分${d.getSeconds()}秒`);
   }
 </script>
 

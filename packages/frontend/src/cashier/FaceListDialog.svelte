@@ -1,15 +1,22 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import FaceConfirmedWindow from "@/lib/FaceConfirmedWindow.svelte";
-  import { onshiFace, onshiFaceArchive, type OnshiFaceConfirmed } from "@/lib/onshi-face";
-  import * as kanjidate from "kanjidate";
+  import {
+    onshiFace,
+    onshiFaceArchive,
+    type OnshiFaceConfirmed,
+  } from "@/lib/onshi-face";
   import { hotlineTrigger } from "@/lib/event-emitter";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
   export let list: OnshiFaceConfirmed[];
 
   function onshiDateTimeRep(onshiDateTime: string): string {
-    return kanjidate.format("{G}{N}年{M}月{D}日 {h}時{m}分", onshiDateTime);
+    return DateWrapper.from(onshiDateTime).render(
+      (d) =>
+        `${d.gengou}${d.nen}年${d.month}月${d.day}日 ${d.getHours()}時${d.getMinutes()}分`
+    );
   }
 
   async function doSelect(c: OnshiFaceConfirmed) {
@@ -24,8 +31,8 @@
           destroy();
         },
         hotlineTrigger,
-      }
-    })
+      },
+    });
   }
 </script>
 

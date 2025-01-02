@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { OnshiResult } from "onshi-result";
-  import * as kanjidate from "kanjidate";
+  
   import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
   import { onshiDateToSqlDate } from "onshi-result/util";
   import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
@@ -12,6 +12,7 @@
   } from "./onshi-consistency";
   import api from "./api";
   import { OnshiPatientInconsistency } from "./onshi-patient-consistency";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let hoken: Shahokokuho | Koukikourei;
@@ -112,7 +113,7 @@
 
   function formatOnshiDate(arg: string): string {
     const sql = onshiDateToSqlDate(arg);
-    return kanjidate.format(kanjidate.f2, sql);
+    return FormatDate.f2(sql);
   }
 
   async function doSetOnshiName() {

@@ -1,11 +1,12 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  
   import { sexRep } from "../../../lib/util";
   import { PhoneMatch, splitPhoneNumber } from "@/lib/phone-number";
   import { CutText } from "@/lib/regexp-util";
   import PhoneLink from "./PhoneLink.svelte";
   import { connect, disconnect } from "@/lib/twilio"
+  import { calcAge, FormatDate } from "myclinic-util";
 
   export let patient: m.Patient;
 
@@ -52,8 +53,8 @@
     {patient.firstName}
     ({patient.lastNameYomi}
     {patient.firstNameYomi})
-    {kanjidate.format(kanjidate.f2, patient.birthday)}生
-    {kanjidate.calcAge(new Date(patient.birthday))}才
+    {FormatDate.f2(patient.birthday)}生
+    {calcAge(new Date(patient.birthday))}才
     {sexRep(patient.sex)}性
     <a href="javascript:void(0)" on:click={toggleDetail}>詳細</a>
   </div>

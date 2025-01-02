@@ -4,7 +4,8 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Text, Visit } from "myclinic-model";
   import Nav from "@/lib/Nav.svelte";
-  import * as kanjidate from "kanjidate";
+  import { FormatDate } from "myclinic-util";
+  
 
   export let destroy: () => void;
   export let patient: Patient | null;
@@ -70,7 +71,7 @@
       {#each textVisits as tv (tv[0].textId)}
         <div class="result-item">
           <div class="visited-at">
-            {kanjidate.format(kanjidate.f9, tv[1].visitedAt)}
+            {FormatDate.f9(tv[1].visitedAt)}
           </div>
           <div>
             {@html formatContent(tv[0].content)}

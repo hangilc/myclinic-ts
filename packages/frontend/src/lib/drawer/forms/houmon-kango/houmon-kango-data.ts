@@ -1,5 +1,5 @@
 import { calcAge } from "@/lib/calc-age";
-import { KanjiDate } from "kanjidate";
+import { DateWrapper } from "myclinic-util";
 
 export interface HoumonKangoData {
   "タイトル"?: string;
@@ -143,27 +143,27 @@ function extend(data: any, key: string, value: string | undefined) {
 
 export function extendData(data: HoumonKangoData): void {
   if (data.validFrom) {
-    const k = new KanjiDate(new Date(data.validFrom));
-    extend(data, "訪問看護指示期間開始（元号）", k.gengou);
-    extend(data, "訪問看護指示期間開始（年）", k.nen.toString());
-    extend(data, "訪問看護指示期間開始（月）", k.month.toString());
-    extend(data, "訪問看護指示期間開始（日）", k.day.toString());
+    const k = DateWrapper.from(new Date(data.validFrom));
+    extend(data, "訪問看護指示期間開始（元号）", k.getGengou());
+    extend(data, "訪問看護指示期間開始（年）", k.getNen().toString());
+    extend(data, "訪問看護指示期間開始（月）", k.getMonth().toString());
+    extend(data, "訪問看護指示期間開始（日）", k.getDay().toString());
   }
   if (data.validUpto) {
-    const k = new KanjiDate(new Date(data.validUpto));
-    extend(data, "訪問看護指示期間期限（元号）", k.gengou);
-    extend(data, "訪問看護指示期間期限（年）", k.nen.toString());
-    extend(data, "訪問看護指示期間期限（月）", k.month.toString());
-    extend(data, "訪問看護指示期間期限（日）", k.day.toString());
+    const k = DateWrapper.from(new Date(data.validUpto));
+    extend(data, "訪問看護指示期間期限（元号）", k.getGengou());
+    extend(data, "訪問看護指示期間期限（年）", k.getNen().toString());
+    extend(data, "訪問看護指示期間期限（月）", k.getMonth().toString());
+    extend(data, "訪問看護指示期間期限（日）", k.getDay().toString());
   }
   if (data.birthdate) {
-    const k = new KanjiDate(new Date(data.birthdate));
+    const k = DateWrapper.from(new Date(data.birthdate));
     const at = data.issueDate ? new Date(data.issueDate) : new Date();
     const age = calcAge(data.birthdate, at);
-    extend(data, `生年月日（元号：${k.gengou}）`, "1");
-    extend(data, "生年月日（年）", k.nen.toString());
-    extend(data, "生年月日（月）", k.month.toString());
-    extend(data, "生年月日（日）", k.day.toString());
+    extend(data, `生年月日（元号：${k.getGengou()}）`, "1");
+    extend(data, "生年月日（年）", k.getNen().toString());
+    extend(data, "生年月日（月）", k.getMonth().toString());
+    extend(data, "生年月日（日）", k.getDay().toString());
     extend(data, "年齢", age.toString());
   }
   if (data.netakiri) {

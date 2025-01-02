@@ -1,10 +1,25 @@
 import { pad } from "./pad";
 import { DateWrapper, DateWrapperLike } from "./date-util";
+import { nameToGengouForce } from "wareki";
 
 export const FormatDate = {
+  f1(date: DateWrapperLike): string {
+    return DateWrapper.from(date).render(d =>
+      `${d.gengou}${d.nen}年${d.month}月${d.day}日（${d.youbi}）`
+    )
+  },
+
   f2(date: DateWrapperLike): string {
     return DateWrapper.from(date).render(d =>
       `${d.gengou}${d.nen}年${d.month}月${d.day}日`
+    )
+  },
+
+  f3(date: DateWrapperLike): string {
+    return DateWrapper.from(date).render(d => {
+      const g = nameToGengouForce(d.gengou);
+      return `${g.alpha[0]}${d.nen}.${d.month}.${d.day}`
+    }
     )
   },
 

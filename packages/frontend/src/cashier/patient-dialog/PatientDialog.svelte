@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { PatientData } from "../patient-dialog/patient-data";
-  import * as kanjidate from "kanjidate";
+  
   import type { Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
@@ -20,6 +20,7 @@
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
   import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
   import type { EventEmitter } from "@/lib/event-emitter";
+  import { FormatDate } from "myclinic-util";
 
   export let data: PatientData;
   export let destroy: () => void;
@@ -248,7 +249,7 @@
       <span data-cy="first-name-yomi">{p.firstNameYomi}</span>
     </div>
     <span>生年月日</span><span data-cy="birthday"
-      >{kanjidate.format(kanjidate.f2, p.birthday)}</span
+      >{FormatDate.f2(p.birthday)}</span
     >
     <span>性別</span><span data-cy="sex">{p.sexAsKanji}性</span>
     <span>住所</span><span data-cy="address">{p.address}</span>

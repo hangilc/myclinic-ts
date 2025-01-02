@@ -3,7 +3,7 @@
   import type { VisitEx } from "myclinic-model";
   import Edit from "./Edit.svelte";
   import PaymentStatus from "./PaymentStatus.svelte";
-  import * as kanjidate from "kanjidate";
+  
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
 
   export let visit: VisitEx;
@@ -17,7 +17,6 @@
   async function doDispClick() {
     if (visit.chargeOption != null) {
       const rezeptMeisai = await calcRezeptMeisai(visit.visitId);
-      const kd = kanjidate.KanjiDate.fromString(visit.visitedAt);
       mode = "edit";
       edit.open(new MeisaiWrapper(rezeptMeisai));
     }

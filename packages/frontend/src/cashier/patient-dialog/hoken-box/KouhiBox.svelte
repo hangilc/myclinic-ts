@@ -1,8 +1,9 @@
 <script lang="ts">
   import type { Kouhi, Visit } from "myclinic-model";
   import { Hoken } from "../hoken";
-  import * as kanjidate from "kanjidate";
+  
   import api from "@/lib/api";
+  import { FormatDate } from "myclinic-util";
 
   export let kouhi: Kouhi;
   export let usageCount: number;
@@ -10,14 +11,14 @@
   let usageList: Visit[] = [];
 
   function formatValidFrom(sqldate: string): string {
-    return kanjidate.format(kanjidate.f2, sqldate);
+    return FormatDate.f2(sqldate);
   }
 
   function formatValidUpto(sqldate: string): string {
     if (sqldate === "0000-00-00") {
       return "（期限なし）";
     } else {
-      return kanjidate.format(kanjidate.f2, sqldate);
+      return FormatDate.f2(sqldate);
     }
   }
 
@@ -46,7 +47,7 @@
       （使用なし）
     {:else}
       {#each usageList as v (v.visitId)}
-        <div>{kanjidate.format(kanjidate.f5, v.visitedAt)}</div>
+        <div>{FormatDate.f5(v.visitedAt)}</div>
       {/each}
     {/if}
   </div>

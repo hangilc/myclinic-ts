@@ -3,7 +3,6 @@
   import api from "../api";
   import Dialog from "../Dialog.svelte";
   import { onMount } from "svelte";
-  import { dialogSelector } from "@cypress/lib/dialog";
 
   export let destroy: () => void;
   export let onEnter: (master: UsageMaster) => void;

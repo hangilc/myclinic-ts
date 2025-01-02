@@ -32,7 +32,6 @@ function preDateItems(firstDate: Date): DateItem[] {
   let npre: number = dow === 0 ? 7 : dow;
   let preItems: DateItem[] = [];
   for (let i = 1; i <= npre; i++) {
-    // let d: Date = kanjidate.addDays(firstDate, -i);
     let d: Date = DateWrapper.from(firstDate).incDay(-i).asDate();
     preItems.push(new DateItem(d, "pre", false));
   }
@@ -46,7 +45,6 @@ function curDateItems(
 ): DateItem[] {
   let items: DateItem[] = [];
   for (let i = 1; i <= n; i++) {
-    // let d = kanjidate.addDays(firstDate, i - 1);
     let d = DateWrapper.from(firstDate).incDay(i - 1).asDate();
     items.push(new DateItem(d, "cur", i === curDay));
   }
@@ -58,7 +56,6 @@ function postDateItems(lastDate: Date): DateItem[] {
   let n = dow === 6 ? 7 : 6 - dow;
   let items: DateItem[] = [];
   for (let i = 1; i <= n; i++) {
-    // let d = kanjidate.addDays(lastDate, i);
     let d = DateWrapper.from(lastDate).incDay(i).asDate();
     items.push(new DateItem(d, "post", false));
   }

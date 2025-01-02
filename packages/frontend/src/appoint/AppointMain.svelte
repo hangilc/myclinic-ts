@@ -151,8 +151,6 @@
   }
 
   function doMoveWeeks(n: number): void {
-    // const d = kanjidate.addDays(new Date(startDate), n * 7);
-    // startDate = dateToSql(d);
     const d = DateWrapper.from(startDate).incDay(n * 7);
     startDate = d.asSqlDate();
     initColumns(startDate);
@@ -164,8 +162,6 @@
   }
 
   async function doCreateAppoints() {
-    // const upto = kanjidate.addDays(new Date(startDate), 6);
-    // await api.fillAppointTimes(startDate, upto);
     const upto = DateWrapper.from(startDate).incDay(6);
     await api.fillAppointTimes(startDate, upto.asDate());
   }

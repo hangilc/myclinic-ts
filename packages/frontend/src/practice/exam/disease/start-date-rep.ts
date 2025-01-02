@@ -1,5 +1,6 @@
-import * as kanjidate from "kanjidate";
+import { FormatDate } from "myclinic-util";
+
 
 export function startDateRep(date: Date): string {
-  return kanjidate.format(kanjidate.f3, date);
+  return FormatDate.f3(date);
 }

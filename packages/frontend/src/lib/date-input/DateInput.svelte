@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { KanjiDate, GengouList } from "kanjidate";
+  import { DateWrapper, GengouList } from "myclinic-util";
   import { DateInput as ValidationDateInput } from "myclinic-model";
   import { sqlDateToDate } from "../date-util";
 
   export let initValue: Date | string | undefined = undefined;
-  export let gengouList: string[] = GengouList.map((g) => g.kanji);
+  export let gengouList: string[] = GengouList.map((g) => g.name);
   export function getInputs(): ValidationDateInput {
     return new ValidationDateInput({
       gengou,
@@ -30,11 +30,12 @@
       } else {
         d = sqlDateToDate(initValue);
       }
-      const k = new KanjiDate(d);
-      gengou = k.gengou;
-      nen = k.nen.toString();
-      month = (d.getMonth() + 1).toString();
-      day = d.getDate().toString();
+      // const k = new KanjiDate(d);
+      const k = DateWrapper.from(d);
+      gengou = k.getGengou();
+      nen = k.getNen().toString();
+      month = k.getMonth().toString();
+      day = k.getDay().toString();
     }
   }
 

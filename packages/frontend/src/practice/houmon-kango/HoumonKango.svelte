@@ -12,13 +12,12 @@
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
   import { dateToSqlDate, type ClinicInfo, type Patient } from "myclinic-model";
   import { type DataInterface, mkDataMap } from "./data-form";
-  import { KanjiDate, GengouList, calcAge } from "kanjidate";
-  import * as kanjidate from "kanjidate";
   import ChevronDown from "@/icons/ChevronDown.svelte";
   import ChevronUp from "@/icons/ChevronUp.svelte";
   import { convertToLastDateOfMonth, incDay, incMonth, sqlDateToDate } from "@/lib/date-util";
   import api from "@/lib/api";
   import { parseDataSource } from "./houmon-kango-helper";
+  import { calcAge, DateWrapper, FormatDate, GengouList } from "myclinic-util";
 
   export let isVisible: boolean;
   let patient: Patient | undefined = undefined;
@@ -28,7 +27,7 @@
   let dataMap: DataInterface;
   let showInputs = false;
   type DataMapKeys = keyof DataInterface;
-  const gengouList: string[] = GengouList.map((g) => g.kanji);
+  const gengouList: string[] = GengouList.map((g) => g.name);
   let showTitleInputChoices = false;
   let clinicInfo: ClinicInfo;
   let dataSource: string = "";
@@ -87,16 +86,16 @@
   function doPatientUpdate(patient: Patient) {
     dataMap["患者氏名"] = `${patient.lastName}${patient.firstName}`;
     dataMap["患者住所"] = patient.address;
-    const k = new KanjiDate(new Date(patient.birthday));
+    const k = DateWrapper.from(new Date(patient.birthday));
     clear(gengouList.map((g) => `生年月日（元号：${g}）`));
     const m: any = dataMap;
-    const gname = `生年月日（元号：${k.gengou}）`;
+    const gname = `生年月日（元号：${k.getGengou()}）`;
     if (gname in m) {
       m[gname] = "1";
     }
-    dataMap["生年月日（年）"] = k.nen.toString();
-    dataMap["生年月日（月）"] = k.month.toString();
-    dataMap["生年月日（日）"] = k.day.toString();
+    dataMap["生年月日（年）"] = k.getNen().toString();
+    dataMap["生年月日（月）"] = k.getMonth().toString();
+    dataMap["生年月日（日）"] = k.getDay().toString();
     setAge(patient);
   }
 
@@ -177,11 +176,11 @@
 
   function doStartDateChange() {
     if (startDate) {
-      const k = new KanjiDate(startDate);
-      dataMap["訪問看護指示期間開始（元号）"] = k.gengou;
-      dataMap["訪問看護指示期間開始（年）"] = k.nen.toString();
-      dataMap["訪問看護指示期間開始（月）"] = k.month.toString();
-      dataMap["訪問看護指示期間開始（日）"] = k.day.toString();
+      const k = DateWrapper.from(startDate);
+      dataMap["訪問看護指示期間開始（元号）"] = k.getGengou();
+      dataMap["訪問看護指示期間開始（年）"] = k.getNen().toString();
+      dataMap["訪問看護指示期間開始（月）"] = k.getMonth().toString();
+      dataMap["訪問看護指示期間開始（日）"] = k.getDay().toString();
       if (!uptoDate) {
         if (startDate.getDate() === 1) {
           const d = incMonth(startDate, 2);
@@ -203,11 +202,11 @@
 
   function doUptoDateChange() {
     if (uptoDate) {
-      const k = new KanjiDate(uptoDate);
-      dataMap["訪問看護指示期間期限（元号）"] = k.gengou;
-      dataMap["訪問看護指示期間期限（年）"] = k.nen.toString();
-      dataMap["訪問看護指示期間期限（月）"] = k.month.toString();
-      dataMap["訪問看護指示期間期限（日）"] = k.day.toString();
+      const k = DateWrapper.from(uptoDate);
+      dataMap["訪問看護指示期間期限（元号）"] = k.getGengou();
+      dataMap["訪問看護指示期間期限（年）"] = k.getNen().toString();
+      dataMap["訪問看護指示期間期限（月）"] = k.getMonth().toString();
+      dataMap["訪問看護指示期間期限（日）"] = k.getDay().toString();
     } else {
       dataMap["訪問看護指示期間期限（元号）"] = "";
       dataMap["訪問看護指示期間期限（年）"] = "";
@@ -218,11 +217,11 @@
 
   function doIssueDateChange() {
     if (issueDate) {
-      const k = new KanjiDate(issueDate);
-      dataMap["発行日（元号）"] = k.gengou;
-      dataMap["発行日（年）"] = k.nen.toString();
-      dataMap["発行日（月）"] = k.month.toString();
-      dataMap["発行日（日）"] = k.day.toString();
+      const k = DateWrapper.from(issueDate);
+      dataMap["発行日（元号）"] = k.getGengou();
+      dataMap["発行日（年）"] = k.getNen().toString();
+      dataMap["発行日（月）"] = k.getMonth().toString();
+      dataMap["発行日（日）"] = k.getDay().toString();
     } else {
       dataMap["発行日（元号）"] = "";
       dataMap["発行日（年）"] = "";
@@ -366,8 +365,8 @@
 
   function doShinryouroku() {
     const { data, startDate, uptoDate, map } = capture();
-    const startPart = startDate ? `${kanjidate.format(kanjidate.f2, startDate)}から` : "";
-    const uptoPart = uptoDate ? `${kanjidate.format(kanjidate.f2, uptoDate)}まで` : "";
+    const startPart = startDate ? `${FormatDate.f2(startDate)}から` : "";
+    const uptoPart = uptoDate ? `${FormatDate.f2(uptoDate)}まで` : "";
     let shijisho = map["タイトル"];
     if( shijisho.includes("訪問看護指示書") ){
       shijisho = "訪問看護指示書";

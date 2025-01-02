@@ -1,7 +1,8 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
+  
   import api from "@/lib/api";
   import { popupTriggerAsync } from "@/lib/popup-helper";
+  import { FormatDate } from "myclinic-util";
 
   export let patientId: number;
   export let onSelect: (d: Date) => void;
@@ -29,7 +30,7 @@
   on:click={popupTriggerAsync(async () => {
     await triggerHook();
     return dates.map((date) => [
-      kanjidate.format(kanjidate.f1, date),
+      FormatDate.f1(date),
       () => onSelect(date),
     ]);
   })}
