@@ -38,7 +38,9 @@ export function isShohousen(s: string): boolean {
 }
 
 export function stripShohousenProlog(s: string): string {
-  return s.replace(reProlog, "");
+  s = s.replace(reProlog, "");
+  s = s.replace(/^\n/, "");
+  return s;
 }
 
 export function isPartStart(s: string): boolean {
