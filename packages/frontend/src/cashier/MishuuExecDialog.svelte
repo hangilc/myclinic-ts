@@ -2,9 +2,9 @@
   import { genid } from "@/lib/genid";
   import Dialog from "@/lib/Dialog.svelte";
   import { Wqueue, WqueueState, type Patient, type Visit } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
   import MishuuDialog from "./MishuuDialog.svelte";
   import api from "@/lib/api";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let patient: Patient;
@@ -51,7 +51,7 @@
       <div>
         <input type="checkbox" id={id} bind:group={selected} value={visit.visitId}
           data-visit-id={visit.visitId}/>
-        {kanjidate.format(kanjidate.f2, visit.visitedAt)}
+        {FormatDate.f2(visit.visitedAt)}
         {charge.toLocaleString()}円
       </div>
     {/each}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
+  import { FormatDate } from "myclinic-util";
   import CalendarIcon from "../../icons/CalendarIcon.svelte";
   import { dateFormPulldown } from "../date-form/date-form-pulldown";
   import { datePickerPopup } from "../date-picker/date-picker-popup";
@@ -9,7 +9,7 @@
     if (date == null) {
       return "（未設定）";
     } else {
-      return kanjidate.format(kanjidate.f2, date);
+      return FormatDate.f2(date);
     }
   };
   export let datePickerDefault: () => Date = () => new Date();

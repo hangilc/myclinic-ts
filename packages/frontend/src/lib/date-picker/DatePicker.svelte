@@ -1,5 +1,4 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
   import GengouPart from "./GengouPart.svelte";
   import NenPart from "./NenPart.svelte";
   import DayPart from "./DayPart.svelte";
@@ -7,6 +6,7 @@
   import DaysPanel from "./DaysPanel.svelte";
   import { listDateItems, type DateItem } from "./date-item";
   import { composeDate } from "./date-picker-misc";
+  import { warekiOf } from "myclinic-util";
 
   export let date: Date;
   export let gengouList: string[] = ["昭和", "平成", "令和"];
@@ -22,12 +22,12 @@
   updateWith(date);
 
   function updateWith(d: Date): void {
-    const wareki = kanjidate.toGengou(
+    const wareki = warekiOf(
       d.getFullYear(),
       d.getMonth() + 1,
       d.getDate()
     );
-    gengou = wareki.gengou;
+    gengou = wareki.gengou.name;
     nen = wareki.nen;
     month = d.getMonth() + 1;
     day = d.getDate();

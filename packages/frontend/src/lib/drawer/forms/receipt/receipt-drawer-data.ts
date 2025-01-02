@@ -5,8 +5,8 @@ import {
   ClinicInfo,
 } from "myclinic-model"
 import { hokenRep } from "@/lib/hoken-rep"
-import * as kanjidate from "kanjidate"
 import { type Meisai, MeisaiWrapper } from "@/lib/rezept-meisai"
+import { FormatDate } from "myclinic-util";
 
 export class ReceiptDrawerData {
   patientName: string = "";
@@ -93,11 +93,11 @@ export class ReceiptDrawerData {
   }
 
   setVisitDate(visitDate: Date): void {
-    this.visitDate = kanjidate.format(kanjidate.f2, visitDate);
+    this.visitDate = FormatDate.f2(visitDate);
   }
 
   setIssueDate(issueDate: Date): void {
-    this.issueDate = kanjidate.format(kanjidate.f2, issueDate);
+    this.issueDate = FormatDate.f2(issueDate);
   }
 
   setClinic(clinicInfo: ClinicInfo): void {

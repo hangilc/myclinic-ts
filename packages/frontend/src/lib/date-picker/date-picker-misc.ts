@@ -1,12 +1,11 @@
-import * as kanjidate from "kanjidate";
-import type { Gengou } from "kanjidate";
+import { lastDayOfMonth, nameToGengou, nenRangeOfGengou, warekiToYear, type Gengou } from "myclinic-util";
 
 export function lastDayOf(year: number, month: number): number {
-  return kanjidate.lastDayOfMonth(year, month);
+  return lastDayOfMonth(year, month);
 }
 
 export function lastNenOf(gengou: Gengou): number {
-  return kanjidate.nenRangeOf(gengou)[1];
+  return nenRangeOfGengou(gengou)[1];
 }
 
 export function composeDate(
@@ -15,13 +14,15 @@ export function composeDate(
   month: number,
   day: number
 ): Date {
-  let g = kanjidate.Gengou.fromString(gengou);
+  let g = nameToGengou(gengou);
   if (g != null) {
-    let lastNen: number = kanjidate.nenRangeOf(g)[1];
+    let lastNen: number = nenRangeOfGengou(g)[1];
     nen = Math.min(nen, lastNen);
+  } else {
+    throw new Error(`invalid gengou: ${gengou}`)
   }
-  let year = kanjidate.fromGengou(gengou, nen);
-  let lastDay: number = kanjidate.lastDayOfMonth(year, month);
+  let year = warekiToYear(g, nen);
+  let lastDay: number = lastDayOfMonth(year, month);
   day = Math.min(day, lastDay);
   return new Date(year, month - 1, day);
 }

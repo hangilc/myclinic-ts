@@ -1,5 +1,5 @@
+import { GengouList } from "myclinic-util";
 import DatePickerPopup from "./DatePickerPopup.svelte"
-import * as kanjidate from "kanjidate";
 
 type PopupOpts = {
   gengouList?: string[],
@@ -7,7 +7,7 @@ type PopupOpts = {
 }
 
 function defaultGengouList(): string[] {
-  return kanjidate.GengouList.map(g => g.kanji);
+  return GengouList.map(g => g.name);
 }
 
 export function datePickerPopup(date: () => Date, onEnter: (d: Date) => void, opts: PopupOpts = {}): (e: MouseEvent) => void {
@@ -21,7 +21,7 @@ export function datePickerPopup(date: () => Date, onEnter: (d: Date) => void, op
         gengouList: opts.gengouList || defaultGengouList(),
         event: e,
         onEnter,
-        onCancel: opts.onCancel || (() => {}),
+        onCancel: opts.onCancel || (() => { }),
       },
     });
   };

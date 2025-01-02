@@ -4,7 +4,7 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { formatValidFrom, formatValidUpto } from "./misc";
   import api from "@/lib/api";
-  import * as kanjidate from "kanjidate";
+  import { FormatDate } from "myclinic-util";
 
   export let patient: Patient | null;
   export let hoken: Hoken;
@@ -66,7 +66,7 @@
       （使用なし）
     {:else}
       {#each usageList as v (v.visitId)}
-        <div>{kanjidate.format(kanjidate.f5, v.visitedAt)}</div>
+        <div>{FormatDate.f5(v.visitedAt)}</div>
       {/each}
     {/if}
   </div>

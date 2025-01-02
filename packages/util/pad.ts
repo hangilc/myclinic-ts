@@ -11,3 +11,5 @@ export function padLeft(arg: number | string, size: number, pad: string): string
   }
   return s;
 }
+
+export const pad = padLeft;

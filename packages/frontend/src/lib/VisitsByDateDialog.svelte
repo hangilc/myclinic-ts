@@ -6,7 +6,7 @@
   import { pad } from "./pad";
   import SelectItem from "./SelectItem.svelte";
   import Dialog from "./Dialog.svelte";
-  import * as kanjidate from "kanjidate";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
   export let title: string;
@@ -41,7 +41,7 @@
   }
 
   function doPrev(): void {
-    const newDate = kanjidate.addDays(date, -1);
+    const newDate = DateWrapper.from(date).incDay(-1).asDate();
     date = newDate;
     init();
     // let newDate = kanjidate.addDays($date, -1);
@@ -49,7 +49,7 @@
   }
 
   function doNext(): void {
-    let newDate = kanjidate.addDays(date, 1);
+    let newDate = DateWrapper.from(date).incDay(1).asDate();
     date = newDate;
     init();
   }
