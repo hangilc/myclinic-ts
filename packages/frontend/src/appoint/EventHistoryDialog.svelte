@@ -1,12 +1,12 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import { Appoint, AppointTime, type AppEvent } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  import { DateWrapper, FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let events: AppEvent[];
   export let appointTimeMap: Record<number, AppointTime>;
-  let curYear = (new Date()).getFullYear();
+  let curYear = new Date().getFullYear();
 
   function kindRep(kind: string): string {
     switch (kind) {
@@ -26,15 +26,22 @@
   }
 
   function formatCreatedAt(at: string): string {
-    return kanjidate.format(kanjidate.f9, at);
+    // return kanjidate.format(kanjidate.f9, at);
+    return FormatDate.f9(at);
   }
 
   function formatDate(date: string): string {
     const y = new Date(date).getFullYear();
-    if( y === curYear ){
-      return kanjidate.format("{M}月{D}日（{W}）", date);
+    if (y === curYear) {
+      // return kanjidate.format("{M}月{D}日（{W}）", date);
+      return DateWrapper.from(date).render(
+        (d) => `${d.month}月${d.day}日（${d.youbi}）`
+      );
     } else {
-      return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+      // return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+      return DateWrapper.from(date).render(
+        (d) => `${d.gengou}${d.nen}年${d.month}月${d.day}日（${d.youbi}）`
+      );
     }
   }
 </script>
@@ -47,7 +54,8 @@
         {@const at = appointTimeMap[a.appointTimeId]}
         <div class="item">
           【{kindRep(e.kind)}】
-          {#if a.memoString}（{a.memoString}） {/if}
+          {#if a.memoString}（{a.memoString}）
+          {/if}
           {formatDate(at.date)}
           {at.fromTime} - {at.untilTime}
           <span class="patient-name">{a.patientName}</span>

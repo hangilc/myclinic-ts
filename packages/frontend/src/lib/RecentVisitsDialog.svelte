@@ -4,8 +4,8 @@
   import { pad } from "./pad";
   import SelectItem from "./SelectItem.svelte";
   import Dialog from "./Dialog.svelte";
-  import * as kanjidate from "kanjidate";
   import api from "./api";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let title: string;
@@ -56,7 +56,7 @@
       {@const patient = item[1]}
       <SelectItem {selected} data={item}>
         ({pad(patient.patientId, 4, "0")}) {patient.fullName()}
-        {kanjidate.format(kanjidate.f2, visit.visitedAt)}
+        {FormatDate.f2(visit.visitedAt)}
       </SelectItem>
     {/each}
   </div>

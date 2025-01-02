@@ -1,3 +1,4 @@
+import { GengouList, nameToGengou, warekiToYear } from "myclinic-util";
 import {
   convert,
   ensure,
@@ -9,7 +10,6 @@ import {
   validated3,
   type VResult,
 } from "../validation";
-import * as kanjidate from "kanjidate";
 
 export interface WarekiInput {
   gengou: VResult<string>;
@@ -18,7 +18,7 @@ export interface WarekiInput {
   day: VResult<number>;
 }
 
-const gengouList = kanjidate.GengouList.map((g) => g.kanji);
+const gengouList = GengouList.map((g) => g.name);
 
 const isValidGengouKanji = ensure<string>(
   (g) => gengouList.includes(g),
@@ -28,7 +28,11 @@ const isValidGengouKanji = ensure<string>(
 const gengouToYear = convert<[string, number], number>(
   ([gen, nen], resolve, reject) => {
     try {
-      const year = kanjidate.fromGengou(gen, nen);
+      const g = nameToGengou(gen);
+      if( !g ){
+        throw new Error(`invalid gengou: ${gen}`);
+      }
+      const year = warekiToYear(g, nen);
       return resolve(year);
     } catch (_ex) {
       return reject("元号・年を西暦に変換できません");

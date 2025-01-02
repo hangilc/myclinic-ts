@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { addYears, addMonths, addDays } from "kanjidate";
   import { source, toInt, validResult, VResult } from "../validation";
   import { validateWareki } from "../validators/wareki-validator";
-  import * as kanjidate from "kanjidate";
   import { createEventDispatcher } from "svelte";
+  import { DateWrapper, GengouList } from "myclinic-util";
 
   export let init: Date | null;
-  export let gengouList: string[] = kanjidate.GengouList.map((g) => g.kanji);
+  export let gengouList: string[] = GengouList.map((g) => g.name);
   export function setValue(value: Date | null): void {
     updateValues(value);
   }
@@ -24,11 +23,12 @@
       month = "";
       day = "";
     } else {
-      const k = new kanjidate.KanjiDate(date);
-      gengou = k.gengou;
-      nen = k.nen.toString();
-      month = (date.getMonth() + 1).toString();
-      day = date.getDate().toString();
+      // const k = new kanjidate.KanjiDate(date);
+      const k = DateWrapper.from(date);
+      gengou = k.getGengou();
+      nen = k.getNen().toString();
+      month = k.getMonth().toString();
+      day = k.getDay().toString();
     }
   }
 
@@ -73,15 +73,18 @@
   }
 
   function doNenClick(event: MouseEvent): void {
-    doModify((d) => addYears(d, event.shiftKey ? -1 : 1));
+    // doModify((d) => addYears(d, event.shiftKey ? -1 : 1));
+    doModify((d) => DateWrapper.from(d).incYear(event.shiftKey ? -1 : 1).asDate());
   }
 
   function doMonthClick(event: MouseEvent): void {
-    doModify((d) => addMonths(d, event.shiftKey ? -1 : 1));
+    // doModify((d) => addMonths(d, event.shiftKey ? -1 : 1));
+    doModify((d) => DateWrapper.from(d).incMonth(event.shiftKey ? -1 : 1).asDate());
   }
 
   function doDayClick(event: MouseEvent): void {
-    doModify((d) => addDays(d, event.shiftKey ? -1 : 1));
+    // doModify((d) => addDays(d, event.shiftKey ? -1 : 1));
+    doModify((d) => DateWrapper.from(d).incDay(event.shiftKey ? -1 : 1).asDate());
   }
 </script>
 

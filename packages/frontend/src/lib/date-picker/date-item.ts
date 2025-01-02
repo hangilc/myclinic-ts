@@ -1,4 +1,4 @@
-import * as kanjidate from "kanjidate";
+import { DateWrapper, lastDayOfMonth } from "myclinic-util";
 
 export class DateItem {
   constructor(
@@ -18,11 +18,11 @@ export function listDateItems(
   let pres: DateItem[] = preDateItems(firstDate);
   let curs: DateItem[] = curDateItems(
     firstDate,
-    kanjidate.lastDayOfMonth(year, month),
+    lastDayOfMonth(year, month),
     day
   );
   let posts: DateItem[] = postDateItems(
-    new Date(year, month - 1, kanjidate.lastDayOfMonth(year, month))
+    new Date(year, month - 1, lastDayOfMonth(year, month))
   );
   return [...pres, ...curs, ...posts];
 }
@@ -32,7 +32,8 @@ function preDateItems(firstDate: Date): DateItem[] {
   let npre: number = dow === 0 ? 7 : dow;
   let preItems: DateItem[] = [];
   for (let i = 1; i <= npre; i++) {
-    let d: Date = kanjidate.addDays(firstDate, -i);
+    // let d: Date = kanjidate.addDays(firstDate, -i);
+    let d: Date = DateWrapper.from(firstDate).incDay(-i).asDate();
     preItems.push(new DateItem(d, "pre", false));
   }
   return preItems.reverse();
@@ -45,7 +46,8 @@ function curDateItems(
 ): DateItem[] {
   let items: DateItem[] = [];
   for (let i = 1; i <= n; i++) {
-    let d = kanjidate.addDays(firstDate, i - 1);
+    // let d = kanjidate.addDays(firstDate, i - 1);
+    let d = DateWrapper.from(firstDate).incDay(i - 1).asDate();
     items.push(new DateItem(d, "cur", i === curDay));
   }
   return items;
@@ -56,7 +58,8 @@ function postDateItems(lastDate: Date): DateItem[] {
   let n = dow === 6 ? 7 : 6 - dow;
   let items: DateItem[] = [];
   for (let i = 1; i <= n; i++) {
-    let d = kanjidate.addDays(lastDate, i);
+    // let d = kanjidate.addDays(lastDate, i);
+    let d = DateWrapper.from(lastDate).incDay(i).asDate();
     items.push(new DateItem(d, "post", false));
   }
   return items;

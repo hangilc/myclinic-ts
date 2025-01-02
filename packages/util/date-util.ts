@@ -113,6 +113,15 @@ export class DateWrapper {
     return w.nen;
   }
 
+  getAmPm(): string {
+    const h = this.getHours();
+    return h < 12 ? "午前" : "午後";
+  }
+
+  getAmPmHours(): number {
+    return this.getHours() % 12;
+  }
+
   getTimeStamp(): string {
     function pad(n: number): string {
       return padLeft(n, 2, "0");
@@ -146,17 +155,23 @@ export class DateWrapper {
     return calcAge(this, d);
   }
 
+  getFirstDayOfWeek(): DateWrapper {
+    const dow = this.getDayOfWeek();
+    return this.incDay(-dow);
+  }
+
   toString(): string {
     return JSON.stringify({ year: this.getYear(), month: this.getMonth(), day: this.getDay() });
   }
 
-  render(f: (self: DateWrapper & { gengou: string, nen: number, month: number, day: number, year: number }) => string): string {
+  render(f: (self: DateWrapper & { gengou: string, nen: number, month: number, day: number, year: number, youbi: string }) => string): string {
     const r = Object.assign(this, {
       gengou: this.getGengou(),
       nen: this.getNen(),
       month: this.getMonth(),
       day: this.getDay(),
       year: this.getYear(),
+      youbi: this.getYoubi(),
     });
     return f(r);
   }
@@ -183,6 +198,11 @@ export class DateWrapper {
     return new DateWrapper(date);
   }
 
+  static fromYearMonthDay(year: number, month: number, day: number): DateWrapper {
+    const date = new Date(year, month - 1, day);
+    return new DateWrapper(date);
+  }
+
   static from(arg: DateWrapperLike): DateWrapper {
     if (arg instanceof DateWrapper) {
       return arg;
@@ -202,8 +222,9 @@ export class DateWrapper {
     return DateWrapper.from(new Date());
   }
 
-  static create(year: number, month: number, day: number): DateWrapper {
-    return new DateWrapper(new Date(year, month - 1, day));
+  static range(start: DateWrapperLike, size: number): DateWrapper[] {
+    const startDate = DateWrapper.from(start);
+    return [...Array(size)].map((_, i) => startDate.incDay(i));
   }
 }
 
@@ -266,7 +287,7 @@ function incMonth(date: Date, amount: number): Date {
   return date;
 }
 
-function lastDayOfMonth(year: number, month: number): number {
+export function lastDayOfMonth(year: number, month: number): number {
   const d = new Date(year, month, 1);
   d.setDate(d.getDate() - 1);
   return d.getDate();

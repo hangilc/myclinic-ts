@@ -4,8 +4,9 @@
   import { setFocus } from "@/lib/set-focus";
   import { fromZenkakuWith, spaceMap } from "@/lib/zenkaku";
   import type { Appoint, AppointTime } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
+  // import * as kanjidate from "kanjidate";
   import { resolveAppointKind } from "./appoint-kind";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
   let result: [Appoint, AppointTime][] = [];
@@ -38,9 +39,12 @@
   function formatDate(date: string): string {
     const y = new Date(date).getFullYear();
     if( y === curYear ){
-      return kanjidate.format("{M}月{D}日（{W}）", date);
+      // return kanjidate.format("{M}月{D}日（{W}）", date);
+      return DateWrapper.from(date).render(d => `${d.month}月${d.day}日（${d.youbi}）`);
     } else {
-      return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+      // return kanjidate.format("{G}{N}年{M}月{D}日（{W}）", date);
+      return DateWrapper.from(date).render(d => 
+        `${d.gengou}${d.nen}年${d.month}月${d.day}日（${d.youbi}）`);
     }
   }
 

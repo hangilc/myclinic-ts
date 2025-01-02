@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { ColumnData } from "./column-data";
-  import * as kanjidate from "kanjidate";
   import AppointTimeBlock from "./AppointTimeBlock.svelte";
   import FilledCircle from "@/icons/FilledCircle.svelte";
   import { isAdmin } from "./appoint-vars";
   import { popupTrigger } from "@/lib/popup-helper";
   import { doAddAppointTime, doOnshiConfirm } from "./column-context-menu";
+  import { FormatDate } from "myclinic-util";
 
   export let data: ColumnData;
   const dateFormat = "{M}月{D}日（{W}）";
@@ -41,7 +41,7 @@
       ])}
       data-cy="date-block"
     >
-      <span data-cy="date-disp">{kanjidate.format(dateFormat, data.date)}</span>
+      <span data-cy="date-disp">{FormatDate.monthDayWeek(data.date)}</span>
       <span class="kenshin-rep" data-cy="kenshin-rep">{kenshinRep(data)}</span>
       {#each data.collectAvail() as avail}
         <span
@@ -55,12 +55,6 @@
       {/each}
       <div class="date-label">{data.op.name ?? ""}</div>
     </div>
-    <!-- <ColumnContextMenu
-      slot="menu"
-      {destroy}
-      date={data.date}
-      siblings={data.appointTimes}
-    /> -->
   {#each data.appointTimes as at (at.appointTime.fromTime)}
     <AppointTimeBlock data={at} column={data} />
   {/each}

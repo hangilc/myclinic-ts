@@ -23,7 +23,7 @@ export function resolveFutanWari(hoken: Shahokokuho | Koukikourei, testUnder6: (
 
 export function isUnder6(birthdate: DateWrapperLike, at: DateWrapperLike): boolean {
   const b6 = DateWrapper.from(birthdate).incYear(6).incDay(-1);
-  let d: DateWrapper = DateWrapper.create(b6.getYear(), 3, 31);
+  let d: DateWrapper = DateWrapper.fromYearMonthDay(b6.getYear(), 3, 31);
   if (cmpNumSeq(b6.monthDayTuple(), [3, 31]) > 0) {
     d = d.incYear(1);
   }

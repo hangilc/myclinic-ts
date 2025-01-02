@@ -5,6 +5,12 @@ const config: Config = {
     testEnvironment: "node",
     testPathIgnorePatterns: ["./dist", "./futan-calc.*"],
     testMatch: ["**/*.test.ts"],
+    extensionsToTreatAsEsm: [".ts"],
+    transform: {
+        '\.ts$': ['ts-jest', {
+            "useESM": true
+        }]
+    }
 }
 
 export default config;

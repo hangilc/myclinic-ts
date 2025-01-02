@@ -4,8 +4,8 @@
   import { formatVisitText } from "@/lib/format-visit-text";
   import { hokenRep } from "@/lib/hoken-rep";
   import { formatPaymentStatus, resolvePaymentStatus } from "@/lib/payment-status";
-  import * as kanjidate from "kanjidate";
   import type { VisitEx } from "myclinic-model";
+  import { FormatDate } from "myclinic-util";
   import { onMount } from "svelte";
 
   export let visit: VisitEx;
@@ -29,7 +29,7 @@
 <div class="top">
   <div class="title">
     <span class="datetime"
-      >{kanjidate.format(kanjidate.f9, visit.visitedAt)}</span
+      >{FormatDate.f9(visit.visitedAt)}</span
     >
   </div>
   <div class="two-cols">

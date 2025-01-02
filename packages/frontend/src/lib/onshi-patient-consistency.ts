@@ -1,6 +1,6 @@
 import type { Patient } from "myclinic-model";
+import { FormatDate } from "myclinic-util";
 import type { ResultItem } from "onshi-result/ResultItem";
-import * as kanjidate from "kanjidate";
 
 export type OnshiPatientInconsistencyKind = "名前" | "よみ" | "生年月日" | "性別";
 
@@ -48,7 +48,7 @@ function patientNameEqv(patient: Patient): (onshiValue: string, patientValue: st
 export function checkOnshiPatientConsistency(ri: ResultItem, patient: Patient): OnshiPatientInconsistency[] {
   const errors: OnshiPatientInconsistency[] = [];
   cmp("名前", ri.name, patient.fullName("　"), errors, { eqv: patientNameEqv(patient) });
-  cmp("生年月日", ri.birthdate, patient.birthday, errors, { rep: s => kanjidate.format(kanjidate.f2, s) });
+  cmp("生年月日", ri.birthdate, patient.birthday, errors, { rep: s => FormatDate.f2(s) });
   cmp("性別", ri.sex, patient.sexAsKanji, errors);
   return errors;
 }

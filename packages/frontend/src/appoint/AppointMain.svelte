@@ -4,7 +4,6 @@
   import TopRow from "./TopRow.svelte";
   import Column from "./Column.svelte";
   import { ColumnData } from "./column-data";
-  import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
   import type { ClinicOperation, AppointTime, Appoint } from "myclinic-model";
   import { dateToSql } from "@/lib/util";
@@ -18,6 +17,7 @@
     appointUpdated,
   } from "@/app-events";
   import { onDestroy } from "svelte";
+  import { DateWrapper } from "myclinic-util";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
@@ -119,12 +119,13 @@
   }
 
   function getStartDateOf(date: Date): string {
-    return dateToSql(kanjidate.firstDayOfWeek(date));
+    // return dateToSql(kanjidate.firstDayOfWeek(date));
+    return DateWrapper.from(date).getFirstDayOfWeek().asSqlDate();
   }
 
   async function initColumns(startSqlDate: string) {
     const startDate = new Date(startSqlDate);
-    const dates = kanjidate.dateRange(startDate, 7);
+    const dates = DateWrapper.range(startDate, 7).map(d => d.asDate());
     const map = await api.batchResolveClinicOperations(dates);
     const proms = dates
       .filter((d) => {
@@ -150,8 +151,10 @@
   }
 
   function doMoveWeeks(n: number): void {
-    const d = kanjidate.addDays(new Date(startDate), n * 7);
-    startDate = dateToSql(d);
+    // const d = kanjidate.addDays(new Date(startDate), n * 7);
+    // startDate = dateToSql(d);
+    const d = DateWrapper.from(startDate).incDay(n * 7);
+    startDate = d.asSqlDate();
     initColumns(startDate);
   }
 
@@ -161,8 +164,10 @@
   }
 
   async function doCreateAppoints() {
-    const upto = kanjidate.addDays(new Date(startDate), 6);
-    await api.fillAppointTimes(startDate, upto);
+    // const upto = kanjidate.addDays(new Date(startDate), 6);
+    // await api.fillAppointTimes(startDate, upto);
+    const upto = DateWrapper.from(startDate).incDay(6);
+    await api.fillAppointTimes(startDate, upto.asDate());
   }
 </script>
 

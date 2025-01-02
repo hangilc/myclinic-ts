@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as kanjidate from "kanjidate";
+  import { nameToGengouForce, warekiToYear, lastDayOfMonth } from "myclinic-util";
   import { range_from_one_upto } from "../range";
   import { dayPartPulldown } from "./day-part-pulldown";
 
@@ -11,8 +11,9 @@
   // let anchor: HTMLElement;
 
   function calcDayList(): number[] {
-    let year = kanjidate.fromGengou(gengou, nen);
-    let lastDay: number = kanjidate.lastDayOfMonth(year, month);
+    // let year = kanjidate.fromGengou(gengou, nen);
+    let year = warekiToYear(nameToGengouForce(gengou), nen);
+    let lastDay: number = lastDayOfMonth(year, month);
     return range_from_one_upto(lastDay);
   }
 

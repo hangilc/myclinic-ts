@@ -1,14 +1,16 @@
-import * as kanjidate from "kanjidate";
 import type { HokenSelector, Hokensha, RezeptComment, RezeptVisit } from "./rezept-types";
 import { RezeptShubetsuCodeBase, RezeptShubetuCodeOffset, レセプト特記事項コード, 負担区分コードNameOf, 都道府県コード } from "./codes";
 import type { ShotokuKubunCode, レセプト特記事項コードCode, 負担区分コードCode } from "./codes";
 import { toZenkaku } from "./zenkaku";
 import { DateSet } from "./date-set";
+import { DateWrapper } from "myclinic-util";
 
 export function calcSeikyuuMonth(year: number, month: number): [number, number] {
-  let d = new Date(year, month - 1, 1);
-  d = kanjidate.addMonths(d, 1);
-  return [d.getFullYear(), d.getMonth() + 1];
+  let d = DateWrapper.fromYearMonthDay(year, month, 1).incMonth(1);
+  return [d.getYear(), d.getMonth()];
+  // let d = new Date(year, month - 1, 1);
+  // d = kanjidate.addMonths(d, 1);
+  // return [d.getFullYear(), d.getMonth() + 1];
 }
 
 export function formatYearMonth(year: number, month: number): string {

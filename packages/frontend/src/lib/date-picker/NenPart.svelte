@@ -1,7 +1,7 @@
 <script lang="ts">
   import { writable, type Writable } from "svelte/store";
-  import * as kanjidate from "kanjidate";
   import { nenPulldown } from "./nen-pulldown";
+  import { nameToGengou, nenRangeOfGengou } from "myclinic-util";
 
   export let nen: number;
   export let gengou: string;
@@ -12,9 +12,10 @@
   selected.subscribe(onChange);
 
   function calcNenList(): number[] {
-    let g = kanjidate.Gengou.fromString(gengou);
+    // let g = kanjidate.Gengou.fromString(gengou);
+    let g = nameToGengou(gengou);
     if (g != null) {
-      let nenLast = kanjidate.nenRangeOf(g)[1];
+      let nenLast = nenRangeOfGengou(g)[1];
       return range(nenLast);
     } else {
       return [];

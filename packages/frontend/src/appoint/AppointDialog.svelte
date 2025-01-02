@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { AppointTimeData } from "./appoint-time-data";
-  import { format } from "kanjidate";
   import { genid } from "@/lib/genid";
   import api from "@/lib/api";
   import { Appoint, type Patient } from "myclinic-model";
@@ -50,7 +49,8 @@
   }
 
   function appointTimeText(data: AppointTimeData): string {
-    const d = format("{M}月{D}日（{W}）", data.appointTime.date);
+    // const d = format("{M}月{D}日（{W}）", data.appointTime.date);
+    const d = DateWrapper.from(data.appointTime.date).render(d => `${d.month}月${d.day}日（${d.youbi}）`);
     const fp = parseTime(data.appointTime.fromTime);
     const f = `${fp.hour}時${fp.minute}分`;
     const up = parseTime(data.appointTime.untilTime);

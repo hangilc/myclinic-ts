@@ -1,4 +1,4 @@
-import { Gengou, GengouList } from "kanjidate";
+import { type Gengou, GengouList, isGengou } from "myclinic-util";
 import { Kouhi, type KouhiInterface, type KouhiMemoInterface, } from "./model";
 import { pipe } from "./pipe";
 
@@ -162,17 +162,17 @@ export function dateInputToDate(arg: DateInput): Date {
   if (errors.length > 0) {
     throw new MultiError(errors);
   }
-  const y = g.getValue().nenStartYear + n.getValue() - 1;
+  const y = g.getValue().startYear + n.getValue() - 1;
   return new Date(y, m.getValue() - 1, d.getValue());
 }
 
 
 function toGengou(arg: any): Gengou {
-  if (arg instanceof Gengou) {
+  if (isGengou(arg)) {
     return arg;
   } else if (typeof arg === "string") {
     for (const g of GengouList) {
-      if (g.kanji === arg || g.alpha === arg) {
+      if (g.name === arg || g.alpha === arg) {
         return g;
       }
     }

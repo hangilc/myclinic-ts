@@ -1,15 +1,15 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import { AppointTime } from "myclinic-model";
-  import * as kanjidate from "kanjidate";
   import api from "@/lib/api";
+  import { FormatDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let appointTime: AppointTime;
   let splitValue: string = "";
 
   function formatDate(date: string): string {
-    return kanjidate.format("{M}月{D}日（{W}）", date);
+    return FormatDate.monthDayWeek(date);
   }
 
   async function doEnter() {
