@@ -7,7 +7,7 @@ const space = "[ 　]";
 const digit = "[0-9０-９]";
 const notSpace = "[^ 　\n]";
 const digitOrPeriod = `[０-９${zenkakuPeriod}]`;
-const reProlog = new RegExp(`^院外処方${space}*\nＲｐ）${space}*\n`);
+const reProlog = new RegExp(`^院外処方${space}*\nＲｐ）${space}*`);
 const rePartStart = new RegExp(`(?<=^|\n)${space}?${digit}+[)）]${space}*`);
 const reLeadingSpaces = new RegExp(`^${space}+`);
 const commandStart = "@";

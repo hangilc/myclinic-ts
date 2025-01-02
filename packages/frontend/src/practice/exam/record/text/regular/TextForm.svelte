@@ -100,7 +100,7 @@
 
   async function doPrintShohousen() {
     if (!(await isTodaysShohousen())) {
-      if (!confirm("本日の処方線でありませんが、印刷しますか？")) {
+      if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
         onClose();
         return;
       }
@@ -195,6 +195,12 @@
   }
 
   async function doPrintShohousen2024() {
+    if (!(await isTodaysShohousen())) {
+      if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
+        onClose();
+        return;
+      }
+    }
     const shohou = parseShohou(text.content, false);
     console.log("shohou", JSON.stringify(shohou, undefined, 2));
     const clinicInfo = await cache.getClinicInfo();

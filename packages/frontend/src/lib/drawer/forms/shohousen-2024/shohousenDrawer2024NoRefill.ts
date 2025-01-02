@@ -60,11 +60,13 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   const result: Op[][] = [];
   if (pages.length === 1) {
     const page = pages[0];
-    page.lastLineRenderer((ext) => ({
-      item: lastLineItem(page.ctx, env.font),
-      halign: "left",
-      valign: "top"
-    }));
+    if ((drawerData?.drugs?.groups.length ?? 0) > 0) {
+      page.lastLineRenderer((ext) => ({
+        item: lastLineItem(page.ctx, env.font),
+        halign: "left",
+        valign: "top"
+      }));
+    }
     page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
     result.push(c.getOps(page.ctx));
   } else {
@@ -992,9 +994,9 @@ interface Env {
 
 function needSecondSignature(data?: Shohousen2024Data): boolean {
   const groups = data?.drugs?.groups ?? [];
-  for(let group of groups){
-    for(let drug of group.drugs){
-      if( drug.senpatsu === "henkoufuka" ){
+  for (let group of groups) {
+    for (let drug of group.drugs) {
+      if (drug.senpatsu === "henkoufuka") {
         return true;
       }
     }
@@ -1030,7 +1032,7 @@ function handleShohousenData(data?: Shohousen2024Data): {
     bikou = src.bikou;
     kigen = src.kigen;
   }
-  return { shohouData, bikou, kigen,  };
+  return { shohouData, bikou, kigen, };
 }
 
 function createEnv(font: string, data?: Shohousen2024Data): Env {
@@ -1038,7 +1040,7 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
   return {
     data,
     font,
-    lastLineRenderer: () => {},
+    lastLineRenderer: () => { },
     shohou: {
       kind: "data",
       data: shohouData,
@@ -1109,5 +1111,5 @@ function continueLineItem(ctx: DrawerContext, font: string, page: number, totalP
 const black: Color = { r: 0, g: 0, b: 0 };
 const green: Color = { r: 0, g: 255, b: 0 };
 const red: Color = { r: 255, g: 0, b: 0 };
-const lightRed: Color = { r:255, g: 127, b: 127 };
+const lightRed: Color = { r: 255, g: 127, b: 127 };
 
