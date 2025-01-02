@@ -1,6 +1,6 @@
 import { pad } from "./pad";
 import { DateWrapper, DateWrapperLike } from "./date-util";
-import { nameToGengouForce } from "wareki";
+import { nameToGengouForce } from "./wareki";
 
 export const FormatDate = {
   f1(date: DateWrapperLike): string {

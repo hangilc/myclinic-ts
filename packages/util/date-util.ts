@@ -74,8 +74,10 @@ export class DateWrapper {
   }
 
   incDay(n: number): DateWrapper {
-    const newdate = incDay(this.date, n);
-    return new DateWrapper(newdate);
+    let d: number = this.date.getDate() + n;
+    let c = new Date(this.date);
+    c.setDate(d);
+    return new DateWrapper(c);
   }
 
   compare(arg: DateWrapperLike): 0 | 1 | -1 {
@@ -194,6 +196,7 @@ export class DateWrapper {
 
   static fromSqlDate(sqldate: string): DateWrapper {
     const date = sqlDateToDate(sqldate);
+    console.log("fromSqlDate", date);
     return new DateWrapper(date);
   }
 
@@ -212,6 +215,7 @@ export class DateWrapper {
   }
 
   static from(arg: DateWrapperLike): DateWrapper {
+    console.log("enter from", arg);
     if (arg instanceof DateWrapper) {
       return arg;
     } else if (arg instanceof Date) {
