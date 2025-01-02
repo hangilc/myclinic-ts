@@ -196,7 +196,6 @@ export class DateWrapper {
 
   static fromSqlDate(sqldate: string): DateWrapper {
     const date = sqlDateToDate(sqldate);
-    console.log("fromSqlDate", date);
     return new DateWrapper(date);
   }
 
@@ -215,7 +214,6 @@ export class DateWrapper {
   }
 
   static from(arg: DateWrapperLike): DateWrapper {
-    console.log("enter from", arg);
     if (arg instanceof DateWrapper) {
       return arg;
     } else if (arg instanceof Date) {
