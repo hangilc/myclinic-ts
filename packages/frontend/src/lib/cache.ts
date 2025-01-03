@@ -2,6 +2,7 @@ import type { ClinicInfo, UsageMaster } from "myclinic-model";
 import api from "./api";
 import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
 import type { DrugDisease } from "./drug-disease";
+import type { ShinryouDisease } from "./shinryou-disease";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -10,6 +11,7 @@ let shohouFreqUsage: FreqUsage[] | undefined = undefined;
 let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 let onshiViewSecret: string | undefined = undefined;
 let drugDiseases: DrugDisease[] | undefined = undefined;
+let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 
 export type FreqUsage = {
@@ -91,6 +93,18 @@ export const cache = {
 
   clearDrugDiseases() {
     drugDiseases = undefined;
+  },
+
+  async getShinryouDiseases(): Promise<ShinryouDisease[]> {
+    if( shinryouDiseases === undefined ){
+      shinryouDiseases = await api.getShinryouDiseases();
+    }
+    return shinryouDiseases;
+  },
+
+  async setShinryouDiseases(newShinryouDiseases: ShinryouDisease[]): Promise<void> {
+    await api.setShinryouDiseases(newShinryouDiseases);
+    shinryouDiseases = newShinryouDiseases;
   },
 
   async getHokengaiHistory(): Promise<string[]> {

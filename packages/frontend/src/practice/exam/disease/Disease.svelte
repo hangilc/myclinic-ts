@@ -23,6 +23,12 @@
   import Drugs from "./Drugs.svelte";
   import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
   import { DateWrapper } from "myclinic-util";
+  import {
+    hasMatchingShinryouDiseases,
+    type ShinryouDisease,
+  } from "@/lib/shinryou-disease";
+  import EditShinryouDiseaseDialog from "./EditShinryouDiseaseDialog.svelte";
+  import { diseaseDeleted, diseaseEntered, diseaseUpdated } from "@/app-events";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -38,13 +44,19 @@
       post: string[];
     }[];
   }[] = [];
+  let shinryouWithoutMatchingDisease: {
+    name: string;
+    fixes: {
+      label: string;
+      exec: () => Promise<void>;
+    }[];
+  }[] = [];
   let drugsWithouMatchingDiseaseIndex = 1;
 
   init();
 
   async function init() {
     drugDiseases = await cache.getDrugDiseases();
-    // console.log("drugDiseases", drugDiseases);
   }
 
   unsubs.push(
@@ -53,14 +65,35 @@
         clear();
         clear = () => {};
         drugsWithouMatchingDisease = [];
+        shinryouWithoutMatchingDisease = [];
         $env = undefined;
       } else {
         $env = await DiseaseEnv.create(p);
         checkDrugs();
+        await checkShinryou();
         doMode("current");
       }
+    }),
+    diseaseEntered.subscribe(async (d) => {
+      if( d ){ update() }
+    }),
+    diseaseUpdated.subscribe(async (d) => {
+      if( d ){ update() }
+    }),
+    diseaseDeleted.subscribe(async (d) => {
+      if( d ){ update() }
     })
   );
+
+  async function update() {
+    const patient = $currentPatient;
+    if (patient) {
+      $env = await DiseaseEnv.create(patient);
+      checkDrugs();
+      await checkShinryou();
+      doMode("current");
+    }
+  }
 
   onDestroy(() => {
     unsubs.forEach((f) => f());
@@ -88,6 +121,52 @@
     }
   }
 
+  async function checkShinryou() {
+    shinryouWithoutMatchingDisease = [];
+    const diseaseNames: string[] =
+      $env?.currentList?.map((disease) => {
+        return disease.byoumeiMaster.name;
+      }) ?? [];
+    const shinryouMap: Record<
+      string,
+      {
+        fixes: {
+          label: string;
+          exec: () => Promise<void>;
+        }[];
+      }
+    > = {};
+    $env?.visits.forEach((visit) => {
+      visit.shinryouList.forEach((shinryou) => {
+        const shinryouName = shinryou.master.name;
+        shinryouMap[shinryouName] = { fixes: [] };
+      });
+    });
+    const shinryouNames = Object.keys(shinryouMap);
+    const shinryouDiseases: ShinryouDisease[] =
+      await cache.getShinryouDiseases();
+    const ctx = createContext(
+      $env?.patient.patientId ?? 0,
+      DateWrapper.from(new Date()).asSqlDate()
+    );
+    shinryouWithoutMatchingDisease = [];
+    for (let shinryouName of shinryouNames) {
+      const m = hasMatchingShinryouDiseases(
+        shinryouName,
+        diseaseNames,
+        shinryouDiseases,
+        ctx
+      );
+      if (m === true) {
+        // nop;
+      } else {
+        const fixes = m;
+        shinryouWithoutMatchingDisease.push({ name: shinryouName, fixes });
+      }
+    }
+    shinryouWithoutMatchingDisease = shinryouWithoutMatchingDisease;
+  }
+
   function fixName(fix: {
     pre: string[];
     name: string;
@@ -111,7 +190,6 @@
                 }
                 return optEnv;
               });
-              // envValue.editTarget = d;
               doMode("edit");
             },
           },
@@ -124,8 +202,6 @@
           target: workarea,
           props: {
             env,
-            // patientId: envValue.patient.patientId,
-            // examples: envValue.examples,
             onEnter: async (data: DiseaseEnterData) => {
               const diseaseId: number = await api.enterDiseaseEx(data);
               const d: DiseaseData = await api.getDiseaseEx(diseaseId);
@@ -135,7 +211,6 @@
                 }
                 return optEnv;
               });
-              // envValue.addDisease(d);
               checkDrugs();
               doMode("add");
             },
@@ -166,13 +241,10 @@
       }
       case "edit": {
         await $env?.fetchAllList();
-        // await envValue.fetchAllList();
         const b = new Edit({
           target: workarea,
           props: {
             env,
-            // diseases: env.allList ?? [],
-            // editTarget: envValue.editTarget,
             onDelete: (diseaseId: number) => {
               env.update((optEnv) => {
                 if (optEnv) {
@@ -181,8 +253,6 @@
                 }
                 return optEnv;
               });
-              // envValue.remove(diseaseId);
-              // envValue.editTarget = undefined;
               checkDrugs();
               doMode("edit");
             },
@@ -194,8 +264,6 @@
                 }
                 return optEnv;
               });
-              // envValue.updateDisease(entered);
-              // envValue.editTarget = undefined;
               checkDrugs();
               doMode("edit");
             },
@@ -208,7 +276,6 @@
         const b: Drugs = new Drugs({
           target: workarea,
           props: {
-            // env,
             onChanged: async () => {
               drugDiseases = await cache.getDrugDiseases();
               checkDrugs();
@@ -244,28 +311,9 @@
           if (created.fix) {
             await addDiseaseByFix(created.fix);
           }
-          checkDrugs();
         },
       },
     });
-    // const d: AddDiseaseForDrugDialog = new AddDiseaseForDrugDialog({
-    //   target: document.body,
-    //   props: {
-    //     destroy: () => d.$destroy(),
-    //     drugName,
-    //     env,
-    //     onAdded: (d: DiseaseData) => {
-    //       env.update((optEnv) => {
-    //         if (optEnv) {
-    //           optEnv.addDisease(d);
-    //         }
-    //         return optEnv;
-    //       });
-    //       checkDrugs();
-    //     },
-    //     onRegistered: () => checkDrugs(),
-    //   },
-    // });
   }
 
   function doSelectDiseaseForDrug(drugName: string) {
@@ -312,14 +360,7 @@
         startDate: at,
         adjCodes: adjList.map((m) => m.shuushokugocode),
       };
-      const diseaseId: number = await api.enterDiseaseEx(data);
-      const d: DiseaseData = await api.getDiseaseEx(diseaseId);
-      env.update((optEnv) => {
-        if (optEnv) {
-          optEnv.addDisease(d);
-        }
-        return optEnv;
-      });
+      await api.enterDiseaseEx(data);
       return true;
     } else {
       return false;
@@ -331,13 +372,83 @@
       checkDrugs();
     }
   }
+
+  function createContext(
+    patientId: number,
+    at: string
+  ): {
+    enterDisease: (diseaseName: string, adjNames: string[]) => Promise<void>;
+  } {
+    async function enterDisease(
+      diseaseName: string,
+      adjNames: string[]
+    ): Promise<void> {
+      const dmaster = await api.resolveByoumeiMasterByName(diseaseName, at);
+      if (!dmaster) {
+        alert(`不明な病名：${diseaseName}`);
+        throw new Error(`no such byoumei: ${diseaseName}`);
+      }
+      const amasters = await Promise.all(
+        adjNames.map((adjName) =>
+          api.resolveShuushokugoMasterByName(adjName, at)
+        )
+      );
+      const adjCodes: number[] = [];
+      for (let m of amasters) {
+        if (!m) {
+          alert("不明の病名修飾語");
+          throw new Error("invalid disease adj");
+        }
+        adjCodes.push(m.shuushokugocode);
+      }
+      const data: DiseaseEnterData = {
+        patientId,
+        byoumeicode: dmaster.shoubyoumeicode,
+        startDate: at,
+        adjCodes,
+      };
+      await api.enterDiseaseEx(data);
+    }
+    return { enterDisease };
+  }
+
+  function doAddDiseaseForShinryou(name: string) {
+    const d: EditShinryouDiseaseDialog = new EditShinryouDiseaseDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "診療病名の追加",
+        shinryouName: name,
+        onEnter: async (item) => {
+          let cur = await cache.getShinryouDiseases();
+          cur = [...cur, item];
+          await cache.setShinryouDiseases(cur);
+          if (item.kind === "disease-check") {
+            if (item.fix) {
+              const patientId = $env?.patient.patientId;
+              if (patientId) {
+                const dname = item.fix.diseaseName;
+                const anames = item.fix.adjNames;
+                const at = DateWrapper.from(new Date()).asSqlDate();
+                const ctx = createContext(patientId, at);
+                await ctx.enterDisease(dname, anames);
+              }
+            }
+          }
+          checkShinryou();
+        },
+      },
+    });
+  }
+
+  function doSelectDiseaseForShinryou(name: string) {}
 </script>
 
 <RightBox title="病名" display={!!env} dataCy="disease-box">
   <div class="workarea" bind:this={workarea} />
-  <div class="drug-without-matching-disease-wrapper">
+  <div>
     {#each drugsWithouMatchingDisease as d (d.id)}
-      <div class="drug-without-matching-disease">
+      <div class="without-matching-disease">
         <div>{d.name}</div>
         {#each d.fixes as fix}
           <div>
@@ -348,6 +459,27 @@
         <div>
           <button on:click={() => doAddDiseaseForDrug(d.name)}>病名追加</button>
           <button on:click={() => doSelectDiseaseForDrug(d.name)}
+            >病名選択</button
+          >
+        </div>
+      </div>
+    {/each}
+  </div>
+  <div>
+    {#each shinryouWithoutMatchingDisease as s}
+      <div class="without-matching-disease">
+        <div>{s.name}</div>
+        {#each s.fixes as fix}
+          <div>
+            <span class="fix-name">{fix.label}</span>
+            <button on:click={fix.exec}>fix</button>
+          </div>
+        {/each}
+        <div>
+          <button on:click={() => doAddDiseaseForShinryou(s.name)}
+            >病名追加</button
+          >
+          <button on:click={() => doSelectDiseaseForShinryou(s.name)}
             >病名選択</button
           >
         </div>
@@ -388,7 +520,7 @@
     margin-top: 6px;
   }
 
-  .drug-without-matching-disease {
+  .without-matching-disease {
     font-size: 12px;
     color: red;
     border: 1px solid red;
@@ -397,7 +529,7 @@
     padding: 4px;
   }
 
-  .drug-without-matching-disease div + div {
+  .without-matching-disease div + div {
     margin-top: 4px;
   }
 

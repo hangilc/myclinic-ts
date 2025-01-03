@@ -9,6 +9,7 @@ import type { ReferConfig } from "./refer";
 import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
 import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
+import type { ShinryouDisease } from "./shinryou-disease";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1663,6 +1664,14 @@ export default {
 
   setDrugDiseases(drugDiseases: DrugDisease[]): Promise<void> {
     return post("set-config", drugDiseases, { name: "drug-disease" }, a => a)
+  },
+
+  getShinryouDiseases(): Promise<ShinryouDisease[]> {
+    return get("get-config", { name: "shinryou-disease" }, a => a ?? []);
+  },
+
+  setShinryouDiseases(shinryouDiseases: ShinryouDisease[]): Promise<void> {
+    return post("set-config", shinryouDiseases, { name: "shinryou-disease" }, a => a)
   },
 
   getHokengaiHistory(): Promise<string[]> {

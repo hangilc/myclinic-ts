@@ -1,11 +1,15 @@
 export type ShinryouDisease = {
   shinryouName: string
-} & DiseaseCheck;
+} & (DiseaseCheck | NoCheck);
 
 interface DiseaseCheck {
   kind: "disease-check";
   diseaseName: string;
   fix?: { diseaseName: string, adjNames: string[] }
+}
+
+interface NoCheck {
+  kind: "no-check";
 }
 
 interface Fix {
@@ -60,6 +64,9 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
           return false;
         }
       }
+    }
+    case "no-check": {
+      return true;
     }
   }
 }
