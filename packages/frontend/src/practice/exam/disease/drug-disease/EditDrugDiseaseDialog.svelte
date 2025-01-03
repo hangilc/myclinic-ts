@@ -3,7 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { fullNameOfFix, type DrugDisease } from "@/lib/drug-disease";
   import type { ByoumeiMaster, ShuushokugoMaster } from "myclinic-model";
-  import { truncateDrugName } from "./drug-disease-util";
+  import { truncateDrugName } from "../drug-disease-util";
 
   export let destroy: () => void;
   export let item: DrugDisease;

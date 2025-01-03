@@ -1,4 +1,4 @@
-import type { ClinicInfo, UsageMaster } from "myclinic-model";
+import type { ClinicInfo, DiseaseExample, UsageMaster } from "myclinic-model";
 import api from "./api";
 import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
 import type { DrugDisease } from "./drug-disease";
@@ -13,6 +13,7 @@ let onshiViewSecret: string | undefined = undefined;
 let drugDiseases: DrugDisease[] | undefined = undefined;
 let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
+let diseaseExamples: DiseaseExample[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -117,4 +118,12 @@ export const cache = {
   clearHokengaiHistory() {
     hokengaiHistory = undefined;
   },
+
+  async getDiseaseExamples(): Promise<DiseaseExample[]> {
+    if( diseaseExamples === undefined ){
+      diseaseExamples = await api.listDiseaseExample();
+    }
+    return diseaseExamples;
+  },
+
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Writable } from "svelte/store";
-  import type { DiseaseEnv } from "./disease-env";
+  import type { DiseaseEnv } from "../disease-env";
   import { DiseaseData, diseaseFullName } from "myclinic-model";
   import type { DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";

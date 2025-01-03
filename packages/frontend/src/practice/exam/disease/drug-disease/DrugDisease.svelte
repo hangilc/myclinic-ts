@@ -3,8 +3,7 @@
   import type { DiseaseEnv } from "../disease-env";
   import type { DiseaseEnterData, ShuushokugoMaster } from "myclinic-model";
   import api from "@/lib/api";
-  import SelectrDiseaseForDrugDialog from "./SelectrDiseaseForDrugDialog.svelte";
-  import Drugs from "../Drugs.svelte";
+  import SelectrDiseaseForDrugDialog from "./SelectDiseaseForDrugDialog.svelte";
   import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
   import { DateWrapper } from "myclinic-util";
   import type { DrugDisease } from "@/lib/drug-disease";
@@ -22,6 +21,7 @@
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
     if (await addDiseaseByFix(fix)) {
+      
       $env?.checkDrugs();
     }
   }

@@ -12,9 +12,9 @@ let drugsWithoutMatchingDiseaseIndex = 1;
 
 export class DiseaseEnv {
   patient: Patient;
-  currentList: DiseaseData[];
+  currentList: DiseaseData[] = [];
   allList: DiseaseData[] | undefined = undefined;
-  examples: DiseaseExample[];
+  examples: DiseaseExample[] = [];
   editTarget: DiseaseData | undefined = undefined;
   today: Date = new Date();
   visits: VisitEx[] = [];
@@ -35,15 +35,9 @@ export class DiseaseEnv {
   );
 
   constructor(
-    patient: Patient,
-    currentList: DiseaseData[],
-    examples: DiseaseExample[],
-    visits?: VisitEx[],
+    patient: Patient
   ) {
     this.patient = patient;
-    this.currentList = [...currentList];
-    this.examples = examples;
-    this.visits = visits ?? [];
   }
 
   addDisease(d: DiseaseData): void {
@@ -96,9 +90,9 @@ export class DiseaseEnv {
     const texts = this.visits.flatMap((visit) => visit.texts) ?? [];
     const drugNames: string[] = extractDrugNames(texts);
     const diseaseNames: string[] =
-      this.currentList?.map((disease) => {
+      this.currentList.map((disease) => {
         return disease.byoumeiMaster.name;
-      }) ?? [];
+      });
     for (let drugName of drugNames) {
       const m = hasMatchingDrugDisease(drugName, diseaseNames, this.drugDiseases);
       if (m === true) {
@@ -113,6 +107,9 @@ export class DiseaseEnv {
     }
   }
 
+  async updateCurrentList() {
+    this.currentList = await api.listCurrentDiseaseEx(this.patient.patientId);
+  }
 
   async fetchAllList() {
     if (this.allList === undefined) {
@@ -121,13 +118,13 @@ export class DiseaseEnv {
   }
 
   static async create(patient: Patient): Promise<DiseaseEnv> {
-    const cur = await api.listCurrentDiseaseEx(patient.patientId);
-    const examples = await DiseaseEnv.examplesCache.get();
+    const env = new DiseaseEnv(patient);
+    await env.updateCurrentList();
+    env.examples = await cache.getDiseaseExamples();
     const today = DateWrapper.from(new Date()).asSqlDate();
     const visitIds = await api.listVisitIdByDateIntervalAndPatient(today, today, patient.patientId);
     let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
-    visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
-    const env = new DiseaseEnv(patient, cur, examples, visits);
+    env.visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
     env.drugDiseases = await cache.getDrugDiseases();
     return env;
   }

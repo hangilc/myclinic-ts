@@ -2,7 +2,7 @@
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
   import type { DrugDisease } from "@/lib/drug-disease";
-  import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
+  import EditDrugDiseaseDialog from "./drug-disease/EditDrugDiseaseDialog.svelte";
   import { DateWrapper } from "myclinic-util";
 
   export let onChanged: () => void;

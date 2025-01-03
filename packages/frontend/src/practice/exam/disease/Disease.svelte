@@ -19,9 +19,9 @@
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
   import { writable, type Writable } from "svelte/store";
-  import SelectrDiseaseForDrugDialog from "./SelectrDiseaseForDrugDialog.svelte";
+  import SelectrDiseaseForDrugDialog from "./drug-disease/SelectDiseaseForDrugDialog.svelte";
   import Drugs from "./Drugs.svelte";
-  import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
+  import EditDrugDiseaseDialog from "./drug-disease/EditDrugDiseaseDialog.svelte";
   import { DateWrapper } from "myclinic-util";
   import {
     hasMatchingShinryouDiseases,
