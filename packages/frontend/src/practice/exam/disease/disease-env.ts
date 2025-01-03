@@ -3,6 +3,7 @@ import { CachedValue } from "@/lib/cached-value";
 import type { Patient, VisitEx } from "myclinic-model";
 import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
 import { DateWrapper } from "myclinic-util";
+import type { Mode } from "./mode";
 
 export class DiseaseEnv {
   patient: Patient;
@@ -12,6 +13,7 @@ export class DiseaseEnv {
   editTarget: DiseaseData | undefined = undefined;
   today: Date = new Date();
   visits: VisitEx[] = [];
+  mode: Mode = "current";
 
   static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
     api.listDiseaseExample

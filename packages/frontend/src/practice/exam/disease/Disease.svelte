@@ -30,6 +30,7 @@
   import EditShinryouDiseaseDialog from "./EditShinryouDiseaseDialog.svelte";
   import { diseaseDeleted, diseaseEntered, diseaseUpdated } from "@/app-events";
   import Shinryou from "./Shinryou.svelte";
+  import type { number } from "valibot";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -74,16 +75,22 @@
         await checkShinryou();
         doMode("current");
       }
-    }),
-    diseaseEntered.subscribe(async (d) => {
-      if( d ){ update() }
-    }),
-    diseaseUpdated.subscribe(async (d) => {
-      if( d ){ update() }
-    }),
-    diseaseDeleted.subscribe(async (d) => {
-      if( d ){ update() }
     })
+    // diseaseEntered.subscribe(async (d) => {
+    //   if (d) {
+    //     update();
+    //   }
+    // }),
+    // diseaseUpdated.subscribe(async (d) => {
+    //   if (d) {
+    //     update();
+    //   }
+    // }),
+    // diseaseDeleted.subscribe(async (d) => {
+    //   if (d) {
+    //     update();
+    //   }
+    // })
   );
 
   async function update() {
@@ -174,6 +181,31 @@
     post: string[];
   }): string {
     return [...fix.pre, fix.name, ...fix.post].join("");
+  }
+
+  async function doAddDisease(data: DiseaseEnterData) {
+    const diseaseId: number = await api.enterDiseaseEx(data);
+    const d: DiseaseData = await api.getDiseaseEx(diseaseId);
+    env.update((optEnv) => {
+      if (optEnv) {
+        optEnv.addDisease(d);
+      }
+      return optEnv;
+    });
+  }
+
+  async function doTenkiEnter(result: [number, string, string][]) {
+    const promises = result.map((r) => {
+      const [diseaseId, date, reason] = r;
+      return api.endDisease(diseaseId, parseSqlDate(date), reason);
+    });
+    await Promise.all(promises);
+    env.update((orig) => {
+      if( orig ){
+        orig.removeFromCurrentList(result.map((d) => d[0]));
+      }
+      return orig;
+    });
   }
 
   async function doMode(mode: Mode) {
@@ -292,8 +324,8 @@
           props: {
             onChanged: async () => {
               await checkShinryou();
-            }
-          }
+            },
+          },
         });
         clear = () => b.$destroy();
         break;
@@ -455,7 +487,53 @@
   }
 
   function doSelectDiseaseForShinryou(name: string) {}
+
+  function doChangeMode(mode: Mode) {
+    env.update((orig) => {
+      if (orig) {
+        orig.mode = mode;
+      }
+      return orig;
+    });
+  }
 </script>
+
+{#if $currentPatient !== undefined && $env !== undefined}
+  <RightBox title="病名" display={true}>
+    <div style="margin-top:6px;">
+      {#if $env.mode === "current"}
+        <Current {env} onSelect={(d) => {}} />
+      {:else if $env.mode === "add"}
+        <Add {env} onEnter={doAddDisease} />
+      {:else if $env.mode === "tenki"}
+        <Tenki {env} onEnter={doTenkiEnter} />
+      {:else if $env.mode === "edit"}
+        EDIT
+      {:else if $env.mode === "drugs"}
+        DRUGS
+      {:else if $env.mode === "shinryou"}
+        SHINRYOU
+      {/if}
+    </div>
+    <div class="commands">
+      <a href="javascript:void(0)" on:click={() => doChangeMode("current")}
+        >現行</a
+      >
+      <a href="javascript:void(0)" on:click={() => doChangeMode("add")}>追加</a>
+      <a href="javascript:void(0)" on:click={() => doChangeMode("tenki")}
+        >転機</a
+      >
+      <a href="javascript:void(0)" on:click={() => doChangeMode("edit")}>編集</a
+      >
+      <a href="javascript:void(0)" on:click={() => doChangeMode("drugs")}
+        >薬剤</a
+      >
+      <a href="javascript:void(0)" on:click={() => doChangeMode("shinryou")}
+        >診療</a
+      >
+    </div>
+  </RightBox>
+{/if}
 
 <RightBox title="病名" display={!!env} dataCy="disease-box">
   <div class="workarea" bind:this={workarea} />

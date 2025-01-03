@@ -4,7 +4,6 @@
   import type { Writable } from "svelte/store";
   import type { DiseaseEnv } from "./disease-env";
 
-  // export let list: DiseaseData[];
   export let env: Writable<DiseaseEnv | undefined>;
   export let onSelect: (d: DiseaseData) => void = (_) => {};
 

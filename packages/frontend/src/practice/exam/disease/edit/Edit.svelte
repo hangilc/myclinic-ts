@@ -12,9 +12,6 @@
   import type { DiseaseEnv } from "../disease-env";
 
   export let env: Writable<DiseaseEnv | undefined>;
-  // export let diseases: DiseaseData[];
-  // export let examples: DiseaseExample[] = [];
-  // export let editTarget: DiseaseData | null = null;
   export let onDelete: (diseaseId: number) => void = (_) => {};
   export let onUpdate: (updated: DiseaseData) => void = (_) => {};
 

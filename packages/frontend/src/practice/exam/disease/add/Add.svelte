@@ -1,13 +1,9 @@
 <script lang="ts">
-  // import api from "@/lib/api";
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { dateParam } from "@/lib/date-param";
-  // import Popup from "@/lib/Popup.svelte";
   import { errorMessagesOf, type VResult } from "@/lib/validation";
-  // import type { Invalid } from "@/lib/validator";
   import {
     ByoumeiMaster,
-    // DiseaseData,
     DiseaseEnterData,
     DiseaseExample,
     diseaseFullName,
@@ -18,7 +14,6 @@
   import DatesPopup from "./DatesPopup.svelte";
   import type { DiseaseEnv } from "../disease-env";
   import type { Writable } from "svelte/store";
-  // import DatesPulldown from "./DatesPopup.svelte";
 
   export let env: Writable<DiseaseEnv | undefined>;
   export let onEnter: (data: DiseaseEnterData) => void = _ => {};
