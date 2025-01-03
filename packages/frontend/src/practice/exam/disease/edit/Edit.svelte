@@ -74,7 +74,8 @@
 
 <style>
   .list.select {
-    height: 10em;
+    height: fit-content;
+    max-height: 10em;
     overflow-y: auto;
     font-size: 13px;
     margin-top: 10px;

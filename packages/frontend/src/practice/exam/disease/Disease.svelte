@@ -10,10 +10,10 @@
   import type { Mode } from "./mode";
   import api from "@/lib/api";
   import { parseSqlDate } from "@/lib/util";
-  import type {
-    DiseaseData,
-    DiseaseEnterData,
-    ShuushokugoMaster,
+  import {
+    type DiseaseData,
+    type DiseaseEnterData,
+    type ShuushokugoMaster,
   } from "myclinic-model";
   import { extractDrugNames } from "./drugs-visit";
   import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
@@ -29,6 +29,7 @@
   } from "@/lib/shinryou-disease";
   import EditShinryouDiseaseDialog from "./EditShinryouDiseaseDialog.svelte";
   import { diseaseDeleted, diseaseEntered, diseaseUpdated } from "@/app-events";
+  import Shinryou from "./Shinryou.svelte";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -285,6 +286,18 @@
         clear = () => b.$destroy();
         break;
       }
+      case "shinryou": {
+        const b: Shinryou = new Shinryou({
+          target: workarea,
+          props: {
+            onChanged: async () => {
+              await checkShinryou();
+            }
+          }
+        });
+        clear = () => b.$destroy();
+        break;
+      }
       default: {
         break;
       }
@@ -511,6 +524,11 @@
       href="javascript:void(0)"
       on:click={() => doMode("drugs")}
       data-cy="edit-link">薬剤</a
+    >
+    <a
+      href="javascript:void(0)"
+      on:click={() => doMode("shinryou")}
+      data-cy="edit-link">診療</a
     >
   </div>
 </RightBox>

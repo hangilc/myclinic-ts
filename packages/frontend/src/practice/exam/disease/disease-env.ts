@@ -87,7 +87,6 @@ export class DiseaseEnv {
     const visitIds = await api.listVisitIdByDateIntervalAndPatient(today, today, patient.patientId);
     let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
     visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
-    // console.log("visits", visits);
     return new DiseaseEnv(patient, cur, examples, visits);
   }
 

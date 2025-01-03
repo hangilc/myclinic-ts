@@ -1,1 +1,1 @@
-export type Mode = "current" | "add" | "tenki" | "edit" | "drugs";
+export type Mode = "current" | "add" | "tenki" | "edit" | "drugs" | "shinryou";
