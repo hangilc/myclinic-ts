@@ -4,6 +4,11 @@ import type { Patient, VisitEx } from "myclinic-model";
 import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
 import { DateWrapper } from "myclinic-util";
 import type { Mode } from "./mode";
+import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
+import { cache } from "@/lib/cache";
+import { extractDrugNames } from "./drugs-visit";
+
+let drugsWithoutMatchingDiseaseIndex = 1;
 
 export class DiseaseEnv {
   patient: Patient;
@@ -14,6 +19,16 @@ export class DiseaseEnv {
   today: Date = new Date();
   visits: VisitEx[] = [];
   mode: Mode = "current";
+  drugDiseases: DrugDisease[] = [];
+  drugsWithoutMatchingDisease: {
+    id: number;
+    name: string;
+    fixes: {
+      pre: string[];
+      name: string;
+      post: string[];
+    }[];
+  }[] = [];
 
   static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
     api.listDiseaseExample
@@ -33,15 +48,15 @@ export class DiseaseEnv {
 
   addDisease(d: DiseaseData): void {
     this.currentList.push(d);
-    if( this.allList !== undefined ){
+    if (this.allList !== undefined) {
       this.allList.push(d);
     }
   }
 
   updateDisease(d: DiseaseData): void {
-    if( d.disease.isCurrentAt(this.today)) {
+    if (d.disease.isCurrentAt(this.today)) {
       const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-      if( i >= 0 ){
+      if (i >= 0) {
         this.currentList.splice(i, 1, d);
       } else {
         this.currentList.push(d);
@@ -49,13 +64,13 @@ export class DiseaseEnv {
       }
     } else {
       const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-      if( i >= 0 ){
+      if (i >= 0) {
         this.currentList.splice(i, 1);
-      }    
+      }
     }
-    if( this.allList !== undefined ){
+    if (this.allList !== undefined) {
       const i = this.allList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-      if( i >= 0 ){
+      if (i >= 0) {
         this.allList.splice(i, 1, d);
       }
     }
@@ -67,7 +82,7 @@ export class DiseaseEnv {
   }
 
   removeFromAllList(diseaseId: number): void {
-    if( this.allList !== undefined ){
+    if (this.allList !== undefined) {
       this.allList = this.allList.filter(d => d.disease.diseaseId !== diseaseId);
     }
   }
@@ -76,8 +91,31 @@ export class DiseaseEnv {
     this.currentList = this.currentList.filter(d => !diseaseIds.includes(d.disease.diseaseId));
   }
 
+  async checkDrugs() {
+    this.drugsWithoutMatchingDisease = [];
+    const texts = this.visits.flatMap((visit) => visit.texts) ?? [];
+    const drugNames: string[] = extractDrugNames(texts);
+    const diseaseNames: string[] =
+      this.currentList?.map((disease) => {
+        return disease.byoumeiMaster.name;
+      }) ?? [];
+    for (let drugName of drugNames) {
+      const m = hasMatchingDrugDisease(drugName, diseaseNames, this.drugDiseases);
+      if (m === true) {
+        continue;
+      } else {
+        this.drugsWithoutMatchingDisease.push({
+          id: drugsWithoutMatchingDiseaseIndex++,
+          name: drugName,
+          fixes: m,
+        });
+      }
+    }
+  }
+
+
   async fetchAllList() {
-    if( this.allList === undefined ){
+    if (this.allList === undefined) {
       this.allList = await api.listDiseaseEx(this.patient.patientId);
     }
   }
@@ -89,7 +127,9 @@ export class DiseaseEnv {
     const visitIds = await api.listVisitIdByDateIntervalAndPatient(today, today, patient.patientId);
     let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
     visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
-    return new DiseaseEnv(patient, cur, examples, visits);
+    const env = new DiseaseEnv(patient, cur, examples, visits);
+    env.drugDiseases = await cache.getDrugDiseases();
+    return env;
   }
 
 }

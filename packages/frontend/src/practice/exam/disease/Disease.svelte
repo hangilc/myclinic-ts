@@ -70,27 +70,12 @@
         shinryouWithoutMatchingDisease = [];
         $env = undefined;
       } else {
-        $env = await DiseaseEnv.create(p);
-        checkDrugs();
-        await checkShinryou();
-        doMode("current");
+        const e = await DiseaseEnv.create(p);
+        await e.checkDrugs();
+        e.mode = "current";
+        $env = e;
       }
     })
-    // diseaseEntered.subscribe(async (d) => {
-    //   if (d) {
-    //     update();
-    //   }
-    // }),
-    // diseaseUpdated.subscribe(async (d) => {
-    //   if (d) {
-    //     update();
-    //   }
-    // }),
-    // diseaseDeleted.subscribe(async (d) => {
-    //   if (d) {
-    //     update();
-    //   }
-    // })
   );
 
   async function update() {
@@ -201,7 +186,7 @@
     });
     await Promise.all(promises);
     env.update((orig) => {
-      if( orig ){
+      if (orig) {
         orig.removeFromCurrentList(result.map((d) => d[0]));
       }
       return orig;
@@ -488,12 +473,35 @@
 
   function doSelectDiseaseForShinryou(name: string) {}
 
-  function doChangeMode(mode: Mode) {
+  async function doChangeMode(mode: Mode) {
+    if (mode === "edit") {
+      await $env?.fetchAllList();
+    }
     env.update((orig) => {
       if (orig) {
         orig.mode = mode;
       }
       return orig;
+    });
+  }
+
+  async function doDeleteDisease(diseaseId: number) {
+    env.update((optEnv) => {
+      if (optEnv) {
+        optEnv.remove(diseaseId);
+        optEnv.editTarget = undefined;
+      }
+      return optEnv;
+    });
+  }
+
+  async function doUpdateDisease(entered: DiseaseData) {
+    env.update((optEnv) => {
+      if (optEnv) {
+        optEnv.updateDisease(entered);
+        optEnv.editTarget = undefined;
+      }
+      return optEnv;
     });
   }
 </script>
@@ -508,7 +516,7 @@
       {:else if $env.mode === "tenki"}
         <Tenki {env} onEnter={doTenkiEnter} />
       {:else if $env.mode === "edit"}
-        EDIT
+        <Edit {env} onDelete={doDeleteDisease} onUpdate={doUpdateDisease} />
       {:else if $env.mode === "drugs"}
         DRUGS
       {:else if $env.mode === "shinryou"}
