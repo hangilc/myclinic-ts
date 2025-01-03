@@ -20,10 +20,7 @@
   }
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
-    if (await addDiseaseByFix(fix)) {
-      
-      $env?.checkDrugs();
-    }
+    await addDiseaseByFix(fix);
   }
 
   async function addDiseaseByFix(fix: {
@@ -75,13 +72,21 @@
         at: DateWrapper.from(new Date()).asSqlDate(),
         onEnter: async (created: DrugDisease) => {
           let cur = await cache.getDrugDiseases();
-          cur = [...cur];
-          cur.push(created);
+          cur = [...cur, created];
           await api.setDrugDiseases(cur);
           cache.clearDrugDiseases();
-          const newDrugDiseases = await cache.getDrugDiseases();
+          let e = $env;
           if (created.fix) {
             await addDiseaseByFix(created.fix);
+            if( e ){
+              await e.updateCurrentList();
+              await e.updateAllList();
+            }
+          }
+          if( e ){
+            await e.checkDrugs();
+            await e.checkShinryou();
+            $env = e;
           }
         },
       },
@@ -96,8 +101,11 @@
         drugName,
         env,
         onSelected: async () => {
-          drugDiseases = await cache.getDrugDiseases();
-          checkDrugs();
+          let e = $env;
+          if( e ){
+            await e.checkDrugs();
+            $env = e;
+          }
         },
       },
     });
@@ -125,3 +133,22 @@
     {/each}
   </div>
 {/if}
+
+<style>
+  .without-matching-disease {
+    font-size: 12px;
+    color: red;
+    border: 1px solid red;
+    border-radius: 4px;
+    margin: 4px 0;
+    padding: 4px;
+  }
+
+  .without-matching-disease div + div {
+    margin-top: 4px;
+  }
+
+  .fix-name {
+    color: darkgreen;
+  }
+</style>

@@ -10,6 +10,7 @@
   } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
   import type { DiseaseEnv } from "../disease-env";
+  import { cache } from "@/lib/cache";
 
   export let env: Writable<DiseaseEnv | undefined>;
   export let onDelete: (diseaseId: number) => void = (_) => {};
@@ -36,6 +37,17 @@
   function doFormCancel() {
     formValues = undefined;
   }
+
+  function doFormUpdate(entered: DiseaseData) {
+    onUpdate(entered);
+    formValues = undefined;
+  }
+
+  function doFormDelete(diseaseId: number) {
+    onDelete(diseaseId);
+    formValues = undefined;
+  }
+
 </script>
 
 <div data-cy="disease-edit">
@@ -44,11 +56,10 @@
       <span data-cy="no-disease-selected">（病名未選択）</span>
     {:else}
       <EditForm
-        examples={$env?.examples ?? []}
         {formValues}
         onCancel={doFormCancel}
-        onEnter={onUpdate}
-        {onDelete}
+        onEnter={doFormUpdate}
+        onDelete={doFormDelete}
       />
     {/if}
   {/key}

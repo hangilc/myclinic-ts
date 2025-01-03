@@ -25,7 +25,6 @@
   import type { EditFormValues } from "./edit-form-values";
 
   export let formValues: EditFormValues;
-  export let examples: DiseaseExample[];
   export let onEnter: (entered: DiseaseData) => void;
   export let onDelete: (diseaseId: number) => void;
   export let onCancel: () => void;
@@ -176,7 +175,6 @@
     >
   </div>
   <DiseaseSearchForm
-    {examples}
     startDate={formValues.startDate ?? new Date()}
     onSelect={doSearchSelect}
   />

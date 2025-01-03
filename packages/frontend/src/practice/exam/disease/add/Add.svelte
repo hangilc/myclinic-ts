@@ -60,6 +60,8 @@
         startDate: dateParam(startDate),
         adjCodes: adjList.map((m) => m.shuushokugocode),
       };
+      byoumeiMaster = null;
+      adjList = [];
       onEnter(data);
     }
   }
@@ -129,7 +131,7 @@
     <a href="javascript:void(0)" on:click={doSusp}>の疑い</a>
     <a href="javascript:void(0)" on:click={doDelAdj}>修飾語削除</a>
   </div>
-  <DiseaseSearchForm examples={$env?.examples ?? []} {startDate} onSelect={onSearchSelect} />
+  <DiseaseSearchForm {startDate} onSelect={onSearchSelect} />
 </div>
 
 <style>

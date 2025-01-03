@@ -14,7 +14,6 @@
   import type { DiseaseEnv } from "./disease-env";
   import { incDay, lastDayOfMonth } from "myclinic-util";
 
-  // export let diseases: DiseaseData[];
   export let env: Writable<DiseaseEnv | undefined>;
   export let onEnter: (result: [number, string, string][]) => void;
   let selected: DiseaseData[] = [];

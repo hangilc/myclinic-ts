@@ -9,8 +9,8 @@
   } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import type { SearchResult } from "./search-result";
+  import { cache } from "@/lib/cache";
 
-  export let examples: DiseaseExample[];
   export let startDate: Date | undefined;
   export let onSelect: (
     result: ByoumeiMaster | ShuushokugoMaster | DiseaseExample
@@ -23,8 +23,18 @@
   let searchSelect: Writable<
     ByoumeiMaster | ShuushokugoMaster | DiseaseExample | null
   > = writable(null);
+  let examples: DiseaseExample[];
 
-  doExample();
+  init();
+
+  async function init() {
+    await loadExamples();
+    doExample();
+  }
+
+  async function loadExamples() {
+    examples = await cache.getDiseaseExamples();
+  }
 
   searchSelect.subscribe((r) => {
     if (r != null) {
