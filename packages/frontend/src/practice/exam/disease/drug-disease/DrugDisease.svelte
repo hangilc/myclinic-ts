@@ -21,6 +21,14 @@
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
     await addDiseaseByFix(fix);
+    const cur = $env;
+    if( cur ){
+      await cur.updateCurrentList();
+      await cur.updateAllList();
+      await cur.checkDrugs();
+      await cur.checkShinryou();
+      $env = cur;
+    }
   }
 
   async function addDiseaseByFix(fix: {

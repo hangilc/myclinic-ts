@@ -180,6 +180,26 @@
     }
   }
 
+  async function doCurrentSelect(d: DiseaseData) {
+    const e = $env;
+    if( e ){
+      await e.fetchAllList();
+      let target: DiseaseData | undefined = undefined;
+      for(let ele of e.allList ?? []){
+        if( ele.disease.diseaseId === d.disease.diseaseId ){
+          target = ele;
+          break;
+        }
+      }
+      if( !target ){
+        throw new Error("cannot find target");
+      }
+      e.editTarget = target;
+      e.mode = "edit";
+      $env = e;
+    }
+  }
+
   async function doAddDisease(data: DiseaseEnterData) {
     await api.enterDiseaseEx(data);
     await onDiseaseModified();
@@ -483,15 +503,18 @@
   function doSelectDiseaseForShinryou(name: string) {}
 
   async function doChangeMode(mode: Mode) {
-    if (mode === "edit") {
-      await $env?.fetchAllList();
-    }
-    env.update((orig) => {
-      if (orig) {
-        orig.mode = mode;
+    const e = $env;
+    if( e ){
+      const prev = e.mode;
+      if( prev === "edit" && mode !== "edit" ){
+        e.allList = [];
       }
-      return orig;
-    });
+      if (mode === "edit") {
+        await e.fetchAllList();
+      }
+      e.mode = mode;
+      $env = e;
+    }
   }
 
 </script>
@@ -500,7 +523,7 @@
   <RightBox title="病名" display={true}>
     <div style="margin-top:6px;">
       {#if $env.mode === "current"}
-        <Current {env} onSelect={(d) => {}} />
+        <Current {env} onSelect={doCurrentSelect} />
       {:else if $env.mode === "add"}
         <Add {env} onEnter={doAddDisease} />
       {:else if $env.mode === "tenki"}
