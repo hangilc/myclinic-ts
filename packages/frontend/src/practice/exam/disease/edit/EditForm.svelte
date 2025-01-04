@@ -6,10 +6,10 @@
   import {
     errorMessagesOf,
     isNotNull,
+    valid,
     validResult,
     type VResult,
   } from "@/lib/validation";
-  // import type { Invalid } from "@/lib/validator";
   import { validateDisease } from "@/lib/validators/disease-validator";
   import {
     ByoumeiMaster,
@@ -48,6 +48,9 @@
       throw new Error("uninitialized validator");
     }
     clearErrors();
+    if( formValues.endReason.label === "継続" ){
+      formValues.endDate = null;
+    }
     const r: VResult<Disease> = validateDisease({
       diseaseId: validResult(formValues.diseaseId),
       patientId: validResult(formValues.patientId),
@@ -57,7 +60,7 @@
         .validate(isNotNull())
         .map((m) => m.shoubyoumeicode),
       startDate: validateStartDate(),
-      endDate: validateEndDate(),
+      endDate: formValues.endReason.label === "継続" ? valid(null, []) : validateEndDate(),
       endReason: validResult(formValues.endReason).map((r) => r.code),
     });
     if (r.isValid) {

@@ -64,8 +64,9 @@
     {/if}
   {/key}
   <div class="list select" data-cy="disease-list">
-    {#each ($env?.allList ?? []) as data}
-      <SelectItem selected={diseaseDataSelected} {data}>
+    {#each ($env?.allList ?? []) as data (data.disease.diseaseId)}
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="item" on:click={() => $diseaseDataSelected = data}>
         <span
           class="disease-name"
           class:hasEnd={data.hasEndDate}
@@ -75,7 +76,7 @@
         <span data-cy="disease-aux" data-disease-id={data.disease.diseaseId}
           >({formatAux(data)})</span
         >
-      </SelectItem>
+      </div>
     {/each}
   </div>
 </div>
@@ -87,6 +88,11 @@
     overflow-y: auto;
     font-size: 13px;
     margin-top: 10px;
+  }
+
+  .item {
+    cursor: pointer;
+    user-select: none;
   }
 
   .disease-name {
