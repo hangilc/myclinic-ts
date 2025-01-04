@@ -500,6 +500,14 @@
     });
   }
 
+  async function doDrugsChanged() {
+    const e = $env;
+    if( e ){
+      await e.checkDrugs();
+      $env = e;
+    }
+  }
+
   function doSelectDiseaseForShinryou(name: string) {}
 
   async function doChangeMode(mode: Mode) {
@@ -531,7 +539,7 @@
       {:else if $env.mode === "edit"}
         <Edit {env} onDelete={doDeleteDisease} onUpdate={doUpdateDisease} />
       {:else if $env.mode === "drugs"}
-        DRUGS
+        <Drugs onChanged={doDrugsChanged}/>
       {:else if $env.mode === "shinryou"}
         SHINRYOU
       {/if}
