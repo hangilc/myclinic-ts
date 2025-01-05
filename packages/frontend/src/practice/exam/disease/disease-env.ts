@@ -1,25 +1,24 @@
 import api from "@/lib/api";
-import { CachedValue } from "@/lib/cached-value";
-import type { Patient, VisitEx } from "myclinic-model";
+import type { DiseaseEnterData, Patient, VisitEx } from "myclinic-model";
 import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
-import { DateWrapper } from "myclinic-util";
 import type { Mode } from "./mode";
 import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
 import { cache } from "@/lib/cache";
 import { extractDrugNames } from "./drugs-visit";
+import { hasMatchingShinryouDiseases, type ShinryouDisease, type Fix as ShinryouFix } from "@/lib/shinryou-disease";
+import { enterDiseaseByNames } from "./enter-disease-by-names";
 
 let drugsWithoutMatchingDiseaseIndex = 1;
+let shinryouWithoutMatchingDiseaseIndex = 1;
 
 export class DiseaseEnv {
   patient: Patient;
   currentList: DiseaseData[] = [];
   allList: DiseaseData[] | undefined = undefined;
-  // examples: DiseaseExample[] = [];
   editTarget: DiseaseData | undefined = undefined;
-  // today: Date = new Date();
-  visits: VisitEx[] = [];
+  checkingVisits: VisitEx[] = [];
+  checkingDate: string | undefined;
   mode: Mode = "current";
-  // drugDiseases: DrugDisease[] = [];
   drugsWithoutMatchingDisease: {
     id: number;
     name: string;
@@ -29,10 +28,11 @@ export class DiseaseEnv {
       post: string[];
     }[];
   }[] = [];
-
-  // static examplesCache: CachedValue<DiseaseExample[]> = new CachedValue(
-  //   api.listDiseaseExample
-  // );
+  shinryouWithoutMatchingDisease: {
+    id: number;
+    name: string;
+    fixes: ShinryouFix[];
+  }[] = [];
 
   constructor(
     patient: Patient
@@ -60,7 +60,7 @@ export class DiseaseEnv {
 
   async checkDrugs() {
     this.drugsWithoutMatchingDisease = [];
-    const texts = this.visits.flatMap((visit) => visit.texts) ?? [];
+    const texts = this.checkingVisits.flatMap((visit) => visit.texts) ?? [];
     const drugNames: string[] = extractDrugNames(texts);
     const diseaseNames: string[] =
       this.currentList.map((disease) => {
@@ -81,64 +81,143 @@ export class DiseaseEnv {
   }
 
   async checkShinryou() {
-
+    this.shinryouWithoutMatchingDisease = [];
+    if (this.checkingDate) {
+      const diseaseNames: string[] =
+        this.currentList.map((disease) => {
+          return disease.byoumeiMaster.name;
+        }) ?? [];
+      const shinryouMap: Record<
+        string,
+        {
+          fixes: {
+            label: string;
+            exec: () => Promise<void>;
+          }[];
+        }
+      > = {};
+      this.checkingVisits.forEach((visit) => {
+        visit.shinryouList.forEach((shinryou) => {
+          const shinryouName = shinryou.master.name;
+          shinryouMap[shinryouName] = { fixes: [] };
+        });
+      });
+      const shinryouNames = Object.keys(shinryouMap);
+      const shinryouDiseases: ShinryouDisease[] =
+        await cache.getShinryouDiseases();
+      const ctx = this.createShinryouContext(
+        this.patient.patientId ?? 0,
+        this.checkingDate,
+      );
+      for (let shinryouName of shinryouNames) {
+        const m = hasMatchingShinryouDiseases(
+          shinryouName,
+          diseaseNames,
+          shinryouDiseases,
+          ctx
+        );
+        if (m === true) {
+          // nop;
+        } else {
+          const fixes = m;
+          this.shinryouWithoutMatchingDisease.push({
+            id: shinryouWithoutMatchingDiseaseIndex++,
+            name: shinryouName,
+            fixes,
+          });
+        }
+      }
+    }
   }
 
-  // addDisease(d: DiseaseData): void {
-  //   this.currentList.push(d);
-  //   if (this.allList !== undefined) {
-  //     this.allList.push(d);
-  //   }
-  // }
+  createShinryouContext(
+    patientId: number,
+    at: string
+  ): {
+    enterDisease: (diseaseName: string, adjNames: string[]) => Promise<void>;
+  } {
+    async function enterDisease(
+      diseaseName: string,
+      adjNames: string[]
+    ): Promise<void> {
+      const result = await enterDiseaseByNames(patientId, at, diseaseName, adjNames);
+      if( typeof result === "string" ){
+        alert(result);
+        throw new Error(result);
+      }
+    }
+    return { enterDisease };
+  }
 
-  // updateDisease(d: DiseaseData): void {
-  //   if (d.disease.isCurrentAt(this.today)) {
-  //     const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-  //     if (i >= 0) {
-  //       this.currentList.splice(i, 1, d);
-  //     } else {
-  //       this.currentList.push(d);
-  //       this.currentList.sort((a, b) => a.disease.diseaseId - b.disease.diseaseId)
-  //     }
-  //   } else {
-  //     const i = this.currentList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-  //     if (i >= 0) {
-  //       this.currentList.splice(i, 1);
-  //     }
-  //   }
-  //   if (this.allList !== undefined) {
-  //     const i = this.allList.findIndex(e => e.disease.diseaseId === d.disease.diseaseId);
-  //     if (i >= 0) {
-  //       this.allList.splice(i, 1, d);
-  //     }
-  //   }
-  // }
-
-  // remove(diseaseId: number): void {
-  //   this.removeFromAllList(diseaseId);
-  //   this.removeFromCurrentList([diseaseId]);
-  // }
-
-  // removeFromAllList(diseaseId: number): void {
-  //   if (this.allList !== undefined) {
-  //     this.allList = this.allList.filter(d => d.disease.diseaseId !== diseaseId);
-  //   }
-  // }
-
-  // removeFromCurrentList(diseaseIds: number[]): void {
-  //   this.currentList = this.currentList.filter(d => !diseaseIds.includes(d.disease.diseaseId));
-  // }
-
-
-  static async create(patient: Patient): Promise<DiseaseEnv> {
+  static async create(patient: Patient, checkingDate?: string): Promise<DiseaseEnv> {
     const env = new DiseaseEnv(patient);
     await env.updateCurrentList();
-    const today = DateWrapper.from(new Date()).asSqlDate();
-    const visitIds = await api.listVisitIdByDateIntervalAndPatient(today, today, patient.patientId);
-    let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
-    env.visits = visits.filter(visit => visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined);
+    const checkingVisits = await loadCheckingVisits(patient.patientId, checkingDate);
+    if (checkingVisits) {
+      env.checkingDate = checkingVisits.visitedAt;
+      env.checkingVisits = checkingVisits.visits;
+    } else {
+      env.checkingDate = undefined;
+      env.checkingVisits = [];
+    }
     await env.checkDrugs();
+    await env.checkShinryou();
     return env;
   }
+}
 
+async function loadCheckingVisits(patientId: number, checkingDate?: string):
+  Promise<{ visitedAt: string, visits: VisitEx[] } | undefined> {
+  function hasHoken(visit: VisitEx): boolean {
+    return visit.hoken.shahokokuho != undefined || visit.hoken.koukikourei != undefined
+  }
+  async function loadVisitsAt(at: string): Promise<VisitEx[]> {
+    const visitIds = await api.listVisitIdByDateIntervalAndPatient(at, at, patientId);
+    let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
+    visits = visits.filter(hasHoken);
+    return visits;
+  }
+  async function loadRecentVisits(n: number): Promise<VisitEx[]> {
+    const visitIds = await api.listVisitIdByPatientReverse(patientId, 0, n);
+    let visits = await Promise.all(visitIds.map(visitId => api.getVisitEx(visitId)));
+    return visits;
+  }
+  if (checkingDate) {
+    let visits = await loadVisitsAt(checkingDate);
+    if (visits.length > 0) {
+      return {
+        visitedAt: checkingDate,
+        visits,
+      }
+    } else {
+      return undefined;
+    }
+  } else {
+    let visits = await loadRecentVisits(6);
+    if (visits.length === 0) {
+      return undefined;
+    } else {
+      const first = visits[0];
+      const visitedAt = first.visitedAt.substring(0, 10);
+      let vs: VisitEx[] = [first];
+      for (let i = 1; i < visits.length; i++) {
+        const v = visits[i];
+        const at = v.visitedAt.substring(0, 10);
+        if (visitedAt === at) {
+          vs.push(v);
+        } else {
+          break;
+        }
+      }
+      vs = vs.filter(hasHoken);
+      if (vs.length > 0) {
+        return {
+          visitedAt,
+          visits: vs
+        }
+      } else {
+        return undefined;
+      }
+    }
+  }
 }

@@ -50,9 +50,6 @@
   function doByoumeiSelect(name: string) {
     fixName = name;
     updateFixFullName();
-    // if (diseaseName === "") {
-    //   diseaseName = name;
-    // }
     searchText = "";
     byoumeiResult = [];
   }

@@ -8,6 +8,7 @@
   import { DateWrapper } from "myclinic-util";
   import type { DrugDisease } from "@/lib/drug-disease";
   import { cache } from "@/lib/cache";
+  import { enterDiseaseByNames } from "../enter-disease-by-names";
 
   export let env: Writable<DiseaseEnv | undefined>;
 
@@ -20,13 +21,15 @@
   }
 
   async function doFix(fix: { pre: string[]; name: string; post: string[] }) {
-    await addDiseaseByFix(fix);
+    const diseaseEntered = await addDiseaseByFix(fix);
     const cur = $env;
-    if( cur ){
-      await cur.updateCurrentList();
-      await cur.updateAllList();
+    if (cur) {
       await cur.checkDrugs();
-      await cur.checkShinryou();
+      if (diseaseEntered) {
+        await cur.updateCurrentList();
+        await cur.updateAllList();
+        await cur.checkShinryou();
+      }
       $env = cur;
     }
   }
@@ -36,32 +39,19 @@
     name: string;
     post: string[];
   }): Promise<boolean> {
-    const at = $env?.visits[0].visitedAt.substring(0, 10);
+    const { pre, name, post } = fix;
+    const curEnv = $env;
+    const at = curEnv?.checkingDate;
     const patientId = $env?.patient.patientId;
-    if (at && patientId) {
-      const adjList: ShuushokugoMaster[] = [];
-      [...fix.pre, ...fix.post].forEach(async (name) => {
-        const m = await api.resolveShuushokugoMasterByName(name, at);
-        if (!m) {
-          alert(`invalid name: ${name}`);
-          return;
-        } else {
-          adjList.push(m);
-        }
-      });
-      const disease = await api.resolveByoumeiMasterByName(fix.name, at);
-      if (!disease) {
-        alert(`invalid name: ${name}`);
+    if (curEnv && at && patientId) {
+      const entered = await enterDiseaseByNames(patientId, at, name, [...pre, ...post]);
+      if( typeof entered === "string" ){
+        alert(entered);
+        console.error(entered);
         return false;
+      } else {
+        return true;
       }
-      const data: DiseaseEnterData = {
-        patientId: patientId,
-        byoumeicode: disease.shoubyoumeicode,
-        startDate: at,
-        adjCodes: adjList.map((m) => m.shuushokugocode),
-      };
-      await api.enterDiseaseEx(data);
-      return true;
     } else {
       return false;
     }
@@ -86,12 +76,12 @@
           let e = $env;
           if (created.fix) {
             await addDiseaseByFix(created.fix);
-            if( e ){
+            if (e) {
               await e.updateCurrentList();
               await e.updateAllList();
             }
           }
-          if( e ){
+          if (e) {
             await e.checkDrugs();
             await e.checkShinryou();
             $env = e;
@@ -110,7 +100,7 @@
         env,
         onSelected: async () => {
           let e = $env;
-          if( e ){
+          if (e) {
             await e.checkDrugs();
             $env = e;
           }
