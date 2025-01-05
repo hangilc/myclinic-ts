@@ -10,8 +10,15 @@
   import Disease from "./disease/Disease.svelte";
   import Appointments from "./appointsments/Appointments.svelte";
   import Epoch from "./Epoch.svelte";
+  import { listBunshoToOwn, queryInstituteEnv } from "@/lib/bunsho/bunsho-api";
 
   export let isVisible = false;
+
+  async function testBunsho() {
+    // const result = await queryInstituteEnv("1311535798");
+    const result = await listBunshoToOwn("20240101", "20250105");
+    console.log("result", result);
+  }
 </script>
 
 <div style:display={isVisible ? "" : "none"} class="top">
@@ -31,6 +38,7 @@
       <RecordsWrapper />
       <Nav page={$navPage} total={$navTotal} {gotoPage} />
     {/if}
+    <button on:click={testBunsho}>文書テスト</button>
   </div>
   <div class="exam-right">
     <Disease />
