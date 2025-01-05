@@ -138,8 +138,8 @@
         <Edit {env} onDelete={doDeleteDisease} onUpdate={doUpdateDisease} />
       {:else if $env.mode === "drugs"}
         <Drugs onChanged={doDrugsChanged}/>
-      {:else if $env.mode === "shinryou"}
-        <Shinryou onChanged={doShinryouChanged} />
+      {:else if $env.mode === "shinryou" && $env.checkingDate}
+        <Shinryou onChanged={doShinryouChanged} at={$env.checkingDate}/>
       {/if}
     </div>
     <DrugDiseaseComp {env} />

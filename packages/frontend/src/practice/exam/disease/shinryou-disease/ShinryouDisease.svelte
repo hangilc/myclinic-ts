@@ -22,18 +22,11 @@
           destroy: () => d.$destroy(),
           title: "診療病名の追加",
           shinryouName: name,
+          at,
           onEnter: async (item) => {
             let cur = await cache.getShinryouDiseases();
             cur = [...cur, item];
             await cache.setShinryouDiseases(cur);
-            const ctx = curEnv.createShinryouContext(patientId, at);
-            const fix = createFix(item, ctx);
-            if (fix) {
-              await fix.exec();
-              await curEnv.updateCurrentList();
-              await curEnv.updateAllList();
-              await curEnv.checkDrugs();
-            }
             await curEnv.checkShinryou();
             $env = curEnv;
           },
@@ -54,7 +47,6 @@
     }
   }
 
-  function doSelectDiseaseForShinryou(name: string) {}
 </script>
 
 {#if $env}
@@ -71,9 +63,6 @@
         <div>
           <button on:click={() => doAddDiseaseForShinryou(s.name)}
             >病名追加</button
-          >
-          <button on:click={() => doSelectDiseaseForShinryou(s.name)}
-            >病名選択</button
           >
         </div>
       </div>
