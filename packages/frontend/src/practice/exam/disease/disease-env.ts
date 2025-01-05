@@ -58,12 +58,13 @@ export class DiseaseEnv {
     }
   }
 
+
   async checkDrugs() {
     this.drugsWithoutMatchingDisease = [];
     const texts = this.checkingVisits.flatMap((visit) => visit.texts) ?? [];
     const drugNames: string[] = extractDrugNames(texts);
     const diseaseNames: string[] =
-      this.currentList.map((disease) => {
+      this.currentList.filter(hasNoSusp).map((disease) => {
         return disease.byoumeiMaster.name;
       });
     for (let drugName of drugNames) {
@@ -220,4 +221,14 @@ async function loadCheckingVisits(patientId: number, checkingDate?: string):
       }
     }
   }
+}
+
+function hasNoSusp(disease: DiseaseData): boolean {
+  for(let adj of disease.adjList){
+    const [_, master] = adj;
+    if( master.name === "の疑い" ){
+      return false;
+    }
+  }
+  return true;
 }
