@@ -61,8 +61,12 @@
           });
           await api.enterText(text);
         },
-        onRegistered: (shohou: PrescInfoData, prescriptionId: string) => {
-          
+        onRegistered: async (shohou: PrescInfoData, prescriptionId: string) => {
+          const text = new m.Text(0, visit.visitId, "");
+          TextMemoWrapper.setTextMemo(text, {
+            kind: "shohou", shohou, prescriptionId: prescriptionId
+          });
+          await api.enterText(text);
         }
       }
     })
