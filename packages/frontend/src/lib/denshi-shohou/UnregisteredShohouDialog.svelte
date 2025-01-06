@@ -277,7 +277,7 @@
     const drugs: Shohou = {
       groups: [],
       shohouComments: [],
-      bikou: [],
+      bikou: shohou.備考レコード?.map(bikou => bikou.備考) ?? [],
       kigen: shohou.使用期限年月日 ? DateWrapper.from(shohou.使用期限年月日).asSqlDate() : undefined,
     };
     const data: Shohousen2024Data = {
@@ -315,7 +315,6 @@
         title: "処方箋印刷",
       },
     });
-    destroy();
   }
 </script>
 
