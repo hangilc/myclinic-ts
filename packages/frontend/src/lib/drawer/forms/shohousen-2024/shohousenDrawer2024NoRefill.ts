@@ -634,7 +634,7 @@ function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Ren
     const cb = ColumnBuilder.fromOffsetExtent(issueDateLimit);
     const [label, body, append] = cb.splitAt(25, 48);
     con.frameRight(label);
-    con.addAligned(stackedTexts(ctx, ["処方箋の", "試用期間"], { halign: "center" }), label, "center", "center");
+    con.addAligned(stackedTexts(ctx, ["処方箋の", "使用期間"], { halign: "center" }), label, "center", "center");
     const dateItem = nenMonthDateRenderer(ctx, optionalDateWrapper(env.kigen), { gengou: "令和", gap: 0.3 });
     con.addAligned(dateItem, body, "right", "center");
     const texts = stackedTexts(ctx, [

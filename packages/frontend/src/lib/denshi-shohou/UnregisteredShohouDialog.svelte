@@ -36,6 +36,7 @@
   import type { Shohousen2024Data } from "../drawer/forms/shohousen-2024/shohousenData2024";
   import { drawShohousen2024NoRefill } from "../drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import type { Shohou } from "../parse-shohou";
 
   export let destroy: () => void;
   export let title: string;
@@ -273,6 +274,12 @@
     //   }
     // }
     // let koufuDate: string = dateToSqlDate(new Date());
+    const drugs: Shohou = {
+      groups: [],
+      shohouComments: [],
+      bikou: [],
+      kigen: shohou.使用期限年月日 ? DateWrapper.from(shohou.使用期限年月日).asSqlDate() : undefined,
+    };
     const data: Shohousen2024Data = {
       clinicAddress: shohou.医療機関所在地,
       clinicName: shohou.医療機関名称,
@@ -289,11 +296,11 @@
       futansha2: shohou.第二公費レコード?.公費負担者番号,
       jukyuusha2: shohou.第二公費レコード?.公費受給者番号,
       shimei: shohou.患者漢字氏名,
-      // birthdate,
-      // sex,
-      // hokenKubun,
-      // koufuDate,
-      // drugs: shohou,
+      birthdate: DateWrapper.from(shohou.患者生年月日).asSqlDate(),
+      sex: shohou.患者性別 === "男" ? "M" : "F",
+      hokenKubun: shohou.被保険者被扶養者 === "被保険者" ? "hihokensha" : "hifuyousha",
+      koufuDate: DateWrapper.from(shohou.処方箋交付年月日).asSqlDate(),
+      drugs,
     };
     const pages = drawShohousen2024NoRefill(data);
     const d: DrawerDialog = new DrawerDialog({
