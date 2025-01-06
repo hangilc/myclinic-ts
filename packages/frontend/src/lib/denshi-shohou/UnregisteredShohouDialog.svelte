@@ -32,6 +32,10 @@
   import KigenForm from "./KigenForm.svelte";
   import InfoForm from "./InfoForm.svelte";
   import EditGroupDialog from "./EditGroupDialog.svelte";
+  import { DateWrapper } from "myclinic-util";
+  import type { Shohousen2024Data } from "../drawer/forms/shohousen-2024/shohousenData2024";
+  import { drawShohousen2024NoRefill } from "../drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 
   export let destroy: () => void;
   export let title: string;
@@ -214,6 +218,98 @@
       },
     });
   }
+
+  function isTodaysShohousen(shohou: PrescInfoData): boolean {
+    const date = DateWrapper.fromOnshiDate(shohou.処方箋交付年月日);
+    const today = DateWrapper.from(new Date());
+    return date.asSqlDate() === today.asSqlDate();
+  }
+
+  function doPrint() {
+    if (!isTodaysShohousen(shohou)) {
+      if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
+        return;
+      }
+    }
+    // let hihokenshaKigou = "";
+    // let hihokenshaBangou = "";
+    // let edaban = "";
+    // let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
+    // if (hoken.shahokokuho) {
+    //   const shahokokuho = hoken.shahokokuho;
+    //   hokenshaBangou = formatHokenshaBangou(shahokokuho.hokenshaBangou);
+    //   hihokenshaKigou = shahokokuho.hihokenshaKigou;
+    //   hihokenshaBangou = shahokokuho.hihokenshaBangou;
+    //   edaban = shahokokuho.edaban;
+    //   hokenKubun = shahokokuho.honninStore !== 0 ? "hihokensha" : "hifuyousha";
+    // } else if (hoken.koukikourei) {
+    //   hokenshaBangou = hoken.koukikourei.hokenshaBangou;
+    //   hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
+    // }
+    // let futansha: string | undefined = undefined;
+    // let jukyuusha: string | undefined = undefined;
+    // if (hoken.kouhiList.length >= 1) {
+    //   const kouhi = hoken.kouhiList[0];
+    //   futansha = kouhi.futansha.toString();
+    //   jukyuusha = kouhi.jukyuusha.toString();
+    // }
+    // let futansha2: string | undefined = undefined;
+    // let jukyuusha2: string | undefined = undefined;
+    // if (hoken.kouhiList.length >= 2) {
+    //   const kouhi = hoken.kouhiList[1];
+    //   futansha2 = kouhi.futansha.toString();
+    //   jukyuusha2 = kouhi.jukyuusha.toString();
+    // }
+    // let shimei: string | undefined = undefined;
+    // let birthdate: string | undefined = undefined;
+    // let sex: "M" | "F" | undefined = undefined;
+    // {
+    //   const visit = await api.getVisit(text.visitId);
+    //   const patient = await api.getPatient(visit.patientId);
+    //   shimei = `${patient.lastName}${patient.firstName}`;
+    //   birthdate = patient.birthday;
+    //   if (patient.sex === "M" || patient.sex === "F") {
+    //     sex = patient.sex;
+    //   }
+    // }
+    // let koufuDate: string = dateToSqlDate(new Date());
+    const data: Shohousen2024Data = {
+      clinicAddress: shohou.医療機関所在地,
+      clinicName: shohou.医療機関名称,
+      clinicPhone: `電話 ${shohou.医療機関電話番号}`,
+      doctorName: shohou.医師漢字氏名,
+      clinicTodoufuken: shohou.医療機関都道府県コード,
+      clinicKikancode: shohou.医療機関コード,
+      hokenshaBangou: shohou.保険者番号,
+      hihokenshaKigou: shohou.被保険者証記号,
+      hihokenshaBangou: shohou.被保険者証番号,
+      edaban: shohou.被保険者証枝番,
+      futansha: shohou.第一公費レコード?.公費負担者番号,
+      jukyuusha: shohou.第一公費レコード?.公費受給者番号,
+      futansha2: shohou.第二公費レコード?.公費負担者番号,
+      jukyuusha2: shohou.第二公費レコード?.公費受給者番号,
+      shimei: shohou.患者漢字氏名,
+      // birthdate,
+      // sex,
+      // hokenKubun,
+      // koufuDate,
+      // drugs: shohou,
+    };
+    const pages = drawShohousen2024NoRefill(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
+    destroy();
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -262,6 +358,7 @@
       <button on:click={doRegister}>登録</button>
     {/if}
     <button on:click={doSave}>保存</button>
+    <button on:click={doPrint}>印刷</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>
