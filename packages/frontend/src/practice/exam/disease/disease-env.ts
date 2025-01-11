@@ -67,6 +67,7 @@ export class DiseaseEnv {
       this.currentList.filter(hasNoSusp).map((disease) => {
         return disease.byoumeiMaster.name;
       });
+    console.log("diseaseNames", diseaseNames);
     for (let drugName of drugNames) {
       const m = hasMatchingDrugDisease(drugName, diseaseNames, await cache.getDrugDiseases());
       if (m === true) {
