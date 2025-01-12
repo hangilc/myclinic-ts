@@ -711,7 +711,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Rendere
       const [left, right] = ColumnBuilder.fromOffsetExtent(label).split(cb.fixed(21), cb.expand(), cb.fixed(2));
       con.addAligned(textItem(ctx, "保険医署名"), left, "center", "center");
       const texts = stackedTexts(ctx, [
-        "「変更不可」蘭に「レ」又は「×」を記載",
+        "「変更不可」欄に「✓」又は「×」を記載",
         "した場合は、署名又は記名・押印すること。"
       ], { halign: "left", font: "f2.3" });
       const bracket = brackettedItem(texts);
@@ -825,11 +825,12 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   {
     const texts = stackedTexts(ctx, [
       "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）",
-      "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記",
+      "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「✓」又は「×」を記",
       "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先",
-      "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。",
+      "発医薬品を処方した場合には、「患者希望」欄に「✓」又は「×」を記載すること。",
     ], { font: "f2.3" });
-    const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.2), fixed(texts.extent.height), skip(0.2), fixed(0));
+    // const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.2), fixed(texts.extent.height), skip(0.2), fixed(0));
+    const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.4), fixed(texts.extent.height), skip(0.4), fixed(0));
     const notice = brackettedItem(texts);
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
