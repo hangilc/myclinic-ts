@@ -43,7 +43,10 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
   const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
-  const pages: { ctx: DrawerContext, renderer: Renderer, lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void }[] = [];
+  const pages: {
+    ctx: DrawerContext, renderer: Renderer,
+    lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void
+  }[] = [];
   let iter = 0;
   do {
     const con = new Container();
@@ -634,7 +637,7 @@ function koufuDateRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Ren
     const cb = ColumnBuilder.fromOffsetExtent(issueDateLimit);
     const [label, body, append] = cb.splitAt(25, 48);
     con.frameRight(label);
-    con.addAligned(stackedTexts(ctx, ["処方箋の", "試用期間"], { halign: "center" }), label, "center", "center");
+    con.addAligned(stackedTexts(ctx, ["処方箋の", "使用期間"], { halign: "center" }), label, "center", "center");
     const dateItem = nenMonthDateRenderer(ctx, optionalDateWrapper(env.kigen), { gengou: "令和", gap: 0.3 });
     con.addAligned(dateItem, body, "right", "center");
     const texts = stackedTexts(ctx, [
@@ -708,7 +711,7 @@ function bikouRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Rendere
       const [left, right] = ColumnBuilder.fromOffsetExtent(label).split(cb.fixed(21), cb.expand(), cb.fixed(2));
       con.addAligned(textItem(ctx, "保険医署名"), left, "center", "center");
       const texts = stackedTexts(ctx, [
-        "「変更不可」蘭に「レ」又は「×」を記載",
+        "「変更不可」欄に「✓」又は「×」を記載",
         "した場合は、署名又は記名・押印すること。"
       ], { halign: "left", font: "f2.3" });
       const bracket = brackettedItem(texts);
@@ -822,11 +825,12 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   {
     const texts = stackedTexts(ctx, [
       "個々の処方薬について、医療上の必要性があるため、後発医薬品（ジェネリック医薬品）",
-      "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「レ」又は「×」を記",
+      "への変更に差し支えがあると判断した場合には、「変更不可」欄に 「✓」又は「×」を記",
       "載し、「保険医署名」 欄に署名又は記名・押印すること。また、患者の希望を踏まえ、先",
-      "発医薬品を処方した場合には、「患者希望」欄に「レ」又は「×」を記載すること。",
+      "発医薬品を処方した場合には、「患者希望」欄に「✓」又は「×」を記載すること。",
     ], { font: "f2.3" });
-    const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.2), fixed(texts.extent.height), skip(0.2), fixed(0));
+    // const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.2), fixed(texts.extent.height), skip(0.2), fixed(0));
+    const [upper, lower] = RowBuilder.fromOffsetExtent(body).split(skip(0.4), fixed(texts.extent.height), skip(0.4), fixed(0));
     const notice = brackettedItem(texts);
     con.addAligned(notice, upper, "center", "center");
     yoffset = lower.offset.dy;
@@ -903,17 +907,25 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
       for (let nameItem of nameItems) {
         drugCol.add(nameItem);
       }
+      const commItems: Item[] = [];
+      drug.drugComments.forEach(comm => {
+        const items = breakToTextItems(ctx, comm, drugCol.width, { font, color: black });
+        commItems.push(...items);
+      });
+      for (let commItem of commItems) {
+        drugCol.add(commItem);
+      }
       if (senpatsu === "kanjakibou") {
-        const item = textItem(ctx, "レ", { font, color: black });
+        const item = textItem(ctx, "✓", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         kanjakibouCol.add(aligned);
       } else if (senpatsu === "henkoufuka") {
-        const item = textItem(ctx, "レ", { font, color: black });
+        const item = textItem(ctx, "✓", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         henkoufukaCol.add(aligned);
       }
     }
-    const lines = [group.usage, ...group.groupComments];
+    const lines = [group.usage, group.groupComments.join("")];
     lines.forEach(line => {
       const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
       items.forEach(item => drugCol.add(item));

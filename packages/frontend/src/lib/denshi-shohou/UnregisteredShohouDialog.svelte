@@ -15,11 +15,14 @@
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
   import {
     createPrescInfo,
+    PrescInfoWrapper,
+    薬品情報Wrapper,
     type PrescInfoData,
     type RP剤情報,
     type 備考レコード,
     type 公費レコード,
     type 提供情報レコード,
+    type 薬品情報,
   } from "./presc-info";
   import {
     checkShohouResult,
@@ -32,6 +35,12 @@
   import KigenForm from "./KigenForm.svelte";
   import InfoForm from "./InfoForm.svelte";
   import EditGroupDialog from "./EditGroupDialog.svelte";
+  import { DateWrapper } from "myclinic-util";
+  import type { Shohousen2024Data } from "../drawer/forms/shohousen-2024/shohousenData2024";
+  import { drawShohousen2024NoRefill } from "../drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import type { DrugGroup, Senpatsu, Shohou, Usage } from "../parse-shohou";
+  import type { Drug } from "@/lib/parse-shohou";
 
   export let destroy: () => void;
   export let title: string;
@@ -101,7 +110,6 @@
       return;
     }
     const prescInfo = createPrescInfo(shohou);
-    console.log("prescInfo", prescInfo);
     const signed = await sign_presc(prescInfo);
     const kikancode = await cache.getShohouKikancode();
     let result = await registerPresc(signed, kikancode, "1");
@@ -214,6 +222,249 @@
       },
     });
   }
+
+  function isTodaysShohousen(shohou: PrescInfoData): boolean {
+    const date = DateWrapper.fromOnshiDate(shohou.処方箋交付年月日);
+    const today = DateWrapper.from(new Date());
+    return date.asSqlDate() === today.asSqlDate();
+  }
+
+  function doPrint() {
+    if (!isTodaysShohousen(shohou)) {
+      if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
+        return;
+      }
+    }
+    const wrapper = new PrescInfoWrapper(shohou);
+    let bikou: string[] = shohou.備考レコード?.map((bikou) => bikou.備考) ?? [];
+    const joho_info =
+      shohou.提供情報レコード?.提供診療情報レコード?.map((info) => {
+        if (info.薬品名称) {
+          return `（${info.薬品名称}）${info.コメント}`;
+        } else {
+          return info.コメント;
+        }
+      }) ?? [];
+    const joho_kensa =
+      shohou.提供情報レコード?.検査値データ等レコード?.map(
+        (joho) => joho.検査値データ等
+      ) ?? [];
+    bikou = [...bikou, ...joho_info, ...joho_kensa];
+    const kouhiCount = wrapper.kouhiCount();
+    const hasMixedKouhi = wrapper.hasMixedKouhi();
+    let groups: DrugGroup[] = shohou.RP剤情報グループ.map((g) =>
+      renderGroup(g, kouhiCount, hasMixedKouhi)
+    );
+    const drugs: Shohou = {
+      groups,
+      shohouComments: [],
+      bikou,
+      kigen: shohou.使用期限年月日
+        ? DateWrapper.from(shohou.使用期限年月日).asSqlDate()
+        : undefined,
+    };
+    const data: Shohousen2024Data = {
+      clinicAddress: shohou.医療機関所在地,
+      clinicName: shohou.医療機関名称,
+      clinicPhone: `電話 ${shohou.医療機関電話番号}`,
+      doctorName: shohou.医師漢字氏名,
+      clinicTodoufuken: shohou.医療機関都道府県コード,
+      clinicKikancode: shohou.医療機関コード,
+      hokenshaBangou: shohou.保険者番号,
+      hihokenshaKigou: shohou.被保険者証記号,
+      hihokenshaBangou: shohou.被保険者証番号,
+      edaban: shohou.被保険者証枝番,
+      futansha: shohou.第一公費レコード?.公費負担者番号,
+      jukyuusha: shohou.第一公費レコード?.公費受給者番号,
+      futansha2: shohou.第二公費レコード?.公費負担者番号,
+      jukyuusha2: shohou.第二公費レコード?.公費受給者番号,
+      shimei: shohou.患者漢字氏名,
+      birthdate: DateWrapper.from(shohou.患者生年月日).asSqlDate(),
+      sex: shohou.患者性別 === "男" ? "M" : "F",
+      hokenKubun:
+        shohou.被保険者被扶養者 === "被保険者" ? "hihokensha" : "hifuyousha",
+      koufuDate: DateWrapper.from(shohou.処方箋交付年月日).asSqlDate(),
+      drugs,
+    };
+    const pages = drawShohousen2024NoRefill(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
+  }
+
+  function renderGroup(
+    rp: RP剤情報,
+    nkouhi: number,
+    hasMixedKouhi: boolean
+  ): DrugGroup {
+    let drugs: Drug[] = rp.薬品情報グループ.map((drug) => {
+      return {
+        name: drug.薬品レコード.薬品名称,
+        amount: toZenkaku(drug.薬品レコード.分量),
+        unit: toZenkaku(drug.薬品レコード.単位名) + unevenRep(drug),
+        senpatsu: resolveSenpatsu(drug),
+        drugComments: resolveDrugComments(drug, nkouhi, hasMixedKouhi),
+      };
+    });
+    let usage: Usage;
+    switch (rp.剤形レコード.剤形区分) {
+      case "内服": {
+        usage = {
+          kind: "days",
+          days: toZenkaku(rp.剤形レコード.調剤数量.toString()),
+          usage: rp.用法レコード.用法名称,
+        };
+        break;
+      }
+      case "頓服": {
+        usage = {
+          kind: "times",
+          times: toZenkaku(rp.剤形レコード.調剤数量.toString()),
+          usage: rp.用法レコード.用法名称,
+        };
+        break;
+      }
+      default: {
+        usage = { kind: "other", usage: rp.用法レコード.用法名称 };
+        break;
+      }
+    }
+    let groupComments: string[] = resolveGroupComments(rp);
+    return {
+      drugs,
+      usage,
+      groupComments,
+    };
+  }
+
+  function resolveSenpatsu(drug: 薬品情報): Senpatsu | undefined {
+    for (let info of drug.薬品補足レコード ?? []) {
+      if (info.薬品補足情報 === "後発品変更不可") {
+        return "henkoufuka";
+      } else if (info.薬品補足情報 === "先発医薬品患者希望") {
+        return "kanjakibou";
+      }
+    }
+    return undefined;
+  }
+
+  function unevenRep(drug: 薬品情報): string {
+    if (drug.不均等レコード) {
+      const parts: string[] = [];
+      const rec = drug.不均等レコード;
+      parts.push(rec.不均等１回目服用量);
+      parts.push(rec.不均等２回目服用量);
+      if (rec.不均等３回目服用量) {
+        parts.push(rec.不均等３回目服用量);
+      }
+      if (rec.不均等４回目服用量) {
+        parts.push(rec.不均等４回目服用量);
+      }
+      if (rec.不均等５回目服用量) {
+        parts.push(rec.不均等５回目服用量);
+      }
+      return "（" + parts.map((part) => toZenkaku(part)).join("ー") + "）";
+    } else {
+      return "";
+    }
+  }
+
+  function resolveGroupComments(rp: RP剤情報): string[] {
+    const recs = rp.用法補足レコード;
+    if (recs) {
+      let addition: string = "";
+      const info: string[] = [];
+      for (let rec of recs) {
+        if (rec.用法補足区分 === "用法の続き") {
+          addition += rec.用法補足情報;
+        } else {
+          info.push(rec.用法補足情報);
+        }
+      }
+      return [addition + info.map((s) => `【${s}】`).join("")];
+    } else {
+      return [];
+    }
+  }
+
+  function resolveDrugComments(
+    drug: 薬品情報,
+    nkouhi: number,
+    hasMixedKouhi: boolean
+  ): string[] {
+    const texts: string[] = [];
+    const cs: string[] = [];
+    drug.薬品補足レコード?.forEach((rec) => {
+      switch (rec.薬品補足情報) {
+        case "一包化": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "粉砕": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "後発品変更不可": {
+          // nop
+          break;
+        }
+        case "剤形変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "含量規格変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "剤形変更不可及び含量規格変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "先発医薬品患者希望": {
+          // nop
+          break;
+        }
+        default: {
+          texts.push(rec.薬品補足情報);
+          break;
+        }
+      }
+    });
+    if (hasMixedKouhi) {
+      if (drug.負担区分レコード) {
+        let ks: string[] = [];
+        if( drug.負担区分レコード.第一公費負担区分){
+          ks.push("第一");
+        }
+        if( drug.負担区分レコード.第二公費負担区分){
+          ks.push("第二");
+        }
+        if( drug.負担区分レコード.第三公費負担区分){
+          ks.push("第三");
+        }
+        if( drug.負担区分レコード.特殊公費負担区分){
+          ks.push("特殊");
+        }
+        if( nkouhi === 1 && ks.length === 1 ){
+          cs.push("公費対象");
+        } else {
+          ks.forEach(k => cs.push(`${k}公費対象`));
+        }
+      } else {
+        cs.push("公費対象外");
+      }
+    }
+    return [texts.join("") + cs.map((c) => `【${c}】`).join("")];
+  }
 </script>
 
 <Dialog {title} {destroy}>
@@ -262,6 +513,7 @@
       <button on:click={doRegister}>登録</button>
     {/if}
     <button on:click={doSave}>保存</button>
+    <button on:click={doPrint}>印刷</button>
     <button on:click={destroy}>キャンセル</button>
   </div>
 </Dialog>

@@ -376,6 +376,69 @@ export class PrescInfoWrapper {
     this.shohou.提供情報レコード = var提供情報レコード;
   }
 
+  kouhiCount(): number {
+    let c = 0;
+    const data = this.shohou;
+    if( data.第一公費レコード ){
+      c += 1;
+    }
+    if( data.第二公費レコード ){
+      c += 1;
+    }
+    if( data.第三公費レコード ){
+      c += 1;
+    }
+    if( data.特殊公費レコード ){
+      c += 1;
+    }
+    return c;
+  }
+
+  hasMixedKouhi(): boolean {
+    const data = this.shohou;
+    const nkouhi = this.kouhiCount();
+    if( nkouhi === 0 ){
+      return false;
+    } else {
+      for(let group of data.RP剤情報グループ){
+        for(let drug of group.薬品情報グループ) {
+          let ndk = new 薬品情報Wrapper(drug).countKouhi();
+          if( ndk !== nkouhi ){
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }
+}
+
+export class 薬品情報Wrapper {
+  data: 薬品情報;
+
+  constructor(data: 薬品情報) {
+    this.data = data;
+  }
+
+  countKouhi(): number {
+    let ndk = 0; // drug kouhi count
+    const drug = this.data;
+    if( drug.負担区分レコード ){
+      if( drug.負担区分レコード.第一公費負担区分 ){
+        ndk += 1;
+      }
+      if( drug.負担区分レコード.第二公費負担区分 ){
+        ndk += 1;
+      }
+      if( drug.負担区分レコード.第三公費負担区分 ){
+        ndk += 1;
+      }
+      if( drug.負担区分レコード.特殊公費負担区分 ){
+        ndk += 1;
+      }
+    }
+    return ndk;
+  }
 }
 
 
