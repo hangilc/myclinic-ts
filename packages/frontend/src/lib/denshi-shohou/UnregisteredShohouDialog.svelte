@@ -20,6 +20,7 @@
     type 備考レコード,
     type 公費レコード,
     type 提供情報レコード,
+    type 薬品情報,
   } from "./presc-info";
   import {
     checkShohouResult,
@@ -36,7 +37,8 @@
   import type { Shohousen2024Data } from "../drawer/forms/shohousen-2024/shohousenData2024";
   import { drawShohousen2024NoRefill } from "../drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import type { Shohou } from "../parse-shohou";
+  import type { DrugGroup, Senpatsu, Shohou, Usage } from "../parse-shohou";
+  import type { Drug } from "@/lib/parse-shohou";
 
   export let destroy: () => void;
   export let title: string;
@@ -274,11 +276,28 @@
     //   }
     // }
     // let koufuDate: string = dateToSqlDate(new Date());
+    let bikou: string[] = shohou.備考レコード?.map((bikou) => bikou.備考) ?? [];
+    const joho_info =
+      shohou.提供情報レコード?.提供診療情報レコード?.map((info) => {
+        if (info.薬品名称) {
+          return `（${info.薬品名称}）${info.コメント}`;
+        } else {
+          return info.コメント;
+        }
+      }) ?? [];
+    const joho_kensa =
+      shohou.提供情報レコード?.検査値データ等レコード?.map(
+        (joho) => joho.検査値データ等
+      ) ?? [];
+    bikou = [...bikou, ...joho_info, ...joho_kensa];
+    let groups: DrugGroup[] = shohou.RP剤情報グループ.map(renderGroup);
     const drugs: Shohou = {
-      groups: [],
+      groups,
       shohouComments: [],
-      bikou: shohou.備考レコード?.map(bikou => bikou.備考) ?? [],
-      kigen: shohou.使用期限年月日 ? DateWrapper.from(shohou.使用期限年月日).asSqlDate() : undefined,
+      bikou,
+      kigen: shohou.使用期限年月日
+        ? DateWrapper.from(shohou.使用期限年月日).asSqlDate()
+        : undefined,
     };
     const data: Shohousen2024Data = {
       clinicAddress: shohou.医療機関所在地,
@@ -298,7 +317,8 @@
       shimei: shohou.患者漢字氏名,
       birthdate: DateWrapper.from(shohou.患者生年月日).asSqlDate(),
       sex: shohou.患者性別 === "男" ? "M" : "F",
-      hokenKubun: shohou.被保険者被扶養者 === "被保険者" ? "hihokensha" : "hifuyousha",
+      hokenKubun:
+        shohou.被保険者被扶養者 === "被保険者" ? "hihokensha" : "hifuyousha",
       koufuDate: DateWrapper.from(shohou.処方箋交付年月日).asSqlDate(),
       drugs,
     };
@@ -315,6 +335,58 @@
         title: "処方箋印刷",
       },
     });
+  }
+
+  function renderGroup(rp: RP剤情報): DrugGroup {
+    let drugs: Drug[] = rp.薬品情報グループ.map((drug) => {
+      return {
+        name: drug.薬品レコード.薬品名称,
+        amount: toZenkaku(drug.薬品レコード.分量),
+        unit: toZenkaku(drug.薬品レコード.単位名),
+        senpatsu: resolveSenpatsu(drug),
+        drugComments: [],
+      };
+    });
+    let usage: Usage;
+    switch (rp.剤形レコード.剤形区分) {
+      case "内服": {
+        usage = {
+          kind: "days",
+          days: toZenkaku(rp.剤形レコード.調剤数量.toString()),
+          usage: rp.用法レコード.用法名称,
+        };
+        break;
+      }
+      case "頓服": {
+        usage = {
+          kind: "times",
+          times: toZenkaku(rp.剤形レコード.調剤数量.toString()),
+          usage: rp.用法レコード.用法名称,
+        };
+        break;
+      }
+      default: {
+        usage = { kind: "other", usage: rp.用法レコード.用法名称 };
+        break;
+      }
+    }
+    let groupComments: string[] = [];
+    return {
+      drugs,
+      usage,
+      groupComments,
+    };
+  }
+
+  function resolveSenpatsu(drug: 薬品情報): Senpatsu | undefined {
+    for(let info of drug.薬品補足レコード ?? []) {
+      if( info.薬品補足情報 === "後発品変更不可" ) {
+        return "henkoufuka";
+      } else if( info.薬品補足情報 === "先発医薬品患者希望" ) {
+        return "kanjakibou";
+      }
+    }
+    return undefined;
   }
 </script>
 
