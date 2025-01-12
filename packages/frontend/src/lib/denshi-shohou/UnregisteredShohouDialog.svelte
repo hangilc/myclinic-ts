@@ -15,6 +15,8 @@
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
   import {
     createPrescInfo,
+    PrescInfoWrapper,
+    薬品情報Wrapper,
     type PrescInfoData,
     type RP剤情報,
     type 備考レコード,
@@ -108,7 +110,6 @@
       return;
     }
     const prescInfo = createPrescInfo(shohou);
-    console.log("prescInfo", prescInfo);
     const signed = await sign_presc(prescInfo);
     const kikancode = await cache.getShohouKikancode();
     let result = await registerPresc(signed, kikancode, "1");
@@ -234,48 +235,7 @@
         return;
       }
     }
-    // let hihokenshaKigou = "";
-    // let hihokenshaBangou = "";
-    // let edaban = "";
-    // let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
-    // if (hoken.shahokokuho) {
-    //   const shahokokuho = hoken.shahokokuho;
-    //   hokenshaBangou = formatHokenshaBangou(shahokokuho.hokenshaBangou);
-    //   hihokenshaKigou = shahokokuho.hihokenshaKigou;
-    //   hihokenshaBangou = shahokokuho.hihokenshaBangou;
-    //   edaban = shahokokuho.edaban;
-    //   hokenKubun = shahokokuho.honninStore !== 0 ? "hihokensha" : "hifuyousha";
-    // } else if (hoken.koukikourei) {
-    //   hokenshaBangou = hoken.koukikourei.hokenshaBangou;
-    //   hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
-    // }
-    // let futansha: string | undefined = undefined;
-    // let jukyuusha: string | undefined = undefined;
-    // if (hoken.kouhiList.length >= 1) {
-    //   const kouhi = hoken.kouhiList[0];
-    //   futansha = kouhi.futansha.toString();
-    //   jukyuusha = kouhi.jukyuusha.toString();
-    // }
-    // let futansha2: string | undefined = undefined;
-    // let jukyuusha2: string | undefined = undefined;
-    // if (hoken.kouhiList.length >= 2) {
-    //   const kouhi = hoken.kouhiList[1];
-    //   futansha2 = kouhi.futansha.toString();
-    //   jukyuusha2 = kouhi.jukyuusha.toString();
-    // }
-    // let shimei: string | undefined = undefined;
-    // let birthdate: string | undefined = undefined;
-    // let sex: "M" | "F" | undefined = undefined;
-    // {
-    //   const visit = await api.getVisit(text.visitId);
-    //   const patient = await api.getPatient(visit.patientId);
-    //   shimei = `${patient.lastName}${patient.firstName}`;
-    //   birthdate = patient.birthday;
-    //   if (patient.sex === "M" || patient.sex === "F") {
-    //     sex = patient.sex;
-    //   }
-    // }
-    // let koufuDate: string = dateToSqlDate(new Date());
+    const wrapper = new PrescInfoWrapper(shohou);
     let bikou: string[] = shohou.備考レコード?.map((bikou) => bikou.備考) ?? [];
     const joho_info =
       shohou.提供情報レコード?.提供診療情報レコード?.map((info) => {
@@ -290,7 +250,11 @@
         (joho) => joho.検査値データ等
       ) ?? [];
     bikou = [...bikou, ...joho_info, ...joho_kensa];
-    let groups: DrugGroup[] = shohou.RP剤情報グループ.map(renderGroup);
+    const kouhiCount = wrapper.kouhiCount();
+    const hasMixedKouhi = wrapper.hasMixedKouhi();
+    let groups: DrugGroup[] = shohou.RP剤情報グループ.map((g) =>
+      renderGroup(g, kouhiCount, hasMixedKouhi)
+    );
     const drugs: Shohou = {
       groups,
       shohouComments: [],
@@ -337,14 +301,18 @@
     });
   }
 
-  function renderGroup(rp: RP剤情報): DrugGroup {
+  function renderGroup(
+    rp: RP剤情報,
+    nkouhi: number,
+    hasMixedKouhi: boolean
+  ): DrugGroup {
     let drugs: Drug[] = rp.薬品情報グループ.map((drug) => {
       return {
         name: drug.薬品レコード.薬品名称,
         amount: toZenkaku(drug.薬品レコード.分量),
         unit: toZenkaku(drug.薬品レコード.単位名) + unevenRep(drug),
         senpatsu: resolveSenpatsu(drug),
-        drugComments: [],
+        drugComments: resolveDrugComments(drug, nkouhi, hasMixedKouhi),
       };
     });
     let usage: Usage;
@@ -379,10 +347,10 @@
   }
 
   function resolveSenpatsu(drug: 薬品情報): Senpatsu | undefined {
-    for(let info of drug.薬品補足レコード ?? []) {
-      if( info.薬品補足情報 === "後発品変更不可" ) {
+    for (let info of drug.薬品補足レコード ?? []) {
+      if (info.薬品補足情報 === "後発品変更不可") {
         return "henkoufuka";
-      } else if( info.薬品補足情報 === "先発医薬品患者希望" ) {
+      } else if (info.薬品補足情報 === "先発医薬品患者希望") {
         return "kanjakibou";
       }
     }
@@ -390,21 +358,21 @@
   }
 
   function unevenRep(drug: 薬品情報): string {
-    if( drug.不均等レコード ) {
+    if (drug.不均等レコード) {
       const parts: string[] = [];
       const rec = drug.不均等レコード;
       parts.push(rec.不均等１回目服用量);
       parts.push(rec.不均等２回目服用量);
-      if( rec.不均等３回目服用量)  {
-        parts.push(rec.不均等３回目服用量)
+      if (rec.不均等３回目服用量) {
+        parts.push(rec.不均等３回目服用量);
       }
-      if( rec.不均等４回目服用量)  {
-        parts.push(rec.不均等４回目服用量)
+      if (rec.不均等４回目服用量) {
+        parts.push(rec.不均等４回目服用量);
       }
-      if( rec.不均等５回目服用量)  {
-        parts.push(rec.不均等５回目服用量)
+      if (rec.不均等５回目服用量) {
+        parts.push(rec.不均等５回目服用量);
       }
-      return "（" + parts.map(part => toZenkaku(part)).join("ー") + "）";
+      return "（" + parts.map((part) => toZenkaku(part)).join("ー") + "）";
     } else {
       return "";
     }
@@ -412,20 +380,90 @@
 
   function resolveGroupComments(rp: RP剤情報): string[] {
     const recs = rp.用法補足レコード;
-    if( recs ){
+    if (recs) {
       let addition: string = "";
       const info: string[] = [];
-      for(let rec of recs){
-        if( rec.用法補足区分 === "用法の続き" ){
+      for (let rec of recs) {
+        if (rec.用法補足区分 === "用法の続き") {
           addition += rec.用法補足情報;
         } else {
           info.push(rec.用法補足情報);
         }
       }
-      return [addition + info.map(s => `【${s}】`).join("")];
+      return [addition + info.map((s) => `【${s}】`).join("")];
     } else {
       return [];
     }
+  }
+
+  function resolveDrugComments(
+    drug: 薬品情報,
+    nkouhi: number,
+    hasMixedKouhi: boolean
+  ): string[] {
+    const texts: string[] = [];
+    const cs: string[] = [];
+    drug.薬品補足レコード?.forEach((rec) => {
+      switch (rec.薬品補足情報) {
+        case "一包化": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "粉砕": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "後発品変更不可": {
+          // nop
+          break;
+        }
+        case "剤形変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "含量規格変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "剤形変更不可及び含量規格変更不可": {
+          cs.push(rec.薬品補足情報);
+          break;
+        }
+        case "先発医薬品患者希望": {
+          // nop
+          break;
+        }
+        default: {
+          texts.push(rec.薬品補足情報);
+          break;
+        }
+      }
+    });
+    if (hasMixedKouhi) {
+      if (drug.負担区分レコード) {
+        let ks: string[] = [];
+        if( drug.負担区分レコード.第一公費負担区分){
+          ks.push("第一");
+        }
+        if( drug.負担区分レコード.第二公費負担区分){
+          ks.push("第二");
+        }
+        if( drug.負担区分レコード.第三公費負担区分){
+          ks.push("第三");
+        }
+        if( drug.負担区分レコード.特殊公費負担区分){
+          ks.push("特殊");
+        }
+        if( nkouhi === 1 && ks.length === 1 ){
+          cs.push("公費対象");
+        } else {
+          ks.forEach(k => cs.push(`${k}公費対象`));
+        }
+      } else {
+        cs.push("公費対象外");
+      }
+    }
+    return [texts.join("") + cs.map((c) => `【${c}】`).join("")];
   }
 </script>
 

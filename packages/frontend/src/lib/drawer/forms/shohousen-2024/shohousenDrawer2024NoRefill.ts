@@ -43,7 +43,10 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   const paper = { width: A5.width, height: A5.height };
   const outerBounds = insetExtent(paper, 3);
   const innerBounds = insetOffsetExtent(outerBounds, 1, 0, 1, 1);
-  const pages: { ctx: DrawerContext, renderer: Renderer, lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void }[] = [];
+  const pages: {
+    ctx: DrawerContext, renderer: Renderer,
+    lastLineRenderer: (f: (ext: Extent) => { item: Item, halign: HAlign, valign: VAlign }) => void
+  }[] = [];
   let iter = 0;
   do {
     const con = new Container();
@@ -903,12 +906,20 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
       for (let nameItem of nameItems) {
         drugCol.add(nameItem);
       }
+      const commItems: Item[] = [];
+      drug.drugComments.forEach(comm => {
+        const items = breakToTextItems(ctx, comm, drugCol.width, { font, color: black });
+        commItems.push(...items);
+      });
+      for (let commItem of commItems) {
+        drugCol.add(commItem);
+      }
       if (senpatsu === "kanjakibou") {
-        const item = textItem(ctx, "レ", { font, color: black });
+        const item = textItem(ctx, "✓", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         kanjakibouCol.add(aligned);
       } else if (senpatsu === "henkoufuka") {
-        const item = textItem(ctx, "レ", { font, color: black });
+        const item = textItem(ctx, "✓", { font, color: black });
         const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
         henkoufukaCol.add(aligned);
       }
