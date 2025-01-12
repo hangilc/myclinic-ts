@@ -913,7 +913,7 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
         henkoufukaCol.add(aligned);
       }
     }
-    const lines = [group.usage, ...group.groupComments];
+    const lines = [group.usage, group.groupComments.join("")];
     lines.forEach(line => {
       const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
       items.forEach(item => drugCol.add(item));

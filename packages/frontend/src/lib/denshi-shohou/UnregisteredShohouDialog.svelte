@@ -342,7 +342,7 @@
       return {
         name: drug.薬品レコード.薬品名称,
         amount: toZenkaku(drug.薬品レコード.分量),
-        unit: toZenkaku(drug.薬品レコード.単位名),
+        unit: toZenkaku(drug.薬品レコード.単位名) + unevenRep(drug),
         senpatsu: resolveSenpatsu(drug),
         drugComments: [],
       };
@@ -370,7 +370,7 @@
         break;
       }
     }
-    let groupComments: string[] = [];
+    let groupComments: string[] = resolveGroupComments(rp);
     return {
       drugs,
       usage,
@@ -387,6 +387,45 @@
       }
     }
     return undefined;
+  }
+
+  function unevenRep(drug: 薬品情報): string {
+    if( drug.不均等レコード ) {
+      const parts: string[] = [];
+      const rec = drug.不均等レコード;
+      parts.push(rec.不均等１回目服用量);
+      parts.push(rec.不均等２回目服用量);
+      if( rec.不均等３回目服用量)  {
+        parts.push(rec.不均等３回目服用量)
+      }
+      if( rec.不均等４回目服用量)  {
+        parts.push(rec.不均等４回目服用量)
+      }
+      if( rec.不均等５回目服用量)  {
+        parts.push(rec.不均等５回目服用量)
+      }
+      return "（" + parts.map(part => toZenkaku(part)).join("ー") + "）";
+    } else {
+      return "";
+    }
+  }
+
+  function resolveGroupComments(rp: RP剤情報): string[] {
+    const recs = rp.用法補足レコード;
+    if( recs ){
+      let addition: string = "";
+      const info: string[] = [];
+      for(let rec of recs){
+        if( rec.用法補足区分 === "用法の続き" ){
+          addition += rec.用法補足情報;
+        } else {
+          info.push(rec.用法補足情報);
+        }
+      }
+      return [addition + info.map(s => `【${s}】`).join("")];
+    } else {
+      return [];
+    }
   }
 </script>
 
