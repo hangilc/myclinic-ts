@@ -13,7 +13,7 @@
   });
 
   function doEnter() {
-    const value = parseFloat(toHankaku(input.trim()));
+    const value = parseInt(toHankaku(input.trim()));
     if( isNaN(value) ){
       alert("調剤数量の入力が数値でありません。");
       return;

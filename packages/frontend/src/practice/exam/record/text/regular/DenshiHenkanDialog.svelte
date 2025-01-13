@@ -208,7 +208,7 @@
       {/each}
     </div>
     <div>
-      <DrugGroupForm />
+      <DrugGroupForm {at}/>
       <!-- <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
         <div>薬剤名</div>
         <div>{targetIyakuhinMaster ? targetIyakuhinMaster.name : ""}</div>

@@ -13,8 +13,8 @@
   let usageSearchElement: HTMLInputElement;
   let freeTextElement: HTMLInputElement;
   let freeText = "";
-  if( 用法 ){
-    if( 用法.用法コード !== freeStyleUsageCode ){
+  if (用法) {
+    if (用法.用法コード !== freeStyleUsageCode) {
       mode = "master";
       usageSearchText = 用法.用法名称;
     } else {
@@ -30,7 +30,7 @@
   async function setFocus() {
     if (mode === "master") {
       usageSearchElement?.focus();
-    } else if( mode === "free-style"){
+    } else if (mode === "free-style") {
       freeTextElement?.focus();
     }
   }
@@ -51,21 +51,26 @@
 
   function doFreeText() {
     const t = freeText.trim();
-    if( t === "" ){
+    if (t === "") {
       alert("用法が入力されていません。");
       return;
     }
     onDone({
       用法コード: freeStyleUsageCode,
       用法名称: freeText,
-    })
+    });
   }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   <div>
-    <input type="radio" bind:group={mode} value="master" on:change={setFocus} />
+    <input
+      type="radio"
+      bind:group={mode}
+      value="master"
+      on:change={setFocus}
+    />
     マスター
     <input
       type="radio"
@@ -80,6 +85,7 @@
         type="text"
         bind:value={usageSearchText}
         bind:this={usageSearchElement}
+        style="width:22em;"
       />
     </form>
     <div style="max-height:10em;overflow-y:auto;">
@@ -94,7 +100,7 @@
     </div>
   {:else if mode === "free-style"}
     <form on:submit|preventDefault={doFreeText}>
-      <input type="text" bind:value={freeText} bind:this={freeTextElement} />
+      <input type="text" bind:value={freeText} bind:this={freeTextElement} style="width:22em;"/>
     </form>
   {/if}
 </div>
