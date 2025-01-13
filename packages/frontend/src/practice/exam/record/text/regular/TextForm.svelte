@@ -10,7 +10,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
-  import { dateToSqlDate } from "myclinic-model/model";
+  import { dateToSqlDate, Visit } from "myclinic-model/model";
   import {
     confirmOnlinePresc,
     getFollowingText,
@@ -347,7 +347,7 @@
       const curMemo = TextMemoWrapper.fromText(text).getMemo();
       const newMemo = await copyTextMemo(curMemo, targetVisitId);
       const warn = checkMemoCompat(curMemo, newMemo);
-      if( typeof warn === "string" ){
+      if (typeof warn === "string") {
         alert(`警告：${warn}`);
       }
       TextMemoWrapper.setTextMemo(t, newMemo);
@@ -400,17 +400,46 @@
     });
   }
 
+  function kouhiCountOfVisit(visit: Visit): number {
+    let count = 0;
+    if (visit.kouhi1Id > 0) {
+      count += 1;
+    } else {
+      if (visit.kouhi2Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      if (visit.kouhi3Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      return count;
+    }
+    if (visit.kouhi2Id > 0) {
+      count += 1;
+    } else {
+      if (visit.kouhi3Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      return count;
+    }
+    if (visit.kouhi3Id > 0) {
+      count += 1;
+    }
+    return count;
+  }
+
   async function doShohouConv() {
     const parsed = parseShohousen(text.content);
     const visit = await api.getVisit(text.visitId);
+    const kouhiCount = kouhiCountOfVisit(visit);
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         source: parsed,
         at: visit.visitedAt.substring(0, 10),
-      }
-    })
+        kouhiCount,
+      },
+    });
   }
 
   async function doEditShohouConv() {

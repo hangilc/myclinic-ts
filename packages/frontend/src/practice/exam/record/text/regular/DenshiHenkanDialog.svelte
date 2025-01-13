@@ -16,6 +16,7 @@
   export let destroy: () => void;
   export let source: Shohousen;
   export let at: string;
+  export let kouhiCount: number;
   let sourceIndex = 1;
   let sourceList: Source[] = [];
   let selectedSourceIndex = 0;
@@ -208,7 +209,7 @@
       {/each}
     </div>
     <div>
-      <DrugGroupForm {at}/>
+      <DrugGroupForm {at} {kouhiCount} />
       <!-- <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
         <div>薬剤名</div>
         <div>{targetIyakuhinMaster ? targetIyakuhinMaster.name : ""}</div>

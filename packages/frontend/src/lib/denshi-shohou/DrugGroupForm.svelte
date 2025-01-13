@@ -15,14 +15,17 @@
     用法レコード,
     用法補足レコード,
     不均等レコード,
+    負担区分レコード,
   } from "./presc-info";
   import UsageAdditionForm from "./drug-group-form/UsageAdditionForm.svelte";
   import JohoKubunForm from "./drug-group-form/JohoKubunForm.svelte";
   import DrugKindForm from "./drug-group-form/DrugKindForm.svelte";
   import AmountForm from "./drug-group-form/AmountForm.svelte";
   import UnevenForm from "./drug-group-form/UnevenForm.svelte";
+  import KouhiForm from "./drug-group-form/KouhiForm.svelte";
 
   export let at: string;
+  export let kouhiCount: number;
   let 剤形区分: 剤形区分 = "内服";
   let 調剤数量: number | undefined = undefined;
   let 用法レコード: 用法レコード | undefined = undefined;
@@ -31,6 +34,7 @@
   let drugKind: DrugKind | undefined = undefined;
   let amount: number | undefined = undefined;
   let 不均等レコード: 不均等レコード | undefined = undefined;
+  let 負担区分レコード: 負担区分レコード | undefined = undefined;
   let edit: EditMode | undefined = undefined;
 
   function doEnter() {
@@ -48,11 +52,11 @@
     if (!(剤形区分 === "内服" || 剤形区分 === "頓服")) {
       調剤数量 = 1;
     }
-    if( !drugKind ) {
+    if (!drugKind) {
       alert("薬剤種別が設定されていません。");
       return;
     }
-    if( amount == undefined ){
+    if (amount == undefined) {
       alert("用量が設定されていません。");
       return;
     }
@@ -95,21 +99,39 @@
   }
 
   function unevenRep(rec: 不均等レコード | undefined): string {
-    if( rec ){
-      const parts: string[] = [
-        rec.不均等１回目服用量,
-        rec.不均等２回目服用量,
-      ];
-      if( rec.不均等３回目服用量 != undefined ){
-        parts.push(rec.不均等３回目服用量)
+    if (rec) {
+      const parts: string[] = [rec.不均等１回目服用量, rec.不均等２回目服用量];
+      if (rec.不均等３回目服用量 != undefined) {
+        parts.push(rec.不均等３回目服用量);
       }
-      if( rec.不均等４回目服用量 != undefined ){
-        parts.push(rec.不均等４回目服用量)
+      if (rec.不均等４回目服用量 != undefined) {
+        parts.push(rec.不均等４回目服用量);
       }
-      if( rec.不均等５回目服用量 != undefined ){
-        parts.push(rec.不均等５回目服用量)
+      if (rec.不均等５回目服用量 != undefined) {
+        parts.push(rec.不均等５回目服用量);
       }
       return parts.join("-");
+    } else {
+      return "";
+    }
+  }
+
+  function kouhiRep(rec: 負担区分レコード | undefined): string {
+    if (rec) {
+      let parts: string[] = [];
+      if (rec.第一公費負担区分) {
+        parts.push("第一公費対象");
+      }
+      if (rec.第二公費負担区分) {
+        parts.push("第二公費対象");
+      }
+      if (rec.第三公費負担区分) {
+        parts.push("第三公費対象");
+      }
+      if (rec.特殊公費負担区分) {
+        parts.push("特殊公費対象");
+      }
+      return parts.join("・");
     } else {
       return "";
     }
@@ -162,6 +184,11 @@
     不均等レコード = value;
     edit = undefined;
   }
+
+  function onDone負担区分レコード(value: 負担区分レコード | undefined) {
+    負担区分レコード = value;
+    edit = undefined;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -197,6 +224,10 @@
     </div>
     <div class="title" on:click={() => doEdit("不均等レコード")}>不均等</div>
     <div>{unevenRep(不均等レコード)}</div>
+    {#if kouhiCount > 0}
+      <div class="title" on:click={() => doEdit("公費")}>公費</div>
+      <div>{kouhiRep(負担区分レコード)}</div>
+    {/if}
   </div>
   <div>
     {#if edit === "剤形区分"}
@@ -222,7 +253,14 @@
       <AmountForm {amount} unit={drugKind?.単位名 ?? ""} onDone={onDone用量} />
     {:else if edit === "不均等レコード"}
       <div class="edit-title">不均等</div>
-      <UnevenForm 不均等レコード={不均等レコード} onDone={onDone不均等レコード} />
+      <UnevenForm {不均等レコード} onDone={onDone不均等レコード} />
+    {:else if edit === "公費"}
+      <div class="edit-title">公費</div>
+      <KouhiForm
+        {負担区分レコード}
+        {kouhiCount}
+        onDone={onDone負担区分レコード}
+      />
     {/if}
   </div>
   <div style="margin-top:10px;padding:10px;text-align:right;">
