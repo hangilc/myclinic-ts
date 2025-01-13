@@ -36,6 +36,7 @@
   } from "@/lib/denshi-shohou/presc-info";
   import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -374,7 +375,7 @@
     }
   }
 
-  async function doShohouConv() {
+  async function doShohouConvOrig() {
     const visit = await api.getVisit(text.visitId);
     onClose();
     const shohou = await initPrescInfoDataFromVisitId(text.visitId);
@@ -397,6 +398,19 @@
         onDelete: undefined,
       },
     });
+  }
+
+  async function doShohouConv() {
+    const parsed = parseShohousen(text.content);
+    const visit = await api.getVisit(text.visitId);
+    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        source: parsed,
+        at: visit.visitedAt.substring(0, 10),
+      }
+    })
   }
 
   async function doEditShohouConv() {
