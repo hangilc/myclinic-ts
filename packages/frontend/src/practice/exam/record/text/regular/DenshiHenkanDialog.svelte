@@ -11,6 +11,7 @@
   } from "@/lib/denshi-shohou/presc-info";
   import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
+  import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
 
   export let destroy: () => void;
   export let source: Shohousen;
@@ -207,7 +208,8 @@
       {/each}
     </div>
     <div>
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
+      <DrugGroupForm />
+      <!-- <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
         <div>薬剤名</div>
         <div>{targetIyakuhinMaster ? targetIyakuhinMaster.name : ""}</div>
         <div>分量</div>
@@ -228,7 +230,6 @@
         <button on:click={doSearchDrug}>検索</button>
         <div>
           {#each drugSearchResult as result (result.iyakuhincode)}
-            <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div
               style="cursor:pointer;"
               on:click={() => doIyakuhinMasterSelect(result)}
@@ -243,15 +244,14 @@
         <input type="text" bind:value={usageSearchText} />
         <button on:click={doSearchUsage}>検索</button>
         {#each usageSearchResult as result (result.usage_code)}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             style="cursor:pointer;"
             on:click={() => doUsageMasterSelect(result)}
           >
             {result.usage_name}
           </div>
-        {/each}
-      </div>
+        {/each} 
+      </div> -->
     </div>
   </div>
   <div style="text-align:right;">
