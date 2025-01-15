@@ -42,7 +42,7 @@
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:value={searchText} bind:this={inputElement} class="search-text"/>
   </form>
-  <div style="max-height:10em;overflow-y:auto;">
+  <div style="height:10em;overflow-y:auto;resize:vertical;font-size: 14px;margin-top:6px;border:1px solid gray;">
     {#each searchResult as master (master.iyakuhincode)}
       <div class="master-item" on:click={() => doMasterSelect(master)}>{master.name}</div>
     {/each}

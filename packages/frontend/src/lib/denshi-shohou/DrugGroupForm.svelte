@@ -1,9 +1,6 @@
 <script lang="ts">
   import type { 剤形区分, 情報区分 } from "./denshi-shohou";
-  import type {
-    DrugKind,
-    EditMode,
-  } from "./drug-group-form/drug-group-form-types";
+  import type { DrugKind } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import EditUsageForm from "./drug-group-form/UsageForm.svelte";
   import EditZaikeiKubunForm from "./drug-group-form/ZaikeiKubunForm.svelte";
@@ -38,7 +35,17 @@
   let 不均等レコード: 不均等レコード | undefined = undefined;
   let 負担区分レコード: 負担区分レコード | undefined = undefined;
   let 薬品補足レコード: 薬品補足レコード[] | undefined = undefined;
-  let edit: EditMode | undefined = undefined;
+
+  let edit剤形区分 = false;
+  let edit調剤数量 = false;
+  let edit用法レコード = false;
+  let edit用法補足レコード = false;
+  let edit情報区分 = false;
+  let edit薬剤種別 = false;
+  let edit用量 = false;
+  let edit不均等レコード = false;
+  let edit負担区分レコード = false;
+  let edit薬品補足レコード = false;
 
   function doEnter() {
     if (調剤数量 == undefined) {
@@ -140,146 +147,192 @@
     }
   }
 
-  function doEdit(mode: EditMode) {
-    if (edit === mode) {
-      edit = undefined;
-    } else {
-      edit = mode;
-    }
-  }
-
   function onDone剤形区分(value: 剤形区分) {
     剤形区分 = value;
-    edit = undefined;
+    edit剤形区分 = false;
   }
 
   function onDone調剤数量(value: number) {
     調剤数量 = value;
-    edit = undefined;
+    edit調剤数量 = false;
   }
 
   function onDone用法(value: 用法レコード) {
     用法レコード = value;
-    edit = undefined;
+    edit用法レコード = false;
   }
 
   function onDone用法補足レコード(value: 用法補足レコード[]) {
     用法補足レコード = value;
-    edit = undefined;
+    edit用法補足レコード = false;
   }
 
   function onDone情報区分(value: 情報区分) {
     情報区分 = value;
-    edit = undefined;
+    edit情報区分 = false;
   }
 
   function onDone薬剤種別(value: DrugKind) {
     drugKind = value;
-    edit = undefined;
+    edit薬剤種別 = false;
   }
 
   function onDone用量(value: number) {
     amount = value;
-    edit = undefined;
+    edit用量 = false;
   }
 
   function onDone不均等レコード(value: 不均等レコード | undefined) {
     不均等レコード = value;
-    edit = undefined;
+    edit不均等レコード = false;
   }
 
   function onDone負担区分レコード(value: 負担区分レコード | undefined) {
     負担区分レコード = value;
-    edit = undefined;
+    edit負担区分レコード = false;
   }
 
   function onDone薬品補足レコード(value: 薬品補足レコード[] | undefined) {
     薬品補足レコード = value;
-    edit = undefined;
+    edit薬品補足レコード = false;
   }
+
+  let edit = "";
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
-    <div class="title" on:click={() => doEdit("情報区分")}>情報区分</div>
-    <div>{情報区分}</div>
-    <div class="title" on:click={() => doEdit("剤形区分")}>剤形区分</div>
-    <div>{剤形区分}</div>
-    <div class="title" on:click={() => doEdit("薬剤種別")}>薬剤種別</div>
-    <div>{drugKind ? drugKind.薬品名称 : ""}</div>
-    <div class="title" on:click={() => doEdit("用量")}>用量</div>
-    <div>{amount ?? ""} {drugKind?.単位名 ?? ""}</div>
-    <div class="title" on:click={() => doEdit("薬品補足")}>薬品補足</div>
-    <div>
-      <ul style="margin-top:0;margin-bottom:0">
-      {#each 薬品補足レコード ?? [] as rec}
-        <li>{rec.薬品補足情報}</li>
-      {/each}
-    </ul>
+    <div class="title" on:click={() => (edit情報区分 = !edit情報区分)}>
+      情報区分
     </div>
-    <div class="title" on:click={() => doEdit("用法レコード")}>用法</div>
     <div>
-      {#if 用法レコード}
-        {用法レコード.用法名称}
+      {#if !edit情報区分}
+        {情報区分}
+      {:else}
+        <JohoKubunForm {情報区分} onDone={onDone情報区分} />
       {/if}
     </div>
+    <div class="title" on:click={() => (edit剤形区分 = !edit剤形区分)}>
+      剤形区分
+    </div>
+    <div>
+      {#if !edit剤形区分}
+        {剤形区分}
+      {:else}
+        <EditZaikeiKubunForm {剤形区分} onDone={onDone剤形区分} />
+      {/if}
+    </div>
+    <div class="title" on:click={() => (edit薬剤種別 = !edit薬剤種別)}>
+      薬剤種別
+    </div>
+    <div>
+      {#if !edit薬剤種別}
+        {drugKind ? drugKind.薬品名称 : ""}
+      {:else}<DrugKindForm {drugKind} {at} onDone={onDone薬剤種別} />
+      {/if}
+    </div>
+    <div class="title" on:click={() => (edit用量 = !edit用量)}>用量</div>
+    <div>
+      {#if !edit用量}
+        {amount ?? ""} {drugKind?.単位名 ?? ""}
+      {:else}
+        <AmountForm
+          {amount}
+          unit={drugKind?.単位名 ?? ""}
+          onDone={onDone用量}
+        />
+      {/if}
+    </div>
+    <div
+      class="title"
+      on:click={() => (edit薬品補足レコード = !edit薬品補足レコード)}
+    >
+      薬品補足
+    </div>
+    <div>
+      {#if !edit薬品補足レコード}
+        <ul style="margin-top:0;margin-bottom:0">
+          {#each 薬品補足レコード ?? [] as rec}
+            <li>{rec.薬品補足情報}</li>
+          {/each}
+        </ul>
+      {:else}<DrugAdditionForm
+          {薬品補足レコード}
+          onDone={onDone薬品補足レコード}
+        />
+      {/if}
+    </div>
+    <div class="title" on:click={() => (edit用法レコード = !edit用法レコード)}>
+      用法
+    </div>
+    <div>
+      {#if !edit用法レコード}
+        {#if 用法レコード}
+          {用法レコード.用法名称}
+        {/if}
+      {:else}<EditUsageForm 用法={用法レコード} onDone={onDone用法} />{/if}
+    </div>
     {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
-      <div class="title" on:click={() => doEdit("調剤数量")}>調剤数量</div>
-      <div>{調剤数量 ?? ""} {timesRep(剤形区分)}</div>
+      <div class="title" on:click={() => (edit調剤数量 = !edit調剤数量)}>
+        調剤数量
+      </div>
+      <div>
+        {#if !edit調剤数量}
+          {調剤数量 ?? ""} {timesRep(剤形区分)}
+        {:else}<EditChouzaiSuuryouForm
+            {調剤数量}
+            unit={timesRep(剤形区分)}
+            onDone={onDone調剤数量}
+          />{/if}
+      </div>
     {/if}
-    <div class="title" on:click={() => doEdit("用法補足レコード")}>
+    <div
+      class="title"
+      on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
+    >
       用法補足
     </div>
     <div>
-      <ul style="margin-top:0;margin-bottom:0;">
-        {#each 用法補足レコード as hosoku}
-          <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
-        {/each}
-      </ul>
+      {#if !edit用法補足レコード}
+        <ul style="margin-top:0;margin-bottom:0;">
+          {#each 用法補足レコード as hosoku}
+            <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
+          {/each}
+        </ul>
+      {:else}<UsageAdditionForm
+          {用法補足レコード}
+          onDone={onDone用法補足レコード}
+        />
+      {/if}
     </div>
-    <div class="title" on:click={() => doEdit("不均等レコード")}>不均等</div>
-    <div>{unevenRep(不均等レコード)}</div>
+    <div
+      class="title"
+      on:click={() => (edit不均等レコード = !edit不均等レコード)}
+    >
+      不均等
+    </div>
+    <div>
+      {#if !edit不均等レコード}
+        {unevenRep(不均等レコード)}
+      {:else}<UnevenForm {不均等レコード} onDone={onDone不均等レコード} />{/if}
+    </div>
     {#if kouhiCount > 0}
-      <div class="title" on:click={() => doEdit("公費")}>公費</div>
-      <div>{kouhiRep(負担区分レコード)}</div>
-    {/if}
-  </div>
-  <div>
-    {#if edit === "剤形区分"}
-      <div class="edit-title">剤形区分</div>
-      <EditZaikeiKubunForm {剤形区分} onDone={onDone剤形区分} />
-    {:else if edit === "調剤数量"}
-      <div class="edit-title">調剤数量</div>
-      <EditChouzaiSuuryouForm {調剤数量} onDone={onDone調剤数量} />
-    {:else if edit === "薬品補足"}
-      <div class="edit-title">薬品補足</div>
-      <DrugAdditionForm {薬品補足レコード} onDone={onDone薬品補足レコード} />
-    {:else if edit === "用法レコード"}
-      <div class="edit-title">用法</div>
-      <EditUsageForm 用法={用法レコード} onDone={onDone用法} />
-    {:else if edit === "用法補足レコード"}
-      <div class="edit-title">用法補足</div>
-      <UsageAdditionForm {用法補足レコード} onDone={onDone用法補足レコード} />
-    {:else if edit === "情報区分"}
-      <div class="edit-title">情報区分</div>
-      <JohoKubunForm {情報区分} onDone={onDone情報区分} />
-    {:else if edit === "薬剤種別"}
-      <div class="edit-title">薬剤種別</div>
-      <DrugKindForm {drugKind} {at} onDone={onDone薬剤種別} />
-    {:else if edit === "用量"}
-      <div class="edit-title">用量</div>
-      <AmountForm {amount} unit={drugKind?.単位名 ?? ""} onDone={onDone用量} />
-    {:else if edit === "不均等レコード"}
-      <div class="edit-title">不均等</div>
-      <UnevenForm {不均等レコード} onDone={onDone不均等レコード} />
-    {:else if edit === "公費"}
-      <div class="edit-title">公費</div>
-      <KouhiForm
-        {負担区分レコード}
-        {kouhiCount}
-        onDone={onDone負担区分レコード}
-      />
+      <div
+        class="title"
+        on:click={() => (edit負担区分レコード = !edit負担区分レコード)}
+      >
+        公費
+      </div>
+      <div>
+        {#if !edit負担区分レコード}
+          {kouhiRep(負担区分レコード)}
+        {:else}<KouhiForm
+            {負担区分レコード}
+            {kouhiCount}
+            onDone={onDone負担区分レコード}
+          />{/if}
+      </div>
     {/if}
   </div>
   <div style="margin-top:10px;padding:10px;text-align:right;">

@@ -12,16 +12,6 @@
     kouhi1Checked = 負担区分レコード.第一公費負担区分 ?? false;
     kouhi2Checked = 負担区分レコード.第二公費負担区分 ?? false;
     kouhi3Checked = 負担区分レコード.第三公費負担区分 ?? false;
-  } else {
-    if( kouhiCount >= 1 ){
-      kouhi1Checked = true;
-    }
-    if( kouhiCount >= 2 ){
-      kouhi2Checked = true;
-    }
-    if( kouhiCount >= 3 ){
-      kouhi3Checked = true;
-    }
   }
 
   function doEnter() {

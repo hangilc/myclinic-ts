@@ -65,12 +65,7 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   <div>
-    <input
-      type="radio"
-      bind:group={mode}
-      value="master"
-      on:change={setFocus}
-    />
+    <input type="radio" bind:group={mode} value="master" on:change={setFocus} />
     マスター
     <input
       type="radio"
@@ -88,7 +83,9 @@
         style="width:22em;"
       />
     </form>
-    <div style="max-height:10em;overflow-y:auto;">
+    <div
+      style="height:10em;overflow-y:auto;reize:vertical;font-size: 14px;margin-top:6px;border:1px solid gray;"
+    >
       {#each usageSearchResult as result (result.usage_code)}
         <div
           style="cursor:pointer;"
@@ -100,7 +97,12 @@
     </div>
   {:else if mode === "free-style"}
     <form on:submit|preventDefault={doFreeText}>
-      <input type="text" bind:value={freeText} bind:this={freeTextElement} style="width:22em;"/>
+      <input
+        type="text"
+        bind:value={freeText}
+        bind:this={freeTextElement}
+        style="width:22em;"
+      />
     </form>
   {/if}
 </div>

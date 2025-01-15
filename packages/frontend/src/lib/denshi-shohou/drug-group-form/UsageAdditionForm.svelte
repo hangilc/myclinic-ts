@@ -61,7 +61,7 @@
 </script>
 
 <div>
-  <ul>
+  <ul style="margin-top:0;margin-bottom:0;">
     {#each 用法補足レコード as rec}
       <li>{rec.用法補足区分}：{rec.用法補足情報}
         <a href="javascript:void(0)" on:click={() => doDelete(rec)}>削除</a>

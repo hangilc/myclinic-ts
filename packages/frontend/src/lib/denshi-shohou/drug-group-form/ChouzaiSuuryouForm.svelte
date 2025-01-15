@@ -3,6 +3,7 @@
   import { onMount } from "svelte";
 
   export let 調剤数量: number | undefined = undefined;
+  export let unit: string;
   export let onDone: (value: number) => void;
 
   let input = 調剤数量 == undefined ? "" : 調剤数量.toString();
@@ -22,5 +23,5 @@
   }
 </script>
 <form on:submit|preventDefault={doEnter}>
-  <input type="text" bind:value={input} bind:this={element}/>
+  <input type="text" bind:value={input} bind:this={element} style="width:5em"/> {unit}
 </form>

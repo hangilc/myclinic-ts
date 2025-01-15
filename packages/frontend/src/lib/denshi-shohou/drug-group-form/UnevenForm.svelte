@@ -91,35 +91,35 @@
 </script>
 
 <div>
-  <div>
+  <div class="input-row">
     １回目服用量 <input
       type="text"
       bind:value={不均等１回目服用量}
       style="width:4em"
     />
   </div>
-  <div>
+  <div class="input-row">
     ２回目服用量 <input
       type="text"
       bind:value={不均等２回目服用量}
       style="width:4em"
     />
   </div>
-  <div>
+  <div class="input-row">
     ３回目服用量 <input
       type="text"
       bind:value={不均等３回目服用量}
       style="width:4em"
     />
   </div>
-  <div>
+  <div class="input-row">
     ４回目服用量 <input
       type="text"
       bind:value={不均等４回目服用量}
       style="width:4em"
     />
   </div>
-  <div>
+  <div class="input-row">
     ５回目服用量 <input
       type="text"
       bind:value={不均等５回目服用量}
@@ -131,3 +131,9 @@
   <button on:click={doClear}>不均等クリア</button>
   <button on:click={doEnter}>不均等設定</button>
 </div>
+
+<style>
+  .input-row {
+    margin: 4px 0;
+  }
+</style>
