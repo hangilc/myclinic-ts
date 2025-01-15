@@ -25,16 +25,27 @@
 
   export let at: string;
   export let kouhiCount: number;
-  let 剤形区分: 剤形区分 = "内服";
-  let 調剤数量: number | undefined = undefined;
-  let 用法レコード: 用法レコード | undefined = undefined;
-  let 用法補足レコード: 用法補足レコード[] = [];
-  let 情報区分: 情報区分 = "医薬品";
-  let drugKind: DrugKind | undefined = undefined;
-  let amount: number | undefined = undefined;
-  let 不均等レコード: 不均等レコード | undefined = undefined;
-  let 負担区分レコード: 負担区分レコード | undefined = undefined;
-  let 薬品補足レコード: 薬品補足レコード[] | undefined = undefined;
+  export let init: {
+    剤形区分?: 剤形区分;
+    調剤数量?: number;
+    用法レコード?: 用法レコード;
+    用法補足レコード?: 用法補足レコード[];
+    情報区分?: 情報区分;
+    薬品レコード?: 薬品レコード;
+    不均等レコード?: 不均等レコード;
+    負担区分レコード?: 負担区分レコード;
+    薬品補足レコード?: 薬品補足レコード[];
+  };
+  let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
+  let 調剤数量: number | undefined = init.調剤数量;
+  let 用法レコード: 用法レコード | undefined = init.用法レコード;
+  let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
+  let 情報区分: 情報区分 = init.情報区分 ?? "医薬品";
+  let drugKind: DrugKind | undefined = drugKindFromInit();
+  let amount: number | undefined = amountFromInit();
+  let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;
+  let 負担区分レコード: 負担区分レコード | undefined = init.負担区分レコード;
+  let 薬品補足レコード: 薬品補足レコード[] | undefined = init.薬品補足レコード;
 
   let edit剤形区分 = false;
   let edit調剤数量 = false;
@@ -46,6 +57,33 @@
   let edit不均等レコード = false;
   let edit負担区分レコード = false;
   let edit薬品補足レコード = false;
+
+  function drugKindFromInit(): DrugKind | undefined {
+    if (init?.薬品レコード) {
+      const rec = init.薬品レコード;
+      if (rec.薬品コード種別 && rec.薬品コード && rec.薬品名称 && rec.単位名) {
+        return {
+          薬品コード種別: rec.薬品コード種別,
+          薬品コード: rec.薬品コード,
+          薬品名称: rec.薬品名称,
+          単位名: rec.単位名,
+        };
+      } else {
+        return undefined;
+      }
+    } else {
+      return undefined;
+    }
+  }
+
+  function amountFromInit(): number | undefined {
+    if (init?.薬品レコード?.分量) {
+      const n = parseFloat(init.薬品レコード?.分量);
+      return isNaN(n) ? undefined : n;
+    } else {
+      return undefined;
+    }
+  }
 
   function doEnter() {
     if (調剤数量 == undefined) {
@@ -87,11 +125,13 @@
       薬品レコード,
       不均等レコード,
     };
+    if (用法補足レコード && 用法補足レコード.length === 0) {
+      用法補足レコード = undefined;
+    }
     const rp: RP剤情報 = {
       剤形レコード,
       用法レコード,
-      用法補足レコード:
-        用法補足レコード.length === 0 ? undefined : 用法補足レコード,
+      用法補足レコード,
       薬品情報グループ: [薬品情報],
     };
     console.log("RP剤情報", rp);
@@ -162,7 +202,7 @@
     edit用法レコード = false;
   }
 
-  function onDone用法補足レコード(value: 用法補足レコード[]) {
+  function onDone用法補足レコード(value: 用法補足レコード[] | undefined) {
     用法補足レコード = value;
     edit用法補足レコード = false;
   }
@@ -295,11 +335,13 @@
     </div>
     <div>
       {#if !edit用法補足レコード}
-        <ul style="margin-top:0;margin-bottom:0;">
-          {#each 用法補足レコード as hosoku}
-            <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
-          {/each}
-        </ul>
+        {#if 用法補足レコード}
+          <ul style="margin-top:0;margin-bottom:0;">
+            {#each 用法補足レコード as hosoku}
+              <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
+            {/each}
+          </ul>
+        {/if}
       {:else}<UsageAdditionForm
           {用法補足レコード}
           onDone={onDone用法補足レコード}

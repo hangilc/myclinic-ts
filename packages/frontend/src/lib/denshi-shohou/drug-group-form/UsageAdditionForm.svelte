@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import type { 用法補足レコード } from "../presc-info";
 
-  export let 用法補足レコード: 用法補足レコード[];
-  export let onDone: (value: 用法補足レコード[]) => void;
+  export let 用法補足レコード: 用法補足レコード[] | undefined;
+  export let onDone: (value: 用法補足レコード[] | undefined) => void;
   let inputElement: HTMLInputElement;
   let kubun:
     | "漸減"
@@ -28,7 +28,7 @@
       setFocus();
     } else {
       onDone([
-        ...用法補足レコード,
+        ...(用法補足レコード ?? []),
         {
           用法補足区分: kubun,
           用法補足情報: kubun,
@@ -45,7 +45,7 @@
         return;
       }
       onDone([
-        ...用法補足レコード,
+        ...(用法補足レコード ?? []),
         {
           用法補足区分: kubun,
           用法補足情報: t,
@@ -55,19 +55,22 @@
   }
 
   function doDelete(rec: 用法補足レコード) {
-    const recs = [...用法補足レコード].filter(r => r !== rec);
-    onDone(recs);
+    const recs = [...(用法補足レコード ?? [])].filter((r) => r !== rec);
+    onDone(recs.length === 0 ? undefined : recs);
   }
 </script>
 
 <div>
-  <ul style="margin-top:0;margin-bottom:0;">
-    {#each 用法補足レコード as rec}
-      <li>{rec.用法補足区分}：{rec.用法補足情報}
-        <a href="javascript:void(0)" on:click={() => doDelete(rec)}>削除</a>
-      </li>
-    {/each}
-  </ul>
+  {#if 用法補足レコード}
+    <ul style="margin-top:0;margin-bottom:0;">
+      {#each 用法補足レコード as rec}
+        <li>
+          {rec.用法補足区分}：{rec.用法補足情報}
+          <a href="javascript:void(0)" on:click={() => doDelete(rec)}>削除</a>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </div>
 <div class="option-wrapper">
   <span

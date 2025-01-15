@@ -30,6 +30,8 @@
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   const freeStyleUsageCode = "0X0XXXXXXXXX0000";
+  let mode: "edit-drug" | undefined = undefined;
+  let editedSource: Source | undefined = undefined;
 
   console.log("source", source);
 
@@ -118,9 +120,9 @@
 
   function doSourceSelect(src: Source) {
     if (src.kind === "parsed") {
-      drugSearchText = src.name;
       selectedSourceIndex = src.id;
-      trySetTargetUsage(src.usage);
+      editedSource = src;
+      mode = "edit-drug";
     }
   }
 
@@ -154,7 +156,7 @@
 
   function targetUsageRep(target: TargetUsage | undefined): string {
     if (target) {
-      switch(target.kind) {
+      switch (target.kind) {
         case "master": {
           return target.master.usage_name;
         }
@@ -188,71 +190,28 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <Dialog title="処方箋電子変換" {destroy} styleWidth="600px">
-  <div style="display:grid;grid-template-columns:200px 1fr;gap:6px;">
+  <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
     <div style="font-size:14px;">
       {#each sourceList as source (source.id)}
-        {#if source.kind === "parsed"}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div
-            class="source"
-            class:selected={source.id === selectedSourceIndex}
-            on:click={() => doSourceSelect(source)}
-          >
+        <div
+          class="drug"
+          class:selected={source.id === selectedSourceIndex}
+          on:click={() => doSourceSelect(source)}
+        >
+          {#if source.kind === "parsed"}
             <div>{source.name}</div>
             <div>{source.amount}</div>
             <div>{source.usage}</div>
-          </div>
-        {:else}
-          <div>DATA</div>
-        {/if}
+          {/if}
+        </div>
       {/each}
     </div>
     <div>
-      <DrugGroupForm {at} {kouhiCount} />
-      <!-- <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
-        <div>薬剤名</div>
-        <div>{targetIyakuhinMaster ? targetIyakuhinMaster.name : ""}</div>
-        <div>分量</div>
-        <div>
-          <input type="text" style="width:3em" bind:value={targetAmount} />
-          {targetAmountUnit}
-        </div>
-        <div>用法</div>
-        <div>{targetUsageRep(targetUsage)}</div>
-      </div>
-      <div style="text-align:right;">
-        <button on:click={doRegister}>追加</button>
-      </div>
-      <hr style="margin:10px 0;grid-column:span 2;" />
-      <div style="font-weight:bold;">薬剤選択</div>
-      <div>
-        <input type="text" bind:value={drugSearchText} />
-        <button on:click={doSearchDrug}>検索</button>
-        <div>
-          {#each drugSearchResult as result (result.iyakuhincode)}
-            <div
-              style="cursor:pointer;"
-              on:click={() => doIyakuhinMasterSelect(result)}
-            >
-              {result.name}
-            </div>
-          {/each}
-        </div>
-      </div>
-      <div style="font-weight:bold;">用法選択</div>
-      <div>
-        <input type="text" bind:value={usageSearchText} />
-        <button on:click={doSearchUsage}>検索</button>
-        {#each usageSearchResult as result (result.usage_code)}
-          <div
-            style="cursor:pointer;"
-            on:click={() => doUsageMasterSelect(result)}
-          >
-            {result.usage_name}
-          </div>
-        {/each} 
-      </div> -->
+      {#if mode === "edit-drug" && editedSource}
+        <DrugGroupForm {at} {kouhiCount} init={({})}/>
+      {/if}
     </div>
   </div>
   <div style="text-align:right;">
@@ -261,12 +220,20 @@
 </Dialog>
 
 <style>
-  .source {
+  .drug {
     border: 1px solid gray;
     border-radius: 4px;
     margin: 6px 0;
     padding: 6px;
     cursor: pointer;
+  }
+
+  .drug:first-of-type {
+    margin-top: 0;
+  }
+
+  .drug:last-of-type {
+    margin-bottom: 0;
   }
 
   .selected {
