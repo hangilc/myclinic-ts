@@ -16,6 +16,7 @@
     用法補足レコード,
     不均等レコード,
     負担区分レコード,
+    薬品補足レコード,
   } from "./presc-info";
   import UsageAdditionForm from "./drug-group-form/UsageAdditionForm.svelte";
   import JohoKubunForm from "./drug-group-form/JohoKubunForm.svelte";
@@ -23,6 +24,7 @@
   import AmountForm from "./drug-group-form/AmountForm.svelte";
   import UnevenForm from "./drug-group-form/UnevenForm.svelte";
   import KouhiForm from "./drug-group-form/KouhiForm.svelte";
+  import DrugAdditionForm from "./drug-group-form/DrugAdditionForm.svelte";
 
   export let at: string;
   export let kouhiCount: number;
@@ -35,6 +37,7 @@
   let amount: number | undefined = undefined;
   let 不均等レコード: 不均等レコード | undefined = undefined;
   let 負担区分レコード: 負担区分レコード | undefined = undefined;
+  let 薬品補足レコード: 薬品補足レコード[] | undefined = undefined;
   let edit: EditMode | undefined = undefined;
 
   function doEnter() {
@@ -189,6 +192,11 @@
     負担区分レコード = value;
     edit = undefined;
   }
+
+  function onDone薬品補足レコード(value: 薬品補足レコード[] | undefined) {
+    薬品補足レコード = value;
+    edit = undefined;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -202,6 +210,14 @@
     <div>{drugKind ? drugKind.薬品名称 : ""}</div>
     <div class="title" on:click={() => doEdit("用量")}>用量</div>
     <div>{amount ?? ""} {drugKind?.単位名 ?? ""}</div>
+    <div class="title" on:click={() => doEdit("薬品補足")}>薬品補足</div>
+    <div>
+      <ul style="margin-top:0;margin-bottom:0">
+      {#each 薬品補足レコード ?? [] as rec}
+        <li>{rec.薬品補足情報}</li>
+      {/each}
+    </ul>
+    </div>
     <div class="title" on:click={() => doEdit("用法レコード")}>用法</div>
     <div>
       {#if 用法レコード}
@@ -236,6 +252,9 @@
     {:else if edit === "調剤数量"}
       <div class="edit-title">調剤数量</div>
       <EditChouzaiSuuryouForm {調剤数量} onDone={onDone調剤数量} />
+    {:else if edit === "薬品補足"}
+      <div class="edit-title">薬品補足</div>
+      <DrugAdditionForm {薬品補足レコード} onDone={onDone薬品補足レコード} />
     {:else if edit === "用法レコード"}
       <div class="edit-title">用法</div>
       <EditUsageForm 用法={用法レコード} onDone={onDone用法} />
