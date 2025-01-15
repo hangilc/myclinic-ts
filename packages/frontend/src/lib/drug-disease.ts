@@ -14,11 +14,8 @@ export function hasMatchingDrugDisease(
   const fixes: { pre: string[], name: string, post: string[] }[] = [];
   for (let item of drugDiseases) {
     if (drugName.includes(item.drugName)) {
-      console.log("item", item.drugName, drugName);
       for (let diseaseName of diseaseNames) {
-        console.log("disease", diseaseName, item.diseaseName);
         if (item.diseaseName.includes(diseaseName)) {
-          console.log("returning true", diseaseName, item);
           return true;
         }
       }

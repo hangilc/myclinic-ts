@@ -63,11 +63,11 @@ export class DiseaseEnv {
     this.drugsWithoutMatchingDisease = [];
     const texts = this.checkingVisits.flatMap((visit) => visit.texts) ?? [];
     const drugNames: string[] = extractDrugNames(texts);
+    console.log("drugNames", drugNames);
     const diseaseNames: string[] =
       this.currentList.filter(hasNoSusp).map((disease) => {
         return disease.byoumeiMaster.name;
       });
-    console.log("diseaseNames", diseaseNames);
     for (let drugName of drugNames) {
       const m = hasMatchingDrugDisease(drugName, diseaseNames, await cache.getDrugDiseases());
       if (m === true) {
@@ -143,12 +143,23 @@ export class DiseaseEnv {
       adjNames: string[]
     ): Promise<void> {
       const result = await enterDiseaseByNames(patientId, at, diseaseName, adjNames);
-      if( typeof result === "string" ){
+      if (typeof result === "string") {
         alert(result);
         throw new Error(result);
       }
     }
     return { enterDisease };
+  }
+
+  async changeModeTo(changingTo: Mode) {
+    const prev = this.mode;
+    if (prev === "edit" && changingTo !== "edit") {
+      this.allList = [];
+    }
+    if (changingTo === "edit") {
+      await this.fetchAllList();
+    }
+    this.mode = changingTo;
   }
 
   static async create(patient: Patient, checkingDate?: string): Promise<DiseaseEnv> {
@@ -225,9 +236,9 @@ async function loadCheckingVisits(patientId: number, checkingDate?: string):
 }
 
 function hasNoSusp(disease: DiseaseData): boolean {
-  for(let adj of disease.adjList){
+  for (let adj of disease.adjList) {
     const [_, master] = adj;
-    if( master.name === "の疑い" ){
+    if (master.name === "の疑い") {
       return false;
     }
   }

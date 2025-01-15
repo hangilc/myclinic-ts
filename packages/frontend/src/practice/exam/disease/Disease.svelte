@@ -111,14 +111,7 @@
   async function doChangeMode(mode: Mode) {
     const e = $env;
     if( e ){
-      const prev = e.mode;
-      if( prev === "edit" && mode !== "edit" ){
-        e.allList = [];
-      }
-      if (mode === "edit") {
-        await e.fetchAllList();
-      }
-      e.mode = mode;
+      await e.changeModeTo(mode);
       $env = e;
     }
   }

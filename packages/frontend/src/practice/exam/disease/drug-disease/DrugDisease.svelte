@@ -24,12 +24,12 @@
     const diseaseEntered = await addDiseaseByFix(fix);
     const cur = $env;
     if (cur) {
-      await cur.checkDrugs();
       if (diseaseEntered) {
         await cur.updateCurrentList();
         await cur.updateAllList();
         await cur.checkShinryou();
       }
+      await cur.checkDrugs();
       $env = cur;
     }
   }
