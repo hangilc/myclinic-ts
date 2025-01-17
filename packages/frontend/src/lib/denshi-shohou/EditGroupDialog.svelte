@@ -61,7 +61,7 @@
         destroy: () => d.$destroy(),
         onEnter: (text) => {
           usageRecord = {
-            用法コード: "“ 0X0XXXXXXXXX0000",
+            用法コード: "0X0XXXXXXXXX0000",
             用法名称: text,
           };
         },
