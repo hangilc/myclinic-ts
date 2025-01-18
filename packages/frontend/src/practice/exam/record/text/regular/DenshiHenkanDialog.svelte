@@ -12,6 +12,8 @@
   import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
   import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
+  import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
+  import { tick } from "svelte";
 
   export let destroy: () => void;
   export let source: Shohousen;
@@ -31,9 +33,7 @@
   let usageSearchResult: UsageMaster[] = [];
   const freeStyleUsageCode = "0X0XXXXXXXXX0000";
   let mode: "edit-drug" | undefined = undefined;
-  let editedSource: Source | undefined = undefined;
-
-  console.log("source", source);
+  let editedSource: DrugGroupFormInit = {};
 
   function compileResult(): RP剤情報[] {
     const rps: RP剤情報[] = [];
@@ -118,10 +118,39 @@
     }
   }
 
-  function doSourceSelect(src: Source) {
+  function resolveParsed剤型区分(times: string | undefined): 剤形区分 | undefined {
+    if( times ){
+      if( times.indexOf("日分") > 0 ){
+        return "内服";
+      } else if( times.indexOf("回分") > 0 ){
+        return "頓服";
+      } else {
+        return "外用";
+      }
+    } else {
+      return "外用";
+    }
+  }
+
+  function sourceToInit(src: Source): DrugGroupFormInit {
+    switch(src.kind) {
+      case "parsed": {
+        return {
+          剤形区分: resolveParsed剤型区分(src.times),
+        };
+      }
+      default: {
+        return {};
+      }
+    }
+  }
+
+  async function doSourceSelect(src: Source) {
     if (src.kind === "parsed") {
       selectedSourceIndex = src.id;
-      editedSource = src;
+      editedSource = sourceToInit(src);
+      mode = undefined;
+      await tick();
       mode = "edit-drug";
     }
   }
@@ -210,7 +239,7 @@
     </div>
     <div>
       {#if mode === "edit-drug" && editedSource}
-        <DrugGroupForm {at} {kouhiCount} init={({})}/>
+        <DrugGroupForm {at} {kouhiCount} init={editedSource}/>
       {/if}
     </div>
   </div>

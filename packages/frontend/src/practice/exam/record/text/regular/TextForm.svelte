@@ -429,6 +429,7 @@
 
   async function doShohouConv() {
     const parsed = parseShohousen(text.content);
+    console.log("parsed", parsed);
     const visit = await api.getVisit(text.visitId);
     const kouhiCount = kouhiCountOfVisit(visit);
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({

@@ -22,20 +22,22 @@
   import UnevenForm from "./drug-group-form/UnevenForm.svelte";
   import KouhiForm from "./drug-group-form/KouhiForm.svelte";
   import DrugAdditionForm from "./drug-group-form/DrugAdditionForm.svelte";
+  import type { DrugGroupFormInit } from "./drug-group-form-types";
 
   export let at: string;
   export let kouhiCount: number;
-  export let init: {
-    剤形区分?: 剤形区分;
-    調剤数量?: number;
-    用法レコード?: 用法レコード;
-    用法補足レコード?: 用法補足レコード[];
-    情報区分?: 情報区分;
-    薬品レコード?: 薬品レコード;
-    不均等レコード?: 不均等レコード;
-    負担区分レコード?: 負担区分レコード;
-    薬品補足レコード?: 薬品補足レコード[];
-  };
+  export let init: DrugGroupFormInit;
+  // {
+  //   剤形区分?: 剤形区分;
+  //   調剤数量?: number;
+  //   用法レコード?: 用法レコード;
+  //   用法補足レコード?: 用法補足レコード[];
+  //   情報区分?: 情報区分;
+  //   薬品レコード?: 薬品レコード;
+  //   不均等レコード?: 不均等レコード;
+  //   負担区分レコード?: 負担区分レコード;
+  //   薬品補足レコード?: 薬品補足レコード[];
+  // };
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
   let 調剤数量: number | undefined = init.調剤数量;
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
