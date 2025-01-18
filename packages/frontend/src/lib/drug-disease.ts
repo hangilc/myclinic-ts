@@ -12,10 +12,13 @@ export function hasMatchingDrugDisease(
   drugName: string, diseaseNames: string[], drugDiseases: DrugDisease[]
 ): true | { pre: string[], name: string, post: string[] }[] {
   const fixes: { pre: string[], name: string, post: string[] }[] = [];
+  const debug =  false;
+  if( debug ){ console.log("drugName", drugName)}
   for (let item of drugDiseases) {
     if (drugName.includes(item.drugName)) {
+      if( debug ) { console.log("name match", item); }
       for (let diseaseName of diseaseNames) {
-        if (item.diseaseName.includes(diseaseName)) {
+        if (diseaseName.includes(item.diseaseName)) {
           return true;
         }
       }

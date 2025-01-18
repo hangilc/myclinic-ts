@@ -63,7 +63,6 @@ export class DiseaseEnv {
     this.drugsWithoutMatchingDisease = [];
     const texts = this.checkingVisits.flatMap((visit) => visit.texts) ?? [];
     const drugNames: string[] = extractDrugNames(texts);
-    console.log("drugNames", drugNames);
     const diseaseNames: string[] =
       this.currentList.filter(hasNoSusp).map((disease) => {
         return disease.byoumeiMaster.name;

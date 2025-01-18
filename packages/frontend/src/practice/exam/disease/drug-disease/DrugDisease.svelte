@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Writable } from "svelte/store";
   import type { DiseaseEnv } from "../disease-env";
-  import type { DiseaseEnterData, ShuushokugoMaster } from "myclinic-model";
   import api from "@/lib/api";
   import SelectrDiseaseForDrugDialog from "./SelectDiseaseForDrugDialog.svelte";
   import EditDrugDiseaseDialog from "./EditDrugDiseaseDialog.svelte";
