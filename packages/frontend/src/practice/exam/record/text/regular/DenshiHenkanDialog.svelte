@@ -62,6 +62,9 @@
         throw new Error("empty RP剤情報");
       }
       let needUpdate = false;
+      if( editedSource.薬品レコード ){
+        needUpdate = 
+      }
       if( editedSource.薬品レコード && !isEqual薬品レコード(editedSource.薬品レコード, rec)) {
 
       }
