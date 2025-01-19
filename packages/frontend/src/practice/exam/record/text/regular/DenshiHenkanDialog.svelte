@@ -4,17 +4,24 @@
   import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
   import type { Source, TargetUsage } from "./denshi-henkan-dialog-types";
   import api from "@/lib/api";
-  import type {
-    RP剤情報,
-    剤形レコード,
-    用法レコード,
+  import {
+  isEqual薬品レコード,
+    type RP剤情報,
+    type 剤形レコード,
+    type 用法レコード,
+    type 薬品レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import { freeStyleUsageCode, type 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import {
+    freeStyleUsageCode,
+    type 剤形区分,
+  } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
   import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
   import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
   import { tick } from "svelte";
   import { cache } from "@/lib/cache";
+  import { searchForWorkspaceRoot } from "vite";
+  import type { DrugKind } from "@/lib/denshi-shohou/drug-group-form/drug-group-form-types";
 
   export let destroy: () => void;
   export let source: Shohousen;
@@ -38,12 +45,25 @@
   sourceList = shohousenToSourceList(source);
 
   async function onFormEnter(rp: RP剤情報) {
-    if( editedSource.用法レコード && editedSource.用法レコード.用法コード === freeStyleUsageCode ) {
-      if( rp.用法レコード.用法コード !== freeStyleUsageCode ) {
+    if (
+      editedSource.用法レコード &&
+      editedSource.用法レコード.用法コード === freeStyleUsageCode
+    ) {
+      if (rp.用法レコード.用法コード !== freeStyleUsageCode) {
         const u = editedSource.用法レコード.用法名称;
         const map = await cache.getUsageMasterMap();
         map[u] = Object.assign({}, rp.用法レコード);
-        await cache.setUsageMasterAMap(map);
+        await cache.setUsageMasterMap(map);
+      }
+    }
+    {
+      const rec: 薬品レコード | undefined = rp.薬品情報グループ[0].薬品レコード;
+      if( rec === undefined ){
+        throw new Error("empty RP剤情報");
+      }
+      let needUpdate = false;
+      if( editedSource.薬品レコード && !isEqual薬品レコード(editedSource.薬品レコード, rec)) {
+
       }
     }
   }
@@ -174,7 +194,53 @@
 
   function resolveParsedAmount(amount: string): number | undefined {
     const a = parseFloat(toHankaku(amount));
-    return isNaN(a) ? undefined: a;
+    return isNaN(a) ? undefined : a;
+  }
+
+  async function resolveParsedIyakuhin(
+    name: string,
+    amount: string
+  ): Promise<
+    | { 薬品レコード: 薬品レコード }
+    | { drugKind: DrugKind }
+    | { iyakuhinSearchText: string; amount: number | undefined }
+  > {
+    const amountValue = resolveParsedAmount(amount);
+    const map = await cache.getDrugNameMap();
+    const bind = map[name];
+    if (bind) {
+      if (bind.codeKind === "レセプト電算処理システム用コード") {
+        const master = await api.getIyakuhinMaster(parseInt(bind.code), at);
+        if (master) {
+          if (amountValue !== undefined) {
+            return {
+              薬品レコード: {
+                情報区分: "医薬品",
+                薬品コード種別: "レセプト電算処理システム用コード",
+                薬品コード: master.iyakuhincode.toString(),
+                薬品名称: master.name,
+                分量: amount.toString(),
+                力価フラグ: "薬価単位",
+                単位名: master.unit,
+              },
+            };
+          } else {
+            return {
+              drugKind: {
+                薬品コード種別: "レセプト電算処理システム用コード",
+                薬品コード: master.iyakuhincode.toString(),
+                薬品名称: master.name,
+                単位名: master.unit,
+              },
+            };
+          }
+        }
+      }
+    }
+    return {
+      iyakuhinSearchText: name,
+      amount: amountValue,
+    };
   }
 
   async function sourceToInit(src: Source): Promise<DrugGroupFormInit> {
@@ -185,7 +251,7 @@
           剤形区分: resolveParsed剤型区分(src.times),
           調剤数量: resolveParsed調剤数量(src.times),
           用法レコード: await resolveParsed用法レコード(src.usage),
-          amount,
+          ...(await resolveParsedIyakuhin(src.name, src.amount)),
         };
       }
       default: {
@@ -282,7 +348,12 @@
     </div>
     <div>
       {#if mode === "edit-drug" && editedSource}
-        <DrugGroupForm {at} {kouhiCount} init={editedSource} onEnter={onFormEnter}/>
+        <DrugGroupForm
+          {at}
+          {kouhiCount}
+          init={editedSource}
+          onEnter={onFormEnter}
+        />
       {/if}
     </div>
   </div>

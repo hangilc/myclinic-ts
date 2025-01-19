@@ -3,6 +3,7 @@ import api from "./api";
 import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
 import type { DrugDisease } from "./drug-disease";
 import type { ShinryouDisease } from "./shinryou-disease";
+import type { 薬品コード種別 } from "./denshi-shohou/denshi-shohou";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -15,6 +16,8 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
+let drugNameMap: Record<string, { codeKind: 薬品コード種別, code: string }> | undefined
+  = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -78,7 +81,7 @@ export const cache = {
   clearShohouFreqUsage() {
     shohouFreqUsage = undefined;
   },
-  
+
   async getOnshiViewSecret(): Promise<string> {
     if (onshiViewSecret === undefined) {
       onshiViewSecret = await api.dictGet("onshi-secret");
@@ -87,7 +90,7 @@ export const cache = {
   },
 
   async getDrugDiseases(): Promise<DrugDisease[]> {
-    if( drugDiseases === undefined ){
+    if (drugDiseases === undefined) {
       drugDiseases = await api.getDrugDiseases();
     }
     return drugDiseases;
@@ -98,7 +101,7 @@ export const cache = {
   },
 
   async getShinryouDiseases(): Promise<ShinryouDisease[]> {
-    if( shinryouDiseases === undefined ){
+    if (shinryouDiseases === undefined) {
       shinryouDiseases = await api.getShinryouDiseases();
     }
     return shinryouDiseases;
@@ -110,7 +113,7 @@ export const cache = {
   },
 
   async getHokengaiHistory(): Promise<string[]> {
-    if( hokengaiHistory === undefined ){
+    if (hokengaiHistory === undefined) {
       hokengaiHistory = await api.getHokengaiHistory();
     }
     return hokengaiHistory;
@@ -121,23 +124,37 @@ export const cache = {
   },
 
   async getDiseaseExamples(): Promise<DiseaseExample[]> {
-    if( diseaseExamples === undefined ){
+    if (diseaseExamples === undefined) {
       diseaseExamples = await api.listDiseaseExample();
     }
     return diseaseExamples;
   },
 
   async getUsageMasterMap(): Promise<Record<string, 用法レコード>> {
-    if( usageMasterMap === undefined ){
+    if (usageMasterMap === undefined) {
       const r: Record<string, 用法レコード> = await api.getUsageMasterMap();
       usageMasterMap = r;
     }
     return usageMasterMap;
   },
 
-  async setUsageMasterAMap(map: Record<string, 用法レコード>) {
+  async setUsageMasterMap(map: Record<string, 用法レコード>) {
     await api.setUsageMasterMap(map);
     usageMasterMap = map;
+  },
+
+  async getDrugNameMap(): Promise<Record<string, { codeKind: 薬品コード種別, code: string }>> {
+    if (drugNameMap === undefined) {
+      const r: Record<string, { codeKind: 薬品コード種別, code: string }> =
+        await api.getDrugNameMap();
+      drugNameMap = r;
+    }
+    return drugNameMap;
+  },
+
+  async setDrugNameMap(map: Record<string, { codeKind: 薬品コード種別, code: string }>) {
+    await api.setDrugNameMap(map);
+    drugNameMap = map;
   },
 
 }

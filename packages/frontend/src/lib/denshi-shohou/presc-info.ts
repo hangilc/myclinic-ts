@@ -1,7 +1,9 @@
-import { DenshiShohou, type 点数表, type 診療科コード, type 診療科コード種別, 
-  type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別, 
-  type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, type 剤形区分, type 用法補足区分, 
-  type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード } from "./denshi-shohou";
+import {
+  DenshiShohou, type 点数表, type 診療科コード, type 診療科コード種別,
+  type 性別コード, type 保険一部負担金区分コード, type 保険種別コード, type 被保険者等種別,
+  type 職務上の事由コード, type 残薬確認対応フラグ, type 備考種別, type 剤形区分, type 用法補足区分,
+  type 情報区分, type 薬品コード種別, type 力価フラグ, type 薬品補足区分, tryCastTo薬品補足区分, type 都道府県コード
+} from "./denshi-shohou";
 
 export interface PrescInfoData {
   医療機関コード種別: 点数表;
@@ -106,11 +108,11 @@ export const 用法補足レコードObject = {
   },
 
   isEqualArray(as: 用法補足レコード[], bs: 用法補足レコード[]): boolean {
-    if( as.length !== bs.length ){
+    if (as.length !== bs.length) {
       return false;
     }
-    for(let i=0;i<as.length;i++){
-      if( !用法補足レコードObject.isEqual(as[i], bs[i]) ){
+    for (let i = 0; i < as.length; i++) {
+      if (!用法補足レコードObject.isEqual(as[i], bs[i])) {
         return false;
       }
     }
@@ -135,6 +137,16 @@ export interface 薬品レコード {
   分量: string;
   力価フラグ: 力価フラグ;
   単位名: string;
+}
+
+export function isEqual薬品レコード(a: 薬品レコード, b: 薬品レコード): boolean {
+  return a.情報区分 === b.情報区分 &&
+    a.薬品コード種別 === b.薬品コード種別 &&
+    a.薬品コード === b.薬品コード &&
+    a.薬品名称 === b.薬品名称 &&
+    a.分量 === b.分量 &&
+    a.力価フラグ === b.力価フラグ &&
+    a.単位名 === b.単位名;
 }
 
 export interface 不均等レコード {
@@ -379,16 +391,16 @@ export class PrescInfoWrapper {
   kouhiCount(): number {
     let c = 0;
     const data = this.shohou;
-    if( data.第一公費レコード ){
+    if (data.第一公費レコード) {
       c += 1;
     }
-    if( data.第二公費レコード ){
+    if (data.第二公費レコード) {
       c += 1;
     }
-    if( data.第三公費レコード ){
+    if (data.第三公費レコード) {
       c += 1;
     }
-    if( data.特殊公費レコード ){
+    if (data.特殊公費レコード) {
       c += 1;
     }
     return c;
@@ -397,13 +409,13 @@ export class PrescInfoWrapper {
   hasMixedKouhi(): boolean {
     const data = this.shohou;
     const nkouhi = this.kouhiCount();
-    if( nkouhi === 0 ){
+    if (nkouhi === 0) {
       return false;
     } else {
-      for(let group of data.RP剤情報グループ){
-        for(let drug of group.薬品情報グループ) {
+      for (let group of data.RP剤情報グループ) {
+        for (let drug of group.薬品情報グループ) {
           let ndk = new 薬品情報Wrapper(drug).countKouhi();
-          if( ndk !== nkouhi ){
+          if (ndk !== nkouhi) {
             return true;
           }
         }
@@ -423,17 +435,17 @@ export class 薬品情報Wrapper {
   countKouhi(): number {
     let ndk = 0; // drug kouhi count
     const drug = this.data;
-    if( drug.負担区分レコード ){
-      if( drug.負担区分レコード.第一公費負担区分 ){
+    if (drug.負担区分レコード) {
+      if (drug.負担区分レコード.第一公費負担区分) {
         ndk += 1;
       }
-      if( drug.負担区分レコード.第二公費負担区分 ){
+      if (drug.負担区分レコード.第二公費負担区分) {
         ndk += 1;
       }
-      if( drug.負担区分レコード.第三公費負担区分 ){
+      if (drug.負担区分レコード.第三公費負担区分) {
         ndk += 1;
       }
-      if( drug.負担区分レコード.特殊公費負担区分 ){
+      if (drug.負担区分レコード.特殊公費負担区分) {
         ndk += 1;
       }
     }
