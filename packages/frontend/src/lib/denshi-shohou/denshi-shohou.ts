@@ -600,6 +600,8 @@ export function tryCastTo薬品補足区分(key: string): 薬品補足区分 | u
   return 薬品補足区分Keys.find(k => k == key);
 }
 
+export const freeStyleUsageCode = "0X0XXXXXXXXX0000";
+
 export const 頻用用法コードMap: {
   [key in "内服" | "頓服" | "外用"]: [string, string, any][]
 } = {

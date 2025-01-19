@@ -1682,6 +1682,14 @@ export default {
     return post("set-config", hokengaiHistory, { name: "hokengai-history" }, a => a)
   },
 
+  getUsageMasterMap(): Promise<any> {
+    return get("get-config", { name: "usage-master-map" }, a => a ?? {});
+  },
+
+  setUsageMasterMap(map: Record<string, 用法レコード>) {
+    return post("set-config", map, { name: "usage-master-map" }, a => a);
+  },
+
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
     return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
   }

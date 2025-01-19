@@ -14,6 +14,7 @@ let drugDiseases: DrugDisease[] | undefined = undefined;
 let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
+let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -124,6 +125,19 @@ export const cache = {
       diseaseExamples = await api.listDiseaseExample();
     }
     return diseaseExamples;
+  },
+
+  async getUsageMasterMap(): Promise<Record<string, 用法レコード>> {
+    if( usageMasterMap === undefined ){
+      const r: Record<string, 用法レコード> = await api.getUsageMasterMap();
+      usageMasterMap = r;
+    }
+    return usageMasterMap;
+  },
+
+  async setUsageMasterAMap(map: Record<string, 用法レコード>) {
+    await api.setUsageMasterMap(map);
+    usageMasterMap = map;
   },
 
 }

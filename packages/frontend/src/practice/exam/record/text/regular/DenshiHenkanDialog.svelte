@@ -9,11 +9,12 @@
     剤形レコード,
     用法レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import { freeStyleUsageCode, type 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
   import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
   import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
   import { tick } from "svelte";
+  import { cache } from "@/lib/cache";
 
   export let destroy: () => void;
   export let source: Shohousen;
@@ -31,9 +32,21 @@
   let drugSearchResult: IyakuhinMaster[] = [];
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
-  const freeStyleUsageCode = "0X0XXXXXXXXX0000";
   let mode: "edit-drug" | undefined = undefined;
   let editedSource: DrugGroupFormInit = {};
+
+  sourceList = shohousenToSourceList(source);
+
+  async function onFormEnter(rp: RP剤情報) {
+    if( editedSource.用法レコード && editedSource.用法レコード.用法コード === freeStyleUsageCode ) {
+      if( rp.用法レコード.用法コード !== freeStyleUsageCode ) {
+        const u = editedSource.用法レコード.用法名称;
+        const map = await cache.getUsageMasterMap();
+        map[u] = Object.assign({}, rp.用法レコード);
+        await cache.setUsageMasterAMap(map);
+      }
+    }
+  }
 
   function compileResult(): RP剤情報[] {
     const rps: RP剤情報[] = [];
@@ -86,43 +99,42 @@
     console.log("RP剤情報", rp);
   }
 
-  source.parts.forEach((part) => {
-    const drugs = part.drugs;
-    const srcUsage = part.usage;
-    let usage: string = "";
-    let times: string | undefined = undefined;
-    if (srcUsage) {
-      usage = srcUsage.usage;
-      times = srcUsage.days;
-    } else if (part.more) {
-      usage = part.more;
-    }
-    drugs.forEach((drug) => {
-      const name = drug.name;
-      const amount = drug.amount;
-      sourceList.push({
-        id: sourceIndex++,
-        kind: "parsed",
-        name,
-        amount,
-        usage,
-        times,
+  function shohousenToSourceList(shohousen: Shohousen): Source[] {
+    const sourceList: Source[] = [];
+    source.parts.forEach((part) => {
+      const drugs = part.drugs;
+      const srcUsage = part.usage;
+      let usage: string = "";
+      let times: string | undefined = undefined;
+      if (srcUsage) {
+        usage = srcUsage.usage;
+        times = srcUsage.days;
+      } else if (part.more) {
+        usage = part.more;
+      }
+      drugs.forEach((drug) => {
+        const name = drug.name;
+        const amount = drug.amount;
+        sourceList.push({
+          id: sourceIndex++,
+          kind: "parsed",
+          name,
+          amount,
+          usage,
+          times,
+        });
       });
     });
-  });
-
-  async function doSearchDrug() {
-    const t = drugSearchText.trim();
-    if (t !== "") {
-      drugSearchResult = await api.searchIyakuhinMaster(t, at);
-    }
+    return sourceList;
   }
 
-  function resolveParsed剤型区分(times: string | undefined): 剤形区分 | undefined {
-    if( times ){
-      if( times.indexOf("日分") > 0 ){
+  function resolveParsed剤型区分(
+    times: string | undefined
+  ): 剤形区分 | undefined {
+    if (times) {
+      if (times.indexOf("日分") > 0) {
         return "内服";
-      } else if( times.indexOf("回分") > 0 ){
+      } else if (times.indexOf("回分") > 0) {
         return "頓服";
       } else {
         return "外用";
@@ -132,11 +144,48 @@
     }
   }
 
-  function sourceToInit(src: Source): DrugGroupFormInit {
-    switch(src.kind) {
+  function resolveParsed調剤数量(
+    times: string | undefined
+  ): number | undefined {
+    if (times) {
+      let m = /([0-9０-９]+)(日|回)分$/.exec(times);
+      if (m) {
+        return parseInt(toHankaku(m[1]));
+      }
+    } else {
+      return undefined;
+    }
+  }
+
+  async function resolveParsed用法レコード(
+    usage: string
+  ): Promise<用法レコード | undefined> {
+    const map = await cache.getUsageMasterMap();
+    const rec = map[usage];
+    if (rec) {
+      return rec;
+    } else {
+      return {
+        用法コード: freeStyleUsageCode,
+        用法名称: usage,
+      };
+    }
+  }
+
+  function resolveParsedAmount(amount: string): number | undefined {
+    const a = parseFloat(toHankaku(amount));
+    return isNaN(a) ? undefined: a;
+  }
+
+  async function sourceToInit(src: Source): Promise<DrugGroupFormInit> {
+    switch (src.kind) {
       case "parsed": {
+        const amount = resolveParsedAmount(src.amount);
         return {
           剤形区分: resolveParsed剤型区分(src.times),
+          調剤数量: resolveParsed調剤数量(src.times),
+          用法レコード: await resolveParsed用法レコード(src.usage),
+          amount,
         };
       }
       default: {
@@ -148,18 +197,11 @@
   async function doSourceSelect(src: Source) {
     if (src.kind === "parsed") {
       selectedSourceIndex = src.id;
-      editedSource = sourceToInit(src);
+      editedSource = await sourceToInit(src);
       mode = undefined;
       await tick();
       mode = "edit-drug";
     }
-  }
-
-  function doIyakuhinMasterSelect(m: IyakuhinMaster) {
-    targetIyakuhinMaster = m;
-    targetAmountUnit = m.unit;
-    drugSearchText = "";
-    drugSearchResult = [];
   }
 
   async function doSearchUsage() {
@@ -233,13 +275,14 @@
             <div>{source.name}</div>
             <div>{source.amount}</div>
             <div>{source.usage}</div>
+            <div>{source.times ?? ""}</div>
           {/if}
         </div>
       {/each}
     </div>
     <div>
       {#if mode === "edit-drug" && editedSource}
-        <DrugGroupForm {at} {kouhiCount} init={editedSource}/>
+        <DrugGroupForm {at} {kouhiCount} init={editedSource} onEnter={onFormEnter}/>
       {/if}
     </div>
   </div>

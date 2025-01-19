@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { 剤形区分, 情報区分 } from "./denshi-shohou";
+  import { freeStyleUsageCode, type 剤形区分, type 情報区分 } from "./denshi-shohou";
   import type { DrugKind } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import EditUsageForm from "./drug-group-form/UsageForm.svelte";
@@ -27,17 +27,7 @@
   export let at: string;
   export let kouhiCount: number;
   export let init: DrugGroupFormInit;
-  // {
-  //   剤形区分?: 剤形区分;
-  //   調剤数量?: number;
-  //   用法レコード?: 用法レコード;
-  //   用法補足レコード?: 用法補足レコード[];
-  //   情報区分?: 情報区分;
-  //   薬品レコード?: 薬品レコード;
-  //   不均等レコード?: 不均等レコード;
-  //   負担区分レコード?: 負担区分レコード;
-  //   薬品補足レコード?: 薬品補足レコード[];
-  // };
+  export let onEnter: (rec: RP剤情報) => void;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
   let 調剤数量: number | undefined = init.調剤数量;
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
@@ -82,6 +72,8 @@
     if (init?.薬品レコード?.分量) {
       const n = parseFloat(init.薬品レコード?.分量);
       return isNaN(n) ? undefined : n;
+    } else if(init?.amount !== undefined) {
+      return init.amount;
     } else {
       return undefined;
     }
@@ -136,7 +128,7 @@
       用法補足レコード,
       薬品情報グループ: [薬品情報],
     };
-    console.log("RP剤情報", rp);
+    onEnter(rp);
   }
 
   function timesRep(kubun: 剤形区分): string {
@@ -312,6 +304,9 @@
       {#if !edit用法レコード}
         {#if 用法レコード}
           {用法レコード.用法名称}
+          {#if 用法レコード.用法コード === freeStyleUsageCode}
+            <span style="font-size:12px;color:green;border:1px solid green;border-radius:3px;padding:2px 4px;">free</span>
+          {/if}
         {/if}
       {:else}<EditUsageForm 用法={用法レコード} onDone={onDone用法} />{/if}
     </div>

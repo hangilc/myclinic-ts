@@ -11,4 +11,6 @@ export interface DrugGroupFormInit {
   不均等レコード?: 不均等レコード;
   負担区分レコード?: 負担区分レコード;
   薬品補足レコード?: 薬品補足レコード[];
+  iyakuhinSearchText?: string;
+  amount?: number;
 }

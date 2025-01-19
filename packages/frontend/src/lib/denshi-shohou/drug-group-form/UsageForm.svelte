@@ -3,10 +3,10 @@
   import type { 用法レコード } from "../presc-info";
   import type { UsageMaster } from "myclinic-model";
   import { onMount } from "svelte";
+  import { freeStyleUsageCode } from "../denshi-shohou";
 
   export let 用法: 用法レコード | undefined;
   export let onDone: (value: 用法レコード) => void;
-  const freeStyleUsageCode = "0X0XXXXXXXXX0000";
   let mode: "master" | "free-style" = "master";
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
