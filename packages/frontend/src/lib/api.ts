@@ -1691,12 +1691,12 @@ export default {
     return post("set-config", map, { name: "usage-master-map" }, a => a);
   },
 
-  getDrugNameMap(): Promise<Record<string, { codeKind: 薬品コード種別, code: string }>> {
-    return get("get-config", { name: "drug-name-map" }, a => a ?? {});
+  getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
+    return get("get-config", { name: "drug-name-iyakuhincode-map" }, a => a ?? {});
   },
 
-  setDrugNameMap(map: Record<string, { codeKind: 薬品コード種別, code: string }>) {
-    return post("set-config", map, { name: "drug-name-map" }, a => a);
+  setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
+    return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, a => {});
   },
 
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {

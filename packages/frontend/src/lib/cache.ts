@@ -16,8 +16,7 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
-let drugNameMap: Record<string, { codeKind: 薬品コード種別, code: string }> | undefined
-  = undefined;
+let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -143,18 +142,12 @@ export const cache = {
     usageMasterMap = map;
   },
 
-  async getDrugNameMap(): Promise<Record<string, { codeKind: 薬品コード種別, code: string }>> {
-    if (drugNameMap === undefined) {
-      const r: Record<string, { codeKind: 薬品コード種別, code: string }> =
-        await api.getDrugNameMap();
-      drugNameMap = r;
+
+  async getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
+    if( drugNameIyakuhincodeMap === undefined ){
+      const map: Record<string, number> = await api.getDrugNameIyakuhincodeMap();
+      drugNameIyakuhincodeMap = map;
     }
-    return drugNameMap;
-  },
-
-  async setDrugNameMap(map: Record<string, { codeKind: 薬品コード種別, code: string }>) {
-    await api.setDrugNameMap(map);
-    drugNameMap = map;
-  },
-
+    return drugNameIyakuhincodeMap;
+  }
 }
