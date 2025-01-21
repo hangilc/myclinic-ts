@@ -138,10 +138,9 @@ export const cache = {
   },
 
   async setUsageMasterMap(map: Record<string, 用法レコード>) {
-    await api.setUsageMasterMap(map);
     usageMasterMap = map;
+    await api.setUsageMasterMap(map);
   },
-
 
   async getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
     if( drugNameIyakuhincodeMap === undefined ){
@@ -149,5 +148,11 @@ export const cache = {
       drugNameIyakuhincodeMap = map;
     }
     return drugNameIyakuhincodeMap;
-  }
+  },
+
+  async setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
+    drugNameIyakuhincodeMap = map;
+    await api.setDrugNameIyakuhincodeMap(map);
+  },
+
 }
