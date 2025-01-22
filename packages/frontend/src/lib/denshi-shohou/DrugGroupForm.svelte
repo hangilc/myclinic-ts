@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { freeStyleUsageCode, type 剤形区分, type 情報区分 } from "./denshi-shohou";
+  import {
+    freeStyleUsageCode,
+    type 剤形区分,
+    type 情報区分,
+  } from "./denshi-shohou";
   import type { DrugKind } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import EditUsageForm from "./drug-group-form/UsageForm.svelte";
@@ -51,8 +55,6 @@
   let edit負担区分レコード = false;
   let edit薬品補足レコード = false;
 
-  console.log("init", init);
-
   function drugKindFromInit(): DrugKind | undefined {
     if (init?.薬品レコード) {
       const rec = init.薬品レコード;
@@ -75,7 +77,7 @@
     if (init?.薬品レコード?.分量) {
       const n = parseFloat(toHankaku(init.薬品レコード?.分量));
       return isNaN(n) ? undefined : n;
-    } else if(init?.amount !== undefined) {
+    } else if (init?.amount !== undefined) {
       return init.amount;
     } else {
       return undefined;
@@ -83,6 +85,9 @@
   }
 
   function doEnter() {
+    if (!(剤形区分 === "内服" || 剤形区分 === "頓服")) {
+      調剤数量 = 1;
+    }
     if (調剤数量 == undefined) {
       alert("調剤数量が設定されていません。");
       return;
@@ -93,9 +98,6 @@
     if (用法レコード == undefined) {
       alert("用法が設定されていません。");
       return;
-    }
-    if (!(剤形区分 === "内服" || 剤形区分 === "頓服")) {
-      調剤数量 = 1;
     }
     if (!drugKind) {
       alert("薬剤種別が設定されていません。");
@@ -266,8 +268,12 @@
     <div>
       {#if !edit薬剤種別}
         {drugKind ? drugKind.薬品名称 : ""}
-      {:else}<DrugKindForm {drugKind} {at} onDone={onDone薬剤種別} 
-        searchText={init.iyakuhinSearchText ?? ""}/>
+      {:else}<DrugKindForm
+          {drugKind}
+          {at}
+          onDone={onDone薬剤種別}
+          searchText={init.iyakuhinSearchText ?? ""}
+        />
       {/if}
     </div>
     <div class="title" on:click={() => (edit用量 = !edit用量)}>用量</div>
@@ -309,7 +315,10 @@
         {#if 用法レコード}
           {用法レコード.用法名称}
           {#if 用法レコード.用法コード === freeStyleUsageCode}
-            <span style="font-size:12px;color:green;border:1px solid green;border-radius:3px;padding:2px 4px;">free</span>
+            <span
+              style="font-size:12px;color:green;border:1px solid green;border-radius:3px;padding:2px 4px;"
+              >free</span
+            >
           {/if}
         {/if}
       {:else}<EditUsageForm 用法={用法レコード} onDone={onDone用法} />{/if}

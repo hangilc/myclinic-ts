@@ -24,6 +24,8 @@
   import { tick } from "svelte";
   import { cache } from "@/lib/cache";
   import type { DrugKind } from "@/lib/denshi-shohou/drug-group-form/drug-group-form-types";
+  import ParsedRep from "./denshi-henkan-dialog/ParsedRep.svelte";
+  import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
 
   export let destroy: () => void;
   export let source: Shohousen;
@@ -78,6 +80,18 @@
       }
     }
     editedSource = {};
+    sourceList = sourceList.map(src => {
+      if( src.id === selectedSourceIndex ){
+        return {
+          kind: "denshi",
+          data: rp,
+          id: selectedSourceIndex,
+
+        }
+      } else {
+        return src;
+      }
+    });
   }
 
   function compileResult(): RP剤情報[] {
@@ -346,10 +360,9 @@
           on:click={() => doSourceSelect(source)}
         >
           {#if source.kind === "parsed"}
-            <div>{source.name}</div>
-            <div>{source.amount}</div>
-            <div>{source.usage}</div>
-            <div>{source.times ?? ""}</div>
+            <ParsedRep parsed={source} />
+          {:else if source.kind === "denshi" }
+            <DenshiRep denshi={source.data} />
           {/if}
         </div>
       {/each}
