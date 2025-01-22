@@ -23,6 +23,7 @@
   import KouhiForm from "./drug-group-form/KouhiForm.svelte";
   import DrugAdditionForm from "./drug-group-form/DrugAdditionForm.svelte";
   import type { DrugGroupFormInit } from "./drug-group-form-types";
+  import { toHankaku } from "../zenkaku";
 
   export let at: string;
   export let kouhiCount: number;
@@ -50,6 +51,8 @@
   let edit負担区分レコード = false;
   let edit薬品補足レコード = false;
 
+  console.log("init", init);
+
   function drugKindFromInit(): DrugKind | undefined {
     if (init?.薬品レコード) {
       const rec = init.薬品レコード;
@@ -70,7 +73,7 @@
 
   function amountFromInit(): number | undefined {
     if (init?.薬品レコード?.分量) {
-      const n = parseFloat(init.薬品レコード?.分量);
+      const n = parseFloat(toHankaku(init.薬品レコード?.分量));
       return isNaN(n) ? undefined : n;
     } else if(init?.amount !== undefined) {
       return init.amount;
@@ -263,7 +266,8 @@
     <div>
       {#if !edit薬剤種別}
         {drugKind ? drugKind.薬品名称 : ""}
-      {:else}<DrugKindForm {drugKind} {at} onDone={onDone薬剤種別} />
+      {:else}<DrugKindForm {drugKind} {at} onDone={onDone薬剤種別} 
+        searchText={init.iyakuhinSearchText ?? ""}/>
       {/if}
     </div>
     <div class="title" on:click={() => (edit用量 = !edit用量)}>用量</div>

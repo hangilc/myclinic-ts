@@ -7,7 +7,7 @@
   export let drugKind: DrugKind | undefined;
   export let at: string;
   export let onDone: (value: DrugKind) => void;
-  let searchText = "";
+  export let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
   

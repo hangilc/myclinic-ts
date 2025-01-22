@@ -20,3 +20,7 @@ export type TargetUsage = {
   kind: "free-style";
   text: string;
 }
+
+export interface DrugGroupFormInitExtent {
+  sourceDrugName?: string;
+}

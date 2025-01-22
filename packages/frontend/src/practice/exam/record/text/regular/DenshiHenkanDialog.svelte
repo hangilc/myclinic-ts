@@ -2,10 +2,13 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
   import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
-  import type { Source, TargetUsage } from "./denshi-henkan-dialog-types";
+  import type {
+    DrugGroupFormInitExtent,
+    Source,
+    TargetUsage,
+  } from "./denshi-henkan-dialog-types";
   import api from "@/lib/api";
   import {
-  isEqual薬品レコード,
     type RP剤情報,
     type 剤形レコード,
     type 用法レコード,
@@ -20,7 +23,6 @@
   import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
   import { tick } from "svelte";
   import { cache } from "@/lib/cache";
-  import { searchForWorkspaceRoot } from "vite";
   import type { DrugKind } from "@/lib/denshi-shohou/drug-group-form/drug-group-form-types";
 
   export let destroy: () => void;
@@ -40,7 +42,7 @@
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let mode: "edit-drug" | undefined = undefined;
-  let editedSource: DrugGroupFormInit = {};
+  let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
 
   sourceList = shohousenToSourceList(source);
 
@@ -57,17 +59,25 @@
       }
     }
     {
-      const rec: 薬品レコード | undefined = rp.薬品情報グループ[0].薬品レコード;
-      if( rec === undefined ){
+      const rec: 薬品レコード | undefined = rp.薬品情報グループ[0]?.薬品レコード;
+      if (rec === undefined) {
         throw new Error("empty RP剤情報");
       }
-      let needUpdate = false;
-      if( editedSource.薬品レコード ){
-      }
-      if( editedSource.薬品レコード && !isEqual薬品レコード(editedSource.薬品レコード, rec)) {
-
+      if( editedSource.sourceDrugName ){
+        const drugName = editedSource.sourceDrugName;
+        if( rec.薬品コード種別 === "レセプト電算処理システム用コード"){
+          const map = await cache.getDrugNameIyakuhincodeMap();
+          const bind = map[drugName];
+          if( !bind || bind.toString() !== rec.薬品コード) {
+            const newMap = { ...map };
+            newMap[drugName] = parseInt(rec.薬品コード);
+            await cache.setDrugNameIyakuhincodeMap(newMap);
+            console.log("newMap", newMap);
+          }
+        }
       }
     }
+    editedSource = {};
   }
 
   function compileResult(): RP剤情報[] {
@@ -199,6 +209,11 @@
     return isNaN(a) ? undefined : a;
   }
 
+  async function probeIyakuhincode(name: string): Promise<number | undefined> {
+    const map = await cache.getDrugNameIyakuhincodeMap();
+    return map[name] ?? undefined;
+  }
+
   async function resolveParsedIyakuhin(
     name: string,
     amount: string
@@ -208,34 +223,22 @@
     | { iyakuhinSearchText: string; amount: number | undefined }
   > {
     const amountValue = resolveParsedAmount(amount);
-    const map = await cache.getDrugNameMap();
-    const bind = map[name];
+    const bind = await probeIyakuhincode(name);
     if (bind) {
-      if (bind.codeKind === "レセプト電算処理システム用コード") {
-        const master = await api.getIyakuhinMaster(parseInt(bind.code), at);
-        if (master) {
-          if (amountValue !== undefined) {
-            return {
-              薬品レコード: {
-                情報区分: "医薬品",
-                薬品コード種別: "レセプト電算処理システム用コード",
-                薬品コード: master.iyakuhincode.toString(),
-                薬品名称: master.name,
-                分量: amount.toString(),
-                力価フラグ: "薬価単位",
-                単位名: master.unit,
-              },
-            };
-          } else {
-            return {
-              drugKind: {
-                薬品コード種別: "レセプト電算処理システム用コード",
-                薬品コード: master.iyakuhincode.toString(),
-                薬品名称: master.name,
-                単位名: master.unit,
-              },
-            };
-          }
+      const master = await api.getIyakuhinMaster(bind, at);
+      if (master) {
+        if (amountValue !== undefined) {
+          return {
+            薬品レコード: {
+              情報区分: "医薬品",
+              薬品コード種別: "レセプト電算処理システム用コード",
+              薬品コード: master.iyakuhincode.toString(),
+              薬品名称: master.name,
+              分量: amount.toString(),
+              力価フラグ: "薬価単位",
+              単位名: master.unit,
+            },
+          };
         }
       }
     }
@@ -245,7 +248,9 @@
     };
   }
 
-  async function sourceToInit(src: Source): Promise<DrugGroupFormInit> {
+  async function sourceToInit(
+    src: Source
+  ): Promise<DrugGroupFormInit & DrugGroupFormInitExtent> {
     switch (src.kind) {
       case "parsed": {
         const amount = resolveParsedAmount(src.amount);
@@ -254,6 +259,7 @@
           調剤数量: resolveParsed調剤数量(src.times),
           用法レコード: await resolveParsed用法レコード(src.usage),
           ...(await resolveParsedIyakuhin(src.name, src.amount)),
+          sourceDrugName: src.name,
         };
       }
       default: {
