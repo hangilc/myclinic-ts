@@ -104,45 +104,17 @@
     return rps;
   }
 
-  function doRegister() {
-    if (!targetIyakuhinMaster) {
-      alert("薬剤名が設定されていません。");
-      return;
+  function isAllConverted(list: Source[]): boolean {
+    for(let src of list){
+      if( src.kind !== "denshi" ){
+        return false;
+      }
     }
-    const 調剤数量: number = parseFloat(toHankaku(targetAmount));
-    if (isNaN(調剤数量)) {
-      alert("用量の入力が数字でありません。");
-      return;
-    }
-    if (!targetUsage) {
-      alert("用法が設定されていません。");
-      return;
-    }
-    let 用法コード: string;
-    let 用法名称: string;
-    if (targetUsage.kind === "master") {
-      用法コード = targetUsage.master.usage_code;
-      用法名称 = targetUsage.master.usage_name;
-    } else if (targetUsage.kind === "free-style") {
-      用法コード = freeStyleUsageCode;
-      用法名称 = targetUsage.text;
-    } else {
-      throw new Error("cannot happen (targetUsage)");
-    }
-    const 剤形レコード: 剤形レコード = {
-      剤形区分: target剤形区分,
-      調剤数量,
-    };
-    const 用法レコード: 用法レコード = {
-      用法コード,
-      用法名称,
-    };
-    const rp: RP剤情報 = {
-      剤形レコード,
-      用法レコード,
-      薬品情報グループ: [],
-    };
-    console.log("RP剤情報", rp);
+    return true;
+  }
+
+  function doEnter() {
+
   }
 
   function shohousenToSourceList(shohousen: Shohousen): Source[] {
@@ -379,6 +351,7 @@
     </div>
   </div>
   <div style="text-align:right;">
+    <button on:click={doEnter} disabled={isAllConverted(sourceList)}>登録</button>
     <button on:click={doCancel}>キャンセル</button>
   </div>
 </Dialog>
