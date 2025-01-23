@@ -8,18 +8,19 @@
   export let 用法: 用法レコード | undefined;
   export let onDone: (value: 用法レコード) => void;
   let mode: "master" | "free-style" = "master";
-  let usageSearchText = "";
+  let inputText = "";
+  // let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let usageSearchElement: HTMLInputElement;
   let freeTextElement: HTMLInputElement;
-  let freeText = "";
+  // let freeText = "";
   if (用法) {
     if (用法.用法コード !== freeStyleUsageCode) {
       mode = "master";
-      usageSearchText = 用法.用法名称;
+      inputText = 用法.用法名称;
     } else {
       mode = "free-style";
-      freeText = 用法.用法名称;
+      inputText = 用法.用法名称;
     }
   }
 
@@ -36,7 +37,7 @@
   }
 
   async function doSearchUsage() {
-    const t = usageSearchText.trim();
+    const t = inputText.trim();
     if (t !== "") {
       usageSearchResult = await api.selectUsageMasterByUsageName(t);
     }
@@ -50,14 +51,14 @@
   }
 
   function doFreeText() {
-    const t = freeText.trim();
+    const t = inputText.trim();
     if (t === "") {
       alert("用法が入力されていません。");
       return;
     }
     onDone({
       用法コード: freeStyleUsageCode,
-      用法名称: freeText,
+      用法名称: t,
     });
   }
 </script>
@@ -78,7 +79,7 @@
     <form on:submit|preventDefault={doSearchUsage}>
       <input
         type="text"
-        bind:value={usageSearchText}
+        bind:value={inputText}
         bind:this={usageSearchElement}
         style="width:22em;"
       />
@@ -99,7 +100,7 @@
     <form on:submit|preventDefault={doFreeText}>
       <input
         type="text"
-        bind:value={freeText}
+        bind:value={inputText}
         bind:this={freeTextElement}
         style="width:22em;"
       />
