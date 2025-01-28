@@ -32,6 +32,7 @@
     createPrescInfo,
     eq公費レコード,
     type PrescInfoData,
+    type RP剤情報,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
@@ -375,31 +376,6 @@
     }
   }
 
-  async function doShohouConvOrig() {
-    const visit = await api.getVisit(text.visitId);
-    onClose();
-    const shohou = await initPrescInfoDataFromVisitId(text.visitId);
-    const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        shohou,
-        at: visit.visitedAt.substring(0, 10),
-        title: "電子変換",
-        onSave: async (shohou) => {
-          const newMemo: ShohouConvTextMemo = {
-            kind: "shohou-conv",
-            shohou,
-          };
-          TextMemoWrapper.setTextMemo(text, newMemo);
-          await api.updateText(text);
-        },
-        onRegistered: undefined,
-        onDelete: undefined,
-      },
-    });
-  }
-
   function kouhiCountOfVisit(visit: Visit): number {
     let count = 0;
     if (visit.kouhi1Id > 0) {
@@ -436,9 +412,19 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        source: parsed,
+        source: { kind: "parsed", shohousen: parsed },
         at: visit.visitedAt.substring(0, 10),
         kouhiCount,
+        onEnter: async (arg) => {
+          let shohou = await initPrescInfoDataFromVisitId(text.visitId);
+          shohou.RP剤情報グループ = arg.drugs;
+          TextMemoWrapper.setTextMemo(text, {
+            kind: "shohou-conv",
+            shohou,
+          });
+          onClose();
+          await api.updateText(text);
+        },
       },
     });
   }
@@ -447,28 +433,42 @@
     const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
     if (memo) {
       const visit = await api.getVisit(text.visitId);
-      onClose();
       const shohou = memo.shohou;
-      const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+      const kouhiCount = kouhiCountOfVisit(visit);
+      const d: DenshiHenkanDialog = new DenshiHenkanDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          shohou,
+          source: { kind: "denshi", data: shohou },
           at: visit.visitedAt.substring(0, 10),
-          title: "電子編集",
-          onSave: async (shohou) => {
-            const newMemo: ShohouConvTextMemo = {
+          kouhiCount,
+          onEnter: async (arg) => {
+            let shohou = await initPrescInfoDataFromVisitId(text.visitId);
+            shohou.RP剤情報グループ = arg.drugs;
+            TextMemoWrapper.setTextMemo(text, {
               kind: "shohou-conv",
               shohou,
-            };
-            TextMemoWrapper.setTextMemo(text, newMemo);
+            });
+            onClose();
             await api.updateText(text);
           },
-          onRegistered: undefined,
-          onDelete: undefined,
         },
       });
     }
+  }
+
+  function oldShohouPopup(): [string, () => void][] {
+    const menu: [string, () => void][] = [
+      ["処方箋印刷", doPrintShohousen],
+      ["処方箋2024印刷", doPrintShohousen2024],
+      ["処方箋フォーマット", doFormatShohousen],
+    ];
+    if (memoKind === undefined) {
+      menu.push(["電子変換", doShohouConv]);
+    } else if (memoKind === "shohou-conv") {
+      menu.push(["電子編集", doEditShohouConv]);
+    }
+    return menu;
   }
 </script>
 
@@ -491,19 +491,9 @@
         >
       {/if}
       {#if isShohousen(text.content)}
-        <a
-          href="javascript:void(0)"
-          on:click={popupTrigger(() => [
-            ["処方箋印刷", doPrintShohousen],
-            ["処方箋2024印刷", doPrintShohousen2024],
-            ["処方箋フォーマット", doFormatShohousen],
-          ])}>処方箋</a
+        <a href="javascript:void(0)" on:click={popupTrigger(oldShohouPopup)}
+          >処方箋</a
         >
-        {#if memoKind === undefined}
-          <a href="javascript:void(0)" on:click={doShohouConv}>電子変換</a>
-        {:else if memoKind === "shohou-conv"}
-          <a href="javascript:void(0)" on:click={doEditShohouConv}>電子編集</a>
-        {/if}
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>

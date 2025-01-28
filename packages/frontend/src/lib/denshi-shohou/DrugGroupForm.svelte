@@ -37,7 +37,7 @@
   let 調剤数量: number | undefined = init.調剤数量;
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
-  let 情報区分: 情報区分 = init.情報区分 ?? "医薬品";
+  let 情報区分: 情報区分 = init.薬品レコード?.情報区分 ?? "医薬品";
   let drugKind: DrugKind | undefined = drugKindFromInit();
   let amount: number | undefined = amountFromInit();
   let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;

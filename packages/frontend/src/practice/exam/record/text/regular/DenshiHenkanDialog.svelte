@@ -9,8 +9,8 @@
   } from "./denshi-henkan-dialog-types";
   import api from "@/lib/api";
   import {
+    type PrescInfoData,
     type RP剤情報,
-    type 剤形レコード,
     type 用法レコード,
     type 薬品レコード,
   } from "@/lib/denshi-shohou/presc-info";
@@ -28,25 +28,22 @@
   import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
 
   export let destroy: () => void;
-  export let source: Shohousen;
+  export let source:
+    | { kind: "parsed"; shohousen: Shohousen }
+    | { kind: "denshi"; data: PrescInfoData };
   export let at: string;
   export let kouhiCount: number;
+  export let onEnter: (arg: { drugs: RP剤情報[] }) => void;
   let sourceIndex = 1;
   let sourceList: Source[] = [];
   let selectedSourceIndex = 0;
-  let targetIyakuhinMaster: IyakuhinMaster | undefined = undefined;
-  let targetAmount = "";
-  let targetAmountUnit = "";
   let targetUsage: TargetUsage | undefined = undefined;
-  let target剤形区分: 剤形区分 = "内服";
-  let drugSearchText = "";
-  let drugSearchResult: IyakuhinMaster[] = [];
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let mode: "edit-drug" | undefined = undefined;
   let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
 
-  sourceList = shohousenToSourceList(source);
+  sourceList = prepareSourceList(source);
 
   async function onFormEnter(rp: RP剤情報) {
     if (
@@ -61,16 +58,17 @@
       }
     }
     {
-      const rec: 薬品レコード | undefined = rp.薬品情報グループ[0]?.薬品レコード;
+      const rec: 薬品レコード | undefined =
+        rp.薬品情報グループ[0]?.薬品レコード;
       if (rec === undefined) {
         throw new Error("empty RP剤情報");
       }
-      if( editedSource.sourceDrugName ){
+      if (editedSource.sourceDrugName) {
         const drugName = editedSource.sourceDrugName;
-        if( rec.薬品コード種別 === "レセプト電算処理システム用コード"){
+        if (rec.薬品コード種別 === "レセプト電算処理システム用コード") {
           const map = await cache.getDrugNameIyakuhincodeMap();
           const bind = map[drugName];
-          if( !bind || bind.toString() !== rec.薬品コード) {
+          if (!bind || bind.toString() !== rec.薬品コード) {
             const newMap = { ...map };
             newMap[drugName] = parseInt(rec.薬品コード);
             await cache.setDrugNameIyakuhincodeMap(newMap);
@@ -79,34 +77,24 @@
         }
       }
     }
+    mode = undefined;
     editedSource = {};
-    sourceList = sourceList.map(src => {
-      if( src.id === selectedSourceIndex ){
+    sourceList = sourceList.map((src) => {
+      if (src.id === selectedSourceIndex) {
         return {
           kind: "denshi",
           data: rp,
           id: selectedSourceIndex,
-
-        }
+        };
       } else {
         return src;
       }
     });
   }
 
-  function compileResult(): RP剤情報[] {
-    const rps: RP剤情報[] = [];
-    sourceList.forEach((src) => {
-      if (src.kind === "denshi") {
-        rps.push(src.data);
-      }
-    });
-    return rps;
-  }
-
   function isAllConverted(list: Source[]): boolean {
-    for(let src of list){
-      if( src.kind !== "denshi" ){
+    for (let src of list) {
+      if (src.kind !== "denshi") {
         return false;
       }
     }
@@ -114,12 +102,48 @@
   }
 
   function doEnter() {
-
+    if (isAllConverted(sourceList)) {
+      const drugs: RP剤情報[] = [];
+      sourceList.forEach((ele) => {
+        if (ele.kind === "denshi") {
+          drugs.push(ele.data);
+        }
+      });
+      onEnter({ drugs });
+    }
   }
 
-  function shohousenToSourceList(shohousen: Shohousen): Source[] {
+  function prepareSourceList(
+    source:
+      | { kind: "parsed"; shohousen: Shohousen }
+      | { kind: "denshi"; data: PrescInfoData }
+  ): Source[] {
+    if (source.kind === "parsed") {
+      return prepareSourceListFromShohousen(source.shohousen);
+    } else {
+      return prepareSourceListFromDenshi(source.data);
+    }
+  }
+
+  function prepareSourceListFromDenshi(data: PrescInfoData): Source[] {
+    return data.RP剤情報グループ.map((g) => {
+      if (g.薬品情報グループ.length !== 1) {
+        throw new Error("invalid number of drug groups");
+      }
+      return {
+        kind: "denshi",
+        剤形レコード: g.剤形レコード,
+        用法レコード: g.用法レコード,
+        用法補足レコード: g.用法補足レコード,
+        薬品情報: g.薬品情報グループ[0],
+        id: sourceIndex++,
+      };
+    });
+  }
+
+  function prepareSourceListFromShohousen(shohousen: Shohousen): Source[] {
     const sourceList: Source[] = [];
-    source.parts.forEach((part) => {
+    shohousen.parts.forEach((part) => {
       const drugs = part.drugs;
       const srcUsage = part.usage;
       let usage: string = "";
@@ -248,6 +272,18 @@
           sourceDrugName: src.name,
         };
       }
+      case "denshi": {
+        return {
+          剤形区分: src.剤形レコード.剤形区分,
+          調剤数量: src.剤形レコード.調剤数量,
+          用法レコード: src.用法レコード,
+          用法補足レコード: src.用法補足レコード,
+          薬品レコード: src.薬品情報.薬品レコード,
+          不均等レコード: src.薬品情報.不均等レコード,
+          負担区分レコード: src.薬品情報.負担区分レコード,
+          薬品補足レコード: src.薬品情報.薬品補足レコード,
+        };
+      }
       default: {
         return {};
       }
@@ -261,6 +297,8 @@
       mode = undefined;
       await tick();
       mode = "edit-drug";
+    } else if (src.kind === "denshi") {
+      selectedSourceIndex = src.id;
     }
   }
 
@@ -333,7 +371,7 @@
         >
           {#if source.kind === "parsed"}
             <ParsedRep parsed={source} />
-          {:else if source.kind === "denshi" }
+          {:else if source.kind === "denshi"}
             <DenshiRep denshi={source.data} />
           {/if}
         </div>
@@ -351,7 +389,9 @@
     </div>
   </div>
   <div style="text-align:right;">
-    <button on:click={doEnter} disabled={isAllConverted(sourceList)}>登録</button>
+    <button on:click={doEnter} disabled={!isAllConverted(sourceList)}
+      >登録</button
+    >
     <button on:click={doCancel}>キャンセル</button>
   </div>
 </Dialog>

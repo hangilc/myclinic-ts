@@ -1,4 +1,5 @@
-import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+import type { RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 import type { UsageMaster } from "myclinic-model";
 
 export type Source = ({
@@ -10,7 +11,10 @@ export type Source = ({
 } | 
 {
   kind: "denshi";
-  data: RP剤情報;
+  剤形レコード: 剤形レコード;
+  用法レコード: 用法レコード;
+  用法補足レコード?: 用法補足レコード[];
+  薬品情報: 薬品情報;
 }) & { id: number };
 
 export type TargetUsage = {
