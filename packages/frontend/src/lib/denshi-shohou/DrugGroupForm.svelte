@@ -7,7 +7,7 @@
   import type { DrugKind } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import EditUsageForm from "./drug-group-form/UsageForm.svelte";
-  import EditZaikeiKubunForm from "./drug-group-form/ZaikeiKubunForm.svelte";
+  import ZaikeiKubunForm from "./drug-group-form/ZaikeiKubunForm.svelte";
   import type {
     RP剤情報,
     薬品情報,
@@ -241,6 +241,13 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
+  <div>
+    <div>
+      <ZaikeiKubunForm {剤形区分} onChange={onDone剤形区分} />
+    </div>
+  </div>
+  <!--  ------------------------------------------------------------>
+  <hr />
   <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
     <div class="title" on:click={() => (edit情報区分 = !edit情報区分)}>
       情報区分
@@ -250,16 +257,6 @@
         {情報区分}
       {:else}
         <JohoKubunForm {情報区分} onDone={onDone情報区分} />
-      {/if}
-    </div>
-    <div class="title" on:click={() => (edit剤形区分 = !edit剤形区分)}>
-      剤形区分
-    </div>
-    <div>
-      {#if !edit剤形区分}
-        {剤形区分}
-      {:else}
-        <EditZaikeiKubunForm {剤形区分} onDone={onDone剤形区分} />
       {/if}
     </div>
     <div class="title" on:click={() => (edit薬剤種別 = !edit薬剤種別)}>
