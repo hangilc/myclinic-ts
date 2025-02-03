@@ -51,7 +51,7 @@
 
 <style>
   .search-text {
-    width: 22em;
+    width: 20em;
   }
 
   .master-item {
