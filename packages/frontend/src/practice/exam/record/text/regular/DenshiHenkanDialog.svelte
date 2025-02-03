@@ -81,11 +81,15 @@
     editedSource = {};
     sourceList = sourceList.map((src) => {
       if (src.id === selectedSourceIndex) {
-        return {
+        let s: Source = {
           kind: "denshi",
-          data: rp,
+          剤形レコード: rp.剤形レコード,
+          用法レコード: rp.用法レコード,
+          用法補足レコード: rp.用法補足レコード,
+          薬品情報: rp.薬品情報グループ[0],
           id: selectedSourceIndex,
         };
+        return s;
       } else {
         return src;
       }
@@ -106,7 +110,13 @@
       const drugs: RP剤情報[] = [];
       sourceList.forEach((ele) => {
         if (ele.kind === "denshi") {
-          drugs.push(ele.data);
+          const rp: RP剤情報 = {
+            剤形レコード: ele.剤形レコード,
+            用法レコード: ele.用法レコード,
+            用法補足レコード: ele.用法補足レコード,
+            薬品情報グループ: [ele.薬品情報],
+          }
+          drugs.push(rp);
         }
       });
       onEnter({ drugs });
@@ -372,7 +382,14 @@
           {#if source.kind === "parsed"}
             <ParsedRep parsed={source} />
           {:else if source.kind === "denshi"}
-            <DenshiRep denshi={source.data} />
+            <DenshiRep
+              denshi={{
+                剤形レコード: source.剤形レコード,
+                用法レコード: source.用法レコード,
+                用法補足レコード: source.用法補足レコード,
+                薬品情報グループ: [source.薬品情報],
+              }}
+            />
           {/if}
         </div>
       {/each}

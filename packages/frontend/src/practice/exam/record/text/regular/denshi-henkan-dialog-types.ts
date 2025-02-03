@@ -8,7 +8,7 @@ export type Source = ({
   amount: string;
   usage: string;
   times: string | undefined;
-} | 
+} |
 {
   kind: "denshi";
   剤形レコード: 剤形レコード;
