@@ -89,7 +89,7 @@
 
   function amountUnitFromInit(): string {
     if (init?.薬品レコード) {
-      return init.薬品レコード.分量;
+      return init.薬品レコード.単位名;
     } else if (init?.amount !== undefined) {
       return init.amount.toString();
     } else {
