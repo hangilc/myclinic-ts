@@ -4,9 +4,11 @@
   import type { UsageMaster } from "myclinic-model";
   import { onMount } from "svelte";
   import { freeStyleUsageCode } from "../denshi-shohou";
+  import XCircle from "@/icons/XCircle.svelte";
 
   export let 用法: 用法レコード | undefined;
   export let onDone: (value: 用法レコード) => void;
+  export let onCancel: () => void;
   let mode: "master" | "free-style" = "master";
   let inputText = "";
   // let usageSearchText = "";
@@ -74,6 +76,9 @@
       value="free-style"
       on:change={setFocus}
     /> 自由文章
+    <a href="javascript:void(0)" style="position:relative;top:5px;margin-left:3px;" on:click={onCancel}>
+      <XCircle  color="#999" width="22"/>
+    </a>
   </div>
   {#if mode === "master"}
     <form on:submit|preventDefault={doSearchUsage}>

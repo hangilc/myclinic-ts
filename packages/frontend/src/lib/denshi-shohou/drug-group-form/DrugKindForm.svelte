@@ -3,10 +3,12 @@
   import type { DrugKind } from "./drug-group-form-types";
   import api from "@/lib/api";
   import { onMount } from "svelte";
+  import XCircle from "@/icons/XCircle.svelte";
 
   export let drugKind: DrugKind | undefined;
   export let at: string;
   export let onDone: (value: DrugKind) => void;
+  export let onCancel: () => void;
   export let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
@@ -41,6 +43,9 @@
 <div>
   <form on:submit|preventDefault={doSearch}>
     <input type="text" bind:value={searchText} bind:this={inputElement} class="search-text"/>
+    <a href="javascript:void(0)" style="position:relative;top:5px;margin-left:3px;" on:click={onCancel}>
+      <XCircle color="#999" width="22"/>
+    </a>
   </form>
   <div style="height:10em;overflow-y:auto;resize:vertical;font-size: 14px;margin-top:6px;border:1px solid gray;">
     {#each searchResult as master (master.iyakuhincode)}
