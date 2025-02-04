@@ -28,11 +28,14 @@
   import DrugAdditionForm from "./drug-group-form/DrugAdditionForm.svelte";
   import type { DrugGroupFormInit } from "./drug-group-form-types";
   import { toHankaku } from "../zenkaku";
+  import CheckCircle from "@/icons/CheckCircle.svelte";
+  import XCircle from "@/icons/XCircle.svelte";
 
   export let at: string;
   export let kouhiCount: number;
   export let init: DrugGroupFormInit;
   export let onEnter: (rec: RP剤情報) => void;
+  export let onCancel: () => void;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
   let 調剤数量: number | undefined = init.調剤数量;
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
@@ -238,6 +241,12 @@
   }
 
   let edit = "";
+
+  function doCancel() {
+    if (confirm("薬剤の編集をキャンセルしますか？")) {
+      onCancel();
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -264,7 +273,11 @@
       {/if}
     </div>
     <div style="margin:6px 0;">
-      <AmountForm {amount} unit={drugKind?.単位名 ?? "（単位未定）"} onDone={onDone用量} />
+      <AmountForm
+        {amount}
+        unit={drugKind?.単位名 ?? "（単位未定）"}
+        onDone={onDone用量}
+      />
     </div>
     <div style="margin:6px 0;">
       {#if !edit用法レコード}
@@ -291,6 +304,32 @@
         </div>
       {/if}
     </div>
+    {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
+      <div>
+        <EditChouzaiSuuryouForm
+          {調剤数量}
+          unit={timesRep(剤形区分)}
+          onDone={onDone調剤数量}
+        />
+      </div>
+    {/if}
+    <div></div>
+  </div>
+  <div style="margin-top:10px;">
+    <a
+      href="javascript:void(0)"
+      style="position:relative;top:5px;margin-left:3px;margin:0"
+      on:click={onCancel}
+    >
+      <CheckCircle color="#00f" width="22" />
+    </a>
+    <a
+      href="javascript:void(0)"
+      style="position:relative;top:5px;margin-left:3px;margin:0;"
+      on:click={doCancel}
+    >
+      <XCircle color="#f99" width="22" />
+    </a>
   </div>
   <!--  ------------------------------------------------------------>
   <hr />

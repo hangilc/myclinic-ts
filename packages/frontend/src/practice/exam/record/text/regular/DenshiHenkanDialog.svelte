@@ -96,6 +96,12 @@
     });
   }
 
+  function onFormCancel() {
+    mode = undefined;
+    editedSource = {};
+    selectedSourceIndex = -1;
+  }
+
   function isAllConverted(list: Source[]): boolean {
     for (let src of list) {
       if (src.kind !== "denshi") {
@@ -401,6 +407,7 @@
           {kouhiCount}
           init={editedSource}
           onEnter={onFormEnter}
+          onCancel={onFormCancel}
         />
       {/if}
     </div>
