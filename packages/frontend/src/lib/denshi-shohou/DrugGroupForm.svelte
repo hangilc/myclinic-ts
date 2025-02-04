@@ -42,7 +42,8 @@
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
   // let 情報区分: 情報区分 = init.薬品レコード?.情報区分 ?? "医薬品";
   let drugKind: DrugKind | undefined = drugKindFromInit();
-  let amount: number | undefined = amountFromInit();
+  let amountInput: string = amountInputFromInit();
+  let amountUnit: string = amountUnitFromInit();
   let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;
   let 負担区分レコード: 負担区分レコード | undefined = init.負担区分レコード;
   let 薬品補足レコード: 薬品補足レコード[] | undefined = init.薬品補足レコード;
@@ -76,14 +77,23 @@
     }
   }
 
-  function amountFromInit(): number | undefined {
-    if (init?.薬品レコード?.分量) {
-      const n = parseFloat(toHankaku(init.薬品レコード?.分量));
-      return isNaN(n) ? undefined : n;
+  function amountInputFromInit(): string {
+    if (init?.薬品レコード) {
+      return init.薬品レコード.分量;
     } else if (init?.amount !== undefined) {
-      return init.amount;
+      return init.amount.toString();
     } else {
-      return undefined;
+      return "";
+    }
+  }
+
+  function amountUnitFromInit(): string {
+    if (init?.薬品レコード) {
+      return init.薬品レコード.分量;
+    } else if (init?.amount !== undefined) {
+      return init.amount.toString();
+    } else {
+      return "";
     }
   }
 
@@ -220,11 +230,6 @@
     edit薬剤種別 = false;
   }
 
-  function onDone用量(value: number) {
-    amount = value;
-    edit用量 = false;
-  }
-
   function onDone不均等レコード(value: 不均等レコード | undefined) {
     不均等レコード = value;
     edit不均等レコード = false;
@@ -274,9 +279,8 @@
     </div>
     <div style="margin:6px 0;">
       <AmountForm
-        {amount}
+        bind:amount={amount}
         unit={drugKind?.単位名 ?? "（単位未定）"}
-        onDone={onDone用量}
       />
     </div>
     <div style="margin:6px 0;">
@@ -319,7 +323,7 @@
     <a
       href="javascript:void(0)"
       style="position:relative;top:5px;margin-left:3px;margin:0"
-      on:click={onCancel}
+      on:click={doEnter}
     >
       <CheckCircle color="#00f" width="22" />
     </a>

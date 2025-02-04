@@ -46,6 +46,7 @@
   sourceList = prepareSourceList(source);
 
   async function onFormEnter(rp: RP剤情報) {
+    console.log("rp", rp);
     if (
       editedSource.用法レコード &&
       editedSource.用法レコード.用法コード === freeStyleUsageCode
@@ -121,7 +122,7 @@
             用法レコード: ele.用法レコード,
             用法補足レコード: ele.用法補足レコード,
             薬品情報グループ: [ele.薬品情報],
-          }
+          };
           drugs.push(rp);
         }
       });
@@ -307,15 +308,20 @@
   }
 
   async function doSourceSelect(src: Source) {
-    if (src.kind === "parsed") {
-      selectedSourceIndex = src.id;
-      editedSource = await sourceToInit(src);
-      mode = undefined;
-      await tick();
-      mode = "edit-drug";
-    } else if (src.kind === "denshi") {
-      selectedSourceIndex = src.id;
-    }
+    editedSource = await sourceToInit(src);
+    selectedSourceIndex = src.id;
+    mode = undefined;
+    await tick();
+    mode = "edit-drug";
+    // if (src.kind === "parsed") {
+    //   selectedSourceIndex = src.id;
+    //   editedSource = await sourceToInit(src);
+    //   mode = undefined;
+    //   await tick();
+    //   mode = "edit-drug";
+    // } else if (src.kind === "denshi") {
+    //   selectedSourceIndex = src.id;
+    // }
   }
 
   async function doSearchUsage() {
