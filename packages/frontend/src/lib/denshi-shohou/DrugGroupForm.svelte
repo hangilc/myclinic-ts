@@ -47,7 +47,6 @@
   let 薬品補足レコード: 薬品補足レコード[] | undefined = init.薬品補足レコード;
 
   let edit剤形区分 = false;
-  let edit調剤数量 = false;
   let edit用法レコード = false;
   let edit用法補足レコード = false;
   let edit情報区分 = false;
@@ -276,6 +275,20 @@
     <div style="margin:6px 0;">
       <AmountForm bind:amount={amountInput} unit={amountUnit} />
     </div>
+    {#if edit薬品補足レコード}
+      <div style="border:1px solid gray;border-radius:6px;padding:10px;">
+        <DrugAdditionForm {薬品補足レコード} onDone={onDone薬品補足レコード} 
+        onClose={() => edit薬品補足レコード = false}/>
+      </div>
+    {:else if 薬品補足レコード}
+      <div>
+        <ul style="margin-top:0;margin-bottom:0">
+          {#each 薬品補足レコード ?? [] as rec}
+            <li>{rec.薬品補足情報}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
     <div style="margin:6px 0;">
       {#if !edit用法レコード}
         <div on:click={() => (edit用法レコード = true)} style="cursor:pointer;">
@@ -303,10 +316,17 @@
     </div>
     {#if edit用法補足レコード}
       <div style="border:1px solid gray;border-radius:6px;padding:10px;">
-        <UsageAdditionForm {用法補足レコード} onDone={onDone用法補足レコード} />
+        <UsageAdditionForm
+          {用法補足レコード}
+          onDone={onDone用法補足レコード}
+          onClose={() => (edit用法補足レコード = false)}
+        />
       </div>
     {:else if 用法補足レコード}
-      <div on:click={() => edit用法補足レコード = true} style="cursor:pointer;user-select:none;">
+      <div
+        on:click={() => (edit用法補足レコード = true)}
+        style="cursor:pointer;user-select:none;"
+      >
         <ul style="margin-top:0;margin-bottom:0;">
           {#each 用法補足レコード as hosoku}
             <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
@@ -341,6 +361,11 @@
     </a>
     <a
       href="javascript:void(0)"
+      on:click={() => (edit薬品補足レコード = !edit薬品補足レコード)}
+      >薬品補足</a
+    >
+    <a
+      href="javascript:void(0)"
       on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
       >用法補足</a
     >
@@ -350,46 +375,6 @@
   <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
     <div class="title" on:click={() => (edit情報区分 = !edit情報区分)}>
       情報区分
-    </div>
-    <div
-      class="title"
-      on:click={() => (edit薬品補足レコード = !edit薬品補足レコード)}
-    >
-      薬品補足
-    </div>
-    <div>
-      {#if !edit薬品補足レコード}
-        <ul style="margin-top:0;margin-bottom:0">
-          {#each 薬品補足レコード ?? [] as rec}
-            <li>{rec.薬品補足情報}</li>
-          {/each}
-        </ul>
-      {:else}<DrugAdditionForm
-          {薬品補足レコード}
-          onDone={onDone薬品補足レコード}
-        />
-      {/if}
-    </div>
-    <div
-      class="title"
-      on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
-    >
-      用法補足
-    </div>
-    <div>
-      {#if !edit用法補足レコード}
-        {#if 用法補足レコード}
-          <ul style="margin-top:0;margin-bottom:0;">
-            {#each 用法補足レコード as hosoku}
-              <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
-            {/each}
-          </ul>
-        {/if}
-      {:else}<UsageAdditionForm
-          {用法補足レコード}
-          onDone={onDone用法補足レコード}
-        />
-      {/if}
     </div>
     <div
       class="title"
@@ -420,19 +405,11 @@
       </div>
     {/if}
   </div>
-  <div style="margin-top:10px;padding:10px;text-align:right;">
-    <button on:click={doEnter}>決定</button>
-  </div>
 </div>
 
 <style>
   .title {
     user-select: none;
     cursor: pointer;
-  }
-
-  .edit-title {
-    font-weight: bold;
-    user-select: none;
   }
 </style>

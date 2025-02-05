@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import type { 用法補足レコード } from "../presc-info";
+  import XCircle from "@/icons/XCircle.svelte";
 
   export let 用法補足レコード: 用法補足レコード[] | undefined;
   export let onDone: (value: 用法補足レコード[] | undefined) => void;
+  export let onClose: () => void;
   let inputElement: HTMLInputElement;
   let kubun:
     | "漸減"
@@ -129,14 +131,19 @@
       on:change={doChangeOption}
     />１回使用量</span
   >
+  <a
+    href="javascript:void(0)"
+    style="position:relative;top:5px;margin-left:3px;"
+    on:click={onClose}
+  >
+    <XCircle color="#999" width="22" />
+  </a>
 </div>
-<div>
-  {#if kubun === "用法の続き" || kubun === "部位" || kubun === "１回使用量"}
-    <form on:submit|preventDefault={doSubmit}>
-      <input type="text" bind:value={inputText} bind:this={inputElement} />
-    </form>
-  {/if}
-</div>
+{#if kubun === "用法の続き" || kubun === "部位" || kubun === "１回使用量"}
+  <form on:submit|preventDefault={doSubmit} style="margin-top:6px;">
+    <input type="text" bind:value={inputText} bind:this={inputElement} />
+  </form>
+{/if}
 
 <style>
   .option-wrapper > span {
