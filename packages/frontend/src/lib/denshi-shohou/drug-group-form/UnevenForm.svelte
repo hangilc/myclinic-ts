@@ -1,6 +1,8 @@
 <script lang="ts">
   import { toHankaku } from "myclinic-rezept/zenkaku";
   import type { 不均等レコード } from "../presc-info";
+  import CheckCircle from "@/icons/CheckCircle.svelte";
+  import Trash from "@/icons/Trash.svelte";
 
   export let 不均等レコード: 不均等レコード | undefined;
   export let onDone: (value: 不均等レコード | undefined) => void;
@@ -10,7 +12,7 @@
   let 不均等４回目服用量 = "";
   let 不均等５回目服用量 = "";
 
-  if( 不均等レコード ){
+  if (不均等レコード) {
     不均等１回目服用量 = 不均等レコード.不均等１回目服用量;
     不均等２回目服用量 = 不均等レコード.不均等２回目服用量;
   }
@@ -53,11 +55,11 @@
   }
 
   function validate(rec: 不均等レコード) {
-    if( !rec.不均等３回目服用量 && rec.不均等４回目服用量 ) {
-      throw "不均等３回目服用量の入力が空白です。"
+    if (!rec.不均等３回目服用量 && rec.不均等４回目服用量) {
+      throw "不均等３回目服用量の入力が空白です。";
     }
-    if( !rec.不均等４回目服用量 && rec.不均等５回目服用量 ) {
-      throw "不均等４回目服用量の入力が空白です。"
+    if (!rec.不均等４回目服用量 && rec.不均等５回目服用量) {
+      throw "不均等４回目服用量の入力が空白です。";
     }
   }
 
@@ -128,8 +130,17 @@
   </div>
 </div>
 <div>
-  <button on:click={doClear}>不均等クリア</button>
-  <button on:click={doEnter}>不均等設定</button>
+  <a
+    href="javascript:void(0)"
+    style="position:relative;top:5px;margin-left:3px;"
+    on:click={doEnter}
+  >
+    <CheckCircle color="#999" width="22" />
+  </a>
+  <a href="javascript:void(0)" on:click={doClear}
+    style="position:relative;top:3px;margin-left:0;">
+    <Trash />
+  </a>
 </div>
 
 <style>

@@ -141,6 +141,8 @@
     const 薬品情報: 薬品情報 = {
       薬品レコード,
       不均等レコード,
+      薬品補足レコード,
+      負担区分レコード,
     };
     if (用法補足レコード && 用法補足レコード.length === 0) {
       用法補足レコード = undefined;
@@ -243,9 +245,10 @@
   let edit = "";
 
   function doCancel() {
-    if (confirm("薬剤の編集をキャンセルしますか？")) {
-      onCancel();
-    }
+    onCancel();
+    // if (confirm("薬剤の編集をキャンセルしますか？")) {
+    //   onCancel();
+    // }
   }
 </script>
 
@@ -275,13 +278,32 @@
     <div style="margin:6px 0;">
       <AmountForm bind:amount={amountInput} unit={amountUnit} />
     </div>
+    <div style="margin:6px 0;">
+      {#if edit不均等レコード}
+        <div style="border:1px solid gray;border-radius:6px;padding:10px;">
+          <UnevenForm {不均等レコード} onDone={onDone不均等レコード} />
+        </div>
+      {:else if 不均等レコード}
+        <span
+          style="cursor:pointer"
+          on:click={() => (edit不均等レコード = true)}
+          >({unevenRep(不均等レコード)})</span
+        >
+      {/if}
+    </div>
     {#if edit薬品補足レコード}
       <div style="border:1px solid gray;border-radius:6px;padding:10px;">
-        <DrugAdditionForm {薬品補足レコード} onDone={onDone薬品補足レコード} 
-        onClose={() => edit薬品補足レコード = false}/>
+        <DrugAdditionForm
+          {薬品補足レコード}
+          onDone={onDone薬品補足レコード}
+          onClose={() => (edit薬品補足レコード = false)}
+        />
       </div>
     {:else if 薬品補足レコード}
-      <div>
+      <div
+        style="cursor:pointer;"
+        on:click={() => (edit薬品補足レコード = true)}
+      >
         <ul style="margin-top:0;margin-bottom:0">
           {#each 薬品補足レコード ?? [] as rec}
             <li>{rec.薬品補足情報}</li>
@@ -327,7 +349,7 @@
         on:click={() => (edit用法補足レコード = true)}
         style="cursor:pointer;user-select:none;"
       >
-        <ul style="margin-top:0;margin-bottom:0;">
+        <ul style="margin-top:6px;margin-bottom:6px;">
           {#each 用法補足レコード as hosoku}
             <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
           {/each}
@@ -342,7 +364,19 @@
         />
       </div>
     {/if}
-    <div></div>
+    <div style="margin:6px 0;">
+      {#if edit負担区分レコード}
+        <div style="border:1px solid gray;border-radius:6px;padding:10px;">
+          <KouhiForm
+            {負担区分レコード}
+            {kouhiCount}
+            onDone={onDone負担区分レコード}
+          />
+        </div>
+      {:else if 負担区分レコード}
+        {kouhiRep(負担区分レコード)}
+      {/if}
+    </div>
   </div>
   <div style="margin-top:10px;">
     <a
@@ -361,6 +395,10 @@
     </a>
     <a
       href="javascript:void(0)"
+      on:click={() => (edit不均等レコード = !edit不均等レコード)}>不均等</a
+    >
+    <a
+      href="javascript:void(0)"
       on:click={() => (edit薬品補足レコード = !edit薬品補足レコード)}
       >薬品補足</a
     >
@@ -369,24 +407,16 @@
       on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
       >用法補足</a
     >
+    {#if kouhiCount > 0}
+      <a
+        href="javascript:void(0)"
+        on:click={() => (edit負担区分レコード = !edit負担区分レコード)}>公費</a
+      >
+    {/if}
   </div>
   <!--  ------------------------------------------------------------>
   <hr />
   <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
-    <div class="title" on:click={() => (edit情報区分 = !edit情報区分)}>
-      情報区分
-    </div>
-    <div
-      class="title"
-      on:click={() => (edit不均等レコード = !edit不均等レコード)}
-    >
-      不均等
-    </div>
-    <div>
-      {#if !edit不均等レコード}
-        {unevenRep(不均等レコード)}
-      {:else}<UnevenForm {不均等レコード} onDone={onDone不均等レコード} />{/if}
-    </div>
     {#if kouhiCount > 0}
       <div
         class="title"

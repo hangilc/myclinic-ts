@@ -96,7 +96,6 @@
       }
     });
     selectedSourceIndex = -1;
-    console.log("sourceList", sourceList);
   }
 
   function onFormCancel() {
