@@ -5,8 +5,6 @@
   export let denshi: RP剤情報;
   let info = denshi.薬品情報グループ[0];
   let rec = info.薬品レコード;
-
-  console.log("DenshiRep", denshi.薬品情報グループ[0]);
 </script>
 
 <div>{rec.薬品名称}</div>

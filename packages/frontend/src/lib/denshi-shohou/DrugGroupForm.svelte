@@ -301,6 +301,19 @@
         </div>
       {/if}
     </div>
+    {#if edit用法補足レコード}
+      <div style="border:1px solid gray;border-radius:6px;padding:10px;">
+        <UsageAdditionForm {用法補足レコード} onDone={onDone用法補足レコード} />
+      </div>
+    {:else if 用法補足レコード}
+      <div on:click={() => edit用法補足レコード = true} style="cursor:pointer;user-select:none;">
+        <ul style="margin-top:0;margin-bottom:0;">
+          {#each 用法補足レコード as hosoku}
+            <li>{hosoku.用法補足区分}：{hosoku.用法補足情報}</li>
+          {/each}
+        </ul>
+      </div>
+    {/if}
     {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
       <div>
         <EditChouzaiSuuryouForm
@@ -326,6 +339,11 @@
     >
       <XCircle color="#f99" width="22" />
     </a>
+    <a
+      href="javascript:void(0)"
+      on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
+      >用法補足</a
+    >
   </div>
   <!--  ------------------------------------------------------------>
   <hr />
@@ -333,39 +351,6 @@
     <div class="title" on:click={() => (edit情報区分 = !edit情報区分)}>
       情報区分
     </div>
-    <!-- <div>
-      {#if !edit情報区分}
-        {情報区分}
-      {:else}
-        <JohoKubunForm {情報区分} onDone={onDone情報区分} />
-      {/if}
-    </div> -->
-    <!-- <div class="title" on:click={() => (edit薬剤種別 = !edit薬剤種別)}>
-      薬剤種別
-    </div>
-    <div>
-      {#if !edit薬剤種別}
-        {drugKind ? drugKind.薬品名称 : ""}
-      {:else}<DrugKindForm
-          {drugKind}
-          {at}
-          onDone={onDone薬剤種別}
-          searchText={init.iyakuhinSearchText ?? ""}
-        />
-      {/if}
-    </div> -->
-    <!-- <div class="title" on:click={() => (edit用量 = !edit用量)}>用量</div>
-    <div>
-      {#if !edit用量}
-        {amount ?? ""} {drugKind?.単位名 ?? ""}
-      {:else}
-        <AmountForm
-          {amount}
-          unit={drugKind?.単位名 ?? ""}
-          onDone={onDone用量}
-        />
-      {/if}
-    </div> -->
     <div
       class="title"
       on:click={() => (edit薬品補足レコード = !edit薬品補足レコード)}
@@ -385,36 +370,6 @@
         />
       {/if}
     </div>
-    <!-- <div class="title" on:click={() => (edit用法レコード = !edit用法レコード)}>
-      用法
-    </div>
-    <div>
-      {#if !edit用法レコード}
-        {#if 用法レコード}
-          {用法レコード.用法名称}
-          {#if 用法レコード.用法コード === freeStyleUsageCode}
-            <span
-              style="font-size:12px;color:green;border:1px solid green;border-radius:3px;padding:2px 4px;"
-              >free</span
-            >
-          {/if}
-        {/if}
-      {:else}<UsageForm 用法={用法レコード} onDone={onDone用法} />{/if}
-    </div> -->
-    <!-- {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
-      <div class="title" on:click={() => (edit調剤数量 = !edit調剤数量)}>
-        調剤数量
-      </div>
-      <div>
-        {#if !edit調剤数量}
-          {調剤数量 ?? ""} {timesRep(剤形区分)}
-        {:else}<EditChouzaiSuuryouForm
-            {調剤数量}
-            unit={timesRep(剤形区分)}
-            onDone={onDone調剤数量}
-          />{/if}
-      </div>
-    {/if} -->
     <div
       class="title"
       on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
