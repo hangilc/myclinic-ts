@@ -88,13 +88,15 @@
           用法レコード: rp.用法レコード,
           用法補足レコード: rp.用法補足レコード,
           薬品情報: rp.薬品情報グループ[0],
-          id: selectedSourceIndex,
+          id: sourceIndex++,
         };
         return s;
       } else {
         return src;
       }
     });
+    selectedSourceIndex = -1;
+    console.log("sourceList", sourceList);
   }
 
   function onFormCancel() {
@@ -406,7 +408,7 @@
         </div>
       {/each}
     </div>
-    <div>
+    <div style="user-select:none;">
       {#if mode === "edit-drug" && editedSource}
         <DrugGroupForm
           {at}

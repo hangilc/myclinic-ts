@@ -12,11 +12,7 @@
   export let onCancel: () => void;
   let mode: "master" | "free-style" = "master";
   let inputText = "";
-  // let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
-  let usageSearchElement: HTMLInputElement;
-  let freeTextElement: HTMLInputElement;
-  // let freeText = "";
   if (用法) {
     if (用法.用法コード !== freeStyleUsageCode) {
       mode = "master";
@@ -24,18 +20,6 @@
     } else {
       mode = "free-style";
       inputText = 用法.用法名称;
-    }
-  }
-
-  onMount(() => {
-    setFocus();
-  });
-
-  async function setFocus() {
-    if (mode === "master") {
-      usageSearchElement?.focus();
-    } else if (mode === "free-style") {
-      freeTextElement?.focus();
     }
   }
 
@@ -69,13 +53,12 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div>
   <div>
-    <input type="radio" bind:group={mode} value="master" on:change={setFocus} />
+    <input type="radio" bind:group={mode} value="master" />
     マスター
     <input
       type="radio"
       bind:group={mode}
       value="free-style"
-      on:change={setFocus}
     /> 自由文章
     <a href="javascript:void(0)" style="position:relative;top:5px;margin-left:3px;" on:click={onCancel}>
       <XCircle  color="#999" width="22"/>
@@ -86,7 +69,6 @@
       <input
         type="text"
         bind:value={inputText}
-        bind:this={usageSearchElement}
         style="width:22em;"
       />
     </form>
@@ -107,7 +89,6 @@
       <input
         type="text"
         bind:value={inputText}
-        bind:this={freeTextElement}
         style="width:22em;"
       />
     </form>

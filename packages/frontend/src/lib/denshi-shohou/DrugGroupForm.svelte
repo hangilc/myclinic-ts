@@ -20,7 +20,6 @@
     薬品補足レコード,
   } from "./presc-info";
   import UsageAdditionForm from "./drug-group-form/UsageAdditionForm.svelte";
-  import JohoKubunForm from "./drug-group-form/JohoKubunForm.svelte";
   import DrugKindForm from "./drug-group-form/DrugKindForm.svelte";
   import AmountForm from "./drug-group-form/AmountForm.svelte";
   import UnevenForm from "./drug-group-form/UnevenForm.svelte";
@@ -37,10 +36,9 @@
   export let onEnter: (rec: RP剤情報) => void;
   export let onCancel: () => void;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
-  let 調剤数量: number | undefined = init.調剤数量;
+  let 調剤数量Input: string = init.調剤数量?.toString() ?? "";
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
-  // let 情報区分: 情報区分 = init.薬品レコード?.情報区分 ?? "医薬品";
   let drugKind: DrugKind | undefined = drugKindFromInit();
   let amountInput: string = amountInputFromInit();
   let amountUnit: string = amountUnitFromInit();
@@ -54,7 +52,6 @@
   let edit用法補足レコード = false;
   let edit情報区分 = false;
   let edit薬剤種別 = false;
-  let edit用量 = false;
   let edit不均等レコード = false;
   let edit負担区分レコード = false;
   let edit薬品補足レコード = false;
@@ -98,13 +95,16 @@
   }
 
   function doEnter() {
-    if (!(剤形区分 === "内服" || 剤形区分 === "頓服")) {
-      調剤数量 = 1;
+    let 調剤数量 = 1;
+    if (剤形区分 === "内服" || 剤形区分 === "頓服") {
+      調剤数量Input = 調剤数量Input.trim();
+      if (調剤数量Input === "") {
+        alert("調剤数量が設定されていません。");
+        return;
+      }
+      調剤数量 = parseInt(toHankaku(調剤数量Input));
     }
-    if (調剤数量 == undefined) {
-      alert("調剤数量が設定されていません。");
-      return;
-    } else if (!(調剤数量 > 0)) {
+    if (!(調剤数量 > 0)) {
       alert("調剤数量の値が正の数値でありません。");
       return;
     }
@@ -116,8 +116,13 @@
       alert("薬剤種別が設定されていません。");
       return;
     }
-    if (amount == undefined) {
+    if (amountInput == undefined) {
       alert("用量が設定されていません。");
+      return;
+    }
+    const amount = parseFloat(toHankaku(amountInput));
+    if (isNaN(amount)) {
+      alert("用量の入力が数値でありません。");
       return;
     }
     const 情報区分: 情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
@@ -205,11 +210,6 @@
     edit剤形区分 = false;
   }
 
-  function onDone調剤数量(value: number) {
-    調剤数量 = value;
-    edit調剤数量 = false;
-  }
-
   function onDone用法(value: 用法レコード) {
     用法レコード = value;
     edit用法レコード = false;
@@ -220,13 +220,9 @@
     edit用法補足レコード = false;
   }
 
-  // function onDone情報区分(value: 情報区分) {
-  //   情報区分 = value;
-  //   edit情報区分 = false;
-  // }
-
   function onDone薬剤種別(value: DrugKind) {
     drugKind = value;
+    amountUnit = drugKind.単位名;
     edit薬剤種別 = false;
   }
 
@@ -278,10 +274,7 @@
       {/if}
     </div>
     <div style="margin:6px 0;">
-      <AmountForm
-        bind:amount={amount}
-        unit={drugKind?.単位名 ?? "（単位未定）"}
-      />
+      <AmountForm bind:amount={amountInput} unit={amountUnit} />
     </div>
     <div style="margin:6px 0;">
       {#if !edit用法レコード}
@@ -311,9 +304,8 @@
     {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
       <div>
         <EditChouzaiSuuryouForm
-          {調剤数量}
+          bind:調剤数量={調剤数量Input}
           unit={timesRep(剤形区分)}
-          onDone={onDone調剤数量}
         />
       </div>
     {/if}
@@ -409,7 +401,7 @@
         {/if}
       {:else}<UsageForm 用法={用法レコード} onDone={onDone用法} />{/if}
     </div> -->
-    {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
+    <!-- {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
       <div class="title" on:click={() => (edit調剤数量 = !edit調剤数量)}>
         調剤数量
       </div>
@@ -422,7 +414,7 @@
             onDone={onDone調剤数量}
           />{/if}
       </div>
-    {/if}
+    {/if} -->
     <div
       class="title"
       on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
