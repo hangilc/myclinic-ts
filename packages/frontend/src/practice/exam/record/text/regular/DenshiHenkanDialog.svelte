@@ -26,6 +26,7 @@
   import type { DrugKind } from "@/lib/denshi-shohou/drug-group-form/drug-group-form-types";
   import ParsedRep from "./denshi-henkan-dialog/ParsedRep.svelte";
   import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
+  import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
 
   export let destroy: () => void;
   export let source:
@@ -40,7 +41,7 @@
   let targetUsage: TargetUsage | undefined = undefined;
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
-  let mode: "edit-drug" | undefined = undefined;
+  let mode: "edit-drug" | "new-drug" | undefined = undefined;
   let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
 
   sourceList = prepareSourceList(source);
@@ -82,20 +83,37 @@
     editedSource = {};
     sourceList = sourceList.map((src) => {
       if (src.id === selectedSourceIndex) {
-        let s: Source = {
-          kind: "denshi",
-          剤形レコード: rp.剤形レコード,
-          用法レコード: rp.用法レコード,
-          用法補足レコード: rp.用法補足レコード,
-          薬品情報: rp.薬品情報グループ[0],
-          id: sourceIndex++,
-        };
-        return s;
+        return rpToSource(rp);
+        // let s: Source = {
+        //   kind: "denshi",
+        //   剤形レコード: rp.剤形レコード,
+        //   用法レコード: rp.用法レコード,
+        //   用法補足レコード: rp.用法補足レコード,
+        //   薬品情報: rp.薬品情報グループ[0],
+        //   id: sourceIndex++,
+        // };
+        // return s;
       } else {
         return src;
       }
     });
     selectedSourceIndex = -1;
+  }
+
+  function onNewDrug(rp: RP剤情報) {
+    sourceList.push(rpToSource(rp));
+    sourceList = sourceList;
+  }
+
+  function rpToSource(rp: RP剤情報): Source {
+    return {
+      kind: "denshi",
+      剤形レコード: rp.剤形レコード,
+      用法レコード: rp.用法レコード,
+      用法補足レコード: rp.用法補足レコード,
+      薬品情報: rp.薬品情報グループ[0],
+      id: sourceIndex++,
+    };
   }
 
   function onFormCancel() {
@@ -314,15 +332,12 @@
     mode = undefined;
     await tick();
     mode = "edit-drug";
-    // if (src.kind === "parsed") {
-    //   selectedSourceIndex = src.id;
-    //   editedSource = await sourceToInit(src);
-    //   mode = undefined;
-    //   await tick();
-    //   mode = "edit-drug";
-    // } else if (src.kind === "denshi") {
-    //   selectedSourceIndex = src.id;
-    // }
+  }
+
+  async function doNew() {
+    mode = undefined;
+    await tick();
+    mode = "new-drug";
   }
 
   async function doSearchUsage() {
@@ -386,6 +401,7 @@
 <Dialog title="処方箋電子変換" {destroy} styleWidth="600px">
   <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
     <div style="font-size:14px;">
+      <div><DenshiMenu onPlus={doNew} /></div>
       {#each sourceList as source (source.id)}
         <div
           class="drug"
@@ -415,6 +431,14 @@
           init={editedSource}
           onEnter={onFormEnter}
           onCancel={onFormCancel}
+        />
+      {:else if mode === "new-drug"}
+        <DrugGroupForm
+          {at}
+          {kouhiCount}
+          init={{}}
+          onEnter={onNewDrug}
+          onCancel={() => (mode = undefined)}
         />
       {/if}
     </div>
