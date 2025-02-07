@@ -1,5 +1,6 @@
 import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
-import type { RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
 import type { UsageMaster } from "myclinic-model";
 
 export type Source = ({
@@ -28,3 +29,8 @@ export type TargetUsage = {
 export interface DrugGroupFormInitExtent {
   sourceDrugName?: string;
 }
+
+export type Mode = "edit-drug" | "new-drug" | "expire-date";
+
+export type Init = { kind: "parsed"; shohousen: Shohousen }
+| { kind: "denshi"; data: PrescInfoData };

@@ -412,7 +412,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        source: { kind: "parsed", shohousen: parsed },
+        init: { kind: "parsed", shohousen: parsed },
         at: visit.visitedAt.substring(0, 10),
         kouhiCount,
         onEnter: async (arg) => {
@@ -439,7 +439,7 @@
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          source: { kind: "denshi", data: shohou },
+          init: { kind: "denshi", data: shohou },
           at: visit.visitedAt.substring(0, 10),
           kouhiCount,
           onEnter: async (arg) => {

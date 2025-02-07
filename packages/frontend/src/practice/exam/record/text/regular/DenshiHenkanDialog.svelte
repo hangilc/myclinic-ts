@@ -4,6 +4,8 @@
   import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
+    Init,
+    Mode,
     Source,
     TargetUsage,
   } from "./denshi-henkan-dialog-types";
@@ -27,11 +29,10 @@
   import ParsedRep from "./denshi-henkan-dialog/ParsedRep.svelte";
   import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
   import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
+  import ExpireDateForm from "./denshi-henkan-dialog/ExpireDateForm.svelte";
 
   export let destroy: () => void;
-  export let source:
-    | { kind: "parsed"; shohousen: Shohousen }
-    | { kind: "denshi"; data: PrescInfoData };
+  export let init: Init;
   export let at: string;
   export let kouhiCount: number;
   export let onEnter: (arg: { drugs: RP剤情報[] }) => void;
@@ -41,10 +42,31 @@
   let targetUsage: TargetUsage | undefined = undefined;
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
-  let mode: "edit-drug" | "new-drug" | undefined = undefined;
+  let mode: Mode | undefined = undefined;
   let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
+  let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
 
-  sourceList = prepareSourceList(source);
+  sourceList = prepareSourceList(init);
+
+  function resolve使用期限年月日FromInit(init: Init): string | undefined {
+    switch(init.kind){
+      case "parsed": {
+        return undefined;
+      }
+      case "denshi": {
+        return init.data.使用期限年月日;
+      }
+      default: {
+        throw new Error("cannot happen");
+      }
+    }
+  }
+
+  function onExpireDateDone(d: string | undefined) {
+    使用期限年月日 = d;
+    console.log("expireDate", 使用期限年月日);
+    mode = undefined;
+  }
 
   async function onFormEnter(rp: RP剤情報) {
     console.log("rp", rp);
@@ -334,6 +356,11 @@
     mode = "new-drug";
   }
 
+  async function changeModeTo(m: Mode) {
+    await reset();
+    mode = m;
+  }
+
   async function doSearchUsage() {
     const t = usageSearchText.trim();
     if (t !== "") {
@@ -395,7 +422,12 @@
 <Dialog title="処方箋電子変換" {destroy} styleWidth="600px">
   <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
     <div style="font-size:14px;">
-      <div><DenshiMenu onPlus={doNew} /></div>
+      <div>
+        <DenshiMenu
+          onPlus={doNew}
+          on有効期限={() => changeModeTo("expire-date")}
+        />
+      </div>
       {#each sourceList as source (source.id)}
         <div
           class="drug"
@@ -434,6 +466,9 @@
           onEnter={onNewDrug}
           onCancel={() => (mode = undefined)}
         />
+        {:else if mode === "expire-date"}
+          <ExpireDateForm expireDate={使用期限年月日} onDone={onExpireDateDone}
+            onCancel={() => mode = undefined}/>
       {/if}
     </div>
   </div>
