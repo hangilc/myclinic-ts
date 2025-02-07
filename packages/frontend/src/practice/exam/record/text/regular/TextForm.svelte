@@ -35,7 +35,7 @@
     type RP剤情報,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
+  import { initPrescInfoData, initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
 
@@ -407,24 +407,36 @@
     const parsed = parseShohousen(text.content);
     console.log("parsed", parsed);
     const visit = await api.getVisit(text.visitId);
+    const patient = await api.getPatient(visit.patientId);
+    const hoken = await api.getHokenInfoForVisit(visit.visitId);
+    const clinicInfo = await cache.getClinicInfo();
     const kouhiCount = kouhiCountOfVisit(visit);
+    const template = initPrescInfoData(visit, patient, hoken, clinicInfo);
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        init: { kind: "parsed", shohousen: parsed },
+        init: { kind: "parsed", shohousen: parsed, template, },
         at: visit.visitedAt.substring(0, 10),
         kouhiCount,
-        onEnter: async (arg) => {
-          let shohou = await initPrescInfoDataFromVisitId(text.visitId);
-          shohou.RP剤情報グループ = arg.drugs;
+        onEnter: async (arg: PrescInfoData) => {
           TextMemoWrapper.setTextMemo(text, {
             kind: "shohou-conv",
-            shohou,
+            shohou: arg,
           });
           onClose();
           await api.updateText(text);
         },
+        // onEnter: async (arg) => {
+        //   let shohou = await initPrescInfoDataFromVisitId(text.visitId);
+        //   shohou.RP剤情報グループ = arg.drugs;
+        //   TextMemoWrapper.setTextMemo(text, {
+        //     kind: "shohou-conv",
+        //     shohou,
+        //   });
+        //   onClose();
+        //   await api.updateText(text);
+        // },
       },
     });
   }
@@ -442,12 +454,10 @@
           init: { kind: "denshi", data: shohou },
           at: visit.visitedAt.substring(0, 10),
           kouhiCount,
-          onEnter: async (arg) => {
-            let shohou = await initPrescInfoDataFromVisitId(text.visitId);
-            shohou.RP剤情報グループ = arg.drugs;
+          onEnter: async (arg: PrescInfoData) => {
             TextMemoWrapper.setTextMemo(text, {
               kind: "shohou-conv",
-              shohou,
+              shohou: arg,
             });
             onClose();
             await api.updateText(text);

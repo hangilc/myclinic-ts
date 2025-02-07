@@ -30,12 +30,14 @@
   import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
   import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
   import ExpireDateForm from "./denshi-henkan-dialog/ExpireDateForm.svelte";
+  import { 使用期限年月日Rep } from "./denshi-henkan-dialog/denshi-henkan-dialog-helper";
 
   export let destroy: () => void;
   export let init: Init;
   export let at: string;
   export let kouhiCount: number;
-  export let onEnter: (arg: { drugs: RP剤情報[] }) => void;
+  export let onEnter: (data: PrescInfoData) => void;
+  // export let onEnter: (arg: { drugs: RP剤情報[] }) => void;
   let sourceIndex = 1;
   let sourceList: Source[] = [];
   let selectedSourceIndex = 0;
@@ -49,7 +51,7 @@
   sourceList = prepareSourceList(init);
 
   function resolve使用期限年月日FromInit(init: Init): string | undefined {
-    switch(init.kind){
+    switch (init.kind) {
       case "parsed": {
         return undefined;
       }
@@ -162,7 +164,17 @@
           drugs.push(rp);
         }
       });
-      onEnter({ drugs });
+      let data: PrescInfoData;
+      if( init.kind === "parsed" ){
+        data = init.template;
+      } else if( init.kind === "denshi" ){
+        data = init.data;
+      } else {
+        throw new Error("cannot happen");
+      }
+      data = Object.assign({}, data);
+      data.使用期限年月日 = 使用期限年月日;
+      onEnter(data);
     }
   }
 
@@ -448,6 +460,14 @@
           {/if}
         </div>
       {/each}
+      {#if 使用期限年月日}
+        <div
+          style="margin:6px 0;cursor:pointer"
+          on:click={() => changeModeTo("expire-date")}
+        >
+          使用期限：{使用期限年月日Rep(使用期限年月日)}
+        </div>
+      {/if}
     </div>
     <div style="user-select:none;">
       {#if mode === "edit-drug" && editedSource}
@@ -466,9 +486,12 @@
           onEnter={onNewDrug}
           onCancel={() => (mode = undefined)}
         />
-        {:else if mode === "expire-date"}
-          <ExpireDateForm expireDate={使用期限年月日} onDone={onExpireDateDone}
-            onCancel={() => mode = undefined}/>
+      {:else if mode === "expire-date"}
+        <ExpireDateForm
+          expireDate={使用期限年月日}
+          onDone={onExpireDateDone}
+          onCancel={() => (mode = undefined)}
+        />
       {/if}
     </div>
   </div>
