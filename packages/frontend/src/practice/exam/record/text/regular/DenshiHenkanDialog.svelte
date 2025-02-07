@@ -79,30 +79,20 @@
         }
       }
     }
-    mode = undefined;
-    editedSource = {};
     sourceList = sourceList.map((src) => {
       if (src.id === selectedSourceIndex) {
         return rpToSource(rp);
-        // let s: Source = {
-        //   kind: "denshi",
-        //   剤形レコード: rp.剤形レコード,
-        //   用法レコード: rp.用法レコード,
-        //   用法補足レコード: rp.用法補足レコード,
-        //   薬品情報: rp.薬品情報グループ[0],
-        //   id: sourceIndex++,
-        // };
-        // return s;
       } else {
         return src;
       }
     });
-    selectedSourceIndex = -1;
+    await reset();
   }
 
-  function onNewDrug(rp: RP剤情報) {
+  async function onNewDrug(rp: RP剤情報) {
     sourceList.push(rpToSource(rp));
     sourceList = sourceList;
+    await reset();
   }
 
   function rpToSource(rp: RP剤情報): Source {
@@ -116,10 +106,15 @@
     };
   }
 
-  function onFormCancel() {
+  async function reset() {
     mode = undefined;
     editedSource = {};
     selectedSourceIndex = -1;
+    await tick();
+  }
+
+  async function onFormCancel() {
+    await reset();
   }
 
   function isAllConverted(list: Source[]): boolean {
@@ -335,8 +330,7 @@
   }
 
   async function doNew() {
-    mode = undefined;
-    await tick();
+    await reset();
     mode = "new-drug";
   }
 
