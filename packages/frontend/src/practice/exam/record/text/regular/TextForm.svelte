@@ -405,7 +405,6 @@
 
   async function doShohouConv() {
     const parsed = parseShohousen(text.content);
-    console.log("parsed", parsed);
     const visit = await api.getVisit(text.visitId);
     const patient = await api.getPatient(visit.patientId);
     const hoken = await api.getHokenInfoForVisit(visit.visitId);
@@ -427,16 +426,6 @@
           onClose();
           await api.updateText(text);
         },
-        // onEnter: async (arg) => {
-        //   let shohou = await initPrescInfoDataFromVisitId(text.visitId);
-        //   shohou.RP剤情報グループ = arg.drugs;
-        //   TextMemoWrapper.setTextMemo(text, {
-        //     kind: "shohou-conv",
-        //     shohou,
-        //   });
-        //   onClose();
-        //   await api.updateText(text);
-        // },
       },
     });
   }
@@ -446,6 +435,7 @@
     if (memo) {
       const visit = await api.getVisit(text.visitId);
       const shohou = memo.shohou;
+      console.log("shohou", shohou);
       const kouhiCount = kouhiCountOfVisit(visit);
       const d: DenshiHenkanDialog = new DenshiHenkanDialog({
         target: document.body,
@@ -474,9 +464,9 @@
       ["処方箋フォーマット", doFormatShohousen],
     ];
     if (memoKind === undefined) {
-      menu.push(["電子変換", doShohouConv]);
+      menu.push(["電子予備作成", doShohouConv]);
     } else if (memoKind === "shohou-conv") {
-      menu.push(["電子編集", doEditShohouConv]);
+      menu.push(["電子予備編集", doEditShohouConv]);
     }
     return menu;
   }

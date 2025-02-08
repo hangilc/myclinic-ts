@@ -37,7 +37,6 @@
   export let at: string;
   export let kouhiCount: number;
   export let onEnter: (data: PrescInfoData) => void;
-  // export let onEnter: (arg: { drugs: RP剤情報[] }) => void;
   let sourceIndex = 1;
   let sourceList: Source[] = [];
   let selectedSourceIndex = 0;
@@ -174,6 +173,7 @@
       }
       data = Object.assign({}, data);
       data.使用期限年月日 = 使用期限年月日;
+      destroy();
       onEnter(data);
     }
   }
@@ -497,7 +497,7 @@
   </div>
   <div style="text-align:right;">
     <button on:click={doEnter} disabled={!isAllConverted(sourceList)}
-      >登録</button
+      >入力</button
     >
     <button on:click={doCancel}>キャンセル</button>
   </div>
