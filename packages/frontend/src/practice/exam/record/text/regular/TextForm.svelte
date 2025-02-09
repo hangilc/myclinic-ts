@@ -419,6 +419,7 @@
         at: visit.visitedAt.substring(0, 10),
         kouhiCount,
         onEnter: async (arg: PrescInfoData) => {
+          console.log("arg", arg);
           TextMemoWrapper.setTextMemo(text, {
             kind: "shohou-conv",
             shohou: arg,

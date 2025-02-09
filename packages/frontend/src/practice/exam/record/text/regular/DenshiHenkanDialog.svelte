@@ -173,6 +173,7 @@
       }
       data = Object.assign({}, data);
       data.使用期限年月日 = 使用期限年月日;
+      data.RP剤情報グループ = drugs;
       destroy();
       onEnter(data);
     }
