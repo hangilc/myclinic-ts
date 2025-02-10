@@ -29,9 +29,11 @@
   import { toHankaku } from "../zenkaku";
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import XCircle from "@/icons/XCircle.svelte";
+  import type { Kouhi } from "myclinic-model";
 
   export let at: string;
-  export let kouhiCount: number;
+  // export let kouhiCount: number;
+  export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
   export let onEnter: (rec: RP剤情報) => void;
   export let onCancel: () => void;
@@ -369,7 +371,7 @@
         <div style="border:1px solid gray;border-radius:6px;padding:10px;">
           <KouhiForm
             {負担区分レコード}
-            {kouhiCount}
+            {kouhiList}
             onDone={onDone負担区分レコード}
           />
         </div>
@@ -407,7 +409,7 @@
       on:click={() => (edit用法補足レコード = !edit用法補足レコード)}
       >用法補足</a
     >
-    {#if kouhiCount > 0}
+    {#if kouhiList.length > 0}
       <a
         href="javascript:void(0)"
         on:click={() => (edit負担区分レコード = !edit負担区分レコード)}>公費</a
@@ -417,7 +419,7 @@
   <!--  ------------------------------------------------------------>
   <hr />
   <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
-    {#if kouhiCount > 0}
+    {#if kouhiList.length > 0}
       <div
         class="title"
         on:click={() => (edit負担区分レコード = !edit負担区分レコード)}
@@ -429,7 +431,7 @@
           {kouhiRep(負担区分レコード)}
         {:else}<KouhiForm
             {負担区分レコード}
-            {kouhiCount}
+            {kouhiList}
             onDone={onDone負担区分レコード}
           />{/if}
       </div>

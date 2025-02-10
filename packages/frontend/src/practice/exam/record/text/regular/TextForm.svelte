@@ -409,7 +409,7 @@
     const patient = await api.getPatient(visit.patientId);
     const hoken = await api.getHokenInfoForVisit(visit.visitId);
     const clinicInfo = await cache.getClinicInfo();
-    const kouhiCount = kouhiCountOfVisit(visit);
+    // const kouhiCount = kouhiCountOfVisit(visit);
     const template = initPrescInfoData(visit, patient, hoken, clinicInfo);
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
@@ -417,7 +417,7 @@
         destroy: () => d.$destroy(),
         init: { kind: "parsed", shohousen: parsed, template, },
         at: visit.visitedAt.substring(0, 10),
-        kouhiCount,
+        kouhiList: hoken.kouhiList,
         onEnter: async (arg: PrescInfoData) => {
           console.log("arg", arg);
           TextMemoWrapper.setTextMemo(text, {
@@ -436,15 +436,15 @@
     if (memo) {
       const visit = await api.getVisit(text.visitId);
       const shohou = memo.shohou;
-      console.log("shohou", shohou);
-      const kouhiCount = kouhiCountOfVisit(visit);
+      const hoken = await api.getHokenInfoForVisit(visit.visitId);
+      // const kouhiCount = kouhiCountOfVisit(visit);
       const d: DenshiHenkanDialog = new DenshiHenkanDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           init: { kind: "denshi", data: shohou },
           at: visit.visitedAt.substring(0, 10),
-          kouhiCount,
+          kouhiList: hoken.kouhiList,
           onEnter: async (arg: PrescInfoData) => {
             TextMemoWrapper.setTextMemo(text, {
               kind: "shohou-conv",

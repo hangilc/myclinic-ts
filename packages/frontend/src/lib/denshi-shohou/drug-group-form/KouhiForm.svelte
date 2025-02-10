@@ -1,8 +1,9 @@
 <script lang="ts">
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import type { 負担区分レコード } from "../presc-info";
+  import type { Kouhi } from "myclinic-model";
 
-  export let kouhiCount: number;
+  export let kouhiList: Kouhi[];
   export let 負担区分レコード: 負担区分レコード | undefined;
   export let onDone: (value: 負担区分レコード | undefined) => void;
   let kouhi1Checked = false;
@@ -16,6 +17,7 @@
   }
 
   function doEnter() {
+    const kouhiCount = kouhiList.length;
     if (kouhi1Checked || kouhi2Checked || kouhi3Checked) {
       const rec: 負担区分レコード = {};
       if (kouhiCount >= 1 && kouhi1Checked) {
@@ -34,13 +36,13 @@
   }
 </script>
 
-{#if kouhiCount >= 1}
+{#if kouhiList.length >= 1}
   <input type="checkbox" bind:checked={kouhi1Checked} />第一公費対象
 {/if}
-{#if kouhiCount >= 2}
+{#if kouhiList.length >= 2}
   <input type="checkbox" bind:checked={kouhi2Checked} />第二公費対象
 {/if}
-{#if kouhiCount >= 3}
+{#if kouhiList.length >= 3}
   <input type="checkbox" bind:checked={kouhi3Checked} />第三公費対象
 {/if}
 <div style="margin-top:6px;">

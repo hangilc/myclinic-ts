@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
-  import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
+  import type { IyakuhinMaster, Kouhi, UsageMaster } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
     Init,
@@ -35,7 +35,8 @@
   export let destroy: () => void;
   export let init: Init;
   export let at: string;
-  export let kouhiCount: number;
+  // export let kouhiCount: number;
+  export let kouhiList: Kouhi[];
   export let onEnter: (data: PrescInfoData) => void;
   let sourceIndex = 1;
   let sourceList: Source[] = [];
@@ -474,7 +475,7 @@
       {#if mode === "edit-drug" && editedSource}
         <DrugGroupForm
           {at}
-          {kouhiCount}
+          {kouhiList}
           init={editedSource}
           onEnter={onFormEnter}
           onCancel={onFormCancel}
@@ -482,7 +483,7 @@
       {:else if mode === "new-drug"}
         <DrugGroupForm
           {at}
-          {kouhiCount}
+          {kouhiList}
           init={{}}
           onEnter={onNewDrug}
           onCancel={() => (mode = undefined)}
