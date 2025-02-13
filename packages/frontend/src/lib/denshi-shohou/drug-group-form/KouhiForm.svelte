@@ -2,6 +2,7 @@
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import type { 負担区分レコード } from "../presc-info";
   import type { Kouhi } from "myclinic-model";
+  import { kouhiRep } from "@/lib/hoken-rep";
 
   export let kouhiList: Kouhi[];
   export let 負担区分レコード: 負担区分レコード | undefined;
@@ -37,13 +38,16 @@
 </script>
 
 {#if kouhiList.length >= 1}
-  <input type="checkbox" bind:checked={kouhi1Checked} />第一公費対象
+  <input type="checkbox" bind:checked={kouhi1Checked} />
+    第一公費対象（{kouhiRep(kouhiList[0].futansha, kouhiList[0].memo)}）
 {/if}
 {#if kouhiList.length >= 2}
-  <input type="checkbox" bind:checked={kouhi2Checked} />第二公費対象
+  <input type="checkbox" bind:checked={kouhi2Checked} />
+  第二公費対象（{kouhiRep(kouhiList[1].futansha, kouhiList[0].memo)}）
 {/if}
 {#if kouhiList.length >= 3}
-  <input type="checkbox" bind:checked={kouhi3Checked} />第三公費対象
+  <input type="checkbox" bind:checked={kouhi3Checked} />
+  第三公費対象（{kouhiRep(kouhiList[2].futansha, kouhiList[0].memo)}）
 {/if}
 <div style="margin-top:6px;">
   <a

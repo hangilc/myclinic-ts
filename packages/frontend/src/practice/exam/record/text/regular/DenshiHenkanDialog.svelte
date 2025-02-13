@@ -31,11 +31,11 @@
   import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
   import ExpireDateForm from "./denshi-henkan-dialog/ExpireDateForm.svelte";
   import { 使用期限年月日Rep } from "./denshi-henkan-dialog/denshi-henkan-dialog-helper";
+  import { kouhiRep } from "@/lib/hoken-rep";
 
   export let destroy: () => void;
   export let init: Init;
   export let at: string;
-  // export let kouhiCount: number;
   export let kouhiList: Kouhi[];
   export let onEnter: (data: PrescInfoData) => void;
   let sourceIndex = 1;
@@ -442,6 +442,15 @@
           on有効期限={() => changeModeTo("expire-date")}
         />
       </div>
+      {#if kouhiList.length > 0}
+        <div>
+          {#each kouhiList as kouhi (kouhi.kouhiId)}
+            <div>
+              {kouhiRep(kouhi.futansha, kouhi.memo)}
+            </div>
+          {/each}
+        </div>
+      {/if}
       {#each sourceList as source (source.id)}
         <div
           class="drug"
@@ -493,7 +502,7 @@
           expireDate={使用期限年月日}
           onDone={onExpireDateDone}
           onCancel={() => (mode = undefined)}
-        />
+          />
       {/if}
     </div>
   </div>
