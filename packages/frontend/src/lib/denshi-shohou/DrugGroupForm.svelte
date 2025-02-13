@@ -416,27 +416,6 @@
       >
     {/if}
   </div>
-  <!--  ------------------------------------------------------------>
-  <hr />
-  <div style="display:grid;grid-template-columns:auto 1fr;gap:6px;">
-    {#if kouhiList.length > 0}
-      <div
-        class="title"
-        on:click={() => (edit負担区分レコード = !edit負担区分レコード)}
-      >
-        公費
-      </div>
-      <div>
-        {#if !edit負担区分レコード}
-          {kouhiRep(負担区分レコード)}
-        {:else}<KouhiForm
-            {負担区分レコード}
-            {kouhiList}
-            onDone={onDone負担区分レコード}
-          />{/if}
-      </div>
-    {/if}
-  </div>
 </div>
 
 <style>
