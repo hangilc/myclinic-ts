@@ -15,6 +15,7 @@
     type RP剤情報,
     type 用法レコード,
     type 薬品レコード,
+    type 備考レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import {
     freeStyleUsageCode,
@@ -32,6 +33,7 @@
   import ExpireDateForm from "./denshi-henkan-dialog/ExpireDateForm.svelte";
   import { 使用期限年月日Rep } from "./denshi-henkan-dialog/denshi-henkan-dialog-helper";
   import { kouhiRep } from "@/lib/hoken-rep";
+  import BikouForm from "./denshi-henkan-dialog/BikouForm.svelte";
 
   export let destroy: () => void;
   export let init: Init;
@@ -47,6 +49,8 @@
   let mode: Mode | undefined = undefined;
   let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
+  let 備考レコード: 備考レコード[] | undefined =
+    resolve備考レコードFromInit(init);
 
   sourceList = prepareSourceList(init);
 
@@ -64,9 +68,28 @@
     }
   }
 
+  function resolve備考レコードFromInit(init: Init): 備考レコード[] | undefined {
+    switch (init.kind) {
+      case "parsed": {
+        return undefined;
+      }
+      case "denshi": {
+        return init.data.備考レコード;
+      }
+      default: {
+        throw new Error("cannot happen");
+      }
+    }
+  }
+
   function onExpireDateDone(d: string | undefined) {
     使用期限年月日 = d;
     console.log("expireDate", 使用期限年月日);
+    mode = undefined;
+  }
+
+  function onBikouDone(recs: 備考レコード[]) {
+    備考レコード = recs.length > 0 ? recs : undefined;
     mode = undefined;
   }
 
@@ -165,15 +188,16 @@
         }
       });
       let data: PrescInfoData;
-      if( init.kind === "parsed" ){
+      if (init.kind === "parsed") {
         data = init.template;
-      } else if( init.kind === "denshi" ){
+      } else if (init.kind === "denshi") {
         data = init.data;
       } else {
         throw new Error("cannot happen");
       }
       data = Object.assign({}, data);
       data.使用期限年月日 = 使用期限年月日;
+      data.備考レコード = 備考レコード;
       data.RP剤情報グループ = drugs;
       destroy();
       onEnter(data);
@@ -440,6 +464,7 @@
         <DenshiMenu
           onPlus={doNew}
           on有効期限={() => changeModeTo("expire-date")}
+          on備考={() => changeModeTo("bikou")}
         />
       </div>
       {#if kouhiList.length > 0}
@@ -479,6 +504,16 @@
           使用期限：{使用期限年月日Rep(使用期限年月日)}
         </div>
       {/if}
+      {#if 備考レコード && 備考レコード.length > 0}
+        <div
+          style="margin:6px 0;cursor:pointer"
+          on:click={() => changeModeTo("bikou")}
+        >
+          {#each 備考レコード ?? [] as bikou}
+            <div>備考：{bikou.備考}</div>
+          {/each}
+        </div>
+      {/if}
     </div>
     <div style="user-select:none;">
       {#if mode === "edit-drug" && editedSource}
@@ -502,7 +537,13 @@
           expireDate={使用期限年月日}
           onDone={onExpireDateDone}
           onCancel={() => (mode = undefined)}
-          />
+        />
+      {:else if mode === "bikou"}
+        <BikouForm
+          records={備考レコード ?? []}
+          onDone={onBikouDone}
+          onCancel={() => (mode = undefined)}
+        />
       {/if}
     </div>
   </div>

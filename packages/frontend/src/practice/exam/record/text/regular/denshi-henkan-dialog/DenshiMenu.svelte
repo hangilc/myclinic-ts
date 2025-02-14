@@ -4,6 +4,7 @@
 
   export let onPlus: () => void;
   export let on有効期限: () => void;
+  export let on備考: () => void;
   let showAux = false;
 
   function toggleAux() {
@@ -30,6 +31,7 @@
       <a href="javascript:void(0)" on:click={() => invokeAux(on有効期限)}
         >有効期限</a
       >
+      <a href="javascript:void(0)" on:click={() => invokeAux(on備考)}>備考</a>
     </div>
   {/if}
 </div>
