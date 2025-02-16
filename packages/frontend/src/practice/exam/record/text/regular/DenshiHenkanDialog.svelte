@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
-  import type { IyakuhinMaster, Kouhi, UsageMaster } from "myclinic-model";
+  import type { Kouhi, UsageMaster } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
     Init,
@@ -16,6 +16,7 @@
     type 用法レコード,
     type 薬品レコード,
     type 備考レコード,
+    type 提供情報レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import {
     freeStyleUsageCode,
@@ -34,6 +35,7 @@
   import { 使用期限年月日Rep } from "./denshi-henkan-dialog/denshi-henkan-dialog-helper";
   import { kouhiRep } from "@/lib/hoken-rep";
   import BikouForm from "./denshi-henkan-dialog/BikouForm.svelte";
+  import JohoForm from "./denshi-henkan-dialog/JohoForm.svelte";
 
   export let destroy: () => void;
   export let init: Init;
@@ -51,6 +53,8 @@
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
   let 備考レコード: 備考レコード[] | undefined =
     resolve備考レコードFromInit(init);
+  let 提供情報レコード: 提供情報レコード | undefined =
+    resolve提供情報レコードFromInit(init);
 
   sourceList = prepareSourceList(init);
 
@@ -82,6 +86,22 @@
     }
   }
 
+  function resolve提供情報レコードFromInit(
+    init: Init
+  ): 提供情報レコード | undefined {
+    switch (init.kind) {
+      case "parsed": {
+        return undefined;
+      }
+      case "denshi": {
+        return init.data.提供情報レコード;
+      }
+      default: {
+        throw new Error("cannot happen");
+      }
+    }
+  }
+
   function onExpireDateDone(d: string | undefined) {
     使用期限年月日 = d;
     console.log("expireDate", 使用期限年月日);
@@ -90,6 +110,11 @@
 
   function onBikouDone(recs: 備考レコード[]) {
     備考レコード = recs.length > 0 ? recs : undefined;
+    mode = undefined;
+  }
+
+  function onJohoDone(rec: 提供情報レコード | undefined) {
+    提供情報レコード = rec;
     mode = undefined;
   }
 
@@ -199,6 +224,7 @@
       data.使用期限年月日 = 使用期限年月日;
       data.備考レコード = 備考レコード;
       data.RP剤情報グループ = drugs;
+      data.提供情報レコード = 提供情報レコード;
       destroy();
       onEnter(data);
     }
@@ -465,6 +491,7 @@
           onPlus={doNew}
           on有効期限={() => changeModeTo("expire-date")}
           on備考={() => changeModeTo("bikou")}
+          on提供情報={() => changeModeTo("joho")}
         />
       </div>
       {#if kouhiList.length > 0}
@@ -514,6 +541,28 @@
           {/each}
         </div>
       {/if}
+      {#if 提供情報レコード}
+        <div>
+          {#if 提供情報レコード.提供診療情報レコード}
+            {#each 提供情報レコード.提供診療情報レコード as record}
+              <div>
+                提供診療情報:
+                {#if record.薬品名称}
+                  【{record.薬品名称}】
+                {/if}
+                {record.コメント}
+              </div>
+            {/each}
+          {/if}
+          {#if 提供情報レコード.検査値データ等レコード}
+            {#each 提供情報レコード.検査値データ等レコード as record}
+              <div>
+                検査値データ等レコード: {record.検査値データ等}
+              </div>
+            {/each}
+          {/if}
+        </div>
+      {/if}
     </div>
     <div style="user-select:none;">
       {#if mode === "edit-drug" && editedSource}
@@ -542,6 +591,12 @@
         <BikouForm
           records={備考レコード ?? []}
           onDone={onBikouDone}
+          onCancel={() => (mode = undefined)}
+        />
+      {:else if mode === "joho"}
+        <JohoForm
+          joho={提供情報レコード}
+          onDone={onJohoDone}
           onCancel={() => (mode = undefined)}
         />
       {/if}

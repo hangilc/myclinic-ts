@@ -30,7 +30,7 @@ export interface DrugGroupFormInitExtent {
   sourceDrugName?: string;
 }
 
-export type Mode = "edit-drug" | "new-drug" | "expire-date" | "bikou";
+export type Mode = "edit-drug" | "new-drug" | "expire-date" | "bikou" | "joho";
 
 export type Init = { kind: "parsed"; shohousen: Shohousen; template: PrescInfoData; }
 | { kind: "denshi"; data: PrescInfoData };
