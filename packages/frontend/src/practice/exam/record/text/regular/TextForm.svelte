@@ -25,18 +25,15 @@
   import {
     copyTextMemo,
     TextMemoWrapper,
-    type ShohouConvTextMemo,
+    type ShohouTextMemo,
     type TextMemo,
   } from "../text-memo";
   import {
-    createPrescInfo,
     eq公費レコード,
     type PrescInfoData,
-    type RP剤情報,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import { initPrescInfoData, initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
-  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
 
   export let onClose: () => void;
@@ -458,6 +455,22 @@
     }
   }
 
+  async function doTransformToDenshi() {
+    const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
+    if( memo ){
+      console.log("memo", memo);
+      const newMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou: memo.shohou,
+        prescriptionId: undefined
+      };
+      TextMemoWrapper.setTextMemo(text, newMemo);
+      onClose();
+      await api.updateText(text);
+    }
+  }
+  
+
   function oldShohouPopup(): [string, () => void][] {
     const menu: [string, () => void][] = [
       ["処方箋印刷", doPrintShohousen],
@@ -468,6 +481,7 @@
       menu.push(["電子予備作成", doShohouConv]);
     } else if (memoKind === "shohou-conv") {
       menu.push(["電子予備編集", doEditShohouConv]);
+      menu.push(["電子処方に", doTransformToDenshi])
     }
     return menu;
   }
