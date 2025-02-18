@@ -38,6 +38,8 @@ import type { Drug, Senpatsu, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import type { HAlign, VAlign } from "../../compiler/align";
 
+// TODO: 公費対象、公費対象外　記載
+
 export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][] {
   const env = createEnv("d3.5", drawerData);
   const paper = { width: A5.width, height: A5.height };
@@ -70,7 +72,8 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
         valign: "top"
       }));
     }
-    page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+    // page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+    page.renderer.renderAt(page.ctx, { x: 0, y: 0 });
     result.push(c.getOps(page.ctx));
   } else {
     for (let i = 0; i < pages.length; i++) {
@@ -80,7 +83,8 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
         halign: "left",
         valign: "top"
       }))
-      page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+      // page.renderer.renderAt(page.ctx, shiftPosition({ x: 0, y: 0 }, innerBounds.offset));
+      page.renderer.renderAt(page.ctx, { x: 0, y: 0 });
       result.push(c.getOps(page.ctx));
     }
   }

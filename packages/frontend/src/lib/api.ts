@@ -10,6 +10,7 @@ import type { RP剤情報, 用法レコード, 用法補足レコード } from "
 import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
 import type { ShinryouDisease } from "./shinryou-disease";
+import type { 薬品コード種別 } from "./denshi-shohou/denshi-shohou";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -1682,9 +1683,25 @@ export default {
     return post("set-config", hokengaiHistory, { name: "hokengai-history" }, a => a)
   },
 
+  getUsageMasterMap(): Promise<Record<string, 用法レコード>> {
+    return get("get-config", { name: "usage-master-map" }, a => a ?? {});
+  },
+
+  setUsageMasterMap(map: Record<string, 用法レコード>) {
+    return post("set-config", map, { name: "usage-master-map" }, a => a);
+  },
+
+  getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
+    return get("get-config", { name: "drug-name-iyakuhincode-map" }, a => a ?? {});
+  },
+
+  setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
+    return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, a => {});
+  },
+
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
     return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
-  }
+  },
 };
 
 

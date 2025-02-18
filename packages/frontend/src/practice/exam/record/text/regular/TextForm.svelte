@@ -10,7 +10,7 @@
   import { setFocus } from "@/lib/set-focus";
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
-  import { dateToSqlDate } from "myclinic-model/model";
+  import { dateToSqlDate, Visit } from "myclinic-model/model";
   import {
     confirmOnlinePresc,
     getFollowingText,
@@ -25,17 +25,16 @@
   import {
     copyTextMemo,
     TextMemoWrapper,
-    type ShohouConvTextMemo,
+    type ShohouTextMemo,
     type TextMemo,
   } from "../text-memo";
   import {
-    createPrescInfo,
     eq公費レコード,
     type PrescInfoData,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
-  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
+  import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -346,7 +345,7 @@
       const curMemo = TextMemoWrapper.fromText(text).getMemo();
       const newMemo = await copyTextMemo(curMemo, targetVisitId);
       const warn = checkMemoCompat(curMemo, newMemo);
-      if( typeof warn === "string" ){
+      if (typeof warn === "string") {
         alert(`警告：${warn}`);
       }
       TextMemoWrapper.setTextMemo(t, newMemo);
@@ -374,27 +373,57 @@
     }
   }
 
+  function kouhiCountOfVisit(visit: Visit): number {
+    let count = 0;
+    if (visit.kouhi1Id > 0) {
+      count += 1;
+    } else {
+      if (visit.kouhi2Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      if (visit.kouhi3Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      return count;
+    }
+    if (visit.kouhi2Id > 0) {
+      count += 1;
+    } else {
+      if (visit.kouhi3Id > 0) {
+        throw new Error("invalid kouhi allocation");
+      }
+      return count;
+    }
+    if (visit.kouhi3Id > 0) {
+      count += 1;
+    }
+    return count;
+  }
+
   async function doShohouConv() {
+    const parsed = parseShohousen(text.content);
     const visit = await api.getVisit(text.visitId);
-    onClose();
-    const shohou = await initPrescInfoDataFromVisitId(text.visitId);
-    const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+    const patient = await api.getPatient(visit.patientId);
+    const hoken = await api.getHokenInfoForVisit(visit.visitId);
+    const clinicInfo = await cache.getClinicInfo();
+    // const kouhiCount = kouhiCountOfVisit(visit);
+    const template = initPrescInfoData(visit, patient, hoken, clinicInfo);
+    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        shohou,
+        init: { kind: "parsed", shohousen: parsed, template, },
         at: visit.visitedAt.substring(0, 10),
-        title: "電子変換",
-        onSave: async (shohou) => {
-          const newMemo: ShohouConvTextMemo = {
+        kouhiList: hoken.kouhiList,
+        onEnter: async (arg: PrescInfoData) => {
+          console.log("arg", arg);
+          TextMemoWrapper.setTextMemo(text, {
             kind: "shohou-conv",
-            shohou,
-          };
-          TextMemoWrapper.setTextMemo(text, newMemo);
+            shohou: arg,
+          });
+          onClose();
           await api.updateText(text);
         },
-        onRegistered: undefined,
-        onDelete: undefined,
       },
     });
   }
@@ -403,28 +432,57 @@
     const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
     if (memo) {
       const visit = await api.getVisit(text.visitId);
-      onClose();
       const shohou = memo.shohou;
-      const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+      const hoken = await api.getHokenInfoForVisit(visit.visitId);
+      // const kouhiCount = kouhiCountOfVisit(visit);
+      const d: DenshiHenkanDialog = new DenshiHenkanDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          shohou,
+          init: { kind: "denshi", data: shohou },
           at: visit.visitedAt.substring(0, 10),
-          title: "電子編集",
-          onSave: async (shohou) => {
-            const newMemo: ShohouConvTextMemo = {
+          kouhiList: hoken.kouhiList,
+          onEnter: async (arg: PrescInfoData) => {
+            TextMemoWrapper.setTextMemo(text, {
               kind: "shohou-conv",
-              shohou,
-            };
-            TextMemoWrapper.setTextMemo(text, newMemo);
+              shohou: arg,
+            });
+            onClose();
             await api.updateText(text);
           },
-          onRegistered: undefined,
-          onDelete: undefined,
         },
       });
     }
+  }
+
+  async function doTransformToDenshi() {
+    const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
+    if( memo ){
+      const newMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou: memo.shohou,
+        prescriptionId: undefined
+      };
+      TextMemoWrapper.setTextMemo(text, newMemo);
+      onClose();
+      await api.updateText(text);
+    }
+  }
+  
+
+  function oldShohouPopup(): [string, () => void][] {
+    const menu: [string, () => void][] = [
+      ["処方箋印刷", doPrintShohousen],
+      ["処方箋2024印刷", doPrintShohousen2024],
+      ["処方箋フォーマット", doFormatShohousen],
+    ];
+    if (memoKind === undefined) {
+      menu.push(["電子予備作成", doShohouConv]);
+    } else if (memoKind === "shohou-conv") {
+      menu.push(["電子予備編集", doEditShohouConv]);
+      menu.push(["電子処方に", doTransformToDenshi])
+    }
+    return menu;
   }
 </script>
 
@@ -447,19 +505,9 @@
         >
       {/if}
       {#if isShohousen(text.content)}
-        <a
-          href="javascript:void(0)"
-          on:click={popupTrigger(() => [
-            ["処方箋印刷", doPrintShohousen],
-            ["処方箋2024印刷", doPrintShohousen2024],
-            ["処方箋フォーマット", doFormatShohousen],
-          ])}>処方箋</a
+        <a href="javascript:void(0)" on:click={popupTrigger(oldShohouPopup)}
+          >処方箋</a
         >
-        {#if memoKind === undefined}
-          <a href="javascript:void(0)" on:click={doShohouConv}>電子変換</a>
-        {:else if memoKind === "shohou-conv"}
-          <a href="javascript:void(0)" on:click={doEditShohouConv}>電子編集</a>
-        {/if}
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>

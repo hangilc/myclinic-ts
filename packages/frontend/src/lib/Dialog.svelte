@@ -83,7 +83,7 @@
   tabindex="0"
 >
   <div class="title" data-cy="dialog-title">
-    <span>{title}</span>
+    <span style="user-select:none;">{title}</span>
     <span class="spacer" />
     {#if fixed}
       <svg
