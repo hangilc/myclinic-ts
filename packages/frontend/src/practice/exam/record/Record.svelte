@@ -28,6 +28,8 @@
 
   probeOnshi();
 
+  // $: console.log("visit.texts", visit.texts);
+
   async function probeOnshi() {
     const onshi: m.Onshi | undefined = await api.findOnshi(visit.visitId);
     onshiConfirmed = !!onshi;

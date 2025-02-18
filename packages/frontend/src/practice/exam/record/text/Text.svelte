@@ -6,8 +6,7 @@
 
   export let text: m.Text;
   export let index: number;
-  const memoWrapper = TextMemoWrapper.fromText(text);
-  const shohouMemo = memoWrapper.probeShohouMemo();
+  $: shohouMemo = TextMemoWrapper.fromText(text).probeShohouMemo();
 </script>
 
 {#if shohouMemo}

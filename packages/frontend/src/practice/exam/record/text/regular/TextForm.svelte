@@ -458,7 +458,6 @@
   async function doTransformToDenshi() {
     const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
     if( memo ){
-      console.log("memo", memo);
       const newMemo: ShohouTextMemo = {
         kind: "shohou",
         shohou: memo.shohou,
