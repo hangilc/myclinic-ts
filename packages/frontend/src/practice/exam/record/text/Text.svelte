@@ -10,7 +10,7 @@
 </script>
 
 {#if shohouMemo}
-  <ShohouText memo={shohouMemo} textId={text.textId} visitId={text.visitId} />
+  <ShohouText {text} />
 {:else}
   <RegularText {text} {index} />
 {/if}

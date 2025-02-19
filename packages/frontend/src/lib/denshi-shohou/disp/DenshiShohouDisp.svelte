@@ -4,10 +4,11 @@
   import GroupsDisp from "./GroupsDisp.svelte";
 
   export let shohou: PrescInfoData;
+  export let prolog: string = "院外処方";
 </script>
 
 <div>
-  <div>院外処方</div>
+  <div>{prolog}</div>
   <div>Ｒｐ）</div>
   <GroupsDisp groups={shohou.RP剤情報グループ} />
   {#each shohou.備考レコード ?? [] as rec}
