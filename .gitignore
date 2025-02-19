@@ -35,6 +35,8 @@ target
 work
 workspaces/jslib/out
 .env
+.env.*
+
 
 
 
