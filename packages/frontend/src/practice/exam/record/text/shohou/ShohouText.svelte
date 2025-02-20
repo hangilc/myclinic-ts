@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Text } from "myclinic-model";
+  import { Kouhi, Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
   import api from "@/lib/api";
   import { shohouHikaeFilename } from "@/lib/denshi-shohou/presc-api";
@@ -21,6 +21,8 @@
   import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
 
   export let text: Text;
+  export let at: string;
+  export let kouhiList: Kouhi[];
   let textId = text.textId;
   let visitId = text.visitId;
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
@@ -161,7 +163,7 @@
       <RegisteredShohouForm {shohou} onCancel={() => (mode = "disp")} />
     {:else}
     <div>
-      <ShohouTextForm {shohou} onCancel={() => (mode = "disp")}/>
+      <ShohouTextForm {shohou} {at} {kouhiList} onCancel={() => (mode = "disp")}/>
     </div>
     {/if}
   {/if}

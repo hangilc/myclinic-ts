@@ -30,8 +30,10 @@ export const FormatDate = {
   },
 
   f9(date: DateWrapperLike): string {
-    return DateWrapper.from(date).render(d =>
-      `${d.gengou}${d.nen}年${d.month}月${d.day}日（${d.youbi}） ${d.getAmPm()}${d.getAmPmHours()}時${d.getMinutes()}分`
+    return DateWrapper.from(date).render(d => {
+      console.log("f9 d", d.getAmPmHours(), d.getHours());
+      return `${d.gengou}${d.nen}年${d.month}月${d.day}日（${d.youbi}） ${d.getAmPm()}${d.getAmPmHours()}時${d.getMinutes()}分`
+    }
     )
   },
 
