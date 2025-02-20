@@ -4,7 +4,12 @@
   import GroupsDisp from "./GroupsDisp.svelte";
 
   export let shohou: PrescInfoData;
+  export let prescriptionId: number | undefined;
   export let prolog: string = "院外処方";
+
+  function initProlog(shohou: PrescInfoData): string {
+    return `院外処方（電子${prescriptionId ? "登録" : ""}）`
+  }
 </script>
 
 <div>

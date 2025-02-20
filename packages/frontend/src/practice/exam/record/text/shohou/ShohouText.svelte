@@ -30,9 +30,8 @@
   let prescriptionId: string | undefined = memo.prescriptionId;
   let showDetail = false;
   let targetVisitId: number | undefined = undefined;
-
   let mode: "disp" | "edit" = "disp";
-  let prolog = `院外処方（電子{prescriptionId ? "登録" : ""}）`
+  let prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
 
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
@@ -150,21 +149,42 @@
       await api.enterText(newText);
     }
   }
+
+  async function doShohouModified(modified: PrescInfoData) {
+    let m = TextMemoWrapper.fromText(text).probeShohouMemo();
+    if (m && m.prescriptionId) {
+      console.error("cannot modify registered denshi shohou");
+      return;
+    }
+    TextMemoWrapper.setTextMemo(text, {
+      kind: "shohou",
+      shohou: modified,
+      prescriptionId: undefined,
+    });
+    await api.updateText(text);
+    mode = "disp";
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div style="margin-bottom:10px;">
   {#if mode === "disp"}
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
-      <DenshiShohouDisp {shohou} {prolog}/>
+      <DenshiShohouDisp {shohou} {prolog} prescriptionId={undefined}/>
     </div>
   {:else if mode === "edit"}
-    {#if prescriptionId }
+    {#if prescriptionId}
       <RegisteredShohouForm {shohou} onCancel={() => (mode = "disp")} />
     {:else}
-    <div>
-      <ShohouTextForm {shohou} {at} {kouhiList} onCancel={() => (mode = "disp")}/>
-    </div>
+      <div>
+        <ShohouTextForm
+          {shohou}
+          {at}
+          {kouhiList}
+          onCancel={() => (mode = "disp")}
+          onModified={doShohouModified}
+        />
+      </div>
     {/if}
   {/if}
 </div>

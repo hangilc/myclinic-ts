@@ -42,6 +42,8 @@
   export let at: string;
   export let kouhiList: Kouhi[];
   export let onEnter: (data: PrescInfoData) => void;
+  export let onCancel: () => void;
+  export let title = "処方箋電子変換";
   let sourceIndex = 1;
   let sourceList: Source[] = [];
   let selectedSourceIndex = 0;
@@ -444,6 +446,7 @@
 
   function doCancel() {
     destroy();
+    onCancel();
   }
 
   function targetUsageRep(target: TargetUsage | undefined): string {
@@ -483,7 +486,7 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<Dialog title="処方箋電子変換" {destroy} styleWidth="600px">
+<Dialog {title} destroy={doCancel} styleWidth="600px">
   <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
     <div style="font-size:14px;">
       <div>

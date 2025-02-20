@@ -80,7 +80,7 @@
   <TwoCols isCurrent={$currentVisitId === visit.visitId}>
     <div slot="left">
       {#each visit.texts as text, i (text.textId)}
-        <Text {text} index={i} at={visit.visitedAt.substring(0, 10)} kouhiList={[]} />
+        <Text {text} index={i} at={visit.visitedAt.substring(0, 10)} kouhiList={visit.hoken.kouhiList} />
       {/each}
       {#if showNewTextEditor}
         <NewTextForm

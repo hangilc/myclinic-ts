@@ -8,22 +8,27 @@ import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   export let at: string;
   export let kouhiList: Kouhi[];
   export let onCancel: () => void;
+  export let onModified: (newShohou: PrescInfoData) => void;
 
   function doEdit() {
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
       props: {
-        destroy: () => d.$destory(),
+        destroy: () => d.$destroy(),
         init: { kind: "denshi", data: shohou },
         at,
         kouhiList,
-        onEnter: (newShohou: PrescInfoData) => {},
+        title: "処方編集",
+        onEnter: (newShohou: PrescInfoData) => {
+          onModified(newShohou);
+        },
+        onCancel: () => { onCancel()}
       }
     })
   }
 </script>
   <div style="border:1px solid green;padding:10px;border-radius:6px">
-    <DenshiShohouDisp {shohou} />
+    <DenshiShohouDisp {shohou} prescriptionId={undefined}/>
   </div>
   <div style="margin-top:6px;">
     <a href="javascript:void(0)" on:click={doEdit}>編集</a>
