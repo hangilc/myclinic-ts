@@ -252,6 +252,7 @@
       clinicAddress: clinicInfo.address,
       clinicName: clinicInfo.name,
       clinicPhone: `電話 ${clinicInfo.tel}`,
+      clinicTodoufuken: clinicInfo.todoufukencode,
       clinicKikancode: clinicInfo.kikancode,
       doctorName: clinicInfo.doctorName,
       hokenshaBangou,
