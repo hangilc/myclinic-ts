@@ -1,5 +1,6 @@
 <script lang="ts">
   import CheckCircle from "@/icons/CheckCircle.svelte";
+  import Trash from "@/icons/Trash.svelte";
   import XCircle from "@/icons/XCircle.svelte";
   import type {
     提供情報レコード,
@@ -35,12 +36,26 @@
     const d = drugInput.trim();
     const t = shinryouInput.trim();
     if (t !== "") {
-      const rec = toRecord([...shinryouList, { 
-        薬品名称: d !== "" ? d : undefined,
-        コメント: t 
-      }], kensaList);
+      const rec = toRecord(
+        [
+          ...shinryouList,
+          {
+            薬品名称: d !== "" ? d : undefined,
+            コメント: t,
+          },
+        ],
+        kensaList
+      );
       onDone(rec);
     }
+  }
+
+  function deleteShinryou(shinryou: 提供診療情報レコード) {
+    const rec = toRecord(
+      shinryouList.filter((s) => s !== shinryou),
+      kensaList
+    );
+    onDone(rec);
   }
 
   function addKensa() {
@@ -49,6 +64,14 @@
       const rec = toRecord(shinryouList, [...kensaList, { 検査値データ等: t }]);
       onDone(rec);
     }
+  }
+
+  function deleteKensa(kensa: 検査値データ等レコード) {
+    const rec = toRecord(
+      shinryouList,
+      kensaList.filter((k) => k !== kensa)
+    );
+    onDone(rec);
   }
 </script>
 
@@ -60,6 +83,13 @@
       {#if shinryou.薬品名称}（{shinryou.薬品名称}）
       {/if}
       {shinryou.コメント}
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:3px;"
+        on:click={() => deleteShinryou(shinryou)}
+      >
+        <Trash color="gray" />
+      </a>
     </div>
   {/each}
   <div>
@@ -88,7 +118,16 @@
 <div style="margin-top:10px;">検査値：</div>
 <div>
   {#each kensaList as kensa}
-    <div>{kensa.検査値データ等}</div>
+    <div>
+      {kensa.検査値データ等}
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:3px;"
+        on:click={() => deleteKensa(kensa)}
+      >
+        <Trash color="gray" />
+      </a>
+    </div>
   {/each}
   <div>
     <input type="text" bind:value={kensaInput} />
