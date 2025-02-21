@@ -32,7 +32,6 @@
   import type { Kouhi } from "myclinic-model";
 
   export let at: string;
-  // export let kouhiCount: number;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
   export let onEnter: (rec: RP剤情報) => void;
@@ -51,11 +50,19 @@
   let edit剤形区分 = false;
   let edit用法レコード = false;
   let edit用法補足レコード = false;
-  let edit情報区分 = false;
   let edit薬剤種別 = false;
   let edit不均等レコード = false;
   let edit負担区分レコード = false;
   let edit薬品補足レコード = false;
+
+  $: isEditing =
+    edit剤形区分 ||
+    edit用法レコード ||
+    edit用法補足レコード ||
+    edit薬剤種別 ||
+    edit不均等レコード ||
+    edit負担区分レコード ||
+    edit薬品補足レコード;
 
   function drugKindFromInit(): DrugKind | undefined {
     if (init?.薬品レコード) {
@@ -376,25 +383,31 @@
           />
         </div>
       {:else if 負担区分レコード}
-        {kouhiRep(負担区分レコード)}
+        <span
+          style="user-select:none;cursor:pointer"
+          on:click={() => (edit負担区分レコード = true)}
+          >{kouhiRep(負担区分レコード)}</span
+        >
       {/if}
     </div>
   </div>
   <div style="margin-top:10px;">
-    <a
-      href="javascript:void(0)"
-      style="position:relative;top:5px;margin-left:3px;margin:0"
-      on:click={doEnter}
-    >
-      <CheckCircle color="#00f" width="22" />
-    </a>
-    <a
-      href="javascript:void(0)"
-      style="position:relative;top:5px;margin-left:3px;margin:0;"
-      on:click={doCancel}
-    >
-      <XCircle color="#f99" width="22" />
-    </a>
+    {#if !isEditing}
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:5px;margin-left:3px;margin:0"
+        on:click={doEnter}
+      >
+        <CheckCircle color="#00f" width="22" />
+      </a>
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:5px;margin-left:3px;margin:0;"
+        on:click={doCancel}
+      >
+        <XCircle color="#f99" width="22" />
+      </a>
+    {/if}
     <a
       href="javascript:void(0)"
       on:click={() => (edit不均等レコード = !edit不均等レコード)}>不均等</a

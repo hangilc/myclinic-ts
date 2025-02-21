@@ -606,7 +606,7 @@
     </div>
   </div>
   <div style="text-align:right;">
-    <button on:click={doEnter} disabled={!isAllConverted(sourceList)}
+    <button on:click={doEnter} disabled={!isAllConverted(sourceList) || mode != undefined }
       >入力</button
     >
     <button on:click={doCancel}>キャンセル</button>

@@ -106,6 +106,5 @@
     >
       <XCircle />
     </a>
-    f
   </div>
 </div>
