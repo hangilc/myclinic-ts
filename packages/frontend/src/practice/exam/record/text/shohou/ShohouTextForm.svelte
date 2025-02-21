@@ -26,11 +26,16 @@ import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
       }
     })
   }
+
+  function doPrint() {
+    
+  }
 </script>
   <div style="border:1px solid green;padding:10px;border-radius:6px">
     <DenshiShohouDisp {shohou} prescriptionId={undefined}/>
   </div>
   <div style="margin-top:6px;">
     <a href="javascript:void(0)" on:click={doEdit}>編集</a>
+    <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
     <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
   </div>
