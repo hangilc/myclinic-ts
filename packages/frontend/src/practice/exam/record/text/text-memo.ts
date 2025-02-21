@@ -93,6 +93,15 @@ export class TextMemoWrapper {
       text.memo = store;
     }
   }
+
+  static getShohouMemo(text: Text): ShohouTextMemo {
+    const m = TextMemoWrapper.fromText(text).probeShohouMemo();
+    if( !m ){
+      throw new Error("cannot get shohou memo");
+    } else {
+      return m;
+    }
+  }
 }
 
 export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: number): Promise<TextMemo | undefined> {

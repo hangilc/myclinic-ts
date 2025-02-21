@@ -33,6 +33,8 @@ export class DateWrapper {
   }
 
   getHours(): number {
+    console.log("date", this.date);
+    console.log("gethours", this.date.getHours());
     return this.date.getHours();
   }
 
@@ -190,6 +192,15 @@ export class DateWrapper {
     return new DateWrapper(date);
   }
 
+  static isSqlDatetime(s: string): boolean {
+    return /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(s);
+  }
+
+  static fromSqlDatetime(s: string): DateWrapper {
+    const date = sqlDatetimeToDate(s);
+    return new DateWrapper(date);
+  }
+
   static isSqlDate(s: string): boolean {
     return /^\d{4}-\d{2}-\d{2}/.test(s);
   }
@@ -218,6 +229,8 @@ export class DateWrapper {
       return arg;
     } else if (arg instanceof Date) {
       return new DateWrapper(arg);
+    } else if (DateWrapper.isSqlDatetime(arg)) {
+      return DateWrapper.fromSqlDatetime(arg);
     } else if (DateWrapper.isSqlDate(arg)) {
       return DateWrapper.fromSqlDate(arg);
     } else if (DateWrapper.isOnshiDate(arg)) {
@@ -255,12 +268,30 @@ export function sqlDateToDate(sqlDate: string): Date {
   return new Date(obj.year, obj.month - 1, obj.day);
 }
 
+export function sqlDatetimeToDate(sqlDatetime: string): Date {
+  const obj = sqlDatetimeToObject(sqlDatetime);
+  return new Date(obj.year, obj.month - 1, obj.day, obj.hour, obj.minute, obj.second);
+}
+
 export function sqlDateToObject(sqlDate: string): { year: number, month: number, day: number } {
   return {
     year: parseInt(sqlDate.substring(0, 4)),
     month: parseInt(sqlDate.substring(5, 7)),
     day: parseInt(sqlDate.substring(8, 10)),
   }
+}
+
+export function sqlDatetimeToObject(sqlDatetime: string): {
+  year: number, month: number, day: number,
+  hour: number, minute: number, second: number,
+} {
+  const d: any = sqlDateToObject(sqlDatetime);
+  Object.assign(d, {
+    hour: parseInt(sqlDatetime.substring(11, 13)),
+    minute: parseInt(sqlDatetime.substring(14, 16)),
+    second: parseInt(sqlDatetime.substring(17, 19)),
+  });
+  return d;
 }
 
 export function onshiDateToDate(onshidate: string): Date {

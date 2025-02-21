@@ -1,13 +1,9 @@
 <script lang="ts">
-  import { Text } from "myclinic-model";
+  import { Kouhi, Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
   import api from "@/lib/api";
-  import {
-    shohouHikaeFilename,
-  } from "@/lib/denshi-shohou/presc-api";
-  import type {
-    PrescInfoData,
-  } from "@/lib/denshi-shohou/presc-info";
+  import { shohouHikaeFilename } from "@/lib/denshi-shohou/presc-api";
+  import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import {
     currentVisitId,
     getCopyTarget,
@@ -21,14 +17,21 @@
   import { textUpdated } from "@/app-events";
   import { onDestroy } from "svelte";
   import ShohouDetail from "./ShohouDetail.svelte";
+  import ShohouTextForm from "./ShohouTextForm.svelte";
+  import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
 
-  export let memo: ShohouTextMemo;
-  export let textId: number;
-  export let visitId: number;
+  export let text: Text;
+  export let at: string;
+  export let kouhiList: Kouhi[];
+  let textId = text.textId;
+  let visitId = text.visitId;
+  let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
   let shohou: PrescInfoData = memo.shohou;
   let prescriptionId: string | undefined = memo.prescriptionId;
   let showDetail = false;
   let targetVisitId: number | undefined = undefined;
+  let mode: "disp" | "edit" = "disp";
+  let prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
 
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
@@ -62,7 +65,6 @@
         },
       });
     } else if (shohou.引換番号 == undefined && prescriptionId == undefined) {
-      const text = await api.getText(textId);
       const visit = await api.getVisit(text.visitId);
       const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
         target: document.body,
@@ -134,7 +136,7 @@
         RP剤情報グループ: [...shohou.RP剤情報グループ],
         備考レコード: shohou.備考レコード,
         提供情報レコード: shohou.提供情報レコード,
-      })
+      });
       const newText = new Text(
         0,
         targetVisitId,
@@ -147,10 +149,47 @@
       await api.enterText(newText);
     }
   }
+
+  async function doShohouModified(modified: PrescInfoData) {
+    let m = TextMemoWrapper.fromText(text).probeShohouMemo();
+    if (m && m.prescriptionId) {
+      console.error("cannot modify registered denshi shohou");
+      return;
+    }
+    console.log("modified", modified);
+    TextMemoWrapper.setTextMemo(text, {
+      kind: "shohou",
+      shohou: modified,
+      prescriptionId: undefined,
+    });
+    await api.updateText(text);
+    mode = "disp";
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
-<div>
+<div style="margin-bottom:10px;">
+  {#if mode === "disp"}
+    <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
+      <DenshiShohouDisp {shohou} {prolog} prescriptionId={undefined}/>
+    </div>
+  {:else if mode === "edit"}
+    {#if prescriptionId}
+      <RegisteredShohouForm {shohou} onCancel={() => (mode = "disp")} />
+    {:else}
+      <div>
+        <ShohouTextForm
+          {shohou}
+          {at}
+          {kouhiList}
+          onCancel={() => (mode = "disp")}
+          onModified={doShohouModified}
+        />
+      </div>
+    {/if}
+  {/if}
+</div>
+<!-- <div>
   <div on:click={doClick} style="cursor:pointer;">
     <DenshiShohouDisp {shohou} />
   </div>
@@ -167,4 +206,4 @@
     {/if}
   </div>
   {#if showDetail && prescriptionId}<ShohouDetail {prescriptionId} />{/if}
-</div>
+</div> -->

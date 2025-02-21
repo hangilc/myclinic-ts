@@ -6,11 +6,13 @@
 
   export let text: m.Text;
   export let index: number;
+  export let at: string;
+  export let kouhiList: m.Kouhi[];
   $: shohouMemo = TextMemoWrapper.fromText(text).probeShohouMemo();
 </script>
 
 {#if shohouMemo}
-  <ShohouText memo={shohouMemo} textId={text.textId} visitId={text.visitId} />
+  <ShohouText {text} {at} {kouhiList}/>
 {:else}
   <RegularText {text} {index} />
 {/if}
