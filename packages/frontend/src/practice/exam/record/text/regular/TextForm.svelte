@@ -425,6 +425,7 @@
           onClose();
           await api.updateText(text);
         },
+        onCancel: onClose
       },
     });
   }
@@ -451,6 +452,7 @@
             onClose();
             await api.updateText(text);
           },
+          onCancel: onClose
         },
       });
     }

@@ -1,8 +1,11 @@
 <script lang="ts">
   import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
-import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+  import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
   import type { Kouhi } from "myclinic-model";
+  import { denshiToPrint } from "./denshi-to-print";
+  import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
+  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -22,20 +25,36 @@ import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
         onEnter: (newShohou: PrescInfoData) => {
           onModified(newShohou);
         },
-        onCancel: () => { onCancel()}
-      }
-    })
+        onCancel: () => {
+          onCancel();
+        },
+      },
+    });
   }
 
   function doPrint() {
-    
+    const data = denshiToPrint(shohou);
+    const pages = drawShohousen2024NoRefill(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
   }
 </script>
-  <div style="border:1px solid green;padding:10px;border-radius:6px">
-    <DenshiShohouDisp {shohou} prescriptionId={undefined}/>
-  </div>
-  <div style="margin-top:6px;">
-    <a href="javascript:void(0)" on:click={doEdit}>編集</a>
-    <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
-    <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
-  </div>
+
+<div style="border:1px solid green;padding:10px;border-radius:6px">
+  <DenshiShohouDisp {shohou} prescriptionId={undefined} />
+</div>
+<div style="margin-top:6px;">
+  <a href="javascript:void(0)" on:click={doEdit}>編集</a>
+  <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
+  <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
+</div>
