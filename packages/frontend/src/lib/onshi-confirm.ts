@@ -92,6 +92,9 @@ export async function onshiConfirm(
     console.log("timeout");
     controller.abort();
   }, timeout * 1000);
+  const login = await onshiLogin();
+  console.log("login", login);
+  console.log("onshiConfirm query", query);
   const response = await fetch(server + "/onshi/kakunin", {
     method: "POST",
     headers: {
