@@ -24,7 +24,6 @@
   export let at: string;
   export let kouhiList: Kouhi[];
   let textId = text.textId;
-  let visitId = text.visitId;
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
   let shohou: PrescInfoData = memo.shohou;
   let prescriptionId: string | undefined = memo.prescriptionId;
@@ -175,6 +174,17 @@
     await api.updateText(text);
     mode = "disp";
   }
+
+  async function doUnregistered() {
+    shohou.引換番号 = undefined;
+    TextMemoWrapper.setTextMemo(text, {
+      kind: "shohou",
+      shohou,
+      prescriptionId: undefined
+    });
+    await api.updateText(text);
+    mode = "disp";
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -185,13 +195,15 @@
     </div>
   {:else if mode === "edit"}
     {#if prescriptionId}
-      <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} />
+      <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} 
+        onUnregistered={doUnregistered} />
     {:else}
       <div>
         <ShohouTextForm
           {shohou}
           {at}
           {kouhiList}
+          {textId}
           onCancel={() => (mode = "disp")}
           onModified={doShohouModified}
           onRegistered={doRegistered}

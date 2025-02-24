@@ -19,6 +19,7 @@
   export let shohou: PrescInfoData;
   export let at: string;
   export let kouhiList: Kouhi[];
+  export let textId: number;
   export let onCancel: () => void;
   export let onModified: (newShohou: PrescInfoData) => void;
   export let onRegistered: (
@@ -113,6 +114,12 @@
     saveHikae(kikancode, prescriptionId);
     onRegistered(shohou, prescriptionId);
   }
+
+  async function doDelete() {
+    if( confirm("この処方を削除していいですか？") ){
+      await api.deleteText(textId);
+    }
+  }
 </script>
 
 <div style="border:1px solid green;padding:10px;border-radius:6px">
@@ -123,5 +130,6 @@
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
+  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>

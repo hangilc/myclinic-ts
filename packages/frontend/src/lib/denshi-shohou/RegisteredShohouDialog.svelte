@@ -69,7 +69,7 @@
 </script>
 
 <Dialog title="登録済処方" {destroy}>
-  <DenshiShohouDisp {shohou} />
+  <DenshiShohouDisp {shohou} {prescriptionId}/>
   <div class="commands">
     <button on:click={doUnregister}>登録削除</button>
     <button on:click={destroy}>閉じる</button>
