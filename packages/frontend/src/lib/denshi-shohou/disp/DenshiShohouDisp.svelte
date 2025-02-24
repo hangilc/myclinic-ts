@@ -5,7 +5,7 @@
 
   export let shohou: PrescInfoData;
   export let prescriptionId: number | undefined;
-  export let prolog: string = "院外処方";
+  export let prolog: string = initProlog(shohou);
 
   function initProlog(shohou: PrescInfoData): string {
     return `院外処方（電子${prescriptionId ? "登録" : ""}）`

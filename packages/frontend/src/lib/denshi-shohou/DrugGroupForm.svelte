@@ -30,6 +30,7 @@
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import XCircle from "@/icons/XCircle.svelte";
   import type { Kouhi } from "myclinic-model";
+  import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
 
   export let at: string;
   export let kouhiList: Kouhi[];
@@ -67,7 +68,13 @@
   function drugKindFromInit(): DrugKind | undefined {
     if (init?.薬品レコード) {
       const rec = init.薬品レコード;
-      if (rec.薬品コード種別 && rec.薬品コード && rec.薬品名称 && rec.単位名) {
+      if (
+        rec.薬品コード種別 &&
+        rec.薬品コード &&
+        rec.薬品名称 &&
+        ((rec.情報区分 === "医薬品" && rec.単位名) ||
+          rec.情報区分 === "医療材料")
+      ) {
         return {
           薬品コード種別: rec.薬品コード種別,
           薬品コード: rec.薬品コード,
@@ -95,8 +102,6 @@
   function amountUnitFromInit(): string {
     if (init?.薬品レコード) {
       return init.薬品レコード.単位名;
-    } else if (init?.amount !== undefined) {
-      return init.amount.toString();
     } else {
       return "";
     }
@@ -216,8 +221,20 @@
   }
 
   function onDone剤形区分(value: 剤形区分) {
-    剤形区分 = value;
-    edit剤形区分 = false;
+    if (value !== 剤形区分) {
+      if (value === "医療材料" || 剤形区分 === "医療材料") {
+        // 調剤数量Input = "";
+        用法レコード = undefined;
+        用法補足レコード = undefined;
+        drugKind = undefined;
+        amountInput = "";
+        amountUnit = "";
+        不均等レコード = undefined;
+        薬品補足レコード = undefined;
+      }
+      剤形区分 = value;
+      edit剤形区分 = false;
+    }
   }
 
   function onDone用法(value: 用法レコード) {
@@ -269,18 +286,32 @@
     </div>
     <div style="margin:6px 0;">
       {#if !edit薬剤種別}
-        <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
-          >{drugKind ? drugKind.薬品名称 : "（薬品未設定）"}</span
-        >
+        <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}>
+          {#if 剤形区分 !== "医療材料"}
+            {drugKind ? drugKind.薬品名称 : "（薬品未設定）"}
+          {:else if 剤形区分 === "医療材料"}
+            {drugKind ? drugKind.薬品名称 : "（器材未設定）"}
+          {/if}
+        </span>
       {:else}
         <div style="border:1px solid gray;border-radius:6px;padding:10px;">
-          <DrugKindForm
-            {drugKind}
-            {at}
-            onDone={onDone薬剤種別}
-            onCancel={() => (edit薬剤種別 = false)}
-            searchText={init.iyakuhinSearchText ?? ""}
-          />
+          {#if 剤形区分 !== "医療材料"}
+            <DrugKindForm
+              {drugKind}
+              {at}
+              onDone={onDone薬剤種別}
+              onCancel={() => (edit薬剤種別 = false)}
+              searchText={init.iyakuhinSearchText ?? ""}
+            />
+          {:else if 剤形区分 === "医療材料"}
+            <KizaiKindForm
+              {drugKind}
+              {at}
+              onDone={onDone薬剤種別}
+              onCancel={() => (edit薬剤種別 = false)}
+              searchText={init.iyakuhinSearchText ?? ""}
+            />
+          {/if}
         </div>
       {/if}
     </div>

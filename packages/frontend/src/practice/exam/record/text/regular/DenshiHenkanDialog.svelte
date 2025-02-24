@@ -121,7 +121,6 @@
   }
 
   async function onFormEnter(rp: RP剤情報) {
-    console.log("rp", rp);
     if (
       editedSource.用法レコード &&
       editedSource.用法レコード.用法コード === freeStyleUsageCode
