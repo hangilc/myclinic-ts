@@ -31,12 +31,15 @@
   }
 
   function doMasterSelect(m: KizaiMaster) {
-    console.log("unit", m);
+    let unit = m.unit;
+    if( unit === "" && m.name.startsWith("万年筆型注入器用注射針") ){
+      unit = "本";
+    }
     onDone({
       薬品コード種別: "レセプト電算処理システム用コード",
       薬品コード: m.kizaicode.toString(),
       薬品名称: m.name,
-      単位名: m.unit,
+      単位名: unit,
     })
   }
 

@@ -165,17 +165,27 @@
     await api.updateText(text);
     mode = "disp";
   }
+
+  async function doRegistered(shohou: PrescInfoData, prescriptionId: string) {
+    TextMemoWrapper.setTextMemo(text, {
+      kind: "shohou",
+      shohou,
+      prescriptionId: prescriptionId,
+    });
+    await api.updateText(text);
+    mode = "disp";
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div style="margin-bottom:10px;">
   {#if mode === "disp"}
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
-      <DenshiShohouDisp {shohou} {prolog} prescriptionId={undefined}/>
+      <DenshiShohouDisp {shohou} {prolog} prescriptionId={undefined} />
     </div>
   {:else if mode === "edit"}
     {#if prescriptionId}
-      <RegisteredShohouForm {shohou} onCancel={() => (mode = "disp")} />
+      <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} />
     {:else}
       <div>
         <ShohouTextForm
@@ -184,6 +194,7 @@
           {kouhiList}
           onCancel={() => (mode = "disp")}
           onModified={doShohouModified}
+          onRegistered={doRegistered}
         />
       </div>
     {/if}

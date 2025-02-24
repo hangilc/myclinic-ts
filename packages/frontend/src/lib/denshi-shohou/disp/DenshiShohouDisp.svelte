@@ -4,7 +4,7 @@
   import GroupsDisp from "./GroupsDisp.svelte";
 
   export let shohou: PrescInfoData;
-  export let prescriptionId: number | undefined;
+  export let prescriptionId: string | undefined;
   export let prolog: string = initProlog(shohou);
 
   function initProlog(shohou: PrescInfoData): string {
