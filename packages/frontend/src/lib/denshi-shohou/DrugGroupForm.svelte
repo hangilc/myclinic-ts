@@ -31,12 +31,15 @@
   import XCircle from "@/icons/XCircle.svelte";
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
+  import Trash from "@/icons/Trash.svelte";
+  import { onshiDeleted } from "@/app-events";
 
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
   export let onEnter: (rec: RP剤情報) => void;
   export let onCancel: () => void;
+  export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
   let 調剤数量Input: string = init.調剤数量?.toString() ?? "";
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
@@ -272,9 +275,12 @@
 
   function doCancel() {
     onCancel();
-    // if (confirm("薬剤の編集をキャンセルしますか？")) {
-    //   onCancel();
-    // }
+  }
+
+  function doDelete() {
+    if (onDelete && confirm("この薬剤を削除していいですか？")) {
+      onDelete();
+    }
   }
 </script>
 
@@ -431,6 +437,15 @@
       >
         <CheckCircle color="#00f" width="22" />
       </a>
+      {#if onDelete}
+        <a
+          href="javascript:void(0)"
+          style="position:relative;top:5px;margin-left:3px;margin:0"
+          on:click={doDelete}
+        >
+          <Trash color="#00f" width="22" />
+        </a>
+      {/if}
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;margin:0;"
@@ -463,8 +478,4 @@
 </div>
 
 <style>
-  .title {
-    user-select: none;
-    cursor: pointer;
-  }
 </style>

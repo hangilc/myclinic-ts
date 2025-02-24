@@ -46,12 +46,13 @@
   export let title = "処方箋電子変換";
   let sourceIndex = 1;
   let sourceList: Source[] = [];
-  let selectedSourceIndex = 0;
+  // let selectedSourceIndex = 0;
+  let selectedSourceId = -1;
   let targetUsage: TargetUsage | undefined = undefined;
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let mode: Mode | undefined = undefined;
-  let editedSource: DrugGroupFormInit & DrugGroupFormInitExtent = {};
+  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined = undefined;
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
   let 備考レコード: 備考レコード[] | undefined =
     resolve備考レコードFromInit(init);
@@ -122,6 +123,7 @@
 
   async function onFormEnter(rp: RP剤情報) {
     if (
+      editedSource &&
       editedSource.用法レコード &&
       editedSource.用法レコード.用法コード === freeStyleUsageCode
     ) {
@@ -574,6 +576,7 @@
           init={editedSource}
           onEnter={onFormEnter}
           onCancel={onFormCancel}
+          onDelete={() => doDelete(editedSource)}
         />
       {:else if mode === "new-drug"}
         <DrugGroupForm
@@ -582,6 +585,7 @@
           init={{}}
           onEnter={onNewDrug}
           onCancel={() => (mode = undefined)}
+          onDelete={undefined}
         />
       {:else if mode === "expire-date"}
         <ExpireDateForm
