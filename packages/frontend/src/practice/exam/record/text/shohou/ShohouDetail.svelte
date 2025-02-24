@@ -8,6 +8,8 @@
   export let prescriptionId: string;
   let statusResult: StatusResult | undefined = undefined;
 
+  doStatus()
+
   async function doStatus() {
     if (prescriptionId) {
       const kikancode = await cache.getShohouKikancode();
@@ -36,9 +38,9 @@
   style="margin:10px 0;border:1px solid gray;border-radius:4px;padding:10px;"
 >
   <div>処方ＩＤ：{prescriptionId}</div>
-  <div>
+  <!-- <div>
     <a href="javascript:void(0)" on:click={doStatus}>処理状況</a>
-  </div>
+  </div> -->
   {#if statusResult}
     <div>
       <div>{statusResult.XmlMsg.MessageBody.PrescriptionStatus}</div>
