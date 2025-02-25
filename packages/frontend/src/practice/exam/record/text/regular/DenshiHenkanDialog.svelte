@@ -1,7 +1,12 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
-  import type { IyakuhinMaster, KizaiMaster, Kouhi, UsageMaster } from "myclinic-model";
+  import type {
+    IyakuhinMaster,
+    KizaiMaster,
+    Kouhi,
+    UsageMaster,
+  } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
     Init,
@@ -53,7 +58,8 @@
   let usageSearchText = "";
   let usageSearchResult: UsageMaster[] = [];
   let mode: Mode | undefined = undefined;
-  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined = undefined;
+  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
+    undefined;
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
   let 備考レコード: 備考レコード[] | undefined =
     resolve備考レコードFromInit(init);
@@ -358,9 +364,9 @@
       let master: IyakuhinMaster | KizaiMaster | undefined = undefined;
       let 情報区分: 情報区分 = "医薬品";
       const code = bind.toString();
-      if( code.startsWith("6") ){
+      if (code.startsWith("6")) {
         master = await api.getIyakuhinMaster(bind, at);
-      } else if( code.startsWith("7") ){
+      } else if (code.startsWith("7")) {
         master = await api.getKizaiMaster(bind, at);
         情報区分 = "医療材料";
       }
@@ -392,12 +398,27 @@
     switch (src.kind) {
       case "parsed": {
         const amount = resolveParsedAmount(src.amount);
-        const resolved = await resolveParsedIyakuhin(src.name, amount?.toString() ?? "");
+        const resolved = await resolveParsedIyakuhin(
+          src.name,
+          amount?.toString() ?? ""
+        );
         let 剤形区分: 剤形区分 | undefined = resolveParsed剤形区分(src.times);
-        if( "薬品レコード" in resolved ){
+        if ("薬品レコード" in resolved) {
           const code = resolved.薬品レコード.薬品コード;
-          if( code.startsWith("7")) {
+          if (code.startsWith("7")) {
             剤形区分 = "医療材料";
+            if (
+              resolved.薬品レコード.薬品名称.startsWith(
+                "万年筆型注入器用注射針"
+              )
+            ) {
+              resolved.薬品レコード.単位名 = "本";
+            }
+          } else {
+            const name = resolved.薬品レコード.薬品名称;
+            if( name.startsWith("ランタス注ソロスター") || name.startsWith("アピドラ注ソロスター")){
+              剤形区分 = "注射";
+            }
           }
         }
         return {
@@ -502,7 +523,7 @@
   }
 
   function doDelete() {
-    sourceList = sourceList.filter(s => s.id !== selectedSourceId);
+    sourceList = sourceList.filter((s) => s.id !== selectedSourceId);
     reset();
   }
 </script>
@@ -630,8 +651,9 @@
     </div>
   </div>
   <div style="text-align:right;">
-    <button on:click={doEnter} disabled={!isAllConverted(sourceList) || mode != undefined }
-      >入力</button
+    <button
+      on:click={doEnter}
+      disabled={!isAllConverted(sourceList) || mode != undefined}>入力</button
     >
     <button on:click={doCancel}>キャンセル</button>
   </div>
