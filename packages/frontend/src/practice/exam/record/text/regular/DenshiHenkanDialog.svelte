@@ -33,7 +33,6 @@
   import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
   import { tick } from "svelte";
   import { cache } from "@/lib/cache";
-  import type { DrugKind } from "@/lib/denshi-shohou/drug-group-form/drug-group-form-types";
   import ParsedRep from "./denshi-henkan-dialog/ParsedRep.svelte";
   import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
   import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
