@@ -27,7 +27,6 @@ export type TargetUsage = {
 
 export interface DrugGroupFormInitExtent {
   sourceDrugName?: string;
-  sourceId: number;
 }
 
 export type Mode = "edit-drug" | "new-drug" | "expire-date" | "bikou" | "joho";

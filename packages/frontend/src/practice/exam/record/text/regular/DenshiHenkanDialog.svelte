@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
-  import type { Kouhi, UsageMaster } from "myclinic-model";
+  import type { IyakuhinMaster, KizaiMaster, Kouhi, UsageMaster } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
     Init,
@@ -21,6 +21,7 @@
   import {
     freeStyleUsageCode,
     type 剤形区分,
+    type 情報区分,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
   import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
@@ -140,7 +141,7 @@
       if (rec === undefined) {
         throw new Error("empty RP剤情報");
       }
-      if (editedSource.sourceDrugName) {
+      if (editedSource?.sourceDrugName) {
         const drugName = editedSource.sourceDrugName;
         if (rec.薬品コード種別 === "レセプト電算処理システム用コード") {
           const map = await cache.getDrugNameIyakuhincodeMap();
@@ -155,7 +156,7 @@
       }
     }
     sourceList = sourceList.map((src) => {
-      if (src.id === selectedSourceIndex) {
+      if (src.id === selectedSourceId) {
         return rpToSource(rp);
       } else {
         return src;
@@ -183,8 +184,8 @@
 
   async function reset() {
     mode = undefined;
-    editedSource = {};
-    selectedSourceIndex = -1;
+    editedSource = undefined;
+    selectedSourceId = -1;
     await tick();
   }
 
@@ -290,7 +291,7 @@
     return sourceList;
   }
 
-  function resolveParsed剤型区分(
+  function resolveParsed剤形区分(
     times: string | undefined
   ): 剤形区分 | undefined {
     if (times) {
@@ -349,22 +350,29 @@
     amount: string
   ): Promise<
     | { 薬品レコード: 薬品レコード }
-    | { drugKind: DrugKind }
     | { iyakuhinSearchText: string; amount: number | undefined }
   > {
     const amountValue = resolveParsedAmount(amount);
     const bind = await probeIyakuhincode(name);
     if (bind) {
-      const master = await api.getIyakuhinMaster(bind, at);
+      let master: IyakuhinMaster | KizaiMaster | undefined = undefined;
+      let 情報区分: 情報区分 = "医薬品";
+      const code = bind.toString();
+      if( code.startsWith("6") ){
+        master = await api.getIyakuhinMaster(bind, at);
+      } else if( code.startsWith("7") ){
+        master = await api.getKizaiMaster(bind, at);
+        情報区分 = "医療材料";
+      }
       if (master) {
         if (amountValue !== undefined) {
           return {
             薬品レコード: {
-              情報区分: "医薬品",
+              情報区分,
               薬品コード種別: "レセプト電算処理システム用コード",
-              薬品コード: master.iyakuhincode.toString(),
+              薬品コード: code,
               薬品名称: master.name,
-              分量: amount.toString(),
+              分量: amount,
               力価フラグ: "薬価単位",
               単位名: master.unit,
             },
@@ -384,11 +392,19 @@
     switch (src.kind) {
       case "parsed": {
         const amount = resolveParsedAmount(src.amount);
+        const resolved = await resolveParsedIyakuhin(src.name, amount?.toString() ?? "");
+        let 剤形区分: 剤形区分 | undefined = resolveParsed剤形区分(src.times);
+        if( "薬品レコード" in resolved ){
+          const code = resolved.薬品レコード.薬品コード;
+          if( code.startsWith("7")) {
+            剤形区分 = "医療材料";
+          }
+        }
         return {
-          剤形区分: resolveParsed剤型区分(src.times),
+          剤形区分,
           調剤数量: resolveParsed調剤数量(src.times),
           用法レコード: await resolveParsed用法レコード(src.usage),
-          ...(await resolveParsedIyakuhin(src.name, src.amount)),
+          ...resolved,
           sourceDrugName: src.name,
         };
       }
@@ -412,7 +428,7 @@
 
   async function doSourceSelect(src: Source) {
     editedSource = await sourceToInit(src);
-    selectedSourceIndex = src.id;
+    selectedSourceId = src.id;
     mode = undefined;
     await tick();
     mode = "edit-drug";
@@ -484,6 +500,11 @@
       }
     }
   }
+
+  function doDelete() {
+    sourceList = sourceList.filter(s => s.id !== selectedSourceId);
+    reset();
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -510,7 +531,7 @@
       {#each sourceList as source (source.id)}
         <div
           class="drug"
-          class:selected={source.id === selectedSourceIndex}
+          class:selected={source.id === selectedSourceId}
           on:click={() => doSourceSelect(source)}
         >
           {#if source.kind === "parsed"}
@@ -576,7 +597,7 @@
           init={editedSource}
           onEnter={onFormEnter}
           onCancel={onFormCancel}
-          onDelete={() => doDelete(editedSource)}
+          onDelete={doDelete}
         />
       {:else if mode === "new-drug"}
         <DrugGroupForm
