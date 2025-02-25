@@ -191,7 +191,7 @@
 <div style="margin-bottom:10px;">
   {#if mode === "disp"}
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
-      <DenshiShohouDisp {shohou} {prolog} prescriptionId={undefined} />
+      <DenshiShohouDisp {shohou} {prolog} {prescriptionId} />
     </div>
   {:else if mode === "edit"}
     {#if prescriptionId}

@@ -9,6 +9,7 @@
   import DenshiMenu from "./denshi-shohou-form/DenshiMenu.svelte";
   import type {
     PrescInfoData,
+    RP剤情報,
     備考レコード,
     提供情報レコード,
     用法レコード,
@@ -18,7 +19,11 @@
   import { tick } from "svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
   import { kouhiRep } from "@/lib/hoken-rep";
-  import { freeStyleUsageCode, type 剤形区分, type 情報区分 } from "./denshi-shohou";
+  import {
+    freeStyleUsageCode,
+    type 剤形区分,
+    type 情報区分,
+  } from "./denshi-shohou";
   import { toHankaku } from "@/lib/zenkaku";
   import { cache } from "@/lib/cache";
   import api from "../api";
@@ -33,11 +38,9 @@
   export let init: Init;
   export let at: string;
   export let kouhiList: Kouhi[];
-  export let onEnter: (data: PrescInfoData) => void;
-  export let onCancel: () => void;
 
   let sourceIndex = 1;
-  let sourceList: Source[] = [];
+  export let sourceList: Source[];
   let selectedSourceId = -1;
   let mode: Mode | undefined = undefined;
   let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
@@ -327,6 +330,133 @@
   async function doNew() {
     await reset();
     mode = "new-drug";
+  }
+
+  function rpToSource(rp: RP剤情報): Source {
+    return {
+      kind: "denshi",
+      剤形レコード: rp.剤形レコード,
+      用法レコード: rp.用法レコード,
+      用法補足レコード: rp.用法補足レコード,
+      薬品情報: rp.薬品情報グループ[0],
+      id: sourceIndex++,
+    };
+  }
+
+  async function onFormEnter(rp: RP剤情報) {
+    if (
+      editedSource &&
+      editedSource.用法レコード &&
+      editedSource.用法レコード.用法コード === freeStyleUsageCode
+    ) {
+      if (rp.用法レコード.用法コード !== freeStyleUsageCode) {
+        const u = editedSource.用法レコード.用法名称;
+        const map = await cache.getUsageMasterMap();
+        map[u] = Object.assign({}, rp.用法レコード);
+        await cache.setUsageMasterMap(map);
+      }
+    }
+    {
+      const rec: 薬品レコード | undefined =
+        rp.薬品情報グループ[0]?.薬品レコード;
+      if (rec === undefined) {
+        throw new Error("empty RP剤情報");
+      }
+      if (editedSource?.sourceDrugName) {
+        const drugName = editedSource.sourceDrugName;
+        if (rec.薬品コード種別 === "レセプト電算処理システム用コード") {
+          const map = await cache.getDrugNameIyakuhincodeMap();
+          const bind = map[drugName];
+          if (!bind || bind.toString() !== rec.薬品コード) {
+            const newMap = { ...map };
+            newMap[drugName] = parseInt(rec.薬品コード);
+            await cache.setDrugNameIyakuhincodeMap(newMap);
+            console.log("newMap", newMap);
+          }
+        }
+      }
+    }
+    sourceList = sourceList.map((src) => {
+      if (src.id === selectedSourceId) {
+        return rpToSource(rp);
+      } else {
+        return src;
+      }
+    });
+    await reset();
+  }
+
+  async function onFormCancel() {
+    await reset();
+  }
+
+  function doDelete() {
+    sourceList = sourceList.filter((s) => s.id !== selectedSourceId);
+    reset();
+  }
+
+  async function onNewDrug(rp: RP剤情報) {
+    sourceList.push(rpToSource(rp));
+    sourceList = sourceList;
+    await reset();
+  }
+
+  function onExpireDateDone(d: string | undefined) {
+    使用期限年月日 = d;
+    console.log("expireDate", 使用期限年月日);
+    mode = undefined;
+  }
+
+  function onBikouDone(recs: 備考レコード[]) {
+    備考レコード = recs.length > 0 ? recs : undefined;
+    mode = undefined;
+  }
+
+  function onJohoDone(rec: 提供情報レコード | undefined) {
+    提供情報レコード = rec;
+    mode = undefined;
+  }
+
+  function isAllConverted(list: Source[]): boolean {
+    for (let src of list) {
+      if (src.kind !== "denshi") {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  export function getPrescInfoData(): PrescInfoData {
+    if (isAllConverted(sourceList)) {
+      const drugs: RP剤情報[] = [];
+      sourceList.forEach((ele) => {
+        if (ele.kind === "denshi") {
+          const rp: RP剤情報 = {
+            剤形レコード: ele.剤形レコード,
+            用法レコード: ele.用法レコード,
+            用法補足レコード: ele.用法補足レコード,
+            薬品情報グループ: [ele.薬品情報],
+          };
+          drugs.push(rp);
+        }
+      });
+      let data: PrescInfoData;
+      if (init.kind === "parsed") {
+        data = init.template;
+      } else if (init.kind === "denshi") {
+        data = init.data;
+      } else {
+        throw new Error("cannot happen");
+      }
+      data = Object.assign({}, data);
+      data.使用期限年月日 = 使用期限年月日;
+      data.備考レコード = 備考レコード;
+      data.RP剤情報グループ = drugs;
+      data.提供情報レコード = 提供情報レコード;
+      return data;
+    } else {
+      throw new Error("not all drugs are denshi");
+    }
   }
 </script>
 

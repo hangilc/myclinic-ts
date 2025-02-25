@@ -35,4 +35,7 @@
   {#each shohou.提供情報レコード?.検査値データ等レコード ?? [] as rec}
     <div>検査値等：{rec.検査値データ等}</div>
   {/each}
+  {#if shohou.引換番号 != undefined}
+  <div>引換番号：{shohou.引換番号}</div>
+  {/if}
 </div>

@@ -20,6 +20,8 @@
   import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import { TextMemoWrapper } from "./text/text-memo";
   import DenshiHenkanDialog from "./text/regular/DenshiHenkanDialog.svelte";
+  import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
+  import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -76,23 +78,13 @@
   }
 
   async function doNewShohou() {
-    const data: PrescInfoData = await initPrescInfoDataFromVisitId(visit.visitId);
-    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
+    const clinicInfo = await cache.getClinicInfo();
+    const d: NewDenshiShohouDialog = new NewDenshiShohouDialog({
       target: document.body,
       props: {
+        visit,
+        clinicInfo,
         destroy: () => d.$destroy(),
-        init: {
-          kind: "denshi",
-          data,
-        },
-        at: visit.visitedAt.substring(0, 10),
-        kouhiList: visit.hoken.kouhiList,
-        onEnter: function (data: PrescInfoData): void {
-          throw new Error("Function not implemented.");
-        },
-        onCancel: function (): void {
-          d.$destroy();
-        }
       }
     })
   }
