@@ -349,6 +349,7 @@
       mkFormData(),
       lastIndex >= 0 ? stores[lastIndex] : {}
     );
+    formData.issueDate = DateWrapper.from(new Date()).asSqlDate();
     formData.immediates["issue-times"] = (stores.length + 1).toString();
     storesIndex = -1;
   }
