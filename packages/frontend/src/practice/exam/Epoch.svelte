@@ -79,7 +79,7 @@
       es.sort((a, b) => {
         return a.visit.visitedAt.localeCompare(b.visit.visitedAt);
       });
-      if( reverse ){
+      if (reverse) {
         es.reverse();
       }
       const ss = es
@@ -101,33 +101,33 @@
 </script>
 
 <div>
+  <div>
+    <span style="font-weight:bold">エポック</span>
+    <a
+      href="javascript:void(0)"
+      style="position:relative;top:3px;"
+      on:click={() => (showMenu = !showMenu)}
+    >
+      <ChevronDown />
+    </a>
+  </div>
+  {#if showMenu}
     <div>
-      <span style="font-weight:bold">エポック</span>
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:3px;"
-        on:click={() => (showMenu = !showMenu)}
+      <a href="javascript:void(0)" on:click={doReload}>リロード</a>
+      <span class="sep">|</span>
+      <a href="javascript:void(0)" on:click={doList}>リスト作成</a>
+      <span class="sep">|</span>
+      <a href="javascript:void(0)" on:click={doListReverse}
+        >リスト作成（逆順）</a
       >
-        <ChevronDown />
-      </a>
     </div>
-    {#if showMenu}
-      <div>
-        <a href="javascript:void(0)" on:click={doReload}>リロード</a>
-        <span class="sep">|</span>
-        <a href="javascript:void(0)" on:click={doList}>リスト作成</a>
-        <span class="sep">|</span>
-        <a href="javascript:void(0)" on:click={doListReverse}
-          >リスト作成（逆順）</a
-        >
-      </div>
-      {#if showEditor}
-        <textarea
-          style="width:95%;resize:vertical;height:10em;"
-          bind:value={editorContent}
-        ></textarea>
-      {/if}
+    {#if showEditor}
+      <textarea
+        style="width:95%;resize:vertical;height:10em;"
+        bind:value={editorContent}
+      ></textarea>
     {/if}
+  {/if}
   {#each epochs as epoch (epoch.id)}
     <div class="epoch">
       <div class="date">{formatDate(epoch.visit.visitedAt)}</div>
