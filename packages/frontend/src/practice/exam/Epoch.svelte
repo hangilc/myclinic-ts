@@ -101,7 +101,6 @@
 </script>
 
 <div>
-  {#if epochs.length > 0}
     <div>
       <span style="font-weight:bold">エポック</span>
       <a
@@ -129,7 +128,6 @@
         ></textarea>
       {/if}
     {/if}
-  {/if}
   {#each epochs as epoch (epoch.id)}
     <div class="epoch">
       <div class="date">{formatDate(epoch.visit.visitedAt)}</div>
