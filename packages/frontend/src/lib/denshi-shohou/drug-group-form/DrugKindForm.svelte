@@ -26,6 +26,7 @@
     if( t !== "" ){
       const ms = await api.searchIyakuhinMaster(t, at);
       searchResult = ms;
+      console.log("searchResult", searchResult);
     }
   }
 
