@@ -33,8 +33,6 @@ export class DateWrapper {
   }
 
   getHours(): number {
-    console.log("date", this.date);
-    console.log("gethours", this.date.getHours());
     return this.date.getHours();
   }
 
