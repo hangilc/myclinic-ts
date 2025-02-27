@@ -20,14 +20,20 @@
     }
   }
 
+  function doSelect(m: ShinryouMaster) {
+    selected = m;
+  }
+
   async function doEnter() {
     if (selected) {
       await enter(visit, [selected.shinryoucode], []);
+      destroy();
     }
   }
 </script>
 
 <Dialog {destroy} title="診療行為検索入力">
+  <div style=margin-bottom:6px;width:270px;>{selected ? selected.name : "（未選択）"}</div>
   <div class="top">
     <form on:submit|preventDefault={doSearch}>
       <input type="text" bind:this={searchTextInput} use:setFocus />
@@ -36,7 +42,8 @@
   </div>
   <div class="select">
     {#each result as m (m.shinryoucode)}
-      <div class="item">{m.name}</div>
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="item" on:click={() => doSelect(m)}>{m.name}</div>
     {/each}
   </div>
   <div class="commands">
