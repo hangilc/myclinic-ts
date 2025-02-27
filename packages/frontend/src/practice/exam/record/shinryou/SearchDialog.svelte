@@ -4,15 +4,14 @@
   import type { ShinryouMaster, VisitEx } from "myclinic-model";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { setFocus } from "@/lib/set-focus";
-  import { writable, type Writable } from "svelte/store";
   import { enter } from "./helper";
 
   export let destroy: () => void;
   export let visit: VisitEx;
-  // let dialog: Dialog;
   let searchTextInput: HTMLInputElement;
   let result: ShinryouMaster[] = [];
-  let selected: Writable<ShinryouMaster | null> = writable(null);
+  // let selected: Writable<ShinryouMaster | null> = writable(null);
+  let selected: ShinryouMaster | undefined = undefined;
 
   async function doSearch() {
     const text = searchTextInput.value.trim();
@@ -22,9 +21,8 @@
   }
 
   async function doEnter() {
-    const m = $selected;
-    if (m != null) {
-      await enter(visit, [m.shinryoucode], []);
+    if (selected) {
+      await enter(visit, [selected.shinryoucode], []);
     }
   }
 </script>
@@ -38,13 +36,11 @@
   </div>
   <div class="select">
     {#each result as m (m.shinryoucode)}
-      <SelectItem {selected} data={m}>
-        {m.name}
-      </SelectItem>
+      <div class="item">{m.name}</div>
     {/each}
   </div>
   <div class="commands">
-    <button on:click={doEnter}>入力</button>
+    <button on:click={doEnter} disabled={!selected}>入力</button>
     <button on:click={destroy}>閉じる</button>
   </div>
 </Dialog>
@@ -59,6 +55,23 @@
     height: 200px;
     margin-top: 10px;
     resize: vertical;
+  }
+
+  .item {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .item:hover {
+    background-color: #ddd;
+  }
+
+  .item:nth-child(even):hover {
+    background-color: #afa;
+  }
+
+  .item:nth-child(even) {
+    background-color: #dfd;
   }
 
   .commands {
