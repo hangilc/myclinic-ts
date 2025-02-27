@@ -2,19 +2,22 @@
   import api from "@/lib/api";
   import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
   import {
-  prescStatus,
+    prescStatus,
     shohouHikaeFilename,
     unregisterPresc,
   } from "@/lib/denshi-shohou/presc-api";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import ShohouDetail from "./ShohouDetail.svelte";
   import { cache } from "@/lib/cache";
-  import { TextMemoWrapper } from "../text-memo";
+  import { getCopyTarget } from "@/practice/exam/exam-vars";
+  import { Text } from "myclinic-model";
+  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
 
   export let shohou: PrescInfoData;
   export let prescriptionId: string;
   export let onCancel: () => void;
   export let onUnregistered: () => void;
+  export let onCopied: () => void;
   let showDetail = false;
 
   async function doHikae() {
@@ -61,6 +64,28 @@
       result.XmlMsg.MessageBody.ProcessingResultMessage;
     alert(`エラー：${msg}`);
   }
+
+  async function doCopy() {
+    const targetVisitId = getCopyTarget();
+    if (targetVisitId !== null) {
+      const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+      const curMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou,
+        prescriptionId,
+      }
+      const newMemo = await copyTextMemo(curMemo, targetVisitId);
+      const warn = checkMemoCompat(curMemo, newMemo);
+      if (typeof warn === "string") {
+        alert(`警告：${warn}`);
+      }
+      TextMemoWrapper.setTextMemo(t, newMemo);
+      api.enterText(t);
+      onCopied();
+    } else {
+      alert("コピー先を見つけられませんでした。");
+    }
+  }
 </script>
 
 <div style="border:1px solid blue;padding:10px;border-radius:6px">
@@ -73,5 +98,6 @@
   <a href="javascript:void(0)" on:click={doHikae}>控え</a>
   <a href="javascript:void(0)" on:click={doStatus}>状態</a>
   <a href="javascript:void(0)" on:click={doUnregister}>発行取消</a>
+  <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>

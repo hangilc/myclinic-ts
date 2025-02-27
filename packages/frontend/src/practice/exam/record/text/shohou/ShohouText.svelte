@@ -16,7 +16,6 @@
   import type { Unsubscriber } from "svelte/store";
   import { textUpdated } from "@/app-events";
   import { onDestroy } from "svelte";
-  import ShohouDetail from "./ShohouDetail.svelte";
   import ShohouTextForm from "./ShohouTextForm.svelte";
   import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
 
@@ -196,7 +195,8 @@
   {:else if mode === "edit"}
     {#if prescriptionId}
       <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} 
-        onUnregistered={doUnregistered} />
+        onUnregistered={doUnregistered} 
+        onCopied={() => (mode = "disp")}/>
     {:else}
       <div>
         <ShohouTextForm
@@ -207,6 +207,7 @@
           onCancel={() => (mode = "disp")}
           onModified={doShohouModified}
           onRegistered={doRegistered}
+          onCopied={() => (mode = "disp")}
         />
       </div>
     {/if}

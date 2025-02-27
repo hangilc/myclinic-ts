@@ -1,4 +1,4 @@
-import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+import { eq公費レコード, type PrescInfoData, type 公費レコード } from "@/lib/denshi-shohou/presc-info";
 import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Text } from "myclinic-model";
 
@@ -49,7 +49,7 @@ export class TextMemoWrapper {
 
   getMemoKind(): "shohou" | "shohou-conv" | undefined {
     const memo = this.getMemo();
-    if( memo ){
+    if (memo) {
       if (memo.kind === "shohou") {
         return "shohou";
       } else if (memo.kind === "shohou-conv") {
@@ -65,7 +65,7 @@ export class TextMemoWrapper {
 
   probeShohouMemo(): ShohouTextMemo | undefined {
     const memo = this.getMemo();
-    if( memo && memo.kind === "shohou" ){
+    if (memo && memo.kind === "shohou") {
       return memo;
     } else {
       return undefined;
@@ -74,7 +74,7 @@ export class TextMemoWrapper {
 
   probeShohouConvMemo(): ShohouConvTextMemo | undefined {
     const memo = this.getMemo();
-    if( memo && memo.kind === "shohou-conv" ){
+    if (memo && memo.kind === "shohou-conv") {
       return memo;
     } else {
       return undefined;
@@ -86,7 +86,7 @@ export class TextMemoWrapper {
   }
 
   static setTextMemo(text: Text, memo: TextMemo | undefined) {
-    if( memo === undefined ){
+    if (memo === undefined) {
       text.memo = undefined;
     } else {
       const store = JSON.stringify(memo);
@@ -96,7 +96,7 @@ export class TextMemoWrapper {
 
   static getShohouMemo(text: Text): ShohouTextMemo {
     const m = TextMemoWrapper.fromText(text).probeShohouMemo();
-    if( !m ){
+    if (!m) {
       throw new Error("cannot get shohou memo");
     } else {
       return m;
@@ -114,6 +114,7 @@ export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: num
         引換番号: undefined,
         RP剤情報グループ: src.shohou.RP剤情報グループ,
         提供情報レコード: src.shohou.提供情報レコード,
+        備考レコード: src.shohou.備考レコード,
       });
       const dstMemo: ShohouTextMemo = {
         kind: "shohou",
@@ -127,6 +128,7 @@ export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: num
         引換番号: undefined,
         RP剤情報グループ: src.shohou.RP剤情報グループ,
         提供情報レコード: src.shohou.提供情報レコード,
+        備考レコード: src.shohou.備考レコード,
       });
       const dstMemo: ShohouConvTextMemo = {
         kind: "shohou-conv",
@@ -138,3 +140,50 @@ export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: num
     }
   }
 }
+
+function checkKouhiCompat(
+  src: PrescInfoData,
+  dst: PrescInfoData
+): string | undefined {
+  function compat(
+    a: 公費レコード | undefined,
+    b: 公費レコード | undefined
+  ): boolean {
+    if (a && b) {
+      return eq公費レコード(a, b);
+    } else {
+      return a === b;
+    }
+  }
+  if (!compat(src.第一公費レコード, dst.第一公費レコード)) {
+    return "第一公費レコードが一致しません。";
+  }
+  if (!compat(src.第二公費レコード, dst.第二公費レコード)) {
+    return "第二公費レコードが一致しません。";
+  }
+  if (!compat(src.第三公費レコード, dst.第三公費レコード)) {
+    return "第三公費レコードが一致しません。";
+  }
+  if (!compat(src.特殊公費レコード, dst.特殊公費レコード)) {
+    return "特殊公費レコードが一致しません。";
+  }
+  return undefined;
+}
+
+export function checkMemoCompat(
+  src: TextMemo | undefined,
+  dst: TextMemo | undefined
+): string | undefined {
+  if (src === undefined && dst === undefined) {
+    return undefined;
+  } else if (src && dst) {
+    if (src.kind === "shohou" && dst.kind === src.kind) {
+      return checkKouhiCompat(src.shohou, dst.shohou);
+    } else if (src.kind === "shohou-conv" && dst.kind === src.kind) {
+      return checkKouhiCompat(src.shohou, dst.shohou);
+    } else {
+    }
+  }
+  return "inconsistent text memo";
+}
+

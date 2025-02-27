@@ -12,9 +12,21 @@
   import ShowCodeDialog from "@/lib/denshi-shohou/ShowCodeDialog.svelte";
   import { sign_presc } from "@/lib/hpki-api";
   import { cache } from "@/lib/cache";
-  import { registerPresc, shohouHikae, shohouHikaeFilename } from "@/lib/denshi-shohou/presc-api";
-  import { checkShohouResult, type HikaeResult, type RegisterResult } from "@/lib/denshi-shohou/shohou-interface";
+  import {
+    registerPresc,
+    shohouHikae,
+    shohouHikaeFilename,
+  } from "@/lib/denshi-shohou/presc-api";
+  import {
+    checkShohouResult,
+    type HikaeResult,
+    type RegisterResult,
+  } from "@/lib/denshi-shohou/shohou-interface";
   import api from "@/lib/api";
+  import { getCopyTarget } from "@/practice/exam/exam-vars";
+  import { Text } from "myclinic-model";
+  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
+
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -26,6 +38,7 @@
     shohou: PrescInfoData,
     prescriptionId: string
   ) => void;
+  export let onCopied: () => void;
 
   function doEdit() {
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
@@ -116,8 +129,30 @@
   }
 
   async function doDelete() {
-    if( confirm("この処方を削除していいですか？") ){
+    if (confirm("この処方を削除していいですか？")) {
       await api.deleteText(textId);
+    }
+  }
+
+  async function doCopy() {
+    const targetVisitId = getCopyTarget();
+    if (targetVisitId !== null) {
+      const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+      const curMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou,
+        prescriptionId: undefined,
+      };
+      const newMemo = await copyTextMemo(curMemo, targetVisitId);
+      const warn = checkMemoCompat(curMemo, newMemo);
+      if (typeof warn === "string") {
+        alert(`警告：${warn}`);
+      }
+      TextMemoWrapper.setTextMemo(t, newMemo);
+      api.enterText(t);
+      onCopied();
+    } else {
+      alert("コピー先を見つけられませんでした。");
     }
   }
 </script>
@@ -131,5 +166,6 @@
   <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+  <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>
