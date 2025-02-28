@@ -13,6 +13,9 @@
   let mode: "master" | "free-style" = "master";
   let inputText = "";
   let usageSearchResult: UsageMaster[] = [];
+  let masterInputElement: HTMLInputElement;
+  let freeStyleInputElement: HTMLInputElement;
+
   if (用法) {
     if (用法.用法コード !== freeStyleUsageCode) {
       mode = "master";
@@ -22,6 +25,14 @@
       inputText = 用法.用法名称;
     }
   }
+
+  onMount(() => {
+    if( mode === "master" ){
+      masterInputElement.focus();
+    } else if( mode === "free-style" ){
+      freeStyleInputElement.focus();
+    }
+  })
 
   async function doSearchUsage() {
     const t = inputText.trim();
@@ -70,6 +81,7 @@
         type="text"
         bind:value={inputText}
         style="width:22em;"
+        bind:this={masterInputElement}
       />
     </form>
     <div
@@ -90,6 +102,7 @@
         type="text"
         bind:value={inputText}
         style="width:22em;"
+        bind:this={freeStyleInputElement}
       />
     </form>
   {/if}
