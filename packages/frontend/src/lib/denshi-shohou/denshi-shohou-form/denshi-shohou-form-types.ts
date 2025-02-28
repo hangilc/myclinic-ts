@@ -37,7 +37,9 @@ export type Init = { kind: "parsed"; shohousen: Shohousen; template: PrescInfoDa
 export type IppanmeiState = {
   kind: "is-ippanmei"
 } | {
-  kind: "has-ippanemi",
-  name: string,
-  code: string,
+  kind: "has-ippanmei";
+  name: string;
+  code: string;
+} | {
+  kind: "has-no-ippanmei";
 };

@@ -8,7 +8,7 @@
 
   export let drugKind: DrugKind | undefined;
   export let at: string;
-  export let onDone: (value: DrugKind, ippanmeiRecord?: IppanmeiRecord) => void;
+  export let onDone: (value: DrugKind, ippanmeiState: IppanmeiState) => void;
   export let onCancel: () => void;
   export let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
@@ -31,19 +31,22 @@
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
-    let ippanmeiRecord: IppanmeiRecord | undefined = undefined;
+    let ippanmeiState: IppanmeiState;
     if( m.ippanmei && m.ippanmeicode ){
-      ippanmeiRecord = {
+      ippanmeiState = {
+        kind: "has-ippanmei",
         name: m.ippanmei,
         code: m.ippanmeicode,
       };
+    } else {
+      ippanmeiState = { kind: "has-no-ippanmei" };
     }
     onDone({
       薬品コード種別: "レセプト電算処理システム用コード",
       薬品コード: m.iyakuhincode.toString(),
       薬品名称: m.name,
       単位名: m.unit,
-    }, ippanmeiRecord);
+    }, ippanmeiState);
   }
 </script>
 

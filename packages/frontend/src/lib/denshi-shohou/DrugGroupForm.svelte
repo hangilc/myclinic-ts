@@ -35,11 +35,12 @@
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
   import Trash from "@/icons/Trash.svelte";
+  import { type IppanmeiState } from "./denshi-shohou-form/denshi-shohou-form-types";
 
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
-  export let onEnter: (rec: RP剤情報, ippanmeiRecord?: IppanmeiRecord) => void;
+  export let onEnter: (rec: RP剤情報, ippanmeiRecord: IppanmeiState) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
@@ -47,7 +48,7 @@
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
   let drugKind: DrugKind | undefined = drugKindFromInit();
-  let ippanmeiRecord: IppanmeiRecord | undefined = undefined;
+  let ippanmeiState: IppanmeiState | undefined = ippanmeiStateFromInit();
   let amountInput: string = amountInputFromInit();
   let amountUnit: string = amountUnitFromInit();
   let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;
@@ -90,6 +91,14 @@
       } else {
         return undefined;
       }
+    } else {
+      return undefined;
+    }
+  }
+
+  function ippanmeiStateFromInit(): IppanmeiState | undefined {
+    if (init?.薬品レコード?.薬品コード種別 === "一般名コード") {
+      return { kind: "is-ippanmei" };
     } else {
       return undefined;
     }
@@ -173,7 +182,7 @@
       用法補足レコード,
       薬品情報グループ: [薬品情報],
     };
-    onEnter(rp, ippanmeiRecord);
+    onEnter(rp, ippanmeiState);
   }
 
   function timesRep(kubun: 剤形区分): string {
