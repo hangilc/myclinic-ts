@@ -1,13 +1,13 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
-  import type { DrugKind } from "./drug-group-form-types";
+  import type { DrugKind, IppanmeiRecord } from "./drug-group-form-types";
   import api from "@/lib/api";
   import { onMount } from "svelte";
   import XCircle from "@/icons/XCircle.svelte";
 
   export let drugKind: DrugKind | undefined;
   export let at: string;
-  export let onDone: (value: DrugKind) => void;
+  export let onDone: (value: DrugKind, ippanmeiRecord?: IppanmeiRecord) => void;
   export let onCancel: () => void;
   export let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
@@ -26,17 +26,23 @@
     if( t !== "" ){
       const ms = await api.searchIyakuhinMaster(t, at);
       searchResult = ms;
-      console.log("searchResult", searchResult);
     }
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
+    let ippanmeiRecord: IppanmeiRecord | undefined = undefined;
+    if( m.ippanmei && m.ippanmeicode ){
+      ippanmeiRecord = {
+        name: m.ippanmei,
+        code: m.ippanmeicode,
+      };
+    }
     onDone({
       薬品コード種別: "レセプト電算処理システム用コード",
       薬品コード: m.iyakuhincode.toString(),
       薬品名称: m.name,
       単位名: m.unit,
-    })
+    }, ippanmeiRecord);
   }
 </script>
 

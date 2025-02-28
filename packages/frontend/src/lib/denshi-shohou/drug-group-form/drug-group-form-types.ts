@@ -6,3 +6,8 @@ export interface DrugKind {
     薬品名称: string;
     単位名: string;
 }
+
+export interface IppanmeiRecord {
+    name: string;
+    code: string;
+}

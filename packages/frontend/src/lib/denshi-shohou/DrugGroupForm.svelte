@@ -4,7 +4,10 @@
     type 剤形区分,
     type 情報区分,
   } from "./denshi-shohou";
-  import type { DrugKind } from "./drug-group-form/drug-group-form-types";
+  import type {
+    DrugKind,
+    IppanmeiRecord,
+  } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import UsageForm from "./drug-group-form/UsageForm.svelte";
   import ZaikeiKubunForm from "./drug-group-form/ZaikeiKubunForm.svelte";
@@ -45,6 +48,7 @@
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
   let drugKind: DrugKind | undefined = drugKindFromInit();
+  let ippanmeiRecord: IppanmeiRecord | undefined = undefined;
   let amountInput: string = amountInputFromInit();
   let amountUnit: string = amountUnitFromInit();
   let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;
@@ -250,8 +254,10 @@
     edit用法補足レコード = false;
   }
 
-  function onDone薬剤種別(value: DrugKind) {
+  function onDone薬剤種別(value: DrugKind, ippan?: IppanmeiRecord) {
     drugKind = value;
+    ippanmeiRecord = ippan;
+    console.log("ippan", ippan);
     amountUnit = drugKind.単位名;
     edit薬剤種別 = false;
   }
@@ -282,6 +288,16 @@
       onDelete();
     }
   }
+
+  function doIppan() {
+    if (ippanmeiRecord && drugKind) {
+      drugKind.薬品コード種別 = "一般名コード";
+      drugKind.薬品コード = ippanmeiRecord.code;
+      drugKind.薬品名称 = ippanmeiRecord.name;
+      drugKind = drugKind;
+      ippanmeiRecord = undefined;
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -292,13 +308,20 @@
     </div>
     <div style="margin:6px 0;">
       {#if !edit薬剤種別}
-        <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}>
+        <div style="line-height:1.5em;">
           {#if 剤形区分 !== "医療材料"}
-            {drugKind ? drugKind.薬品名称 : "（薬品未設定）"}
+            <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
+              >{drugKind ? drugKind.薬品名称 : "（薬品未設定）"}</span
+            >
+            {#if ippanmeiRecord}
+              <a class="ippan-link" on:click={doIppan}>一般名有</a>
+            {/if}
           {:else if 剤形区分 === "医療材料"}
-            {drugKind ? drugKind.薬品名称 : "（器材未設定）"}
+            <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
+              >{drugKind ? drugKind.薬品名称 : "（器材未設定）"}</span
+            >
           {/if}
-        </span>
+        </div>
       {:else}
         <div style="border:1px solid gray;border-radius:6px;padding:10px;">
           {#if 剤形区分 !== "医療材料"}
@@ -478,4 +501,12 @@
 </div>
 
 <style>
+  .ippan-link {
+    white-space: nowrap;
+    font-size: 0.8em;
+    border: 1px solid blue;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 255, 0.05);
+  }
 </style>
