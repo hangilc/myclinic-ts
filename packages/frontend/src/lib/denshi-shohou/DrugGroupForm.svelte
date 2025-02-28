@@ -35,12 +35,11 @@
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
   import Trash from "@/icons/Trash.svelte";
-  import { onshiDeleted } from "@/app-events";
 
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
-  export let onEnter: (rec: RP剤情報) => void;
+  export let onEnter: (rec: RP剤情報, ippanmeiRecord?: IppanmeiRecord) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
@@ -174,7 +173,7 @@
       用法補足レコード,
       薬品情報グループ: [薬品情報],
     };
-    onEnter(rp);
+    onEnter(rp, ippanmeiRecord);
   }
 
   function timesRep(kubun: 剤形区分): string {

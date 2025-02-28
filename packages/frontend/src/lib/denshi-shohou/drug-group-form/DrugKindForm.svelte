@@ -4,6 +4,7 @@
   import api from "@/lib/api";
   import { onMount } from "svelte";
   import XCircle from "@/icons/XCircle.svelte";
+  import type { IppanmeiState } from "../denshi-shohou-form/denshi-shohou-form-types";
 
   export let drugKind: DrugKind | undefined;
   export let at: string;

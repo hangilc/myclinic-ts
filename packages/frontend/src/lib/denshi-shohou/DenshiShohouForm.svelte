@@ -34,6 +34,7 @@
   import ExpireDateForm from "./denshi-shohou-form/ExpireDateForm.svelte";
   import BikouForm from "./denshi-shohou-form/BikouForm.svelte";
   import JohoForm from "./denshi-shohou-form/JohoForm.svelte";
+  import type { IppanmeiRecord } from "./drug-group-form/drug-group-form-types";
 
   export let init: Init;
   export let at: string;
@@ -121,8 +122,24 @@
     }
   }
 
+  async function probeIppanmei(src: Source) {
+    if (
+      src.kind === "denshi" &&
+      src.薬品情報.薬品レコード.薬品コード種別 ===
+        "レセプト電算処理システム用コード" &&
+      src.剤形レコード.剤形区分 !== "医療材料" &&
+      src.ippanmeiState === "undetermined"
+    ) {
+      const iyakuhincode = parseInt(src.薬品情報.薬品レコード.薬品コード);
+      const m = await api.getIyakuhinMaster(iyakuhincode, at);
+      if( m && !!m.ippanmei ){
+        src.ippanmeiState = "has-ippanmei";
+      }
+    }
+  }
+
   function prepareSourceListFromDenshi(data: PrescInfoData): Source[] {
-    return data.RP剤情報グループ.map((g) => {
+    const list: Source[] = data.RP剤情報グループ.map((g) => {
       if (g.薬品情報グループ.length !== 1) {
         throw new Error("invalid number of drug groups");
       }
@@ -133,8 +150,18 @@
         用法補足レコード: g.用法補足レコード,
         薬品情報: g.薬品情報グループ[0],
         id: sourceIndex++,
+        ippanmeiState:
+          g.薬品情報グループ[0].薬品レコード.薬品コード種別 === "一般名コード"
+            ? "ippanmei"
+            : "undetermined",
       };
     });
+    list.forEach((s) => {
+      if (s.ippanmeiState === "undetermined") {
+        probeIppanmei(s);
+      }
+    });
+    return list;
   }
 
   function prepareSourceListFromShohousen(shohousen: Shohousen): Source[] {
@@ -160,6 +187,7 @@
           amount,
           usage,
           times,
+          ippanmeiState: "undetermined",
         });
       });
     });
@@ -343,7 +371,7 @@
     };
   }
 
-  async function onFormEnter(rp: RP剤情報) {
+  async function onFormEnter(rp: RP剤情報, ippanmeiRecord?: IppanmeiRecord) {
     if (
       editedSource &&
       editedSource.用法レコード &&

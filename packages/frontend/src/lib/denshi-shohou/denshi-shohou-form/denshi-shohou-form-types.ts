@@ -15,7 +15,7 @@ export type Source = ({
   用法レコード: 用法レコード;
   用法補足レコード?: 用法補足レコード[];
   薬品情報: 薬品情報;
-}) & { id: number };
+}) & { id: number, ippanmeiState: IppanmeiState };
 
 export type TargetUsage = {
   kind: "master";
@@ -33,3 +33,11 @@ export type Mode = "edit-drug" | "new-drug" | "expire-date" | "bikou" | "joho";
 
 export type Init = { kind: "parsed"; shohousen: Shohousen; template: PrescInfoData; }
 | { kind: "denshi"; data: PrescInfoData };
+
+export type IppanmeiState = {
+  kind: "is-ippanmei"
+} | {
+  kind: "has-ippanemi",
+  name: string,
+  code: string,
+};
