@@ -3,6 +3,7 @@
   import type {
     DrugGroupFormInitExtent,
     Init,
+    IppanmeiState,
     Mode,
     Source,
   } from "./denshi-shohou-form/denshi-shohou-form-types";
@@ -34,7 +35,6 @@
   import ExpireDateForm from "./denshi-shohou-form/ExpireDateForm.svelte";
   import BikouForm from "./denshi-shohou-form/BikouForm.svelte";
   import JohoForm from "./denshi-shohou-form/JohoForm.svelte";
-  import type { IppanmeiRecord } from "./drug-group-form/drug-group-form-types";
 
   export let init: Init;
   export let at: string;
@@ -122,22 +122,6 @@
     }
   }
 
-  async function probeIppanmei(src: Source) {
-    if (
-      src.kind === "denshi" &&
-      src.薬品情報.薬品レコード.薬品コード種別 ===
-        "レセプト電算処理システム用コード" &&
-      src.剤形レコード.剤形区分 !== "医療材料" &&
-      src.ippanmeiState === "undetermined"
-    ) {
-      const iyakuhincode = parseInt(src.薬品情報.薬品レコード.薬品コード);
-      const m = await api.getIyakuhinMaster(iyakuhincode, at);
-      if( m && !!m.ippanmei ){
-        src.ippanmeiState = "has-ippanmei";
-      }
-    }
-  }
-
   function prepareSourceListFromDenshi(data: PrescInfoData): Source[] {
     const list: Source[] = data.RP剤情報グループ.map((g) => {
       if (g.薬品情報グループ.length !== 1) {
@@ -155,11 +139,6 @@
             ? "ippanmei"
             : "undetermined",
       };
-    });
-    list.forEach((s) => {
-      if (s.ippanmeiState === "undetermined") {
-        probeIppanmei(s);
-      }
     });
     return list;
   }
@@ -360,7 +339,7 @@
     mode = "new-drug";
   }
 
-  function rpToSource(rp: RP剤情報): Source {
+  function rpToSource(rp: RP剤情報, ippanmeiState: IppanmeiState): Source {
     return {
       kind: "denshi",
       剤形レコード: rp.剤形レコード,
@@ -368,10 +347,11 @@
       用法補足レコード: rp.用法補足レコード,
       薬品情報: rp.薬品情報グループ[0],
       id: sourceIndex++,
+      ippanmeiState,
     };
   }
 
-  async function onFormEnter(rp: RP剤情報, ippanmeiRecord?: IppanmeiRecord) {
+  async function onFormEnter(rp: RP剤情報, ippanmeiState: IppanmeiState) {
     if (
       editedSource &&
       editedSource.用法レコード &&
@@ -406,7 +386,7 @@
     }
     sourceList = sourceList.map((src) => {
       if (src.id === selectedSourceId) {
-        return rpToSource(rp);
+        return rpToSource(rp, ippanmeiState);
       } else {
         return src;
       }
@@ -423,8 +403,8 @@
     reset();
   }
 
-  async function onNewDrug(rp: RP剤情報) {
-    sourceList.push(rpToSource(rp));
+  async function onNewDrug(rp: RP剤情報, ippanmeiState: IppanmeiState) {
+    sourceList.push(rpToSource(rp, ippanmeiState));
     sourceList = sourceList;
     await reset();
   }

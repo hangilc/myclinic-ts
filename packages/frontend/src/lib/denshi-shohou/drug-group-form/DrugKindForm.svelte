@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
-  import type { DrugKind, IppanmeiRecord } from "./drug-group-form-types";
+  import type { DrugKind } from "./drug-group-form-types";
   import api from "@/lib/api";
   import { onMount } from "svelte";
   import XCircle from "@/icons/XCircle.svelte";

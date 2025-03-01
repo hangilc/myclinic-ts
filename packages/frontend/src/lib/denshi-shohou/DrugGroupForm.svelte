@@ -6,7 +6,6 @@
   } from "./denshi-shohou";
   import type {
     DrugKind,
-    IppanmeiRecord,
   } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import UsageForm from "./drug-group-form/UsageForm.svelte";
@@ -40,7 +39,7 @@
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
-  export let onEnter: (rec: RP剤情報, ippanmeiRecord: IppanmeiState) => void;
+  export let onEnter: (rec: RP剤情報, ippanmeiState: IppanmeiState) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
@@ -123,6 +122,9 @@
   }
 
   function doEnter() {
+    if (!ippanmeiState) {
+      throw new Error(`cannot happen (undefined ippanmeiState)`);
+    }
     let 調剤数量 = 1;
     if (剤形区分 === "内服" || 剤形区分 === "頓服") {
       調剤数量Input = 調剤数量Input.trim();
@@ -262,12 +264,15 @@
     edit用法補足レコード = false;
   }
 
-  function onDone薬剤種別(value: DrugKind, ippan?: IppanmeiRecord) {
+  function onDone薬剤種別(value: DrugKind, ippan: IppanmeiState) {
     drugKind = value;
-    ippanmeiRecord = ippan;
-    console.log("ippan", ippan);
+    ippanmeiState = ippan;
     amountUnit = drugKind.単位名;
     edit薬剤種別 = false;
+  }
+
+  function onDone薬剤種別Kizai(value: DrugKind) {
+    onDone薬剤種別(value, { kind: "has-no-ippanmei" });
   }
 
   function onDone不均等レコード(value: 不均等レコード | undefined) {
@@ -298,12 +303,12 @@
   }
 
   function doIppan() {
-    if (ippanmeiRecord && drugKind) {
+    if (ippanmeiState?.kind === "has-ippanmei" && drugKind) {
       drugKind.薬品コード種別 = "一般名コード";
-      drugKind.薬品コード = ippanmeiRecord.code;
-      drugKind.薬品名称 = ippanmeiRecord.name;
+      drugKind.薬品コード = ippanmeiState.code;
+      drugKind.薬品名称 = ippanmeiState.name;
       drugKind = drugKind;
-      ippanmeiRecord = undefined;
+      ippanmeiState = { kind: "is-ippanmei" };
     }
   }
 </script>
@@ -321,7 +326,7 @@
             <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
               >{drugKind ? drugKind.薬品名称 : "（薬品未設定）"}</span
             >
-            {#if ippanmeiRecord}
+            {#if ippanmeiState?.kind === "has-ippanmei"}
               <a class="ippan-link" on:click={doIppan}>一般名有</a>
             {/if}
           {:else if 剤形区分 === "医療材料"}
@@ -344,7 +349,7 @@
             <KizaiKindForm
               {drugKind}
               {at}
-              onDone={onDone薬剤種別}
+              onDone={onDone薬剤種別Kizai}
               onCancel={() => (edit薬剤種別 = false)}
               searchText={init.iyakuhinSearchText ?? ""}
             />
