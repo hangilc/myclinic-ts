@@ -1,3 +1,5 @@
+import { toHankaku } from "./zenkaku";
+
 export interface Shohou {
   groups: DrugGroup[];
   shohouComments: string[];
@@ -29,7 +31,7 @@ export interface DrugGroup {
   groupComments: string[],
 }
 
-export function parseShohou(text: string, debug: boolean = false): Shohou {
+export function parseShohouOrig(text: string, debug: boolean = false): Shohou {
   const shohou: Shohou = {
     groups: [],
     shohouComments: [],
@@ -95,7 +97,7 @@ function parseComment(com: string): { key: string, value: string } {
   let key: string;
   let value: string;
   let colon = com.indexOf(":");
-  if( colon < 0 ){
+  if (colon < 0) {
     colon = com.indexOf("：");
   }
   if (colon >= 0) {
@@ -600,4 +602,124 @@ function report(label: string, active: boolean, tok: Tokenizer): Tokenizer {
     }
     return end;
   }
+}
+
+// Parser /////////////////////////////////////////////////////////////////////
+
+interface ProbeSrc {
+  found: string;
+  rest: string;
+}
+
+type Probe = (src: string) => ProbeSrc | undefined;
+
+function probeSeq(...probes: Probe[]): Probe {
+  return (src: string) => {
+    let found = "";
+    for (let probe of probes) {
+      const probed = probe(src);
+      if (probed) {
+        found += probed.found;
+        src = probed.rest;
+      } else {
+        return undefined;
+      }
+    }
+    return { found, rest: src }
+  }
+}
+
+function probeWhile(probe: Probe, atLeast: number = 0): Probe {
+  return (src: string) => {
+    let success = 0;
+    let found = "";
+    while (true) {
+      const r = probe(src);
+      if (r) {
+        found += r.found;
+        src = r.rest;
+      } else {
+        if (success >= atLeast) {
+          return { found, rest: src };
+        } else {
+          return undefined;
+        }
+      }
+    }
+  }
+}
+
+function probeOne(pred: (c: string) => boolean): Probe {
+  return src => {
+    if (src.length > 0 && pred(src[0])) {
+      return { found: src[0], rest: src.substring(1) }
+    }
+  }
+}
+
+function probeWhiteSpaces(atLeast: number = 0): Probe {
+  return probeWhile(probeOne(ch => ch === " " || ch === "\t"), atLeast);
+}
+
+const probeNewLine: Probe = probeOne(ch => ch === "\n");
+
+function probeOptional(probe: Probe): Probe {
+  return (src: string) => {
+    let r = probe(src);
+    if (r) {
+      return r;
+    } else {
+      return { found: "", rest: src };
+    }
+  }
+}
+
+function probeImmediate(immediate: string): Probe {
+  return src => {
+    if (src.startsWith(immediate)) {
+      return { found: immediate, rest: src.substring(immediate.length) };
+    } else {
+      return undefined;
+    }
+  }
+}
+
+function probeNoCase(immediate: string): Probe {
+  return src => {
+    let rest = src;
+    let found: string = "";
+    for (let i = 0; i < immediate.length; i++) {
+      if (probeOne(ch => ch.toLowerCase() === immediate[i].toLowerCase())(rest)) {
+        found += immediate[i];
+        rest = rest.substring(1);
+      } else {
+        return undefined;
+      }
+    }
+    return { found, rest }
+  }
+}
+
+function probeNoKaku(immediate: string): Probe {
+  let probes: Probe[] = Array.from(immediate).map(ch => {
+    return probeOne(c => toHankaku(c) === toHankaku(ch));
+  });
+  return probeSeq(...probes);
+}
+
+function probeProlog(): Probe {
+  const probeLine1 = probeSeq(probeImmediate("院外処方"), probeWhiteSpaces(), probeNewLine);
+  const probeLine2 = probeSeq(probeNoKaku("Rp)"), probeWhiteSpaces(), probeNewLine);
+  return probeSeq(probeOptional(probeLine1), probeLine2);
+}
+
+export function parseShohou(text: string, debug: boolean = false): Shohou {
+  const shohou: Shohou = {
+    groups: [],
+    shohouComments: [],
+    bikou: [],
+  };
+  const prolog = probeProlog()(text);
+  console.log("prolog", prolog);
+  return shohou;
 }
