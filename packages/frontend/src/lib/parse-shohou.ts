@@ -1,3 +1,4 @@
+import { castBoolean } from "./cast";
 import { toHankaku } from "./zenkaku";
 
 export interface Shohou {
@@ -606,60 +607,48 @@ function report(label: string, active: boolean, tok: Tokenizer): Tokenizer {
 
 // Parser /////////////////////////////////////////////////////////////////////
 
-type Probe = (src: string) => string | undefined;
+type Probe = (src: string, i: number) => number | undefined;
+type Proceed = (src: string, i: number) => number;
 
-function probeSeq(...probes: Probe[]): Probe {
-  return (src: string) => {
+function probeSeq(...probes: (Probe | Proceed)[]): Probe {
+  return (src: string, i: number) => {
     for (let probe of probes) {
-      const rest = probe(src);
-      if (rest !== undefined) {
-        src = rest;
+      const j = probe(src, i);
+      if (j !== undefined) {
+        i = j;
       } else {
         return undefined;
       }
     }
-    return src;
+    return i;
   }
 }
 
 function probeOr(...probes: Probe[]): Probe {
-  return (src: string) => {
-    for(let probe of probes) {
-      let rest: string | undefined = probe(src);
-      if( rest !== undefined ){
-        return rest;
+  return (src: string, i: number) => {
+    for (let probe of probes) {
+      let j = probe(src, i);
+      if (j !== undefined) {
+        return j;
       }
     }
     return undefined;
   }
 }
 
-function probeWhile(probe: Probe, atLeast: number = 0): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    let success = 0;
-    while (true) {
-      const r = probe(rest);
-      if (r !== undefined) {
-        rest = r;
-        success += 1;
+function proceedWhile(f: (ch: string) => boolean, cb: (s: string) => void = _ => { }): Proceed {
+  return (src: string, i: number) => {
+    let acc = "";
+    while (i < src.length) {
+      if (f(src[i])) {
+        acc += src[i];
+        i += 1;
       } else {
-        if (success >= atLeast) {
-          return rest;
-        } else {
-          return undefined;
-        }
+        break;
       }
     }
-  }
-}
-
-function probeOne(pred: (c: string) => boolean, cb: (ch: string) => void = _ => { }): Probe {
-  return src => {
-    if (src.length > 0 && pred(src[0])) {
-      cb(src[0]);
-      return src.substring(1);
-    }
+    cb(acc);
+    return i;
   }
 }
 
@@ -667,113 +656,111 @@ function isSpace(ch: string): boolean {
   return ch === " " || ch === "　" || ch === "\t";
 }
 
-function probeSpaces(atLeast: number = 0, cb: (s: string) => void = _ => { }): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
+function proceedSpaces(cb: (s: string) => void = _ => { }): Proceed {
+  return proceedWhile(isSpace, cb);
+}
+
+function proceedNonSpaces(cb: (found: string) => void = _ => {}): Proceed {
+  return proceedWhile(ch => !isSpace(ch) && ch !== "\n", cb);
+}
+
+function probeNonSpaces(cb: (s: string) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
     let found = "";
-    rest = probeWhile(probeOne(isSpace, ch => found += ch), atLeast)(rest);
-    if (rest !== undefined) {
+    i = proceedNonSpaces(s => found = s)(src, i);
+    if (i !== undefined) {
       cb(found);
-    }
-    return rest;
-  }
-}
-
-function probeNonSpaces(cb: (found: string) => void, atLeast = 1): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    let found = "";
-    rest = probeWhile(probeOne(ch => !isSpace(ch) && ch !== "\n", ch => {
-      found += ch
-    }), atLeast)(rest);
-    if (rest !== undefined) {
-      cb(found);
-    }
-    return rest;
-  }
-}
-
-const probeEol: Probe = (src: string) => {
-  if (src === "") {
-    return "";
-  } else if (src[0] === "\n") {
-    return src.substring(1);
-  } else if (src[0] === "\r" && src[1] === "\n") {
-    return src.substring(2);
-  } else {
-    return undefined;
-  }
-}
-
-function probeOptional(probe: Probe): Probe {
-  return (src: string) => {
-    let rest = probe(src);
-    if (rest !== undefined) {
-      return rest;
-    } else {
-      return src;
-    }
-  }
-}
-
-function probeUntil(repeatProbe: Probe, condProbe: Probe): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    while (true) {
-      let r = condProbe(rest);
-      if (r !== undefined) {
-        return r;
-      }
-      r = repeatProbe(rest);
-      if (r !== undefined) {
-        rest = r;
-      } else {
-        return undefined;
-      }
-    }
-  }
-}
-
-function probeImmediate(immediate: string, cb: (s: string) => void = _ => {}): Probe {
-  return src => {
-    if (src.startsWith(immediate)) {
-      cb(immediate);
-      return src.substring(immediate.length);
+      return i;
     } else {
       return undefined;
     }
   }
 }
 
-function probeNoCase(immediate: string): Probe {
-  let probes: Probe[] = Array.from(immediate).map(ch => {
-    return probeOne(c => c.toLowerCase() === ch.toLowerCase());
-  });
-  return probeSeq(...probes);
+const probeEol: Probe = (src: string, i: number) => {
+  if (i < src.length) {
+    const ch = src[i];
+    if (ch === "\n") {
+      return i + 1;
+    } else {
+      undefined;
+    }
+  } else if (i < src.length - 1) {
+    if (src[i] === "\r" && src[i + 1] == "\n") {
+      return i + 2;
+    } else {
+      return undefined;
+    }
+  } else {
+    return i;
+  }
 }
 
-function probeNoKaku(immediate: string): Probe {
-  let probes: Probe[] = Array.from(immediate).map(ch => {
-    return probeOne(c => toHankaku(c) === toHankaku(ch));
-  });
-  return probeSeq(...probes);
+function probeOptional(probe: Probe): Probe {
+  return (src: string, i: number) => {
+    let j = probe(src, i);
+    if (j !== undefined) {
+      return j;
+    } else {
+      return i;
+    }
+  }
 }
 
-function probeDigit(cb: (ch: string) => void): Probe {
-  return probeOne(ch => {
-    const d = toHankaku(ch);
-    return "0" <= d && d <= "9";
+function probeImmediate(
+  immediate: string,
+  cb: (s: string) => void = _ => { },
+  conv: (chS: string, chI: string) => [string, string] = (s, i) => [s, i]
+): Probe {
+  return (src: string, i: number) => {
+    let acc = "";
+    for (let imm of immediate) {
+      let chS = src[i];
+      let chI = imm;
+      [chS, chI] = conv(chS, chI);
+      if (chS === chI) {
+        acc += src[i];
+        i += 1;
+      } else {
+        return undefined;
+      }
+    }
+    cb(acc);
+    return i;
+  }
+}
+
+function probeNoCaseImmediate(immediate: string, cb: (s: string) => void = _ => { }): Probe {
+  return probeImmediate(immediate, cb, (chS, chI) => [chS.toLowerCase(), chI.toLowerCase()]);
+}
+
+function probeNoKakuImmediate(immediate: string, cb: (s: string) => void = _ => { }): Probe {
+  return probeImmediate(immediate, cb, (chS, chI) => [toHankaku(chS), toHankaku(chI)]);
+}
+
+function proceedDigits(cb: (found: string) => void = _ => { }): Proceed {
+  return proceedWhile(ch => {
+    ch = toHankaku(ch);
+    return "0" <= ch && ch <= "9";
   }, cb);
 }
 
-function probeDigits(cb: (found: string) => void = _ => { }): Probe {
-  let found = "";
-  return probeWhile(probeDigit(ch => (found += ch)));
+function probeDigits(cb: (s: string) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
+    let digits = "";
+    i = proceedDigits(s => digits = s)(src, i);
+    if (digits === "") {
+      return undefined;
+    } else {
+      cb(digits);
+      return i;
+    }
+  }
 }
 
 function probeProlog(): Probe {
-  const probeLine1 = probeSeq(probeImmediate("院外処方"), probeSpaces(), probeEol);
-  const probeLine2 = probeSeq(probeNoKaku("Rp)"), probeSpaces(), probeEol);
+  const probeLine1 = probeSeq(probeImmediate("院外処方"), proceedSpaces(), probeEol);
+  const probeLine2 = probeSeq(probeNoKakuImmediate("Rp)"), proceedSpaces(), probeEol);
   return probeSeq(probeOptional(probeLine1), probeLine2);
 }
 
@@ -794,85 +781,180 @@ const drugUnits = [
   "本",
 ];
 
-function probeDrugUnit(cb: (s: string) => void): Probe {
+function probeDrugUnit(cb: (s: string) => void = _ => { }): Probe {
   const probes: Probe[] = drugUnits.map(u => probeImmediate(u, cb));
   return probeOr(...probes);
 }
 
-function probeAmount(cb: (s: string) => void): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    let digits: string = "";
-    rest = probeDigits(s => digits = s)(rest);
-    if (rest === undefined) {
+function probeFloat(cb: (s: string) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
+    let digits = "";
+    let j: number | undefined = probeDigits(s => digits = s)(src, i);
+    if (j === undefined) {
       return undefined;
     }
-    if (rest[0] === "." || rest[0] === "．") {
-      digits += rest[0];
-      rest = rest.substring(1);
+    if (src[j] === "." || src[j] === "．") {
+      digits += src[j];
+      j += 1;
+      j = probeDigits(s => digits += s)(src, j);
+      if (j === undefined) {
+        return undefined;
+      }
     }
-    rest = probeDigits(s => digits += s)(rest);
-    if (rest !== undefined) {
-      cb(digits);
+    cb(digits);
+    return j;
+  }
+
+}
+
+function probeAmountAndUnit(cb: (amount: string, unit: string) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
+    let amount = "";
+    let j: number | undefined = probeFloat(s => amount = s)(src, i);
+    if (j === undefined) {
+      return undefined;
     }
-    return rest;
+    let unit = "";
+    j = probeDrugUnit(s => unit = s)(src, j);
+    if (j !== undefined) {
+      cb(amount, unit);
+    }
+    return j;
   }
 }
 
-function probeDrugNameAndAmount(cb: (r: { name: string, amount: string, unit: string }) => void): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    let name: string = "";
-    rest = probeNonSpaces(found => name = found)(rest);
-    if (rest === undefined) {
+function probeDrugNameAndAmount(cb: (r: { name: string, amount: string, unit: string }) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
+    while(true) {
+      let j: number | undefined = probeEol(src, i);
+    }
+    i = proceedSpaces()(src, i);
+    let name = "";
+    let j: number | undefined = proceedNonSpaces(s => name += s)(src, i);
+    if (j === undefined) {
       return undefined;
     }
-    rest = probeSpaces(1, sp => name += sp)(rest);
-    if (rest === undefined) {
-      return undefined;
-    }
-    let amount = "";
-    let unit = "";
+    i = j;
     while (true) {
-      const r = probeSeq(
-        probeAmount(s => amount = s), 
-        probeDrugUnit(s => unit = s),
-        probeSpaces(0),
-        probeEol,
-      )(rest);
-      if (r !== undefined) {
-        rest = r;
-        break;
+      let space = "";
+      i = proceedSpaces(s => space = s)(src, i);
+      j = probeEol(src, i);
+      if (j !== undefined) {
+        return undefined;
+      }
+      let amount = "";
+      let unit = "";
+      j = probeAmountAndUnit((a, u) => {
+        amount = a; unit = u;
+      })(src, i);
+      if (j !== undefined) {
+        cb({ name, amount, unit });
+        return j;
       } else {
-        rest = probeNonSpaces(s => name += s)(rest);
-        if (rest === undefined) {
-          return undefined;
-        }
+        name += space;
+        i = proceedNonSpaces(s => name += s)(src, i);
       }
     }
-    if( rest !== undefined ){
-      cb({ name, amount, unit })
-    }
-    return rest;
   }
+}
 
+function probeTimes(): Probe {
+  return (src: string, i: number) => {
+    let j: number | undefined = probeSeq(
+      probeDigits(),
+      probeOr(probeOr(probeImmediate("日分"), probeImmediate("回分"))),
+    )(src, i);
+    return j;
+  }
+}
 
+function probeBlankLineEnd(): Probe {
+  return probeSeq(proceedSpaces(), probeEol);
+}
+
+function probeUsageTimes(): Probe {
+  return (src: string, i: number) => {
+    console.log("enter probeUsageTimes", src.substring(i, i+6))
+    let usage = "";
+    while(true){
+      let j: number | undefined = probeEol(src, i);
+      if( j !== undefined ){
+        return undefined;
+      }
+      j = probeSeq(
+        probeTimes(),
+        probeBlankLineEnd(),
+      )(src, i);
+      if( j !== undefined ){
+        i = j;
+        if( usage === "" ){
+          return undefined;
+        } else {
+          usage = usage.trim();
+          return i;
+        }
+      } else {
+        i = proceedNonSpaces(s => usage += s)(src, i);
+        i = proceedSpaces(s => usage += s)(src, i);
+      }
+    }
+  }
+}
+
+function probeDrugIndex(): Probe {
+  return probeSeq(
+    proceedSpaces(),
+    probeDigits(),
+    probeNoKakuImmediate(")"),
+  )
 }
 
 function probeDrugGroup(cb: (drugGroup: DrugGroup) => void): Probe {
-  return (src: string) => {
-    let rest: string | undefined = src;
-    let nameAndAmount: { name: string, amount: string, unit: string } | undefined = undefined;
-    rest = probeSeq(
-      probeSpaces(0),
-      probeDigits(),
-      probeNoKaku(")"),
-      probeSpaces(0),
-      probeDrugNameAndAmount(r => nameAndAmount = r),
-    )(rest);
-    console.log("nameAndAmount", nameAndAmount);
-    return rest;
+  return (src: string, i: number) => {
+    let j: number | undefined;
+    j = probeDrugIndex()(src, i);
+    if (j === undefined) {
+      return undefined;
+    }
+    i = j;
+    while (true) {
+      i = proceedSpaces()(src, i);
+      j = probeEol(src, i);
+      if (j !== undefined) {
+        i = j;
+        break;
+      }
+      j = probeDrugIndex()(src, i);
+      if (j !== undefined) {
+        i = j;
+        break;
+      }
+      j = probeDrugNameAndAmount()(src, i);
+      if (j !== undefined) {
+        i = j;
+        continue;
+      }
+      j = probeUsageTimes()(src, i);
+      if( j !== undefined ){
+        i = j;
+        continue;
+      }
+    }
+    return i;
   }
+  // return (src: string) => {
+  //   let rest: string | undefined = src;
+  //   let nameAndAmount: { name: string, amount: string, unit: string } | undefined = undefined;
+  //   rest = probeSeq(
+  //     probeSpaces(0),
+  //     probeDigits(),
+  //     probeNoKaku(")"),
+  //     probeSpaces(0),
+  //     probeDrugNameAndAmount(r => nameAndAmount = r),
+  //   )(rest);
+  //   console.log("nameAndAmount", nameAndAmount);
+  //   return rest;
+  // }
 }
 
 export function parseShohou(text: string, debug: boolean = false): Shohou {
@@ -881,13 +963,18 @@ export function parseShohou(text: string, debug: boolean = false): Shohou {
     shohouComments: [],
     bikou: [],
   };
-  let src: string | undefined = text;
-  src = probeProlog()(src);
-  if (src === undefined) {
+  let i: number | undefined = 0;
+  i = probeProlog()(text, i);
+  if (i === undefined) {
     throw new Error("failed to read prolog");
   }
-  let g: DrugGroup | undefined;
-  src = probeDrugGroup(found => g = found)(src);
-  console.log("src", src);
+  i = probeDrugGroup(_ => { })(text, i);
+  console.log("i", i);
+  if (i !== undefined) {
+    console.log("rest", text.substring(i))
+  }
+  // let g: DrugGroup | undefined;
+  // src = probeDrugGroup(found => g = found)(src);
+  // console.log("src", src);
   return shohou;
 }
