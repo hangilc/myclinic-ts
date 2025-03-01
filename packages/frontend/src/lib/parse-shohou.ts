@@ -622,16 +622,30 @@ function probeSeq(...probes: Probe[]): Probe {
   }
 }
 
+function probeOr(...probes: Probe[]): Probe {
+  return (src: string) => {
+    for(let probe of probes) {
+      let rest: string | undefined = probe(src);
+      if( rest !== undefined ){
+        return rest;
+      }
+    }
+    return undefined;
+  }
+}
+
 function probeWhile(probe: Probe, atLeast: number = 0): Probe {
   return (src: string) => {
+    let rest: string | undefined = src;
     let success = 0;
     while (true) {
-      const rest = probe(src);
-      if (rest !== undefined) {
-        src = rest;
+      const r = probe(rest);
+      if (r !== undefined) {
+        rest = r;
+        success += 1;
       } else {
         if (success >= atLeast) {
-          return src;
+          return rest;
         } else {
           return undefined;
         }
@@ -653,18 +667,30 @@ function isSpace(ch: string): boolean {
   return ch === " " || ch === "　" || ch === "\t";
 }
 
-function probeSpaces(atLeast: number = 0): Probe {
-  return probeWhile(probeOne(isSpace), atLeast);
+function probeSpaces(atLeast: number = 0, cb: (s: string) => void = _ => { }): Probe {
+  return (src: string) => {
+    let rest: string | undefined = src;
+    let found = "";
+    rest = probeWhile(probeOne(isSpace, ch => found += ch), atLeast)(rest);
+    if (rest !== undefined) {
+      cb(found);
+    }
+    return rest;
+  }
 }
 
 function probeNonSpaces(cb: (found: string) => void, atLeast = 1): Probe {
-  let found = "";
-  let rest = probeWhile(probeOne(ch => !isSpace(ch) && ch !== "\n", ch => found += ch), atLeast)
-  if( rest !== undefined ){
-    console.log("found", found);
-    cb(found);
+  return (src: string) => {
+    let rest: string | undefined = src;
+    let found = "";
+    rest = probeWhile(probeOne(ch => !isSpace(ch) && ch !== "\n", ch => {
+      found += ch
+    }), atLeast)(rest);
+    if (rest !== undefined) {
+      cb(found);
+    }
+    return rest;
   }
-  return rest;
 }
 
 const probeEol: Probe = (src: string) => {
@@ -708,9 +734,10 @@ function probeUntil(repeatProbe: Probe, condProbe: Probe): Probe {
   }
 }
 
-function probeImmediate(immediate: string): Probe {
+function probeImmediate(immediate: string, cb: (s: string) => void = _ => {}): Probe {
   return src => {
     if (src.startsWith(immediate)) {
+      cb(immediate);
       return src.substring(immediate.length);
     } else {
       return undefined;
@@ -750,12 +777,82 @@ function probeProlog(): Probe {
   return probeSeq(probeOptional(probeLine1), probeLine2);
 }
 
-function probeDrugNameAndAmount(): Probe {
+const drugUnits = [
+  "錠",
+  "カプセル",
+  "ｇ",
+  "ｍｇ",
+  "包",
+  "ｍＬ",
+  "ブリスター",
+  "瓶",
+  "個",
+  "キット",
+  "枚",
+  "パック",
+  "袋",
+  "本",
+];
+
+function probeDrugUnit(cb: (s: string) => void): Probe {
+  const probes: Probe[] = drugUnits.map(u => probeImmediate(u, cb));
+  return probeOr(...probes);
+}
+
+function probeAmount(cb: (s: string) => void): Probe {
+  return (src: string) => {
+    let rest: string | undefined = src;
+    let digits: string = "";
+    rest = probeDigits(s => digits = s)(rest);
+    if (rest === undefined) {
+      return undefined;
+    }
+    if (rest[0] === "." || rest[0] === "．") {
+      digits += rest[0];
+      rest = rest.substring(1);
+    }
+    rest = probeDigits(s => digits += s)(rest);
+    if (rest !== undefined) {
+      cb(digits);
+    }
+    return rest;
+  }
+}
+
+function probeDrugNameAndAmount(cb: (r: { name: string, amount: string, unit: string }) => void): Probe {
   return (src: string) => {
     let rest: string | undefined = src;
     let name: string = "";
     rest = probeNonSpaces(found => name = found)(rest);
-    console.log("name", name);
+    if (rest === undefined) {
+      return undefined;
+    }
+    rest = probeSpaces(1, sp => name += sp)(rest);
+    if (rest === undefined) {
+      return undefined;
+    }
+    let amount = "";
+    let unit = "";
+    while (true) {
+      const r = probeSeq(
+        probeAmount(s => amount = s), 
+        probeDrugUnit(s => unit = s),
+        probeSpaces(0),
+        probeEol,
+      )(rest);
+      if (r !== undefined) {
+        rest = r;
+        break;
+      } else {
+        rest = probeNonSpaces(s => name += s)(rest);
+        if (rest === undefined) {
+          return undefined;
+        }
+      }
+    }
+    if( rest !== undefined ){
+      cb({ name, amount, unit })
+    }
     return rest;
   }
 
@@ -765,13 +862,15 @@ function probeDrugNameAndAmount(): Probe {
 function probeDrugGroup(cb: (drugGroup: DrugGroup) => void): Probe {
   return (src: string) => {
     let rest: string | undefined = src;
+    let nameAndAmount: { name: string, amount: string, unit: string } | undefined = undefined;
     rest = probeSeq(
       probeSpaces(0),
       probeDigits(),
       probeNoKaku(")"),
       probeSpaces(0),
-      probeDrugNameAndAmount(),
+      probeDrugNameAndAmount(r => nameAndAmount = r),
     )(rest);
+    console.log("nameAndAmount", nameAndAmount);
     return rest;
   }
 }
