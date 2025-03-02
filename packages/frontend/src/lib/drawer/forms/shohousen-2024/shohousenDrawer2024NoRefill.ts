@@ -977,7 +977,7 @@ function initPen(ctx: DrawerContext) {
 
 type ShohouData = {
   groups: ShohouGroup[];
-  shohouComments: string[];
+  // shohouComments: string[];
 }
 
 type ShohouGroup = {
@@ -1025,7 +1025,9 @@ function handleShohousenData(data?: Shohousen2024Data): {
   bikou: string[];
   kigen?: string;
 } {
-  const shohouData: ShohouData = { groups: [], shohouComments: [] };
+  const shohouData: ShohouData = { groups: [], 
+    // shohouComments: [] 
+  };
   let bikou: string[] = [];
   let kigen: string | undefined = undefined;
   function handleDrug(src: Drug): ShohouDrug {
@@ -1044,7 +1046,7 @@ function handleShohousenData(data?: Shohousen2024Data): {
       };
       shohouData.groups.push(dstGroup);
     });
-    shohouData.shohouComments = src.shohouComments;
+    // shohouData.shohouComments = src.shohouComments;
     bikou = src.bikou;
     kigen = src.kigen;
   }
