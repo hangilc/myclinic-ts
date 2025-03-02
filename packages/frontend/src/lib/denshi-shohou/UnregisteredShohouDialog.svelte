@@ -257,7 +257,7 @@
     );
     const drugs: Shohou = {
       groups,
-      shohouComments: [],
+      // shohouComments: [],
       bikou,
       kigen: shohou.使用期限年月日
         ? DateWrapper.from(shohou.使用期限年月日).asSqlDate()

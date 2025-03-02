@@ -41,7 +41,7 @@ export function denshiToPrint(src: PrescInfoData): Shohousen2024Data {
 
 function toDrugs(src: PrescInfoData): Shohou {
   let groups: DrugGroup[] = [];
-  let shohouComments: string[] = [];
+  // let shohouComments: string[] = [];
   let bikou: string[] = [];
   let kigen: string | undefined = undefined;
   src.RP剤情報グループ.forEach(g => {
@@ -62,7 +62,10 @@ function toDrugs(src: PrescInfoData): Shohou {
     bikou.push(rec.検査値データ等);
   });
   return {
-    groups, shohouComments, bikou, kigen,
+    groups, 
+    // shohouComments, 
+    bikou, 
+    kigen,
   }
 }
 
