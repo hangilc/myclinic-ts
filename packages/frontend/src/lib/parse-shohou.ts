@@ -769,6 +769,24 @@ function probeEol(): Probe {
   }
 }
 
+// probes whether it is at start of line
+function probeSol(): Probe {
+  return (src: string, i: number) => {
+    if (i === 0) {
+      return i;
+    } else if (i >= 1) {
+      if (src[i - 1] === "\n") {
+        return i;
+      }
+    }
+    return undefined;
+  }
+}
+
+function ensureSol(): Probe {
+  return or(probeEol(), probeSol());
+}
+
 function probeEndOfSource(): Probe {
   return (src: string, i: number) => {
     if (i < src.length) {
@@ -976,9 +994,8 @@ function probeUsageOther(cb: (d: { usage: string }) => void = _ => { }): Probe {
     let usage = "";
     let j: number | undefined = seq(
       probeWhile(ch => ch != "\n", s => usage = s),
-      proc(() => console.log("usage", usage)),
     )(src, i);
-    if( j !== undefined ){
+    if (j !== undefined) {
       cb({ usage: usage.trim() })
     }
     return j;
@@ -992,6 +1009,22 @@ function probeDrugIndex(): Probe {
   )
 }
 
+function probeDrugCommandLine(cb: (s: string) => void = _ => { }): Probe {
+  return (src: string, i: number) => {
+    let cmd = "";
+    let j: number | undefined = seq(
+      probeSpaces(),
+      probeNoKakuImmediate("@"),
+      probeWhile(ch => ch !== "\n", s => cmd = s),
+      probeEol(),
+    )(src, i);
+    if (j !== undefined) {
+      cb(cmd.trim());
+    }
+    return j;
+  }
+}
+
 function drugTemplate(): Drug {
   return {
     name: "",
@@ -1001,6 +1034,45 @@ function drugTemplate(): Drug {
   };
 }
 
+function handleDrugCommand(drug: Drug, command: string) {
+  const cmd = parseCommand(command);
+  switch (cmd.key) {
+    case "変更不可": {
+      drug.senpatsu = "henkoufuka";
+      break;
+    }
+    case "患者希望": {
+      drug.senpatsu = "kanjakibou";
+      break;
+    }
+    case "comment": {
+      drug.drugComments.push(cmd.value.trim());
+      break;
+    }
+    default: {
+      throw new Error(`unknown drug command: ${command}`);
+    }
+  }
+}
+
+function probeDrugLine(cb: (drug: Drug) => void): Probe {
+  return (src: string, i: number) => {
+    let drug: Drug = drugTemplate();
+    let drugCommands: string[] = [];
+    let j: number | undefined = seq(
+      seq(probeDrugNameAndAmount(d => {
+        drug.name = d.name, drug.amount = d.amount, drug.unit = d.unit
+      }), blankLineEnd()),
+      repeat(probeDrugCommandLine(s => drugCommands.push(s))),
+    )(src, i);
+    if (j !== undefined) {
+      drugCommands.forEach(c => handleDrugCommand(drug, c));
+      cb(drug);
+    }
+    return j;
+  }
+}
+
 function probeDrugGroup(cb: (drugGroup: DrugGroup) => void = _ => { }): Probe {
   return (src: string, i: number) => {
     let dg: DrugGroup = {
@@ -1008,18 +1080,12 @@ function probeDrugGroup(cb: (drugGroup: DrugGroup) => void = _ => { }): Probe {
       usage: { kind: "other", usage: "" },
       groupComments: []
     };
-    let drug: Drug = drugTemplate();
     let j: number | undefined = seq(
       proceedSpaces(),
       probeDrugIndex(),
       proceedSpaces(),
-      seq(probeDrugNameAndAmount(d => {
-        drug.name = d.name, drug.amount = d.amount, drug.unit = d.unit
-      }), blankLineEnd()),
-      proc(() => {
-        dg.drugs.push(drug);
-        drug = drugTemplate();
-      }),
+      probeDrugLine(drug => dg.drugs.push(drug)),
+      repeat(seq(probeSpaces(), probeDrugLine(drug => dg.drugs.push(drug)))),
       seq(probeSpaces(), or(
         probeUsageDays(d => dg.usage = { kind: "days", days: d.days, usage: d.usage }),
         probeUsageTimes(d => dg.usage = { kind: "times", times: d.times, usage: d.usage }),
@@ -1089,6 +1155,7 @@ function handleShohouCommand(shohou: Shohou, command: string) {
 }
 
 export function parseShohou(src: string, debug: boolean): Shohou {
+  console.log("src\n", src);
   const shohou: Shohou = {
     groups: [],
     // shohouComments: [],
