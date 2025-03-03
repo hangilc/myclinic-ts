@@ -15,7 +15,7 @@ export type Source = ({
   用法レコード: 用法レコード;
   用法補足レコード?: 用法補足レコード[];
   薬品情報: 薬品情報;
-  ippanmeiState: IppanmeiState ;
+  ippanmeiState?: IppanmeiState;
 }) & { id: number };
 
 export type TargetUsage = {

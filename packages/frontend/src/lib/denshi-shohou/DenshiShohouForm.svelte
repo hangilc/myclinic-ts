@@ -35,6 +35,7 @@
   import ExpireDateForm from "./denshi-shohou-form/ExpireDateForm.svelte";
   import BikouForm from "./denshi-shohou-form/BikouForm.svelte";
   import JohoForm from "./denshi-shohou-form/JohoForm.svelte";
+  import Circle from "@/icons/Circle.svelte";
 
   export let init: Init;
   export let at: string;
@@ -127,6 +128,14 @@
       if (g.薬品情報グループ.length !== 1) {
         throw new Error("invalid number of drug groups");
       }
+      let ippanmeiState: IppanmeiState | undefined;
+      if (
+        g.薬品情報グループ[0].薬品レコード.薬品コード種別 === "一般名コード"
+      ) {
+        ippanmeiState = { kind: "is-ippanmei" };
+      } else {
+        ippanmeiState = undefined;
+      }
       return {
         kind: "denshi",
         剤形レコード: g.剤形レコード,
@@ -134,10 +143,7 @@
         用法補足レコード: g.用法補足レコード,
         薬品情報: g.薬品情報グループ[0],
         id: sourceIndex++,
-        ippanmeiState:
-          g.薬品情報グループ[0].薬品レコード.薬品コード種別 === "一般名コード"
-            ? "ippanmei"
-            : "undetermined",
+        ippanmeiState,
       };
     });
     return list;
@@ -166,7 +172,6 @@
           amount,
           usage,
           times,
-          ippanmeiState: "undetermined",
         });
       });
     });
@@ -466,6 +471,16 @@
       throw new Error("not all drugs are denshi");
     }
   }
+
+  function ippanmeiSymbol(ippanmeiState: IppanmeiState | undefined): string {
+    if( ippanmeiState ){
+      switch(ippanmeiState.kind) {
+        case "is-ippanmei": return "●";
+        case "has-ippanmei": return "○";
+      }
+    }
+    return "";
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -497,14 +512,19 @@
         {#if source.kind === "parsed"}
           <ParsedRep parsed={source} />
         {:else if source.kind === "denshi"}
-          <DenshiRep
-            denshi={{
-              剤形レコード: source.剤形レコード,
-              用法レコード: source.用法レコード,
-              用法補足レコード: source.用法補足レコード,
-              薬品情報グループ: [source.薬品情報],
-            }}
-          />
+          <div style="position:relative;">
+            <DenshiRep
+              denshi={{
+                剤形レコード: source.剤形レコード,
+                用法レコード: source.用法レコード,
+                用法補足レコード: source.用法補足レコード,
+                薬品情報グループ: [source.薬品情報],
+              }}
+            />
+            <div style="position:absolute;right:2px;bottom:2px">
+              <Circle color="blue"/>
+            </div>
+          </div>
         {/if}
       </div>
     {/each}
@@ -589,3 +609,29 @@
     {/if}
   </div>
 </div>
+
+<style>
+  .drug {
+    border: 1px solid gray;
+    border-radius: 4px;
+    margin: 6px 0;
+    padding: 6px;
+    cursor: pointer;
+  }
+
+  .drug:first-of-type {
+    margin-top: 0;
+  }
+
+  .drug:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .selected {
+    border: 2px solid blue;
+  }
+
+  .ippanmei-symbol {
+    color: rgba(0, 0, 255, 0.5);
+  }
+</style>

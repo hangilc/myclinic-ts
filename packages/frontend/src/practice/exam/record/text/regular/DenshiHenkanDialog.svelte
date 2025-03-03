@@ -41,6 +41,7 @@
   import { kouhiRep } from "@/lib/hoken-rep";
   import BikouForm from "./denshi-henkan-dialog/BikouForm.svelte";
   import JohoForm from "./denshi-henkan-dialog/JohoForm.svelte";
+  import DenshiShohouForm from "@/lib/denshi-shohou/DenshiShohouForm.svelte";
 
   export let destroy: () => void;
   export let init: Init;
@@ -64,6 +65,7 @@
     resolve備考レコードFromInit(init);
   let 提供情報レコード: 提供情報レコード | undefined =
     resolve提供情報レコードFromInit(init);
+  let getPrescInfoData: () => PrescInfoData;
 
   sourceList = prepareSourceList(init);
 
@@ -415,7 +417,10 @@
             }
           } else {
             const name = resolved.薬品レコード.薬品名称;
-            if( name.startsWith("ランタス注ソロスター") || name.startsWith("アピドラ注ソロスター")){
+            if (
+              name.startsWith("ランタス注ソロスター") ||
+              name.startsWith("アピドラ注ソロスター")
+            ) {
               剤形区分 = "注射";
             }
           }
@@ -529,7 +534,7 @@
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <Dialog {title} destroy={doCancel} styleWidth="600px">
-  <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
+  <!-- <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
     <div style="font-size:14px;">
       <div>
         <DenshiMenu
@@ -648,7 +653,14 @@
         />
       {/if}
     </div>
-  </div>
+  </div> -->
+  <DenshiShohouForm
+    {init}
+    {at}
+    {kouhiList}
+    bind:sourceList
+    bind:getPrescInfoData
+  />
   <div style="text-align:right;">
     <button
       on:click={doEnter}
