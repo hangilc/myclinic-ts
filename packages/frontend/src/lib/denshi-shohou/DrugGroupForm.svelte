@@ -98,6 +98,8 @@
   function ippanmeiStateFromInit(): IppanmeiState | undefined {
     if (init?.薬品レコード?.薬品コード種別 === "一般名コード") {
       return { kind: "is-ippanmei" };
+    } else if( init?.薬品レコード?.薬品コード種別 === "レセプト電算処理システム用コード" ){
+      
     } else {
       return undefined;
     }

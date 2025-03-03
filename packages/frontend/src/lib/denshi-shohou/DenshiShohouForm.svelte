@@ -472,14 +472,30 @@
     }
   }
 
-  function ippanmeiSymbol(ippanmeiState: IppanmeiState | undefined): string {
-    if( ippanmeiState ){
-      switch(ippanmeiState.kind) {
-        case "is-ippanmei": return "●";
-        case "has-ippanmei": return "○";
+  function ippanmeiSymbolSpec(ippanmeiState: IppanmeiState): {
+    stroke: string;
+    fill: string;
+  } {
+    switch (ippanmeiState.kind) {
+      case "is-ippanmei": {
+        return { 
+          stroke: "blue",
+          fill: "blue",
+        };
+      }
+      case "has-ippanmei": {
+        return { 
+          stroke: "blue",
+          fill: "none"
+        };
+      }
+      case "has-no-ippanmei": {
+        return { 
+          stroke: "green",
+          fill: "yellow",
+        }
       }
     }
-    return "";
   }
 </script>
 
@@ -521,9 +537,19 @@
                 薬品情報グループ: [source.薬品情報],
               }}
             />
-            <div style="position:absolute;right:2px;bottom:2px">
-              <Circle color="blue"/>
-            </div>
+            {#if source.ippanmeiState}
+              {@const spec=ippanmeiSymbolSpec(source.ippanmeiState)}
+              <div style="position:absolute;right:2px;bottom:2px">
+                <a
+                  href="javascript:void(0)"
+                  on:click|stopPropagation={() => alert("click")}
+                >
+                  <Circle
+                    {...spec}
+                  />
+                </a>
+              </div>
+            {/if}
           </div>
         {/if}
       </div>
@@ -629,9 +655,5 @@
 
   .selected {
     border: 2px solid blue;
-  }
-
-  .ippanmei-symbol {
-    color: rgba(0, 0, 255, 0.5);
   }
 </style>

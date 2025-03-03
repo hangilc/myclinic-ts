@@ -1,10 +1,12 @@
 <script lang="ts">
   export let width: string = "18";
-  export let color: string = "gray";
+  export let stroke: string = "black";
+  export let fill: string = "none";
+  export let strokeOpacity: string  = "1.0";
+  export let fillOpacity: string = "1.0";
   export let style: string = "";
   export let dx: string | undefined = undefined;
   export let dy: string | undefined = undefined;
-  export let onClick: (e: MouseEvent) => void = (_) => {};
 
   if (dy != undefined) {
     style += `margin-top: ${dy};`;
@@ -17,10 +19,12 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  fill="none"
+  fill={fill}
+  fill-opacity={fillOpacity}
   viewBox="0 0 240 240"
   {width}
-  stroke={color}
+  stroke={stroke}
+  stroke-opacity={strokeOpacity}
   stroke-width="10"
   {style}
 >
