@@ -606,3 +606,107 @@ export function parseShohou(src: string, debug: boolean): Shohou {
   }
   return shohou;
 }
+
+// New Parser ///////////////////////////////////////////////////////////////
+
+interface ParseInput {
+  src: string;
+  i: number;
+}
+
+// type ParseResult<T> = {
+//   src: string;
+//   j: number;
+//   value: T;
+// }
+
+class SuccessResult<T> {
+  src: string;
+  j: number;
+  value: T;
+
+  constructor(src: string, j: number, value: T) {
+    this.src = src;
+    this.j = j;
+    this.value = value;
+  }
+}
+
+class ParseResult<T> {
+  result: SuccessResult<T> | undefined;
+
+  constructor(result: SuccessResult<T> | undefined) {
+    this.result = result;
+  }
+
+  isSuccess(): boolean {
+    return this.result !== undefined;
+  }
+
+  isFailure(): boolean {
+    return this.result === undefined;
+  }
+
+  chain<U, S>(parser: Parser<U>, comb: (t: T, u: U) => S) {
+    if (this.result === undefined) {
+      return failure();
+    } else {
+      const input = { src: this.result.src, i: this.result.j };
+      const r = parser(input);
+      if (r.result === undefined) {
+        return failure();
+      } else {
+        const v = comb(this.result.value, r.result.value);
+        return success(r.result.src, r.result.j, v);
+      }
+    }
+  }
+}
+
+function success<T>(src: string, j: number, value: T): ParseResult<T> {
+  return new ParseResult(new SuccessResult(src, j, value));
+}
+
+function failure(): ParseResult<any> {
+  return new ParseResult(undefined);
+}
+
+type Parser<T> = (input: ParseInput) => ParseResult<T>;
+
+function parseImmediate(s: string): Parser<string> {
+  return input => {
+    const { src, i } = input;
+    for (let j = 0; j < s.length; j++) {
+      if (src[i + j] !== s[j]) {
+        return failure();
+      }
+    }
+    return success(src, i + s.length, s);
+  }
+}
+
+function takeWhile(f: (ch: string) => boolean): Parser<string> {
+  return ({ src, i }: ParseInput) => {
+    let j = i;
+    for (j = i; j < src.length; j++) {
+      if (!f(src[j])) {
+        break;
+      }
+    }
+    return success(src, j, src.substring(i, j));
+  }
+}
+
+function repUntil<T, U, S>(item: Parser<T>, cond: Parser<U>, comb: (ts: T[], s: S) => U): Parser {
+  return ({ src, i}: ParseInput) => {
+    const ts: T[] = [];
+    while(true) {
+      const rc = cond({ src, i }).result;
+      if( rc !== undefined ){
+
+      } else {
+
+      }
+    }
+  }
+}
