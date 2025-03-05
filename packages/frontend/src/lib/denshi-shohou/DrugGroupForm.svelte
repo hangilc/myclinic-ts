@@ -4,9 +4,7 @@
     type 剤形区分,
     type 情報区分,
   } from "./denshi-shohou";
-  import type {
-    DrugKind,
-  } from "./drug-group-form/drug-group-form-types";
+  import type { DrugKind } from "./drug-group-form/drug-group-form-types";
   import EditChouzaiSuuryouForm from "./drug-group-form/ChouzaiSuuryouForm.svelte";
   import UsageForm from "./drug-group-form/UsageForm.svelte";
   import ZaikeiKubunForm from "./drug-group-form/ZaikeiKubunForm.svelte";
@@ -34,12 +32,16 @@
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
   import Trash from "@/icons/Trash.svelte";
-  import { type IppanmeiState } from "./denshi-shohou-form/denshi-shohou-form-types";
+  import { ippanmeiStateFromMaster, type IppanmeiState } from "./denshi-shohou-form/denshi-shohou-form-types";
+  import api from "../api";
 
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
-  export let onEnter: (rec: RP剤情報, ippanmeiState: IppanmeiState) => void;
+  export let onEnter: (
+    rec: RP剤情報,
+    ippanmeiState: IppanmeiState | undefined
+  ) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
@@ -95,14 +97,24 @@
     }
   }
 
+  async function spawnIppanmeiResolver(iyakuhincode: number) {
+    let m = await api.getIyakuhinMaster(iyakuhincode, at);
+    ippanmeiState = ippanmeiStateFromMaster(m);
+  }
+
   function ippanmeiStateFromInit(): IppanmeiState | undefined {
-    if (init?.薬品レコード?.薬品コード種別 === "一般名コード") {
-      return { kind: "is-ippanmei" };
-    } else if( init?.薬品レコード?.薬品コード種別 === "レセプト電算処理システム用コード" ){
-      
-    } else {
-      return undefined;
+    let ippanmeiState: IppanmeiState | undefined = init?.ippanmeiState;
+    if (ippanmeiState === undefined) {
+      if (init?.薬品レコード?.薬品コード種別 === "一般名コード") {
+        ippanmeiState = { kind: "is-ippanmei" };
+      } else if (
+        init?.薬品レコード?.薬品コード種別 ===
+        "レセプト電算処理システム用コード"
+      ) {
+        spawnIppanmeiResolver(parseInt(init.薬品レコード.薬品コード))
+      }
     }
+    return ippanmeiState;
   }
 
   function amountInputFromInit(): string {
@@ -124,9 +136,6 @@
   }
 
   function doEnter() {
-    if (!ippanmeiState) {
-      throw new Error(`cannot happen (undefined ippanmeiState)`);
-    }
     let 調剤数量 = 1;
     if (剤形区分 === "内服" || 剤形区分 === "頓服") {
       調剤数量Input = 調剤数量Input.trim();
@@ -305,6 +314,7 @@
   }
 
   function doIppan() {
+    console.log("ippanmeiState", ippanmeiState);
     if (ippanmeiState?.kind === "has-ippanmei" && drugKind) {
       drugKind.薬品コード種別 = "一般名コード";
       drugKind.薬品コード = ippanmeiState.code;

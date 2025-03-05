@@ -1,11 +1,12 @@
 <script lang="ts">
   import type { IyakuhinMaster, KizaiMaster, Kouhi } from "myclinic-model";
-  import type {
-    DrugGroupFormInitExtent,
-    Init,
-    IppanmeiState,
-    Mode,
-    Source,
+  import {
+  ippanmeiStateFromMaster,
+    type DrugGroupFormInitExtent,
+    type Init,
+    type IppanmeiState,
+    type Mode,
+    type Source,
   } from "./denshi-shohou-form/denshi-shohou-form-types";
   import DenshiMenu from "./denshi-shohou-form/DenshiMenu.svelte";
   import type {
@@ -45,8 +46,7 @@
   export let sourceList: Source[];
   let selectedSourceId = -1;
   let mode: Mode | undefined = undefined;
-  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
-    undefined;
+  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined = undefined;
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
   let 備考レコード: 備考レコード[] | undefined =
     resolve備考レコードFromInit(init);
@@ -136,7 +136,7 @@
       } else {
         ippanmeiState = undefined;
       }
-      return {
+      let src: Source = {
         kind: "denshi",
         剤形レコード: g.剤形レコード,
         用法レコード: g.用法レコード,
@@ -145,6 +145,18 @@
         id: sourceIndex++,
         ippanmeiState,
       };
+      if (ippanmeiState === undefined) {
+        if (
+          g.薬品情報グループ[0].薬品レコード.薬品コード種別 ===
+          "レセプト電算処理システム用コード"
+        ) {
+          const iyakuhincode = parseInt(
+            g.薬品情報グループ[0].薬品レコード.薬品コード
+          );
+          spawnIppanmeiResolver(src.id, iyakuhincode);
+        }
+      }
+      return src;
     });
     return list;
   }
@@ -323,6 +335,7 @@
           不均等レコード: src.薬品情報.不均等レコード,
           負担区分レコード: src.薬品情報.負担区分レコード,
           薬品補足レコード: src.薬品情報.薬品補足レコード,
+          ippanmeiState: src.ippanmeiState,
         };
       }
       default: {
@@ -344,8 +357,28 @@
     mode = "new-drug";
   }
 
-  function rpToSource(rp: RP剤情報, ippanmeiState: IppanmeiState): Source {
-    return {
+  async function spawnIppanmeiResolver(srcId: number, iyakuhincode: number) {
+    let m = await api.getIyakuhinMaster(iyakuhincode, at);
+    let ippanmeiState: IppanmeiState = ippanmeiStateFromMaster(m);
+    sourceList = sourceList.map((src) => {
+      if (
+        src.id === srcId &&
+        src.kind === "denshi" &&
+        src.薬品情報.薬品レコード.薬品コード種別 ===
+          "レセプト電算処理システム用コード" &&
+        src.薬品情報.薬品レコード.薬品コード === iyakuhincode.toString()
+      ) {
+        src.ippanmeiState = ippanmeiState;
+      }
+      return src;
+    });
+  }
+
+  function rpToSource(
+    rp: RP剤情報,
+    ippanmeiState: IppanmeiState | undefined
+  ): Source {
+    let src: Source = {
       kind: "denshi",
       剤形レコード: rp.剤形レコード,
       用法レコード: rp.用法レコード,
@@ -354,9 +387,21 @@
       id: sourceIndex++,
       ippanmeiState,
     };
+    if (
+      ippanmeiState === undefined &&
+      src.薬品情報.薬品レコード.薬品コード種別 ===
+        "レセプト電算処理システム用コード"
+    ) {
+      const iyakuhincode = parseInt(src.薬品情報.薬品レコード.薬品コード);
+      spawnIppanmeiResolver(src.id, iyakuhincode);
+    }
+    return src;
   }
 
-  async function onFormEnter(rp: RP剤情報, ippanmeiState: IppanmeiState) {
+  async function onFormEnter(
+    rp: RP剤情報,
+    ippanmeiState: IppanmeiState | undefined
+  ) {
     if (
       editedSource &&
       editedSource.用法レコード &&
@@ -408,7 +453,10 @@
     reset();
   }
 
-  async function onNewDrug(rp: RP剤情報, ippanmeiState: IppanmeiState) {
+  async function onNewDrug(
+    rp: RP剤情報,
+    ippanmeiState: IppanmeiState | undefined
+  ) {
     sourceList.push(rpToSource(rp, ippanmeiState));
     sourceList = sourceList;
     await reset();
@@ -475,26 +523,38 @@
   function ippanmeiSymbolSpec(ippanmeiState: IppanmeiState): {
     stroke: string;
     fill: string;
+    fillOpacity?: string;
   } {
     switch (ippanmeiState.kind) {
       case "is-ippanmei": {
-        return { 
+        return {
           stroke: "blue",
           fill: "blue",
         };
       }
       case "has-ippanmei": {
-        return { 
+        return {
           stroke: "blue",
-          fill: "none"
+          fill: "none",
         };
       }
       case "has-no-ippanmei": {
-        return { 
-          stroke: "green",
-          fill: "yellow",
-        }
+        return {
+          stroke: "none",
+          fill: "green",
+          fillOpacity: "0.5",
+        };
       }
+    }
+  }
+
+  async function doConvertToIppanmei(srcId: number) {
+    let src = sourceList.find(src => src.id === srcId);
+    if( src && src.kind === "denshi" && src.ippanmeiState?.kind === "has-ippanmei" ){
+      src.薬品情報.薬品レコード.薬品コード種別 = "一般名コード";
+      src.薬品情報.薬品レコード.薬品コード = src.ippanmeiState.code;
+      src.薬品情報.薬品レコード.薬品名称 = src.ippanmeiState.name;
+      src.ippanmeiState = { kind: "is-ippanmei" };
     }
   }
 </script>
@@ -538,15 +598,14 @@
               }}
             />
             {#if source.ippanmeiState}
-              {@const spec=ippanmeiSymbolSpec(source.ippanmeiState)}
+              {@const spec = ippanmeiSymbolSpec(source.ippanmeiState)}
               <div style="position:absolute;right:2px;bottom:2px">
                 <a
                   href="javascript:void(0)"
-                  on:click|stopPropagation={() => alert("click")}
+                  style="position:relative;top:6px;"
+                  on:click|stopPropagation={() => doConvertToIppanmei(source.id)}
                 >
-                  <Circle
-                    {...spec}
-                  />
+                  <Circle {...spec} />
                 </a>
               </div>
             {/if}
