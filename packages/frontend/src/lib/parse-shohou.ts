@@ -977,11 +977,23 @@ function drugUnit(): Parser<string> {
   return _drugUnit;
 }
 
-function drugCommentLine(): Parser<string> {
+export function drugCommandLine(): Parser<string> {
   return spaces(1)
     .then(immediateNoKaku("@"))
     .then(toEol().map(s => s.trim()))
 }
+
+export function groupCommandLine(): Parser<string> {
+  return spaces(1)
+    .then(immediateNoKaku("@"))
+    .then(toEol().map(s => s.trim()))
+}
+
+export function shohouCommandLine(): Parser<string> {
+  return immediateNoKaku("@")
+    .then(repeatUntil(one(ch => true), eol(), (cs, _) => cs.join("").trim()));
+}
+
 
 export function drugIndex(): Parser<void> {
   return spaces(0)
@@ -1002,41 +1014,103 @@ export function drugNameAndAmount(): Parser<{ name: string, amount: string, unit
   )
 }
 
-export function drugLines(): Parser<Drug[]> {
-  return drugNameAndAmount().skip(blankLineEnd())
-    .chain(
-      repeat(
-        spaces(1).then(drugNameAndAmount().skip(blankLineEnd()))
-      ),
-      (d, ds) => [d, ...ds]
-    ).map(list => {
-      const drugs: Drug[] = list.map(obj => (
-        {
-          name: obj.name,
-          amount: obj.amount,
-          unit: obj.unit,
-          drugComments: [],
-        }
-      ));
-      return drugs;
-    });
+function parseCommand(command: string): { key: string, value: string } {
+  let key: string;
+  let value: string;
+  let i: number;
+  i = command.indexOf(":");
+  if (i < 0) {
+    i = command.indexOf("：");
+  }
+  if (i >= 0) {
+    key = command.substring(0, i);
+    value = command.substring(i + 1);
+  } else {
+    key = command;
+    value = "";
+  }
+  return { key, value: value.trim() };
 }
 
-// function drugLines(): Parser<Drug> {
-//   return repeatUntil(
-//     nonSpaces(1).chain(spaces(1), (s, ss) => s + ss),
-//     float().chain(drugUnit(), (amount, unit) => ({ amount, unit })).skip(blankLineEnd()),
-//     (ns, au) => ({
-//       name: ns.join("").trim(),
-//       amount: au.amount,
-//       unit: au.unit,
-//       drugComments: []
-//     })
-//   ).chain(
-//     repeat(drugCommentLine()),
-//     (drug, comms) => Object.assign(drug, { drugComments: comms })
-//   )
-// }
+function handleDrugCommand(drug: Drug, command: string) {
+  const cmd = parseCommand(command);
+  switch (cmd.key) {
+    case "変更不可": {
+      drug.senpatsu = "henkoufuka";
+      break;
+    }
+    case "患者希望": {
+      drug.senpatsu = "kanjakibou";
+      break;
+    }
+    case "comment": {
+      drug.drugComments.push(cmd.value);
+      break;
+    }
+    default: {
+      throw new Error(`unknown drug command: ${command}`);
+    }
+  }
+}
+
+function handleGroupCommand(drugGroup: DrugGroup, command: string) {
+  const cmd = parseCommand(command);
+  switch (cmd.key) {
+    case "comment": {
+      drugGroup.groupComments.push(cmd.value);
+      break;
+    }
+    default: {
+      throw new Error(`unknown group command: ${command}`)
+    }
+  }
+}
+
+function handleShohouCommand(shohou: Shohou, command: string) {
+  let cmd = parseCommand(command);
+  switch (cmd.key) {
+    case "memo": {
+      shohou.bikou.push(cmd.value);
+      break;
+    }
+    case "有効期限": {
+      shohou.kigen = DateWrapper.from(cmd.value.trim()).asSqlDate();
+      break;
+    }
+    default: {
+      throw new Error(`unknown command: ${command}`)
+    }
+  }
+}
+
+export function drugLines(): Parser<Drug> {
+  return drugNameAndAmount()
+    .skip(blankLineEnd())
+    .chain(
+      repeat(
+        drugCommandLine()
+      ),
+      (nau, cs) => {
+        const drug: Drug = {
+          name: nau.name,
+          amount: nau.amount,
+          unit: nau.unit,
+          drugComments: [],
+        };
+        cs.forEach(c => handleDrugCommand(drug, c));
+        return drug;
+      }
+    )
+}
+
+export function drugsLines(): Parser<Drug[]> {
+  return drugLines()
+    .chain(
+      repeat(
+        spaces(1).then(drugLines())),
+      (d, ds) => [d, ...ds]
+    )
+}
 
 export function daysUsage(): Parser<{ usage: string, days: string, kind: "days" }> {
   return repeatUntil(
@@ -1073,12 +1147,19 @@ export function drugGroup(): Parser<DrugGroup> {
   return spaces(0)
     .skip(drugIndex())
     .skip(spaces(0))
-    .then(drugLines())
+    .then(drugsLines())
     .chain(usageLine(), (ds, u) => ({
       drugs: ds,
       usage: u,
       groupComments: []
-    }));
+    }))
+    .chain(
+      repeat(groupCommandLine()),
+      (dg, cs) => {
+        cs.forEach(c => handleGroupCommand(dg, c));
+        return dg;
+      }
+    )
 }
 
 export function prolog(): Parser<void> {
@@ -1089,11 +1170,6 @@ export function prolog(): Parser<void> {
     .discard()
 }
 
-export function shohouCommentLine(): Parser<string> {
-  return immediateNoKaku("@")
-    .then(repeatUntil(one(ch => true), eol(), (cs, _) => cs.join("")));
-}
-
 export function shohou(): Parser<Shohou> {
   return prolog()
     .then(repeat(drugGroup(), 1))
@@ -1101,34 +1177,25 @@ export function shohou(): Parser<Shohou> {
       groups: dgs,
       bikou: [],
     }))
+    .chain(
+      repeat(shohouCommandLine()),
+      (s, cs) => {
+        cs.forEach(c => handleShohouCommand(s, c));
+        return s;
+      }
+    )
 }
 
-// function epilog(): Parser<string[]> {
-//   return repeat(
-//     immediateNoKaku("@")
-//       .then(toEol().map(s => s.trim()))
-//   )
-// }
-
-// function parser(): Parser<Drug[][]> {
-//   return prolog()
-//     .then(repeat(drugGroup()))
-//     .chain(epilog(), (ds, cs) => ds)
-//     .skip(repeat(blankLine()))
-// }
-
-// export function parseShohou(src: string, debug: boolean): Shohou {
-//   const shohou: Shohou = {
-//     groups: [],
-//     // shohouComments: [],
-//     bikou: [],
-//   };
-//   const r = parser().apply(src, 0);
-//   if (r !== undefined) {
-//     console.log("success", r.value);
-//     console.log("rest", src.substring(r.j, r.j + 20));
-//   } else {
-//     console.log("failed");
-//   }
-//   return shohou;
-// }
+export function parseShohou(src: string, debug: boolean): Shohou {
+  src = src.trim();
+  src = src.replaceAll(/\n{2,}/g, "");
+  const r = shohou().apply(src, 0);
+  if (r !== undefined) {
+    console.log("success", r.value);
+    console.log("rest", src.substring(r.j, r.j + 20));
+    return r.value;
+  } else {
+    console.log("failed");
+    throw new Error("failed to parse shohou");
+  }
+}

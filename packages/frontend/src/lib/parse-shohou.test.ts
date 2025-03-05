@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { daysUsage, drugGroup, drugIndex, drugLines, drugNameAndAmount, eol, otherUsage, prolog, shohou, shohouCommentLine, timesUsage, usageLine } from "./parse-shohou"
+import {
+  daysUsage, drugCommandLine, drugGroup, drugIndex, drugsLines, drugNameAndAmount, eol, otherUsage,
+  prolog, shohou, shohouCommandLine, timesUsage, usageLine,
+  drugLines,
+  groupCommandLine
+} from "./parse-shohou"
 
 describe("parse-shohou", () => {
   it("should parse eol", () => {
@@ -84,7 +89,7 @@ describe("parse-shohou", () => {
 
   it("should parse single drug line", () => {
     const src = "カロナール錠５００　５００ｍｇ　３錠";
-    const r = drugLines().apply(src, 0);
+    const r = drugsLines().apply(src, 0);
     expect(r?.value).toEqual(
       [
         {
@@ -100,7 +105,7 @@ describe("parse-shohou", () => {
 
   it("should parse multiple drug lines", () => {
     const src = "カロナール錠５００　５００ｍｇ　３錠\n　　アンブロキソール錠１５ｍｇ　３錠\n";
-    const r = drugLines().apply(src, 0);
+    const r = drugsLines().apply(src, 0);
     expect(r?.value).toEqual(
       [
         {
@@ -203,14 +208,179 @@ describe("parse-shohou", () => {
 
   it("should parse shohou comment line", () => {
     let src = "@memo: 高７\n";
-    let r = shohouCommentLine().apply(src, 0);
+    let r = shohouCommandLine().apply(src, 0);
     expect(r).toEqual({
       value: "memo: 高７",
       j: src.length,
     })
 
     src = " @memo: 高７\n";
-    r = shohouCommentLine().apply(src, 0);
+    r = shohouCommandLine().apply(src, 0);
     expect(r).toBeUndefined();
+  })
+
+  it("should parse drug comment line", () => {
+    let src = "　　@comment: ５ｍＬ２本\n";
+    let r = drugCommandLine().apply(src, 0);
+    expect(r).toEqual({
+      value: "comment: ５ｍＬ２本",
+      j: src.length,
+    })
+  })
+
+  it("should handle drug comment", () => {
+    let src = "カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　@comment:５ｍＬ２本\n";
+    let r = drugLines().apply(src, 0);
+    expect(r?.value).toEqual(
+      {
+        name: "カロナール錠５００　５００ｍｇ",
+        amount: "３",
+        unit: "錠",
+        drugComments: ["５ｍＬ２本"],
+      }
+    );
+    expect(r?.j).toBe(src.length);
+
+    src = "カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　@変更不可\n";
+    r = drugLines().apply(src, 0);
+    expect(r?.value).toEqual(
+      {
+        name: "カロナール錠５００　５００ｍｇ",
+        amount: "３",
+        unit: "錠",
+        drugComments: [],
+        senpatsu: "henkoufuka",
+      }
+    );
+    expect(r?.j).toBe(src.length);
+
+    src = "カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　@患者希望\n";
+    r = drugLines().apply(src, 0);
+    expect(r?.value).toEqual(
+      {
+        name: "カロナール錠５００　５００ｍｇ",
+        amount: "３",
+        unit: "錠",
+        drugComments: [],
+        senpatsu: "kanjakibou",
+      }
+    );
+    expect(r?.j).toBe(src.length);
+
+    src = "カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　@変更不可\n" +
+      "　　@comment: ５ｍＬ　２本\n";
+    r = drugLines().apply(src, 0);
+    expect(r?.value).toEqual(
+      {
+        name: "カロナール錠５００　５００ｍｇ",
+        amount: "３",
+        unit: "錠",
+        drugComments: ["５ｍＬ　２本"],
+        senpatsu: "henkoufuka",
+      }
+    );
+    expect(r?.j).toBe(src.length);
+  })
+
+  it("should shohou with bikou", () => {
+    let src = "院外処方\nＲｐ）\n" +
+      "１）カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　分３　毎食後　５日分\n" +
+      "@memo:高７";
+    let r = shohou().apply(src, 0);
+    expect(r?.value).toEqual({
+      groups: [
+        {
+          drugs: [
+            {
+              name: "カロナール錠５００　５００ｍｇ",
+              amount: "３",
+              unit: "錠",
+              drugComments: [],
+            }
+          ],
+          usage: {
+            kind: "days",
+            usage: "分３　毎食後",
+            days: "５"
+          },
+          groupComments: [],
+        }
+      ],
+      bikou: ["高７"],
+    });
+    expect(r?.j).toBe(src.length);
+  })
+
+  it("should shohou with effective date", () => {
+    let src = "院外処方\nＲｐ）\n" +
+      "１）カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　分３　毎食後　５日分\n" +
+      "＠有効期限: 2025-03-05";
+    let r = shohou().apply(src, 0);
+    expect(r?.value).toEqual({
+      groups: [
+        {
+          drugs: [
+            {
+              name: "カロナール錠５００　５００ｍｇ",
+              amount: "３",
+              unit: "錠",
+              drugComments: [],
+            }
+          ],
+          usage: {
+            kind: "days",
+            usage: "分３　毎食後",
+            days: "５"
+          },
+          groupComments: [],
+        }
+      ],
+      bikou: [],
+      kigen: "2025-03-05",
+    });
+    expect(r?.j).toBe(src.length);
+  })
+
+  it("should parse group command", () => {
+    let src = "　　@comment: １日３回まで\n";
+    let r = groupCommandLine().apply(src, 0);
+    expect(r?.value).toBe("comment: １日３回まで");
+    expect(r?.j).toBe(src.length);
+  })
+
+  it("should shohou with group command", () => {
+    let src = "院外処方\nＲｐ）\n" +
+      "１）カロナール錠５００　５００ｍｇ　３錠\n" +
+      "　　分３　毎食後　５日分\n" +
+      "　　@comment: １日３回まで\n";
+    let r = shohou().apply(src, 0);
+    expect(r?.value).toEqual({
+      groups: [
+        {
+          drugs: [
+            {
+              name: "カロナール錠５００　５００ｍｇ",
+              amount: "３",
+              unit: "錠",
+              drugComments: [],
+            }
+          ],
+          usage: {
+            kind: "days",
+            usage: "分３　毎食後",
+            days: "５"
+          },
+          groupComments: ["１日３回まで"],
+        }
+      ],
+      bikou: [],
+    });
+    expect(r?.j).toBe(src.length);
   })
 })
