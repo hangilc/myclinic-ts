@@ -306,7 +306,11 @@ async function diseasesOfPatient(patient: Patient, firstDay: string, lastDay: st
         `Cannot find main disease ${mainDiseaseName} in ($[aptient.patientId]) ${new PatientWrapper(patient).fullName()}`)
     }
   } else {
-    result[0].isMainDisease = true;
+    if( result[0] ){
+      result[0].isMainDisease = true;
+    } else {{
+      console.log("no disease for patient: ", patient);
+    }}
   }
   return result;
 }
