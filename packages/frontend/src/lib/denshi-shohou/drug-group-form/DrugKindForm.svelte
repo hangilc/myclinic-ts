@@ -4,10 +4,11 @@
   import api from "@/lib/api";
   import { onMount } from "svelte";
   import XCircle from "@/icons/XCircle.svelte";
+  import type { IppanmeiState } from "../denshi-shohou-form/denshi-shohou-form-types";
 
   export let drugKind: DrugKind | undefined;
   export let at: string;
-  export let onDone: (value: DrugKind) => void;
+  export let onDone: (value: DrugKind, ippanmeiState: IppanmeiState) => void;
   export let onCancel: () => void;
   export let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
@@ -30,12 +31,22 @@
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
+    let ippanmeiState: IppanmeiState;
+    if( m.ippanmei && m.ippanmeicode ){
+      ippanmeiState = {
+        kind: "has-ippanmei",
+        name: m.ippanmei,
+        code: m.ippanmeicode,
+      };
+    } else {
+      ippanmeiState = { kind: "has-no-ippanmei" };
+    }
     onDone({
       薬品コード種別: "レセプト電算処理システム用コード",
       薬品コード: m.iyakuhincode.toString(),
       薬品名称: m.name,
       単位名: m.unit,
-    })
+    }, ippanmeiState);
   }
 </script>
 

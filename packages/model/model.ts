@@ -747,7 +747,12 @@ export class IyakuhinMaster {
     public kouhatsu: string,
     public zaikei: string,
     public validFrom: string,
-    public validUpto: string
+    public validUpto: string,
+    public senteiRyouyouKubun: number,
+    public ippanmei: string,
+    public ippanmeicode: string,
+    public choukiShuusaihinKanren: number,
+    public ippanmeiShohouKasanKubun: number,
   ) { }
 
   static cast(arg: any): IyakuhinMaster {
@@ -762,8 +767,13 @@ export class IyakuhinMaster {
       arg.kouhatsu,
       arg.zaikei,
       arg.validFrom,
-      arg.validUpto
-    );
+      arg.validUpto,
+      arg.senteiRyouyouKubun,
+      arg.ippanmei,
+      arg.ippanmeicode,
+      arg.choukiShuusaihinKanren,
+      arg.ippanmeiShohouKasanKubun,
+      );
   }
 }
 

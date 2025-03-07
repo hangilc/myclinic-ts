@@ -332,7 +332,6 @@ export function mkHokenHairyosochi(): Payer {
 }
 
 export function mkKouhiNanbyou(gendogaku: number): Payer {
-  console.log("gendogaku", gendogaku);
   return mkPayer("nanbyou", 54, (bill: number, ctx: PaymentContext) => {
     let jikofutan = bill;
     const futanWari = ctx.futanWari;

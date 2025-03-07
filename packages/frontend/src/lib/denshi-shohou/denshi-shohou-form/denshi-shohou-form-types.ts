@@ -1,6 +1,6 @@
 import type { PrescInfoData, RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
-import type { UsageMaster } from "myclinic-model";
+import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
 
 export type Source = ({
   kind: "parsed";
@@ -15,6 +15,7 @@ export type Source = ({
   用法レコード: 用法レコード;
   用法補足レコード?: 用法補足レコード[];
   薬品情報: 薬品情報;
+  ippanmeiState?: IppanmeiState;
 }) & { id: number };
 
 export type TargetUsage = {
@@ -33,3 +34,26 @@ export type Mode = "edit-drug" | "new-drug" | "expire-date" | "bikou" | "joho";
 
 export type Init = { kind: "parsed"; shohousen: Shohousen; template: PrescInfoData; }
 | { kind: "denshi"; data: PrescInfoData };
+
+export type IppanmeiState = {
+  kind: "is-ippanmei"
+} | {
+  kind: "has-ippanmei";
+  name: string;
+  code: string;
+} | {
+  kind: "has-no-ippanmei";
+};
+
+export function ippanmeiStateFromMaster(m: IyakuhinMaster): IppanmeiState {
+  return m.ippanmei
+  ? {
+      kind: "has-ippanmei",
+      name: m.ippanmei,
+      code: m.ippanmeicode.toString(),
+    }
+  : {
+      kind: "has-no-ippanmei",
+    };
+
+}

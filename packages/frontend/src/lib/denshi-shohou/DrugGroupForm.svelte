@@ -32,12 +32,16 @@
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
   import Trash from "@/icons/Trash.svelte";
-  import { onshiDeleted } from "@/app-events";
+  import { ippanmeiStateFromMaster, type IppanmeiState } from "./denshi-shohou-form/denshi-shohou-form-types";
+  import api from "../api";
 
   export let at: string;
   export let kouhiList: Kouhi[];
   export let init: DrugGroupFormInit;
-  export let onEnter: (rec: RP剤情報) => void;
+  export let onEnter: (
+    rec: RP剤情報,
+    ippanmeiState: IppanmeiState | undefined
+  ) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
   let 剤形区分: 剤形区分 = init.剤形区分 ?? "内服";
@@ -45,6 +49,7 @@
   let 用法レコード: 用法レコード | undefined = init.用法レコード;
   let 用法補足レコード: 用法補足レコード[] | undefined = init.用法補足レコード;
   let drugKind: DrugKind | undefined = drugKindFromInit();
+  let ippanmeiState: IppanmeiState | undefined = ippanmeiStateFromInit();
   let amountInput: string = amountInputFromInit();
   let amountUnit: string = amountUnitFromInit();
   let 不均等レコード: 不均等レコード | undefined = init.不均等レコード;
@@ -90,6 +95,26 @@
     } else {
       return undefined;
     }
+  }
+
+  async function spawnIppanmeiResolver(iyakuhincode: number) {
+    let m = await api.getIyakuhinMaster(iyakuhincode, at);
+    ippanmeiState = ippanmeiStateFromMaster(m);
+  }
+
+  function ippanmeiStateFromInit(): IppanmeiState | undefined {
+    let ippanmeiState: IppanmeiState | undefined = init?.ippanmeiState;
+    if (ippanmeiState === undefined) {
+      if (init?.薬品レコード?.薬品コード種別 === "一般名コード") {
+        ippanmeiState = { kind: "is-ippanmei" };
+      } else if (
+        init?.薬品レコード?.薬品コード種別 ===
+        "レセプト電算処理システム用コード"
+      ) {
+        spawnIppanmeiResolver(parseInt(init.薬品レコード.薬品コード))
+      }
+    }
+    return ippanmeiState;
   }
 
   function amountInputFromInit(): string {
@@ -170,7 +195,7 @@
       用法補足レコード,
       薬品情報グループ: [薬品情報],
     };
-    onEnter(rp);
+    onEnter(rp, ippanmeiState);
   }
 
   function timesRep(kubun: 剤形区分): string {
@@ -250,10 +275,15 @@
     edit用法補足レコード = false;
   }
 
-  function onDone薬剤種別(value: DrugKind) {
+  function onDone薬剤種別(value: DrugKind, ippan: IppanmeiState) {
     drugKind = value;
+    ippanmeiState = ippan;
     amountUnit = drugKind.単位名;
     edit薬剤種別 = false;
+  }
+
+  function onDone薬剤種別Kizai(value: DrugKind) {
+    onDone薬剤種別(value, { kind: "has-no-ippanmei" });
   }
 
   function onDone不均等レコード(value: 不均等レコード | undefined) {
@@ -282,6 +312,17 @@
       onDelete();
     }
   }
+
+  function doIppan() {
+    console.log("ippanmeiState", ippanmeiState);
+    if (ippanmeiState?.kind === "has-ippanmei" && drugKind) {
+      drugKind.薬品コード種別 = "一般名コード";
+      drugKind.薬品コード = ippanmeiState.code;
+      drugKind.薬品名称 = ippanmeiState.name;
+      drugKind = drugKind;
+      ippanmeiState = { kind: "is-ippanmei" };
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -292,13 +333,20 @@
     </div>
     <div style="margin:6px 0;">
       {#if !edit薬剤種別}
-        <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}>
+        <div style="line-height:1.5em;">
           {#if 剤形区分 !== "医療材料"}
-            {drugKind ? drugKind.薬品名称 : "（薬品未設定）"}
+            <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
+              >{drugKind ? drugKind.薬品名称 : "（薬品未設定）"}</span
+            >
+            {#if ippanmeiState?.kind === "has-ippanmei"}
+              <a class="ippan-link" on:click={doIppan}>一般名有</a>
+            {/if}
           {:else if 剤形区分 === "医療材料"}
-            {drugKind ? drugKind.薬品名称 : "（器材未設定）"}
+            <span style="cursor:pointer" on:click={() => (edit薬剤種別 = true)}
+              >{drugKind ? drugKind.薬品名称 : "（器材未設定）"}</span
+            >
           {/if}
-        </span>
+        </div>
       {:else}
         <div style="border:1px solid gray;border-radius:6px;padding:10px;">
           {#if 剤形区分 !== "医療材料"}
@@ -313,7 +361,7 @@
             <KizaiKindForm
               {drugKind}
               {at}
-              onDone={onDone薬剤種別}
+              onDone={onDone薬剤種別Kizai}
               onCancel={() => (edit薬剤種別 = false)}
               searchText={init.iyakuhinSearchText ?? ""}
             />
@@ -478,4 +526,12 @@
 </div>
 
 <style>
+  .ippan-link {
+    white-space: nowrap;
+    font-size: 0.8em;
+    border: 1px solid blue;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 255, 0.05);
+  }
 </style>
