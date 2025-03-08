@@ -1,3 +1,4 @@
+import api from "@/lib/api";
 import { eq公費レコード, type PrescInfoData, type 公費レコード } from "@/lib/denshi-shohou/presc-info";
 import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Text } from "myclinic-model";
@@ -123,6 +124,10 @@ export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: num
       };
       return dstMemo;
     } else if (src.kind === "shohou-conv") {
+      const visit = await api.getVisit(targetVisitId);
+      if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
+        return undefined;
+      }
       const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
       Object.assign(dstShohou, {
         引換番号: undefined,
