@@ -89,6 +89,22 @@ export class DateWrapper {
     );
   }
 
+  lt(other: DateWrapperLike): boolean {
+    return this.compare(other) < 0;
+  }
+
+  le(other: DateWrapperLike): boolean {
+    return this.compare(other) <= 0;
+  }
+
+  gt(other: DateWrapperLike): boolean {
+    return this.compare(other) > 0;
+  }
+
+  ge(other: DateWrapperLike): boolean {
+    return this.compare(other) >= 0;
+  }
+
   isEqual(arg: DateWrapperLike): boolean {
     return this.compare(arg) === 0;
   }
@@ -168,6 +184,20 @@ export class DateWrapper {
   getFirstDayOfWeek(): DateWrapper {
     const dow = this.getDayOfWeek();
     return this.incDay(-dow);
+  }
+
+  getFirstDayOfSameMonth(): DateWrapper {
+    const cur = this.date;
+    const newDate: Date = new Date(cur.getFullYear(), cur.getMonth(), 1);
+    return new DateWrapper(newDate);
+  }
+
+  getFirstDayOfNextMonth(): DateWrapper {
+    return this.getFirstDayOfSameMonth().incMonth(1);
+  }
+
+  getLastDayOfSameMonth(): DateWrapper {
+    return this.getFirstDayOfNextMonth().incDay(-1);
   }
 
   toString(): string {

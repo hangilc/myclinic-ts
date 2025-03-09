@@ -10,10 +10,7 @@
   import type { Mode } from "./mode";
   import api from "@/lib/api";
   import { parseSqlDate } from "@/lib/util";
-  import {
-    type DiseaseData,
-    type DiseaseEnterData,
-  } from "myclinic-model";
+  import { type DiseaseData, type DiseaseEnterData } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import Drugs from "./Drugs.svelte";
   import Shinryou from "./Shinryou.svelte";
@@ -32,16 +29,16 @@
         e.mode = "current";
         $env = e;
       }
-    })
+    }),
   );
 
   onDestroy(() => {
     unsubs.forEach((f) => f());
   });
 
-   async function onDiseaseModified() {
+  async function onDiseaseModified() {
     const cur = $env;
-    if( cur ){
+    if (cur) {
       await cur.updateCurrentList();
       await cur.updateAllList();
       await cur.checkDrugs();
@@ -52,16 +49,16 @@
 
   async function doCurrentSelect(d: DiseaseData) {
     const e = $env;
-    if( e ){
+    if (e) {
       await e.fetchAllList();
       let target: DiseaseData | undefined = undefined;
-      for(let ele of e.allList ?? []){
-        if( ele.disease.diseaseId === d.disease.diseaseId ){
+      for (let ele of e.allList ?? []) {
+        if (ele.disease.diseaseId === d.disease.diseaseId) {
           target = ele;
           break;
         }
       }
-      if( !target ){
+      if (!target) {
         throw new Error("cannot find target");
       }
       e.editTarget = target;
@@ -94,7 +91,7 @@
 
   async function doDrugsChanged() {
     const e = $env;
-    if( e ){
+    if (e) {
       await e.checkDrugs();
       $env = e;
     }
@@ -102,7 +99,7 @@
 
   async function doShinryouChanged() {
     const e = $env;
-    if( e ){
+    if (e) {
       await e.checkShinryou();
       $env = e;
     }
@@ -110,12 +107,11 @@
 
   async function doChangeMode(mode: Mode) {
     const e = $env;
-    if( e ){
+    if (e) {
       await e.changeModeTo(mode);
       $env = e;
     }
   }
-
 </script>
 
 {#if $currentPatient !== undefined && $env !== undefined}
@@ -130,13 +126,14 @@
       {:else if $env.mode === "edit"}
         <Edit {env} onDelete={doDeleteDisease} onUpdate={doUpdateDisease} />
       {:else if $env.mode === "drugs"}
-        <Drugs onChanged={doDrugsChanged}/>
+        <Drugs onChanged={doDrugsChanged} />
       {:else if $env.mode === "shinryou" && $env.checkingDate}
-        <Shinryou onChanged={doShinryouChanged} at={$env.checkingDate}/>
+        <Shinryou onChanged={doShinryouChanged} at={$env.checkingDate} />
       {/if}
     </div>
     <DrugDiseaseComp {env} />
     <ShinryouDiseaseComp {env} />
+      <!-- svelte-ignore a11y-invalid-attribute -->
     <div class="commands">
       <a href="javascript:void(0)" on:click={() => doChangeMode("current")}
         >現行</a

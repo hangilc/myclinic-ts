@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { DiseaseEnterData, Patient, VisitEx } from "myclinic-model";
+import type { Text, Patient, VisitEx } from "myclinic-model";
 import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
 import type { Mode } from "./mode";
 import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
@@ -33,6 +33,8 @@ export class DiseaseEnv {
     name: string;
     fixes: ShinryouFix[];
   }[] = [];
+  drugNames: string[] = [];
+  shinryouNames: string[] = [];
 
   constructor(
     patient: Patient
@@ -61,8 +63,7 @@ export class DiseaseEnv {
 
   async checkDrugs() {
     this.drugsWithoutMatchingDisease = [];
-    const texts = this.checkingVisits.flatMap((visit) => visit.texts) ?? [];
-    const drugNames: string[] = extractDrugNames(texts);
+    const drugNames: string[] = this.drugNames;
     const diseaseNames: string[] =
       this.currentList.filter(hasNoSusp).map((disease) => {
         return disease.byoumeiMaster.name;
@@ -97,13 +98,8 @@ export class DiseaseEnv {
           }[];
         }
       > = {};
-      this.checkingVisits.forEach((visit) => {
-        visit.shinryouList.forEach((shinryou) => {
-          const shinryouName = shinryou.master.name;
-          shinryouMap[shinryouName] = { fixes: [] };
-        });
-      });
-      const shinryouNames = Object.keys(shinryouMap);
+      const shinryouNames = this.shinryouNames;
+      shinryouNames.forEach(shinryouName => shinryouMap[shinryouName] = { fixes: [] });
       const shinryouDiseases: ShinryouDisease[] =
         await cache.getShinryouDiseases();
       const ctx = this.createShinryouContext(
@@ -172,6 +168,8 @@ export class DiseaseEnv {
       env.checkingDate = undefined;
       env.checkingVisits = [];
     }
+    env.drugNames = getDrugNames(env.checkingVisits);
+    env.shinryouNames = getShinryouNames(env.checkingVisits);
     await env.checkDrugs();
     await env.checkShinryou();
     return env;
@@ -242,4 +240,20 @@ function hasNoSusp(disease: DiseaseData): boolean {
     }
   }
   return true;
+}
+
+function getDrugNames(visits: VisitEx[]): string[] {
+  const texts: Text[] = [];
+  visits.forEach(v => v.texts.forEach(t => texts.push(t)));
+  return extractDrugNames(texts);
+}
+
+function getShinryouNames(visits: VisitEx[]): string[] {
+  const result: string[] = [];
+  visits.forEach(visit => {
+    visit.shinryouList.forEach(shinryou => {
+      result.push(shinryou.master.name);
+    });
+  });
+  return result;
 }
