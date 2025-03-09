@@ -11,6 +11,10 @@
   function onDiseaseClick(d: DiseaseData) {
     onSelect(d);
   }
+
+  function doUpdated(updated: DiseaseEnv) {
+    env.set(updated);
+  }
 </script>
 
 <div data-cy="disease-current">
@@ -22,7 +26,7 @@
       class="diseaseWrapper"
       data-cy="disease-item"
       data-disease-id={d.disease.diseaseId}
-    ><DiseaseRep disease={d} env={$env}/>
+    ><DiseaseRep disease={d} env={$env} onUpdated={doUpdated}/>
     </div>
   {/each}
 </div>

@@ -1,12 +1,13 @@
 <script lang="ts">
   import type { DiseaseData } from "myclinic-model";
   import { startDateRep } from "./start-date-rep";
-  import type { DiseaseEnv } from "./disease-env";
+  import { updateDiseaseEnv, type DiseaseEnv } from "./disease-env";
   import { DateWrapper } from "myclinic-util";
   import api from "@/lib/api";
 
   export let disease: DiseaseData;
   export let env: DiseaseEnv | undefined;
+  export let onUpdated: (updated: DiseaseEnv) => void;
   let dmSuspEndDate: string | undefined = undefined;
 
   if (disease.fullName === "糖尿病の疑い") {
@@ -25,8 +26,12 @@
   }
 
   async function endDm(endDate: string) {
-    const diseaseId = disease.disease.diseaseId;
-    await api.endDisease(diseaseId, endDate, "S");
+    if (env) {
+      const diseaseId = disease.disease.diseaseId;
+      await api.endDisease(diseaseId, endDate, "S");
+      const update = await updateDiseaseEnv(env);
+      onUpdated(update);
+    }
   }
 </script>
 

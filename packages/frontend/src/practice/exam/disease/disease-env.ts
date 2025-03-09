@@ -1,12 +1,13 @@
 import api from "@/lib/api";
 import type { Text, Patient, VisitEx } from "myclinic-model";
-import type { DiseaseData, DiseaseExample } from "myclinic-model/model";
+import type { DiseaseData, } from "myclinic-model/model";
 import type { Mode } from "./mode";
-import { hasMatchingDrugDisease, type DrugDisease } from "@/lib/drug-disease";
+import { hasMatchingDrugDisease, } from "@/lib/drug-disease";
 import { cache } from "@/lib/cache";
 import { extractDrugNames } from "./drugs-visit";
 import { hasMatchingShinryouDiseases, type ShinryouDisease, type Fix as ShinryouFix } from "@/lib/shinryou-disease";
 import { enterDiseaseByNames } from "./enter-disease-by-names";
+import type { Writable } from "svelte/store";
 
 let drugsWithoutMatchingDiseaseIndex = 1;
 let shinryouWithoutMatchingDiseaseIndex = 1;
@@ -257,3 +258,12 @@ function getShinryouNames(visits: VisitEx[]): string[] {
   });
   return result;
 }
+
+export async function updateDiseaseEnv(env: DiseaseEnv) {
+  await env.updateCurrentList();
+  await env.updateAllList();
+  await env.checkDrugs();
+  await env.checkShinryou();
+  return env;
+}
+
