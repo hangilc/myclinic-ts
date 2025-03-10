@@ -1,0 +1,2 @@
+* rcpt-check の改善
+  - rcpt-check/check.ts で、チェック関数をリストにして、それぞれの関数は新たに作成する checkers ディレクトリーにまとめて配置する。

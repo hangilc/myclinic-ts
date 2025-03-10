@@ -7,6 +7,15 @@ import { checkMainDisease } from "./main-disease";
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
 export type CheckResult = "ok" | "no-visit" | CheckError[];
+export type RcptChecker = (visit: VisitEx) => Promise<(CheckError | undefined)>;
+
+const checkers: RcptChecker[] = [
+  checkGeneric1,
+  checkXpSatsuei,
+  checkXpShindan,
+  checkOnshi,
+  checkMainDisease,
+];
 
 export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
   if (visits.length === 0) {
@@ -18,17 +27,21 @@ export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
       errs.push(err);
     }
   }
-  visits.forEach(visit => chk(checkGeneric1(visit)));
-  visits.forEach(visit => chk(checkXpSatsuei(visit)));
-  visits.forEach(visit => chk(checkXpShindan(visit)));
-  (await Promise.all(visits.map(visit => checkOnshi(visit)))).forEach(chk);
-  (await Promise.all(visits.map(visit => checkMainDisease(visit)))).forEach(chk);
+  for (let checker of checkers) {
+    const checks = await Promise.all(visits.map(visit => checker(visit)));
+    checks.forEach(chk);
+  }
+  // visits.forEach(visit => chk(checkGeneric1(visit)));
+  // visits.forEach(visit => chk(checkXpSatsuei(visit)));
+  // visits.forEach(visit => chk(checkXpShindan(visit)));
+  // (await Promise.all(visits.map(visit => checkOnshi(visit)))).forEach(chk);
+  // (await Promise.all(visits.map(visit => checkMainDisease(visit)))).forEach(chk);
   return errs.length === 0 ? "ok" : errs;
 }
 
 // 単純撮影（アナログ撮影）には、枚数と部位が必要
 // 170001910: 単純撮影（アナログ撮影）
-function checkXpSatsuei(visit: VisitEx): CheckError | undefined {
+function checkXpSatsuei(visit: VisitEx): Promise<CheckError | undefined> {
   const satsuei = visit.conducts
     .flatMap(c => c.shinryouList)
     .find(s => s.shinryoucode === 170001910)?.asConductShinryou();
@@ -67,14 +80,14 @@ function checkXpSatsuei(visit: VisitEx): CheckError | undefined {
 
 // 単純撮影（イ）の写真診断には、枚数が必要
 // 170000410: 単純撮影（イ）の写真診断
-function checkXpShindan(visit: VisitEx): CheckError | undefined {
+function checkXpShindan(visit: VisitEx): Promise<CheckError | undefined> {
   const shindan = visit.conducts
     .flatMap(c => c.shinryouList)
     .find(s => s.shinryoucode === 170000410)?.asConductShinryou();
   if (shindan) {
     if (shindan.memo) {
       const json = JSON.parse(shindan.memo);
-      if (json.amount !== undefined ) {
+      if (json.amount !== undefined) {
         return undefined;
       }
     }
@@ -104,7 +117,7 @@ function checkXpShindan(visit: VisitEx): CheckError | undefined {
 // 一般名処方加算１は２品目以上の薬剤が処方されている場合に適応される。
 // 120004270: 一般名処方加算１（処方箋料）
 // 120003570: 一般名処方加算２（処方箋料）
-function checkGeneric1(visit: VisitEx): CheckError | undefined {
+function checkGeneric1(visit: VisitEx): Promise<CheckError | undefined> {
   const idx = visit.shinryouList.findIndex(s => s.shinryoucode === 120004270);
   if (idx >= 0) {
     let texts = visit.texts.filter(t => isShohousen(t.content));
