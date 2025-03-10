@@ -18,7 +18,7 @@
   import { initPrescInfoData, initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
   import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
-  import { TextMemoWrapper } from "./text/text-memo";
+  import { TextMemoWrapper } from "@/lib/text-memo";
   import DenshiHenkanDialog from "./text/regular/DenshiHenkanDialog.svelte";
   import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
   import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";

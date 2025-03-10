@@ -8,7 +8,7 @@
     Source,
   } from "./denshi-shohou-form/denshi-shohou-form-types";
   import Dialog from "../Dialog.svelte";
-  import { TextMemoWrapper } from "@/practice/exam/record/text/text-memo";
+  import { TextMemoWrapper } from "@/lib/text-memo";
   import api from "../api";
   import { registerPresc, shohouHikae, shohouHikaeFilename } from "./presc-api";
   import {

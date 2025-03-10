@@ -25,7 +25,7 @@
   import api from "@/lib/api";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
-  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
+  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
 
 
   export let shohou: PrescInfoData;

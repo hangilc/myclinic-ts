@@ -27,7 +27,7 @@
     TextMemoWrapper,
     type ShohouTextMemo,
     type TextMemo,
-  } from "../text-memo";
+  } from "@/lib/text-memo";
   import {
     eq公費レコード,
     type PrescInfoData,

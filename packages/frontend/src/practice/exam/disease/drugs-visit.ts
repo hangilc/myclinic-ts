@@ -1,7 +1,6 @@
-import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
 import { isShohousen, parseShohousen } from "@/lib/shohousen/parse-shohousen";
 import { Text } from "myclinic-model";
-import { TextMemoWrapper } from "../record/text/text-memo";
+import { TextMemoWrapper } from "@/lib/text-memo";
 
 export function extractDrugNames(texts: Text[]): string[] {
   const names: string[] = [];
