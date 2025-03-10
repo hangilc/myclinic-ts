@@ -1,2 +1,13 @@
-* rcpt-check の改善
+* rcpt-check の改善（血糖自己測定器加算の追加情報チェック）
+
+血糖自己測定器加算（６０回以上）（１型糖尿病の患者等を除く） shinryoucode = 114007410 を算定した場合には、診療行為に対してコメントをくわえなければならない。
+
+たとえば、visit_shinryou の memo に以下を設定する。
+
+#+SRC_BEGIN json
+{"comments": [{"code": 842100048, "text": "６０"}]}
+#+SRC_END
+
   - rcpt-check/check.ts で、チェック関数をリストにして、それぞれの関数は新たに作成する checkers ディレクトリーにまとめて配置する。
+  - checkers/glucose-self-measuring.ts を作成し、check function を実装する。
+  
