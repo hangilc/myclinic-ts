@@ -383,4 +383,22 @@ describe("parse-shohou", () => {
     });
     expect(r?.j).toBe(src.length);
   })
+
+	it("should parse multiple drugs", () => {
+		let text = `院外処方
+Ｒｐ）
+１）メトプロロール錠（４０）　　　２錠
+　　ニトロールＲカプセル（２０）　　　　　　２Ｃ
+　　アロプリノール（１００）　　　　　　　　２錠
+　　分２　朝夕食後　５６日分
+２）アダラートＣＲ（１０）　１錠
+　　ブロプレス（２）　１錠
+　　分１　朝食後　５６日分
+３）リピトール（１０）　１錠
+　　分１　朝食後　５６日分`;
+		let parsed = shohou().apply(text, 0);
+		expect(parsed?.rest).toBe("");
+	});
+
+	
 })
