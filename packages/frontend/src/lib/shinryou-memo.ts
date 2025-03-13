@@ -1,4 +1,4 @@
-import type { RezeptComment } from "myclinic-model";
+import type { RezeptComment, Shinryou } from "myclinic-model";
 import { 診療識別コード, 診療識別コードvalues } from "myclinic-rezept/codes";
 
 export class ShinryouMemoWrapper {
@@ -6,6 +6,10 @@ export class ShinryouMemoWrapper {
 
 	constructor(memo: string | undefined) {
 		this.memo = memo ?? "";
+	}
+
+	static fromShinryou(shinryou: Shinryou): ShinryouMemoWrapper {
+		return new ShinryouMemoWrapper(shinryou.memo);
 	}
 
 	getJson(): any {
@@ -31,6 +35,16 @@ export class ShinryouMemoWrapper {
 			result.push(rc);
 		}
 		return result;
+	}
+
+	setComments(comments: RezeptComment[]) {
+		let json = this.getJson();
+		if( comments.length === 0 ){
+			delete json.comments;
+		} else {
+			json = Object.assign({}, json, { comments });
+		}
+		this.memo = JSON.stringify(json);
 	}
 }
 

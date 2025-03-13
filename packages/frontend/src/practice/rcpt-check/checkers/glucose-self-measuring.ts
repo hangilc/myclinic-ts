@@ -1,6 +1,7 @@
-import type { Shinryou, ShinryouEx, VisitEx } from "myclinic-model";
+import type { ShinryouEx, VisitEx } from "myclinic-model";
 import type { CheckError } from "../check";
-import api from "@/lib/api";
+import { ShinryouMemoWrapper } from "@/lib/shinryou-memo";
+
 
 // 血糖自己測定器加算（６０回以上）（１型糖尿病の患者等を除く）
 // shinryoucode = 114007410 を算定した場合には、
@@ -10,7 +11,9 @@ export async function checkGlucoseSelfMeasuring(visit: VisitEx):
   const slist: ShinryouEx[] = [];
   visit.shinryouList.forEach(shinryou => {
     if (shinryou.shinryoucode === 114007410) {
-      console.log("found");
+			let memo = new ShinryouMemoWrapper(shinryou.memo);
+			let comments = memo.getComments();
+      console.log("found", comments);
     }
   });
   return undefined;
