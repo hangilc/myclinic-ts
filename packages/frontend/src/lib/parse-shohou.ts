@@ -389,6 +389,7 @@ let drugUnitStrings = [
   "パック",
   "袋",
   "本",
+	"Ｃ",
 ];
 
 const _drugUnit: Parser<string> = or(
@@ -614,9 +615,14 @@ export function parseShohou(src: string, debug: boolean): Shohou {
   const r = shohou().apply(src, 0);
   if (r !== undefined) {
     console.log("success", r.value);
-    console.log("rest", src.substring(r.j, r.j + 20));
+		const rest = src.substring(r.j);
+		if( rest !== "" ){
+			console.log("rest", rest);
+			alert(`failed to parse shohou: remaining is '${rest}'`);
+		}
     return r.value;
   } else {
+		alert("failed to parse shohousen");
     console.log("failed");
     throw new Error("failed to parse shohou");
   }
