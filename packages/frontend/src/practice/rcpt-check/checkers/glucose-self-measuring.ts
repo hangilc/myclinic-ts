@@ -1,5 +1,5 @@
 import type { RezeptComment, ShinryouEx, VisitEx } from "myclinic-model";
-import type { CheckError } from "../check";
+import { checkForRcpt, type CheckError } from "../check";
 import { ShinryouMemoWrapper } from "@/lib/shinryou-memo";
 import { toHankaku } from "@/lib/zenkaku";
 
@@ -16,22 +16,24 @@ export async function checkGlucoseSelfMeasuring(visit: VisitEx):
 			let comments = memo.getComments();
 			let com = findComment(comments);
 			if( com ){
-				let value = getCommentValue(com);
-				if( value !== undefined && value >= 60 ){
-					return undefined;
-				} else {
-					return { code: "該当コメントが不適切です。" };
-				}
+				return checkComment(com);
 			} else {
-
+				return checkNullComment();
 			}
-			console.log("found", comments);
 		}
 	});
 	return undefined;
 	}
 
-export function checkForShinryoucode114007410(comment: RezeptComment): CheckError | undefined {
+export const testExports = {
+	checkComment,
+};
+
+function checkNullComment(): CheckError {
+	return { code: "該当コメントがありません。" };
+}
+
+function checkComment(comment: RezeptComment): CheckError | undefined {
 	let text = comment.text;
 	if( text == undefined ){
 		return { code: "該当コメントが不適切です（no text）。" };
