@@ -29,6 +29,25 @@ export async function checkGlucoseSelfMeasuring(visit: VisitEx):
 		}
 	});
 	return undefined;
+	}
+
+export function checkForShinryoucode114007410(comment: RezeptComment): CheckError | undefined {
+	let text = comment.text;
+	if( text == undefined ){
+		return { code: "該当コメントが不適切です（no text）。" };
+	}
+	text = toHankaku(text);
+	if( /^\d+$/.test(text) ){
+		let days = parseInt(text);
+		if( days >= 60 ){
+			return undefined;
+		} else {
+			return { code: "該当コメントが不適切です（less then 60）。" };
+		}
+	} else {
+		return { code: "該当コメントが不適切です（not integer）。" };
+	}
+	
 }
 
 function findComment(comments: RezeptComment[]): RezeptComment | undefined {
