@@ -1,27 +1,20 @@
-import type { RezeptComment, Shinryou } from "myclinic-model";
-import { 診療識別コード, 診療識別コードvalues } from "myclinic-rezept/codes";
+import type { RezeptComment } from "myclinic-model";
+import { 診療識別コードvalues } from "myclinic-rezept/codes";
+import { jsonToMemo, memoToJson } from "@/lib/memo";
 
 export class ShinryouMemoWrapper {
-	memo: string;
+	memo: string| undefined;
 
 	constructor(memo: string | undefined) {
 		this.memo = memo ?? "";
 	}
 
-	static fromShinryou(shinryou: Shinryou): ShinryouMemoWrapper {
-		return new ShinryouMemoWrapper(shinryou.memo);
-	}
-
-	getJson(): any {
-		if( this.memo === "" ){
-			return {};
-		} else {
-			return JSON.parse(this.memo);
-		}
+	asJson(): any {
+		return memoToJson(this.memo);
 	}
 
 	getComments(): RezeptComment[] {
-		let json = this.getJson();
+		let json = this.asJson();
 		let comments = json.comments ?? [];
 		if( !Array.isArray(comments) ){
 			throw new Error("Invalid shinryou-memo comments type");
@@ -38,13 +31,13 @@ export class ShinryouMemoWrapper {
 	}
 
 	setComments(comments: RezeptComment[]) {
-		let json = this.getJson();
+		let json = this.asJson();
 		if( comments.length === 0 ){
 			delete json.comments;
 		} else {
 			json = Object.assign({}, json, { comments });
 		}
-		this.memo = JSON.stringify(json);
+		this.memo = jsonToMemo(json);
 	}
 }
 
