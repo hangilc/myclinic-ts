@@ -75,8 +75,8 @@ export function rezeptCommentVerifier(): Verifier<any, RezeptComment> {
 	let v = asDefined()
 		.chain(asObject())
 		.map((src: any) => ({ src, props: {} }))
-		.chain(propVerifier("code", asDefined().chain(asNumber()).chain(asInt()), t => ({ code: t })))
-		.chain(propVerifier("text", asDefined().chain(asStr()).chain(asNotEmptyStr()), t => ({ text: t })))
+		.chain(propVerifier2<RezeptComment>("code", asDefined().chain(asNumber()).chain(asInt())))
+		.chain(propVerifier2<RezeptComment>("text", asDefined().chain(asStr()).chain(asNotEmptyStr())))
 		.map(arg => arg.props);
 	return v;
 
@@ -148,7 +148,7 @@ class Verifier<S, T> {
 		return new Verifier(
 			(src) => {
 				const r = self.verify(src);
-				if( r.ok ){
+				if (r.ok) {
 					return ok(new ObjectVerifier(r.value, {}, []));
 				} else {
 					return r;
@@ -293,6 +293,20 @@ function propVerifier<P, T, TT>(name: string, verifier: Verifier<any, T>, assign
 		let t: VerifyResult<T> = verifier.verify(prop);
 		if (t.ok) {
 			let newProps: P & TT = Object.assign({}, arg.props, assigner(t.value));
+			return ok({ src: arg.src, props: newProps });
+		} else {
+			return addErrorPrefix(t, prefixName);
+		}
+	});
+}
+
+function propVerifier2<O>(name: Extract<keyof O, string>, verifier: Verifier<any, O[typeof name]>, prefixName: string = name):
+	Verifier<{ src: any, props: Partial<O> }, { src: any; props: Partial<O> }> {
+	return new Verifier((arg: { src: any; props: Partial<O> }) => {
+		let prop: any = arg.src[name];
+		let t = verifier.verify(prop);
+		if (t.ok) {
+			let newProps = Object.assign({}, arg.props, { [name]: t.value });
 			return ok({ src: arg.src, props: newProps });
 		} else {
 			return addErrorPrefix(t, prefixName);
