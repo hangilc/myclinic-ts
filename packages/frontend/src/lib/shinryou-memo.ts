@@ -77,7 +77,7 @@ export function rezeptCommentVerifier(): Verifier<any, RezeptComment> {
 		.map((src: any) => ({ src, props: {} }))
 		.chain(propVerifier("code", asDefined().chain(asNumber()).chain(asInt()), t => ({ code: t })))
 		.chain(propVerifier("text", asDefined().chain(asStr()).chain(asNotEmptyStr()), t => ({ text: t })))
-	  .map(arg => arg.props);
+		.map(arg => arg.props);
 	return v;
 
 	// let code = arg.code;
@@ -143,6 +143,20 @@ class Verifier<S, T> {
 		);
 	}
 
+	beginObject<O>(): Verifier<any, ObjectVerifier<O, {}>> {
+		const self = this;
+		return new Verifier(
+			(src) => {
+				const r = self.verify(src);
+				if( r.ok ){
+					return ok(new ObjectVerifier(r.value, {}, []));
+				} else {
+					return r;
+				}
+			}
+		);
+	}
+
 	map<U>(f: (t: T) => U): Verifier<S, U> {
 		const self = this;
 		return new Verifier<S, U>(
@@ -155,6 +169,30 @@ class Verifier<S, T> {
 				}
 			}
 		);
+	}
+}
+
+class ObjectVerifier<O, P extends Partial<O>> {
+	src: any;
+	props: P;
+	errors: string[];
+
+	constructor(src: any, props: P, errors: string[]) {
+		this.src = src;
+		this.props = props;
+		this.errors = errors;
+	}
+
+	prop(name: Extract<keyof O, string>, propVerifier: Verifier<any, O[typeof name]>, repName: string = name.toString()) {
+		const r = propVerifier.verify(this.src);
+		if (r.ok) {
+			let newProps = Object.assign({}, this.props, { [name]: r.value });
+			return new ObjectVerifier(this.src, newProps, this.errors);
+		} else {
+			let msgs = [r.message, ...r.otherMessages];
+			msgs = msgs.map(m => repName + ":" + m);
+			return new ObjectVerifier(this.src, this.props, msgs);
+		}
 	}
 }
 
@@ -190,7 +228,7 @@ function asDefined(): Verifier<any, any> {
 
 function asNumber(): Verifier<any, number> {
 	return new Verifier((src: any) => {
-		if ( typeof src === "number" ) {
+		if (typeof src === "number") {
 			return ok(src);
 		} else {
 			return error("数値でありません");
@@ -220,7 +258,7 @@ function asPositive(): Verifier<number, number> {
 
 function asStr(): Verifier<any, string> {
 	return new Verifier((src: any) => {
-		if( typeof src === "string" ){
+		if (typeof src === "string") {
 			return ok(src);
 		} else {
 			return error("文字列でありません");
@@ -230,7 +268,7 @@ function asStr(): Verifier<any, string> {
 
 function asNotEmptyStr(): Verifier<string, string> {
 	return new Verifier((src: string) => {
-		if( src !== "" ){
+		if (src !== "") {
 			return ok(src);
 		} else {
 			return error("空白の文字列です");
@@ -263,7 +301,7 @@ function propVerifier<P, T, TT>(name: string, verifier: Verifier<any, T>, assign
 }
 
 function verified<T>(r: VerifyResult<T>): T {
-	if( r.ok ){
+	if (r.ok) {
 		return r.value;
 	} else {
 		throw new Error(r.message);
