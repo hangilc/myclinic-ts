@@ -300,8 +300,9 @@ function propVerifier<P, T, TT>(name: string, verifier: Verifier<any, T>, assign
 	});
 }
 
-function propVerifier2<O>(name: Extract<keyof O, string>, verifier: Verifier<any, O[typeof name]>, prefixName: string = name):
-	Verifier<{ src: any, props: Partial<O> }, { src: any; props: Partial<O> }> {
+function propVerifier2<O, P1 extends Partial<O>, P2 extends Partial<O>>(
+	name: Extract<keyof O, string>, verifier: Verifier<any, O[typeof name]>, prefixName: string = name):
+	Verifier<{ src: any, props: P1 }, { src: any; props: P2 }> {
 	return new Verifier((arg: { src: any; props: Partial<O> }) => {
 		let prop: any = arg.src[name];
 		let t = verifier.verify(prop);
