@@ -71,44 +71,6 @@ function validateComment(arg: any): RezeptComment | string {
 	return { code, text, shikibetsucode };
 }
 
-export function rezeptCommentVerifier(): Verifier<any, RezeptComment> {
-	let v = asDefined()
-		.chain(asObject())
-		.map((src: any) => ({ src, props: {} }))
-		.chain(propVerifier2<RezeptComment>("code", asDefined().chain(asNumber()).chain(asInt())))
-		.chain(propVerifier2<RezeptComment>("text", asDefined().chain(asStr()).chain(asNotEmptyStr())))
-		.map(arg => arg.props);
-	return v;
-
-	// let code = arg.code;
-	// if (!code) {
-	// 	return error("'code' 属性がみつかりません");
-	// }
-	// if (typeof code !== "number") {
-	// 	return error("'code' 属性が数値でありません");
-	// }
-	// let text = arg.text;
-	// if (text == null) {
-	// 	return error("'text' 属性がみつかりません");
-	// }
-	// if (typeof text !== "string") {
-	// 	return error("'text' 属性が文字列でありません");
-	// }
-	// let shikibetsucode = arg.shikibetsucode;
-	// if (shikibetsucode == null) {
-	// 	shikibetsucode = undefined;
-	// } else {
-	// 	if (typeof shikibetsucode !== "string") {
-	// 		return "'shikibetsucode' is not string";
-	// 	}
-	// 	let codes = 診療識別コードvalues;
-	// 	if (!codes.includes(shikibetsucode)) {
-	// 		return `invalid 'shikibetsucode': ${shikibetsucode}`;
-	// 	}
-	// }
-	// return ok({ code, text, shikibetsucode });
-}
-
 type VerifyResult<T> = {
 	ok: true;
 	value: T
@@ -125,8 +87,17 @@ class Verifier<S, T> {
 		this.f = f;
 	}
 
-	verify(src: S): VerifyResult<T> {
-		return this.f(src);
+	verify(src: S, errorPrefix?: string): VerifyResult<T> {
+		const r = this.f(src);
+		if (!r.ok && errorPrefix !== undefined) {
+			return {
+				ok: false,
+				message: errorPrefix + ":" + r.message,
+				otherMessages: r.otherMessages.map(m => errorPrefix + ":" + m),
+			}
+		} else {
+			return r;
+		}
 	}
 
 	chain<U>(next: Verifier<T, U>): Verifier<S, U> {
@@ -136,20 +107,6 @@ class Verifier<S, T> {
 				const r = self.verify(src);
 				if (r.ok) {
 					return next.verify(r.value);
-				} else {
-					return r;
-				}
-			}
-		);
-	}
-
-	beginObject<O>(): Verifier<any, ObjectVerifier<O, {}>> {
-		const self = this;
-		return new Verifier(
-			(src) => {
-				const r = self.verify(src);
-				if (r.ok) {
-					return ok(new ObjectVerifier(r.value, {}, []));
 				} else {
 					return r;
 				}
@@ -172,29 +129,34 @@ class Verifier<S, T> {
 	}
 }
 
-class ObjectVerifier<O, P extends Partial<O>> {
-	src: any;
-	props: P;
-	errors: string[];
-
-	constructor(src: any, props: P, errors: string[]) {
-		this.src = src;
-		this.props = props;
-		this.errors = errors;
-	}
-
-	prop(name: Extract<keyof O, string>, propVerifier: Verifier<any, O[typeof name]>, repName: string = name.toString()) {
-		const r = propVerifier.verify(this.src);
+// RezeptComment code text shikibetsucode
+function verifierOfRezeptComment(): Verifier<any, RezeptComment> {
+	return new Verifier<any, RezeptComment>(src => {
+		let v = asDefined().chain(asObject());
+		let r = v.verify(src);
 		if (r.ok) {
-			let newProps = Object.assign({}, this.props, { [name]: r.value });
-			return new ObjectVerifier(this.src, newProps, this.errors);
+			let obj = r.value;
+			let codeVerifier = asDefined()
+				.chain(asNumber())
+				.chain(asInt());
+			let textVerifier = asDefined().chain(asStr()).chain(asNotEmptyStr());
+			let shikibetsucodeVerifier = asDefined();
+			let codeResult = codeVerifier.verify(obj["code"], "code");
+			let textResult = textVerifier.verify(obj["text"], "text");
+			let shikibetsucodeResult = shikibetsucodeVerifier.verify(obj["shikibetsucode"], "shikibetsucode");
+			if (codeResult.ok && textResult.ok && shikibetsucodeResult.ok) {
+				return ok({ "code": codeResult.value, "text": textResult.value, "shikibetsucode": shikibetsucodeResult.value, });
+			} else {
+				let ms = combineErrors(codeResult, textResult, shikibetsucodeResult);
+				return { ok: false, ...ms };
+			}
 		} else {
-			let msgs = [r.message, ...r.otherMessages];
-			msgs = msgs.map(m => repName + ":" + m);
-			return new ObjectVerifier(this.src, this.props, msgs);
+			return r;
 		}
-	}
+	})
 }
+
+export const rezeptCommentVerifier = verifierOfRezeptComment;
 
 function ok<T>(value: T): VerifyResult<T> {
 	return { ok: true, value };
@@ -202,18 +164,6 @@ function ok<T>(value: T): VerifyResult<T> {
 
 function error<T>(message: string, otherMessages: string[] = []): VerifyResult<T> {
 	return { ok: false, message, otherMessages };
-}
-
-function addErrorPrefix(err: { ok: false; message: string; otherMessages: string[] }, prefix: string | undefined): {
-	ok: false; message: string; otherMessages: string[]
-} {
-	if (prefix == undefined) {
-		return err;
-	} else {
-		let message = prefix + ":" + err.message;
-		let otherMessages = err.otherMessages.map(m => prefix + ":" + m);
-		return { ok: false, message, otherMessages };
-	}
 }
 
 function asDefined(): Verifier<any, any> {
@@ -286,40 +236,17 @@ function asObject(): Verifier<any, any> {
 	});
 }
 
-function propVerifier<P, T, TT>(name: string, verifier: Verifier<any, T>, assigner: (t: T) => TT, prefixName: string = name):
-	Verifier<{ src: any, props: P }, { src: any; props: P & TT }> {
-	return new Verifier((arg: { src: any; props: P }) => {
-		let prop: any = arg.src[name];
-		let t: VerifyResult<T> = verifier.verify(prop);
-		if (t.ok) {
-			let newProps: P & TT = Object.assign({}, arg.props, assigner(t.value));
-			return ok({ src: arg.src, props: newProps });
-		} else {
-			return addErrorPrefix(t, prefixName);
+function combineErrors(...errs: VerifyResult<any>[]): { message: string; otherMessages: string[] } {
+	const ms: string[] = [];
+	for (let err of errs) {
+		if (!err.ok) {
+			ms.push(err.message);
+			ms.push(...err.otherMessages);
 		}
-	});
-}
-
-function propVerifier2<O, P1 extends Partial<O>, P2 extends Partial<O>>(
-	name: Extract<keyof O, string>, verifier: Verifier<any, O[typeof name]>, prefixName: string = name):
-	Verifier<{ src: any, props: P1 }, { src: any; props: P2 }> {
-	return new Verifier((arg: { src: any; props: Partial<O> }) => {
-		let prop: any = arg.src[name];
-		let t = verifier.verify(prop);
-		if (t.ok) {
-			let newProps = Object.assign({}, arg.props, { [name]: t.value });
-			return ok({ src: arg.src, props: newProps });
-		} else {
-			return addErrorPrefix(t, prefixName);
-		}
-	});
-}
-
-function verified<T>(r: VerifyResult<T>): T {
-	if (r.ok) {
-		return r.value;
-	} else {
-		throw new Error(r.message);
 	}
+	let message = ms.shift();
+	if (message === undefined) {
+		throw new Error("no error found");
+	}
+	return { message, otherMessages: ms };
 }
-
