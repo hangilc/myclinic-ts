@@ -140,7 +140,7 @@ function verifierOfRezeptComment(): Verifier<any, RezeptComment> {
 				.chain(asNumber())
 				.chain(asInt());
 			let textVerifier = asDefined().chain(asStr()).chain(asNotEmptyStr());
-			let shikibetsucodeVerifier: Verifier<any, undefined | string> = orVerifier(
+			let shikibetsucodeVerifier: Verifier<any, undefined | string> = orVerifier([
 				asUndefined(),
 				asDefined().chain(asStr()).chain(asNotEmptyStr()).chain(new Verifier(src => {
 					let codes = 診療識別コードvalues;
@@ -149,7 +149,8 @@ function verifierOfRezeptComment(): Verifier<any, RezeptComment> {
 					} else {
 						return error("正しい診療識別コードでありません");
 					}
-				}))
+				}))],
+				"正しい診療識別コードでありません"
 			);
 			let codeResult = codeVerifier.verify(obj["code"], "code");
 			let textResult = textVerifier.verify(obj["text"], "text");
@@ -247,16 +248,16 @@ function asObject(): Verifier<any, any> {
 }
 
 function asUndefined(): Verifier<any, undefined> {
-	return new Verifier(src => {
+	return new Verifier((src: any) => {
 		if( src === undefined ){
 			return ok(src);
 		} else {
-			error("undefined でありません");
+			return error("undefined でありません");
 		}
 	});
 }
 
-function orVerifier<S, T>(...verifiers: Verifier<S, T>[]): Verifier<S, T> {
+function orVerifier<S, T>(verifiers: Verifier<S, T>[], errorMessage?: string): Verifier<S, T> {
 	return new Verifier<S, T>((src: any) => {
 		let errs: string[] = [];
 		for(let ver of verifiers){
@@ -267,7 +268,10 @@ function orVerifier<S, T>(...verifiers: Verifier<S, T>[]): Verifier<S, T> {
 				errs.push(r.message);
 			}
 		}
-		return error(errs.join(","));
+		if( errorMessage === undefined ){
+			errorMessage = errs.join(",");
+		}
+		return error(errorMessage);
 	});
 }
 

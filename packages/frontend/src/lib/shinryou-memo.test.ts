@@ -36,5 +36,20 @@ describe("test shinryou-memo", () => {
 		expect(r.ok).toBe(false);
 		expect(!r.ok && r.message).toBe("text:値がありません");
 	});
+
+	it("should check shikibetsucode", () => {
+		const arg = { code: 123456, text: "６０", shikibetsucode: "01" };
+		const r = rezeptCommentVerifier().verify(arg);
+		expect(r.ok).toBe(true);
+		expect(r.ok && r.value).toEqual(arg);
+	});
+
+	it("should check for invalid shikibetsucode", () => {
+		const arg = { code: 123456, text: "６０", shikibetsucode: "ZZ" };
+		const r = rezeptCommentVerifier().verify(arg);
+		expect(r.ok).toBe(false);
+		expect(!r.ok && r.message).toBe("shikibetsucode:正しい診療識別コードでありません");
+		// shikibetsucode:undefined でありません,正しい診療識別コードでありません
+	});
 });
 
