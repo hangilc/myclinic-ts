@@ -143,7 +143,12 @@ function verifierOfRezeptComment(): Verifier<any, RezeptComment> {
 			let shikibetsucodeVerifier: Verifier<any, undefined | string> = orVerifier(
 				asUndefined(),
 				asDefined().chain(asStr()).chain(asNotEmptyStr()).chain(new Verifier(src => {
-					return ok("");
+					let codes = 診療識別コードvalues;
+					if( codes.includes(src) ){
+						return ok(src);
+					} else {
+						return error("正しい診療識別コードでありません");
+					}
 				}))
 			);
 			let codeResult = codeVerifier.verify(obj["code"], "code");
