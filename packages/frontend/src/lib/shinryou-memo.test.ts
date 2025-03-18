@@ -6,7 +6,7 @@ describe("test shinryou-memo", () => {
 		const arg = { code: 123456, text: "６０" };
 		const r = rezeptCommentVerifier().verify(arg);
 		expect(r.ok).toBe(true);
-		expect(r.ok && r.value).deep.equal(arg);
+		expect(r.ok && r.value).toEqual(arg);
 	});
 
 	it("should check for undefined code", () => {
