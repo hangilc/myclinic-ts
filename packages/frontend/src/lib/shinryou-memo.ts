@@ -140,7 +140,12 @@ function verifierOfRezeptComment(): Verifier<any, RezeptComment> {
 				.chain(asNumber())
 				.chain(asInt());
 			let textVerifier = asDefined().chain(asStr()).chain(asNotEmptyStr());
-			let shikibetsucodeVerifier = asDefined();
+			let shikibetsucodeVerifier: Verifier<any, undefined | string> = orVerifier(
+				asUndefined(),
+				asDefined().chain(asStr()).chain(asNotEmptyStr()).chain(new Verifier(src => {
+					return ok("");
+				}))
+			);
 			let codeResult = codeVerifier.verify(obj["code"], "code");
 			let textResult = textVerifier.verify(obj["text"], "text");
 			let shikibetsucodeResult = shikibetsucodeVerifier.verify(obj["shikibetsucode"], "shikibetsucode");
@@ -233,6 +238,31 @@ function asObject(): Verifier<any, any> {
 		} else {
 			return error("Object 型でありません");
 		}
+	});
+}
+
+function asUndefined(): Verifier<any, undefined> {
+	return new Verifier(src => {
+		if( src === undefined ){
+			return ok(src);
+		} else {
+			error("undefined でありません");
+		}
+	});
+}
+
+function orVerifier<S, T>(...verifiers: Verifier<S, T>[]): Verifier<S, T> {
+	return new Verifier<S, T>((src: any) => {
+		let errs: string[] = [];
+		for(let ver of verifiers){
+			let r = ver.verify(src);
+			if( r.ok ){
+				return r;
+			} else {
+				errs.push(r.message);
+			}
+		}
+		return error(errs.join(","));
 	});
 }
 
