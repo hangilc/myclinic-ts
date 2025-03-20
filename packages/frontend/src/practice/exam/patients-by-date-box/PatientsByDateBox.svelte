@@ -44,6 +44,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <RightBox title="日付別患者リスト">
   <div>
     <EditableDate bind:date onChange={update} />

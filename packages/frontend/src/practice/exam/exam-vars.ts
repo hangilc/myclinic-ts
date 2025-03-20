@@ -14,6 +14,8 @@ export const mishuuList: Writable<m.VisitEx[]> = writable([]);
 export const examAlerts: Writable<string[]> = writable([]);
 let totalVisits: number = 0;
 
+export const showKensaService: Writable<boolean> = writable(false);
+
 export const recordsPerPage = 10;
 
 export class StartPatientReq {
