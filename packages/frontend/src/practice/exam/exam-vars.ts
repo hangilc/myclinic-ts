@@ -15,6 +15,12 @@ export const examAlerts: Writable<string[]> = writable([]);
 let totalVisits: number = 0;
 
 export const showKensaService: Writable<boolean> = writable(false);
+export type KensaDataClipboard = {
+	patientId: number;
+	text: string;
+}
+export const kensaDataClipboard: Writable<KensaDataClipboard> =
+						 writable({ patientId: 0, text: "" });
 
 export const recordsPerPage = 10;
 

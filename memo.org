@@ -9,6 +9,14 @@
 
 * TODO rcpt-check: 再診時病名のチェック
 
+* TODO 検査結果の入力補助機能追加
+
+  - practice/exam/Header.svelte に「検査結果」リンクを追加
+  - practice/exam/exam-vars.ts にshowKensaService Writable を追加
+  - practice/exam/exam-vars.ts に appClipboard を追加
+  - KensaKekka.svelte を作成。RightBox widget として right column に追加する(Exam.svelte)。
+  - Record.svelte に「検査貼付」リンクを追加
+** TODO 検査データを解析して KensaData[] を作成する
 
 * DONE rcpt-check の改善（血糖自己測定器加算の追加情報チェック）
 

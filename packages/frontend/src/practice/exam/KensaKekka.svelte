@@ -1,6 +1,6 @@
 <script lang="ts">
 	import api from "@/lib/api";
-	import { startPatient } from "./exam-vars";
+	import { startPatient, kensaDataClipboard } from "./exam-vars";
 	import RightBox from "./RightBox.svelte";
 	let showInputBox = true;
 	let kensaData = "";
@@ -21,6 +21,7 @@
 	function doLoad() {}
 
 	async function openPatient(data: KensaData) {
+		kensaDataClipboard.set(data);
 		let patient = await api.getPatient(data.patientId);
 		startPatient(patient);
 		selectedPatientId = data.patientId;
