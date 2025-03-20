@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ShohouTextMemo } from "@/practice/exam/record/text/text-memo";
+  import type { ShohouTextMemo } from "@/lib/text-memo";
   import { cache } from "../cache";
   import Dialog from "../Dialog.svelte";
   import { sign_presc } from "../hpki-api";

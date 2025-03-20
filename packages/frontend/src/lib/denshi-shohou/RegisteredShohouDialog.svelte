@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { TextMemoWrapper } from "@/practice/exam/record/text/text-memo";
+  import { TextMemoWrapper } from "@/lib/text-memo";
   import api from "../api";
   import Dialog from "../Dialog.svelte";
   import DenshiShohouDisp from "./disp/DenshiShohouDisp.svelte";

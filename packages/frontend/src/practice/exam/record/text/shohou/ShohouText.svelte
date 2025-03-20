@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Kouhi, Text } from "myclinic-model";
-  import { TextMemoWrapper, type ShohouTextMemo } from "../text-memo";
+  import { TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
   import api from "@/lib/api";
   import { shohouHikaeFilename } from "@/lib/denshi-shohou/presc-api";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
