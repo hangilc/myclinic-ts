@@ -13,7 +13,6 @@
 	import type { ReferDrawerData } from "@/lib/drawer/forms/refer/refer-drawer-data";
 	import { writable, type Writable } from "svelte/store";
 	import VisitsView from "@/lib/VisitsView.svelte";
-    import type { EventHandler } from "svelte/elements";
 
 	export let isVisible = false;
 	let title = "紹介状";
@@ -133,8 +132,8 @@
 	}
 
 	function doClearPatient() {
-		if( contentIsModified() ){
-			if( !confirm("内容が変更されていますが、このまま終了しますか？") ){
+		if (contentIsModified()) {
+			if (!confirm("内容が変更されていますが、このまま終了しますか？")) {
 				return;
 			}
 		}
@@ -201,11 +200,10 @@
 	}
 
 	function onBeforeUnload(event: BeforeUnloadEvent): any {
-		if( !confirm("continue?") ){
-			event.preventDefault()
+		if (contentIsModified() && !confirm("continue?")) {
+			event.preventDefault();
 		}
 	}
-
 </script>
 
 {#if isVisible}
@@ -281,7 +279,7 @@
 		</div>
 	</div>
 {/if}
-<svelte:window on:beforeunload={(evt) => onBeforeUnload(evt)}/>
+<svelte:window on:beforeunload={(evt) => onBeforeUnload(evt)} />
 
 <style>
 	.wrapper {
