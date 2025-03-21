@@ -9,10 +9,19 @@
 
 * TODO rcpt-check: 再診時病名のチェック
 
-* TODO 紹介状：保存されていない入力があって患者終了する場合警告をだす
+* 医療情報取得加算補助
+
+  診療行為入力画面で、過去の請求状況に応じて、診療情報取得加算（再診）にあらかじめチェックをいれるようにする。
+
+  - 診療行為入力画面を開いたとき、過去の請求状況をチェックする function を起動する
+  - 医療情報取得加算について https://medrock.co.jp/navi/medical-information-acquisition/
+  - 医療情報取得加算（再診）：３ヶ月に１回請求可能
+  - 医療情報取得加算（再診）：112708970
+    
+* DONE 紹介状：保存されていない入力があって患者終了する場合警告をだす
 ** DONE practice/Refer.svelt で savedContent 変数を作成する。適時更新。
 ** DONE 「患者終了」時に変更を確認する。
-** TODO beforeunload Event に handler を登録する
+** DONE beforeunload Event に handler を登録する
   - handler 内で event.preventDefault() を呼ぶと別ＵＲＬへの移動をしていいかのダイアログが表示される。
 * DONE 検査結果の入力補助機能追加
 
