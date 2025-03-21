@@ -9,16 +9,35 @@
 		patientId: number;
 		text: string;
 	}
-	let dataList: { name: string; patientId: number; text: string }[] = [
-		{ name: "ﾀﾅｶｲﾁｲﾛｳ", patientId: 7676, text: "Test Data" },
-	];
+	let dataList: { name: string; patientId: number; text: string }[] = [];
 	let selectedPatientId = -1;
-	
+
 	function toggleLoad() {
 		showInputBox = !showInputBox;
 	}
 
-	function doLoad() {}
+	function parseKensa(t: string): KensaData[] {
+		let parts = t.split(/[\r\n]+(?=\d+)/g).filter((s) => s.trim() !== "");
+		let result: KensaData[] = [];
+		for (let part of parts) {
+			let m = part.match(/^(\d+)\s+(\d{4}\/\d{2}\/\d{2})\s+(.+)[\r\n]/);
+			if (!m) {
+				alert(`Invalid kensa data: ${part}`);
+				return [];
+			}
+			let patientId = parseInt(m[1]);
+			let name = m[3];
+			let text = part;
+			const data = { name, patientId, text };
+			result.push(data);
+		}
+		return result;
+	}
+
+	function doLoad() {
+		dataList = parseKensa(kensaData);
+		showInputBox = false;
+	}
 
 	async function openPatient(data: KensaData) {
 		kensaDataClipboard.set(data);
@@ -40,12 +59,12 @@
 			<button on:click={doLoad}>ロード</button>
 		</div>
 	{/if}
-	<div>
+	<div class="data-list">
 		{#each dataList as data}
 			<div>
-				<div>
+				<div class:selected={data.patientId === selectedPatientId}>
 					<a href="javascript:void(0)" on:click={() => openPatient(data)}
-						class:selected={data.patientId === selectedPatientId}>{data.name}</a>
+						>{data.name}</a>
 				</div>
 			</div>
 		{/each}
@@ -55,9 +74,19 @@
 <style>
 	.load-data {
 		width: 95%;
+		height: 200px;
+		font-size: 12px;
+	}
+
+	.data-list {
+		margin-top: 6px;
 	}
 
 	.selected {
 		font-weight: bold;
+		border: 1px solid blue;
+		border-radius: 3px;
+		padding: 2px;
+		margin: 3px 0;
 	}
 </style>
