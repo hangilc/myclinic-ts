@@ -13,6 +13,7 @@
 ** DONE practice/Refer.svelt で savedContent 変数を作成する。適時更新。
 ** DONE 「患者終了」時に変更を確認する。
 ** TODO beforeunload Event に handler を登録する
+  - handler 内で event.preventDefault() を呼ぶと別ＵＲＬへの移動をしていいかのダイアログが表示される。
 * DONE 検査結果の入力補助機能追加
 
 
