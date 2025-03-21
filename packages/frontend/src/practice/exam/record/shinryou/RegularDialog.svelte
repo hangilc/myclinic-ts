@@ -11,6 +11,7 @@
 	import { type ConductSpec, enter } from "./helper";
 	import api from "@/lib/api";
 	import { DateWrapper } from "myclinic-util";
+	import { checkForIryouJouhouSantei } from "./iryou-jouhou-santei";
 
 	export let destroy: () => void;
 	export let visit: VisitEx;
@@ -18,120 +19,27 @@
 	let leftItems: Item[] = [];
 	let rightItems: Item[] = [];
 	let bottomItems: Item[] = [];
-	const code医療情報取得加算初診 = 111703270; // 医療情報取得加算（初診）
-	const code医療情報取得加算再診 = 112708970; // 医療情報取得加算（再診）：112708970
 
 	init();
 	probeIryouJouhouShutoku();
 
-	function checkShoshinSaishin(
-		shinryouList: ShinryouEx[],
-	): "shoshin" | "saishin" | "other" {
-		for (let s of shinryouList) {
-			let name = s.master.name;
-			if (name.startsWith("初診")) {
-				return "shoshin";
-			} else if (name.startsWith("再診")) {
-				return "saishin";
+	function checkItemByName(items: Item[], name: string) {
+		for (let item of items) {
+			if (item.label === name) {
+				item.checked = true;
 			}
 		}
-		return "other";
 	}
 
-	async function collectPrevVisits(nMonths: number): Promise<Visit[]> {
-		let prevVisits: Visit[] = await api.listVisitByPatientReverse(
-			visit.patient.patientId,
-			0,
-			20,
-		);
-		let result: Visit[] = [];
-		for (let v of prevVisits) {
-			if (v.visitedAt > visit.visitedAt) {
-				// ignore newer visits
-				continue;
-			} else if (v.visitId === visit.visitId) {
-				// ignore current visit
-				continue;
-			} else {
-				let curYm = visit.visitedAt.substring(0, 7);
-				let ym = DateWrapper.fromSqlDatetime(visit.asVisit.visitedAt)
-					.getFirstDayOfSameMonth()
-					.incMonth(-2)
-					.asSqlDate()
-					.substring(0, 7);
-				let at = v.visitedAt.substring(0, 7);
-				if (at >= ym && at <= curYm) {
-					result.push(v);
-				} else {
-					break;
-				}
-			}
-		}
-		return result;
-	}
-
-	async function listShinryouOfVisits(visitIds: number[]): Promise<Shinryou[]> {
-		return (await Promise.all(
-			visitIds.map(visitId => api.listShinryouForVisit(visitId))
-		)).flat();
-	}
-
-	function shinryouListIncludes(list: Shinryou[], shinryoucode: number): boolean {
-		for(let s of list){
-			if( s.shinryoucode === shinryoucode ){
-				return true;
-			}
-		}
-		return false;
-	}
-
-	async function probeIryouJouhouShutokuShoshin() {
-		let visits = await collectPrevVisits(1);
-		let shinryouList = await listShinryouOfVisits(visits.map(v => v.visitId));
-		if( shinryouListIncludes(shinryouList, code医療情報取得加算初診) ){
-			return;
-		}
-	}
-
-	async function probeIryouJouhouShutokuSaishin() {
-		let visits: Visit[] = await api.listVisitByPatientReverse(
-			visit.patient.patientId,
-			0,
-			20,
-		);
-		let ym = DateWrapper.fromSqlDatetime(visit.asVisit.visitedAt)
-			.getFirstDayOfSameMonth()
-			.incMonth(-2)
-			.asSqlDate()
-			.substring(0, 7);
-		visits = visits.filter(
-			(v) =>
-				v.visitId !== visit.visitId &&
-				(v.shahokokuhoId > 0 || v.koukikoureiId > 0) &&
-				v.visitedAt.substring(0, 7) >= ym,
-		);
-		let result: Shinryou[] = (
-			await Promise.all(
-				visits.map((visit) => api.listShinryouForVisit(visit.visitId)),
-			)
-		).flat();
-		let prevFound = result.some((s) => s.shinryoucode === 112708970);
-		console.log("prevFound", prevFound);
+	function checkLeftItemByName(name: string) {
+		checkItemByName(leftItems, name);
+		leftItems = leftItems;
 	}
 
 	async function probeIryouJouhouShutoku() {
-		switch (checkShoshinSaishin(visit.shinryouList)) {
-			case "shoshin": {
-				await probeIryouJouhouShutokuShoshin();
-				return;
-			}
-			case "saishin": {
-				await probeIryouJouhouShutokuSaishin();
-				return;
-			}
-			default: {
-				// nop
-			}
+		let result = await checkForIryouJouhouSantei(visit);
+		if( result ){
+			checkLeftItemByName(result);
 		}
 	}
 
