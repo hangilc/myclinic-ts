@@ -10,7 +10,8 @@
 * TODO rcpt-check: 再診時病名のチェック
 
 * TODO 紹介状：保存されていない入力があって患者終了する場合警告をだす
-** TODO savedText 変数を作成する。適時更新。
+** DONE practice/Refer.svelt で savedContent 変数を作成する。適時更新。
+** DONE 「患者終了」時に変更を確認する。
 ** TODO beforeunload Event に handler を登録する
 * DONE 検査結果の入力補助機能追加
 
