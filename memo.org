@@ -13,7 +13,8 @@
 
   診療行為入力画面で、過去の請求状況に応じて、診療情報取得加算（再診）にあらかじめチェックをいれるようにする。
 
-  - 診療行為入力画面を開いたとき、過去の請求状況をチェックする function を起動する
+  - 診療行為入力画面(RegularDialog.svelte) を開いたとき、過去の請求状況をチェックする function を起動する
+  - チェックする関数名は probeIryouJouhouShutoku
   - 医療情報取得加算について https://medrock.co.jp/navi/medical-information-acquisition/
   - 医療情報取得加算（再診）：３ヶ月に１回請求可能
   - 医療情報取得加算（再診）：112708970

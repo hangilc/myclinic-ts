@@ -1702,6 +1702,10 @@ export default {
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
     return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
   },
+
+	listShinryouForVisit(visitId: number): Promise<m.Shinryou[]> {
+		return get("list-shinryou-for-visit", { "visit-id": visitId.toString() }, castList(m.Shinryou.cast));
+	},
 };
 
 
