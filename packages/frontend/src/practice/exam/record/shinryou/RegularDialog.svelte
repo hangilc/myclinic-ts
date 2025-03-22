@@ -9,12 +9,14 @@
 		type VisitEx,
 	} from "myclinic-model";
 	import { type ConductSpec, enter } from "./helper";
-	import api from "@/lib/api";
-	import { DateWrapper } from "myclinic-util";
-	import { adapToShoshinoIryouJouhou } from "./santei-check/iryou-jouhou-santei";
+	import {
+		adaptToShoshinForIryouJouhou,
+		adaptToSaishinForIryouJouhou,
+	} from "./santei-check/iryou-jouhou-santei";
 	import type { ShinryouCheckProc } from "./santei-check/record-shinryou-types";
 	import type { RegularName } from "./regular-names";
 	import { adaptToSeikatsuShuukanForGairaiDataTeishutsu } from "./santei-check/gairai-data-santei";
+    import { adaptToShoshinForIryouDxSuishin } from "./santei-check/iryou-dx-suishin-santei";
 
 	export let destroy: () => void;
 	export let visit: VisitEx;
@@ -127,14 +129,19 @@
 		}
 		switch (label) {
 			case "初診": {
-				pushProcs(await adapToShoshinoIryouJouhou(visit, checked));
+				pushProcs(await adaptToShoshinForIryouJouhou(visit, checked));
+				pushProcs(await adaptToShoshinForIryouDxSuishin(visit, checked));
+				break;
+			}
+			case "再診": {
+				pushProcs(await adaptToSaishinForIryouJouhou(visit, checked));
 				break;
 			}
 			case "生活習慣病管理料２": {
 				pushProcs(
 					await adaptToSeikatsuShuukanForGairaiDataTeishutsu(visit, checked),
 				);
-
+				console.log("procs", procs);
 				break;
 			}
 		}

@@ -11,10 +11,11 @@ export async function adaptToSeikatsuShuukanForGairaiDataTeishutsu(
 ): Promise<ShinryouCheckProc[]> {
 	if( checked ){
 		let shinryouList = await listShinryouOfRecentMonths(visit, 1);
-		if( shinryouListIncludes(shinryouList, gairaiDataCode) ){
-			return [{ name: gairaiDataName, check: false }]
-		} else {
+		console.log("shinryouList", shinryouList);
+		if( !shinryouListIncludes(shinryouList, gairaiDataCode) ){
 			return [{ name: gairaiDataName, check: true }]
+		} else {
+			return [{ name: gairaiDataName, check: false }]
 		}
 	} else {
 		return [{ name: gairaiDataName, check: false }];

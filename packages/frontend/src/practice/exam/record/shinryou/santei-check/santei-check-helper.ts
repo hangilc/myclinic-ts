@@ -25,7 +25,7 @@ async function collectRecentVisits(visit: VisitEx, nMonths: number): Promise<Vis
 			let curYm = visit.visitedAt.substring(0, 7);
 			let ym = DateWrapper.fromSqlDatetime(visit.asVisit.visitedAt)
 				.getFirstDayOfSameMonth()
-				.incMonth(-2)
+				.incMonth(-(nMonths - 1))
 				.asSqlDate()
 				.substring(0, 7);
 			let at = v.visitedAt.substring(0, 7);
