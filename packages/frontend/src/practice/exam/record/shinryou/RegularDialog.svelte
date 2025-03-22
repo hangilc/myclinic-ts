@@ -11,7 +11,8 @@
 	import { type ConductSpec, enter } from "./helper";
 	import api from "@/lib/api";
 	import { DateWrapper } from "myclinic-util";
-	import { checkForIryouJouhouSantei } from "./iryou-jouhou-santei";
+	import { adapToShoshinoIryouJouhou } from "./iryou-jouhou-santei";
+    import type { ShinryouCheckProc } from "./record-shinryou-types";
 
 	export let destroy: () => void;
 	export let visit: VisitEx;
@@ -22,23 +23,34 @@
 
 	init();
 
-	function checkItemByName(items: Item[], name: string) {
+	function findItemByLabel(items: Item[], label: string): Item | undefined {
 		for (let item of items) {
-			if (item.label === name) {
-				item.checked = true;
+			if (item.label === label) {
+				return item;
 			}
 		}
+		return undefined;
 	}
 
-	function checkLeftItemByName(name: string) {
-		checkItemByName(leftItems, name);
-		leftItems = leftItems;
-	}
-
-	async function probeIryouJouhouShutoku() {
-		let result = await checkForIryouJouhouSantei(visit);
-		if( result ){
-			checkLeftItemByName(result);
+	function checkItemByLabel(label: string, checked: boolean) {
+		let item: Item | undefined;
+		item = findItemByLabel(leftItems, label);
+		if (item) {
+			item.checked = checked;
+			leftItems = leftItems;
+			return;
+		}
+		item = findItemByLabel(rightItems, label);
+		if (item) {
+			item.checked = checked;
+			rightItems = rightItems;
+			return;
+		}
+		item = findItemByLabel(bottomItems, label);
+		if (item) {
+			item.checked = checked;
+			bottomItems = bottomItems;
+			return;
 		}
 	}
 
@@ -95,9 +107,16 @@
 		}
 	}
 
-	function checkBoxCallback(label: string, checked: boolean) {
-		console.log("check", label, checked);
+	async function adaptToCheck(label: string, checked: boolean) {
+		const procs: ShinryouCheckProc[] = [];
+		if (label === "初診") {
+			procs.push(...(await adapToShoshinoIryouJouhou(visit, checked)));
+		}
+		for(let proc of procs){
+			checkItemByLabel(proc.label, proc.check);
+		}
 	}
+
 </script>
 
 <Dialog {destroy} title="診療行為入力">
@@ -108,7 +127,11 @@
 					<div class="leading" />
 				{:else}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label} onChange={checkBoxCallback} />
+						<CheckLabel
+							bind:checked={item.checked}
+							label={item.label}
+							onChange={adaptToCheck}
+						/>
 					</div>
 				{/if}
 			{/each}
@@ -119,7 +142,11 @@
 					<div class="leading" />
 				{:else}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label}  onChange={checkBoxCallback} />
+						<CheckLabel
+							bind:checked={item.checked}
+							label={item.label}
+							onChange={adaptToCheck}
+						/>
 					</div>
 				{/if}
 			{/each}
@@ -128,7 +155,11 @@
 			<div class="bottom">
 				{#each bottomItems as item}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label}  onChange={checkBoxCallback} />
+						<CheckLabel
+							bind:checked={item.checked}
+							label={item.label}
+							onChange={adaptToCheck}
+						/>
 					</div>
 				{/each}
 			</div>

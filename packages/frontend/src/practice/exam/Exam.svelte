@@ -48,11 +48,11 @@
 		{#if $showAppoints}
 			<Appointments />
 		{/if}
-		{#if $showPatientsByDate}
-			<PatientsByDateBox />
-		{/if}
 		{#if $showKensaService}
 			<KensaKekka />
+		{/if}
+		{#if $showPatientsByDate}
+			<PatientsByDateBox />
 		{/if}
 		{#if $currentPatient}
 			<Epoch />

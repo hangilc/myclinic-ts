@@ -16,6 +16,9 @@
   - 診療行為入力画面(RegularDialog.svelte) を開いたとき、過去の請求状況をチェックする function を起動する
   - チェックする関数名は probeIryouJouhouShutoku
   - 医療情報取得加算について https://medrock.co.jp/navi/medical-information-acquisition/
+  - RegularDialog.svelte （診療行為入力ダイアログ）の再編
+    - checkbox に event handler を登録し、変更に動的に対応できるようにする。
+    - checkbox に変更があったら呼び出される adaptToCheck を作成する。
   - 現在の診察が初診か再診かをチェック
     - 初診ならば
       - 医療情報取得加算（初診）は一ヶ月に１回算定可能
@@ -39,7 +42,7 @@
   - Record.svelte に「検査貼付」リンクを追加
 ** DONE 検査データを解析して KensaData[] を作成する
   - KensaKekka.svelte にparseKensa を実装
-
+ 
 * DONE rcpt-check の改善（血糖自己測定器加算の追加情報チェック）
 
 血糖自己測定器加算（６０回以上）（１型糖尿病の患者等を除く） shinryoucode = 114007410 を算定した場合には、診療行為に対してコメントをくわえなければならない。

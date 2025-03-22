@@ -1,48 +1,24 @@
 import api from "@/lib/api";
 import type { Shinryou, Visit, VisitEx } from "myclinic-model";
 import { DateWrapper } from "myclinic-util";
+import type { ShinryouCheckProc } from "./record-shinryou-types";
 
 const code医療情報取得加算初診 = 111703270; // 医療情報取得加算（初診）
 const code医療情報取得加算再診 = 112708970; // 医療情報取得加算（再診）：112708970
 
-export async function checkForIryouJouhouSantei(visit: VisitEx):
-	Promise<"医療情報取得加算（初診）" | "医療情報取得加算（再診）" | undefined> {
-	switch (checkShoshinSaishin(visit)) {
-		case "shoshin": {
-			await probeIryouJouhouShutokuShoshin(visit);
-			return;
-		}
-		case "saishin": {
-			await probeIryouJouhouShutokuSaishin(visit);
-			return;
-		}
-		default: {
-			return undefined;
-		}
-	}
-}
-
-function checkShoshinSaishin(visit: VisitEx): "shoshin" | "saishin" | "other" {
-	for (let s of visit.shinryouList) {
-		let name = s.master.name;
-		if (name.startsWith("初診")) {
-			return "shoshin";
-		} else if (name.startsWith("再診")) {
-			return "saishin";
-		}
-	}
-	return "other";
-}
-
-async function probeIryouJouhouShutokuShoshin(visit: VisitEx):
-	Promise<"医療情報取得加算（初診）" | undefined> {
+export async function adapToShoshinoIryouJouhou(visit: VisitEx, checked: boolean):
+	Promise<ShinryouCheckProc[]> {
+	if (checked) {
 		let visits = await collectPrevVisits(visit, 1);
 		let shinryouList = await listShinryouForVisits(visits);
-		if( !shinryouListIncludes(shinryouList, code医療情報取得加算初診 ) ){
-			return "医療情報取得加算（初診）";
+		if (!shinryouListIncludes(shinryouList, code医療情報取得加算初診)) {
+			return [{ label: "医療情報取得加算（初診）", check: true }];
 		} else {
-			return undefined;
+			return [];
 		}
+	} else {
+		return [{ label: "医療情報取得加算（初診）", check: false }];
+	}
 }
 
 async function probeIryouJouhouShutokuSaishin(visit: VisitEx):
