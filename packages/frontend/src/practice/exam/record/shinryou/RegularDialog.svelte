@@ -12,41 +12,42 @@
 	import api from "@/lib/api";
 	import { DateWrapper } from "myclinic-util";
 	import { adapToShoshinoIryouJouhou } from "./iryou-jouhou-santei";
-    import type { ShinryouCheckProc } from "./record-shinryou-types";
+	import type { ShinryouCheckProc } from "./record-shinryou-types";
+    import type { RegularName } from "./regular-names";
 
 	export let destroy: () => void;
 	export let visit: VisitEx;
-	export let names: Record<string, string[]>;
+	export let names: Record<string, RegularName[]>;
 	let leftItems: Item[] = [];
 	let rightItems: Item[] = [];
 	let bottomItems: Item[] = [];
 
 	init();
 
-	function findItemByLabel(items: Item[], label: string): Item | undefined {
+	function findItemByName(items: Item[], name: string): Item | undefined {
 		for (let item of items) {
-			if (item.label === label) {
+			if (item.name === name) {
 				return item;
 			}
 		}
 		return undefined;
 	}
 
-	function checkItemByLabel(label: string, checked: boolean) {
+	function checkItemByName(name: string, checked: boolean) {
 		let item: Item | undefined;
-		item = findItemByLabel(leftItems, label);
+		item = findItemByName(leftItems, name);
 		if (item) {
 			item.checked = checked;
 			leftItems = leftItems;
 			return;
 		}
-		item = findItemByLabel(rightItems, label);
+		item = findItemByName(rightItems, name);
 		if (item) {
 			item.checked = checked;
 			rightItems = rightItems;
 			return;
 		}
-		item = findItemByLabel(bottomItems, label);
+		item = findItemByName(bottomItems, name);
 		if (item) {
 			item.checked = checked;
 			bottomItems = bottomItems;
@@ -56,13 +57,27 @@
 
 	interface Item {
 		label: string;
+		name: string;
 		checked: boolean;
 	}
 
+	function regularNameToItem(regularName: RegularName): Item {
+		let label: string;
+		let name: string;
+		if( typeof regularName === "string" ){
+			label = regularName;
+			name = label;
+		} else {
+			label = regularName.label;
+			name = regularName.name;
+		}
+		return { label, name, checked: false };
+	}
+
 	function setupItems(names: Record<string, string[]>): void {
-		leftItems = names.left.map((name) => ({ label: name, checked: false }));
-		rightItems = names.right.map((name) => ({ label: name, checked: false }));
-		bottomItems = names.bottom.map((name) => ({ label: name, checked: false }));
+		leftItems = names.left.map(regularNameToItem);
+		rightItems = names.right.map(regularNameToItem);
+		bottomItems = names.bottom.map(regularNameToItem);
 	}
 
 	function init(): void {
@@ -86,7 +101,7 @@
 			...bottomItems,
 		]
 			.filter((item) => item.checked)
-			.map((item) => item.label);
+			.map((item) => item.name);
 		const regularNames: string[] = [];
 		const conductSpecs: ConductSpec[] = [];
 		selectedNames.forEach((name) => {
@@ -94,9 +109,6 @@
 				conductSpecs.push(conductReqMap[name]);
 			} else {
 				regularNames.push(name);
-				if (name === "生活習慣病管理料２") {
-					regularNames.push("外来データ提出加算（生活習慣病管理料１・２）");
-				}
 			}
 		});
 		try {
@@ -109,14 +121,21 @@
 
 	async function adaptToCheck(label: string, checked: boolean) {
 		const procs: ShinryouCheckProc[] = [];
-		if (label === "初診") {
-			procs.push(...(await adapToShoshinoIryouJouhou(visit, checked)));
+		switch (label) {
+			case "初診": {
+				procs.push(...(await adapToShoshinoIryouJouhou(visit, checked)));
+				break;
+			}
+			case "生活習慣病管理料２": {
+				procs.push({ name: "外来データ提出加算（生活習慣病管理料１・２）", check: checked });
+				break;
+			}
 		}
-		for(let proc of procs){
-			checkItemByLabel(proc.label, proc.check);
+
+		for (let proc of procs) {
+			checkItemByName(proc.name, proc.check);
 		}
 	}
-
 </script>
 
 <Dialog {destroy} title="診療行為入力">
@@ -130,6 +149,7 @@
 						<CheckLabel
 							bind:checked={item.checked}
 							label={item.label}
+							name={item.name}
 							onChange={adaptToCheck}
 						/>
 					</div>
@@ -145,6 +165,7 @@
 						<CheckLabel
 							bind:checked={item.checked}
 							label={item.label}
+							name={item.name}
 							onChange={adaptToCheck}
 						/>
 					</div>
@@ -158,6 +179,7 @@
 						<CheckLabel
 							bind:checked={item.checked}
 							label={item.label}
+							name={item.name}
 							onChange={adaptToCheck}
 						/>
 					</div>

@@ -3,11 +3,12 @@
 
   export let checked: boolean;
   export let label: string;
-	export let onChange: (label: string, checked: boolean) => void = _ => {};
+	export let name: string;
+	export let onChange: (name: string, checked: boolean) => void = _ => {};
   const id = genid("check-label-");
 
 	function doOnChange() {
-		onChange(label, checked);
+		onChange(name, checked);
 	}
 
 </script>

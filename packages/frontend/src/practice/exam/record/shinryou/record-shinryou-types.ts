@@ -1,4 +1,4 @@
 export interface ShinryouCheckProc {
-	label: string;
+	name: string;
 	check: boolean;
 }
