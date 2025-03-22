@@ -21,7 +21,6 @@
 	let bottomItems: Item[] = [];
 
 	init();
-	probeIryouJouhouShutoku();
 
 	function checkItemByName(items: Item[], name: string) {
 		for (let item of items) {
@@ -95,6 +94,10 @@
 			alert(ex);
 		}
 	}
+
+	function checkBoxCallback(label: string, checked: boolean) {
+		console.log("check", label, checked);
+	}
 </script>
 
 <Dialog {destroy} title="診療行為入力">
@@ -105,7 +108,7 @@
 					<div class="leading" />
 				{:else}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label} />
+						<CheckLabel bind:checked={item.checked} label={item.label} onChange={checkBoxCallback} />
 					</div>
 				{/if}
 			{/each}
@@ -116,7 +119,7 @@
 					<div class="leading" />
 				{:else}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label} />
+						<CheckLabel bind:checked={item.checked} label={item.label}  onChange={checkBoxCallback} />
 					</div>
 				{/if}
 			{/each}
@@ -125,7 +128,7 @@
 			<div class="bottom">
 				{#each bottomItems as item}
 					<div>
-						<CheckLabel bind:checked={item.checked} label={item.label} />
+						<CheckLabel bind:checked={item.checked} label={item.label}  onChange={checkBoxCallback} />
 					</div>
 				{/each}
 			</div>
