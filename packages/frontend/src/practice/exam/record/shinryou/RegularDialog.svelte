@@ -11,9 +11,10 @@
 	import { type ConductSpec, enter } from "./helper";
 	import api from "@/lib/api";
 	import { DateWrapper } from "myclinic-util";
-	import { adapToShoshinoIryouJouhou } from "./iryou-jouhou-santei";
-	import type { ShinryouCheckProc } from "./record-shinryou-types";
-    import type { RegularName } from "./regular-names";
+	import { adapToShoshinoIryouJouhou } from "./santei-check/iryou-jouhou-santei";
+	import type { ShinryouCheckProc } from "./santei-check/record-shinryou-types";
+	import type { RegularName } from "./regular-names";
+	import { adaptToSeikatsuShuukanForGairaiDataTeishutsu } from "./santei-check/gairai-data-santei";
 
 	export let destroy: () => void;
 	export let visit: VisitEx;
@@ -64,7 +65,7 @@
 	function regularNameToItem(regularName: RegularName): Item {
 		let label: string;
 		let name: string;
-		if( typeof regularName === "string" ){
+		if (typeof regularName === "string") {
 			label = regularName;
 			name = label;
 		} else {
@@ -74,7 +75,7 @@
 		return { label, name, checked: false };
 	}
 
-	function setupItems(names: Record<string, string[]>): void {
+	function setupItems(names: Record<string, RegularName[]>): void {
 		leftItems = names.left.map(regularNameToItem);
 		rightItems = names.right.map(regularNameToItem);
 		bottomItems = names.bottom.map(regularNameToItem);
@@ -121,13 +122,19 @@
 
 	async function adaptToCheck(label: string, checked: boolean) {
 		const procs: ShinryouCheckProc[] = [];
+		function pushProcs(newProcs: ShinryouCheckProc[]) {
+			procs.push(...newProcs);
+		}
 		switch (label) {
 			case "初診": {
-				procs.push(...(await adapToShoshinoIryouJouhou(visit, checked)));
+				pushProcs(await adapToShoshinoIryouJouhou(visit, checked));
 				break;
 			}
 			case "生活習慣病管理料２": {
-				procs.push({ name: "外来データ提出加算（生活習慣病管理料１・２）", check: checked });
+				pushProcs(
+					await adaptToSeikatsuShuukanForGairaiDataTeishutsu(visit, checked),
+				);
+
 				break;
 			}
 		}

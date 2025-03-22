@@ -6,18 +6,18 @@ import type { ShinryouCheckProc } from "./record-shinryou-types";
 const code医療情報取得加算初診 = 111703270; // 医療情報取得加算（初診）
 const code医療情報取得加算再診 = 112708970; // 医療情報取得加算（再診）：112708970
 
-export async function adapToShoshinoIryouJouhou(visit: VisitEx, checked: boolean):
+export async function adaptToShoshinForIryouJouhou(visit: VisitEx, checked: boolean):
 	Promise<ShinryouCheckProc[]> {
 	if (checked) {
 		let visits = await collectPrevVisits(visit, 1);
 		let shinryouList = await listShinryouForVisits(visits);
 		if (!shinryouListIncludes(shinryouList, code医療情報取得加算初診)) {
-			return [{ label: "医療情報取得加算（初診）", check: true }];
+			return [{ name: "医療情報取得加算（初診）", check: true }];
 		} else {
 			return [];
 		}
 	} else {
-		return [{ label: "医療情報取得加算（初診）", check: false }];
+		return [{ name: "医療情報取得加算（初診）", check: false }];
 	}
 }
 
