@@ -4,13 +4,11 @@ import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
 import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 import { pipe } from "myclinic-model/pipe";
-import { mapNullOptional } from "myclinic-model/model";
-import type { ReferConfig } from "./refer";
-import type { RP剤情報, 用法レコード, 用法補足レコード } from "./denshi-shohou/presc-info";
+import type { RP剤情報, 用法レコード} from "./denshi-shohou/presc-info";
 import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
 import type { ShinryouDisease } from "./shinryou-disease";
-import type { 薬品コード種別 } from "./denshi-shohou/denshi-shohou";
+import { parseLocationQuery } from "./parse-location-query";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -45,6 +43,11 @@ export function getBackend(): string {
     if (import.meta.env.VITE_BACKEND_PORT) {
       port = import.meta.env.VITE_BACKEND_PORT;
     }
+    let query = parseLocationQuery();
+    if( query["api-port"] ) {
+      port = parseInt(query["api-port"])
+    }
+
     return `${proto}//${host}:${port}`;
   } else {
     return "http://localhost:8080";

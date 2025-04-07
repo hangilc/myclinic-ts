@@ -18,7 +18,7 @@
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
-
+  
   export let serviceStore: Writable<string>;
 
   currentPatient.subscribe((p) => {
@@ -29,6 +29,7 @@
     }
   });
 
+  
 </script>
 
 <div>
