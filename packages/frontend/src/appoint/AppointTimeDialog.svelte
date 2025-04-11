@@ -59,8 +59,8 @@
   }
 
   function checkConsitencyForEnter(at: AppointTime): boolean {
-    for(let x of siblings) {
-      if( x.appointTime.overlapsWith(at) ){
+    for (let x of siblings) {
+      if (x.appointTime.overlapsWith(at)) {
         return false;
       }
     }
@@ -81,15 +81,17 @@
     });
     if (result instanceof AppointTime) {
       let ok = false;
-      if( result.appointTimeId === 0 ){
+      if (result.appointTimeId === 0) {
         ok = checkConsitencyForEnter(result);
       } else {
         ok = checkConsistentyForUpdate(result);
       }
-      if( ok ){
-          destroy();
-          onEnter(result);
-        }
+      if (ok) {
+        destroy();
+        onEnter(result);
+      } else {
+        errors = [new Invalid("予約枠の操作に失敗しました", [])]
+      }
     } else {
       errors = result;
     }
