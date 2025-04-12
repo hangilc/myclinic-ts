@@ -33,7 +33,8 @@ export function getBackend(): string {
     const l = window.location;
     let proto = l.protocol.toLowerCase();
     let host = l.hostname;
-    let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
+    // let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
+    let port = proto === "https:" ? l.port : nonSslServerPort();
     if (import.meta.env.VITE_BACKEND_PROTO) {
       proto = import.meta.env.VITE_BACKEND_PROTO;
     }
@@ -45,10 +46,12 @@ export function getBackend(): string {
     }
     let query = parseLocationQuery();
     if( query["api-port"] ) {
-      port = parseInt(query["api-port"])
+      // port = parseInt(query["api-port"])
+      port = query["api-port"]
     }
-
-    return `${proto}//${host}:${port}`;
+    let result = `${proto}//${host}:${port}`;
+    console.log("getBackend", result);
+    return result;
   } else {
     return "http://localhost:8080";
   }
