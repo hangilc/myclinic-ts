@@ -33,6 +33,7 @@
   export let kouhiList: Kouhi[];
   export let textId: number;
   export let onCancel: () => void;
+  export let onDone: () => void;
   export let onModified: (newShohou: PrescInfoData) => void;
   export let onRegistered: (
     shohou: PrescInfoData,
@@ -62,6 +63,7 @@
   function doPrint() {
     const data = denshiToPrint(shohou);
     const pages = drawShohousen2024NoRefill(data);
+    onDone();
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {

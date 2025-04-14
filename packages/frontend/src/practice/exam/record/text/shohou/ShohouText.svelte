@@ -205,6 +205,7 @@
           {kouhiList}
           {textId}
           onCancel={() => (mode = "disp")}
+          onDone={() => (mode = "disp")}
           onModified={doShohouModified}
           onRegistered={doRegistered}
           onCopied={() => (mode = "disp")}
