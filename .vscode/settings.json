@@ -53,5 +53,8 @@
   },
   "files.watcherExclude": {
     "**/target": true
+  },
+  "[snippets]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
   }
 }
