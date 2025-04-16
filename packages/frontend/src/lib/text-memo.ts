@@ -103,6 +103,14 @@ export class TextMemoWrapper {
       return m;
     }
   }
+
+  static createShohouTextMemo(shohou: PrescInfoData, prescriptionId: string | undefined): ShohouTextMemo {
+    return {
+      kind: "shohou",
+      shohou: shohou,
+      prescriptionId: prescriptionId
+    }
+  }
 }
 
 export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: number): Promise<TextMemo | undefined> {

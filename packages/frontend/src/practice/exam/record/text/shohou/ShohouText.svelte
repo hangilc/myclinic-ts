@@ -195,7 +195,9 @@
   {:else if mode === "edit"}
     {#if prescriptionId}
       <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} 
+        textId={text.textId}
         onUnregistered={doUnregistered} 
+        onDone={() => (mode ="disp")}
         onCopied={() => (mode = "disp")}/>
     {:else}
       <div>

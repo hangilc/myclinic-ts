@@ -6,7 +6,7 @@
   import { CutText } from "@/lib/regexp-util";
   import PhoneLink from "./PhoneLink.svelte";
   import { connect, disconnect } from "@/lib/twilio"
-  import { calcAge, FormatDate } from "myclinic-util";
+  import { calcAge, DateWrapper, FormatDate } from "myclinic-util";
 
   export let patient: m.Patient;
 
@@ -44,6 +44,11 @@
     showPhone = false;
     phoneNumber = "";
   }
+
+  function toSeireki(at: string): string {
+    let d = DateWrapper.from(at);
+    return d.render(f => `${f.year}年${f.month}月${f.day}日`)
+  }
 </script>
 
 <div class="patient-disp" data-patient-disp={patient.patientId}>
@@ -53,7 +58,7 @@
     {patient.firstName}
     ({patient.lastNameYomi}
     {patient.firstNameYomi})
-    {FormatDate.f2(patient.birthday)}生
+    <span title={toSeireki(patient.birthday)}>{FormatDate.f2(patient.birthday)}生</span>
     {calcAge(new Date(patient.birthday))}才
     {sexRep(patient.sex)}性
     <a href="javascript:void(0)" on:click={toggleDetail}>詳細</a>

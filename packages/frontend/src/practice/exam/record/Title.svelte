@@ -23,7 +23,7 @@
   import { createShinryoumeisaishoData } from "./title/shinryoumeisaisho";
   import { drawShinryoumeisaisho } from "@/lib/drawer/forms/shinryoumeisaisho/shinryoumeisaisho-drawer";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
-  import { FormatDate } from "myclinic-util";
+  import { DateWrapper, FormatDate } from "myclinic-util";
 
   export let visit: VisitEx;
 
@@ -186,14 +186,20 @@
     add("領収書宛名", doReceiptName);
     return m;
   }
+
+  function toSeireki(at: string): string {
+    let d = DateWrapper.from(at);
+    return d.render(f => `${f.year}年${f.month}月${f.day}日`)
+  }
 </script>
+
 
 <div
   class="top"
   class:current={visit.visitId === $currentVisitId}
   class:temp-visit={visit.visitId === $tempVisitId}
 >
-  <span class="datetime">{FormatDate.f9(visit.visitedAt)}</span
+  <span class="datetime" title={toSeireki(visit.visitedAt)}>{FormatDate.f9(visit.visitedAt)}</span
   >
   <a href="javascript:void(0)" on:click={popupTrigger(() => composeMenu())}
     >操作</a

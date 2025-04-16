@@ -25,8 +25,12 @@
   import api from "@/lib/api";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
-  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
-
+  import {
+    checkMemoCompat,
+    copyTextMemo,
+    TextMemoWrapper,
+    type ShohouTextMemo,
+  } from "@/lib/text-memo";
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -37,7 +41,7 @@
   export let onModified: (newShohou: PrescInfoData) => void;
   export let onRegistered: (
     shohou: PrescInfoData,
-    prescriptionId: string
+    prescriptionId: string,
   ) => void;
   export let onCopied: () => void;
 
@@ -157,7 +161,8 @@
       alert("コピー先を見つけられませんでした。");
     }
   }
-</script>
+
+ </script>
 
 <div style="border:1px solid green;padding:10px;border-radius:6px">
   <DenshiShohouDisp {shohou} prescriptionId={undefined} />

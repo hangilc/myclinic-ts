@@ -4,11 +4,13 @@
   import { currentPatient, showAppoints, startPatient } from "../exam-vars";
   import RightBox from "../RightBox.svelte";
   import { pad } from "@/lib/pad";
+  import { DateWrapper } from "myclinic-util";
 
   let today = new Date();
+  let curdate = today;
   let data: [AppointTime, Appoint[]][] = [];
   let showList = true;
-
+    
   showAppoints.subscribe((show) => {
     if (show) {
       refresh();
@@ -16,7 +18,7 @@
   });
 
   async function refresh() {
-    data = await api.listAppoints(today);
+    data = await api.listAppoints(curdate);
   }
 
   function doClose(): void {
@@ -37,9 +39,27 @@
   function doExtend() {
     showList = true;
   }
+
+  function doChangeDate() {
+    let input = prompt("日付（YYYY-MM-DD）：", DateWrapper.from(curdate).asSqlDate());
+    if (input) {
+      curdate = DateWrapper.from(input).asDate();
+      refresh();
+    }
+  }
+
+  function dateRep(date: Date): string {
+    let d = DateWrapper.from(curdate);
+    return d.render(
+      (d) => `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日（${d.youbi}）`,
+    );
+  }
 </script>
 
 <RightBox title="予約患者">
+  {#if curdate != today}
+    <div>{dateRep(curdate)}</div>
+  {/if}
   {#if showList}
     <div class="list">
       {#each data as [appointTime, appoints], i}
@@ -60,12 +80,13 @@
   {/if}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="commands">
+    <a href="javascript:void(0)" on:click={doChangeDate}>日付変更</a>
     <a href="javascript:void(0)" on:click={refresh}>更新</a>
     <a href="javascript:void(0)" on:click={doClose}>閉じる</a>
     {#if showList}
-    <a href="javascript:void(0)" on:click={doCollapse}>圧縮</a>
+      <a href="javascript:void(0)" on:click={doCollapse}>圧縮</a>
     {:else}
-    <a href="javascript:void(0)" on:click={doExtend}>伸展</a>
+      <a href="javascript:void(0)" on:click={doExtend}>伸展</a>
     {/if}
   </div>
 </RightBox>

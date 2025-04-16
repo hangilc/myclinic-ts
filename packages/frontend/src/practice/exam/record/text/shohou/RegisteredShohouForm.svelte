@@ -11,12 +11,18 @@
   import { cache } from "@/lib/cache";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
-  import { checkMemoCompat, copyTextMemo, TextMemoWrapper, type ShohouTextMemo }
-  from "@/lib/text-memo";
+  import {
+    checkMemoCompat,
+    copyTextMemo,
+    TextMemoWrapper,
+    type ShohouTextMemo,
+  } from "@/lib/text-memo";
 
   export let shohou: PrescInfoData;
   export let prescriptionId: string;
+  export let textId: number;
   export let onCancel: () => void;
+  export let onDone: () => void;
   export let onUnregistered: () => void;
   export let onCopied: () => void;
   let showDetail = false;
@@ -74,7 +80,7 @@
         kind: "shohou",
         shohou,
         prescriptionId,
-      }
+      };
       const newMemo = await copyTextMemo(curMemo, targetVisitId);
       const warn = checkMemoCompat(curMemo, newMemo);
       if (typeof warn === "string") {
@@ -85,6 +91,19 @@
       onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
+    }
+  }
+
+  async function doReissueSameDay() {
+    if (confirm("この処方を同日再発行しますか？")) {
+      let newShohou = Object.assign({}, shohou);
+      delete newShohou.引換番号;
+      let newText: Text = await api.getText(textId);
+      newText = Object.assign({}, newText);
+      let newMemo = TextMemoWrapper.createShohouTextMemo(newShohou, undefined);
+      TextMemoWrapper.setTextMemo(newText, newMemo);
+      await api.enterText(newText);
+      onDone();
     }
   }
 </script>
@@ -100,5 +119,6 @@
   <a href="javascript:void(0)" on:click={doStatus}>状態</a>
   <a href="javascript:void(0)" on:click={doUnregister}>発行取消</a>
   <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
+  <a href="javascript:void(0)" on:click={doReissueSameDay}>同日再発行</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>
