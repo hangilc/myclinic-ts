@@ -17,6 +17,7 @@ let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
 let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
+let onshiServer: string | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -154,5 +155,17 @@ export const cache = {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);
   },
+
+  async getOnshiServer(): Promise<string> {
+    if( onshiServer === undefined ){
+      const value = await api.dictGet("onshi-server");
+      onshiServer = value;
+    }
+    return onshiServer;
+  },
+
+  async setOnshiServer(value: string): Promise<void> {
+    await api.dictSet("onshi-server", value);
+  }
 
 }

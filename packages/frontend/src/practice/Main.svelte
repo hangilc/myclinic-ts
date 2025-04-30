@@ -18,6 +18,7 @@
   import Refer from "./refer/Refer.svelte";
   import Shindansho from "./shindansho/Shindansho.svelte";
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
+  import ModifyOnshi from "./ModifyOnshi.svelte";
   
   export let serviceStore: Writable<string>;
 
@@ -60,6 +61,9 @@
   <Henrei isVisible={$serviceStore === "henrei"} />
   {#if $serviceStore === "shohou-usage"}
     <ShohouUsage />
+  {/if}
+  {#if $serviceStore === "modify-onshi"}
+	<ModifyOnshi />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>
