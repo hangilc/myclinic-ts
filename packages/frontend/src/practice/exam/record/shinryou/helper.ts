@@ -3,11 +3,12 @@ import {
 } from "myclinic-model"
 import api from "@/lib/api"
 import { dateParam } from "@/lib/date-param"
+import type { RegularNamesSet } from "./regular-names";
 
 async function resolveShinryoucode(src: string | number, at: string): Promise<number> {
   if (typeof src === "number") {
     const result: number | null = await api.resolveShinryoucode(src, at);
-    if( result == null ){
+    if (result == null) {
       throw new Error("診療行為が有効でありません：" + src);
     } else {
       return result;
@@ -138,3 +139,61 @@ export async function enterTo(
   };
   await api.batchEnterShinryouConduct(req);
 }
+
+export function adaptRegularNamesToDxKasan(set: RegularNamesSet, dxLevel: number | undefined):
+  RegularNamesSet {
+  if (dxLevel === 1) {
+    const left = set.left.filter(e => {
+      if (typeof e === "string") {
+        return true;
+      } else {
+        switch (e.label) {
+          case "医療ＤＸ推進２（初診）":
+          case "医療ＤＸ推進３（初診）": return false;
+          default: return true;
+        }
+      }
+    });
+    return Object.assign({}, { right: set.right, bottom: set.bottom }, { left });
+  } else if (dxLevel === 2) {
+    const left = set.left.filter(e => {
+      if (typeof e === "string") {
+        return true;
+      } else {
+        switch (e.label) {
+          case "医療ＤＸ推進１（初診）":
+          case "医療ＤＸ推進３（初診）": return false;
+          default: return true;
+        }
+      }
+    });
+    return Object.assign({}, { right: set.right, bottom: set.bottom }, { left });
+  } else if (dxLevel === 3) {
+    const left = set.left.filter(e => {
+      if (typeof e === "string") {
+        return true;
+      } else {
+        switch (e.label) {
+          case "医療ＤＸ推進１（初診）":
+          case "医療ＤＸ推進２（初診）": return false;
+          default: return true;
+        }
+      }
+    });
+    return Object.assign({}, { right: set.right, bottom: set.bottom }, { left });
+  } else {
+    return set;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
