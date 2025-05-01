@@ -4,12 +4,13 @@ import { type RP剤情報, type 用法レコード, type 用法補足レコー�
 import type { DrugDisease } from "./drug-disease";
 import type { ShinryouDisease } from "./shinryou-disease";
 import type { 薬品コード種別 } from "./denshi-shohou/denshi-shohou";
+import { validateDxKasanSeries, type DxKasanApplied } from "./dx-kasan";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
 let shohouFreqUsage: FreqUsage[] | undefined = undefined;
-let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
+// let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 let onshiViewSecret: string | undefined = undefined;
 let drugDiseases: DrugDisease[] | undefined = undefined;
 let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
@@ -18,6 +19,7 @@ let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
 let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
 let onshiServer: string | undefined = undefined;
+let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -165,7 +167,27 @@ export const cache = {
   },
 
   async setOnshiServer(value: string): Promise<void> {
+    onshiServer = value;
     await api.dictSet("onshi-server", value);
+  },
+
+  async getDxKasanSeries(): Promise<DxKasanApplied[]> {
+    if( dxKasanSeries === undefined ){
+      let value = await api.getConfig("dx-kasan");
+      if( !value ){
+        value = [];
+      }
+      dxKasanSeries = value;
+    }
+    return validateDxKasanSeries(dxKasanSeries);
+  },
+
+  async setDxKasanSeries(series: DxKasanApplied[]): Promise<void> {
+    dxKasanSeries = series;
+    await api.setConfig("dx-kasan", series);
   }
 
 }
+
+
+
