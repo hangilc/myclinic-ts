@@ -19,6 +19,7 @@
   import Shindansho from "./shindansho/Shindansho.svelte";
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
   import ModifyOnshi from "./ModifyOnshi.svelte";
+  import DXKasan from "./DXKasan.svelte";
   
   export let serviceStore: Writable<string>;
 
@@ -64,6 +65,9 @@
   {/if}
   {#if $serviceStore === "modify-onshi"}
 	<ModifyOnshi />
+  {/if}
+  {#if $serviceStore === "dx-kasan"}
+	<DXKasan />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>
