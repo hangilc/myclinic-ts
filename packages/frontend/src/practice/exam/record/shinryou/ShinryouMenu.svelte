@@ -16,17 +16,19 @@
   export let visit: VisitEx;
 
   async function doRegular() {
-	const at = visit.visitedAt.substring(0, 8);
+	const at = visit.visitedAt.substring(0, 10);
 	let names = getRegularNames(at);
 	const dxSeries = await cache.getDxKasanSeries();
 	const dxLevel = resolveDxKasanLevel(dxSeries, at);
 	names = adaptRegularNamesToDxKasan(names, dxLevel);
+	console.log("left", names.left, dxSeries, dxLevel);
 	const d: RegularDialog = new RegularDialog({
 	  target: document.body,
 	  props: {
 		destroy: () => d.$destroy(),
 		names: { left: names.left, right: names.right, bottom: names.bottom },
 		visit,
+		dxKasanLevel: dxLevel,
 	  },
 	});
   }

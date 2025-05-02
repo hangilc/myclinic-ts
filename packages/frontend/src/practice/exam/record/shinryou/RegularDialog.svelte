@@ -3,9 +3,6 @@
   import CheckLabel from "@/lib/CheckLabel.svelte";
   import {
 	ConductKind,
-	Shinryou,
-	ShinryouEx,
-	Visit,
 	type VisitEx,
   } from "myclinic-model";
   import { type ConductSpec, enter } from "./helper";
@@ -21,6 +18,7 @@
   export let destroy: () => void;
   export let visit: VisitEx;
   export let names: Record<string, RegularName[]>;
+  export let dxKasanLevelt: number | undefined = undefined;
   let leftItems: Item[] = [];
   let rightItems: Item[] = [];
   let bottomItems: Item[] = [];

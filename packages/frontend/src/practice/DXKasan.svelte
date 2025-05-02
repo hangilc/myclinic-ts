@@ -16,13 +16,13 @@
     } catch (err) {
       alert(`invalid format: ${err}`);
     }
-	await api.setConfig("dx-kasan", c);
+    await api.setConfig("dx-kasan", c);
   }
 
   async function doRefresh() {
     let value = (await api.getConfig("dx-kasan")) || "[\n\n]";
-	let series = validateDxKasanSeries(value)
-	editValue = JSON.stringify(series, undefined, 2);
+    let series = validateDxKasanSeries(value);
+    editValue = JSON.stringify(series, undefined, 2);
   }
 </script>
 

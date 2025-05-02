@@ -4,6 +4,7 @@ export interface DxKasanApplied {
 }
 
 export function resolveDxKasanLevel(series: DxKasanApplied[], date: string): number | undefined {
+  console.log("enter resolve", date);
   for (let spec of series) {
     if (spec.validFrom <= date) {
       return spec.level;
