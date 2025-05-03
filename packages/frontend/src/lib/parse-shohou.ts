@@ -426,9 +426,18 @@ export function drugIndex(): Parser<void> {
 }
 
 export function drugNameAndAmount(): Parser<{ name: string, amount: string, unit: string }> {
+  const kaisu = digits(1).chain(immediate("回"), (d, k) => d + k);
+  const optionalKaisu = opt(kaisu).map(k => k.length > 0 ? k[0] : "");
+  
   return repeatUntil(
     nonSpaces(1).chain(spaces(1), (s, ss) => s + ss),
-    float().chain(drugUnit(), (amount, unit) => ({ amount, unit })).skip(peek(blankLineEnd())),
+    optionalKaisu.chain(
+      float().chain(drugUnit(), (amount, unit) => ({ amount, unit })),
+      (kaisuStr, au) => ({ 
+        amount: kaisuStr + au.amount, 
+        unit: au.unit 
+      })
+    ).skip(peek(blankLineEnd())),
     (ns, au) => ({
       name: ns.join("").trim(),
       amount: au.amount,

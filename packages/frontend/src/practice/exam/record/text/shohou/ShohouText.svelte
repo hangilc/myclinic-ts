@@ -187,6 +187,7 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div style="margin-bottom:10px;">
   {#if mode === "disp"}
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
@@ -216,21 +217,3 @@
     {/if}
   {/if}
 </div>
-<!-- <div>
-  <div on:click={doClick} style="cursor:pointer;">
-    <DenshiShohouDisp {shohou} />
-  </div>
-  <div>
-    {#if shohou.引換番号}
-      引換番号：{shohou.引換番号}
-      {#if memo?.prescriptionId}
-        <a href="javascript:void(0)" on:click={doHikae}>控え</a>
-        <a href="javascript:void(0)" on:click={toggleShowDetail}>詳細</a>
-      {/if}
-    {/if}
-    {#if targetVisitId && targetVisitId !== visitId}
-      <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
-    {/if}
-  </div>
-  {#if showDetail && prescriptionId}<ShohouDetail {prescriptionId} />{/if}
-</div> -->

@@ -41,7 +41,7 @@
   export let index: number | undefined = undefined;
   let textarea: HTMLTextAreaElement;
   let memoKind: "shohou" | "shohou-conv" | undefined =
-    TextMemoWrapper.fromText(text).getMemoKind();
+      TextMemoWrapper.fromText(text).getMemoKind();
 
   async function onEnter() {
     const content = textarea.value.trim();
@@ -488,9 +488,10 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <textarea bind:this={textarea} on:keydown={doKeyDown} use:setFocus
-    >{text.content}</textarea
+  >{text.content}</textarea
   >
   {#if text.textId === 0}
     <div>
@@ -503,12 +504,12 @@
       <a href="javascript:void(0)" on:click={onClose}>キャンセル</a>
       {#if containsHikitsugi()}
         <a href="javascript:void(0)" on:click={() => doHikitsugi()}
-          >引継ぎコピー</a
+        >引継ぎコピー</a
         >
       {/if}
       {#if isShohousen(text.content)}
         <a href="javascript:void(0)" on:click={popupTrigger(oldShohouPopup)}
-          >処方箋</a
+        >処方箋</a
         >
       {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
