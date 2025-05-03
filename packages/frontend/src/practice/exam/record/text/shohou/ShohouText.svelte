@@ -2,22 +2,15 @@
   import { Kouhi, Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
   import api from "@/lib/api";
-  import { shohouHikaeFilename } from "@/lib/denshi-shohou/presc-api";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
-  import {
-    currentVisitId,
-    getCopyTarget,
-    tempVisitId,
-  } from "@/practice/exam/exam-vars";
-  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import DenshiShohouDisp from "@/lib/denshi-shohou/disp/DenshiShohouDisp.svelte";
-  import RegisteredShohouDialog from "@/lib/denshi-shohou/RegisteredShohouDialog.svelte";
-  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
   import type { Unsubscriber } from "svelte/store";
   import { textUpdated } from "@/app-events";
   import { onDestroy } from "svelte";
   import ShohouTextForm from "./ShohouTextForm.svelte";
   import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
+  import { DateWrapper } from "myclinic-util";
+  import { ippanmeiStateFromMaster } from "@/lib/denshi-shohou/denshi-shohou-form/denshi-shohou-form-types";
 
   export let text: Text;
   export let at: string;
@@ -26,10 +19,10 @@
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
   let shohou: PrescInfoData = memo.shohou;
   let prescriptionId: string | undefined = memo.prescriptionId;
-  let showDetail = false;
-  let targetVisitId: number | undefined = undefined;
   let mode: "disp" | "edit" = "disp";
   let prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
+  let ippanRep = "";
+  let ippanDrugs: { drugName: string, ippanKind: "一般名" | "一般名有り" | "" }[] = [];
 
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
@@ -42,110 +35,58 @@
         }
       }
     }),
-    currentVisitId.subscribe(
-      () => (targetVisitId = getCopyTarget() ?? undefined)
-    ),
-    tempVisitId.subscribe(() => (targetVisitId = getCopyTarget() ?? undefined)),
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
+  $: setupIppan(shohou)
 
-  async function doClick() {
-    if (shohou.引換番号 && prescriptionId) {
-      const d: RegisteredShohouDialog = new RegisteredShohouDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          shohou,
-          textId,
-          prescriptionId,
-          onUnregistered,
-        },
-      });
-    } else if (shohou.引換番号 == undefined && prescriptionId == undefined) {
-      const visit = await api.getVisit(text.visitId);
-      const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
-        target: document.body,
-        props: {
-          destroy: () => d.$destroy(),
-          shohou,
-          onDelete: destroyThisText,
-          title: "未登録処方編集",
-          at: visit.visitedAt.substring(0, 10),
-          onSave: saveMemo,
-          onRegistered: async (shohou, prescriptionId) => {
-            const text = await api.getText(textId);
-            TextMemoWrapper.setTextMemo(text, {
-              kind: "shohou",
-              shohou,
-              prescriptionId,
-            });
-            await api.updateText(text);
-          },
-        },
-      });
-    }
+  function isToday(): boolean {
+	return at === DateWrapper.from(new Date()).asSqlDate();
   }
 
-  async function saveMemo(shohou: PrescInfoData) {
-    const text = await api.getText(textId);
-    TextMemoWrapper.setTextMemo(text, {
-      kind: "shohou",
-      shohou,
-      prescriptionId: undefined,
-    });
-    await api.updateText(text);
-  }
-
-  async function destroyThisText() {
-    await api.deleteText(textId);
-  }
-
-  async function onUnregistered() {
-    const text = await api.getText(textId);
-    const newMemo = TextMemoWrapper.fromText(text).probeShohouMemo();
-    if (!newMemo) {
-      throw new Error("no text memo for shohousen");
-    }
-    memo = newMemo;
-    shohou = memo.shohou;
-    prescriptionId = memo.prescriptionId;
-  }
-
-  async function doHikae() {
-    if (memo?.prescriptionId) {
-      let filename = shohouHikaeFilename(memo?.prescriptionId);
-      let url = api.portalTmpFileUrl(filename);
-      window.open(url, "_blank");
-    }
-  }
-
-  function toggleShowDetail() {
-    showDetail = !showDetail;
-  }
-
-  async function doCopy() {
-    if (targetVisitId) {
-      const shohou = memo.shohou;
-      const drugs = shohou.RP剤情報グループ;
-      console.log("shohou", JSON.stringify(drugs, undefined, 2));
-      const newShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-      Object.assign(newShohou, {
-        RP剤情報グループ: [...shohou.RP剤情報グループ],
-        備考レコード: shohou.備考レコード,
-        提供情報レコード: shohou.提供情報レコード,
-      });
-      const newText = new Text(
-        0,
-        targetVisitId,
-        "",
-        JSON.stringify({
-          kind: "shohou",
-          shohou: newShohou,
-        })
-      );
-      await api.enterText(newText);
-    }
+  async function setupIppan(shohou: PrescInfoData) {
+	if( isToday() ){
+	  ippanDrugs = [];
+	  const drugGroups = shohou.RP剤情報グループ;
+	  for( let g of drugGroups ){
+		for(let r of g.薬品情報グループ){
+		  // レセプト電算処理システム用コード
+          // YJコード
+          // 一般名コード
+		  const codeKind = r.薬品レコード.薬品コード種別;
+		  const code = r.薬品レコード.薬品コード;
+		  const drugName = r.薬品レコード.薬品名称;
+		  let ippanKind: "一般名" | "一般名有り" | "" = "";
+		  if( codeKind === "一般名コード" ){
+			ippanKind = "一般名";
+		  } else if( codeKind === "レセプト電算処理システム用コード" ){
+			const m = await api.getIyakuhinMaster(parseInt(code), at);
+			const s = ippanmeiStateFromMaster(m);
+			if( s.kind === "has-ippanmei" ){
+			  ippanKind = "一般名有り";
+			} else if( s.kind === "has-no-ippanmei" ){
+			  ippanKind = "";
+			}
+		  }
+		  ippanDrugs.push({ drugName, ippanKind });
+		}
+	  }
+	}
+	let nIppan = 0;
+	let nHasIppan = 0;
+	console.log("ippan", nIppan, nHasIppan, ippanDrugs);
+	for(let d of ippanDrugs){
+	  if( d.ippanKind === "一般名有り" ){
+		nHasIppan += 1;
+	  } else if( d.ippanKind === "一般名") {
+		nIppan += 1;
+	  }
+	}
+	if( nIppan >= 2 && nHasIppan === 0 ){
+	  ippanRep = "一般名加算１";
+	} else if( nIppan > 0 ){
+	  ippanRep = "一般名加算２";
+	}
   }
 
   async function doShohouModified(modified: PrescInfoData) {
@@ -193,6 +134,7 @@
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
       <DenshiShohouDisp {shohou} {prolog} {prescriptionId} />
     </div>
+	<div>{ippanRep}</div>
   {:else if mode === "edit"}
     {#if prescriptionId}
       <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} 
