@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import { cache } from "@/lib/cache";
   import { validateDxKasanSeries } from "@/lib/dx-kasan";
   import ServiceHeader from "@/ServiceHeader.svelte";
 
@@ -17,6 +18,7 @@
       alert(`invalid format: ${err}`);
     }
     await api.setConfig("dx-kasan", c);
+	cache.clearDxKasanSeries();
   }
 
   async function doRefresh() {

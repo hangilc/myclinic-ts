@@ -18,7 +18,7 @@
   export let destroy: () => void;
   export let visit: VisitEx;
   export let names: Record<string, RegularName[]>;
-  export let dxKasanLevelt: number | undefined = undefined;
+  export let dxKasanLevel: number | undefined = undefined;
   let leftItems: Item[] = [];
   let rightItems: Item[] = [];
   let bottomItems: Item[] = [];
@@ -121,38 +121,38 @@
   }
 
   async function adaptToCheck(label: string, checked: boolean) {
-	const procs: ShinryouCheckProc[] = [];
-	function pushProcs(newProcs: ShinryouCheckProc[]) {
-	  procs.push(...newProcs);
-	}
-	switch (label) {
-	  case "初診": {
-		pushProcs(await adaptToShoshinForIryouJouhou(visit, checked));
-		pushProcs(
-		  await adaptToShoshinForIryouDxSuishin(visit, checked),
-		);
-		break;
+	  const procs: ShinryouCheckProc[] = [];
+	  function pushProcs(newProcs: ShinryouCheckProc[]) {
+		procs.push(...newProcs);
 	  }
-	  case "再診": {
-		pushProcs(await adaptToSaishinForIryouJouhou(visit, checked));
-		break;
+	  switch (label) {
+		case "初診": {
+		  pushProcs(await adaptToShoshinForIryouJouhou(visit, checked));
+		  pushProcs(
+			await adaptToShoshinForIryouDxSuishin(visit, checked, dxKasanLevel),
+		  );
+		  break;
+		}
+		case "再診": {
+		  pushProcs(await adaptToSaishinForIryouJouhou(visit, checked));
+		  break;
+		}
+		case "生活習慣病管理料２": {
+		  pushProcs(
+			await adaptToSeikatsuShuukanForGairaiDataTeishutsu(
+			  visit,
+			  checked,
+			),
+		  );
+		  console.log("procs", procs);
+		  break;
+		}
 	  }
-	  case "生活習慣病管理料２": {
-		pushProcs(
-		  await adaptToSeikatsuShuukanForGairaiDataTeishutsu(
-			visit,
-			checked,
-		  ),
-		);
-		console.log("procs", procs);
-		break;
-	  }
-	}
 
-	for (let proc of procs) {
-	  checkItemByName(proc.name, proc.check);
+	  for (let proc of procs) {
+		checkItemByName(proc.name, proc.check);
+	  }
 	}
-  }
 </script>
 
 <Dialog {destroy} title="診療行為入力">

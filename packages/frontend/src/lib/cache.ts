@@ -182,6 +182,10 @@ export const cache = {
     return validateDxKasanSeries(dxKasanSeries);
   },
 
+  async clearDxKasanSeries() {
+    dxKasanSeries = undefined;
+  },
+
   async setDxKasanSeries(series: DxKasanApplied[]): Promise<void> {
     dxKasanSeries = series;
     await api.setConfig("dx-kasan", series);
