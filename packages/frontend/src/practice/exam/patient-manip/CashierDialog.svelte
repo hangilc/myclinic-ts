@@ -21,27 +21,6 @@
   let mode = "disp";
   let isMishuu = false;
   const mishuuId = genid();
-  // let monthlyFutan: number | undefined = undefined;
-
-  // updateMonthlyFutan();
-
-  // function updateMonthlyFutan(): void {
-  //   if ($visitId != null) {
-  //     let futan = 0;
-  //     (payments ?? []).forEach((payment) => {
-  //       if (payment.visitId === $visitId) {
-  //         // nop
-  //       } else {
-  //         futan += payment.amount;
-  //       }
-  //     });
-  //     const value = parseInt(chargeValue || "0");
-  //     if (value > 0) {
-  //       futan += value;
-  //     }
-  //     monthlyFutan = futan;
-  //   }
-  // }
 
   function mkMeisaiItems(meisai: MeisaiWrapper | null): string[] {
     if (meisai == null) {

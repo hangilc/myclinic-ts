@@ -33,8 +33,8 @@
       let visit = await api.getVisit(visitId);
       if (
         visit.shahokokuhoId === 0 &&
-        visit.koukikoureiId === 0 &&
-        !hasHokengai(visit)
+          visit.koukikoureiId === 0 &&
+          !hasHokengai(visit)
       ) {
         await fixHokengai(visit);
       }
@@ -214,6 +214,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="patient-manip top">
   <button on:click={doCashier} disabled={$currentVisitId == null}>会計</button>
   <button on:click={onEndPatientClick}>患者終了</button>

@@ -118,6 +118,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <a href="javascript:void(0)" on:click={doRegular}>[診療行為]</a>
   <a

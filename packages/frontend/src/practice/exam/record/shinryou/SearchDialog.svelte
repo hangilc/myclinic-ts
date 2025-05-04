@@ -2,7 +2,6 @@
   import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
   import type { ShinryouMaster, VisitEx } from "myclinic-model";
-  import SelectItem from "@/lib/SelectItem.svelte";
   import { setFocus } from "@/lib/set-focus";
   import { enter } from "./helper";
 
@@ -10,7 +9,6 @@
   export let visit: VisitEx;
   let searchTextInput: HTMLInputElement;
   let result: ShinryouMaster[] = [];
-  // let selected: Writable<ShinryouMaster | null> = writable(null);
   let selected: ShinryouMaster | undefined = undefined;
 
   async function doSearch() {
@@ -26,6 +24,11 @@
 
   async function doEnter() {
     if (selected) {
+	  const name = selected.name;
+	  if( name === "療養費同意書交付料" ){
+		alert("療養費同意書交付料は、前回交付日が、１月１０日（１５日以前）の場合、６月１日以降、" +
+		  "１月１６日の場合、７月１日以降算定可能です。")
+	  }
       await enter(visit, [selected.shinryoucode], []);
       destroy();
     }
@@ -43,6 +46,7 @@
   <div class="select">
     {#each result as m (m.shinryoucode)}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div class="item" on:click={() => doSelect(m)}>{m.name}</div>
     {/each}
   </div>

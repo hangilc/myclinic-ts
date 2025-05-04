@@ -157,6 +157,18 @@ export class DateWrapper {
     return s1 + s2;
   }
 
+  setDay(day: number): DateWrapper {
+    let date = new Date(this.date);
+    date.setDate(day);
+    return new DateWrapper(date);
+  }
+
+  setMonth(month: number): DateWrapper {
+    let date = new Date(this.date);
+    date.setMonth(month - 1);
+    return new DateWrapper(date);
+  }
+
   format1(): string {
     return `${this.getGengou()}${this.getNen()}年${this.getMonth()}月${this.getDay()}日`
   }
