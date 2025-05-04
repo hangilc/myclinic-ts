@@ -7,6 +7,7 @@ import { checkXpShindan } from "./checkers/check-xp-shindan";
 import { checkGlucoseSelfMeasuring } from "./checkers/glucose-self-measuring";
 import { checkDuplicate } from "./checkers/check-duplicate";
 import { checkHandanryou } from "./checkers/check-handanryou";
+import { checkShoshinSaishin } from "./checkers/check-shoshin-saishin";
 
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
@@ -22,6 +23,7 @@ const checkers: RcptChecker[] = [
   checkGlucoseSelfMeasuring,
   checkDuplicate,
   checkHandanryou,
+  checkShoshinSaishin,
 ];
 
 export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
