@@ -1,5 +1,5 @@
-import type { RezeptComment, Shinryou, ShinryouEx, VisitEx } from "myclinic-model";
-import { checkForRcpt, type CheckError, type Fixer } from "../check";
+import type { RezeptComment, Shinryou, VisitEx } from "myclinic-model";
+import { type CheckError, type Fixer } from "../check";
 import { ShinryouMemoWrapper } from "@/lib/shinryou-memo";
 import { toHankaku } from "@/lib/zenkaku";
 import api from "@/lib/api";
@@ -10,8 +10,9 @@ import api from "@/lib/api";
 // 診療行為に対してコメントをくわえなければならない。
 const commentCode = 842100048;
 
-export async function checkGlucoseSelfMeasuring(visit: VisitEx):
-	Promise<CheckError | undefined> {
+export async function checkGlucoseSelfMeasuring(visits: VisitEx[]): Promise<CheckError[]> {
+  const checkErrors: CheckError[] = [];
+  for(let visit of visits){
 	for (let shinryou of visit.shinryouList) {
 		if (shinryou.shinryoucode === 114007410) {
 			console.log("glucose measurement");
@@ -20,13 +21,20 @@ export async function checkGlucoseSelfMeasuring(visit: VisitEx):
 			let com = findComment(comments);
 			console.log("com", com);
 			if (com) {
-				return checkComment(com);
+			  let err = checkComment(com);
+              if( err ){
+                checkErrors.push(err);
+              }
 			} else {
-				return checkNullComment(shinryou.asShinryou());
+			  let err = checkNullComment(shinryou.asShinryou());
+              if( err ){
+                checkErrors.push(err);
+              }
 			}
 		}
 	}
-	return undefined;
+  }
+  return checkErrors;
 }
 
 export const testExports = {
@@ -94,12 +102,12 @@ function findComment(comments: RezeptComment[]): RezeptComment | undefined {
 	return undefined;
 }
 
-function getCommentValue(comment: RezeptComment): number | undefined {
-	let text = comment.text;
-	text = toHankaku(text);
-	if (/^\d+$/.test(text)) {
-		return parseInt(text);
-	} else {
-		return undefined;
-	}
-}
+// function getCommentValue(comment: RezeptComment): number | undefined {
+// 	let text = comment.text;
+// 	text = toHankaku(text);
+// 	if (/^\d+$/.test(text)) {
+// 		return parseInt(text);
+// 	} else {
+// 		return undefined;
+// 	}
+// }
