@@ -2,6 +2,7 @@ import { type Result, error, ok } from "./result";
 import { castList, castNumber, castOptionUndefined, castString } from "./cast";
 export * from "./converters";
 import { dateToSqlDate } from "./converters";
+import { DateWrapper, pad } from "myclinic-util";
 
 export function padNumber(n: number | string, finalSize: number, pad: string) {
   let s: string;
@@ -262,6 +263,91 @@ export class RezeptComment {
   static isEqualComments(a: RezeptComment, b: RezeptComment): boolean {
     return a.code === b.code && a.text === b.text;
   }
+
+  static new10(code: number): RezeptComment {
+    return new RezeptComment(code, "");
+  }
+
+  static new20(code: number): RezeptComment {
+    return new RezeptComment(code, "");
+  }
+
+  static new30(code: number, text: string): RezeptComment {
+    return new RezeptComment(code, text);
+  }
+
+  static new31(code: number, shinryoucode: number): RezeptComment {
+    return new RezeptComment(code, shinryoucode.toString());
+  }
+
+  static new40(code: number, n: number): RezeptComment {
+    return new RezeptComment(code, n.toString());
+  }
+
+  static new42(code: number, n: number): RezeptComment {
+    return new RezeptComment(code, n.toString());
+  }
+
+  static new50(code: number, date: DateWrapper): RezeptComment {
+    return new RezeptComment(code, encodeDate(date));
+  }
+
+  static new51(code: number, hours: number, minutes: number): RezeptComment {
+    let h = pad(hours, 2, "0");
+    let m = pad(minutes, 2, "0");
+    let t = `${h}${m}`;
+    return new RezeptComment(code, t);
+  }
+
+  static new52(code: number, minutes: number): RezeptComment {
+    return new RezeptComment(code, minutes.toString());
+  }
+
+  static new53(code: number, day: number, hour: number, minute: number): RezeptComment {
+    let d = pad(day, 2, "0");
+    let h = pad(hour, 2, "0");
+    let m = pad(minute, 2, "0");
+    return new RezeptComment(code, `${d}${h}${m}`);
+  }
+
+  static new80(code: number, date: DateWrapper, value: number | string): RezeptComment {
+    let d = encodeDate(date);
+    let v = pad(value, 8, "0");
+    let t = `${d}${v}`;
+    return new RezeptComment(code, t);
+  }
+
+  static new90(code: number, adjList: number[]): RezeptComment {
+    const ts: string[] = [];
+    for(let a of adjList){
+      if( a > 9999 ){
+        throw new Error(`invalid shuushokugo code: ${a}`);
+      }
+      ts.push(pad(a, 4, "0"));
+    }
+    const t = ts.join("");
+    return new RezeptComment(code, t);
+  }
+}
+
+function encodeDate(date: DateWrapper): string {
+    let g: number | undefined = undefined;
+    let gengou = date.getGengou()
+    let gmap: Record<string, number> = {
+      "明治": 1,
+      "大正": 2,
+      "昭和": 3,
+      "平成": 4,
+      "令和": 5,
+    };
+    g = gmap[gengou];
+    if( g == undefined ){
+      throw new Error(`unknown gengou: ${gengou}`)
+    }
+    const n = pad(date.getNen(), 2, "0");
+    const m = pad(date.getMonth(), 2, "0");
+    const d = pad(date.getDay(), 2, "0");
+    return `${g}${n}${m}${d}`;
 }
 
 export class RezeptShoujouShouki {
@@ -325,7 +411,6 @@ export class Visit {
   get comments(): RezeptComment[] {
     const comm = this.memoAsJson()["comments"];
     if (comm) {
-      console.log("comments json", comm);
       return comm.map(RezeptComment.cast);
     } else {
       return [];
@@ -773,7 +858,7 @@ export class IyakuhinMaster {
       arg.ippanmeicode,
       arg.choukiShuusaihinKanren,
       arg.ippanmeiShohouKasanKubun,
-      );
+    );
   }
 }
 
@@ -1180,9 +1265,9 @@ export class VisitAttributes {
   static isVisitAttributes(arg: any): arg is VisitAttributes {
     return (
       arg != null &&
-      typeof arg === "object" &&
-      (arg.futanWari === undefined ||
-        (typeof arg.futanWari === "number" && Number.isInteger(arg.futanWari)))
+        typeof arg === "object" &&
+        (arg.futanWari === undefined ||
+          (typeof arg.futanWari === "number" && Number.isInteger(arg.futanWari)))
     );
   }
 
@@ -1554,9 +1639,9 @@ export class ByoumeiMaster {
   static isByoumeiMaster(arg: any): arg is ByoumeiMaster {
     return (
       arg != null &&
-      typeof arg === "object" &&
-      typeof arg.shoubyoumeicode === "number" &&
-      typeof arg.name === "string"
+        typeof arg === "object" &&
+        typeof arg.shoubyoumeicode === "number" &&
+        typeof arg.name === "string"
     );
   }
 
@@ -1594,9 +1679,9 @@ export class ShuushokugoMaster {
   static isShuushokugoMaster(arg: any): arg is ShuushokugoMaster {
     return (
       arg != null &&
-      typeof arg === "object" &&
-      typeof arg.shuushokugocode === "number" &&
-      typeof arg.name === "string"
+        typeof arg === "object" &&
+        typeof arg.shuushokugocode === "number" &&
+        typeof arg.name === "string"
     );
   }
 }
@@ -1764,10 +1849,10 @@ export class DiseaseExample {
   static isDiseaseExample(arg: any): arg is DiseaseExample {
     return (
       arg != null &&
-      typeof arg === "object" &&
-      (arg.byoumei == null || typeof arg.byoumei === "string") &&
-      Array.isArray(arg.preAdjList) &&
-      Array.isArray(arg.postAdjList)
+        typeof arg === "object" &&
+        (arg.byoumei == null || typeof arg.byoumei === "string") &&
+        Array.isArray(arg.preAdjList) &&
+        Array.isArray(arg.postAdjList)
     );
   }
 }
