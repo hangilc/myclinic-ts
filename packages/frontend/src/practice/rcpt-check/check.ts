@@ -9,6 +9,10 @@ import { checkDuplicate } from "./checkers/check-duplicate";
 import { checkHandanryou } from "./checkers/check-handanryou";
 import { checkShoshinSaishin } from "./checkers/check-shoshin-saishin";
 import { checkRyouyouDouisho } from "./checkers/check-ryouyou-douisho";
+import { checkShoshinByoumei } from "./checkers/check-shoshin-byoumei";
+import { checkIryoujouhouShutokuKasan } from "./checkers/check-iryoujouhou-shutoku-kasan";
+import { checkSaishinByoumei } from "./checkers/check-saishin-byoumei";
+import { checkByoumei } from "./checkers/check-byoumei";
 
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
@@ -26,6 +30,10 @@ const checkers: RcptChecker[] = [
   checkHandanryou,
   checkShoshinSaishin,
   checkRyouyouDouisho,
+  checkIryoujouhouShutokuKasan,
+  checkShoshinByoumei,
+  checkSaishinByoumei,
+  checkByoumei,
 ];
 
 export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
@@ -39,6 +47,3 @@ export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
   }
   return errors.length === 0 ? "ok" : errors;
 }
-
-
-

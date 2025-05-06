@@ -37,6 +37,7 @@ workspaces/jslib/out
 .env
 .env.*
 
-
+# Emacs lock files
+.#*
 
 
