@@ -45,21 +45,25 @@
   function auxLabel(item: ShinryouDisease): string {
     switch(item.kind){
       case "disease-check": {
-        const diseaseName = item.diseaseName;
-        let fix = "no fix";
-        if( item.fix ){
-          fix = item.fix.diseaseName;
-          const adj = item.fix.adjNames;
-          if( adj.length > 0 ){
-            fix = `${fix}（${adj.join("・")}）`
-          }
-        }
-        return `${diseaseName}|${fix}`
+		return auxLabelOne(item.diseaseName, item.fix);
       }
+	  case "multi-disease-check": {
+		
+	  }
       case "no-check": {
         return "no-check";
       }
     }
+  }
+
+  function auxLabelOne(diseaseName: string,
+	fix: { diseaseName: string, adjNames: string[] } | undefined): string {
+	if( fix === undefined ){
+	  return "no fix";
+	} else {
+	  const adj = fix.adjNames.join("・");
+      return `${fix.diseaseName} (${adj})`
+	}
   }
 </script>
 
