@@ -10,7 +10,7 @@
   export let at: string;
   export let orig: ShinryouDisease | undefined = undefined;
   export let onEnter: (item: ShinryouDisease) => void;
-  let kind: "disease-check" | "no-check" = "disease-check";
+  let kind: "disease-check" | "no-check" | "multi-disease-check" = "disease-check";
   let diseaseCheckInputs: {
     diseaseName: string;
     fixDiseaseName: string;
@@ -118,7 +118,7 @@
     <input type="radio" bind:group={kind} value="disease-check" /> 病名チェック
     <input type="radio" bind:group={kind} value="no-check" /> チェックなし
   </div>
-  {#if kind === "disease-check"}
+  {#if kind === "disease-check" || kind === "multi-disease-check" }
     <div class="row">
       傷病名：{diseaseCheckInputs.diseaseName}
     </div>
@@ -155,12 +155,14 @@
       {#if byoumeiResult.length > 0}
         {#each byoumeiResult as m (m.shoubyoumeicode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => doByoumeiSelect(m)} style="cursor:pointer;">{m.name}</div>
         {/each}
       {/if}
       {#if adjResult.length > 0}
         {#each adjResult as m (m.shuushokugocode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => doAdjSelect(m)} style="cursor:pointer;">{m.name}</div>
         {/each}
       {/if}
