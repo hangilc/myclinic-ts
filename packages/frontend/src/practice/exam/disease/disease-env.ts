@@ -7,7 +7,6 @@ import { cache } from "@/lib/cache";
 import { extractDrugNames } from "./drugs-visit";
 import { hasMatchingShinryouDiseases, type ShinryouDisease, type Fix as ShinryouFix } from "@/lib/shinryou-disease";
 import { enterDiseaseByNames } from "./enter-disease-by-names";
-import type { Writable } from "svelte/store";
 
 let drugsWithoutMatchingDiseaseIndex = 1;
 let shinryouWithoutMatchingDiseaseIndex = 1;

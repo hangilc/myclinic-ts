@@ -1,11 +1,17 @@
 export type ShinryouDisease = {
   shinryouName: string
-} & (DiseaseCheck | NoCheck);
+} & (DiseaseCheck | MultiDiseaseCheck |  NoCheck);
 
 interface DiseaseCheck {
   kind: "disease-check";
   diseaseName: string;
   fix?: { diseaseName: string, adjNames: string[] }
+}
+
+interface MultiDiseaseCheck {
+  kind: "multi-disease-check";
+  diseaseNames: string[];
+  fix?: { diseaseName: string, adjNames: string[] }[];
 }
 
 interface NoCheck {
@@ -61,6 +67,13 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context): Fix |
         return undefined;
       }
     }
+    case "multi-disease-check": {
+      if( shinryouDisease.fix ){
+        
+      } else {
+        return undefined;
+      }
+    }
     default: {
       return undefined;
     }
@@ -71,6 +84,14 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
   switch (shinryouDisease.kind) {
     case "disease-check": {
       if (diseaseNamesContain(diseases, shinryouDisease.diseaseName)) {
+        return true;
+      } else {
+        const fix = createFix(shinryouDisease, ctx);
+        return fix ?? false;
+      }
+    }
+    case "multi-disease-check":{
+      if( diseaseNamesContainAll(diseases, shinryouDisease.diseaseNames)) {
         return true;
       } else {
         const fix = createFix(shinryouDisease, ctx);
@@ -90,4 +111,13 @@ function diseaseNamesContain(names: string[], shortName: string): boolean {
     }
   }
   return false;
+}
+
+function diseaseNamesContainAll(names: string[], shortNames: string[]): boolean {
+  for(let shortName of shortNames){
+    if( !diseaseNamesContain(names, shortName) ){
+      return false;
+    }
+  }
+  return true;
 }
