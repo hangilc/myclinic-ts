@@ -49,16 +49,13 @@ export function hasMatchingShinryouDiseases(
   return fixes;
 }
 
-export function createFix(shinryouDisease: ShinryouDisease, ctx: Context): Fix | undefined {
+export function createFix(shinryouDisease: ShinryouDisease, ctx: Context, diseases: string[]): Fix | undefined {
   switch (shinryouDisease.kind) {
     case "disease-check": {
       if (shinryouDisease.fix) {
         const dname = shinryouDisease.fix.diseaseName;
         const anames = shinryouDisease.fix.adjNames;
-        let label = dname;
-        if (anames.length > 0) {
-          label = `${label}（${anames.join("・")}）`;
-        }
+        let label = fixItemLabel(shinryouDisease.fix);
         return {
           label: `「${label}」を追加`,
           exec: () => ctx.enterDisease(dname, anames),
@@ -69,7 +66,23 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context): Fix |
     }
     case "multi-disease-check": {
       if( shinryouDisease.fix ){
-        
+        let fixItems: { diseaseName: string, adjNames: string[] }[] = [];
+        for(let f of shinryouDisease.fix ){
+          if( diseases.indexOf(f.diseaseName) >= 0){
+            continue;
+          }
+          fixItems.push(f);
+        }
+        if( fixItems.length === 0 ){
+          return undefined;
+        }
+        let label = fixItems.map(f => fixItemLabel(f)).join("、");
+        return {
+          label: `「${label}」を追加`,
+          exec: async () => {
+            await Promise.all(fixItems.map(f => ctx.enterDisease(f.diseaseName, f.adjNames)));
+          },
+        }
       } else {
         return undefined;
       }
@@ -80,13 +93,21 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context): Fix |
   }
 }
 
+function fixItemLabel(f: { diseaseName: string, adjNames: string[] }): string {
+  if( f.adjNames.length > 0 ) {
+    return `${f.diseaseName}（${f.adjNames.join("・")}）`;
+  } else {
+    return f.diseaseName;
+  }
+}
+
 function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Context): boolean | Fix {
   switch (shinryouDisease.kind) {
     case "disease-check": {
       if (diseaseNamesContain(diseases, shinryouDisease.diseaseName)) {
         return true;
       } else {
-        const fix = createFix(shinryouDisease, ctx);
+        const fix = createFix(shinryouDisease, ctx, diseases);
         return fix ?? false;
       }
     }
@@ -94,7 +115,7 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
       if( diseaseNamesContainAll(diseases, shinryouDisease.diseaseNames)) {
         return true;
       } else {
-        const fix = createFix(shinryouDisease, ctx);
+        const fix = createFix(shinryouDisease, ctx, diseases);
         return fix ?? false;
       }
     }
