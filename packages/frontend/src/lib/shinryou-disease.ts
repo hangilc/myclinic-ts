@@ -2,16 +2,20 @@ export type ShinryouDisease = {
   shinryouName: string
 } & (DiseaseCheck | MultiDiseaseCheck |  NoCheck);
 
-interface DiseaseCheck {
-  kind: "disease-check";
-  diseaseName: string;
-  fix?: { diseaseName: string, adjNames: string[] }
-}
+
+export type DiseaseCheck = {
+  kind: "disease-check" 
+} & Requirement
+
+// interface DiseaseCheck {
+//   kind: "disease-check";
+//   diseaseName: string;
+//   fix?: { diseaseName: string, adjNames: string[] }
+// }
 
 interface MultiDiseaseCheck {
   kind: "multi-disease-check";
-  diseaseNames: string[];
-  fix?: { diseaseName: string, adjNames: string[] }[];
+  requirements: Requirement[];
 }
 
 interface NoCheck {
@@ -25,6 +29,11 @@ export interface Fix {
 
 interface Context {
   enterDisease: (diseaseName: string, adjNames: string[]) => Promise<void>;
+}
+
+interface Requirement {
+  diseaseName: string;
+  fix?: { diseaseName: string, adjNames: string []}
 }
 
 export function hasMatchingShinryouDiseases(
@@ -49,42 +58,33 @@ export function hasMatchingShinryouDiseases(
   return fixes;
 }
 
+function createFixFromRequirement(req: Requirement, ctx: Context): Fix | undefined {
+  if( req.fix ){
+    const dname = req.fix.diseaseName;
+    const anames = req.fix.adjNames;
+    let label = fixItemLabel(req.fix);
+    return {
+      label: `「${label}」を追加`,
+      exec: () => ctx.enterDisease(dname, anames),
+    }
+  } else {
+    return undefined;
+  }
+}
+
 export function createFix(shinryouDisease: ShinryouDisease, ctx: Context, diseases: string[]): Fix | undefined {
   switch (shinryouDisease.kind) {
     case "disease-check": {
-      if (shinryouDisease.fix) {
-        const dname = shinryouDisease.fix.diseaseName;
-        const anames = shinryouDisease.fix.adjNames;
-        let label = fixItemLabel(shinryouDisease.fix);
-        return {
-          label: `「${label}」を追加`,
-          exec: () => ctx.enterDisease(dname, anames),
-        }
-      } else {
-        return undefined;
-      }
+      return createFixFromRequirement(shinryouDisease, ctx);
     }
     case "multi-disease-check": {
-      if( shinryouDisease.fix ){
-        let fixItems: { diseaseName: string, adjNames: string[] }[] = [];
-        for(let f of shinryouDisease.fix ){
-          if( diseases.indexOf(f.diseaseName) >= 0){
-            continue;
-          }
-          fixItems.push(f);
-        }
-        if( fixItems.length === 0 ){
-          return undefined;
-        }
-        let label = fixItems.map(f => fixItemLabel(f)).join("、");
-        return {
-          label: `「${label}」を追加`,
-          exec: async () => {
-            await Promise.all(fixItems.map(f => ctx.enterDisease(f.diseaseName, f.adjNames)));
-          },
-        }
-      } else {
-        return undefined;
+      let fixOpts = shinryouDisease.requirements.map(req => createFixFromRequirement(req, ctx));
+      let fixes: Fix[] = fixOpts.filter(fix => fix != undefined);
+      let label = fixes.map(fix => fix.label).join("：");
+      let execAll = Promise.all(fixes.map(fix => fix.exec))
+      return {
+        label,
+        exec: async () => { await execAll }
       }
     }
     default: {
@@ -104,7 +104,7 @@ function fixItemLabel(f: { diseaseName: string, adjNames: string[] }): string {
 function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Context): boolean | Fix {
   switch (shinryouDisease.kind) {
     case "disease-check": {
-      if (diseaseNamesContain(diseases, shinryouDisease.diseaseName)) {
+      if (isRequirementSatisified(shinryouDisease, diseases)){
         return true;
       } else {
         const fix = createFix(shinryouDisease, ctx, diseases);
@@ -112,7 +112,7 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
       }
     }
     case "multi-disease-check":{
-      if( diseaseNamesContainAll(diseases, shinryouDisease.diseaseNames)) {
+      if( isAllRequirementsSatisfied(shinryouDisease.requirements, diseases) ){
         return true;
       } else {
         const fix = createFix(shinryouDisease, ctx, diseases);
@@ -125,20 +125,22 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
   }
 }
 
-function diseaseNamesContain(names: string[], shortName: string): boolean {
-  for (let name of names) {
-    if (name.indexOf(shortName) >= 0) {
+function isRequirementSatisified(req: Requirement, diseaseNames: string[]): boolean {
+  for(let name of diseaseNames){
+    if( name.indexOf(req.diseaseName) >= 0 ){
       return true;
     }
   }
   return false;
 }
 
-function diseaseNamesContainAll(names: string[], shortNames: string[]): boolean {
-  for(let shortName of shortNames){
-    if( !diseaseNamesContain(names, shortName) ){
+function isAllRequirementsSatisfied(reqs: Requirement[], diseaseNames: string[]): boolean {
+  for(let req of reqs){
+    if( !isRequirementSatisified(req, diseaseNames) ){
       return false;
     }
   }
   return true;
 }
+
+
