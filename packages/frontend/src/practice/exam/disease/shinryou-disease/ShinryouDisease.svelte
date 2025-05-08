@@ -4,8 +4,8 @@
   import EditShinryouDiseaseDialog from "./EditShinryouDiseaseDialog.svelte";
   import { cache } from "@/lib/cache";
   import {
-    createFix,
-    createFix as createShinryouFix,
+    // createFix,
+    // createFix as createShinryouFix,
     type Fix,
   } from "@/lib/shinryou-disease";
 

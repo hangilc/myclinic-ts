@@ -7,12 +7,6 @@ export type DiseaseCheck = {
   kind: "disease-check" 
 } & Requirement
 
-// interface DiseaseCheck {
-//   kind: "disease-check";
-//   diseaseName: string;
-//   fix?: { diseaseName: string, adjNames: string[] }
-// }
-
 interface MultiDiseaseCheck {
   kind: "multi-disease-check";
   requirements: Requirement[];
@@ -31,7 +25,7 @@ interface Context {
   enterDisease: (diseaseName: string, adjNames: string[]) => Promise<void>;
 }
 
-interface Requirement {
+export interface Requirement {
   diseaseName: string;
   fix?: { diseaseName: string, adjNames: string []}
 }
