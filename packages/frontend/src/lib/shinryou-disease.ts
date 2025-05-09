@@ -137,4 +137,30 @@ function isAllRequirementsSatisfied(reqs: Requirement[], diseaseNames: string[])
   return true;
 }
 
+export function validateShinryouDisease(arg: any): ShinryouDisease {
+  if( typeof arg !== "object" ){
+    throw new Error("not an object");
+  }
+  if( !arg.hasOwnProperty("shinryouName") ){
+    throw new Error("missing shinryouName property");
+  }
+  let shinryouName = arg.shinryouName;
+  if( typeof shinryouName !== "string" ){
+    throw new Error("shinryouName is not string");
+  }
+  if( !arg.hasOwnProperty("kind") ){
+    throw new Error("missing kind property");
+  }
+  let kind = arg.kind;
+  if( typeof kind !== "string" ){
+    throw new Error("kind is not string");
+  }
+  if( kind === "disease-check" ){
+    
+  } else {
+    throw new Error(`invalid kind: ${kind}`);
+  }
+  return arg;
+}
+
 
