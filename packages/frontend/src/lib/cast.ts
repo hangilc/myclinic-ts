@@ -82,6 +82,10 @@ export function castList<T>(cast: Caster<T>): Caster<T[]> {
   return (arg: any) => arg.map((a: any) => cast(a));
 }
 
+export function castListOpt<T>(cast: Caster<T>): Caster<T[]> {
+  return (arg: any) => (arg == undefined) ? [] : castList(cast)(arg)
+}
+
 type ObjectKey = string | number | symbol;
 
 export function castObject<K extends ObjectKey, V>(

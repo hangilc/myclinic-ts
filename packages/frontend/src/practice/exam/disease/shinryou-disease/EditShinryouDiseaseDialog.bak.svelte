@@ -6,11 +6,10 @@
 
   export let destroy: () => void;
   export let title: string;
-  export let orig: ShinryouDisease | undefined = undefined;
-  export let onEnter: (item: ShinryouDisease) => void;
-  
   export let shinryouName: string;
   export let at: string;
+  export let orig: ShinryouDisease | undefined = undefined;
+  export let onEnter: (item: ShinryouDisease) => void;
   let kind: "disease-check" | "no-check" | "multi-disease-check" = "disease-check";
   let diseaseCheckInputs: {
     diseaseName: string;

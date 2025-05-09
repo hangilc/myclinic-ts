@@ -156,9 +156,58 @@ export function validateShinryouDisease(arg: any): ShinryouDisease {
     throw new Error("kind is not string");
   }
   if( kind === "disease-check" ){
-    
+    validateRequirement(arg);
+  } else if(kind === "multi-disease-check") {
+    if( !arg.hasOwnProperty("requirements") ){
+      throw new Error("missing requirements property");
+    }
+    let reqs = arg.requirements;
+    for(let req of reqs){
+      validateRequirement(req);
+    }
+  } else if(kind === "no-check") {
+    // nop
   } else {
     throw new Error(`invalid kind: ${kind}`);
+  }
+  return arg;
+}
+
+function validateRequirement(arg: any): Requirement {
+  if( typeof arg !== "object" ){
+    throw new Error("is not object");
+  }
+  if( !arg.hasOwnProperty("diseaseName") ){
+    throw new Error("missing diseaseName property");
+  }
+  let diseaseName = arg.diseaseName;
+  if( typeof diseaseName !== "string" ){
+    throw new Error("diseaseName property is not string");
+  }
+  if( arg.hasOwnProperty("fix") ){
+    let fix = arg.fix;
+    if( typeof fix !== "object" ){
+      throw new Error("is not object (fix)");
+    }
+    if( !fix.hasOwnProperty("diseaseName")){
+      throw new Error("missing diseaseName propert (fix)");
+    }
+    let diseaseName = fix.diseaseName;
+    if( typeof diseaseName !== "string" ){
+      throw new Error("diseaseName is not string (fix)");
+    }
+    if( !fix.hasOwnProperty("adjNames")){
+      throw new Error("missing adjNames propert (fix)");
+    }
+    let adjNames = fix.adjNames;
+    if( !Array.isArray(adjNames) ){
+      throw new Error("adjNames is not Array");
+    }
+    for(let adj of adjNames){
+      if( typeof adj !== "string" ){
+        throw new Error("adjNames element is not string");
+      }
+    }
   }
   return arg;
 }

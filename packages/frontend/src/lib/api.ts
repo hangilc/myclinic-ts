@@ -2,12 +2,12 @@ import { toKouhi, interfaceToKouhi } from "myclinic-model";
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
-import { castBoolean, castCdr, castList, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+import { castBoolean, castCdr, castList, castListOpt, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
 import { pipe } from "myclinic-model/pipe";
 import type { RP剤情報, 用法レコード} from "./denshi-shohou/presc-info";
 import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
-import type { ShinryouDisease } from "./shinryou-disease";
+import { validateShinryouDisease, type ShinryouDisease } from "./shinryou-disease";
 import { parseLocationQuery } from "./parse-location-query";
 
 function castDrawerOp(obj: any): DrawerOp {
@@ -1674,7 +1674,8 @@ export default {
   },
 
   getShinryouDiseases(): Promise<ShinryouDisease[]> {
-    return get("get-config", { name: "shinryou-disease" }, a => a ?? []);
+    return get("get-config", { name: "shinryou-disease" },
+      castListOpt(validateShinryouDisease));
   },
 
   setShinryouDiseases(shinryouDiseases: ShinryouDisease[]): Promise<void> {
