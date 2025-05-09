@@ -3,7 +3,7 @@
   import type { Requirement } from "@/lib/shinryou-disease";
   import type { ByoumeiMaster, ShuushokugoMaster } from "myclinic-model";
 
-  export let src: Requirement | undefined = undefined;
+  export let src: Requirement;
   export let at: string;
   export let onEnter: (entered: Requirement) => void;
   export let onCancel: () => void;

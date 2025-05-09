@@ -7,6 +7,7 @@
     // createFix,
     // createFix as createShinryouFix,
     type Fix,
+    type ShinryouDisease,
   } from "@/lib/shinryou-disease";
 
   export let env: Writable<DiseaseEnv | undefined>;
@@ -16,12 +17,16 @@
     const patientId = curEnv?.patient?.patientId;
     const at = curEnv?.checkingDate;
     if (curEnv && patientId && at) {
+	  let orig: ShinryouDisease = {
+		shinryouName: name,
+		kind: "no-check",
+	  }
       const d: EditShinryouDiseaseDialog = new EditShinryouDiseaseDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
-          title: "診療病名の追加",
-          shinryouName: name,
+          title: "診療行為病名の追加",
+          orig,
           at,
           onEnter: async (item) => {
             let cur = await cache.getShinryouDiseases();

@@ -5,7 +5,6 @@
 
   export let onChanged: () => void;
   export let at: string;
-  
   let shinryouDiseases: ShinryouDisease[] = [];
 
   loadShinryouDiseases();
@@ -19,7 +18,8 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        title: "診療行為病名の編集",
+        shinryouName: item.shinryouName,
+        title: "診療病名の編集",
         at,
         orig: item,
         onEnter: async (updated: ShinryouDisease) => {
@@ -42,42 +42,27 @@
     }
   }
 
-  function reqFixRep(fix: { diseaseName: string, adjNames: string[] }): string {
-	if( fix.adjNames.length === 0 ){
-	  return fix.diseaseName; 
-	} else {
-	  let adj = fix.adjNames.join("、");
-	  return `${fix.diseaseName} (${adj})`
-	}
-  }
-  
-  function shinryouRep(item: ShinryouDisease): string {
-	switch(item.kind) {
-	  case "disease-check": {
-		let s = `${item.shinryouName}|${item.diseaseName}`;
-		if( item.fix ){
-		  s += `|${reqFixRep(item.fix)}`;
-		}
-		return s;
-	  }
+  function auxLabel(item: ShinryouDisease): string {
+    switch(item.kind){
+      case "disease-check": {
+		return auxLabelOne(item.diseaseName, item.fix);
+      }
 	  case "multi-disease-check": {
-		let d = item.requirements.map(req => req.diseaseName).join("・");
-		let s = `${item.shinryouName}|${d}`;
-		let fixes: { diseaseName: string, adjNames: string[]}[] = [];
-		for(let req of item.requirements){
-		  if( req.fix ){
-			fixes.push(req.fix);
-		  }
-		}
-		let f = fixes.map(fix => reqFixRep(fix)).join("、");
-		if( f ){
-		  s += `|${f}`;
-		}
-		return s;
+		
 	  }
-	  case "no-check": {
-		return `${item.shinryouName}|no-check`;
-	  }
+      case "no-check": {
+        return "no-check";
+      }
+    }
+  }
+
+  function auxLabelOne(diseaseName: string,
+	fix: { diseaseName: string, adjNames: string[] } | undefined): string {
+	if( fix === undefined ){
+	  return "no fix";
+	} else {
+	  const adj = fix.adjNames.join("・");
+      return `${fix.diseaseName} (${adj})`
 	}
   }
 </script>
@@ -85,7 +70,7 @@
 <div class="wrapper">
   {#each shinryouDiseases as item}
     <div class="item">
-      <div>{shinryouRep(item)}</div>
+      <div>{item.shinryouName}|{auxLabel(item)}</div>
       <div>
         <button on:click={() => doEdit(item)}>編集</button>
         <button on:click={() => doDelete(item)}>削除</button>
