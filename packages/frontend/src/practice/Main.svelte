@@ -20,6 +20,7 @@
   import ShohouUsage from "./shohou-usage/ShohouUsage.svelte";
   import ModifyOnshi from "./ModifyOnshi.svelte";
   import DXKasan from "./DXKasan.svelte";
+  import DupPatient from "./dup-patient/DupPatient.svelte";
   
   export let serviceStore: Writable<string>;
 
@@ -68,6 +69,9 @@
   {/if}
   {#if $serviceStore === "dx-kasan"}
 	<DXKasan />
+  {/if}
+  {#if $serviceStore === "dup-patient"}
+	<DupPatient />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>

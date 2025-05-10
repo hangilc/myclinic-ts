@@ -9,6 +9,7 @@ import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
 import { validateShinryouDisease, type ShinryouDisease } from "./shinryou-disease";
 import { parseLocationQuery } from "./parse-location-query";
+import { validateDupPatient, type DupPatient } from "@/practice/dup-patient/dup-patient";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -57,9 +58,9 @@ export function getBackend(): string {
   }
 }
 
-function sslServerPort(): number {
-  return 8443;
-}
+// function sslServerPort(): number {
+//   return 8443;
+// }
 
 function nonSslServerPort(): number {
   return 8080;
@@ -1138,7 +1139,7 @@ export default {
       { "patient-id": patientId.toString(), at: dateParam(at) },
       (json: any) => {
         const [_ser, _patient, shahoList, koukiList, roujinList, kouhiList] =
-          json;
+              json;
         return [
           castList(m.Shahokokuho.cast)(shahoList),
           castList(m.Koukikourei.cast)(koukiList),
@@ -1498,10 +1499,10 @@ export default {
 
   batchEnterOrUpdateHoken(shahokokuhoList: m.Shahokokuho[], koukikoureiList: m.Koukikourei[]):
     Promise<[m.Shahokokuho[], m.Koukikourei[]]> {
-    return post("batch-enter-or-update-hoken", {
-      shahokokuhoList, koukikoureiList
-    }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
-  },
+      return post("batch-enter-or-update-hoken", {
+        shahokokuhoList, koukikoureiList
+      }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
+    },
 
   countShahokokuhoUsage(shahokokuhoId: number): Promise<number> {
     return get("count-shahokokuho-usage", { "shahokokuho-id": shahokokuhoId.toString() }, castNumber);
@@ -1703,16 +1704,20 @@ export default {
   },
 
   setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
-    return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, a => {});
+    return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, () => {});
   },
 
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
     return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
   },
 
-	listShinryouForVisit(visitId: number): Promise<m.Shinryou[]> {
-		return get("list-shinryou-for-visit", { "visit-id": visitId.toString() }, castList(m.Shinryou.cast));
-	},
+  listShinryouForVisit(visitId: number): Promise<m.Shinryou[]> {
+	return get("list-shinryou-for-visit", { "visit-id": visitId.toString() }, castList(m.Shinryou.cast));
+  },
+
+  searchDupPatient(): Promise<DupPatient[]> {
+    return get("search-dup-patient", {}, castList(validateDupPatient))
+  }
 };
 
 
