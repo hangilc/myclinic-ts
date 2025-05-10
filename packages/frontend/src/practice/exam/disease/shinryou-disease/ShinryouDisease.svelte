@@ -4,8 +4,7 @@
   import EditShinryouDiseaseDialog from "./EditShinryouDiseaseDialog.svelte";
   import { cache } from "@/lib/cache";
   import {
-    // createFix,
-    // createFix as createShinryouFix,
+  createId,
     type Fix,
     type ShinryouDisease,
   } from "@/lib/shinryou-disease";
@@ -18,6 +17,7 @@
     const at = curEnv?.checkingDate;
     if (curEnv && patientId && at) {
 	  let orig: ShinryouDisease = {
+		id: createId(),
 		shinryouName: name,
 		kind: "no-check",
 	  }
@@ -35,6 +35,7 @@
             await curEnv.checkShinryou();
             $env = curEnv;
           },
+		  onCancel: () => {},
         },
       });
     }

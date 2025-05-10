@@ -24,10 +24,13 @@
         orig: item,
         onEnter: async (updated: ShinryouDisease) => {
           let cur = await cache.getShinryouDiseases();
-          cur = cur.map(e => e === item ? updated : e) ;
+          cur = cur.map(e => e.id === updated.id ? updated : e) ;
           await cache.setShinryouDiseases(cur);
-          onChanged()
-        }
+		  shinryouDiseases = cur;
+          onChanged();
+		  d.$destroy();
+        },
+		onCancel: () => d.$destroy(),
       }
     })
   }

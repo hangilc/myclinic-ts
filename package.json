@@ -26,6 +26,7 @@
     "@types/diff-match-patch": "^1.0.36",
     "diff-match-patch": "^1.0.5",
     "js-base64": "^3.7.7",
+    "uuid": "^11.1.0",
     "valibot": "^0.30.0"
   }
 }

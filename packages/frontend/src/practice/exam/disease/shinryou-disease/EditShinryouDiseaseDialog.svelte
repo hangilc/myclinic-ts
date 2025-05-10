@@ -1,8 +1,6 @@
 <script lang="ts">
-  import api from "@/lib/api";
   import Dialog from "@/lib/Dialog.svelte";
-  import type { Requirement, ShinryouDisease } from "@/lib/shinryou-disease";
-  import type { ByoumeiMaster, ShuushokugoMaster } from "myclinic-model";
+  import { type Requirement, type ShinryouDisease } from "@/lib/shinryou-disease";
   import RequirementForm from "./RequirementForm.svelte";
 
   export let destroy: () => void;
@@ -10,9 +8,9 @@
   export let orig: ShinryouDisease;
   export let at: string;
   export let onEnter: (item: ShinryouDisease) => void;
+  export let onCancel: () => void;
   
   let shinryouName: string = orig.shinryouName;
-  let kind: "disease-check" | "no-check" | "multi-disease-check" = orig.kind;
   let reqPartSeq = 0;
   let reqParts: {
 	id: number;
@@ -25,86 +23,49 @@
 	let parts = orig.requirements.map(req => ({ id: reqPartSeq++, req, editing: false }));
 	reqParts.push(...parts);
   }
-  let searchMode: "byoumei" | "shuushokugo" = "byoumei";
-  let searchText = "";
-  let byoumeiResult: ByoumeiMaster[] = [];
-  let adjResult: ShuushokugoMaster[] = [];
 
   function doEnter() {
-    // shinryouName = shinryouName.trim();
-    // if (shinryouName !== "") {
-    //   switch (kind) {
-    //     case "no-check": {
-    //       destroy();
-    //       onEnter({
-    //         shinryouName,
-    //         kind,
-    //       });
-    //       break;
-    //     }
-    //     case "disease-check": {
-    //       const inputs = diseaseCheckInputs;
-    //       if (inputs.diseaseName === "") {
-    //         alert("病名が設定されていません。");
-    //         return;
-    //       }
-    //       let fix: { diseaseName: string; adjNames: string[] } | undefined =
-    //         undefined;
-    //       if (inputs.fixDiseaseName === "" && inputs.fixAdjNames.length > 0) {
-    //         alert("Ｆｉｘ病名が設定されていません。");
-    //         return;
-    //       }
-    //       if (inputs.fixDiseaseName !== "") {
-    //         fix = {
-    //           diseaseName: inputs.fixDiseaseName,
-    //           adjNames: inputs.fixAdjNames,
-    //         };
-    //       }
-    //       destroy();
-    //       onEnter({
-    //         shinryouName,
-    //         kind,
-    //         diseaseName: inputs.diseaseName,
-    //         fix,
-    //       });
-    //     }
-    //   }
-    // }
+	if( reqParts.length === 0 ){
+	  onEnter({
+		id: orig.id,
+		shinryouName,
+		kind: "no-check",
+	  })
+	} else if( reqParts.length === 1 ){
+	  const req = reqParts[0].req;
+	  console.log("req", req);
+	  onEnter({
+		id: orig.id,
+		shinryouName,
+		kind: "disease-check",
+		diseaseName: req.diseaseName,
+		fix: req.fix,
+	  });
+	} else {
+	  const reqs = reqParts.map(p => p.req);
+	  onEnter({
+		id: orig.id,
+		shinryouName,
+		kind: "multi-disease-check",
+		requirements: reqs,
+	  })
+	}
   }
 
-  // async function doSearch() {
-  //   searchText = searchText.trim();
-  //   if (searchText !== "") {
-  //     byoumeiResult = [];
-  //     adjResult = [];
-  //     if (searchMode === "byoumei") {
-  //       byoumeiResult = await api.searchByoumeiMaster(searchText, at);
-  //     } else if (searchMode === "shuushokugo") {
-  //       adjResult = await api.searchShuushokugoMaster(searchText, at);
-  //     }
-  //   }
-  // }
 
-  // function doByoumeiSelect(m: ByoumeiMaster) {
-  //   if (kind === "disease-check") {
-  //     diseaseCheckInputs.diseaseName = m.name;
-  //     diseaseCheckInputs.fixDiseaseName = m.name;
-  //     diseaseCheckInputs = diseaseCheckInputs;
-  //     searchText = "";
-  //     searchMode = "shuushokugo";
-  //     byoumeiResult = [];
-  //   }
-  // }
-
-  // function doAdjSelect(m: ShuushokugoMaster) {
-  //   if (kind === "disease-check") {
-  //     diseaseCheckInputs.fixAdjNames.push(m.name);
-  //     diseaseCheckInputs = diseaseCheckInputs;
-  //     adjResult = [];
-  //   }
-  // }
-
+  function doReqEntered(partId: number, entered: Requirement) {
+	for(let part of reqParts){
+	  if( part.id === partId ){
+		part.req = entered;
+		part.editing = false;
+		reqParts = reqParts;
+		break;
+	  }
+	}
+  }
+  
   function reqRep(req: Requirement): string {
+	if( req.diseaseName ){
 	let s = req.diseaseName;
 	if( req.fix ){
 	  let f = req.fix.diseaseName;
@@ -114,7 +75,26 @@
 	  }
 	  s += `|${f}`;
 	}
-	return s;
+	  return s;
+	} else {
+	  return "(未設定)";
+	}
+  }
+
+  function doCancel() {
+	onCancel();
+  }
+
+  function doAdd() {
+	let newReq = {
+	  diseaseName: "",
+	}
+	reqParts.push({
+	  id: reqPartSeq++,
+	  req: newReq,
+	  editing: true,
+	});
+	reqParts = reqParts;
   }
   
 </script>
@@ -124,18 +104,26 @@
     診療行為名：{shinryouName}
   </div>
   {#each reqParts as part (part.id)} 
-	<div class="req">
-	  <div>{reqRep(part.req)}</div>
-	  <div>
-		<button on:click={() => part.editing = !part.editing}>編集</button>
-		<button>削除</button>
-	  </div>
-	  {#if part.editing}
-		<RequirementForm src={part.req} at={at} onEnter={() => {}}
-		  onCancel={() => part.editing = false}/>
-	  {/if}
-	</div>
+  <div class="req">
+	<div>{reqRep(part.req)}</div>
+	<div>
+	  <button on:click={() => part.editing = !part.editing}>編集</button>
+	  <button>削除</button>
+  </div>
+  {#if part.editing}
+	<RequirementForm src={part.req} at={at}
+	  onEnter={entered => doReqEntered(part.id, entered)}
+	  onCancel={() => part.editing = false}/>
+  {/if}
+  </div>
   {/each}
+  <div>
+	<button on:click={doAdd}>追加</button>
+  </div>
+  <div>
+	<button on:click={doEnter}>入力</button>
+	<button on:click={doCancel}>キャンセル</button>
+  </div>
 </Dialog>
 
 <style>
@@ -146,5 +134,4 @@
   .req {
 	border: 1px solid gray;
   }
-
 </style>

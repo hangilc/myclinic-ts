@@ -1,5 +1,12 @@
+import { v4 as uuidv4 } from "uuid";
+
+export function createId(): string {
+  return uuidv4();
+}
+
 export type ShinryouDisease = {
-  shinryouName: string
+  id: string;
+  shinryouName: string;
 } & (DiseaseCheck | MultiDiseaseCheck |  NoCheck);
 
 
@@ -72,13 +79,21 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context, diseas
       return createFixFromRequirement(shinryouDisease, ctx);
     }
     case "multi-disease-check": {
-      let fixOpts = shinryouDisease.requirements.map(req => createFixFromRequirement(req, ctx));
+      let reqs = shinryouDisease.requirements;
+      reqs = reqs.filter(req => !isRequirementSatisified(req, diseases));
+      let fixOpts = reqs.map(req => createFixFromRequirement(req, ctx));
+      for(let f of fixOpts){
+        if( !f ){
+          return undefined;
+        }
+      }
       let fixes: Fix[] = fixOpts.filter(fix => fix != undefined);
+      console.log("fixes", fixes);
       let label = fixes.map(fix => fix.label).join("：");
       let execAll = Promise.all(fixes.map(fix => fix.exec))
       return {
         label,
-        exec: async () => { await execAll }
+        exec: execAll
       }
     }
     default: {
@@ -107,6 +122,7 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
     }
     case "multi-disease-check":{
       if( isAllRequirementsSatisfied(shinryouDisease.requirements, diseases) ){
+        console.log("multi-returning-true");
         return true;
       } else {
         const fix = createFix(shinryouDisease, ctx, diseases);
@@ -140,6 +156,14 @@ function isAllRequirementsSatisfied(reqs: Requirement[], diseaseNames: string[])
 export function validateShinryouDisease(arg: any): ShinryouDisease {
   if( typeof arg !== "object" ){
     throw new Error("not an object");
+  }
+  if( !arg.hasOwnProperty("id") ){
+    arg.id = createId();
+  } else {
+    let id = arg.id;
+    if( typeof id !== "string" ){
+      throw new Error("id is not string");
+    }
   }
   if( !arg.hasOwnProperty("shinryouName") ){
     throw new Error("missing shinryouName property");
