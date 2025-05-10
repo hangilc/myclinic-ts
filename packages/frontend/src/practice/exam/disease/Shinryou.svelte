@@ -64,7 +64,7 @@
       let cur = await cache.getShinryouDiseases();
       cur = cur.filter((e) => e !== item);
       await cache.setShinryouDiseases(cur);
-      shinryouDiseases = await cache.getShinryouDiseases();
+	  loadShinryouDiseases();
       onChanged();
     }
   }
