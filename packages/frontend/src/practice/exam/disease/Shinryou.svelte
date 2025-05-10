@@ -51,7 +51,7 @@
           let cur = await cache.getShinryouDiseases();
           cur = cur.map(e => e.id === updated.id ? updated : e) ;
           await cache.setShinryouDiseases(cur);
-		  shinryouDiseases = cur;
+		  loadShinryouDiseases();
           onChanged();
         },
 		onCancel: () => {},
