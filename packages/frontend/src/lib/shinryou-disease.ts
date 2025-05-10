@@ -90,10 +90,11 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context, diseas
       let fixes: Fix[] = fixOpts.filter(fix => fix != undefined);
       console.log("fixes", fixes);
       let label = fixes.map(fix => fix.label).join("：");
-      let execAll = Promise.all(fixes.map(fix => fix.exec))
       return {
         label,
-        exec: execAll
+        exec: async() => {
+          await Promise.all(fixes.map(fix => fix.exec()))
+        }
       }
     }
     default: {
@@ -122,7 +123,6 @@ function execCheck(shinryouDisease: ShinryouDisease, diseases: string[], ctx: Co
     }
     case "multi-disease-check":{
       if( isAllRequirementsSatisfied(shinryouDisease.requirements, diseases) ){
-        console.log("multi-returning-true");
         return true;
       } else {
         const fix = createFix(shinryouDisease, ctx, diseases);

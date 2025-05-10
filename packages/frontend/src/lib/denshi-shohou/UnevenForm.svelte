@@ -39,7 +39,6 @@
       if (typeof r == "string") {
         error = r;
       } else {
-        console.log("r", r);
         onEnter(r);
       }
     }

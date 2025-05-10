@@ -2,16 +2,41 @@
   import { cache } from "@/lib/cache";
   import type { ShinryouDisease } from "@/lib/shinryou-disease";
   import EditShinryouDiseaseDialog from "./shinryou-disease/EditShinryouDiseaseDialog.svelte";
+  import { shinryouDiseasesUpdated } from "../exam-vars";
+  import { onDestroy } from "svelte";
 
   export let onChanged: () => void;
   export let at: string;
   
   let shinryouDiseases: ShinryouDisease[] = [];
-
+  let filterText = "";
+  let filteredShinryouDiseases: ShinryouDisease[] = [];
+  
   loadShinryouDiseases();
 
+  const unsubs = [shinryouDiseasesUpdated.subscribe(ver => {
+	if( ver !== 0 ){
+	  console.log("ver", ver);
+	  loadShinryouDiseases();
+	}
+  })];
+
+  onDestroy(() => unsubs.forEach(f => f()))
+  
   async function loadShinryouDiseases() {
     shinryouDiseases = await cache.getShinryouDiseases();
+	doApplyFilter();
+  }
+
+  function doApplyFilter() {
+	if( filterText === "" ){
+	  console.log("no-filter", shinryouDiseases.length);
+	  filteredShinryouDiseases = shinryouDiseases;
+	} else {
+	  filteredShinryouDiseases = shinryouDiseases.filter(s => {
+		return s.shinryouName.indexOf(filterText) >= 0;
+	  })
+	}
   }
 
   function doEdit(item: ShinryouDisease) {
@@ -28,9 +53,8 @@
           await cache.setShinryouDiseases(cur);
 		  shinryouDiseases = cur;
           onChanged();
-		  d.$destroy();
         },
-		onCancel: () => d.$destroy(),
+		onCancel: () => {},
       }
     })
   }
@@ -86,7 +110,12 @@
 </script>
 
 <div class="wrapper">
-  {#each shinryouDiseases as item}
+  <form on:submit|preventDefault={doApplyFilter}>
+	filter: <input type="text" size="9" bind:value={filterText}/>
+	<button type="submit">apply</button>
+  </form>
+  <hr />
+  {#each filteredShinryouDiseases as item}
     <div class="item">
       <div>{shinryouRep(item)}</div>
       <div>

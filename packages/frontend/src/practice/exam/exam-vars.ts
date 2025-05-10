@@ -719,4 +719,5 @@ appEvent.patientUpdated.subscribe(patient => {
   }
 })
 
+export const shinryouDiseasesUpdated = writable<number>(0);
 

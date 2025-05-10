@@ -8,6 +8,7 @@
     type Fix,
     type ShinryouDisease,
   } from "@/lib/shinryou-disease";
+  import { shinryouDiseasesUpdated } from "../../exam-vars";
 
   export let env: Writable<DiseaseEnv | undefined>;
 
@@ -19,7 +20,8 @@
 	  let orig: ShinryouDisease = {
 		id: createId(),
 		shinryouName: name,
-		kind: "no-check",
+		kind: "disease-check",
+		diseaseName: "",
 	  }
       const d: EditShinryouDiseaseDialog = new EditShinryouDiseaseDialog({
         target: document.body,
@@ -33,6 +35,7 @@
             cur = [...cur, item];
             await cache.setShinryouDiseases(cur);
             await curEnv.checkShinryou();
+			shinryouDiseasesUpdated.update(n => n+1);
             $env = curEnv;
           },
 		  onCancel: () => {},

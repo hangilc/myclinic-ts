@@ -25,6 +25,13 @@
   }
 
   function doEnter() {
+	for(let part of reqParts){
+	  if( part.req.diseaseName === "" ){
+		alert("病名が設定されていません");
+		return;
+	  }
+	}
+	destroy();
 	if( reqParts.length === 0 ){
 	  onEnter({
 		id: orig.id,
@@ -82,6 +89,7 @@
   }
 
   function doCancel() {
+	destroy();
 	onCancel();
   }
 
@@ -96,6 +104,10 @@
 	});
 	reqParts = reqParts;
   }
+
+  function doDelete(id: number) {
+	reqParts = reqParts.filter(p => p.id !== id);
+  }
   
 </script>
 
@@ -108,18 +120,22 @@
 	<div>{reqRep(part.req)}</div>
 	<div>
 	  <button on:click={() => part.editing = !part.editing}>編集</button>
-	  <button>削除</button>
+	  <button on:click={() => doDelete(part.id)}>削除</button>
   </div>
   {#if part.editing}
+	<div class="req-form">
 	<RequirementForm src={part.req} at={at}
 	  onEnter={entered => doReqEntered(part.id, entered)}
 	  onCancel={() => part.editing = false}/>
+	</div>
   {/if}
   </div>
   {/each}
+  <hr />
   <div>
 	<button on:click={doAdd}>追加</button>
   </div>
+  <hr />
   <div>
 	<button on:click={doEnter}>入力</button>
 	<button on:click={doCancel}>キャンセル</button>
@@ -133,5 +149,11 @@
 
   .req {
 	border: 1px solid gray;
+	padding: 6px;
+	margin-bottom: 6px;
+  }
+
+  .req-form {
+	margin-top: 6px;
   }
 </style>

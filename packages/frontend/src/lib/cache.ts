@@ -1,16 +1,14 @@
-import type { ClinicInfo, DiseaseExample, UsageMaster } from "myclinic-model";
+import type { ClinicInfo, DiseaseExample } from "myclinic-model";
 import api from "./api";
-import { type RP剤情報, type 用法レコード, type 用法補足レコード, 用法レコードObject, 用法補足レコードObject } from "./denshi-shohou/presc-info";
+import { type RP剤情報, type 用法レコード, } from "./denshi-shohou/presc-info";
 import type { DrugDisease } from "./drug-disease";
-import type { ShinryouDisease } from "./shinryou-disease";
-import type { 薬品コード種別 } from "./denshi-shohou/denshi-shohou";
 import { validateDxKasanSeries, type DxKasanApplied } from "./dx-kasan";
+import type { ShinryouDisease } from "./shinryou-disease";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
 let shohouFreqUsage: FreqUsage[] | undefined = undefined;
-// let shohouFreqPrescription: FreqPresc[] | undefined = undefined;
 let onshiViewSecret: string | undefined = undefined;
 let drugDiseases: DrugDisease[] | undefined = undefined;
 let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
