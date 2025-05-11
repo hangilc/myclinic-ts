@@ -38,7 +38,7 @@
   async function init() {
     hoken1Usage = await fetchUsage(hoken1);
     hoken2Usage = await fetchUsage(hoken2);
-    // initDone = true;
+	console.log("hoken1Usage", hoken1Usage, hoken1);
   }
 
   async function fetchUsage(h: Shahokokuho | Koukikourei): Promise<Visit[]> {
@@ -151,7 +151,7 @@
       <div class="hoken-aux">
         使用回数：{hoken1Usage.length}回
         {#if hoken1Usage.length > 0}
-          最終試用日：{lastVisitDate(hoken1Usage)}
+          最終使用日：{lastVisitDate(hoken1Usage)}
         {:else}
           <button on:click={doDeleteHoken1}>削除</button>
         {/if}
@@ -179,7 +179,7 @@
       <div class="hoken-aux">
         使用回数：{hoken2Usage.length}回
         {#if hoken2Usage.length > 0}
-          最終試用日：{lastVisitDate(hoken2Usage)}
+          最終使用日：{lastVisitDate(hoken2Usage)}
         {:else}
           <button on:click={doDeleteHoken2}>削除</button>
         {/if}

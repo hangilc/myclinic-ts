@@ -37,6 +37,9 @@
   {#if visitIds !== undefined}
 	<div>
 	  診察：{visitIds.length}
+	  {#if info.lastVisit}
+		(最終受診日：{info.lastVisit.visitedAt.substring(0, 10)})
+	  {/if}
 	</div>
   {/if}
 </div>

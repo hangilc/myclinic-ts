@@ -1004,6 +1004,10 @@ export default {
     );
   },
 
+  updateDisease(disease: m.Disease): Promise<boolean> {
+    return post("update-disease", disease, {}, castBoolean)
+  },
+
   listAppEventSince(fromEventId: number): Promise<m.AppEvent[]> {
     return get(
       "list-app-event-since",
@@ -1188,6 +1192,10 @@ export default {
 
   updateKoukikourei(koukikourei: m.Koukikourei): Promise<boolean> {
     return post("update-koukikourei", koukikourei, {}, castBoolean);
+  },
+
+  updateRoujin(roujin: m.Roujin): Promise<boolean> {
+    return post("update-roujin", roujin, {}, castBoolean);
   },
 
   updateKouhi(kouhi: m.KouhiInterface): Promise<boolean> {

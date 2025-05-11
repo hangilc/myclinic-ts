@@ -1,4 +1,4 @@
-import type { Appoint, DiseaseData, Kouhi, Koukikourei, Patient, Roujin, Shahokokuho } from "myclinic-model";
+import type { Appoint, DiseaseData, Kouhi, Koukikourei, Patient, Roujin, Shahokokuho, Visit } from "myclinic-model";
 
 export interface DupPatient {
   patient1: Patient;
@@ -24,4 +24,5 @@ export interface PatientInfo {
   appoints: Appoint[];
   diseases: DiseaseData[];
   visitIds: number[];
+  lastVisit: Visit | undefined;
 }

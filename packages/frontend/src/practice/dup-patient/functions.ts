@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { Appoint, Patient } from "myclinic-model";
+import type { Appoint, DiseaseData, Kouhi, Koukikourei, Patient, Roujin, Shahokokuho, Visit } from "myclinic-model";
 import type { HokenInfo, PatientInfo } from "./dup-patient";
 
 let serialId = 1;
@@ -37,30 +37,111 @@ export async function getAppoints(patientId: number): Promise<Appoint[]> {
   return result.map(e => e[0]);
 }
 
+async function getLastVisit(visitIds: number[]): Promise<Visit | undefined> {
+  if( visitIds.length > 0 ){
+	let id = visitIds[visitIds.length - 1];
+	return await api.getVisit(id)
+  } else {
+	return undefined;
+  }
+}
+
 export async function getInfo(patient: Patient): Promise<PatientInfo> {
+  let visitIds = await api.listVisitIdByPatientReverse(patient.patientId, 0, 100000);
+  visitIds.reverse();
+  
   return {
     patient,
     hokenInfo: await getHoken(patient.patientId),
     appoints: await getAppoints(patient.patientId),
     diseases: await api.listDiseaseEx(patient.patientId),
-    visitIds: (await api.listVisitIdByPatientReverse(patient.patientId, 0, 100000)).reverse()
+    visitIds,
+    lastVisit: await getLastVisit(visitIds),
   }
 }
 
 export function createMerge(src: PatientInfo, dst: PatientInfo, cb: () => void):
-(() => Promise<void>) | undefined {
-  if( hasNoHoken(src.hokenInfo) && src.appoints.length === 0 &&
-    src.diseases.length === 0 ){
-      return async() => {
-        for(let visitId of src.visitIds){
-          let visit = await api.getVisit(visitId);
-          visit.patientId = dst.patient.patientId;
-          await api.updateVisit(visit);
-        }
-        await api.deletePatient(src.patient.patientId);
-        cb();
-      }
-    } else {
-      return undefined;
+() => Promise<void> {
+  let dstPatientId = dst.patient.patientId;
+  return async() => {
+    await mergeVisit(src.visitIds, dstPatientId);
+    await mergeAppoints(src.appoints, dstPatientId);
+    await mergeDiseases(src.diseases, dstPatientId);
+    await mergeHoken(src.hokenInfo, dstPatientId);
+    await api.deletePatient(src.patient.patientId);
+    let hokenOverlap = await checkCurrentDupHoken(dstPatientId);
+    if( hokenOverlap ){
+      alert(hokenOverlap);
     }
+    cb();
+  }
+}
+
+async function checkCurrentDupHoken(patientId: number): Promise<string | undefined> {
+  let today = new Date();
+  let shahokokuho = await api.listAvailableShahokokuho(patientId, today);
+  let koukikourei = await api.listAvailableKoukikourei(patientId, today);
+  if( shahokokuho.length + koukikourei.length > 1 ){
+    return `hoken overlap (patient-id: ${patientId})`;
+  } else {
+    return undefined;
+  }
+}
+
+async function mergeAppoints(srcAppoints: Appoint[], dstPatientId: number) {
+  for(let appoint of srcAppoints) {
+    appoint = Object.assign({}, appoint, { patientId: dstPatientId });
+    await api.updateAppoint(appoint);
+  }
+}
+
+async function mergeDiseases(diseases: DiseaseData[], dstPatientId: number) {
+  for(let diseaseData of diseases) {
+    let disease = diseaseData.disease;
+    disease = Object.assign({}, disease, { patientId: dstPatientId });
+    await api.updateDisease(disease);
+  }
+}
+
+async function mergeShahokokuho(list: Shahokokuho[], dstPatientId: number) {
+  for(let shahokokuho of list){
+    shahokokuho = Object.assign({}, shahokokuho, { patientId: dstPatientId });
+    await api.updateShahokokuho(shahokokuho);
+  }
+}
+
+async function mergeKoukikourei(list: Koukikourei[], dstPatientId: number) {
+  for(let koukikourei of list){
+    koukikourei = Object.assign({}, koukikourei, { patientId: dstPatientId });
+    await api.updateKoukikourei(koukikourei);
+  }
+}
+
+async function mergeRoujin(list: Roujin[], dstPatientId: number) {
+  for(let roujin of list){
+    roujin = Object.assign({}, roujin, { patientId: dstPatientId });
+    await api.updateRoujin(roujin);
+  }
+}
+
+async function mergeKouhi(list: Kouhi[], dstPatientId: number) {
+  for(let kouhi of list){
+    kouhi = Object.assign({}, kouhi, { patientId: dstPatientId });
+    await api.updateKouhi(kouhi);
+  }
+}
+
+async function mergeHoken(hokenInfo: HokenInfo, dstPatientId: number) {
+  await mergeShahokokuho(hokenInfo.shahokokuho, dstPatientId);
+  await mergeKoukikourei(hokenInfo.koukikourei, dstPatientId);
+  await mergeRoujin(hokenInfo.roujin, dstPatientId);
+  await mergeKouhi(hokenInfo.kouhi, dstPatientId);
+}
+
+async function mergeVisit(visitIds: number[], dstPatientId: number) {
+  for(let visitId of visitIds){
+    let visit = await api.getVisit(visitId);
+    visit.patientId = dstPatientId;
+    await api.updateVisit(visit);
+  }
 }

@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { Patient } from "myclinic-model";
+  import type { Patient, Visit } from "myclinic-model";
   import { createMerge, getInfo } from "./functions";
   import type { PatientInfo } from "./dup-patient";
   import PatientInfoComponent from "./PatientInfo.svelte";
+  import api from "@/lib/api";
 
   export let patient1: Patient
   export let patient2: Patient
@@ -11,7 +12,7 @@
   let info2: PatientInfo | undefined = undefined;
   let merge1: (() => Promise<void>) | undefined = undefined;
   let merge2: (() => Promise<void>) | undefined = undefined;
-
+  
   init();
 
   async function init() {
@@ -20,6 +21,7 @@
 	merge1 = createMerge(info1, info2, onMerged);
 	merge2 = createMerge(info2, info1, onMerged);
   }
+
 </script>
 
 <div>
