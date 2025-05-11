@@ -14,7 +14,7 @@
   }
 </script>
 
-<ServiceHeader title="ＤＸ加算設定" />
+<ServiceHeader title="重複患者管理" />
 <div>
   <button on:click={doSearch}>重複患者検索</button>
 </div>
