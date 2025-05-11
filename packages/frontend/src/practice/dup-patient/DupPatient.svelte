@@ -8,6 +8,10 @@
   async function doSearch() {
 	searchResult = await searchDupPatient();
   }
+
+  function doDelete(id: number) {
+	searchResult = searchResult.filter(r => r.id !== id);
+  }
 </script>
 
 <ServiceHeader title="ＤＸ加算設定" />
@@ -24,7 +28,8 @@
 	  </div>
 	  {#if result.detail}
 		<div>
-		  <DupDetail patient1={result.patient1} patient2={result.patient2}/>
+		  <DupDetail patient1={result.patient1} patient2={result.patient2}
+			onMerged={() => doDelete(result.id)}/>
 		</div>
 	  {/if}
 	</div>

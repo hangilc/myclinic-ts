@@ -883,7 +883,7 @@ export default {
     return get(
       "list-disease-ex",
       { "patient-id": patientId.toString() },
-      castList(m.DiseaseData.castFromTuple)
+      castListOpt(m.DiseaseData.castFromTuple)
     );
   },
 
@@ -1717,6 +1717,10 @@ export default {
 
   searchDupPatient(): Promise<DupPatient[]> {
     return get("search-dup-patient", {}, castList(validateDupPatient))
+  },
+
+  deletePatient(patientId: number): Promise<boolean> {
+    return get("delete-patient", { "patient-id": patientId.toString() }, castBoolean); 
   }
 };
 
