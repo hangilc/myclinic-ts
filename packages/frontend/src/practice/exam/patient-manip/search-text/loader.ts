@@ -6,6 +6,8 @@ export interface Loader {
   load(): Promise<[Text, Visit][]>;
   gotoPrev(): boolean;
   gotoNext(): boolean;
+  hasPrev(): boolean;
+  hasNext(): boolean;
   getPage(): number;
 }
 
@@ -55,6 +57,15 @@ export class SimpleLoader implements Loader {
   getPage(): number {
     return this.page+1;
   }
+
+  hasPrev(): boolean {
+    return this.page >= 1;
+  }
+
+  hasNext(): boolean {
+    return this.page < this.totalPages - 1;
+  }
+  
 }
 
 export class SkipLoader implements Loader {
@@ -63,6 +74,7 @@ export class SkipLoader implements Loader {
   pageOffsets: number[] = [];
   page: number = 0;
   nPerPage: number;
+  eofMet: boolean = false;
 
   constructor(text: string, patientId: number, nPerPage: number) {
     this.text = text;
@@ -110,6 +122,7 @@ export class SkipLoader implements Loader {
         }
       }
       if( eof ){
+        this.eofMet = true;
         break;
       }
       if( ++iter > 60 ){
@@ -148,6 +161,18 @@ export class SkipLoader implements Loader {
 
   getPage(): number {
     return this.page + 1;
+  }
+
+  hasPrev(): boolean {
+    return this.page >= 1;
+  }
+
+  hasNext(): boolean {
+    if( this.eofMet ){
+      return this.page === this.pageOffsets.length - 1;
+    } else {
+      return true;
+    }
   }
   
 }

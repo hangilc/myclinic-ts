@@ -4,7 +4,7 @@
   import type { Patient, Text, Visit } from "myclinic-model";
   import { FormatDate } from "myclinic-util";
   import { SimpleLoader, SkipLoader, type Loader } from "./search-text/loader";
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   
 
   export let destroy: () => void;
@@ -18,7 +18,10 @@
   let loader: Loader | undefined = undefined;
   let inputElement: HTMLInputElement;
   let pageNumber: number | undefined = undefined;
+  let hasPrev: boolean = false;
+  let hasNext: boolean = false;
   let skipHikitsugi = true;
+  let resultElement: HTMLDivElement;
 
   onMount(() => inputElement?.focus());
   
@@ -26,6 +29,12 @@
 	if( loader ){
 	  textVisits = await loader.load();
 	  pageNumber = loader.getPage();
+	  hasPrev = loader.hasPrev();
+	  hasNext = loader.hasNext();
+	  await tick();
+	  if( resultElement ){
+		resultElement.scrollTop = 0;
+	  }
 	}
   }
 
@@ -86,15 +95,19 @@
     <form on:submit|preventDefault={doSearch} class="form">
       <input type="text" bind:value={searchText} bind:this={inputElement} />
       <button type="submit">検索</button>
-	<input type="checkbox" bind:checked={skipHikitsugi} on:change={doHikitsugiChange} />
-	引継ぎ除外
+	  <input type="checkbox" bind:checked={skipHikitsugi} on:change={doHikitsugiChange} />
+	  引継ぎ除外
     </form>
 	{#if loader}
-	  <a href="javascript:void(0)" on:click={gotoPrev}>前へ</a>
+	  <a href="javascript:void(0)"
+		on:click={hasPrev ? gotoPrev : () => {}}
+		class:disabled={!hasPrev}>前へ</a>
 	  <span class="page-number">{pageNumber}</span>
-	  <a href="javascript:void(0)" on:click={gotoNext}>次へ</a>
+	  <a href="javascript:void(0)"
+		on:click={hasNext ? gotoNext : () => {}}
+		class:disabled={!hasNext}>次へ</a>
 	{/if}
-    <div class="result">
+    <div class="result" bind:this={resultElement}>
 	  {#each textVisits as tv (tv[0].textId)}
         <div class="result-item">
 		  <div class="visited-at">
@@ -126,6 +139,11 @@
 
   .form {
     margin-bottom: 10px;
+  }
+
+  a.disabled {
+	color: gray;
+	cursor:default;
   }
 
   .result {
