@@ -6,7 +6,7 @@
   import { endPatient, currentPatient, currentVisitId } from "./exam-vars";
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
-  import SearchTextDialog from "./patient-manip/SearchTextDialog.svelte";
+  import SearchTextDialog from "./patient-manip/search-text/SearchTextDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";

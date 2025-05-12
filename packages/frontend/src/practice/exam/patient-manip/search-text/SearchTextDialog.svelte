@@ -3,7 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { Patient, Text, Visit } from "myclinic-model";
   import { FormatDate } from "myclinic-util";
-  import { SimpleLoader, SkipLoader, type Loader } from "./search-text/loader";
+  import { SimpleLoader, SkipLoader, type Loader } from "./loader";
   import { onMount, tick } from "svelte";
   
 
@@ -61,6 +61,9 @@
 	text = "";
 	loader = undefined;
 	pageNumber = undefined;
+	hasPrev = false;
+	hasNext = false;
+	textVisits = [];
   }
 
   function formatContent(c: string): string {
