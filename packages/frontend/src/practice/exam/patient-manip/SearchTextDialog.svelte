@@ -33,6 +33,7 @@
     let t = searchText.trim();
     if (t !== "" && patientId != null) {
 	  if( skipHikitsugi ){
+		console.log("skipHikitsugi");
 		loader = new SkipLoader(t, patientId, nPerPage);
 	  } else {
 		let totalPages = 0;

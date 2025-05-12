@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import type { Text, Visit } from "myclinic-model";
+import { skipHikitsugi } from "../../record/text/hikitsugi";
 
 export interface Loader {
   load(): Promise<[Text, Visit][]>;
@@ -59,7 +60,8 @@ export class SimpleLoader implements Loader {
 export class SkipLoader implements Loader {
   text: string;
   patientId: number;
-  page: number = 1;
+  pageOffsets: number[] = [];
+  page: number = 0;
   nPerPage: number;
   offset: number = 0;
   noMoreRemoteData: boolean = false;
@@ -73,12 +75,21 @@ export class SkipLoader implements Loader {
   async load(): Promise<[Text, Visit][]> {
     let acc: [Text, Visit][] = [];
     while( true ){
+      console.log("iter");
       if( this.noMoreRemoteData ){
         break;
       }
       let fetched = await this.fetchFromRemote();
+      fetched = fetched.map(([t,v]) => {
+        t = Object.assign({}, t, { content: skipHikitsugi(t.content).trim()});
+        return [t, v];
+      })
+      fetched = fetched.filter(([t, _v]) => t.content.indexOf(this.text) >= 0);
       acc.push(...fetched);
-      break;
+      if( acc.length >= this.nPerPage) {
+        console.log("acc length", acc.length);
+        break;
+      }
     }
     return acc;
   }
@@ -93,6 +104,7 @@ export class SkipLoader implements Loader {
     if( result.length === 0){
       this.noMoreRemoteData = true;
     }
+    this.offset += result.length;
     return result;
   }
 
@@ -122,3 +134,5 @@ export class SkipLoader implements Loader {
   }
   
 }
+
+

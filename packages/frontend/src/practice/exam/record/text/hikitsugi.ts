@@ -18,3 +18,12 @@ export function extractHikitsugi(s: string): string {
     return s.substring(0, m.index);
   }
 }
+
+export function skipHikitsugi(s: string): string {
+  const m = endregex.exec(s);
+  if( m == null || m.length === 0){
+    return "";
+  } else {
+    return s.substring(m.index);
+  }
+}
