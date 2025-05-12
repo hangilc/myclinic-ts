@@ -10,7 +10,7 @@
 		showKensaService,
 	} from "./exam-vars";
 	import SearchShohouSampleDialog from "./SearchShohouSampleDialog.svelte";
-	import GlobalSearchDialog from "./GlobalSearchDialog.svelte";
+	import GlobalSearchDialog from "./global-search/GlobalSearchDialog.svelte";
 	import OnshiKakuninFormDialog from "@/lib/OnshiKakuninFormDialog.svelte";
 	import PopupMenu from "@/lib/PopupMenu.svelte";
 	import { dataCySetter } from "@/lib/popup-helper";
