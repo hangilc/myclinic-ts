@@ -93,14 +93,15 @@ export class SkipLoader implements Loader {
     let iter = 0;
     while( true ){
       let fetched = await this.fetchFromRemote(offset, limit);
-      offset += fetched.length;
       const eof = fetched.length < limit;
-      fetched = fetched.map(([t,v]) => {
-        t = Object.assign({}, t, { content: skipHikitsugi(t.content).trim()});
-        return [t, v];
-      })
-      fetched = fetched.filter(([t, _v]) => t.content.indexOf(this.text) >= 0);
-      acc.push(...fetched);
+      for(let [t, v] of fetched) {
+        let c = t.content;
+        c = skipHikitsugi(c).trim();
+        if( c.indexOf(this.text) >= 0 ){
+          acc.push([Object.assign({}, t, { content: c}), v]);
+        }
+        
+      }
       if( acc.length >= this.nPerPage) {
         let overflow = acc.length - this.nPerPage;
         offset -= overflow;
