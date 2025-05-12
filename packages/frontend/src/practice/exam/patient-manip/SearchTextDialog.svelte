@@ -48,6 +48,12 @@
     }
   }
 
+  async function doHikitsugiChange() {
+	text = "";
+	loader = undefined;
+	pageNumber = undefined;
+  }
+
   function formatContent(c: string): string {
     return c
       .replaceAll("\n", "<br />")
@@ -80,7 +86,7 @@
     <form on:submit|preventDefault={doSearch} class="form">
       <input type="text" bind:value={searchText} bind:this={inputElement} />
       <button type="submit">検索</button>
-	<input type="checkbox" bind:checked={skipHikitsugi} />
+	<input type="checkbox" bind:checked={skipHikitsugi} on:change={doHikitsugiChange} />
 	引継ぎ除外
     </form>
 	{#if loader}
