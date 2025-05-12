@@ -63,8 +63,6 @@ export class SkipLoader implements Loader {
   pageOffsets: number[] = [];
   page: number = 0;
   nPerPage: number;
-  offset: number = 0;
-  noMoreRemoteData: boolean = false;
 
   constructor(text: string, patientId: number, nPerPage: number) {
     this.text = text;
@@ -73,13 +71,30 @@ export class SkipLoader implements Loader {
   }
 
   async load(): Promise<[Text, Visit][]> {
+    if( !(this.page <= this.pageOffsets.length ) ){
+      let p = this.page;
+      let l = this.pageOffsets.length;
+      throw new Error(`should not happen page: ${p}, offsets.length: ${l}`);
+    }
+    let offset: number;
+    let limit: number;
+    if( this.page === 0 ){
+      offset = 0;
+    } else {
+      offset = this.pageOffsets[this.page - 1];
+    }
+    if( this.page === this.pageOffsets.length ){
+      limit = this.nPerPage;
+    } else {
+      limit = this.pageOffsets[this.page] - offset;
+    }
+    console.log("offset:limit", offset, limit);
     let acc: [Text, Visit][] = [];
+    let iter = 0;
     while( true ){
-      console.log("iter");
-      if( this.noMoreRemoteData ){
-        break;
-      }
-      let fetched = await this.fetchFromRemote();
+      let fetched = await this.fetchFromRemote(offset, limit);
+      offset += fetched.length;
+      const eof = fetched.length < limit;
       fetched = fetched.map(([t,v]) => {
         t = Object.assign({}, t, { content: skipHikitsugi(t.content).trim()});
         return [t, v];
@@ -87,50 +102,52 @@ export class SkipLoader implements Loader {
       fetched = fetched.filter(([t, _v]) => t.content.indexOf(this.text) >= 0);
       acc.push(...fetched);
       if( acc.length >= this.nPerPage) {
-        console.log("acc length", acc.length);
+        let overflow = acc.length - this.nPerPage;
+        offset -= overflow;
+        if( this.page === this.pageOffsets.length ){
+          this.pageOffsets.push(offset);
+        }
         break;
+      }
+      if( eof ){
+        break;
+      }
+      if( ++iter > 60 ){
+        throw new Error("too many iteration");
       }
     }
     return acc;
   }
 
-  async fetchFromRemote(): Promise<[Text, Visit][]> {
-    let result = await api.searchTextForPatient(
+  async fetchFromRemote(offset: number, limit: number): Promise<[Text, Visit][]> {
+    return await api.searchTextForPatient(
       this.text,
       this.patientId,
-      this.nPerPage,
-      this.offset,
+      limit,
+      offset,
     );
-    if( result.length === 0){
-      this.noMoreRemoteData = true;
-    }
-    this.offset += result.length;
-    return result;
   }
 
   gotoPrev(): boolean {
-    if( this.offset === 0 ){
+    if( this.page === 0 ){
       return false;
     } else {
-      this.offset -= this.nPerPage;
-      if( this.offset < 0 ){
-        this.offset = 0;
-      }
+      this.page -= 1;
       return true;
     }
   }
 
   gotoNext(): boolean {
-    if( this.noMoreRemoteData ){
-      return false;
-    } else {
-      this.offset += this.nPerPage;
+    if( this.page < this.pageOffsets.length ){
+      this.page += 1;
       return true;
+    } else {
+      return false;
     }
   }
 
   getPage(): number {
-    return this.page;
+    return this.page + 1;
   }
   
 }
