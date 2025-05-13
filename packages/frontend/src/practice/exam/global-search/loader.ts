@@ -3,7 +3,7 @@ import type { Patient, Text, Visit } from "myclinic-model";
 import { skipHikitsugi } from "../record/text/hikitsugi";
 
 export interface Loader {
-  load(): Promise<[Text, Visit, Patient][]>;
+  load(cancel: () => boolean): Promise<[Text, Visit, Patient][]>;
   gotoPrev(): boolean;
   gotoNext(): boolean;
   hasPrev(): boolean;
@@ -21,10 +21,9 @@ export class SimpleLoader implements Loader {
     this.text = text;
     this.nPerPage = nPerPage;
     this.totalPages = totalPages;
-    console.log("totalPages", totalPages);
   }
 
-  load(): Promise<[Text, Visit, Patient][]> {
+  load(_cancel: () => boolean): Promise<[Text, Visit, Patient][]> {
     return api.searchTextGlobally(this.text, this.nPerPage, this.nPerPage * this.page);
   }
 
@@ -38,7 +37,6 @@ export class SimpleLoader implements Loader {
   }
   
   gotoNext(): boolean {
-    console.log("enter gotoNext", this.page, this.totalPages);
     if( this.totalPages <= 1 || this.page === (this.totalPages - 1) ){
       return false;
     } else {
@@ -73,28 +71,25 @@ export class SkipLoader implements Loader {
     this.nPerPage = nPerPage;
   }
 
-  async load(): Promise<[Text, Visit, Patient][]> {
+  async load(cancel: () => boolean): Promise<[Text, Visit, Patient][]> {
     if( !(this.page <= this.pageOffsets.length ) ){
       let p = this.page;
       let l = this.pageOffsets.length;
       throw new Error(`should not happen page: ${p}, offsets.length: ${l}`);
     }
     let offset: number;
-    let limit: number;
+    let limit: number = this.nPerPage;
     if( this.page === 0 ){
       offset = 0;
     } else {
       offset = this.pageOffsets[this.page - 1];
     }
-    if( this.page === this.pageOffsets.length ){
-      limit = this.nPerPage;
-    } else {
-      limit = this.pageOffsets[this.page] - offset;
-    }
-    console.log("offset:limit", offset, limit);
     let acc: [Text, Visit, Patient][] = [];
     let iter = 0;
     outer: while( true ){
+      if( cancel() ){
+        break;
+      }
       let fetched = await this.fetchFromRemote(offset, limit);
       const eof = fetched.length < limit;
       for(let [t, v, p] of fetched) {
@@ -106,9 +101,8 @@ export class SkipLoader implements Loader {
           if( acc.length === this.nPerPage ){
             if( this.page === this.pageOffsets.length ){
               this.pageOffsets.push(offset);
-              break outer;
             }
-            
+            break outer;
           }
         }
       }

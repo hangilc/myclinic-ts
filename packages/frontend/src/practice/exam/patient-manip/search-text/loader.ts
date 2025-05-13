@@ -115,9 +115,8 @@ export class SkipLoader implements Loader {
           if( acc.length === this.nPerPage ){
             if( this.page === this.pageOffsets.length ){
               this.pageOffsets.push(offset);
-              break outer;
             }
-            
+            break outer;
           }
         }
       }

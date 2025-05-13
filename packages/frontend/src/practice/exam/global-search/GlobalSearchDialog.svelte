@@ -19,6 +19,7 @@
   let resultWrapper: HTMLElement;
   let inputElement: HTMLInputElement;
   let skipHikitsugi: boolean = true;
+  let cancelFlag = false;
 
   onMount(() => inputElement?.focus());
 
@@ -35,9 +36,17 @@
 	result = [];
   }
 
+  function checkCancel(): boolean {
+	let b = cancelFlag;
+	if( b ){
+	  cancelFlag = false;
+	}
+	return b;
+  }
+
   async function load() {
 	if( loader ){
-	  result = await loader.load();
+	  result = await loader.load(checkCancel);
 	  pageNumber = loader.getPage();
 	  hasPrev = loader.hasPrev();
 	  hasNext = loader.hasNext();
@@ -100,6 +109,7 @@
 	  <a href="javascript:void(0)"
 		on:click={hasNext ? gotoNext : () => {}}
 		class:disabled={!hasNext}>次へ</a>
+	  <a href="javascript:void(0)" on:click={() => cancelFlag = true}>キャンセル</a>
 	</div>
     {/if}
     <div class="result" bind:this={resultWrapper}>
@@ -129,6 +139,7 @@
 	  <a href="javascript:void(0)"
 		on:click={hasNext ? gotoNext : () => {}}
 		class:disabled={!hasNext}>次へ</a>
+	  <a href="javascript:void(0)" on:click={() => cancelFlag = true}>キャンセル</a>
 	</div>
     {/if}
   </div>
