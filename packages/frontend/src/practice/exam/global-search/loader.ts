@@ -21,6 +21,7 @@ export class SimpleLoader implements Loader {
     this.text = text;
     this.nPerPage = nPerPage;
     this.totalPages = totalPages;
+    console.log("totalPages", totalPages);
   }
 
   load(): Promise<[Text, Visit, Patient][]> {
@@ -42,7 +43,6 @@ export class SimpleLoader implements Loader {
       return false;
     } else {
       this.page += 1;
-      console.log("returning true");
       return true;
     }
   }
@@ -116,7 +116,7 @@ export class SkipLoader implements Loader {
         this.eofMet = true;
         break;
       }
-      if( ++iter > 60 ){
+      if( ++iter > 6000 ){
         throw new Error("too many iteration");
       }
     }
