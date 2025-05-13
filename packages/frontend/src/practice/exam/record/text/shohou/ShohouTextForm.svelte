@@ -31,6 +31,7 @@
     TextMemoWrapper,
     type ShohouTextMemo,
   } from "@/lib/text-memo";
+  import { denshiToOldShohou } from "./denshi-to-old-shohou";
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -162,11 +163,19 @@
     }
   }
 
- </script>
+  async function doOldShohou() {
+	if( confirm("旧処方に変更しますか？") ){
+	  let c = denshiToOldShohou(shohou);
+	  console.log(c);
+	}
+  }
+
+</script>
 
 <div style="border:1px solid green;padding:10px;border-radius:6px">
   <DenshiShohouDisp {shohou} prescriptionId={undefined} />
 </div>
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
@@ -174,5 +183,6 @@
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
+  <a href="javascript:void(0)" on:click={doOldShohou}>旧処方に</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>

@@ -74,7 +74,6 @@
 	}
 	let nIppan = 0;
 	let nHasIppan = 0;
-	console.log("ippan", nIppan, nHasIppan, ippanDrugs);
 	for(let d of ippanDrugs){
 	  if( d.ippanKind === "一般名有り" ){
 		nHasIppan += 1;
