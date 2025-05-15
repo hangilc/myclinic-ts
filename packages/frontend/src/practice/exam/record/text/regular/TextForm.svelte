@@ -19,7 +19,8 @@
   } from "@/lib/shohousen-text-helper";
   import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
   import { cache } from "@/lib/cache";
-  import { parseShohou } from "@/lib/parse-shohou";
+  // import { parseShohou } from "@/lib/parse-shohou";
+  import { parseShohou } from "@/lib/parse-shohou2";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import { formatHokenshaBangou } from "myclinic-util";
   import {
@@ -200,7 +201,12 @@
         return;
       }
     }
-    const shohou = parseShohou(text.content, false);
+    // const shohou = parseShohou(text.content, false);
+    const shohou = parseShohou(text.content);
+	if( typeof shohou === "string" ){
+	  alert(shohou);
+	  return;
+	}
     const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
