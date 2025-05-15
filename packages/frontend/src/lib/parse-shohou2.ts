@@ -205,12 +205,19 @@ function parseAmount(src: string, i: number): Result<Amount> {
   if( !m ){
     return failure("failed to parse amount");
   }
-  let amount: Amount = {
-    pre: m[1],
-    amount: m[2],
-    unit: m[3],
+  {
+    let r = eatToEol(src, i);
+    if( !r.ok ){
+      return failure("failed to parse amount (non empty line trailer)");
+    }
+    i = r.next;
+    let amount: Amount = {
+      pre: m[1],
+      amount: m[2],
+      unit: m[3],
+    }
+    return { ok: true, value: amount, next: i};
   }
-  return { ok: true, value: amount, next: i};
 }
 
 
