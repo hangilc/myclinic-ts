@@ -17,6 +17,11 @@ export function parseShohou(src: string): Shohou | string {
     }
     i = r.next;
   }
+  {
+    let index = 1;
+    let r = parseDrugAndAmount(src, i, index);
+    console.log("r", r);
+  }
   return "result";
 }
 
@@ -53,21 +58,6 @@ function matchStringToHankaku(src: string, start: number, str: string): Result<v
     }
     let a = src[start+i];
     a = toHankaku(a);
-    if( a !== str[i]) {
-      return failure(`failed to match ${str}`);
-    }
-  }
-  return { ok: true, value: undefined, next: start + str.length };
-}
-
-function matchStringToZenkaku(src: string, start: number, str: string): Result<void> {
-  for(let i=0;i<str.length;i++){
-    let j = start + i;
-    if( j >= src.length ){
-      return failure(`failed to match: ${str}`)
-    }
-    let a = src[start+i];
-    a = toZenkaku(a);
     if( a !== str[i]) {
       return failure(`failed to match ${str}`);
     }
@@ -161,14 +151,40 @@ Result<DrugAndAmount> {
     }
     i = r.next;
   }
-  i = skipSpaces(src, i);
-  while(true){
+  {
     let r = parseNonSpaces(src, i);
     if( !r.ok ){
-      return failure();
+      let s = src.substring(i, i+10);
+      return failure(`failed to read drug name: ${s}`);
+    }
+    drug = r.value;
+    i = r.next;
+  }
+  let iter = 0;
+  while(true){
+    i = skipSpaces(src, i);
+    console.log("iter", src.substring(i, i+10));
+    let r = parseNonSpaces(src, i);
+    if( !r.ok ){
+      let s = src.substring(i, i+10);
+      return failure(`cannot find drug amount: ${s}`);
+    }
+    let amount = cvtToAmount(r.value);
+    if( !amount ){
+      drug += ` ${r.value}`;
+      i = r.next;
+    } else {
+      let r2 = eatToEol(src, r.next);
+      if( !r2.ok) {
+        let s = src.substring(r.next, r.next+10);
+        return failure(`extra content after drug amount: ${s}`);
+      }
+      return { ok: true, value: { drug, amount }, next: r2.next };
+    }
+    if( ++iter > 3 ){
+      return failure("too many iteration while reading drug amount");
     }
   }
-  return { ok: true, value: {drug, amount}, next: i };
 }
 
 let drugUnitStrings = [
@@ -195,28 +211,17 @@ let reAmount = new RegExp(
     "(" + drugUnitStrings.join("|") + ")"
 );
 
-function parseAmount(src: string, i: number): Result<Amount> {
-  let r = parseNonSpaces(src, i);
-  if( !r.ok ){
-    return failure("failed to parse amount");
-  }
-  i = r.next;
-  let m = reAmount.exec(r.value);
+function cvtToAmount(s: string): Amount | undefined {
+  let m = reAmount.exec(s);
   if( !m ){
-    return failure("failed to parse amount");
-  }
-  {
-    let r = eatToEol(src, i);
-    if( !r.ok ){
-      return failure("failed to parse amount (non empty line trailer)");
-    }
-    i = r.next;
+    return undefined;
+  } else {
     let amount: Amount = {
       pre: m[1],
       amount: m[2],
       unit: m[3],
-    }
-    return { ok: true, value: amount, next: i};
+    };
+    return amount;
   }
 }
 
