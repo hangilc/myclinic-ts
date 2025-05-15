@@ -1,5 +1,5 @@
 import { type Shohou } from "@/lib/parse-shohou";
-import { toHankaku, toZenkaku } from "./zenkaku";
+import { toHankaku } from "./zenkaku";
 
 export function parseShohou(src: string): Shohou | string {
   let i = 0;
@@ -22,7 +22,7 @@ export function parseShohou(src: string): Shohou | string {
     let r = parseDrugAndAmount(src, i, index);
     console.log("r", r);
   }
-  return "result";
+  return "develop";
 }
 
 type Result<T> = {
@@ -34,7 +34,11 @@ type Result<T> = {
   reason: string;
 }
 
-function failure(reason: string): Result<any>{
+function failure(reason: string, src?: string, at?: number): Result<any>{
+  if( src !== undefined && at !== undefined ){
+    let extract = src.substring(at - 10, at) + "|" + src.substring(at, at + 10);
+    reason += ":at " + extract;
+  }
   return { ok: false, reason, };
 }
 
@@ -78,32 +82,23 @@ function eatToEol(src: string, start: number): Result<void> {
   return { ok: true, value: undefined, next: src.length };
 }
 
-function skipNonSpaces(src: string, i: number): number {
-  for(;i<src.length;i++){
-    let ch = src[i];
-    if( isSpace(ch) ){
-      return i;
-    }
-  }
-  return i;
-}
-
 function parseNonSpaces(src: string, i: number): Result<string> {
   let start = i;
-  if( i < src.length ){
+  for(;i<src.length && src[i] !== "\n"; i++){
     let ch = src[i];
     if( isSpace(ch) ){
-      return failure("space expected");
+      break;
     }
-    let j = skipNonSpaces(src, i+1);
-    return { ok: true, value: src.substring(start, j), next: j };
+  }
+  if( i === start ){
+    return failure("unexpected space");
   } else {
-    return failure("unexpected EOF");
+    return { ok: true, value: src.substring(start, i), next: i };
   }
 }
 
 function skipSpaces(src: string, i: number): number {
-  for(;i<src.length;i++){
+  for(;i<src.length && src[i] !== "\n";i++){
     let ch = src[i];
     if( !isSpace(ch) ){
       return i;
@@ -142,7 +137,6 @@ interface DrugAndAmount {
 function parseDrugAndAmount(src: string, i: number, index: number):
 Result<DrugAndAmount> {
   let drug: string = "";
-  let amount: string = "";
   i = skipSpaces(src, i);
   {
     let r = matchStringToHankaku(src, i, `${index})`);
@@ -176,8 +170,7 @@ Result<DrugAndAmount> {
     } else {
       let r2 = eatToEol(src, r.next);
       if( !r2.ok) {
-        let s = src.substring(r.next, r.next+10);
-        return failure(`extra content after drug amount: ${s}`);
+        return failure("extra content after drug amount", src, r.next);
       }
       return { ok: true, value: { drug, amount }, next: r2.next };
     }
