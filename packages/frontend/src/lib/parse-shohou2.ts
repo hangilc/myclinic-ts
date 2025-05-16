@@ -24,20 +24,44 @@ export function parseShohou(src: string): Shohou | string {
   }
   let groups = rGroups.value;
   pos = rGroups.rest;
+  let shohou: Shohou = {
+    groups,
+    bikou: [],
+    kigen: undefined
+  };
   let rShohouCommands = repeat(probeShohouCommand, pos);
   if( !rShohouCommands.success ){
     return formatFailure(rShohouCommands);
+  }
+  let handleError = handleShohouCommands(shohou, rShohouCommands.value);
+  if( handleError ){
+    return handleError;
   }
   pos = rShohouCommands.rest;
   pos = posSkipSpaceNLs(pos);
   if( !posIsAtEOL(pos) ){
     return formatFailure({ success: false, message: "extra content", pos })
   }
-  return {
-    groups,
-    bikou: [],
-    kigen: undefined,
+  return shohou;
+}
+
+function handleShohouCommands(shohou: Shohou, commands: Command[]): string | undefined {
+  for(let c of commands) {
+    switch(c.name){
+      case "memo": {
+        shohou.bikou.push(c.value);
+        break;
+      }
+      case "有効期限":{
+        shohou.kigen = c.value;
+        break;
+      }
+      default: {
+        return `unknown shohou command: ${c.name}`;
+      }
+    }
   }
+  return undefined;
 }
 
 interface Pos {
