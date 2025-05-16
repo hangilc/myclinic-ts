@@ -1,63 +1,123 @@
-import { type Shohou } from "@/lib/parse-shohou";
-import { toHankaku, toZenkaku } from "./zenkaku";
+import {
+  type Shohou,
+  type Drug,
+  type Usage,
+  type DrugGroup,
+} from "@/lib/parse-shohou";
+import { toHankaku } from "./zenkaku";
 
 export function parseShohou(src: string): Shohou | string {
-  let lr = newLineReader(src);
-  let line = lr();
-  if( line === undefined ){
-    return "unexpected end of data while reading prolog1";
+  let pos = { src, i: 0 };
+  let rProlog1 = parseProlog1(pos);
+  if (!rProlog1.success) {
+    return formatFailure(rProlog1);
+  }
+  pos = rProlog1.rest;
+  let rProlog2 = parseProlog2(pos);
+  if (!rProlog2.success) {
+    return formatFailure(rProlog2);
+  }
+  pos = rProlog2.rest;
+  let rGroups = repeat(parseDrugGroup, pos);
+  if( !rGroups.success ){
+    return formatFailure(rGroups);
+  }
+  let groups = rGroups.value;
+  pos = rGroups.rest;
+  return {
+    groups,
+    bikou: [],
+    kigen: undefined,
+  }
+}
+
+interface Pos {
+  src: string;
+  i: number;
+}
+
+function posStartsWithSpace(pos: Pos): boolean {
+  let { src, i } = pos;
+  if( i < src.length ){
+    let ch = src[i];
+    return ch === " " || ch === "　";
   } else {
-    if( !matchProlog1(line) ){
-      return `invalid prolog1: ${line}`;
+    return false;
+  }
+}
+
+function posSkipSpaces(pos: Pos): Pos {
+  let { src, i } = pos;
+  for(;i<src.length && src[i] !== "\n";i++) {
+    let ch = src[i];
+    if( ch === " " || ch === "　" ){
+      //nop
+    } else {
+      break;
     }
   }
-  line = lr();
-  if( line === undefined ){
-    return "unexpected end of data while reading prolog2";
+  return { src, i };
+}
+
+type Result<T> = {
+  success: true;
+  value: T;
+  rest: Pos;
+} | {
+  success: false;
+  message: string;
+  pos: Pos;
+}
+
+function formatFailure(failure: { success: false, message: string, pos: Pos }): string {
+  let pos = failure.pos;
+  let context = pos.src.substring(pos.i - 10, pos.i) + "|" +
+    pos.src.substring(pos.i, pos.i+10);
+  context = context.replaceAll("\n", "\\n");
+  return `${failure.message}: ${context}`;
+}
+
+function getLine(pos: Pos): Result<string> {
+  let j = pos.src.indexOf("\n", pos.i);
+  if (j < 0) {
+    return { success: false, message: "cannot get line", pos };
   } else {
-    if( !matchProlog2(line) ){
-      return `invalid prolog2: ${line}`
+    return {
+      success: true,
+      value: pos.src.substring(pos.i, j),
+      rest: { src: pos.src, i: j + 1 }
     }
   }
-  line = lr();
-  if( line === undefined ){
-    return "unexpected end of data while reading drug group";
-  }
-  {
-    let r = matchIndexDrugAmount(line);
-    if( typeof r === "string" ){
-      return r;
-    }
-    console.log("r", r);
-  }
-  return "develop";
 }
 
-type LineReader = () => string | undefined;
-
-function newLineReader(src: string): () => string | undefined {
-  let i = 0;
-  return () => {
-    for(let j=i;j<src.length;j++){
-      if( src[j] === "\n" ){
-        let line = src.substring(i, j);
-        i = j+1;
-        return line;
-      }
-    }
-    return undefined;
+function parseProlog1(pos: Pos): Result<void> {
+  let rLine = getLine(pos);
+  if (!rLine.success) {
+    return rLine;
+  }
+  let rest = rLine.rest;
+  let line = rLine.value.trim();
+  if (line === "院外処方") {
+    return { success: true, value: undefined, rest };
+  } else {
+    return { success: false, message: "「院外処方」expected", pos };
   }
 }
 
-function matchProlog1(line: string): boolean {
-  line = line.trim();
-  return line === "院外処方"
+function parseProlog2(pos: Pos): Result<void> {
+  let rLine = getLine(pos);
+  if (!rLine.success) {
+    return rLine;
+  }
+  let rest = rLine.rest;
+  let line = rLine.value.trim();
+  if (toHankaku(line) === "Rp)") {
+    return { success: true, value: undefined, rest };
+  } else {
+    return { success: false, message: "「Ｒｐ）」expected", pos };
+  }
 }
 
-function matchProlog2(line: string): boolean {
-  line = line.trim();
-  return toHankaku(line) === "Rp)"
-}
 
 interface Amount {
   pre: string;
@@ -90,86 +150,154 @@ let drugUnitStrings = [
 ];
 
 let reAmount = new RegExp(
-  "(一回)?" + 
+  "(一回)?" +
     "([0-9０-９]+(?:[.．][0-9０-９]+)?)" +
     "(" + drugUnitStrings.join("|") + ")" +
     "$"
 );
 
-function findSpace(s: string): number {
-  for(let i=0;i<s.length;i++){
-    let ch = s[i];
-    if( ch === " " || ch === "　" ){
-      return i;
-    }
+function parseDrugIndex(pos: Pos): Result<void> {
+  let rLine = getLine(pos);
+  if (!rLine.success) {
+    return rLine;
   }
-  return -1;
+  let line = rLine.value;
+  line = toHankaku(line);
+  let m = /^\s*\d+\)/.exec(line);
+  if (!m) {
+    return { success: false, message: "drug index expected", pos };
+  }
+  return {
+    success: true, value: undefined,
+    rest: { src: pos.src, i: pos.i + m[0].length }
+  }
 }
 
-function skipSpaces(s: string, start: number): number {
-  for(let i=start;i<s.length;i++){
-    let ch = s[i];
+function parseDrugAndAmount(pos: Pos): Result<Drug> {
+  let rLine = getLine(pos);
+  if( !rLine.success ){
+    return rLine;
+  }
+  let rest = rLine.rest;
+  let line = rLine.value;
+  let m = reAmount.exec(line);
+  if( !m ){
+    return { success: false, message: "cannot find drug amount", pos };
+  }
+  let name = pos.src.substring(pos.i, pos.i + m.index).trim();
+  let drug: Drug = {
+    name,
+    amount: (m[1] ?? "") + m[2],
+    unit: m[3],
+    drugComments: []
+  };
+  return { success: true, value: drug, rest };
+}
+
+function parseSpaces(pos: Pos): Result<void> {
+  let { src, i } = pos;
+  if( i < src.length ){
+    let ch = src[i];
     if( ch === " " || ch === "　" ){
-      // nop
+      i += 1;
     } else {
-      return i;
+      return { success: false, message: "space expected", pos };
+    }
+  } else {
+    return { success: false, message: "unexpected end of data", pos };
+  }
+  for(;i<src.length && src[i] !== "\n";i++){
+    let ch = src[i];
+    if( ch === " " || ch === "　" ){
+      //nop
+    } else {
+      break;
     }
   }
-  return -1;
+  return { success: true, value: undefined, rest: { src: pos.src, i }};
 }
 
-function matchIndexDrugAmount(line: string): DrugAndAmount | string {
-  let origLine = line;
+function parseUsage(pos: Pos): Result<Usage> {
+  if( !posStartsWithSpace(pos) ){
+    return { success: false, message: "space expected", pos };
+  }
+  let rLine = getLine(pos);
+  if( !rLine.success ){
+    return rLine;
+  }
+  let line = rLine.value;
+  let rest = rLine.rest;
   line = line.trim();
-  let reIndex = /^[0-9０-９]+[)）]\s*/;
-  let m = reIndex.exec(line);
-  if( !m ){
-    return `missing index: ${line}`
+  let m = /([0-9０-９]+)日分$/.exec(line);
+  if( m ){
+    let usage = line.substring(0, m.index).trim();
+    let value: Usage = { kind: "days", days: m[1], usage };
+    return { success: true, value, rest };
   }
-  line = line.substring(m[0].length);
-  let i = findSpace(line);
-  if( i < 0 ){
-    return `failed to find drug name: ${origLine}`;
+  m = /([0-9０-９]+)回分$/.exec(line);
+  if( m ){
+    let usage = line.substring(0, m.index).trim();
+    let value: Usage = { kind: "times", times: m[1], usage };
+    return { success: true, value, rest };
   }
-  m = reAmount.exec(line);
-  if( !m ){
-    return `failed to parse drug and amount: ${origLine}`;
-  }
-  let name = line.substring(0, m.index-1).trim();
-  let amount: Amount = {
-    pre: m[1] ?? "",
-    amount: m[2],
-    unit: m[3],
-  };
-  return { drug: name, amount };
+  let value: Usage = { kind: "other", usage: line };
+  return { success: true, value, rest };
 }
 
-function matchSpaceDrugAmount(line: string): DrugAndAmount | string {
-  let origLine = line;
-  let i = skipSpaces(line, 0);
-  if( i === 0 ){
-    return "no leading space";
+function repeat<T>(f: (pos: Pos, nth: number) => Result<T>, pos: Pos): Result<T[]> {
+  let result: T[] = [];
+  while(true){
+    let r = f(pos, result.length);
+    if( !r.success ){
+      break;
+    }
+    result.push(r.value);
+    pos = r.rest;
   }
-  line = line.trim();
-  let reIndex = /^[0-9０-９]+[)）]\s*/;
-  let m = reIndex.exec(line);
-  if( !m ){
-    return `missing index: ${line}`
-  }
-  line = line.substring(m[0].length);
-  let i = findSpace(line);
-  if( i < 0 ){
-    return `failed to find drug name: ${origLine}`;
-  }
-  m = reAmount.exec(line);
-  if( !m ){
-    return `failed to parse drug and amount: ${origLine}`;
-  }
-  let name = line.substring(0, m.index-1).trim();
-  let amount: Amount = {
-    pre: m[1] ?? "",
-    amount: m[2],
-    unit: m[3],
-  };
-  return { drug: name, amount };
+  return { success: true, value: result, rest: pos };
 }
+
+function parseDrug(pos: Pos, nth: number): Result<Drug> {
+  if( nth === 0 ){
+    let rIndex = parseDrugIndex(pos);
+    if( !rIndex.success ){
+      return { success: false, message: "drug index not found", pos };
+    }
+    pos = rIndex.rest;
+  } else {
+    if( !posStartsWithSpace(pos) ){
+      return { success: false, message: "space expected", pos };
+    }
+    pos = posSkipSpaces(pos);
+  }
+  return parseDrugAndAmount(pos);
+}
+
+function parseDrugGroup(pos: Pos): Result<DrugGroup> {
+  let rIndex = parseDrugIndex(pos);
+  if( !rIndex.success ){
+    return rIndex;
+  }
+  pos = rIndex.rest;
+  let rDrugs = repeat(parseDrug, pos);
+  if( !rDrugs.success ) {
+    return rDrugs;
+  }
+  let drugs = rDrugs.value;
+  pos = rDrugs.rest;
+  let rUsage = parseUsage(pos);
+  if( !rUsage.success ){
+    return rUsage;
+  }
+  let usage = rUsage.value;
+  pos = rUsage.rest;
+  let comments: string[] = [];
+  let group: DrugGroup = {
+    drugs,
+    usage,
+    groupComments: comments,
+  };
+  return { success: true, value: group, rest: pos };
+}
+
+
