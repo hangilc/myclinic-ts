@@ -24,6 +24,10 @@ export function parseShohou(src: string): Shohou | string {
   }
   let groups = rGroups.value;
   pos = rGroups.rest;
+  pos = posSkipSpaceNLs(pos);
+  if( !posIsAtEOL(pos) ){
+    return formatFailure({ success: false, message: "extra content", pos })
+  }
   return {
     groups,
     bikou: [],
@@ -57,6 +61,23 @@ function posSkipSpaces(pos: Pos): Pos {
     }
   }
   return { src, i };
+}
+
+function posSkipSpaceNLs(pos: Pos): Pos {
+  let { src, i } = pos;
+  for(;i<src.length;i++) {
+    let ch = src[i];
+    if( ch === " " || ch === "　" ){
+      //nop
+    } else {
+      break;
+    }
+  }
+  return { src, i };
+}
+
+function posIsAtEOL(pos: Pos): boolean {
+  return pos.i === pos.src.length;
 }
 
 type Result<T> = {
