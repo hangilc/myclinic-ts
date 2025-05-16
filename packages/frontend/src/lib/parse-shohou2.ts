@@ -242,6 +242,7 @@ function parseDrugAndAmount(pos: Pos): Result<Drug> {
   }
   let rest = rLine.rest;
   let line = rLine.value;
+  console.log("line", line);
   let m = reAmount.exec(line);
   if( !m ){
     return { success: false, message: "cannot find drug amount", pos };
@@ -300,6 +301,20 @@ function repeat<T>(f: (pos: Pos, nth: number) => Result<T> | undefined, pos: Pos
   return { success: true, value: result, rest: pos };
 }
 
+function probeAdditionalDrug(pos: Pos): Result<Drug> | undefined {
+  if( posStartsWithSpace(pos) ){
+    let r = parseDrugAndAmount(posSkipSpaces(pos));
+    if( r.success ){
+      return r;
+    } else {
+      console.log("err", r.message);
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
+}
+
 function parseDrugs(pos: Pos): Result<Drug[]> {
   let rIndex = parseDrugIndex(pos);
   if( !rIndex.success ){
@@ -313,15 +328,12 @@ function parseDrugs(pos: Pos): Result<Drug[]> {
   }
   let drugs: Drug[] = [rDrug.value];
   pos = rDrug.rest;
-  while(posStartsWithSpace(pos)){
-    let rDrug = parseDrugAndAmount(posSkipSpaces(pos));
-    if( rDrug.success ){
-      drugs.push(rDrug.value);
-      pos = rDrug.rest;
-    } else {
-      break;
-    }
+  let rExtraDrugs = repeat(probeAdditionalDrug, pos);
+  if( !rExtraDrugs.success ){
+    return rExtraDrugs;
   }
+  pos = rExtraDrugs.rest;
+  drugs.push(...rExtraDrugs.value);
   return { success: true, value: drugs, rest: pos };
 }
 
