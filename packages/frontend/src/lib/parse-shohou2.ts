@@ -24,6 +24,11 @@ export function parseShohou(src: string): Shohou | string {
   }
   let groups = rGroups.value;
   pos = rGroups.rest;
+  let rShohouCommands = repeat(probeShohouCommand, pos);
+  if( !rShohouCommands.success ){
+    return formatFailure(rShohouCommands);
+  }
+  pos = rShohouCommands.rest;
   pos = posSkipSpaceNLs(pos);
   if( !posIsAtEOL(pos) ){
     return formatFailure({ success: false, message: "extra content", pos })
@@ -80,6 +85,28 @@ function posIsAtEOL(pos: Pos): boolean {
   return pos.i === pos.src.length;
 }
 
+function posFirstChar(pos: Pos): string | undefined {
+  let { src, i } = pos;
+  if( i < src.length ){
+    return src[i];
+  } else {
+    return undefined;
+  }
+}
+
+function posFirstCharSatisfies(pos: Pos, pred: (ch: string) => boolean ): boolean {
+  let ch = posFirstChar(pos)
+  if( ch !== undefined ){
+    return pred(ch);
+  } else {
+    return false;
+  }
+}
+
+function posIsCommandStart(pos: Pos): boolean {
+  return posFirstCharSatisfies(pos, ch => ch === "@" || ch === "＠")
+}
+
 type Result<T> = {
   success: true;
   value: T;
@@ -99,9 +126,11 @@ function formatFailure(failure: { success: false, message: string, pos: Pos }): 
 }
 
 function getLine(pos: Pos): Result<string> {
-  let j = pos.src.indexOf("\n", pos.i);
+  let { src, i } = pos;
+  let j = src.indexOf("\n", i);
   if (j < 0) {
-    return { success: false, message: "cannot get line", pos };
+    return { success: true, value: src.substring(i),
+      rest: { src, i: src.length } };
   } else {
     return {
       success: true,
@@ -137,18 +166,6 @@ function parseProlog2(pos: Pos): Result<void> {
   } else {
     return { success: false, message: "「Ｒｐ）」expected", pos };
   }
-}
-
-
-interface Amount {
-  pre: string;
-  amount: string;
-  unit: string;
-}
-
-interface DrugAndAmount {
-  drug: string;
-  amount: Amount;
 }
 
 
@@ -212,30 +229,8 @@ function parseDrugAndAmount(pos: Pos): Result<Drug> {
     unit: m[3],
     drugComments: []
   };
+  console.log("drug", drug);
   return { success: true, value: drug, rest };
-}
-
-function parseSpaces(pos: Pos): Result<void> {
-  let { src, i } = pos;
-  if( i < src.length ){
-    let ch = src[i];
-    if( ch === " " || ch === "　" ){
-      i += 1;
-    } else {
-      return { success: false, message: "space expected", pos };
-    }
-  } else {
-    return { success: false, message: "unexpected end of data", pos };
-  }
-  for(;i<src.length && src[i] !== "\n";i++){
-    let ch = src[i];
-    if( ch === " " || ch === "　" ){
-      //nop
-    } else {
-      break;
-    }
-  }
-  return { success: true, value: undefined, rest: { src: pos.src, i }};
 }
 
 function parseUsage(pos: Pos): Result<Usage> {
@@ -265,12 +260,15 @@ function parseUsage(pos: Pos): Result<Usage> {
   return { success: true, value, rest };
 }
 
-function repeat<T>(f: (pos: Pos, nth: number) => Result<T>, pos: Pos): Result<T[]> {
+function repeat<T>(f: (pos: Pos, nth: number) => Result<T> | undefined, pos: Pos): Result<T[]> {
   let result: T[] = [];
   while(true){
     let r = f(pos, result.length);
-    if( !r.success ){
+    if( r === undefined ){
       break;
+    }
+    if( !r.success ){
+      return r;
     }
     result.push(r.value);
     pos = r.rest;
@@ -278,33 +276,40 @@ function repeat<T>(f: (pos: Pos, nth: number) => Result<T>, pos: Pos): Result<T[
   return { success: true, value: result, rest: pos };
 }
 
-function parseDrug(pos: Pos, nth: number): Result<Drug> {
-  if( nth === 0 ){
-    let rIndex = parseDrugIndex(pos);
-    if( !rIndex.success ){
-      return { success: false, message: "drug index not found", pos };
-    }
-    pos = rIndex.rest;
-  } else {
-    if( !posStartsWithSpace(pos) ){
-      return { success: false, message: "space expected", pos };
-    }
-    pos = posSkipSpaces(pos);
-  }
-  return parseDrugAndAmount(pos);
-}
-
-function parseDrugGroup(pos: Pos): Result<DrugGroup> {
+function parseDrugs(pos: Pos): Result<Drug[]> {
   let rIndex = parseDrugIndex(pos);
   if( !rIndex.success ){
-    return rIndex;
+    return { success: true, value: [], rest: pos };
   }
   pos = rIndex.rest;
-  let rDrugs = repeat(parseDrug, pos);
+  pos = posSkipSpaces(pos);
+  let rDrug = parseDrugAndAmount(pos);
+  if( !rDrug.success ){
+    return rDrug;
+  }
+  let drugs: Drug[] = [rDrug.value];
+  pos = rDrug.rest;
+  while(posStartsWithSpace(pos)){
+    let rDrug = parseDrugAndAmount(posSkipSpaces(pos));
+    if( rDrug.success ){
+      drugs.push(rDrug.value);
+      pos = rDrug.rest;
+    } else {
+      break;
+    }
+  }
+  return { success: true, value: drugs, rest: pos };
+}
+
+function parseDrugGroup(pos: Pos): Result<DrugGroup> | undefined {
+  let rDrugs = parseDrugs(pos);
   if( !rDrugs.success ) {
     return rDrugs;
   }
   let drugs = rDrugs.value;
+  if( drugs.length === 0){
+    return undefined;
+  }
   pos = rDrugs.rest;
   let rUsage = parseUsage(pos);
   if( !rUsage.success ){
@@ -321,4 +326,45 @@ function parseDrugGroup(pos: Pos): Result<DrugGroup> {
   return { success: true, value: group, rest: pos };
 }
 
+interface Command {
+  name: string;
+  value: string;
+}
 
+function parseCommand(pos: Pos): Result<Command> {
+  if( !posIsCommandStart(pos) ){
+    return { success: false, message: "missing comment start char @", pos };
+  }
+  let rLine = getLine({ ...pos, i: pos.i + 1 });
+  if( !rLine.success ){
+    return rLine;
+  }
+  let line = rLine.value;
+  pos = rLine.rest;
+  let delim = -1;
+  for(let i=0;i<line.length;i++){
+    let ch = line[i];
+    if( ch === ":" || ch === "：" ){
+      delim = i;
+      break;
+    }
+  }
+  let name: string;
+  let value: string;
+  if( delim >= 0 ){
+    name = line.substring(0, delim).trim();
+    value = line.substring(delim+1);
+  } else {
+    name = line.trim();
+    value = "";
+  }
+  return { success: true, value: { name, value }, rest: pos };
+}
+
+function probeShohouCommand(pos: Pos): Result<Command> | undefined {
+  if( posIsCommandStart(pos) ){
+    return parseCommand(pos);
+  } else {
+    return undefined;
+  }
+}
