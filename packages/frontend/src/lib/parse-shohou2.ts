@@ -1,126 +1,62 @@
 import { type Shohou } from "@/lib/parse-shohou";
-import { toHankaku } from "./zenkaku";
+import { toHankaku, toZenkaku } from "./zenkaku";
 
 export function parseShohou(src: string): Shohou | string {
-  let i = 0;
-  {
-    let r = matchProlog1(src, i);
-    if( !r.ok ){
-      return "「院外処方」ではじまっていません。";
+  let lr = newLineReader(src);
+  let line = lr();
+  if( line === undefined ){
+    return "unexpected end of data while reading prolog1";
+  } else {
+    if( !matchProlog1(line) ){
+      return `invalid prolog1: ${line}`;
     }
-    i = r.next;
+  }
+  line = lr();
+  if( line === undefined ){
+    return "unexpected end of data while reading prolog2";
+  } else {
+    if( !matchProlog2(line) ){
+      return `invalid prolog2: ${line}`
+    }
+  }
+  line = lr();
+  if( line === undefined ){
+    return "unexpected end of data while reading drug group";
   }
   {
-    let r = matchProlog2(src, i);
-    if( !r.ok ){
-      return "「Ｒｐ）」がありません。";
+    let r = matchIndexDrugAmount(line);
+    if( typeof r === "string" ){
+      return r;
     }
-    i = r.next;
-  }
-  {
-    let index = 1;
-    let r = parseDrugAndAmount(src, i, index);
     console.log("r", r);
   }
   return "develop";
 }
 
-type Result<T> = {
-  ok: true;
-  value: T;
-  next: number;
-} | {
-  ok: false
-  reason: string;
-}
+type LineReader = () => string | undefined;
 
-function failure(reason: string, src?: string, at?: number): Result<any>{
-  if( src !== undefined && at !== undefined ){
-    let extract = src.substring(at - 10, at) + "|" + src.substring(at, at + 10);
-    reason += ":at " + extract;
-  }
-  return { ok: false, reason, };
-}
-
-function isSpace(ch: string): boolean {
-  return ch === " " || ch === "　";
-}
-
-function matchString(src: string, i: number, str: string): Result<void> {
-  if( src.startsWith(str, i) ){
-    return { ok: true, value: undefined, next: i + str.length };
-  } else {
-    return failure(`failed to match: ${str}`);
-  }
-}
-
-function matchStringToHankaku(src: string, start: number, str: string): Result<void> {
-  for(let i=0;i<str.length;i++){
-    let j = start + i;
-    if( j >= src.length ){
-      return failure(`failed to match: ${str}`)
+function newLineReader(src: string): () => string | undefined {
+  let i = 0;
+  return () => {
+    for(let j=i;j<src.length;j++){
+      if( src[j] === "\n" ){
+        let line = src.substring(i, j);
+        i = j+1;
+        return line;
+      }
     }
-    let a = src[start+i];
-    a = toHankaku(a);
-    if( a !== str[i]) {
-      return failure(`failed to match ${str}`);
-    }
-  }
-  return { ok: true, value: undefined, next: start + str.length };
-}
-
-function eatToEol(src: string, start: number): Result<void> {
-  for(let i=start;i<src.length;i++){
-    let ch = src[i];
-    if( ch == "\n"){
-      return { ok: true, value: undefined, next: i+1};
-    }
-    if( !isSpace(src[i]) ){
-      return failure(`unexpected non-space char: ${src[i]}`);
-    }
-  }
-  return { ok: true, value: undefined, next: src.length };
-}
-
-function parseNonSpaces(src: string, i: number): Result<string> {
-  let start = i;
-  for(;i<src.length && src[i] !== "\n"; i++){
-    let ch = src[i];
-    if( isSpace(ch) ){
-      break;
-    }
-  }
-  if( i === start ){
-    return failure("unexpected space");
-  } else {
-    return { ok: true, value: src.substring(start, i), next: i };
+    return undefined;
   }
 }
 
-function skipSpaces(src: string, i: number): number {
-  for(;i<src.length && src[i] !== "\n";i++){
-    let ch = src[i];
-    if( !isSpace(ch) ){
-      return i;
-    }
-  }
-  return i;
+function matchProlog1(line: string): boolean {
+  line = line.trim();
+  return line === "院外処方"
 }
 
-function matchProlog1(src: string, i: number): Result<void> {
-  let r = matchString(src, i, "院外処方");
-  if( !r.ok ){
-    return r;
-  }
-  return eatToEol(src, r.next);
-}
-
-function matchProlog2(src: string, i: number): Result<void> {
-  let r = matchStringToHankaku(src, i, "Rp)");
-  if( !r.ok ){
-    return r;
-  }
-  return eatToEol(src, r.next);
+function matchProlog2(line: string): boolean {
+  line = line.trim();
+  return toHankaku(line) === "Rp)"
 }
 
 interface Amount {
@@ -134,51 +70,6 @@ interface DrugAndAmount {
   amount: Amount;
 }
 
-function parseDrugAndAmount(src: string, i: number, index: number):
-Result<DrugAndAmount> {
-  let drug: string = "";
-  i = skipSpaces(src, i);
-  {
-    let r = matchStringToHankaku(src, i, `${index})`);
-    if( !r.ok ){
-      return failure(`failed to match index part: ${index})`);
-    }
-    i = r.next;
-  }
-  {
-    let r = parseNonSpaces(src, i);
-    if( !r.ok ){
-      let s = src.substring(i, i+10);
-      return failure(`failed to read drug name: ${s}`);
-    }
-    drug = r.value;
-    i = r.next;
-  }
-  let iter = 0;
-  while(true){
-    i = skipSpaces(src, i);
-    console.log("iter", src.substring(i, i+10));
-    let r = parseNonSpaces(src, i);
-    if( !r.ok ){
-      let s = src.substring(i, i+10);
-      return failure(`cannot find drug amount: ${s}`);
-    }
-    let amount = cvtToAmount(r.value);
-    if( !amount ){
-      drug += ` ${r.value}`;
-      i = r.next;
-    } else {
-      let r2 = eatToEol(src, r.next);
-      if( !r2.ok) {
-        return failure("extra content after drug amount", src, r.next);
-      }
-      return { ok: true, value: { drug, amount }, next: r2.next };
-    }
-    if( ++iter > 3 ){
-      return failure("too many iteration while reading drug amount");
-    }
-  }
-}
 
 let drugUnitStrings = [
   "錠",
@@ -200,28 +91,85 @@ let drugUnitStrings = [
 
 let reAmount = new RegExp(
   "(一回)?" + 
-    "([0-9０－９]+(?:[.．][0-9０－９]+)?)" +
-    "(" + drugUnitStrings.join("|") + ")"
+    "([0-9０-９]+(?:[.．][0-9０-９]+)?)" +
+    "(" + drugUnitStrings.join("|") + ")" +
+    "$"
 );
 
-function cvtToAmount(s: string): Amount | undefined {
-  let m = reAmount.exec(s);
-  if( !m ){
-    return undefined;
-  } else {
-    let amount: Amount = {
-      pre: m[1],
-      amount: m[2],
-      unit: m[3],
-    };
-    return amount;
+function findSpace(s: string): number {
+  for(let i=0;i<s.length;i++){
+    let ch = s[i];
+    if( ch === " " || ch === "　" ){
+      return i;
+    }
   }
+  return -1;
 }
 
+function skipSpaces(s: string, start: number): number {
+  for(let i=start;i<s.length;i++){
+    let ch = s[i];
+    if( ch === " " || ch === "　" ){
+      // nop
+    } else {
+      return i;
+    }
+  }
+  return -1;
+}
 
+function matchIndexDrugAmount(line: string): DrugAndAmount | string {
+  let origLine = line;
+  line = line.trim();
+  let reIndex = /^[0-9０-９]+[)）]\s*/;
+  let m = reIndex.exec(line);
+  if( !m ){
+    return `missing index: ${line}`
+  }
+  line = line.substring(m[0].length);
+  let i = findSpace(line);
+  if( i < 0 ){
+    return `failed to find drug name: ${origLine}`;
+  }
+  m = reAmount.exec(line);
+  if( !m ){
+    return `failed to parse drug and amount: ${origLine}`;
+  }
+  let name = line.substring(0, m.index-1).trim();
+  let amount: Amount = {
+    pre: m[1] ?? "",
+    amount: m[2],
+    unit: m[3],
+  };
+  return { drug: name, amount };
+}
 
-
-
-
-
-
+function matchSpaceDrugAmount(line: string): DrugAndAmount | string {
+  let origLine = line;
+  let i = skipSpaces(line, 0);
+  if( i === 0 ){
+    return "no leading space";
+  }
+  line = line.trim();
+  let reIndex = /^[0-9０-９]+[)）]\s*/;
+  let m = reIndex.exec(line);
+  if( !m ){
+    return `missing index: ${line}`
+  }
+  line = line.substring(m[0].length);
+  let i = findSpace(line);
+  if( i < 0 ){
+    return `failed to find drug name: ${origLine}`;
+  }
+  m = reAmount.exec(line);
+  if( !m ){
+    return `failed to parse drug and amount: ${origLine}`;
+  }
+  let name = line.substring(0, m.index-1).trim();
+  let amount: Amount = {
+    pre: m[1] ?? "",
+    amount: m[2],
+    unit: m[3],
+  };
+  return { drug: name, amount };
+}
