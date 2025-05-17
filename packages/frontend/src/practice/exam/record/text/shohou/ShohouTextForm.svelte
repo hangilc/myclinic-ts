@@ -164,13 +164,11 @@
   }
 
   async function doOldShohou() {
-	if( confirm("旧処方に変更しますか？") ){
-	  let c = denshiToOldShohou(shohou);
-	  const visitId = (await api.getText(textId)).visitId;
-	  const text = { textId: 0, visitId, content: c };
-	  onDone();
-	  await api.enterText(text);
-	}
+	let c = denshiToOldShohou(shohou);
+	const visitId = (await api.getText(textId)).visitId;
+	const text = { textId: 0, visitId, content: c };
+	onDone();
+	await api.enterText(text);
   }
 
 </script>

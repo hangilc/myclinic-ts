@@ -29,18 +29,9 @@
     type 情報区分,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import { toHankaku } from "myclinic-rezept/zenkaku";
-  import DrugGroupForm from "@/lib/denshi-shohou/DrugGroupForm.svelte";
   import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
   import { tick } from "svelte";
   import { cache } from "@/lib/cache";
-  import ParsedRep from "./denshi-henkan-dialog/ParsedRep.svelte";
-  import DenshiRep from "./denshi-henkan-dialog/DenshiRep.svelte";
-  import DenshiMenu from "./denshi-henkan-dialog/DenshiMenu.svelte";
-  import ExpireDateForm from "./denshi-henkan-dialog/ExpireDateForm.svelte";
-  import { 使用期限年月日Rep } from "./denshi-henkan-dialog/denshi-henkan-dialog-helper";
-  import { kouhiRep } from "@/lib/hoken-rep";
-  import BikouForm from "./denshi-henkan-dialog/BikouForm.svelte";
-  import JohoForm from "./denshi-henkan-dialog/JohoForm.svelte";
   import DenshiShohouForm from "@/lib/denshi-shohou/DenshiShohouForm.svelte";
 
   export let destroy: () => void;
@@ -52,11 +43,7 @@
   export let title = "処方箋電子変換";
   let sourceIndex = 1;
   let sourceList: Source[] = [];
-  // let selectedSourceIndex = 0;
   let selectedSourceId = -1;
-  let targetUsage: TargetUsage | undefined = undefined;
-  let usageSearchText = "";
-  let usageSearchResult: UsageMaster[] = [];
   let mode: Mode | undefined = undefined;
   let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
     undefined;
@@ -65,7 +52,6 @@
     resolve備考レコードFromInit(init);
   let 提供情報レコード: 提供情報レコード | undefined =
     resolve提供情報レコードFromInit(init);
-  let getPrescInfoData: () => PrescInfoData;
 
   sourceList = prepareSourceList(init);
 
@@ -236,6 +222,7 @@
       data.備考レコード = 備考レコード;
       data.RP剤情報グループ = drugs;
       data.提供情報レコード = 提供情報レコード;
+	  console.log("limit", 使用期限年月日);
       destroy();
       onEnter(data);
     }
@@ -469,197 +456,81 @@
     mode = m;
   }
 
-  async function doSearchUsage() {
-    const t = usageSearchText.trim();
-    if (t !== "") {
-      usageSearchResult = await api.selectUsageMasterByUsageName(t);
-    }
-  }
+  // async function doSearchUsage() {
+  //   const t = usageSearchText.trim();
+  //   if (t !== "") {
+  //     usageSearchResult = await api.selectUsageMasterByUsageName(t);
+  //   }
+  // }
 
-  function doUsageMasterSelect(m: UsageMaster) {
-    targetUsage = {
-      kind: "master",
-      master: m,
-    };
-    console.log("usageMaster", m);
-    usageSearchText = "";
-    usageSearchResult = [];
-  }
+  // function doUsageMasterSelect(m: UsageMaster) {
+  //   targetUsage = {
+  //     kind: "master",
+  //     master: m,
+  //   };
+  //   console.log("usageMaster", m);
+  //   usageSearchText = "";
+  //   usageSearchResult = [];
+  // }
 
   function doCancel() {
     destroy();
     onCancel();
   }
 
-  function targetUsageRep(target: TargetUsage | undefined): string {
-    if (target) {
-      switch (target.kind) {
-        case "master": {
-          return target.master.usage_name;
-        }
-        case "free-style": {
-          return target.text;
-        }
-        default: {
-          throw new Error("cannot happen (targetUsageRep)");
-        }
-      }
-    } else {
-      return "";
-    }
-  }
+  // function targetUsageRep(target: TargetUsage | undefined): string {
+  //   if (target) {
+  //     switch (target.kind) {
+  //       case "master": {
+  //         return target.master.usage_name;
+  //       }
+  //       case "free-style": {
+  //         return target.text;
+  //       }
+  //       default: {
+  //         throw new Error("cannot happen (targetUsageRep)");
+  //       }
+  //     }
+  //   } else {
+  //     return "";
+  //   }
+  // }
 
-  async function trySetTargetUsage(src: string) {
-    targetUsage = undefined;
-    let t = "";
-    switch (src) {
-      case "分１　寝る前": {
-        t = "１日１回就寝前　服用";
-        break;
-      }
-    }
-    if (t !== "") {
-      const r = await api.selectUsageMasterByUsageName(t);
-      if (r.length === 1) {
-        targetUsage = { kind: "master", master: r[0] };
-      }
-    }
-  }
+  // async function trySetTargetUsage(src: string) {
+  //   targetUsage = undefined;
+  //   let t = "";
+  //   switch (src) {
+  //     case "分１　寝る前": {
+  //       t = "１日１回就寝前　服用";
+  //       break;
+  //     }
+  //   }
+  //   if (t !== "") {
+  //     const r = await api.selectUsageMasterByUsageName(t);
+  //     if (r.length === 1) {
+  //       targetUsage = { kind: "master", master: r[0] };
+  //     }
+  //   }
+  // }
 
-  function doDelete() {
-    sourceList = sourceList.filter((s) => s.id !== selectedSourceId);
-    reset();
-  }
+  // function doDelete() {
+  //   sourceList = sourceList.filter((s) => s.id !== selectedSourceId);
+  //   reset();
+  // }
+
+  
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <Dialog {title} destroy={doCancel} styleWidth="600px">
-  <!-- <div style="display:grid;grid-template-columns:200px 1fr;gap:10px;">
-    <div style="font-size:14px;">
-      <div>
-        <DenshiMenu
-          onPlus={doNew}
-          on有効期限={() => changeModeTo("expire-date")}
-          on備考={() => changeModeTo("bikou")}
-          on提供情報={() => changeModeTo("joho")}
-        />
-      </div>
-      {#if kouhiList.length > 0}
-        <div>
-          {#each kouhiList as kouhi (kouhi.kouhiId)}
-            <div>
-              {kouhiRep(kouhi.futansha, kouhi.memo)}
-            </div>
-          {/each}
-        </div>
-      {/if}
-      {#each sourceList as source (source.id)}
-        <div
-          class="drug"
-          class:selected={source.id === selectedSourceId}
-          on:click={() => doSourceSelect(source)}
-        >
-          {#if source.kind === "parsed"}
-            <ParsedRep parsed={source} />
-          {:else if source.kind === "denshi"}
-            <DenshiRep
-              denshi={{
-                剤形レコード: source.剤形レコード,
-                用法レコード: source.用法レコード,
-                用法補足レコード: source.用法補足レコード,
-                薬品情報グループ: [source.薬品情報],
-              }}
-            />
-          {/if}
-        </div>
-      {/each}
-      {#if 使用期限年月日}
-        <div
-          style="margin:6px 0;cursor:pointer"
-          on:click={() => changeModeTo("expire-date")}
-        >
-          使用期限：{使用期限年月日Rep(使用期限年月日)}
-        </div>
-      {/if}
-      {#if 備考レコード && 備考レコード.length > 0}
-        <div
-          style="margin:6px 0;cursor:pointer"
-          on:click={() => changeModeTo("bikou")}
-        >
-          {#each 備考レコード ?? [] as bikou}
-            <div>備考：{bikou.備考}</div>
-          {/each}
-        </div>
-      {/if}
-      {#if 提供情報レコード}
-        <div>
-          {#if 提供情報レコード.提供診療情報レコード}
-            {#each 提供情報レコード.提供診療情報レコード as record}
-              <div>
-                提供診療情報:
-                {#if record.薬品名称}
-                  【{record.薬品名称}】
-                {/if}
-                {record.コメント}
-              </div>
-            {/each}
-          {/if}
-          {#if 提供情報レコード.検査値データ等レコード}
-            {#each 提供情報レコード.検査値データ等レコード as record}
-              <div>
-                検査値データ等レコード: {record.検査値データ等}
-              </div>
-            {/each}
-          {/if}
-        </div>
-      {/if}
-    </div>
-    <div style="user-select:none;">
-      {#if mode === "edit-drug" && editedSource}
-        <DrugGroupForm
-          {at}
-          {kouhiList}
-          init={editedSource}
-          onEnter={onFormEnter}
-          onCancel={onFormCancel}
-          onDelete={doDelete}
-        />
-      {:else if mode === "new-drug"}
-        <DrugGroupForm
-          {at}
-          {kouhiList}
-          init={{}}
-          onEnter={onNewDrug}
-          onCancel={() => (mode = undefined)}
-          onDelete={undefined}
-        />
-      {:else if mode === "expire-date"}
-        <ExpireDateForm
-          expireDate={使用期限年月日}
-          onDone={onExpireDateDone}
-          onCancel={() => (mode = undefined)}
-        />
-      {:else if mode === "bikou"}
-        <BikouForm
-          records={備考レコード ?? []}
-          onDone={onBikouDone}
-          onCancel={() => (mode = undefined)}
-        />
-      {:else if mode === "joho"}
-        <JohoForm
-          joho={提供情報レコード}
-          onDone={onJohoDone}
-          onCancel={() => (mode = undefined)}
-        />
-      {/if}
-    </div>
-  </div> -->
   <DenshiShohouForm
     {init}
     {at}
     {kouhiList}
     bind:sourceList
-    bind:getPrescInfoData
+	bind:使用期限年月日
+	bind:備考レコード
+	bind:提供情報レコード
   />
   <div style="text-align:right;">
     <button

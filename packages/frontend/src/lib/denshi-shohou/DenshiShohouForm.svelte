@@ -47,11 +47,9 @@
   let selectedSourceId = -1;
   let mode: Mode | undefined = undefined;
   let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined = undefined;
-  let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
-  let 備考レコード: 備考レコード[] | undefined =
-    resolve備考レコードFromInit(init);
-  let 提供情報レコード: 提供情報レコード | undefined =
-    resolve提供情報レコードFromInit(init);
+  export let 使用期限年月日: string | undefined;
+  export let 備考レコード: 備考レコード[] | undefined;
+  export let 提供情報レコード: 提供情報レコード | undefined;
 
   sourceList = prepareSourceList(init);
 
@@ -487,38 +485,39 @@
     return true;
   }
 
-  export function getPrescInfoData(): PrescInfoData {
-    if (isAllConverted(sourceList)) {
-      const drugs: RP剤情報[] = [];
-      sourceList.forEach((ele) => {
-        if (ele.kind === "denshi") {
-          const rp: RP剤情報 = {
-            剤形レコード: ele.剤形レコード,
-            用法レコード: ele.用法レコード,
-            用法補足レコード: ele.用法補足レコード,
-            薬品情報グループ: [ele.薬品情報],
-          };
-          drugs.push(rp);
-        }
-      });
-      let data: PrescInfoData;
-      if (init.kind === "parsed") {
-        data = init.template;
-      } else if (init.kind === "denshi") {
-        data = init.data;
-      } else {
-        throw new Error("cannot happen");
-      }
-      data = Object.assign({}, data);
-      data.使用期限年月日 = 使用期限年月日;
-      data.備考レコード = 備考レコード;
-      data.RP剤情報グループ = drugs;
-      data.提供情報レコード = 提供情報レコード;
-      return data;
-    } else {
-      throw new Error("not all drugs are denshi");
-    }
-  }
+  // export function getPrescInfoData(): PrescInfoData {
+  //   if (isAllConverted(sourceList)) {
+  //     const drugs: RP剤情報[] = [];
+  //     sourceList.forEach((ele) => {
+  //       if (ele.kind === "denshi") {
+  //         const rp: RP剤情報 = {
+  //           剤形レコード: ele.剤形レコード,
+  //           用法レコード: ele.用法レコード,
+  //           用法補足レコード: ele.用法補足レコード,
+  //           薬品情報グループ: [ele.薬品情報],
+  //         };
+  //         drugs.push(rp);
+  //       }
+  //     });
+  //     let data: PrescInfoData;
+  //     if (init.kind === "parsed") {
+  //       data = init.template;
+  //     } else if (init.kind === "denshi") {
+  //       data = init.data;
+  //     } else {
+  //       throw new Error("cannot happen");
+  //     }
+  //     data = Object.assign({}, data);
+  //     data.使用期限年月日 = 使用期限年月日;
+  //     data.備考レコード = 備考レコード;
+  //     data.RP剤情報グループ = drugs;
+  //     data.提供情報レコード = 提供情報レコード;
+  // 	  console.log("limit", 使用期限年月日);
+  //     return data;
+  //   } else {
+  //     throw new Error("not all drugs are denshi");
+  //   }
+  // }
 
   function ippanmeiSymbolSpec(ippanmeiState: IppanmeiState): {
     stroke: string;
@@ -580,6 +579,7 @@
       </div>
     {/if}
     {#each sourceList as source (source.id)}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="drug"
         class:selected={source.id === selectedSourceId}
@@ -600,6 +600,7 @@
             {#if source.ippanmeiState}
               {@const spec = ippanmeiSymbolSpec(source.ippanmeiState)}
               <div style="position:absolute;right:2px;bottom:2px">
+                <!-- svelte-ignore a11y-invalid-attribute -->
                 <a
                   href="javascript:void(0)"
                   style="position:relative;top:6px;"
@@ -614,6 +615,7 @@
       </div>
     {/each}
     {#if 使用期限年月日}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         style="margin:6px 0;cursor:pointer"
         on:click={() => changeModeTo("expire-date")}
@@ -622,6 +624,7 @@
       </div>
     {/if}
     {#if 備考レコード && 備考レコード.length > 0}
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         style="margin:6px 0;cursor:pointer"
         on:click={() => changeModeTo("bikou")}
