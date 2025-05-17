@@ -11,55 +11,34 @@ export function denshiToOldShohou(data: PrescInfoData): string {
 
   // Process each RP group
   data.RP剤情報グループ.forEach((rpGroup, index) => {
-    const rpIndex = toZenkaku(`${index + 1})`);
-
-    // Get first drug info
-    const firstDrug = rpGroup.薬品情報グループ[0];
-    const firstName = firstDrug.薬品レコード.薬品名称;
-    const firstAmount = toZenkaku(firstDrug.薬品レコード.分量);
-    const firstUnit = firstDrug.薬品レコード.単位名;
-
-    // Format the first line with the drug name and amount
-    let firstLine = `${rpIndex}${firstName}　${firstAmount}${firstUnit}`;
-    
-    // Add uneven dosage information if present
-    if (firstDrug.不均等レコード) {
-      firstLine += `　（${unevenDisp(firstDrug.不均等レコード)}）`;
-    }
-    
-    // Add drug supplementary information if present
-    if (firstDrug.薬品補足レコード && firstDrug.薬品補足レコード.length > 0) {
-      firstDrug.薬品補足レコード.forEach(info => {
-        firstLine += `　【${info.薬品補足情報}】`;
-      });
-    }
-
-    // Add part start marker with index and first drug on same line
-    lines.push(firstLine);
-
-    // Add remaining drug names and amounts
-    for (let i = 1; i < rpGroup.薬品情報グループ.length; i++) {
+    for (let i = 0; i < rpGroup.薬品情報グループ.length; i++) {
       const drug = rpGroup.薬品情報グループ[i];
       const name = drug.薬品レコード.薬品名称;
       const amount = toZenkaku(drug.薬品レコード.分量);
       const unit = drug.薬品レコード.単位名;
       
       // Format the drug line with name and amount
-      let drugLine = `　　${name}　${amount}${unit}`;
+      let prefix: string;
+      if( i === 0 ){
+        prefix = toZenkaku(`${index + 1})`);
+      } else {
+        prefix = "　　";
+      }
+      let drugLine = `${prefix}${name}　${amount}${unit}`;
       
       // Add uneven dosage information if present
       if (drug.不均等レコード) {
         drugLine += `　（${unevenDisp(drug.不均等レコード)}）`;
       }
+
+      lines.push(drugLine);
       
       // Add drug supplementary information if present
       if (drug.薬品補足レコード && drug.薬品補足レコード.length > 0) {
         drug.薬品補足レコード.forEach(info => {
-          drugLine += `　【${info.薬品補足情報}】`;
+          lines.push(`　　@comment:【${info.薬品補足情報}】`);
         });
       }
-      
-      lines.push(drugLine);
     }
 
     // Add usage information
@@ -72,7 +51,7 @@ export function denshiToOldShohou(data: PrescInfoData): string {
     // Add supplementary usage information if present
     if (rpGroup.用法補足レコード && rpGroup.用法補足レコード.length > 0) {
       rpGroup.用法補足レコード.forEach(suppl => {
-        lines.push(`　　${suppl.用法補足情報}`);
+        lines.push(`　　@comment:${suppl.用法補足情報}`);
       });
     }
   });
