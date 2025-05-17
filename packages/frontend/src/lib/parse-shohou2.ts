@@ -247,7 +247,7 @@ let drugUnitStrings = [
 
 let reUneven = "([(（]\\s*" + 
   "[0-9０-９.．]+" + "(?:\\s*[-ー]\\s*" + "[0-9０-９.．]+)+" +
-  "\\s*[)）])";
+  "\\s*[)）])?";
 
 let reAmount = new RegExp(
   "(一回)?" +

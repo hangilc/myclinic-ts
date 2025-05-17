@@ -5,14 +5,12 @@
     IyakuhinMaster,
     KizaiMaster,
     Kouhi,
-    UsageMaster,
   } from "myclinic-model";
   import type {
     DrugGroupFormInitExtent,
     Init,
     Mode,
     Source,
-    TargetUsage,
   } from "./denshi-henkan-dialog-types";
   import api from "@/lib/api";
   import {

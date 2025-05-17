@@ -2,7 +2,6 @@
   import type { ClinicInfo, Text, VisitEx } from "myclinic-model";
   import DenshiShohouForm from "./DenshiShohouForm.svelte";
   import { initPrescInfoData } from "./visit-shohou";
-  import { createPrescInfo, type PrescInfoData } from "./presc-info";
   import type {
     Init,
     Source,
@@ -18,12 +17,21 @@
   } from "./shohou-interface";
   import { sign_presc } from "../hpki-api";
   import { cache } from "../cache";
+  import {
+	createPrescInfo,
+    type PrescInfoData,
+    type RP剤情報,
+    type 備考レコード,
+    type 提供情報レコード,
+  } from "@/lib/denshi-shohou/presc-info";
 
   export let visit: VisitEx;
   export let clinicInfo: ClinicInfo;
   export let destroy: () => void;
   let sourceList: Source[] = [];
-  let getPrescInfoData: () => PrescInfoData;
+  let 使用期限年月日: string | undefined = undefined;
+  let 備考レコード: 備考レコード[] | undefined = undefined;
+  let 提供情報レコード: 提供情報レコード | undefined = undefined;
 
   const data: PrescInfoData = initPrescInfoData(
     visit.asVisit,
@@ -38,6 +46,9 @@
 
   async function doSave() {
     const data = getPrescInfoData();
+	if( !data ){
+	  return;
+	}
     const text: Text = {
       textId: 0,
       visitId: visit.visitId,
@@ -65,8 +76,52 @@
     await api.decodeBase64ToFile(filename, base64);
   }
 
+  function isAllConverted(list: Source[]): boolean {
+    for (let src of list) {
+      if (src.kind !== "denshi") {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function getPrescInfoData(): PrescInfoData | undefined  {
+    if (isAllConverted(sourceList)) {
+      const drugs: RP剤情報[] = [];
+      sourceList.forEach((ele) => {
+        if (ele.kind === "denshi") {
+          const rp: RP剤情報 = {
+            剤形レコード: ele.剤形レコード,
+            用法レコード: ele.用法レコード,
+            用法補足レコード: ele.用法補足レコード,
+            薬品情報グループ: [ele.薬品情報],
+          };
+          drugs.push(rp);
+        }
+      });
+      let data: PrescInfoData;
+      if (init.kind === "parsed") {
+        data = init.template;
+      } else if (init.kind === "denshi") {
+        data = init.data;
+      } else {
+        throw new Error("cannot happen");
+      }
+      data = Object.assign({}, data);
+      data.使用期限年月日 = 使用期限年月日;
+      data.備考レコード = 備考レコード;
+      data.RP剤情報グループ = drugs;
+      data.提供情報レコード = 提供情報レコード;
+	  console.log("limit", 使用期限年月日);
+	  return data;
+    }
+  }
+
   async function doRegister() {
     const shohou = getPrescInfoData();
+	if( !shohou ){
+	  return;
+	}
     if (shohou.引換番号) {
       alert("既に登録されています。");
       return;
@@ -116,7 +171,9 @@
     at={visit.visitedAt.substring(0, 10)}
     kouhiList={visit.hoken.kouhiList}
     bind:sourceList
-    bind:getPrescInfoData
+	bind:使用期限年月日
+	bind:備考レコード
+	bind:提供情報レコード
   />
   <div style="margin-top:10px;text-align:right;">
     {#if sourceList.length > 0}

@@ -1,4 +1,4 @@
-import type { PrescInfoData, 薬品情報, RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, } from "@/lib/denshi-shohou/presc-info";
 import { unevenDisp } from "@/lib/denshi-shohou/disp/disp-util";
 import { toZenkaku } from "@/lib/zenkaku";
 
@@ -34,9 +34,15 @@ export function denshiToOldShohou(data: PrescInfoData): string {
       lines.push(drugLine);
       
       // Add drug supplementary information if present
-      if (drug.薬品補足レコード && drug.薬品補足レコード.length > 0) {
+      if( drug.薬品補足レコード){
         drug.薬品補足レコード.forEach(info => {
-          lines.push(`　　@comment:【${info.薬品補足情報}】`);
+          if( info.薬品補足情報 === "後発品変更不可" ){
+            lines.push("　　＠変更不可");
+          } else if (info.薬品補足情報 === "先発医薬品患者希望") { 
+            lines.push("　　＠患者希望");
+          }  else {
+            lines.push(`　　@comment:【${info.薬品補足情報}】`);
+          }
         });
       }
     }

@@ -5,6 +5,7 @@ export interface Shohou {
   groups: DrugGroup[];
   bikou: string[];
   kigen?: string;
+  comments?: string[];
 }
 
 export type Usage = ({
