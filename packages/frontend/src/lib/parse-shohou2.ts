@@ -90,6 +90,13 @@ function handleShohouCommands(shohou: Shohou, commands: Command[]): string | und
         shohou.kigen = c.value;
         break;
       }
+      case "comment": {
+        if( !shohou.comments ){
+          shohou.comments = [];
+        }
+        shohou.comments.push(c.value);
+        break;
+      }
       default: {
         return `unknown shohou command: ${c.name}`;
       }

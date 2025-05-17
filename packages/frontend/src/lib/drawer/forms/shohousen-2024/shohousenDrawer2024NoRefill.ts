@@ -116,8 +116,8 @@ function mainArea(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   const con: Container = new Container();
   const rb = new RowBuilder(extent);
   const [upperRow, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
-    rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
-      rb.fixed(20), rb.fixed(10), rb.fixed(10));
+        rb.split(rb.fixed(20), rb.skip(3), rb.fixed(33), rb.fixed(10), rb.expand(),
+          rb.fixed(20), rb.fixed(10), rb.fixed(10));
   {
     let { offset, extent } = upperRow;
     const cb = new ColumnBuilder(extent);
@@ -232,40 +232,40 @@ function circleRenderer(radius: number, pen?: string): Renderer {
 function nenMonthDateRenderer(ctx: DrawerContext, date?: DateWrapper,
   opt?: { gengou?: string, nenWidth?: number; monthWidth?: number; dayWidth?: number; gap?: number })
   : Item {
-  const nenWidth = opt?.nenWidth ?? 2.5;
-  const monthWidth = opt?.monthWidth ?? 2.5;
-  const dayWidth = opt?.dayWidth ?? 2.5;
-  const gap = opt?.gap ?? 1;
-  function content(value: number | undefined): () => Item {
-    return () => value !== undefined ?
-      textItem(ctx, value.toString(), { font: "d2.5", color: black }) :
-      emptyItem();
-  }
-  let gengouItems: blk.FlexRowItem[] = [];
-  if (opt?.gengou) {
-    gengouItems = [
-      { kind: "item", item: textItem(ctx, opt?.gengou) },
+    const nenWidth = opt?.nenWidth ?? 2.5;
+    const monthWidth = opt?.monthWidth ?? 2.5;
+    const dayWidth = opt?.dayWidth ?? 2.5;
+    const gap = opt?.gap ?? 1;
+    function content(value: number | undefined): () => Item {
+      return () => value !== undefined ?
+        textItem(ctx, value.toString(), { font: "d2.5", color: black }) :
+        emptyItem();
+    }
+    let gengouItems: blk.FlexRowItem[] = [];
+    if (opt?.gengou) {
+      gengouItems = [
+        { kind: "item", item: textItem(ctx, opt?.gengou) },
+        { kind: "gap", width: gap },
+      ]
+    }
+    const nenContent = content(date?.getNen());
+    const monthContent = content(date?.getMonth());
+    const dayContent = content(date?.getDay());
+    return flexRow(2.5, [
+      ...gengouItems,
+      { kind: "gap", width: nenWidth, halign: "right", valign: "center", content: nenContent },
       { kind: "gap", width: gap },
-    ]
+      { kind: "item", item: textItem(ctx, "年") },
+      { kind: "gap", width: gap },
+      { kind: "gap", width: monthWidth, halign: "right", valign: "center", content: monthContent },
+      { kind: "gap", width: gap },
+      { kind: "item", item: textItem(ctx, "月") },
+      { kind: "gap", width: gap },
+      { kind: "gap", width: dayWidth, halign: "right", valign: "center", content: dayContent },
+      { kind: "gap", width: gap },
+      { kind: "item", item: textItem(ctx, "日") },
+    ]);
   }
-  const nenContent = content(date?.getNen());
-  const monthContent = content(date?.getMonth());
-  const dayContent = content(date?.getDay());
-  return flexRow(2.5, [
-    ...gengouItems,
-    { kind: "gap", width: nenWidth, halign: "right", valign: "center", content: nenContent },
-    { kind: "gap", width: gap },
-    { kind: "item", item: textItem(ctx, "年") },
-    { kind: "gap", width: gap },
-    { kind: "gap", width: monthWidth, halign: "right", valign: "center", content: monthContent },
-    { kind: "gap", width: gap },
-    { kind: "item", item: textItem(ctx, "月") },
-    { kind: "gap", width: gap },
-    { kind: "gap", width: dayWidth, halign: "right", valign: "center", content: dayContent },
-    { kind: "gap", width: gap },
-    { kind: "item", item: textItem(ctx, "日") },
-  ]);
-}
 
 function birthdateRenderer(ctx: DrawerContext, extent: Extent, birthdate: string | undefined): Renderer {
   function gengouRenderer(extent: Extent, gengou: string | undefined): Renderer {
@@ -893,93 +893,98 @@ interface ShohouItemDict {
 
 function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
   henkoufukaWidth: number, kanjakibouWidth: number, shohouWidth: number, font: string): ShohouItemDict[] {
-  const fontSize = c.resolveFontHeight(ctx, font);
-  const indexWidth = data.groups.length < 10 ? fontSize * 2 : fontSize * 3;
-  const result: ShohouItemDict[] = [];
-  for (let i = 0; i < data.groups.length; i++) {
-    const group = data.groups[i];
-    const henkoufukaCol = new GrowingColumn(henkoufukaWidth);
-    const kanjakibouCol = new GrowingColumn(kanjakibouWidth);
-    const indexCol = new GrowingColumn(indexWidth);
-    const drugCol = new GrowingColumn(shohouWidth - indexWidth);
-    const shohouCol = new GrowingColumnGroup(indexCol, drugCol);
-    const indexItem = textItem(ctx, indexLabel(i + 1), { font, color: black });
-    indexCol.add(indexItem, "right");
-    for (let drug of group.drugs) {
-      // Get the current position before adding this drug content
-      const drugStartPos = drugCol.top;
+    const fontSize = c.resolveFontHeight(ctx, font);
+    const indexWidth = data.groups.length < 10 ? fontSize * 2 : fontSize * 3;
+    const result: ShohouItemDict[] = [];
+    for (let i = 0; i < data.groups.length; i++) {
+      const group = data.groups[i];
+      const henkoufukaCol = new GrowingColumn(henkoufukaWidth);
+      const kanjakibouCol = new GrowingColumn(kanjakibouWidth);
+      const indexCol = new GrowingColumn(indexWidth);
+      const drugCol = new GrowingColumn(shohouWidth - indexWidth);
+      const shohouCol = new GrowingColumnGroup(indexCol, drugCol);
+      const indexItem = textItem(ctx, indexLabel(i + 1), { font, color: black });
+      indexCol.add(indexItem, "right");
+      for (let drug of group.drugs) {
+        // Get the current position before adding this drug content
+        const drugStartPos = drugCol.top;
       
-      // Add drug name text
-      const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
-      for (let nameItem of nameItems) {
-        drugCol.add(nameItem);
-      }
-      
-      const commItems: Item[] = [];
-      drug.drugComments.forEach(comm => {
-        const items = breakToTextItems(ctx, comm, drugCol.width, { font, color: black });
-        commItems.push(...items);
-      });
-      for (let commItem of commItems) {
-        drugCol.add(commItem);
-      }
-      
-      // Get how much vertical space this drug's content used
-      const drugHeight = drugCol.top - drugStartPos;
-      
-      // Add senpatsu check mark at the correct position
-      const senpatsu = drug.senpatsu;
-      if (senpatsu === "kanjakibou") {
-        // Advance kanjakibouCol to align with this drug's start position
-        kanjakibouCol.advanceTo(drugStartPos);
-        
-        const item = textItem(ctx, "✓", { font, color: black });
-        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "center");
-        kanjakibouCol.add(aligned);
-        
-        // Advance remaining space if the drug content is taller than the check mark
-        if (drugHeight > fontSize) {
-          kanjakibouCol.advanceTo(drugStartPos + drugHeight);
+        // Add drug name text
+        const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
+        for (let nameItem of nameItems) {
+          drugCol.add(nameItem);
         }
+      
+        const commItems: Item[] = [];
+        drug.drugComments.forEach(comm => {
+          const items = breakToTextItems(ctx, comm, drugCol.width, { font, color: black });
+          commItems.push(...items);
+        });
+        for (let commItem of commItems) {
+          drugCol.add(commItem);
+        }
+      
+        // Get how much vertical space this drug's content used
+        const drugHeight = drugCol.top - drugStartPos;
+      
+        // Add senpatsu check mark at the correct position
+        const senpatsu = drug.senpatsu;
+        if (senpatsu === "kanjakibou") {
+          // Advance kanjakibouCol to align with this drug's start position
+          kanjakibouCol.advanceTo(drugStartPos);
         
-        // Also advance henkoufukaCol to keep columns in sync
-        henkoufukaCol.advanceTo(drugStartPos + drugHeight);
-      } else if (senpatsu === "henkoufuka") {
-        // Advance henkoufukaCol to align with this drug's start position
-        henkoufukaCol.advanceTo(drugStartPos);
+          const item = textItem(ctx, "✓", { font, color: black });
+          const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "center");
+          kanjakibouCol.add(aligned);
         
-        const item = textItem(ctx, "✓", { font, color: black });
-        const aligned = alignedItem(item, { width: henkoufukaCol.width, height: fontSize }, "center", "center");
-        henkoufukaCol.add(aligned);
+          // Advance remaining space if the drug content is taller than the check mark
+          if (drugHeight > fontSize) {
+            kanjakibouCol.advanceTo(drugStartPos + drugHeight);
+          }
         
-        // Advance remaining space if the drug content is taller than the check mark
-        if (drugHeight > fontSize) {
+          // Also advance henkoufukaCol to keep columns in sync
           henkoufukaCol.advanceTo(drugStartPos + drugHeight);
-        }
+        } else if (senpatsu === "henkoufuka") {
+          // Advance henkoufukaCol to align with this drug's start position
+          henkoufukaCol.advanceTo(drugStartPos);
         
-        // Also advance kanjakibouCol to keep columns in sync
-        kanjakibouCol.advanceTo(drugStartPos + drugHeight);
-      } else {
-        // If no senpatsu, still advance both columns to maintain alignment
-        henkoufukaCol.advanceTo(drugCol.top);
-        kanjakibouCol.advanceTo(drugCol.top);
+          const item = textItem(ctx, "✓", { font, color: black });
+          const aligned = alignedItem(item, { width: henkoufukaCol.width, height: fontSize }, "center", "center");
+          henkoufukaCol.add(aligned);
+        
+          // Advance remaining space if the drug content is taller than the check mark
+          if (drugHeight > fontSize) {
+            henkoufukaCol.advanceTo(drugStartPos + drugHeight);
+          }
+        
+          // Also advance kanjakibouCol to keep columns in sync
+          kanjakibouCol.advanceTo(drugStartPos + drugHeight);
+        } else {
+          // If no senpatsu, still advance both columns to maintain alignment
+          henkoufukaCol.advanceTo(drugCol.top);
+          kanjakibouCol.advanceTo(drugCol.top);
+        }
       }
+      const lines = [group.usage, group.groupComments.join("")];
+      lines.forEach(line => {
+        const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
+        items.forEach(item => drugCol.add(item));
+      })
+      const height = drugCol.top;
+      [henkoufukaCol, kanjakibouCol].forEach(col => col.advanceTo(height));
+      result.push({
+        henkoufuka: henkoufukaCol.toItem(),
+        kanjakibou: kanjakibouCol.toItem(),
+        shohou: shohouCol.toItem(),
+      })
     }
-    const lines = [group.usage, group.groupComments.join("")];
-    lines.forEach(line => {
-      const items = breakToTextItems(ctx, line, drugCol.width, { font, color: black });
-      items.forEach(item => drugCol.add(item));
-    })
-    const height = drugCol.top;
-    [henkoufukaCol, kanjakibouCol].forEach(col => col.advanceTo(height));
-    result.push({
-      henkoufuka: henkoufukaCol.toItem(),
-      kanjakibou: kanjakibouCol.toItem(),
-      shohou: shohouCol.toItem(),
-    })
+    // data.shohouComments.forEach(comm => {
+    //   const items = breakToTextItems(ctx, comm,
+    //     indexCol.width + drugCol.width, { font, color: black });
+    //   items.forEach(item => indexCol.add(item));
+    // })
+    return result;
   }
-  return result;
-}
 
 function prepareDrawerContext(): DrawerContext {
   const ctx = mkDrawerContext();
@@ -1013,7 +1018,7 @@ function initPen(ctx: DrawerContext) {
 
 type ShohouData = {
   groups: ShohouGroup[];
-  // shohouComments: string[];
+  shohouComments: string[];
 }
 
 type ShohouGroup = {
@@ -1062,7 +1067,7 @@ function handleShohousenData(data?: Shohousen2024Data): {
   kigen?: string;
 } {
   const shohouData: ShohouData = { groups: [], 
-    // shohouComments: [] 
+    shohouComments: [] 
   };
   let bikou: string[] = [];
   let kigen: string | undefined = undefined;
@@ -1082,7 +1087,7 @@ function handleShohousenData(data?: Shohousen2024Data): {
       };
       shohouData.groups.push(dstGroup);
     });
-    // shohouData.shohouComments = src.shohouComments;
+    shohouData.shohouComments = src.comments ?? [];
     bikou = src.bikou;
     kigen = src.kigen;
   }
@@ -1105,22 +1110,22 @@ function createEnv(font: string, data?: Shohousen2024Data): Env {
   }
 }
 
-interface Command {
-  kind: string;
-  arg: string;
-}
+// interface Command {
+//   kind: string;
+//   arg: string;
+// }
 
-function parseCommand(cmd: string): Command {
-  const index = cmd.indexOf(":");
-  if (index > 0) {
-    return {
-      kind: cmd.substring(0, index).trim(),
-      arg: cmd.substring(index + 1).trim(),
-    }
-  } else {
-    return { kind: cmd.trim(), arg: "" }
-  }
-}
+// function parseCommand(cmd: string): Command {
+//   const index = cmd.indexOf(":");
+//   if (index > 0) {
+//     return {
+//       kind: cmd.substring(0, index).trim(),
+//       arg: cmd.substring(index + 1).trim(),
+//     }
+//   } else {
+//     return { kind: cmd.trim(), arg: "" }
+//   }
+// }
 
 function isDone(env: Env): boolean {
   return env.shohou.kind === "rest" && env.shohou.rest.length === 0;
