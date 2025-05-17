@@ -245,10 +245,15 @@ let drugUnitStrings = [
   "Ｃ",
 ];
 
+let reUneven = "([(（]\\s*" + 
+  "[0-9０-９.．]+" + "(?:\\s*[-ー]\\s*" + "[0-9０-９.．]+)+" +
+  "\\s*[)）])";
+
 let reAmount = new RegExp(
   "(一回)?" +
     "([0-9０-９]+(?:[.．][0-9０-９]+)?)" +
     "(" + drugUnitStrings.join("|") + ")" +
+    "\\s*" + reUneven + "\\s*" +
     "$"
 );
 
@@ -283,8 +288,8 @@ function parseDrug(pos: Pos): Result<Drug> {
   let name = line.substring(0, m.index).trim();
   let drug: Drug = {
     name,
-    amount: (m[1] ?? "") + m[2],
-    unit: m[3],
+    amount: (m[1] ?? "") + m[2],   // 一回, amount
+    unit: m[3] + (m[4] ?? ""), // unit, unevent
     drugComments: []
   };
   let rCommands = repeat(probeDrugCommand, pos);
