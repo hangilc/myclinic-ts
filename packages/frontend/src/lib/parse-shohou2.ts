@@ -45,6 +45,27 @@ export function parseShohou(src: string): Shohou | string {
   return shohou;
 }
 
+function handleDrugCommands(drug: Drug, commands: Command[]): string | undefined {
+  for(let c of commands) {
+    switch(c.name) {
+      case "変更不可": {
+        drug.senpatsu = "henkoufuka";
+        break;
+      }
+      case "患者希望": {
+        drug.senpatsu = "kanjakibou";
+        break;
+      }
+      case "comment": {
+        drug.drugComments.push(c.value);
+        break;
+      }
+      default: return `unknown drug command: ${c.name}`;
+    }
+  }
+  return undefined;
+}
+
 function handleShohouCommands(shohou: Shohou, commands: Command[]): string | undefined {
   for(let c of commands) {
     switch(c.name){
@@ -240,9 +261,8 @@ function parseDrugAndAmount(pos: Pos): Result<Drug> {
   if( !rLine.success ){
     return rLine;
   }
-  let rest = rLine.rest;
+  pos = rLine.rest;
   let line = rLine.value;
-  console.log("line", line);
   let m = reAmount.exec(line);
   if( !m ){
     return { success: false, message: "cannot find drug amount", pos };
@@ -254,8 +274,16 @@ function parseDrugAndAmount(pos: Pos): Result<Drug> {
     unit: m[3],
     drugComments: []
   };
-  console.log("drug", drug);
-  return { success: true, value: drug, rest };
+  let rCommands = repeat(probeDrugCommand, pos);
+  if( !rCommands.success ){
+    return rCommands;
+  }
+  pos = rCommands.rest;
+  let err = handleDrugCommands(drug, rCommands.value);
+  if( err ) {
+    return { success: false, message: err, pos };
+  }
+  return { success: true, value: drug, rest: pos };
 }
 
 function parseUsage(pos: Pos): Result<Usage> {
@@ -307,7 +335,6 @@ function probeAdditionalDrug(pos: Pos): Result<Drug> | undefined {
     if( r.success ){
       return r;
     } else {
-      console.log("err", r.message);
       return undefined;
     }
   } else {
@@ -395,6 +422,30 @@ function parseCommand(pos: Pos): Result<Command> {
     value = "";
   }
   return { success: true, value: { name, value }, rest: pos };
+}
+
+function probeDrugCommand(pos: Pos): Result<Command> | undefined {
+  if( posStartsWithSpace(pos) ){
+    if( posIsCommandStart(posSkipSpaces(pos)) ){
+      return parseCommand(posSkipSpaces(pos));
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
+}
+
+function probeUsageCommand(pos: Pos): Result<Command> | undefined {
+  if( posStartsWithSpace(pos) ){
+    if( posIsCommandStart(posSkipSpaces(pos)) ){
+      return parseCommand(posSkipSpaces(pos));
+    } else {
+      return undefined;
+    }
+  } else {
+    return undefined;
+  }
 }
 
 function probeShohouCommand(pos: Pos): Result<Command> | undefined {
