@@ -906,11 +906,15 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
     const indexItem = textItem(ctx, indexLabel(i + 1), { font, color: black });
     indexCol.add(indexItem, "right");
     for (let drug of group.drugs) {
-      const senpatsu = drug.senpatsu;
+      // Get the current position before adding this drug content
+      const drugStartPos = drugCol.top;
+      
+      // Add drug name text
       const nameItems: Item[] = breakToTextItems(ctx, drug.text, drugCol.width, { font, color: black });
       for (let nameItem of nameItems) {
         drugCol.add(nameItem);
       }
+      
       const commItems: Item[] = [];
       drug.drugComments.forEach(comm => {
         const items = breakToTextItems(ctx, comm, drugCol.width, { font, color: black });
@@ -919,14 +923,46 @@ function shohouDataToItems(ctx: DrawerContext, data: ShohouData,
       for (let commItem of commItems) {
         drugCol.add(commItem);
       }
+      
+      // Get how much vertical space this drug's content used
+      const drugHeight = drugCol.top - drugStartPos;
+      
+      // Add senpatsu check mark at the correct position
+      const senpatsu = drug.senpatsu;
       if (senpatsu === "kanjakibou") {
+        // Advance kanjakibouCol to align with this drug's start position
+        kanjakibouCol.advanceTo(drugStartPos);
+        
         const item = textItem(ctx, "✓", { font, color: black });
-        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
+        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "center");
         kanjakibouCol.add(aligned);
+        
+        // Advance remaining space if the drug content is taller than the check mark
+        if (drugHeight > fontSize) {
+          kanjakibouCol.advanceTo(drugStartPos + drugHeight);
+        }
+        
+        // Also advance henkoufukaCol to keep columns in sync
+        henkoufukaCol.advanceTo(drugStartPos + drugHeight);
       } else if (senpatsu === "henkoufuka") {
+        // Advance henkoufukaCol to align with this drug's start position
+        henkoufukaCol.advanceTo(drugStartPos);
+        
         const item = textItem(ctx, "✓", { font, color: black });
-        const aligned = alignedItem(item, { width: kanjakibouCol.width, height: fontSize }, "center", "top");
+        const aligned = alignedItem(item, { width: henkoufukaCol.width, height: fontSize }, "center", "center");
         henkoufukaCol.add(aligned);
+        
+        // Advance remaining space if the drug content is taller than the check mark
+        if (drugHeight > fontSize) {
+          henkoufukaCol.advanceTo(drugStartPos + drugHeight);
+        }
+        
+        // Also advance kanjakibouCol to keep columns in sync
+        kanjakibouCol.advanceTo(drugStartPos + drugHeight);
+      } else {
+        // If no senpatsu, still advance both columns to maintain alignment
+        henkoufukaCol.advanceTo(drugCol.top);
+        kanjakibouCol.advanceTo(drugCol.top);
       }
     }
     const lines = [group.usage, group.groupComments.join("")];
