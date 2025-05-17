@@ -36,6 +36,8 @@
   } from "@/lib/denshi-shohou/presc-info";
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
+  import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
+  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -386,6 +388,24 @@
     onClose();
   }
 
+  async function doPrintShohousen2025() {
+	let data: ShohousenData2025 = {};
+	let pages = drawShohousen2025(data);
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
+    onClose();
+  }
+
   function doFormatShohousen(): void {
     textarea.value = parseShohousen(textarea.value.trim()).formatForSave();
   }
@@ -577,7 +597,7 @@
     const menu: [string, () => void][] = [
       ["処方箋印刷", doPrintShohousen],
       ["処方箋2024印刷（旧）", doPrintShohousen2024Old],
-      ["処方箋2024印刷", doPrintShohousen2024],
+      ["処方箋2024印刷", doPrintShohousen2025],
       ["処方箋フォーマット", doFormatShohousen],
     ];
     if (memoKind === undefined) {

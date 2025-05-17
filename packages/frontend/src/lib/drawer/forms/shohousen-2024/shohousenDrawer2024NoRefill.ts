@@ -66,7 +66,7 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   if (pages.length === 1) {
     const page = pages[0];
     if ((drawerData?.drugs?.groups.length ?? 0) > 0) {
-      page.lastLineRenderer((ext) => ({
+      page.lastLineRenderer((_ext) => ({
         item: lastLineItem(page.ctx, env.font),
         halign: "left",
         valign: "top"
@@ -78,7 +78,7 @@ export function drawShohousen2024NoRefill(drawerData?: Shohousen2024Data): Op[][
   } else {
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i];
-      page.lastLineRenderer((ext) => ({
+      page.lastLineRenderer((_ext) => ({
         item: continueLineItem(page.ctx, env.font, i + 1, pages.length),
         halign: "left",
         valign: "top"
