@@ -42,7 +42,6 @@ export function parseShohou(src: string): Shohou | string {
   if( !posIsAtEOL(pos) ){
     return formatFailure({ success: false, message: "extra content", pos })
   }
-  console.log("shohou", shohou);
   return shohou;
 }
 
@@ -62,6 +61,19 @@ function handleDrugCommands(drug: Drug, commands: Command[]): string | undefined
         break;
       }
       default: return `unknown drug command: ${c.name}`;
+    }
+  }
+  return undefined;
+}
+
+function handleGroupCommands(group: DrugGroup, commands: Command[]): string | undefined {
+  for(let c of commands) {
+    switch(c.name) {
+      case "comment": {
+        group.groupComments.push(c.value);
+        break;
+      }
+      default: return `unknown group command: ${c.name}`;
     }
   }
   return undefined;
@@ -275,7 +287,6 @@ function parseDrug(pos: Pos): Result<Drug> {
     unit: m[3],
     drugComments: []
   };
-  console.log("drug", drug);
   let rCommands = repeat(probeDrugCommand, pos);
   if( !rCommands.success ){
     return rCommands;
@@ -361,6 +372,7 @@ function parseDrugs(pos: Pos): Result<Drug[]> {
   if( !rExtraDrugs.success ){
     return rExtraDrugs;
   }
+
   pos = rExtraDrugs.rest;
   drugs.push(...rExtraDrugs.value);
   return { success: true, value: drugs, rest: pos };
@@ -382,12 +394,17 @@ function parseDrugGroup(pos: Pos): Result<DrugGroup> | undefined {
   }
   let usage = rUsage.value;
   pos = rUsage.rest;
-  let comments: string[] = [];
   let group: DrugGroup = {
     drugs,
     usage,
-    groupComments: comments,
+    groupComments: []
   };
+  let rCommands = repeat(probeGroupCommand, pos);
+  if( !rCommands.success ){
+    return rCommands;
+  }
+  pos = rCommands.rest;
+  let err = handleGroupCommands(group, rCommands.value);
   return { success: true, value: group, rest: pos };
 }
 
@@ -438,7 +455,7 @@ function probeDrugCommand(pos: Pos): Result<Command> | undefined {
   }
 }
 
-function probeUsageCommand(pos: Pos): Result<Command> | undefined {
+function probeGroupCommand(pos: Pos): Result<Command> | undefined {
   if( posStartsWithSpace(pos) ){
     if( posIsCommandStart(posSkipSpaces(pos)) ){
       return parseCommand(posSkipSpaces(pos));
