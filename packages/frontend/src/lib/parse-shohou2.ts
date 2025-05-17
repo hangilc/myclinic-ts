@@ -42,6 +42,7 @@ export function parseShohou(src: string): Shohou | string {
   if( !posIsAtEOL(pos) ){
     return formatFailure({ success: false, message: "extra content", pos })
   }
+  console.log("shohou", shohou);
   return shohou;
 }
 
@@ -256,7 +257,7 @@ function parseDrugIndex(pos: Pos): Result<void> {
   }
 }
 
-function parseDrugAndAmount(pos: Pos): Result<Drug> {
+function parseDrug(pos: Pos): Result<Drug> {
   let rLine = getLine(pos);
   if( !rLine.success ){
     return rLine;
@@ -267,13 +268,14 @@ function parseDrugAndAmount(pos: Pos): Result<Drug> {
   if( !m ){
     return { success: false, message: "cannot find drug amount", pos };
   }
-  let name = pos.src.substring(pos.i, pos.i + m.index).trim();
+  let name = line.substring(0, m.index).trim();
   let drug: Drug = {
     name,
     amount: (m[1] ?? "") + m[2],
     unit: m[3],
     drugComments: []
   };
+  console.log("drug", drug);
   let rCommands = repeat(probeDrugCommand, pos);
   if( !rCommands.success ){
     return rCommands;
@@ -331,7 +333,7 @@ function repeat<T>(f: (pos: Pos, nth: number) => Result<T> | undefined, pos: Pos
 
 function probeAdditionalDrug(pos: Pos): Result<Drug> | undefined {
   if( posStartsWithSpace(pos) ){
-    let r = parseDrugAndAmount(posSkipSpaces(pos));
+    let r = parseDrug(posSkipSpaces(pos));
     if( r.success ){
       return r;
     } else {
@@ -349,7 +351,7 @@ function parseDrugs(pos: Pos): Result<Drug[]> {
   }
   pos = rIndex.rest;
   pos = posSkipSpaces(pos);
-  let rDrug = parseDrugAndAmount(pos);
+  let rDrug = parseDrug(pos);
   if( !rDrug.success ){
     return rDrug;
   }
