@@ -4,12 +4,13 @@ import * as c from "@/lib/drawer/compiler/compiler";
 import * as x from "./xsplit";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { black } from "./helper";
-import { breakLines } from "../../compiler/break-lines";
+import { drawShimei } from "./kanja/shimei";
+import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
 
 export function drawKanja(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   let [patient, clinic] = b.splitToColumns(frame, b.evenSplitter(2));
   drawPatient(ctx, patient, data);
+  drawClinic(ctx, clinic, data);
 }
 
 export function drawPatient(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
@@ -21,46 +22,10 @@ export function drawPatient(ctx: DrawerContext,  frame: Box, data: ShohousenData
   let [name, birthdayAndSex, kubun] = b.splitToRows(body, b.evenSplitter(3));
   [name, birthdayAndSex].forEach(b => c.frameBottom(ctx, b));
   let leftWidth = 20;
-  drawPatientName(ctx, name, leftWidth, data);
+  drawShimei(ctx, name, leftWidth, data);
+  drawBirthdayAndSex(ctx, birthdayAndSex, leftWidth, data);
 }
 
-function drawPatientName(ctx: DrawerContext, frame: Box, leftWidth: number, data: ShohousenData2025) {
-  let [label, body] = b.splitToColumns(frame, b.splitAt(leftWidth));
-  c.frameRight(ctx, label);
-  c.drawText(ctx, "氏　名", label, "center", "center");
-  let shimei: string | undefined = data.shimei;
-  drawShimei(ctx, body, shimei);
-}
-
-function drawShimei(ctx: DrawerContext, frame: Box, shimei: string | undefined ){
-  if( shimei === undefined || shimei.trim() === "" ){
-    return;
-  }
-  let fonts = ["d5", "d4", "d3", "d2.5"];
-  for(let font of fonts){
-    let done = false;
-    c.withTextColor(ctx, black, () => {
-      let w = c.textWidthWithFont(ctx, shimei, font);
-      if( w + 2 <= b.width(frame) ){
-        c.withFont(ctx, font, () => {
-          c.drawText(ctx, shimei, frame, "center", "center");
-        });
-        console.log("font", font);
-        done = true;
-      }
-    });
-    if( done ){
-      return;
-    }
-  }
-  c.withTextColor(ctx, black, () => {
-    c.withFont(ctx, "d2.5", () => {
-      let fontSize = c.currentFontSize(ctx);
-      let texts = breakLines(shimei, fontSize, b.width(frame));
-      c.drawTexts(ctx, texts, frame, { halign: "left", valign: "center" })
-    });
-  })
-}
 
 export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   c.frame(ctx, frame);
