@@ -7,6 +7,7 @@ import * as c from "@/lib/drawer/compiler/compiler";
 import { mkBox, type Box } from "@/lib/drawer/compiler/box";
 import * as x from "./xsplit";
 import { drawUpperRow } from "./upper-row";
+import { drawKanja } from "./kanja";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
@@ -27,7 +28,7 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
       b.splitToRows(main, x.split(x.fixed(20), x.skip(3), x.fixed(33), x.fixed(10),
         x.gap(), x.fixed(20), x.fixed(10), x.fixed(10)))
   drawUpperRow(ctx, upperRow, data);
-  c.frame(ctx, kanjaRow);
+  drawKanja(ctx, kanjaRow, data);
   c.frame(ctx, koufuDateRow);
   c.frame(ctx, drugsRow);
   c.frame(ctx, bikouRow);
