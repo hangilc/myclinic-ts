@@ -6,6 +6,7 @@ import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
 import { drawShimei } from "./kanja/shimei";
 import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
+import { drawKubun } from "./kanja/kubun";
 
 export function drawKanja(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   let [patient, clinic] = b.splitToColumns(frame, b.evenSplitter(2));
@@ -24,8 +25,8 @@ export function drawPatient(ctx: DrawerContext,  frame: Box, data: ShohousenData
   let leftWidth = 20;
   drawShimei(ctx, name, leftWidth, data);
   drawBirthdayAndSex(ctx, birthdayAndSex, leftWidth, data);
+  drawKubun(ctx, kubun, leftWidth, data);
 }
-
 
 export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   c.frame(ctx, frame);

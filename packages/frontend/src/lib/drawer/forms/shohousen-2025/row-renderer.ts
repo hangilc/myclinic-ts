@@ -3,18 +3,24 @@ import type { DrawerContext } from "@/lib/drawer/compiler/context";
 import * as x from "./xsplit";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
+import type { VAlign } from "@/lib/drawer/compiler/align";
 
 export interface Item {
   width: (ctx: DrawerContext) => number | { kind: "gap"} | { kind: "at"; at: number };
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
-export function t(text: string): Item {
+export function t(text: string, opt?: {
+  valign?: VAlign;
+  render?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void;
+}): Item {
+  let render = (ctx: DrawerContext, box: Box) => {
+    let valign: VAlign = opt?.valign ?? "center";
+    c.drawText(ctx, text, box, "left", valign);
+  }
   return {
     width: (ctx) => c.textWidth(ctx, text),
-    render: (ctx, box) => {
-      c.drawText(ctx, text, box, "center", "center");
-    }
+    render: extendRender(render, opt?.render),
   }
 }
 
@@ -29,14 +35,12 @@ export function fixed(w: number, render?: (ctx: DrawerContext, box: Box) => void
   }
 }
 
-export function gap(render?: (ctx: DrawerContext, box: Box) => void): Item {
+export function gap(
+  render?: (ctx: DrawerContext, box: Box) => void,
+): Item {
   return {
     width: () => ({ kind: "gap"}),
-    render: (ctx, box) => {
-      if( render ){
-        render(ctx, box);
-      }
-    }
+    render: render ?? (() => {}),
   }
 }
 
@@ -48,6 +52,20 @@ export function at(pos: number, render?: (ctx: DrawerContext, box: Box) => void)
         render(ctx, box);
       }
     }
+  }
+}
+
+function extendRender(
+  orig?: (ctx: DrawerContext, box: Box) => void,
+  optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
+): (ctx: DrawerContext, box: Box) => void {
+  orig = orig ?? (() => {});
+  if( optRender ){
+    return (ctx, box) => {
+      optRender(ctx, box, orig);
+    }
+  } else {
+    return orig;
   }
 }
 

@@ -73,6 +73,7 @@ export function nenMonthDayRenderer(
     }
     
     r.renderRow(ctx, box,
+      r.gap(),
       ...(opt?.gengou ? [r.t(opt.gengou), r.fixed(gap)] : []),
       content(nenWidth, date?.getNen()),
       r.fixed(gap),
