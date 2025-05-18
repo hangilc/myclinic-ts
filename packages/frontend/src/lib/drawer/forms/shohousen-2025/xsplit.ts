@@ -27,6 +27,8 @@ export function fixed(width: number): FixedItem {
   return { kind: "fixed", width };
 }
 
+export const skip = fixed;
+
 export function gap(): GapItem {
   return { kind: "gap" };
 }
@@ -35,7 +37,7 @@ export function at(pos: number): AtItem {
   return { kind: "at", at: pos };
 }
 
-export function xsplit(...items: Item[]): Splitter {
+export function split(...items: Item[]): Splitter {
   return (ext: number) => {
     let result: number[] = [];
     let pos = 0;
@@ -80,7 +82,7 @@ function splitSimple(ext: number, items: SimpleItem[]): number[] {
   }
   let extra = 0;
   if( gs.length > 0 ){
-    extra = (ext - extra) / gs.length;
+    extra = (ext - fixedSum) / gs.length;
   }
   let result: number[] = [];
   let pos = 0;

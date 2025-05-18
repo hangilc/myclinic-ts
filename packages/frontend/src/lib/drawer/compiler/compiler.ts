@@ -78,16 +78,16 @@ export function lineTo(ctx: DrawerContext, x: number, y: number) {
 export function createFont(
   ctx: DrawerContext, name: string, fontName: string, size: number,
   weight: number | "bold" = FontWeightDontCare, italic: boolean = false) {
-  function resolveWeight(): number {
-    if (weight === "bold") {
-      return FontWeightBold;
-    } else {
-      return weight;
+    function resolveWeight(): number {
+      if (weight === "bold") {
+        return FontWeightBold;
+      } else {
+        return weight;
+      }
     }
+    ctx.ops.push(["create_font", name, fontName, size, resolveWeight(), italic ? 1 : 0]);
+    fsm.registerFontSize(ctx.fsm, name, size);
   }
-  ctx.ops.push(["create_font", name, fontName, size, resolveWeight(), italic ? 1 : 0]);
-  fsm.registerFontSize(ctx.fsm, name, size);
-}
 
 export function setFont(ctx: DrawerContext, name: string | undefined) {
   if (name) {
@@ -108,8 +108,8 @@ export function drawChars(ctx: DrawerContext, str: string, xs: number[], ys: num
 
 export function createPen(ctx: DrawerContext, name: string, r: number, g: number, b: number,
   width: number, penStyle: number[] = []) {
-  ctx.ops.push(["create_pen", name, r, g, b, width, penStyle])
-}
+    ctx.ops.push(["create_pen", name, r, g, b, width, penStyle])
+  }
 
 export function setPen(ctx: DrawerContext, name: string) {
   ctx.ops.push(["set_pen", name]);
@@ -260,47 +260,47 @@ class DrawerTextOption {
 
 export function drawText(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
   optArg: DrawTextOptionArg = {}) {
-  const opt = new DrawerTextOption(optArg);
-  if (opt.modifiers.length > 0) {
-    box = b.modify(box, ...opt.modifiers);
-  }
-  const fontSize = fsm.getCurrentFontSize(ctx.fsm);
-  let charWidths = stringToCharWidths(text, fontSize);
-  if (opt.interCharsSpace !== 0) {
-    charWidths = charWidths.map((cs, i) => {
-      if (i !== charWidths.length - 1) {
-        return cs + opt.interCharsSpace;
-      } else {
-        return cs;
+    const opt = new DrawerTextOption(optArg);
+    if (opt.modifiers.length > 0) {
+      box = b.modify(box, ...opt.modifiers);
+    }
+    const fontSize = fsm.getCurrentFontSize(ctx.fsm);
+    let charWidths = stringToCharWidths(text, fontSize);
+    if (opt.interCharsSpace !== 0) {
+      charWidths = charWidths.map((cs, i) => {
+        if (i !== charWidths.length - 1) {
+          return cs + opt.interCharsSpace;
+        } else {
+          return cs;
+        }
+      })
+    }
+    const length = sumOfNumbers(charWidths);
+    const y = locateY(box, fontSize, valign) + opt.dy;
+    let x: number;
+    switch (halign) {
+      case "left": {
+        x = box.left;
+        break;
       }
-    })
-  }
-  const length = sumOfNumbers(charWidths);
-  const y = locateY(box, fontSize, valign) + opt.dy;
-  let x: number;
-  switch (halign) {
-    case "left": {
-      x = box.left;
-      break;
+      case "center": {
+        x = b.cx(box) - length / 2.0;
+        break;
+      }
+      case "right": {
+        x = box.right - length;
+        break;
+      }
     }
-    case "center": {
-      x = b.cx(box) - length / 2.0;
-      break;
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (let i = 0; i < charWidths.length; i++) {
+      xs.push(x);
+      ys.push(y);
+      x += charWidths[i];
     }
-    case "right": {
-      x = box.right - length;
-      break;
-    }
+    drawChars(ctx, text, xs, ys);
   }
-  const xs: number[] = [];
-  const ys: number[] = [];
-  for (let i = 0; i < charWidths.length; i++) {
-    xs.push(x);
-    ys.push(y);
-    x += charWidths[i];
-  }
-  drawChars(ctx, text, xs, ys);
-}
 
 export interface DrawTextVerticallyOptionArg {
   interCharsSpace?: number;
@@ -316,68 +316,68 @@ class DrawerTextVerticallyOption {
 
 export function drawTextVertically(ctx: DrawerContext, text: string, box: Box, halign: HAlign, valign: VAlign,
   optArg: DrawTextOptionArg = {}) {
-  const opt = new DrawerTextVerticallyOption(optArg);
-  const fontSize = currentFontSize(ctx);
-  const tw = fontSize;
-  let th = fontSize * text.length;
-  if (text.length > 1 && opt.interCharsSpace !== 0) {
-    th += opt.interCharsSpace * (text.length - 1);
+    const opt = new DrawerTextVerticallyOption(optArg);
+    const fontSize = currentFontSize(ctx);
+    const tw = fontSize;
+    let th = fontSize * text.length;
+    if (text.length > 1 && opt.interCharsSpace !== 0) {
+      th += opt.interCharsSpace * (text.length - 1);
+    }
+    let x: number;
+    switch (halign) {
+      case "center": {
+        x = b.cx(box) - tw / 2.0;
+        break;
+      }
+      case "right": {
+        x = box.right - tw;
+        break;
+      }
+      default: {
+        x = box.left;
+        break;
+      }
+    }
+    let y: number;
+    switch (valign) {
+      case "center": {
+        y = b.cy(box) - th / 2.0;
+        break;
+      }
+      case "bottom": {
+        y = box.bottom - th;
+        break;
+      }
+      default: {
+        y = box.top;
+        break;
+      }
+    }
+    for (let i = 0; i < text.length; i++) {
+      const ch = text.charAt(i);
+      if (ch === "╭" || ch === "╰") {
+        const fontSize = currentFontSize(ctx);
+        drawChars(ctx, ch, [x + fontSize * 0.25], [y]);
+      } else {
+        drawChars(ctx, ch, [x], [y]);
+      }
+      y += fontSize + opt.interCharsSpace;
+    }
   }
-  let x: number;
-  switch (halign) {
-    case "center": {
-      x = b.cx(box) - tw / 2.0;
-      break;
-    }
-    case "right": {
-      x = box.right - tw;
-      break;
-    }
-    default: {
-      x = box.left;
-      break;
-    }
-  }
-  let y: number;
-  switch (valign) {
-    case "center": {
-      y = b.cy(box) - th / 2.0;
-      break;
-    }
-    case "bottom": {
-      y = box.bottom - th;
-      break;
-    }
-    default: {
-      y = box.top;
-      break;
-    }
-  }
-  for (let i = 0; i < text.length; i++) {
-    const ch = text.charAt(i);
-    if (ch === "╭" || ch === "╰") {
-      const fontSize = currentFontSize(ctx);
-      drawChars(ctx, ch, [x + fontSize * 0.25], [y]);
-    } else {
-      drawChars(ctx, ch, [x], [y]);
-    }
-    y += fontSize + opt.interCharsSpace;
-  }
-}
 
 export function drawTextInEvenColumns(ctx: DrawerContext, text: string, box: Box, ncol: number,
   justify: "left" | "right" = "left") {
-  let start = 0;
-  if (justify === "right") {
-    start = ncol - text.length;
+    let start = 0;
+    if (justify === "right") {
+      start = ncol - text.length;
+    }
+    const cols = b.splitToColumns(box, b.evenSplitter(ncol));
+    for (let i = 0; i < text.length; i++) {
+      const ch = text.charAt(i);
+      drawText(ctx, ch, cols[start], "center", "center");
+      start += 1;
+    }
   }
-  const cols = b.splitToColumns(box, b.evenSplitter(ncol));
-  for (let i = 0; i < text.length; i++) {
-    const ch = text.charAt(i);
-    drawText(ctx, ch, cols[start], "center", "center");
-    start += 1;
-  }
-}
 
 export interface DrawTextsInBoxesOptArg {
   leading?: number;
@@ -396,27 +396,27 @@ export class DrawTextsInBoxesOpt {
 
 export function drawTextsInBoxes(ctx: DrawerContext, texts: string[], box: Box,
   writer: (t: string, b: Box) => void, optArg: DrawTextsInBoxesOptArg = {}) {
-  const opt = new DrawTextsInBoxesOpt(optArg, ctx);
-  let top = box.top;
-  const lineHeight = currentFontSize(ctx);
-  if (opt.valign === "center" || opt.valign === "bottom") {
-    let totalHeight = lineHeight * texts.length;
-    if (opt.leading !== 0 && texts.length > 1) {
-      totalHeight += opt.leading * (texts.length - 1);
+    const opt = new DrawTextsInBoxesOpt(optArg, ctx);
+    let top = box.top;
+    const lineHeight = currentFontSize(ctx);
+    if (opt.valign === "center" || opt.valign === "bottom") {
+      let totalHeight = lineHeight * texts.length;
+      if (opt.leading !== 0 && texts.length > 1) {
+        totalHeight += opt.leading * (texts.length - 1);
+      }
+      if (opt.valign === "center") {
+        const rem = b.height(box) - totalHeight;
+        top += rem * 0.5;
+      } else if (opt.valign === "bottom") {
+        top = box.bottom - totalHeight;
+      }
     }
-    if (opt.valign === "center") {
-      const rem = b.height(box) - totalHeight;
-      top += rem * 0.5;
-    } else if (opt.valign === "bottom") {
-      top = box.bottom - totalHeight;
-    }
+    let bb = b.modify(box, b.setTop(top), b.setHeight(lineHeight, "top"));
+    texts.forEach(t => {
+      writer(t, bb);
+      bb = b.modify(bb, b.shiftDown(lineHeight + opt.leading));
+    })
   }
-  let bb = b.modify(box, b.setTop(top), b.setHeight(lineHeight, "top"));
-  texts.forEach(t => {
-    writer(t, bb);
-    bb = b.modify(bb, b.shiftDown(lineHeight + opt.leading));
-  })
-}
 
 export type DrawTextsOptArg = DrawTextsInBoxesOptArg & DrawTextOptionArg & {
   halign?: HAlign;
@@ -448,17 +448,17 @@ export function drawTexts(ctx: DrawerContext, texts: string[], box: Box, optArg:
 
 export function drawTextTmpls(ctx: DrawerContext, texts: string[], box: Box,
   writer: (key: string) => CompositeItem[], optArg: DrawTextsOptArg = {}) {
-  const opt = new DrawTextsOpt(optArg, ctx);
-  drawTextsInBoxes(ctx, texts, box,
-    (tt, bb) => {
-      if (hasCompTmpl(tt)) {
-        drawComposite(ctx, bb, parseCompTmpl(tt, writer), optArg);
-      } else {
-        drawText(ctx, tt, bb, opt.halign, opt.valign, optArg);
-      }
-    },
-    optArg);
-}
+    const opt = new DrawTextsOpt(optArg, ctx);
+    drawTextsInBoxes(ctx, texts, box,
+      (tt, bb) => {
+        if (hasCompTmpl(tt)) {
+          drawComposite(ctx, bb, parseCompTmpl(tt, writer), optArg);
+        } else {
+          drawText(ctx, tt, bb, opt.halign, opt.valign, optArg);
+        }
+      },
+      optArg);
+  }
 
 interface ParagraphOptArg {
   halign?: HAlign;
@@ -627,21 +627,21 @@ export function frameInnerRowBorders(ctx: DrawerContext, box: Box, splitter: Spl
 
 export function withGrid(ctx: DrawerContext, box: Box, rowSplitter: Splitter | number, colSplitter: Splitter | number,
   f: (cells: Box[][]) => void) {
-  const rSplitter: Splitter = typeof rowSplitter === "number" ? b.evenSplitter(rowSplitter) : rowSplitter;
-  const cSplitter: Splitter = typeof colSplitter === "number" ? b.evenSplitter(colSplitter) : colSplitter;
-  rect(ctx, box);
-  frameInnerRowBorders(ctx, box, rSplitter);
-  frameInnerColumnBorders(ctx, box, cSplitter);
-  const cells: Box[][] = [];
-  b.withSplitRows(box, rSplitter, rows => {
-    rows.forEach(row => {
-      b.withSplitColumns(row, cSplitter, cols => {
-        cells.push(cols);
+    const rSplitter: Splitter = typeof rowSplitter === "number" ? b.evenSplitter(rowSplitter) : rowSplitter;
+    const cSplitter: Splitter = typeof colSplitter === "number" ? b.evenSplitter(colSplitter) : colSplitter;
+    rect(ctx, box);
+    frameInnerRowBorders(ctx, box, rSplitter);
+    frameInnerColumnBorders(ctx, box, cSplitter);
+    const cells: Box[][] = [];
+    b.withSplitRows(box, rSplitter, rows => {
+      rows.forEach(row => {
+        b.withSplitColumns(row, cSplitter, cols => {
+          cells.push(cols);
+        })
       })
-    })
-  });
-  f(cells);
-}
+    });
+    f(cells);
+  }
 
 export function textWidth(ctx: DrawerContext, text: string): number {
   return stringDrawWidth(text, fsm.getCurrentFontSize(ctx.fsm));
@@ -815,106 +815,106 @@ export function calcTotalCompositeWidth(ctx: DrawerContext, comps: CompositeItem
 
 export function drawComposite(ctx: DrawerContext, box: Box, comps: CompositeItem[],
   optArg: DrawCompositeOptionArg = {}) {
-  const opt = new DrawCompositeOption(optArg);
-  if (opt.boxModifiers.length > 0) {
-    box = b.modify(box, ...opt.boxModifiers);
-  }
-  const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
-  const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
-  switch (opt.halign) {
-    case "center": {
-      const extra = (b.width(box) - cw) / 2.0;
-      box = b.modify(box, b.shrinkHoriz(extra, extra));
-      break;
+    const opt = new DrawCompositeOption(optArg);
+    if (opt.boxModifiers.length > 0) {
+      box = b.modify(box, ...opt.boxModifiers);
     }
-    case "right": {
-      const x = box.right - cw;
-      box = b.modify(box, b.setLeft(x));
-      break;
-    }
-  }
-  let pos = 0;
-  cs.forEach(item => {
-    switch (item.kind) {
-      case "text": {
-        const textBox = b.modify(box, b.shift(pos, 0))
-        const tw = item._w;
-        drawText(ctx, item.text, textBox, "left", opt.valign, {
-          // dy: opt.dy 
-        });
-        if (item.mark) {
-          mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
-        }
+    const cs: (CompositeItem & { _w: number })[] = calcCompositeWidths(ctx, comps, b.width(box));
+    const cw = cs.reduce((acc, ele) => acc + ele._w, 0);
+    switch (opt.halign) {
+      case "center": {
+        const extra = (b.width(box) - cw) / 2.0;
+        box = b.modify(box, b.shrinkHoriz(extra, extra));
         break;
       }
-      case "gap": {
-        if (item.mark || item.callback) {
-          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width });
-          if (item.modifiers) {
-            mb = b.modify(mb, ...item.modifiers);
-          }
+      case "right": {
+        const x = box.right - cw;
+        box = b.modify(box, b.setLeft(x));
+        break;
+      }
+    }
+    let pos = 0;
+    cs.forEach(item => {
+      switch (item.kind) {
+        case "text": {
+          const textBox = b.modify(box, b.shift(pos, 0))
+          const tw = item._w;
+          drawText(ctx, item.text, textBox, "left", opt.valign, {
+            // dy: opt.dy 
+          });
           if (item.mark) {
+            mark(ctx, item.mark, b.modify(textBox, b.setWidth(tw, "left")), item.ropt);
+          }
+          break;
+        }
+        case "gap": {
+          if (item.mark || item.callback) {
+            let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + pos + item.width });
+            if (item.modifiers) {
+              mb = b.modify(mb, ...item.modifiers);
+            }
+            if (item.mark) {
+              mark(ctx, item.mark, mb, item.ropt);
+            }
+            if (item.callback) {
+              item.callback(b.clone(mb));
+            }
+          }
+          break;
+        }
+        case "gap-to": {
+          const at: number = item.at === "end" ? b.width(box) : item.at;
+          if (item.mark) {
+            let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + at });
+            if (item.modifiers) {
+              mb = b.modify(mb, ...item.modifiers);
+            }
             mark(ctx, item.mark, mb, item.ropt);
           }
-          if (item.callback) {
-            item.callback(b.clone(mb));
+          break;
+        }
+        case "text-by-font": {
+          withFont(ctx, item.fontName, () => {
+            const dx = item.dx ?? 0;
+            const dy = item.dy ?? 0;
+            drawText(ctx, item.text, b.modify(box, b.shift(pos + dx, dy)), "left", opt.valign);
+          })
+          break;
+        }
+        case "box": {
+          const fontSize = currentFontSize(ctx);
+          const outerBox: Box = b.modify(box,
+            b.setLeft(box.left + pos),
+            b.setHeight(fontSize, "center"),
+            b.setWidth(fontSize, "left"));
+          let inset = fontSize * 0.075;
+          let shiftDown = fontSize * 0.15;
+          const innerBox: Box = b.modify(outerBox, b.inset(inset), b.shiftDown(shiftDown));
+          let penSave: string | undefined = undefined;
+          if (item.pen) {
+            penSave = getCurrentPen(ctx);
+            setPen(ctx, item.pen);
           }
-        }
-        break;
-      }
-      case "gap-to": {
-        const at: number = item.at === "end" ? b.width(box) : item.at;
-        if (item.mark) {
-          let mb = Object.assign({}, box, { left: box.left + pos, right: box.left + at });
-          if (item.modifiers) {
-            mb = b.modify(mb, ...item.modifiers);
+          rect(ctx, innerBox);
+          if (penSave) {
+            setPen(ctx, penSave);
           }
-          mark(ctx, item.mark, mb, item.ropt);
+          if (item.mark) {
+            mark(ctx, item.mark, innerBox, item.ropt);
+          }
+          break;
         }
-        break;
+        case "expander": {
+          if (item.mark) {
+            mark(ctx, item.mark, b.modify(box, b.shiftToRight(pos), b.setWidth(item._w, "left")));
+          }
+          break;
+        }
+        default: throw new Error("Cannot happen");
       }
-      case "text-by-font": {
-        withFont(ctx, item.fontName, () => {
-          const dx = item.dx ?? 0;
-          const dy = item.dy ?? 0;
-          drawText(ctx, item.text, b.modify(box, b.shift(pos + dx, dy)), "left", opt.valign);
-        })
-        break;
-      }
-      case "box": {
-        const fontSize = currentFontSize(ctx);
-        const outerBox: Box = b.modify(box,
-          b.setLeft(box.left + pos),
-          b.setHeight(fontSize, "center"),
-          b.setWidth(fontSize, "left"));
-        let inset = fontSize * 0.075;
-        let shiftDown = fontSize * 0.15;
-        const innerBox: Box = b.modify(outerBox, b.inset(inset), b.shiftDown(shiftDown));
-        let penSave: string | undefined = undefined;
-        if (item.pen) {
-          penSave = getCurrentPen(ctx);
-          setPen(ctx, item.pen);
-        }
-        rect(ctx, innerBox);
-        if (penSave) {
-          setPen(ctx, penSave);
-        }
-        if (item.mark) {
-          mark(ctx, item.mark, innerBox, item.ropt);
-        }
-        break;
-      }
-      case "expander": {
-        if (item.mark) {
-          mark(ctx, item.mark, b.modify(box, b.shiftToRight(pos), b.setWidth(item._w, "left")));
-        }
-        break;
-      }
-      default: throw new Error("Cannot happen");
-    }
-    pos += item._w;
-  });
-}
+      pos += item._w;
+    });
+  }
 
 export function drawVertLines(ctx: DrawerContext, box: Box, splitter: Splitter) {
   splitter(b.width(box)).forEach(at => {
@@ -973,17 +973,24 @@ export function withTextColor(ctx: DrawerContext, color: Color | undefined, f: (
   }
 }
 
+export function withFontAndColor(ctx: DrawerContext, font: string, color: Color | undefined,
+  f: () => void ){
+    withFont(ctx, font, () => {
+      withTextColor(ctx, color, f);
+    });
+  }
+
 export function withMark(ctx: DrawerContext, markName: string, f: (box: Box) => void,
   modifiers: Modifier[] = []) {
-  let mark = getMark(ctx, markName);
-  withOps(ctx, mark.ops, () => {
-    let box = mark.box;
-    if (modifiers.length > 0) {
-      box = b.modify(box, ...modifiers);
-    }
-    f(box);
-  })
-}
+    let mark = getMark(ctx, markName);
+    withOps(ctx, mark.ops, () => {
+      let box = mark.box;
+      if (modifiers.length > 0) {
+        box = b.modify(box, ...modifiers);
+      }
+      f(box);
+    })
+  }
 
 export interface DataRendererOpt {
   font?: string;
@@ -1001,78 +1008,78 @@ export interface DataRendererOpt {
 
 export function renderData(ctx: DrawerContext, markName: string, data: string | undefined,
   opt: DataRendererOpt = {}): void {
-  if (data != null) {
-    const halign: HAlign = opt.halign ?? "left";
-    const valign: VAlign = opt.valign ?? "center";
-    let mark = getMark(ctx, markName);
-    withOps(ctx, mark.ops, () => {
-      let markBox = mark.box;
-      if (opt.render) {
-        opt.render(ctx, markBox, data);
-        return;
-      }
-      if (opt.modifiers) {
-        markBox = b.modify(markBox, ...opt.modifiers);
-      }
-      if (opt.tryFonts && opt.tryFonts.length > 0) {
-        const fallbackPara = opt.fallbackParagraph ?? true;
-        const fontSave = getCurrentFont(ctx);
-        let done = false;
-        for (let font of opt.tryFonts) {
-          setFont(ctx, font);
-          const tw = textWidth(ctx, data);
-          if (tw <= b.width(markBox)) {
-            drawText(ctx, data, markBox, halign, valign);
-            done = true;
-            break;
+    if (data != null) {
+      const halign: HAlign = opt.halign ?? "left";
+      const valign: VAlign = opt.valign ?? "center";
+      let mark = getMark(ctx, markName);
+      withOps(ctx, mark.ops, () => {
+        let markBox = mark.box;
+        if (opt.render) {
+          opt.render(ctx, markBox, data);
+          return;
+        }
+        if (opt.modifiers) {
+          markBox = b.modify(markBox, ...opt.modifiers);
+        }
+        if (opt.tryFonts && opt.tryFonts.length > 0) {
+          const fallbackPara = opt.fallbackParagraph ?? true;
+          const fontSave = getCurrentFont(ctx);
+          let done = false;
+          for (let font of opt.tryFonts) {
+            setFont(ctx, font);
+            const tw = textWidth(ctx, data);
+            if (tw <= b.width(markBox)) {
+              drawText(ctx, data, markBox, halign, valign);
+              done = true;
+              break;
+            }
           }
-        }
-        if (!done) {
-          const lastFont: string = opt.tryFonts[opt.tryFonts.length - 1]!;
-          setFont(ctx, lastFont);
-          if (fallbackPara) {
-            paragraph(ctx, data, markBox, { valign, leading: opt.leading })
-          } else {
-            drawText(ctx, data, markBox, halign, valign);
+          if (!done) {
+            const lastFont: string = opt.tryFonts[opt.tryFonts.length - 1]!;
+            setFont(ctx, lastFont);
+            if (fallbackPara) {
+              paragraph(ctx, data, markBox, { valign, leading: opt.leading })
+            } else {
+              drawText(ctx, data, markBox, halign, valign);
+            }
           }
-        }
-        setFont(ctx, fontSave);
-      } else if (opt.paragraph) {
-        let fontSave: string | undefined = undefined;
-        if (opt.font) {
-          fontSave = getCurrentFont(ctx);
-          setFont(ctx, opt.font);
-        }
-        paragraph(ctx, data, markBox, { halign: opt.halign ?? "left", leading: opt.leading })
-        if (opt.font) {
           setFont(ctx, fontSave);
-        }
-      } else {
-        let fontSave: string | undefined = undefined;
-        if (opt.font) {
-          fontSave = getCurrentFont(ctx);
-          setFont(ctx, opt.font);
-        }
-        if (opt.circle && !(data === "" || data === "0" || data === "false")) {
-          let r: number;
-          if (typeof opt.circle === "number") {
-            r = opt.circle;
-          } else {
-            r = currentFontSize(ctx) / 2.0;
+        } else if (opt.paragraph) {
+          let fontSave: string | undefined = undefined;
+          if (opt.font) {
+            fontSave = getCurrentFont(ctx);
+            setFont(ctx, opt.font);
           }
-          withPen(ctx, opt.pen, () => {
-            circle(ctx, b.cx(markBox), b.cy(markBox), r);
-          });
+          paragraph(ctx, data, markBox, { halign: opt.halign ?? "left", leading: opt.leading })
+          if (opt.font) {
+            setFont(ctx, fontSave);
+          }
         } else {
-          drawText(ctx, data, markBox, halign, valign);
+          let fontSave: string | undefined = undefined;
+          if (opt.font) {
+            fontSave = getCurrentFont(ctx);
+            setFont(ctx, opt.font);
+          }
+          if (opt.circle && !(data === "" || data === "0" || data === "false")) {
+            let r: number;
+            if (typeof opt.circle === "number") {
+              r = opt.circle;
+            } else {
+              r = currentFontSize(ctx) / 2.0;
+            }
+            withPen(ctx, opt.pen, () => {
+              circle(ctx, b.cx(markBox), b.cy(markBox), r);
+            });
+          } else {
+            drawText(ctx, data, markBox, halign, valign);
+          }
+          if (opt.font) {
+            setFont(ctx, fontSave);
+          }
         }
-        if (opt.font) {
-          setFont(ctx, fontSave);
-        }
-      }
-    });
+      });
+    }
   }
-}
 
 export function rectMark(ctx: DrawerContext, markName: string) {
   const mark = getMark(ctx, markName);

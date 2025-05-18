@@ -5,6 +5,8 @@ import * as b from "@/lib/drawer/compiler/box";
 import { mkDrawerContext, type DrawerContext } from "@/lib/drawer/compiler/context";
 import * as c from "@/lib/drawer/compiler/compiler";
 import { mkBox, type Box } from "@/lib/drawer/compiler/box";
+import * as x from "./xsplit";
+import { drawUpperRow } from "./upper-row";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
@@ -21,7 +23,16 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   c.drawText(ctx, "(この処方箋は、どの保険薬局でも有効です。)", title2, "center", "center");
   c.frame(ctx, outerBounds);
   main = b.modify(main, b.inset(2, 3, 2, 0))
-  c.frame(ctx, main);
+  let [upperRow, _ignore1, kanjaRow, koufuDateRow, drugsRow, bikouRow, shohouDateRow, pharmaRow] =
+      b.splitToRows(main, x.split(x.fixed(20), x.skip(3), x.fixed(33), x.fixed(10),
+        x.gap(), x.fixed(20), x.fixed(10), x.fixed(10)))
+  drawUpperRow(ctx, upperRow, data);
+  c.frame(ctx, kanjaRow);
+  c.frame(ctx, koufuDateRow);
+  c.frame(ctx, drugsRow);
+  c.frame(ctx, bikouRow);
+  c.frame(ctx, shohouDateRow);
+  c.frame(ctx, pharmaRow);
   return [ctx.ops];
 }
 

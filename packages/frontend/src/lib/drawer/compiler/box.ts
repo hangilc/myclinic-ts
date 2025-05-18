@@ -294,6 +294,12 @@ export function align(box: Box, outer: Box, halign: HAlign, valign: VAlign): Box
   return modify(box, alignHoriz(outer, halign), alignVert(outer, valign));
 }
 
+export function aligned(wrapping: Box, width: number, height: number,
+  halign: HAlign, valign: VAlign): Box {
+    let b = mkBox(0, 0, width, height);
+    return align(b, wrapping, halign, valign);
+  }
+
 export function withSlice(box: Box, size: number, f: (slice: Box) => void): Box {
   f(modify(box, setHeight(size, "top")));
   return modify(box, shrinkVert(size, 0));
