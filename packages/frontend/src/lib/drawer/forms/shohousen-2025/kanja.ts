@@ -11,6 +11,7 @@ import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
 import { drawKubun } from "./kanja/kubun";
 import { drawElement, stackedTexts } from "./element";
 import { black } from "./helper";
+import { pad } from "myclinic-util";
 
 export function drawKanja(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   let [patient, clinic] = b.splitToColumns(frame, b.evenSplitter(2));
@@ -123,9 +124,62 @@ function kikanDrawer(data: ShohousenData2025): (ctx: DrawerContext, box: Box) =>
       box => c.frameRight(ctx, box)
     );
     c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
+    drawKikanFuken(ctx, fuken, data);
+    drawKikanTensuuhyouLabel(ctx, tensuuLabel);
+    c.withFontAndColor(ctx, "d2.5", black, () => {
+      c.drawText(ctx, "1", tensuu, "center", "center");
+    });
+    drawKikanLabel(ctx, kikanLabel, data);
+    drawKikanCode(ctx, kikancode, data);
   };
   
 }
+
+function drawKikanFuken(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+  let cs = b.splitToColumns(box, b.evenSplitter(2));
+  c.withPen(ctx, "thin", () => c.frameRight(ctx, cs[0]));
+  let fuken = data.clinicTodoufuken;
+  if( fuken ){
+    const fukenStr = pad(fuken, 2, "0");
+    c.withFontAndColor(ctx, "d2.5", black, () => {
+      for(let i=0;i<2;i++){
+        c.drawText(ctx, fukenStr.charAt(i), cs[i], "center", "center");
+      }
+    })
+  }
+}
+
+function drawKikanTensuuhyouLabel(ctx: DrawerContext, box: Box) {
+  let ele = stackedTexts(["点数表", "番号"]);
+  drawElement(ctx, box, ele);
+}
+
+function drawKikanLabel(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+  c.withFont(ctx, "f1.5", () => {
+    let ele = stackedTexts(["医療機関", "コード"]);
+    drawElement(ctx, box, ele);
+  })
+}
+
+function drawKikanCode(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+  let cs = b.splitToColumns(box, b.evenSplitter(7));
+  [1, 5].forEach(i => c.frameRight(ctx, cs[i]));
+  c.withPen(ctx, "thin", () => {
+    [0, 2, 3, 4].forEach(i => c.frameRight(ctx, cs[i]));
+  })
+  let kikancode = data.clinicKikancode;
+  if( kikancode ) {
+    let kikancodeStr: string = kikancode;
+    c.withFontAndColor(ctx, "d2.5", black, () => {
+      for(let i=0;i<kikancodeStr.length;i++){
+        let ch = kikancodeStr.charAt(i);
+        c.drawText(ctx, ch, cs[i], "center", "center");
+      }
+    })
+  }
+}
+
+
 
 
 
