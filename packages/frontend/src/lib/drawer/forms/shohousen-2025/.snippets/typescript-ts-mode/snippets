@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: drawer function
+# key: drawer
+# --
+function drawer(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+
+}
