@@ -388,8 +388,79 @@
     onClose();
   }
 
+  async function prepareData(): Promise<ShohousenData2025> {
+	const clinicInfo = await cache.getClinicInfo();
+    const visitId = text.visitId;
+    const hoken = await api.getHokenInfoForVisit(visitId);
+    let hokenshaBangou: string | undefined = undefined;
+    let hihokenshaKigou = "";
+    let hihokenshaBangou = "";
+    let edaban = "";
+    let hokenKubun: "hihokensha" | "hifuyousha" | undefined = undefined;
+    if (hoken.shahokokuho) {
+      const shahokokuho = hoken.shahokokuho;
+      hokenshaBangou = formatHokenshaBangou(shahokokuho.hokenshaBangou);
+      hihokenshaKigou = shahokokuho.hihokenshaKigou;
+      hihokenshaBangou = shahokokuho.hihokenshaBangou;
+      edaban = shahokokuho.edaban;
+      hokenKubun = shahokokuho.honninStore !== 0 ? "hihokensha" : "hifuyousha";
+    } else if (hoken.koukikourei) {
+      hokenshaBangou = hoken.koukikourei.hokenshaBangou;
+      hihokenshaBangou = hoken.koukikourei.hihokenshaBangou;
+    }
+    let futansha: string | undefined = undefined;
+    let jukyuusha: string | undefined = undefined;
+    if (hoken.kouhiList.length >= 1) {
+      const kouhi = hoken.kouhiList[0];
+      futansha = kouhi.futansha.toString();
+      jukyuusha = kouhi.jukyuusha.toString();
+    }
+    let futansha2: string | undefined = undefined;
+    let jukyuusha2: string | undefined = undefined;
+    if (hoken.kouhiList.length >= 2) {
+      const kouhi = hoken.kouhiList[1];
+      futansha2 = kouhi.futansha.toString();
+      jukyuusha2 = kouhi.jukyuusha.toString();
+    }
+    let shimei: string | undefined = undefined;
+    let birthdate: string | undefined = undefined;
+    let sex: "M" | "F" | undefined = undefined;
+    {
+      const visit = await api.getVisit(text.visitId);
+      const patient = await api.getPatient(visit.patientId);
+      shimei = `${patient.lastName}${patient.firstName}`;
+      birthdate = patient.birthday;
+      if (patient.sex === "M" || patient.sex === "F") {
+        sex = patient.sex;
+      }
+    }
+    let koufuDate: string = dateToSqlDate(new Date());
+    const data: ShohousenData2025 = {
+      clinicAddress: clinicInfo.address,
+      clinicName: clinicInfo.name,
+      clinicPhone: `電話 ${clinicInfo.tel}`,
+      clinicTodoufuken: clinicInfo.todoufukencode,
+      clinicKikancode: clinicInfo.kikancode,
+      doctorName: clinicInfo.doctorName,
+      hokenshaBangou,
+      hihokenshaKigou,
+      hihokenshaBangou,
+      edaban,
+      futansha,
+      jukyuusha,
+      futansha2,
+      jukyuusha2,
+      shimei,
+      birthdate,
+      sex,
+      hokenKubun,
+      koufuDate,
+    };
+	return data;
+  }
+
   async function doPrintShohousen2025() {
-	let data: ShohousenData2025 = {};
+	let data: ShohousenData2025 = await prepareData();
 	let pages = drawShohousen2025(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
