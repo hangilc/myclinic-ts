@@ -33,16 +33,16 @@ export function drawPatient(ctx: DrawerContext,  frame: Box, data: ShohousenData
 }
 
 export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
-  let labelWidth = 26;
-  c.frame(ctx, frame);
-  cr.renderCol(ctx, frame,
+  let insetFrame = b.modify(frame, b.inset(2, 0, 0, 0));
+  let labelWidth = 24;
+  cr.renderCol(ctx, insetFrame,
     cr.fixed(10, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth, drawAddressLabel),
         r.fixed(labelWidth, addressDrawer(data)),
       )
     }),
-    cr.fixed(13, (ctx, box) => {
+    cr.fixed(6.5, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth,
           (ctx, box) => {
@@ -53,8 +53,7 @@ export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2
         r.gap(phoneDrawer(data)),
       );
     }),
-    cr.fixed(2),
-    cr.fixed(6, (ctx, box) => {
+    cr.fixed(6.5, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth,
           (ctx, box) => {
@@ -65,6 +64,8 @@ export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2
         r.gap(doctorNameDrawer(data)),
       );
     }),
+    cr.fixed(2),
+    cr.fixed(6, kikanDrawer(data))
   );
 }
 
@@ -77,7 +78,7 @@ function addressDrawer(
   data: ShohousenData2025
 ): (ctx: DrawerContext, box: Box) => void {
   return (ctx, box) => {
-    let addr: string = data.clinicAddress ?? "";
+    let addr: string = data.clinicAddress ?? "東京都";
     let name: string = data.clinicName ?? "";
     c.withFontAndColor(ctx, "d2.5", black, () => {
       cr.renderCol(ctx, box,
@@ -111,6 +112,19 @@ function doctorNameDrawer(data: ShohousenData2025): (ctx: DrawerContext, box: Bo
       r.fixed(8),
     );
   }
+}
+
+function kikanDrawer(data: ShohousenData2025): (ctx: DrawerContext, box: Box) => void {
+  return (ctx, box) => {
+    c.frame(ctx, box);
+    const [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel, kikancode] =
+          b.splitToColumns(box, b.splitAt(23, 28, 38.5, 44, 51));
+    [fukenLabel, fuken, tensuuLabel, tensuu, kikanLabel].forEach(
+      box => c.frameRight(ctx, box)
+    );
+    c.drawText(ctx, "都道府県番号", fukenLabel, "center", "center");
+  };
+  
 }
 
 
