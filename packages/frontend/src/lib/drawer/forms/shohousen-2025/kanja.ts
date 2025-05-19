@@ -39,20 +39,30 @@ export function drawClinic(ctx: DrawerContext,  frame: Box, data: ShohousenData2
     cr.fixed(10, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth, drawAddressLabel),
-        r.fixed(labelWidth, (ctx, box) => drawAddress(ctx, box, data)),
+        r.fixed(labelWidth, addressDrawer(data)),
       )
     }),
     cr.fixed(13, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth,
-          (ctx, box) => c.drawText(ctx, "電話番号", box, "center", "center"))
+          (ctx, box) => {
+            let w = c.currentFontSize(ctx) * 7;
+            box = b.modify(box, b.setWidth(w, "center"));
+            c.drawTextJustified(ctx, "電話番号", box, "center")
+          }),
+        r.gap(phoneDrawer(data)),
       );
     }),
     cr.fixed(2),
     cr.fixed(6, (ctx, box) => {
       r.renderRow(ctx, box,
         r.fixed(labelWidth,
-          (ctx, box) => c.drawText(ctx, "保険医氏名", box, "center", "center"))
+          (ctx, box) => {
+            let w = c.currentFontSize(ctx) * 7;
+            box = b.modify(box, b.setWidth(w, "center"));
+            c.drawTextJustified(ctx, "保険医氏名", box, "center")
+          }),
+        r.gap(doctorNameDrawer(data)),
       );
     }),
   );
@@ -63,15 +73,44 @@ function drawAddressLabel(ctx: DrawerContext, box: Box) {
   drawElement(ctx, box, ele);
 }
 
-function drawAddress(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
-  let addr: string = data.clinicAddress ?? "";
-  let name: string = data.clinicName ?? "";
-  c.withFontAndColor(ctx, "d2.5", black, () => {
-    cr.renderCol(ctx, box,
-      cr.gap((ctx, box) => c.drawText(ctx, addr, box, "left", "center")),
-      cr.gap((ctx, box) => c.drawText(ctx, name, box, "left", "center")),
+function addressDrawer(
+  data: ShohousenData2025
+): (ctx: DrawerContext, box: Box) => void {
+  return (ctx, box) => {
+    let addr: string = data.clinicAddress ?? "";
+    let name: string = data.clinicName ?? "";
+    c.withFontAndColor(ctx, "d2.5", black, () => {
+      cr.renderCol(ctx, box,
+        cr.gap((ctx, box) => c.drawText(ctx, addr, box, "left", "center")),
+        cr.gap((ctx, box) => c.drawText(ctx, name, box, "left", "center")),
+      );
+    })
+  }
+}
+
+function phoneDrawer(data: ShohousenData2025): (ctx: DrawerContext, box: Box) => void {
+  return (ctx, box) => {
+    let phone: string = data.clinicPhone ?? "";
+    c.withFontAndColor(ctx, "d2.5", black, () => {
+      c.drawText(ctx, phone, box, "left", "center");
+    });
+  }
+}
+
+function doctorNameDrawer(data: ShohousenData2025): (ctx: DrawerContext, box: Box) => void {
+  let name = data.doctorName ?? "診療太郎";
+  return (ctx, box) => {
+    r.renderRow(ctx, box,
+      r.gap((ctx, box) => {
+        c.withFontAndColor(ctx, "d2.5", black, () => {
+          c.drawText(ctx, name, box, "left", "center");
+        });
+      }),
+      r.fixed(2),
+      r.fixed(2.5, (ctx, box) => c.drawText(ctx, "㊞", box, "center", "center")),
+      r.fixed(8),
     );
-  })
+  }
 }
 
 
