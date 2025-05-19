@@ -9,27 +9,19 @@ export interface Item {
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
-export function fixed(height: number, rowItems?: r.Item[] ): Item {
-  let render: (ctx: DrawerContext, box: Box) => void = () => {};
-  if( rowItems ){
-    render = (ctx, box) => r.renderRow(ctx, box, ...rowItems);
-  }
+export function fixed(height: number, render?: (ctx: DrawerContext, box: Box) => void): Item {
   return {
     height: () => height,
-    render,
+    render: render ?? (() => {}),
   }
 }
 
 export function gap(
-  rowItems?: r.Item[]
+  render?: (ctx: DrawerContext, box: Box) => void,
 ): Item {
-  let render: (ctx: DrawerContext, box: Box) => void = () => {};
-  if( rowItems ){
-    render = (ctx, box) => r.renderRow(ctx, box, ...rowItems);
-  }
   return {
     height: () => ({ kind: "gap"}),
-    render,
+    render: render ?? (() => {}),
   }
 }
 
