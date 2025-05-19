@@ -2,9 +2,10 @@ import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
 import * as x from "./xsplit";
+import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { eightDigits, sevenDigits } from "./helper";
+import { black, eightDigits, sevenDigits } from "./helper";
 
 export function drawUpperRow(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   let [kouhiBox, hokenBox] = b.splitToColumns(frame, b.evenSplitter(2));
@@ -59,13 +60,34 @@ function drawHokensha(ctx: DrawerContext, frame: Box, data: ShohousenData2025) {
 
 function drawHihokensha(ctx: DrawerContext, frame: Box, data: ShohousenData2025) {
   const digitWidth = 5;
-  const [label, digits] = b.splitToColumns(frame, x.split(
+  const [label, kigoubangou] = b.splitToColumns(frame, x.split(
     x.gap(), x.fixed(digitWidth * 8)
   ));
   c.frameRight(ctx, label);
   drawCentered(ctx, label, ["被保険者証・被保険", "者手帳の記号・番号"]);
-  let hihokensha: string | undefined = data.hihokenshaBangou;
-  eightDigits(ctx, digits, hihokensha);
+  drawKigouBangou(ctx, kigoubangou, data);
+}
+
+function drawKigouBangou(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+  let kigou = data.hihokenshaKigou ?? "";
+  let bangou = data.hihokenshaBangou ?? "";
+  let edaban = data.edaban ?? "";
+  function txt(t: string): (ctx: DrawerContext, box: Box) => void {
+    return (ctx, box) => {
+      c.withFontAndColor(ctx, "d2.5", black, () => {
+        c.drawText(ctx, t, box, "center", "center");
+      })
+    }
+  }
+  r.renderRow(ctx, box,
+    r.fixed(1),
+    r.gap(txt(kigou)),
+    r.t("・"),
+    r.gap(txt(bangou)),
+    r.t("(枝番)"),
+    r.fixed(3, txt(edaban)),
+    r.fixed(1),
+  );
 }
 
 function drawCentered(ctx: DrawerContext, outer: Box, texts: string[]) {
