@@ -26,6 +26,11 @@ function drawBirthday(ctx: DrawerContext, frame: Box, data: ShohousenData2025) {
   let [geng, body] = b.splitToColumns(frame, b.splitAt(4));
   let box = b.modify(geng, b.inset(0, 0.5));
   let rows = b.splitToRows(box, b.evenSplitter(5));
+  function circle(box: Box) {
+    c.withPen(ctx, "data-thin", () => {
+      c.circle(ctx, b.cx(box), b.cy(box), 0.9);
+    })
+  }
   c.withFont(ctx, "f1.5", () => {
     c.drawText(ctx, "明", rows[0], "center", "center");
     c.drawText(ctx, "大", rows[1], "center", "center");
@@ -36,21 +41,11 @@ function drawBirthday(ctx: DrawerContext, frame: Box, data: ShohousenData2025) {
   if( birthday ){
     let geng = birthday.getGengou().charAt(0);
     switch(geng){
-      case "明": {
-        
-      }
-      case "大": {
-        
-      }
-      case "昭": {
-        
-      }
-      case "平": {
-        
-      }
-      case "令": {
-        
-      }
+      case "明": { circle(rows[0]); break; }
+      case "大": { circle(rows[1]); break; }
+      case "昭": { circle(rows[2]); break; }
+      case "平": { circle(rows[3]); break; }
+      case "令": { circle(rows[4]); break; }
     }
   }
   nenMonthDayRenderer(

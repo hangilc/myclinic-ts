@@ -1,3 +1,5 @@
+import type { Shohou } from "@/lib/parse-shohou";
+
 export interface ShohousenData2025 {
   clinicAddress?: string;
   clinicName?: string;
@@ -20,4 +22,5 @@ export interface ShohousenData2025 {
   koufuDate?: string; // YYYY-MM-DD
   isDenshi?: boolean;
   accessCode?: string;
+  shohou?: Shohou;
 }

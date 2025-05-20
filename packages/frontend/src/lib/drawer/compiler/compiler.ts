@@ -175,8 +175,12 @@ export function currentFontSize(ctx: DrawerContext): number {
   return fsm.getCurrentFontSize(ctx.fsm);
 }
 
-export function getFontSizeOf(ctx: DrawerContext, fontName: string): number {
-  return fsm.getFontSizeOf(ctx.fsm, fontName);
+export function getFontSizeOf(ctx: DrawerContext, fontName: string | undefined): number {
+  if( fontName ){
+    return fsm.getFontSizeOf(ctx.fsm, fontName);
+  } else {
+    return currentFontSize(ctx);
+  }
 }
 
 export function resolveFontHeight(ctx: DrawerContext, fontName?: string): number {
@@ -973,8 +977,8 @@ export function withTextColor(ctx: DrawerContext, color: Color | undefined, f: (
   }
 }
 
-export function withFontAndColor(ctx: DrawerContext, font: string, color: Color | undefined,
-  f: () => void ){
+export function withFontAndColor(ctx: DrawerContext, font: string | undefined,
+  color: Color | undefined, f: () => void ){
     withFont(ctx, font, () => {
       withTextColor(ctx, color, f);
     });

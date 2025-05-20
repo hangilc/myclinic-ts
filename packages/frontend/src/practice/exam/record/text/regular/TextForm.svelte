@@ -460,7 +460,13 @@
   }
 
   async function doPrintShohousen2025() {
+    const shohou = parseShohou(text.content);
+	if( typeof shohou === "string" ){
+	  alert(shohou);
+	  return;
+	}
 	let data: ShohousenData2025 = await prepareData();
+	data.shohou = shohou;
 	let pages = drawShohousen2025(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,

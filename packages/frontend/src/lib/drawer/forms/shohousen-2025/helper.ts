@@ -2,7 +2,7 @@ import { type Color } from "@/lib/drawer/compiler/compiler";
 import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-import { rowElement, type Element } from "./element";
+import { drawElement, rowElement, rowOfElements, type Element } from "./element";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import { DateWrapper, pad } from "myclinic-util";
 import * as r from "./row-renderer";
@@ -90,7 +90,7 @@ export function nenMonthDayRenderer(
   }
 
 export function nenMonthDayElement(
-  ctx: DrawerContext, box: Box, date?: DateWrapper,
+  ctx: DrawerContext, date?: DateWrapper,
   opt?: {
     gengou?: string, nenWidth?: number; monthWidth?: number; dayWidth?: number; gap?: number
   }): Element {
@@ -125,4 +125,55 @@ export function nenMonthDayElement(
     )
   }
 
+function leftBracket(width: number, height: number,
+  pen: string | undefined = undefined, vertOffset: number = 0): Element {
+    return {
+      width: () => width,
+      height: () => height,
+      render: (ctx, box) => {
+        c.withPen(ctx, pen, () => {
+          c.moveTo(ctx, box.right, box.top + vertOffset);
+          c.lineTo(ctx, box.left, box.top + vertOffset);
+          c.lineTo(ctx, box.left, box.bottom - vertOffset);
+          c.lineTo(ctx, box.right, box.bottom - vertOffset)
+        })
+      }
+    }
+  }
+
+function rightBracket(width: number, height: number,
+  pen: string | undefined = undefined, vertOffset: number = 0): Element {
+    return {
+      width: () => width,
+      height: () => height,
+      render: (ctx, box) => {
+        c.withPen(ctx, pen, () => {
+          c.moveTo(ctx, box.left, box.top + vertOffset);
+          c.lineTo(ctx, box.right, box.top + vertOffset);
+          c.lineTo(ctx, box.right, box.bottom - vertOffset);
+          c.lineTo(ctx, box.left, box.bottom - vertOffset)
+        })
+      }
+    }
+  }
+
+export function BrackettedElement(inner: Element, opt?: {
+  size?: number,
+  pen?: string;
+  vertOffset?: number,
+}): Element {
+  let size = opt?.size ?? 0.75;
+  let vertOffset = opt?.vertOffset ?? 0;
+  return {
+    width: (ctx) => size * 2 + inner.width(ctx),
+    height: (ctx) => inner.height(ctx),
+    render: (ctx, box) => {
+      let height = inner.height(ctx);
+      let leftbra = leftBracket(size, height, opt?.pen, vertOffset);
+      let rightbra = rightBracket(size, height, opt?.pen, vertOffset);
+      let ele = rowOfElements([leftbra, inner, rightbra]);
+      drawElement(ctx, box, ele, { halign: "left", valign: "top" });
+    }
+  }
+}
 
