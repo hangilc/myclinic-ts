@@ -47,7 +47,7 @@ export function breakParagraph(str: string, fontSize: number, lineWidth: number)
 // returns end of extracted line
 export function breakSingleLine(str: string, start: number, fontSize: number, lineWidth: number): number {
   let w = 0;
-  let i = 0;
+  let i: number;
   for (i = start; i < str.length; i++) {
     const ch = str.charAt(i);
     if (ch === "\n") {
@@ -57,6 +57,7 @@ export function breakSingleLine(str: string, start: number, fontSize: number, li
     const code = ch.charCodeAt(0);
     const cw = charWidth(code, fontSize);
     if (w + cw > lineWidth && i !== start) {
+      console.log("breakLine", w, cw, lineWidth);
       return i - 1;
     }
     w += cw;

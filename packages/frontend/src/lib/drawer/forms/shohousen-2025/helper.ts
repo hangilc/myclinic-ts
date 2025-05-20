@@ -6,12 +6,13 @@ import { drawElement, rowElement, rowOfElements, type Element } from "./element"
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import { DateWrapper, pad } from "myclinic-util";
 import * as r from "./row-renderer";
+import { breakSingleLine } from "@/lib/drawer/compiler/break-lines";
+import type { HAlign } from "@/lib/drawer/compiler/align";
 
-export const black: Color = {
-  r: 0,
-  g: 0,
-  b: 0,
-};
+export const black: Color = {r: 0, g: 0, b: 0,};
+export const green: Color = { r: 0, g: 255, b: 0 };
+export const red: Color = { r: 255, g: 0, b: 0 };
+export const lightRed: Color = { r: 255, g: 127, b: 127 };
 
 export function eightDigits(ctx: DrawerContext, frame: Box, digits?: string) {
   const cols = b.splitToColumns(frame, b.evenSplitter(8));
@@ -176,4 +177,47 @@ export function brackettedElement(inner: Element, opt?: {
     }
   }
 }
+
+export function flowTextIn(ctx: DrawerContext, box: Box, text: string, opt?: {
+  font?: string;
+  color?: Color;
+  leading?: number;
+  halign?: HAlign;
+}): string {
+  c.frame(ctx, box);
+  const font = opt?.font;
+  const fontSize = c.getFontSizeOf(ctx, font);
+  const lineWidth = b.width(box);
+  const halign = opt?.halign ?? "left";
+  let start = 0;
+  let leading = opt?.leading ?? 0;
+  let iter = 0;
+  let top = box.top;
+  while (start < text.length) {
+    if( top + fontSize > box.bottom ){
+      break;
+    }
+    const end = breakSingleLine(text, start, fontSize, lineWidth);
+    const line = text.substring(start, end).trimEnd();
+    console.log("line", fontSize, c.textWidthWithFont(ctx, line, font), b.width(box), line);
+    let lineBox = Object.assign({}, box, { top });
+    c.withFontAndColor(ctx, font, opt?.color, () => {
+      c.drawText(ctx, line, lineBox, halign, "top");
+    });
+    start = end;
+    top += fontSize + leading;
+    if (++iter > 200) {
+      throw new Error("too many iteration (flowTextIn)");
+    }
+  }
+  return text.substring(start);
+}
+
+
+
+
+
+
+
+
 

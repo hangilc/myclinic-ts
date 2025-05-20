@@ -10,7 +10,7 @@ import { drawShimei } from "./kanja/shimei";
 import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
 import { drawKubun } from "./kanja/kubun";
 import { colOfElements, drawElement, fixedElement, stackedTexts, textElement } from "./element";
-import { black, brackettedElement, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
+import { black, brackettedElement, flowTextIn, lightRed, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
 import { DateWrapper, pad } from "myclinic-util";
 
 export function drawBikou(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
@@ -21,6 +21,9 @@ export function drawBikou(ctx: DrawerContext, box: Box, data: ShohousenData2025)
   let [upper, lower] = b.splitToRows(body, b.splitAt(13));
   const [upperLeft, upperRight] = b.splitToColumns(upper, b.splitAt(70));
   drawUpperLeft(ctx, upperLeft, data)
+  let upperRightInner = b.modify(upperRight, b.inset(1, 1, 1, 0));
+  let lowerInner = b.modify(lower, b.inset(1));
+  drawBikouTexts(ctx, upperRightInner, lowerInner, data);
 }
 
 function drawMark(ctx: DrawerContext, box: Box) {
@@ -60,6 +63,29 @@ function isDoctorNameRequired(data: ShohousenData2025): boolean {
   }
   return false;
 }
+
+function drawUpperLeftDoctorName(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+  let innerBox = b.modify(box, b.shrinkHoriz(15, 6));
+  let [area, inkan] = b.splitToColumns(innerBox, x.split(x.gap(), x.fixed(2.5)));
+  c.withFontAndColor(ctx, "d3", black, () => {
+    c.drawText(ctx, data.doctorName ?? "", area, "left", "center");
+  });
+  c.withFontAndColor(ctx, "f2.5", lightRed, () => {
+    c.drawText(ctx, "㊞", inkan, "center", "center");
+  })
+}
+
+function drawBikouTexts(ctx: DrawerContext, box1: Box, box2: Box, data: ShohousenData2025) {
+  let bikou = (data.shohou?.bikou ?? []).join("\n");
+  let rest = flowTextIn(ctx, box1, bikou, { font: "d3", color: black });
+  
+}
+
+
+
+
+
+
 
 
 
