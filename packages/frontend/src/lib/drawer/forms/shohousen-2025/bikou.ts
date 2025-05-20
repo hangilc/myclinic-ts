@@ -21,8 +21,8 @@ export function drawBikou(ctx: DrawerContext, box: Box, data: ShohousenData2025)
   let [upper, lower] = b.splitToRows(body, b.splitAt(13));
   const [upperLeft, upperRight] = b.splitToColumns(upper, b.splitAt(70));
   drawUpperLeft(ctx, upperLeft, data)
-  let upperRightInner = b.modify(upperRight, b.inset(1, 1, 1, 0));
-  let lowerInner = b.modify(lower, b.inset(1));
+  let upperRightInner = b.modify(upperRight, b.inset(1, 0.5, 1, 0));
+  let lowerInner = b.modify(lower, b.inset(1, 0, 1, 1));
   drawBikouTexts(ctx, upperRightInner, lowerInner, data);
 }
 
@@ -78,7 +78,9 @@ function drawUpperLeftDoctorName(ctx: DrawerContext, box: Box, data: ShohousenDa
 function drawBikouTexts(ctx: DrawerContext, box1: Box, box2: Box, data: ShohousenData2025) {
   let bikou = (data.shohou?.bikou ?? []).join("\n");
   let rest = flowTextIn(ctx, box1, bikou, { font: "d3", color: black });
-  
+  if( rest !== "" ){
+    flowTextIn(ctx, box2, rest, { font: "d3", color: black });
+  }
 }
 
 

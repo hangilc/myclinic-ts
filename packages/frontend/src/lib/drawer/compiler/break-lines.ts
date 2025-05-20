@@ -58,7 +58,7 @@ export function breakSingleLine(str: string, start: number, fontSize: number, li
     const cw = charWidth(code, fontSize);
     if (w + cw > lineWidth && i !== start) {
       console.log("breakLine", w, cw, lineWidth);
-      return i - 1;
+      return i;
     }
     w += cw;
   }

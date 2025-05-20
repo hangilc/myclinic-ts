@@ -184,7 +184,6 @@ export function flowTextIn(ctx: DrawerContext, box: Box, text: string, opt?: {
   leading?: number;
   halign?: HAlign;
 }): string {
-  c.frame(ctx, box);
   const font = opt?.font;
   const fontSize = c.getFontSizeOf(ctx, font);
   const lineWidth = b.width(box);
