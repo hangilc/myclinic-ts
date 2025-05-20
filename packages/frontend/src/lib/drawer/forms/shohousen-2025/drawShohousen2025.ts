@@ -9,6 +9,8 @@ import * as x from "./xsplit";
 import { drawUpperRow } from "./upper-row";
 import { drawKanja } from "./kanja";
 import { drawKoufuDate } from "./koufu-date";
+import { drawDrugs } from "./drugs";
+import { drawBikou } from "./bikou";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
@@ -32,8 +34,8 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   drawUpperRow(ctx, upperRow, data);
   drawKanja(ctx, kanjaRow, data);
   drawKoufuDate(ctx, koufuDateRow, data);
-  c.frame(ctx, drugsRow);
-  c.frame(ctx, bikouRow);
+  let drugBoxes = drawDrugs(ctx, drugsRow, data);
+  drawBikou(ctx, bikouRow, data);
   c.frame(ctx, shohouDateRow);
   c.frame(ctx, pharmaRow);
   return [ctx.ops];

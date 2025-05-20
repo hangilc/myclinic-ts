@@ -40,11 +40,20 @@ export function stackedTexts(texts: string[], opt?: {
 export function drawElement(ctx: DrawerContext, box: Box, ele: Element, opt?: {
   halign?: HAlign,
   valign?: VAlign,
-}) {
+}): Box {
   let halign: HAlign = opt?.halign ?? "center";
   let valign: VAlign = opt?.valign ?? "center";
   let eb = b.aligned(box, ele.width(ctx), ele.height(ctx), halign, valign);
   ele.render(ctx, eb);
+  return eb;
+}
+
+export function fixedElement(width: number, height: number): Element {
+  return {
+    width: () => width,
+    height: () => height,
+    render: () => {},
+  }
 }
 
 export function rowElement(ctx: DrawerContext, ...items: r.FixedWidthItem[]): Element {

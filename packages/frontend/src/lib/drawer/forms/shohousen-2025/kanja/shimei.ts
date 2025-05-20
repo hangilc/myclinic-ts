@@ -29,7 +29,6 @@ function drawBody(ctx: DrawerContext, frame: Box, shimei: string | undefined ){
         c.withFont(ctx, font, () => {
           c.drawText(ctx, shimei, frame, "center", "center");
         });
-        console.log("font", font);
         done = true;
       }
     });

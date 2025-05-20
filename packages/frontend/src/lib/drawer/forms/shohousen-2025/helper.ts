@@ -157,7 +157,7 @@ function rightBracket(width: number, height: number,
     }
   }
 
-export function BrackettedElement(inner: Element, opt?: {
+export function brackettedElement(inner: Element, opt?: {
   size?: number,
   pen?: string;
   vertOffset?: number,

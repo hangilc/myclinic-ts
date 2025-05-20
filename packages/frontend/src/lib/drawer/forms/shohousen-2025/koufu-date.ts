@@ -10,7 +10,7 @@ import { drawShimei } from "./kanja/shimei";
 import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
 import { drawKubun } from "./kanja/kubun";
 import { drawElement, stackedTexts } from "./element";
-import { black, BrackettedElement, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
+import { black, brackettedElement, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
 import { DateWrapper, pad } from "myclinic-util";
 
 export function drawKoufuDate(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
@@ -77,7 +77,7 @@ function drawIssueDateLimitAppend(ctx: DrawerContext, box: Box) {
     "めて４日以内に保険薬",
     "局に提出すること。",
   ], { font: "f1.5", leading: 0.5 });
-  let ele = BrackettedElement(texts, { size: 0.75, pen: "thin" });
+  let ele = brackettedElement(texts, { size: 0.75, pen: "thin" });
   drawElement(ctx, box, ele, { halign: "center", valign: "center"})
 }
 
