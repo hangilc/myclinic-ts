@@ -33,6 +33,26 @@ function drawBirthday(ctx: DrawerContext, frame: Box, data: ShohousenData2025) {
     c.drawText(ctx, "平", rows[3], "center", "center");
     c.drawText(ctx, "令", rows[4], "center", "center");
   });
+  if( birthday ){
+    let geng = birthday.getGengou().charAt(0);
+    switch(geng){
+      case "明": {
+        
+      }
+      case "大": {
+        
+      }
+      case "昭": {
+        
+      }
+      case "平": {
+        
+      }
+      case "令": {
+        
+      }
+    }
+  }
   nenMonthDayRenderer(
     ctx,
     b.modify(body, b.inset(0, 0, 3, 0)),

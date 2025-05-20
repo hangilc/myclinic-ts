@@ -10,10 +10,15 @@ export interface Item {
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
+export interface FixedWidthItem {
+  width: (ctx: DrawerContext) => number;
+  render: (ctx: DrawerContext, box: Box) => void;
+}
+
 export function t(text: string, opt?: {
   valign?: VAlign;
   render?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void;
-}): Item {
+}): FixedWidthItem {
   let render = (ctx: DrawerContext, box: Box) => {
     let valign: VAlign = opt?.valign ?? "center";
     c.drawText(ctx, text, box, "left", valign);
@@ -24,7 +29,8 @@ export function t(text: string, opt?: {
   }
 }
 
-export function fixed(w: number, render?: (ctx: DrawerContext, box: Box) => void): Item {
+export function fixed(w: number, render?: (ctx: DrawerContext, box: Box) => void
+): FixedWidthItem {
   return {
     width: () => w,
     render: (ctx, box) => {

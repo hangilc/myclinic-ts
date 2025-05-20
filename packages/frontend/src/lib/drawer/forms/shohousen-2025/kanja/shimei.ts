@@ -13,7 +13,6 @@ export function drawShimei(
   c.frameRight(ctx, label);
   c.drawText(ctx, "氏　名", label, "center", "center");
   let shimei: string | undefined = data.shimei;
-  shimei = "診療太郎"
   drawBody(ctx, body, shimei);
 }
 
