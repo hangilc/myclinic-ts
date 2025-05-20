@@ -32,6 +32,9 @@ function drawUpperLeft(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
   c.frame(ctx, box);
   let [label, doctorName] = b.splitToRows(box, b.splitAt(7));
   drawUpperLeftLabel(ctx, label);
+  if( isDoctorNameRequired(data) ){
+    drawUpperLeftDoctorName(ctx, doctorName, data);
+  }
 }
 
 function drawUpperLeftLabel(ctx: DrawerContext, box: Box) {
@@ -46,6 +49,17 @@ function drawUpperLeftLabel(ctx: DrawerContext, box: Box) {
   drawElement(ctx, right, bra);
 }
 
+function isDoctorNameRequired(data: ShohousenData2025): boolean {
+  for(let g of (data.shohou?.groups ?? [])){
+    for(let d of g.drugs){
+      let ippan = d.senpatsu;
+      if( ippan !== undefined ){
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 
 
