@@ -1,17 +1,11 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-import * as x from "./xsplit";
-import * as cr from "./col-renderer";
-import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { drawShimei } from "./kanja/shimei";
-import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
-import { drawKubun } from "./kanja/kubun";
-import { colOfElements, drawElement, fixedElement, justifiedStackedTexts, stackedTexts, textElement } from "./element";
-import { black, brackettedElement, flowTextIn, lightRed, nenMonthDayElement, nenMonthDayRenderer, sevenDigits } from "./helper";
-import { DateWrapper, pad } from "myclinic-util";
+import { drawElement, justifiedStackedTexts } from "./element";
+import { sevenDigits } from "./helper";
+import * as x from "./xsplit";
 
 export function drawPharma(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
   c.frame(ctx, box);
@@ -22,7 +16,7 @@ export function drawPharma(ctx: DrawerContext, box: Box, data: ShohousenData2025
 }
 
 function drawPharmaPart(ctx: DrawerContext, box: Box) {
-  const [label, body] = b.splitToColumns(box, b.splitAt(25));
+  const [label, _body] = b.splitToColumns(box, b.splitAt(25));
   c.frameRight(ctx, label);
   let st = justifiedStackedTexts(ctx, [
     "保険薬局の所在地",
