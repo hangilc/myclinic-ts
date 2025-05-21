@@ -460,6 +460,12 @@
   }
 
   async function doPrintShohousen2025() {
+    if (!(await isTodaysShohousen())) {
+      if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
+        onClose();
+        return;
+      }
+    }
     const shohou = parseShohou(text.content);
 	if( typeof shohou === "string" ){
 	  alert(shohou);
