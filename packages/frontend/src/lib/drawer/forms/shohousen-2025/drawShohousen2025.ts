@@ -13,7 +13,7 @@ import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
-import { handleShohou, shohouToLines } from "./drug-helper";
+import { drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
 import { availableLines } from "./helper";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
@@ -21,15 +21,22 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   let page = drawPage(ctx, data);
   if( data.shohou){
     let font = "d3.5";
+    let leading = 0;
     let fontSize = c.getFontSizeOf(ctx, "d3.5");
     let indexDigits = data.shohou.groups.length < 10 ? 1 : 2;
     let indexWidth = fontSize * (indexDigits + 1);
     let drugWidth = b.width(page.drugs) - indexWidth;
     let lines = shohouToLines(data.shohou, fontSize, drugWidth);
     let drugHeight = b.height(page.drugs);
-    let leading = 0;
     let availLines = availableLines(drugHeight, fontSize, leading);
-    if( lines.totalLines <= availLines) {
+    let totalLines = totalLinesOfShohouLines(lines);
+    let [indexCol, drugText] = b.splitToColumns(page.drugs, b.splitAt(indexWidth));
+    let boxes: ShohouLinesBoxes = Object.assign({}, page, {
+      indexCol, drugText,
+    })
+    if( totalLines <= availLines) {
+      drawShohouLines(ctx, boxes, lines, font, leading, "--- 以下余白 ---");
+    } else {
       
     }
   }

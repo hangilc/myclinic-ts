@@ -1,6 +1,11 @@
 import type { Drug, Senpatsu, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import { breakLines } from "@/lib/drawer/compiler/break-lines";
+import type { DrawerContext } from "@/lib/drawer/compiler/context";
+import type { DrugBoxes } from "./drugs";
+import * as c from "@/lib/drawer/compiler/compiler"
+import { black } from "./helper";
+import type { Box } from "@/lib/drawer/compiler/box";
 
 export type ShohouData = {
   groups: ShohouGroup[];
@@ -112,7 +117,6 @@ function groupToLines(
 export interface ShohouLines {
   groupLines: ShohouLine[][];
   commentLines: string[][];
-  totalLines: number;
 }
 
 export function shohouToLines(
@@ -130,6 +134,11 @@ export function shohouToLines(
     let lines = breakLines(c, fontSize, lineWidth);
     commentLines.push(lines);
   }
+  return { groupLines, commentLines, };
+}
+
+export function totalLinesOfShohouLines(lines: ShohouLines): number {
+  let { groupLines, commentLines } = lines;
   let totalLines = 0;
   for(let line of groupLines){
     totalLines += line.length;
@@ -137,5 +146,43 @@ export function shohouToLines(
   for(let line of commentLines){
     totalLines += line.length;
   }
-  return { groupLines, commentLines, totalLines };
+  return totalLines;
 }
+
+export type ShohouLinesBoxes = DrugBoxes & {
+  indexCol: Box;
+  drugText: Box;
+}
+
+export function drawShohouLines(
+  ctx: DrawerContext, boxes: ShohouLinesBoxes, shohouLines: ShohouLines,
+  font: string, leading: number,
+  trailingLine: string,
+) {
+  c.withFontAndColor(ctx, font, black, () => {
+    let dy = 0;
+    let fontSize = c.getFontSizeOf(ctx, font)
+    for(let glines of shohouLines.groupLines){
+      for(let line of glines){
+        if( line.senpatsu === "henkoufuka" ){
+          c.drawText(ctx, "✓", boxes.col1, "center", "top", { dy });
+        } else if( line.senpatsu === "kanjakibou" ){
+          c.drawText(ctx, "✓", boxes.col2, "center", "top", { dy });
+        }
+        if( line.index ){
+          c.drawText(ctx, line.index, boxes.indexCol, "left", "top", { dy });
+        }
+        c.drawText(ctx, line.content, boxes.drugText, "left", "top", { dy });
+        dy += fontSize + leading;
+      }
+    }
+    for(let coms of shohouLines.commentLines) {
+      for(let com of coms){
+        c.drawText(ctx, com, boxes.drugs, "left", "top", { dy });
+        dy += fontSize + leading;
+      }
+    }
+    c.drawText(ctx, trailingLine, boxes.drugs, "left", "top", { dy });
+  })
+}
+
