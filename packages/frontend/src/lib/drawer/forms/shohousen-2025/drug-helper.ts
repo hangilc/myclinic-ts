@@ -1,6 +1,8 @@
 import type { Drug, Senpatsu, Shohou, Usage } from "@/lib/parse-shohou";
+import { toZenkaku } from "@/lib/zenkaku";
+import { breakLines } from "@/lib/drawer/compiler/break-lines";
 
-type ShohouData = {
+export type ShohouData = {
   groups: ShohouGroup[];
   shohouComments: string[];
 }
@@ -17,11 +19,7 @@ type ShohouDrug = {
   drugComments: string[];
 }
 
-function handleShohou(shohou: Shohou): {
-  shohouData: ShohouData;
-  bikou: string[];
-  kigen: string;
-} {
+export function handleShohou(shohou: Shohou): ShohouData {
   const shohouData: ShohouData = { groups: [], 
     shohouComments: [] 
   };
@@ -40,10 +38,11 @@ function handleShohou(shohou: Shohou): {
     shohouData.groups.push(dstGroup);
   });
   shohouData.shohouComments = shohou.comments ?? [];
-  let bikou = shohou.bikou;
-  let kigen = shohou.kigen ?? "";
-  shohouData.shohouComments = shohou.comments ?? [];
-  return { shohouData, bikou, kigen, };
+  return shohouData;
+}
+
+export function indexLabel(index: number): string {
+  return toZenkaku(`${index})`);
 }
 
 function drugNameAndAmountLine(drug: Drug): string {
@@ -64,3 +63,23 @@ function drugUsageLine(usage: Usage): string {
   }
 }
 
+export interface ShohouLine {
+  senpatsu?: Senpatsu;
+  content: string;
+}
+
+export function groupToLines(
+  group: ShohouGroup, fontSize: number, lineWidth: number
+): ShohouLine[] {
+  const lines: ShohouLine[] = [];
+  for(let drug of group.drugs){
+    let line: ShohouLine = { content: "" };
+    if( i === 0 ){
+      if( drug.senpatsu ){
+        line.senpatsu = drug.senpatsu;
+      }
+    }
+    let ss  = breakLines(drug.text, fontSize, lineWidth)
+  }
+  return lines;
+}

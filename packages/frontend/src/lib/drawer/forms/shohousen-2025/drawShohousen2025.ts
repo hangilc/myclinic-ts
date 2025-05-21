@@ -9,14 +9,24 @@ import * as x from "./xsplit";
 import { drawUpperRow } from "./upper-row";
 import { drawKanja } from "./kanja";
 import { drawKoufuDate } from "./koufu-date";
-import { drawDrugs } from "./drugs";
+import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
+import { handleShohou } from "./drug-helper";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
-  const paper: Box = mkBox(0, 0, A5.width, A5.height);
   const ctx = mkDrawerContext();
+  let page = drawPage(ctx, data);
+  if( data.shohou){
+    let shohouContent = handleShohou(data.shohou);
+    console.log(shohouContent);
+  }
+  return ctx.pages;
+}
+
+export function drawPage(ctx: DrawerContext, data: ShohousenData2025): DrugBoxes {
+  const paper: Box = mkBox(0, 0, A5.width, A5.height);
   initFont(ctx);
   initPen(ctx);
   c.setFont(ctx, "f2.5");
@@ -40,7 +50,7 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   drawBikou(ctx, bikouRow, data);
   drawKouhi2(ctx, kouhi2Row, data);
   drawPharma(ctx, pharmaRow, data);
-  return [ctx.ops];
+  return drugBoxes;
 }
 
 function initFont(ctx: DrawerContext) {

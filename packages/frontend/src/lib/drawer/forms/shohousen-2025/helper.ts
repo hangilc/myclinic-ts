@@ -198,7 +198,6 @@ export function flowTextIn(ctx: DrawerContext, box: Box, text: string, opt?: {
     }
     const end = breakSingleLine(text, start, fontSize, lineWidth);
     const line = text.substring(start, end).trimEnd();
-    console.log("line", fontSize, c.textWidthWithFont(ctx, line, font), b.width(box), line);
     let lineBox = Object.assign({}, box, { top });
     c.withFontAndColor(ctx, font, opt?.color, () => {
       c.drawText(ctx, line, lineBox, halign, "top");

@@ -1,17 +1,10 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-import * as x from "./xsplit";
-import * as cr from "./col-renderer";
-import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { drawShimei } from "./kanja/shimei";
-import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
-import { drawKubun } from "./kanja/kubun";
 import { colOfElements, drawElement, fixedElement, stackedTexts, textElement } from "./element";
-import { black, brackettedElement, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
-import { DateWrapper, pad } from "myclinic-util";
+import { brackettedElement, } from "./helper";
 
 export interface DrugBoxes {
   col1: Box;
@@ -19,7 +12,7 @@ export interface DrugBoxes {
   drugs: Box;
 }
 
-export function drawDrugs(ctx: DrawerContext, box: Box, data: ShohousenData2025): DrugBoxes {
+export function drawDrugs(ctx: DrawerContext, box: Box, _data: ShohousenData2025): DrugBoxes {
   c.frame(ctx, box);
   const [mark, col1, col2, body] = b.splitToColumns(box, b.splitAt(5, 18, 31));
   c.frameRight(ctx, mark);
@@ -38,8 +31,6 @@ export function drawDrugs(ctx: DrawerContext, box: Box, data: ShohousenData2025)
     col2: b.modify(col2Body, b.setHeight(workHeight, "bottom")),
     drugs: b.modify(body, b.setHeight(workHeight, "bottom")),
   }
-  let drugsBody = b.modify(body, b.shrinkVert(h, 0));
-  
 }
 
 function drawMark(ctx: DrawerContext, box: Box) {
