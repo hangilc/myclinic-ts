@@ -65,21 +65,27 @@ function drugUsageLine(usage: Usage): string {
 
 export interface ShohouLine {
   senpatsu?: Senpatsu;
+  index?: string;
   content: string;
 }
 
 export function groupToLines(
-  group: ShohouGroup, fontSize: number, lineWidth: number
+  group: ShohouGroup, index: number,
+  ffontSize: number, lineWidth: number
 ): ShohouLine[] {
   const lines: ShohouLine[] = [];
-  for(let drug of group.drugs){
-    let line: ShohouLine = { content: "" };
+  for(let i=0;i<group.drugs.length;i++){
+    let drug = group.drugs[i];
+    let textLines = breakLines(drug.text, fontSize, lineWidth);
+    let dlines: ShohouLine[] = textLines.map(tl => {
+      return { content: tl };
+    })
     if( i === 0 ){
-      if( drug.senpatsu ){
-        line.senpatsu = drug.senpatsu;
-      }
+      dlines[0].index = indexLabel(index);
     }
-    let ss  = breakLines(drug.text, fontSize, lineWidth)
+    if( drug.senpatsu ){
+      dlines[0].senpatsu = drug.senpatsu;
+    }
   }
   return lines;
 }
