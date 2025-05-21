@@ -12,6 +12,7 @@ import { drawKoufuDate } from "./koufu-date";
 import { drawDrugs } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
+import { drawPharma } from "./pharma";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
@@ -38,7 +39,7 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   let drugBoxes = drawDrugs(ctx, drugsRow, data);
   drawBikou(ctx, bikouRow, data);
   drawKouhi2(ctx, kouhi2Row, data);
-  c.frame(ctx, pharmaRow);
+  drawPharma(ctx, pharmaRow, data);
   return [ctx.ops];
 }
 

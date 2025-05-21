@@ -26,6 +26,17 @@ export function textElement(text: string, opt?: {
   }
 }
 
+export function justifiedTextElement(
+  ctx: DrawerContext, text: string, width: number, font?: string
+): Element {
+  let th = c.getFontSizeOf(ctx, font);
+  return {
+    width: () => width,
+    height: () => th,
+    render: (ctx, box) => c.drawTextJustified(ctx, text, box, "top"),
+  }
+}
+
 export function stackedTexts(texts: string[], opt?: {
   font?: string;
   halign?: HAlign;
@@ -35,6 +46,16 @@ export function stackedTexts(texts: string[], opt?: {
   return colOfElements(texts.map(text => textElement(text, {
     font: opt?.font,
   })), { halign, leading: opt?.leading })
+}
+
+export function justifiedStackedTexts(ctx: DrawerContext, texts: string[], opt?: {
+  font?: string;
+  leading?: number;
+}): Element {
+  let font = opt?.font;
+  let w = Math.max(...texts.map(txt => c.textWidthWithFont(ctx, txt, font)));
+  let eles = texts.map(text => justifiedTextElement(ctx, text, w, font));
+  return colOfElements(eles, { leading: opt?.leading });
 }
 
 export function drawElement(ctx: DrawerContext, box: Box, ele: Element, opt?: {
