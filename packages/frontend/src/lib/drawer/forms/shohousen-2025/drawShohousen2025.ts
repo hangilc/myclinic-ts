@@ -13,14 +13,25 @@ import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
-import { handleShohou } from "./drug-helper";
+import { handleShohou, shohouToLines } from "./drug-helper";
+import { availableLines } from "./helper";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const ctx = mkDrawerContext();
   let page = drawPage(ctx, data);
   if( data.shohou){
-    let shohouContent = handleShohou(data.shohou);
-    console.log(shohouContent);
+    let font = "d3.5";
+    let fontSize = c.getFontSizeOf(ctx, "d3.5");
+    let indexDigits = data.shohou.groups.length < 10 ? 1 : 2;
+    let indexWidth = fontSize * (indexDigits + 1);
+    let drugWidth = b.width(page.drugs) - indexWidth;
+    let lines = shohouToLines(data.shohou, fontSize, drugWidth);
+    let drugHeight = b.height(page.drugs);
+    let leading = 0;
+    let availLines = availableLines(drugHeight, fontSize, leading);
+    if( lines.totalLines <= availLines) {
+      
+    }
   }
   return ctx.pages;
 }

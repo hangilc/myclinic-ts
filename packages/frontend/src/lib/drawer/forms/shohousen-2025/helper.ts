@@ -211,11 +211,13 @@ export function flowTextIn(ctx: DrawerContext, box: Box, text: string, opt?: {
   return text.substring(start);
 }
 
-
-
-
-
-
-
-
-
+export function availableLines(
+  height: number, lineHeight: number, leading: number
+): number {
+  if( height < lineHeight ){
+    return 0;
+  } else {
+    let rest = height - lineHeight;
+    return 1 + Math.floor(rest / (lineHeight + leading));
+  }
+}
