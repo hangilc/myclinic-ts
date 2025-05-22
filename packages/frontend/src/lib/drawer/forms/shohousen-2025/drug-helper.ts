@@ -186,3 +186,55 @@ export function drawShohouLines(
   })
 }
 
+export function breakPages(
+  shohouLines: ShohouLines, fontSize: number, leading: number, boxHeight: number,
+): ShohouLines[] {
+  if( boxHeight < fontSize ){
+    throw new Error("too small box height");
+  }
+  let result: ShohouLines[] = [];
+  let lineHeight = fontSize + leading;
+  let top = -leading;
+  let srcGroups: ShohouLine[][] = shohouLines.groupLines;
+  let srcComments: string[][] = shohouLines.commentLines;
+  let dstGroups: ShohouLine[][] = [];
+  let dstComments: string[][] = [];
+  while(srcGroups.length > 0) {
+    let group = srcGroups[0];
+    let reqHeight = lineHeight * group.length;
+    let bottom = top + reqHeight;
+    if( bottom <= boxHeight ){
+      dstGroups.push(group);
+      top = bottom;
+      srcGroups.shift();
+    } else {
+      const dst: ShohouLines = {
+        groupLines: dstGroups,
+        commentLines: [],
+      };
+      result.push(dst);
+      dstGroups = [];
+      top = -leading;
+    }
+  }
+  while(srcComments.length > 0){
+    let coms = srcComments[0];
+    let reqHeight = lineHeight * coms.length;
+    let bottom = top + reqHeight;
+    if( bottom <= boxHeight ){
+      dstComments.push(coms);
+      top = bottom;
+      srcComments.shift();
+    } else {
+      const dst: ShohouLines = {
+        groupLines: dstGroups,
+        commentLines: dstComments,
+      };
+      result.push(dst);
+      srcGroups = [];
+      
+    }
+  }
+  return result;
+}
+

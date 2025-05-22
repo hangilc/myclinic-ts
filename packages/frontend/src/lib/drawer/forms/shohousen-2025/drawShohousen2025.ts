@@ -37,7 +37,7 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
     if( totalLines <= availLines) {
       drawShohouLines(ctx, boxes, lines, font, leading, "--- 以下余白 ---");
     } else {
-      
+      let pageHeight = b.height(page.drugs) - (fontSize + leading);
     }
   }
   return ctx.pages;
