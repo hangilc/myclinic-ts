@@ -196,9 +196,7 @@ export function breakPages(
   let lineHeight = fontSize + leading;
   let top = -leading;
   let srcGroups: ShohouLine[][] = shohouLines.groupLines;
-  let srcComments: string[][] = shohouLines.commentLines;
   let dstGroups: ShohouLine[][] = [];
-  let dstComments: string[][] = [];
   while(srcGroups.length > 0) {
     let group = srcGroups[0];
     let reqHeight = lineHeight * group.length;
@@ -217,6 +215,8 @@ export function breakPages(
       top = -leading;
     }
   }
+  let srcComments: string[][] = shohouLines.commentLines;
+  let dstComments: string[][] = [];
   while(srcComments.length > 0){
     let coms = srcComments[0];
     let reqHeight = lineHeight * coms.length;
@@ -231,8 +231,8 @@ export function breakPages(
         commentLines: dstComments,
       };
       result.push(dst);
-      srcGroups = [];
-      
+      dstGroups = [];
+      dstComments = [];
     }
   }
   return result;
