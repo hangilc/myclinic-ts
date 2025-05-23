@@ -157,10 +157,9 @@ export type ShohouLinesBoxes = DrugBoxes & {
 export function drawShohouLines(
   ctx: DrawerContext, boxes: ShohouLinesBoxes, shohouLines: ShohouLines,
   font: string, leading: number,
-  trailingLine: string,
-) {
+): number {
+  let dy = 0;
   c.withFontAndColor(ctx, font, black, () => {
-    let dy = 0;
     let fontSize = c.getFontSizeOf(ctx, font)
     for(let glines of shohouLines.groupLines){
       for(let line of glines){
@@ -182,11 +181,11 @@ export function drawShohouLines(
         dy += fontSize + leading;
       }
     }
-    c.drawText(ctx, trailingLine, boxes.drugs, "left", "top", { dy });
-  })
+  });
+  return dy;
 }
 
-export function breakPages(
+export function breakShohouPages(
   shohouLines: ShohouLines, fontSize: number, leading: number, boxHeight: number,
 ): ShohouLines[] {
   if( boxHeight < fontSize ){
@@ -234,6 +233,15 @@ export function breakPages(
       dstGroups = [];
       dstComments = [];
     }
+  }
+  if( dstGroups.length > 0 || dstComments.length > 0 ){
+    const dst: ShohouLines = {
+      groupLines: dstGroups,
+      commentLines: dstComments,
+    };
+    result.push(dst);
+    dstGroups = [];
+    dstComments = [];
   }
   return result;
 }

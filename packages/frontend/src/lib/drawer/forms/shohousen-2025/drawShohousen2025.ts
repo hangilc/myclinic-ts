@@ -13,11 +13,14 @@ import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
-import { drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
-import { availableLines } from "./helper";
+import { breakShohouPages, drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
+import { availableLines, black, red } from "./helper";
 
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
-  const ctx = mkDrawerContext();
+  const ctx = mkDrawerContext(ctx => {
+    initFont(ctx);
+    initPen(ctx);
+  });
   let page = drawPage(ctx, data);
   if( data.shohou){
     let font = "d3.5";
@@ -35,9 +38,33 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
       indexCol, drugText,
     })
     if( totalLines <= availLines) {
-      drawShohouLines(ctx, boxes, lines, font, leading, "--- 以下余白 ---");
+      let dy = drawShohouLines(ctx, boxes, lines, font, leading);
+      c.withFontAndColor(ctx, font, black, () => {
+        c.drawText(ctx, "--- 以下余白 ---", page.drugs, "left", "top", { dy });
+      })
     } else {
       let pageHeight = b.height(page.drugs) - (fontSize + leading);
+      let shohouPages = breakShohouPages(lines, fontSize, leading, pageHeight);
+      for(let i=0;i<shohouPages.length;i++){
+        if( i !== 0 ){
+          page = drawPage(ctx, data);
+          boxes = Object.assign({}, page, {
+            indexCol, drugText,
+          })
+        }
+        let dy = drawShohouLines(ctx, boxes, shohouPages[i], font, leading);
+        if( i !== (shohouPages.length - 1) ){
+          const text = `--- 次ページに続く　（${i+1} / ${shohouPages.length}） ---`;
+          c.withFontAndColor(ctx, font, red, () => {
+            c.drawText(ctx, text, page.drugs, "left", "top", { dy });
+          });
+          c.newPage(ctx);
+        } else {
+          c.withFontAndColor(ctx, font, black, () => {
+            c.drawText(ctx, "--- 以下余白 ---", page.drugs, "left", "top", { dy });
+          })
+        }
+      }
     }
   }
   return ctx.pages;
@@ -45,8 +72,8 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
 
 export function drawPage(ctx: DrawerContext, data: ShohousenData2025): DrugBoxes {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
-  initFont(ctx);
-  initPen(ctx);
+  // initFont(ctx);
+  // initPen(ctx);
   c.setFont(ctx, "f2.5");
   c.setTextColor(ctx, 0, 255, 0);
   c.setPen(ctx, "default");
