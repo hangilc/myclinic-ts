@@ -2,6 +2,7 @@
 	import api from "@/lib/api";
 	import { startPatient, kensaDataClipboard } from "./exam-vars";
 	import RightBox from "./RightBox.svelte";
+  import { tick } from "svelte";
 	let showInputBox = true;
 	let kensaData = "";
 	interface KensaData {
@@ -45,6 +46,11 @@
 		startPatient(patient);
 		selectedPatientId = data.patientId;
 	}
+
+  async function onPaste(_event: ClipboardEvent) {
+	await tick();
+	navigator.clipboard.writeText("");
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -54,7 +60,8 @@
 	</div>
 
 	{#if showInputBox}
-		<textarea class="load-data" bind:value={kensaData}></textarea>
+	  <textarea class="load-data" bind:value={kensaData}
+		on:paste={onPaste}></textarea>
 		<div>
 			<button on:click={doLoad}>ロード</button>
 		</div>
