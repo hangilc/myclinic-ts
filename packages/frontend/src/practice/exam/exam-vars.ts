@@ -16,11 +16,11 @@ let totalVisits: number = 0;
 
 export const showKensaService: Writable<boolean> = writable(false);
 export type KensaDataClipboard = {
-	patientId: number;
-	text: string;
+  patientId: number;
+  text: string;
 }
 export const kensaDataClipboard: Writable<KensaDataClipboard> =
-						 writable({ patientId: 0, text: "" });
+			 writable({ patientId: 0, text: "" });
 
 export const recordsPerPage = 10;
 
@@ -529,20 +529,25 @@ appEvent.conductShinryouDeleted.subscribe(async conductShinryou => {
   if (conductShinryou == null) {
     return;
   }
-  const conduct = await api.getConduct(conductShinryou.conductId);
-  const visitsValue = get(visits);
-  const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
-  if (index >= 0) {
-    const visit = visitsValue[index];
-    const ci = visit.conducts.findIndex(c => c.conductId === conductShinryou.conductId);
-    if (ci >= 0) {
-      const list = visit.conducts[ci].shinryouList;
-      const si = list.findIndex(s => s.conductShinryouId === conductShinryou.conductShinryouId)
-      if (si >= 0) {
-        list.splice(si, 1);
-        visits.set(visitsValue);
+  try {
+    const conduct = await api.getConduct(conductShinryou.conductId);
+    const visitsValue = get(visits);
+    const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
+    if (index >= 0) {
+      const visit = visitsValue[index];
+      const ci = visit.conducts.findIndex(c => c.conductId === conductShinryou.conductId);
+      if (ci >= 0) {
+        const list = visit.conducts[ci].shinryouList;
+        const si = list.findIndex(s => s.conductShinryouId === conductShinryou.conductShinryouId)
+        if (si >= 0) {
+          list.splice(si, 1);
+          visits.set(visitsValue);
+        }
       }
     }
+  } catch {
+    // conduct may have been deleted
+    console.log("exception in conductShinryouDeleted handler");
   }
 });
 
@@ -569,6 +574,7 @@ appEvent.conductDrugDeleted.subscribe(async conductDrug => {
   if (conductDrug == null) {
     return;
   }
+  try {
   const conduct = await api.getConduct(conductDrug.conductId);
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
@@ -583,6 +589,10 @@ appEvent.conductDrugDeleted.subscribe(async conductDrug => {
         visits.set(visitsValue);
       }
     }
+  }
+  } catch {
+    // conduct may have been deleted
+    console.log("exception in conductDrugDeleted handler");
   }
 });
 
@@ -609,6 +619,7 @@ appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
   if (conductKizai == null) {
     return;
   }
+  try {
   const conduct = await api.getConduct(conductKizai.conductId);
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
@@ -623,6 +634,10 @@ appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
         visits.set(visitsValue);
       }
     }
+  }
+  } catch {
+    // conduct may have been deleted
+    console.log("exception in conductKizaiDeleted handler")
   }
 });
 
