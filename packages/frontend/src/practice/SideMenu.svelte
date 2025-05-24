@@ -28,7 +28,6 @@
   <a href="javascript:void(0)" on:click={menu("ryouyou-keikakusho")}>療養計画書</a>
   <a href="javascript:void(0)" on:click={menu("houmon-kango")}>訪問看護</a>
   <a href="javascript:void(0)" on:click={menu("shujii")}>主治医意見書</a>
-  <a href="javascript:void(0)">ファックス送信</a>
   <a href="javascript:void(0)" on:click={menu("print-setting")}>印刷設定</a>
   <a href="javascript:void(0)" on:click={menu("scan")}>スキャン</a>
   <a href="javascript:void(0)" on:click={menu("refer")}>紹介状</a>
