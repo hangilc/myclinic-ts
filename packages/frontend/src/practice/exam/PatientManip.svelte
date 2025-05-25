@@ -7,6 +7,7 @@
   import CashierDialog from "./patient-manip/CashierDialog.svelte";
   import GazouListDialog from "./patient-manip/GazouListDialog.svelte";
   import SearchTextDialog from "./patient-manip/search-text/SearchTextDialog.svelte";
+  import PrescHistoryDialog from "./patient-manip/PrescHistoryDialog.svelte";
   import UploadImageDialog from "./patient-manip/UploadImageDialog.svelte";
   import PatientMemoEditorDialog from "./patient-manip/PatientMemoEditorDialog.svelte";
   import { MeisaiWrapper, calcRezeptMeisai } from "@/lib/rezept-meisai";
@@ -212,6 +213,18 @@
       }
     }
   }
+
+  function doPrescHistory() {
+    if ($currentPatient) {
+      const d: PrescHistoryDialog = new PrescHistoryDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          patient: $currentPatient,
+        },
+      });
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -220,6 +233,7 @@
   <button on:click={onEndPatientClick}>患者終了</button>
   <a href="javascript:void(0)" on:click={doRegister}>診察登録</a>
   <a href="javascript:void(0)" on:click={doSearchText}>文章検索</a>
+  <a href="javascript:void(0)" on:click={doPrescHistory}>処方履歴</a>
   <a href="javascript:void(0)" on:click={doMemo}>メモ編集</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
