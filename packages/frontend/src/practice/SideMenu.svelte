@@ -24,7 +24,6 @@
     on:click={(_) => start("cashier")}
     class:current={$serviceStore === "cashier"}>会計</a
   >
-  <a href="javascript:void(0)" on:click={menu("fax-shohousen")}>ファックス済処方箋</a>
   <a href="javascript:void(0)" on:click={menu("ryouyou-keikakusho")}>療養計画書</a>
   <a href="javascript:void(0)" on:click={menu("houmon-kango")}>訪問看護</a>
   <a href="javascript:void(0)" on:click={menu("shujii")}>主治医意見書</a>
