@@ -45,6 +45,39 @@ export function parseShohou(src: string): Shohou | string {
   return shohou;
 }
 
+export function parseShohouDrugs(src: string): string[] {
+  const lines = src.split(/\r\n|\n/);
+  const drugNames: string[] = [];
+  
+  for (const line of lines) {
+    // Check if line is eligible
+    const digitMatch = /^[ 　]*[0-9０-９]+[)）]/.exec(line);
+    const startsWithSpace = /^[ 　]+/.exec(line);
+    
+    if (!digitMatch && !startsWithSpace) {
+      continue;
+    }
+    
+    // Remove the initial part (digit index or spaces)
+    let cleanLine = line;
+    if (digitMatch) {
+      cleanLine = line.substring(digitMatch[0].length);
+    } else if (startsWithSpace) {
+      cleanLine = line.substring(startsWithSpace[0].length);
+    }
+    
+    // Match against reAmount regex
+    const match = reAmount.exec(cleanLine);
+    if (match) {
+      const drugName = cleanLine.substring(0, match.index).trim();
+      if (drugName) {
+        drugNames.push(drugName);
+      }
+    }
+  }
+  return drugNames;
+}
+
 function handleDrugCommands(drug: Drug, commands: Command[]): string | undefined {
   for(let c of commands) {
     switch(c.name) {
