@@ -13,6 +13,7 @@ import { checkShoshinByoumei } from "./checkers/check-shoshin-byoumei";
 import { checkIryoujouhouShutokuKasan } from "./checkers/check-iryoujouhou-shutoku-kasan";
 import { checkSaishinByoumei } from "./checkers/check-saishin-byoumei";
 import { checkByoumei } from "./checkers/check-byoumei";
+import { checkNonEmptyMeisai } from "./checkers/check-non-empty-meisai";
 
 export type Fixer = () => Promise<boolean>;
 export type CheckError = { code: string, fix?: Fixer, hint?: string };
@@ -34,6 +35,7 @@ const checkers: RcptChecker[] = [
   checkShoshinByoumei,
   checkSaishinByoumei,
   checkByoumei,
+  checkNonEmptyMeisai,
 ];
 
 export async function checkForRcpt(visits: VisitEx[]): Promise<CheckResult> {
