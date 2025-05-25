@@ -82,6 +82,7 @@
         height: 297 * 1.5,
         viewBox: "0 0 210 297",
         scale: 1.5,
+		kind: "shujii",
       },
     });
   }

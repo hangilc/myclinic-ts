@@ -19,7 +19,9 @@
   export let onClose: () => void = () => {};
   export let stamp: ArrayBuffer | undefined = undefined;
   export let stampStyle: string = "";
-  export let stampPrintOption: { left: number, top: number, width: number, height: number} | undefined = undefined;
+  export let stampPrintOption: {
+	left: number, top: number, width: number, height: number
+  } | undefined = undefined;
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
