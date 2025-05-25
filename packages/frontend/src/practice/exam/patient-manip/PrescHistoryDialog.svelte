@@ -93,7 +93,7 @@
       } else if (drugNamesSort === "name") {
         drugNames.sort((a, b) => a.name.localeCompare(b.name));
       }
-	  drugNames = drugNames;
+      drugNames = drugNames;
     }
   }
 
@@ -119,13 +119,17 @@
         }
       }
       sortDrugNames();
-	  showDrugNames = true;
+      showDrugNames = true;
     }
+  }
+
+  function doDrugItemClick(item: [Text, Visit]) {
+	let [text, visit] = item;
   }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog {destroy} title="処方履歴">
+<Dialog {destroy} title="処方履歴" styleWidth="400px">
   <div class="top">
     <div class="patient">
       ({patient?.patientId}) {patient?.lastName}{patient?.firstName}
@@ -160,15 +164,28 @@
     {/if}
 
     {#if showDrugNames && drugNames !== undefined}
-	<div>
-	  <input type="radio" bind:group={drugNamesSort} value="date"
-		on:change={sortDrugNames}/> 日付順
-	  <input type="radio" bind:group={drugNamesSort} value="name"
-		on:change={sortDrugNames}/> 名前順
-	</div>
+      <div>
+        <input
+          type="radio"
+          bind:group={drugNamesSort}
+          value="date"
+          on:change={sortDrugNames}
+        />
+        日付順
+        <input
+          type="radio"
+          bind:group={drugNamesSort}
+          value="name"
+          on:change={sortDrugNames}
+        /> 名前順
+      </div>
       <div class="drug-names-area">
         {#each drugNames as item (item.name)}
-          <div>{item.name}</div>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div class="drug-item" on:click={(item) => doDrugItemClick(item)}>
+            {item.name}
+          </div>
         {/each}
       </div>
     {/if}
@@ -197,10 +214,6 @@
 </Dialog>
 
 <style>
-  .top {
-    width: 26em;
-  }
-
   .patient {
     margin-bottom: 10px;
     font-weight: bold;
@@ -228,9 +241,13 @@
   }
 
   .drug-names-area {
-	margin: 10px;
-	border: 1px solid gray;
-	padding: 10px;
+    margin: 10px;
+    border: 1px solid gray;
+    padding: 10px;
+  }
+
+  .drug-item:nth-child(even) {
+    background-color: #eee;
   }
 
   .result {
