@@ -63,10 +63,16 @@ export interface RezeptUnitToPatientUnitOption {
   searchNumber?: string;
 }
 
-export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, month: number,
-  opt: RezeptUnitToPatientUnitOption = {}, ctx: Partial<PaymentSetting> = {}): PatientUnit {
+export function rezeptUnitToPatientUnit(
+  rezeptUnit: RezeptUnit, year: number, month: number,
+  opt: RezeptUnitToPatientUnitOption = {}, ctx: Partial<PaymentSetting> = {}
+): PatientUnit {
   const { visits, hokensha, kouhiList, shotokuKubun, diseases, patient } = rezeptUnit;
   if (!hokensha) {
+    alert([
+      "保険者を決定できません。（例：診療行為なし）",
+      `(${patient.patientId}) ${patient.name}`
+    ].join("\n"));
     throw new Error(`No hokensha patient-id ${patient.patientId}`);
   }
   const rows: string[] = [];
@@ -98,7 +104,7 @@ export function rezeptUnitToPatientUnit(rezeptUnit: RezeptUnit, year: number, mo
       }
       let futanKingaku: number | undefined = undefined;
       if( kouhi.payer.payment.gendogakuReached ){
-      const payment = kouhi.payer.payment;
+        const payment = kouhi.payer.payment;
         futanKingaku = payment.kakari - payment.payment;
       }
       rows.push(create公費レコード(kouhi, sel, visits, kouhiTotals[index], futanKingaku));
