@@ -30,7 +30,7 @@
     await loadPrescTexts();
     loading = false;
     filteredTexts = prescTexts;
-	updateTotalPages();
+    updateTotalPages();
     updateCurrent();
   });
 
@@ -85,6 +85,13 @@
     }
   }
 
+  function gotoFirst() {
+	if( currentPage !== 0 && totalPages > 0 ){
+	  currentPage = 0;
+	  updateCurrent();
+	}
+  }
+
   function gotoPrev() {
     if (currentPage > 0) {
       currentPage--;
@@ -99,16 +106,25 @@
     }
   }
 
+  function gotoLast() {
+	if( currentPage < (totalPages - 1) && totalPages > 0){
+	  currentPage = totalPages - 1;
+	  updateCurrent();
+	}
+  }
+
   function doClose(): void {
     destroy();
   }
 
   function formatContent(content: string): string {
-	if( searchText !== "" ){
-	  content = content.replaceAll(searchText,
-		`<span class="presc-history-dialog-search-hit">${searchText}</span>`);
-	  console.log("content", content);
-	}
+    if (searchText !== "") {
+      content = content.replaceAll(
+        searchText,
+        `<span class="presc-history-dialog-search-hit">${searchText}</span>`,
+      );
+      console.log("content", content);
+    }
     return content.replaceAll("\n", "<br />");
   }
 
@@ -154,28 +170,28 @@
   }
 
   function doDrugItemClick(name: string) {
-	searchText = name;
+    searchText = name;
     applySearchFilter();
-	currentPage = 0;
-	updateTotalPages();
+    currentPage = 0;
+    updateTotalPages();
     updateCurrent();
-	showSearch = true;
+    showSearch = true;
   }
 
   async function toggleSearch() {
-	if( showSearch ){
-	  showSearch = false;
-	} else {
-	  showSearch = true;
-	  await tick();
-	  searchTextElement?.focus();
-	}
+    if (showSearch) {
+      showSearch = false;
+    } else {
+      showSearch = true;
+      await tick();
+      searchTextElement?.focus();
+    }
   }
 
   function doSearch() {
     applySearchFilter();
-	currentPage = 0;
-	updateTotalPages();
+    currentPage = 0;
+    updateTotalPages();
     updateCurrent();
   }
 </script>
@@ -193,6 +209,11 @@
       <div class="pagination">
         <a
           href="javascript:void(0)"
+          on:click={gotoFirst}
+          class:disabled={currentPage === 0}>最初へ</a
+        >
+        <a
+          href="javascript:void(0)"
           on:click={hasPrev ? gotoPrev : () => {}}
           class:disabled={!hasPrev}>前へ</a
         >
@@ -201,6 +222,11 @@
           href="javascript:void(0)"
           on:click={hasNext ? gotoNext : () => {}}
           class:disabled={!hasNext}>次へ</a
+        >
+        <a
+          href="javascript:void(0)"
+          on:click={gotoLast}
+          class:disabled={currentPage === totalPages - 1}>最後へ</a
         >
         <a href="javascript:void(0)" class="list-bullet" on:click={doAllDrugs}>
           <ListBullet width="22" />
@@ -217,8 +243,11 @@
 
     {#if showSearch}
       <form on:submit|preventDefault={doSearch} class="search-form">
-        <input type="text" bind:value={searchText}
-		  bind:this={searchTextElement}/>
+        <input
+          type="text"
+          bind:value={searchText}
+          bind:this={searchTextElement}
+        />
         <button type="submit">検索</button>
       </form>
     {/if}
@@ -300,8 +329,8 @@
   }
 
   :global(.presc-history-dialog-search-hit) {
-	color: red;
-	font-weight: bold;
+    color: red;
+    font-weight: bold;
   }
 
   a.disabled {
@@ -313,12 +342,12 @@
     margin: 10px;
     border: 1px solid gray;
     padding: 10px;
-	max-height: 300px;
-	overflow-y: auto;
+    max-height: 300px;
+    overflow-y: auto;
   }
 
   .drug-item {
-	cursor: pointer;
+    cursor: pointer;
   }
 
   .drug-item:nth-child(even) {
