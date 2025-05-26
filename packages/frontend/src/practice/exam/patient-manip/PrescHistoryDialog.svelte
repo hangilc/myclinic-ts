@@ -12,7 +12,7 @@
   export let destroy: () => void;
   export let patient: Patient;
   let prescTexts: [Text, Visit][] = [];
-  let filteredTexts: [Text,Visit][] = [];
+  let filteredTexts: [Text, Visit][] = [];
   let current: [Text, Visit][] = [];
   const nPerPage = 10;
   let currentPage = 0;
@@ -24,16 +24,17 @@
   let showDrugNames = false;
   let showSearch = false;
   let searchText = "";
+  let searchTextElement: HTMLInputElement;
 
   onMount(async () => {
-    await loadPrescHistory();
-	filteredTexts = prescTexts;
-	current = filteredTexts;
-	updateCurrent();
+    await loadPrescTexts();
     loading = false;
+    filteredTexts = prescTexts;
+	updateTotalPages();
+    updateCurrent();
   });
 
-  async function loadPrescHistory() {
+  async function loadPrescTexts() {
     try {
       const candidates = await api.searchTextForPatient(
         "院外処方",
@@ -47,31 +48,31 @@
           new Date(b[1].visitedAt).getTime() -
           new Date(a[1].visitedAt).getTime(),
       );
-      totalPages = Math.ceil(prescTexts.length / nPerPage);
     } catch (error) {
       console.error("Failed to load prescription history:", error);
       alert("処方履歴の読み込みに失敗しました。");
     }
   }
 
+  function updateTotalPages() {
+    totalPages = Math.ceil(filteredTexts.length / nPerPage);
+  }
+
   function applySearchFilter() {
-	if( searchText === "" ){
-	  filteredTexts = prescTexts;
-	} else {
-	  filteredTexts = prescTexts.filter(([t, _v]) => {
-		const c = t.content;
-		const ds = parseShohouDrugs(c);
-		for(let d of ds){
-		  if( d.indexOf(searchText) >= 0 ){
-			return true;
-		  }
-		}
-		return false;
-	  })
-	}
-	currentPage = 0;
-	console.log("filtered length", filteredTexts.length);
-	totalPages = Math.ceil(filteredTexts.length / nPerPage);
+    if (searchText === "") {
+      filteredTexts = prescTexts;
+    } else {
+      filteredTexts = prescTexts.filter(([t, _v]) => {
+        const c = t.content;
+        const ds = parseShohouDrugs(c);
+        for (let d of ds) {
+          if (d.indexOf(searchText) >= 0) {
+            return true;
+          }
+        }
+        return false;
+      });
+    }
   }
 
   async function updateCurrent() {
@@ -147,12 +148,23 @@
     }
   }
 
-  function doDrugItemClick(name: string) {
+  function doDrugItemClick(name: string) {}
+
+  async function toggleSearch() {
+	if( showSearch ){
+	  showSearch = false;
+	} else {
+	  showSearch = true;
+	  await tick();
+	  searchTextElement?.focus();
+	}
   }
 
   function doSearch() {
-	applySearchFilter();
-	updateCurrent();
+    applySearchFilter();
+	currentPage = 0;
+	updateTotalPages();
+    updateCurrent();
   }
 </script>
 
@@ -184,16 +196,17 @@
         <a
           href="javascript:void(0)"
           class="magnifying-glass"
-          on:click={() => { showSearch = !showSearch}}
+          on:click={toggleSearch}
         >
           <MagnifyingGlass width="20" />
         </a>
       </div>
     {/if}
 
-    {#if showSearch }
+    {#if showSearch}
       <form on:submit|preventDefault={doSearch} class="search-form">
-        <input type="text" bind:value={searchText} />
+        <input type="text" bind:value={searchText}
+		  bind:this={searchTextElement}/>
         <button type="submit">検索</button>
       </form>
     {/if}
@@ -271,7 +284,7 @@
   }
 
   .search-form {
-	margin: 10px;
+    margin: 10px;
   }
 
   a.disabled {
