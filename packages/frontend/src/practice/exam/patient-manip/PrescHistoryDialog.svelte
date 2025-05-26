@@ -7,11 +7,12 @@
   import { onMount, tick } from "svelte";
   import ListBullet from "@/icons/ListBullet.svelte";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
-  import { parseShohou, parseShohouDrugs } from "@/lib/parse-shohou2";
+  import { parseShohouDrugs } from "@/lib/parse-shohou2";
 
   export let destroy: () => void;
   export let patient: Patient;
   let prescTexts: [Text, Visit][] = [];
+  let filteredTexts: [Text,Visit][] = [];
   let current: [Text, Visit][] = [];
   const nPerPage = 10;
   let currentPage = 0;
@@ -21,9 +22,14 @@
   let drugNames: { name: string; at: string }[] | undefined = undefined;
   let drugNamesSort: "date" | "name" = "date";
   let showDrugNames = false;
+  let showSearch = false;
+  let searchText = "";
 
   onMount(async () => {
-    loadPrescHistory();
+    await loadPrescHistory();
+	filteredTexts = prescTexts;
+	current = filteredTexts;
+	updateCurrent();
     loading = false;
   });
 
@@ -41,19 +47,37 @@
           new Date(b[1].visitedAt).getTime() -
           new Date(a[1].visitedAt).getTime(),
       );
-      console.log("totalPages", prescTexts.length);
       totalPages = Math.ceil(prescTexts.length / nPerPage);
-      updateCurrent();
     } catch (error) {
       console.error("Failed to load prescription history:", error);
       alert("処方履歴の読み込みに失敗しました。");
     }
   }
 
+  function applySearchFilter() {
+	if( searchText === "" ){
+	  filteredTexts = prescTexts;
+	} else {
+	  filteredTexts = prescTexts.filter(([t, _v]) => {
+		const c = t.content;
+		const ds = parseShohouDrugs(c);
+		for(let d of ds){
+		  if( d.indexOf(searchText) >= 0 ){
+			return true;
+		  }
+		}
+		return false;
+	  })
+	}
+	currentPage = 0;
+	console.log("filtered length", filteredTexts.length);
+	totalPages = Math.ceil(filteredTexts.length / nPerPage);
+  }
+
   async function updateCurrent() {
     const startIndex = currentPage * nPerPage;
     const endIndex = startIndex + nPerPage;
-    current = prescTexts.slice(startIndex, endIndex);
+    current = filteredTexts.slice(startIndex, endIndex);
     await tick();
     if (resultElement) {
       resultElement.scrollTop = 0;
@@ -123,8 +147,12 @@
     }
   }
 
-  function doDrugItemClick(item: [Text, Visit]) {
-	let [text, visit] = item;
+  function doDrugItemClick(name: string) {
+  }
+
+  function doSearch() {
+	applySearchFilter();
+	updateCurrent();
   }
 </script>
 
@@ -156,11 +184,18 @@
         <a
           href="javascript:void(0)"
           class="magnifying-glass"
-          on:click={() => {}}
+          on:click={() => { showSearch = !showSearch}}
         >
           <MagnifyingGlass width="20" />
         </a>
       </div>
+    {/if}
+
+    {#if showSearch }
+      <form on:submit|preventDefault={doSearch} class="search-form">
+        <input type="text" bind:value={searchText} />
+        <button type="submit">検索</button>
+      </form>
     {/if}
 
     {#if showDrugNames && drugNames !== undefined}
@@ -183,7 +218,7 @@
         {#each drugNames as item (item.name)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div class="drug-item" on:click={(item) => doDrugItemClick(item)}>
+          <div class="drug-item" on:click={() => doDrugItemClick(item.name)}>
             {item.name}
           </div>
         {/each}
@@ -233,6 +268,10 @@
   .page-number {
     margin: 0 0.5em;
     font-weight: bold;
+  }
+
+  .search-form {
+	margin: 10px;
   }
 
   a.disabled {
