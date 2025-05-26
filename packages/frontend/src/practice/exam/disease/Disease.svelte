@@ -16,6 +16,7 @@
   import Shinryou from "./Shinryou.svelte";
   import DrugDiseaseComp from "./drug-disease/DrugDisease.svelte";
   import ShinryouDiseaseComp from "./shinryou-disease/ShinryouDisease.svelte";
+  import { diseaseAdjDeleted, diseaseAdjEntered, diseaseAdjUpdated, diseaseDeleted, diseaseEntered, diseaseUpdated } from "@/app-events";
 
   const unsubs: (() => void)[] = [];
   let env: Writable<DiseaseEnv | undefined> = writable(undefined);
@@ -30,6 +31,36 @@
         $env = e;
       }
     }),
+	diseaseEntered.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	}),
+	diseaseUpdated.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	}),
+	diseaseDeleted.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	}),
+	diseaseAdjEntered.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	}),
+	diseaseAdjUpdated.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	}),
+	diseaseAdjDeleted.subscribe((d) => {
+	  if( d ){
+		onDiseaseModified();
+	  }
+	})
   );
 
   onDestroy(() => {
@@ -69,7 +100,7 @@
 
   async function doAddDisease(data: DiseaseEnterData) {
     await api.enterDiseaseEx(data);
-    await onDiseaseModified();
+    //await onDiseaseModified();
   }
 
   async function doTenkiEnter(result: [number, string, string][]) {
@@ -78,15 +109,15 @@
       return api.endDisease(diseaseId, parseSqlDate(date), reason);
     });
     await Promise.all(promises);
-    await onDiseaseModified();
+    //await onDiseaseModified();
   }
 
   async function doDeleteDisease(diseaseId: number) {
-    await onDiseaseModified();
+    // await onDiseaseModified();
   }
 
   async function doUpdateDisease(entered: DiseaseData) {
-    await onDiseaseModified();
+    // await onDiseaseModified();
   }
 
   async function doDrugsChanged() {
