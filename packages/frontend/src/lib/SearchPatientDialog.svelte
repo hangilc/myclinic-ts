@@ -88,6 +88,7 @@
     overflow-x: hidden;
     border: 1px solid gray;
     padding: 6px;
+	resize: horizontal;
   }
 
   .commands {

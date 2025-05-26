@@ -48,14 +48,14 @@
     }
     screen.$destroy();
     // Clean up drag event listeners
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
     onClose();
   });
 
   onMount(() => {
     dialog.style.zIndex = zIndexDialog.toString();
-    if( enableAutoFocus ){
+    if (enableAutoFocus) {
       dialog.focus();
     }
     initializePosition();
@@ -96,7 +96,7 @@
   function handleTitleMouseDown(event: MouseEvent) {
     // Don't start drag if clicking on buttons
     const target = event.target as HTMLElement;
-    if (target.tagName === 'svg' || target.closest('svg')) {
+    if (target.tagName === "svg" || target.closest("svg")) {
       return;
     }
 
@@ -105,8 +105,8 @@
     dragOffset.x = event.clientX - rect.left;
     dragOffset.y = event.clientY - rect.top;
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     event.preventDefault();
   }
 
@@ -128,13 +128,14 @@
 
   function handleMouseUp() {
     isDragging = false;
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
   }
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="dialog"
   bind:this={dialog}
@@ -144,9 +145,14 @@
   on:keydown={doKeyDown}
   tabindex="0"
 >
-  <div class="title" data-cy="dialog-title" bind:this={titleBar} on:mousedown={handleTitleMouseDown}>
-    <span style="user-select:none;">{title}</span>
-    <span class="spacer" />
+  <div
+    class="title"
+    data-cy="dialog-title"
+    bind:this={titleBar}
+  >
+    <span class="spacer dialog-grab" on:mousedown={handleTitleMouseDown}>
+	  {title}
+	</span>
     {#if fixed}
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -232,8 +238,11 @@
     display: flex;
     align-items: center;
     margin-bottom: 10px;
-    cursor: move;
-    user-select: none;
+  }
+
+  .dialog-grab {
+	cursor: move;
+	user-select: none;
   }
 
   .title .spacer {

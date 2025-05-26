@@ -36,9 +36,9 @@
   }
 
   function findCurrentIndex(): number | undefined {
-    if( $selected ){
+    if ($selected) {
       const patientId = $selected.patientId;
-      const i = patients.findIndex(p => p.patientId === patientId);
+      const i = patients.findIndex((p) => p.patientId === patientId);
       return i >= 0 ? i : undefined;
     } else {
       return undefined;
@@ -59,21 +59,20 @@
   }
 
   function doKeydown(e: KeyboardEvent): void {
-    if( e.key === "ArrowDown" ){
+    if (e.key === "ArrowDown") {
       e.preventDefault();
       const i = findCurrentIndex();
-      if( i !== undefined && i < patients.length - 1 ){
-        selected.set(patients[i+1]);
+      if (i !== undefined && i < patients.length - 1) {
+        selected.set(patients[i + 1]);
       }
-    } else if( e.key === "ArrowUp" ){
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       const i = findCurrentIndex();
-      if( i !== undefined && i > 0 ){
-        selected.set(patients[i-1]);
+      if (i !== undefined && i > 0) {
+        selected.set(patients[i - 1]);
       }
     }
   }
-
 </script>
 
 <Dialog {destroy} title="患者検索">
@@ -89,24 +88,32 @@
     </form>
     <div class="select">
       {#each patients as patient}
-        <SelectItem {selected} data={patient} eqData={(a, b) => a.patientId === b.patientId}
-          autoIntoView={true}>
+        <SelectItem
+          {selected}
+          data={patient}
+          eqData={(a, b) => a.patientId === b.patientId}
+          autoIntoView={true}
+        >
           <span data-cy="patient-item" data-patient-id={patient.patientId}>
             ({pad(patient.patientId, 4, "0")})
             {patient.lastName}
-          {patient.firstName}</span>
+            {patient.firstName}</span
+          >
         </SelectItem>
       {/each}
     </div>
   </div>
   <div class="commands">
     {#if showRegisterButton}
-    <button on:click={onRegisterButtonClick} disabled={$selected == null}
-      >診察登録</button>
+      <button on:click={onRegisterButtonClick} disabled={$selected == null}
+        >診察登録</button
+      >
     {/if}
-    <button on:click={onSelectButtonClick} disabled={$selected == null} bind:this={selectButton}
-      on:keydown={doKeydown}
-      >選択</button
+    <button
+      on:click={onSelectButtonClick}
+      disabled={$selected == null}
+      bind:this={selectButton}
+      on:keydown={doKeydown}>選択</button
     >
     <button on:click={destroy}>キャンセル</button>
   </div>
@@ -122,7 +129,8 @@
   }
 
   .select {
-    height: 100px;
+    height: 200px;
+    resize: vertical;
   }
 
   .commands {

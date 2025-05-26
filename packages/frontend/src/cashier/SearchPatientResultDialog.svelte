@@ -28,6 +28,7 @@
     {:else}
       {#each patients as p (p.patientId)}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="result-item" on:click={() => doSelect(p)} data-patient-id={p.patientId}>
           ({pad(p.patientId, 4, "0")}) {p.fullName()}
         </div>
@@ -38,8 +39,9 @@
 
 <style>
   .result-wrapper {
-    max-height: 360px;
+    height: 200px;
     overflow-y: auto;
+	resize: vertical;
   }
 
   .result-item {
