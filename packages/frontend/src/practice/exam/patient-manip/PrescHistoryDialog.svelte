@@ -104,6 +104,11 @@
   }
 
   function formatContent(content: string): string {
+	if( searchText !== "" ){
+	  content = content.replaceAll(searchText,
+		`<span class="presc-history-dialog-search-hit">${searchText}</span>`);
+	  console.log("content", content);
+	}
     return content.replaceAll("\n", "<br />");
   }
 
@@ -294,6 +299,11 @@
     margin: 10px;
   }
 
+  :global(.presc-history-dialog-search-hit) {
+	color: red;
+	font-weight: bold;
+  }
+
   a.disabled {
     color: gray;
     cursor: default;
@@ -305,6 +315,10 @@
     padding: 10px;
 	max-height: 300px;
 	overflow-y: auto;
+  }
+
+  .drug-item {
+	cursor: pointer;
   }
 
   .drug-item:nth-child(even) {
