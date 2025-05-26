@@ -13,9 +13,15 @@
   export let enableAutoFocus = false;
 
   let dialog: HTMLElement;
+  let titleBar: HTMLElement;
 
   let zIndexScreen = alloc();
   let zIndexDialog = alloc();
+
+  // Drag state management
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+  let dialogPosition = { x: 0, y: 0 };
 
   const screen = new Screen({
     target: document.body,
@@ -41,6 +47,9 @@
       release(zIndexScreen);
     }
     screen.$destroy();
+    // Clean up drag event listeners
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
     onClose();
   });
 
@@ -49,6 +58,7 @@
     if( enableAutoFocus ){
       dialog.focus();
     }
+    initializePosition();
   });
 
   function doKeyDown(event: KeyboardEvent): void {
@@ -69,6 +79,58 @@
     dialog.style.position = "fixed";
     fixed = true;
   }
+
+  function initializePosition() {
+    const rect = dialog.getBoundingClientRect();
+    dialogPosition.x = rect.left;
+    dialogPosition.y = rect.top;
+    updateDialogPosition();
+  }
+
+  function updateDialogPosition() {
+    dialog.style.left = `${dialogPosition.x}px`;
+    dialog.style.top = `${dialogPosition.y}px`;
+    dialog.style.transform = "none";
+  }
+
+  function handleTitleMouseDown(event: MouseEvent) {
+    // Don't start drag if clicking on buttons
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'svg' || target.closest('svg')) {
+      return;
+    }
+
+    isDragging = true;
+    const rect = dialog.getBoundingClientRect();
+    dragOffset.x = event.clientX - rect.left;
+    dragOffset.y = event.clientY - rect.top;
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+    event.preventDefault();
+  }
+
+  function handleMouseMove(event: MouseEvent) {
+    if (!isDragging) return;
+
+    const newX = event.clientX - dragOffset.x;
+    const newY = event.clientY - dragOffset.y;
+
+    // Boundary checks
+    const maxX = window.innerWidth - dialog.offsetWidth;
+    const maxY = window.innerHeight - dialog.offsetHeight;
+
+    dialogPosition.x = Math.max(0, Math.min(newX, maxX));
+    dialogPosition.y = Math.max(0, Math.min(newY, maxY));
+
+    updateDialogPosition();
+  }
+
+  function handleMouseUp() {
+    isDragging = false;
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', handleMouseUp);
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-tabindex -->
@@ -82,7 +144,7 @@
   on:keydown={doKeyDown}
   tabindex="0"
 >
-  <div class="title" data-cy="dialog-title">
+  <div class="title" data-cy="dialog-title" bind:this={titleBar} on:mousedown={handleTitleMouseDown}>
     <span style="user-select:none;">{title}</span>
     <span class="spacer" />
     {#if fixed}
@@ -170,6 +232,8 @@
     display: flex;
     align-items: center;
     margin-bottom: 10px;
+    cursor: move;
+    user-select: none;
   }
 
   .title .spacer {
