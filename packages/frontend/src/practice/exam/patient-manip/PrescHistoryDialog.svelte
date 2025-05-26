@@ -148,7 +148,14 @@
     }
   }
 
-  function doDrugItemClick(name: string) {}
+  function doDrugItemClick(name: string) {
+	searchText = name;
+    applySearchFilter();
+	currentPage = 0;
+	updateTotalPages();
+    updateCurrent();
+	showSearch = true;
+  }
 
   async function toggleSearch() {
 	if( showSearch ){
@@ -296,6 +303,8 @@
     margin: 10px;
     border: 1px solid gray;
     padding: 10px;
+	max-height: 300px;
+	overflow-y: auto;
   }
 
   .drug-item:nth-child(even) {
