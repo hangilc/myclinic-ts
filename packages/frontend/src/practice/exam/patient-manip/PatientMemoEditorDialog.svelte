@@ -13,6 +13,7 @@
       "onshi-name": undefined,
       "rezept-name": undefined,
       "main-disease": undefined,
+	  "email": undefined,
     };
     if (memo !== undefined) {
       const m = JSON.parse(memo);
@@ -38,7 +39,7 @@
     try {
       const json = JSON.parse(input);
       const keys = Object.keys(json);
-      const validKeys = ["onshi-name", "rezept-name", "main-disease"];
+      const validKeys = ["onshi-name", "rezept-name", "main-disease", "email"];
       for (let key of keys) {
         if (!validKeys.includes(key)) {
           return {

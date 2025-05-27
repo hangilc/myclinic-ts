@@ -5,6 +5,7 @@
 
   export let text: m.Text;
   export let index: number;
+  export let patientId: number;
   let isEditing = false;
 
   function conv(s: string): string {
@@ -13,7 +14,7 @@
 </script>
 
 {#if isEditing}
-  <TextForm text={text} index={index} onClose={() => isEditing = false} />
+  <TextForm {text} {index} {patientId} onClose={() => isEditing = false} />
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->

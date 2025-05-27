@@ -38,13 +38,17 @@
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
   import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
+  import { isKensa } from "./helper";
 
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
+  export let patientId: number;
+
   let textarea: HTMLTextAreaElement;
   let memoKind: "shohou" | "shohou-conv" | undefined =
-      TextMemoWrapper.fromText(text).getMemoKind();
+    TextMemoWrapper.fromText(text).getMemoKind();
+  $: isKensaText = isKensa(patientId, text.content);
 
   async function onEnter() {
     const content = textarea.value.trim();
@@ -111,7 +115,8 @@
       const follow = await getFollowingText(text);
       if (follow == null || !isFaxToPharmacyText(follow.content)) {
         const ok = confirm(
-          "オンライン処方箋のようですが、送信先の薬局が指定されていません。\nこのまま印刷しますか？"
+          "オンライン処方箋のようですが、送信先の薬局が指定されていません。\n" +
+			"このまま印刷しますか？",
         );
         if (!ok) {
           return;
@@ -204,10 +209,10 @@
       }
     }
     const shohou = parseShohouOld(text.content, false);
-	if( typeof shohou === "string" ){
-	  alert(shohou);
-	  return;
-	}
+    if (typeof shohou === "string") {
+      alert(shohou);
+      return;
+    }
     const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
@@ -291,7 +296,7 @@
     });
     onClose();
   }
-  
+
   async function doPrintShohousen2024() {
     if (!(await isTodaysShohousen())) {
       if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
@@ -300,10 +305,10 @@
       }
     }
     const shohou = parseShohou(text.content);
-	if( typeof shohou === "string" ){
-	  alert(shohou);
-	  return;
-	}
+    if (typeof shohou === "string") {
+      alert(shohou);
+      return;
+    }
     const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
@@ -389,7 +394,7 @@
   }
 
   async function prepareData(): Promise<ShohousenData2025> {
-	const clinicInfo = await cache.getClinicInfo();
+    const clinicInfo = await cache.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
     let hokenshaBangou: string | undefined = undefined;
@@ -456,7 +461,7 @@
       hokenKubun,
       koufuDate,
     };
-	return data;
+    return data;
   }
 
   async function doPrintShohousen2025() {
@@ -467,13 +472,13 @@
       }
     }
     const shohou = parseShohou(text.content);
-	if( typeof shohou === "string" ){
-	  alert(shohou);
-	  return;
-	}
-	let data: ShohousenData2025 = await prepareData();
-	data.shohou = shohou;
-	let pages = drawShohousen2025(data);
+    if (typeof shohou === "string") {
+      alert(shohou);
+      return;
+    }
+    let data: ShohousenData2025 = await prepareData();
+    data.shohou = shohou;
+    let pages = drawShohousen2025(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
       props: {
@@ -495,11 +500,11 @@
 
   function checkKouhiCompat(
     src: PrescInfoData,
-    dst: PrescInfoData
+    dst: PrescInfoData,
   ): string | undefined {
     function compat(
       a: 公費レコード | undefined,
-      b: 公費レコード | undefined
+      b: 公費レコード | undefined,
     ): boolean {
       if (a && b) {
         return eq公費レコード(a, b);
@@ -524,7 +529,7 @@
 
   function checkMemoCompat(
     src: TextMemo | undefined,
-    dst: TextMemo | undefined
+    dst: TextMemo | undefined,
   ): string | undefined {
     if (src === undefined && dst === undefined) {
       return undefined;
@@ -616,7 +621,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        init: { kind: "parsed", shohousen: parsed, template, },
+        init: { kind: "parsed", shohousen: parsed, template },
         at: visit.visitedAt.substring(0, 10),
         kouhiList: hoken.kouhiList,
         onEnter: async (arg: PrescInfoData) => {
@@ -628,7 +633,7 @@
           onClose();
           await api.updateText(text);
         },
-        onCancel: onClose
+        onCancel: onClose,
       },
     });
   }
@@ -655,7 +660,7 @@
             onClose();
             await api.updateText(text);
           },
-          onCancel: onClose
+          onCancel: onClose,
         },
       });
     }
@@ -663,18 +668,17 @@
 
   async function doTransformToDenshi() {
     const memo = TextMemoWrapper.fromText(text).probeShohouConvMemo();
-    if( memo ){
+    if (memo) {
       const newMemo: ShohouTextMemo = {
         kind: "shohou",
         shohou: memo.shohou,
-        prescriptionId: undefined
+        prescriptionId: undefined,
       };
       TextMemoWrapper.setTextMemo(text, newMemo);
       onClose();
       await api.updateText(text);
     }
   }
-  
 
   function oldShohouPopup(): [string, () => void][] {
     const menu: [string, () => void][] = [
@@ -687,16 +691,20 @@
       menu.push(["電子予備作成", doShohouConv]);
     } else if (memoKind === "shohou-conv") {
       menu.push(["電子予備編集", doEditShohouConv]);
-      menu.push(["電子処方に", doTransformToDenshi])
+      menu.push(["電子処方に", doTransformToDenshi]);
     }
     return menu;
+  }
+
+  async function doMail() {
+	
   }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <textarea bind:this={textarea} on:keydown={doKeyDown} use:setFocus
-  >{text.content}</textarea
+    >{text.content}</textarea
   >
   {#if text.textId === 0}
     <div>
@@ -709,14 +717,17 @@
       <a href="javascript:void(0)" on:click={onClose}>キャンセル</a>
       {#if containsHikitsugi()}
         <a href="javascript:void(0)" on:click={() => doHikitsugi()}
-        >引継ぎコピー</a
+          >引継ぎコピー</a
         >
       {/if}
       {#if isShohousen(text.content)}
         <a href="javascript:void(0)" on:click={popupTrigger(oldShohouPopup)}
-        >処方箋</a
+          >処方箋</a
         >
       {/if}
+	  {#if isKensaText}
+		<a href="javascript:void(0)" on:click={doMail}>メール送信</a>
+	  {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>
     </div>

@@ -118,6 +118,7 @@
           index={i}
           at={visit.visitedAt.substring(0, 10)}
           kouhiList={visit.hoken.kouhiList}
+		  patientId={visit.patient.patientId}
         />
       {/each}
       {#if showNewTextEditor}
