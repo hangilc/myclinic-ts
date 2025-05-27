@@ -697,7 +697,12 @@
   }
 
   async function doMail() {
-	
+	let ok = await api.sendmail({
+	  "to": "hangil@chang.jp",
+	  "from": "hangil@changclinic.com",
+	  "subject": "test",
+	  "content": "テスト",
+	})
   }
 </script>
 

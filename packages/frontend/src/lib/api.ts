@@ -1729,7 +1729,18 @@ export default {
 
   deletePatient(patientId: number): Promise<boolean> {
     return get("delete-patient", { "patient-id": patientId.toString() }, castBoolean); 
+  },
+
+  sendmail(mail: {
+    "to": string;
+    "from": string;
+    "subject": string;
+    "content": string;
+  }): Promise<boolean> {
+    return post("sendmail", mail, {}, castBoolean);
   }
 };
+
+
 
 
