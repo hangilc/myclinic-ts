@@ -706,12 +706,17 @@
 	  alert("No email address");
 	  return;
 	}
+	let from = await cache.getDoctorEmail();
+	if( from === "" ){
+	  alert("Doctor email is not configured.");
+	  return;
+	}
 	let d: MailDialog = new MailDialog({
 	  target: document.body,
 	  props: {
 		destroy: () => d.$destroy(),
 		to: addr,
-
+		from,
 	  }
 	})
 	// let ok = await api.sendmail({
