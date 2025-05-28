@@ -39,6 +39,8 @@
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
   import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { isKensa } from "./helper";
+  import { PatientMemoWrapper } from "@/lib/patient-memo";
+  import MailDialog from "@/lib/MailDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -697,12 +699,27 @@
   }
 
   async function doMail() {
-	let ok = await api.sendmail({
-	  "to": "hangil@chang.jp",
-	  "from": "hangil@changclinic.com",
-	  "subject": "test",
-	  "content": "テスト",
+	const patient = await api.getPatient(patientId);
+	let memoWrapper = new PatientMemoWrapper(patient.memo);
+	let addr = memoWrapper.getEmail();
+	if( !addr ){
+	  alert("No email address");
+	  return;
+	}
+	let d: MailDialog = new MailDialog({
+	  target: document.body,
+	  props: {
+		destroy: () => d.$destroy(),
+		to: addr,
+
+	  }
 	})
+	// let ok = await api.sendmail({
+	//   "to": addr,
+	//   "from": "hangil@changclinic.com",
+	//   "subject": "検査結果",
+	//   "content": "テスト",
+	// })
   }
 </script>
 
