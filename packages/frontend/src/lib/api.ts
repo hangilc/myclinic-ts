@@ -1650,6 +1650,10 @@ export default {
     return get("get-config", { name }, a => a);
   },
 
+  getConfigRaw(name: string): Promise<string> {
+    return getText("get-config", { name });
+  },
+
   setConfig(name: string, content: any): Promise<void> {
     return post("set-config", content, { name }, a => a);
   },
@@ -1738,6 +1742,10 @@ export default {
     "content": string;
   }): Promise<boolean> {
     return post("sendmail", mail, {}, castBoolean);
+  },
+
+  listConfigKey(): Promise<string[]> {
+    return get("list-config-key", {}, castList(castString))
   }
 };
 

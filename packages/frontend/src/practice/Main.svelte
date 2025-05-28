@@ -21,6 +21,7 @@
   import ModifyOnshi from "./ModifyOnshi.svelte";
   import DXKasan from "./DXKasan.svelte";
   import DupPatient from "./dup-patient/DupPatient.svelte";
+  import EditConfig from "@/practice/EditConfig.svelte";
   
   export let serviceStore: Writable<string>;
 
@@ -72,6 +73,9 @@
   {/if}
   {#if $serviceStore === "dup-patient"}
 	<DupPatient />
+  {/if}
+  {#if $serviceStore === "edit-config"}
+	<EditConfig />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>

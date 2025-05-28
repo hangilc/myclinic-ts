@@ -40,6 +40,7 @@
   <a href="javascript:void(0)" on:click={menu("modify-onshi")}>オン資サーバー</a>
   <a href="javascript:void(0)" on:click={menu("dx-kasan")}>ＤＸ加算設定</a>
   <a href="javascript:void(0)" on:click={menu("dup-patient")}>重複患者</a>
+  <a href="javascript:void(0)" on:click={menu("edit-config")}>Config</a>
   <a href="javascript:void(0)" on:click={menu("big-char")}>大きい文字</a>
 </div>
 

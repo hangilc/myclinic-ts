@@ -18,7 +18,7 @@ let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
 let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
-let doctorMailAddress: string | undefined = undefined;
+let doctorEmail: string | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -190,21 +190,21 @@ export const cache = {
     await api.setConfig("dx-kasan", series);
   },
 
-  async getDoctorAddress(): Promise<string> {
-    if( doctorMailAddress === undefined ){
-      let value = await api.getConfig("doctor-mail-address");
+  async getDoctorEmail(): Promise<string> {
+    if( doctorEmail === undefined ){
+      let value = await api.getConfig("doctor-email");
       if( !value ){
         value = "";
       }
-      doctorMailAddress = value;
+      doctorEmail = value;
     }
-    return doctorMailAddress ?? "";
+    return doctorEmail ?? "";
   },
 
-  async setDoctorMailAddress(value: string): Promise<void> {
-  doctorMailAddress = value;
-    await api.setConfig("doctor-mail-address", doctorMailAddress);
-}
+  async setDoctorEmail(value: string): Promise<void> {
+    doctorEmail = value;
+    await api.setConfig("doctor-email", doctorEmail);
+  }
 
 }
 
