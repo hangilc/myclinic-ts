@@ -4,6 +4,8 @@
   export let destroy: () => void;
   export let to: string;
   export let from: string;
+  export let subject: string;
+  export let content: string;
 
   function doClose() {
     destroy();
@@ -16,5 +18,14 @@
   </div>
   <div>
     From: <input type="text" bind:value={from} />
+  </div>
+  <div>
+    Subject: <input type="text" bind:value={subject} />
+  </div>
+  <div>
+	Content:
+	<div>
+	  <textarea bind:value={content} />
+	</div>
   </div>
 </Dialog>

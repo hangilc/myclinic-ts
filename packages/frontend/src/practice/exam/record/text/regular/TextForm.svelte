@@ -717,6 +717,8 @@
 		destroy: () => d.$destroy(),
 		to: addr,
 		from,
+		subject: "検査結果",
+		content: "血液検査の結果です",
 	  }
 	})
 	// let ok = await api.sendmail({
