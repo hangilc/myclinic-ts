@@ -22,6 +22,8 @@
   import PrescListDialog from "./PrescListDialog.svelte";
   import CashierHokengaiDialog from "./CashierHokengaiDialog.svelte";
   import type { PatientMemo } from "myclinic-model/model";
+  import { PatientMemoWrapper } from "@/lib/patient-memo";
+  import MailDialog from "@/lib/MailDialog.svelte";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -34,8 +36,8 @@
       let visit = await api.getVisit(visitId);
       if (
         visit.shahokokuhoId === 0 &&
-          visit.koukikoureiId === 0 &&
-          !hasHokengai(visit)
+        visit.koukikoureiId === 0 &&
+        !hasHokengai(visit)
       ) {
         await fixHokengai(visit);
       }
@@ -60,9 +62,11 @@
               visit = Object.assign({}, visit);
               let attr = JSON.parse(visit.attributesStore ?? "{}");
               attr.hokengai = [s];
-              await api.updateVisit(Object.assign({}, visit, {
-                attributesStore: JSON.stringify(attr)
-              }));
+              await api.updateVisit(
+                Object.assign({}, visit, {
+                  attributesStore: JSON.stringify(attr),
+                }),
+              );
             }
             d.$destroy();
             resolve();
@@ -145,12 +149,12 @@
 
   async function searchPatientPresc(
     patientId: number,
-    at: DateWrapper
+    at: DateWrapper,
   ): Promise<SearchResult | undefined> {
     let kikancode = await cache.getShohouKikancode();
     let shahokokuho = await api.findAvailableShahokokuho(
       patientId,
-      at.asSqlDate()
+      at.asSqlDate(),
     );
     if (shahokokuho) {
       return await searchPresc(
@@ -160,12 +164,12 @@
         shahokokuho.hihokenshaBangou,
         shahokokuho.edaban,
         undefined,
-        undefined
+        undefined,
       );
     } else {
       let koukikourei = await api.findAvailableKoukikourei(
         patientId,
-        at.asSqlDate()
+        at.asSqlDate(),
       );
       if (koukikourei) {
         return await searchPresc(
@@ -175,7 +179,7 @@
           koukikourei.hihokenshaBangou,
           undefined,
           undefined,
-          undefined
+          undefined,
         );
       }
     }
@@ -187,7 +191,7 @@
     if (patient) {
       let result = await searchPatientPresc(
         patient.patientId,
-        DateWrapper.from(new Date())
+        DateWrapper.from(new Date()),
       );
       if (result) {
         let err = checkShohouResult(result);
@@ -198,7 +202,7 @@
         let list = result.XmlMsg.MessageBody.PrescriptionIdList;
         if (list) {
           list.sort(
-            (a, b) => -a.CreateDateTime.localeCompare(b.CreateDateTime)
+            (a, b) => -a.CreateDateTime.localeCompare(b.CreateDateTime),
           );
           const d: PrescListDialog = new PrescListDialog({
             target: document.body,
@@ -225,6 +229,32 @@
       });
     }
   }
+
+  async function doEmail() {
+    const patient = $currentPatient;
+    if (patient) {
+      let to = new PatientMemoWrapper(patient.memo).getEmail();
+      let from = await cache.getDoctorEmail();
+      if (!to) {
+        alert("患者のメールアドレスが登録されていません。");
+        return;
+      }
+      if (!from) {
+        alert("医師のメールアドレスが登録されていません。");
+        return;
+      }
+      const d: MailDialog = new MailDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          to,
+          from,
+          subject: "",
+          content: "",
+        },
+      });
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -235,6 +265,7 @@
   <a href="javascript:void(0)" on:click={doSearchText}>文章検索</a>
   <a href="javascript:void(0)" on:click={doPrescHistory}>処方履歴</a>
   <a href="javascript:void(0)" on:click={doMemo}>メモ編集</a>
+  <a href="javascript:void(0)" on:click={doEmail}>メール送信</a>
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
   <a href="javascript:void(0)" on:click={doPrescList}>処方一覧</a>
