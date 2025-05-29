@@ -41,6 +41,7 @@
   import { isKensa } from "./helper";
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
+  import type { Patient } from "myclinic-model";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -698,6 +699,16 @@
     return menu;
   }
 
+  function prepareMailContent(p: Patient, t: string): string {
+	let c = `${p.lastName}様、
+
+	血液検査の結果です。
+
+	${t}`;
+	c = c.replaceAll(/^(?!\s*$)\s+/gm, "");
+	return c;
+  }
+
   async function doMail() {
 	const patient = await api.getPatient(patientId);
 	let memoWrapper = new PatientMemoWrapper(patient.memo);
@@ -718,7 +729,7 @@
 		to: addr,
 		from,
 		subject: "検査結果",
-		content: "血液検査の結果です",
+		content: prepareMailContent(patient, text.content),
 	  }
 	})
 	// let ok = await api.sendmail({
