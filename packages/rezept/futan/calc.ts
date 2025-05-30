@@ -351,7 +351,8 @@ export function mkKouhiNanbyou(gendogaku: number): Payer {
 
 export function mkKouhiFutanNashi(kind: string, houbetsuBangou: number | undefined): Payer {
   return mkPayer(kind, houbetsuBangou, (bill: number, ctx: PaymentContext) => {
-    return { payment: bill, gendogakuReached: true };
+    // return { payment: bill, gendogakuReached: true }; // modified 2025-05-30
+    return { payment: bill, gendogakuReached: false };
   })
 }
 

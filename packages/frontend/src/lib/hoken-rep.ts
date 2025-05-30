@@ -157,6 +157,7 @@ export function kouhiRep(futanshaBangou: number, memo?: any): string {
       }
     }
     switch (s.substring(0, 2)) {
+      case "19": return "被爆者一般";
       case "54": return "難病";
       case "83": return "難病";
       case "80": return "心身障害";
