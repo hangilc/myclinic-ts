@@ -79,7 +79,9 @@ export function castTuple4<A, B, C, D>(
 }
 
 export function castList<T>(cast: Caster<T>): Caster<T[]> {
-  return (arg: any) => arg.map((a: any) => cast(a));
+  return (arg: any) => {
+    return arg.map((a: any) => cast(a));
+  }
 }
 
 export function castListOpt<T>(cast: Caster<T>): Caster<T[]> {
