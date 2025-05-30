@@ -17,7 +17,7 @@
 
   async function populateMap(
     event: AppEvent,
-    map: Record<number, AppointTime>
+    map: Record<number, AppointTime>,
   ) {
     if (event.model === "appoint") {
       const at = Appoint.cast(JSON.parse(event.data));
@@ -72,6 +72,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top">
   <button on:click={() => onMoveWeeks(-4)}>前の月</button>
   <button on:click={() => onMoveWeeks(-1)}>前の週</button>

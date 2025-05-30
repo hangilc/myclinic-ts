@@ -18,6 +18,7 @@
   } from "@/app-events";
   import { onDestroy } from "svelte";
   import { DateWrapper } from "myclinic-util";
+  import { createAppointTimesFromTemplate } from "./appoints-template";
 
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
@@ -119,7 +120,6 @@
   }
 
   function getStartDateOf(date: Date): string {
-    // return dateToSql(kanjidate.firstDayOfWeek(date));
     return DateWrapper.from(date).getFirstDayOfWeek().asSqlDate();
   }
 
@@ -162,9 +162,26 @@
   }
 
   async function doCreateAppoints() {
-    const upto = DateWrapper.from(startDate).incDay(6);
-    await api.fillAppointTimes(startDate, upto.asDate());
+    const dates = DateWrapper.range(startDate, 7).map(d => d.asDate());
+    const map = await api.batchResolveClinicOperations(dates);
+	const appointTimes: AppointTime[] = [];
+	for(let date of dates) {
+	  const sqldate = DateWrapper.from(date).asSqlDate();
+	  const op = map[sqldate];
+	  if( op.code === "in-operation" ){
+		const toBeCreated = await createAppointTimesFromTemplate(sqldate);
+		appointTimes.push(...toBeCreated);
+	  }
+	}
+	const proms = appointTimes.map(at => api.addAppointTime(at));
+	await Promise.all(proms);
   }
+
+  // async function doCreateAppoints() {
+  //   const upto = DateWrapper.from(startDate).incDay(6);
+  //   await api.fillAppointTimes(startDate, upto.asDate());
+  // }
+  
 </script>
 
 <div class="top">

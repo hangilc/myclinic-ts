@@ -4,6 +4,7 @@ import { type RP剤情報, type 用法レコード, } from "./denshi-shohou/pres
 import type { DrugDisease } from "./drug-disease";
 import { validateDxKasanSeries, type DxKasanApplied } from "./dx-kasan";
 import type { ShinryouDisease } from "./shinryou-disease";
+import { validateAppointsTemplate, type AppointsTemplate } from "@/appoint/appoints-template";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -19,6 +20,7 @@ let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
+let appointsTemplate: AppointsTemplate | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -204,9 +206,20 @@ export const cache = {
   async setDoctorEmail(value: string): Promise<void> {
     doctorEmail = value;
     await api.setConfig("doctor-email", doctorEmail);
-  }
+  },
+
+  async getAppointsTemplate(): Promise<AppointsTemplate> {
+    if (appointsTemplate === undefined) {
+      let value = await api.getConfig("appoints-template");
+      appointsTemplate = validateAppointsTemplate(value);
+    }
+    return appointsTemplate;
+  },
+
+  async setAppointsTemplate(value: AppointsTemplate): Promise<void> {
+    appointsTemplate = value;
+    await api.setConfig("appoints-template", value);
+  },
 
 }
-
-
 
