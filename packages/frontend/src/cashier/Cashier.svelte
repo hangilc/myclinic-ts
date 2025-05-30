@@ -46,17 +46,10 @@
     })
   );
 
-  // async function getWqueueData(wq: Wqueue): Promise<WqueueData> {
-  //   let visit = await api.getVisit(wq.visitId);
-  //   let patient = await api.getPatient(visit.patientId);
-  //   return new WqueueData(wq, visit, patient);
-  // }
 
   async function refresh() {
     const curr = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
-    console.log("refresh", curr);
     wqItems.set(curr);
-    // wqItems = (await api.listWqueueFull()).map((r) => new WqueueData(...r));
   }
 </script>
 

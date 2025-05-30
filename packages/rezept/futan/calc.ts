@@ -359,6 +359,10 @@ export function mkKouhiHibakusha(): Payer {
   return mkKouhiFutanNashi("hibakusha", 18);
 }
 
+export function mkKouhiHibakushaIppan(): Payer { // 一般疾病
+  return mkKouhiFutanNashi("hibakusha-ippan", 19);
+}
+
 export function mkKouhiMaruaoFutanNash(): Payer {
   return mkKouhiFutanNashi("maruao", 89);
 }

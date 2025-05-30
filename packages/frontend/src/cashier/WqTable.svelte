@@ -16,8 +16,6 @@
   export let items: Writable<WqueueData[]>;
   export let isAdmin: boolean;
 
-  $: console.log("items", $items);
-
   function formatDob(birthday: string): string {
     return FormatDate.f2(birthday);
   }

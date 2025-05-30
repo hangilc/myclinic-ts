@@ -101,7 +101,6 @@
           isAdmin: data.isAdmin,
           title: "新規後期高齢",
           onEntered: (entered: Koukikourei) => {
-            console.log("entered", entered);
             data.hokenCache.enterHokenType(entered);
           },
         },

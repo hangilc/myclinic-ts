@@ -1,4 +1,4 @@
-import { mkKouhiNanbyou, mkMaruAo, mkMaruShoFutanAri, mkMaruShoFutanNashi, mkMaruToHibakushaNoKo, mkMaruToTaikiosen, mkUnknownPayer, type Payer } from "myclinic-rezept/futan/calc";
+import { mkKouhiHibakushaIppan, mkKouhiNanbyou, mkMaruAo, mkMaruShoFutanAri, mkMaruShoFutanNashi, mkMaruToHibakushaNoKo, mkMaruToTaikiosen, mkUnknownPayer, type Payer } from "myclinic-rezept/futan/calc";
 import type { Kouhi } from "myclinic-model";
 
 export interface KouhiContext {
@@ -24,6 +24,9 @@ export function resolveKouhiPayer(kouhi: Kouhi, ctx: KouhiContext): Payer {
   // const houbetsu = Math.floor(kouhi.futansha / 1000000);
   const houbetsu = part(kouhi.futansha, 2);
   switch (houbetsu) {
+    case 19: { // 被爆者一般疾病
+      return mkKouhiHibakushaIppan();
+    }
     case 54: { // 難病
       const gendogaku = ctx.nanbyouGendogaku ?? kouhi.memoAsJson.gendogaku ?? 100000;
       return mkKouhiNanbyou(gendogaku);

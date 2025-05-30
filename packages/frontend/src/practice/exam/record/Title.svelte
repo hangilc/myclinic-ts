@@ -106,7 +106,7 @@
 
   async function doNanbyouGendogaku() {
     const gendo = prompt(
-      "難病限度額",
+      "難病限度額（当月支払う自己負担額の合計）",
       visit.attributes?.nanbyouGendogaku?.toString() ?? ""
     );
     if (gendo == null) {
