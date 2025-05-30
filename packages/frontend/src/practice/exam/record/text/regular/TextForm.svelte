@@ -628,7 +628,6 @@
         at: visit.visitedAt.substring(0, 10),
         kouhiList: hoken.kouhiList,
         onEnter: async (arg: PrescInfoData) => {
-          console.log("arg", arg);
           TextMemoWrapper.setTextMemo(text, {
             kind: "shohou-conv",
             shohou: arg,
@@ -731,13 +730,8 @@
 		subject: "検査結果",
 		content: prepareMailContent(patient, text.content),
 	  }
-	})
-	// let ok = await api.sendmail({
-	//   "to": addr,
-	//   "from": "hangil@changclinic.com",
-	//   "subject": "検査結果",
-	//   "content": "テスト",
-	// })
+	});
+	onClose();
   }
 </script>
 
