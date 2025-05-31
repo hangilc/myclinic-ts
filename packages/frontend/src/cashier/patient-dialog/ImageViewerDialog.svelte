@@ -1,7 +1,7 @@
 <script lang="ts">
   import Dialog from "@/lib/Dialog.svelte";
   import type { FileInfo, Patient } from "myclinic-model";
-  
+
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import api from "@/lib/api";
@@ -66,6 +66,8 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <Dialog {title} destroy={doClose} styleWidth="600px">
   <div class="top">
     <div class="files select">
@@ -78,7 +80,6 @@
       {/each}
     </div>
     <div class="scale">
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -94,7 +95,6 @@
           d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM13.5 10.5h-6"
         />
       </svg>
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"
@@ -113,7 +113,7 @@
     </div>
     <div class="img">
       {#if imageUrl}
-        <img src={imageUrl} width={imageWidth} alt="保存された患者画像"/>
+        <img src={imageUrl} width={imageWidth} alt="保存された患者画像" />
       {/if}
       {#if extImageUrl}
         <a href={extImageUrl} target="_blank">別ウィンドウで開く</a>
