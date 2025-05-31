@@ -5,6 +5,7 @@
   import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
+  import ImageView from "./ImageView.svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -54,7 +55,7 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog {destroy} title="画像一覧" styleWidth="600px">
+<Dialog {destroy} title="画像一覧">
   <div class="select">
     {#each list as f}
       <SelectItem selected={imgSrc} data={f}>{f}</SelectItem>
@@ -62,7 +63,8 @@
   </div>
   {#if inlineImageSrc !== ""}
     <div class="image-wrapper">
-      <img src={inlineImageSrc} width="800px" alt="保存画像" />
+	  <ImageView src={inlineImageSrc} />
+      <!-- <img src={inlineImageSrc} width="800px" alt="保存画像" /> -->
     </div>
   {/if}
   {#if externalImageSrc !== ""}
@@ -87,8 +89,10 @@
 
   .image-wrapper {
     /* width: 600px; */
-    max-height: 500px;
-    overflow: auto;
+   /*  max-height: 500px; */
+	/*  overflow: auto; */
+	width: 500px;
+	height: 600px;
   }
 
   .commands {
