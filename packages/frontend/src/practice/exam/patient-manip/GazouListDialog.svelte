@@ -53,7 +53,8 @@
   }
 </script>
 
-<Dialog {destroy} title="画像一覧">
+<!-- svelte-ignore a11y-invalid-attribute -->
+<Dialog {destroy} title="画像一覧" styleWidth="600px">
   <div class="select">
     {#each list as f}
       <SelectItem selected={imgSrc} data={f}>{f}</SelectItem>

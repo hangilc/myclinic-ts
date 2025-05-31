@@ -228,6 +228,7 @@
     border-radius: 8px;
     max-height: calc(100vh - 40px);
     overflow-y: auto;
+	resize: both;
   }
 
   .dialog:focus {
