@@ -1,7 +1,7 @@
 <script lang="ts">
   import api from "@/lib/api";
 
-  import Dialog from "@/lib/Dialog.svelte";
+  import Dialog2 from "@/lib/Dialog2.svelte";
   import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
@@ -55,44 +55,39 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<Dialog {destroy} title="画像一覧">
-  <div class="select">
-    {#each list as f}
-      <SelectItem selected={imgSrc} data={f}>{f}</SelectItem>
-    {/each}
-  </div>
-  {#if inlineImageSrc !== ""}
-    <div class="image-wrapper">
-	  <ImageView src={inlineImageSrc} />
-      <!-- <img src={inlineImageSrc} width="800px" alt="保存画像" /> -->
+<Dialog2 {destroy} title="画像一覧">
+  <div class="content">
+    <div class="select">
+      {#each list as f}
+        <SelectItem selected={imgSrc} data={f}>{f}</SelectItem>
+      {/each}
     </div>
-  {/if}
-  {#if externalImageSrc !== ""}
-    <a href={externalImageSrc} target="_blank" rel="noreferrer"
-      >別のタブで開く</a
-    >
-  {/if}
-  <div class="commands">
-    {#if $imgSrc != null}
-      <a href="javascript:void(0)" on:click={() => doDelete($imgSrc)}>削除</a>
+    <div class="image-wrapper">
+      <ImageView src={inlineImageSrc} />
+    </div>
+    {#if externalImageSrc !== ""}
+      <a href={externalImageSrc} target="_blank" rel="noreferrer"
+        >別のタブで開く</a
+      >
     {/if}
-    <button on:click={doClose}>閉じる</button>
+    <div class="commands">
+      {#if $imgSrc != null}
+        <a href="javascript:void(0)" on:click={() => doDelete($imgSrc)}>削除</a>
+      {/if}
+      <button on:click={doClose}>閉じる</button>
+    </div>
   </div>
-</Dialog>
+</Dialog2>
 
 <style>
+  .content {
+	padding: 10px;
+  }
+  
   .select {
     height: 6em;
     resize: vertical;
     margin-bottom: 10px;
-  }
-
-  .image-wrapper {
-    /* width: 600px; */
-   /*  max-height: 500px; */
-	/*  overflow: auto; */
-	width: 500px;
-	height: 600px;
   }
 
   .commands {

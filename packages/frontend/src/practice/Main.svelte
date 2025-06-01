@@ -22,7 +22,7 @@
   import DXKasan from "./DXKasan.svelte";
   import DupPatient from "./dup-patient/DupPatient.svelte";
   import EditConfig from "@/practice/EditConfig.svelte";
-  
+
   export let serviceStore: Writable<string>;
 
   currentPatient.subscribe((p) => {
@@ -33,7 +33,6 @@
     }
   });
 
-  
 </script>
 
 <div>
@@ -66,16 +65,16 @@
     <ShohouUsage />
   {/if}
   {#if $serviceStore === "modify-onshi"}
-	<ModifyOnshi />
+    <ModifyOnshi />
   {/if}
   {#if $serviceStore === "dx-kasan"}
-	<DXKasan />
+    <DXKasan />
   {/if}
   {#if $serviceStore === "dup-patient"}
-	<DupPatient />
+    <DupPatient />
   {/if}
   {#if $serviceStore === "edit-config"}
-	<EditConfig />
+    <EditConfig />
   {/if}
   <BigChar isVisible={$serviceStore === "big-char"} />
 </div>
