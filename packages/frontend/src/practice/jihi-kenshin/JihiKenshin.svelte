@@ -3,7 +3,7 @@
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { createJihiKenshinCompiler } from "./jihi-kenshin-compiler";
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
-  
+
   import type { Box } from "@/lib/drawer/compiler/box";
   import api from "@/lib/api";
   import SelectPatientBySearch from "../exam/select-patient-dialogs/SelectPatientBySearch.svelte";
@@ -222,7 +222,7 @@
     name: string,
     value: string,
     unit: string,
-    collect: string[]
+    collect: string[],
   ) {
     const i = kensaLabels.findIndex((e) => e === name);
     const s = `${value} ${unit}`;
@@ -245,7 +245,7 @@
   function set(
     ctx: DrawerContext,
     name: string,
-    value: string | c.CompositeItem[]
+    value: string | c.CompositeItem[],
   ): void {
     let box = b.modify(c.getMark(ctx, name).box, b.shrinkHoriz(2, 0));
     if (typeof value === "string") {
@@ -267,7 +267,7 @@
           b.modify(box, b.shift(1, 0)),
           "center",
           "center",
-          { dy: -0.5 }
+          { dy: -0.5 },
         ); // en-dash
         break;
       }
@@ -337,7 +337,7 @@
       height || [
         { kind: "gap", width: 18 },
         { kind: "text", text: " cm" },
-      ]
+      ],
     );
     set(
       ctx,
@@ -345,7 +345,7 @@
       weight || [
         { kind: "gap", width: 18 },
         { kind: "text", text: " kg" },
-      ]
+      ],
     );
     set(ctx, "診察", physicalExam);
     if (hasNoVisualAcuityInput()) {
@@ -361,7 +361,7 @@
       if (visualAcuityLeftCorrected) {
         lts.push(
           { kind: "gap", width: 1 },
-          { kind: "text", text: `(${visualAcuityLeftCorrected})` }
+          { kind: "text", text: `(${visualAcuityLeftCorrected})` },
         );
       }
       set(ctx, "視力左", lts);
@@ -375,7 +375,7 @@
       if (visualAcuityRightCorrected) {
         rts.push(
           { kind: "gap", width: 1 },
-          { kind: "text", text: `(${visualAcuityRightCorrected})` }
+          { kind: "text", text: `(${visualAcuityRightCorrected})` },
         );
       }
       set(ctx, "視力右", rts);
@@ -397,18 +397,18 @@
               "4000Hz 所見" + hearingLeft4000Loss,
               top,
               "left",
-              "center"
+              "center",
             );
             c.drawText(
               ctx,
               "1000Hz 所見" + hearingLeft1000Loss,
               bottom,
               "left",
-              "center"
+              "center",
             );
             c.setFont(ctx, saveFont);
           });
-        }
+        },
       );
       b.withSplitColumns(
         b.modify(right, b.shrinkHoriz(1, 0)),
@@ -423,25 +423,29 @@
               "4000Hz 所見" + hearingRight4000Loss,
               top,
               "left",
-              "center"
+              "center",
             );
             c.drawText(
               ctx,
               "1000Hz 所見" + hearingRight1000Loss,
               bottom,
               "left",
-              "center"
+              "center",
             );
             c.setFont(ctx, saveFont);
           });
-        }
+        },
       );
     } else {
       diagonal(ctx, c.getMark(ctx, "聴力").box);
     }
     set(ctx, "血圧", bloodPressure);
     set(ctx, "心電図", shindenzu);
-    c.paragraph(ctx, kioureki, c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)).box);
+    c.paragraph(
+      ctx,
+      kioureki,
+      c.getMark(ctx, "既往歴", b.inset(1, 0, 2, 0)).box,
+    );
     c.paragraph(ctx, xp, c.getMark(ctx, "Ｘ線", b.inset(1, 0, 2, 0)).box);
     if (xpConductedDate) {
       set(ctx, "Ｘ線撮影日", FormatDate.f2(xpConductedDate));
@@ -456,12 +460,12 @@
           ([left, right]) => {
             c.drawText(ctx, value, left, "right", "center");
             const unitBox = b.modify(right, b.shrinkHoriz(1, 0));
-            if( hasCompTmpl(unit) ){
+            if (hasCompTmpl(unit)) {
               c.drawComposite(ctx, unitBox, parseCompTmpl(unit, rewriteComp));
             } else {
               c.drawText(ctx, unit, unitBox, "left", "center");
             }
-          }
+          },
         );
       } else {
         const bb = c.getMark(ctx, `血液検査結果${i + 1}`).box;
@@ -494,6 +498,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div style:display={isVisible ? "block" : "none"}>
   <ServiceHeader title="自費健診" />
   <div class="two-cols">
