@@ -1,4 +1,3 @@
-import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
 import { unevenDisp } from "@/lib/denshi-shohou/disp/disp-util";
 import type {
   PrescInfoData, RP剤情報, 剤形レコード,
@@ -10,6 +9,35 @@ import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohou
 import type { Drug, DrugGroup, Senpatsu, Shohou, Usage } from "@/lib/parse-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
+import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
+
+export function denshiToPrint2(src: PrescInfoData): ShohousenData2025 {
+  const data: ShohousenData2025 = {
+    clinicAddress: src.医療機関所在地,
+    clinicName: src.医療機関名称,
+    clinicPhone: src.医療機関電話番号,
+    clinicKikancode: src.医療機関コード,
+    doctorName: src.医師漢字氏名,
+    clinicTodoufuken: src.医療機関都道府県コード,
+    hokenshaBangou: src.保険者番号,
+    hihokenshaKigou: src.被保険者証記号,
+    hihokenshaBangou: src.被保険者証番号,
+    edaban: src.被保険者証枝番,
+    futansha: src.第一公費レコード?.公費負担者番号,
+    jukyuusha: src.第一公費レコード?.公費受給者番号,
+    futansha2: src.第二公費レコード?.公費負担者番号,
+    jukyuusha2: src.第二公費レコード?.公費受給者番号,
+    shimei: src.患者漢字氏名,
+    birthdate: DateWrapper.fromOnshiDate(src.患者生年月日).asSqlDate(), // YYYY-MM-DD
+    sex: src.患者性別 === "男" ? "M" : "F", //"M" | "F",
+    hokenKubun: src.被保険者被扶養者 === "被保険者" ? "hihokensha" : "hifuyousha", // "hihokensha" | "hifuyousha",
+    koufuDate: DateWrapper.fromOnshiDate(src.処方箋交付年月日).asSqlDate(), // YYYY-MM-DD
+    shohou: toDrugs(src),
+    isDenshi: true,
+    accessCode: src.引換番号,
+  };
+  return data;
+}
 
 export function denshiToPrint(src: PrescInfoData): Shohousen2024Data {
   const data: Shohousen2024Data = {

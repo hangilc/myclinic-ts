@@ -6,7 +6,7 @@
   } from "@/lib/denshi-shohou/presc-info";
   import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
   import type { Kouhi } from "myclinic-model";
-  import { denshiToPrint } from "./denshi-to-print";
+  import { denshiToPrint, denshiToPrint2 } from "./denshi-to-print";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import ShowCodeDialog from "@/lib/denshi-shohou/ShowCodeDialog.svelte";
@@ -32,6 +32,7 @@
     type ShohouTextMemo,
   } from "@/lib/text-memo";
   import { denshiToOldShohou } from "./denshi-to-old-shohou";
+  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -68,6 +69,24 @@
   function doPrint() {
     const data = denshiToPrint(shohou);
     const pages = drawShohousen2024NoRefill(data);
+    onDone();
+    const d: DrawerDialog = new DrawerDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        pages,
+        width: 148,
+        height: 210,
+        scale: 3,
+        kind: "shohousen2024",
+        title: "処方箋印刷",
+      },
+    });
+  }
+
+  function doPrint2() {
+    const data = denshiToPrint2(shohou);
+    const pages = drawShohousen2025(data);
     onDone();
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -180,7 +199,8 @@
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
-  <a href="javascript:void(0)" on:click={doPrint}>印刷</a>
+  <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
+  <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
