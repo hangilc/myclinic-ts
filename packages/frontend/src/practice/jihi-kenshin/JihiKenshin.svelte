@@ -89,7 +89,6 @@
   }
 
   async function applyData() {
-    tokkijikou = "";
     const d: TextInputDialog = new TextInputDialog({
       target: document.body,
       props: {
@@ -102,7 +101,7 @@
   }
 
   function handleData(t: string): void {
-    const collect: string[] = [];
+    let collect: string[] = [];
     for (let line of t.split(/\r?\n/)) {
       let m = /^HT\s+([\d.]+)/.exec(line);
       if (m) {
@@ -137,6 +136,11 @@
       m = /^(?:胸部Ｘ線|Ｘ線|Xp|Ｘｐ)[:：\s]+(.+)/.exec(line);
       if (m) {
         xp = m[1];
+        continue;
+      }
+      m = /^(?:既往歴)[:：\s]+(.+)/.exec(line);
+      if (m) {
+        kioureki = m[1];
         continue;
       }
       m = /^白血球数\s+([\d.]+)/.exec(line);
@@ -215,7 +219,46 @@
     if (tokkijikou && !tokkijikou.endsWith("\n")) {
       tokkijikou += "\n";
     }
+	collect = reorderCollection(collect);
     tokkijikou += collect.join("\n");
+  }
+
+  function reorderCollection(collect: string[]): string[] {
+    let mark: number | undefined = undefined;
+    let result: string[] = [];
+    let 中性脂肪: string | undefined;
+    let LDLコレステロール: string | undefined;
+    let HDLコレステロール: string | undefined;
+    collect.forEach((line, index) => {
+      if (
+        mark === undefined &&
+        (line.startsWith("中性脂肪") ||
+          line.startsWith("LDLコレステロール") ||
+          line.startsWith("HDLコレステロール"))
+      ) {
+        mark = index;
+      }
+      if (line.startsWith("中性脂肪")) {
+        中性脂肪 = line;} else 
+      if (line.startsWith("LDLコレステロール")) {
+        LDLコレステロール = line;} else 
+      if (line.startsWith("HDLコレステロール")) {
+        HDLコレステロール = line;
+      } else {
+		result.push(line);
+	  }
+    });
+	if( mark != undefined ){
+	  let lines: string[] =
+		  [LDLコレステロール, HDLコレステロール, 中性脂肪].filter(line =>
+			line !== undefined
+		  );
+	  result.splice(mark, 0, ...lines);
+	}
+	if( collect.length !== result.length ){
+	  alert("inconsisten reorder collect result");
+	}
+    return result;
   }
 
   function setLaboExam(
@@ -302,7 +345,7 @@
   function renderTokkijikou(ctx: DrawerContext, box: Box, value: string): void {
     const r: Box = b.modify(box, b.inset(1, 1, 2, 1));
     const lines = value.split(/\r?\n/);
-    c.drawTextTmpls(ctx, lines, box, rewriteComp, { leading: 1 });
+    c.drawTextTmpls(ctx, lines, r, rewriteComp, { leading: 1 });
   }
 
   function diagonal(ctx: DrawerContext, box: Box) {
