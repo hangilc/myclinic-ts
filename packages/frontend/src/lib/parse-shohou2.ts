@@ -290,10 +290,11 @@ let reUneven = "([(（]\\s*" +
   "\\s*[)）])?";
 
 let reAmount = new RegExp(
+  "(?<=[ 　])" + 
   "(一回)?" +
     "([0-9０-９]+(?:[.．][0-9０-９]+)?)" +
     "(" + drugUnitStrings.join("|") + ")" +
-    "\\s*" + reUneven + "\\s*" +
+    "[ 　]*" + reUneven + "[ 　]*" +
     "$"
 );
 
