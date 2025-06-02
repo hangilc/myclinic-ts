@@ -290,13 +290,14 @@ let reUneven = "([(（]\\s*" +
   "\\s*[)）])?";
 
 let reAmount = new RegExp(
-  "(?<=[ 　])" + 
-  "(一回)?" +
+  "([一1１]回)?" +
     "([0-9０-９]+(?:[.．][0-9０-９]+)?)" +
     "(" + drugUnitStrings.join("|") + ")" +
     "[ 　]*" + reUneven + "[ 　]*" +
     "$"
 );
+
+export { reAmount as _reAmount };
 
 function parseDrugIndex(pos: Pos): Result<void> {
   let rLine = getLine(pos);
