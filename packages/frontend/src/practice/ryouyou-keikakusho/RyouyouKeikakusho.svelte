@@ -22,6 +22,7 @@
     updateByPartial,
     type FormData,
   } from "./form-data";
+  import { getRyouyouKeikakushoMasterText } from "./helper";
 
   export let isVisible = false;
   let showDev = false;
@@ -363,7 +364,7 @@
         onEnter: async (selected: Patient) => {
           patient = selected;
           initWithStores(
-            (await api.getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
+            (await getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
           );
           formData.patientId = patient.patientId;
         },

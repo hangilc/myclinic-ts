@@ -24,6 +24,7 @@
   import type { PatientMemo } from "myclinic-model/model";
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
+  import { issueRyouyouKeikakusho } from "@/lib/issue-ryouyou-keikakusho";
 
   let cashierVisitId: Writable<number | null> = writable(null);
 
@@ -255,6 +256,13 @@
       });
     }
   }
+
+  async function doIssueRyouyouKeikakusho() {
+	let patient = $currentPatient;
+    if (patient) {
+      await issueRyouyouKeikakusho(patient);
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -269,6 +277,7 @@
   <a href="javascript:void(0)" on:click={doUploadImage}>画像保存</a>
   <a href="javascript:void(0)" on:click={doGazouList}>画像一覧</a>
   <a href="javascript:void(0)" on:click={doPrescList}>処方一覧</a>
+  <a href="javascript:void(0)" on:click={doIssueRyouyouKeikakusho}>療養計画書発行</a>
 </div>
 
 <style>
