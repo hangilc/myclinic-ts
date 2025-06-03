@@ -56,12 +56,25 @@ function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentD
     return undefined;
   }
   
-  // Check if current month is equal or after 4 months of the last issue date
-  const lastDate = DateWrapper.from(lastIssueDate);
-  const fourMonthsLater = new Date(lastDate);
-  fourMonthsLater.setMonth(fourMonthsLater.getMonth() + 4);
-  
-  return currentDate >= fourMonthsLater;
+  let lastDate = DateWrapper.from(lastIssueDate);
+  let iter = 0;
+  while(iter++ < 4 ){
+    let adjustedLastDate = lastDate;
+    if( lastDate.getDay() > 28 ){
+      adjustedLastDate = lastDate.setDay(28);
+    }
+    const fourMonthsLater = adjustedLastDate.incMonth(4);
+    const firstDay = fourMonthsLater.setDay(1);
+    const lastDay = fourMonthsLater.getLastDayOfSameMonth();
+    fourMonthsLater.setMonth(fourMonthsLater.getMonth() + 4);
+    if( firstDay.isAfter(currentDate) ) {
+      return undefined;
+    } else if( lastDay.isBefore(currentDate) ){
+      return 
+    }
+    return currentDate >= fourMonthsLater;
+  }
+  throw new Error("Too many iterations.");
 }
 
 function createFormData(patient: Patient, isContinuous: boolean, history: Partial<FormData>[]): FormData {
