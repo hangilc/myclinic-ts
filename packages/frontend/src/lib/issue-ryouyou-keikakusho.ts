@@ -17,47 +17,51 @@ export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
     // 2. Determine if new or continuous based on history and timing
     const currentDate = DateWrapper.from(new Date());
     const shouldCreateContinuous = shouldCreateContinuousKeikakusho(history, currentDate);
+
+    for(let date of shouldCreateContinuous){
+      // 3. Create form data
+      const formData = createFormData(patient, date, history);
     
-    // 3. Create form data
-    const formData = createFormData(patient, shouldCreateContinuous, history);
+      // // 4. Generate drawing operations
+      // const ops = createOps(formData, patient);
     
-    // 4. Generate drawing operations
-    const ops = createOps(formData, patient);
+      // // 5. Create PDF and save as patient image
+      // const filename = await generateAndSavePdf(patient, ops, formData.mode);
     
-    // 5. Create PDF and save as patient image
-    const filename = await generateAndSavePdf(patient, ops, formData.mode);
+      // // 6. Save the form data to history
+      // await saveFormDataToHistory(patient, formData, history);
     
-    // 6. Save the form data to history
-    await saveFormDataToHistory(patient, formData, history);
+      // // 7. Print the PDF
+      // await printPdf(ops);
     
-    // 7. Print the PDF
-    await printPdf(ops);
-    
-    alert(`療養計画書（${formData.mode === "shokai" ? "初回" : "継続"}）を発行しました。\nPDF: ${filename}`);
-    
+      // alert(`療養計画書（${formData.mode === "shokai" ? "初回" : "継続"}）を発行しました。\nPDF: ${filename}`);
+    }
   } catch (error) {
     console.error("Error issuing ryouyou keikakusho:", error);
     alert("療養計画書の発行中にエラーが発生しました。");
   }
 }
 
-function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentDate: DateWrapper): DateWrapper | undefined {
+function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentDate: DateWrapper): DateWrapper[] {
   if (history.length === 0) {
-    return undefined; // No history, create new (shokai)
+    return [currentDate]; // No history, create new (shokai)
   }
   
   const lastIndex = indexOfLastFormData(history);
   if (lastIndex < 0) {
-    return undefined;
+    console.log("indexOfLastFormData returned negative value");
+    return [];
   }
   
   const lastIssueDate = history[lastIndex].issueDate;
   if (!lastIssueDate) {
-    return undefined;
+    console.log("last history has no issudeDate");
+    return [];
   }
   
   let lastDate = DateWrapper.from(lastIssueDate);
   let iter = 0;
+  let result: DateWrapper[] = [];
   while(iter++ < 4 ){
     let adjustedLastDate = lastDate;
     if( lastDate.getDay() > 28 ){
@@ -68,22 +72,25 @@ function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentD
     const lastDay = fourMonthsLater.getLastDayOfSameMonth();
     fourMonthsLater.setMonth(fourMonthsLater.getMonth() + 4);
     if( firstDay.isAfter(currentDate) ) {
-      return undefined;
+      return result;
     } else if( lastDay.isBefore(currentDate) ){
-      return 
+      result.push(fourMonthsLater);
+      lastDate = fourMonthsLater;
+    } else {
+      result.push(currentDate);
+      return result;
     }
-    return currentDate >= fourMonthsLater;
   }
   throw new Error("Too many iterations.");
 }
 
-function createFormData(patient: Patient, isContinuous: boolean, history: Partial<FormData>[]): FormData {
+function createFormData(patient: Patient, date: DateWrapper, history: Partial<FormData>[]): FormData {
   const formData = mkFormData();
   
   // Set basic info
   formData.patientId = patient.patientId;
   formData.issueDate = DateWrapper.from(new Date()).asSqlDate();
-  formData.mode = isContinuous ? "keizoku" : "shokai";
+  formData.mode = history.length > 0 ? "keizoku" : "shokai";
   formData.immediates["issue-times"] = (history.length + 1).toString();
   
   // Populate with patient's last form data if exists
@@ -101,6 +108,8 @@ function createFormData(patient: Patient, isContinuous: boolean, history: Partia
         Object.assign(formData.immediates, lastData.immediates);
       }
     }
+  } else {
+    // ask for diseases
   }
   
   return formData;
