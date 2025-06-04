@@ -9,6 +9,11 @@ import type { Op } from "@/lib/drawer/compiler/op";
 import { printApi } from "@/lib/printApi";
 import { getRyouyouKeikakushoMasterText } from "@/practice/ryouyou-keikakusho/helper";
 
+type Task = {
+  label: string;
+  exec: () => Promise<void>;
+}
+
 export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
   try {
     // 1. Retrieve history of ryouyou keikakusho issueing of the patient
@@ -17,29 +22,52 @@ export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
     // 2. Determine if new or continuous based on history and timing
     const currentDate = DateWrapper.from(new Date());
     const shouldCreateContinuous = shouldCreateContinuousKeikakusho(history, currentDate);
-
-    for(let date of shouldCreateContinuous){
-      // 3. Create form data
-      const formData = createFormData(patient, date, history);
-    
-      // // 4. Generate drawing operations
-      // const ops = createOps(formData, patient);
-    
-      // // 5. Create PDF and save as patient image
-      // const filename = await generateAndSavePdf(patient, ops, formData.mode);
-    
-      // // 6. Save the form data to history
-      // await saveFormDataToHistory(patient, formData, history);
-    
-      // // 7. Print the PDF
-      // await printPdf(ops);
-    
-      // alert(`療養計画書（${formData.mode === "shokai" ? "初回" : "継続"}）を発行しました。\nPDF: ${filename}`);
+    if( shouldCreateContinuous.length === 0 ){
+      return;
+    }
+    const tasks = cvtToTasks(patient, shouldCreateContinuous, history);
+    let taskPrompt = `実行しますか？\n${tasks.map(t => t.label).join("\n")}`;
+    if( confirm(taskPrompt) ){
+      try {
+        for(let task of tasks) {
+          await task.exec();
+        }
+      } catch(e) {
+        alert(e);
+        return;
+      }
     }
   } catch (error) {
     console.error("Error issuing ryouyou keikakusho:", error);
     alert("療養計画書の発行中にエラーが発生しました。");
   }
+}
+
+function cvtToTasks(patient: Patient, dates: DateWrapper[], history: Partial<FormData>[]): Task[] {
+  history = [...history];
+  return dates.map((date, index) => {
+    let labels: string[] = [];
+    let procs: (() => Promise<any>)[] = [];
+    const formData = createFormData(patient, date, history);
+    labels.push("保存");
+    procs.push(() => saveFormDataToHistory(patient, formData, history));
+    labels.push("ＰＤＦ保存");
+    const ops = createOps(formData, patient);
+    procs.push(() => generateAndSavePdf(patient, ops, formData.mode));
+    if( index === history.length - 1 ){
+      labels.push("印刷");
+      procs.push(() => printPdf(ops));
+    }
+    let exec: () => Promise<void> = async () => {
+      for(let proc of procs) {
+        await proc();
+      }
+    };
+    history.push(formData);
+    const label = `${date.asSqlDate()}:${labels.join("・")}`
+    return { label, exec };
+  })
+  
 }
 
 function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentDate: DateWrapper): DateWrapper[] {
