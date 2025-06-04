@@ -29,9 +29,11 @@
   let patient: Patient | undefined = undefined;
   let formData: FormData = mkFormData();
   let clinicInfo: ClinicInfo | undefined = undefined;
-  let stores: Partial<FormData>[] = [];
-  let storesIndex = -1;
+  let stores: { id: number; formData: Partial<FormData> }[] = [];
+  let storesId = -1;
   let storesAreaVisible = false;
+
+  let serialStoreId = 0;
 
   function adaptShokujiChecks() {
     if (!formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"]) {
@@ -55,7 +57,7 @@
     }
     if (!formData.shokujiCheck) {
       formData.shokujiCheck = Object.values(formData.shokujiChecks).some(
-        (checked) => checked
+        (checked) => checked,
       );
     }
   }
@@ -84,7 +86,7 @@
     }
     if (!formData.undouCheck) {
       formData.undouCheck = Object.values(formData.undouChecks).some(
-        (checked) => checked
+        (checked) => checked,
       );
     }
   }
@@ -97,7 +99,7 @@
     }
     if (!formData.tabakoCheck) {
       formData.tabakoCheck = Object.values(formData.tabakoChecks).some(
-        (checked) => checked
+        (checked) => checked,
       );
     }
   }
@@ -110,7 +112,7 @@
     }
     if (!formData.sonotaCheck) {
       formData.sonotaCheck = Object.values(formData.sonotaChecks).some(
-        (checked) => checked
+        (checked) => checked,
       );
     }
   }
@@ -235,7 +237,7 @@
   function updateBox(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
     key: keyof RyouyouKeikakushoData,
-    checked: boolean
+    checked: boolean,
   ) {
     updateValue(ryouyouKeikakushoData, key, checked ? "1" : "");
   }
@@ -243,51 +245,51 @@
   function updateValue(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
     key: keyof RyouyouKeikakushoData,
-    value: string
+    value: string,
   ) {
     ryouyouKeikakushoData[key] = value;
   }
 
   function populateDiseases(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
-    fdata: FormData
+    fdata: FormData,
   ) {
     updateBox(ryouyouKeikakushoData, "disease-diabetes", fdata.diseaseDiabetes);
     updateBox(
       ryouyouKeikakushoData,
       "disease-hypertension",
-      fdata.diseaseHypertension
+      fdata.diseaseHypertension,
     );
     updateBox(
       ryouyouKeikakushoData,
       "disease-hyperlipidemia",
-      fdata.diseaseHyperlipidemia
+      fdata.diseaseHyperlipidemia,
     );
   }
 
   function populateMokuhyou(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
-    fdata: FormData
+    fdata: FormData,
   ) {
     updateBox(
       ryouyouKeikakushoData,
       "mokuhyou-体重-mark",
-      fdata.immediates["mokuhyou-体重"] !== ""
+      fdata.immediates["mokuhyou-体重"] !== "",
     );
     updateBox(
       ryouyouKeikakushoData,
       "mokuhyou-BMI-mark",
-      fdata.immediates["mokuhyou-BMI"] !== ""
+      fdata.immediates["mokuhyou-BMI"] !== "",
     );
     updateBox(
       ryouyouKeikakushoData,
       "mokuhyou-BP-mark",
-      fdata.immediates["mokuhyou-BP"] !== ""
+      fdata.immediates["mokuhyou-BP"] !== "",
     );
     updateBox(
       ryouyouKeikakushoData,
       "mokuhyou-HbA1c-mark",
-      fdata.immediates["mokuhyou-HbA1c"] !== ""
+      fdata.immediates["mokuhyou-HbA1c"] !== "",
     );
   }
 
@@ -310,7 +312,7 @@
     updateBox(
       data,
       "juuten-運動-息がはずむが会話が可能な強さ",
-      fdata.undouIntensityBreath
+      fdata.undouIntensityBreath,
     );
     updateBox(data, "juuten-運動-mark", fdata.undouCheck);
   }
@@ -344,15 +346,19 @@
   }
 
   function initWithStores(newStores: Partial<FormData>[]) {
-    stores = newStores;
+    let buf: { id: number; formData: Partial<FormData> }[] = [];
+    for (let n of newStores) {
+      buf.push({ id: ++serialStoreId, formData: n });
+    }
+    stores = buf;
     const lastIndex = indexOfLastFormData(stores);
     formData = updateByPartial(
       mkFormData(),
-      lastIndex >= 0 ? stores[lastIndex] : {}
+      lastIndex >= 0 ? stores[lastIndex] : {},
     );
     formData.issueDate = DateWrapper.from(new Date()).asSqlDate();
     formData.immediates["issue-times"] = (stores.length + 1).toString();
-    storesIndex = -1;
+    storesId = -1;
   }
 
   function doSelectPatient() {
@@ -364,7 +370,7 @@
         onEnter: async (selected: Patient) => {
           patient = selected;
           initWithStores(
-            (await getRyouyouKeikakushoMasterText(patient.patientId)) ?? []
+            (await getRyouyouKeikakushoMasterText(patient.patientId)) ?? [],
           );
           formData.patientId = patient.patientId;
         },
@@ -424,7 +430,7 @@
 
   function populateWithIssueDate(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
-    fdata: FormData
+    fdata: FormData,
   ) {
     if (fdata.issueDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
       const d = DateWrapper.from(fdata.issueDate);
@@ -440,7 +446,7 @@
 
   function populateWithPatient(
     ryouyouKeikakushoData: RyouyouKeikakushoData,
-    fdata: FormData
+    fdata: FormData,
   ) {
     if (patient) {
       ryouyouKeikakushoData["patient-name"] =
@@ -504,62 +510,77 @@
   async function doFreshSave() {
     if (patient) {
       const store = effectiveFormDataOf(formData);
-      stores = [store, ...stores];
+      const id = ++serialStoreId;
+      stores = [{ id, formData: store }, ...stores];
       await api.saveRyouyouKeikakushoMasterText(
         patient.patientId,
-        JSON.stringify(stores)
+        JSON.stringify(stores.map((s) => s.formData)),
       );
-      storesIndex = 0;
+      storesId = id;
       storesAreaVisible = true;
-      // alert("新規保存しました。");
     }
   }
 
   async function doUpdateSave() {
-    if (storesIndex >= 0 && patient) {
+    if (storesId > 0 && patient) {
       const eff = effectiveFormDataOf(formData);
-      const newStores = [...stores];
-      newStores[storesIndex] = eff;
+      const newStores: Partial<FormData>[] = [...stores].map((s) => {
+        if (s.id === eff) {
+          return eff;
+        } else {
+          return s.formData;
+        }
+      });
       await api.saveRyouyouKeikakushoMasterText(
         patient.patientId,
-        JSON.stringify(newStores)
+        JSON.stringify(newStores),
       );
-      // alert("更新しました。");
       storesAreaVisible = true;
     } else {
       alert("選択されていないので、更新保存できません。");
     }
   }
 
-  function doSelectStore(index: number) {
-    const s = stores[index];
-    if (s !== undefined) {
-      formData = updateByPartial(mkFormData(), s);
-      storesIndex = index;
+  function getFormDataById(id: number): Partial<FormData> | undefined {
+    for (let s of stores) {
+      if (s.id === id) {
+        return s.formData;
+      }
+    }
+    return undefined;
+  }
+
+  function doSelectStore(id: number) {
+    const f = getFormDataById(id);
+    if (f) {
+      formData = updateByPartial(mkFormData(), f);
+      storesId = id;
     }
   }
 
-  async function doDeleteStore(index: number) {
+  async function doDeleteStore(id: number) {
     if (patient) {
       if (!confirm("この療養計画書の記録を削除していいですか？")) {
         return;
       }
-      stores = stores.filter((_s, i) => i !== index);
+      stores = stores.filter((s) => s.id !== id);
+      const newFormDataList: Partial<FormData>[] = stores.map(
+        (s) => s.formData,
+      );
       await api.saveRyouyouKeikakushoMasterText(
         patient?.patientId,
-        JSON.stringify(stores)
+        JSON.stringify(newFormDataList),
       );
-      if (storesIndex === index) {
-        initWithStores(stores);
-      } else if (storesIndex > index) {
-        storesIndex -= 1;
+      if (storesId === id) {
+        initWithStores(newFormDataList);
+        storesId = 0;
       }
     }
   }
 
-  async function doShowPdf(index: number) {
+  async function doShowPdf(id: number) {
     if (patient) {
-      let store = stores[index];
+      let store: Partial<FormData> | undefined = getFormDataById(id);
       if (!store) {
         return;
       }
@@ -570,9 +591,9 @@
       await api.createPdfFile(ops, "A4", filename);
       console.log("pdf", filename);
       let result = await fetch(api.portalTmpFileUrl(filename), {
-        "method": "GET",
+        method: "GET",
       });
-      if( result.ok ){
+      if (result.ok) {
         let buf: ArrayBuffer = await result.arrayBuffer();
         let formData = new FormData();
         let blob = new Blob([buf], { type: "application/pdf" });
@@ -584,6 +605,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 {#if isVisible}
   <div>
     {#if patient === undefined}
@@ -595,7 +617,7 @@
     {#if patient}
       <button on:click={doFreshSave}>新規保存</button>
     {/if}
-    {#if storesIndex >= 0}
+    {#if storesId > 0}
       <button on:click={doUpdateSave}>更新保存</button>
     {/if}
     {#if stores.length > 0}
@@ -608,20 +630,21 @@
     <div
       style="margin:10px 0; border: 1px solid gray; padding: 10px; width: 600px;"
     >
-      {#each stores as store, index}
+      {#each stores as store (store.id)}
         <div>
-          {store.issueDate}
+          {store.formData.issueDate}
           <a
             href="javascript:void(0)"
-            on:click={async () => {
-              await doSelectStore(index);
-              storesAreaVisible = false;
+            on:click={() => {
+              doSelectStore(store.id);
             }}>選択</a
           >
-          <a href="javascript:void(0)" on:click={() => doDeleteStore(index)}
+          <a href="javascript:void(0)" on:click={() => doDeleteStore(store.id)}
             >削除</a
           >
-          <a href="javascript:void(0)" on:click={() => doShowPdf(index)}>PDF保存</a>
+          <a href="javascript:void(0)" on:click={() => doShowPdf(store.id)}
+            >PDF保存</a
+          >
         </div>
       {/each}
     </div>
@@ -640,7 +663,11 @@
       <div>
         発行日：<input type="text" bind:value={formData.issueDate} />
         {#if formData.mode === "keizoku"}
-          <input type="text" bind:value={formData.immediates["issue-times"]} style="width:2rem"/> 回目
+          <input
+            type="text"
+            bind:value={formData.immediates["issue-times"]}
+            style="width:2rem"
+          /> 回目
         {/if}
       </div>
       <div>
@@ -688,13 +715,13 @@
             />
           </span>
           {#if formData.mode === "keizoku"}
-          <div style="display: flex; align-items:top;margin:4px 0;">
-            【達成状況】
-            <textarea
-              style="width: 400px; height: 4em; resize: vertical"
-              bind:value={formData.immediates["mokuhyou-目標達成状況"]}
-            />
-          </div>
+            <div style="display: flex; align-items:top;margin:4px 0;">
+              【達成状況】
+              <textarea
+                style="width: 400px; height: 4em; resize: vertical"
+                bind:value={formData.immediates["mokuhyou-目標達成状況"]}
+              />
+            </div>
           {/if}
           <div style="display: flex; align-items:top;margin:4px 0;">
             【達成目標】
@@ -721,36 +748,38 @@
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.shokujiChecks[
-                "juuten-食事-摂取量を適正にする-mark"
-              ]}
+              bind:checked={
+                formData.shokujiChecks["juuten-食事-摂取量を適正にする-mark"]
+              }
               on:change={adaptChecks}
             /> 摂取量を適正にする
           </div>
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.shokujiChecks[
-                "juuten-食事-食塩・調味料を控える-mark"
-              ]}
+              bind:checked={
+                formData.shokujiChecks["juuten-食事-食塩・調味料を控える-mark"]
+              }
               on:change={adaptChecks}
             /> 食塩・調味料を控える
           </div>
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.shokujiChecks[
-                "juuten-食事-食物繊維の摂取を増やす-mark"
-              ]}
+              bind:checked={
+                formData.shokujiChecks[
+                  "juuten-食事-食物繊維の摂取を増やす-mark"
+                ]
+              }
               on:change={adaptChecks}
             /> 食物繊維の摂取を増やす
           </div>
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.shokujiChecks[
-                "juuten-食事-外食の際の注意事項-mark"
-              ]}
+              bind:checked={
+                formData.shokujiChecks["juuten-食事-外食の際の注意事項-mark"]
+              }
               on:change={adaptChecks}
             />
             外食の際の注意事項
@@ -763,9 +792,11 @@
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.shokujiChecks[
-                "juuten-食事-油を使った料理の摂取を減らす-mark"
-              ]}
+              bind:checked={
+                formData.shokujiChecks[
+                  "juuten-食事-油を使った料理の摂取を減らす-mark"
+                ]
+              }
               on:change={adaptChecks}
             /> 油を使った料理の摂取を減らす
           </div>
@@ -957,27 +988,27 @@
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.tabakoChecks[
-                "juuten-たばこ-非喫煙者-mark"
-              ]}
+              bind:checked={
+                formData.tabakoChecks["juuten-たばこ-非喫煙者-mark"]
+              }
               on:change={adaptChecks}
             /> 非喫煙者
           </div>
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.tabakoChecks[
-                "juuten-たばこ-禁煙・節煙の有効性-mark"
-              ]}
+              bind:checked={
+                formData.tabakoChecks["juuten-たばこ-禁煙・節煙の有効性-mark"]
+              }
               on:change={adaptChecks}
             /> 禁煙・節煙の有効性
           </div>
           <div>
             <input
               type="checkbox"
-              bind:checked={formData.tabakoChecks[
-                "juuten-たばこ-禁煙の実施補法等-mark"
-              ]}
+              bind:checked={
+                formData.tabakoChecks["juuten-たばこ-禁煙の実施補法等-mark"]
+              }
               on:change={adaptChecks}
             /> 禁煙の実施補法等
           </div>
@@ -1007,9 +1038,9 @@
           <span style="white-space:nowrap">
             <input
               type="checkbox"
-              bind:checked={formData.sonotaChecks[
-                "juuten-その他-睡眠の確保-mark"
-              ]}
+              bind:checked={
+                formData.sonotaChecks["juuten-その他-睡眠の確保-mark"]
+              }
               on:change={adaptChecks}
             /> 睡眠の確保
           </span>
@@ -1023,9 +1054,9 @@
           <span style="white-space:nowrap">
             <input
               type="checkbox"
-              bind:checked={formData.sonotaChecks[
-                "juuten-その他-家庭での計測-mark"
-              ]}
+              bind:checked={
+                formData.sonotaChecks["juuten-その他-家庭での計測-mark"]
+              }
               on:change={adaptChecks}
             /> 家庭での計測
           </span>
@@ -1122,9 +1153,9 @@
               <span
                 ><input
                   type="checkbox"
-                  bind:checked={formData.kensaChecks[
-                    "kensa-総コレステロール-mark"
-                  ]}
+                  bind:checked={
+                    formData.kensaChecks["kensa-総コレステロール-mark"]
+                  }
                 />&nbsp;</span
               >
               <div>
@@ -1152,9 +1183,9 @@
               <span
                 ><input
                   type="checkbox"
-                  bind:checked={formData.kensaChecks[
-                    "kensa-ＨＤＬコレステロール-mark"
-                  ]}
+                  bind:checked={
+                    formData.kensaChecks["kensa-ＨＤＬコレステロール-mark"]
+                  }
                 />&nbsp;</span
               >
               <div>
@@ -1168,9 +1199,9 @@
               <span
                 ><input
                   type="checkbox"
-                  bind:checked={formData.kensaChecks[
-                    "kensa-ＬＤＬコレステロール-mark"
-                  ]}
+                  bind:checked={
+                    formData.kensaChecks["kensa-ＬＤＬコレステロール-mark"]
+                  }
                 />&nbsp;</span
               >
               <div>
@@ -1184,9 +1215,9 @@
               <span
                 ><input
                   type="checkbox"
-                  bind:checked={formData.kensaChecks[
-                    "kensa-血液検査項目-その他-mark"
-                  ]}
+                  bind:checked={
+                    formData.kensaChecks["kensa-血液検査項目-その他-mark"]
+                  }
                 />&nbsp;</span
               >
               <div>
@@ -1210,9 +1241,9 @@
             栄養状態（
             <input
               type="checkbox"
-              bind:checked={formData.kensaChecks[
-                "kensa-栄養状態-低栄養状態の恐れ"
-              ]}
+              bind:checked={
+                formData.kensaChecks["kensa-栄養状態-低栄養状態の恐れ"]
+              }
               on:change={adaptChecks}
             />
             低栄養状態の恐れ
@@ -1246,6 +1277,7 @@
   </div>
   <div>
     <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
     <div class="dev-menu">
       <span>Dev</span>
       <div

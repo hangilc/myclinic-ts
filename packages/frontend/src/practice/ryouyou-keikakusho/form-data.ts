@@ -169,15 +169,14 @@ export function mkFormData(): FormData {
   }
 }
 
-export function indexOfLastFormData(dataList: Partial<FormData>[]): number {
+export function indexOfLastFormData(dataList: { id: number, formData: Partial<FormData> }[]): number {
   let issue: string = "";
   let index = -1;
   dataList.forEach((d, i) => {
-    if (d.issueDate) {
-
-      if (d.issueDate > issue) {
+    if (d.formData.issueDate) {
+      if (d.formData.issueDate > issue) {
         index = i;
-        issue = d.issueDate;
+        issue = d.formData.issueDate;
       }
     }
   });
@@ -209,9 +208,10 @@ export function effectiveFormDataOf(data: FormData): Partial<FormData> {
   return obj;
 }
 
-export function updateByPartial(obj: any, partial: any): any {
-  for(const key in partial){
-    const value = partial[key];
+export function updateByPartial(obj: Partial<FormData>, partial: Partial<FormData>): Partial<FormData> {
+  let keys = Object.keys(partial) as (keyof FormData)[];
+  for(const key of keys){
+    const value: any = partial[key];
     if( typeof value === "object" ){
       updateByPartial(obj[key], value);
     } else {
