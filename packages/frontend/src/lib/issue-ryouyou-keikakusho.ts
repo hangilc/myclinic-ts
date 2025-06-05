@@ -17,7 +17,7 @@ type Task = {
 export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
   try {
     // 1. Retrieve history of ryouyou keikakusho issueing of the patient
-    const history: Partial<FormData>[] = await getRyouyouKeikakushoMasterText(patient.patientId);
+    const history: Partial<FormData>[] = await api.getRyouyouKeikakushoMasterText(patient.patientId);
     console.log("issue history", history);
     
     // 2. Determine if new or continuous based on history and timing
