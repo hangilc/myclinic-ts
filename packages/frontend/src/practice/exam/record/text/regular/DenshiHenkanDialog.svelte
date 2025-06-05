@@ -2,34 +2,34 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
   import type {
-    IyakuhinMaster,
-    KizaiMaster,
+    // IyakuhinMaster,
+    // KizaiMaster,
     Kouhi,
   } from "myclinic-model";
   import type {
-    DrugGroupFormInitExtent,
+    //DrugGroupFormInitExtent,
     Init,
     Mode,
     Source,
   } from "./denshi-henkan-dialog-types";
-  import api from "@/lib/api";
+  // import api from "@/lib/api";
   import {
     type PrescInfoData,
     type RP剤情報,
-    type 用法レコード,
-    type 薬品レコード,
+    // type 用法レコード,
+    // type 薬品レコード,
     type 備考レコード,
     type 提供情報レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import {
-    freeStyleUsageCode,
-    type 剤形区分,
-    type 情報区分,
-  } from "@/lib/denshi-shohou/denshi-shohou";
-  import { toHankaku } from "myclinic-rezept/zenkaku";
-  import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
-  import { tick } from "svelte";
-  import { cache } from "@/lib/cache";
+  // import {
+  //   freeStyleUsageCode,
+  //   type 剤形区分,
+  //   type 情報区分,
+  // } from "@/lib/denshi-shohou/denshi-shohou";
+  // import { toHankaku } from "myclinic-rezept/zenkaku";
+  // import { type DrugGroupFormInit } from "@/lib/denshi-shohou/drug-group-form-types";
+  // import { tick } from "svelte";
+  // import { cache } from "@/lib/cache";
   import DenshiShohouForm from "@/lib/denshi-shohou/DenshiShohouForm.svelte";
 
   export let destroy: () => void;
@@ -41,10 +41,10 @@
   export let title = "処方箋電子変換";
   let sourceIndex = 1;
   let sourceList: Source[] = [];
-  let selectedSourceId = -1;
+  // let selectedSourceId = -1;
   let mode: Mode | undefined = undefined;
-  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
-    undefined;
+  // let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
+  //  undefined;
   let 使用期限年月日: string | undefined = resolve使用期限年月日FromInit(init);
   let 備考レコード: 備考レコード[] | undefined =
     resolve備考レコードFromInit(init);
@@ -173,16 +173,16 @@
   //   };
   // }
 
-  async function reset() {
-    mode = undefined;
-    editedSource = undefined;
-    selectedSourceId = -1;
-    await tick();
-  }
+  // async function reset() {
+  //   mode = undefined;
+  //   editedSource = undefined;
+  //   selectedSourceId = -1;
+  //   await tick();
+  // }
 
-  async function onFormCancel() {
-    await reset();
-  }
+  // async function onFormCancel() {
+  //   await reset();
+  // }
 
   function isAllConverted(list: Source[]): boolean {
     for (let src of list) {
@@ -283,176 +283,176 @@
     return sourceList;
   }
 
-  function resolveParsed剤形区分(
-    times: string | undefined
-  ): 剤形区分 | undefined {
-    if (times) {
-      if (times.indexOf("日分") > 0) {
-        return "内服";
-      } else if (times.indexOf("回分") > 0) {
-        return "頓服";
-      } else {
-        return "外用";
-      }
-    } else {
-      return "外用";
-    }
-  }
+  // function resolveParsed剤形区分(
+  //   times: string | undefined
+  // ): 剤形区分 | undefined {
+  //   if (times) {
+  //     if (times.indexOf("日分") > 0) {
+  //       return "内服";
+  //     } else if (times.indexOf("回分") > 0) {
+  //       return "頓服";
+  //     } else {
+  //       return "外用";
+  //     }
+  //   } else {
+  //     return "外用";
+  //   }
+  // }
 
-  function resolveParsed調剤数量(
-    times: string | undefined
-  ): number | undefined {
-    if (times) {
-      let m = /([0-9０-９]+)(日|回)分$/.exec(times);
-      if (m) {
-        return parseInt(toHankaku(m[1]));
-      }
-    } else {
-      return undefined;
-    }
-  }
+  // function resolveParsed調剤数量(
+  //   times: string | undefined
+  // ): number | undefined {
+  //   if (times) {
+  //     let m = /([0-9０-９]+)(日|回)分$/.exec(times);
+  //     if (m) {
+  //       return parseInt(toHankaku(m[1]));
+  //     }
+  //   } else {
+  //     return undefined;
+  //   }
+  // }
 
-  async function resolveParsed用法レコード(
-    usage: string
-  ): Promise<用法レコード | undefined> {
-    const map = await cache.getUsageMasterMap();
-    const rec = map[usage];
-    if (rec) {
-      return rec;
-    } else {
-      return {
-        用法コード: freeStyleUsageCode,
-        用法名称: usage,
-      };
-    }
-  }
+  // async function resolveParsed用法レコード(
+  //   usage: string
+  // ): Promise<用法レコード | undefined> {
+  //   const map = await cache.getUsageMasterMap();
+  //   const rec = map[usage];
+  //   if (rec) {
+  //     return rec;
+  //   } else {
+  //     return {
+  //       用法コード: freeStyleUsageCode,
+  //       用法名称: usage,
+  //     };
+  //   }
+  // }
 
-  function resolveParsedAmount(amount: string): number | undefined {
-    const a = parseFloat(toHankaku(amount));
-    return isNaN(a) ? undefined : a;
-  }
+  // function resolveParsedAmount(amount: string): number | undefined {
+  //   const a = parseFloat(toHankaku(amount));
+  //   return isNaN(a) ? undefined : a;
+  // }
 
-  async function probeIyakuhincode(name: string): Promise<number | undefined> {
-    const map = await cache.getDrugNameIyakuhincodeMap();
-    return map[name] ?? undefined;
-  }
+  // async function probeIyakuhincode(name: string): Promise<number | undefined> {
+  //   const map = await cache.getDrugNameIyakuhincodeMap();
+  //   return map[name] ?? undefined;
+  // }
 
-  async function resolveParsedIyakuhin(
-    name: string,
-    amount: string
-  ): Promise<
-    | { 薬品レコード: 薬品レコード }
-    | { iyakuhinSearchText: string; amount: number | undefined }
-  > {
-    const amountValue = resolveParsedAmount(amount);
-    const bind = await probeIyakuhincode(name);
-    if (bind) {
-      let master: IyakuhinMaster | KizaiMaster | undefined = undefined;
-      let 情報区分: 情報区分 = "医薬品";
-      const code = bind.toString();
-      if (code.startsWith("6")) {
-        master = await api.getIyakuhinMaster(bind, at);
-      } else if (code.startsWith("7")) {
-        master = await api.getKizaiMaster(bind, at);
-        情報区分 = "医療材料";
-      }
-      if (master) {
-        if (amountValue !== undefined) {
-          return {
-            薬品レコード: {
-              情報区分,
-              薬品コード種別: "レセプト電算処理システム用コード",
-              薬品コード: code,
-              薬品名称: master.name,
-              分量: amount,
-              力価フラグ: "薬価単位",
-              単位名: master.unit,
-            },
-          };
-        }
-      }
-    }
-    return {
-      iyakuhinSearchText: name,
-      amount: amountValue,
-    };
-  }
+  // async function resolveParsedIyakuhin(
+  //   name: string,
+  //   amount: string
+  // ): Promise<
+  //   | { 薬品レコード: 薬品レコード }
+  //   | { iyakuhinSearchText: string; amount: number | undefined }
+  // > {
+  //   const amountValue = resolveParsedAmount(amount);
+  //   const bind = await probeIyakuhincode(name);
+  //   if (bind) {
+  //     let master: IyakuhinMaster | KizaiMaster | undefined = undefined;
+  //     let 情報区分: 情報区分 = "医薬品";
+  //     const code = bind.toString();
+  //     if (code.startsWith("6")) {
+  //       master = await api.getIyakuhinMaster(bind, at);
+  //     } else if (code.startsWith("7")) {
+  //       master = await api.getKizaiMaster(bind, at);
+  //       情報区分 = "医療材料";
+  //     }
+  //     if (master) {
+  //       if (amountValue !== undefined) {
+  //         return {
+  //           薬品レコード: {
+  //             情報区分,
+  //             薬品コード種別: "レセプト電算処理システム用コード",
+  //             薬品コード: code,
+  //             薬品名称: master.name,
+  //             分量: amount,
+  //             力価フラグ: "薬価単位",
+  //             単位名: master.unit,
+  //           },
+  //         };
+  //       }
+  //     }
+  //   }
+  //   return {
+  //     iyakuhinSearchText: name,
+  //     amount: amountValue,
+  //   };
+  // }
 
-  async function sourceToInit(
-    src: Source
-  ): Promise<DrugGroupFormInit & DrugGroupFormInitExtent> {
-    switch (src.kind) {
-      case "parsed": {
-        const amount = resolveParsedAmount(src.amount);
-        const resolved = await resolveParsedIyakuhin(
-          src.name,
-          amount?.toString() ?? ""
-        );
-        let 剤形区分: 剤形区分 | undefined = resolveParsed剤形区分(src.times);
-        if ("薬品レコード" in resolved) {
-          const code = resolved.薬品レコード.薬品コード;
-          if (code.startsWith("7")) {
-            剤形区分 = "医療材料";
-            if (
-              resolved.薬品レコード.薬品名称.startsWith(
-                "万年筆型注入器用注射針"
-              )
-            ) {
-              resolved.薬品レコード.単位名 = "本";
-            }
-          } else {
-            const name = resolved.薬品レコード.薬品名称;
-            if (
-              name.startsWith("ランタス注ソロスター") ||
-              name.startsWith("アピドラ注ソロスター")
-            ) {
-              剤形区分 = "注射";
-            }
-          }
-        }
-        return {
-          剤形区分,
-          調剤数量: resolveParsed調剤数量(src.times),
-          用法レコード: await resolveParsed用法レコード(src.usage),
-          ...resolved,
-          sourceDrugName: src.name,
-        };
-      }
-      case "denshi": {
-        return {
-          剤形区分: src.剤形レコード.剤形区分,
-          調剤数量: src.剤形レコード.調剤数量,
-          用法レコード: src.用法レコード,
-          用法補足レコード: src.用法補足レコード,
-          薬品レコード: src.薬品情報.薬品レコード,
-          不均等レコード: src.薬品情報.不均等レコード,
-          負担区分レコード: src.薬品情報.負担区分レコード,
-          薬品補足レコード: src.薬品情報.薬品補足レコード,
-        };
-      }
-      default: {
-        return {};
-      }
-    }
-  }
+  // async function sourceToInit(
+  //   src: Source
+  // ): Promise<DrugGroupFormInit & DrugGroupFormInitExtent> {
+  //   switch (src.kind) {
+  //     case "parsed": {
+  //       const amount = resolveParsedAmount(src.amount);
+  //       const resolved = await resolveParsedIyakuhin(
+  //         src.name,
+  //         amount?.toString() ?? ""
+  //       );
+  //       let 剤形区分: 剤形区分 | undefined = resolveParsed剤形区分(src.times);
+  //       if ("薬品レコード" in resolved) {
+  //         const code = resolved.薬品レコード.薬品コード;
+  //         if (code.startsWith("7")) {
+  //           剤形区分 = "医療材料";
+  //           if (
+  //             resolved.薬品レコード.薬品名称.startsWith(
+  //               "万年筆型注入器用注射針"
+  //             )
+  //           ) {
+  //             resolved.薬品レコード.単位名 = "本";
+  //           }
+  //         } else {
+  //           const name = resolved.薬品レコード.薬品名称;
+  //           if (
+  //             name.startsWith("ランタス注ソロスター") ||
+  //             name.startsWith("アピドラ注ソロスター")
+  //           ) {
+  //             剤形区分 = "注射";
+  //           }
+  //         }
+  //       }
+  //       return {
+  //         剤形区分,
+  //         調剤数量: resolveParsed調剤数量(src.times),
+  //         用法レコード: await resolveParsed用法レコード(src.usage),
+  //         ...resolved,
+  //         sourceDrugName: src.name,
+  //       };
+  //     }
+  //     case "denshi": {
+  //       return {
+  //         剤形区分: src.剤形レコード.剤形区分,
+  //         調剤数量: src.剤形レコード.調剤数量,
+  //         用法レコード: src.用法レコード,
+  //         用法補足レコード: src.用法補足レコード,
+  //         薬品レコード: src.薬品情報.薬品レコード,
+  //         不均等レコード: src.薬品情報.不均等レコード,
+  //         負担区分レコード: src.薬品情報.負担区分レコード,
+  //         薬品補足レコード: src.薬品情報.薬品補足レコード,
+  //       };
+  //     }
+  //     default: {
+  //       return {};
+  //     }
+  //   }
+  // }
 
-  async function doSourceSelect(src: Source) {
-    editedSource = await sourceToInit(src);
-    selectedSourceId = src.id;
-    mode = undefined;
-    await tick();
-    mode = "edit-drug";
-  }
+  // async function doSourceSelect(src: Source) {
+  //   editedSource = await sourceToInit(src);
+  //   selectedSourceId = src.id;
+  //   mode = undefined;
+  //   await tick();
+  //   mode = "edit-drug";
+  // }
 
-  async function doNew() {
-    await reset();
-    mode = "new-drug";
-  }
+  // async function doNew() {
+  //   await reset();
+  //   mode = "new-drug";
+  // }
 
-  async function changeModeTo(m: Mode) {
-    await reset();
-    mode = m;
-  }
+  // async function changeModeTo(m: Mode) {
+  //   await reset();
+  //   mode = m;
+  // }
 
   // async function doSearchUsage() {
   //   const t = usageSearchText.trim();
@@ -539,24 +539,3 @@
   </div>
 </Dialog>
 
-<style>
-  .drug {
-    border: 1px solid gray;
-    border-radius: 4px;
-    margin: 6px 0;
-    padding: 6px;
-    cursor: pointer;
-  }
-
-  .drug:first-of-type {
-    margin-top: 0;
-  }
-
-  .drug:last-of-type {
-    margin-bottom: 0;
-  }
-
-  .selected {
-    border: 2px solid blue;
-  }
-</style>
