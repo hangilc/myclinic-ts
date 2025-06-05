@@ -47,7 +47,7 @@
 <style>
   .image-wrapper {
     width: 820px;
-    height: 600px;
+    height: 560px;
     overflow: auto;
     padding: 0;
     resize: both;
