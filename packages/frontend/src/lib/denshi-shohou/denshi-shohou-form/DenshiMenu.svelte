@@ -18,6 +18,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <div class="menu">
     <a href="javascript:void(0)" on:click={onPlus}>
@@ -33,13 +34,14 @@
         >有効期限</a
       >
       <a href="javascript:void(0)" on:click={() => invokeAux(on備考)}>備考</a>
-      <a href="javascript:void(0)" on:click={() => invokeAux(on提供情報)}>提供情報</a>
+      <a href="javascript:void(0)" on:click={() => invokeAux(on提供情報)}
+        >提供情報</a
+      >
     </div>
   {/if}
 </div>
 
 <style>
-  .menu span {
-    white-space: nowrap;
-  }
 </style>
+
+

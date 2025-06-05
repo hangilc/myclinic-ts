@@ -3,7 +3,9 @@ import type { FormData } from "./form-data";
 
 export async function getRyouyouKeikakushoMasterText(patientId: number): Promise<Partial<FormData>[]> {
   try {
-    return await api.getRyouyouKeikakushoMasterText(patientId);
+    let result = await api.getRyouyouKeikakushoMasterText(patientId);
+    console.log("result", result);
+    return result;
   } catch(e) {
     console.error(e);
     return [];

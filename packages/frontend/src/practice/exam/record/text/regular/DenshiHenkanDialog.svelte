@@ -97,81 +97,81 @@
     }
   }
 
-  function onExpireDateDone(d: string | undefined) {
-    使用期限年月日 = d;
-    console.log("expireDate", 使用期限年月日);
-    mode = undefined;
-  }
+  // function onExpireDateDone(d: string | undefined) {
+  //   使用期限年月日 = d;
+  //   console.log("expireDate", 使用期限年月日);
+  //   mode = undefined;
+  // }
 
-  function onBikouDone(recs: 備考レコード[]) {
-    備考レコード = recs.length > 0 ? recs : undefined;
-    mode = undefined;
-  }
+  // function onBikouDone(recs: 備考レコード[]) {
+  //   備考レコード = recs.length > 0 ? recs : undefined;
+  //   mode = undefined;
+  // }
 
-  function onJohoDone(rec: 提供情報レコード | undefined) {
-    提供情報レコード = rec;
-    mode = undefined;
-  }
+  // function onJohoDone(rec: 提供情報レコード | undefined) {
+  //   提供情報レコード = rec;
+  //   mode = undefined;
+  // }
 
-  async function onFormEnter(rp: RP剤情報) {
-    if (
-      editedSource &&
-      editedSource.用法レコード &&
-      editedSource.用法レコード.用法コード === freeStyleUsageCode
-    ) {
-      if (rp.用法レコード.用法コード !== freeStyleUsageCode) {
-        const u = editedSource.用法レコード.用法名称;
-        const map = await cache.getUsageMasterMap();
-        map[u] = Object.assign({}, rp.用法レコード);
-        await cache.setUsageMasterMap(map);
-      }
-    }
-    {
-      const rec: 薬品レコード | undefined =
-        rp.薬品情報グループ[0]?.薬品レコード;
-      if (rec === undefined) {
-        throw new Error("empty RP剤情報");
-      }
-      if (editedSource?.sourceDrugName) {
-        const drugName = editedSource.sourceDrugName;
-        if (rec.薬品コード種別 === "レセプト電算処理システム用コード") {
-          const map = await cache.getDrugNameIyakuhincodeMap();
-          const bind = map[drugName];
-          if (!bind || bind.toString() !== rec.薬品コード) {
-            const newMap = { ...map };
-            newMap[drugName] = parseInt(rec.薬品コード);
-            await cache.setDrugNameIyakuhincodeMap(newMap);
-            console.log("newMap", newMap);
-          }
-        }
-      }
-    }
-    sourceList = sourceList.map((src) => {
-      if (src.id === selectedSourceId) {
-        return rpToSource(rp);
-      } else {
-        return src;
-      }
-    });
-    await reset();
-  }
+  // async function onFormEnter(rp: RP剤情報) {
+  //   if (
+  //     editedSource &&
+  //     editedSource.用法レコード &&
+  //     editedSource.用法レコード.用法コード === freeStyleUsageCode
+  //   ) {
+  //     if (rp.用法レコード.用法コード !== freeStyleUsageCode) {
+  //       const u = editedSource.用法レコード.用法名称;
+  //       const map = await cache.getUsageMasterMap();
+  //       map[u] = Object.assign({}, rp.用法レコード);
+  //       await cache.setUsageMasterMap(map);
+  //     }
+  //   }
+  //   {
+  //     const rec: 薬品レコード | undefined =
+  //       rp.薬品情報グループ[0]?.薬品レコード;
+  //     if (rec === undefined) {
+  //       throw new Error("empty RP剤情報");
+  //     }
+  //     if (editedSource?.sourceDrugName) {
+  //       const drugName = editedSource.sourceDrugName;
+  //       if (rec.薬品コード種別 === "レセプト電算処理システム用コード") {
+  //         const map = await cache.getDrugNameIyakuhincodeMap();
+  //         const bind = map[drugName];
+  //         if (!bind || bind.toString() !== rec.薬品コード) {
+  //           const newMap = { ...map };
+  //           newMap[drugName] = parseInt(rec.薬品コード);
+  //           await cache.setDrugNameIyakuhincodeMap(newMap);
+  //           console.log("newMap", newMap);
+  //         }
+  //       }
+  //     }
+  //   }
+  //   sourceList = sourceList.map((src) => {
+  //     if (src.id === selectedSourceId) {
+  //       return rpToSource(rp);
+  //     } else {
+  //       return src;
+  //     }
+  //   });
+  //   await reset();
+  // }
 
-  async function onNewDrug(rp: RP剤情報) {
-    sourceList.push(rpToSource(rp));
-    sourceList = sourceList;
-    await reset();
-  }
+  // async function onNewDrug(rp: RP剤情報) {
+  //   sourceList.push(rpToSource(rp));
+  //   sourceList = sourceList;
+  //   await reset();
+  // }
 
-  function rpToSource(rp: RP剤情報): Source {
-    return {
-      kind: "denshi",
-      剤形レコード: rp.剤形レコード,
-      用法レコード: rp.用法レコード,
-      用法補足レコード: rp.用法補足レコード,
-      薬品情報: rp.薬品情報グループ[0],
-      id: sourceIndex++,
-    };
-  }
+  // function rpToSource(rp: RP剤情報): Source {
+  //   return {
+  //     kind: "denshi",
+  //     剤形レコード: rp.剤形レコード,
+  //     用法レコード: rp.用法レコード,
+  //     用法補足レコード: rp.用法補足レコード,
+  //     薬品情報: rp.薬品情報グループ[0],
+  //     id: sourceIndex++,
+  //   };
+  // }
 
   async function reset() {
     mode = undefined;

@@ -1639,7 +1639,10 @@ export default {
   },
 
   getRyouyouKeikakushoMasterText(patientId: number): Promise<any> {
-    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, a => a);
+    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, a => {
+      console.log("a", typeof a, a);
+      return a;
+    });
   },
 
   saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {

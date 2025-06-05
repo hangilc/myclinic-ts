@@ -85,7 +85,8 @@
       {#if item.label.startsWith("---")}
       <div class="leading"></div>
       {:else}
-      <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
+		<div><CheckLabel bind:checked={item.checked} label={item.label}
+		  name={item.value}/></div>
       {/if}
     {/each}
     </div>
@@ -94,7 +95,8 @@
       {#if item.label.startsWith("---")}
       <div class="leading"></div>
       {:else}
-      <div><CheckLabel bind:checked={item.checked} label={item.label}/></div>
+		<div><CheckLabel bind:checked={item.checked} label={item.label}
+		  name={item.value}/></div>
       {/if} 
     {/each}
     </div>

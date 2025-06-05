@@ -21,6 +21,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="option-wrapper">
   <div>
     <span
@@ -104,7 +105,4 @@
 </div>
 
 <style>
-  .option-wrapper > span {
-    white-space: nowrap;
-  }
 </style>

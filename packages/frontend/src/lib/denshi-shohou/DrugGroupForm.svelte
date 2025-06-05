@@ -32,7 +32,10 @@
   import type { Kouhi } from "myclinic-model";
   import KizaiKindForm from "./drug-group-form/KizaiKindForm.svelte";
   import Trash from "@/icons/Trash.svelte";
-  import { ippanmeiStateFromMaster, type IppanmeiState } from "./denshi-shohou-form/denshi-shohou-form-types";
+  import {
+    ippanmeiStateFromMaster,
+    type IppanmeiState,
+  } from "./denshi-shohou-form/denshi-shohou-form-types";
   import api from "../api";
 
   export let at: string;
@@ -40,7 +43,7 @@
   export let init: DrugGroupFormInit;
   export let onEnter: (
     rec: RP剤情報,
-    ippanmeiState: IppanmeiState | undefined
+    ippanmeiState: IppanmeiState | undefined,
   ) => void;
   export let onCancel: () => void;
   export let onDelete: (() => void) | undefined;
@@ -111,7 +114,7 @@
         init?.薬品レコード?.薬品コード種別 ===
         "レセプト電算処理システム用コード"
       ) {
-        spawnIppanmeiResolver(parseInt(init.薬品レコード.薬品コード))
+        spawnIppanmeiResolver(parseInt(init.薬品レコード.薬品コード));
       }
     }
     return ippanmeiState;
@@ -301,7 +304,7 @@
     edit薬品補足レコード = false;
   }
 
-  let edit = "";
+  //  let edit = "";
 
   function doCancel() {
     onCancel();
@@ -326,6 +329,9 @@
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-missing-attribute -->
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <div>
     <div>

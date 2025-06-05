@@ -1,6 +1,6 @@
 import type { Patient } from "myclinic-model";
 import api from "@/lib/api";
-import { mkFormData, type FormData, getMostRecent } from "@/practice/ryouyou-keikakusho/form-data";
+import { mkFormData, type FormData, getMostRecent, effectiveFormDataOf } from "@/practice/ryouyou-keikakusho/form-data";
 import { mkRyouyouKeikakushoData, type RyouyouKeikakushoData } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-data";
 import { drawRyouyouKeikakushoShokai } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-shokai-drawer";
 import { drawRyouyouKeikakushoKeizoku } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-keizoku-drawer";
@@ -18,6 +18,7 @@ export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
   try {
     // 1. Retrieve history of ryouyou keikakusho issueing of the patient
     const history: Partial<FormData>[] = await getRyouyouKeikakushoMasterText(patient.patientId);
+    console.log("issue history", history);
     
     // 2. Determine if new or continuous based on history and timing
     const currentDate = DateWrapper.from(new Date());
@@ -25,6 +26,7 @@ export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
     if( shouldCreateContinuous.length === 0 ){
       return;
     }
+    console.log("issue history2", history);
     const tasks = cvtToTasks(patient, shouldCreateContinuous, history);
     let taskPrompt = `実行しますか？\n${tasks.map(t => t.label).join("\n")}`;
     if( confirm(taskPrompt) ){
@@ -44,26 +46,39 @@ export async function issueRyouyouKeikakusho(patient: Patient): Promise<void> {
 }
 
 function cvtToTasks(patient: Patient, dates: DateWrapper[], history: Partial<FormData>[]): Task[] {
-  history = [...history];
+  console.log("enter with history (before)", history);
+  //history = [...history];
+  console.log("enter with history (after)", history);
   return dates.map((date, index) => {
     let labels: string[] = [];
     let procs: (() => Promise<any>)[] = [];
     const formData = createFormData(patient, date, history);
+    const eff = effectiveFormDataOf(formData);
     labels.push("保存");
-    procs.push(() => saveFormDataToHistory(patient, formData, history));
+    procs.push(async () => {
+      let h = [...history];
+      console.log("saving", eff, h);
+      return
+      // return await saveFormDataToHistory(patient, eff, h);
+    });
     labels.push("ＰＤＦ保存");
     const ops = createOps(formData, patient);
-    procs.push(() => generateAndSavePdf(patient, ops, formData.mode));
+    procs.push(async () => {
+      // await generateAndSavePdf(patient, ops, formData.mode)
+    });
     if( index === history.length - 1 ){
       labels.push("印刷");
-      procs.push(() => printPdf(ops));
+      procs.push(async () => {
+        console.log("print");
+        // await printPdf(ops)
+      });
     }
     let exec: () => Promise<void> = async () => {
       for(let proc of procs) {
         await proc();
       }
     };
-    history.push(formData);
+    history.push(eff);
     const label = `${date.asSqlDate()}:${labels.join("・")}`
     return { label, exec };
   })
@@ -111,12 +126,14 @@ function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentD
   throw new Error("Too many iterations.");
 }
 
-function createFormData(patient: Patient, _date: DateWrapper, history: Partial<FormData>[]): FormData {
+function createFormData(
+  patient: Patient, date: DateWrapper, history: Partial<FormData>[]
+): FormData {
   const formData = mkFormData();
   
   // Set basic info
   formData.patientId = patient.patientId;
-  formData.issueDate = DateWrapper.from(new Date()).asSqlDate();
+  formData.issueDate = date.asSqlDate();
   formData.mode = history.length > 0 ? "keizoku" : "shokai";
   formData.immediates["issue-times"] = (history.length + 1).toString();
   
@@ -241,11 +258,8 @@ async function generateAndSavePdf(patient: Patient, ops: Op[], mode: string): Pr
   return filename;
 }
 
-async function saveFormDataToHistory(patient: Patient, formData: FormData, history: Partial<FormData>[]): Promise<void> {
-  // Add new form data to history
-  const newHistory = [formData, ...history];
-  
-  // Save to backend
+async function saveFormDataToHistory(patient: Patient, eff: Partial<FormData>, history: Partial<FormData>[]): Promise<void> {
+  const newHistory = [eff, ...history];
   await api.saveRyouyouKeikakushoMasterText(
     patient.patientId,
     JSON.stringify(newHistory)

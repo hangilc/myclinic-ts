@@ -9,9 +9,11 @@ export interface DrugKind {
     単位名: string;
 }
 
-export async function resolveIppanmeiState(iyakuhincode: number, at: string): IppanmeiState {
+export async function resolveIppanmeiState(iyakuhincode: number, at: string): Promise<IppanmeiState> {
     const m = await api.getIyakuhinMaster(iyakuhincode, at);
     if( m.ippanmei ){
-        return { kind: "has-ippanmei", }
+      return { kind: "has-ippanmei", name: m.ippanmei, code: m.ippanmeicode }
+    } else {
+      return { kind: "has-no-ippanmei" };
     }
 } 
