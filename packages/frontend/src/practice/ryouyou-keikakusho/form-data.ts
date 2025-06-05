@@ -169,18 +169,20 @@ export function mkFormData(): FormData {
   }
 }
 
-export function indexOfLastFormData(dataList: { id: number, formData: Partial<FormData> }[]): number {
+export function getMostRecent(
+  dataList: Partial<FormData>[]
+): Partial<FormData> | undefined {
   let issue: string = "";
   let index = -1;
   dataList.forEach((d, i) => {
-    if (d.formData.issueDate) {
-      if (d.formData.issueDate > issue) {
+    if (d.issueDate) {
+      if (d.issueDate > issue) {
         index = i;
-        issue = d.formData.issueDate;
+        issue = d.issueDate;
       }
     }
   });
-  return index;
+  return index >= 0 ? dataList[index] : undefined;
 }
 
 export function effectiveFormDataOf(data: FormData): Partial<FormData> {
@@ -208,16 +210,28 @@ export function effectiveFormDataOf(data: FormData): Partial<FormData> {
   return obj;
 }
 
-export function updateByPartial(obj: Partial<FormData>, partial: Partial<FormData>): Partial<FormData> {
-  let keys = Object.keys(partial) as (keyof FormData)[];
-  for(const key of keys){
-    const value: any = partial[key];
+function copy(dstObj: any, srcObj: any) {
+  if( typeof dstObj !== "object" ){
+    throw new Error("not an object");
+  }
+  if( typeof srcObj !== "object" ){
+    throw new Error("not an object")
+  }
+  for(let key of Object.keys(srcObj) ){
+    let value = srcObj[key];
     if( typeof value === "object" ){
-      updateByPartial(obj[key], value);
+      if( dstObj[key] == undefined ){
+        dstObj[key] = {};
+      }
+      copy(dstObj[key], value);
     } else {
-      obj[key] = value;
+      dstObj[key] = value;
     }
   }
+}
+
+export function updateByPartial(obj: FormData, partial: Partial<FormData>): FormData {
+  copy(obj, partial);
   return obj;
 }
 

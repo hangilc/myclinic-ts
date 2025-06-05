@@ -17,7 +17,7 @@
   import { sqlDateToDate } from "@/lib/date-util";
   import {
     effectiveFormDataOf,
-    indexOfLastFormData,
+    getMostRecent,
     mkFormData,
     updateByPartial,
     type FormData,
@@ -351,11 +351,12 @@
       buf.push({ id: ++serialStoreId, formData: n });
     }
     stores = buf;
-    const lastIndex = indexOfLastFormData(stores);
+    const lastFormData = getMostRecent(stores.map(s => s.formData));
     formData = updateByPartial(
       mkFormData(),
-      lastIndex >= 0 ? stores[lastIndex] : {},
+      lastFormData ?? {},
     );
+	formData.mode = lastFormData ? "keizoku" : "shokai";
     formData.issueDate = DateWrapper.from(new Date()).asSqlDate();
     formData.immediates["issue-times"] = (stores.length + 1).toString();
     storesId = -1;

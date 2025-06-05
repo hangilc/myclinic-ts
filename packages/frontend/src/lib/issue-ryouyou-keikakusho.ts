@@ -1,6 +1,6 @@
 import type { Patient } from "myclinic-model";
 import api from "@/lib/api";
-import { mkFormData, type FormData, indexOfLastFormData } from "@/practice/ryouyou-keikakusho/form-data";
+import { mkFormData, type FormData, getMostRecent } from "@/practice/ryouyou-keikakusho/form-data";
 import { mkRyouyouKeikakushoData, type RyouyouKeikakushoData } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-data";
 import { drawRyouyouKeikakushoShokai } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-shokai-drawer";
 import { drawRyouyouKeikakushoKeizoku } from "@/lib/drawer/forms/ryouyou-keikakusho/ryouyou-keikakusho-keizoku-drawer";
@@ -67,7 +67,6 @@ function cvtToTasks(patient: Patient, dates: DateWrapper[], history: Partial<For
     const label = `${date.asSqlDate()}:${labels.join("・")}`
     return { label, exec };
   })
-  
 }
 
 function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentDate: DateWrapper): DateWrapper[] {
@@ -75,13 +74,13 @@ function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentD
     return [currentDate]; // No history, create new (shokai)
   }
   
-  const lastIndex = indexOfLastFormData(history);
-  if (lastIndex < 0) {
-    console.log("indexOfLastFormData returned negative value");
+  const lastFormData = getMostRecent(history);
+  if (!lastFormData) {
+    console.log("getMostRecent returned undefined");
     return [];
   }
   
-  const lastIssueDate = history[lastIndex].issueDate;
+  const lastIssueDate = lastFormData.issueDate;
   if (!lastIssueDate) {
     console.log("last history has no issudeDate");
     return [];
@@ -112,7 +111,7 @@ function shouldCreateContinuousKeikakusho(history: Partial<FormData>[], currentD
   throw new Error("Too many iterations.");
 }
 
-function createFormData(patient: Patient, date: DateWrapper, history: Partial<FormData>[]): FormData {
+function createFormData(patient: Patient, _date: DateWrapper, history: Partial<FormData>[]): FormData {
   const formData = mkFormData();
   
   // Set basic info
@@ -123,9 +122,9 @@ function createFormData(patient: Patient, date: DateWrapper, history: Partial<Fo
   
   // Populate with patient's last form data if exists
   if (history.length > 0) {
-    const lastIndex = indexOfLastFormData(history);
-    if (lastIndex >= 0) {
-      const lastData = history[lastIndex];
+    const lastFormData = getMostRecent(history);
+    if (lastFormData) {
+      const lastData = lastFormData;
       // Copy over relevant fields from last form for continuity
       if (lastData.diseaseDiabetes !== undefined) formData.diseaseDiabetes = lastData.diseaseDiabetes;
       if (lastData.diseaseHypertension !== undefined) formData.diseaseHypertension = lastData.diseaseHypertension;
