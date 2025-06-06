@@ -48,9 +48,7 @@ function cvtToTasks(
     let labels: string[] = [];
     let procs: (() => Promise<any>)[] = [];
     const formData = createFormData(patient, date, history);
-    console.log("formData", formData);
     const eff = effectiveFormDataOf(formData);
-    console.log("eff", eff); return;
     const newHistory = [eff, ...history];
     labels.push("保存");
     procs.push(async () => {

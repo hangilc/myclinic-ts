@@ -5,7 +5,7 @@
   import { printApi, type PrintRequest } from "@/lib/printApi";
   import { onMount } from "svelte";
   import * as Base64 from "js-base64";
-  import {getBase} from "@lib/api";
+  import { getBase } from "@lib/api";
 
   export let destroy: () => void;
   export let ops: Op[] = [];
@@ -19,9 +19,14 @@
   export let onClose: () => void = () => {};
   export let stamp: ArrayBuffer | undefined = undefined;
   export let stampStyle: string = "";
-  export let stampPrintOption: {
-	left: number, top: number, width: number, height: number
-  } | undefined = undefined;
+  export let stampPrintOption:
+    | {
+        left: number;
+        top: number;
+        width: number;
+        height: number;
+      }
+    | undefined = undefined;
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
@@ -62,7 +67,7 @@
       };
       await printApi.printDrawer(
         req,
-        settingSelect === "手動" ? "" : settingSelect
+        settingSelect === "手動" ? "" : settingSelect,
       );
       if (setDefaultChecked && settingSelect !== printPref && kind) {
         printApi.setPrintPref(kind, settingSelect);
@@ -72,15 +77,25 @@
       const opsList: Op[][] = pages || [ops];
       const paperSize = "A5";
       let opt = stampPrintOption ?? {
-        left: 10, top: 30, width: 15, height: 15
+        left: 10,
+        top: 30,
+        width: 15,
+        height: 15,
       };
-      const body = { paperSize, opsList, outFile: "test.pdf", stamp: base64Data, page: 1, ...opt };
+      const body = {
+        paperSize,
+        opsList,
+        outFile: "test.pdf",
+        stamp: base64Data,
+        page: 1,
+        ...opt,
+      };
       const result = await fetch(`${getBase()}/create-pdf-file-with-stamp`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
-      if( !result.ok ){
+      if (!result.ok) {
         throw new Error(await result.text());
       }
     }
@@ -103,6 +118,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <Dialog {destroy} {onClose} {title}>
   {#if pages && pages.length >= 2}
     <a href="javascript:void(0)" on:click={() => gotoPage(pageIndex - 1)}
@@ -120,7 +136,11 @@
     height={`${height * scale}`}
   >
     {#if base64Data !== ""}
-      <img style={stampStyle} src={`data:image/jpeg;base64,${base64Data}`} alt="stamp"/>
+      <img
+        style={stampStyle}
+        src={`data:image/jpeg;base64,${base64Data}`}
+        alt="stamp"
+      />
     {/if}</DrawerSvg
   >
   <div>
