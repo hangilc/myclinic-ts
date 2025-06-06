@@ -83,15 +83,7 @@ async function get<T>(
     arg += `?${q}`;
   }
   const resp = await fetch(arg);
-  if( cmd === "get-ryouyou-keikakusho-master-text" ){
-    const txt = await resp.text();
-    console.log("text", txt);
-    const retval = JSON.parse(txt);
-    console.log("retval", retval);
-    return retval;
-  } else {
-    return cast(await resp.json());
-  }
+  return cast(await resp.json());
 }
 
 async function getText(
@@ -1647,10 +1639,8 @@ export default {
   },
 
   getRyouyouKeikakushoMasterText(patientId: number): Promise<any> {
-    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() }, a => {
-      console.log("value of a", typeof a, a);
-      return a;
-    });
+    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() },
+      a => a);
   },
 
   saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {
