@@ -52,6 +52,7 @@ function cvtToTasks(
     const newHistory = [eff, ...history];
     labels.push("保存");
     procs.push(async () => {
+      console.log("saving", newHistory);
       await api.saveRyouyouKeikakushoMasterText(
         patient.patientId,
         JSON.stringify(newHistory)
@@ -62,7 +63,7 @@ function cvtToTasks(
     procs.push(async () => {
       await generateAndSavePdf(patient, ops, formData.mode)
     });
-    if( index === history.length - 1 ){
+    if( index === dates.length - 1 ){
       labels.push("印刷");
       procs.push(async () => {
         await printPdf(ops)
@@ -251,14 +252,6 @@ async function generateAndSavePdf(patient: Patient, ops: Op[], mode: string): Pr
   }
   
   return filename;
-}
-
-async function saveFormDataToHistory(patient: Patient, eff: Partial<FormData>, history: Partial<FormData>[]): Promise<void> {
-  const newHistory = [eff, ...history];
-  await api.saveRyouyouKeikakushoMasterText(
-    patient.patientId,
-    JSON.stringify(newHistory)
-  );
 }
 
 async function printPdf(ops: Op[]): Promise<void> {
