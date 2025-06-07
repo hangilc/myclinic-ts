@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { _reAmount } from "./parse-shohou2";
+import { _reAmount, _reUneven } from "./parse-shohou2";
 
 describe("parse-shohou2", () => {
   it("should parse amount", () => {
@@ -21,7 +21,17 @@ describe("parse-shohou2", () => {
       expect(m[2]).equals("１");
       expect(m[3]).equals("錠");
     }
-  })
+  });
+
+  it("should parse uneven", () => {
+    let re = new RegExp(_reUneven);
+    let m = _reAmount.exec("プレドニン錠５ｍｇ　６錠（３－２－１）");
+    expect(m).not.toBeNull();
+    if( m ){
+
+    }
+    
+  });
 })
 
 

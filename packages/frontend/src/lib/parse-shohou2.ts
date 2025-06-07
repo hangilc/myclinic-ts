@@ -285,9 +285,9 @@ let drugUnitStrings = [
   "Ｃ",
 ];
 
-let reUneven = "([(（]\\s*" + 
-  "[0-9０-９.．]+" + "(?:\\s*[-ー]\\s*" + "[0-9０-９.．]+)+" +
-  "\\s*[)）])?";
+let reUneven = "(?:[(（]\\s*" + 
+  "([0-9０-９.．]+" + "(?:\\s*[-ー]\\s*" + "[0-9０-９.．]+)+" +
+  ")\\s*[)）])?";
 
 let reAmount = new RegExp(
   "([一1１]回)?" +
@@ -297,7 +297,7 @@ let reAmount = new RegExp(
     "$"
 );
 
-export { reAmount as _reAmount };
+export { reAmount as _reAmount, reUneven as _reUneven };
 
 function parseDrugIndex(pos: Pos): Result<void> {
   let rLine = getLine(pos);

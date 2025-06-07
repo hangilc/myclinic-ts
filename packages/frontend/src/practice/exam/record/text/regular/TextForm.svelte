@@ -42,6 +42,7 @@
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
   import type { Patient } from "myclinic-model";
+  import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -683,6 +684,15 @@
     }
   }
 
+  function doOpenKisaiRei() {
+	const d: ShohouExampleDialog = new ShohouExampleDialog({
+	  target: document.body,
+	  props: {
+		destroy: () => d.$destroy(),
+	  }
+	})
+  }
+
   function oldShohouPopup(): [string, () => void][] {
     const menu: [string, () => void][] = [
       ["処方箋印刷", doPrintShohousen],
@@ -696,6 +706,7 @@
       menu.push(["電子予備編集", doEditShohouConv]);
       menu.push(["電子処方に", doTransformToDenshi]);
     }
+	menu.push(["記載例", doOpenKisaiRei])
     return menu;
   }
 
