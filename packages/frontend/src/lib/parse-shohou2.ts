@@ -286,7 +286,7 @@ let drugUnitStrings = [
 ];
 
 let reUneven = "(?:[(（]\\s*" + 
-  "([0-9０-９.．]+" + "(?:\\s*[-ー]\\s*" + "[0-9０-９.．]+)+" +
+  "([0-9０-９.．]+" + "(?:\\s*[-ー－]\\s*" + "[0-9０-９.．]+)+" +
   ")\\s*[)）])?";
 
 let reAmount = new RegExp(
@@ -452,6 +452,9 @@ function parseDrugGroup(pos: Pos): Result<DrugGroup> | undefined {
   }
   pos = rCommands.rest;
   let err = handleGroupCommands(group, rCommands.value);
+  if( err ){
+    throw new Error(err);
+  }
   return { success: true, value: group, rest: pos };
 }
 
