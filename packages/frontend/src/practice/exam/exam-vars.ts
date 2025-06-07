@@ -530,7 +530,11 @@ appEvent.conductShinryouDeleted.subscribe(async conductShinryou => {
     return;
   }
   try {
-    const conduct = await api.getConduct(conductShinryou.conductId);
+    const conduct = await api.findConduct(conductShinryou.conductId);
+    if( conduct == null ){
+      // Conduct was already deleted, which is expected when deleting a conduct
+      return;
+    }
     const visitsValue = get(visits);
     const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
     if (index >= 0) {
@@ -545,9 +549,9 @@ appEvent.conductShinryouDeleted.subscribe(async conductShinryou => {
         }
       }
     }
-  } catch {
-    // conduct may have been deleted
-    console.log("exception in conductShinryouDeleted handler");
+  } catch (error) {
+    // Log the error for debugging purposes
+    console.log("Error in conductShinryouDeleted handler:", error);
   }
 });
 
@@ -575,7 +579,10 @@ appEvent.conductDrugDeleted.subscribe(async conductDrug => {
     return;
   }
   try {
-  const conduct = await api.getConduct(conductDrug.conductId);
+  const conduct = await api.findConduct(conductDrug.conductId);
+  if( conduct == null ){
+    return;
+  }
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
@@ -620,7 +627,10 @@ appEvent.conductKizaiDeleted.subscribe(async conductKizai => {
     return;
   }
   try {
-  const conduct = await api.getConduct(conductKizai.conductId);
+  const conduct = await api.findConduct(conductKizai.conductId);
+  if( conduct == null ){
+    return;
+  }
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {
@@ -681,7 +691,10 @@ appEvent.gazouLabelDeleted.subscribe(async gazouLabel => {
   if (gazouLabel == null) {
     return;
   }
-  const conduct = await api.getConduct(gazouLabel.conductId);
+  const conduct = await api.findConduct(gazouLabel.conductId);
+  if( conduct == null ) {
+    return;
+  }
   const visitsValue = get(visits);
   const index = visitsValue.findIndex(v => v.visitId === conduct.visitId);
   if (index >= 0) {

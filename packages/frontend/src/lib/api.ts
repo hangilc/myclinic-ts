@@ -820,6 +820,14 @@ export default {
     );
   },
 
+  findConduct(conductId: number): Promise<m.Conduct | null> {
+    return get(
+      "find-conduct",
+      { "conduct-id": conductId.toString() },
+      castOption(m.Conduct.cast)
+    );
+  },
+
   deleteConductShinryou(conductShinryouId: number): Promise<boolean> {
     return get(
       "delete-conduct-shinryou",

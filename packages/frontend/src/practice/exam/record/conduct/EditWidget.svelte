@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { ConductEx, VisitEx } from "myclinic-model";
   import Widget from "@/lib/Widget.svelte";
-  import { confirm } from "@/lib/confirm-call"
   import api from "@/lib/api";
   import AddShinryou from "./AddShinryou.svelte"
   import AddDrug from "./AddDrug.svelte"
@@ -24,15 +23,11 @@
     widget.open();
   }
 
-  // function kindRep(kindTag: ConductKindTag): string {
-  //   return ConductKindObject.fromTag(kindTag).rep;
-  // }
-
-  function doDelete(close: () => void): void {
-    confirm("この処置を削除していいですか？", async () => {
+  async function doDelete(close: () => void) {
+    if( confirm("この処置を削除していいですか？")) {
       await api.deleteConductEx(conduct.conductId);
       close();
-    });
+    }
   }
 
   function doAddShinryou(): void {

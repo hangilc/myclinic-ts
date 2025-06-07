@@ -22,7 +22,10 @@
   let mode: "disp" | "edit" = "disp";
   let prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
   let ippanRep = "";
-  let ippanDrugs: { drugName: string, ippanKind: "一般名" | "一般名有り" | "" }[] = [];
+  let ippanDrugs: {
+    drugName: string;
+    ippanKind: "一般名" | "一般名有り" | "";
+  }[] = [];
 
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
@@ -38,54 +41,54 @@
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
-  $: setupIppan(shohou)
+  $: setupIppan(shohou);
 
   function isToday(): boolean {
-	return at === DateWrapper.from(new Date()).asSqlDate();
+    return at === DateWrapper.from(new Date()).asSqlDate();
   }
 
   async function setupIppan(shohou: PrescInfoData) {
-	if( isToday() ){
-	  ippanDrugs = [];
-	  const drugGroups = shohou.RP剤情報グループ;
-	  for( let g of drugGroups ){
-		for(let r of g.薬品情報グループ){
-		  // レセプト電算処理システム用コード
+    if (isToday()) {
+      ippanDrugs = [];
+      const drugGroups = shohou.RP剤情報グループ;
+      for (let g of drugGroups) {
+        for (let r of g.薬品情報グループ) {
+          // レセプト電算処理システム用コード
           // YJコード
           // 一般名コード
-		  const codeKind = r.薬品レコード.薬品コード種別;
-		  const code = r.薬品レコード.薬品コード;
-		  const drugName = r.薬品レコード.薬品名称;
-		  let ippanKind: "一般名" | "一般名有り" | "" = "";
-		  if( codeKind === "一般名コード" ){
-			ippanKind = "一般名";
-		  } else if( codeKind === "レセプト電算処理システム用コード" ){
-			const m = await api.getIyakuhinMaster(parseInt(code), at);
-			const s = ippanmeiStateFromMaster(m);
-			if( s.kind === "has-ippanmei" ){
-			  ippanKind = "一般名有り";
-			} else if( s.kind === "has-no-ippanmei" ){
-			  ippanKind = "";
-			}
-		  }
-		  ippanDrugs.push({ drugName, ippanKind });
-		}
-	  }
-	}
-	let nIppan = 0;
-	let nHasIppan = 0;
-	for(let d of ippanDrugs){
-	  if( d.ippanKind === "一般名有り" ){
-		nHasIppan += 1;
-	  } else if( d.ippanKind === "一般名") {
-		nIppan += 1;
-	  }
-	}
-	if( nIppan >= 2 && nHasIppan === 0 ){
-	  ippanRep = "一般名加算１";
-	} else if( nIppan > 0 ){
-	  ippanRep = "一般名加算２";
-	}
+          const codeKind = r.薬品レコード.薬品コード種別;
+          const code = r.薬品レコード.薬品コード;
+          const drugName = r.薬品レコード.薬品名称;
+          let ippanKind: "一般名" | "一般名有り" | "" = "";
+          if (codeKind === "一般名コード") {
+            ippanKind = "一般名";
+          } else if (codeKind === "レセプト電算処理システム用コード") {
+            const m = await api.getIyakuhinMaster(parseInt(code), at);
+            const s = ippanmeiStateFromMaster(m);
+            if (s.kind === "has-ippanmei") {
+              ippanKind = "一般名有り";
+            } else if (s.kind === "has-no-ippanmei") {
+              ippanKind = "";
+            }
+          }
+          ippanDrugs.push({ drugName, ippanKind });
+        }
+      }
+    }
+    let nIppan = 0;
+    let nHasIppan = 0;
+    for (let d of ippanDrugs) {
+      if (d.ippanKind === "一般名有り") {
+        nHasIppan += 1;
+      } else if (d.ippanKind === "一般名") {
+        nIppan += 1;
+      }
+    }
+    if (nIppan >= 2 && nHasIppan === 0) {
+      ippanRep = "一般名加算１";
+    } else if (nIppan > 0) {
+      ippanRep = "一般名加算２";
+    }
   }
 
   async function doShohouModified(modified: PrescInfoData) {
@@ -119,7 +122,7 @@
     TextMemoWrapper.setTextMemo(text, {
       kind: "shohou",
       shohou,
-      prescriptionId: undefined
+      prescriptionId: undefined,
     });
     await api.updateText(text);
     mode = "disp";
@@ -133,14 +136,18 @@
     <div style="cursor:pointer;" on:click={() => (mode = "edit")}>
       <DenshiShohouDisp {shohou} {prolog} {prescriptionId} />
     </div>
-	<div>{ippanRep}</div>
+    <div>{ippanRep}</div>
   {:else if mode === "edit"}
     {#if prescriptionId}
-      <RegisteredShohouForm {shohou} {prescriptionId} onCancel={() => (mode = "disp")} 
+      <RegisteredShohouForm
+        {shohou}
+        {prescriptionId}
+        onCancel={() => (mode = "disp")}
         textId={text.textId}
-        onUnregistered={doUnregistered} 
-        onDone={() => (mode ="disp")}
-        onCopied={() => (mode = "disp")}/>
+        onUnregistered={doUnregistered}
+        onDone={() => (mode = "disp")}
+        onCopied={() => (mode = "disp")}
+      />
     {:else}
       <div>
         <ShohouTextForm
