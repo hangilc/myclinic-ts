@@ -6,6 +6,7 @@
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
   import ImageView from "./ImageView.svelte";
+  import { onMount } from "svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -21,7 +22,16 @@
   let upright = "7.14 / 10";
   let landscape = "10 / 7.14";
   let aspect = upright;
+  let imgElement: HTMLImageElement;
 
+  function onImgLoad() {
+	const w = imgElement.naturalWidth;
+	const h = imgElement.naturalHeight;
+	console.log("wh", w, h);
+	imgElement.style.width =`${w/2}px`;
+	imgElement.style.height = `${h/2}pxg`;
+  }
+  
   imgSrc.subscribe((src) => {
     if (src == null) {
       return;
@@ -141,10 +151,8 @@
   <div class="content">
     {#if inlineImageSrc}
       <img src={inlineImageSrc}
-		style="transform:rotate({rotate}deg);transform-origin:center;
-		width:{width == undefined ? '' : `${width}%`};
-		height:{height == undefined ? '' : `${height}%`};
-        aspect-ratio:{aspect};"/>
+		style="transform:rotate({rotate}deg);width:auto;height:auto;"
+		bind:this={imgElement} on:load={onImgLoad}/>
     {/if}
   </div>
 </Dialog2>
