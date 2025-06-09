@@ -14,7 +14,9 @@
   let inlineImageSrc: string = "";
   let externalImageSrc: string = "";
   let externals: string[] = ["pdf"];
-  let width = 100;
+  let width: number | undefined = 100;
+  let height: number | undefined = undefined;
+  
   let rotate = 0;
   let upright = "7.14 / 10";
   let landscape = "10 / 7.14";
@@ -59,26 +61,52 @@
   }
 
   function doEnlarge() {
-	width *= 1.25;
+	if( typeof width === "number" ){
+	  	width *= 1.25;
+	} else if( typeof height === "number" ){
+	  height *= 1.25;
+	}
   }
 
   function doShrink() {
-	width /= 1.25;
+	if( typeof width === "number" ){
+	  width /= 1.25;
+	} else if( typeof height === "number" ){
+	  height /= 1.25;
+	}
+  }
+
+  function doRotate(deg: number) {
+	// [width, height] = [height, width];
+	// if( width != undefined ){
+	//   aspect = upright;
+	// } else {
+	//   aspect = landscape;
+	// }
+	rotate = (rotate + deg) % 360;
   }
 
   function doRotateRight() {
-	rotate = (rotate + 90) % 360;
+	doRotate(90);
   }
   
   function doRotateLeft() {
-	rotate = (rotate - 90) % 360;
+	doRotate(-90);
   }
 
   function doUpright() {
+	if( width == undefined ){
+	  width = height;
+	  height = undefined;
+	}
 	aspect = upright;
   }
 
   function doLandscape() {
+	if( height == undefined ){
+	  height = width;
+	  width = undefined;
+	}
 	aspect = landscape;
   }
 </script>
@@ -113,7 +141,10 @@
   <div class="content">
     {#if inlineImageSrc}
       <img src={inlineImageSrc}
-		style="transform:rotate({rotate}deg);width:{width}%;aspect-ratio:{aspect};"/>
+		style="transform:rotate({rotate}deg);transform-origin:center;
+		width:{width == undefined ? '' : `${width}%`};
+		height:{height == undefined ? '' : `${height}%`};
+        aspect-ratio:{aspect};"/>
     {/if}
   </div>
 </Dialog2>
@@ -139,8 +170,7 @@
 	padding: 6px;
   }
 
-  .content img {
-    width: calc(100% - 0px);
-    aspect-ratio: 7.14 / 10;
-  }
 </style>
+
+
+
