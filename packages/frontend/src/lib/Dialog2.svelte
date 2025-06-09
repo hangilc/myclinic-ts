@@ -6,8 +6,6 @@
 
   export let destroy: () => void;
   export let title = "Untitled";
-  export let width: string;
-  export let height: string;
   export let screenOpacity: string = "0.4";
   export let onClose: () => void = () => {};
 
@@ -110,9 +108,7 @@
     <div class="title-text" on:mousedown={handleTitleMouseDown}>{title}</div>
     <div on:click={destroy} class="title-xmark"><XMark /></div>
   </div>
-  <div class="content" style:width={width} style:height={height}>
-    <slot />
-  </div>
+  <slot />
 </div>
 
 <style>
@@ -128,7 +124,7 @@
     padding: 6px;
     display: grid;
     grid-template-columns: 1fr auto;
-	cursor: move;
+    cursor: move;
   }
 
   .title-text {
@@ -138,10 +134,5 @@
   .title-xmark {
     cursor: pointer;
   }
-
-  .content {
-    max-height: calc(100vh - 80px);
-	overflow-y: auto;
-	resize: both;
-  }
 </style>
+
