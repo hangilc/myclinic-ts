@@ -5,8 +5,6 @@
   import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
-  import ImageView from "./ImageView.svelte";
-  import { onMount } from "svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -15,23 +13,29 @@
   let inlineImageSrc: string = "";
   let externalImageSrc: string = "";
   let externals: string[] = ["pdf"];
-  let width: number | undefined = 100;
-  let height: number | undefined = undefined;
-  
+
+  let scale = 1;
   let rotate = 0;
-  let upright = "7.14 / 10";
-  let landscape = "10 / 7.14";
-  let aspect = upright;
+  let contentElement: HTMLDivElement;
   let imgElement: HTMLImageElement;
+  let naturalWidth: number;
+  let naturalHeight: number;
 
   function onImgLoad() {
-	const w = imgElement.naturalWidth;
-	const h = imgElement.naturalHeight;
-	console.log("wh", w, h);
-	imgElement.style.width =`${w/2}px`;
-	imgElement.style.height = `${h/2}pxg`;
+    naturalWidth = imgElement.naturalWidth;
+    naturalHeight = imgElement.naturalHeight;
+    let cw = contentElement.clientWidth;
+    scale = cw / naturalWidth;
+	updateImage();
   }
-  
+
+  function updateImage() {
+    if (imgElement && naturalWidth && naturalHeight) {
+      imgElement.width = naturalWidth * scale;
+      imgElement.height = naturalHeight * scale;
+    }
+  }
+
   imgSrc.subscribe((src) => {
     if (src == null) {
       return;
@@ -71,53 +75,21 @@
   }
 
   function doEnlarge() {
-	if( typeof width === "number" ){
-	  	width *= 1.25;
-	} else if( typeof height === "number" ){
-	  height *= 1.25;
-	}
+	scale *= 1.25;
+	updateImage();
   }
 
   function doShrink() {
-	if( typeof width === "number" ){
-	  width /= 1.25;
-	} else if( typeof height === "number" ){
-	  height /= 1.25;
-	}
-  }
-
-  function doRotate(deg: number) {
-	// [width, height] = [height, width];
-	// if( width != undefined ){
-	//   aspect = upright;
-	// } else {
-	//   aspect = landscape;
-	// }
-	rotate = (rotate + deg) % 360;
+	scale /= 1.25;
+	updateImage();
   }
 
   function doRotateRight() {
-	doRotate(90);
+	rotate = (rotate + 90) % 360;
   }
-  
+
   function doRotateLeft() {
-	doRotate(-90);
-  }
-
-  function doUpright() {
-	if( width == undefined ){
-	  width = height;
-	  height = undefined;
-	}
-	aspect = upright;
-  }
-
-  function doLandscape() {
-	if( height == undefined ){
-	  height = width;
-	  width = undefined;
-	}
-	aspect = landscape;
+	rotate = (rotate - 90) % 360;
   }
 </script>
 
@@ -130,14 +102,12 @@
     {/each}
   </div>
   <div class="commands">
-	{#if inlineImageSrc}
-	  <a href="javascript:void(0)" on:click={doEnlarge}>拡大</a>
-	  <a href="javascript:void(0)" on:click={doShrink}>縮小</a>
-	  <a href="javascript:void(0)" on:click={doRotateRight}>右回転</a>
-	  <a href="javascript:void(0)" on:click={doRotateLeft}>左回転</a>
-	  <a href="javascript:void(0)" on:click={doUpright}>縦</a>
-	  <a href="javascript:void(0)" on:click={doLandscape}>横</a>
-	  {/if}
+    {#if inlineImageSrc}
+      <a href="javascript:void(0)" on:click={doEnlarge}>拡大</a>
+      <a href="javascript:void(0)" on:click={doShrink}>縮小</a>
+      <a href="javascript:void(0)" on:click={doRotateRight}>右回転</a>
+      <a href="javascript:void(0)" on:click={doRotateLeft}>左回転</a>
+    {/if}
     {#if externalImageSrc !== ""}
       <a href={externalImageSrc} target="_blank" rel="noreferrer"
         >別のタブで開く</a
@@ -148,11 +118,9 @@
     {/if}
     <button on:click={doClose}>閉じる</button>
   </div>
-  <div class="content">
+  <div class="content" bind:this={contentElement}>
     {#if inlineImageSrc}
-      <img src={inlineImageSrc}
-		style="transform:rotate({rotate}deg);width:auto;height:auto;"
-		bind:this={imgElement} on:load={onImgLoad}/>
+      <img src={inlineImageSrc} bind:this={imgElement} on:load={onImgLoad} />
     {/if}
   </div>
 </Dialog2>
@@ -168,17 +136,18 @@
     margin: 10px;
     text-align: right;
   }
-  
+
   .content {
-    padding: 10px;
     width: 600px;
     height: 500px;
     overflow: auto;
     resize: both;
-	padding: 6px;
+    margin: 6px;
   }
 
+  .content img {
+    transform-origin: 0 0;
+    object-position: left top;
+    object-fit: contain;
+  }
 </style>
-
-
-
