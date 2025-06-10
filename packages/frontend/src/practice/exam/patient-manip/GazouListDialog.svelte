@@ -26,21 +26,23 @@
     naturalHeight = imgElement.naturalHeight;
     let cw = contentElement.clientWidth;
     scale = cw / naturalWidth;
+    imgElement.width = naturalWidth * scale;
     updateImage();
   }
 
   function updateImage() {
     if (imgElement && naturalWidth && naturalHeight) {
       if (rotate === 90) {
-		imgElement.style.objectFit = "none";
-        imgElement.style.transform = `rotate(90deg) translateY(-${naturalHeight}px)`;
-        imgElement.width = naturalHeight * scale;
-        imgElement.height = naturalWidth * scale;
-		//imgElement.style.objectFit = "contain";
+		console.log("rotate-90");
+        imgElement.className = "rotate-90";
+      } else if (rotate === 180) {
+        imgElement.className = "rotate-180";
+      } else if (rotate === 270) {
+        imgElement.className = "rotate-270";
       } else {
-        imgElement.width = naturalWidth * scale;
-        imgElement.height = naturalHeight * scale;
+        imgElement.className = "";
       }
+      //imgElement.width = naturalWidth * scale;
     }
   }
 
@@ -94,12 +96,12 @@
 
   function doRotateRight() {
     rotate = (rotate + 90) % 360;
-	updateImage();
+    updateImage();
   }
 
   function doRotateLeft() {
     rotate = (rotate - 90) % 360;
-	updateImage();
+    updateImage();
   }
 </script>
 
@@ -153,10 +155,26 @@
     overflow: auto;
     resize: both;
     margin: 6px;
+    position: relative;
   }
 
-  .content img {
+  .content :global(img) {
     transform-origin: 0 0;
-    object-position: left top;
+    height: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .content :global(img.rotate-90) {
+    transform: rotate(90deg) translate(0, -100%);
+  }
+
+  .content :global(img.rotate-180) {
+    transform: rotate(180deg) translate(-100%, -100%);
+  }
+
+  .content :global(img.rotate-270) {
+    transform: rotate(270deg) translate(-100%, 0);
   }
 </style>
