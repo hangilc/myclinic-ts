@@ -160,7 +160,6 @@
 
   .content :global(img) {
     transform-origin: 0 0;
-    height: auto;
     position: absolute;
     top: 0;
     left: 0;
