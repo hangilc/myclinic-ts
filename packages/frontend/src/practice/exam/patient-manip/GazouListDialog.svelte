@@ -26,13 +26,21 @@
     naturalHeight = imgElement.naturalHeight;
     let cw = contentElement.clientWidth;
     scale = cw / naturalWidth;
-	updateImage();
+    updateImage();
   }
 
   function updateImage() {
     if (imgElement && naturalWidth && naturalHeight) {
-      imgElement.width = naturalWidth * scale;
-      imgElement.height = naturalHeight * scale;
+      if (rotate === 90) {
+		imgElement.style.objectFit = "none";
+        imgElement.style.transform = `rotate(90deg) translateY(-${naturalHeight}px)`;
+        imgElement.width = naturalHeight * scale;
+        imgElement.height = naturalWidth * scale;
+		//imgElement.style.objectFit = "contain";
+      } else {
+        imgElement.width = naturalWidth * scale;
+        imgElement.height = naturalHeight * scale;
+      }
     }
   }
 
@@ -75,21 +83,23 @@
   }
 
   function doEnlarge() {
-	scale *= 1.25;
-	updateImage();
+    scale *= 1.25;
+    updateImage();
   }
 
   function doShrink() {
-	scale /= 1.25;
-	updateImage();
+    scale /= 1.25;
+    updateImage();
   }
 
   function doRotateRight() {
-	rotate = (rotate + 90) % 360;
+    rotate = (rotate + 90) % 360;
+	updateImage();
   }
 
   function doRotateLeft() {
-	rotate = (rotate - 90) % 360;
+    rotate = (rotate - 90) % 360;
+	updateImage();
   }
 </script>
 
@@ -148,6 +158,5 @@
   .content img {
     transform-origin: 0 0;
     object-position: left top;
-    object-fit: contain;
   }
 </style>
