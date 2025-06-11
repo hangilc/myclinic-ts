@@ -1,9 +1,6 @@
 <script lang="ts">
   import type {
-    剤形区分,
-    情報区分,
     薬品コード種別,
-    力価フラグ,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
   import type { IyakuhinMaster } from "myclinic-model";
@@ -27,6 +24,7 @@
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
   let ippanmei = "";
+  let ippanmeicode = "";
 
   if (薬品コード === "") {
     isEditing = true;
@@ -66,14 +64,18 @@
   }
 
   function doCancel() {
+	isEditing = false;
     searchText = "";
     searchResult = [];
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
+	薬品コード種別 = "レセプト電算処理システム用コード";
     薬品コード = m.iyakuhincode.toString();
     薬品名称 = m.name;
     単位名 = m.unit;
+	ippanmei = m.ippanmei ?? "";
+	ippanmeicode = m.ippanmeicode?.toString() ?? "";
     isEditing = false;
     searchText = "";
     searchResult = [];
@@ -83,6 +85,14 @@
       薬品名称,
       単位名,
     });
+  }
+
+  function doIppanmei() {
+	if( ippanmei && ippanmeicode ){
+	  薬品コード種別 = "一般名コード";
+	  薬品コード = ippanmeicode;
+	  薬品名称 = ippanmei;
+	}
   }
 
   function doEdit() {
@@ -125,6 +135,10 @@
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="rep" on:click={doEdit}>{薬品名称}</div>
+  {#if 薬品コード種別 !== "一般名コード" && ippanmei}
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <a href="javascript:void(0)" class="ippan-link" on:click={doIppanmei}>一般名有</a>
+  {/if}
 {/if}
 
 <style>
@@ -142,5 +156,14 @@
 
   .rep {
     cursor: pointer;
+  }
+
+  .ippan-link {
+    white-space: nowrap;
+    font-size: 0.8em;
+    border: 1px solid blue;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: rgba(0, 0, 255, 0.05);
   }
 </style>

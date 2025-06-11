@@ -567,7 +567,7 @@ export type 力価フラグ = keyof typeof 力価フラグMap;
 const 薬品コード種別Map = {
   レセプト電算処理システム用コード: "2",
   YJコード: "4",
-  "一般名コード: "7",
+  "一般名コード": "7",
 } as const;
 
 export type 薬品コード種別 = keyof typeof 薬品コード種別Map;

@@ -8,6 +8,8 @@
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
   import DrugKind from "./DrugKind.svelte";
   import KizaiKind from "./KizaiKind.svelte";
+  import DrugAmount from "./DrugAmount.svelte";
+  import type { 薬品レコード } from "../denshi-shohou/presc-info";
 
   export let onDone: () => void;
   export let at: string;
@@ -41,6 +43,23 @@
     薬品名称 = arg.薬品名称;
     単位名 = arg.単位名;
   }
+
+  function doEnter() {
+    let data: 薬品レコード = {
+      情報区分,
+      薬品コード種別,
+      薬品コード,
+      薬品名称,
+      分量,
+      力価フラグ,
+      単位名,
+    };
+    alert(JSON.stringify(data, undefined, 2));
+  }
+
+  function doCancel() {
+    onDone();
+  }
 </script>
 
 <div>新規薬剤</div>
@@ -57,3 +76,20 @@
 {:else}
   <KizaiKind />
 {/if}
+<div class="form-part">
+  <DrugAmount bind:分量 {単位名} />
+</div>
+<div class="commands">
+  <button on:click={doEnter}>入力</button>
+  <button on:click={doCancel}>キャンセル</button>
+</div>
+
+<style>
+  .form-part {
+    margin: 10px 0;
+  }
+
+  .commands {
+    text-align: right;
+  }
+</style>

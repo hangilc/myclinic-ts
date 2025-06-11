@@ -24,11 +24,11 @@
 	  props: {
 		at,
 		onDone: () => {
-		  clearForm = () => {};
-		  e.$destroy();
+		  clearForm();
 		}
 	  }
-	})
+	});
+	clearForm = () => e.$destroy();
   }
 </script>
 
