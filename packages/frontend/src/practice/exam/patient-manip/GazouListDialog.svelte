@@ -5,6 +5,7 @@
   import { getFileExtension } from "@/lib/file-ext";
   import SelectItem from "@/lib/SelectItem.svelte";
   import { writable, type Writable } from "svelte/store";
+  import ImageView from "./ImageView.svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -21,6 +22,17 @@
   let naturalWidth: number;
   let naturalHeight: number;
 
+  let setImageWidth: (width: number) => void;
+  let enlarge: (scale: number) => void;
+  let rotateRight: () => void;
+  let rotateLeft: () => void;
+
+  function onImageLoaded() {
+    if (contentElement) {
+      setImageWidth(contentElement.clientWidth);
+    }
+  }
+
   function onImgLoad() {
     naturalWidth = imgElement.naturalWidth;
     naturalHeight = imgElement.naturalHeight;
@@ -33,7 +45,7 @@
   function updateImage() {
     if (imgElement && naturalWidth && naturalHeight) {
       if (rotate === 90) {
-		console.log("rotate-90");
+        console.log("rotate-90");
         imgElement.className = "rotate-90";
       } else if (rotate === 180) {
         imgElement.className = "rotate-180";
@@ -85,23 +97,24 @@
   }
 
   function doEnlarge() {
-    scale *= 1.25;
-    updateImage();
+    enlarge(1.25);
   }
 
   function doShrink() {
-    scale /= 1.25;
-    updateImage();
+    enlarge(1 / 1.25);
   }
 
   function doRotateRight() {
-    rotate = (rotate + 90) % 360;
-    updateImage();
+    if (rotateRight) {
+      rotateRight();
+	  
+    }
   }
 
   function doRotateLeft() {
-    rotate = (rotate - 90) % 360;
-    updateImage();
+	if( rotateLeft) {
+	  rotateLeft();
+	}
   }
 </script>
 
@@ -132,7 +145,15 @@
   </div>
   <div class="content" bind:this={contentElement}>
     {#if inlineImageSrc}
-      <img src={inlineImageSrc} bind:this={imgElement} on:load={onImgLoad} />
+      <ImageView
+        src={inlineImageSrc}
+        {onImageLoaded}
+        bind:setWidth={setImageWidth}
+        bind:enlarge
+		bind:rotateRight
+		bind:rotateLeft
+      />
+      <!-- <img src={inlineImageSrc} bind:this={imgElement} on:load={onImgLoad} /> -->
     {/if}
   </div>
 </Dialog2>
