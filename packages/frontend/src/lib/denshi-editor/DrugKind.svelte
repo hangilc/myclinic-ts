@@ -8,6 +8,7 @@
   import api from "@/lib/api";
   import type { IyakuhinMaster } from "myclinic-model";
   import XCircle from "@/icons/XCircle.svelte";
+  import { onMount } from "svelte";
 
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
@@ -15,16 +16,45 @@
   export let 単位名: string;
   export let at: string;
   export let onChange: (data: {
-	
+    薬品コード種別: 薬品コード種別;
+    薬品コード: string;
+    薬品名称: string;
+    単位名: string;
   }) => void;
 
   let isEditing = false;
   let searchText = "";
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
+  let ippanmei = "";
 
   if (薬品コード === "") {
     isEditing = true;
+  }
+
+  initIppanmei();
+
+  onMount(() => {
+    if (isEditing && inputElement) {
+      inputElement.focus();
+    }
+  });
+
+  async function initIppanmei() {
+    if (薬品コード) {
+      if (薬品コード種別 === "一般名コード") {
+        ippanmei = 薬品名称;
+      } else if (薬品コード種別 === "レセプト電算処理システム用コード") {
+        const iyakuhincode = parseInt(薬品コード);
+        let m = await api.getIyakuhinMaster(iyakuhincode, at);
+        if (
+          薬品コード種別 === "レセプト電算処理システム用コード" &&
+          m.iyakuhincode.toString() === 薬品コード
+        ) {
+          ippanmei = m.ippanmei ?? "";
+        }
+      }
+    }
   }
 
   async function doSearch() {
@@ -47,11 +77,17 @@
     isEditing = false;
     searchText = "";
     searchResult = [];
+    onChange({
+      薬品コード種別,
+      薬品コード,
+      薬品名称,
+      単位名,
+    });
   }
 
   function doEdit() {
-	searchText = 薬品名称;
-	isEditing = true;
+    searchText = 薬品名称;
+    isEditing = true;
   }
 </script>
 
