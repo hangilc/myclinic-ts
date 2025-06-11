@@ -14,6 +14,9 @@
   export let 薬品名称: string;
   export let 単位名: string;
   export let at: string;
+  export let onChange: (data: {
+	
+  }) => void;
 
   let isEditing = false;
   let searchText = "";
