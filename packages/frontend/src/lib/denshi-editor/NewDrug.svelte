@@ -10,6 +10,7 @@
   import KizaiKind from "./KizaiKind.svelte";
   import DrugAmount from "./DrugAmount.svelte";
   import type { 薬品レコード } from "../denshi-shohou/presc-info";
+  import DrugUsage from "./DrugUsage.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -22,6 +23,8 @@
   let 分量: string = "";
   let 力価フラグ: 力価フラグ = "薬価単位";
   let 単位名: string = "";
+  let 用法コード: string = "";
+  let 用法名称: string = "";
 
   function doZaikeiKubunChange(value: 剤形区分) {
     剤形区分 = value;
@@ -78,6 +81,9 @@
 {/if}
 <div class="form-part">
   <DrugAmount bind:分量 {単位名} />
+</div>
+<div class="form-part">
+  <DrugUsage bind:用法コード={用法コード} bind:用法名称={用法名称} />
 </div>
 <div class="commands">
   <button on:click={doEnter}>入力</button>
