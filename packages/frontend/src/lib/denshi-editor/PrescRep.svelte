@@ -1,20 +1,20 @@
 <script lang="ts">
-  import { writable, type Writable } from "svelte/store";
-  import type { PrescInfoData } from "../denshi-shohou/presc-info";
+  import type { PrescInfoData, RP剤情報 } from "../denshi-shohou/presc-info";
   import { toZenkaku } from "@/lib/zenkaku";
   import { daysTimesDisp } from "../denshi-shohou/disp/disp-util";
   import Plus from "@/icons/Plus.svelte";
 
-  export let data: Writable<PrescInfoData>;
+  export let data: PrescInfoData;
+  export let onAddDrug: (greoup: RP剤情報) => void;
 
   let zspc = "　";
-  console.log("data", $data);
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <div class="groups">
-    {#each $data.RP剤情報グループ as group, index}
+    {#each data.RP剤情報グループ as group, index}
       <div>{toZenkaku((index + 1).toString())}）</div>
       <div>
         <div>
@@ -27,7 +27,7 @@
           {/each}
         </div>
         <div>
-          <a href="javascript:void(0)" class="plus">
+          <a href="javascript:void(0)" class="plus" on:click={() => onAddDrug(group)}>
             <span><Plus color="green"/></span>
           </a>
         </div>

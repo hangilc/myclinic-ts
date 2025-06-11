@@ -53,7 +53,7 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-		src: shohou,
+		data: shohou,
       },
     });
   }
