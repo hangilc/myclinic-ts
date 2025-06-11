@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog2 from "@/lib/Dialog2.svelte";
-  import type { PrescInfoData, RP剤情報 } from "../denshi-shohou/presc-info";
+  import type { PrescInfoData, RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
 
@@ -16,7 +16,7 @@
 	let d = shohouDate.substring(6,8);
 	return `${y}-${m}-${d}`;
   }
-  
+
   function doAddDrug(group: RP剤情報) {
 	clearForm();
 	const e: NewDrug = new NewDrug({
@@ -25,6 +25,13 @@
 		at,
 		onDone: () => {
 		  clearForm();
+		},
+		onEnter: drug => {
+		  const drugInfo: 薬品情報 = {
+			薬品レコード: drug
+		  }
+		  group.薬品情報グループ.push(drugInfo);
+		  data = data;
 		}
 	  }
 	});

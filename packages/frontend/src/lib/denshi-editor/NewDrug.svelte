@@ -10,8 +10,10 @@
   import KizaiKind from "./KizaiKind.svelte";
   import DrugAmount from "./DrugAmount.svelte";
   import type { 薬品レコード } from "../denshi-shohou/presc-info";
-  import DrugUsage from "./DrugUsage.svelte";
+  import { validateDrug } from "./helper";
+  import { toHankaku } from "@/lib/zenkaku";
 
+  export let onEnter: (created: 薬品レコード) => void;
   export let onDone: () => void;
   export let at: string;
 
@@ -23,8 +25,6 @@
   let 分量: string = "";
   let 力価フラグ: 力価フラグ = "薬価単位";
   let 単位名: string = "";
-  let 用法コード: string = "";
-  let 用法名称: string = "";
 
   function doZaikeiKubunChange(value: 剤形区分) {
     剤形区分 = value;
@@ -53,11 +53,17 @@
       薬品コード種別,
       薬品コード,
       薬品名称,
-      分量,
+      分量: toHankaku(分量),
       力価フラグ,
       単位名,
     };
-    alert(JSON.stringify(data, undefined, 2));
+	let err = validateDrug(data);
+	if( typeof err === "string" ){
+	  alert(err);
+	} else {
+	  onEnter(data);
+	  onDone();
+	}
   }
 
   function doCancel() {
@@ -81,9 +87,6 @@
 {/if}
 <div class="form-part">
   <DrugAmount bind:分量 {単位名} />
-</div>
-<div class="form-part">
-  <DrugUsage bind:用法コード={用法コード} bind:用法名称={用法名称} />
 </div>
 <div class="commands">
   <button on:click={doEnter}>入力</button>

@@ -3,12 +3,12 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { daysTimesDisp } from "../denshi-shohou/disp/disp-util";
   import Plus from "@/icons/Plus.svelte";
+  import PlusCircle from "@/icons/PlusCircle.svelte";
 
   export let data: PrescInfoData;
   export let onAddDrug: (greoup: RP剤情報) => void;
 
   let zspc = "　";
-
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -27,8 +27,12 @@
           {/each}
         </div>
         <div>
-          <a href="javascript:void(0)" class="plus" on:click={() => onAddDrug(group)}>
-            <span><Plus color="green"/></span>
+          <a
+            href="javascript:void(0)"
+            class="plus"
+            on:click={() => onAddDrug(group)}
+          >
+            <PlusCircle color="green" />
           </a>
         </div>
         <div>
@@ -45,17 +49,4 @@
     grid-template-columns: auto 1fr;
   }
 
-  .plus {
-	width: 16px;
-	height: 16px;
-	border: 1px solid green;
-	border-radius: 50%;
-	position: relative;
-	top: -2px;
-  }
-
-  .plus span {
-	position:relative;
-	top: 3px;
-  }
 </style>
