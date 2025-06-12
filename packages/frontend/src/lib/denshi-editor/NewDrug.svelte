@@ -5,10 +5,6 @@
     薬品コード種別,
     力価フラグ,
   } from "@/lib/denshi-shohou/denshi-shohou";
-  import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
-  import DrugKind from "./DrugKind.svelte";
-  import KizaiKind from "./KizaiKind.svelte";
-  import DrugAmount from "./DrugAmount.svelte";
   import type { 薬品レコード } from "../denshi-shohou/presc-info";
   import { validateDrug } from "./helper";
   import { toHankaku } from "@/lib/zenkaku";

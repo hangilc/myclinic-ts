@@ -1,6 +1,6 @@
 <script lang="ts">
   import Dialog2 from "@/lib/Dialog2.svelte";
-  import type { PrescInfoData, RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { PrescInfoData, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
   import { indexRP剤情報, index薬品情報, type RP剤情報Indexed } from "./denshi-editor-types";
@@ -35,6 +35,7 @@
 		  }
 		  group.薬品情報グループ.push(index薬品情報(drugInfo));
 		  data = data;
+		  groups = groups;
 		}
 	  }
 	});
