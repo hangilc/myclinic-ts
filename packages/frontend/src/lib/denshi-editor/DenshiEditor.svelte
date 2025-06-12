@@ -3,6 +3,7 @@
   import type { PrescInfoData, RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
+  import { indexRP剤情報, index薬品情報, type RP剤情報Indexed } from "./denshi-editor-types";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -10,6 +11,8 @@
   let clearForm: () => void = () => {};
   let at = shohouDateToSqlDate(data.処方箋交付年月日);
 
+  let groups: RP剤情報Indexed[] = data.RP剤情報グループ.map(g => indexRP剤情報(g));
+  
   function shohouDateToSqlDate(shohouDate: string): string {
 	let y = shohouDate.substring(0, 4);
 	let m = shohouDate.substring(4, 6);
@@ -17,7 +20,7 @@
 	return `${y}-${m}-${d}`;
   }
 
-  function doAddDrug(group: RP剤情報) {
+  function doAddDrug(group: RP剤情報Indexed) {
 	clearForm();
 	const e: NewDrug = new NewDrug({
 	  target: formElement,
@@ -30,7 +33,7 @@
 		  const drugInfo: 薬品情報 = {
 			薬品レコード: drug
 		  }
-		  group.薬品情報グループ.push(drugInfo);
+		  group.薬品情報グループ.push(index薬品情報(drugInfo));
 		  data = data;
 		}
 	  }
@@ -41,7 +44,7 @@
 
 <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="top">
-    <div class="rep"><PrescRep {data} onAddDrug={doAddDrug} /></div>
+    <div class="rep"><PrescRep {groups} onAddDrug={doAddDrug} /></div>
     <div class="form" bind:this={formElement}></div>
   </div>
 </Dialog2>

@@ -28,7 +28,7 @@ describe("parse-shohou2", () => {
     let m = _reAmount.exec("プレドニン錠５ｍｇ　６錠（３－２－１）");
     expect(m).not.toBeNull();
     if( m ){
-      expect(m[4]).toBe("３－２－１");
+      expect(m[4]).toBe("（３－２－１）");
     }
     
   });
