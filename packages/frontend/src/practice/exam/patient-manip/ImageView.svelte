@@ -31,7 +31,7 @@
 
   function update() {
     if (imgElement && wrapperElement) {
-      imgElement.style = imgStyle();
+      imgElement.setAttribute("style", imgStyle());
       if (rotate % 180 === 0) {
         wrapperElement.style.width = `${naturalWidth * scale}px`;
         wrapperElement.style.height = `${naturalHeight * scale}px`;
