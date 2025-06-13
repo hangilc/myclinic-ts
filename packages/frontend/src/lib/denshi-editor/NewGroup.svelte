@@ -32,7 +32,8 @@
   let 単位名: string = "";
   let 用法コード: string = "";
   let 用法名称: string = "";
-  let 調剤数量: number = 1;
+  let 調剤数量: number = 7;
+  let timesText: string = 調剤数量.toString();
 
   function doCancel() {
     onDone();
@@ -69,6 +70,16 @@
       用法名称,
     };
     if (剤形区分 === "内服" || 剤形区分 === "頓服") {
+	  let input = toHankaku(timesText.trim());
+	  if( input === "" ){
+		alert("日数・回数が設定されていません。");
+		return;
+	  }
+	  調剤数量 = parseInt(input);
+	  if( isNaN(調剤数量) ){
+		alert("日数・回数が整数でありません。");
+		return;
+	  }
       if (調剤数量 <= 0) {
         alert("日数・回数が正の数値でありません。");
         return;
@@ -101,7 +112,9 @@
   bind:単位名
 />
 <DrugUsage bind:用法コード bind:用法名称 />
-<DrugDays />
+{#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
+  <DrugDays bind:剤形区分 bind:timesText />
+{/if}
 
 <div class="commands">
   <button on:click={doEnter}>入力</button>
