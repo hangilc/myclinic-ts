@@ -47,15 +47,6 @@
     clearForm = () => e.$destroy();
   }
 
-  function findGroup(id: number): RP剤情報Indexed | undefined {
-    for (let g of groups) {
-      if (g.id === id) {
-        return g;
-      }
-    }
-    return undefined;
-  }
-
   function doDrugSelect(group: RP剤情報Indexed, drug: 薬品情報Indexed) {
     clearForm();
     const e: EditDrug = new EditDrug({
@@ -68,14 +59,10 @@
           clearForm();
         },
         onEnter: (updated: 薬品情報) => {
-          console.log("onEnter", updated);
-          let g = findGroup(group.id);
-          if (g) {
-            g.薬品情報グループ = g.薬品情報グループ.map((d) =>
-              d.id === drug.id ? index薬品情報(updated) : d,
-            );
-            groups = groups;
-          }
+          group.薬品情報グループ = group.薬品情報グループ.map((d) =>
+            d.id === drug.id ? index薬品情報(updated) : d,
+          );
+          groups = groups;
         },
         onDelete: () => {
           group.薬品情報グループ = group.薬品情報グループ.filter(
