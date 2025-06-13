@@ -68,17 +68,30 @@
           group.薬品情報グループ = group.薬品情報グループ.filter(
             (d) => d.id !== drug.id,
           );
-          groups = groups;
+          if (group.薬品情報グループ.length === 0) {
+            groups = groups.filter((g) => g.id !== group.id);
+          } else {
+            groups = groups;
+          }
         },
       },
     });
     clearForm = () => e.$destroy();
   }
+
+  function doAddGroup() {
+	clearForm();
+	
+  }
+  
 </script>
 
 <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="top">
-    <div class="rep">
+    <div class="left">
+      <div>
+        <button on:click={doAddGroup}>追加</button>
+      </div>
       <PrescRep {groups} onAddDrug={doAddDrug} onDrugSelect={doDrugSelect} />
     </div>
     <div class="form" bind:this={formElement}></div>
