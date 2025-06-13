@@ -16,6 +16,7 @@
   import DrugUsage from "./DrugUsage.svelte";
   import { toHankaku } from "@/lib/zenkaku";
   import { validateDrug } from "./helper";
+  import DrugDays from "./DrugDays.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -100,6 +101,7 @@
   bind:単位名
 />
 <DrugUsage bind:用法コード bind:用法名称 />
+<DrugDays />
 
 <div class="commands">
   <button on:click={doEnter}>入力</button>
