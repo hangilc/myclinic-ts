@@ -7,7 +7,6 @@
     剤形区分,
     情報区分,
     薬品コード種別,
-    力価フラグ,
   } from "@/lib/denshi-shohou/denshi-shohou";
 
   export let at: string;
@@ -16,7 +15,7 @@
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
   export let 薬品名称: string;
-  export let 分量: string = "";
+  export let 分量: string;
   export let 単位名: string;
 
   function doZaikeiKubunChange(value: 剤形区分) {

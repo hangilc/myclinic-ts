@@ -2,15 +2,9 @@
   export let 分量: string;
   export let 単位名: string;
 
-  let isEditing = false;
-  if( !分量 ){
-	isEditing = true;
-  }
-</script>
+ </script>
 
-{#if isEditing}
-  分量：<input type="text" bind:value={分量}/> {単位名}
-{/if}
+分量：<input type="text" bind:value={分量}/> {単位名}
 
 <style>
   input {

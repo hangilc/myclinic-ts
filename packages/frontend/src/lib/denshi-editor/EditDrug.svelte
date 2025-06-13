@@ -10,18 +10,20 @@
   import { toHankaku } from "@/lib/zenkaku";
   import DrugForm from "./DrugForm.svelte";
 
+  export let drug: 薬品情報;
+  export let 剤形区分: 剤形区分;
   export let onEnter: (created: 薬品情報) => void;
+  export let onDelete: () => void;
   export let onDone: () => void;
   export let at: string;
 
-  let 剤形区分: 剤形区分 = "内服";
-  let 情報区分: 情報区分 = "医薬品";
-  let 薬品コード種別: 薬品コード種別 = "レセプト電算処理システム用コード";
-  let 薬品コード: string = "";
-  let 薬品名称: string = "";
-  let 分量: string = "";
-  let 力価フラグ: 力価フラグ = "薬価単位";
-  let 単位名: string = "";
+  let 情報区分: 情報区分 = drug.薬品レコード.情報区分;
+  let 薬品コード種別: 薬品コード種別 = drug.薬品レコード.薬品コード種別;
+  let 薬品コード: string = drug.薬品レコード.薬品コード;
+  let 薬品名称: string = drug.薬品レコード.薬品名称;
+  let 分量: string = drug.薬品レコード.分量;
+  let 力価フラグ: 力価フラグ = drug.薬品レコード.力価フラグ;
+  let 単位名: string = drug.薬品レコード.単位名;
 
   function doEnter() {
     let record: 薬品レコード = {
@@ -48,9 +50,16 @@
   function doCancel() {
     onDone();
   }
+
+  function doDelete() {
+    if (confirm("この薬剤を削除していいですか？")) {
+      onDelete();
+      onDone();
+    }
+  }
 </script>
 
-<div>新規薬剤</div>
+<div>薬剤編集</div>
 <DrugForm
   {at}
   bind:剤形区分
@@ -62,6 +71,8 @@
   bind:単位名
 />
 <div class="commands">
+  <!-- svelte-ignore a11y-invalid-attribute -->
+  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <button on:click={doEnter}>入力</button>
   <button on:click={doCancel}>キャンセル</button>
 </div>
