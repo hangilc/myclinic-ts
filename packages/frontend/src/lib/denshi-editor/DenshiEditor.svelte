@@ -6,6 +6,7 @@
   import {
     indexRP剤情報,
     index薬品情報,
+    unindexRP剤情報,
     unindex薬品情報,
     type RP剤情報Indexed,
     type 薬品情報Indexed,
@@ -15,6 +16,7 @@
 
   export let destroy: () => void;
   export let data: PrescInfoData;
+  export let onEnter: (shohou: PrescInfoData) => void;
   let formElement: HTMLElement;
   let clearForm: () => void = () => {};
   let at = shohouDateToSqlDate(data.処方箋交付年月日);
@@ -22,6 +24,14 @@
   let groups: RP剤情報Indexed[] = data.RP剤情報グループ.map((g) =>
     indexRP剤情報(g),
   );
+
+  function doEnter() {
+    let shohou: PrescInfoData = Object.assign({}, data, {
+      RP剤情報グループ: groups.map(unindexRP剤情報),
+    });
+    onEnter(shohou);
+    destroy();
+  }
 
   function shohouDateToSqlDate(shohouDate: string): string {
     let y = shohouDate.substring(0, 4);
@@ -87,14 +97,22 @@
       props: {
         onDone: () => clearForm(),
         at,
+        onEnter: (group) => {
+          groups.push(indexRP剤情報(group));
+          groups = groups;
+        },
       },
     });
     clearForm = () => e.$destroy();
   }
+
+  function doCancel() {
+    destroy();
+  }
 </script>
 
 <Dialog2 title="電子処方箋編集" {destroy}>
-  <div class="top">
+  <div class="upper">
     <div class="left">
       <div>
         <button on:click={doAddGroup}>追加</button>
@@ -103,10 +121,14 @@
     </div>
     <div class="form" bind:this={formElement}></div>
   </div>
+  <div class="commands">
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doCancel}>キャンセル</button>
+  </div>
 </Dialog2>
 
 <style>
-  .top {
+  .upper {
     width: 500px;
     height: 600px;
     display: grid;
@@ -114,5 +136,9 @@
     gap: 10px;
     padding: 10px;
     overflow-y: auto;
+  }
+
+  .commands {
+    text-align: right;
   }
 </style>

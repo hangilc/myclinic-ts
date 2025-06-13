@@ -54,6 +54,9 @@
       props: {
         destroy: () => d.$destroy(),
 		data: shohou,
+		onEnter: (updated: PrescInfoData) => {
+		  onModified(updated);
+		}
       },
     });
   }

@@ -14,17 +14,17 @@
   let freeStyleInputElement: HTMLInputElement;
   let searchResult: UsageMaster[] = [];
 
-  if (!用法コード) {
-    isEditing = true;
-  }
-
-  onMount(() => {
+  export const focus: () => void = () => {
     if (mode === "master") {
       masterInputElement.focus();
     } else if (mode === "free-style") {
       freeStyleInputElement.focus();
     }
-  });
+  }
+  
+  if (!用法コード) {
+    isEditing = true;
+  }
 
   function onCancel() {
     isEditing = false;
@@ -37,11 +37,30 @@
     }
   }
 
-  function doUsageMasterSelect(value: UsageMaster) {}
+  function doUsageMasterSelect(value: UsageMaster) {
+	用法コード = value.usage_code;
+	用法名称 = value.usage_name;
+	isEditing = false;
+  }
 
-  function doFreeText() {}
+  function doFreeText() {
+	let t = inputText.trim();
+	if( t === "" ){
+	  alert("用法が入力されていません。");
+	  return;
+	}
+	用法コード = "0X0XXXXXXXXX0000";
+	用法名称 = t;
+	isEditing = false;
+  }
+
+  function editingMode() {
+	inputText = 用法名称;
+	isEditing = true;
+  }
 </script>
 
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 {#if isEditing}
   <div>
     <input type="radio" bind:group={mode} value="master" />
@@ -89,15 +108,24 @@
       />
     </form>
   {/if}
+{:else}
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div
+	class="usage-rep"
+	on:click={editingMode}>{用法名称 || "（用法未設定）"}</div>
 {/if}
 
 <style>
   .search-result {
     height: 10em;
     overflow-y: auto;
-    reize: vertical;
+    resize: vertical;
     font-size: 14px;
     margin-top: 6px;
     border: 1px solid gray;
+  }
+
+  .usage-rep {
+	cursor: pointer;
   }
 </style>

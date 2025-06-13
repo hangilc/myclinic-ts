@@ -57,29 +57,29 @@
     let 薬品情報: 薬品情報 = {
       薬品レコード: record,
     };
-	if( 用法コード === "" ){
-	  alert("用法コードが設定されていません。");
-	  return;
-	}
-	if( 用法名称 === "" ){
-	  alert("用法名称が設定されていません。");
-	  return;
-	}
+    if (用法コード === "") {
+      alert("用法コードが設定されていません。");
+      return;
+    }
+    if (用法名称 === "") {
+      alert("用法名称が設定されていません。");
+      return;
+    }
     let 用法レコード: 用法レコード = {
       用法コード,
       用法名称,
     };
     if (剤形区分 === "内服" || 剤形区分 === "頓服") {
-	  let input = toHankaku(timesText.trim());
-	  if( input === "" ){
-		alert("日数・回数が設定されていません。");
-		return;
-	  }
-	  調剤数量 = parseInt(input);
-	  if( isNaN(調剤数量) ){
-		alert("日数・回数が整数でありません。");
-		return;
-	  }
+      let input = toHankaku(timesText.trim());
+      if (input === "") {
+        alert("日数・回数が設定されていません。");
+        return;
+      }
+      調剤数量 = parseInt(input);
+      if (isNaN(調剤数量)) {
+        alert("日数・回数が整数でありません。");
+        return;
+      }
       if (調剤数量 <= 0) {
         alert("日数・回数が正の数値でありません。");
         return;
@@ -111,7 +111,9 @@
   bind:分量
   bind:単位名
 />
-<DrugUsage bind:用法コード bind:用法名称 />
+<div class="form-part">
+  <DrugUsage bind:用法コード bind:用法名称 />
+</div>
 {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
   <DrugDays bind:剤形区分 bind:timesText />
 {/if}
@@ -122,6 +124,9 @@
 </div>
 
 <style>
+  .form-part {
+	margin: 10px 0;
+  }
   .commands {
     margin-top: 10px;
     text-align: right;
