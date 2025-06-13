@@ -11,6 +11,7 @@
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import EditDrug from "./EditDrug.svelte";
+  import NewGroup from "./NewGroup.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -80,10 +81,16 @@
   }
 
   function doAddGroup() {
-	clearForm();
-	
+    clearForm();
+    const e: NewGroup = new NewGroup({
+      target: formElement,
+      props: {
+        onDone: () => clearForm(),
+        at,
+      },
+    });
+    clearForm = () => e.$destroy();
   }
-  
 </script>
 
 <Dialog2 title="電子処方箋編集" {destroy}>
