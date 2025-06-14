@@ -5,6 +5,7 @@
   import XCircle from "@/icons/XCircle.svelte";
   import { onMount } from "svelte";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
+  import Trash from "@/icons/Trash.svelte";
 
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
@@ -98,6 +99,12 @@
     searchText = 薬品名称;
     isEditing = true;
   }
+
+  function doClearSearchText() {
+	searchText = "";
+	inputElement?.focus();
+  }
+  
 </script>
 
 {#if isEditing}
@@ -118,6 +125,13 @@
 		on:click={doSearch}
         ><MagnifyingGlass /></a
       >
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:5px;margin-left:-4px;"
+        on:click={doClearSearchText}
+      >
+        <Trash color="#999" width="22" />
+      </a>
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:-4px;"
@@ -150,7 +164,7 @@
 
 <style>
   .search-text {
-    width: 20em;
+    width: 18em;
   }
 
   .search-result {
