@@ -64,9 +64,13 @@
   }
 
   function doCancel() {
-    isEditing = false;
     searchText = "";
     searchResult = [];
+    if (薬品名称) {
+      isEditing = false;
+    } else {
+      inputElement?.focus();
+    }
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
@@ -101,10 +105,9 @@
   }
 
   function doClearSearchText() {
-	searchText = "";
-	inputElement?.focus();
+    searchText = "";
+    inputElement?.focus();
   }
-  
 </script>
 
 {#if isEditing}
@@ -122,23 +125,26 @@
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;"
-		on:click={doSearch}
-        ><MagnifyingGlass /></a
+        on:click={doSearch}><MagnifyingGlass /></a
       >
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:-4px;"
-        on:click={doClearSearchText}
-      >
-        <Trash color="#999" width="22" />
-      </a>
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:-4px;"
-        on:click={doCancel}
-      >
-        <XCircle color="#999" width="22" />
-      </a>
+      {#if searchText.length > 0}
+        <a
+          href="javascript:void(0)"
+          style="position:relative;top:5px;margin-left:-4px;"
+          on:click={doClearSearchText}
+        >
+          <Trash color="#999" width="22" />
+        </a>
+      {/if}
+      {#if 薬品名称}
+        <a
+          href="javascript:void(0)"
+          style="position:relative;top:5px;margin-left:-4px;"
+          on:click={doCancel}
+        >
+          <XCircle color="#999" width="22" />
+        </a>
+      {/if}
     </form>
     {#if searchResult.length > 0}
       <div class="search-result">
