@@ -38,30 +38,23 @@
     薬品名称 = arg.薬品名称;
     単位名 = arg.単位名;
   }
-  
 </script>
 
 <ZaikeiKubunForm 剤形区分="内服" onChange={doZaikeiKubunChange} />
-{#if 剤形区分 !== "医療材料"}
-  <DrugKind
-    {薬品コード種別}
-    {薬品コード}
-    {薬品名称}
-    {単位名}
-    {at}
-    onChange={doDrugKindChange}
-  />
-{:else}
-  <KizaiKind />
-{/if}
+<DrugKind
+  {薬品コード種別}
+  {薬品コード}
+  {薬品名称}
+  {単位名}
+  {at}
+  onChange={doDrugKindChange}
+/>
 <div class="form-part">
   <DrugAmount bind:分量 {単位名} />
 </div>
 
 <style>
-  
   .form-part {
     margin: 10px 0;
   }
-  
 </style>

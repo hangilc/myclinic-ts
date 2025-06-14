@@ -139,6 +139,7 @@
   }
 
   .commands {
+	margin: 10px;
     text-align: right;
   }
 </style>

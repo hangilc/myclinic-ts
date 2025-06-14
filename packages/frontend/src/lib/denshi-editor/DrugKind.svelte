@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type {
-    薬品コード種別,
-  } from "@/lib/denshi-shohou/denshi-shohou";
+  import type { 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
   import type { IyakuhinMaster } from "myclinic-model";
   import XCircle from "@/icons/XCircle.svelte";
   import { onMount } from "svelte";
+  import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
 
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
@@ -64,18 +63,18 @@
   }
 
   function doCancel() {
-	isEditing = false;
+    isEditing = false;
     searchText = "";
     searchResult = [];
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
-	薬品コード種別 = "レセプト電算処理システム用コード";
+    薬品コード種別 = "レセプト電算処理システム用コード";
     薬品コード = m.iyakuhincode.toString();
     薬品名称 = m.name;
     単位名 = m.unit;
-	ippanmei = m.ippanmei ?? "";
-	ippanmeicode = m.ippanmeicode?.toString() ?? "";
+    ippanmei = m.ippanmei ?? "";
+    ippanmeicode = m.ippanmeicode?.toString() ?? "";
     isEditing = false;
     searchText = "";
     searchResult = [];
@@ -88,11 +87,11 @@
   }
 
   function doIppanmei() {
-	if( ippanmei && ippanmeicode ){
-	  薬品コード種別 = "一般名コード";
-	  薬品コード = ippanmeicode;
-	  薬品名称 = ippanmei;
-	}
+    if (ippanmei && ippanmeicode) {
+      薬品コード種別 = "一般名コード";
+      薬品コード = ippanmeicode;
+      薬品名称 = ippanmei;
+    }
   }
 
   function doEdit() {
@@ -116,20 +115,26 @@
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;"
+		on:click={doSearch}
+        ><MagnifyingGlass /></a
+      >
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:5px;margin-left:-4px;"
         on:click={doCancel}
       >
         <XCircle color="#999" width="22" />
       </a>
     </form>
-    <div
-      style="height:10em;overflow-y:auto;resize:vertical;font-size: 14px;margin-top:6px;border:1px solid gray;"
-    >
-      {#each searchResult as master (master.iyakuhincode)}
-        <div class="master-item" on:click={() => doMasterSelect(master)}>
-          {master.name}
-        </div>
-      {/each}
-    </div>
+    {#if searchResult.length > 0}
+      <div class="search-result">
+        {#each searchResult as master (master.iyakuhincode)}
+          <div class="master-item" on:click={() => doMasterSelect(master)}>
+            {master.name}
+          </div>
+        {/each}
+      </div>
+    {/if}
   </div>
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -137,13 +142,24 @@
   <div class="rep" on:click={doEdit}>{薬品名称}</div>
   {#if 薬品コード種別 !== "一般名コード" && ippanmei}
     <!-- svelte-ignore a11y-invalid-attribute -->
-    <a href="javascript:void(0)" class="ippan-link" on:click={doIppanmei}>一般名有</a>
+    <a href="javascript:void(0)" class="ippan-link" on:click={doIppanmei}
+      >一般名有</a
+    >
   {/if}
 {/if}
 
 <style>
   .search-text {
     width: 20em;
+  }
+
+  .search-result {
+    height: 10em;
+    overflow-y: auto;
+    resize: vertical;
+    font-size: 14px;
+    margin-top: 6px;
+    border: 1px solid gray;
   }
 
   .master-item {
