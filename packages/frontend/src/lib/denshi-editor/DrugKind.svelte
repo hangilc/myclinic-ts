@@ -118,6 +118,7 @@
     <form on:submit|preventDefault={doSearch}>
       <input
         type="text"
+        tabindex="0"
         bind:value={searchText}
         bind:this={inputElement}
         class="search-text"
@@ -125,24 +126,27 @@
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;"
+        tabindex="-1"
         on:click={doSearch}><MagnifyingGlass /></a
       >
       {#if searchText.length > 0}
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
+          tabindex="-1"
           on:click={doClearSearchText}
         >
-          <Trash color="#999" width="22" />
+          <Trash color="#999" />
         </a>
       {/if}
       {#if 薬品名称}
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
+          tabindex="-1"
           on:click={doCancel}
         >
-          <XCircle color="#999" width="22" />
+          <XCircle color="#999" />
         </a>
       {/if}
     </form>
@@ -162,8 +166,11 @@
   <div class="rep" on:click={doEdit}>{薬品名称}</div>
   {#if 薬品コード種別 !== "一般名コード" && ippanmei}
     <!-- svelte-ignore a11y-invalid-attribute -->
-    <a href="javascript:void(0)" class="ippan-link" on:click={doIppanmei}
-      >一般名有</a
+    <a
+      href="javascript:void(0)"
+      class="ippan-link"
+      on:click={doIppanmei}
+      tabindex="-1">一般名有</a
     >
   {/if}
 {/if}
