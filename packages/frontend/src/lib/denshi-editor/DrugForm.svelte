@@ -42,10 +42,10 @@
 
 <ZaikeiKubunForm 剤形区分="内服" onChange={doZaikeiKubunChange} />
 <DrugKind
-  {薬品コード種別}
-  {薬品コード}
-  {薬品名称}
-  {単位名}
+  bind:薬品コード種別
+  bind:薬品コード
+  bind:薬品名称
+  bind:単位名
   {at}
   onChange={doDrugKindChange}
 />

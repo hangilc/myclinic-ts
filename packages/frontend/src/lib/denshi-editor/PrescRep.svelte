@@ -1,9 +1,8 @@
 <script lang="ts">
-  import type { RP剤情報 } from "../denshi-shohou/presc-info";
   import { toZenkaku } from "@/lib/zenkaku";
   import { daysTimesDisp } from "../denshi-shohou/disp/disp-util";
   import PlusCircle from "@/icons/PlusCircle.svelte";
-  import { unindex薬品情報, type RP剤情報Indexed, type 薬品情報Indexed } from "./denshi-editor-types";
+  import { type RP剤情報Indexed, type 薬品情報Indexed } from "./denshi-editor-types";
   
   export let groups: RP剤情報Indexed[];
   export let onAddDrug: (greoup: RP剤情報Indexed) => void;

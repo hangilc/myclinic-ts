@@ -13,6 +13,8 @@
   } from "./denshi-editor-types";
   import EditDrug from "./EditDrug.svelte";
   import NewGroup from "./NewGroup.svelte";
+  import ExpirationDate from "./ExpirationDate.svelte";
+  import { onshiDateToSqlDate } from "myclinic-util";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -24,10 +26,12 @@
   let groups: RP剤情報Indexed[] = data.RP剤情報グループ.map((g) =>
     indexRP剤情報(g),
   );
+  let 使用期限年月日: string | undefined = data.使用期限年月日;
 
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
       RP剤情報グループ: groups.map(unindexRP剤情報),
+	  使用期限年月日,
     });
     onEnter(shohou);
     destroy();
@@ -48,6 +52,7 @@
         at,
         onDone: () => {
           clearForm();
+          clearForm = () => {};
         },
         onEnter: (drug) => {
           group.薬品情報グループ.push(index薬品情報(drug));
@@ -68,6 +73,7 @@
         剤形区分: group.剤形レコード.剤形区分,
         onDone: () => {
           clearForm();
+          clearForm = () => {};
         },
         onEnter: (updated: 薬品情報) => {
           group.薬品情報グループ = group.薬品情報グループ.map((d) =>
@@ -95,11 +101,32 @@
     const e: NewGroup = new NewGroup({
       target: formElement,
       props: {
-        onDone: () => clearForm(),
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
         at,
         onEnter: (group) => {
           groups.push(indexRP剤情報(group));
           groups = groups;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
+  function doExpirationDate() {
+    clearForm();
+    const e: ExpirationDate = new ExpirationDate({
+      target: formElement,
+      props: {
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        使用期限年月日,
+        onChange: (value) => {
+          使用期限年月日 = value;
         },
       },
     });
@@ -113,11 +140,24 @@
 
 <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="upper">
-    <div class="left">
-      <div>
-        <button on:click={doAddGroup}>追加</button>
-      </div>
+    <div>
       <PrescRep {groups} onAddDrug={doAddDrug} onDrugSelect={doDrugSelect} />
+      <div class="aux-data">
+        {#if 使用期限年月日}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div on:click={doExpirationDate} class="cursor-pointer">
+            有効期限：{onshiDateToSqlDate(使用期限年月日)}
+          </div>
+        {/if}
+      </div>
+      <div class="aux-menu">
+        <button on:click={doAddGroup}>追加</button>
+        {#if !使用期限年月日}
+          <!-- svelte-ignore a11y-invalid-attribute -->
+          <a href="javascript:void(0)" on:click={doExpirationDate}>有効期限</a>
+        {/if}
+      </div>
     </div>
     <div class="form" bind:this={formElement}></div>
   </div>
@@ -138,8 +178,16 @@
     overflow-y: auto;
   }
 
+  .aux-menu {
+    margin: 10px 0;
+  }
+
   .commands {
-	margin: 10px;
+    margin: 10px;
     text-align: right;
+  }
+
+  .cursor-pointer {
+	cursor: pointer;
   }
 </style>

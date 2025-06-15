@@ -5,7 +5,6 @@
   import XCircle from "@/icons/XCircle.svelte";
   import { onMount } from "svelte";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
-  import Trash from "@/icons/Trash.svelte";
   import Eraser from "@/icons/Eraser.svelte";
 
   export let 薬品コード種別: 薬品コード種別;
@@ -43,6 +42,7 @@
     if (薬品コード) {
       if (薬品コード種別 === "一般名コード") {
         ippanmei = 薬品名称;
+		ippanmeicode = 薬品コード;
       } else if (薬品コード種別 === "レセプト電算処理システム用コード") {
         const iyakuhincode = parseInt(薬品コード);
         let m = await api.getIyakuhinMaster(iyakuhincode, at);
@@ -51,6 +51,7 @@
           m.iyakuhincode.toString() === 薬品コード
         ) {
           ippanmei = m.ippanmei ?? "";
+		  ippanmeicode = m.ippanmeicode ?? "";
         }
       }
     }
