@@ -11,14 +11,14 @@
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
   export let 薬品名称: string;
-  export let 単位名: string;
+  export let 単位名: string| undefined;
   export let at: string;
   export let onChange: (data: {
 	情報区分: 情報区分,
     薬品コード種別: 薬品コード種別;
     薬品コード: string;
     薬品名称: string;
-    単位名: string;
+    単位名: string | undefined;
   }) => void;
 
   let isEditing = false;
@@ -42,7 +42,7 @@
   });
 
   async function initIppanmei() {
-    if (薬品コード) {
+    if ( 情報区分 === "医薬品" && 薬品コード) {
       if (薬品コード種別 === "一般名コード") {
         ippanmei = 薬品名称;
 		ippanmeicode = 薬品コード;

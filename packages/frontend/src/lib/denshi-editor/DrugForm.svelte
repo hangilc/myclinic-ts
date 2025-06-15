@@ -15,7 +15,7 @@
   export let 薬品コード: string;
   export let 薬品名称: string;
   export let 分量: string;
-  export let 単位名: string;
+  export let 単位名: string | undefined;
 
   let drugFormKey = 1;
 
@@ -35,8 +35,8 @@
       薬品コード = "";
       薬品名称 = "";
       分量 = "";
-      単位名 = "";
-	  drugFormKey += 1;
+      単位名 = undefined;
+      drugFormKey += 1;
     }
   }
 
@@ -45,7 +45,7 @@
     薬品コード種別: 薬品コード種別;
     薬品コード: string;
     薬品名称: string;
-    単位名: string;
+    単位名: string | undefined;
   }) {
     情報区分 = arg.情報区分;
     薬品コード種別 = arg.薬品コード種別;
@@ -55,10 +55,10 @@
   }
 </script>
 
-<ZaikeiKubunForm 剤形区分="内服" onChange={doZaikeiKubunChange} />
+<ZaikeiKubunForm {剤形区分} onChange={doZaikeiKubunChange} />
 {#key drugFormKey}
   <DrugKind
-    bind:情報区分
+    {情報区分}
     bind:薬品コード種別
     bind:薬品コード
     bind:薬品名称
@@ -68,7 +68,7 @@
   />
 {/key}
 <div class="form-part">
-  <DrugAmount bind:分量 {単位名} />
+  <DrugAmount bind:分量 単位名={単位名 || ""} />
 </div>
 
 <style>

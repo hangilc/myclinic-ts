@@ -21,10 +21,10 @@
   let 薬品名称: string = "";
   let 分量: string = "";
   let 力価フラグ: 力価フラグ = "薬価単位";
-  let 単位名: string = "";
+  let 単位名: string | undefined = undefined;
 
   function doEnter() {
-    let record: 薬品レコード = {
+    let record: 薬品レコード| string = validateDrug({
       情報区分,
       薬品コード種別,
       薬品コード,
@@ -32,10 +32,9 @@
       分量: toHankaku(分量),
       力価フラグ,
       単位名,
-    };
-    let err = validateDrug(record);
-    if (typeof err === "string") {
-      alert(err);
+    });
+    if (typeof record === "string") {
+      alert(record);
       return;
     }
     let data: 薬品情報 = {
