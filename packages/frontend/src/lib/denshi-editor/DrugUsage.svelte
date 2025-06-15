@@ -5,6 +5,7 @@
   import api from "@/lib/api";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Trash from "@/icons/Trash.svelte";
+  import Eraser from "@/icons/Eraser.svelte";
 
   export let 用法コード: string;
   export let 用法名称: string;
@@ -107,7 +108,7 @@
 		  tabindex="-1"
           on:click={doClearSearchText}
         >
-          <Trash color="#999" />
+          <Eraser color="#999" />
         </a>
       {/if}
       {#if 用法コード}

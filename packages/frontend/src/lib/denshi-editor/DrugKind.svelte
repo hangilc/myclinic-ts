@@ -6,6 +6,7 @@
   import { onMount } from "svelte";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Trash from "@/icons/Trash.svelte";
+  import Eraser from "@/icons/Eraser.svelte";
 
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
@@ -136,7 +137,7 @@
           tabindex="-1"
           on:click={doClearSearchText}
         >
-          <Trash color="#999" />
+          <Eraser color="#999" />
         </a>
       {/if}
       {#if 薬品名称}
