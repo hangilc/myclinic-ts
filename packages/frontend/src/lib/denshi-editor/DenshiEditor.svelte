@@ -15,7 +15,7 @@
   import NewGroup from "./NewGroup.svelte";
   import ExpirationDate from "./ExpirationDate.svelte";
   import { onshiDateToSqlDate } from "myclinic-util";
-  import UsageEdit from "./UsageEdit.svelte";
+  import GroupForm from "./GroupForm.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -99,7 +99,7 @@
 
   function doUsageSelect(group: RP剤情報Indexed) {
     clearForm();
-    const e: UsageEdit = new UsageEdit({
+    const e: GroupForm = new GroupForm({
       target: formElement,
       props: {
         onDone: () => {
@@ -108,9 +108,11 @@
         },
 		用法コード: group.用法レコード.用法コード,
 		用法名称: group.用法レコード.用法名称,
-		調剤数量: group.剤形レコード.調剤数量;
+		調剤数量: group.剤形レコード.調剤数量,
+		剤形区分: group.剤形レコード.剤形区分,
+		drugs: group.薬品情報グループ,
 		onChange: (data: {
-		  用法コード: string; 用法名称: string;
+		  用法コード: string; 用法名称: string; 調剤数量: number;
 		}) => {
 		  let g = findGroupById(group.id);
 		  if( g ){
@@ -118,6 +120,9 @@
 			  用法コード: data.用法コード,
 			  用法名称: data.用法名称
 			});
+			g.剤形レコード = Object.assign({}, g.剤形レコード, {
+			  調剤数量: data.調剤数量,
+			})
 			groups = groups;
 		  }
 		},

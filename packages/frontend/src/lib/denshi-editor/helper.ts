@@ -1,5 +1,6 @@
-import type { 薬品レコード } from "@/lib//denshi-shohou/presc-info";
+import type { 薬品レコード, 薬品情報 } from "@/lib//denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
+import { toZenkaku } from "@/lib/zenkaku";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -30,5 +31,9 @@ export function validateDrug(drug: {
   return Object.assign({}, drug, { 単位名: drug.単位名 });
 }
 
-
+export function drugRep(drug: 薬品情報): string {
+  return `${drug.薬品レコード.薬品名称}　${toZenkaku(
+    drug.薬品レコード.分量,
+  )}${drug.薬品レコード.単位名}`;
+}
 

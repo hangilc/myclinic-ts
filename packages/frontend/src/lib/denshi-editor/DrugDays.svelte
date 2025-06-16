@@ -1,10 +1,7 @@
 <script lang="ts">
   import type {
     剤形区分,
-    情報区分,
-    薬品コード種別,
-    力価フラグ,
-  } from "@/lib/denshi-shohou/denshi-shohou";
+   } from "@/lib/denshi-shohou/denshi-shohou";
   import type { 薬品情報, 薬品レコード } from "../denshi-shohou/presc-info";
 
   export let 剤形区分: 剤形区分;
