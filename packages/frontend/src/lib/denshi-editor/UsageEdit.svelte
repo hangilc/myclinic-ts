@@ -4,9 +4,11 @@
   export let onDone: () => void;
   export let 用法コード: string;
   export let 用法名称: string;
+  export let 調剤数量: number;
   export let onChange: (date: {
 	用法コード: string,
 	用法名称: string,
+	調剤数量: number;
   }) => void;
 
   let isEditing = true;

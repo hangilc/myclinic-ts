@@ -31,10 +31,6 @@
     isEditing = true;
   }
 
-  function onCancel() {
-    isEditing = false;
-  }
-
   function doModeChanged() {
 	searchText = 用法名称;
 	searchResult = [];
@@ -125,7 +121,7 @@
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
-g		  tabindex="-1"
+		  tabindex="-1"
           on:click={doCancel}
           >
           <XCircle color="#999" />
