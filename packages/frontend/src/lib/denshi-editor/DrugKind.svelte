@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { 薬品コード種別, 情報区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import type {
+    薬品コード種別,
+    情報区分,
+  } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
   import XCircle from "@/icons/XCircle.svelte";
@@ -7,16 +10,17 @@
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Eraser from "@/icons/Eraser.svelte";
   import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
+  import Rep from "./drug-kind/Rep.svelte";
 
   export let 情報区分: 情報区分;
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
   export let 薬品名称: string;
-  export let 単位名: string| undefined;
-  export let 不均等レコード: 不均等レコード|  undefined;
+  export let 単位名: string | undefined;
+  export let 不均等レコード: 不均等レコード | undefined;
   export let at: string;
   export let onChange: (data: {
-	情報区分: 情報区分,
+    情報区分: 情報区分;
     薬品コード種別: 薬品コード種別;
     薬品コード: string;
     薬品名称: string;
@@ -44,10 +48,10 @@
   });
 
   async function initIppanmei() {
-    if ( 情報区分 === "医薬品" && 薬品コード) {
+    if (情報区分 === "医薬品" && 薬品コード) {
       if (薬品コード種別 === "一般名コード") {
         ippanmei = 薬品名称;
-		ippanmeicode = 薬品コード;
+        ippanmeicode = 薬品コード;
       } else if (薬品コード種別 === "レセプト電算処理システム用コード") {
         const iyakuhincode = parseInt(薬品コード);
         let m = await api.getIyakuhinMaster(iyakuhincode, at);
@@ -56,27 +60,27 @@
           m.iyakuhincode.toString() === 薬品コード
         ) {
           ippanmei = m.ippanmei ?? "";
-		  ippanmeicode = m.ippanmeicode ?? "";
+          ippanmeicode = m.ippanmeicode ?? "";
         }
       }
     } else {
-	  ippanmei = "";
-	  ippanmeicode = "";
-	}
+      ippanmei = "";
+      ippanmeicode = "";
+    }
   }
 
   async function doSearch() {
     const t = searchText.trim();
-	if( t === "" ){
-	  return;
-	}
+    if (t === "") {
+      return;
+    }
     if (情報区分 === "医薬品") {
       const ms = await api.searchIyakuhinMaster(t, at);
       searchIyakuhinResult = ms;
     } else {
-	  const ms = await api.searchKizaiMaster(t, at);
-	  searchKizaiResult = ms;
-	}
+      const ms = await api.searchKizaiMaster(t, at);
+      searchKizaiResult = ms;
+    }
   }
 
   function doCancel() {
@@ -100,7 +104,7 @@
     searchText = "";
     searchIyakuhinResult = [];
     onChange({
-	  情報区分,
+      情報区分,
       薬品コード種別,
       薬品コード,
       薬品名称,
@@ -119,7 +123,7 @@
     searchText = "";
     searchKizaiResult = [];
     onChange({
-	  情報区分,
+      情報区分,
       薬品コード種別,
       薬品コード,
       薬品名称,
@@ -189,7 +193,10 @@
     {#if searchIyakuhinResult.length > 0}
       <div class="search-result">
         {#each searchIyakuhinResult as master (master.iyakuhincode)}
-          <div class="master-item" on:click={() => doIyakuhinMasterSelect(master)}>
+          <div
+            class="master-item"
+            on:click={() => doIyakuhinMasterSelect(master)}
+          >
             {master.name}
           </div>
         {/each}
@@ -206,18 +213,13 @@
     {/if}
   </div>
 {:else}
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div class="rep" on:click={doEdit}>{薬品名称}</div>
-  {#if 薬品コード種別 !== "一般名コード" && ippanmei}
-    <!-- svelte-ignore a11y-invalid-attribute -->
-    <a
-      href="javascript:void(0)"
-      class="ippan-link"
-      on:click={doIppanmei}
-      tabindex="-1">一般名有</a
-    >
-  {/if}
+  <Rep
+    {薬品コード種別}
+    {薬品名称}
+    {ippanmei}
+    onClick={doEdit}
+    onIppanmeiClick={doIppanmei}
+  />
 {/if}
 
 <style>
