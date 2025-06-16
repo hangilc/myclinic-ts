@@ -4,16 +4,25 @@
   import ChevronUp from "@/icons/ChevronUp.svelte";
 
   export let 剤形区分: 剤形区分;
-  export let onChange: (zaikei: 剤形区分) => void;
+  export let notifyChange: (prev: 剤形区分) => void;
+  let prev剤形区分 = 剤形区分;
 
-  let showMore = isUsual(剤形区分) ? false : true;
+  let showMore = false;
+
+  updateShowMore();
 
   function isUsual(zaikei: 剤形区分): boolean {
     return zaikei === "内服" || zaikei === "頓服" || zaikei === "外用";
   }
 
+  function updateShowMore() {
+	showMore = isUsual(剤形区分) ? false : true;
+  }
+
   function doChange() {
-    onChange(剤形区分);
+	notifyChange(prev剤形区分);
+	prev剤形区分 = 剤形区分;
+	updateShowMore();
   }
 
   function toggleMore() {

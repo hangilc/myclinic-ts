@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import type { 不均等レコード } from "../denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
@@ -20,19 +21,20 @@
   export let 不均等レコード: 不均等レコード | undefined;
 
   let drugFormKey = 1;
+  let drugKindFocus: () => boolean;
 
-  function doZaikeiKubunChange(new剤形区分: 剤形区分) {
-    const new情報区分: 情報区分 =
-      new剤形区分 === "医療材料" ? "医療材料" : "医薬品";
+  onMount(() => {
+	drugKindFocus();
+  })
+
+  function doZaikeiKubunChange(prev剤形区分: 剤形区分) {
+    情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
     if (
-      (剤形区分 === "内服" && new剤形区分 === "頓服") ||
-      (剤形区分 === "頓服" && new剤形区分 === "内服")
+      (剤形区分 === "内服" && prev剤形区分 === "頓服") ||
+      (剤形区分 === "頓服" && prev剤形区分 === "内服")
     ) {
-      剤形区分 = new剤形区分;
-      情報区分 = new情報区分;
+	  // nop
     } else {
-      剤形区分 = new剤形区分;
-      情報区分 = new情報区分;
       薬品コード種別 = "レセプト電算処理システム用コード";
       薬品コード = "";
       薬品名称 = "";
@@ -57,7 +59,7 @@
   }
 </script>
 
-<ZaikeiKubunForm {剤形区分} onChange={doZaikeiKubunChange} />
+<ZaikeiKubunForm bind:剤形区分 notifyChange={doZaikeiKubunChange} />
 {#key drugFormKey}
   <DrugKind
     {情報区分}
@@ -68,6 +70,7 @@
 	{不均等レコード}
     {at}
     onChange={doDrugKindChange}
+	bind:focus={drugKindFocus}
   />
 {/key}
 <div class="form-part">

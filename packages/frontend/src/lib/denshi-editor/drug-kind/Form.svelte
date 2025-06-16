@@ -26,14 +26,14 @@
   let searchKizaiResult: KizaiMaster[] = [];
 
   export const focus: () => boolean = () => {
-	if( inputElement ){
-	  inputElement.focus();
-	  return true;
-	} else {
-	  return false;
-	}
+    if (inputElement) {
+      inputElement.focus();
+      return true;
+    } else {
+      return false;
+    }
   };
-  
+
   async function doSearch() {
     const t = searchText.trim();
     if (t === "") {
@@ -50,8 +50,8 @@
 
   function doClearSearchText() {
     searchText = "";
-	searchIyakuhinResult = [];
-	searchKizaiResult = [];
+    searchIyakuhinResult = [];
+    searchKizaiResult = [];
     inputElement?.focus();
   }
 
@@ -74,7 +74,7 @@
     ippanmeicode = m.ippanmeicode?.toString() ?? "";
     searchText = "";
     searchIyakuhinResult = [];
-	notifySelect();
+    notifySelect();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {
@@ -86,7 +86,7 @@
     ippanmeicode = "";
     searchText = "";
     searchKizaiResult = [];
-	notifySelect();
+    notifySelect();
   }
 </script>
 
@@ -102,13 +102,13 @@
       bind:this={inputElement}
       class="search-text"
     />
-    <a
-      href="javascript:void(0)"
-      style="position:relative;top:5px;margin-left:3px;"
-      tabindex="-1"
-      on:click={doSearch}><MagnifyingGlass /></a
-    >
     {#if searchText.length > 0}
+      <a
+        href="javascript:void(0)"
+        style="position:relative;top:5px;margin-left:3px;"
+        tabindex="-1"
+        on:click={doSearch}><MagnifyingGlass /></a
+      >
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:-4px;"
@@ -173,6 +173,4 @@
   .master-item:hover {
     background-color: #eee;
   }
-
 </style>
-
