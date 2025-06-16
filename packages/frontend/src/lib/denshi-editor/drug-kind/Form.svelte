@@ -12,14 +12,28 @@
   export let 薬品コード: string;
   export let 薬品名称: string;
   export let 情報区分: 情報区分;
+  export let 薬品コード種別: 薬品コード種別;
+  export let 単位名: string | undefined;
+  export let ippanmei: string;
+  export let ippanmeicode: string;
   export let at: string;
-  export let onCancel: () => void;
+  export let notifyCancel: () => void;
+  export let notifySelect: () => void;
 
   let searchText: string = 薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
+  export const focus: () => boolean = () => {
+	if( inputElement ){
+	  inputElement.focus();
+	  return true;
+	} else {
+	  return false;
+	}
+  };
+  
   async function doSearch() {
     const t = searchText.trim();
     if (t === "") {
@@ -36,6 +50,8 @@
 
   function doClearSearchText() {
     searchText = "";
+	searchIyakuhinResult = [];
+	searchKizaiResult = [];
     inputElement?.focus();
   }
 
@@ -43,7 +59,7 @@
     searchText = "";
     searchIyakuhinResult = [];
     if (薬品名称) {
-      onCancel();
+      notifyCancel();
     } else {
       inputElement?.focus();
     }
@@ -56,16 +72,9 @@
     単位名 = m.unit;
     ippanmei = m.ippanmei ?? "";
     ippanmeicode = m.ippanmeicode?.toString() ?? "";
-    isEditing = false;
     searchText = "";
     searchIyakuhinResult = [];
-    onChange({
-      情報区分,
-      薬品コード種別,
-      薬品コード,
-      薬品名称,
-      単位名,
-    });
+	notifySelect();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {
@@ -75,16 +84,9 @@
     単位名 = m.unit;
     ippanmei = "";
     ippanmeicode = "";
-    isEditing = false;
     searchText = "";
     searchKizaiResult = [];
-    onChange({
-      情報区分,
-      薬品コード種別,
-      薬品コード,
-      薬品名称,
-      単位名,
-    });
+	notifySelect();
   }
 </script>
 
@@ -149,3 +151,28 @@
     </div>
   {/if}
 </div>
+
+<style>
+  .search-text {
+    width: 18em;
+  }
+
+  .search-result {
+    height: 10em;
+    overflow-y: auto;
+    resize: vertical;
+    font-size: 14px;
+    margin-top: 6px;
+    border: 1px solid gray;
+  }
+
+  .master-item {
+    cursor: pointer;
+  }
+
+  .master-item:hover {
+    background-color: #eee;
+  }
+
+</style>
+
