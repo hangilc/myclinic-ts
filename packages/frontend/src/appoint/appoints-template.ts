@@ -61,7 +61,7 @@ export function validateAppointsTemplate(src: any): AppointsTemplate {
   }
 
   const validDaysOfWeek: DayOfWeek[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const timePattern = /^\d{2}:\d{2}$/;
+  const timePattern = /^\d{2}:\d{2}:\d{2}$/;
 
   return src.map((entry, index) => {
     if (typeof entry !== "object" || entry === null) {
@@ -119,9 +119,10 @@ export function validateAppointsTemplate(src: any): AppointsTemplate {
             `appoint at index ${appointIndex}: "from" must be a string`);
       }
       if (!timePattern.test(appoint.from)) {
+		console.error("appoint.from", appoint.from);
         throw new Error(
           `Entry at index ${index}, ` +
-            `appoint at index ${appointIndex}: "from" must be in format "HH:MM"`);
+            `appoint at index ${appointIndex}: "from" must be in format "HH:MM:SS"`);
       }
 
       if (!appoint.hasOwnProperty("to")) {

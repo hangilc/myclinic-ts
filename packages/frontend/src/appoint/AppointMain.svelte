@@ -128,25 +128,25 @@
     const dates = DateWrapper.range(startDate, 7).map(d => d.asDate());
     const map = await api.batchResolveClinicOperations(dates);
     const proms = dates
-      .filter((d) => {
-        const op: ClinicOperation = map[dateToSql(d)];
-        return !(op.code === "regular-holiday");
-      })
-      .map(async (d) => {
-        const pairs = await api.listAppoints(d);
-        const appoints = pairs.map((pair) => {
-          const [at, as] = pair;
-          return new AppointTimeData(at, as, undefined);
-        });
-        for (let i = appoints.length - 2; i >= 0; i--) {
-          const atd = appoints[i];
-          if (appoints[i + 1].isRegularVacant) {
-            atd.followingVacant = appoints[i + 1].appointTime;
-          }
-        }
-        const sqldate = dateToSql(d);
-        return new ColumnData(sqldate, map[sqldate], appoints);
-      });
+		  .filter((d) => {
+			const op: ClinicOperation = map[dateToSql(d)];
+			return !(op.code === "regular-holiday");
+		  })
+		  .map(async (d) => {
+			const pairs = await api.listAppoints(d);
+			const appoints = pairs.map((pair) => {
+			  const [at, as] = pair;
+			  return new AppointTimeData(at, as, undefined);
+			});
+			for (let i = appoints.length - 2; i >= 0; i--) {
+			  const atd = appoints[i];
+			  if (appoints[i + 1].isRegularVacant) {
+				atd.followingVacant = appoints[i + 1].appointTime;
+			  }
+			}
+			const sqldate = dateToSql(d);
+			return new ColumnData(sqldate, map[sqldate], appoints);
+		  });
     cols = await Promise.all(proms);
   }
 
@@ -177,11 +177,6 @@
 	await Promise.all(proms);
   }
 
-  // async function doCreateAppoints() {
-  //   const upto = DateWrapper.from(startDate).incDay(6);
-  //   await api.fillAppointTimes(startDate, upto.asDate());
-  // }
-  
 </script>
 
 <div class="top">
@@ -191,7 +186,7 @@
       onCreateAppoints={doCreateAppoints}
       onMoveWeeks={doMoveWeeks}
       onThisWeek={doThisWeek}
-    />
+      />
     <div class="cols-wrapper">
       {#each cols as col}
         <Column data={col} />
