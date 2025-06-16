@@ -24,6 +24,7 @@
   let 分量: string = drug.薬品レコード.分量;
   let 力価フラグ: 力価フラグ = drug.薬品レコード.力価フラグ;
   let 単位名: string = drug.薬品レコード.単位名;
+  let 不均等レコード = drug.不均等レコード;
 
   function doEnter() {
     let record: 薬品レコード = {
@@ -69,6 +70,7 @@
   bind:薬品名称
   bind:分量
   bind:単位名
+  {不均等レコード}
 />
 <div class="commands">
   <!-- svelte-ignore a11y-invalid-attribute -->

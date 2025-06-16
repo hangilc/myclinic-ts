@@ -5,7 +5,7 @@
     薬品コード種別,
     力価フラグ,
   } from "@/lib/denshi-shohou/denshi-shohou";
-  import type { 薬品情報, 薬品レコード } from "../denshi-shohou/presc-info";
+  import type { 薬品情報, 薬品レコード, 不均等レコード } from "../denshi-shohou/presc-info";
   import { validateDrug } from "./helper";
   import { toHankaku } from "@/lib/zenkaku";
   import DrugForm from "./DrugForm.svelte";
@@ -22,6 +22,7 @@
   let 分量: string = "";
   let 力価フラグ: 力価フラグ = "薬価単位";
   let 単位名: string | undefined = undefined;
+  let 不均等レコード: 不均等レコード | undefined = undefined;
 
   function doEnter() {
     let record: 薬品レコード| string = validateDrug({
@@ -59,6 +60,7 @@
   bind:薬品名称
   bind:分量
   bind:単位名
+  {不均等レコード}
 />
 <div class="commands">
   <button on:click={doEnter}>入力</button>

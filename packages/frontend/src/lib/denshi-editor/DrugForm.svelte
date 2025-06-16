@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { 不均等レコード } from "../denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
@@ -16,6 +17,7 @@
   export let 薬品名称: string;
   export let 分量: string;
   export let 単位名: string | undefined;
+  export let 不均等レコード: 不均等レコード | undefined;
 
   let drugFormKey = 1;
 
@@ -63,6 +65,7 @@
     bind:薬品コード
     bind:薬品名称
     bind:単位名
+	{不均等レコード}
     {at}
     onChange={doDrugKindChange}
   />

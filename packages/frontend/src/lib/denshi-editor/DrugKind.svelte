@@ -6,12 +6,14 @@
   import { onMount } from "svelte";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Eraser from "@/icons/Eraser.svelte";
+  import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
 
   export let 情報区分: 情報区分;
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
   export let 薬品名称: string;
   export let 単位名: string| undefined;
+  export let 不均等レコード: 不均等レコード|  undefined;
   export let at: string;
   export let onChange: (data: {
 	情報区分: 情報区分,
