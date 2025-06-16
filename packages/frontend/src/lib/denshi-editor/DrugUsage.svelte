@@ -21,9 +21,9 @@
   
   export const focus: () => void = () => {
     if (mode === "master") {
-      masterInputElement.focus();
+      masterInputElement?.focus();
     } else if (mode === "free-style") {
-      freeStyleInputElement.focus();
+      freeStyleInputElement?.focus();
     }
   };
 
@@ -37,6 +37,8 @@
 
   function doModeChanged() {
 	searchText = 用法名称;
+	searchResult = [];
+	focus();
   }
 
   async function doSearchUsage() {
@@ -72,11 +74,9 @@
 
   function doClearSearchText() {
     searchText = "";
-	if( mode === "free-style") {
-	  freeStyleInputElement?.focus();
-	} else{
+	focus();
+	if( mode === "master") {
       searchResult = [];
-      masterInputElement?.focus();
 	}
   }
 
