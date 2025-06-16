@@ -5,6 +5,7 @@
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
+  import CancelIcon from "./icons/CancelIcon.svelte";
 
   export let 用法コード: string;
   export let 用法名称: string;
@@ -16,6 +17,8 @@
   let freeStyleInputElement: HTMLInputElement;
   let searchResult: UsageMaster[] = [];
 
+  const freeTextCode = "0X0XXXXXXXXX0000";
+  
   export const focus: () => void = () => {
     if (mode === "master") {
       masterInputElement.focus();
@@ -30,6 +33,10 @@
 
   function onCancel() {
     isEditing = false;
+  }
+
+  function doModeChanged() {
+	searchText = 用法名称;
   }
 
   async function doSearchUsage() {
@@ -53,7 +60,7 @@
       alert("用法が入力されていません。");
       return;
     }
-    用法コード = "0X0XXXXXXXXX0000";
+    用法コード = freeTextCode;
     用法名称 = t;
     isEditing = false;
   }
@@ -65,8 +72,12 @@
 
   function doClearSearchText() {
     searchText = "";
-    searchResult = [];
-    masterInputElement?.focus();
+	if( mode === "free-style") {
+	  freeStyleInputElement?.focus();
+	} else{
+      searchResult = [];
+      masterInputElement?.focus();
+	}
   }
 
   function doCancel() {
@@ -80,9 +91,9 @@
 <!-- svelte-ignore a11y-invalid-attribute -->
 {#if isEditing}
   <div>
-    <input type="radio" bind:group={mode} value="master" tabindex="-1" />
+    <input type="radio" bind:group={mode} value="master" tabindex="-1" on:change={doModeChanged}/>
     マスター
-    <input type="radio" bind:group={mode} value="free-style" tabindex="-1" /> 自由文章
+    <input type="radio" bind:group={mode} value="free-style" tabindex="-1" on:change={doModeChanged} /> 自由文章
     <!-- svelte-ignore a11y-invalid-attribute -->
   </div>
   {#if mode === "master"}
@@ -114,7 +125,7 @@
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
-		  tabindex="-1"
+g		  tabindex="-1"
           on:click={doCancel}
           >
           <XCircle color="#999" />
@@ -152,13 +163,14 @@
 	  <a href="javascript:void(0)"
 		 style="position:relative;top:5px;margin-left:-4px;"
 		 tabindex="-1"
-		 on:click={() => searchText = ""}
-		>
+		 on:click={doClearSearchText}
+		 >
 		<Eraser />
 	  </a>
 	{/if}
-  </form>
-{/if}
+  {#if 用法コード}<CancelIcon onClick={doCancel} /> {/if}
+	</form>
+  {/if}
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="usage-rep" on:click={editingMode}>
