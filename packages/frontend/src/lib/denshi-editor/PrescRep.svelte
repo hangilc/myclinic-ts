@@ -7,6 +7,7 @@
   export let groups: RP剤情報Indexed[];
   export let onAddDrug: (greoup: RP剤情報Indexed) => void;
   export let onDrugSelect: (g: RP剤情報Indexed, d: 薬品情報Indexed) => void;
+  export let onUsageSelect: (g: RP剤情報Indexed) => void;
 
   let zspc = "　";
 
@@ -17,6 +18,7 @@
   <div class="groups">
     {#each groups as group, index (group.id)}
       <div>{toZenkaku((index + 1).toString())}）</div>
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div>
         <div>
           {#each group.薬品情報グループ as drug (drug.id)}
@@ -38,7 +40,9 @@
             <PlusCircle color="green" />
           </a>
         </div>
-        <div>
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div class="usage-rep" on:click={() => onUsageSelect(group)}>
           {group.用法レコード.用法名称}{zspc}{daysTimesDisp(group)}
         </div>
       </div>
@@ -52,7 +56,7 @@
     grid-template-columns: auto 1fr;
   }
 
-  .drug-rep {
+  .drug-rep, .usage-rep {
     cursor: pointer;
   }
 </style>

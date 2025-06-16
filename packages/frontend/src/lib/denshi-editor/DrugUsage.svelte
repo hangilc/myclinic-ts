@@ -1,18 +1,17 @@
 <script lang="ts">
   import XCircle from "@/icons/XCircle.svelte";
   import type { UsageMaster } from "myclinic-model";
-  import { onMount } from "svelte";
   import api from "@/lib/api";
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
-  import Trash from "@/icons/Trash.svelte";
   import Eraser from "@/icons/Eraser.svelte";
+  import CheckCircle from "@/icons/CheckCircle.svelte";
 
   export let 用法コード: string;
   export let 用法名称: string;
+  export let isEditing = false;
 
-  let isEditing = false;
   let mode: "master" | "free-style" = "master";
-  let searchText = "";
+  let searchText = 用法名称;
   let masterInputElement: HTMLInputElement;
   let freeStyleInputElement: HTMLInputElement;
   let searchResult: UsageMaster[] = [];
@@ -94,20 +93,20 @@
 		tabindex="0"
         bind:value={searchText}
         bind:this={masterInputElement}
-      />
+		/>
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;"
 		tabindex="-1"
         on:click={doSearchUsage}><MagnifyingGlass /></a
-      >
+													  >
       {#if searchText.length > 0}
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
 		  tabindex="-1"
           on:click={doClearSearchText}
-        >
+          >
           <Eraser color="#999" />
         </a>
       {/if}
@@ -117,7 +116,7 @@
           style="position:relative;top:5px;margin-left:-4px;"
 		  tabindex="-1"
           on:click={doCancel}
-        >
+          >
           <XCircle color="#999" />
         </a>
       {/if}
@@ -126,26 +125,40 @@
       <div class="search-result">
         {#each searchResult as result (result.usage_code)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div
-            style="cursor:pointer;"
-            on:click={() => doUsageMasterSelect(result)}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div
+          style="cursor:pointer;"
+          on:click={() => doUsageMasterSelect(result)}
           >
-            {result.usage_name}
-          </div>
-        {/each}
-      </div>
-    {/if}
-  {:else if mode === "free-style"}
-    <form on:submit|preventDefault={doFreeText}>
-      <input
-        type="text"
-        bind:value={searchText}
-        style="width:22em;"
-        bind:this={freeStyleInputElement}
-      />
-    </form>
+          {result.usage_name}
+        </div>
+      {/each}
+    </div>
   {/if}
+{:else if mode === "free-style"}
+  <form on:submit|preventDefault={doFreeText}>
+    <input
+      type="text"
+	  class="input-text"
+      bind:value={searchText}
+      bind:this={freeStyleInputElement}
+	  />
+	{#if searchText.length > 0}
+	  <a href="javascript:void(0)" on:click={doFreeText}
+		 style="position:relative;top:5px;"
+		 tabindex="-1">
+		<CheckCircle color="#007bff"/>
+	  </a>
+	  <a href="javascript:void(0)"
+		 style="position:relative;top:5px;margin-left:-4px;"
+		 tabindex="-1"
+		 on:click={() => searchText = ""}
+		>
+		<Eraser />
+	  </a>
+	{/if}
+  </form>
+{/if}
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="usage-rep" on:click={editingMode}>

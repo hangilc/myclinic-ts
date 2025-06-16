@@ -15,6 +15,7 @@
   import NewGroup from "./NewGroup.svelte";
   import ExpirationDate from "./ExpirationDate.svelte";
   import { onshiDateToSqlDate } from "myclinic-util";
+  import UsageEdit from "./UsageEdit.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -31,7 +32,7 @@
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
       RP剤情報グループ: groups.map(unindexRP剤情報),
-	  使用期限年月日,
+      使用期限年月日,
     });
     onEnter(shohou);
     destroy();
@@ -96,6 +97,34 @@
     clearForm = () => e.$destroy();
   }
 
+  function doUsageSelect(group: RP剤情報Indexed) {
+    clearForm();
+    const e: UsageEdit = new UsageEdit({
+      target: formElement,
+      props: {
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+		用法コード: group.用法レコード.用法コード,
+		用法名称: group.用法レコード.用法名称,
+		onChange: (data: {
+		  用法コード: string; 用法名称: string;
+		}) => {
+		  let g = findGroupById(group.id);
+		  if( g ){
+			g.用法レコード = Object.assign({}, g.用法レコード, {
+			  用法コード: data.用法コード,
+			  用法名称: data.用法名称
+			});
+			groups = groups;
+		  }
+		},
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
   function doAddGroup() {
     clearForm();
     const e: NewGroup = new NewGroup({
@@ -133,6 +162,15 @@
     clearForm = () => e.$destroy();
   }
 
+  function findGroupById(id: number): RP剤情報Indexed | undefined {
+	for(let g of groups){
+	  if( g.id === id ){
+		return g;
+	  }
+	}
+	return undefined;
+  }
+
   function doCancel() {
     destroy();
   }
@@ -141,7 +179,12 @@
 <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="upper">
     <div>
-      <PrescRep {groups} onAddDrug={doAddDrug} onDrugSelect={doDrugSelect} />
+      <PrescRep
+        {groups}
+        onAddDrug={doAddDrug}
+        onDrugSelect={doDrugSelect}
+        onUsageSelect={doUsageSelect}
+      />
       <div class="aux-data">
         {#if 使用期限年月日}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -188,6 +231,6 @@
   }
 
   .cursor-pointer {
-	cursor: pointer;
+    cursor: pointer;
   }
 </style>
