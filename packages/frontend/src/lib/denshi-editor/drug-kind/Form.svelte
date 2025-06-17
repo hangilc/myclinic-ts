@@ -8,6 +8,7 @@
   import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Eraser from "@/icons/Eraser.svelte";
   import XCircle from "@/icons/XCircle.svelte";
+  import { tick } from "svelte";
 
   export let 薬品コード: string;
   export let 薬品名称: string;
@@ -33,6 +34,10 @@
       return false;
     }
   };
+
+  $: if( 薬品コード === "" ){
+	tick().then(() => focus())
+  }
 
   async function doSearch() {
     const t = searchText.trim();

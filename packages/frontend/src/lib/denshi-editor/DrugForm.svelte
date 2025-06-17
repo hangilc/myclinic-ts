@@ -9,6 +9,7 @@
     情報区分,
     薬品コード種別,
   } from "@/lib/denshi-shohou/denshi-shohou";
+  import Cog from "@/icons/Cog.svelte";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -22,10 +23,11 @@
 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
+  let showAux = false;
 
   onMount(() => {
-	drugKindFocus();
-  })
+    drugKindFocus();
+  });
 
   function doZaikeiKubunChange(prev剤形区分: 剤形区分) {
     情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
@@ -33,7 +35,7 @@
       (剤形区分 === "内服" && prev剤形区分 === "頓服") ||
       (剤形区分 === "頓服" && prev剤形区分 === "内服")
     ) {
-	  // nop
+      // nop
     } else {
       薬品コード種別 = "レセプト電算処理システム用コード";
       薬品コード = "";
@@ -67,18 +69,32 @@
     bind:薬品コード
     bind:薬品名称
     bind:単位名
-	{不均等レコード}
+    {不均等レコード}
     {at}
     onChange={doDrugKindChange}
-	bind:focus={drugKindFocus}
+    bind:focus={drugKindFocus}
   />
 {/key}
 <div class="form-part">
   <DrugAmount bind:分量 単位名={単位名 || ""} />
 </div>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div>
+  <span class="cog" on:click={() => (showAux = !showAux)}><Cog /></span>
+</div>
+{#if showAux}
+  {#if !不均等レコード}
+	{/if}
+{/if}
 
 <style>
   .form-part {
     margin: 10px 0;
+  }
+
+  .cog {
+    color: gray;
+    cursor: pointer;
   }
 </style>

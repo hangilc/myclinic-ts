@@ -53,32 +53,32 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-		data: shohou,
-		onEnter: (updated: PrescInfoData) => {
-		  onModified(updated);
-		}
+        data: shohou,
+        onEnter: (updated: PrescInfoData) => {
+          onModified(updated);
+        },
       },
     });
   }
 
-  // function doEdit() {
-  //   const d: DenshiHenkanDialog = new DenshiHenkanDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       init: { kind: "denshi", data: shohou },
-  //       at,
-  //       kouhiList,
-  //       title: "処方編集",
-  //       onEnter: (newShohou: PrescInfoData) => {
-  //         onModified(newShohou);
-  //       },
-  //       onCancel: () => {
-  //         onCancel();
-  //       },
-  //     },
-  //   });
-  // }
+  function doOldEdit() {
+    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        init: { kind: "denshi", data: shohou },
+        at,
+        kouhiList,
+        title: "処方編集",
+        onEnter: (newShohou: PrescInfoData) => {
+          onModified(newShohou);
+        },
+        onCancel: () => {
+          onCancel();
+        },
+      },
+    });
+  }
 
   function doPrint() {
     const data = denshiToPrint(shohou);
@@ -197,13 +197,12 @@
   }
 
   async function doOldShohou() {
-	let c = denshiToOldShohou(shohou);
-	const visitId = (await api.getText(textId)).visitId;
-	const text = { textId: 0, visitId, content: c };
-	onDone();
-	await api.enterText(text);
+    let c = denshiToOldShohou(shohou);
+    const visitId = (await api.getText(textId)).visitId;
+    const text = { textId: 0, visitId, content: c };
+    onDone();
+    await api.enterText(text);
   }
-
 </script>
 
 <div style="border:1px solid green;padding:10px;border-radius:6px">
@@ -213,6 +212,7 @@
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
+  <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a>
   <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
