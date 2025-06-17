@@ -17,15 +17,17 @@
   export let 情報区分: 情報区分;
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
+  export let isEditing薬品コード: boolean;
   export let 薬品名称: string;
   export let 分量: string;
-  export let 単位名: string | undefined;
+  export let isEditing分量: boolean;
+  export let 単位名: string;
   export let 不均等レコード: 不均等レコード | undefined;
+  export let isEditing不均等レコード: boolean;
 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
   let showAux = false;
-  let unevenIsEditing = false;
 
   onMount(() => {
     drugKindFocus();
@@ -48,27 +50,13 @@
     }
   }
 
-  // function doDrugKindChange(arg: {
-  //   情報区分: 情報区分;
-  //   薬品コード種別: 薬品コード種別;
-  //   薬品コード: string;
-  //   薬品名称: string;
-  //   単位名: string | undefined;
-  // }) {
-  //   情報区分 = arg.情報区分;
-  //   薬品コード種別 = arg.薬品コード種別;
-  //   薬品コード = arg.薬品コード;
-  //   薬品名称 = arg.薬品名称;
-  //   単位名 = arg.単位名;
-  // }
-
   function doUneven() {
 	if( !不均等レコード ){
 	  不均等レコード = {
 		不均等１回目服用量: "1",
 		不均等２回目服用量: "2",
 	  };
-	  unevenIsEditing = true;
+	  isEditing不均等レコード = true;
 	}
   }
   
@@ -80,6 +68,7 @@
     {情報区分}
     bind:薬品コード種別
     bind:薬品コード
+	bind:isEditing={isEditing薬品コード}
     bind:薬品名称
     bind:単位名
     {at}
@@ -87,11 +76,11 @@
   />
 {/key}
 <div class="form-part">
-  <DrugAmount bind:分量 単位名={単位名 || ""} />
+  <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
 </div>
 {#if 不均等レコード}
   <div>
-    <Uneven bind:不均等レコード bind:isEditing={unevenIsEditing}/>
+    <Uneven bind:不均等レコード bind:isEditing={isEditing不均等レコード}/>
   </div>
 {/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->

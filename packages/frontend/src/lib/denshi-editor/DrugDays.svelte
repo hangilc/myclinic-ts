@@ -1,15 +1,56 @@
 <script lang="ts">
-  import type {
-    剤形区分,
-   } from "@/lib/denshi-shohou/denshi-shohou";
-  import type { 薬品情報, 薬品レコード } from "../denshi-shohou/presc-info";
+  import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import SubmitIcon from "./icons/SubmitIcon.svelte";
+  import CancelIcon from "./icons/CancelIcon.svelte";
+  import { toHankaku } from "../zenkaku";
 
   export let 剤形区分: 剤形区分;
-  export let timesText: string;
+  export let 調剤数量: number;
+  export let isEditing: boolean;
+
+  let inputText: string = 調剤数量.toString();
+
+  function doEnter() {
+	const d = parseInt(toHankaku(inputText.trim()))
+	if( isNaN(d) ){
+	  alert("日数・回数が整数でありません。");
+	  return;
+	}
+	if( d <= 0 ) {
+	  alert("日数・回数が正の値でありません。");
+	  return;
+	}
+	調剤数量 = d;
+	inputText = d.toString();
+	isEditing = false;
+  }
+  
+  function doCancel() {
+	inputText = 調剤数量.toString();
+	isEditing = false;
+  }
+  
+  function doEdit() {
+	inputText = 調剤数量.toString();
+	isEditing = true;
+  }
 </script>
 
 <div>
-<span>{剤形区分 === "内服" ? "日数" : "回数"}：</span>
-  <input type="text" style="width:3rem" bind:value={timesText} />
-  {剤形区分 === "内服" ? "日分" : "回分"}
+  {#if isEditing}
+    <form on:submit|preventDefault={doEnter}>
+      <span>{剤形区分 === "内服" ? "日数" : "回数"}：</span>
+      <input type="text" style="width:3rem" bind:value={inputText} />
+      {剤形区分 === "内服" ? "日分" : "回分"}
+      <SubmitIcon onClick={doEnter} />
+      <CancelIcon onClick={doCancel} />
+    </form>
+  {:else}
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <div on:click={doEdit}>
+      <span>{剤形区分 === "内服" ? "日数" : "回数"}：</span>
+      {調剤数量}{剤形区分 === "内服" ? "日分" : "回分"}
+    </div>
+  {/if}
 </div>

@@ -27,21 +27,50 @@
   let 情報区分: 情報区分 = "医薬品";
   let 薬品コード種別: 薬品コード種別 = "レセプト電算処理システム用コード";
   let 薬品コード: string = "";
+  let isEditing薬品コード= true;
   let 薬品名称: string = "";
   let 分量: string = "";
+  let isEditing分量 = true;
   let 力価フラグ: 力価フラグ = "薬価単位";
   let 単位名: string = "";
   let 用法コード: string = "";
+  let isEditing用法コード = true;
   let 用法名称: string = "";
-  let 調剤数量: number = 7;
-  let timesText: string = 調剤数量.toString();
+  let 調剤数量: number = 5;
+  let isEditing調剤数量 = true;
   let 不均等レコード: 不均等レコード| undefined = undefined;
+  let isEditing不均等レコード = false;
 
   function doCancel() {
     onDone();
   }
 
+  function isEditing(): string | false {
+	
+	if(isEditing薬品コード){
+	  return "薬品コード";
+	}
+	if(isEditing分量){
+	  return "分量";
+	}
+	if(isEditing用法コード){
+	  return "用法コード";
+	}
+	if(isEditing調剤数量){
+	  return "調剤数量";
+	}
+	if(isEditing不均等レコード){
+	  return "不均等レコード";
+	}
+	return false;
+  }
+
   function doEnter() {
+	let editing = isEditing();
+	if( editing ){
+	  alert(`入力中の項目があります。（${editing}）`);
+	  return;
+	}
     let record: 薬品レコード = {
       情報区分,
       薬品コード種別,
@@ -51,41 +80,16 @@
       力価フラグ,
       単位名,
     };
-    let err = validateDrug(record);
-    if (typeof err === "string") {
-      alert(err);
-      return;
-    }
     let 薬品情報: 薬品情報 = {
       薬品レコード: record,
+	  不均等レコード,
     };
-    if (用法コード === "") {
-      alert("用法コードが設定されていません。");
-      return;
-    }
-    if (用法名称 === "") {
-      alert("用法名称が設定されていません。");
-      return;
-    }
     let 用法レコード: 用法レコード = {
       用法コード,
       用法名称,
     };
     if (剤形区分 === "内服" || 剤形区分 === "頓服") {
-      let input = toHankaku(timesText.trim());
-      if (input === "") {
-        alert("日数・回数が設定されていません。");
-        return;
-      }
-      調剤数量 = parseInt(input);
-      if (isNaN(調剤数量)) {
-        alert("日数・回数が整数でありません。");
-        return;
-      }
-      if (調剤数量 <= 0) {
-        alert("日数・回数が正の数値でありません。");
-        return;
-      }
+	  // nop
     } else {
       調剤数量 = 1;
     }
@@ -109,16 +113,19 @@
   bind:情報区分
   bind:薬品コード種別
   bind:薬品コード
+  bind:isEditing薬品コード
   bind:薬品名称
   bind:分量
+  bind:isEditing分量
   bind:単位名
   bind:不均等レコード
+  bind:isEditing不均等レコード
 />
 <div class="form-part">
-  <DrugUsage bind:用法コード bind:用法名称 />
+  <DrugUsage bind:用法コード bind:用法名称 bind:isEditing={isEditing用法コード} />
 </div>
 {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
-  <DrugDays bind:剤形区分 bind:timesText />
+  <DrugDays bind:剤形区分 bind:調剤数量 bind:isEditing={isEditing調剤数量} />
 {/if}
 
 <div class="commands">

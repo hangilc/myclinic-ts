@@ -1,5 +1,5 @@
 <script lang="ts">
-  import XCircle from "@/icons/XCircle.svelte";
+  import CheckCircle from "@/icons/CheckCircle.svelte";
 
   export let onClick: () => void;
 </script>
@@ -10,23 +10,16 @@
   tabindex="-1"
   on:click={onClick}
 >
-  <XCircle color="currentColor" width="20" />
+  <CheckCircle color="currentColor" width="20"/>
 </a>
 
 <style>
   a {
-    color: gray;
     position: relative;
-  }
-
-  a:hover {
-	color: red;
   }
 
   a :global(svg) {
 	position: relative;
 	top: 4.5px;
-	left: -2px;
   }
 </style>
-

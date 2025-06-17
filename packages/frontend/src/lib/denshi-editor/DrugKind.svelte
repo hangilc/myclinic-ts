@@ -10,11 +10,11 @@
   export let 情報区分: 情報区分;
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
+  export let isEditing: boolean;
   export let 薬品名称: string;
   export let 単位名: string | undefined;
    export let at: string;
  
-  let isEditing = false;
   let ippanmei = "";
   let ippanmeicode = "";
   let formFocus: () => boolean ;
