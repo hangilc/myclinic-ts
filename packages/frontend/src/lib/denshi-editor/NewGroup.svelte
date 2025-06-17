@@ -12,6 +12,7 @@
     RP剤情報,
     剤形レコード,
     用法レコード,
+    不均等レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import DrugUsage from "./DrugUsage.svelte";
   import { toHankaku } from "@/lib/zenkaku";
@@ -34,6 +35,7 @@
   let 用法名称: string = "";
   let 調剤数量: number = 7;
   let timesText: string = 調剤数量.toString();
+  let 不均等レコード: 不均等レコード| undefined = undefined;
 
   function doCancel() {
     onDone();
@@ -110,6 +112,7 @@
   bind:薬品名称
   bind:分量
   bind:単位名
+  bind:不均等レコード
 />
 <div class="form-part">
   <DrugUsage bind:用法コード bind:用法名称 />

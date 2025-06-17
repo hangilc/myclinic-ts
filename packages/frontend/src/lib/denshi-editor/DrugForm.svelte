@@ -48,19 +48,19 @@
     }
   }
 
-  function doDrugKindChange(arg: {
-    情報区分: 情報区分;
-    薬品コード種別: 薬品コード種別;
-    薬品コード: string;
-    薬品名称: string;
-    単位名: string | undefined;
-  }) {
-    情報区分 = arg.情報区分;
-    薬品コード種別 = arg.薬品コード種別;
-    薬品コード = arg.薬品コード;
-    薬品名称 = arg.薬品名称;
-    単位名 = arg.単位名;
-  }
+  // function doDrugKindChange(arg: {
+  //   情報区分: 情報区分;
+  //   薬品コード種別: 薬品コード種別;
+  //   薬品コード: string;
+  //   薬品名称: string;
+  //   単位名: string | undefined;
+  // }) {
+  //   情報区分 = arg.情報区分;
+  //   薬品コード種別 = arg.薬品コード種別;
+  //   薬品コード = arg.薬品コード;
+  //   薬品名称 = arg.薬品名称;
+  //   単位名 = arg.単位名;
+  // }
 
   function doUneven() {
 	if( !不均等レコード ){
@@ -82,9 +82,7 @@
     bind:薬品コード
     bind:薬品名称
     bind:単位名
-    {不均等レコード}
     {at}
-    onChange={doDrugKindChange}
     bind:focus={drugKindFocus}
   />
 {/key}

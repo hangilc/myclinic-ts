@@ -40,7 +40,9 @@
     }
     let data: 薬品情報 = {
       薬品レコード: record,
+	  不均等レコード,
     };
+	console.log("data", data);
     onEnter(data);
     onDone();
   }
@@ -60,7 +62,7 @@
   bind:薬品名称
   bind:分量
   bind:単位名
-  {不均等レコード}
+  bind:不均等レコード
 />
 <div class="commands">
   <button on:click={doEnter}>入力</button>

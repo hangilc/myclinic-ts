@@ -4,7 +4,6 @@
     情報区分,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
-  import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import Rep from "./drug-kind/Rep.svelte";
   import Form from "./drug-kind/Form.svelte";
 
@@ -13,16 +12,8 @@
   export let 薬品コード: string;
   export let 薬品名称: string;
   export let 単位名: string | undefined;
-  export let 不均等レコード: 不均等レコード | undefined;
-  export let at: string;
-  export let onChange: (data: {
-    情報区分: 情報区分;
-    薬品コード種別: 薬品コード種別;
-    薬品コード: string;
-    薬品名称: string;
-    単位名: string | undefined;
-  }) => void;
-
+   export let at: string;
+ 
   let isEditing = false;
   let ippanmei = "";
   let ippanmeicode = "";
