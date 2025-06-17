@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { 不均等レコード } from "../denshi-shohou/presc-info";
+  import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
