@@ -10,6 +10,7 @@
     薬品コード種別,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import Cog from "@/icons/Cog.svelte";
+  import Uneven from "./drug-form/Uneven.svelte";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -24,6 +25,7 @@
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
   let showAux = false;
+  let unevenIsEditing = false;
 
   onMount(() => {
     drugKindFocus();
@@ -59,6 +61,17 @@
     薬品名称 = arg.薬品名称;
     単位名 = arg.単位名;
   }
+
+  function doUneven() {
+	if( !不均等レコード ){
+	  不均等レコード = {
+		不均等１回目服用量: "1",
+		不均等２回目服用量: "2",
+	  };
+	  unevenIsEditing = true;
+	}
+  }
+  
 </script>
 
 <ZaikeiKubunForm bind:剤形区分 notifyChange={doZaikeiKubunChange} />
@@ -78,14 +91,23 @@
 <div class="form-part">
   <DrugAmount bind:分量 単位名={単位名 || ""} />
 </div>
+{#if 不均等レコード}
+  <div>
+    <Uneven bind:不均等レコード bind:isEditing={unevenIsEditing}/>
+  </div>
+{/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
   <span class="cog" on:click={() => (showAux = !showAux)}><Cog /></span>
 </div>
 {#if showAux}
-  {#if !不均等レコード}
-	{/if}
+  <!-- svelte-ignore a11y-invalid-attribute -->
+  <div>
+    {#if !不均等レコード}
+      <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
+    {/if}
+  </div>
 {/if}
 
 <style>
