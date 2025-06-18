@@ -1,14 +1,16 @@
 <script lang="ts">
-  import type {
-    用法補足レコードIndexed,
-    薬品情報Indexed,
+  import {
+  index用法補足レコード,
+    type 用法補足レコードIndexed,
+    type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import DrugDays from "./DrugDays.svelte";
   import DrugUsage from "./DrugUsage.svelte";
-  import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import type { 剤形区分, 用法補足区分 } from "@/lib/denshi-shohou/denshi-shohou";
   import { drugRep } from "./helper";
   import CogLink from "./icons/CogLink.svelte";
   import YouhouHosoku from "./drug-form/YouhouHosoku.svelte";
+  import type { 用法補足レコード } from "../denshi-shohou/presc-info";
 
   export let onDone: () => void;
   export let onDelete: () => void;
@@ -59,9 +61,34 @@
     showAuxMenu = !showAuxMenu;
   }
 
-  function doAddYouhouHosoku() {
-	
+  function doAddYouhouHosoku(kubun: 用法補足区分) {
+    if( kubun === "一包化"){
+      let h: 用法補足レコード = {
+        用法補足区分: kubun,
+        用法補足情報: kubun,
+      }
+      用法補足レコード.push(index用法補足レコード(h));
+      用法補足レコード = 用法補足レコード;
+    } else {
+      let h: 用法補足レコード = {
+        用法補足区分: kubun,
+        用法補足情報: "",
+      }
+      用法補足レコード.push(index用法補足レコード(h));
+      用法補足レコード = 用法補足レコード;
+    }
+    showAuxMenu = false;
   }
+
+  function youhouHosokuNotContains(list: 用法補足レコードIndexed[], kubun: 用法補足区分): boolean {
+    for(let r of list){
+      if( r.用法補足区分 === kubun ){
+        return false;
+      }
+    }
+    return true;
+  }
+
 </script>
 
 <div>薬剤グループの編集</div>
@@ -78,9 +105,12 @@
 <div><YouhouHosoku bind:用法補足レコード /></div>
 <div><CogLink onClick={toggleAuxMenu} /></div>
 {#if showAuxMenu}
-  <div>
 	<!-- svelte-ignore a11y-invalid-attribute -->
-	<a href="javascript:void(0)" on:click={doAddYouhouHosoku}>用法補足</a>
+  <div>
+    {#if youhouHosokuNotContains(用法補足レコード, "一包化")}
+    <a href="javascript:void(0)" on:click={() => doAddYouhouHosoku("一包化")}>一包化</a>
+    {/if}
+	<a href="javascript:void(0)" on:click={() => doAddYouhouHosoku("用法の続き")}>用法補足</a>
   </div>
 {/if}
 <div class="commands">

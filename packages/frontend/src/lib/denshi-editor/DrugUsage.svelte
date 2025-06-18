@@ -18,7 +18,7 @@
   let searchResult: UsageMaster[] = [];
 
   const freeTextCode = "0X0XXXXXXXXX0000";
-  
+
   export const focus: () => void = () => {
     if (mode === "master") {
       masterInputElement?.focus();
@@ -32,9 +32,9 @@
   }
 
   function doModeChanged() {
-	searchText = 用法名称;
-	searchResult = [];
-	focus();
+    searchText = 用法名称;
+    searchResult = [];
+    focus();
   }
 
   async function doSearchUsage() {
@@ -48,8 +48,8 @@
     用法コード = value.usage_code;
     用法名称 = value.usage_name;
     isEditing = false;
-	searchText = "";
-	searchResult = [];
+    searchText = "";
+    searchResult = [];
   }
 
   function doFreeText() {
@@ -70,10 +70,10 @@
 
   function doClearSearchText() {
     searchText = "";
-	focus();
-	if( mode === "master") {
+    focus();
+    if (mode === "master") {
       searchResult = [];
-	}
+    }
   }
 
   function doCancel() {
@@ -87,9 +87,22 @@
 <!-- svelte-ignore a11y-invalid-attribute -->
 {#if isEditing}
   <div>
-    <input type="radio" bind:group={mode} value="master" tabindex="-1" on:change={doModeChanged}/>
+    <input
+      type="radio"
+      bind:group={mode}
+      value="master"
+      tabindex="-1"
+      on:change={doModeChanged}
+    />
     マスター
-    <input type="radio" bind:group={mode} value="free-style" tabindex="-1" on:change={doModeChanged} /> 自由文章
+    <input
+      type="radio"
+      bind:group={mode}
+      value="free-style"
+      tabindex="-1"
+      on:change={doModeChanged}
+    />
+    自由文章
     <!-- svelte-ignore a11y-invalid-attribute -->
   </div>
   {#if mode === "master"}
@@ -97,23 +110,23 @@
       <input
         class="input-text"
         type="text"
-		tabindex="0"
+        tabindex="0"
         bind:value={searchText}
         bind:this={masterInputElement}
-		/>
+      />
       <a
         href="javascript:void(0)"
         style="position:relative;top:5px;margin-left:3px;"
-		tabindex="-1"
+        tabindex="-1"
         on:click={doSearchUsage}><MagnifyingGlass /></a
-													  >
+      >
       {#if searchText.length > 0}
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
-		  tabindex="-1"
+          tabindex="-1"
           on:click={doClearSearchText}
-          >
+        >
           <Eraser color="#999" />
         </a>
       {/if}
@@ -121,9 +134,9 @@
         <a
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:-4px;"
-		  tabindex="-1"
+          tabindex="-1"
           on:click={doCancel}
-          >
+        >
           <XCircle color="#999" />
         </a>
       {/if}
@@ -132,40 +145,45 @@
       <div class="search-result">
         {#each searchResult as result (result.usage_code)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div
-          style="cursor:pointer;"
-          on:click={() => doUsageMasterSelect(result)}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            style="cursor:pointer;"
+            on:click={() => doUsageMasterSelect(result)}
           >
-          {result.usage_name}
-        </div>
-      {/each}
-    </div>
-  {/if}
-{:else if mode === "free-style"}
-  <form on:submit|preventDefault={doFreeText}>
-    <input
-      type="text"
-	  class="input-text"
-      bind:value={searchText}
-      bind:this={freeStyleInputElement}
-	  />
-	{#if searchText.length > 0}
-	  <a href="javascript:void(0)" on:click={doFreeText}
-		 style="position:relative;top:5px;"
-		 tabindex="-1">
-		<CheckCircle color="#007bff"/>
-	  </a>
-	  <a href="javascript:void(0)"
-		 style="position:relative;top:5px;margin-left:-4px;"
-		 tabindex="-1"
-		 on:click={doClearSearchText}
-		 >
-		<Eraser />
-	  </a>
-	{/if}
-  {#if 用法コード}<CancelIcon onClick={doCancel} /> {/if}
-	</form>
+            {result.usage_name}
+          </div>
+        {/each}
+      </div>
+    {/if}
+  {:else if mode === "free-style"}
+    <form on:submit|preventDefault={doFreeText}>
+      <input
+        type="text"
+        class="input-text"
+        bind:value={searchText}
+        bind:this={freeStyleInputElement}
+      />
+      {#if searchText.length > 0}
+        <a
+          href="javascript:void(0)"
+          on:click={doFreeText}
+          style="position:relative;top:5px;"
+          tabindex="-1"
+        >
+          <CheckCircle color="#007bff" />
+        </a>
+        <a
+          href="javascript:void(0)"
+          style="position:relative;top:5px;margin-left:-4px;"
+          tabindex="-1"
+          on:click={doClearSearchText}
+        >
+          <Eraser />
+        </a>
+      {/if}
+      {#if 用法コード}<CancelIcon onClick={doCancel} />
+      {/if}
+    </form>
   {/if}
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
