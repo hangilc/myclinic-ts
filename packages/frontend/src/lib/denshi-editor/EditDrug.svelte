@@ -20,13 +20,35 @@
   let 情報区分: 情報区分 = drug.薬品レコード.情報区分;
   let 薬品コード種別: 薬品コード種別 = drug.薬品レコード.薬品コード種別;
   let 薬品コード: string = drug.薬品レコード.薬品コード;
+  let isEditing薬品コード: boolean = false;
   let 薬品名称: string = drug.薬品レコード.薬品名称;
   let 分量: string = drug.薬品レコード.分量;
+  let isEditing分量: boolean = false;
   let 力価フラグ: 力価フラグ = drug.薬品レコード.力価フラグ;
   let 単位名: string = drug.薬品レコード.単位名;
   let 不均等レコード = drug.不均等レコード;
+  let isEditing不均等レコード: boolean = false;
 
+  function confirmNotEditing(): boolean {
+	if( isEditing薬品コード){
+	  alert("薬品が編集中です。");
+	  return false;
+	}
+	if( isEditing分量){
+	  alert("分量が編集中です。");
+	  return false;
+	}
+	if( isEditing不均等レコード){
+	  alert("不均等が編集中です。");
+	  return false;
+	}
+	return true;
+  }
+  
   function doEnter() {
+	if( !confirmNotEditing() ){
+	  return;
+	}
     let record: 薬品レコード = {
       情報区分,
       薬品コード種別,
@@ -43,6 +65,7 @@
     }
     let data: 薬品情報 = {
       薬品レコード: record,
+	  不均等レコード,
     };
     onEnter(data);
     onDone();
@@ -67,10 +90,13 @@
   bind:情報区分
   bind:薬品コード種別
   bind:薬品コード
+  bind:isEditing薬品コード
   bind:薬品名称
   bind:分量
+  bind:isEditing分量
   bind:単位名
-  {不均等レコード}
+  bind:不均等レコード
+  bind:isEditing不均等レコード
 />
 <div class="commands">
   <!-- svelte-ignore a11y-invalid-attribute -->

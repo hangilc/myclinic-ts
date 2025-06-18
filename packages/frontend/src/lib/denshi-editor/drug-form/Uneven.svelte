@@ -84,13 +84,15 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
   {#if isEditing}
-    不均等：<input type="text" bind:value={inputText} />
-    <a href="javascript:void(0)" class="icon" on:click={doEnter}
-      ><CheckCircle color="currentColor" /></a
-    >
-    <a href="javascript:void(0)" class="icon not-first" on:click={doCancel}
-      ><XCircle /></a
-    >
+    <form on:submit|preventDefault={doEnter}>
+      不均等：<input type="text" bind:value={inputText} />
+      <a href="javascript:void(0)" class="icon" on:click={doEnter}
+        ><CheckCircle color="currentColor" /></a
+      >
+      <a href="javascript:void(0)" class="icon not-first" on:click={doCancel}
+        ><XCircle /></a
+      >
+    </form>
   {:else}
     <div on:click={doEdit} class="rep">不均等：{inputText}</div>
   {/if}
@@ -107,6 +109,6 @@
   }
 
   .rep {
-	cursor: pointer;
+    cursor: pointer;
   }
 </style>

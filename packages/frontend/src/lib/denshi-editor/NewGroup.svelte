@@ -16,7 +16,6 @@
   } from "@/lib/denshi-shohou/presc-info";
   import DrugUsage from "./DrugUsage.svelte";
   import { toHankaku } from "@/lib/zenkaku";
-  import { validateDrug } from "./helper";
   import DrugDays from "./DrugDays.svelte";
 
   export let onDone: () => void;
