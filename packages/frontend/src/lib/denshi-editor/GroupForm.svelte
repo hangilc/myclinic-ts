@@ -6,6 +6,7 @@
   import { drugRep } from "./helper";
 
   export let onDone: () => void;
+  export let onDelete: () => void;
   export let 用法コード: string;
   export let 用法名称: string;
   export let 調剤数量: number;
@@ -39,6 +40,13 @@
     onDone();
     onChange({ 用法コード, 用法名称, 調剤数量 });
   }
+
+  function doDelete() {
+	if( confirm("この薬剤グループを削除しますか？")){
+	  onDone();
+	  onDelete();
+	}
+  }
 </script>
 
 <div>薬剤グループの編集</div>
@@ -53,6 +61,8 @@
   <DrugDays bind:調剤数量 {剤形区分} bind:isEditing={isEditing調剤数量} />
 {/if}
 <div class="commands">
+  <!-- svelte-ignore a11y-invalid-attribute -->
+  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   {#if !isEditing用法コード&& !isEditing調剤数量}
 	<button on:click={doEnter}>入力</button>
   {/if}

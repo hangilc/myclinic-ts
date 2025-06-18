@@ -106,6 +106,9 @@
           clearForm();
           clearForm = () => {};
         },
+		onDelete: () => {
+		  groups = groups.filter(g => g.id !== group.id);
+		},
 		用法コード: group.用法レコード.用法コード,
 		用法名称: group.用法レコード.用法名称,
 		調剤数量: group.剤形レコード.調剤数量,
