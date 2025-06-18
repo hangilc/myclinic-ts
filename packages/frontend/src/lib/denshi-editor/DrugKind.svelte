@@ -10,25 +10,25 @@
   export let 情報区分: 情報区分;
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品コード: string;
-  export let isEditing: boolean;
+  export let isEditing薬品コード: boolean;
   export let 薬品名称: string;
   export let 単位名: string | undefined;
-   export let at: string;
- 
+  export let at: string;
+
   let ippanmei = "";
   let ippanmeicode = "";
-  let formFocus: () => boolean ;
+  let formFocus: () => boolean;
 
   export const focus: () => boolean = () => {
-	if( formFocus ){
-	  return formFocus();
-	} else {
-	  return false;
-	}
-  }
+    if (formFocus) {
+      return formFocus();
+    } else {
+      return false;
+    }
+  };
 
   if (薬品コード === "") {
-    isEditing = true;
+    isEditing薬品コード = true;
   }
 
   initIppanmei();
@@ -55,7 +55,6 @@
     }
   }
 
-
   function doIppanmei() {
     if (ippanmei && ippanmeicode) {
       薬品コード種別 = "一般名コード";
@@ -65,33 +64,32 @@
   }
 
   function doEdit() {
-    isEditing = true;
+    isEditing薬品コード = true;
   }
 
   function doCancel() {
-	isEditing = false;
+    isEditing薬品コード = false;
   }
 
   function doSelect() {
-	isEditing = false;
+    isEditing薬品コード = false;
   }
-
 </script>
 
-{#if isEditing}
+{#if isEditing薬品コード}
   <Form
-	bind:薬品コード
-	bind:薬品名称
-	bind:単位名
-	bind:ippanmei
-	bind:ippanmeicode
-	{情報区分}
-	{薬品コード種別}
-	{at}
-	notifyCancel={doCancel}
-	notifySelect={doSelect}
-	bind:focus={formFocus}
-	/>
+    bind:薬品コード
+    bind:薬品名称
+    bind:単位名
+    bind:ippanmei
+    bind:ippanmeicode
+    {情報区分}
+    {薬品コード種別}
+    {at}
+    notifyCancel={doCancel}
+    notifySelect={doSelect}
+    bind:focus={formFocus}
+  />
 {:else}
   <Rep
     {薬品コード種別}
@@ -101,4 +99,3 @@
     onIppanmeiClick={doIppanmei}
   />
 {/if}
-

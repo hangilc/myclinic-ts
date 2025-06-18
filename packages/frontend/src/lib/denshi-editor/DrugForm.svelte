@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
+  import type { 不均等レコード, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
@@ -24,6 +24,8 @@
   export let 単位名: string;
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
+  export let 薬品補足レコード: 薬品補足レコード[] | undefined;
+  export let isEditing薬品補足レコード: boolean;
 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
@@ -59,6 +61,13 @@
 	  isEditing不均等レコード = true;
 	}
   }
+
+  function doHosoku() {
+	if( !薬品補足レコード){
+	  薬品補足レコード = [{ "薬品補足情報": "" }];
+	  isEditing薬品補足レコード = true;
+	}
+  }
   
 </script>
 
@@ -68,7 +77,7 @@
     {情報区分}
     bind:薬品コード種別
     bind:薬品コード
-	bind:isEditing={isEditing薬品コード}
+	bind:isEditing薬品コード
     bind:薬品名称
     bind:単位名
     {at}
@@ -83,6 +92,11 @@
     <Uneven bind:不均等レコード bind:isEditing={isEditing不均等レコード}/>
   </div>
 {/if}
+{#if 薬品補足レコード}
+  <div>
+	<Hosoku bind:薬品補足レコード bind:isEditing={isEditing薬品補足レコード} />
+	</div>
+  {/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
@@ -94,6 +108,9 @@
     {#if !不均等レコード}
       <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
     {/if}
+	{#if !薬品補足レコード}
+	  <a href="javascript:void(0)" on:click={doHosoku}>補足レコード</a>
+	{/if}
   </div>
 {/if}
 
