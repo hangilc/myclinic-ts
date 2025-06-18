@@ -1,4 +1,4 @@
-import type { 不均等レコード, 薬品レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { 不均等レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import { toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
@@ -40,9 +40,17 @@ function unevenRep(u: 不均等レコード | undefined): string {
   }
 }
 
+function hosokuRep(h: 薬品補足レコード[] | undefined) {
+  if( h ){
+    return h.map(e => `　${e.薬品補足情報}`).join("");
+  } else {
+    return "";
+  }
+}
+
 export function drugRep(drug: 薬品情報): string {
   return `${drug.薬品レコード.薬品名称}　${toZenkaku(
     drug.薬品レコード.分量,
-  )}${drug.薬品レコード.単位名}${unevenRep(drug.不均等レコード)}`;
+  )}${drug.薬品レコード.単位名}${unevenRep(drug.不均等レコード)}${hosokuRep(drug.薬品補足レコード)}`;
 }
 

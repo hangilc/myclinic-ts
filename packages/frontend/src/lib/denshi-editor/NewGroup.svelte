@@ -39,6 +39,8 @@
   let isEditing調剤数量 = true;
   let 不均等レコード: 不均等レコード| undefined = undefined;
   let isEditing不均等レコード = false;
+  let 薬品補足レコード: 薬品補足レコード[] | undefined = undefined;
+  let isEditing薬品補足レコード: boolean = false;
 
   function doCancel() {
     onDone();
@@ -119,6 +121,8 @@
   bind:単位名
   bind:不均等レコード
   bind:isEditing不均等レコード
+  bind:薬品補足レコード
+  bind:isEditing薬品補足レコード
 />
 <div class="form-part">
   <DrugUsage bind:用法コード bind:用法名称 bind:isEditing={isEditing用法コード} />

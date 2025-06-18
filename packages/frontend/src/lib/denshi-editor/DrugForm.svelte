@@ -1,6 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type { 不均等レコード, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
+  import type {
+    不均等レコード,
+    薬品補足レコード,
+  } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
@@ -11,6 +14,7 @@
   } from "@/lib/denshi-shohou/denshi-shohou";
   import Cog from "@/icons/Cog.svelte";
   import Uneven from "./drug-form/Uneven.svelte";
+  import Hosoku from "./drug-form/Hosoku.svelte";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -53,22 +57,22 @@
   }
 
   function doUneven() {
-	if( !不均等レコード ){
-	  不均等レコード = {
-		不均等１回目服用量: "1",
-		不均等２回目服用量: "2",
-	  };
-	  isEditing不均等レコード = true;
-	}
+    if (!不均等レコード) {
+      不均等レコード = {
+        不均等１回目服用量: "1",
+        不均等２回目服用量: "2",
+      };
+      isEditing不均等レコード = true;
+    }
   }
 
   function doHosoku() {
-	if( !薬品補足レコード){
-	  薬品補足レコード = [{ "薬品補足情報": "" }];
-	  isEditing薬品補足レコード = true;
-	}
+    if (!薬品補足レコード) {
+      薬品補足レコード = [];
+    }
+    薬品補足レコード.push({ 薬品補足情報: "" });
+    薬品補足レコード = 薬品補足レコード;
   }
-  
 </script>
 
 <ZaikeiKubunForm bind:剤形区分 notifyChange={doZaikeiKubunChange} />
@@ -77,7 +81,7 @@
     {情報区分}
     bind:薬品コード種別
     bind:薬品コード
-	bind:isEditing薬品コード
+    bind:isEditing薬品コード
     bind:薬品名称
     bind:単位名
     {at}
@@ -89,14 +93,14 @@
 </div>
 {#if 不均等レコード}
   <div>
-    <Uneven bind:不均等レコード bind:isEditing={isEditing不均等レコード}/>
+    <Uneven bind:不均等レコード bind:isEditing={isEditing不均等レコード} />
   </div>
 {/if}
 {#if 薬品補足レコード}
   <div>
-	<Hosoku bind:薬品補足レコード bind:isEditing={isEditing薬品補足レコード} />
-	</div>
-  {/if}
+    <Hosoku bind:薬品補足レコード bind:isEditing={isEditing薬品補足レコード} />
+  </div>
+{/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
@@ -108,9 +112,7 @@
     {#if !不均等レコード}
       <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
     {/if}
-	{#if !薬品補足レコード}
-	  <a href="javascript:void(0)" on:click={doHosoku}>補足レコード</a>
-	{/if}
+    <a href="javascript:void(0)" on:click={doHosoku}>補足レコード</a>
   </div>
 {/if}
 

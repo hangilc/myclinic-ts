@@ -6,6 +6,8 @@ let serialId = 1;
 export interface 薬品補足レコードIndexed {
   id: number;
   薬品補足情報: string;
+  isEditing: boolean;
+  orig薬品補足情報: string;
 }
 
 export interface 薬品情報Indexed {
@@ -22,7 +24,6 @@ export interface 用法補足レコードIndexed {
   id: number;
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
-
 }
 
 export interface RP剤情報Indexed {
@@ -34,7 +35,12 @@ export interface RP剤情報Indexed {
 }
 
 export function index薬品補足レコード(obj: 薬品補足レコード): 薬品補足レコードIndexed {
-  return Object.assign({}, obj, { id: serialId++ });
+  return {
+    id: serialId++,
+    薬品補足情報: obj.薬品補足情報,
+    isEditing: obj.薬品補足情報 === "" ? true : false,
+    orig薬品補足情報: obj.薬品補足情報,
+  }
 }
 
 export function index薬品情報(obj: 薬品情報): 薬品情報Indexed {
