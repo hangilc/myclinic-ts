@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
   import type {
     不均等レコード,
-    薬品補足レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
@@ -15,7 +14,10 @@
   import Cog from "@/icons/Cog.svelte";
   import Uneven from "./drug-form/Uneven.svelte";
   import Hosoku from "./drug-form/Hosoku.svelte";
-  import { index薬品補足レコード, type 薬品補足レコードIndexed } from "./denshi-editor-types";
+  import {
+    index薬品補足レコード,
+    type 薬品補足レコードIndexed,
+  } from "./denshi-editor-types";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -29,8 +31,8 @@
   export let 単位名: string;
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
-  export let 薬品補足レコード: 薬品補足レコードIndexed[] | undefined;
- 
+  export let 薬品補足レコード: 薬品補足レコードIndexed[];
+
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
   let showAux = false;

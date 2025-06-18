@@ -1,9 +1,14 @@
 <script lang="ts">
-  import type { 薬品情報Indexed } from "./denshi-editor-types";
+  import type {
+    用法補足レコードIndexed,
+    薬品情報Indexed,
+  } from "./denshi-editor-types";
   import DrugDays from "./DrugDays.svelte";
   import DrugUsage from "./DrugUsage.svelte";
   import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
   import { drugRep } from "./helper";
+  import CogLink from "./icons/CogLink.svelte";
+  import YouhouHosoku from "./drug-form/YouhouHosoku.svelte";
 
   export let onDone: () => void;
   export let onDelete: () => void;
@@ -12,6 +17,7 @@
   export let 調剤数量: number;
   export let 剤形区分: 剤形区分;
   export let drugs: 薬品情報Indexed[];
+  export let 用法補足レコード: 用法補足レコードIndexed[];
   export let onChange: (date: {
     用法コード: string;
     用法名称: string;
@@ -20,6 +26,7 @@
 
   let isEditing用法コード: boolean = true;
   let isEditing調剤数量: boolean = true;
+  let showAuxMenu = false;
 
   function confirmNotEditing(): boolean {
     if (isEditing用法コード) {
@@ -42,10 +49,18 @@
   }
 
   function doDelete() {
-	if( confirm("この薬剤グループを削除しますか？")){
-	  onDone();
-	  onDelete();
-	}
+    if (confirm("この薬剤グループを削除しますか？")) {
+      onDone();
+      onDelete();
+    }
+  }
+
+  function toggleAuxMenu() {
+    showAuxMenu = !showAuxMenu;
+  }
+
+  function doAddYouhouHosoku() {
+	
   }
 </script>
 
@@ -60,11 +75,19 @@
 {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
   <DrugDays bind:調剤数量 {剤形区分} bind:isEditing={isEditing調剤数量} />
 {/if}
+<div><YouhouHosoku bind:用法補足レコード /></div>
+<div><CogLink onClick={toggleAuxMenu} /></div>
+{#if showAuxMenu}
+  <div>
+	<!-- svelte-ignore a11y-invalid-attribute -->
+	<a href="javascript:void(0)" on:click={doAddYouhouHosoku}>用法補足</a>
+  </div>
+{/if}
 <div class="commands">
   <!-- svelte-ignore a11y-invalid-attribute -->
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
-  {#if !isEditing用法コード&& !isEditing調剤数量}
-	<button on:click={doEnter}>入力</button>
+  {#if !isEditing用法コード && !isEditing調剤数量}
+    <button on:click={doEnter}>入力</button>
   {/if}
   <button on:click={onDone}>キャンセル</button>
 </div>

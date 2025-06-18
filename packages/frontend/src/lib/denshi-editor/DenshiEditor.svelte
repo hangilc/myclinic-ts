@@ -5,6 +5,7 @@
   import NewDrug from "./NewDrug.svelte";
   import {
     indexRP剤情報,
+    index用法補足レコード,
     index薬品情報,
     unindexRP剤情報,
     unindex薬品情報,
@@ -113,6 +114,7 @@
 		用法名称: group.用法レコード.用法名称,
 		調剤数量: group.剤形レコード.調剤数量,
 		剤形区分: group.剤形レコード.剤形区分,
+		用法補足レコード: group.用法補足レコード?.map(r => index用法補足レコード(r)) ?? [],
 		drugs: group.薬品情報グループ,
 		onChange: (data: {
 		  用法コード: string; 用法名称: string; 調剤数量: number;

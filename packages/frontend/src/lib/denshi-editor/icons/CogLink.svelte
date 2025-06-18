@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Trash from "@/icons/Trash.svelte";
+  import Cog from "@/icons/Cog.svelte";
 
   export let onClick: () => void;
   export let style: string = "";
@@ -12,7 +12,7 @@
   {style}
   on:click={onClick}
 >
-  <Trash width="18"/>
+  <Cog width="18"/>
 </a>
 
 <style>

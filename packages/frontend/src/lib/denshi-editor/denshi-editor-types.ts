@@ -24,6 +24,8 @@ export interface 用法補足レコードIndexed {
   id: number;
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
+  isEditing: boolean;
+  orig: 用法補足レコード;
 }
 
 export interface RP剤情報Indexed {
@@ -51,7 +53,13 @@ export function index薬品情報(obj: 薬品情報): 薬品情報Indexed {
 }
 
 export function index用法補足レコード(obj: 用法補足レコード): 用法補足レコードIndexed {
-  return Object.assign({}, obj, { id: serialId++ });
+  return {
+    id: serialId++,
+    用法補足区分: obj.用法補足区分,
+    用法補足情報: obj.用法補足情報,
+    isEditing: obj.用法補足情報 === "",
+    orig: obj,
+  }
 }
 
 export function indexRP剤情報(obj: RP剤情報): RP剤情報Indexed {
