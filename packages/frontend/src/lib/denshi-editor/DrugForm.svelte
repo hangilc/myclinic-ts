@@ -15,6 +15,7 @@
   import Cog from "@/icons/Cog.svelte";
   import Uneven from "./drug-form/Uneven.svelte";
   import Hosoku from "./drug-form/Hosoku.svelte";
+  import { index薬品補足レコード, type 薬品補足レコードIndexed } from "./denshi-editor-types";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -28,9 +29,8 @@
   export let 単位名: string;
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
-  export let 薬品補足レコード: 薬品補足レコード[] | undefined;
-  export let isEditing薬品補足レコード: boolean;
-
+  export let 薬品補足レコード: 薬品補足レコードIndexed[] | undefined;
+ 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
   let showAux = false;
@@ -70,7 +70,7 @@
     if (!薬品補足レコード) {
       薬品補足レコード = [];
     }
-    薬品補足レコード.push({ 薬品補足情報: "" });
+    薬品補足レコード.push(index薬品補足レコード({ 薬品補足情報: "" }));
     薬品補足レコード = 薬品補足レコード;
   }
 </script>
@@ -98,7 +98,7 @@
 {/if}
 {#if 薬品補足レコード}
   <div>
-    <Hosoku bind:薬品補足レコード bind:isEditing={isEditing薬品補足レコード} />
+    <Hosoku bind:薬品補足レコード />
   </div>
 {/if}
 <!-- svelte-ignore a11y-no-static-element-interactions -->

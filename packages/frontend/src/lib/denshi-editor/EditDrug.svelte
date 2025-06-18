@@ -13,6 +13,11 @@
   import { validateDrug } from "./helper";
   import { toHankaku } from "@/lib/zenkaku";
   import DrugForm from "./DrugForm.svelte";
+  import {
+    index薬品補足レコード,
+    unindex薬品補足レコード,
+    type 薬品補足レコードIndexed,
+  } from "./denshi-editor-types";
 
   export let drug: 薬品情報;
   export let 剤形区分: 剤形区分;
@@ -32,8 +37,32 @@
   let 単位名: string = drug.薬品レコード.単位名;
   let 不均等レコード = drug.不均等レコード;
   let isEditing不均等レコード: boolean = false;
-  let 薬品補足レコード: 薬品補足レコード[] | undefined = drug.薬品補足レコード;
-  let isEditing薬品補足レコード: boolean = false;
+  let 薬品補足レコード: 薬品補足レコードIndexed[] | undefined =
+    drug.薬品補足レコード === undefined
+      ? undefined
+      : drug.薬品補足レコード.map((r) => index薬品補足レコード(r));
+
+  function isEditing薬品補足レコード(): boolean {
+    if (薬品補足レコード) {
+      for (let r of 薬品補足レコード) {
+        if (r.isEditing) {
+          return true;
+        }
+      }
+      return false;
+    } else {
+	  return false;
+	}
+  }
+
+  function get薬品補足レコード(): 薬品補足レコード[] | undefined {
+	if( 薬品補足レコード){
+	  let rs = 薬品補足レコード.map(r => unindex薬品補足レコード(r));
+	  return rs.length === 0 ? undefined: rs;
+	} else {
+	  return undefined;
+	}
+  }
 
   function confirmNotEditing(): boolean {
     if (isEditing薬品コード) {
@@ -48,7 +77,7 @@
       alert("不均等が編集中です。");
       return false;
     }
-    if (isEditing薬品補足レコード) {
+    if (isEditing薬品補足レコード()) {
       alert("薬品補足が編集中です。");
       return false;
     }
@@ -76,7 +105,7 @@
     let data: 薬品情報 = {
       薬品レコード: record,
       不均等レコード,
-	  薬品補足レコード,
+      薬品補足レコード: get薬品補足レコード(),
     };
     onEnter(data);
     onDone();
@@ -109,7 +138,6 @@
   bind:不均等レコード
   bind:isEditing不均等レコード
   bind:薬品補足レコード
-  bind:isEditing薬品補足レコード
 />
 <div class="commands">
   <!-- svelte-ignore a11y-invalid-attribute -->
