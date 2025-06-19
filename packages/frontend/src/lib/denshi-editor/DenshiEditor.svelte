@@ -397,16 +397,19 @@
           {/each}
         </div>
         {/if}
-       <div on:click={doEditInfoProviders} class="cursor-pointer">
+        {#if 提供診療情報レコード.length > 0 || 検査値データ等レコード.length > 0}
+        <div class="frame-with-label cursur-pointer">
+          <div class="label">情報提供</div>
           {#each 提供診療情報レコード as rec (rec.id)}
             <div>
-              {#if rec.薬品名称}
-                <span class="drug-name">{rec.薬品名称}</span>：
-              {/if}
-              {rec.コメント}
+              {#if rec.薬品名称}{rec.薬品名称}：{/if}{rec.コメント}
             </div>
           {/each}
+          {#each 検査値データ等レコード as rec (rec.id)}
+            <div>{rec.検査値データ等}</div>
+          {/each}
         </div>
+        {/if}
       </div>
     </div>
     <div class="form" bind:this={formElement}></div>
@@ -448,7 +451,7 @@
   .frame-with-label {
     border: 1px solid #ccc;
     padding: 20px 6px 6px 6px;
-    margin: 10px 0;
+    margin: 14px 0 10px 0;
     position: relative;
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { 備考レコードIndexed } from "./denshi-editor-types";
+  import { index備考レコード, type 備考レコードIndexed } from "./denshi-editor-types";
   import CancelLink from "./icons/CancelLink.svelte";
   import SubmitLink from "./icons/SubmitLink.svelte";
   import TrashLink from "./icons/TrashLink.svelte";
@@ -33,6 +33,12 @@
     rec.isEditing = false;
     備考レコード = 備考レコード;
   }
+
+  function doNew() {
+    let newRec = index備考レコード({備考: ""});
+    備考レコード.push(newRec);
+    備考レコード = 備考レコード;
+  }
 </script>
 
 <div>備考</div>
@@ -53,6 +59,7 @@
   {/if}
 {/each}
 <div class="commands">
+  <a href="javascript:void(0)" on:click={doNew}>追加</a>
   <button on:click={doNotice}>入力</button>
   <button on:click={onDone}>キャンセル</button>
 </div>
