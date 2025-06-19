@@ -1,5 +1,6 @@
 <script lang="ts">
   import Dialog2 from "@/lib/Dialog2.svelte";
+  import { tick } from "svelte";
   import type {
     PrescInfoData,
     提供診療情報レコード,
@@ -42,6 +43,7 @@
   export let data: PrescInfoData;
   export let onEnter: (shohou: PrescInfoData) => void;
   let formElement: HTMLElement;
+  let upperElement: HTMLElement;
   let clearForm: () => void = () => {};
   let at = shohouDateToSqlDate(data.処方箋交付年月日);
 
@@ -59,6 +61,13 @@
   let 備考レコード: 備考レコードIndexed[] = (data.備考レコード ?? []).map(
     index備考レコード,
   );
+
+  async function scrollToTop() {
+    await tick();
+    if (upperElement) {
+      upperElement.scrollTop = 0;
+    }
+  }
 
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
@@ -344,6 +353,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doEditBikou() {
@@ -362,6 +372,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function findGroupById(id: number): RP剤情報Indexed | undefined {
@@ -381,7 +392,7 @@
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <!-- svelte-ignore a11y-click-events-have-key-events -->
  <Dialog2 title="電子処方箋編集" {destroy}>
-  <div class="upper">
+  <div class="upper" bind:this={upperElement}>
     <div>
       <div class="aux-menu">
         <button on:click={doAddGroup}>追加</button>
