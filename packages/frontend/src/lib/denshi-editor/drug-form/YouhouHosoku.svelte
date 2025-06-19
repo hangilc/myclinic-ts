@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { receiveMessageOnPort } from "worker_threads";
   import type { 用法補足レコードIndexed } from "../denshi-editor-types";
   import CancelLink from "../icons/CancelLink.svelte";
   import SubmitLink from "../icons/SubmitLink.svelte";
@@ -40,7 +39,7 @@
           <SubmitLink onClick={() => doEnter(rec)} />
         {/if}
         <TrashLink onClick={() => doDelete(rec)} />
-        <CancelLink onClick={() => doCancel(rec)} />
+        <CancelLink onClick={() => doCancel(rec)} style="left:-4px;"/>
       </form>
     {:else}
       <div>

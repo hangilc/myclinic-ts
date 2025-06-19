@@ -7,7 +7,6 @@
 
 <!-- svelte-ignore a11y-invalid-attribute -->
 <a href="javascript:void(0)" tabindex="-1" {style} on:click={onClick}>
-  Cancel
   <XCircle color="currentColor" width="20" />
 </a>
 
