@@ -3,6 +3,7 @@
   import XCircle from "@/icons/XCircle.svelte";
   import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import { toHankaku } from "@/lib/zenkaku";
+  import TrashLink from "../icons/TrashLink.svelte";
 
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing: boolean;
@@ -77,6 +78,12 @@
       };
     }
   }
+
+  function doDelete() {
+    不均等レコード = undefined;
+    isEditing = false;
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -89,12 +96,14 @@
       <a href="javascript:void(0)" class="icon" on:click={doEnter}
         ><CheckCircle color="currentColor" /></a
       >
+      <TrashLink onClick={doDelete} />
       <a href="javascript:void(0)" class="icon not-first" on:click={doCancel}
         ><XCircle /></a
       >
     </form>
   {:else}
-    <div on:click={doEdit} class="rep">不均等：{inputText}</div>
+    <div on:click={doEdit} class="rep">不均等：{inputText} <TrashLink onClick={doDelete} /></div>
+    
   {/if}
 </div>
 
