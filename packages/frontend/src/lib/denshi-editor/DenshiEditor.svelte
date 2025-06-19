@@ -2,7 +2,6 @@
   import Dialog2 from "@/lib/Dialog2.svelte";
   import type {
     PrescInfoData,
-    用法補足レコード,
     薬品情報,
   } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
@@ -12,10 +11,8 @@
     index用法補足レコード,
     index薬品情報,
     unindexRP剤情報,
-    unindex用法補足レコード,
     unindex薬品情報,
     type RP剤情報Indexed,
-    type 用法補足レコードIndexed,
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import EditDrug from "./EditDrug.svelte";
@@ -23,6 +20,8 @@
   import ExpirationDate from "./ExpirationDate.svelte";
   import { onshiDateToSqlDate } from "myclinic-util";
   import GroupForm from "./GroupForm.svelte";
+  import ChevronDownLink from "./icons/ChevronDownLink.svelte";
+  import ChevronUpLink from "./icons/ChevronUpLink.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -35,6 +34,7 @@
     indexRP剤情報(g),
   );
   let 使用期限年月日: string | undefined = data.使用期限年月日;
+  let showAuxMenu = false;
 
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
@@ -180,6 +180,30 @@
     clearForm = () => e.$destroy();
   }
 
+  function doAddInfoProvider() {
+    clearForm();
+    const e: GroupForm = new GroupForm({
+      target: formElement,
+      props: {
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onDelete: () => {},
+        用法コード: "",
+        用法名称: "",
+        調剤数量: 1,
+        剤形区分: "錠剤",
+        用法補足レコード: [],
+        drugs: [],
+        onChange: (data) => {
+          // No action needed for adding info provider
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
   function findGroupById(id: number): RP剤情報Indexed | undefined {
     for (let g of groups) {
       if (g.id === id) {
@@ -197,6 +221,23 @@
 <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="upper">
     <div>
+      <div class="aux-menu">
+        <button on:click={doAddGroup}>追加</button>
+        {#if !使用期限年月日}
+          <!-- svelte-ignore a11y-invalid-attribute -->
+          <a href="javascript:void(0)" class="small-link" on:click={doExpirationDate}>有効期限</a>
+        {/if}
+        {#if showAuxMenu === false}
+          <ChevronDownLink onClick={() => (showAuxMenu = true)} />
+            {:else}
+            <ChevronUpLink onClick={() => (showAuxMenu = false)} /> 
+        {/if}
+        {#if showAuxMenu}
+            <a href="javascript:void(0)" class="small-link" on:click={doAddInfoProvider}>
+              情報提供
+              </a>
+        {/if}
+      </div>
       <PrescRep
         {groups}
         onAddDrug={doAddDrug}
@@ -210,13 +251,6 @@
           <div on:click={doExpirationDate} class="cursor-pointer">
             有効期限：{onshiDateToSqlDate(使用期限年月日)}
           </div>
-        {/if}
-      </div>
-      <div class="aux-menu">
-        <button on:click={doAddGroup}>追加</button>
-        {#if !使用期限年月日}
-          <!-- svelte-ignore a11y-invalid-attribute -->
-          <a href="javascript:void(0)" on:click={doExpirationDate}>有効期限</a>
         {/if}
       </div>
     </div>
@@ -241,6 +275,10 @@
 
   .aux-menu {
     margin: 10px 0;
+  }
+
+  .small-link {
+    font-size: 14px;
   }
 
   .commands {
