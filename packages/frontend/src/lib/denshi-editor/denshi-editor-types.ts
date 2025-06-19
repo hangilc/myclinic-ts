@@ -1,4 +1,4 @@
-import type { RP剤情報, 不均等レコード, 剤形レコード, 提供診療情報レコード, 検査値データ等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード, 薬品１回服用量レコード, 負担区分レコード } from "@/lib/denshi-shohou/presc-info";
+import type { RP剤情報, 不均等レコード, 備考レコード, 剤形レコード, 提供診療情報レコード, 検査値データ等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード, 薬品１回服用量レコード, 負担区分レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 用法補足区分 } from "../denshi-shohou/denshi-shohou";
 
 let serialId = 1;
@@ -52,6 +52,26 @@ export interface 検査値データ等レコードIndexed {
   検査値データ等: string;
   isEditing: boolean;
   orig: 検査値データ等レコード;
+}
+
+export interface 備考レコードIndexed {
+  id: number;
+  備考: string;
+  isEditing: boolean;
+  orig備考: string;
+}
+
+export function index備考レコード(obj: 備考レコード): 備考レコードIndexed {
+  return {
+    id: serialId++,
+    備考: obj.備考,
+    isEditing: obj.備考 === "",
+    orig備考: obj.備考,
+  };
+}
+
+export function unindex備考レコード(obj: 備考レコードIndexed): 備考レコード {
+  return { 備考: obj.備考 };
 }
 
 export function index薬品補足レコード(obj: 薬品補足レコード): 薬品補足レコードIndexed {

@@ -325,6 +325,11 @@
             有効期限：{onshiDateToSqlDate(使用期限年月日)}
           </div>
         {/if}
+        <div class="frame-with-label">
+          <div class="label">備考</div>
+          <div>一包化</div>
+          <div>追加時効</div>
+        </div>
         <!-- svelte-ignore missing-declaration -->
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div on:click={doEditInfoProviders} class="cursor-pointer">
@@ -373,5 +378,21 @@
 
   .cursor-pointer {
     cursor: pointer;
+  }
+
+  .frame-with-label {
+    border: 1px solid #ccc;
+    padding: 20px 6px 6px 6px;
+    margin: 10px 0;
+    position: relative;
+  }
+
+  .frame-with-label .label {
+    position: absolute;
+    left: 6px;
+    top: -0.6em;
+    background-color: white;
+    padding: 2px 6px 0 6px;
+    border: 1px solid #ccc;
   }
 </style>
