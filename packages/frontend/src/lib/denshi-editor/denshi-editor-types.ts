@@ -38,10 +38,13 @@ export interface RP剤情報Indexed {
 
 export interface 提供診療情報レコードIndexed {
   id: number;
-  薬品名称?: string;
+  薬品名称: string;
   コメント: string;
   isEditing: boolean;
-  orig: 提供診療情報レコード;
+  orig: {
+    薬品名称: string;
+    コメント: string;
+  };
 }
 
 export interface 検査値データ等レコードIndexed {
@@ -114,10 +117,13 @@ export function unindexRP剤情報(obj: RP剤情報Indexed): RP剤情報 {
 export function index提供診療情報レコード(obj: 提供診療情報レコード): 提供診療情報レコードIndexed {
   return {
     id: serialId++,
-    薬品名称: obj.薬品名称,
+    薬品名称: obj.薬品名称 ?? "",
     コメント: obj.コメント,
     isEditing: obj.コメント === "",
-    orig: obj,
+    orig: {
+      薬品名称: obj.薬品名称 ?? "",
+      コメント: obj.コメント,
+    },
   };
 }
 
@@ -132,7 +138,7 @@ export function index検査値データ等レコード(obj: 検査値データ�
 
 export function unindex提供診療情報レコード(obj: 提供診療情報レコードIndexed): 提供診療情報レコード {
   return {
-    薬品名称: obj.薬品名称,
+    薬品名称: obj.薬品名称 === "" ? undefined : obj.薬品名称,
     コメント: obj.コメント,
   };
 }

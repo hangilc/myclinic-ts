@@ -2,17 +2,25 @@
   import Dialog2 from "@/lib/Dialog2.svelte";
   import type {
     PrescInfoData,
+    提供診療情報レコード,
     薬品情報,
+    検査値データ等レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
   import {
     indexRP剤情報,
+    index提供診療情報レコード,
+    index検査値データ等レコード,
     index用法補足レコード,
     index薬品情報,
     unindexRP剤情報,
+    unindex提供診療情報レコード,
+    unindex検査値データ等レコード,
     unindex薬品情報,
     type RP剤情報Indexed,
+    type 提供診療情報レコードIndexed,
+    type 検査値データ等レコードIndexed,
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import EditDrug from "./EditDrug.svelte";
@@ -22,6 +30,7 @@
   import GroupForm from "./GroupForm.svelte";
   import ChevronDownLink from "./icons/ChevronDownLink.svelte";
   import ChevronUpLink from "./icons/ChevronUpLink.svelte";
+  import InfoProviders from "./InfoProviders.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -35,14 +44,50 @@
   );
   let 使用期限年月日: string | undefined = data.使用期限年月日;
   let showAuxMenu = false;
+  let 提供診療情報レコード: 提供診療情報レコードIndexed[] = (
+    data.提供情報レコード?.提供診療情報レコード ?? []
+  ).map(index提供診療情報レコード);
+  let 検査値データ等レコード: 検査値データ等レコードIndexed[] = (
+    data.提供情報レコード?.検査値データ等レコード ?? []
+  ).map((r) => index検査値データ等レコード(r));
 
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
       RP剤情報グループ: groups.map(unindexRP剤情報),
       使用期限年月日,
+      提供情報レコード: get提供情報レコード(),
     });
     onEnter(shohou);
     destroy();
+  }
+
+  function get提供診療情報レコード(): 提供診療情報レコード[] | undefined {
+    if (提供診療情報レコード.length === 0) {
+      return undefined;
+    }
+    return 提供診療情報レコード.map(unindex提供診療情報レコード);
+  }
+
+  function get検査値データ等レコード(): 検査値データ等レコード[] | undefined {
+    if (検査値データ等レコード.length === 0) {
+      return undefined;
+    }
+    return 検査値データ等レコード.map(unindex検査値データ等レコード);
+  }
+
+  function get提供情報レコード() {
+    let a = get提供診療情報レコード();
+    let b = get検査値データ等レコード();
+    if (a === undefined && b === undefined) {
+      return undefined;
+    } else {
+    }
+    return {
+      提供診療情報レコード:
+        提供診療情報レコード.map(unindex提供診療情報レコード),
+      検査値データ等レコード:
+        検査値データ等レコード.map(unindex検査値データ等レコード),
+    };
   }
 
   function shohouDateToSqlDate(shohouDate: string): string {
@@ -182,22 +227,40 @@
 
   function doAddInfoProvider() {
     clearForm();
-    const e: GroupForm = new GroupForm({
+    const e: InfoProviders = new InfoProviders({
       target: formElement,
       props: {
+        提供診療情報レコード: [
+          ...提供診療情報レコード,
+          index提供診療情報レコード({
+            薬品名称: "",
+            コメント: "",
+          })
+        ],
         onDone: () => {
           clearForm();
           clearForm = () => {};
         },
-        onDelete: () => {},
-        用法コード: "",
-        用法名称: "",
-        調剤数量: 1,
-        剤形区分: "錠剤",
-        用法補足レコード: [],
-        drugs: [],
         onChange: (data) => {
-          // No action needed for adding info provider
+          提供診療情報レコード = data;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
+  function doEditInfoProviders() {
+    clearForm();
+    const e: InfoProviders = new InfoProviders({
+      target: formElement,
+      props: {
+        提供診療情報レコード,
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onChange: (data) => {
+          提供診療情報レコード = data;
         },
       },
     });
@@ -225,17 +288,27 @@
         <button on:click={doAddGroup}>追加</button>
         {#if !使用期限年月日}
           <!-- svelte-ignore a11y-invalid-attribute -->
-          <a href="javascript:void(0)" class="small-link" on:click={doExpirationDate}>有効期限</a>
+          <a
+            href="javascript:void(0)"
+            class="small-link"
+            on:click={doExpirationDate}>有効期限</a
+          >
         {/if}
         {#if showAuxMenu === false}
           <ChevronDownLink onClick={() => (showAuxMenu = true)} />
-            {:else}
-            <ChevronUpLink onClick={() => (showAuxMenu = false)} /> 
+        {:else}
+          <ChevronUpLink onClick={() => (showAuxMenu = false)} />
         {/if}
         {#if showAuxMenu}
-            <a href="javascript:void(0)" class="small-link" on:click={doAddInfoProvider}>
+          <div>
+            <a
+              href="javascript:void(0)"
+              class="small-link"
+              on:click={doAddInfoProvider}
+            >
               情報提供
-              </a>
+            </a>
+          </div>
         {/if}
       </div>
       <PrescRep
@@ -252,6 +325,18 @@
             有効期限：{onshiDateToSqlDate(使用期限年月日)}
           </div>
         {/if}
+        <!-- svelte-ignore missing-declaration -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div on:click={doEditInfoProviders} class="cursor-pointer">
+          {#each 提供診療情報レコード as rec (rec.id)}
+            <div>
+              {#if rec.薬品名称}
+                <span class="drug-name">{rec.薬品名称}</span>：
+              {/if}
+              {rec.コメント}
+            </div>
+          {/each}
+        </div>
       </div>
     </div>
     <div class="form" bind:this={formElement}></div>
