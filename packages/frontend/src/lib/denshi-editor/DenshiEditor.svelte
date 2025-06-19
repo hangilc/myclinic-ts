@@ -35,6 +35,7 @@
   import ChevronDownLink from "./icons/ChevronDownLink.svelte";
   import ChevronUpLink from "./icons/ChevronUpLink.svelte";
   import InfoProviders from "./InfoProviders.svelte";
+  import Bikou from "./Bikou.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -282,7 +283,46 @@
     clearForm = () => e.$destroy();
   }
 
-  function doAddBiou() {}
+  function doAddBikou() {
+    clearForm();
+    const e: Bikou = new Bikou({
+      target: formElement,
+      props: {
+        備考レコード: [
+          ...備考レコード,
+          index備考レコード({
+            備考: ""
+          }),
+        ],
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onChange: (data) => {
+          備考レコード = data;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
+  function doEditBikou() {
+    clearForm();
+    const e: Bikou = new Bikou({
+      target: formElement,
+      props: {
+        備考レコード: 備考レコード,
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onChange: (data) => {
+          備考レコード = data;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
 
   function findGroupById(id: number): RP剤情報Indexed | undefined {
     for (let g of groups) {
@@ -298,7 +338,9 @@
   }
 </script>
 
-<Dialog2 title="電子処方箋編集" {destroy}>
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+ <Dialog2 title="電子処方箋編集" {destroy}>
   <div class="upper">
     <div>
       <div class="aux-menu">
@@ -343,20 +385,19 @@
       />
       <div class="aux-data">
         {#if 使用期限年月日}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <div on:click={doExpirationDate} class="cursor-pointer">
+           <div on:click={doExpirationDate} class="cursor-pointer">
             有効期限：{onshiDateToSqlDate(使用期限年月日)}
           </div>
         {/if}
-        <div class="frame-with-label">
+        {#if 備考レコード.length > 0}
+        <div class="frame-with-label cursor-pointer" on:click={doEditBikou}>
           <div class="label">備考</div>
-          <div>一包化</div>
-          <div>追加時効</div>
+          {#each 備考レコード as rec (rec.id)}
+          <div>{rec.備考}</div>
+          {/each}
         </div>
-        <!-- svelte-ignore missing-declaration -->
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div on:click={doEditInfoProviders} class="cursor-pointer">
+        {/if}
+       <div on:click={doEditInfoProviders} class="cursor-pointer">
           {#each 提供診療情報レコード as rec (rec.id)}
             <div>
               {#if rec.薬品名称}
