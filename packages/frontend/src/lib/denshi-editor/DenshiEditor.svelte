@@ -5,20 +5,24 @@
     提供診療情報レコード,
     薬品情報,
     検査値データ等レコード,
+    備考レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
   import {
     indexRP剤情報,
+    index備考レコード,
     index提供診療情報レコード,
     index検査値データ等レコード,
     index用法補足レコード,
     index薬品情報,
     unindexRP剤情報,
+    unindex備考レコード,
     unindex提供診療情報レコード,
     unindex検査値データ等レコード,
     unindex薬品情報,
     type RP剤情報Indexed,
+    type 備考レコードIndexed,
     type 提供診療情報レコードIndexed,
     type 検査値データ等レコードIndexed,
     type 薬品情報Indexed,
@@ -49,12 +53,16 @@
   ).map(index提供診療情報レコード);
   let 検査値データ等レコード: 検査値データ等レコードIndexed[] = (
     data.提供情報レコード?.検査値データ等レコード ?? []
-  ).map((r) => index検査値データ等レコード(r));
+  ).map(index検査値データ等レコード);
+  let 備考レコード: 備考レコードIndexed[] = (data.備考レコード ?? []).map(
+    index備考レコード,
+  );
 
   function doEnter() {
     let shohou: PrescInfoData = Object.assign({}, data, {
       RP剤情報グループ: groups.map(unindexRP剤情報),
       使用期限年月日,
+      備考レコード: get備考レコード(),
       提供情報レコード: get提供情報レコード(),
     });
     onEnter(shohou);
@@ -88,6 +96,13 @@
       検査値データ等レコード:
         検査値データ等レコード.map(unindex検査値データ等レコード),
     };
+  }
+
+  function get備考レコード(): 備考レコード[] | undefined {
+    if (備考レコード.length === 0) {
+      return undefined;
+    }
+    return 備考レコード.map(unindex備考レコード);
   }
 
   function shohouDateToSqlDate(shohouDate: string): string {
@@ -235,7 +250,7 @@
           index提供診療情報レコード({
             薬品名称: "",
             コメント: "",
-          })
+          }),
         ],
         onDone: () => {
           clearForm();
@@ -266,6 +281,8 @@
     });
     clearForm = () => e.$destroy();
   }
+
+  function doAddBiou() {}
 
   function findGroupById(id: number): RP剤情報Indexed | undefined {
     for (let g of groups) {
@@ -307,6 +324,13 @@
               on:click={doAddInfoProvider}
             >
               情報提供
+            </a>
+            <a
+              href="javascript:void(0)"
+              class="small-link"
+              on:click={doAddBikou}
+            >
+              備考追加
             </a>
           </div>
         {/if}
