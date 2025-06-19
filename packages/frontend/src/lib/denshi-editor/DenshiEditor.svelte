@@ -38,6 +38,7 @@
   import InfoProviders from "./InfoProviders.svelte";
   import KensaValues from "./KensaValues.svelte";
   import Bikou from "./Bikou.svelte";
+  import { runner } from "./helper";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -140,6 +141,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doDrugSelect(group: RP剤情報Indexed, drug: 薬品情報Indexed) {
@@ -173,6 +175,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doUsageSelect(group: RP剤情報Indexed) {
@@ -212,6 +215,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doAddGroup() {
@@ -231,6 +235,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doExpirationDate() {
@@ -249,6 +254,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doAddInfoProvider() {
@@ -273,6 +279,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doEditInfoProviders() {
@@ -291,6 +298,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doAddKensa() {
@@ -312,6 +320,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doEditKensa() {
@@ -330,6 +339,7 @@
       },
     });
     clearForm = () => e.$destroy();
+    scrollToTop();
   }
 
   function doAddBikou() {
@@ -340,7 +350,7 @@
         備考レコード: [
           ...備考レコード,
           index備考レコード({
-            備考: ""
+            備考: "",
           }),
         ],
         onDone: () => {
@@ -387,48 +397,56 @@
   function doCancel() {
     destroy();
   }
+
+  function hide_aux_menu() {
+    showAuxMenu = false;
+  }
+
+  function auxInvoke(...fs: (() => any)[]): () => void {
+    return runner(hide_aux_menu, ...fs);
+  }
 </script>
 
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <!-- svelte-ignore a11y-click-events-have-key-events -->
- <Dialog2 title="電子処方箋編集" {destroy}>
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<Dialog2 title="電子処方箋編集" {destroy}>
   <div class="upper" bind:this={upperElement}>
     <div>
       <div class="aux-menu">
         <button on:click={doAddGroup}>追加</button>
-        {#if !使用期限年月日}
-          <!-- svelte-ignore a11y-invalid-attribute -->
-          <a
-            href="javascript:void(0)"
-            class="small-link"
-            on:click={doExpirationDate}>有効期限</a
-          >
-        {/if}
         {#if showAuxMenu === false}
           <ChevronDownLink onClick={() => (showAuxMenu = true)} />
         {:else}
           <ChevronUpLink onClick={() => (showAuxMenu = false)} />
         {/if}
         {#if showAuxMenu}
-          <div>
+          <div class="aux-menu-panel">
+            {#if !使用期限年月日}
+              <!-- svelte-ignore a11y-invalid-attribute -->
+              <a
+                href="javascript:void(0)"
+                class="small-link"
+                on:click={auxInvoke(doExpirationDate)}>有効期限</a
+              >
+            {/if}
             <a
               href="javascript:void(0)"
               class="small-link"
-              on:click={doAddInfoProvider}
+              on:click={auxInvoke(doAddInfoProvider)}
             >
               情報提供
             </a>
             <a
               href="javascript:void(0)"
               class="small-link"
-              on:click={doAddKensa}
+              on:click={auxInvoke(doAddKensa)}
             >
               検査値
             </a>
             <a
               href="javascript:void(0)"
               class="small-link"
-              on:click={doAddBikou}
+              on:click={auxInvoke(doAddBikou)}
             >
               備考追加
             </a>
@@ -443,30 +461,34 @@
       />
       <div class="aux-data">
         {#if 使用期限年月日}
-           <div on:click={doExpirationDate} class="cursor-pointer">
+          <div on:click={doExpirationDate} class="cursor-pointer">
             有効期限：{onshiDateToSqlDate(使用期限年月日)}
           </div>
         {/if}
         {#if 備考レコード.length > 0}
-        <div class="frame-with-label cursor-pointer" on:click={doEditBikou}>
-          <div class="label">備考</div>
-          {#each 備考レコード as rec (rec.id)}
-          <div>{rec.備考}</div>
-          {/each}
-        </div>
+          <div class="frame-with-label cursor-pointer" on:click={doEditBikou}>
+            <div class="label">備考</div>
+            {#each 備考レコード as rec (rec.id)}
+              <div>{rec.備考}</div>
+            {/each}
+          </div>
         {/if}
         {#if 提供診療情報レコード.length > 0 || 検査値データ等レコード.length > 0}
-        <div class="frame-with-label cursur-pointer">
-          <div class="label">情報提供</div>
-          {#each 提供診療情報レコード as rec (rec.id)}
-            <div>
-              {#if rec.薬品名称}{rec.薬品名称}：{/if}{rec.コメント}
+          <div class="frame-with-label cursur-pointer">
+            <div class="label">情報提供</div>
+            <div class="cursor-pointer" on:click={doEditInfoProviders}>
+              {#each 提供診療情報レコード as rec (rec.id)}
+                <div>
+                  {#if rec.薬品名称}{rec.薬品名称}：{/if}{rec.コメント}
+                </div>
+              {/each}
             </div>
-          {/each}
-          {#each 検査値データ等レコード as rec (rec.id)}
-            <div>{rec.検査値データ等}</div>
-          {/each}
-        </div>
+            <div class="cursor-pointer" on:click={doEditKensa}>
+              {#each 検査値データ等レコード as rec (rec.id)}
+                <div>{rec.検査値データ等}</div>
+              {/each}
+            </div>
+          </div>
         {/if}
       </div>
     </div>
@@ -479,11 +501,19 @@
 </Dialog2>
 
 <style>
+  a {
+    white-space: nowrap;
+  }
+
+  .aux-menu-panel {
+    margin: 10px 0;
+  }
+
   .upper {
-    width: 500px;
+    width: 700px;
     height: 600px;
     display: grid;
-    grid-template-columns: 30% 1fr;
+    grid-template-columns: 50% 1fr;
     gap: 10px;
     padding: 10px;
     overflow-y: auto;
