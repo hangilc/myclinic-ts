@@ -1,5 +1,8 @@
 <script lang="ts">
-  import type { 用法補足レコードIndexed } from "../denshi-editor-types";
+  import {
+    index用法補足レコード,
+    type 用法補足レコードIndexed,
+  } from "../denshi-editor-types";
   import CancelLink from "../icons/CancelLink.svelte";
   import SubmitLink from "../icons/SubmitLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
@@ -24,6 +27,13 @@
   }
 
   function doCancel(rec: 用法補足レコードIndexed) {
+    用法補足レコード = 用法補足レコード.map((r) => {
+      if (r.id === rec.id) {
+        return index用法補足レコード(rec.orig);
+      } else {
+        return r;
+      }
+    });
     rec.isEditing = false;
     rec.用法補足情報 = rec.orig.用法補足情報;
     用法補足レコード = 用法補足レコード;
@@ -39,7 +49,9 @@
           <SubmitLink onClick={() => doEnter(rec)} />
         {/if}
         <TrashLink onClick={() => doDelete(rec)} />
-        <CancelLink onClick={() => doCancel(rec)} style="left:-4px;"/>
+        {#if rec.orig.用法補足情報 !== ""}
+          <CancelLink onClick={() => doCancel(rec)} style="left:-4px;" />
+        {/if}
       </form>
     {:else}
       <div>

@@ -1,6 +1,10 @@
 <script lang="ts">
   import Dialog2 from "@/lib/Dialog2.svelte";
-  import type { PrescInfoData, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type {
+    PrescInfoData,
+    用法補足レコード,
+    薬品情報,
+  } from "@/lib/denshi-shohou/presc-info";
   import PrescRep from "./PrescRep.svelte";
   import NewDrug from "./NewDrug.svelte";
   import {
@@ -8,8 +12,10 @@
     index用法補足レコード,
     index薬品情報,
     unindexRP剤情報,
+    unindex用法補足レコード,
     unindex薬品情報,
     type RP剤情報Indexed,
+    type 用法補足レコードIndexed,
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import EditDrug from "./EditDrug.svelte";
@@ -107,30 +113,31 @@
           clearForm();
           clearForm = () => {};
         },
-		onDelete: () => {
-		  groups = groups.filter(g => g.id !== group.id);
-		},
-		用法コード: group.用法レコード.用法コード,
-		用法名称: group.用法レコード.用法名称,
-		調剤数量: group.剤形レコード.調剤数量,
-		剤形区分: group.剤形レコード.剤形区分,
-		用法補足レコード: group.用法補足レコード?.map(r => index用法補足レコード(r)) ?? [],
-		drugs: group.薬品情報グループ,
-		onChange: (data: {
-		  用法コード: string; 用法名称: string; 調剤数量: number;
-		}) => {
-		  let g = findGroupById(group.id);
-		  if( g ){
-			g.用法レコード = Object.assign({}, g.用法レコード, {
-			  用法コード: data.用法コード,
-			  用法名称: data.用法名称
-			});
-			g.剤形レコード = Object.assign({}, g.剤形レコード, {
-			  調剤数量: data.調剤数量,
-			})
-			groups = groups;
-		  }
-		},
+        onDelete: () => {
+          groups = groups.filter((g) => g.id !== group.id);
+        },
+        用法コード: group.用法レコード.用法コード,
+        用法名称: group.用法レコード.用法名称,
+        調剤数量: group.剤形レコード.調剤数量,
+        剤形区分: group.剤形レコード.剤形区分,
+        用法補足レコード:
+          group.用法補足レコード?.map((r) => index用法補足レコード(r)) ?? [],
+        drugs: group.薬品情報グループ,
+        onChange: (data) => {
+          let g = findGroupById(group.id);
+          if (g) {
+            g.用法レコード = Object.assign({}, g.用法レコード, {
+              用法コード: data.用法コード,
+              用法名称: data.用法名称,
+            });
+            g.用法補足レコード = data.用法補足レコード;
+            g.剤形レコード = Object.assign({}, g.剤形レコード, {
+              調剤数量: data.調剤数量,
+            });
+            groups = groups;
+            console.log("groups", groups);
+          }
+        },
       },
     });
     clearForm = () => e.$destroy();
@@ -174,12 +181,12 @@
   }
 
   function findGroupById(id: number): RP剤情報Indexed | undefined {
-	for(let g of groups){
-	  if( g.id === id ){
-		return g;
-	  }
-	}
-	return undefined;
+    for (let g of groups) {
+      if (g.id === id) {
+        return g;
+      }
+    }
+    return undefined;
   }
 
   function doCancel() {

@@ -1,6 +1,7 @@
 <script lang="ts">
   import {
   index用法補足レコード,
+    unindex用法補足レコード,
     type 用法補足レコードIndexed,
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
@@ -24,11 +25,16 @@
     用法コード: string;
     用法名称: string;
     調剤数量: number;
+    用法補足レコード: 用法補足レコードIndexed[];
   }) => void;
 
-  let isEditing用法コード: boolean = true;
-  let isEditing調剤数量: boolean = true;
+  let isEditing用法コード: boolean = false;
+  let isEditing調剤数量: boolean = false;
   let showAuxMenu = false;
+
+  function isEditing用法補足レコード(): boolean {
+    return 用法補足レコード.some((r) => r.isEditing);
+  }
 
   function confirmNotEditing(): boolean {
     if (isEditing用法コード) {
@@ -39,6 +45,10 @@
       alert("日数・回数が編集中です。");
       return false;
     }
+    if( isEditing用法補足レコード()) {
+      alert("用法補足が編集中です。");
+      return false;
+    }
     return true;
   }
 
@@ -47,7 +57,7 @@
       return;
     }
     onDone();
-    onChange({ 用法コード, 用法名称, 調剤数量 });
+    onChange({ 用法コード, 用法名称, 調剤数量, 用法補足レコード });
   }
 
   function doDelete() {
