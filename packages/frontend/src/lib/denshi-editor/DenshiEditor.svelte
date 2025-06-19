@@ -35,6 +35,7 @@
   import ChevronDownLink from "./icons/ChevronDownLink.svelte";
   import ChevronUpLink from "./icons/ChevronUpLink.svelte";
   import InfoProviders from "./InfoProviders.svelte";
+  import KensaValues from "./KensaValues.svelte";
   import Bikou from "./Bikou.svelte";
 
   export let destroy: () => void;
@@ -283,6 +284,45 @@
     clearForm = () => e.$destroy();
   }
 
+  function doAddKensa() {
+    clearForm();
+    const e: KensaValues = new KensaValues({
+      target: formElement,
+      props: {
+        検査値データ等レコード: [
+          ...検査値データ等レコード,
+          index検査値データ等レコード({ 検査値データ等: "" }),
+        ],
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onChange: (data) => {
+          検査値データ等レコード = data;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
+  function doEditKensa() {
+    clearForm();
+    const e: KensaValues = new KensaValues({
+      target: formElement,
+      props: {
+        検査値データ等レコード,
+        onDone: () => {
+          clearForm();
+          clearForm = () => {};
+        },
+        onChange: (data) => {
+          検査値データ等レコード = data;
+        },
+      },
+    });
+    clearForm = () => e.$destroy();
+  }
+
   function doAddBikou() {
     clearForm();
     const e: Bikou = new Bikou({
@@ -366,6 +406,13 @@
               on:click={doAddInfoProvider}
             >
               情報提供
+            </a>
+            <a
+              href="javascript:void(0)"
+              class="small-link"
+              on:click={doAddKensa}
+            >
+              検査値
             </a>
             <a
               href="javascript:void(0)"
