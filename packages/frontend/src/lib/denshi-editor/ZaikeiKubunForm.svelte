@@ -114,4 +114,7 @@
 </div>
 
 <style>
+  .option-wrapper {
+    margin-bottom: 6px;
+  }
 </style>

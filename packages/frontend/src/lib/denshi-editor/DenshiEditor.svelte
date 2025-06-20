@@ -39,6 +39,7 @@
   import KensaValues from "./KensaValues.svelte";
   import Bikou from "./Bikou.svelte";
   import { runner } from "./helper";
+  import { writable, type Writable } from "svelte/store";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -47,7 +48,6 @@
   let upperElement: HTMLElement;
   let clearForm: () => void = () => {};
   let at = shohouDateToSqlDate(data.処方箋交付年月日);
-
   let groups: RP剤情報Indexed[] = data.RP剤情報グループ.map((g) =>
     indexRP剤情報(g),
   );
@@ -62,6 +62,7 @@
   let 備考レコード: 備考レコードIndexed[] = (data.備考レコード ?? []).map(
     index備考レコード,
   );
+  let isEditing: Writable<boolean> = writable(false);
 
   async function scrollToTop() {
     await tick();
@@ -129,10 +130,12 @@
     const e: NewDrug = new NewDrug({
       target: formElement,
       props: {
+        isEditing,
         at,
         onDone: () => {
           clearForm();
           clearForm = () => {};
+          $isEditing = false;
         },
         onEnter: (drug) => {
           group.薬品情報グループ.push(index薬品情報(drug));
@@ -223,9 +226,11 @@
     const e: NewGroup = new NewGroup({
       target: formElement,
       props: {
+        isEditing,
         onDone: () => {
           clearForm();
           clearForm = () => {};
+          $isEditing = false;
         },
         at,
         onEnter: (group) => {
@@ -495,7 +500,9 @@
     <div class="form" bind:this={formElement}></div>
   </div>
   <div class="commands">
-    <button on:click={doEnter}>入力</button>
+    {#if !$isEditing}
+      <button on:click={doEnter}>入力</button>
+    {/if}
     <button on:click={doCancel}>キャンセル</button>
   </div>
 </Dialog2>

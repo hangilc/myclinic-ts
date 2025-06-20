@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import type {
-    不均等レコード,
-  } from "@/lib/denshi-shohou/presc-info";
+  import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
   import ZaikeiKubunForm from "./ZaikeiKubunForm.svelte";
@@ -18,6 +16,7 @@
     index薬品補足レコード,
     type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
+  import CogLink from "./icons/CogLink.svelte";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -90,8 +89,12 @@
     bind:focus={drugKindFocus}
   />
 {/key}
-<div class="form-part">
-  <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
+<div class="amount-cog">
+  <div class="amount-part">
+    <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
+  </div>
+  <span></span>
+  <CogLink onClick={() => (showAux = !showAux)} style="margin-left: 1em;"/>
 </div>
 {#if 不均等レコード}
   <div>
@@ -103,11 +106,6 @@
     <Hosoku bind:薬品補足レコード />
   </div>
 {/if}
-<!-- svelte-ignore a11y-no-static-element-interactions -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div>
-  <span class="cog" on:click={() => (showAux = !showAux)}><Cog /></span>
-</div>
 {#if showAux}
   <!-- svelte-ignore a11y-invalid-attribute -->
   <div>
@@ -119,12 +117,13 @@
 {/if}
 
 <style>
-  .form-part {
-    margin: 10px 0;
+  .amount-cog {
+    vertical-align: middle;
   }
 
-  .cog {
-    color: gray;
-    cursor: pointer;
+  .amount-part {
+    margin: 10px 0;
+    display: inline-block;
   }
+
 </style>
