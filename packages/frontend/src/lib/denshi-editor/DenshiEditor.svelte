@@ -517,7 +517,7 @@
   }
 
   .upper {
-    width: 700px;
+    width: 760px;
     height: 600px;
     display: grid;
     grid-template-columns: 50% 1fr;

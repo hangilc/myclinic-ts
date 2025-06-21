@@ -13,15 +13,12 @@
 <style>
   a {
     position: relative;
-    color: gray;
-  }
-
-  a:hover {
-    color: red;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
   }
 
   a :global(svg) {
-    position: relative;
-    top: 4.5px;
+    position: absolute;
   }
 </style>

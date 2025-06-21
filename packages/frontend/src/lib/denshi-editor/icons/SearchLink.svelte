@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CheckCircle from "@/icons/CheckCircle.svelte";
+  import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
 
   export let onClick: () => void;
   export let style = "";
@@ -12,7 +12,7 @@
   on:click={onClick}
   {style}
 >
-  <CheckCircle color="currentColor" width="20"/>
+  <MagnifyingGlass width="20"/>
 </a>
 
 <style>

@@ -3,6 +3,8 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import SubmitIcon from "./icons/SubmitIcon.svelte";
   import "./widgets/style.css";
+  import CancelLink from "./icons/CancelLink.svelte";
+  import SubmitLink from "./icons/SubmitLink.svelte";
 
   export let 分量: string;
   export let isEditing: boolean;
@@ -31,16 +33,15 @@
   }
 </script>
 
+<div class="label">分量</div>
 {#if isEditing}
-  <div class="label">分量設定</div>
-  <form on:submit|preventDefault={doEnter}>
+  <form on:submit|preventDefault={doEnter} class="input-with-icons">
     <input type="text" bind:value={inputText} />
     {単位名}
-    <SubmitIcon onClick={doEnter} />
-    <CancelIcon onClick={doCancel} />
+    <SubmitLink onClick={doEnter} />
+    <CancelLink onClick={doCancel} />
   </form>
 {:else}
-<div class="label">分量</div>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="rep" on:click={doEdit}>分量：{分量}{単位名}</div>
@@ -55,5 +56,4 @@
 	cursor: pointer;
   }
 
-  
 </style>

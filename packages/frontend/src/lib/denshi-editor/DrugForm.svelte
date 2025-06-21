@@ -12,7 +12,6 @@
   import Uneven from "./drug-form/Uneven.svelte";
   import Hosoku from "./drug-form/Hosoku.svelte";
   import {
-    index薬品補足レコード,
     type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
   import "./widgets/style.css";

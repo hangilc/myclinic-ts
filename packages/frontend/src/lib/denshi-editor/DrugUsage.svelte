@@ -7,6 +7,9 @@
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import CancelIcon from "./icons/CancelIcon.svelte";
   import "./widgets/style.css";
+  import SearchLink from "./icons/SearchLink.svelte";
+  import EraserLink from "./icons/EraserLink.svelte";
+  import CancelLink from "./icons/CancelLink.svelte";
 
   export let 用法コード: string;
   export let 用法名称: string;
@@ -84,10 +87,10 @@
   }
 </script>
 
+<div class="label">用法</div>
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-invalid-attribute -->
 {#if isEditing}
-  <div class="label">用法設定</div>
   <div>
     <input
       type="radio"
@@ -108,7 +111,7 @@
     <!-- svelte-ignore a11y-invalid-attribute -->
   </div>
   {#if mode === "master"}
-    <form on:submit|preventDefault={doSearchUsage}>
+    <form on:submit|preventDefault={doSearchUsage} class="input-with-icons">
       <input
         class="input-text"
         type="text"
@@ -116,31 +119,10 @@
         bind:value={searchText}
         bind:this={masterInputElement}
       />
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:3px;"
-        tabindex="-1"
-        on:click={doSearchUsage}><MagnifyingGlass /></a
-      >
-      {#if searchText.length > 0}
-        <a
-          href="javascript:void(0)"
-          style="position:relative;top:5px;margin-left:-4px;"
-          tabindex="-1"
-          on:click={doClearSearchText}
-        >
-          <Eraser color="#999" />
-        </a>
-      {/if}
+      <SearchLink onClick={doSearchUsage} />
+      <EraserLink onClick={doClearSearchText}/>
       {#if 用法コード}
-        <a
-          href="javascript:void(0)"
-          style="position:relative;top:5px;margin-left:-4px;"
-          tabindex="-1"
-          on:click={doCancel}
-        >
-          <XCircle color="#999" />
-        </a>
+        <CancelLink onClick={doCancel} />
       {/if}
     </form>
     {#if searchResult.length > 0}
@@ -188,7 +170,6 @@
     </form>
   {/if}
 {:else}
-  <div class="label">用法</div>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="usage-rep" on:click={editingMode}>
     {用法名称 || "（用法未設定）"}

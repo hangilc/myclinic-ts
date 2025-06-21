@@ -4,6 +4,8 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import { toHankaku } from "../zenkaku";
   import "./widgets/style.css";
+  import SubmitLink from "./icons/SubmitLink.svelte";
+  import CancelLink from "./icons/CancelLink.svelte";
 
   export let 剤形区分: 剤形区分;
   export let 調剤数量: number;
@@ -44,11 +46,11 @@
 <div>
   {#if isEditing}
     <div class="label">{nissuuKaisuu(剤形区分)}設定</div>
-    <form on:submit|preventDefault={doEnter}>
+    <form on:submit|preventDefault={doEnter} class="input-with-icons">
       <input type="text" style="width:3rem" bind:value={inputText} />
       {nissuuKaisuu(剤形区分)}
-      <SubmitIcon onClick={doEnter} />
-      <CancelIcon onClick={doCancel} />
+      <SubmitLink onClick={doEnter} />
+      <CancelLink onClick={doCancel} />
     </form>
   {:else}
     <div class="label">{nissuuKaisuu(剤形区分)}</div>

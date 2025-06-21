@@ -4,3 +4,29 @@
     font-size: 12px;
     margin-top: 6px;
   }
+
+  input[type="radio"] {
+    accent-color: gray;
+  }
+
+  input[type="text"] {
+    padding: 6px;
+  }
+
+  .input-with-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .input-with-icons a:first-of-type {
+    margin-left: 2px;
+  }
+
+  .input-with-icons a:not(:first-of-type) {
+    color: gray;
+  }
+
+  .input-with-icons a:not(:first-of-type):hover {
+    color: red;
+  }

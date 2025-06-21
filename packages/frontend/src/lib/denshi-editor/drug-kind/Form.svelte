@@ -5,11 +5,11 @@
   } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-  import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
-  import Eraser from "@/icons/Eraser.svelte";
-  import XCircle from "@/icons/XCircle.svelte";
   import { tick } from "svelte";
   import "../widgets/style.css";
+  import SearchLink from "../icons/SearchLink.svelte";
+  import EraserLink from "../icons/EraserLink.svelte";
+  import CancelLink from "../icons/CancelLink.svelte";
 
   export let 薬品コード: string;
   export let 薬品名称: string;
@@ -36,8 +36,8 @@
     }
   };
 
-  $: if( 薬品コード === "" ){
-	tick().then(() => focus())
+  $: if (薬品コード === "") {
+    tick().then(() => focus());
   }
 
   async function doSearch() {
@@ -102,39 +102,20 @@
 <div>
   <form on:submit|preventDefault={doSearch}>
     <div class="label">薬品名検索</div>
-    <input
-      type="text"
-      tabindex="0"
-      bind:value={searchText}
-      bind:this={inputElement}
-      class="search-text"
-    />
-    {#if searchText.length > 0}
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:3px;"
-        tabindex="-1"
-        on:click={doSearch}><MagnifyingGlass /></a
-      >
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:-4px;"
-        tabindex="-1"
-        on:click={doClearSearchText}
-      >
-        <Eraser color="#999" />
-      </a>
-    {/if}
-    {#if 薬品名称}
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:-4px;"
-        tabindex="-1"
-        on:click={doCancel}
-      >
-        <XCircle color="#999" />
-      </a>
-    {/if}
+    <div class="input-with-icons">
+      <input
+        type="text"
+        tabindex="0"
+        bind:value={searchText}
+        bind:this={inputElement}
+        class="search-text"
+      />
+      <SearchLink onClick={doSearch} />
+      <EraserLink onClick={doClearSearchText} />
+      {#if 薬品名称}
+        <CancelLink onClick={doCancel} />
+      {/if}
+    </div>
   </form>
   {#if searchIyakuhinResult.length > 0}
     <div class="search-result">
@@ -179,5 +160,11 @@
 
   .master-item:hover {
     background-color: #eee;
+  }
+
+  .input-with-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
   }
 </style>

@@ -1,6 +1,5 @@
 <script lang="ts">
   export let width: string = "18";
-  export let color: string = "gray";
   export let style: string = "";
   export let dx: string | undefined = undefined;
   export let dy: string | undefined = undefined;
@@ -18,7 +17,7 @@
   fill="none"
   viewBox="0 0 24 24"
   stroke-width="1.5"
-  stroke={color}
+  stroke="currentColor"
   {width}
   {style}
 >
