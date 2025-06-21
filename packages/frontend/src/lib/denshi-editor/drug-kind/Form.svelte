@@ -100,6 +100,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
   <form on:submit|preventDefault={doSearch}>
+    <div class="input-label">薬品名検索</div>
     <input
       type="text"
       tabindex="0"
@@ -177,5 +178,10 @@
 
   .master-item:hover {
     background-color: #eee;
+  }
+
+  .input-label {
+    font-weight: bold;
+    font-size: 12px;
   }
 </style>

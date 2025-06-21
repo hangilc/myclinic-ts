@@ -135,19 +135,16 @@
 
 <style>
   .wrapper {
-    border: 2px solid #87CEEB;
+    border: 2px solid #ccc;
     border-radius: 6px;
     padding: 10px;
   }
 
   .title {
-    background-color: #d7ebfd;
-    /* background-color: #E0FFFF; */
     padding: 6px;
     font-weight: bold;
-    color: black;
-    border-radius: 6px;
     margin-bottom: 10px;
+    border-bottom: 2px solid #ccc;
   }
 
   .form-part {
@@ -157,4 +154,5 @@
     margin-top: 10px;
     text-align: right;
   }
+
 </style>

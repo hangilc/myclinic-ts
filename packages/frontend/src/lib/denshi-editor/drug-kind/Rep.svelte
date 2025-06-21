@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
+  import Link from "../widgets/Link.svelte";
 
   export let 薬品名称: string;
   export let 薬品コード種別: 薬品コード種別;
@@ -11,15 +12,17 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class="top">
+  <div class="label">薬品名称</div>
   <span class="rep" on:click={onClick}>{薬品名称}</span>
-  {#if 薬品コード種別 !== "一般名コード" && ippanmei}
-    <!-- svelte-ignore a11y-invalid-attribute -->
-    <a
-      href="javascript:void(0)"
-      class="ippan-link"
-      on:click={onIppanmeiClick}
-      tabindex="-1">一般名有</a
-    >
+
+  <div class="label">一般名</div>
+  {#if 薬品コード種別 === "一般名コード"}
+    <span>一般名</span>
+  {:else if ippanmei}
+    <span>一般名有り</span>
+    <Link onClick={onIppanmeiClick}>一般名に変更</Link>
+  {:else}
+    <span>一般名なし</span>
   {/if}
 </div>
 
@@ -32,14 +35,13 @@
     cursor: pointer;
   }
 
-  .ippan-link {
-    white-space: nowrap;
-    font-size: 0.8em;
-    border: 1px solid #87CEEB; /* sky blue */
-    padding: 1px 6px;
-    border-radius: 6px;
-    /* background: rgba(0, 0, 255, 0.05); */
-    /* background-color: #87CEEB; */
-    background-color: #EDF9FE;
+  .label {
+    font-weight: bold;
+    color: #999;
+    font-size: 12px;
+  }
+
+  .label ~ .label {
+    margin-top: 6px;
   }
 </style>

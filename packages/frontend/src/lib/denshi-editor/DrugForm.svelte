@@ -76,6 +76,7 @@
   }
 </script>
 
+<div class="label">剤形</div>
 <ZaikeiKubunForm bind:剤形区分 notifyChange={doZaikeiKubunChange} />
 {#key drugFormKey}
   <DrugKind
@@ -124,6 +125,12 @@
   .amount-part {
     margin: 10px 0;
     display: inline-block;
+  }
+
+  .label {
+    font-weight: bold;
+    color: #999;
+    font-size: 12px;
   }
 
 </style>
