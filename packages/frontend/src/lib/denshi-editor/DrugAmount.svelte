@@ -32,7 +32,7 @@
 
 {#if isEditing}
   <form on:submit|preventDefault={doEnter}>
-    分量：<input type="text" bind:value={inputText} />
+    <input type="text" bind:value={inputText} />
     {単位名}
     <SubmitIcon onClick={doEnter} />
     <CancelIcon onClick={doCancel} />

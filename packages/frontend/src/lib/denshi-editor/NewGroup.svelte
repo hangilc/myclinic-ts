@@ -43,6 +43,7 @@
   let 不均等レコード: 不均等レコード | undefined = undefined;
   let isEditing不均等レコード = false;
   let 薬品補足レコード: 薬品補足レコードIndexed[] = [];
+  let drugFormShowAux = false;
 
   $: $isEditing =
     isEditing薬品コード ||
@@ -113,6 +114,7 @@
   bind:不均等レコード
   bind:isEditing不均等レコード
   bind:薬品補足レコード
+  showAux={drugFormShowAux}
 />
 <div class="form-part">
   <DrugUsage

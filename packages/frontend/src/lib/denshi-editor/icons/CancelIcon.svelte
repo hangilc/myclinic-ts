@@ -2,6 +2,7 @@
   import XCircle from "@/icons/XCircle.svelte";
 
   export let onClick: () => void;
+  export let style = "";
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -9,8 +10,9 @@
   href="javascript:void(0)"
   tabindex="-1"
   on:click={onClick}
+  {style}
 >
-  <XCircle color="currentColor" width="20" />
+  <XCircle color="currentColor" width="18" />
 </a>
 
 <style>

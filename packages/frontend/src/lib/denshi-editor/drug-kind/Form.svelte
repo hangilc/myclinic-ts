@@ -9,6 +9,7 @@
   import Eraser from "@/icons/Eraser.svelte";
   import XCircle from "@/icons/XCircle.svelte";
   import { tick } from "svelte";
+  import "../widgets/style.css";
 
   export let 薬品コード: string;
   export let 薬品名称: string;
@@ -100,7 +101,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
   <form on:submit|preventDefault={doSearch}>
-    <div class="input-label">薬品名検索</div>
+    <div class="label">薬品名検索</div>
     <input
       type="text"
       tabindex="0"
@@ -178,10 +179,5 @@
 
   .master-item:hover {
     background-color: #eee;
-  }
-
-  .input-label {
-    font-weight: bold;
-    font-size: 12px;
   }
 </style>

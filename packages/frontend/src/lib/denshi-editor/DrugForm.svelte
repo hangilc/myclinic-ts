@@ -9,7 +9,6 @@
     情報区分,
     薬品コード種別,
   } from "@/lib/denshi-shohou/denshi-shohou";
-  import Cog from "@/icons/Cog.svelte";
   import Uneven from "./drug-form/Uneven.svelte";
   import Hosoku from "./drug-form/Hosoku.svelte";
   import {
@@ -17,6 +16,7 @@
     type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
   import CogLink from "./icons/CogLink.svelte";
+  import "./widgets/style.css";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -31,10 +31,10 @@
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
+  export let showAux = false;
 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
-  let showAux = false;
 
   onMount(() => {
     drugKindFocus();
@@ -90,20 +90,21 @@
     bind:focus={drugKindFocus}
   />
 {/key}
-<div class="amount-cog">
-  <div class="amount-part">
-    <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
-  </div>
-  <span></span>
-  <CogLink onClick={() => (showAux = !showAux)} style="margin-left: 1em;"/>
+<div class="label">分量</div>
+<DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
+<div style="vert-align:middle;margin-top:8px;">
+  <div class="label" style="display:inline-block;">その他</div>
+  <CogLink onClick={() => (showAux = !showAux)} style="margin-left: 1em;" />
 </div>
 {#if 不均等レコード}
   <div>
+    <div class="label">不均等</div>
     <Uneven bind:不均等レコード bind:isEditing={isEditing不均等レコード} />
   </div>
 {/if}
-{#if 薬品補足レコード}
+{#if 薬品補足レコード.length > 0}
   <div>
+    <div class="label">補足</div>
     <Hosoku bind:薬品補足レコード />
   </div>
 {/if}
@@ -118,19 +119,4 @@
 {/if}
 
 <style>
-  .amount-cog {
-    vertical-align: middle;
-  }
-
-  .amount-part {
-    margin: 10px 0;
-    display: inline-block;
-  }
-
-  .label {
-    font-weight: bold;
-    color: #999;
-    font-size: 12px;
-  }
-
 </style>

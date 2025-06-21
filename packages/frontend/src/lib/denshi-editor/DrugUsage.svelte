@@ -6,6 +6,7 @@
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import CancelIcon from "./icons/CancelIcon.svelte";
+  import "./widgets/style.css";
 
   export let 用法コード: string;
   export let 用法名称: string;
@@ -86,6 +87,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-invalid-attribute -->
 {#if isEditing}
+  <div class="label">用法設定</div>
   <div>
     <input
       type="radio"
@@ -181,11 +183,12 @@
           <Eraser />
         </a>
       {/if}
-      {#if 用法コード}<CancelIcon onClick={doCancel} />
+      {#if 用法コード}<CancelIcon onClick={doCancel} style="margin-left:-2px;"/>
       {/if}
     </form>
   {/if}
 {:else}
+  <div class="label">用法</div>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="usage-rep" on:click={editingMode}>
     {用法名称 || "（用法未設定）"}

@@ -34,14 +34,4 @@
   .rep {
     cursor: pointer;
   }
-
-  .label {
-    font-weight: bold;
-    color: #999;
-    font-size: 12px;
-  }
-
-  .label ~ .label {
-    margin-top: 6px;
-  }
 </style>
