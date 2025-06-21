@@ -1,42 +1,53 @@
 <script lang="ts">
   import { toHankaku } from "@/lib/zenkaku";
-  import CancelIcon from "./icons/CancelIcon.svelte";
-  import SubmitIcon from "./icons/SubmitIcon.svelte";
   import "./widgets/style.css";
   import CancelLink from "./icons/CancelLink.svelte";
   import SubmitLink from "./icons/SubmitLink.svelte";
+  import { onMount, tick } from "svelte";
 
   export let 分量: string;
   export let isEditing: boolean;
   export let 単位名: string;
 
   let inputText: string = 分量;
+  let inputElement: HTMLInputElement;
+
+  $: if( isEditing ){
+    focus();
+  }
+
+  async function focus() {
+    await tick();
+    if (inputElement) {
+      inputElement.focus();
+    }
+  }
 
   function doEnter() {
-	let f = parseFloat(toHankaku(inputText.trim()));
-	if( isNaN(f) ){
-	  alert("分量の値が数値でありません。");
-	  return;
-	}
-	分量 = f.toString();
-	inputText = 分量;
-	isEditing = false;
+    let f = parseFloat(toHankaku(inputText.trim()));
+    if (isNaN(f)) {
+      alert("分量の値が数値でありません。");
+      return;
+    }
+    分量 = f.toString();
+    inputText = 分量;
+    isEditing = false;
   }
 
   function doCancel() {
-	isEditing = false;
+    isEditing = false;
   }
 
   function doEdit() {
-	inputText = 分量;
-	isEditing = true;
+    inputText = 分量;
+    isEditing = true;
   }
 </script>
 
 <div class="label">分量</div>
 {#if isEditing}
   <form on:submit|preventDefault={doEnter} class="input-with-icons">
-    <input type="text" bind:value={inputText} />
+    <input type="text" bind:value={inputText} bind:this={inputElement} />
     {単位名}
     <SubmitLink onClick={doEnter} />
     <CancelLink onClick={doCancel} />
@@ -53,7 +64,6 @@
   }
 
   .rep {
-	cursor: pointer;
+    cursor: pointer;
   }
-
 </style>

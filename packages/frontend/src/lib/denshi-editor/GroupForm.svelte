@@ -1,13 +1,16 @@
 <script lang="ts">
   import {
-  index用法補足レコード,
+    index用法補足レコード,
     unindex用法補足レコード,
     type 用法補足レコードIndexed,
     type 薬品情報Indexed,
   } from "./denshi-editor-types";
   import DrugDays from "./DrugDays.svelte";
   import DrugUsage from "./DrugUsage.svelte";
-  import type { 剤形区分, 用法補足区分 } from "@/lib/denshi-shohou/denshi-shohou";
+  import type {
+    剤形区分,
+    用法補足区分,
+  } from "@/lib/denshi-shohou/denshi-shohou";
   import { drugRep } from "./helper";
   import CogLink from "./icons/CogLink.svelte";
   import YouhouHosoku from "./drug-form/YouhouHosoku.svelte";
@@ -45,7 +48,7 @@
       alert("日数・回数が編集中です。");
       return false;
     }
-    if( isEditing用法補足レコード()) {
+    if (isEditing用法補足レコード()) {
       alert("用法補足が編集中です。");
       return false;
     }
@@ -72,64 +75,78 @@
   }
 
   function doAddYouhouHosoku(kubun: 用法補足区分) {
-    if( kubun === "一包化"){
+    if (kubun === "一包化") {
       let h: 用法補足レコード = {
         用法補足区分: kubun,
         用法補足情報: kubun,
-      }
+      };
       用法補足レコード.push(index用法補足レコード(h));
       用法補足レコード = 用法補足レコード;
     } else {
       let h: 用法補足レコード = {
         用法補足区分: kubun,
         用法補足情報: "",
-      }
+      };
       用法補足レコード.push(index用法補足レコード(h));
       用法補足レコード = 用法補足レコード;
     }
     showAuxMenu = false;
   }
 
-  function youhouHosokuNotContains(list: 用法補足レコードIndexed[], kubun: 用法補足区分): boolean {
-    for(let r of list){
-      if( r.用法補足区分 === kubun ){
+  function youhouHosokuNotContains(
+    list: 用法補足レコードIndexed[],
+    kubun: 用法補足区分,
+  ): boolean {
+    for (let r of list) {
+      if (r.用法補足区分 === kubun) {
         return false;
       }
     }
     return true;
   }
-
 </script>
 
-<div>薬剤グループの編集</div>
-<div class="drugs">
-  {#each drugs as drug (drug.id)}
-    <div>・</div>
-    <div>{drugRep(drug)}</div>
-  {/each}
-</div>
-<DrugUsage bind:用法コード bind:用法名称 bind:isEditing={isEditing用法コード} />
-{#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
-  <DrugDays bind:調剤数量 {剤形区分} bind:isEditing={isEditing調剤数量} />
-{/if}
-<div><YouhouHosoku bind:用法補足レコード /></div>
-<div><CogLink onClick={toggleAuxMenu} /></div>
-{#if showAuxMenu}
-	<!-- svelte-ignore a11y-invalid-attribute -->
-  <div>
-    {#if youhouHosokuNotContains(用法補足レコード, "一包化")}
-    <a href="javascript:void(0)" on:click={() => doAddYouhouHosoku("一包化")}>一包化</a>
-    {/if}
-	<a href="javascript:void(0)" on:click={() => doAddYouhouHosoku("用法の続き")}>用法補足</a>
+<div class="wrapper">
+  <div class="title">薬剤グループの編集</div>
+  <div class="drugs">
+    {#each drugs as drug (drug.id)}
+      <div>・</div>
+      <div>{drugRep(drug)}</div>
+    {/each}
   </div>
-{/if}
-<div class="commands">
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
-  {#if !isEditing用法コード && !isEditing調剤数量}
-    <button on:click={doEnter}>入力</button>
+  <DrugUsage
+    bind:用法コード
+    bind:用法名称
+    bind:isEditing={isEditing用法コード}
+  />
+  {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
+    <DrugDays bind:調剤数量 {剤形区分} bind:isEditing={isEditing調剤数量} />
   {/if}
-  <button on:click={onDone}>キャンセル</button>
+  <div><YouhouHosoku bind:用法補足レコード /></div>
+  <div><CogLink onClick={toggleAuxMenu} /></div>
+  {#if showAuxMenu}
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <div>
+      {#if youhouHosokuNotContains(用法補足レコード, "一包化")}
+        <a
+          href="javascript:void(0)"
+          on:click={() => doAddYouhouHosoku("一包化")}>一包化</a
+        >
+      {/if}
+      <a
+        href="javascript:void(0)"
+        on:click={() => doAddYouhouHosoku("用法の続き")}>用法補足</a
+      >
+    </div>
+  {/if}
+  <div class="commands">
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {#if !isEditing用法コード && !isEditing調剤数量}
+      <button on:click={doEnter}>入力</button>
+    {/if}
+    <button on:click={onDone}>キャンセル</button>
+  </div>
 </div>
 
 <style>

@@ -37,10 +37,9 @@
   let 単位名: string = drug.薬品レコード.単位名;
   let 不均等レコード = drug.不均等レコード;
   let isEditing不均等レコード: boolean = false;
-  let 薬品補足レコード: 薬品補足レコードIndexed[] | undefined =
-    drug.薬品補足レコード === undefined
-      ? undefined
-      : drug.薬品補足レコード.map((r) => index薬品補足レコード(r));
+  let 薬品補足レコード: 薬品補足レコードIndexed[] = (
+    drug.薬品補足レコード ?? []
+  ).map((r) => index薬品補足レコード(r));
 
   function isEditing薬品補足レコード(): boolean {
     if (薬品補足レコード) {
@@ -51,17 +50,17 @@
       }
       return false;
     } else {
-	  return false;
-	}
+      return false;
+    }
   }
 
   function get薬品補足レコード(): 薬品補足レコード[] | undefined {
-	if( 薬品補足レコード){
-	  let rs = 薬品補足レコード.map(r => unindex薬品補足レコード(r));
-	  return rs.length === 0 ? undefined: rs;
-	} else {
-	  return undefined;
-	}
+    if (薬品補足レコード) {
+      let rs = 薬品補足レコード.map((r) => unindex薬品補足レコード(r));
+      return rs.length === 0 ? undefined : rs;
+    } else {
+      return undefined;
+    }
   }
 
   function confirmNotEditing(): boolean {
@@ -123,27 +122,29 @@
   }
 </script>
 
-<div>薬剤編集</div>
-<DrugForm
-  {at}
-  bind:剤形区分
-  bind:情報区分
-  bind:薬品コード種別
-  bind:薬品コード
-  bind:isEditing薬品コード
-  bind:薬品名称
-  bind:分量
-  bind:isEditing分量
-  bind:単位名
-  bind:不均等レコード
-  bind:isEditing不均等レコード
-  bind:薬品補足レコード
-/>
-<div class="commands">
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
-  <button on:click={doEnter}>入力</button>
-  <button on:click={doCancel}>キャンセル</button>
+<div class="wrapper">
+  <div class="title">薬剤編集</div>
+  <DrugForm
+    {at}
+    bind:剤形区分
+    bind:情報区分
+    bind:薬品コード種別
+    bind:薬品コード
+    bind:isEditing薬品コード
+    bind:薬品名称
+    bind:分量
+    bind:isEditing分量
+    bind:単位名
+    bind:不均等レコード
+    bind:isEditing不均等レコード
+    bind:薬品補足レコード
+  />
+  <div class="commands">
+    <!-- svelte-ignore a11y-invalid-attribute -->
+    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    <button on:click={doEnter}>入力</button>
+    <button on:click={doCancel}>キャンセル</button>
+  </div>
 </div>
 
 <style>

@@ -415,10 +415,14 @@
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <Dialog2 title="電子処方箋編集" {destroy}>
-  <div class="upper" bind:this={upperElement}>
+  <div class="upper denshi-editor" bind:this={upperElement}>
     <div>
       <div class="aux-menu">
         <button on:click={doAddGroup}>追加</button>
+        {#if !$isEditing}
+          <button on:click={doEnter}>入力</button>
+        {/if}
+        <button on:click={doCancel}>キャンセル</button>
         {#if showAuxMenu === false}
           <ChevronDownLink onClick={() => (showAuxMenu = true)} />
         {:else}
@@ -499,12 +503,6 @@
     </div>
     <div class="form" bind:this={formElement}></div>
   </div>
-  <div class="commands">
-    {#if !$isEditing}
-      <button on:click={doEnter}>入力</button>
-    {/if}
-    <button on:click={doCancel}>キャンセル</button>
-  </div>
 </Dialog2>
 
 <style>
@@ -532,11 +530,6 @@
 
   .small-link {
     font-size: 14px;
-  }
-
-  .commands {
-    margin: 10px;
-    text-align: right;
   }
 
   .cursor-pointer {

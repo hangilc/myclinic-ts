@@ -17,7 +17,10 @@
   import DrugUsage from "./DrugUsage.svelte";
   import { toHankaku } from "@/lib/zenkaku";
   import DrugDays from "./DrugDays.svelte";
-  import { index薬品補足レコード, type 薬品補足レコードIndexed } from "./denshi-editor-types";
+  import {
+    index薬品補足レコード,
+    type 薬品補足レコードIndexed,
+  } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
   import Link from "./widgets/Link.svelte";
 
@@ -99,74 +102,60 @@
 
   function doUneven() {
     不均等レコード = {
-      "不均等１回目服用量": "2",
-      "不均等２回目服用量": "1",
+      不均等１回目服用量: "2",
+      不均等２回目服用量: "1",
     };
     isEditing不均等レコード = true;
   }
 
-    function doHosoku() {
+  function doHosoku() {
     if (!薬品補足レコード) {
       薬品補足レコード = [];
     }
     薬品補足レコード.push(index薬品補足レコード({ 薬品補足情報: "" }));
     薬品補足レコード = 薬品補足レコード;
   }
-
 </script>
 
 <div class="wrapper">
-<div class="title">新規薬剤グループ</div>
-<DrugForm
-  {at}
-  bind:剤形区分
-  bind:情報区分
-  bind:薬品コード種別
-  bind:薬品コード
-  bind:isEditing薬品コード
-  bind:薬品名称
-  bind:分量
-  bind:isEditing分量
-  bind:単位名
-  bind:不均等レコード
-  bind:isEditing不均等レコード
-  bind:薬品補足レコード
-/>
-<div class="form-part">
-  <DrugUsage
-    bind:用法コード
-    bind:用法名称
-    bind:isEditing={isEditing用法コード}
+  <div class="title">新規薬剤グループ</div>
+  <DrugForm
+    {at}
+    bind:剤形区分
+    bind:情報区分
+    bind:薬品コード種別
+    bind:薬品コード
+    bind:isEditing薬品コード
+    bind:薬品名称
+    bind:分量
+    bind:isEditing分量
+    bind:単位名
+    bind:不均等レコード
+    bind:isEditing不均等レコード
+    bind:薬品補足レコード
   />
-</div>
-{#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
-  <DrugDays bind:剤形区分 bind:調剤数量 bind:isEditing={isEditing調剤数量} />
-{/if}
-
-<div class="commands">
-  {#if !不均等レコード}<Link onClick={doUneven}>不均等</Link>{/if}
-  <Link onClick={doHosoku}>補足</Link>
-  {#if !$isEditing}
-  <button on:click={doEnter}>入力</button>
+  <div class="form-part">
+    <DrugUsage
+      bind:用法コード
+      bind:用法名称
+      bind:isEditing={isEditing用法コード}
+    />
+  </div>
+  {#if 剤形区分 === "内服" || 剤形区分 === "頓服"}
+    <DrugDays bind:剤形区分 bind:調剤数量 bind:isEditing={isEditing調剤数量} />
   {/if}
-  <button on:click={doCancel}>キャンセル</button>
-</div>
+
+  <div class="commands">
+    {#if !不均等レコード}<Link onClick={doUneven}>不均等</Link>{/if}
+    <Link onClick={doHosoku}>補足</Link>
+    {#if !$isEditing}
+      <button on:click={doEnter}>入力</button>
+    {/if}
+    <button on:click={doCancel}>キャンセル</button>
+  </div>
 </div>
 
 <style>
-  .wrapper {
-    border: 2px solid #ccc;
-    border-radius: 6px;
-    padding: 10px;
-  }
-
-  .title {
-    padding: 6px;
-    font-weight: bold;
-    margin-bottom: 10px;
-    border-bottom: 2px solid #ccc;
-  }
-
   .form-part {
     margin: 10px 0;
   }
@@ -174,5 +163,4 @@
     margin-top: 10px;
     text-align: right;
   }
-
 </style>

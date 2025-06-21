@@ -5,7 +5,7 @@
   } from "@/lib/denshi-shohou/denshi-shohou";
   import api from "@/lib/api";
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
   import "../widgets/style.css";
   import SearchLink from "../icons/SearchLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
@@ -36,9 +36,11 @@
     }
   };
 
-  $: if (薬品コード === "") {
-    tick().then(() => focus());
-  }
+  onMount(() => focus());
+
+  // $: if (薬品コード === "") {
+  //   tick().then(() => focus());
+  // }
 
   async function doSearch() {
     const t = searchText.trim();

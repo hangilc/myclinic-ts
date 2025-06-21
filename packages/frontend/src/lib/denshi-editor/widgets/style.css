@@ -30,3 +30,18 @@
   .input-with-icons a:not(:first-of-type):hover {
     color: red;
   }
+
+  .denshi-editor {
+    .wrapper {
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .title {
+      padding: 6px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ccc;
+    }
+  }
