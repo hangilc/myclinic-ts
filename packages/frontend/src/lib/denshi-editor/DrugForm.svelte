@@ -15,7 +15,6 @@
     index薬品補足レコード,
     type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
-  import CogLink from "./icons/CogLink.svelte";
   import "./widgets/style.css";
 
   export let at: string;
@@ -31,7 +30,6 @@
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
-  export let showAux = false;
 
   let drugFormKey = 1;
   let drugKindFocus: () => boolean;
@@ -57,23 +55,6 @@
     }
   }
 
-  function doUneven() {
-    if (!不均等レコード) {
-      不均等レコード = {
-        不均等１回目服用量: "1",
-        不均等２回目服用量: "2",
-      };
-      isEditing不均等レコード = true;
-    }
-  }
-
-  function doHosoku() {
-    if (!薬品補足レコード) {
-      薬品補足レコード = [];
-    }
-    薬品補足レコード.push(index薬品補足レコード({ 薬品補足情報: "" }));
-    薬品補足レコード = 薬品補足レコード;
-  }
 </script>
 
 <div class="label">剤形</div>
@@ -90,12 +71,7 @@
     bind:focus={drugKindFocus}
   />
 {/key}
-<div class="label">分量</div>
 <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
-<div style="vert-align:middle;margin-top:8px;">
-  <div class="label" style="display:inline-block;">その他</div>
-  <CogLink onClick={() => (showAux = !showAux)} style="margin-left: 1em;" />
-</div>
 {#if 不均等レコード}
   <div>
     <div class="label">不均等</div>
@@ -106,15 +82,6 @@
   <div>
     <div class="label">補足</div>
     <Hosoku bind:薬品補足レコード />
-  </div>
-{/if}
-{#if showAux}
-  <!-- svelte-ignore a11y-invalid-attribute -->
-  <div>
-    {#if !不均等レコード}
-      <a href="javascript:void(0)" on:click={doUneven}>不均等</a>
-    {/if}
-    <a href="javascript:void(0)" on:click={doHosoku}>補足レコード</a>
   </div>
 {/if}
 

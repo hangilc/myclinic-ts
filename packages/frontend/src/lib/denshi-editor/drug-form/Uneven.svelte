@@ -92,7 +92,7 @@
 <div>
   {#if isEditing}
     <form on:submit|preventDefault={doEnter}>
-      不均等：<input type="text" bind:value={inputText} />
+      <input type="text" bind:value={inputText} />
       <a href="javascript:void(0)" class="icon" on:click={doEnter}
         ><CheckCircle color="currentColor" /></a
       >
@@ -102,7 +102,7 @@
       >
     </form>
   {:else}
-    <div on:click={doEdit} class="rep">不均等：{inputText} <TrashLink onClick={doDelete} /></div>
+    <div on:click={doEdit} class="rep">{inputText} <TrashLink onClick={doDelete} /></div>
     
   {/if}
 </div>

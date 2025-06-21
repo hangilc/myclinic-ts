@@ -17,8 +17,9 @@
   import DrugUsage from "./DrugUsage.svelte";
   import { toHankaku } from "@/lib/zenkaku";
   import DrugDays from "./DrugDays.svelte";
-  import type { 薬品補足レコードIndexed } from "./denshi-editor-types";
+  import { index薬品補足レコード, type 薬品補足レコードIndexed } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
+  import Link from "./widgets/Link.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -43,7 +44,6 @@
   let 不均等レコード: 不均等レコード | undefined = undefined;
   let isEditing不均等レコード = false;
   let 薬品補足レコード: 薬品補足レコードIndexed[] = [];
-  let drugFormShowAux = false;
 
   $: $isEditing =
     isEditing薬品コード ||
@@ -96,6 +96,23 @@
     onEnter(group);
     onDone();
   }
+
+  function doUneven() {
+    不均等レコード = {
+      "不均等１回目服用量": "2",
+      "不均等２回目服用量": "1",
+    };
+    isEditing不均等レコード = true;
+  }
+
+    function doHosoku() {
+    if (!薬品補足レコード) {
+      薬品補足レコード = [];
+    }
+    薬品補足レコード.push(index薬品補足レコード({ 薬品補足情報: "" }));
+    薬品補足レコード = 薬品補足レコード;
+  }
+
 </script>
 
 <div class="wrapper">
@@ -114,7 +131,6 @@
   bind:不均等レコード
   bind:isEditing不均等レコード
   bind:薬品補足レコード
-  showAux={drugFormShowAux}
 />
 <div class="form-part">
   <DrugUsage
@@ -128,6 +144,8 @@
 {/if}
 
 <div class="commands">
+  {#if !不均等レコード}<Link onClick={doUneven}>不均等</Link>{/if}
+  <Link onClick={doHosoku}>補足</Link>
   {#if !$isEditing}
   <button on:click={doEnter}>入力</button>
   {/if}
