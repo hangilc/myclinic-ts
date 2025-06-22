@@ -15,9 +15,10 @@
   import CogLink from "./icons/CogLink.svelte";
   import YouhouHosoku from "./drug-form/YouhouHosoku.svelte";
   import type { 用法補足レコード } from "../denshi-shohou/presc-info";
+  import Link from "./widgets/Link.svelte";
 
   export let onDone: () => void;
-  export let onDelete: () => void;
+  export let onDeleteDrugs: (drugIds: number[]) => void;
   export let 用法コード: string;
   export let 用法名称: string;
   export let 調剤数量: number;
@@ -34,6 +35,7 @@
   let isEditing用法コード: boolean = false;
   let isEditing調剤数量: boolean = false;
   let showAuxMenu = false;
+  let selectedDrugs: Record<number, boolean> = {};
 
   function isEditing用法補足レコード(): boolean {
     return 用法補足レコード.some((r) => r.isEditing);
@@ -64,9 +66,16 @@
   }
 
   function doDelete() {
-    if (confirm("この薬剤グループを削除しますか？")) {
+    const drugIds: number[] = [];
+    for(let key in selectedDrugs){
+      if( selectedDrugs[key] ){
+        drugIds.push(parseInt(key));
+      }
+    }
+    console.log("drugIds", drugIds);
+    if (drugIds.length > 0 && ("この薬剤グループを削除しますか？")) {
       onDone();
-      onDelete();
+      onDeleteDrugs(drugIds);
     }
   }
 
@@ -104,13 +113,28 @@
     }
     return true;
   }
+
+  function hasSelection(map: Record<number, boolean>): boolean {
+    for(let key in map){
+      if( map[key] ){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function selectAll() {
+    for(let d of drugs){
+      selectedDrugs[d.id] = true;
+    }
+  }
 </script>
 
 <div class="wrapper">
   <div class="title">薬剤グループの編集</div>
   <div class="drugs">
     {#each drugs as drug (drug.id)}
-      <div>・</div>
+      <div><input type="checkbox" bind:checked={selectedDrugs[drug.id]}/></div>
       <div>{drugRep(drug)}</div>
     {/each}
   </div>
@@ -140,8 +164,11 @@
     </div>
   {/if}
   <div class="commands">
+    <Link onClick={selectAll}>全選択</Link>
+    {#if hasSelection(selectedDrugs)}
     <!-- svelte-ignore a11y-invalid-attribute -->
     <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+    {/if}
     {#if !isEditing用法コード && !isEditing調剤数量}
       <button on:click={doEnter}>入力</button>
     {/if}
@@ -152,12 +179,11 @@
 <style>
   .drugs {
     margin: 10px 0;
-    border: 1px solid gray;
-    border-radius: 4px;
     padding: 10px;
     line-height: 1.5;
     display: grid;
     grid-template-columns: auto 1fr;
+    border-bottom: 2px solid #ccc;
   }
   .commands {
     text-align: right;

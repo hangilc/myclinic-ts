@@ -190,8 +190,14 @@
           clearForm();
           clearForm = () => {};
         },
-        onDelete: () => {
-          groups = groups.filter((g) => g.id !== group.id);
+        onDeleteDrugs: (drugIds: number[]) => {
+          group.薬品情報グループ = group.薬品情報グループ.filter(d => !drugIds.includes(d.id));
+          if( group.薬品情報グループ.length === 0){
+            groups = groups.filter(g => g.id !== group.id);
+          } else {
+            groups = groups;
+            doUsageSelect(group);
+          }
         },
         用法コード: group.用法レコード.用法コード,
         用法名称: group.用法レコード.用法名称,
@@ -212,7 +218,6 @@
               調剤数量: data.調剤数量,
             });
             groups = groups;
-            console.log("groups", groups);
           }
         },
       },

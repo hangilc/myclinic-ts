@@ -9,6 +9,10 @@
     accent-color: gray;
   }
 
+  input[type="checkbox"] {
+    accent-color: gray;
+  }
+
   input[type="text"] {
     padding: 6px;
   }
