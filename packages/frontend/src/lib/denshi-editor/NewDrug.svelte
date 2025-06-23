@@ -15,6 +15,7 @@
   import DrugForm from "./DrugForm.svelte";
   import type { 薬品補足レコードIndexed } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
+  import "./widgets/style.css";
 
   export let onEnter: (created: 薬品情報) => void;
   export let onDone: () => void;
@@ -40,8 +41,6 @@
     isEditing分量 ||
     isEditing不均等レコード ||
     薬品補足レコード.some((r) => r.isEditing);
-
-  console.log("isEditing", $isEditing)
 
   function doEnter() {
     let record: 薬品レコード | string = validateDrug({
@@ -70,27 +69,29 @@
   }
 </script>
 
-<div>新規薬剤</div>
-<DrugForm
-  {at}
-  bind:剤形区分
-  bind:情報区分
-  bind:薬品コード種別
-  bind:薬品コード
-  bind:isEditing薬品コード
-  bind:薬品名称
-  bind:分量
-  bind:isEditing分量
-  bind:単位名
-  bind:不均等レコード
-  bind:isEditing不均等レコード
-  bind:薬品補足レコード
-/>
-<div class="commands">
-  {#if !$isEditing}
-    <button on:click={doEnter}>入力</button>
-  {/if}
-  <button on:click={doCancel}>キャンセル</button>
+<div class="wrapper">
+  <div class="title">新規薬剤</div>
+  <DrugForm
+    {at}
+    bind:剤形区分
+    bind:情報区分
+    bind:薬品コード種別
+    bind:薬品コード
+    bind:isEditing薬品コード
+    bind:薬品名称
+    bind:分量
+    bind:isEditing分量
+    bind:単位名
+    bind:不均等レコード
+    bind:isEditing不均等レコード
+    bind:薬品補足レコード
+  />
+  <div class="commands">
+    {#if !$isEditing}
+      <button on:click={doEnter}>入力</button>
+    {/if}
+    <button on:click={doCancel}>キャンセル</button>
+  </div>
 </div>
 
 <style>

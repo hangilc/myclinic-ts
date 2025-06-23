@@ -19,6 +19,7 @@
 
   export let onDone: () => void;
   export let onDeleteDrugs: (drugIds: number[]) => void;
+  export let onAddDrug: () => void;
   export let 用法コード: string;
   export let 用法名称: string;
   export let 調剤数量: number;
@@ -128,6 +129,11 @@
       selectedDrugs[d.id] = true;
     }
   }
+
+  function doAddDrug() {
+    onDone();
+    onAddDrug();
+  }
 </script>
 
 <div class="wrapper">
@@ -164,6 +170,7 @@
     </div>
   {/if}
   <div class="commands">
+    <Link onClick={doAddDrug}>薬剤追加</Link>
     <Link onClick={selectAll}>全選択</Link>
     {#if hasSelection(selectedDrugs)}
     <!-- svelte-ignore a11y-invalid-attribute -->
