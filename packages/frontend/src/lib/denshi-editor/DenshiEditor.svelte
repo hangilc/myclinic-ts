@@ -514,10 +514,6 @@
 </Dialog2>
 
 <style>
-  a {
-    white-space: nowrap;
-  }
-
   .aux-menu-panel {
     margin: 10px 0;
   }
@@ -534,10 +530,6 @@
 
   .aux-menu {
     margin: 10px 0;
-  }
-
-  .small-link {
-    font-size: 14px;
   }
 
   .cursor-pointer {

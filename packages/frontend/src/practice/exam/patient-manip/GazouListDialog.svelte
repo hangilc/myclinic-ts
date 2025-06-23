@@ -15,15 +15,17 @@
   let externalImageSrc: string = "";
   let externals: string[] = ["pdf"];
   let contentElement: HTMLDivElement;
-  
-  let setImageWidth: (width: number) => void;
-  let enlarge: (scale: number) => void;
-  let rotateRight: () => void;
-  let rotateLeft: () => void;
+
+  let setImageWidth: ((width: number) => void) | undefined;
+  let enlarge: ((scale: number) => void) | undefined;
+  let rotateRight: (() => void) | undefined;
+  let rotateLeft: (() => void) | undefined;
 
   function onImageLoaded() {
     if (contentElement) {
-      setImageWidth(contentElement.clientWidth);
+      if (setImageWidth) {
+        setImageWidth(contentElement.clientWidth);
+      }
     }
   }
 
@@ -66,19 +68,27 @@
   }
 
   function doEnlarge() {
-    enlarge(1.25);
+    if (enlarge) {
+      enlarge(1.25);
+    }
   }
 
   function doShrink() {
-    enlarge(1 / 1.25);
+    if (enlarge) {
+      enlarge(1 / 1.25);
+    }
   }
 
   function doRotateRight() {
-    rotateRight();
+    if( rotateRight ){
+      rotateRight();
+    }
   }
 
   function doRotateLeft() {
-	rotateLeft();
+    if( rotateLeft ){
+      rotateLeft();
+    }
   }
 </script>
 
@@ -114,8 +124,8 @@
         {onImageLoaded}
         bind:setWidth={setImageWidth}
         bind:enlarge
-		bind:rotateRight
-		bind:rotateLeft
+        bind:rotateRight
+        bind:rotateLeft
       />
     {/if}
   </div>
@@ -148,5 +158,4 @@
     top: 0;
     left: 0;
   }
-
 </style>

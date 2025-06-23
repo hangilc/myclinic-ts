@@ -17,7 +17,7 @@
 
   let ippanmei = "";
   let ippanmeicode = "";
-  let formFocus: () => boolean;
+  let formFocus: (() => boolean) | undefined;
 
   export const focus: () => boolean = () => {
     if (formFocus) {

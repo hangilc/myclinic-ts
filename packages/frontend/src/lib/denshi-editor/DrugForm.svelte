@@ -31,11 +31,13 @@
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
 
   let drugFormKey = 1;
-  let drugKindFocus: () => boolean;
+  let drugKindFocus: (() => boolean) | undefined;
 
   onMount(async () => {
     await tick();
-    drugKindFocus();
+    if (drugKindFocus) {
+      drugKindFocus();
+    }
   });
 
   function doZaikeiKubunChange(prev剤形区分: 剤形区分) {
