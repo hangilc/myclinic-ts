@@ -1,0 +1,51 @@
+  .label {
+    font-weight: bold;
+    color: #999;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  input[type="radio"] {
+    accent-color: gray;
+  }
+
+  input[type="checkbox"] {
+    accent-color: gray;
+  }
+
+  input[type="text"] {
+    padding: 6px;
+  }
+
+  .input-with-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .input-with-icons a:first-of-type {
+    margin-left: 2px;
+  }
+
+  .input-with-icons a:not(:first-of-type) {
+    color: gray;
+  }
+
+  .input-with-icons a:not(:first-of-type):hover {
+    color: red;
+  }
+
+  .denshi-editor {
+    .wrapper {
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+    }
+
+    .title {
+      padding: 6px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #ccc;
+    }
+  }

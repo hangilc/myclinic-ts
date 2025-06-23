@@ -108,9 +108,7 @@
     <div class="title-text" on:mousedown={handleTitleMouseDown}>{title}</div>
     <div on:click={destroy} class="title-xmark"><XMark /></div>
   </div>
-  <div class="content">
-    <slot />
-  </div>
+  <slot />
 </div>
 
 <style>
@@ -126,7 +124,7 @@
     padding: 6px;
     display: grid;
     grid-template-columns: 1fr auto;
-	cursor: move;
+    cursor: move;
   }
 
   .title-text {
@@ -136,10 +134,5 @@
   .title-xmark {
     cursor: pointer;
   }
-
-  .content {
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    resize: both;
-  }
 </style>
+

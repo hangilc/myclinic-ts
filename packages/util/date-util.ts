@@ -340,6 +340,14 @@ export function onshiDateToDate(onshidate: string): Date {
 
 }
 
+export function onshiDateToSqlDate(onshidate: string): string {
+  return DateWrapper.fromOnshiDate(onshidate).asSqlDate();
+}
+
+export function sqlDateToOnshiDate(sqldate: string): string {
+  return DateWrapper.fromSqlDate(sqldate).asOnshiDate();
+}
+
 export function onshiDateToObject(onshidate: string): { year: number, month: number, day: number } {
   return {
     year: parseInt(onshidate.substring(0, 4)),
