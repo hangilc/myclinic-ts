@@ -51,7 +51,7 @@ export function indexLabel(index: number): string {
 }
 
 function drugNameAndAmountLine(drug: Drug): string {
-  return `${drug.name}　${drug.amount}${drug.unit}`
+  return `${drug.name}　${drug.amount}${drug.unit}${drug.uneven ?? ""}`
 }
 
 function drugUsageLine(usage: Usage): string {
