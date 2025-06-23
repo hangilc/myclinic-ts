@@ -43,6 +43,13 @@
   onDestroy(() => unsubs.forEach((f) => f()));
   $: setupIppan(shohou);
 
+  function adaptToText() {
+    memo = TextMemoWrapper.getShohouMemo(text);
+    shohou = memo.shohou;
+    prescriptionId = memo.prescriptionId;
+    prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
+  }
+
   function isToday(): boolean {
     return at === DateWrapper.from(new Date()).asSqlDate();
   }
@@ -115,6 +122,8 @@
     });
     await api.updateText(text);
     mode = "disp";
+    text = text;
+    adaptToText();
   }
 
   async function doUnregistered() {
@@ -126,6 +135,8 @@
     });
     await api.updateText(text);
     mode = "disp";
+    text = text;
+    adaptToText();
   }
 </script>
 
