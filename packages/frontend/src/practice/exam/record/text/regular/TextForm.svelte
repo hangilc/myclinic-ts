@@ -120,7 +120,7 @@
       if (follow == null || !isFaxToPharmacyText(follow.content)) {
         const ok = confirm(
           "オンライン処方箋のようですが、送信先の薬局が指定されていません。\n" +
-			"このまま印刷しますか？",
+            "このまま印刷しますか？",
         );
         if (!ok) {
           return;
@@ -480,7 +480,7 @@
       alert(shohou);
       return;
     }
-	console.log("shohou", shohou);
+    console.log("shohou", shohou);
     let data: ShohousenData2025 = await prepareData();
     data.shohou = shohou;
     let pages = drawShohousen2025(data);
@@ -685,12 +685,12 @@
   }
 
   function doOpenKisaiRei() {
-	const d: ShohouExampleDialog = new ShohouExampleDialog({
-	  target: document.body,
-	  props: {
-		destroy: () => d.$destroy(),
-	  }
-	})
+    const d: ShohouExampleDialog = new ShohouExampleDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+      },
+    });
   }
 
   function oldShohouPopup(): [string, () => void][] {
@@ -706,44 +706,44 @@
       menu.push(["電子予備編集", doEditShohouConv]);
       menu.push(["電子処方に", doTransformToDenshi]);
     }
-	menu.push(["記載例", doOpenKisaiRei])
+    menu.push(["記載例", doOpenKisaiRei]);
     return menu;
   }
 
   function prepareMailContent(p: Patient, t: string): string {
-	let c = `${p.lastName}様、
+    let c = `${p.lastName}様、
 
 	血液検査の結果です。
 
 	${t}`;
-	c = c.replaceAll(/^(?!\s*$)\s+/gm, "");
-	return c;
+    c = c.replaceAll(/^(?!\s*$)\s+/gm, "");
+    return c;
   }
 
   async function doMail() {
-	const patient = await api.getPatient(patientId);
-	let memoWrapper = new PatientMemoWrapper(patient.memo);
-	let addr = memoWrapper.getEmail();
-	if( !addr ){
-	  alert("No email address");
-	  return;
-	}
-	let from = await cache.getDoctorEmail();
-	if( from === "" ){
-	  alert("Doctor email is not configured.");
-	  return;
-	}
-	let d: MailDialog = new MailDialog({
-	  target: document.body,
-	  props: {
-		destroy: () => d.$destroy(),
-		to: addr,
-		from,
-		subject: "検査結果",
-		content: prepareMailContent(patient, text.content),
-	  }
-	});
-	onClose();
+    const patient = await api.getPatient(patientId);
+    let memoWrapper = new PatientMemoWrapper(patient.memo);
+    let addr = memoWrapper.getEmail();
+    if (!addr) {
+      alert("No email address");
+      return;
+    }
+    let from = await cache.getDoctorEmail();
+    if (from === "") {
+      alert("Doctor email is not configured.");
+      return;
+    }
+    let d: MailDialog = new MailDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        to: addr,
+        from,
+        subject: "検査結果",
+        content: prepareMailContent(patient, text.content),
+      },
+    });
+    onClose();
   }
 </script>
 
@@ -771,9 +771,9 @@
           >処方箋</a
         >
       {/if}
-	  {#if isKensaText}
-		<a href="javascript:void(0)" on:click={doMail}>メール送信</a>
-	  {/if}
+      {#if isKensaText}
+        <a href="javascript:void(0)" on:click={doMail}>メール送信</a>
+      {/if}
       <a href="javascript:void(0)" on:click={onDelete}>削除</a>
       <a href="javascript:void(0)" on:click={onCopy}>コピー</a>
     </div>

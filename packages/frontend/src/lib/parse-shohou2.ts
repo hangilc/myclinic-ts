@@ -331,7 +331,8 @@ function parseDrug(pos: Pos): Result<Drug> {
   let drug: Drug = {
     name,
     amount: (m[1] ?? "") + m[2],   // 一回, amount
-    unit: m[3] + (m[4] ?? ""), // unit, unevent
+    uneven: m[4] ? `(${m[4]})` : undefined,
+    unit: m[3], // unit
     drugComments: []
   };
   let rCommands = repeat(probeDrugCommand, pos);
