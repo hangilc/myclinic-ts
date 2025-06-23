@@ -41,6 +41,12 @@
   function nissuuKaisuu(剤形区分: 剤形区分): string {
     return 剤形区分 === "内服" ? "日数" : "回数";
   }
+
+  function nissuuBun(剤形区分: 剤形区分): string {
+    return 剤形区分 === "内服" ? "日分" : "回分";
+  }
+
+
 </script>
 
 <div>
@@ -48,7 +54,7 @@
     <div class="label">{nissuuKaisuu(剤形区分)}設定</div>
     <form on:submit|preventDefault={doEnter} class="input-with-icons">
       <input type="text" style="width:3rem" bind:value={inputText} />
-      {nissuuKaisuu(剤形区分)}
+      {nissuuBun(剤形区分)}
       <SubmitLink onClick={doEnter} />
       <CancelLink onClick={doCancel} />
     </form>
