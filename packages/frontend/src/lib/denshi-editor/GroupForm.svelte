@@ -12,10 +12,10 @@
     用法補足区分,
   } from "@/lib/denshi-shohou/denshi-shohou";
   import { drugRep } from "./helper";
-  import CogLink from "./icons/CogLink.svelte";
   import YouhouHosoku from "./drug-form/YouhouHosoku.svelte";
   import type { 用法補足レコード } from "../denshi-shohou/presc-info";
   import Link from "./widgets/Link.svelte";
+  import type { Writable } from "svelte/store";
 
   export let onDone: () => void;
   export let onDeleteDrugs: (drugIds: number[]) => void;
@@ -32,11 +32,13 @@
     調剤数量: number;
     用法補足レコード: 用法補足レコードIndexed[];
   }) => void;
+  export let isEditing: Writable<boolean>;
 
   let isEditing用法コード: boolean = false;
   let isEditing調剤数量: boolean = false;
-  let showAuxMenu = false;
   let selectedDrugs: Record<number, boolean> = {};
+
+  $: $isEditing = isEditing用法コード || isEditing調剤数量;
 
   function isEditing用法補足レコード(): boolean {
     return 用法補足レコード.some((r) => r.isEditing);
@@ -68,20 +70,16 @@
 
   function doDelete() {
     const drugIds: number[] = [];
-    for(let key in selectedDrugs){
-      if( selectedDrugs[key] ){
+    for (let key in selectedDrugs) {
+      if (selectedDrugs[key]) {
         drugIds.push(parseInt(key));
       }
     }
     console.log("drugIds", drugIds);
-    if (drugIds.length > 0 && ("この薬剤グループを削除しますか？")) {
+    if (drugIds.length > 0 && "この薬剤グループを削除しますか？") {
       onDone();
       onDeleteDrugs(drugIds);
     }
-  }
-
-  function toggleAuxMenu() {
-    showAuxMenu = !showAuxMenu;
   }
 
   function doAddYouhouHosoku(kubun: 用法補足区分) {
@@ -100,7 +98,6 @@
       用法補足レコード.push(index用法補足レコード(h));
       用法補足レコード = 用法補足レコード;
     }
-    showAuxMenu = false;
   }
 
   function youhouHosokuNotContains(
@@ -116,8 +113,8 @@
   }
 
   function hasSelection(map: Record<number, boolean>): boolean {
-    for(let key in map){
-      if( map[key] ){
+    for (let key in map) {
+      if (map[key]) {
         return true;
       }
     }
@@ -125,7 +122,7 @@
   }
 
   function selectAll() {
-    for(let d of drugs){
+    for (let d of drugs) {
       selectedDrugs[d.id] = true;
     }
   }
@@ -140,7 +137,7 @@
   <div class="title">薬剤グループの編集</div>
   <div class="drugs">
     {#each drugs as drug (drug.id)}
-      <div><input type="checkbox" bind:checked={selectedDrugs[drug.id]}/></div>
+      <div><input type="checkbox" bind:checked={selectedDrugs[drug.id]} /></div>
       <div>{drugRep(drug)}</div>
     {/each}
   </div>
@@ -153,28 +150,25 @@
     <DrugDays bind:調剤数量 {剤形区分} bind:isEditing={isEditing調剤数量} />
   {/if}
   <div><YouhouHosoku bind:用法補足レコード /></div>
-  <div><CogLink onClick={toggleAuxMenu} /></div>
-  {#if showAuxMenu}
-    <!-- svelte-ignore a11y-invalid-attribute -->
-    <div>
-      {#if youhouHosokuNotContains(用法補足レコード, "一包化")}
-        <a
-          href="javascript:void(0)"
-          on:click={() => doAddYouhouHosoku("一包化")}>一包化</a
-        >
-      {/if}
-      <a
-        href="javascript:void(0)"
-        on:click={() => doAddYouhouHosoku("用法の続き")}>用法補足</a
-      >
-    </div>
-  {/if}
   <div class="commands">
-    <Link onClick={doAddDrug}>薬剤追加</Link>
+    <a
+      href="javascript:void(0)"
+      on:click={() => doAddYouhouHosoku("用法の続き")}>用法補足</a
+    >
+    {#if youhouHosokuNotContains(用法補足レコード, "一包化")}
+      <a href="javascript:void(0)" on:click={() => doAddYouhouHosoku("一包化")}
+        >一包化</a
+      >
+    {/if}
+  </div>
+  <div class="commands">
+    {#if !$isEditing}
+      <Link onClick={doAddDrug}>薬剤追加</Link>
+    {/if}
     <Link onClick={selectAll}>全選択</Link>
     {#if hasSelection(selectedDrugs)}
-    <!-- svelte-ignore a11y-invalid-attribute -->
-    <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+      <!-- svelte-ignore a11y-invalid-attribute -->
+      <a href="javascript:void(0)" on:click={doDelete}>削除</a>
     {/if}
     {#if !isEditing用法コード && !isEditing調剤数量}
       <button on:click={doEnter}>入力</button>
@@ -193,6 +187,7 @@
     border-bottom: 2px solid #ccc;
   }
   .commands {
+    margin-top: 4px;
     text-align: right;
   }
 </style>

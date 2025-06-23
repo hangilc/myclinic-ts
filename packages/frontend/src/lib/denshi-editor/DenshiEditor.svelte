@@ -40,6 +40,8 @@
   import Bikou from "./Bikou.svelte";
   import { runner } from "./helper";
   import { writable, type Writable } from "svelte/store";
+  import Link from "./widgets/Link.svelte";
+  import SmallLink from "./widgets/SmallLink.svelte";
 
   export let destroy: () => void;
   export let data: PrescInfoData;
@@ -125,7 +127,10 @@
     return `${y}-${m}-${d}`;
   }
 
-  function doAddDrug(group: RP剤情報Indexed) {
+  function doAddDrug(
+    group: RP剤情報Indexed,
+    resumeToEditGroup: boolean = false,
+  ) {
     clearForm();
     const e: NewDrug = new NewDrug({
       target: formElement,
@@ -135,12 +140,20 @@
         onDone: () => {
           clearForm();
           clearForm = () => {};
-          $isEditing = false;
         },
-        onEnter: (drug) => {
+        onEnter: (drug: 薬品情報) => {
           group.薬品情報グループ.push(index薬品情報(drug));
           groups = groups;
+          if (resumeToEditGroup) {
+            doUsageSelect(group);
+          }
         },
+        onCancel: () => {
+          if (resumeToEditGroup) {
+            doUsageSelect(group);
+          }
+        },
+        group,
       },
     });
     clearForm = () => e.$destroy();
@@ -186,21 +199,24 @@
     const e: GroupForm = new GroupForm({
       target: formElement,
       props: {
+        isEditing,
         onDone: () => {
           clearForm();
           clearForm = () => {};
         },
         onDeleteDrugs: (drugIds: number[]) => {
-          group.薬品情報グループ = group.薬品情報グループ.filter(d => !drugIds.includes(d.id));
-          if( group.薬品情報グループ.length === 0){
-            groups = groups.filter(g => g.id !== group.id);
+          group.薬品情報グループ = group.薬品情報グループ.filter(
+            (d) => !drugIds.includes(d.id),
+          );
+          if (group.薬品情報グループ.length === 0) {
+            groups = groups.filter((g) => g.id !== group.id);
           } else {
             groups = groups;
             doUsageSelect(group);
           }
         },
         onAddDrug: () => {
-          doAddDrug(group);
+          doAddDrug(group, true);
         },
         用法コード: group.用法レコード.用法コード,
         用法名称: group.用法レコード.用法名称,
@@ -379,6 +395,10 @@
     scrollToTop();
   }
 
+  function doAddBikouIppouka() {
+    備考レコード = [ ...備考レコード, index備考レコード({ 備考: "一包化", }) ];
+  }
+
   function doEditBikou() {
     clearForm();
     const e: Bikou = new Bikou({
@@ -438,41 +458,21 @@
         {/if}
         {#if showAuxMenu}
           <div class="aux-menu-panel">
-            {#if !使用期限年月日}
-              <!-- svelte-ignore a11y-invalid-attribute -->
-              <a
-                href="javascript:void(0)"
-                class="small-link"
-                on:click={auxInvoke(doExpirationDate)}>有効期限</a
-              >
-            {/if}
-            <a
-              href="javascript:void(0)"
-              class="small-link"
-              on:click={auxInvoke(doAddInfoProvider)}
+            <SmallLink
+              onClick={auxInvoke(doExpirationDate)}
+              visible={!使用期限年月日}>有効期限</SmallLink
             >
-              情報提供
-            </a>
-            <a
-              href="javascript:void(0)"
-              class="small-link"
-              on:click={auxInvoke(doAddKensa)}
+            <SmallLink onClick={auxInvoke(doAddBikouIppouka)}>一包化</SmallLink>
+            <SmallLink onClick={auxInvoke(doAddBikou)}>備考追加</SmallLink>
+            <SmallLink onClick={auxInvoke(doAddInfoProvider)}
+              >情報提供</SmallLink
             >
-              検査値
-            </a>
-            <a
-              href="javascript:void(0)"
-              class="small-link"
-              on:click={auxInvoke(doAddBikou)}
-            >
-              備考追加
-            </a>
+            <SmallLink onClick={auxInvoke(doAddKensa)}>検査値</SmallLink>
           </div>
         {/if}
       </div>
       <PrescRep
         {groups}
-        onAddDrug={doAddDrug}
         onDrugSelect={doDrugSelect}
         onUsageSelect={doUsageSelect}
       />

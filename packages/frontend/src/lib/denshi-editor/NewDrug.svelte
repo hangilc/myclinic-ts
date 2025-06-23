@@ -10,16 +10,21 @@
     薬品レコード,
     不均等レコード,
   } from "../denshi-shohou/presc-info";
-  import { validateDrug } from "./helper";
-  import { toHankaku } from "@/lib/zenkaku";
+  import { drugRep, validateDrug } from "./helper";
+  import { toHankaku, toZenkaku } from "@/lib/zenkaku";
   import DrugForm from "./DrugForm.svelte";
-  import type { 薬品補足レコードIndexed } from "./denshi-editor-types";
+  import type {
+    RP剤情報Indexed,
+    薬品補足レコードIndexed,
+  } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
   import "./widgets/style.css";
 
   export let onEnter: (created: 薬品情報) => void;
+  export let onCancel: () => void;
   export let onDone: () => void;
   export let at: string;
+  export let group: RP剤情報Indexed;
 
   export let isEditing: Writable<boolean>;
   let 剤形区分: 剤形区分 = "内服";
@@ -60,17 +65,27 @@
       薬品レコード: record,
       不均等レコード,
     };
-    onEnter(data);
     onDone();
+    onEnter(data);
   }
 
   function doCancel() {
+    $isEditing = false;
     onDone();
+    onCancel();
   }
 </script>
 
 <div class="wrapper">
   <div class="title">新規薬剤</div>
+  {#if group.薬品情報グループ.length > 0}
+    <div class="label">同グループ薬剤</div>
+    <div class="drugs">
+      {#each group.薬品情報グループ as drug (drug.id)}
+        <div class="drug-rep">&bull; {drugRep(drug)}</div>
+      {/each}
+    </div>
+  {/if}
   <DrugForm
     {at}
     bind:剤形区分
@@ -86,6 +101,20 @@
     bind:isEditing不均等レコード
     bind:薬品補足レコード
   />
+  <div class="label">用法</div>
+  <div class="usage-rep">{group.用法レコード.用法名称}</div>
+  {#if group.剤形レコード.剤形区分 === "内服"}
+    <div class="label">日数</div>
+    <div class="amount-rep">
+      {toZenkaku(group.剤形レコード.調剤数量.toString())}日分
+    </div>
+  {:else if group.剤形レコード.剤形区分 === "頓服"}
+    <div class="label">回数</div>
+    <div class="amount-rep">
+      {toZenkaku(group.剤形レコード.調剤数量.toString())}回分
+    </div>
+  {/if}
+  <div></div>
   <div class="commands">
     {#if !$isEditing}
       <button on:click={doEnter}>入力</button>
@@ -95,6 +124,17 @@
 </div>
 
 <style>
+  .drugs {
+    padding-left: 10px;
+  }
+
+  .drug-rep,
+  .usage-rep,
+  .amount-rep {
+    font-size: 12px;
+    color: gray;
+  }
+
   .commands {
     text-align: right;
   }

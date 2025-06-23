@@ -9,7 +9,7 @@
   import { drugRep } from "./helper";
 
   export let groups: RP剤情報Indexed[];
-  export let onAddDrug: (greoup: RP剤情報Indexed) => void;
+  // export let onAddDrug: (greoup: RP剤情報Indexed) => void;
   export let onDrugSelect: (g: RP剤情報Indexed, d: 薬品情報Indexed) => void;
   export let onUsageSelect: (g: RP剤情報Indexed) => void;
 
@@ -33,13 +33,13 @@
           {/each}
         </div>
         <div>
-          <a
+          <!-- <a
             href="javascript:void(0)"
             class="plus"
             on:click={() => onAddDrug(group)}
           >
             <PlusCircle color="green" />
-          </a>
+          </a> -->
         </div>
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
