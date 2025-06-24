@@ -480,7 +480,6 @@
       alert(shohou);
       return;
     }
-    console.log("shohou", shohou);
     let data: ShohousenData2025 = await prepareData();
     data.shohou = shohou;
     let pages = drawShohousen2025(data);

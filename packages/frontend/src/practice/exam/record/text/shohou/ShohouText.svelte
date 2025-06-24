@@ -104,7 +104,6 @@
       console.error("cannot modify registered denshi shohou");
       return;
     }
-    console.log("modified", modified);
     TextMemoWrapper.setTextMemo(text, {
       kind: "shohou",
       shohou: modified,

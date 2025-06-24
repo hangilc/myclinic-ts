@@ -28,7 +28,9 @@ export function denshiToOldShohou(data: PrescInfoData): string {
       
       // Add uneven dosage information if present
       if (drug.不均等レコード) {
-        drugLine += `　（${unevenDisp(drug.不均等レコード)}）`;
+        let rep = `(${unevenDisp(drug.不均等レコード)})`;
+        // drugLine += `　（${unevenDisp(drug.不均等レコード)}）`;
+        drugLine += toZenkaku(rep);
       }
 
       lines.push(drugLine);
