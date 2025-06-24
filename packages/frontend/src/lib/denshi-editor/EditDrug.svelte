@@ -9,6 +9,9 @@
     薬品情報,
     薬品レコード,
     薬品補足レコード,
+    用法レコード,
+    剤形レコード,
+    RP剤情報,
   } from "../denshi-shohou/presc-info";
   import { drugRep, validateDrug } from "./helper";
   import { toHankaku, toZenkaku } from "@/lib/zenkaku";
@@ -17,7 +20,7 @@
     index薬品補足レコード,
     unindex薬品補足レコード,
     type 薬品補足レコードIndexed,
-    type RP剤情報Indexed,
+    type 薬品情報Indexed,
   } from "./denshi-editor-types";
 
   export let drug: 薬品情報;
@@ -26,7 +29,10 @@
   export let onDelete: () => void;
   export let onDone: () => void;
   export let at: string;
-  export let group: RP剤情報Indexed;
+  export let 剤形レコード: 剤形レコード;
+  export let 用法レコード: 用法レコード;
+  export let drugs: 薬品情報Indexed[];
+  // export let group: RP剤情報Indexed;
 
   let 情報区分: 情報区分 = drug.薬品レコード.情報区分;
   let 薬品コード種別: 薬品コード種別 = drug.薬品レコード.薬品コード種別;
@@ -122,18 +128,14 @@
       onDone();
     }
   }
-
-  function getGroupDrugs(drugs: 薬品情報): 薬品情報[] {
-    
-  }
 </script>
 
 <div class="wrapper">
   <div class="title">薬剤編集</div>
-  {#if group.薬品情報グループ.length > 0}
+  {#if drugs.length > 0}
     <div class="label">同グループ薬剤</div>
     <div class="drugs">
-      {#each group.薬品情報グループ as drug (drug.id)}
+      {#each drugs as drug (drug.id)}
         <div class="drug-rep">&bull; {drugRep(drug)}</div>
       {/each}
     </div>
@@ -154,16 +156,16 @@
     bind:薬品補足レコード
   />
   <div class="label">用法</div>
-  <div class="usage-rep">{group.用法レコード.用法名称}</div>
-  {#if group.剤形レコード.剤形区分 === "内服"}
+  <div class="usage-rep">{用法レコード.用法名称}</div>
+  {#if 剤形レコード.剤形区分 === "内服"}
     <div class="label">日数</div>
     <div class="amount-rep">
-      {toZenkaku(group.剤形レコード.調剤数量.toString())}日分
+      {toZenkaku(剤形レコード.調剤数量.toString())}日分
     </div>
-  {:else if group.剤形レコード.剤形区分 === "頓服"}
+  {:else if 剤形レコード.剤形区分 === "頓服"}
     <div class="label">回数</div>
     <div class="amount-rep">
-      {toZenkaku(group.剤形レコード.調剤数量.toString())}回分
+      {toZenkaku(剤形レコード.調剤数量.toString())}回分
     </div>
   {/if}
   <div></div>
