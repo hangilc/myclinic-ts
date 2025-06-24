@@ -167,6 +167,7 @@
       props: {
         at,
         drug: unindex薬品情報(drug),
+        group,
         剤形区分: group.剤形レコード.剤形区分,
         onDone: () => {
           clearForm();
