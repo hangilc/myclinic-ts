@@ -111,7 +111,7 @@
     <!-- svelte-ignore a11y-invalid-attribute -->
   </div>
   {#if mode === "master"}
-    <form on:submit|preventDefault={doSearchUsage} class="input-with-icons">
+    <form on:submit|preventDefault={doSearchUsage} class="with-icons">
       <input
         class="input-text"
         type="text"

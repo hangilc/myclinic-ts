@@ -23,6 +23,8 @@
   } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
   import Link from "./widgets/Link.svelte";
+  import "./widgets/style.css";
+  import { onMount } from "svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -55,6 +57,20 @@
     isEditing調剤数量 ||
     isEditing不均等レコード ||
     薬品補足レコード.some((r) => r.isEditing);
+
+  $: console.log("isEditing薬品コード", isEditing薬品コード);
+  $: console.log("isEditing分量", isEditing分量);
+  $: console.log("isEditing用法コード", isEditing用法コード);
+  $: console.log("isEditing調剤数量", isEditing調剤数量);
+  $: console.log("isEditing不均等レコード", isEditing不均等レコード);
+
+  let focusDrugForm: (() => void) | undefined = undefined;
+
+  onMount(() => {
+    if( focusDrugForm ){
+      focusDrugForm();
+    }
+  });
 
   function doCancel() {
     onDone();
@@ -108,12 +124,24 @@
     isEditing不均等レコード = true;
   }
 
-  function doHosoku() {
+  function addYakuhinHosoku() {
     if (!薬品補足レコード) {
       薬品補足レコード = [];
     }
     薬品補足レコード.push(index薬品補足レコード({ 薬品補足情報: "" }));
     薬品補足レコード = 薬品補足レコード;
+  }
+
+  function addGroupHosoku() {}
+
+  function on剤形区分Change(kubun: 剤形区分) {
+    if( kubun === "内服" || kubun === "頓服" ){
+      調剤数量 = 7;
+      isEditing調剤数量 = true;
+    } else {
+      調剤数量 = 1;
+      isEditing調剤数量 = false;
+    }
   }
 </script>
 
@@ -133,6 +161,8 @@
     bind:不均等レコード
     bind:isEditing不均等レコード
     bind:薬品補足レコード
+    on剤形区分Change={on剤形区分Change}
+    bind:focus={focusDrugForm}
   />
   <div class="form-part">
     <DrugUsage
@@ -145,9 +175,12 @@
     <DrugDays bind:剤形区分 bind:調剤数量 bind:isEditing={isEditing調剤数量} />
   {/if}
 
-  <div class="commands">
+  <div class="link-commands">
+    <Link onClick={addYakuhinHosoku}>薬品補足追加</Link>
     {#if !不均等レコード}<Link onClick={doUneven}>不均等</Link>{/if}
-    <Link onClick={doHosoku}>補足</Link>
+    <Link onClick={addGroupHosoku}>グループ補足追加</Link>
+  </div>
+  <div class="commands">
     {#if !$isEditing}
       <button on:click={doEnter}>入力</button>
     {/if}
@@ -158,9 +191,5 @@
 <style>
   .form-part {
     margin: 10px 0;
-  }
-  .commands {
-    margin-top: 10px;
-    text-align: right;
   }
 </style>

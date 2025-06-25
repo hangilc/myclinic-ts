@@ -17,13 +17,11 @@
 
   let ippanmei = "";
   let ippanmeicode = "";
-  let formFocus: (() => boolean) | undefined;
+  let formFocus: (() => boolean) | undefined = undefined;
 
-  export const focus: () => boolean = () => {
+  export const focus: () => void = () => {
     if (formFocus) {
-      return formFocus();
-    } else {
-      return false;
+      formFocus();
     }
   };
 

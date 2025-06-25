@@ -46,7 +46,7 @@
 
 <div class="label">分量</div>
 {#if isEditing}
-  <form on:submit|preventDefault={doEnter} class="input-with-icons">
+  <form on:submit|preventDefault={doEnter} class="with-icons">
     <input type="text" bind:value={inputText} bind:this={inputElement} />
     {単位名}
     <SubmitLink onClick={doEnter} />

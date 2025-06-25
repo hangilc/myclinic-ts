@@ -52,7 +52,7 @@
 <div>
   {#if isEditing}
     <div class="label">{nissuuKaisuu(剤形区分)}設定</div>
-    <form on:submit|preventDefault={doEnter} class="input-with-icons">
+    <form on:submit|preventDefault={doEnter} class="with-icons">
       <input type="text" style="width:3rem" bind:value={inputText} />
       {nissuuBun(剤形区分)}
       <SubmitLink onClick={doEnter} />

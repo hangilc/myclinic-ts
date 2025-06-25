@@ -27,6 +27,6 @@
 
   a :global(svg) {
 	position: relative;
-	top: 3px;
+	top: 1px;
   }
 </style>

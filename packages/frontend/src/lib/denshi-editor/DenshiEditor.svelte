@@ -40,7 +40,6 @@
   import Bikou from "./Bikou.svelte";
   import { runner } from "./helper";
   import { writable, type Writable } from "svelte/store";
-  import Link from "./widgets/Link.svelte";
   import SmallLink from "./widgets/SmallLink.svelte";
 
   export let destroy: () => void;

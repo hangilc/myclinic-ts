@@ -27,7 +27,8 @@
   let searchIyakuhinResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
-  export const focus: () => boolean = () => {
+  export const focus: () => void = async () => {
+    await tick();
     if (inputElement) {
       inputElement.focus();
       return true;
@@ -104,7 +105,7 @@
 <div>
   <form on:submit|preventDefault={doSearch}>
     <div class="label">薬品名検索</div>
-    <div class="input-with-icons">
+    <div class="with-icons">
       <input
         type="text"
         tabindex="0"
@@ -164,7 +165,7 @@
     background-color: #eee;
   }
 
-  .input-with-icons {
+  .with-icons {
     display: flex;
     align-items: center;
     gap: 2px;

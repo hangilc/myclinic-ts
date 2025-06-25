@@ -1,41 +1,45 @@
-  .label {
-    font-weight: bold;
-    color: #999;
-    font-size: 12px;
-    margin-top: 6px;
-  }
-
-  input[type="radio"] {
-    accent-color: gray;
-  }
-
-  input[type="checkbox"] {
-    accent-color: gray;
-  }
-
-  input[type="text"] {
-    padding: 6px;
-  }
-
-  .input-with-icons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
-
-  .input-with-icons a:first-of-type {
-    margin-left: 2px;
-  }
-
-  .input-with-icons a:not(:first-of-type) {
-    color: gray;
-  }
-
-  .input-with-icons a:not(:first-of-type):hover {
-    color: red;
-  }
-
   .denshi-editor {
+    a {
+      white-space: nowrap;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #999;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    input[type="radio"] {
+      accent-color: gray;
+    }
+
+    input[type="checkbox"] {
+      accent-color: gray;
+    }
+
+    input[type="text"] {
+      padding: 6px;
+    }
+
+    .with-icons {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .with-icons a:first-of-type {
+      margin-left: 2px;
+    }
+
+    .with-icons a:not(:first-of-type) {
+      color: gray;
+    }
+
+    .with-icons a:not(:first-of-type):hover {
+      color: red;
+    }
+
     .wrapper {
       border: 2px solid #ccc;
       border-radius: 6px;
@@ -48,4 +52,18 @@
       margin-bottom: 10px;
       border-bottom: 2px solid #ccc;
     }
+
+    .link-commands {
+      margin-top: 10px;
+    }
+
+    .commands {
+      margin-top: 10px;
+      text-align: right;
+    }
+
+    .cursor-pointer {
+      cursor: pointer;
+    }
+
   }

@@ -4,6 +4,9 @@
   import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import { toHankaku } from "@/lib/zenkaku";
   import TrashLink from "../icons/TrashLink.svelte";
+  import "../widgets/style.css";
+  import SubmitLink from "../icons/SubmitLink.svelte";
+  import CancelLink from "../icons/CancelLink.svelte";
 
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing: boolean;
@@ -91,33 +94,16 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div>
   {#if isEditing}
-    <form on:submit|preventDefault={doEnter}>
+    <form on:submit|preventDefault={doEnter} class="with-icons">
       <input type="text" bind:value={inputText} />
-      <a href="javascript:void(0)" class="icon" on:click={doEnter}
-        ><CheckCircle color="currentColor" /></a
-      >
+      <SubmitLink onClick={doEnter} />
+      <CancelLink onClick={doCancel} />
       <TrashLink onClick={doDelete} />
-      <a href="javascript:void(0)" class="icon not-first" on:click={doCancel}
-        ><XCircle /></a
-      >
     </form>
   {:else}
-    <div on:click={doEdit} class="rep">{inputText} <TrashLink onClick={doDelete} /></div>
-    
+    <div on:click={doEdit} class="cursor-pointer with-icons">{inputText} <TrashLink onClick={doDelete} /></div>
   {/if}
 </div>
 
 <style>
-  .icon {
-    position: relative;
-    top: 4px;
-  }
-
-  .icon.not-first {
-    left: -4px;
-  }
-
-  .rep {
-    cursor: pointer;
-  }
 </style>

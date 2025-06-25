@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
   import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import DrugAmount from "./DrugAmount.svelte";
   import DrugKind from "./DrugKind.svelte";
@@ -29,16 +28,16 @@
   export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing不均等レコード: boolean;
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
+  export let on剤形区分Change: (kubun: 剤形区分) => void = _ => {};
 
   let drugFormKey = 1;
-  let drugKindFocus: (() => boolean) | undefined;
+  let focusDrugKind: (() => void) | undefined = undefined;
 
-  onMount(async () => {
-    await tick();
-    if (drugKindFocus) {
-      drugKindFocus();
+  export const focus: () => void = () => {
+    if( focusDrugKind ){
+      focusDrugKind();
     }
-  });
+  }
 
   function doZaikeiKubunChange(prev剤形区分: 剤形区分) {
     情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
@@ -55,6 +54,7 @@
       単位名 = "";
       drugFormKey += 1;
     }
+    on剤形区分Change(剤形区分);
   }
 
 </script>
@@ -70,7 +70,7 @@
     bind:薬品名称
     bind:単位名
     {at}
-    bind:focus={drugKindFocus}
+    bind:focus={focusDrugKind}
   />
 {/key}
 <DrugAmount bind:分量 bind:isEditing={isEditing分量} {単位名} />
@@ -82,10 +82,8 @@
 {/if}
 {#if 薬品補足レコード.length > 0}
   <div>
-    <div class="label">補足</div>
+    <div class="label">薬品補足</div>
     <Hosoku bind:薬品補足レコード />
   </div>
 {/if}
 
-<style>
-</style>

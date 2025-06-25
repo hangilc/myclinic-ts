@@ -13,12 +13,14 @@
   import { drugRep, validateDrug } from "./helper";
   import { toHankaku, toZenkaku } from "@/lib/zenkaku";
   import DrugForm from "./DrugForm.svelte";
-  import type {
-    RP剤情報Indexed,
-    薬品補足レコードIndexed,
+  import {
+  index薬品補足レコード,
+    type RP剤情報Indexed,
+    type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
   import type { Writable } from "svelte/store";
   import "./widgets/style.css";
+  import Link from "./widgets/Link.svelte";
 
   export let onEnter: (created: 薬品情報) => void;
   export let onCancel: () => void;
@@ -74,6 +76,7 @@
     onDone();
     onCancel();
   }
+
 </script>
 
 <div class="wrapper">
