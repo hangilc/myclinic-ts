@@ -10,6 +10,10 @@
       margin-top: 6px;
     }
 
+    .small-text {
+      font-size: 12px;
+    }
+
     input[type="radio"] {
       accent-color: gray;
     }

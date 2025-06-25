@@ -693,8 +693,9 @@
     });
   }
 
-  function doConvTextToDenshi() {
+  async function doConvTextToDenshi() {
     onClose();
+    let visit = await api.getVisit(text.visitId);
     const shohou = parseShohou(text.content);
     if( typeof shohou === "string" ){
       alert(shohou);
@@ -705,6 +706,7 @@
       props: {
         destroy: () => d.$destroy(),
         shohou,
+        at: visit.visitedAt.substring(0, 10),
       }
     })
   }

@@ -4,6 +4,7 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import ConvertedIcon from "./conv-widgets/ConvertedIcon.svelte";
   import UnconvertedIcon from "./conv-widgets/UnconvertedIcon.svelte";
+  import { drugRep } from "../helper";
 
   export let groups: ConvGroupRep[];
   export let onDrugSelected: (group: ConvGroupRep, index: number) => void;
@@ -27,7 +28,7 @@
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div on:click={() => onDrugSelected(group, index)} class="cursor-pointer">
           {#if drug.converted}
-            <ConvertedIcon /> カロナール
+            <ConvertedIcon /> {drugRep(drug.converted)}
           {:else}
             <UnconvertedIcon /> {unconvRep(drug.src)}
           {/if}
