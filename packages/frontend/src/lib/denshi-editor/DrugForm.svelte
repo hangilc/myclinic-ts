@@ -11,9 +11,11 @@
   import Uneven from "./drug-form/Uneven.svelte";
   import Hosoku from "./drug-form/Hosoku.svelte";
   import {
+  index薬品補足レコード,
     type 薬品補足レコードIndexed,
   } from "./denshi-editor-types";
   import "./widgets/style.css";
+  import SmallLink from "./widgets/SmallLink.svelte";
 
   export let at: string;
   export let 剤形区分: 剤形区分;
@@ -57,6 +59,20 @@
     on剤形区分Change(剤形区分);
   }
 
+  function addHosoku() {
+    薬品補足レコード = [...薬品補足レコード, index薬品補足レコード({
+      薬品補足情報: ""
+    })];
+  }
+
+  function doUneven() {
+    不均等レコード = {
+      "不均等１回目服用量": "2",
+      "不均等２回目服用量": "1",
+    };
+    isEditing不均等レコード = true;
+  }
+
 </script>
 
 <div class="label">剤形</div>
@@ -86,4 +102,11 @@
     <Hosoku bind:薬品補足レコード />
   </div>
 {/if}
+<div class="label">その他（薬品）</div>
+<div>
+  <SmallLink onClick={addHosoku}>薬品補足</SmallLink>
+  {#if !不均等レコード}
+  <SmallLink onClick={doUneven}>不均等</SmallLink>
+  {/if}
+</div>
 

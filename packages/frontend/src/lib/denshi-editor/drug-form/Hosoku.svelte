@@ -6,6 +6,10 @@
 
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
 
+  function initElement(e: HTMLInputElement) {
+    e.focus();
+  }
+
   function doEnter(record: 薬品補足レコードIndexed) {
     if (record.薬品補足情報 === "") {
       alert("薬品補足が空白です。");
@@ -36,7 +40,7 @@
   <div>
     {#if record.isEditing}
       <form on:submit|preventDefault={() => doEnter(record)} class="with-icons">
-        <input type="text" bind:value={record.薬品補足情報} />
+        <input type="text" bind:value={record.薬品補足情報} use:initElement/>
         {#if record.薬品補足情報.length > 0}
           <SubmitLink onClick={() => doEnter(record)} />
         {/if}
@@ -52,3 +56,9 @@
     {/if}
   </div>
 {/each}
+
+<style>
+  form {
+    margin: 4px 0;
+  }
+</style>

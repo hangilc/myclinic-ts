@@ -1,6 +1,4 @@
 <script lang="ts">
-  import CheckCircle from "@/icons/CheckCircle.svelte";
-  import XCircle from "@/icons/XCircle.svelte";
   import type { 不均等レコード } from "@/lib/denshi-shohou/presc-info";
   import { toHankaku } from "@/lib/zenkaku";
   import TrashLink from "../icons/TrashLink.svelte";
@@ -14,6 +12,10 @@
 
   if (inputText === "") {
     isEditing = true;
+  }
+
+  function initElement(e: HTMLInputElement) {
+    e.focus();
   }
 
   function doEnter() {
@@ -95,7 +97,7 @@
 <div>
   {#if isEditing}
     <form on:submit|preventDefault={doEnter} class="with-icons">
-      <input type="text" bind:value={inputText} />
+      <input type="text" bind:value={inputText} use:initElement/>
       <SubmitLink onClick={doEnter} />
       <CancelLink onClick={doCancel} />
       <TrashLink onClick={doDelete} />
