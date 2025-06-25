@@ -58,12 +58,6 @@
     isEditing不均等レコード ||
     薬品補足レコード.some((r) => r.isEditing);
 
-  $: console.log("isEditing薬品コード", isEditing薬品コード);
-  $: console.log("isEditing分量", isEditing分量);
-  $: console.log("isEditing用法コード", isEditing用法コード);
-  $: console.log("isEditing調剤数量", isEditing調剤数量);
-  $: console.log("isEditing不均等レコード", isEditing不均等レコード);
-
   let focusDrugForm: (() => void) | undefined = undefined;
 
   onMount(() => {

@@ -43,6 +43,7 @@
   import MailDialog from "@/lib/MailDialog.svelte";
   import type { Patient } from "myclinic-model";
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
+  import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -692,6 +693,22 @@
     });
   }
 
+  function doConvTextToDenshi() {
+    onClose();
+    const shohou = parseShohou(text.content);
+    if( typeof shohou === "string" ){
+      alert(shohou);
+      return;
+    }
+    const d: DenshiConv = new DenshiConv({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        shohou,
+      }
+    })
+  }
+
   function oldShohouPopup(): [string, () => void][] {
     const menu: [string, () => void][] = [
       ["処方箋印刷", doPrintShohousen],
@@ -700,6 +717,7 @@
       ["処方箋フォーマット", doFormatShohousen],
     ];
     if (memoKind === undefined) {
+      menu.push(["電子処方に", doConvTextToDenshi]);
       menu.push(["電子予備作成", doShohouConv]);
     } else if (memoKind === "shohou-conv") {
       menu.push(["電子予備編集", doEditShohouConv]);
