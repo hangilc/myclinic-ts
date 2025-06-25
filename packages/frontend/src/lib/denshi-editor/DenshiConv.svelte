@@ -31,9 +31,7 @@
       return;
     }
     let drug = group.drugs[index];
-    if( drug.converted ){
-
-    } else {
+    if( drug.kind === "resolver" ){
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
         props: {
@@ -52,7 +50,10 @@
                 単位名: m.unit,
               }
             };
-            drug.converted = converted;
+            group.drugs[index] = {
+              kind: "converted",
+              data: drug.resolver(m),
+            }
             groups = groups;
           },
         }
@@ -88,5 +89,10 @@
 
   .left {
     border-right: 1px solid gray;
+  }
+
+  .work {
+    height: auto;
+    max-height: 100%;
   }
 </style>
