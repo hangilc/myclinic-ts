@@ -15,11 +15,12 @@
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
-  import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
-  import UnregisteredShohouDialog from "@/lib/denshi-shohou/UnregisteredShohouDialog.svelte";
+  import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
   import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
+  import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
+  import { type Text as ModelText } from "myclinic-model";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -42,45 +43,45 @@
     }
   });
 
-  async function doNewShohouPrevVersion() {
-    const clinicInfo = await cache.getClinicInfo();
-    const shohou = initPrescInfoData(
-      visit.asVisit,
-      visit.patient,
-      visit.hoken,
-      clinicInfo,
-    );
-    const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        title: "新規処方",
-        shohou,
-        onDelete: undefined,
-        at: visit.visitedAt.substring(0, 10),
-        onSave: async (shohou: PrescInfoData) => {
-          const text = new m.Text(0, visit.visitId, "");
-          TextMemoWrapper.setTextMemo(text, {
-            kind: "shohou",
-            shohou,
-            prescriptionId: undefined,
-          });
-          await api.enterText(text);
-        },
-        onRegistered: async (shohou: PrescInfoData, prescriptionId: string) => {
-          const text = new m.Text(0, visit.visitId, "");
-          TextMemoWrapper.setTextMemo(text, {
-            kind: "shohou",
-            shohou,
-            prescriptionId: prescriptionId,
-          });
-          await api.enterText(text);
-        },
-      },
-    });
-  }
+  // async function doNewShohouPrevVersion() {
+  //   const clinicInfo = await cache.getClinicInfo();
+  //   const shohou = initPrescInfoData(
+  //     visit.asVisit,
+  //     visit.patient,
+  //     visit.hoken,
+  //     clinicInfo,
+  //   );
+  //   const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       title: "新規処方",
+  //       shohou,
+  //       onDelete: undefined,
+  //       at: visit.visitedAt.substring(0, 10),
+  //       onSave: async (shohou: PrescInfoData) => {
+  //         const text = new m.Text(0, visit.visitId, "");
+  //         TextMemoWrapper.setTextMemo(text, {
+  //           kind: "shohou",
+  //           shohou,
+  //           prescriptionId: undefined,
+  //         });
+  //         await api.enterText(text);
+  //       },
+  //       onRegistered: async (shohou: PrescInfoData, prescriptionId: string) => {
+  //         const text = new m.Text(0, visit.visitId, "");
+  //         TextMemoWrapper.setTextMemo(text, {
+  //           kind: "shohou",
+  //           shohou,
+  //           prescriptionId: prescriptionId,
+  //         });
+  //         await api.enterText(text);
+  //       },
+  //     },
+  //   });
+  // }
 
-  async function doNewShohou() {
+  async function doNewShohouPrevVersion() {
     const clinicInfo = await cache.getClinicInfo();
     const d: NewDenshiShohouDialog = new NewDenshiShohouDialog({
       target: document.body,
@@ -88,6 +89,30 @@
         visit,
         clinicInfo,
         destroy: () => d.$destroy(),
+      },
+    });
+  }
+
+  async function doNewShohou() {
+    const data = await initPrescInfoDataFromVisitId(visit.visitId);
+    const d: DenshiEditor = new DenshiEditor({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        data,
+        onEnter: async (shohou: PrescInfoData) => {
+          const newText: ModelText = {
+            textId: 0,
+            visitId: visit.visitId,
+            content: "",
+          };
+          TextMemoWrapper.setTextMemo(newText, {
+            kind: "shohou",
+            shohou: shohou,
+            prescriptionId: undefined,
+          });
+          await api.enterText(newText);
+        },
       },
     });
   }
@@ -118,7 +143,7 @@
           index={i}
           at={visit.visitedAt.substring(0, 10)}
           kouhiList={visit.hoken.kouhiList}
-		  patientId={visit.patient.patientId}
+          patientId={visit.patient.patientId}
         />
       {/each}
       {#if showNewTextEditor}
