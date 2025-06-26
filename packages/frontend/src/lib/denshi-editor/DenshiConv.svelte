@@ -2,7 +2,7 @@
   import type { IyakuhinMaster } from "myclinic-model";
   import Dialog2 from "../Dialog2.svelte";
   import type { Shohou } from "../parse-shohou";
-  import { createConvGroupRep, type ConvGroupRep, type UsageResolver } from "./conv/conv-types";
+  import { createConvGroupRep, type ConvGroupRep } from "./conv/conv-types";
   import ConvRep from "./conv/ConvRep.svelte";
   import ResolveDrug from "./conv/ResolveDrug.svelte";
   import type { 用法レコード, 薬品情報 } from "../denshi-shohou/presc-info";
@@ -69,7 +69,6 @@
   function doUsageSelected(
     group: ConvGroupRep,
     name: string,
-    resolver: UsageResolver,
   ) {
     if( clearWork ){
       return;
@@ -80,7 +79,11 @@
         name,
         onDone: () => clearWork && clearWork(),
         onResolved: (rec: 用法レコード) => {
-
+          group.usage = {
+            kind: "converted",
+            data: rec,
+          }
+          groups = groups;
         }
       }
     });

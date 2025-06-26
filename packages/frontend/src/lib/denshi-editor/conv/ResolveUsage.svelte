@@ -167,4 +167,8 @@
     margin-top: 6px;
     border: 1px solid gray;
   }
+
+  form {
+    margin-top: 10px;
+  }
 </style>

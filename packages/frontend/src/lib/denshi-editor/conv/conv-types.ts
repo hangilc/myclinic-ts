@@ -17,21 +17,12 @@ export type DrugResolver = (master: IyakuhinMaster) => 薬品情報;
 
 export type ConvDrugRep = { kind: "converted", data: 薬品情報 } | { kind: "resolver"; src: Drug; resolver: DrugResolver };
 
-export interface ConvertedUsage {
-  剤形レコード: 剤形レコード,
-  用法レコード: 用法レコード,
-  用法補足レコード?: 用法補足レコード[];
-}
-
-export type UsageResolver = (usageCode: string, usageName: string) => ConvertedUsage;
-
 export type ConvUsageRep = {
   kind: "converted";
-  data: ConvertedUsage;
+  data: 用法レコード;
 } | {
-  kind: "resolver";
+  kind: "unconverted";
   src: Usage,
-  resolver: UsageResolver;
 }
 
 function validateAmount(amount: string): number | undefined {
@@ -115,75 +106,16 @@ export async function convertUsageToDenshi(usage: Usage): Promise<ConvUsageRep> 
   const map = await cache.getUsageMasterMap();
   const usageText = usage.usage;
 
-  if (map[usageText]) {
-    const usageRecord = map[usageText];
-    let 剤形区分: "内服" | "頓服" | "外用";
-    let 調剤数量: number;
-
-    if (usage.kind === "days") {
-      剤形区分 = "内服";
-      調剤数量 = parseInt(toHankaku(usage.days));
-      if (isNaN(調剤数量)) {
-        throw new Error(`日数が適切でありません。${usage.days}`);
-      }
-    } else if (usage.kind === "times") {
-      剤形区分 = "頓服";
-      調剤数量 = parseInt(toHankaku(usage.times));
-      if (isNaN(調剤数量)) {
-        throw new Error(`回数が適切でありません。${usage.times}`);
-      }
-    } else {
-      剤形区分 = "外用";
-      調剤数量 = 1;
-    }
-
+  let usageRecord = map[usageText];
+  if (usageRecord) {
     return {
       kind: "converted",
-      data: {
-        剤形レコード: {
-          剤形区分,
-          調剤数量,
-        },
-        用法レコード: usageRecord,
-      }
+      data: usageRecord,
     };
   }
 
   return {
-    kind: "resolver",
+    kind: "unconverted",
     src: usage,
-    resolver:
-      (usageCode: string, usageName: string) => {
-        let 剤形区分: "内服" | "頓服" | "外用";
-        let 調剤数量: number;
-
-        if (usage.kind === "days") {
-          剤形区分 = "内服";
-          調剤数量 = parseInt(toHankaku(usage.days));
-          if (isNaN(調剤数量)) {
-            throw new Error(`日数が適切でありません。${usage.days}`);
-          }
-        } else if (usage.kind === "times") {
-          剤形区分 = "頓服";
-          調剤数量 = parseInt(toHankaku(usage.times));
-          if (isNaN(調剤数量)) {
-            throw new Error(`回数が適切でありません。${usage.times}`);
-          }
-        } else {
-          剤形区分 = "外用";
-          調剤数量 = 1;
-        }
-
-        return {
-          剤形レコード: {
-            剤形区分,
-            調剤数量,
-          },
-          用法レコード: {
-            用法コード: usageCode,
-            用法名称: usageName,
-          },
-        };
-      }
   };
 }
