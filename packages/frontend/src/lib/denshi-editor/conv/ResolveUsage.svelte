@@ -4,11 +4,9 @@
   import api from "@/lib/api";
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
-  import CancelIcon from "../icons/CancelIcon.svelte";
   import "./widgets/style.css";
   import SearchLink from "../icons/SearchLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
-  import CancelLink from "../icons/CancelLink.svelte";
   import type { 用法レコード } from "@/lib/denshi-shohou/presc-info";
 
   export let name: string;
@@ -110,9 +108,6 @@
     />
     <SearchLink onClick={doSearchUsage} />
     <EraserLink onClick={doClearSearchText} />
-    {#if 用法コード}
-      <CancelLink onClick={doCancel} />
-    {/if}
   </form>
   {#if searchResult.length > 0}
     <div class="search-result">
@@ -153,8 +148,6 @@
       >
         <Eraser />
       </a>
-    {/if}
-    {#if 用法コード}<CancelIcon onClick={doCancel} style="margin-left:-2px;" />
     {/if}
   </form>
 {/if}

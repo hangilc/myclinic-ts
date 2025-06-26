@@ -28,16 +28,28 @@
   {#each groups as group, index (group.id)}
     <div>{toZenkaku(`${(index + 1).toString()}）`)}</div>
     <div>
-      {#each group.drugs as drug}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        {#if drug.kind === "converted"}
-          <div><ConvertedIcon /> {drugRep(drug.data)}</div>
+      <div>
+        {#each group.drugs as drug}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          {#if drug.kind === "converted"}
+            <div><ConvertedIcon /> {drugRep(drug.data)}</div>
+          {:else}
+            <div
+              class="cursor-pointer"
+              on:click={() => onDrugSelected(group, index, drug.resolver)}
+            >
+              <UnconvertedIcon />{unconvRep(drug.src)}
+            </div>
+          {/if}
+        {/each}
+      </div>
+      <div>
+        {#if group.usage.kind == "converted"}
+          {group.usage.data.用法レコード.用法名称}
         {:else}
-          <div class="cursor-pointer" on:click={() => onDrugSelected(
-            group, index, drug.resolver
-          )}><UnconvertedIcon />{unconvRep(drug.src)}</div>
+          UNCONV
         {/if}
-      {/each}
+      </div>
     </div>
   {/each}
 </div>
