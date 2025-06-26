@@ -2,7 +2,6 @@
   import XCircle from "@/icons/XCircle.svelte";
   import type { UsageMaster } from "myclinic-model";
   import api from "@/lib/api";
-  import MagnifyingGlass from "@/icons/MagnifyingGlass.svelte";
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import CancelIcon from "./icons/CancelIcon.svelte";

@@ -65,7 +65,7 @@
     padding: 10px;
     overflow-y: auto;
     height: auto;
-    max-height: 40vh;
+    max-height: 340px;
   }
 
   .search-result-item {
