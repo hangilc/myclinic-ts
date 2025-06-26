@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Drug } from "@/lib/parse-shohou";
-  import type { ConvGroupRep, DrugResolver } from "./conv-types";
+  import type { ConvGroupRep, DrugResolver, UsageResolver } from "./conv-types";
   import { toZenkaku } from "@/lib/zenkaku";
   import ConvertedIcon from "./conv-widgets/ConvertedIcon.svelte";
   import UnconvertedIcon from "./conv-widgets/UnconvertedIcon.svelte";
@@ -11,6 +11,11 @@
     group: ConvGroupRep,
     index: number,
     resolver: DrugResolver,
+  ) => void;
+  export let onUsageSelected: (
+    group: ConvGroupRep,
+    name: string,
+    resolver: UsageResolver,
   ) => void;
 
   function unconvRep(drug: Drug): string {
@@ -47,7 +52,15 @@
         {#if group.usage.kind == "converted"}
           {group.usage.data.用法レコード.用法名称}
         {:else}
-          UNCONV
+          {@const usage = group.usage}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div
+            class="cursor-pointer"
+            on:click={() =>
+              onUsageSelected(group, usage.src.usage, usage.resolver)}
+          >
+            <UnconvertedIcon />{group.usage.src.usage}
+          </div>
         {/if}
       </div>
     </div>

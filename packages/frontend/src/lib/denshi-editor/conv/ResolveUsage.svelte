@@ -4,7 +4,7 @@
   import api from "@/lib/api";
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
-  import "./widgets/style.css";
+  import "../widgets/style.css";
   import SearchLink from "../icons/SearchLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
   import type { 用法レコード } from "@/lib/denshi-shohou/presc-info";
@@ -75,82 +75,84 @@
   }
 </script>
 
-<div class="label">用法の解決</div>
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<!-- svelte-ignore a11y-invalid-attribute -->
-<div>
-  <input
-    type="radio"
-    bind:group={mode}
-    value="master"
-    tabindex="-1"
-    on:change={doModeChanged}
-  />
-  マスター
-  <input
-    type="radio"
-    bind:group={mode}
-    value="free-style"
-    tabindex="-1"
-    on:change={doModeChanged}
-  />
-  自由文章
+<div class="wrapper">
+  <div class="title">用法の解決</div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <!-- svelte-ignore a11y-invalid-attribute -->
-</div>
-{#if mode === "master"}
-  <form on:submit|preventDefault={doSearchUsage} class="with-icons">
+  <div>
     <input
-      class="input-text"
-      type="text"
-      tabindex="0"
-      bind:value={searchText}
-      bind:this={masterInputElement}
+      type="radio"
+      bind:group={mode}
+      value="master"
+      tabindex="-1"
+      on:change={doModeChanged}
     />
-    <SearchLink onClick={doSearchUsage} />
-    <EraserLink onClick={doClearSearchText} />
-  </form>
-  {#if searchResult.length > 0}
-    <div class="search-result">
-      {#each searchResult as result (result.usage_code)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div
-          style="cursor:pointer;"
-          on:click={() => doUsageMasterSelect(result)}
-        >
-          {result.usage_name}
-        </div>
-      {/each}
-    </div>
-  {/if}
-{:else if mode === "free-style"}
-  <form on:submit|preventDefault={doFreeText}>
+    マスター
     <input
-      type="text"
-      class="input-text"
-      bind:value={searchText}
-      bind:this={freeStyleInputElement}
+      type="radio"
+      bind:group={mode}
+      value="free-style"
+      tabindex="-1"
+      on:change={doModeChanged}
     />
-    {#if searchText.length > 0}
-      <a
-        href="javascript:void(0)"
-        on:click={doFreeText}
-        style="position:relative;top:5px;"
-        tabindex="-1"
-      >
-        <CheckCircle color="#007bff" />
-      </a>
-      <a
-        href="javascript:void(0)"
-        style="position:relative;top:5px;margin-left:-4px;"
-        tabindex="-1"
-        on:click={doClearSearchText}
-      >
-        <Eraser />
-      </a>
+    自由文章
+    <!-- svelte-ignore a11y-invalid-attribute -->
+  </div>
+  {#if mode === "master"}
+    <form on:submit|preventDefault={doSearchUsage} class="with-icons">
+      <input
+        class="input-text"
+        type="text"
+        tabindex="0"
+        bind:value={searchText}
+        bind:this={masterInputElement}
+      />
+      <SearchLink onClick={doSearchUsage} />
+      <EraserLink onClick={doClearSearchText} />
+    </form>
+    {#if searchResult.length > 0}
+      <div class="search-result">
+        {#each searchResult as result (result.usage_code)}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            style="cursor:pointer;"
+            on:click={() => doUsageMasterSelect(result)}
+          >
+            {result.usage_name}
+          </div>
+        {/each}
+      </div>
     {/if}
-  </form>
-{/if}
+  {:else if mode === "free-style"}
+    <form on:submit|preventDefault={doFreeText}>
+      <input
+        type="text"
+        class="input-text"
+        bind:value={searchText}
+        bind:this={freeStyleInputElement}
+      />
+      {#if searchText.length > 0}
+        <a
+          href="javascript:void(0)"
+          on:click={doFreeText}
+          style="position:relative;top:5px;"
+          tabindex="-1"
+        >
+          <CheckCircle color="#007bff" />
+        </a>
+        <a
+          href="javascript:void(0)"
+          style="position:relative;top:5px;margin-left:-4px;"
+          tabindex="-1"
+          on:click={doClearSearchText}
+        >
+          <Eraser />
+        </a>
+      {/if}
+    </form>
+  {/if}
+</div>
 
 <style>
   .input-text {

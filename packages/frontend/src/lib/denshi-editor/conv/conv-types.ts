@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { cache } from "@/lib/cache";
-import { 薬品情報Wrapper, type 剤形レコード, type 用法レコード, type 用法補足レコード, type 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import { type 剤形レコード, type 用法レコード, type 用法補足レコード, type 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 import type { DrugGroup, Drug, Usage } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import type { IyakuhinMaster } from "myclinic-model";
@@ -30,6 +30,7 @@ export type ConvUsageRep = {
   data: ConvertedUsage;
 } | {
   kind: "resolver";
+  src: Usage,
   resolver: UsageResolver;
 }
 
@@ -150,6 +151,7 @@ export async function convertUsageToDenshi(usage: Usage): Promise<ConvUsageRep> 
 
   return {
     kind: "resolver",
+    src: usage,
     resolver:
       (usageCode: string, usageName: string) => {
         let 剤形区分: "内服" | "頓服" | "外用";

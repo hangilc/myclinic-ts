@@ -2,10 +2,11 @@
   import type { IyakuhinMaster } from "myclinic-model";
   import Dialog2 from "../Dialog2.svelte";
   import type { Shohou } from "../parse-shohou";
-  import { createConvGroupRep, type ConvGroupRep } from "./conv/conv-types";
+  import { createConvGroupRep, type ConvGroupRep, type UsageResolver } from "./conv/conv-types";
   import ConvRep from "./conv/ConvRep.svelte";
   import ResolveDrug from "./conv/ResolveDrug.svelte";
-  import type { 薬品情報 } from "../denshi-shohou/presc-info";
+  import type { 用法レコード, 薬品情報 } from "../denshi-shohou/presc-info";
+  import ResolveUsage from "./conv/ResolveUsage.svelte";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -19,7 +20,7 @@
 
   async function initGroups() {
     let gs: ConvGroupRep[] = [];
-    for(let g of shohou.groups) {
+    for (let g of shohou.groups) {
       let group = await createConvGroupRep(g, at);
       gs.push(group);
     }
@@ -27,11 +28,11 @@
   }
 
   function doDrugSelected(group: ConvGroupRep, index: number) {
-    if( clearWork ){
+    if (clearWork) {
       return;
     }
     let drug = group.drugs[index];
-    if( drug.kind === "resolver" ){
+    if (drug.kind === "resolver") {
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
         props: {
@@ -48,20 +49,44 @@
                 分量: drug.src.amount,
                 力価フラグ: "薬価単位",
                 単位名: m.unit,
-              }
+              },
             };
             group.drugs[index] = {
               kind: "converted",
               data: drug.resolver(m),
-            }
+            };
             groups = groups;
           },
-        }
+        },
       });
       clearWork = () => {
         d.$destroy();
         clearWork = undefined;
+      };
+    }
+  }
+
+  function doUsageSelected(
+    group: ConvGroupRep,
+    name: string,
+    resolver: UsageResolver,
+  ) {
+    if( clearWork ){
+      return;
+    }
+    const e: ResolveUsage = new ResolveUsage({
+      target: workElement,
+      props: {
+        name,
+        onDone: () => clearWork && clearWork(),
+        onResolved: (rec: 用法レコード) => {
+
+        }
       }
+    });
+    clearWork = () => {
+      e.$destroy();
+      clearWork = undefined;
     }
   }
 </script>
@@ -69,11 +94,9 @@
 <Dialog2 title="処方箋電子変換" {destroy}>
   <div class="denshi-editor wrapper">
     <div class="left">
-      <ConvRep bind:groups onDrugSelected={doDrugSelected}/>
+      <ConvRep bind:groups onDrugSelected={doDrugSelected} onUsageSelected={doUsageSelected}/>
     </div>
-    <div class="work" bind:this={workElement}>
-
-    </div>
+    <div class="work" bind:this={workElement}></div>
   </div>
 </Dialog2>
 
