@@ -707,6 +707,20 @@
         destroy: () => d.$destroy(),
         shohou,
         at: visit.visitedAt.substring(0, 10),
+        visitId: visit.visitId,
+        onEnter: async (arg: PrescInfoData) => {
+          let newText: m.Text = {
+            textId: 0,
+            visitId: visit.visitId,
+            content: "",
+          };
+          TextMemoWrapper.setTextMemo(newText, {
+            kind: "shohou",
+            shohou: arg,
+            prescriptionId: undefined,
+          });
+          await api.enterText(text);
+        },
       }
     })
   }
