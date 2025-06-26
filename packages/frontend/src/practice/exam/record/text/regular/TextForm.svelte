@@ -719,7 +719,7 @@
             shohou: arg,
             prescriptionId: undefined,
           });
-          await api.enterText(text);
+          await api.enterText(newText);
         },
       }
     })
