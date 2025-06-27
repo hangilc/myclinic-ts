@@ -17,6 +17,7 @@
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
+  import { DateWrapper } from "myclinic-util";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -261,19 +262,54 @@
     }
   }
 
-  function handleBikou(data: PrescInfoData, shohou: Shohou){
+  function handleBikou(data: PrescInfoData, shohou: Shohou) {
     let bs: 備考レコード[] = [];
-    for(let b of shohou.bikou){
-      if( b === "高７" || b === "高８" || b === "高９" ){
+    for (let b of shohou.bikou) {
+      if (b === "高７" || b === "高８" || b === "高９") {
         continue;
       }
-      bs.push({備考: b });
+      bs.push({ 備考: b });
     }
-    if( bs.length > 0 ){
-      if( !data.備考レコード) {
+    if (bs.length > 0) {
+      if (!data.備考レコード) {
         data.備考レコード = [];
       }
       data.備考レコード.push(...bs);
+    }
+  }
+
+  function handleKigen(data: PrescInfoData, shohou: Shohou) {
+    if (shohou.kigen) {
+      data.使用期限年月日 = DateWrapper.from(shohou.kigen)
+        .asSqlDate()
+        .replaceAll(/-/g, "");
+    }
+  }
+
+  function handleShohouComments(data: PrescInfoData, shohou: Shohou) {
+    if( shohou.comments ){
+      for(let c of shohou.comments) {
+        if( c === "一包化" ){
+          if( !data.備考レコード ) {
+            data.備考レコード = [];
+          }
+          data.備考レコード.push({
+            備考: "一包化",
+          })
+        } else {
+          if( !data.提供情報レコード ) {
+            data.提供情報レコード = {
+              "提供診療情報レコード": []
+            }
+          }
+          if( !data.提供情報レコード["提供診療情報レコード"] ) {
+            data.提供情報レコード["提供診療情報レコード"] = [];
+          }
+          data.提供情報レコード.提供診療情報レコード.push({
+            コメント: c
+          })
+        }
+      }
     }
   }
 
@@ -312,6 +348,8 @@
 
     prescInfoData.RP剤情報グループ = RP剤情報グループ;
     handleBikou(prescInfoData, shohou);
+    handleKigen(prescInfoData, shohou);
+    handleShohouComments(prescInfoData, shohou);
     return prescInfoData;
   }
 
