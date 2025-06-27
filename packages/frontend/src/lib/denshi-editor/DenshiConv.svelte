@@ -264,7 +264,9 @@
   function handleBikou(data: PrescInfoData, shohou: Shohou){
     let bs: 備考レコード[] = [];
     for(let b of shohou.bikou){
-      if( b === "高７" || b === "高８" || b === "高９" )
+      if( b === "高７" || b === "高８" || b === "高９" ){
+        continue;
+      }
       bs.push({備考: b });
     }
     if( bs.length > 0 ){
