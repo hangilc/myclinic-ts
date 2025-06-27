@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { IyakuhinMaster } from "myclinic-model";
-  import Dialog2 from "../Dialog2.svelte";
-  import type { DrugGroup, Shohou } from "../parse-shohou";
-  import { toHankaku } from "../zenkaku";
+  import Dialog2 from "@/lib/Dialog2.svelte";
+  import type { DrugGroup, Shohou, Drug } from "@/lib/parse-shohou";
+  import { toHankaku } from "@/lib/zenkaku";
   import { createConvGroupRep, type ConvGroupRep } from "./conv/conv-types";
   import ConvRep from "./conv/ConvRep.svelte";
   import ResolveDrug from "./conv/ResolveDrug.svelte";
@@ -11,6 +11,7 @@
     RP剤情報,
     用法レコード,
     薬品情報,
+    不均等レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
@@ -150,7 +151,7 @@
 
   function 調剤数量ofShohou(group: DrugGroup): number {
     const usage = group.usage;
-    
+
     // For days-based prescriptions, return the number of days
     if (usage.kind === "days") {
       const days = parseInt(toHankaku(usage.days));
@@ -159,7 +160,7 @@
       }
       return days;
     }
-    
+
     // For times-based prescriptions (頓服), return the number of times
     if (usage.kind === "times") {
       const times = parseInt(toHankaku(usage.times));
@@ -170,6 +171,38 @@
     }
 
     return 1;
+  }
+
+  function createDenshiDrug(joho: 薬品情報, drug: Drug): 薬品情報 {
+    const result = { ...joho };
+
+    // Handle uneven dosing (不均等レコード)
+    if (drug.uneven) {
+      let uneven = drug.uneven;
+      uneven = uneven.replace(/^\s*[(（]/, "");
+      uneven = uneven.replace(/[)）]\s*$/, "")
+      let sep = /\s*[-ー－]\s*/;
+      const unevenParts = uneven.split(sep);
+      console.log("unevenParts", unevenParts);
+      if (unevenParts.length >= 2) {
+        const 不均等レコード: 不均等レコード = {
+          不均等１回目服用量: toHankaku(unevenParts[0]),
+          不均等２回目服用量: toHankaku(unevenParts[1]),
+          不均等３回目服用量: unevenParts[2]
+            ? toHankaku(unevenParts[2].trim())
+            : undefined,
+          不均等４回目服用量: unevenParts[3]
+            ? toHankaku(unevenParts[3].trim())
+            : undefined,
+          不均等５回目服用量: unevenParts[4]
+            ? toHankaku(unevenParts[4].trim())
+            : undefined,
+        };
+        result.不均等レコード = 不均等レコード;
+      } else throw new Error("uneven record has less than two parts.");
+    }
+
+    return result;
   }
 
   async function createDenshi(
@@ -186,13 +219,21 @@
     const prescInfoData = await initPrescInfoDataFromVisitId(visitId);
 
     const RP剤情報グループ: RP剤情報[] = converted.map((group, index) => {
+      const originalGroup = shohou.groups[index];
+      const processedDrugs = group.薬品情報グループ.map(
+        (drugInfo, drugIndex) => {
+          const originalDrug = originalGroup.drugs[drugIndex];
+          return createDenshiDrug(drugInfo, originalDrug);
+        },
+      );
+
       return {
         剤形レコード: {
-          剤形区分: 剤形区分ofShohou(shohou.groups[index]),
-          調剤数量: 調剤数量ofShohou(shohou.groups[index]),
+          剤形区分: 剤形区分ofShohou(originalGroup),
+          調剤数量: 調剤数量ofShohou(originalGroup),
         },
         用法レコード: group.用法レコード,
-        薬品情報グループ: group.薬品情報グループ,
+        薬品情報グループ: processedDrugs,
       };
     });
 
@@ -269,6 +310,7 @@
     try {
       const converted = convertedData();
       const prescInfo = await createDenshi(visitId, shohou, converted);
+      destroy();
       onEnter(prescInfo);
     } catch (error) {
       console.error("Error creating denshi:", error);
