@@ -1,5 +1,5 @@
   .denshi-editor {
-    a {
+    :is(a) {
       white-space: nowrap;
     }
 
