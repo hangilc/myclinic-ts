@@ -10,7 +10,6 @@
   export let onDrugSelected: (
     group: ConvGroupRep,
     index: number,
-    resolver: DrugResolver,
   ) => void;
   export let onUsageSelected: (
     group: ConvGroupRep,
@@ -33,14 +32,14 @@
     <div>{toZenkaku(`${(index + 1).toString()}）`)}</div>
     <div>
       <div>
-        {#each group.drugs as drug}
+        {#each group.drugs as drug, drugIndex}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           {#if drug.kind === "converted"}
             <div><ConvertedIcon /> {drugRep(drug.data)}</div>
           {:else}
             <div
               class="cursor-pointer"
-              on:click={() => onDrugSelected(group, index, drug.resolver)}
+              on:click={() => onDrugSelected(group, drugIndex)}
             >
               <UnconvertedIcon />{unconvRep(drug.src)}
             </div>

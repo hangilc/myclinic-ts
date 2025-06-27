@@ -1,74 +1,76 @@
-  .denshi-editor {
-    :is(a) {
-      white-space: nowrap;
-    }
+.denshi-editor a {
+  white-space: nowrap;
 
-    .label {
-      font-weight: bold;
-      color: #999;
-      font-size: 12px;
-      margin-top: 6px;
-    }
+}
 
-    .small-text {
-      font-size: 12px;
-    }
+.denshi-editor {
 
-    input[type="radio"] {
-      accent-color: gray;
-    }
-
-    input[type="checkbox"] {
-      accent-color: gray;
-    }
-
-    input[type="text"] {
-      padding: 6px;
-    }
-
-    .with-icons {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .with-icons a:first-of-type {
-      margin-left: 2px;
-    }
-
-    .with-icons a:not(:first-of-type) {
-      color: gray;
-    }
-
-    .with-icons a:not(:first-of-type):hover {
-      color: red;
-    }
-
-    .wrapper {
-      border: 2px solid #ccc;
-      border-radius: 6px;
-      padding: 10px;
-      max-height: 100%;
-    }
-
-    .title {
-      padding: 6px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      border-bottom: 2px solid #ccc;
-    }
-
-    .link-commands {
-      margin-top: 10px;
-    }
-
-    .commands {
-      margin-top: 10px;
-      text-align: right;
-    }
-
-    .cursor-pointer {
-      cursor: pointer;
-    }
-
+  .label {
+    font-weight: bold;
+    color: #999;
+    font-size: 12px;
+    margin-top: 6px;
   }
+
+  .small-text {
+    font-size: 12px;
+  }
+
+  input[type="radio"] {
+    accent-color: gray;
+  }
+
+  input[type="checkbox"] {
+    accent-color: gray;
+  }
+
+  input[type="text"] {
+    padding: 6px;
+  }
+
+  .with-icons {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .with-icons a:first-of-type {
+    margin-left: 2px;
+  }
+
+  .with-icons a:not(:first-of-type) {
+    color: gray;
+  }
+
+  .with-icons a:not(:first-of-type):hover {
+    color: red;
+  }
+
+  .wrapper {
+    border: 2px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    max-height: 100%;
+  }
+
+  .title {
+    padding: 6px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #ccc;
+  }
+
+  .link-commands {
+    margin-top: 10px;
+  }
+
+  .commands {
+    margin-top: 10px;
+    text-align: right;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+}

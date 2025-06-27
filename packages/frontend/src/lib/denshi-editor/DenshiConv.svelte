@@ -28,6 +28,7 @@
   let groups: ConvGroupRep[] = [];
   let workElement: HTMLElement;
 
+
   let clearWork: (() => void) | undefined = undefined;
 
   initGroups();
@@ -38,6 +39,7 @@
       let group = await createConvGroupRep(g, at);
       gs.push(group);
     }
+    console.log("gs", gs);
     groups = gs;
   }
 
@@ -358,6 +360,7 @@
       return;
     }
     let drug = group.drugs[index];
+    console.log("drug", drug);
     if (drug.kind === "resolver") {
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
@@ -379,7 +382,7 @@
             };
             group.drugs[index] = {
               kind: "converted",
-              data: drug.resolver(m),
+              data: converted,
             };
             groups = groups;
           },
