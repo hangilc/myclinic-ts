@@ -3,6 +3,7 @@
   import SearchLink from "../icons/SearchLink.svelte";
   import "../widgets/style.css";
   import api from "@/lib/api";
+  import { cache } from "@/lib/cache";
   import { onMount } from "svelte";
 
   export let onDone: () => void;
@@ -17,7 +18,18 @@
     searchResult = await api.searchIyakuhinMaster(searchText, at);
   }
 
-  function doSelect(master: IyakuhinMaster) {
+  async function doSelect(master: IyakuhinMaster) {
+    try {
+      // Update the cache with the new drug name -> iyakuhin code mapping
+      const currentMap = await cache.getDrugNameIyakuhincodeMap();
+      const updatedMap = { ...currentMap };
+      updatedMap[name] = master.iyakuhincode;
+      await cache.setDrugNameIyakuhincodeMap(updatedMap);
+    } catch (error) {
+      console.error("Failed to update drug cache:", error);
+      // Continue with the selection even if cache update fails
+    }
+    
     onDone();
     onResolved(master);
   }

@@ -12,6 +12,7 @@
     用法レコード,
     薬品情報,
     不均等レコード,
+    薬品補足レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
@@ -173,17 +174,13 @@
     return 1;
   }
 
-  function createDenshiDrug(joho: 薬品情報, drug: Drug): 薬品情報 {
-    const result = { ...joho };
-
-    // Handle uneven dosing (不均等レコード)
+  function handleDrugUneven(joho: 薬品情報, drug: Drug) {
     if (drug.uneven) {
       let uneven = drug.uneven;
       uneven = uneven.replace(/^\s*[(（]/, "");
-      uneven = uneven.replace(/[)）]\s*$/, "")
+      uneven = uneven.replace(/[)）]\s*$/, "");
       let sep = /\s*[-ー－]\s*/;
       const unevenParts = uneven.split(sep);
-      console.log("unevenParts", unevenParts);
       if (unevenParts.length >= 2) {
         const 不均等レコード: 不均等レコード = {
           不均等１回目服用量: toHankaku(unevenParts[0]),
@@ -198,10 +195,87 @@
             ? toHankaku(unevenParts[4].trim())
             : undefined,
         };
-        result.不均等レコード = 不均等レコード;
+        joho.不均等レコード = 不均等レコード;
       } else throw new Error("uneven record has less than two parts.");
     }
+  }
 
+  function handleDrugSenpatsu(joho: 薬品情報, drug: Drug){
+    console.log("drug", drug);
+    if (drug.senpatsu) {
+      if (!joho.薬品補足レコード) {
+        joho.薬品補足レコード = [];
+      }
+      
+      let 薬品補足情報: string;
+      switch (drug.senpatsu) {
+        case "henkoufuka":
+          薬品補足情報 = "後発品変更不可";
+          break;
+        case "kanjakibou":
+          薬品補足情報 = "先発医薬品患者希望";
+          break;
+        default:
+          throw new Error(`Unknown senpatsu type: ${drug.senpatsu}`);
+      }
+      
+      const 薬品補足レコード: 薬品補足レコード = {
+        薬品補足情報
+      };
+      
+      joho.薬品補足レコード.push(薬品補足レコード);
+    }
+  }
+
+  function handleDrugComments(joho: 薬品情報, drug: Drug) {
+    if (drug.drugComments && drug.drugComments.length > 0) {
+      if (!joho.薬品補足レコード) {
+        joho.薬品補足レコード = [];
+      }
+      
+      for (const comment of drug.drugComments) {
+        const supplementInfo = parseDrugComment(comment);
+        const 薬品補足レコード: 薬品補足レコード = {
+          薬品補足情報: supplementInfo
+        };
+        joho.薬品補足レコード.push(薬品補足レコード);
+      }
+    }
+  }
+
+  function parseDrugComment(comment: string): string {
+    // Map specific drug commands to standardized 薬品補足区分
+    const commandMap: Record<string, string> = {
+      "一包化をお願いします。": "一包化",
+      "一包化をお願いします": "一包化",
+      "一包化をおねがいします。": "一包化",
+    };
+    
+    const trimmedComment = comment.trim();
+    
+    // Check for exact matches first
+    if (commandMap[trimmedComment]) {
+      return commandMap[trimmedComment];
+    }
+    
+    // Check for partial matches (case-insensitive)
+    const lowerComment = trimmedComment.toLowerCase();
+    for (const [key, value] of Object.entries(commandMap)) {
+      if (lowerComment.includes(key.toLowerCase()) || 
+          lowerComment.includes(value.toLowerCase())) {
+        return value;
+      }
+    }
+    
+    // Return original comment if no mapping found
+    return trimmedComment;
+  }
+
+  function createDenshiDrug(joho: 薬品情報, drug: Drug): 薬品情報 {
+    const result = { ...joho };
+    handleDrugUneven(result, drug);
+    handleDrugSenpatsu(result, drug);
+    handleDrugComments(result, drug);
     return result;
   }
 

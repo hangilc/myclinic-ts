@@ -2,6 +2,7 @@
   import XCircle from "@/icons/XCircle.svelte";
   import type { UsageMaster } from "myclinic-model";
   import api from "@/lib/api";
+  import { cache } from "@/lib/cache";
   import Eraser from "@/icons/Eraser.svelte";
   import CheckCircle from "@/icons/CheckCircle.svelte";
   import "../widgets/style.css";
@@ -41,15 +42,27 @@
     }
   }
 
-  function doUsageMasterSelect(value: UsageMaster) {
+  async function doUsageMasterSelect(value: UsageMaster) {
     let 用法コード = value.usage_code;
     let 用法名称 = value.usage_name;
     let resolved: 用法レコード = { 用法コード, 用法名称 };
+    
+    try {
+      // Update the cache with the new usage name -> usage record mapping
+      const currentMap = await cache.getUsageMasterMap();
+      const updatedMap = { ...currentMap };
+      updatedMap[name] = resolved;
+      await cache.setUsageMasterMap(updatedMap);
+    } catch (error) {
+      console.error("Failed to update usage cache:", error);
+      // Continue with the selection even if cache update fails
+    }
+    
     onDone();
     onResolved(resolved);
   }
 
-  function doFreeText() {
+  async function doFreeText() {
     let t = searchText.trim();
     if (t === "") {
       alert("用法が入力されていません。");
@@ -58,6 +71,18 @@
     let 用法コード = freeTextCode;
     let 用法名称 = t;
     let resolved: 用法レコード = { 用法コード, 用法名称 };
+    
+    try {
+      // Update the cache with the new usage name -> usage record mapping
+      const currentMap = await cache.getUsageMasterMap();
+      const updatedMap = { ...currentMap };
+      updatedMap[name] = resolved;
+      await cache.setUsageMasterMap(updatedMap);
+    } catch (error) {
+      console.error("Failed to update usage cache:", error);
+      // Continue with the selection even if cache update fails
+    }
+    
     onDone();
     onResolved(resolved);
   }
