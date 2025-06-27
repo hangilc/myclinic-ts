@@ -13,6 +13,7 @@
     薬品情報,
     不均等レコード,
     薬品補足レコード,
+    備考レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
@@ -200,13 +201,12 @@
     }
   }
 
-  function handleDrugSenpatsu(joho: 薬品情報, drug: Drug){
-    console.log("drug", drug);
+  function handleDrugSenpatsu(joho: 薬品情報, drug: Drug) {
     if (drug.senpatsu) {
       if (!joho.薬品補足レコード) {
         joho.薬品補足レコード = [];
       }
-      
+
       let 薬品補足情報: string;
       switch (drug.senpatsu) {
         case "henkoufuka":
@@ -218,11 +218,11 @@
         default:
           throw new Error(`Unknown senpatsu type: ${drug.senpatsu}`);
       }
-      
+
       const 薬品補足レコード: 薬品補足レコード = {
-        薬品補足情報
+        薬品補足情報,
       };
-      
+
       joho.薬品補足レコード.push(薬品補足レコード);
     }
   }
@@ -232,43 +232,14 @@
       if (!joho.薬品補足レコード) {
         joho.薬品補足レコード = [];
       }
-      
+
       for (const comment of drug.drugComments) {
-        const supplementInfo = parseDrugComment(comment);
         const 薬品補足レコード: 薬品補足レコード = {
-          薬品補足情報: supplementInfo
+          薬品補足情報: comment,
         };
         joho.薬品補足レコード.push(薬品補足レコード);
       }
     }
-  }
-
-  function parseDrugComment(comment: string): string {
-    // Map specific drug commands to standardized 薬品補足区分
-    const commandMap: Record<string, string> = {
-      "一包化をお願いします。": "一包化",
-      "一包化をお願いします": "一包化",
-      "一包化をおねがいします。": "一包化",
-    };
-    
-    const trimmedComment = comment.trim();
-    
-    // Check for exact matches first
-    if (commandMap[trimmedComment]) {
-      return commandMap[trimmedComment];
-    }
-    
-    // Check for partial matches (case-insensitive)
-    const lowerComment = trimmedComment.toLowerCase();
-    for (const [key, value] of Object.entries(commandMap)) {
-      if (lowerComment.includes(key.toLowerCase()) || 
-          lowerComment.includes(value.toLowerCase())) {
-        return value;
-      }
-    }
-    
-    // Return original comment if no mapping found
-    return trimmedComment;
   }
 
   function createDenshiDrug(joho: 薬品情報, drug: Drug): 薬品情報 {
@@ -277,6 +248,31 @@
     handleDrugSenpatsu(result, drug);
     handleDrugComments(result, drug);
     return result;
+  }
+
+  function handleDenshiGroup(denshi: RP剤情報, group: DrugGroup) {
+    if (!denshi.用法補足レコード) {
+      denshi.用法補足レコード = [];
+    }
+    for (let c of group.groupComments) {
+      denshi.用法補足レコード.push({
+        用法補足情報: c,
+      });
+    }
+  }
+
+  function handleBikou(data: PrescInfoData, shohou: Shohou){
+    let bs: 備考レコード[] = [];
+    for(let b of shohou.bikou){
+      if( b === "高７" || b === "高８" || b === "高９" )
+      bs.push({備考: b });
+    }
+    if( bs.length > 0 ){
+      if( !data.備考レコード) {
+        data.備考レコード = [];
+      }
+      data.備考レコード.push(...bs);
+    }
   }
 
   async function createDenshi(
@@ -300,8 +296,7 @@
           return createDenshiDrug(drugInfo, originalDrug);
         },
       );
-
-      return {
+      let denshiGroup: RP剤情報 = {
         剤形レコード: {
           剤形区分: 剤形区分ofShohou(originalGroup),
           調剤数量: 調剤数量ofShohou(originalGroup),
@@ -309,11 +304,12 @@
         用法レコード: group.用法レコード,
         薬品情報グループ: processedDrugs,
       };
+      handleDenshiGroup(denshiGroup, originalGroup);
+      return denshiGroup;
     });
 
     prescInfoData.RP剤情報グループ = RP剤情報グループ;
-    prescInfoData.処方箋交付年月日 = at.replaceAll(/-/g, "");
-
+    handleBikou(prescInfoData, shohou);
     return prescInfoData;
   }
 
