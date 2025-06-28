@@ -13,9 +13,8 @@ export interface ConvGroupRep {
   usage: ConvUsageRep,
 }
 
-export type DrugResolver = (master: IyakuhinMaster) => 薬品情報;
-
-export type ConvDrugRep = { kind: "converted", data: 薬品情報 } | { kind: "resolver"; src: Drug; resolver: DrugResolver };
+export type ConvDrugRep = { kind: "converted", data: 薬品情報 }
+  | { kind: "resolver"; src: Drug; partial:  };
 
 export type ConvUsageRep = {
   kind: "converted";
