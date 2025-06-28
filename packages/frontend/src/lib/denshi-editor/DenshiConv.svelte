@@ -14,10 +14,12 @@
     不均等レコード,
     薬品補足レコード,
     備考レコード,
+    薬品レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
   import { DateWrapper } from "myclinic-util";
+  import { convDrugToDenshi, type DrugAuxInfo } from "./conv/denshi-conv-helper";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -360,7 +362,6 @@
       return;
     }
     let drug = group.drugs[index];
-    console.log("drug", drug);
     if (drug.kind === "resolver") {
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
@@ -368,7 +369,9 @@
           name: drug.src.name,
           at,
           onDone: () => clearWork && clearWork(),
-          onResolved: (m: IyakuhinMaster) => {
+          onResolved: (aux: DrugAuxInfo) => {
+            let converted: 薬品レコード = convDrugToDenshi(drug.src, aux);
+)
             let converted: 薬品情報 = {
               薬品レコード: {
                 情報区分: "医薬品",
