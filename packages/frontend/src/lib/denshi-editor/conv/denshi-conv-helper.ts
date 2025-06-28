@@ -1,5 +1,5 @@
 import type { 不均等レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
-import type { Drug, DrugGroup } from "@/lib/parse-shohou";
+import type { Drug } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import type { IyakuhinMaster } from "myclinic-model";
 
@@ -8,8 +8,11 @@ export type 薬品情報Partial2 = Omit<薬品情報, keyof 薬品情報Partial1
 export type 薬品レコードPartial1 = Omit<薬品レコード, "情報区分" | "薬品コード種別" | "薬品コード" | "薬品名称" | "単位名">;
 export type 薬品レコードPartial2 = Omit<薬品レコード, keyof 薬品レコードPartial1>;
 
-export function convDrugToDenshi(info1: 薬品情報Partial1, info2: 薬品情報Partial2): 薬品情報 {
-  return Object.assign({}, info1, info2);
+export function convDrugToDenshi(
+  info1: 薬品情報Partial1, info2: 薬品レコードPartial1, info3: 薬品レコードPartial2
+): 薬品情報 {
+  let 薬品レコード: 薬品レコード = Object.assign({}, info2, info3);
+  return Object.assign({ 薬品レコード, }, info1);
 }
 
 export function convShohouDrugTo薬品情報Partial1(drug: Drug): 薬品情報Partial1 {
@@ -29,7 +32,6 @@ export function convShohouDrugTo薬品レコードPartial1(drug: Drug): 薬品�
   };
 }
 
-
 export function createPartial2FromIyakuhinMaster(m: IyakuhinMaster, applyIppanmei: boolean): 薬品レコードPartial2 {
   let rec = {
     情報区分: "医薬品" as const,
@@ -37,15 +39,18 @@ export function createPartial2FromIyakuhinMaster(m: IyakuhinMaster, applyIppanme
   }
   if (applyIppanmei && m.ippanmei && m.ippanmeicode) {
     return Object.assign(rec, {
-      薬品コード種別: "レセプト電算処理システム用コード" as const,
-      薬品コード: m.iyakuhincode.toString(),
-      薬品名称: m.name,
-    });
-  } else {
-    return Object.assign(rec, {
       薬品コード種別: "一般名コード" as const,
       薬品コード: m.ippanmeicode.toString(),
       薬品名称: m.ippanmei,
+    });
+  } else {
+    if( applyIppanmei ){
+      console.log(`cannot find ippanmei for ${m.name}`)
+    }
+    return Object.assign(rec, {
+      薬品コード種別: "レセプト電算処理システム用コード" as const,
+      薬品コード: m.iyakuhincode.toString(),
+      薬品名称: m.name,
     });
   };
 }

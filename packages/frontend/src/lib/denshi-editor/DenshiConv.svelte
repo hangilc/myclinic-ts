@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { IyakuhinMaster } from "myclinic-model";
   import Dialog2 from "@/lib/Dialog2.svelte";
   import type { DrugGroup, Shohou, Drug } from "@/lib/parse-shohou";
   import { toHankaku } from "@/lib/zenkaku";
@@ -14,12 +13,11 @@
     不均等レコード,
     薬品補足レコード,
     備考レコード,
-    薬品レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
   import { DateWrapper } from "myclinic-util";
-  import { convDrugToDenshi, type DrugAuxInfo } from "./conv/denshi-conv-helper";
+  import { convDrugToDenshi, type 薬品レコードPartial2 } from "./conv/denshi-conv-helper";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -144,12 +142,6 @@
       ) {
         return "内服滴剤";
       }
-
-      // Medical materials (医療材料) indicators
-      // if (name.includes("材料") || name.includes("器具") || name.includes("用品") || name.includes("注射針") ||
-      //     unit.includes("セット") || unit.includes("キット")) {
-      //   return "医療材料";
-      // }
     }
 
     // Fallback to unknown
@@ -362,27 +354,15 @@
       return;
     }
     let drug = group.drugs[index];
-    if (drug.kind === "resolver") {
+    if (drug.kind === "unconverted" && workElement ) {
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
         props: {
           name: drug.src.name,
           at,
           onDone: () => clearWork && clearWork(),
-          onResolved: (aux: DrugAuxInfo) => {
-            let converted: 薬品レコード = convDrugToDenshi(drug.src, aux);
-)
-            let converted: 薬品情報 = {
-              薬品レコード: {
-                情報区分: "医薬品",
-                薬品コード種別: "レセプト電算処理システム用コード",
-                薬品コード: m.iyakuhincode.toString(),
-                薬品名称: m.name,
-                分量: drug.src.amount,
-                力価フラグ: "薬価単位",
-                単位名: m.unit,
-              },
-            };
+          onResolved: (info: 薬品レコードPartial2) => {
+            let converted: 薬品情報 = convDrugToDenshi(drug.薬品情報Partial1, drug.薬品レコードpartial1, info);
             group.drugs[index] = {
               kind: "converted",
               data: converted,

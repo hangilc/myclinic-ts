@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Drug } from "@/lib/parse-shohou";
-  import type { ConvGroupRep, DrugResolver } from "./conv-types";
+  import type { ConvGroupRep } from "./conv-types";
   import { toZenkaku } from "@/lib/zenkaku";
   import ConvertedIcon from "./conv-widgets/ConvertedIcon.svelte";
   import UnconvertedIcon from "./conv-widgets/UnconvertedIcon.svelte";

@@ -5,11 +5,12 @@
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
   import { onMount } from "svelte";
+  import { createPartial2FromIyakuhinMaster, type 薬品レコードPartial2 } from "./denshi-conv-helper";
 
   export let onDone: () => void;
   export let name: string;
   export let at: string;
-  export let onResolved: (master: IyakuhinMaster) => void;
+  export let onResolved: (resolved: 薬品レコードPartial2) => void;
   let searchText = name;
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
@@ -31,7 +32,7 @@
     }
     
     onDone();
-    onResolved(master);
+    onResolved(createPartial2FromIyakuhinMaster(master, false));
   }
 
   onMount(() => {
