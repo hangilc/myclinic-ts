@@ -45,11 +45,12 @@
 // }
 
 import type { RP剤情報, 備考レコード, 提供情報レコード } from "@/lib/denshi-shohou/presc-info";
+import type { Shohou } from "@/lib/parse-shohou";
+import { DateWrapper } from "myclinic-util";
 
 export interface ConvData1 {
   使用期限年月日?: string;
   備考レコード?: 備考レコード[];
-  RP剤情報グループ: RP剤情報[];
   提供情報レコード?: 提供情報レコード;
 }
 
@@ -57,4 +58,16 @@ export async function createPrescInfo(
   visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
 ): Promise<PrescInfoData> {
 
+}
+
+export function getConvData1(shohou: Shohou): ConvData1 {
+  let kigen: string | undefined = undefined;
+  if (shohou.kigen) {
+    kigen = DateWrapper.from(shohou.kigen)
+      .asSqlDate()
+      .replaceAll(/-/g, "");
+  }
+  return {
+    使用期限年月日: kigen,
+  }
 }
