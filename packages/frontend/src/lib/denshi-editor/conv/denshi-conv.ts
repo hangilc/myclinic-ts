@@ -1,3 +1,11 @@
+import type {
+  PrescInfoData,
+  RP剤情報, 備考レコード, 提供情報レコード, 提供診療情報レコード, 検査値データ等レコード
+} from "@/lib/denshi-shohou/presc-info";
+import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
+import type { Shohou } from "@/lib/parse-shohou";
+import { DateWrapper } from "myclinic-util";
+
 // export interface PrescInfoData {
 //   医療機関コード種別: 点数表;
 //   医療機関コード: string;
@@ -44,9 +52,20 @@
 //   提供情報レコード?: 提供情報レコード;
 // }
 
-import type { RP剤情報, 備考レコード, 提供情報レコード } from "@/lib/denshi-shohou/presc-info";
-import type { Shohou } from "@/lib/parse-shohou";
-import { DateWrapper } from "myclinic-util";
+// export interface 提供情報レコード {
+//   提供診療情報レコード?: 提供診療情報レコード[];
+//   検査値データ等レコード?: 検査値データ等レコード[];
+// }
+
+// export interface 提供診療情報レコード {
+//   薬品名称?: string;
+//   コメント: string;
+// }
+
+// export interface 検査値データ等レコード {
+//   検査値データ等: string;
+// }
+
 
 export interface ConvData1 {
   使用期限年月日?: string;
@@ -54,11 +73,6 @@ export interface ConvData1 {
   提供情報レコード?: 提供情報レコード;
 }
 
-export async function createPrescInfo(
-  visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
-): Promise<PrescInfoData> {
-
-}
 
 export function getConvData1(shohou: Shohou): ConvData1 {
   let kigen: string | undefined = undefined;
@@ -67,7 +81,88 @@ export function getConvData1(shohou: Shohou): ConvData1 {
       .asSqlDate()
       .replaceAll(/-/g, "");
   }
+  let bikou: 備考レコード[] = [];
+  for (let b of shohou.bikou) {
+    if (b === "高７" || b === "高８" || b === "高９") {
+      continue;
+    }
+    bikou.push({ 備考: b });
+  }
+  let 提供診療情報レコード: 提供診療情報レコード[] = [];
+  if (shohou.comments) {
+    for (let c of shohou.comments) {
+      if (c === "一包化") {
+        bikou.push({
+          備考: "一包化",
+        })
+      } else {
+        提供診療情報レコード.push({
+          コメント: c
+        })
+      }
+    }
+  }
+  let 提供情報レコード: 提供情報レコード | undefined = undefined;
+  if (提供診療情報レコード.length > 0) {
+    提供情報レコード = {
+      提供診療情報レコード,
+    }
+  }
+
   return {
     使用期限年月日: kigen,
+    備考レコード: bikou.length === 0 ? undefined : bikou,
+    提供情報レコード,
   }
+}
+
+export async function createPrescInfo(
+  visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
+): Promise<PrescInfoData> {
+  const result = await initPrescInfoDataFromVisitId(visitId);
+  Object.assign(result, data1, { RP剤情報グループ, });
+  return result;
+}
+
+// export interface RP剤情報 {
+//   剤形レコード: 剤形レコード;
+//   用法レコード: 用法レコード;
+//   用法補足レコード?: 用法補足レコード[];
+//   薬品情報グループ: 薬品情報[];
+// }
+
+// export interface 剤形レコード {
+//   剤形区分: 剤形区分;
+//   剤形名称?: string;
+//   調剤数量: number;
+// }
+
+// export interface 用法レコード {
+//   用法コード: string;
+//   用法名称: string;
+//   用法１日回数?: number;
+// }
+
+// export const 用法レコードObject = {
+//   isEqual(a: 用法レコード, b: 用法レコード): boolean {
+//     return a.用法コード == b.用法コード &&
+//       a.用法名称 === b.用法コード &&
+//       a.用法１日回数 == b.用法１日回数;
+//   }
+// }
+
+// export interface 用法補足レコード {
+//   用法補足区分?: 用法補足区分;
+//   用法補足情報: string;
+// }
+
+export interface ConvData2 {
+  剤形レコード: 剤形レコード;
+  用法レコード: 用法レコード;
+  用法補足レコード?: 用法補足レコード[];
+  薬品情報グループ: 薬品情報[];
+}
+
+export function createRP剤情報(): RP剤情報 {
+
 }
