@@ -1,9 +1,19 @@
+import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
-  RP剤情報, 備考レコード, 提供情報レコード, 提供診療情報レコード, 検査値データ等レコード
+  RP剤情報, 不均等レコード, 備考レコード, 剤形レコード, 提供情報レコード, 提供診療情報レコード, 検査値データ等レコード,
+  用法レコード,
+  用法補足レコード,
+  薬品レコード,
+  薬品情報,
+  薬品補足レコード,
 } from "@/lib/denshi-shohou/presc-info";
+import type {
+  薬品コード種別,
+} from "@/lib/denshi-shohou/denshi-shohou";
 import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
-import type { Shohou } from "@/lib/parse-shohou";
+import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
+import { toHankaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
 
 // export interface PrescInfoData {
@@ -158,11 +168,212 @@ export async function createPrescInfo(
 
 export interface ConvData2 {
   剤形レコード: 剤形レコード;
-  用法レコード: 用法レコード;
   用法補足レコード?: 用法補足レコード[];
-  薬品情報グループ: 薬品情報[];
 }
 
-export function createRP剤情報(): RP剤情報 {
-
+export function createRP剤情報(data: ConvData2, 用法レコード: 用法レコード, 薬品情報グループ: 薬品情報[]): RP剤情報 {
+  return Object.assign({}, data, { 用法レコード, 薬品情報グループ, })
 }
+
+export function getConvData2(group: DrugGroup): ConvData2 {
+  let 剤形区分: 剤形区分 = get剤形区分(group);
+  let 調剤数量: number = get調剤数量(group);
+  let 用法補足レコード: 用法補足レコード[] = get用法補足レコード(group);
+  return {
+    剤形レコード: {
+      剤形区分, 調剤数量
+    },
+    用法補足レコード: 用法補足レコード.length === 0 ? undefined : 用法補足レコード,
+  }
+}
+
+function get剤形区分(group: DrugGroup): 剤形区分 {
+  // Most frequent case
+  if (group.usage.kind === "days") {
+    return "内服";
+  }
+
+  // Check usage pattern first
+  if (group.usage.kind === "times") {
+    // Times-based usage typically indicates 頓服 (as needed)
+    return "頓服";
+  }
+
+  // Check drug names and units for external use indicators
+  for (const drug of group.drugs) {
+    const name = drug.name.toLowerCase();
+    const unit = drug.unit.toLowerCase();
+
+    // External use (外用) indicators
+    if (
+      name.includes("軟膏") ||
+      name.includes("クリーム") ||
+      name.includes("ローション") ||
+      name.includes("湿布") ||
+      name.includes("シール") ||
+      name.includes("貼付") ||
+      name.includes("点眼") ||
+      name.includes("点鼻") ||
+      name.includes("吸入") ||
+      name.includes("うがい") ||
+      name.includes("外用") ||
+      name.includes("塗布") ||
+      unit.includes("g") ||
+      (unit.includes("ml") &&
+        (name.includes("点眼") || name.includes("点鼻")))
+    ) {
+      return "外用";
+    }
+
+    // Injectable (注射) indicators
+    if (
+      name.includes("注射") ||
+      name.includes("注入") ||
+      name.includes("静注") ||
+      name.includes("筋注") ||
+      name.includes("皮下注") ||
+      unit.includes("バイアル") ||
+      unit.includes("アンプル")
+    ) {
+      return "注射";
+    }
+
+    // Liquid internal use (内服滴剤) indicators
+    if (
+      (name.includes("内服液") ||
+        name.includes("シロップ") ||
+        name.includes("滴剤")) &&
+      unit.includes("ml")
+    ) {
+      return "内服滴剤";
+    }
+  }
+
+  // Fallback to unknown
+  return "不明";
+}
+
+function get調剤数量(group: DrugGroup): number {
+  const usage = group.usage;
+
+  // For days-based prescriptions, return the number of days
+  if (usage.kind === "days") {
+    const days = parseInt(toHankaku(usage.days));
+    if (isNaN(days)) {
+      throw new Error(`Invalid days value: ${usage.days}`);
+    }
+    return days;
+  }
+
+  // For times-based prescriptions (頓服), return the number of times
+  if (usage.kind === "times") {
+    const times = parseInt(toHankaku(usage.times));
+    if (isNaN(times)) {
+      throw new Error(`Invalid times value: ${usage.times}`);
+    }
+    return times;
+  }
+
+  return 1;
+}
+
+function get用法補足レコード(group: DrugGroup): 用法補足レコード[] {
+  let 用法補足レコード: 用法補足レコード[] = [];
+  for (let c of group.groupComments) {
+    用法補足レコード.push({
+      用法補足情報: c,
+    });
+  }
+  return 用法補足レコード;
+}
+
+// export interface 薬品情報 {
+//   薬品レコード: 薬品レコード;
+//   単位変換レコード?: string;
+//   不均等レコード?: 不均等レコード;
+//   負担区分レコード?: 負担区分レコード;
+//   薬品１回服用量レコード?: 薬品１回服用量レコード;
+//   薬品補足レコード?: 薬品補足レコード[];
+// }
+
+export interface ConvData3 {
+  不均等レコード?: 不均等レコード;
+  薬品補足レコード?: 薬品補足レコード[];
+}
+
+export function create薬品情報(data: ConvData3, 薬品レコード: 薬品レコード): 薬品情報 {
+  return Object.assign({}, data, {
+    薬品レコード,
+  })
+}
+
+export function createConvData2(drug: Drug): ConvData3 {
+  return {
+    不均等レコード: get不均等レコード(drug),
+    薬品補足レコード: get薬品補足レコード(drug),
+  }
+}
+
+
+function get不均等レコード(drug: Drug): 不均等レコード | undefined {
+  if (drug.uneven) {
+    let uneven = drug.uneven;
+    uneven = uneven.replace(/^\s*[(（]/, "");
+    uneven = uneven.replace(/[)）]\s*$/, "");
+    let sep = /\s*[-ー－]\s*/;
+    const unevenParts = uneven.split(sep);
+    if (unevenParts.length >= 2) {
+      const 不均等レコード: 不均等レコード = {
+        不均等１回目服用量: toHankaku(unevenParts[0]),
+        不均等２回目服用量: toHankaku(unevenParts[1]),
+        不均等３回目服用量: unevenParts[2]
+          ? toHankaku(unevenParts[2].trim())
+          : undefined,
+        不均等４回目服用量: unevenParts[3]
+          ? toHankaku(unevenParts[3].trim())
+          : undefined,
+        不均等５回目服用量: unevenParts[4]
+          ? toHankaku(unevenParts[4].trim())
+          : undefined,
+      };
+      return 不均等レコード;
+    } else throw new Error("uneven record has less than two parts.");
+  } else {
+    undefined;
+  }
+}
+
+function get薬品補足レコード(drug: Drug): 薬品補足レコード[] | undefined {
+  let 薬品補足レコード: 薬品補足レコード[] = [];
+  if (drug.senpatsu) {
+    let 薬品補足情報: string;
+    switch (drug.senpatsu) {
+      case "henkoufuka":
+        薬品補足情報 = "後発品変更不可";
+        break;
+      case "kanjakibou":
+        薬品補足情報 = "先発医薬品患者希望";
+        break;
+      default:
+        throw new Error(`Unknown senpatsu type: ${drug.senpatsu}`);
+    }
+    薬品補足レコード.push({ 薬品補足情報 });
+  }
+  if (drug.drugComments) {
+    for (const comment of drug.drugComments) {
+      薬品補足レコード.push({ 薬品補足情報: comment });
+    }
+  }
+  return 薬品補足レコード.length === 0 ? undefined : 薬品補足レコード;
+}
+
+// export interface 薬品レコード {
+//   情報区分: 情報区分;
+//   薬品コード種別: 薬品コード種別;
+//   薬品コード: string;
+//   薬品名称: string;
+//   分量: string;
+//   力価フラグ: 力価フラグ;
+//   単位名: string;
+// }
+
