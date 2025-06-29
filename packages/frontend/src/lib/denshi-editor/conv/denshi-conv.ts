@@ -1,4 +1,4 @@
-import type { 剤形区分 } from "@/lib/denshi-shohou/denshi-shohou";
+import type { 剤形区分, 力価フラグ, 情報区分 } from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
   RP剤情報, 不均等レコード, 備考レコード, 剤形レコード, 提供情報レコード, 提供診療情報レコード, 検査値データ等レコード,
@@ -15,6 +15,7 @@ import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
+import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
 
 // export interface PrescInfoData {
 //   医療機関コード種別: 点数表;
@@ -377,3 +378,57 @@ function get薬品補足レコード(drug: Drug): 薬品補足レコード[] | u
 //   単位名: string;
 // }
 
+export interface ConvData4 {
+  分量: string;
+  力価フラグ: 力価フラグ;
+};
+
+export function create薬品レコード(data: ConvData4, 情報区分: 情報区分, 薬品コード種別: 薬品コード種別,
+  薬品コード: string, 薬品名称: string, 単位名: string
+): 薬品レコード {
+  return Object.assign({}, data, {
+    情報区分, 薬品コード種別, 薬品コード, 薬品名称, 単位名
+  })
+}
+
+export function createConvData4DepsFromIyakuhinMaster(master: IyakuhinMaster): {
+  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
+  薬品コード: string; 薬品名称: string; 単位名: string;
+} {
+  return {
+    情報区分: "医薬品",
+    薬品コード種別: "レセプト電算処理システム用コード" as const,
+    薬品コード: master.iyakuhincode.toString(),
+    薬品名称: master.name,
+    単位名: master.unit,
+  };
+}
+
+export function createConvData4DepsFromIyakuhinMasterIppanmei(master: IyakuhinMaster): {
+  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
+  薬品コード: string; 薬品名称: string; 単位名: string;
+} {
+  if( !master.ippanmei || !master.ippanmeicode ){
+    throw new Error(`has no ippanmei: (${master.iyakuhincode}) ${master.name}`)
+  }
+  return {
+    情報区分: "医薬品",
+    薬品コード種別: "一般名コード",
+    薬品コード: master.ippanmeicode.toString(),
+    薬品名称: master.ippanmei,
+    単位名: master.unit,
+  };
+}
+
+export function createConvData4DepsFromKizaiMaster(master: KizaiMaster): {
+  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
+  薬品コード: string; 薬品名称: string; 単位名: string;
+} {
+  return {
+    情報区分: "医療材料",
+    薬品コード種別: "レセプト電算処理システム用コード",
+    薬品コード: master.kizaicode.toString(),
+    薬品名称: master.name,
+    単位名: master.unit,
+  };
+}
