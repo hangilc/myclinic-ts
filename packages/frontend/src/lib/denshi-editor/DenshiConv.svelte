@@ -1,8 +1,11 @@
 <script lang="ts">
   import Dialog2 from "@/lib/Dialog2.svelte";
-  import type { DrugGroup, Shohou, Drug } from "@/lib/parse-shohou";
-  import { toHankaku } from "@/lib/zenkaku";
-  import { createConvGroupRep, getConvertedGroup, type ConvGroupRep } from "./conv/conv-types";
+  import type { Shohou } from "@/lib/parse-shohou";
+  import {
+    createConvGroupRep,
+    getConvertedGroup,
+    type ConvGroupRep,
+  } from "./conv/conv-types";
   import ConvRep from "./conv/ConvRep.svelte";
   import ResolveDrug from "./conv/ResolveDrug.svelte";
   import type {
@@ -10,16 +13,17 @@
     RP剤情報,
     用法レコード,
     薬品情報,
-    不均等レコード,
-    薬品補足レコード,
-    備考レコード,
     薬品レコード,
   } from "../denshi-shohou/presc-info";
-  import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
-  import { DateWrapper } from "myclinic-util";
-  import { convDrugToDenshi, type 薬品レコードPartial2 } from "./conv/denshi-conv-helper";
-  import { createPrescInfo, create薬品レコード, create薬品情報, getConvData1, type ConvAux4, type ConvData1 } from "./conv/denshi-conv";
+  import {
+    createPrescInfo,
+    create薬品レコード,
+    create薬品情報,
+    getConvData1,
+    type ConvAux4,
+    type ConvData1,
+  } from "./conv/denshi-conv";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -43,7 +47,6 @@
     groups = gs;
   }
 
-
   function isAllConverted(gs: ConvGroupRep[]): boolean {
     for (let g of gs) {
       if (g.usage.kind !== "converted") {
@@ -59,7 +62,9 @@
   }
 
   async function getPrescInfo(): Promise<PrescInfoData> {
-    let RPRP剤情報グループ: RP剤情報[] = groups.map(g => getConvertedGroup(g));
+    let RPRP剤情報グループ: RP剤情報[] = groups.map((g) =>
+      getConvertedGroup(g),
+    );
     return await createPrescInfo(visitId, data1, RPRP剤情報グループ);
   }
 
@@ -360,7 +365,7 @@
       return;
     }
     let drug = group.drugs[index];
-    if (drug.kind === "unconverted" && workElement ) {
+    if (drug.kind === "unconverted" && workElement) {
       const d: ResolveDrug = new ResolveDrug({
         target: workElement,
         props: {
@@ -368,7 +373,10 @@
           at,
           onDone: () => clearWork && clearWork(),
           onResolved: (aux: ConvAux4) => {
-            let 薬品レコード: 薬品レコード = create薬品レコード(drug.data4, aux);
+            let 薬品レコード: 薬品レコード = create薬品レコード(
+              drug.data4,
+              aux,
+            );
             let converted: 薬品情報 = create薬品情報(drug.data3, 薬品レコード);
             group.drugs[index] = {
               kind: "converted",
@@ -411,8 +419,7 @@
 
   async function doEnter() {
     try {
-      let RP剤情報グループ: RP剤情報[] = groups.map(g => getConvertedGroup(g));
-      const prescInfo = await createPrescInfo(visitId, data1, RP剤情報グループ);
+      const prescInfo = await getPrescInfo();
       destroy();
       onEnter(prescInfo);
     } catch (error) {
