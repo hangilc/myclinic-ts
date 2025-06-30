@@ -1,16 +1,24 @@
-import type { 剤形区分, 力価フラグ, 情報区分 } from "@/lib/denshi-shohou/denshi-shohou";
+import type {
+  剤形区分,
+  力価フラグ,
+  情報区分,
+} from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
-  RP剤情報, 不均等レコード, 備考レコード, 剤形レコード, 提供情報レコード, 提供診療情報レコード, 検査値データ等レコード,
+  RP剤情報,
+  不均等レコード,
+  備考レコード,
+  剤形レコード,
+  提供情報レコード,
+  提供診療情報レコード,
+  検査値データ等レコード,
   用法レコード,
   用法補足レコード,
   薬品レコード,
   薬品情報,
   薬品補足レコード,
 } from "@/lib/denshi-shohou/presc-info";
-import type {
-  薬品コード種別,
-} from "@/lib/denshi-shohou/denshi-shohou";
+import type { 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
@@ -77,28 +85,26 @@ import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
 //   検査値データ等: string;
 // }
 
-
 export interface ConvData1 {
   使用期限年月日?: string;
   備考レコード?: 備考レコード[];
   提供情報レコード?: 提供情報レコード;
 }
 
-
 export async function createPrescInfo(
-  visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
+  visitId: number,
+  data1: ConvData1,
+  RP剤情報グループ: RP剤情報[]
 ): Promise<PrescInfoData> {
   const result = await initPrescInfoDataFromVisitId(visitId);
-  Object.assign(result, data1, { RP剤情報グループ, });
+  Object.assign(result, data1, { RP剤情報グループ });
   return result;
 }
 
 export function getConvData1(shohou: Shohou): ConvData1 {
   let kigen: string | undefined = undefined;
   if (shohou.kigen) {
-    kigen = DateWrapper.from(shohou.kigen)
-      .asSqlDate()
-      .replaceAll(/-/g, "");
+    kigen = DateWrapper.from(shohou.kigen).asSqlDate().replaceAll(/-/g, "");
   }
   let bikou: 備考レコード[] = [];
   for (let b of shohou.bikou) {
@@ -113,11 +119,11 @@ export function getConvData1(shohou: Shohou): ConvData1 {
       if (c === "一包化") {
         bikou.push({
           備考: "一包化",
-        })
+        });
       } else {
         提供診療情報レコード.push({
-          コメント: c
-        })
+          コメント: c,
+        });
       }
     }
   }
@@ -125,14 +131,14 @@ export function getConvData1(shohou: Shohou): ConvData1 {
   if (提供診療情報レコード.length > 0) {
     提供情報レコード = {
       提供診療情報レコード,
-    }
+    };
   }
 
   return {
     使用期限年月日: kigen,
     備考レコード: bikou.length === 0 ? undefined : bikou,
     提供情報レコード,
-  }
+  };
 }
 
 // export interface RP剤情報 {
@@ -172,8 +178,12 @@ export interface ConvData2 {
   用法補足レコード?: 用法補足レコード[];
 }
 
-export function createRP剤情報(data: ConvData2, 用法レコード: 用法レコード, 薬品情報グループ: 薬品情報[]): RP剤情報 {
-  return Object.assign({}, data, { 用法レコード, 薬品情報グループ, })
+export function createRP剤情報(
+  data: ConvData2,
+  用法レコード: 用法レコード,
+  薬品情報グループ: 薬品情報[]
+): RP剤情報 {
+  return Object.assign({}, data, { 用法レコード, 薬品情報グループ });
 }
 
 export function getConvData2(group: DrugGroup): ConvData2 {
@@ -182,10 +192,12 @@ export function getConvData2(group: DrugGroup): ConvData2 {
   let 用法補足レコード: 用法補足レコード[] = get用法補足レコード(group);
   return {
     剤形レコード: {
-      剤形区分, 調剤数量
+      剤形区分,
+      調剤数量,
     },
-    用法補足レコード: 用法補足レコード.length === 0 ? undefined : 用法補足レコード,
-  }
+    用法補足レコード:
+      用法補足レコード.length === 0 ? undefined : 用法補足レコード,
+  };
 }
 
 function get剤形区分(group: DrugGroup): 剤形区分 {
@@ -220,8 +232,7 @@ function get剤形区分(group: DrugGroup): 剤形区分 {
       name.includes("外用") ||
       name.includes("塗布") ||
       unit.includes("g") ||
-      (unit.includes("ml") &&
-        (name.includes("点眼") || name.includes("点鼻")))
+      (unit.includes("ml") && (name.includes("点眼") || name.includes("点鼻")))
     ) {
       return "外用";
     }
@@ -302,19 +313,21 @@ export interface ConvData3 {
   薬品補足レコード?: 薬品補足レコード[];
 }
 
-export function create薬品情報(data: ConvData3, 薬品レコード: 薬品レコード): 薬品情報 {
+export function create薬品情報(
+  data: ConvData3,
+  薬品レコード: 薬品レコード
+): 薬品情報 {
   return Object.assign({}, data, {
     薬品レコード,
-  })
+  });
 }
 
 export function getConvData3(drug: Drug): ConvData3 {
   return {
     不均等レコード: get不均等レコード(drug),
     薬品補足レコード: get薬品補足レコード(drug),
-  }
+  };
 }
-
 
 function get不均等レコード(drug: Drug): 不均等レコード | undefined {
   if (drug.uneven) {
@@ -381,30 +394,44 @@ function get薬品補足レコード(drug: Drug): 薬品補足レコード[] | u
 export interface ConvData4 {
   分量: string;
   力価フラグ: 力価フラグ;
-};
+}
 
 export function getConvData4(drug: Drug): ConvData4 {
   let amount = Number(toHankaku(drug.amount));
-  if( isNaN(amount) ){
+  if (isNaN(amount)) {
     throw new Error(`invalid amount: ${drug.amount}`);
   }
   return {
     分量: drug.amount,
     力価フラグ: "薬価単位",
-  }
+  };
 }
 
-export function create薬品レコード(data: ConvData4, 情報区分: 情報区分, 薬品コード種別: 薬品コード種別,
-  薬品コード: string, 薬品名称: string, 単位名: string
-): 薬品レコード {
+export interface ConvAux4 {
+  情報区分: 情報区分;
+  薬品コード種別: 薬品コード種別;
+  薬品コード: string;
+  薬品名称: string;
+  単位名: string;
+}
+
+export function create薬品レコード(data: ConvData4, aux: ConvAux4): 薬品レコード {
+  let { 情報区分, 薬品コード種別, 薬品コード, 薬品名称, 単位名 } = aux;
   return Object.assign({}, data, {
-    情報区分, 薬品コード種別, 薬品コード, 薬品名称, 単位名
-  })
+    情報区分,
+    薬品コード種別,
+    薬品コード,
+    薬品名称,
+    単位名,
+  });
 }
 
 export function createConvData4DepsFromIyakuhinMaster(master: IyakuhinMaster): {
-  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
-  薬品コード: string; 薬品名称: string; 単位名: string;
+  情報区分: 情報区分;
+  薬品コード種別: 薬品コード種別;
+  薬品コード: string;
+  薬品名称: string;
+  単位名: string;
 } {
   return {
     情報区分: "医薬品",
@@ -415,12 +442,17 @@ export function createConvData4DepsFromIyakuhinMaster(master: IyakuhinMaster): {
   };
 }
 
-export function createConvData4DepsFromIyakuhinMasterIppanmei(master: IyakuhinMaster): {
-  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
-  薬品コード: string; 薬品名称: string; 単位名: string;
+export function createConvData4DepsFromIyakuhinMasterIppanmei(
+  master: IyakuhinMaster
+): {
+  情報区分: 情報区分;
+  薬品コード種別: 薬品コード種別;
+  薬品コード: string;
+  薬品名称: string;
+  単位名: string;
 } {
-  if( !master.ippanmei || !master.ippanmeicode ){
-    throw new Error(`has no ippanmei: (${master.iyakuhincode}) ${master.name}`)
+  if (!master.ippanmei || !master.ippanmeicode) {
+    throw new Error(`has no ippanmei: (${master.iyakuhincode}) ${master.name}`);
   }
   return {
     情報区分: "医薬品",
@@ -432,8 +464,11 @@ export function createConvData4DepsFromIyakuhinMasterIppanmei(master: IyakuhinMa
 }
 
 export function createConvData4DepsFromKizaiMaster(master: KizaiMaster): {
-  情報区分: 情報区分; 薬品コード種別: 薬品コード種別;
-  薬品コード: string; 薬品名称: string; 単位名: string;
+  情報区分: 情報区分;
+  薬品コード種別: 薬品コード種別;
+  薬品コード: string;
+  薬品名称: string;
+  単位名: string;
 } {
   return {
     情報区分: "医療材料",

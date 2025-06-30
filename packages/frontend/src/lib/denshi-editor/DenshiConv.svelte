@@ -13,12 +13,13 @@
     不均等レコード,
     薬品補足レコード,
     備考レコード,
+    薬品レコード,
   } from "../denshi-shohou/presc-info";
   import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
   import { DateWrapper } from "myclinic-util";
   import { convDrugToDenshi, type 薬品レコードPartial2 } from "./conv/denshi-conv-helper";
-  import { createPrescInfo, getConvData1, type ConvData1 } from "./conv/denshi-conv";
+  import { createPrescInfo, create薬品レコード, create薬品情報, getConvData1, type ConvAux4, type ConvData1 } from "./conv/denshi-conv";
 
   export let destroy: () => void;
   export let shohou: Shohou;
@@ -366,8 +367,9 @@
           name: drug.src.name,
           at,
           onDone: () => clearWork && clearWork(),
-          onResolved: (info: 薬品レコードPartial2) => {
-            let converted: 薬品情報 = convDrugToDenshi(drug.薬品情報Partial1, drug.薬品レコードpartial1, info);
+          onResolved: (aux: ConvAux4) => {
+            let 薬品レコード: 薬品レコード = create薬品レコード(drug.data4, aux);
+            let converted: 薬品情報 = create薬品情報(drug.data3, 薬品レコード);
             group.drugs[index] = {
               kind: "converted",
               data: converted,
@@ -409,8 +411,8 @@
 
   async function doEnter() {
     try {
-      const converted = convertedData();
-      const prescInfo = await createDenshi(visitId, shohou, converted);
+      let RP剤情報グループ: RP剤情報[] = groups.map(g => getConvertedGroup(g));
+      const prescInfo = await createPrescInfo(visitId, data1, RP剤情報グループ);
       destroy();
       onEnter(prescInfo);
     } catch (error) {
