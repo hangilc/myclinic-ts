@@ -85,6 +85,14 @@ export interface ConvData1 {
 }
 
 
+export async function createPrescInfo(
+  visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
+): Promise<PrescInfoData> {
+  const result = await initPrescInfoDataFromVisitId(visitId);
+  Object.assign(result, data1, { RP剤情報グループ, });
+  return result;
+}
+
 export function getConvData1(shohou: Shohou): ConvData1 {
   let kigen: string | undefined = undefined;
   if (shohou.kigen) {
@@ -125,14 +133,6 @@ export function getConvData1(shohou: Shohou): ConvData1 {
     備考レコード: bikou.length === 0 ? undefined : bikou,
     提供情報レコード,
   }
-}
-
-export async function createPrescInfo(
-  visitId: number, data1: ConvData1, RP剤情報グループ: RP剤情報[]
-): Promise<PrescInfoData> {
-  const result = await initPrescInfoDataFromVisitId(visitId);
-  Object.assign(result, data1, { RP剤情報グループ, });
-  return result;
 }
 
 // export interface RP剤情報 {
@@ -308,7 +308,7 @@ export function create薬品情報(data: ConvData3, 薬品レコード: 薬品�
   })
 }
 
-export function createConvData2(drug: Drug): ConvData3 {
+export function getConvData3(drug: Drug): ConvData3 {
   return {
     不均等レコード: get不均等レコード(drug),
     薬品補足レコード: get薬品補足レコード(drug),
@@ -382,6 +382,17 @@ export interface ConvData4 {
   分量: string;
   力価フラグ: 力価フラグ;
 };
+
+export function getConvData4(drug: Drug): ConvData4 {
+  let amount = Number(toHankaku(drug.amount));
+  if( isNaN(amount) ){
+    throw new Error(`invalid amount: ${drug.amount}`);
+  }
+  return {
+    分量: drug.amount,
+    力価フラグ: "薬価単位",
+  }
+}
 
 export function create薬品レコード(data: ConvData4, 情報区分: 情報区分, 薬品コード種別: 薬品コード種別,
   薬品コード: string, 薬品名称: string, 単位名: string
