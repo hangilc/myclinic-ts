@@ -17,29 +17,9 @@ export async function checkIryouJohoShutokuShoshinSaishin(
       }
     }
   }
-  shoshinList.sort((a, b) => a.visitId - b.visitId);
-  saishinList.sort((a, b) => a.visitId - b.visitId);
-  if( shoshinList.length + saishinList.length > 1 ){
-    const deleteIds: number[] = [];
-    if( shoshinList.length > 0 ){
-      if( shoshinList.length > 1 ){
-        for(let i=1;i<shoshinList.length;i++){
-          deleteIds.push(shoshinList[i].shinryouId);
-        }
-      }
-      deleteIds.push(...saishinList.map(s => s.shinryouId));
-    } else {
-      for(let i=1;i<saishinList.length;i++){
-        deleteIds.push(saishinList[i].shinryouId);
-      }
-    }
+  if( shoshinList.length > 0 && saishinList.length > 0 ){
     checkErrors.push({
-      code: "医療情報取得加算の重複",
-      hint: "重複している医療情報加算を削除",
-      fix: async () => {
-        await Promise.all(deleteIds.map(id => api.deleteShinryou(id)));
-        return true;
-      }
+      code: "医療情報取得加算（初診）と医療情報取得加算（再診）は同月に両方は算定できません。",
     })
   }
   return checkErrors;
