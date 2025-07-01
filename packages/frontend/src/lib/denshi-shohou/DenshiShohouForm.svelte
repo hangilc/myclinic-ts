@@ -239,7 +239,12 @@
 
   async function probeIyakuhincode(name: string): Promise<number | undefined> {
     const map = await cache.getDrugNameIyakuhincodeMap();
-    return map[name] ?? undefined;
+    let bind = map[name];
+    if( typeof bind === "number" ){
+      return bind;
+    } else {
+      return undefined;
+    }
   }
 
   async function resolveParsedIyakuhin(

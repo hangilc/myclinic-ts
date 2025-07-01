@@ -1,10 +1,13 @@
 import type { ClinicInfo, DiseaseExample } from "myclinic-model";
 import api from "./api";
-import { type RP剤情報, type 用法レコード, } from "./denshi-shohou/presc-info";
+import { type RP剤情報, type 用法レコード } from "./denshi-shohou/presc-info";
 import type { DrugDisease } from "./drug-disease";
 import { validateDxKasanSeries, type DxKasanApplied } from "./dx-kasan";
 import type { ShinryouDisease } from "./shinryou-disease";
-import { validateAppointsTemplate, type AppointsTemplate } from "@/appoint/appoints-template";
+import {
+  validateAppointsTemplate,
+  type AppointsTemplate,
+} from "@/appoint/appoints-template";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -16,7 +19,9 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
-let drugNameIyakuhincodeMap: Record<string, number | { kind: "ippanmei", code: string}> | undefined = undefined;
+let drugNameIyakuhincodeMap:
+  | Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+  | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
@@ -26,12 +31,12 @@ export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
   用法コード: string;
   用法名称: string;
-}
+};
 
 export type FreqPresc = {
   presc: RP剤情報;
   comment: string;
-}
+};
 
 export const cache = {
   async getClinicInfo(): Promise<ClinicInfo> {
@@ -110,7 +115,9 @@ export const cache = {
     return shinryouDiseases;
   },
 
-  async setShinryouDiseases(newShinryouDiseases: ShinryouDisease[]): Promise<void> {
+  async setShinryouDiseases(
+    newShinryouDiseases: ShinryouDisease[]
+  ): Promise<void> {
     await api.setShinryouDiseases(newShinryouDiseases);
     shinryouDiseases = newShinryouDiseases;
   },
@@ -146,15 +153,20 @@ export const cache = {
     await api.setUsageMasterMap(map);
   },
 
-  async getDrugNameIyakuhincodeMap(): Promise<Record<string, number | { kind: "ippanmei", code: string }>> {
+  async getDrugNameIyakuhincodeMap(): Promise<
+    Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+  > {
     if (drugNameIyakuhincodeMap === undefined) {
-      const map: Record<string, number> = await api.getDrugNameIyakuhincodeMap();
+      const map: Record<string, number> =
+        await api.getDrugNameIyakuhincodeMap();
       drugNameIyakuhincodeMap = map;
     }
     return drugNameIyakuhincodeMap;
   },
 
-  async setDrugNameIyakuhincodeMap(map: Record<string, number | { kind: "ippanmei", code: string }>): Promise<void> {
+  async setDrugNameIyakuhincodeMap(
+    map: Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+  ): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);
   },
@@ -220,6 +232,4 @@ export const cache = {
     appointsTemplate = value;
     await api.setConfig("appoints-template", value);
   },
-
-}
-
+};

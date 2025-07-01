@@ -93,7 +93,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
   let info2 = convShohouDrugTo薬品レコードPartial1(drug);
   let map = await cache.getDrugNameIyakuhincodeMap();
   let iyakuhincode = map[drug.name];
-  if (iyakuhincode) {
+  if (typeof iyakuhincode === "number") {
     try {
       let master = await api.getIyakuhinMaster(iyakuhincode, at);
       let info3 = createPartial2FromIyakuhinMaster(master, false);

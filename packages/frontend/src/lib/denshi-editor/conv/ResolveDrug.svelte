@@ -28,6 +28,7 @@
     薬品情報,
     薬品補足レコード,
   } from "@/lib/denshi-shohou/presc-info";
+  import Link from "../widgets/Link.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -37,10 +38,20 @@
   export let 薬品コード: string | undefined = undefined;
   export let 薬品名称: string;
   export let 単位名: string | undefined = undefined;
-  let searchText = name;
+  let searchText = 薬品名称;
   let searchResult: IyakuhinMaster[] = [];
   let inputElement: HTMLInputElement;
-  let isUpdatedByMaster = false;
+  let cacheUpdateKey: string | undefined = undefined;
+  let cacheUpdateData:
+    | undefined
+    | number
+    | {
+        kind: "ippanmei";
+        name: string;
+        code: string;
+      } = undefined;
+  let ippanmei: string | undefined = undefined;
+  let ippanmeicode: string | undefined = undefined;
 
   function isAllSet(
     情報区分: 情報区分 | undefined,
@@ -63,6 +74,10 @@
       薬品コード !== undefined &&
       単位名 !== undefined
     ) {
+      if (cacheUpdateKey && cacheUpdateData) {
+        updateCache(cacheUpdateKey, cacheUpdateData);
+      }
+      onDone();
       onResolved({
         情報区分,
         薬品コード種別,
@@ -74,41 +89,45 @@
   }
 
   async function doSearch() {
+    cacheUpdateKey = searchText;
     searchResult = await api.searchIyakuhinMaster(searchText, at);
   }
 
-  async function updateMap() {
-    if (
-      薬品コード !== undefined &&
-      薬品コード種別 === "レセプト電算処理システム用コード"
-    ) {
-      try {
-        // Update the cache with the new drug name -> iyakuhin code mapping
-        const currentMap = await cache.getDrugNameIyakuhincodeMap();
-        const updatedMap = { ...currentMap };
-        updatedMap[name] = master.iyakuhincode;
-        await cache.setDrugNameIyakuhincodeMap(updatedMap);
-      } catch (error) {
-        console.error("Failed to update drug cache:", error);
-        // Continue with the selection even if cache update fails
-      }
-    }
-  }
-
-  async function doSelect(master: IyakuhinMaster) {
+  async function updateCache(
+    name: string,
+    bind: number | { kind: "ippanmei"; name: string; code: string },
+  ) {
     try {
       // Update the cache with the new drug name -> iyakuhin code mapping
       const currentMap = await cache.getDrugNameIyakuhincodeMap();
       const updatedMap = { ...currentMap };
-      updatedMap[name] = master.iyakuhincode;
+      updatedMap[name] = bind;
       await cache.setDrugNameIyakuhincodeMap(updatedMap);
     } catch (error) {
       console.error("Failed to update drug cache:", error);
       // Continue with the selection even if cache update fails
     }
+  }
 
-    onDone();
-    onResolved(createPartial2FromIyakuhinMaster(master, false));
+  async function doSelect(master: IyakuhinMaster) {
+    情報区分 = "医薬品";
+    薬品コード種別 = "レセプト電算処理システム用コード";
+    薬品コード = master.iyakuhincode.toString();
+    薬品名称 = master.name;
+    単位名 = master.unit;
+    ippanmei = master.ippanmei || undefined;
+    ippanmeicode = master.ippanmeicode || undefined;
+    searchText = "";
+    searchResult = [];
+  }
+
+  function doIppanmei() {
+    if( ippanmei && ippanmeicode ){
+      薬品コード種別 = "一般名コード";
+      薬品コード = ippanmeicode;
+      薬品名称 = ippanmei;
+      cacheUpdateData = { kind: "ippanmei", name: ippanmei, code: ippanmeicode };
+    }
   }
 
   onMount(() => {
@@ -125,7 +144,7 @@
 <div class="wrapper">
   <div class="title">薬剤の解決</div>
   <div class="label">名称</div>
-  <div class="small-text">{name}</div>
+  <div class="small-text">{薬品名称}</div>
   <form on:submit|preventDefault={doSearch} class="with-icons">
     <input
       type="text"
@@ -144,6 +163,9 @@
     {/each}
   </div>
   <div class="commands">
+    {#if ippanmei && ippanmeicode }
+      <Link onClick={doIppanmei}>一般名に</Link>
+    {/if}
     {#if isAllSet(情報区分, 薬品コード種別, 薬品コード, 単位名)}
       <button on:click={doEnter}>入力</button>
     {/if}
