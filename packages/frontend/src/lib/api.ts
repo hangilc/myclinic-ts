@@ -10,6 +10,7 @@ import type { DrugDisease } from "./drug-disease";
 import { validateShinryouDisease, type ShinryouDisease } from "./shinryou-disease";
 import { parseLocationQuery } from "./parse-location-query";
 import { validateDupPatient, type DupPatient } from "@/practice/dup-patient/dup-patient";
+import { convertToHankakuIfDigits } from "./zenkaku";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -135,6 +136,7 @@ export default {
   },
 
   async searchPatient(text: string): Promise<Array<m.Patient>> {
+    text = convertToHankakuIfDigits(text);
     const [_, list] = await get(
       "search-patient",
       { text: text },
@@ -145,6 +147,7 @@ export default {
 
   async searchPatientSmart(text: string): Promise<m.Patient[]> {
     text = text.trim();
+    text = convertToHankakuIfDigits(text);
     if (text) {
       if (/^\d+$/.test(text)) {
         const patientId = parseInt(text);
