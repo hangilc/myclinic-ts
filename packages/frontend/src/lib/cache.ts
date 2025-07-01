@@ -16,7 +16,7 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
-let drugNameIyakuhincodeMap: Record<string, number> | undefined = undefined;
+let drugNameIyakuhincodeMap: Record<string, number | { kind: "ippanmei", code: string}> | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
@@ -146,21 +146,21 @@ export const cache = {
     await api.setUsageMasterMap(map);
   },
 
-  async getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
-    if( drugNameIyakuhincodeMap === undefined ){
+  async getDrugNameIyakuhincodeMap(): Promise<Record<string, number | { kind: "ippanmei", code: string }>> {
+    if (drugNameIyakuhincodeMap === undefined) {
       const map: Record<string, number> = await api.getDrugNameIyakuhincodeMap();
       drugNameIyakuhincodeMap = map;
     }
     return drugNameIyakuhincodeMap;
   },
 
-  async setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
+  async setDrugNameIyakuhincodeMap(map: Record<string, number | { kind: "ippanmei", code: string }>): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);
   },
 
   async getOnshiServer(): Promise<string> {
-    if( onshiServer === undefined ){
+    if (onshiServer === undefined) {
       const value = await api.dictGet("onshi-server");
       onshiServer = value;
     }
@@ -173,9 +173,9 @@ export const cache = {
   },
 
   async getDxKasanSeries(): Promise<DxKasanApplied[]> {
-    if( dxKasanSeries === undefined ){
+    if (dxKasanSeries === undefined) {
       let value = await api.getConfig("dx-kasan");
-      if( !value ){
+      if (!value) {
         value = [];
       }
       dxKasanSeries = value;
@@ -193,9 +193,9 @@ export const cache = {
   },
 
   async getDoctorEmail(): Promise<string> {
-    if( doctorEmail === undefined ){
+    if (doctorEmail === undefined) {
       let value = await api.getConfig("doctor-email");
-      if( !value ){
+      if (!value) {
         value = "";
       }
       doctorEmail = value;

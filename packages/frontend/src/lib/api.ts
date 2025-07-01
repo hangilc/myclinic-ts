@@ -1724,7 +1724,7 @@ export default {
     return get("get-config", { name: "drug-name-iyakuhincode-map" }, a => a ?? {});
   },
 
-  setDrugNameIyakuhincodeMap(map: Record<string, number>): Promise<void> {
+  setDrugNameIyakuhincodeMap(map: Record<string, number | { kind: "ippanmei", code: string}>): Promise<void> {
     return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, () => {});
   },
 
