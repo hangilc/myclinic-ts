@@ -50,7 +50,9 @@
 
   function appointTimeText(data: AppointTimeData): string {
     // const d = format("{M}月{D}日（{W}）", data.appointTime.date);
-    const d = DateWrapper.from(data.appointTime.date).render(d => `${d.month}月${d.day}日（${d.youbi}）`);
+    const d = DateWrapper.from(data.appointTime.date).render(
+      (d) => `${d.month}月${d.day}日（${d.youbi}）`,
+    );
     const fp = parseTime(data.appointTime.fromTime);
     const f = `${fp.hour}時${fp.minute}分`;
     const up = parseTime(data.appointTime.untilTime);
@@ -88,7 +90,7 @@
 
   async function enterAppoint(
     appointTimeId: number,
-    tags: string[]
+    tags: string[],
   ): Promise<boolean> {
     const validation = validateAppoint(0, {
       appointTimeId: intSrc(appointTimeId),
@@ -148,7 +150,7 @@
         }
         ok = await enterAppoint(
           following.appointTimeId,
-          tags.filter((t) => t !== "健診")
+          tags.filter((t) => t !== "健診"),
         );
         if (!ok) {
           return;
@@ -241,7 +243,7 @@
                 isCurrent={p.patientId === patientId}
                 onSelect={doPatientSelect}
               >
-              ({pad(p.patientId, 4, "0")})
+                ({pad(p.patientId, 4, "0")})
                 <span style="font-weight:bold;">{p.fullName()}</span>
                 <span>
                   {birthdayRep(p.birthday)}
