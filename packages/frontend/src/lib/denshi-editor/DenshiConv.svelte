@@ -365,32 +365,45 @@
       return;
     }
     let drug = group.drugs[index];
-    if (drug.kind === "unconverted" && workElement) {
-      const d: ResolveDrug = new ResolveDrug({
-        target: workElement,
-        props: {
-          name: drug.src.name,
-          at,
-          onDone: () => clearWork && clearWork(),
-          onResolved: (aux: ConvAux4) => {
+    if (!workElement) {
+      return;
+    }
+    let name: string;
+    if (drug.kind === "unconverted") {
+      name = drug.src.name;
+    } else {
+      name = drug.data.薬品レコード.薬品名称;
+    }
+    const d: ResolveDrug = new ResolveDrug({
+      target: workElement,
+      props: {
+        薬品名称: name,
+        at,
+        onDone: () => clearWork && clearWork(),
+        onResolved: (aux: ConvAux4) => {
+          let converted: 薬品情報;
+          if (drug.kind === "unconverted") {
             let 薬品レコード: 薬品レコード = create薬品レコード(
               drug.data4,
               aux,
             );
-            let converted: 薬品情報 = create薬品情報(drug.data3, 薬品レコード);
-            group.drugs[index] = {
-              kind: "converted",
-              data: converted,
-            };
-            groups = groups;
-          },
+            converted = create薬品情報(drug.data3, 薬品レコード);
+          } else {
+            let 薬品レコード: 薬品レコード = Object.assign({}, drug.data.薬品レコード, aux);
+            converted = Object.assign({}, drug.data, { 薬品レコード });
+          }
+          group.drugs[index] = {
+            kind: "converted",
+            data: converted,
+          };
+          groups = groups;
         },
-      });
-      clearWork = () => {
-        d.$destroy();
-        clearWork = undefined;
-      };
-    }
+      },
+    });
+    clearWork = () => {
+      d.$destroy();
+      clearWork = undefined;
+    };
   }
 
   function doUsageSelected(group: ConvGroupRep, name: string) {

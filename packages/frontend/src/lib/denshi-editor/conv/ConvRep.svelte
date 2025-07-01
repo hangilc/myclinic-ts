@@ -7,14 +7,8 @@
   import { drugRep } from "../helper";
 
   export let groups: ConvGroupRep[];
-  export let onDrugSelected: (
-    group: ConvGroupRep,
-    index: number,
-  ) => void;
-  export let onUsageSelected: (
-    group: ConvGroupRep,
-    name: string,
-  ) => void;
+  export let onDrugSelected: (group: ConvGroupRep, index: number) => void;
+  export let onUsageSelected: (group: ConvGroupRep, name: string) => void;
 
   function unconvRep(drug: Drug): string {
     let s = `${drug.name}　${drug.amount}${drug.unit}${drug.uneven ?? ""}`;
@@ -35,7 +29,13 @@
         {#each group.drugs as drug, drugIndex}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           {#if drug.kind === "converted"}
-            <div><ConvertedIcon /> {drugRep(drug.data)}</div>
+            <div
+              class="cursor-pointer"
+              on:click={() => onDrugSelected(group, drugIndex)}
+            >
+              <ConvertedIcon />
+              {drugRep(drug.data)}
+            </div>
           {:else}
             <div
               class="cursor-pointer"
@@ -54,8 +54,7 @@
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             class="cursor-pointer"
-            on:click={() =>
-              onUsageSelected(group, usage.src.usage)}
+            on:click={() => onUsageSelected(group, usage.src.usage.usage)}
           >
             <UnconvertedIcon />{group.usage.src.usage}
           </div>
