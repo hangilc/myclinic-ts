@@ -396,6 +396,9 @@
             kind: "converted",
             data: converted,
           };
+          if( aux.情報区分 === "医療材料" ){
+            group.data2.剤形レコード.剤形区分 = "医療材料";
+          }
           groups = groups;
         },
       },
