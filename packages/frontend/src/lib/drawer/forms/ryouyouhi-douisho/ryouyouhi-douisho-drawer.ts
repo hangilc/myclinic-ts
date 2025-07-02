@@ -53,7 +53,7 @@ export function drawRyouyouhiDouisho(data: RyouyouhiDouishoDrawerData): Op[] {
   const paper = b.paperSizeToBox(A4);
   const wrappingBox = b.modify(paper, b.shift(17, 28), b.setWidth(178, "left"), b.setHeight(238, "top"));
   const [titleBox, patientBox, byoumeiBox, hatubyouDateBox, douiKubunBox,
-    shinsatubiBox, shoujouBox, sejutuBox, chiyouBox, chuuiBox, bottomBox
+    shinsatubiBox, shoujouBox, sejutuBox, ouryouBox, chuuiBox, bottomBox
   ] = b.splitToRows(wrappingBox, b.splitWidths(9.5, 19, 11, 8, 8, 8, 40, 17, 40, 20));
 
   c.rect(ctx, wrappingBox);
@@ -65,7 +65,7 @@ export function drawRyouyouhiDouisho(data: RyouyouhiDouishoDrawerData): Op[] {
   c.frameBottom(ctx, shinsatubiBox);
   c.frameBottom(ctx, shoujouBox);
   c.frameBottom(ctx, sejutuBox);
-  c.frameBottom(ctx, chiyouBox);
+  c.frameBottom(ctx, ouryouBox);
   c.frameBottom(ctx, chuuiBox);
 
   drawTitle(ctx, titleBox, data);
@@ -76,7 +76,7 @@ export function drawRyouyouhiDouisho(data: RyouyouhiDouishoDrawerData): Op[] {
   drawShinsatuDate(ctx, shinsatubiBox, data);
   drawShoujou(ctx, shoujouBox, data);
   drawSejutu(ctx, sejutuBox, data);
-  drawChiyou(ctx, chiyouBox, data);
+  drawOuryou(ctx, ouryouBox, data);
   drawChuui(ctx, chuuiBox, data);
   drawBottom(ctx, bottomBox, data);
   return c.getOps(ctx);
@@ -147,14 +147,16 @@ function drawSejutu(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
   }
 }
 
-function drawChiyou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
+function drawOuryou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
+  c.drawTextJustified(ctx, "往療", b.modify(left, b.shrinkHoriz(3, 3)), "center");
 }
 
 function drawChuui(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
+  c.drawText(ctx, "注意事項等", left, "center", "center");
 }
 
 function drawBottom(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
