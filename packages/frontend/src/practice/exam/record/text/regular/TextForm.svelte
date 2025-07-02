@@ -19,7 +19,11 @@
   } from "@/lib/shohousen-text-helper";
   import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
   import { cache } from "@/lib/cache";
-  import { parseShohou as parseShohouOld } from "@/lib/parse-shohou";
+  import {
+  checkForSenpatsu,
+    parseShohou as parseShohouOld,
+    type Shohou,
+  } from "@/lib/parse-shohou";
   import { parseShohou } from "@/lib/parse-shohou2";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import { formatHokenshaBangou } from "myclinic-util";
@@ -37,11 +41,13 @@
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
-  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
+  import {
+    drawShohousen2025,
+  } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { isKensa } from "./helper";
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
-  import type { Patient } from "myclinic-model";
+  import { Hotline, type Patient } from "myclinic-model";
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
 
@@ -469,6 +475,15 @@
     return data;
   }
 
+  async function sendSenpatsuNoticeViaHotline() {
+    const message =
+      "[Bot] 処方箋印刷：「変更不可」または「患者希望」にチェックが入っています。押印を２か所にしてください。";
+    const hotline = new Hotline(message, "practice", "reception");
+    api.postHotline(hotline).catch((err) => {
+      console.error("Failed to send hotline message:", err);
+    });
+  }
+
   async function doPrintShohousen2025() {
     if (!(await isTodaysShohousen())) {
       if (!confirm("本日の処方箋でありませんが、印刷しますか？")) {
@@ -483,6 +498,7 @@
     }
     let data: ShohousenData2025 = await prepareData();
     data.shohou = shohou;
+    let hasSenpatsu = checkForSenpatsu(data.shohou);
     let pages = drawShohousen2025(data);
     const d: DrawerDialog = new DrawerDialog({
       target: document.body,
@@ -494,6 +510,11 @@
         scale: 3,
         kind: "shohousen2024",
         title: "処方箋印刷",
+        onPrint: () => {
+          if (hasSenpatsu) {
+            sendSenpatsuNoticeViaHotline();
+          }
+        },
       },
     });
     onClose();
@@ -697,7 +718,7 @@
     onClose();
     let visit = await api.getVisit(text.visitId);
     const shohou = parseShohou(text.content);
-    if( typeof shohou === "string" ){
+    if (typeof shohou === "string") {
       alert(shohou);
       return;
     }
@@ -721,8 +742,8 @@
           });
           await api.enterText(newText);
         },
-      }
-    })
+      },
+    });
   }
 
   function oldShohouPopup(): [string, () => void][] {

@@ -27,6 +27,7 @@
         height: number;
       }
     | undefined = undefined;
+  export let onPrint: () => void = () => {};
   let pageIndex = 0;
   if (pages) {
     adaptToPageIndex();
@@ -72,6 +73,7 @@
       if (setDefaultChecked && settingSelect !== printPref && kind) {
         printApi.setPrintPref(kind, settingSelect);
       }
+      onPrint();
       doClose();
     } else {
       const opsList: Op[][] = pages || [ops];
