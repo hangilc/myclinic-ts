@@ -214,7 +214,7 @@ function drawShoujou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
       r.t("（　　　　　　）"));
   }
   {
-        let row = rows[2];
+    let row = rows[2];
     let [keyBox, bodyBox] = b.splitToColumns(row, b.splitAt(middleWidth));
     c.frameRight(ctx, keyBox);
     c.drawTextJustified(ctx, "その他", b.modify(keyBox, b.shrinkHoriz(1.5, 1.5)), "center");
@@ -229,12 +229,68 @@ function drawSejutu(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
     c.drawText(ctx, "施術の種類", dbox, "center", "top");
     c.drawText(ctx, "施術部位", dbox, "center", "bottom");
   }
+  {
+    let [upper, lower] = b.splitToRows(b.modify(right, b.shrinkHoriz(1, 1)), b.evenSplitter(2));
+    c.frameBottom(ctx, upper);
+    r.renderRow(ctx, upper, r.t("マッサージ"), r.t("　　（　"),
+      r.t("躯幹"), r.t("　"),
+      r.t("右上肢"), r.t("　"),
+      r.t("左上肢"), r.t("　"),
+      r.t("右下肢"), r.t("　"),
+      r.t("左下肢"), r.t("　）"),
+    );
+    r.renderRow(ctx, lower, r.t("変形徒手矯正術"), r.t("（　　"),
+      r.t("右上肢"), r.t("　"),
+      r.t("左上肢"), r.t("　"),
+      r.t("右下肢"), r.t("　"),
+      r.t("左下肢"), r.t("　　）"),
+    )
+  }
 }
 
 function drawOuryou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawTextJustified(ctx, "往療", b.modify(left, b.shrinkHoriz(3, 3)), "center");
+  let [upper, lower] = b.splitToRows(right, b.splitAt(8));
+  c.frameBottom(ctx, upper);
+  {
+    r.renderRow(ctx, b.modify(upper, b.shrinkHoriz(3.5, 0)),
+      r.t("１"), r.t("．必要とする　　"),
+      r.t("２"), r.t("．必要としない"))
+  }
+  {
+    let rows = b.splitToRows(lower, b.evenSplitter(5));
+    {
+      let row = rows[0];
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(1, 30)),
+        r.t("往療を必要とする理由　　介護保険の要介護度　（"),
+        r.gap(),
+        r.t("）"));
+    }
+    {
+      let row = rows[1];
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
+        r.t("１"), r.t("．独歩による公共交通機関を使っての外出が困難"),
+      )
+    }
+    {
+      let row = rows[2];
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
+        r.t("２"), r.t("．認知症や視覚、内部、精神障害などにより単独での外出が困難"),
+      )
+    }
+    {
+      let row = rows[3];
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
+        r.t("３"), r.t("．その他"),
+      )
+    }
+    {
+      let row = rows[4];
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(7, 7)), r.t("（"), r.gap(), r.t("）"));
+    }
+  }
 }
 
 function drawChuui(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
