@@ -87,8 +87,8 @@ export function drawRyouyouhiDouisho(data: RyouyouhiDouishoDrawerData): Op[] {
 function initContext(ctx: DrawerContext) {
   c.createFont(ctx, "title", "MS Mincho", 7);
   c.createFont(ctx, "regular", "MS Mincho", 4);
-  c.createFont(ctx, "large", "MS Mincho", 4.2);
-  c.createFont(ctx, "small", "MS Mincho", 3);
+  c.createFont(ctx, "large", "MS Mincho", 5.7);
+  c.createFont(ctx, "small", "MS Mincho", 3.5);
   c.createPen(ctx, "regular", 0, 0, 0, 0.1);
 }
 
@@ -300,6 +300,34 @@ function drawChuui(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDat
 }
 
 function drawBottom(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
-
+  c.withFont(ctx, "large", () => {
+    let fontSize = c.currentFontSize(ctx);
+    c.drawText(ctx, "上記の者については、頭書の疾病により療養のための医療上の",
+      b.modify(box, b.shift(11, 3.5)), "left", "top");
+    c.drawText(ctx, "マッサージが必要と認め、マッサージの施術に同意する。",
+      b.modify(box, b.shift(11 - fontSize, 10)), "left", "top");
+  });
+  let dbox = b.modify(box, b.shrinkHoriz(13, 10), b.shrinkVert(17, 0));
+  let rows = b.splitToRows(dbox, b.evenSplitter(4));
+  c.withFont(ctx, "small", () => {
+    r.renderRow(ctx, rows[0], r.t("令"), r.fixed(8), r.t("和"),
+      r.fixed(12), r.t("年"),
+      r.fixed(12), r.t("月"),
+      r.fixed(12), r.t("日"),
+    );
+    {
+      let [keyBox, bodyBox] = b.splitToColumns(rows[1], b.splitAt(38));
+      c.drawTextJustified(ctx, "保険医療機関名", keyBox, "center");
+    }
+    {
+      let [keyBox, bodyBox] = b.splitToColumns(rows[2], b.splitAt(38));
+      c.drawTextJustified(ctx, "所在地", keyBox, "center");
+    }
+    {
+      let [keyBox, bodyBox] = b.splitToColumns(rows[3], b.splitAt(38));
+      c.drawTextJustified(ctx, "保険医氏名", keyBox, "center");
+      c.drawText(ctx, "印", b.modify(bodyBox, b.setWidth(4, "right")), "center", "center");
+    }
+  })
 }
 
