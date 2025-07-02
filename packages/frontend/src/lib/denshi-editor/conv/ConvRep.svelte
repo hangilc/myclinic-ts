@@ -56,7 +56,7 @@
             class="cursor-pointer"
             on:click={() => onUsageSelected(group, usage.src.usage.usage)}
           >
-            <UnconvertedIcon />{group.usage.src.usage}
+            <UnconvertedIcon />{group.usage.src.usage.usage}
           </div>
         {/if}
       </div>

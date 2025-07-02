@@ -20,7 +20,12 @@ let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
 let drugNameIyakuhincodeMap:
-  | Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+  | Record<
+      string,
+      | number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number }
+    >
   | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
@@ -154,7 +159,12 @@ export const cache = {
   },
 
   async getDrugNameIyakuhincodeMap(): Promise<
-    Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+    Record<
+      string,
+      | number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number }
+    >
   > {
     if (drugNameIyakuhincodeMap === undefined) {
       const map: Record<string, number> =
@@ -165,7 +175,12 @@ export const cache = {
   },
 
   async setDrugNameIyakuhincodeMap(
-    map: Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+    map: Record<
+      string,
+      | number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number }
+    >
   ): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);

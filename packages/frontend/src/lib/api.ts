@@ -2,14 +2,35 @@ import { toKouhi, interfaceToKouhi } from "myclinic-model";
 import * as m from "myclinic-model";
 import { dateParam, dateTimeParam } from "./date-param";
 import { type Op as DrawerOp, type Op } from "./drawer/compiler/op";
-import { castBoolean, castCdr, castList, castListOpt, castNumber, castNumberFromString, castObject, castOption, castPair, castString, castStringToInt, castTuple3, castTuple4, type Caster } from "./cast";
+import {
+  castBoolean,
+  castCdr,
+  castList,
+  castListOpt,
+  castNumber,
+  castNumberFromString,
+  castObject,
+  castOption,
+  castPair,
+  castString,
+  castStringToInt,
+  castTuple3,
+  castTuple4,
+  type Caster,
+} from "./cast";
 import { pipe } from "myclinic-model/pipe";
-import type { RP剤情報, 用法レコード} from "./denshi-shohou/presc-info";
+import type { RP剤情報, 用法レコード } from "./denshi-shohou/presc-info";
 import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
-import { validateShinryouDisease, type ShinryouDisease } from "./shinryou-disease";
+import {
+  validateShinryouDisease,
+  type ShinryouDisease,
+} from "./shinryou-disease";
 import { parseLocationQuery } from "./parse-location-query";
-import { validateDupPatient, type DupPatient } from "@/practice/dup-patient/dup-patient";
+import {
+  validateDupPatient,
+  type DupPatient,
+} from "@/practice/dup-patient/dup-patient";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;
@@ -46,9 +67,9 @@ export function getBackend(): string {
       port = import.meta.env.VITE_BACKEND_PORT;
     }
     let query = parseLocationQuery();
-    if( query["api-port"] ) {
+    if (query["api-port"]) {
       // port = parseInt(query["api-port"])
-      port = query["api-port"]
+      port = query["api-port"];
     }
     let result = `${proto}//${host}:${port}`;
     console.log("getBackend", result);
@@ -86,10 +107,7 @@ async function get<T>(
   return cast(await resp.json());
 }
 
-async function getText(
-  cmd: string,
-  params: ParamsInit
-): Promise<string> {
+async function getText(cmd: string, params: ParamsInit): Promise<string> {
   let arg = `${base}/${cmd}`;
   if (typeof params === "object" && Object.keys(params).length !== 0) {
     const q = new URLSearchParams(params).toString();
@@ -103,7 +121,7 @@ async function post<T>(
   cmd: string,
   data: any,
   params: ParamsInit,
-  cast: Caster<T>,
+  cast: Caster<T>
 ): Promise<T> {
   return postRaw(cmd, JSON.stringify(data), params, cast);
 }
@@ -120,10 +138,12 @@ async function postRaw<T>(
     const q = new URLSearchParams(params).toString();
     arg += `?${q}`;
   }
-  const resp = await fetch(arg, Object.assign({ method: "POST", body: data }, init));
+  const resp = await fetch(
+    arg,
+    Object.assign({ method: "POST", body: data }, init)
+  );
   return cast(await resp.json());
 }
-
 
 export default {
   getPatient(patientId: number): Promise<m.Patient> {
@@ -158,7 +178,11 @@ export default {
   },
 
   async seawrchPatientByPhone(text: string): Promise<m.Patient[]> {
-    return await get("search-patient-by-phone", { text }, castList(m.Patient.cast));
+    return await get(
+      "search-patient-by-phone",
+      { text },
+      castList(m.Patient.cast)
+    );
   },
 
   batchGetPatient(patientIds: number[]): Promise<Record<number, m.Patient>> {
@@ -237,7 +261,11 @@ export default {
     );
   },
 
-  startVisitWithHoken(patientId: number, at: string | Date, hoken: m.HokenIdSet): Promise<m.Visit> {
+  startVisitWithHoken(
+    patientId: number,
+    at: string | Date,
+    hoken: m.HokenIdSet
+  ): Promise<m.Visit> {
     return post(
       "start-visit-with-hoken",
       hoken,
@@ -246,7 +274,7 @@ export default {
         at: dateTimeParam(at),
       },
       m.Visit.cast
-    )
+    );
   },
 
   updateVisit(visit: m.Visit): Promise<boolean> {
@@ -388,8 +416,11 @@ export default {
   },
 
   listTextForVisit(visitId: number): Promise<m.Text[]> {
-    return get("list-text-for-visit", { "visit-id": visitId.toString() },
-      castList(m.Text.cast));
+    return get(
+      "list-text-for-visit",
+      { "visit-id": visitId.toString() },
+      castList(m.Text.cast)
+    );
   },
 
   enterPayment(payment: m.Payment): Promise<boolean> {
@@ -397,7 +428,11 @@ export default {
   },
 
   listPayment(visitId: number): Promise<m.Payment[]> {
-    return get("list-payment", { "visit-id": visitId.toString() }, castList(m.Payment.cast));
+    return get(
+      "list-payment",
+      { "visit-id": visitId.toString() },
+      castList(m.Payment.cast)
+    );
   },
 
   shohousenDrawer(textId: number): Promise<DrawerOp[]> {
@@ -432,7 +467,7 @@ export default {
         "paper-size": paperSize,
         "file-name": fileName,
       },
-      castBoolean,
+      castBoolean
     );
   },
 
@@ -681,12 +716,7 @@ export default {
   },
 
   updateShinryou(shinryou: m.Shinryou): Promise<m.Shinryou> {
-    return post(
-      "update-shinryou",
-      shinryou,
-      {},
-      m.Shinryou.cast
-    )
+    return post("update-shinryou", shinryou, {}, m.Shinryou.cast);
   },
 
   deleteShinryou(shinryouId: number): Promise<boolean> {
@@ -710,13 +740,13 @@ export default {
 
   getIyakuhinMaster(
     iyakuhincode: number,
-    at: Date | string,
+    at: Date | string
   ): Promise<m.IyakuhinMaster> {
     return get(
       "get-iyakuhin-master",
       { iyakuhincode: iyakuhincode.toString(), at: dateParam(at) },
-      m.IyakuhinMaster.cast,
-    )
+      m.IyakuhinMaster.cast
+    );
   },
 
   searchKizaiMaster(text: string, at: Date | string): Promise<m.KizaiMaster[]> {
@@ -727,15 +757,12 @@ export default {
     );
   },
 
-  getKizaiMaster(
-    kizaicode: number,
-    at: Date | string,
-  ): Promise<m.KizaiMaster> {
+  getKizaiMaster(kizaicode: number, at: Date | string): Promise<m.KizaiMaster> {
     return get(
       "get-kizai-master",
       { kizaicode: kizaicode.toString(), at: dateParam(at) },
-      m.KizaiMaster.cast,
-    )
+      m.KizaiMaster.cast
+    );
   },
 
   getConductEx(conductId: number): Promise<m.ConductEx> {
@@ -928,7 +955,11 @@ export default {
   },
 
   deleteDiseaseEx(diseaseId: number): Promise<boolean> {
-    return get("delete-disease-ex", { "disease-id": diseaseId.toString() }, castBoolean);
+    return get(
+      "delete-disease-ex",
+      { "disease-id": diseaseId.toString() },
+      castBoolean
+    );
   },
 
   getDiseaseEx(diseaseId: number): Promise<m.DiseaseData> {
@@ -1013,7 +1044,7 @@ export default {
   },
 
   updateDisease(disease: m.Disease): Promise<boolean> {
-    return post("update-disease", disease, {}, castBoolean)
+    return post("update-disease", disease, {}, castBoolean);
   },
 
   listAppEventSince(fromEventId: number): Promise<m.AppEvent[]> {
@@ -1151,7 +1182,7 @@ export default {
       { "patient-id": patientId.toString(), at: dateParam(at) },
       (json: any) => {
         const [_ser, _patient, shahoList, koukiList, roujinList, kouhiList] =
-              json;
+          json;
         return [
           castList(m.Shahokokuho.cast)(shahoList),
           castList(m.Koukikourei.cast)(koukiList),
@@ -1183,15 +1214,27 @@ export default {
   },
 
   getShahokokuho(shahokokuhoId: number): Promise<m.Shahokokuho> {
-    return get("get-shahokokuho", { "shahokokuho-id": shahokokuhoId.toString() }, m.Shahokokuho.cast);
+    return get(
+      "get-shahokokuho",
+      { "shahokokuho-id": shahokokuhoId.toString() },
+      m.Shahokokuho.cast
+    );
   },
 
   getKoukikourei(koukikoureiId: number): Promise<m.Koukikourei> {
-    return get("get-koukikourei", { "koukikourei-id": koukikoureiId.toString() }, m.Koukikourei.cast);
+    return get(
+      "get-koukikourei",
+      { "koukikourei-id": koukikoureiId.toString() },
+      m.Koukikourei.cast
+    );
   },
 
   getKouhi(kouhiId: number): Promise<m.Kouhi> {
-    return get("get-kouhi", { "kouhi-id": kouhiId.toString() }, pipe(toKouhi, interfaceToKouhi));
+    return get(
+      "get-kouhi",
+      { "kouhi-id": kouhiId.toString() },
+      pipe(toKouhi, interfaceToKouhi)
+    );
   },
 
   updateShahokokuho(shahokokuho: m.Shahokokuho): Promise<number> {
@@ -1281,7 +1324,7 @@ export default {
         headers: {
           "Content-Type": "application/octet-stream",
           "Content-Length": data.byteLength.toString(),
-        }
+        },
       }
     );
   },
@@ -1351,8 +1394,11 @@ export default {
   },
 
   getAppointTime(appointTimeId: number): Promise<m.AppointTime> {
-    return get("get-appoint-time", { "appoint-time-id": appointTimeId.toString() },
-      m.AppointTime.cast);
+    return get(
+      "get-appoint-time",
+      { "appoint-time-id": appointTimeId.toString() },
+      m.AppointTime.cast
+    );
   },
 
   updateAppointTime(appointTime: m.AppointTime): Promise<boolean> {
@@ -1419,7 +1465,7 @@ export default {
       "appoint-history-at",
       { "appoint-time-id": appointTimeId.toString() },
       castList(m.AppEvent.cast)
-    )
+    );
   },
 
   getOnshi(visitId: number): Promise<m.Onshi> {
@@ -1427,7 +1473,11 @@ export default {
   },
 
   async findOnshi(visitId: number): Promise<m.Onshi | undefined> {
-    const o = await get("find-onshi", { "visit-id": visitId.toString() }, castOption(m.Onshi.cast))
+    const o = await get(
+      "find-onshi",
+      { "visit-id": visitId.toString() },
+      castOption(m.Onshi.cast)
+    );
     return o || undefined;
   },
 
@@ -1452,135 +1502,244 @@ export default {
   },
 
   newShahokokuho(shahokokuho: m.Shahokokuho): Promise<m.Shahokokuho> {
-    return post("new-shahokokuho", shahokokuho, {}, m.Shahokokuho.cast)
+    return post("new-shahokokuho", shahokokuho, {}, m.Shahokokuho.cast);
   },
 
   newKoukikourei(koukikourei: m.Koukikourei): Promise<m.Koukikourei> {
-    return post("new-koukikourei", koukikourei, {}, m.Koukikourei.cast)
+    return post("new-koukikourei", koukikourei, {}, m.Koukikourei.cast);
   },
 
-  shahokokuhoUsageSince(shahokokuhoId: number, since: Date | string): Promise<m.Visit[]> {
-    return get("shahokokuho-usage-since", {
-      "shahokokuho-id": shahokokuhoId.toString(),
-      date: dateParam(since),
-    }, castList(m.Visit.cast));
+  shahokokuhoUsageSince(
+    shahokokuhoId: number,
+    since: Date | string
+  ): Promise<m.Visit[]> {
+    return get(
+      "shahokokuho-usage-since",
+      {
+        "shahokokuho-id": shahokokuhoId.toString(),
+        date: dateParam(since),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   shahokokuhoUsage(shahokokuhoId: number): Promise<m.Visit[]> {
-    return get("shahokokuho-usage", {
-      "shahokokuho-id": shahokokuhoId.toString(),
-    }, castList(m.Visit.cast));
+    return get(
+      "shahokokuho-usage",
+      {
+        "shahokokuho-id": shahokokuhoId.toString(),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
-  koukikoureiUsageSince(koukikoureiId: number, since: Date | string): Promise<m.Visit[]> {
-    return get("koukikourei-usage-since", {
-      "koukikourei-id": koukikoureiId.toString(),
-      date: dateParam(since),
-    }, castList(m.Visit.cast));
+  koukikoureiUsageSince(
+    koukikoureiId: number,
+    since: Date | string
+  ): Promise<m.Visit[]> {
+    return get(
+      "koukikourei-usage-since",
+      {
+        "koukikourei-id": koukikoureiId.toString(),
+        date: dateParam(since),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   koukikoureiUsage(koukikoureiId: number): Promise<m.Visit[]> {
-    return get("koukikourei-usage", {
-      "koukikourei-id": koukikoureiId.toString(),
-    }, castList(m.Visit.cast));
+    return get(
+      "koukikourei-usage",
+      {
+        "koukikourei-id": koukikoureiId.toString(),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   kouhiUsageSince(kouhiId: number, since: Date | string): Promise<m.Visit[]> {
-    return get("kouhi-usage-since", {
-      "kouhi-id": kouhiId.toString(),
-      date: dateParam(since),
-    }, castList(m.Visit.cast));
+    return get(
+      "kouhi-usage-since",
+      {
+        "kouhi-id": kouhiId.toString(),
+        date: dateParam(since),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   kouhiUsage(kouhiId: number): Promise<m.Visit[]> {
-    return get("kouhi-usage", {
-      "kouhi-id": kouhiId.toString(),
-    }, castList(m.Visit.cast));
+    return get(
+      "kouhi-usage",
+      {
+        "kouhi-id": kouhiId.toString(),
+      },
+      castList(m.Visit.cast)
+    );
   },
 
   listConductForVisit(visitId: number): Promise<m.Conduct[]> {
-    return get("list-conduct-for-visit", {
-      "visit-id": visitId.toString()
-    },
-      castList(m.Conduct.cast));
+    return get(
+      "list-conduct-for-visit",
+      {
+        "visit-id": visitId.toString(),
+      },
+      castList(m.Conduct.cast)
+    );
   },
 
-  listVisitIdByPatientAndMonth(patientId: number, year: number, month: number): Promise<number[]> {
-    return get("list-visit-id-by-patient-and-month", {
-      "patient-id": patientId.toString(),
-      year: year.toString(),
-      month: month.toString(),
-    }, castList(castNumber));
+  listVisitIdByPatientAndMonth(
+    patientId: number,
+    year: number,
+    month: number
+  ): Promise<number[]> {
+    return get(
+      "list-visit-id-by-patient-and-month",
+      {
+        "patient-id": patientId.toString(),
+        year: year.toString(),
+        month: month.toString(),
+      },
+      castList(castNumber)
+    );
   },
 
-  batchEnterOrUpdateHoken(shahokokuhoList: m.Shahokokuho[], koukikoureiList: m.Koukikourei[]):
-    Promise<[m.Shahokokuho[], m.Koukikourei[]]> {
-      return post("batch-enter-or-update-hoken", {
-        shahokokuhoList, koukikoureiList
-      }, {}, castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast)))
-    },
+  batchEnterOrUpdateHoken(
+    shahokokuhoList: m.Shahokokuho[],
+    koukikoureiList: m.Koukikourei[]
+  ): Promise<[m.Shahokokuho[], m.Koukikourei[]]> {
+    return post(
+      "batch-enter-or-update-hoken",
+      {
+        shahokokuhoList,
+        koukikoureiList,
+      },
+      {},
+      castPair(castList(m.Shahokokuho.cast), castList(m.Koukikourei.cast))
+    );
+  },
 
   countShahokokuhoUsage(shahokokuhoId: number): Promise<number> {
-    return get("count-shahokokuho-usage", { "shahokokuho-id": shahokokuhoId.toString() }, castNumber);
+    return get(
+      "count-shahokokuho-usage",
+      { "shahokokuho-id": shahokokuhoId.toString() },
+      castNumber
+    );
   },
 
-  countShahokokuhoUsageBefore(shahokokuhoId: number, date: string | Date): Promise<number> {
-    return get("count-shahokokuho-usage-before", {
-      "shahokokuho-id": shahokokuhoId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+  countShahokokuhoUsageBefore(
+    shahokokuhoId: number,
+    date: string | Date
+  ): Promise<number> {
+    return get(
+      "count-shahokokuho-usage-before",
+      {
+        "shahokokuho-id": shahokokuhoId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
-  countShahokokuhoUsageAfter(shahokokuhoId: number, date: string | Date): Promise<number> {
-    return get("count-shahokokuho-usage-after", {
-      "shahokokuho-id": shahokokuhoId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+  countShahokokuhoUsageAfter(
+    shahokokuhoId: number,
+    date: string | Date
+  ): Promise<number> {
+    return get(
+      "count-shahokokuho-usage-after",
+      {
+        "shahokokuho-id": shahokokuhoId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
   countKoukikoureiUsage(koukikoureiId: number): Promise<number> {
-    return get("count-koukikourei-usage", { "koukikourei-id": koukikoureiId.toString() }, castNumber);
+    return get(
+      "count-koukikourei-usage",
+      { "koukikourei-id": koukikoureiId.toString() },
+      castNumber
+    );
   },
 
-  countKoukikoureiUsageBefore(koukikoureiId: number, date: string | Date): Promise<number> {
-    return get("count-koukikourei-usage-before", {
-      "koukikourei-id": koukikoureiId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+  countKoukikoureiUsageBefore(
+    koukikoureiId: number,
+    date: string | Date
+  ): Promise<number> {
+    return get(
+      "count-koukikourei-usage-before",
+      {
+        "koukikourei-id": koukikoureiId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
-  countKoukikoureiUsageAfter(koukikoureiId: number, date: string | Date): Promise<number> {
-    return get("count-koukikourei-usage-after", {
-      "koukikourei-id": koukikoureiId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+  countKoukikoureiUsageAfter(
+    koukikoureiId: number,
+    date: string | Date
+  ): Promise<number> {
+    return get(
+      "count-koukikourei-usage-after",
+      {
+        "koukikourei-id": koukikoureiId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
   countKouhiUsage(kouhiId: number): Promise<number> {
-    return get("count-kouhi-usage", { "kouhi-id": kouhiId.toString() }, castNumber);
+    return get(
+      "count-kouhi-usage",
+      { "kouhi-id": kouhiId.toString() },
+      castNumber
+    );
   },
 
   countKouhiUsageBefore(kouhiId: number, date: string | Date): Promise<number> {
-    return get("count-kouhi-usage-before", {
-      "kouhi-id": kouhiId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+    return get(
+      "count-kouhi-usage-before",
+      {
+        "kouhi-id": kouhiId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
   countKouhiUsageAfter(kouhiId: number, date: string | Date): Promise<number> {
-    return get("count-kouhi-usage-after", {
-      "kouhi-id": kouhiId.toString(),
-      date: dateParam(date)
-    }, castNumber);
+    return get(
+      "count-kouhi-usage-after",
+      {
+        "kouhi-id": kouhiId.toString(),
+        date: dateParam(date),
+      },
+      castNumber
+    );
   },
 
   getClinicInfo(): Promise<m.ClinicInfo> {
     return get("get-clinic-info", {}, m.ClinicInfo.cast);
   },
 
-  batchGetChargePayment(visitIds: number[]): Promise<[number, m.Charge | null, m.Payment | null][]> {
-    return post("batch-get-charge-payment", visitIds, {},
-      castList(castTuple3(castNumber, castOption(m.Charge.cast), castOption(m.Payment.cast))));
+  batchGetChargePayment(
+    visitIds: number[]
+  ): Promise<[number, m.Charge | null, m.Payment | null][]> {
+    return post(
+      "batch-get-charge-payment",
+      visitIds,
+      {},
+      castList(
+        castTuple3(
+          castNumber,
+          castOption(m.Charge.cast),
+          castOption(m.Payment.cast)
+        )
+      )
+    );
   },
 
   // (placeholder) not implemented yet in server
@@ -1591,72 +1750,129 @@ export default {
   // },
 
   listVisitByMonth(year: number, month: number): Promise<m.Visit[]> {
-    return get("list-visit-by-month", { year: year.toString(), month: month.toString() }, castList(m.Visit.cast));
+    return get(
+      "list-visit-by-month",
+      { year: year.toString(), month: month.toString() },
+      castList(m.Visit.cast)
+    );
   },
 
   getHokenInfoForVisit(visitId: number): Promise<m.HokenInfo> {
-    return get("get-hoken-info-for-visit", { "visit-id": visitId.toString() }, m.HokenInfo.cast);
+    return get(
+      "get-hoken-info-for-visit",
+      { "visit-id": visitId.toString() },
+      m.HokenInfo.cast
+    );
   },
 
-  listDiseaseActiveAt(patientId: number, from: Date | string, upto: Date | string): Promise<m.Disease[]> {
-    return get("list-disease-active-at", {
-      "patient-id": patientId.toString(),
-      "from": dateParam(from),
-      "upto": dateParam(upto)
-    }, castList(m.Disease.cast));
+  listDiseaseActiveAt(
+    patientId: number,
+    from: Date | string,
+    upto: Date | string
+  ): Promise<m.Disease[]> {
+    return get(
+      "list-disease-active-at",
+      {
+        "patient-id": patientId.toString(),
+        from: dateParam(from),
+        upto: dateParam(upto),
+      },
+      castList(m.Disease.cast)
+    );
   },
 
   listPatientByOnshiName(onshiName: string): Promise<m.Patient[]> {
-    return get("list-patient-by-onshi-name", { text: onshiName }, castList(m.Patient.cast));
+    return get(
+      "list-patient-by-onshi-name",
+      { text: onshiName },
+      castList(m.Patient.cast)
+    );
   },
 
-  listVisitIdInDateInterval(fromDate: string, uptoDate: string): Promise<number[]> {
-    return get("list-visit-id-in-date-interval", { from: fromDate, upto: uptoDate },
-      castList(castNumber))
+  listVisitIdInDateInterval(
+    fromDate: string,
+    uptoDate: string
+  ): Promise<number[]> {
+    return get(
+      "list-visit-id-in-date-interval",
+      { from: fromDate, upto: uptoDate },
+      castList(castNumber)
+    );
   },
 
-  listVisitIdByDateIntervalAndPatient(fromDate: string, uptoDate: string, patientId: number): Promise<number[]> {
-    return get("list-visit-id-by-date-interval-and-patient",
+  listVisitIdByDateIntervalAndPatient(
+    fromDate: string,
+    uptoDate: string,
+    patientId: number
+  ): Promise<number[]> {
+    return get(
+      "list-visit-id-by-date-interval-and-patient",
       { from: fromDate, upto: uptoDate, "patient-id": patientId.toString() },
-      castList(castNumber))
+      castList(castNumber)
+    );
   },
 
   getPharmaAddr(): Promise<any> {
-    return get("list-pharma-addr", {}, a => a);
+    return get("list-pharma-addr", {}, (a) => a);
   },
 
   getPharmaData(): Promise<string> {
     return getText("list-pharma-data", {});
   },
 
-  createMultiPagePdfFile(opsList: Op[][], paperSize: string, fileName: string): Promise<void> {
-    return post("create-multi-page-pdf-file", opsList, {
-      "paper-size": paperSize,
-      "file-name": fileName,
-    }, _ => { })
+  createMultiPagePdfFile(
+    opsList: Op[][],
+    paperSize: string,
+    fileName: string
+  ): Promise<void> {
+    return post(
+      "create-multi-page-pdf-file",
+      opsList,
+      {
+        "paper-size": paperSize,
+        "file-name": fileName,
+      },
+      (_) => {}
+    );
   },
 
   getShujiiMasterText(patientId: number): Promise<string> {
-    return getText("get-shujii-master-text", { "patient-id": patientId.toString() });
+    return getText("get-shujii-master-text", {
+      "patient-id": patientId.toString(),
+    });
   },
 
   saveShujiiMasterText(patient: m.Patient, text: string): Promise<void> {
-    return post("save-shujii-master-text", text,
+    return post(
+      "save-shujii-master-text",
+      text,
       { "patient-id": patient.patientId.toString() },
-      _ => { });
+      (_) => {}
+    );
   },
 
   getRyouyouKeikakushoMasterText(patientId: number): Promise<any> {
-    return get("get-ryouyou-keikakusho-master-text", { "patient-id": patientId.toString() },
-      a => a);
+    return get(
+      "get-ryouyou-keikakusho-master-text",
+      { "patient-id": patientId.toString() },
+      (a) => a
+    );
   },
 
-  saveRyouyouKeikakushoMasterText(patientId: number, text: string): Promise<boolean> {
-    return postRaw("save-ryouyou-keikakusho-master-text", text, { "patient-id": patientId.toString() }, castBoolean);
+  saveRyouyouKeikakushoMasterText(
+    patientId: number,
+    text: string
+  ): Promise<boolean> {
+    return postRaw(
+      "save-ryouyou-keikakusho-master-text",
+      text,
+      { "patient-id": patientId.toString() },
+      castBoolean
+    );
   },
 
   getConfig(name: string): Promise<any> {
-    return get("get-config", { name }, a => a);
+    return get("get-config", { name }, (a) => a);
   },
 
   getConfigRaw(name: string): Promise<string> {
@@ -1664,100 +1880,154 @@ export default {
   },
 
   setConfig(name: string, content: any): Promise<void> {
-    return post("set-config", content, { name }, a => a);
+    return post("set-config", content, { name }, (a) => a);
   },
 
   selectUsageMasterByUsageName(name: string): Promise<m.UsageMaster[]> {
-    return get("select-usage-master-by-usage-name", { name }, a => a as m.UsageMaster[])
+    return get(
+      "select-usage-master-by-usage-name",
+      { name },
+      (a) => a as m.UsageMaster[]
+    );
   },
 
   getShohouFreqUsage(): Promise<FreqUsage[]> {
-    return get("get-config", { name: "shohou-freq-usage" }, a => a ?? []);
+    return get("get-config", { name: "shohou-freq-usage" }, (a) => a ?? []);
   },
 
   saveShohouFreqUsage(usages: FreqUsage[]): Promise<void> {
-    return post("set-config", usages, { name: "shohou-freq-usage" }, a => a);
+    return post("set-config", usages, { name: "shohou-freq-usage" }, (a) => a);
   },
 
-  getShohouFreqPrescription(): Promise<{ presc: RP剤情報, comment: string }[]> {
-    return get("get-config", { name: "shohou-freq-prescription" }, a => a ?? []);
+  getShohouFreqPrescription(): Promise<{ presc: RP剤情報; comment: string }[]> {
+    return get(
+      "get-config",
+      { name: "shohou-freq-prescription" },
+      (a) => a ?? []
+    );
   },
 
-  saveShohouFreqPrescription(usages: { presc: RP剤情報, comment: string }): Promise<void> {
-    return post("set-config", usages, { name: "shohou-freq-prescription" }, a => a);
+  saveShohouFreqPrescription(usages: {
+    presc: RP剤情報;
+    comment: string;
+  }): Promise<void> {
+    return post(
+      "set-config",
+      usages,
+      { name: "shohou-freq-prescription" },
+      (a) => a
+    );
   },
 
   getDrugDiseases(): Promise<DrugDisease[]> {
-    return get("get-config", { name: "drug-disease" }, a => a ?? []);
+    return get("get-config", { name: "drug-disease" }, (a) => a ?? []);
   },
 
   setDrugDiseases(drugDiseases: DrugDisease[]): Promise<void> {
-    return post("set-config", drugDiseases, { name: "drug-disease" }, a => a)
+    return post("set-config", drugDiseases, { name: "drug-disease" }, (a) => a);
   },
 
   getShinryouDiseases(): Promise<ShinryouDisease[]> {
-    return get("get-config", { name: "shinryou-disease" },
-      castListOpt(validateShinryouDisease));
+    return get(
+      "get-config",
+      { name: "shinryou-disease" },
+      castListOpt(validateShinryouDisease)
+    );
   },
 
   setShinryouDiseases(shinryouDiseases: ShinryouDisease[]): Promise<void> {
-    return post("set-config", shinryouDiseases, { name: "shinryou-disease" }, a => a)
+    return post(
+      "set-config",
+      shinryouDiseases,
+      { name: "shinryou-disease" },
+      (a) => a
+    );
   },
 
   getHokengaiHistory(): Promise<string[]> {
-    return get("get-config", { name: "hokengai-history" }, a => a ?? []);
+    return get("get-config", { name: "hokengai-history" }, (a) => a ?? []);
   },
 
   setHokengaiHistory(hokengaiHistory: string[]): Promise<void> {
-    return post("set-config", hokengaiHistory, { name: "hokengai-history" }, a => a)
+    return post(
+      "set-config",
+      hokengaiHistory,
+      { name: "hokengai-history" },
+      (a) => a
+    );
   },
 
   getUsageMasterMap(): Promise<Record<string, 用法レコード>> {
-    return get("get-config", { name: "usage-master-map" }, a => a ?? {});
+    return get("get-config", { name: "usage-master-map" }, (a) => a ?? {});
   },
 
   setUsageMasterMap(map: Record<string, 用法レコード>) {
-    return post("set-config", map, { name: "usage-master-map" }, a => a);
+    return post("set-config", map, { name: "usage-master-map" }, (a) => a);
   },
 
   getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
-    return get("get-config", { name: "drug-name-iyakuhincode-map" }, a => a ?? {});
+    return get(
+      "get-config",
+      { name: "drug-name-iyakuhincode-map" },
+      (a) => a ?? {}
+    );
   },
 
-  setDrugNameIyakuhincodeMap(map: Record<string, number | { kind: "ippanmei", code: string}>): Promise<void> {
-    return post("set-config", map, { name: "drug-name-iyakuhincode-map"}, () => {});
+  setDrugNameIyakuhincodeMap(
+    map: Record<
+      string,
+      | number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number }
+    >
+  ): Promise<void> {
+    return post(
+      "set-config",
+      map,
+      { name: "drug-name-iyakuhincode-map" },
+      () => {}
+    );
   },
 
   decodeBase64ToFile(filename: string, base64: string): Promise<boolean> {
-    return postRaw("decode-base64-to-file", base64, { "file-name": filename }, a => a);
+    return postRaw(
+      "decode-base64-to-file",
+      base64,
+      { "file-name": filename },
+      (a) => a
+    );
   },
 
   listShinryouForVisit(visitId: number): Promise<m.Shinryou[]> {
-	return get("list-shinryou-for-visit", { "visit-id": visitId.toString() }, castList(m.Shinryou.cast));
+    return get(
+      "list-shinryou-for-visit",
+      { "visit-id": visitId.toString() },
+      castList(m.Shinryou.cast)
+    );
   },
 
   searchDupPatient(): Promise<DupPatient[]> {
-    return get("search-dup-patient", {}, castList(validateDupPatient))
+    return get("search-dup-patient", {}, castList(validateDupPatient));
   },
 
   deletePatient(patientId: number): Promise<boolean> {
-    return get("delete-patient", { "patient-id": patientId.toString() }, castBoolean); 
+    return get(
+      "delete-patient",
+      { "patient-id": patientId.toString() },
+      castBoolean
+    );
   },
 
   sendmail(mail: {
-    "to": string;
-    "from": string;
-    "subject": string;
-    "content": string;
+    to: string;
+    from: string;
+    subject: string;
+    content: string;
   }): Promise<boolean> {
     return post("sendmail", mail, {}, castBoolean);
   },
 
   listConfigKey(): Promise<string[]> {
-    return get("list-config-key", {}, castList(castString))
-  }
+    return get("list-config-key", {}, castList(castString));
+  },
 };
-
-
-
-

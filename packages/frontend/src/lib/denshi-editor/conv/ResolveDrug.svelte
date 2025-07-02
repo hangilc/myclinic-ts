@@ -1,33 +1,15 @@
 <script lang="ts">
-  import type { IyakuhinMaster } from "myclinic-model";
+  import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
   import SearchLink from "../icons/SearchLink.svelte";
   import "../widgets/style.css";
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
   import { onMount } from "svelte";
-  import { createPartial2FromIyakuhinMaster } from "./denshi-conv-helper";
   import type { ConvAux4 } from "./denshi-conv";
   import type {
-    剤形区分,
-    力価フラグ,
     情報区分,
     薬品コード種別,
   } from "@/lib/denshi-shohou/denshi-shohou";
-  import type {
-    PrescInfoData,
-    RP剤情報,
-    不均等レコード,
-    備考レコード,
-    剤形レコード,
-    提供情報レコード,
-    提供診療情報レコード,
-    検査値データ等レコード,
-    用法レコード,
-    用法補足レコード,
-    薬品レコード,
-    薬品情報,
-    薬品補足レコード,
-  } from "@/lib/denshi-shohou/presc-info";
   import Link from "../widgets/Link.svelte";
 
   export let onDone: () => void;
@@ -40,6 +22,7 @@
   export let 単位名: string | undefined = undefined;
   let searchText = 薬品名称;
   let searchResult: IyakuhinMaster[] = [];
+  let searchKizaiResult: KizaiMaster[] = [];
   let inputElement: HTMLInputElement;
   let cacheUpdateKey: string | undefined = undefined;
   let cacheUpdateData:
@@ -93,9 +76,17 @@
     searchResult = await api.searchIyakuhinMaster(searchText, at);
   }
 
+  async function doSearchKizai() {
+    cacheUpdateKey = searchText;
+    searchKizaiResult = await api.searchKizaiMaster(searchText, at);
+  }
+
   async function updateCache(
     name: string,
-    bind: number | { kind: "ippanmei"; name: string; code: string },
+    bind:
+      | number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number },
   ) {
     try {
       // Update the cache with the new drug name -> iyakuhin code mapping
@@ -109,7 +100,7 @@
     }
   }
 
-  async function doSelect(master: IyakuhinMaster) {
+  function doSelect(master: IyakuhinMaster) {
     情報区分 = "医薬品";
     薬品コード種別 = "レセプト電算処理システム用コード";
     薬品コード = master.iyakuhincode.toString();
@@ -121,12 +112,28 @@
     searchResult = [];
   }
 
+  function doKizaiSelect(master: KizaiMaster) {
+    情報区分 = "医療材料";
+    薬品コード種別 = "レセプト電算処理システム用コード";
+    薬品コード = master.kizaicode.toString();
+    薬品名称 = master.name;
+    単位名 = master.unit;
+    ippanmei = undefined;
+    ippanmeicode = undefined;
+    searchText = "";
+    searchKizaiResult = [];
+  }
+
   function doIppanmei() {
-    if( ippanmei && ippanmeicode ){
+    if (ippanmei && ippanmeicode) {
       薬品コード種別 = "一般名コード";
       薬品コード = ippanmeicode;
       薬品名称 = ippanmei;
-      cacheUpdateData = { kind: "ippanmei", name: ippanmei, code: ippanmeicode };
+      cacheUpdateData = {
+        kind: "ippanmei",
+        name: ippanmei,
+        code: ippanmeicode,
+      };
     }
   }
 
@@ -153,7 +160,11 @@
       bind:this={inputElement}
     />
     <SearchLink onClick={doSearch} />
+    <a href="javascript:void(0)" on:click={doSearchKizai} class="kizai-link"
+      >器材検索</a
+    >
   </form>
+  {#if searchResult.length > 0}
   <div class="search-result">
     {#each searchResult as master (master.iyakuhincode)}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -162,8 +173,19 @@
       </div>
     {/each}
   </div>
+  {/if}
+  {#if searchKizaiResult.length > 0}
+  <div class="search-result">
+    {#each searchKizaiResult as master (master.kizaicode)}
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="search-result-item" on:click={() => doKizaiSelect(master)}>
+        {master.name}
+      </div>
+    {/each}
+  </div>
+  {/if}
   <div class="commands">
-    {#if ippanmei && ippanmeicode }
+    {#if ippanmei && ippanmeicode}
       <Link onClick={doIppanmei}>一般名に</Link>
     {/if}
     {#if isAllSet(情報区分, 薬品コード種別, 薬品コード, 単位名)}
@@ -176,6 +198,11 @@
 <style>
   form {
     margin: 10px 0;
+  }
+
+  .kizai-link {
+    font-size: 12px;
+    margin-left: 12px;
   }
 
   .search-input {

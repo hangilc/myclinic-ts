@@ -1,9 +1,8 @@
 import api from "@/lib/api";
 import { cache } from "@/lib/cache";
-import { type RP剤情報, type 用法レコード, type 薬品情報 } from "@/lib/denshi-shohou/presc-info";
-import type { DrugGroup, Drug, Usage, Shohou } from "@/lib/parse-shohou";
-import { convDrugToDenshi, convShohouDrugTo薬品レコードPartial1, convShohouDrugTo薬品情報Partial1, createPartial2FromIyakuhinMaster, type 薬品レコードPartial1, type 薬品情報Partial1 } from "./denshi-conv-helper";
-import { createRP剤情報, getConvData2, getConvData3, getConvData4, type ConvData2, type ConvData3, type ConvData4 } from "./denshi-conv";
+import { type RP剤情報, type 用法レコード, type 薬品レコード, type 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { DrugGroup, Drug } from "@/lib/parse-shohou";
+import { createConvData4DepsFromIyakuhinMaster, createRP剤情報, create薬品レコード, create薬品情報, getConvData2, getConvData3, getConvData4, type ConvData2, type ConvData3, type ConvData4 } from "./denshi-conv";
 
 let serialId = 1;
 
@@ -52,8 +51,8 @@ export function getConvertedGroup(rep: ConvGroupRep): RP剤情報 {
 }
 
 export function isAllConvered(groups: ConvGroupRep[]): boolean {
-  for(let g of groups){
-    if( !isGroupConverted(g.drugs, g.usage)){
+  for (let g of groups) {
+    if (!isGroupConverted(g.drugs, g.usage)) {
       return false;
     }
   }
@@ -73,7 +72,7 @@ export function isGroupConverted(drugs: ConvDrugRep[], usage: ConvUsageRep): boo
 }
 
 export function getConvertedUsage(usage: ConvUsageRep): 用法レコード {
-  if( usage.kind === "converted" ){
+  if (usage.kind === "converted") {
     return usage.data;
   } else {
     throw new Error("usage not converted");
@@ -81,7 +80,7 @@ export function getConvertedUsage(usage: ConvUsageRep): 用法レコード {
 }
 
 export function getConvertedDrug(drug: ConvDrugRep): 薬品情報 {
-  if( drug.kind === "converted") {
+  if (drug.kind === "converted") {
     return drug.data;
   } else {
     throw new Error("drug not convertged");
@@ -89,15 +88,17 @@ export function getConvertedDrug(drug: ConvDrugRep): 薬品情報 {
 }
 
 async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
-  let info1 = convShohouDrugTo薬品情報Partial1(drug);
-  let info2 = convShohouDrugTo薬品レコードPartial1(drug);
+  let data3: ConvData3 = getConvData3(drug);
+  let data4: ConvData4 = getConvData4(drug);
   let map = await cache.getDrugNameIyakuhincodeMap();
-  let iyakuhincode = map[drug.name];
-  if (typeof iyakuhincode === "number") {
+  let bind = map[drug.name];
+  if (typeof bind === "number") {
+    let iyakuhincode = bind;
     try {
       let master = await api.getIyakuhinMaster(iyakuhincode, at);
-      let info3 = createPartial2FromIyakuhinMaster(master, false);
-      let 薬品情報: 薬品情報 = convDrugToDenshi(info1, info2, info3);
+      let aux = createConvData4DepsFromIyakuhinMaster(master);
+      let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
+      let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
       return { kind: "converted", data: 薬品情報 }
     } catch {
       console.log(`iyakuhincode ${iyakuhincode} not available at ${at}`)
@@ -106,8 +107,8 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
   return {
     kind: "unconverted",
     src: drug,
-    data3: getConvData3(drug),
-    data4: getConvData4(drug),
+    data3,
+    data4
   }
 }
 
