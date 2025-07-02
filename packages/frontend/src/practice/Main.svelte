@@ -22,6 +22,7 @@
   import DXKasan from "./DXKasan.svelte";
   import DupPatient from "./dup-patient/DupPatient.svelte";
   import EditConfig from "@/practice/EditConfig.svelte";
+  import RyouyouhiDouisho from "./ryouyouhi-douisho/RyouyouhiDouisho.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -43,6 +44,7 @@
   {#if $serviceStore === "fax-shohousen"}<FaxShohousen />{/if}
   <HoumonKango isVisible={$serviceStore === "houmon-kango"} />
   <RyouyouKeikakusho isVisible={$serviceStore === "ryouyou-keikakusho"} />
+  <RyouyouhiDouisho isVisible={$serviceStore === "ryouyouhi-douisho"} />
   <Shujii isVisible={$serviceStore === "shujii"} />
   {#if $serviceStore === "print-setting"}
     <PrintSetting />

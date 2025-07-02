@@ -26,6 +26,7 @@
   >
   <a href="javascript:void(0)" on:click={menu("ryouyou-keikakusho")}>療養計画書</a>
   <a href="javascript:void(0)" on:click={menu("houmon-kango")}>訪問看護</a>
+  <a href="javascript:void(0)" on:click={menu("ryouyouhi-douisho")}>療養費同意書</a>
   <a href="javascript:void(0)" on:click={menu("shujii")}>主治医意見書</a>
   <a href="javascript:void(0)" on:click={menu("print-setting")}>印刷設定</a>
   <a href="javascript:void(0)" on:click={menu("scan")}>スキャン</a>
