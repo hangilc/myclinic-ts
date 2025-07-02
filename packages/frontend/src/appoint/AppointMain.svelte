@@ -23,7 +23,7 @@
   let startDate: string = getStartDateOf(new Date());
   let cols: ColumnData[] = [];
   let unsubs: (() => void)[] = [];
-  onDestroy(() => unsubs.forEach(f => f()));
+  onDestroy(() => unsubs.forEach((f) => f()));
 
   initColumns(startDate);
 
@@ -125,28 +125,28 @@
 
   async function initColumns(startSqlDate: string) {
     const startDate = new Date(startSqlDate);
-    const dates = DateWrapper.range(startDate, 7).map(d => d.asDate());
+    const dates = DateWrapper.range(startDate, 7).map((d) => d.asDate());
     const map = await api.batchResolveClinicOperations(dates);
     const proms = dates
-		  .filter((d) => {
-			const op: ClinicOperation = map[dateToSql(d)];
-			return !(op.code === "regular-holiday");
-		  })
-		  .map(async (d) => {
-			const pairs = await api.listAppoints(d);
-			const appoints = pairs.map((pair) => {
-			  const [at, as] = pair;
-			  return new AppointTimeData(at, as, undefined);
-			});
-			for (let i = appoints.length - 2; i >= 0; i--) {
-			  const atd = appoints[i];
-			  if (appoints[i + 1].isRegularVacant) {
-				atd.followingVacant = appoints[i + 1].appointTime;
-			  }
-			}
-			const sqldate = dateToSql(d);
-			return new ColumnData(sqldate, map[sqldate], appoints);
-		  });
+      .filter((d) => {
+        const op: ClinicOperation = map[dateToSql(d)];
+        return !(op.code === "regular-holiday");
+      })
+      .map(async (d) => {
+        const pairs = await api.listAppoints(d);
+        const appoints = pairs.map((pair) => {
+          const [at, as] = pair;
+          return new AppointTimeData(at, as, undefined);
+        });
+        for (let i = appoints.length - 2; i >= 0; i--) {
+          const atd = appoints[i];
+          if (appoints[i + 1].isRegularVacant) {
+            atd.followingVacant = appoints[i + 1].appointTime;
+          }
+        }
+        const sqldate = dateToSql(d);
+        return new ColumnData(sqldate, map[sqldate], appoints);
+      });
     cols = await Promise.all(proms);
   }
 
@@ -162,21 +162,20 @@
   }
 
   async function doCreateAppoints() {
-    const dates = DateWrapper.range(startDate, 7).map(d => d.asDate());
+    const dates = DateWrapper.range(startDate, 7).map((d) => d.asDate());
     const map = await api.batchResolveClinicOperations(dates);
-	const appointTimes: AppointTime[] = [];
-	for(let date of dates) {
-	  const sqldate = DateWrapper.from(date).asSqlDate();
-	  const op = map[sqldate];
-	  if( op.code === "in-operation" ){
-		const toBeCreated = await createAppointTimesFromTemplate(sqldate);
-		appointTimes.push(...toBeCreated);
-	  }
-	}
-	const proms = appointTimes.map(at => api.addAppointTime(at));
-	await Promise.all(proms);
+    for (let date of dates) {
+      const appointTimes: AppointTime[] = [];
+      const sqldate = DateWrapper.from(date).asSqlDate();
+      const op = map[sqldate];
+      if (op.code === "in-operation") {
+        const toBeCreated = await createAppointTimesFromTemplate(sqldate);
+        appointTimes.push(...toBeCreated);
+      }
+      const proms = appointTimes.map((at) => api.addAppointTime(at));
+      await Promise.all(proms);
+    }
   }
-
 </script>
 
 <div class="top">
@@ -186,7 +185,7 @@
       onCreateAppoints={doCreateAppoints}
       onMoveWeeks={doMoveWeeks}
       onThisWeek={doThisWeek}
-      />
+    />
     <div class="cols-wrapper">
       {#each cols as col}
         <Column data={col} />

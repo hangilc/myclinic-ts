@@ -16,6 +16,7 @@ import { drawPharma } from "./pharma";
 import { breakShohouPages, drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
 import { availableLines, black, red } from "./helper";
 
+
 export function drawShohousen2025(data: ShohousenData2025): Op[][] {
   const ctx = mkDrawerContext(ctx => {
     initFont(ctx);

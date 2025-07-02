@@ -309,3 +309,11 @@ export function convertHankakuKatakanaToZenkakuHiragana(s: string): string {
 export function convertZenkakuHiraganaToHankakuKatakana(s: string): string {
   return s.normalize("NFKC").split("").map(zenkakuHiraganaToHankakuKatakana).join("");
 }
+
+export function convertToHankakuIfDigits(s: string): string {
+  if( /^\s*[0-9０-９]+\s*$/.test(s) ){
+    return toHankaku(s);
+  } else {
+    return s;
+  }
+}

@@ -638,3 +638,14 @@ export function parseShohou(src: string, debug: boolean): Shohou {
     throw new Error("failed to parse shohou");
   }
 }
+
+export function checkForSenpatsu(shohou?: Shohou) {
+  for(let g of (shohou?.groups ?? [])){
+    for(let d of g.drugs){
+      if( d.senpatsu === "henkoufuka" || d.senpatsu === "kanjakibou" ){
+        return true;
+      }
+    }
+  }
+  return false;
+}

@@ -24,7 +24,7 @@
   } from "@/lib/denshi-shohou/shohou-interface";
   import api from "@/lib/api";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
-  import { Text } from "myclinic-model";
+  import { Hotline, Text } from "myclinic-model";
   import {
     checkMemoCompat,
     copyTextMemo,
@@ -32,8 +32,11 @@
     type ShohouTextMemo,
   } from "@/lib/text-memo";
   import { denshiToOldShohou } from "./denshi-to-old-shohou";
-  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
+  import {
+    drawShohousen2025,
+  } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
+  import { checkForSenpatsu } from "@/lib/parse-shohou";
 
   export let shohou: PrescInfoData;
   export let at: string;
@@ -98,8 +101,18 @@
     });
   }
 
+  async function sendSenpatsuNoticeViaHotline() {
+    const message =
+      "[Bot] 処方箋印刷：「変更不可」または「患者希望」にチェックが入っています。押印を２か所にしてください。";
+    const hotline = new Hotline(message, "practice", "reception");
+    api.postHotline(hotline).catch((err) => {
+      console.error("Failed to send hotline message:", err);
+    });
+  }
+
   function doPrint2() {
     const data = denshiToPrint2(shohou);
+    const hasSenpatsu = checkForSenpatsu(data.shohou);
     const pages = drawShohousen2025(data);
     onDone();
     const d: DrawerDialog = new DrawerDialog({
@@ -112,6 +125,11 @@
         scale: 3,
         kind: "shohousen2024",
         title: "処方箋印刷",
+        onPrint: () => {
+          if( hasSenpatsu ){
+            sendSenpatsuNoticeViaHotline();
+          }
+        }
       },
     });
   }
