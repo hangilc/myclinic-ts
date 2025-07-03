@@ -71,18 +71,6 @@
     let 用法コード = freeTextCode;
     let 用法名称 = t;
     let resolved: 用法レコード = { 用法コード, 用法名称 };
-    
-    try {
-      // Update the cache with the new usage name -> usage record mapping
-      const currentMap = await cache.getUsageMasterMap();
-      const updatedMap = { ...currentMap };
-      updatedMap[name] = resolved;
-      await cache.setUsageMasterMap(updatedMap);
-    } catch (error) {
-      console.error("Failed to update usage cache:", error);
-      // Continue with the selection even if cache update fails
-    }
-    
     onDone();
     onResolved(resolved);
   }

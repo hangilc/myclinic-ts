@@ -35,7 +35,7 @@
   let searchResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
   let inputElement: HTMLInputElement;
-  let cacheUpdateKey: string | undefined = undefined;
+  let cacheUpdateKey: string = 薬品名称;
   let cacheUpdateData:
     | undefined
     | number
@@ -43,7 +43,11 @@
         kind: "ippanmei";
         name: string;
         code: string;
-      } = undefined;
+      } 
+    | {
+      kind: "kizai";
+      kizaicode: number;
+    }= undefined;
   let ippanmei: string | undefined = undefined;
   let ippanmeicode: string | undefined = undefined;
   let suppls: 薬品補足レコードIndexed[] = 薬品補足レコード.map((r) =>
@@ -71,7 +75,7 @@
       薬品コード !== undefined &&
       単位名 !== undefined
     ) {
-      if (cacheUpdateKey && cacheUpdateData) {
+      if (cacheUpdateData) {
         updateCache(cacheUpdateKey, cacheUpdateData);
       }
       onDone();
@@ -89,12 +93,10 @@
   }
 
   async function doSearch() {
-    cacheUpdateKey = searchText;
     searchResult = await api.searchIyakuhinMaster(searchText, at);
   }
 
   async function doSearchKizai() {
-    cacheUpdateKey = searchText;
     searchKizaiResult = await api.searchKizaiMaster(searchText, at);
   }
 
@@ -125,6 +127,7 @@
     単位名 = master.unit;
     ippanmei = master.ippanmei || undefined;
     ippanmeicode = master.ippanmeicode || undefined;
+    cacheUpdateData = master.iyakuhincode;
     searchText = "";
     searchResult = [];
   }
@@ -137,6 +140,10 @@
     単位名 = master.unit;
     ippanmei = undefined;
     ippanmeicode = undefined;
+    cacheUpdateData = {
+      kind: "kizai",
+      kizaicode: master.kizaicode,
+    }
     searchText = "";
     searchKizaiResult = [];
   }

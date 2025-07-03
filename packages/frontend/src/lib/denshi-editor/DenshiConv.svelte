@@ -177,7 +177,7 @@
         {/if}
         <button on:click={doCancel}>キャンセル</button>
       </div>
-      <div>
+      <div class="conv-reps">
         <ConvRep
           bind:groups
           onDrugSelected={doDrugSelected}
@@ -192,7 +192,7 @@
 <style>
   .wrapper {
     width: 800px;
-    height: 600px;
+    min-height: 400px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 10px;
@@ -201,6 +201,11 @@
 
   .left {
     border-right: 1px solid gray;
+  }
+
+  .conv-reps {
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
   }
 
   .work {
