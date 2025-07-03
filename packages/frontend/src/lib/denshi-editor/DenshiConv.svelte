@@ -14,6 +14,7 @@
     用法レコード,
     薬品情報,
     薬品レコード,
+    薬品補足レコード,
   } from "../denshi-shohou/presc-info";
   import ResolveUsage from "./conv/ResolveUsage.svelte";
   import {
@@ -68,298 +69,6 @@
     return await createPrescInfo(visitId, data1, RPRP剤情報グループ);
   }
 
-  // function convertedData(): {
-  //   薬品情報グループ: 薬品情報[];
-  //   用法レコード: 用法レコード;
-  // }[] {
-  //   const result: {
-  //     薬品情報グループ: 薬品情報[];
-  //     用法レコード: 用法レコード;
-  //   }[] = [];
-  //   for (let g of groups) {
-  //     if (g.usage.kind !== "converted") {
-  //       throw new Error("not converted usage");
-  //     }
-  //     let 用法レコード = g.usage.data;
-  //     let 薬品情報グループ: 薬品情報[] = [];
-  //     for (let d of g.drugs) {
-  //       if (d.kind !== "converted") {
-  //         throw new Error("not converted drug");
-  //       }
-  //       薬品情報グループ.push(d.data);
-  //     }
-  //     result.push({ 薬品情報グループ, 用法レコード });
-  //   }
-  //   return result;
-  // }
-
-  // function 剤形区分ofShohou(group: DrugGroup): 剤形区分 {
-  //   // Most frequent case
-  //   if (group.usage.kind === "days") {
-  //     return "内服";
-  //   }
-
-  //   // Check usage pattern first
-  //   if (group.usage.kind === "times") {
-  //     // Times-based usage typically indicates 頓服 (as needed)
-  //     return "頓服";
-  //   }
-
-  //   // Check drug names and units for external use indicators
-  //   for (const drug of group.drugs) {
-  //     const name = drug.name.toLowerCase();
-  //     const unit = drug.unit.toLowerCase();
-
-  //     // External use (外用) indicators
-  //     if (
-  //       name.includes("軟膏") ||
-  //       name.includes("クリーム") ||
-  //       name.includes("ローション") ||
-  //       name.includes("湿布") ||
-  //       name.includes("シール") ||
-  //       name.includes("貼付") ||
-  //       name.includes("点眼") ||
-  //       name.includes("点鼻") ||
-  //       name.includes("吸入") ||
-  //       name.includes("うがい") ||
-  //       name.includes("外用") ||
-  //       name.includes("塗布") ||
-  //       unit.includes("g") ||
-  //       (unit.includes("ml") &&
-  //         (name.includes("点眼") || name.includes("点鼻")))
-  //     ) {
-  //       return "外用";
-  //     }
-
-  //     // Injectable (注射) indicators
-  //     if (
-  //       name.includes("注射") ||
-  //       name.includes("注入") ||
-  //       name.includes("静注") ||
-  //       name.includes("筋注") ||
-  //       name.includes("皮下注") ||
-  //       unit.includes("バイアル") ||
-  //       unit.includes("アンプル")
-  //     ) {
-  //       return "注射";
-  //     }
-
-  //     // Liquid internal use (内服滴剤) indicators
-  //     if (
-  //       (name.includes("内服液") ||
-  //         name.includes("シロップ") ||
-  //         name.includes("滴剤")) &&
-  //       unit.includes("ml")
-  //     ) {
-  //       return "内服滴剤";
-  //     }
-  //   }
-
-  //   // Fallback to unknown
-  //   return "不明";
-  // }
-
-  // function 調剤数量ofShohou(group: DrugGroup): number {
-  //   const usage = group.usage;
-
-  //   // For days-based prescriptions, return the number of days
-  //   if (usage.kind === "days") {
-  //     const days = parseInt(toHankaku(usage.days));
-  //     if (isNaN(days)) {
-  //       throw new Error(`Invalid days value: ${usage.days}`);
-  //     }
-  //     return days;
-  //   }
-
-  //   // For times-based prescriptions (頓服), return the number of times
-  //   if (usage.kind === "times") {
-  //     const times = parseInt(toHankaku(usage.times));
-  //     if (isNaN(times)) {
-  //       throw new Error(`Invalid times value: ${usage.times}`);
-  //     }
-  //     return times;
-  //   }
-
-  //   return 1;
-  // }
-
-  // function handleDrugUneven(joho: 薬品情報, drug: Drug) {
-  //   if (drug.uneven) {
-  //     let uneven = drug.uneven;
-  //     uneven = uneven.replace(/^\s*[(（]/, "");
-  //     uneven = uneven.replace(/[)）]\s*$/, "");
-  //     let sep = /\s*[-ー－]\s*/;
-  //     const unevenParts = uneven.split(sep);
-  //     if (unevenParts.length >= 2) {
-  //       const 不均等レコード: 不均等レコード = {
-  //         不均等１回目服用量: toHankaku(unevenParts[0]),
-  //         不均等２回目服用量: toHankaku(unevenParts[1]),
-  //         不均等３回目服用量: unevenParts[2]
-  //           ? toHankaku(unevenParts[2].trim())
-  //           : undefined,
-  //         不均等４回目服用量: unevenParts[3]
-  //           ? toHankaku(unevenParts[3].trim())
-  //           : undefined,
-  //         不均等５回目服用量: unevenParts[4]
-  //           ? toHankaku(unevenParts[4].trim())
-  //           : undefined,
-  //       };
-  //       joho.不均等レコード = 不均等レコード;
-  //     } else throw new Error("uneven record has less than two parts.");
-  //   }
-  // }
-
-  // function handleDrugSenpatsu(joho: 薬品情報, drug: Drug) {
-  //   if (drug.senpatsu) {
-  //     if (!joho.薬品補足レコード) {
-  //       joho.薬品補足レコード = [];
-  //     }
-
-  //     let 薬品補足情報: string;
-  //     switch (drug.senpatsu) {
-  //       case "henkoufuka":
-  //         薬品補足情報 = "後発品変更不可";
-  //         break;
-  //       case "kanjakibou":
-  //         薬品補足情報 = "先発医薬品患者希望";
-  //         break;
-  //       default:
-  //         throw new Error(`Unknown senpatsu type: ${drug.senpatsu}`);
-  //     }
-
-  //     const 薬品補足レコード: 薬品補足レコード = {
-  //       薬品補足情報,
-  //     };
-
-  //     joho.薬品補足レコード.push(薬品補足レコード);
-  //   }
-  // }
-
-  // function handleDrugComments(joho: 薬品情報, drug: Drug) {
-  //   if (drug.drugComments && drug.drugComments.length > 0) {
-  //     if (!joho.薬品補足レコード) {
-  //       joho.薬品補足レコード = [];
-  //     }
-
-  //     for (const comment of drug.drugComments) {
-  //       const 薬品補足レコード: 薬品補足レコード = {
-  //         薬品補足情報: comment,
-  //       };
-  //       joho.薬品補足レコード.push(薬品補足レコード);
-  //     }
-  //   }
-  // }
-
-  // function createDenshiDrug(joho: 薬品情報, drug: Drug): 薬品情報 {
-  //   const result = { ...joho };
-  //   handleDrugUneven(result, drug);
-  //   handleDrugSenpatsu(result, drug);
-  //   handleDrugComments(result, drug);
-  //   return result;
-  // }
-
-  // function handleDenshiGroup(denshi: RP剤情報, group: DrugGroup) {
-  //   if (!denshi.用法補足レコード) {
-  //     denshi.用法補足レコード = [];
-  //   }
-  //   for (let c of group.groupComments) {
-  //     denshi.用法補足レコード.push({
-  //       用法補足情報: c,
-  //     });
-  //   }
-  // }
-
-  // function handleBikou(data: PrescInfoData, shohou: Shohou) {
-  //   let bs: 備考レコード[] = [];
-  //   for (let b of shohou.bikou) {
-  //     if (b === "高７" || b === "高８" || b === "高９") {
-  //       continue;
-  //     }
-  //     bs.push({ 備考: b });
-  //   }
-  //   if (bs.length > 0) {
-  //     if (!data.備考レコード) {
-  //       data.備考レコード = [];
-  //     }
-  //     data.備考レコード.push(...bs);
-  //   }
-  // }
-
-  // function handleKigen(data: PrescInfoData, shohou: Shohou) {
-  //   if (shohou.kigen) {
-  //     data.使用期限年月日 = DateWrapper.from(shohou.kigen)
-  //       .asSqlDate()
-  //       .replaceAll(/-/g, "");
-  //   }
-  // }
-
-  // function handleShohouComments(data: PrescInfoData, shohou: Shohou) {
-  //   if( shohou.comments ){
-  //     for(let c of shohou.comments) {
-  //       if( c === "一包化" ){
-  //         if( !data.備考レコード ) {
-  //           data.備考レコード = [];
-  //         }
-  //         data.備考レコード.push({
-  //           備考: "一包化",
-  //         })
-  //       } else {
-  //         if( !data.提供情報レコード ) {
-  //           data.提供情報レコード = {
-  //             "提供診療情報レコード": []
-  //           }
-  //         }
-  //         if( !data.提供情報レコード["提供診療情報レコード"] ) {
-  //           data.提供情報レコード["提供診療情報レコード"] = [];
-  //         }
-  //         data.提供情報レコード.提供診療情報レコード.push({
-  //           コメント: c
-  //         })
-  //       }
-  //     }
-  //   }
-  // }
-
-  // async function createDenshi(
-  //   visitId: number,
-  //   shohou: Shohou,
-  //   converted: {
-  //     薬品情報グループ: 薬品情報[];
-  //     用法レコード: 用法レコード;
-  //   }[],
-  // ): Promise<PrescInfoData> {
-  //   const { initPrescInfoDataFromVisitId } = await import(
-  //     "../denshi-shohou/visit-shohou"
-  //   );
-  //   const prescInfoData = await initPrescInfoDataFromVisitId(visitId);
-
-  //   const RP剤情報グループ: RP剤情報[] = converted.map((group, index) => {
-  //     const originalGroup = shohou.groups[index];
-  //     const processedDrugs = group.薬品情報グループ.map(
-  //       (drugInfo, drugIndex) => {
-  //         const originalDrug = originalGroup.drugs[drugIndex];
-  //         return createDenshiDrug(drugInfo, originalDrug);
-  //       },
-  //     );
-  //     let denshiGroup: RP剤情報 = {
-  //       剤形レコード: {
-  //         剤形区分: 剤形区分ofShohou(originalGroup),
-  //         調剤数量: 調剤数量ofShohou(originalGroup),
-  //       },
-  //       用法レコード: group.用法レコード,
-  //       薬品情報グループ: processedDrugs,
-  //     };
-  //     handleDenshiGroup(denshiGroup, originalGroup);
-  //     return denshiGroup;
-  //   });
-
-  //   prescInfoData.RP剤情報グループ = RP剤情報グループ;
-  //   handleBikou(prescInfoData, shohou);
-  //   handleKigen(prescInfoData, shohou);
-  //   handleShohouComments(prescInfoData, shohou);
-  //   return prescInfoData;
-  // }
-
   function doDrugSelected(group: ConvGroupRep, index: number) {
     if (clearWork) {
       return;
@@ -378,9 +87,13 @@
       target: workElement,
       props: {
         薬品名称: name,
+        薬品補足レコード:
+          (drug.kind === "unconverted"
+            ? drug.data3.薬品補足レコード
+            : drug.data.薬品補足レコード) ?? [],
         at,
         onDone: () => clearWork && clearWork(),
-        onResolved: (aux: ConvAux4) => {
+        onResolved: (aux: ConvAux4, 薬品補足レコード: 薬品補足レコード[]) => {
           let converted: 薬品情報;
           if (drug.kind === "unconverted") {
             let 薬品レコード: 薬品レコード = create薬品レコード(
@@ -389,14 +102,20 @@
             );
             converted = create薬品情報(drug.data3, 薬品レコード);
           } else {
-            let 薬品レコード: 薬品レコード = Object.assign({}, drug.data.薬品レコード, aux);
+            let 薬品レコード: 薬品レコード = Object.assign(
+              {},
+              drug.data.薬品レコード,
+              aux,
+            );
             converted = Object.assign({}, drug.data, { 薬品レコード });
           }
+          converted.薬品補足レコード =
+            薬品補足レコード.length > 0 ? 薬品補足レコード : undefined;
           group.drugs[index] = {
             kind: "converted",
             data: converted,
           };
-          if( aux.情報区分 === "医療材料" ){
+          if (aux.情報区分 === "医療材料") {
             group.data2.剤形レコード.剤形区分 = "医療材料";
           }
           groups = groups;
