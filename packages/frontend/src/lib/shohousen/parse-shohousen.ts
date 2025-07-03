@@ -93,6 +93,21 @@ export function span<T>(list: T[], pred: (t: T) => boolean): [T[], T[]] {
 }
 
 export function parsePartTemplate(s: string): PartTemplate {
+  function convPreLine(line: string): string {
+    if( line.startsWith("@") || line.startsWith("＠")) {
+      let colonPos = line.indexOf(":");
+      if( colonPos < 0 ){
+        colonPos = line.indexOf("：");
+      }
+      if( colonPos > 0 ){
+        return line.substring(0, colonPos+1) + toZenkaku(line.substring(colonPos+1));
+      } else {
+        return line;
+      }
+    } else {
+      return toZenkaku(line);
+    }
+  }
   if( debug ){
     console.log("[enter parsePartTemplate]");
     console.log("s --- ", s);
@@ -103,7 +118,7 @@ export function parsePartTemplate(s: string): PartTemplate {
   lines = lines.map(line => line.replace(reLeadingSpaces, zenkakuSpace));
   let [pre, post] = span(lines, (a) => a.startsWith(zenkakuSpace));
   pre = pre.map((a) => a.replace(reLeadingSpaces, ""))
-    .map((a) => toZenkaku(a));
+    .map((a) => convPreLine(a));
   const [commands, trails] = partition(post, (a) => a.startsWith(commandStart));
   let [localCommands, globalCommands] = partition(commands, (c) =>
     c.startsWith(localCommandStart)

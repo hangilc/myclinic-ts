@@ -521,6 +521,7 @@
   }
 
   function doFormatShohousen(): void {
+    console.log("parseShohousen", parseShohousen(textarea.value.trim()));
     textarea.value = parseShohousen(textarea.value.trim()).formatForSave();
   }
 
