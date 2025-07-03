@@ -9,6 +9,7 @@ import {
 import type { DrugGroup, Drug } from "@/lib/parse-shohou";
 import {
   createConvData4DepsFromIyakuhinMaster,
+  createConvData4DepsFromIyakuhinMasterIppanmei,
   createRP剤情報,
   create薬品レコード,
   create薬品情報,
@@ -129,6 +130,20 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
       return { kind: "converted", data: 薬品情報 };
     } catch {
       console.log(`iyakuhincode ${iyakuhincode} not available at ${at}`);
+    }
+  } else if (bind && bind.kind === "ippanmei") {
+    let ippanmei = bind.name;
+    try {
+      let masters = await api.listIyakuhinMasterByIppanmei(ippanmei, at);
+      if (masters.length > 0) {
+        let master = masters[0];
+        let aux = createConvData4DepsFromIyakuhinMasterIppanmei(master);
+        let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
+        let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
+        return { kind: "converted", data: 薬品情報 };
+      }
+    } catch {
+      console.log(`ippanmei ${ippanmei} not available at ${at}`);
     }
   }
   return {

@@ -738,6 +738,17 @@ export default {
     );
   },
 
+  listIyakuhinMasterByIppanmei(
+    ippanmei: string,
+    at: Date | string
+  ): Promise<m.IyakuhinMaster[]> {
+    return get(
+      "list-iyakuhin-master-by-ippanmei",
+      { ippanmei, at: dateParam(at) },
+      castList(m.IyakuhinMaster.cast)
+    );
+  },
+
   getIyakuhinMaster(
     iyakuhincode: number,
     at: Date | string
