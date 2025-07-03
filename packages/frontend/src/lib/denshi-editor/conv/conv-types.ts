@@ -10,6 +10,7 @@ import type { DrugGroup, Drug } from "@/lib/parse-shohou";
 import {
   createConvData4DepsFromIyakuhinMaster,
   createConvData4DepsFromIyakuhinMasterIppanmei,
+  createConvData4DepsFromKizaiMaster,
   createRP剤情報,
   create薬品レコード,
   create薬品情報,
@@ -120,6 +121,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
   let data4: ConvData4 = getConvData4(drug);
   let map = await cache.getDrugNameIyakuhincodeMap();
   let bind = map[drug.name];
+  console.log("bind", bind);
   if (typeof bind === "number") {
     let iyakuhincode = bind;
     try {
@@ -144,6 +146,17 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
       }
     } catch {
       console.log(`ippanmei ${ippanmei} not available at ${at}`);
+    }
+  } else if( bind && bind.kind === "kizai"){
+    let kizaicode = bind.kizaicode;
+    try {
+      let master = await api.getKizaiMaster(kizaicode, at);
+      let aux = createConvData4DepsFromKizaiMaster(master);
+      let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
+      let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
+      return { kind: "converted", data: 薬品情報 };
+    } catch {
+      console.log(`kizaicode ${kizaicode} not available at ${at}`);
     }
   }
   return {
