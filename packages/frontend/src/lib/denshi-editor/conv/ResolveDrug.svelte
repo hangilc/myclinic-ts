@@ -18,6 +18,9 @@
     type 薬品補足レコードIndexed,
   } from "../denshi-editor-types";
   import Hosoku from "../drug-form/Hosoku.svelte";
+  import DrugAmount from "../DrugAmount.svelte";
+  import { unconvDrugRep } from "../helper";
+  import type { Drug } from "@/lib/parse-shohou";
 
   export let onDone: () => void;
   export let at: string;
@@ -29,8 +32,10 @@
   export let 薬品コード種別: 薬品コード種別 | undefined = undefined;
   export let 薬品コード: string | undefined = undefined;
   export let 薬品名称: string;
-  export let 単位名: string | undefined = undefined;
+  export let 分量: string;
+  export let 単位名: string;
   export let 薬品補足レコード: 薬品補足レコード[];
+  export let src: Drug;
   let searchText = 薬品名称;
   let searchResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
@@ -53,6 +58,7 @@
   let suppls: 薬品補足レコードIndexed[] = 薬品補足レコード.map((r) =>
     index薬品補足レコード(r),
   );
+  let isEditingAmount = false;
 
   function isAllSet(
     情報区分: 情報区分 | undefined,
@@ -179,6 +185,7 @@
 
 <div class="wrapper">
   <div class="title">薬剤の解決</div>
+  <div>{unconvDrugRep(src)}</div>
   <div class="label">名称</div>
   <div class="small-text">{薬品名称}</div>
   <form on:submit|preventDefault={doSearch} class="with-icons">
@@ -213,6 +220,7 @@
       {/each}
     </div>
   {/if}
+  <DrugAmount bind:分量 bind:isEditing={isEditingAmount} {単位名}/>
   <div>
     <div class="label">薬品補足</div>
     <Hosoku bind:薬品補足レコード={suppls} />

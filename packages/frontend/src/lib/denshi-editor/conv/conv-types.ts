@@ -42,7 +42,7 @@ export type ConvUsageRep =
   };
 
 export type ConvDrugRep =
-  | { kind: "converted"; data: 薬品情報 }
+  | { kind: "converted"; data: 薬品情報; src: Drug }
   | {
     kind: "unconverted";
     src: Drug;
@@ -129,7 +129,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
       let aux = createConvData4DepsFromIyakuhinMaster(master);
       let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
       let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
-      return { kind: "converted", data: 薬品情報 };
+      return { kind: "converted", data: 薬品情報, src: drug };
     } catch {
       console.log(`iyakuhincode ${iyakuhincode} not available at ${at}`);
     }
@@ -142,7 +142,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
         let aux = createConvData4DepsFromIyakuhinMasterIppanmei(master);
         let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
         let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
-        return { kind: "converted", data: 薬品情報 };
+        return { kind: "converted", data: 薬品情報, src: drug };
       }
     } catch {
       console.log(`ippanmei ${ippanmei} not available at ${at}`);
@@ -154,7 +154,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
       let aux = createConvData4DepsFromKizaiMaster(master);
       let 薬品レコード: 薬品レコード = create薬品レコード(data4, aux);
       let 薬品情報: 薬品情報 = create薬品情報(data3, 薬品レコード);
-      return { kind: "converted", data: 薬品情報 };
+      return { kind: "converted", data: 薬品情報, src: drug };
     } catch {
       console.log(`kizaicode ${kizaicode} not available at ${at}`);
     }

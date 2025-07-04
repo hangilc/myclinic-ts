@@ -87,10 +87,19 @@
       target: workElement,
       props: {
         薬品名称: name,
+        分量: (drug.kind === "unconverted" 
+          ? drug.data4.分量
+          : drug.data.薬品レコード.分量
+        ),
+        単位名: (drug.kind === "unconverted"
+          ? ""
+          : drug.data.薬品レコード.単位名
+        ),
         薬品補足レコード:
           (drug.kind === "unconverted"
             ? drug.data3.薬品補足レコード
             : drug.data.薬品補足レコード) ?? [],
+        src: drug.src,
         at,
         onDone: () => clearWork && clearWork(),
         onResolved: (aux: ConvAux4, 薬品補足レコード: 薬品補足レコード[]) => {
@@ -114,6 +123,7 @@
           group.drugs[index] = {
             kind: "converted",
             data: converted,
+            src: drug.src,
           };
           if (aux.情報区分 === "医療材料") {
             group.data2.剤形レコード.剤形区分 = "医療材料";
