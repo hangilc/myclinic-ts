@@ -192,7 +192,7 @@
 <style>
   .wrapper {
     width: 800px;
-    min-height: 400px;
+    height: 600px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 10px;
@@ -201,11 +201,14 @@
 
   .left {
     border-right: 1px solid gray;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 0;
   }
 
   .conv-reps {
-    max-height: calc(100vh - 160px);
     overflow-y: auto;
+    min-height: 0;
   }
 
   .work {

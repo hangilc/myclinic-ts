@@ -25,6 +25,7 @@
     type Shohou,
   } from "@/lib/parse-shohou";
   import { parseShohou } from "@/lib/parse-shohou2";
+  import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import { formatHokenshaBangou } from "myclinic-util";
   import {
@@ -718,7 +719,7 @@
   async function doConvTextToDenshi() {
     onClose();
     let visit = await api.getVisit(text.visitId);
-    const shohou = parseShohou(text.content);
+    const shohou = parseShohou3(text.content);
     if (typeof shohou === "string") {
       alert(shohou);
       return;

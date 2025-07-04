@@ -397,12 +397,17 @@ export interface ConvData4 {
 }
 
 export function getConvData4(drug: Drug): ConvData4 {
-  let amount = Number(toHankaku(drug.amount));
+  let src = drug.amount;
+  src = toHankaku(src);
+  if( src.startsWith("1回") ){
+    src = src.replace(/^1回/, "");
+  }
+  let amount = Number(toHankaku(src));
   if (isNaN(amount)) {
     throw new Error(`invalid amount: ${drug.amount}`);
   }
   return {
-    分量: drug.amount,
+    分量: amount.toString(),
     力価フラグ: "薬価単位",
   };
 }
