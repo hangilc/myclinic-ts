@@ -21,6 +21,12 @@
   import DrugAmount from "../DrugAmount.svelte";
   import { unconvDrugRep } from "../helper";
   import type { Drug } from "@/lib/parse-shohou";
+  import Wrapper from "./workarea/Wrapper.svelte";
+  import Title from "./workarea/Title.svelte";
+  import OrigDrug from "./workarea/OrigDrug.svelte";
+  import DrugKindField from "./workarea/DrugKindField.svelte";
+  import DrugAmountField from "./workarea/DrugAmountField.svelte";
+  import DrugHosokuField from "./workarea/DrugHosokuField.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -28,9 +34,9 @@
     resolved: ConvAux4,
     薬品補足レコード: 薬品補足レコード[],
   ) => void;
-  export let 情報区分: 情報区分 | undefined = undefined;
-  export let 薬品コード種別: 薬品コード種別 | undefined = undefined;
-  export let 薬品コード: string | undefined = undefined;
+  export let 情報区分: 情報区分 = "医薬品";
+  export let 薬品コード種別: 薬品コード種別 = "レセプト電算処理システム用コード";
+  export let 薬品コード: string = "";
   export let 薬品名称: string;
   export let 分量: string;
   export let 単位名: string;
@@ -48,11 +54,11 @@
         kind: "ippanmei";
         name: string;
         code: string;
-      } 
+      }
     | {
-      kind: "kizai";
-      kizaicode: number;
-    }= undefined;
+        kind: "kizai";
+        kizaicode: number;
+      } = undefined;
   let ippanmei: string | undefined = undefined;
   let ippanmeicode: string | undefined = undefined;
   let suppls: 薬品補足レコードIndexed[] = 薬品補足レコード.map((r) =>
@@ -149,7 +155,7 @@
     cacheUpdateData = {
       kind: "kizai",
       kizaicode: master.kizaicode,
-    }
+    };
     searchText = "";
     searchKizaiResult = [];
   }
@@ -168,64 +174,32 @@
   }
 
   onMount(() => {
-    if (inputElement) {
-      inputElement.focus();
-      inputElement.setSelectionRange(
-        inputElement.value.length,
-        inputElement.value.length,
-      );
-    }
   });
 
   function doAddHosoku() {
     suppls.push(index薬品補足レコード({ 薬品補足情報: "" }));
     suppls = suppls;
   }
+
+  function doChange情報区分(kubun: 情報区分) {
+    情報区分 = kubun;
+  }
 </script>
 
-<div class="wrapper">
-  <div class="title">薬剤の解決</div>
-  <div>{unconvDrugRep(src)}</div>
-  <div class="label">名称</div>
-  <div class="small-text">{薬品名称}</div>
-  <form on:submit|preventDefault={doSearch} class="with-icons">
-    <input
-      type="text"
-      bind:value={searchText}
-      class="search-input"
-      bind:this={inputElement}
-    />
-    <SearchLink onClick={doSearch} />
-    <a href="javascript:void(0)" on:click={doSearchKizai} class="kizai-link"
-      >器材検索</a
-    >
-  </form>
-  {#if searchResult.length > 0}
-    <div class="search-result">
-      {#each searchResult as master (master.iyakuhincode)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="search-result-item" on:click={() => doSelect(master)}>
-          {master.name}
-        </div>
-      {/each}
-    </div>
+<Wrapper>
+  <Title>薬剤の解決</Title>
+  <OrigDrug drug={src}></OrigDrug>
+  <DrugKindField bind:薬品名称 bind:薬品コード bind:薬品コード種別 {at} {情報区分}/>
+  <DrugAmountField bind:分量 bind:isEditing={isEditingAmount} {単位名} />
+  {#if suppls.length > 0}
+    <DrugHosokuField bind:薬品補足レコード={suppls}/>
   {/if}
-  {#if searchKizaiResult.length > 0}
-    <div class="search-result">
-      {#each searchKizaiResult as master (master.kizaicode)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="search-result-item" on:click={() => doKizaiSelect(master)}>
-          {master.name}
-        </div>
-      {/each}
-    </div>
-  {/if}
-  <DrugAmount bind:分量 bind:isEditing={isEditingAmount} {単位名}/>
-  <div>
-    <div class="label">薬品補足</div>
-    <Hosoku bind:薬品補足レコード={suppls} />
-  </div>
   <div class="commands">
+    {#if 情報区分 === "医薬品"}
+    <Link onClick={() => doChange情報区分("医療材料")}>器材選択</Link>
+    {:else}
+    <Link onClick={() => doChange情報区分("医薬品")}>薬品選択</Link>
+    {/if}
     {#if ippanmei && ippanmeicode}
       <Link onClick={doIppanmei}>一般名に</Link>
     {/if}
@@ -235,35 +209,7 @@
     {/if}
     <button on:click={onDone}>キャンセル</button>
   </div>
-</div>
+</Wrapper>
 
 <style>
-  form {
-    margin: 10px 0;
-  }
-
-  .kizai-link {
-    font-size: 12px;
-    margin-left: 12px;
-  }
-
-  .search-input {
-    width: 20em;
-  }
-
-  .search-result {
-    border: 1px solid gray;
-    padding: 10px;
-    overflow-y: auto;
-    height: auto;
-    max-height: 340px;
-  }
-
-  .search-result-item {
-    cursor: pointer;
-  }
-
-  .search-result-item:hover {
-    background-color: #ccc;
-  }
 </style>

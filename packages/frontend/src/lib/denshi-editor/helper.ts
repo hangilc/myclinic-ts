@@ -58,6 +58,11 @@ export function drugRep(drug: 薬品情報): string {
 
 export function unconvDrugRep(drug: Drug): string {
   let s = `${drug.name}　${drug.amount}${drug.unit}${drug.uneven ?? ""}`;
+  if( drug.senpatsu === "henkoufuka") {
+    s += " 変更不可";
+  } else if( drug.senpatsu === "kanjakibou") {
+    s += "　患者希望";
+  }
   if (drug.drugComments.length > 0) {
     for (let c of drug.drugComments) {
       s += `　${c}`;

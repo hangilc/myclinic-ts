@@ -222,8 +222,8 @@
   }
 
   .work {
-    height: auto;
-    max-height: 100%;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .dialog-commands {

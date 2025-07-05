@@ -265,7 +265,7 @@ function getGroupCommentsFromTail(lines: string[]): string[] {
         comments.push(value);
       }
     } else {
-      lines.unshift(line);
+      lines.push(line);
       break;
     }
   }
