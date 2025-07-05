@@ -4,7 +4,6 @@
 <div class="workarea-wrapper"><slot /></div>
 
 <style>
-  
   .workarea-wrapper {
     --border: 2px solid #ccc;
     border: var(--border);

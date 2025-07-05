@@ -1,4 +1,10 @@
-<div class="top"><slot /></div>
+<script lang="ts">
+  export let visible = true;
+</script>
+
+{#if visible}
+  <div class="top"><slot /></div>
+{/if}
 
 <style>
   .top {

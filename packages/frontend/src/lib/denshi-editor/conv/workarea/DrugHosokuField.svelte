@@ -8,6 +8,7 @@
   import FieldTitle from "./FieldTitle.svelte";
 
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
+  export let visible = true;
 
   function initElement(e: HTMLInputElement) {
     e.focus();
@@ -39,7 +40,7 @@
   }
 </script>
 
-<Field>
+<Field {visible}>
   <FieldTitle>薬品補足</FieldTitle>
   <FieldForm>
     {#each 薬品補足レコード as record (record.id)}

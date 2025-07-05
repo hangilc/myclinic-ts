@@ -27,6 +27,7 @@
   import DrugKindField from "./workarea/DrugKindField.svelte";
   import DrugAmountField from "./workarea/DrugAmountField.svelte";
   import DrugHosokuField from "./workarea/DrugHosokuField.svelte";
+  import DrugIppanField from "./workarea/DrugIppanField.svelte";
 
   export let onDone: () => void;
   export let at: string;
@@ -35,7 +36,8 @@
     薬品補足レコード: 薬品補足レコード[],
   ) => void;
   export let 情報区分: 情報区分 = "医薬品";
-  export let 薬品コード種別: 薬品コード種別 = "レセプト電算処理システム用コード";
+  export let 薬品コード種別: 薬品コード種別 =
+    "レセプト電算処理システム用コード";
   export let 薬品コード: string = "";
   export let 薬品名称: string;
   export let 分量: string;
@@ -59,8 +61,8 @@
         kind: "kizai";
         kizaicode: number;
       } = undefined;
-  let ippanmei: string | undefined = undefined;
-  let ippanmeicode: string | undefined = undefined;
+  let ippanmei: string = "";
+  let ippanmeicode: string = "";
   let suppls: 薬品補足レコードIndexed[] = 薬品補足レコード.map((r) =>
     index薬品補足レコード(r),
   );
@@ -104,14 +106,6 @@
     }
   }
 
-  async function doSearch() {
-    searchResult = await api.searchIyakuhinMaster(searchText, at);
-  }
-
-  async function doSearchKizai() {
-    searchKizaiResult = await api.searchKizaiMaster(searchText, at);
-  }
-
   async function updateCache(
     name: string,
     bind:
@@ -137,8 +131,8 @@
     薬品コード = master.iyakuhincode.toString();
     薬品名称 = master.name;
     単位名 = master.unit;
-    ippanmei = master.ippanmei || undefined;
-    ippanmeicode = master.ippanmeicode || undefined;
+    ippanmei = master.ippanmei || "";
+    ippanmeicode = master.ippanmeicode || "";
     cacheUpdateData = master.iyakuhincode;
     searchText = "";
     searchResult = [];
@@ -150,8 +144,8 @@
     薬品コード = master.kizaicode.toString();
     薬品名称 = master.name;
     単位名 = master.unit;
-    ippanmei = undefined;
-    ippanmeicode = undefined;
+    ippanmei = "";
+    ippanmeicode = "";
     cacheUpdateData = {
       kind: "kizai",
       kizaicode: master.kizaicode,
@@ -173,8 +167,7 @@
     }
   }
 
-  onMount(() => {
-  });
+  onMount(() => {});
 
   function doAddHosoku() {
     suppls.push(index薬品補足レコード({ 薬品補足情報: "" }));
@@ -184,21 +177,33 @@
   function doChange情報区分(kubun: 情報区分) {
     情報区分 = kubun;
   }
+
+  function doConvToIppanmei() {}
 </script>
 
 <Wrapper>
   <Title>薬剤の解決</Title>
   <OrigDrug drug={src}></OrigDrug>
-  <DrugKindField bind:薬品名称 bind:薬品コード bind:薬品コード種別 {at} {情報区分}/>
+  <DrugKindField
+    bind:薬品名称
+    bind:薬品コード
+    bind:薬品コード種別
+    {at}
+    {情報区分}
+  />
+  <DrugIppanField
+    {薬品コード種別}
+    {ippanmeicode}
+    visible={情報区分 === "医薬品"}
+    onConvToIppanmei={doConvToIppanmei}
+  />
   <DrugAmountField bind:分量 bind:isEditing={isEditingAmount} {単位名} />
-  {#if suppls.length > 0}
-    <DrugHosokuField bind:薬品補足レコード={suppls}/>
-  {/if}
+  <DrugHosokuField bind:薬品補足レコード={suppls} visible={suppls.length > 0} />
   <div class="commands">
     {#if 情報区分 === "医薬品"}
-    <Link onClick={() => doChange情報区分("医療材料")}>器材選択</Link>
+      <Link onClick={() => doChange情報区分("医療材料")}>器材選択</Link>
     {:else}
-    <Link onClick={() => doChange情報区分("医薬品")}>薬品選択</Link>
+      <Link onClick={() => doChange情報区分("医薬品")}>薬品選択</Link>
     {/if}
     {#if ippanmei && ippanmeicode}
       <Link onClick={doIppanmei}>一般名に</Link>
