@@ -51,6 +51,8 @@
   import { Hotline, type Patient } from "myclinic-model";
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
+  import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
+  import { createTopTmplFromShohou } from "@/lib/denshi-editor/denshi-tmpl";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -717,6 +719,24 @@
   }
 
   async function doConvTextToDenshi() {
+    onClose();
+    let visit = await api.getVisit(text.visitId);
+    const shohou = parseShohou3(text.content);
+    if (typeof shohou === "string") {
+      alert(shohou);
+      return;
+    }
+    const d: DenshiEditorDialog = new DenshiEditorDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        title: "電子処方に変換",
+        topTmpl: createTopTmplFromShohou(shohou, visit.visitId),
+      },
+    });
+  }
+
+  async function doConvTextToDenshiSave() {
     onClose();
     let visit = await api.getVisit(text.visitId);
     const shohou = parseShohou3(text.content);

@@ -220,42 +220,6 @@ export function getConvData1(shohou: Shohou): ConvData1 {
 //   用法補足情報: string;
 // }
 
-export interface ShohouExtract {
-  使用期限年月日?: string;
-  備考レコード: 備考レコード[];
-  提供診療情報レコード: 提供診療情報レコード[];
-  検査値データ等レコード: 検査値データ等レコード[];
-  RP剤情報Extract: RP剤情報Extract[];
-}
-
-export interface RP剤情報Extract {
-  剤形区分: 剤形区分;
-  調剤数量: number;
-  用法コード: string;
-  用法名称: string;
-  用法補足レコード: 用法補足レコード[];
-}
-
-export function extractShohou(shohou: Shohou): ShohouExtract {
-  return {
-    使用期限年月日: get使用期限年月日FromShohou(shohou),
-    備考レコード: get備考レコードFromShohou(shohou),
-    提供診療情報レコード: get提供診療情報レコードFromShohou(shohou),
-    検査値データ等レコード: get検査値データ等レコードFromShohou(shohou),
-    RP剤情報Extract: shohou.groups.map(extractRP剤情報),
-  }
-}
-
-function extractRP剤情報(group: DrugGroup): RP剤情報Extract {
-  return {
-    剤形区分: extract剤形区分FromGroup(group),
-    調剤数量: extract調剤数量FromGroup(group),
-    用法コード: "",
-    用法名称: group.usage.usage,
-    用法補足レコード: extract用法補足レコードFromGroup(group),
-  }
-}
-
 function extract剤形区分FromGroup(group: DrugGroup): 剤形区分 {
   // Most frequent case
   if (group.usage.kind === "days") {
@@ -490,6 +454,64 @@ function get用法補足レコード(group: DrugGroup): 用法補足レコード
 //   薬品１回服用量レコード?: 薬品１回服用量レコード;
 //   薬品補足レコード?: 薬品補足レコード[];
 // }
+
+export interface ShohouExtract {
+  使用期限年月日?: string;
+  備考レコード: 備考レコード[];
+  提供診療情報レコード: 提供診療情報レコード[];
+  RP剤情報Extract: RP剤情報Extract[];
+}
+
+export interface 薬品情報Extract {
+  薬品名称: string;
+  分量: string;
+  単位名: string;
+}
+
+export interface RP剤情報Extract {
+  剤形区分: 剤形区分;
+  調剤数量: number;
+  用法コード: string;
+  用法名称: string;
+  用法補足レコード: 用法補足レコードIndexed[];
+  薬品情報グループ: 薬品情報Extract[];
+}
+
+function extract薬品情報FromDrug(drug: Drug): 薬品情報Extract {
+  return {
+    薬品名称: drug.name,
+    分量: drug.amount,
+    単位名: drug.unit,
+  }
+}
+
+function extractRP剤情報(group: DrugGroup): RP剤情報Extract {
+  return {
+    剤形区分: extract剤形区分FromGroup(group),
+    調剤数量: extract調剤数量FromGroup(group),
+    用法コード: "",
+    用法名称: group.usage.usage,
+    用法補足レコード: extract用法補足レコードFromGroup(group),
+    薬品情報グループ: group.drugs.map(extract薬品情報FromDrug),
+  }
+}
+
+export function extractShohou(shohou: Shohou): ShohouExtract {
+  return {
+    使用期限年月日: get使用期限年月日FromShohou(shohou),
+    備考レコード: get備考レコードFromShohou(shohou),
+    提供診療情報レコード: get提供診療情報レコードFromShohou(shohou),
+    RP剤情報Extract: shohou.groups.map(extractRP剤情報),
+  }
+}
+
+export interface ShohouConv {
+  使用期限年月日?: string;
+  備考レコード: 備考レコードIndexed[];
+  提供診療情報レコード: 提供診療情報レコードIndexed[];
+  RP剤情報Extract: RP剤情報Extract[];
+}
+
 
 export interface ConvData3 {
   不均等レコード?: 不均等レコード;
