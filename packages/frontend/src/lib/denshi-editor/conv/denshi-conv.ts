@@ -24,6 +24,7 @@ import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
 import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
+import { index備考レコード, type 備考レコードIndexed, type 提供診療情報レコードIndexed } from "../denshi-editor-types";
 
 // export interface PrescInfoData {
 //   医療機関コード種別: 点数表;
@@ -84,6 +85,52 @@ import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
 // export interface 検査値データ等レコード {
 //   検査値データ等: string;
 // }
+
+export function get使用期限年月日FromShohou(shohou: Shohou): string | undefined {
+  let kigen = shohou.kigen;
+  if (kigen) {
+    return DateWrapper.from(kigen).asOnshiDate();
+  } else {
+    return undefined;
+  }
+}
+
+export function get備考レコードFromShohou(shohou: Shohou): 備考レコード[] {
+  let bikou: 備考レコード[] = [];
+  for (let b of shohou.bikou) {
+    if (b === "高７" || b === "高８" || b === "高９") {
+      continue;
+    }
+    bikou.push({ 備考: b });
+  }
+  if (shohou.comments) {
+    for (let c of shohou.comments) {
+      if (c === "一包化") {
+        bikou.push({ 備考: "一包化", });
+      }
+    }
+  }
+  return bikou;
+}
+
+export function get提供診療情報レコードFromShohou(shohou: Shohou): 提供診療情報レコード[] {
+  let 提供診療情報レコード: 提供診療情報レコード[] = [];
+  if (shohou.comments) {
+    for (let c of shohou.comments) {
+      if (c === "一包化") {
+        continue;
+      } else {
+        提供診療情報レコード.push({ コメント: c, });
+      }
+    }
+  }
+  return 提供診療情報レコード;
+}
+
+export function get検査値データ等レコードFromShohou(shohou: Shohou): 検査値データ等レコード[] {
+  return [];
+}
+
 
 export interface ConvData1 {
   使用期限年月日?: string;
@@ -172,6 +219,142 @@ export function getConvData1(shohou: Shohou): ConvData1 {
 //   用法補足区分?: 用法補足区分;
 //   用法補足情報: string;
 // }
+
+export interface ShohouExtract {
+  使用期限年月日?: string;
+  備考レコード: 備考レコード[];
+  提供診療情報レコード: 提供診療情報レコード[];
+  検査値データ等レコード: 検査値データ等レコード[];
+  RP剤情報Extract: RP剤情報Extract[];
+}
+
+export interface RP剤情報Extract {
+  剤形区分: 剤形区分;
+  調剤数量: number;
+  用法コード: string;
+  用法名称: string;
+  用法補足レコード: 用法補足レコード[];
+}
+
+export function extractShohou(shohou: Shohou): ShohouExtract {
+  return {
+    使用期限年月日: get使用期限年月日FromShohou(shohou),
+    備考レコード: get備考レコードFromShohou(shohou),
+    提供診療情報レコード: get提供診療情報レコードFromShohou(shohou),
+    検査値データ等レコード: get検査値データ等レコードFromShohou(shohou),
+    RP剤情報Extract: shohou.groups.map(extractRP剤情報),
+  }
+}
+
+function extractRP剤情報(group: DrugGroup): RP剤情報Extract {
+  return {
+    剤形区分: extract剤形区分FromGroup(group),
+    調剤数量: extract調剤数量FromGroup(group),
+    用法コード: "",
+    用法名称: group.usage.usage,
+    用法補足レコード: extract用法補足レコードFromGroup(group),
+  }
+}
+
+function extract剤形区分FromGroup(group: DrugGroup): 剤形区分 {
+  // Most frequent case
+  if (group.usage.kind === "days") {
+    return "内服";
+  }
+
+  // Check usage pattern first
+  if (group.usage.kind === "times") {
+    // Times-based usage typically indicates 頓服 (as needed)
+    return "頓服";
+  }
+
+  // Check drug names and units for external use indicators
+  for (const drug of group.drugs) {
+    const name = drug.name.toLowerCase();
+    const unit = drug.unit.toLowerCase();
+
+    // External use (外用) indicators
+    if (
+      name.includes("軟膏") ||
+      name.includes("クリーム") ||
+      name.includes("ローション") ||
+      name.includes("湿布") ||
+      name.includes("シール") ||
+      name.includes("貼付") ||
+      name.includes("点眼") ||
+      name.includes("点鼻") ||
+      name.includes("吸入") ||
+      name.includes("うがい") ||
+      name.includes("外用") ||
+      name.includes("塗布") ||
+      unit.includes("g") ||
+      (unit.includes("ml") && (name.includes("点眼") || name.includes("点鼻")))
+    ) {
+      return "外用";
+    }
+
+    // Injectable (注射) indicators
+    if (
+      name.includes("注射") ||
+      name.includes("注入") ||
+      name.includes("静注") ||
+      name.includes("筋注") ||
+      name.includes("皮下注") ||
+      unit.includes("バイアル") ||
+      unit.includes("アンプル")
+    ) {
+      return "注射";
+    }
+
+    // Liquid internal use (内服滴剤) indicators
+    if (
+      (name.includes("内服液") ||
+        name.includes("シロップ") ||
+        name.includes("滴剤")) &&
+      unit.includes("ml")
+    ) {
+      return "内服滴剤";
+    }
+  }
+
+  // Fallback to unknown
+  return "不明";
+}
+
+function extract調剤数量FromGroup(group: DrugGroup): number {
+  const usage = group.usage;
+
+  // For days-based prescriptions, return the number of days
+  if (usage.kind === "days") {
+    const days = parseInt(toHankaku(usage.days));
+    if (isNaN(days)) {
+      throw new Error(`Invalid days value: ${usage.days}`);
+    }
+    return days;
+  }
+
+  // For times-based prescriptions (頓服), return the number of times
+  if (usage.kind === "times") {
+    const times = parseInt(toHankaku(usage.times));
+    if (isNaN(times)) {
+      throw new Error(`Invalid times value: ${usage.times}`);
+    }
+    return times;
+  }
+
+  return 1;
+}
+
+function extract用法補足レコードFromGroup(group: DrugGroup): 用法補足レコード[] {
+  let 用法補足レコード: 用法補足レコード[] = [];
+  for (let c of group.groupComments) {
+    用法補足レコード.push({
+      用法補足情報: c,
+    });
+  }
+  return 用法補足レコード;
+}
+
 
 export interface ConvData2 {
   剤形レコード: 剤形レコード;
@@ -399,7 +582,7 @@ export interface ConvData4 {
 export function getConvData4(drug: Drug): ConvData4 {
   let src = drug.amount;
   src = toHankaku(src);
-  if( src.startsWith("1回") ){
+  if (src.startsWith("1回")) {
     src = src.replace(/^1回/, "");
   }
   let amount = Number(toHankaku(src));

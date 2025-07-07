@@ -9,6 +9,9 @@
 
   export let 薬品補足レコード: 薬品補足レコードIndexed[];
   export let visible = true;
+  export let isEditing: boolean = false;
+
+  $: isEditing = 薬品補足レコード.some(r => r.isEditing);
 
   function initElement(e: HTMLInputElement) {
     e.focus();

@@ -15,7 +15,7 @@
   export let 薬品コード種別: 薬品コード種別;
   export let 薬品名称: string;
   export let 薬品コード: string;
-  export let isEditing: boolean = !薬品コード;
+  export let isEditing: boolean;
   export let 単位名: string = "";
   export let at: string;
 

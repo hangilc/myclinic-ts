@@ -42,8 +42,11 @@
   export let 薬品名称: string;
   export let 分量: string;
   export let 単位名: string;
-  export let 薬品補足レコード: 薬品補足レコード[];
+  export let 薬品補足レコード: 薬品補足レコードIndexed[];
   export let src: Drug;
+  let isDrugKindEditing = 薬品コード === "";
+  let isDrugAmountEditing = 分量 === "";
+  let isHosokuEditing = 薬品補足レコード.some(r => r.isEditing);
   let searchText = 薬品名称;
   let searchResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
@@ -190,6 +193,7 @@
     bind:薬品コード種別
     {at}
     {情報区分}
+    bind:isEditing={isDrugKindEditing}
   />
   <DrugIppanField
     {薬品コード種別}

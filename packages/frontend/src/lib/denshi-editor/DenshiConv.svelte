@@ -102,7 +102,7 @@
         src: drug.src,
         at,
         onDone: () => clearWork && clearWork(),
-        onResolved: (aux: ConvAux4, 薬品補足レコード: 薬品補足レコード[]) => {
+        onResolved: (aux: ConvAux4, 薬品補足レコード: 薬品補足レコードIndexed[]) => {
           let converted: 薬品情報;
           if (drug.kind === "unconverted") {
             let 薬品レコード: 薬品レコード = create薬品レコード(
