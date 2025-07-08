@@ -304,7 +304,7 @@ class Wrapper<T> {
 
   constructor(data: T) {
     this.id = serialId++;
-    this.data = data;
+    this.data = Object.assign({}, data);
   }
 }
 
@@ -325,7 +325,7 @@ export class 備考レコードWrapper extends Wrapper<備考レコード> { }
 export class 提供診療情報レコードWrapper extends Wrapper<提供診療情報レコード> { }
 export class 検査値データ等レコードWrapper extends Wrapper<検査値データ等レコード> { }
 export class 用法補足レコードWrapper extends Wrapper<用法補足レコード> { }
-export class 薬品補足レコードWrapper extends<薬品補足レコード>{}
+export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコード>{}
 
 export class 提供情報レコードWrapper extends Wrapper<提供情報レコード> {
   提供診療情報レコード: 提供診療情報レコードWrapper[];
@@ -354,7 +354,7 @@ export class 薬品情報Wrapper extends Wrapper<薬品情報> {
 
   constructor(data: 薬品情報) {
     super(data);
-    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(r => new Wrapper<薬品補足レコード>(r)),
+    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(r => new Wrapper<薬品補足レコード>(r));
   }
 }
 

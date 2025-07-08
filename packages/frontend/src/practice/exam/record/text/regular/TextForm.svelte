@@ -52,7 +52,7 @@
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
-  import { createTopTmplFromShohou } from "@/lib/denshi-editor/denshi-tmpl";
+  import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -726,12 +726,13 @@
       alert(shohou);
       return;
     }
+    let orig: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         title: "電子処方に変換",
-        topTmpl: createTopTmplFromShohou(shohou, visit.visitId),
+        orig,
       },
     });
   }

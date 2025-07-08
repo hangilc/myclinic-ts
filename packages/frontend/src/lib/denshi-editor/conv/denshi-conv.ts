@@ -24,7 +24,7 @@ import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
 import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-import { index備考レコード, type 備考レコードIndexed, type 提供診療情報レコードIndexed } from "../denshi-editor-types";
+import { index備考レコード, index用法補足レコード, type 備考レコードIndexed, type 提供診療情報レコードIndexed, type 用法補足レコードIndexed } from "../denshi-editor-types";
 
 // export interface PrescInfoData {
 //   医療機関コード種別: 点数表;
@@ -491,7 +491,7 @@ function extractRP剤情報(group: DrugGroup): RP剤情報Extract {
     調剤数量: extract調剤数量FromGroup(group),
     用法コード: "",
     用法名称: group.usage.usage,
-    用法補足レコード: extract用法補足レコードFromGroup(group),
+    用法補足レコード: extract用法補足レコードFromGroup(group).map(index用法補足レコード),
     薬品情報グループ: group.drugs.map(extract薬品情報FromDrug),
   }
 }

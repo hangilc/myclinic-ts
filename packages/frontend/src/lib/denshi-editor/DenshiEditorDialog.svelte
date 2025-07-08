@@ -1,11 +1,11 @@
 <script lang="ts">
+  import type { PrescInfoData } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
-  import type { TopTmpl } from "./denshi-tmpl";
 
   export let title: string;
   export let destroy: () => void;
-  export let topTmpl: TopTmpl;
+  export let orig: PrescInfoData;
 
   function doCancel() {
     destroy();
