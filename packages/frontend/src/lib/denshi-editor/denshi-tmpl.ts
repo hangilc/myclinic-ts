@@ -76,7 +76,7 @@ function create提供情報レコード(
 ): 提供情報レコード | undefined {
   let a: 提供診療情報レコード[] = 提供診療情報レコード.map(r => r.data);
   let b: 検査値データ等レコード[] = 検査値データ等レコード.map(r => r.data);
-  if( a.length === 0 && b.length === 0 ){
+  if (a.length === 0 && b.length === 0) {
     return undefined;
   } else {
     return {
@@ -118,14 +118,14 @@ export class 検査値データ等レコードWrapper {
 
 export interface TopTmpl {
   orig:
-    | {
-        kind: "denshi";
-        data: PrescInfoData;
-      }
-    | {
-        kind: "none";
-        visitId: number;
-      };
+  | {
+    kind: "denshi";
+    data: PrescInfoData;
+  }
+  | {
+    kind: "none";
+    visitId: number;
+  };
   使用期限年月日: string | undefined;
   備考レコード: 備考レコードTmpl[];
   提供診療情報レコード: 提供診療情報レコードTmpl[];
@@ -220,18 +220,6 @@ export class 用法補足レコードWrapper {
   constructor(data: 用法補足レコード) {
     this.id = serialId++;
     this.data = data;
-  }
-}
-
-export class 薬品情報Wrapper {
-  id: number;
-  data: 薬品情報;
-  薬品補足レコード: 薬品補足レコードWrapper[];
-
-  constructor(data: 薬品情報) {
-    this.id = serialId++;
-    this.data = data;
-    this.薬品補足レコード = [];
   }
 }
 
@@ -344,8 +332,28 @@ function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
 //   薬品補足レコード?: 薬品補足レコード[];
 // }
 
-function get薬品情報FromDrug(drug: Drug): 薬品情報 {
+class Wrapper<T> {
+  id: number;
+  data: T;
+
+  constructor(data: T) {
+    this.id = serialId++;
+    this.data = data;
+  }
+}
+
+class 薬品情報Wrapper extends Wrapper<薬品情報> {
+  薬品補足レコード: Wrapper<薬品補足レコード>[];
+
+  constructor(data: 薬品情報) {
+    super(data);
+    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(r => new Wrapper<薬品補足レコード>(r)),
+  }
+}
+
+function get薬品情報FromDrug(drug: Drug, 剤形区分: 剤形区分): 薬品情報 {
   return {
+    薬品レコード: get薬品レコードfromDrug(drug, 剤形区分),
     不均等レコード: get不均等レコードFromDrug(drug),
     薬品補足レコード: get薬品補足レコードFromDrug(drug),
   }
@@ -401,4 +409,28 @@ function get薬品補足レコードFromDrug(drug: Drug): 薬品補足レコー�
     }
   }
   return 薬品補足レコード.length === 0 ? undefined : 薬品補足レコード;
+}
+
+// export interface 薬品レコード {
+//   情報区分: 情報区分;
+//   薬品コード種別: 薬品コード種別;
+//   薬品コード: string;
+//   薬品名称: string;
+//   分量: string;
+//   力価フラグ: 力価フラグ;
+//   単位名: string;
+// }
+
+function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 薬品レコード {
+  const 情報区分: 情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
+  const 薬品コード種別: 薬品コード種別 = drug.name.startsWith("【般】") ? "一般名コード" : "レセプト電算処理システム用コード";
+  return {
+    情報区分,
+    薬品コード種別,
+    薬品コード: "",
+    薬品名称: drug.name,
+    分量: drug.amount,
+    力価フラグ: "薬価単位",
+    単位名: drug.unit,
+  }
 }
