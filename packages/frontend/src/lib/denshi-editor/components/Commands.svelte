@@ -1,9 +1,13 @@
 <script lang="ts">
-  import type { TopTmpl } from "../denshi-tmpl";
-
   export let onCancel: () => void;
 </script>
 
-<div>
+<div class="top">
   <button on:click={onCancel}>キャンセル</button>
 </div>
+
+<style>
+  .top {
+    margin-bottom: 10px;
+  }
+</style>
