@@ -33,7 +33,8 @@
       target: wa,
       props: {
         destroy: () => (clearWorkarea && clearWorkarea()),
-        drug,
+        group,
+        drugId: drug.id,
         at,
         onChange: () => data = data,
       }

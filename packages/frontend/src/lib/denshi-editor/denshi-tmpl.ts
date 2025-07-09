@@ -400,8 +400,17 @@ export class 用法補足レコードWrapper extends Wrapper<用法補足レコ�
 }
 
 export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコード> {
+  isEditing: boolean = false;
+
   clone(): 薬品補足レコードWrapper {
-    return new 薬品補足レコードWrapper(this.toDenshi(), this.id);
+    return Object.assign(new 薬品補足レコードWrapper(this.toDenshi(), this.id), { isEditing: this.isEditing });
+  }
+
+  toDenshi(): 薬品補足レコード {
+    if( this.isEditing ){
+      throw new Error(`薬品補足レコードが編集中ｎです。`);
+    }
+    return super.toDenshi();
   }
 }
 
@@ -474,14 +483,14 @@ export class RP剤情報Wrapper extends Wrapper<RP剤情報> {
 }
 
 export class 薬品情報Wrapper extends Wrapper<薬品情報> {
-  薬品補足レコード: Wrapper<薬品補足レコード>[];
+  薬品補足レコード: 薬品補足レコードWrapper[];
   ippanmei?: string;
   ippanmeicode?: string;
 
   constructor(data: 薬品情報, id?: number) {
     super(data, id);
     this.薬品補足レコード = (data.薬品補足レコード ?? []).map(
-      (r) => new Wrapper<薬品補足レコード>(r)
+      (r) => new 薬品補足レコードWrapper(r)
     );
   }
 
