@@ -26,12 +26,15 @@ import { initPrescInfoDataFromVisitId } from "../denshi-shohou/visit-shohou";
 import { toHankaku } from "@/lib/zenkaku";
 import { listDateItems } from "../date-picker/date-item";
 
-export async function shohouToPrescInfo(shohou: Shohou, visitId: number): Promise<PrescInfoData> {
+export async function shohouToPrescInfo(
+  shohou: Shohou,
+  visitId: number
+): Promise<PrescInfoData> {
   let data: PrescInfoData = await initPrescInfoDataFromVisitId(visitId);
   data.使用期限年月日 = get使用期限年月日FromShohou(shohou);
   data.備考レコード = get備考レコードFromShohou(shohou);
   data.提供情報レコード = get提供情報レコードFromShohou(shohou);
-  data.RP剤情報グループ = shohou.groups.map(g => getRP剤情報FromGroup(g)); 
+  data.RP剤情報グループ = shohou.groups.map((g) => getRP剤情報FromGroup(g));
   return data;
 }
 
@@ -86,7 +89,9 @@ export function get検査値データ等レコードFromShohou(
   return [];
 }
 
-function get提供情報レコードFromShohou(shohou: Shohou): 提供情報レコード | undefined {
+function get提供情報レコードFromShohou(
+  shohou: Shohou
+): 提供情報レコード | undefined {
   let a: 提供診療情報レコード[] = get提供診療情報レコードFromShohou(shohou);
   let b: 検査値データ等レコード[] = get検査値データ等レコードFromShohou(shohou);
   if (a.length === 0 && b.length === 0) {
@@ -95,7 +100,7 @@ function get提供情報レコードFromShohou(shohou: Shohou): 提供情報レ�
     return {
       提供診療情報レコード: a,
       検査値データ等レコード: b,
-    }
+    };
   }
 }
 
@@ -105,15 +110,17 @@ function getRP剤情報FromGroup(group: DrugGroup): RP剤情報 {
     剤形レコード,
     用法レコード: get用法レコードFromGroup(group),
     用法補足レコード: get用法補足レコードFromGroup(group),
-    薬品情報グループ: group.drugs.map(d => get薬品情報FromDrug(d, 剤形レコード.剤形区分)),
-  }
+    薬品情報グループ: group.drugs.map((d) =>
+      get薬品情報FromDrug(d, 剤形レコード.剤形区分)
+    ),
+  };
 }
 
 function get剤形レコードFromGroup(group: DrugGroup): 剤形レコード {
   return {
     剤形区分: get剤形区分FromGroup(group),
     調剤数量: get調剤数量FromGroup(group),
-  }
+  };
 }
 
 function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
@@ -209,7 +216,7 @@ function get用法レコードFromGroup(group: DrugGroup): 用法レコード {
   return {
     用法コード: "",
     用法名称: group.usage.usage,
-  }
+  };
 }
 
 function get用法補足レコードFromGroup(group: DrugGroup): 用法補足レコード[] {
@@ -227,7 +234,7 @@ function get薬品情報FromDrug(drug: Drug, 剤形区分: 剤形区分): 薬品
     薬品レコード: get薬品レコードfromDrug(drug, 剤形区分),
     不均等レコード: get不均等レコードFromDrug(drug),
     薬品補足レコード: get薬品補足レコードFromDrug(drug),
-  }
+  };
 }
 
 function get不均等レコードFromDrug(drug: Drug): 不均等レコード | undefined {
@@ -258,7 +265,9 @@ function get不均等レコードFromDrug(drug: Drug): 不均等レコード | u
   }
 }
 
-function get薬品補足レコードFromDrug(drug: Drug): 薬品補足レコード[] | undefined {
+function get薬品補足レコードFromDrug(
+  drug: Drug
+): 薬品補足レコード[] | undefined {
   let 薬品補足レコード: 薬品補足レコード[] = [];
   if (drug.senpatsu) {
     let 薬品補足情報: string;
@@ -284,7 +293,9 @@ function get薬品補足レコードFromDrug(drug: Drug): 薬品補足レコー�
 
 function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 薬品レコード {
   const 情報区分: 情報区分 = 剤形区分 === "医療材料" ? "医療材料" : "医薬品";
-  const 薬品コード種別: 薬品コード種別 = drug.name.startsWith("【般】") ? "一般名コード" : "レセプト電算処理システム用コード";
+  const 薬品コード種別: 薬品コード種別 = drug.name.startsWith("【般】")
+    ? "一般名コード"
+    : "レセプト電算処理システム用コード";
   return {
     情報区分,
     薬品コード種別,
@@ -293,7 +304,7 @@ function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 
     分量: drug.amount,
     力価フラグ: "薬価単位",
     単位名: drug.unit,
-  }
+  };
 }
 
 // Wrapper /////////////////////////////////////////////////////////////////////////////////////
@@ -303,18 +314,25 @@ class Wrapper<T> {
   id: number;
   data: T;
 
-  constructor(data: T) {
-    this.id = serialId++;
+  constructor(data: T, id?: number) {
+    if (!id) {
+      id = serialId++;
+    }
+    this.id = id;
     this.data = Object.assign({}, data);
   }
 
   toDenshi(): T {
     return this.data;
   }
+
+  assign(src: Wrapper<T>): void {
+    this.data = src.data;
+  }
 }
 
 function unwrap<T>(list: Wrapper<T>[]): T[] {
-  return list.map(r => r.toDenshi());
+  return list.map((r) => r.toDenshi());
 }
 
 export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
@@ -322,11 +340,17 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
   提供情報レコード: 提供情報レコードWrapper;
   RP剤情報グループ: RP剤情報Wrapper[];
 
-  constructor(data: PrescInfoData) {
-    super(data);
-    this.備考レコード = (data.備考レコード ?? []).map(r => new 備考レコードWrapper(r));
-    this.提供情報レコード = new 提供情報レコードWrapper(data.提供情報レコード ?? {});
-    this.RP剤情報グループ = data.RP剤情報グループ.map(g => new RP剤情報Wrapper(g));
+  constructor(data: PrescInfoData, id?: number) {
+    super(data, id);
+    this.備考レコード = (data.備考レコード ?? []).map(
+      (r) => new 備考レコードWrapper(r)
+    );
+    this.提供情報レコード = new 提供情報レコードWrapper(
+      data.提供情報レコード ?? {}
+    );
+    this.RP剤情報グループ = data.RP剤情報グループ.map(
+      (g) => new RP剤情報Wrapper(g)
+    );
   }
 
   toDenshi(): PrescInfoData {
@@ -334,30 +358,83 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
       備考レコード: unwrap(this.備考レコード),
       提供情報レコード: this.提供情報レコード.toDenshi(),
       RP剤情報グループ: unwrap(this.RP剤情報グループ),
-    })
+    });
+  }
+
+  clone(): PrescInfoWrapper {
+    return new PrescInfoWrapper(this.toDenshi(), this.id);
+  }
+
+  assign(src: PrescInfoWrapper) {
+    super.assign(src);
+    Object.assign(this, {
+      備考レコード: src.備考レコード,
+      提供情報レコード: src.提供情報レコード,
+      RP剤情報グループ: src.RP剤情報グループ,
+    });
   }
 }
 
-export class 備考レコードWrapper extends Wrapper<備考レコード> { }
-export class 提供診療情報レコードWrapper extends Wrapper<提供診療情報レコード> { }
-export class 検査値データ等レコードWrapper extends Wrapper<検査値データ等レコード> { }
-export class 用法補足レコードWrapper extends Wrapper<用法補足レコード> { }
-export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコード>{}
+export class 備考レコードWrapper extends Wrapper<備考レコード> {
+  clone(): 備考レコードWrapper {
+    return new 備考レコードWrapper(this.toDenshi(), this.id);
+  }
+}
+
+export class 提供診療情報レコードWrapper extends Wrapper<提供診療情報レコード> {
+  clone(): 提供診療情報レコードWrapper {
+    return new 提供診療情報レコードWrapper(this.toDenshi(), this.id);
+  }
+}
+
+export class 検査値データ等レコードWrapper extends Wrapper<検査値データ等レコード> {
+  clone(): 検査値データ等レコードWrapper {
+    return new 検査値データ等レコードWrapper(this.toDenshi(), this.id);
+  }
+}
+
+export class 用法補足レコードWrapper extends Wrapper<用法補足レコード> {
+  clone(): 用法補足レコードWrapper {
+    return new 用法補足レコードWrapper(this.toDenshi(), this.id);
+  }
+}
+
+export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコード> {
+  clone(): 薬品補足レコードWrapper {
+    return new 薬品補足レコードWrapper(this.toDenshi(), this.id);
+  }
+}
 
 export class 提供情報レコードWrapper extends Wrapper<提供情報レコード> {
   提供診療情報レコード: 提供診療情報レコードWrapper[];
   検査値データ等レコード: 検査値データ等レコードWrapper[];
 
-  constructor(data: 提供情報レコード) {
-    super(data);
-    this.提供診療情報レコード = (data.提供診療情報レコード ?? []).map(r => new 提供診療情報レコードWrapper(r));
-    this.検査値データ等レコード = (data.検査値データ等レコード ?? []).map(r => new 検査値データ等レコードWrapper(r));
+  constructor(data: 提供情報レコード, id?: number) {
+    super(data, id);
+    this.提供診療情報レコード = (data.提供診療情報レコード ?? []).map(
+      (r) => new 提供診療情報レコードWrapper(r)
+    );
+    this.検査値データ等レコード = (data.検査値データ等レコード ?? []).map(
+      (r) => new 検査値データ等レコードWrapper(r)
+    );
   }
 
   toDenshi(): 提供情報レコード {
     return Object.assign({}, super.toDenshi(), {
       提供診療情報レコード: unwrap(this.提供診療情報レコード),
       検査値データ等レコード: unwrap(this.検査値データ等レコード),
+    });
+  }
+
+  clone(): 提供情報レコードWrapper {
+    return new 提供情報レコードWrapper(this.toDenshi(), this.id);
+  }
+
+  assign(src: 提供情報レコードWrapper): void {
+    super.assign(src);
+    Object.assign(this, {
+      提供診療情報レコード: src.提供診療情報レコード,
+      検査値データ等レコード: src.検査値データ等レコード,
     })
   }
 }
@@ -366,32 +443,62 @@ export class RP剤情報Wrapper extends Wrapper<RP剤情報> {
   用法補足レコード: 用法補足レコードWrapper[];
   薬品情報グループ: 薬品情報Wrapper[];
 
-  constructor(data: RP剤情報) {
-    super(data);
-    this.用法補足レコード = (data.用法補足レコード ?? []).map(r => new 用法補足レコードWrapper(r));
-    this.薬品情報グループ = data.薬品情報グループ.map(r => new 薬品情報Wrapper(r));
+  constructor(data: RP剤情報, id?: number) {
+    super(data, id);
+    this.用法補足レコード = (data.用法補足レコード ?? []).map(
+      (r) => new 用法補足レコードWrapper(r)
+    );
+    this.薬品情報グループ = data.薬品情報グループ.map(
+      (r) => new 薬品情報Wrapper(r)
+    );
   }
 
   toDenshi(): RP剤情報 {
     return Object.assign({}, super.toDenshi(), {
       用法補足レコード: unwrap(this.用法補足レコード),
       薬品情報グループ: unwrap(this.薬品情報グループ),
+    });
+  }
+
+  clone(): RP剤情報Wrapper {
+    return new RP剤情報Wrapper(this.toDenshi(), this.id);
+  }
+
+  assign(src: RP剤情報Wrapper) {
+    super.assign(src);
+    Object.assign(this, {
+      用法補足レコード: src.用法補足レコード,
+      薬品情報グループ: src.薬品情報グループ,
     })
   }
 }
 
 export class 薬品情報Wrapper extends Wrapper<薬品情報> {
   薬品補足レコード: Wrapper<薬品補足レコード>[];
+  ippanmei?: string;
+  ippanmeicode?: string;
 
-  constructor(data: 薬品情報) {
-    super(data);
-    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(r => new Wrapper<薬品補足レコード>(r));
+  constructor(data: 薬品情報, id?: number) {
+    super(data, id);
+    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(
+      (r) => new Wrapper<薬品補足レコード>(r)
+    );
   }
 
   toDenshi(): 薬品情報 {
     return Object.assign({}, super.toDenshi(), {
       薬品補足レコード: unwrap(this.薬品補足レコード),
+    });
+  }
+
+  clone(): 薬品情報Wrapper {
+    return new 薬品情報Wrapper(this.toDenshi(), this.id);
+  }
+
+  assign(src: 薬品情報Wrapper) {
+    super.assign(src);
+    Object.assign(this, {
+      薬品補足レコード: src.薬品補足レコード,
     })
   }
 }
-

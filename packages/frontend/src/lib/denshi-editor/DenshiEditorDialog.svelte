@@ -35,6 +35,7 @@
         destroy: () => (clearWorkarea && clearWorkarea()),
         drug,
         at,
+        onChange: () => data = data,
       }
     });
     clearWorkarea =  () => {

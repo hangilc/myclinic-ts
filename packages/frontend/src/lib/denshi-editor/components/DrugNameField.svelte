@@ -12,6 +12,7 @@
   export let drug: 薬品情報Wrapper;
   export let isEditing: boolean;
   export let at: string;
+  export let onChange: () => void;
   let searchText = drug.data.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: IyakuhinMaster[] = [];
@@ -35,7 +36,18 @@
   function doCancel() {}
 
   function doIyakuhinMasterSelect(m: IyakuhinMaster) {
+    Object.assign(drug.data.薬品レコード, {
+      薬品コード種別: "レセプト電算処理システム用コード",
+      薬品コード: m.iyakuhincode.toString(),
+      薬品名称: m.name,
+      単位名: m.unit,
+    })
+    drug.ippanmei = m.ippanmei;
+    drug.ippanmeicode = m.ippanmeicode?.toString();
+    searchText = "";
     searchIyakuhinResult = [];
+    isEditing = false;
+    onChange();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {}
