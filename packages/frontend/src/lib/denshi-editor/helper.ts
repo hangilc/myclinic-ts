@@ -1,6 +1,6 @@
 import type { RP剤情報, 不均等レコード, 剤形レコード, 用法レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
-import { toZenkaku } from "@/lib/zenkaku";
+import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
 import type { Drug, DrugGroup, Usage } from "@/lib/parse-shohou";
 import type { ConvData2 } from "./conv/denshi-conv";
@@ -58,9 +58,9 @@ export function drugRep(drug: 薬品情報): string {
 
 export function unconvDrugRep(drug: Drug): string {
   let s = `${drug.name}　${drug.amount}${drug.unit}${drug.uneven ?? ""}`;
-  if( drug.senpatsu === "henkoufuka") {
+  if (drug.senpatsu === "henkoufuka") {
     s += " 変更不可";
-  } else if( drug.senpatsu === "kanjakibou") {
+  } else if (drug.senpatsu === "kanjakibou") {
     s += "　患者希望";
   }
   if (drug.drugComments.length > 0) {
@@ -73,8 +73,8 @@ export function unconvDrugRep(drug: Drug): string {
 
 export function usageRep(usage: 用法レコード, data2: ConvData2): string {
   let s = usage.用法名称;
-  if( data2.用法補足レコード && data2.用法補足レコード.length > 0){
-    for(let rec of data2.用法補足レコード){
+  if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
+    for (let rec of data2.用法補足レコード) {
       s += `　${rec.用法補足情報}`
     }
   }
@@ -83,8 +83,8 @@ export function usageRep(usage: 用法レコード, data2: ConvData2): string {
 
 export function unconvUsageRep(usage: Usage, data2: ConvData2): string {
   let s = usage.usage;
-  if( data2.用法補足レコード && data2.用法補足レコード.length > 0){
-    for(let rec of data2.用法補足レコード){
+  if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
+    for (let rec of data2.用法補足レコード) {
       s += `　${rec.用法補足情報}`
     }
   }
@@ -99,3 +99,50 @@ export function runner(...fs: (() => any)[]): () => void {
     }
   }
 }
+
+ export function serializeUneven(r: 不均等レコード | undefined): string {
+  if (r) {
+    let parts: string[] = [r.不均等１回目服用量, r.不均等２回目服用量];
+    [
+      r.不均等３回目服用量,
+      r.不均等４回目服用量,
+      r.不均等５回目服用量,
+    ].forEach((e) => {
+      if (e) {
+        parts.push(e);
+      }
+    });
+    return parts.join("-");
+  } else {
+    return "";
+  }
+}
+
+export function deserializeUneven(s: string): 不均等レコード | undefined {
+  s = s.trim();
+  if (s === "") {
+    return undefined;
+  } else {
+    s = toHankaku(s);
+    let parts: string[] = [];
+    for (let e of s.split(/\s*-\s*/)) {
+      let f = parseFloat(e);
+      if (isNaN(f)) {
+        throw new Error(`数値でありません: ${e}`);
+      } else {
+        parts.push(f.toString());
+      }
+    }
+    if (parts.length < 2) {
+      throw new Error(`分割数が少なすぎます（２つ以上必要）`);
+    }
+    return {
+      不均等１回目服用量: parts[0],
+      不均等２回目服用量: parts[1],
+      不均等３回目服用量: parts[2],
+      不均等４回目服用量: parts[3],
+      不均等５回目服用量: parts[4],
+    };
+  }
+}
+

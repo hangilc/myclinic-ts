@@ -8,24 +8,38 @@
   import FieldForm from "./workarea/FieldForm.svelte";
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import api from "@/lib/api";
+  import { tick } from "svelte";
 
   export let drug: 薬品情報Wrapper;
   export let isEditing: boolean;
   export let at: string;
-  export let onChange: () => void;
+  export let onFieldChange: () => void;
+  export const focus: () => void = async () => {
+    await tick();
+    inputElement?.focus();
+  }
   let searchText = drug.data.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
+
+  function doRepClick() {
+    searchText = drug.data.薬品レコード.薬品名称;
+    isEditing = true;
+    focus();
+  }
 
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
       if (drug.data.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = await api.searchIyakuhinMaster(t, at);
-      } else {
+      } else if (drug.data.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
       }
+    } else {
+      searchIyakuhinResult = [];
+      searchKizaiResult = [];
     }
   }
 
@@ -33,7 +47,11 @@
     searchText = "";
   }
 
-  function doCancel() {}
+  function doCancel() {
+    if( drug.data.薬品レコード.薬品コード !== "" ){
+      isEditing = false;
+    }
+  }
 
   function doIyakuhinMasterSelect(m: IyakuhinMaster) {
     Object.assign(drug.data.薬品レコード, {
@@ -41,13 +59,13 @@
       薬品コード: m.iyakuhincode.toString(),
       薬品名称: m.name,
       単位名: m.unit,
-    })
+    });
     drug.ippanmei = m.ippanmei;
     drug.ippanmeicode = m.ippanmeicode?.toString();
     searchText = "";
     searchIyakuhinResult = [];
     isEditing = false;
-    onChange();
+    onFieldChange();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {}
@@ -57,7 +75,8 @@
   <FieldTitle>薬品名称</FieldTitle>
   <FieldForm>
     {#if !isEditing}
-      <div>{drug.data.薬品レコード.薬品名称}</div>
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="rep" on:click={doRepClick}>{drug.data.薬品レコード.薬品名称}</div>
     {:else}
       <div class="with-icons">
         <form on:submit|preventDefault={doSearch}>
@@ -76,17 +95,19 @@
         {/if}
       </div>
     {/if}
-    {#if drug.data.薬品レコード.情報区分 === "医薬品"}
-      {#each searchIyakuhinResult as master (master.iyakuhincode)}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div
-          class="master-item"
-          on:click={() => doIyakuhinMasterSelect(master)}
-        >
-          {master.name}
-        </div>
-      {/each}
-    {:else if drug.data.薬品レコード.情報区分 === "医療材料"}
+    {#if drug.data.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
+      <div class="search-result">
+        {#each searchIyakuhinResult as master (master.iyakuhincode)}
+          <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <div
+            class="master-item"
+            on:click={() => doIyakuhinMasterSelect(master)}
+          >
+            {master.name}
+          </div>
+        {/each}
+      </div>
+    {:else if drug.data.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
       <div class="search-result">
         {#each searchKizaiResult as master (master.kizaicode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -100,6 +121,10 @@
 </Field>
 
 <style>
+  .rep {
+    cursor: pointer;
+  }
+
   .search-text {
     width: 18em;
   }
