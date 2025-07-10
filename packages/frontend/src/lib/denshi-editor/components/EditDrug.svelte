@@ -2,7 +2,9 @@
   import type { RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-tmpl";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
+  import DrugUsageField from "./DrugUsageField.svelte";
   import JohoKubunField from "./JohoKubunField.svelte";
+  import TimesField from "./TimesField.svelte";
   import UnevenField from "./UnevenField.svelte";
   import Commands from "./workarea/Commands.svelte";
   import Title from "./workarea/Title.svelte";
@@ -22,6 +24,8 @@
   let isEditingUneven = false;
   let isEditingDrugSuppl = false;
   let isEditingZaikeiKubun = false;
+  let isEditingUsage = false;
+  let isEditingTimes = false;
 
   function onFieldChange() {
     data = data;
@@ -57,6 +61,8 @@
     bind:isEditing={isEditingZaikeiKubun}
     {onFieldChange}
   />
+  <DrugUsageField {group} bind:isEditing={isEditingUsage} {onFieldChange}/>
+  <TimesField {group} bind:isEditing={isEditingTimes} {onFieldChange} />
   <Commands>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
