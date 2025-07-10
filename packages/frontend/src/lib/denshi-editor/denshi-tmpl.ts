@@ -394,8 +394,17 @@ export class 検査値データ等レコードWrapper extends Wrapper<検査値�
 }
 
 export class 用法補足レコードWrapper extends Wrapper<用法補足レコード> {
+  isEditing: boolean = false;
+
   clone(): 用法補足レコードWrapper {
-    return new 用法補足レコードWrapper(this.toDenshi(), this.id);
+    let r = new 用法補足レコードWrapper(this.toDenshi(), this.id);
+    r.isEditing = this.isEditing;
+    return r;
+  }
+
+  assign(src: 用法補足レコードWrapper) {
+    super.assign(src);
+    this.isEditing = src.isEditing;
   }
 }
 
@@ -411,6 +420,11 @@ export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコ�
       throw new Error(`薬品補足レコードが編集中ｎです。`);
     }
     return super.toDenshi();
+  }
+
+  assign(src: 薬品補足レコードWrapper) {
+    super.assign(src);
+    this.isEditing = src.isEditing;
   }
 }
 
