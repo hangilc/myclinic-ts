@@ -45,7 +45,7 @@
   import {
     drawShohousen2025,
   } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
-  import { isKensa } from "./helper";
+  import { isKensa, resolveByMap } from "./helper";
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
   import { Hotline, type Patient } from "myclinic-model";
@@ -727,6 +727,7 @@
       return;
     }
     let orig: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
+    await resolveByMap(orig);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {

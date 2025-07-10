@@ -24,7 +24,6 @@ import type { Drug, DrugGroup, Shohou } from "@/lib/parse-shohou";
 import { DateWrapper } from "myclinic-util";
 import { initPrescInfoDataFromVisitId } from "../denshi-shohou/visit-shohou";
 import { toHankaku } from "@/lib/zenkaku";
-import { listDateItems } from "../date-picker/date-item";
 
 export async function shohouToPrescInfo(
   shohou: Shohou,
