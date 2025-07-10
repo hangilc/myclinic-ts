@@ -1,9 +1,10 @@
-import type { RP剤情報, 不均等レコード, 剤形レコード, 用法レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報, 不均等レコード, 剤形レコード, 用法レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
 import type { Drug, DrugGroup, Usage } from "@/lib/parse-shohou";
 import type { ConvData2 } from "./conv/denshi-conv";
+import type { RP剤情報Wrapper, 薬品情報Wrapper } from "./denshi-tmpl";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -144,5 +145,13 @@ export function deserializeUneven(s: string): 不均等レコード | undefined 
       不均等５回目服用量: parts[4],
     };
   }
+}
+
+export function isValidDrug(drug: 薬品情報Wrapper): boolean {
+  return drug.data.薬品レコード.薬品コード !== "";
+}
+
+export function isValidUsage(usage: 用法レコード): boolean {
+  return usage.用法コード !== "";
 }
 

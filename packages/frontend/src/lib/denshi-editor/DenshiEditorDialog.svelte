@@ -14,6 +14,7 @@
   export let destroy: () => void;
   export let orig: PrescInfoData;
   export let at: string;
+  export let showValid: boolean = false;
   
   let data = new PrescInfoWrapper(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
@@ -50,7 +51,7 @@
   <div class="top">
     <div class="left">
       <Commands onCancel={doCancel} />
-      <CurrentPresc {data} {onDrugSelect} />
+      <CurrentPresc {data} {onDrugSelect} {showValid} />
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>

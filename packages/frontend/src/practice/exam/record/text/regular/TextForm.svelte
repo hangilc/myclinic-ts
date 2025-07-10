@@ -734,6 +734,7 @@
         title: "電子処方に変換",
         orig,
         at: visit.visitedAt.substring(0, 10),
+        showValid: true,
       },
     });
   }
