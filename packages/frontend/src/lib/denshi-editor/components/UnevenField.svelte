@@ -21,7 +21,7 @@
 
   function rep(不均等レコード: 不均等レコード | undefined): string {
     let s = serializeUneven(不均等レコード);
-    if( s === "" ){
+    if (s === "") {
       return "（なし）";
     } else {
       return s;
@@ -53,24 +53,26 @@
   }
 </script>
 
-<Field>
-  <FieldTitle>不均等レコード</FieldTitle>
-  <FieldForm>
-    {#if !isEditing}
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="rep" on:click={doRepClick}>
-        {rep(不均等レコード)}
-      </div>
-    {:else}
-      <form on:submit|preventDefault={doEnter} class="with-icons">
-        <input type="text" bind:value={inputText} bind:this={inputElement} />
-        <SubmitLink onClick={doEnter} />
-        <CancelLink onClick={doCancel} />
-        <TrashLink onClick={doDelete} />
-      </form>
-    {/if}
-  </FieldForm>
-</Field>
+{#if 不均等レコード !== undefined}
+  <Field>
+    <FieldTitle>不均等レコード</FieldTitle>
+    <FieldForm>
+      {#if !isEditing}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="rep" on:click={doRepClick}>
+          {rep(不均等レコード)}
+        </div>
+      {:else}
+        <form on:submit|preventDefault={doEnter} class="with-icons">
+          <input type="text" bind:value={inputText} bind:this={inputElement} />
+          <SubmitLink onClick={doEnter} />
+          <CancelLink onClick={doCancel} />
+          <TrashLink onClick={doDelete} />
+        </form>
+      {/if}
+    </FieldForm>
+  </Field>
+{/if}
 
 <style>
   .rep {

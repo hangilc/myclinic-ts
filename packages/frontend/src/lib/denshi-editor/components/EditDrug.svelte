@@ -6,6 +6,7 @@
   import JohoKubunField from "./JohoKubunField.svelte";
   import TimesField from "./TimesField.svelte";
   import UnevenField from "./UnevenField.svelte";
+  import UsageSupplField from "./UsageSupplField.svelte";
   import Commands from "./workarea/Commands.svelte";
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
@@ -26,6 +27,7 @@
   let isEditingZaikeiKubun = false;
   let isEditingUsage = false;
   let isEditingTimes = false;
+  let isEditingUsageSuppl = false;
 
   function onFieldChange() {
     data = data;
@@ -61,8 +63,13 @@
     bind:isEditing={isEditingZaikeiKubun}
     {onFieldChange}
   />
-  <DrugUsageField {group} bind:isEditing={isEditingUsage} {onFieldChange}/>
+  <DrugUsageField {group} bind:isEditing={isEditingUsage} {onFieldChange} />
   <TimesField {group} bind:isEditing={isEditingTimes} {onFieldChange} />
+  <UsageSupplField
+    {group}
+    bind:isEditing={isEditingUsageSuppl}
+    {onFieldChange}
+  />
   <Commands>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>

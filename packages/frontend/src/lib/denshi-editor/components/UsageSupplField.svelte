@@ -13,6 +13,7 @@
 
   export let group: RP剤情報Wrapper;
   export let isEditing: boolean;
+  export let onFieldChange: () => void;
   let inputText = "";
   let inputElement: HTMLInputElement | undefined = undefined;
 
