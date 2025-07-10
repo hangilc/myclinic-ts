@@ -19,6 +19,8 @@
   let data = new PrescInfoWrapper(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
   let wa: HTMLElement;
+  let selectedGroupId = 0;
+  let selectedDrugId = 0;
 
   function doCancel() {
     destroy();
@@ -43,6 +45,8 @@
     clearWorkarea =  () => {
       w.$destroy();
       clearWorkarea = undefined;
+      selectedGroupId = 0;
+      selectedDrugId = 0;
     }
   }
 </script>
@@ -51,7 +55,7 @@
   <div class="top">
     <div class="left">
       <Commands onCancel={doCancel} />
-      <CurrentPresc {data} {onDrugSelect} {showValid} />
+      <CurrentPresc {data} {onDrugSelect} {showValid} bind:selectedGroupId bind:selectedDrugId/>
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>

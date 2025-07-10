@@ -16,28 +16,39 @@
     drug: 薬品情報Wrapper,
   ) => void;
   export let showValid: boolean = false;
+  export let selectedGroupId: number;
+  export let selectedDrugId: number;
+
+  function doDrugSelect(group: RP剤情報Wrapper, drug: 薬品情報Wrapper) {
+    selectedGroupId = group.id;
+    selectedDrugId = drug.id;
+    onDrugSelect(group, drug);
+  }
 </script>
 
 <div>
   <div class="groups">
     {#each data.RP剤情報グループ as group, index (group.id)}
-      <div>{toZenkaku((index + 1).toString())}）</div>
-      <div>
-        {#each group.薬品情報グループ as drug (drug.id)}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
-          <div class="drug-rep" on:click={() => onDrugSelect(group, drug)}>
+      <div class:group-selected={selectedGroupId === group.id} class="group">
+        <div>{toZenkaku((index + 1).toString())}）</div>
+        <div>
+          {#each group.薬品情報グループ as drug (drug.id)}
+            <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <div class="drug-rep" on:click={() => doDrugSelect(group, drug)} 
+              class:drug-selected={drug.id === selectedDrugId}>
+              {#if showValid}
+                <ConvDrugValidity {drug} />
+              {/if}
+              <span>{drugRep(drug.toDenshi())}</span>
+            </div>
+          {/each}
+          <div class="usage-rep">
             {#if showValid}
-              <ConvDrugValidity {drug} />
+              <ConvUsageValidity usage={group.data.用法レコード} />
             {/if}
-            <span>{drugRep(drug.toDenshi())}</span>
+            {group.data.用法レコード.用法名称}
+            {daysTimesDisp(group.toDenshi())}
           </div>
-        {/each}
-        <div class="usage-rep">
-          {#if showValid}
-            <ConvUsageValidity usage={group.data.用法レコード} />
-          {/if}
-          {group.data.用法レコード.用法名称}
-          {daysTimesDisp(group.toDenshi())}
         </div>
       </div>
     {/each}
@@ -45,13 +56,23 @@
 </div>
 
 <style>
-  .groups {
+  .group {
     display: grid;
     grid-template-columns: auto 1fr;
+    padding: 2px;
+    margin-bottom: 6px;
   }
 
   .drug-rep,
   .usage-rep {
     cursor: pointer;
+  }
+
+  .group-selected {
+    border: 2px solid green;
+  }
+
+  .drug-selected {
+    text-decoration: underline;
   }
 </style>

@@ -29,6 +29,43 @@
   let isEditingTimes = false;
   let isEditingUsageSuppl = false;
 
+  function confirmNotEditing(): boolean {
+    if (isEditingJohoKubun) {
+      alert("情報区分が編集中です。");
+      return false;
+    }
+    if (isEdigintName) {
+      alert("薬品名が編集中です。");
+      return false;
+    }
+    if (isEditingUneven) {
+      alert("不均等レコードが編集中です。");
+      return false;
+    }
+    if (isEditingDrugSuppl) {
+      alert("薬品補足が編集中です。");
+      return false;
+    }
+    if (isEditingZaikeiKubun) {
+      alert("　剤型区分が編集中です。");
+      return false;
+    }
+    if (isEditingUsage) {
+      alert("用法が編集中です。");
+      return false;
+    }
+    if (isEditingTimes) {
+      alert("日数・回数が編集中です。");
+      return false;
+    }
+    if (isEditingUsageSuppl) {
+      alert("用法補足が編集中です。");
+      return false;
+    }
+
+    return true;
+  }
+
   function onFieldChange() {
     data = data;
   }
@@ -38,6 +75,9 @@
   }
 
   function doEnter() {
+    if( !confirmNotEditing() ){
+      return;
+    }
     group.assign(data);
     destroy();
     onChange();

@@ -16,6 +16,9 @@
   export let group: RP剤情報Wrapper;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
+  if( group.data.用法レコード.用法コード === "") {
+    isEditing = true;
+  }
   const freeTextCode = "0X0XXXXXXXXX0000";
   let codeMode: "master" | "free" = codeModeValue();
   let searchText = group.data.用法レコード.用法名称;
@@ -88,6 +91,9 @@
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div class="rep" on:click={doRepClick}>
         {rep(group)}
+        {#if group.data.用法レコード.用法コード === freeTextCode}
+        （自由文章）
+        {/if}
       </div>
     {:else}
       <div>
