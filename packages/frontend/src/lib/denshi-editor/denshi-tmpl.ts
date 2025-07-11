@@ -661,6 +661,9 @@ export class 薬品情報Wrapper {
 
   addSuppl(text: string): void {
     let suppl = 薬品補足レコードWrapper.fromText(text);
+    if( text === "" ){
+      suppl.isEditing = true;
+    }
     this.薬品補足レコード.push(suppl);
   }
 }
