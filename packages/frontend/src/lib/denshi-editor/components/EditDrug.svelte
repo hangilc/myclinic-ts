@@ -8,6 +8,7 @@
   import UnevenField from "./UnevenField.svelte";
   import UsageSupplField from "./UsageSupplField.svelte";
   import Commands from "./workarea/Commands.svelte";
+  import SmallLink from "./workarea/SmallLink.svelte";
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
@@ -82,6 +83,16 @@
     destroy();
     onChange();
   }
+
+
+  function addDrugSuppl(): void {
+    let drug = data.findDrugById(drugId);
+    if( !drug ){
+      throw new Error(`no such drug: ${drugId}`);
+    }
+    drug.addSuppl("");
+    data = data;
+  }
 </script>
 
 <Workarea>
@@ -111,7 +122,18 @@
     {onFieldChange}
   />
   <Commands>
+    <div class="sub-commands">
+      <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>
+
+    </div>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
   </Commands>
 </Workarea>
+
+<style>
+  .sub-commands {
+    text-align: left;
+    margin-bottom: 6px;
+  }
+</style>

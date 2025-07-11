@@ -372,6 +372,17 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
       RP剤情報グループ: src.RP剤情報グループ,
     });
   }
+
+  findDrugById(drugId: number): { group: RP剤情報Wrapper; drug: 薬品情報Wrapper; } | undefined {
+    for(let g of this.RP剤情報グループ){
+      for(let d of g.薬品情報グループ){
+        if( d.id === drugId ){
+          return { group: g, drug: d };
+        }
+      }
+    }
+    return undefined;
+  }
 }
 
 export class 備考レコードWrapper extends Wrapper<備考レコード> {
@@ -424,6 +435,11 @@ export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコ�
   assign(src: 薬品補足レコードWrapper) {
     super.assign(src);
     this.isEditing = src.isEditing;
+  }
+
+  static fromText(text: string): 薬品補足レコードWrapper {
+    let data: 薬品補足レコード = { 薬品補足情報: text };
+    return new 薬品補足レコードWrapper(data);
   }
 }
 
@@ -493,6 +509,15 @@ export class RP剤情報Wrapper extends Wrapper<RP剤情報> {
       薬品情報グループ: src.薬品情報グループ,
     })
   }
+
+  findDrugById(drugId: number): 薬品情報Wrapper | undefined {
+    for(let d of this.薬品情報グループ){
+      if( d.id === drugId ){
+        return d;
+      }
+    }
+    return undefined;
+  }
 }
 
 export class 薬品情報Wrapper extends Wrapper<薬品情報> {
@@ -522,5 +547,10 @@ export class 薬品情報Wrapper extends Wrapper<薬品情報> {
     Object.assign(this, {
       薬品補足レコード: src.薬品補足レコード,
     })
+  }
+
+  addSuppl(text: string): void {
+    let suppl = 薬品補足レコードWrapper.fromText(text);
+    this.薬品補足レコード.push(suppl);
   }
 }
