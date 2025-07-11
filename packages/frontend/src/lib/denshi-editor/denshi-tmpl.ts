@@ -309,38 +309,42 @@ function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 
 // Wrapper /////////////////////////////////////////////////////////////////////////////////////
 let serialId = 1;
 
-class Wrapper<T> {
-  id: number;
-  data: T;
+// class Wrapper<T> {
+//   id: number;
+//   data: T;
 
-  constructor(data: T, id?: number) {
-    if (!id) {
-      id = serialId++;
-    }
-    this.id = id;
-    this.data = Object.assign({}, data);
-  }
+//   constructor(data: T, id?: number) {
+//     this.id = id ?? serialId++;
+//     this.data = Object.assign({}, data);
+//   }
 
-  toDenshi(): T {
-    return this.data;
-  }
+//   toDenshi(): T {
+//     return this.data;
+//   }
 
-  assign(src: Wrapper<T>): void {
-    this.data = src.data;
-  }
-}
+//   assign(src: Wrapper<T>): void {
+//     this.data = src.data;
+//   }
+// }
 
-function unwrap<T>(list: Wrapper<T>[]): T[] {
-  return list.map((r) => r.toDenshi());
-}
+// function unwrap<T>(list: Wrapper<T>[]): T[] {
+//   return list.map((r) => r.toDenshi());
+// }
 
-export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
+export class PrescInfoWrapper {
+  data: PrescInfoData;
   備考レコード: 備考レコードWrapper[];
   提供情報レコード: 提供情報レコードWrapper;
   RP剤情報グループ: RP剤情報Wrapper[];
 
-  constructor(data: PrescInfoData, id?: number) {
-    super(data, id);
+  constructor(data: PrescInfoData,
+    備考レコード: 備考レコードWrapper[],
+    提供情報レコード: 提供情報レコードWrapper,
+    RP剤情報グループ: RP剤情報Wrapper[]) {
+    this.data = data;
+    this.備考レコード = 備考レコード;
+    this.提供情報レコード = 提供情報レコード;
+    this.RP剤情報グループ = RP剤情報グループ;
     this.備考レコード = (data.備考レコード ?? []).map(
       (r) => new 備考レコードWrapper(r)
     );
@@ -352,21 +356,34 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
     );
   }
 
+  static fromData(data: PrescInfoData): PrescInfoWrapper {
+    return new PrescInfoWrapper(
+      data,
+      (data.備考レコード ?? []).map((r) => 備考レコードWrapper.fromData(r)),
+      提供情報レコードWrapper.fromData(data.提供情報レコード ?? {}),
+      data.RP剤情報グループ.map(g => RP剤情報Wrapper.fromData(g)),
+    )
+  }
+
   toDenshi(): PrescInfoData {
-    return Object.assign({}, super.toDenshi(), {
-      備考レコード: unwrap(this.備考レコード),
+    return Object.assign({}, this.data, {
+      備考レコード: this.備考レコード.map(r => r.toDenshi()),
       提供情報レコード: this.提供情報レコード.toDenshi(),
-      RP剤情報グループ: unwrap(this.RP剤情報グループ),
+      RP剤情報グループ: this.RP剤情報グループ.map(r => r.toDenshi()),
     });
   }
 
   clone(): PrescInfoWrapper {
-    return new PrescInfoWrapper(this.toDenshi(), this.id);
+    return new PrescInfoWrapper(Object.assign({}, this.data),
+      this.備考レコード.map(r => r.clone()),
+      this.提供情報レコード.clone(),
+      this.RP剤情報グループ.map(g => g.clone())
+    )
   }
 
   assign(src: PrescInfoWrapper) {
-    super.assign(src);
     Object.assign(this, {
+      data: src.data,
       備考レコード: src.備考レコード,
       提供情報レコード: src.提供情報レコード,
       RP剤情報グループ: src.RP剤情報グループ,
@@ -374,9 +391,9 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
   }
 
   findDrugById(drugId: number): { group: RP剤情報Wrapper; drug: 薬品情報Wrapper; } | undefined {
-    for(let g of this.RP剤情報グループ){
-      for(let d of g.薬品情報グループ){
-        if( d.id === drugId ){
+    for (let g of this.RP剤情報グループ) {
+      for (let d of g.薬品情報グループ) {
+        if (d.id === drugId) {
           return { group: g, drug: d };
         }
       }
@@ -385,76 +402,145 @@ export class PrescInfoWrapper extends Wrapper<PrescInfoData> {
   }
 }
 
-export class 備考レコードWrapper extends Wrapper<備考レコード> {
+export class 備考レコードWrapper {
+  id: number;
+  data: 備考レコード;
+
+  constructor(id: number, data: 備考レコード) {
+    this.id = id;
+    this.data = data;
+  }
+
+  static fromData(data: 備考レコード): 備考レコードWrapper {
+    return new 備考レコードWrapper(serialId++, data);
+  }
+
   clone(): 備考レコードWrapper {
-    return new 備考レコードWrapper(this.toDenshi(), this.id);
+    return new 備考レコードWrapper(this.id, Object.assign({}, this.data));
+  }
+
+  toDenshi(): 備考レコード {
+    return this.data;
   }
 }
 
-export class 提供診療情報レコードWrapper extends Wrapper<提供診療情報レコード> {
+
+export class 提供診療情報レコードWrapper {
+  id: number;
+  data: 提供診療情報レコード;
+
+  constructor(id: number, data: 提供診療情報レコード) {
+    this.id = id;
+    this.data = data;
+  }
+
+  static fromData(data: 提供診療情報レコード): 提供診療情報レコードWrapper {
+    return new 提供診療情報レコードWrapper(serialId++, data);
+  }
+
   clone(): 提供診療情報レコードWrapper {
-    return new 提供診療情報レコードWrapper(this.toDenshi(), this.id);
+    return new 提供診療情報レコードWrapper(this.id, Object.assign({}, this.data));
+  }
+
+  toDenshi(): 提供診療情報レコード {
+    return this.data;
   }
 }
 
-export class 検査値データ等レコードWrapper extends Wrapper<検査値データ等レコード> {
+export class 検査値データ等レコードWrapper {
+  id: number;
+  data: 検査値データ等レコード;
+
+  constructor(id: number, data: 検査値データ等レコード) {
+    this.id = id;
+    this.data = data;
+  }
+
+  static fromData(data: 検査値データ等レコード): 検査値データ等レコードWrapper {
+    return new 検査値データ等レコードWrapper(serialId++, data);
+  }
+
   clone(): 検査値データ等レコードWrapper {
-    return new 検査値データ等レコードWrapper(this.toDenshi(), this.id);
+    return new 検査値データ等レコードWrapper(this.id, Object.assign({}, this.data));
+  }
+
+  toDenshi(): 検査値データ等レコード {
+    return this.data;
   }
 }
 
-export class 用法補足レコードWrapper extends Wrapper<用法補足レコード> {
+export class 用法補足レコードWrapper {
+  id: number;
+  data: 用法補足レコード;
   isEditing: boolean = false;
+
+  constructor(id: number, data: 用法補足レコード) {
+    this.id = id;
+    this.data = data;
+  }
+
+  static fromData(data: 用法補足レコード): 用法補足レコードWrapper {
+    return new 用法補足レコードWrapper(serialId++, data);
+  }
 
   clone(): 用法補足レコードWrapper {
-    let r = new 用法補足レコードWrapper(this.toDenshi(), this.id);
-    r.isEditing = this.isEditing;
-    return r;
+    return new 用法補足レコードWrapper(this.id, Object.assign({}, this.data));
   }
 
-  assign(src: 用法補足レコードWrapper) {
-    super.assign(src);
-    this.isEditing = src.isEditing;
+  toDenshi(): 用法補足レコード {
+    return this.data;
   }
 }
 
-export class 薬品補足レコードWrapper extends Wrapper<薬品補足レコード> {
+export class 薬品補足レコードWrapper {
+  id: number;
+  data: 薬品補足レコード;
   isEditing: boolean = false;
 
+  constructor(id: number, data: 薬品補足レコード) {
+    this.id = id;
+    this.data = data;
+  }
+
+  static fromData(data: 薬品補足レコード): 薬品補足レコードWrapper {
+    return new 薬品補足レコードWrapper(serialId++, data);
+  }
+
   clone(): 薬品補足レコードWrapper {
-    return Object.assign(new 薬品補足レコードWrapper(this.toDenshi(), this.id), { isEditing: this.isEditing });
+    return new 薬品補足レコードWrapper(this.id, Object.assign({}, this.data));
   }
 
   toDenshi(): 薬品補足レコード {
-    if( this.isEditing ){
-      throw new Error(`薬品補足レコードが編集中ｎです。`);
-    }
-    return super.toDenshi();
-  }
-
-  assign(src: 薬品補足レコードWrapper) {
-    super.assign(src);
-    this.isEditing = src.isEditing;
+    return this.data;
   }
 
   static fromText(text: string): 薬品補足レコードWrapper {
     let data: 薬品補足レコード = { 薬品補足情報: text };
-    return new 薬品補足レコードWrapper(data);
+    return 薬品補足レコードWrapper.fromData(data);
   }
 }
 
-export class 提供情報レコードWrapper extends Wrapper<提供情報レコード> {
+export class 提供情報レコードWrapper {
+  id: number;
+  data: 提供情報レコード;
   提供診療情報レコード: 提供診療情報レコードWrapper[];
   検査値データ等レコード: 検査値データ等レコードWrapper[];
 
-  constructor(data: 提供情報レコード, id?: number) {
-    super(data, id);
-    this.提供診療情報レコード = (data.提供診療情報レコード ?? []).map(
-      (r) => new 提供診療情報レコードWrapper(r)
-    );
-    this.検査値データ等レコード = (data.検査値データ等レコード ?? []).map(
-      (r) => new 検査値データ等レコードWrapper(r)
-    );
+  constructor(id: number, data: 提供情報レコード,
+    提供診療情報レコード: 提供診療情報レコードWrapper[],
+    検査値データ等レコード: 検査値データ等レコードWrapper[]
+  ) {
+    this.id = id;
+    this.data = data;
+    this.提供診療情報レコード = 提供診療情報レコード;
+    this.検査値データ等レコード = 検査値データ等レコード;
+  }
+
+  static fromData(data: 提供情報レコード): 提供情報レコードWrapper {
+    return new 提供情報レコードWrapper(serialId++, data, 
+      (data.提供診療情報レコード ?? []).map(r => 提供診療情報レコードWrapper.fromData(r)),
+      data.検査値データ等レコード.map(r => 検査値データ等レコードWrapper.fromData(r)),
+    )
   }
 
   toDenshi(): 提供情報レコード {
@@ -511,8 +597,8 @@ export class RP剤情報Wrapper extends Wrapper<RP剤情報> {
   }
 
   findDrugById(drugId: number): 薬品情報Wrapper | undefined {
-    for(let d of this.薬品情報グループ){
-      if( d.id === drugId ){
+    for (let d of this.薬品情報グループ) {
+      if (d.id === drugId) {
         return d;
       }
     }
