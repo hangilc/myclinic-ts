@@ -542,7 +542,7 @@ export class 提供情報レコードWrapper {
   }
 
   clone(): 提供情報レコードWrapper {
-    return new 提供情報レコードWrapper(this.id, Object.assign({}, this.data,
+    return new 提供情報レコードWrapper(this.id, Object.assign({}, this.data),
       this.提供診療情報レコード.map(r => r.clone()),
       this.検査値データ等レコード.map(r => r.clone()),
     )
@@ -572,6 +572,15 @@ export class RP剤情報Wrapper {
     this.data = data;
     this.用法補足レコード = 用法補足レコード;
     this.薬品情報グループ = 薬品情報グループ;
+  }
+
+  static fromData(data: RP剤情報): RP剤情報Wrapper {
+    return new RP剤情報Wrapper(
+      serialId++,
+      data,
+      (data.用法補足レコード ?? []).map(r => 用法補足レコードWrapper.fromData(r)),
+      data.薬品情報グループ.map(g => 薬品情報Wrapper.fromData(g)),
+    )
   }
 
   toDenshi(): RP剤情報 {
@@ -606,32 +615,47 @@ export class RP剤情報Wrapper {
   }
 }
 
-export class 薬品情報Wrapper extends Wrapper<薬品情報> {
+export class 薬品情報Wrapper {
+  id: number;
+  data: 薬品情報;
   薬品補足レコード: 薬品補足レコードWrapper[];
-  ippanmei?: string;
-  ippanmeicode?: string;
+  ippanmei: string = "";
+  ippanmeicode: string = "";
 
-  constructor(data: 薬品情報, id?: number) {
-    super(data, id);
-    this.薬品補足レコード = (data.薬品補足レコード ?? []).map(
-      (r) => new 薬品補足レコードWrapper(r)
-    );
+  constructor(id: number, data: 薬品情報,
+    薬品補足レコード: 薬品補足レコードWrapper[]
+  ) {
+    this.id = id;
+    this.data = data;
+    this.薬品補足レコード = 薬品補足レコード;
+  }
+
+  static fromData(data: 薬品情報): 薬品情報Wrapper {
+    return new 薬品情報Wrapper(
+      serialId++,
+      data,
+      (data.薬品補足レコード ?? []).map(r => 薬品補足レコードWrapper.fromData(r)),
+    )
   }
 
   toDenshi(): 薬品情報 {
-    return Object.assign({}, super.toDenshi(), {
-      薬品補足レコード: unwrap(this.薬品補足レコード),
+    return Object.assign({}, this.data, {
+      薬品補足レコード: this.薬品補足レコード.map(r => r.toDenshi()),
     });
   }
 
   clone(): 薬品情報Wrapper {
-    return new 薬品情報Wrapper(this.toDenshi(), this.id);
+    return new 薬品情報Wrapper(this.id, Object.assign({}, this.data),
+      this.薬品補足レコード.map(r => r.clone()));
   }
 
   assign(src: 薬品情報Wrapper) {
-    super.assign(src);
     Object.assign(this, {
+      id: src.id,
+      data: src.data,
       薬品補足レコード: src.薬品補足レコード,
+      ippanmei: src.ippanmei,
+      ippanmeicode: src.ippanmeicode,
     })
   }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-tmpl";
+  import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
   import DrugUsageField from "./DrugUsageField.svelte";
@@ -19,11 +20,12 @@
   export let at: string;
   export let onChange: () => void;
   let data = group.clone();
-  let drug = group.薬品情報グループ.filter((d) => d.id === drugId)[0];
+  let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
 
   let isEditingJohoKubun = false;
   let isEdigintName = drug.data.薬品レコード.薬品コード === "";
   let isEditingUneven = false;
+  let isEditingDrugAmount = false;
   let isEditingDrugSuppl = false;
   let isEditingZaikeiKubun = false;
   let isEditingUsage = false;
@@ -41,6 +43,10 @@
     }
     if (isEditingUneven) {
       alert("不均等レコードが編集中です。");
+      return false;
+    }
+    if (isEditingDrugAmount) {
+      alert("薬品分量が編集中です。");
       return false;
     }
     if (isEditingDrugSuppl) {
@@ -68,7 +74,7 @@
   }
 
   function onFieldChange() {
-    data = data;
+    drug = drug;
   }
 
   function doCancel() {
@@ -91,7 +97,7 @@
       throw new Error(`no such drug: ${drugId}`);
     }
     drug.addSuppl("");
-    data = data;
+    onFieldChange();
   }
 </script>
 
@@ -108,7 +114,8 @@
     {onFieldChange}
     bind:isEditing={isEditingUneven}
   />
-  <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} />
+  <DrugAmountField {drug} bind:isEditing={isEditingDrugAmount} {onFieldChange} />
+  <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} {onFieldChange} />
   <ZaikeiKubunField
     bind:剤形区分={data.data.剤形レコード.剤形区分}
     bind:isEditing={isEditingZaikeiKubun}

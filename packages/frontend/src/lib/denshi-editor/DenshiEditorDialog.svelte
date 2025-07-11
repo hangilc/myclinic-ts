@@ -16,7 +16,7 @@
   export let at: string;
   export let showValid: boolean = false;
   
-  let data = new PrescInfoWrapper(orig);
+  let data = PrescInfoWrapper.fromData(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
   let wa: HTMLElement;
   let selectedGroupId = 0;

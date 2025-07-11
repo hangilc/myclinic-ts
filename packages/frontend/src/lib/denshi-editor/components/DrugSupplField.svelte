@@ -12,6 +12,7 @@
 
   export let drug: 薬品情報Wrapper;
   export let isEditing: boolean;
+  export let onFieldChange: () => void;
   let inputText = "";
   let inputElement: HTMLInputElement | undefined = undefined;
 
@@ -34,6 +35,7 @@
       record.isEditing = false;
       drug = drug;
       updateIsEditing();
+      onFieldChange();
     }
   }
 
@@ -50,9 +52,15 @@
     );
     drug = drug;
     updateIsEditing();
+    onFieldChange();
+  }
+
+  function isVisible(drug: 薬品情報Wrapper): boolean {
+    return drug.薬品補足レコード.length > 0;
   }
 </script>
 
+{#if isVisible(drug)}
 <Field>
   <FieldTitle>薬品補足</FieldTitle>
   <FieldForm>
@@ -76,6 +84,7 @@
     {/each}
   </FieldForm>
 </Field>
+{/if}
 
 <style>
   .rep {
