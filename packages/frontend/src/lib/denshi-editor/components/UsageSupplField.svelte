@@ -10,6 +10,7 @@
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
+  import UsageSupplForm from "./UsageSupplForm.svelte";
 
   export let group: RP剤情報Wrapper;
   export let isEditing: boolean;
@@ -70,19 +71,12 @@
             {record.data.用法補足情報}
           </div>
         {:else}
-          <form
-            on:submit|preventDefault={() => doEnter(record)}
-            class="with-icons"
-          >
-            <input
-              type="text"
-              bind:value={inputText}
-              bind:this={inputElement}
-            />
-            <SubmitLink onClick={() => doEnter(record)} />
-            <CancelLink onClick={() => doCancel(record)} />
-            <TrashLink onClick={() => doDelete(record)} />
-          </form>
+          <UsageSupplForm
+            suppl={record}
+            onEnter={() => doEnter(record)}
+            onCancel={() => doCancel(record)}
+            onDelete={() => doDelete(record)}
+          />
         {/if}
       {/each}
     </FieldForm>

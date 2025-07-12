@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-tmpl";
+  import { 用法補足レコードWrapper, type RP剤情報Wrapper, type 薬品情報Wrapper } from "../denshi-tmpl";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -77,6 +77,10 @@
     drug = drug;
   }
 
+  function onGroupChange() {
+    data = data;
+  }
+
   function doCancel() {
     destroy();
   }
@@ -98,6 +102,15 @@
     }
     drug.addSuppl("");
     onFieldChange();
+  }
+
+  function addUsageSuppl(): void {
+    let r = 用法補足レコードWrapper.fromData({
+      用法補足情報: ""
+    });
+    r.isEditing = true;
+    data.用法補足レコード.push(r);
+    onGroupChange();
   }
 </script>
 
@@ -121,17 +134,17 @@
     bind:isEditing={isEditingZaikeiKubun}
     {onFieldChange}
   />
-  <DrugUsageField {group} bind:isEditing={isEditingUsage} {onFieldChange} />
-  <TimesField {group} bind:isEditing={isEditingTimes} {onFieldChange} />
+  <DrugUsageField group={data} bind:isEditing={isEditingUsage} {onFieldChange} />
+  <TimesField group={data} bind:isEditing={isEditingTimes} {onFieldChange} />
   <UsageSupplField
-    {group}
+    group={data}
     bind:isEditing={isEditingUsageSuppl}
-    {onFieldChange}
+    onFieldChange={onGroupChange}
   />
   <Commands>
     <div class="sub-commands">
       <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>
-
+      <SmallLink onClick={addUsageSuppl}>用法補足追加</SmallLink>
     </div>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
