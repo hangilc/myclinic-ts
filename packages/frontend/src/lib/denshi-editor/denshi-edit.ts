@@ -53,6 +53,18 @@ export class 薬品レコードEdit implements 薬品レコード {
   assign(src: 薬品レコードEdit): void {
     Object.assign(this, src);
   }
+
+  toObject(): 薬品レコード {
+    return Object.assign({}, {
+      情報区分: this.情報区分,
+      薬品コード種別: this.薬品コード種別,
+      薬品コード: this.薬品コード,
+      薬品名称: this.薬品名称,
+      分量: this.分量,
+      力価フラグ: this.力価フラグ,
+      単位名: this.単位名,
+    })
+  }
 }
 
 export class 不均等レコードEdit implements 不均等レコード {
@@ -87,6 +99,23 @@ export class 不均等レコードEdit implements 不均等レコード {
   assign(src: 不均等レコードEdit): void {
     Object.assign(this, src);
   }
+
+  toObject(): 不均等レコード {
+    let obj: 不均等レコード = Object.assign({}, {
+      不均等１回目服用量: this.不均等１回目服用量,
+      不均等２回目服用量: this.不均等２回目服用量,
+    });
+    if (this.不均等３回目服用量) {
+      obj.不均等３回目服用量 = this.不均等３回目服用量
+    }
+    if (this.不均等４回目服用量) {
+      obj.不均等４回目服用量 = this.不均等４回目服用量
+    }
+    if (this.不均等５回目服用量) {
+      obj.不均等５回目服用量 = this.不均等５回目服用量
+    }
+    return obj;
+  }
 }
 
 export class 負担区分レコードEdit implements 負担区分レコード {
@@ -118,6 +147,27 @@ export class 負担区分レコードEdit implements 負担区分レコード {
   assign(src: 負担区分レコードEdit): void {
     Object.assign(this, src);
   }
+
+  toObject(): 負担区分レコード | undefined {
+    if (this.第一公費負担区分 === undefined && this.第二公費負担区分 === undefined &&
+      this.第三公費負担区分 === undefined && this.特殊公費負担区分 === undefined) {
+      return undefined;
+    }
+    let obj: 負担区分レコード = {};
+    if (this.第一公費負担区分 !== undefined) {
+      obj.第一公費負担区分 = this.第一公費負担区分;
+    }
+    if (this.第二公費負担区分 !== undefined) {
+      obj.第二公費負担区分 = this.第二公費負担区分;
+    }
+    if (this.第三公費負担区分 !== undefined) {
+      obj.第三公費負担区分 = this.第三公費負担区分;
+    }
+    if (this.特殊公費負担区分 !== undefined) {
+      obj.特殊公費負担区分 = this.特殊公費負担区分;
+    }
+    return obj;
+  }
 }
 
 export class 薬品１回服用量レコードEdit implements 薬品１回服用量レコード {
@@ -143,6 +193,16 @@ export class 薬品１回服用量レコードEdit implements 薬品１回服用
   assign(src: 薬品１回服用量レコードEdit): void {
     Object.assign(this, src);
   }
+
+  toObject(): 薬品１回服用量レコード {
+    let obj: 薬品１回服用量レコード = {
+      薬剤１回服用量: this.薬剤１回服用量,
+    };
+    if (this.薬剤１日服用回数 !== undefined) {
+      obj.薬剤１日服用回数 = this.薬剤１日服用回数;
+    }
+    return obj;
+  }
 }
 
 export class 薬品補足レコードEdit implements 薬品補足レコード {
@@ -166,6 +226,12 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
 
   assign(src: 薬品補足レコードEdit): void {
     this.薬品補足情報 = src.薬品補足情報;
+  }
+
+  toObject(): 薬品補足レコード {
+    return {
+      薬品補足情報: this.薬品補足情報,
+    };
   }
 }
 
@@ -226,6 +292,30 @@ export class 薬品情報Edit implements 薬品情報 {
     this.薬品補足レコード = src.薬品補足レコード;
   }
 
+  toObject(): 薬品情報 {
+    let obj: 薬品情報 = {
+      薬品レコード: this.薬品レコード.toObject(),
+    };
+    if (this.単位変換レコード !== undefined) {
+      obj.単位変換レコード = this.単位変換レコード;
+    }
+    if (this.不均等レコード !== undefined) {
+      obj.不均等レコード = this.不均等レコード.toObject();
+    }
+    if (this.負担区分レコード !== undefined) {
+      const 負担区分 = this.負担区分レコード.toObject();
+      if (負担区分 !== undefined) {
+        obj.負担区分レコード = 負担区分;
+      }
+    }
+    if (this.薬品１回服用量レコード !== undefined) {
+      obj.薬品１回服用量レコード = this.薬品１回服用量レコード.toObject();
+    }
+    if (this.薬品補足レコード !== undefined) {
+      obj.薬品補足レコード = this.薬品補足レコード.map(record => record.toObject());
+    }
+    return obj;
+  }
 }
 
 export class 剤形レコードEdit implements 剤形レコード {
@@ -253,6 +343,17 @@ export class 剤形レコードEdit implements 剤形レコード {
 
   assign(src: 剤形レコードEdit): void {
     Object.assign(this, src);
+  }
+
+  toObject(): 剤形レコード {
+    let obj: 剤形レコード = {
+      剤形区分: this.剤形区分,
+      調剤数量: this.調剤数量,
+    };
+    if (this.剤形名称 !== undefined) {
+      obj.剤形名称 = this.剤形名称;
+    }
+    return obj;
   }
 }
 
@@ -282,6 +383,17 @@ export class 用法レコードEdit implements 用法レコード {
   assign(src: 用法レコードEdit): void {
     Object.assign(this, src);
   }
+
+  toObject(): 用法レコード {
+    let obj: 用法レコード = {
+      用法コード: this.用法コード,
+      用法名称: this.用法名称,
+    };
+    if (this.用法１日回数 !== undefined) {
+      obj.用法１日回数 = this.用法１日回数;
+    }
+    return obj;
+  }
 }
 
 export class 用法補足レコードEdit implements 用法補足レコード {
@@ -306,6 +418,16 @@ export class 用法補足レコードEdit implements 用法補足レコード {
 
   assign(src: 用法補足レコードEdit): void {
     Object.assign(this, src);
+  }
+
+  toObject(): 用法補足レコード {
+    let obj: 用法補足レコード = {
+      用法補足情報: this.用法補足情報,
+    };
+    if (this.用法補足区分 !== undefined) {
+      obj.用法補足区分 = this.用法補足区分;
+    }
+    return obj;
   }
 }
 
@@ -352,5 +474,17 @@ export class RP剤情報Edit implements RP剤情報 {
     this.用法レコード = src.用法レコード;
     this.用法補足レコード = src.用法補足レコード;
     this.薬品情報グループ = src.薬品情報グループ;
+  }
+
+  toObject(): RP剤情報 {
+    let obj: RP剤情報 = {
+      剤形レコード: this.剤形レコード.toObject(),
+      用法レコード: this.用法レコード.toObject(),
+      薬品情報グループ: this.薬品情報グループ.map(info => info.toObject()),
+    };
+    if (this.用法補足レコード !== undefined) {
+      obj.用法補足レコード = this.用法補足レコード.map(record => record.toObject());
+    }
+    return obj;
   }
 }
