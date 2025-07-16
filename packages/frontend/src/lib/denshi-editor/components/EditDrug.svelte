@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { 用法補足レコードWrapper, type RP剤情報Wrapper, type 薬品情報Wrapper } from "../denshi-tmpl";
+  import { 用法補足レコードWrapper, type RP剤情報Wrapper, } from "../denshi-wrapper";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -21,9 +21,11 @@
   export let onChange: () => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
+  console.log("group", group);
+  console.log("data", drugId, data)
 
   let isEditingJohoKubun = false;
-  let isEdigintName = drug.data.薬品レコード.薬品コード === "";
+  let isEdigintName = drug.薬品レコード.薬品コード === "";
   let isEditingUneven = false;
   let isEditingDrugAmount = false;
   let isEditingDrugSuppl = false;
@@ -100,16 +102,12 @@
     if( !drug ){
       throw new Error(`no such drug: ${drugId}`);
     }
-    drug.addSuppl("");
+    drug.addDrugSuppl("");
     onFieldChange();
   }
 
   function addUsageSuppl(): void {
-    let r = 用法補足レコードWrapper.fromData({
-      用法補足情報: ""
-    });
-    r.isEditing = true;
-    data.用法補足レコード.push(r);
+    data.addUsageSuppl("", true);
     onGroupChange();
   }
 </script>
@@ -118,10 +116,10 @@
   <Title>薬品編集</Title>
   <JohoKubunField
     bind:isEditing={isEditingJohoKubun}
-    bind:情報区分={drug.data.薬品レコード.情報区分}
+    bind:情報区分={drug.薬品レコード.情報区分}
     {onFieldChange}
   />
-  <DrugNameField {drug} {at} bind:isEditing={isEdigintName} {onFieldChange} />
+  <!-- <DrugNameField {drug} {at} bind:isEditing={isEdigintName} {onFieldChange} />
   <UnevenField
     不均等レコード={drug.data.不均等レコード}
     {onFieldChange}
@@ -140,7 +138,7 @@
     group={data}
     bind:isEditing={isEditingUsageSuppl}
     onFieldChange={onGroupChange}
-  />
+  /> -->
   <Commands>
     <div class="sub-commands">
       <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>

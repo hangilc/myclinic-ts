@@ -53,6 +53,7 @@
   import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
+  import { PrescInfoDataWrapper } from "@/lib/denshi-editor/denshi-wrapper";
 
   export let onClose: () => void;
   export let text: m.Text;

@@ -147,8 +147,8 @@ export function deserializeUneven(s: string): 不均等レコード | undefined 
   }
 }
 
-export function isValidDrug(drug: 薬品情報Wrapper): boolean {
-  return drug.data.薬品レコード.薬品コード !== "";
+export function isValidDrug(drug: 薬品情報): boolean {
+  return drug.薬品レコード.薬品コード !== "";
 }
 
 export function isValidUsage(usage: 用法レコード): boolean {

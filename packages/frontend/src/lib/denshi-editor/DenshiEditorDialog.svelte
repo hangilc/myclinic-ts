@@ -4,10 +4,10 @@
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
   import {
-    PrescInfoWrapper,
+    PrescInfoDataWrapper,
     RP剤情報Wrapper,
     薬品情報Wrapper,
-  } from "./denshi-tmpl";
+  } from "./denshi-wrapper";
   import EditDrug from "./components/EditDrug.svelte";
 
   export let title: string;
@@ -16,7 +16,7 @@
   export let at: string;
   export let showValid: boolean = false;
   
-  let data = PrescInfoWrapper.fromData(orig);
+  let data = PrescInfoDataWrapper.fromObject(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
   let wa: HTMLElement;
   let selectedGroupId = 0;
@@ -32,6 +32,8 @@
       alert("現在編集中です。」");
       return;
     }
+    console.log("group", group);
+    console.log("drug", drug);
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
@@ -73,6 +75,4 @@
     overflow-y: auto;
   }
 
-  .left {
-  }
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { 薬品情報Wrapper } from "../denshi-tmpl";
+  import type { 薬品情報Wrapper } from "../denshi-wrapper";
   import { isValidDrug } from "../helper";
   import ConvertedIcon from "../icons/ConvertedIcon.svelte";
   import UnconvertedIcon from "../icons/UnconvertedIcon.svelte";

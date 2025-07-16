@@ -1,16 +1,12 @@
 <script lang="ts">
   import { toZenkaku } from "@/lib/zenkaku";
-  import type {
-    PrescInfoWrapper,
-    RP剤情報Wrapper,
-    薬品情報Wrapper,
-  } from "../denshi-tmpl";
   import { drugRep } from "../helper";
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
   import ConvDrugValidity from "./ConvDrugValidity.svelte";
   import ConvUsageValidity from "./ConvUsageValidity.svelte";
+  import type { PrescInfoDataWrapper, RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-wrapper";
 
-  export let data: PrescInfoWrapper;
+  export let data: PrescInfoDataWrapper;
   export let onDrugSelect: (
     group: RP剤情報Wrapper,
     drug: 薬品情報Wrapper,
@@ -39,15 +35,15 @@
               {#if showValid}
                 <ConvDrugValidity {drug} />
               {/if}
-              <span>{drugRep(drug.toDenshi())}</span>
+              <span>{drugRep(drug)}</span>
             </div>
           {/each}
           <div class="usage-rep">
             {#if showValid}
-              <ConvUsageValidity usage={group.data.用法レコード} />
+              <ConvUsageValidity usage={group.用法レコード} />
             {/if}
-            {group.data.用法レコード.用法名称}
-            {daysTimesDisp(group.toDenshi())}
+            {group.用法レコード.用法名称}
+            {daysTimesDisp(group)}
           </div>
         </div>
       </div>
