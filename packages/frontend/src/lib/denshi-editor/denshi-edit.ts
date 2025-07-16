@@ -488,3 +488,545 @@ export class RP剤情報Edit implements RP剤情報 {
     return obj;
   }
 }
+
+export class 公費レコードEdit implements 公費レコード {
+  公費負担者番号: string;
+  公費受給者番号?: string;
+
+  constructor(src: {
+    公費負担者番号: string;
+    公費受給者番号?: string;
+  }) {
+    this.公費負担者番号 = src.公費負担者番号;
+    this.公費受給者番号 = src.公費受給者番号;
+  }
+
+  static fromObject(obj: 公費レコード): 公費レコードEdit {
+    return new 公費レコードEdit(obj);
+  }
+
+  clone(): 公費レコードEdit {
+    return new 公費レコードEdit(this);
+  }
+
+  assign(src: 公費レコードEdit): void {
+    Object.assign(this, src);
+  }
+
+  toObject(): 公費レコード {
+    let obj: 公費レコード = {
+      公費負担者番号: this.公費負担者番号,
+    };
+    if (this.公費受給者番号 !== undefined) {
+      obj.公費受給者番号 = this.公費受給者番号;
+    }
+    return obj;
+  }
+}
+
+export class 麻薬施用レコードEdit implements 麻薬施用レコード {
+  麻薬施用者免許番号: string;
+  麻薬施用患者住所: string;
+  麻薬施用患者電話番号: string;
+
+  constructor(src: {
+    麻薬施用者免許番号: string;
+    麻薬施用患者住所: string;
+    麻薬施用患者電話番号: string;
+  }) {
+    this.麻薬施用者免許番号 = src.麻薬施用者免許番号;
+    this.麻薬施用患者住所 = src.麻薬施用患者住所;
+    this.麻薬施用患者電話番号 = src.麻薬施用患者電話番号;
+  }
+
+  static fromObject(obj: 麻薬施用レコード): 麻薬施用レコードEdit {
+    return new 麻薬施用レコードEdit(obj);
+  }
+
+  clone(): 麻薬施用レコードEdit {
+    return new 麻薬施用レコードEdit(this);
+  }
+
+  assign(src: 麻薬施用レコードEdit): void {
+    Object.assign(this, src);
+  }
+
+  toObject(): 麻薬施用レコード {
+    return {
+      麻薬施用者免許番号: this.麻薬施用者免許番号,
+      麻薬施用患者住所: this.麻薬施用患者住所,
+      麻薬施用患者電話番号: this.麻薬施用患者電話番号,
+    };
+  }
+}
+
+export class 備考レコードEdit implements 備考レコード {
+  id: number;
+  備考: string;
+
+  constructor(src: {
+    備考: string;
+  }, id: number) {
+    this.id = id;
+    this.備考 = src.備考;
+  }
+
+  static fromObject(obj: 備考レコード): 備考レコードEdit {
+    return new 備考レコードEdit(obj, nextId());
+  }
+
+  clone(): 備考レコードEdit {
+    return new 備考レコードEdit(this, this.id);
+  }
+
+  assign(src: 備考レコードEdit): void {
+    this.備考 = src.備考;
+  }
+
+  toObject(): 備考レコード {
+    return {
+      備考: this.備考,
+    };
+  }
+}
+
+export class 提供診療情報レコードEdit implements 提供診療情報レコード {
+  id: number;
+  薬品名称?: string;
+  コメント: string;
+
+  constructor(src: {
+    薬品名称?: string;
+    コメント: string;
+  }, id: number) {
+    this.id = id;
+    this.薬品名称 = src.薬品名称;
+    this.コメント = src.コメント;
+  }
+
+  static fromObject(obj: 提供診療情報レコード): 提供診療情報レコードEdit {
+    return new 提供診療情報レコードEdit(obj, nextId());
+  }
+
+  clone(): 提供診療情報レコードEdit {
+    return new 提供診療情報レコードEdit(this, this.id);
+  }
+
+  assign(src: 提供診療情報レコードEdit): void {
+    this.薬品名称 = src.薬品名称;
+    this.コメント = src.コメント;
+  }
+
+  toObject(): 提供診療情報レコード {
+    let obj: 提供診療情報レコード = {
+      コメント: this.コメント,
+    };
+    if (this.薬品名称 !== undefined) {
+      obj.薬品名称 = this.薬品名称;
+    }
+    return obj;
+  }
+}
+
+export class 検査値データ等レコードEdit implements 検査値データ等レコード {
+  id: number;
+  検査値データ等: string;
+
+  constructor(src: {
+    検査値データ等: string;
+  }, id: number) {
+    this.id = id;
+    this.検査値データ等 = src.検査値データ等;
+  }
+
+  static fromObject(obj: 検査値データ等レコード): 検査値データ等レコードEdit {
+    return new 検査値データ等レコードEdit(obj, nextId());
+  }
+
+  clone(): 検査値データ等レコードEdit {
+    return new 検査値データ等レコードEdit(this, this.id);
+  }
+
+  assign(src: 検査値データ等レコードEdit): void {
+    this.検査値データ等 = src.検査値データ等;
+  }
+
+  toObject(): 検査値データ等レコード {
+    return {
+      検査値データ等: this.検査値データ等,
+    };
+  }
+}
+
+export class 提供情報レコードEdit implements 提供情報レコード {
+  提供診療情報レコード?: 提供診療情報レコードEdit[];
+  検査値データ等レコード?: 検査値データ等レコードEdit[];
+
+  constructor(src: {
+    提供診療情報レコード?: 提供診療情報レコードEdit[];
+    検査値データ等レコード?: 検査値データ等レコードEdit[];
+  }) {
+    this.提供診療情報レコード = src.提供診療情報レコード;
+    this.検査値データ等レコード = src.検査値データ等レコード;
+  }
+
+  static fromObject(obj: 提供情報レコード): 提供情報レコードEdit {
+    return new 提供情報レコードEdit({
+      提供診療情報レコード: obj.提供診療情報レコード?.map(record => 提供診療情報レコードEdit.fromObject(record)),
+      検査値データ等レコード: obj.検査値データ等レコード?.map(record => 検査値データ等レコードEdit.fromObject(record)),
+    });
+  }
+
+  clone(): 提供情報レコードEdit {
+    return new 提供情報レコードEdit({
+      提供診療情報レコード: this.提供診療情報レコード?.map(record => record.clone()),
+      検査値データ等レコード: this.検査値データ等レコード?.map(record => record.clone()),
+    });
+  }
+
+  assign(src: 提供情報レコードEdit): void {
+    this.提供診療情報レコード = src.提供診療情報レコード;
+    this.検査値データ等レコード = src.検査値データ等レコード;
+  }
+
+  toObject(): 提供情報レコード | undefined {
+    if (this.提供診療情報レコード === undefined && this.検査値データ等レコード === undefined) {
+      return undefined;
+    }
+    let obj: 提供情報レコード = {};
+    if (this.提供診療情報レコード !== undefined) {
+      obj.提供診療情報レコード = this.提供診療情報レコード.map(record => record.toObject());
+    }
+    if (this.検査値データ等レコード !== undefined) {
+      obj.検査値データ等レコード = this.検査値データ等レコード.map(record => record.toObject());
+    }
+    return obj;
+  }
+}
+
+export class PrescInfoDataEdit implements PrescInfoData {
+  医療機関コード種別: 点数表;
+  医療機関コード: string;
+  医療機関都道府県コード: 都道府県コード;
+  医療機関名称: string;
+  医療機関郵便番号?: string;
+  医療機関所在地: string;
+  医療機関電話番号: string;
+  ＦＡＸ番号?: string;
+  その他連絡先?: string;
+  診療科レコード?: {
+    診療科コード種別: 診療科コード種別;
+    診療科コード: 診療科コード;
+  };
+  医師コード?: string;
+  医師カナ氏名?: string;
+  医師漢字氏名: string;
+  患者コード?: string;
+  患者漢字氏名: string;
+  患者カナ氏名: string;
+  患者性別: 性別コード;
+  患者生年月日: string;
+  保険一部負担金区分?: 保険一部負担金区分コード;
+  保険種別?: 保険種別コード;
+  保険者番号: string;
+  被保険者証記号?: string;
+  被保険者証番号: string;
+  被保険者被扶養者: 被保険者等種別;
+  被保険者証枝番?: string;
+  負担割合?: number;
+  職務上の事由?: 職務上の事由コード;
+  第一公費レコード?: 公費レコードEdit;
+  第二公費レコード?: 公費レコードEdit;
+  第三公費レコード?: 公費レコードEdit;
+  特殊公費レコード?: 公費レコードEdit;
+  レセプト種別コード?: string;
+  処方箋交付年月日: string;
+  使用期限年月日?: string;
+  麻薬施用レコード?: 麻薬施用レコードEdit;
+  残薬確認対応フラグ?: 残薬確認対応フラグ;
+  備考レコード?: 備考レコードEdit[];
+  引換番号?: string;
+  RP剤情報グループ: RP剤情報Edit[];
+  提供情報レコード?: 提供情報レコードEdit;
+
+  constructor(src: {
+    医療機関コード種別: 点数表;
+    医療機関コード: string;
+    医療機関都道府県コード: 都道府県コード;
+    医療機関名称: string;
+    医療機関郵便番号?: string;
+    医療機関所在地: string;
+    医療機関電話番号: string;
+    ＦＡＸ番号?: string;
+    その他連絡先?: string;
+    診療科レコード?: {
+      診療科コード種別: 診療科コード種別;
+      診療科コード: 診療科コード;
+    };
+    医師コード?: string;
+    医師カナ氏名?: string;
+    医師漢字氏名: string;
+    患者コード?: string;
+    患者漢字氏名: string;
+    患者カナ氏名: string;
+    患者性別: 性別コード;
+    患者生年月日: string;
+    保険一部負担金区分?: 保険一部負担金区分コード;
+    保険種別?: 保険種別コード;
+    保険者番号: string;
+    被保険者証記号?: string;
+    被保険者証番号: string;
+    被保険者被扶養者: 被保険者等種別;
+    被保険者証枝番?: string;
+    負担割合?: number;
+    職務上の事由?: 職務上の事由コード;
+    第一公費レコード?: 公費レコードEdit;
+    第二公費レコード?: 公費レコードEdit;
+    第三公費レコード?: 公費レコードEdit;
+    特殊公費レコード?: 公費レコードEdit;
+    レセプト種別コード?: string;
+    処方箋交付年月日: string;
+    使用期限年月日?: string;
+    麻薬施用レコード?: 麻薬施用レコードEdit;
+    残薬確認対応フラグ?: 残薬確認対応フラグ;
+    備考レコード?: 備考レコードEdit[];
+    引換番号?: string;
+    RP剤情報グループ: RP剤情報Edit[];
+    提供情報レコード?: 提供情報レコードEdit;
+  }) {
+    this.医療機関コード種別 = src.医療機関コード種別;
+    this.医療機関コード = src.医療機関コード;
+    this.医療機関都道府県コード = src.医療機関都道府県コード;
+    this.医療機関名称 = src.医療機関名称;
+    this.医療機関郵便番号 = src.医療機関郵便番号;
+    this.医療機関所在地 = src.医療機関所在地;
+    this.医療機関電話番号 = src.医療機関電話番号;
+    this.ＦＡＸ番号 = src.ＦＡＸ番号;
+    this.その他連絡先 = src.その他連絡先;
+    this.診療科レコード = src.診療科レコード;
+    this.医師コード = src.医師コード;
+    this.医師カナ氏名 = src.医師カナ氏名;
+    this.医師漢字氏名 = src.医師漢字氏名;
+    this.患者コード = src.患者コード;
+    this.患者漢字氏名 = src.患者漢字氏名;
+    this.患者カナ氏名 = src.患者カナ氏名;
+    this.患者性別 = src.患者性別;
+    this.患者生年月日 = src.患者生年月日;
+    this.保険一部負担金区分 = src.保険一部負担金区分;
+    this.保険種別 = src.保険種別;
+    this.保険者番号 = src.保険者番号;
+    this.被保険者証記号 = src.被保険者証記号;
+    this.被保険者証番号 = src.被保険者証番号;
+    this.被保険者被扶養者 = src.被保険者被扶養者;
+    this.被保険者証枝番 = src.被保険者証枝番;
+    this.負担割合 = src.負担割合;
+    this.職務上の事由 = src.職務上の事由;
+    this.第一公費レコード = src.第一公費レコード;
+    this.第二公費レコード = src.第二公費レコード;
+    this.第三公費レコード = src.第三公費レコード;
+    this.特殊公費レコード = src.特殊公費レコード;
+    this.レセプト種別コード = src.レセプト種別コード;
+    this.処方箋交付年月日 = src.処方箋交付年月日;
+    this.使用期限年月日 = src.使用期限年月日;
+    this.麻薬施用レコード = src.麻薬施用レコード;
+    this.残薬確認対応フラグ = src.残薬確認対応フラグ;
+    this.備考レコード = src.備考レコード;
+    this.引換番号 = src.引換番号;
+    this.RP剤情報グループ = src.RP剤情報グループ;
+    this.提供情報レコード = src.提供情報レコード;
+  }
+
+  static fromObject(obj: PrescInfoData): PrescInfoDataEdit {
+    return new PrescInfoDataEdit({
+      医療機関コード種別: obj.医療機関コード種別,
+      医療機関コード: obj.医療機関コード,
+      医療機関都道府県コード: obj.医療機関都道府県コード,
+      医療機関名称: obj.医療機関名称,
+      医療機関郵便番号: obj.医療機関郵便番号,
+      医療機関所在地: obj.医療機関所在地,
+      医療機関電話番号: obj.医療機関電話番号,
+      ＦＡＸ番号: obj.ＦＡＸ番号,
+      その他連絡先: obj.その他連絡先,
+      診療科レコード: obj.診療科レコード,
+      医師コード: obj.医師コード,
+      医師カナ氏名: obj.医師カナ氏名,
+      医師漢字氏名: obj.医師漢字氏名,
+      患者コード: obj.患者コード,
+      患者漢字氏名: obj.患者漢字氏名,
+      患者カナ氏名: obj.患者カナ氏名,
+      患者性別: obj.患者性別,
+      患者生年月日: obj.患者生年月日,
+      保険一部負担金区分: obj.保険一部負担金区分,
+      保険種別: obj.保険種別,
+      保険者番号: obj.保険者番号,
+      被保険者証記号: obj.被保険者証記号,
+      被保険者証番号: obj.被保険者証番号,
+      被保険者被扶養者: obj.被保険者被扶養者,
+      被保険者証枝番: obj.被保険者証枝番,
+      負担割合: obj.負担割合,
+      職務上の事由: obj.職務上の事由,
+      第一公費レコード: obj.第一公費レコード ? 公費レコードEdit.fromObject(obj.第一公費レコード) : undefined,
+      第二公費レコード: obj.第二公費レコード ? 公費レコードEdit.fromObject(obj.第二公費レコード) : undefined,
+      第三公費レコード: obj.第三公費レコード ? 公費レコードEdit.fromObject(obj.第三公費レコード) : undefined,
+      特殊公費レコード: obj.特殊公費レコード ? 公費レコードEdit.fromObject(obj.特殊公費レコード) : undefined,
+      レセプト種別コード: obj.レセプト種別コード,
+      処方箋交付年月日: obj.処方箋交付年月日,
+      使用期限年月日: obj.使用期限年月日,
+      麻薬施用レコード: obj.麻薬施用レコード ? 麻薬施用レコードEdit.fromObject(obj.麻薬施用レコード) : undefined,
+      残薬確認対応フラグ: obj.残薬確認対応フラグ,
+      備考レコード: obj.備考レコード?.map(record => 備考レコードEdit.fromObject(record)),
+      引換番号: obj.引換番号,
+      RP剤情報グループ: obj.RP剤情報グループ.map(info => RP剤情報Edit.fromObject(info)),
+      提供情報レコード: obj.提供情報レコード ? 提供情報レコードEdit.fromObject(obj.提供情報レコード) : undefined,
+    });
+  }
+
+  clone(): PrescInfoDataEdit {
+    return new PrescInfoDataEdit({
+      医療機関コード種別: this.医療機関コード種別,
+      医療機関コード: this.医療機関コード,
+      医療機関都道府県コード: this.医療機関都道府県コード,
+      医療機関名称: this.医療機関名称,
+      医療機関郵便番号: this.医療機関郵便番号,
+      医療機関所在地: this.医療機関所在地,
+      医療機関電話番号: this.医療機関電話番号,
+      ＦＡＸ番号: this.ＦＡＸ番号,
+      その他連絡先: this.その他連絡先,
+      診療科レコード: this.診療科レコード,
+      医師コード: this.医師コード,
+      医師カナ氏名: this.医師カナ氏名,
+      医師漢字氏名: this.医師漢字氏名,
+      患者コード: this.患者コード,
+      患者漢字氏名: this.患者漢字氏名,
+      患者カナ氏名: this.患者カナ氏名,
+      患者性別: this.患者性別,
+      患者生年月日: this.患者生年月日,
+      保険一部負担金区分: this.保険一部負担金区分,
+      保険種別: this.保険種別,
+      保険者番号: this.保険者番号,
+      被保険者証記号: this.被保険者証記号,
+      被保険者証番号: this.被保険者証番号,
+      被保険者被扶養者: this.被保険者被扶養者,
+      被保険者証枝番: this.被保険者証枝番,
+      負担割合: this.負担割合,
+      職務上の事由: this.職務上の事由,
+      第一公費レコード: this.第一公費レコード?.clone(),
+      第二公費レコード: this.第二公費レコード?.clone(),
+      第三公費レコード: this.第三公費レコード?.clone(),
+      特殊公費レコード: this.特殊公費レコード?.clone(),
+      レセプト種別コード: this.レセプト種別コード,
+      処方箋交付年月日: this.処方箋交付年月日,
+      使用期限年月日: this.使用期限年月日,
+      麻薬施用レコード: this.麻薬施用レコード?.clone(),
+      残薬確認対応フラグ: this.残薬確認対応フラグ,
+      備考レコード: this.備考レコード?.map(record => record.clone()),
+      引換番号: this.引換番号,
+      RP剤情報グループ: this.RP剤情報グループ.map(info => info.clone()),
+      提供情報レコード: this.提供情報レコード?.clone(),
+    });
+  }
+
+  assign(src: PrescInfoDataEdit): void {
+    Object.assign(this, src);
+  }
+
+  toObject(): PrescInfoData {
+    let obj: PrescInfoData = {
+      医療機関コード種別: this.医療機関コード種別,
+      医療機関コード: this.医療機関コード,
+      医療機関都道府県コード: this.医療機関都道府県コード,
+      医療機関名称: this.医療機関名称,
+      医療機関所在地: this.医療機関所在地,
+      医療機関電話番号: this.医療機関電話番号,
+      医師漢字氏名: this.医師漢字氏名,
+      患者漢字氏名: this.患者漢字氏名,
+      患者カナ氏名: this.患者カナ氏名,
+      患者性別: this.患者性別,
+      患者生年月日: this.患者生年月日,
+      保険者番号: this.保険者番号,
+      被保険者証番号: this.被保険者証番号,
+      被保険者被扶養者: this.被保険者被扶養者,
+      処方箋交付年月日: this.処方箋交付年月日,
+      RP剤情報グループ: this.RP剤情報グループ.map(info => info.toObject()),
+    };
+
+    // Optional fields
+    if (this.医療機関郵便番号 !== undefined) {
+      obj.医療機関郵便番号 = this.医療機関郵便番号;
+    }
+    if (this.ＦＡＸ番号 !== undefined) {
+      obj.ＦＡＸ番号 = this.ＦＡＸ番号;
+    }
+    if (this.その他連絡先 !== undefined) {
+      obj.その他連絡先 = this.その他連絡先;
+    }
+    if (this.診療科レコード !== undefined) {
+      obj.診療科レコード = this.診療科レコード;
+    }
+    if (this.医師コード !== undefined) {
+      obj.医師コード = this.医師コード;
+    }
+    if (this.医師カナ氏名 !== undefined) {
+      obj.医師カナ氏名 = this.医師カナ氏名;
+    }
+    if (this.患者コード !== undefined) {
+      obj.患者コード = this.患者コード;
+    }
+    if (this.保険一部負担金区分 !== undefined) {
+      obj.保険一部負担金区分 = this.保険一部負担金区分;
+    }
+    if (this.保険種別 !== undefined) {
+      obj.保険種別 = this.保険種別;
+    }
+    if (this.被保険者証記号 !== undefined) {
+      obj.被保険者証記号 = this.被保険者証記号;
+    }
+    if (this.被保険者証枝番 !== undefined) {
+      obj.被保険者証枝番 = this.被保険者証枝番;
+    }
+    if (this.負担割合 !== undefined) {
+      obj.負担割合 = this.負担割合;
+    }
+    if (this.職務上の事由 !== undefined) {
+      obj.職務上の事由 = this.職務上の事由;
+    }
+    if (this.第一公費レコード !== undefined) {
+      obj.第一公費レコード = this.第一公費レコード.toObject();
+    }
+    if (this.第二公費レコード !== undefined) {
+      obj.第二公費レコード = this.第二公費レコード.toObject();
+    }
+    if (this.第三公費レコード !== undefined) {
+      obj.第三公費レコード = this.第三公費レコード.toObject();
+    }
+    if (this.特殊公費レコード !== undefined) {
+      obj.特殊公費レコード = this.特殊公費レコード.toObject();
+    }
+    if (this.レセプト種別コード !== undefined) {
+      obj.レセプト種別コード = this.レセプト種別コード;
+    }
+    if (this.使用期限年月日 !== undefined) {
+      obj.使用期限年月日 = this.使用期限年月日;
+    }
+    if (this.麻薬施用レコード !== undefined) {
+      obj.麻薬施用レコード = this.麻薬施用レコード.toObject();
+    }
+    if (this.残薬確認対応フラグ !== undefined) {
+      obj.残薬確認対応フラグ = this.残薬確認対応フラグ;
+    }
+    if (this.備考レコード !== undefined) {
+      obj.備考レコード = this.備考レコード.map(record => record.toObject());
+    }
+    if (this.引換番号 !== undefined) {
+      obj.引換番号 = this.引換番号;
+    }
+    if (this.提供情報レコード !== undefined) {
+      const 提供情報 = this.提供情報レコード.toObject();
+      if (提供情報 !== undefined) {
+        obj.提供情報レコード = 提供情報;
+      }
+    }
+
+    return obj;
+  }
+}
