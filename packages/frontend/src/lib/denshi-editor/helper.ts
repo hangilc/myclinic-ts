@@ -102,6 +102,7 @@ export function runner(...fs: (() => any)[]): () => void {
 }
 
  export function serializeUneven(r: 不均等レコード | undefined): string {
+  console.log("ser uneven", r);
   if (r) {
     let parts: string[] = [r.不均等１回目服用量, r.不均等２回目服用量];
     [

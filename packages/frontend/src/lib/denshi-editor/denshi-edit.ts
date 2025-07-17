@@ -207,21 +207,27 @@ export class 薬品１回服用量レコードEdit implements 薬品１回服用
 
 export class 薬品補足レコードEdit implements 薬品補足レコード {
   id: number;
+  isEditing: boolean;
   薬品補足情報: string;
 
   constructor(src: {
     薬品補足情報: string;
-  }, id: number) {
+  }, id: number, isEditing: boolean) {
     this.id = id;
+    this.isEditing = isEditing;
     this.薬品補足情報 = src.薬品補足情報;
   }
 
   static fromObject(obj: 薬品補足レコード): 薬品補足レコードEdit {
-    return new 薬品補足レコードEdit(obj, nextId());
+    return new 薬品補足レコードEdit(obj, nextId(), obj.薬品補足情報 === "");
+  }
+
+  static fromInfo(薬品補足情報: string): 薬品補足レコードEdit {
+    return 薬品補足レコードEdit.fromObject({ 薬品補足情報 });
   }
 
   clone(): 薬品補足レコードEdit {
-    return new 薬品補足レコードEdit(this, this.id);
+    return new 薬品補足レコードEdit(this, this.id, this.isEditing);
   }
 
   assign(src: 薬品補足レコードEdit): void {
@@ -243,6 +249,8 @@ export class 薬品情報Edit implements 薬品情報 {
   負担区分レコード?: 負担区分レコードEdit;
   薬品１回服用量レコード?: 薬品１回服用量レコードEdit;
   薬品補足レコード?: 薬品補足レコードEdit[];
+  ippanmei: string;
+  ippanmeicode: string;
 
   constructor(src: {
     薬品レコード: 薬品レコードEdit;
@@ -251,14 +259,16 @@ export class 薬品情報Edit implements 薬品情報 {
     負担区分レコード?: 負担区分レコードEdit;
     薬品１回服用量レコード?: 薬品１回服用量レコードEdit;
     薬品補足レコード?: 薬品補足レコードEdit[];
-  }, id: number) {
-    this.id = id;
+  }, aux: { id: number; ippanmei: string; ippanmeicode: string; }) {
+    this.id = aux.id;
     this.薬品レコード = src.薬品レコード;
     this.単位変換レコード = src.単位変換レコード;
     this.不均等レコード = src.不均等レコード;
     this.負担区分レコード = src.負担区分レコード;
     this.薬品１回服用量レコード = src.薬品１回服用量レコード;
     this.薬品補足レコード = src.薬品補足レコード;
+    this.ippanmei = aux.ippanmei;
+    this.ippanmeicode = aux.ippanmeicode;
   }
 
   static fromObject(obj: 薬品情報): 薬品情報Edit {
@@ -269,7 +279,7 @@ export class 薬品情報Edit implements 薬品情報 {
       負担区分レコード: obj.負担区分レコード ? 負担区分レコードEdit.fromObject(obj.負担区分レコード) : undefined,
       薬品１回服用量レコード: obj.薬品１回服用量レコード ? 薬品１回服用量レコードEdit.fromObject(obj.薬品１回服用量レコード) : undefined,
       薬品補足レコード: obj.薬品補足レコード?.map(record => 薬品補足レコードEdit.fromObject(record))
-    }, nextId());
+    }, { id: nextId(), ippanmei: "", ippanmeicode: "" });
   }
 
   clone(): 薬品情報Edit {
@@ -280,7 +290,7 @@ export class 薬品情報Edit implements 薬品情報 {
       負担区分レコード: this.負担区分レコード?.clone(),
       薬品１回服用量レコード: this.薬品１回服用量レコード?.clone(),
       薬品補足レコード: this.薬品補足レコード?.map(record => record.clone())
-    }, this.id);
+    }, this);
   }
 
   assign(src: 薬品情報Edit): void {
@@ -290,6 +300,8 @@ export class 薬品情報Edit implements 薬品情報 {
     this.負担区分レコード = src.負担区分レコード;
     this.薬品１回服用量レコード = src.薬品１回服用量レコード;
     this.薬品補足レコード = src.薬品補足レコード;
+    this.ippanmei = src.ippanmei;
+    this.ippanmeicode = src.ippanmeicode;
   }
 
   toObject(): 薬品情報 {
@@ -315,6 +327,13 @@ export class 薬品情報Edit implements 薬品情報 {
       obj.薬品補足レコード = this.薬品補足レコード.map(record => record.toObject());
     }
     return obj;
+  }
+
+  addDrugSuppl(suppl: 薬品補足レコードEdit): void {
+    if( this.薬品補足レコード === undefined ){
+      this.薬品補足レコード = [];
+    }
+    this.薬品補足レコード.push(suppl);
   }
 }
 
@@ -397,27 +416,36 @@ export class 用法レコードEdit implements 用法レコード {
 }
 
 export class 用法補足レコードEdit implements 用法補足レコード {
+  id: number;
+  isEditing: boolean;
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
 
   constructor(src: {
     用法補足区分?: 用法補足区分;
     用法補足情報: string;
-  }) {
+  }, id: number, isEditing: boolean) {
+    this.id = id;
+    this.isEditing = isEditing;
     this.用法補足区分 = src.用法補足区分;
     this.用法補足情報 = src.用法補足情報;
   }
 
   static fromObject(obj: 用法補足レコード): 用法補足レコードEdit {
-    return new 用法補足レコードEdit(obj);
+    return new 用法補足レコードEdit(obj, nextId(), obj.用法補足情報 === "");
+  }
+
+  static fromInfo(用法補足情報: string): 用法補足レコードEdit {
+    return 用法補足レコードEdit.fromObject({ 用法補足情報 });
   }
 
   clone(): 用法補足レコードEdit {
-    return new 用法補足レコードEdit(this);
+    return new 用法補足レコードEdit(this, this.id, this.isEditing);
   }
 
   assign(src: 用法補足レコードEdit): void {
-    Object.assign(this, src);
+    this.用法補足区分 = src.用法補足区分;
+    this.用法補足情報 = src.用法補足情報;
   }
 
   toObject(): 用法補足レコード {
@@ -486,6 +514,22 @@ export class RP剤情報Edit implements RP剤情報 {
       obj.用法補足レコード = this.用法補足レコード.map(record => record.toObject());
     }
     return obj;
+  }
+
+  findDrugById(drugId: number): 薬品情報Edit | undefined {
+    for (let drug of this.薬品情報グループ) {
+      if (drug.id === drugId) {
+        return drug;
+      }
+    }
+    return undefined;
+  }
+
+  addUsageSuppl(suppl: 用法補足レコードEdit): void {
+    if( this.用法補足レコード === undefined ){
+      this.用法補足レコード = [];
+    }
+    this.用法補足レコード.push(suppl);
   }
 }
 

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-  import type { 薬品情報Wrapper } from "../denshi-tmpl";
+  import type { 薬品情報Edit } from "../denshi-edit";
   import CancelLink from "../icons/CancelLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
   import SearchLink from "../icons/SearchLink.svelte";
@@ -10,21 +10,21 @@
   import api from "@/lib/api";
   import { tick } from "svelte";
 
-  export let drug: 薬品情報Wrapper;
+  export let drug: 薬品情報Edit;
   export let isEditing: boolean;
   export let at: string;
   export let onFieldChange: () => void;
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
-  }
-  let searchText = drug.data.薬品レコード.薬品名称;
+  };
+  let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: IyakuhinMaster[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
   function doRepClick() {
-    searchText = drug.data.薬品レコード.薬品名称;
+    searchText = drug.薬品レコード.薬品名称;
     isEditing = true;
     focus();
   }
@@ -32,9 +32,9 @@
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
-      if (drug.data.薬品レコード.情報区分 === "医薬品") {
+      if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = await api.searchIyakuhinMaster(t, at);
-      } else if (drug.data.薬品レコード.情報区分 === "医療材料") {
+      } else if (drug.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
       }
     } else {
@@ -48,13 +48,13 @@
   }
 
   function doCancel() {
-    if( drug.data.薬品レコード.薬品コード !== "" ){
+    if (drug.薬品レコード.薬品コード !== "") {
       isEditing = false;
     }
   }
 
   function doIyakuhinMasterSelect(m: IyakuhinMaster) {
-    Object.assign(drug.data.薬品レコード, {
+    Object.assign(drug.薬品レコード, {
       薬品コード種別: "レセプト電算処理システム用コード",
       薬品コード: m.iyakuhincode.toString(),
       薬品名称: m.name,
@@ -68,7 +68,20 @@
     onFieldChange();
   }
 
-  function doKizaiMasterSelect(m: KizaiMaster) {}
+  function doKizaiMasterSelect(m: KizaiMaster) {
+    Object.assign(drug.薬品レコード, {
+      薬品コード種別: "レセプト電算処理システム用コード",
+      薬品コード: m.kizaicode.toString(),
+      薬品名称: m.name,
+      単位名: m.unit,
+    });
+    drug.ippanmei = "";
+    drug.ippanmeicode = "";
+    searchText = "";
+    searchIyakuhinResult = [];
+    isEditing = false;
+    onFieldChange();
+  }
 </script>
 
 <Field>
@@ -76,7 +89,7 @@
   <FieldForm>
     {#if !isEditing}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="rep" on:click={doRepClick}>{drug.data.薬品レコード.薬品名称}</div>
+      <div class="rep" on:click={doRepClick}>{drug.薬品レコード.薬品名称}</div>
     {:else}
       <div class="with-icons">
         <form on:submit|preventDefault={doSearch}>
@@ -90,12 +103,12 @@
         </form>
         <SearchLink onClick={doSearch} />
         <EraserLink onClick={doClearSearchText} />
-        {#if drug.data.薬品レコード.薬品コード !== ""}
+        {#if drug.薬品レコード.薬品コード !== ""}
           <CancelLink onClick={doCancel} />
         {/if}
       </div>
     {/if}
-    {#if drug.data.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
+    {#if drug.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
       <div class="search-result">
         {#each searchIyakuhinResult as master (master.iyakuhincode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -107,7 +120,7 @@
           </div>
         {/each}
       </div>
-    {:else if drug.data.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
+    {:else if drug.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
       <div class="search-result">
         {#each searchKizaiResult as master (master.kizaicode)}
           <!-- svelte-ignore a11y-no-static-element-interactions -->

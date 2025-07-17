@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { 用法補足レコードWrapper, type RP剤情報Wrapper, } from "../denshi-wrapper";
+  import {
+    不均等レコードEdit,
+    用法補足レコードEdit,
+    薬品補足レコードEdit,
+    type RP剤情報Edit,
+  } from "../denshi-edit";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -15,14 +20,14 @@
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
 
   export let destroy: () => void;
-  export let group: RP剤情報Wrapper;
+  export let group: RP剤情報Edit;
   export let drugId: number;
   export let at: string;
   export let onChange: () => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
   console.log("group", group);
-  console.log("data", drugId, data)
+  console.log("data", drugId, data);
 
   let isEditingJohoKubun = false;
   let isEdigintName = drug.薬品レコード.薬品コード === "";
@@ -75,7 +80,7 @@
     return true;
   }
 
-  function onFieldChange() {
+  function onDrugChange() {
     drug = drug;
   }
 
@@ -88,7 +93,7 @@
   }
 
   function doEnter() {
-    if( !confirmNotEditing() ){
+    if (!confirmNotEditing()) {
       return;
     }
     group.assign(data);
@@ -96,18 +101,32 @@
     onChange();
   }
 
-
   function addDrugSuppl(): void {
     let drug = data.findDrugById(drugId);
-    if( !drug ){
+    if (!drug) {
       throw new Error(`no such drug: ${drugId}`);
     }
-    drug.addDrugSuppl("");
-    onFieldChange();
+    let suppl = 薬品補足レコードEdit.fromInfo("");
+    suppl.isEditing = true;
+    drug.addDrugSuppl(suppl);
+    onDrugChange();
+  }
+
+  function doUneven(): void {
+    if (drug.不均等レコード === undefined) {
+      let edit: 不均等レコードEdit = 不均等レコードEdit.fromObject({
+        不均等１回目服用量: "1",
+        不均等２回目服用量: "2",
+      });
+      drug.不均等レコード = edit;
+    }
+    isEditingUneven = true;
+    onDrugChange();
   }
 
   function addUsageSuppl(): void {
-    data.addUsageSuppl("", true);
+    let suppl: 用法補足レコードEdit = 用法補足レコードEdit.fromInfo("");
+    data.addUsageSuppl(suppl);
     onGroupChange();
   }
 </script>
@@ -117,14 +136,20 @@
   <JohoKubunField
     bind:isEditing={isEditingJohoKubun}
     bind:情報区分={drug.薬品レコード.情報区分}
-    {onFieldChange}
+    onFieldChange={onDrugChange}
   />
-  <!-- <DrugNameField {drug} {at} bind:isEditing={isEdigintName} {onFieldChange} />
+  <DrugNameField
+    {drug}
+    {at}
+    bind:isEditing={isEdigintName}
+    onFieldChange={onDrugChange}
+  />
   <UnevenField
-    不均等レコード={drug.data.不均等レコード}
-    {onFieldChange}
+    不均等レコード={drug.不均等レコード}
+    onFieldChange={onDrugChange}
     bind:isEditing={isEditingUneven}
   />
+  <!-- 
   <DrugAmountField {drug} bind:isEditing={isEditingDrugAmount} {onFieldChange} />
   <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} {onFieldChange} />
   <ZaikeiKubunField
@@ -142,6 +167,7 @@
   <Commands>
     <div class="sub-commands">
       <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>
+      <SmallLink onClick={doUneven}>不均等</SmallLink>
       <SmallLink onClick={addUsageSuppl}>用法補足追加</SmallLink>
     </div>
     <button on:click={doEnter}>入力</button>
