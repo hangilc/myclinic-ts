@@ -145,7 +145,7 @@
     onFieldChange={onDrugChange}
   />
   <UnevenField
-    不均等レコード={drug.不均等レコード}
+    bind:不均等レコード={drug.不均等レコード}
     onFieldChange={onDrugChange}
     bind:isEditing={isEditingUneven}
   />

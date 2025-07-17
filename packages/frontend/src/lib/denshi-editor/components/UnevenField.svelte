@@ -9,18 +9,19 @@
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
 
-  export let 不均等レコード: 不均等レコード;
+  export let 不均等レコード: 不均等レコード | undefined;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  
+
   let inputText: string = serializeUneven(不均等レコード);
   let inputElement: HTMLInputElement | undefined = undefined;
+
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
   };
 
-  function rep(不均等レコード: 不均等レコード): string {
+  function rep(不均等レコード: 不均等レコード | undefined): string {
     let s = serializeUneven(不均等レコード);
     if (s === "") {
       return "（なし）";
@@ -37,14 +38,16 @@
 
   function doEnter() {
     let uneven = deserializeUneven(inputText);
-    if( uneven ){
+    if( uneven === undefined ){
+      alert("不均等レコードの入力が適切でありません。例：2-1-1");
+      return;
+    }
     try {
       不均等レコード = uneven;
       onFieldChange();
     } catch (e: any) {
       alert(e);
     }
-  }
   }
 
   function doCancel() {
