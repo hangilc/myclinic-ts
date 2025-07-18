@@ -8,6 +8,7 @@
   import { validatePrescinfoData } from "./validate-presc-info";
   import PrescAux from "./components/PrescAux.svelte";
   import EditValidUpto from "./components/EditValidUpto.svelte";
+  import SubCommands from "./components/workarea/SubCommands.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -21,6 +22,7 @@
   let wa: HTMLElement;
   let selectedGroupId = 0;
   let selectedDrugId = 0;
+  let showSubCommands = false;
 
   function doCancel() {
     destroy();
@@ -93,7 +95,10 @@
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onEnter={doEnter} onCancel={doCancel} />
+      <Commands onEnter={doEnter} onCancel={doCancel} onChevronDown={() => showSubCommands = true}/>
+      {#if showSubCommands}
+      <SubCommands data={data} onValidUpto={doValidUpto}/>
+      {/if}
       <CurrentPresc
         {data}
         {onDrugSelect}
