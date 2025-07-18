@@ -3,12 +3,18 @@
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
-  import { PrescInfoDataEdit, RP剤情報Edit, 薬品情報Edit } from "./denshi-edit";
+  import {
+    PrescInfoDataEdit,
+    RP剤情報Edit,
+    備考レコードEdit,
+    薬品情報Edit,
+  } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
   import { validatePrescinfoData } from "./validate-presc-info";
   import PrescAux from "./components/PrescAux.svelte";
   import EditValidUpto from "./components/EditValidUpto.svelte";
   import SubCommands from "./components/workarea/SubCommands.svelte";
+  import EditBikou from "./EditBikou.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -90,6 +96,25 @@
       clearWorkarea = undefined;
     };
   }
+
+  function doBikouClick(record: 備考レコードEdit): void {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    record.isEditing = true;
+    const w: EditBikou = new EditBikou({
+      target: wa,
+      destroy: () => clearWorkarea && clearWorkarea(),
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -106,7 +131,11 @@
         bind:selectedGroupId
         bind:selectedDrugId
       />
-      <PrescAux {data} onValidUptoClick={doValidUpto} />
+      <PrescAux
+        {data}
+        onValidUptoClick={doValidUpto}
+        onBikouClick={doBikouClick}
+      />
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>

@@ -614,21 +614,23 @@ export class 麻薬施用レコードEdit implements 麻薬施用レコード {
 
 export class 備考レコードEdit implements 備考レコード {
   id: number;
+  isEditing: boolean;
   備考: string;
 
   constructor(src: {
     備考: string;
-  }, id: number) {
+  }, id: number, isEditing: boolean) {
     this.id = id;
     this.備考 = src.備考;
+    this.isEditing = isEditing;
   }
 
   static fromObject(obj: 備考レコード): 備考レコードEdit {
-    return new 備考レコードEdit(obj, nextId());
+    return new 備考レコードEdit(obj, nextId(), obj.備考 === "");
   }
 
   clone(): 備考レコードEdit {
-    return new 備考レコードEdit(this, this.id);
+    return new 備考レコードEdit(this, this.id, this.isEditing);
   }
 
   assign(src: 備考レコードEdit): void {
