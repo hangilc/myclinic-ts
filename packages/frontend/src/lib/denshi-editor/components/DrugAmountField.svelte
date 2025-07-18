@@ -5,10 +5,10 @@
   import { tick } from "svelte";
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
-  import type { RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-tmpl";
-  import { toHankaku, toZenkaku } from "@/lib/zenkaku";
+  import type { 薬品情報Edit } from "../denshi-edit";
+  import { toHankaku } from "@/lib/zenkaku";
 
-  export let drug: 薬品情報Wrapper;
+  export let drug: 薬品情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
   let inputText: string = inputValue();
@@ -19,7 +19,7 @@
   };
 
   function inputValue(): string {
-    return toHankaku(drug.data.薬品レコード.分量);
+    return toHankaku(drug.薬品レコード.分量);
   }
 
   function doRepClick() {
@@ -29,7 +29,7 @@
   }
 
   function doEnter() {
-    let n = parseFloat(inputText);
+    let n = parseFloat(toHankaku(inputText.trim()));
     if (isNaN(n)) {
       alert("薬品分量が数値でありません。");
       return;
@@ -38,7 +38,7 @@
       alert("薬品分量が正の数値でありません。");
       return;
     }
-    drug.data.薬品レコード.分量 = n.toString();
+    drug.薬品レコード.分量 = n.toString();
     isEditing = false;
     onFieldChange();
   }
@@ -54,7 +54,7 @@
       {#if !isEditing}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <div class="rep" on:click={doRepClick}>
-          {drug.data.薬品レコード.分量 || "（未設定）"}{drug.data.薬品レコード.単位名}
+          {drug.薬品レコード.分量 || "（未設定）"}{drug.薬品レコード.単位名}
         </div>
       {:else}
         <form on:submit|preventDefault={doEnter} class="with-icons">
@@ -63,7 +63,7 @@
             bind:value={inputText}
             bind:this={inputElement}
             class="input"
-          />{drug.data.薬品レコード.単位名}
+          />{drug.薬品レコード.単位名}
           <SubmitLink onClick={doEnter} />
           <CancelLink onClick={doCancel} />
         </form>

@@ -3,28 +3,28 @@
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import FieldForm from "./workarea/FieldForm.svelte";
   import type {
-    薬品情報Wrapper,
-    薬品補足レコードWrapper,
-  } from "../denshi-tmpl";
+    薬品情報Edit,
+    薬品補足レコードEdit,
+  } from "../denshi-edit";
   import DrugSupplForm from "./DrugSupplForm.svelte";
 
-  export let drug: 薬品情報Wrapper;
+  export let drug: 薬品情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
 
   updateIsEditing();
 
   function updateIsEditing() {
-    isEditing = drug.薬品補足レコード.some((r) => r.isEditing);
+    isEditing = drug.薬品補足レコードAsList().some((r) => r.isEditing);
   }
 
-  function doEdit(record: 薬品補足レコードWrapper) {
+  function doEdit(record: 薬品補足レコードEdit) {
     record.isEditing = true;
     drug = drug;
     updateIsEditing();
   }
 
-  function doEnter(record: 薬品補足レコードWrapper) {
+  function doEnter(record: 薬品補足レコードEdit) {
     console.log("doEnter");
     record.isEditing = false;
     drug = drug;
@@ -32,13 +32,13 @@
     onFieldChange();
   }
 
-  function doCancel(record: 薬品補足レコードWrapper) {
+  function doCancel(record: 薬品補足レコードEdit) {
     record.isEditing = false;
     updateIsEditing();
   }
 
-  function doDelete(record: 薬品補足レコードWrapper) {
-    drug.薬品補足レコード = drug.薬品補足レコード.filter(
+  function doDelete(record: 薬品補足レコードEdit) {
+    drug.薬品補足レコード = drug.薬品補足レコードAsList().filter(
       (r) => r.id !== record.id,
     );
     drug = drug;
@@ -46,8 +46,8 @@
     onFieldChange();
   }
 
-  function isVisible(drug: 薬品情報Wrapper): boolean {
-    return drug.薬品補足レコード.length > 0;
+  function isVisible(drug: 薬品情報Edit): boolean {
+    return drug.薬品補足レコードAsList().length > 0;
   }
 </script>
 
@@ -55,11 +55,11 @@
   <Field>
     <FieldTitle>薬品補足</FieldTitle>
     <FieldForm>
-      {#each drug.薬品補足レコード as record (record.id)}
+      {#each drug.薬品補足レコードAsList() as record (record.id)}
         {#if !record.isEditing}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div on:click={() => doEdit(record)} class="rep">
-            {record.data.薬品補足情報 || "（空白）"}
+            {record.薬品補足情報 || "（空白）"}
           </div>
         {:else}
           <DrugSupplForm

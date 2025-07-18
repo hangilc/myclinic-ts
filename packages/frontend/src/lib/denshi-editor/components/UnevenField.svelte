@@ -9,17 +9,23 @@
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
 
-  export let 不均等レコード: 不均等レコード | undefined;
+  export let 不均等レコード: 不均等レコード | undefined = undefined;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
 
-  let inputText: string = serializeUneven(不均等レコード);
+  let inputText: string = ""; 
   let inputElement: HTMLInputElement | undefined = undefined;
+
+  $: if( isEditing ){ initInput() }
 
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
   };
+
+  function initInput(): void {
+    inputText = serializeUneven(不均等レコード);
+  }
 
   function rep(不均等レコード: 不均等レコード | undefined): string {
     let s = serializeUneven(不均等レコード);
@@ -38,12 +44,9 @@
 
   function doEnter() {
     let uneven = deserializeUneven(inputText);
-    if( uneven === undefined ){
-      alert("不均等レコードの入力が適切でありません。例：2-1-1");
-      return;
-    }
     try {
       不均等レコード = uneven;
+      isEditing = false;
       onFieldChange();
     } catch (e: any) {
       alert(e);
@@ -60,24 +63,26 @@
   }
 </script>
 
-<Field>
-  <FieldTitle>不均等レコード</FieldTitle>
-  <FieldForm>
-    {#if !isEditing}
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="rep" on:click={doRepClick}>
-        {rep(不均等レコード)}
-      </div>
-    {:else}
-      <form on:submit|preventDefault={doEnter} class="with-icons">
-        <input type="text" bind:value={inputText} bind:this={inputElement} />
-        <SubmitLink onClick={doEnter} />
-        <CancelLink onClick={doCancel} />
-        <TrashLink onClick={doDelete} />
-      </form>
-    {/if}
-  </FieldForm>
-</Field>
+{#if 不均等レコード}
+  <Field>
+    <FieldTitle>不均等レコード</FieldTitle>
+    <FieldForm>
+      {#if !isEditing}
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="rep" on:click={doRepClick}>
+          {rep(不均等レコード)}
+        </div>
+      {:else}
+        <form on:submit|preventDefault={doEnter} class="with-icons">
+          <input type="text" bind:value={inputText} bind:this={inputElement} />
+          <SubmitLink onClick={doEnter} />
+          <CancelLink onClick={doCancel} />
+          <TrashLink onClick={doDelete} />
+        </form>
+      {/if}
+    </FieldForm>
+  </Field>
+{/if}
 
 <style>
   .rep {

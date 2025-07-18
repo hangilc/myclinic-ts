@@ -323,17 +323,21 @@ export class 薬品情報Edit implements 薬品情報 {
     if (this.薬品１回服用量レコード !== undefined) {
       obj.薬品１回服用量レコード = this.薬品１回服用量レコード.toObject();
     }
-    if (this.薬品補足レコード !== undefined) {
+    if (this.薬品補足レコード !== undefined && this.薬品補足レコード.length > 0) {
       obj.薬品補足レコード = this.薬品補足レコード.map(record => record.toObject());
     }
     return obj;
   }
 
   addDrugSuppl(suppl: 薬品補足レコードEdit): void {
-    if( this.薬品補足レコード === undefined ){
+    if (this.薬品補足レコード === undefined) {
       this.薬品補足レコード = [];
     }
     this.薬品補足レコード.push(suppl);
+  }
+
+  薬品補足レコードAsList(): 薬品補足レコードEdit[] {
+    return this.薬品補足レコード ?? [];
   }
 }
 
@@ -510,7 +514,7 @@ export class RP剤情報Edit implements RP剤情報 {
       用法レコード: this.用法レコード.toObject(),
       薬品情報グループ: this.薬品情報グループ.map(info => info.toObject()),
     };
-    if (this.用法補足レコード !== undefined) {
+    if (this.用法補足レコード !== undefined && this.用法補足レコード.length > 0) {
       obj.用法補足レコード = this.用法補足レコード.map(record => record.toObject());
     }
     return obj;
@@ -526,7 +530,7 @@ export class RP剤情報Edit implements RP剤情報 {
   }
 
   addUsageSuppl(suppl: 用法補足レコードEdit): void {
-    if( this.用法補足レコード === undefined ){
+    if (this.用法補足レコード === undefined) {
       this.用法補足レコード = [];
     }
     this.用法補足レコード.push(suppl);
@@ -734,14 +738,15 @@ export class 提供情報レコードEdit implements 提供情報レコード {
   }
 
   toObject(): 提供情報レコード | undefined {
-    if (this.提供診療情報レコード === undefined && this.検査値データ等レコード === undefined) {
+    if ((this.提供診療情報レコード === undefined || this.提供診療情報レコード.length === 0) &&
+      (this.検査値データ等レコード === undefined || this.検査値データ等レコード.length === 0)) {
       return undefined;
     }
     let obj: 提供情報レコード = {};
-    if (this.提供診療情報レコード !== undefined) {
+    if (this.提供診療情報レコード !== undefined && this.提供診療情報レコード.length > 0) {
       obj.提供診療情報レコード = this.提供診療情報レコード.map(record => record.toObject());
     }
-    if (this.検査値データ等レコード !== undefined) {
+    if (this.検査値データ等レコード !== undefined && this.検査値データ等レコード.length > 0) {
       obj.検査値データ等レコード = this.検査値データ等レコード.map(record => record.toObject());
     }
     return obj;
@@ -1058,7 +1063,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
     if (this.残薬確認対応フラグ !== undefined) {
       obj.残薬確認対応フラグ = this.残薬確認対応フラグ;
     }
-    if (this.備考レコード !== undefined) {
+    if (this.備考レコード !== undefined && this.備考レコード.length > 0) {
       obj.備考レコード = this.備考レコード.map(record => record.toObject());
     }
     if (this.引換番号 !== undefined) {

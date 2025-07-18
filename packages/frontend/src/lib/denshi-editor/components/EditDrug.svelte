@@ -26,8 +26,6 @@
   export let onChange: () => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
-  console.log("group", group);
-  console.log("data", drugId, data);
 
   let isEditingJohoKubun = false;
   let isEdigintName = drug.薬品レコード.薬品コード === "";
@@ -149,9 +147,9 @@
     onFieldChange={onDrugChange}
     bind:isEditing={isEditingUneven}
   />
+  <DrugAmountField {drug} bind:isEditing={isEditingDrugAmount} onFieldChange={onDrugChange} />
+  <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} onFieldChange={onDrugChange} />
   <!-- 
-  <DrugAmountField {drug} bind:isEditing={isEditingDrugAmount} {onFieldChange} />
-  <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} {onFieldChange} />
   <ZaikeiKubunField
     bind:剤形区分={data.data.剤形レコード.剤形区分}
     bind:isEditing={isEditingZaikeiKubun}
