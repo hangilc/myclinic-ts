@@ -4,6 +4,7 @@
 
   export let data: PrescInfoDataEdit;
   export let onValidUpto: () => void;
+  export let onEditBikou: () => void;
 
 </script>
 
@@ -11,6 +12,7 @@
   {#if data.使用期限年月日 == undefined}
     <SmallLink onClick={onValidUpto}>有効期限</SmallLink>
   {/if}
+  <SmallLink onClick={onEditBikou}>備考編集</SmallLink>
 </div>
 
 <style>

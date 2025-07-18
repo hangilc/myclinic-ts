@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { PrescInfoData } from "../denshi-shohou/presc-info";
+  import type { PrescInfoData, 備考レコード } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
@@ -14,7 +14,7 @@
   import PrescAux from "./components/PrescAux.svelte";
   import EditValidUpto from "./components/EditValidUpto.svelte";
   import SubCommands from "./components/workarea/SubCommands.svelte";
-  import EditBikou from "./EditBikou.svelte";
+  import EditBikou from "./components/EditBikou.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -97,7 +97,7 @@
     };
   }
 
-  function doBikouClick(record: 備考レコードEdit): void {
+  function doBikouClick(record: 備考レコードEdit | undefined): void {
     if (!wa) {
       return;
     }
@@ -105,15 +105,28 @@
       alert("現在編集中です。」");
       return;
     }
-    record.isEditing = true;
+    if( record ){
+      record.isEditing = true;
+    }
     const w: EditBikou = new EditBikou({
       target: wa,
-      destroy: () => clearWorkarea && clearWorkarea(),
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        bikou: data.備考レコード,
+        update: (value: 備考レコードEdit[] | undefined) => {
+          data.備考レコード = value;
+          data = data;
+        },
+      },
     });
     clearWorkarea = () => {
       w.$destroy();
       clearWorkarea = undefined;
     };
+  }
+
+  function doEditBikou(): void {
+    doBikouClick(undefined);
   }
 </script>
 
@@ -122,7 +135,7 @@
     <div class="left">
       <Commands onEnter={doEnter} onCancel={doCancel} bind:showSubCommands />
       {#if showSubCommands}
-        <SubCommands {data} onValidUpto={doValidUpto} />
+        <SubCommands {data} onValidUpto={doValidUpto} onEditBikou={doEditBikou}/>
       {/if}
       <CurrentPresc
         {data}
