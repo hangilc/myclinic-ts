@@ -331,339 +331,339 @@ let serialId = 1;
 //   return list.map((r) => r.toDenshi());
 // }
 
-export class PrescInfoWrapper {
-  data: PrescInfoData;
-  備考レコード: 備考レコードWrapper[];
-  提供情報レコード: 提供情報レコードWrapper;
-  RP剤情報グループ: RP剤情報Wrapper[];
+// export class PrescInfoWrapper {
+//   data: PrescInfoData;
+//   備考レコード: 備考レコードWrapper[];
+//   提供情報レコード: 提供情報レコードWrapper;
+//   RP剤情報グループ: RP剤情報Wrapper[];
 
-  constructor(data: PrescInfoData,
-    備考レコード: 備考レコードWrapper[],
-    提供情報レコード: 提供情報レコードWrapper,
-    RP剤情報グループ: RP剤情報Wrapper[]) {
-    this.data = data;
-    this.備考レコード = 備考レコード;
-    this.提供情報レコード = 提供情報レコード;
-    this.RP剤情報グループ = RP剤情報グループ;
-  }
+//   constructor(data: PrescInfoData,
+//     備考レコード: 備考レコードWrapper[],
+//     提供情報レコード: 提供情報レコードWrapper,
+//     RP剤情報グループ: RP剤情報Wrapper[]) {
+//     this.data = data;
+//     this.備考レコード = 備考レコード;
+//     this.提供情報レコード = 提供情報レコード;
+//     this.RP剤情報グループ = RP剤情報グループ;
+//   }
 
-  static fromData(data: PrescInfoData): PrescInfoWrapper {
-    return new PrescInfoWrapper(
-      data,
-      (data.備考レコード ?? []).map((r) => 備考レコードWrapper.fromData(r)),
-      提供情報レコードWrapper.fromData(data.提供情報レコード ?? {}),
-      data.RP剤情報グループ.map(g => RP剤情報Wrapper.fromData(g)),
-    )
-  }
+//   static fromData(data: PrescInfoData): PrescInfoWrapper {
+//     return new PrescInfoWrapper(
+//       data,
+//       (data.備考レコード ?? []).map((r) => 備考レコードWrapper.fromData(r)),
+//       提供情報レコードWrapper.fromData(data.提供情報レコード ?? {}),
+//       data.RP剤情報グループ.map(g => RP剤情報Wrapper.fromData(g)),
+//     )
+//   }
 
-  toDenshi(): PrescInfoData {
-    return Object.assign({}, this.data, {
-      備考レコード: this.備考レコード.map(r => r.toDenshi()),
-      提供情報レコード: this.提供情報レコード.toDenshi(),
-      RP剤情報グループ: this.RP剤情報グループ.map(r => r.toDenshi()),
-    });
-  }
+//   toDenshi(): PrescInfoData {
+//     return Object.assign({}, this.data, {
+//       備考レコード: this.備考レコード.map(r => r.toDenshi()),
+//       提供情報レコード: this.提供情報レコード.toDenshi(),
+//       RP剤情報グループ: this.RP剤情報グループ.map(r => r.toDenshi()),
+//     });
+//   }
 
-  clone(): PrescInfoWrapper {
-    return new PrescInfoWrapper(Object.assign({}, this.data),
-      this.備考レコード.map(r => r.clone()),
-      this.提供情報レコード.clone(),
-      this.RP剤情報グループ.map(g => g.clone())
-    )
-  }
+//   clone(): PrescInfoWrapper {
+//     return new PrescInfoWrapper(Object.assign({}, this.data),
+//       this.備考レコード.map(r => r.clone()),
+//       this.提供情報レコード.clone(),
+//       this.RP剤情報グループ.map(g => g.clone())
+//     )
+//   }
 
-  assign(src: PrescInfoWrapper) {
-    Object.assign(this, {
-      data: src.data,
-      備考レコード: src.備考レコード,
-      提供情報レコード: src.提供情報レコード,
-      RP剤情報グループ: src.RP剤情報グループ,
-    });
-  }
+//   assign(src: PrescInfoWrapper) {
+//     Object.assign(this, {
+//       data: src.data,
+//       備考レコード: src.備考レコード,
+//       提供情報レコード: src.提供情報レコード,
+//       RP剤情報グループ: src.RP剤情報グループ,
+//     });
+//   }
 
-  findDrugById(drugId: number): { group: RP剤情報Wrapper; drug: 薬品情報Wrapper; } | undefined {
-    for (let g of this.RP剤情報グループ) {
-      for (let d of g.薬品情報グループ) {
-        if (d.id === drugId) {
-          return { group: g, drug: d };
-        }
-      }
-    }
-    return undefined;
-  }
-}
+//   findDrugById(drugId: number): { group: RP剤情報Wrapper; drug: 薬品情報Wrapper; } | undefined {
+//     for (let g of this.RP剤情報グループ) {
+//       for (let d of g.薬品情報グループ) {
+//         if (d.id === drugId) {
+//           return { group: g, drug: d };
+//         }
+//       }
+//     }
+//     return undefined;
+//   }
+// }
 
-export class 備考レコードWrapper {
-  id: number;
-  data: 備考レコード;
+// export class 備考レコードWrapper {
+//   id: number;
+//   data: 備考レコード;
 
-  constructor(id: number, data: 備考レコード) {
-    this.id = id;
-    this.data = data;
-  }
+//   constructor(id: number, data: 備考レコード) {
+//     this.id = id;
+//     this.data = data;
+//   }
 
-  static fromData(data: 備考レコード): 備考レコードWrapper {
-    return new 備考レコードWrapper(serialId++, data);
-  }
+//   static fromData(data: 備考レコード): 備考レコードWrapper {
+//     return new 備考レコードWrapper(serialId++, data);
+//   }
 
-  clone(): 備考レコードWrapper {
-    return new 備考レコードWrapper(this.id, Object.assign({}, this.data));
-  }
+//   clone(): 備考レコードWrapper {
+//     return new 備考レコードWrapper(this.id, Object.assign({}, this.data));
+//   }
 
-  toDenshi(): 備考レコード {
-    return this.data;
-  }
-}
+//   toDenshi(): 備考レコード {
+//     return this.data;
+//   }
+// }
 
 
-export class 提供診療情報レコードWrapper {
-  id: number;
-  data: 提供診療情報レコード;
+// export class 提供診療情報レコードWrapper {
+//   id: number;
+//   data: 提供診療情報レコード;
 
-  constructor(id: number, data: 提供診療情報レコード) {
-    this.id = id;
-    this.data = data;
-  }
+//   constructor(id: number, data: 提供診療情報レコード) {
+//     this.id = id;
+//     this.data = data;
+//   }
 
-  static fromData(data: 提供診療情報レコード): 提供診療情報レコードWrapper {
-    return new 提供診療情報レコードWrapper(serialId++, data);
-  }
+//   static fromData(data: 提供診療情報レコード): 提供診療情報レコードWrapper {
+//     return new 提供診療情報レコードWrapper(serialId++, data);
+//   }
 
-  clone(): 提供診療情報レコードWrapper {
-    return new 提供診療情報レコードWrapper(this.id, Object.assign({}, this.data));
-  }
+//   clone(): 提供診療情報レコードWrapper {
+//     return new 提供診療情報レコードWrapper(this.id, Object.assign({}, this.data));
+//   }
 
-  toDenshi(): 提供診療情報レコード {
-    return this.data;
-  }
-}
+//   toDenshi(): 提供診療情報レコード {
+//     return this.data;
+//   }
+// }
 
-export class 検査値データ等レコードWrapper {
-  id: number;
-  data: 検査値データ等レコード;
+// export class 検査値データ等レコードWrapper {
+//   id: number;
+//   data: 検査値データ等レコード;
 
-  constructor(id: number, data: 検査値データ等レコード) {
-    this.id = id;
-    this.data = data;
-  }
+//   constructor(id: number, data: 検査値データ等レコード) {
+//     this.id = id;
+//     this.data = data;
+//   }
 
-  static fromData(data: 検査値データ等レコード): 検査値データ等レコードWrapper {
-    return new 検査値データ等レコードWrapper(serialId++, data);
-  }
+//   static fromData(data: 検査値データ等レコード): 検査値データ等レコードWrapper {
+//     return new 検査値データ等レコードWrapper(serialId++, data);
+//   }
 
-  clone(): 検査値データ等レコードWrapper {
-    return new 検査値データ等レコードWrapper(this.id, Object.assign({}, this.data));
-  }
+//   clone(): 検査値データ等レコードWrapper {
+//     return new 検査値データ等レコードWrapper(this.id, Object.assign({}, this.data));
+//   }
 
-  toDenshi(): 検査値データ等レコード {
-    return this.data;
-  }
-}
+//   toDenshi(): 検査値データ等レコード {
+//     return this.data;
+//   }
+// }
 
-export class 用法補足レコードWrapper {
-  id: number;
-  data: 用法補足レコード;
-  isEditing: boolean = false;
+// export class 用法補足レコードWrapper {
+//   id: number;
+//   data: 用法補足レコード;
+//   isEditing: boolean = false;
 
-  constructor(id: number, data: 用法補足レコード) {
-    this.id = id;
-    this.data = data;
-  }
+//   constructor(id: number, data: 用法補足レコード) {
+//     this.id = id;
+//     this.data = data;
+//   }
 
-  static fromData(data: 用法補足レコード): 用法補足レコードWrapper {
-    return new 用法補足レコードWrapper(serialId++, data);
-  }
+//   static fromData(data: 用法補足レコード): 用法補足レコードWrapper {
+//     return new 用法補足レコードWrapper(serialId++, data);
+//   }
 
-  clone(): 用法補足レコードWrapper {
-    return new 用法補足レコードWrapper(this.id, Object.assign({}, this.data));
-  }
+//   clone(): 用法補足レコードWrapper {
+//     return new 用法補足レコードWrapper(this.id, Object.assign({}, this.data));
+//   }
 
-  toDenshi(): 用法補足レコード {
-    return this.data;
-  }
-}
+//   toDenshi(): 用法補足レコード {
+//     return this.data;
+//   }
+// }
 
-export class 薬品補足レコードWrapper {
-  id: number;
-  data: 薬品補足レコード;
-  isEditing: boolean = false;
+// export class 薬品補足レコードWrapper {
+//   id: number;
+//   data: 薬品補足レコード;
+//   isEditing: boolean = false;
 
-  constructor(id: number, data: 薬品補足レコード) {
-    this.id = id;
-    this.data = data;
-  }
+//   constructor(id: number, data: 薬品補足レコード) {
+//     this.id = id;
+//     this.data = data;
+//   }
 
-  static fromData(data: 薬品補足レコード): 薬品補足レコードWrapper {
-    return new 薬品補足レコードWrapper(serialId++, data);
-  }
+//   static fromData(data: 薬品補足レコード): 薬品補足レコードWrapper {
+//     return new 薬品補足レコードWrapper(serialId++, data);
+//   }
 
-  clone(): 薬品補足レコードWrapper {
-    return new 薬品補足レコードWrapper(this.id, Object.assign({}, this.data));
-  }
+//   clone(): 薬品補足レコードWrapper {
+//     return new 薬品補足レコードWrapper(this.id, Object.assign({}, this.data));
+//   }
 
-  toDenshi(): 薬品補足レコード {
-    return this.data;
-  }
+//   toDenshi(): 薬品補足レコード {
+//     return this.data;
+//   }
 
-  static fromText(text: string): 薬品補足レコードWrapper {
-    let data: 薬品補足レコード = { 薬品補足情報: text };
-    return 薬品補足レコードWrapper.fromData(data);
-  }
-}
+//   static fromText(text: string): 薬品補足レコードWrapper {
+//     let data: 薬品補足レコード = { 薬品補足情報: text };
+//     return 薬品補足レコードWrapper.fromData(data);
+//   }
+// }
 
-export class 提供情報レコードWrapper {
-  id: number;
-  data: 提供情報レコード;
-  提供診療情報レコード: 提供診療情報レコードWrapper[];
-  検査値データ等レコード: 検査値データ等レコードWrapper[];
+// export class 提供情報レコードWrapper {
+//   id: number;
+//   data: 提供情報レコード;
+//   提供診療情報レコード: 提供診療情報レコードWrapper[];
+//   検査値データ等レコード: 検査値データ等レコードWrapper[];
 
-  constructor(id: number, data: 提供情報レコード,
-    提供診療情報レコード: 提供診療情報レコードWrapper[],
-    検査値データ等レコード: 検査値データ等レコードWrapper[]
-  ) {
-    this.id = id;
-    this.data = data;
-    this.提供診療情報レコード = 提供診療情報レコード;
-    this.検査値データ等レコード = 検査値データ等レコード;
-  }
+//   constructor(id: number, data: 提供情報レコード,
+//     提供診療情報レコード: 提供診療情報レコードWrapper[],
+//     検査値データ等レコード: 検査値データ等レコードWrapper[]
+//   ) {
+//     this.id = id;
+//     this.data = data;
+//     this.提供診療情報レコード = 提供診療情報レコード;
+//     this.検査値データ等レコード = 検査値データ等レコード;
+//   }
 
-  static fromData(data: 提供情報レコード): 提供情報レコードWrapper {
-    return new 提供情報レコードWrapper(serialId++, data,
-      (data.提供診療情報レコード ?? []).map(r => 提供診療情報レコードWrapper.fromData(r)),
-      (data.検査値データ等レコード ?? []).map(r => 検査値データ等レコードWrapper.fromData(r)),
-    )
-  }
+//   static fromData(data: 提供情報レコード): 提供情報レコードWrapper {
+//     return new 提供情報レコードWrapper(serialId++, data,
+//       (data.提供診療情報レコード ?? []).map(r => 提供診療情報レコードWrapper.fromData(r)),
+//       (data.検査値データ等レコード ?? []).map(r => 検査値データ等レコードWrapper.fromData(r)),
+//     )
+//   }
 
-  toDenshi(): 提供情報レコード {
-    return Object.assign({}, this.data, {
-      提供診療情報レコード: this.提供診療情報レコード.map(r => r.toDenshi()),
-      検査値データ等レコード: this.検査値データ等レコード.map(r => r.toDenshi()),
-    });
-  }
+//   toDenshi(): 提供情報レコード {
+//     return Object.assign({}, this.data, {
+//       提供診療情報レコード: this.提供診療情報レコード.map(r => r.toDenshi()),
+//       検査値データ等レコード: this.検査値データ等レコード.map(r => r.toDenshi()),
+//     });
+//   }
 
-  clone(): 提供情報レコードWrapper {
-    return new 提供情報レコードWrapper(this.id, Object.assign({}, this.data),
-      this.提供診療情報レコード.map(r => r.clone()),
-      this.検査値データ等レコード.map(r => r.clone()),
-    )
-  }
+//   clone(): 提供情報レコードWrapper {
+//     return new 提供情報レコードWrapper(this.id, Object.assign({}, this.data),
+//       this.提供診療情報レコード.map(r => r.clone()),
+//       this.検査値データ等レコード.map(r => r.clone()),
+//     )
+//   }
 
-  assign(src: 提供情報レコードWrapper): void {
-    Object.assign(this, {
-      id: src.id,
-      data: src.data,
-      提供診療情報レコード: src.提供診療情報レコード,
-      検査値データ等レコード: src.検査値データ等レコード,
-    })
-  }
-}
+//   assign(src: 提供情報レコードWrapper): void {
+//     Object.assign(this, {
+//       id: src.id,
+//       data: src.data,
+//       提供診療情報レコード: src.提供診療情報レコード,
+//       検査値データ等レコード: src.検査値データ等レコード,
+//     })
+//   }
+// }
 
-export class RP剤情報Wrapper {
-  id: number;
-  data: RP剤情報;
-  用法補足レコード: 用法補足レコードWrapper[];
-  薬品情報グループ: 薬品情報Wrapper[];
+// export class RP剤情報Wrapper {
+//   id: number;
+//   data: RP剤情報;
+//   用法補足レコード: 用法補足レコードWrapper[];
+//   薬品情報グループ: 薬品情報Wrapper[];
 
-  constructor(id: number, data: RP剤情報,
-    用法補足レコード: 用法補足レコードWrapper[],
-    薬品情報グループ: 薬品情報Wrapper[]
-  ) {
-    this.id = id;
-    this.data = data;
-    this.用法補足レコード = 用法補足レコード;
-    this.薬品情報グループ = 薬品情報グループ;
-  }
+//   constructor(id: number, data: RP剤情報,
+//     用法補足レコード: 用法補足レコードWrapper[],
+//     薬品情報グループ: 薬品情報Wrapper[]
+//   ) {
+//     this.id = id;
+//     this.data = data;
+//     this.用法補足レコード = 用法補足レコード;
+//     this.薬品情報グループ = 薬品情報グループ;
+//   }
 
-  static fromData(data: RP剤情報): RP剤情報Wrapper {
-    return new RP剤情報Wrapper(
-      serialId++,
-      data,
-      (data.用法補足レコード ?? []).map(r => 用法補足レコードWrapper.fromData(r)),
-      data.薬品情報グループ.map(g => 薬品情報Wrapper.fromData(g)),
-    )
-  }
+//   static fromData(data: RP剤情報): RP剤情報Wrapper {
+//     return new RP剤情報Wrapper(
+//       serialId++,
+//       data,
+//       (data.用法補足レコード ?? []).map(r => 用法補足レコードWrapper.fromData(r)),
+//       data.薬品情報グループ.map(g => 薬品情報Wrapper.fromData(g)),
+//     )
+//   }
 
-  toDenshi(): RP剤情報 {
-    return Object.assign({}, this.data, {
-      用法補足レコード: this.用法補足レコード.map(r => r.toDenshi()),
-      薬品情報グループ: this.薬品情報グループ.map(r => r.toDenshi()),
-    });
-  }
+//   toDenshi(): RP剤情報 {
+//     return Object.assign({}, this.data, {
+//       用法補足レコード: this.用法補足レコード.map(r => r.toDenshi()),
+//       薬品情報グループ: this.薬品情報グループ.map(r => r.toDenshi()),
+//     });
+//   }
 
-  clone(): RP剤情報Wrapper {
-    return new RP剤情報Wrapper(this.id, Object.assign({}, this.data),
-      this.用法補足レコード.map(r => r.clone()),
-      this.薬品情報グループ.map(g => g.clone()));
-  }
+//   clone(): RP剤情報Wrapper {
+//     return new RP剤情報Wrapper(this.id, Object.assign({}, this.data),
+//       this.用法補足レコード.map(r => r.clone()),
+//       this.薬品情報グループ.map(g => g.clone()));
+//   }
 
-  assign(src: RP剤情報Wrapper) {
-    Object.assign(this, {
-      id: src.id,
-      data: src.data,
-      用法補足レコード: src.用法補足レコード,
-      薬品情報グループ: src.薬品情報グループ,
-    })
-  }
+//   assign(src: RP剤情報Wrapper) {
+//     Object.assign(this, {
+//       id: src.id,
+//       data: src.data,
+//       用法補足レコード: src.用法補足レコード,
+//       薬品情報グループ: src.薬品情報グループ,
+//     })
+//   }
 
-  findDrugById(drugId: number): 薬品情報Wrapper | undefined {
-    for (let d of this.薬品情報グループ) {
-      if (d.id === drugId) {
-        return d;
-      }
-    }
-    return undefined;
-  }
-}
+//   findDrugById(drugId: number): 薬品情報Wrapper | undefined {
+//     for (let d of this.薬品情報グループ) {
+//       if (d.id === drugId) {
+//         return d;
+//       }
+//     }
+//     return undefined;
+//   }
+// }
 
-export class 薬品情報Wrapper {
-  id: number;
-  data: 薬品情報;
-  薬品補足レコード: 薬品補足レコードWrapper[];
-  ippanmei: string = "";
-  ippanmeicode: string = "";
+// export class 薬品情報Wrapper {
+//   id: number;
+//   data: 薬品情報;
+//   薬品補足レコード: 薬品補足レコードWrapper[];
+//   ippanmei: string = "";
+//   ippanmeicode: string = "";
 
-  constructor(id: number, data: 薬品情報,
-    薬品補足レコード: 薬品補足レコードWrapper[]
-  ) {
-    this.id = id;
-    this.data = data;
-    this.薬品補足レコード = 薬品補足レコード;
-  }
+//   constructor(id: number, data: 薬品情報,
+//     薬品補足レコード: 薬品補足レコードWrapper[]
+//   ) {
+//     this.id = id;
+//     this.data = data;
+//     this.薬品補足レコード = 薬品補足レコード;
+//   }
 
-  static fromData(data: 薬品情報): 薬品情報Wrapper {
-    return new 薬品情報Wrapper(
-      serialId++,
-      data,
-      (data.薬品補足レコード ?? []).map(r => 薬品補足レコードWrapper.fromData(r)),
-    )
-  }
+//   static fromData(data: 薬品情報): 薬品情報Wrapper {
+//     return new 薬品情報Wrapper(
+//       serialId++,
+//       data,
+//       (data.薬品補足レコード ?? []).map(r => 薬品補足レコードWrapper.fromData(r)),
+//     )
+//   }
 
-  toDenshi(): 薬品情報 {
-    return Object.assign({}, this.data, {
-      薬品補足レコード: this.薬品補足レコード.map(r => r.toDenshi()),
-    });
-  }
+//   toDenshi(): 薬品情報 {
+//     return Object.assign({}, this.data, {
+//       薬品補足レコード: this.薬品補足レコード.map(r => r.toDenshi()),
+//     });
+//   }
 
-  clone(): 薬品情報Wrapper {
-    return new 薬品情報Wrapper(this.id, Object.assign({}, this.data),
-      this.薬品補足レコード.map(r => r.clone()));
-  }
+//   clone(): 薬品情報Wrapper {
+//     return new 薬品情報Wrapper(this.id, Object.assign({}, this.data),
+//       this.薬品補足レコード.map(r => r.clone()));
+//   }
 
-  assign(src: 薬品情報Wrapper) {
-    Object.assign(this, {
-      id: src.id,
-      data: src.data,
-      薬品補足レコード: src.薬品補足レコード,
-      ippanmei: src.ippanmei,
-      ippanmeicode: src.ippanmeicode,
-    })
-  }
+//   assign(src: 薬品情報Wrapper) {
+//     Object.assign(this, {
+//       id: src.id,
+//       data: src.data,
+//       薬品補足レコード: src.薬品補足レコード,
+//       ippanmei: src.ippanmei,
+//       ippanmeicode: src.ippanmeicode,
+//     })
+//   }
 
-  addSuppl(text: string): void {
-    let suppl = 薬品補足レコードWrapper.fromText(text);
-    if( text === "" ){
-      suppl.isEditing = true;
-    }
-    this.薬品補足レコード.push(suppl);
-  }
-}
+//   addSuppl(text: string): void {
+//     let suppl = 薬品補足レコードWrapper.fromText(text);
+//     if( text === "" ){
+//       suppl.isEditing = true;
+//     }
+//     this.薬品補足レコード.push(suppl);
+//   }
+// }

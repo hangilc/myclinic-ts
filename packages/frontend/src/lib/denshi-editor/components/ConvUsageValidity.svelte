@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { 用法レコード } from "@/lib/denshi-shohou/presc-info";
-  import type { 薬品情報Wrapper } from "../denshi-tmpl";
-  import { isValidDrug, isValidUsage } from "../helper";
+  import { isValidUsage } from "../helper";
   import ConvertedIcon from "../icons/ConvertedIcon.svelte";
   import UnconvertedIcon from "../icons/UnconvertedIcon.svelte";
 
