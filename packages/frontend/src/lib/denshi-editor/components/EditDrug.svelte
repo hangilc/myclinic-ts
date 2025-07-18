@@ -5,7 +5,7 @@
     薬品補足レコードEdit,
     type RP剤情報Edit,
   } from "../denshi-edit";
-  import { hasHenkoufukaDrugSuppl, hasKanjakibouDrugSuppl, henkoufukaDrugSuppl, kanjakibouDrugSuppl } from "../helper";
+  import { hasHenkoufukaDrugSuppl, hasIppoukaUsageSuppl, hasKanjakibouDrugSuppl, henkoufukaDrugSuppl, ippoukaUsageSuppl, kanjakibouDrugSuppl } from "../helper";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -146,6 +146,12 @@
     data.addUsageSuppl(suppl);
     onGroupChange();
   }
+
+  function doIppouka(): void {
+    let suppl = 用法補足レコードEdit.fromObject(ippoukaUsageSuppl());
+    data.addUsageSuppl(suppl);
+    onGroupChange();
+  }
 </script>
 
 <Workarea>
@@ -176,19 +182,18 @@
     bind:isEditing={isEditingDrugSuppl}
     onFieldChange={onDrugChange}
   />
-  <!-- 
   <ZaikeiKubunField
-    bind:剤形区分={data.data.剤形レコード.剤形区分}
+    bind:剤形区分={data.剤形レコード.剤形区分}
     bind:isEditing={isEditingZaikeiKubun}
-    {onFieldChange}
+    onFieldChange={onDrugChange}
   />
-  <DrugUsageField group={data} bind:isEditing={isEditingUsage} {onFieldChange} />
-  <TimesField group={data} bind:isEditing={isEditingTimes} {onFieldChange} />
+  <DrugUsageField group={data} bind:isEditing={isEditingUsage} onFieldChange={onDrugChange} />
+  <TimesField group={data} bind:isEditing={isEditingTimes} onFieldChange={onDrugChange} />
   <UsageSupplField
     group={data}
     bind:isEditing={isEditingUsageSuppl}
     onFieldChange={onGroupChange}
-  /> -->
+  />
   <Commands>
     <div class="sub-commands">
       {#if !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}
@@ -197,9 +202,12 @@
       {#if !hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())}
         <SmallLink onClick={doKanjakibou}>患者希望</SmallLink>
       {/if}
-      <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>
+      <SmallLink onClick={addDrugSuppl}>薬品補足</SmallLink>
       <SmallLink onClick={doUneven}>不均等</SmallLink>
-      <SmallLink onClick={addUsageSuppl}>用法補足追加</SmallLink>
+      {#if !hasIppoukaUsageSuppl(data.用法補足レコードAsList())}
+      <SmallLink onClick={doIppouka}>一包化</SmallLink>
+      {/if}
+      <SmallLink onClick={addUsageSuppl}>用法補足</SmallLink>
     </div>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>

@@ -535,6 +535,10 @@ export class RP剤情報Edit implements RP剤情報 {
     }
     this.用法補足レコード.push(suppl);
   }
+
+  用法補足レコードAsList(): 用法補足レコードEdit[] {
+    return this.用法補足レコード ?? [];
+  }
 }
 
 export class 公費レコードEdit implements 公費レコード {

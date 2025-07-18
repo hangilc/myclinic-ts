@@ -1,15 +1,15 @@
 <script lang="ts">
-  import type { 用法補足レコードWrapper } from "../denshi-tmpl";
+  import type { 用法補足レコードEdit } from "../denshi-edit";
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
   import { tick } from "svelte";
 
-  export let suppl: 用法補足レコードWrapper;
+  export let suppl: 用法補足レコードEdit;
   export let onEnter: () => void;
   export let onCancel: () => void;
   export let onDelete: () => void;
-  let inputText: string = suppl.data.用法補足情報;
+  let inputText: string = suppl.用法補足情報;
   let inputElement: HTMLInputElement | undefined = undefined;
   export const focus = async () => {
     await tick();
@@ -19,7 +19,7 @@
   function doEnter() {
     console.log("enter doEnter")
     if (inputText !== "") {
-      suppl.data.用法補足情報 = inputText;
+      suppl.用法補足情報 = inputText;
       console.log("calling onEnter")
       onEnter();
     }

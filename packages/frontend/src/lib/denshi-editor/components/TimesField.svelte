@@ -7,10 +7,10 @@
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
-  import type { RP剤情報Wrapper } from "../denshi-tmpl";
+  import type { RP剤情報Edit } from "../denshi-edit";
   import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 
-  export let group: RP剤情報Wrapper;
+  export let group: RP剤情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
   let inputText: string = inputValue();
@@ -21,39 +21,39 @@
   };
 
   function inputValue(): string {
-    return toHankaku(group.data.剤形レコード.調剤数量.toString());
+    return toHankaku(group.剤形レコード.調剤数量.toString());
   }
 
-  function title(group: RP剤情報Wrapper): string {
-    if (group.data.剤形レコード.剤形区分 === "内服") {
+  function title(group: RP剤情報Edit): string {
+    if (group.剤形レコード.剤形区分 === "内服") {
       return "日数";
-    } else if (group.data.剤形レコード.剤形区分 === "頓服") {
+    } else if (group.剤形レコード.剤形区分 === "頓服") {
       return "回数";
     } else {
       return "";
     }
   }
 
-  function timesUnit(group: RP剤情報Wrapper): string {
-    if (group.data.剤形レコード.剤形区分 === "内服") {
+  function timesUnit(group: RP剤情報Edit): string {
+    if (group.剤形レコード.剤形区分 === "内服") {
       return "日分";
-    } else if (group.data.剤形レコード.剤形区分 === "頓服") {
+    } else if (group.剤形レコード.剤形区分 === "頓服") {
       return "`回分";
     } else {
       return "";
     }
   }
 
-  function isVisible(group: RP剤情報Wrapper): boolean {
-    let zaikei = group.data.剤形レコード.剤形区分;
+  function isVisible(group: RP剤情報Edit): boolean {
+    let zaikei = group.剤形レコード.剤形区分;
     return zaikei === "内服" || zaikei === "頓服";
   }
 
-  function rep(group: RP剤情報Wrapper): string {
-    if (group.data.剤形レコード.剤形区分 === "内服") {
-      return `${toZenkaku(group.data.剤形レコード.調剤数量.toString())}日分`;
-    } else if (group.data.剤形レコード.剤形区分 === "頓服") {
-      return `${toZenkaku(group.data.剤形レコード.調剤数量.toString())}回分`;
+  function rep(group: RP剤情報Edit): string {
+    if (group.剤形レコード.剤形区分 === "内服") {
+      return `${toZenkaku(group.剤形レコード.調剤数量.toString())}日分`;
+    } else if (group.剤形レコード.剤形区分 === "頓服") {
+      return `${toZenkaku(group.剤形レコード.調剤数量.toString())}回分`;
     } else {
       return "";
     }
@@ -66,7 +66,7 @@
   }
 
   function doEnter() {
-    let n = parseInt(inputText);
+    let n = parseInt(toHankaku(inputText.trim()));
     if (isNaN(n)) {
       alert("日数・回数が整数でありません。");
       return;
@@ -75,7 +75,7 @@
       alert("日数・回数が正の整数でありません。");
       return;
     }
-    group.data.剤形レコード.調剤数量 = n;
+    group.剤形レコード.調剤数量 = n;
     isEditing = false;
     onFieldChange();
   }

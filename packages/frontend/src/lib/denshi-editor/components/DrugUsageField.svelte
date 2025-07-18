@@ -2,38 +2,35 @@
   import Field from "./workarea/Field.svelte";
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import FieldForm from "./workarea/FieldForm.svelte";
-  import { deserializeUneven, serializeUneven } from "../helper";
   import { tick } from "svelte";
-  import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
-  import TrashLink from "../icons/TrashLink.svelte";
-  import type { RP剤情報Wrapper } from "../denshi-tmpl";
+  import type { RP剤情報Edit } from "../denshi-edit";
   import SearchLink from "../icons/SearchLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
   import type { UsageMaster } from "myclinic-model";
   import api from "@/lib/api";
 
-  export let group: RP剤情報Wrapper;
+  export let group: RP剤情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  if( group.data.用法レコード.用法コード === "") {
+  if( group.用法レコード.用法コード === "") {
     isEditing = true;
   }
   const freeTextCode = "0X0XXXXXXXXX0000";
   let codeMode: "master" | "free" = codeModeValue();
-  let searchText = group.data.用法レコード.用法名称;
+  let searchText = group.用法レコード.用法名称;
   let inputElement: HTMLInputElement | undefined = undefined;
   let searchResult: UsageMaster[] = [];
 
   function codeModeValue() {
-    let code = group.data.用法レコード.用法コード;
+    let code = group.用法レコード.用法コード;
     return code == freeTextCode || code === ""
       ? "free"
       : "master";
   }
 
   function updateCodeMode() {
-    let code = group.data.用法レコード.用法コード;
+    let code = group.用法レコード.用法コード;
     codeMode =   code == freeTextCode || code === ""
       ? "free"
       : "master";
@@ -44,12 +41,12 @@
     inputElement?.focus();
   };
 
-  function rep(group: RP剤情報Wrapper): string {
-    return group.data.用法レコード.用法名称;
+  function rep(group: RP剤情報Edit): string {
+    return group.用法レコード.用法名称;
   }
 
   function doRepClick() {
-    searchText = group.data.用法レコード.用法名称;
+    searchText = group.用法レコード.用法名称;
     isEditing = true;
   }
 
@@ -74,8 +71,8 @@
   }
 
   function doUsageMasterSelect(master: UsageMaster) {
-    group.data.用法レコード.用法コード = master.usage_code;
-    group.data.用法レコード.用法名称 = master.usage_name;
+    group.用法レコード.用法コード = master.usage_code;
+    group.用法レコード.用法名称 = master.usage_name;
     isEditing = false;
     updateCodeMode();
     searchText = "";
@@ -91,7 +88,7 @@
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div class="rep" on:click={doRepClick}>
         {rep(group)}
-        {#if group.data.用法レコード.用法コード === freeTextCode}
+        {#if group.用法レコード.用法コード === freeTextCode}
         （自由文章）
         {/if}
       </div>
@@ -117,7 +114,7 @@
         />
         <SearchLink onClick={doFormSubmit} />
         <EraserLink onClick={doClearSearchText} />
-        {#if group.data.用法レコード.用法コード !== ""}
+        {#if group.用法レコード.用法コード !== ""}
           <CancelLink onClick={doCancel} />
         {/if}
       </form>
