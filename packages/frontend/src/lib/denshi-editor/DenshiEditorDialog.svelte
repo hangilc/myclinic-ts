@@ -95,7 +95,9 @@
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onEnter={doEnter} onCancel={doCancel} onChevronDown={() => showSubCommands = true}/>
+      <Commands onEnter={doEnter} onCancel={doCancel} 
+        bind:showSubCommands
+      onChevronDown={() => showSubCommands = true}/>
       {#if showSubCommands}
       <SubCommands data={data} onValidUpto={doValidUpto}/>
       {/if}

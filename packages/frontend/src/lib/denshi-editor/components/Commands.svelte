@@ -3,7 +3,7 @@
 
   export let onEnter: () => void;
   export let onCancel: () => void;
-  export let onChevronDown: () => void;
+  export let showSubCommands: boolean;
 </script>
 
 <div class="top">
