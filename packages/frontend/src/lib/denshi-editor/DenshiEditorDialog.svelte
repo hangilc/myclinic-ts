@@ -3,19 +3,17 @@
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
-  import {
-    PrescInfoDataEdit,
-    RP剤情報Edit,
-    薬品情報Edit,
-  } from "./denshi-edit";
+  import { PrescInfoDataEdit, RP剤情報Edit, 薬品情報Edit } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
+  import { validatePrescinfoData } from "./validate-presc-info";
 
   export let title: string;
   export let destroy: () => void;
   export let orig: PrescInfoData;
   export let at: string;
   export let showValid: boolean = false;
-  
+  export let onEnter: (presc: PrescInfoData) => void;
+
   let data = PrescInfoDataEdit.fromObject(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
   let wa: HTMLElement;
@@ -26,8 +24,21 @@
     destroy();
   }
 
+  function doEnter() {
+    let presc = data.toObject();
+    let err = validatePrescinfoData(presc);
+    if( err ){
+      alert(err);
+      return;
+    }
+    destroy();
+    onEnter(presc);
+  }
+
   function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    if( !wa ){ return; }
+    if (!wa) {
+      return;
+    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -35,27 +46,33 @@
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
-        destroy: () => (clearWorkarea && clearWorkarea()),
+        destroy: () => clearWorkarea && clearWorkarea(),
         group,
         drugId: drug.id,
         at,
-        onChange: () => data = data,
-      }
+        onChange: () => (data = data),
+      },
     });
-    clearWorkarea =  () => {
+    clearWorkarea = () => {
       w.$destroy();
       clearWorkarea = undefined;
       selectedGroupId = 0;
       selectedDrugId = 0;
-    }
+    };
   }
 </script>
 
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onCancel={doCancel} />
-      <CurrentPresc {data} {onDrugSelect} {showValid} bind:selectedGroupId bind:selectedDrugId/>
+      <Commands onEnter={doEnter} onCancel={doCancel} />
+      <CurrentPresc
+        {data}
+        {onDrugSelect}
+        {showValid}
+        bind:selectedGroupId
+        bind:selectedDrugId
+      />
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>
@@ -72,5 +89,4 @@
     padding: 0 10px 10px 10px;
     overflow-y: auto;
   }
-
 </style>

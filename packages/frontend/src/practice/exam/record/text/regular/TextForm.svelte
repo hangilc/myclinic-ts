@@ -20,7 +20,7 @@
   import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
   import { cache } from "@/lib/cache";
   import {
-  checkForSenpatsu,
+    checkForSenpatsu,
     parseShohou as parseShohouOld,
     type Shohou,
   } from "@/lib/parse-shohou";
@@ -42,9 +42,7 @@
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
-  import {
-    drawShohousen2025,
-  } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
+  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { isKensa, resolveByMap } from "./helper";
   import { PatientMemoWrapper } from "@/lib/patient-memo";
   import MailDialog from "@/lib/MailDialog.svelte";
@@ -645,7 +643,6 @@
     const patient = await api.getPatient(visit.patientId);
     const hoken = await api.getHokenInfoForVisit(visit.visitId);
     const clinicInfo = await cache.getClinicInfo();
-    // const kouhiCount = kouhiCountOfVisit(visit);
     const template = initPrescInfoData(visit, patient, hoken, clinicInfo);
     const d: DenshiHenkanDialog = new DenshiHenkanDialog({
       target: document.body,
@@ -736,6 +733,19 @@
         orig,
         at: visit.visitedAt.substring(0, 10),
         showValid: true,
+        onEnter: async (presc: PrescInfoData) => {
+          let newText: m.Text = {
+            textId: 0,
+            visitId: visit.visitId,
+            content: "",
+          };
+          TextMemoWrapper.setTextMemo(newText, {
+            kind: "shohou",
+            shohou: presc,
+            prescriptionId: undefined,
+          });
+          await api.enterText(newText);
+        },
       },
     });
   }
