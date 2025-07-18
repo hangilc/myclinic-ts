@@ -1,5 +1,6 @@
 <script lang="ts">
   import ChevronDownLink from "../icons/ChevronDownLink.svelte";
+  import ChevronUpLink from "../icons/ChevronUpLink.svelte";
 
   export let onEnter: () => void;
   export let onCancel: () => void;
@@ -9,7 +10,11 @@
 <div class="top">
   <button on:click={onEnter}>入力</button>
   <button on:click={onCancel}>キャンセル</button>
-  <ChevronDownLink onClick={onChevronDown} />
+  {#if !showSubCommands}
+  <ChevronDownLink onClick={() => showSubCommands = true} />
+    {:else}
+    <ChevronUpLink onClick={() => showSubCommands = false} />
+  {/if}
 </div>
 
 <style>
