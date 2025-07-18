@@ -6,6 +6,8 @@
   import { PrescInfoDataEdit, RP剤情報Edit, 薬品情報Edit } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
   import { validatePrescinfoData } from "./validate-presc-info";
+  import PrescAux from "./components/PrescAux.svelte";
+  import EditValidUpto from "./components/EditValidUpto.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -27,7 +29,7 @@
   function doEnter() {
     let presc = data.toObject();
     let err = validatePrescinfoData(presc);
-    if( err ){
+    if (err) {
       alert(err);
       return;
     }
@@ -60,6 +62,32 @@
       selectedDrugId = 0;
     };
   }
+
+  function doValidUpto() {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: EditValidUpto = new EditValidUpto({
+      target: wa,
+      props: {
+        validUpto: data.使用期限年月日,
+        destroy: () => clearWorkarea && clearWorkarea(),
+        onEnter: (value: string | undefined) => {
+          data.使用期限年月日 = value;
+          data = data;
+        },
+        onCancel: () => {},
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -73,6 +101,7 @@
         bind:selectedGroupId
         bind:selectedDrugId
       />
+      <PrescAux {data} onValidUptoClick={doValidUpto} />
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>

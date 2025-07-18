@@ -4,18 +4,18 @@
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
   import ConvDrugValidity from "./ConvDrugValidity.svelte";
   import ConvUsageValidity from "./ConvUsageValidity.svelte";
-  import type { PrescInfoDataWrapper, RP剤情報Wrapper, 薬品情報Wrapper } from "../denshi-wrapper";
+  import type { PrescInfoDataEdit, RP剤情報Edit, 薬品情報Edit } from "../denshi-edit";
 
-  export let data: PrescInfoDataWrapper;
+  export let data: PrescInfoDataEdit;
   export let onDrugSelect: (
-    group: RP剤情報Wrapper,
-    drug: 薬品情報Wrapper,
+    group: RP剤情報Edit,
+    drug: 薬品情報Edit,
   ) => void;
   export let showValid: boolean = false;
   export let selectedGroupId: number;
   export let selectedDrugId: number;
 
-  function doDrugSelect(group: RP剤情報Wrapper, drug: 薬品情報Wrapper) {
+  function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
     selectedGroupId = group.id;
     selectedDrugId = drug.id;
     onDrugSelect(group, drug);
