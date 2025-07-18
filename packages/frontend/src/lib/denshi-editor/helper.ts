@@ -101,7 +101,7 @@ export function runner(...fs: (() => any)[]): () => void {
   }
 }
 
- export function serializeUneven(r: 不均等レコード | undefined): string {
+export function serializeUneven(r: 不均等レコード | undefined): string {
   if (r) {
     let parts: string[] = [r.不均等１回目服用量, r.不均等２回目服用量];
     [
@@ -154,4 +154,28 @@ export function isValidDrug(drug: 薬品情報): boolean {
 export function isValidUsage(usage: 用法レコード): boolean {
   return usage.用法コード !== "";
 }
+
+export const henkoufukaInfo = "後発品変更不可";
+export const kanjakibouInfo = "先発医薬品患者希望";
+
+export function henkoufukaDrugSuppl(): 薬品補足レコード {
+  return {
+    "薬品補足情報": henkoufukaInfo
+  }
+}
+
+export function kanjakibouDrugSuppl(): 薬品補足レコード {
+  return {
+    "薬品補足情報": kanjakibouInfo
+  }
+}
+
+export function hasHenkoufukaDrugSuppl(list: 薬品補足レコード[]): boolean {
+  return list.some(s => s.薬品補足情報 === henkoufukaInfo);
+}
+
+export function hasKanjakibouDrugSuppl(list: 薬品補足レコード[]): boolean {
+  return list.some(s => s.薬品補足情報 === kanjakibouInfo);
+}
+
 

@@ -5,6 +5,7 @@
     薬品補足レコードEdit,
     type RP剤情報Edit,
   } from "../denshi-edit";
+  import { hasHenkoufukaDrugSuppl, hasKanjakibouDrugSuppl, henkoufukaDrugSuppl, kanjakibouDrugSuppl } from "../helper";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -110,6 +111,24 @@
     onDrugChange();
   }
 
+  function doHenkouFuka(): void {
+    if( !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList()) ){
+      let suppl = 薬品補足レコードEdit.fromObject(henkoufukaDrugSuppl());
+      suppl.isEditing = false;
+      drug.addDrugSuppl(suppl);
+      onDrugChange();
+    }
+  }
+
+  function doKanjakibou(): void {
+    if( !hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList()) ){
+      let suppl = 薬品補足レコードEdit.fromObject(kanjakibouDrugSuppl());
+      suppl.isEditing = false;
+      drug.addDrugSuppl(suppl);
+      onDrugChange();
+    }
+  }
+
   function doUneven(): void {
     if (drug.不均等レコード === undefined) {
       let edit: 不均等レコードEdit = 不均等レコードEdit.fromObject({
@@ -147,8 +166,16 @@
     onFieldChange={onDrugChange}
     bind:isEditing={isEditingUneven}
   />
-  <DrugAmountField {drug} bind:isEditing={isEditingDrugAmount} onFieldChange={onDrugChange} />
-  <DrugSupplField {drug} bind:isEditing={isEditingDrugSuppl} onFieldChange={onDrugChange} />
+  <DrugAmountField
+    {drug}
+    bind:isEditing={isEditingDrugAmount}
+    onFieldChange={onDrugChange}
+  />
+  <DrugSupplField
+    {drug}
+    bind:isEditing={isEditingDrugSuppl}
+    onFieldChange={onDrugChange}
+  />
   <!-- 
   <ZaikeiKubunField
     bind:剤形区分={data.data.剤形レコード.剤形区分}
@@ -164,6 +191,12 @@
   /> -->
   <Commands>
     <div class="sub-commands">
+      {#if !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}
+        <SmallLink onClick={doHenkouFuka}>変更不可</SmallLink>
+      {/if}
+      {#if !hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())}
+        <SmallLink onClick={doKanjakibou}>患者希望</SmallLink>
+      {/if}
       <SmallLink onClick={addDrugSuppl}>薬品補足追加</SmallLink>
       <SmallLink onClick={doUneven}>不均等</SmallLink>
       <SmallLink onClick={addUsageSuppl}>用法補足追加</SmallLink>
