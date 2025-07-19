@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { cache } from "@/lib/cache";
   import {
     不均等レコードEdit,
     用法補足レコードEdit,
@@ -34,6 +35,8 @@
   export let onChange: () => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
+  let origCode = drug.薬品レコード.薬品コード;
+  let origName = drug.薬品レコード.薬品名称;
 
   let isEditingJohoKubun = false;
   let isEdigintName = drug.薬品レコード.薬品コード === "";
@@ -105,6 +108,15 @@
     group.assign(data);
     destroy();
     onChange();
+    handleCache();
+  }
+
+  async function handleCache() {
+    if (origCode === "" && drug.薬品レコード.薬品コード !== "") {
+      let map = await cache.getDrugNameIyakuhincodeMap();
+      map[origName] = parseInt(drug.薬品レコード.薬品コード);
+      await cache.setDrugNameIyakuhincodeMap(map);
+    }
   }
 
   function addDrugSuppl(): void {
@@ -161,13 +173,13 @@
   }
 
   function onJohoKubunChange() {
-    if( drug.薬品レコード.情報区分 === "医薬品" ){
-      if( data.剤形レコード.剤形区分 === "医療材料" ){
+    if (drug.薬品レコード.情報区分 === "医薬品") {
+      if (data.剤形レコード.剤形区分 === "医療材料") {
         data.剤形レコード.剤形区分 = "内服";
         onGroupChange();
       }
-    } else if(  drug.薬品レコード.情報区分 === "医療材料" ){
-      if( data.剤形レコード.剤形区分 !== "医療材料" ){
+    } else if (drug.薬品レコード.情報区分 === "医療材料") {
+      if (data.剤形レコード.剤形区分 !== "医療材料") {
         data.剤形レコード.剤形区分 = "医療材料";
         onGroupChange();
       }

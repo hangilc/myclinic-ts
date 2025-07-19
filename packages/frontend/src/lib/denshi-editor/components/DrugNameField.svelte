@@ -9,6 +9,7 @@
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import api from "@/lib/api";
   import { tick } from "svelte";
+  import { cache } from "@/lib/cache";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
