@@ -1,13 +1,13 @@
 <script lang="ts">
-  import type { 提供診療情報レコードEdit } from "../denshi-edit";
+  import type { 検査値データ等レコードEdit } from "../denshi-edit";
   import CancelLink from "../icons/CancelLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
   import SubmitLink from "../icons/SubmitLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
 
-  export let record: 提供診療情報レコードEdit;
+  export let record: 検査値データ等レコードEdit;
   export let onChange: () => void;
-  export let onDelete: (record: 提供診療情報レコードEdit) => void;
+  export let onDelete: (record: 検査値データ等レコードEdit) => void;
 
   let inputText: string = "";
 
@@ -16,7 +16,7 @@
   }
 
   function initInputText(): void {
-    inputText = record.コメント;
+    inputText = record.検査値データ等;
   }
 
   function doDelete() {
@@ -29,7 +29,7 @@
       alert("提供診療情報の内容が空白です。");
       return;
     }
-    record.コメント = t;
+    record.検査値データ等 = t;
     record.isEditing = false;
     record = record;
     onChange();
@@ -53,7 +53,7 @@
 {#if !record.isEditing}
   <div class="with-icons top">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <span class="rep" on:click={doRepClick}>{record.コメント}</span>
+    <span class="rep" on:click={doRepClick}>{record.検査値データ等}</span>
     <TrashLink onClick={doDelete} />
   </div>
 {:else}

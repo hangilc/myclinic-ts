@@ -1097,7 +1097,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
     this.normalize提供情報レコード();
   }
 
-  setd検査値データ等レコード(records: 検査値データ等レコードEdit[] | undefined): void {
+  set検査値データ等レコード(records: 検査値データ等レコードEdit[] | undefined): void {
     if (!this.提供情報レコード) {
       this.提供情報レコード = 提供情報レコードEdit.fromObject({});
     }

@@ -3,6 +3,7 @@
     PrescInfoData,
     備考レコード,
     提供診療情報レコード,
+    検査値データ等レコード,
   } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
@@ -12,6 +13,7 @@
     RP剤情報Edit,
     備考レコードEdit,
     提供診療情報レコードEdit,
+    検査値データ等レコードEdit,
     薬品情報Edit,
   } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
@@ -21,6 +23,7 @@
   import SubCommands from "./components/workarea/SubCommands.svelte";
   import EditBikou from "./components/EditBikou.svelte";
   import EditClinicalInfo from "./components/EditClinicalInfo.svelte";
+  import EditExamInfo from "./components/EditExamInfo.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -150,6 +153,7 @@
         info: data.提供情報レコード?.提供診療情報レコード,
         update: (value: 提供診療情報レコードEdit[] | undefined) => {
           data.set提供診療情報レコード(value);
+          data = data;
         },
       },
     });
@@ -159,7 +163,40 @@
     };
   }
 
-  function doEditExamInfo(): void {}
+  function doClinicalInfoClick(record: 提供診療情報レコードEdit): void {
+    record.isEditing = true;
+    doEditClinicalInfo();
+  }
+
+  function doEditExamInfo(): void {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: EditExamInfo = new EditExamInfo({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        info: data.提供情報レコード?.検査値データ等レコード,
+        update: (value: 検査値データ等レコードEdit[] | undefined) => {
+          data.set検査値データ等レコード(value);
+          data = data;
+        },
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
+
+  function doExamInfoClick(record: 検査値データ等レコードEdit): void {
+    record.isEditing = true;
+    doEditExamInfo();
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -186,6 +223,8 @@
         {data}
         onValidUptoClick={doValidUpto}
         onBikouClick={doBikouClick}
+        onClinicalInfoClick={doClinicalInfoClick}
+        onExamInfoClick={doExamInfoClick}
       />
     </div>
     <div class="workarea" bind:this={wa}></div>
