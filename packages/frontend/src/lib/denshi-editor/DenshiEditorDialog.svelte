@@ -1,5 +1,9 @@
 <script lang="ts">
-  import type { PrescInfoData, 備考レコード } from "../denshi-shohou/presc-info";
+  import type {
+    PrescInfoData,
+    備考レコード,
+    提供診療情報レコード,
+  } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
@@ -7,6 +11,7 @@
     PrescInfoDataEdit,
     RP剤情報Edit,
     備考レコードEdit,
+    提供診療情報レコードEdit,
     薬品情報Edit,
   } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
@@ -15,6 +20,7 @@
   import EditValidUpto from "./components/EditValidUpto.svelte";
   import SubCommands from "./components/workarea/SubCommands.svelte";
   import EditBikou from "./components/EditBikou.svelte";
+  import EditClinicalInfo from "./components/EditClinicalInfo.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -105,7 +111,7 @@
       alert("現在編集中です。」");
       return;
     }
-    if( record ){
+    if (record) {
       record.isEditing = true;
     }
     const w: EditBikou = new EditBikou({
@@ -128,6 +134,43 @@
   function doEditBikou(): void {
     doBikouClick(undefined);
   }
+
+  function doEditClinicalInfo(): void {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: EditClinicalInfo = new EditClinicalInfo({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        info: data.提供情報レコード?.提供診療情報レコード,
+        update: (value: 提供診療情報レコードEdit[] | undefined) => {
+          if (data.提供情報レコード) {
+            if (value) {
+              data.提供情報レコード.提供診療情報レコード = value;
+            } else {
+              delete data.提供情報レコード.提供診療情報レコード;
+              if (!data.提供情報レコード.検査値データ等レコード) {
+                delete data.提供情報レコード;
+              }
+            }
+
+            data = data;
+          }
+        },
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
+
+  function doEditExamInfo(): void {}
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -135,7 +178,13 @@
     <div class="left">
       <Commands onEnter={doEnter} onCancel={doCancel} bind:showSubCommands />
       {#if showSubCommands}
-        <SubCommands {data} onValidUpto={doValidUpto} onEditBikou={doEditBikou}/>
+        <SubCommands
+          {data}
+          onValidUpto={doValidUpto}
+          onEditBikou={doEditBikou}
+          onEditClinicalInfo={doEditClinicalInfo}
+          onEditExamInfo={doEditExamInfo}
+        />
       {/if}
       <CurrentPresc
         {data}

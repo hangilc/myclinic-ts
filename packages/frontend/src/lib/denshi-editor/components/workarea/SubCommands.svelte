@@ -5,6 +5,8 @@
   export let data: PrescInfoDataEdit;
   export let onValidUpto: () => void;
   export let onEditBikou: () => void;
+  export let onEditClinicalInfo: () => void;
+  export let onEditExamInfo: () => void;
 
 </script>
 
@@ -13,6 +15,8 @@
     <SmallLink onClick={onValidUpto}>有効期限</SmallLink>
   {/if}
   <SmallLink onClick={onEditBikou}>備考編集</SmallLink>
+  <SmallLink onClick={onEditClinicalInfo}>診療情報編集</SmallLink>
+  <SmallLink onClick={onEditExamInfo}>検査情報編集</SmallLink>
 </div>
 
 <style>

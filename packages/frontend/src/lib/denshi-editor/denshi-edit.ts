@@ -646,24 +646,26 @@ export class 備考レコードEdit implements 備考レコード {
 
 export class 提供診療情報レコードEdit implements 提供診療情報レコード {
   id: number;
+  isEditing: boolean;
   薬品名称?: string;
   コメント: string;
 
   constructor(src: {
     薬品名称?: string;
     コメント: string;
-  }, id: number) {
+  }, id: number, isEditing: boolean) {
     this.id = id;
     this.薬品名称 = src.薬品名称;
     this.コメント = src.コメント;
+    this.isEditing = isEditing;
   }
 
   static fromObject(obj: 提供診療情報レコード): 提供診療情報レコードEdit {
-    return new 提供診療情報レコードEdit(obj, nextId());
+    return new 提供診療情報レコードEdit(obj, nextId(), obj.コメント === "");
   }
 
   clone(): 提供診療情報レコードEdit {
-    return new 提供診療情報レコードEdit(this, this.id);
+    return new 提供診療情報レコードEdit(this, this.id, this.isEditing);
   }
 
   assign(src: 提供診療情報レコードEdit): void {
@@ -684,21 +686,23 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
 
 export class 検査値データ等レコードEdit implements 検査値データ等レコード {
   id: number;
+  isEditing: boolean;
   検査値データ等: string;
 
   constructor(src: {
     検査値データ等: string;
-  }, id: number) {
+  }, id: number, isEditing: boolean) {
     this.id = id;
     this.検査値データ等 = src.検査値データ等;
+    this.isEditing = isEditing;
   }
 
   static fromObject(obj: 検査値データ等レコード): 検査値データ等レコードEdit {
-    return new 検査値データ等レコードEdit(obj, nextId());
+    return new 検査値データ等レコードEdit(obj, nextId(), obj.検査値データ等 === "");
   }
 
   clone(): 検査値データ等レコードEdit {
-    return new 検査値データ等レコードEdit(this, this.id);
+    return new 検査値データ等レコードEdit(this, this.id, this.isEditing);
   }
 
   assign(src: 検査値データ等レコードEdit): void {
