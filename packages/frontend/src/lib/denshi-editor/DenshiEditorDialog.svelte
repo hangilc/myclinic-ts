@@ -158,8 +158,9 @@
                 delete data.提供情報レコード;
               }
             }
-
             data = data;
+          } else {
+            data.提供情報レコード = 
           }
         },
       },

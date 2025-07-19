@@ -51,13 +51,13 @@
 </script>
 
 {#if !record.isEditing}
-  <div class="with-icons">
+  <div class="with-icons top">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <span class="rep" on:click={doRepClick}>{record.備考}</span>
     <TrashLink onClick={doDelete} />
   </div>
 {:else}
-  <form on:submit|preventDefault={doEnter} class="with-icons">
+  <form on:submit|preventDefault={doEnter} class="with-icons top">
     <input type="text" bind:value={inputText} />
     <SubmitLink onClick={doEnter} />
     <EraserLink onClick={doErase} />
@@ -67,6 +67,10 @@
 {/if}
 
 <style>
+  .top {
+    margin: 6px 0;
+  }
+  
   .with-icons {
     display: flex;
     align-items: center;

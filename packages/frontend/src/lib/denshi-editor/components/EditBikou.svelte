@@ -31,6 +31,7 @@
       bikou = [];
     }
     bikou.push(備考レコードEdit.fromObject({ 備考: ""}));
+    bikou = bikou;
     update(bikou);
   }
 </script>
