@@ -1088,4 +1088,38 @@ export class PrescInfoDataEdit implements PrescInfoData {
 
     return obj;
   }
+
+  set提供診療情報レコード(records: 提供診療情報レコードEdit[] | undefined): void {
+    if (!this.提供情報レコード) {
+      this.提供情報レコード = 提供情報レコードEdit.fromObject({});
+    }
+    this.提供情報レコード.提供診療情報レコード = records;
+    this.normalize提供情報レコード();
+  }
+
+  setd検査値データ等レコード(records: 検査値データ等レコードEdit[] | undefined): void {
+    if (!this.提供情報レコード) {
+      this.提供情報レコード = 提供情報レコードEdit.fromObject({});
+    }
+    this.提供情報レコード.検査値データ等レコード = records;
+    this.normalize提供情報レコード();
+  }
+
+  normalize提供情報レコード(): void {
+    if (this.提供情報レコード) {
+      if (this.提供情報レコード.提供診療情報レコード) {
+        if (this.提供情報レコード.提供診療情報レコード.length === 0) {
+          delete this.提供情報レコード.提供診療情報レコード;
+        }
+      }
+      if (this.提供情報レコード.検査値データ等レコード) {
+        if (this.提供情報レコード.検査値データ等レコード.length === 0) {
+          delete this.提供情報レコード.検査値データ等レコード;
+        }
+      }
+      if (!this.提供情報レコード.提供診療情報レコード && !this.提供情報レコード.検査値データ等レコード) {
+        delete this.提供情報レコード;
+      }
+    }
+  }
 }

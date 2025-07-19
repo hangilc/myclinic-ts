@@ -149,19 +149,7 @@
         destroy: () => clearWorkarea && clearWorkarea(),
         info: data.提供情報レコード?.提供診療情報レコード,
         update: (value: 提供診療情報レコードEdit[] | undefined) => {
-          if (data.提供情報レコード) {
-            if (value) {
-              data.提供情報レコード.提供診療情報レコード = value;
-            } else {
-              delete data.提供情報レコード.提供診療情報レコード;
-              if (!data.提供情報レコード.検査値データ等レコード) {
-                delete data.提供情報レコード;
-              }
-            }
-            data = data;
-          } else {
-            data.提供情報レコード = 
-          }
+          data.set提供診療情報レコード(value);
         },
       },
     });
