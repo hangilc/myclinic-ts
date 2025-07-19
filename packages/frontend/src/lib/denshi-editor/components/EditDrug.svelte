@@ -5,7 +5,14 @@
     薬品補足レコードEdit,
     type RP剤情報Edit,
   } from "../denshi-edit";
-  import { hasHenkoufukaDrugSuppl, hasIppoukaUsageSuppl, hasKanjakibouDrugSuppl, henkoufukaDrugSuppl, ippoukaUsageSuppl, kanjakibouDrugSuppl } from "../helper";
+  import {
+    hasHenkoufukaDrugSuppl,
+    hasIppoukaUsageSuppl,
+    hasKanjakibouDrugSuppl,
+    henkoufukaDrugSuppl,
+    ippoukaUsageSuppl,
+    kanjakibouDrugSuppl,
+  } from "../helper";
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
@@ -112,7 +119,7 @@
   }
 
   function doHenkouFuka(): void {
-    if( !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList()) ){
+    if (!hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())) {
       let suppl = 薬品補足レコードEdit.fromObject(henkoufukaDrugSuppl());
       suppl.isEditing = false;
       drug.addDrugSuppl(suppl);
@@ -121,7 +128,7 @@
   }
 
   function doKanjakibou(): void {
-    if( !hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList()) ){
+    if (!hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())) {
       let suppl = 薬品補足レコードEdit.fromObject(kanjakibouDrugSuppl());
       suppl.isEditing = false;
       drug.addDrugSuppl(suppl);
@@ -152,6 +159,21 @@
     data.addUsageSuppl(suppl);
     onGroupChange();
   }
+
+  function onJohoKubunChange() {
+    if( drug.薬品レコード.情報区分 === "医薬品" ){
+      if( data.剤形レコード.剤形区分 === "医療材料" ){
+        data.剤形レコード.剤形区分 = "内服";
+        onGroupChange();
+      }
+    } else if(  drug.薬品レコード.情報区分 === "医療材料" ){
+      if( data.剤形レコード.剤形区分 !== "医療材料" ){
+        data.剤形レコード.剤形区分 = "医療材料";
+        onGroupChange();
+      }
+    }
+    onDrugChange();
+  }
 </script>
 
 <Workarea>
@@ -159,7 +181,7 @@
   <JohoKubunField
     bind:isEditing={isEditingJohoKubun}
     bind:情報区分={drug.薬品レコード.情報区分}
-    onFieldChange={onDrugChange}
+    onFieldChange={onJohoKubunChange}
   />
   <DrugNameField
     {drug}
@@ -187,8 +209,16 @@
     bind:isEditing={isEditingZaikeiKubun}
     onFieldChange={onDrugChange}
   />
-  <DrugUsageField group={data} bind:isEditing={isEditingUsage} onFieldChange={onDrugChange} />
-  <TimesField group={data} bind:isEditing={isEditingTimes} onFieldChange={onDrugChange} />
+  <DrugUsageField
+    group={data}
+    bind:isEditing={isEditingUsage}
+    onFieldChange={onDrugChange}
+  />
+  <TimesField
+    group={data}
+    bind:isEditing={isEditingTimes}
+    onFieldChange={onDrugChange}
+  />
   <UsageSupplField
     group={data}
     bind:isEditing={isEditingUsageSuppl}
@@ -205,7 +235,7 @@
       <SmallLink onClick={addDrugSuppl}>薬品補足</SmallLink>
       <SmallLink onClick={doUneven}>不均等</SmallLink>
       {#if !hasIppoukaUsageSuppl(data.用法補足レコードAsList())}
-      <SmallLink onClick={doIppouka}>一包化</SmallLink>
+        <SmallLink onClick={doIppouka}>一包化</SmallLink>
       {/if}
       <SmallLink onClick={addUsageSuppl}>用法補足</SmallLink>
     </div>

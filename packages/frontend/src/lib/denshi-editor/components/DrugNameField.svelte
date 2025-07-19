@@ -45,6 +45,7 @@
 
   function doClearSearchText() {
     searchText = "";
+    focus();
   }
 
   function doCancel() {
@@ -78,7 +79,7 @@
     drug.ippanmei = "";
     drug.ippanmeicode = "";
     searchText = "";
-    searchIyakuhinResult = [];
+    searchKizaiResult = [];
     isEditing = false;
     onFieldChange();
   }

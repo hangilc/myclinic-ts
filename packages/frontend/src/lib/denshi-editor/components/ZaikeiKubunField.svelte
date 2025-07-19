@@ -19,6 +19,7 @@
 
   function doChange() {
     剤形区分 = value;
+    console.log("剤形区分", 剤形区分)
     onFieldChange();
     isEditing = false;
   }
@@ -81,7 +82,7 @@
             <span
               ><input
                 type="radio"
-                bind:group={剤形区分}
+                bind:group={value}
                 value="内服滴剤"
                 on:change={doChange}
               /> 内服滴剤</span
@@ -89,7 +90,7 @@
             <span
               ><input
                 type="radio"
-                bind:group={剤形区分}
+                bind:group={value}
                 value="注射"
                 on:change={doChange}
               /> 注射</span
@@ -97,7 +98,7 @@
             <span
               ><input
                 type="radio"
-                bind:group={剤形区分}
+                bind:group={value}
                 value="医療材料"
                 on:change={doChange}
               /> 医療材料</span
@@ -105,7 +106,7 @@
             <span
               ><input
                 type="radio"
-                bind:group={剤形区分}
+                bind:group={value}
                 value="不明"
                 on:change={doChange}
               /> 不明</span

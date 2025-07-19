@@ -9,11 +9,12 @@
   import EraserLink from "../icons/EraserLink.svelte";
   import type { UsageMaster } from "myclinic-model";
   import api from "@/lib/api";
+  import SubmitLink from "../icons/SubmitLink.svelte";
 
   export let group: RP剤情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  if( group.用法レコード.用法コード === "") {
+  if (group.用法レコード.用法コード === "") {
     isEditing = true;
   }
   const freeTextCode = "0X0XXXXXXXXX0000";
@@ -24,16 +25,12 @@
 
   function codeModeValue() {
     let code = group.用法レコード.用法コード;
-    return code == freeTextCode || code === ""
-      ? "free"
-      : "master";
+    return code == freeTextCode || code === "" ? "free" : "master";
   }
 
   function updateCodeMode() {
     let code = group.用法レコード.用法コード;
-    codeMode =   code == freeTextCode || code === ""
-      ? "free"
-      : "master";
+    codeMode = code == freeTextCode || code === "" ? "free" : "master";
   }
 
   export const focus: () => void = async () => {
@@ -52,13 +49,12 @@
 
   async function doFormSubmit() {
     const t = searchText.trim();
-    if( t === "" ){
+    if (t === "") {
       return;
     }
-    if( codeMode === "master" ){
+    if (codeMode === "master") {
       searchResult = await api.selectUsageMasterByUsageName(t);
     } else {
-
     }
   }
 
@@ -79,6 +75,17 @@
     searchResult = [];
     onFieldChange();
   }
+
+  function doSubmitFree(): void {
+    let t = searchText.trim();
+    if( t === "" ){
+      return;
+    }
+    group.用法レコード.用法コード = freeTextCode;
+    group.用法レコード.用法名称 = t;
+    isEditing = false;
+    onFieldChange();
+  }
 </script>
 
 <Field>
@@ -89,7 +96,7 @@
       <div class="rep" on:click={doRepClick}>
         {rep(group)}
         {#if group.用法レコード.用法コード === freeTextCode}
-        （自由文章）
+          （自由文章）
         {/if}
       </div>
     {:else}
@@ -112,7 +119,11 @@
           bind:value={searchText}
           bind:this={inputElement}
         />
-        <SearchLink onClick={doFormSubmit} />
+        {#if codeMode === "master"}
+          <SearchLink onClick={doFormSubmit} />
+        {:else if codeMode === "free"}
+          <SubmitLink onClick={doSubmitFree} />
+        {/if}
         <EraserLink onClick={doClearSearchText} />
         {#if group.用法レコード.用法コード !== ""}
           <CancelLink onClick={doCancel} />
