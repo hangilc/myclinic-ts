@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { cache } from "@/lib/cache";
-import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報, 用法レコード } from "@/lib/denshi-shohou/presc-info";
 import { DateWrapper } from "myclinic-util";
 
 export function isKensa(patientId: number, content: string): boolean {
@@ -15,51 +15,59 @@ export async function resolveByMap(data: PrescInfoData): Promise<void> {
 
 async function resolveDrugByMap(data: PrescInfoData): Promise<void> {
   let at = DateWrapper.fromOnshiDate(data.処方箋交付年月日).asSqlDate();
-  let map = await cache.getDrugNameIyakuhincodeMap();
   for (let g of data.RP剤情報グループ) {
-    for (let d of g.薬品情報グループ) {
-      if (d.薬品レコード.薬品コード === "") {
-        let record = d.薬品レコード;
-        let bind = map[record.薬品名称];
-        if (bind) {
-          if (typeof bind === "number") {
-            try {
-              let m = await api.getIyakuhinMaster(bind, at);
-              record.薬品コード種別 = "レセプト電算処理システム用コード";
-              record.薬品名称 = m.name;
-              record.薬品コード = m.iyakuhincode.toString();
-              record.情報区分 = "医薬品";
-            } catch { }
-          } else if (bind.kind === "ippanmei") {
-            record.薬品コード種別 = "一般名コード";
-            record.薬品名称 = bind.name;
-            record.薬品コード = bind.code;
+    await resolveDrugGroupByMap(g, at);
+  }
+}
+
+async function resolveUsageByMap(data: PrescInfoData): Promise<void> {
+  for (let g of data.RP剤情報グループ) {
+    let usage = g.用法レコード;
+    await resolveUsageRecordByMap(usage);
+  }
+}
+
+export async function resolveDrugGroupByMap(g: RP剤情報, at: string): Promise<void> {
+  let map = await cache.getDrugNameIyakuhincodeMap();
+  for (let d of g.薬品情報グループ) {
+    if (d.薬品レコード.薬品コード === "") {
+      let record = d.薬品レコード;
+      let bind = map[record.薬品名称];
+      if (bind) {
+        if (typeof bind === "number") {
+          try {
+            let m = await api.getIyakuhinMaster(bind, at);
+            record.薬品コード種別 = "レセプト電算処理システム用コード";
+            record.薬品名称 = m.name;
+            record.薬品コード = m.iyakuhincode.toString();
             record.情報区分 = "医薬品";
-          } else if (bind.kind === "kizai") {
-            try {
-              let m = await api.getKizaiMaster(bind.kizaicode, at);
-              record.薬品コード種別 = "レセプト電算処理システム用コード";
-              record.薬品名称 = m.name;
-              record.薬品コード = m.kizaicode.toString();
-              record.情報区分 = "医療材料";
-              g.剤形レコード.剤形区分 = "医療材料";
-            } catch { }
-          }
+          } catch { }
+        } else if (bind.kind === "ippanmei") {
+          record.薬品コード種別 = "一般名コード";
+          record.薬品名称 = bind.name;
+          record.薬品コード = bind.code;
+          record.情報区分 = "医薬品";
+        } else if (bind.kind === "kizai") {
+          try {
+            let m = await api.getKizaiMaster(bind.kizaicode, at);
+            record.薬品コード種別 = "レセプト電算処理システム用コード";
+            record.薬品名称 = m.name;
+            record.薬品コード = m.kizaicode.toString();
+            record.情報区分 = "医療材料";
+            g.剤形レコード.剤形区分 = "医療材料";
+          } catch { }
         }
       }
     }
   }
 }
 
-async function resolveUsageByMap(data: PrescInfoData): Promise<void> {
+export async function resolveUsageRecordByMap(usage: 用法レコード): Promise<void> {
   let map = await cache.getUsageMasterMap();
-  for(let g of data.RP剤情報グループ){
-    let usage = g.用法レコード;
-    if( usage.用法コード === "" ){
-      let bind = map[usage.用法名称];
-      if( bind ){
-        Object.assign(usage, bind);
-      }
+  if (usage.用法コード === "") {
+    let bind = map[usage.用法名称];
+    if (bind) {
+      Object.assign(usage, bind);
     }
   }
 }

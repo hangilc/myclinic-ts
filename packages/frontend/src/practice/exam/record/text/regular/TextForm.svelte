@@ -719,7 +719,6 @@
     onClose();
     let visit = await api.getVisit(text.visitId);
     const shohou = parseShohou3(text.content);
-    console.log("shohou", shohou);
     if (typeof shohou === "string") {
       alert(shohou);
       return;

@@ -21,6 +21,7 @@
   import EditBikou from "./components/EditBikou.svelte";
   import EditClinicalInfo from "./components/EditClinicalInfo.svelte";
   import EditExamInfo from "./components/EditExamInfo.svelte";
+  import Paste from "./components/Paste.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -199,12 +200,37 @@
     record.isEditing = true;
     doEditExamInfo();
   }
+
+  function doPaste(): void {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: Paste = new Paste({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        at,
+        onEnter: (value: RP剤情報Edit[]) => {
+          data.RP剤情報グループ.push(...value);
+          data = data;
+        }
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onEnter={doEnter} onCancel={doCancel} bind:showSubCommands />
+      <Commands onEnter={doEnter} onCancel={doCancel} onPaste={doPaste} bind:showSubCommands />
       {#if showSubCommands}
         <SubCommands
           {data}

@@ -121,7 +121,7 @@ function probeUneven(usage: string): undefined | { usage: string, uneven: string
   return undefined;
 }
 
-function getRP剤情報FromGroup(group: DrugGroup): RP剤情報 {
+export function getRP剤情報FromGroup(group: DrugGroup): RP剤情報 {
   let 剤形レコード: 剤形レコード = get剤形レコードFromGroup(group);
   if (group.drugs.length === 1) {
     let unevenInfo = probeUneven(group.usage.usage);
