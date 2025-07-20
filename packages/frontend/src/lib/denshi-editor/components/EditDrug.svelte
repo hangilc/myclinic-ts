@@ -27,6 +27,7 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
+  import { DrugCacheHandler, UsageCacheHandler } from "../cache-handler";
 
   export let destroy: () => void;
   export let group: RP剤情報Edit;
@@ -35,11 +36,11 @@
   export let onChange: () => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
-  let origCode = drug.薬品レコード.薬品コード;
-  let origName = drug.薬品レコード.薬品名称;
+  let drugCacheHandler = new DrugCacheHandler(drug.薬品レコード.薬品名称, drug.薬品レコード.薬品コード);
+  let usageCacheHandler = new UsageCacheHandler(data.用法レコード.用法名称, data.用法レコード.用法コード);
 
   let isEditingJohoKubun = false;
-  let isEdigintName = drug.薬品レコード.薬品コード === "";
+  let isEditingName = drug.薬品レコード.薬品コード === "";
   let isEditingUneven = false;
   let isEditingDrugAmount = false;
   let isEditingDrugSuppl = false;
@@ -53,7 +54,7 @@
       alert("情報区分が編集中です。");
       return false;
     }
-    if (isEdigintName) {
+    if (isEditingName) {
       alert("薬品名が編集中です。");
       return false;
     }
@@ -112,11 +113,12 @@
   }
 
   async function handleCache() {
-    if (origCode === "" && drug.薬品レコード.薬品コード !== "") {
-      let map = await cache.getDrugNameIyakuhincodeMap();
-      map[origName] = parseInt(drug.薬品レコード.薬品コード);
-      await cache.setDrugNameIyakuhincodeMap(map);
+    let kind = drug.getKind();
+    if( kind === undefined ){
+      throw new Error("invalid drug kind");
     }
+    await drugCacheHandler.handle(drug.薬品レコード.薬品名称, drug.薬品レコード.薬品コード, kind);
+    await usageCacheHandler.handle(data.用法レコード.用法名称, data.用法レコード.用法コード);
   }
 
   function addDrugSuppl(): void {
@@ -198,7 +200,7 @@
   <DrugNameField
     {drug}
     {at}
-    bind:isEditing={isEdigintName}
+    bind:isEditing={isEditingName}
     onFieldChange={onDrugChange}
   />
   <UnevenField

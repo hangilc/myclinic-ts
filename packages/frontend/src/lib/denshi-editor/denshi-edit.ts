@@ -339,6 +339,36 @@ export class 薬品情報Edit implements 薬品情報 {
   薬品補足レコードAsList(): 薬品補足レコードEdit[] {
     return this.薬品補足レコード ?? [];
   }
+
+  getKind(): "iyakuhin" | "kizai" | "ippanmei" | undefined {
+    if( this.薬品レコード.薬品コード === "" ){
+      return undefined;
+    }
+    if( this.薬品レコード.情報区分 === "医薬品" ) {
+      if( this.薬品レコード.薬品名称.startsWith("【般】") ){
+        return "ippanmei";
+      } else {
+        return "iyakuhin";
+      }
+    } else if( this.薬品レコード.情報区分 === "医療材料") {
+      return "kizai";
+    } else {
+      return undefined;
+    }
+  }
+
+  isConvertibleToIppanmei(): boolean {
+    console.log("convIppanmei", this.ippanmeicode, this.薬品レコード.薬品コード);
+    return this.ippanmeicode !== "" && this.薬品レコード.薬品コード !== this.ippanmeicode;
+  }
+
+  convertToIppanmei(): void {
+    if( this.ippanmeicode !== "" ){
+      this.薬品レコード.薬品名称 = this.ippanmei;
+      this.薬品レコード.薬品コード = this.ippanmeicode;
+      this.薬品レコード.薬品コード種別 = "一般名コード";
+    }
+  }
 }
 
 export class 剤形レコードEdit implements 剤形レコード {

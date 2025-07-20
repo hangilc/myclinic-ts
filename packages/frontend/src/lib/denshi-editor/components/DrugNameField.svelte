@@ -9,7 +9,7 @@
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import api from "@/lib/api";
   import { tick } from "svelte";
-  import { cache } from "@/lib/cache";
+  import SmallLink from "./workarea/SmallLink.svelte";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -84,6 +84,12 @@
     isEditing = false;
     onFieldChange();
   }
+
+  function convertToIppanmei() {
+    drug.convertToIppanmei();
+    isEditing = false;
+    onFieldChange();
+  }
 </script>
 
 <Field>
@@ -91,7 +97,12 @@
   <FieldForm>
     {#if !isEditing}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
-      <div class="rep" on:click={doRepClick}>{drug.薬品レコード.薬品名称}</div>
+      <div>
+        <span class="rep" on:click={doRepClick}>{drug.薬品レコード.薬品名称}</span>
+        {#if drug.isConvertibleToIppanmei()}
+          <SmallLink onClick={convertToIppanmei}>一般名に</SmallLink>
+        {/if}
+      </div>
     {:else}
       <div class="with-icons">
         <form on:submit|preventDefault={doSearch}>
