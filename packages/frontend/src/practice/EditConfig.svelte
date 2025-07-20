@@ -1,5 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
+  import { cache } from "@/lib/cache";
   import ServiceHeader from "@/ServiceHeader.svelte";
 
   let configKeys: string[] = [];
@@ -24,42 +25,52 @@
   }
 
   async function doEnter() {
-	let value: any;
-	try {
-	  value = JSON.parse(editValue);
-	} catch {
-	  alert("Invalid JSON");
-	  return;
-	}
-	await api.setConfig(editKey, value);
-	isEditing = false;
+    let value: any;
+    try {
+      value = JSON.parse(editValue);
+    } catch {
+      alert("Invalid JSON");
+      return;
+    }
+    await api.setConfig(editKey, value);
+    isEditing = false;
+    switch (editKey) {
+      case "usage-master-map": {
+        cache.clearUsageMasterMap();
+        break;
+      }
+      case "drug-name-iyakuhincode-map": {
+        cache.clearDrugNameIyakuhincodeMap();
+        break;
+      }
+    }
   }
 
   function doAdd() {
-	newKey = "";
-	newValue = "";
-	isAdding = true;
+    newKey = "";
+    newValue = "";
+    isAdding = true;
   }
 
   async function doAddEnter() {
-	if( newKey === "" ){
-	  alert("Empty key");
-	  return;
-	}
-	if( configKeys.includes(newKey) ){
-	  alert("key already exists");
-	  return;
-	}
-	let value: any;
-	try {
-	  value = JSON.parse(newValue);
-	} catch {
-	  alert("Invalid JSON");
-	  return;
-	}
-	await api.setConfig(newKey, value);
-	isAdding = false;
-	await init();
+    if (newKey === "") {
+      alert("Empty key");
+      return;
+    }
+    if (configKeys.includes(newKey)) {
+      alert("key already exists");
+      return;
+    }
+    let value: any;
+    try {
+      value = JSON.parse(newValue);
+    } catch {
+      alert("Invalid JSON");
+      return;
+    }
+    await api.setConfig(newKey, value);
+    isAdding = false;
+    await init();
   }
 </script>
 
@@ -76,16 +87,16 @@
   <div class="edit-wrapper">
     <div>
       <span class="edit-label">Key:</span>
-	  <input type="text" bind:value={newKey} />
+      <input type="text" bind:value={newKey} />
     </div>
     <span class="edit-label">Value:</span>
     <div>
       <textarea bind:value={newValue} class="edit-value" />
     </div>
-	<div>
-	  <button on:click={doAddEnter}>入力</button>
-	  <button on:click={() => isAdding = false}>キャンセル</button>
-	</div>
+    <div>
+      <button on:click={doAddEnter}>入力</button>
+      <button on:click={() => (isAdding = false)}>キャンセル</button>
+    </div>
   </div>
 {/if}
 {#if isEditing}
@@ -97,10 +108,10 @@
     <div>
       <textarea bind:value={editValue} class="edit-value" />
     </div>
-	<div>
-	  <button on:click={doEnter}>入力</button>
-	  <button on:click={() => isEditing = false}>キャンセル</button>
-	</div>
+    <div>
+      <button on:click={doEnter}>入力</button>
+      <button on:click={() => (isEditing = false)}>キャンセル</button>
+    </div>
   </div>
 {/if}
 

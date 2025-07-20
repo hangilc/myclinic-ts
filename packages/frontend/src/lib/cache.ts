@@ -158,6 +158,10 @@ export const cache = {
     await api.setUsageMasterMap(map);
   },
 
+  clearUsageMasterMap(): void {
+    usageMasterMap = undefined;
+  },
+
   async getDrugNameIyakuhincodeMap(): Promise<
     Record<
       string,
@@ -184,6 +188,10 @@ export const cache = {
   ): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);
+  },
+
+  clearDrugNameIyakuhincodeMap(): void {
+    drugNameIyakuhincodeMap = undefined;
   },
 
   async getOnshiServer(): Promise<string> {

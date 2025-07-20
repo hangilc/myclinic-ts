@@ -36,8 +36,14 @@
   export let onChange: (value: RP剤情報Edit) => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
-  let drugCacheHandler = new DrugCacheHandler(drug.薬品レコード.薬品名称, drug.薬品レコード.薬品コード);
-  let usageCacheHandler = new UsageCacheHandler(data.用法レコード.用法名称, data.用法レコード.用法コード);
+  let drugCacheHandler = new DrugCacheHandler(
+    drug.薬品レコード.薬品名称,
+    drug.薬品レコード.薬品コード,
+  );
+  let usageCacheHandler = new UsageCacheHandler(
+    data.用法レコード.用法名称,
+    data.用法レコード.用法コード,
+  );
 
   let isEditingJohoKubun = false;
   let isEditingName = drug.薬品レコード.薬品コード === "";
@@ -113,11 +119,24 @@
 
   async function handleCache() {
     let kind = drug.getKind();
-    if( kind === undefined ){
+    if (kind === undefined) {
       throw new Error("invalid drug kind");
     }
-    await drugCacheHandler.handle(drug.薬品レコード.薬品名称, drug.薬品レコード.薬品コード, kind);
-    await usageCacheHandler.handle(data.用法レコード.用法名称, data.用法レコード.用法コード);
+    await drugCacheHandler.handle(
+      drug.薬品レコード.薬品名称,
+      drug.薬品レコード.薬品コード,
+      kind,
+    );
+    if (
+      drug.薬品補足レコードAsList().length === 0 &&
+      drug.不均等レコード == undefined &&
+      data.用法補足レコードAsList().length === 0
+    ) {
+      await usageCacheHandler.handle(
+        data.用法レコード.用法名称,
+        data.用法レコード.用法コード,
+      );
+    }
   }
 
   function addDrugSuppl(): void {
@@ -189,7 +208,9 @@
   }
 
   function doDelete() {
-    data.薬品情報グループ = data.薬品情報グループ.filter(d => d.id !== drugId);
+    data.薬品情報グループ = data.薬品情報グループ.filter(
+      (d) => d.id !== drugId,
+    );
     destroy();
     onChange(data);
   }

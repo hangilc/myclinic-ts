@@ -103,8 +103,35 @@ function get提供情報レコードFromShohou(
   }
 }
 
+function probeUneven(usage: string): undefined | { usage: string, uneven: string[] } {
+  console.log("enter probeUneven", usage);
+  let m = /(.+?)[(（)](.+)[）)](.+)/.exec(usage);
+  console.log("m", m);
+  if (m) {
+    let usage = m[1] + "　" + m[3];
+    usage = usage.replaceAll(/[ 　]+/g, "　");
+    console.log("usage", usage);
+    let parts = m[2].split(/[-ー－]/);
+    console.log("parts", parts);
+    if (parts.length >= 2) {
+      let uneven = parts.map(p => p.trim());
+      return { usage, uneven };
+    }
+  }
+  return undefined;
+}
+
 function getRP剤情報FromGroup(group: DrugGroup): RP剤情報 {
   let 剤形レコード: 剤形レコード = get剤形レコードFromGroup(group);
+  if (group.drugs.length === 1) {
+    let unevenInfo = probeUneven(group.usage.usage);
+    if (unevenInfo) {
+      let drug = Object.assign({}, group.drugs[0]);
+      drug.uneven = unevenInfo.uneven.join("-");
+      let usage = Object.assign({}, group.usage, { usage: unevenInfo.usage });
+      group = Object.assign({}, group, { usage, drugs: [drug] });
+    }
+  }
   return {
     剤形レコード,
     用法レコード: get用法レコードFromGroup(group),
