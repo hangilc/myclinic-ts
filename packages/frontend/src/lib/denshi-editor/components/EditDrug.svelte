@@ -6,6 +6,7 @@
     type RP剤情報Edit,
   } from "../denshi-edit";
   import {
+    freeTextCode,
     hasHenkoufukaDrugSuppl,
     hasIppoukaUsageSuppl,
     hasKanjakibouDrugSuppl,
@@ -28,6 +29,7 @@
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
   import { DrugCacheHandler, UsageCacheHandler } from "../cache-handler";
   import Link from "./workarea/Link.svelte";
+  import { toHankaku } from "@/lib/zenkaku";
 
   export let destroy: () => void;
   export let group: RP剤情報Edit;
@@ -39,6 +41,7 @@
   let drugCacheHandler = new DrugCacheHandler(
     drug.薬品レコード.薬品名称,
     drug.薬品レコード.薬品コード,
+    drug.薬品レコード.単位名,
   );
   let usageCacheHandler = new UsageCacheHandler(
     data.用法レコード.用法名称,
@@ -122,15 +125,21 @@
     if (kind === undefined) {
       throw new Error("invalid drug kind");
     }
-    await drugCacheHandler.handle(
-      drug.薬品レコード.薬品名称,
-      drug.薬品レコード.薬品コード,
-      kind,
-    );
+    if (
+      toHankaku(drugCacheHandler.origDrugUnit) ===
+      toHankaku(drug.薬品レコード.単位名)
+    ) {
+      await drugCacheHandler.handle(
+        drug.薬品レコード.薬品名称,
+        drug.薬品レコード.薬品コード,
+        kind,
+      );
+    }
     if (
       drug.薬品補足レコードAsList().length === 0 &&
       drug.不均等レコード == undefined &&
-      data.用法補足レコードAsList().length === 0
+      data.用法補足レコードAsList().length === 0 &&
+      data.用法レコード.用法コード !== freeTextCode
     ) {
       await usageCacheHandler.handle(
         data.用法レコード.用法名称,

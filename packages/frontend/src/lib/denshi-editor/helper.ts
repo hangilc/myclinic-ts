@@ -187,4 +187,5 @@ export function ippoukaUsageSuppl(): 用法補足レコード {
   }
 }
 
+export const freeTextCode = "0X0XXXXXXXXX0000";
 

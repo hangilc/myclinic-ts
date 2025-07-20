@@ -5,10 +5,12 @@ import type { RP剤情報Edit, 薬品情報Edit } from "./denshi-edit";
 export class DrugCacheHandler {
   origDrugName: string;
   origDrugCode: string;
+  origDrugUnit: string;
 
-  constructor(origDrugName: string, origDrugCode: string) {
+  constructor(origDrugName: string, origDrugCode: string, origDrugUnit: string) {
     this.origDrugName = origDrugName;
     this.origDrugCode = origDrugCode;
+    this.origDrugUnit = origDrugUnit;
   }
 
   async handle(drugName: string, drugCode: string, kind: "iyakuhin" | "kizai" | "ippanmei"): Promise<void> {
