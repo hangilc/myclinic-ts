@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { cache } from "@/lib/cache";
   import {
     不均等レコードEdit,
     用法補足レコードEdit,
@@ -28,12 +27,13 @@
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
   import { DrugCacheHandler, UsageCacheHandler } from "../cache-handler";
+  import Link from "./workarea/Link.svelte";
 
   export let destroy: () => void;
   export let group: RP剤情報Edit;
   export let drugId: number;
   export let at: string;
-  export let onChange: () => void;
+  export let onChange: (value: RP剤情報Edit) => void;
   let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
   let drugCacheHandler = new DrugCacheHandler(drug.薬品レコード.薬品名称, drug.薬品レコード.薬品コード);
@@ -106,9 +106,8 @@
     if (!confirmNotEditing()) {
       return;
     }
-    group.assign(data);
     destroy();
-    onChange();
+    onChange(data);
     handleCache();
   }
 
@@ -188,6 +187,12 @@
     }
     onDrugChange();
   }
+
+  function doDelete() {
+    data.薬品情報グループ = data.薬品情報グループ.filter(d => d.id !== drugId);
+    destroy();
+    onChange(data);
+  }
 </script>
 
 <Workarea>
@@ -253,6 +258,7 @@
       {/if}
       <SmallLink onClick={addUsageSuppl}>用法補足</SmallLink>
     </div>
+    <Link onClick={doDelete}>削除</Link>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
   </Commands>

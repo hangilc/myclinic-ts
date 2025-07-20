@@ -358,7 +358,6 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   isConvertibleToIppanmei(): boolean {
-    console.log("convIppanmei", this.ippanmeicode, this.薬品レコード.薬品コード);
     return this.ippanmeicode !== "" && this.薬品レコード.薬品コード !== this.ippanmeicode;
   }
 

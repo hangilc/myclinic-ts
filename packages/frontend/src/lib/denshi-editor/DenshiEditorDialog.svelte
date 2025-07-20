@@ -69,7 +69,12 @@
         group,
         drugId: drug.id,
         at,
-        onChange: () => (data = data),
+        onChange: (value: RP剤情報Edit) => {
+          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
+            g.id === group.id ? value : g,
+          ).filter((g) => g.薬品情報グループ.length > 0);
+          data = data;
+        },
       },
     });
     clearWorkarea = () => {
