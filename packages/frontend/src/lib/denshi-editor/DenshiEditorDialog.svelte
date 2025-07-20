@@ -1,9 +1,6 @@
 <script lang="ts">
   import type {
     PrescInfoData,
-    備考レコード,
-    提供診療情報レコード,
-    検査値データ等レコード,
   } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";

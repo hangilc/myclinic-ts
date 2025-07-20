@@ -16,20 +16,44 @@ export class DrugCacheHandler {
       return;
     }
     let map = await cache.getDrugNameIyakuhincodeMap();
+    let bind: number
+      | { kind: "ippanmei"; name: string; code: string }
+      | { kind: "kizai"; kizaicode: number };
     if (kind === "iyakuhin") {
       let code = parseInt(drugCode);
       if (isNaN(code)) {
         throw new Error(`invalid iyakuhincode: ${drugCode}`);
       }
-      map[this.origDrugName] = code;
+      bind = code;
     } else if (kind === "kizai") {
       let code = parseInt(drugCode);
       if (isNaN(code)) {
         throw new Error(`invalid iyakuhincode: ${drugCode}`);
       }
-      map[this.origDrugName] = { "kind": "kizai", "kizaicode": code };
+      bind = { "kind": "kizai", "kizaicode": code };
     } else if (kind === "ippanmei") {
-      map[this.origDrugName] = { "kind": "ippanmei", name: drugName, code: drugCode };
+      bind = { "kind": "ippanmei", name: drugName, code: drugCode };
+    } else {
+      throw new Error("cannot happen");
+    }
+    if (this.origDrugCode === "") {
+      map[this.origDrugName] = bind;
+    } else {
+      const origCode = this.origDrugCode;
+      for (let k in map) {
+        let v = map[k];
+        let replace = false;
+        if (typeof v === "number") {
+          replace = v.toString() === origCode;
+        } else if (v.kind === "ippanmei") {
+          replace = v.code === origCode;
+        } else {
+          replace = v.kizaicode.toString() === origCode;
+        }
+        if (replace) {
+          map[k] = bind;
+        }
+      }
     }
     await cache.setDrugNameIyakuhincodeMap(map);
   }
