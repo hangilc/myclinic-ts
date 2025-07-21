@@ -3,6 +3,7 @@
   import ChevronUpLink from "../icons/ChevronUpLink.svelte";
 
   export let onEnter: () => void;
+  export let onSearch: () => void;
   export let onPaste: () => void;
   export let onCancel: () => void;
   export let showSubCommands: boolean;
@@ -10,6 +11,7 @@
 
 <div class="top">
   <button on:click={onEnter}>入力</button>
+  <button on:click={onSearch}>検索</button>
   <button on:click={onPaste}>貼付</button>
   <button on:click={onCancel}>キャンセル</button>
   {#if !showSubCommands}

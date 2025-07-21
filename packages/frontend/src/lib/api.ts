@@ -2041,4 +2041,12 @@ export default {
   listConfigKey(): Promise<string[]> {
     return get("list-config-key", {}, castList(castString));
   },
+
+  listPrescForPatient(patientId: number, limit: number, offset: number): Promise<[m.Text, m.Visit][]> {
+    return get("list-presc-for-patient", {
+      "patient-id": patientId.toString(),
+      limit: limit.toString(),
+      offset: offset.toString()
+    }, _ => _)
+  },
 };

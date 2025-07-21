@@ -22,10 +22,12 @@
   import EditClinicalInfo from "./components/EditClinicalInfo.svelte";
   import EditExamInfo from "./components/EditExamInfo.svelte";
   import Paste from "./components/Paste.svelte";
+  import PrevSearch from "./components/PrevSearch.svelte";
 
   export let title: string;
   export let destroy: () => void;
   export let orig: PrescInfoData;
+  export let patientId: number;
   export let at: string;
   export let showValid: boolean = false;
   export let onEnter: (presc: PrescInfoData) => void;
@@ -225,12 +227,37 @@
       clearWorkarea = undefined;
     };
   }
+
+  function doSearch() {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: PrevSearch = new PrevSearch({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        patientId,
+        onEnter: (value: RP剤情報Edit[]) => {
+          data.RP剤情報グループ.push(...value);
+          data = data;
+        }
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onEnter={doEnter} onCancel={doCancel} onPaste={doPaste} bind:showSubCommands />
+      <Commands onEnter={doEnter} onSearch={doSearch} onCancel={doCancel} onPaste={doPaste} bind:showSubCommands />
       {#if showSubCommands}
         <SubCommands
           {data}

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Link from "./workarea/Link.svelte";
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import Commands from "./workarea/Commands.svelte";
@@ -12,9 +11,7 @@
   export let at: string;
   export let onEnter: (value: RP剤情報Edit[]) => void;
 
-  let inputValue = `２）ロゼレム錠８ｍｇ　１錠
-　　分１　寝る前　３０日分
-`;
+  let inputValue = ``;
 
   function doCancel(): void {
     destroy();
@@ -38,7 +35,7 @@
 </script>
 
 <Workarea>
-  <Title>有効期限</Title>
+  <Title>貼付</Title>
   <div>
     <textarea class="textarea" bind:value={inputValue} />
   </div>

@@ -104,15 +104,11 @@ function get提供情報レコードFromShohou(
 }
 
 function probeUneven(usage: string): undefined | { usage: string, uneven: string[] } {
-  console.log("enter probeUneven", usage);
   let m = /(.+?)[(（)](.+)[）)](.+)/.exec(usage);
-  console.log("m", m);
   if (m) {
     let usage = m[1] + "　" + m[3];
     usage = usage.replaceAll(/[ 　]+/g, "　");
-    console.log("usage", usage);
     let parts = m[2].split(/[-ー－]/);
-    console.log("parts", parts);
     if (parts.length >= 2) {
       let uneven = parts.map(p => p.trim());
       return { usage, uneven };
