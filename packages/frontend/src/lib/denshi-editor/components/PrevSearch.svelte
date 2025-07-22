@@ -7,11 +7,16 @@
   import api from "@/lib/api";
   import { isShohousen } from "@/lib/shohousen/parse-shohousen";
   import PrescSearchList from "./presc-search/PrescSearchList.svelte";
+  import NavBar from "./presc-search/nav-bar.svelte";
 
   export let destroy: () => void;
   export let patientId: number;
   export let onEnter: (value: RP剤情報Edit[]) => void;
-  let list: [Text, Visit][] = [];
+  let currentPage = 0;
+  let allItems: [Text, Visit][] = [];
+  let selectedItems: [Text, Visit][] = [];
+  let pageItems: [Text, Visit][] = [];
+  let itemsPerPage = 10;
 
   function doCancel(): void {
     destroy();
@@ -19,21 +24,19 @@
 
   async function doEnter() {}
 
-  setupList();
+  setupAllItems();
 
-  async function setupList() {
-    list = await getShohouHistory();
+  async function setupAllItems() {
+    allItems = await getShohouHistory();
+    selectedItems = allItems;
+    currentPage = 0;
+    pageItems = selectedItems.slice(0, itemsPerPage);
   }
 
   async function getShohouHistory(): Promise<[Text, Visit][]> {
     try {
-      const candidates = await api.listPrescForPatient(
-        patientId,
-        1000,
-        0,
-      );
+      const candidates = await api.listPrescForPatient(patientId, 1000, 0);
       let prescTexts = candidates.filter(([t, _v]) => isShohousen(t.content));
-      console.log("texts", prescTexts.slice(0, 3))
       return prescTexts;
     } catch (error) {
       console.error("Failed to load prescription history:", error);
@@ -41,12 +44,32 @@
       return [];
     }
   }
+
+  function doPageChange(page: number) {
+    currentPage = page;
+    pageItems = selectedItems.slice(
+      currentPage * itemsPerPage,
+      (currentPage + 1) * itemsPerPage,
+    );
+  }
 </script>
 
 <Workarea>
   <Title>過去の処方</Title>
   <div>
-    <PrescSearchList {patientId} />
+    <NavBar
+      totalItems={allItems.length}
+      bind:currentPage
+      {itemsPerPage}
+      onChange={doPageChange}
+    />
+    <PrescSearchList list={pageItems} />
+    <NavBar
+      totalItems={allItems.length}
+      bind:currentPage
+      {itemsPerPage}
+      onChange={doPageChange}
+    />
   </div>
   <Commands>
     <button on:click={doEnter}>入力</button>
