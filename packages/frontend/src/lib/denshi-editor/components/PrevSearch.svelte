@@ -9,9 +9,11 @@
   import PrescSearchList from "./presc-search/PrescSearchList.svelte";
   import NavBar from "./presc-search/nav-bar.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let destroy: () => void;
   export let patientId: number;
+  export let at: string;
   export let onEnter: (value: RP剤情報Edit[]) => void;
   let currentPage = 0;
   let allItems: [Text, Visit][] = [];
@@ -64,6 +66,10 @@
       (currentPage + 1) * itemsPerPage,
     );
   }
+
+  function doSelect(group: RP剤情報[]) {
+    console.log("select", group);
+  }
 </script>
 
 <Workarea>
@@ -75,7 +81,7 @@
       {itemsPerPage}
       onChange={doPageChange}
     />
-    <PrescSearchList list={pageItems} />
+    <PrescSearchList list={pageItems} onSelect={doSelect}/>
     <NavBar
       totalItems={allItems.length}
       bind:currentPage

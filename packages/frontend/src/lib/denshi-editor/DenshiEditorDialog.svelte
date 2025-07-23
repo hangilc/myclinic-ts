@@ -241,6 +241,7 @@
       props: {
         destroy: () => clearWorkarea && clearWorkarea(),
         patientId,
+        at,
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
           data = data;
