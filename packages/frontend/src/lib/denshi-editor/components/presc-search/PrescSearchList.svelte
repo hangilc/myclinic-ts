@@ -11,15 +11,26 @@
     return TextMemoWrapper.fromText(text).getMemoKind() === "shohou";
   }
 
- $:  console.log("list", list);
+  $: console.log("list", list);
 </script>
 
 <div>
   {#each list as [text, visit] (text.textId)}
-    {#if isDenshi(text)}
-    <DenshiShohouItem {text} {visit} />
-    {:else}
-    <PaperShohouItem {text} {visit} />
-    {/if}
+    <div class="item-top">
+      {#if isDenshi(text)}
+        <DenshiShohouItem {text} {visit} />
+      {:else}
+        <PaperShohouItem {text} {visit} />
+      {/if}
+    </div>
   {/each}
 </div>
+
+<style>
+  .item-top {
+    margin: 6px 0;
+    border: 1px solid gray;
+    border-radius: 4px;
+    padding: 10px;
+  }
+</style>

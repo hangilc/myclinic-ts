@@ -8,6 +8,7 @@
   import { isShohousen } from "@/lib/shohousen/parse-shohousen";
   import PrescSearchList from "./presc-search/PrescSearchList.svelte";
   import NavBar from "./presc-search/nav-bar.svelte";
+  import { TextMemoWrapper } from "@/lib/text-memo";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -33,10 +34,21 @@
     pageItems = selectedItems.slice(0, itemsPerPage);
   }
 
+  function filterPresc(text: Text): boolean {
+    if( isShohousen(text.content)) {
+      return true;
+    }
+    if( TextMemoWrapper.fromText(text).getMemoKind() === "shohou" ){
+      return true;
+    }
+    return false;
+  }
+
   async function getShohouHistory(): Promise<[Text, Visit][]> {
     try {
       const candidates = await api.listPrescForPatient(patientId, 1000, 0);
-      let prescTexts = candidates.filter(([t, _v]) => isShohousen(t.content));
+      console.log("candidates", candidates.slice(0, 10));
+      let prescTexts = candidates.filter(([t, _v]) => filterPresc(t));
       return prescTexts;
     } catch (error) {
       console.error("Failed to load prescription history:", error);
