@@ -7,6 +7,7 @@
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let list: [Text, Visit][] = [];
+  export let at: string;
   export let onSelect: (group: RP剤情報[]) => void;
 
   function isDenshi(text: Text): boolean {
@@ -21,7 +22,7 @@
       {#if isDenshi(text)}
         <DenshiShohouItem {text} onSelect={onSelect}/>
       {:else}
-        <PaperShohouItem {text} onSelect={onSelect} />
+        <PaperShohouItem {text} {at} onSelect={onSelect} />
       {/if}
     </div>
   {/each}

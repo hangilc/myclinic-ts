@@ -23,6 +23,7 @@
     for(let group of groups){
       await resolveDrugGroupByMap(group, at);
     }
+    onSelect(groups);
   }
 </script>
 

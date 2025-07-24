@@ -240,10 +240,15 @@ export async function confirmDrugCode(drug: 薬品レコード, at: string): Pro
   }
 }
 
-export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string): Promise<undefined | string[]> {
+export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string, {
+  skipBlankCode
+}: { skipBlankCode?: boolean }): Promise<undefined | string[]> {
   let errs: string[] = [];
   for(let group of groups) {
     for(let drug of group.薬品情報グループ){
+      if(skipBlankCode &&  drug.薬品レコード.薬品コード === "" ) {
+        continue;
+      }
       let e = await confirmDrugCode(drug.薬品レコード, at);
       if( e ){
         errs.push(e);

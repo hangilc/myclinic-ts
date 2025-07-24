@@ -10,6 +10,7 @@
   import NavBar from "./presc-search/nav-bar.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+  import DrugSelectDialog from "../DrugSelectDialog.svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -67,8 +68,15 @@
     );
   }
 
-  function doSelect(group: RP剤情報[]) {
-    console.log("select", group);
+  function doSelect(groups: RP剤情報[]) {
+    console.log("doSelect", groups);
+    const d: DrugSelectDialog = new DrugSelectDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        src: groups,
+      }
+    })
   }
 </script>
 
@@ -81,7 +89,7 @@
       {itemsPerPage}
       onChange={doPageChange}
     />
-    <PrescSearchList list={pageItems} onSelect={doSelect}/>
+    <PrescSearchList list={pageItems} {at} onSelect={doSelect}/>
     <NavBar
       totalItems={allItems.length}
       bind:currentPage
