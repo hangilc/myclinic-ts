@@ -1,9 +1,12 @@
-import type { 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
+import type { RP剤情報, 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
 import type { Drug, Usage } from "@/lib/parse-shohou";
 import type { ConvData2 } from "./conv/denshi-conv";
+import { 薬品情報Edit } from "./denshi-edit";
+import api from "../api";
+import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -188,4 +191,65 @@ export function ippoukaUsageSuppl(): 用法補足レコード {
 }
 
 export const freeTextCode = "0X0XXXXXXXXX0000";
+
+export async function confirmDrugCode(drug: 薬品レコード, at: string): Promise<undefined | string> {
+  let code = drug.薬品コード;
+  if (code === "") {
+    return `no-drug-code:薬品コードが設定されていません（${drug.薬品名称}）`;
+  }
+  if (drug.情報区分 === "医薬品") {
+    if (/^\d+$/.test(code)) {
+      let m: IyakuhinMaster;
+      try {
+        m = await api.getIyakuhinMaster(parseInt(code), at);
+      } catch {
+        return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
+      }
+      if (m.name === drug.薬品名称) {
+        return undefined;
+      } else {
+        return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${m.name})`;
+      }
+    } else {
+      let ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
+      if (ms.length !== 0) {
+        let name = ms[0].name;
+        if (name === drug.薬品名称) {
+          return undefined;
+        } else {
+          return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${name})`;
+        }
+      } else {
+        return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
+      }
+    }
+  } else if (drug.情報区分 === "医療材料") {
+    let m: KizaiMaster;
+    try {
+      m = await api.getKizaiMaster(parseInt(code), at);
+    } catch {
+      return `invalid-code:不適切な器材コードです（${drug.薬品コード}|${drug.薬品名称}）`
+    }
+    if (m.name === drug.薬品名称) {
+      return undefined;
+    } else {
+      return `incompat-name:器材名称が一致しません（${drug.薬品名称}）|${m.name})`;
+    }
+  } else {
+    throw new Error("cannot happen")
+  }
+}
+
+export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string): Promise<undefined | string[]> {
+  let errs: string[] = [];
+  for(let group of groups) {
+    for(let drug of group.薬品情報グループ){
+      let e = await confirmDrugCode(drug.薬品レコード, at);
+      if( e ){
+        errs.push(e);
+      }
+    }
+  }
+  return errs.length === 0 ? undefined: errs;
+}
 
