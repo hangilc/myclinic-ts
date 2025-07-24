@@ -50,7 +50,6 @@
   async function getShohouHistory(): Promise<[Text, Visit][]> {
     try {
       const candidates = await api.listPrescForPatient(patientId, 1000, 0);
-      console.log("candidates", candidates.slice(0, 10));
       let prescTexts = candidates.filter(([t, _v]) => filterPresc(t));
       return prescTexts;
     } catch (error) {
@@ -69,12 +68,15 @@
   }
 
   function doSelect(groups: RP剤情報[]) {
-    console.log("doSelect", groups);
     const d: DrugSelectDialog = new DrugSelectDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         src: groups,
+        onEnter: (groups: RP剤情報[]) => {
+          let edit: RP剤情報Edit[] = groups.map(g => RP剤情報Edit.fromObject(g));
+          onEnter(edit);
+        }
       }
     })
   }
