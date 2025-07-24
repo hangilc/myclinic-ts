@@ -13,16 +13,16 @@
 
 <Dialog2 title="薬剤選択" {destroy}>
   <div class="groups">
-    {#each groups as group}
-      <div><input type="checkbox" bind:checked={group.selected} /></div>
+    {#each groups as group, index}
+      <div>
+        <input type="checkbox" bind:checked={group.selected} />
+        {toZenkaku((index + 1).toString())}）
+      </div>
       <div>
         <div class="drugs">
-          {#each group.drugs as drug, index}
+          {#each group.drugs as drug}
             <div><input type="checkbox" bind:checked={drug.selected} /></div>
-            <div>
-              <div>{toZenkaku((index + 1).toString())}）</div>
-              <div>{drugRep(drug.data)}</div>
-            </div>
+            <div>{drugRep(drug.data)}</div>
           {/each}
         </div>
         <div>
@@ -35,7 +35,15 @@
 </Dialog2>
 
 <style>
-  .groups, .drugs {
+  .groups {
+    width: 300px;
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .groups,
+  .drugs {
     display: grid;
     grid-template-columns: auto 1fr;
   }
