@@ -14,13 +14,13 @@
   }
 
   async function doSelect() {
-        const shohou = parseShohou3(text.content);
+    const shohou = parseShohou3(text.content);
     if (typeof shohou === "string") {
       alert(shohou);
       return;
     }
-    let groups: RP剤情報[] = shohou.groups.map(g => getRP剤情報FromGroup(g));
-    for(let group of groups){
+    let groups: RP剤情報[] = shohou.groups.map((g) => getRP剤情報FromGroup(g));
+    for (let group of groups) {
       await resolveDrugGroupByMap(group, at);
     }
     onSelect(groups);

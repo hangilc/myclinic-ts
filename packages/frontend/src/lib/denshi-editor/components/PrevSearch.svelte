@@ -11,6 +11,9 @@
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import DrugSelectDialog from "../DrugSelectDialog.svelte";
+  import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
+  import { getRP剤情報FromGroup } from "../denshi-tmpl";
+  import { resolveDrugGroupByMap } from "@/practice/exam/record/text/regular/helper";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -35,11 +38,45 @@
     pageItems = selectedItems.slice(0, itemsPerPage);
   }
 
+  async function listNames(items: [Text, Visit][]): Promise<string[]> {
+    const names: string[] = [];
+    const nameMap: Record<string, boolean> = {};
+    const handleGroups = (groups: RP剤情報[]) => {
+      for (let group of groups) {
+        for (let drug of group.薬品情報グループ) {
+          let name = drug.薬品レコード.薬品名称;
+          if (!(name in nameMap)) {
+            names.push(name);
+          }
+        }
+      }
+    };
+    for (let [text, _] of items) {
+      let memo = TextMemoWrapper.fromText(text).probeShohouMemo();
+      if (memo) {
+        handleGroups(memo.shohou.RP剤情報グループ);
+      } else {
+        const shohou = parseShohou3(text.content);
+        if (typeof shohou !== "string") {
+          let groups: RP剤情報[] = shohou.groups.map((g) =>
+            getRP剤情報FromGroup(g),
+          );
+          handleGroups(groups);
+        }
+      }
+    }
+    return names;
+  }
+
+  function isDenshi(text: Text): boolean {
+    return TextMemoWrapper.fromText(text).getMemoKind() === "shohou";
+  }
+
   function filterPresc(text: Text): boolean {
-    if( isShohousen(text.content)) {
+    if (isShohousen(text.content)) {
       return true;
     }
-    if( TextMemoWrapper.fromText(text).getMemoKind() === "shohou" ){
+    if (TextMemoWrapper.fromText(text).getMemoKind() === "shohou") {
       return true;
     }
     return false;
@@ -72,24 +109,31 @@
         destroy: () => d.$destroy(),
         src: groups,
         onEnter: (groups: RP剤情報[]) => {
-          let edit: RP剤情報Edit[] = groups.map(g => RP剤情報Edit.fromObject(g));
+          let edit: RP剤情報Edit[] = groups.map((g) =>
+            RP剤情報Edit.fromObject(g),
+          );
           onEnter(edit);
-        }
-      }
-    })
+        },
+      },
+    });
   }
 </script>
 
 <Workarea>
   <Title>過去の処方</Title>
   <div>
-    <NavBar
-      totalItems={allItems.length}
-      bind:currentPage
-      {itemsPerPage}
-      onChange={doPageChange}
-    />
-    <PrescSearchList list={pageItems} {at} onSelect={doSelect}/>
+    <div class="top-nav-bar">
+      <div class="nav-bar-wrapper">
+        <NavBar
+          totalItems={allItems.length}
+          bind:currentPage
+          {itemsPerPage}
+          onChange={doPageChange}
+        />
+      </div>
+      <button>薬剤リスト</button>
+    </div>
+    <PrescSearchList list={pageItems} {at} onSelect={doSelect} />
     <NavBar
       totalItems={allItems.length}
       bind:currentPage
@@ -103,4 +147,12 @@
 </Workarea>
 
 <style>
+  .nav-bar-wrapper {
+    display: inline-block;
+  }
+  .top-nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 </style>
