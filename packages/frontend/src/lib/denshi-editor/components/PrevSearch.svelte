@@ -13,7 +13,7 @@
   import DrugSelectDialog from "../DrugSelectDialog.svelte";
   import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
   import { getRP剤情報FromGroup } from "../denshi-tmpl";
-  import { resolveDrugGroupByMap } from "@/practice/exam/record/text/regular/helper";
+  import NameList from "./presc-search/NameList.svelte";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -24,6 +24,9 @@
   let selectedItems: [Text, Visit][] = [];
   let pageItems: [Text, Visit][] = [];
   let itemsPerPage = 10;
+  let showNameList = false;
+  let drugNames: string[] | undefined = undefined;
+  let selectedDrugName: string = "";
 
   function doClose(): void {
     destroy();
@@ -45,8 +48,9 @@
       for (let group of groups) {
         for (let drug of group.薬品情報グループ) {
           let name = drug.薬品レコード.薬品名称;
-          if (!(name in nameMap)) {
+          if (name !== "" && !(name in nameMap)) {
             names.push(name);
+            nameMap[name] = true;
           }
         }
       }
@@ -66,10 +70,6 @@
       }
     }
     return names;
-  }
-
-  function isDenshi(text: Text): boolean {
-    return TextMemoWrapper.fromText(text).getMemoKind() === "shohou";
   }
 
   function filterPresc(text: Text): boolean {
@@ -117,6 +117,22 @@
       },
     });
   }
+
+  async function doNameList() {
+    if( showNameList ){
+      showNameList = false;
+    } else {
+      if( drugNames === undefined ){
+        drugNames = await listNames(allItems);
+      }
+      showNameList = true;
+    }
+  }
+
+  function doNameClick(name: string) {
+    selectedDrugName = name;
+    
+  }
 </script>
 
 <Workarea>
@@ -131,8 +147,11 @@
           onChange={doPageChange}
         />
       </div>
-      <button>薬剤リスト</button>
+      <button on:click={doNameList}>薬剤リスト</button>
     </div>
+    {#if showNameList}
+      <NameList nameList={drugNames} onClick={doNameClick}/>
+    {/if}
     <PrescSearchList list={pageItems} {at} onSelect={doSelect} />
     <NavBar
       totalItems={allItems.length}
