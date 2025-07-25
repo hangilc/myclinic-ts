@@ -148,7 +148,7 @@ async function createConvDrugRep(drug: Drug, at: string): Promise<ConvDrugRep> {
       console.log(`ippanmei ${ippanmei} not available at ${at}`);
     }
   } else if( bind && bind.kind === "kizai"){
-    let kizaicode = bind.kizaicode;
+    let kizaicode = parseInt(bind.code);
     try {
       let master = await api.getKizaiMaster(kizaicode, at);
       let aux = createConvData4DepsFromKizaiMaster(master);

@@ -34,9 +34,9 @@ export async function resolveDrugGroupByMap(g: RP剤情報, at: string): Promise
       let record = d.薬品レコード;
       let bind = map[record.薬品名称];
       if (bind) {
-        if (typeof bind === "number") {
+        if (bind.kind === "iyakuhin") {
           try {
-            let m = await api.getIyakuhinMaster(bind, at);
+            let m = await api.getIyakuhinMaster(parseInt(bind.code), at);
             record.薬品コード種別 = "レセプト電算処理システム用コード";
             record.薬品名称 = m.name;
             record.薬品コード = m.iyakuhincode.toString();
@@ -49,7 +49,7 @@ export async function resolveDrugGroupByMap(g: RP剤情報, at: string): Promise
           record.情報区分 = "医薬品";
         } else if (bind.kind === "kizai") {
           try {
-            let m = await api.getKizaiMaster(bind.kizaicode, at);
+            let m = await api.getKizaiMaster(parseInt(bind.code), at);
             record.薬品コード種別 = "レセプト電算処理システム用コード";
             record.薬品名称 = m.name;
             record.薬品コード = m.kizaicode.toString();

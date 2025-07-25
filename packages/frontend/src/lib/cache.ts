@@ -9,6 +9,8 @@ import {
   type AppointsTemplate,
 } from "@/appoint/appoints-template";
 
+export type DrugNameBind = { kind: "iyakuhin" | "ippanmei" | "kizai"} & { code: string; name: string };
+
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
 let prescUrl: string | undefined = undefined;
@@ -19,14 +21,7 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
-let drugNameIyakuhincodeMap:
-  | Record<
-      string,
-      | number
-      | { kind: "ippanmei"; name: string; code: string }
-      | { kind: "kizai"; kizaicode: number }
-    >
-  | undefined = undefined;
+let drugNameIyakuhincodeMap: Record<string, DrugNameBind> | undefined = undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
@@ -162,29 +157,16 @@ export const cache = {
     usageMasterMap = undefined;
   },
 
-  async getDrugNameIyakuhincodeMap(): Promise<
-    Record<
-      string,
-      | number
-      | { kind: "ippanmei"; name: string; code: string }
-      | { kind: "kizai"; kizaicode: number }
-    >
-  > {
+  async getDrugNameIyakuhincodeMap(): Promise<Record<string, DrugNameBind>> {
     if (drugNameIyakuhincodeMap === undefined) {
-      const map: Record<string, number> =
-        await api.getDrugNameIyakuhincodeMap();
+      const map = await api.getDrugNameIyakuhincodeMap();
       drugNameIyakuhincodeMap = map;
     }
     return drugNameIyakuhincodeMap;
   },
 
   async setDrugNameIyakuhincodeMap(
-    map: Record<
-      string,
-      | number
-      | { kind: "ippanmei"; name: string; code: string }
-      | { kind: "kizai"; kizaicode: number }
-    >
+    map: Record<string, DrugNameBind>
   ): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);

@@ -3,7 +3,7 @@
   import SearchLink from "../icons/SearchLink.svelte";
   import "../widgets/style.css";
   import api from "@/lib/api";
-  import { cache } from "@/lib/cache";
+  import { cache, type DrugNameBind } from "@/lib/cache";
   import { onMount } from "svelte";
   import type { ConvAux4 } from "./denshi-conv";
   import type {
@@ -52,18 +52,7 @@
   let searchKizaiResult: KizaiMaster[] = [];
   let inputElement: HTMLInputElement;
   let cacheUpdateKey: string = 薬品名称;
-  let cacheUpdateData:
-    | undefined
-    | number
-    | {
-        kind: "ippanmei";
-        name: string;
-        code: string;
-      }
-    | {
-        kind: "kizai";
-        kizaicode: number;
-      } = undefined;
+  let cacheUpdateData: DrugNameBind | undefined = undefined;
   let ippanmei: string = "";
   let ippanmeicode: string = "";
   let suppls: 薬品補足レコードIndexed[] = 薬品補足レコード.map((r) =>
@@ -111,10 +100,7 @@
 
   async function updateCache(
     name: string,
-    bind:
-      | number
-      | { kind: "ippanmei"; name: string; code: string }
-      | { kind: "kizai"; kizaicode: number },
+    bind: DrugNameBind
   ) {
     try {
       // Update the cache with the new drug name -> iyakuhin code mapping
@@ -128,34 +114,34 @@
     }
   }
 
-  function doSelect(master: IyakuhinMaster) {
-    情報区分 = "医薬品";
-    薬品コード種別 = "レセプト電算処理システム用コード";
-    薬品コード = master.iyakuhincode.toString();
-    薬品名称 = master.name;
-    単位名 = master.unit;
-    ippanmei = master.ippanmei || "";
-    ippanmeicode = master.ippanmeicode || "";
-    cacheUpdateData = master.iyakuhincode;
-    searchText = "";
-    searchResult = [];
-  }
+  // function doSelect(master: IyakuhinMaster) {
+  //   情報区分 = "医薬品";
+  //   薬品コード種別 = "レセプト電算処理システム用コード";
+  //   薬品コード = master.iyakuhincode.toString();
+  //   薬品名称 = master.name;
+  //   単位名 = master.unit;
+  //   ippanmei = master.ippanmei || "";
+  //   ippanmeicode = master.ippanmeicode || "";
+  //   cacheUpdateData = master.iyakuhincode;
+  //   searchText = "";
+  //   searchResult = [];
+  // }
 
-  function doKizaiSelect(master: KizaiMaster) {
-    情報区分 = "医療材料";
-    薬品コード種別 = "レセプト電算処理システム用コード";
-    薬品コード = master.kizaicode.toString();
-    薬品名称 = master.name;
-    単位名 = master.unit;
-    ippanmei = "";
-    ippanmeicode = "";
-    cacheUpdateData = {
-      kind: "kizai",
-      kizaicode: master.kizaicode,
-    };
-    searchText = "";
-    searchKizaiResult = [];
-  }
+  // function doKizaiSelect(master: KizaiMaster) {
+  //   情報区分 = "医療材料";
+  //   薬品コード種別 = "レセプト電算処理システム用コード";
+  //   薬品コード = master.kizaicode.toString();
+  //   薬品名称 = master.name;
+  //   単位名 = master.unit;
+  //   ippanmei = "";
+  //   ippanmeicode = "";
+  //   cacheUpdateData = {
+  //     kind: "kizai",
+  //     kizaicode: master.kizaicode,
+  //   };
+  //   searchText = "";
+  //   searchKizaiResult = [];
+  // }
 
   function doIppanmei() {
     if (ippanmei && ippanmeicode) {

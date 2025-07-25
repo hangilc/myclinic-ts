@@ -20,7 +20,7 @@ import {
 } from "./cast";
 import { pipe } from "myclinic-model/pipe";
 import type { RP剤情報, 用法レコード } from "./denshi-shohou/presc-info";
-import type { FreqUsage } from "./cache";
+import type { DrugNameBind, FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
 import {
   validateShinryouDisease,
@@ -1987,7 +1987,7 @@ export default {
     return post("set-config", map, { name: "usage-master-map" }, (a) => a);
   },
 
-  getDrugNameIyakuhincodeMap(): Promise<Record<string, number>> {
+  getDrugNameIyakuhincodeMap(): Promise<Record<string, DrugNameBind>> {
     return get(
       "get-config",
       { name: "drug-name-iyakuhincode-map" },
@@ -1996,12 +1996,7 @@ export default {
   },
 
   setDrugNameIyakuhincodeMap(
-    map: Record<
-      string,
-      | number
-      | { kind: "ippanmei"; name: string; code: string }
-      | { kind: "kizai"; kizaicode: number }
-    >
+    map: Record<string, DrugNameBind>
   ): Promise<void> {
     return post(
       "set-config",
