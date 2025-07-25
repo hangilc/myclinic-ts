@@ -22,11 +22,9 @@
   let pageItems: [Text, Visit][] = [];
   let itemsPerPage = 10;
 
-  function doCancel(): void {
+  function doClose(): void {
     destroy();
   }
-
-  async function doEnter() {}
 
   setupAllItems();
 
@@ -100,8 +98,7 @@
     />
   </div>
   <Commands>
-    <button on:click={doEnter}>入力</button>
-    <button on:click={doCancel}>キャンセル</button>
+    <button on:click={doClose}>閉じる</button>
   </Commands>
 </Workarea>
 
