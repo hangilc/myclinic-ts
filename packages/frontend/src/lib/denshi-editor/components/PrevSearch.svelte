@@ -17,8 +17,7 @@
 
   export let destroy: () => void;
   export let patientId: number;
-  export let at: string;
-  export let onEnter: (value: RP剤情報Edit[]) => void;
+  export let onEnter: (value: RP剤情報[]) => void;
   let currentPage = 0;
   let allItems: [Text, Visit][] = [];
   let selectedItems: [Text, Visit][] = [];
@@ -108,12 +107,7 @@
       props: {
         destroy: () => d.$destroy(),
         src: groups,
-        onEnter: (groups: RP剤情報[]) => {
-          let edit: RP剤情報Edit[] = groups.map((g) =>
-            RP剤情報Edit.fromObject(g),
-          );
-          onEnter(edit);
-        },
+        onEnter,
       },
     });
   }
@@ -152,7 +146,7 @@
     {#if showNameList}
       <NameList nameList={drugNames} onClick={doNameClick}/>
     {/if}
-    <PrescSearchList list={pageItems} {at} onSelect={doSelect} />
+    <PrescSearchList list={pageItems} onSelect={doSelect} />
     <NavBar
       totalItems={allItems.length}
       bind:currentPage

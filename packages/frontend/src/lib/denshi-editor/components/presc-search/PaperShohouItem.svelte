@@ -6,7 +6,6 @@
   import { resolveDrugGroupByMap } from "@/practice/exam/record/text/regular/helper";
 
   export let text: Text;
-  export let at: string;
   export let onSelect: (group: RP剤情報[]) => void;
 
   function toHTML(c: string): string {
@@ -21,7 +20,7 @@
     }
     let groups: RP剤情報[] = shohou.groups.map((g) => getRP剤情報FromGroup(g));
     for (let group of groups) {
-      await resolveDrugGroupByMap(group, at);
+      await resolveDrugGroupByMap(group);
     }
     onSelect(groups);
   }

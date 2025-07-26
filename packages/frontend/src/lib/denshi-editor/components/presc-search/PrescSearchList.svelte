@@ -1,13 +1,11 @@
 <script lang="ts">
   import type { Text, Visit } from "myclinic-model";
-  import api from "@/lib/api";
   import PaperShohouItem from "./PaperShohouItem.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import DenshiShohouItem from "./DenshiShohouItem.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let list: [Text, Visit][] = [];
-  export let at: string;
   export let onSelect: (group: RP剤情報[]) => void;
 
   function isDenshi(text: Text): boolean {
@@ -22,7 +20,7 @@
       {#if isDenshi(text)}
         <DenshiShohouItem {text} onSelect={onSelect}/>
       {:else}
-        <PaperShohouItem {text} {at} onSelect={onSelect} />
+        <PaperShohouItem {text} onSelect={onSelect} />
       {/if}
     </div>
   {/each}

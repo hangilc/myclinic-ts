@@ -1,6 +1,7 @@
 <script lang="ts">
   import type {
     PrescInfoData,
+    RP剤情報,
   } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
@@ -23,6 +24,7 @@
   import EditExamInfo from "./components/EditExamInfo.svelte";
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
+  import { confirmDrugCodesOfGroups } from "./helper";
 
   export let title: string;
   export let destroy: () => void;
@@ -241,10 +243,15 @@
       props: {
         destroy: () => clearWorkarea && clearWorkarea(),
         patientId,
-        at,
-        onEnter: (value: RP剤情報Edit[]) => {
-          data.RP剤情報グループ.push(...value);
-          data = data;
+        onEnter: async (value: RP剤情報[]) => {
+          let errs = await confirmDrugCodesOfGroups(value, at);
+          if( errs ){
+            alert(errs.join("\n"));
+          } else {
+            let edit = value.map(g => RP剤情報Edit.fromObject(g));
+            data.RP剤情報グループ.push(...edit);
+            data = data;
+          }
         }
       },
     });

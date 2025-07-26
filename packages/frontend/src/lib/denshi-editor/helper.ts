@@ -192,69 +192,127 @@ export function ippoukaUsageSuppl(): 用法補足レコード {
 
 export const freeTextCode = "0X0XXXXXXXXX0000";
 
-export async function confirmDrugCode(drug: 薬品レコード, at: string): Promise<undefined | string> {
-  let code = drug.薬品コード;
-  if (code === "") {
-    return `no-drug-code:薬品コードが設定されていません（${drug.薬品名称}）`;
-  }
-  if (drug.情報区分 === "医薬品") {
+// export async function confirmDrugCode(drug: 薬品レコード, at: string): Promise<undefined | string> {
+//   let code = drug.薬品コード;
+//   if (code === "") {
+//     return `no-drug-code:薬品コードが設定されていません（${drug.薬品名称}）`;
+//   }
+//   if (drug.情報区分 === "医薬品") {
+//     if (/^\d+$/.test(code)) {
+//       let m: IyakuhinMaster;
+//       try {
+//         m = await api.getIyakuhinMaster(parseInt(code), at);
+//       } catch {
+//         return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
+//       }
+//       if (m.name === drug.薬品名称) {
+//         return undefined;
+//       } else {
+//         return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${m.name})`;
+//       }
+//     } else {
+//       let ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
+//       if (ms.length !== 0) {
+//         let name = ms[0].name;
+//         if (name === drug.薬品名称) {
+//           return undefined;
+//         } else {
+//           return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${name})`;
+//         }
+//       } else {
+//         return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
+//       }
+//     }
+//   } else if (drug.情報区分 === "医療材料") {
+//     let m: KizaiMaster;
+//     try {
+//       m = await api.getKizaiMaster(parseInt(code), at);
+//     } catch {
+//       return `invalid-code:不適切な器材コードです（${drug.薬品コード}|${drug.薬品名称}）`
+//     }
+//     if (m.name === drug.薬品名称) {
+//       return undefined;
+//     } else {
+//       return `incompat-name:器材名称が一致しません（${drug.薬品名称}）|${m.name})`;
+//     }
+//   } else {
+//     throw new Error("cannot happen")
+//   }
+// }
+
+// export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string, {
+//   skipBlankCode
+// }: { skipBlankCode?: boolean }): Promise<undefined | string[]> {
+//   let errs: string[] = [];
+//   for(let group of groups) {
+//     for(let drug of group.薬品情報グループ){
+//       if(skipBlankCode &&  drug.薬品レコード.薬品コード === "" ) {
+//         continue;
+//       }
+//       let e = await confirmDrugCode(drug.薬品レコード, at);
+//       if( e ){
+//         errs.push(e);
+//       }
+//     }
+//   }
+//   return errs.length === 0 ? undefined: errs;
+// }
+
+export async function confirmDrugCode(drug: 薬品情報, at: string): Promise<undefined | string> {
+  const name = drug.薬品レコード.薬品名称;
+  const code = drug.薬品レコード.薬品コード;
+  console.log("drug", drug);
+  if (drug.薬品レコード.情報区分 === "医薬品") {
     if (/^\d+$/.test(code)) {
-      let m: IyakuhinMaster;
       try {
-        m = await api.getIyakuhinMaster(parseInt(code), at);
-      } catch {
-        return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
-      }
-      if (m.name === drug.薬品名称) {
-        return undefined;
-      } else {
-        return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${m.name})`;
-      }
-    } else {
-      let ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
-      if (ms.length !== 0) {
-        let name = ms[0].name;
-        if (name === drug.薬品名称) {
-          return undefined;
-        } else {
-          return `incompat-name:薬品名称が一致しません（${drug.薬品名称}）|${name})`;
+        let m = await api.getIyakuhinMaster(parseInt(drug.薬品レコード.薬品コード), at);
+        if (m.name !== name) {
+          return `医薬品マスターと名前が一致しません:${code}|${name}|${m.name}`;
         }
-      } else {
-        return `invalid-code:不適切な薬品コードです（${drug.薬品コード}|${drug.薬品名称}）`
+      } catch {
+        return `医薬品マスターがみつかりません：${code}:${name}`;
       }
-    }
-  } else if (drug.情報区分 === "医療材料") {
-    let m: KizaiMaster;
-    try {
-      m = await api.getKizaiMaster(parseInt(code), at);
-    } catch {
-      return `invalid-code:不適切な器材コードです（${drug.薬品コード}|${drug.薬品名称}）`
-    }
-    if (m.name === drug.薬品名称) {
-      return undefined;
-    } else {
-      return `incompat-name:器材名称が一致しません（${drug.薬品名称}）|${m.name})`;
+    } else { // 一般名コード
+      let ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
+      if (ms.length === 0) {
+        return `医薬品マスターがみつかりません：${code}:${name}`;
+      } else {
+        let m = ms[0];
+        if (m.ippanmei !== name) {
+          return `医薬品マスターと名前が一致しません:${code}|${name}|${m.name}`;
+        }
+      }
     }
   } else {
-    throw new Error("cannot happen")
+    try {
+      let m = await api.getKizaiMaster(parseInt(drug.薬品レコード.薬品コード), at);
+      if (m.name !== name) {
+        return `器材マスターと名前が一致しません:${code}|${name}|${m.name}`;
+      }
+    } catch {
+      return `器材マスターがみつかりません：${code}:${name}`;
+    }
   }
+  return undefined;
 }
 
-export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string, {
-  skipBlankCode
-}: { skipBlankCode?: boolean }): Promise<undefined | string[]> {
+export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string, opt: {
+  skipBlankCodes?: boolean;
+} = {}): Promise<undefined | string[]> {
   let errs: string[] = [];
-  for(let group of groups) {
-    for(let drug of group.薬品情報グループ){
-      if(skipBlankCode &&  drug.薬品レコード.薬品コード === "" ) {
+  const skipBlankCodes = opt.skipBlankCodes ?? false;
+  for (let group of groups) {
+    for (let drug of group.薬品情報グループ) {
+      if( skipBlankCodes && drug.薬品レコード.薬品コード === "" ){
         continue;
       }
-      let e = await confirmDrugCode(drug.薬品レコード, at);
+      const e = await confirmDrugCode(drug, at);
       if( e ){
         errs.push(e);
       }
     }
   }
-  return errs.length === 0 ? undefined: errs;
+  return errs.length === 0 ? undefined : errs;
 }
+
 

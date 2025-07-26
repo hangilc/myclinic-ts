@@ -8,8 +8,7 @@ import {
   validateAppointsTemplate,
   type AppointsTemplate,
 } from "@/appoint/appoints-template";
-
-export type DrugNameBind = { kind: "iyakuhin" | "ippanmei" | "kizai"} & { code: string; name: string };
+import type { DrugNameBind } from "@/lib/drug-name-bind";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;

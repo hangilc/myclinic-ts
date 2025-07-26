@@ -13,6 +13,7 @@
     TextMemoWrapper.fromText(text).probeShohouMemo()!.shohou;
 
   function doClick() {
+    console.log("data", data.RP剤情報グループ);
     onSelect(data.RP剤情報グループ);
   }
 </script>
