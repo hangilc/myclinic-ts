@@ -8,7 +8,7 @@
     let totalPages = 0;
 
     $: totalPages = calcTotalPages(totalItems);
-    
+
     function calcTotalPages(total: number): number {
       return Math.floor((total - itemsPerPage + 1)/itemsPerPage);
     }

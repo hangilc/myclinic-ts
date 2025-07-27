@@ -7,8 +7,12 @@
 
   export let text: Text;
   export let onSelect: (group: RP剤情報[]) => void;
+  export let selectedName: string | undefined = undefined;
 
   function toHTML(c: string): string {
+    if( selectedName ){
+      c = c.replaceAll(selectedName, `<span style="color: red">${selectedName}</span>`)
+    }
     return c.replaceAll(/\r?\n/g, "<br />\n");
   }
 

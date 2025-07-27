@@ -7,6 +7,7 @@
 
   export let list: [Text, Visit][] = [];
   export let onSelect: (group: RP剤情報[]) => void;
+  export let selectedName: string | undefined = undefined;
 
   function isDenshi(text: Text): boolean {
     return TextMemoWrapper.fromText(text).getMemoKind() === "shohou";
@@ -18,9 +19,9 @@
   {#each list as [text, visit] (text.textId)}
     <div class="item-top">
       {#if isDenshi(text)}
-        <DenshiShohouItem {text} onSelect={onSelect}/>
+        <DenshiShohouItem {text} onSelect={onSelect} {selectedName} />
       {:else}
-        <PaperShohouItem {text} onSelect={onSelect} />
+        <PaperShohouItem {text} onSelect={onSelect} {selectedName} />
       {/if}
     </div>
   {/each}

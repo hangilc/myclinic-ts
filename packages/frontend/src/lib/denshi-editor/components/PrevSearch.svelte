@@ -2,7 +2,6 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import Commands from "./workarea/Commands.svelte";
-  import { RP剤情報Edit } from "../denshi-edit";
   import type { Text, Visit } from "myclinic-model";
   import api from "@/lib/api";
   import { isShohousen } from "@/lib/shohousen/parse-shohousen";
@@ -11,12 +10,10 @@
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import DrugSelectDialog from "../DrugSelectDialog.svelte";
-  import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
-  import { getRP剤情報FromGroup } from "../denshi-tmpl";
   import NameList from "./presc-search/NameList.svelte";
-  import { resolveDrugGroupByMap } from "@/lib/drug-name-bind";
-  import { group } from "console";
+  import { type DrugNameBind } from "@/lib/drug-name-bind";
   import { cache } from "@/lib/cache";
+  import { textToDrugGroups } from "./presc-search/helper";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -57,23 +54,9 @@
         }
       }
     };
-    const drugNameMap = await cache.getDrugNameIyakuhincodeMap();
     for (let [text, _] of items) {
-      let memo = TextMemoWrapper.fromText(text).probeShohouMemo();
-      if (memo) {
-        handleGroups(memo.shohou.RP剤情報グループ);
-      } else {
-        const shohou = parseShohou3(text.content);
-        if (typeof shohou !== "string") {
-          let groups: RP剤情報[] = shohou.groups.map((g) =>
-            getRP剤情報FromGroup(g),
-          );
-          for (let group of groups) {
-            resolveDrugGroupByMap(group, drugNameMap);
-          }
-          handleGroups(groups);
-        }
-      }
+      let groups = textToDrugGroups(text);
+      handleGroups(groups);
     }
     return names;
   }
@@ -130,8 +113,26 @@
     }
   }
 
+  function selectDrug(name: string) {
+    selectedItems = allItems.filter(([t, v]) => {
+      let groups = textToDrugGroups(t);
+      for(let group of groups){
+        for(let drug of group.薬品情報グループ ){
+          if( drug.薬品レコード.薬品名称 === name ){
+            return true;
+          }
+        }
+      }
+      return false;
+    });
+  }
+
   function doNameClick(name: string) {
+    currentPage = 0;
     selectedDrugName = name;
+    selectDrug(name);
+    doPageChange(0);
+    showNameList = false;
   }
 </script>
 
@@ -141,7 +142,7 @@
     <div class="top-nav-bar">
       <div class="nav-bar-wrapper">
         <NavBar
-          totalItems={allItems.length}
+          totalItems={selectedItems.length}
           bind:currentPage
           {itemsPerPage}
           onChange={doPageChange}
@@ -152,9 +153,9 @@
     {#if showNameList}
       <NameList nameList={drugNames} onClick={doNameClick} />
     {/if}
-    <PrescSearchList list={pageItems} onSelect={doSelect} />
+    <PrescSearchList list={pageItems} onSelect={doSelect} selectedName={selectedDrugName} />
     <NavBar
-      totalItems={allItems.length}
+      totalItems={selectedItems.length}
       bind:currentPage
       {itemsPerPage}
       onChange={doPageChange}
