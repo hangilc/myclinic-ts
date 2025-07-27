@@ -2,7 +2,7 @@
   import Dialog2 from "@/lib/Dialog2.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import {
-  DrugSelectDrug,
+    DrugSelectDrug,
     DrugSelectGroup,
     getSelectedGroups,
   } from "./components/presc-search/drug-select-type";
@@ -47,45 +47,51 @@
 </script>
 
 <Dialog2 title="薬剤選択" {destroy}>
-  <div class="groups">
-    {#each groups as group, index}
-      <div>
-        <input
-          type="checkbox"
-          bind:checked={group.selected}
-          on:change={() => onGroupChange(group)}
-        />
-        {toZenkaku((index + 1).toString())}）
-      </div>
-      <div>
-        <div class="drugs">
-          {#each group.drugs as drug}
-            <div>
-              <input
-                type="checkbox"
-                bind:checked={drug.selected}
-                on:change={() => {
-                  onDrugChange(drug, group);
-                }}
-              />
-            </div>
-            <div>{drugRep(drug.data)}</div>
-          {/each}
+  <div class="top">
+    <div class="groups">
+      {#each groups as group, index}
+        <div>
+          <input
+            type="checkbox"
+            bind:checked={group.selected}
+            on:change={() => onGroupChange(group)}
+          />
+          {toZenkaku((index + 1).toString())}）
         </div>
         <div>
-          {group.data.用法レコード.用法名称}
-          {daysTimesDisp(group.data)}
+          <div class="drugs">
+            {#each group.drugs as drug}
+              <div>
+                <input
+                  type="checkbox"
+                  bind:checked={drug.selected}
+                  on:change={() => {
+                    onDrugChange(drug, group);
+                  }}
+                />
+              </div>
+              <div>{drugRep(drug.data)}</div>
+            {/each}
+          </div>
+          <div>
+            {group.data.用法レコード.用法名称}
+            {daysTimesDisp(group.data)}
+          </div>
         </div>
-      </div>
-    {/each}
-  </div>
-  <div>
-    <button on:click={doEnter}>決定</button>
-    <button on:click={doCancel}>キャンセル</button>
+      {/each}
+    </div>
+    <div>
+      <button on:click={doEnter}>決定</button>
+      <button on:click={doCancel}>キャンセル</button>
+    </div>
   </div>
 </Dialog2>
 
 <style>
+  .top {
+    padding: 10px;
+  }
+  
   .groups {
     width: 300px;
     padding: 10px;

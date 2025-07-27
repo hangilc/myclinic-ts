@@ -11,8 +11,6 @@
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import DrugSelectDialog from "../DrugSelectDialog.svelte";
   import NameList from "./presc-search/NameList.svelte";
-  import { type DrugNameBind } from "@/lib/drug-name-bind";
-  import { cache } from "@/lib/cache";
   import { textToDrugGroups } from "./presc-search/helper";
 
   export let destroy: () => void;
