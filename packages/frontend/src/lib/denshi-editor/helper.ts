@@ -261,7 +261,6 @@ export const freeTextCode = "0X0XXXXXXXXX0000";
 export async function confirmDrugCode(drug: 薬品情報, at: string): Promise<undefined | string> {
   const name = drug.薬品レコード.薬品名称;
   const code = drug.薬品レコード.薬品コード;
-  console.log("drug", drug);
   if (drug.薬品レコード.情報区分 === "医薬品") {
     if (/^\d+$/.test(code)) {
       try {

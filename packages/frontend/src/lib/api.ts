@@ -20,7 +20,7 @@ import {
 } from "./cast";
 import { pipe } from "myclinic-model/pipe";
 import type { RP剤情報, 用法レコード } from "./denshi-shohou/presc-info";
-import type { DrugNameBind, FreqUsage } from "./cache";
+import type { FreqUsage } from "./cache";
 import type { DrugDisease } from "./drug-disease";
 import {
   validateShinryouDisease,
@@ -29,6 +29,7 @@ import {
 import { parseLocationQuery } from "./parse-location-query";
 import { validateDupPatient, type DupPatient } from "@/practice/dup-patient/dup-patient";
 import { convertToHankakuIfDigits } from "./zenkaku";
+import type { DrugNameBind } from "./drug-name-bind";
 
 function castDrawerOp(obj: any): DrawerOp {
   return obj;

@@ -1,8 +1,6 @@
 import type {
   剤形区分,
-  力価フラグ,
   情報区分,
-  用法補足区分,
 } from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
@@ -145,7 +143,7 @@ function get剤形レコードFromGroup(group: DrugGroup): 剤形レコード {
   };
 }
 
-function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
+export function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
   // Most frequent case
   if (group.usage.kind === "days") {
     return "内服";
@@ -157,12 +155,17 @@ function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
     return "頓服";
   }
 
+  let usage: string = group.usage.usage;
+  if (usage.includes("貼付") || usage.includes("塗布")) {
+    return "外用";
+  }
+
+  let curr: 剤形区分 | undefined = undefined;
   // Check drug names and units for external use indicators
   for (const drug of group.drugs) {
     const name = drug.name.toLowerCase();
     const unit = drug.unit.toLowerCase();
 
-    // External use (外用) indicators
     if (
       name.includes("軟膏") ||
       name.includes("クリーム") ||
@@ -174,16 +177,16 @@ function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
       name.includes("点鼻") ||
       name.includes("吸入") ||
       name.includes("うがい") ||
-      name.includes("外用") ||
-      name.includes("塗布") ||
-      unit.includes("g") ||
-      (unit.includes("ml") && (name.includes("点眼") || name.includes("点鼻")))
+      name.includes("パップ") ||
+      name.includes("テープ") ||
+      name.includes("塗布")
     ) {
-      return "外用";
-    }
-
-    // Injectable (注射) indicators
-    if (
+      if (curr === undefined) {
+        curr = "外用";
+      } else if (curr !== "外用") {
+        return "不明";
+      }
+    } else if (
       name.includes("注射") ||
       name.includes("注入") ||
       name.includes("静注") ||
@@ -192,22 +195,26 @@ function get剤形区分FromGroup(group: DrugGroup): 剤形区分 {
       unit.includes("バイアル") ||
       unit.includes("アンプル")
     ) {
-      return "注射";
-    }
-
-    // Liquid internal use (内服滴剤) indicators
-    if (
+      if (curr === undefined) {
+        curr = "注射";
+      } else if (curr !== "注射") {
+        return "不明";
+      }
+    } else if (
       (name.includes("内服液") ||
         name.includes("シロップ") ||
-        name.includes("滴剤")) &&
-      unit.includes("ml")
+        name.includes("滴剤"))
     ) {
-      return "内服滴剤";
+      if (curr === undefined) {
+        curr = "内服滴剤";
+      } else if (curr !== "内服滴剤") {
+        return "不明";
+      }
+    } else {
+      return "不明";
     }
   }
-
-  // Fallback to unknown
-  return "不明";
+  return curr ?? "不明";
 }
 
 function get調剤数量FromGroup(group: DrugGroup): number {

@@ -14,6 +14,9 @@
   import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
   import { getRP剤情報FromGroup } from "../denshi-tmpl";
   import NameList from "./presc-search/NameList.svelte";
+  import { resolveDrugGroupByMap } from "@/lib/drug-name-bind";
+  import { group } from "console";
+  import { cache } from "@/lib/cache";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -54,6 +57,7 @@
         }
       }
     };
+    const drugNameMap = await cache.getDrugNameIyakuhincodeMap();
     for (let [text, _] of items) {
       let memo = TextMemoWrapper.fromText(text).probeShohouMemo();
       if (memo) {
@@ -64,6 +68,9 @@
           let groups: RP剤情報[] = shohou.groups.map((g) =>
             getRP剤情報FromGroup(g),
           );
+          for (let group of groups) {
+            resolveDrugGroupByMap(group, drugNameMap);
+          }
           handleGroups(groups);
         }
       }
@@ -113,10 +120,10 @@
   }
 
   async function doNameList() {
-    if( showNameList ){
+    if (showNameList) {
       showNameList = false;
     } else {
-      if( drugNames === undefined ){
+      if (drugNames === undefined) {
         drugNames = await listNames(allItems);
       }
       showNameList = true;
@@ -125,7 +132,6 @@
 
   function doNameClick(name: string) {
     selectedDrugName = name;
-    
   }
 </script>
 
@@ -144,7 +150,7 @@
       <button on:click={doNameList}>薬剤リスト</button>
     </div>
     {#if showNameList}
-      <NameList nameList={drugNames} onClick={doNameClick}/>
+      <NameList nameList={drugNames} onClick={doNameClick} />
     {/if}
     <PrescSearchList list={pageItems} onSelect={doSelect} />
     <NavBar

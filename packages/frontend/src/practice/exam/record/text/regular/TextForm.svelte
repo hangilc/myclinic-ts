@@ -37,6 +37,7 @@
   import {
     eq公費レコード,
     type PrescInfoData,
+    type RP剤情報,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
   import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
@@ -51,6 +52,7 @@
   import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
+  import { confirmDrugCode } from "@/lib/denshi-editor/helper";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -715,9 +717,24 @@
     });
   }
 
+  async function disableUnavailableDrugs(groups: RP剤情報[], at: string) {
+    for (let group of groups) {
+      for (let drug of group.薬品情報グループ) {
+        if (drug.薬品レコード.薬品コード !== "") {
+          let err = await confirmDrugCode(drug, at);
+          if (err !== undefined) {
+            console.log("error", err);
+            drug.薬品レコード.薬品コード = "";
+          }
+        }
+      }
+    }
+  }
+
   async function doConvTextToDenshi() {
     onClose();
     let visit = await api.getVisit(text.visitId);
+    let at = visit.visitedAt.substring(0, 10);
     const shohou = parseShohou3(text.content);
     if (typeof shohou === "string") {
       alert(shohou);
@@ -725,13 +742,14 @@
     }
     let orig: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
     await resolveByMap(orig);
+    await disableUnavailableDrugs(orig.RP剤情報グループ, at);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
         title: "電子処方に変換",
         orig,
-        at: visit.visitedAt.substring(0, 10),
+        at,
         patientId,
         showValid: true,
         onEnter: async (presc: PrescInfoData) => {
