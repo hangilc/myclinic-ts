@@ -15,12 +15,12 @@
   export let list: [Text, Visit][] = [];
   export let onSelect: (group: RP剤情報[]) => void;
   export let selectedName: string | undefined = undefined;
-  let items: PrescSearchItem[] = list.map(([t, v]) =>
-    textToPrescSearchItem(t, v),
-  );
+  let items: PrescSearchItem[] = [];
+  
+  $: items = convToItems(list);
 
-  function isDenshi(text: Text): boolean {
-    return TextMemoWrapper.fromText(text).getMemoKind() === "shohou";
+  function convToItems(list: [Text, Visit][]): PrescSearchItem[] {
+    return list.map(([t, v]) => textToPrescSearchItem(t, v));
   }
 
   function rep(drug: 薬品情報): string {
@@ -36,37 +36,32 @@
   }
 </script>
 
-<div>
-  {#each list as [text, visit] (text.textId)}
-    <div class="item-top">
-      {#each items as item}
-        <div>{item.title}</div>
-        <div>Ｒｐ）</div>
-        {#each item.drugs as group, index}
-          <div class="group">
-            <div>{toZenkaku((index + 1).toString())}）</div>
-            <div>
-              <div class="drugs">
-                {#each group.薬品情報グループ as drug}
-                  <div></div>
-                  <div>{@html rep(drug)}</div>
-                {/each}
-              </div>
-              <div>
-                {group.用法レコード.用法名称}
-                {daysTimesDisp(group)}
-              </div>
-            </div>
+<div class="item-top">
+  {#each items as item}
+    <div>{item.title}</div>
+    <div>Ｒｐ）</div>
+    {#each item.drugs as group, index}
+      <div class="group">
+        <div>{toZenkaku((index + 1).toString())}）</div>
+        <div>
+          <div class="drugs">
+            {#each group.薬品情報グループ as drug}
+              <div>{@html rep(drug)}</div>
+            {/each}
           </div>
-        {/each}
-      {/each}
-      <!-- {#if isDenshi(text)}
+          <div>
+            {group.用法レコード.用法名称}
+            {daysTimesDisp(group)}
+          </div>
+        </div>
+      </div>
+    {/each}
+  {/each}
+  <!-- {#if isDenshi(text)}
         <DenshiShohouItem {text} {onSelect} {selectedName} />
       {:else}
         <PaperShohouItem {text} {onSelect} {selectedName} />
       {/if} -->
-    </div>
-  {/each}
 </div>
 
 <style>
