@@ -721,7 +721,7 @@
     for (let group of groups) {
       for (let drug of group.薬品情報グループ) {
         if (drug.薬品レコード.薬品コード !== "") {
-          let err = await confirmDrugCode(drug, at);
+          let err = await confirmDrugCode(drug.薬品レコード, at);
           if (err !== undefined) {
             console.log("error", err);
             drug.薬品レコード.薬品コード = "";
