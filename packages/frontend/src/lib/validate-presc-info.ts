@@ -1,15 +1,25 @@
 import type { PrescInfoData, RP剤情報, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
 import api from "@/lib/api";
+import { issueDateOfPrescInfoAsSqlDate } from "./denshi-shohou/presc-info-helper";
 
-export function validatePrescinfoData(data: PrescInfoData): string | undefined {
+export async function validatePrescinfoData(data: PrescInfoData): Promise<string | undefined> {
+  let at = issueDateOfPrescInfoAsSqlDate(data);
   for(let group of data.RP剤情報グループ){
     for(let drug of group.薬品情報グループ){
       if( drug.薬品レコード.薬品コード === "" ){
         return `薬品コードが設定されていません：（${drug.薬品レコード.薬品名称}）`;
       }
+      let err = await confirmDrugCode(drug.薬品レコード, at);
+      if( err ){
+        return err;
+      }
     }
     if( group.用法レコード.用法コード === "" ){
       return `用法コードが設定されていません：（${group.用法レコード.用法名称}）`;
+    }
+    let err = await confirmUsageCode(group.用法レコード.用法コード, group.用法レコード.用法名称);
+    if( !err ){
+      return err;
     }
   }
 }
@@ -67,6 +77,21 @@ export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string
     }
   }
   return errs.length === 0 ? undefined : errs;
+}
+
+export async function confirmUsageCode(code: string, text: string): Promise<undefined | string> {
+  if( code === "" ){
+    return `用法コードが設定されていません：${text}`;
+  }
+  try {
+    const m = await api.getUsageMaster(code);
+    if( m.usage_name !== text ){
+      return `用法名称が一致しません：${code}:${m.usage_name}:${name}`;
+    }
+  } catch {
+    return `用法マスターが取得できません：${code}:${name}`;
+  }
+  return undefined;
 }
 
 

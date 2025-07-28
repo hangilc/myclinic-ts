@@ -2056,4 +2056,8 @@ export default {
       offset: offset.toString()
     }, _ => _)
   },
+
+  getUsageMaster(code: string): Promise<m.UsageMaster> {
+    return get("get-usage-master", { code, }, a => a);
+  }
 };
