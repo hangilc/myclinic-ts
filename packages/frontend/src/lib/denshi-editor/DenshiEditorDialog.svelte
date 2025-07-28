@@ -15,7 +15,7 @@
     薬品情報Edit,
   } from "./denshi-edit";
   import EditDrug from "./components/EditDrug.svelte";
-  import { validatePrescinfoData } from "./validate-presc-info";
+  import { validatePrescinfoData } from "../validate-presc-info";
   import PrescAux from "./components/PrescAux.svelte";
   import EditValidUpto from "./components/EditValidUpto.svelte";
   import SubCommands from "./components/workarea/SubCommands.svelte";
