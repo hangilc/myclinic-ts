@@ -11,12 +11,13 @@
   import { toZenkaku } from "@/lib/zenkaku";
   import { drugRep } from "../../helper";
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
+  import PrescSearchItemComponent from "./PrescSearchItem.svelte";
 
   export let list: [Text, Visit][] = [];
   export let onSelect: (group: RP剤情報[]) => void;
   export let selectedName: string | undefined = undefined;
   let items: PrescSearchItem[] = [];
-  
+
   $: items = convToItems(list);
 
   function convToItems(list: [Text, Visit][]): PrescSearchItem[] {
@@ -36,32 +37,21 @@
   }
 </script>
 
-<div class="item-top">
+<div class="top">
   {#each items as item}
-    <div>{item.title}</div>
-    <div>Ｒｐ）</div>
-    {#each item.drugs as group, index}
-      <div class="group">
-        <div>{toZenkaku((index + 1).toString())}）</div>
-        <div>
-          <div class="drugs">
-            {#each group.薬品情報グループ as drug}
-              <div>{@html rep(drug)}</div>
-            {/each}
-          </div>
+    <div class="item-top">
+      <div class="title">{item.title}</div>
+      <div>Ｒｐ）</div>
+      {#each item.drugs as group, index}
+        <div class="group">
+          <div>{toZenkaku((index + 1).toString())}）</div>
           <div>
-            {group.用法レコード.用法名称}
-            {daysTimesDisp(group)}
+            <PrescSearchItemComponent {group} {selectedName} />
           </div>
         </div>
-      </div>
-    {/each}
+      {/each}
+    </div>
   {/each}
-  <!-- {#if isDenshi(text)}
-        <DenshiShohouItem {text} {onSelect} {selectedName} />
-      {:else}
-        <PaperShohouItem {text} {onSelect} {selectedName} />
-      {/if} -->
 </div>
 
 <style>
@@ -70,5 +60,14 @@
     border: 1px solid gray;
     border-radius: 4px;
     padding: 10px;
+  }
+
+  .title {
+    font-weight: bold;
+  }
+
+  .group {
+    display: grid;
+    grid-template-columns: auto 1fr;
   }
 </style>

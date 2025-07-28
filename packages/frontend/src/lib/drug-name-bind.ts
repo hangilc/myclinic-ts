@@ -1,10 +1,11 @@
-import type { PrescInfoData, RP剤情報, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報, 用法レコード, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
 import type {
   情報区分,
   薬品コード種別,
   力価フラグ,
 } from "@/lib/denshi-shohou/denshi-shohou";
 import { cache } from "@/lib/cache";
+import { confirmDrugCode } from "@/lib/denshi-editor/helper";
 
 export type DrugNameBind = { kind: "iyakuhin" | "ippanmei" | "kizai" } & {
   code: string;
@@ -35,20 +36,21 @@ export function resolveDrugRecordByMap(drug: 薬品レコード, map: Record<str
   return drug;
 }
 
-export async function resolveDrugRecordByMapAt(drug: 薬品レコード, at: string): Promise<薬品レコード> {
-  if( drug.薬品コード !== ""){
-    return drug;
-  }
-  let map = await cache.getDrugNameIyakuhincodeMap();
-  let record = resolveDrugRecordByMap(drug, map);
+export async function resolveDrugRecordByMapAt(record: 薬品レコード, at: string): Promise<薬品レコード> {
+  const save: 薬品レコード = Object.assign({}, record);
   if( record.薬品コード === "" ){
-    return drug;
+    let map = await cache.getDrugNameIyakuhincodeMap();
+    record = resolveDrugRecordByMap(record, map);
+  }
+  if( record.薬品コード === "" ){
+    return save;
   } else {
-    
+    const err = await confirmDrugCode(record, at);
+    return err ? save : record;
   }
 }
 
-export function resolveDrugGroupByMap(g: RP剤情報, map: Record<string, DrugNameBind>): RP剤情報 {
+export function resolveDrugGroupByMap(g: RP剤情報, map: Record<string, DrugNameBind>): void {
   for (let d of g.薬品情報グループ) {
     if (d.薬品レコード.薬品コード === "") {
       let record = d.薬品レコード;

@@ -258,13 +258,13 @@ export const freeTextCode = "0X0XXXXXXXXX0000";
 //   return errs.length === 0 ? undefined: errs;
 // }
 
-export async function confirmDrugCode(drug: 薬品情報, at: string): Promise<undefined | string> {
-  const name = drug.薬品レコード.薬品名称;
-  const code = drug.薬品レコード.薬品コード;
-  if (drug.薬品レコード.情報区分 === "医薬品") {
+export async function confirmDrugCode(record: 薬品レコード, at: string): Promise<undefined | string> {
+  const name = record.薬品名称;
+  const code = record.薬品コード;
+  if (record.情報区分 === "医薬品") {
     if (/^\d+$/.test(code)) {
       try {
-        let m = await api.getIyakuhinMaster(parseInt(drug.薬品レコード.薬品コード), at);
+        let m = await api.getIyakuhinMaster(parseInt(record.薬品コード), at);
         if (m.name !== name) {
           return `医薬品マスターと名前が一致しません:${code}|${name}|${m.name}`;
         }
@@ -284,7 +284,7 @@ export async function confirmDrugCode(drug: 薬品情報, at: string): Promise<u
     }
   } else {
     try {
-      let m = await api.getKizaiMaster(parseInt(drug.薬品レコード.薬品コード), at);
+      let m = await api.getKizaiMaster(parseInt(record.薬品コード), at);
       if (m.name !== name) {
         return `器材マスターと名前が一致しません:${code}|${name}|${m.name}`;
       }
@@ -305,7 +305,7 @@ export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string
       if( skipBlankCodes && drug.薬品レコード.薬品コード === "" ){
         continue;
       }
-      const e = await confirmDrugCode(drug, at);
+      const e = await confirmDrugCode(drug.薬品レコード, at);
       if( e ){
         errs.push(e);
       }
