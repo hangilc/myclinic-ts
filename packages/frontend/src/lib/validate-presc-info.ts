@@ -4,25 +4,47 @@ import { issueDateOfPrescInfoAsSqlDate } from "./denshi-shohou/presc-info-helper
 
 export async function validatePrescinfoData(data: PrescInfoData): Promise<string | undefined> {
   let at = issueDateOfPrescInfoAsSqlDate(data);
-  for(let group of data.RP剤情報グループ){
-    for(let drug of group.薬品情報グループ){
-      if( drug.薬品レコード.薬品コード === "" ){
-        return `薬品コードが設定されていません：（${drug.薬品レコード.薬品名称}）`;
-      }
-      let err = await confirmDrugCode(drug.薬品レコード, at);
-      if( err ){
-        return err;
-      }
-    }
-    if( group.用法レコード.用法コード === "" ){
-      return `用法コードが設定されていません：（${group.用法レコード.用法名称}）`;
-    }
-    let err = await confirmUsageCode(group.用法レコード.用法コード, group.用法レコード.用法名称);
-    if( !err ){
+  for (let group of data.RP剤情報グループ) {
+    let err = validateRP剤情報(group, at);
+    if( err ){
       return err;
     }
   }
 }
+
+export async function validateRP剤情報(group: RP剤情報, at: string): Promise<string | undefined> {
+  for (let drug of group.薬品情報グループ) {
+    if (drug.薬品レコード.薬品コード === "") {
+      return `薬品コードが設定されていません：（${drug.薬品レコード.薬品名称}）`;
+    }
+    let err = await confirmDrugCode(drug.薬品レコード, at);
+    if (err) {
+      return err;
+    }
+  }
+  if (group.用法レコード.用法コード === "") {
+    return `用法コードが設定されていません：（${group.用法レコード.用法名称}）`;
+  }
+  let err = await confirmUsageCode(group.用法レコード.用法コード, group.用法レコード.用法名称);
+  if (!err) {
+    return err;
+  }
+  if( group.剤形レコード.剤形区分 === "医療材料" ){
+    for(let drug of group.薬品情報グループ){
+      if( drug.薬品レコード.情報区分 !== "医療材料" ){
+        return `剤形区分が医療材料ですが、薬剤が医療材料でありません：${drug.薬品レコード.薬品名称}`;
+      }
+    }
+  } else {
+    for(let drug of group.薬品情報グループ){
+      if( drug.薬品レコード.情報区分 === "医療材料" ){
+        return `医薬品でなく医療材料です：${drug.薬品レコード.薬品名称}`;
+      }
+    }
+  }
+  return undefined;
+}
+
 export async function confirmDrugCode(record: 薬品レコード, at: string): Promise<undefined | string> {
   const name = record.薬品名称;
   const code = record.薬品コード;
@@ -67,11 +89,11 @@ export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string
   const skipBlankCodes = opt.skipBlankCodes ?? false;
   for (let group of groups) {
     for (let drug of group.薬品情報グループ) {
-      if( skipBlankCodes && drug.薬品レコード.薬品コード === "" ){
+      if (skipBlankCodes && drug.薬品レコード.薬品コード === "") {
         continue;
       }
       const e = await confirmDrugCode(drug.薬品レコード, at);
-      if( e ){
+      if (e) {
         errs.push(e);
       }
     }
@@ -80,12 +102,12 @@ export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string
 }
 
 export async function confirmUsageCode(code: string, text: string): Promise<undefined | string> {
-  if( code === "" ){
+  if (code === "") {
     return `用法コードが設定されていません：${text}`;
   }
   try {
     const m = await api.getUsageMaster(code);
-    if( m.usage_name !== text ){
+    if (m.usage_name !== text) {
       return `用法名称が一致しません：${code}:${m.usage_name}:${name}`;
     }
   } catch {
