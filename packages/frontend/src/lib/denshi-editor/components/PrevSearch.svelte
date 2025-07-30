@@ -9,13 +9,12 @@
   import NavBar from "./presc-search/nav-bar.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
-  import DrugSelectDialog from "../DrugSelectDialog.svelte";
   import NameList from "./presc-search/NameList.svelte";
   import { textToDrugGroups } from "./presc-search/helper";
 
   export let destroy: () => void;
   export let patientId: number;
-  export let onEnter: (value: RP剤情報[]) => void;
+  export let onEnter: (value: RP剤情報) => void;
   let currentPage = 0;
   let allItems: [Text, Visit][] = [];
   let selectedItems: [Text, Visit][] = [];
@@ -89,15 +88,8 @@
     );
   }
 
-  function doSelect(groups: RP剤情報[]) {
-    const d: DrugSelectDialog = new DrugSelectDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        src: groups,
-        onEnter,
-      },
-    });
+  function doSelect(group: RP剤情報) {
+    onEnter(group);
   }
 
   async function doNameList() {

@@ -1,20 +1,15 @@
 <script lang="ts">
   import type { Text, Visit } from "myclinic-model";
-  import PaperShohouItem from "./PaperShohouItem.svelte";
-  import { TextMemoWrapper } from "@/lib/text-memo";
-  import DenshiShohouItem from "./DenshiShohouItem.svelte";
-  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import {
     textToPrescSearchItem,
     type PrescSearchItem,
   } from "./presc-search-item";
   import { toZenkaku } from "@/lib/zenkaku";
-  import { drugRep } from "../../helper";
-  import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
   import PrescSearchItemComponent from "./PrescSearchItem.svelte";
 
   export let list: [Text, Visit][] = [];
-  export let onSelect: (group: RP剤情報[]) => void;
+  export let onSelect: (group: RP剤情報) => void;
   export let selectedName: string | undefined = undefined;
   let items: PrescSearchItem[] = [];
 
@@ -24,16 +19,8 @@
     return list.map(([t, v]) => textToPrescSearchItem(t, v));
   }
 
-  function rep(drug: 薬品情報): string {
-    let html = drugRep(drug);
-    if (selectedName) {
-      return html.replaceAll(
-        selectedName,
-        `<span style="color: red">${selectedName}</span>`,
-      );
-    } else {
-      return html;
-    }
+  function doAdd(group: RP剤情報): void {
+    onSelect(group);
   }
 </script>
 
@@ -46,7 +33,7 @@
         <div class="group">
           <div>{toZenkaku((index + 1).toString())}）</div>
           <div>
-            <PrescSearchItemComponent {group} {selectedName} />
+            <PrescSearchItemComponent {group} {selectedName} onSelect={doAdd}/>
           </div>
         </div>
       {/each}
