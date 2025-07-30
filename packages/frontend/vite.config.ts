@@ -4,6 +4,13 @@ import { resolve } from 'path'
 
 export default defineConfig(({command, mode, ssrBuild }) => ({
   plugins: [svelte()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
+  },
   build: {
     rollupOptions: {
       input: {
