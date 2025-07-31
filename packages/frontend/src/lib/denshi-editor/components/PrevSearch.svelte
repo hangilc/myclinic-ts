@@ -14,7 +14,7 @@
 
   export let destroy: () => void;
   export let patientId: number;
-  export let onEnter: (value: RP剤情報) => void;
+  export let onEnter: (value: RP剤情報[]) => void;
   let currentPage = 0;
   let allItems: [Text, Visit][] = [];
   let selectedItems: [Text, Visit][] = [];
@@ -88,7 +88,8 @@
     );
   }
 
-  function doSelect(group: RP剤情報) {
+  async function doSelect(group: RP剤情報) {
+    resolveDrug
     onEnter(group);
   }
 

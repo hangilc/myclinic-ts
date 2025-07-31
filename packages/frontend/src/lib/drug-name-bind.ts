@@ -5,7 +5,7 @@ import type {
   力価フラグ,
 } from "@/lib/denshi-shohou/denshi-shohou";
 import { cache } from "@/lib/cache";
-import { confirmDrugCode } from "@/lib/denshi-editor/helper";
+import { confirmDrugCode } from "@/lib/validate-presc-info";
 
 export type DrugNameBind = { kind: "iyakuhin" | "ippanmei" | "kizai" } & {
   code: string;
@@ -38,11 +38,11 @@ export function resolveDrugRecordByMap(drug: 薬品レコード, map: Record<str
 
 export async function resolveDrugRecordByMapAt(record: 薬品レコード, at: string): Promise<薬品レコード> {
   const save: 薬品レコード = Object.assign({}, record);
-  if( record.薬品コード === "" ){
+  if (record.薬品コード === "") {
     let map = await cache.getDrugNameIyakuhincodeMap();
     record = resolveDrugRecordByMap(record, map);
   }
-  if( record.薬品コード === "" ){
+  if (record.薬品コード === "") {
     return save;
   } else {
     const err = await confirmDrugCode(record, at);
@@ -50,11 +50,13 @@ export async function resolveDrugRecordByMapAt(record: 薬品レコード, at: s
   }
 }
 
-export function resolveDrugGroupByMap(g: RP剤情報, map: Record<string, DrugNameBind>): void {
+export function resolveDrugGroupByMap(g: RP剤情報, drugMap: Record<string, DrugNameBind>,
+  usageMap: Record<string, 用法レコード>
+): void {
   for (let d of g.薬品情報グループ) {
     if (d.薬品レコード.薬品コード === "") {
       let record = d.薬品レコード;
-      let bind = map[record.薬品名称];
+      let bind = drugMap[record.薬品名称];
       if (bind) {
         record.薬品名称 = bind.name;
         record.薬品コード = bind.code;
@@ -78,12 +80,18 @@ export function resolveDrugGroupByMap(g: RP剤情報, map: Record<string, DrugNa
       }
     }
   }
+  resolveUsageRecordByMap(g.用法レコード, usageMap);
+}
+
+export async function resolveDrugGroupByMapAt(g: RP剤情報, at: string): void {
+  const map = await cache.getDrugNameIyakuhincodeMap();
+  resolveDrugGroupByMap(g, map);
 }
 
 export async function resolveUsageRecordByMap(
-  usage: 用法レコード
+  usage: 用法レコード,
+  map: Record<string, 用法レコード>
 ): Promise<void> {
-  let map = await cache.getUsageMasterMap();
   if (usage.用法コード === "") {
     let bind = map[usage.用法名称];
     if (bind) {

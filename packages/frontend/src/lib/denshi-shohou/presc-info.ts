@@ -139,6 +139,7 @@ export interface 薬品レコード {
   単位名: string;
 }
 
+
 export function isEqual薬品レコード(a: 薬品レコード, b: 薬品レコード): boolean {
   return a.情報区分 === b.情報区分 &&
     a.薬品コード種別 === b.薬品コード種別 &&
@@ -453,6 +454,98 @@ export class 薬品情報Wrapper {
   }
 }
 
+export function deepCloneRP剤情報(src: RP剤情報): RP剤情報 {
+  const dst: RP剤情報 = Object.assign({}, src, {
+    剤形レコード: Object.assign({}, src.剤形レコード),
+    用法レコード: Object.assign({}, src.用法レコード),
+    薬品情報グループ: src.薬品情報グループ.map(deepClone薬品情報),
+  });
+  if( src.用法補足レコード ){
+    dst.用法補足レコード = src.用法補足レコード.map(deepClone用法補足レコード);
+  }
+  return dst;
+}
+
+export function deepClone薬品情報(src: 薬品情報): 薬品情報 {
+  const dst: 薬品情報 = { 薬品レコード: deepClone薬品レコード(src.薬品レコード) };
+  if( src.不均等レコード ){
+    dst.不均等レコード = deepClone不均等レコード(src.不均等レコード);
+  }
+  if( src.負担区分レコード ){
+    dst.負担区分レコード = deepClone負担区分レコード(src.負担区分レコード);
+  }
+  if( src.薬品１回服用量レコード ){
+    dst.薬品１回服用量レコード = deepClone薬品１回服用量レコード(src.薬品１回服用量レコード);
+  }
+  if( src.薬品補足レコード ){
+    dst.薬品補足レコード = src.薬品補足レコード.map(deepClone薬品補足レコード);
+  }
+  return dst;
+}
+
+export function deepClone用法補足レコード(src: 用法補足レコード): 用法補足レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClone薬品レコード(src: 薬品レコード): 薬品レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClone不均等レコード(src: 不均等レコード): 不均等レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClone負担区分レコード(src: 負担区分レコード): 負担区分レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClone薬品１回服用量レコード(src: 薬品１回服用量レコード): 薬品１回服用量レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClone薬品補足レコード(src: 薬品補足レコード): 薬品補足レコード {
+  return Object.assign({}, src);
+}
+
+export function deepClonePrescInfoData(src: PrescInfoData): PrescInfoData {
+  const dst: PrescInfoData = Object.assign({}, src);
+  if( src.診療科レコード ){
+    dst.診療科レコード = Object.assign({}, src.診療科レコード);
+  }
+  if( src.第一公費レコード ){
+    dst.第一公費レコード = Object.assign({}, src.第一公費レコード);
+  }
+  if( src.第二公費レコード ){
+    dst.第二公費レコード = Object.assign({}, src.第二公費レコード);
+  }
+  if( src.第三公費レコード ){
+    dst.第三公費レコード = Object.assign({}, src.第三公費レコード);
+  }
+  if( src.特殊公費レコード ){
+    dst.特殊公費レコード = Object.assign({}, src.特殊公費レコード);
+  }
+  if( src.麻薬施用レコード ){
+    dst.麻薬施用レコード = Object.assign({}, src.麻薬施用レコード);
+  }
+  if( src.備考レコード ){
+    dst.備考レコード = src.備考レコード.map(bikou => Object.assign({}, bikou));
+  }
+  dst.RP剤情報グループ = src.RP剤情報グループ.map(deepCloneRP剤情報);
+  if( src.提供情報レコード ){
+    dst.提供情報レコード = deepClone提供情報レコード(src.提供情報レコード);
+  }
+  return dst;
+}
+export function deepClone提供情報レコード(src: 提供情報レコード): 提供情報レコード {
+  const dst: 提供情報レコード = {};
+  if( src.提供診療情報レコード ) {
+    dst.提供診療情報レコード = src.提供診療情報レコード.map(rec => Object.assign({}, rec));
+  }
+  if( src.検査値データ等レコード ) {
+    dst.検査値データ等レコード = src.検査値データ等レコード.map(rec => Object.assign({}, rec));
+  }
+  return dst;
+}
 
 
 

@@ -1,8 +1,5 @@
 <script lang="ts">
-  import type {
-    PrescInfoData,
-    RP剤情報,
-  } from "../denshi-shohou/presc-info";
+  import type { PrescInfoData, RP剤情報 } from "../denshi-shohou/presc-info";
   import Dialog2 from "../Dialog2.svelte";
   import Commands from "./components/Commands.svelte";
   import CurrentPresc from "./components/CurrentPresc.svelte";
@@ -221,7 +218,7 @@
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
           data = data;
-        }
+        },
       },
     });
     clearWorkarea = () => {
@@ -244,15 +241,10 @@
         destroy: () => clearWorkarea && clearWorkarea(),
         patientId,
         onEnter: async (value: RP剤情報[]) => {
-          let errs = await confirmDrugCodesOfGroups(value, at);
-          if( errs ){
-            alert(errs.join("\n"));
-          } else {
-            let edit = value.map(g => RP剤情報Edit.fromObject(g));
-            data.RP剤情報グループ.push(...edit);
-            data = data;
-          }
-        }
+          let edit = value.map((g) => RP剤情報Edit.fromObject(g));
+          data.RP剤情報グループ.push(...edit);
+          data = data;
+        },
       },
     });
     clearWorkarea = () => {
@@ -265,7 +257,13 @@
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
-      <Commands onEnter={doEnter} onSearch={doSearch} onCancel={doCancel} onPaste={doPaste} bind:showSubCommands />
+      <Commands
+        onEnter={doEnter}
+        onSearch={doSearch}
+        onCancel={doCancel}
+        onPaste={doPaste}
+        bind:showSubCommands
+      />
       {#if showSubCommands}
         <SubCommands
           {data}
