@@ -12,41 +12,36 @@ export type DrugNameBind = { kind: "iyakuhin" | "ippanmei" | "kizai" } & {
   name: string;
 };
 
-export function resolveDrugRecordByMap(drug: 薬品レコード, map: Record<string, DrugNameBind>): 薬品レコード {
+export function resolveDrugRecordByMap(drug: 薬品レコード, map: Record<string, DrugNameBind>): void {
   if (drug.薬品コード === "") {
     const bind = map[drug.薬品名称];
     if (bind) {
-      const record = Object.assign({}, drug, {
-        薬品名称: bind.name,
-        薬品コード: bind.code,
-      });
+      drug.薬品名称 = bind.name;
+      drug.薬品コード = bind.code;
       if (bind.kind === "iyakuhin") {
-        record.薬品コード種別 = "レセプト電算処理システム用コード";
-        record.情報区分 = "医薬品";
+        drug.薬品コード種別 = "レセプト電算処理システム用コード";
+        drug.情報区分 = "医薬品";
       } else if (bind.kind === "ippanmei") {
-        record.薬品コード種別 = "一般名コード";
-        record.情報区分 = "医薬品";
+        drug.薬品コード種別 = "一般名コード";
+        drug.情報区分 = "医薬品";
       } else if (bind.kind === "kizai") {
-        record.薬品コード種別 = "レセプト電算処理システム用コード";
-        record.情報区分 = "医療材料";
+        drug.薬品コード種別 = "レセプト電算処理システム用コード";
+        drug.情報区分 = "医療材料";
       }
-      return record;
     }
   }
-  return drug;
 }
 
-export async function resolveDrugRecordByMapAt(record: 薬品レコード, at: string): Promise<薬品レコード> {
-  const save: 薬品レコード = Object.assign({}, record);
+export async function resolveDrugRecordByMapAt(record: 薬品レコード, at: string) {
   if (record.薬品コード === "") {
     let map = await cache.getDrugNameIyakuhincodeMap();
-    record = resolveDrugRecordByMap(record, map);
+    resolveDrugRecordByMap(record, map);
   }
-  if (record.薬品コード === "") {
-    return save;
-  } else {
+  if (record.薬品コード !== "") {
     const err = await confirmDrugCode(record, at);
-    return err ? save : record;
+    if( err ){
+      record.薬品コード = "";
+    }
   }
 }
 
@@ -56,36 +51,21 @@ export function resolveDrugGroupByMap(g: RP剤情報, drugMap: Record<string, Dr
   for (let d of g.薬品情報グループ) {
     if (d.薬品レコード.薬品コード === "") {
       let record = d.薬品レコード;
-      let bind = drugMap[record.薬品名称];
-      if (bind) {
-        record.薬品名称 = bind.name;
-        record.薬品コード = bind.code;
-        if (bind.kind === "iyakuhin") {
-          record.薬品コード種別 = "レセプト電算処理システム用コード";
-          record.情報区分 = "医薬品";
-          if (g.剤形レコード.剤形区分 === "医療材料") {
-            g.剤形レコード.剤形区分 = "不明";
-          }
-        } else if (bind.kind === "ippanmei") {
-          record.薬品コード種別 = "一般名コード";
-          record.情報区分 = "医薬品";
-          if (g.剤形レコード.剤形区分 === "医療材料") {
-            g.剤形レコード.剤形区分 = "不明";
-          }
-        } else if (bind.kind === "kizai") {
-          record.薬品コード種別 = "レセプト電算処理システム用コード";
-          record.情報区分 = "医療材料";
-          g.剤形レコード.剤形区分 = "医療材料";
-        }
-      }
+      resolveDrugRecordByMap(record, drugMap);
     }
   }
   resolveUsageRecordByMap(g.用法レコード, usageMap);
 }
 
-export async function resolveDrugGroupByMapAt(g: RP剤情報, at: string): void {
-  const map = await cache.getDrugNameIyakuhincodeMap();
-  resolveDrugGroupByMap(g, map);
+export async function resolveDrugGroupByMapAt(g: RP剤情報, at: string) {
+  const usageMap = await cache.getUsageMasterMap();
+  for (let d of g.薬品情報グループ) {
+    if (d.薬品レコード.薬品コード === "") {
+      let record = d.薬品レコード;
+      resolveDrugRecordByMapAt(record, at);
+    }
+  }
+  resolveUsageRecordByMap(g.用法レコード, usageMap);
 }
 
 export async function resolveUsageRecordByMap(

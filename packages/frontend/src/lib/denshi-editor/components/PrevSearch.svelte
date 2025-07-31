@@ -11,9 +11,11 @@
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import NameList from "./presc-search/NameList.svelte";
   import { textToDrugGroups } from "./presc-search/helper";
+  import { resolveDrugGroupByMapAt } from "@/lib/drug-name-bind";
 
   export let destroy: () => void;
   export let patientId: number;
+  export let at: string;
   export let onEnter: (value: RP剤情報[]) => void;
   let currentPage = 0;
   let allItems: [Text, Visit][] = [];
@@ -89,8 +91,8 @@
   }
 
   async function doSelect(group: RP剤情報) {
-    resolveDrug
-    onEnter(group);
+    await resolveDrugGroupByMapAt(group, at);
+    onEnter([group]);
   }
 
   async function doNameList() {
