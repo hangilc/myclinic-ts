@@ -16,15 +16,15 @@
     font-size: 12px;
   }
 
-  input[type="radio"] {
+  :is(input)[type="radio"] {
     accent-color: gray;
   }
 
-  input[type="checkbox"] {
+  :is(input)[type="checkbox"] {
     accent-color: gray;
   }
 
-  input[type="text"] {
+  :is(input)[type="text"] {
     padding: 6px;
   }
 
