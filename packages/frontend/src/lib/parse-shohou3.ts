@@ -159,11 +159,11 @@ let reAmount = new RegExp(
   "$"
 );
 
-interface ParsedDrug {
+export interface ParsedDrug {
   name: string; amount: string; uneven: string | undefined; unit: string
 }
 
-function parseDrugLine(
+export function parseDrugLine(
   s: string
 ): ParsedDrug | undefined {
   let m = reAmount.exec(s);
@@ -239,7 +239,7 @@ function parseDrug(lines: string[]): Drug {
   return Object.assign({}, parsed, { senpatsu, drugComments })
 }
 
-function parseUsageLine(line: string): Usage {
+export function parseUsageLine(line: string): Usage {
   line = line.trim();
   let m = /([0-9０-９]+)日分$/.exec(line);
   if (m) {
