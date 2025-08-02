@@ -240,6 +240,7 @@
       props: {
         destroy: () => clearWorkarea && clearWorkarea(),
         patientId,
+        at,
         onEnter: async (value: RP剤情報[]) => {
           let edit = value.map((g) => RP剤情報Edit.fromObject(g));
           data.RP剤情報グループ.push(...edit);
@@ -252,6 +253,10 @@
       clearWorkarea = undefined;
     };
   }
+
+  function doExample() {
+    
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -262,6 +267,7 @@
         onSearch={doSearch}
         onCancel={doCancel}
         onPaste={doPaste}
+        onExample={doExample}
         bind:showSubCommands
       />
       {#if showSubCommands}
