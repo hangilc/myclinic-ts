@@ -5,13 +5,13 @@
     createPrescExampleData,
     type PrescExampleData,
   } from "./presc-example-data";
-  import { toZenkaku } from "@/lib/zenkaku";
-  import { drugRep } from "@/lib/denshi-editor/helper";
   import DrugGroupRep from "./components/DrugGroupRep.svelte";
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
+  export let onSelect: (group: RP剤情報, drug: 薬品情報) => void;
   let list: PrescExampleData[] = [];
   let selected: PrescExampleData[] = [];
+
 
   load();
 
@@ -23,14 +23,13 @@
     selected = list;
   }
 
-  function doSelect(group: RP剤情報, drug: 薬品情報) {}
 </script>
 
 <Link onClick={doShowAll}>全例</Link>
 <div class="list">
   {#each list as data (data.id)}
     <div class="group">
-      <div><DrugGroupRep group={data.data} onSelect={doSelect} /></div>
+      <div><DrugGroupRep group={data.data} onSelect={onSelect} /></div>
       <div>{data.data.comment ?? ""}</div>
     </div>
   {/each}

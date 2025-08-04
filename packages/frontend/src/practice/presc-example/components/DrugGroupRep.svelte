@@ -25,3 +25,9 @@
     </div>
   </div>
 </div>
+
+<style>
+  .drug-rep {
+    cursor: pointer;
+  }
+</style>
