@@ -558,6 +558,14 @@ export class RP剤情報Edit implements RP剤情報 {
     return undefined;
   }
 
+  getDrugById(drugId: number): 薬品情報Edit {
+    const d = this.findDrugById(drugId);
+    if( d === undefined ){
+      throw new Error("cannot find drug");
+    }
+    return d;
+  }
+
   addUsageSuppl(suppl: 用法補足レコードEdit): void {
     if (this.用法補足レコード === undefined) {
       this.用法補足レコード = [];

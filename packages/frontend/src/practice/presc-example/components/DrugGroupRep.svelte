@@ -4,17 +4,17 @@
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let group: RP剤情報;
-  export let onSelect: (group: RP剤情報, drug: 薬品情報) => void;
+  export let onSelect: (group: RP剤情報, drugIndex: number) => void;
 
 </script>
 
 <div class="group">
   <div>
-    {#each group.薬品情報グループ as drug}
+    {#each group.薬品情報グループ as drug, index}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div
         class="drug-rep"
-        on:click={() => onSelect(group, drug)}
+        on:click={() => onSelect(group, index)}
       >
         <span>{drugRep(drug)}</span>
       </div>

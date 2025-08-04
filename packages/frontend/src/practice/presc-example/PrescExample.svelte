@@ -3,16 +3,19 @@
   import SearchArea from "./SearchArea.svelte";
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import EditArea from "./EditArea.svelte";
+  import { RP剤情報Edit } from "@/lib/denshi-editor/denshi-edit";
 
   let editArea: HTMLElement;
 
-  function doSelect(group: RP剤情報, drug: 薬品情報) {
+  function doSelect(group: RP剤情報, drugIndex: number) {
+    const groupEdit = RP剤情報Edit.fromObject(group);
+    const drugId = groupEdit.薬品情報グループ[drugIndex].id;
     const e: EditArea = new EditArea({
       target: editArea,
       props: {
         destroy: () => e.$destroy(),
-        group,
-        drug,
+        group: groupEdit,
+        drugId,
       }
     });
   }

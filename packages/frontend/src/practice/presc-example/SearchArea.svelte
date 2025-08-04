@@ -8,7 +8,7 @@
   import DrugGroupRep from "./components/DrugGroupRep.svelte";
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
-  export let onSelect: (group: RP剤情報, drug: 薬品情報) => void;
+  export let onSelect: (group: RP剤情報, drugIndex: number) => void;
   let list: PrescExampleData[] = [];
   let selected: PrescExampleData[] = [];
 
