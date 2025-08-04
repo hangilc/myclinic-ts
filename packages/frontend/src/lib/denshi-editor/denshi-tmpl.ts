@@ -330,7 +330,7 @@ function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 
     薬品コード種別,
     薬品コード: "",
     薬品名称: drug.name,
-    分量: drug.amount,
+    分量: toHankaku(drug.amount),
     力価フラグ: "薬価単位",
     単位名: drug.unit,
   };

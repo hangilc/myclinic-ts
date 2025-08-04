@@ -22,6 +22,7 @@
   import DXKasan from "./DXKasan.svelte";
   import DupPatient from "./dup-patient/DupPatient.svelte";
   import EditConfig from "@/practice/EditConfig.svelte";
+  import PrescExample from "./presc-example/PrescExample.svelte";
 
   export let serviceStore: Writable<string>;
 
@@ -61,6 +62,9 @@
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei"} />
+  {#if $serviceStore === "presc-example"}
+    <PrescExample />
+  {/if}
   {#if $serviceStore === "shohou-usage"}
     <ShohouUsage />
   {/if}

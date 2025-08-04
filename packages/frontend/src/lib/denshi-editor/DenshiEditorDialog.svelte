@@ -21,7 +21,6 @@
   import EditExamInfo from "./components/EditExamInfo.svelte";
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
-  import { confirmDrugCodesOfGroups } from "@/lib/validate-presc-info";
 
   export let title: string;
   export let destroy: () => void;
