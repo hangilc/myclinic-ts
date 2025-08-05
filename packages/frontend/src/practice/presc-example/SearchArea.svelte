@@ -7,7 +7,7 @@
   } from "./presc-example-data";
   import DrugGroupRep from "./components/DrugGroupRep.svelte";
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
-  import PencilSquareLink from "@/lib/denshi-editor/icons/PencilSquareLink.svelte";
+  import CommentField from "./components/CommentField.svelte";
 
   export let onSelect: (group: RP剤情報, drugIndex: number) => void;
   let list: PrescExampleData[] = [];
@@ -32,8 +32,7 @@
     <div class="group">
       <div><DrugGroupRep group={data.data} onSelect={onSelect} /></div>
       <div class="comment">
-        {data.data.comment ?? "（コメントなし）"}
-        <PencilSquareLink />
+        <CommentField data={data} />
       </div>
     </div>
   {/each}

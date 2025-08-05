@@ -10,10 +10,21 @@ export interface PrescExampleData {
 let serialId = 1;
 
 export function createPrescExampleData(data: PrescExample): PrescExampleData {
+  normalizeComment(data);
   return {
     data, 
     id: serialId++,
     isEditingComment: false,
-    commentInput: "",
+    commentInput: data.comment ?? "",
+  }
+}
+
+function normalizeComment(data: PrescExample) {
+  if( data.comment ){
+    let c = data.comment;
+    c = c.replace(/^@_comment:/, "");
+    data.comment = c;
+  } else {
+    return undefined;
   }
 }

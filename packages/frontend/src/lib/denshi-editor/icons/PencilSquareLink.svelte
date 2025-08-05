@@ -1,9 +1,10 @@
 <script lang="ts">
   import PencilSquare from "@/icons/PencilSquare.svelte";
 
+  export let onClick: () => void = () => undefined;
 </script>
 
-<a href="javascript:void(0)">
+<a href="javascript:void(0)" on:click={onClick}>
   <PencilSquare />
 </a>
 

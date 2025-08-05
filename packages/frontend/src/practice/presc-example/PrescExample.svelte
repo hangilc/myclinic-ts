@@ -1,7 +1,7 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import EditArea from "./EditArea.svelte";
   import { RP剤情報Edit } from "@/lib/denshi-editor/denshi-edit";
 
@@ -16,6 +16,7 @@
         destroy: () => e.$destroy(),
         group: groupEdit,
         drugId,
+        onChange: () => {},
       }
     });
   }
