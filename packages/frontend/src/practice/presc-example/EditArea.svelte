@@ -9,16 +9,16 @@
   export let destroy: () => void;
   export let group: RP剤情報Edit;
   export let drugId: number;
-  let drug: 薬品情報Edit = group.getDrugById(drugId);
+  export let onChange: () => void;
   let at = DateWrapper.fromDate(new Date()).asSqlDate();
 
-  function doChange(value: RP剤情報Edit) {
-
+  function doChange(_value: RP剤情報Edit) {
+    onChange();
   }
 </script>
 
 <div class="title">処方例編集</div>
-<EditDrug group={group} drugId={drugId} {at} onChange={doChange} destroy={destroy}/>
+<EditDrug {group} {drugId} {at} onChange={doChange} {destroy} />
 
 <style>
 </style>

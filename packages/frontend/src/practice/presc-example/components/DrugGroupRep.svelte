@@ -1,7 +1,7 @@
 <script lang="ts">
   import { drugRep } from "@/lib/denshi-editor/helper";
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
-  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let group: RP剤情報;
   export let onSelect: (group: RP剤情報, drugIndex: number) => void;
