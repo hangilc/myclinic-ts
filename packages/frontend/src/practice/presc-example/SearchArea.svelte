@@ -6,19 +6,12 @@
     type PrescExampleData,
   } from "./presc-example-data";
   import DrugGroupRep from "./components/DrugGroupRep.svelte";
-  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import CommentField from "./components/CommentField.svelte";
 
   export let onSelect: (group: RP剤情報, drugIndex: number) => void;
-  let list: PrescExampleData[] = [];
+  export let list: PrescExampleData[] = [];
   let selected: PrescExampleData[] = [];
-
-
-  load();
-
-  async function load() {
-    list = (await cache.getPrescExample()).map(createPrescExampleData);
-  }
 
   function doShowAll() {
     selected = list;

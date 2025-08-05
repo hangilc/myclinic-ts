@@ -36,7 +36,8 @@ async function run() {
         throw new Error(`skipping: ${drug} | ${usage}`);
       }
     } else if (line.startsWith("@_comment:")) {
-      comment = line.trim();
+      let com = line.replace(/^@_comment:/, "");
+      comment = com.trim();
     } else {
       const parsed = parseDrugLine(line);
       if (!parsed) {
