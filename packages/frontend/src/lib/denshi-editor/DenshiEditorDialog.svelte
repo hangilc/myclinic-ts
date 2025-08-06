@@ -21,6 +21,7 @@
   import EditExamInfo from "./components/EditExamInfo.svelte";
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
+  import Example from "./components/Example.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -213,7 +214,6 @@
       target: wa,
       props: {
         destroy: () => clearWorkarea && clearWorkarea(),
-        at,
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
           data = data;
@@ -254,7 +254,27 @@
   }
 
   function doExample() {
-    
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const w: Example = new Example({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        onEnter: (value: RP剤情報Edit[]) => {
+          data.RP剤情報グループ.push(...value);
+          data = data;
+        },
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+    };
   }
 </script>
 

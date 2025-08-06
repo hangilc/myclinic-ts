@@ -8,7 +8,6 @@
   import { RP剤情報Edit } from "../denshi-edit";
 
   export let destroy: () => void;
-  export let at: string;
   export let onEnter: (value: RP剤情報Edit[]) => void;
 
   let inputValue = ``;
@@ -25,7 +24,7 @@
     }
     let groups = shohou.groups.map((g) => getRP剤情報FromGroup(g));
     for(let g of groups){
-      await resolveDrugGroupByMap(g, at);
+      await resolveDrugGroupByMap(g);
       await resolveUsageRecordByMap(g.用法レコード);
     }
     let data: RP剤情報Edit[] = groups.map(g => RP剤情報Edit.fromObject(g));
