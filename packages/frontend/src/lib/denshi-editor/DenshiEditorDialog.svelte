@@ -22,14 +22,15 @@
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
+  import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
 
   export let title: string;
   export let destroy: () => void;
   export let orig: PrescInfoData;
   export let patientId: number;
   export let at: string;
-  export let showValid: boolean = false;
   export let onEnter: (presc: PrescInfoData) => void;
+  let showValid: boolean = true;
 
   let data = PrescInfoDataEdit.fromObject(orig);
   let clearWorkarea: (() => void) | undefined = undefined;
@@ -276,12 +277,44 @@
       clearWorkarea = undefined;
     };
   }
+
+  function doAdd() {
+    if (!wa) {
+      return;
+    }
+    if (clearWorkarea) {
+      alert("現在編集中です。」");
+      return;
+    }
+    const RP剤情報 = createBlankRP剤情報();
+    const group = RP剤情報Edit.fromObject(RP剤情報);
+    let w: EditDrug = new EditDrug({
+      target: wa,
+      props: {
+        destroy: () => clearWorkarea && clearWorkarea(),
+        group,
+        drugId: group.薬品情報グループ[0].id,
+        at,
+        onChange: (value: RP剤情報Edit) => {
+          data.RP剤情報グループ.push(value);
+          data = data;
+        },
+      },
+    });
+    clearWorkarea = () => {
+      w.$destroy();
+      clearWorkarea = undefined;
+      selectedGroupId = 0;
+      selectedDrugId = 0;
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
   <div class="top">
     <div class="left">
       <Commands
+        onAdd={doAdd}
         onEnter={doEnter}
         onSearch={doSearch}
         onCancel={doCancel}

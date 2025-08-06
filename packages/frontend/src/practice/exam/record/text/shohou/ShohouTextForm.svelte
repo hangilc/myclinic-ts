@@ -4,7 +4,7 @@
     createPrescInfo,
     type PrescInfoData,
   } from "@/lib/denshi-shohou/presc-info";
-  import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
+  // import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
   import type { Kouhi } from "myclinic-model";
   import { denshiToPrint, denshiToPrint2 } from "./denshi-to-print";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
@@ -35,10 +35,12 @@
   import {
     drawShohousen2025,
   } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
-  import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
+  // import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
+  import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
 
   export let shohou: PrescInfoData;
+  export let patientId: number;
   export let at: string;
   export let kouhiList: Kouhi[];
   export let textId: number;
@@ -52,36 +54,52 @@
   export let onCopied: () => void;
 
   function doEdit() {
-    const d: DenshiEditor = new DenshiEditor({
+    const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        data: shohou,
-        onEnter: (updated: PrescInfoData) => {
-          onModified(updated);
-        },
-      },
-    });
+        title: "電子処方編集",
+        orig: shohou,
+        patientId,
+        at,
+        onEnter: function (presc: PrescInfoData): void {
+          onModified(presc);
+        }
+      }
+    })
   }
 
-  function doOldEdit() {
-    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        init: { kind: "denshi", data: shohou },
-        at,
-        kouhiList,
-        title: "処方編集",
-        onEnter: (newShohou: PrescInfoData) => {
-          onModified(newShohou);
-        },
-        onCancel: () => {
-          onCancel();
-        },
-      },
-    });
-  }
+  // function doEdit() {
+  //   const d: DenshiEditor = new DenshiEditor({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       data: shohou,
+  //       onEnter: (updated: PrescInfoData) => {
+  //         onModified(updated);
+  //       },
+  //     },
+  //   });
+  // }
+
+  // function doOldEdit() {
+  //   const d: DenshiHenkanDialog = new DenshiHenkanDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       init: { kind: "denshi", data: shohou },
+  //       at,
+  //       kouhiList,
+  //       title: "処方編集",
+  //       onEnter: (newShohou: PrescInfoData) => {
+  //         onModified(newShohou);
+  //       },
+  //       onCancel: () => {
+  //         onCancel();
+  //       },
+  //     },
+  //   });
+  // }
 
   function doPrint() {
     const data = denshiToPrint(shohou);
@@ -230,7 +248,7 @@
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
-  <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a>
+  <!-- <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a> -->
   <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>

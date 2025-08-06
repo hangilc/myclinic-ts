@@ -1,7 +1,9 @@
 <script lang="ts">
   import ChevronDownLink from "../icons/ChevronDownLink.svelte";
   import ChevronUpLink from "../icons/ChevronUpLink.svelte";
+  import PlusLink from "../icons/PlusLink.svelte";
 
+  export let onAdd: () => void;
   export let onEnter: () => void;
   export let onSearch: () => void;
   export let onPaste: () => void;
@@ -11,20 +13,24 @@
 </script>
 
 <div class="top">
+  <PlusLink onClick={onAdd}/>
   <button on:click={onEnter}>入力</button>
   <button on:click={onSearch}>検索</button>
   <button on:click={onPaste}>貼付</button>
   <button on:click={onExample}>処方例</button>
   <button on:click={onCancel}>キャンセル</button>
   {#if !showSubCommands}
-  <ChevronDownLink onClick={() => showSubCommands = true} />
-    {:else}
-    <ChevronUpLink onClick={() => showSubCommands = false} />
+    <ChevronDownLink onClick={() => (showSubCommands = true)} />
+  {:else}
+    <ChevronUpLink onClick={() => (showSubCommands = false)} />
   {/if}
 </div>
 
 <style>
   .top {
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 </style>

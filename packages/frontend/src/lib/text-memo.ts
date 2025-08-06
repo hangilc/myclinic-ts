@@ -73,14 +73,14 @@ export class TextMemoWrapper {
     }
   }
 
-  probeShohouConvMemo(): ShohouConvTextMemo | undefined {
-    const memo = this.getMemo();
-    if (memo && memo.kind === "shohou-conv") {
-      return memo;
-    } else {
-      return undefined;
-    }
-  }
+  // probeShohouConvMemo(): ShohouConvTextMemo | undefined {
+  //   const memo = this.getMemo();
+  //   if (memo && memo.kind === "shohou-conv") {
+  //     return memo;
+  //   } else {
+  //     return undefined;
+  //   }
+  // }
 
   static fromText(text: Text) {
     return new TextMemoWrapper(text.memo);

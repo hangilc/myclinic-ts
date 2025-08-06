@@ -19,8 +19,9 @@
   import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
-  import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
+  // import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
   import { type Text as ModelText } from "myclinic-model";
+  import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
@@ -43,44 +44,6 @@
     }
   });
 
-  // async function doNewShohouPrevVersion() {
-  //   const clinicInfo = await cache.getClinicInfo();
-  //   const shohou = initPrescInfoData(
-  //     visit.asVisit,
-  //     visit.patient,
-  //     visit.hoken,
-  //     clinicInfo,
-  //   );
-  //   const d: UnregisteredShohouDialog = new UnregisteredShohouDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       title: "新規処方",
-  //       shohou,
-  //       onDelete: undefined,
-  //       at: visit.visitedAt.substring(0, 10),
-  //       onSave: async (shohou: PrescInfoData) => {
-  //         const text = new m.Text(0, visit.visitId, "");
-  //         TextMemoWrapper.setTextMemo(text, {
-  //           kind: "shohou",
-  //           shohou,
-  //           prescriptionId: undefined,
-  //         });
-  //         await api.enterText(text);
-  //       },
-  //       onRegistered: async (shohou: PrescInfoData, prescriptionId: string) => {
-  //         const text = new m.Text(0, visit.visitId, "");
-  //         TextMemoWrapper.setTextMemo(text, {
-  //           kind: "shohou",
-  //           shohou,
-  //           prescriptionId: prescriptionId,
-  //         });
-  //         await api.enterText(text);
-  //       },
-  //     },
-  //   });
-  // }
-
   async function doNewShohouPrevVersion() {
     const clinicInfo = await cache.getClinicInfo();
     const d: NewDenshiShohouDialog = new NewDenshiShohouDialog({
@@ -93,28 +56,51 @@
     });
   }
 
+  // async function doNewShohou() {
+  //   const data = await initPrescInfoDataFromVisitId(visit.visitId);
+  //   const d: DenshiEditor = new DenshiEditor({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       data,
+  //       onEnter: async (shohou: PrescInfoData) => {
+  //         const newText: ModelText = {
+  //           textId: 0,
+  //           visitId: visit.visitId,
+  //           content: "",
+  //         };
+  //         TextMemoWrapper.setTextMemo(newText, {
+  //           kind: "shohou",
+  //           shohou: shohou,
+  //           prescriptionId: undefined,
+  //         });
+  //         await api.enterText(newText);
+  //       },
+  //     },
+  //   });
+  // }
+
   async function doNewShohou() {
-    const data = await initPrescInfoDataFromVisitId(visit.visitId);
-    const d: DenshiEditor = new DenshiEditor({
+    const orig: PrescInfoData = await initPrescInfoDataFromVisitId(visit.visitId);
+    const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
+        title: "新規電子処方",
         destroy: () => d.$destroy(),
-        data,
-        onEnter: async (shohou: PrescInfoData) => {
-          const newText: ModelText = {
-            textId: 0,
-            visitId: visit.visitId,
-            content: "",
-          };
+        orig,
+        patientId: visit.patient.patientId,
+        at: visit.visitedAt.substring(0, 10),
+        onEnter: async (presc: PrescInfoData) => {
+          const newText = { textId: 0, visitId: visit.visitId, content: "" };
           TextMemoWrapper.setTextMemo(newText, {
             kind: "shohou",
-            shohou: shohou,
-            prescriptionId: undefined,
+            shohou: presc, 
+            prescriptionId: undefined
           });
           await api.enterText(newText);
-        },
-      },
-    });
+        }
+      }
+    })
   }
 
   async function doPasteKensa() {

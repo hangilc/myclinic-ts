@@ -13,7 +13,7 @@
 </script>
 
 {#if shohouMemo}
-  <ShohouText {text} {at} {kouhiList}/>
+  <ShohouText {text} {at} {kouhiList} {patientId}/>
 {:else}
   <RegularText {text} {index} {patientId} />
 {/if}

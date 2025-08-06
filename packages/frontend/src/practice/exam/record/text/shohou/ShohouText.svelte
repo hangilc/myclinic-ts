@@ -15,6 +15,7 @@
   export let text: Text;
   export let at: string;
   export let kouhiList: Kouhi[];
+  export let patientId: number;
   let textId = text.textId;
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
   let shohou: PrescInfoData = memo.shohou;
@@ -167,6 +168,7 @@
           {at}
           {kouhiList}
           {textId}
+          {patientId}
           onCancel={() => (mode = "disp")}
           onDone={() => (mode = "disp")}
           onModified={doShohouModified}
