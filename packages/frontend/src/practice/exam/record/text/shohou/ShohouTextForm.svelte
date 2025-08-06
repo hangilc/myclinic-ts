@@ -53,6 +53,8 @@
   ) => void;
   export let onCopied: () => void;
 
+  console.log("kouhiList should be used", kouhiList);
+
   function doEdit() {
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
