@@ -8,6 +8,7 @@
   import VisitsView from "@/lib/VisitsView.svelte";
   import { writable, type Writable } from "svelte/store";
   import { onDestroy } from "svelte";
+  import type { ShujiiDrawerData } from "@/lib/drawer/forms/shujii/shujii-drawer-data";
 
   export let isVisible: boolean = false;
   let patient: Writable<Patient | undefined> = writable(undefined);
