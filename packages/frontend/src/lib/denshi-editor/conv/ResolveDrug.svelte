@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-  import SearchLink from "../icons/SearchLink.svelte";
   import "../widgets/style.css";
-  import api from "@/lib/api";
-  import { cache, type DrugNameBind } from "@/lib/cache";
+  import { cache } from "@/lib/cache";
   import { onMount } from "svelte";
   import type { ConvAux4 } from "./denshi-conv";
   import type {
@@ -17,9 +15,6 @@
     unindex薬品補足レコード,
     type 薬品補足レコードIndexed,
   } from "../denshi-editor-types";
-  import Hosoku from "../drug-form/Hosoku.svelte";
-  import DrugAmount from "../DrugAmount.svelte";
-  import { unconvDrugRep } from "../helper";
   import type { Drug } from "@/lib/parse-shohou";
   import Wrapper from "./workarea/Wrapper.svelte";
   import Title from "./workarea/Title.svelte";
@@ -28,6 +23,7 @@
   import DrugAmountField from "./workarea/DrugAmountField.svelte";
   import DrugHosokuField from "./workarea/DrugHosokuField.svelte";
   import DrugIppanField from "./workarea/DrugIppanField.svelte";
+  import type { DrugNameBind } from "@/lib/drug-name-bind";
 
   export let onDone: () => void;
   export let at: string;

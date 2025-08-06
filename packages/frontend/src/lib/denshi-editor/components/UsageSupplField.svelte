@@ -12,7 +12,6 @@
   export let isEditing: boolean;
   export let onFieldChange: () => void;
   let inputText = "";
-  let inputElement: HTMLInputElement | undefined = undefined;
 
   updateIsEditing();
 
@@ -25,6 +24,7 @@
     inputText = record.用法補足情報;
     group = group;
     updateIsEditing();
+    onFieldChange();
   }
 
   function doEnter(record: 用法補足レコードEdit) {
@@ -33,6 +33,7 @@
       record.isEditing = false;
       group = group;
       updateIsEditing();
+      onFieldChange();
     }
   }
 
@@ -49,6 +50,7 @@
     );
     group = group;
     updateIsEditing();
+    onFieldChange();
   }
 
   function isVisible(group: RP剤情報Edit): boolean {
@@ -82,11 +84,5 @@
 <style>
   .rep {
     cursor: pointer;
-  }
-
-  .with-icons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
   }
 </style>

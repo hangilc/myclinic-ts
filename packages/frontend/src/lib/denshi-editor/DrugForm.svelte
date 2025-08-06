@@ -36,9 +36,9 @@
   let focusDrugKind: (() => void) | undefined = undefined;
 
   export const focus: () => void = () => {
-    if( focusDrugKind ){
-      focusDrugKind();
-    }
+    // if( focusDrugKind ){
+    //   focusDrugKind();
+    // }
   }
 
   function doZaikeiKubunChange(prev剤形区分: 剤形区分) {

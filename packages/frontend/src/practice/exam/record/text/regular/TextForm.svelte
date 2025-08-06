@@ -49,7 +49,6 @@
   import MailDialog from "@/lib/MailDialog.svelte";
   import { Hotline, type Patient } from "myclinic-model";
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
-  import DenshiConv from "@/lib/denshi-editor/DenshiConv.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
   import { resolvePrescInfoByMapAt } from "@/lib/master-map";
@@ -746,38 +745,6 @@
           TextMemoWrapper.setTextMemo(newText, {
             kind: "shohou",
             shohou: presc,
-            prescriptionId: undefined,
-          });
-          await api.enterText(newText);
-        },
-      },
-    });
-  }
-
-  async function doConvTextToDenshiSave() {
-    onClose();
-    let visit = await api.getVisit(text.visitId);
-    const shohou = parseShohou3(text.content);
-    if (typeof shohou === "string") {
-      alert(shohou);
-      return;
-    }
-    const d: DenshiConv = new DenshiConv({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        shohou,
-        at: visit.visitedAt.substring(0, 10),
-        visitId: visit.visitId,
-        onEnter: async (arg: PrescInfoData) => {
-          let newText: m.Text = {
-            textId: 0,
-            visitId: visit.visitId,
-            content: "",
-          };
-          TextMemoWrapper.setTextMemo(newText, {
-            kind: "shohou",
-            shohou: arg,
             prescriptionId: undefined,
           });
           await api.enterText(newText);

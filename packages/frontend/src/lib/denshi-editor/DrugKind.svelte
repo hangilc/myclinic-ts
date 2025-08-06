@@ -20,9 +20,9 @@
   let formFocus: (() => boolean) | undefined = undefined;
 
   export const focus: () => void = () => {
-    if (formFocus) {
-      formFocus();
-    }
+    // if (formFocus) {
+    //   formFocus();
+    // }
   };
 
   if (薬品コード === "") {

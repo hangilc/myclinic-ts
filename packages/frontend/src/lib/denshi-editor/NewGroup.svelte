@@ -61,9 +61,9 @@
   let focusDrugForm: (() => void) | undefined = undefined;
 
   onMount(() => {
-    if( focusDrugForm ){
-      focusDrugForm();
-    }
+    // if( focusDrugForm ){
+    //   focusDrugForm();
+    // }
   });
 
   function doCancel() {
