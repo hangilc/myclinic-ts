@@ -48,7 +48,7 @@
     data.用法レコード.用法コード,
   );
 
-  let isEditingJohoKubun = false;
+  // let isEditingJohoKubun = false;
   let isEditingName = drug.薬品レコード.薬品コード === "";
   let isEditingUneven = false;
   let isEditingDrugAmount = false;
@@ -59,10 +59,6 @@
   let isEditingUsageSuppl = false;
 
   function confirmNotEditing(): boolean {
-    if (isEditingJohoKubun) {
-      alert("情報区分が編集中です。");
-      return false;
-    }
     if (isEditingName) {
       alert("薬品名が編集中です。");
       return false;
@@ -93,6 +89,11 @@
     }
     if (isEditingUsageSuppl) {
       alert("用法補足が編集中です。");
+      return false;
+    }
+
+    if( data.isEditing() ){
+      alert("薬剤が編集中です。");
       return false;
     }
 
@@ -229,7 +230,7 @@
 <Workarea>
   <Title>薬品編集</Title>
   <JohoKubunField
-    bind:isEditing={isEditingJohoKubun}
+    bind:isEditing={drug.薬品レコード.isEditing情報区分}
     bind:情報区分={drug.薬品レコード.情報区分}
     onFieldChange={onJohoKubunChange}
   />

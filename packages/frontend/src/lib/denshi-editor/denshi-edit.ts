@@ -23,6 +23,7 @@ export class 薬品レコードEdit implements 薬品レコード {
   分量: string;
   力価フラグ: 力価フラグ;
   単位名: string;
+  isEditing情報区分: boolean;
 
   constructor(src: {
     情報区分: 情報区分;
@@ -32,6 +33,8 @@ export class 薬品レコードEdit implements 薬品レコード {
     分量: string;
     力価フラグ: 力価フラグ;
     単位名: string;
+  }, aux: {
+    isEditing情報区分: boolean;
   }) {
     this.情報区分 = src.情報区分;
     this.薬品コード種別 = src.薬品コード種別;
@@ -40,19 +43,20 @@ export class 薬品レコードEdit implements 薬品レコード {
     this.分量 = src.分量;
     this.力価フラグ = src.力価フラグ;
     this.単位名 = src.単位名;
+    this.isEditing情報区分 = aux.isEditing情報区分;
   }
 
   static fromObject(obj: 薬品レコード): 薬品レコードEdit {
-    return new 薬品レコードEdit(obj);
+    return new 薬品レコードEdit(obj, { isEditing情報区分: false });
   }
 
   clone(): 薬品レコードEdit {
-    return new 薬品レコードEdit(this);
+    return new 薬品レコードEdit(this, this);
   }
 
-  assign(src: 薬品レコードEdit): void {
-    Object.assign(this, src);
-  }
+  // assign(src: 薬品レコードEdit): void {
+  //   Object.assign(this, src);
+  // }
 
   toObject(): 薬品レコード {
     return Object.assign({}, {
@@ -64,6 +68,10 @@ export class 薬品レコードEdit implements 薬品レコード {
       力価フラグ: this.力価フラグ,
       単位名: this.単位名,
     })
+  }
+
+  isEditing(): boolean {
+    return this.isEditing情報区分;
   }
 }
 
@@ -293,6 +301,16 @@ export class 薬品情報Edit implements 薬品情報 {
     }, this);
   }
 
+  isEditing(): boolean {
+    if( this.薬品レコード.isEditing() ){
+      return true;
+    }
+    if( this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing) ){
+      return true;
+    }
+    return false;
+  }
+
   assign(src: 薬品情報Edit): void {
     this.薬品レコード = src.薬品レコード;
     this.単位変換レコード = src.単位変換レコード;
@@ -341,16 +359,16 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   getKind(): "iyakuhin" | "kizai" | "ippanmei" | undefined {
-    if( this.薬品レコード.薬品コード === "" ){
+    if (this.薬品レコード.薬品コード === "") {
       return undefined;
     }
-    if( this.薬品レコード.情報区分 === "医薬品" ) {
-      if( this.薬品レコード.薬品名称.startsWith("【般】") ){
+    if (this.薬品レコード.情報区分 === "医薬品") {
+      if (this.薬品レコード.薬品名称.startsWith("【般】")) {
         return "ippanmei";
       } else {
         return "iyakuhin";
       }
-    } else if( this.薬品レコード.情報区分 === "医療材料") {
+    } else if (this.薬品レコード.情報区分 === "医療材料") {
       return "kizai";
     } else {
       return undefined;
@@ -362,7 +380,7 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   convertToIppanmei(): void {
-    if( this.ippanmeicode !== "" ){
+    if (this.ippanmeicode !== "") {
       this.薬品レコード.薬品名称 = this.ippanmei;
       this.薬品レコード.薬品コード = this.ippanmeicode;
       this.薬品レコード.薬品コード種別 = "一般名コード";
@@ -530,6 +548,15 @@ export class RP剤情報Edit implements RP剤情報 {
     }, this.id);
   }
 
+  isEditing(): boolean {
+    for(let drug of this.薬品情報グループ){
+      if( drug.isEditing() ){
+        return true;
+      }
+    }
+    return false;
+  }
+
   assign(src: RP剤情報Edit): void {
     this.剤形レコード = src.剤形レコード;
     this.用法レコード = src.用法レコード;
@@ -560,7 +587,7 @@ export class RP剤情報Edit implements RP剤情報 {
 
   getDrugById(drugId: number): 薬品情報Edit {
     const d = this.findDrugById(drugId);
-    if( d === undefined ){
+    if (d === undefined) {
       throw new Error("cannot find drug");
     }
     return d;
