@@ -55,8 +55,13 @@
         destroy: () => f.$destroy(),
         group: group,
         drugId: group.薬品情報グループ[0].id,
-        onChange: function (): void {
-          throw new Error("Function not implemented.");
+        onChange: function (value: RP剤情報Edit): void {
+          if( value.薬品情報グループ.length === 0 ){
+            return;
+          }
+          let ex = createPrescExampleData(value);
+          list.push(ex);
+          list = list;
         },
       },
     });
