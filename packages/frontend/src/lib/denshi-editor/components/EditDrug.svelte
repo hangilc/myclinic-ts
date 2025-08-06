@@ -220,6 +220,7 @@
     data.薬品情報グループ = data.薬品情報グループ.filter(
       (d) => d.id !== drugId,
     );
+    console.log("doDelete", drugId, data);
     destroy();
     onChange(data);
   }

@@ -9,23 +9,27 @@
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import CommentField from "./components/CommentField.svelte";
 
-  export let onSelect: (group: RP剤情報, drugIndex: number) => void;
+  export let onSelect: (data: PrescExampleData, drugIndex: number) => void;
   export let list: PrescExampleData[] = [];
   let selected: PrescExampleData[] = [];
 
   function doShowAll() {
     selected = list;
   }
-
 </script>
 
 <Link onClick={doShowAll}>全例</Link>
 <div class="list">
   {#each list as data (data.id)}
     <div class="group">
-      <div><DrugGroupRep group={data.data} onSelect={onSelect} /></div>
+      <div>
+        <DrugGroupRep
+          group={data.data}
+          onSelect={(_g, index) => onSelect(data, index)}
+        />
+      </div>
       <div class="comment">
-        <CommentField data={data} />
+        <CommentField {data} />
       </div>
     </div>
   {/each}

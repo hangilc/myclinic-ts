@@ -9,16 +9,13 @@
   export let destroy: () => void;
   export let group: RP剤情報Edit;
   export let drugId: number;
-  export let onChange: () => void;
+  export let onChange: (value: RP剤情報Edit) => void;
   let at = DateWrapper.fromDate(new Date()).asSqlDate();
 
-  function doChange(_value: RP剤情報Edit) {
-    onChange();
-  }
 </script>
 
 <div class="title">処方例編集</div>
-<EditDrug {group} {drugId} {at} onChange={doChange} {destroy} />
+<EditDrug {group} {drugId} {at} onChange={onChange} {destroy} />
 
 <style>
 </style>

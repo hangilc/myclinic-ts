@@ -20,8 +20,21 @@
     inputElement?.focus();
   };
 
+  $: isEditing = initIsEditing(group);
+
+  function initIsEditing(group: RP剤情報Edit): boolean {
+    if (!isEditing && group.剤形レコード.調剤数量 <= 0) {
+      return true;
+    }
+    return isEditing;
+  }
+
   function inputValue(): string {
-    return toHankaku(group.剤形レコード.調剤数量.toString());
+    if (group.剤形レコード.調剤数量 <= 0) {
+      return "";
+    } else {
+      return toHankaku(group.剤形レコード.調剤数量.toString());
+    }
   }
 
   function title(group: RP剤情報Edit): string {
@@ -104,7 +117,9 @@
           />
           {timesUnit(group)}
           <SubmitLink onClick={doEnter} />
-          <CancelLink onClick={doCancel} />
+          {#if group.剤形レコード.調剤数量 > 0}
+            <CancelLink onClick={doCancel} />
+          {/if}
         </form>
       {/if}
     </FieldForm>

@@ -62,9 +62,7 @@
   <RcptCheck isVisible={$serviceStore === "rcpt-check"} />
   <Rezept isVisible={$serviceStore === "rezept"} />
   <Henrei isVisible={$serviceStore === "henrei"} />
-  {#if $serviceStore === "presc-example"}
-    <PrescExample />
-  {/if}
+  <PrescExample isVisible={$serviceStore === "presc-example"} />
   {#if $serviceStore === "shohou-usage"}
     <ShohouUsage />
   {/if}
