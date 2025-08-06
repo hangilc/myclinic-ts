@@ -1,7 +1,6 @@
 import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 import type { Text, Visit } from "myclinic-model/model";
 import { DateWrapper } from "myclinic-util";
-import { usageRep } from "../../helper";
 import { textToDrugGroups } from "./helper";
 
 export interface PrescSearchItem {

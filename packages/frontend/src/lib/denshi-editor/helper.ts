@@ -1,13 +1,8 @@
-import type { RP剤情報, 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
+import type { 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
-import type { Drug, Usage } from "@/lib/parse-shohou";
-import type { ConvData2 } from "./conv/denshi-conv";
-import { 薬品情報Edit } from "./denshi-edit";
-import api from "../api";
-import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-import { cache } from "../cache";
+import type { Drug } from "@/lib/parse-shohou";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -75,25 +70,25 @@ export function unconvDrugRep(drug: Drug): string {
   return s;
 }
 
-export function usageRep(usage: 用法レコード, data2: ConvData2): string {
-  let s = usage.用法名称;
-  if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
-    for (let rec of data2.用法補足レコード) {
-      s += `　${rec.用法補足情報}`
-    }
-  }
-  return s;
-}
+// export function usageRep(usage: 用法レコード, data2: ConvData2): string {
+//   let s = usage.用法名称;
+//   if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
+//     for (let rec of data2.用法補足レコード) {
+//       s += `　${rec.用法補足情報}`
+//     }
+//   }
+//   return s;
+// }
 
-export function unconvUsageRep(usage: Usage, data2: ConvData2): string {
-  let s = usage.usage;
-  if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
-    for (let rec of data2.用法補足レコード) {
-      s += `　${rec.用法補足情報}`
-    }
-  }
-  return s;
-}
+// export function unconvUsageRep(usage: Usage, data2: ConvData2): string {
+//   let s = usage.usage;
+//   if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
+//     for (let rec of data2.用法補足レコード) {
+//       s += `　${rec.用法補足情報}`
+//     }
+//   }
+//   return s;
+// }
 
 
 export function runner(...fs: (() => any)[]): () => void {
