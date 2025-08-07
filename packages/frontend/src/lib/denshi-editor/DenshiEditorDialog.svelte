@@ -23,6 +23,7 @@
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
   import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
+  import type { WorkareaService } from "./denshi-editor-dialog";
 
   export let title: string;
   export let destroy: () => void;
@@ -33,7 +34,8 @@
   let showValid: boolean = true;
 
   let data = PrescInfoDataEdit.fromObject(orig);
-  let clearWorkarea: (() => void) | undefined = undefined;
+  let workareaService: WorkareaService | undefined = undefined;
+  // let clearWorkarea: (() => void) | undefined = undefined;
   let wa: HTMLElement;
   let selectedGroupId = 0;
   let selectedDrugId = 0;
@@ -54,13 +56,15 @@
     onEnter(presc);
   }
 
-  function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
+  async function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
     if (!wa) {
       return;
     }
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
-      return;
+    if( workareaService ){
+      let ok = await workareaService.confirmClear();
+      if( !ok ){
+        return;
+      }
     }
     let w: EditDrug = new EditDrug({
       target: wa,
@@ -77,6 +81,7 @@
         },
       },
     });
+    
     clearWorkarea = () => {
       w.$destroy();
       clearWorkarea = undefined;
