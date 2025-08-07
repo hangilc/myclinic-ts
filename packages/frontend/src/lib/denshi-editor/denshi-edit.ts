@@ -443,28 +443,36 @@ export class 用法レコードEdit implements 用法レコード {
   用法コード: string;
   用法名称: string;
   用法１日回数?: number;
+  isEditing用法コード: boolean;
 
   constructor(src: {
     用法コード: string;
     用法名称: string;
     用法１日回数?: number;
+  }, aux: {
+    isEditing用法コード: boolean;
   }) {
     this.用法コード = src.用法コード;
     this.用法名称 = src.用法名称;
     this.用法１日回数 = src.用法１日回数;
+    this.isEditing用法コード = aux.isEditing用法コード;
   }
 
   static fromObject(obj: 用法レコード): 用法レコードEdit {
-    return new 用法レコードEdit(obj);
+    return new 用法レコードEdit(obj, { isEditing用法コード: false });
   }
 
   clone(): 用法レコードEdit {
-    return new 用法レコードEdit(this);
+    return new 用法レコードEdit(this, this);
   }
 
-  assign(src: 用法レコードEdit): void {
-    Object.assign(this, src);
+  isEditing(): boolean {
+    return this.isEditing用法コード;
   }
+
+  // assign(src: 用法レコードEdit): void {
+  //   Object.assign(this, src);
+  // }
 
   toObject(): 用法レコード {
     let obj: 用法レコード = {
@@ -562,6 +570,7 @@ export class RP剤情報Edit implements RP剤情報 {
 
   isEditing(): boolean {
     return this.剤形レコード.isEditing() ||
+    this.用法レコード.isEditing() ||
     this.薬品情報グループ.some(d => d.isEditing());
   }
 
