@@ -18,9 +18,8 @@
     isEditing = true;
   }
 
-  function doChange() {
+  function doSubmit() {
     剤形区分 = value;
-    console.log("剤形区分", 剤形区分)
     onFieldChange();
     isEditing = false;
   }
@@ -34,11 +33,8 @@
   }
 
   function doCancel() {
+    value = 剤形区分;
     isEditing = false;
-  }
-
-  function doSubmit() {
-    
   }
 </script>
 
@@ -56,7 +52,6 @@
               type="radio"
               bind:group={value}
               value="内服"
-              on:change={doChange}
             /> 内服</span
           >
           <span
@@ -64,7 +59,6 @@
               type="radio"
               bind:group={value}
               value="頓服"
-              on:change={doChange}
             /> 頓服</span
           >
           <span
@@ -72,7 +66,6 @@
               type="radio"
               bind:group={value}
               value="外用"
-              on:change={doChange}
             /> 外用</span
           >
           <SubmitLink onClick={doSubmit} />
@@ -90,7 +83,6 @@
                 type="radio"
                 bind:group={value}
                 value="内服滴剤"
-                on:change={doChange}
               /> 内服滴剤</span
             >
             <span
@@ -98,7 +90,6 @@
                 type="radio"
                 bind:group={value}
                 value="注射"
-                on:change={doChange}
               /> 注射</span
             >
             <span
@@ -106,7 +97,6 @@
                 type="radio"
                 bind:group={value}
                 value="医療材料"
-                on:change={doChange}
               /> 医療材料</span
             >
             <span
@@ -114,7 +104,6 @@
                 type="radio"
                 bind:group={value}
                 value="不明"
-                on:change={doChange}
               /> 不明</span
             >
           </div>
