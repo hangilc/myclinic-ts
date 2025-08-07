@@ -48,37 +48,12 @@
     data.用法レコード.用法コード,
   );
 
-  // let isEditingJohoKubun = false;
-  let isEditingName = drug.薬品レコード.薬品コード === "";
-  let isEditingUneven = false;
-  let isEditingDrugAmount = false;
-  let isEditingDrugSuppl = false;
-  let isEditingZaikeiKubun = false;
+  drug.薬品レコード.isEditing薬品コード = drug.薬品レコード.薬品コード === "";
   let isEditingUsage = false;
   let isEditingTimes = false;
   let isEditingUsageSuppl = false;
 
   function confirmNotEditing(): boolean {
-    if (isEditingName) {
-      alert("薬品名が編集中です。");
-      return false;
-    }
-    if (isEditingUneven) {
-      alert("不均等レコードが編集中です。");
-      return false;
-    }
-    if (isEditingDrugAmount) {
-      alert("薬品分量が編集中です。");
-      return false;
-    }
-    if (isEditingDrugSuppl) {
-      alert("薬品補足が編集中です。");
-      return false;
-    }
-    if (isEditingZaikeiKubun) {
-      alert("　剤型区分が編集中です。");
-      return false;
-    }
     if (isEditingUsage) {
       alert("用法が編集中です。");
       return false;
@@ -186,7 +161,7 @@
       });
       drug.不均等レコード = edit;
     }
-    isEditingUneven = true;
+    drug.isEditing不均等レコード = true;
     onDrugChange();
   }
 
@@ -237,27 +212,26 @@
   <DrugNameField
     {drug}
     {at}
-    bind:isEditing={isEditingName}
+    bind:isEditing={drug.薬品レコード.isEditing薬品コード}
     onFieldChange={onDrugChange}
   />
   <UnevenField
     bind:不均等レコード={drug.不均等レコード}
     onFieldChange={onDrugChange}
-    bind:isEditing={isEditingUneven}
+    bind:isEditing={drug.isEditing不均等レコード}
   />
   <DrugAmountField
     {drug}
-    bind:isEditing={isEditingDrugAmount}
+    bind:isEditing={drug.薬品レコード.isEditing分量}
     onFieldChange={onDrugChange}
   />
   <DrugSupplField
     {drug}
-    bind:isEditing={isEditingDrugSuppl}
     onFieldChange={onDrugChange}
   />
   <ZaikeiKubunField
     bind:剤形区分={data.剤形レコード.剤形区分}
-    bind:isEditing={isEditingZaikeiKubun}
+    bind:isEditing={data.剤形レコード.isEditing剤形区分}
     onFieldChange={onDrugChange}
   />
   <DrugUsageField

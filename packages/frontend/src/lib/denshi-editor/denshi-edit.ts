@@ -24,6 +24,8 @@ export class 薬品レコードEdit implements 薬品レコード {
   力価フラグ: 力価フラグ;
   単位名: string;
   isEditing情報区分: boolean;
+  isEditing薬品コード: boolean;
+  isEditing分量: boolean;
 
   constructor(src: {
     情報区分: 情報区分;
@@ -35,6 +37,8 @@ export class 薬品レコードEdit implements 薬品レコード {
     単位名: string;
   }, aux: {
     isEditing情報区分: boolean;
+    isEditing薬品コード: boolean;
+    isEditing分量: boolean;
   }) {
     this.情報区分 = src.情報区分;
     this.薬品コード種別 = src.薬品コード種別;
@@ -44,10 +48,12 @@ export class 薬品レコードEdit implements 薬品レコード {
     this.力価フラグ = src.力価フラグ;
     this.単位名 = src.単位名;
     this.isEditing情報区分 = aux.isEditing情報区分;
+    this.isEditing薬品コード = aux.isEditing薬品コード;
+    this.isEditing分量 = aux.isEditing分量;
   }
 
   static fromObject(obj: 薬品レコード): 薬品レコードEdit {
-    return new 薬品レコードEdit(obj, { isEditing情報区分: false });
+    return new 薬品レコードEdit(obj, { isEditing情報区分: false, isEditing薬品コード: false, isEditing分量: false });
   }
 
   clone(): 薬品レコードEdit {
@@ -71,7 +77,7 @@ export class 薬品レコードEdit implements 薬品レコード {
   }
 
   isEditing(): boolean {
-    return this.isEditing情報区分;
+    return this.isEditing情報区分 || this.isEditing薬品コード || this.isEditing分量;
   }
 }
 
@@ -259,6 +265,7 @@ export class 薬品情報Edit implements 薬品情報 {
   薬品補足レコード?: 薬品補足レコードEdit[];
   ippanmei: string;
   ippanmeicode: string;
+  isEditing不均等レコード: boolean;
 
   constructor(src: {
     薬品レコード: 薬品レコードEdit;
@@ -267,7 +274,7 @@ export class 薬品情報Edit implements 薬品情報 {
     負担区分レコード?: 負担区分レコードEdit;
     薬品１回服用量レコード?: 薬品１回服用量レコードEdit;
     薬品補足レコード?: 薬品補足レコードEdit[];
-  }, aux: { id: number; ippanmei: string; ippanmeicode: string; }) {
+  }, aux: { id: number; ippanmei: string; ippanmeicode: string; isEditing不均等レコード: boolean }) {
     this.id = aux.id;
     this.薬品レコード = src.薬品レコード;
     this.単位変換レコード = src.単位変換レコード;
@@ -277,6 +284,7 @@ export class 薬品情報Edit implements 薬品情報 {
     this.薬品補足レコード = src.薬品補足レコード;
     this.ippanmei = aux.ippanmei;
     this.ippanmeicode = aux.ippanmeicode;
+    this.isEditing不均等レコード = aux.isEditing不均等レコード;
   }
 
   static fromObject(obj: 薬品情報): 薬品情報Edit {
@@ -287,7 +295,7 @@ export class 薬品情報Edit implements 薬品情報 {
       負担区分レコード: obj.負担区分レコード ? 負担区分レコードEdit.fromObject(obj.負担区分レコード) : undefined,
       薬品１回服用量レコード: obj.薬品１回服用量レコード ? 薬品１回服用量レコードEdit.fromObject(obj.薬品１回服用量レコード) : undefined,
       薬品補足レコード: obj.薬品補足レコード?.map(record => 薬品補足レコードEdit.fromObject(record))
-    }, { id: nextId(), ippanmei: "", ippanmeicode: "" });
+    }, { id: nextId(), ippanmei: "", ippanmeicode: "", isEditing不均等レコード: false });
   }
 
   clone(): 薬品情報Edit {
@@ -302,25 +310,21 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   isEditing(): boolean {
-    if( this.薬品レコード.isEditing() ){
-      return true;
-    }
-    if( this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing) ){
-      return true;
-    }
-    return false;
+    return this.薬品レコード.isEditing() ||
+      this.isEditing不均等レコード ||
+      !!(this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing));
   }
 
-  assign(src: 薬品情報Edit): void {
-    this.薬品レコード = src.薬品レコード;
-    this.単位変換レコード = src.単位変換レコード;
-    this.不均等レコード = src.不均等レコード;
-    this.負担区分レコード = src.負担区分レコード;
-    this.薬品１回服用量レコード = src.薬品１回服用量レコード;
-    this.薬品補足レコード = src.薬品補足レコード;
-    this.ippanmei = src.ippanmei;
-    this.ippanmeicode = src.ippanmeicode;
-  }
+  // assign(src: 薬品情報Edit): void {
+  //   this.薬品レコード = src.薬品レコード;
+  //   this.単位変換レコード = src.単位変換レコード;
+  //   this.不均等レコード = src.不均等レコード;
+  //   this.負担区分レコード = src.負担区分レコード;
+  //   this.薬品１回服用量レコード = src.薬品１回服用量レコード;
+  //   this.薬品補足レコード = src.薬品補足レコード;
+  //   this.ippanmei = src.ippanmei;
+  //   this.ippanmeicode = src.ippanmeicode;
+  // }
 
   toObject(): 薬品情報 {
     let obj: 薬品情報 = {
@@ -392,28 +396,36 @@ export class 剤形レコードEdit implements 剤形レコード {
   剤形区分: 剤形区分;
   剤形名称?: string;
   調剤数量: number;
+  isEditing剤形区分: boolean;
 
   constructor(src: {
     剤形区分: 剤形区分;
     剤形名称?: string;
     調剤数量: number;
+  }, aux: {
+    isEditing剤形区分: boolean;
   }) {
     this.剤形区分 = src.剤形区分;
     this.剤形名称 = src.剤形名称;
     this.調剤数量 = src.調剤数量;
+    this.isEditing剤形区分 = aux.isEditing剤形区分;
   }
 
   static fromObject(obj: 剤形レコード): 剤形レコードEdit {
-    return new 剤形レコードEdit(obj);
+    return new 剤形レコードEdit(obj, { isEditing剤形区分: false });
   }
 
   clone(): 剤形レコードEdit {
-    return new 剤形レコードEdit(this);
+    return new 剤形レコードEdit(this, this);
   }
 
-  assign(src: 剤形レコードEdit): void {
-    Object.assign(this, src);
+  isEditing(): boolean {
+    return this.isEditing剤形区分;
   }
+
+  // assign(src: 剤形レコードEdit): void {
+  //   Object.assign(this, src);
+  // }
 
   toObject(): 剤形レコード {
     let obj: 剤形レコード = {
@@ -549,20 +561,16 @@ export class RP剤情報Edit implements RP剤情報 {
   }
 
   isEditing(): boolean {
-    for(let drug of this.薬品情報グループ){
-      if( drug.isEditing() ){
-        return true;
-      }
-    }
-    return false;
+    return this.剤形レコード.isEditing() ||
+    this.薬品情報グループ.some(d => d.isEditing());
   }
 
-  assign(src: RP剤情報Edit): void {
-    this.剤形レコード = src.剤形レコード;
-    this.用法レコード = src.用法レコード;
-    this.用法補足レコード = src.用法補足レコード;
-    this.薬品情報グループ = src.薬品情報グループ;
-  }
+  // assign(src: RP剤情報Edit): void {
+  //   this.剤形レコード = src.剤形レコード;
+  //   this.用法レコード = src.用法レコード;
+  //   this.用法補足レコード = src.用法補足レコード;
+  //   this.薬品情報グループ = src.薬品情報グループ;
+  // }
 
   toObject(): RP剤情報 {
     let obj: RP剤情報 = {

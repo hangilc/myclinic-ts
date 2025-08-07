@@ -9,32 +9,22 @@
   import DrugSupplForm from "./DrugSupplForm.svelte";
 
   export let drug: 薬品情報Edit;
-  export let isEditing: boolean;
   export let onFieldChange: () => void;
-
-  updateIsEditing();
-
-  function updateIsEditing() {
-    isEditing = drug.薬品補足レコードAsList().some((r) => r.isEditing);
-  }
 
   function doEdit(record: 薬品補足レコードEdit) {
     record.isEditing = true;
     drug = drug;
-    updateIsEditing();
   }
 
   function doEnter(record: 薬品補足レコードEdit) {
-    console.log("doEnter");
     record.isEditing = false;
     drug = drug;
-    updateIsEditing();
     onFieldChange();
   }
 
   function doCancel(record: 薬品補足レコードEdit) {
     record.isEditing = false;
-    updateIsEditing();
+    drug = drug;
   }
 
   function doDelete(record: 薬品補足レコードEdit) {
@@ -42,7 +32,6 @@
       (r) => r.id !== record.id,
     );
     drug = drug;
-    updateIsEditing();
     onFieldChange();
   }
 
