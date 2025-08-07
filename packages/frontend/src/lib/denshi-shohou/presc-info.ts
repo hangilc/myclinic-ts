@@ -139,17 +139,6 @@ export interface 薬品レコード {
   単位名: string;
 }
 
-
-export function isEqual薬品レコード(a: 薬品レコード, b: 薬品レコード): boolean {
-  return a.情報区分 === b.情報区分 &&
-    a.薬品コード種別 === b.薬品コード種別 &&
-    a.薬品コード === b.薬品コード &&
-    a.薬品名称 === b.薬品名称 &&
-    a.分量 === b.分量 &&
-    a.力価フラグ === b.力価フラグ &&
-    a.単位名 === b.単位名;
-}
-
 export interface 不均等レコード {
   不均等１回目服用量: string; 不均等２回目服用量: string;
   不均等３回目服用量?: string; 不均等４回目服用量?: string;
