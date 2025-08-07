@@ -17,10 +17,8 @@
   };
 
   function doEnter() {
-    console.log("enter doEnter")
     if (inputText !== "") {
       suppl.用法補足情報 = inputText;
-      console.log("calling onEnter")
       onEnter();
     }
   }

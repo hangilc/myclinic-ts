@@ -44,6 +44,11 @@
             {/if}
             {group.用法レコード.用法名称}
             {daysTimesDisp(group)}
+            {#if group.用法補足レコード}
+              {#each group.用法補足レコード as rec (rec.id)}
+                <div>{rec.用法補足情報}</div>
+              {/each}
+            {/if}
           </div>
         </div>
       </div>

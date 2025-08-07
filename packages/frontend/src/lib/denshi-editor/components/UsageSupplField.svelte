@@ -9,39 +9,22 @@
   import UsageSupplForm from "./UsageSupplForm.svelte";
 
   export let group: RP剤情報Edit;
-  export let isEditing: boolean;
   export let onFieldChange: () => void;
-  let inputText = "";
-
-  updateIsEditing();
-
-  function updateIsEditing() {
-    isEditing = group.用法補足レコードAsList().some((r) => r.isEditing);
-  }
 
   function doEdit(record: 用法補足レコードEdit) {
-    record.isEditing = true;
-    inputText = record.用法補足情報;
+    record.isEditing用法補足情報 = true;
     group = group;
-    updateIsEditing();
-    onFieldChange();
   }
 
   function doEnter(record: 用法補足レコードEdit) {
-    if (inputText !== "") {
-      record.用法補足情報 = inputText;
-      record.isEditing = false;
+      record.isEditing用法補足情報 = false;
       group = group;
-      updateIsEditing();
       onFieldChange();
-    }
   }
 
   function doCancel(record: 用法補足レコードEdit) {
-    record.isEditing = false;
-    inputText = "";
+    record.isEditing用法補足情報 = false;
     group = group;
-    updateIsEditing();
   }
 
   function doDelete(record: 用法補足レコードEdit) {
@@ -49,7 +32,6 @@
       (r) => r.id !== record.id,
     );
     group = group;
-    updateIsEditing();
     onFieldChange();
   }
 
@@ -63,7 +45,7 @@
     <FieldTitle>用法補足</FieldTitle>
     <FieldForm>
       {#each group.用法補足レコードAsList() as record (record.id)}
-        {#if !record.isEditing}
+        {#if !record.isEditing用法補足情報}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div on:click={() => doEdit(record)} class="rep">
             {record.用法補足情報}

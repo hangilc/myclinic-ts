@@ -397,6 +397,7 @@ export class 剤形レコードEdit implements 剤形レコード {
   剤形名称?: string;
   調剤数量: number;
   isEditing剤形区分: boolean;
+  isEditing調剤数量: boolean;
 
   constructor(src: {
     剤形区分: 剤形区分;
@@ -404,15 +405,17 @@ export class 剤形レコードEdit implements 剤形レコード {
     調剤数量: number;
   }, aux: {
     isEditing剤形区分: boolean;
+    isEditing調剤数量: boolean;
   }) {
     this.剤形区分 = src.剤形区分;
     this.剤形名称 = src.剤形名称;
     this.調剤数量 = src.調剤数量;
     this.isEditing剤形区分 = aux.isEditing剤形区分;
+    this.isEditing調剤数量 = aux.isEditing調剤数量;
   }
 
   static fromObject(obj: 剤形レコード): 剤形レコードEdit {
-    return new 剤形レコードEdit(obj, { isEditing剤形区分: false });
+    return new 剤形レコードEdit(obj, { isEditing剤形区分: false, isEditing調剤数量: false });
   }
 
   clone(): 剤形レコードEdit {
@@ -420,7 +423,7 @@ export class 剤形レコードEdit implements 剤形レコード {
   }
 
   isEditing(): boolean {
-    return this.isEditing剤形区分;
+    return this.isEditing剤形区分 || this.isEditing調剤数量;
   }
 
   // assign(src: 剤形レコードEdit): void {
@@ -488,7 +491,7 @@ export class 用法レコードEdit implements 用法レコード {
 
 export class 用法補足レコードEdit implements 用法補足レコード {
   id: number;
-  isEditing: boolean;
+  isEditing用法補足情報: boolean;
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
 
@@ -497,7 +500,7 @@ export class 用法補足レコードEdit implements 用法補足レコード {
     用法補足情報: string;
   }, id: number, isEditing: boolean) {
     this.id = id;
-    this.isEditing = isEditing;
+    this.isEditing用法補足情報 = isEditing;
     this.用法補足区分 = src.用法補足区分;
     this.用法補足情報 = src.用法補足情報;
   }
@@ -511,13 +514,17 @@ export class 用法補足レコードEdit implements 用法補足レコード {
   }
 
   clone(): 用法補足レコードEdit {
-    return new 用法補足レコードEdit(this, this.id, this.isEditing);
+    return new 用法補足レコードEdit(this, this.id, this.isEditing用法補足情報);
   }
 
-  assign(src: 用法補足レコードEdit): void {
-    this.用法補足区分 = src.用法補足区分;
-    this.用法補足情報 = src.用法補足情報;
+  isEditing(): boolean {
+    return this.isEditing用法補足情報;
   }
+
+  // assign(src: 用法補足レコードEdit): void {
+  //   this.用法補足区分 = src.用法補足区分;
+  //   this.用法補足情報 = src.用法補足情報;
+  // }
 
   toObject(): 用法補足レコード {
     let obj: 用法補足レコード = {
@@ -571,7 +578,8 @@ export class RP剤情報Edit implements RP剤情報 {
   isEditing(): boolean {
     return this.剤形レコード.isEditing() ||
     this.用法レコード.isEditing() ||
-    this.薬品情報グループ.some(d => d.isEditing());
+    this.薬品情報グループ.some(d => d.isEditing()) ||
+    !!this.用法補足レコード?.some(r => r.isEditing());
   }
 
   // assign(src: RP剤情報Edit): void {

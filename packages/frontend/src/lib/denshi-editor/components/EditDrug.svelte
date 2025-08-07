@@ -49,19 +49,8 @@
   );
 
   drug.薬品レコード.isEditing薬品コード = drug.薬品レコード.薬品コード === "";
-  let isEditingTimes = false;
-  let isEditingUsageSuppl = false;
 
   function confirmNotEditing(): boolean {
-    if (isEditingTimes) {
-      alert("日数・回数が編集中です。");
-      return false;
-    }
-    if (isEditingUsageSuppl) {
-      alert("用法補足が編集中です。");
-      return false;
-    }
-
     if( data.isEditing() ){
       alert("薬剤が編集中です。");
       return false;
@@ -236,12 +225,11 @@
   />
   <TimesField
     group={data}
-    bind:isEditing={isEditingTimes}
+    bind:isEditing={data.剤形レコード.isEditing調剤数量}
     onFieldChange={onDrugChange}
   />
   <UsageSupplField
     group={data}
-    bind:isEditing={isEditingUsageSuppl}
     onFieldChange={onGroupChange}
   />
   <Commands>
