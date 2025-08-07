@@ -6,6 +6,7 @@
   import ChevronDownLink from "../icons/ChevronDownLink.svelte";
   import ChevronUpLink from "../icons/ChevronUpLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
+  import SubmitLink from "../icons/SubmitLink.svelte";
 
   export let 剤形区分: 剤形区分;
   export let isEditing: boolean;
@@ -34,6 +35,10 @@
 
   function doCancel() {
     isEditing = false;
+  }
+
+  function doSubmit() {
+    
   }
 </script>
 
@@ -70,6 +75,7 @@
               on:change={doChange}
             /> 外用</span
           >
+          <SubmitLink onClick={doSubmit} />
           <CancelLink onClick={doCancel} />
           {#if !showMore}
             <ChevronDownLink onClick={toggleMore} />
