@@ -23,7 +23,8 @@
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
   import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
-  import type { WorkareaService } from "./denshi-editor-dialog";
+  import { WorkareaService } from "./denshi-editor-dialog";
+  import Workarea from "./components/workarea/Workarea.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -34,8 +35,7 @@
   let showValid: boolean = true;
 
   let data = PrescInfoDataEdit.fromObject(orig);
-  let workareaService: WorkareaService | undefined = undefined;
-  // let clearWorkarea: (() => void) | undefined = undefined;
+  let workareaService: WorkareaService = new WorkareaService();
   let wa: HTMLElement;
   let selectedGroupId = 0;
   let selectedDrugId = 0;
@@ -57,20 +57,16 @@
   }
 
   async function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    if (!wa) {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
-    if( workareaService ){
-      let ok = await workareaService.confirmClear();
-      if( !ok ){
-        return;
-      }
-    }
+    const edit = group.clone();
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
-        group,
+        destroy: () => workareaService.clear(),
+        orig: group,
+        data: edit,
         drugId: drug.id,
         at,
         onChange: (value: RP剤情報Edit) => {
@@ -81,19 +77,21 @@
         },
       },
     });
-    
-    clearWorkarea = () => {
+    workareaService.setClearByDestroy(() => {
       w.$destroy();
-      clearWorkarea = undefined;
       selectedGroupId = 0;
       selectedDrugId = 0;
-    };
+    });
+    workareaService.setConfirmForClear((): Promise<boolean> => {
+      return new Promise((resolve) => {
+        if( edit.isEditing() ){
+          const proceed = confirm("薬剤が編集中です")
+        }
+      });
+    });
   }
 
   function doValidUpto() {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -117,9 +115,6 @@
   }
 
   function doBikouClick(record: 備考レコードEdit | undefined): void {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -149,9 +144,6 @@
   }
 
   function doEditClinicalInfo(): void {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -179,9 +171,6 @@
   }
 
   function doEditExamInfo(): void {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -209,9 +198,6 @@
   }
 
   function doPaste(): void {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -233,9 +219,6 @@
   }
 
   function doSearch() {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;
@@ -260,9 +243,6 @@
   }
 
   function doExample() {
-    if (!wa) {
-      return;
-    }
     if (clearWorkarea) {
       alert("現在編集中です。」");
       return;

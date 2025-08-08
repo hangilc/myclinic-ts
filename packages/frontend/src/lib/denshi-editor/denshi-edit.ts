@@ -8,6 +8,7 @@ import type {
   点数表, 都道府県コード, 診療科コード種別, 診療科コード, 性別コード, 保険一部負担金区分コード, 保険種別コード, 被保険者等種別,
   職務上の事由コード, 残薬確認対応フラグ
 } from "@/lib/denshi-shohou/denshi-shohou";
+import { isEqualRP剤情報 } from "../denshi-shohou/presc-info-equal";
 
 let serialId = 1;
 
@@ -60,10 +61,6 @@ export class 薬品レコードEdit implements 薬品レコード {
     return new 薬品レコードEdit(this, this);
   }
 
-  // assign(src: 薬品レコードEdit): void {
-  //   Object.assign(this, src);
-  // }
-
   toObject(): 薬品レコード {
     return Object.assign({}, {
       情報区分: this.情報区分,
@@ -110,10 +107,6 @@ export class 不均等レコードEdit implements 不均等レコード {
     return new 不均等レコードEdit(this);
   }
 
-  assign(src: 不均等レコードEdit): void {
-    Object.assign(this, src);
-  }
-
   toObject(): 不均等レコード {
     let obj: 不均等レコード = Object.assign({}, {
       不均等１回目服用量: this.不均等１回目服用量,
@@ -158,10 +151,6 @@ export class 負担区分レコードEdit implements 負担区分レコード {
     return new 負担区分レコードEdit(this);
   }
 
-  assign(src: 負担区分レコードEdit): void {
-    Object.assign(this, src);
-  }
-
   toObject(): 負担区分レコード | undefined {
     if (this.第一公費負担区分 === undefined && this.第二公費負担区分 === undefined &&
       this.第三公費負担区分 === undefined && this.特殊公費負担区分 === undefined) {
@@ -204,10 +193,6 @@ export class 薬品１回服用量レコードEdit implements 薬品１回服用
     return new 薬品１回服用量レコードEdit(this);
   }
 
-  assign(src: 薬品１回服用量レコードEdit): void {
-    Object.assign(this, src);
-  }
-
   toObject(): 薬品１回服用量レコード {
     let obj: 薬品１回服用量レコード = {
       薬剤１回服用量: this.薬剤１回服用量,
@@ -242,10 +227,6 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
 
   clone(): 薬品補足レコードEdit {
     return new 薬品補足レコードEdit(this, this.id, this.isEditing);
-  }
-
-  assign(src: 薬品補足レコードEdit): void {
-    this.薬品補足情報 = src.薬品補足情報;
   }
 
   toObject(): 薬品補足レコード {
@@ -314,17 +295,6 @@ export class 薬品情報Edit implements 薬品情報 {
       this.isEditing不均等レコード ||
       !!(this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing));
   }
-
-  // assign(src: 薬品情報Edit): void {
-  //   this.薬品レコード = src.薬品レコード;
-  //   this.単位変換レコード = src.単位変換レコード;
-  //   this.不均等レコード = src.不均等レコード;
-  //   this.負担区分レコード = src.負担区分レコード;
-  //   this.薬品１回服用量レコード = src.薬品１回服用量レコード;
-  //   this.薬品補足レコード = src.薬品補足レコード;
-  //   this.ippanmei = src.ippanmei;
-  //   this.ippanmeicode = src.ippanmeicode;
-  // }
 
   toObject(): 薬品情報 {
     let obj: 薬品情報 = {
@@ -426,10 +396,6 @@ export class 剤形レコードEdit implements 剤形レコード {
     return this.isEditing剤形区分 || this.isEditing調剤数量;
   }
 
-  // assign(src: 剤形レコードEdit): void {
-  //   Object.assign(this, src);
-  // }
-
   toObject(): 剤形レコード {
     let obj: 剤形レコード = {
       剤形区分: this.剤形区分,
@@ -472,10 +438,6 @@ export class 用法レコードEdit implements 用法レコード {
   isEditing(): boolean {
     return this.isEditing用法コード;
   }
-
-  // assign(src: 用法レコードEdit): void {
-  //   Object.assign(this, src);
-  // }
 
   toObject(): 用法レコード {
     let obj: 用法レコード = {
@@ -520,11 +482,6 @@ export class 用法補足レコードEdit implements 用法補足レコード {
   isEditing(): boolean {
     return this.isEditing用法補足情報;
   }
-
-  // assign(src: 用法補足レコードEdit): void {
-  //   this.用法補足区分 = src.用法補足区分;
-  //   this.用法補足情報 = src.用法補足情報;
-  // }
 
   toObject(): 用法補足レコード {
     let obj: 用法補足レコード = {
@@ -582,12 +539,9 @@ export class RP剤情報Edit implements RP剤情報 {
     !!this.用法補足レコード?.some(r => r.isEditing());
   }
 
-  // assign(src: RP剤情報Edit): void {
-  //   this.剤形レコード = src.剤形レコード;
-  //   this.用法レコード = src.用法レコード;
-  //   this.用法補足レコード = src.用法補足レコード;
-  //   this.薬品情報グループ = src.薬品情報グループ;
-  // }
+  isModified(orig: RP剤情報): boolean {
+    return !isEqualRP剤情報(this, orig);
+  }
 
   toObject(): RP剤情報 {
     let obj: RP剤情報 = {
@@ -650,10 +604,6 @@ export class 公費レコードEdit implements 公費レコード {
     return new 公費レコードEdit(this);
   }
 
-  assign(src: 公費レコードEdit): void {
-    Object.assign(this, src);
-  }
-
   toObject(): 公費レコード {
     let obj: 公費レコード = {
       公費負担者番号: this.公費負担者番号,
@@ -688,10 +638,6 @@ export class 麻薬施用レコードEdit implements 麻薬施用レコード {
     return new 麻薬施用レコードEdit(this);
   }
 
-  assign(src: 麻薬施用レコードEdit): void {
-    Object.assign(this, src);
-  }
-
   toObject(): 麻薬施用レコード {
     return {
       麻薬施用者免許番号: this.麻薬施用者免許番号,
@@ -720,10 +666,6 @@ export class 備考レコードEdit implements 備考レコード {
 
   clone(): 備考レコードEdit {
     return new 備考レコードEdit(this, this.id, this.isEditing);
-  }
-
-  assign(src: 備考レコードEdit): void {
-    this.備考 = src.備考;
   }
 
   toObject(): 備考レコード {
@@ -755,11 +697,6 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
 
   clone(): 提供診療情報レコードEdit {
     return new 提供診療情報レコードEdit(this, this.id, this.isEditing);
-  }
-
-  assign(src: 提供診療情報レコードEdit): void {
-    this.薬品名称 = src.薬品名称;
-    this.コメント = src.コメント;
   }
 
   toObject(): 提供診療情報レコード {
@@ -794,10 +731,6 @@ export class 検査値データ等レコードEdit implements 検査値データ
     return new 検査値データ等レコードEdit(this, this.id, this.isEditing);
   }
 
-  assign(src: 検査値データ等レコードEdit): void {
-    this.検査値データ等 = src.検査値データ等;
-  }
-
   toObject(): 検査値データ等レコード {
     return {
       検査値データ等: this.検査値データ等,
@@ -829,11 +762,6 @@ export class 提供情報レコードEdit implements 提供情報レコード {
       提供診療情報レコード: this.提供診療情報レコード?.map(record => record.clone()),
       検査値データ等レコード: this.検査値データ等レコード?.map(record => record.clone()),
     });
-  }
-
-  assign(src: 提供情報レコードEdit): void {
-    this.提供診療情報レコード = src.提供診療情報レコード;
-    this.検査値データ等レコード = src.検査値データ等レコード;
   }
 
   toObject(): 提供情報レコード | undefined {
@@ -1072,10 +1000,6 @@ export class PrescInfoDataEdit implements PrescInfoData {
       RP剤情報グループ: this.RP剤情報グループ.map(info => info.clone()),
       提供情報レコード: this.提供情報レコード?.clone(),
     });
-  }
-
-  assign(src: PrescInfoDataEdit): void {
-    Object.assign(this, src);
   }
 
   toObject(): PrescInfoData {

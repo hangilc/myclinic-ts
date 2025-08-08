@@ -32,11 +32,11 @@
   import { toHankaku } from "@/lib/zenkaku";
 
   export let destroy: () => void;
-  export let group: RP剤情報Edit;
+  export let orig: RP剤情報Edit;
+  export let data: RP剤情報Edit;
   export let drugId: number;
   export let at: string;
   export let onChange: (value: RP剤情報Edit) => void;
-  let data = group.clone();
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
   let drugCacheHandler = new DrugCacheHandler(
     drug.薬品レコード.薬品名称,
