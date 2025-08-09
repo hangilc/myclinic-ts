@@ -69,9 +69,9 @@
         data: edit,
         drugId: drug.id,
         at,
-        onChange: (value: RP剤情報Edit) => {
+        onChange: () => {
           data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
-            g.id === group.id ? value : g,
+            g.id === group.id ? edit : g,
           ).filter((g) => g.薬品情報グループ.length > 0);
           data = data;
         },
@@ -82,18 +82,31 @@
       selectedGroupId = 0;
       selectedDrugId = 0;
     });
-    workareaService.setConfirmForClear((): Promise<boolean> => {
-      return new Promise((resolve) => {
-        if( edit.isEditing() ){
-          const proceed = confirm("薬剤が編集中です")
+    workareaService.setConfirmForClear(async (): Promise<boolean> => {
+      if (edit.isEditing()) {
+        alert("薬剤が編集中です");
+        return false;
+      }
+      if (edit.isModified(group)) {
+        let ok = confirm(
+          "変更されて保存されていない薬剤があります。保存して進みますか？",
+        );
+        if (ok) {
+          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
+            g.id === group.id ? edit : g,
+          ).filter((g) => g.薬品情報グループ.length > 0);
+          data = data;
+          return true;
+        } else {
+          return false;
         }
-      });
+      }
+      return true;
     });
   }
 
-  function doValidUpto() {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doValidUpto() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: EditValidUpto = new EditValidUpto({
@@ -108,15 +121,14 @@
         onCancel: () => {},
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirmForClear(async (): Promise<boolean> {
+
+    })
   }
 
-  function doBikouClick(record: 備考レコードEdit | undefined): void {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doBikouClick(record: 備考レコードEdit | undefined): void {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     if (record) {
@@ -143,9 +155,8 @@
     doBikouClick(undefined);
   }
 
-  function doEditClinicalInfo(): void {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doEditClinicalInfo() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: EditClinicalInfo = new EditClinicalInfo({
@@ -170,9 +181,8 @@
     doEditClinicalInfo();
   }
 
-  function doEditExamInfo(): void {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doEditExamInfo(): void {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: EditExamInfo = new EditExamInfo({
@@ -197,9 +207,8 @@
     doEditExamInfo();
   }
 
-  function doPaste(): void {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doPaste() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: Paste = new Paste({
@@ -218,9 +227,8 @@
     };
   }
 
-  function doSearch() {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doSearch() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: PrevSearch = new PrevSearch({
@@ -242,9 +250,8 @@
     };
   }
 
-  function doExample() {
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doExample() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const w: Example = new Example({
@@ -263,12 +270,8 @@
     };
   }
 
-  function doAdd() {
-    if (!wa) {
-      return;
-    }
-    if (clearWorkarea) {
-      alert("現在編集中です。」");
+  async function doAdd() {
+    if (!(await workareaService.confirmForClear())) {
       return;
     }
     const RP剤情報 = createBlankRP剤情報();

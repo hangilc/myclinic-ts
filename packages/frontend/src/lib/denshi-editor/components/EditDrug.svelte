@@ -36,7 +36,7 @@
   export let data: RP剤情報Edit;
   export let drugId: number;
   export let at: string;
-  export let onChange: (value: RP剤情報Edit) => void;
+  export let onChange: () => void;
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
   let drugCacheHandler = new DrugCacheHandler(
     drug.薬品レコード.薬品名称,
@@ -76,7 +76,7 @@
       return;
     }
     destroy();
-    onChange(data);
+    onChange();
     handleCache();
   }
 
@@ -180,9 +180,8 @@
     data.薬品情報グループ = data.薬品情報グループ.filter(
       (d) => d.id !== drugId,
     );
-    console.log("doDelete", drugId, data);
     destroy();
-    onChange(data);
+    onChange();
   }
 </script>
 
