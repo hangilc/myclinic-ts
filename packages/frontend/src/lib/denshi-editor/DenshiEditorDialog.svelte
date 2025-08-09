@@ -24,7 +24,6 @@
   import Example from "./components/Example.svelte";
   import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
-  import Workarea from "./components/workarea/Workarea.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -113,7 +112,7 @@
       target: wa,
       props: {
         validUpto: data.使用期限年月日,
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         onEnter: (value: string | undefined) => {
           data.使用期限年月日 = value;
           data = data;
@@ -137,7 +136,7 @@
     const w: EditBikou = new EditBikou({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         bikou: data.備考レコード,
         update: (value: 備考レコードEdit[] | undefined) => {
           data.備考レコード = value;
@@ -162,7 +161,7 @@
     const w: EditClinicalInfo = new EditClinicalInfo({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         info: data.提供情報レコード?.提供診療情報レコード,
         update: (value: 提供診療情報レコードEdit[] | undefined) => {
           data.set提供診療情報レコード(value);
@@ -188,7 +187,7 @@
     const w: EditExamInfo = new EditExamInfo({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         info: data.提供情報レコード?.検査値データ等レコード,
         update: (value: 検査値データ等レコードEdit[] | undefined) => {
           data.set検査値データ等レコード(value);
@@ -214,7 +213,7 @@
     const w: Paste = new Paste({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
           data = data;
@@ -234,7 +233,7 @@
     const w: PrevSearch = new PrevSearch({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         patientId,
         at,
         onEnter: async (value: RP剤情報[]) => {
@@ -257,7 +256,7 @@
     const w: Example = new Example({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
           data = data;
@@ -279,7 +278,7 @@
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
-        destroy: () => clearWorkarea && clearWorkarea(),
+        destroy: () => workareaService.clear(),
         group,
         drugId: group.薬品情報グループ[0].id,
         at,
