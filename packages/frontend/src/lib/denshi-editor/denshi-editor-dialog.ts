@@ -11,6 +11,7 @@ export class WorkareaService {
     let ok = await this.confirm();
     if( ok ){
       this.clear();
+      this.reset();
     }
     return ok;
   }
@@ -18,6 +19,7 @@ export class WorkareaService {
   reset(): void {
     this.clear = () => undefined;
     this.confirmAndClear = async (): Promise<boolean> => {
+      console.log("default confirm");
       this.clear();
       return true;
     };

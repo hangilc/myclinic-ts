@@ -12,12 +12,8 @@
     drug: 薬品情報Edit,
   ) => void;
   export let showValid: boolean = false;
-  export let selectedGroupId: number;
-  export let selectedDrugId: number;
 
   function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    selectedGroupId = group.id;
-    selectedDrugId = drug.id;
     onDrugSelect(group, drug);
   }
 </script>
@@ -25,13 +21,13 @@
 <div>
   <div class="groups">
     {#each data.RP剤情報グループ as group, index (group.id)}
-      <div class:group-selected={selectedGroupId === group.id} class="group">
+      <div class:group-selected={group.isSelected} class="group">
         <div>{toZenkaku((index + 1).toString())}）</div>
         <div>
           {#each group.薬品情報グループ as drug (drug.id)}
             <!-- svelte-ignore a11y-no-static-element-interactions -->
             <div class="drug-rep" on:click={() => doDrugSelect(group, drug)} 
-              class:drug-selected={drug.id === selectedDrugId}>
+              class:drug-selected={drug.isSelected}>
               {#if showValid}
                 <ConvDrugValidity {drug} />
               {/if}

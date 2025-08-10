@@ -36,8 +36,6 @@
   let data = PrescInfoDataEdit.fromObject(orig);
   let workareaService: WorkareaService = new WorkareaService();
   let wa: HTMLElement;
-  let selectedGroupId = 0;
-  let selectedDrugId = 0;
   let showSubCommands = false;
 
   function doCancel() {
@@ -45,7 +43,7 @@
   }
 
   async function doEnter() {
-    if( !(await workareaService.confirmAndClear() )){
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     let presc = data.toObject();
@@ -62,6 +60,8 @@
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    data.selectDrugExclusive(group.id, drug.id);
+    data = data;
     const edit = group.clone();
     let w: EditDrug = new EditDrug({
       target: wa,
@@ -81,11 +81,11 @@
     });
     workareaService.setClearByDestroy(() => {
       w.$destroy();
-      selectedGroupId = 0;
-      selectedDrugId = 0;
+      data.clearAllSelected();
+      data = data;
     });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      console.log("enter confirm", edit.isEditing());
+      console.log("enter confirm", edit.isEditing(), group, edit);
       if (edit.isEditing()) {
         alert("薬剤が編集中です");
         return false;
@@ -99,9 +99,9 @@
             g.id === group.id ? edit : g,
           ).filter((g) => g.薬品情報グループ.length > 0);
           data = data;
-          return  true;
+          return true;
         } else {
-          return  false;
+          return false;
         }
       }
       return true;
@@ -330,13 +330,7 @@
           onEditExamInfo={doEditExamInfo}
         />
       {/if}
-      <CurrentPresc
-        {data}
-        {onDrugSelect}
-        {showValid}
-        bind:selectedGroupId
-        bind:selectedDrugId
-      />
+      <CurrentPresc {data} {onDrugSelect} {showValid} />
       <PrescAux
         {data}
         onValidUptoClick={doValidUpto}

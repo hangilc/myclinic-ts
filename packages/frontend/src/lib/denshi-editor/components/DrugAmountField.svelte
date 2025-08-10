@@ -25,6 +25,7 @@
   function doRepClick() {
     inputText = inputValue();
     isEditing = true;
+    console.log("amount click", drug);
     focus();
   }
 
