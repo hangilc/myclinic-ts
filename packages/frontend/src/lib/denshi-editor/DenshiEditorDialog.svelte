@@ -45,6 +45,9 @@
   }
 
   async function doEnter() {
+    if( !(await workareaService.confirmAndClear() )){
+      return;
+    }
     let presc = data.toObject();
     let err = await validatePrescinfoData(presc);
     if (err) {
@@ -56,7 +59,7 @@
   }
 
   async function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const edit = group.clone();
@@ -81,7 +84,8 @@
       selectedGroupId = 0;
       selectedDrugId = 0;
     });
-    workareaService.setConfirmForClear(async (): Promise<boolean> => {
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      console.log("enter confirm", edit.isEditing());
       if (edit.isEditing()) {
         alert("薬剤が編集中です");
         return false;
@@ -95,9 +99,9 @@
             g.id === group.id ? edit : g,
           ).filter((g) => g.薬品情報グループ.length > 0);
           data = data;
-          return true;
+          return  true;
         } else {
-          return false;
+          return  false;
         }
       }
       return true;
@@ -105,7 +109,7 @@
   }
 
   async function doValidUpto() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: EditValidUpto = new EditValidUpto({
@@ -121,13 +125,14 @@
       },
     });
     workareaService.setClearByDestroy(w.$destroy);
-    workareaService.setConfirmForClear(async (): Promise<boolean> {
-
-    })
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("有効期限が編集中です。");
+      return false;
+    });
   }
 
-  async function doBikouClick(record: 備考レコードEdit | undefined): void {
-    if (!(await workareaService.confirmForClear())) {
+  async function doBikouClick(record: 備考レコードEdit | undefined) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     if (record) {
@@ -144,10 +149,11 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("備考が編集中です。");
+      return false;
+    });
   }
 
   function doEditBikou(): void {
@@ -155,7 +161,7 @@
   }
 
   async function doEditClinicalInfo() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: EditClinicalInfo = new EditClinicalInfo({
@@ -169,10 +175,11 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("提供診療情報が編集中です。");
+      return false;
+    });
   }
 
   function doClinicalInfoClick(record: 提供診療情報レコードEdit): void {
@@ -180,8 +187,8 @@
     doEditClinicalInfo();
   }
 
-  async function doEditExamInfo(): void {
-    if (!(await workareaService.confirmForClear())) {
+  async function doEditExamInfo() {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: EditExamInfo = new EditExamInfo({
@@ -195,10 +202,11 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("検査値データ等レコードが編集中です。");
+      return false;
+    });
   }
 
   function doExamInfoClick(record: 検査値データ等レコードEdit): void {
@@ -207,7 +215,7 @@
   }
 
   async function doPaste() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: Paste = new Paste({
@@ -220,14 +228,15 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("薬剤の貼付けの実行中です。");
+      return false;
+    });
   }
 
   async function doSearch() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: PrevSearch = new PrevSearch({
@@ -243,14 +252,15 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("薬剤の検索の実行中です。");
+      return false;
+    });
   }
 
   async function doExample() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const w: Example = new Example({
@@ -263,37 +273,39 @@
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("処方例を利用中です。");
+      return false;
+    });
   }
 
   async function doAdd() {
-    if (!(await workareaService.confirmForClear())) {
+    if (!(await workareaService.confirmAndClear())) {
       return;
     }
     const RP剤情報 = createBlankRP剤情報();
-    const group = RP剤情報Edit.fromObject(RP剤情報);
+    const orig = RP剤情報Edit.fromObject(RP剤情報);
+    const edit = orig.clone();
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
         destroy: () => workareaService.clear(),
-        group,
-        drugId: group.薬品情報グループ[0].id,
+        orig,
+        data: edit,
+        drugId: orig.薬品情報グループ[0].id,
         at,
-        onChange: (value: RP剤情報Edit) => {
-          data.RP剤情報グループ.push(value);
+        onChange: () => {
+          data.RP剤情報グループ.push(edit);
           data = data;
         },
       },
     });
-    clearWorkarea = () => {
-      w.$destroy();
-      clearWorkarea = undefined;
-      selectedGroupId = 0;
-      selectedDrugId = 0;
-    };
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => {
+      alert("薬剤追加を実行中です。");
+      return false;
+    });
   }
 </script>
 
