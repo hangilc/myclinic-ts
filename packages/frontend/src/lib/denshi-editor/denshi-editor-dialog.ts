@@ -18,11 +18,7 @@ export class WorkareaService {
 
   reset(): void {
     this.clear = () => undefined;
-    this.confirmAndClear = async (): Promise<boolean> => {
-      console.log("default confirm");
-      this.clear();
-      return true;
-    };
+    this.confirm = async() => true;
   }
 
   setClear(clear: () => void): void {
@@ -32,7 +28,6 @@ export class WorkareaService {
   setClearByDestroy(destroy: () => void): void {
     this.setClear(() => {
       destroy();
-      this.reset();
     })
   }
 
