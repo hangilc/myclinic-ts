@@ -8,15 +8,18 @@
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
   import TrashLink from "../icons/TrashLink.svelte";
+  import { 不均等レコードEdit } from "../denshi-edit";
 
-  export let 不均等レコード: 不均等レコード | undefined = undefined;
+  export let 不均等レコード: 不均等レコードEdit | undefined = undefined;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
 
-  let inputText: string = ""; 
+  let inputText: string = "";
   let inputElement: HTMLInputElement | undefined = undefined;
 
-  $: if( isEditing ){ initInput() }
+  $: if (isEditing) {
+    initInput();
+  }
 
   export const focus: () => void = async () => {
     await tick();
@@ -43,9 +46,9 @@
   }
 
   function doEnter() {
-    let uneven = deserializeUneven(inputText);
     try {
-      不均等レコード = uneven;
+      let uneven = deserializeUneven(inputText);
+      不均等レコード = 不均等レコードEdit.fromOptionalObject(uneven);
       isEditing = false;
       onFieldChange();
     } catch (e: any) {

@@ -28,8 +28,6 @@
     ippanKind: "一般名" | "一般名有り" | "";
   }[] = [];
 
-  console.log("text", text);
-
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
       if (updated && updated.textId === textId) {

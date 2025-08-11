@@ -35,7 +35,6 @@
   import {
     drawShohousen2025,
   } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
-  // import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
 
@@ -70,38 +69,6 @@
       }
     })
   }
-
-  // function doEdit() {
-  //   const d: DenshiEditor = new DenshiEditor({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       data: shohou,
-  //       onEnter: (updated: PrescInfoData) => {
-  //         onModified(updated);
-  //       },
-  //     },
-  //   });
-  // }
-
-  // function doOldEdit() {
-  //   const d: DenshiHenkanDialog = new DenshiHenkanDialog({
-  //     target: document.body,
-  //     props: {
-  //       destroy: () => d.$destroy(),
-  //       init: { kind: "denshi", data: shohou },
-  //       at,
-  //       kouhiList,
-  //       title: "処方編集",
-  //       onEnter: (newShohou: PrescInfoData) => {
-  //         onModified(newShohou);
-  //       },
-  //       onCancel: () => {
-  //         onCancel();
-  //       },
-  //     },
-  //   });
-  // }
 
   function doPrint() {
     const data = denshiToPrint(shohou);

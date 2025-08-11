@@ -1,4 +1,4 @@
-import { toZenkaku } from "myclinic-rezept/zenkaku";
+import { toZenkaku } from "@/lib/zenkaku";
 import type { RP剤情報, 不均等レコード, 用法レコード, 用法補足レコード, 薬品レコード, 薬品情報, 負担区分レコード } from "../presc-info";
 
 export function amountDisp(rec: 薬品レコード): string {
@@ -63,7 +63,7 @@ export function daysTimesDisp(group: RP剤情報): string {
 }
 
 export function unevenDisp(rec: 不均等レコード): string {
-  return [
+  const s = [
     rec?.不均等１回目服用量,
     rec?.不均等２回目服用量,
     rec?.不均等３回目服用量 ?? "",
@@ -72,4 +72,5 @@ export function unevenDisp(rec: 不均等レコード): string {
   ]
     .filter((s) => s !== "")
     .join("-");
+  return toZenkaku(s);
 }

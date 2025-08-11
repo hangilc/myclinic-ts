@@ -103,6 +103,14 @@ export class 不均等レコードEdit implements 不均等レコード {
     return new 不均等レコードEdit(obj);
   }
 
+  static fromOptionalObject(obj: 不均等レコード | undefined): 不均等レコードEdit | undefined {
+    if( obj === undefined ){
+      return undefined;
+    } else {
+      return 不均等レコードEdit.fromObject(obj);
+    }
+  }
+
   clone(): 不均等レコードEdit {
     return new 不均等レコードEdit(this);
   }
