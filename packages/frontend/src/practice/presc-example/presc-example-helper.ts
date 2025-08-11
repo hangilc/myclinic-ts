@@ -1,4 +1,4 @@
-import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
 export function createBlankRP剤情報(): RP剤情報 {
   return {
@@ -10,16 +10,20 @@ export function createBlankRP剤情報(): RP剤情報 {
       用法コード: "",
       用法名称: ""
     },
-    薬品情報グループ: [{
-      薬品レコード: {
-        情報区分: "医薬品",
-        薬品コード種別: "レセプト電算処理システム用コード",
-        薬品コード: "",
-        薬品名称: "",
-        分量: "",
-        力価フラグ: "薬価単位",
-        単位名: ""
-      }
-    }]
+    薬品情報グループ: [createBlank薬品情報()]
   }
+}
+
+export function createBlank薬品情報(): 薬品情報 {
+  return {
+    薬品レコード: {
+      情報区分: "医薬品",
+      薬品コード種別: "レセプト電算処理システム用コード",
+      薬品コード: "",
+      薬品名称: "",
+      分量: "",
+      力価フラグ: "薬価単位",
+      単位名: ""
+    }
+  };
 }

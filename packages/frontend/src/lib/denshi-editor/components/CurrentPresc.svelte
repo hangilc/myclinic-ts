@@ -4,17 +4,24 @@
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
   import ConvDrugValidity from "./ConvDrugValidity.svelte";
   import ConvUsageValidity from "./ConvUsageValidity.svelte";
-  import type { PrescInfoDataEdit, RP剤情報Edit, 薬品情報Edit } from "../denshi-edit";
+  import type {
+    PrescInfoDataEdit,
+    RP剤情報Edit,
+    薬品情報Edit,
+  } from "../denshi-edit";
+  import PlusLink from "../icons/PlusLink.svelte";
 
   export let data: PrescInfoDataEdit;
-  export let onDrugSelect: (
-    group: RP剤情報Edit,
-    drug: 薬品情報Edit,
-  ) => void;
+  export let onDrugSelect: (group: RP剤情報Edit, drug: 薬品情報Edit) => void;
   export let showValid: boolean = false;
+  export let onAddDrug: (group: RP剤情報Edit) => void;
 
   function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
     onDrugSelect(group, drug);
+  }
+
+  function doAddDrug(group: RP剤情報Edit) {
+    onAddDrug(group);
   }
 </script>
 
@@ -24,14 +31,18 @@
       <div class:group-selected={group.isSelected} class="group">
         <div>{toZenkaku((index + 1).toString())}）</div>
         <div>
-          {#each group.薬品情報グループ as drug (drug.id)}
+          {#each group.薬品情報グループ as drug, drugIndex (drug.id)}
             <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div class="drug-rep" on:click={() => doDrugSelect(group, drug)} 
-              class:drug-selected={drug.isSelected}>
-              {#if showValid}
-                <ConvDrugValidity {drug} />
+            <div class="drug-rep" class:drug-selected={drug.isSelected}>
+              <span on:click={() => doDrugSelect(group, drug)}>
+                {#if showValid}
+                  <ConvDrugValidity {drug} />
+                {/if}
+                <span>{drugRep(drug)}</span>
+              </span>
+              {#if drugIndex === group.薬品情報グループ.length - 1}
+                <PlusLink onClick={() => doAddDrug(group)} />
               {/if}
-              <span>{drugRep(drug)}</span>
             </div>
           {/each}
           <div class="usage-rep">
@@ -58,6 +69,7 @@
     grid-template-columns: auto 1fr;
     padding: 2px;
     margin-bottom: 6px;
+    --ui-plus-link-top: 3px;
   }
 
   .drug-rep,

@@ -22,7 +22,7 @@
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
-  import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
+  import { createBlankRP剤情報, createBlank薬品情報 } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
   import { writable, type Writable } from "svelte/store";
 
@@ -57,7 +57,7 @@
     onEnter(presc);
   }
 
-  async function onDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
+  async function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
@@ -335,6 +335,16 @@
     });
   }
 
+  function doAddDrugToGroup(group: RP剤情報Edit) {
+    const 薬品情報 = 薬品情報Edit.fromObject(createBlank薬品情報());
+    薬品情報.薬品レコード.isEditing薬品コード = false;
+    薬品情報.薬品レコード.isEditing分量 = false;
+    console.log("drug", 薬品情報);
+    group.薬品情報グループ.push(薬品情報);
+    data = data;
+    doDrugSelect(group, 薬品情報);
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -364,7 +374,7 @@
           onAddExamInfo={wrapSubCommand(doAddExamInfo)}
         />
       {/if}
-      <CurrentPresc {data} {onDrugSelect} {showValid} />
+      <CurrentPresc {data} onDrugSelect={doDrugSelect} {showValid} onAddDrug={doAddDrugToGroup}/>
       <PrescAux
         {data}
         onValidUptoClick={doValidUpto}

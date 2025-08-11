@@ -19,3 +19,10 @@
     />
   </svg>
 </a>
+
+<style>
+  a {
+    position: relative;
+    top: var(--ui-plus-link-top, 0);
+  }
+</style>
