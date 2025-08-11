@@ -78,6 +78,21 @@ function toDrugs(src: PrescInfoData): Shohou {
   if (src.使用期限年月日) {
     kigen = DateWrapper.fromOnshiDate(src.使用期限年月日).asSqlDate();
   }
+  switch (src.保険一部負担金区分) {
+    case "高齢者一般": {
+      bikou.push("高９");
+      break;
+    }
+    case "高齢者８割": {
+      bikou.push("高８");
+      break;
+    }
+    case "高齢者７割": {
+      bikou.push("高７");
+      break;
+    }
+    default: break;
+  }
   if (src.備考レコード) {
     bikou.push(...src.備考レコード.map(rec => rec.備考));
   }
@@ -90,9 +105,9 @@ function toDrugs(src: PrescInfoData): Shohou {
     bikou.push(rec.検査値データ等);
   });
   return {
-    groups, 
+    groups,
     // shohouComments, 
-    bikou, 
+    bikou,
     kigen,
   }
 }
@@ -120,9 +135,9 @@ function toDrugsOld(src: PrescInfoData): Shohou {
     bikou.push(rec.検査値データ等);
   });
   return {
-    groups, 
+    groups,
     // shohouComments, 
-    bikou, 
+    bikou,
     kigen,
   }
 }
@@ -171,9 +186,9 @@ function toShohouDrug(info: 薬品情報): Drug {
   }
   let drugComments: string[] = [];
   (info.薬品補足レコード ?? []).forEach(info => {
-    if( info.薬品補足情報 === "後発品変更不可" ){
+    if (info.薬品補足情報 === "後発品変更不可") {
       senpatsu = "henkoufuka";
-    } else if(info.薬品補足情報 === "先発医薬品患者希望") {
+    } else if (info.薬品補足情報 === "先発医薬品患者希望") {
       senpatsu = "kanjakibou";
     } else {
       drugComments.push(info.薬品補足情報);
@@ -196,9 +211,9 @@ function toShohouDrugOld(info: 薬品情報): Drug {
     drugComments.push(s);
   }
   (info.薬品補足レコード ?? []).forEach(info => {
-    if( info.薬品補足情報 === "後発品変更不可" ){
+    if (info.薬品補足情報 === "後発品変更不可") {
       senpatsu = "henkoufuka";
-    } else if(info.薬品補足情報 === "先発医薬品患者希望") {
+    } else if (info.薬品補足情報 === "先発医薬品患者希望") {
       senpatsu = "kanjakibou";
     } else {
       drugComments.push(info.薬品補足情報);
