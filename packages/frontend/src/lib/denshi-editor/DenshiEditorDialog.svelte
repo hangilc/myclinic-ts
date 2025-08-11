@@ -24,7 +24,8 @@
   import Example from "./components/Example.svelte";
   import { createBlankRP剤情報, createBlank薬品情報 } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
-  import { writable, type Writable } from "svelte/store";
+  import GroupReorder from "./components/GroupReorder.svelte";
+  import Workarea from "./components/workarea/Workarea.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -345,6 +346,26 @@
     doDrugSelect(group, 薬品情報);
   }
 
+  async function doGroupReorder() {
+    if (!(await workareaService.confirmAndClear())) {
+      return;
+    }
+    let w: GroupReorder = new GroupReorder({
+      target: wa,
+      props: {
+        groups: data.RP剤情報グループ,
+        onEnter: (groups: RP剤情報Edit[]) => {
+          data.RP剤情報グループ = groups;
+          workareaService.clear();
+          data = data;
+        },
+        onCancel: () => { workareaService.clear() },
+      },
+    });
+    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setConfirm(async (): Promise<boolean> => true);
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -372,9 +393,15 @@
           onAddBikou={wrapSubCommand(doAddBikou)}
           onAddClinicalInfo={wrapSubCommand(doAddClinicalInfo)}
           onAddExamInfo={wrapSubCommand(doAddExamInfo)}
+          onReorder={wrapSubCommand(doGroupReorder)}
         />
       {/if}
-      <CurrentPresc {data} onDrugSelect={doDrugSelect} {showValid} onAddDrug={doAddDrugToGroup}/>
+      <CurrentPresc
+        {data}
+        onDrugSelect={doDrugSelect}
+        {showValid}
+        onAddDrug={doAddDrugToGroup}
+      />
       <PrescAux
         {data}
         onValidUptoClick={doValidUpto}

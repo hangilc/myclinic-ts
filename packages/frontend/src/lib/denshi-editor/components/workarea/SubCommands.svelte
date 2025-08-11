@@ -7,6 +7,7 @@
   export let onAddBikou: () => void;
   export let onAddClinicalInfo: () => void;
   export let onAddExamInfo: () => void;
+  export let onReorder: () => void;
 </script>
 
 <div class="top">
@@ -16,6 +17,9 @@
   <SmallLink onClick={onAddBikou}>備考追加</SmallLink>
   <SmallLink onClick={onAddClinicalInfo}>診療情報追加</SmallLink>
   <SmallLink onClick={onAddExamInfo}>検査情報追加</SmallLink>
+  {#if data.RP剤情報グループ.length > 1}
+    <SmallLink onClick={onReorder}>順序変種</SmallLink>
+  {/if}
 </div>
 
 <style>
