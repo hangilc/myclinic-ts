@@ -35,7 +35,7 @@ export function validateDrug(drug: {
 function unevenRep(u: 不均等レコード | undefined): string {
   if (u) {
     let wrapper = new 不均等レコードWrapper(u);
-    return "(" + wrapper.getParts().join("-") + ")"
+    return "（" + toZenkaku(wrapper.getParts().join("-")) + "）"
   } else {
     return "";
   }

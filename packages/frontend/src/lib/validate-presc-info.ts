@@ -1,6 +1,7 @@
 import type { PrescInfoData, RP剤情報, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
 import api from "@/lib/api";
 import { issueDateOfPrescInfoAsSqlDate } from "./denshi-shohou/presc-info-helper";
+import { toHankaku } from "./zenkaku";
 
 export async function validatePrescinfoData(data: PrescInfoData): Promise<string | undefined> {
   let at = issueDateOfPrescInfoAsSqlDate(data);
@@ -16,6 +17,15 @@ export async function validateRP剤情報(group: RP剤情報, at: string): Promi
   for (let drug of group.薬品情報グループ) {
     if (drug.薬品レコード.薬品コード === "") {
       return `薬品コードが設定されていません：（${drug.薬品レコード.薬品名称}）`;
+    }
+    {
+      let amount = drug.薬品レコード.分量;
+      amount = toHankaku(amount);
+      const value = Number(amount);
+      if( isNaN(value) ||  amount.startsWith(".") || amount.endsWith(".") ){
+        return `薬品の分量が不適切です：${drug.薬品レコード.薬品名称}:${drug.薬品レコード.分量}`;
+      }
+      drug.薬品レコード.分量 = amount;
     }
     let err = await confirmDrugCode(drug.薬品レコード, at);
     if (err) {

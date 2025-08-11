@@ -1197,6 +1197,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
   clearAllSelected() {
     this.RP剤情報グループ.forEach(g => {
       g.isSelected = false;
+      console.log("g", g);
       g.薬品情報グループ.forEach(d => {
         d.isSelected = false;
       })

@@ -61,22 +61,23 @@
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    const orig = group.clone();
     data.selectDrugExclusive(group.id, drug.id);
     data = data;
-    const edit = group.clone();
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
         destroy: () => workareaService.clear(),
-        orig: group,
-        data: edit,
+        data: group,
         drugId: drug.id,
         at,
         onChange: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
-            g.id === group.id ? edit : g,
-          ).filter((g) => g.薬品情報グループ.length > 0);
-          data = data;
+          data.RP剤情報グループ = data.RP剤情報グループ.filter(
+            (g) => g.薬品情報グループ.length > 0,
+          );
+        },
+        onCancel: () => {
+          data.RP剤情報グループ = data.RP剤情報グループ.map(g => g.id === group.id ? orig : g);
         },
       },
     });
@@ -86,18 +87,16 @@
       data = data;
     });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      if (edit.isEditing()) {
+      if (group.isEditing()) {
         alert("薬剤が編集中です");
         return false;
       }
-      if (edit.isModified(group)) {
+      if (group.isModified(orig)) {
         let ok = confirm(
           "変更されて保存されていない薬剤があります。保存して進みますか？",
         );
         if (ok) {
-          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
-            g.id === group.id ? edit : g,
-          ).filter((g) => g.薬品情報グループ.length > 0);
+          data.RP剤情報グループ = data.RP剤情報グループ.filter((g) => g.薬品情報グループ.length > 0);
           data = data;
           return true;
         } else {
@@ -254,7 +253,7 @@
     });
     workareaService.setClearByDestroy(w.$destroy);
     workareaService.setConfirm(async (): Promise<boolean> => {
-      if( edit.inputValue === "" ){
+      if (edit.inputValue === "") {
         return true;
       }
       alert("薬剤の貼付けの実行中です。");
@@ -310,20 +309,23 @@
       return;
     }
     const RP剤情報 = createBlankRP剤情報();
-    const orig = RP剤情報Edit.fromObject(RP剤情報);
-    const edit = orig.clone();
+    const edit = RP剤情報Edit.fromObject(RP剤情報);
+    const drugId = edit.薬品情報グループ[0].id;
     let w: EditDrug = new EditDrug({
       target: wa,
       props: {
         destroy: () => workareaService.clear(),
-        orig,
         data: edit,
-        drugId: orig.薬品情報グループ[0].id,
+        drugId,
         at,
         onChange: () => {
           data.RP剤情報グループ.push(edit);
           data = data;
         },
+        onCancel: () => {
+          data.RP剤情報グループ = data.RP剤情報グループ.filter(g => g.id !== drugId);
+          data = data;
+        }
       },
     });
     workareaService.setClearByDestroy(w.$destroy);
