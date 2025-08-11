@@ -24,6 +24,7 @@
   import Example from "./components/Example.svelte";
   import { createBlankRP剤情報 } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
+  import { writable, type Writable } from "svelte/store";
 
   export let title: string;
   export let destroy: () => void;
@@ -85,7 +86,6 @@
       data = data;
     });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      console.log("enter confirm", edit.isEditing(), group, edit);
       if (edit.isEditing()) {
         alert("薬剤が編集中です");
         return false;
@@ -112,32 +112,45 @@
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    const orig = data.使用期限年月日;
+    const edit: { value: string | undefined } = { value: orig };
     const w: EditValidUpto = new EditValidUpto({
       target: wa,
       props: {
-        validUpto: data.使用期限年月日,
+        validUpto: edit,
         destroy: () => workareaService.clear(),
-        onEnter: (value: string | undefined) => {
-          data.使用期限年月日 = value;
+        onEnter: () => {
+          data.使用期限年月日 = edit.value;
           data = data;
         },
-        onCancel: () => {},
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => {
+      w.$destroy();
+    });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      alert("有効期限が編集中です。");
-      return false;
+      if (orig === edit.value) {
+        return true;
+      } else {
+        const proceed = confirm(
+          "有効期限が変更されています。保存して続けますか？",
+        );
+        if (proceed) {
+          data.使用期限年月日 = edit.value;
+          data = data;
+          return true;
+        } else {
+          return false;
+        }
+      }
     });
   }
 
-  async function doBikouClick(record: 備考レコードEdit | undefined) {
+  async function doBikouClick(record: 備考レコードEdit) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
-    if (record) {
-      record.isEditing = true;
-    }
+    record.isEditing = true;
     const w: EditBikou = new EditBikou({
       target: wa,
       props: {
@@ -156,14 +169,20 @@
     });
   }
 
-  function doEditBikou(): void {
-    doBikouClick(undefined);
+  function doAddBikou(): void {
+    const record = 備考レコードEdit.fromBikou("");
+    if (data.備考レコード === undefined) {
+      data.備考レコード = [];
+    }
+    data.備考レコード.push(record);
+    doBikouClick(record);
   }
 
-  async function doEditClinicalInfo() {
+  async function doEditClinicalInfo(record: 提供診療情報レコードEdit) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    record.isEditing = true;
     const w: EditClinicalInfo = new EditClinicalInfo({
       target: wa,
       props: {
@@ -182,15 +201,17 @@
     });
   }
 
-  function doClinicalInfoClick(record: 提供診療情報レコードEdit): void {
-    record.isEditing = true;
-    doEditClinicalInfo();
+  function doAddClinicalInfo(): void {
+    const record = 提供診療情報レコードEdit.fromComment("");
+    data.add提供診療情報レコード(record);
+    doEditClinicalInfo(record);
   }
 
-  async function doEditExamInfo() {
+  async function doEditExamInfo(record: 検査値データ等レコードEdit) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    record.isEditing = true;
     const w: EditExamInfo = new EditExamInfo({
       target: wa,
       props: {
@@ -209,18 +230,21 @@
     });
   }
 
-  function doExamInfoClick(record: 検査値データ等レコードEdit): void {
-    record.isEditing = true;
-    doEditExamInfo();
+  function doAddExamInfo(): void {
+    const record = 検査値データ等レコードEdit.fromData("");
+    data.add検査値データ等レコード(record);
+    doEditExamInfo(record);
   }
 
   async function doPaste() {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    const edit: { inputValue: string } = { inputValue: "" };
     const w: Paste = new Paste({
       target: wa,
       props: {
+        edit,
         destroy: () => workareaService.clear(),
         onEnter: (value: RP剤情報Edit[]) => {
           data.RP剤情報グループ.push(...value);
@@ -230,6 +254,9 @@
     });
     workareaService.setClearByDestroy(w.$destroy);
     workareaService.setConfirm(async (): Promise<boolean> => {
+      if( edit.inputValue === "" ){
+        return true;
+      }
       alert("薬剤の貼付けの実行中です。");
       return false;
     });
@@ -254,8 +281,7 @@
     });
     workareaService.setClearByDestroy(w.$destroy);
     workareaService.setConfirm(async (): Promise<boolean> => {
-      alert("薬剤の検索の実行中です。");
-      return false;
+      return true;
     });
   }
 
@@ -275,8 +301,7 @@
     });
     workareaService.setClearByDestroy(w.$destroy);
     workareaService.setConfirm(async (): Promise<boolean> => {
-      alert("処方例を利用中です。");
-      return false;
+      return true;
     });
   }
 
@@ -307,6 +332,13 @@
       return false;
     });
   }
+
+  function wrapSubCommand(f: () => void): () => void {
+    return () => {
+      showSubCommands = false;
+      f();
+    };
+  }
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -324,10 +356,10 @@
       {#if showSubCommands}
         <SubCommands
           {data}
-          onValidUpto={doValidUpto}
-          onEditBikou={doEditBikou}
-          onEditClinicalInfo={doEditClinicalInfo}
-          onEditExamInfo={doEditExamInfo}
+          onValidUpto={wrapSubCommand(doValidUpto)}
+          onAddBikou={wrapSubCommand(doAddBikou)}
+          onAddClinicalInfo={wrapSubCommand(doAddClinicalInfo)}
+          onAddExamInfo={wrapSubCommand(doAddExamInfo)}
         />
       {/if}
       <CurrentPresc {data} {onDrugSelect} {showValid} />
@@ -335,8 +367,8 @@
         {data}
         onValidUptoClick={doValidUpto}
         onBikouClick={doBikouClick}
-        onClinicalInfoClick={doClinicalInfoClick}
-        onExamInfoClick={doExamInfoClick}
+        onClinicalInfoClick={doEditClinicalInfo}
+        onExamInfoClick={doEditExamInfo}
       />
     </div>
     <div class="workarea" bind:this={wa}></div>

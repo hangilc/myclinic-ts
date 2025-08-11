@@ -668,6 +668,10 @@ export class 備考レコードEdit implements 備考レコード {
     return new 備考レコードEdit(obj, { id: nextId(), isEditing: obj.備考 === "" });
   }
 
+  static fromBikou(備考: string): 備考レコードEdit {
+    return 備考レコードEdit.fromObject({ 備考 });
+  }
+
   clone(): 備考レコードEdit {
     return new 備考レコードEdit(this, this);
   }
@@ -697,6 +701,10 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
 
   static fromObject(obj: 提供診療情報レコード): 提供診療情報レコードEdit {
     return new 提供診療情報レコードEdit(obj, { id: nextId(), isEditing: obj.コメント === "" });
+  }
+
+  static fromComment(comment: string): 提供診療情報レコードEdit {
+    return 提供診療情報レコードEdit.fromObject({ コメント: comment });
   }
 
   clone(): 提供診療情報レコードEdit {
@@ -729,6 +737,10 @@ export class 検査値データ等レコードEdit implements 検査値データ
 
   static fromObject(obj: 検査値データ等レコード): 検査値データ等レコードEdit {
     return new 検査値データ等レコードEdit(obj, { id: nextId(), isEditing: obj.検査値データ等 === "" });
+  }
+
+  static fromData(data: string): 検査値データ等レコードEdit {
+    return 検査値データ等レコードEdit.fromObject({ 検査値データ等: data });
   }
 
   clone(): 検査値データ等レコードEdit {
@@ -1104,6 +1116,26 @@ export class PrescInfoDataEdit implements PrescInfoData {
     }
 
     return obj;
+  }
+
+  add提供診療情報レコード(record: 提供診療情報レコードEdit) {
+    if( this.提供情報レコード === undefined ){
+      this.提供情報レコード = 提供情報レコードEdit.fromObject({});
+    }
+    if( this.提供情報レコード.提供診療情報レコード === undefined ){
+       this.提供情報レコード.提供診療情報レコード = [];
+    }
+    this.提供情報レコード.提供診療情報レコード.push(record);
+  }
+
+  add検査値データ等レコード(record: 検査値データ等レコードEdit) {
+    if( this.提供情報レコード === undefined ){
+      this.提供情報レコード = 提供情報レコードEdit.fromObject({});
+    }
+    if( this.提供情報レコード.検査値データ等レコード === undefined ){
+       this.提供情報レコード.検査値データ等レコード = [];
+    }
+    this.提供情報レコード.検査値データ等レコード.push(record);
   }
 
   set提供診療情報レコード(records: 提供診療情報レコードEdit[] | undefined): void {

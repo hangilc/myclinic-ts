@@ -7,17 +7,16 @@
   import { resolveDrugGroupByMap, resolveUsageRecordByMap } from "@/practice/exam/record/text/regular/helper";
   import { RP剤情報Edit } from "../denshi-edit";
 
+  export let edit: { inputValue: string };
   export let destroy: () => void;
   export let onEnter: (value: RP剤情報Edit[]) => void;
-
-  let inputValue = ``;
 
   function doCancel(): void {
     destroy();
   }
 
   async function doEnter() {
-    let shohou = parseShohou(inputValue);
+    let shohou = parseShohou(edit.inputValue);
     if (typeof shohou === "string") {
       alert(shohou);
       return;
@@ -36,7 +35,7 @@
 <Workarea>
   <Title>貼付</Title>
   <div>
-    <textarea class="textarea" bind:value={inputValue} />
+    <textarea class="textarea" bind:value={edit.inputValue} />
   </div>
   <Commands>
     <button on:click={doEnter}>入力</button>

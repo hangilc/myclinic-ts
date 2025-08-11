@@ -1,24 +1,23 @@
 export class WorkareaService {
   clear: () => void;
   confirm: () => Promise<boolean>;
-  
+
   constructor() {
-    this.clear = () => {};
+    this.clear = () => { };
     this.confirm = async () => true;
   }
 
   async confirmAndClear(): Promise<boolean> {
     let ok = await this.confirm();
-    if( ok ){
+    if (ok) {
       this.clear();
-      this.reset();
     }
     return ok;
   }
 
   reset(): void {
     this.clear = () => undefined;
-    this.confirm = async() => true;
+    this.confirm = async () => true;
   }
 
   setClear(clear: () => void): void {
@@ -28,6 +27,7 @@ export class WorkareaService {
   setClearByDestroy(destroy: () => void): void {
     this.setClear(() => {
       destroy();
+      this.reset();
     })
   }
 

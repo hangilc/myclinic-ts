@@ -4,19 +4,18 @@
 
   export let data: PrescInfoDataEdit;
   export let onValidUpto: () => void;
-  export let onEditBikou: () => void;
-  export let onEditClinicalInfo: () => void;
-  export let onEditExamInfo: () => void;
-
+  export let onAddBikou: () => void;
+  export let onAddClinicalInfo: () => void;
+  export let onAddExamInfo: () => void;
 </script>
 
 <div class="top">
   {#if data.使用期限年月日 == undefined}
     <SmallLink onClick={onValidUpto}>有効期限</SmallLink>
   {/if}
-  <SmallLink onClick={onEditBikou}>備考編集</SmallLink>
-  <SmallLink onClick={onEditClinicalInfo}>診療情報編集</SmallLink>
-  <SmallLink onClick={onEditExamInfo}>検査情報編集</SmallLink>
+  <SmallLink onClick={onAddBikou}>備考追加</SmallLink>
+  <SmallLink onClick={onAddClinicalInfo}>診療情報追加</SmallLink>
+  <SmallLink onClick={onAddExamInfo}>検査情報追加</SmallLink>
 </div>
 
 <style>

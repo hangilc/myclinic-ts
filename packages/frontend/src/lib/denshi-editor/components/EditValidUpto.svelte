@@ -7,32 +7,34 @@
   import EditableDate from "@/lib/editable-date/EditableDate.svelte";
 
   export let destroy: () => void;
-  export let validUpto: string | undefined;
-  export let onEnter: (value: string | undefined) => void;
-  export let onCancel: () => void;
+  export let validUpto: { value: string | undefined };
+  export let onEnter: () => void;
 
-  let date: Date | null = validUpto 
-    ? DateWrapper.fromOnshiDate(validUpto).asDate()
+  let date: Date | null = validUpto.value 
+    ? DateWrapper.fromOnshiDate(validUpto.value).asDate()
     : null;
 
 
   function doCancel() {
     destroy();
-    onCancel();
   }
 
   function doDelete() {
     destroy();
-    onEnter(undefined);
+    validUpto.value = undefined;
+    onEnter();
   }
 
   function doEnter() {
     destroy();
+    onEnter();
+  }
+
+  function doFormChange() {
     if( date == null ){
-      onEnter(undefined);
+      validUpto.value = undefined;
     } else {
-      let value = DateWrapper.fromDate(date).asOnshiDate();
-      onEnter(value);
+      validUpto.value = DateWrapper.fromDate(date).asOnshiDate();
     }
   }
 </script>
@@ -40,7 +42,7 @@
 <Workarea>
   <Title>有効期限</Title>
   <div>
-    <EditableDate bind:date={date} />
+    <EditableDate bind:date={date} onChange={doFormChange}/>
   </div>
   <Commands>
     <Link onClick={doDelete}>削除</Link>
