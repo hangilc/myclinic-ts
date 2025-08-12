@@ -1,16 +1,17 @@
 <script lang="ts">
-  import PencilSquare from "@/icons/PencilSquare.svelte";
+  import ArrowUpDown from "@/icons/ArrowUpDown.svelte";
 
   export let onClick: () => void = () => undefined;
+
 </script>
 
 <a href="javascript:void(0)" on:click={onClick}>
-  <PencilSquare />
+  <ArrowUpDown />
 </a>
 
 <style>
   a {
     position: relative;
-    top: var(--pencil-square-icon-top, 2px);
+    top: var(--arrow-up-down-icon-top, 2px);
   }
 </style>

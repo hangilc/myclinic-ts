@@ -366,6 +366,10 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
+  async function doDrugReorder(group: RP剤情報Edit) {
+
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -401,6 +405,7 @@
         onDrugSelect={doDrugSelect}
         {showValid}
         onAddDrug={doAddDrugToGroup}
+        onDrugReorder={doDrugReorder}
       />
       <PrescAux
         {data}

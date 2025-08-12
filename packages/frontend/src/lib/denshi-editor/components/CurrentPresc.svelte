@@ -10,11 +10,13 @@
     薬品情報Edit,
   } from "../denshi-edit";
   import PlusLink from "../icons/PlusLink.svelte";
+  import ArrowUpDownLink from "../icons/ArrowUpDownLink.svelte";
 
   export let data: PrescInfoDataEdit;
   export let onDrugSelect: (group: RP剤情報Edit, drug: 薬品情報Edit) => void;
   export let showValid: boolean = false;
   export let onAddDrug: (group: RP剤情報Edit) => void;
+  export let onDrugReorder: (group: RP剤情報Edit) => void;
 
   function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
     onDrugSelect(group, drug);
@@ -22,6 +24,10 @@
 
   function doAddDrug(group: RP剤情報Edit) {
     onAddDrug(group);
+  }
+
+  function doDrugReorder(group: RP剤情報Edit) {
+    onDrugReorder(group);
   }
 </script>
 
@@ -42,6 +48,9 @@
               </span>
               {#if drugIndex === group.薬品情報グループ.length - 1}
                 <PlusLink onClick={() => doAddDrug(group)} />
+                {#if group.薬品情報グループ.length > 1}
+                  <ArrowUpDownLink onClick={() => doDrugReorder(group)} />
+                {/if}
               {/if}
             </div>
           {/each}
