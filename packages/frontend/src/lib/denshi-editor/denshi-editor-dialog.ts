@@ -26,8 +26,8 @@ export class WorkareaService {
 
   setClearByDestroy(destroy: () => void): void {
     this.setClear(() => {
-      destroy();
       this.reset();
+      destroy();
     })
   }
 

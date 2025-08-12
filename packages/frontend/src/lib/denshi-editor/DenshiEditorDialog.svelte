@@ -22,7 +22,10 @@
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
-  import { createBlankRP剤情報, createBlank薬品情報 } from "@/practice/presc-example/presc-example-helper";
+  import {
+    createBlankRP剤情報,
+    createBlank薬品情報,
+  } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
   import GroupReorder from "./components/GroupReorder.svelte";
   import Workarea from "./components/workarea/Workarea.svelte";
@@ -78,7 +81,9 @@
           );
         },
         onCancel: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.map(g => g.id === group.id ? orig : g);
+          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
+            g.id === group.id ? orig : g,
+          );
         },
       },
     });
@@ -97,7 +102,9 @@
           "変更されて保存されていない薬剤があります。保存して進みますか？",
         );
         if (ok) {
-          data.RP剤情報グループ = data.RP剤情報グループ.filter((g) => g.薬品情報グループ.length > 0);
+          data.RP剤情報グループ = data.RP剤情報グループ.filter(
+            (g) => g.薬品情報グループ.length > 0,
+          );
           data = data;
           return true;
         } else {
@@ -162,7 +169,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       alert("備考が編集中です。");
       return false;
@@ -194,7 +201,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       alert("提供診療情報が編集中です。");
       return false;
@@ -223,7 +230,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       alert("検査値データ等レコードが編集中です。");
       return false;
@@ -252,7 +259,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       if (edit.inputValue === "") {
         return true;
@@ -279,7 +286,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       return true;
     });
@@ -299,7 +306,7 @@
         },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       return true;
     });
@@ -324,12 +331,14 @@
           data = data;
         },
         onCancel: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.filter(g => g.id !== drugId);
+          data.RP剤情報グループ = data.RP剤情報グループ.filter(
+            (g) => g.id !== drugId,
+          );
           data = data;
-        }
+        },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => {
       alert("薬剤追加を実行中です。");
       return false;
@@ -359,16 +368,16 @@
           workareaService.clear();
           data = data;
         },
-        onCancel: () => { workareaService.clear() },
+        onCancel: () => {
+          workareaService.clear();
+        },
       },
     });
-    workareaService.setClearByDestroy(w.$destroy);
+    workareaService.setClearByDestroy(() => w.$destroy());
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
-  async function doDrugReorder(group: RP剤情報Edit) {
-
-  }
+  async function doDrugReorder(group: RP剤情報Edit) {}
 
   function wrapSubCommand(f: () => void): () => void {
     return () => {
