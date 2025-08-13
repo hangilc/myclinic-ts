@@ -2,41 +2,39 @@
   import type { Text, Visit } from "myclinic-model";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import {
-    textToPrescSearchItem,
-    type PrescSearchItem,
-  } from "./presc-search-item";
-  import { toZenkaku } from "@/lib/zenkaku";
-  import PrescSearchItemComponent from "./PrescSearchItem.svelte";
+    textToPrevSearchItem,
+    type PrevSearchItem,
+  } from "./prev-search-item";
+  import PrevSearchForm from "./PrevSearchForm.svelte";
+  import PrevSearchRep from "./PrevSearchRep.svelte";
 
-  export let list: [Text, Visit][] = [];
+  export let items: PrevSearchItem[] = [];
   export let onSelect: (group: RP剤情報) => void;
   export let selectedName: string | undefined = undefined;
-  let items: PrescSearchItem[] = [];
-
-  $: items = convToItems(list);
-
-  function convToItems(list: [Text, Visit][]): PrescSearchItem[] {
-    return list.map(([t, v]) => textToPrescSearchItem(t, v));
-  }
 
   function doAdd(group: RP剤情報): void {
     onSelect(group);
+  }
+
+  function toggleEditing(item: PrevSearchItem) {
+    item.isEditing = !item.isEditing;
+    items = items;
+    console.log("editing", item.isEditing)
   }
 </script>
 
 <div class="top">
   {#each items as item}
     <div class="item-top">
-      <div class="title">{item.title}</div>
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
+      <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <div class="title" on:click={() => toggleEditing(item)}>{item.title}</div>
       <div>Ｒｐ）</div>
-      {#each item.drugs as group, index}
-        <div class="group">
-          <div>{toZenkaku((index + 1).toString())}）</div>
-          <div>
-            <PrescSearchItemComponent {group} {selectedName} onSelect={doAdd}/>
-          </div>
-        </div>
-      {/each}
+        {#if item.isEditing}
+          <PrevSearchForm item={item} />
+        {:else}
+          <PrevSearchRep item={item} />
+        {/if}
     </div>
   {/each}
 </div>
@@ -51,10 +49,7 @@
 
   .title {
     font-weight: bold;
+    cursor: pointer;
   }
 
-  .group {
-    display: grid;
-    grid-template-columns: auto 1fr;
-  }
 </style>

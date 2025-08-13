@@ -5,13 +5,14 @@
   import type { Text, Visit } from "myclinic-model";
   import api from "@/lib/api";
   import { isShohousen } from "@/lib/shohousen/parse-shohousen";
-  import PrescSearchList from "./prev-search/PrevSearchList.svelte";
+  import PrevSearchList from "./prev-search/PrevSearchList.svelte";
   import NavBar from "./prev-search/nav-bar.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import NameList from "./prev-search/NameList.svelte";
   import { textToDrugGroups } from "./prev-search/helper";
   import { resolveDrugGroupByMapAt } from "@/lib/drug-name-bind";
+  import { type PrevSearchItem, textToPrevSearchItem } from "./prev-search/prev-search-item";
 
   export let destroy: () => void;
   export let patientId: number;
@@ -109,9 +110,9 @@
   function selectDrug(name: string) {
     selectedItems = allItems.filter(([t, v]) => {
       let groups = textToDrugGroups(t);
-      for(let group of groups){
-        for(let drug of group.薬品情報グループ ){
-          if( drug.薬品レコード.薬品名称 === name ){
+      for (let group of groups) {
+        for (let drug of group.薬品情報グループ) {
+          if (drug.薬品レコード.薬品名称 === name) {
             return true;
           }
         }
@@ -126,6 +127,10 @@
     selectDrug(name);
     doPageChange(0);
     showNameList = false;
+  }
+
+  function convToItems(list: [Text, Visit][]): PrevSearchItem[] {
+    return list.map(([t, v]) => textToPrevSearchItem(t, v));
   }
 </script>
 
@@ -146,7 +151,11 @@
     {#if showNameList}
       <NameList nameList={drugNames} onClick={doNameClick} />
     {/if}
-    <PrescSearchList list={pageItems} onSelect={doSelect} selectedName={selectedDrugName} />
+    <PrevSearchList
+      items={convToItems(pageItems)}
+      onSelect={doSelect}
+      selectedName={selectedDrugName}
+    />
     <NavBar
       totalItems={selectedItems.length}
       bind:currentPage
