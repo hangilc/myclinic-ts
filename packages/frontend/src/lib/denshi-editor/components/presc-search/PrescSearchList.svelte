@@ -7,6 +7,8 @@
   } from "./presc-search-item";
   import { toZenkaku } from "@/lib/zenkaku";
   import PrescSearchItemComponent from "./PrescSearchItem.svelte";
+  import PrescSearchRep from "./PrescSearchRep.svelte";
+  import PrescSearchForm from "./PrescSearchForm.svelte";
 
   export let list: [Text, Visit][] = [];
   export let onSelect: (group: RP剤情報) => void;
@@ -26,18 +28,11 @@
 
 <div class="top">
   {#each items as item}
-    <div class="item-top">
-      <div class="title">{item.title}</div>
-      <div>Ｒｐ）</div>
-      {#each item.drugs as group, index}
-        <div class="group">
-          <div>{toZenkaku((index + 1).toString())}）</div>
-          <div>
-            <PrescSearchItemComponent {group} {selectedName} onSelect={doAdd}/>
-          </div>
-        </div>
-      {/each}
-    </div>
+    {#if item.isEditing}
+      <PrescSearchForm item={item} />
+    {:else}
+      <PrescSearchRep item={item} />
+    {/if}
   {/each}
 </div>
 

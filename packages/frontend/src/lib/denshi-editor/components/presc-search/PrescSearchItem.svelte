@@ -83,6 +83,18 @@
   {group.用法レコード.用法名称}
   {daysTimesDisp(group)}
 </div>
+    <!-- <div class="item-top">
+      <div class="title">{item.title}</div>
+      <div>Ｒｐ）</div>
+      {#each item.drugs as group, index}
+        <div class="group">
+          <div>{toZenkaku((index + 1).toString())}）</div>
+          <div>
+            <PrescSearchItemComponent {group} {selectedName} onSelect={doAdd}/>
+          </div>
+        </div>
+      {/each}
+    </div> -->
 
 <style>
   .drugs,

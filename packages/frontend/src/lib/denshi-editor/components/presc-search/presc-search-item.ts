@@ -6,6 +6,7 @@ import { textToDrugGroups } from "./helper";
 export interface PrescSearchItem {
   title: string;
   drugs: RP剤情報[];
+  isEditing: boolean;
 }
 
 export function textToPrescSearchItem(text: Text, visit: Visit): PrescSearchItem {
@@ -15,6 +16,7 @@ export function textToPrescSearchItem(text: Text, visit: Visit): PrescSearchItem
   let drugs = textToDrugGroups(text);
   return {
     title,
-    drugs
+    drugs,
+    isEditing: false,
   }
 }
