@@ -5,12 +5,12 @@
   import type { Text, Visit } from "myclinic-model";
   import api from "@/lib/api";
   import { isShohousen } from "@/lib/shohousen/parse-shohousen";
-  import PrescSearchList from "./presc-search/PrescSearchList.svelte";
-  import NavBar from "./presc-search/nav-bar.svelte";
+  import PrescSearchList from "./prev-search/PrevSearchList.svelte";
+  import NavBar from "./prev-search/nav-bar.svelte";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
-  import NameList from "./presc-search/NameList.svelte";
-  import { textToDrugGroups } from "./presc-search/helper";
+  import NameList from "./prev-search/NameList.svelte";
+  import { textToDrugGroups } from "./prev-search/helper";
   import { resolveDrugGroupByMapAt } from "@/lib/drug-name-bind";
 
   export let destroy: () => void;
