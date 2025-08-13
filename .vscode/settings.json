@@ -1,3 +1,5 @@
 {
-    "extensions.supportNodeGlobalNavigator": true
+    "extensions.supportNodeGlobalNavigator": true,
+    "scm.autoReveal": false,
+    "problems.autoReveal": false
 }

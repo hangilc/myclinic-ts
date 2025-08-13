@@ -40,4 +40,6 @@ workspaces/jslib/out
 # Emacs lock files
 .#*
 
+.vscode/
+
 
