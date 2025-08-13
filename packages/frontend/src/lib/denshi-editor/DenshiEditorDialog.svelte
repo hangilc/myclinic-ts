@@ -29,6 +29,7 @@
   import { WorkareaService } from "./denshi-editor-dialog";
   import GroupReorder from "./components/GroupReorder.svelte";
   import Workarea from "./components/workarea/Workarea.svelte";
+  import DrugReorder from "./components/DrugReorder.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -377,7 +378,25 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
-  async function doDrugReorder(group: RP剤情報Edit) {}
+  async function doDrugReorder(group: RP剤情報Edit) {
+    if (!(await workareaService.confirmAndClear())) {
+      return;
+    }
+    let w: DrugReorder = new DrugReorder({
+      target: wa,
+      props: {
+        drugs: group.薬品情報グループ,
+        onCancel: () => workareaService.clear(),
+        onEnter: (ordered: 薬品情報Edit[]) => {
+          group.薬品情報グループ = ordered;
+          data = data;
+          workareaService.clear();
+        },
+      },
+    });
+    workareaService.setClearByDestroy(() => w.$destroy());
+    workareaService.setConfirm(async (): Promise<boolean> => true);
+  }
 
   function wrapSubCommand(f: () => void): () => void {
     return () => {
