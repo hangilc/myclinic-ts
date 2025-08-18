@@ -67,7 +67,8 @@
           onModified(presc);
         }
       }
-    })
+    });
+    onDone();
   }
 
   function doPrint() {

@@ -3,8 +3,10 @@
   import type { PrevSearchItem } from "./prev-search-item";
   import { drugRep } from "../../helper";
   import { toZenkaku } from "@/lib/zenkaku";
+  import { prevDrugRep } from "./helper";
 
   export let item: PrevSearchItem;
+  export let selectedName: string | undefined;
 </script>
 
 <div class="groups">
@@ -12,7 +14,7 @@
     <div>{toZenkaku(`${index + 1})`)}</div>
     <div class="drug-list">
       {#each group.薬品情報グループ as drug (drug.id)}
-        <div>{drugRep(drug)}</div>
+        <div>{@html prevDrugRep(drug, selectedName)}</div>
       {/each}
       <div></div>
       <div class="usage">
