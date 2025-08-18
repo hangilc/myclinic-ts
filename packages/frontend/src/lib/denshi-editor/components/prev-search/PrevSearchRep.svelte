@@ -8,10 +8,10 @@
 </script>
 
 <div class="groups">
-  {#each item.groups as group, index}
+  {#each item.groups as group, index (group.id)}
     <div>{toZenkaku(`${index + 1})`)}</div>
     <div class="drug-list">
-      {#each group.薬品情報グループ as drug, index}
+      {#each group.薬品情報グループ as drug (drug.id)}
         <div>{drugRep(drug)}</div>
       {/each}
       <div></div>

@@ -2,24 +2,31 @@
   import type { Text, Visit } from "myclinic-model";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import {
-    textToPrevSearchItem,
     type PrevSearchItem,
   } from "./prev-search-item";
   import PrevSearchForm from "./PrevSearchForm.svelte";
   import PrevSearchRep from "./PrevSearchRep.svelte";
 
   export let items: PrevSearchItem[] = [];
-  export let onSelect: (group: RP剤情報) => void;
+  export let onSelect: (groups: RP剤情報[]) => void;
   export let selectedName: string | undefined = undefined;
 
-  function doAdd(group: RP剤情報): void {
-    onSelect(group);
+  function doAdd(groups: RP剤情報[]): void {
+    onSelect(groups);
   }
 
   function toggleEditing(item: PrevSearchItem) {
     item.isEditing = !item.isEditing;
+    item.groups.forEach(group => {
+      group.isSelected = true;
+      group.薬品情報グループ.forEach(drug => drug.isSelected = true);
+    })
     items = items;
-    console.log("editing", item.isEditing)
+  }
+
+  function doFormCancel(item: PrevSearchItem) {
+    item.isEditing = false;
+    items = items;
   }
 </script>
 
@@ -31,7 +38,7 @@
       <div class="title" on:click={() => toggleEditing(item)}>{item.title}</div>
       <div>Ｒｐ）</div>
         {#if item.isEditing}
-          <PrevSearchForm item={item} />
+          <PrevSearchForm item={item} onCancel={() => doFormCancel(item)} onSelect={doAdd}/>
         {:else}
           <PrevSearchRep item={item} />
         {/if}

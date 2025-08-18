@@ -91,9 +91,9 @@
     );
   }
 
-  async function doSelect(group: RP剤情報) {
-    await resolveDrugGroupByMapAt(group, at);
-    onEnter([group]);
+  async function doSelect(groups: RP剤情報[]) {
+    await Promise.all(groups.map(group  => resolveDrugGroupByMapAt(group, at)));
+    onEnter(groups);
   }
 
   async function doNameList() {
