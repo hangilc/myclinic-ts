@@ -28,6 +28,10 @@
     item.isEditing = false;
     items = items;
   }
+
+  function doItemSelect() {
+    items = items;
+  }
 </script>
 
 <div class="top">
@@ -45,7 +49,7 @@
           onSelect={(groups) => doAdd(groups, item)}
         />
       {:else}
-        <PrevSearchRep {item} selectedName={selectedName}/>
+        <PrevSearchRep {item} selectedName={selectedName} onSelect={doItemSelect}/>
       {/if}
     </div>
   {/each}
