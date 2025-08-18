@@ -226,7 +226,7 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
   }
 
   static fromObject(obj: 薬品補足レコード): 薬品補足レコードEdit {
-    return new 薬品補足レコードEdit(obj, { id: nextId(), isEditing: obj.薬品補足情報 === "" });
+    return new 薬品補足レコードEdit(obj, { id: nextId(), isEditing: false });
   }
 
   static fromInfo(薬品補足情報: string): 薬品補足レコードEdit {
@@ -478,7 +478,7 @@ export class 用法補足レコードEdit implements 用法補足レコード {
   }
 
   static fromObject(obj: 用法補足レコード): 用法補足レコードEdit {
-    return new 用法補足レコードEdit(obj, { id: nextId(), isEditing用法補足情報: obj.用法補足情報 === "" });
+    return new 用法補足レコードEdit(obj, { id: nextId(), isEditing用法補足情報: false });
   }
 
   static fromInfo(用法補足情報: string): 用法補足レコードEdit {
@@ -673,7 +673,7 @@ export class 備考レコードEdit implements 備考レコード {
   }
 
   static fromObject(obj: 備考レコード): 備考レコードEdit {
-    return new 備考レコードEdit(obj, { id: nextId(), isEditing: obj.備考 === "" });
+    return new 備考レコードEdit(obj, { id: nextId(), isEditing: false });
   }
 
   static fromBikou(備考: string): 備考レコードEdit {
@@ -708,7 +708,7 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
   }
 
   static fromObject(obj: 提供診療情報レコード): 提供診療情報レコードEdit {
-    return new 提供診療情報レコードEdit(obj, { id: nextId(), isEditing: obj.コメント === "" });
+    return new 提供診療情報レコードEdit(obj, { id: nextId(), isEditing: false });
   }
 
   static fromComment(comment: string): 提供診療情報レコードEdit {
@@ -744,7 +744,7 @@ export class 検査値データ等レコードEdit implements 検査値データ
   }
 
   static fromObject(obj: 検査値データ等レコード): 検査値データ等レコードEdit {
-    return new 検査値データ等レコードEdit(obj, { id: nextId(), isEditing: obj.検査値データ等 === "" });
+    return new 検査値データ等レコードEdit(obj, { id: nextId(), isEditing: false });
   }
 
   static fromData(data: string): 検査値データ等レコードEdit {

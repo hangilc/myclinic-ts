@@ -28,8 +28,8 @@
   } from "@/practice/presc-example/presc-example-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
   import GroupReorder from "./components/GroupReorder.svelte";
-  import Workarea from "./components/workarea/Workarea.svelte";
   import DrugReorder from "./components/DrugReorder.svelte";
+  import { initIsEditing } from "./helper";
 
   export let title: string;
   export let destroy: () => void;
@@ -68,6 +68,7 @@
     }
     const orig = group.clone();
     data.selectDrugExclusive(group.id, drug.id);
+    data.RP剤情報グループ.forEach(group => initIsEditing(group));
     data = data;
     let w: EditDrug = new EditDrug({
       target: wa,
@@ -319,6 +320,7 @@
     }
     const RP剤情報 = createBlankRP剤情報();
     const edit = RP剤情報Edit.fromObject(RP剤情報);
+    initIsEditing(edit);
     const drugId = edit.薬品情報グループ[0].id;
     let w: EditDrug = new EditDrug({
       target: wa,

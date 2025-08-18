@@ -3,6 +3,7 @@ import type { 力価フラグ, 情報区分, 薬品コード種別 } from "@/lib
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
 import type { Drug } from "@/lib/parse-shohou";
+import type { RP剤情報Edit } from "./denshi-edit";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -69,27 +70,6 @@ export function unconvDrugRep(drug: Drug): string {
   }
   return s;
 }
-
-// export function usageRep(usage: 用法レコード, data2: ConvData2): string {
-//   let s = usage.用法名称;
-//   if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
-//     for (let rec of data2.用法補足レコード) {
-//       s += `　${rec.用法補足情報}`
-//     }
-//   }
-//   return s;
-// }
-
-// export function unconvUsageRep(usage: Usage, data2: ConvData2): string {
-//   let s = usage.usage;
-//   if (data2.用法補足レコード && data2.用法補足レコード.length > 0) {
-//     for (let rec of data2.用法補足レコード) {
-//       s += `　${rec.用法補足情報}`
-//     }
-//   }
-//   return s;
-// }
-
 
 export function runner(...fs: (() => any)[]): () => void {
   return () => {
@@ -188,7 +168,18 @@ export function ippoukaUsageSuppl(): 用法補足レコード {
 
 export const freeTextCode = "0X0XXXXXXXXX0000";
 
-
-
+export function initIsEditing(group: RP剤情報Edit) {
+  group.薬品情報グループ.forEach(drug => {
+    if( drug.薬品レコード.薬品コード === "" ){
+      drug.薬品レコード.isEditing薬品コード = true;
+    }
+    if( drug.薬品レコード.分量 === "" ){
+      drug.薬品レコード.isEditing分量 = true;
+    }
+    if( group.用法レコード.用法コード === "" ){
+      group.用法レコード.isEditing用法コード = true;
+    }
+  })
+}
 
 

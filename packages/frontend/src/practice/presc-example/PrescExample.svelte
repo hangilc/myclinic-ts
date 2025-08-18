@@ -1,7 +1,6 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import EditArea from "./EditArea.svelte";
   import { RP剤情報Edit } from "@/lib/denshi-editor/denshi-edit";
   import {
@@ -10,6 +9,7 @@
   } from "./presc-example-data";
   import { cache } from "@/lib/cache";
   import { createBlankRP剤情報 } from "./presc-example-helper";
+  import { onDestroy } from "svelte";
 
   export let isVisible: boolean;
   let list: PrescExampleData[] = [];
@@ -55,14 +55,17 @@
         destroy: () => f.$destroy(),
         group: group,
         drugId: group.薬品情報グループ[0].id,
-        onChange: function (value: RP剤情報Edit): void {
-          if( value.薬品情報グループ.length === 0 ){
+        onChange: () => {
+          if( group.薬品情報グループ.length === 0 ){
             return;
           }
-          let ex = createPrescExampleData(value);
+          let ex = createPrescExampleData(group);
           list.push(ex);
           list = list;
         },
+        onCancel: () => {
+          f.$destroy();
+        }
       },
     });
   }
