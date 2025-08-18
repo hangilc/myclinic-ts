@@ -14,23 +14,28 @@
   export let group: RP剤情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  if (group.用法レコード.用法コード === "") {
-    isEditing = true;
-  }
+  // if (group.用法レコード.用法コード === "") {
+  //   isEditing = true;
+  // }
   const freeTextCode = "0X0XXXXXXXXX0000";
-  let codeMode: "master" | "free" = codeModeValue();
+  let codeMode: "master" | "free" | undefined = codeModeValue();
   let searchText = group.用法レコード.用法名称;
   let inputElement: HTMLInputElement | undefined = undefined;
   let searchResult: UsageMaster[] = [];
 
-  function codeModeValue() {
+  function codeModeValue(): "master" | "free" | undefined {
     let code = group.用法レコード.用法コード;
-    return code == freeTextCode || code === "" ? "free" : "master";
+    if (code === freeTextCode) {
+      return "free";
+    } else if (code === "") {
+      return undefined;
+    } else {
+      return "master";
+    }
   }
 
   function updateCodeMode() {
-    let code = group.用法レコード.用法コード;
-    codeMode = code == freeTextCode || code === "" ? "free" : "master";
+    codeMode = codeModeValue();
   }
 
   export const focus: () => void = async () => {
@@ -54,7 +59,6 @@
     }
     if (codeMode === "master") {
       searchResult = await api.selectUsageMasterByUsageName(t);
-    } else {
     }
   }
 
@@ -78,7 +82,7 @@
 
   function doSubmitFree(): void {
     let t = searchText.trim();
-    if( t === "" ){
+    if (t === "") {
       return;
     }
     group.用法レコード.用法コード = freeTextCode;
@@ -88,11 +92,12 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <Field>
   <FieldTitle>用法</FieldTitle>
   <FieldForm>
     {#if !isEditing}
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div class="rep" on:click={doRepClick}>
         {rep(group)}
         {#if group.用法レコード.用法コード === freeTextCode}
@@ -125,9 +130,7 @@
           <SubmitLink onClick={doSubmitFree} />
         {/if}
         <EraserLink onClick={doClearSearchText} />
-        {#if group.用法レコード.用法コード !== ""}
-          <CancelLink onClick={doCancel} />
-        {/if}
+        <CancelLink onClick={doCancel} />
       </form>
       {#if searchResult.length > 0}
         <div class="search-result">

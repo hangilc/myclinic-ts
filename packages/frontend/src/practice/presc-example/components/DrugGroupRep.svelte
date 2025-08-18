@@ -12,6 +12,7 @@
   <div>
     {#each group.薬品情報グループ as drug, index}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
         class="drug-rep"
         on:click={() => onSelect(group, index)}

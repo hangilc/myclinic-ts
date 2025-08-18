@@ -9,8 +9,7 @@
   } from "./presc-example-data";
   import { cache } from "@/lib/cache";
   import { createBlankRP剤情報 } from "./presc-example-helper";
-  import { onDestroy } from "svelte";
-
+  
   export let isVisible: boolean;
   let list: PrescExampleData[] = [];
 
@@ -31,14 +30,15 @@
         destroy: () => e.$destroy(),
         group: groupEdit,
         drugId,
-        onChange: (value: RP剤情報Edit) => {
-          if (value.薬品情報グループ.length === 0) {
+        onChange: () => {
+          if (groupEdit.薬品情報グループ.length === 0) {
             list = list.filter((e) => e.id !== data.id);
           } else {
-            data.data = Object.assign({}, value.toObject(), data.data.comment);
+            data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
             list = list;
           }
         },
+        onCancel: () => {},
       },
     });
   }

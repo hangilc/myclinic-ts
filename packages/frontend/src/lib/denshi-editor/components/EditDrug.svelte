@@ -48,7 +48,7 @@
     data.用法レコード.用法コード,
   );
 
-  drug.薬品レコード.isEditing薬品コード = drug.薬品レコード.薬品コード === "";
+  // drug.薬品レコード.isEditing薬品コード = drug.薬品レコード.薬品コード === "";
 
   function confirmNotEditing(): boolean {
     if( data.isEditing() ){

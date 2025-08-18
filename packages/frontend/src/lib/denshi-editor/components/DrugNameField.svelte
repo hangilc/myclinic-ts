@@ -50,9 +50,7 @@
   }
 
   function doCancel() {
-    if (drug.薬品レコード.薬品コード !== "") {
-      isEditing = false;
-    }
+    isEditing = false;
   }
 
   function doIyakuhinMasterSelect(m: IyakuhinMaster) {
@@ -92,13 +90,16 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <Field>
   <FieldTitle>薬品名称</FieldTitle>
   <FieldForm>
     {#if !isEditing}
-      <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div>
-        <span class="rep" on:click={doRepClick}>{drug.薬品レコード.薬品名称}</span>
+        <span class="rep" on:click={doRepClick}
+          >{drug.薬品レコード.薬品名称}</span
+        >
         {#if drug.isConvertibleToIppanmei()}
           <SmallLink onClick={convertToIppanmei}>一般名に</SmallLink>
         {/if}
@@ -116,15 +117,12 @@
         </form>
         <SearchLink onClick={doSearch} />
         <EraserLink onClick={doClearSearchText} />
-        {#if drug.薬品レコード.薬品コード !== ""}
-          <CancelLink onClick={doCancel} />
-        {/if}
+        <CancelLink onClick={doCancel} />
       </div>
     {/if}
     {#if drug.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
       <div class="search-result">
         {#each searchIyakuhinResult as master (master.iyakuhincode)}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div
             class="master-item"
             on:click={() => doIyakuhinMasterSelect(master)}
@@ -136,7 +134,6 @@
     {:else if drug.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
       <div class="search-result">
         {#each searchKizaiResult as master (master.kizaicode)}
-          <!-- svelte-ignore a11y-no-static-element-interactions -->
           <div class="master-item" on:click={() => doKizaiMasterSelect(master)}>
             {master.name}
           </div>
