@@ -8,6 +8,7 @@
   export let onAddClinicalInfo: () => void;
   export let onAddExamInfo: () => void;
   export let onReorder: () => void;
+  export let onChooseKouhi: () => void;
 </script>
 
 <div class="top">
@@ -19,6 +20,9 @@
   <SmallLink onClick={onAddExamInfo}>検査情報追加</SmallLink>
   {#if data.RP剤情報グループ.length > 1}
     <SmallLink onClick={onReorder}>順序変種</SmallLink>
+  {/if}
+  {#if data.hasKouhi()}
+    <SmallLink onClick={onChooseKouhi}>公費選択</SmallLink>
   {/if}
 </div>
 

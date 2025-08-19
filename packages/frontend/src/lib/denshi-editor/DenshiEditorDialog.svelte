@@ -32,6 +32,7 @@
   import { initIsEditing } from "./helper";
   import KouhiRep from "./components/KouhiRep.svelte";
   import { KouhiSet } from "./kouhi-set";
+  import ChooseKouhi from "./components/ChooseKouhi.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -45,8 +46,6 @@
   let workareaService: WorkareaService = new WorkareaService();
   let wa: HTMLElement;
   let showSubCommands = false;
-
-  console.log("orig", orig);
 
   function doCancel() {
     destroy();
@@ -406,6 +405,27 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
+  async function doChooseKouhi() {
+    if (!(await workareaService.confirmAndClear())) {
+      return;
+    }
+    const save: RP剤情報Edit[] = data.RP剤情報グループ.map(drug => drug.clone());
+    let w: ChooseKouhi = new ChooseKouhi({
+      target: wa,
+      props: {
+        kouhiSet: KouhiSet.fromPrescInfoData(data),
+        groups: data.RP剤情報グループ,
+        onCancel: () => {
+          data.RP剤情報グループ = save;
+          workareaService.clear();
+        },
+        onEnter: () => workareaService.clear(),
+      },
+    });
+    workareaService.setClearByDestroy(() => w.$destroy());
+    workareaService.setConfirm(async (): Promise<boolean> => true);
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -434,6 +454,7 @@
           onAddClinicalInfo={wrapSubCommand(doAddClinicalInfo)}
           onAddExamInfo={wrapSubCommand(doAddExamInfo)}
           onReorder={wrapSubCommand(doGroupReorder)}
+          onChooseKouhi={wrapSubCommand(doChooseKouhi)}
         />
       {/if}
       <CurrentPresc

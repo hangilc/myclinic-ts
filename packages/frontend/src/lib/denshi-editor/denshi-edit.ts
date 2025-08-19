@@ -1251,4 +1251,9 @@ export class PrescInfoDataEdit implements PrescInfoData {
       })
     })
   }
+
+  hasKouhi(): boolean {
+    return !!(this.第一公費レコード || this.第二公費レコード || this.第三公費レコード ||
+      this.特殊公費レコード);
+  }
 }

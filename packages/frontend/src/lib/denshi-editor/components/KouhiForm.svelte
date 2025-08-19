@@ -20,7 +20,9 @@
     drug.負担区分レコード?.特殊公費負担区分,
   );
 
-  function encodeValue(orig: boolean | undefined): "true" | "false" | "undefined" {
+  function encodeValue(
+    orig: boolean | undefined,
+  ): "true" | "false" | "undefined" {
     if (orig === undefined) {
       return "undefined";
     } else {
@@ -28,11 +30,16 @@
     }
   }
 
-  function decodeValue(value: "true" | "false" | "undefined"): boolean | undefined {
-    switch(value){
-      case "true": return true;
-      case "false": return false;
-      case "undefined": return undefined;
+  function decodeValue(
+    value: "true" | "false" | "undefined",
+  ): boolean | undefined {
+    switch (value) {
+      case "true":
+        return true;
+      case "false":
+        return false;
+      case "undefined":
+        return undefined;
     }
   }
 
@@ -54,28 +61,40 @@
 
 <div class="form">
   {#if kouhiSet.kouhi1}
-    {kouhiSet.kouhi1Label()}（{kouhiRep(kouhiSet.kouhi1.公費負担者番号)}）：
-    <input type="radio" bind:group={kouhi1Value} value="undefined" />規定
-    <input type="radio" bind:group={kouhi1Value} value="true" />適用
-    <input type="radio" bind:group={kouhi1Value} value="false" />非適用
+    <div>
+      {kouhiSet.kouhi1Label()}（{kouhiRep(kouhiSet.kouhi1.公費負担者番号)}）：
+      <input type="radio" bind:group={kouhi1Value} value="undefined" />規定
+      <input type="radio" bind:group={kouhi1Value} value="true" />適用
+      <input type="radio" bind:group={kouhi1Value} value="false" />非適用
+    </div>
   {/if}
   {#if kouhiSet.kouhi2}
-    第二公費（{kouhiRep(kouhiSet.kouhi2.公費負担者番号)}）：
-    <input type="radio" bind:group={kouhi2Value} value="undefined" />規定
-    <input type="radio" bind:group={kouhi2Value} value="true" />適用
-    <input type="radio" bind:group={kouhi2Value} value="false" />非適用
+    <div>
+      第二公費（{kouhiRep(kouhiSet.kouhi2.公費負担者番号)}）：
+      <input type="radio" bind:group={kouhi2Value} value="undefined" />規定
+      <input type="radio" bind:group={kouhi2Value} value="true" />適用
+      <input type="radio" bind:group={kouhi2Value} value="false" />非適用
+    </div>
   {/if}
   {#if kouhiSet.kouhi3}
-    第三公費（{kouhiRep(kouhiSet.kouhi3.公費負担者番号)}）：
-    <input type="radio" bind:group={kouhi3Value} value="undefined" />規定
-    <input type="radio" bind:group={kouhi3Value} value="true" />適用
-    <input type="radio" bind:group={kouhi3Value} value="false" />非適用
+    <div>
+      第三公費（{kouhiRep(kouhiSet.kouhi3.公費負担者番号)}）：
+      <input type="radio" bind:group={kouhi3Value} value="undefined" />規定
+      <input type="radio" bind:group={kouhi3Value} value="true" />適用
+      <input type="radio" bind:group={kouhi3Value} value="false" />非適用
+    </div>
   {/if}
   {#if kouhiSet.kouhiSpecial}
-    特殊公費（{kouhiRep(kouhiSet.kouhiSpecial.公費負担者番号)}）：
-    <input type="radio" bind:group={kouhiSpecialValue} value="undefined" />規定
-    <input type="radio" bind:group={kouhiSpecialValue} value="true" />適用
-    <input type="radio" bind:group={kouhiSpecialValue} value="false" />非適用
+    <div>
+      特殊公費（{kouhiRep(kouhiSet.kouhiSpecial.公費負担者番号)}）：
+      <input
+        type="radio"
+        bind:group={kouhiSpecialValue}
+        value="undefined"
+      />規定
+      <input type="radio" bind:group={kouhiSpecialValue} value="true" />適用
+      <input type="radio" bind:group={kouhiSpecialValue} value="false" />非適用
+    </div>
   {/if}
   <div>
     <button on:click={doEnter}>決定</button>
