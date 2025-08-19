@@ -30,11 +30,14 @@
   import { DrugCacheHandler, UsageCacheHandler } from "../cache-handler";
   import Link from "./workarea/Link.svelte";
   import { toHankaku } from "@/lib/zenkaku";
+  import KouhiField from "./KouhiField.svelte";
+  import type { KouhiSet } from "../kouhi-set";
 
   export let destroy: () => void;
   export let data: RP剤情報Edit;
   export let drugId: number;
   export let at: string;
+  export let kouhiSet: KouhiSet;
   export let onChange: () => void;
   export let onCancel: () => void;
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
@@ -47,8 +50,6 @@
     data.用法レコード.用法名称,
     data.用法レコード.用法コード,
   );
-
-  // drug.薬品レコード.isEditing薬品コード = drug.薬品レコード.薬品コード === "";
 
   function confirmNotEditing(): boolean {
     if( data.isEditing() ){
@@ -213,6 +214,7 @@
     {drug}
     onFieldChange={onDrugChange}
   />
+  <KouhiField kouhiSet={kouhiSet} {drug} onFieldChange={onDrugChange}/>
   <ZaikeiKubunField
     bind:剤形区分={data.剤形レコード.剤形区分}
     bind:isEditing={data.剤形レコード.isEditing剤形区分}

@@ -39,6 +39,7 @@
         <div>
           {#each group.薬品情報グループ as drug, drugIndex (drug.id)}
             <!-- svelte-ignore a11y-no-static-element-interactions -->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="drug-rep" class:drug-selected={drug.isSelected}>
               <span on:click={() => doDrugSelect(group, drug)}>
                 {#if showValid}

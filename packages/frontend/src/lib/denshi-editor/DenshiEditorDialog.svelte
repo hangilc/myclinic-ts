@@ -30,6 +30,8 @@
   import GroupReorder from "./components/GroupReorder.svelte";
   import DrugReorder from "./components/DrugReorder.svelte";
   import { initIsEditing } from "./helper";
+  import KouhiRep from "./components/KouhiRep.svelte";
+  import { KouhiSet } from "./kouhi-set";
 
   export let title: string;
   export let destroy: () => void;
@@ -43,6 +45,8 @@
   let workareaService: WorkareaService = new WorkareaService();
   let wa: HTMLElement;
   let showSubCommands = false;
+
+  console.log("orig", orig);
 
   function doCancel() {
     destroy();
@@ -68,7 +72,7 @@
     }
     const orig = group.clone();
     data.selectDrugExclusive(group.id, drug.id);
-    data.RP剤情報グループ.forEach(group => initIsEditing(group));
+    data.RP剤情報グループ.forEach((group) => initIsEditing(group));
     data = data;
     let w: EditDrug = new EditDrug({
       target: wa,
@@ -77,6 +81,7 @@
         data: group,
         drugId: drug.id,
         at,
+        kouhiSet: KouhiSet.fromPrescInfoData(data),
         onChange: () => {
           data.RP剤情報グループ = data.RP剤情報グループ.filter(
             (g) => g.薬品情報グループ.length > 0,
@@ -329,6 +334,7 @@
         data: edit,
         drugId,
         at,
+        kouhiSet: KouhiSet.fromPrescInfoData(orig),
         onChange: () => {
           data.RP剤情報グループ.push(edit);
           data = data;
@@ -444,6 +450,7 @@
         onClinicalInfoClick={doEditClinicalInfo}
         onExamInfoClick={doEditExamInfo}
       />
+      <KouhiRep kouhiSet={KouhiSet.fromPrescInfoData(orig)} />
     </div>
     <div class="workarea" bind:this={wa}></div>
   </div>

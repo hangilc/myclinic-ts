@@ -113,11 +113,12 @@ const toukyouKouhiHoubetsu: Record<string, string> = {
   "82137530": "大気汚染関連疾病（負担あり）",
 }
 
-export function kouhiRep(futanshaBangou: number, memo?: any): string {
+export function kouhiRep(futanshaBangou: number | string, memo?: any): string {
   if (memo && memo.name) {
     return memo.name;
   }
-  const s = futanshaBangou.toString();
+  let s = typeof futanshaBangou === "string" ? futanshaBangou : futanshaBangou.toString();
+  // const s = futanshaBangou.toString();
   if (s.length === 8) {
     const fuken = s.substring(2, 4);
     if (fuken === "13") {

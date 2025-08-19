@@ -1,13 +1,35 @@
 import type {
-  薬品レコード, 薬品情報, 不均等レコード, 負担区分レコード, 薬品１回服用量レコード, 薬品補足レコード,
-  RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 提供診療情報レコード, 検査値データ等レコード, 提供情報レコード,
-  PrescInfoData, 公費レコード, 麻薬施用レコード, 備考レコード,
-} from "@/lib/denshi-shohou/presc-info";
-import type {
-  剤形区分, 用法補足区分, 情報区分, 薬品コード種別, 力価フラグ,
-  点数表, 都道府県コード, 診療科コード種別, 診療科コード, 性別コード, 保険一部負担金区分コード, 保険種別コード, 被保険者等種別,
-  職務上の事由コード, 残薬確認対応フラグ
+  保険一部負担金区分コード, 保険種別コード,
+  剤形区分,
+  力価フラグ,
+  性別コード,
+  情報区分,
+  残薬確認対応フラグ,
+  点数表,
+  用法補足区分,
+  職務上の事由コード,
+  薬品コード種別,
+  被保険者等種別,
+  診療科コード,
+  診療科コード種別,
+  都道府県コード
 } from "@/lib/denshi-shohou/denshi-shohou";
+import type {
+  PrescInfoData,
+  RP剤情報,
+  不均等レコード,
+  備考レコード,
+  公費レコード,
+  剤形レコード,
+  提供情報レコード,
+  提供診療情報レコード, 検査値データ等レコード,
+  用法レコード, 用法補足レコード,
+  薬品レコード, 薬品情報,
+  薬品補足レコード,
+  薬品１回服用量レコード,
+  負担区分レコード,
+  麻薬施用レコード,
+} from "@/lib/denshi-shohou/presc-info";
 import { isEqualRP剤情報 } from "../denshi-shohou/presc-info-equal";
 
 let serialId = 1;
@@ -104,7 +126,7 @@ export class 不均等レコードEdit implements 不均等レコード {
   }
 
   static fromOptionalObject(obj: 不均等レコード | undefined): 不均等レコードEdit | undefined {
-    if( obj === undefined ){
+    if (obj === undefined) {
       return undefined;
     } else {
       return 不均等レコードEdit.fromObject(obj);
@@ -138,25 +160,44 @@ export class 負担区分レコードEdit implements 負担区分レコード {
   第二公費負担区分?: boolean;
   第三公費負担区分?: boolean;
   特殊公費負担区分?: boolean;
+  isEditing第一公費負担区分: boolean;
+  isEditing第二公費負担区分: boolean;
+  isEditing第三公費負担区分: boolean;
+  isEditing特殊公費負担区分: boolean;
 
   constructor(src: {
     第一公費負担区分?: boolean;
     第二公費負担区分?: boolean;
     第三公費負担区分?: boolean;
     特殊公費負担区分?: boolean;
-  }) {
+  },
+    aux: {
+      isEditing第一公費負担区分: boolean;
+      isEditing第二公費負担区分: boolean;
+      isEditing第三公費負担区分: boolean;
+      isEditing特殊公費負担区分: boolean;
+    }) {
     this.第一公費負担区分 = src.第一公費負担区分;
     this.第二公費負担区分 = src.第二公費負担区分;
     this.第三公費負担区分 = src.第三公費負担区分;
     this.特殊公費負担区分 = src.特殊公費負担区分;
+    this.isEditing第一公費負担区分 = aux.isEditing第一公費負担区分;
+    this.isEditing第二公費負担区分 = aux.isEditing第二公費負担区分;
+    this.isEditing第三公費負担区分 = aux.isEditing第三公費負担区分;
+    this.isEditing特殊公費負担区分 = aux.isEditing特殊公費負担区分;
   }
 
   static fromObject(obj: 負担区分レコード): 負担区分レコードEdit {
-    return new 負担区分レコードEdit(obj);
+    return new 負担区分レコードEdit(obj, {
+      isEditing第一公費負担区分: false,
+      isEditing第二公費負担区分: false,
+      isEditing第三公費負担区分: false,
+      isEditing特殊公費負担区分: false,
+    });
   }
 
   clone(): 負担区分レコードEdit {
-    return new 負担区分レコードEdit(this);
+    return new 負担区分レコードEdit(this, this);
   }
 
   toObject(): 負担区分レコード | undefined {
@@ -178,6 +219,13 @@ export class 負担区分レコードEdit implements 負担区分レコード {
       obj.特殊公費負担区分 = this.特殊公費負担区分;
     }
     return obj;
+  }
+
+  isEditing(): boolean {
+    return this.isEditing第一公費負担区分 ||
+      this.isEditing第二公費負担区分 ||
+      this.isEditing第三公費負担区分 ||
+      this.isEditing特殊公費負担区分;
   }
 }
 
@@ -303,7 +351,8 @@ export class 薬品情報Edit implements 薬品情報 {
   isEditing(): boolean {
     return this.薬品レコード.isEditing() ||
       this.isEditing不均等レコード ||
-      !!(this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing));
+      !!(this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing)) ||
+      !!(this.負担区分レコード && this.負担区分レコード.isEditing())
   }
 
   toObject(): 薬品情報 {
@@ -1127,21 +1176,21 @@ export class PrescInfoDataEdit implements PrescInfoData {
   }
 
   add提供診療情報レコード(record: 提供診療情報レコードEdit) {
-    if( this.提供情報レコード === undefined ){
+    if (this.提供情報レコード === undefined) {
       this.提供情報レコード = 提供情報レコードEdit.fromObject({});
     }
-    if( this.提供情報レコード.提供診療情報レコード === undefined ){
-       this.提供情報レコード.提供診療情報レコード = [];
+    if (this.提供情報レコード.提供診療情報レコード === undefined) {
+      this.提供情報レコード.提供診療情報レコード = [];
     }
     this.提供情報レコード.提供診療情報レコード.push(record);
   }
 
   add検査値データ等レコード(record: 検査値データ等レコードEdit) {
-    if( this.提供情報レコード === undefined ){
+    if (this.提供情報レコード === undefined) {
       this.提供情報レコード = 提供情報レコードEdit.fromObject({});
     }
-    if( this.提供情報レコード.検査値データ等レコード === undefined ){
-       this.提供情報レコード.検査値データ等レコード = [];
+    if (this.提供情報レコード.検査値データ等レコード === undefined) {
+      this.提供情報レコード.検査値データ等レコード = [];
     }
     this.提供情報レコード.検査値データ等レコード.push(record);
   }
@@ -1182,7 +1231,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
 
   selectDrugExclusive(groupId: number, drugId: number) {
     this.RP剤情報グループ.forEach(g => {
-      if( g.id === groupId ){
+      if (g.id === groupId) {
         g.isSelected = true;
         g.薬品情報グループ.forEach(d => {
           d.isSelected = d.id === drugId;
