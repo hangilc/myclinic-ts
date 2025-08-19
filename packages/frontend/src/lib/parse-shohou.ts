@@ -24,6 +24,7 @@ export interface Drug {
   unit: string,
   senpatsu?: Senpatsu,
   uneven?: string,
+  kouhi?: string,
   drugComments: string[],
 }
 

@@ -21,6 +21,7 @@ type ShohouGroup = {
 type ShohouDrug = {
   text: string;
   senpatsu?: Senpatsu;
+  kouhi?: string;
   drugComments: string[];
 }
 
@@ -31,8 +32,9 @@ export function handleShohou(shohou: Shohou): ShohouData {
   function handleDrug(src: Drug): ShohouDrug {
     const text = drugNameAndAmountLine(src);
     const senpatsu = src.senpatsu;
+    const kouhi = src.kouhi;
     const drugComments = src.drugComments;
-    return { text, senpatsu, drugComments };
+    return { text, senpatsu, kouhi, drugComments };
   }
   shohou.groups.forEach(srcGroup => {
     const dstGroup: ShohouGroup = {
@@ -78,7 +80,11 @@ function drugToLines(
   drug: ShohouDrug,
   fontSize: number, lineWidth: number
 ): ShohouLine[] {
-  let ss: string[] = breakLines(drug.text, fontSize, lineWidth);
+  let drugText = drug.text;
+  if( drug.kouhi ){
+    drugText += `「${drug.kouhi}」`
+  }
+  let ss: string[] = breakLines(drugText, fontSize, lineWidth);
   for(let com of drug.drugComments){
     let cs = breakLines(com, fontSize, lineWidth);
     ss.push(...cs);

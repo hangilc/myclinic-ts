@@ -4,6 +4,7 @@ import type {
   用法レコード,
   用法補足レコード,
   薬品情報,
+  負担区分レコード,
 } from "@/lib/denshi-shohou/presc-info";
 import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
 import type { Drug, DrugGroup, Senpatsu, Shohou, Usage } from "@/lib/parse-shohou";
@@ -69,7 +70,6 @@ export function denshiToPrint(src: PrescInfoData): Shohousen2024Data {
 
 function toDrugs(src: PrescInfoData): Shohou {
   let groups: DrugGroup[] = [];
-  // let shohouComments: string[] = [];
   let bikou: string[] = [];
   let kigen: string | undefined = undefined;
   src.RP剤情報グループ.forEach(g => {
@@ -106,7 +106,6 @@ function toDrugs(src: PrescInfoData): Shohou {
   });
   return {
     groups,
-    // shohouComments, 
     bikou,
     kigen,
   }
@@ -172,6 +171,21 @@ function toGroupOld(g: RP剤情報): DrugGroup {
   return { drugs, usage, groupComments };
 }
 
+function composeDrugKouhi(rec: 負担区分レコード): string {
+  const parts: string[] = [];
+  function rep(label: string, value: boolean | undefined) {
+    if (value === undefined) {
+      return;
+    }
+    const s = value ? "適用" : "不適用";
+    parts.push(`${label}${s}`);
+  }
+  rep("第一公費", rec.第一公費負担区分);
+  rep("第二公費", rec.第二公費負担区分);
+  rep("第三公費", rec.第三公費負担区分);
+  rep("特殊公費", rec.特殊公費負担区分);
+  return parts.join("・");
+}
 
 function toShohouDrug(info: 薬品情報): Drug {
   let name: string = info.薬品レコード.薬品名称;
@@ -179,10 +193,12 @@ function toShohouDrug(info: 薬品情報): Drug {
   let unit: string = info.薬品レコード.単位名;
   let senpatsu: Senpatsu | undefined = undefined;
   let uneven: string | undefined = undefined;
+  let kouhi: string | undefined = undefined;
   if (info.不均等レコード) {
     uneven = toZenkaku(`(${unevenDisp(info.不均等レコード)})`);
-    // let s = toZenkaku(`(${unevenDisp(info.不均等レコード)})`);
-    // drugComments.push(s);
+  }
+  if (info.負担区分レコード) {
+    kouhi = composeDrugKouhi(info.負担区分レコード);
   }
   let drugComments: string[] = [];
   (info.薬品補足レコード ?? []).forEach(info => {
@@ -195,7 +211,7 @@ function toShohouDrug(info: 薬品情報): Drug {
     }
   })
   return {
-    name, amount, unit, senpatsu, uneven, drugComments
+    name, amount, unit, senpatsu, uneven, kouhi, drugComments
   }
 }
 
