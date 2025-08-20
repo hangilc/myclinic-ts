@@ -541,10 +541,11 @@
 <style>
   .top {
     margin: 0 10px 10px 10px;
-    width: 760px;
-    height: 600px;
+    min-width: 760px;
+    /* min-height: 600px; */
+    max-height: calc(100vh - 160px);
     display: grid;
-    grid-template-columns: 50% 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
     padding: 0 10px 10px 10px;
     overflow-y: auto;
