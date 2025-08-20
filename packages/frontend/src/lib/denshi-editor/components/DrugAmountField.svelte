@@ -25,7 +25,6 @@
   function doRepClick() {
     inputText = inputValue();
     isEditing = true;
-    console.log("amount click", drug);
     focus();
   }
 
@@ -54,6 +53,7 @@
     <FieldForm>
       {#if !isEditing}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="rep" on:click={doRepClick}>
           {drug.薬品レコード.分量 || "（未設定）"}{drug.薬品レコード.単位名}
         </div>
