@@ -51,7 +51,7 @@ function hosokuRep(h: 薬品補足レコード[] | undefined) {
 }
 
 export function drugRep(drug: 薬品情報): string {
-  return `${drug.薬品レコード.薬品名称}　${toZenkaku(
+  return `${drug.薬品レコード.薬品名称 || "（未設定）"}　${toZenkaku(
     drug.薬品レコード.分量,
   )}${drug.薬品レコード.単位名}${unevenRep(drug.不均等レコード)}${hosokuRep(drug.薬品補足レコード)}`;
 }

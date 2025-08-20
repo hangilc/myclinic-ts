@@ -541,7 +541,7 @@
 <style>
   .top {
     margin: 0 10px 10px 10px;
-    min-width: 760px;
+    width: 760px;
     /* min-height: 600px; */
     max-height: calc(100vh - 160px);
     display: grid;

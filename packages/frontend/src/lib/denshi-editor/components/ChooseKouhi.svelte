@@ -23,8 +23,10 @@
   }
 
   function doAllDefault() {
-    groups.forEach(group => {
-      group.薬品情報グループ.forEach(drug => drug.負担区分レコード = undefined)
+    groups.forEach((group) => {
+      group.薬品情報グループ.forEach(
+        (drug) => (drug.負担区分レコード = undefined),
+      );
     });
     groups = groups;
   }
@@ -35,14 +37,14 @@
   <div class="groups">
     {#each groups as group, index (group.id)}
       <div>{toZenkaku(`${index + 1})`)}</div>
-      {#each group.薬品情報グループ as drug (drug.id)}
-        <div>
-          <div>{drugRep(drug)}</div>
+      <div>
+        {#each group.薬品情報グループ as drug (drug.id)}
+          <div class="drug-name">{drugRep(drug)}</div>
           <div>
             <ChooseKouhiItem {kouhiSet} {drug} />
           </div>
-        </div>
-      {/each}
+        {/each}
+      </div>
     {/each}
   </div>
   <Commands>
@@ -56,5 +58,9 @@
   .groups {
     display: grid;
     grid-template-columns: auto 1fr;
+  }
+
+  .drug-name {
+    color: green;
   }
 </style>
