@@ -3,7 +3,7 @@
     RP剤情報,
   } from "@/lib/denshi-shohou/presc-info";
   import { toZenkaku } from "@/lib/zenkaku";
-  import { amountDisp, daysTimesDisp, drugDisp, usageDisp } from "./disp-util";
+  import { daysTimesDisp, usageDisp } from "./disp-util";
   import DrugDisp from "./DrugDisp.svelte";
 
   export let groups: RP剤情報[];

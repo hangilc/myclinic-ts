@@ -11,6 +11,7 @@ import type { Drug, DrugGroup, Senpatsu, Shohou, Usage } from "@/lib/parse-shoho
 import { toZenkaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
 import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
+import { drugKouhiRep } from "@/lib/denshi-helper";
 
 export function denshiToPrint2(src: PrescInfoData): ShohousenData2025 {
   const data: ShohousenData2025 = {
@@ -171,21 +172,21 @@ function toGroupOld(g: RP剤情報): DrugGroup {
   return { drugs, usage, groupComments };
 }
 
-function composeDrugKouhi(rec: 負担区分レコード): string {
-  const parts: string[] = [];
-  function rep(label: string, value: boolean | undefined) {
-    if (value === undefined) {
-      return;
-    }
-    const s = value ? "適用" : "不適用";
-    parts.push(`${label}${s}`);
-  }
-  rep("第一公費", rec.第一公費負担区分);
-  rep("第二公費", rec.第二公費負担区分);
-  rep("第三公費", rec.第三公費負担区分);
-  rep("特殊公費", rec.特殊公費負担区分);
-  return parts.join("・");
-}
+// function composeDrugKouhi(rec: 負担区分レコード): string {
+//   const parts: string[] = [];
+//   function rep(label: string, value: boolean | undefined) {
+//     if (value === undefined) {
+//       return;
+//     }
+//     const s = value ? "適用" : "不適用";
+//     parts.push(`${label}${s}`);
+//   }
+//   rep("第一公費", rec.第一公費負担区分);
+//   rep("第二公費", rec.第二公費負担区分);
+//   rep("第三公費", rec.第三公費負担区分);
+//   rep("特殊公費", rec.特殊公費負担区分);
+//   return parts.join("・");
+// }
 
 function toShohouDrug(info: 薬品情報): Drug {
   let name: string = info.薬品レコード.薬品名称;
@@ -198,7 +199,7 @@ function toShohouDrug(info: 薬品情報): Drug {
     uneven = toZenkaku(`(${unevenDisp(info.不均等レコード)})`);
   }
   if (info.負担区分レコード) {
-    kouhi = composeDrugKouhi(info.負担区分レコード);
+    kouhi = drugKouhiRep(info.負担区分レコード);
   }
   let drugComments: string[] = [];
   (info.薬品補足レコード ?? []).forEach(info => {

@@ -42,11 +42,14 @@
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
+
+  $: adaptToText(text);
   $: setupIppan(shohou);
 
-  function adaptToText() {
+  function adaptToText(text: Text) {
     memo = TextMemoWrapper.getShohouMemo(text);
     shohou = memo.shohou;
+    console.log("shohou", shohou);
     prescriptionId = memo.prescriptionId;
     prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
   }
@@ -61,9 +64,6 @@
       const drugGroups = shohou.RP剤情報グループ;
       for (let g of drugGroups) {
         for (let r of g.薬品情報グループ) {
-          // レセプト電算処理システム用コード
-          // YJコード
-          // 一般名コード
           const codeKind = r.薬品レコード.薬品コード種別;
           const code = r.薬品レコード.薬品コード;
           const drugName = r.薬品レコード.薬品名称;
@@ -123,7 +123,7 @@
     await api.updateText(text);
     mode = "disp";
     text = text;
-    adaptToText();
+    // adaptToText(text);
   }
 
   async function doUnregistered() {
@@ -136,7 +136,7 @@
     await api.updateText(text);
     mode = "disp";
     text = text;
-    adaptToText();
+    // adaptToText(text);
   }
 </script>
 

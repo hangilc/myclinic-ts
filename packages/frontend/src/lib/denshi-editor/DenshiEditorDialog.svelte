@@ -144,10 +144,6 @@
           workareaService.clear();
         },
         onEnter: () => {
-          // if( aux.drug ){
-          //   const auxDrug = aux.drug;
-          //   group.薬品情報グループ = group.薬品情報グループ.map(d => d.id === auxDrug.id ? auxDrug : d);
-          // }
           if( group.薬品情報グループ.length === 0 ){
             data.RP剤情報グループ = data.RP剤情報グループ.filter(g => g.id !== group.id);
           }

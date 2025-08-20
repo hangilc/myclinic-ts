@@ -4,8 +4,8 @@
 
   export let drug: 薬品情報;
 
-  const name = drug.薬品レコード.薬品名称;
-  const amount = amountDisp(drug.薬品レコード);
+  $: name = drug.薬品レコード.薬品名称;
+  $: amount = amountDisp(drug.薬品レコード);
 </script>
 
 <span>{name}</span>

@@ -13,17 +13,23 @@
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
+  export let onChange: () => void;
 
   function doCancel() {
     onCancel();
   }
 
   function doEnter() {
+    if( drug?.isEditing() ){
+      alert("編集中です。");
+      return;
+    }
     onEnter();
   }
 
   function doDrugChange() {
-
+    drug = drug;
+    onChange();
   }
 </script>
 
