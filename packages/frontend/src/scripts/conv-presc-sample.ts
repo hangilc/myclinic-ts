@@ -1,12 +1,13 @@
 // Usage: npx vite-node conv-presc-sample.ts SAMPLE.TXT
 // read-lines.ts
 import { getRP剤情報FromGroup } from '@/lib/denshi-editor/denshi-tmpl';
-import type { Drug, DrugGroup, Shohou, Usage } from '@/lib/parse-shohou';
-import { parseDrugLine, parseUsageLine, type ParsedDrug } from '@/lib/parse-shohou3';
+import type { Drug, DrugGroup, Usage } from '@/lib/parse-shohou';
+import { parseDrugLine, parseUsageLine } from '@/lib/parse-shohou3';
 import type { PrescExample } from '@/lib/presc-example';
 import * as fs from 'fs';
 import * as readline from 'readline';
 import clipboard from 'clipboardy';
+import { v4 as uuidv4 } from "uuid";
 
 async function run() {
   const sampleFile = process.argv[2];
@@ -50,7 +51,7 @@ async function run() {
   }
 
   const gs: PrescExample[] = list.map(([g, c]) => {
-    let pg: PrescExample = getRP剤情報FromGroup(g);
+    let pg: PrescExample = Object.assign(getRP剤情報FromGroup(g), { id: uuidv4() });
     if( c ) {
       pg.comment = c;
     }

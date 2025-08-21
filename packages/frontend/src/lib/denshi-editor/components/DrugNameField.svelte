@@ -11,6 +11,7 @@
   import { tick } from "svelte";
   import SmallLink from "./workarea/SmallLink.svelte";
   import { cache } from "@/lib/cache";
+  import { searchPrescExample } from "@/lib/presc-example";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -36,7 +37,8 @@
     if (t !== "") {
       if (drug.薬品レコード.情報区分 === "医薬品") {
         const examples = await cache.getPrescExample();
-        console.log("example", examples);
+        const exResult = searchPrescExample(examples, t);
+        console.log("result", exResult);
         searchIyakuhinResult = await api.searchIyakuhinMaster(t, at);
       } else if (drug.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
