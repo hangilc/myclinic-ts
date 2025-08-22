@@ -65,6 +65,9 @@ export async function confirmDrugCode(record: 薬品レコード, at: string): P
         if (m.name !== name) {
           return `医薬品マスターと名前が一致しません:${code}|${name}|${m.name}`;
         }
+        if( m.unit !== record.単位名 ){
+          return `医薬品マスターと単位名が一致しません:${m.unit}|${record.単位名}`;
+        }
       } catch {
         return `医薬品マスターがみつかりません：${code}:${name}`;
       }
@@ -76,6 +79,9 @@ export async function confirmDrugCode(record: 薬品レコード, at: string): P
         let m = ms[0];
         if (m.ippanmei !== name) {
           return `医薬品マスターと名前が一致しません:${code}|${name}|${m.name}`;
+        }
+        if( m.unit !== record.単位名 ){
+          return `医薬品マスターと単位名が一致しません:${m.unit}|${record.単位名}`;
         }
       }
     }

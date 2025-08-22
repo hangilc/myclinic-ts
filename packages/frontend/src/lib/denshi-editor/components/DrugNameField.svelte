@@ -12,6 +12,12 @@
   import SmallLink from "./workarea/SmallLink.svelte";
   import { cache } from "@/lib/cache";
   import { searchPrescExample } from "@/lib/presc-example";
+  import {
+    createIyakuhinResultFromExample,
+    createIyakuhinResultFromMaster,
+    iyakuhinResultRep,
+    type SearchIyakuhinResult,
+  } from "./drug-name-field/drug-name-field-types";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -23,7 +29,7 @@
   };
   let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
-  let searchIyakuhinResult: IyakuhinMaster[] = [];
+  let searchIyakuhinResult: SearchIyakuhinResult[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
   function doRepClick() {
@@ -36,10 +42,17 @@
     let t = searchText.trim();
     if (t !== "") {
       if (drug.薬品レコード.情報区分 === "医薬品") {
+        searchIyakuhinResult = [];
         const examples = await cache.getPrescExample();
         const exResult = searchPrescExample(examples, t);
-        console.log("result", exResult);
-        searchIyakuhinResult = await api.searchIyakuhinMaster(t, at);
+        exResult.forEach((e) =>
+          searchIyakuhinResult.push(createIyakuhinResultFromExample(e)),
+        );
+        const msResult = await api.searchIyakuhinMaster(t, at);
+        msResult.forEach((m) =>
+          searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
+        );
+        searchIyakuhinResult = searchIyakuhinResult;
       } else if (drug.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
       }
@@ -58,15 +71,29 @@
     isEditing = false;
   }
 
-  function doIyakuhinMasterSelect(m: IyakuhinMaster) {
-    Object.assign(drug.薬品レコード, {
-      薬品コード種別: "レセプト電算処理システム用コード",
-      薬品コード: m.iyakuhincode.toString(),
-      薬品名称: m.name,
-      単位名: m.unit,
-    });
-    drug.ippanmei = m.ippanmei;
-    drug.ippanmeicode = m.ippanmeicode?.toString();
+  function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
+    if (item.kind === "master") {
+      const m = item.master;
+      Object.assign(drug.薬品レコード, {
+        薬品コード種別: "レセプト電算処理システム用コード",
+        薬品コード: m.iyakuhincode.toString(),
+        薬品名称: m.name,
+        単位名: m.unit,
+      });
+      drug.ippanmei = m.ippanmei;
+      drug.ippanmeicode = m.ippanmeicode;
+      console.log("master", m);
+      console.log("ippanmei", drug.ippanmei, drug.ippanmeicode);
+    } else if( item.kind === "example" ){
+      const rec = item.example.薬品情報グループ[0];
+      if( rec ){
+        Object.assign(drug.薬品レコード, rec.薬品レコード);
+        drug.ippanmei = "";
+        drug.ippanmeicode = "";
+      } else {
+        return;
+      }
+    }
     searchText = "";
     searchIyakuhinResult = [];
     isEditing = false;
@@ -127,19 +154,22 @@
     {/if}
     {#if drug.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
       <div class="search-result">
-        {#each searchIyakuhinResult as master (master.iyakuhincode)}
+        {#each searchIyakuhinResult as item (item.id)}
           <div
-            class="master-item"
-            on:click={() => doIyakuhinMasterSelect(master)}
+            class="search-result-item"
+            on:click={() => doIyakuhinMasterSelect(item)}
           >
-            {master.name}
+            {iyakuhinResultRep(item)}
           </div>
         {/each}
       </div>
     {:else if drug.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
       <div class="search-result">
         {#each searchKizaiResult as master (master.kizaicode)}
-          <div class="master-item" on:click={() => doKizaiMasterSelect(master)}>
+          <div
+            class="search-result-item"
+            on:click={() => doKizaiMasterSelect(master)}
+          >
             {master.name}
           </div>
         {/each}
@@ -172,11 +202,11 @@
     border: 1px solid gray;
   }
 
-  .master-item {
+  .search-result-item {
     cursor: pointer;
   }
 
-  .master-item:hover {
+  .search-result-item:hover {
     background-color: #eee;
   }
 </style>
