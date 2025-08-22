@@ -52,7 +52,7 @@
   );
 
   function confirmNotEditing(): boolean {
-    if( data.isEditing() ){
+    if( drug.isEditing() ){
       alert("薬剤が編集中です。");
       return false;
     }

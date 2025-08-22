@@ -693,7 +693,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    data = await resolvePrescInfoByMapAt(data, at);
+    // data = await resolvePrescInfoByMapAt(data, at);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {

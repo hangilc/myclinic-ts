@@ -5,8 +5,11 @@ export type SearchIyakuhinResult = ({
   kind: "master";
   master: IyakuhinMaster;
 } | {
-  kind: "example";
-  example: PrescExample;
+  kind: "ippanmei";
+  master: IyakuhinMaster;
+} | {
+  kind: "alias";
+  alias: string;
 }) & { id: number };
 
 let iyakuhinResultSerialId = 1;
@@ -15,13 +18,18 @@ export function createIyakuhinResultFromMaster(m: IyakuhinMaster): SearchIyakuhi
   return { id: iyakuhinResultSerialId++, kind: "master", master: m };
 }
 
-export function createIyakuhinResultFromExample(e: PrescExample): SearchIyakuhinResult {
-  return { id: iyakuhinResultSerialId++, kind: "example", example: e };
+export function createIyakuhinResultFromIppanmei(m: IyakuhinMaster): SearchIyakuhinResult {
+  return { id: iyakuhinResultSerialId++, kind: "ippanmei", master: m };
+}
+
+export function createIyakuhinResultFromAlias(alias: string): SearchIyakuhinResult {
+  return { id: iyakuhinResultSerialId++, kind: "alias", alias};
 }
 
 export function iyakuhinResultRep(r: SearchIyakuhinResult): string {
   switch(r.kind){
     case "master": return r.master.name;
-    case "example": return `(登) ${r.example.薬品情報グループ[0].薬品レコード.薬品名称}`;
+    case "ippanmei": return r.master.name;
+    case "alias": return `(別) ${r.alias}`;
   }
 }

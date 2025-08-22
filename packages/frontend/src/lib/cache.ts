@@ -250,4 +250,10 @@ export const cache = {
     prescExample = value;
     await api.setConfig("presc-example", value);
   },
+
+  async getDrugNameAlias(): Promise<Record<string, string>> {
+    return {
+      "レンドルミンＤ錠０．２５ｍｇ": "【般】ブロチゾラム口腔内崩壊錠０．２５ｍｇ",
+    }
+  }
 };

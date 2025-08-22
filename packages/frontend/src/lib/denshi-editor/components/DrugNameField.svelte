@@ -11,13 +11,14 @@
   import { tick } from "svelte";
   import SmallLink from "./workarea/SmallLink.svelte";
   import { cache } from "@/lib/cache";
-  import { searchPrescExample } from "@/lib/presc-example";
   import {
-    createIyakuhinResultFromExample,
+    createIyakuhinResultFromAlias,
+    createIyakuhinResultFromIppanmei,
     createIyakuhinResultFromMaster,
     iyakuhinResultRep,
     type SearchIyakuhinResult,
   } from "./drug-name-field/drug-name-field-types";
+  import { resolveDrugNameAlias } from "@/lib/drug-name-alias";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -41,17 +42,29 @@
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
+      const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
-        const examples = await cache.getPrescExample();
-        const exResult = searchPrescExample(examples, t);
-        exResult.forEach((e) =>
-          searchIyakuhinResult.push(createIyakuhinResultFromExample(e)),
+        const aliasList = resolveDrugNameAlias(drugNameAlias, t);
+        aliasList.forEach((alias) =>
+          searchIyakuhinResult.push(createIyakuhinResultFromAlias(alias)),
         );
-        const msResult = await api.searchIyakuhinMaster(t, at);
-        msResult.forEach((m) =>
-          searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
-        );
+        // const examples = await cache.getPrescExample();
+        // const exResult = searchPrescExample(examples, t);
+        // exResult.forEach((e) =>
+        //   searchIyakuhinResult.push(createIyakuhinResultFromExample(e)),
+        // );
+        if (t.startsWith("【般】")) {
+          const rs = await api.listIyakuhinMasterByIppanmei(t, at);
+          if (rs.length > 0) {
+            doIyakuhinMasterSelect(createIyakuhinResultFromIppanmei(rs[0]));
+          }
+        } else {
+          const msResult = await api.searchIyakuhinMaster(t, at);
+          msResult.forEach((m) =>
+            searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
+          );
+        }
         searchIyakuhinResult = searchIyakuhinResult;
       } else if (drug.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
@@ -82,22 +95,28 @@
       });
       drug.ippanmei = m.ippanmei;
       drug.ippanmeicode = m.ippanmeicode;
-      console.log("master", m);
-      console.log("ippanmei", drug.ippanmei, drug.ippanmeicode);
-    } else if( item.kind === "example" ){
-      const rec = item.example.薬品情報グループ[0];
-      if( rec ){
-        Object.assign(drug.薬品レコード, rec.薬品レコード);
-        drug.ippanmei = "";
-        drug.ippanmeicode = "";
-      } else {
-        return;
-      }
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onFieldChange();
+    } else if (item.kind === "alias") {
+      searchText = item.alias;
+      doSearch();
+    } else if (item.kind === "ippanmei") {
+      const m = item.master;
+      Object.assign(drug.薬品レコード, {
+        薬品コード種別: "一般名コード",
+        薬品コード: m.ippanmeicode,
+        薬品名称: m.ippanmei,
+        単位名: m.unit,
+      });
+      drug.ippanmei = m.ippanmei;
+      drug.ippanmeicode = m.ippanmeicode;
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onFieldChange();
     }
-    searchText = "";
-    searchIyakuhinResult = [];
-    isEditing = false;
-    onFieldChange();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {

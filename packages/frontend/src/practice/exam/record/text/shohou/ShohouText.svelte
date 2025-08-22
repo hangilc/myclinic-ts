@@ -49,7 +49,6 @@
   function adaptToText(text: Text) {
     memo = TextMemoWrapper.getShohouMemo(text);
     shohou = memo.shohou;
-    console.log("shohou", shohou);
     prescriptionId = memo.prescriptionId;
     prolog = `院外処方（電子${prescriptionId ? "登録" : ""}）`;
   }
