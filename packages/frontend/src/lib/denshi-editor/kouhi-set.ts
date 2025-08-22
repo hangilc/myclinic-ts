@@ -17,6 +17,10 @@ export class KouhiSet {
     return new KouhiSet(data);
   }
 
+  static createEmpty(): KouhiSet {
+    return new KouhiSet({});
+  }
+
   isEmpty(): boolean {
     return !this.kouhi1 && !this.kouhi2 && !this.kouhi3 && !this.kouhiSpecial;
   }
