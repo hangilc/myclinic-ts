@@ -41,11 +41,11 @@
   export let onChange: () => void;
   export let onCancel: () => void;
   let drug = data.薬品情報グループ.filter((d) => d.id === drugId)[0];
-  let drugCacheHandler = new DrugCacheHandler(
-    drug.薬品レコード.薬品名称,
-    drug.薬品レコード.薬品コード,
-    drug.薬品レコード.単位名,
-  );
+  // let drugCacheHandler = new DrugCacheHandler(
+  //   drug.薬品レコード.薬品名称,
+  //   drug.薬品レコード.薬品コード,
+  //   drug.薬品レコード.単位名,
+  // );
   let usageCacheHandler = new UsageCacheHandler(
     data.用法レコード.用法名称,
     data.用法レコード.用法コード,
@@ -79,36 +79,36 @@
     }
     destroy();
     onChange();
-    handleCache();
+    // handleCache();
   }
 
-  async function handleCache() {
-    let kind = drug.getKind();
-    if (kind === undefined) {
-      throw new Error("invalid drug kind");
-    }
-    if (
-      toHankaku(drugCacheHandler.origDrugUnit) ===
-      toHankaku(drug.薬品レコード.単位名)
-    ) {
-      await drugCacheHandler.handle(
-        drug.薬品レコード.薬品名称,
-        drug.薬品レコード.薬品コード,
-        kind,
-      );
-    }
-    if (
-      drug.薬品補足レコードAsList().length === 0 &&
-      drug.不均等レコード == undefined &&
-      data.用法補足レコードAsList().length === 0 &&
-      data.用法レコード.用法コード !== freeTextCode
-    ) {
-      await usageCacheHandler.handle(
-        data.用法レコード.用法名称,
-        data.用法レコード.用法コード,
-      );
-    }
-  }
+  // async function handleCache() {
+  //   let kind = drug.getKind();
+  //   if (kind === undefined) {
+  //     throw new Error("invalid drug kind");
+  //   }
+  //   if (
+  //     toHankaku(drugCacheHandler.origDrugUnit) ===
+  //     toHankaku(drug.薬品レコード.単位名)
+  //   ) {
+  //     await drugCacheHandler.handle(
+  //       drug.薬品レコード.薬品名称,
+  //       drug.薬品レコード.薬品コード,
+  //       kind,
+  //     );
+  //   }
+  //   if (
+  //     drug.薬品補足レコードAsList().length === 0 &&
+  //     drug.不均等レコード == undefined &&
+  //     data.用法補足レコードAsList().length === 0 &&
+  //     data.用法レコード.用法コード !== freeTextCode
+  //   ) {
+  //     await usageCacheHandler.handle(
+  //       data.用法レコード.用法名称,
+  //       data.用法レコード.用法コード,
+  //     );
+  //   }
+  // }
 
   function addDrugSuppl(): void {
     let drug = data.findDrugById(drugId);
