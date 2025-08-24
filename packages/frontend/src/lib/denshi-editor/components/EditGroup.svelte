@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEmpty薬品情報 } from "@/lib/denshi-helper";
-  import { 薬品情報Edit, type RP剤情報Edit } from "../denshi-edit";
+  import { 剤形レコードEdit, 用法レコードEdit, 用法補足レコードEdit, 薬品情報Edit, type RP剤情報Edit } from "../denshi-edit";
   import type { KouhiSet } from "../kouhi-set";
   import DrugUsageField from "./DrugUsageField.svelte";
   import DrugForm from "./edit-group/DrugForm.svelte";
@@ -12,6 +12,7 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let group: RP剤情報Edit;
   export let aux: { drug: 薬品情報Edit | undefined };
@@ -44,13 +45,13 @@
   }
 
   function validateForEnter(drug: 薬品情報Edit): string | undefined {
-    if( drug.isEditing() ){
+    if (drug.isEditing()) {
       return "薬品の編集中です。";
     }
-    if( drug.薬品レコード.薬品名称 === "" ){
+    if (drug.薬品レコード.薬品名称 === "") {
       return "薬品の種類が設定されていません。";
     }
-    if( drug.薬品レコード.分量 === "" ){
+    if (drug.薬品レコード.分量 === "") {
       return "薬品の分量が設定されていません。";
     }
     return undefined;
@@ -59,21 +60,21 @@
   function doDrugEnter() {
     if (drug) {
       let err = validateForEnter(drug);
-      if( err ){
+      if (err) {
         alert(err);
         return;
       }
       const curr = drug;
       let found = false;
-      for(let i=0;i<group.薬品情報グループ.length;i++){
+      for (let i = 0; i < group.薬品情報グループ.length; i++) {
         let d = group.薬品情報グループ[i];
-        if( d.id === curr.id ){
+        if (d.id === curr.id) {
           group.薬品情報グループ[i] = curr;
           found = true;
           break;
         }
       }
-      if( !found ){
+      if (!found) {
         group.薬品情報グループ.push(curr);
       }
     }
@@ -93,11 +94,25 @@
   }
 
   function doDeleteDrug() {
-    if( drug ){
+    if (drug) {
       let curr = drug;
-      group.薬品情報グループ = group.薬品情報グループ.filter(d => d.id !== curr.id);
+      group.薬品情報グループ = group.薬品情報グループ.filter(
+        (d) => d.id !== curr.id,
+      );
       aux.drug = undefined;
       aux = aux;
+      group = group;
+    }
+  }
+
+  function doDrugPrefab(prefab: RP剤情報) {
+    if (group.薬品情報グループ.length === 1) {
+      Object.assign(group, {
+        剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
+        用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
+        用法補足レコード: prefab.用法補足レコード ? prefab.用法補足レコード.map(r => 用法補足レコードEdit.fromObject(r)) : undefined,
+      });
+      aux.drug = drug;
       group = group;
     }
   }
@@ -111,6 +126,7 @@
     onCancel={doDrugCancel}
     onEnter={doDrugEnter}
     onChange={doDrugChange}
+    onPrefab={doDrugPrefab}
     {at}
     {kouhiSet}
   />

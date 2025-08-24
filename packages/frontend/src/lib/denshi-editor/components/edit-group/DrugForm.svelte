@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import type { 薬品情報Edit } from "../../denshi-edit";
   import type { KouhiSet } from "../../kouhi-set";
   import DrugAmountField from "../DrugAmountField.svelte";
@@ -14,13 +15,14 @@
   export let onCancel: () => void;
   export let onEnter: () => void;
   export let onChange: () => void;
+  export let onPrefab: (prefab: RP剤情報) => void;
 
   function doCancel() {
     onCancel();
   }
 
   function doEnter() {
-    if( drug?.isEditing() ){
+    if (drug?.isEditing()) {
       alert("編集中です。");
       return;
     }
@@ -45,6 +47,7 @@
       {at}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
       onFieldChange={doDrugChange}
+      onPrefab={onPrefab}
     />
     <UnevenField
       bind:不均等レコード={drug.不均等レコード}

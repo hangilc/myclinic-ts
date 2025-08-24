@@ -41,5 +41,5 @@ export function newPrescEampleData(): PrescExampleData {
       }
     }]
   }
-  return createPrescExampleData(RP剤情報);
+  throw new Error("newPrescEampleData not implemented");
 }

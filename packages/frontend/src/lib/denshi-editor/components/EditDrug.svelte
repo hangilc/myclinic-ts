@@ -32,6 +32,7 @@
   import { toHankaku } from "@/lib/zenkaku";
   import KouhiField from "./KouhiField.svelte";
   import type { KouhiSet } from "../kouhi-set";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let destroy: () => void;
   export let data: RP剤情報Edit;
@@ -185,6 +186,19 @@
     destroy();
     onChange();
   }
+
+  function onDrugPrefab(prefab: RP剤情報) {
+    if( data.薬品情報グループ.length === 1 ){
+      Object.assign(data, {
+        剤形レコード: prefab.剤形レコード,
+        用法レコード: prefab.用法レコード,
+        用法補足レコード: prefab.用法補足レコード,
+      });
+      console.log("data", data);
+      onDrugChange();
+      onGroupChange();
+    }
+  }
 </script>
 
 <Workarea>
@@ -198,6 +212,7 @@
     {drug}
     {at}
     bind:isEditing={drug.薬品レコード.isEditing薬品コード}
+    onPrefab={onDrugPrefab}
     onFieldChange={onDrugChange}
   />
   <UnevenField

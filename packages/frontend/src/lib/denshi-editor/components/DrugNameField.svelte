@@ -12,13 +12,18 @@
   import SmallLink from "./workarea/SmallLink.svelte";
   import { cache } from "@/lib/cache";
   import {
-    createIyakuhinResultFromAlias,
     createIyakuhinResultFromIppanmei,
     createIyakuhinResultFromMaster,
+    createIyakuhinResultFromPrefab,
     iyakuhinResultRep,
     type SearchIyakuhinResult,
   } from "./drug-name-field/drug-name-field-types";
-  import { resolveDrugNameAlias } from "@/lib/drug-name-alias";
+  import {
+    exapleDrugPrefab,
+    searchDrugPrefab,
+    type PrescPrefab,
+  } from "@/lib/drug-prefab";
+  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -28,6 +33,7 @@
     await tick();
     inputElement?.focus();
   };
+  export let onPrefab: (prefab: RP剤情報) => void;
   let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];
@@ -39,21 +45,38 @@
     focus();
   }
 
+  async function findIyakuhinMaster(
+    iyakuhincode: number,
+  ): Promise<IyakuhinMaster | undefined> {
+    try {
+      return await api.getIyakuhinMaster(iyakuhincode, at);
+    } catch {
+      return undefined;
+    }
+  }
+
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
       const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
-        const aliasList = resolveDrugNameAlias(drugNameAlias, t);
-        aliasList.forEach((alias) =>
-          searchIyakuhinResult.push(createIyakuhinResultFromAlias(alias)),
-        );
-        // const examples = await cache.getPrescExample();
-        // const exResult = searchPrescExample(examples, t);
-        // exResult.forEach((e) =>
-        //   searchIyakuhinResult.push(createIyakuhinResultFromExample(e)),
-        // );
+        const drugPrefab = await exapleDrugPrefab();
+        const prefabs = searchDrugPrefab(drugPrefab, t);
+        const prefabMasters: [PrescPrefab, IyakuhinMaster | undefined][] =
+          await Promise.all(
+            prefabs.map(async (pre) => {
+              const master = await findIyakuhinMaster(
+                parseInt(pre.薬品情報グループ[0].薬品レコード.薬品コード),
+              );
+              return [pre, master];
+            }),
+          );
+        prefabMasters.forEach(([fab, m]) => {
+          if (m) {
+            searchIyakuhinResult.push(createIyakuhinResultFromPrefab(fab, m));
+          }
+        });
         if (t.startsWith("【般】")) {
           const rs = await api.listIyakuhinMasterByIppanmei(t, at);
           if (rs.length > 0) {
@@ -99,9 +122,23 @@
       searchIyakuhinResult = [];
       isEditing = false;
       onFieldChange();
-    } else if (item.kind === "alias") {
-      searchText = item.alias;
-      doSearch();
+    } else if (item.kind === "prefab") {
+      Object.assign(
+        drug.薬品レコード,
+        item.prefab.薬品情報グループ[0].薬品レコード,
+        {
+          isEditing情報区分: false,
+          isEditing薬品コード: false,
+          isEditing分量: false,
+        }
+      );
+      drug.ippanmei = item.master.ippanmei;
+      drug.ippanmeicode = item.master.ippanmeicode;
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onPrefab(item.prefab);
+      onFieldChange();
     } else if (item.kind === "ippanmei") {
       const m = item.master;
       Object.assign(drug.薬品レコード, {

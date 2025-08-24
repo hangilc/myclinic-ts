@@ -34,8 +34,8 @@
           if (groupEdit.薬品情報グループ.length === 0) {
             list = list.filter((e) => e.id !== data.id);
           } else {
-            data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
-            list = list;
+            // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
+            // list = list;
           }
         },
         onCancel: () => {},
@@ -59,8 +59,8 @@
           if( group.薬品情報グループ.length === 0 ){
             return;
           }
-          let ex = createPrescExampleData(group);
-          list.push(ex);
+          // let ex = createPrescExampleData(group);
+          // list.push(ex);
           list = list;
         },
         onCancel: () => {
