@@ -127,14 +127,12 @@
       return;
     }
     group.isSelected = true;
-    const aux: { drug: 薬品情報Edit | undefined } = { drug: undefined };
     data = data;
     const orig = group.clone();
     let w: EditGroup = new EditGroup({
       target: wa,
       props: {
         group: group,
-        aux,
         at,
         kouhiSet: KouhiSet.fromPrescInfoData(data),
         onCancel: () => {

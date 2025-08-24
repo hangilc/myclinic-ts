@@ -26,7 +26,13 @@
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
-  let drugOrig = drug ? drug.clone() : undefined;
+
+  let drugOrig: 薬品情報Edit | undefined = undefined;
+  if (drug === undefined) {
+    drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+  } else {
+    drugOrig = drug.clone();
+  }
 
   function doCancel() {
     onCancel();
@@ -38,7 +44,7 @@
         alert("薬品が編集中です。");
         return;
       }
-      if( !drugOrig ){
+      if (!drugOrig) {
         group.薬品情報グループ.push(drug);
         group = group;
       }
@@ -54,26 +60,26 @@
 
   function doDrugSelect(selected: 薬品情報Edit) {
     drug = selected;
+    drugOrig = drug.clone();
   }
 
-  function doDrugCancel() {
-    if (drug) {
-      if (!drugOrig) {
-        throw new Error("cannot happen");
-      }
+  function restoreOrig() {
+    if (drugOrig) {
       for (let i = 0; i < group.薬品情報グループ.length; i++) {
-        if (group.薬品情報グループ[i].id === drug.id) {
+        if (group.薬品情報グループ[i].id === drugOrig.id) {
           group.薬品情報グループ[i] = drugOrig;
           break;
         }
       }
-      drug = undefined;
-      group = group;
-    } else {
-      if (drugOrig) {
-        throw new Error("cannot happen");
-      }
     }
+  }
+
+  function doDrugCancel() {
+    if (drug) {
+      restoreOrig();
+      drug = undefined;
+    }
+    drugOrig = undefined;
   }
 
   function validateForEnter(drug: 薬品情報Edit): string | undefined {
@@ -98,12 +104,14 @@
       }
       const curr = drug;
       let found = false;
-      for (let i = 0; i < group.薬品情報グループ.length; i++) {
-        let d = group.薬品情報グループ[i];
-        if (d.id === curr.id) {
-          group.薬品情報グループ[i] = curr;
-          found = true;
-          break;
+      if (drugOrig) {
+        for (let i = 0; i < group.薬品情報グループ.length; i++) {
+          let d = group.薬品情報グループ[i];
+          if (d.id === curr.id) {
+            group.薬品情報グループ[i] = curr;
+            found = true;
+            break;
+          }
         }
       }
       if (!found) {
@@ -119,6 +127,7 @@
   function doAddDrug() {
     if (!drug) {
       drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+      drugOrig = undefined;
     }
   }
 
@@ -128,25 +137,28 @@
       group.薬品情報グループ = group.薬品情報グループ.filter(
         (d) => d.id !== curr.id,
       );
-      aux.drug = undefined;
-      aux = aux;
+      drug = undefined;
+      drugOrig = undefined;
       group = group;
     }
   }
 
   function doDrugPrefab(prefab: RP剤情報) {
-    if (group.薬品情報グループ.length === 1) {
-      Object.assign(group, {
-        剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
-        用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
-        用法補足レコード: prefab.用法補足レコード
-          ? prefab.用法補足レコード.map((r) =>
-              用法補足レコードEdit.fromObject(r),
-            )
-          : undefined,
-      });
-      aux.drug = drug;
-      group = group;
+    if (drug) {
+      if (group.薬品情報グループ.length === 1) {
+        Object.assign(group, {
+          剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
+          用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
+          用法補足レコード: prefab.用法補足レコード
+            ? prefab.用法補足レコード.map((r) =>
+                用法補足レコードEdit.fromObject(r),
+              )
+            : undefined,
+        });
+        drug = drug;
+        drugOrig = drug.clone();
+        group = group;
+      }
     }
   }
 </script>
