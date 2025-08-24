@@ -1,6 +1,12 @@
 <script lang="ts">
   import { createEmpty薬品情報 } from "@/lib/denshi-helper";
-  import { 剤形レコードEdit, 用法レコードEdit, 用法補足レコードEdit, 薬品情報Edit, type RP剤情報Edit } from "../denshi-edit";
+  import {
+    剤形レコードEdit,
+    用法レコードEdit,
+    用法補足レコードEdit,
+    薬品情報Edit,
+    type RP剤情報Edit,
+  } from "../denshi-edit";
   import type { KouhiSet } from "../kouhi-set";
   import DrugUsageField from "./DrugUsageField.svelte";
   import DrugForm from "./edit-group/DrugForm.svelte";
@@ -15,19 +21,30 @@
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let group: RP剤情報Edit;
-  export let aux: { drug: 薬品情報Edit | undefined };
+  export let drug: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
-
-  $: drug = aux.drug?.clone();
+  let drugOrig = drug ? drug.clone() : undefined;
 
   function doCancel() {
     onCancel();
   }
 
   function doEnter() {
+    if (drug) {
+      if (drug.isEditing()) {
+        alert("薬品が編集中です。");
+        return;
+      }
+      if( !drugOrig ){
+        group.薬品情報グループ.push(drug);
+        group = group;
+      }
+      drug = undefined;
+      drugOrig = undefined;
+    }
     onEnter();
   }
 
@@ -35,13 +52,28 @@
     group = group;
   }
 
-  function doDrugSelect(drug: 薬品情報Edit) {
-    aux.drug = drug;
-    aux = aux;
+  function doDrugSelect(selected: 薬品情報Edit) {
+    drug = selected;
   }
 
   function doDrugCancel() {
-    drug = undefined;
+    if (drug) {
+      if (!drugOrig) {
+        throw new Error("cannot happen");
+      }
+      for (let i = 0; i < group.薬品情報グループ.length; i++) {
+        if (group.薬品情報グループ[i].id === drug.id) {
+          group.薬品情報グループ[i] = drugOrig;
+          break;
+        }
+      }
+      drug = undefined;
+      group = group;
+    } else {
+      if (drugOrig) {
+        throw new Error("cannot happen");
+      }
+    }
   }
 
   function validateForEnter(drug: 薬品情報Edit): string | undefined {
@@ -78,8 +110,7 @@
         group.薬品情報グループ.push(curr);
       }
     }
-    aux.drug = undefined;
-    aux = aux;
+    drug = undefined;
     group = group;
   }
 
@@ -88,8 +119,6 @@
   function doAddDrug() {
     if (!drug) {
       drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-      aux.drug = drug;
-      aux = aux;
     }
   }
 
@@ -110,7 +139,11 @@
       Object.assign(group, {
         剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
         用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
-        用法補足レコード: prefab.用法補足レコード ? prefab.用法補足レコード.map(r => 用法補足レコードEdit.fromObject(r)) : undefined,
+        用法補足レコード: prefab.用法補足レコード
+          ? prefab.用法補足レコード.map((r) =>
+              用法補足レコードEdit.fromObject(r),
+            )
+          : undefined,
       });
       aux.drug = drug;
       group = group;
