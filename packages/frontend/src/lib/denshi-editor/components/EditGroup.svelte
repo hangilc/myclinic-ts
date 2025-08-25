@@ -29,12 +29,12 @@
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
-  export let drugOrig: 薬品情報Edit | undefined;
+  // export let drugOrig: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
-  export let onTargetDrugChange: (targetDrug: 薬品情報Edit | undefined) => void;
+  // export let onTargetDrugChange: (targetDrug: 薬品情報Edit | undefined) => void;
 
   function doCancel() {
     onCancel();
@@ -46,13 +46,6 @@
         alert("薬品が編集中です。");
         return;
       }
-      if (!drugOrig) {
-        group.薬品情報グループ.push(drug);
-        group = group;
-      }
-      drug = undefined;
-      onTargetDrugChange(drug);
-      drugOrig = undefined;
     }
     onEnter();
   }
@@ -61,106 +54,82 @@
     group = group;
   }
 
-  function doDrugSelect(selected: 薬品情報Edit) {
-    drug = selected;
-    onTargetDrugChange(drug);
-    drugOrig = drug.clone();
-  }
+  // function validateForEnter(drug: 薬品情報Edit): string | undefined {
+  //   if (drug.isEditing()) {
+  //     return "薬品の編集中です。";
+  //   }
+  //   if (drug.薬品レコード.薬品名称 === "") {
+  //     return "薬品の種類が設定されていません。";
+  //   }
+  //   if (drug.薬品レコード.分量 === "") {
+  //     return "薬品の分量が設定されていません。";
+  //   }
+  //   return undefined;
+  // }
 
-  function restoreOrig() {
-    if (drugOrig) {
-      for (let i = 0; i < group.薬品情報グループ.length; i++) {
-        if (group.薬品情報グループ[i].id === drugOrig.id) {
-          group.薬品情報グループ[i] = drugOrig;
-          break;
-        }
-      }
-    }
-  }
-
-  function doDrugCancel() {
-    if (drug) {
-      restoreOrig();
-      drug = undefined;
-      onTargetDrugChange(drug);
-    }
-    drugOrig = undefined;
-  }
-
-  function validateForEnter(drug: 薬品情報Edit): string | undefined {
-    if (drug.isEditing()) {
-      return "薬品の編集中です。";
-    }
-    if (drug.薬品レコード.薬品名称 === "") {
-      return "薬品の種類が設定されていません。";
-    }
-    if (drug.薬品レコード.分量 === "") {
-      return "薬品の分量が設定されていません。";
-    }
-    return undefined;
-  }
-
-  function doDrugEnter() {
-    if (drug) {
-      let err = validateForEnter(drug);
-      if (err) {
-        alert(err);
-        return;
-      }
-      const curr = drug;
-      let found = false;
-      if (drugOrig) {
-        for (let i = 0; i < group.薬品情報グループ.length; i++) {
-          let d = group.薬品情報グループ[i];
-          if (d.id === curr.id) {
-            group.薬品情報グループ[i] = curr;
-            found = true;
-            break;
-          }
-        }
-      }
-      if (!found) {
-        group.薬品情報グループ.push(curr);
-      }
-    }
-    drug = undefined;
-    onTargetDrugChange(drug);
-    group = group;
-  }
+  // function doDrugEnter() {
+  //   if (drug) {
+  //     let err = validateForEnter(drug);
+  //     if (err) {
+  //       alert(err);
+  //       return;
+  //     }
+  //     const curr = drug;
+  //     let found = false;
+  //     if (drugOrig) {
+  //       for (let i = 0; i < group.薬品情報グループ.length; i++) {
+  //         let d = group.薬品情報グループ[i];
+  //         if (d.id === curr.id) {
+  //           group.薬品情報グループ[i] = curr;
+  //           found = true;
+  //           break;
+  //         }
+  //       }
+  //     }
+  //     if (!found) {
+  //       group.薬品情報グループ.push(curr);
+  //     }
+  //   }
+  //   drug = undefined;
+  //   onTargetDrugChange(drug);
+  //   group = group;
+  // }
 
   function doDrugChange() {}
 
-  function doAddDrug() {
-    if (!drug) {
-      drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-      onTargetDrugChange(drug);
-      drugOrig = undefined;
-    }
-  }
+  // function doAddDrug() {
+  //   if (!drug) {
+  //     drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+  //     onTargetDrugChange(drug);
+  //     drugOrig = undefined;
+  //   }
+  // }
 
-  function doDeleteDrug() {
+  function doDelete() {
     if (drug) {
       let curr = drug;
       group.薬品情報グループ = group.薬品情報グループ.filter(
         (d) => d.id !== curr.id,
       );
-      drug = undefined;
-      onTargetDrugChange(drug);
-      drugOrig = undefined;
-      group = group;
+      onEnter();
     }
   }
 
-  function doDrugPrefab(prefab: RP剤情報) {
+  function doPrefab(prefab: RP剤情報) {
     if (drug) {
-      drug = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
-      if (drugOrig) {
-        drugOrig = drug.clone();
-      }
+      const pre = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
+      drug.薬品レコード = pre.薬品レコード;
+      drug.単位変換レコード = pre.単位変換レコード;
+      drug.不均等レコード = pre.不均等レコード;
+      drug.負担区分レコード = pre.負担区分レコード;
+      drug.薬品１回服用量レコード = pre.薬品１回服用量レコード;
+      drug.薬品補足レコード = pre.薬品補足レコード;
+      drug.ippanmei = pre.ippanmei;
+      drug.ippanmeicode = pre.ippanmeicode;
+      drug.isEditing不均等レコード = pre.isEditing不均等レコード;
+      drug.isSelected = pre.isSelected;
       if (
-        group.薬品情報グループ.length === 0 ||
-        (group.薬品情報グループ.length === 1 && drugOrig)
-      ) {
+        group.薬品情報グループ.length === 1) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
@@ -199,7 +168,7 @@
       {at}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
       onFieldChange={doDrugChange}
-      onPrefab={doDrugPrefab}
+      onPrefab={doPrefab}
     />
     <UnevenField
       bind:不均等レコード={drug.不均等レコード}
@@ -232,9 +201,7 @@
   <UsageSupplField {group} onFieldChange={onGroupChange} />
   <Commands>
     {#if drug}
-      <Link onClick={doDeleteDrug}>薬品削除</Link>
-    {:else}
-      <Link onClick={doAddDrug}>薬品追加</Link>
+      <Link onClick={doDelete}>薬品削除</Link>
     {/if}
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
