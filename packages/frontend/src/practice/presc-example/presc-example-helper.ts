@@ -1,6 +1,6 @@
 import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
-export function createBlankRP剤情報(): RP剤情報 {
+export function createEmptyRP剤情報(): RP剤情報 {
   return {
     剤形レコード: {
       剤形区分: "内服",
@@ -10,8 +10,14 @@ export function createBlankRP剤情報(): RP剤情報 {
       用法コード: "",
       用法名称: ""
     },
-    薬品情報グループ: [createBlank薬品情報()]
+    薬品情報グループ: []
   }
+}
+
+export function createSingleDrugRP剤情報(): RP剤情報 {
+  const r = createEmptyRP剤情報();
+  r.薬品情報グループ.push(createBlank薬品情報());
+  return r;
 }
 
 export function createBlank薬品情報(): 薬品情報 {

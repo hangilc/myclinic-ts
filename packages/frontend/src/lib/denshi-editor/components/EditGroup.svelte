@@ -19,18 +19,24 @@
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+  import { initIsEditingOfDrug } from "../helper";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
+  export let addDrug: boolean;
   export let at: string;
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
+  export let onTargetDrugChange: (targetDrug: 薬品情報Edit | undefined) => void;
 
-  let drugOrig: 薬品情報Edit | undefined = undefined;
-  if (drug === undefined) {
+  let drugOrig: 薬品情報Edit | undefined;
+  if (addDrug) {
     drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-  } else {
+    initIsEditingOfDrug(drug);
+    onTargetDrugChange(drug);
+    drugOrig = undefined;
+  } else if( drug ) {
     drugOrig = drug.clone();
   }
 
@@ -49,6 +55,7 @@
         group = group;
       }
       drug = undefined;
+      onTargetDrugChange(drug);
       drugOrig = undefined;
     }
     onEnter();
@@ -60,6 +67,7 @@
 
   function doDrugSelect(selected: 薬品情報Edit) {
     drug = selected;
+    onTargetDrugChange(drug);
     drugOrig = drug.clone();
   }
 
@@ -78,6 +86,7 @@
     if (drug) {
       restoreOrig();
       drug = undefined;
+      onTargetDrugChange(drug);
     }
     drugOrig = undefined;
   }
@@ -119,6 +128,7 @@
       }
     }
     drug = undefined;
+    onTargetDrugChange(drug);
     group = group;
   }
 
@@ -127,6 +137,7 @@
   function doAddDrug() {
     if (!drug) {
       drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+      onTargetDrugChange(drug);
       drugOrig = undefined;
     }
   }
@@ -138,14 +149,18 @@
         (d) => d.id !== curr.id,
       );
       drug = undefined;
+      onTargetDrugChange(drug);
       drugOrig = undefined;
       group = group;
     }
   }
 
   function doDrugPrefab(prefab: RP剤情報) {
+    console.log("enter doDrugPrefab", prefab);
     if (drug) {
-      if (group.薬品情報グループ.length === 1) {
+      if (group.薬品情報グループ.length === 0 ||
+        (group.薬品情報グループ.length === 1 && drugOrig )
+      ) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
@@ -155,8 +170,8 @@
               )
             : undefined,
         });
-        drug = drug;
-        drugOrig = drug.clone();
+        // group.clearEditingFlagsExceptDrugs();
+        console.log("group", group);
         group = group;
       }
     }

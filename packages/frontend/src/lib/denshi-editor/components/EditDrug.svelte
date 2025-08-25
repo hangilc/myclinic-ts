@@ -1,6 +1,8 @@
 <script lang="ts">
   import {
     不均等レコードEdit,
+    剤形レコードEdit,
+    用法レコードEdit,
     用法補足レコードEdit,
     薬品補足レコードEdit,
     type RP剤情報Edit,
@@ -53,7 +55,7 @@
   );
 
   function confirmNotEditing(): boolean {
-    if( drug.isEditing() ){
+    if (drug.isEditing()) {
       alert("薬剤が編集中です。");
       return false;
     }
@@ -188,11 +190,15 @@
   }
 
   function onDrugPrefab(prefab: RP剤情報) {
-    if( data.薬品情報グループ.length === 1 ){
+    if (data.薬品情報グループ.length === 1) {
       Object.assign(data, {
-        剤形レコード: prefab.剤形レコード,
-        用法レコード: prefab.用法レコード,
-        用法補足レコード: prefab.用法補足レコード,
+        剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
+        用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
+        用法補足レコード: prefab.用法補足レコード
+          ? prefab.用法補足レコード.map((r) =>
+              用法補足レコードEdit.fromObject(r),
+            )
+          : undefined,
       });
       console.log("data", data);
       onDrugChange();
@@ -225,11 +231,8 @@
     bind:isEditing={drug.薬品レコード.isEditing分量}
     onFieldChange={onDrugChange}
   />
-  <DrugSupplField
-    {drug}
-    onFieldChange={onDrugChange}
-  />
-  <KouhiField kouhiSet={kouhiSet} {drug} onFieldChange={onDrugChange}/>
+  <DrugSupplField {drug} onFieldChange={onDrugChange} />
+  <KouhiField {kouhiSet} {drug} onFieldChange={onDrugChange} />
   <ZaikeiKubunField
     bind:剤形区分={data.剤形レコード.剤形区分}
     bind:isEditing={data.剤形レコード.isEditing剤形区分}
@@ -245,10 +248,7 @@
     bind:isEditing={data.剤形レコード.isEditing調剤数量}
     onFieldChange={onDrugChange}
   />
-  <UsageSupplField
-    group={data}
-    onFieldChange={onGroupChange}
-  />
+  <UsageSupplField group={data} onFieldChange={onGroupChange} />
   <Commands>
     <div class="sub-commands">
       {#if !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}

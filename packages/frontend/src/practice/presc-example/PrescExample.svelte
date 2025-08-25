@@ -8,7 +8,7 @@
     type PrescExampleData,
   } from "./presc-example-data";
   import { cache } from "@/lib/cache";
-  import { createBlankRP剤情報 } from "./presc-example-helper";
+  import { createSingleDrugRP剤情報 } from "./presc-example-helper";
   
   export let isVisible: boolean;
   let list: PrescExampleData[] = [];
@@ -48,7 +48,7 @@
   }
 
   function doAdd() {
-    const group = RP剤情報Edit.fromObject(createBlankRP剤情報());
+    const group = RP剤情報Edit.fromObject(createSingleDrugRP剤情報());
     const f: EditArea = new EditArea({
       target: editArea,
       props: {
