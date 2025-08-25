@@ -29,22 +29,12 @@
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
-  export let addDrug: boolean;
+  export let drugOrig: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
   export let onTargetDrugChange: (targetDrug: 薬品情報Edit | undefined) => void;
-
-  let drugOrig: 薬品情報Edit | undefined;
-  if (addDrug) {
-    drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-    initIsEditingOfDrug(drug);
-    onTargetDrugChange(drug);
-    drugOrig = undefined;
-  } else if (drug) {
-    drugOrig = drug.clone();
-  }
 
   function doCancel() {
     onCancel();

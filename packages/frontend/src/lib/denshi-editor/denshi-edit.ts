@@ -777,6 +777,10 @@ export class RP剤情報Edit implements RP剤情報 {
     return undefined;
   }
 
+  includesDrug(drugId: number): boolean {
+    return this.findDrugById(drugId) !== undefined;
+  }
+
   getDrugById(drugId: number): 薬品情報Edit {
     const d = this.findDrugById(drugId);
     if (d === undefined) {
