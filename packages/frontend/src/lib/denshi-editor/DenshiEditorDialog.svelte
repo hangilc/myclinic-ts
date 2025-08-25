@@ -127,7 +127,9 @@
   async function doGroupSelect(
     group: RP剤情報Edit,
     drug: 薬品情報Edit | undefined,
-    drugOrig: 薬品情報Edit | undefined,
+    opt: {
+      preEnterHook?: () => void;
+    } = {},
   ) {
     if (!(await workareaService.confirmAndClear())) {
       return;
@@ -140,7 +142,6 @@
       props: {
         group: group,
         drug,
-        drugOrig,
         at,
         kouhiSet: KouhiSet.fromPrescInfoData(data),
         onCancel: () => {
@@ -150,9 +151,7 @@
           workareaService.clear();
         },
         onEnter: () => {
-          if (!data.hasRP剤情報(group.id)) {
-            data.RP剤情報グループ.push(group);
-          }
+          opt.preEnterHook && opt.preEnterHook();
           if (group.薬品情報グループ.length === 0) {
             data.RP剤情報グループ = data.RP剤情報グループ.filter(
               (g) => g.id !== group.id,
@@ -160,7 +159,6 @@
           }
           workareaService.clear();
         },
-        onTargetDrugChange: (value) => (drug = value),
       },
     });
     workareaService.setClearByDestroy(() => {
@@ -173,7 +171,7 @@
         alert("薬品が編集中です");
         return false;
       }
-      if( drug && !group.includesDrug(drug.id) ){
+      if (drug && !group.includesDrug(drug.id)) {
         alert("追加されていない薬品があります。");
         return false;
       }
@@ -395,9 +393,12 @@
   async function doAdd() {
     const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
     const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+    group.薬品情報グループ.push(drug);
     initIsEditingUsage(group);
     initIsEditingOfDrug(drug);
-    doGroupSelect(group, drug, undefined);
+    doGroupSelect(group, drug, {
+      preEnterHook: () => data.RP剤情報グループ.push(group),
+    });
   }
 
   async function doAdd_Old() {
@@ -543,8 +544,8 @@
       {/if}
       <CurrentPresc
         {data}
-        onDrugSelect={(group, drug) => doGroupSelect(group, drug, drug.clone())}
-        onGroupSelect={(group) => doGroupSelect(group, undefined, undefined)}
+        onDrugSelect={(group, drug) => doGroupSelect(group, drug)}
+        onGroupSelect={(group) => doGroupSelect(group, undefined)}
         {showValid}
         onAddDrug={doAddDrugToGroup}
         onDrugReorder={doDrugReorder}
