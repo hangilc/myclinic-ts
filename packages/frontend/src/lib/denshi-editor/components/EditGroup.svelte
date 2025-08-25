@@ -20,6 +20,12 @@
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import { initIsEditingOfDrug } from "../helper";
+  import JohoKubunField from "./JohoKubunField.svelte";
+  import DrugNameField from "./DrugNameField.svelte";
+  import UnevenField from "./UnevenField.svelte";
+  import DrugAmountField from "./DrugAmountField.svelte";
+  import DrugSupplField from "./DrugSupplField.svelte";
+  import KouhiField from "./KouhiField.svelte";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -36,7 +42,7 @@
     initIsEditingOfDrug(drug);
     onTargetDrugChange(drug);
     drugOrig = undefined;
-  } else if( drug ) {
+  } else if (drug) {
     drugOrig = drug.clone();
   }
 
@@ -156,10 +162,14 @@
   }
 
   function doDrugPrefab(prefab: RP剤情報) {
-    console.log("enter doDrugPrefab", prefab);
     if (drug) {
-      if (group.薬品情報グループ.length === 0 ||
-        (group.薬品情報グループ.length === 1 && drugOrig )
+      drug = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
+      if (drugOrig) {
+        drugOrig = drug.clone();
+      }
+      if (
+        group.薬品情報グループ.length === 0 ||
+        (group.薬品情報グループ.length === 1 && drugOrig)
       ) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
@@ -170,8 +180,6 @@
               )
             : undefined,
         });
-        // group.clearEditingFlagsExceptDrugs();
-        console.log("group", group);
         group = group;
       }
     }
@@ -180,8 +188,8 @@
 
 <Workarea>
   <Title>薬品グループ編集</Title>
-  <DrugsList drugs={group.薬品情報グループ} onSelect={doDrugSelect} />
-  <DrugForm
+  <!-- <DrugsList drugs={group.薬品情報グループ} onSelect={doDrugSelect} /> -->
+  <!-- <DrugForm
     {drug}
     onCancel={doDrugCancel}
     onEnter={doDrugEnter}
@@ -189,7 +197,33 @@
     onPrefab={doDrugPrefab}
     {at}
     {kouhiSet}
-  />
+  /> -->
+  {#if drug}
+    <JohoKubunField
+      bind:isEditing={drug.薬品レコード.isEditing情報区分}
+      bind:情報区分={drug.薬品レコード.情報区分}
+      onFieldChange={doDrugChange}
+    />
+    <DrugNameField
+      {drug}
+      {at}
+      bind:isEditing={drug.薬品レコード.isEditing薬品コード}
+      onFieldChange={doDrugChange}
+      onPrefab={doDrugPrefab}
+    />
+    <UnevenField
+      bind:不均等レコード={drug.不均等レコード}
+      onFieldChange={doDrugChange}
+      bind:isEditing={drug.isEditing不均等レコード}
+    />
+    <DrugAmountField
+      {drug}
+      bind:isEditing={drug.薬品レコード.isEditing分量}
+      onFieldChange={doDrugChange}
+    />
+    <DrugSupplField {drug} onFieldChange={doDrugChange} />
+    <KouhiField {kouhiSet} {drug} onFieldChange={doDrugChange} />
+  {/if}
   <ZaikeiKubunField
     bind:剤形区分={group.剤形レコード.剤形区分}
     bind:isEditing={group.剤形レコード.isEditing剤形区分}

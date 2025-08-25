@@ -114,6 +114,12 @@ export class 薬品レコードEdit implements 薬品レコード {
       this.isEditing情報区分 || this.isEditing薬品コード || this.isEditing分量
     );
   }
+
+  clearEditingFlags() {
+    this.isEditing情報区分 = false;
+    this.isEditing薬品コード = false;
+    this.isEditing分量 = false;
+  }
 }
 
 export class 不均等レコードEdit implements 不均等レコード {
@@ -256,6 +262,13 @@ export class 負担区分レコードEdit implements 負担区分レコード {
       this.isEditing特殊公費負担区分
     );
   }
+
+  clearEditingFlags() {
+    this.isEditing第一公費負担区分 = false;
+    this.isEditing第二公費負担区分 = false;
+    this.isEditing第三公費負担区分 = false;
+    this.isEditing特殊公費負担区分 = false;
+  }
 }
 
 export class 薬品１回服用量レコードEdit implements 薬品１回服用量レコード {
@@ -318,6 +331,10 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
     return {
       薬品補足情報: this.薬品補足情報,
     };
+  }
+
+  clearEditingFlags() {
+    this.isEditing = false;
   }
 }
 
@@ -417,6 +434,13 @@ export class 薬品情報Edit implements 薬品情報 {
       ) ||
       !!(this.負担区分レコード && this.負担区分レコード.isEditing())
     );
+  }
+
+  clearEditingFlags() {
+    this.薬品レコード.clearEditingFlags();
+    this.isEditing不均等レコード = false;
+    this.薬品補足レコード?.forEach((r) => r.clearEditingFlags());
+    this.負担区分レコード?.clearEditingFlags();
   }
 
   toObject(): 薬品情報 {
