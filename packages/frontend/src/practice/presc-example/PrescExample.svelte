@@ -30,17 +30,16 @@
     const e: EditArea = new EditArea({
       target: editArea,
       props: {
-        destroy: () => e.$destroy(),
         group: groupEdit,
         drug,
-        onChange: () => {
-          if (groupEdit.薬品情報グループ.length === 0) {
-            list = list.filter((e) => e.id !== data.id);
-          } else {
-            // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
-            // list = list;
-          }
-        },
+        // onChange: () => {
+        //   if (groupEdit.薬品情報グループ.length === 0) {
+        //     list = list.filter((e) => e.id !== data.id);
+        //   } else {
+        //     // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
+        //     // list = list;
+        //   }
+        // },
         onCancel: () => {},
       },
     });
@@ -55,20 +54,17 @@
     const f: EditArea = new EditArea({
       target: editArea,
       props: {
-        destroy: () => f.$destroy(),
         group: group,
-        drugId: group.薬品情報グループ[0].id,
-        onChange: () => {
-          if( group.薬品情報グループ.length === 0 ){
-            return;
-          }
-          // let ex = createPrescExampleData(group);
-          // list.push(ex);
-          list = list;
-        },
+        drug: group.薬品情報グループ[0],
+        // onChange: () => {
+        //   if( group.薬品情報グループ.length === 0 ){
+        //     return;
+        //   }
+        //   list = list;
+        // },
         onCancel: () => {
           f.$destroy();
-        }
+        },
       },
     });
   }
