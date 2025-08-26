@@ -23,13 +23,16 @@
 
   function doSelect(data: PrescExampleData, drugIndex: number) {
     const groupEdit = RP剤情報Edit.fromObject(data.data);
-    const drugId = groupEdit.薬品情報グループ[drugIndex].id;
+    const drug = groupEdit.薬品情報グループ[drugIndex];
+    if( !drug ){
+      return;
+    }
     const e: EditArea = new EditArea({
       target: editArea,
       props: {
         destroy: () => e.$destroy(),
         group: groupEdit,
-        drugId,
+        drug,
         onChange: () => {
           if (groupEdit.薬品情報グループ.length === 0) {
             list = list.filter((e) => e.id !== data.id);

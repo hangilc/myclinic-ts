@@ -12,19 +12,20 @@
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  $: inputText = inputValue(drug);
+  let inputText: string = "";
+  $: updateInputText(drug);
   let inputElement: HTMLInputElement | undefined = undefined;
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
   };
 
-  function inputValue(drug: 薬品情報): string {
-    return toHankaku(drug.薬品レコード.分量);
+  function updateInputText(drug: 薬品情報) {
+    inputText = toHankaku(drug.薬品レコード.分量);
   }
 
   function doRepClick() {
-    inputText = inputValue(drug);
+    updateInputText(drug);
     isEditing = true;
     focus();
   }
@@ -41,6 +42,7 @@
     }
     drug.薬品レコード.分量 = n.toString();
     isEditing = false;
+    drug = drug;
     onFieldChange();
   }
 

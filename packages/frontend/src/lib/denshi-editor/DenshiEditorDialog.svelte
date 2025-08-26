@@ -11,7 +11,6 @@
     検査値データ等レコードEdit,
     薬品情報Edit,
   } from "./denshi-edit";
-  import EditDrug from "./components/EditDrug.svelte";
   import { validatePrescinfoData } from "../validate-presc-info";
   import PrescAux from "./components/PrescAux.svelte";
   import EditValidUpto from "./components/EditValidUpto.svelte";
@@ -68,61 +67,61 @@
     onEnter(presc);
   }
 
-  async function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    if (!(await workareaService.confirmAndClear())) {
-      return;
-    }
-    const orig = group.clone();
-    data.selectDrugExclusive(group.id, drug.id);
-    // data.RP剤情報グループ.forEach((group) => initIsEditingOfGroup(group));
-    data = data;
-    let w: EditDrug = new EditDrug({
-      target: wa,
-      props: {
-        destroy: () => workareaService.clear(),
-        data: group,
-        drugId: drug.id,
-        at,
-        kouhiSet: KouhiSet.fromPrescInfoData(data),
-        onChange: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.filter(
-            (g) => g.薬品情報グループ.length > 0,
-          );
-        },
-        onCancel: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
-            g.id === group.id ? orig : g,
-          );
-        },
-      },
-    });
-    workareaService.setClearByDestroy(() => {
-      w.$destroy();
-      data.clearAllSelected();
-      data = data;
-    });
-    workareaService.setConfirm(async (): Promise<boolean> => {
-      if (group.isEditing()) {
-        alert("薬剤が編集中です");
-        return false;
-      }
-      if (group.isModified(orig)) {
-        let ok = confirm(
-          "変更されて保存されていない薬剤があります。保存して進みますか？",
-        );
-        if (ok) {
-          data.RP剤情報グループ = data.RP剤情報グループ.filter(
-            (g) => g.薬品情報グループ.length > 0,
-          );
-          data = data;
-          return true;
-        } else {
-          return false;
-        }
-      }
-      return true;
-    });
-  }
+  // async function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
+  //   if (!(await workareaService.confirmAndClear())) {
+  //     return;
+  //   }
+  //   const orig = group.clone();
+  //   data.selectDrugExclusive(group.id, drug.id);
+  //   // data.RP剤情報グループ.forEach((group) => initIsEditingOfGroup(group));
+  //   data = data;
+  //   let w: EditDrug = new EditDrug({
+  //     target: wa,
+  //     props: {
+  //       destroy: () => workareaService.clear(),
+  //       data: group,
+  //       drugId: drug.id,
+  //       at,
+  //       kouhiSet: KouhiSet.fromPrescInfoData(data),
+  //       onChange: () => {
+  //         data.RP剤情報グループ = data.RP剤情報グループ.filter(
+  //           (g) => g.薬品情報グループ.length > 0,
+  //         );
+  //       },
+  //       onCancel: () => {
+  //         data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
+  //           g.id === group.id ? orig : g,
+  //         );
+  //       },
+  //     },
+  //   });
+  //   workareaService.setClearByDestroy(() => {
+  //     w.$destroy();
+  //     data.clearAllSelected();
+  //     data = data;
+  //   });
+  //   workareaService.setConfirm(async (): Promise<boolean> => {
+  //     if (group.isEditing()) {
+  //       alert("薬剤が編集中です");
+  //       return false;
+  //     }
+  //     if (group.isModified(orig)) {
+  //       let ok = confirm(
+  //         "変更されて保存されていない薬剤があります。保存して進みますか？",
+  //       );
+  //       if (ok) {
+  //         data.RP剤情報グループ = data.RP剤情報グループ.filter(
+  //           (g) => g.薬品情報グループ.length > 0,
+  //         );
+  //         data = data;
+  //         return true;
+  //       } else {
+  //         return false;
+  //       }
+  //     }
+  //     return true;
+  //   });
+  // }
 
   function addOrphanGroup(group: RP剤情報Edit) {
     if( !data.hasRP剤情報(group.id) ){
@@ -403,49 +402,48 @@
     doGroupSelect(group, drug);
   }
 
-  async function doAdd_Old() {
-    if (!(await workareaService.confirmAndClear())) {
-      return;
-    }
-    const RP剤情報 = createSingleDrugRP剤情報();
-    const edit = RP剤情報Edit.fromObject(RP剤情報);
-    // initIsEditingOfGroup(edit);
-    const drugId = edit.薬品情報グループ[0].id;
-    let w: EditDrug = new EditDrug({
-      target: wa,
-      props: {
-        destroy: () => workareaService.clear(),
-        data: edit,
-        drugId,
-        at,
-        kouhiSet: KouhiSet.fromPrescInfoData(orig),
-        onChange: () => {
-          data.RP剤情報グループ.push(edit);
-          data = data;
-        },
-        onCancel: () => {
-          data.RP剤情報グループ = data.RP剤情報グループ.filter(
-            (g) => g.id !== drugId,
-          );
-          data = data;
-        },
-      },
-    });
-    workareaService.setClearByDestroy(() => w.$destroy());
-    workareaService.setConfirm(async (): Promise<boolean> => {
-      alert("薬剤追加を実行中です。");
-      return false;
-    });
-  }
+  // async function doAdd_Old() {
+  //   if (!(await workareaService.confirmAndClear())) {
+  //     return;
+  //   }
+  //   const RP剤情報 = createSingleDrugRP剤情報();
+  //   const edit = RP剤情報Edit.fromObject(RP剤情報);
+  //   // initIsEditingOfGroup(edit);
+  //   const drugId = edit.薬品情報グループ[0].id;
+  //   let w: EditDrug = new EditDrug({
+  //     target: wa,
+  //     props: {
+  //       destroy: () => workareaService.clear(),
+  //       data: edit,
+  //       drugId,
+  //       at,
+  //       kouhiSet: KouhiSet.fromPrescInfoData(orig),
+  //       onChange: () => {
+  //         data.RP剤情報グループ.push(edit);
+  //         data = data;
+  //       },
+  //       onCancel: () => {
+  //         data.RP剤情報グループ = data.RP剤情報グループ.filter(
+  //           (g) => g.id !== drugId,
+  //         );
+  //         data = data;
+  //       },
+  //     },
+  //   });
+  //   workareaService.setClearByDestroy(() => w.$destroy());
+  //   workareaService.setConfirm(async (): Promise<boolean> => {
+  //     alert("薬剤追加を実行中です。");
+  //     return false;
+  //   });
+  // }
 
   function doAddDrugToGroup(group: RP剤情報Edit) {
     const 薬品情報 = 薬品情報Edit.fromObject(createBlank薬品情報());
-    薬品情報.薬品レコード.isEditing薬品コード = false;
-    薬品情報.薬品レコード.isEditing分量 = false;
-    console.log("drug", 薬品情報);
+    initIsEditingOfDrug(薬品情報);
+    // 薬品情報.薬品レコード.isEditing薬品コード = false;
+    // 薬品情報.薬品レコード.isEditing分量 = false;
     group.薬品情報グループ.push(薬品情報);
-    data = data;
-    doDrugSelect(group, 薬品情報);
+    doGroupSelect(group, 薬品情報);
   }
 
   async function doGroupReorder() {
@@ -513,6 +511,9 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
+  function doGroupManip(group: RP剤情報Edit) {
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -547,7 +548,8 @@
       <CurrentPresc
         {data}
         onDrugSelect={(group, drug) => doGroupSelect(group, drug)}
-        onGroupSelect={(group) => doGroupSelect(group, undefined)}
+        onUsageAndTimesSelect={(group) => doGroupSelect(group, undefined)}
+        onGroupSelect={(group) => doGroupManip(group)}
         {showValid}
         onAddDrug={doAddDrugToGroup}
         onDrugReorder={doDrugReorder}
