@@ -124,12 +124,15 @@
     });
   }
 
+  function addOrphanGroup(group: RP剤情報Edit) {
+    if( !data.hasRP剤情報(group.id) ){
+      data.RP剤情報グループ.push(group);
+    }
+  }
+
   async function doGroupSelect(
     group: RP剤情報Edit,
     drug: 薬品情報Edit | undefined,
-    opt: {
-      preEnterHook?: () => void;
-    } = {},
   ) {
     if (!(await workareaService.confirmAndClear())) {
       return;
@@ -151,7 +154,7 @@
           workareaService.clear();
         },
         onEnter: () => {
-          opt.preEnterHook && opt.preEnterHook();
+          addOrphanGroup(group);
           if (group.薬品情報グループ.length === 0) {
             data.RP剤情報グループ = data.RP剤情報グループ.filter(
               (g) => g.id !== group.id,
@@ -180,6 +183,7 @@
           "変更されて保存されていない薬剤があります。保存して進みますか？",
         );
         if (ok) {
+          addOrphanGroup(group);
           data.RP剤情報グループ = data.RP剤情報グループ.filter(
             (g) => g.薬品情報グループ.length > 0,
           );
@@ -396,9 +400,7 @@
     group.薬品情報グループ.push(drug);
     initIsEditingUsage(group);
     initIsEditingOfDrug(drug);
-    doGroupSelect(group, drug, {
-      preEnterHook: () => data.RP剤情報グループ.push(group),
-    });
+    doGroupSelect(group, drug);
   }
 
   async function doAdd_Old() {
