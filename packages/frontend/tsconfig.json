@@ -20,10 +20,7 @@
       "@/*": [
         "src/*"
       ],
-      "@lib/*": ["src/lib/*"],
-      "@cypress/*": [
-        "cypress/*"
-      ]
+      "@lib/*": ["src/lib/*"]
     },
     "types": ["svelte"],
     "strict": true,
@@ -34,8 +31,7 @@
     "src/**/*.d.ts",
     "src/**/*.ts",
     "src/**/*.js",
-    "src/**/*.svelte",
-    "cypress/**/*.ts"
+    "src/**/*.svelte"
   ],
   "exclude": [
     "./node_modules"
