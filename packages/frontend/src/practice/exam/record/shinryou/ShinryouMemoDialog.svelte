@@ -22,7 +22,7 @@
       if( !memo ){
         memo = undefined;
       } else {
-        const _json = JSON.stringify(memo);
+        // const _json = JSON.stringify(memo);
       }
     } catch (_ex) {
       alert("Invalid JSON");

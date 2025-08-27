@@ -17,14 +17,15 @@
     }
   }
 
-  function doSelect(date: Date, destroy: () => void): void {
-    destroy();
-    onSelect(date);
-  }
+  // function doSelect(date: Date, destroy: () => void): void {
+  //   destroy();
+  //   onSelect(date);
+  // }
 </script>
 
 <!-- <Popup let:destroy let:trigger {triggerHook}> -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
   class="wrapper"
   on:click={popupTriggerAsync(async () => {

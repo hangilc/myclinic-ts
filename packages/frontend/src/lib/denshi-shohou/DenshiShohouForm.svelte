@@ -66,49 +66,49 @@
     mode = m;
   }
 
-  function resolve使用期限年月日FromInit(init: Init): string | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.使用期限年月日;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve使用期限年月日FromInit(init: Init): string | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.使用期限年月日;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
-  function resolve備考レコードFromInit(init: Init): 備考レコード[] | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.備考レコード;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve備考レコードFromInit(init: Init): 備考レコード[] | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.備考レコード;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
-  function resolve提供情報レコードFromInit(
-    init: Init,
-  ): 提供情報レコード | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.提供情報レコード;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve提供情報レコードFromInit(
+  //   init: Init,
+  // ): 提供情報レコード | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.提供情報レコード;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
   function prepareSourceList(
     source:
@@ -482,14 +482,14 @@
     mode = undefined;
   }
 
-  function isAllConverted(list: Source[]): boolean {
-    for (let src of list) {
-      if (src.kind !== "denshi") {
-        return false;
-      }
-    }
-    return true;
-  }
+  // function isAllConverted(list: Source[]): boolean {
+  //   for (let src of list) {
+  //     if (src.kind !== "denshi") {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 
   // export function getPrescInfoData(): PrescInfoData {
   //   if (isAllConverted(sourceList)) {

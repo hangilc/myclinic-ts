@@ -198,7 +198,7 @@
 
   function doEnterHokenFromOnshi(
     result: OnshiResult,
-    current: Shahokokuho | Koukikourei
+    _current: Shahokokuho | Koukikourei
   ): () => void {
     return async () => {
       fEnterHokenFromOnshi = undefined;

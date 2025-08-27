@@ -19,8 +19,6 @@
   import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import { TextMemoWrapper } from "@/lib/text-memo";
   import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
-  // import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
-  import { type Text as ModelText } from "myclinic-model";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
 
   export let visit: m.VisitEx;

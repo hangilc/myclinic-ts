@@ -135,7 +135,7 @@ function mainArea(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
 }
 
 function kanjaRowRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
-  const data = env.data;
+  // const data = env.data;
   const cb = new ColumnBuilder(extent);
   const [patientArea, clinicArea] = cb.splitEven(2);
   const con = new Container();
@@ -359,7 +359,7 @@ function kubunRenderer(ctx: DrawerContext, extent: Extent, kubun: "hihokensha" |
 }
 
 function clinicAreaRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
-  const data = env.data;
+  // const data = env.data;
   const con = new Container();
   const inset = insetExtent(extent, 2, 0, 0, 0);
   const rb = new RowBuilder(inset.extent, inset.offset);
@@ -426,7 +426,7 @@ function clinicNameRenderer(ctx: DrawerContext, extent: Extent, labelWidth: numb
   return con;
 }
 
-function kikanRenderer(ctx: DrawerContext, extent: Extent, labelWidth: number, env: Env): Renderer {
+function kikanRenderer(ctx: DrawerContext, extent: Extent, _labelWidth: number, env: Env): Renderer {
   const data = env.data;
   const con = new Container();
   con.frame({ offset: blk.zeroOffset(), extent })
@@ -850,7 +850,7 @@ function drugsRenderer(ctx: DrawerContext, extent: Extent, env: Env): Renderer {
   }
   let dy = 0;
   if (rest.length > 0) {
-    const font = shohouFont;
+    // const font = shohouFont;
     let [henkoufuka] = RowBuilder.fromOffsetExtent(col1).split(skip(yoffset), expand());
     let [kanjakibou] = RowBuilder.fromOffsetExtent(col2).split(skip(yoffset), expand());
     let [shohou] = RowBuilder.fromOffsetExtent(body).split(skip(yoffset), expand());

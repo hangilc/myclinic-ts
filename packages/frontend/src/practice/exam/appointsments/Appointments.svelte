@@ -48,7 +48,7 @@
     }
   }
 
-  function dateRep(date: Date): string {
+  function dateRep(_date: Date): string {
     let d = DateWrapper.from(curdate);
     return d.render(
       (d) => `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日（${d.youbi}）`,

@@ -101,9 +101,9 @@ function drawSubtitle(ctx: DrawerContext, paper: Box) {
   ], { halign: "left", valign: "top" });
 }
 
-function ropt(opt: c.DataRendererOpt): c.DataRendererOpt {
-  return Object.assign({ font: "input-regular" }, opt);
-}
+// function ropt(opt: c.DataRendererOpt): c.DataRendererOpt {
+//   return Object.assign({ font: "input-regular" }, opt);
+// }
 
 function renderRow0(ctx: DrawerContext, box: Box) {
   const cols: Box[] = b.splitToColumns(box, b.splitAt(20, 83.5));

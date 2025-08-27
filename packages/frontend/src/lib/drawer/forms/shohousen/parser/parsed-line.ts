@@ -38,10 +38,10 @@ const reDays = /(.*\S)\s+([０-９]+)(日分|回分)(（.+）)?\s*$/;
 export function parseNonFirstLine(line: string): RegularLine | DaysLine {
   const m = line.match(reDays);
   if (m) {
-    const str = m[1];
-    const days = m[2];
-    const unit = m[3];
-    const extra = m[4];
+    // const str = m[1];
+    // const days = m[2];
+    // const unit = m[3];
+    // const extra = m[4];
     return {
       kind: "days",
       str: m[1],

@@ -69,7 +69,7 @@
     }
   }
 
-  function parseHenreiData(data: string): [string[], string[]] {
+  function parseHenreiData(_data: string): [string[], string[]] {
     const rows = henreiData.split(/\r?\n/).filter((s) => s !== "");
     let seikyuu: string[] = [];
     let tail: string[] = [];

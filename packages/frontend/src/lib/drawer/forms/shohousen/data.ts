@@ -97,7 +97,7 @@ function drawValidUpto(ctx: DrawerContext, date: string | undefined) {
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
-  phone: string, kikancode: string) {
+  _phone: string, kikancode: string) {
   c.setFont(ctx, "mincho-3");
   let r = b.modify(box, b.shift(2, 1));
   c.drawText(ctx, address, r, "left", "top");

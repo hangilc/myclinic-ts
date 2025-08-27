@@ -20,7 +20,7 @@
       props: {
         destroy: () => d.$destroy(),
         shinryou: conductShinryou,
-        onUpdate: (updated: ConductShinryouEx) => {
+        onUpdate: (_updated: ConductShinryouEx) => {
 
         }
       }

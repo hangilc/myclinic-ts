@@ -1,6 +1,4 @@
-import api from "@/lib/api";
-import type { Shinryou, Visit, VisitEx } from "myclinic-model";
-import { DateWrapper } from "myclinic-util";
+import type { VisitEx } from "myclinic-model";
 import type { ShinryouCheckProc } from "./record-shinryou-types";
 import { listShinryouOfRecentMonths, shinryouListIncludes } from "./santei-check-helper";
 

@@ -1,6 +1,6 @@
 import type { Box } from "../../compiler/box";
 import * as b from "../../compiler/box";
-import { A5, type PaperSize } from "../../compiler/paper-size";
+import { A5 } from "../../compiler/paper-size";
 
 export interface Layout {
   wrap: Box;

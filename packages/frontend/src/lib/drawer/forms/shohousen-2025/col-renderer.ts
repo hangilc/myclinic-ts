@@ -1,7 +1,6 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import type { DrawerContext } from "@/lib/drawer/compiler/context";
 import * as x from "./xsplit";
-import * as r from "./row-renderer";
 import * as b from "@/lib/drawer/compiler/box";
 
 export interface Item {

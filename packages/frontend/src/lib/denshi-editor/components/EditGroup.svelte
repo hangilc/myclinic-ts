@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { createEmpty薬品情報 } from "@/lib/denshi-helper";
   import {
     剤形レコードEdit,
     用法レコードEdit,
@@ -9,8 +8,6 @@
   } from "../denshi-edit";
   import type { KouhiSet } from "../kouhi-set";
   import DrugUsageField from "./DrugUsageField.svelte";
-  import DrugForm from "./edit-group/DrugForm.svelte";
-  import DrugsList from "./edit-group/DrugsList.svelte";
   import TimesField from "./TimesField.svelte";
   import UsageSupplField from "./UsageSupplField.svelte";
   import Commands from "./workarea/Commands.svelte";
@@ -19,7 +16,6 @@
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
-  import { initIsEditingOfDrug } from "../helper";
   import JohoKubunField from "./JohoKubunField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import UnevenField from "./UnevenField.svelte";
@@ -147,16 +143,6 @@
 
 <Workarea>
   <Title>薬品グループ編集</Title>
-  <!-- <DrugsList drugs={group.薬品情報グループ} onSelect={doDrugSelect} /> -->
-  <!-- <DrugForm
-    {drug}
-    onCancel={doDrugCancel}
-    onEnter={doDrugEnter}
-    onChange={doDrugChange}
-    onPrefab={doDrugPrefab}
-    {at}
-    {kouhiSet}
-  /> -->
   {#if drug}
     <JohoKubunField
       bind:isEditing={drug.薬品レコード.isEditing情報区分}
