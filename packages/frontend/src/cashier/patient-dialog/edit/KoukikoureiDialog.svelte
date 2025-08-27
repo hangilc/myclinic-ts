@@ -3,10 +3,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import { type Patient, Koukikourei } from "myclinic-model";
   import KoukikoureiDialogContent from "./KoukikoureiDialogContent.svelte";
-  import {
-    countInvalidUsage,
-  } from "@/lib/hoken-check";
-
+  
   export let destroy: () => void;
   export let title: string;
   export let init: Koukikourei | null;
@@ -14,13 +11,13 @@
   export let onEntered: (entered: Koukikourei) => void = (_) => {};
   export let onUpdated: (entered: Koukikourei) => void = (_) => {};
   export let isAdmin: boolean;
-  let prevInvalids = 0;
+  // let prevInvalids = 0;
 
   checkPrevInvalids();
 
   async function checkPrevInvalids() {
     if (init) {
-      prevInvalids = await countInvalidUsage(init);
+      // prevInvalids = await countInvalidUsage(init);
     }
   }
 

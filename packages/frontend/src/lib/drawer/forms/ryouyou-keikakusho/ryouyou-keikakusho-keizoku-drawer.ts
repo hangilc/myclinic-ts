@@ -1,12 +1,12 @@
 import type { Op } from "../../compiler/op";
-import { mkDrawerContext, type DrawerContext as DC, type DrawerContext } from "../../compiler/context";
+import { mkDrawerContext, type DrawerContext as DC } from "../../compiler/context";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec, advanceTo, } from "../../compiler/render";
+import { textBlock, advanceTo, } from "../../compiler/render";
 import { booleanValue, boxed, expander, gap, line, textCircle, value } from "./widgets";
 
 export function drawRyouyouKeikakushoKeizoku(data: RyouyouKeikakushoData): Op[] {

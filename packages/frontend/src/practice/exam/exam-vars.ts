@@ -334,13 +334,13 @@ appEvent.visitDeleted.subscribe(visit => {
   }
   const patient: m.Patient | null = get(currentPatient);
   if (patient != null && visit.patientId === patient.patientId) {
-    let focusedVisitId: number | undefined;
+    // let focusedVisitId: number | undefined;
     const currentVisitIdValue: number | null = get(currentVisitId);
     if (currentVisitIdValue) {
       if (currentVisitIdValue === visit.visitId) {
         currentVisitId.set(null);
       } else {
-        focusedVisitId = currentVisitIdValue;
+        // focusedVisitId = currentVisitIdValue;
       }
     } else {
       const tempVisitIdValue = get(tempVisitId);
@@ -348,7 +348,7 @@ appEvent.visitDeleted.subscribe(visit => {
         if (tempVisitIdValue === visit.visitId) {
           tempVisitId.set(null);
         } else {
-          focusedVisitId = tempVisitIdValue;
+          // focusedVisitId = tempVisitIdValue;
         }
       }
     }

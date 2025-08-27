@@ -1,4 +1,3 @@
-import api from "@/lib/api";
 import { cache } from "@/lib/cache";
 import { AppointTime } from "myclinic-model";
 import { DateWrapper } from "myclinic-util";

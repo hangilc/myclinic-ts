@@ -1,4 +1,4 @@
-import { asJson, asNotEmptyStr, ok, Verifier, type VerifyResult } from "./verify";
+import { asJson, ok, Verifier } from "./verify";
 
 export function memoToJson(): Verifier<any, any> {
 	return new Verifier((src: any) => {

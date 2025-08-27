@@ -1,6 +1,5 @@
 import type { Koukikourei, Shahokokuho } from "myclinic-model";
 import api from "./api";
-import type { ResultItem } from "onshi-result/ResultItem";
 
 export type TryUpdateHokenResult = "success" | "not-allowed" | "invalid-valid-upto";
 

@@ -2,11 +2,9 @@
   import Field from "./workarea/Field.svelte";
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import FieldForm from "./workarea/FieldForm.svelte";
-  import { deserializeUneven, serializeUneven } from "../helper";
   import { tick } from "svelte";
   import SubmitLink from "../icons/SubmitLink.svelte";
   import CancelLink from "../icons/CancelLink.svelte";
-  import TrashLink from "../icons/TrashLink.svelte";
   import type { RP剤情報Edit } from "../denshi-edit";
   import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 

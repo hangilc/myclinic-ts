@@ -24,7 +24,7 @@ describe("parse-shohou2", () => {
   });
 
   it("should parse uneven", () => {
-    let re = new RegExp(_reUneven);
+    // let re = new RegExp(_reUneven);
     let m = _reAmount.exec("プレドニン錠５ｍｇ　６錠（３－２－１）");
     expect(m).not.toBeNull();
     if( m ){

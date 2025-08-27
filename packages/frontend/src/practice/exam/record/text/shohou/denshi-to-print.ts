@@ -4,7 +4,6 @@ import type {
   用法レコード,
   用法補足レコード,
   薬品情報,
-  負担区分レコード,
 } from "@/lib/denshi-shohou/presc-info";
 import type { Shohousen2024Data } from "@/lib/drawer/forms/shohousen-2024/shohousenData2024";
 import type { Drug, DrugGroup, Senpatsu, Shohou, Usage } from "@/lib/parse-shohou";

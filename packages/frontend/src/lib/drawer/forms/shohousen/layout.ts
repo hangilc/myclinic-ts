@@ -43,18 +43,18 @@ export function mkMainLayout(box: Box): MainLayout {
 }
 
 
-function mkMainLayoutOrig(box: Box): MainLayout {
-  const [patientClinic, issue, drugs, memo, chouzai1, chouzai2] =
-    b.splitToRows(box, b.splitAt(18, 24.5, 109, 143, 149.5));
-  console.log("height", b.height(box));
-  console.log("patientClinic", b.height(patientClinic));
-  console.log("issue", b.height(issue));
-  console.log("drugs", b.height(drugs));
-  console.log("memo", b.height(memo));
-  console.log("chouzai1", b.height(chouzai1));
-  console.log("chouzai2", b.height(chouzai2));
-  // 0.713
+// function mkMainLayoutOrig(box: Box): MainLayout {
+//   const [patientClinic, issue, drugs, memo, chouzai1, chouzai2] =
+//     b.splitToRows(box, b.splitAt(18, 24.5, 109, 143, 149.5));
+//   console.log("height", b.height(box));
+//   console.log("patientClinic", b.height(patientClinic));
+//   console.log("issue", b.height(issue));
+//   console.log("drugs", b.height(drugs));
+//   console.log("memo", b.height(memo));
+//   console.log("chouzai1", b.height(chouzai1));
+//   console.log("chouzai2", b.height(chouzai2));
+//   // 0.713
 
-  return { patientClinic, issue, drugs, memo, chouzai1, chouzai2 };
-}
+//   return { patientClinic, issue, drugs, memo, chouzai1, chouzai2 };
+// }
 

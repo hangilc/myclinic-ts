@@ -1,6 +1,5 @@
 <script lang="ts">
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
-  import { drugRep } from "../../helper";
   import type { PrevSearchItem } from "./prev-search-item";
   import { toZenkaku } from "@/lib/zenkaku";
   import type { RP剤情報Edit } from "../../denshi-edit";

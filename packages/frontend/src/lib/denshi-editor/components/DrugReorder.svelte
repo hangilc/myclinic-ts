@@ -44,7 +44,7 @@
     e.addEventListener("mousemove", doMouseMove);
   }
 
-  function doMouseUp(this: HTMLElement, event: MouseEvent) {
+  function doMouseUp(this: HTMLElement, _event: MouseEvent) {
     this.classList.remove("dragged");
     this.style.position = "";
     this.style.top = "";
@@ -115,7 +115,7 @@
 <Workarea>
   <Title>薬剤順序編集</Title>
   <div bind:this={drugListElement} class="drug-list">
-    {#each ordered as drug, index (drug.id)}
+    {#each ordered as drug (drug.id)}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <div
         class="drug-item"

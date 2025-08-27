@@ -3,7 +3,6 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import { 検査値データ等レコードEdit } from "../denshi-edit";
-  import ClinicalInfoRecord from "./ClinicalInfoRecord.svelte";
   import Link from "./workarea/Link.svelte";
   import ExamInfoRecord from "./ExamInfoRecord.svelte";
 

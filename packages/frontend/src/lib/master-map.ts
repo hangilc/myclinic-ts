@@ -2,7 +2,6 @@ import type { PrescInfoData, RP剤情報, 用法レコード, 薬品レコード
 import type { DrugNameBind } from "./drug-name-bind";
 import { cache } from "./cache";
 import { confirmDrugCode } from "./validate-presc-info";
-import type { RP剤情報Edit } from "./denshi-editor/denshi-edit";
 
 export function resolveDrugRecordByMap(record: 薬品レコード, map: Record<string, DrugNameBind>): 薬品レコード {
   let bind = map[record.薬品名称];

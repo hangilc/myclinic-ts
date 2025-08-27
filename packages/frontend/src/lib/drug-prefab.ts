@@ -1,4 +1,4 @@
-import type { RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "./denshi-shohou/presc-info";
+import type { 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "./denshi-shohou/presc-info";
 
 export interface DrugPrefab {
   presc: PrescPrefab[];
@@ -49,7 +49,7 @@ export async function exapleDrugPrefab(): Promise<DrugPrefab[]> {
 export function searchDrugPrefab(fab: DrugPrefab[], name: string): PrescPrefab[] {
   const result: PrescPrefab[] = [];
   for (let entry of fab) {
-    let aliasMatch = false;
+    // let aliasMatch = false;
     for (let a of entry.alias) {
       if (a.includes(name)) {
         result.push(...entry.presc);

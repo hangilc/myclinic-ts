@@ -1,7 +1,5 @@
-import api from "@/lib/api";
 import { cache } from "@/lib/cache";
 import type { PrescInfoData, RP剤情報, 用法レコード } from "@/lib/denshi-shohou/presc-info";
-import { DateWrapper } from "myclinic-util";
 
 export function isKensa(patientId: number, content: string): boolean {
   const re = new RegExp(`^0*${patientId}\\s+\\d+/\\d+/\\d+.+\n検査結果：`)
@@ -14,7 +12,7 @@ export async function resolveByMap(data: PrescInfoData): Promise<void> {
 }
 
 async function resolveDrugByMap(data: PrescInfoData): Promise<void> {
-  let at = DateWrapper.fromOnshiDate(data.処方箋交付年月日).asSqlDate();
+  // let at = DateWrapper.fromOnshiDate(data.処方箋交付年月日).asSqlDate();
   for (let g of data.RP剤情報グループ) {
     await resolveDrugGroupByMap(g);
   }

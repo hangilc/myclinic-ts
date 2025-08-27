@@ -108,7 +108,7 @@
   }
 
   function selectDrug(name: string) {
-    selectedItems = allItems.filter(([t, v]) => {
+    selectedItems = allItems.filter(([t, _v]) => {
       let groups = textToDrugGroups(t);
       for (let group of groups) {
         for (let drug of group.薬品情報グループ) {

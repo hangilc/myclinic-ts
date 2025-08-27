@@ -8,7 +8,7 @@
   import { FormatDate } from "myclinic-util";
 
   export let data: ColumnData;
-  const dateFormat = "{M}月{D}日（{W}）";
+  // const dateFormat = "{M}月{D}日（{W}）";
 
   function kenshinRep(data: ColumnData): string {
     const n = data.countKenshin();
@@ -19,15 +19,15 @@
     }
   }
 
-  function doContextMenu(
-    event: MouseEvent,
-    trigger: (e: MouseEvent) => void
-  ): void {
-    if (isAdmin) {
-      event.preventDefault();
-      trigger(event);
-    }
-  }
+  // function doContextMenu(
+  //   event: MouseEvent,
+  //   trigger: (e: MouseEvent) => void
+  // ): void {
+  //   if (isAdmin) {
+  //     event.preventDefault();
+  //     trigger(event);
+  //   }
+  // }
 </script>
 
 <div class={`top ${isAdmin ? "admin" : ""}`} 

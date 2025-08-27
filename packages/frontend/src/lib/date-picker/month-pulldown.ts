@@ -1,4 +1,3 @@
-import type { Writable } from "svelte/store"
 import MonthPulldown from "./MonthPulldown.svelte"
 
 export function monthPulldown(month: () => number, onChange: (m: number) => void): (event: MouseEvent) => void {

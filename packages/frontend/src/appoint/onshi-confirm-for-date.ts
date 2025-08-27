@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 import { messageOfOnshiConfirmHokenResult, onshiConfirmHoken } from "@/lib/onshi-query-helper";
-import type { Appoint, Koukikourei, Patient, Shahokokuho } from "myclinic-model";
+import type { Appoint, Koukikourei, Shahokokuho } from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 
 export type ConfirmError = "" | "保険重複" | "確認不成功" | "患者番号なし" | "情報不一致" | "保険なし";
@@ -80,7 +80,7 @@ export function startConfirm(appoint: Appoint, date: string, idToken: string, st
     try {
 
       if (patientId > 0) {
-        const patient = await api.getPatient(patientId);
+        // const patient = await api.getPatient(patientId);
         const shahoOpt = await api.findAvailableShahokokuho(patientId, date);
         const koukiOpt = await api.findAvailableKoukikourei(patientId, date);
         if (shahoOpt && koukiOpt) {

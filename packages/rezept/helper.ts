@@ -317,7 +317,7 @@ function visitHasHokenSelector(visit: RezeptVisit, selector: HokenSelector): boo
 
 export function calcJitsuNissuu(visits: RezeptVisit[], selector: HokenSelector): number {
   let ds = new DateSet();
-  const days: string[] = [];
+  // const days: string[] = [];
   visits.forEach(visit => {
     if (visitHasHokenSelector(visit, selector)) {
       ds.add(visit.visitedAt);

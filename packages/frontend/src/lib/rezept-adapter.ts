@@ -1,6 +1,6 @@
-import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type Shinryou, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, type KizaiMaster, type Meisai, PatientWrapper } from "myclinic-model";
+import { type DiseaseData, type ConductDrugEx, type ConductEx, type ConductKizaiEx, type ConductShinryouEx, type HokenInfo, type Kouhi, Koukikourei, type RezeptShoujouShouki, Shahokokuho, type ShinryouEx, type ShinryouMaster, type Visit, type VisitEx, type Patient, PatientWrapper } from "myclinic-model";
 import type { RezeptComment } from "myclinic-model/model";
-import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
+import { is診療識別コードCode, is負担区分コードName, 診療識別コード, 負担区分コード, type ShotokuKubunCode, type 診療識別コードCode, type 負担区分コードCode } from "myclinic-rezept/codes";
 import { resolve保険種別 } from "myclinic-rezept/helper";
 import type { Hokensha, RezeptConduct, RezeptConductDrug, RezeptConductKizai, RezeptConductShinryou, RezeptDisease, RezeptKouhi, RezeptPatient, RezeptShinryou, RezeptVisit } from "myclinic-rezept/rezept-types";
 import { OnshiResult } from "onshi-result";
@@ -70,12 +70,12 @@ export async function loadVisitsForPatient(year: number, month: number, patientI
   return doLoadVisits(visits);
 }
 
-function hokenOfShinryou(shinryou: ShinryouEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
+function hokenOfShinryou(_shinryou: ShinryouEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
   kouhiList: Kouhi[]): [Shahokokuho | undefined, Koukikourei | undefined, Kouhi[]] {
   return [shahokokuho, koukikourei, kouhiList];
 }
 
-function hokenOfConduct(conduct: ConductEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
+function hokenOfConduct(_conduct: ConductEx, shahokokuho: Shahokokuho | undefined, koukikourei: Koukikourei | undefined,
   kouhiList: Kouhi[]): [Shahokokuho | undefined, Koukikourei | undefined, Kouhi[]] {
   return [shahokokuho, koukikourei, kouhiList];
 }
@@ -244,7 +244,7 @@ async function resolveShotokuKubunOfVisits(hoken: Shahokokuho | Koukikourei | un
 async function adjCodesOfDisease(diseaseId: number): Promise<number[]> {
   const dex: DiseaseData = await api.getDiseaseEx(diseaseId);
   return dex.adjList.map(e => {
-    const [adj, master] = e;
+    const [adj, _master] = e;
     return adj.shuushokugocode;
   });
 }
@@ -306,11 +306,13 @@ async function diseasesOfPatient(patient: Patient, firstDay: string, lastDay: st
         `Cannot find main disease ${mainDiseaseName} in ($[aptient.patientId]) ${new PatientWrapper(patient).fullName()}`)
     }
   } else {
-    if( result[0] ){
+    if (result[0]) {
       result[0].isMainDisease = true;
-    } else {{
-      console.log("no disease for patient: ", patient);
-    }}
+    } else {
+      {
+        console.log("no disease for patient: ", patient);
+      }
+    }
   }
   return result;
 }
@@ -405,11 +407,11 @@ export async function cvtModelVisitsToRezeptVisits(visits: VisitEx[], hokenColle
   return await Promise.all(visits.map(visit => cvtModelVisitToRezeptVisit(visit, hokenCollector)));
 }
 
-function commentsOfVisit(visit: VisitEx): RezeptComment[] {
+function commentsOfVisit(_visit: VisitEx): RezeptComment[] {
   return [];
 }
 
-function shoujouShoukiOfVisit(visit: VisitEx): RezeptShoujouShouki[] {
+function shoujouShoukiOfVisit(_visit: VisitEx): RezeptShoujouShouki[] {
   return [];
 }
 
@@ -467,11 +469,11 @@ function commenctsOfConductShinryou(cs: ConductShinryouEx): RezeptComment[] {
   return cs.comments;
 }
 
-function commenctsOfConductDrug(cs: ConductDrugEx): RezeptComment[] {
+function commenctsOfConductDrug(_cs: ConductDrugEx): RezeptComment[] {
   return [];
 }
 
-function commenctsOfConductKizai(cs: ConductKizaiEx): RezeptComment[] {
+function commenctsOfConductKizai(_cs: ConductKizaiEx): RezeptComment[] {
   return [];
 }
 

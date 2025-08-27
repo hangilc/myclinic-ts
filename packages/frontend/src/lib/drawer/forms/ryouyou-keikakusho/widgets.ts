@@ -4,7 +4,7 @@ import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
 import type { DrawerContext } from "../../compiler/context";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
-import { textBlock, type LineItemSpec, type Block } from "../../compiler/render";
+import { textBlock, type LineItemSpec } from "../../compiler/render";
 import type { HAlign } from "../../compiler/align";
 
 export function value(data: RyouyouKeikakushoData, key: keyof RyouyouKeikakushoData): string {

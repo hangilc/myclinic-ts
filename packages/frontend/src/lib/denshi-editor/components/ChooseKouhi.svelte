@@ -3,7 +3,7 @@
   import Workarea from "./workarea/Workarea.svelte";
   import Commands from "./workarea/Commands.svelte";
   import type { KouhiSet } from "../kouhi-set";
-  import type { RP剤情報Edit, 薬品情報Edit } from "../denshi-edit";
+  import type { RP剤情報Edit } from "../denshi-edit";
   import { toZenkaku } from "@/lib/zenkaku";
   import { drugRep } from "../helper";
   import ChooseKouhiItem from "./ChooseKouhiItem.svelte";

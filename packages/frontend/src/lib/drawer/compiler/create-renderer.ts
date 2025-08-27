@@ -16,7 +16,7 @@ export function createRendererInterface(ctx: DrawerContext): string {
   return lines.join("\n");
 }
 
-export function createRendererMap(ctx: DrawerContext, name: string = "dataMap", values: Record<string, string> = {}): string {
+export function createRendererMap(ctx: DrawerContext, name: string = "dataMap", _values: Record<string, string> = {}): string {
   const lines: string[] = [];
   lines.push(`let ${name} = {`);
   for (let key of Object.keys(ctx.marks)) {

@@ -274,7 +274,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], me
     } else if (tryDrawDrugs(ctx, "gothic-3.5", new RenderDrugContext({ maxLine: 36 }), box, memoBox, drugs, memo)) {
       // nop
     } else {
-      const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, "gothic-3.5",
+      const { drugLines, memoLines } = prepareDrugMemoLines(ctx, "gothic-3.5",
         new RenderDrugContext({ maxLine: 36 }), memoBox, drugs, memo);
       c.drawTexts(ctx, [...drugLines, ...memoLines], box);
     }

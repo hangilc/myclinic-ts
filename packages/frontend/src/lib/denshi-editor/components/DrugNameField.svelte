@@ -10,7 +10,6 @@
   import api from "@/lib/api";
   import { tick } from "svelte";
   import SmallLink from "./workarea/SmallLink.svelte";
-  import { cache } from "@/lib/cache";
   import {
     createIyakuhinResultFromIppanmei,
     createIyakuhinResultFromMaster,
@@ -58,7 +57,7 @@
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
-      const drugNameAlias = await cache.getDrugNameAlias();
+      // const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
         const drugPrefab = await exapleDrugPrefab();

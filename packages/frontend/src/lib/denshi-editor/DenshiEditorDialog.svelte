@@ -22,7 +22,6 @@
   import PrevSearch from "./components/PrevSearch.svelte";
   import Example from "./components/Example.svelte";
   import {
-    createSingleDrugRP剤情報,
     createBlank薬品情報,
     createEmptyRP剤情報,
   } from "@/practice/presc-example/presc-example-helper";
@@ -511,7 +510,7 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
-  function doGroupManip(group: RP剤情報Edit) {
+  function doGroupManip(_group: RP剤情報Edit) {
   }
 
   function wrapSubCommand(f: () => void): () => void {

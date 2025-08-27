@@ -19,7 +19,6 @@
   import api from "@/lib/api";
   import ImageViewerDialog from "./ImageViewerDialog.svelte";
   import DoubleEditHokenDialog from "./DoubleEditHokenDialog.svelte";
-  import type { EventEmitter } from "@/lib/event-emitter";
   import { FormatDate } from "myclinic-util";
 
   export let data: PatientData;

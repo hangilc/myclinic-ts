@@ -13,7 +13,7 @@ import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
-import { breakShohouPages, drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
+import { breakShohouPages, drawShohouLines, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
 import { availableLines, black, red } from "./helper";
 
 
