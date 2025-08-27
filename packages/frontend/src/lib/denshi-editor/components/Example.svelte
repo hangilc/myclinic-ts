@@ -4,7 +4,7 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import { cache } from "@/lib/cache";
-  import DrugGroupRep from "@/practice/presc-example/components/DrugGroupRep.svelte";
+  import DrugGroupRep from "@/practice/presc-example/components/DrugPrefabRep.svelte";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import { resolveDrugGroupByMap, resolveUsageRecordByMap } from "@/practice/exam/record/text/regular/helper";
   import { RP剤情報Edit } from "../denshi-edit";

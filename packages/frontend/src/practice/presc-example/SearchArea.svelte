@@ -1,37 +1,36 @@
 <script lang="ts">
   import Link from "../ui/Link.svelte";
-  import {
-    type PrescExampleData,
-  } from "./presc-example-data";
-  import DrugGroupRep from "./components/DrugGroupRep.svelte";
-  import CommentField from "./components/CommentField.svelte";
+  import type { DrugPrefab } from "@/lib/drug-prefab";
 
-  export let onSelect: (data: PrescExampleData, drugIndex: number) => void;
-  export let list: PrescExampleData[] = [];
-  let selected: PrescExampleData[] = [];
+  export let onSelect: (data: DrugPrefab) => void;
+  export let list: DrugPrefab[];
+  let selected: DrugPrefab[] = [];
   let searchText = "";
 
-  $: selected = updateSelected(list);
+  
 
-  function updateSelected(list: PrescExampleData[]): PrescExampleData[] {
-    if (searchText === "") {
-      return list;
-    } else {
-      return list.filter((e) => {
-        return e.data.薬品情報グループ.some((d) =>
-          d.薬品レコード.薬品名称.includes(searchText),
-        );
-      });
-    }
-  }
+  // $: selected = updateSelected(list);
+
+  // function updateSelected(list: PrescExampleData[]): PrescExampleData[] {
+  //   if (searchText === "") {
+  //     return list;
+  //   } else {
+  //     return list.filter((e) => {
+  //       return e.data.薬品情報グループ.some((d) =>
+  //         d.薬品レコード.薬品名称.includes(searchText),
+  //       );
+  //     });
+  //   }
+  // }
 
   function doShowAll() {
     selected = list;
   }
 
   function doSearch() {
-    selected = updateSelected(list);
+    // selected = updateSelected(list);
   }
+
 </script>
 
 <div class="search-form">
@@ -45,13 +44,11 @@
   {#each selected as data (data.id)}
     <div class="group">
       <div>
-        <DrugGroupRep
+        {data.id}
+        <!-- <DrugGroupRep
           group={data.data}
           onSelect={(_g, index) => onSelect(data, index)}
-        />
-      </div>
-      <div class="comment">
-        <CommentField {data} />
+        /> -->
       </div>
     </div>
   {/each}
@@ -82,9 +79,4 @@
     margin-top: 0;
   }
 
-  .comment {
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid gray;
-  }
 </style>

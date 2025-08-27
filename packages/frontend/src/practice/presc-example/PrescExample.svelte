@@ -1,78 +1,95 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import EditArea from "./EditArea.svelte";
-  import { RP剤情報Edit } from "@/lib/denshi-editor/denshi-edit";
-  import {
-    createPrescExampleData,
-    type PrescExampleData,
-  } from "./presc-example-data";
-  import { cache } from "@/lib/cache";
-  import { createSingleDrugRP剤情報 } from "./presc-example-helper";
+  import { exapleDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   
   export let isVisible: boolean;
-  let list: PrescExampleData[] = [];
-
+  let list: DrugPrefab[] = [];
   let editArea: HTMLElement;
 
-  load();
+  initList();
 
-  async function load() {
-    list = (await cache.getPrescExample()).map(createPrescExampleData);
+  async function initList() {
+    list = await exapleDrugPrefab();
   }
 
-  function doSelect(data: PrescExampleData, drugIndex: number) {
-    const groupEdit = RP剤情報Edit.fromObject(data.data);
-    const drug = groupEdit.薬品情報グループ[drugIndex];
-    if( !drug ){
-      return;
-    }
-    const e: EditArea = new EditArea({
-      target: editArea,
-      props: {
-        group: groupEdit,
-        drug,
-        // onChange: () => {
-        //   if (groupEdit.薬品情報グループ.length === 0) {
-        //     list = list.filter((e) => e.id !== data.id);
-        //   } else {
-        //     // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
-        //     // list = list;
-        //   }
-        // },
-        onCancel: () => {},
-      },
-    });
-    console.log("e", e);
-  }
-
-  async function doSave() {
-    await cache.setPrescExample(list.map((e) => e.data));
+  function doSelect(_value: DrugPrefab) {
+    
   }
 
   function doAdd() {
-    const group = RP剤情報Edit.fromObject(createSingleDrugRP剤情報());
-    const f: EditArea = new EditArea({
-      target: editArea,
-      props: {
-        group: group,
-        drug: group.薬品情報グループ[0],
-        // onChange: () => {
-        //   if( group.薬品情報グループ.length === 0 ){
-        //     return;
-        //   }
-        //   list = list;
-        // },
-        onCancel: () => {
-          f.$destroy();
-        },
-      },
-    });
+
   }
 
-  async function doCancel() {
-    await load();
+  function doSave() {
+
   }
+
+  function doCancel() {
+
+  }
+
+  // let list: PrescExampleData[] = [];
+
+
+  // load();
+
+  // async function load() {
+  //   list = (await cache.getPrescExample()).map(createPrescExampleData);
+  // }
+
+  // function doSelect(data: PrescExampleData, drugIndex: number) {
+  //   const groupEdit = RP剤情報Edit.fromObject(data.data);
+  //   const drug = groupEdit.薬品情報グループ[drugIndex];
+  //   if( !drug ){
+  //     return;
+  //   }
+  //   const e: EditArea = new EditArea({
+  //     target: editArea,
+  //     props: {
+  //       group: groupEdit,
+  //       drug,
+  //       // onChange: () => {
+  //       //   if (groupEdit.薬品情報グループ.length === 0) {
+  //       //     list = list.filter((e) => e.id !== data.id);
+  //       //   } else {
+  //       //     // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
+  //       //     // list = list;
+  //       //   }
+  //       // },
+  //       onCancel: () => {},
+  //     },
+  //   });
+  //   console.log("e", e);
+  // }
+
+  // async function doSave() {
+  //   await cache.setPrescExample(list.map((e) => e.data));
+  // }
+
+  // function doAdd() {
+  //   const group = RP剤情報Edit.fromObject(createSingleDrugRP剤情報());
+  //   const f: EditArea = new EditArea({
+  //     target: editArea,
+  //     props: {
+  //       group: group,
+  //       drug: group.薬品情報グループ[0],
+  //       // onChange: () => {
+  //       //   if( group.薬品情報グループ.length === 0 ){
+  //       //     return;
+  //       //   }
+  //       //   list = list;
+  //       // },
+  //       onCancel: () => {
+  //         f.$destroy();
+  //       },
+  //     },
+  //   });
+  // }
+
+  // async function doCancel() {
+  //   await load();
+  // }
 </script>
 
 {#if isVisible}

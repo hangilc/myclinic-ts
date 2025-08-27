@@ -2,15 +2,16 @@
   import { drugRep } from "@/lib/denshi-editor/helper";
   import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { DrugPrefab } from "@/lib/drug-prefab";
 
-  export let group: RP剤情報;
-  export let onSelect: (group: RP剤情報, drugIndex: number) => void;
+  export let drugPrefab: DrugPrefab;
+  export let onSelect: (value: DrugPrefab) => void;
 
 </script>
 
 <div class="group">
   <div>
-    {#each group.薬品情報グループ as drug, index}
+    {#each drugPrefab.presc.薬品情報グループ as drug, index}
       <!-- svelte-ignore a11y-no-static-element-interactions -->
       <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div
