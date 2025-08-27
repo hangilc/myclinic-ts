@@ -1,6 +1,7 @@
 <script lang="ts">
   import Link from "../ui/Link.svelte";
   import type { DrugPrefab } from "@/lib/drug-prefab";
+  import DrugPrefabRep from "./components/DrugPrefabRep.svelte";
 
   export let onSelect: (data: DrugPrefab) => void;
   export let list: DrugPrefab[];
@@ -44,11 +45,7 @@
   {#each selected as data (data.id)}
     <div class="group">
       <div>
-        {data.id}
-        <!-- <DrugGroupRep
-          group={data.data}
-          onSelect={(_g, index) => onSelect(data, index)}
-        /> -->
+        <DrugPrefabRep drugPrefab={data} onSelect={onSelect}/>
       </div>
     </div>
   {/each}

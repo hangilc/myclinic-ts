@@ -5,7 +5,9 @@
   
   export let isVisible: boolean;
   let list: DrugPrefab[] = [];
-  let editArea: HTMLElement;
+  // let editArea: HTMLElement;
+
+  
 
   initList();
 
@@ -103,7 +105,7 @@
       </div>
       <SearchArea onSelect={doSelect} {list} />
     </div>
-    <div bind:this={editArea}></div>
+    <!-- <div bind:this={editArea}></div> -->
   </div>
 {/if}
 

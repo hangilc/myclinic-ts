@@ -1,4 +1,4 @@
-import type { PrescPrefab } from "@/lib/drug-prefab";
+import type { DrugPrefab } from "@/lib/drug-prefab";
 import type { IyakuhinMaster } from "myclinic-model"
 import { drugRep } from "../../helper";
 import { daysTimesDisp } from "@/lib/denshi-shohou/disp/disp-util";
@@ -11,7 +11,7 @@ export type SearchIyakuhinResult = ({
   master: IyakuhinMaster;
 } | {
   kind: "prefab";
-  prefab: PrescPrefab;
+  prefab: DrugPrefab;
   master: IyakuhinMaster;
 }) & { id: number };
 
@@ -25,7 +25,7 @@ export function createIyakuhinResultFromIppanmei(m: IyakuhinMaster): SearchIyaku
   return { id: iyakuhinResultSerialId++, kind: "ippanmei", master: m };
 }
 
-export function createIyakuhinResultFromPrefab(prefab: PrescPrefab, master: IyakuhinMaster): SearchIyakuhinResult {
+export function createIyakuhinResultFromPrefab(prefab: DrugPrefab, master: IyakuhinMaster): SearchIyakuhinResult {
   return { id: iyakuhinResultSerialId++, kind: "prefab", prefab, master };
 }
 
@@ -33,6 +33,6 @@ export function iyakuhinResultRep(r: SearchIyakuhinResult): string {
   switch(r.kind){
     case "master": return r.master.name;
     case "ippanmei": return r.master.name;
-    case "prefab": return `(登) ${drugRep(r.prefab.薬品情報グループ[0])}${daysTimesDisp(r.prefab)}`;
+    case "prefab": return `(登) ${drugRep(r.prefab.presc.薬品情報グループ[0])}${daysTimesDisp(r.prefab.presc)}`;
   }
 }

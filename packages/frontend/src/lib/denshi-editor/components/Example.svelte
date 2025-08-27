@@ -1,4 +1,13 @@
 <script lang="ts">
+  import { RP剤情報Edit } from "../denshi-edit";
+
+  export let destroy: () => void;
+  export let onEnter: (value: RP剤情報Edit[]) => void;
+
+  console.log("destroy", destroy, onEnter);
+</script>
+
+<!-- <script lang="ts">
   import type { PrescExample } from "@/lib/presc-example";
   import Commands from "./workarea/Commands.svelte";
   import Title from "./workarea/Title.svelte";
@@ -82,4 +91,4 @@
     border: 1px solid gray;
     padding: 6px;
   }
-</style>
+</style> -->

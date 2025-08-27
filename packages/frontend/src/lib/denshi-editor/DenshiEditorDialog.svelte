@@ -24,7 +24,7 @@
   import {
     createBlank薬品情報,
     createEmptyRP剤情報,
-  } from "@/practice/presc-example/presc-example-helper";
+  } from "@/lib/denshi-shohou/presc-info-helper";
   import { WorkareaService } from "./denshi-editor-dialog";
   import GroupReorder from "./components/GroupReorder.svelte";
   import DrugReorder from "./components/DrugReorder.svelte";

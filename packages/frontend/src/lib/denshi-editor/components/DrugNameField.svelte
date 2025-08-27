@@ -20,7 +20,7 @@
   import {
     exapleDrugPrefab,
     searchDrugPrefab,
-    type PrescPrefab,
+    type DrugPrefab,
   } from "@/lib/drug-prefab";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
@@ -62,11 +62,11 @@
         searchIyakuhinResult = [];
         const drugPrefab = await exapleDrugPrefab();
         const prefabs = searchDrugPrefab(drugPrefab, t);
-        const prefabMasters: [PrescPrefab, IyakuhinMaster | undefined][] =
+        const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(
             prefabs.map(async (pre) => {
               const master = await findIyakuhinMaster(
-                parseInt(pre.薬品情報グループ[0].薬品レコード.薬品コード),
+                parseInt(pre.presc.薬品情報グループ[0].薬品レコード.薬品コード),
               );
               return [pre, master];
             }),
@@ -124,7 +124,7 @@
     } else if (item.kind === "prefab") {
       Object.assign(
         drug.薬品レコード,
-        item.prefab.薬品情報グループ[0].薬品レコード,
+        item.prefab.presc.薬品情報グループ[0].薬品レコード,
         {
           isEditing情報区分: false,
           isEditing薬品コード: false,
@@ -136,7 +136,7 @@
       searchText = "";
       searchIyakuhinResult = [];
       isEditing = false;
-      onPrefab(item.prefab);
+      onPrefab(item.prefab.presc);
       onFieldChange();
     } else if (item.kind === "ippanmei") {
       const m = item.master;

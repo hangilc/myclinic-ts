@@ -9,7 +9,6 @@ import {
   type AppointsTemplate,
 } from "@/appoint/appoints-template";
 import type { DrugNameBind } from "@/lib/drug-name-bind";
-import type { PrescExample } from "@/lib/presc-example";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -26,7 +25,6 @@ let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
 let appointsTemplate: AppointsTemplate | undefined = undefined;
-let prescExample: PrescExample[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -239,21 +237,4 @@ export const cache = {
     await api.setConfig("appoints-template", value);
   },
 
-  async getPrescExample(): Promise<PrescExample[]> {
-    if( prescExample === undefined ){
-      prescExample = (await api.getConfig("presc-example")) as PrescExample[];
-    }
-    return prescExample;
-  },
-
-  async setPrescExample(value: PrescExample[]) {
-    prescExample = value;
-    await api.setConfig("presc-example", value);
-  },
-
-  async getDrugNameAlias(): Promise<Record<string, string>> {
-    return {
-      "レンドルミンＤ錠０．２５ｍｇ": "【般】ブロチゾラム口腔内崩壊錠０．２５ｍｇ",
-    }
-  }
 };

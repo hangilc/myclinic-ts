@@ -2,35 +2,36 @@
   // import Field from "@/lib/denshi-editor/conv/workarea/Field.svelte";
   // import FieldForm from "@/lib/denshi-editor/conv/workarea/FieldForm.svelte";
   // import FieldTitle from "@/lib/denshi-editor/conv/workarea/FieldTitle.svelte";
-  import type { PrescExampleData } from "../presc-example-data";
-  import PencilSquareLink from "@/lib/denshi-editor/icons/PencilSquareLink.svelte";
-  import SubmitLink from "@/lib/denshi-editor/icons/SubmitLink.svelte";
-  import CancelLink from "@/lib/denshi-editor/icons/CancelLink.svelte";
-  import Field from "@/lib/denshi-editor/components/workarea/Field.svelte";
-  import FieldTitle from "@/lib/denshi-editor/components/workarea/FieldTitle.svelte";
-  import FieldForm from "@/lib/denshi-editor/components/workarea/FieldForm.svelte";
+  // import PencilSquareLink from "@/lib/denshi-editor/icons/PencilSquareLink.svelte";
+  // import SubmitLink from "@/lib/denshi-editor/icons/SubmitLink.svelte";
+  // import CancelLink from "@/lib/denshi-editor/icons/CancelLink.svelte";
+  // import Field from "@/lib/denshi-editor/components/workarea/Field.svelte";
+  // import FieldTitle from "@/lib/denshi-editor/components/workarea/FieldTitle.svelte";
+  // import FieldForm from "@/lib/denshi-editor/components/workarea/FieldForm.svelte";
 
-  export let data: PrescExampleData;
+  export let comment: string | undefined;
+  console.log("comment", comment);
 
-  function doRepClick() {
-    data.isEditingComment = true;
-    data = data;
-  }
+  // function doRepClick() {
+  //   data.isEditingComment = true;
+  //   data = data;
+  // }
 
-  function doEnter() {
-    let c = data.commentInput || undefined;
-    data.data.comment = c;
-    data.isEditingComment = false;
-    data = data;
-  }
+  // function doEnter() {
+  //   let c = data.commentInput || undefined;
+  //   data.data.comment = c;
+  //   data.isEditingComment = false;
+  //   data = data;
+  // }
 
-  function doCancelInput() {
-    data.commentInput = data.data.comment ?? "";
-    data.isEditingComment = false;
-    data = data;
-  }
+  // function doCancelInput() {
+  //   data.commentInput = data.data.comment ?? "";
+  //   data.isEditingComment = false;
+  //   data = data;
+  // }
 </script>
 
+<!-- 
 <Field>
   <FieldTitle>コメント</FieldTitle>
   <FieldForm>
@@ -59,4 +60,4 @@
     align-items: center;
     gap: 6px;
   }
-</style>
+</style> -->
