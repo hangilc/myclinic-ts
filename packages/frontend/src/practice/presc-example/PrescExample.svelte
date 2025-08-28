@@ -2,10 +2,17 @@
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
   import { exapleDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
+  import EditPrefab from "@/lib/denshi-editor/components/EditPrefab.svelte";
+  import { RP剤情報Edit, 薬品情報Edit } from "@/lib/denshi-editor/denshi-edit";
+  import { createEmptyRP剤情報 } from "@/lib/denshi-shohou/presc-info-helper";
+  import { createEmpty薬品情報 } from "@/lib/denshi-helper";
+  import { initIsEditingOfDrug, initIsEditingUsage } from "@/lib/denshi-editor/helper";
+  import { DateWrapper } from "myclinic-util";
+  import { KouhiSet } from "@/lib/denshi-editor/kouhi-set";
   
   export let isVisible: boolean;
   let list: DrugPrefab[] = [];
-  // let editArea: HTMLElement;
+  let editArea: HTMLElement;
 
   
 
@@ -19,8 +26,28 @@
     
   }
 
-  function doAdd() {
-
+  function doNew() {
+    const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
+    const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+    group.薬品情報グループ.push(drug);
+    initIsEditingUsage(group);
+    initIsEditingOfDrug(drug);
+    const at = DateWrapper.fromDate(new Date()).asSqlDate();
+    const d: EditPrefab = new EditPrefab({
+      target: editArea,
+      props: {
+        group: group,
+        drug: drug,
+        at: at,
+        kouhiSet: KouhiSet.createEmpty(),
+        onCancel: function (): void {
+          d.$destroy();
+        },
+        onEnter: function (): void {
+          throw new Error("Function not implemented.");
+        }
+      }
+    })
   }
 
   function doSave() {
@@ -99,13 +126,13 @@
   <div class="top">
     <div>
       <div class="commands">
-        <button on:click={doAdd}>新規</button>
+        <button on:click={doNew}>新規</button>
         <button on:click={doSave}>保存</button>
         <button on:click={doCancel}>キャンセル</button>
       </div>
       <SearchArea onSelect={doSelect} {list} />
     </div>
-    <!-- <div bind:this={editArea}></div> -->
+    <div bind:this={editArea}></div>
   </div>
 {/if}
 
