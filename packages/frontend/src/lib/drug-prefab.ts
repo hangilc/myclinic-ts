@@ -1,3 +1,4 @@
+import { RP剤情報Edit, type 剤形レコードEdit, type 用法レコードEdit, type 用法補足レコードEdit, type 薬品情報Edit } from "./denshi-editor/denshi-edit";
 import type {
   剤形レコード,
   用法レコード,
@@ -13,12 +14,34 @@ export interface DrugPrefab {
   comment: string;
 }
 
-export interface PrescOfPrefab {
-  剤形レコード: 剤形レコード;
-  用法レコード: 用法レコード;
-  用法補足レコード?: 用法補足レコード[];
-  薬品情報グループ: [薬品情報];
+export class PrescOfPrefab extends RP剤情報Edit {
+  override 薬品情報グループ: [薬品情報Edit];
+
+  constructor(
+    src: {
+      剤形レコード: 剤形レコードEdit;
+      用法レコード: 用法レコードEdit;
+      用法補足レコード?: 用法補足レコードEdit[];
+      薬品情報グループ: [薬品情報Edit];
+    },
+    aux: { id: number; isSelected: boolean }
+  ) {
+    super({
+      剤形レコード: src.剤形レコード,
+      用法レコード: src.用法レコード,
+      用法補足レコード: src.用法補足レコード,
+      薬品情報グループ: src.薬品情報グループ,
+    }, aux);
+    this.薬品情報グループ = src.薬品情報グループ;
+  }
 }
+
+// export interface PrescOfPrefab {
+//   剤形レコード: 剤形レコードEdit;
+//   用法レコード: 用法レコードEdit;
+//   用法補足レコード?: 用法補足レコードEdit[];
+//   薬品情報グループ: [薬品情報Edit];
+// }
 
 export async function exapleDrugPrefab(): Promise<DrugPrefab[]> {
   return [

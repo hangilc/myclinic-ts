@@ -44,7 +44,13 @@
           d.$destroy();
         },
         onEnter: function (): void {
-          throw new Error("Function not implemented.");
+          const pre: DrugPrefab = {
+            id: "",
+            presc: group,
+            alias: [],
+            tag: [],
+            comment: ""
+          }
         }
       }
     })
