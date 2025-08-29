@@ -173,6 +173,7 @@
   function convertToIppanmei() {
     drug.convertToIppanmei();
     isEditing = false;
+    drug = drug;
     onFieldChange();
   }
 </script>
