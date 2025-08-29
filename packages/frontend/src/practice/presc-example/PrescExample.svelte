@@ -16,8 +16,28 @@
     list = await exapleDrugPrefab();
   }
 
-  function doSelect(_value: DrugPrefab) {
-    
+  function doSelect(value: DrugPrefab) {
+    const at = DateWrapper.fromDate(new Date()).asSqlDate();
+    const d: EditPrefab = new EditPrefab({
+      target: editArea,
+      props: {
+        prefab: value,
+        at: at,
+        kouhiSet: KouhiSet.createEmpty(),
+        onCancel: function (): void {
+          d.$destroy();
+        },
+        onEnter: function (): void {
+          d.$destroy();
+          list = list;
+        },
+        onDelete: function(): void {
+          d.$destroy();
+          list = list.filter(p => p.id !== value.id );
+          list = list;
+        }
+      }
+    })
   }
 
   function doNew() {
@@ -39,8 +59,6 @@
         },
         onDelete: function(): void {
           d.$destroy();
-          list = list.filter(p => p.id !== prefab.id );
-          list = list;
         }
       }
     })

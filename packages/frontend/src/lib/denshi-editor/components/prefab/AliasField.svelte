@@ -12,7 +12,6 @@
   $: updateInputText(alias);
   let inputElement: HTMLInputElement | undefined = undefined;
   let isEditing = false;
-  let orig = alias;
 
   export const focus: () => void = async () => {
     await tick();
@@ -36,12 +35,11 @@
 
   function doCancel() {
     isEditing = false;
-    alias = orig;
   }
 
   function rep(alias: string[]): string {
     if( alias.length === 0 ){
-      return "（未設定）";
+      return "（なし）";
     } else {
       return alias.join(" ");
     }
@@ -78,7 +76,7 @@
   }
 
   .input {
-    width: 3em;
+    width: 20em;
   }
 
   .with-icons {

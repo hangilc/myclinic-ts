@@ -19,6 +19,7 @@
     type DrugPrefab,
     type PrescOfPrefab,
   } from "@/lib/drug-prefab";
+  import AliasField from "./prefab/AliasField.svelte";
 
   export let prefab: DrugPrefab;
   export let at: string;
@@ -51,6 +52,10 @@
   function doPrefab(value: PrescOfPrefab) {
     edit = PrescOfPrefabEdit.create(value);
   }
+
+  function doPrefabChange() {
+
+  }
 </script>
 
 <Workarea>
@@ -67,6 +72,7 @@
     onPrefab={doPrefab}
     onFieldChange={doDrugChange}
   />
+  <AliasField bind:alias={prefab.alias} onFieldChange={doPrefabChange}/>
   <UnevenField
     bind:不均等レコード={edit.薬品情報グループ[0].不均等レコード}
     onFieldChange={doDrugChange}
