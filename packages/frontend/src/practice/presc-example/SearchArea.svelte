@@ -1,35 +1,21 @@
 <script lang="ts">
   import Link from "../ui/Link.svelte";
-  import type { DrugPrefab } from "@/lib/drug-prefab";
+  import { searchDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import DrugPrefabRep from "./components/DrugPrefabRep.svelte";
 
   export let onSelect: (data: DrugPrefab) => void;
   export let list: DrugPrefab[];
+  let mode: "all" | "selected" = "all";
   let selected: DrugPrefab[] = [];
   let searchText = "";
-
-  
-
-  // $: selected = updateSelected(list);
-
-  // function updateSelected(list: PrescExampleData[]): PrescExampleData[] {
-  //   if (searchText === "") {
-  //     return list;
-  //   } else {
-  //     return list.filter((e) => {
-  //       return e.data.薬品情報グループ.some((d) =>
-  //         d.薬品レコード.薬品名称.includes(searchText),
-  //       );
-  //     });
-  //   }
-  // }
 
   function doShowAll() {
     selected = list;
   }
 
   function doSearch() {
-    // selected = updateSelected(list);
+    selected = searchDrugPrefab(list, searchText);
+    mode = "selected";
   }
 
 </script>
@@ -42,7 +28,7 @@
   <Link onClick={doShowAll}>全例</Link>
 </div>
 <div class="list">
-  {#each selected as data (data.id)}
+  {#each mode === "all" ? list : selected as data (data.id)}
     <div class="group">
       <div>
         <DrugPrefabRep drugPrefab={data} onSelect={onSelect}/>

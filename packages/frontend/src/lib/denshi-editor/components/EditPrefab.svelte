@@ -34,6 +34,7 @@
   }
 
   function doEnter() {
+    prefab.presc = edit.toObject();
     onEnter();
   }
 

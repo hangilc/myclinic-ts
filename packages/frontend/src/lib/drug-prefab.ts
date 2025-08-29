@@ -98,6 +98,11 @@ export class PrescOfPrefabEdit extends RP剤情報Edit {
       { id: 0, isSelected: false }
     );
   }
+
+  toObject(): PrescOfPrefab {
+    const obj = super.toObject();
+    return convertRP剤情報ToPrescOfPrefab(obj);
+  }
 }
 
 // export interface PrescOfPrefab {

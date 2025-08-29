@@ -10,8 +10,6 @@
   let list: DrugPrefab[] = [];
   let editArea: HTMLElement;
 
-  
-
   initList();
 
   async function initList() {

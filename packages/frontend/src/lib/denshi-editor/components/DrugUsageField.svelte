@@ -15,20 +15,28 @@
   export let isEditing: boolean;
   export let onFieldChange: () => void;
   const freeTextCode = "0X0XXXXXXXXX0000";
-  $: codeMode = codeModeValue(group);
-  $: searchText = group.用法レコード.用法名称;
+  let codeMode: "master" | "free" | undefined = undefined;
+  $: updateCodeMode(group);
+  let searchText: string = "";
+  $: updateSearchText(group);
   let inputElement: HTMLInputElement | undefined = undefined;
   let searchResult: UsageMaster[] = [];
 
-  function codeModeValue(group: RP剤情報Edit): "master" | "free" | undefined {
+  function updateCodeMode(group: RP剤情報Edit): void {
     let code = group.用法レコード.用法コード;
+    let value: "master" | "free" | undefined
     if (code === freeTextCode) {
-      return "free";
+      value = "free";
     } else if (code === "") {
-      return undefined;
+      value = undefined;
     } else {
-      return "master";
+      value = "master";
     }
+    codeMode = value;
+  }
+
+  function updateSearchText(group: RP剤情報Edit) {
+    searchText = group.用法レコード.用法名称;
   }
 
   // function updateCodeMode() {
@@ -41,7 +49,11 @@
   };
 
   function rep(group: RP剤情報Edit): string {
-    return group.用法レコード.用法名称;
+    let s = group.用法レコード.用法名称;
+    if( s === "" ){
+      s = "（未設定）"
+    }
+    return s;
   }
 
   function doRepClick() {
