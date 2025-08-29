@@ -15,6 +15,7 @@
   import DrugSupplField from "./DrugSupplField.svelte";
   import KouhiField from "./KouhiField.svelte";
   import {
+  DrugPrefabEdit,
     PrescOfPrefabEdit,
     type DrugPrefab,
     type PrescOfPrefab,
@@ -28,19 +29,19 @@
   export let onEnter: () => void;
   export let onDelete: () => void;
 
-  let edit: PrescOfPrefabEdit = PrescOfPrefabEdit.create(prefab.presc);
+  let edit: DrugPrefabEdit = DrugPrefabEdit.fromDrugPrefab(prefab);
 
   function doCancel() {
     onCancel();
   }
 
   function doEnter() {
-    prefab.presc = edit.toObject();
+    edit.assignToDrugPrefab(prefab);
     onEnter();
   }
 
   function onGroupChange() {
-    prefab = prefab;
+    edit = edit;
   }
 
   function doDrugChange() {}
@@ -50,7 +51,8 @@
   }
 
   function doPrefab(value: PrescOfPrefab) {
-    edit = PrescOfPrefabEdit.create(value);
+    edit.presc = PrescOfPrefabEdit.fromPrescOfPrefab(value);
+    edit = edit;
   }
 
   function doPrefabChange() {
@@ -61,53 +63,53 @@
 <Workarea>
   <Title>薬品グループ編集</Title>
   <JohoKubunField
-    bind:isEditing={edit.薬品情報グループ[0].薬品レコード.isEditing情報区分}
-    bind:情報区分={edit.薬品情報グループ[0].薬品レコード.情報区分}
+    bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing情報区分}
+    bind:情報区分={edit.presc.薬品情報グループ[0].薬品レコード.情報区分}
     onFieldChange={doDrugChange}
   />
   <DrugNameField
-    drug={edit.薬品情報グループ[0]}
+    drug={edit.presc.薬品情報グループ[0]}
     {at}
-    bind:isEditing={edit.薬品情報グループ[0].薬品レコード.isEditing薬品コード}
+    bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード}
     onPrefab={doPrefab}
     onFieldChange={doDrugChange}
   />
-  <AliasField bind:alias={prefab.alias} onFieldChange={doPrefabChange}/>
   <UnevenField
-    bind:不均等レコード={edit.薬品情報グループ[0].不均等レコード}
+    bind:不均等レコード={edit.presc.薬品情報グループ[0].不均等レコード}
     onFieldChange={doDrugChange}
-    bind:isEditing={edit.薬品情報グループ[0].isEditing不均等レコード}
+    bind:isEditing={edit.presc.薬品情報グループ[0].isEditing不均等レコード}
   />
   <DrugAmountField
-    drug={edit.薬品情報グループ[0]}
-    bind:isEditing={edit.薬品情報グループ[0].薬品レコード.isEditing分量}
+    drug={edit.presc.薬品情報グループ[0]}
+    bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing分量}
     onFieldChange={doDrugChange}
   />
   <DrugSupplField
-    drug={edit.薬品情報グループ[0]}
+    drug={edit.presc.薬品情報グループ[0]}
     onFieldChange={doDrugChange}
   />
   <KouhiField
     {kouhiSet}
-    drug={edit.薬品情報グループ[0]}
+    drug={edit.presc.薬品情報グループ[0]}
     onFieldChange={doDrugChange}
   />
   <ZaikeiKubunField
-    bind:剤形区分={edit.剤形レコード.剤形区分}
-    bind:isEditing={edit.剤形レコード.isEditing剤形区分}
+    bind:剤形区分={edit.presc.剤形レコード.剤形区分}
+    bind:isEditing={edit.presc.剤形レコード.isEditing剤形区分}
     onFieldChange={onGroupChange}
   />
   <DrugUsageField
-    group={edit}
-    bind:isEditing={edit.用法レコード.isEditing用法コード}
+    group={edit.presc}
+    bind:isEditing={edit.presc.用法レコード.isEditing用法コード}
     onFieldChange={onGroupChange}
   />
   <TimesField
-    group={edit}
-    bind:isEditing={edit.剤形レコード.isEditing調剤数量}
+    group={edit.presc}
+    bind:isEditing={edit.presc.剤形レコード.isEditing調剤数量}
     onFieldChange={onGroupChange}
   />
-  <UsageSupplField group={edit} onFieldChange={onGroupChange} />
+  <UsageSupplField group={edit.presc} onFieldChange={onGroupChange} />
+  <AliasField bind:alias={edit.alias} onFieldChange={doPrefabChange}/>
   <Commands>
     <Link onClick={doDelete}>薬品削除</Link>
     <button on:click={doEnter}>入力</button>

@@ -29,6 +29,7 @@
 
   function doEnter() {
     alias = inputText.split(/[ 　,、|｜:：]+/).filter(t => t.trim() !== "");
+    console.log("alias", alias);
     isEditing = false;
     onFieldChange();
   }

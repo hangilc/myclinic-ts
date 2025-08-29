@@ -39,6 +39,56 @@ export function newDrugPrefab(): DrugPrefab {
   };
 }
 
+export class DrugPrefabEdit implements DrugPrefab {
+  id: string;
+  presc: PrescOfPrefabEdit;
+  alias: string[];
+  tag: string[];
+  comment: string;
+
+  constructor(arg: {
+    id: string;
+    presc: PrescOfPrefabEdit;
+    alias: string[];
+    tag: string[];
+    comment: string;
+  }) {
+    this.id = arg.id;
+    this.presc = arg.presc;
+    this.alias = arg.alias;
+    this.tag = arg.tag;
+    this.comment = arg.comment;
+  }
+
+  static fromDrugPrefab(pre: DrugPrefab): DrugPrefabEdit {
+    return new DrugPrefabEdit({
+      id: pre.id,
+      presc: PrescOfPrefabEdit.fromPrescOfPrefab(pre.presc),
+      alias: pre.alias,
+      tag: pre.tag,
+      comment: pre.comment,
+    });
+  }
+
+  toDrugPrefab(): DrugPrefab {
+    return {
+      id: this.id,
+      presc: this.presc.toPrescOfPrefab(),
+      alias: this.alias,
+      tag: this.tag,
+      comment: this.comment,
+    }
+  }
+
+  assignToDrugPrefab(dst: DrugPrefab) {
+    dst.id = this.id;
+    dst.presc = this.presc.toPrescOfPrefab();
+    dst.alias = this.alias;
+    dst.tag = this.tag;
+    dst.comment = this.comment;
+  }
+}
+
 export interface PrescOfPrefab {
   剤形レコード: 剤形レコード;
   用法レコード: 用法レコード;
@@ -85,7 +135,7 @@ export class PrescOfPrefabEdit extends RP剤情報Edit {
     this.薬品情報グループ = src.薬品情報グループ;
   }
 
-  static create(src: PrescOfPrefab): PrescOfPrefabEdit {
+  static fromPrescOfPrefab(src: PrescOfPrefab): PrescOfPrefabEdit {
     return new PrescOfPrefabEdit(
       {
         剤形レコード: 剤形レコードEdit.fromObject(src.剤形レコード),
@@ -99,8 +149,8 @@ export class PrescOfPrefabEdit extends RP剤情報Edit {
     );
   }
 
-  toObject(): PrescOfPrefab {
-    const obj = super.toObject();
+  toPrescOfPrefab(): PrescOfPrefab {
+    const obj = super.toPrescOfPrefab();
     return convertRP剤情報ToPrescOfPrefab(obj);
   }
 }

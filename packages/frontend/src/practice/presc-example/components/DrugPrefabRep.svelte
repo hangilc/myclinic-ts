@@ -17,6 +17,9 @@
     <div class="usage-rep">
       {drugPrefab.presc.用法レコード.用法名称}
       {daysTimesDisp(drugPrefab.presc)}
+      {#if drugPrefab.alias.length > 0}
+      【別名】{drugPrefab.alias.join(" ")}
+      {/if}
     </div>
   </div>
 </div>
