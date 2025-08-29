@@ -6,10 +6,10 @@
   import SubmitLink from "../../icons/SubmitLink.svelte";
   import CancelLink from "../../icons/CancelLink.svelte";
   
-  export let alias: string[];
+  export let tag: string[];
   export let onFieldChange: () => void;
   let inputText: string = "";
-  $: updateInputText(alias);
+  $: updateInputText(tag);
   let inputElement: HTMLInputElement | undefined = undefined;
   let isEditing = false;
 
@@ -28,7 +28,7 @@
   }
 
   function doEnter() {
-    alias = inputText.split(/[ 　,、|｜:：]+/).filter(t => t.trim() !== "");
+    tag = inputText.split(/[ 　,、|｜:：]+/).filter(t => t.trim() !== "");
     isEditing = false;
     onFieldChange();
   }
@@ -47,13 +47,13 @@
 </script>
 
   <Field>
-    <FieldTitle>薬品別名</FieldTitle>
+    <FieldTitle>タグ</FieldTitle>
     <FieldForm>
       {#if !isEditing}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="rep" on:click={doRepClick}>
-          {rep(alias)}
+          {rep(tag)}
         </div>
       {:else}
         <form on:submit|preventDefault={doEnter} class="with-icons">

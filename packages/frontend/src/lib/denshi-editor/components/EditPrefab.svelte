@@ -21,6 +21,7 @@
     type PrescOfPrefab,
   } from "@/lib/drug-prefab";
   import AliasField from "./prefab/AliasField.svelte";
+  import TagField from "./prefab/TagField.svelte";
 
   export let prefab: DrugPrefab;
   export let at: string;
@@ -110,6 +111,7 @@
   />
   <UsageSupplField group={edit.presc} onFieldChange={onGroupChange} />
   <AliasField bind:alias={edit.alias} onFieldChange={doPrefabChange}/>
+  <TagField bind:tag={edit.tag} onFieldChange={doPrefabChange}/>
   <Commands>
     <Link onClick={doDelete}>薬品削除</Link>
     <button on:click={doEnter}>入力</button>

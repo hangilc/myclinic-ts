@@ -20,6 +20,9 @@
       {#if drugPrefab.alias.length > 0}
       【別名】{drugPrefab.alias.join(" ")}
       {/if}
+      {#if drugPrefab.tag.length > 0}
+      【タグ】{drugPrefab.tag.join(" ")}
+      {/if}
     </div>
   </div>
 </div>
