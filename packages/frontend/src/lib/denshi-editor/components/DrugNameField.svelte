@@ -21,8 +21,8 @@
     exapleDrugPrefab,
     searchDrugPrefab,
     type DrugPrefab,
+    type PrescOfPrefab,
   } from "@/lib/drug-prefab";
-  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -32,7 +32,7 @@
     await tick();
     inputElement?.focus();
   };
-  export let onPrefab: (prefab: RP剤情報) => void;
+  export let onPrefab: (prefab: PrescOfPrefab) => void;
   let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];

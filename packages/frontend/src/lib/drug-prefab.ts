@@ -1,10 +1,21 @@
-import { RP剤情報Edit, type 剤形レコードEdit, type 用法レコードEdit, type 用法補足レコードEdit, type 薬品情報Edit } from "./denshi-editor/denshi-edit";
+import { v4 as uuidv4 } from "uuid";
+
+import {
+  RP剤情報Edit,
+  剤形レコードEdit,
+  用法レコードEdit,
+  用法補足レコードEdit,
+  薬品情報Edit,
+} from "./denshi-editor/denshi-edit";
 import type {
+  RP剤情報,
   剤形レコード,
   用法レコード,
   用法補足レコード,
   薬品情報,
 } from "./denshi-shohou/presc-info";
+import { createEmptyRP剤情報 } from "./denshi-shohou/presc-info-helper";
+import { createEmpty薬品情報 } from "./denshi-helper";
 
 export interface DrugPrefab {
   id: string;
@@ -14,7 +25,43 @@ export interface DrugPrefab {
   comment: string;
 }
 
-export class PrescOfPrefab extends RP剤情報Edit {
+export function newDrugPrefab(): DrugPrefab {
+  const group = createEmptyRP剤情報();
+  const drug = createEmpty薬品情報();
+  group.薬品情報グループ.push(drug);
+  const presc = convertRP剤情報ToPrescOfPrefab(group);
+  return {
+    id: uuidv4(),
+    presc,
+    alias: [],
+    tag: [],
+    comment: "",
+  };
+}
+
+export interface PrescOfPrefab {
+  剤形レコード: 剤形レコード;
+  用法レコード: 用法レコード;
+  用法補足レコード?: 用法補足レコード[];
+  薬品情報グループ: [薬品情報];
+}
+
+export function convertRP剤情報ToPrescOfPrefab(group: RP剤情報): PrescOfPrefab {
+  if (group.薬品情報グループ.length !== 1) {
+    throw new Error(
+      "cannot convert to PrescOfPrefab (number of drugs is not one)"
+    );
+  }
+  let drug: 薬品情報 = group.薬品情報グループ[0];
+  return {
+    剤形レコード: group.剤形レコード,
+    用法レコード: group.用法レコード,
+    用法補足レコード: group.用法補足レコード,
+    薬品情報グループ: [drug],
+  };
+}
+
+export class PrescOfPrefabEdit extends RP剤情報Edit {
   override 薬品情報グループ: [薬品情報Edit];
 
   constructor(
@@ -26,13 +73,30 @@ export class PrescOfPrefab extends RP剤情報Edit {
     },
     aux: { id: number; isSelected: boolean }
   ) {
-    super({
-      剤形レコード: src.剤形レコード,
-      用法レコード: src.用法レコード,
-      用法補足レコード: src.用法補足レコード,
-      薬品情報グループ: src.薬品情報グループ,
-    }, aux);
+    super(
+      {
+        剤形レコード: src.剤形レコード,
+        用法レコード: src.用法レコード,
+        用法補足レコード: src.用法補足レコード,
+        薬品情報グループ: src.薬品情報グループ,
+      },
+      aux
+    );
     this.薬品情報グループ = src.薬品情報グループ;
+  }
+
+  static create(src: PrescOfPrefab): PrescOfPrefabEdit {
+    return new PrescOfPrefabEdit(
+      {
+        剤形レコード: 剤形レコードEdit.fromObject(src.剤形レコード),
+        用法レコード: 用法レコードEdit.fromObject(src.用法レコード),
+        用法補足レコード: src.用法補足レコード?.map((record) =>
+          用法補足レコードEdit.fromObject(record)
+        ),
+        薬品情報グループ: [薬品情報Edit.fromObject(src.薬品情報グループ[0])],
+      },
+      { id: 0, isSelected: false }
+    );
   }
 }
 

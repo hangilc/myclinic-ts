@@ -1,12 +1,8 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import { exapleDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
+  import { exapleDrugPrefab, newDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import EditPrefab from "@/lib/denshi-editor/components/EditPrefab.svelte";
-  import { RP剤情報Edit, 薬品情報Edit } from "@/lib/denshi-editor/denshi-edit";
-  import { createEmptyRP剤情報 } from "@/lib/denshi-shohou/presc-info-helper";
-  import { createEmpty薬品情報 } from "@/lib/denshi-helper";
-  import { initIsEditingOfDrug, initIsEditingUsage } from "@/lib/denshi-editor/helper";
   import { DateWrapper } from "myclinic-util";
   import { KouhiSet } from "@/lib/denshi-editor/kouhi-set";
   
@@ -27,30 +23,26 @@
   }
 
   function doNew() {
-    const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
-    const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-    group.薬品情報グループ.push(drug);
-    initIsEditingUsage(group);
-    initIsEditingOfDrug(drug);
+    const prefab = newDrugPrefab();
     const at = DateWrapper.fromDate(new Date()).asSqlDate();
     const d: EditPrefab = new EditPrefab({
       target: editArea,
       props: {
-        group: group,
-        drug: drug,
+        prefab: prefab,
         at: at,
         kouhiSet: KouhiSet.createEmpty(),
         onCancel: function (): void {
           d.$destroy();
         },
         onEnter: function (): void {
-          const pre: DrugPrefab = {
-            id: "",
-            presc: group,
-            alias: [],
-            tag: [],
-            comment: ""
-          }
+          d.$destroy();
+          list.push(prefab);
+          list = list;
+        },
+        onDelete: function(): void {
+          d.$destroy();
+          list = list.filter(p => p.id !== prefab.id );
+          list = list;
         }
       }
     })
