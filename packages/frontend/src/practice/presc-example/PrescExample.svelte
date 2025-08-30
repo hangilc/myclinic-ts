@@ -65,75 +65,16 @@
     })
   }
 
-  function doSave() {
-
+  async function doSave() {
+    await cache.setDrugPrefabList(list);
+    alert("drug-prefab-list として保存しました。");
   }
 
-  function doCancel() {
-
+  function doClose() {
+    isVisible = false;
   }
 
-  // let list: PrescExampleData[] = [];
 
-
-  // load();
-
-  // async function load() {
-  //   list = (await cache.getPrescExample()).map(createPrescExampleData);
-  // }
-
-  // function doSelect(data: PrescExampleData, drugIndex: number) {
-  //   const groupEdit = RP剤情報Edit.fromObject(data.data);
-  //   const drug = groupEdit.薬品情報グループ[drugIndex];
-  //   if( !drug ){
-  //     return;
-  //   }
-  //   const e: EditArea = new EditArea({
-  //     target: editArea,
-  //     props: {
-  //       group: groupEdit,
-  //       drug,
-  //       // onChange: () => {
-  //       //   if (groupEdit.薬品情報グループ.length === 0) {
-  //       //     list = list.filter((e) => e.id !== data.id);
-  //       //   } else {
-  //       //     // data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
-  //       //     // list = list;
-  //       //   }
-  //       // },
-  //       onCancel: () => {},
-  //     },
-  //   });
-  //   console.log("e", e);
-  // }
-
-  // async function doSave() {
-  //   await cache.setPrescExample(list.map((e) => e.data));
-  // }
-
-  // function doAdd() {
-  //   const group = RP剤情報Edit.fromObject(createSingleDrugRP剤情報());
-  //   const f: EditArea = new EditArea({
-  //     target: editArea,
-  //     props: {
-  //       group: group,
-  //       drug: group.薬品情報グループ[0],
-  //       // onChange: () => {
-  //       //   if( group.薬品情報グループ.length === 0 ){
-  //       //     return;
-  //       //   }
-  //       //   list = list;
-  //       // },
-  //       onCancel: () => {
-  //         f.$destroy();
-  //       },
-  //     },
-  //   });
-  // }
-
-  // async function doCancel() {
-  //   await load();
-  // }
 </script>
 
 {#if isVisible}
@@ -143,7 +84,7 @@
       <div class="commands">
         <button on:click={doNew}>新規</button>
         <button on:click={doSave}>保存</button>
-        <button on:click={doCancel}>キャンセル</button>
+        <button on:click={doClose}>閉じる</button>
       </div>
       <SearchArea onSelect={doSelect} {list} />
     </div>

@@ -10,7 +10,7 @@
   export let onFieldChange: () => void;
   let inputText: string = "";
   $: updateInputText(comment);
-  let inputElement: HTMLInputElement | undefined = undefined;
+  let inputElement: HTMLTextAreaElement | undefined = undefined;
   let isEditing = false;
 
   export const focus: () => void = async () => {
@@ -57,8 +57,7 @@
         </div>
       {:else}
         <form on:submit|preventDefault={doEnter} class="with-icons">
-          <input
-            type="text"
+          <textarea
             bind:value={inputText}
             bind:this={inputElement}
             class="input"
@@ -76,7 +75,9 @@
   }
 
   .input {
-    width: 20em;
+    width: 30em;
+    height: 12em;
+    resize: both;
   }
 
   .with-icons {
