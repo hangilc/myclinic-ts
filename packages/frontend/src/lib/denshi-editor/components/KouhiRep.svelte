@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { 公費レコード } from "@/lib/denshi-shohou/presc-info";
-  import type { 公費レコードEdit } from "../denshi-edit";
   import { kouhiRep } from "@/lib/hoken-rep";
   import type { KouhiSet } from "../kouhi-set";
 

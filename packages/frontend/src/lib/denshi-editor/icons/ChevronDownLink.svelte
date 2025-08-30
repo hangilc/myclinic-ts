@@ -1,6 +1,5 @@
 <script lang="ts">
-  import ChevronDown from "@/icons/ChevronDown.svelte";
-
+  
   export let width: string = "18"
   export let onClick: () => void;
   export let style: string = "";

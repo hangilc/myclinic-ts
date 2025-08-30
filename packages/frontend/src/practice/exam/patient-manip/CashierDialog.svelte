@@ -4,7 +4,7 @@
   import { genid } from "@/lib/genid";
   import { dateTimeToSql } from "@/lib/util";
   import { WqueueState, type Payment } from "myclinic-model";
-  import { MeisaiWrapper, type Meisai } from "@/lib/rezept-meisai";
+  import { MeisaiWrapper } from "@/lib/rezept-meisai";
   import type { Readable } from "svelte/store";
   import { endPatient } from "../exam-vars";
   import ChargeForm from "./ChargeForm.svelte";

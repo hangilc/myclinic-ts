@@ -34,7 +34,6 @@
     type PrescInfoData,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  import { initPrescInfoData } from "@/lib/denshi-shohou/visit-shohou";
   // import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
   import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
@@ -45,8 +44,7 @@
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
-  import { resolvePrescInfoByMapAt } from "@/lib/master-map";
-
+  
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
@@ -693,7 +691,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    data = await resolvePrescInfoByMapAt(data, at);
+    // data = await resolvePrescInfoByMapAt(data, at);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {

@@ -9,7 +9,6 @@
   } from "../exam-vars";
   import Dialog from "@/lib/Dialog.svelte";
   import api from "@/lib/api";
-  import FutanWariOverrideDialog from "./FutanWariOverrideDialog.svelte";
   import type { Kouhi, VisitAttributes, VisitEx } from "myclinic-model";
   import { popupTrigger } from "@/lib/popup-helper";
   import HokengaiDialog from "./HokengaiDialog.svelte";
@@ -56,15 +55,15 @@
     showMeisai = true;
   }
 
-  function doFutanwariOverride() {
-    const d: FutanWariOverrideDialog = new FutanWariOverrideDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        visit,
-      },
-    });
-  }
+  // function doFutanwariOverride() {
+  //   const d: FutanWariOverrideDialog = new FutanWariOverrideDialog({
+  //     target: document.body,
+  //     props: {
+  //       destroy: () => d.$destroy(),
+  //       visit,
+  //     },
+  //   });
+  // }
 
   function doMishuuList(): void {
     addToMishuuList(visit);
@@ -124,8 +123,8 @@
   }
 
   async function doIssueShinryouMeisai() {
-    const shinryouList = visit.shinryouList;
-    const conducts = visit.conducts;
+    // const shinryouList = visit.shinryouList;
+    // const conducts = visit.conducts;
     const clinicInfo = await api.getClinicInfo();
     const data = createShinryoumeisaishoData(visit, clinicInfo);
     const pages = drawShinryoumeisaisho(data);

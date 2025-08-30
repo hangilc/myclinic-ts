@@ -14,29 +14,34 @@
   export let group: RP剤情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  // if (group.用法レコード.用法コード === "") {
-  //   isEditing = true;
-  // }
   const freeTextCode = "0X0XXXXXXXXX0000";
-  let codeMode: "master" | "free" | undefined = codeModeValue();
-  let searchText = group.用法レコード.用法名称;
+  let codeMode: "master" | "free" | undefined = undefined;
+  $: updateCodeMode(group);
+  let searchText: string = "";
+  $: updateSearchText(group);
   let inputElement: HTMLInputElement | undefined = undefined;
   let searchResult: UsageMaster[] = [];
 
-  function codeModeValue(): "master" | "free" | undefined {
+  function updateCodeMode(group: RP剤情報Edit): void {
     let code = group.用法レコード.用法コード;
+    let value: "master" | "free" | undefined
     if (code === freeTextCode) {
-      return "free";
+      value = "free";
     } else if (code === "") {
-      return undefined;
+      value = undefined;
     } else {
-      return "master";
+      value = "master";
     }
+    codeMode = value;
   }
 
-  function updateCodeMode() {
-    codeMode = codeModeValue();
+  function updateSearchText(group: RP剤情報Edit) {
+    searchText = group.用法レコード.用法名称;
   }
+
+  // function updateCodeMode() {
+  //   codeMode = codeModeValue();
+  // }
 
   export const focus: () => void = async () => {
     await tick();
@@ -44,7 +49,11 @@
   };
 
   function rep(group: RP剤情報Edit): string {
-    return group.用法レコード.用法名称;
+    let s = group.用法レコード.用法名称;
+    if( s === "" ){
+      s = "（未設定）"
+    }
+    return s;
   }
 
   function doRepClick() {
@@ -74,7 +83,7 @@
     group.用法レコード.用法コード = master.usage_code;
     group.用法レコード.用法名称 = master.usage_name;
     isEditing = false;
-    updateCodeMode();
+    // updateCodeMode();
     searchText = "";
     searchResult = [];
     onFieldChange();

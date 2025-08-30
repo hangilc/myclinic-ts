@@ -69,50 +69,50 @@ function cmp(kind: OnshiPatientInconsistencyKind, onshiValue: string, patientVal
   }
 }
 
-function equalWithCharCmp(a: string, b: string, charCmp: (ca: string, cb: string) => boolean): boolean {
-  if (a === b) {
-    return true;
-  } else {
-    const as = a.split("");
-    const bs = b.split("");
-    if (as.length === bs.length) {
-      for (let i = 0; i < as.length; i++) {
-        if (!charCmp(as[i], bs[i])) {
-          return false;
-        }
-      }
-      return true;
-    } else {
-      return false;
-    }
-  }
-}
+// function equalWithCharCmp(a: string, b: string, charCmp: (ca: string, cb: string) => boolean): boolean {
+//   if (a === b) {
+//     return true;
+//   } else {
+//     const as = a.split("");
+//     const bs = b.split("");
+//     if (as.length === bs.length) {
+//       for (let i = 0; i < as.length; i++) {
+//         if (!charCmp(as[i], bs[i])) {
+//           return false;
+//         }
+//       }
+//       return true;
+//     } else {
+//       return false;
+//     }
+//   }
+// }
 
-const variantMap: Record<string, string> = {
-  "國": "国",
-  "邉": "辺",
-  "邊": "辺",
-  "彌": "弥",
-  "補": "輔",
-  "巖": "巌",
-  "禮": "礼",
-  "惠": "恵",
-  "ゃ": "や",
-  "ゅ": "ゆ",
-  "ょ": "よ",
-}
+// const variantMap: Record<string, string> = {
+//   "國": "国",
+//   "邉": "辺",
+//   "邊": "辺",
+//   "彌": "弥",
+//   "補": "輔",
+//   "巖": "巌",
+//   "禮": "礼",
+//   "惠": "恵",
+//   "ゃ": "や",
+//   "ゅ": "ゆ",
+//   "ょ": "よ",
+// }
 
-function normalizeVariant(c: string): string {
-  return variantMap[c] ?? c;
-}
+// function normalizeVariant(c: string): string {
+//   return variantMap[c] ?? c;
+// }
 
-function equalName(a: string, b: string): boolean {
-  function eq(ca: string, cb: string): boolean {
-    return ca === cb || ca === "●" || cb === "●" ||
-      (normalizeVariant(ca) === normalizeVariant(cb));
-  }
-  return equalWithCharCmp(a, b, eq);
-}
+// function equalName(a: string, b: string): boolean {
+//   function eq(ca: string, cb: string): boolean {
+//     return ca === cb || ca === "●" || cb === "●" ||
+//       (normalizeVariant(ca) === normalizeVariant(cb));
+//   }
+//   return equalWithCharCmp(a, b, eq);
+// }
 
 // const kanaVariantMap: Record<string, string> = {
 //   "ゃ": "や",

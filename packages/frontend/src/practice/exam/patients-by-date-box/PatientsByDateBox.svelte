@@ -15,7 +15,7 @@
 
   async function update() {
     const ds = await fetchData(date);
-    const ps = ds.map(([v, p]) => p);
+    const ps = ds.map(([_v, p]) => p);
     const m: Set<number> = new Set();
     patients = [];
     ps.forEach((p) => {

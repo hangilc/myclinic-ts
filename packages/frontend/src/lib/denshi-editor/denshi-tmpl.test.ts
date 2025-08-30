@@ -1,12 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
-import type { Shohou, DrugGroup, Drug, Usage } from "@/lib/parse-shohou";
+import { describe, it, expect } from "vitest";
+import type { DrugGroup } from "@/lib/parse-shohou";
 import {
-  shohouToPrescInfo,
-  get使用期限年月日FromShohou,
-  get備考レコードFromShohou,
-  get提供診療情報レコードFromShohou,
-  get検査値データ等レコードFromShohou,
-  getRP剤情報FromGroup,
   get剤形区分FromGroup,
 } from "./denshi-tmpl";
 import type { 剤形区分 } from "../denshi-shohou/denshi-shohou";

@@ -5,8 +5,7 @@
   import { onMount } from "svelte";
   import { freeStyleUsageCode } from "../denshi-shohou";
   import XCircle from "@/icons/XCircle.svelte";
-  import CheckCircle from "@/icons/CheckCircle.svelte";
-
+  
   export let 用法: 用法レコード | undefined;
   export let onDone: (value: 用法レコード) => void;
   export let onCancel: () => void;

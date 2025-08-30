@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PopupContext } from "../popup-context";
-  import { errorMessagesOf, invalid, VResult } from "../validation";
+  import { errorMessagesOf, VResult } from "../validation";
   import { ViewportCoord } from "../viewport-coord";
   import DateForm from "./DateForm.svelte";
 

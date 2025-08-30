@@ -1,7 +1,6 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import type { DrawerContext } from "@/lib/drawer/compiler/context";
 import * as x from "./xsplit";
-import * as r from "./row-renderer";
 import * as b from "@/lib/drawer/compiler/box";
 
 export interface Item {
@@ -36,19 +35,19 @@ export function at(pos: number, render?: (ctx: DrawerContext, box: Box) => void)
   }
 }
 
-function extendRender(
-  orig?: (ctx: DrawerContext, box: Box) => void,
-  optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
-): (ctx: DrawerContext, box: Box) => void {
-  orig = orig ?? (() => {});
-  if( optRender ){
-    return (ctx, box) => {
-      optRender(ctx, box, orig);
-    }
-  } else {
-    return orig;
-  }
-}
+// function extendRender(
+//   orig?: (ctx: DrawerContext, box: Box) => void,
+//   optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
+// ): (ctx: DrawerContext, box: Box) => void {
+//   orig = orig ?? (() => {});
+//   if( optRender ){
+//     return (ctx, box) => {
+//       optRender(ctx, box, orig);
+//     }
+//   } else {
+//     return orig;
+//   }
+// }
 
 export function renderCol(ctx: DrawerContext, row: Box, ...items: Item[]) {
   const splits = items.map(item => {

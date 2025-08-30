@@ -1,14 +1,11 @@
 <script lang="ts">
-  import type { ShohouTextMemo } from "@/lib/text-memo";
   import { cache } from "../cache";
   import Dialog from "../Dialog.svelte";
   import { sign_presc } from "../hpki-api";
   import { toZenkaku } from "../zenkaku";
   import {
-    amountDisp,
     daysTimesDisp,
     drugDisp,
-    unevenDisp,
     usageDisp,
   } from "./disp/disp-util";
   import NewGroupDialog from "./EditGroupDialog.svelte";
@@ -16,7 +13,6 @@
   import {
     createPrescInfo,
     PrescInfoWrapper,
-    薬品情報Wrapper,
     type PrescInfoData,
     type RP剤情報,
     type 備考レコード,

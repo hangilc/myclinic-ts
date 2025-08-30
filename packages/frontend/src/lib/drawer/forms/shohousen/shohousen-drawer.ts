@@ -4,7 +4,7 @@ import * as b from "../../compiler/box";
 import type { Box } from "../../compiler/box";
 import * as c from "../../compiler/compiler";
 import { drawTopBox } from "./top-box";
-import { mkLayout, mkMainLayout, type Layout, mkDenshiLayout } from "./layout";
+import { mkLayout, mkMainLayout, mkDenshiLayout } from "./layout";
 import { drawPatientClinic } from "./patient-clinic";
 import { drawIssue } from "./issue";
 import { drawMemo } from "./memo";

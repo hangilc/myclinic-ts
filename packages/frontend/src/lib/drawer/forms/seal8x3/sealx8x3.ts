@@ -1,5 +1,4 @@
 import type { DrawerContext } from "../../compiler/context";
-import type { Op } from "../../compiler/op";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";

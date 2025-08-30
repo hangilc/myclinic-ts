@@ -125,7 +125,7 @@ export function advanceTo(at: number): LineItemSpec {
   }
 }
 
-export function paragraph(ctx: DrawerContext, blocks: Block[], opt?: {
+export function paragraph(_ctx: DrawerContext, blocks: Block[], opt?: {
   halign?: HAlign;
   leading?: number;
   decorate?: (ctx: DrawerContext, box: Box) => void;

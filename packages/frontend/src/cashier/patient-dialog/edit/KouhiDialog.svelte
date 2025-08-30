@@ -35,7 +35,7 @@
     if (!(getValidFromInputs && getValidUptoInputs)) {
       throw new Error("uninitialized validator");
     }
-    const kouhiId = init?.kouhiId ?? 0;
+    // const kouhiId = init?.kouhiId ?? 0;
     const memoInput: KouhiMemoInterface = Object.assign({}, memo, {
       gendogaku,
     });

@@ -337,7 +337,7 @@ function get薬品レコードfromDrug(drug: Drug, 剤形区分: 剤形区分): 
 }
 
 // Wrapper /////////////////////////////////////////////////////////////////////////////////////
-let serialId = 1;
+// let serialId = 1;
 
 // class Wrapper<T> {
 //   id: number;

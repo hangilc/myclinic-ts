@@ -4,7 +4,7 @@
 
   export let conduct: ConductEx;
   export let visit: VisitEx;
-  let editWidget: EditWidget;
+  // let editWidget: EditWidget;
 
   let mode = "disp";
 
@@ -19,6 +19,7 @@
 
 {#if mode === "disp"}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
   <div class="disp" on:click={doDispClick}>
     <div>[{kindRep(conduct.kind)}]</div>
     <div>{conduct.gazouLabel || ""}</div>
@@ -37,7 +38,6 @@
     {conduct}
     {visit}
     onClose={() => (mode = "disp")}
-    bind:this={editWidget}
   />
 {/if}
 

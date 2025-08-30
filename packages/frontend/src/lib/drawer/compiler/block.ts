@@ -1,4 +1,4 @@
-import { mkBox, type Box } from "./box";
+import { type Box } from "./box";
 import type { DrawerContext } from "./context";
 import * as c from "./compiler";
 import * as b from "./box";

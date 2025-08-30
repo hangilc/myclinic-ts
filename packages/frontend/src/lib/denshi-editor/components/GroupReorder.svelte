@@ -13,7 +13,7 @@
   let ordered: RP剤情報Edit[] = [...groups];
   let groupIdElementMap: Record<string, HTMLDivElement> = {};
   let groupListElement: HTMLElement;
-  let draggedGroup: RP剤情報Edit | null = null;
+  // let draggedGroup: RP剤情報Edit | null = null;
   let draggedElement: HTMLElement | null = null;
   let ghostElement: HTMLElement | null = null;
   let placeholder: HTMLElement | null = null;
@@ -39,7 +39,7 @@
 
   function doMouseDown(g: RP剤情報Edit, ev: MouseEvent) {
     ev.preventDefault();
-    draggedGroup = g;
+    // draggedGroup = g;
     draggedElement = groupIdElementMap[g.id];
     
     const rect = draggedElement.getBoundingClientRect();
@@ -116,7 +116,7 @@
         ordered = newOrder;
       }
 
-      draggedGroup = null;
+      // draggedGroup = null;
       draggedElement = null;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);

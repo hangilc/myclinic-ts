@@ -14,6 +14,7 @@
 
   export let data: PrescInfoDataEdit;
   export let onDrugSelect: (group: RP剤情報Edit, drug: 薬品情報Edit) => void;
+  export let onUsageAndTimesSelect: (group: RP剤情報Edit) => void;
   export let onGroupSelect: (group: RP剤情報Edit) => void;
   export let showValid: boolean = false;
   export let onAddDrug: (group: RP剤情報Edit) => void;
@@ -41,8 +42,8 @@
 <div>
   <div class="groups">
     {#each data.RP剤情報グループ as group, index (group.id)}
-      <div class:group-selected={group.isSelected} class="group" on:click={() => doGroupSelect(group)}>
-        <div>{toZenkaku((index + 1).toString())}）</div>
+      <div class:group-selected={group.isSelected} class="group">
+        <div on:click={() => doGroupSelect(group)}>{toZenkaku((index + 1).toString())}）</div>
         <div>
           {#each group.薬品情報グループ as drug, drugIndex (drug.id)}
             <div class="drug-rep" class:drug-selected={drug.isSelected}>
@@ -60,7 +61,7 @@
               {/if}
             </div>
           {/each}
-          <div class="usage-rep">
+          <div class="usage-rep" on:click={() => onUsageAndTimesSelect(group)}>
             {#if showValid}
               <ConvUsageValidity usage={group.用法レコード} />
             {/if}

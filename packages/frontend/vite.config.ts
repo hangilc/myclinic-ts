@@ -26,7 +26,6 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
     alias: {
       "@": resolve(__dirname, "src"),
       "@lib": resolve(__dirname, "src/lib"),
-      "@cypress": resolve(__dirname, "cypress")
     }
   },
   base: "/vite/",

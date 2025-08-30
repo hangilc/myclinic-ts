@@ -1,5 +1,6 @@
 import type {
-  保険一部負担金区分コード, 保険種別コード,
+  保険一部負担金区分コード,
+  保険種別コード,
   剤形区分,
   力価フラグ,
   性別コード,
@@ -12,7 +13,7 @@ import type {
   被保険者等種別,
   診療科コード,
   診療科コード種別,
-  都道府県コード
+  都道府県コード,
 } from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
@@ -22,9 +23,12 @@ import type {
   公費レコード,
   剤形レコード,
   提供情報レコード,
-  提供診療情報レコード, 検査値データ等レコード,
-  用法レコード, 用法補足レコード,
-  薬品レコード, 薬品情報,
+  提供診療情報レコード,
+  検査値データ等レコード,
+  用法レコード,
+  用法補足レコード,
+  薬品レコード,
+  薬品情報,
   薬品補足レコード,
   薬品１回服用量レコード,
   負担区分レコード,
@@ -50,19 +54,22 @@ export class 薬品レコードEdit implements 薬品レコード {
   isEditing薬品コード: boolean;
   isEditing分量: boolean;
 
-  constructor(src: {
-    情報区分: 情報区分;
-    薬品コード種別: 薬品コード種別;
-    薬品コード: string;
-    薬品名称: string;
-    分量: string;
-    力価フラグ: 力価フラグ;
-    単位名: string;
-  }, aux: {
-    isEditing情報区分: boolean;
-    isEditing薬品コード: boolean;
-    isEditing分量: boolean;
-  }) {
+  constructor(
+    src: {
+      情報区分: 情報区分;
+      薬品コード種別: 薬品コード種別;
+      薬品コード: string;
+      薬品名称: string;
+      分量: string;
+      力価フラグ: 力価フラグ;
+      単位名: string;
+    },
+    aux: {
+      isEditing情報区分: boolean;
+      isEditing薬品コード: boolean;
+      isEditing分量: boolean;
+    }
+  ) {
     this.情報区分 = src.情報区分;
     this.薬品コード種別 = src.薬品コード種別;
     this.薬品コード = src.薬品コード;
@@ -76,7 +83,11 @@ export class 薬品レコードEdit implements 薬品レコード {
   }
 
   static fromObject(obj: 薬品レコード): 薬品レコードEdit {
-    return new 薬品レコードEdit(obj, { isEditing情報区分: false, isEditing薬品コード: false, isEditing分量: false });
+    return new 薬品レコードEdit(obj, {
+      isEditing情報区分: false,
+      isEditing薬品コード: false,
+      isEditing分量: false,
+    });
   }
 
   clone(): 薬品レコードEdit {
@@ -84,19 +95,30 @@ export class 薬品レコードEdit implements 薬品レコード {
   }
 
   toObject(): 薬品レコード {
-    return Object.assign({}, {
-      情報区分: this.情報区分,
-      薬品コード種別: this.薬品コード種別,
-      薬品コード: this.薬品コード,
-      薬品名称: this.薬品名称,
-      分量: this.分量,
-      力価フラグ: this.力価フラグ,
-      単位名: this.単位名,
-    })
+    return Object.assign(
+      {},
+      {
+        情報区分: this.情報区分,
+        薬品コード種別: this.薬品コード種別,
+        薬品コード: this.薬品コード,
+        薬品名称: this.薬品名称,
+        分量: this.分量,
+        力価フラグ: this.力価フラグ,
+        単位名: this.単位名,
+      }
+    );
   }
 
   isEditing(): boolean {
-    return this.isEditing情報区分 || this.isEditing薬品コード || this.isEditing分量;
+    return (
+      this.isEditing情報区分 || this.isEditing薬品コード || this.isEditing分量
+    );
+  }
+
+  clearEditingFlags() {
+    this.isEditing情報区分 = false;
+    this.isEditing薬品コード = false;
+    this.isEditing分量 = false;
   }
 }
 
@@ -125,7 +147,9 @@ export class 不均等レコードEdit implements 不均等レコード {
     return new 不均等レコードEdit(obj);
   }
 
-  static fromOptionalObject(obj: 不均等レコード | undefined): 不均等レコードEdit | undefined {
+  static fromOptionalObject(
+    obj: 不均等レコード | undefined
+  ): 不均等レコードEdit | undefined {
     if (obj === undefined) {
       return undefined;
     } else {
@@ -138,18 +162,21 @@ export class 不均等レコードEdit implements 不均等レコード {
   }
 
   toObject(): 不均等レコード {
-    let obj: 不均等レコード = Object.assign({}, {
-      不均等１回目服用量: this.不均等１回目服用量,
-      不均等２回目服用量: this.不均等２回目服用量,
-    });
+    let obj: 不均等レコード = Object.assign(
+      {},
+      {
+        不均等１回目服用量: this.不均等１回目服用量,
+        不均等２回目服用量: this.不均等２回目服用量,
+      }
+    );
     if (this.不均等３回目服用量) {
-      obj.不均等３回目服用量 = this.不均等３回目服用量
+      obj.不均等３回目服用量 = this.不均等３回目服用量;
     }
     if (this.不均等４回目服用量) {
-      obj.不均等４回目服用量 = this.不均等４回目服用量
+      obj.不均等４回目服用量 = this.不均等４回目服用量;
     }
     if (this.不均等５回目服用量) {
-      obj.不均等５回目服用量 = this.不均等５回目服用量
+      obj.不均等５回目服用量 = this.不均等５回目服用量;
     }
     return obj;
   }
@@ -165,18 +192,20 @@ export class 負担区分レコードEdit implements 負担区分レコード {
   isEditing第三公費負担区分: boolean;
   isEditing特殊公費負担区分: boolean;
 
-  constructor(src: {
-    第一公費負担区分?: boolean;
-    第二公費負担区分?: boolean;
-    第三公費負担区分?: boolean;
-    特殊公費負担区分?: boolean;
-  },
+  constructor(
+    src: {
+      第一公費負担区分?: boolean;
+      第二公費負担区分?: boolean;
+      第三公費負担区分?: boolean;
+      特殊公費負担区分?: boolean;
+    },
     aux: {
       isEditing第一公費負担区分: boolean;
       isEditing第二公費負担区分: boolean;
       isEditing第三公費負担区分: boolean;
       isEditing特殊公費負担区分: boolean;
-    }) {
+    }
+  ) {
     this.第一公費負担区分 = src.第一公費負担区分;
     this.第二公費負担区分 = src.第二公費負担区分;
     this.第三公費負担区分 = src.第三公費負担区分;
@@ -201,8 +230,12 @@ export class 負担区分レコードEdit implements 負担区分レコード {
   }
 
   toObject(): 負担区分レコード | undefined {
-    if (this.第一公費負担区分 === undefined && this.第二公費負担区分 === undefined &&
-      this.第三公費負担区分 === undefined && this.特殊公費負担区分 === undefined) {
+    if (
+      this.第一公費負担区分 === undefined &&
+      this.第二公費負担区分 === undefined &&
+      this.第三公費負担区分 === undefined &&
+      this.特殊公費負担区分 === undefined
+    ) {
       return undefined;
     }
     let obj: 負担区分レコード = {};
@@ -222,10 +255,19 @@ export class 負担区分レコードEdit implements 負担区分レコード {
   }
 
   isEditing(): boolean {
-    return this.isEditing第一公費負担区分 ||
+    return (
+      this.isEditing第一公費負担区分 ||
       this.isEditing第二公費負担区分 ||
       this.isEditing第三公費負担区分 ||
-      this.isEditing特殊公費負担区分;
+      this.isEditing特殊公費負担区分
+    );
+  }
+
+  clearEditingFlags() {
+    this.isEditing第一公費負担区分 = false;
+    this.isEditing第二公費負担区分 = false;
+    this.isEditing第三公費負担区分 = false;
+    this.isEditing特殊公費負担区分 = false;
   }
 }
 
@@ -233,10 +275,7 @@ export class 薬品１回服用量レコードEdit implements 薬品１回服用
   薬剤１回服用量: string;
   薬剤１日服用回数?: number;
 
-  constructor(src: {
-    薬剤１回服用量: string;
-    薬剤１日服用回数?: number;
-  }) {
+  constructor(src: { 薬剤１回服用量: string; 薬剤１日服用回数?: number }) {
     this.薬剤１回服用量 = src.薬剤１回服用量;
     this.薬剤１日服用回数 = src.薬剤１日服用回数;
   }
@@ -265,9 +304,12 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
   id: number;
   isEditing: boolean;
 
-  constructor(src: {
-    薬品補足情報: string;
-  }, aux: { id: number, isEditing: boolean }) {
+  constructor(
+    src: {
+      薬品補足情報: string;
+    },
+    aux: { id: number; isEditing: boolean }
+  ) {
     this.薬品補足情報 = src.薬品補足情報;
     this.id = aux.id;
     this.isEditing = aux.isEditing;
@@ -290,6 +332,10 @@ export class 薬品補足レコードEdit implements 薬品補足レコード {
       薬品補足情報: this.薬品補足情報,
     };
   }
+
+  clearEditingFlags() {
+    this.isEditing = false;
+  }
 }
 
 export class 薬品情報Edit implements 薬品情報 {
@@ -305,14 +351,23 @@ export class 薬品情報Edit implements 薬品情報 {
   isEditing不均等レコード: boolean;
   isSelected: boolean;
 
-  constructor(src: {
-    薬品レコード: 薬品レコードEdit;
-    単位変換レコード?: string;
-    不均等レコード?: 不均等レコードEdit;
-    負担区分レコード?: 負担区分レコードEdit;
-    薬品１回服用量レコード?: 薬品１回服用量レコードEdit;
-    薬品補足レコード?: 薬品補足レコードEdit[];
-  }, aux: { id: number; ippanmei: string; ippanmeicode: string; isEditing不均等レコード: boolean, isSelected: boolean }) {
+  constructor(
+    src: {
+      薬品レコード: 薬品レコードEdit;
+      単位変換レコード?: string;
+      不均等レコード?: 不均等レコードEdit;
+      負担区分レコード?: 負担区分レコードEdit;
+      薬品１回服用量レコード?: 薬品１回服用量レコードEdit;
+      薬品補足レコード?: 薬品補足レコードEdit[];
+    },
+    aux: {
+      id: number;
+      ippanmei: string;
+      ippanmeicode: string;
+      isEditing不均等レコード: boolean;
+      isSelected: boolean;
+    }
+  ) {
     this.id = aux.id;
     this.薬品レコード = src.薬品レコード;
     this.単位変換レコード = src.単位変換レコード;
@@ -327,32 +382,65 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   static fromObject(obj: 薬品情報): 薬品情報Edit {
-    return new 薬品情報Edit({
-      薬品レコード: 薬品レコードEdit.fromObject(obj.薬品レコード),
-      単位変換レコード: obj.単位変換レコード,
-      不均等レコード: obj.不均等レコード ? 不均等レコードEdit.fromObject(obj.不均等レコード) : undefined,
-      負担区分レコード: obj.負担区分レコード ? 負担区分レコードEdit.fromObject(obj.負担区分レコード) : undefined,
-      薬品１回服用量レコード: obj.薬品１回服用量レコード ? 薬品１回服用量レコードEdit.fromObject(obj.薬品１回服用量レコード) : undefined,
-      薬品補足レコード: obj.薬品補足レコード?.map(record => 薬品補足レコードEdit.fromObject(record))
-    }, { id: nextId(), ippanmei: "", ippanmeicode: "", isEditing不均等レコード: false, isSelected: false });
+    return new 薬品情報Edit(
+      {
+        薬品レコード: 薬品レコードEdit.fromObject(obj.薬品レコード),
+        単位変換レコード: obj.単位変換レコード,
+        不均等レコード: obj.不均等レコード
+          ? 不均等レコードEdit.fromObject(obj.不均等レコード)
+          : undefined,
+        負担区分レコード: obj.負担区分レコード
+          ? 負担区分レコードEdit.fromObject(obj.負担区分レコード)
+          : undefined,
+        薬品１回服用量レコード: obj.薬品１回服用量レコード
+          ? 薬品１回服用量レコードEdit.fromObject(obj.薬品１回服用量レコード)
+          : undefined,
+        薬品補足レコード: obj.薬品補足レコード?.map((record) =>
+          薬品補足レコードEdit.fromObject(record)
+        ),
+      },
+      {
+        id: nextId(),
+        ippanmei: "",
+        ippanmeicode: "",
+        isEditing不均等レコード: false,
+        isSelected: false,
+      }
+    );
   }
 
   clone(): 薬品情報Edit {
-    return new 薬品情報Edit({
-      薬品レコード: this.薬品レコード.clone(),
-      単位変換レコード: this.単位変換レコード,
-      不均等レコード: this.不均等レコード?.clone(),
-      負担区分レコード: this.負担区分レコード?.clone(),
-      薬品１回服用量レコード: this.薬品１回服用量レコード?.clone(),
-      薬品補足レコード: this.薬品補足レコード?.map(record => record.clone())
-    }, this);
+    return new 薬品情報Edit(
+      {
+        薬品レコード: this.薬品レコード.clone(),
+        単位変換レコード: this.単位変換レコード,
+        不均等レコード: this.不均等レコード?.clone(),
+        負担区分レコード: this.負担区分レコード?.clone(),
+        薬品１回服用量レコード: this.薬品１回服用量レコード?.clone(),
+        薬品補足レコード: this.薬品補足レコード?.map((record) =>
+          record.clone()
+        ),
+      },
+      this
+    );
   }
 
   isEditing(): boolean {
-    return this.薬品レコード.isEditing() ||
+    return (
+      this.薬品レコード.isEditing() ||
       this.isEditing不均等レコード ||
-      !!(this.薬品補足レコード && this.薬品補足レコード.some(r => r.isEditing)) ||
+      !!(
+        this.薬品補足レコード && this.薬品補足レコード.some((r) => r.isEditing)
+      ) ||
       !!(this.負担区分レコード && this.負担区分レコード.isEditing())
+    );
+  }
+
+  clearEditingFlags() {
+    this.薬品レコード.clearEditingFlags();
+    this.isEditing不均等レコード = false;
+    this.薬品補足レコード?.forEach((r) => r.clearEditingFlags());
+    this.負担区分レコード?.clearEditingFlags();
   }
 
   toObject(): 薬品情報 {
@@ -374,8 +462,13 @@ export class 薬品情報Edit implements 薬品情報 {
     if (this.薬品１回服用量レコード !== undefined) {
       obj.薬品１回服用量レコード = this.薬品１回服用量レコード.toObject();
     }
-    if (this.薬品補足レコード !== undefined && this.薬品補足レコード.length > 0) {
-      obj.薬品補足レコード = this.薬品補足レコード.map(record => record.toObject());
+    if (
+      this.薬品補足レコード !== undefined &&
+      this.薬品補足レコード.length > 0
+    ) {
+      obj.薬品補足レコード = this.薬品補足レコード.map((record) =>
+        record.toObject()
+      );
     }
     return obj;
   }
@@ -409,7 +502,10 @@ export class 薬品情報Edit implements 薬品情報 {
   }
 
   isConvertibleToIppanmei(): boolean {
-    return this.ippanmeicode !== "" && this.薬品レコード.薬品コード !== this.ippanmeicode;
+    return (
+      this.ippanmeicode !== "" &&
+      this.薬品レコード.薬品コード !== this.ippanmeicode
+    );
   }
 
   convertToIppanmei(): void {
@@ -428,14 +524,17 @@ export class 剤形レコードEdit implements 剤形レコード {
   isEditing剤形区分: boolean;
   isEditing調剤数量: boolean;
 
-  constructor(src: {
-    剤形区分: 剤形区分;
-    剤形名称?: string;
-    調剤数量: number;
-  }, aux: {
-    isEditing剤形区分: boolean;
-    isEditing調剤数量: boolean;
-  }) {
+  constructor(
+    src: {
+      剤形区分: 剤形区分;
+      剤形名称?: string;
+      調剤数量: number;
+    },
+    aux: {
+      isEditing剤形区分: boolean;
+      isEditing調剤数量: boolean;
+    }
+  ) {
     this.剤形区分 = src.剤形区分;
     this.剤形名称 = src.剤形名称;
     this.調剤数量 = src.調剤数量;
@@ -444,7 +543,10 @@ export class 剤形レコードEdit implements 剤形レコード {
   }
 
   static fromObject(obj: 剤形レコード): 剤形レコードEdit {
-    return new 剤形レコードEdit(obj, { isEditing剤形区分: false, isEditing調剤数量: false });
+    return new 剤形レコードEdit(obj, {
+      isEditing剤形区分: false,
+      isEditing調剤数量: false,
+    });
   }
 
   clone(): 剤形レコードEdit {
@@ -453,6 +555,11 @@ export class 剤形レコードEdit implements 剤形レコード {
 
   isEditing(): boolean {
     return this.isEditing剤形区分 || this.isEditing調剤数量;
+  }
+
+  clearEditingFlags() {
+    this.isEditing剤形区分 = false;
+    this.isEditing調剤数量 = false;
   }
 
   toObject(): 剤形レコード {
@@ -473,13 +580,16 @@ export class 用法レコードEdit implements 用法レコード {
   用法１日回数?: number;
   isEditing用法コード: boolean;
 
-  constructor(src: {
-    用法コード: string;
-    用法名称: string;
-    用法１日回数?: number;
-  }, aux: {
-    isEditing用法コード: boolean;
-  }) {
+  constructor(
+    src: {
+      用法コード: string;
+      用法名称: string;
+      用法１日回数?: number;
+    },
+    aux: {
+      isEditing用法コード: boolean;
+    }
+  ) {
     this.用法コード = src.用法コード;
     this.用法名称 = src.用法名称;
     this.用法１日回数 = src.用法１日回数;
@@ -496,6 +606,10 @@ export class 用法レコードEdit implements 用法レコード {
 
   isEditing(): boolean {
     return this.isEditing用法コード;
+  }
+
+  clearEditingFlags() {
+    this.isEditing用法コード = false;
   }
 
   toObject(): 用法レコード {
@@ -516,10 +630,13 @@ export class 用法補足レコードEdit implements 用法補足レコード {
   用法補足区分?: 用法補足区分;
   用法補足情報: string;
 
-  constructor(src: {
-    用法補足区分?: 用法補足区分;
-    用法補足情報: string;
-  }, aux: { id: number, isEditing用法補足情報: boolean }) {
+  constructor(
+    src: {
+      用法補足区分?: 用法補足区分;
+      用法補足情報: string;
+    },
+    aux: { id: number; isEditing用法補足情報: boolean }
+  ) {
     this.id = aux.id;
     this.isEditing用法補足情報 = aux.isEditing用法補足情報;
     this.用法補足区分 = src.用法補足区分;
@@ -527,7 +644,10 @@ export class 用法補足レコードEdit implements 用法補足レコード {
   }
 
   static fromObject(obj: 用法補足レコード): 用法補足レコードEdit {
-    return new 用法補足レコードEdit(obj, { id: nextId(), isEditing用法補足情報: false });
+    return new 用法補足レコードEdit(obj, {
+      id: nextId(),
+      isEditing用法補足情報: false,
+    });
   }
 
   static fromInfo(用法補足情報: string): 用法補足レコードEdit {
@@ -540,6 +660,10 @@ export class 用法補足レコードEdit implements 用法補足レコード {
 
   isEditing(): boolean {
     return this.isEditing用法補足情報;
+  }
+
+  clearEditingFlags() {
+    this.isEditing用法補足情報 = false;
   }
 
   toObject(): 用法補足レコード {
@@ -561,12 +685,15 @@ export class RP剤情報Edit implements RP剤情報 {
   薬品情報グループ: 薬品情報Edit[];
   isSelected: boolean;
 
-  constructor(src: {
-    剤形レコード: 剤形レコードEdit;
-    用法レコード: 用法レコードEdit;
-    用法補足レコード?: 用法補足レコードEdit[];
-    薬品情報グループ: 薬品情報Edit[];
-  }, aux: { id: number, isSelected: boolean }) {
+  constructor(
+    src: {
+      剤形レコード: 剤形レコードEdit;
+      用法レコード: 用法レコードEdit;
+      用法補足レコード?: 用法補足レコードEdit[];
+      薬品情報グループ: 薬品情報Edit[];
+    },
+    aux: { id: number; isSelected: boolean }
+  ) {
     this.剤形レコード = src.剤形レコード;
     this.用法レコード = src.用法レコード;
     this.用法補足レコード = src.用法補足レコード;
@@ -576,42 +703,67 @@ export class RP剤情報Edit implements RP剤情報 {
   }
 
   static fromObject(obj: RP剤情報): RP剤情報Edit {
-    return new RP剤情報Edit({
-      剤形レコード: 剤形レコードEdit.fromObject(obj.剤形レコード),
-      用法レコード: 用法レコードEdit.fromObject(obj.用法レコード),
-      用法補足レコード: obj.用法補足レコード?.map(record => 用法補足レコードEdit.fromObject(record)),
-      薬品情報グループ: obj.薬品情報グループ.map(info => 薬品情報Edit.fromObject(info))
-    }, { id: nextId(), isSelected: false });
+    return new RP剤情報Edit(
+      {
+        剤形レコード: 剤形レコードEdit.fromObject(obj.剤形レコード),
+        用法レコード: 用法レコードEdit.fromObject(obj.用法レコード),
+        用法補足レコード: obj.用法補足レコード?.map((record) =>
+          用法補足レコードEdit.fromObject(record)
+        ),
+        薬品情報グループ: obj.薬品情報グループ.map((info) =>
+          薬品情報Edit.fromObject(info)
+        ),
+      },
+      { id: nextId(), isSelected: false }
+    );
   }
 
   clone(): RP剤情報Edit {
-    return new RP剤情報Edit({
-      剤形レコード: this.剤形レコード.clone(),
-      用法レコード: this.用法レコード.clone(),
-      用法補足レコード: this.用法補足レコード?.map(record => record.clone()),
-      薬品情報グループ: this.薬品情報グループ.map(info => info.clone())
-    }, this);
+    return new RP剤情報Edit(
+      {
+        剤形レコード: this.剤形レコード.clone(),
+        用法レコード: this.用法レコード.clone(),
+        用法補足レコード: this.用法補足レコード?.map((record) =>
+          record.clone()
+        ),
+        薬品情報グループ: this.薬品情報グループ.map((info) => info.clone()),
+      },
+      this
+    );
   }
 
   isEditing(): boolean {
-    return this.剤形レコード.isEditing() ||
+    return (
+      this.剤形レコード.isEditing() ||
       this.用法レコード.isEditing() ||
-      this.薬品情報グループ.some(d => d.isEditing()) ||
-      !!this.用法補足レコード?.some(r => r.isEditing());
+      this.薬品情報グループ.some((d) => d.isEditing()) ||
+      !!this.用法補足レコード?.some((r) => r.isEditing())
+    );
+  }
+
+  clearEditingFlagsExceptDrugs() {
+    this.剤形レコード.clearEditingFlags();
+    this.用法レコード.clearEditingFlags();
+    this.用法補足レコード?.forEach((r) => r.clearEditingFlags());
   }
 
   isModified(orig: RP剤情報): boolean {
     return !isEqualRP剤情報(this, orig);
   }
 
-  toObject(): RP剤情報 {
+  toPrescOfPrefab(): RP剤情報 {
     let obj: RP剤情報 = {
       剤形レコード: this.剤形レコード.toObject(),
       用法レコード: this.用法レコード.toObject(),
-      薬品情報グループ: this.薬品情報グループ.map(info => info.toObject()),
+      薬品情報グループ: this.薬品情報グループ.map((info) => info.toObject()),
     };
-    if (this.用法補足レコード !== undefined && this.用法補足レコード.length > 0) {
-      obj.用法補足レコード = this.用法補足レコード.map(record => record.toObject());
+    if (
+      this.用法補足レコード !== undefined &&
+      this.用法補足レコード.length > 0
+    ) {
+      obj.用法補足レコード = this.用法補足レコード.map((record) =>
+        record.toObject()
+      );
     }
     return obj;
   }
@@ -623,6 +775,10 @@ export class RP剤情報Edit implements RP剤情報 {
       }
     }
     return undefined;
+  }
+
+  includesDrug(drugId: number): boolean {
+    return this.findDrugById(drugId) !== undefined;
   }
 
   getDrugById(drugId: number): 薬品情報Edit {
@@ -649,10 +805,7 @@ export class 公費レコードEdit implements 公費レコード {
   公費負担者番号: string;
   公費受給者番号?: string;
 
-  constructor(src: {
-    公費負担者番号: string;
-    公費受給者番号?: string;
-  }) {
+  constructor(src: { 公費負担者番号: string; 公費受給者番号?: string }) {
     this.公費負担者番号 = src.公費負担者番号;
     this.公費受給者番号 = src.公費受給者番号;
   }
@@ -713,9 +866,12 @@ export class 備考レコードEdit implements 備考レコード {
   isEditing: boolean;
   備考: string;
 
-  constructor(src: {
-    備考: string;
-  }, aux: { id: number, isEditing: boolean }) {
+  constructor(
+    src: {
+      備考: string;
+    },
+    aux: { id: number; isEditing: boolean }
+  ) {
     this.備考 = src.備考;
     this.id = aux.id;
     this.isEditing = aux.isEditing;
@@ -746,10 +902,13 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
   薬品名称?: string;
   コメント: string;
 
-  constructor(src: {
-    薬品名称?: string;
-    コメント: string;
-  }, aux: { id: number, isEditing: boolean }) {
+  constructor(
+    src: {
+      薬品名称?: string;
+      コメント: string;
+    },
+    aux: { id: number; isEditing: boolean }
+  ) {
     this.薬品名称 = src.薬品名称;
     this.コメント = src.コメント;
     this.id = aux.id;
@@ -757,7 +916,10 @@ export class 提供診療情報レコードEdit implements 提供診療情報レ
   }
 
   static fromObject(obj: 提供診療情報レコード): 提供診療情報レコードEdit {
-    return new 提供診療情報レコードEdit(obj, { id: nextId(), isEditing: false });
+    return new 提供診療情報レコードEdit(obj, {
+      id: nextId(),
+      isEditing: false,
+    });
   }
 
   static fromComment(comment: string): 提供診療情報レコードEdit {
@@ -784,16 +946,22 @@ export class 検査値データ等レコードEdit implements 検査値データ
   isEditing: boolean;
   検査値データ等: string;
 
-  constructor(src: {
-    検査値データ等: string;
-  }, aux: { id: number, isEditing: boolean }) {
+  constructor(
+    src: {
+      検査値データ等: string;
+    },
+    aux: { id: number; isEditing: boolean }
+  ) {
     this.id = aux.id;
     this.検査値データ等 = src.検査値データ等;
     this.isEditing = aux.isEditing;
   }
 
   static fromObject(obj: 検査値データ等レコード): 検査値データ等レコードEdit {
-    return new 検査値データ等レコードEdit(obj, { id: nextId(), isEditing: false });
+    return new 検査値データ等レコードEdit(obj, {
+      id: nextId(),
+      isEditing: false,
+    });
   }
 
   static fromData(data: string): 検査値データ等レコードEdit {
@@ -825,29 +993,51 @@ export class 提供情報レコードEdit implements 提供情報レコード {
 
   static fromObject(obj: 提供情報レコード): 提供情報レコードEdit {
     return new 提供情報レコードEdit({
-      提供診療情報レコード: obj.提供診療情報レコード?.map(record => 提供診療情報レコードEdit.fromObject(record)),
-      検査値データ等レコード: obj.検査値データ等レコード?.map(record => 検査値データ等レコードEdit.fromObject(record)),
+      提供診療情報レコード: obj.提供診療情報レコード?.map((record) =>
+        提供診療情報レコードEdit.fromObject(record)
+      ),
+      検査値データ等レコード: obj.検査値データ等レコード?.map((record) =>
+        検査値データ等レコードEdit.fromObject(record)
+      ),
     });
   }
 
   clone(): 提供情報レコードEdit {
     return new 提供情報レコードEdit({
-      提供診療情報レコード: this.提供診療情報レコード?.map(record => record.clone()),
-      検査値データ等レコード: this.検査値データ等レコード?.map(record => record.clone()),
+      提供診療情報レコード: this.提供診療情報レコード?.map((record) =>
+        record.clone()
+      ),
+      検査値データ等レコード: this.検査値データ等レコード?.map((record) =>
+        record.clone()
+      ),
     });
   }
 
   toObject(): 提供情報レコード | undefined {
-    if ((this.提供診療情報レコード === undefined || this.提供診療情報レコード.length === 0) &&
-      (this.検査値データ等レコード === undefined || this.検査値データ等レコード.length === 0)) {
+    if (
+      (this.提供診療情報レコード === undefined ||
+        this.提供診療情報レコード.length === 0) &&
+      (this.検査値データ等レコード === undefined ||
+        this.検査値データ等レコード.length === 0)
+    ) {
       return undefined;
     }
     let obj: 提供情報レコード = {};
-    if (this.提供診療情報レコード !== undefined && this.提供診療情報レコード.length > 0) {
-      obj.提供診療情報レコード = this.提供診療情報レコード.map(record => record.toObject());
+    if (
+      this.提供診療情報レコード !== undefined &&
+      this.提供診療情報レコード.length > 0
+    ) {
+      obj.提供診療情報レコード = this.提供診療情報レコード.map((record) =>
+        record.toObject()
+      );
     }
-    if (this.検査値データ等レコード !== undefined && this.検査値データ等レコード.length > 0) {
-      obj.検査値データ等レコード = this.検査値データ等レコード.map(record => record.toObject());
+    if (
+      this.検査値データ等レコード !== undefined &&
+      this.検査値データ等レコード.length > 0
+    ) {
+      obj.検査値データ等レコード = this.検査値データ等レコード.map((record) =>
+        record.toObject()
+      );
     }
     return obj;
   }
@@ -1014,19 +1204,35 @@ export class PrescInfoDataEdit implements PrescInfoData {
       被保険者証枝番: obj.被保険者証枝番,
       負担割合: obj.負担割合,
       職務上の事由: obj.職務上の事由,
-      第一公費レコード: obj.第一公費レコード ? 公費レコードEdit.fromObject(obj.第一公費レコード) : undefined,
-      第二公費レコード: obj.第二公費レコード ? 公費レコードEdit.fromObject(obj.第二公費レコード) : undefined,
-      第三公費レコード: obj.第三公費レコード ? 公費レコードEdit.fromObject(obj.第三公費レコード) : undefined,
-      特殊公費レコード: obj.特殊公費レコード ? 公費レコードEdit.fromObject(obj.特殊公費レコード) : undefined,
+      第一公費レコード: obj.第一公費レコード
+        ? 公費レコードEdit.fromObject(obj.第一公費レコード)
+        : undefined,
+      第二公費レコード: obj.第二公費レコード
+        ? 公費レコードEdit.fromObject(obj.第二公費レコード)
+        : undefined,
+      第三公費レコード: obj.第三公費レコード
+        ? 公費レコードEdit.fromObject(obj.第三公費レコード)
+        : undefined,
+      特殊公費レコード: obj.特殊公費レコード
+        ? 公費レコードEdit.fromObject(obj.特殊公費レコード)
+        : undefined,
       レセプト種別コード: obj.レセプト種別コード,
       処方箋交付年月日: obj.処方箋交付年月日,
       使用期限年月日: obj.使用期限年月日,
-      麻薬施用レコード: obj.麻薬施用レコード ? 麻薬施用レコードEdit.fromObject(obj.麻薬施用レコード) : undefined,
+      麻薬施用レコード: obj.麻薬施用レコード
+        ? 麻薬施用レコードEdit.fromObject(obj.麻薬施用レコード)
+        : undefined,
       残薬確認対応フラグ: obj.残薬確認対応フラグ,
-      備考レコード: obj.備考レコード?.map(record => 備考レコードEdit.fromObject(record)),
+      備考レコード: obj.備考レコード?.map((record) =>
+        備考レコードEdit.fromObject(record)
+      ),
       引換番号: obj.引換番号,
-      RP剤情報グループ: obj.RP剤情報グループ.map(info => RP剤情報Edit.fromObject(info)),
-      提供情報レコード: obj.提供情報レコード ? 提供情報レコードEdit.fromObject(obj.提供情報レコード) : undefined,
+      RP剤情報グループ: obj.RP剤情報グループ.map((info) =>
+        RP剤情報Edit.fromObject(info)
+      ),
+      提供情報レコード: obj.提供情報レコード
+        ? 提供情報レコードEdit.fromObject(obj.提供情報レコード)
+        : undefined,
     });
   }
 
@@ -1068,9 +1274,9 @@ export class PrescInfoDataEdit implements PrescInfoData {
       使用期限年月日: this.使用期限年月日,
       麻薬施用レコード: this.麻薬施用レコード?.clone(),
       残薬確認対応フラグ: this.残薬確認対応フラグ,
-      備考レコード: this.備考レコード?.map(record => record.clone()),
+      備考レコード: this.備考レコード?.map((record) => record.clone()),
       引換番号: this.引換番号,
-      RP剤情報グループ: this.RP剤情報グループ.map(info => info.clone()),
+      RP剤情報グループ: this.RP剤情報グループ.map((info) => info.clone()),
       提供情報レコード: this.提供情報レコード?.clone(),
     });
   }
@@ -1092,7 +1298,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
       被保険者証番号: this.被保険者証番号,
       被保険者被扶養者: this.被保険者被扶養者,
       処方箋交付年月日: this.処方箋交付年月日,
-      RP剤情報グループ: this.RP剤情報グループ.map(info => info.toObject()),
+      RP剤情報グループ: this.RP剤情報グループ.map((info) => info.toPrescOfPrefab()),
     };
 
     // Optional fields
@@ -1160,7 +1366,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
       obj.残薬確認対応フラグ = this.残薬確認対応フラグ;
     }
     if (this.備考レコード !== undefined && this.備考レコード.length > 0) {
-      obj.備考レコード = this.備考レコード.map(record => record.toObject());
+      obj.備考レコード = this.備考レコード.map((record) => record.toObject());
     }
     if (this.引換番号 !== undefined) {
       obj.引換番号 = this.引換番号;
@@ -1195,7 +1401,9 @@ export class PrescInfoDataEdit implements PrescInfoData {
     this.提供情報レコード.検査値データ等レコード.push(record);
   }
 
-  set提供診療情報レコード(records: 提供診療情報レコードEdit[] | undefined): void {
+  set提供診療情報レコード(
+    records: 提供診療情報レコードEdit[] | undefined
+  ): void {
     if (!this.提供情報レコード) {
       this.提供情報レコード = 提供情報レコードEdit.fromObject({});
     }
@@ -1203,7 +1411,9 @@ export class PrescInfoDataEdit implements PrescInfoData {
     this.normalize提供情報レコード();
   }
 
-  set検査値データ等レコード(records: 検査値データ等レコードEdit[] | undefined): void {
+  set検査値データ等レコード(
+    records: 検査値データ等レコードEdit[] | undefined
+  ): void {
     if (!this.提供情報レコード) {
       this.提供情報レコード = 提供情報レコードEdit.fromObject({});
     }
@@ -1223,37 +1433,57 @@ export class PrescInfoDataEdit implements PrescInfoData {
           delete this.提供情報レコード.検査値データ等レコード;
         }
       }
-      if (!this.提供情報レコード.提供診療情報レコード && !this.提供情報レコード.検査値データ等レコード) {
+      if (
+        !this.提供情報レコード.提供診療情報レコード &&
+        !this.提供情報レコード.検査値データ等レコード
+      ) {
         delete this.提供情報レコード;
       }
     }
   }
 
   selectDrugExclusive(groupId: number, drugId: number) {
-    this.RP剤情報グループ.forEach(g => {
+    this.RP剤情報グループ.forEach((g) => {
       if (g.id === groupId) {
         g.isSelected = true;
-        g.薬品情報グループ.forEach(d => {
+        g.薬品情報グループ.forEach((d) => {
           d.isSelected = d.id === drugId;
-        })
+        });
       } else {
         g.isSelected = false;
-        g.薬品情報グループ.forEach(d => d.isSelected = false);
+        g.薬品情報グループ.forEach((d) => (d.isSelected = false));
       }
-    })
+    });
   }
 
   clearAllSelected() {
-    this.RP剤情報グループ.forEach(g => {
+    this.RP剤情報グループ.forEach((g) => {
       g.isSelected = false;
-      g.薬品情報グループ.forEach(d => {
+      g.薬品情報グループ.forEach((d) => {
         d.isSelected = false;
-      })
-    })
+      });
+    });
   }
 
   hasKouhi(): boolean {
-    return !!(this.第一公費レコード || this.第二公費レコード || this.第三公費レコード ||
-      this.特殊公費レコード);
+    return !!(
+      this.第一公費レコード ||
+      this.第二公費レコード ||
+      this.第三公費レコード ||
+      this.特殊公費レコード
+    );
+  }
+
+  findRP剤情報ById(groupId: number): RP剤情報Edit | undefined {
+    for (let group of this.RP剤情報グループ) {
+      if (group.id === groupId) {
+        return group;
+      }
+    }
+    return undefined;
+  }
+
+  hasRP剤情報(groupId: number): boolean {
+    return this.findRP剤情報ById(groupId) !== undefined;
   }
 }

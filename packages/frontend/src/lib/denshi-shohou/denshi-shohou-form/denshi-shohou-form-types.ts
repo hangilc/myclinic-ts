@@ -1,4 +1,4 @@
-import type { PrescInfoData, RP剤情報, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, 剤形レコード, 用法レコード, 用法補足レコード, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 import type { Shohousen } from "@/lib/shohousen/parse-shohousen";
 import type { IyakuhinMaster, UsageMaster } from "myclinic-model";
 

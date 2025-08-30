@@ -1,9 +1,4 @@
-import type { PrescInfoData, RP剤情報, 用法レコード, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
-import type {
-  情報区分,
-  薬品コード種別,
-  力価フラグ,
-} from "@/lib/denshi-shohou/denshi-shohou";
+import type { RP剤情報, 用法レコード, 薬品レコード } from "@/lib/denshi-shohou/presc-info";
 import { cache } from "@/lib/cache";
 import { confirmDrugCode } from "@/lib/validate-presc-info";
 

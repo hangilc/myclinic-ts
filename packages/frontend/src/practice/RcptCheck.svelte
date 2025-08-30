@@ -10,7 +10,7 @@
   let shinryouYearMonth: string = defaultShinryouYearMonth();
   let patientTotal = 0;
   let current = 0;
-  let serial = 1;
+  // let serial = 1;
   let errors: { patient: Patient, checkErrors: CheckError[] }[] = [];
 
   function defaultShinryouYearMonth(): string {
@@ -40,7 +40,7 @@
     current = 0;
     patientTotal = visitsList.length;
     errors = [];
-    serial = 1;
+    // serial = 1;
     for(const visits of visitsList) {
       if( visits.length === 0 ){
         continue;
@@ -50,7 +50,7 @@
       const errs = await checkForRcpt(patientVisits);
       if( errs !== "ok" && errs !== "no-visit" ){
         errors = [...errors, { patient: patientVisits[0].patient, checkErrors: errs}];
-        const patient = patientVisits[0].patient;
+        // const patient = patientVisits[0].patient;
       }
     }
   }

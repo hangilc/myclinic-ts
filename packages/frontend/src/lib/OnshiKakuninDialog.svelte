@@ -3,17 +3,15 @@
   import type { OnshiResult } from "onshi-result";
   
   import OnshiKakuninFormItem from "./OnshiKakuninFormItem.svelte";
-  import { onshiDateToSqlDate } from "onshi-result/util";
   import type { Koukikourei, Patient, Shahokokuho } from "myclinic-model";
-  import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
+  import { onshiConfirm } from "./onshi-confirm";
   import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
   import {
     checkOnshiInconsistency,
   } from "./onshi-consistency";
   import api from "./api";
   import { OnshiPatientInconsistency } from "./onshi-patient-consistency";
-  import { FormatDate } from "myclinic-util";
-
+  
   export let destroy: () => void;
   export let hoken: Shahokokuho | Koukikourei;
   export let confirmDate: string;
@@ -111,10 +109,10 @@
     destroy();
   }
 
-  function formatOnshiDate(arg: string): string {
-    const sql = onshiDateToSqlDate(arg);
-    return FormatDate.f2(sql);
-  }
+  // function formatOnshiDate(arg: string): string {
+  //   const sql = onshiDateToSqlDate(arg);
+  //   return FormatDate.f2(sql);
+  // }
 
   async function doSetOnshiName() {
     if (updateOnshiNameData) {

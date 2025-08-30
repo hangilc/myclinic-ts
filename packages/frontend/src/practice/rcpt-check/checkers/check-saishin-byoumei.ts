@@ -1,4 +1,4 @@
-import type { Disease, VisitEx } from "myclinic-model";
+import type { VisitEx } from "myclinic-model";
 import type { CheckError } from "../check";
 import { isSaishinName } from "./helper";
 import api from "@/lib/api";

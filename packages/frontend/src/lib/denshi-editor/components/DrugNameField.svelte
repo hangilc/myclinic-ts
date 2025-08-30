@@ -10,6 +10,19 @@
   import api from "@/lib/api";
   import { tick } from "svelte";
   import SmallLink from "./workarea/SmallLink.svelte";
+  import {
+    createIyakuhinResultFromIppanmei,
+    createIyakuhinResultFromMaster,
+    createIyakuhinResultFromPrefab,
+    iyakuhinResultRep,
+    type SearchIyakuhinResult,
+  } from "./drug-name-field/drug-name-field-types";
+  import {
+    searchDrugPrefab,
+    type DrugPrefab,
+    type PrescOfPrefab,
+  } from "@/lib/drug-prefab";
+  import { cache } from "@/lib/cache";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -19,9 +32,10 @@
     await tick();
     inputElement?.focus();
   };
+  export let onPrefab: (prefab: PrescOfPrefab) => void;
   let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
-  let searchIyakuhinResult: IyakuhinMaster[] = [];
+  let searchIyakuhinResult: SearchIyakuhinResult[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
   function doRepClick() {
@@ -30,11 +44,50 @@
     focus();
   }
 
+  async function findIyakuhinMaster(
+    iyakuhincode: number,
+  ): Promise<IyakuhinMaster | undefined> {
+    try {
+      return await api.getIyakuhinMaster(iyakuhincode, at);
+    } catch {
+      return undefined;
+    }
+  }
+
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
+      // const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
-        searchIyakuhinResult = await api.searchIyakuhinMaster(t, at);
+        searchIyakuhinResult = [];
+        const drugPrefab = await cache.getDrugPrefabList();
+        const prefabs = searchDrugPrefab(drugPrefab, t);
+        const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
+          await Promise.all(
+            prefabs.map(async (pre) => {
+              const master = await findIyakuhinMaster(
+                parseInt(pre.presc.薬品情報グループ[0].薬品レコード.薬品コード),
+              );
+              return [pre, master];
+            }),
+          );
+        prefabMasters.forEach(([fab, m]) => {
+          if (m) {
+            searchIyakuhinResult.push(createIyakuhinResultFromPrefab(fab, m));
+          }
+        });
+        if (t.startsWith("【般】")) {
+          const rs = await api.listIyakuhinMasterByIppanmei(t, at);
+          if (rs.length > 0) {
+            doIyakuhinMasterSelect(createIyakuhinResultFromIppanmei(rs[0]));
+          }
+        } else {
+          const msResult = await api.searchIyakuhinMaster(t, at);
+          msResult.forEach((m) =>
+            searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
+          );
+        }
+        searchIyakuhinResult = searchIyakuhinResult;
       } else if (drug.薬品レコード.情報区分 === "医療材料") {
         searchKizaiResult = await api.searchKizaiMaster(t, at);
       }
@@ -53,19 +106,53 @@
     isEditing = false;
   }
 
-  function doIyakuhinMasterSelect(m: IyakuhinMaster) {
-    Object.assign(drug.薬品レコード, {
-      薬品コード種別: "レセプト電算処理システム用コード",
-      薬品コード: m.iyakuhincode.toString(),
-      薬品名称: m.name,
-      単位名: m.unit,
-    });
-    drug.ippanmei = m.ippanmei;
-    drug.ippanmeicode = m.ippanmeicode?.toString();
-    searchText = "";
-    searchIyakuhinResult = [];
-    isEditing = false;
-    onFieldChange();
+  function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
+    if (item.kind === "master") {
+      const m = item.master;
+      Object.assign(drug.薬品レコード, {
+        薬品コード種別: "レセプト電算処理システム用コード",
+        薬品コード: m.iyakuhincode.toString(),
+        薬品名称: m.name,
+        単位名: m.unit,
+      });
+      drug.ippanmei = m.ippanmei;
+      drug.ippanmeicode = m.ippanmeicode;
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onFieldChange();
+    } else if (item.kind === "prefab") {
+      Object.assign(
+        drug.薬品レコード,
+        item.prefab.presc.薬品情報グループ[0].薬品レコード,
+        {
+          isEditing情報区分: false,
+          isEditing薬品コード: false,
+          isEditing分量: false,
+        }
+      );
+      drug.ippanmei = item.master.ippanmei;
+      drug.ippanmeicode = item.master.ippanmeicode;
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onPrefab(item.prefab.presc);
+      onFieldChange();
+    } else if (item.kind === "ippanmei") {
+      const m = item.master;
+      Object.assign(drug.薬品レコード, {
+        薬品コード種別: "一般名コード",
+        薬品コード: m.ippanmeicode,
+        薬品名称: m.ippanmei,
+        単位名: m.unit,
+      });
+      drug.ippanmei = m.ippanmei;
+      drug.ippanmeicode = m.ippanmeicode;
+      searchText = "";
+      searchIyakuhinResult = [];
+      isEditing = false;
+      onFieldChange();
+    }
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {
@@ -86,6 +173,7 @@
   function convertToIppanmei() {
     drug.convertToIppanmei();
     isEditing = false;
+    drug = drug;
     onFieldChange();
   }
 </script>
@@ -122,19 +210,22 @@
     {/if}
     {#if drug.薬品レコード.情報区分 === "医薬品" && searchIyakuhinResult.length > 0}
       <div class="search-result">
-        {#each searchIyakuhinResult as master (master.iyakuhincode)}
+        {#each searchIyakuhinResult as item (item.id)}
           <div
-            class="master-item"
-            on:click={() => doIyakuhinMasterSelect(master)}
+            class="search-result-item"
+            on:click={() => doIyakuhinMasterSelect(item)}
           >
-            {master.name}
+            {iyakuhinResultRep(item)}
           </div>
         {/each}
       </div>
     {:else if drug.薬品レコード.情報区分 === "医療材料" && searchKizaiResult.length > 0}
       <div class="search-result">
         {#each searchKizaiResult as master (master.kizaicode)}
-          <div class="master-item" on:click={() => doKizaiMasterSelect(master)}>
+          <div
+            class="search-result-item"
+            on:click={() => doKizaiMasterSelect(master)}
+          >
             {master.name}
           </div>
         {/each}
@@ -167,11 +258,11 @@
     border: 1px solid gray;
   }
 
-  .master-item {
+  .search-result-item {
     cursor: pointer;
   }
 
-  .master-item:hover {
+  .search-result-item:hover {
     background-color: #eee;
   }
 </style>

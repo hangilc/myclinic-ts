@@ -1,7 +1,7 @@
-import type { RezeptComment, Shinryou } from "myclinic-model";
+import type { RezeptComment } from "myclinic-model";
 import { 診療識別コードvalues } from "myclinic-rezept/codes";
 import { jsonToMemo, memoToJson } from "@/lib/memo";
-import { asDefined, asJson, asNotEmptyStr, asObject, asPositiveInt, asTypedArray, asUndefined, combineErrors, error, ok, orVerifier, strAsJson, verified, Verifier } from "./verify";
+import { asDefined, asNotEmptyStr, asObject, asPositiveInt, asTypedArray, asUndefined, combineErrors, error, ok, orVerifier, verified, Verifier } from "./verify";
 
 export const rezeptCommentVerifier = verifierOfRezeptComment();
 const memoToJsonVerifier = memoToJson();

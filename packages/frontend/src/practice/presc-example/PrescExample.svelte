@@ -1,78 +1,80 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import EditArea from "./EditArea.svelte";
-  import { RP剤情報Edit } from "@/lib/denshi-editor/denshi-edit";
-  import {
-    createPrescExampleData,
-    type PrescExampleData,
-  } from "./presc-example-data";
+  import { newDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
+  import EditPrefab from "@/lib/denshi-editor/components/EditPrefab.svelte";
+  import { DateWrapper } from "myclinic-util";
+  import { KouhiSet } from "@/lib/denshi-editor/kouhi-set";
   import { cache } from "@/lib/cache";
-  import { createBlankRP剤情報 } from "./presc-example-helper";
   
   export let isVisible: boolean;
-  let list: PrescExampleData[] = [];
-
+  let list: DrugPrefab[] = [];
   let editArea: HTMLElement;
 
-  load();
+  initList();
 
-  async function load() {
-    list = (await cache.getPrescExample()).map(createPrescExampleData);
+  async function initList() {
+    list = await cache.getDrugPrefabList();
   }
 
-  function doSelect(data: PrescExampleData, drugIndex: number) {
-    const groupEdit = RP剤情報Edit.fromObject(data.data);
-    const drugId = groupEdit.薬品情報グループ[drugIndex].id;
-    const e: EditArea = new EditArea({
+  function doSelect(value: DrugPrefab) {
+    const at = DateWrapper.fromDate(new Date()).asSqlDate();
+    const d: EditPrefab = new EditPrefab({
       target: editArea,
       props: {
-        destroy: () => e.$destroy(),
-        group: groupEdit,
-        drugId,
-        onChange: () => {
-          if (groupEdit.薬品情報グループ.length === 0) {
-            list = list.filter((e) => e.id !== data.id);
-          } else {
-            data.data = Object.assign({}, groupEdit.toObject(), { comment: data.data.comment });
-            list = list;
-          }
+        prefab: value,
+        at: at,
+        kouhiSet: KouhiSet.createEmpty(),
+        onCancel: function (): void {
+          d.$destroy();
         },
-        onCancel: () => {},
-      },
-    });
+        onEnter: function (): void {
+          d.$destroy();
+          list = list;
+        },
+        onDelete: function(): void {
+          d.$destroy();
+          list = list.filter(p => p.id !== value.id );
+          list = list;
+        }
+      }
+    })
+  }
+
+  function doNew() {
+    const prefab = newDrugPrefab();
+    const at = DateWrapper.fromDate(new Date()).asSqlDate();
+    const d: EditPrefab = new EditPrefab({
+      target: editArea,
+      props: {
+        prefab: prefab,
+        at: at,
+        kouhiSet: KouhiSet.createEmpty(),
+        onCancel: function (): void {
+          d.$destroy();
+        },
+        onEnter: function (): void {
+          d.$destroy();
+          list.push(prefab);
+          list = list;
+        },
+        onDelete: function(): void {
+          d.$destroy();
+        }
+      }
+    })
   }
 
   async function doSave() {
-    await cache.setPrescExample(list.map((e) => e.data));
+    await cache.setDrugPrefabList(list);
+    alert("drug-prefab-list として保存しました。");
   }
 
-  function doAdd() {
-    const group = RP剤情報Edit.fromObject(createBlankRP剤情報());
-    const f: EditArea = new EditArea({
-      target: editArea,
-      props: {
-        destroy: () => f.$destroy(),
-        group: group,
-        drugId: group.薬品情報グループ[0].id,
-        onChange: () => {
-          if( group.薬品情報グループ.length === 0 ){
-            return;
-          }
-          let ex = createPrescExampleData(group);
-          list.push(ex);
-          list = list;
-        },
-        onCancel: () => {
-          f.$destroy();
-        }
-      },
-    });
+  function doClose() {
+    isVisible = false;
   }
 
-  async function doCancel() {
-    await load();
-  }
+
 </script>
 
 {#if isVisible}
@@ -80,9 +82,9 @@
   <div class="top">
     <div>
       <div class="commands">
-        <button on:click={doAdd}>新規</button>
+        <button on:click={doNew}>新規</button>
         <button on:click={doSave}>保存</button>
-        <button on:click={doCancel}>キャンセル</button>
+        <button on:click={doClose}>閉じる</button>
       </div>
       <SearchArea onSelect={doSelect} {list} />
     </div>

@@ -1,6 +1,6 @@
 import type { Kubun, ShinryoumeisaishoData } from "@/lib/drawer/forms/shinryoumeisaisho/shinryoumeisaisho-data";
-import { calcRezeptMeisai, groupMeisaiItemsBySection, visitToMeisaiItems } from "@/lib/rezept-meisai";
-import type { ClinicInfo, Patient, ShinryouEx, VisitEx } from "myclinic-model";
+import { groupMeisaiItemsBySection, visitToMeisaiItems } from "@/lib/rezept-meisai";
+import type { ClinicInfo, VisitEx } from "myclinic-model";
 
 export function createShinryoumeisaishoData(visit: VisitEx, clinicInfo: ClinicInfo): ShinryoumeisaishoData {
   const at = visit.visitedAt.substring(0, 10);

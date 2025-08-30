@@ -3,7 +3,7 @@
 import { connect, disconnect } from "@/lib/twilio";
 
   let phoneNumberValue: string = "";
-  let defaultInput: HTMLInputElement;
+  // let defaultInput: HTMLInputElement;
 
   function getPhoneNumber(): string | undefined {
     let n = phoneNumberValue.trim();

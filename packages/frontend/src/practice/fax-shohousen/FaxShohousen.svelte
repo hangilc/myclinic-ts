@@ -9,7 +9,7 @@
     type PharmaData,
     mkLetterText,
   } from "./fax-shohousen-helper";
-  import api, { getBackend, getBase } from "@/lib/api";
+  import api, { getBackend } from "@/lib/api";
   import { ClinicInfo, dateToSqlDate } from "myclinic-model";
   import type { Op } from "@/lib/drawer/compiler/op";
   import * as c from "@/lib/drawer/compiler/compiler";
@@ -119,7 +119,7 @@
     c.createPen(ctx, "default", 0, 0, 0, 0.2);
     c.setPen(ctx, "default");
     drawSeal8x3Frames(ctx);
-    const ops = c.getOps(ctx);
+    // const ops = c.getOps(ctx);
     const filename = "faxed-shohousen-pharm-addr-frames.pdf";
     await api.createPdfFile(c.getOps(ctx), "A4", filename);
     window.open(`${getBackend()}/portal-tmp/${filename}`, "_blank");

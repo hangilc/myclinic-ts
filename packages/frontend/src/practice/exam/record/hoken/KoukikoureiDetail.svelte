@@ -1,8 +1,7 @@
 <script lang="ts">
   
   import { toZenkaku } from "@/lib/zenkaku";
-  import { Koukikourei, dateToSqlDate } from "myclinic-model";
-  import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
+  import { Koukikourei } from "myclinic-model";
   import { FormatDate } from "myclinic-util";
 
   export let koukikourei: Koukikourei;

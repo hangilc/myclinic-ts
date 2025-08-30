@@ -1,5 +1,5 @@
 import type { DrawerContext } from "./context";
-import { FontWeightBold, FontWeightDontCare, FontWeightNormal } from "./font-weight";
+import { FontWeightBold, FontWeightDontCare } from "./font-weight";
 import type { Op } from "./op";
 import * as fsm from "./font-size-manager";
 import * as b from "./box";
@@ -392,7 +392,7 @@ export class DrawTextsInBoxesOpt {
   leading: number;
   valign: VAlign;
 
-  constructor(arg: DrawTextsInBoxesOptArg, ctx: DrawerContext) {
+  constructor(arg: DrawTextsInBoxesOptArg, _ctx: DrawerContext) {
     this.leading = arg.leading ?? 0;
     this.valign = arg.valign ?? "top";
   }
@@ -470,17 +470,17 @@ interface ParagraphOptArg {
   leading?: number;
 }
 
-class ParagraphOpt {
-  halign: HAlign;
-  valign: VAlign;
-  leading: number;
+// class ParagraphOpt {
+//   halign: HAlign;
+//   valign: VAlign;
+//   leading: number;
 
-  constructor(arg: ParagraphOptArg) {
-    this.halign = arg.halign ?? "left";
-    this.valign = arg.valign ?? "top";
-    this.leading = arg.leading ?? 0;
-  }
-}
+//   constructor(arg: ParagraphOptArg) {
+//     this.halign = arg.halign ?? "left";
+//     this.valign = arg.valign ?? "top";
+//     this.leading = arg.leading ?? 0;
+//   }
+// }
 
 export function paragraph(ctx: DrawerContext, content: string, box: Box, optArg: ParagraphOptArg = {}) {
   const texts: string[] = content.split("\n");
@@ -763,7 +763,7 @@ export function calcCompositeWidths(ctx: DrawerContext, comps: CompositeItem[], 
     let expanders = 0;
     let pos = 0;
     const cs = comps.map(comp => {
-      function setWidth(c: CompositeItem, w: number): (CompositeItem & { _w: number }) {
+      function setWidth(_c: CompositeItem, w: number): (CompositeItem & { _w: number }) {
         pos += w;
         return Object.assign({}, comp, { _w: w });
       }

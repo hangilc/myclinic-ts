@@ -1,5 +1,4 @@
 <script lang="ts">
-  import type { Text, Visit } from "myclinic-model";
   import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
   import { type PrevSearchItem } from "./prev-search-item";
   import PrevSearchForm from "./PrevSearchForm.svelte";

@@ -35,7 +35,7 @@
   import ChoosePatientDialog from "./ChoosePatientDialog.svelte";
   import RegisterOnshiShahokokuhoDialog from "./RegisterOnshiShahokokuhoDialog.svelte";
   import RegisterOnshiKoukikoureiDialog from "./RegisterOnshiKoukikoureiDialog.svelte";
-  import { validFromOf } from "./util";
+  // import { validFromOf } from "./util";
   import KouhiDialog from "@/cashier/patient-dialog/edit/KouhiDialog.svelte";
   import { convertHankakuKatakanaToZenkakuHiragana } from "./zenkaku";
   import type { EventEmitter } from "./event-emitter";
@@ -139,7 +139,7 @@
     koukiOpt: Koukikourei | undefined,
     kouhiList: Kouhi[]
   ) {
-    const validFrom = validFromOf(hoken);
+    // const validFrom = validFromOf(hoken);
     let errMsg: string = "";
     const prev: Shahokokuho | Koukikourei | undefined = shahoOpt || koukiOpt;
     if( prev !== undefined ){

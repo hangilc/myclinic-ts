@@ -1,6 +1,6 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import type { Op } from "@/lib/drawer/compiler/op";
+  // import type { Op } from "@/lib/drawer/compiler/op";
   import { drawShujii } from "@/lib/drawer/forms/shujii/shujii-drawer";
   import SearchPatientDialog from "@/lib/SearchPatientDialog.svelte";
   import type { Patient } from "myclinic-model";

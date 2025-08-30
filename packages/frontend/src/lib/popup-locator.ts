@@ -1,4 +1,3 @@
-import { ElderlyRecipientCertificateInfo } from "onshi-result/ElderlyRecipientCertificateInfo";
 import type { ViewportCoord } from "./viewport-coord";
 
 export function locatePulldown(

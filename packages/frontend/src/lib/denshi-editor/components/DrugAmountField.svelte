@@ -7,23 +7,25 @@
   import CancelLink from "../icons/CancelLink.svelte";
   import type { 薬品情報Edit } from "../denshi-edit";
   import { toHankaku } from "@/lib/zenkaku";
+  import type { 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
   export let onFieldChange: () => void;
-  let inputText: string = inputValue();
+  let inputText: string = "";
+  $: updateInputText(drug);
   let inputElement: HTMLInputElement | undefined = undefined;
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
   };
 
-  function inputValue(): string {
-    return toHankaku(drug.薬品レコード.分量);
+  function updateInputText(drug: 薬品情報) {
+    inputText = toHankaku(drug.薬品レコード.分量);
   }
 
   function doRepClick() {
-    inputText = inputValue();
+    updateInputText(drug);
     isEditing = true;
     focus();
   }
@@ -40,6 +42,7 @@
     }
     drug.薬品レコード.分量 = n.toString();
     isEditing = false;
+    drug = drug;
     onFieldChange();
   }
 

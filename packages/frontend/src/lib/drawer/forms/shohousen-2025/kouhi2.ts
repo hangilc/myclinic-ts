@@ -2,16 +2,10 @@ import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
 import * as x from "./xsplit";
-import * as cr from "./col-renderer";
-import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { drawShimei } from "./kanja/shimei";
-import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
-import { drawKubun } from "./kanja/kubun";
-import { colOfElements, drawElement, fixedElement, stackedTexts, textElement } from "./element";
-import { black, brackettedElement, eightDigits, flowTextIn, lightRed, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
-import { DateWrapper, pad } from "myclinic-util";
+import { drawElement } from "./element";
+import { eightDigits, nenMonthDayElement } from "./helper";
 
 export function drawKouhi2(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
   c.frame(ctx, box);

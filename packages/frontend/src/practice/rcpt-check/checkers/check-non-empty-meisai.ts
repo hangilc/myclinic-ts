@@ -1,6 +1,5 @@
 import { type VisitEx } from "myclinic-model";
 import type { CheckError } from "../check";
-import api from "@/lib/api";
 
 export async function checkNonEmptyMeisai(visits: VisitEx[]): Promise<CheckError[]> {
   const checkErrors: CheckError[] = [];

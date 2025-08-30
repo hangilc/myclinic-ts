@@ -9,7 +9,7 @@
     dateToSqlDateTime,
     VisitEx,
   } from "myclinic-model";
-  import { hokenRep } from "@/lib/hoken-rep";
+  // import { hokenRep } from "@/lib/hoken-rep";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
   import type { MeisaiWrapper } from "@/lib/rezept-meisai";

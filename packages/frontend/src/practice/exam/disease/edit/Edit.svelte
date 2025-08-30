@@ -1,6 +1,5 @@
 <script lang="ts">
-  import SelectItem from "@/lib/SelectItem.svelte";
-  import type { DiseaseData, DiseaseExample } from "myclinic-model";
+  import type { DiseaseData } from "myclinic-model";
   import { writable, type Writable } from "svelte/store";
   import { endDateRep } from "../end-date-rep";
   import { startDateRep } from "../start-date-rep";
@@ -10,8 +9,7 @@
   } from "./edit-form-values";
   import EditForm from "./EditForm.svelte";
   import type { DiseaseEnv } from "../disease-env";
-  import { cache } from "@/lib/cache";
-
+  
   export let env: Writable<DiseaseEnv | undefined>;
   export let onDelete: (diseaseId: number) => void = (_) => {};
   export let onUpdate: (updated: DiseaseData) => void = (_) => {};

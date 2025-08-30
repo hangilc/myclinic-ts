@@ -1,7 +1,6 @@
-import { Koukikourei, Patient, Shahokokuho, } from "myclinic-model";
+import { Koukikourei, Shahokokuho, } from "myclinic-model";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { toHankaku } from "./zenkaku";
-import type { ShahokokuhoInterface } from "myclinic-model/model";
 
 export namespace OnshiHokenInconsistency {
   export class Inconsistency {

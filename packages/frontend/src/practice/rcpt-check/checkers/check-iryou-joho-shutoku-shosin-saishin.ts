@@ -1,4 +1,3 @@
-import api from "@/lib/api";
 import type { VisitEx } from "myclinic-model";
 import type { CheckError } from "../check";
 

@@ -192,7 +192,7 @@ function reorderBills(bills: [number, Payer[]][]): [number, Payer[]][] {
 }
 
 export function reorderPayers(payers: Payer[]): Payer[] {
-  const items: { payer: Payer, weight: number }[] = payers.map((payer, i) => {
+  const items: { payer: Payer, weight: number }[] = payers.map((payer, _i) => {
     const houbetsu = payer.getHoubetsuBangou();
     if (houbetsu !== undefined) {
       let w = getKouhiOrderWeight(houbetsu);
@@ -350,7 +350,7 @@ export function mkKouhiNanbyou(gendogaku: number): Payer {
 }
 
 export function mkKouhiFutanNashi(kind: string, houbetsuBangou: number | undefined): Payer {
-  return mkPayer(kind, houbetsuBangou, (bill: number, ctx: PaymentContext) => {
+  return mkPayer(kind, houbetsuBangou, (bill: number, _ctx: PaymentContext) => {
     // return { payment: bill, gendogakuReached: true }; // modified 2025-05-30
     return { payment: bill, gendogakuReached: false };
   })
@@ -370,7 +370,7 @@ export function mkKouhiMaruaoFutanNash(): Payer {
 
 // マル都・都大気汚染医療費助成
 export function mkMaruToTaikiosen(gendogaku: number): Payer {
-  return mkPayer("taikiosen", 82, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("taikiosen", 82, (bill: number, _ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: gendogaku !== 0 };
     } else {
@@ -387,7 +387,7 @@ export function mkMaruToHibakushaNoKo(): Payer {
 }
 
 export function mkKouhiMarucho(gendogaku: number): Payer {
-  return mkPayer("marucho", undefined, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("marucho", undefined, (bill: number, _ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
@@ -426,7 +426,7 @@ export function mkKouhiSeishinTsuuin(): Payer {
 
 // 肝炎治療特別促進事業
 export function mkKouhiHepatitis(gendogaku: number): Payer {
-  return mkPayer("hepatitis", 38, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("hepatitis", 38, (bill: number, _ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
@@ -437,14 +437,14 @@ export function mkKouhiHepatitis(gendogaku: number): Payer {
 
 // １類・２類感染症
 export function mkKouhiGroup1Infection(): Payer {
-  return mkPayer("group1-infection", 28, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("group1-infection", 28, (bill: number, _ctx: PaymentContext) => {
     return { payment: bill };
   })
 }
 
 // 小児慢性
 export function mkKouhiShouniMansei(gendogaku: number): Payer {
-  return mkPayer("shouni-mansei", 52, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("shouni-mansei", 52, (bill: number, _ctx: PaymentContext) => {
     if (bill > gendogaku) {
       return { payment: bill - gendogaku, gendogakuReached: true };
     } else {
@@ -488,7 +488,7 @@ export function mkMaruShoFutanAri(gendogaku: number): Payer {
 
 // 生活保護
 export function mkSeikatsuHogo(): Payer {
-  return mkPayer("seikatsuhogo", 12, (bill: number, ctx: PaymentContext) => {
+  return mkPayer("seikatsuhogo", 12, (bill: number, _ctx: PaymentContext) => {
     return { payment: bill };
   })
 }
