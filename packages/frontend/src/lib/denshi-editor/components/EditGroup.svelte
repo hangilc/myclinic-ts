@@ -124,6 +124,7 @@
       drug.ippanmeicode = pre.ippanmeicode;
       drug.isEditing不均等レコード = pre.isEditing不均等レコード;
       drug.isSelected = pre.isSelected;
+      drug = drug;
       if (
         group.薬品情報グループ.length === 1) {
         Object.assign(group, {
