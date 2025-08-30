@@ -18,10 +18,13 @@
       {drugPrefab.presc.用法レコード.用法名称}
       {daysTimesDisp(drugPrefab.presc)}
       {#if drugPrefab.alias.length > 0}
-      【別名】{drugPrefab.alias.join(" ")}
+        【別名】{drugPrefab.alias.join(" ")}
       {/if}
       {#if drugPrefab.tag.length > 0}
-      【タグ】{drugPrefab.tag.join(" ")}
+        【タグ】{drugPrefab.tag.join(" ")}
+      {/if}
+      {#if drugPrefab.comment !== ""}
+        【コメント】{drugPrefab.comment}
       {/if}
     </div>
   </div>

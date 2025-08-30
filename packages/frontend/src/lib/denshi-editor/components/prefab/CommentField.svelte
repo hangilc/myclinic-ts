@@ -6,10 +6,10 @@
   import SubmitLink from "../../icons/SubmitLink.svelte";
   import CancelLink from "../../icons/CancelLink.svelte";
   
-  export let tag: string[];
+  export let comment: string;
   export let onFieldChange: () => void;
   let inputText: string = "";
-  $: updateInputText(tag);
+  $: updateInputText(comment);
   let inputElement: HTMLInputElement | undefined = undefined;
   let isEditing = false;
 
@@ -18,8 +18,8 @@
     inputElement?.focus();
   };
 
-  function updateInputText(value: string[]) {
-    inputText = value.join(" ");
+  function updateInputText(value: string) {
+    inputText = value.trim();
   }
 
   function doRepClick() {
@@ -28,7 +28,7 @@
   }
 
   function doEnter() {
-    tag = inputText.split(/[ 　,、|｜:：]+/).filter(t => t.trim() !== "");
+    comment = inputText.trim();
     isEditing = false;
     onFieldChange();
   }
@@ -37,23 +37,23 @@
     isEditing = false;
   }
 
-  function rep(tag: string[]): string {
-    if( tag.length === 0 ){
+  function rep(alias: string): string {
+    if( alias.length === 0 ){
       return "（なし）";
     } else {
-      return tag.join(" ");
+      return alias;
     }
   }
 </script>
 
   <Field>
-    <FieldTitle>タグ</FieldTitle>
+    <FieldTitle>コメント</FieldTitle>
     <FieldForm>
       {#if !isEditing}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="rep" on:click={doRepClick}>
-          {rep(tag)}
+          {rep(comment)}
         </div>
       {:else}
         <form on:submit|preventDefault={doEnter} class="with-icons">

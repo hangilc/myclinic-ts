@@ -18,11 +18,11 @@
     type SearchIyakuhinResult,
   } from "./drug-name-field/drug-name-field-types";
   import {
-    exapleDrugPrefab,
     searchDrugPrefab,
     type DrugPrefab,
     type PrescOfPrefab,
   } from "@/lib/drug-prefab";
+  import { cache } from "@/lib/cache";
 
   export let drug: 薬品情報Edit;
   export let isEditing: boolean;
@@ -60,7 +60,7 @@
       // const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
-        const drugPrefab = await exapleDrugPrefab();
+        const drugPrefab = await cache.getDrugPrefabList();
         const prefabs = searchDrugPrefab(drugPrefab, t);
         const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(

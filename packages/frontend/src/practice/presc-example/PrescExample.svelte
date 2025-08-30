@@ -1,10 +1,11 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import { exapleDrugPrefab, newDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
+  import { newDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import EditPrefab from "@/lib/denshi-editor/components/EditPrefab.svelte";
   import { DateWrapper } from "myclinic-util";
   import { KouhiSet } from "@/lib/denshi-editor/kouhi-set";
+  import { cache } from "@/lib/cache";
   
   export let isVisible: boolean;
   let list: DrugPrefab[] = [];
@@ -13,7 +14,7 @@
   initList();
 
   async function initList() {
-    list = await exapleDrugPrefab();
+    list = await cache.getDrugPrefabList();
   }
 
   function doSelect(value: DrugPrefab) {
