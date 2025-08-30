@@ -380,8 +380,9 @@
       target: wa,
       props: {
         destroy: () => workareaService.clear(),
-        onEnter: (value: RP剤情報Edit[]) => {
-          data.RP剤情報グループ.push(...value);
+        onEnter: (value: RP剤情報) => {
+          const edit = RP剤情報Edit.fromObject(value);
+          data.RP剤情報グループ.push(edit);
           data = data;
         },
       },

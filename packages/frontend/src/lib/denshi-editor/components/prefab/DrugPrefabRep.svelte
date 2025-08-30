@@ -7,11 +7,11 @@
   export let onSelect: (value: DrugPrefab) => void;
 </script>
 
-<div class="group">
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<div class="group" on:click={() => onSelect(drugPrefab)}>
   <div>
-    <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <div class="drug-rep" on:click={() => onSelect(drugPrefab)}>
+    <div class="drug-rep">
       <span>{drugRep(drugPrefab.presc.薬品情報グループ[0])}</span>
     </div>
     <div class="usage-rep">

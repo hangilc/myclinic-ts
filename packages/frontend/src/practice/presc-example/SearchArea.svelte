@@ -1,7 +1,7 @@
 <script lang="ts">
   import Link from "../ui/Link.svelte";
   import { searchDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
-  import DrugPrefabRep from "./components/DrugPrefabRep.svelte";
+  import DrugPrefabRep from "../../lib/denshi-editor/components/prefab/DrugPrefabRep.svelte";
 
   export let onSelect: (data: DrugPrefab) => void;
   export let list: DrugPrefab[];
