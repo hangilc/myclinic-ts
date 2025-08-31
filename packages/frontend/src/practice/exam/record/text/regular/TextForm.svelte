@@ -18,9 +18,7 @@
     isOnlineShohousen,
   } from "@/lib/shohousen-text-helper";
   import { cache } from "@/lib/cache";
-  import {
-    checkForSenpatsu,
-  } from "@/lib/parse-shohou";
+  import { checkForSenpatsu } from "@/lib/parse-shohou";
   import { parseShohou } from "@/lib/parse-shohou2";
   import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
   import { formatHokenshaBangou } from "myclinic-util";
@@ -44,7 +42,8 @@
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
-  
+  import { applyPrescExample } from "./shohou-conv";
+
   export let onClose: () => void;
   export let text: m.Text;
   export let index: number | undefined = undefined;
@@ -691,7 +690,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    // data = await resolvePrescInfoByMapAt(data, at);
+    applyPrescExample(data);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
