@@ -690,7 +690,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    applyPrescExample(data);
+    await applyPrescExample(data);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {

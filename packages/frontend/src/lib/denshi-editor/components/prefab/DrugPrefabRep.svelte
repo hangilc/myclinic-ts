@@ -31,7 +31,7 @@
 </div>
 
 <style>
-  .drug-rep {
+  .group {
     cursor: pointer;
   }
 </style>

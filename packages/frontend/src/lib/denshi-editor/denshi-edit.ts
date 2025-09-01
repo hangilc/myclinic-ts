@@ -710,9 +710,9 @@ export class RP剤情報Edit implements RP剤情報 {
         用法補足レコード: obj.用法補足レコード?.map((record) =>
           用法補足レコードEdit.fromObject(record)
         ),
-        薬品情報グループ: obj.薬品情報グループ.map((info) =>
-          薬品情報Edit.fromObject(info)
-        ),
+        薬品情報グループ: obj.薬品情報グループ.map((info) =>{
+          return 薬品情報Edit.fromObject(info)
+      }),
       },
       { id: nextId(), isSelected: false }
     );
