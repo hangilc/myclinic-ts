@@ -28,6 +28,8 @@ let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
 let appointsTemplate: AppointsTemplate | undefined = undefined;
 let drugPrefabList: DrugPrefab[] | undefined = undefined;
+let drugNameConv: Record<string, string> | undefined = undefined;
+let drugUsageConv: Record<string, string> | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -251,5 +253,31 @@ export const cache = {
   async setDrugPrefabList(value: DrugPrefab[]): Promise<void> {
     drugPrefabList = value;
     await api.setConfig("drug-prefab-list", value);
+  },
+
+  async getDrugNameConv(): Promise<Record<string, string>> {
+    if (drugNameConv === undefined) {
+      let value: Record<string, string> = await api.getConfig("drug-name-conv");
+      drugNameConv = value;
+    }
+    return drugNameConv;
+  },
+
+  async setDrugNameConv(value: Record<string, string>): Promise<void> {
+    drugNameConv = value;
+    await api.setConfig("drug-name-conv", value);
+  },
+
+  async getDrugUsageConv(): Promise<Record<string, string>> {
+    if (drugUsageConv === undefined) {
+      let value: Record<string, string> = await api.getConfig("drug-usage-conv");
+      drugUsageConv = value;
+    }
+    return drugUsageConv;
+  },
+
+  async setDrugUsageConv(value: Record<string, string>): Promise<void> {
+    drugUsageConv = value;
+    await api.setConfig("drug-usage-conv", value);
   },
 };

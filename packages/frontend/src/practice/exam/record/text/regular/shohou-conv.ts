@@ -1,14 +1,33 @@
 import { cache } from "@/lib/cache";
-import type { PrescInfoData, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type { PrescInfoData, RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 import type { DrugPrefab } from "@/lib/drug-prefab";
 
-export async function applyPrescExample(data: PrescInfoData) {
-  const list: DrugPrefab[] = await cache.getDrugPrefabList();
+export async function applyPrescExample(list: DrugPrefab[], data: PrescInfoData) {
   for (let group of data.RP剤情報グループ) {
     for (let drug of group.薬品情報グループ) {
       applyDrug(list, drug);
     }
+    applyGroup(list, group);
   }
+}
+
+function applyGroup(list: DrugPrefab[], group: RP剤情報) {
+  if( group.用法レコード.用法コード === "" ){
+    let code = findUsageCodeByName(list, group.用法レコード.用法名称);
+    if( code !== undefined ){
+      group.用法レコード.用法コード = code;
+      return;
+    }
+  }
+}
+
+function findUsageCodeByName(list: DrugPrefab[], name: string): string | undefined {
+  for(let pre of list){
+    if( pre.presc.用法レコード.用法名称 === name ){
+      return pre.presc.用法レコード.用法コード;
+    }
+  }
+  return undefined;
 }
 
 function applyDrug(list: DrugPrefab[], drug: 薬品情報) {

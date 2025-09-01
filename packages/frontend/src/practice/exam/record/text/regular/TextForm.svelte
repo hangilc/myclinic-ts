@@ -680,6 +680,32 @@
     });
   }
 
+  function applyDrugNameConv(convMap: Record<string, string>, data: PrescInfoData) {
+    for(let group of data.RP剤情報グループ){
+      for(let drug of group.薬品情報グループ) {
+        if( drug.薬品レコード.薬品コード !== "" ){
+          continue;
+        }
+        const bind = convMap[drug.薬品レコード.薬品名称];
+        if( bind ){
+          drug.薬品レコード.薬品名称 = bind;
+        }
+      }
+    }
+  }
+
+  function applyDrugUsageConv(convMap: Record<string, string>, data: PrescInfoData) {
+    for(let group of data.RP剤情報グループ){
+      if( group.用法レコード.用法コード !== "" ){
+        continue;
+      }
+      const bind = convMap[group.用法レコード.用法名称];
+      if( bind ){
+        group.用法レコード.用法名称 = bind;
+      }
+    }
+  }
+
   async function doConvTextToDenshi() {
     onClose();
     let visit = await api.getVisit(text.visitId);
@@ -690,7 +716,10 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    await applyPrescExample(data);
+    applyDrugNameConv(await cache.getDrugNameConv(), data);
+    applyDrugUsageConv(await cache.getDrugUsageConv(), data);
+    applyPrescExample(await cache.getDrugPrefabList(), data);
+    console.log("data", data, await cache.getDrugUsageConv());
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
