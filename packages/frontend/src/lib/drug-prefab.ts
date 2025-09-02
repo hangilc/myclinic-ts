@@ -25,11 +25,15 @@ export interface DrugPrefab {
   comment: string;
 }
 
-export function newDrugPrefab(): DrugPrefab {
+export function emptyDrugPrefab(): DrugPrefab {
   const group = createEmptyRP剤情報();
   const drug = createEmpty薬品情報();
   group.薬品情報グループ.push(drug);
   const presc = convertRP剤情報ToPrescOfPrefab(group);
+  return createDrugPrefab(presc);
+}
+
+export function createDrugPrefab(presc: PrescOfPrefab): DrugPrefab {
   return {
     id: uuidv4(),
     presc,
@@ -150,7 +154,7 @@ export class PrescOfPrefabEdit extends RP剤情報Edit {
   }
 
   toPrescOfPrefab(): PrescOfPrefab {
-    const obj = super.toPrescOfPrefab();
+    const obj = super.toObject();
     return convertRP剤情報ToPrescOfPrefab(obj);
   }
 }
@@ -205,7 +209,7 @@ export function searchDrugPrefab(
     for (let a of entry.alias) {
       if (a.includes(name)) {
         result.push(entry);
-        continue;
+        break;
       }
     }
     if (entry.presc.薬品情報グループ[0].薬品レコード.薬品名称.includes(name)) {

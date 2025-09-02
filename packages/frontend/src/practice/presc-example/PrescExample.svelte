@@ -1,7 +1,7 @@
 <script lang="ts">
   import ServiceHeader from "@/ServiceHeader.svelte";
   import SearchArea from "./SearchArea.svelte";
-  import { newDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
+  import { emptyDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import EditPrefab from "@/lib/denshi-editor/components/EditPrefab.svelte";
   import { DateWrapper } from "myclinic-util";
   import { KouhiSet } from "@/lib/denshi-editor/kouhi-set";
@@ -42,7 +42,7 @@
   }
 
   function doNew() {
-    const prefab = newDrugPrefab();
+    const prefab = emptyDrugPrefab();
     const at = DateWrapper.fromDate(new Date()).asSqlDate();
     const d: EditPrefab = new EditPrefab({
       target: editArea,

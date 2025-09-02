@@ -22,6 +22,9 @@
   import UsageSupplField from "./UsageSupplField.svelte";
   import Commands from "./workarea/Commands.svelte";
   import Link from "./workarea/Link.svelte";
+  import { isValidDrug, isValidUsage } from "../helper";
+  import { convertRP剤情報ToPrescOfPrefab, createDrugPrefab } from "@/lib/drug-prefab";
+  import { cache } from "@/lib/cache";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -29,6 +32,7 @@
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
+  let prefabId: number | undefined = undefined;
 
   function doDrugChange() {
     drug = drug;
@@ -68,7 +72,12 @@
   }
 
   function doDelete() {
-    onDelete();
+    if( drug ){
+      const drugId = drug.id;
+      group.薬品情報グループ = group.薬品情報グループ.filter(d => d.id !== drugId);
+      group = group;
+      onEnter();
+    }
   }
 
   function doEnter() {
@@ -77,6 +86,14 @@
 
   function doCancel() {
     onCancel();
+  }
+
+  async function doEnterPrefab() {
+    const presc = convertRP剤情報ToPrescOfPrefab(group.toObject());
+    const prefab = createDrugPrefab(presc);
+    const list = await cache.getDrugPrefabList();
+    list.push(prefab);
+    await cache.setDrugPrefabList(list);
   }
 </script>
 
@@ -124,6 +141,11 @@
     onFieldChange={doGroupChange}
   />
   <UsageSupplField {group} onFieldChange={doGroupChange} />
+  {#if drug && isValidDrug(drug) && isValidUsage(group.用法レコード)}
+  {#if prefabId === undefined}
+    <Link onClick={doEnterPrefab}>処方例に追加</Link>
+  {/if}
+  {/if}
   <Commands>
     {#if drug}
       <Link onClick={doDelete}>薬品削除</Link>

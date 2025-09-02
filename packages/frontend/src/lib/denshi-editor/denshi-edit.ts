@@ -751,7 +751,7 @@ export class RP剤情報Edit implements RP剤情報 {
     return !isEqualRP剤情報(this, orig);
   }
 
-  toPrescOfPrefab(): RP剤情報 {
+  toObject(): RP剤情報 {
     let obj: RP剤情報 = {
       剤形レコード: this.剤形レコード.toObject(),
       用法レコード: this.用法レコード.toObject(),
@@ -1298,7 +1298,7 @@ export class PrescInfoDataEdit implements PrescInfoData {
       被保険者証番号: this.被保険者証番号,
       被保険者被扶養者: this.被保険者被扶養者,
       処方箋交付年月日: this.処方箋交付年月日,
-      RP剤情報グループ: this.RP剤情報グループ.map((info) => info.toPrescOfPrefab()),
+      RP剤情報グループ: this.RP剤情報グループ.map((info) => info.toObject()),
     };
 
     // Optional fields
