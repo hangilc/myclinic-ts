@@ -36,6 +36,7 @@
     initIsEditingOfDrug,
     initIsEditingUsage,
     isValidDrug,
+    isValidUsage,
   } from "./helper";
   import { createEmpty薬品情報 } from "../denshi-helper";
   import EditShohouDrug from "./components/EditShohouDrug.svelte";
@@ -76,15 +77,15 @@
     }
   }
 
-  function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit) {
-    if (isValidDrug(drug)) {
+  function doDrugSelect(group: RP剤情報Edit, drug: 薬品情報Edit | undefined) {
+    if ( isValidUsage(group.用法レコード) &&  (!drug || isValidDrug(drug))) {
       doGroupSelect(group, drug);
     } else {
       doConvDrug(group, drug);
     }
   }
 
-  async function doConvDrug(group: RP剤情報Edit, drug: 薬品情報Edit) {
+  async function doConvDrug(group: RP剤情報Edit, drug: 薬品情報Edit | undefined) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
@@ -94,25 +95,25 @@
     let w: EditShohouDrug = new EditShohouDrug({
       target: wa,
       props: {
-        // group: group,
-        // drug,
-        // at,
-        // kouhiSet: KouhiSet.fromPrescInfoData(data),
-        // onCancel: () => {
-        //   data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
-        //     g.id === group.id ? orig : g,
-        //   );
-        //   workareaService.clear();
-        // },
-        // onEnter: () => {
-        //   addOrphanGroup(group);
-        //   if (group.薬品情報グループ.length === 0) {
-        //     data.RP剤情報グループ = data.RP剤情報グループ.filter(
-        //       (g) => g.id !== group.id,
-        //     );
-        //   }
-        //   workareaService.clear();
-        // },
+        group: group,
+        drug,
+        at,
+        kouhiSet: KouhiSet.fromPrescInfoData(data),
+        onCancel: () => {
+          data.RP剤情報グループ = data.RP剤情報グループ.map((g) =>
+            g.id === group.id ? orig : g,
+          );
+          workareaService.clear();
+        },
+        onEnter: () => {
+          addOrphanGroup(group);
+          if (group.薬品情報グループ.length === 0) {
+            data.RP剤情報グループ = data.RP剤情報グループ.filter(
+              (g) => g.id !== group.id,
+            );
+          }
+          workareaService.clear();
+        },
       },
     });
     workareaService.setClearByDestroy(() => {
@@ -121,29 +122,29 @@
       data = data;
     });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      // if (group.isEditing() || drug?.isEditing()) {
-      //   alert("薬品が編集中です");
-      //   return false;
-      // }
-      // if (drug && !group.includesDrug(drug.id)) {
-      //   alert("追加されていない薬品があります。");
-      //   return false;
-      // }
-      // if (group.isModified(orig)) {
-      //   let ok = confirm(
-      //     "変更されて保存されていない薬剤があります。保存して進みますか？",
-      //   );
-      //   if (ok) {
-      //     addOrphanGroup(group);
-      //     data.RP剤情報グループ = data.RP剤情報グループ.filter(
-      //       (g) => g.薬品情報グループ.length > 0,
-      //     );
-      //     data = data;
-      //     return true;
-      //   } else {
-      //     return false;
-      //   }
-      // }
+      if (group.isEditing() || drug?.isEditing()) {
+        alert("薬品が編集中です");
+        return false;
+      }
+      if (drug && !group.includesDrug(drug.id)) {
+        alert("追加されていない薬品があります。");
+        return false;
+      }
+      if (group.isModified(orig)) {
+        let ok = confirm(
+          "変更されて保存されていない薬剤があります。保存して進みますか？",
+        );
+        if (ok) {
+          addOrphanGroup(group);
+          data.RP剤情報グループ = data.RP剤情報グループ.filter(
+            (g) => g.薬品情報グループ.length > 0,
+          );
+          data = data;
+          return true;
+        } else {
+          return false;
+        }
+      }
       return true;
     });
   }
@@ -532,7 +533,7 @@
       <CurrentPresc
         {data}
         onDrugSelect={(group, drug) => doDrugSelect(group, drug)}
-        onUsageAndTimesSelect={(group) => doGroupSelect(group, undefined)}
+        onUsageAndTimesSelect={(group) => doDrugSelect(group, undefined)}
         onGroupSelect={(group) => doGroupManip(group)}
         {showValid}
         onAddDrug={doAddDrugToGroup}

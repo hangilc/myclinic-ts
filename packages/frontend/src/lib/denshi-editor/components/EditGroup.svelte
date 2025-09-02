@@ -25,12 +25,10 @@
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
-  // export let drugOrig: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
-  // export let onTargetDrugChange: (targetDrug: 薬品情報Edit | undefined) => void;
 
   function doCancel() {
     onCancel();
@@ -50,56 +48,7 @@
     group = group;
   }
 
-  // function validateForEnter(drug: 薬品情報Edit): string | undefined {
-  //   if (drug.isEditing()) {
-  //     return "薬品の編集中です。";
-  //   }
-  //   if (drug.薬品レコード.薬品名称 === "") {
-  //     return "薬品の種類が設定されていません。";
-  //   }
-  //   if (drug.薬品レコード.分量 === "") {
-  //     return "薬品の分量が設定されていません。";
-  //   }
-  //   return undefined;
-  // }
-
-  // function doDrugEnter() {
-  //   if (drug) {
-  //     let err = validateForEnter(drug);
-  //     if (err) {
-  //       alert(err);
-  //       return;
-  //     }
-  //     const curr = drug;
-  //     let found = false;
-  //     if (drugOrig) {
-  //       for (let i = 0; i < group.薬品情報グループ.length; i++) {
-  //         let d = group.薬品情報グループ[i];
-  //         if (d.id === curr.id) {
-  //           group.薬品情報グループ[i] = curr;
-  //           found = true;
-  //           break;
-  //         }
-  //       }
-  //     }
-  //     if (!found) {
-  //       group.薬品情報グループ.push(curr);
-  //     }
-  //   }
-  //   drug = undefined;
-  //   onTargetDrugChange(drug);
-  //   group = group;
-  // }
-
   function doDrugChange() {}
-
-  // function doAddDrug() {
-  //   if (!drug) {
-  //     drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-  //     onTargetDrugChange(drug);
-  //     drugOrig = undefined;
-  //   }
-  // }
 
   function doDelete() {
     if (drug) {
