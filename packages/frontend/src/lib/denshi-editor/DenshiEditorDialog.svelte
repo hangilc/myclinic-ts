@@ -40,6 +40,7 @@
   } from "./helper";
   import { createEmpty薬品情報 } from "../denshi-helper";
   import EditShohouDrug from "./components/EditShohouDrug.svelte";
+  import DrugPrefabDialog from "../drug-prefab-dialog/DrugPrefabDialog.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -499,12 +500,22 @@
 
   function doGroupManip(_group: RP剤情報Edit) {}
 
+  function doDrugPrefabEditor() {
+    const d: DrugPrefabDialog = new DrugPrefabDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+      }
+    })
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
       f();
     };
   }
+
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -528,6 +539,7 @@
           onAddExamInfo={wrapSubCommand(doAddExamInfo)}
           onReorder={wrapSubCommand(doGroupReorder)}
           onChooseKouhi={wrapSubCommand(doChooseKouhi)}
+          onDrugPrefabEditor={wrapSubCommand(doDrugPrefabEditor)}
         />
       {/if}
       <CurrentPresc
@@ -556,7 +568,6 @@
   .top {
     margin: 0 10px 10px 10px;
     width: 760px;
-    /* min-height: 600px; */
     max-height: calc(100vh - 160px);
     display: grid;
     grid-template-columns: 1fr 1fr;

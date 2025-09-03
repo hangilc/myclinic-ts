@@ -39,10 +39,18 @@
         cache.clearUsageMasterMap();
         break;
       }
-      case "drug-name-iyakuhincode-map": {
-        cache.clearDrugNameIyakuhincodeMap();
+      case "drug-name-conv": {
+        cache.reloadDrugNameConv();
         break;
       }
+      case "drug-usage-conv": {
+        cache.reloadDrugUsageConv();
+        break;
+      }
+      // case "drug-name-iyakuhincode-map": {
+      //   cache.clearDrugNameIyakuhincodeMap();
+      //   break;
+      // }
     }
   }
 

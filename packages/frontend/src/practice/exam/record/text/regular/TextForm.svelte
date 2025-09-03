@@ -695,11 +695,13 @@
   }
 
   function applyDrugUsageConv(convMap: Record<string, string>, data: PrescInfoData) {
+    console.log("convMap", convMap);
     for(let group of data.RP剤情報グループ){
       if( group.用法レコード.用法コード !== "" ){
         continue;
       }
       const bind = convMap[group.用法レコード.用法名称];
+      console.log("bind", bind);
       if( bind ){
         group.用法レコード.用法名称 = bind;
       }
@@ -719,7 +721,6 @@
     applyDrugNameConv(await cache.getDrugNameConv(), data);
     applyDrugUsageConv(await cache.getDrugUsageConv(), data);
     applyPrescExample(await cache.getDrugPrefabList(), data);
-    console.log("data", data, await cache.getDrugUsageConv());
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {

@@ -244,9 +244,14 @@ export const cache = {
 
   async getDrugPrefabList(): Promise<DrugPrefab[]> {
     if (drugPrefabList === undefined) {
-      let value: DrugPrefab[] = await api.getConfig("drug-prefab-list");
-      drugPrefabList = value;
+      return cache.reloadDrugPrefabList();
     }
+    return drugPrefabList;
+  },
+
+  async reloadDrugPrefabList(): Promise<DrugPrefab[]> {
+    const value: DrugPrefab[] = await api.getConfig("drug-prefab-list");
+    drugPrefabList = value;
     return drugPrefabList;
   },
 
@@ -257,9 +262,14 @@ export const cache = {
 
   async getDrugNameConv(): Promise<Record<string, string>> {
     if (drugNameConv === undefined) {
-      let value: Record<string, string> = await api.getConfig("drug-name-conv");
-      drugNameConv = value;
+      return cache.reloadDrugNameConv();
     }
+    return drugNameConv;
+  },
+
+  async reloadDrugNameConv(): Promise<Record<string, string>> {
+    let value: Record<string, string> = await api.getConfig("drug-name-conv");
+    drugNameConv = value;
     return drugNameConv;
   },
 
@@ -270,9 +280,14 @@ export const cache = {
 
   async getDrugUsageConv(): Promise<Record<string, string>> {
     if (drugUsageConv === undefined) {
-      let value: Record<string, string> = await api.getConfig("drug-usage-conv");
-      drugUsageConv = value;
+      return cache.reloadDrugUsageConv();
     }
+    return drugUsageConv;
+  },
+
+  async reloadDrugUsageConv(): Promise<Record<string, string>> {
+    let value: Record<string, string> = await api.getConfig("drug-usage-conv");
+    drugUsageConv = value;
     return drugUsageConv;
   },
 

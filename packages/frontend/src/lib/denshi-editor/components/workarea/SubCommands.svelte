@@ -9,6 +9,7 @@
   export let onAddExamInfo: () => void;
   export let onReorder: () => void;
   export let onChooseKouhi: () => void;
+  export let onDrugPrefabEditor: () => void;
 </script>
 
 <div class="top">
@@ -24,6 +25,7 @@
   {#if data.hasKouhi()}
     <SmallLink onClick={onChooseKouhi}>公費選択</SmallLink>
   {/if}
+  <SmallLink onClick={onDrugPrefabEditor}>処方例管理</SmallLink>
 </div>
 
 <style>
