@@ -186,7 +186,11 @@
     {#if !isEditing}
       <div>
         <span class="rep" on:click={doRepClick}
-          >{drug.薬品レコード.薬品名称 || "（未設定）"}</span
+          >{drug.薬品レコード.薬品名称 || "（未設定）"}
+          {#if drug.薬品レコード.薬品コード === ""}
+          （コードなし）
+          {/if}
+          </span
         >
         {#if drug.isConvertibleToIppanmei()}
           <SmallLink onClick={convertToIppanmei}>一般名に</SmallLink>
