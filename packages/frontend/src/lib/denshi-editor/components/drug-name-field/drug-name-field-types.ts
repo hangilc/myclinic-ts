@@ -29,10 +29,16 @@ export function createIyakuhinResultFromPrefab(prefab: DrugPrefab, master: Iyaku
   return { id: iyakuhinResultSerialId++, kind: "prefab", prefab, master };
 }
 
-export function iyakuhinResultRep(r: SearchIyakuhinResult): string {
+export function iyakuhinResultRep(r: SearchIyakuhinResult, isNewDrug: boolean): string {
   switch(r.kind){
     case "master": return r.master.name;
     case "ippanmei": return r.master.ippanmei;
-    case "prefab": return `(登) ${drugRep(r.prefab.presc.薬品情報グループ[0])}${daysTimesDisp(r.prefab.presc)}`;
+    case "prefab": {
+      if( isNewDrug ){
+        return `(登) ${drugRep(r.prefab.presc.薬品情報グループ[0])}${daysTimesDisp(r.prefab.presc)}`;
+      } else {
+        return `(登薬) ${r.prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称}`;
+      }
+    }
   }
 }

@@ -25,6 +25,7 @@
   import { cache } from "@/lib/cache";
 
   export let drug: 薬品情報Edit;
+  export let isNewDrug: boolean;
   export let isEditing: boolean;
   export let at: string;
   export let onFieldChange: () => void;
@@ -91,7 +92,6 @@
         if (t.startsWith("【般】")) {
           const rs = await api.listIyakuhinMasterByIppanmei(t, at);
           if (rs.length > 0) {
-            // doIyakuhinMasterSelect(createIyakuhinResultFromIppanmei(rs[0]));
             searchIyakuhinResult.push(createIyakuhinResultFromIppanmei(rs[0]));
             searchIyakuhinResult.push(...rs.map(createIyakuhinResultFromMaster));
           }
@@ -233,7 +233,7 @@
             class="search-result-item"
             on:click={() => doIyakuhinMasterSelect(item)}
           >
-            {iyakuhinResultRep(item)}
+            {iyakuhinResultRep(item, isNewDrug)}
           </div>
         {/each}
       </div>

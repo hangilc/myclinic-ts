@@ -80,6 +80,9 @@
   async function doGroupSelect(
     group: RP剤情報Edit,
     drug: 薬品情報Edit | undefined,
+    opt: {
+      isNewDrug: boolean
+    } = { isNewDrug: false }
   ) {
     if (!(await workareaService.confirmAndClear())) {
       return;
@@ -92,6 +95,7 @@
       props: {
         group: group,
         drug,
+        isNewDrug: opt.isNewDrug,
         at,
         kouhiSet: KouhiSet.fromPrescInfoData(data),
         onCancel: () => {
@@ -345,10 +349,9 @@
   async function doAdd() {
     const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
     const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
-    group.薬品情報グループ.push(drug);
     initIsEditingUsage(group);
     initIsEditingOfDrug(drug);
-    doGroupSelect(group, drug);
+    doGroupSelect(group, drug, { isNewDrug: true });
   }
 
   function doAddDrugToGroup(group: RP剤情報Edit) {

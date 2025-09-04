@@ -33,6 +33,7 @@
   export let drug: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
+  export let isNewDrug: boolean = false;
   export let onCancel: () => void;
   export let onEnter: () => void;
   let origName: string | undefined =
@@ -60,6 +61,9 @@
         alert("薬品が編集中です。");
         return;
       }
+    }
+    if( drug && isNewDrug ){
+      group.薬品情報グループ.push(drug);
     }
     onEnter();
     if (addToPrefab) {
@@ -91,19 +95,19 @@
 
   function doPrefab(prefab: RP剤情報) {
     if (drug) {
-      const pre = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
-      drug.薬品レコード = pre.薬品レコード;
-      drug.単位変換レコード = pre.単位変換レコード;
-      drug.不均等レコード = pre.不均等レコード;
-      drug.負担区分レコード = pre.負担区分レコード;
-      drug.薬品１回服用量レコード = pre.薬品１回服用量レコード;
-      drug.薬品補足レコード = pre.薬品補足レコード;
-      drug.ippanmei = pre.ippanmei;
-      drug.ippanmeicode = pre.ippanmeicode;
-      drug.isEditing不均等レコード = pre.isEditing不均等レコード;
-      drug.isSelected = pre.isSelected;
+      // const pre = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
+      // drug.薬品レコード = pre.薬品レコード;
+      // drug.単位変換レコード = pre.単位変換レコード;
+      // drug.不均等レコード = pre.不均等レコード;
+      // drug.負担区分レコード = pre.負担区分レコード;
+      // drug.薬品１回服用量レコード = pre.薬品１回服用量レコード;
+      // drug.薬品補足レコード = pre.薬品補足レコード;
+      // drug.ippanmei = pre.ippanmei;
+      // drug.ippanmeicode = pre.ippanmeicode;
+      // drug.isEditing不均等レコード = pre.isEditing不均等レコード;
+      // drug.isSelected = pre.isSelected;
       drug = drug;
-      if (group.薬品情報グループ.length === 1) {
+      if (isNewDrug ) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
@@ -173,6 +177,7 @@
     <DrugNameField
       {drug}
       {at}
+      {isNewDrug}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
       onFieldChange={doDrugChange}
       onPrefab={doPrefab}
