@@ -8,14 +8,18 @@
   export let srcName: string;
   export let onCancel: () => void;
   export let onEnter: (srcName: string, dstName: string) => void;
+  let searchText = "";
   let masters: IyakuhinMaster[] = [];
   let at = DateWrapper.fromDate(new Date()).asSqlDate();
   let dstMaster: IyakuhinMaster | undefined;
+  let chooseIppanmei: boolean = false;
 
-  $: resetDstMaster(invokeId);
+  $: reset(invokeId);
 
-  function resetDstMaster(_invokeId: number) {
+  function reset(_invokeId: number) {
+    searchText = "";
     dstMaster = undefined;
+    chooseIppanmei = false;
   }
 
   function doCancel() {
@@ -29,14 +33,19 @@
   }
 
   async function doMasterSearch() {
-    const t = dstName.trim();
+    const t = searchText.trim();
     if( t !== "" ){
       masters = await api.searchIyakuhinMaster(t, at);
+      searchText = "";
     }
   }
 
   function doMasterSelect(m: IyakuhinMaster) {
-    dstName = m.name;
+    dstMaster = m;
+  }
+
+  function dstValue(): string {
+
   }
 </script>
 
@@ -44,7 +53,7 @@
   変換元：<input type="text" bind:value={srcName} />
 </div>
 <div class="field">
-  変換先：<input type="text" bind:value={dstName} />
+  変換先：<input type="text" bind:value={} />
   <SmallLink onClick={doMasterSearch}>マスター検索</SmallLink>
 </div>
 <div class="masters">
