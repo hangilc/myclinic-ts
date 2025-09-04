@@ -107,6 +107,10 @@ export function convertRP剤情報ToPrescOfPrefab(group: RP剤情報): PrescOfPr
     );
   }
   let drug: 薬品情報 = group.薬品情報グループ[0];
+  if( drug.負担区分レコード ){
+    drug = Object.assign({}, drug);
+    delete drug.負担区分レコード;
+  }
   return {
     剤形レコード: group.剤形レコード,
     用法レコード: group.用法レコード,
@@ -159,13 +163,6 @@ export class PrescOfPrefabEdit extends RP剤情報Edit {
   }
 }
 
-// export interface PrescOfPrefab {
-//   剤形レコード: 剤形レコードEdit;
-//   用法レコード: 用法レコードEdit;
-//   用法補足レコード?: 用法補足レコードEdit[];
-//   薬品情報グループ: [薬品情報Edit];
-// }
-
 export async function exapleDrugPrefab(): Promise<DrugPrefab[]> {
   return [
     {
@@ -206,14 +203,15 @@ export function searchDrugPrefab(
 ): DrugPrefab[] {
   const result: DrugPrefab[] = [];
   for (let entry of fab) {
-    for (let a of entry.alias) {
-      if (a.includes(name)) {
-        result.push(entry);
-        break;
-      }
-    }
     if (entry.presc.薬品情報グループ[0].薬品レコード.薬品名称.includes(name)) {
       result.push(entry);
+    } else {
+      for (let a of entry.alias) {
+        if (a.includes(name)) {
+          result.push(entry);
+          break;
+        }
+      }
     }
   }
   return result;

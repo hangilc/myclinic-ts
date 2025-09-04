@@ -22,6 +22,12 @@
   import DrugAmountField from "./DrugAmountField.svelte";
   import DrugSupplField from "./DrugSupplField.svelte";
   import KouhiField from "./KouhiField.svelte";
+  import {
+    convertRP剤情報ToPrescOfPrefab,
+    createDrugPrefab,
+  } from "@/lib/drug-prefab";
+  import { cache } from "@/lib/cache";
+  import { validateRP剤情報 } from "@/lib/validate-presc-info";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -29,12 +35,24 @@
   export let kouhiSet: KouhiSet;
   export let onCancel: () => void;
   export let onEnter: () => void;
+  let origName: string | undefined =
+    drug && drug.薬品レコード.薬品コード === ""
+      ? drug.薬品レコード.薬品名称
+      : undefined;
+  let origUsage: string | undefined =
+    group.用法レコード.用法コード === ""
+      ? group.用法レコード.用法名称
+      : undefined;
+  let addToPrefab = false;
+  let isConvertibleToPrefab = false;
+
+  $: updateIsConvertibleToPrefab(group, drug);
 
   function doCancel() {
     onCancel();
   }
 
-  function doEnter() {
+  async function doEnter() {
     if (drug) {
       if (drug.isEditing()) {
         alert("薬品が編集中です。");
@@ -42,6 +60,9 @@
       }
     }
     onEnter();
+    if (addToPrefab) {
+      await doAddToPrefab();
+    }
   }
 
   function onGroupChange() {
@@ -74,8 +95,7 @@
       drug.isEditing不均等レコード = pre.isEditing不均等レコード;
       drug.isSelected = pre.isSelected;
       drug = drug;
-      if (
-        group.薬品情報グループ.length === 1) {
+      if (group.薬品情報グループ.length === 1) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
@@ -88,6 +108,27 @@
         group = group;
       }
     }
+  }
+
+  async function doAddToPrefab() {
+    const presc = convertRP剤情報ToPrescOfPrefab(group);
+    const prefab = createDrugPrefab(presc);
+    const list = await cache.getDrugPrefabList();
+    list.push(prefab);
+    await cache.setDrugPrefabList(list);
+  }
+
+  async function updateIsConvertibleToPrefab(group: RP剤情報Edit, drug: 薬品情報Edit | undefined) {
+    if( drug === undefined ){
+      isConvertibleToPrefab = false;
+      return;
+    }
+    const g = group.toObject();
+    const d = drug.toObject();
+    g.薬品情報グループ = [d];
+    const err = await validateRP剤情報(g, at);
+    const ok = err === undefined;
+    isConvertibleToPrefab = ok;
   }
 </script>
 
@@ -135,6 +176,13 @@
     onFieldChange={onGroupChange}
   />
   <UsageSupplField {group} onFieldChange={onGroupChange} />
+  {#if origName}{/if}
+  {#if origUsage}{/if}
+  {#if isConvertibleToPrefab}
+    <div>
+      <input type="checkbox" bind:checked={addToPrefab} /> 処方例に追加
+    </div>
+  {/if}
   <Commands>
     {#if drug}
       <Link onClick={doDelete}>薬品削除</Link>

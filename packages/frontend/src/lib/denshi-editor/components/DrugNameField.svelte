@@ -60,8 +60,10 @@
       // const drugNameAlias = await cache.getDrugNameAlias();
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
-        const drugPrefab = await cache.getDrugPrefabList();
-        const prefabs = searchDrugPrefab(drugPrefab, t);
+        const drugPrefabList = await cache.getDrugPrefabList();
+        console.log("drugPrefabs", drugPrefabList);
+        const prefabs = searchDrugPrefab(drugPrefabList, t);
+        console.log("found", prefabs);
         const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(
             prefabs.map(async (pre) => {
