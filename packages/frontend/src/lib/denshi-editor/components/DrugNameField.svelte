@@ -54,6 +54,20 @@
     }
   }
 
+  async function resolvePrefabMaster(prefab: DrugPrefab): Promise<IyakuhinMaster | undefined> {
+    const name = prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称;
+    if( name.startsWith("【般】")){
+      const ms = await api.listIyakuhinMasterByIppanmei(prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称, at);
+      if( ms.length > 0 ){
+        return ms[0];
+      } else {
+        return undefined;
+      }
+    } else {
+      return findIyakuhinMaster(parseInt(prefab.presc.薬品情報グループ[0].薬品レコード.薬品コード));
+    }
+  }
+
   async function doSearch() {
     let t = searchText.trim();
     if (t !== "") {
@@ -61,15 +75,11 @@
       if (drug.薬品レコード.情報区分 === "医薬品") {
         searchIyakuhinResult = [];
         const drugPrefabList = await cache.getDrugPrefabList();
-        console.log("drugPrefabs", drugPrefabList);
         const prefabs = searchDrugPrefab(drugPrefabList, t);
-        console.log("found", prefabs);
         const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(
             prefabs.map(async (pre) => {
-              const master = await findIyakuhinMaster(
-                parseInt(pre.presc.薬品情報グループ[0].薬品レコード.薬品コード),
-              );
+              const master = await resolvePrefabMaster(pre);
               return [pre, master];
             }),
           );
