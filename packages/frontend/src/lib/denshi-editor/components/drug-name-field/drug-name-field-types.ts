@@ -32,7 +32,7 @@ export function createIyakuhinResultFromPrefab(prefab: DrugPrefab, master: Iyaku
 export function iyakuhinResultRep(r: SearchIyakuhinResult): string {
   switch(r.kind){
     case "master": return r.master.name;
-    case "ippanmei": return r.master.name;
+    case "ippanmei": return r.master.ippanmei;
     case "prefab": return `(登) ${drugRep(r.prefab.presc.薬品情報グループ[0])}${daysTimesDisp(r.prefab.presc)}`;
   }
 }

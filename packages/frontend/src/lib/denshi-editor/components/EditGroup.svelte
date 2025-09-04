@@ -45,6 +45,8 @@
       : undefined;
   let addToPrefab = false;
   let isConvertibleToPrefab = false;
+  let addToDrugNameConv = true;
+  let addToDrugUsageConv = true;
 
   $: updateIsConvertibleToPrefab(group, drug);
 
@@ -62,6 +64,12 @@
     onEnter();
     if (addToPrefab) {
       await doAddToPrefab();
+    }
+    if( addToDrugNameConv ){
+      await doAddToDrugNameConv();
+    }
+    if( addToDrugUsageConv ){
+      await doAddToDrugUsageConv();
     }
   }
 
@@ -118,6 +126,26 @@
     await cache.setDrugPrefabList(list);
   }
 
+  async function doAddToDrugNameConv() {
+    if( origName && drug && drug.薬品レコード.薬品コード !== "" ){
+      const src = origName;
+      const dst = drug.薬品レコード.薬品名称;
+      const map = await cache.getDrugNameConv();
+      map[src] = dst;
+      await cache.setDrugNameConv(map);
+    }
+  }
+
+  async function doAddToDrugUsageConv() {
+    if( origUsage && group.用法レコード.用法コード !== "" ){
+      const src = origUsage;
+      const dst = group.用法レコード.用法名称;
+      const map = await cache.getDrugUsageConv();
+      map[src] = dst;
+      await cache.setDrugUsageConv(map);
+    }
+  }
+
   async function updateIsConvertibleToPrefab(group: RP剤情報Edit, drug: 薬品情報Edit | undefined) {
     if( drug === undefined ){
       isConvertibleToPrefab = false;
@@ -130,6 +158,8 @@
     const ok = err === undefined;
     isConvertibleToPrefab = ok;
   }
+
+  
 </script>
 
 <Workarea>
@@ -176,8 +206,18 @@
     onFieldChange={onGroupChange}
   />
   <UsageSupplField {group} onFieldChange={onGroupChange} />
-  {#if origName}{/if}
-  {#if origUsage}{/if}
+  {#if origName && drug && drug.薬品レコード.薬品コード !== ""}
+    <div>
+      <input type="checkbox" bind:checked={addToDrugNameConv} />
+      {origName} → {drug.薬品レコード.薬品名称}
+    </div>
+  {/if}
+  {#if origUsage && group.用法レコード.用法コード !== ""}
+    <div>
+      <input type="checkbox" bind:checked={addToDrugUsageConv} />
+      {origUsage} → {group.用法レコード.用法名称}
+    </div>
+  {/if}
   {#if isConvertibleToPrefab}
     <div>
       <input type="checkbox" bind:checked={addToPrefab} /> 処方例に追加

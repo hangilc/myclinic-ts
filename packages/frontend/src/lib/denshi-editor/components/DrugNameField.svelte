@@ -91,7 +91,9 @@
         if (t.startsWith("【般】")) {
           const rs = await api.listIyakuhinMasterByIppanmei(t, at);
           if (rs.length > 0) {
-            doIyakuhinMasterSelect(createIyakuhinResultFromIppanmei(rs[0]));
+            // doIyakuhinMasterSelect(createIyakuhinResultFromIppanmei(rs[0]));
+            searchIyakuhinResult.push(createIyakuhinResultFromIppanmei(rs[0]));
+            searchIyakuhinResult.push(...rs.map(createIyakuhinResultFromMaster));
           }
         } else {
           const msResult = await api.searchIyakuhinMaster(t, at);
