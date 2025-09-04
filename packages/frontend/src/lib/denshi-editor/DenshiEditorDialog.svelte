@@ -39,6 +39,7 @@
   import { createEmpty薬品情報 } from "../denshi-helper";
   import DrugPrefabDialog from "../drug-prefab-dialog/DrugPrefabDialog.svelte";
   import DrugNameConvDialog from "../drug-name-conv/DrugNameConvDialog.svelte";
+  import DrugUsageConvDialog from "../drug-usage-conv/DrugUsageConvDialog.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -507,6 +508,15 @@
     })
   }
 
+  function doDrugUsageConvEditor() {
+    const d: DrugUsageConvDialog = new DrugUsageConvDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+      }
+    })
+  }
+
   function doDrugPrefabEditor() {
     const d: DrugPrefabDialog = new DrugPrefabDialog({
       target: document.body,
@@ -547,6 +557,7 @@
           onReorder={wrapSubCommand(doGroupReorder)}
           onChooseKouhi={wrapSubCommand(doChooseKouhi)}
           onDrugNameConvEditor={wrapSubCommand(doDrugNameConvEditor)}
+          onDrugUsageConvEditor={wrapSubCommand(doDrugUsageConvEditor)}
           onDrugPrefabEditor={wrapSubCommand(doDrugPrefabEditor)}
         />
       {/if}

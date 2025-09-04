@@ -10,6 +10,7 @@
   export let onReorder: () => void;
   export let onChooseKouhi: () => void;
   export let onDrugNameConvEditor: () => void;
+  export let onDrugUsageConvEditor: () => void;
   export let onDrugPrefabEditor: () => void;
 </script>
 
@@ -27,6 +28,7 @@
     <SmallLink onClick={onChooseKouhi}>公費選択</SmallLink>
   {/if}
   <SmallLink onClick={onDrugNameConvEditor}>薬品名変換管理</SmallLink>
+  <SmallLink onClick={onDrugUsageConvEditor}>用法変換管理</SmallLink>
   <SmallLink onClick={onDrugPrefabEditor}>処方例管理</SmallLink>
 </div>
 
