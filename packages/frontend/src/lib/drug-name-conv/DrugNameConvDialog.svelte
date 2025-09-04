@@ -7,9 +7,10 @@
   let map: Record<string, string> = {};
   let matched: [number, string, string][] = [];
   let serialId = 1;
+  let id: number = 0;
   let srcName: string = "";
-  let nextEditorInvokeId = 1;
-  let editorInvokeId = 0;
+  let dstName: string = "";
+  let searchText: string = "";
 
   init();
 
@@ -22,20 +23,48 @@
   }
 
   function doNew() {
+    id = serialId++;
     srcName = "";
-    editorInvokeId = nextEditorInvokeId++;
+    dstName = "";
   }
 
   function doEditorCancel() {
-    editorInvokeId = 0;
+    id = 0;
     srcName = "";
+    dstName = "";
   }
 
-  async function doEditorEnter(srcName: string, dstName: string) {
-    map[srcName] = dstName;
+  async function doEditorEnter(
+    _targetId: number,
+    srcName: string,
+    dstName: string,
+  ) {
+    if (dstName === "") {
+      delete map[srcName];
+    } else {
+      map[srcName] = dstName;
+    }
     await cache.setDrugNameConv(map);
-    map = map;
-    srcName = "";
+    await init();
+    id = 0;
+  }
+
+  async function doSearch() {
+    const t = searchText.trim();
+    matched = [];
+    for (let key in map) {
+      let value = map[key];
+      if (key.includes(t) || value.includes(t)) {
+        matched.push([serialId++, key, value]);
+      }
+    }
+  }
+
+  function doItemSelect(targetId: number, src: string, dst: string) {
+    srcName = src;
+    dstName = dst;
+    id = targetId;
+    matched = [];
   }
 </script>
 
@@ -45,17 +74,29 @@
       <div>
         <button on:click={doNew}>新規</button>
       </div>
-      <div>
+      <form on:submit|preventDefault={doSearch} class="search-form">
+        <input type="text" bind:value={searchText} />
+        <button type="submit">検索</button>
+      </form>
+      <div class="search-result">
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
         {#each matched as [id, src, dst] (id)}
-          <div>{src} → {dst}</div>
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <div
+            class="cursor-pointer item"
+            on:click={() => doItemSelect(id, src, dst)}
+          >
+            {src} → {dst}
+          </div>
         {/each}
       </div>
     </div>
     <div>
-      {#if editorInvokeId > 0}
+      {#if id > 0}
         <DrugNameConvEdit
-          invokeId={editorInvokeId}
+          {id}
           {srcName}
+          {dstName}
           onCancel={doEditorCancel}
           onEnter={doEditorEnter}
         />
@@ -71,5 +112,21 @@
     grid-template-columns: 1fr 1fr;
     column-gap: 10px;
     padding: 10px;
+  }
+
+  .search-form {
+    margin: 10px 0;
+  }
+
+  .search-result {
+    max-height: 200px;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  .item:hover {
+    background-color: #eee;
   }
 </style>
