@@ -59,8 +59,10 @@
     const name = prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称;
     if( name.startsWith("【般】")){
       const ms = await api.listIyakuhinMasterByIppanmei(prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称, at);
+      let rs = ms.filter(m => m.senteiRyouyouKubun !== 2);
       if( ms.length > 0 ){
-        return ms[0];
+        let r = rs.filter(m => m.kouhatsu === "0")[0];
+        return r || rs[0];
       } else {
         return undefined;
       }
@@ -77,26 +79,30 @@
         searchIyakuhinResult = [];
         const drugPrefabList = await cache.getDrugPrefabList();
         const prefabs = searchDrugPrefab(drugPrefabList, t);
+        console.log("matching prefabs", prefabs);
         const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(
             prefabs.map(async (pre) => {
               const master = await resolvePrefabMaster(pre);
+              console.log("master", master);
               return [pre, master];
             }),
           );
         prefabMasters.forEach(([fab, m]) => {
-          if (m) {
+          if (m && m.senteiRyouyouKubun !== 2) {
             searchIyakuhinResult.push(createIyakuhinResultFromPrefab(fab, m));
           }
         });
         if (t.startsWith("【般】")) {
-          const rs = await api.listIyakuhinMasterByIppanmei(t, at);
+          let rs = await api.listIyakuhinMasterByIppanmei(t, at);
+          rs = rs.filter(m => m.senteiRyouyouKubun !== 2);
           if (rs.length > 0) {
             searchIyakuhinResult.push(createIyakuhinResultFromIppanmei(rs[0]));
             searchIyakuhinResult.push(...rs.map(createIyakuhinResultFromMaster));
           }
         } else {
-          const msResult = await api.searchIyakuhinMaster(t, at);
+          let msResult = await api.searchIyakuhinMaster(t, at);
+          msResult = msResult.filter(m => m.senteiRyouyouKubun !== 2);
           msResult.forEach((m) =>
             searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
           );

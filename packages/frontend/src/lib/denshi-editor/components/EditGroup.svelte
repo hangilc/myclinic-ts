@@ -25,9 +25,12 @@
   import {
     convertRP剤情報ToPrescOfPrefab,
     createDrugPrefab,
+    searchDrugPrefab,
+    type DrugPrefab,
   } from "@/lib/drug-prefab";
   import { cache } from "@/lib/cache";
   import { validateRP剤情報 } from "@/lib/validate-presc-info";
+  import api from "@/lib/api";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -50,6 +53,7 @@
   let addToDrugUsageConv = true;
 
   $: updateIsConvertibleToPrefab(group, drug);
+  $: updateAddToPrefab(drug);
 
   function doCancel() {
     onCancel();
@@ -62,17 +66,17 @@
         return;
       }
     }
-    if( drug && isNewDrug ){
+    if (drug && isNewDrug) {
       group.薬品情報グループ.push(drug);
     }
     onEnter();
     if (addToPrefab) {
       await doAddToPrefab();
     }
-    if( addToDrugNameConv ){
+    if (addToDrugNameConv) {
       await doAddToDrugNameConv();
     }
-    if( addToDrugUsageConv ){
+    if (addToDrugUsageConv) {
       await doAddToDrugUsageConv();
     }
   }
@@ -107,7 +111,7 @@
       // drug.isEditing不均等レコード = pre.isEditing不均等レコード;
       // drug.isSelected = pre.isSelected;
       drug = drug;
-      if (isNewDrug ) {
+      if (isNewDrug) {
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
@@ -122,16 +126,34 @@
     }
   }
 
+  async function addAlias(prefab: DrugPrefab) {
+    const name = prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称;
+    if (name.startsWith("【般】")) {
+      let ms = await api.listIyakuhinMasterByIppanmei(name, at);
+      ms = ms.filter((m) => m.senteiRyouyouKubun !== 2 && m.kouhatsu === "0");
+      ms.forEach((m) => prefab.alias.push(m.name));
+    } else {
+      let m = await api.getIyakuhinMaster(
+        parseInt(prefab.presc.薬品情報グループ[0].薬品レコード.薬品コード),
+        at,
+      );
+      if( m.ippanmei !== "" ){
+        prefab.alias.push(m.ippanmei);
+      }
+    }
+  }
+
   async function doAddToPrefab() {
     const presc = convertRP剤情報ToPrescOfPrefab(group);
     const prefab = createDrugPrefab(presc);
+    await addAlias(prefab);
     const list = await cache.getDrugPrefabList();
     list.push(prefab);
     await cache.setDrugPrefabList(list);
   }
 
   async function doAddToDrugNameConv() {
-    if( origName && drug && drug.薬品レコード.薬品コード !== "" ){
+    if (origName && drug && drug.薬品レコード.薬品コード !== "") {
       const src = origName;
       const dst = drug.薬品レコード.薬品名称;
       const map = await cache.getDrugNameConv();
@@ -141,7 +163,7 @@
   }
 
   async function doAddToDrugUsageConv() {
-    if( origUsage && group.用法レコード.用法コード !== "" ){
+    if (origUsage && group.用法レコード.用法コード !== "") {
       const src = origUsage;
       const dst = group.用法レコード.用法名称;
       const map = await cache.getDrugUsageConv();
@@ -150,8 +172,11 @@
     }
   }
 
-  async function updateIsConvertibleToPrefab(group: RP剤情報Edit, drug: 薬品情報Edit | undefined) {
-    if( drug === undefined ){
+  async function updateIsConvertibleToPrefab(
+    group: RP剤情報Edit,
+    drug: 薬品情報Edit | undefined,
+  ) {
+    if (drug === undefined) {
       isConvertibleToPrefab = false;
       return;
     }
@@ -163,7 +188,17 @@
     isConvertibleToPrefab = ok;
   }
 
-  
+  async function updateAddToPrefab(drug: 薬品情報Edit | undefined) {
+    if (drug === undefined) {
+      addToPrefab = false;
+      return;
+    }
+    const fabs = await searchDrugPrefab(
+      await cache.getDrugPrefabList(),
+      drug.薬品レコード.薬品名称,
+    );
+    addToPrefab = fabs.length === 0;
+  }
 </script>
 
 <Workarea>
