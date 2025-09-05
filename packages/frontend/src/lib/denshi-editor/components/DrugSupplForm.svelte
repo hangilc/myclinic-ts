@@ -17,10 +17,8 @@
   };
 
   function doEnter() {
-    console.log("enter doEnter")
     if (inputText !== "") {
       suppl.薬品補足情報 = inputText;
-      console.log("calling onEnter")
       onEnter();
     }
   }

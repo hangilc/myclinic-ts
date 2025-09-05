@@ -44,12 +44,10 @@ export class SimpleLoader implements Loader {
   }
 
   gotoNext(): boolean {
-    console.log("enter gotoNext", this.page, this.totalPages);
     if (this.totalPages <= 1 || this.page === (this.totalPages - 1)) {
       return false;
     } else {
       this.page += 1;
-      console.log("returning true");
       return true;
     }
   }

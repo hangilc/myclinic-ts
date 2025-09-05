@@ -25,7 +25,6 @@
   import {
     convertRP剤情報ToPrescOfPrefab,
     createDrugPrefab,
-    searchDrugPrefab,
     type DrugPrefab,
   } from "@/lib/drug-prefab";
   import { cache } from "@/lib/cache";
@@ -85,7 +84,9 @@
     group = group;
   }
 
-  function doDrugChange() {}
+  function doDrugChange() {
+    drug = drug;
+  }
 
   function doDelete() {
     if (drug) {
@@ -193,11 +194,15 @@
       addToPrefab = false;
       return;
     }
-    const fabs = await searchDrugPrefab(
-      await cache.getDrugPrefabList(),
-      drug.薬品レコード.薬品名称,
-    );
-    addToPrefab = fabs.length === 0;
+    const fabsList = await cache.getDrugPrefabList();
+    let found = false;
+    for(let prefab of fabsList){
+      if( prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称 === drug.薬品レコード.薬品名称){
+        found = true;
+        break;
+      }
+    }
+    addToPrefab = !found;
   }
 </script>
 
@@ -246,13 +251,13 @@
     onFieldChange={onGroupChange}
   />
   <UsageSupplField {group} onFieldChange={onGroupChange} />
-  {#if origName && drug && drug.薬品レコード.薬品コード !== ""}
+  {#if origName && drug && drug.薬品レコード.薬品コード !== "" && origName !== drug.薬品レコード.薬品名称}
     <div>
       <input type="checkbox" bind:checked={addToDrugNameConv} />
       {origName} → {drug.薬品レコード.薬品名称}
     </div>
   {/if}
-  {#if origUsage && group.用法レコード.用法コード !== ""}
+  {#if origUsage && group.用法レコード.用法コード !== "" && origUsage !== group.用法レコード.用法名称}
     <div>
       <input type="checkbox" bind:checked={addToDrugUsageConv} />
       {origUsage} → {group.用法レコード.用法名称}

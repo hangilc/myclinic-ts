@@ -24,7 +24,7 @@
 
   function updateCodeMode(group: RP剤情報Edit): void {
     let code = group.用法レコード.用法コード;
-    let value: "master" | "free" | undefined
+    let value: "master" | "free" | undefined;
     if (code === freeTextCode) {
       value = "free";
     } else if (code === "") {
@@ -50,8 +50,8 @@
 
   function rep(group: RP剤情報Edit): string {
     let s = group.用法レコード.用法名称;
-    if( s === "" ){
-      s = "（未設定）"
+    if (s === "") {
+      s = "（未設定）";
     }
     return s;
   }
@@ -111,6 +111,8 @@
         {rep(group)}
         {#if group.用法レコード.用法コード === freeTextCode}
           （自由文章）
+        {:else if group.用法レコード.用法コード === ""}
+          （コードなし）
         {/if}
       </div>
     {:else}

@@ -79,12 +79,10 @@
         searchIyakuhinResult = [];
         const drugPrefabList = await cache.getDrugPrefabList();
         const prefabs = searchDrugPrefab(drugPrefabList, t);
-        console.log("matching prefabs", prefabs);
         const prefabMasters: [DrugPrefab, IyakuhinMaster | undefined][] =
           await Promise.all(
             prefabs.map(async (pre) => {
               const master = await resolvePrefabMaster(pre);
-              console.log("master", master);
               return [pre, master];
             }),
           );

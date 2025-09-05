@@ -32,8 +32,12 @@ export async function validateRP剤情報(group: RP剤情報, at: string): Promi
       return err;
     }
   }
+  console.log("usage", group.用法レコード.用法コード);
   if (group.用法レコード.用法コード === "") {
     return `用法コードが設定されていません：（${group.用法レコード.用法名称}）`;
+  }
+  if( group.剤形レコード.調剤数量 <= 0) {
+    return `調剤数量が正でありません`;
   }
   let err = await confirmUsageCode(group.用法レコード.用法コード, group.用法レコード.用法名称);
   if (!err) {

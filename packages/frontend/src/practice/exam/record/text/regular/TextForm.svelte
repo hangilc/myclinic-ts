@@ -695,13 +695,11 @@
   }
 
   function applyDrugUsageConv(convMap: Record<string, string>, data: PrescInfoData) {
-    console.log("convMap", convMap);
     for(let group of data.RP剤情報グループ){
       if( group.用法レコード.用法コード !== "" ){
         continue;
       }
       const bind = convMap[group.用法レコード.用法名称];
-      console.log("bind", bind);
       if( bind ){
         group.用法レコード.用法名称 = bind;
       }
@@ -747,13 +745,13 @@
     });
   }
 
-  function oldShohouPopup(): [string, () => void][] {
+  function shohouPopup(): [string, () => void][] {
     const menu: [string, () => void][] = [
       ["処方箋印刷", doPrintShohousen],
       ["処方箋2024印刷", doPrintShohousen2025],
       ["処方箋フォーマット", doFormatShohousen],
     ];
-    if (memoKind === undefined) {
+    if (memoKind === undefined || memoKind === "shohou-conv") {
       menu.push(["電子処方に", doConvTextToDenshi]);
     }
     menu.push(["記載例", doOpenKisaiRei]);
@@ -817,7 +815,7 @@
         >
       {/if}
       {#if isShohousen(text.content)}
-        <a href="javascript:void(0)" on:click={popupTrigger(oldShohouPopup)}
+        <a href="javascript:void(0)" on:click={popupTrigger(shohouPopup)}
           >処方箋</a
         >
       {/if}

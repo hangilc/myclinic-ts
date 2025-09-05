@@ -72,6 +72,7 @@
   <DrugNameField
     drug={edit.presc.薬品情報グループ[0]}
     {at}
+    isNewDrug={false}
     bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード}
     onPrefab={doPrefab}
     onFieldChange={doDrugChange}
