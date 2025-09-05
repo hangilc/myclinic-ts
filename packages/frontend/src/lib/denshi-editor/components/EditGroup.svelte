@@ -4,6 +4,7 @@
     用法レコードEdit,
     用法補足レコードEdit,
     薬品情報Edit,
+    薬品補足レコードEdit,
     type RP剤情報Edit,
   } from "../denshi-edit";
   import type { KouhiSet } from "../kouhi-set";
@@ -30,6 +31,8 @@
   import { cache } from "@/lib/cache";
   import { validateRP剤情報 } from "@/lib/validate-presc-info";
   import api from "@/lib/api";
+  import SmallLink from "./workarea/SmallLink.svelte";
+  import { hasHenkoufukaDrugSuppl, henkoufukaDrugSuppl } from "../helper";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -138,7 +141,7 @@
         parseInt(prefab.presc.薬品情報グループ[0].薬品レコード.薬品コード),
         at,
       );
-      if( m.ippanmei !== "" ){
+      if (m.ippanmei !== "") {
         prefab.alias.push(m.ippanmei);
       }
     }
@@ -196,13 +199,27 @@
     }
     const fabsList = await cache.getDrugPrefabList();
     let found = false;
-    for(let prefab of fabsList){
-      if( prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称 === drug.薬品レコード.薬品名称){
+    for (let prefab of fabsList) {
+      if (
+        prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称 ===
+        drug.薬品レコード.薬品名称
+      ) {
         found = true;
         break;
       }
     }
     addToPrefab = !found;
+  }
+
+  function doHenkouFuka(): void {
+    if (drug) {
+      if (!hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())) {
+        let suppl = 薬品補足レコードEdit.fromObject(henkoufukaDrugSuppl());
+        suppl.isEditing = false;
+        drug.addDrugSuppl(suppl);
+        doDrugChange();
+      }
+    }
   }
 </script>
 
@@ -269,6 +286,11 @@
     </div>
   {/if}
   <Commands>
+    <div class="sub-commands">
+      {#if drug && !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}
+        <SmallLink onClick={doHenkouFuka}>変更不可</SmallLink>
+      {/if}
+    </div>
     {#if drug}
       <Link onClick={doDelete}>薬品削除</Link>
     {/if}
@@ -276,3 +298,10 @@
     <button on:click={doCancel}>キャンセル</button>
   </Commands>
 </Workarea>
+
+<style>
+  .sub-commands {
+    text-align: left;
+    margin-bottom: 6px;
+  }
+</style>
