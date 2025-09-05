@@ -39,6 +39,12 @@
       alias = alias;
     }
   }
+
+  function doUpdate(a: AliasEdit, value: string) {
+    a.value = value;
+    a.isEditing = false;
+    alias = alias;
+  }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
