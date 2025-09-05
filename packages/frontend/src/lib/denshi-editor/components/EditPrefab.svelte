@@ -15,6 +15,7 @@
   import DrugSupplField from "./DrugSupplField.svelte";
   import KouhiField from "./KouhiField.svelte";
   import {
+  AliasEdit,
     DrugPrefabEdit,
     PrescOfPrefabEdit,
     type DrugPrefab,
@@ -92,6 +93,13 @@
     group.addUsageSuppl(suppl);
     doPrefabChange();
   }
+
+  function doAddAlias() {
+    const a = new AliasEdit("");
+    a.isEditing = true;
+    edit.alias.push(a);
+    edit = edit;
+  }
 </script>
 
 <Workarea>
@@ -156,6 +164,7 @@
       <SmallLink onClick={addDrugSuppl}>薬品補足</SmallLink>
       <SmallLink onClick={doUneven}>不均等</SmallLink>
       <SmallLink onClick={doAddUsageSuppl}>用法補足</SmallLink>
+      <SmallLink onClick={doAddAlias}>薬品別名追加</SmallLink>
     </div>
     <Link onClick={doDelete}>薬品削除</Link>
     <button on:click={doEnter}>入力</button>

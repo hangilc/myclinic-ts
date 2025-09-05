@@ -47,6 +47,7 @@
       {#each drug.薬品補足レコードAsList() as record (record.id)}
         {#if !record.isEditing}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => doEdit(record)} class="rep">
             {record.薬品補足情報 || "（空白）"}
           </div>

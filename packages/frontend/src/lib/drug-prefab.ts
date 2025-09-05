@@ -48,6 +48,7 @@ let nextAliasId = 1;
 export class AliasEdit {
   id: number;
   value: string;
+  isEditing: boolean = false;
 
   constructor(value: string, id?: number) {
     if( id == undefined ){

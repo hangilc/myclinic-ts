@@ -496,8 +496,9 @@
           href="javascript:void(0)"
           style="position:relative;top:5px;margin-left:3px;margin:0"
           on:click={doDelete}
+          class="trash-link"
         >
-          <Trash color="#00f" width="22" />
+          <Trash width="22" />
         </a>
       {/if}
       <a
@@ -539,5 +540,9 @@
     padding: 1px 6px;
     border-radius: 6px;
     background: rgba(0, 0, 255, 0.05);
+  }
+
+  .trash-link {
+    --trash-stroke: #00f;
   }
 </style>

@@ -6,27 +6,22 @@
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
-<a
-  href="javascript:void(0)"
-  tabindex="-1"
-  {style}
-  on:click={onClick}
->
-  <Trash width="18"/>
+<a href="javascript:void(0)" tabindex="-1" {style} on:click={onClick}>
+  <Trash width="18" />
 </a>
 
 <style>
   a {
     position: relative;
-	color: gray;
+    /* color: gray; */
   }
 
   a:hover {
-	color: red;
+    color: red;
   }
 
   a :global(svg) {
-	position: relative;
-	top: 1px;
+    position: relative;
+    top: 1px;
   }
 </style>

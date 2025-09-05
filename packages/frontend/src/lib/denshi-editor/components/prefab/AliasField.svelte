@@ -2,71 +2,60 @@
   import Field from "../workarea/Field.svelte";
   import FieldTitle from "../workarea/FieldTitle.svelte";
   import FieldForm from "../workarea/FieldForm.svelte";
-  import { tick } from "svelte";
-  import SubmitLink from "../../icons/SubmitLink.svelte";
-  import CancelLink from "../../icons/CancelLink.svelte";
   import type { AliasEdit } from "@/lib/drug-prefab";
-  
+  import AliasFieldEdit from "./AliasFieldEdit.svelte";
+
   export let alias: AliasEdit[];
   export let onFieldChange: () => void;
-  let isEditing = false;
 
-  export const focus: () => void = async () => {
-    await tick();
-    inputElement?.focus();
-  };
-
-  function updateInputText(value: string[]) {
-    inputText = value.join(" ");
+  function rep(alias: AliasEdit): string {
+    const value = alias.value;
+    if (value === "") {
+      return "（空白）";
+    }
+    return value;
   }
 
-  function doRepClick() {
-    isEditing = true;
-    focus();
+  function doRepClick(a: AliasEdit) {
+    a.isEditing = true;
+    alias = alias;
   }
 
-  function doEnter() {
-    alias = inputText.split(/[ 　,、|｜:：]+/).filter(t => t.trim() !== "");
-    isEditing = false;
-    onFieldChange();
+  function doCancel(a: AliasEdit) {
+    a.isEditing = false;
+    alias = alias;
   }
 
-  function doCancel() {
-    isEditing = false;
-  }
-
-  function rep(alias: string[]): string {
-    if( alias.length === 0 ){
-      return "（なし）";
-    } else {
-      return alias.join(" ");
+  function doDelete(a: AliasEdit) {
+    let index = -1;
+    for(let i=0;i<alias.length;i++){
+      if( alias[i].id === a.id){
+        index = i;
+        break;
+      }
+    }
+    if( index >= 0 ){
+      alias.splice(index, 1);
+      alias = alias;
     }
   }
 </script>
 
-  <Field>
-    <FieldTitle>薬品別名</FieldTitle>
-    <FieldForm>
-      {#if !isEditing}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div class="rep" on:click={doRepClick}>
-          {rep(alias)}
-        </div>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<Field>
+  <FieldTitle>薬品別名</FieldTitle>
+  <FieldForm>
+    {#each alias as a (a.id)}
+      {#if a.isEditing}
+        <AliasFieldEdit value={a.value} onCancel={() => doCancel(a)} onDelete={() => doDelete(a)}
+          onEnter={(value) => doUpdate(a, value)}/>
       {:else}
-        <form on:submit|preventDefault={doEnter} class="with-icons">
-          <input
-            type="text"
-            bind:value={inputText}
-            bind:this={inputElement}
-            class="input"
-          />
-          <SubmitLink onClick={doEnter} />
-          <CancelLink onClick={doCancel} />
-        </form>
+        <div class="rep" on:click={() => doRepClick(a)}>{rep(a)}</div>
       {/if}
-    </FieldForm>
-  </Field>
+    {/each}
+  </FieldForm>
+</Field>
 
 <style>
   .rep {

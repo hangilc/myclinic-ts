@@ -77,6 +77,7 @@
 
 <div style="font-weight:bold;">提供情報</div>
 <div>診療情報：</div>
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   {#each shinryouList as shinryou}
     <div>
@@ -85,10 +86,11 @@
       {shinryou.コメント}
       <a
         href="javascript:void(0)"
-        style="position:relative;top:3px;"
         on:click={() => deleteShinryou(shinryou)}
+        style="position:relative;top:3px;"
+        class="trash-link"
       >
-        <Trash color="gray" />
+        <Trash />
       </a>
     </div>
   {/each}
@@ -125,7 +127,7 @@
         style="position:relative;top:3px;"
         on:click={() => deleteKensa(kensa)}
       >
-        <Trash color="gray" />
+        <Trash />
       </a>
     </div>
   {/each}
@@ -147,3 +149,9 @@
     </a>
   </div>
 </div>
+
+<style>
+  .trash-link {
+    --trash-stroke: gray;
+  }
+</style>

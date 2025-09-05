@@ -138,7 +138,7 @@
     <CheckCircle color="#999" width="22" />
   </a>
   <a href="javascript:void(0)" on:click={doClear}
-    style="position:relative;top:3px;margin-left:0;">
+    style="position:relative;top:3px;margin-left:0;--trash-stroke:gray;">
     <Trash />
   </a>
 </div>
