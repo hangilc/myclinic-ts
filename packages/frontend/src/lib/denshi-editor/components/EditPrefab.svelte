@@ -61,7 +61,9 @@
     edit = edit;
   }
 
-  function doPrefabChange() {}
+  function doPrefabChange() {
+    onGroupChange();
+  }
 
   function addDrugSuppl(): void {
     let suppl = 薬品補足レコードEdit.fromInfo("");
@@ -86,6 +88,7 @@
   function doAddUsageSuppl(): void {
     const group = edit.presc;
     let suppl: 用法補足レコードEdit = 用法補足レコードEdit.fromInfo("");
+    suppl.isEditing用法補足情報 = true;
     group.addUsageSuppl(suppl);
     doPrefabChange();
   }

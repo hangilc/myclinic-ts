@@ -5,12 +5,10 @@
   import { tick } from "svelte";
   import SubmitLink from "../../icons/SubmitLink.svelte";
   import CancelLink from "../../icons/CancelLink.svelte";
+  import type { AliasEdit } from "@/lib/drug-prefab";
   
-  export let alias: string[];
+  export let alias: AliasEdit[];
   export let onFieldChange: () => void;
-  let inputText: string = "";
-  $: updateInputText(alias);
-  let inputElement: HTMLInputElement | undefined = undefined;
   let isEditing = false;
 
   export const focus: () => void = async () => {

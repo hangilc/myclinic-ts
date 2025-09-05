@@ -43,10 +43,25 @@ export function createDrugPrefab(presc: PrescOfPrefab): DrugPrefab {
   };
 }
 
-export class DrugPrefabEdit implements DrugPrefab {
+let nextAliasId = 1;
+
+export class AliasEdit {
+  id: number;
+  value: string;
+
+  constructor(value: string, id?: number) {
+    if( id == undefined ){
+      id = nextAliasId++;
+    }
+    this.id = id;
+    this.value = value;
+  }
+}
+
+export class DrugPrefabEdit {
   id: string;
   presc: PrescOfPrefabEdit;
-  alias: string[];
+  alias: AliasEdit[];
   tag: string[];
   comment: string;
 
@@ -59,7 +74,7 @@ export class DrugPrefabEdit implements DrugPrefab {
   }) {
     this.id = arg.id;
     this.presc = arg.presc;
-    this.alias = arg.alias;
+    this.alias = arg.alias.map(a => new AliasEdit(a));
     this.tag = arg.tag;
     this.comment = arg.comment;
   }
@@ -78,7 +93,7 @@ export class DrugPrefabEdit implements DrugPrefab {
     return {
       id: this.id,
       presc: this.presc.toPrescOfPrefab(),
-      alias: this.alias,
+      alias: this.alias.map(a => a.value),
       tag: this.tag,
       comment: this.comment,
     }
@@ -87,7 +102,7 @@ export class DrugPrefabEdit implements DrugPrefab {
   assignToDrugPrefab(dst: DrugPrefab) {
     dst.id = this.id;
     dst.presc = this.presc.toPrescOfPrefab();
-    dst.alias = this.alias;
+    dst.alias = this.alias.map(a => a.value);
     dst.tag = this.tag;
     dst.comment = this.comment;
   }

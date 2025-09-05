@@ -7,6 +7,7 @@
     用法補足レコードEdit,
   } from "../denshi-edit";
   import UsageSupplForm from "./UsageSupplForm.svelte";
+  import type { 用法補足レコード } from "@/lib/denshi-shohou/presc-info";
 
   export let group: RP剤情報Edit;
   export let onFieldChange: () => void;
@@ -38,6 +39,14 @@
   function isVisible(group: RP剤情報Edit): boolean {
     return group.用法補足レコードAsList().length > 0;
   }
+
+  function rep(record: 用法補足レコード): string {
+    if( record.用法補足情報 === "" ){
+      return "（空白）"
+    } else {
+      return record.用法補足情報;
+    }
+  }
 </script>
 
 {#if isVisible(group)}
@@ -49,7 +58,7 @@
           <!-- svelte-ignore a11y-no-static-element-interactions -->
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => doEdit(record)} class="rep">
-            {record.用法補足情報}
+            {rep(record)}
           </div>
         {:else}
           <UsageSupplForm

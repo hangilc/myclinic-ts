@@ -262,6 +262,7 @@
 
   function doAddUsageSuppl(): void {
     let suppl: 用法補足レコードEdit = 用法補足レコードEdit.fromInfo("");
+    suppl.isEditing用法補足情報 = true;
     group.addUsageSuppl(suppl);
     doGroupChange();
   }
