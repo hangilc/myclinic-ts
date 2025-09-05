@@ -47,6 +47,7 @@
       {#each group.用法補足レコードAsList() as record (record.id)}
         {#if !record.isEditing用法補足情報}
           <!-- svelte-ignore a11y-no-static-element-interactions -->
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
           <div on:click={() => doEdit(record)} class="rep">
             {record.用法補足情報}
           </div>

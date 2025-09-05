@@ -1,5 +1,6 @@
 <script lang="ts">
   import {
+    不均等レコードEdit,
     剤形レコードEdit,
     用法レコードEdit,
     用法補足レコードEdit,
@@ -32,7 +33,14 @@
   import { validateRP剤情報 } from "@/lib/validate-presc-info";
   import api from "@/lib/api";
   import SmallLink from "./workarea/SmallLink.svelte";
-  import { hasHenkoufukaDrugSuppl, henkoufukaDrugSuppl } from "../helper";
+  import {
+    hasHenkoufukaDrugSuppl,
+    hasIppoukaUsageSuppl,
+    hasKanjakibouDrugSuppl,
+    henkoufukaDrugSuppl,
+    ippoukaUsageSuppl,
+    kanjakibouDrugSuppl,
+  } from "../helper";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -63,8 +71,9 @@
 
   async function doEnter() {
     if (drug) {
-      if (drug.isEditing()) {
-        alert("薬品が編集中です。");
+      const causes: string[] = [];
+      if (drug.isEditing(causes)) {
+        alert("薬品が編集中です。\n" + causes.join("・"));
         return;
       }
     }
@@ -83,7 +92,7 @@
     }
   }
 
-  function onGroupChange() {
+  function doGroupChange() {
     group = group;
   }
 
@@ -103,17 +112,6 @@
 
   function doPrefab(prefab: RP剤情報) {
     if (drug) {
-      // const pre = 薬品情報Edit.fromObject(prefab.薬品情報グループ[0]);
-      // drug.薬品レコード = pre.薬品レコード;
-      // drug.単位変換レコード = pre.単位変換レコード;
-      // drug.不均等レコード = pre.不均等レコード;
-      // drug.負担区分レコード = pre.負担区分レコード;
-      // drug.薬品１回服用量レコード = pre.薬品１回服用量レコード;
-      // drug.薬品補足レコード = pre.薬品補足レコード;
-      // drug.ippanmei = pre.ippanmei;
-      // drug.ippanmeicode = pre.ippanmeicode;
-      // drug.isEditing不均等レコード = pre.isEditing不均等レコード;
-      // drug.isSelected = pre.isSelected;
       drug = drug;
       if (isNewDrug) {
         Object.assign(group, {
@@ -221,6 +219,52 @@
       }
     }
   }
+
+  function doKanjakibou(): void {
+    if (drug) {
+      if (!hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())) {
+        let suppl = 薬品補足レコードEdit.fromObject(kanjakibouDrugSuppl());
+        suppl.isEditing = false;
+        drug.addDrugSuppl(suppl);
+        doDrugChange();
+      }
+    }
+  }
+
+  function addDrugSuppl(): void {
+    if (drug) {
+      let suppl = 薬品補足レコードEdit.fromInfo("");
+      suppl.isEditing = true;
+      drug.addDrugSuppl(suppl);
+      doDrugChange();
+    }
+  }
+
+  function doUneven(): void {
+    if (drug) {
+      if (drug.不均等レコード === undefined) {
+        let edit: 不均等レコードEdit = 不均等レコードEdit.fromObject({
+          不均等１回目服用量: "1",
+          不均等２回目服用量: "2",
+        });
+        drug.不均等レコード = edit;
+      }
+      drug.isEditing不均等レコード = true;
+      doDrugChange();
+    }
+  }
+
+  function doIppouka(): void {
+    let suppl = 用法補足レコードEdit.fromObject(ippoukaUsageSuppl());
+    group.addUsageSuppl(suppl);
+    doGroupChange();
+  }
+
+  function doAddUsageSuppl(): void {
+    let suppl: 用法補足レコードEdit = 用法補足レコードEdit.fromInfo("");
+    group.addUsageSuppl(suppl);
+    doGroupChange();
+  }
 </script>
 
 <Workarea>
@@ -255,19 +299,19 @@
   <ZaikeiKubunField
     bind:剤形区分={group.剤形レコード.剤形区分}
     bind:isEditing={group.剤形レコード.isEditing剤形区分}
-    onFieldChange={onGroupChange}
+    onFieldChange={doGroupChange}
   />
   <DrugUsageField
     {group}
     bind:isEditing={group.用法レコード.isEditing用法コード}
-    onFieldChange={onGroupChange}
+    onFieldChange={doGroupChange}
   />
   <TimesField
     {group}
     bind:isEditing={group.剤形レコード.isEditing調剤数量}
-    onFieldChange={onGroupChange}
+    onFieldChange={doGroupChange}
   />
-  <UsageSupplField {group} onFieldChange={onGroupChange} />
+  <UsageSupplField {group} onFieldChange={doGroupChange} />
   {#if origName && drug && drug.薬品レコード.薬品コード !== "" && origName !== drug.薬品レコード.薬品名称}
     <div>
       <input type="checkbox" bind:checked={addToDrugNameConv} />
@@ -290,6 +334,15 @@
       {#if drug && !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}
         <SmallLink onClick={doHenkouFuka}>変更不可</SmallLink>
       {/if}
+      {#if drug && !hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())}
+        <SmallLink onClick={doKanjakibou}>患者希望</SmallLink>
+      {/if}
+      <SmallLink onClick={addDrugSuppl}>薬品補足</SmallLink>
+      <SmallLink onClick={doUneven}>不均等</SmallLink>
+      {#if !hasIppoukaUsageSuppl(group.用法補足レコードAsList())}
+        <SmallLink onClick={doIppouka}>一包化</SmallLink>
+      {/if}
+      <SmallLink onClick={doAddUsageSuppl}>用法補足</SmallLink>
     </div>
     {#if drug}
       <Link onClick={doDelete}>薬品削除</Link>

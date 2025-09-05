@@ -109,7 +109,16 @@ export class 薬品レコードEdit implements 薬品レコード {
     );
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    if(this.isEditing情報区分){
+      causes.push("情報区分");
+    }
+    if( this.isEditing薬品コード ){
+      causes.push("薬品コード")
+    }
+    if( this.isEditing分量 ) {
+      causes.push("分量");
+    }
     return (
       this.isEditing情報区分 || this.isEditing薬品コード || this.isEditing分量
     );
@@ -254,7 +263,19 @@ export class 負担区分レコードEdit implements 負担区分レコード {
     return obj;
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    if (this.isEditing第一公費負担区分) {
+      causes.push("第一公費負担区分");
+    }
+    if (this.isEditing第二公費負担区分) {
+      causes.push("第二公費負担区分");
+    }
+    if (this.isEditing第三公費負担区分) {
+      causes.push("第三公費負担区分");
+    }
+    if (this.isEditing特殊公費負担区分) {
+      causes.push("特殊公費負担区分");
+    }
     return (
       this.isEditing第一公費負担区分 ||
       this.isEditing第二公費負担区分 ||
@@ -425,14 +446,28 @@ export class 薬品情報Edit implements 薬品情報 {
     );
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    let drugCauses: string[] = [];
+    if (this.薬品レコード.isEditing(drugCauses)) {
+      causes.push(...drugCauses.map(cause => `薬品レコード.${cause}`));
+    }
+    if (this.isEditing不均等レコード) {
+      causes.push("不均等レコード");
+    }
+    if (this.薬品補足レコード && this.薬品補足レコード.some((r) => r.isEditing)) {
+      causes.push("薬品補足レコード");
+    }
+    let futanCauses: string[] = [];
+    if (this.負担区分レコード && this.負担区分レコード.isEditing(futanCauses)) {
+      causes.push(...futanCauses.map(cause => `負担区分レコード.${cause}`));
+    }
     return (
-      this.薬品レコード.isEditing() ||
+      this.薬品レコード.isEditing(drugCauses) ||
       this.isEditing不均等レコード ||
       !!(
         this.薬品補足レコード && this.薬品補足レコード.some((r) => r.isEditing)
       ) ||
-      !!(this.負担区分レコード && this.負担区分レコード.isEditing())
+      !!(this.負担区分レコード && this.負担区分レコード.isEditing(futanCauses))
     );
   }
 
@@ -553,7 +588,13 @@ export class 剤形レコードEdit implements 剤形レコード {
     return new 剤形レコードEdit(this, this);
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    if (this.isEditing剤形区分) {
+      causes.push("剤形区分");
+    }
+    if (this.isEditing調剤数量) {
+      causes.push("調剤数量");
+    }
     return this.isEditing剤形区分 || this.isEditing調剤数量;
   }
 
@@ -604,7 +645,10 @@ export class 用法レコードEdit implements 用法レコード {
     return new 用法レコードEdit(this, this);
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    if (this.isEditing用法コード) {
+      causes.push("用法コード");
+    }
     return this.isEditing用法コード;
   }
 
@@ -658,7 +702,10 @@ export class 用法補足レコードEdit implements 用法補足レコード {
     return new 用法補足レコードEdit(this, this);
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    if (this.isEditing用法補足情報) {
+      causes.push("用法補足情報");
+    }
     return this.isEditing用法補足情報;
   }
 
@@ -732,12 +779,38 @@ export class RP剤情報Edit implements RP剤情報 {
     );
   }
 
-  isEditing(): boolean {
+  isEditing(causes: string[]): boolean {
+    let zaikeiCauses: string[] = [];
+    if (this.剤形レコード.isEditing(zaikeiCauses)) {
+      causes.push(...zaikeiCauses.map(cause => `剤形レコード.${cause}`));
+    }
+    let youhouCauses: string[] = [];
+    if (this.用法レコード.isEditing(youhouCauses)) {
+      causes.push(...youhouCauses.map(cause => `用法レコード.${cause}`));
+    }
+    this.薬品情報グループ.forEach((d, index) => {
+      let drugCauses: string[] = [];
+      if (d.isEditing(drugCauses)) {
+        causes.push(...drugCauses.map(cause => `薬品情報グループ[${index}].${cause}`));
+      }
+    });
+    this.用法補足レコード?.forEach((r, index) => {
+      let supplCauses: string[] = [];
+      if (r.isEditing(supplCauses)) {
+        causes.push(...supplCauses.map(cause => `用法補足レコード[${index}].${cause}`));
+      }
+    });
     return (
-      this.剤形レコード.isEditing() ||
-      this.用法レコード.isEditing() ||
-      this.薬品情報グループ.some((d) => d.isEditing()) ||
-      !!this.用法補足レコード?.some((r) => r.isEditing())
+      this.剤形レコード.isEditing(zaikeiCauses) ||
+      this.用法レコード.isEditing(youhouCauses) ||
+      this.薬品情報グループ.some((d) => {
+        let tmpCauses: string[] = [];
+        return d.isEditing(tmpCauses);
+      }) ||
+      !!this.用法補足レコード?.some((r) => {
+        let tmpCauses: string[] = [];
+        return r.isEditing(tmpCauses);
+      })
     );
   }
 

@@ -121,13 +121,20 @@
       data = data;
     });
     workareaService.setConfirm(async (): Promise<boolean> => {
-      if (group.isEditing() || drug?.isEditing()) {
-        alert("薬品が編集中です");
-        return false;
+      const editingCauses: string[] = [];
+      if (group.isEditing(editingCauses) || drug?.isEditing(editingCauses)) {
+        // alert("薬品が編集中です");
+        const ok = confirm("薬品が編集中ですがこのまま続けますか？\n" + editingCauses.join("・"));
+        if( !ok ){
+          return false;
+        }
       }
       if (drug && !group.includesDrug(drug.id)) {
-        alert("追加されていない薬品があります。");
-        return false;
+        // alert("追加されていない薬品があります。");
+        const ok = confirm("追加されていない薬品がありますがこのまま続けますか・");
+        if( !ok ){
+          return false;
+        }
       }
       if (group.isModified(orig)) {
         let ok = confirm(

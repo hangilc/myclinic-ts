@@ -15,7 +15,7 @@
   import DrugSupplField from "./DrugSupplField.svelte";
   import KouhiField from "./KouhiField.svelte";
   import {
-  DrugPrefabEdit,
+    DrugPrefabEdit,
     PrescOfPrefabEdit,
     type DrugPrefab,
     type PrescOfPrefab,
@@ -23,6 +23,8 @@
   import AliasField from "./prefab/AliasField.svelte";
   import TagField from "./prefab/TagField.svelte";
   import CommentField from "./prefab/CommentField.svelte";
+  import SmallLink from "./workarea/SmallLink.svelte";
+  import { 不均等レコードEdit, 用法補足レコードEdit, 薬品補足レコードEdit } from "../denshi-edit";
 
   export let prefab: DrugPrefab;
   export let at: string;
@@ -46,7 +48,9 @@
     edit = edit;
   }
 
-  function doDrugChange() {}
+  function doDrugChange() {
+    onGroupChange();
+  }
 
   function doDelete() {
     onDelete();
@@ -57,15 +61,42 @@
     edit = edit;
   }
 
-  function doPrefabChange() {
+  function doPrefabChange() {}
 
+  function addDrugSuppl(): void {
+    let suppl = 薬品補足レコードEdit.fromInfo("");
+    suppl.isEditing = true;
+    edit.presc.薬品情報グループ[0].addDrugSuppl(suppl);
+    doDrugChange();
+  }
+
+  function doUneven(): void {
+    const drug = edit.presc.薬品情報グループ[0];
+    if (drug.不均等レコード === undefined) {
+      let edit: 不均等レコードEdit = 不均等レコードEdit.fromObject({
+        不均等１回目服用量: "1",
+        不均等２回目服用量: "2",
+      });
+      drug.不均等レコード = edit;
+    }
+    drug.isEditing不均等レコード = true;
+    doDrugChange();
+  }
+
+  function doAddUsageSuppl(): void {
+    const group = edit.presc;
+    let suppl: 用法補足レコードEdit = 用法補足レコードEdit.fromInfo("");
+    group.addUsageSuppl(suppl);
+    doPrefabChange();
   }
 </script>
 
 <Workarea>
   <Title>薬品グループ編集</Title>
   <JohoKubunField
-    bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing情報区分}
+    bind:isEditing={
+      edit.presc.薬品情報グループ[0].薬品レコード.isEditing情報区分
+    }
     bind:情報区分={edit.presc.薬品情報グループ[0].薬品レコード.情報区分}
     onFieldChange={doDrugChange}
   />
@@ -73,7 +104,9 @@
     drug={edit.presc.薬品情報グループ[0]}
     {at}
     isNewDrug={false}
-    bind:isEditing={edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード}
+    bind:isEditing={
+      edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード
+    }
     onPrefab={doPrefab}
     onFieldChange={doDrugChange}
   />
@@ -112,12 +145,24 @@
     onFieldChange={onGroupChange}
   />
   <UsageSupplField group={edit.presc} onFieldChange={onGroupChange} />
-  <AliasField bind:alias={edit.alias} onFieldChange={doPrefabChange}/>
-  <TagField bind:tag={edit.tag} onFieldChange={doPrefabChange}/>
-  <CommentField bind:comment={edit.comment} onFieldChange={doPrefabChange}/>
+  <AliasField bind:alias={edit.alias} onFieldChange={doPrefabChange} />
+  <TagField bind:tag={edit.tag} onFieldChange={doPrefabChange} />
+  <CommentField bind:comment={edit.comment} onFieldChange={doPrefabChange} />
   <Commands>
+    <div class="sub-commands">
+      <SmallLink onClick={addDrugSuppl}>薬品補足</SmallLink>
+      <SmallLink onClick={doUneven}>不均等</SmallLink>
+      <SmallLink onClick={doAddUsageSuppl}>用法補足</SmallLink>
+    </div>
     <Link onClick={doDelete}>薬品削除</Link>
     <button on:click={doEnter}>入力</button>
     <button on:click={doCancel}>キャンセル</button>
   </Commands>
 </Workarea>
+
+<style>
+  .sub-commands {
+    text-align: left;
+    margin-bottom: 6px;
+  }
+</style>
