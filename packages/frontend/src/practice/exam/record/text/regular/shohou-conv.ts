@@ -27,6 +27,9 @@ export async function shohowConv(data: PrescInfoData) {
       if( !m ){
         continue;
       }
+      if( m.unit === drug.薬品レコード.単位名){
+        
+      }
     }
   }
   applyDrugNameConv(await cache.getDrugNameConv(), data);
