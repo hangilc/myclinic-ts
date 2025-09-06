@@ -739,6 +739,17 @@ export default {
     );
   },
 
+  findIyakuhinMasterByName(
+    name: string,
+    at: Date | string
+  ): Promise<m.IyakuhinMaster | null> {
+    return get(
+      "find-iyakuhin-master-by-name",
+      { name, at: dateParam(at) },
+      castOption(m.IyakuhinMaster.cast)
+    )
+  },
+
   listIyakuhinMasterByIppanmei(
     ippanmei: string,
     at: Date | string
