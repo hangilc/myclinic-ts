@@ -55,19 +55,26 @@
     }
   }
 
-  async function resolvePrefabMaster(prefab: DrugPrefab): Promise<IyakuhinMaster | undefined> {
+  async function resolvePrefabMaster(
+    prefab: DrugPrefab,
+  ): Promise<IyakuhinMaster | undefined> {
     const name = prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称;
-    if( name.startsWith("【般】")){
-      const ms = await api.listIyakuhinMasterByIppanmei(prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称, at);
-      let rs = ms.filter(m => m.senteiRyouyouKubun !== 2);
-      if( ms.length > 0 ){
-        let r = rs.filter(m => m.kouhatsu === "0")[0];
+    if (name.startsWith("【般】")) {
+      const ms = await api.listIyakuhinMasterByIppanmei(
+        prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称,
+        at,
+      );
+      let rs = ms.filter((m) => m.senteiRyouyouKubun !== 2);
+      if (ms.length > 0) {
+        let r = rs.filter((m) => m.kouhatsu === "0")[0];
         return r || rs[0];
       } else {
         return undefined;
       }
     } else {
-      return findIyakuhinMaster(parseInt(prefab.presc.薬品情報グループ[0].薬品レコード.薬品コード));
+      return findIyakuhinMaster(
+        parseInt(prefab.presc.薬品情報グループ[0].薬品レコード.薬品コード),
+      );
     }
   }
 
@@ -93,14 +100,16 @@
         });
         if (t.startsWith("【般】")) {
           let rs = await api.listIyakuhinMasterByIppanmei(t, at);
-          rs = rs.filter(m => m.senteiRyouyouKubun !== 2);
+          rs = rs.filter((m) => m.senteiRyouyouKubun !== 2);
           if (rs.length > 0) {
             searchIyakuhinResult.push(createIyakuhinResultFromIppanmei(rs[0]));
-            searchIyakuhinResult.push(...rs.map(createIyakuhinResultFromMaster));
+            searchIyakuhinResult.push(
+              ...rs.map(createIyakuhinResultFromMaster),
+            );
           }
         } else {
           let msResult = await api.searchIyakuhinMaster(t, at);
-          msResult = msResult.filter(m => m.senteiRyouyouKubun !== 2);
+          msResult = msResult.filter((m) => m.senteiRyouyouKubun !== 2);
           msResult.forEach((m) =>
             searchIyakuhinResult.push(createIyakuhinResultFromMaster(m)),
           );
@@ -124,33 +133,58 @@
     isEditing = false;
   }
 
+  function setByMaster(m: IyakuhinMaster, isNewDrug: boolean) {
+    const origUnit = drug.薬品レコード.単位名;
+    Object.assign(drug.薬品レコード, {
+      薬品コード種別: "レセプト電算処理システム用コード",
+      薬品コード: m.iyakuhincode.toString(),
+      薬品名称: m.name,
+      単位名: m.unit,
+    });
+    if( !isNewDrug && origUnit !== "" && origUnit !== m.unit ){
+      alert(`単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`)
+    }
+    drug.ippanmei = m.ippanmei;
+    drug.ippanmeicode = m.ippanmeicode;
+  }
+
+  function setByPrefab(prefab: DrugPrefab, master: IyakuhinMaster, isNewDrug: boolean) {
+      const origUnit = drug.薬品レコード.単位名;
+      Object.assign(
+        drug.薬品レコード,
+        item.prefab.presc.薬品情報グループ[0].薬品レコード,
+        {
+          単位名: origUnit,
+          isEditing情報区分: false,
+          isEditing薬品コード: false,
+          isEditing分量: false,
+        },
+      );
+      if (
+        !isNewDrug &&
+        origUnit !== item.prefab.presc.薬品情報グループ[0].薬品レコード.単位名
+      ) {
+        const changeIt = confirm(
+          "単位名がマスターと違っています。マスターの単位名に変更しますか？",
+        );
+        if (changeIt) {
+          drug.薬品レコード.単位名 =
+            item.prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
+        }
+      }
+      drug.ippanmei = item.master.ippanmei;
+      drug.ippanmeicode = item.master.ippanmeicode;
+  }
+
   function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
     if (item.kind === "master") {
-      const m = item.master;
-      Object.assign(drug.薬品レコード, {
-        薬品コード種別: "レセプト電算処理システム用コード",
-        薬品コード: m.iyakuhincode.toString(),
-        薬品名称: m.name,
-        単位名: m.unit,
-      });
-      drug.ippanmei = m.ippanmei;
-      drug.ippanmeicode = m.ippanmeicode;
+      setByMaster(item.master, isNewDrug);
       searchText = "";
       searchIyakuhinResult = [];
       isEditing = false;
       onFieldChange();
     } else if (item.kind === "prefab") {
-      Object.assign(
-        drug.薬品レコード,
-        item.prefab.presc.薬品情報グループ[0].薬品レコード,
-        {
-          isEditing情報区分: false,
-          isEditing薬品コード: false,
-          isEditing分量: false,
-        }
-      );
-      drug.ippanmei = item.master.ippanmei;
-      drug.ippanmeicode = item.master.ippanmeicode;
+      setByPrefab(item.prefab, item.master, isNewDrug);
       searchText = "";
       searchIyakuhinResult = [];
       isEditing = false;
@@ -206,10 +240,9 @@
         <span class="rep" on:click={doRepClick}
           >{drug.薬品レコード.薬品名称 || "（未設定）"}
           {#if drug.薬品レコード.薬品コード === ""}
-          （コードなし）
+            （コードなし）
           {/if}
-          </span
-        >
+        </span>
         {#if drug.isConvertibleToIppanmei()}
           <SmallLink onClick={convertToIppanmei}>一般名に</SmallLink>
         {/if}
