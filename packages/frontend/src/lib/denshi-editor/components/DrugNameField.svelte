@@ -133,78 +133,66 @@
     isEditing = false;
   }
 
-  function setByMaster(m: IyakuhinMaster, isNewDrug: boolean) {
+  function setByMaster(
+    m: IyakuhinMaster,
+    isNewDrug: boolean,
+    ippanmei: boolean,
+  ) {
     const origUnit = drug.薬品レコード.単位名;
     Object.assign(drug.薬品レコード, {
-      薬品コード種別: "レセプト電算処理システム用コード",
-      薬品コード: m.iyakuhincode.toString(),
-      薬品名称: m.name,
+      薬品コード種別: ippanmei
+        ? "一般名コード"
+        : "レセプト電算処理システム用コード",
+      薬品コード: ippanmei ? m.ippanmeicode : m.iyakuhincode.toString(),
+      薬品名称: ippanmei ? m.ippanmei : m.name,
       単位名: m.unit,
     });
-    if( !isNewDrug && origUnit !== "" && origUnit !== m.unit ){
-      alert(`単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`)
+    if (!isNewDrug && origUnit !== "" && origUnit !== m.unit) {
+      alert(
+        `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`,
+      );
     }
     drug.ippanmei = m.ippanmei;
     drug.ippanmeicode = m.ippanmeicode;
   }
 
-  function setByPrefab(prefab: DrugPrefab, master: IyakuhinMaster, isNewDrug: boolean) {
-      const origUnit = drug.薬品レコード.単位名;
-      Object.assign(
-        drug.薬品レコード,
-        item.prefab.presc.薬品情報グループ[0].薬品レコード,
-        {
-          単位名: origUnit,
-          isEditing情報区分: false,
-          isEditing薬品コード: false,
-          isEditing分量: false,
-        },
+  function setByPrefab(
+    prefab: DrugPrefab,
+    master: IyakuhinMaster,
+    isNewDrug: boolean,
+  ) {
+    const origUnit = drug.薬品レコード.単位名;
+    Object.assign(
+      drug.薬品レコード,
+      prefab.presc.薬品情報グループ[0].薬品レコード,
+      {
+        isEditing情報区分: false,
+        isEditing薬品コード: false,
+        isEditing分量: false,
+      },
+    );
+    const prefabUnit = prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
+    if (!isNewDrug && origUnit !== "" && origUnit !== prefabUnit) {
+      alert(
+        `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${prefabUnit}）に変更しました`,
       );
-      if (
-        !isNewDrug &&
-        origUnit !== item.prefab.presc.薬品情報グループ[0].薬品レコード.単位名
-      ) {
-        const changeIt = confirm(
-          "単位名がマスターと違っています。マスターの単位名に変更しますか？",
-        );
-        if (changeIt) {
-          drug.薬品レコード.単位名 =
-            item.prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
-        }
-      }
-      drug.ippanmei = item.master.ippanmei;
-      drug.ippanmeicode = item.master.ippanmeicode;
+    }
+    drug.ippanmei = master.ippanmei;
+    drug.ippanmeicode = master.ippanmeicode;
   }
 
   function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
     if (item.kind === "master") {
-      setByMaster(item.master, isNewDrug);
-      searchText = "";
-      searchIyakuhinResult = [];
-      isEditing = false;
-      onFieldChange();
+      setByMaster(item.master, isNewDrug, false);
     } else if (item.kind === "prefab") {
       setByPrefab(item.prefab, item.master, isNewDrug);
-      searchText = "";
-      searchIyakuhinResult = [];
-      isEditing = false;
-      onPrefab(item.prefab.presc);
-      onFieldChange();
     } else if (item.kind === "ippanmei") {
-      const m = item.master;
-      Object.assign(drug.薬品レコード, {
-        薬品コード種別: "一般名コード",
-        薬品コード: m.ippanmeicode,
-        薬品名称: m.ippanmei,
-        単位名: m.unit,
-      });
-      drug.ippanmei = m.ippanmei;
-      drug.ippanmeicode = m.ippanmeicode;
-      searchText = "";
-      searchIyakuhinResult = [];
-      isEditing = false;
-      onFieldChange();
+      setByMaster(item.master, isNewDrug, true);
     }
+    searchText = "";
+    searchIyakuhinResult = [];
+    isEditing = false;
+    onFieldChange();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {
