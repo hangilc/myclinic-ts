@@ -42,7 +42,7 @@
   import ShohouExampleDialog from "./ShohouExampleDialog.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
-  import { applyPrescExample } from "./shohou-conv";
+  import { shohowConv } from "./shohou-conv";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -680,31 +680,6 @@
     });
   }
 
-  function applyDrugNameConv(convMap: Record<string, string>, data: PrescInfoData) {
-    for(let group of data.RP剤情報グループ){
-      for(let drug of group.薬品情報グループ) {
-        if( drug.薬品レコード.薬品コード !== "" ){
-          continue;
-        }
-        const bind = convMap[drug.薬品レコード.薬品名称];
-        if( bind ){
-          drug.薬品レコード.薬品名称 = bind;
-        }
-      }
-    }
-  }
-
-  function applyDrugUsageConv(convMap: Record<string, string>, data: PrescInfoData) {
-    for(let group of data.RP剤情報グループ){
-      if( group.用法レコード.用法コード !== "" ){
-        continue;
-      }
-      const bind = convMap[group.用法レコード.用法名称];
-      if( bind ){
-        group.用法レコード.用法名称 = bind;
-      }
-    }
-  }
 
   async function doConvTextToDenshi() {
     onClose();
@@ -716,9 +691,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
-    applyDrugNameConv(await cache.getDrugNameConv(), data);
-    applyDrugUsageConv(await cache.getDrugUsageConv(), data);
-    applyPrescExample(await cache.getDrugPrefabList(), data);
+    await shohowConv(data);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
@@ -727,7 +700,6 @@
         orig: data,
         at,
         patientId,
-        // showValid: true,
         onEnter: async (presc: PrescInfoData) => {
           let newText: m.Text = {
             textId: 0,

@@ -1,8 +1,57 @@
+import api from "@/lib/api";
 import { cache } from "@/lib/cache";
-import type { PrescInfoData, RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+import type {
+  PrescInfoData,
+  RP剤情報,
+  薬品情報,
+} from "@/lib/denshi-shohou/presc-info";
 import type { DrugPrefab } from "@/lib/drug-prefab";
 
-export async function applyPrescExample(list: DrugPrefab[], data: PrescInfoData) {
+export async function shohowConv(data: PrescInfoData) {
+  applyDrugNameConv(await cache.getDrugNameConv(), data);
+  applyDrugUsageConv(await cache.getDrugUsageConv(), data);
+  applyPrescExample(await cache.getDrugPrefabList(), data);
+}
+
+async function findMaster(name: string): IyakuhinMaster | undefined {
+}
+
+function applyDrugNameConv(
+  convMap: Record<string, string>,
+  data: PrescInfoData
+) {
+  for (let group of data.RP剤情報グループ) {
+    for (let drug of group.薬品情報グループ) {
+      if (drug.薬品レコード.薬品コード !== "") {
+        continue;
+      }
+      const bind = convMap[drug.薬品レコード.薬品名称];
+      if (bind) {
+        drug.薬品レコード.薬品名称 = bind;
+      }
+    }
+  }
+}
+
+function applyDrugUsageConv(
+  convMap: Record<string, string>,
+  data: PrescInfoData
+) {
+  for (let group of data.RP剤情報グループ) {
+    if (group.用法レコード.用法コード !== "") {
+      continue;
+    }
+    const bind = convMap[group.用法レコード.用法名称];
+    if (bind) {
+      group.用法レコード.用法名称 = bind;
+    }
+  }
+}
+
+export async function applyPrescExample(
+  list: DrugPrefab[],
+  data: PrescInfoData
+) {
   for (let group of data.RP剤情報グループ) {
     for (let drug of group.薬品情報グループ) {
       applyDrug(list, drug);
@@ -12,18 +61,21 @@ export async function applyPrescExample(list: DrugPrefab[], data: PrescInfoData)
 }
 
 function applyGroup(list: DrugPrefab[], group: RP剤情報) {
-  if( group.用法レコード.用法コード === "" ){
+  if (group.用法レコード.用法コード === "") {
     let code = findUsageCodeByName(list, group.用法レコード.用法名称);
-    if( code !== undefined ){
+    if (code !== undefined) {
       group.用法レコード.用法コード = code;
       return;
     }
   }
 }
 
-function findUsageCodeByName(list: DrugPrefab[], name: string): string | undefined {
-  for(let pre of list){
-    if( pre.presc.用法レコード.用法名称 === name ){
+function findUsageCodeByName(
+  list: DrugPrefab[],
+  name: string
+): string | undefined {
+  for (let pre of list) {
+    if (pre.presc.用法レコード.用法名称 === name) {
       return pre.presc.用法レコード.用法コード;
     }
   }
