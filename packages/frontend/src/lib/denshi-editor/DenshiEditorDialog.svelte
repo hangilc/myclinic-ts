@@ -84,11 +84,9 @@
       isNewDrug: boolean
     } = { isNewDrug: false }
   ) {
-    console.log("enter doGroupSelect");
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
-    console.log("after confirmAndClear");
     group.isSelected = true;
     data = data;
     const orig = group.clone();
