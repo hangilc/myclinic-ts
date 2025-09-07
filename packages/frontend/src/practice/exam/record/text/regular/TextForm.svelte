@@ -43,6 +43,7 @@
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
   import { shohowConv } from "./shohou-conv";
+  import { preprocessPrescInfoForConv } from "./preprocess-shohou-conv";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -691,6 +692,7 @@
       return;
     }
     let data: PrescInfoData = await shohouToPrescInfo(shohou, visit.visitId);
+    preprocessPrescInfoForConv(data);
     await shohowConv(data);
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,

@@ -51,14 +51,12 @@ async function usageConv(group: RP剤情報, drugUsageMap: Record<string, string
   if (!info) {
     return;
   }
-  console.log("info", info);
   group.用法レコード.用法名称 = info.name;
   group.用法レコード.用法コード = info.code;
 }
 
 async function resolveUsageInfoByName(name: string): Promise<UsageInfo | undefined> {
   const m = await api.findUsageMasterByUsageName(name);
-  console.log("m", m);
   if (!m) {
     return undefined;
   }
