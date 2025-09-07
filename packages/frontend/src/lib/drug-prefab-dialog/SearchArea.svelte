@@ -5,17 +5,22 @@
 
   export let onSelect: (data: DrugPrefab) => void;
   export let list: DrugPrefab[];
-  let mode: "all" | "selected" = "all";
+  let selector: (list: DrugPrefab[]) => DrugPrefab[] = a => a;
   let selected: DrugPrefab[] = [];
   let searchText = "";
 
+  $: updateSelected(list, selector);
+
+  function updateSelected(list: DrugPrefab[], selector: (list: DrugPrefab[]) => DrugPrefab[]) {
+    selected = selector(list);
+  }
+
   function doShowAll() {
-    selected = list;
+    selector = a => a;
   }
 
   function doSearch() {
-    selected = searchDrugPrefab(list, searchText);
-    mode = "selected";
+    selector = list => searchDrugPrefab(list, searchText);
   }
 
 </script>
@@ -28,7 +33,7 @@
   <Link onClick={doShowAll}>全例</Link>
 </div>
 <div class="list">
-  {#each mode === "all" ? list : selected as data (data.id)}
+  {#each selected as data (data.id)}
     <div class="group">
       <div>
         <DrugPrefabRep drugPrefab={data} onSelect={onSelect}/>

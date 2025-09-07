@@ -41,8 +41,8 @@
         },
         onDelete: function (): void {
           d.$destroy();
+          console.log("onDelete", value.id);
           list = list.filter((p) => p.id !== value.id);
-          list = list;
         },
       },
     });
