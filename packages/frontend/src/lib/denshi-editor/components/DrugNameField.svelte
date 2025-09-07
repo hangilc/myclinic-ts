@@ -162,15 +162,24 @@
     isNewDrug: boolean,
   ) {
     const origUnit = drug.薬品レコード.単位名;
+    const prefabDrugRecord = prefab.presc.薬品情報グループ[0].薬品レコード;
     Object.assign(
       drug.薬品レコード,
-      prefab.presc.薬品情報グループ[0].薬品レコード,
+      {
+        薬品コード種別: prefabDrugRecord.薬品コード種別,
+        薬品コード: prefabDrugRecord.薬品コード,
+        薬品名称: prefabDrugRecord.薬品名称,
+        単位名: prefabDrugRecord.単位名,
+      },
       {
         isEditing情報区分: false,
         isEditing薬品コード: false,
         isEditing分量: false,
       },
     );
+    if( isNewDrug ){
+      drug.薬品レコード.分量 = prefabDrugRecord.分量;
+    }
     const prefabUnit = prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
     if (!isNewDrug && origUnit !== "" && origUnit !== prefabUnit) {
       alert(
