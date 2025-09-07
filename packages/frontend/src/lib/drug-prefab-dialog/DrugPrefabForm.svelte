@@ -7,14 +7,21 @@
   import { emptyDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
 
   export let destroy: () => void;
+  export let editId: string | undefined = undefined;
 
   let list: DrugPrefab[] = [];
   let editArea: HTMLElement;
 
-  initList();
+  init();
 
-  async function initList() {
+  async function init() {
     list = await cache.getDrugPrefabList();
+    if( editId ){
+      const prefab = list.find(pre => pre.id === editId);
+      if( prefab ){
+        doSelect(prefab);
+      }
+    }
   }
 
   function doSelect(value: DrugPrefab) {

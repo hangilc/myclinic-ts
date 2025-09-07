@@ -3,12 +3,13 @@
   import DrugPrefabForm from "./DrugPrefabForm.svelte";
 
   export let destroy: () => void;
+  export let editId: string | undefined = undefined;
 
 </script>
 
 <Dialog2 {destroy} title="処方例編集">
   <div class="form">
-    <DrugPrefabForm destroy={destroy}/>
+    <DrugPrefabForm destroy={destroy} {editId} />
   </div>
 </Dialog2>
 

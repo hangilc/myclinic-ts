@@ -41,6 +41,7 @@
     ippoukaUsageSuppl,
     kanjakibouDrugSuppl,
   } from "../helper";
+  import DrugPrefabDialog from "@/lib/drug-prefab-dialog/DrugPrefabDialog.svelte";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -61,6 +62,7 @@
   let isConvertibleToPrefab = false;
   let addToDrugNameConv = true;
   let addToDrugUsageConv = true;
+  let editPrefabAfterEntered = false;
 
   $: updateIsConvertibleToPrefab(group, drug);
   $: updateAddToPrefab(drug);
@@ -155,6 +157,15 @@
     const list = await cache.getDrugPrefabList();
     list.push(prefab);
     await cache.setDrugPrefabList(list);
+    if( editPrefabAfterEntered ){
+      const d: DrugPrefabDialog = new DrugPrefabDialog({
+        target: document.body,
+        props: {
+          destroy: () => d.$destroy(),
+          editId: prefab.id,
+        }
+      })
+    }
   }
 
   async function doAddToDrugNameConv() {
@@ -331,6 +342,7 @@
   {#if isConvertibleToPrefab}
     <div>
       <input type="checkbox" bind:checked={addToPrefab} /> 処方例に追加
+      <input type="checkbox" bind:checked={editPrefabAfterEntered} /> 後編集
     </div>
   {/if}
   <Commands>

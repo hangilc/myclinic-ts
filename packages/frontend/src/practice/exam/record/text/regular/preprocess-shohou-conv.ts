@@ -1,4 +1,5 @@
-import type { PrescInfoData, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
+import { freeTextCode } from "@/lib/denshi-editor/helper";
+import type { PrescInfoData, RP剤情報, 薬品情報, 薬品補足レコード } from "@/lib/denshi-shohou/presc-info";
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 
 export function preprocessPrescInfoForConv(data: PrescInfoData) {
@@ -8,6 +9,16 @@ export function preprocessPrescInfoForConv(data: PrescInfoData) {
         preprocess(drug);
       }
     }
+    preprocessGroup(group);
+  }
+}
+
+function preprocessGroup(group: RP剤情報) {
+  if( group.用法レコード.用法コード !== "" ){
+    return;
+  }
+  if( group.剤形レコード.剤形区分 === "外用" ){
+    group.用法レコード.用法コード = freeTextCode;
   }
 }
 
