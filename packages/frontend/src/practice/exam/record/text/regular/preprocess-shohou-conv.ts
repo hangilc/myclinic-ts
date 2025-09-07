@@ -18,12 +18,38 @@ function preprocess(drug: 薬品情報) {
   const name = drug.薬品レコード.薬品名称;
   const amount = drug.薬品レコード.分量;
   const unit = drug.薬品レコード.単位名;
-  const procs: PreprocessProc[] = [procアローゼン, procパタノール]
+  const procs: PreprocessProc[] = [procLiquidOrPack]
   for (const proc of procs) {
     if (proc(drug, name, amount, unit)) {
       return;
     }
   }
+}
+
+function procLiquidOrPack(drug: 薬品情報, name: string, amount: string, unit: string): boolean {
+  const liquidOrPackMatch = /^(.+)(mL|ｍＬ|g|ｇ)$/.exec(name);
+  if (!liquidOrPackMatch) {
+    return false;
+  }
+  const liquidOrPackUnitAmountMatch = /([0-9０-９.．]+)$/.exec(liquidOrPackMatch[1]);
+  if (!liquidOrPackUnitAmountMatch) {
+    return false;
+  }
+  const unitAmount = Number(toHankaku(liquidOrPackUnitAmountMatch[1]));
+  if (isNaN(unitAmount)) {
+    return false;
+  }
+  const amountValue = Number(toHankaku(amount));
+  if (isNaN(amountValue)) {
+    return false;
+  }
+  drug.薬品レコード.分量 = toZenkaku((unitAmount * amountValue).toString());
+  drug.薬品レコード.単位名 = toZenkaku(liquidOrPackMatch[2]);
+  if (amountValue !== 1) {
+    const sup = `${toZenkaku(unitAmount.toString())}${toZenkaku(liquidOrPackMatch[2])}${toZenkaku(amountValue.toString())}${unit}`;
+    addSuppl(drug, sup);
+  }
+  return true;
 }
 
 function procパタノール(drug: 薬品情報, name: string, amount: string, unit: string): boolean {
@@ -33,7 +59,7 @@ function procパタノール(drug: 薬品情報, name: string, amount: string, u
       const total = 5 * a;
       drug.薬品レコード.分量 = toZenkaku(total.toString());
       drug.薬品レコード.単位名 = "ｍＬ";
-      if( a !== 1 ){
+      if (a !== 1) {
         addSuppl(drug, `５ｍＬ${toZenkaku(a.toString())}瓶`)
       }
     }
@@ -53,7 +79,7 @@ function procアローゼン(drug: 薬品情報, name: string, amount: string, u
       drug.薬品レコード.単位名 = "ｇ";
       if (a !== 1) {
         const hou = toZenkaku((total / 0.5).toString());
-        addSuppl(drug, `０．５ｇ${hou}包` );
+        addSuppl(drug, `０．５ｇ${hou}包`);
       }
       return true;
     }
