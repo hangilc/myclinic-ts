@@ -1925,6 +1925,14 @@ export default {
     );
   },
 
+  findUsageMasterByUsageName(name: string): Promise<m.UsageMaster | undefined> {
+    return get(
+      "find-usage-master-by-usage-name",
+      { name },
+      (a) => a ? a as m.UsageMaster : undefined
+    );
+  },
+
   getShohouFreqUsage(): Promise<FreqUsage[]> {
     return get("get-config", { name: "shohou-freq-usage" }, (a) => a ?? []);
   },

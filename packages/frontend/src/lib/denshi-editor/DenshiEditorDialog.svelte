@@ -47,6 +47,7 @@
   export let patientId: number;
   export let at: string;
   export let onEnter: (presc: PrescInfoData) => void;
+  console.log("orig", orig);
   let showValid: boolean = true;
   let data = PrescInfoDataEdit.fromObject(orig);
   let workareaService: WorkareaService = new WorkareaService();
