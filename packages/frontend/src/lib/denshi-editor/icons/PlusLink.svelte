@@ -1,7 +1,8 @@
 <script lang="ts">
-  export let onClick: () => void = () => undefined;
+  export let onClick: (event: MouseEvent) => void = () => undefined;
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <a href="javascript:void(0)" on:click={onClick}>
   <svg
     xmlns="http://www.w3.org/2000/svg"

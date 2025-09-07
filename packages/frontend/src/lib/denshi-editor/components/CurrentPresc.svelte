@@ -53,13 +53,26 @@
                 <ConvDrugValidity {drug} />
               {/if}
             </span>
-            <div on:click|stopPropagation={() => doDrugSelect(group, drug)} class="drug-rep">
+            <div
+              on:click|stopPropagation={() => doDrugSelect(group, drug)}
+              class="drug-rep"
+            >
               <DrugDisp {drug}>
                 <span slot="post">
                   {#if drugIndex === group.薬品情報グループ.length - 1}
-                    <PlusLink onClick={() => doAddDrug(group)} />
+                    <PlusLink
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        doAddDrug(group);
+                      }}
+                    />
                     {#if group.薬品情報グループ.length > 1}
-                      <ArrowUpDownLink onClick={() => doDrugReorder(group)} />
+                      <ArrowUpDownLink
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          doDrugReorder(group);
+                        }}
+                      />
                     {/if}
                   {/if}
                 </span>

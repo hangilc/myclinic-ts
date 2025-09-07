@@ -99,7 +99,7 @@
   }
 
   function drugRep(drug: 薬品情報Edit): string {
-    return drug.薬品レコード.薬品名称;
+    return drug.薬品レコード.薬品名称 || "（未設定）";
   }
 
   function doEnter() {

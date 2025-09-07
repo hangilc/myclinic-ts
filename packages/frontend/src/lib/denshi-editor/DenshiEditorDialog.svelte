@@ -47,7 +47,6 @@
   export let patientId: number;
   export let at: string;
   export let onEnter: (presc: PrescInfoData) => void;
-  console.log("orig", orig);
   let showValid: boolean = true;
   let data = PrescInfoDataEdit.fromObject(orig);
   let workareaService: WorkareaService = new WorkareaService();
@@ -85,9 +84,11 @@
       isNewDrug: boolean
     } = { isNewDrug: false }
   ) {
+    console.log("enter doGroupSelect");
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    console.log("after confirmAndClear");
     group.isSelected = true;
     data = data;
     const orig = group.clone();
@@ -367,10 +368,7 @@
   function doAddDrugToGroup(group: RP剤情報Edit) {
     const 薬品情報 = 薬品情報Edit.fromObject(createBlank薬品情報());
     initIsEditingOfDrug(薬品情報);
-    // 薬品情報.薬品レコード.isEditing薬品コード = false;
-    // 薬品情報.薬品レコード.isEditing分量 = false;
-    group.薬品情報グループ.push(薬品情報);
-    doGroupSelect(group, 薬品情報);
+    doGroupSelect(group, 薬品情報, { isNewDrug: true });
   }
 
   async function doGroupReorder() {

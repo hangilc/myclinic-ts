@@ -9,7 +9,7 @@
 </script>
 
 <div>
-  <span>{name}</span>
+  <span>{name || "（未設定）"}</span>
   <span class="no-break">{amount}</span>
   {#if drug.不均等レコード}
     （{unevenDisp(drug.不均等レコード)}）
