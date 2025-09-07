@@ -2,6 +2,7 @@ import type { PrescInfoData, RP剤情報, 薬品レコード } from "@/lib/densh
 import api from "@/lib/api";
 import { issueDateOfPrescInfoAsSqlDate } from "./denshi-shohou/presc-info-helper";
 import { toHankaku } from "./zenkaku";
+import { freeTextCode } from "./denshi-editor/helper";
 
 export async function validatePrescinfoData(data: PrescInfoData): Promise<string | undefined> {
   let at = issueDateOfPrescInfoAsSqlDate(data);
@@ -123,6 +124,9 @@ export async function confirmDrugCodesOfGroups(groups: RP剤情報[], at: string
 export async function confirmUsageCode(code: string, text: string): Promise<undefined | string> {
   if (code === "") {
     return `用法コードが設定されていません：${text}`;
+  }
+  if( code === freeTextCode ){
+    return undefined;
   }
   try {
     const m = await api.getUsageMaster(code);

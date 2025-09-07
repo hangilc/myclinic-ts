@@ -179,6 +179,7 @@
     }
     drug.ippanmei = master.ippanmei;
     drug.ippanmeicode = master.ippanmeicode;
+    onPrefab(prefab.presc);
   }
 
   function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {

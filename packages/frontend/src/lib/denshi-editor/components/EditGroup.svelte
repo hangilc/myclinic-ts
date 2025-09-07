@@ -17,7 +17,7 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
-  import type { RP剤情報 } from "@/lib/denshi-shohou/presc-info";
+  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import JohoKubunField from "./JohoKubunField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import UnevenField from "./UnevenField.svelte";
@@ -114,6 +114,9 @@
     if (drug) {
       drug = drug;
       if (isNewDrug) {
+        const prefabDrug: 薬品情報 = prefab.薬品情報グループ[0];
+        drug.不均等レコード = prefabDrug.不均等レコード ? 不均等レコードEdit.fromObject(prefabDrug.不均等レコード) : undefined;
+        drug.薬品補足レコード = prefabDrug.薬品補足レコード?.map(sup => 薬品補足レコードEdit.fromObject(sup));
         Object.assign(group, {
           剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
           用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
