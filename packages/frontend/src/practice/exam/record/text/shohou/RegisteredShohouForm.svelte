@@ -12,12 +12,9 @@
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
   import {
-  checkKouhiCompat,
-    copyPrescInfoDataToOtherVisit,
-    TextMemoWrapper,
-    type ShohouTextMemo,
+  TextMemoWrapper,
   } from "@/lib/text-memo";
-  import { clear保険区分レコード } from "@/lib/denshi-shohou/presc-info-helper";
+  import { copyTextToOtherVisit } from "../text-helper";
 
   export let shohou: PrescInfoData;
   export let prescriptionId: string;
@@ -76,22 +73,8 @@
   async function doCopy() {
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
-      const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(
-        shohou,
-        targetVisitId,
-      );
-      const warn = checkKouhiCompat(shohou, dstData);
-      if (typeof warn === "string") {
-        alert(`警告：${warn}`);
-        clear保険区分レコード(dstData.RP剤情報グループ);
-      }
-      const dstMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou: dstData,
-        prescriptionId: undefined,
-      };
-      TextMemoWrapper.setTextMemo(t, dstMemo);
+      const src = await api.getText(textId);
+      const t = await copyTextToOtherVisit(src, targetVisitId);
       api.enterText(t);
       onCopied();
       // const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
