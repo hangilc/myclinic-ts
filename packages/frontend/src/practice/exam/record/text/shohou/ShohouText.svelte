@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Kouhi, Text } from "myclinic-model";
+  import { Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
   import api from "@/lib/api";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
@@ -14,7 +14,6 @@
 
   export let text: Text;
   export let at: string;
-  export let kouhiList: Kouhi[];
   export let patientId: number;
   let textId = text.textId;
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
@@ -163,7 +162,6 @@
         <ShohouTextForm
           {shohou}
           {at}
-          {kouhiList}
           {textId}
           {patientId}
           onCancel={() => (mode = "disp")}

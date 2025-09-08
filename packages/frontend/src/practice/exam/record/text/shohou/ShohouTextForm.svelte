@@ -5,7 +5,6 @@
     type PrescInfoData,
   } from "@/lib/denshi-shohou/presc-info";
   // import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
-  import type { Kouhi } from "myclinic-model";
   import { denshiToPrint, denshiToPrint2 } from "./denshi-to-print";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
@@ -36,7 +35,6 @@
   export let shohou: PrescInfoData;
   export let patientId: number;
   export let at: string;
-  export let kouhiList: Kouhi[];
   export let textId: number;
   export let onCancel: () => void;
   export let onDone: () => void;
@@ -46,8 +44,6 @@
     prescriptionId: string,
   ) => void;
   export let onCopied: () => void;
-
-  console.log("kouhiList should be used", kouhiList);
 
   function doEdit() {
     const d: DenshiEditorDialog = new DenshiEditorDialog({
