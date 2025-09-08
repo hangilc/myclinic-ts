@@ -32,7 +32,6 @@
     type PrescInfoData,
     type 公費レコード,
   } from "@/lib/denshi-shohou/presc-info";
-  // import DenshiHenkanDialog from "./DenshiHenkanDialog.svelte";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
   import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { isKensa } from "./helper";

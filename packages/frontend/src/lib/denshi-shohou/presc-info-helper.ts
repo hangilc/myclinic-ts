@@ -38,3 +38,11 @@ export function createBlank薬品情報(): 薬品情報 {
     }
   };
 }
+
+export function clear保険区分レコード(groups: RP剤情報[]) {
+  for(const group of groups){
+    for(const drug of group.薬品情報グループ){
+      drug.負担区分レコード = undefined;
+    }
+  }
+}

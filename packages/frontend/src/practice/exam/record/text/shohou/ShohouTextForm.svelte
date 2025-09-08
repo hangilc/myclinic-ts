@@ -26,8 +26,8 @@
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Hotline, Text } from "myclinic-model";
   import {
-    checkMemoCompat,
-    copyTextMemo,
+  checkKouhiCompat,
+    copyPrescInfoDataToOtherVisit,
     TextMemoWrapper,
     type ShohouTextMemo,
   } from "@/lib/text-memo";
@@ -37,6 +37,7 @@
   } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
+  import { clear保険区分レコード } from "@/lib/denshi-shohou/presc-info-helper";
 
   export let shohou: PrescInfoData;
   export let patientId: number;
@@ -184,23 +185,47 @@
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
       const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      const curMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou,
-        prescriptionId: undefined,
-      };
-      const newMemo = await copyTextMemo(curMemo, targetVisitId);
-      const warn = checkMemoCompat(curMemo, newMemo);
+      const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
+      const warn = checkKouhiCompat(shohou, dstData);
       if (typeof warn === "string") {
         alert(`警告：${warn}`);
+        clear保険区分レコード(dstData.RP剤情報グループ);
       }
-      TextMemoWrapper.setTextMemo(t, newMemo);
+      const dstMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou: dstData,
+        prescriptionId: undefined,
+      }
+      TextMemoWrapper.setTextMemo(t, dstMemo);
       api.enterText(t);
       onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
     }
   }
+
+  // async function doCopy__orig() {
+  //   const targetVisitId = getCopyTarget();
+  //   if (targetVisitId !== null) {
+  //     const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+  //     const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
+  //     const curMemo: ShohouTextMemo = {
+  //       kind: "shohou",
+  //       shohou,
+  //       prescriptionId: undefined,
+  //     };
+  //     const newMemo = await copyTextMemo(curMemo, targetVisitId);
+  //     const warn = checkMemoCompat(curMemo, newMemo);
+  //     if (typeof warn === "string") {
+  //       alert(`警告：${warn}`);
+  //     }
+  //     TextMemoWrapper.setTextMemo(t, newMemo);
+  //     api.enterText(t);
+  //     onCopied();
+  //   } else {
+  //     alert("コピー先を見つけられませんでした。");
+  //   }
+  // }
 
   async function doOldShohou() {
     let c = denshiToOldShohou(shohou);

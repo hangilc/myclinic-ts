@@ -79,7 +79,7 @@
   <Field>
     <FieldTitle>公費</FieldTitle>
     <FieldForm>
-      {#if !drug.負担区分レコード?.isEditing()}
+      {#if !drug.負担区分レコード?.isEditing([])}
         <div class="rep">
           {#if kouhiSet.kouhi1}
             <span on:click={doKouhi1Click}

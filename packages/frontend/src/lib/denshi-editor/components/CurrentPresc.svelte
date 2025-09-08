@@ -157,7 +157,4 @@
     border: 2px solid green;
   }
 
-  .drug-selected {
-    text-decoration: underline;
-  }
 </style>

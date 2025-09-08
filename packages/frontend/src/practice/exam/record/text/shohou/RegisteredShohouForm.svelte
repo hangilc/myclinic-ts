@@ -12,11 +12,12 @@
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
   import {
-    checkMemoCompat,
-    copyTextMemo,
+  checkKouhiCompat,
+    copyPrescInfoDataToOtherVisit,
     TextMemoWrapper,
     type ShohouTextMemo,
   } from "@/lib/text-memo";
+  import { clear保険区分レコード } from "@/lib/denshi-shohou/presc-info-helper";
 
   export let shohou: PrescInfoData;
   export let prescriptionId: string;
@@ -76,19 +77,37 @@
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
       const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      const curMemo: ShohouTextMemo = {
-        kind: "shohou",
+      const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(
         shohou,
-        prescriptionId,
-      };
-      const newMemo = await copyTextMemo(curMemo, targetVisitId);
-      const warn = checkMemoCompat(curMemo, newMemo);
+        targetVisitId,
+      );
+      const warn = checkKouhiCompat(shohou, dstData);
       if (typeof warn === "string") {
         alert(`警告：${warn}`);
+        clear保険区分レコード(dstData.RP剤情報グループ);
       }
-      TextMemoWrapper.setTextMemo(t, newMemo);
+      const dstMemo: ShohouTextMemo = {
+        kind: "shohou",
+        shohou: dstData,
+        prescriptionId: undefined,
+      };
+      TextMemoWrapper.setTextMemo(t, dstMemo);
       api.enterText(t);
       onCopied();
+      // const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+      // const curMemo: ShohouTextMemo = {
+      //   kind: "shohou",
+      //   shohou,
+      //   prescriptionId,
+      // };
+      // const newMemo = await copyTextMemo(curMemo, targetVisitId);
+      // const warn = checkMemoCompat(curMemo, newMemo);
+      // if (typeof warn === "string") {
+      //   alert(`警告：${warn}`);
+      // }
+      // TextMemoWrapper.setTextMemo(t, newMemo);
+      // api.enterText(t);
+      // onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
     }

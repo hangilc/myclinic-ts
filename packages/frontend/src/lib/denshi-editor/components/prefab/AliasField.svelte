@@ -37,6 +37,7 @@
     if( index >= 0 ){
       alias.splice(index, 1);
       alias = alias;
+      onFieldChange();
     }
   }
 
@@ -44,6 +45,7 @@
     a.value = value;
     a.isEditing = false;
     alias = alias;
+    onFieldChange();
   }
 </script>
 
@@ -68,13 +70,4 @@
     cursor: pointer;
   }
 
-  .input {
-    width: 20em;
-  }
-
-  .with-icons {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-  }
 </style>
