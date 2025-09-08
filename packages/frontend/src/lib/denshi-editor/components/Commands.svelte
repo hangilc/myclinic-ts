@@ -5,6 +5,7 @@
 
   export let onAdd: () => void;
   export let onEnter: () => void;
+  export let onBatch: () => void;
   export let onSearch: () => void;
   export let onPaste: () => void;
   export let onCancel: () => void;
@@ -14,6 +15,7 @@
 <div class="top">
   <PlusLink onClick={onAdd}/>
   <button on:click={onEnter}>入力</button>
+  <button on:click={onBatch}>選択</button>
   <button on:click={onSearch}>検索</button>
   <button on:click={onPaste}>貼付</button>
   <button on:click={onCancel}>キャンセル</button>

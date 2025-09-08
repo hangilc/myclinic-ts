@@ -31,14 +31,12 @@
   import { KouhiSet } from "./kouhi-set";
   import ChooseKouhi from "./components/ChooseKouhi.svelte";
   import EditGroup from "./components/EditGroup.svelte";
-  import {
-    initIsEditingOfDrug,
-    initIsEditingUsage,
-  } from "./helper";
+  import { initIsEditingOfDrug, initIsEditingUsage } from "./helper";
   import { createEmpty薬品情報 } from "../denshi-helper";
   import DrugPrefabDialog from "../drug-prefab-dialog/DrugPrefabDialog.svelte";
   import DrugNameConvDialog from "../drug-name-conv/DrugNameConvDialog.svelte";
   import DrugUsageConvDialog from "../drug-usage-conv/DrugUsageConvDialog.svelte";
+  import Batch from "./components/Batch.svelte";
 
   export let title: string;
   export let destroy: () => void;
@@ -80,8 +78,8 @@
     group: RP剤情報Edit,
     drug: 薬品情報Edit | undefined,
     opt: {
-      isNewDrug: boolean
-    } = { isNewDrug: false }
+      isNewDrug: boolean;
+    } = { isNewDrug: false },
   ) {
     if (!(await workareaService.confirmAndClear())) {
       return;
@@ -123,20 +121,26 @@
       const editingCauses: string[] = [];
       if (group.isEditing(editingCauses) || drug?.isEditing(editingCauses)) {
         // alert("薬品が編集中です");
-        const ok = confirm("薬品が編集中ですがこのまま続けますか？\n" + editingCauses.join("・"));
-        if( !ok ){
+        const ok = confirm(
+          "薬品が編集中ですがこのまま続けますか？\n" + editingCauses.join("・"),
+        );
+        if (!ok) {
           return false;
         }
       }
       if (drug && !group.includesDrug(drug.id)) {
         // alert("追加されていない薬品があります。");
-        const ok = confirm("追加されていない薬品がありますがこのまま続けますか・");
-        if( !ok ){
+        const ok = confirm(
+          "追加されていない薬品がありますがこのまま続けますか・",
+        );
+        if (!ok) {
           return false;
         }
       }
       if (group.isModified(orig)) {
-        let ok = confirm("変更されている薬品があります。保存せずにこのまま進みますか？");
+        let ok = confirm(
+          "変更されている薬品があります。保存せずにこのまま進みますか？",
+        );
         return ok;
         // let ok = confirm(
         //   "変更されて保存されていない薬剤があります。保存して進みますか？",
@@ -412,6 +416,27 @@
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
+  async function doBatch() {
+    if (!(await workareaService.confirmAndClear())) {
+      return;
+    }
+    let w: Batch = new Batch({
+      target: wa,
+      props: {
+        groups: data.RP剤情報グループ,
+        onClose: () => {
+          workareaService.clear();
+        },
+        onModified: () => {
+          workareaService.clear();
+          data = data;
+        },
+      },
+    });
+    workareaService.setClearByDestroy(() => w.$destroy());
+    workareaService.setConfirm(async (): Promise<boolean> => true);
+  }
+
   function doGroupManip(_group: RP剤情報Edit) {}
 
   function doDrugNameConvEditor() {
@@ -419,8 +444,8 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-      }
-    })
+      },
+    });
   }
 
   function doDrugUsageConvEditor() {
@@ -428,8 +453,8 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-      }
-    })
+      },
+    });
   }
 
   function doDrugPrefabEditor() {
@@ -437,8 +462,8 @@
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-      }
-    })
+      },
+    });
   }
 
   function wrapSubCommand(f: () => void): () => void {
@@ -447,7 +472,6 @@
       f();
     };
   }
-
 </script>
 
 <Dialog2 {title} {destroy}>
@@ -456,6 +480,7 @@
       <Commands
         onAdd={doAdd}
         onEnter={doEnter}
+        onBatch={doBatch}
         onSearch={doSearch}
         onCancel={doCancel}
         onPaste={doPaste}
