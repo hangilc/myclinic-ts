@@ -20,7 +20,6 @@
   import EditExamInfo from "./components/EditExamInfo.svelte";
   import Paste from "./components/Paste.svelte";
   import PrevSearch from "./components/PrevSearch.svelte";
-  import Example from "./components/Example.svelte";
   import {
     createBlank薬品情報,
     createEmptyRP剤情報,
@@ -334,27 +333,6 @@
     });
   }
 
-  async function doExample() {
-    if (!(await workareaService.confirmAndClear())) {
-      return;
-    }
-    const w: Example = new Example({
-      target: wa,
-      props: {
-        destroy: () => workareaService.clear(),
-        onEnter: (value: RP剤情報) => {
-          const edit = RP剤情報Edit.fromObject(value);
-          data.RP剤情報グループ.push(edit);
-          data = data;
-        },
-      },
-    });
-    workareaService.setClearByDestroy(() => w.$destroy());
-    workareaService.setConfirm(async (): Promise<boolean> => {
-      return true;
-    });
-  }
-
   async function doAdd() {
     const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
     const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
@@ -481,7 +459,6 @@
         onSearch={doSearch}
         onCancel={doCancel}
         onPaste={doPaste}
-        onExample={doExample}
         bind:showSubCommands
       />
       {#if showSubCommands}
