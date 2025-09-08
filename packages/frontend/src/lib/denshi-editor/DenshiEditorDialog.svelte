@@ -420,6 +420,15 @@
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
+    function clearSelection() {
+      data.RP剤情報グループ.forEach((group) => {
+        group.isSelected = false;
+        group.薬品情報グループ.forEach((drug) => {
+          drug.isSelected = false;
+        });
+      });
+    }
+    clearSelection();
     let w: Batch = new Batch({
       target: wa,
       props: {
@@ -428,12 +437,14 @@
           workareaService.clear();
         },
         onModified: () => {
-          workareaService.clear();
           data = data;
         },
       },
     });
-    workareaService.setClearByDestroy(() => w.$destroy());
+    workareaService.setClearByDestroy(() => {
+      clearSelection();
+      w.$destroy();
+  });
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 
