@@ -18,12 +18,11 @@ export async function copyTextToOtherVisit(
   });
   const curMemo = TextMemoWrapper.fromText(src).getMemo();
   if (curMemo) {
-    const t: Text = { textId: 0, visitId: targetVisitId, content: src.content };
     const srcMemo = TextMemoWrapper.fromText(src).getMemo();
     if (srcMemo) {
       let dstMemo: TextMemo | undefined = srcMemo;
       if (srcMemo.kind === "shohou") {
-        t.content = "";
+        dst.content = "";
         const srcData: PrescInfoData = srcMemo.shohou;
         const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(
           srcData,
@@ -48,7 +47,7 @@ export async function copyTextToOtherVisit(
       if( dstMemo && dstMemo.kind === "shohou" && dstMemo.prescriptionId ){
         throw new Error("invalid prescriptionId");
       }
-      TextMemoWrapper.setTextMemo(t, dstMemo);
+      TextMemoWrapper.setTextMemo(dst, dstMemo);
     }
   }
   return dst;

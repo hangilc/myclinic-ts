@@ -133,51 +133,51 @@ export async function copyPrescInfoDataToOtherVisit(
   return dst;
 }
 
-export async function copyTextMemo(
-  src: TextMemo | undefined,
-  targetVisitId: number
-): Promise<TextMemo | undefined> {
-  if (src == undefined) {
-    return undefined;
-  } else {
-    if (src.kind === "shohou") {
-      const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-      Object.assign(dstShohou, {
-        引換番号: undefined,
-        RP剤情報グループ: src.shohou.RP剤情報グループ,
-        提供情報レコード: src.shohou.提供情報レコード,
-        備考レコード: src.shohou.備考レコード,
-      });
-      const dstMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou: dstShohou,
-        prescriptionId: undefined,
-      };
-      return dstMemo;
-    } else if (src.kind === "shohou-conv") {
-      alert("not supported: shohou-conv");
-      return undefined;
-      // const visit = await api.getVisit(targetVisitId);
-      // if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
-      //   return undefined;
-      // }
-      // const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-      // Object.assign(dstShohou, {
-      //   引換番号: undefined,
-      //   RP剤情報グループ: src.shohou.RP剤情報グループ,
-      //   提供情報レコード: src.shohou.提供情報レコード,
-      //   備考レコード: src.shohou.備考レコード,
-      // });
-      // const dstMemo: ShohouConvTextMemo = {
-      //   kind: "shohou-conv",
-      //   shohou: dstShohou,
-      // };
-      // return dstMemo;
-    } else {
-      throw new Error("cannot happen");
-    }
-  }
-}
+// export async function copyTextMemo(
+//   src: TextMemo | undefined,
+//   targetVisitId: number
+// ): Promise<TextMemo | undefined> {
+//   if (src == undefined) {
+//     return undefined;
+//   } else {
+//     if (src.kind === "shohou") {
+//       const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+//       Object.assign(dstShohou, {
+//         引換番号: undefined,
+//         RP剤情報グループ: src.shohou.RP剤情報グループ,
+//         提供情報レコード: src.shohou.提供情報レコード,
+//         備考レコード: src.shohou.備考レコード,
+//       });
+//       const dstMemo: ShohouTextMemo = {
+//         kind: "shohou",
+//         shohou: dstShohou,
+//         prescriptionId: undefined,
+//       };
+//       return dstMemo;
+//     } else if (src.kind === "shohou-conv") {
+//       alert("not supported: shohou-conv");
+//       return undefined;
+//       // const visit = await api.getVisit(targetVisitId);
+//       // if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
+//       //   return undefined;
+//       // }
+//       // const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+//       // Object.assign(dstShohou, {
+//       //   引換番号: undefined,
+//       //   RP剤情報グループ: src.shohou.RP剤情報グループ,
+//       //   提供情報レコード: src.shohou.提供情報レコード,
+//       //   備考レコード: src.shohou.備考レコード,
+//       // });
+//       // const dstMemo: ShohouConvTextMemo = {
+//       //   kind: "shohou-conv",
+//       //   shohou: dstShohou,
+//       // };
+//       // return dstMemo;
+//     } else {
+//       throw new Error("cannot happen");
+//     }
+//   }
+// }
 
 export function checkKouhiCompat(
   src: PrescInfoData,
