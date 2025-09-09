@@ -1,12 +1,10 @@
 <script lang="ts">
   import {
+  RP剤情報Edit,
     不均等レコードEdit,
-    剤形レコードEdit,
-    用法レコードEdit,
     用法補足レコードEdit,
     薬品情報Edit,
     薬品補足レコードEdit,
-    type RP剤情報Edit,
   } from "../denshi-edit";
   import type { KouhiSet } from "../kouhi-set";
   import DrugUsageField from "./DrugUsageField.svelte";
@@ -17,7 +15,6 @@
   import Title from "./workarea/Title.svelte";
   import Workarea from "./workarea/Workarea.svelte";
   import ZaikeiKubunField from "./ZaikeiKubunField.svelte";
-  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
   import JohoKubunField from "./JohoKubunField.svelte";
   import DrugNameField from "./DrugNameField.svelte";
   import UnevenField from "./UnevenField.svelte";
@@ -112,26 +109,30 @@
     }
   }
 
-  function doPrefab(prefab: RP剤情報) {
-    if (drug) {
-      drug = drug;
-      if (isNewDrug) {
-        const prefabDrug: 薬品情報 = prefab.薬品情報グループ[0];
-        drug.不均等レコード = prefabDrug.不均等レコード ? 不均等レコードEdit.fromObject(prefabDrug.不均等レコード) : undefined;
-        drug.薬品補足レコード = prefabDrug.薬品補足レコード?.map(sup => 薬品補足レコードEdit.fromObject(sup));
-        Object.assign(group, {
-          剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
-          用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
-          用法補足レコード: prefab.用法補足レコード
-            ? prefab.用法補足レコード.map((r) =>
-                用法補足レコードEdit.fromObject(r),
-              )
-            : undefined,
-        });
-        group = group;
-      }
-    }
-  }
+  // function doPrefab(prefab: RP剤情報) {
+  //   if (drug) {
+  //     drug = drug;
+  //     if (isNewDrug) {
+  //       const prefabDrug: 薬品情報 = prefab.薬品情報グループ[0];
+  //       drug.不均等レコード = prefabDrug.不均等レコード
+  //         ? 不均等レコードEdit.fromObject(prefabDrug.不均等レコード)
+  //         : undefined;
+  //       drug.薬品補足レコード = prefabDrug.薬品補足レコード?.map((sup) =>
+  //         薬品補足レコードEdit.fromObject(sup),
+  //       );
+  //       Object.assign(group, {
+  //         剤形レコード: 剤形レコードEdit.fromObject(prefab.剤形レコード),
+  //         用法レコード: 用法レコードEdit.fromObject(prefab.用法レコード),
+  //         用法補足レコード: prefab.用法補足レコード
+  //           ? prefab.用法補足レコード.map((r) =>
+  //               用法補足レコードEdit.fromObject(r),
+  //             )
+  //           : undefined,
+  //       });
+  //       group = group;
+  //     }
+  //   }
+  // }
 
   async function addAlias(prefab: DrugPrefab) {
     const name = prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称;
@@ -157,14 +158,14 @@
     const list = await cache.getDrugPrefabList();
     list.push(prefab);
     await cache.setDrugPrefabList(list);
-    if( editPrefabAfterEntered ){
+    if (editPrefabAfterEntered) {
       const d: DrugPrefabDialog = new DrugPrefabDialog({
         target: document.body,
         props: {
           destroy: () => d.$destroy(),
           editId: prefab.id,
-        }
-      })
+        },
+      });
     }
   }
 
@@ -295,8 +296,13 @@
       {at}
       {isNewDrug}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
-      onFieldChange={doDrugChange}
-      onPrefab={doPrefab}
+      onDrugChange={doDrugChange}
+      onGroupChangeRequest={(f) => {
+        const groupObj = group.toObject();
+        f(groupObj);
+        RP剤情報Edit.fromObject(groupObj).assignContentTo(group);
+        group = group;
+      }}
     />
     <UnevenField
       bind:不均等レコード={drug.不均等レコード}

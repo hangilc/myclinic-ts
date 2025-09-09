@@ -32,6 +32,7 @@
         prefab: value,
         at: at,
         kouhiSet: KouhiSet.createEmpty(),
+        isNewDrug: false,
         onCancel: function (): void {
           d.$destroy();
         },
@@ -57,6 +58,7 @@
         prefab: prefab,
         at: at,
         kouhiSet: KouhiSet.createEmpty(),
+        isNewDrug: true,
         onCancel: function (): void {
           d.$destroy();
         },

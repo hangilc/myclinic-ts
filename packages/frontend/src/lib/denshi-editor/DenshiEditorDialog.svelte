@@ -433,18 +433,20 @@
       target: wa,
       props: {
         groups: data.RP剤情報グループ,
-        onClose: () => {
+        onCancel: () => {
           workareaService.clear();
         },
-        onModified: () => {
+        onEnter: (value: RP剤情報Edit[]) => {
+          data.RP剤情報グループ = value;
           data = data;
+          workareaService.clear();
         },
       },
     });
     workareaService.setClearByDestroy(() => {
       clearSelection();
       w.$destroy();
-  });
+    });
     workareaService.setConfirm(async (): Promise<boolean> => true);
   }
 

@@ -1,6 +1,10 @@
 <script lang="ts">
   import type { IyakuhinMaster, KizaiMaster } from "myclinic-model";
-  import type { 薬品情報Edit } from "../denshi-edit";
+  import {
+    不均等レコードEdit,
+    薬品補足レコードEdit,
+    type 薬品情報Edit,
+  } from "../denshi-edit";
   import CancelLink from "../icons/CancelLink.svelte";
   import EraserLink from "../icons/EraserLink.svelte";
   import SearchLink from "../icons/SearchLink.svelte";
@@ -17,23 +21,21 @@
     iyakuhinResultRep,
     type SearchIyakuhinResult,
   } from "./drug-name-field/drug-name-field-types";
-  import {
-    searchDrugPrefab,
-    type DrugPrefab,
-    type PrescOfPrefab,
-  } from "@/lib/drug-prefab";
+  import { searchDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import { cache } from "@/lib/cache";
+  import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
 
   export let drug: 薬品情報Edit;
   export let isNewDrug: boolean;
   export let isEditing: boolean;
   export let at: string;
-  export let onFieldChange: () => void;
+  export let onDrugChange: () => void;
+  export let onGroupChangeRequest: (req: (g: RP剤情報) => void) => void;
   export const focus: () => void = async () => {
     await tick();
     inputElement?.focus();
   };
-  export let onPrefab: (prefab: PrescOfPrefab) => void;
+  // export let onPrefab: (prefab: PrescOfPrefab) => void;
   let searchText = drug.薬品レコード.薬品名称;
   let inputElement: HTMLInputElement;
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];
@@ -177,7 +179,7 @@
         isEditing分量: false,
       },
     );
-    if( isNewDrug ){
+    if (isNewDrug) {
       drug.薬品レコード.分量 = prefabDrugRecord.分量;
     }
     const prefabUnit = prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
@@ -188,7 +190,23 @@
     }
     drug.ippanmei = master.ippanmei;
     drug.ippanmeicode = master.ippanmeicode;
-    onPrefab(prefab.presc);
+    // onPrefab(prefab.presc);
+    if (isNewDrug) {
+      const prefabDrug: 薬品情報 = prefab.presc.薬品情報グループ[0];
+      drug.不均等レコード = prefabDrug.不均等レコード
+        ? 不均等レコードEdit.fromObject(prefabDrug.不均等レコード)
+        : undefined;
+      drug.薬品補足レコード = prefabDrug.薬品補足レコード?.map((sup) =>
+        薬品補足レコードEdit.fromObject(sup),
+      );
+      onGroupChangeRequest((g: RP剤情報) => {
+        Object.assign(g, {
+          剤形レコード: prefab.presc.剤形レコード,
+          用法レコード: prefab.presc.用法レコード,
+          用法補足レコード: prefab.presc.用法補足レコード,
+        });
+      });
+    }
   }
 
   function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
@@ -202,7 +220,7 @@
     searchText = "";
     searchIyakuhinResult = [];
     isEditing = false;
-    onFieldChange();
+    onDrugChange();
   }
 
   function doKizaiMasterSelect(m: KizaiMaster) {
@@ -217,14 +235,14 @@
     searchText = "";
     searchKizaiResult = [];
     isEditing = false;
-    onFieldChange();
+    onDrugChange();
   }
 
   function convertToIppanmei() {
     drug.convertToIppanmei();
     isEditing = false;
     drug = drug;
-    onFieldChange();
+    onDrugChange();
   }
 </script>
 

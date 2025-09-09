@@ -15,21 +15,26 @@
   import DrugSupplField from "./DrugSupplField.svelte";
   import KouhiField from "./KouhiField.svelte";
   import {
-  AliasEdit,
+    AliasEdit,
+    convertRP剤情報ToPrescOfPrefab,
     DrugPrefabEdit,
     PrescOfPrefabEdit,
     type DrugPrefab,
-    type PrescOfPrefab,
   } from "@/lib/drug-prefab";
   import AliasField from "./prefab/AliasField.svelte";
   import TagField from "./prefab/TagField.svelte";
   import CommentField from "./prefab/CommentField.svelte";
   import SmallLink from "./workarea/SmallLink.svelte";
-  import { 不均等レコードEdit, 用法補足レコードEdit, 薬品補足レコードEdit } from "../denshi-edit";
+  import {
+    不均等レコードEdit,
+    用法補足レコードEdit,
+    薬品補足レコードEdit,
+  } from "../denshi-edit";
 
   export let prefab: DrugPrefab;
   export let at: string;
   export let kouhiSet: KouhiSet;
+  export let isNewDrug: boolean;
   export let onCancel: () => void;
   export let onEnter: () => void;
   export let onDelete: () => void;
@@ -57,10 +62,10 @@
     onDelete();
   }
 
-  function doPrefab(value: PrescOfPrefab) {
-    edit.presc = PrescOfPrefabEdit.fromPrescOfPrefab(value);
-    edit = edit;
-  }
+  // function doPrefab(value: PrescOfPrefab) {
+  //   edit.presc = PrescOfPrefabEdit.fromPrescOfPrefab(value);
+  //   edit = edit;
+  // }
 
   function doPrefabChange() {
     onGroupChange();
@@ -114,12 +119,21 @@
   <DrugNameField
     drug={edit.presc.薬品情報グループ[0]}
     {at}
-    isNewDrug={false}
+    {isNewDrug}
     bind:isEditing={
       edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード
     }
-    onPrefab={doPrefab}
-    onFieldChange={doDrugChange}
+    onDrugChange={doDrugChange}
+    onGroupChangeRequest={(f) => {
+      let obj = edit.presc.toObject();
+      console.log("obj before", obj);
+      f(obj);
+      console.log("obj after");
+      edit.presc = PrescOfPrefabEdit.fromPrescOfPrefab(
+        convertRP剤情報ToPrescOfPrefab(obj),
+      );
+      edit = edit;
+    }}
   />
   <UnevenField
     bind:不均等レコード={edit.presc.薬品情報グループ[0].不均等レコード}

@@ -123,7 +123,6 @@
         searchText,
         `<span class="presc-history-dialog-search-hit">${searchText}</span>`,
       );
-      console.log("content", content);
     }
     return content.replaceAll("\n", "<br />");
   }

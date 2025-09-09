@@ -110,13 +110,13 @@ export class 薬品レコードEdit implements 薬品レコード {
   }
 
   isEditing(causes: string[]): boolean {
-    if(this.isEditing情報区分){
+    if (this.isEditing情報区分) {
       causes.push("情報区分");
     }
-    if( this.isEditing薬品コード ){
-      causes.push("薬品コード")
+    if (this.isEditing薬品コード) {
+      causes.push("薬品コード");
     }
-    if( this.isEditing分量 ) {
+    if (this.isEditing分量) {
       causes.push("分量");
     }
     return (
@@ -449,17 +449,20 @@ export class 薬品情報Edit implements 薬品情報 {
   isEditing(causes: string[]): boolean {
     let drugCauses: string[] = [];
     if (this.薬品レコード.isEditing(drugCauses)) {
-      causes.push(...drugCauses.map(cause => `薬品レコード.${cause}`));
+      causes.push(...drugCauses.map((cause) => `薬品レコード.${cause}`));
     }
     if (this.isEditing不均等レコード) {
       causes.push("不均等レコード");
     }
-    if (this.薬品補足レコード && this.薬品補足レコード.some((r) => r.isEditing)) {
+    if (
+      this.薬品補足レコード &&
+      this.薬品補足レコード.some((r) => r.isEditing)
+    ) {
       causes.push("薬品補足レコード");
     }
     let futanCauses: string[] = [];
     if (this.負担区分レコード && this.負担区分レコード.isEditing(futanCauses)) {
-      causes.push(...futanCauses.map(cause => `負担区分レコード.${cause}`));
+      causes.push(...futanCauses.map((cause) => `負担区分レコード.${cause}`));
     }
     return (
       this.薬品レコード.isEditing(drugCauses) ||
@@ -757,12 +760,19 @@ export class RP剤情報Edit implements RP剤情報 {
         用法補足レコード: obj.用法補足レコード?.map((record) =>
           用法補足レコードEdit.fromObject(record)
         ),
-        薬品情報グループ: obj.薬品情報グループ.map((info) =>{
-          return 薬品情報Edit.fromObject(info)
-      }),
+        薬品情報グループ: obj.薬品情報グループ.map((info) => {
+          return 薬品情報Edit.fromObject(info);
+        }),
       },
       { id: nextId(), isSelected: false }
     );
+  }
+
+  assignContentTo(dst: RP剤情報Edit) {
+    dst.剤形レコード = this.剤形レコード;
+    dst.用法レコード = this.用法レコード;
+    dst.用法補足レコード = this.用法補足レコード;
+    dst.薬品情報グループ = this.薬品情報グループ;
   }
 
   clone(): RP剤情報Edit {
@@ -782,22 +792,26 @@ export class RP剤情報Edit implements RP剤情報 {
   isEditing(causes: string[]): boolean {
     let zaikeiCauses: string[] = [];
     if (this.剤形レコード.isEditing(zaikeiCauses)) {
-      causes.push(...zaikeiCauses.map(cause => `剤形レコード.${cause}`));
+      causes.push(...zaikeiCauses.map((cause) => `剤形レコード.${cause}`));
     }
     let youhouCauses: string[] = [];
     if (this.用法レコード.isEditing(youhouCauses)) {
-      causes.push(...youhouCauses.map(cause => `用法レコード.${cause}`));
+      causes.push(...youhouCauses.map((cause) => `用法レコード.${cause}`));
     }
     this.薬品情報グループ.forEach((d, index) => {
       let drugCauses: string[] = [];
       if (d.isEditing(drugCauses)) {
-        causes.push(...drugCauses.map(cause => `薬品情報グループ[${index}].${cause}`));
+        causes.push(
+          ...drugCauses.map((cause) => `薬品情報グループ[${index}].${cause}`)
+        );
       }
     });
     this.用法補足レコード?.forEach((r, index) => {
       let supplCauses: string[] = [];
       if (r.isEditing(supplCauses)) {
-        causes.push(...supplCauses.map(cause => `用法補足レコード[${index}].${cause}`));
+        causes.push(
+          ...supplCauses.map((cause) => `用法補足レコード[${index}].${cause}`)
+        );
       }
     });
     return (
