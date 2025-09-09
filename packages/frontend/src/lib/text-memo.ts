@@ -1,4 +1,3 @@
-import api from "@/lib/api";
 import {
   eq公費レコード,
   type PrescInfoData,
