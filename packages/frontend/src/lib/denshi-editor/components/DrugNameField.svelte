@@ -42,7 +42,6 @@
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
-
   function doRepClick() {
     searchText = drug.薬品レコード.薬品名称;
     isEditing = true;
@@ -178,12 +177,37 @@
     return undefined;
   }
 
+  function handleUnitConv(origDrugName: string, origUnit: string, newUnit: string) {
+    if (!isNewDrug && origUnit !== "" && origUnit !== newUnit) {
+      if (drug.薬品レコード.分量 === "") {
+        drug.薬品レコード.単位名 = newUnit;
+      } else {
+        const fix = fixUnitConv(
+          origDrugName,
+          drug.薬品レコード.分量,
+          origUnit,
+          newUnit,
+        );
+        if (fix) {
+          drug.薬品レコード.分量 = fix.newAmount;
+          drug.薬品レコード.単位名 = newUnit;
+          console.log("before fix drug", typeof drug, drug);
+          fix.suppls.forEach((suppl) => drug.addDrugSupplText(suppl));
+          console.log("fixed drug", drug);
+        } else {
+          alert(
+            `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${newUnit}）に変更しました`,
+          );
+        }
+      }
+    }
+  }
+
   function setByMaster(
     m: IyakuhinMaster,
-    isNewDrug: boolean,
+    _isNewDrug: boolean,
     ippanmei: boolean,
   ) {
-    console.log("enter setByMaster", typeof drug);
     const origName = drug.薬品レコード.薬品名称;
     const origUnit = drug.薬品レコード.単位名;
     Object.assign(drug.薬品レコード, {
@@ -194,29 +218,7 @@
       薬品名称: ippanmei ? m.ippanmei : m.name,
       単位名: m.unit,
     });
-    if (!isNewDrug && origUnit !== "" && origUnit !== m.unit) {
-      if (drug.薬品レコード.分量 === "") {
-        drug.薬品レコード.単位名 = m.unit;
-      } else {
-        const fix = fixUnitConv(
-          origName,
-          drug.薬品レコード.分量,
-          origUnit,
-          m.unit,
-        );
-        if (fix) {
-          drug.薬品レコード.分量 = fix.newAmount;
-          drug.薬品レコード.単位名 = m.unit;
-          console.log("before fix drug", typeof drug, drug);
-          fix.suppls.forEach(suppl => drug.addDrugSupplText(suppl));
-          console.log("fixed drug", drug);
-        } else {
-          alert(
-            `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`,
-          );
-        }
-      }
-    }
+    handleUnitConv(origName, origUnit, m.unit);
     drug.ippanmei = m.ippanmei;
     drug.ippanmeicode = m.ippanmeicode;
   }
@@ -224,8 +226,9 @@
   function setByPrefab(
     prefab: DrugPrefab,
     master: IyakuhinMaster,
-    isNewDrug: boolean,
+    _isNewDrug: boolean,
   ) {
+    const origName = drug.薬品レコード.薬品名称;
     const origUnit = drug.薬品レコード.単位名;
     const prefabDrugRecord = prefab.presc.薬品情報グループ[0].薬品レコード;
     Object.assign(
@@ -246,11 +249,7 @@
       drug.薬品レコード.分量 = prefabDrugRecord.分量;
     }
     const prefabUnit = prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
-    if (!isNewDrug && origUnit !== "" && origUnit !== prefabUnit) {
-      alert(
-        `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${prefabUnit}）に変更しました`,
-      );
-    }
+    handleUnitConv(origName, origUnit, prefabUnit);
     drug.ippanmei = master.ippanmei;
     drug.ippanmeicode = master.ippanmeicode;
     // onPrefab(prefab.presc);
