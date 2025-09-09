@@ -127,7 +127,13 @@
   }
 
   async function doAddToPrefab() {
-    const presc = convertRP剤情報ToPrescOfPrefab(group);
+    if( !drug ){
+      return;
+    }
+    const prescGroup = group.toObject();
+    const prescDrug = drug.toObject();
+    prescGroup.薬品情報グループ = [prescDrug];
+    const presc = convertRP剤情報ToPrescOfPrefab(prescGroup);
     const prefab = createDrugPrefab(presc);
     await addAlias(prefab);
     const list = await cache.getDrugPrefabList();

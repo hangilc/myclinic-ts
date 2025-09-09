@@ -82,7 +82,6 @@
   }
 
   async function doSearch() {
-    console.log("enter doSearch", typeof drug);
     let t = searchText.trim();
     if (t !== "") {
       // const drugNameAlias = await cache.getDrugNameAlias();
