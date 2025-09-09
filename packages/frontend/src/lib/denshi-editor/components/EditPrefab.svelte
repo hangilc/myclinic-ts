@@ -74,7 +74,7 @@
   function addDrugSuppl(): void {
     let suppl = 薬品補足レコードEdit.fromInfo("");
     suppl.isEditing = true;
-    edit.presc.薬品情報グループ[0].addDrugSuppl(suppl);
+    edit.presc.薬品情報グループ[0].add薬品補足レコード(suppl);
     doDrugChange();
   }
 

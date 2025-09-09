@@ -511,11 +511,18 @@ export class 薬品情報Edit implements 薬品情報 {
     return obj;
   }
 
-  addDrugSuppl(suppl: 薬品補足レコードEdit): void {
+  add薬品補足レコード(suppl: 薬品補足レコードEdit): void {
     if (this.薬品補足レコード === undefined) {
       this.薬品補足レコード = [];
     }
     this.薬品補足レコード.push(suppl);
+  }
+
+  addDrugSupplText(text: string) {
+    const suppl = 薬品補足レコードEdit.fromObject({
+      薬品補足情報: text
+    });
+    this.add薬品補足レコード(suppl);
   }
 
   薬品補足レコードAsList(): 薬品補足レコードEdit[] {

@@ -42,6 +42,8 @@
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
+  console.log("enter DrugNameField", typeof drug);
+
   function doRepClick() {
     searchText = drug.薬品レコード.薬品名称;
     isEditing = true;
@@ -82,6 +84,7 @@
   }
 
   async function doSearch() {
+    console.log("enter doSearch", typeof drug);
     let t = searchText.trim();
     if (t !== "") {
       // const drugNameAlias = await cache.getDrugNameAlias();
@@ -170,7 +173,8 @@
         return undefined;
       }
       const total = packAmount * origAmountValue;
-      return { newAmount: toZenkaku(total.toString()) };
+      const suppl = `${toZenkaku(packAmount.toString())}${packUnit}${toZenkaku(origAmount)}${toZenkaku(origUnit)}}`;
+      return { newAmount: toZenkaku(total.toString()), suppls: [suppl] };
     }
     return undefined;
   }
@@ -180,6 +184,7 @@
     isNewDrug: boolean,
     ippanmei: boolean,
   ) {
+    console.log("enter setByMaster", typeof drug);
     const origName = drug.薬品レコード.薬品名称;
     const origUnit = drug.薬品レコード.単位名;
     Object.assign(drug.薬品レコード, {
@@ -203,6 +208,9 @@
         if (fix) {
           drug.薬品レコード.分量 = fix.newAmount;
           drug.薬品レコード.単位名 = m.unit;
+          console.log("before fix drug", typeof drug, drug);
+          fix.suppls.forEach(suppl => drug.addDrugSupplText(suppl));
+          console.log("fixed drug", drug);
         } else {
           alert(
             `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`,

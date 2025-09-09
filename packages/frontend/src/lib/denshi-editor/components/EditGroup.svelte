@@ -61,6 +61,8 @@
   let addToDrugUsageConv = true;
   let editPrefabAfterEntered = false;
 
+  console.log("enter EditGrup", typeof drug, drug?.addDrugSupplText);
+
   $: updateIsConvertibleToPrefab(group, drug);
   $: updateAddToPrefab(drug);
 
@@ -229,7 +231,7 @@
       if (!hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())) {
         let suppl = 薬品補足レコードEdit.fromObject(henkoufukaDrugSuppl());
         suppl.isEditing = false;
-        drug.addDrugSuppl(suppl);
+        drug.add薬品補足レコード(suppl);
         doDrugChange();
       }
     }
@@ -240,7 +242,7 @@
       if (!hasKanjakibouDrugSuppl(drug.薬品補足レコードAsList())) {
         let suppl = 薬品補足レコードEdit.fromObject(kanjakibouDrugSuppl());
         suppl.isEditing = false;
-        drug.addDrugSuppl(suppl);
+        drug.add薬品補足レコード(suppl);
         doDrugChange();
       }
     }
@@ -250,7 +252,7 @@
     if (drug) {
       let suppl = 薬品補足レコードEdit.fromInfo("");
       suppl.isEditing = true;
-      drug.addDrugSuppl(suppl);
+      drug.add薬品補足レコード(suppl);
       doDrugChange();
     }
   }
