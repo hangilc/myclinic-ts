@@ -42,7 +42,6 @@
   let searchIyakuhinResult: SearchIyakuhinResult[] = [];
   let searchKizaiResult: KizaiMaster[] = [];
 
-  console.log("enter DrugNameField", typeof drug);
 
   function doRepClick() {
     searchText = drug.薬品レコード.薬品名称;
@@ -173,7 +172,7 @@
         return undefined;
       }
       const total = packAmount * origAmountValue;
-      const suppl = `${toZenkaku(packAmount.toString())}${packUnit}${toZenkaku(origAmount)}${toZenkaku(origUnit)}}`;
+      const suppl = `${toZenkaku(packAmount.toString())}${packUnit}${toZenkaku(origAmount)}${toZenkaku(origUnit)}`;
       return { newAmount: toZenkaku(total.toString()), suppls: [suppl] };
     }
     return undefined;
