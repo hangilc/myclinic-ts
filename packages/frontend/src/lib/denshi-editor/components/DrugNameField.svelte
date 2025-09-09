@@ -165,7 +165,7 @@
     if (isNaN(packAmount)) {
       return undefined;
     }
-    if (origUnit === "包") {
+    if (origUnit === "包" || origUnit === "本") {
       const origAmountValue: number = Number(toHankaku(origAmount));
       if (isNaN(origAmountValue)) {
         return undefined;

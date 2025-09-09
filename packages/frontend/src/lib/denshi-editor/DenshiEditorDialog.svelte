@@ -142,19 +142,6 @@
           "変更されている薬品があります。保存せずにこのまま進みますか？",
         );
         return ok;
-        // let ok = confirm(
-        //   "変更されて保存されていない薬剤があります。保存して進みますか？",
-        // );
-        // if (ok) {
-        //   addOrphanGroup(group);
-        //   data.RP剤情報グループ = data.RP剤情報グループ.filter(
-        //     (g) => g.薬品情報グループ.length > 0,
-        //   );
-        //   data = data;
-        //   return true;
-        // } else {
-        //   return false;
-        // }
       }
       return true;
     });
