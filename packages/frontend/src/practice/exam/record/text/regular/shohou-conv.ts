@@ -1,5 +1,6 @@
 import api from "@/lib/api";
 import { cache } from "@/lib/cache";
+import { freeTextCode } from "@/lib/denshi-editor/helper";
 import type { 薬品コード種別 } from "@/lib/denshi-shohou/denshi-shohou";
 import type {
   PrescInfoData,
@@ -49,6 +50,10 @@ async function usageConv(group: RP剤情報, drugUsageMap: Record<string, string
     }
   }
   if (!info) {
+    if( group.剤形レコード.剤形区分 === "外用" && group.用法レコード.用法コード === "" ) {
+      group.用法レコード.用法コード = freeTextCode;
+    }
+    
     return;
   }
   group.用法レコード.用法名称 = info.name;
