@@ -24,6 +24,7 @@
   import { searchDrugPrefab, type DrugPrefab } from "@/lib/drug-prefab";
   import { cache } from "@/lib/cache";
   import type { RP剤情報, 薬品情報 } from "@/lib/denshi-shohou/presc-info";
+  import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 
   export let drug: 薬品情報Edit;
   export let isNewDrug: boolean;
@@ -135,11 +136,51 @@
     isEditing = false;
   }
 
+  function fixUnitConv(
+    drugName: string,
+    origAmount: string,
+    origUnit: string,
+    newUnit: string,
+  ):
+    | {
+        newAmount: string;
+        suppls: string[];
+      }
+    | undefined {
+    console.log("enter fixUnitConv", drugName, origAmount, origUnit, newUnit);
+    const packUnitMatch = /^(.+)(mL|ｍＬ|g|ｇ)$/.exec(drugName);
+    if (!packUnitMatch) {
+      return undefined;
+    }
+    const packUnit: string = toZenkaku(packUnitMatch[2]);
+    if (packUnit !== newUnit) {
+      return undefined;
+    }
+    const packAmountMatch = /([0-9０-９.．]+)$/.exec(packUnitMatch[1]);
+    if (!packAmountMatch) {
+      return undefined;
+    }
+    const packAmount = Number(toHankaku(packAmountMatch[1]));
+    if (isNaN(packAmount)) {
+      return undefined;
+    }
+    if (origUnit === "包") {
+      const origAmountValue: number = Number(toHankaku(origAmount));
+      if (isNaN(origAmountValue)) {
+        return undefined;
+      }
+      const total = packAmount * origAmountValue;
+      return { newAmount: toZenkaku(total.toString()) };
+    }
+    return undefined;
+  }
+
   function setByMaster(
     m: IyakuhinMaster,
     isNewDrug: boolean,
     ippanmei: boolean,
   ) {
+    const origName = drug.薬品レコード.薬品名称;
     const origUnit = drug.薬品レコード.単位名;
     Object.assign(drug.薬品レコード, {
       薬品コード種別: ippanmei
@@ -150,9 +191,24 @@
       単位名: m.unit,
     });
     if (!isNewDrug && origUnit !== "" && origUnit !== m.unit) {
-      alert(
-        `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`,
-      );
+      if (drug.薬品レコード.分量 === "") {
+        drug.薬品レコード.単位名 = m.unit;
+      } else {
+        const fix = fixUnitConv(
+          origName,
+          drug.薬品レコード.分量,
+          origUnit,
+          m.unit,
+        );
+        if (fix) {
+          drug.薬品レコード.分量 = fix.newAmount;
+          drug.薬品レコード.単位名 = m.unit;
+        } else {
+          alert(
+            `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${m.unit}）に変更しました`,
+          );
+        }
+      }
     }
     drug.ippanmei = m.ippanmei;
     drug.ippanmeicode = m.ippanmeicode;
