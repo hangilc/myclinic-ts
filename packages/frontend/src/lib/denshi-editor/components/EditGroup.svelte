@@ -66,7 +66,8 @@
 
   $: updateIsConvertibleToPrefab(group, drug);
   $: updateAddToPrefab(drug);
-  $: setupPrefabs(drug?.薬品レコード.薬品名称);
+
+  setupPrefabs(drug?.薬品レコード.薬品名称);
 
   function doCancel() {
     onCancel();
@@ -269,6 +270,7 @@
 
   async function doNameChange() {
     doDrugChange();
+    await setupPrefabs(drug?.薬品レコード.薬品名称);
   }
 
   async function setupPrefabs(drugName: string | undefined) {
