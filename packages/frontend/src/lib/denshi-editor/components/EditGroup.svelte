@@ -24,6 +24,7 @@
   import {
     convertRP剤情報ToPrescOfPrefab,
     createDrugPrefab,
+    listDrugPrefabByName,
     type DrugPrefab,
   } from "@/lib/drug-prefab";
   import { cache } from "@/lib/cache";
@@ -39,7 +40,8 @@
     kanjakibouDrugSuppl,
   } from "../helper";
   import DrugPrefabDialog from "@/lib/drug-prefab-dialog/DrugPrefabDialog.svelte";
-
+  import ShowCommentDialog from "./ShowCommentDialog.svelte";
+  
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
   export let at: string;
@@ -60,9 +62,11 @@
   let addToDrugNameConv = true;
   let addToDrugUsageConv = true;
   let editPrefabAfterEntered = false;
+  let prefabs: DrugPrefab[] = [];
 
   $: updateIsConvertibleToPrefab(group, drug);
   $: updateAddToPrefab(drug);
+  $: setupPrefabs(drug?.薬品レコード.薬品名称);
 
   function doCancel() {
     onCancel();
@@ -262,6 +266,32 @@
     group.addUsageSuppl(suppl);
     doGroupChange();
   }
+
+  async function doNameChange() {
+    doDrugChange();
+  }
+
+  async function setupPrefabs(drugName: string | undefined) {
+    console.log("enter setupPrefabs");
+    if( drugName ){
+      prefabs = listDrugPrefabByName(await cache.getDrugPrefabList(), drugName);
+    } else {
+      prefabs = [];
+    }
+  }
+
+  function doShowComment() {
+    if( prefabs.length === 0 ){
+      return;
+    }
+    const d: ShowCommentDialog = new ShowCommentDialog({
+      target: document.body,
+      props: {
+        destroy: () => d.$destroy(),
+        prefabs,
+      }
+    })
+  }
 </script>
 
 <Workarea>
@@ -277,7 +307,7 @@
       {at}
       {isNewDrug}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
-      onDrugChange={doDrugChange}
+      onDrugChange={doNameChange}
       onGroupChangeRequest={(f) => {
         const groupObj = group.toObject();
         f(groupObj);
@@ -334,6 +364,9 @@
   {/if}
   <Commands>
     <div class="sub-commands">
+      {#if prefabs.length > 0 && prefabs.some(pre => pre.comment)}
+        <SmallLink onClick={doShowComment}>コメント閲覧</SmallLink>
+      {/if}
       {#if drug && !hasHenkoufukaDrugSuppl(drug.薬品補足レコードAsList())}
         <SmallLink onClick={doHenkouFuka}>変更不可</SmallLink>
       {/if}

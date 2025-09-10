@@ -16,6 +16,7 @@ import type {
 } from "./denshi-shohou/presc-info";
 import { createEmptyRP剤情報 } from "./denshi-shohou/presc-info-helper";
 import { createEmpty薬品情報 } from "./denshi-helper";
+import { cache } from "./cache";
 
 export interface DrugPrefab {
   id: string;
@@ -227,6 +228,21 @@ export function searchDrugPrefab(
           result.push(entry);
           break;
         }
+      }
+    }
+  }
+  return result;
+}
+
+export function listDrugPrefabByName(list: DrugPrefab[], drugName: string, includeAlias: boolean = true): DrugPrefab[] {
+  const result: DrugPrefab[] = [];
+  for(const prefab of list) {
+    if( prefab.presc.薬品情報グループ[0].薬品レコード.薬品名称 === drugName ){
+      result.push(prefab);
+    }
+    for(const a of prefab.alias){
+      if( a === drugName ){
+        result.push(prefab);
       }
     }
   }
