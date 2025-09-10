@@ -127,7 +127,13 @@
     }
   }
 
-  function doClearSearchText() {
+  function doEraseSearchText() {
+    let m = /(.+)（[０-９]+）$/.exec(searchText);
+    if( m ){
+      searchText = m[1];
+      focus();
+      return;
+    }
     searchText = "";
     focus();
   }
@@ -298,7 +304,7 @@
           />
         </form>
         <SearchLink onClick={doSearch} />
-        <EraserLink onClick={doClearSearchText} />
+        <EraserLink onClick={doEraseSearchText} />
         <CancelLink onClick={doCancel} />
       </div>
     {/if}
