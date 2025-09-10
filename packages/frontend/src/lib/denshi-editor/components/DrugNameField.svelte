@@ -128,7 +128,7 @@
   }
 
   function doEraseSearchText() {
-    let m = /(.+)（[０-９]+）$/.exec(searchText);
+    let m = /(.+)（[０-９．]+）$/.exec(searchText);
     if( m ){
       searchText = m[1];
       focus();
