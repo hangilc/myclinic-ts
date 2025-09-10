@@ -11,7 +11,6 @@ export function fixUnitConv(
     suppls: string[];
   }
   | undefined {
-  console.log("enter fixUnitConv", drugName, origAmount, origUnit, newUnit);
   const packUnitMatch = /^(.+)(mL|ｍＬ|g|ｇ|mg|ｍｇ)$/.exec(drugName);
   if (!packUnitMatch) {
     return undefined;
@@ -35,5 +34,4 @@ export function fixUnitConv(
   const total = packAmount * origAmountValue;
   const suppl = `${toZenkaku(packAmount.toString())}${packUnit}${toZenkaku(origAmount)}${toZenkaku(origUnit)}`;
   return { newAmount: toZenkaku(total.toString()), suppls: [suppl] };
-  return undefined;
 }

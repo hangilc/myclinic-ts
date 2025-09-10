@@ -95,7 +95,6 @@ async function drugConv(drug: 薬品情報, at: string, drugNameMap: Record<stri
   if (!info) {
     return;
   }
-  console.log("info", info);
   const origUnit = drug.薬品レコード.単位名;
   if (origUnit === info.unit) {
     drug.薬品レコード.薬品名称 = info.name;
@@ -117,6 +116,7 @@ async function drugConv(drug: 薬品情報, at: string, drugNameMap: Record<stri
   drug.薬品レコード.薬品コード = info.code;
   drug.薬品レコード.薬品コード種別 = info.codeKind;
   drug.薬品レコード.分量 = fix.newAmount;
+  drug.薬品レコード.単位名 = info.unit;
   if( !drug.薬品補足レコード ){
     drug.薬品補足レコード = [];
   }
