@@ -113,6 +113,33 @@
   function doTogglePreset() {
     showPreset = !showPreset;
   }
+
+  async function doPresetUsageClick(presetValue: string) {
+    const trimmedValue = presetValue.trim();
+    if (trimmedValue === "") {
+      return;
+    }
+
+    const freePrefix = "free:";
+    if (trimmedValue.startsWith(freePrefix)) {
+      const value = trimmedValue.substring(freePrefix.length);
+      group.用法レコード.用法コード = freeTextCode;
+      group.用法レコード.用法名称 = value;
+    } else {
+      const master = await api.findUsageMasterByUsageName(trimmedValue);
+
+      if (master) {
+        group.用法レコード.用法コード = master.usage_code;
+        group.用法レコード.用法名称 = master.usage_name;
+      }
+    }
+
+    isEditing = false;
+    searchText = "";
+    searchResult = [];
+    showPreset = false;
+    onFieldChange();
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -161,7 +188,12 @@
       {#if showPreset}
         <div class="preset">
           {#each presetUsage as preset}
-          <div>{preset}</div>
+            <div
+              on:click={() => doPresetUsageClick(preset)}
+              class="cursor-pointer preset-item"
+            >
+              {preset}
+            </div>
           {/each}
         </div>
       {/if}
@@ -205,5 +237,19 @@
     font-size: 14px;
     margin-top: 6px;
     border: 1px solid gray;
+  }
+
+  .preset {
+    margin: 10px 0;
+    border: 1px solid gray;
+    padding: 10px;
+  }
+
+  .preset-item:hover {
+    background-color: #eee;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 </style>

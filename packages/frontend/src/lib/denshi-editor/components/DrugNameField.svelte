@@ -160,7 +160,6 @@
           drug.薬品レコード.単位名 = newUnit;
           console.log("before fix drug", typeof drug, drug);
           fix.suppls.forEach((suppl) => drug.addDrugSupplText(suppl));
-          console.log("fixed drug", drug);
         } else {
           alert(
             `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${newUnit}）に変更しました`,

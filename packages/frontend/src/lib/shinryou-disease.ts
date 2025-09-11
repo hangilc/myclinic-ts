@@ -88,7 +88,6 @@ export function createFix(shinryouDisease: ShinryouDisease, ctx: Context, diseas
         }
       }
       let fixes: Fix[] = fixOpts.filter(fix => fix != undefined);
-      console.log("fixes", fixes);
       let label = fixes.map(fix => fix.label).join("：");
       return {
         label,

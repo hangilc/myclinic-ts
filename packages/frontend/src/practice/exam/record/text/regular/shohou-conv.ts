@@ -111,7 +111,6 @@ async function drugConv(drug: 薬品情報, at: string, drugNameMap: Record<stri
   if (!fix) {
     return;
   }
-  console.log("fix", fix);
   drug.薬品レコード.薬品名称 = info.name;
   drug.薬品レコード.薬品コード = info.code;
   drug.薬品レコード.薬品コード種別 = info.codeKind;
