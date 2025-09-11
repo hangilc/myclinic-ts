@@ -94,6 +94,8 @@
       ippanRep = "一般名加算１";
     } else if (nIppan > 0) {
       ippanRep = "一般名加算２";
+    } else {
+      ippanRep = "一般名加算なし";
     }
   }
 
