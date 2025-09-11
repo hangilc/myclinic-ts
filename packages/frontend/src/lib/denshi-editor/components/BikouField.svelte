@@ -12,7 +12,8 @@
   <Label>備考</Label>
   {#each bikou as record (record.id)}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="rep" on:click={() => onClick(record)}>{record.備考}</div>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <div class="rep" on:click={() => onClick(record)}>{record.備考 || "（空白）"}</div>
   {/each}
 </LeftArea>
 {/if}

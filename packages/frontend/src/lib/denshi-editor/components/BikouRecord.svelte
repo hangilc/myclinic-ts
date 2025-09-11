@@ -53,7 +53,8 @@
 {#if !record.isEditing}
   <div class="with-icons top">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <span class="rep" on:click={doRepClick}>{record.備考}</span>
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <span class="rep" on:click={doRepClick}>{record.備考 || "（空白）"}</span>
     <TrashLink onClick={doDelete} />
   </div>
 {:else}
