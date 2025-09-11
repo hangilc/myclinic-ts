@@ -41,6 +41,7 @@
   } from "../helper";
   import DrugPrefabDialog from "@/lib/drug-prefab-dialog/DrugPrefabDialog.svelte";
   import ShowCommentDialog from "./ShowCommentDialog.svelte";
+  import type { IyakuhinMaster } from "myclinic-model";
 
   export let group: RP剤情報Edit;
   export let drug: 薬品情報Edit | undefined;
@@ -63,13 +64,13 @@
   let addToDrugUsageConv = true;
   let editPrefabAfterEntered = false;
   let prefabs: DrugPrefab[] = [];
-  let yakkacode: string = "";
+  let drugInfoUrl: string = "javascript:void(0)";
 
   $: updateIsConvertibleToPrefab(group, drug);
   $: updateAddToPrefab(drug);
 
   setupPrefabs(drug?.薬品レコード.薬品名称);
-  setupYakkacode(drug?.薬品レコード.薬品コード);
+  resolveDrugInfoUrl(drug?.薬品レコード.薬品名称);
 
   function doCancel() {
     onCancel();
@@ -273,7 +274,7 @@
   async function doNameChange() {
     doDrugChange();
     await setupPrefabs(drug?.薬品レコード.薬品名称);
-    await setupYakkacode(drug?.薬品レコード.薬品コード);
+    await resolveDrugInfoUrl(drug?.薬品レコード.薬品名称);
   }
 
   async function setupPrefabs(drugName: string | undefined) {
@@ -284,38 +285,86 @@
     }
   }
 
-  async function setupYakkacode(code: string | undefined) {
-    if (!code) {
-      yakkacode = "";
-      return;
+  // async function setupYakkacode(code: string | undefined) {
+  //   if (!code) {
+  //     yakkacode = "";
+  //     return;
+  //   }
+  //   try {
+  //     if (/^\d+$/.test(code)) {
+  //       const m = await api.getIyakuhinMaster(parseInt(code), at);
+  //       yakkacode = m.yakkacode;
+  //       return;
+  //     } else {
+  //       const ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
+  //       if (ms.length > 0) {
+  //         const m = ms[0];
+  //         console.log("m", m);
+  //         yakkacode = m.yakkacode;
+  //         return;
+  //       }
+  //     }
+  //   } catch {
+  //     // nop
+  //   }
+  //   yakkacode = "";
+  // }
+
+
+  async function resolveDrugInfoUrl(drugName: string | undefined) {
+    function url(code: string): string {
+      const pre = code.substring(0, 2);
+      return `https://medical.nikkeibp.co.jp/inc/all/drugdic/prd/${pre}/${code}.html`;
     }
-    try {
-      if (/^\d+$/.test(code)) {
-        const m = await api.getIyakuhinMaster(parseInt(code), at);
-        yakkacode = m.yakkacode;
-        return;
-      } else {
-        const ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
-        if (ms.length > 0) {
-          const m = ms[0];
-          console.log("m", m);
-          yakkacode = m.yakkacode;
+
+    if (drugName) {
+      if (drugName.startsWith("【般】")) {
+        const ms = await api.listIyakuhinMasterByIppanmei(drugName, at);
+        if (ms.length === 0) {
+          drugInfoUrl = "javascript:void(0)";
+          return;
+        }
+        let m: IyakuhinMaster | undefined = undefined;
+        for(let e of ms){
+          if( e.name.endsWith("」")) {
+            m = e;
+            break;
+          }
+        }
+        if( !m ){
+          drugInfoUrl = "javascript:void(0)";
+          return;
+        }
+        const yjcode = await api.getYJCodeByName(m.name);
+        if (yjcode) {
+          drugInfoUrl = url(yjcode);
+          return;
+        } else {
+          drugInfoUrl = "javascript:void(0)";
           return;
         }
       }
-    } catch {
-      // nop
+      const yjcode = await api.getYJCodeByName(drugName);
+      if (yjcode) {
+        drugInfoUrl = url(yjcode);
+        return;
+      }
+      const m = await api.findIyakuhinMasterByName(drugName, at);
+      if (m) {
+        drugInfoUrl = url(m.iyakuhincode.toString());
+        return;
+      }
     }
-    yakkacode = "";
+    drugInfoUrl = "javascript:void(0)";
   }
 
-  function drugInfoUrl(yakkacode: string | undefined): string {
-    if (!yakkacode) {
-      return "javascript:void(0)";
-    }
-    let pre = yakkacode.substring(0, 2);
-    return `https://medical.nikkeibp.co.jp/inc/all/drugdic/prd/${pre}/${yakkacode}.html`;
-  }
+  // function drugInfoUrl(yakkacode: string | undefined): string {
+  //   if (!yakkacode) {
+  //     return "javascript:void(0)";
+  //   }
+  //   let pre = yakkacode.substring(0, 2);
+  //   return `https://medical.nikkeibp.co.jp/inc/all/drugdic/prd/${pre}/${yakkacode}.html`;
+  // }
 
   function doShowComment() {
     if (prefabs.length === 0) {
@@ -401,8 +450,8 @@
   {/if}
   <Commands>
     <div class="sub-commands">
-      {#if yakkacode}
-        <a href={drugInfoUrl(yakkacode)} target="_blank">薬品情報</a>
+      {#if drugInfoUrl !== "javascript:void(0)"}
+        <a href={drugInfoUrl} target="_blank">薬品情報</a>
       {/if}
       {#if prefabs.length > 0 && prefabs.some((pre) => pre.comment)}
         <SmallLink onClick={doShowComment}>コメント閲覧</SmallLink>

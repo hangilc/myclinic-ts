@@ -2078,5 +2078,9 @@ export default {
 
   getUsageMaster(code: string): Promise<m.UsageMaster> {
     return get("get-usage-master", { code, }, a => a);
+  },
+
+  getYJCodeByName(name: string): Promise<string | undefined> {
+    return get("get-yj-code-by-name", { name }, a => a || undefined);
   }
 };
