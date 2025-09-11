@@ -49,6 +49,14 @@
     id = 0;
   }
 
+  async function doEditorDelete(srcName: string) {
+    const map = await cache.getDrugUsageConv();
+    delete map[srcName];
+    await cache.setDrugUsageConv(map);
+    await init();
+    id = 0;
+  }
+
   async function doSearch() {
     const t = searchText.trim();
     matched = [];
@@ -99,6 +107,7 @@
           {dstName}
           onCancel={doEditorCancel}
           onEnter={doEditorEnter}
+          onDelete={doEditorDelete}
         />
       {/if}
     </div>

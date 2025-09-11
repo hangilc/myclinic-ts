@@ -2,12 +2,14 @@
   import type { UsageMaster } from "myclinic-model";
   import SmallLink from "../denshi-editor/components/workarea/SmallLink.svelte";
   import api from "../api";
+  import Link from "@/practice/ui/Link.svelte";
 
   export let id: number;
   export let srcName: string;
   export let dstName: string;
   export let onCancel: () => void;
   export let onEnter: (id: number, srcName: string, dstName: string) => void;
+  export let onDelete: (srcName: string) => void;
   let searchText = "";
   let masters: UsageMaster[] = [];
   let dstMaster: UsageMaster | undefined;
@@ -53,6 +55,10 @@
     masters = [];
   }
 
+  function doDelete() {
+    onDelete(srcName);
+  }
+
 </script>
 
 <div class="field">
@@ -72,6 +78,7 @@
   {/each}
 </div>
 <div class="commands">
+  <Link onClick={doDelete}>削除</Link>
   {#if srcName !== "" && dstMaster}
     <button on:click={doEnter}>入力</button>
   {/if}
