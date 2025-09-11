@@ -30,6 +30,7 @@ let appointsTemplate: AppointsTemplate | undefined = undefined;
 let drugPrefabList: DrugPrefab[] | undefined = undefined;
 let drugNameConv: Record<string, string> | undefined = undefined;
 let drugUsageConv: Record<string, string> | undefined = undefined;
+let presetUsage: string[] | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -295,4 +296,24 @@ export const cache = {
     drugUsageConv = value;
     await api.setConfig("drug-usage-conv", value);
   },
+
+  async getPresetUsage(): Promise<string[]> {
+    if (presetUsage === undefined) {
+      return cache.reloadPresetUsage();
+    }
+    return presetUsage;
+  },
+
+  async reloadPresetUsage(): Promise<string[]> {
+    let value: string[] = await api.getConfig("preset-usage");
+    presetUsage = value;
+    return presetUsage;
+  },
+
+  async setPresetUsage(value: string[]): Promise<void> {
+    presetUsage = value;
+    await api.setConfig("preset-usage", value);
+  },
+
+
 };

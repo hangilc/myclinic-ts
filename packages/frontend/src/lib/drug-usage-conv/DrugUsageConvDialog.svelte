@@ -129,6 +129,7 @@
 
   .search-result {
     max-height: 200px;
+    overflow-y: auto;
   }
 
   .cursor-pointer {

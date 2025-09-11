@@ -2,7 +2,6 @@
   import Field from "./workarea/Field.svelte";
   import FieldTitle from "./workarea/FieldTitle.svelte";
   import FieldForm from "./workarea/FieldForm.svelte";
-  import { tick } from "svelte";
   import CancelLink from "../icons/CancelLink.svelte";
   import type { RP剤情報Edit } from "../denshi-edit";
   import SearchLink from "../icons/SearchLink.svelte";
@@ -10,6 +9,9 @@
   import type { UsageMaster } from "myclinic-model";
   import api from "@/lib/api";
   import SubmitLink from "../icons/SubmitLink.svelte";
+  import { cache } from "@/lib/cache";
+  import ChevronDownLink from "../icons/ChevronDownLink.svelte";
+  import { tick } from "svelte";
 
   export let group: RP剤情報Edit;
   export let isEditing: boolean;
@@ -21,6 +23,10 @@
   $: updateSearchText(group);
   let inputElement: HTMLInputElement | undefined = undefined;
   let searchResult: UsageMaster[] = [];
+  let presetUsage: string[] = [];
+  let showPreset: boolean = false;
+
+  updatePresetUsage();
 
   function updateCodeMode(group: RP剤情報Edit): void {
     let code = group.用法レコード.用法コード;
@@ -37,6 +43,10 @@
 
   function updateSearchText(group: RP剤情報Edit) {
     searchText = group.用法レコード.用法名称;
+  }
+
+  async function updatePresetUsage() {
+    presetUsage = await cache.getPresetUsage();
   }
 
   // function updateCodeMode() {
@@ -99,6 +109,10 @@
     isEditing = false;
     onFieldChange();
   }
+
+  function doTogglePreset() {
+    showPreset = !showPreset;
+  }
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -142,7 +156,15 @@
         {/if}
         <EraserLink onClick={doClearSearchText} />
         <CancelLink onClick={doCancel} />
+        <ChevronDownLink onClick={doTogglePreset} />
       </form>
+      {#if showPreset}
+        <div class="preset">
+          {#each presetUsage as preset}
+          <div>{preset}</div>
+          {/each}
+        </div>
+      {/if}
       {#if searchResult.length > 0}
         <div class="search-result">
           {#each searchResult as result (result.usage_code)}
