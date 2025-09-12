@@ -31,6 +31,9 @@ export async function validateRP剤情報(
     {
       let amount = drug.薬品レコード.分量;
       amount = toHankaku(amount);
+      if( amount.trim() === "" ){
+        return `薬品の分量が設定されていません。`;
+      }
       const value = Number(amount);
       if (isNaN(value) || amount.startsWith(".") || amount.endsWith(".")) {
         return `薬品の分量が不適切です：${drug.薬品レコード.薬品名称}:${drug.薬品レコード.分量}`;
