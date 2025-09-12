@@ -31,6 +31,7 @@ let drugPrefabList: DrugPrefab[] | undefined = undefined;
 let drugNameConv: Record<string, string> | undefined = undefined;
 let drugUsageConv: Record<string, string> | undefined = undefined;
 let presetUsage: string[] | undefined = undefined;
+let scanResolution: number | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -313,6 +314,24 @@ export const cache = {
   async setPresetUsage(value: string[]): Promise<void> {
     presetUsage = value;
     await api.setConfig("preset-usage", value);
+  },
+
+  async getScanResolution(): Promise<number> {
+    if (scanResolution === undefined) {
+      return cache.reloadScanResolution();
+    }
+    return scanResolution;
+  },
+
+  async reloadScanResolution(): Promise<number> {
+    let value: number = await api.getConfig("scan-resolution");
+    scanResolution = value;
+    return scanResolution;
+  },
+
+  async setScanResolution(value: number): Promise<void> {
+    scanResolution = value;
+    await api.setConfig("scan-resolution", value);
   },
 
 

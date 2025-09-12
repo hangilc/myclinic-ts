@@ -5,7 +5,8 @@ export async function startScan(
   device: string,
   onStart: () => void,
   pct: (pct: number) => void,
-  onEnd: () => void
+  onEnd: () => void,
+  resolution: number = 100,
 ): Promise<string | undefined> {
   if( !getScanner(device) ){
     alert("スキャナーを使用できません。");

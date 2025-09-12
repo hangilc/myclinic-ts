@@ -24,6 +24,7 @@ export class ScanManager {
   onDocsChange: (docs: ScannedDocData[]) => void = (_) => {};
   tq: TaskQueue = new TaskQueue();
   unsubs: (() => void)[] = [];
+  resolution: number = 100;
 
   constructor() {
     this.unsubs.push(
@@ -124,7 +125,8 @@ export class ScanManager {
       (pct) => {
         this.onScanPctChange(pct);
       },
-      () => this.onScanEnd()
+      () => this.onScanEnd(),
+      this.resolution,
     );
     if (img == undefined) {
       return;
@@ -157,7 +159,8 @@ export class ScanManager {
       scanner.deviceId,
       () => this.onScanStart(),
       (pct) => this.onScanPctChange(pct),
-      () => this.onScanEnd()
+      () => this.onScanEnd(),
+      this.resolution,
     );
     if (img == undefined) {
       return;
