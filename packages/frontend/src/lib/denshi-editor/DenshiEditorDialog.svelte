@@ -49,6 +49,7 @@
   let workareaService: WorkareaService = new WorkareaService();
   let wa: HTMLElement;
   let showSubCommands = false;
+  let lastDays = 0;
 
   function doCancel() {
     destroy();
@@ -103,6 +104,9 @@
             data.RP剤情報グループ = data.RP剤情報グループ.filter(
               (g) => g.id !== group.id,
             );
+          }
+          if( drug && group.剤形レコード.調剤数量 > 0 ){
+            lastDays = group.剤形レコード.調剤数量;
           }
           workareaService.clear();
         },
@@ -323,6 +327,7 @@
   async function doAdd() {
     const group = RP剤情報Edit.fromObject(createEmptyRP剤情報());
     const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
+    group.剤形レコード.調剤数量 = lastDays;
     initIsEditingUsage(group);
     initIsEditingOfDrug(drug);
     doGroupSelect(group, drug);
