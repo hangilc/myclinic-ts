@@ -325,13 +325,13 @@
     const drug = 薬品情報Edit.fromObject(createEmpty薬品情報());
     initIsEditingUsage(group);
     initIsEditingOfDrug(drug);
-    doGroupSelect(group, drug, { isNewDrug: true });
+    doGroupSelect(group, drug);
   }
 
   function doAddDrugToGroup(group: RP剤情報Edit) {
     const 薬品情報 = 薬品情報Edit.fromObject(createBlank薬品情報());
     initIsEditingOfDrug(薬品情報);
-    doGroupSelect(group, 薬品情報, { isNewDrug: true });
+    doGroupSelect(group, 薬品情報);
   }
 
   async function doGroupReorder() {
