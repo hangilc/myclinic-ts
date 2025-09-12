@@ -77,10 +77,7 @@
   async function doGroupSelect(
     group: RP剤情報Edit,
     drug: 薬品情報Edit | undefined,
-    opt: {
-      isNewDrug: boolean;
-    } = { isNewDrug: false },
-  ) {
+   ) {
     if (!(await workareaService.confirmAndClear())) {
       return;
     }
@@ -92,7 +89,6 @@
       props: {
         group: group,
         drug,
-        isNewDrug: opt.isNewDrug,
         at,
         kouhiSet: KouhiSet.fromPrescInfoData(data),
         onCancel: () => {

@@ -27,7 +27,7 @@
   import { fixUnitConv } from "@/lib/fix-unit-conv";
 
   export let drug: 薬品情報Edit;
-  export let isNewDrug: boolean;
+  // export let isNewDrug: boolean;
   export let isEditing: boolean;
   export let at: string;
   export let onDrugChange: () => void;
@@ -129,7 +129,7 @@
 
   function doEraseSearchText() {
     let m = /(.+)（[０-９．]+）$/.exec(searchText);
-    if( m ){
+    if (m) {
       searchText = m[1];
       focus();
       return;
@@ -142,39 +142,43 @@
     isEditing = false;
   }
 
-
-
-  function handleUnitConv(origDrugName: string, origUnit: string, newUnit: string) {
-    if (!isNewDrug && origUnit !== "" && origUnit !== newUnit) {
-      if (drug.薬品レコード.分量 === "") {
-        drug.薬品レコード.単位名 = newUnit;
-      } else {
-        const fix = fixUnitConv(
-          origDrugName,
-          drug.薬品レコード.分量,
-          origUnit,
-          newUnit,
-        );
-        if (fix) {
-          drug.薬品レコード.分量 = fix.newAmount;
-          drug.薬品レコード.単位名 = newUnit;
-          console.log("before fix drug", typeof drug, drug);
-          fix.suppls.forEach((suppl) => drug.addDrugSupplText(suppl));
-        } else {
-          alert(
-            `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${newUnit}）に変更しました`,
-          );
-        }
-      }
+  function adjustAmountAndUnit(
+    origDrugName: string,
+    origAmount: string,
+    origUnit: string,
+    newAmount: string,
+    newUnit: string,
+  ) {
+    if (origAmount === "") {
+      drug.薬品レコード.分量 = newAmount;
+      drug.薬品レコード.単位名 = newUnit;
+      drug.薬品レコード.isEditing分量 = false;
+      return;
+    }
+    if (origUnit === newUnit) {
+      return;
+    }
+    const fix = fixUnitConv(origDrugName, origAmount, origUnit, newUnit);
+    if (fix) {
+      drug.薬品レコード.分量 = fix.newAmount;
+      drug.薬品レコード.単位名 = newUnit;
+      drug.薬品レコード.isEditing分量 = false;
+      fix.suppls.forEach((suppl) => drug.addDrugSupplText(suppl));
+    } else {
+      drug.薬品レコード.単位名 = newUnit;
+      drug.薬品レコード.isEditing分量 = false;
+      alert(
+        `単位名を現在のもの（${origUnit}）からマスターレコードの単位名（${newUnit}）に変更しました`,
+      );
     }
   }
 
   function setByMaster(
     m: IyakuhinMaster,
-    _isNewDrug: boolean,
     ippanmei: boolean,
   ) {
     const origName = drug.薬品レコード.薬品名称;
+    const origAmount = drug.薬品レコード.分量;
     const origUnit = drug.薬品レコード.単位名;
     Object.assign(drug.薬品レコード, {
       薬品コード種別: ippanmei
@@ -184,7 +188,7 @@
       薬品名称: ippanmei ? m.ippanmei : m.name,
       単位名: m.unit,
     });
-    handleUnitConv(origName, origUnit, m.unit);
+    adjustAmountAndUnit(origName, origAmount, origUnit, "", m.unit);
     drug.ippanmei = m.ippanmei;
     drug.ippanmeicode = m.ippanmeicode;
   }
@@ -192,34 +196,22 @@
   function setByPrefab(
     prefab: DrugPrefab,
     master: IyakuhinMaster,
-    _isNewDrug: boolean,
   ) {
     const origName = drug.薬品レコード.薬品名称;
+    const origAmount = drug.薬品レコード.分量;
     const origUnit = drug.薬品レコード.単位名;
-    const prefabDrugRecord = prefab.presc.薬品情報グループ[0].薬品レコード;
-    Object.assign(
-      drug.薬品レコード,
-      {
-        薬品コード種別: prefabDrugRecord.薬品コード種別,
-        薬品コード: prefabDrugRecord.薬品コード,
-        薬品名称: prefabDrugRecord.薬品名称,
-        単位名: prefabDrugRecord.単位名,
-      },
-      {
-        isEditing情報区分: false,
-        isEditing薬品コード: false,
-        isEditing分量: false,
-      },
-    );
-    if (isNewDrug) {
-      drug.薬品レコード.分量 = prefabDrugRecord.分量;
-    }
-    const prefabUnit = prefab.presc.薬品情報グループ[0].薬品レコード.単位名;
-    handleUnitConv(origName, origUnit, prefabUnit);
+   const prefabDrugRecord = prefab.presc.薬品情報グループ[0].薬品レコード;
+    Object.assign(drug.薬品レコード, {
+      薬品コード種別: prefabDrugRecord.薬品コード種別,
+      薬品コード: prefabDrugRecord.薬品コード,
+      薬品名称: prefabDrugRecord.薬品名称,
+      isEditing情報区分: false,
+      isEditing薬品コード: false,
+    });
+    adjustAmountAndUnit(origName, origAmount, origUnit, prefabDrugRecord.分量, prefabDrugRecord.単位名);
     drug.ippanmei = master.ippanmei;
     drug.ippanmeicode = master.ippanmeicode;
-    // onPrefab(prefab.presc);
-    if (isNewDrug) {
+    if (origAmount === "") {
       const prefabDrug: 薬品情報 = prefab.presc.薬品情報グループ[0];
       drug.不均等レコード = prefabDrug.不均等レコード
         ? 不均等レコードEdit.fromObject(prefabDrug.不均等レコード)
@@ -239,11 +231,11 @@
 
   function doIyakuhinMasterSelect(item: SearchIyakuhinResult) {
     if (item.kind === "master") {
-      setByMaster(item.master, isNewDrug, false);
+      setByMaster(item.master, false);
     } else if (item.kind === "prefab") {
-      setByPrefab(item.prefab, item.master, isNewDrug);
+      setByPrefab(item.prefab, item.master);
     } else if (item.kind === "ippanmei") {
-      setByMaster(item.master, isNewDrug, true);
+      setByMaster(item.master, true);
     }
     searchText = "";
     searchIyakuhinResult = [];
@@ -314,7 +306,7 @@
             class="search-result-item"
             on:click={() => doIyakuhinMasterSelect(item)}
           >
-            {iyakuhinResultRep(item, isNewDrug)}
+            {iyakuhinResultRep(item, drug.薬品レコード.分量 === "")}
           </div>
         {/each}
       </div>

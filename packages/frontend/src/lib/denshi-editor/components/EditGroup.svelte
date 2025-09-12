@@ -47,7 +47,7 @@
   export let drug: 薬品情報Edit | undefined;
   export let at: string;
   export let kouhiSet: KouhiSet;
-  export let isNewDrug: boolean = false;
+  // export let isNewDrug: boolean = false;
   export let onCancel: () => void;
   export let onEnter: () => void;
   let origName: string | undefined =
@@ -84,7 +84,7 @@
         return;
       }
     }
-    if (drug && isNewDrug) {
+    if (drug && !group.includesDrug(drug.id)) {
       group.薬品情報グループ.push(drug);
     }
     onEnter();
@@ -285,32 +285,6 @@
     }
   }
 
-  // async function setupYakkacode(code: string | undefined) {
-  //   if (!code) {
-  //     yakkacode = "";
-  //     return;
-  //   }
-  //   try {
-  //     if (/^\d+$/.test(code)) {
-  //       const m = await api.getIyakuhinMaster(parseInt(code), at);
-  //       yakkacode = m.yakkacode;
-  //       return;
-  //     } else {
-  //       const ms = await api.listIyakuhinMasterByIppanmeicode(code, at);
-  //       if (ms.length > 0) {
-  //         const m = ms[0];
-  //         console.log("m", m);
-  //         yakkacode = m.yakkacode;
-  //         return;
-  //       }
-  //     }
-  //   } catch {
-  //     // nop
-  //   }
-  //   yakkacode = "";
-  // }
-
-
   async function resolveDrugInfoUrl(drugName: string | undefined) {
     function url(code: string): string {
       const pre = code.substring(0, 2);
@@ -391,7 +365,6 @@
     <DrugNameField
       {drug}
       {at}
-      {isNewDrug}
       bind:isEditing={drug.薬品レコード.isEditing薬品コード}
       onDrugChange={doNameChange}
       onGroupChangeRequest={(f) => {
