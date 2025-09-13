@@ -47,6 +47,10 @@
         cache.reloadDrugUsageConv();
         break;
       }
+      case "scan-resolution": {
+        cache.reloadScanResolution();
+        break;
+      }
       // case "drug-name-iyakuhincode-map": {
       //   cache.clearDrugNameIyakuhincodeMap();
       //   break;

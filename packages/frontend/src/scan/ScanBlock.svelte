@@ -51,11 +51,12 @@
   initScanResolution();
 
   async function initScanResolution() {
+    console.log("enter initScanResolution");
     try {
       const resolution = await cache.getScanResolution();
-      console.log("init scanResolution", resolution);
       if( resolution > 0 ){
         manager.resolution = resolution;
+        console.log("scan resolution", manager.resolution);
       }
     } catch {
       //
@@ -96,6 +97,7 @@
   }
 
   function doStartScan(): void {
+    console.log("resolution", manager.resolution);
     manager.scan();
   }
 

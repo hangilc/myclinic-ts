@@ -17,7 +17,7 @@ export async function startScan(
   try {
     return await printApi.scan(device, (loaded, total) => {
       pct((loaded / total) * 100);
-    });
+    }, resolution);
   } catch (ex) {
     console.error("scan-error", ex);
     return undefined;
