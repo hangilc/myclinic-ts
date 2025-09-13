@@ -10,6 +10,7 @@ import {
 } from "@/appoint/appoints-template";
 import type { DrugNameBind } from "@/lib/drug-name-bind";
 import type { DrugPrefab } from "./drug-prefab";
+import { configChanged } from "@/app-events";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -324,8 +325,16 @@ export const cache = {
   },
 
   async reloadScanResolution(): Promise<number> {
-    let value: number = await api.getConfig("scan-resolution");
-    scanResolution = value;
+    try {
+      let value: number = await api.getConfig("scan-resolution");
+      if (typeof value === 'number' && value > 0) {
+        scanResolution = value;
+        return scanResolution;
+      }
+    } catch (error) {
+      console.log("scan-resolution config not found or invalid:", error);
+    }
+    scanResolution = 100;
     return scanResolution;
   },
 
@@ -336,3 +345,19 @@ export const cache = {
 
 
 };
+
+configChanged.subscribe(data => {
+  if( !data ){
+    return;
+  }
+  const value = data.value;
+  switch(data.name){
+    case "scan-resolution": {
+      if( typeof value === "number" && value > 0 ){
+        scanResolution = value;
+        console.log("config scan-resolution changed", value);
+      }
+      break;
+    }
+  }
+})

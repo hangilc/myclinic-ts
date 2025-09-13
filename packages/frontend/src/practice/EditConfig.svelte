@@ -25,6 +25,7 @@
   }
 
   async function doEnter() {
+    console.log("enter doEnter");
     let value: any;
     try {
       value = JSON.parse(editValue);
@@ -33,6 +34,7 @@
       return;
     }
     await api.setConfig(editKey, value);
+    console.log("config saved", editKey, value);
     isEditing = false;
     switch (editKey) {
       case "usage-master-map": {
@@ -40,15 +42,16 @@
         break;
       }
       case "drug-name-conv": {
-        cache.reloadDrugNameConv();
+        await cache.reloadDrugNameConv();
         break;
       }
       case "drug-usage-conv": {
-        cache.reloadDrugUsageConv();
+        await cache.reloadDrugUsageConv();
         break;
       }
       case "scan-resolution": {
-        cache.reloadScanResolution();
+        const value = await cache.reloadScanResolution();
+        console.log("scan-resolution reload", value);
         break;
       }
       // case "drug-name-iyakuhincode-map": {

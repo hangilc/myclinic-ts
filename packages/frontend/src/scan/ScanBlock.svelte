@@ -56,10 +56,12 @@
       const resolution = await cache.getScanResolution();
       if( resolution > 0 ){
         manager.resolution = resolution;
-        console.log("scan resolution", manager.resolution);
+        console.log("scan resolution set to", manager.resolution);
+      } else {
+        console.log("scan resolution not configured, using default", manager.resolution);
       }
-    } catch {
-      //
+    } catch (error) {
+      console.log("failed to load scan resolution, using default", manager.resolution, error);
     }
   }
 

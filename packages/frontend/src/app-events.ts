@@ -162,6 +162,9 @@ export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
 export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
 
+export const configChanged: Writable<{ name: string; value: any } | null> =
+  writable(null);
+
 function handleAppEvent(e: m.AppEvent): void {
   if (isDraining) {
     eventQueue.push(e);
@@ -559,22 +562,30 @@ function publishAppEvent(e: m.AppEvent): void {
 }
 
 function dispatch(e: any): void {
-  // console.log("dispatch", e);
-  if (e.format === "appevent") {
-    handleAppEvent(e.data as m.AppEvent);
-  } else if (e.format === "hotline-beep") {
-    const hotlineBeep = e.data as m.HotlineBeep;
-    hotlineBeepEntered.set(hotlineBeep);
-  } else if (e.format === "event-id-notice") {
-    const eventIdNotice = e.data;
-    const eventId = eventIdNotice.currentEventId
-    log("event-id-notice currentEventId", eventId);
-    if (eventId >= nextEventId) {
-      drainEvents();
+  try {
+    if (e.format === "appevent") {
+      handleAppEvent(e.data as m.AppEvent);
+    } else if (e.format === "hotline-beep") {
+      const hotlineBeep = e.data as m.HotlineBeep;
+      hotlineBeepEntered.set(hotlineBeep);
+    } else if (e.format === "event-id-notice") {
+      const eventIdNotice = e.data;
+      const eventId = eventIdNotice.currentEventId;
+      log("event-id-notice currentEventId", eventId);
+      if (eventId >= nextEventId) {
+        drainEvents();
+      }
+      eventIdNoticeEntered.set(eventIdNotice);
+    } else if (e.format === "heart-beat") {
+      const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
+      heartBeatEntered.set(heartBeat);
+    } else if (e.format === "config-change") {
+      const data = e.data;
+      const name = data.name;
+      const value = JSON.parse(data.value);
+      configChanged.set({ name, value });
     }
-    eventIdNoticeEntered.set(eventIdNotice);
-  } else if (e.format === "heart-beat") {
-    const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
-    heartBeatEntered.set(heartBeat);
+  } catch (ex: any) {
+    console.log("dispatch failed", ex);
   }
 }
