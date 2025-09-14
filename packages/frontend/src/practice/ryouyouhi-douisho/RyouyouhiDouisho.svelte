@@ -6,6 +6,7 @@
   } from "@/lib/drawer/forms/ryouyouhi-douisho/ryouyouhi-douisho-drawer";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import AddressField from "@/lib/drawer/forms/ryouyouhi-douisho/components/AddressField.svelte";
+  import TextField from "@/lib/drawer/forms/ryouyouhi-douisho/components/TextField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -41,8 +42,27 @@
 
 {#if isVisible}
   <button on:click={doPrint}>印刷</button>
-{/if}
 
-<div>
-  <AddressField bind:value={data["patient-address"]} />
-</div>
+  <div class="fields-container">
+    <TextField bind:value={data["patient-address"]} label="住所" />
+    <TextField bind:value={data["patient-name"]} label="氏名" />
+    <TextField bind:value={data["birth-date"]} label="生年月日" />
+    <TextField bind:value={data["condition-name"]} label="傷病名" />
+    <TextField bind:value={data["onset-date"]} label="発病年月日" />
+    <TextField bind:value={data["consent-type"]} label="同意区分" />
+    <TextField bind:value={data["examination-date"]} label="診察日" />
+    <TextField bind:value={data["issue-date"]} label="発行日" />
+    <TextField bind:value={data["clinic-name"]} label="保険医療機関名" />
+    <TextField bind:value={data["clinic-address"]} label="所在地" />
+    <TextField bind:value={data["doctor-name"]} label="保険医氏名" />
+  </div>
+{/if}
+fd
+<style>
+  .fields-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+</style>
