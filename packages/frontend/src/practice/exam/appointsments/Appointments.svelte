@@ -4,13 +4,14 @@
   import { currentPatient, showAppoints, startPatient } from "../exam-vars";
   import RightBox from "../RightBox.svelte";
   import { pad } from "@/lib/pad";
-  import { DateWrapper } from "myclinic-util";
+  import { DateWrapper, GengouList } from "myclinic-util";
+  import DatePickerPopup from "@/lib/date-picker/DatePickerPopup.svelte";
 
   let today = new Date();
   let curdate = today;
   let data: [AppointTime, Appoint[]][] = [];
   let showList = true;
-    
+
   showAppoints.subscribe((show) => {
     if (show) {
       refresh();
@@ -40,24 +41,50 @@
     showList = true;
   }
 
-  function doChangeDate() {
-    let input = prompt("日付（YYYY-MM-DD）：", DateWrapper.from(curdate).asSqlDate());
-    if (input) {
-      curdate = DateWrapper.from(input).asDate();
-      refresh();
-    }
+  function defaultGengouList(): string[] {
+    return GengouList.map((g) => g.name);
   }
 
-  function dateRep(date: Date): string {
+  function doChangeDate(e: MouseEvent) {
+    const d: DatePickerPopup = new DatePickerPopup({
+      target: document.body,
+      props: {
+        date: curdate,
+        destroy: () => d.$destroy(),
+        gengouList: defaultGengouList(),
+        event: e,
+        onEnter: (value: Date) => {
+          curdate = value;
+          refresh();
+        },
+        onCancel: () => {
+        },
+      },
+    });
+    // let input = prompt("日付（YYYY-MM-DD）：", DateWrapper.from(curdate).asSqlDate());
+    // if (input) {
+    //   curdate = DateWrapper.from(input).asDate();
+    //   refresh();
+    // }
+  }
+
+  function dateRep(_date: Date): string {
     let d = DateWrapper.from(curdate);
     return d.render(
-      (d) => `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日（${d.youbi}）`,
+      (d) =>
+        `${d.getGengou()}${d.getNen()}年${d.getMonth()}月${d.getDay()}日（${d.youbi}）`,
     );
+  }
+
+  function isSameDate(a: Date, b: Date): boolean {
+    return a.getFullYear() == b.getFullYear() &&
+      a.getMonth() == b.getMonth() &&
+      a.getDate() == b.getDate();
   }
 </script>
 
 <RightBox title="予約患者">
-  {#if curdate != today}
+  {#if !isSameDate(curdate, today) }
     <div>{dateRep(curdate)}</div>
   {/if}
   {#if showList}
@@ -79,6 +106,7 @@
     </div>
   {/if}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y-invalid-attribute -->
   <div class="commands">
     <a href="javascript:void(0)" on:click={doChangeDate}>日付変更</a>
     <a href="javascript:void(0)" on:click={refresh}>更新</a>

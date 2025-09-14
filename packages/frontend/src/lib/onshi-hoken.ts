@@ -1,4 +1,4 @@
-import { Koukikourei, Shahokokuho, dateToSqlDate, type ShahokokuhoInterface, } from "myclinic-model";
+import { Koukikourei, Shahokokuho, dateToSqlDate, } from "myclinic-model";
 import { isKoukikourei } from "./hoken-rep";
 import type { ResultItem } from "onshi-result/ResultItem";
 import { toHankaku } from "./zenkaku";

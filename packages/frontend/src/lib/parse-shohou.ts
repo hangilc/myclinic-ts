@@ -24,6 +24,7 @@ export interface Drug {
   unit: string,
   senpatsu?: Senpatsu,
   uneven?: string,
+  kouhi?: string,
   drugComments: string[],
 }
 
@@ -141,19 +142,19 @@ function immediateNoKaku(s: string): Parser<string> {
   return immediate(s, toHankaku);
 }
 
-function takeWhile(f: (ch: string) => boolean): Parser<string> {
-  return new Parser(
-    (src, i) => {
-      let j = i;
-      for (j = i; j < src.length; j++) {
-        if (!f(src[j])) {
-          break;
-        }
-      }
-      return success(j, src.substring(i, j));
-    }
-  );
-}
+// function takeWhile(f: (ch: string) => boolean): Parser<string> {
+//   return new Parser(
+//     (src, i) => {
+//       let j = i;
+//       for (j = i; j < src.length; j++) {
+//         if (!f(src[j])) {
+//           break;
+//         }
+//       }
+//       return success(j, src.substring(i, j));
+//     }
+//   );
+// }
 
 function repeatUntil<T, U, S>(item: Parser<T>, cond: Parser<U>, comb: (ts: T[], u: U) => S): Parser<S> {
   return new Parser(
@@ -226,18 +227,18 @@ function peek<T>(item: Parser<T>): Parser<T> {
   )
 }
 
-function not<T>(item: Parser<T>): Parser<void> {
-  return new Parser(
-    (src, i) => {
-      const r = item.apply(src, i);
-      if (r !== undefined) {
-        return failure();
-      } else {
-        return success(i, undefined);
-      }
-    }
-  )
-}
+// function not<T>(item: Parser<T>): Parser<void> {
+//   return new Parser(
+//     (src, i) => {
+//       const r = item.apply(src, i);
+//       if (r !== undefined) {
+//         return failure();
+//       } else {
+//         return success(i, undefined);
+//       }
+//     }
+//   )
+// }
 
 function opt<T>(item: Parser<T>): Parser<T[]> {
   return new Parser(
@@ -281,17 +282,17 @@ function nonSpaces(atLeast: number): Parser<string> {
   return repeat(one(isNonSpace), atLeast).map(ss => ss.join(""));
 }
 
-function end(): Parser<void> {
-  return new Parser<void>(
-    (src, i) => {
-      if (i >= src.length) {
-        return success(i, undefined);
-      } else {
-        return failure();
-      }
-    }
-  )
-}
+// function end(): Parser<void> {
+//   return new Parser<void>(
+//     (src, i) => {
+//       if (i >= src.length) {
+//         return success(i, undefined);
+//       } else {
+//         return failure();
+//       }
+//     }
+//   )
+// }
 
 export function eol(): Parser<string> {
   return new Parser(
@@ -316,37 +317,37 @@ export function eol(): Parser<string> {
   )
 }
 
-function sol(): Parser<void> {
-  return new Parser(
-    (src, i) => {
-      if (i === 0) {
-        return success(i, undefined);
-      } else if (i >= 1) {
-        if (src[i - 1] === "\n") {
-          return success(i, undefined);
-        }
-      }
-      return failure();
-    }
-  )
-}
+// function sol(): Parser<void> {
+//   return new Parser(
+//     (src, i) => {
+//       if (i === 0) {
+//         return success(i, undefined);
+//       } else if (i >= 1) {
+//         if (src[i - 1] === "\n") {
+//           return success(i, undefined);
+//         }
+//       }
+//       return failure();
+//     }
+//   )
+// }
 
 
 function blankLineEnd(): Parser<string> {
   return spaces(0).chain(eol(), (a, b) => a + b);
 }
 
-function charsBeforeEol(): Parser<string> {
-  return repeatUntil(one(ch => true), peek(eol()), (cs, _) => cs.join(""));
-}
+// function charsBeforeEol(): Parser<string> {
+//   return repeatUntil(one(ch => true), peek(eol()), (cs, _) => cs.join(""));
+// }
 
 function toEol(): Parser<string> {
   return repeatUntil(one(ch => ch != "\n"), eol(), (cs, _) => cs.join(""));
 }
 
-function blankLine(): Parser<string> {
-  return sol().then(blankLineEnd());
-}
+// function blankLine(): Parser<string> {
+//   return sol().then(blankLineEnd());
+// }
 
 function isDigit(ch: string): boolean {
   ch = toHankaku(ch);
@@ -368,13 +369,13 @@ function float(): Parser<string> {
   );
 }
 
-function ignore(a: any, b: any): void {
-  return undefined;
-}
+// function ignore(a: any, b: any): void {
+//   return undefined;
+// }
 
-function keepRight<T>(a: any, b: T): T {
-  return b;
-}
+// function keepRight<T>(_a: any, b: T): T {
+//   return b;
+// }
 
 let drugUnitStrings = [
   "錠",
@@ -416,7 +417,7 @@ export function groupCommandLine(): Parser<string> {
 
 export function shohouCommandLine(): Parser<string> {
   return immediateNoKaku("@")
-    .then(repeatUntil(one(ch => true), eol(), (cs, _) => cs.join("").trim()));
+    .then(repeatUntil(one(_ch => true), eol(), (cs, _) => cs.join("").trim()));
 }
 
 
@@ -563,7 +564,7 @@ export function timesUsage(): Parser<{ usage: string, times: string, kind: "time
 }
 
 export function otherUsage(): Parser<{ usage: string, kind: "other" }> {
-  return repeatUntil(one(ch => true), peek(eol()), (cs, _) => ({
+  return repeatUntil(one(_ch => true), peek(eol()), (cs, _) => ({
     kind: "other",
     usage: cs.join("")
   }))
@@ -620,7 +621,7 @@ export function shohou(): Parser<Shohou> {
     )
 }
 
-export function parseShohou(src: string, debug: boolean): Shohou {
+export function parseShohou(src: string, _debug: boolean): Shohou {
   src = src.trim();
   src = src.replaceAll(/\n{2,}/g, "");
   const r = shohou().apply(src, 0);

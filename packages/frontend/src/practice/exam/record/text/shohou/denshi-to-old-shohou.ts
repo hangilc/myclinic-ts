@@ -16,16 +16,16 @@ export function denshiToOldShohou(data: PrescInfoData): string {
       const name = drug.薬品レコード.薬品名称;
       const amount = toZenkaku(drug.薬品レコード.分量);
       const unit = drug.薬品レコード.単位名;
-      
+
       // Format the drug line with name and amount
       let prefix: string;
-      if( i === 0 ){
+      if (i === 0) {
         prefix = toZenkaku(`${index + 1})`);
       } else {
         prefix = "　　";
       }
       let drugLine = `${prefix}${name}　${amount}${unit}`;
-      
+
       // Add uneven dosage information if present
       if (drug.不均等レコード) {
         let rep = `(${unevenDisp(drug.不均等レコード)})`;
@@ -34,15 +34,15 @@ export function denshiToOldShohou(data: PrescInfoData): string {
       }
 
       lines.push(drugLine);
-      
+
       // Add drug supplementary information if present
-      if( drug.薬品補足レコード){
+      if (drug.薬品補足レコード) {
         drug.薬品補足レコード.forEach(info => {
-          if( info.薬品補足情報 === "後発品変更不可" ){
+          if (info.薬品補足情報 === "後発品変更不可") {
             lines.push("　　＠変更不可");
-          } else if (info.薬品補足情報 === "先発医薬品患者希望") { 
+          } else if (info.薬品補足情報 === "先発医薬品患者希望") {
             lines.push("　　＠患者希望");
-          }  else {
+          } else {
             lines.push(`　　@comment:【${info.薬品補足情報}】`);
           }
         });
@@ -63,6 +63,22 @@ export function denshiToOldShohou(data: PrescInfoData): string {
       });
     }
   });
+
+  switch (data.保険一部負担金区分) {
+    case "高齢者一般": {
+      lines.push("@memo:高９");
+      break;
+    }
+    case "高齢者８割": {
+      lines.push("@memo:高８");
+      break;
+    }
+    case "高齢者７割": {
+      lines.push("@memo:高７");
+      break;
+    }
+    default: break;
+  }
 
   // Add remarks if present
   if (data.備考レコード && data.備考レコード.length > 0) {

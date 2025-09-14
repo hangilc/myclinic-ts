@@ -2,14 +2,13 @@ import type { Op } from "../../compiler/op";
 import * as c from "../../compiler/compiler";
 import * as b from "../../compiler/box";
 import * as r from "../../compiler/render";
-import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
+import { mkDrawerContext } from "../../compiler/context";
 import { type DrawerContext as DC } from "../../compiler/context";
 import { type Box } from "../../compiler/box";
 import { A4 } from "../../compiler/paper-size";
 import type { RyouyouKeikakushoData } from "./ryouyou-keikakusho-data";
 import { textBlock, type LineItemSpec, advanceTo } from "../../compiler/render";
-import type { HAlign } from "../../compiler/align";
-import { booleanValue, boxed, drawBracketed, drawLeftSquareBracket, drawRightSquareBracket, expander, gap, line, textCircle, value } from "./widgets";
+import { booleanValue, boxed, drawBracketed, expander, gap, line, textCircle, value } from "./widgets";
 
 export function drawRyouyouKeikakushoShokai(data: RyouyouKeikakushoData): Op[] {
   const ctx = mkDrawerContext();

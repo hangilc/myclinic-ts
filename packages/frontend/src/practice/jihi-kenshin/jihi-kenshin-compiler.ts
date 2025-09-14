@@ -46,27 +46,27 @@ function compileFormat1(ctx: DrawerContext, box: Box, label: string, mark: strin
   c.mark(ctx, mark, cols[1]);
 }
 
-function compileShincho(ctx: DrawerContext, row: Box): void {
-  // const cols = row.splitToCols(firstColWidth);
-  const cols = b.splitToColumns(row, b.splitWidths(firstColWidth));
-  // cols.forEach((col) => c.frame(col));
-  cols.forEach((col) => c.frame(ctx, col));
-  // c.text(cols[0], "身長", { interCharsSpace: 4, ...Centered });
-  c.drawText(ctx, "身長", cols[0], "center", "center", { interCharsSpace: 4 });
-  // c.addMark("身長", cols[1]);
-  c.mark(ctx, "身長", cols[1]);
-}
+// function compileShincho(ctx: DrawerContext, row: Box): void {
+//   // const cols = row.splitToCols(firstColWidth);
+//   const cols = b.splitToColumns(row, b.splitWidths(firstColWidth));
+//   // cols.forEach((col) => c.frame(col));
+//   cols.forEach((col) => c.frame(ctx, col));
+//   // c.text(cols[0], "身長", { interCharsSpace: 4, ...Centered });
+//   c.drawText(ctx, "身長", cols[0], "center", "center", { interCharsSpace: 4 });
+//   // c.addMark("身長", cols[1]);
+//   c.mark(ctx, "身長", cols[1]);
+// }
 
-function compileTaijuu(ctx: DrawerContext, row: Box): void {
-  // const cols = row.splitToCols(firstColWidth);
-  const cols = b.splitToColumns(row, b.splitWidths(firstColWidth));
-  // cols.forEach((col) => c.frame(col));
-  cols.forEach((col) => c.frame(ctx, col));
-  // c.text(cols[0], "体重", { interCharsSpace: 4, ...Centered });
-  c.drawText(ctx, "体重", cols[0], "center", "center", { interCharsSpace: 4 });
-  // c.addMark("体重", cols[1]);
-  c.mark(ctx, "体重", cols[1]);
-}
+// function compileTaijuu(ctx: DrawerContext, row: Box): void {
+//   // const cols = row.splitToCols(firstColWidth);
+//   const cols = b.splitToColumns(row, b.splitWidths(firstColWidth));
+//   // cols.forEach((col) => c.frame(col));
+//   cols.forEach((col) => c.frame(ctx, col));
+//   // c.text(cols[0], "体重", { interCharsSpace: 4, ...Centered });
+//   c.drawText(ctx, "体重", cols[0], "center", "center", { interCharsSpace: 4 });
+//   // c.addMark("体重", cols[1]);
+//   c.mark(ctx, "体重", cols[1]);
+// }
 
 function compileShiryoku(ctx: DrawerContext, row: Box): void {
   const cols = b.splitToColumns(row, b.splitWidths(firstColWidth));

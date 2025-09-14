@@ -97,7 +97,7 @@ function drawValidUpto(ctx: DrawerContext, date: string | undefined) {
 }
 
 function drawClinicInfo(ctx: DrawerContext, box: Box, address: string, name: string,
-  phone: string, kikancode: string) {
+  _phone: string, kikancode: string) {
   c.setFont(ctx, "mincho-3");
   let r = b.modify(box, b.shift(2, 1));
   c.drawText(ctx, address, r, "left", "top");
@@ -274,7 +274,7 @@ function drawDrugs(ctx: DrawerContext, box: Box, memoBox: Box, drugs: Drug[], me
     } else if (tryDrawDrugs(ctx, "gothic-3.5", new RenderDrugContext({ maxLine: 36 }), box, memoBox, drugs, memo)) {
       // nop
     } else {
-      const { drugLines, memoLines, fontSize } = prepareDrugMemoLines(ctx, "gothic-3.5",
+      const { drugLines, memoLines } = prepareDrugMemoLines(ctx, "gothic-3.5",
         new RenderDrugContext({ maxLine: 36 }), memoBox, drugs, memo);
       c.drawTexts(ctx, [...drugLines, ...memoLines], box);
     }

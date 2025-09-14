@@ -13,7 +13,7 @@
   export let enableAutoFocus = false;
 
   let dialog: HTMLElement;
-  let titleBar: HTMLElement;
+  // let titleBar: HTMLElement;
 
   let zIndexScreen = alloc();
   let zIndexDialog = alloc();
@@ -148,7 +148,6 @@
   <div
     class="title"
     data-cy="dialog-title"
-    bind:this={titleBar}
   >
     <span class="spacer dialog-grab" on:mousedown={handleTitleMouseDown}>
 	  {title}

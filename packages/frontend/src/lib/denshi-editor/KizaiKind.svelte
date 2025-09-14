@@ -1,1 +1,0 @@
-KIZAI KIND

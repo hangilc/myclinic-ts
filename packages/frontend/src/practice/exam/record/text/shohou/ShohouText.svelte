@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Kouhi, Text } from "myclinic-model";
+  import { Text } from "myclinic-model";
   import { TextMemoWrapper, type ShohouTextMemo } from "@/lib/text-memo";
   import api from "@/lib/api";
   import type { PrescInfoData } from "@/lib/denshi-shohou/presc-info";
@@ -14,7 +14,7 @@
 
   export let text: Text;
   export let at: string;
-  export let kouhiList: Kouhi[];
+  export let patientId: number;
   let textId = text.textId;
   let memo: ShohouTextMemo = TextMemoWrapper.getShohouMemo(text);
   let shohou: PrescInfoData = memo.shohou;
@@ -41,9 +41,11 @@
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
+
+  $: adaptToText(text);
   $: setupIppan(shohou);
 
-  function adaptToText() {
+  function adaptToText(text: Text) {
     memo = TextMemoWrapper.getShohouMemo(text);
     shohou = memo.shohou;
     prescriptionId = memo.prescriptionId;
@@ -60,9 +62,6 @@
       const drugGroups = shohou.RP剤情報グループ;
       for (let g of drugGroups) {
         for (let r of g.薬品情報グループ) {
-          // レセプト電算処理システム用コード
-          // YJコード
-          // 一般名コード
           const codeKind = r.薬品レコード.薬品コード種別;
           const code = r.薬品レコード.薬品コード;
           const drugName = r.薬品レコード.薬品名称;
@@ -95,6 +94,8 @@
       ippanRep = "一般名加算１";
     } else if (nIppan > 0) {
       ippanRep = "一般名加算２";
+    } else {
+      ippanRep = "一般名加算なし";
     }
   }
 
@@ -122,7 +123,7 @@
     await api.updateText(text);
     mode = "disp";
     text = text;
-    adaptToText();
+    // adaptToText(text);
   }
 
   async function doUnregistered() {
@@ -135,7 +136,7 @@
     await api.updateText(text);
     mode = "disp";
     text = text;
-    adaptToText();
+    // adaptToText(text);
   }
 </script>
 
@@ -163,8 +164,8 @@
         <ShohouTextForm
           {shohou}
           {at}
-          {kouhiList}
           {textId}
+          {patientId}
           onCancel={() => (mode = "disp")}
           onDone={() => (mode = "disp")}
           onModified={doShohouModified}

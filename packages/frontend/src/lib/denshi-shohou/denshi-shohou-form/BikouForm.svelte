@@ -30,6 +30,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <div style="font-weight:bold;">備考</div>
   <div>
@@ -38,7 +39,8 @@
         {record.備考}
         <a href="javascript:void(0)" on:click={() => doDelete(record)}
           style="position:relative;top:3px;"
-          ><Trash color="gray" /></a
+          class="trash-link"
+          ><Trash /></a
         >
       </div>
     {/each}
@@ -61,3 +63,9 @@
     </a>
   </div>
 </div>
+
+<style>
+  .trash-link {
+    --trash-stroke: gray;
+  }
+</style>

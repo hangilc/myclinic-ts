@@ -21,6 +21,7 @@
     display: inline-block;
     width: 20px;
     height: 20px;
+    margin-left: var(--search-link-margin-left, 0);
   }
 
   a :global(svg) {

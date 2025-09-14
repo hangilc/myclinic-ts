@@ -13,6 +13,7 @@
   import SelectScannerPulldown from "./SelectScannerPulldown.svelte";
   import { popupTrigger } from "@/lib/popup-helper";
   import { kindChoices } from "./kind-choices";
+  import { cache } from "@/lib/cache";
 
   export let remove: () => void;
 
@@ -47,6 +48,22 @@
   manager.onScanPctChange = (pct) => (scanPct = pct);
 
   probeScanner();
+  initScanResolution();
+
+  async function initScanResolution() {
+    console.log("enter initScanResolution");
+    try {
+      const resolution = await cache.getScanResolution();
+      if( resolution > 0 ){
+        manager.resolution = resolution;
+        console.log("scan resolution set to", manager.resolution);
+      } else {
+        console.log("scan resolution not configured, using default", manager.resolution);
+      }
+    } catch (error) {
+      console.log("failed to load scan resolution, using default", manager.resolution, error);
+    }
+  }
 
   async function probeScanner() {
     const result = await printApi.listScannerDevices();
@@ -82,6 +99,7 @@
   }
 
   function doStartScan(): void {
+    console.log("resolution", manager.resolution);
     manager.scan();
   }
 
@@ -130,6 +148,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top" data-cy="scan-block">
   <div class="title main">書類のスキャン</div>
   <div class="title">患者選択</div>
@@ -143,14 +162,11 @@
       <a href="javascript:void(0)" on:click={popupTrigger(() => Object.keys(kindChoices).map(k => [
         k, () => manager.setKindKey(k)
       ]), { modifier: m => m.setAttribute("data-cy", "scan-kind-pulldown")})}>選択</a>
-      <!-- <ScanKindPulldown slot="menu" {destroy} onEnter={k => manager.setKindKey(k)}/> -->
   </div>
   <div class="title">スキャナー</div>
   <div class="work" data-cy="scanner-selection-workarea">
     <span data-cy="scanner-text">{scannerText}</span>
       <a href="javascript:void(0)" on:click={doScannerPopup}>選択</a>
-      <!-- <SelectScannerPulldown slot="menu" {destroy} list={scannerList}
-        current={manager.scanDevice} onSelect={d => manager.setDevice(d)}/> -->
   </div>
   <div class="commands" data-cy="scan-commands">
     <button on:click={doStartScan} disabled={!$canScan}>スキャン開始</button>

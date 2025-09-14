@@ -9,7 +9,7 @@ import { resolveKouhiPayer, type KouhiContext } from "./resolve-payer";
 import { isUnder70, isBirthday75 } from "myclinic-rezept/gendogaku";
 import { is診療識別コードCode, type ShotokuKubunCode, type 診療識別コードCode, type 診療識別コードName } from "myclinic-rezept/codes";
 import { kizaiKingakuToTen } from "myclinic-rezept/helper";
-import { eqArray, type DateWrapperLike, groupBy, groupByGeneric, sqlDateToObject } from "myclinic-util";
+import { eqArray, type DateWrapperLike, groupByGeneric, sqlDateToObject } from "myclinic-util";
 import { isUnder6, resolveFutanWari } from "./futan-wari";
 import { getKouhiOrderWeight } from "myclinic-rezept/kouhi-order";
 import { resolveGendo, resolveShotokuKubun } from "./rezept-adapter";
@@ -40,11 +40,11 @@ export async function calcRezeptMeisai(visitId: number): Promise<Meisai> {
   }
 }
 
-function resolveTasuuGaitou(visits: Visit[]): boolean {
+function resolveTasuuGaitou(_visits: Visit[]): boolean {
   return false;
 }
 
-function resolveMarucho(visits: Visit[]): number | undefined {
+function resolveMarucho(_visits: Visit[]): number | undefined {
   return undefined;
 }
 

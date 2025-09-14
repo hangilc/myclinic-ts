@@ -5,7 +5,8 @@ export async function startScan(
   device: string,
   onStart: () => void,
   pct: (pct: number) => void,
-  onEnd: () => void
+  onEnd: () => void,
+  resolution: number = 100,
 ): Promise<string | undefined> {
   if( !getScanner(device) ){
     alert("スキャナーを使用できません。");
@@ -16,7 +17,7 @@ export async function startScan(
   try {
     return await printApi.scan(device, (loaded, total) => {
       pct((loaded / total) * 100);
-    });
+    }, resolution);
   } catch (ex) {
     console.error("scan-error", ex);
     return undefined;

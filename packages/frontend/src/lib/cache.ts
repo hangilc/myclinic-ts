@@ -8,6 +8,9 @@ import {
   validateAppointsTemplate,
   type AppointsTemplate,
 } from "@/appoint/appoints-template";
+import type { DrugNameBind } from "@/lib/drug-name-bind";
+import type { DrugPrefab } from "./drug-prefab";
+import { configChanged } from "@/app-events";
 
 let clinicInfo: ClinicInfo | undefined = undefined;
 let hpkiUrl: string | undefined = undefined;
@@ -19,13 +22,17 @@ let shinryouDiseases: ShinryouDisease[] | undefined = undefined;
 let hokengaiHistory: string[] | undefined = undefined;
 let diseaseExamples: DiseaseExample[] | undefined = undefined;
 let usageMasterMap: Record<string, 用法レコード> | undefined = undefined;
-let drugNameIyakuhincodeMap:
-  | Record<string, number | { kind: "ippanmei"; name: string; code: string }>
-  | undefined = undefined;
+let drugNameIyakuhincodeMap: Record<string, DrugNameBind> | undefined =
+  undefined;
 let onshiServer: string | undefined = undefined;
 let dxKasanSeries: DxKasanApplied[] | undefined = undefined;
 let doctorEmail: string | undefined = undefined;
 let appointsTemplate: AppointsTemplate | undefined = undefined;
+let drugPrefabList: DrugPrefab[] | undefined = undefined;
+let drugNameConv: Record<string, string> | undefined = undefined;
+let drugUsageConv: Record<string, string> | undefined = undefined;
+let presetUsage: string[] | undefined = undefined;
+let scanResolution: number | undefined = undefined;
 
 export type FreqUsage = {
   剤型区分: "内服" | "頓服" | "外用";
@@ -153,22 +160,27 @@ export const cache = {
     await api.setUsageMasterMap(map);
   },
 
-  async getDrugNameIyakuhincodeMap(): Promise<
-    Record<string, number | { kind: "ippanmei"; name: string; code: string }>
-  > {
+  clearUsageMasterMap(): void {
+    usageMasterMap = undefined;
+  },
+
+  async getDrugNameIyakuhincodeMap(): Promise<Record<string, DrugNameBind>> {
     if (drugNameIyakuhincodeMap === undefined) {
-      const map: Record<string, number> =
-        await api.getDrugNameIyakuhincodeMap();
+      const map = await api.getDrugNameIyakuhincodeMap();
       drugNameIyakuhincodeMap = map;
     }
     return drugNameIyakuhincodeMap;
   },
 
   async setDrugNameIyakuhincodeMap(
-    map: Record<string, number | { kind: "ippanmei"; name: string; code: string }>
+    map: Record<string, DrugNameBind>
   ): Promise<void> {
     drugNameIyakuhincodeMap = map;
     await api.setDrugNameIyakuhincodeMap(map);
+  },
+
+  clearDrugNameIyakuhincodeMap(): void {
+    drugNameIyakuhincodeMap = undefined;
   },
 
   async getOnshiServer(): Promise<string> {
@@ -232,4 +244,120 @@ export const cache = {
     appointsTemplate = value;
     await api.setConfig("appoints-template", value);
   },
+
+  async getDrugPrefabList(): Promise<DrugPrefab[]> {
+    if (drugPrefabList === undefined) {
+      return cache.reloadDrugPrefabList();
+    }
+    return drugPrefabList;
+  },
+
+  async reloadDrugPrefabList(): Promise<DrugPrefab[]> {
+    const value: DrugPrefab[] = await api.getConfig("drug-prefab-list");
+    drugPrefabList = value;
+    return drugPrefabList;
+  },
+
+  async setDrugPrefabList(value: DrugPrefab[]): Promise<void> {
+    drugPrefabList = value;
+    await api.setConfig("drug-prefab-list", value);
+  },
+
+  async getDrugNameConv(): Promise<Record<string, string>> {
+    if (drugNameConv === undefined) {
+      return cache.reloadDrugNameConv();
+    }
+    return drugNameConv;
+  },
+
+  async reloadDrugNameConv(): Promise<Record<string, string>> {
+    let value: Record<string, string> = await api.getConfig("drug-name-conv");
+    drugNameConv = value;
+    return drugNameConv;
+  },
+
+  async setDrugNameConv(value: Record<string, string>): Promise<void> {
+    drugNameConv = value;
+    await api.setConfig("drug-name-conv", value);
+  },
+
+  async getDrugUsageConv(): Promise<Record<string, string>> {
+    if (drugUsageConv === undefined) {
+      return cache.reloadDrugUsageConv();
+    }
+    return drugUsageConv;
+  },
+
+  async reloadDrugUsageConv(): Promise<Record<string, string>> {
+    let value: Record<string, string> = await api.getConfig("drug-usage-conv");
+    drugUsageConv = value;
+    return drugUsageConv;
+  },
+
+  async setDrugUsageConv(value: Record<string, string>): Promise<void> {
+    drugUsageConv = value;
+    await api.setConfig("drug-usage-conv", value);
+  },
+
+  async getPresetUsage(): Promise<string[]> {
+    if (presetUsage === undefined) {
+      return cache.reloadPresetUsage();
+    }
+    return presetUsage;
+  },
+
+  async reloadPresetUsage(): Promise<string[]> {
+    let value: string[] = await api.getConfig("preset-usage");
+    presetUsage = value;
+    return presetUsage;
+  },
+
+  async setPresetUsage(value: string[]): Promise<void> {
+    presetUsage = value;
+    await api.setConfig("preset-usage", value);
+  },
+
+  async getScanResolution(): Promise<number> {
+    if (scanResolution === undefined) {
+      return cache.reloadScanResolution();
+    }
+    return scanResolution;
+  },
+
+  async reloadScanResolution(): Promise<number> {
+    try {
+      let value: number = await api.getConfig("scan-resolution");
+      if (typeof value === 'number' && value > 0) {
+        scanResolution = value;
+        return scanResolution;
+      }
+    } catch (error) {
+      console.log("scan-resolution config not found or invalid:", error);
+    }
+    scanResolution = 100;
+    return scanResolution;
+  },
+
+  async setScanResolution(value: number): Promise<void> {
+    scanResolution = value;
+    await api.setConfig("scan-resolution", value);
+  },
+
+
 };
+
+configChanged.subscribe(data => {
+  if( !data ){
+    return;
+  }
+  const value = data.value;
+  switch(data.name){
+    case "scan-resolution": {
+      if( typeof value === "number" && value > 0 ){
+        scanResolution = value;
+        console.log("config scan-resolution changed", value);
+      }
+      break;
+    }
+  }
+})

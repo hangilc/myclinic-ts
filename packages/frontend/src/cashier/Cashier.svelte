@@ -1,7 +1,7 @@
 <script lang="ts">
   import { wqueueDeleted, wqueueEntered, wqueueUpdated } from "@/app-events";
   import api from "@/lib/api";
-  import type { Wqueue } from "myclinic-model";
+  // import type { Wqueue } from "myclinic-model";
   import { onDestroy } from "svelte";
   import TopBlock from "./TopBlock.svelte";
   import { WqueueData } from "./wq-data";

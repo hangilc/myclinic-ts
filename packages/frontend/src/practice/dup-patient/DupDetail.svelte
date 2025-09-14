@@ -1,10 +1,9 @@
 <script lang="ts">
-  import type { Patient, Visit } from "myclinic-model";
+  import type { Patient } from "myclinic-model";
   import { createMerge, getInfo } from "./functions";
   import type { PatientInfo } from "./dup-patient";
   import PatientInfoComponent from "./PatientInfo.svelte";
-  import api from "@/lib/api";
-
+  
   export let patient1: Patient
   export let patient2: Patient
   export let onMerged: () => void;

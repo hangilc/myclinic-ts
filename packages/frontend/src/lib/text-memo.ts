@@ -1,5 +1,8 @@
-import api from "@/lib/api";
-import { eq公費レコード, type PrescInfoData, type 公費レコード } from "@/lib/denshi-shohou/presc-info";
+import {
+  eq公費レコード,
+  type PrescInfoData,
+  type 公費レコード,
+} from "@/lib/denshi-shohou/presc-info";
 import { initPrescInfoDataFromVisitId } from "@/lib/denshi-shohou/visit-shohou";
 import type { Text } from "myclinic-model";
 
@@ -58,7 +61,6 @@ export class TextMemoWrapper {
       } else {
         throw new Error("invalid text memo");
       }
-
     } else {
       return undefined;
     }
@@ -73,14 +75,14 @@ export class TextMemoWrapper {
     }
   }
 
-  probeShohouConvMemo(): ShohouConvTextMemo | undefined {
-    const memo = this.getMemo();
-    if (memo && memo.kind === "shohou-conv") {
-      return memo;
-    } else {
-      return undefined;
-    }
-  }
+  // probeShohouConvMemo(): ShohouConvTextMemo | undefined {
+  //   const memo = this.getMemo();
+  //   if (memo && memo.kind === "shohou-conv") {
+  //     return memo;
+  //   } else {
+  //     return undefined;
+  //   }
+  // }
 
   static fromText(text: Text) {
     return new TextMemoWrapper(text.memo);
@@ -104,57 +106,79 @@ export class TextMemoWrapper {
     }
   }
 
-  static createShohouTextMemo(shohou: PrescInfoData, prescriptionId: string | undefined): ShohouTextMemo {
+  static createShohouTextMemo(
+    shohou: PrescInfoData,
+    prescriptionId: string | undefined
+  ): ShohouTextMemo {
     return {
       kind: "shohou",
       shohou: shohou,
-      prescriptionId: prescriptionId
-    }
+      prescriptionId: prescriptionId,
+    };
   }
 }
 
-export async function copyTextMemo(src: TextMemo | undefined, targetVisitId: number): Promise<TextMemo | undefined> {
-  if (src == undefined) {
-    return undefined;
-  } else {
-    if (src.kind === "shohou") {
-      const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-      Object.assign(dstShohou, {
-        引換番号: undefined,
-        RP剤情報グループ: src.shohou.RP剤情報グループ,
-        提供情報レコード: src.shohou.提供情報レコード,
-        備考レコード: src.shohou.備考レコード,
-      });
-      const dstMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou: dstShohou,
-        prescriptionId: undefined,
-      };
-      return dstMemo;
-    } else if (src.kind === "shohou-conv") {
-      const visit = await api.getVisit(targetVisitId);
-      if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
-        return undefined;
-      }
-      const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
-      Object.assign(dstShohou, {
-        引換番号: undefined,
-        RP剤情報グループ: src.shohou.RP剤情報グループ,
-        提供情報レコード: src.shohou.提供情報レコード,
-        備考レコード: src.shohou.備考レコード,
-      });
-      const dstMemo: ShohouConvTextMemo = {
-        kind: "shohou-conv",
-        shohou: dstShohou,
-      };
-      return dstMemo;
-    } else {
-      throw new Error("cannot happen");
-    }
-  }
+export async function copyPrescInfoDataToOtherVisit(
+  src: PrescInfoData,
+  targetVisitId: number
+): Promise<PrescInfoData> {
+  const dst: PrescInfoData = await initPrescInfoDataFromVisitId(targetVisitId);
+  Object.assign(dst, {
+    引換番号: undefined,
+    RP剤情報グループ: src.RP剤情報グループ,
+    提供情報レコード: src.提供情報レコード,
+    備考レコード: src.備考レコード,
+  });
+  return dst;
 }
 
-function checkKouhiCompat(
+// export async function copyTextMemo(
+//   src: TextMemo | undefined,
+//   targetVisitId: number
+// ): Promise<TextMemo | undefined> {
+//   if (src == undefined) {
+//     return undefined;
+//   } else {
+//     if (src.kind === "shohou") {
+//       const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+//       Object.assign(dstShohou, {
+//         引換番号: undefined,
+//         RP剤情報グループ: src.shohou.RP剤情報グループ,
+//         提供情報レコード: src.shohou.提供情報レコード,
+//         備考レコード: src.shohou.備考レコード,
+//       });
+//       const dstMemo: ShohouTextMemo = {
+//         kind: "shohou",
+//         shohou: dstShohou,
+//         prescriptionId: undefined,
+//       };
+//       return dstMemo;
+//     } else if (src.kind === "shohou-conv") {
+//       alert("not supported: shohou-conv");
+//       return undefined;
+//       // const visit = await api.getVisit(targetVisitId);
+//       // if (visit.shahokokuhoId === 0 && visit.koukikoureiId === 0) {
+//       //   return undefined;
+//       // }
+//       // const dstShohou = await initPrescInfoDataFromVisitId(targetVisitId);
+//       // Object.assign(dstShohou, {
+//       //   引換番号: undefined,
+//       //   RP剤情報グループ: src.shohou.RP剤情報グループ,
+//       //   提供情報レコード: src.shohou.提供情報レコード,
+//       //   備考レコード: src.shohou.備考レコード,
+//       // });
+//       // const dstMemo: ShohouConvTextMemo = {
+//       //   kind: "shohou-conv",
+//       //   shohou: dstShohou,
+//       // };
+//       // return dstMemo;
+//     } else {
+//       throw new Error("cannot happen");
+//     }
+//   }
+// }
+
+export function checkKouhiCompat(
   src: PrescInfoData,
   dst: PrescInfoData
 ): string | undefined {
@@ -183,20 +207,20 @@ function checkKouhiCompat(
   return undefined;
 }
 
-export function checkMemoCompat(
-  src: TextMemo | undefined,
-  dst: TextMemo | undefined
-): string | undefined {
-  if (src === undefined && dst === undefined) {
-    return undefined;
-  } else if (src && dst) {
-    if (src.kind === "shohou" && dst.kind === src.kind) {
-      return checkKouhiCompat(src.shohou, dst.shohou);
-    } else if (src.kind === "shohou-conv" && dst.kind === src.kind) {
-      return checkKouhiCompat(src.shohou, dst.shohou);
-    } else {
-    }
-  }
-  return "inconsistent text memo";
-}
-
+// export function checkMemoCompat(
+//   src: TextMemo | undefined,
+//   dst: TextMemo | undefined
+// ): string | undefined {
+//   if (src === undefined && dst === undefined) {
+//     return undefined;
+//   } else if (src && dst) {
+//     if (src.kind === "shohou" && dst.kind === src.kind) {
+//       return checkKouhiCompat(src.shohou, dst.shohou);
+//     } else if (src.kind === "shohou-conv" && dst.kind === src.kind) {
+//       throw new Error("not supported: shohou-conv");
+//       // return checkKouhiCompat(src.shohou, dst.shohou);
+//     } else {
+//       return "inconsistent text memo";
+//     }
+//   }
+// }

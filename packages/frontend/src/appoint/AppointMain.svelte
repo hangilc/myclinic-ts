@@ -173,7 +173,14 @@
         appointTimes.push(...toBeCreated);
       }
       const proms = appointTimes.map((at) => api.addAppointTime(at));
-      await Promise.all(proms);
+      for(let prom of proms){
+        try {
+          await prom;
+        } catch {
+          // ignore
+        }
+      }
+      // await Promise.all(proms);
     }
   }
 </script>

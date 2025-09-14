@@ -1,5 +1,4 @@
-import type { Charge, Meisai, Payment } from "myclinic-model";
-import { OnshiResult } from "onshi-result";
+import type { Charge, Payment } from "myclinic-model";
 import type { LimitApplicationCertificateClassificationFlagLabel } from "onshi-result/codes";
 import api from "./api";
 
@@ -107,30 +106,30 @@ export function isKuniKouhiOfHeiyou(houbetsuList: number[]): boolean {
   return false;
 }
 
-async function gendogaku(
-  kubun: LimitApplicationCertificateClassificationFlagLabel,
-  iryouhi: () => Promise<number>
-): Promise<number | undefined> {
-  switch (kubun) {
-    case "ア":
-    case "現役並みⅢ": return calc(252600, await iryouhi(), 842000, 0.01);
-    case "イ":
-    case "現役並みⅡ": return calc(167400, await iryouhi(), 558000, 0.01);
-    case "ウ":
-    case "現役並みⅠ": return calc(80100, await iryouhi(), 267000, 0.01);
-    case "エ": return 57600;
-    case "オ":
-    case "オ（境）": return 35400;
-    case "一般Ⅱ": return Math.min(18000, calc(6000, await iryouhi(), 30000, 0.10));
-    case "一般Ⅰ":
-    case "一般": return 18000;
-    case "低所得Ⅱ":
-    case "低所得Ⅰ":
-    case "低所得Ⅰ（老福）":
-    case "低所得Ⅰ（境）": return 8000;
-    default: return undefined;
-  }
-}
+// async function gendogaku(
+//   kubun: LimitApplicationCertificateClassificationFlagLabel,
+//   iryouhi: () => Promise<number>
+// ): Promise<number | undefined> {
+//   switch (kubun) {
+//     case "ア":
+//     case "現役並みⅢ": return calc(252600, await iryouhi(), 842000, 0.01);
+//     case "イ":
+//     case "現役並みⅡ": return calc(167400, await iryouhi(), 558000, 0.01);
+//     case "ウ":
+//     case "現役並みⅠ": return calc(80100, await iryouhi(), 267000, 0.01);
+//     case "エ": return 57600;
+//     case "オ":
+//     case "オ（境）": return 35400;
+//     case "一般Ⅱ": return Math.min(18000, calc(6000, await iryouhi(), 30000, 0.10));
+//     case "一般Ⅰ":
+//     case "一般": return 18000;
+//     case "低所得Ⅱ":
+//     case "低所得Ⅰ":
+//     case "低所得Ⅰ（老福）":
+//     case "低所得Ⅰ（境）": return 8000;
+//     default: return undefined;
+//   }
+// }
 
 function calc(threshold: number, iryouhi: number, offset: number, ratio: number): number {
   if (iryouhi <= offset) {

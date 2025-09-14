@@ -10,6 +10,7 @@ import type { Drug, DrugGroup, Senpatsu, Shohou, Usage } from "@/lib/parse-shoho
 import { toZenkaku } from "@/lib/zenkaku";
 import { DateWrapper } from "myclinic-util";
 import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
+import { drugKouhiRep } from "@/lib/denshi-helper";
 
 export function denshiToPrint2(src: PrescInfoData): ShohousenData2025 {
   const data: ShohousenData2025 = {
@@ -69,7 +70,6 @@ export function denshiToPrint(src: PrescInfoData): Shohousen2024Data {
 
 function toDrugs(src: PrescInfoData): Shohou {
   let groups: DrugGroup[] = [];
-  // let shohouComments: string[] = [];
   let bikou: string[] = [];
   let kigen: string | undefined = undefined;
   src.RP剤情報グループ.forEach(g => {
@@ -77,6 +77,21 @@ function toDrugs(src: PrescInfoData): Shohou {
   })
   if (src.使用期限年月日) {
     kigen = DateWrapper.fromOnshiDate(src.使用期限年月日).asSqlDate();
+  }
+  switch (src.保険一部負担金区分) {
+    case "高齢者一般": {
+      bikou.push("高９");
+      break;
+    }
+    case "高齢者８割": {
+      bikou.push("高８");
+      break;
+    }
+    case "高齢者７割": {
+      bikou.push("高７");
+      break;
+    }
+    default: break;
   }
   if (src.備考レコード) {
     bikou.push(...src.備考レコード.map(rec => rec.備考));
@@ -90,9 +105,8 @@ function toDrugs(src: PrescInfoData): Shohou {
     bikou.push(rec.検査値データ等);
   });
   return {
-    groups, 
-    // shohouComments, 
-    bikou, 
+    groups,
+    bikou,
     kigen,
   }
 }
@@ -120,9 +134,9 @@ function toDrugsOld(src: PrescInfoData): Shohou {
     bikou.push(rec.検査値データ等);
   });
   return {
-    groups, 
+    groups,
     // shohouComments, 
-    bikou, 
+    bikou,
     kigen,
   }
 }
@@ -157,6 +171,21 @@ function toGroupOld(g: RP剤情報): DrugGroup {
   return { drugs, usage, groupComments };
 }
 
+// function composeDrugKouhi(rec: 負担区分レコード): string {
+//   const parts: string[] = [];
+//   function rep(label: string, value: boolean | undefined) {
+//     if (value === undefined) {
+//       return;
+//     }
+//     const s = value ? "適用" : "不適用";
+//     parts.push(`${label}${s}`);
+//   }
+//   rep("第一公費", rec.第一公費負担区分);
+//   rep("第二公費", rec.第二公費負担区分);
+//   rep("第三公費", rec.第三公費負担区分);
+//   rep("特殊公費", rec.特殊公費負担区分);
+//   return parts.join("・");
+// }
 
 function toShohouDrug(info: 薬品情報): Drug {
   let name: string = info.薬品レコード.薬品名称;
@@ -164,23 +193,25 @@ function toShohouDrug(info: 薬品情報): Drug {
   let unit: string = info.薬品レコード.単位名;
   let senpatsu: Senpatsu | undefined = undefined;
   let uneven: string | undefined = undefined;
+  let kouhi: string | undefined = undefined;
   if (info.不均等レコード) {
     uneven = toZenkaku(`(${unevenDisp(info.不均等レコード)})`);
-    // let s = toZenkaku(`(${unevenDisp(info.不均等レコード)})`);
-    // drugComments.push(s);
+  }
+  if (info.負担区分レコード) {
+    kouhi = drugKouhiRep(info.負担区分レコード);
   }
   let drugComments: string[] = [];
   (info.薬品補足レコード ?? []).forEach(info => {
-    if( info.薬品補足情報 === "後発品変更不可" ){
+    if (info.薬品補足情報 === "後発品変更不可") {
       senpatsu = "henkoufuka";
-    } else if(info.薬品補足情報 === "先発医薬品患者希望") {
+    } else if (info.薬品補足情報 === "先発医薬品患者希望") {
       senpatsu = "kanjakibou";
     } else {
       drugComments.push(info.薬品補足情報);
     }
   })
   return {
-    name, amount, unit, senpatsu, uneven, drugComments
+    name, amount, unit, senpatsu, uneven, kouhi, drugComments
   }
 }
 
@@ -196,9 +227,9 @@ function toShohouDrugOld(info: 薬品情報): Drug {
     drugComments.push(s);
   }
   (info.薬品補足レコード ?? []).forEach(info => {
-    if( info.薬品補足情報 === "後発品変更不可" ){
+    if (info.薬品補足情報 === "後発品変更不可") {
       senpatsu = "henkoufuka";
-    } else if(info.薬品補足情報 === "先発医薬品患者希望") {
+    } else if (info.薬品補足情報 === "先発医薬品患者希望") {
       senpatsu = "kanjakibou";
     } else {
       drugComments.push(info.薬品補足情報);

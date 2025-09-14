@@ -6,7 +6,7 @@ export interface KouhiContext {
 }
 
 export function resolveKouhiPayer(kouhi: Kouhi, ctx: KouhiContext): Payer {
-  const p5 = part(kouhi.futansha, 5);
+  // const p5 = part(kouhi.futansha, 5);
   switch (part(kouhi.futansha, 5)) {
     case 89135:
     case 89137: {

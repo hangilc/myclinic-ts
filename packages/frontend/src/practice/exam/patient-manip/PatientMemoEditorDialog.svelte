@@ -19,7 +19,7 @@
       const m = JSON.parse(memo);
       value = Object.assign(value, m);
     }
-    return JSON.stringify(value, (k, v) => (v === undefined ? null : v), 2);
+    return JSON.stringify(value, (_k, v) => (v === undefined ? null : v), 2);
   }
 
   type ValidationResult =

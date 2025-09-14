@@ -5,6 +5,7 @@
     type RyouyouhiDouishoDrawerData,
   } from "@/lib/drawer/forms/ryouyouhi-douisho/ryouyouhi-douisho-drawer";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
+  import AddressField from "@/lib/drawer/forms/ryouyouhi-douisho/components/AddressField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -41,3 +42,7 @@
 {#if isVisible}
   <button on:click={doPrint}>印刷</button>
 {/if}
+
+<div>
+  <AddressField bind:value={data["patient-address"]} />
+</div>

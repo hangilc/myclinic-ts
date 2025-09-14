@@ -95,7 +95,6 @@ export function shindanshoDrawerContext(): DrawerContext {
     p.text("㊞")
   ], { valign: "center" });
   console.log("doctor-name", c.getMark(ctx, "doctor-name"));
-  c.rect(ctx, paper);
   return ctx;
 }
 

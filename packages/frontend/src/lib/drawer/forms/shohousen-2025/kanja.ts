@@ -1,7 +1,6 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-import * as x from "./xsplit";
 import * as cr from "./col-renderer";
 import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
@@ -154,7 +153,7 @@ function drawKikanTensuuhyouLabel(ctx: DrawerContext, box: Box) {
   drawElement(ctx, box, ele);
 }
 
-function drawKikanLabel(ctx: DrawerContext, box: Box, data: ShohousenData2025) {
+function drawKikanLabel(ctx: DrawerContext, box: Box, _data: ShohousenData2025) {
   c.withFont(ctx, "f1.5", () => {
     let ele = stackedTexts(["医療機関", "コード"]);
     drawElement(ctx, box, ele);

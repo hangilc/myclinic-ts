@@ -12,11 +12,9 @@
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Text } from "myclinic-model";
   import {
-    checkMemoCompat,
-    copyTextMemo,
-    TextMemoWrapper,
-    type ShohouTextMemo,
+  TextMemoWrapper,
   } from "@/lib/text-memo";
+  import { copyTextToOtherVisit } from "../text-helper";
 
   export let shohou: PrescInfoData;
   export let prescriptionId: string;
@@ -75,20 +73,24 @@
   async function doCopy() {
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
-      const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      const curMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou,
-        prescriptionId,
-      };
-      const newMemo = await copyTextMemo(curMemo, targetVisitId);
-      const warn = checkMemoCompat(curMemo, newMemo);
-      if (typeof warn === "string") {
-        alert(`警告：${warn}`);
-      }
-      TextMemoWrapper.setTextMemo(t, newMemo);
+      const src = await api.getText(textId);
+      const t = await copyTextToOtherVisit(src, targetVisitId);
       api.enterText(t);
       onCopied();
+      // const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+      // const curMemo: ShohouTextMemo = {
+      //   kind: "shohou",
+      //   shohou,
+      //   prescriptionId,
+      // };
+      // const newMemo = await copyTextMemo(curMemo, targetVisitId);
+      // const warn = checkMemoCompat(curMemo, newMemo);
+      // if (typeof warn === "string") {
+      //   alert(`警告：${warn}`);
+      // }
+      // TextMemoWrapper.setTextMemo(t, newMemo);
+      // api.enterText(t);
+      // onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
     }

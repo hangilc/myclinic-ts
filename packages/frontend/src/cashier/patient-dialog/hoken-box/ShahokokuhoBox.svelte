@@ -33,7 +33,7 @@
         destroy: () => d.$destroy(),
         hoken: shahokokuho,
         confirmDate,
-        onOnshiNameUpdated: (updated) => {},
+        onOnshiNameUpdated: (_updated) => {},
       },
     });
   }

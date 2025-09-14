@@ -118,6 +118,8 @@
     left: 50vw;
     transform: translateX(-60%);
     background-color: white;
+    resize: var(--ui-dialog2-resize, none);
+    overflow: var(--ui-dialog2-overflow, hidden);
   }
 
   .title {

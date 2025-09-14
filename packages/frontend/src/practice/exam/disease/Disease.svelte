@@ -112,11 +112,11 @@
     //await onDiseaseModified();
   }
 
-  async function doDeleteDisease(diseaseId: number) {
+  async function doDeleteDisease(_diseaseId: number) {
     // await onDiseaseModified();
   }
 
-  async function doUpdateDisease(entered: DiseaseData) {
+  async function doUpdateDisease(_entered: DiseaseData) {
     // await onDiseaseModified();
   }
 

@@ -34,7 +34,7 @@
         destroy: () => d.$destroy(),
         hoken: koukikourei,
         confirmDate,
-        onOnshiNameUpdated: (updated) => {},
+        onOnshiNameUpdated: (_updated) => {},
       },
     });
   }

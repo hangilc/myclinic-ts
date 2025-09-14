@@ -4,8 +4,7 @@
     createPrescInfo,
     type PrescInfoData,
   } from "@/lib/denshi-shohou/presc-info";
-  import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
-  import type { Kouhi } from "myclinic-model";
+  // import DenshiHenkanDialog from "../regular/DenshiHenkanDialog.svelte";
   import { denshiToPrint, denshiToPrint2 } from "./denshi-to-print";
   import { drawShohousen2024NoRefill } from "@/lib/drawer/forms/shohousen-2024/shohousenDrawer2024NoRefill";
   import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
@@ -24,23 +23,18 @@
   } from "@/lib/denshi-shohou/shohou-interface";
   import api from "@/lib/api";
   import { getCopyTarget } from "@/practice/exam/exam-vars";
-  import { Hotline, Text } from "myclinic-model";
-  import {
-    checkMemoCompat,
-    copyTextMemo,
-    TextMemoWrapper,
-    type ShohouTextMemo,
-  } from "@/lib/text-memo";
+  import { Hotline } from "myclinic-model";
   import { denshiToOldShohou } from "./denshi-to-old-shohou";
   import {
     drawShohousen2025,
   } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
-  import DenshiEditor from "@/lib/denshi-editor/DenshiEditor.svelte";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
+  import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
+  import { copyTextToOtherVisit } from "../text-helper";
 
   export let shohou: PrescInfoData;
+  export let patientId: number;
   export let at: string;
-  export let kouhiList: Kouhi[];
   export let textId: number;
   export let onCancel: () => void;
   export let onDone: () => void;
@@ -52,35 +46,20 @@
   export let onCopied: () => void;
 
   function doEdit() {
-    const d: DenshiEditor = new DenshiEditor({
+    const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
         destroy: () => d.$destroy(),
-        data: shohou,
-        onEnter: (updated: PrescInfoData) => {
-          onModified(updated);
-        },
-      },
-    });
-  }
-
-  function doOldEdit() {
-    const d: DenshiHenkanDialog = new DenshiHenkanDialog({
-      target: document.body,
-      props: {
-        destroy: () => d.$destroy(),
-        init: { kind: "denshi", data: shohou },
+        title: "電子処方編集",
+        orig: shohou,
+        patientId,
         at,
-        kouhiList,
-        title: "処方編集",
-        onEnter: (newShohou: PrescInfoData) => {
-          onModified(newShohou);
-        },
-        onCancel: () => {
-          onCancel();
-        },
-      },
+        onEnter: function (presc: PrescInfoData): void {
+          onModified(presc);
+        }
+      }
     });
+    onDone();
   }
 
   function doPrint() {
@@ -195,24 +174,50 @@
   async function doCopy() {
     const targetVisitId = getCopyTarget();
     if (targetVisitId !== null) {
-      const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      const curMemo: ShohouTextMemo = {
-        kind: "shohou",
-        shohou,
-        prescriptionId: undefined,
-      };
-      const newMemo = await copyTextMemo(curMemo, targetVisitId);
-      const warn = checkMemoCompat(curMemo, newMemo);
-      if (typeof warn === "string") {
-        alert(`警告：${warn}`);
-      }
-      TextMemoWrapper.setTextMemo(t, newMemo);
+      const src = await api.getText(textId);
+      const t = await copyTextToOtherVisit(src, targetVisitId);
+      // const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+      // const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
+      // const warn = checkKouhiCompat(shohou, dstData);
+      // if (typeof warn === "string") {
+      //   alert(`警告：${warn}`);
+      //   clear保険区分レコード(dstData.RP剤情報グループ);
+      // }
+      // const dstMemo: ShohouTextMemo = {
+      //   kind: "shohou",
+      //   shohou: dstData,
+      //   prescriptionId: undefined,
+      // }
+      // TextMemoWrapper.setTextMemo(t, dstMemo);
       api.enterText(t);
       onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
     }
   }
+
+  // async function doCopy__orig() {
+  //   const targetVisitId = getCopyTarget();
+  //   if (targetVisitId !== null) {
+  //     const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
+  //     const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
+  //     const curMemo: ShohouTextMemo = {
+  //       kind: "shohou",
+  //       shohou,
+  //       prescriptionId: undefined,
+  //     };
+  //     const newMemo = await copyTextMemo(curMemo, targetVisitId);
+  //     const warn = checkMemoCompat(curMemo, newMemo);
+  //     if (typeof warn === "string") {
+  //       alert(`警告：${warn}`);
+  //     }
+  //     TextMemoWrapper.setTextMemo(t, newMemo);
+  //     api.enterText(t);
+  //     onCopied();
+  //   } else {
+  //     alert("コピー先を見つけられませんでした。");
+  //   }
+  // }
 
   async function doOldShohou() {
     let c = denshiToOldShohou(shohou);
@@ -230,7 +235,7 @@
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
-  <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a>
+  <!-- <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a> -->
   <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>

@@ -64,7 +64,7 @@ export function toNumber(arg: unknown): number {
   if (typeof arg === "number") {
     n = arg;
   } else if (typeof arg === "string") {
-    const s = nonEmptyString(arg.trim());
+    // const s = nonEmptyString(arg.trim());
     n = Number(arg);
   } else {
     console.log("arg", arg);
@@ -114,7 +114,7 @@ export class ConversionResult<T> {
     return this.errors;
   }
 
-  getErrorMessage(sep: string = "\n"): string {
+  getErrorMessage(_sep: string = "\n"): string {
     return this.getErrorMessages().join("\n");
   }
 

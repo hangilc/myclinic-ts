@@ -1,6 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-
+  
   export let amount: string;
   export let unit: string;
 </script>

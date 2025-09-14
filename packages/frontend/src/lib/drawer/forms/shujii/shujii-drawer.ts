@@ -3,6 +3,7 @@ import type { Op } from "../../compiler/op";
 import * as c from "@/lib/drawer/compiler/compiler";
 import * as b from "@/lib/drawer/compiler/box";
 import { type Box } from "@/lib/drawer/compiler/box";
+import type { ShujiiDrawerData } from "./shujii-drawer-data";
 
 export function drawShujii(data: ShujiiDrawerData): Op[] {
   let ctx = mkDrawerContext();

@@ -1,4 +1,4 @@
-interface ShujiiDrawerData {
+export interface ShujiiDrawerData {
   'doctorName'?: string;
   'clinicName'?: string;
   'clinicAddress'?: string;

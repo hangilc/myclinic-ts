@@ -37,6 +37,7 @@
   <a href="javascript:void(0)" on:click={menu("rcpt-check")}>レセプトチェック</a>
   <a href="javascript:void(0)" on:click={menu("rezept")}>レセプト</a>
   <a href="javascript:void(0)" on:click={menu("henrei")}>返戻</a>
+  <a href="javascript:void(0)" on:click={menu("presc-example")}>処方例管理</a>
   <a href="javascript:void(0)" on:click={menu("shohou-usage")}>処方用法管理</a>
   <a href="javascript:void(0)" on:click={menu("modify-onshi")}>オン資サーバー</a>
   <a href="javascript:void(0)" on:click={menu("dx-kasan")}>ＤＸ加算設定</a>

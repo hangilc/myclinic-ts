@@ -14,7 +14,6 @@
 
   async function init() {
     freqUsages = await cache.getShohouFreqUsage();
-    console.log("freqUsage", freqUsages);
   }
 
   async function doSearch() {

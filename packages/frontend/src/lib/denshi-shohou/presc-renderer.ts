@@ -1,4 +1,4 @@
-import type { PrescInfoData, RP剤情報, 不均等レコード } from "./presc-info";
+import type { RP剤情報, 不均等レコード } from "./presc-info";
 
 export function renderPresc(presc: RP剤情報[]): string {
   let buf = new Buffer();

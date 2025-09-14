@@ -13,7 +13,7 @@ import { drawDrugs, type DrugBoxes } from "./drugs";
 import { drawBikou } from "./bikou";
 import { drawKouhi2 } from "./kouhi2";
 import { drawPharma } from "./pharma";
-import { breakShohouPages, drawShohouLines, handleShohou, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
+import { breakShohouPages, drawShohouLines, shohouToLines, totalLinesOfShohouLines, type ShohouLinesBoxes } from "./drug-helper";
 import { availableLines, black, red } from "./helper";
 
 
@@ -73,8 +73,6 @@ export function drawShohousen2025(data: ShohousenData2025): Op[][] {
 
 export function drawPage(ctx: DrawerContext, data: ShohousenData2025): DrugBoxes {
   const paper: Box = mkBox(0, 0, A5.width, A5.height);
-  // initFont(ctx);
-  // initPen(ctx);
   c.setFont(ctx, "f2.5");
   c.setTextColor(ctx, 0, 255, 0);
   c.setPen(ctx, "default");

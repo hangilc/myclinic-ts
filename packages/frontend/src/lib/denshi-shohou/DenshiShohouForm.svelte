@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { IyakuhinMaster, KizaiMaster, Kouhi } from "myclinic-model";
   import {
-  ippanmeiStateFromMaster,
+    ippanmeiStateFromMaster,
     type DrugGroupFormInitExtent,
     type Init,
     type IppanmeiState,
@@ -46,7 +46,8 @@
   export let sourceList: Source[];
   let selectedSourceId = -1;
   let mode: Mode | undefined = undefined;
-  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined = undefined;
+  let editedSource: (DrugGroupFormInit & DrugGroupFormInitExtent) | undefined =
+    undefined;
   export let 使用期限年月日: string | undefined;
   export let 備考レコード: 備考レコード[] | undefined;
   export let 提供情報レコード: 提供情報レコード | undefined;
@@ -65,54 +66,54 @@
     mode = m;
   }
 
-  function resolve使用期限年月日FromInit(init: Init): string | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.使用期限年月日;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve使用期限年月日FromInit(init: Init): string | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.使用期限年月日;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
-  function resolve備考レコードFromInit(init: Init): 備考レコード[] | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.備考レコード;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve備考レコードFromInit(init: Init): 備考レコード[] | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.備考レコード;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
-  function resolve提供情報レコードFromInit(
-    init: Init
-  ): 提供情報レコード | undefined {
-    switch (init.kind) {
-      case "parsed": {
-        return undefined;
-      }
-      case "denshi": {
-        return init.data.提供情報レコード;
-      }
-      default: {
-        throw new Error("cannot happen");
-      }
-    }
-  }
+  // function resolve提供情報レコードFromInit(
+  //   init: Init,
+  // ): 提供情報レコード | undefined {
+  //   switch (init.kind) {
+  //     case "parsed": {
+  //       return undefined;
+  //     }
+  //     case "denshi": {
+  //       return init.data.提供情報レコード;
+  //     }
+  //     default: {
+  //       throw new Error("cannot happen");
+  //     }
+  //   }
+  // }
 
   function prepareSourceList(
     source:
       | { kind: "parsed"; shohousen: Shohousen }
-      | { kind: "denshi"; data: PrescInfoData }
+      | { kind: "denshi"; data: PrescInfoData },
   ): Source[] {
     if (source.kind === "parsed") {
       return prepareSourceListFromShohousen(source.shohousen);
@@ -149,7 +150,7 @@
           "レセプト電算処理システム用コード"
         ) {
           const iyakuhincode = parseInt(
-            g.薬品情報グループ[0].薬品レコード.薬品コード
+            g.薬品情報グループ[0].薬品レコード.薬品コード,
           );
           spawnIppanmeiResolver(src.id, iyakuhincode);
         }
@@ -189,7 +190,7 @@
   }
 
   function resolveParsed剤形区分(
-    times: string | undefined
+    times: string | undefined,
   ): 剤形区分 | undefined {
     if (times) {
       if (times.indexOf("日分") > 0) {
@@ -205,7 +206,7 @@
   }
 
   function resolveParsed調剤数量(
-    times: string | undefined
+    times: string | undefined,
   ): number | undefined {
     if (times) {
       let m = /([0-9０-９]+)(日|回)分$/.exec(times);
@@ -218,7 +219,7 @@
   }
 
   async function resolveParsed用法レコード(
-    usage: string
+    usage: string,
   ): Promise<用法レコード | undefined> {
     const map = await cache.getUsageMasterMap();
     const rec = map[usage];
@@ -240,8 +241,8 @@
   async function probeIyakuhincode(name: string): Promise<number | undefined> {
     const map = await cache.getDrugNameIyakuhincodeMap();
     let bind = map[name];
-    if( typeof bind === "number" ){
-      return bind;
+    if (bind.kind === "iyakuhin") {
+      return parseInt(bind.code);
     } else {
       return undefined;
     }
@@ -249,7 +250,7 @@
 
   async function resolveParsedIyakuhin(
     name: string,
-    amount: string
+    amount: string,
   ): Promise<
     | { 薬品レコード: 薬品レコード }
     | { iyakuhinSearchText: string; amount: number | undefined }
@@ -289,14 +290,14 @@
   }
 
   async function sourceToInit(
-    src: Source
+    src: Source,
   ): Promise<DrugGroupFormInit & DrugGroupFormInitExtent> {
     switch (src.kind) {
       case "parsed": {
         const amount = resolveParsedAmount(src.amount);
         const resolved = await resolveParsedIyakuhin(
           src.name,
-          amount?.toString() ?? ""
+          amount?.toString() ?? "",
         );
         let 剤形区分: 剤形区分 | undefined = resolveParsed剤形区分(src.times);
         if ("薬品レコード" in resolved) {
@@ -305,7 +306,7 @@
             剤形区分 = "医療材料";
             if (
               resolved.薬品レコード.薬品名称.startsWith(
-                "万年筆型注入器用注射針"
+                "万年筆型注入器用注射針",
               )
             ) {
               resolved.薬品レコード.単位名 = "本";
@@ -379,7 +380,7 @@
 
   function rpToSource(
     rp: RP剤情報,
-    ippanmeiState: IppanmeiState | undefined
+    ippanmeiState: IppanmeiState | undefined,
   ): Source {
     let src: Source = {
       kind: "denshi",
@@ -403,7 +404,7 @@
 
   async function onFormEnter(
     rp: RP剤情報,
-    ippanmeiState: IppanmeiState | undefined
+    ippanmeiState: IppanmeiState | undefined,
   ) {
     if (
       editedSource &&
@@ -430,7 +431,7 @@
           const bind = map[drugName];
           if (!bind || bind.toString() !== rec.薬品コード) {
             const newMap = { ...map };
-            newMap[drugName] = parseInt(rec.薬品コード);
+            newMap[drugName] = { kind: "iyakuhin", code: rec.薬品コード, name: drugName };
             await cache.setDrugNameIyakuhincodeMap(newMap);
             console.log("newMap", newMap);
           }
@@ -458,7 +459,7 @@
 
   async function onNewDrug(
     rp: RP剤情報,
-    ippanmeiState: IppanmeiState | undefined
+    ippanmeiState: IppanmeiState | undefined,
   ) {
     sourceList.push(rpToSource(rp, ippanmeiState));
     sourceList = sourceList;
@@ -481,14 +482,14 @@
     mode = undefined;
   }
 
-  function isAllConverted(list: Source[]): boolean {
-    for (let src of list) {
-      if (src.kind !== "denshi") {
-        return false;
-      }
-    }
-    return true;
-  }
+  // function isAllConverted(list: Source[]): boolean {
+  //   for (let src of list) {
+  //     if (src.kind !== "denshi") {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 
   // export function getPrescInfoData(): PrescInfoData {
   //   if (isAllConverted(sourceList)) {
@@ -553,8 +554,12 @@
   }
 
   async function doConvertToIppanmei(srcId: number) {
-    let src = sourceList.find(src => src.id === srcId);
-    if( src && src.kind === "denshi" && src.ippanmeiState?.kind === "has-ippanmei" ){
+    let src = sourceList.find((src) => src.id === srcId);
+    if (
+      src &&
+      src.kind === "denshi" &&
+      src.ippanmeiState?.kind === "has-ippanmei"
+    ) {
       src.薬品情報.薬品レコード.薬品コード種別 = "一般名コード";
       src.薬品情報.薬品レコード.薬品コード = src.ippanmeiState.code;
       src.薬品情報.薬品レコード.薬品名称 = src.ippanmeiState.name;
@@ -609,7 +614,8 @@
                 <a
                   href="javascript:void(0)"
                   style="position:relative;top:6px;"
-                  on:click|stopPropagation={() => doConvertToIppanmei(source.id)}
+                  on:click|stopPropagation={() =>
+                    doConvertToIppanmei(source.id)}
                 >
                   <Circle {...spec} />
                 </a>

@@ -1,21 +1,12 @@
 <script lang="ts">
   import type * as m from "myclinic-model";
   import api from "@/lib/api";
-  import { hasHikitsugi, extractHikitsugi } from "./hikitsugi";
-  import { getCopyTarget } from "../../exam-vars";
-  import { parseShohousen } from "@/lib/shohousen/parse-shohousen";
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
-  import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
   import { setFocus } from "@/lib/set-focus";
-  import { popupTrigger } from "@/lib/popup-helper";
-  import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
-  import { dateToSqlDate } from "myclinic-model/model";
   import {
     confirmOnlinePresc,
-    getFollowingText,
     isFaxToPharmacyText,
-    isOnlineShohousen,
   } from "@/lib/shohousen-text-helper";
 
   export let onClose: () => void;
@@ -44,11 +35,11 @@
     }
   }
 
-  function onDelete(): void {
-    if (confirm("この文章を削除していいですか？")) {
-      api.deleteText(text.textId);
-    }
-  }
+  // function onDelete(): void {
+  //   if (confirm("この文章を削除していいですか？")) {
+  //     api.deleteText(text.textId);
+  //   }
+  // }
 
   function doKeyDown(event: KeyboardEvent): void {
     if (event.altKey && event.key === "p") {

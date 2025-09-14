@@ -4,6 +4,13 @@ import { resolve } from 'path'
 
 export default defineConfig(({command, mode, ssrBuild }) => ({
   plugins: [svelte()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    }
+  },
   build: {
     rollupOptions: {
       input: {
@@ -19,7 +26,6 @@ export default defineConfig(({command, mode, ssrBuild }) => ({
     alias: {
       "@": resolve(__dirname, "src"),
       "@lib": resolve(__dirname, "src/lib"),
-      "@cypress": resolve(__dirname, "cypress")
     }
   },
   base: "/vite/",

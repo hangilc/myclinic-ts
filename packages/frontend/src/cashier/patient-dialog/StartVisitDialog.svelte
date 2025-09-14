@@ -88,13 +88,13 @@
     hokenConfirmedCount = c;
   }
 
-  function doShahokokuhoChange(item: ShahokokuhoItem): void {
+  function doShahokokuhoChange(_item: ShahokokuhoItem): void {
     updateHokenSelectionCount();
     updateHokenConfirmedCount();
     error = "";
   }
 
-  function doKoukikoureiChange(item: KoukikoureiItem): void {
+  function doKoukikoureiChange(_item: KoukikoureiItem): void {
     updateHokenSelectionCount();
     updateHokenConfirmedCount();
     error = "";

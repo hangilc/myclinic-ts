@@ -26,12 +26,14 @@
     }
   }
 </script>
+
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div>
   <div style="font-weight:bold;">使用期限設定</div>
   <div>
     <EditableDate bind:date={date} onChange={doChange}/>
     <a href="javascript:void(0)" style="position:relative;top:3px;"
-    on:click={() => onDone(undefined)}>
+    on:click={() => onDone(undefined)} class="trash-link">
       <Trash />
     </a>
    <a href="javascript:void(0)" style="position:relative;top:3px;"
@@ -40,3 +42,9 @@
     </a>
   </div>
 </div>
+
+<style>
+  .trash-link {
+    --trash-stroke: gray;
+  }
+</style>

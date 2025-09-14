@@ -70,9 +70,7 @@
     const patient = onshiToPatient(confirm);
     patient.phone = phone;
     const entered: Patient = await api.enterPatient(patient);
-    console.log("entered", entered);
     const hoken = createHokenFromOnshiResult(entered.patientId, confirm.resultList[0]);
-    console.log("hoken", hoken);
     if( typeof hoken === "string" ){
       error = hoken;
       return;

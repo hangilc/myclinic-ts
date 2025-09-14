@@ -1,11 +1,10 @@
 import {
   type Patient,
-  MeisaiSectionEnum,
   type VisitEx,
   ClinicInfo,
 } from "myclinic-model"
 import { hokenRep } from "@/lib/hoken-rep"
-import { type Meisai, MeisaiWrapper } from "@/lib/rezept-meisai"
+import { MeisaiWrapper } from "@/lib/rezept-meisai"
 import { FormatDate } from "myclinic-util";
 
 export class ReceiptDrawerData {

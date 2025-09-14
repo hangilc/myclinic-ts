@@ -63,7 +63,7 @@
       <li>
         {rec.薬品補足情報}
         <a href="javascript:void(0)" on:click={() => doDelete(rec)}
-          style="position:relative;top:3px;margin-left:6px;">
+          style="position:relative;top:3px;margin-left:6px;--trash-stroke:gray;">
           <Trash />
         </a>
       </li>

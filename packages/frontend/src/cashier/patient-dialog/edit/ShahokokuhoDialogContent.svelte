@@ -5,7 +5,7 @@
   import { dateToSql } from "@/lib/util";
   import OnshiKakuninDialog from "@/lib/OnshiKakuninDialog.svelte";
   import Refer from "./refer/Refer.svelte";
-  import { batchFromHoken, fetchHokenList } from "../fetch-hoken-list";
+  import { batchFromHoken } from "../fetch-hoken-list";
   import type { Hoken } from "../hoken";
   import api from "@/lib/api";
 

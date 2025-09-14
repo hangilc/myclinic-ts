@@ -1,17 +1,11 @@
 import type { Box } from "@/lib/drawer/compiler/box";
 import * as b from "@/lib/drawer/compiler/box";
 import * as c from "@/lib/drawer/compiler/compiler";
-import * as x from "./xsplit";
-import * as cr from "./col-renderer";
-import * as r from "./row-renderer";
 import { type DrawerContext } from "@/lib/drawer/compiler/context";
 import type { ShohousenData2025 } from "./data2025";
-import { drawShimei } from "./kanja/shimei";
-import { drawBirthdayAndSex } from "./kanja/birthday-and-sex";
-import { drawKubun } from "./kanja/kubun";
 import { drawElement, stackedTexts } from "./element";
-import { black, brackettedElement, nenMonthDayElement, nenMonthDayRenderer } from "./helper";
-import { DateWrapper, pad } from "myclinic-util";
+import { brackettedElement, nenMonthDayElement } from "./helper";
+import { DateWrapper } from "myclinic-util";
 
 export function drawKoufuDate(ctx: DrawerContext,  frame: Box, data: ShohousenData2025) {
   c.frame(ctx, frame);

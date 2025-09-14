@@ -121,6 +121,7 @@
         height: 297 * 1.5,
         viewBox: "0 0 210 297",
         scale: 1.5,
+        kind: "houmon-kango",
       },
     });
   }
@@ -421,8 +422,8 @@
       </a>
     </div>
     {#if showTitleInputChoices}
-      <!-- svelte-ignore missing-declaration -->
       <!-- svelte-ignore a11y-no-static-element-interactions -->
+      <!-- svelte-ignore a11y-click-events-have-key-events -->
       <div class="title-input-choice-wrapper">
         <div
           class="title-input-choice"
@@ -477,6 +478,7 @@
   <div>
     <button on:click={doCreate}>作成</button>
   </div>
+  <!-- svelte-ignore a11y-invalid-attribute -->
   <div>
     {#if showInputs}
       <a href="javascript:void(0)" on:click={() => (showInputs = false)}

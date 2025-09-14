@@ -4,8 +4,7 @@ import type { LimitApplicationCertificateRelatedConsFlgCode } from "onshi-result
 import type { ResultItem } from "onshi-result/ResultItem";
 import api from "./api";
 import { onshiConfirm, type OnshiKakuninQuery } from "./onshi-confirm";
-import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, OnshiError, OnshiHokenInconsistency, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
-import { checkOnshiPatientConsistency, type OnshiPatientInconsistency } from "./onshi-patient-consistency";
+import { checkOnshiKoukikoureiConsistency, checkOnshiShahokokuhoConsistency, type OnshiHokenConsistencyError } from "./onshi-hoken-consistency";
 import { onshi_query_from_hoken } from "./onshi-query-from-hoken";
 
 export async function onshiConfirmByHoken(hoken: Shahokokuho | Koukikourei, confirmationDate: string,
@@ -64,7 +63,7 @@ export async function onshiConfirmHoken(hoken: Shahokokuho | Koukikourei, confir
   const result = await onshiConfirmByHoken(hoken, confirmationDate, { limitAppConsFlag, queryCallback, idToken });
   if (result.isValid) {
     const ri: ResultItem = result.resultList[0];
-    const messages: string[] = [];
+    // const messages: string[] = [];
     const inconsistencies: OnshiHokenConsistencyError[] = [];
     if (hoken instanceof Shahokokuho) {
       inconsistencies.push(...checkOnshiShahokokuhoConsistency(ri, hoken));
