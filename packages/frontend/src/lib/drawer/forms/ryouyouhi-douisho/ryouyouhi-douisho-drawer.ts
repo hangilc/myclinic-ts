@@ -5,14 +5,10 @@ import type { Box } from "../../compiler/box";
 import * as r from "./row-renderer";
 import { A4 } from "../../compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
-import { ConductDrugEx } from "myclinic-model";
-import { breakNextLine } from "../../compiler/break-lines";
-import { split } from "../shohousen-2025/xsplit";
-import type { join } from "path";
 
 
 export interface RyouyouhiDouishoDrawerData {
-  patientAddress: string;
+  "patient-address": string;
   "patient-name": string;
   "birth-date": string;
   "condition-name": string;
@@ -27,7 +23,7 @@ export interface RyouyouhiDouishoDrawerData {
 
 export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
   return {
-    patientAddress: "",
+    "patient-address": "",
     "patient-name": "",
     "birth-date": "",
     "condition-name": "",
@@ -116,6 +112,7 @@ function drawPatient(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
     let [keyBox, bodyBox] = b.splitToColumns(row, b.splitAt(middleWidth));
     c.frameRight(ctx, keyBox);
     c.drawTextJustified(ctx, "住所", b.modify(keyBox, b.shrinkHoriz(keyMargin, keyMargin)), "center");
+    c.drawText(ctx, data["patient-address"], b.modify(bodyBox, b.shrinkHoriz(2, 2)), "left", "center");
   }
   {
     let row = rows[1];
@@ -123,6 +120,7 @@ function drawPatient(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
     let [keyBox, bodyBox] = b.splitToColumns(row, b.splitAt(middleWidth));
     c.frameRight(ctx, keyBox);
     c.drawTextJustified(ctx, "氏名", b.modify(keyBox, b.shrinkHoriz(keyMargin, keyMargin)), "center");
+    c.drawText(ctx, data["patient-name"], b.modify(bodyBox, b.shrinkHoriz(2, 2)), "left", "center");
   }
   {
     let row = rows[2];
@@ -130,9 +128,7 @@ function drawPatient(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
     let [keyBox, bodyBox] = b.splitToColumns(row, b.splitAt(middleWidth));
     c.frameRight(ctx, keyBox);
     c.drawTextJustified(ctx, "生年月日", b.modify(keyBox, b.shrinkHoriz(keyMargin, keyMargin)), "center");
-    let area: Box = b.modify(bodyBox, b.shrinkHoriz(9, 9));
-    r.renderRow(ctx, area, r.t("明"), r.t("・"), r.t("大"), r.t("・"), r.t("昭"), r.t("・"), r.t("平"),
-      r.gap(), r.t("年"), r.gap(), r.t("月"), r.gap(), r.t("日"));
+    c.drawText(ctx, data["birth-date"], b.modify(bodyBox, b.shrinkHoriz(2, 2)), "left", "center");
   }
 }
 
@@ -140,30 +136,28 @@ function drawByoumei(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawTextJustified(ctx, "傷病名", b.modify(left, b.shrinkHoriz(3, 3)), "center");
+  c.drawText(ctx, data["condition-name"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
 }
 
 function drawHatubyouDate(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawText(ctx, "発病年月日", left, "center", "center");
-  r.renderRow(ctx, b.modify(right, b.shrinkHoriz(15, 42)),
-    r.t("昭"), r.t("・"), r.t("平"), r.t("・"), r.t("令"), r.gap(), r.t("年"), r.gap(), r.t("月"), r.gap(), r.t("日"));
+  c.drawText(ctx, data["onset-date"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
 }
 
 function drawDouiKubun(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawText(ctx, "同意区分", left, "center", "center");
-  r.renderRow(ctx, b.modify(right, b.shrinkHoriz(15, 0)),
-    r.t("初回の同意"), r.t("　・　"), r.t("再　同　意"));
+  c.drawText(ctx, data["consent-type"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
 }
 
 function drawShinsatuDate(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawTextJustified(ctx, "診察日", b.modify(left, b.shrinkHoriz(3, 3)), "center");
-  r.renderRow(ctx, b.modify(right, b.shrinkHoriz(20, 45)),
-    r.t("令和"), r.gap(), r.t("年"), r.gap(), r.t("月"), r.gap(), r.t("日"));
+  c.drawText(ctx, data["examination-date"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
 }
 
 function drawShoujou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
@@ -310,22 +304,33 @@ function drawBottom(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
   let dbox = b.modify(box, b.shrinkHoriz(13, 10), b.shrinkVert(17, 0));
   let rows = b.splitToRows(dbox, b.evenSplitter(4));
   c.withFont(ctx, "small", () => {
-    r.renderRow(ctx, rows[0], r.t("令"), r.fixed(8), r.t("和"),
-      r.fixed(12), r.t("年"),
-      r.fixed(12), r.t("月"),
-      r.fixed(12), r.t("日"),
-    );
+    let issueDateParts = data["issue-date"].replace(/[年月日]/g, " ").trim().split(/\s+/);
+    if (issueDateParts.length >= 3 && issueDateParts[0].startsWith("令和")) {
+      let year = issueDateParts[0].replace("令和", "");
+      let month = issueDateParts[1];
+      let day = issueDateParts[2];
+      r.renderRow(ctx, rows[0], r.t("令"), r.fixed(8), r.t("和"),
+        r.fixed(12), r.t(year + "年"),
+        r.fixed(12), r.t(month + "月"),
+        r.fixed(12), r.t(day + "日"),
+      );
+    } else {
+      c.drawText(ctx, data["issue-date"], rows[0], "left", "center");
+    }
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[1], b.splitAt(38));
       c.drawTextJustified(ctx, "保険医療機関名", keyBox, "center");
+      c.drawText(ctx, data["clinic-name"], bodyBox, "left", "center");
     }
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[2], b.splitAt(38));
       c.drawTextJustified(ctx, "所在地", keyBox, "center");
+      c.drawText(ctx, data["clinic-address"], bodyBox, "left", "center");
     }
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[3], b.splitAt(38));
       c.drawTextJustified(ctx, "保険医氏名", keyBox, "center");
+      c.drawText(ctx, data["doctor-name"], b.modify(bodyBox, b.shrinkHoriz(0, 10)), "left", "center");
       c.drawText(ctx, "印", b.modify(bodyBox, b.setWidth(4, "right")), "center", "center");
     }
   })
