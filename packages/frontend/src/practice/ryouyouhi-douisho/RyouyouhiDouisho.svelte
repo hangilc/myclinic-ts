@@ -11,6 +11,8 @@
   import { DateWrapper } from "myclinic-util";
   import api from "@/lib/api";
   import ConsentTypeField from "./components/ConsentTypeField.svelte";
+  import SymptomWeaknessField from "./components/SymptomWeaknessField.svelte";
+  import SymptomContractureField from "./components/SymptomContractureField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -90,6 +92,8 @@
     <TextField bind:value={data["condition-name"]} label="傷病名" />
     <TextField bind:value={data["onset-date"]} label="発病年月日" />
     <ConsentTypeField bind:consentType={data["consent-type"]} />
+    <SymptomWeaknessField bind:values={data["symptom-weakness"]} />
+    <SymptomContractureField bind:values={data["symptom-contracture"]} />
     <TextField bind:value={data["examination-date"]} label="診察日" />
     <TextField bind:value={data["issue-date"]} label="発行日" />
     <TextField bind:value={data["clinic-name"]} label="保険医療機関名" />

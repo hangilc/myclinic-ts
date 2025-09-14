@@ -6,18 +6,7 @@ import * as r from "./row-renderer";
 import { A4 } from "../../compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import { circleMark } from "./decorators";
-
-// {
-//   let [upper, lower] = b.splitToRows(b.modify(keyBox, b.shrinkVert(0.5, 0.5)), b.evenSplitter(2));
-//   c.drawTextJustified(ctx, "筋麻痺", b.modify(upper, b.shrinkHoriz(1.5, 1.5)), "center");
-//   c.drawTextJustified(ctx, "筋委縮", b.modify(lower, b.shrinkHoriz(1.5, 1.5)), "center");
-// }
-// r.renderRow(ctx, b.modify(bodyBox, b.shrinkHoriz(7, 18)),
-//   r.t("躯幹"), r.gap(), r.t("・"), r.gap(),
-//   r.t("右上肢"), r.gap(), r.t("・"), r.gap(),
-//   r.t("左上肢"), r.gap(), r.t("・"), r.gap(),
-//   r.t("右下肢"), r.gap(), r.t("・"), r.gap(),
-//   r.t("左下肢"));
+import { boolean } from "valibot";
 
 export interface SymptomWeakness {
   "躯幹"?: boolean;
@@ -27,6 +16,36 @@ export interface SymptomWeakness {
   "左下肢"?: boolean;
 };
 
+    //   r.t("右肩"), r.t("・"),
+    //   r.t("右肘"), r.t("・"),
+    //   r.t("右手首"), r.t("・"),
+    //   r.t("右股関節"), r.t("・"),
+    //   r.t("右膝"), r.t("・"),
+    //   r.t("右足首"), r.t("　　"),
+    //   r.t("その他"));
+    // r.renderRow(ctx, lower,
+    //   r.t("左肩"), r.t("・"),
+    //   r.t("左肘"), r.t("・"),
+    //   r.t("左手首"), r.t("・"),
+    //   r.t("左股関節"), r.t("・"),
+    //   r.t("左膝"), r.t("・"),
+    //   r.t("左足首"), r.t("　"),
+
+export interface SymptomContracture {
+    "右肩"?: boolean;
+    "右肘"?: boolean;
+    "右手首"?: boolean;
+    "右股関節"?: boolean;
+    "右膝"?: boolean;
+    "右足首"?: boolean;
+    "左肩"?: boolean;
+    "左肘"?: boolean;
+    "左手首"?: boolean;
+    "左股関節"?: boolean;
+    "左膝"?: boolean;
+    "左足首"?: boolean;
+    "その他"?: string;
+}
 
 export interface RyouyouhiDouishoDrawerData {
   "patient-address": string;
@@ -37,6 +56,7 @@ export interface RyouyouhiDouishoDrawerData {
   "consent-type": "初回の同意" | "再同意";
   "examination-date": string;
   "symptom-weakness": SymptomWeakness;
+  "symptom-contracture": SymptomContracture;
   "issue-date": string;
   "clinic-name": string;
   "clinic-address": string;
@@ -52,6 +72,7 @@ export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
     "onset-date": "",
     "consent-type": "初回の同意",
     "symptom-weakness": { "躯幹": true },
+    "symptom-contracture": { "右肩": true },
     "examination-date": "",
     "issue-date": "",
     "clinic-name": "",
@@ -221,21 +242,21 @@ function drawShoujou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
     c.drawText(ctx, "関節拘縮", keyBox, "center", "center");
     let [upper, lower] = b.splitToRows(b.modify(bodyBox, b.shrinkVert(1.5, 1.5), b.shrinkHoriz(7, 0)), b.evenSplitter(2));
     r.renderRow(ctx, upper,
-      r.t("右肩"), r.t("・"),
-      r.t("右肘"), r.t("・"),
-      r.t("右手首"), r.t("・"),
-      r.t("右股関節"), r.t("・"),
-      r.t("右膝"), r.t("・"),
-      r.t("右足首"), r.t("　　"),
+      r.t("右肩", circleMark(data["symptom-contracture"]["右肩"] ?? false)), r.t("・"),
+      r.t("右肘", circleMark(data["symptom-contracture"]["右肘"] ?? false)), r.t("・"),
+      r.t("右手首", circleMark(data["symptom-contracture"]["右手首"] ?? false)), r.t("・"),
+      r.t("右股関節", circleMark(data["symptom-contracture"]["右股関節"] ?? false)), r.t("・"),
+      r.t("右膝", circleMark(data["symptom-contracture"]["右膝"] ?? false)), r.t("・"),
+      r.t("右足首", circleMark(data["symptom-contracture"]["右足首"] ?? false)), r.t("　　"),
       r.t("その他"));
     r.renderRow(ctx, lower,
-      r.t("左肩"), r.t("・"),
-      r.t("左肘"), r.t("・"),
-      r.t("左手首"), r.t("・"),
-      r.t("左股関節"), r.t("・"),
-      r.t("左膝"), r.t("・"),
-      r.t("左足首"), r.t("　"),
-      r.t("（　　　　　　）"));
+      r.t("左肩", circleMark(data["symptom-contracture"]["左肩"] ?? false)), r.t("・"),
+      r.t("左肘", circleMark(data["symptom-contracture"]["左肘"] ?? false)), r.t("・"),
+      r.t("左手首", circleMark(data["symptom-contracture"]["左手首"] ?? false)), r.t("・"),
+      r.t("左股関節", circleMark(data["symptom-contracture"]["左股関節"] ?? false)), r.t("・"),
+      r.t("左膝", circleMark(data["symptom-contracture"]["左膝"] ?? false)), r.t("・"),
+      r.t("左足首", circleMark(data["symptom-contracture"]["左足首"] ?? false)), r.t("　"),
+      r.t(`（${data["symptom-contracture"]["その他"] || "　　　　　　"}）`));
   }
   {
     let row = rows[2];
