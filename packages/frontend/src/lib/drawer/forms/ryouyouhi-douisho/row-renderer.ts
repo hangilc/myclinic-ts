@@ -15,9 +15,11 @@ export interface FixedWidthItem {
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
+export type Decorator = (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void;
+
 export function t(text: string, opt?: {
   valign?: VAlign;
-  render?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void;
+  decorator?: Decorator;
 }): FixedWidthItem {
   let render = (ctx: DrawerContext, box: Box) => {
     let valign: VAlign = opt?.valign ?? "center";
@@ -25,7 +27,7 @@ export function t(text: string, opt?: {
   }
   return {
     width: (ctx) => c.textWidth(ctx, text),
-    render: extendRender(render, opt?.render),
+    render: extendRender(render, opt?.decorator),
   }
 }
 

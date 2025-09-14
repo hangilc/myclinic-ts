@@ -5,7 +5,27 @@ import type { Box } from "../../compiler/box";
 import * as r from "./row-renderer";
 import { A4 } from "../../compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
-import { circleDecorator } from "./decorators";
+import { circleMark } from "./decorators";
+
+// {
+//   let [upper, lower] = b.splitToRows(b.modify(keyBox, b.shrinkVert(0.5, 0.5)), b.evenSplitter(2));
+//   c.drawTextJustified(ctx, "筋麻痺", b.modify(upper, b.shrinkHoriz(1.5, 1.5)), "center");
+//   c.drawTextJustified(ctx, "筋委縮", b.modify(lower, b.shrinkHoriz(1.5, 1.5)), "center");
+// }
+// r.renderRow(ctx, b.modify(bodyBox, b.shrinkHoriz(7, 18)),
+//   r.t("躯幹"), r.gap(), r.t("・"), r.gap(),
+//   r.t("右上肢"), r.gap(), r.t("・"), r.gap(),
+//   r.t("左上肢"), r.gap(), r.t("・"), r.gap(),
+//   r.t("右下肢"), r.gap(), r.t("・"), r.gap(),
+//   r.t("左下肢"));
+
+export interface SymptomWeakness {
+  "躯幹"?: boolean;
+  "右上肢"?: boolean;
+  "左上肢"?: boolean;
+  "右下肢"?: boolean;
+  "左下肢"?: boolean;
+};
 
 
 export interface RyouyouhiDouishoDrawerData {
@@ -16,6 +36,7 @@ export interface RyouyouhiDouishoDrawerData {
   "onset-date": string;
   "consent-type": "初回の同意" | "再同意";
   "examination-date": string;
+  "symptom-weakness": SymptomWeakness;
   "issue-date": string;
   "clinic-name": string;
   "clinic-address": string;
@@ -30,6 +51,7 @@ export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
     "condition-name": "",
     "onset-date": "",
     "consent-type": "初回の同意",
+    "symptom-weakness": { "躯幹": true },
     "examination-date": "",
     "issue-date": "",
     "clinic-name": "",
@@ -155,10 +177,10 @@ function drawDouiKubun(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawe
   // c.drawText(ctx, data["consent-type"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
   right = b.modify(right, b.shrinkHoriz(2, 2));
   const consentType = data["consent-type"];
-  r.renderRow(ctx, right, 
-    r.t("初回の同意", { render: consentType === "初回の同意" ? circleDecorator(2.5) : undefined }), 
-    r.t("・"), 
-    r.t("再 同 意", { render: consentType === "再同意" ? circleDecorator(2.5) : undefined }));
+  r.renderRow(ctx, right,
+    r.t("初回の同意", circleMark(consentType === "初回の同意")),
+    r.t("・"),
+    r.t("再 同 意", circleMark(consentType === "再同意")));
 }
 
 function drawShinsatuDate(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
@@ -186,11 +208,11 @@ function drawShoujou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
       c.drawTextJustified(ctx, "筋委縮", b.modify(lower, b.shrinkHoriz(1.5, 1.5)), "center");
     }
     r.renderRow(ctx, b.modify(bodyBox, b.shrinkHoriz(7, 18)),
-      r.t("躯幹"), r.gap(), r.t("・"), r.gap(),
-      r.t("右上肢"), r.gap(), r.t("・"), r.gap(),
-      r.t("左上肢"), r.gap(), r.t("・"), r.gap(),
-      r.t("右下肢"), r.gap(), r.t("・"), r.gap(),
-      r.t("左下肢"));
+      r.t("躯幹", circleMark(data["symptom-weakness"]["躯幹"] ?? false)), r.gap(), r.t("・"), r.gap(),
+      r.t("右上肢", circleMark(data["symptom-weakness"]["右上肢"] ?? false)), r.gap(), r.t("・"), r.gap(),
+      r.t("左上肢", circleMark(data["symptom-weakness"]["左上肢"] ?? false)), r.gap(), r.t("・"), r.gap(),
+      r.t("右下肢", circleMark(data["symptom-weakness"]["右下肢"] ?? false)), r.gap(), r.t("・"), r.gap(),
+      r.t("左下肢", circleMark(data["symptom-weakness"]["左下肢"] ?? false)));
   }
   {
     let row = rows[1];

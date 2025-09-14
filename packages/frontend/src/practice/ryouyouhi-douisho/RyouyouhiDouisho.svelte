@@ -10,6 +10,7 @@
   import type { Patient, ClinicInfo } from "myclinic-model";
   import { DateWrapper } from "myclinic-util";
   import api from "@/lib/api";
+  import ConsentTypeField from "./components/ConsentTypeField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -88,7 +89,7 @@
     <TextField bind:value={data["birth-date"]} label="生年月日" />
     <TextField bind:value={data["condition-name"]} label="傷病名" />
     <TextField bind:value={data["onset-date"]} label="発病年月日" />
-    <TextField bind:value={data["consent-type"]} label="同意区分" />
+    <ConsentTypeField bind:consentType={data["consent-type"]} />
     <TextField bind:value={data["examination-date"]} label="診察日" />
     <TextField bind:value={data["issue-date"]} label="発行日" />
     <TextField bind:value={data["clinic-name"]} label="保険医療機関名" />
