@@ -27,7 +27,12 @@
     };
     if (wrapper) {
       wrapper.innerHTML = "";
-      wrapper.appendChild(drawerToSvg(ops, option));
+      try {
+        const e = drawerToSvg(ops, option);
+        wrapper.appendChild(e);
+      } catch(ex: any) {
+        alert(ex);
+      }
     }
   }
 

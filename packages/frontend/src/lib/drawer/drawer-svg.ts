@@ -78,6 +78,9 @@ export function drawerToSvg(ops: Op[], options: any) {
 
   function set_pen(name: string) {
     let pen = pen_dict[name];
+    if( !pen ){
+      throw new Error(`cannot find pen: ${name}`)
+    }
     pen_color = pen.color;
     pen_width = pen.width;
     pen_style = pen.penstyle;
@@ -95,6 +98,9 @@ export function drawerToSvg(ops: Op[], options: any) {
 
   function set_font(name: string) {
     let font = font_dict[name];
+    if( !font ){
+      throw new Error(`cannot find font: ${name}`)
+    }
     font_name = font.font_name;
     font_size = font.font_size;
     font_weight = font.font_weight;

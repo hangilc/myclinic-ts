@@ -5,6 +5,7 @@ import type { Box } from "../../compiler/box";
 import * as r from "./row-renderer";
 import { A4 } from "../../compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
+import { circleDecorator } from "./decorators";
 
 
 export interface RyouyouhiDouishoDrawerData {
@@ -13,7 +14,7 @@ export interface RyouyouhiDouishoDrawerData {
   "birth-date": string;
   "condition-name": string;
   "onset-date": string;
-  "consent-type": string;
+  "consent-type": "初回の同意" | "再同意";
   "examination-date": string;
   "issue-date": string;
   "clinic-name": string;
@@ -28,7 +29,7 @@ export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
     "birth-date": "",
     "condition-name": "",
     "onset-date": "",
-    "consent-type": "",
+    "consent-type": "初回の同意",
     "examination-date": "",
     "issue-date": "",
     "clinic-name": "",
@@ -86,6 +87,7 @@ function initContext(ctx: DrawerContext) {
   c.createFont(ctx, "large", "MS Mincho", 5.7);
   c.createFont(ctx, "small", "MS Mincho", 3.5);
   c.createPen(ctx, "regular", 0, 0, 0, 0.1);
+  c.createPen(ctx, "data-thin", 0, 0, 0, 0.2);
 }
 
 function drawTitle(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
@@ -150,7 +152,13 @@ function drawDouiKubun(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawe
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawText(ctx, "同意区分", left, "center", "center");
-  c.drawText(ctx, data["consent-type"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
+  // c.drawText(ctx, data["consent-type"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
+  right = b.modify(right, b.shrinkHoriz(2, 2));
+  const consentType = data["consent-type"];
+  r.renderRow(ctx, right, 
+    r.t("初回の同意", { render: consentType === "初回の同意" ? circleDecorator(2.5) : undefined }), 
+    r.t("・"), 
+    r.t("再 同 意", { render: consentType === "再同意" ? circleDecorator(2.5) : undefined }));
 }
 
 function drawShinsatuDate(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {

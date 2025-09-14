@@ -13,8 +13,14 @@
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
+  setupData(data);
   setupClinicData();
   
+  function setupData(data: RyouyouhiDouishoDrawerData) {
+    data["condition-name"] = "筋麻痺、筋委縮、関節拘縮";
+    data["consent-type"] = "初回の同意";
+  }
+
   async function setupClinicData() {
     const clinicInfo: ClinicInfo = await api.getClinicInfo();
     data["clinic-name"] = clinicInfo.name;
@@ -52,11 +58,23 @@
     });
   }
 
-  function setPatientData(patient: Patient) {
+  async function setPatientData(patient: Patient) {
     const bd = DateWrapper.from(patient.birthday);
     data["patient-name"] = patient.fullName();
     data["patient-address"] = patient.address || "";
     data["birth-date"] = `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日`;
+
+    // Get last visit date
+    try {
+      const visits = await api.listVisitByPatientReverse(patient.patientId, 0, 1);
+      if (visits.length > 0) {
+        const lastVisitDate = DateWrapper.from(visits[0].visitedAt);
+        data["examination-date"] = lastVisitDate.format1();
+      }
+    } catch (error) {
+      console.warn("Could not fetch last visit date:", error);
+      // Keep the default examination-date set by setupClinicData
+    }
   }
 </script>
 
