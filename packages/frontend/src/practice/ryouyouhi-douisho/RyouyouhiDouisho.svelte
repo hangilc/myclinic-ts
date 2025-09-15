@@ -49,6 +49,7 @@
         destroy: () => d.$destroy(),
         ops,
         scale: 2,
+        kind: "ryouyouhi",
       },
     });
   }
