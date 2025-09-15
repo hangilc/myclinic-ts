@@ -19,11 +19,12 @@
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
   setupData(data);
-  setupClinicData();
   
-  function setupData(data: RyouyouhiDouishoDrawerData) {
+  async function setupData(value: RyouyouhiDouishoDrawerData) {
+    data = value;
     data["condition-name"] = "筋麻痺、筋委縮、関節拘縮";
     data["consent-type"] = "初回の同意";
+    await setupClinicData();
   }
 
   async function setupClinicData() {
@@ -81,11 +82,16 @@
       // Keep the default examination-date set by setupClinicData
     }
   }
+
+  function doReset() {
+    setupData(mkRyouyouhiDouishoDrawerData());
+  }
 </script>
 
 {#if isVisible}
   <button on:click={doSelectPatient}>患者選択</button>
   <button on:click={doPrint}>印刷</button>
+  <button on:click={doReset}>リセット</button>
 
   <div class="fields-container">
     <TextField bind:value={data["patient-address"]} label="住所" />
