@@ -18,8 +18,10 @@
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
+  const contentMark = "[[[療養費同意書]]]";
+
   setupData(data);
-  
+
   async function setupData(value: RyouyouhiDouishoDrawerData) {
     data = value;
     data["condition-name"] = "筋麻痺、筋委縮、関節拘縮";
@@ -68,11 +70,16 @@
     const bd = DateWrapper.from(patient.birthday);
     data["patient-name"] = patient.fullName();
     data["patient-address"] = patient.address || "";
-    data["birth-date"] = `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日`;
+    data["birth-date"] =
+      `${bd.getGengou()}${bd.getNen()}年${bd.getMonth()}月${bd.getDay()}日`;
 
     // Get last visit date
     try {
-      const visits = await api.listVisitByPatientReverse(patient.patientId, 0, 1);
+      const visits = await api.listVisitByPatientReverse(
+        patient.patientId,
+        0,
+        1,
+      );
       if (visits.length > 0) {
         const lastVisitDate = DateWrapper.from(visits[0].visitedAt);
         data["examination-date"] = lastVisitDate.format1();
@@ -86,12 +93,32 @@
   function doReset() {
     setupData(mkRyouyouhiDouishoDrawerData());
   }
+
+  async function doCopyToClipboard() {
+    const json = JSON.stringify(data);
+    const prolog = "療養費同意書作成";
+    const content = `${prolog}\n\n${contentMark}\n${json}`;
+    await navigator.clipboard.writeText(content);
+    alert("内容をクリップボードにコピーしました。");
+  }
+
+  async function doPasteToClipboard() {
+    const content = await navigator.clipboard.readText();
+    let i = content.indexOf(contentMark);
+    if( i >= 0 ){
+      const json = content.substring(i + contentMark.length);
+      data = JSON.parse(json);
+      alert("クリップボードの内容を貼付けました。")
+    }
+  }
 </script>
 
 {#if isVisible}
   <button on:click={doSelectPatient}>患者選択</button>
   <button on:click={doPrint}>印刷</button>
   <button on:click={doReset}>リセット</button>
+  <button on:click={doCopyToClipboard}>クリップボードにコピー</button>
+  <button on:click={doPasteToClipboard}>クリップボードを貼付け</button>
 
   <div class="fields-container">
     <TextField bind:value={data["patient-address"]} label="住所" />
