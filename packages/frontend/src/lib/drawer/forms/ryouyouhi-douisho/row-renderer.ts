@@ -6,7 +6,7 @@ import * as c from "@/lib/drawer/compiler/compiler";
 import type { VAlign } from "@/lib/drawer/compiler/align";
 
 export interface Item {
-  width: (ctx: DrawerContext) => number | { kind: "gap"} | { kind: "at"; at: number };
+  width: (ctx: DrawerContext) => number | { kind: "gap" } | { kind: "at"; at: number };
   render: (ctx: DrawerContext, box: Box) => void;
 }
 
@@ -19,15 +19,24 @@ export type Decorator = (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext
 
 export function t(text: string, opt?: {
   valign?: VAlign;
+  font?: string;
   decorator?: Decorator;
 }): FixedWidthItem {
-  let render = (ctx: DrawerContext, box: Box) => {
+  let orig = (ctx: DrawerContext, box: Box) => {
     let valign: VAlign = opt?.valign ?? "center";
-    c.drawText(ctx, text, box, "left", valign);
+    c.withFont(ctx, opt?.font, () => c.drawText(ctx, text, box, "left", valign));
   }
+  let decorator = opt?.decorator;
   return {
     width: (ctx) => c.textWidth(ctx, text),
-    render: extendRender(render, opt?.decorator),
+    // render: extendRender(render, opt?.decorator),
+    render: (ctx, box) => {
+      if( decorator ){
+        decorator(ctx, box, orig);
+      } else {
+        orig(ctx, box);
+      }
+    }
   }
 }
 
@@ -36,7 +45,7 @@ export function fixed(w: number, render?: (ctx: DrawerContext, box: Box) => void
   return {
     width: () => w,
     render: (ctx, box) => {
-      if( render ){
+      if (render) {
         render(ctx, box);
       }
     }
@@ -47,8 +56,8 @@ export function gap(
   render?: (ctx: DrawerContext, box: Box) => void,
 ): Item {
   return {
-    width: () => ({ kind: "gap"}),
-    render: render ?? (() => {}),
+    width: () => ({ kind: "gap" }),
+    render: render ?? (() => { }),
   }
 }
 
@@ -56,7 +65,7 @@ export function at(pos: number, render?: (ctx: DrawerContext, box: Box) => void)
   return {
     width: () => ({ kind: "at", at: pos }),
     render: (ctx, box) => {
-      if( render ){
+      if (render) {
         render(ctx, box);
       }
     }
@@ -67,8 +76,8 @@ function extendRender(
   orig?: (ctx: DrawerContext, box: Box) => void,
   optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
 ): (ctx: DrawerContext, box: Box) => void {
-  orig = orig ?? (() => {});
-  if( optRender ){
+  orig = orig ?? (() => { });
+  if (optRender) {
     return (ctx, box) => {
       optRender(ctx, box, orig);
     }
@@ -80,16 +89,16 @@ function extendRender(
 export function renderRow(ctx: DrawerContext, row: Box, ...items: Item[]) {
   const splits = items.map(item => {
     let w = item.width(ctx);
-    if( typeof w === "number" ){
+    if (typeof w === "number") {
       return x.fixed(w);
-    } else if( w.kind === "gap" ){
+    } else if (w.kind === "gap") {
       return x.gap();
     } else {
       return x.at(w.at);
     }
   });
   let bs = b.splitToColumns(row, x.split(...splits));
-  for(let i=0;i<items.length;i++){
+  for (let i = 0; i < items.length; i++) {
     let item = items[i];
     let box = bs[i];
     item.render(ctx, box);
