@@ -15,3 +15,8 @@
 ## Development Notes
 - This project contains Japanese text and requires proper UTF-8 handling
 - When running tests or viewing output, ensure terminal supports UTF-8
+
+## Claude Code UTF-8 Setup
+- **IMPORTANT**: Before starting any work session, run: `export LANG=ja_JP.UTF-8 && export LC_ALL=ja_JP.UTF-8`
+- **FILE EDITING**: Always verify encoding after editing files with Japanese content using: `file <filename>`
+- **TROUBLESHOOTING**: If Japanese characters appear corrupted, rewrite the file with proper UTF-8 encoding
