@@ -16,19 +16,19 @@ export interface SymptomWeakness {
 };
 
 export interface SymptomContracture {
-    "右肩"?: boolean;
-    "右肘"?: boolean;
-    "右手首"?: boolean;
-    "右股関節"?: boolean;
-    "右膝"?: boolean;
-    "右足首"?: boolean;
-    "左肩"?: boolean;
-    "左肘"?: boolean;
-    "左手首"?: boolean;
-    "左股関節"?: boolean;
-    "左膝"?: boolean;
-    "左足首"?: boolean;
-    "その他"?: string;
+  "右肩"?: boolean;
+  "右肘"?: boolean;
+  "右手首"?: boolean;
+  "右股関節"?: boolean;
+  "右膝"?: boolean;
+  "右足首"?: boolean;
+  "左肩"?: boolean;
+  "左肘"?: boolean;
+  "左手首"?: boolean;
+  "左股関節"?: boolean;
+  "左膝"?: boolean;
+  "左足首"?: boolean;
+  "その他"?: string;
 }
 
 export interface Treatment {
@@ -43,6 +43,13 @@ export interface Treatment {
   "変形徒手矯正術-左下肢"?: boolean;
 }
 
+export interface HouseVisit {
+  required: boolean;
+  reason: 1 | 2 | 3;
+  reasonString?: string;
+  "kaigodo"?: string;
+}
+
 export interface RyouyouhiDouishoDrawerData {
   "patient-address": string;
   "patient-name": string;
@@ -55,6 +62,8 @@ export interface RyouyouhiDouishoDrawerData {
   "symptom-contracture": SymptomContracture;
   "symptom-sonota": string;
   "treatment": Treatment;
+  "house-visit": HouseVisit;
+  "notice": string;
   "issue-date": string;
   "clinic-name": string;
   "clinic-address": string;
@@ -75,6 +84,8 @@ export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
     "symptom-contracture": { "右肩": true },
     "symptom-sonota": "",
     "treatment": { "マッサージ-躯幹": true, },
+    "house-visit": { required: true, reason: 1 },
+    "notice": "",
     "examination-date": "",
     "issue-date": "",
     "clinic-name": "",
@@ -303,8 +314,9 @@ function drawOuryou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
   c.frameBottom(ctx, upper);
   {
     r.renderRow(ctx, b.modify(upper, b.shrinkHoriz(3.5, 0)),
-      r.t("１"), r.t("．必要とする　　"),
-      r.t("２"), r.t("．必要としない"))
+      r.t("１"), r.t("．必要とする　　", circleMark(data["house-visit"].required)),
+      r.t("２"), r.t("．必要としない", circleMark(!data["house-visit"].required))
+    );
   }
   {
     let rows = b.splitToRows(lower, b.evenSplitter(5));
@@ -312,30 +324,36 @@ function drawOuryou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
       let row = rows[0];
       r.renderRow(ctx, b.modify(row, b.shrinkHoriz(1, 30)),
         r.t("往療を必要とする理由　　介護保険の要介護度　（"),
-        r.gap(),
+        r.gap((ctx, box) => {
+          c.drawText(ctx, data["house-visit"].kaigodo ?? "", b.modify(box, b.shrinkHoriz(2, 2)), "center", "center")
+        }),
         r.t("）"));
     }
     {
       let row = rows[1];
       r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
-        r.t("１"), r.t("．独歩による公共交通機関を使っての外出が困難"),
+        r.t("１", circleMark(data["house-visit"].reason === 1)), r.t("．独歩による公共交通機関を使っての外出が困難"),
       )
     }
     {
       let row = rows[2];
       r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
-        r.t("２"), r.t("．認知症や視覚、内部、精神障害などにより単独での外出が困難"),
+        r.t("２", circleMark(data["house-visit"].reason === 2)), r.t("．認知症や視覚、内部、精神障害などにより単独での外出が困難"),
       )
     }
     {
       let row = rows[3];
       r.renderRow(ctx, b.modify(row, b.shrinkHoriz(3.5, 0)),
-        r.t("３"), r.t("．その他"),
+        r.t("３", circleMark(data["house-visit"].reason === 3)), r.t("．その他"),
       )
     }
     {
       let row = rows[4];
-      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(7, 7)), r.t("（"), r.gap(), r.t("）"));
+      r.renderRow(ctx, b.modify(row, b.shrinkHoriz(7, 7)), r.t("（"), r.gap((ctx, box) => {
+        if (data["house-visit"].reason === 3 && data["house-visit"].reasonString) {
+          c.drawText(ctx, data["house-visit"].reasonString, b.modify(box, b.shrinkHoriz(2, 2)), "left", "center");
+        }
+      }), r.t("）"));
     }
   }
 }
@@ -344,6 +362,7 @@ function drawChuui(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDat
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawText(ctx, "注意事項等", left, "center", "center");
+  c.drawText(ctx, data.notice, b.modify(right, b.inset(2)), "left", "center");
 }
 
 function drawBottom(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
@@ -373,16 +392,19 @@ function drawBottom(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[1], b.splitAt(38));
       c.drawTextJustified(ctx, "保険医療機関名", keyBox, "center");
+      bodyBox = b.modify(bodyBox, b.shrinkHoriz(5, 2));
       c.drawText(ctx, data["clinic-name"], bodyBox, "left", "center");
     }
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[2], b.splitAt(38));
       c.drawTextJustified(ctx, "所在地", keyBox, "center");
+      bodyBox = b.modify(bodyBox, b.shrinkHoriz(5, 2));
       c.drawText(ctx, data["clinic-address"], bodyBox, "left", "center");
     }
     {
       let [keyBox, bodyBox] = b.splitToColumns(rows[3], b.splitAt(38));
       c.drawTextJustified(ctx, "保険医氏名", keyBox, "center");
+      bodyBox = b.modify(bodyBox, b.shrinkHoriz(5, 2));
       c.drawText(ctx, data["doctor-name"], b.modify(bodyBox, b.shrinkHoriz(0, 10)), "left", "center");
       c.drawText(ctx, "印", b.modify(bodyBox, b.setWidth(4, "right")), "center", "center");
     }

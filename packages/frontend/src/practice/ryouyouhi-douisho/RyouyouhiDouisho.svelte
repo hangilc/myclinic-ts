@@ -14,6 +14,7 @@
   import SymptomWeaknessField from "./components/SymptomWeaknessField.svelte";
   import SymptomContractureField from "./components/SymptomContractureField.svelte";
   import TreatmentField from "./components/TreatmentField.svelte";
+  import HouseVisitField from "./components/HouseVisitField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -97,6 +98,8 @@
     <SymptomContractureField bind:values={data["symptom-contracture"]} />
     <TreatmentField bind:values={data["treatment"]} />
     <TextField bind:value={data["symptom-sonota"]} label="症状（その他）" />
+    <HouseVisitField bind:values={data["house-visit"]} />
+    <TextField bind:value={data["notice"]} label="注意事項等" />
     <TextField bind:value={data["examination-date"]} label="診察日" />
     <TextField bind:value={data["issue-date"]} label="発行日" />
     <TextField bind:value={data["clinic-name"]} label="保険医療機関名" />
