@@ -13,6 +13,7 @@
   import ConsentTypeField from "./components/ConsentTypeField.svelte";
   import SymptomWeaknessField from "./components/SymptomWeaknessField.svelte";
   import SymptomContractureField from "./components/SymptomContractureField.svelte";
+  import TreatmentField from "./components/TreatmentField.svelte";
 
   export let isVisible: boolean;
   let data: RyouyouhiDouishoDrawerData = mkRyouyouhiDouishoDrawerData();
@@ -94,6 +95,8 @@
     <ConsentTypeField bind:consentType={data["consent-type"]} />
     <SymptomWeaknessField bind:values={data["symptom-weakness"]} />
     <SymptomContractureField bind:values={data["symptom-contracture"]} />
+    <TreatmentField bind:values={data["treatment"]} />
+    <TextField bind:value={data["symptom-sonota"]} label="症状（その他）" />
     <TextField bind:value={data["examination-date"]} label="診察日" />
     <TextField bind:value={data["issue-date"]} label="発行日" />
     <TextField bind:value={data["clinic-name"]} label="保険医療機関名" />

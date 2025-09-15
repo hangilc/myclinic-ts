@@ -6,7 +6,6 @@ import * as r from "./row-renderer";
 import { A4 } from "../../compiler/paper-size";
 import { mkDrawerContext, type DrawerContext } from "../../compiler/context";
 import { circleMark } from "./decorators";
-import { boolean } from "valibot";
 
 export interface SymptomWeakness {
   "躯幹"?: boolean;
@@ -15,21 +14,6 @@ export interface SymptomWeakness {
   "右下肢"?: boolean;
   "左下肢"?: boolean;
 };
-
-    //   r.t("右肩"), r.t("・"),
-    //   r.t("右肘"), r.t("・"),
-    //   r.t("右手首"), r.t("・"),
-    //   r.t("右股関節"), r.t("・"),
-    //   r.t("右膝"), r.t("・"),
-    //   r.t("右足首"), r.t("　　"),
-    //   r.t("その他"));
-    // r.renderRow(ctx, lower,
-    //   r.t("左肩"), r.t("・"),
-    //   r.t("左肘"), r.t("・"),
-    //   r.t("左手首"), r.t("・"),
-    //   r.t("左股関節"), r.t("・"),
-    //   r.t("左膝"), r.t("・"),
-    //   r.t("左足首"), r.t("　"),
 
 export interface SymptomContracture {
     "右肩"?: boolean;
@@ -47,6 +31,18 @@ export interface SymptomContracture {
     "その他"?: string;
 }
 
+export interface Treatment {
+  "マッサージ-躯幹"?: boolean;
+  "マッサージ-右上肢"?: boolean;
+  "マッサージ-左上肢"?: boolean;
+  "マッサージ-右下肢"?: boolean;
+  "マッサージ-左下肢"?: boolean;
+  "変形徒手矯正術-右上肢"?: boolean;
+  "変形徒手矯正術-左上肢"?: boolean;
+  "変形徒手矯正術-右下肢"?: boolean;
+  "変形徒手矯正術-左下肢"?: boolean;
+}
+
 export interface RyouyouhiDouishoDrawerData {
   "patient-address": string;
   "patient-name": string;
@@ -57,11 +53,15 @@ export interface RyouyouhiDouishoDrawerData {
   "examination-date": string;
   "symptom-weakness": SymptomWeakness;
   "symptom-contracture": SymptomContracture;
+  "symptom-sonota": string;
+  "treatment": Treatment;
   "issue-date": string;
   "clinic-name": string;
   "clinic-address": string;
   "doctor-name": string;
 }
+
+
 
 export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
   return {
@@ -73,6 +73,8 @@ export function mkRyouyouhiDouishoDrawerData(): RyouyouhiDouishoDrawerData {
     "consent-type": "初回の同意",
     "symptom-weakness": { "躯幹": true },
     "symptom-contracture": { "右肩": true },
+    "symptom-sonota": "",
+    "treatment": { "マッサージ-躯幹": true, },
     "examination-date": "",
     "issue-date": "",
     "clinic-name": "",
@@ -117,7 +119,7 @@ export function drawRyouyouhiDouisho(data: RyouyouhiDouishoDrawerData): Op[] {
   drawDouiKubun(ctx, douiKubunBox, data);
   drawShinsatuDate(ctx, shinsatubiBox, data);
   drawShoujou(ctx, shoujouBox, data);
-  drawSejutu(ctx, sejutuBox, data);
+  drawSejutsu(ctx, sejutuBox, data);
   drawOuryou(ctx, ouryouBox, data);
   drawChuui(ctx, chuuiBox, data);
   drawBottom(ctx, bottomBox, data);
@@ -195,7 +197,6 @@ function drawDouiKubun(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawe
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   c.drawText(ctx, "同意区分", left, "center", "center");
-  // c.drawText(ctx, data["consent-type"], b.modify(right, b.shrinkHoriz(2, 2)), "left", "center");
   right = b.modify(right, b.shrinkHoriz(2, 2));
   const consentType = data["consent-type"];
   r.renderRow(ctx, right,
@@ -263,10 +264,11 @@ function drawShoujou(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerD
     let [keyBox, bodyBox] = b.splitToColumns(row, b.splitAt(middleWidth));
     c.frameRight(ctx, keyBox);
     c.drawTextJustified(ctx, "その他", b.modify(keyBox, b.shrinkHoriz(1.5, 1.5)), "center");
+    c.drawText(ctx, data["symptom-sonota"], b.modify(bodyBox, b.shrinkHoriz(2, 2)), "left", "center");
   }
 }
 
-function drawSejutu(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
+function drawSejutsu(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
   let [left, right] = b.splitToColumns(box, b.splitAt(leftColumnWidth));
   c.frameRight(ctx, left);
   {
@@ -278,17 +280,17 @@ function drawSejutu(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerDa
     let [upper, lower] = b.splitToRows(b.modify(right, b.shrinkHoriz(1, 1)), b.evenSplitter(2));
     c.frameBottom(ctx, upper);
     r.renderRow(ctx, upper, r.t("マッサージ"), r.t("　　（　"),
-      r.t("躯幹"), r.t("　"),
-      r.t("右上肢"), r.t("　"),
-      r.t("左上肢"), r.t("　"),
-      r.t("右下肢"), r.t("　"),
-      r.t("左下肢"), r.t("　）"),
+      r.t("躯幹", circleMark(data["treatment"]["マッサージ-躯幹"] ?? false)), r.t("　"),
+      r.t("右上肢", circleMark(data["treatment"]["マッサージ-右上肢"] ?? false)), r.t("　"),
+      r.t("左上肢", circleMark(data["treatment"]["マッサージ-左上肢"] ?? false)), r.t("　"),
+      r.t("右下肢", circleMark(data["treatment"]["マッサージ-右下肢"] ?? false)), r.t("　"),
+      r.t("左下肢", circleMark(data["treatment"]["マッサージ-左下肢"] ?? false)), r.t("　）"),
     );
     r.renderRow(ctx, lower, r.t("変形徒手矯正術"), r.t("（　　"),
-      r.t("右上肢"), r.t("　"),
-      r.t("左上肢"), r.t("　"),
-      r.t("右下肢"), r.t("　"),
-      r.t("左下肢"), r.t("　　）"),
+      r.t("右上肢", circleMark(data["treatment"]["変形徒手矯正術-右上肢"] ?? false)), r.t("　"),
+      r.t("左上肢", circleMark(data["treatment"]["変形徒手矯正術-左上肢"] ?? false)), r.t("　"),
+      r.t("右下肢", circleMark(data["treatment"]["変形徒手矯正術-右下肢"] ?? false)), r.t("　"),
+      r.t("左下肢", circleMark(data["treatment"]["変形徒手矯正術-左下肢"] ?? false)), r.t("　　）"),
     )
   }
 }
