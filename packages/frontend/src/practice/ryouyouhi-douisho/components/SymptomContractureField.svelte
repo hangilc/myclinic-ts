@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { SymptomContracture } from "@/lib/drawer/forms/ryouyouhi-douisho/ryouyouhi-douisho-drawer";
+  import EditableText from "./EditableText.svelte";
 
   export let values: SymptomContracture;
 </script>
@@ -67,9 +68,10 @@
   </div>
 
   <div class="section">
+    <!-- svelte-ignore a11y-label-has-associated-control -->
     <label class="other-label">
-      その他:
-      <input type="text" bind:value={values["その他"]} placeholder="その他の関節拘縮" />
+      その他: <EditableText bind:value={values["その他"]} placeholder={"その他の関節拘縮"} />
+      <!-- <input type="text" bind:value={values["その他"]} placeholder="その他の関節拘縮" /> -->
     </label>
   </div>
 </div>

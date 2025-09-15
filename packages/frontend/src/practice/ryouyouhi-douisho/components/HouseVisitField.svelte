@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { HouseVisit } from "@/lib/drawer/forms/ryouyouhi-douisho/ryouyouhi-douisho-drawer";
+  import EditableText from "./EditableText.svelte";
 
   export let values: HouseVisit;
 
@@ -21,13 +22,15 @@
     </div>
 
     <div class="kaigodo-section">
+      <!-- svelte-ignore a11y-label-has-associated-control -->
       <label class="kaigodo-label">
         介護保険の要介護度：
-        <input
+        <EditableText bind:value={values.kaigodo} />
+        <!-- <input
           type="text"
           bind:value={values.kaigodo}
           placeholder="要介護度を入力"
-        />
+        /> -->
       </label>
     </div>
 
@@ -59,11 +62,12 @@
 
           {#if values.reason === 3}
             <div class="other-reason">
-              <input
+              <EditableText bind:value={values.reasonString} isEditing={true} placeholder="その他の理由を入力してください"/>
+              <!-- <input
                 type="text"
                 bind:value={values.reasonString}
                 placeholder="その他の理由を入力してください"
-              />
+              /> -->
             </div>
           {/if}
         </div>
@@ -111,11 +115,8 @@
     color: #333;
   }
 
-  input[type="text"] {
-    padding: 0.25rem 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    font-size: 0.9em;
+  .other-reason {
+    --editable-text-width: 20em;
   }
 
   /*
