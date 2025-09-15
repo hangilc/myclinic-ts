@@ -1,5 +1,10 @@
 # Project Configuration
 
+## File Access Restrictions
+- **NEVER read *.env files** in this directory or any subdirectories
+- **SECURITY**: Environment files may contain sensitive credentials and secrets
+- **SCOPE**: This restriction applies to all .env, .env.local, .env.production, .env.development, etc.
+
 ## Character Encoding
 - **ALWAYS use UTF-8 encoding for all file operations and text processing**
 - **MANDATORY**: Set `export LANG=ja_JP.UTF-8` at the start of any session involving Japanese text
@@ -20,3 +25,8 @@
 - **IMPORTANT**: Before starting any work session, run: `export LANG=ja_JP.UTF-8 && export LC_ALL=ja_JP.UTF-8`
 - **FILE EDITING**: Always verify encoding after editing files with Japanese content using: `file <filename>`
 - **TROUBLESHOOTING**: If Japanese characters appear corrupted, rewrite the file with proper UTF-8 encoding
+
+## Claude Code Security Settings
+- **PROHIBITED**: Do not read any files matching *.env pattern anywhere in this project
+- **INCLUDES**: .env, .env.local, .env.production, .env.development, .env.test, etc.
+- **REASON**: Environment files contain sensitive configuration data and credentials
