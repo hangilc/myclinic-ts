@@ -25,9 +25,7 @@
   import { getCopyTarget } from "@/practice/exam/exam-vars";
   import { Hotline } from "myclinic-model";
   import { denshiToOldShohou } from "./denshi-to-old-shohou";
-  import {
-    drawShohousen2025,
-  } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
+  import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { copyTextToOtherVisit } from "../text-helper";
@@ -56,8 +54,8 @@
         at,
         onEnter: function (presc: PrescInfoData): void {
           onModified(presc);
-        }
-      }
+        },
+      },
     });
     onDone();
   }
@@ -105,10 +103,10 @@
         kind: "shohousen2024",
         title: "処方箋印刷",
         onPrint: () => {
-          if( hasSenpatsu ){
+          if (hasSenpatsu) {
             sendSenpatsuNoticeViaHotline();
           }
-        }
+        },
       },
     });
   }
@@ -176,48 +174,12 @@
     if (targetVisitId !== null) {
       const src = await api.getText(textId);
       const t = await copyTextToOtherVisit(src, targetVisitId);
-      // const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-      // const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
-      // const warn = checkKouhiCompat(shohou, dstData);
-      // if (typeof warn === "string") {
-      //   alert(`警告：${warn}`);
-      //   clear保険区分レコード(dstData.RP剤情報グループ);
-      // }
-      // const dstMemo: ShohouTextMemo = {
-      //   kind: "shohou",
-      //   shohou: dstData,
-      //   prescriptionId: undefined,
-      // }
-      // TextMemoWrapper.setTextMemo(t, dstMemo);
       api.enterText(t);
       onCopied();
     } else {
       alert("コピー先を見つけられませんでした。");
     }
   }
-
-  // async function doCopy__orig() {
-  //   const targetVisitId = getCopyTarget();
-  //   if (targetVisitId !== null) {
-  //     const t: Text = { textId: 0, visitId: targetVisitId, content: "" };
-  //     const dstData: PrescInfoData = await copyPrescInfoDataToOtherVisit(shohou, targetVisitId);
-  //     const curMemo: ShohouTextMemo = {
-  //       kind: "shohou",
-  //       shohou,
-  //       prescriptionId: undefined,
-  //     };
-  //     const newMemo = await copyTextMemo(curMemo, targetVisitId);
-  //     const warn = checkMemoCompat(curMemo, newMemo);
-  //     if (typeof warn === "string") {
-  //       alert(`警告：${warn}`);
-  //     }
-  //     TextMemoWrapper.setTextMemo(t, newMemo);
-  //     api.enterText(t);
-  //     onCopied();
-  //   } else {
-  //     alert("コピー先を見つけられませんでした。");
-  //   }
-  // }
 
   async function doOldShohou() {
     let c = denshiToOldShohou(shohou);
@@ -235,7 +197,6 @@
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
-  <!-- <a href="javascript:void(0)" on:click={doOldEdit}>編集（旧）</a> -->
   <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
   <a href="javascript:void(0)" on:click={doCode}>コード</a>
