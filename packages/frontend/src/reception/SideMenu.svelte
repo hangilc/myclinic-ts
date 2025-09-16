@@ -8,6 +8,7 @@
   }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="top" data-cy="side-menu">
   <a
     href="javascript:void(0);"
