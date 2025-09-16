@@ -1,6 +1,5 @@
 <script lang="ts">
   import api from "@/lib/api";
-  import { cache } from "@/lib/cache";
   import ServiceHeader from "@/ServiceHeader.svelte";
 
   let configKeys: string[] = [];
@@ -36,29 +35,6 @@
     await api.setConfig(editKey, value);
     console.log("config saved", editKey, value);
     isEditing = false;
-    switch (editKey) {
-      case "usage-master-map": {
-        cache.clearUsageMasterMap();
-        break;
-      }
-      case "drug-name-conv": {
-        await cache.reloadDrugNameConv();
-        break;
-      }
-      case "drug-usage-conv": {
-        await cache.reloadDrugUsageConv();
-        break;
-      }
-      case "scan-resolution": {
-        const value = await cache.reloadScanResolution();
-        console.log("scan-resolution reload", value);
-        break;
-      }
-      // case "drug-name-iyakuhincode-map": {
-      //   cache.clearDrugNameIyakuhincodeMap();
-      //   break;
-      // }
-    }
   }
 
   function doAdd() {

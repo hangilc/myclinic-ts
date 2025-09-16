@@ -351,13 +351,26 @@ configChanged.subscribe(data => {
     return;
   }
   const value = data.value;
+  console.log("configChange", value);
   switch(data.name){
     case "scan-resolution": {
       if( typeof value === "number" && value > 0 ){
         scanResolution = value;
-        console.log("config scan-resolution changed", value);
       }
       break;
+    }
+    case "drug-name-conv": {
+      if( typeof value === "object" ){
+        drugNameConv = value;
+        break;
+      }
+    }
+    case "drug-usage-conv": {
+     if( typeof value === "object" ){
+        drugUsageConv = value;
+        break;
+      }
+
     }
   }
 })
