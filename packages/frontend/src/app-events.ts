@@ -2,9 +2,9 @@ import api, { getWsUrl } from "./lib/api";
 import * as m from "myclinic-model";
 import { writable, type Writable } from "svelte/store";
 
-let nextEventId = 0;
-let isDraining = false;
-let eventQueue: m.AppEvent[] = [];
+let nextAppEventId = 0;
+let isHandlerRunning = false;
+let eventQueue: any[] = [];
 let heartBeatSerialId = 0;
 let debug = false;
 
@@ -16,10 +16,12 @@ function log(...msgs: any[]): void {
 
 export async function initAppEvents() {
   log("initializing AppEvents");
-  nextEventId = await api.getNextAppEventId();
-  log("got nextEventId", nextEventId);
+  nextAppEventId = await api.getNextAppEventId();
+  log("got nextEventId", nextAppEventId);
   connect();
 }
+
+// let rnd = 0;
 
 function connect(): void {
   let ws = new WebSocket(getWsUrl());
@@ -33,10 +35,10 @@ function connect(): void {
     log("got ws message", data);
     if (typeof data === "string") {
       const json = JSON.parse(data);
-      // if (json.format !== "heart-beat") {
-      //   console.log(json);
+      // if( rnd++ % 2 !== 1 ){
+      eventQueue.push(json);
+      tryStartEventHandler();
       // }
-      dispatch(json);
     }
   });
 
@@ -53,26 +55,107 @@ function connect(): void {
   });
 }
 
-async function drainEvents() {
-  if (isDraining) {
-    return;
+async function tryStartEventHandler() {
+  if (isHandlerRunning) {
+    return; // Already processing events
   }
-  isDraining = true;
-  console.log("start drain");
-  let events = await api.listAppEventSince(nextEventId);
-  events.forEach((event) => {
-    if (event.appEventId >= nextEventId) {
-      nextEventId = event.appEventId + 1;
-      publishAppEvent(event);
-    }
-  });
-  isDraining = false;
-  console.log("end drain");
-  while (eventQueue.length > 0) {
-    const e = eventQueue.shift() as m.AppEvent;
-    handleAppEvent(e);
+
+  isHandlerRunning = true;
+  try {
+    await handleEvent();
+  } catch (error) {
+    console.error("Event handler error:", error);
+  } finally {
+    isHandlerRunning = false;
   }
 }
+
+async function handleEvent() {
+  while (eventQueue.length > 0) {
+    const event = eventQueue.shift();
+
+    if (event.format === "appevent") {
+      const appEvent = event.data as m.AppEvent;
+      const eventId = appEvent.appEventId;
+
+      if (eventId === nextAppEventId) {
+        // Expected event - process it
+        nextAppEventId = eventId + 1;
+        publishAppEvent(appEvent);
+      } else if (eventId > nextAppEventId) {
+        // Gap detected - fetch missing events
+        await fillEventGap(nextAppEventId, eventId);
+        // Process current event
+        nextAppEventId = eventId + 1;
+        publishAppEvent(appEvent);
+      }
+      // If eventId < nextAppEventId, it's a duplicate - ignore
+    } else {
+      // Non-app events (hotline, heartbeat, etc.) - process immediately
+      dispatch(event);
+    }
+  }
+}
+
+async function fillEventGap(fromId: number, toId: number) {
+  console.log("enter fillEventGap");
+  const missingEvents = await api.listAppEventSince(fromId);
+  for (const event of missingEvents) {
+    if (event.appEventId >= fromId && event.appEventId < toId) {
+      nextAppEventId = event.appEventId + 1;
+      publishAppEvent(event);
+    }
+  }
+}
+
+function dispatch(e: any): void {
+  try {
+    if (e.format === "hotline-beep") {
+      const hotlineBeep = e.data as m.HotlineBeep;
+      hotlineBeepEntered.set(hotlineBeep);
+    } else if (e.format === "event-id-notice") {
+      console.log("eventIdNotice ignored");
+      // const eventIdNotice = e.data;
+      // const eventId = eventIdNotice.currentEventId;
+      // log("event-id-notice currentEventId", eventId);
+      // if (eventId >= nextAppEventId) {
+      //   drainEvents();
+      // }
+      // eventIdNoticeEntered.set(eventIdNotice);
+    } else if (e.format === "heart-beat") {
+      const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
+      heartBeatEntered.set(heartBeat);
+    } else if (e.format === "config-change") {
+      const data = e.data;
+      const name = data.name;
+      const value = JSON.parse(data.value);
+      configChanged.set({ name, value });
+    }
+  } catch (ex: any) {
+    console.log("unknown event type", e, ex);
+  }
+}
+
+// async function drainEvents() {
+//   if (isDraining) {
+//     return;
+//   }
+//   isDraining = true;
+//   console.log("start drain");
+//   let events = await api.listAppEventSince(nextAppEventId);
+//   events.forEach((event) => {
+//     if (event.appEventId >= nextAppEventId) {
+//       nextAppEventId = event.appEventId + 1;
+//       publishAppEvent(event);
+//     }
+//   });
+//   isDraining = false;
+//   console.log("end drain");
+//   while (eventQueue.length > 0) {
+//     const e = eventQueue.shift() as m.AppEvent;
+//     handleAppEvent(e);
+//   }
+// }
 
 export const textEntered: Writable<m.Text | null> = writable(null);
 export const textUpdated: Writable<m.Text | null> = writable(null);
@@ -156,8 +239,8 @@ export const onshiDeleted: Writable<m.Onshi | null> = writable(null);
 export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null);
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> =
   writable(null);
-export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> =
-  writable(null);
+// export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> =
+//   writable(null);
 export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
 export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
@@ -165,19 +248,19 @@ export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
 export const configChanged: Writable<{ name: string; value: any } | null> =
   writable(null);
 
-function handleAppEvent(e: m.AppEvent): void {
-  if (isDraining) {
-    eventQueue.push(e);
-  } else {
-    const eventId = e.appEventId;
-    if (eventId === nextEventId) {
-      nextEventId = eventId + 1;
-      publishAppEvent(e);
-    } else if (eventId > nextEventId) {
-      drainEvents();
-    }
-  }
-}
+// function handleAppEvent(e: m.AppEvent): void {
+//   if (isDraining) {
+//     eventQueue.push(e);
+//   } else {
+//     const eventId = e.appEventId;
+//     if (eventId === nextAppEventId) {
+//       nextAppEventId = eventId + 1;
+//       publishAppEvent(e);
+//     } else if (eventId > nextAppEventId) {
+//       drainEvents();
+//     }
+//   }
+// }
 
 function publishAppEvent(e: m.AppEvent): void {
   const model: string = e.model;
@@ -558,34 +641,5 @@ function publishAppEvent(e: m.AppEvent): void {
       }
       break;
     }
-  }
-}
-
-function dispatch(e: any): void {
-  try {
-    if (e.format === "appevent") {
-      handleAppEvent(e.data as m.AppEvent);
-    } else if (e.format === "hotline-beep") {
-      const hotlineBeep = e.data as m.HotlineBeep;
-      hotlineBeepEntered.set(hotlineBeep);
-    } else if (e.format === "event-id-notice") {
-      const eventIdNotice = e.data;
-      const eventId = eventIdNotice.currentEventId;
-      log("event-id-notice currentEventId", eventId);
-      if (eventId >= nextEventId) {
-        drainEvents();
-      }
-      eventIdNoticeEntered.set(eventIdNotice);
-    } else if (e.format === "heart-beat") {
-      const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
-      heartBeatEntered.set(heartBeat);
-    } else if (e.format === "config-change") {
-      const data = e.data;
-      const name = data.name;
-      const value = JSON.parse(data.value);
-      configChanged.set({ name, value });
-    }
-  } catch (ex: any) {
-    console.log("dispatch failed", ex);
   }
 }
