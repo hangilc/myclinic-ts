@@ -19,9 +19,8 @@ export async function initAppEvents() {
   nextAppEventId = await api.getNextAppEventId();
   log("got nextEventId", nextAppEventId);
   connect();
+  pollEvent();
 }
-
-// let rnd = 0;
 
 function connect(): void {
   let ws = new WebSocket(getWsUrl());
@@ -35,10 +34,8 @@ function connect(): void {
     log("got ws message", data);
     if (typeof data === "string") {
       const json = JSON.parse(data);
-      // if( rnd++ % 2 !== 1 ){
       eventQueue.push(json);
       tryStartEventHandler();
-      // }
     }
   });
 
@@ -90,6 +87,13 @@ async function handleEvent() {
         publishAppEvent(appEvent);
       }
       // If eventId < nextAppEventId, it's a duplicate - ignore
+    } else if (event.format === "catch-up") {
+      const nextId = event.nextId;
+      if (typeof nextId === "number") {
+        await fillEventGap(nextAppEventId, nextId);
+      } else {
+        console.log("invalid catch-up nextId", nextId);
+      }
     } else {
       // Non-app events (hotline, heartbeat, etc.) - process immediately
       dispatch(event);
@@ -105,6 +109,24 @@ async function fillEventGap(fromId: number, toId: number) {
       nextAppEventId = event.appEventId + 1;
       publishAppEvent(event);
     }
+  }
+}
+
+async function pollEvent() {
+  try {
+    const nextId = await api.getNextAppEventId();
+    if (nextId > nextAppEventId) {
+      eventQueue.push({
+        format: "catch-up",
+        nextId: nextId,
+      });
+    }
+  } catch (ex: any) {
+    console.log("pollEvent failed", ex);
+  } finally {
+    setTimeout(() => {
+      pollEvent();
+    }, 10000);
   }
 }
 
