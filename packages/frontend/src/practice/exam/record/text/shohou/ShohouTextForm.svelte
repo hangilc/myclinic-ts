@@ -188,6 +188,12 @@
     onDone();
     await api.enterText(text);
   }
+
+  async function doCopyToClipboard() {
+    const json = JSON.stringify(shohou);
+    const data: ClipboardItems = [];
+    await navigator.clipboard.write()
+  }
 </script>
 
 <div style="border:1px solid green;padding:10px;border-radius:6px">
@@ -203,5 +209,6 @@
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
   <a href="javascript:void(0)" on:click={doOldShohou}>旧処方に</a>
+  <a href="javascript:void(0)" on:click={doCopyToClipboard}>クリップボードにコピー</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>
