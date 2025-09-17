@@ -1,4 +1,5 @@
 import type {
+  PrescInfoData,
   不均等レコード,
   用法レコード,
   用法補足レコード,
@@ -13,8 +14,13 @@ import type {
 } from "@/lib/denshi-shohou/denshi-shohou";
 import { toHankaku, toZenkaku } from "@/lib/zenkaku";
 import { 不均等レコードWrapper } from "../denshi-shohou/denshi-type-wrappers";
-import type { Drug } from "@/lib/parse-shohou";
-import type { RP剤情報Edit, 薬品情報Edit } from "./denshi-edit";
+import { type Drug } from "@/lib/parse-shohou";
+import { RP剤情報Edit, type PrescInfoDataEdit, type 薬品情報Edit } from "./denshi-edit";
+import { parseShohou } from "../parse-shohou3";
+import { getRP剤情報FromGroup } from "./denshi-tmpl";
+import { groupConv } from "@/practice/exam/record/text/regular/shohou-conv";
+import { DateWrapper } from "myclinic-util";
+import { clear保険区分レコード } from "../denshi-shohou/presc-info-helper";
 
 export function validateDrug(drug: {
   情報区分: 情報区分;
@@ -180,13 +186,6 @@ export function ippoukaUsageSuppl(): 用法補足レコード {
 
 export const freeTextCode = "0X0XXXXXXXXX0000";
 
-// export function initIsEditingOfGroup(group: RP剤情報Edit) {
-//   group.薬品情報グループ.forEach((drug) => {
-//     initIsEditingOfDrug(drug);
-//   });
-//   initIsEditingUsage(group);
-// }
-
 export function initIsEditingUsage(group: RP剤情報Edit) {
   if (group.用法レコード.用法コード === "") {
     group.用法レコード.isEditing用法コード = true;
@@ -200,4 +199,27 @@ export function initIsEditingOfDrug(drug: 薬品情報Edit) {
   if (drug.薬品レコード.分量 === "") {
     drug.薬品レコード.isEditing分量 = true;
   }
+}
+
+export async function addShohouByText(data: PrescInfoDataEdit, text: string): Promise<string | undefined> {
+  const at: string = DateWrapper.fromOnshiDate(
+    data.処方箋交付年月日
+  ).asSqlDate();
+  let shohou = parseShohou(text);
+  if (typeof shohou === "string") {
+    return shohou;
+  }
+  let groups = shohou.groups.map((g) => getRP剤情報FromGroup(g));
+  for (let g of groups) {
+    await groupConv(g, at);
+  }
+  let groupEdits: RP剤情報Edit[] = groups.map(g => RP剤情報Edit.fromObject(g));
+  data.RP剤情報グループ.push(...groupEdits);
+  return undefined;
+}
+
+export function addShohouByDenshi(data: PrescInfoDataEdit, src: PrescInfoData) {
+  const groups = src.RP剤情報グループ.map(g => RP剤情報Edit.fromObject(g));
+  clear保険区分レコード(groups);
+  data.RP剤情報グループ.push(...groups);
 }

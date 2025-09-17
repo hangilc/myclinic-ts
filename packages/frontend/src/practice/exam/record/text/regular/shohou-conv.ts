@@ -26,18 +26,23 @@ export async function shohowConv(data: PrescInfoData) {
   const at: string = DateWrapper.fromOnshiDate(
     data.処方箋交付年月日
   ).asSqlDate();
+  for (let group of data.RP剤情報グループ) {
+    groupConv(group, at);
+  }
+}
+
+export async function groupConv(group: RP剤情報, at: string) {
   const drugNameMap: Record<string, string> = await cache.getDrugNameConv();
   const drugUsageMap: Record<string, string> = await cache.getDrugUsageConv();
-  for (let group of data.RP剤情報グループ) {
-    for (let drug of group.薬品情報グループ) {
-      if (drug.薬品レコード.薬品コード === "") {
-        await drugConv(drug, at, drugNameMap);
-      }
-    }
-    if (group.用法レコード.用法コード === "") {
-      await usageConv(group, drugUsageMap);
+  for (let drug of group.薬品情報グループ) {
+    if (drug.薬品レコード.薬品コード === "") {
+      await drugConv(drug, at, drugNameMap);
     }
   }
+  if (group.用法レコード.用法コード === "") {
+    await usageConv(group, drugUsageMap);
+  }
+
 }
 
 async function usageConv(group: RP剤情報, drugUsageMap: Record<string, string>) {
@@ -116,10 +121,10 @@ async function drugConv(drug: 薬品情報, at: string, drugNameMap: Record<stri
   drug.薬品レコード.薬品コード種別 = info.codeKind;
   drug.薬品レコード.分量 = fix.newAmount;
   drug.薬品レコード.単位名 = info.unit;
-  if( !drug.薬品補足レコード ){
+  if (!drug.薬品補足レコード) {
     drug.薬品補足レコード = [];
   }
-  for(let suppl of fix.suppls){
+  for (let suppl of fix.suppls) {
     drug.薬品補足レコード.push({
       薬品補足情報: suppl,
     })

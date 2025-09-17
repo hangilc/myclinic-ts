@@ -29,6 +29,7 @@
   import { checkForSenpatsu } from "@/lib/parse-shohou";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { copyTextToOtherVisit } from "../text-helper";
+  import { shohouList } from "@/practice/exam/shohou-list";
 
   export let shohou: PrescInfoData;
   export let patientId: number;
@@ -189,10 +190,9 @@
     await api.enterText(text);
   }
 
-  async function doCopyToClipboard() {
-    const json = JSON.stringify(shohou);
-    const data: ClipboardItems = [];
-    await navigator.clipboard.write()
+  function doAddToShohouList() {
+    shohouList.push(shohou);
+    onDone();
   }
 </script>
 
@@ -209,6 +209,12 @@
   <a href="javascript:void(0)" on:click={doDelete}>削除</a>
   <a href="javascript:void(0)" on:click={doCopy}>コピー</a>
   <a href="javascript:void(0)" on:click={doOldShohou}>旧処方に</a>
-  <a href="javascript:void(0)" on:click={doCopyToClipboard}>クリップボードにコピー</a>
+  <a href="javascript:void(0)" on:click={doAddToShohouList}>処方リストに追加</a>
   <a href="javascript:void(0)" on:click={onCancel}>キャンセル</a>
 </div>
+
+<style>
+  a {
+    white-space: nowrap;
+  }
+</style>

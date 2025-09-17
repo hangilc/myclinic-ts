@@ -31,12 +31,13 @@
   import { KouhiSet } from "./kouhi-set";
   import ChooseKouhi from "./components/ChooseKouhi.svelte";
   import EditGroup from "./components/EditGroup.svelte";
-  import { initIsEditingOfDrug, initIsEditingUsage } from "./helper";
+  import { addShohouByDenshi, addShohouByText, initIsEditingOfDrug, initIsEditingUsage } from "./helper";
   import { createEmpty薬品情報 } from "../denshi-helper";
   import DrugPrefabDialog from "../drug-prefab-dialog/DrugPrefabDialog.svelte";
   import DrugNameConvDialog from "../drug-name-conv/DrugNameConvDialog.svelte";
   import DrugUsageConvDialog from "../drug-usage-conv/DrugUsageConvDialog.svelte";
   import Batch from "./components/Batch.svelte";
+  import { shohouList } from "@/practice/exam/shohou-list";
 
   export let title: string;
   export let destroy: () => void;
@@ -467,6 +468,21 @@
     });
   }
 
+  async function doPasteShohouList() {
+    for(let item of shohouList) {
+      if( typeof item === "string" ){
+        const err = await addShohouByText(data, item);
+        if( err ){
+          alert(err);
+        }
+      } else {
+        addShohouByDenshi(data, item);
+      }
+    }
+    data = data;
+    shohouList.splice(0);
+  }
+
   function wrapSubCommand(f: () => void): () => void {
     return () => {
       showSubCommands = false;
@@ -499,6 +515,7 @@
           onDrugNameConvEditor={wrapSubCommand(doDrugNameConvEditor)}
           onDrugUsageConvEditor={wrapSubCommand(doDrugUsageConvEditor)}
           onDrugPrefabEditor={wrapSubCommand(doDrugPrefabEditor)}
+          onPasteShohouList={wrapSubCommand(doPasteShohouList)}
         />
       {/if}
       <CurrentPresc

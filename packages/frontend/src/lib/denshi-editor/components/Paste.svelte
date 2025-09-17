@@ -6,7 +6,7 @@
   import { getRP剤情報FromGroup } from "../denshi-tmpl";
   import { resolveDrugGroupByMap, resolveUsageRecordByMap } from "@/practice/exam/record/text/regular/helper";
   import { RP剤情報Edit } from "../denshi-edit";
-
+  
   export let edit: { inputValue: string };
   export let destroy: () => void;
   export let onEnter: (value: RP剤情報Edit[]) => void;
@@ -30,6 +30,7 @@
     destroy();
     onEnter(data);
   }
+
 </script>
 
 <Workarea>

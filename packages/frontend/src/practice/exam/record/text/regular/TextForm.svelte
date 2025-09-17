@@ -39,6 +39,7 @@
   import { shohouToPrescInfo } from "@/lib/denshi-editor/denshi-tmpl";
   import { shohowConv } from "./shohou-conv";
   import { copyTextToOtherVisit } from "../text-helper";
+  import { shohouList } from "@/practice/exam/shohou-list";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -406,7 +407,13 @@
       menu.push(["電子処方に", doConvTextToDenshi]);
     }
     menu.push(["記載例", doOpenKisaiRei]);
+    menu.push(["処方リストに追加", doAddToShohouList]);
     return menu;
+  }
+
+  function doAddToShohouList() {
+    shohouList.push(text.content);
+    onClose();
   }
 
   function prepareMailContent(p: Patient, t: string): string {
