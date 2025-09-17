@@ -22,12 +22,8 @@
   import { parseShohou } from "@/lib/parse-shohou2";
   import { parseShohou as parseShohou3 } from "@/lib/parse-shohou3";
   import { formatHokenshaBangou } from "myclinic-util";
-  import {
-    TextMemoWrapper,
-  } from "@/lib/text-memo";
-  import {
-    type PrescInfoData,
-  } from "@/lib/denshi-shohou/presc-info";
+  import { TextMemoWrapper } from "@/lib/text-memo";
+  import { type PrescInfoData } from "@/lib/denshi-shohou/presc-info";
   import type { ShohousenData2025 } from "@/lib/drawer/forms/shohousen-2025/data2025";
   import { drawShohousen2025 } from "@/lib/drawer/forms/shohousen-2025/drawShohousen2025";
   import { isKensa } from "./helper";
@@ -40,6 +36,7 @@
   import { shohowConv } from "./shohou-conv";
   import { copyTextToOtherVisit } from "../text-helper";
   import { shohouList } from "@/practice/exam/shohou-list";
+  import { shohouPrinted } from "@/practice/exam/shohou-print-watcher";
 
   export let onClose: () => void;
   export let text: m.Text;
@@ -64,10 +61,10 @@
     }
     const newText: m.Text = Object.assign({}, text, { content });
     if (newText.textId === 0) {
-      api.enterText(newText);
       onClose();
+      await api.enterText(newText);
     } else {
-      api.updateText(newText);
+      await api.updateText(newText);
       onClose();
     }
   }
@@ -197,6 +194,9 @@
         scale: 3,
         kind: "shohousen",
         title: "処方箋印刷",
+        onPrint: () => {
+          shohouPrinted(text.textId);
+        },
       },
     });
     onClose();
@@ -312,6 +312,7 @@
           if (hasSenpatsu) {
             sendSenpatsuNoticeViaHotline();
           }
+          shohouPrinted(text.textId);
         },
       },
     });
@@ -359,7 +360,6 @@
       },
     });
   }
-
 
   async function doConvTextToDenshi() {
     onClose();

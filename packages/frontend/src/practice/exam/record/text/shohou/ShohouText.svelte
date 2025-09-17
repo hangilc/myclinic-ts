@@ -11,6 +11,7 @@
   import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
   import { DateWrapper } from "myclinic-util";
   import { ippanmeiStateFromMaster } from "@/lib/denshi-shohou/denshi-shohou-form/denshi-shohou-form-types";
+  import { isShohouPrintPending, shohouPrintChanged } from "@/practice/exam/shohou-print-watcher";
 
   export let text: Text;
   export let at: string;
@@ -26,6 +27,7 @@
     drugName: string;
     ippanKind: "一般名" | "一般名有り" | "";
   }[] = [];
+  let isPrintPending = isShohouPrintPending(text.textId);
 
   let unsubs: Unsubscriber[] = [
     textUpdated.subscribe((updated) => {
@@ -38,6 +40,12 @@
         }
       }
     }),
+    shohouPrintChanged.subscribe(id => {
+      if( id <= 0 ) {
+        return;
+      }
+      isPrintPending = isShohouPrintPending(text.textId);
+    })
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
@@ -148,6 +156,9 @@
       <DenshiShohouDisp {shohou} {prolog} {prescriptionId} />
     </div>
     <div>{ippanRep}</div>
+    {#if !prescriptionId && isPrintPending}
+      <div class="print-pending">未印刷・未登録</div>
+    {/if}
   {:else if mode === "edit"}
     {#if prescriptionId}
       <RegisteredShohouForm
@@ -176,3 +187,9 @@
     {/if}
   {/if}
 </div>
+
+<style>
+  .print-pending {
+    color: red;
+  }
+</style>

@@ -30,6 +30,7 @@
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
   import { copyTextToOtherVisit } from "../text-helper";
   import { shohouList } from "@/practice/exam/shohou-list";
+  import { shohouPrinted } from "@/practice/exam/shohou-print-watcher";
 
   export let shohou: PrescInfoData;
   export let patientId: number;
@@ -75,6 +76,9 @@
         scale: 3,
         kind: "shohousen2024",
         title: "処方箋印刷",
+        onPrint: () => {
+          shohouPrinted(textId);
+        }
       },
     });
   }
@@ -107,6 +111,7 @@
           if (hasSenpatsu) {
             sendSenpatsuNoticeViaHotline();
           }
+          shohouPrinted(textId);
         },
       },
     });
@@ -162,6 +167,7 @@
     }
     saveHikae(kikancode, prescriptionId);
     onRegistered(shohou, prescriptionId);
+    shohouPrinted(textId);
   }
 
   async function doDelete() {
