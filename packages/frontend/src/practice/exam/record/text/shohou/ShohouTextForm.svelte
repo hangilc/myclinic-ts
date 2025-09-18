@@ -31,6 +31,7 @@
   import { copyTextToOtherVisit } from "../text-helper";
   import { shohouList } from "@/practice/exam/shohou-list";
   import { shohouPrinted } from "@/practice/exam/shohou-print-watcher";
+  import { Base64 } from "js-base64";
 
   export let shohou: PrescInfoData;
   export let patientId: number;
@@ -78,7 +79,7 @@
         title: "処方箋印刷",
         onPrint: () => {
           shohouPrinted(textId);
-        }
+        },
       },
     });
   }
@@ -170,6 +171,70 @@
     shohouPrinted(textId);
   }
 
+  async function doRegisterSecond() {
+    if (shohou.引換番号) {
+      alert("既に登録されています。");
+      return;
+    }
+    const prescInfo = createPrescInfo(shohou);
+    const csvData = Base64.encode(prescInfo);
+    const tokenUrl =
+      "http://hpkicardless-clientadapter-server:3000/token?secondarycert-id=main";
+    let res = await fetch(tokenUrl);
+    if (res.ok) {
+      const body = await res.json();
+      if (body.result) {
+        const token = body.source;
+        let res = await fetch(
+          "http://hpkicardless-clientadapter-server:5000/signature/prescription/sign",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token, csvData }),
+          },
+        );
+        if (res.ok) {
+          const body = await res.json();
+          if (body.isSuccess) {
+            const signedBase64 = body.signedXmlData;
+            const signed = Base64.decode(signedBase64);
+            console.log("signed", signed);
+            const kikancode = await cache.getShohouKikancode();
+            let result = await registerPresc(signed, kikancode, "1");
+            console.log("result", result);
+            let register: RegisterResult = JSON.parse(result);
+            if (register.XmlMsg.MessageBody?.CsvCheckResultList) {
+              let list = register.XmlMsg.MessageBody?.CsvCheckResultList;
+              if (list.length > 0) {
+                let ms = list.map((item) => item.ResultMessage).join("\n");
+                alert(ms);
+              }
+            }
+            shohou = Object.assign({}, shohou, {
+              引換番号: register.XmlMsg.MessageBody?.AccessCode,
+            });
+            const prescriptionId = register.XmlMsg.MessageBody?.PrescriptionId;
+            if (prescriptionId == undefined) {
+              throw new Error("undefined prescriptionId");
+            }
+            saveHikae(kikancode, prescriptionId);
+            onRegistered(shohou, prescriptionId);
+            shohouPrinted(textId);
+          } else {
+            console.log("error body", body);
+          }
+        }
+      }
+    }
+    if (false) {
+      const authUrl =
+        "http://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
+      window.open(authUrl, "_blank");
+    }
+  }
+
   async function doDelete() {
     if (confirm("この処方を削除していいですか？")) {
       await api.deleteText(textId);
@@ -208,6 +273,7 @@
 <!-- svelte-ignore a11y-invalid-attribute -->
 <div style="margin-top:6px;">
   <a href="javascript:void(0)" on:click={doRegister}>登録</a>
+  <a href="javascript:void(0)" on:click={doRegisterSecond}>登録（セカンド）</a>
   <a href="javascript:void(0)" on:click={doEdit}>編集</a>
   <a href="javascript:void(0)" on:click={doPrint2}>印刷</a>
   <a href="javascript:void(0)" on:click={doPrint}>印刷（旧）</a>
