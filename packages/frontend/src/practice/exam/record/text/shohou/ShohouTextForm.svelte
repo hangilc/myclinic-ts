@@ -227,8 +227,7 @@
           }
         }
       }
-    }
-    if (false) {
+    } else {
       const authUrl =
         "http://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
       window.open(authUrl, "_blank");
