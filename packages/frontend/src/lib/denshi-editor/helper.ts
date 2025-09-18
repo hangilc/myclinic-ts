@@ -144,6 +144,7 @@ export function deserializeUneven(s: string): 不均等レコード | undefined 
 }
 
 export function isValidDrug(drug: 薬品情報): boolean {
+  console.log("drug", drug);
   return drug.薬品レコード.薬品コード !== "";
 }
 

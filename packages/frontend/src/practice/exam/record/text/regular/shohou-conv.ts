@@ -27,7 +27,7 @@ export async function shohowConv(data: PrescInfoData) {
     data.処方箋交付年月日
   ).asSqlDate();
   for (let group of data.RP剤情報グループ) {
-    groupConv(group, at);
+    await groupConv(group, at);
   }
 }
 
