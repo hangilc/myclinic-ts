@@ -74,20 +74,13 @@
   async function initRefer(): Promise<Hoken[]> {
     let [shahokokuhoList, koukikoureiList, roujinList, kouhiList] =
       await api.listAllHoken(patient.patientId);
-    // console.log("koukikoureiList", koukikoureiList);
-    // koukikoureiList = koukikoureiList.filter((h) => {
-    //   if (init) {
-    //     return h.koukikoureiId !== init.koukikoureiId;
-    //   } else {
-    //     return true;
-    //   }
-    // });
     const hs: Hoken[] = await batchFromHoken(
       shahokokuhoList,
       koukikoureiList,
       roujinList,
       kouhiList
     );
+    hs.sort((a, b) => -a.validFrom.localeCompare(b.validFrom));
     return hs;
   }
 
@@ -103,7 +96,7 @@
 <div>
   <div class="form-wrapper">
     {#if showRefer}
-      <Refer init={initRefer} />
+      <Refer init={initRefer} src={init ? { kind: "koukikourei", koukikourei: init} : {kind: "none"}}/>
     {/if}
     <div>
       {#if errors.length > 0}
@@ -116,6 +109,7 @@
       <KoukikoureiForm {patient} {init} bind:validate />
     </div>
   </div>
+  <!-- svelte-ignore a11y-invalid-attribute -->
   <div class="commands">
     <a href="javascript:void(0)" on:click={doReferAnother}>別保険参照</a>
     <a href="javascript:void(0)" on:click={doOnshiConfirm}>資格確認</a>

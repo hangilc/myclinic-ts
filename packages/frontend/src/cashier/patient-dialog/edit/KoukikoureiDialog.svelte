@@ -11,15 +11,6 @@
   export let onEntered: (entered: Koukikourei) => void = (_) => {};
   export let onUpdated: (entered: Koukikourei) => void = (_) => {};
   export let isAdmin: boolean;
-  // let prevInvalids = 0;
-
-  checkPrevInvalids();
-
-  async function checkPrevInvalids() {
-    if (init) {
-      // prevInvalids = await countInvalidUsage(init);
-    }
-  }
 
   async function doEnter(koukikourei: Koukikourei): Promise<string[]> {
     if (init === null) {

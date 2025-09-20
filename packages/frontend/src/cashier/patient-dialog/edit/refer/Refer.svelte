@@ -5,8 +5,11 @@
   import ReferShahokokuhoDisp from "./ReferShahokokuhoDisp.svelte";
   import ReferKoukikoureiDisp from "./ReferKoukikoureiDisp.svelte";
   import ReferKouhiDisp from "./ReferKouhiDisp.svelte";
+  import type { ReferSrc } from "./refer-src";
 
   export let init: () => Promise<Hoken[]>;
+  export let src: ReferSrc = { kind: "none" };
+  console.log("src", src);
 
   let mode:
     | { mode: "list" }
@@ -31,8 +34,19 @@
   function doList() {
     mode = { mode: "list" };
   }
+
+  function doPasteKoukikoureiToBlank(src: Koukikourei, dst: Koukikourei) {
+    if (dst.hokenshaBangou === "") {
+      dst.hokenshaBangou = src.hokenshaBangou;
+    }
+    if (dst.hihokenshaBangou === "") {
+      dst.hihokenshaBangou = src.hihokenshaBangou;
+    }
+    console.log("validFrom", dst.validFrom);
+  }
 </script>
 
+<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="wrapper">
   {#if mode.mode === "list"}
     <ReferList
@@ -50,13 +64,17 @@
       <a href="javascript:void(0)" on:click={doList}>リストへ</a>
     </div>
   {:else if mode.mode === "koukikourei"}
-    <ReferKoukikoureiDisp
-      koukikourei={mode.koukikourei}
-      usageCount={mode.usageCount}
-    />
+    {@const koukikourei = mode.koukikourei}
+    <ReferKoukikoureiDisp {koukikourei} usageCount={mode.usageCount} />
     <div class="commands">
       <a href="javascript:void(0)" on:click={doList}>リストへ</a>
     </div>
+    {#if src.kind === "koukikourei"}
+      <button
+        on:click={() => doPasteKoukikoureiToBlank(koukikourei, src.koukikourei)}
+        >→空白に貼付</button
+      >
+    {/if}
   {:else if mode.mode === "kouhi"}
     <ReferKouhiDisp kouhi={mode.kouhi} usageCount={mode.usageCount} />
     <div class="commands">

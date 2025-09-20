@@ -27,4 +27,4 @@
 【負担割】{toZenkaku(roujin.futanWari.toString())}割 【期限開始】{formatValidFrom(
   roujin.validFrom
 )}
-【期限終了】{formatValidUpto(roujin.validUpto)}] 【使用回数】{usageCount}回
+【期限終了】{formatValidUpto(roujin.validUpto)} 【使用回数】{usageCount}回

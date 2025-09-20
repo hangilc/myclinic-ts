@@ -38,8 +38,8 @@
 【負担者】{kouhi.futansha}
 【受給者】{kouhi.jukyuusha}
 【期限開始】{formatValidFrom(kouhi.validFrom)}
-【期限終了】{formatValidUpto(kouhi.validUpto)}] 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+【期限終了】{formatValidUpto(kouhi.validUpto)}
+<!-- svelte-ignore a11y-invalid-attribute -->
 <a href="javascript:void(0)" on:click={doUsageClick} class="usage-link">【使用回数】</a>{usageCount}回
 {#if showUsageDates}
   <div class="usage-dates-box">
