@@ -1,6 +1,6 @@
 import type { VisitEx } from "myclinic-model";
 import { checkOnshi } from "./checkers/check-onshi";
-import { checkMainDisease } from "./checkers/main-disease";
+import { checkMainDisease } from "./checkers/check-main-disease";
 import { checkGenericOne } from "./checkers/check-generic-one";
 import { checkXpSatsuei } from "./checkers/check-xp-satsuei";
 import { checkXpShindan } from "./checkers/check-xp-shindan";
@@ -47,7 +47,7 @@ const checkers: RcptChecker[] = [
   convSingle(checkXpSatsuei),
   convSingle(checkXpShindan),
   convSingle(checkOnshi),
-  convSingle(checkMainDisease),
+  checkMainDisease,
   convSingle(checkGlucoseSelfMeasuring),
   convSingle(checkDuplicate),
   convSingle(checkHandanryou),

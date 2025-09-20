@@ -124,9 +124,10 @@
           <div class="error-code-wrapper">
             <div class="error-code">{ce.code}</div>
             {#each ce.fixers as fixer}
-              <div class="hint-wrapper">| {fixer.hint}</div>
               <div class="fix-wrapper">
-                <button on:click={() => doFix(fixer.fix, error.patient.patientId)}
+                → {fixer.hint}
+                <button
+                  on:click={() => doFix(fixer.fix, error.patient.patientId)}
                   >Fix</button
                 >
               </div>
@@ -154,16 +155,8 @@
     margin-top: 6px;
   }
 
-  .error-wrapper .error-code {
-    display: inline-block;
+  .fix-wrapper {
+    margin-top: 2px;
   }
 
-  .error-wrapper .hint-wrapper {
-    display: inline-block;
-  }
-
-  .error-wrapper .fix-wrapper {
-    display: inline-block;
-    margin-left: 10px;
-  }
 </style>
