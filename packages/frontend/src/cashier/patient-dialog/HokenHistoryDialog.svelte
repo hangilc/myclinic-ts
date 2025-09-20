@@ -17,17 +17,13 @@
   let patient: Patient = data.patient;
 
   let classified: Record<string, Hoken[]> = mkClassified(
-    data.hokenCache.listAll()
+    data.hokenCache.listAll(),
   );
 
   function mkClassified(list: Hoken[]): Record<string, Hoken[]> {
-    const c = classify(list, (h) => h.slug);
-    Object.values(c).forEach((list: Hoken[]) => {
-      list.sort(
-        (a: Hoken, b: Hoken) => -a.validFrom.localeCompare(b.validFrom)
-      );
-    });
-    return c;
+    list = [...list];
+    list.sort((a: Hoken, b: Hoken) => -a.validFrom.localeCompare(b.validFrom));
+    return classify(list, (h) => h.slug);
   }
 
   function close(): void {
@@ -47,7 +43,7 @@
   function doDelete(hoken: Hoken): void {
     confirm("この保険を削除していいですか？", async () => {
       const ok = await deleteHoken(hoken);
-      if( !ok ){
+      if (!ok) {
         alert("保険の削除に失敗しました。");
         return;
       }
@@ -68,10 +64,13 @@
         {#each classified[hokenName] as hoken (hoken.key)}
           {@const hokenType = hoken.slug}
           {@const usageCount = hoken.usageCount}
-          <div class={`hoken-box ${hokenType}`} data-cy="hoken-box" 
-            data-key={hoken.key}>
+          <div
+            class={`hoken-box ${hokenType}`}
+            data-cy="hoken-box"
+            data-key={hoken.key}
+          >
             {#if hokenType === "shahokokuho"}
-              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount}/>
+              <ShahokokuhoBox shahokokuho={hoken.asShahokokuho} {usageCount} />
             {:else if hokenType === "koukikourei"}
               <KoukikoureiBox koukikourei={hoken.asKoukikourei} {usageCount} />
             {:else if hokenType === "roujin"}
@@ -80,7 +79,10 @@
               <KouhiBox kouhi={hoken.asKouhi} {usageCount} />
             {/if}
             {#if hoken.usageCount === 0}
-              <a href="javascript:void(0)" on:click={() => doDelete(hoken)}>削除</a>
+              <!-- svelte-ignore a11y-invalid-attribute -->
+              <a href="javascript:void(0)" on:click={() => doDelete(hoken)}
+                >削除</a
+              >
             {/if}
             {#if hokenType !== "roujin"}
               <button on:click={() => doEdit(hoken)}>編集</button>

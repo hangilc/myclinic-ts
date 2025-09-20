@@ -233,6 +233,7 @@
   }
 </script>
 
+      <!-- svelte-ignore a11y-invalid-attribute -->
 <Dialog destroy={exit} title="患者情報" styleWidth="320px">
   <div class="info">
     <span>患者番号</span><span data-cy="patient-id">{p.patientId}</span>
