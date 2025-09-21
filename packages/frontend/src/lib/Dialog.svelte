@@ -58,7 +58,7 @@
     if (enableAutoFocus) {
       dialog.focus();
     }
-    initializePosition();
+    //initializePosition();
   });
 
   function doKeyDown(event: KeyboardEvent): void {
@@ -80,12 +80,12 @@
     fixed = true;
   }
 
-  function initializePosition() {
-    const rect = dialog.getBoundingClientRect();
-    dialogPosition.x = rect.left;
-    dialogPosition.y = rect.top;
-    updateDialogPosition();
-  }
+  // function initializePosition() {
+  //   const rect = dialog.getBoundingClientRect();
+  //   dialogPosition.x = rect.left;
+  //   dialogPosition.y = rect.top;
+  //   updateDialogPosition();
+  // }
 
   function updateDialogPosition() {
     dialog.style.left = `${dialogPosition.x}px`;

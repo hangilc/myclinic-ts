@@ -18,7 +18,7 @@
 
   onMount(() => {
     dialog.style.zIndex = zIndexDialog.toString();
-    initializePosition();
+    // initializePosition();
   });
 
   onDestroy(() => {
@@ -48,12 +48,12 @@
     ev.preventDefault();
   }
 
-  function initializePosition() {
-    const rect = dialog.getBoundingClientRect();
-    dialogPosition.x = rect.left;
-    dialogPosition.y = rect.top;
-    updateDialogPosition();
-  }
+  // function initializePosition() {
+  //   const rect = dialog.getBoundingClientRect();
+  //   dialogPosition.x = rect.left;
+  //   dialogPosition.y = rect.top;
+  //   updateDialogPosition();
+  // }
 
   function updateDialogPosition() {
     dialog.style.left = `${dialogPosition.x}px`;
