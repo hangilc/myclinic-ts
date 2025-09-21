@@ -15,7 +15,7 @@
   let month: string;
   let day: string;
 
-  updateValues(init);
+  $: updateValues(init);
 
   function updateValues(date: Date | null): void {
     if (date === null) {

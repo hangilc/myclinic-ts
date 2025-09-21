@@ -7,6 +7,7 @@
   import ReferKouhiDisp from "./ReferKouhiDisp.svelte";
   import type { ReferSrc } from "./refer-src";
   import type { KoukikoureiFormValues } from "../koukikourei-form-values";
+  import { DateWrapper } from "myclinic-util";
 
   export let init: () => Promise<Hoken[]>;
   export let src: ReferSrc = { kind: "none" };
@@ -45,6 +46,9 @@
     }
     if (dst.hihokenshaBangou === "") {
       dst.hihokenshaBangou = src.hihokenshaBangou;
+    }
+    if( dst.validFrom == null && src.validUpto !== "0000-00-00" ){
+      dst.validFrom = DateWrapper.from(src.validUpto).incDay(1).asDate();
     }
     onModify();
   }
