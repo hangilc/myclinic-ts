@@ -135,15 +135,6 @@ function dispatch(e: any): void {
     if (e.format === "hotline-beep") {
       const hotlineBeep = e.data as m.HotlineBeep;
       hotlineBeepEntered.set(hotlineBeep);
-    } else if (e.format === "event-id-notice") {
-      console.log("eventIdNotice ignored");
-      // const eventIdNotice = e.data;
-      // const eventId = eventIdNotice.currentEventId;
-      // log("event-id-notice currentEventId", eventId);
-      // if (eventId >= nextAppEventId) {
-      //   drainEvents();
-      // }
-      // eventIdNoticeEntered.set(eventIdNotice);
     } else if (e.format === "heart-beat") {
       const heartBeat = { heartBeatSerialId: ++heartBeatSerialId };
       heartBeatEntered.set(heartBeat);
@@ -261,28 +252,12 @@ export const onshiDeleted: Writable<m.Onshi | null> = writable(null);
 export const hotlineEntered: Writable<m.HotlineEx | null> = writable(null);
 export const hotlineBeepEntered: Writable<m.HotlineBeep | null> =
   writable(null);
-// export const eventIdNoticeEntered: Writable<m.EventIdNotice | null> =
-//   writable(null);
 export const heartBeatEntered: Writable<m.HeartBeat | null> = writable(null);
 
 export const windowResized: Writable<UIEvent | undefined> = writable(undefined);
 
 export const configChanged: Writable<{ name: string; value: any } | null> =
   writable(null);
-
-// function handleAppEvent(e: m.AppEvent): void {
-//   if (isDraining) {
-//     eventQueue.push(e);
-//   } else {
-//     const eventId = e.appEventId;
-//     if (eventId === nextAppEventId) {
-//       nextAppEventId = eventId + 1;
-//       publishAppEvent(e);
-//     } else if (eventId > nextAppEventId) {
-//       drainEvents();
-//     }
-//   }
-// }
 
 function publishAppEvent(e: m.AppEvent): void {
   const model: string = e.model;

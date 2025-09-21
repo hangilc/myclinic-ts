@@ -1965,14 +1965,6 @@ export class HotlineBeep {
   }
 }
 
-export class EventIdNotice {
-  constructor(public currentEventId: number) { }
-
-  static cast(arg: any): EventIdNotice {
-    return new EventIdNotice(arg.currentEventId);
-  }
-}
-
 export class HeartBeat {
   constructor(public heartBeatSerialId: number) { }
 

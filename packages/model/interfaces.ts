@@ -636,10 +636,6 @@ export interface HotlineBeep {
   recipient: string;
 }
 
-export interface EventIdNotice {
-  currentEventId: number;
-}
-
 export interface HeartBeat {
   heartBeatSerialId: number;
 }
