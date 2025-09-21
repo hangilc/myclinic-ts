@@ -11,7 +11,10 @@
   import RegisteredShohouForm from "./RegisteredShohouForm.svelte";
   import { DateWrapper } from "myclinic-util";
   import { ippanmeiStateFromMaster } from "@/lib/denshi-shohou/denshi-shohou-form/denshi-shohou-form-types";
-  import { isShohouPrintPending, shohouPrintChanged } from "@/practice/exam/shohou-print-watcher";
+  import {
+    isShohouPrintPending,
+    shohouPrintChanged,
+  } from "@/practice/exam/shohou-print-watcher";
 
   export let text: Text;
   export let at: string;
@@ -40,12 +43,12 @@
         }
       }
     }),
-    shohouPrintChanged.subscribe(id => {
-      if( id <= 0 ) {
+    shohouPrintChanged.subscribe((id) => {
+      if (id <= 0) {
         return;
       }
       isPrintPending = isShohouPrintPending(text.textId);
-    })
+    }),
   ];
 
   onDestroy(() => unsubs.forEach((f) => f()));
@@ -65,28 +68,29 @@
   }
 
   async function setupIppan(shohou: PrescInfoData) {
-    if (isToday()) {
-      ippanDrugs = [];
-      const drugGroups = shohou.RP剤情報グループ;
-      for (let g of drugGroups) {
-        for (let r of g.薬品情報グループ) {
-          const codeKind = r.薬品レコード.薬品コード種別;
-          const code = r.薬品レコード.薬品コード;
-          const drugName = r.薬品レコード.薬品名称;
-          let ippanKind: "一般名" | "一般名有り" | "" = "";
-          if (codeKind === "一般名コード") {
-            ippanKind = "一般名";
-          } else if (codeKind === "レセプト電算処理システム用コード") {
-            const m = await api.getIyakuhinMaster(parseInt(code), at);
-            const s = ippanmeiStateFromMaster(m);
-            if (s.kind === "has-ippanmei") {
-              ippanKind = "一般名有り";
-            } else if (s.kind === "has-no-ippanmei") {
-              ippanKind = "";
-            }
+    if (!isToday()) {
+      return;
+    }
+    ippanDrugs = [];
+    const drugGroups = shohou.RP剤情報グループ;
+    for (let g of drugGroups) {
+      for (let r of g.薬品情報グループ) {
+        const codeKind = r.薬品レコード.薬品コード種別;
+        const code = r.薬品レコード.薬品コード;
+        const drugName = r.薬品レコード.薬品名称;
+        let ippanKind: "一般名" | "一般名有り" | "" = "";
+        if (codeKind === "一般名コード") {
+          ippanKind = "一般名";
+        } else if (codeKind === "レセプト電算処理システム用コード") {
+          const m = await api.getIyakuhinMaster(parseInt(code), at);
+          const s = ippanmeiStateFromMaster(m);
+          if (s.kind === "has-ippanmei") {
+            ippanKind = "一般名有り";
+          } else if (s.kind === "has-no-ippanmei") {
+            ippanKind = "";
           }
-          ippanDrugs.push({ drugName, ippanKind });
         }
+        ippanDrugs.push({ drugName, ippanKind });
       }
     }
     let nIppan = 0;
