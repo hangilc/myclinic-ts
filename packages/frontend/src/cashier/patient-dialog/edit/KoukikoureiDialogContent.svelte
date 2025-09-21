@@ -8,6 +8,7 @@
   import api from "@/lib/api";
   import { batchFromHoken } from "../fetch-hoken-list";
   import Refer from "./refer/Refer.svelte";
+  import { KoukikoureiFormValues } from "./koukikourei-form-values";
 
   export let patient: Patient;
   export let init: Koukikourei | null;
@@ -16,6 +17,7 @@
   let validate: (() => VResult<Koukikourei>) | undefined = undefined;
   let errors: string[] = [];
   let showRefer = false;
+  let formValues = init ? KoukikoureiFormValues.fromKoukikourei(init) : new KoukikoureiFormValues(patient.patientId);
 
   async function doEnter() {
     if (validate) {
@@ -91,12 +93,16 @@
       showRefer = false;
     }
   }
+
+  function doReferModify() {
+    formValues = formValues;
+  }
 </script>
 
 <div>
   <div class="form-wrapper">
     {#if showRefer}
-      <Refer init={initRefer} src={init ? { kind: "koukikourei", koukikourei: init} : {kind: "none"}}/>
+      <Refer init={initRefer} src={({ kind: "koukikourei", koukikourei: formValues})} onModify={doReferModify}/>
     {/if}
     <div>
       {#if errors.length > 0}
@@ -106,7 +112,7 @@
           {/each}
         </div>
       {/if}
-      <KoukikoureiForm {patient} {init} bind:validate />
+      <KoukikoureiForm {patient} values={formValues} bind:validate/>
     </div>
   </div>
   <!-- svelte-ignore a11y-invalid-attribute -->

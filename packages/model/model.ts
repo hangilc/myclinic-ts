@@ -649,6 +649,18 @@ export class Koukikourei {
     return isValidAt(this.validFrom, this.validUpto, at);
   }
 
+  clone(): Koukikourei {
+    return new Koukikourei(
+      this.koukikoureiId,
+      this.patientId,
+      this.hokenshaBangou,
+      this.hihokenshaBangou,
+      this.futanWari,
+      this.validFrom,
+      this.validUpto
+    );
+  }
+
   static isContentEqual(a: Koukikourei, b: Koukikourei): boolean {
     return a.koukikoureiId === b.koukikoureiId &&
       a.patientId === b.patientId &&

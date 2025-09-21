@@ -2,7 +2,7 @@
   import Dialog from "@/lib/Dialog.svelte";
   import type { PatientData } from "../patient-dialog/patient-data";
   
-  import type { Hoken } from "./hoken";
+  import { type Hoken } from "./hoken";
   import HokenInfoDialog from "./HokenInfoDialog.svelte";
   import EditPatientDialog from "./EditPatientDialog.svelte";
   import HokenHistoryDialog from "./HokenHistoryDialog.svelte";

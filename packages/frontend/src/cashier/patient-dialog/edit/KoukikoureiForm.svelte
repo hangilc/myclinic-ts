@@ -2,51 +2,26 @@
   import DateFormWithCalendar from "@/lib/date-form/DateFormWithCalendar.svelte";
   import { gengouListUpto } from "@/lib/gengou-list-upto";
   import { genid } from "@/lib/genid";
-  import { parseOptionalSqlDate, parseSqlDate } from "@/lib/util";
   import { validResult, VResult } from "@/lib/validation";
   import { validateKoukikourei } from "@/lib/validators/koukikourei-validator";
   import { toZenkaku } from "@/lib/zenkaku";
   import type { Koukikourei, Patient } from "myclinic-model";
-  import { createEventDispatcher } from "svelte";
+  import type { KoukikoureiFormValues } from "./koukikourei-form-values";
 
   export let patient: Patient;
-  export let init: Koukikourei | null;
-  let dispatch = createEventDispatcher<{ "value-change": void }>();
-  let hokenshaBangou: string;
-  let hihokenshaBangou: string;
-  let futanWari: number;
-  let validFrom: Date | null;
-  let validUpto: Date | null;
+  export let values: KoukikoureiFormValues;
   let gengouList = gengouListUpto("平成");
   let validateValidFrom: (() => VResult<Date | null>) | undefined = undefined;
   let validateValidUpto: (() => VResult<Date | null>) | undefined = undefined;
 
-  updateValues(init);
-
-  function updateValues(data: Koukikourei | null): void {
-    if (data === null) {
-      hokenshaBangou = "";
-      hihokenshaBangou = "";
-      futanWari = 1;
-      validFrom = null;
-      validUpto = null;
-    } else {
-      hokenshaBangou = data.hokenshaBangou;
-      hihokenshaBangou = data.hihokenshaBangou;
-      futanWari = data.futanWari;
-      validFrom = parseSqlDate(data.validFrom);
-      validUpto = parseOptionalSqlDate(data.validUpto);
-    }
-  }
-
   export function validate(): VResult<Koukikourei> {
     if (validateValidFrom && validateValidUpto) {
       const input = {
-        koukikoureiId: validResult(init?.koukikoureiId ?? 0),
+        koukikoureiId: validResult(values.koukikoureiId),
         patientId: validResult(patient.patientId),
-        hokenshaBangou: validResult(hokenshaBangou),
-        hihokenshaBangou: validResult(hihokenshaBangou),
-        futanWari: validResult(futanWari),
+        hokenshaBangou: validResult(values.hokenshaBangou),
+        hihokenshaBangou: validResult(values.hihokenshaBangou),
+        futanWari: validResult(values.futanWari),
         validFrom: validateValidFrom(),
         validUpto: validateValidUpto(),
       };
@@ -56,14 +31,12 @@
     }
   }
 
-  function doUserInput(): void {
-    dispatch("value-change");
-  }
+  function doUserInput(): void {}
 </script>
 
 <div>
-  <span data-cy="patient-id">({patient.patientId})</span>
-  <span data-cy="patient-name">{patient.fullName(" ")}</span>
+  <span>({patient.patientId})</span>
+  <span>{patient.fullName(" ")}</span>
 </div>
 <div class="panel">
   <span>保険者番号</span>
@@ -71,9 +44,8 @@
     <input
       type="text"
       class="regular"
-      bind:value={hokenshaBangou}
+      bind:value={values.hokenshaBangou}
       on:change={doUserInput}
-      data-cy="hokensha-bangou-input"
     />
   </div>
   <span>被保険者番号</span>
@@ -81,9 +53,8 @@
     <input
       type="text"
       class="regular"
-      bind:value={hihokenshaBangou}
+      bind:value={values.hihokenshaBangou}
       on:change={doUserInput}
-      data-cy="hihokensha-bangou-input"
     />
   </div>
   <span>負担割</span>
@@ -93,9 +64,8 @@
       <input
         type="radio"
         value={w}
-        bind:group={futanWari}
+        bind:group={values.futanWari}
         on:change={doUserInput}
-        data-cy="futan-wari-input"
       />
       <label for={id}>{toZenkaku(w.toString())}割</label>
     {/each}
@@ -103,7 +73,7 @@
   <span>期限開始</span>
   <div data-cy="valid-from-input">
     <DateFormWithCalendar
-      init={validFrom}
+      init={values.validFrom}
       on:value-change={doUserInput}
       {gengouList}
       bind:validate={validateValidFrom}
@@ -112,7 +82,7 @@
   <span>期限終了</span>
   <div data-cy="valid-upto-input">
     <DateFormWithCalendar
-      init={validUpto}
+      init={values.validUpto}
       on:value-change={doUserInput}
       {gengouList}
       bind:validate={validateValidUpto}
@@ -136,8 +106,4 @@
   input[type="text"].regular {
     width: 6rem;
   }
-
-  /* input.edaban {
-    width: 2rem;
-  } */
 </style>

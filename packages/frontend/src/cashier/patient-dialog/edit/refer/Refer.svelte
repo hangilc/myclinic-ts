@@ -6,10 +6,11 @@
   import ReferKoukikoureiDisp from "./ReferKoukikoureiDisp.svelte";
   import ReferKouhiDisp from "./ReferKouhiDisp.svelte";
   import type { ReferSrc } from "./refer-src";
+  import type { KoukikoureiFormValues } from "../koukikourei-form-values";
 
   export let init: () => Promise<Hoken[]>;
   export let src: ReferSrc = { kind: "none" };
-  console.log("src", src);
+  export let onModify: () => void;
 
   let mode:
     | { mode: "list" }
@@ -35,18 +36,20 @@
     mode = { mode: "list" };
   }
 
-  function doPasteKoukikoureiToBlank(src: Koukikourei, dst: Koukikourei) {
+  function doPasteKoukikoureiToBlank(
+    src: Koukikourei,
+    dst: KoukikoureiFormValues,
+  ) {
     if (dst.hokenshaBangou === "") {
       dst.hokenshaBangou = src.hokenshaBangou;
     }
     if (dst.hihokenshaBangou === "") {
       dst.hihokenshaBangou = src.hihokenshaBangou;
     }
-    console.log("validFrom", dst.validFrom);
+    onModify();
   }
 </script>
 
-<!-- svelte-ignore a11y-invalid-attribute -->
 <div class="wrapper">
   {#if mode.mode === "list"}
     <ReferList

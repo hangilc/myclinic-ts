@@ -1,8 +1,8 @@
-import type { Koukikourei } from "myclinic-model";
+import type { KoukikoureiFormValues } from "../koukikourei-form-values";
 
 export type ReferSrc = {
   kind: "koukikourei";
-  koukikourei: Koukikourei;
+  koukikourei: KoukikoureiFormValues;
 } | {
   kind: "none";
 }
