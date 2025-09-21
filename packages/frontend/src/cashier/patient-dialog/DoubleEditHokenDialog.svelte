@@ -3,12 +3,13 @@
   import { Shahokokuho, Koukikourei, Patient, Visit } from "myclinic-model";
   import ShahokokuhoForm from "./edit/ShahokokuhoForm.svelte";
   import api from "@/lib/api";
-  
+
   import KoukikoureiForm from "./edit/KoukikoureiForm.svelte";
   import type { VResult } from "@/lib/validation";
   import { shallowEqual } from "@/lib/shallow-equal";
   import { confirm } from "@/lib/confirm-call";
   import { FormatDate } from "myclinic-util";
+  import { KoukikoureiFormValues } from "./edit/koukikourei-form-values";
 
   export let destroy: () => void;
   export let hoken1: Shahokokuho | Koukikourei;
@@ -16,7 +17,7 @@
   export let patient: Patient;
   export let onHandle: (
     shahokokuhoList: Shahokokuho[],
-    koukikoureiList: Koukikourei[]
+    koukikoureiList: Koukikourei[],
   ) => void;
   export let onDelete: (deleted: Shahokokuho | Koukikourei) => void;
   // let initDone: boolean = false;
@@ -38,7 +39,7 @@
   async function init() {
     hoken1Usage = await fetchUsage(hoken1);
     hoken2Usage = await fetchUsage(hoken2);
-	console.log("hoken1Usage", hoken1Usage, hoken1);
+    console.log("hoken1Usage", hoken1Usage, hoken1);
   }
 
   async function fetchUsage(h: Shahokokuho | Koukikourei): Promise<Visit[]> {
@@ -120,7 +121,7 @@
     if (shahokokuhoList.length + koukikoureiList.length === 2) {
       const [s, k] = await api.batchEnterOrUpdateHoken(
         shahokokuhoList,
-        koukikoureiList
+        koukikoureiList,
       );
       onHandle(s, k);
     }
@@ -144,7 +145,7 @@
         <div>【後期高齢】</div>
         <KoukikoureiForm
           {patient}
-          init={hoken1}
+          values={KoukikoureiFormValues.fromKoukikourei(hoken1)}
           bind:validate={validateKoukikourei1}
         />
       {/if}
@@ -172,7 +173,7 @@
         <div>【後期高齢】</div>
         <KoukikoureiForm
           {patient}
-          init={hoken2}
+          values={KoukikoureiFormValues.fromKoukikourei(hoken2)}
           bind:validate={validateKoukikourei2}
         />
       {/if}
@@ -187,7 +188,7 @@
     </div>
   </div>
   <div class="commands">
-    {#if shallowEqual( hoken1, hoken2, { excludeKeys: ["shahokokuhoId", "koukikoureiId"] } )}
+    {#if shallowEqual( hoken1, hoken2, { excludeKeys: ["shahokokuhoId", "koukikoureiId"] }, )}
       （両者同じ内容）
     {/if}
     <button on:click={doEnter}>入力</button>
