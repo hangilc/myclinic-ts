@@ -51,6 +51,3 @@
     onEnter={doEnter}
   />
 </Dialog>
-
-<style>
-</style>

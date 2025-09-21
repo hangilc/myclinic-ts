@@ -3,7 +3,13 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 import { resolve } from 'path'
 
 export default defineConfig(({command, mode, ssrBuild }) => ({
-  plugins: [svelte()],
+  plugins: [svelte({
+    onwarn: (warning, handler) => {
+      // Suppress all a11y warnings
+      if (warning.code.startsWith('a11y-')) return;
+      handler(warning);
+    }
+  })],
   css: {
     preprocessorOptions: {
       scss: {
