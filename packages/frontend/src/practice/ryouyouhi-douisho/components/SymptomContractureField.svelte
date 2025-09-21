@@ -114,11 +114,11 @@
     gap: 0.5rem;
   }
 
-  input[type="text"] {
+  /* input[type="text"] {
     flex: 1;
     max-width: 300px;
     padding: 0.25rem 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
-  }
+  } */
 </style>

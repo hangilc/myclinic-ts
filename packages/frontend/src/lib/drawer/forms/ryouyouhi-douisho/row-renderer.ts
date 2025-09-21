@@ -72,19 +72,19 @@ export function at(pos: number, render?: (ctx: DrawerContext, box: Box) => void)
   }
 }
 
-function extendRender(
-  orig?: (ctx: DrawerContext, box: Box) => void,
-  optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
-): (ctx: DrawerContext, box: Box) => void {
-  orig = orig ?? (() => { });
-  if (optRender) {
-    return (ctx, box) => {
-      optRender(ctx, box, orig);
-    }
-  } else {
-    return orig;
-  }
-}
+// function extendRender(
+//   orig?: (ctx: DrawerContext, box: Box) => void,
+//   optRender?: (ctx: DrawerContext, box: Box, orig: (ctx: DrawerContext, box: Box) => void) => void,
+// ): (ctx: DrawerContext, box: Box) => void {
+//   orig = orig ?? (() => { });
+//   if (optRender) {
+//     return (ctx, box) => {
+//       optRender(ctx, box, orig);
+//     }
+//   } else {
+//     return orig;
+//   }
+// }
 
 export function renderRow(ctx: DrawerContext, row: Box, ...items: Item[]) {
   const splits = items.map(item => {

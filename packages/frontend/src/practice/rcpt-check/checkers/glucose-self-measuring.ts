@@ -1,5 +1,5 @@
 import type { RezeptComment, Shinryou, VisitEx } from "myclinic-model";
-import { type CheckError, type Fixer } from "../check";
+import { type CheckError } from "../check";
 import { ShinryouMemoWrapper } from "@/lib/shinryou-memo";
 import { toHankaku } from "@/lib/zenkaku";
 import api from "@/lib/api";
@@ -51,7 +51,7 @@ function createFixComment(): RezeptComment {
 function nullCommentFix(
 	shinryou: Shinryou,
 	updateShinryou: (shinryou: Shinryou) => Promise<any>
-): { fix: Fixer; hint: string } {
+): { fix: () => Promise<boolean>; hint: string } {
 	const fix = async () => {
 		const memoWrapper = new ShinryouMemoWrapper(shinryou.memo);
 		let comms = [...memoWrapper.getComments()];
@@ -101,13 +101,3 @@ function findComment(comments: RezeptComment[]): RezeptComment | undefined {
 	}
 	return undefined;
 }
-
-// function getCommentValue(comment: RezeptComment): number | undefined {
-// 	let text = comment.text;
-// 	text = toHankaku(text);
-// 	if (/^\d+$/.test(text)) {
-// 		return parseInt(text);
-// 	} else {
-// 		return undefined;
-// 	}
-// }

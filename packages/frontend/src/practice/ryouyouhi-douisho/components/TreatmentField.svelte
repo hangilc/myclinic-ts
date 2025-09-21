@@ -102,8 +102,8 @@
     transform: scale(1.1);
   }
 
-  input[type="checkbox"]:checked + span {
+  /* input[type="checkbox"]:checked + span {
     font-weight: 500;
     color: #2563eb;
-  }
+  } */
 </style>

@@ -4,7 +4,7 @@ import {
   PatientWrapper,
   type VisitEx,
 } from "myclinic-model";
-import type { CheckError, CheckErrorWithFixers, Fixer } from "../check";
+import type { CheckErrorWithFixers, Fixer } from "../check";
 import api from "@/lib/api";
 
 const allowedMainDiseases = [

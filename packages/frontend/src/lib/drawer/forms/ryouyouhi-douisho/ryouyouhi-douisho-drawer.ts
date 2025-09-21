@@ -147,7 +147,7 @@ function initContext(ctx: DrawerContext) {
   c.createPen(ctx, "data-thin", 0, 0, 0, 0.2);
 }
 
-function drawTitle(ctx: DrawerContext, box: Box, data: RyouyouhiDouishoDrawerData) {
+function drawTitle(ctx: DrawerContext, box: Box, _data: RyouyouhiDouishoDrawerData) {
   c.withFont(ctx, "title", () => {
     c.drawText(ctx, "同意書", b.modify(box),
       "center", "top", { interCharsSpace: 13 })

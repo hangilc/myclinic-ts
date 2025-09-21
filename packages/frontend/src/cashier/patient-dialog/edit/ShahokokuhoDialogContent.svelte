@@ -91,12 +91,14 @@
       showRefer = false;
     }
   }
+
+  function doReferModify() {}
 </script>
 
 <div>
   <div class="form-wrapper">
     {#if showRefer}
-      <Refer init={initRefer} />
+      <Refer init={initRefer} onModify={doReferModify}/>
     {/if}
     <div>
       {#if errors.length > 0}

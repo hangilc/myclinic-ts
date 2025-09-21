@@ -34,7 +34,6 @@
   export let prefab: DrugPrefab;
   export let at: string;
   export let kouhiSet: KouhiSet;
-  export let isNewDrug: boolean;
   export let onCancel: () => void;
   export let onEnter: () => void;
   export let onDelete: () => void;
@@ -119,7 +118,6 @@
   <DrugNameField
     drug={edit.presc.薬品情報グループ[0]}
     {at}
-    {isNewDrug}
     bind:isEditing={
       edit.presc.薬品情報グループ[0].薬品レコード.isEditing薬品コード
     }
