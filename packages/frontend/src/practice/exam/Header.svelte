@@ -175,7 +175,7 @@
 
   function doLoginSecondHpki() {
     const authUrl =
-      "http://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
+      "https://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
     window.open(authUrl, "_blank");
   }
 </script>

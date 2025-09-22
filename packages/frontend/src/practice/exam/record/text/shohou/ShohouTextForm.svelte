@@ -179,14 +179,14 @@
     const prescInfo = createPrescInfo(shohou);
     const csvData = Base64.encode(prescInfo);
     const tokenUrl =
-      "http://hpkicardless-clientadapter-server:3000/token?secondarycert-id=main";
+      "https://hpkicardless-clientadapter-server:3000/token?secondarycert-id=main";
     let res = await fetch(tokenUrl);
     if (res.ok) {
       const body = await res.json();
       if (body.result) {
         const token = body.source;
         let res = await fetch(
-          "http://hpkicardless-clientadapter-server:5000/signature/prescription/sign",
+          "https://hpkicardless-clientadapter-server:5000/signature/prescription/sign",
           {
             method: "POST",
             headers: {
@@ -229,7 +229,7 @@
       }
     } else {
       const authUrl =
-        "http://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
+        "https://hpkicardless-clientadapter-server:3000/auth/login?secondarycert-id=main";
       window.open(authUrl, "_blank");
     }
   }
