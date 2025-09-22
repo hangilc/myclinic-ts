@@ -50,24 +50,25 @@ export function getBase(): string {
 }
 
 export function getBackend(): string {
-  if (!import.meta.env.SSR) {
+  console.log("DEV", import.meta.env.DEV)
+  // if (!import.meta.env.SSR) {
+  if (!import.meta.env.DEV) {
     const l = window.location;
     let proto = l.protocol.toLowerCase();
     let host = l.hostname;
-    // let port = proto === "https:" ? sslServerPort() : nonSslServerPort();
-    let port = proto === "https:" ? l.port : nonSslServerPort();
-    if (import.meta.env.VITE_BACKEND_PROTO) {
-      proto = import.meta.env.VITE_BACKEND_PROTO;
-    }
-    if (import.meta.env.VITE_BACKEND_HOST) {
-      host = import.meta.env.VITE_BACKEND_HOST;
-    }
-    if (import.meta.env.VITE_BACKEND_PORT) {
-      port = import.meta.env.VITE_BACKEND_PORT;
-    }
+    // let port = proto === "https:" ? l.port : nonSslServerPort();
+    let port = l.port;
+    // if (import.meta.env.VITE_BACKEND_PROTO) {
+    //   proto = import.meta.env.VITE_BACKEND_PROTO;
+    // }
+    // if (import.meta.env.VITE_BACKEND_HOST) {
+    //   host = import.meta.env.VITE_BACKEND_HOST;
+    // }
+    // if (import.meta.env.VITE_BACKEND_PORT) {
+    //   port = import.meta.env.VITE_BACKEND_PORT;
+    // }
     let query = parseLocationQuery();
     if (query["api-port"]) {
-      // port = parseInt(query["api-port"])
       port = query["api-port"];
     }
     let result = `${proto}//${host}:${port}`;
@@ -82,9 +83,9 @@ export function getBackend(): string {
 //   return 8443;
 // }
 
-function nonSslServerPort(): number {
-  return 8080;
-}
+// function nonSslServerPort(): number {
+//   return 8080;
+// }
 
 function identity<T>(arg: T): T {
   return arg;
