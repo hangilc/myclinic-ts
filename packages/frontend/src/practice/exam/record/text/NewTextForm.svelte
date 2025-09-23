@@ -4,10 +4,6 @@
   import TextCommandDialog from "./TextCommandDialog.svelte";
   import { listTextCommands } from "./text-commands";
   import { setFocus } from "@/lib/set-focus";
-  import {
-    confirmOnlinePresc,
-    isFaxToPharmacyText,
-  } from "@/lib/shohousen-text-helper";
 
   export let onClose: () => void;
   export let visitId: number;
@@ -16,15 +12,6 @@
 
   async function onEnter() {
     const content = textarea.value.trim();
-    if (isFaxToPharmacyText(content)) {
-      const err = await confirmOnlinePresc(text);
-      if (err) {
-        const proceed = confirm(`${err}\nこのまま入力しますか？`);
-        if (!proceed) {
-          return;
-        }
-      }
-    }
     const newText: m.Text = Object.assign({}, text, { content });
     if (newText.textId === 0) {
       api.enterText(newText);
@@ -34,12 +21,6 @@
       onClose();
     }
   }
-
-  // function onDelete(): void {
-  //   if (confirm("この文章を削除していいですか？")) {
-  //     api.deleteText(text.textId);
-  //   }
-  // }
 
   function doKeyDown(event: KeyboardEvent): void {
     if (event.altKey && event.key === "p") {

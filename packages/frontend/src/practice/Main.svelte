@@ -9,7 +9,6 @@
   import Henrei from "./Henrei.svelte";
   import Cashier from "@/cashier/Cashier.svelte";
   import BigChar from "./BigChar.svelte";
-  import FaxShohousen from "./fax-shohousen/FaxShohousen.svelte";
   import HoumonKango from "./houmon-kango/HoumonKango.svelte";
   import Shujii from "./shujii/Shujii.svelte";
   import RyouyouKeikakusho from "./ryouyou-keikakusho/RyouyouKeikakusho.svelte";
@@ -42,7 +41,6 @@
   {#if $serviceStore === "cashier"}
     <Cashier isAdmin={true} />
   {/if}
-  {#if $serviceStore === "fax-shohousen"}<FaxShohousen />{/if}
   <HoumonKango isVisible={$serviceStore === "houmon-kango"} />
   <RyouyouKeikakusho isVisible={$serviceStore === "ryouyou-keikakusho"} />
   <RyouyouhiDouisho isVisible={$serviceStore === "ryouyouhi-douisho"} />

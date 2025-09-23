@@ -11,12 +11,6 @@
   import { popupTrigger } from "@/lib/popup-helper";
   import { drawShohousen } from "@/lib/drawer/forms/shohousen/shohousen-drawer";
   import { dateToSqlDate } from "myclinic-model/model";
-  import {
-    confirmOnlinePresc,
-    getFollowingText,
-    isFaxToPharmacyText,
-    isOnlineShohousen,
-  } from "@/lib/shohousen-text-helper";
   import { cache } from "@/lib/cache";
   import { checkForSenpatsu } from "@/lib/parse-shohou";
   import { parseShohou } from "@/lib/parse-shohou2";
@@ -50,15 +44,6 @@
 
   async function onEnter() {
     const content = textarea.value.trim();
-    if (isFaxToPharmacyText(content)) {
-      const err = await confirmOnlinePresc(text);
-      if (err) {
-        const proceed = confirm(`${err}\nこのまま入力しますか？`);
-        if (!proceed) {
-          return;
-        }
-      }
-    }
     const newText: m.Text = Object.assign({}, text, { content });
     if (newText.textId === 0) {
       onClose();
@@ -109,18 +94,18 @@
         return;
       }
     }
-    if (isOnlineShohousen(text.content)) {
-      const follow = await getFollowingText(text);
-      if (follow == null || !isFaxToPharmacyText(follow.content)) {
-        const ok = confirm(
-          "オンライン処方箋のようですが、送信先の薬局が指定されていません。\n" +
-            "このまま印刷しますか？",
-        );
-        if (!ok) {
-          return;
-        }
-      }
-    }
+    // if (isOnlineShohousen(text.content)) {
+    //   const follow = await getFollowingText(text);
+    //   if (follow == null || !isFaxToPharmacyText(follow.content)) {
+    //     const ok = confirm(
+    //       "オンライン処方箋のようですが、送信先の薬局が指定されていません。\n" +
+    //         "このまま印刷しますか？",
+    //     );
+    //     if (!ok) {
+    //       return;
+    //     }
+    //   }
+    // }
     const clinicInfo = await api.getClinicInfo();
     const visitId = text.visitId;
     const hoken = await api.getHokenInfoForVisit(visitId);
