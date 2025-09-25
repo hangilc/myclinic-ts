@@ -39,12 +39,17 @@
     srcName: string,
     dstName: string,
   ) {
-    if (dstName === "") {
-      delete map[srcName];
-    } else {
-      map[srcName] = dstName;
+    if (srcName === "" || dstName === "") {
+      return;
     }
-    console.debug("setDrugNameConv", map);
+    map[srcName] = dstName;
+    await cache.setDrugNameConv(map);
+    await init();
+    id = 0;
+  }
+
+  async function doEditorDelete(srcName: string) {
+    delete map[srcName];
     await cache.setDrugNameConv(map);
     await init();
     id = 0;
@@ -100,6 +105,7 @@
           {dstName}
           onCancel={doEditorCancel}
           onEnter={doEditorEnter}
+          onDelete={doEditorDelete}
         />
       {/if}
     </div>

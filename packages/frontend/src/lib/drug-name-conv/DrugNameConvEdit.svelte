@@ -9,6 +9,7 @@
   export let dstName: string;
   export let onCancel: () => void;
   export let onEnter: (id: number, srcName: string, dstName: string) => void;
+  export let onDelete: (srcName: string) => void;
   let searchText = "";
   let masters: IyakuhinMaster[] = [];
   let at = DateWrapper.fromDate(new Date()).asSqlDate();
@@ -90,6 +91,16 @@
       chooseIppanmei = true;
     }
   }
+
+  function doDelete() {
+    if( srcName === "" ){
+      return;
+    }
+    if(!confirm("この変換設定を削除しますか？")){
+      return;
+    }
+    onDelete(srcName);
+  }
 </script>
 
 <div class="field">
@@ -118,6 +129,9 @@
   {/each}
 </div>
 <div class="commands">
+  {#if srcName !== ""}
+  <a href="javascript:void(0)" on:click={doDelete}>削除</a>
+  {/if}
   {#if srcName !== "" && dstMaster && (chooseIppanmei ? dstMaster.ippanmei === searchText : dstMaster.name === searchText)}
     <button on:click={doEnter}>入力</button>
   {/if}
