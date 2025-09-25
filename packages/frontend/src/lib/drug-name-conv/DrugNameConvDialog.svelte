@@ -44,6 +44,7 @@
     } else {
       map[srcName] = dstName;
     }
+    console.debug("setDrugNameConv", map);
     await cache.setDrugNameConv(map);
     await init();
     id = 0;

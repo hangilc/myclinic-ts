@@ -95,6 +95,9 @@
 <div class="field">
   変換元：<input type="text" bind:value={srcName} />
 </div>
+{#if srcName === ""}
+<div class="error">変換元が空白です</div>
+{/if}
 <div class="field">
   <form on:submit|preventDefault={doMasterSearch}>
     変換先：<input type="text" bind:value={searchText} />
@@ -104,6 +107,9 @@
     {/if}
   </form>
 </div>
+{#if !(dstMaster && (chooseIppanmei ? dstMaster.ippanmei === searchText : dstMaster.name === searchText))}
+<div class="error">マスター検索が必要です</div>
+{/if}
 <div class="masters">
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -112,7 +118,7 @@
   {/each}
 </div>
 <div class="commands">
-  {#if srcName !== "" && dstMaster}
+  {#if srcName !== "" && dstMaster && (chooseIppanmei ? dstMaster.ippanmei === searchText : dstMaster.name === searchText)}
     <button on:click={doEnter}>入力</button>
   {/if}
   <button on:click={doCancel}>キャンセル</button>
@@ -121,6 +127,13 @@
 <style>
   .field + .field {
     margin-top: 6px;
+  }
+
+  .error {
+    border: 1px solid red;
+    padding: 10px;
+    margin: 10px 0;
+    color: red;
   }
 
   .masters {
