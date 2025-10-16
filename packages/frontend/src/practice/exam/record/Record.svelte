@@ -11,7 +11,7 @@
   import ConductWrapper from "./conduct/ConductWrapper.svelte";
   import Payment from "./payment/Payment.svelte";
   import { afterUpdate } from "svelte";
-  import { currentVisitId, kensaDataClipboard } from "../exam-vars";
+  import { currentVisitId, kensaDataClipboard, endPatient } from "../exam-vars";
   import DrugWrapper from "./drug/DrugWrapper.svelte";
   import api from "@/lib/api";
   import { cache } from "@/lib/cache";
@@ -26,6 +26,7 @@
   export let onLast: () => void;
   let showNewTextEditor = false;
   let onshiConfirmed: boolean | undefined = undefined;
+  let showMacroMenu = false;
 
   $: hasKensaData = $kensaDataClipboard.patientId === visit.patient.patientId;
 
@@ -114,6 +115,84 @@
       kensaDataClipboard.set({ patientId: 0, text: "" });
     }
   }
+
+  function toggleMacroMenu() {
+    showMacroMenu = !showMacroMenu;
+  }
+
+  async function doInfluenzaVaccination() {
+    const newText: m.Text = {
+      textId: 0,
+      visitId: visit.visitId,
+      content: "インフルエンザ予防接種",
+    };
+    await api.enterText(newText);
+
+    // Make visit 自費 (self-pay) by removing all hoken/kouhi and adding hokengai item
+    const currentVisit = visit.asVisit;
+    let attr = JSON.parse(currentVisit.attributesStore ?? "{}");
+    attr.hokengai = ["インフルエンザワクチン接種"];
+    await api.updateVisit(
+      Object.assign({}, currentVisit, {
+        shahokokuhoId: 0,
+        koukikoureiId: 0,
+        roujinId: 0,
+        kouhi1Id: 0,
+        kouhi2Id: 0,
+        kouhi3Id: 0,
+        attributesStore: JSON.stringify(attr),
+      })
+    );
+
+    // Set charge to 2500 yen
+    if (visit.chargeOption) {
+      await api.updateChargeValue(visit.visitId, 2500);
+    } else {
+      await api.enterChargeValue(visit.visitId, 2500);
+    }
+
+    // End exam and move to cashier
+    endPatient(m.WqueueState.WaitCashier);
+
+    showMacroMenu = false;
+  }
+
+  async function doCovidVaccination() {
+    const newText: m.Text = {
+      textId: 0,
+      visitId: visit.visitId,
+      content: "コロナワクチン接種",
+    };
+    await api.enterText(newText);
+
+    // Make visit 自費 (self-pay) by removing all hoken/kouhi and adding hokengai item
+    const currentVisit = visit.asVisit;
+    let attr = JSON.parse(currentVisit.attributesStore ?? "{}");
+    attr.hokengai = ["コロナワクチン接種"];
+    await api.updateVisit(
+      Object.assign({}, currentVisit, {
+        shahokokuhoId: 0,
+        koukikoureiId: 0,
+        roujinId: 0,
+        kouhi1Id: 0,
+        kouhi2Id: 0,
+        kouhi3Id: 0,
+        attributesStore: JSON.stringify(attr),
+      })
+    );
+
+    // Set charge to 2500 yen
+    if (visit.chargeOption) {
+      await api.updateChargeValue(visit.visitId, 2500);
+    } else {
+      await api.enterChargeValue(visit.visitId, 2500);
+    }
+
+    // End exam and move to cashier
+    endPatient(m.WqueueState.WaitCashier);
+
+    showMacroMenu = false;
+  }
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -144,6 +223,15 @@
             >新規処方（旧）</a
           >
           <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
+          <span class="macro-menu-wrapper">
+            <a href="javascript:void(0)" on:click={toggleMacroMenu}>マクロ</a>
+            {#if showMacroMenu}
+              <div class="macro-popup">
+                <a href="javascript:void(0)" on:click={doInfluenzaVaccination}>インフルエンザ予防接種</a>
+                <a href="javascript:void(0)" on:click={doCovidVaccination}>コロナ予防接種</a>
+              </div>
+            {/if}
+          </span>
           {#if hasKensaData}
             <a href="javascript:void(0)" on:click={doPasteKensa}>検査貼付</a>
           {/if}
@@ -165,5 +253,34 @@
 <style>
   .top {
     margin-bottom: 10px;
+  }
+
+  .macro-menu-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+
+  .macro-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 4px 0;
+    z-index: 1000;
+    min-width: 180px;
+    margin-top: 2px;
+  }
+
+  .macro-popup a {
+    display: block;
+    padding: 6px 12px;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .macro-popup a:hover {
+    background-color: #f0f0f0;
   }
 </style>
