@@ -121,6 +121,10 @@
   }
 
   async function doInfluenzaVaccination() {
+    showMacroMenu = false;
+    if( !confirm("インフルエンザ予防接種マクロを実行しますか？")) {
+      return;
+    }
     const newText: m.Text = {
       textId: 0,
       visitId: visit.visitId,
@@ -154,10 +158,13 @@
     // End exam and move to cashier
     endPatient(m.WqueueState.WaitCashier);
 
-    showMacroMenu = false;
   }
 
   async function doCovidVaccination() {
+    showMacroMenu = false;
+    if( !confirm("ロナワクチン接種マクロを実行しますか？")) {
+      return;
+    }
     const newText: m.Text = {
       textId: 0,
       visitId: visit.visitId,
@@ -191,7 +198,6 @@
     // End exam and move to cashier
     endPatient(m.WqueueState.WaitCashier);
 
-    showMacroMenu = false;
   }
 </script>
 
