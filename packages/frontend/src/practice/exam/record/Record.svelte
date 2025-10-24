@@ -20,13 +20,13 @@
   import { TextMemoWrapper } from "@/lib/text-memo";
   import NewDenshiShohouDialog from "@/lib/denshi-shohou/NewDenshiShohouDialog.svelte";
   import DenshiEditorDialog from "@/lib/denshi-editor/DenshiEditorDialog.svelte";
+  import { popupTrigger, type PopupMenuItem } from "@/lib/popup-helper";
 
   export let visit: m.VisitEx;
   export let isLast: boolean;
   export let onLast: () => void;
   let showNewTextEditor = false;
   let onshiConfirmed: boolean | undefined = undefined;
-  let showMacroMenu = false;
 
   $: hasKensaData = $kensaDataClipboard.patientId === visit.patient.patientId;
 
@@ -80,7 +80,9 @@
   // }
 
   async function doNewShohou() {
-    const orig: PrescInfoData = await initPrescInfoDataFromVisitId(visit.visitId);
+    const orig: PrescInfoData = await initPrescInfoDataFromVisitId(
+      visit.visitId,
+    );
     const d: DenshiEditorDialog = new DenshiEditorDialog({
       target: document.body,
       props: {
@@ -93,13 +95,13 @@
           const newText = { textId: 0, visitId: visit.visitId, content: "" };
           TextMemoWrapper.setTextMemo(newText, {
             kind: "shohou",
-            shohou: presc, 
-            prescriptionId: undefined
+            shohou: presc,
+            prescriptionId: undefined,
           });
           await api.enterText(newText);
-        }
-      }
-    })
+        },
+      },
+    });
   }
 
   async function doPasteKensa() {
@@ -116,13 +118,16 @@
     }
   }
 
-  function toggleMacroMenu() {
-    showMacroMenu = !showMacroMenu;
+  function composeMacroMenu(): PopupMenuItem[] {
+    return [
+      ["インフルエンザ予防接種", doInfluenzaVaccination],
+      ["コロナ予防接種", doCovidVaccination],
+      ["インフルエンザ予防接種（自費）", doInfluenzaVaccinationJihi],
+    ];
   }
 
   async function doInfluenzaVaccination() {
-    showMacroMenu = false;
-    if( !confirm("インフルエンザ予防接種マクロを実行しますか？")) {
+    if (!confirm("インフルエンザ予防接種マクロを実行しますか？")) {
       return;
     }
     const newText: m.Text = {
@@ -145,7 +150,7 @@
         kouhi2Id: 0,
         kouhi3Id: 0,
         attributesStore: JSON.stringify(attr),
-      })
+      }),
     );
 
     // Set charge to 2500 yen
@@ -157,12 +162,10 @@
 
     // End exam and move to cashier
     endPatient(m.WqueueState.WaitCashier);
-
   }
 
   async function doCovidVaccination() {
-    showMacroMenu = false;
-    if( !confirm("コロナワクチン接種マクロを実行しますか？")) {
+    if (!confirm("コロナワクチン接種マクロを実行しますか？")) {
       return;
     }
     const newText: m.Text = {
@@ -185,7 +188,7 @@
         kouhi2Id: 0,
         kouhi3Id: 0,
         attributesStore: JSON.stringify(attr),
-      })
+      }),
     );
 
     // Set charge to 2500 yen
@@ -197,12 +200,10 @@
 
     // End exam and move to cashier
     endPatient(m.WqueueState.WaitCashier);
-
   }
 
-    async function doInfluenzaVaccinationJihi() {
-    showMacroMenu = false;
-    if( !confirm("インフルエンザ予防接種（自費）マクロを実行しますか？")) {
+  async function doInfluenzaVaccinationJihi() {
+    if (!confirm("インフルエンザ予防接種（自費）マクロを実行しますか？")) {
       return;
     }
     const newText: m.Text = {
@@ -225,7 +226,7 @@
         kouhi2Id: 0,
         kouhi3Id: 0,
         attributesStore: JSON.stringify(attr),
-      })
+      }),
     );
 
     // Set charge to 2500 yen
@@ -237,9 +238,7 @@
 
     // End exam and move to cashier
     endPatient(m.WqueueState.WaitCashier);
-
   }
-
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -270,16 +269,7 @@
             >新規処方（旧）</a
           >
           <a href="javascript:void(0)" on:click={doNewShohou}>新規処方</a>
-          <span class="macro-menu-wrapper">
-            <a href="javascript:void(0)" on:click={toggleMacroMenu}>マクロ</a>
-            {#if showMacroMenu}
-              <div class="macro-popup">
-                <a href="javascript:void(0)" on:click={doInfluenzaVaccination}>インフルエンザ予防接種</a>
-                <a href="javascript:void(0)" on:click={doCovidVaccination}>コロナ予防接種</a>
-                <a href="javascript:void(0)" on:click={doInfluenzaVaccinationJihi}>インフルエンザ予防接種（自費）</a>
-              </div>
-            {/if}
-          </span>
+          <a href="javascript:void(0)" on:click={popupTrigger(() => composeMacroMenu())}>マクロ</a>
           {#if hasKensaData}
             <a href="javascript:void(0)" on:click={doPasteKensa}>検査貼付</a>
           {/if}
@@ -301,34 +291,5 @@
 <style>
   .top {
     margin-bottom: 10px;
-  }
-
-  .macro-menu-wrapper {
-    position: relative;
-    display: inline-block;
-  }
-
-  .macro-popup {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: white;
-    border: 1px solid #ccc;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    padding: 4px 0;
-    z-index: 1000;
-    min-width: 180px;
-    margin-top: 2px;
-  }
-
-  .macro-popup a {
-    display: block;
-    padding: 6px 12px;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-
-  .macro-popup a:hover {
-    background-color: #f0f0f0;
   }
 </style>
