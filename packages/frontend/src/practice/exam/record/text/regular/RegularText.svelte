@@ -42,10 +42,6 @@
 {/if}
 
 <style>
-  .top {
-    margin-bottom: 10px;
-  }
-
   .print-pending {
     color: red;
   }
