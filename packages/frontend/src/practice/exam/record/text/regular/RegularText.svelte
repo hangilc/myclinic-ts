@@ -35,7 +35,7 @@
 {:else}
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <!-- svelte-ignore a11y-click-events-have-key-events -->
-  <div class="top" on:click={() => (isEditing = true)}>
+  <div on:click={() => (isEditing = true)}>
     <div>{@html conv(text.content)}</div>
     {#if isPrintPending}<div class="print-pending">未印刷</div>{/if}
   </div>

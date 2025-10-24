@@ -162,7 +162,7 @@
 
   async function doCovidVaccination() {
     showMacroMenu = false;
-    if( !confirm("ロナワクチン接種マクロを実行しますか？")) {
+    if( !confirm("コロナワクチン接種マクロを実行しますか？")) {
       return;
     }
     const newText: m.Text = {
@@ -199,6 +199,47 @@
     endPatient(m.WqueueState.WaitCashier);
 
   }
+
+    async function doInfluenzaVaccinationJihi() {
+    showMacroMenu = false;
+    if( !confirm("インフルエンザ予防接種（自費）マクロを実行しますか？")) {
+      return;
+    }
+    const newText: m.Text = {
+      textId: 0,
+      visitId: visit.visitId,
+      content: "インフルエンザ予防接種",
+    };
+    await api.enterText(newText);
+
+    // Make visit 自費 (self-pay) by removing all hoken/kouhi and adding hokengai item
+    const currentVisit = visit.asVisit;
+    let attr = JSON.parse(currentVisit.attributesStore ?? "{}");
+    attr.hokengai = ["インフルエンザワクチン接種"];
+    await api.updateVisit(
+      Object.assign({}, currentVisit, {
+        shahokokuhoId: 0,
+        koukikoureiId: 0,
+        roujinId: 0,
+        kouhi1Id: 0,
+        kouhi2Id: 0,
+        kouhi3Id: 0,
+        attributesStore: JSON.stringify(attr),
+      })
+    );
+
+    // Set charge to 2500 yen
+    if (visit.chargeOption) {
+      await api.updateChargeValue(visit.visitId, 3500);
+    } else {
+      await api.enterChargeValue(visit.visitId, 3500);
+    }
+
+    // End exam and move to cashier
+    endPatient(m.WqueueState.WaitCashier);
+
+  }
+
 </script>
 
 <!-- svelte-ignore a11y-invalid-attribute -->
@@ -235,6 +276,7 @@
               <div class="macro-popup">
                 <a href="javascript:void(0)" on:click={doInfluenzaVaccination}>インフルエンザ予防接種</a>
                 <a href="javascript:void(0)" on:click={doCovidVaccination}>コロナ予防接種</a>
+                <a href="javascript:void(0)" on:click={doInfluenzaVaccinationJihi}>インフルエンザ予防接種（自費）</a>
               </div>
             {/if}
           </span>
