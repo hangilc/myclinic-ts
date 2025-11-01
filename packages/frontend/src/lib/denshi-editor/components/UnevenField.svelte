@@ -62,6 +62,7 @@
 
   function doDelete() {
     不均等レコード = undefined;
+    isEditing = false;
     onFieldChange();
   }
 </script>
@@ -72,6 +73,7 @@
     <FieldForm>
       {#if !isEditing}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <div class="rep" on:click={doRepClick}>
           {rep(不均等レコード)}
         </div>
