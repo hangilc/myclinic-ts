@@ -1,9 +1,9 @@
-
 import { ReceiptDrawerData } from "@/lib/drawer/forms/receipt/receipt-drawer-data";
 import MishuuDialog from "./MishuuDialog.svelte";
 import DrawerDialog from "@/lib/drawer/DrawerDialog.svelte";
 import { drawReceipt } from "@/lib/drawer/forms/receipt/receipt-drawer";
 import api from "@/lib/api";
+import ManualFaceConfirmDialog from "./ManualFaceConfirmDialog.svelte";
 
 export function doMishuu(): void {
   const d: MishuuDialog = new MishuuDialog({
@@ -23,9 +23,10 @@ export async function doBlankReceipt() {
     clinicInfo.address,
     clinicInfo.tel,
     clinicInfo.fax,
-    clinicInfo.homepage
+    clinicInfo.homepage,
   ];
-  { // test
+  {
+    // test
     // receipt.patientName = "田中隆";
     // receipt.charge = 1200;
     // receipt.visitDate = "2024-02-15";
@@ -60,3 +61,11 @@ export async function doBlankReceipt() {
   });
 }
 
+export function doManualFaceConfirm() {
+  const dlog: ManualFaceConfirmDialog = new ManualFaceConfirmDialog({
+    target: document.body,
+    props: {
+      destroy: () => dlog.$destroy(),
+    }
+  })
+}
